@@ -152,7 +152,7 @@ export async function synthesizeAggregate(
     }
     if (sub === 'integration-outbox' || sub === 'domain-event-failures' || sub === 'audit-log') return [];
     if (sub === 'storage-usage') return { totalBytes: 0, buckets: [] };
-    if (sub === 'integrations') return [];
+    if (sub === 'integrations') return demoIntegrations();
     if (sub === 'mfa') return { enforced: false, policies: [] };
     if (sub === 'accounting-mode') return { mode: 'standalone', providerId: null, isConfigured: false };
     if (sub === 'users') {
@@ -207,7 +207,15 @@ export async function synthesizeAggregate(
   if (head === 'replenishment' && method === 'GET') return { items: [] };
   if (head === 'mrp' && method === 'GET') return { runs: [], plannedOrders: [] };
   if (head === 'shop-floor' && method === 'GET') return { activeJobs: [], workers: [] };
-  if (head === 'display' && method === 'GET') return { jobs: [], alerts: [] };
+  if (head === 'display' && method === 'GET') {
+    // Shop-floor kiosk: /display/shop-floor (overview) + /display/shop-floor/clock-status (workers).
+    if (sub === 'shop-floor') {
+      if (segs[2] === 'clock-status') return synthesizeShopFloorWorkers(store);
+      if (!segs[2]) return synthesizeShopFloorOverview(store);
+      return []; // Other shop-floor subresources (receivable POs, etc.) — load on demand.
+    }
+    return { jobs: [], alerts: [] };
+  }
   if (head === 'scanner' && method === 'GET') return { devices: [] };
 
   return undefined;
@@ -421,6 +429,251 @@ function companyProfile(): unknown {
     ein: null,
     website: 'https://forge.com',
   };
+}
+
+// ── Admin → Integrations ───────────────────────────────────────────────────
+
+/**
+ * /admin/integrations — IntegrationSettingsResult { showSandboxGuides, integrations[] }.
+ * The static demo has no backend to read real connection state from, so present a
+ * representative, read-only catalog: the carriers exercised in the app (FedEx/USPS
+ * connected, UPS/DHL available), QuickBooks (standalone → not connected), plus core
+ * services. Mutations are no-ops in demo mode, so values for connected providers are
+ * shown masked.
+ */
+function demoIntegrations(): unknown {
+  const f = (
+    key: string, label: string, value: string,
+    inputType = 'text', isSensitive = false, isRequired = true,
+  ) => ({ key, label, value, isSensitive, isRequired, inputType, choices: null, description: null });
+
+  const integrations = [
+    {
+      provider: 'fedex', name: 'FedEx', category: 'shipping', icon: 'local_shipping',
+      description: 'Live shipping rates, label generation, and tracking for FedEx services.',
+      isConfigured: true,
+      fields: [
+        f('accountNumber', 'Account Number', '••••4821'),
+        f('apiKey', 'API Key', '••••••••••••', 'password', true),
+        f('secretKey', 'Secret Key', '••••••••••••', 'password', true),
+        f('environment', 'Environment', 'production'),
+      ],
+      sandboxSteps: null, sandboxUrl: 'https://developer.fedex.com', logoUrl: null,
+    },
+    {
+      provider: 'usps', name: 'USPS', category: 'shipping', icon: 'markunread_mailbox',
+      description: 'Address validation (Delivery Point Validation) and domestic USPS rates.',
+      isConfigured: true,
+      fields: [f('userId', 'Web Tools User ID', '••••3920')],
+      sandboxSteps: null, sandboxUrl: 'https://www.usps.com/business/web-tools-apis/', logoUrl: null,
+    },
+    {
+      provider: 'ups', name: 'UPS', category: 'shipping', icon: 'local_shipping',
+      description: 'Connect a UPS account for rates, labels, and tracking.',
+      isConfigured: false,
+      fields: [
+        f('clientId', 'Client ID', ''),
+        f('clientSecret', 'Client Secret', '', 'password', true),
+        f('accountNumber', 'Account Number', ''),
+      ],
+      sandboxSteps: [
+        'Create a developer account at the UPS Developer Portal.',
+        'Register an application to obtain a Client ID and Secret.',
+        'Add your six-character UPS account number.',
+      ],
+      sandboxUrl: 'https://developer.ups.com', logoUrl: null,
+    },
+    {
+      provider: 'dhl', name: 'DHL Express', category: 'shipping', icon: 'flight',
+      description: 'International shipping rates and labels via DHL Express.',
+      isConfigured: false,
+      fields: [
+        f('apiKey', 'API Key', '', 'password', true),
+        f('accountNumber', 'Account Number', ''),
+      ],
+      sandboxSteps: null, sandboxUrl: 'https://developer.dhl.com', logoUrl: null,
+    },
+    {
+      provider: 'quickbooks', name: 'QuickBooks Online', category: 'accounting', icon: 'account_balance',
+      description: 'Sync customers, invoices, and payments. When connected, the built-in accounting becomes read-only.',
+      isConfigured: false,
+      fields: [
+        f('clientId', 'Client ID', ''),
+        f('clientSecret', 'Client Secret', '', 'password', true),
+        f('realmId', 'Company (Realm) ID', ''),
+      ],
+      sandboxSteps: [
+        'Sign in to the Intuit Developer portal and create an app.',
+        'Copy the Client ID and Client Secret from the app keys.',
+        'Authorize the connection to bind your QuickBooks company.',
+      ],
+      sandboxUrl: 'https://developer.intuit.com', logoUrl: null,
+    },
+    {
+      provider: 'smtp', name: 'Email (SMTP)', category: 'service', icon: 'mail',
+      description: 'Outbound email for notifications, invoices, and statements.',
+      isConfigured: true,
+      fields: [
+        f('host', 'SMTP Host', 'smtp.forge-demo.example'),
+        f('port', 'Port', '587', 'number'),
+        f('username', 'Username', 'notifications@forge-demo.example'),
+        f('password', 'Password', '••••••••', 'password', true),
+      ],
+      sandboxSteps: null, sandboxUrl: null, logoUrl: null,
+    },
+    {
+      provider: 'ai', name: 'AI Assistant', category: 'service', icon: 'smart_toy',
+      description: 'Self-hosted AI for smart search, drafting, and document Q&A.',
+      isConfigured: true,
+      fields: [
+        f('endpoint', 'Model Endpoint', 'http://forge-ai:11434'),
+        f('model', 'Model', 'gemma3:4b'),
+      ],
+      sandboxSteps: null, sandboxUrl: null, logoUrl: null,
+    },
+  ];
+
+  return { showSandboxGuides: true, integrations };
+}
+
+// ── Shop floor (kiosk display) ─────────────────────────────────────────────
+
+function userFullName(u: Row | undefined): string {
+  const first = String(u?.['firstName'] ?? '').trim();
+  const last = String(u?.['lastName'] ?? '').trim();
+  return last && first ? `${last}, ${first}` : first || last || 'Unknown';
+}
+
+function userInitials(u: Row | undefined): string {
+  const first = String(u?.['firstName'] ?? '').trim();
+  const last = String(u?.['lastName'] ?? '').trim();
+  return ((first[0] ?? '?') + (last[0] ?? '')).toUpperCase();
+}
+
+function isArchivedJob(j: Row): boolean {
+  if (j['isArchived'] === true) return true;
+  const d = String(j['disposition'] ?? '').toLowerCase();
+  return d === 'archived' || d === 'cancelled' || d === 'completed' || d === 'shipped';
+}
+
+/** Active jobs in a shop-floor stage (falls back to all active jobs so the demo isn't empty). */
+async function loadShopFloorJobs(
+  store: DemoDataStore,
+): Promise<{ jobs: Row[]; stageById: Map<string, Row>; users: Row[] }> {
+  const [jobs, users, stages] = await Promise.all([
+    store.load('job'), store.load('application-user'), store.load('job-stage'),
+  ]);
+  const stageById = new Map<string, Row>();
+  for (const s of stages) stageById.set(String(s['id']), s);
+  const active = jobs.filter(j => !isArchivedJob(j));
+  const onFloor = active.filter(j => stageById.get(String(j['currentStageId']))?.['isShopFloor'] === true);
+  return { jobs: onFloor.length ? onFloor : active, stageById, users };
+}
+
+async function synthesizeShopFloorOverview(store: DemoDataStore): Promise<unknown> {
+  const { jobs, stageById, users } = await loadShopFloorJobs(store);
+  const now = Date.now();
+  const chosen = jobs.slice(0, 12);
+  const activeJobs = chosen.map(j => {
+    const s = stageById.get(String(j['currentStageId']));
+    const u = users.find(x => String(x['id']) === String(j['assigneeId']));
+    const dueT = j['dueDate'] ? new Date(String(j['dueDate'])).getTime() : NaN;
+    return {
+      id: Number(j['id']),
+      jobNumber: String(j['jobNumber'] ?? `#${j['id']}`),
+      title: String(j['title'] ?? ''),
+      stageName: String(s?.['name'] ?? ''),
+      stageColor: String(s?.['color'] ?? '#0d9488'),
+      priorityName: String(j['priority'] ?? 'Normal'),
+      assigneeId: j['assigneeId'] != null ? Number(j['assigneeId']) : null,
+      assigneeInitials: u ? userInitials(u) : null,
+      assigneeColor: u ? String(u['avatarColor'] ?? '#64748b') : null,
+      dueDate: j['dueDate'] ?? null,
+      isOverdue: !isNaN(dueT) && dueT < now,
+    };
+  });
+  // Lightweight worker projection for the overview header (the card grid uses /clock-status).
+  const workers = buildClockWorkers(jobs, users, stageById)
+    .filter(w => w.status !== 'Out')
+    .map(w => ({
+      userId: w.userId, name: w.name, initials: w.initials, avatarColor: w.avatarColor,
+      currentTask: w.currentTask, currentJobId: w.currentJobId,
+      currentJobNumber: w.currentJobNumber, timeOnTask: w.timeOnTask,
+    }));
+  return { activeJobs, workers, completedToday: chosen.length ? 3 : 0, maintenanceAlerts: 0 };
+}
+
+async function synthesizeShopFloorWorkers(store: DemoDataStore): Promise<unknown[]> {
+  const { jobs, stageById, users } = await loadShopFloorJobs(store);
+  return buildClockWorkers(jobs, users, stageById);
+}
+
+interface DemoClockWorker {
+  userId: number; name: string; email: string; initials: string; avatarColor: string;
+  isClockedIn: boolean; clockedInAt: string | null; status: string;
+  currentTask: string | null; currentJobId: number | null; currentJobNumber: string | null;
+  timeOnTask: string; statusSince: string | null; assignments: unknown[]; role: string;
+}
+
+/**
+ * Build a believable clocked-in roster from the demo users + their assigned jobs.
+ * status strings match ClockEventTypeService: 'In' (working), 'OnBreak'/'OnLunch'
+ * (cssClass 'break'), 'Out' (clocked out).
+ */
+function buildClockWorkers(jobs: Row[], users: Row[], stageById: Map<string, Row>): DemoClockWorker[] {
+  const byAssignee = new Map<string, Row[]>();
+  for (const j of jobs) {
+    const uid = j['assigneeId'];
+    if (uid == null) continue;
+    const list = byAssignee.get(String(uid)) ?? [];
+    list.push(j);
+    byAssignee.set(String(uid), list);
+  }
+  const now = Date.now();
+  const active = users.filter(u => u['isActive'] !== false);
+  // Prefer users with real assigned jobs, then fill the roster with others.
+  const withJobs = active.filter(u => byAssignee.has(String(u['id'])));
+  const without = active.filter(u => !byAssignee.has(String(u['id'])));
+  const roster = [...withJobs, ...without].slice(0, 8);
+  const statuses = ['In', 'In', 'In', 'In', 'OnBreak', 'In', 'OnLunch', 'Out'];
+
+  return roster.map((u, i) => {
+    const status = statuses[i % statuses.length];
+    const assignedJobs = byAssignee.get(String(u['id'])) ?? [];
+    const current = status === 'In' ? assignedJobs[0] : undefined;
+    const since = status === 'Out' ? null : new Date(now - (12 + i * 9) * 60_000).toISOString();
+    const assignments = assignedJobs.slice(0, 4).map(j => {
+      const s = stageById.get(String(j['currentStageId']));
+      const dueT = j['dueDate'] ? new Date(String(j['dueDate'])).getTime() : NaN;
+      return {
+        jobId: Number(j['id']),
+        jobNumber: String(j['jobNumber'] ?? `#${j['id']}`),
+        title: String(j['title'] ?? ''),
+        priorityName: String(j['priority'] ?? 'Normal'),
+        stageName: String(s?.['name'] ?? ''),
+        stageColor: String(s?.['color'] ?? '#0d9488'),
+        isOverdue: !isNaN(dueT) && dueT < now,
+        hasActiveTimer: current != null && String(j['id']) === String(current['id']),
+      };
+    });
+    return {
+      userId: Number(u['id']),
+      name: userFullName(u),
+      email: String(u['email'] ?? ''),
+      initials: String(u['initials'] ?? userInitials(u)),
+      avatarColor: String(u['avatarColor'] ?? '#64748b'),
+      isClockedIn: status !== 'Out',
+      clockedInAt: since,
+      status,
+      currentTask: current ? String(current['title'] ?? '') : null,
+      currentJobId: current ? Number(current['id']) : null,
+      currentJobNumber: current ? String(current['jobNumber'] ?? '') : null,
+      timeOnTask: '0m',
+      statusSince: since,
+      assignments,
+      role: 'ProductionWorker',
+    };
+  });
 }
 
 async function synthesizeTrackType(store: DemoDataStore, id: number): Promise<unknown | null> {

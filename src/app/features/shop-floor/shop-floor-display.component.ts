@@ -103,8 +103,12 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   // Pairing gate — true when this device has no kiosk device token (or the
   // token was revoked). Shows the admin setup flow instead of attempting to
-  // load shop-floor data (which would 401).
-  protected readonly isUnpaired = signal(!localStorage.getItem('forge-kiosk-device-token'));
+  // load shop-floor data (which would 401). In the static demo there's no
+  // backend to pair against, so treat the kiosk as already paired and let the
+  // mocked shop-floor data render instead of the setup screen.
+  protected readonly isUnpaired = signal(
+    !environment.demoMode && !localStorage.getItem('forge-kiosk-device-token'),
+  );
 
   // Live elapsed times — recomputed every second via tick signal
   private readonly tick = signal(0);
