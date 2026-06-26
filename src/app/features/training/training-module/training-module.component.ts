@@ -16,6 +16,7 @@ import { WalkthroughContent } from '../models/walkthrough-content.model';
 import { QuickRefContent } from '../models/quickref-content.model';
 import { QuizContent } from '../models/quiz-content.model';
 import { TrainingModuleQuizComponent } from './training-module-quiz.component';
+import { attachAdvanceGate } from '../walkthrough-gate.util';
 
 @Component({
   selector: 'app-training-module',
@@ -188,6 +189,9 @@ export class TrainingModuleComponent implements OnInit {
     const numericModuleId = this.module()?.id;
     const ngZone = this.ngZone;
     const fromUrl = this.fromUrl();
+    // First run = never completed: interaction gates are HARD (no skip).
+    // Repeat run (already completed): gates are advisory — Next stays available.
+    const firstRun = !this.completed();
 
     router.navigateByUrl(targetUrl).then(() => {
       import('driver.js').then(({ driver }) => {
@@ -204,55 +208,134 @@ export class TrainingModuleComponent implements OnInit {
           svg.remove();
         };
 
+        // --- Interaction gating (#2) ---------------------------------------
+        // On a first run, a step with `advanceOn` is "locked": its Next button
+        // is disabled until the user performs the interaction, then the tour
+        // advances automatically. On a repeat run, gates are skipped.
+        const hasGates = content.steps.some(s => !!s.advanceOn);
+        let gateDetach: () => void = () => {};
+        let gateSatisfied = true;
+
+        // `d` is forward-declared so the hook closures below (finishTour /
+        // advance / evaluateGate) can capture it; it's assigned exactly once
+        // from driver(...) further down, before any hook actually runs.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, prefer-const
+        let d: any;
+
+        const finishTour = () => {
+          cleanup();
+          gateDetach();
+          ngZone.run(() => {
+            if (numericModuleId) {
+              trainingService.completeModule(numericModuleId).subscribe({
+                error: () => { /* swallow — navigation proceeds regardless */ },
+              });
+              // Carry ?from= back to the splash so its Back button still
+              // returns to wherever the user originally opened it.
+              const back = fromUrl ? `?from=${encodeURIComponent(fromUrl)}` : '';
+              router.navigateByUrl(`/training/module/${numericModuleId}${back}`);
+            } else {
+              router.navigateByUrl('/training/library');
+            }
+          });
+          setTimeout(() => d.destroy(), 0);
+        };
+
+        const advance = () => {
+          if (d.hasNextStep()) { d.moveNext(); } else { finishTour(); }
+        };
+
+        // Disable / re-enable the popover's Next button + show the lock hint.
+        const lockNext = (locked: boolean, hint?: string) => {
+          const pop = document.querySelector('.driver-popover.qb-tour-popover');
+          if (!pop) return;
+          const nextBtn = pop.querySelector('.driver-popover-next-btn');
+          if (nextBtn) {
+            nextBtn.classList.toggle('qb-tour-locked', locked);
+            if (locked) {
+              nextBtn.setAttribute('disabled', 'true');
+              nextBtn.setAttribute('aria-disabled', 'true');
+            } else {
+              nextBtn.removeAttribute('disabled');
+              nextBtn.removeAttribute('aria-disabled');
+            }
+          }
+          let hintEl = pop.querySelector('.qb-tour-gate-hint');
+          if (locked && hint) {
+            if (!hintEl) {
+              hintEl = document.createElement('div');
+              hintEl.className = 'qb-tour-gate-hint';
+              const desc = pop.querySelector('.driver-popover-description');
+              if (desc) { desc.insertAdjacentElement('afterend', hintEl); }
+              else { pop.appendChild(hintEl); }
+            }
+            hintEl.textContent = hint;
+          } else if (hintEl) {
+            hintEl.remove();
+          }
+        };
+
+        // Bind (or clear) the gate for whichever step is now active.
+        const evaluateGate = (element: Element | undefined) => {
+          gateDetach();
+          gateDetach = () => {};
+          const idx = d.getActiveIndex();
+          const step = typeof idx === 'number' ? content.steps[idx] : undefined;
+          const gate = firstRun ? step?.advanceOn : undefined;
+          if (gate) {
+            gateSatisfied = false;
+            lockNext(true, gate.hint);
+            const g = attachAdvanceGate(gate, element, () => {
+              gateSatisfied = true;
+              lockNext(false);
+              advance();
+            });
+            if (g.attached) {
+              gateDetach = g.detach;
+            } else {
+              // Target not on the page — fail open so the user isn't trapped.
+              gateSatisfied = true;
+              lockNext(false);
+            }
+          } else {
+            gateSatisfied = true;
+            lockNext(false);
+          }
+        };
+
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const d = (driver as any)({
+        d = (driver as any)({
           animate: true,
           overlayOpacity: 0,
           popoverOffset: 20,
           allowClose: true,
+          // Block arrow/Enter tour-nav during gated first runs so the gate can't be bypassed.
+          allowKeyboardControl: !(firstRun && hasGates),
           popoverClass: 'qb-tour-popover',
           doneBtnText: '<span class="material-icons-outlined" aria-hidden="true">check</span>Done',
-          onHighlighted: () => {
+          onHighlighted: (element: Element | undefined) => {
             requestAnimationFrame(() => {
               updateTourConnector(svg, { center: true });
               setupPopoverDraggable();
+              evaluateGate(element);
             });
           },
           onDeselected: () => {
             clearTourConnector(svg);
+            gateDetach();
+            gateDetach = () => {};
           },
           // Intercept every Next/Done click so we control last-step behavior.
           // driver.js only fires onDestroyed if __activeElement is still set,
           // which can be lost in zoneless apps. onNextClick fires reliably.
           onNextClick: () => {
-            if (d.hasNextStep()) {
-              d.moveNext();
-            } else {
-              // Done button on last step.
-              // 1. Remove our SVG overlay immediately.
-              cleanup();
-              // 2. Navigate first — defer d.destroy() to the next macrotask so
-              //    driver.js DOM cleanup (focus restoration, body class removal)
-              //    does not race against Angular's router navigation.
-              ngZone.run(() => {
-                if (numericModuleId) {
-                  trainingService.completeModule(numericModuleId).subscribe({
-                    error: () => { /* swallow — navigation proceeds regardless */ },
-                  });
-                  // Carry ?from= back to the splash so its Back button still
-                  // returns to wherever the user originally opened it.
-                  const back = fromUrl ? `?from=${encodeURIComponent(fromUrl)}` : '';
-                  router.navigateByUrl(`/training/module/${numericModuleId}${back}`);
-                } else {
-                  router.navigateByUrl('/training/library');
-                }
-              });
-              setTimeout(() => d.destroy(), 0);
-            }
+            if (!gateSatisfied) return; // gated step not yet satisfied — block
+            advance();
           },
           // Handles close button / Escape key (not the Done button)
           onDestroyed: () => {
             cleanup();
+            gateDetach();
           },
         });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

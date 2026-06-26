@@ -480,6 +480,28 @@ html[data-theme='dark'] {
     }
   }
 
+  // #2 interaction-gating: a "locked" Next button (step requires the user to act first)
+  .driver-popover-next-btn.qb-tour-locked {
+    opacity: 0.45 !important;
+    cursor: not-allowed !important;
+    background: var(--surface) !important;
+    border-color: var(--border) !important;
+    color: var(--text-muted) !important;
+
+    &:hover { background: var(--surface) !important; border-color: var(--border) !important; }
+  }
+
+  // The "do this to continue" instruction shown under the description while locked
+  .qb-tour-gate-hint {
+    margin: $sp-sm 0 0 0 !important;
+    padding: $sp-sm $sp-md !important;
+    font-size: var(--font-size-xs) !important;
+    color: var(--primary) !important;
+    background: color-mix(in srgb, var(--primary) 12%, transparent) !important;
+    border-left: $border-width-accent solid var(--primary) !important;
+    font-family: $font-family-primary !important;
+  }
+
   .driver-popover-close-btn {
     all: unset !important;
     position: absolute !important;

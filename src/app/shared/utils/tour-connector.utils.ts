@@ -50,7 +50,12 @@ function injectOverlayFix(): void {
     // button to fire mouseleave → tooltip hides → button regains hover → tooltip shows
     // → rapid 300-500ms flash cycle.
     // ID selector (#qb-tour-connector specificity 1,0,0) beats the class rule above.
-    '.driver-overlay,#qb-tour-connector,.cdk-overlay-container,.cdk-overlay-container *{pointer-events:none!important}',
+    // `#qb-tour-connector *` is REQUIRED: driver.js adds `.driver-active` to <body>,
+    // so the `.driver-active *{pointer-events:auto}` rule above re-enables pointer
+    // events on our connector's child <rect>s — which then intercept clicks on the
+    // highlighted element and break interaction-gated walkthrough steps. The ID-scoped
+    // descendant selector (1,0,0) overrides it so the whole connector stays pass-through.
+    '.driver-overlay,#qb-tour-connector,#qb-tour-connector *,.cdk-overlay-container,.cdk-overlay-container *{pointer-events:none!important}',
   ].join('');
   document.head.appendChild(s);
 }
