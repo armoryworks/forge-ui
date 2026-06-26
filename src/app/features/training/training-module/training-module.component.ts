@@ -38,6 +38,15 @@ export class TrainingModuleComponent implements OnInit {
   protected readonly isCompleting = signal(false);
   protected readonly completed = signal(false);
 
+  /** Where the user opened this module from (`?from=`), so "Back" returns there. */
+  protected readonly fromUrl = signal<string | null>(null);
+  protected readonly backLabel = computed((): string => {
+    const from = this.fromUrl();
+    if (!from) return 'Training Library';
+    const label = this.deriveLabel(from);
+    return label ? `Back to ${label}` : 'Back';
+  });
+
   protected readonly isAdmin = computed(() => this.authService.hasAnyRole(['Admin', 'Manager']));
 
   // Reading timer — counts seconds spent on the page (pauses when tab is hidden)
@@ -116,6 +125,7 @@ export class TrainingModuleComponent implements OnInit {
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
+    this.fromUrl.set(this.route.snapshot.queryParamMap.get('from'));
     this.trainingService.getModule(id).subscribe({
       next: module => {
         this.module.set(module);
@@ -177,6 +187,7 @@ export class TrainingModuleComponent implements OnInit {
     const trainingService = this.trainingService;
     const numericModuleId = this.module()?.id;
     const ngZone = this.ngZone;
+    const fromUrl = this.fromUrl();
 
     router.navigateByUrl(targetUrl).then(() => {
       import('driver.js').then(({ driver }) => {
@@ -228,7 +239,10 @@ export class TrainingModuleComponent implements OnInit {
                   trainingService.completeModule(numericModuleId).subscribe({
                     error: () => { /* swallow — navigation proceeds regardless */ },
                   });
-                  router.navigateByUrl(`/training/module/${numericModuleId}`);
+                  // Carry ?from= back to the splash so its Back button still
+                  // returns to wherever the user originally opened it.
+                  const back = fromUrl ? `?from=${encodeURIComponent(fromUrl)}` : '';
+                  router.navigateByUrl(`/training/module/${numericModuleId}${back}`);
                 } else {
                   router.navigateByUrl('/training/library');
                 }
@@ -262,7 +276,20 @@ export class TrainingModuleComponent implements OnInit {
 
 
   protected goBack(): void {
-    this.router.navigate(['/training/library']);
+    const from = this.fromUrl();
+    if (from) {
+      this.router.navigateByUrl(from);
+    } else {
+      this.router.navigate(['/training/library']);
+    }
+  }
+
+  /** Human label for a `?from=` URL, e.g. "/admin/carriers" → "Carriers". */
+  private deriveLabel(url: string): string {
+    const path = url.split('?')[0].split('#')[0];
+    const seg = path.split('/').filter(s => s && !/^\d+$/.test(s)).pop();
+    if (!seg) return '';
+    return seg.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   }
 
   protected onQuizComplete(passed: boolean): void {

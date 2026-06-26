@@ -24,9 +24,12 @@ export class TrainingPathComponent implements OnInit {
 
   protected readonly isLoading = signal(true);
   protected readonly path = signal<TrainingPath | null>(null);
+  /** This path's URL, passed as `?from=` so a module's Back returns here. */
+  protected readonly currentUrl = signal('');
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
+    this.currentUrl.set(this.router.url);
     this.trainingService.getPath(id).subscribe({
       next: path => {
         this.path.set(path);

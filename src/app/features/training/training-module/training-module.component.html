@@ -2,9 +2,9 @@
 
   <!-- Static: back navigation -->
   <div class="module-viewer__back">
-    <button class="module-viewer__back-btn" (click)="goBack()" aria-label="Back to Training Library">
+    <button class="module-viewer__back-btn" (click)="goBack()" [attr.aria-label]="backLabel()">
       <span class="material-icons-outlined" aria-hidden="true">chevron_left</span>
-      Training Library
+      {{ backLabel() }}
     </button>
   </div>
 
@@ -136,11 +136,10 @@
                 }
 
                 <button class="walkthrough-viewer__start-btn" (click)="startWalkthrough()"
-                        [disabled]="completed()"
-                        aria-label="Take the interactive tour">
+                        [attr.aria-label]="completed() ? 'Repeat this interactive tour' : 'Take the interactive tour'">
                   @if (completed()) {
-                    <span class="material-icons-outlined" aria-hidden="true">check_circle</span>
-                    Tour Complete
+                    <span class="material-icons-outlined" aria-hidden="true">replay</span>
+                    Repeat Training
                   } @else {
                     <span class="material-icons-outlined" aria-hidden="true">play_circle</span>
                     {{ walkthrough.startButtonLabel || 'Take the Tour' }}
@@ -237,14 +236,14 @@
                 </button>
               }
             } @else {
-              <button class="action-btn" (click)="goBack()" aria-label="Return to Training Library">
-                <span class="material-icons-outlined" aria-hidden="true">chevron_left</span>
-                Training Library
-              </button>
               <span class="module-viewer__completed-badge">
                 <span class="material-icons-outlined" aria-hidden="true">check_circle</span>
                 Completed
               </span>
+              <button class="action-btn" (click)="goBack()" [attr.aria-label]="backLabel()">
+                <span class="material-icons-outlined" aria-hidden="true">chevron_left</span>
+                {{ backLabel() }}
+              </button>
             }
           </div>
         </div>

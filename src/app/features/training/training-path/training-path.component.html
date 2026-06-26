@@ -66,6 +66,7 @@
               <div class="path-module__action">
                 <a class="action-btn action-btn--primary"
                    [routerLink]="['/training/module', module.moduleId]"
+                   [queryParams]="{ from: currentUrl() }"
                    [attr.aria-label]="moduleActionLabel(module.myStatus) + ' ' + module.title">
                   {{ moduleActionLabel(module.myStatus) }}
                 </a>

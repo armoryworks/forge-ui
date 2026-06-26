@@ -61,7 +61,8 @@
           <p class="ai-help-panel__suggested-label">Related training:</p>
           @for (module of suggestedModules(); track module.id) {
             <a class="ai-help-panel__module-link"
-               [routerLink]="['/training/module', module.id]">
+               [routerLink]="['/training/module', module.id]"
+               [queryParams]="{ from: appRoute() }">
               <span class="material-icons-outlined">{{ contentTypeIcon(module.contentType) }}</span>
               {{ module.title }}
             </a>

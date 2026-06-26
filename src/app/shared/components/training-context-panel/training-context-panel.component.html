@@ -25,6 +25,7 @@
           @for (module of modules(); track module.id) {
             <a class="training-context-card"
                [routerLink]="['/training/module', module.id]"
+               [queryParams]="{ from: currentRoute() }"
                (click)="closed.emit()">
               <span class="material-icons-outlined training-context-card__icon">{{ contentTypeIcon(module.contentType) }}</span>
               <div class="training-context-card__info">
