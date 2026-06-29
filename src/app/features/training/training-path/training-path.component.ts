@@ -49,6 +49,7 @@ export class TrainingPathComponent implements OnInit {
       Walkthrough: 'route',
       QuickRef: 'quick_reference_all',
       Quiz: 'quiz',
+      Reference: 'menu_book',
     };
     return icons[type] ?? 'school';
   }

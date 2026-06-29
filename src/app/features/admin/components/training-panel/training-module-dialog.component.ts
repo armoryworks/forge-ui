@@ -53,6 +53,7 @@ export class TrainingModuleDialogComponent implements OnInit {
     { value: 'Walkthrough', label: 'Walkthrough' },
     { value: 'QuickRef', label: 'Quick Reference' },
     { value: 'Quiz', label: 'Quiz' },
+    { value: 'Reference', label: 'Reference (advanced / edge-case)' },
   ];
 
   readonly form = new FormGroup({
@@ -90,6 +91,7 @@ export class TrainingModuleDialogComponent implements OnInit {
       case 'Walkthrough': return 'Walkthrough Steps JSON';
       case 'QuickRef': return 'Quick Reference JSON';
       case 'Quiz': return 'Quiz Questions JSON';
+      case 'Reference': return 'Reference Content JSON ({ body, sections: [] })';
       default: return 'Content JSON';
     }
   }

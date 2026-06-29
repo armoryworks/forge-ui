@@ -6333,7 +6333,8 @@
       "article": "Artículo",
       "walkthrough": "Tutorial",
       "quickRef": "Referencia Rápida",
-      "quiz": "Quiz / Evaluación"
+      "quiz": "Quiz / Evaluación",
+      "reference": "Referencia"
     },
     "styleOptions": {
       "all": "Todos los Estilos",

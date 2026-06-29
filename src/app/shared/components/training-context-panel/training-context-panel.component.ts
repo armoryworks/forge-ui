@@ -62,6 +62,7 @@ export class TrainingContextPanelComponent {
       Walkthrough: 'route',
       QuickRef: 'quick_reference_all',
       Quiz: 'quiz',
+      Reference: 'menu_book',
     };
     return icons[type] ?? 'school';
   }

@@ -58,7 +58,7 @@ export class UserTrainingDetailPanelComponent {
   protected contentTypeIcon(type: string): string {
     const icons: Record<string, string> = {
       Article: 'article', Video: 'play_circle',
-      Walkthrough: 'route', QuickRef: 'quick_reference_all', Quiz: 'quiz',
+      Walkthrough: 'route', QuickRef: 'quick_reference_all', Quiz: 'quiz', Reference: 'menu_book',
     };
     return icons[type] ?? 'school';
   }

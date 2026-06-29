@@ -253,6 +253,7 @@ export class TrainingPanelComponent implements OnInit {
       Walkthrough: 'route',
       QuickRef: 'quick_reference_all',
       Quiz: 'quiz',
+      Reference: 'menu_book',
     };
     return icons[type] ?? 'school';
   }
@@ -263,6 +264,7 @@ export class TrainingPanelComponent implements OnInit {
       Walkthrough: 'chip--success',
       QuickRef: 'chip--muted',
       Quiz: 'chip--warning',
+      Reference: 'chip--info',
     };
     return classes[type] ?? 'chip--muted';
   }

@@ -138,6 +138,7 @@ export class TrainingComponent implements OnInit {
       Walkthrough: 'route',
       QuickRef: 'quick_reference_all',
       Quiz: 'quiz',
+      Reference: 'menu_book',
     };
     return icons[type] ?? 'school';
   }
@@ -148,6 +149,7 @@ export class TrainingComponent implements OnInit {
       Walkthrough: this.translate.instant('trainingPage.typeOptions.walkthrough'),
       QuickRef: this.translate.instant('trainingPage.typeOptions.quickRef'),
       Quiz: this.translate.instant('trainingPage.typeOptions.quiz'),
+      Reference: this.translate.instant('trainingPage.typeOptions.reference'),
     };
     return labels[type] ?? type;
   }
@@ -158,6 +160,7 @@ export class TrainingComponent implements OnInit {
       Walkthrough: 'Best for: Visual / Kinesthetic learners',
       QuickRef:    'Best for: Visual / Reading learners',
       Quiz:        'Best for: Kinesthetic learners — learn by doing',
+      Reference:   'Best for: looking up advanced details and edge cases',
     };
     return hints[type] ?? '';
   }

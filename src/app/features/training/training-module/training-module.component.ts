@@ -58,8 +58,8 @@ export class TrainingModuleComponent implements OnInit {
     if (!m || this.completed()) return 0;
     // Walkthroughs complete via the tour interaction — no wait required
     if (m.contentType === 'Walkthrough') return 0;
-    // QuickRef is a reference card — glance-and-done, very short minimum
-    if (m.contentType === 'QuickRef') return Math.min(30, m.estimatedMinutes * 15);
+    // QuickRef + Reference are glance-and-done reference content — very short minimum
+    if (m.contentType === 'QuickRef' || m.contentType === 'Reference') return Math.min(30, m.estimatedMinutes * 15);
     // Article: actual reading time, minimum 20 seconds
     return Math.max(20, m.estimatedMinutes * 60);
   });
@@ -92,7 +92,8 @@ export class TrainingModuleComponent implements OnInit {
 
   protected readonly articleContent = computed<ArticleContent | null>(() => {
     const m = this.module();
-    if (!m || m.contentType !== 'Article') return null;
+    // Reference (edge-case side docs) renders through the Article path — same {body, sections} shape.
+    if (!m || (m.contentType !== 'Article' && m.contentType !== 'Reference')) return null;
     try { return JSON.parse(m.contentJson) as ArticleContent; } catch { return null; }
   });
 

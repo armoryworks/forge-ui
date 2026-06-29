@@ -1,1 +1,1 @@
-export type TrainingContentType = 'Article' | 'Walkthrough' | 'QuickRef' | 'Quiz';
+export type TrainingContentType = 'Article' | 'Walkthrough' | 'QuickRef' | 'Quiz' | 'Reference';

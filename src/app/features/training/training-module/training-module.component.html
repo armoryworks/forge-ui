@@ -93,6 +93,29 @@
             }
           }
 
+          @case ('Reference') {
+            @if (articleContent(); as reference) {
+              <div class="article-body" aria-label="Reference content">
+                @if (articleHeadings().length > 1) {
+                  <nav class="article-outline" aria-label="Reference contents">
+                    <div class="article-outline__header">
+                      <span class="material-icons-outlined" aria-hidden="true">toc</span>
+                      In this reference
+                    </div>
+                    <ol class="article-outline__list">
+                      @for (heading of articleHeadings(); track $index) {
+                        <li class="article-outline__item">{{ heading }}</li>
+                      }
+                    </ol>
+                  </nav>
+                }
+                @if (reference.body) {
+                  <markdown class="article-body__text" [data]="reference.body" />
+                }
+              </div>
+            }
+          }
+
           @case ('Walkthrough') {
             @if (walkthroughContent(); as walkthrough) {
               <div class="walkthrough-viewer">
