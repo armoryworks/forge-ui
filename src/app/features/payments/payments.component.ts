@@ -151,7 +151,14 @@ export class PaymentsComponent implements OnInit {
   }
 
   // --- Create Dialog ---
-  protected openCreateDialog(): void { this.showCreateDialog.set(true); }
+  // ⚡ ACCOUNTING BOUNDARY — recording payments is only allowed in standalone
+  // mode. When an accounting provider is connected (integrated mode) payments
+  // are provider-managed, so this is a no-op (defense in depth: also guards the
+  // draft-resume path in ngOnInit, not just the gated header button).
+  protected openCreateDialog(): void {
+    if (!this.isStandalone()) { return; }
+    this.showCreateDialog.set(true);
+  }
   protected closeCreateDialog(): void { this.showCreateDialog.set(false); }
   protected onCreateSaved(): void {
     this.closeCreateDialog();
