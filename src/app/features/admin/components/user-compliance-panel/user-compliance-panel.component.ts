@@ -42,6 +42,7 @@ export class UserCompliancePanelComponent {
   protected readonly detail = signal<UserComplianceDetail | null>(null);
   protected readonly loading = signal(false);
   protected readonly sending = signal(false);
+  protected readonly syncing = signal(false);
 
   // Payroll
   protected readonly payStubs = signal<PayStub[]>([]);
@@ -149,6 +150,22 @@ export class UserCompliancePanelComponent {
         this.snackbar.success(this.translate.instant('admin.reminderSent'));
       },
       error: () => this.sending.set(false),
+    });
+  }
+
+  protected syncPayroll(): void {
+    this.syncing.set(true);
+    this.payrollService.syncPayroll().subscribe({
+      next: () => {
+        this.syncing.set(false);
+        this.snackbar.success(this.translate.instant('userCompliance.payrollSynced'));
+        const id = this.userId();
+        if (id) this.loadPayroll(id);
+      },
+      error: () => {
+        this.syncing.set(false);
+        this.snackbar.error(this.translate.instant('userCompliance.payrollSyncFailed'));
+      },
     });
   }
 

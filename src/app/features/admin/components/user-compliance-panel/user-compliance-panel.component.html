@@ -5,10 +5,16 @@
         <span class="user-compliance__name">{{ d.userName }}</span>
         <span class="user-compliance__email">{{ d.userEmail }}</span>
       </div>
-      <button class="action-btn" [disabled]="sending()" (click)="sendReminder()" [attr.aria-label]="'userCompliance.sendReminder' | translate">
-        <span class="material-icons-outlined">notifications_active</span>
-        {{ 'userCompliance.sendReminder' | translate }}
-      </button>
+      <div class="user-compliance__header-actions">
+        <button class="action-btn" [disabled]="syncing()" (click)="syncPayroll()" [attr.aria-label]="'userCompliance.syncPayroll' | translate">
+          <span class="material-icons-outlined" [class.spin]="syncing()">sync</span>
+          {{ 'userCompliance.syncPayroll' | translate }}
+        </button>
+        <button class="action-btn" [disabled]="sending()" (click)="sendReminder()" [attr.aria-label]="'userCompliance.sendReminder' | translate">
+          <span class="material-icons-outlined">notifications_active</span>
+          {{ 'userCompliance.sendReminder' | translate }}
+        </button>
+      </div>
     </div>
 
     <!-- State Withholding Info Banner -->

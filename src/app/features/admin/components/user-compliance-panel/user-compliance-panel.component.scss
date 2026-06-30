@@ -18,6 +18,12 @@
   gap: $sp-xs;
 }
 
+.user-compliance__header-actions {
+  display: flex;
+  gap: $sp-sm;
+  align-items: center;
+}
+
 .user-compliance__name {
   font-size: var(--font-size-md);
   font-weight: 600;
