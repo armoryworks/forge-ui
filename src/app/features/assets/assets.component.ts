@@ -64,6 +64,7 @@ export class AssetsComponent implements OnInit {
   protected readonly assetForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
     assetType: new FormControl<AssetType>('Machine', [Validators.required]),
+    status: new FormControl<AssetStatus>('Active', [Validators.required]),
     location: new FormControl(''),
     manufacturer: new FormControl(''),
     model: new FormControl(''),
@@ -133,6 +134,16 @@ export class AssetsComponent implements OnInit {
     { value: 'Other', label: this.translate.instant('assets.typeOther') },
   ];
 
+  // Status options for the edit form. Reuses the same i18n labels as the
+  // status filter (minus the "all" null entry) so the edit dialog and the
+  // detail-panel quick actions stay in lockstep.
+  protected readonly assetStatusOptions: SelectOption[] = [
+    { value: 'Active', label: this.translate.instant('assets.statusActive') },
+    { value: 'Maintenance', label: this.translate.instant('assets.statusMaintenance') },
+    { value: 'Retired', label: this.translate.instant('assets.statusRetired') },
+    { value: 'OutOfService', label: this.translate.instant('assets.statusOutOfService') },
+  ];
+
   constructor() {
     this.loadAssets();
   }
@@ -188,7 +199,7 @@ export class AssetsComponent implements OnInit {
     this.editingAsset.set(null);
     this.draftConfig = { entityType: 'asset', entityId: 'new', route: '/assets' };
     this.assetForm.reset({
-      name: '', assetType: 'Machine', location: '',
+      name: '', assetType: 'Machine', status: 'Active', location: '',
       manufacturer: '', model: '', serialNumber: '', notes: '',
       isCustomerOwned: false, cavityCount: null, toolLifeExpectancy: null,
       // Phase 3 F4 — reset full-record fields too.
@@ -204,6 +215,7 @@ export class AssetsComponent implements OnInit {
     this.assetForm.patchValue({
       name: asset.name,
       assetType: asset.assetType,
+      status: asset.status,
       location: asset.location ?? '',
       manufacturer: asset.manufacturer ?? '',
       model: asset.model ?? '',
@@ -231,6 +243,7 @@ export class AssetsComponent implements OnInit {
       this.assetsService.updateAsset(editing.id, {
         name: form.name!,
         assetType: form.assetType!,
+        status: form.status!,
         location: form.location || undefined,
         manufacturer: form.manufacturer || undefined,
         model: form.model || undefined,

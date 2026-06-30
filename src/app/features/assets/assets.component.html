@@ -57,6 +57,10 @@
         <app-input [label]="'assets.location' | translate" formControlName="location" data-testid="asset-location" />
       </div>
 
+      @if (editingAsset()) {
+        <app-select [label]="'common.status' | translate" formControlName="status" [options]="assetStatusOptions" [required]="true" data-testid="asset-status" />
+      }
+
       <div class="dialog-row">
         <app-input [label]="'assets.manufacturer' | translate" formControlName="manufacturer" data-testid="asset-manufacturer" />
         <app-input [label]="'assets.model' | translate" formControlName="model" data-testid="asset-model" />
