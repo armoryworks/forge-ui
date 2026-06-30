@@ -24,6 +24,7 @@
       <div class="account-page__actions">
         <app-validation-button [violations]="passwordViolations" [loading]="passwordMismatch()">
         <button class="action-btn action-btn--primary"
+          data-testid="change-password-btn"
           [disabled]="passwordForm.invalid || savingPassword() || passwordMismatch()"
           (click)="changePassword()">
           @if (savingPassword()) {
@@ -56,6 +57,7 @@
 
       <div class="account-page__actions">
         <button class="action-btn action-btn--primary"
+          data-testid="set-pin-btn"
           [disabled]="pinForm.invalid || savingPin() || pinMismatch()"
           (click)="setPin()">
           @if (savingPin()) {
@@ -151,7 +153,7 @@
           <p class="security__hint">Add an extra layer of security by requiring a verification code from an authenticator app when signing in.</p>
 
           <div class="account-page__actions">
-            <button class="action-btn action-btn--primary" (click)="setupMfa()">
+            <button class="action-btn action-btn--primary" data-testid="enable-mfa-btn" (click)="setupMfa()">
               <span class="material-icons-outlined">verified_user</span>
               Enable Two-Factor Authentication
             </button>
