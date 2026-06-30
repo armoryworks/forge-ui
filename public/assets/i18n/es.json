@@ -3821,6 +3821,7 @@
     "statusNeedsUpload": "Necesita Subida"
   },
   "trackTypeDialog": {
+    "codeImmutableHint": "El código es fijo tras la creación y no se puede cambiar.",
     "editTrackType": "Editar Tipo de Pista",
     "createTrackType": "Crear Tipo de Pista",
     "codePlaceholder": "ej. PISTA_PERSONALIZADA",
@@ -3836,6 +3837,9 @@
     "removeStage": "Eliminar etapa"
   },
   "userCompliance": {
+    "syncPayroll": "Sincronizar Nómina",
+    "payrollSynced": "Nómina sincronizada",
+    "payrollSyncFailed": "Error al sincronizar la nómina",
     "sendReminder": "Enviar Recordatorio",
     "noStateTax": "Sin impuesto estatal sobre la renta — formulario de retención estatal no requerido",
     "usesFederalW4": "Usa el W-4 Federal para retención estatal",

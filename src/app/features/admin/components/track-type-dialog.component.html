@@ -3,7 +3,8 @@
   <div [formGroup]="form">
     <app-input [label]="'common.name' | translate" formControlName="name" />
     <div class="dialog-row">
-      <app-input [label]="'admin.code' | translate" formControlName="code" [placeholder]="'trackTypeDialog.codePlaceholder' | translate" />
+      <app-input [label]="'admin.code' | translate" formControlName="code" [placeholder]="'trackTypeDialog.codePlaceholder' | translate"
+        [isReadonly]="isEdit()" [info]="isEdit() ? ('trackTypeDialog.codeImmutableHint' | translate) : ''" />
       <div></div>
     </div>
     <app-input [label]="'common.description' | translate" formControlName="description" />
@@ -38,6 +39,7 @@
             <input class="stage-row__input stage-row__input--name" [placeholder]="'trackTypeDialog.stageNamePlaceholder' | translate" [value]="stage.name"
               (input)="updateStage(i, 'name', $any($event.target).value)" />
             <input class="stage-row__input stage-row__input--code" [placeholder]="'trackTypeDialog.codeStagePlaceholder' | translate" [value]="stage.code"
+              [readonly]="isEdit()" [title]="isEdit() ? ('trackTypeDialog.codeImmutableHint' | translate) : null"
               (input)="updateStage(i, 'code', $any($event.target).value)" />
             <input class="stage-row__input stage-row__input--wip" type="number" [placeholder]="'trackTypeDialog.wipPlaceholder' | translate" [value]="stage.wipLimit"
               (input)="updateStage(i, 'wipLimit', $any($event.target).value ? +$any($event.target).value : null)" />

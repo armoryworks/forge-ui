@@ -3821,6 +3821,7 @@
     "statusNeedsUpload": "Needs Upload"
   },
   "trackTypeDialog": {
+    "codeImmutableHint": "Code is fixed after creation and cannot be changed.",
     "editTrackType": "Edit Track Type",
     "createTrackType": "Create Track Type",
     "codePlaceholder": "e.g. CUSTOM_TRACK",
@@ -3836,6 +3837,9 @@
     "removeStage": "Remove stage"
   },
   "userCompliance": {
+    "syncPayroll": "Sync Payroll",
+    "payrollSynced": "Payroll synced",
+    "payrollSyncFailed": "Payroll sync failed",
     "sendReminder": "Send Reminder",
     "noStateTax": "No state income tax — state withholding form not required",
     "usesFederalW4": "Uses Federal W-4 for state withholding",
