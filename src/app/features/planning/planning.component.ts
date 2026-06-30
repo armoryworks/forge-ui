@@ -120,7 +120,7 @@ export class PlanningComponent implements OnInit {
 
   protected readonly hasCycle = computed(() => this.selectedCycle() !== null);
   protected readonly isActiveCycle = computed(() => this.selectedCycle()?.status === 'Active');
-  protected readonly isDraftCycle = computed(() => this.selectedCycle()?.status === 'Draft');
+  protected readonly isPlanningCycle = computed(() => this.selectedCycle()?.status === 'Planning');
 
   ngOnInit(): void {
     this.loadData();

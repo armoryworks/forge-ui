@@ -66,7 +66,7 @@
           <button class="icon-btn" [matTooltip]="'planning.editCycleBtn' | translate" matTooltipPosition="above" (click)="openEditCycleDialog()" [attr.aria-label]="'planning.editCycleBtn' | translate">
             <span class="material-icons-outlined">edit</span>
           </button>
-          @if (isDraftCycle()) {
+          @if (isPlanningCycle()) {
             <button class="action-btn action-btn--sm" (click)="activateCycle()">
               <span class="material-icons-outlined">play_arrow</span>
               {{ 'planning.activateBtn' | translate }}

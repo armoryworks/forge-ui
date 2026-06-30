@@ -13,7 +13,7 @@
       <span class="cycle-board__count">{{ completedEntries() }} / {{ totalEntries() }}</span>
       <span class="cycle-board__status chip" [class.chip--success]="cycle().status === 'Completed'"
         [class.chip--primary]="cycle().status === 'Active'"
-        [class.chip--muted]="cycle().status === 'Draft'">
+        [class.chip--muted]="cycle().status === 'Planning'">
         {{ cycle().status }}
       </span>
     </div>
