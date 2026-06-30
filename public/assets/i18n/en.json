@@ -4610,6 +4610,7 @@
     "newOrderTitle": "New Sales Order",
     "optional": "Optional",
     "customerPOLabel": "Customer PO",
+    "billingAddress": "Billing Address",
     "editDetails": "Edit Details",
     "headerUpdated": "Details updated",
     "noLinesYet": "No lines yet",

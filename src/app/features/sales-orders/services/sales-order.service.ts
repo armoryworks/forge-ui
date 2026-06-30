@@ -10,6 +10,7 @@ import { CreateSalesOrderRequest } from '../models/create-sales-order-request.mo
 import { FileAttachment } from '../../../shared/models/file.model';
 import { ScheduleMilestone } from '../models/schedule-milestone.model';
 import { PagedQuery, PagedResponse } from '../../../shared/models/paged-response.model';
+import { CustomerAddress } from '../../../shared/models/customer-address.model';
 
 /** Phase 3 F1 partial / WU-18 — extra filter dimensions on the SO list. */
 export interface SalesOrderListQuery extends PagedQuery {
@@ -88,6 +89,15 @@ export class SalesOrderService {
 
   getSalesOrderById(id: number): Observable<SalesOrderDetail> {
     return this.http.get<SalesOrderDetail>(`${this.base}/${id}`);
+  }
+
+  /**
+   * A customer's saved addresses, for the Draft header-edit Billing Address picker
+   * (#8 / SO-8). Mirrors the customer-addresses surface used elsewhere
+   * (`/customers/{id}/addresses` → CustomerAddressResponseModel list).
+   */
+  getCustomerAddresses(customerId: number): Observable<CustomerAddress[]> {
+    return this.http.get<CustomerAddress[]>(`${environment.apiUrl}/customers/${customerId}/addresses`);
   }
 
   /**

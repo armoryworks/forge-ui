@@ -4603,6 +4603,7 @@
     "newOrderTitle": "Nueva Orden de Venta",
     "optional": "Opcional",
     "customerPOLabel": "OC del Cliente",
+    "billingAddress": "Dirección de Facturación",
     "editDetails": "Editar detalles",
     "headerUpdated": "Detalles actualizados",
     "noLinesYet": "Sin líneas aún",

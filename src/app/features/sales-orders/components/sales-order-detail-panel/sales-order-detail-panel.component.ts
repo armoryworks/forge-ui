@@ -19,7 +19,7 @@ import { EntityLinkComponent } from '../../../../shared/components/entity-link/e
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
-import { SelectComponent } from '../../../../shared/components/select/select.component';
+import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
@@ -27,6 +27,7 @@ import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.con
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { FileAttachment } from '../../../../shared/models/file.model';
+import { CustomerAddress } from '../../../../shared/models/customer-address.model';
 import { ScheduleTimelineComponent } from '../schedule-timeline/schedule-timeline.component';
 import { ScheduleMilestone } from '../../models/schedule-milestone.model';
 
@@ -145,8 +146,22 @@ export class SalesOrderDetailPanelComponent {
     customerPO: new FormControl<string>('', { nonNullable: true }),
     creditTerms: new FormControl<string | null>(null),
     requestedDeliveryDate: new FormControl<Date | null>(null),
+    billingAddressId: new FormControl<number | null>(null),
   });
   protected readonly canEditHeader = computed(() => this.so()?.status === 'Draft');
+
+  // Billing-address picker options for the Draft header edit (#8 / SO-8). Loaded
+  // lazily when the user enters edit mode (the customer's saved addresses).
+  protected readonly customerAddresses = signal<CustomerAddress[]>([]);
+  protected readonly billingAddressOptions = computed<SelectOption[]>(() => {
+    const opts: SelectOption[] = this.customerAddresses()
+      .filter(a => a.addressType === 'Billing' || a.addressType === 'Both')
+      .map(a => ({
+        value: a.id,
+        label: `${a.label} — ${a.line1}, ${a.city} ${a.state} ${a.postalCode}`.trim(),
+      }));
+    return [{ value: null, label: this.translate.instant('common.none') }, ...opts];
+  });
 
   constructor() {
     effect(() => {
@@ -402,8 +417,17 @@ export class SalesOrderDetailPanelComponent {
       customerPO: so.customerPO ?? '',
       creditTerms: so.creditTerms ?? null,
       requestedDeliveryDate: so.requestedDeliveryDate ? new Date(so.requestedDeliveryDate) : null,
+      billingAddressId: so.billingAddressId ?? null,
     });
+    this.loadCustomerAddresses(so.customerId);
     this.editingHeader.set(true);
+  }
+
+  private loadCustomerAddresses(customerId: number): void {
+    this.soService.getCustomerAddresses(customerId).subscribe({
+      next: (addresses) => this.customerAddresses.set(addresses),
+      error: () => this.customerAddresses.set([]),
+    });
   }
 
   protected cancelHeaderEdit(): void {
@@ -421,6 +445,7 @@ export class SalesOrderDetailPanelComponent {
       customerPO: v.customerPO || undefined,
       creditTerms: v.creditTerms || undefined,
       requestedDeliveryDate: toIsoDate(v.requestedDeliveryDate) || undefined,
+      billingAddressId: v.billingAddressId ?? undefined,
     }).subscribe({
       next: () => {
         this.savingHeader.set(false);

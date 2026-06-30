@@ -163,6 +163,7 @@
                 <div class="line-edit-form__title">{{ 'salesOrders.editDetails' | translate }}</div>
                 <app-input [label]="'salesOrders.customerPOLabel' | translate" formControlName="customerPO" data-testid="so-header-po" />
                 <app-select [label]="'salesOrders.creditTerms' | translate" formControlName="creditTerms" [options]="creditTermsOptions" data-testid="so-header-terms" />
+                <app-select [label]="'salesOrders.billingAddress' | translate" formControlName="billingAddressId" [options]="billingAddressOptions()" data-testid="so-header-billing" />
                 <app-datepicker [label]="'salesOrders.requestedDeliveryDate' | translate" formControlName="requestedDeliveryDate" data-testid="so-header-delivery" />
                 <div class="line-edit-form__actions">
                   <button type="button" class="action-btn" (click)="cancelHeaderEdit()">{{ 'common.cancel' | translate }}</button>
