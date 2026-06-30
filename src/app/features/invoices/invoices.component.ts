@@ -160,7 +160,8 @@ export class InvoicesComponent implements OnInit {
   }
 
   // --- Create Dialog ---
-  protected openCreateDialog(): void { this.showCreateDialog.set(true); }
+  // ⚡ ACCOUNTING BOUNDARY: invoice creation is disabled when a provider is connected
+  protected openCreateDialog(): void { if (!this.isStandalone()) return; this.showCreateDialog.set(true); }
   protected closeCreateDialog(): void { this.showCreateDialog.set(false); }
   protected onCreateSaved(): void {
     this.closeCreateDialog();
@@ -177,10 +178,11 @@ export class InvoicesComponent implements OnInit {
     });
   }
 
-  protected openUninvoicedPanel(): void { this.showUninvoicedPanel.set(true); }
+  protected openUninvoicedPanel(): void { if (!this.isStandalone()) return; this.showUninvoicedPanel.set(true); }
   protected closeUninvoicedPanel(): void { this.showUninvoicedPanel.set(false); }
 
   protected createInvoiceFromJob(jobId: number): void {
+    if (!this.isStandalone()) return;
     this.invoiceService.createInvoiceFromJob(jobId).subscribe({
       next: (invoice) => {
         this.snackbar.success(this.translate.instant('invoices.invoiceCreatedNumber', { number: invoice.invoiceNumber }));

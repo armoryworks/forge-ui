@@ -1,15 +1,18 @@
 <app-page-header [title]="'invoices.title' | translate" [subtitle]="'invoices.subtitle' | translate">
-  <button class="action-btn" (click)="openUninvoicedPanel()">
-    <span class="material-icons-outlined">pending_actions</span>
-    {{ 'invoices.uninvoicedJobs' | translate }}
-    @if (uninvoicedCount() > 0) {
-      <span class="nudge-badge">{{ uninvoicedCount() }}</span>
-    }
-  </button>
-  <button class="action-btn action-btn--create" data-testid="new-invoice-btn" (click)="openCreateDialog()">
-    <span class="material-icons-outlined">add</span>
-    {{ 'invoices.newInvoice' | translate }}
-  </button>
+  <!-- ⚡ ACCOUNTING BOUNDARY: invoice creation only in standalone mode (provider-managed when integrated) -->
+  @if (isStandalone()) {
+    <button class="action-btn" (click)="openUninvoicedPanel()">
+      <span class="material-icons-outlined">pending_actions</span>
+      {{ 'invoices.uninvoicedJobs' | translate }}
+      @if (uninvoicedCount() > 0) {
+        <span class="nudge-badge">{{ uninvoicedCount() }}</span>
+      }
+    </button>
+    <button class="action-btn action-btn--create" data-testid="new-invoice-btn" (click)="openCreateDialog()">
+      <span class="material-icons-outlined">add</span>
+      {{ 'invoices.newInvoice' | translate }}
+    </button>
+  }
 </app-page-header>
 
 @if (!isStandalone()) {
