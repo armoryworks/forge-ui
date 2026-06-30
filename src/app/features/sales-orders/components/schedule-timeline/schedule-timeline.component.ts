@@ -50,17 +50,11 @@ export class ScheduleTimelineComponent {
     return milestones.map(ms => {
       const date = ms.dateStr ? new Date(ms.dateStr) : null;
       let status: 'completed' | 'overdue' | 'upcoming' = 'upcoming';
-      if (date) {
-        if (date < now) {
-          // Past milestones: assume completed unless this is a future-oriented milestone
-          // For simplicity, if the delivery date itself is past, it's overdue; others are completed
-          status = ms.key === 'deliveryDate' ? 'overdue' : 'completed';
-        }
-        // If the milestone is past but the whole line is at risk, mark past items as overdue
-        if (date < now && m.isAtRisk && ms.key !== 'deliveryDate') {
-          // Only mark as overdue if a downstream milestone is also past
-          status = 'completed';
-        }
+      if (date && date < now) {
+        // A past delivery date is always overdue. Other past milestones are
+        // normally completed, but when the whole line is at risk they render as
+        // overdue rather than merely done so the schedule slip is visible.
+        status = ms.key === 'deliveryDate' || m.isAtRisk ? 'overdue' : 'completed';
       }
       return { key: ms.key, label: ms.label, icon: ms.icon, date, status };
     });
