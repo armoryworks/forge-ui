@@ -2415,6 +2415,7 @@
     "requestRevision": "Needs Revision",
     "needsRevision": "Needs Revision",
     "expenseRevisionRequested": "Revision requested.",
+    "rejectInQueueHint": "This expense is governed by an approval workflow. Open the approval queue to reject it with a required note.",
     "resubmit": "Resubmit",
     "expenseResubmitted": "Expense resubmitted.",
     "ledgerTitle": "Expense Ledger",

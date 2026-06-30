@@ -1,11 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 
+import { Router } from '@angular/router';
 import { DatePipe, CurrencyPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { ExpenseSettings } from './models/expense-settings.model';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 import { ExpensesService } from './services/expenses.service';
+import { ApprovalsService } from '../approvals/services/approvals.service';
 import { ExpenseItem } from './models/expense-item.model';
 import { ExpenseStatus } from './models/expense-status.type';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
@@ -51,8 +53,10 @@ export class ExpensesComponent implements OnInit {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
 
   private readonly expensesService = inject(ExpensesService);
+  private readonly approvalsService = inject(ApprovalsService);
   private readonly refDataService = inject(ReferenceDataService);
   private readonly vendorService = inject(VendorService);
+  private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -281,12 +285,27 @@ export class ExpensesComponent implements OnInit {
   }
 
   protected approveExpense(expense: ExpenseItem): void {
+    // Governed expense: route the decision through the approval engine (the guarded PATCH
+    // would 409). Completing the workflow flips the status server-side, so just refresh.
+    if (expense.pendingApprovalRequestId != null) {
+      this.approvalsService.approve(expense.pendingApprovalRequestId).subscribe({
+        next: () => { this.loadExpenses(); this.snackbar.success(this.translate.instant('expenses.expenseApproved')); },
+      });
+      return;
+    }
     this.expensesService.updateExpenseStatus(expense.id, { status: 'Approved' }).subscribe({
       next: () => { this.loadExpenses(); this.snackbar.success(this.translate.instant('expenses.expenseApproved')); },
     });
   }
 
   protected rejectExpense(expense: ExpenseItem): void {
+    // Governed expense: the approval engine reject requires a comment, which this inline row
+    // action doesn't collect — send the reviewer to the approval queue to reject with a note.
+    if (expense.pendingApprovalRequestId != null) {
+      this.snackbar.info(this.translate.instant('expenses.rejectInQueueHint'));
+      this.router.navigate(['/expenses/approval']);
+      return;
+    }
     this.expensesService.updateExpenseStatus(expense.id, { status: 'Rejected' }).subscribe({
       next: () => { this.loadExpenses(); this.snackbar.success(this.translate.instant('expenses.expenseRejected')); },
     });

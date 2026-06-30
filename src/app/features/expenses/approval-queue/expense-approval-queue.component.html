@@ -89,11 +89,13 @@
         [disabled]="processing() || !declineNoteValid()"
         [matTooltip]="declineNoteValid() ? '' : ('expenses.declineNoteRequiredTooltip' | translate:{ min: DECLINE_NOTE_MIN })"
         (click)="reject()">{{ 'expenses.reject' | translate }}</button>
-      <button class="action-btn action-btn--warn"
-        data-testid="expense-request-revision-btn"
-        [disabled]="processing() || !declineNoteValid()"
-        [matTooltip]="declineNoteValid() ? '' : ('expenses.declineNoteRequiredTooltip' | translate:{ min: DECLINE_NOTE_MIN })"
-        (click)="requestRevision()">{{ 'expenses.requestRevision' | translate }}</button>
+      @if (!reviewGoverned()) {
+        <button class="action-btn action-btn--warn"
+          data-testid="expense-request-revision-btn"
+          [disabled]="processing() || !declineNoteValid()"
+          [matTooltip]="declineNoteValid() ? '' : ('expenses.declineNoteRequiredTooltip' | translate:{ min: DECLINE_NOTE_MIN })"
+          (click)="requestRevision()">{{ 'expenses.requestRevision' | translate }}</button>
+      }
       <button class="action-btn action-btn--primary"
         data-testid="expense-approve-btn"
         [disabled]="processing()"

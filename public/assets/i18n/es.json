@@ -2415,6 +2415,7 @@
     "requestRevision": "Requiere Revisión",
     "needsRevision": "Requiere Revisión",
     "expenseRevisionRequested": "Revisión solicitada.",
+    "rejectInQueueHint": "Este gasto está regido por un flujo de aprobación. Abra la cola de aprobación para rechazarlo con una nota obligatoria.",
     "resubmit": "Reenviar",
     "expenseResubmitted": "Gasto reenviado.",
     "ledgerTitle": "Libro de Gastos",

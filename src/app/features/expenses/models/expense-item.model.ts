@@ -11,6 +11,13 @@ export interface ExpenseItem {
   description: string;
   receiptFileId: string | null;
   status: ExpenseStatus;
+  /**
+   * The id of the non-terminal ApprovalRequest governing this expense, or null when no
+   * approval workflow governs it. When set, decisions must route through the approval
+   * engine (ApprovalsService.approve/reject) — the PATCH /expenses/{id}/status path is
+   * server-guarded (409) for governed expenses.
+   */
+  pendingApprovalRequestId?: number | null;
   approvedBy: number | null;
   approvedByName: string | null;
   approvalNotes: string | null;

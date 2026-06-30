@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe, CurrencyPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -6,6 +6,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { ExpensesService } from '../services/expenses.service';
+import { ApprovalsService } from '../../approvals/services/approvals.service';
 import { ExpenseItem } from '../models/expense-item.model';
 import { ExpenseStatus } from '../models/expense-status.type';
 import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
@@ -35,6 +36,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 })
 export class ExpenseApprovalQueueComponent {
   private readonly expensesService = inject(ExpensesService);
+  private readonly approvalsService = inject(ApprovalsService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -45,6 +47,11 @@ export class ExpenseApprovalQueueComponent {
 
   // Review dialog
   protected readonly reviewExpense = signal<ExpenseItem | null>(null);
+  /**
+   * True when the expense under review is governed by a live approval workflow. Decisions
+   * route through the approval engine; the guarded PATCH (and Request Revision) are hidden.
+   */
+  protected readonly reviewGoverned = computed(() => this.reviewExpense()?.pendingApprovalRequestId != null);
   protected readonly notesControl = new FormControl('');
   protected readonly processing = signal(false);
 
@@ -94,27 +101,54 @@ export class ExpenseApprovalQueueComponent {
   protected approve(): void {
     const expense = this.reviewExpense();
     if (!expense) return;
+    const note = this.notesControl.value?.trim() || undefined;
 
     this.processing.set(true);
+
+    // Governed expense: route the decision through the approval engine. Completing the
+    // workflow flips the expense status server-side, so the queue just refreshes after.
+    // The guarded PATCH would 409 here.
+    if (expense.pendingApprovalRequestId != null) {
+      this.approvalsService.approve(expense.pendingApprovalRequestId, note).subscribe({
+        next: () => this.onDecisionSuccess('expenses.expenseApproved'),
+        error: () => this.processing.set(false),
+      });
+      return;
+    }
+
+    // No-workflow small-shop path: legacy direct status PATCH.
     this.expensesService.updateExpenseStatus(expense.id, {
       status: 'Approved',
-      approvalNotes: this.notesControl.value?.trim() || undefined,
+      approvalNotes: note,
     }).subscribe({
-      next: () => {
-        this.processing.set(false);
-        this.closeReview();
-        this.loadPending();
-        this.snackbar.success(this.translate.instant('expenses.expenseApproved'));
-      },
+      next: () => this.onDecisionSuccess('expenses.expenseApproved'),
       error: () => this.processing.set(false),
     });
   }
 
   protected reject(): void {
+    const expense = this.reviewExpense();
+    if (!expense) return;
+    if (!this.declineNoteValid()) return;
+    const note = this.notesControl.value?.trim() ?? '';
+
+    this.processing.set(true);
+
+    // Governed expense: the approval engine reject requires a comment — reuse the queue's note.
+    if (expense.pendingApprovalRequestId != null) {
+      this.approvalsService.reject(expense.pendingApprovalRequestId, note).subscribe({
+        next: () => this.onDecisionSuccess('expenses.expenseRejected'),
+        error: () => this.processing.set(false),
+      });
+      return;
+    }
+
     this.updateStatus('Rejected', 'expenses.expenseRejected');
   }
 
   protected requestRevision(): void {
+    // Only reachable for ungoverned expenses — the action is hidden when governed (the formal
+    // approval workflow is approve/reject only and the guarded PATCH would 409).
     this.updateStatus('NeedsRevision', 'expenses.expenseRevisionRequested');
   }
 
@@ -128,14 +162,16 @@ export class ExpenseApprovalQueueComponent {
       status,
       approvalNotes: this.notesControl.value?.trim() || undefined,
     }).subscribe({
-      next: () => {
-        this.processing.set(false);
-        this.closeReview();
-        this.loadPending();
-        this.snackbar.success(this.translate.instant(successKey));
-      },
+      next: () => this.onDecisionSuccess(successKey),
       error: () => this.processing.set(false),
     });
+  }
+
+  private onDecisionSuccess(successKey: string): void {
+    this.processing.set(false);
+    this.closeReview();
+    this.loadPending();
+    this.snackbar.success(this.translate.instant(successKey));
   }
 
   protected getPendingTotal(): number {
