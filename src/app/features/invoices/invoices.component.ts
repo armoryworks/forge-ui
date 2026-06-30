@@ -22,7 +22,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InvoiceDialogComponent } from './components/invoice-dialog/invoice-dialog.component';
 import { UninvoicedJobsPanelComponent } from './components/uninvoiced-jobs-panel/uninvoiced-jobs-panel.component';
-import { InvoiceDetailDialogComponent, InvoiceDetailDialogData, InvoiceDetailDialogResult } from './components/invoice-detail-dialog/invoice-detail-dialog.component';
+import { InvoiceDetailDialogComponent, InvoiceDetailDialogData } from './components/invoice-detail-dialog/invoice-detail-dialog.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
 
@@ -144,18 +144,15 @@ export class InvoicesComponent implements OnInit {
   protected applyFilters(): void { this.loadInvoices(); }
 
   protected openInvoiceDetail(item: InvoiceListItem): void {
-    const ref = this.detailDialog.open<InvoiceDetailDialogComponent, InvoiceDetailDialogData, InvoiceDetailDialogResult | undefined>(
+    const ref = this.detailDialog.open<InvoiceDetailDialogComponent, InvoiceDetailDialogData, void>(
       'invoice',
       item.id,
       InvoiceDetailDialogComponent,
       { invoiceId: item.id },
     );
-    ref.afterClosed().subscribe(result => {
+    ref.afterClosed().subscribe(() => {
       // Always reload in case actions were taken inside the dialog
       this.loadInvoices();
-      if (result?.action === 'edit') {
-        // Handle edit if needed in the future
-      }
     });
   }
 

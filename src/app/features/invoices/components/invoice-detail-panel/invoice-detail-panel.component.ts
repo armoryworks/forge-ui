@@ -34,7 +34,6 @@ export class InvoiceDetailPanelComponent {
 
   readonly invoiceId = input.required<number>();
   readonly closed = output<void>();
-  readonly editRequested = output<InvoiceDetail>();
   readonly invoiceChanged = output<void>();
 
   protected readonly loading = signal(false);
