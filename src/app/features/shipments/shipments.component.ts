@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -43,6 +43,7 @@ export class ShipmentsComponent implements OnInit {
 
   protected readonly showCreateDialog = signal(false);
   protected readonly loading = signal(false);
+  // Raw, fully-loaded list from the API; the table binds the filtered view below.
   protected readonly shipments = signal<ShipmentListItem[]>([]);
 
   // Filters
@@ -50,6 +51,32 @@ export class ShipmentsComponent implements OnInit {
   protected readonly statusFilterControl = new FormControl<string | null>(null);
 
   private readonly searchTerm = toSignal(this.searchControl.valueChanges.pipe(startWith('')), { initialValue: '' });
+  private readonly statusFilter = toSignal(this.statusFilterControl.valueChanges.pipe(startWith(null)), { initialValue: null });
+
+  // Client-side filter over the already-loaded list — search across shipment #, SO #,
+  // customer, carrier, and tracking #, composed with the status filter. No API round-trip
+  // per keystroke (mirrors backlog.component's filteredJobs computed).
+  protected readonly filteredShipments = computed<ShipmentListItem[]>(() => {
+    let list = this.shipments();
+
+    const status = this.statusFilter();
+    if (status) {
+      list = list.filter(s => s.status === status);
+    }
+
+    const search = (this.searchTerm() ?? '').toLowerCase().trim();
+    if (search) {
+      list = list.filter(s =>
+        s.shipmentNumber.toLowerCase().includes(search) ||
+        s.salesOrderNumber.toLowerCase().includes(search) ||
+        s.customerName.toLowerCase().includes(search) ||
+        (s.carrier ?? '').toLowerCase().includes(search) ||
+        (s.trackingNumber ?? '').toLowerCase().includes(search),
+      );
+    }
+
+    return list;
+  });
 
   protected readonly statusOptions: SelectOption[] = [
     { value: null, label: this.translate.instant('shipments.allStatuses') },
@@ -91,8 +118,8 @@ export class ShipmentsComponent implements OnInit {
 
   protected loadShipments(): void {
     this.loading.set(true);
-    const status = this.statusFilterControl.value ?? undefined;
-    this.shipmentService.getShipments(undefined, status).subscribe({
+    // Load the full list once; search + status filtering happen client-side via filteredShipments.
+    this.shipmentService.getShipments().subscribe({
       next: (list) => {
         this.shipments.set(list);
         this.loading.set(false);
@@ -111,8 +138,6 @@ export class ShipmentsComponent implements OnInit {
       ).afterClosed().subscribe(() => this.loadShipments());
     }
   }
-
-  protected applyFilters(): void { this.loadShipments(); }
 
   protected openShipmentDetail(item: ShipmentListItem): void {
     this.detailDialog.open<ShipmentDetailDialogComponent, ShipmentDetailDialogData>(

@@ -8,13 +8,12 @@
 <div class="sh-layout">
   <div class="sh-list-panel">
     <div class="filters-bar">
-      <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'shipments.searchPlaceholder' | translate"
-        (keyup.enter)="applyFilters()" />
+      <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'shipments.searchPlaceholder' | translate" />
       <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusOptions" />
     </div>
 
     <div [appLoadingBlock]="loading()" class="sh-list-content">
-      <app-data-table tableId="shipments" [columns]="shipmentColumns" [data]="shipments()"
+      <app-data-table tableId="shipments" [columns]="shipmentColumns" [data]="filteredShipments()"
         emptyIcon="local_shipping" [emptyMessage]="'shipments.noShipmentsFound' | translate"
         [clickableRows]="true"
         (rowClick)="openShipmentDetail($any($event))">
