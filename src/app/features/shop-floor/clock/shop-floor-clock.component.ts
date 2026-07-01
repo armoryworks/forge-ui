@@ -3,6 +3,8 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { forkJoin, interval } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -19,6 +21,7 @@ import { ClockWorker } from '../models/clock-worker.model';
 import { ShopFloorOverview } from '../models/shop-floor-overview.model';
 import { KioskTerminal } from '../models/kiosk-terminal.model';
 import { ScanIdentification } from '../models/scan-identification.model';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 const REFRESH_INTERVAL_MS = 15_000;
 const AUTO_LOGOUT_MS = 30_000;
@@ -39,6 +42,8 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
   private readonly rfid = inject(WebHidRfidService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
+  private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
   protected readonly clockTypes = inject(ClockEventTypeService);
 
   // Terminal config
@@ -324,6 +329,29 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
     this.emailControl.reset();
     this.passwordControl.reset();
     this.kioskPhase.set('dashboard');
+  }
+
+  // ─── Exit Kiosk ───
+  // Deliberate "leave this mode" — mirrors MobileAccountComponent.openDesktop().
+  // Entering the kiosk clears the JWT, so there's no live session to return to;
+  // exiting must re-authenticate. Confirm first so a mis-tap doesn't drop the
+  // worker to login.
+  protected exitKiosk(): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('shopFloor.exitKioskConfirmTitle'),
+        message: this.translate.instant('shopFloor.exitKioskConfirmMessage'),
+        confirmLabel: this.translate.instant('shopFloor.exitKiosk'),
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      // Tear down kiosk state, then re-authenticate via /login.
+      this.rfid.disconnect();
+      this.resetToDashboard(); // clears timers and calls authService.clearAuth()
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/dashboard' } });
+    });
   }
 
   private startAutoLogoutTimer(): void {

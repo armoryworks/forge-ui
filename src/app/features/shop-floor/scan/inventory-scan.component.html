@@ -8,6 +8,14 @@
         <span class="inv-scan__stat-label">Scanned</span>
       </span>
     </div>
+    <div class="inv-scan__controls">
+      <button class="inv-scan__control-btn inv-scan__control-btn--exit" (click)="exitKiosk()"
+              [attr.aria-label]="'shopFloor.exitKioskAria' | translate"
+              [title]="'shopFloor.exitKiosk' | translate"
+              data-testid="sf-exit-kiosk">
+        <span class="material-icons-outlined">logout</span>
+      </button>
+    </div>
   </header>
 
   <div class="inv-scan__body">

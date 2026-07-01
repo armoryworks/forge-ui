@@ -64,6 +64,12 @@
               [attr.aria-label]="theme() === 'light' ? 'Switch to dark theme' : 'Switch to light theme'">
         <span class="material-icons-outlined">{{ theme() === 'light' ? 'dark_mode' : 'light_mode' }}</span>
       </button>
+      <button class="sf-header__control-btn sf-header__control-btn--exit" (click)="exitKiosk()"
+              [attr.aria-label]="'shopFloor.exitKioskAria' | translate"
+              [title]="'shopFloor.exitKiosk' | translate"
+              data-testid="sf-exit-kiosk">
+        <span class="material-icons-outlined">logout</span>
+      </button>
     </div>
     <span class="sf-header__clock">{{ clockDisplay() }}</span>
   </header>

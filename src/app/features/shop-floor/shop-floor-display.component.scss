@@ -68,6 +68,12 @@ $grid-columns: 5;
 
   &:hover:not(:disabled) { background: rgba(255, 255, 255, 0.25); }
   &:disabled { opacity: 0.4; cursor: default; }
+
+  // Exit-kiosk affordance — distinct so it clearly reads as "leave this mode".
+  &--exit {
+    margin-left: $sp-sm;
+    &:hover:not(:disabled) { background: color-mix(in srgb, var(--error) 70%, transparent); }
+  }
 }
 
 .sf-header__font-label {

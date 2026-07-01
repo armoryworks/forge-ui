@@ -5,8 +5,10 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { catchError, forkJoin, interval, of } from 'rxjs';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { environment } from '../../../environments/environment';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
@@ -39,6 +41,7 @@ import { ScanDailyLogComponent } from './components/scan-daily-log/scan-daily-lo
 import { ScanDevicesPanelComponent } from './components/scan-devices-panel/scan-devices-panel.component';
 import { ScanLocationViewComponent } from './components/scan-location-view/scan-location-view.component';
 import { NumericKeypadComponent } from './components/numeric-keypad/numeric-keypad.component';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
 const FONT_SIZES = [12, 14, 16, 18, 20] as const;
 
@@ -52,7 +55,7 @@ type DisplayPhase = 'main' | 'pin' | 'actions' | 'job-select' | 'receiving' | 's
 @Component({
   selector: 'app-shop-floor-display',
   standalone: true,
-  imports: [DatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, KioskSessionBarComponent, KioskSetupComponent, TrainingModeBannerComponent, ScanUndoListComponent, ScanActionOverlayComponent, ScanDailyLogComponent, ScanDevicesPanelComponent, ScanLocationViewComponent, NumericKeypadComponent],
+  imports: [DatePipe, TranslatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, KioskSessionBarComponent, KioskSetupComponent, TrainingModeBannerComponent, ScanUndoListComponent, ScanActionOverlayComponent, ScanDailyLogComponent, ScanDevicesPanelComponent, ScanLocationViewComponent, NumericKeypadComponent],
   templateUrl: './shop-floor-display.component.html',
   styleUrl: './shop-floor-display.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -89,6 +92,8 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private readonly eventsService = inject(EventsService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
+  private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
   protected readonly kioskSession = inject(KioskSessionService);
 
   // Training mode — when enabled, actions are simulated (no backend calls)
@@ -767,6 +772,29 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   protected toggleTheme(): void {
     this.theme.update(t => t === 'light' ? 'dark' : 'light');
     localStorage.setItem('sf-theme', this.theme());
+  }
+
+  // ─── Exit Kiosk ───
+  // Deliberate "leave this mode" — mirrors MobileAccountComponent.openDesktop().
+  // Entering the kiosk clears the JWT, so there's no live session to return to;
+  // exiting must re-authenticate. Confirm first so a mis-tap on a shop-floor
+  // screen doesn't drop the worker to login.
+  protected exitKiosk(): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('shopFloor.exitKioskConfirmTitle'),
+        message: this.translate.instant('shopFloor.exitKioskConfirmMessage'),
+        confirmLabel: this.translate.instant('shopFloor.exitKiosk'),
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      // Tear down kiosk state, then re-authenticate via /login.
+      this.scanner.stop();
+      this.resetToMain(); // clears timers/phase and calls authService.clearAuth()
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/dashboard' } });
+    });
   }
 
   protected increaseFontSize(): void {

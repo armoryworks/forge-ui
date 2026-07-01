@@ -24,6 +24,14 @@
     <span class="sf-header__clock">{{ clockDisplay() }}</span>
     <span class="sf-header__date">{{ dateDisplay() }}</span>
   </div>
+  <div class="sf-header__controls">
+    <button class="sf-header__control-btn sf-header__control-btn--exit" (click)="exitKiosk()"
+            [attr.aria-label]="'shopFloor.exitKioskAria' | translate"
+            [title]="'shopFloor.exitKiosk' | translate"
+            data-testid="sf-exit-kiosk">
+      <span class="material-icons-outlined">logout</span>
+    </button>
+  </div>
 </header>
 
 <!-- KPI Strip -->

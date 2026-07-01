@@ -5364,6 +5364,10 @@
     "maxSessionsReached": "Máximo de sesiones concurrentes alcanzado",
     "sessionActive": "Activo",
     "sessionIdle": "Inactivo",
+    "exitKiosk": "Salir del quiosco",
+    "exitKioskAria": "Salir del quiosco a la aplicación principal",
+    "exitKioskConfirmTitle": "¿Salir del quiosco?",
+    "exitKioskConfirmMessage": "¿Salir del quiosco de la planta? Deberá iniciar sesión de nuevo.",
     "shipFlow": {
       "title": "Enviar Artículos",
       "selectShipmentLine": "Seleccione una línea de envío para completar",

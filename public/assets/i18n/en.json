@@ -5371,6 +5371,10 @@
     "maxSessionsReached": "Maximum concurrent sessions reached",
     "sessionActive": "Active",
     "sessionIdle": "Idle",
+    "exitKiosk": "Exit kiosk",
+    "exitKioskAria": "Exit kiosk to main app",
+    "exitKioskConfirmTitle": "Exit kiosk?",
+    "exitKioskConfirmMessage": "Exit the shop floor kiosk? You'll need to sign back in.",
     "dailyLog": {
       "title": "Scan Daily Log",
       "filterByDate": "Date",

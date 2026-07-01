@@ -58,6 +58,36 @@
   opacity: 0.8;
 }
 
+.inv-scan__controls {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  flex-shrink: 0;
+}
+
+.inv-scan__control-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: inherit;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  .material-icons-outlined { font-size: $icon-size-md; }
+
+  &:hover:not(:disabled) { background: rgba(255, 255, 255, 0.25); }
+  &:disabled { opacity: 0.4; cursor: default; }
+
+  // Exit-kiosk affordance — distinct so it clearly reads as "leave this mode".
+  &--exit:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--error) 70%, transparent);
+  }
+}
+
 .inv-scan__body {
   display: flex;
   flex-direction: column;
