@@ -188,6 +188,7 @@
     "total": "Total",
     "notes": "Notas",
     "priority": "Prioridad",
+    "priorityAria": "Prioridad: {{name}}",
     "assignee": "Asignado",
     "dueDate": "Fecha de Vencimiento",
     "created": "Creado",

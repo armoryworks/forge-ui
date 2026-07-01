@@ -188,6 +188,7 @@
     "total": "Total",
     "notes": "Notes",
     "priority": "Priority",
+    "priorityAria": "Priority: {{name}}",
     "assignee": "Assignee",
     "dueDate": "Due Date",
     "created": "Created",

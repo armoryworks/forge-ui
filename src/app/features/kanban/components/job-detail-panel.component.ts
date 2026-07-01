@@ -24,7 +24,7 @@ import { JobBomAtRelease } from '../../parts/models/bom-revision.model';
 import { Subtask } from '../models/subtask.model';
 import { JobLink } from '../models/job-link.model';
 import { KanbanJob } from '../models/kanban-job.model';
-import { PRIORITY_COLORS } from '../models/priority-colors.const';
+import { PriorityIndicatorComponent } from '../../../shared/components/priority-indicator/priority-indicator.component';
 import { LINK_TYPE_OPTIONS } from '../models/link-type-options.const';
 import { LINK_TYPE_ICONS } from '../models/link-type-icons.const';
 import { LINK_TYPE_LABELS } from '../models/link-type-labels.const';
@@ -43,7 +43,7 @@ import { OperationTimeTabComponent } from './operation-time-tab.component';
 @Component({
   selector: 'app-job-detail-panel',
   standalone: true,
-  imports: [DatePipe, ReactiveFormsModule, TranslatePipe, AvatarComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, JobCostTabComponent, OperationTimeTabComponent, MatMenuModule, MatTooltipModule, EntityLinkComponent],
+  imports: [DatePipe, ReactiveFormsModule, TranslatePipe, AvatarComponent, PriorityIndicatorComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, JobCostTabComponent, OperationTimeTabComponent, MatMenuModule, MatTooltipModule, EntityLinkComponent],
   templateUrl: './job-detail-panel.component.html',
   styleUrl: './job-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -176,11 +176,6 @@ export class JobDetailPanelComponent implements OnInit {
       this.showLinkResults.set(true);
     });
   }
-
-  protected priorityColor(priority: string): string {
-    return PRIORITY_COLORS[priority] ?? PRIORITY_COLORS['Normal'];
-  }
-
 
   protected completedCount(): number {
     return this.subtasks().filter(s => s.isCompleted).length;

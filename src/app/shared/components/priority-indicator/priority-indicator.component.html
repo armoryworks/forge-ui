@@ -1,0 +1,13 @@
+<span
+  class="priority-indicator"
+  [class]="'priority-indicator--' + size()"
+  [style.--priority-color]="style().color"
+  [attr.aria-label]="'common.priorityAria' | translate:{ name: priority() }">
+  <span
+    class="priority-indicator__shape"
+    [class]="'priority-indicator__shape--' + style().shape"
+    aria-hidden="true"></span>
+  @if (showLabel()) {
+    <span class="priority-indicator__label">{{ priority() }}</span>
+  }
+</span>

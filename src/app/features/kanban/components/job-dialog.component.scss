@@ -15,3 +15,13 @@
   font-size: $icon-size-xs;
   animation: spin 0.8s linear infinite;
 }
+
+.job-priority-field {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+
+  &__preview {
+    padding-left: $sp-xs;
+  }
+}

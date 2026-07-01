@@ -95,22 +95,6 @@
     color: var(--text-secondary);
   }
 
-  &__priority {
-    display: flex;
-    align-items: center;
-    gap: $sp-sm;
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-  }
-
-  &__priority-dot {
-    display: inline-block;
-    width: $dot-size-sm;
-    height: $dot-size-sm;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
   &__customer {
     display: flex;
     align-items: center;

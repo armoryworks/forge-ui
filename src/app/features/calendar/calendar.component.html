@@ -54,14 +54,14 @@
                 <div class="job-chip"
                      [style.border-left-color]="job.stageColor"
                      [style.--job-tint]="getJobTint(job)"
-                     [class.job-chip--high-priority]="job.priorityName === 'High' || job.priorityName === 'Critical'"
+                     [class.job-chip--high-priority]="isHighPriority(job.priorityName)"
                      role="button" tabindex="0"
                      [attr.aria-label]="job.title + (job.customerName ? ' — ' + job.customerName : '')"
                      [title]="job.title + (job.customerName ? ' — ' + job.customerName : '')"
                      (click)="onJobClick(job); $event.stopPropagation()"
                      (keydown.enter)="onJobClick(job); $event.stopPropagation()">
-                  @if (getPriorityIcon(job.priorityName)) {
-                    <span class="material-icons-outlined job-chip__priority job-chip__priority--{{ job.priorityName === 'Critical' ? 'critical' : 'high' }}">{{ getPriorityIcon(job.priorityName) }}</span>
+                  @if (isHighPriority(job.priorityName)) {
+                    <app-priority-indicator class="job-chip__priority" [priority]="job.priorityName" size="sm" />
                   }
                   <span class="job-chip__number">{{ job.jobNumber }}</span>
                   <span class="job-chip__title">{{ job.title }}</span>
@@ -115,14 +115,14 @@
               <div class="job-chip job-chip--week"
                    [style.border-left-color]="job.stageColor"
                    [style.--job-tint]="getJobTint(job)"
-                   [class.job-chip--high-priority]="job.priorityName === 'High' || job.priorityName === 'Critical'"
+                   [class.job-chip--high-priority]="isHighPriority(job.priorityName)"
                    role="button" tabindex="0"
                    [attr.aria-label]="job.title"
                    [title]="job.title"
                    (click)="onJobClick(job)" (keydown.enter)="onJobClick(job)">
                 <div class="job-chip__top-row">
-                  @if (getPriorityIcon(job.priorityName)) {
-                    <span class="material-icons-outlined job-chip__priority job-chip__priority--{{ job.priorityName === 'Critical' ? 'critical' : 'high' }}">{{ getPriorityIcon(job.priorityName) }}</span>
+                  @if (isHighPriority(job.priorityName)) {
+                    <app-priority-indicator class="job-chip__priority" [priority]="job.priorityName" size="sm" />
                   }
                   <span class="job-chip__number">{{ job.jobNumber }}</span>
                   @if (job.isOverdue) {
@@ -173,13 +173,13 @@
           <div class="day-job"
                [style.border-left-color]="job.stageColor"
                [style.--job-tint]="getJobTint(job)"
-               [class.day-job--high-priority]="job.priorityName === 'High' || job.priorityName === 'Critical'"
+               [class.day-job--high-priority]="isHighPriority(job.priorityName)"
                role="button" tabindex="0"
                [attr.aria-label]="job.title"
                (click)="onJobClick(job)" (keydown.enter)="onJobClick(job)">
             <div class="day-job__header">
-              @if (getPriorityIcon(job.priorityName)) {
-                <span class="material-icons-outlined day-job__priority-icon day-job__priority-icon--{{ job.priorityName === 'Critical' ? 'critical' : 'high' }}">{{ getPriorityIcon(job.priorityName) }}</span>
+              @if (isHighPriority(job.priorityName)) {
+                <app-priority-indicator class="day-job__priority-icon" [priority]="job.priorityName" size="sm" />
               }
               <span class="day-job__number">{{ job.jobNumber }}</span>
               <span class="day-job__title">{{ job.title }}</span>
@@ -201,9 +201,7 @@
                   <span class="material-icons-outlined">assignment_ind</span> {{ job.assigneeInitials }}
                 </span>
               }
-              <span class="day-job__priority chip chip--{{ job.priorityName === 'Critical' ? 'error' : job.priorityName === 'High' ? 'error' : job.priorityName === 'Medium' ? 'warning' : 'muted' }}">
-                {{ job.priorityName }}
-              </span>
+              <app-priority-indicator class="day-job__priority" [priority]="job.priorityName" size="sm" [showLabel]="true" />
             </div>
           </div>
         }

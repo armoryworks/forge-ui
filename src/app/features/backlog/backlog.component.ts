@@ -22,7 +22,6 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/componen
 import { KanbanJob } from '../kanban/models/kanban-job.model';
 import { UserRef } from '../kanban/models/user-ref.model';
 import { JobDetail } from '../kanban/models/job-detail.model';
-import { PRIORITY_COLORS } from '../kanban/models/priority-colors.const';
 import { PRIORITIES } from '../../shared/models/priority.const';
 import { TrackType } from '../../shared/models/track-type.model';
 import { JobDetailDialogComponent, JobDetailDialogData, JobDetailDialogResult } from '../kanban/components/job-detail-dialog.component';
@@ -35,6 +34,7 @@ import { DataTableComponent } from '../../shared/components/data-table/data-tabl
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { BacklogCardGridComponent } from './components/backlog-card-grid/backlog-card-grid.component';
+import { PriorityIndicatorComponent } from '../../shared/components/priority-indicator/priority-indicator.component';
 
 type ViewMode = 'table' | 'card';
 
@@ -46,7 +46,7 @@ type ViewMode = 'table' | 'card';
     JobDialogComponent, AvatarComponent,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
-    BacklogCardGridComponent,
+    BacklogCardGridComponent, PriorityIndicatorComponent,
   ],
   templateUrl: './backlog.component.html',
   styleUrl: './backlog.component.scss',
@@ -239,10 +239,6 @@ export class BacklogComponent implements OnInit {
       queryParamsHandling: 'merge',
     });
     this.userPreferences.set('backlog:viewMode', mode);
-  }
-
-  protected priorityColor(priority: string): string {
-    return PRIORITY_COLORS[priority] ?? '#94a3b8';
   }
 
   protected onRowClicked(job: KanbanJob): void {

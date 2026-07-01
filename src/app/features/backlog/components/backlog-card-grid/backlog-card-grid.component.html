@@ -31,13 +31,7 @@
         </div>
 
         <div class="backlog-card__meta">
-          <span class="backlog-card__priority">
-            <span
-              class="backlog-card__priority-dot"
-              [style.background]="priorityDotColor(job.priorityName)">
-            </span>
-            {{ job.priorityName }}
-          </span>
+          <app-priority-indicator class="backlog-card__priority" [priority]="job.priorityName" size="sm" [showLabel]="true" />
 
           @if (job.assigneeInitials) {
             <app-avatar

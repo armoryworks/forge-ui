@@ -59,8 +59,7 @@
         <span class="chip" [style.--chip-color]="job.stageColor">{{ job.stageName }}</span>
       </ng-template>
       <ng-template appColumnCell="priorityName" let-job>
-        <span class="priority-dot" [style.background]="priorityColor(job.priorityName)"></span>
-        {{ job.priorityName }}
+        <app-priority-indicator [priority]="job.priorityName" size="sm" [showLabel]="true" />
       </ng-template>
       <ng-template appColumnCell="assignee" let-job>
         @if (job.assigneeInitials) {

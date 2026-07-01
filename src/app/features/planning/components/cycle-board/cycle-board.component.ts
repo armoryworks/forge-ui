@@ -8,11 +8,12 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { PlanningCycleDetail } from '../../models/planning-cycle-detail.model';
 import { PlanningCycleEntry } from '../../models/planning-cycle-entry.model';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { PriorityIndicatorComponent } from '../../../../shared/components/priority-indicator/priority-indicator.component';
 
 @Component({
   selector: 'app-cycle-board',
   standalone: true,
-  imports: [DatePipe, CdkDropList, CdkDrag, MatTooltipModule, TranslatePipe, EmptyStateComponent],
+  imports: [DatePipe, CdkDropList, CdkDrag, MatTooltipModule, TranslatePipe, EmptyStateComponent, PriorityIndicatorComponent],
   templateUrl: './cycle-board.component.html',
   styleUrl: './cycle-board.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,16 +47,6 @@ export class CycleBoardComponent {
   });
 
   protected readonly isActive = computed(() => this.cycle().status === 'Active');
-
-  protected getPriorityClass(priority: string): string {
-    const map: Record<string, string> = {
-      Urgent: 'entry__priority--urgent',
-      High: 'entry__priority--high',
-      Normal: 'entry__priority--normal',
-      Low: 'entry__priority--low',
-    };
-    return map[priority] ?? '';
-  }
 
   protected onDrop(event: CdkDragDrop<PlanningCycleEntry[]>): void {
     this.entryReordered.emit(event);

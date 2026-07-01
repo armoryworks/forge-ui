@@ -31,6 +31,7 @@
   </div>
   <div class="card__title">{{ job().title }}</div>
   <div class="card__footer">
+    <app-priority-indicator [priority]="job().priorityName" size="sm" />
     @if (job().assigneeInitials) {
       <app-avatar
         [initials]="job().assigneeInitials!"

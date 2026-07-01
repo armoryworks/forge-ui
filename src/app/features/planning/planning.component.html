@@ -35,8 +35,7 @@
               </div>
               <div class="backlog-job__bottom">
                 <span class="chip" [style.--chip-color]="job.stageColor">{{ job.stageName }}</span>
-                <span class="backlog-job__priority-dot" [style.background]="priorityColor(job.priorityName)"></span>
-                <span class="backlog-job__priority-text">{{ job.priorityName }}</span>
+                <app-priority-indicator [priority]="job.priorityName" size="sm" [showLabel]="true" />
                 @if (job.assigneeInitials) {
                   <app-avatar [initials]="job.assigneeInitials" [color]="job.assigneeColor ?? '#0d9488'" size="sm" />
                 }

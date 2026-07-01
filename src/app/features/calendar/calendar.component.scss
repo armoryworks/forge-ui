@@ -68,16 +68,7 @@
 .job-chip__overdue { font-size: var(--font-size-base); color: var(--error); flex-shrink: 0; }
 
 .job-chip__priority {
-  font-size: $icon-size-xs;
   flex-shrink: 0;
-
-  &--high {
-    color: var(--warning);
-  }
-
-  &--critical {
-    color: var(--error);
-  }
 }
 
 .job-overflow {
@@ -175,15 +166,7 @@
 .day-job__overdue { font-size: var(--font-size-md); color: var(--error); }
 
 .day-job__priority-icon {
-  font-size: $icon-size-md;
-
-  &--high {
-    color: var(--warning);
-  }
-
-  &--critical {
-    color: var(--error);
-  }
+  flex-shrink: 0;
 }
 
 .day-job__meta {

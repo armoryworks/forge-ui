@@ -140,18 +140,6 @@
     font-size: var(--font-size-xs);
   }
 
-  &__priority-dot {
-    display: inline-block;
-    width: $dot-size-sm;
-    height: $dot-size-sm;
-    border-radius: 50%;
-  }
-
-  &__priority-text {
-    font-size: var(--font-size-xxs);
-    color: var(--text-muted);
-  }
-
   &__add {
     flex-shrink: 0;
     color: var(--primary);

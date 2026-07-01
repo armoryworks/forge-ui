@@ -11,6 +11,7 @@ import { CalendarDay } from './models/calendar-day.model';
 import { PoCalendarEvent } from './models/po-calendar-event.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
+import { PriorityIndicatorComponent } from '../../shared/components/priority-indicator/priority-indicator.component';
 import { KanbanService } from '../kanban/services/kanban.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 
@@ -19,7 +20,7 @@ export type CalendarView = 'month' | 'week' | 'day';
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [ReactiveFormsModule, MatTooltipModule, TranslatePipe, PageHeaderComponent, SelectComponent],
+  imports: [ReactiveFormsModule, MatTooltipModule, TranslatePipe, PageHeaderComponent, SelectComponent, PriorityIndicatorComponent],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -226,12 +227,9 @@ export class CalendarComponent {
     return `${h - 12} PM`;
   }
 
-  protected getPriorityIcon(priority: string): string {
-    switch (priority) {
-      case 'Critical': return 'priority_high';
-      case 'High': return 'arrow_upward';
-      default: return '';
-    }
+  /** Only High/Urgent jobs get a visible priority indicator in the calendar (preserves the original "flag high-priority only" intent, with correct enum keys). */
+  protected isHighPriority(priority: string): boolean {
+    return priority === 'High' || priority === 'Urgent';
   }
 
   protected getJobTint(job: CalendarJob): string {

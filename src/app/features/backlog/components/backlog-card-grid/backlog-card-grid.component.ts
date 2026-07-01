@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
+import { PriorityIndicatorComponent } from '../../../../shared/components/priority-indicator/priority-indicator.component';
 import { KanbanJob } from '../../../kanban/models/kanban-job.model';
 
 @Component({
   selector: 'app-backlog-card-grid',
   standalone: true,
-  imports: [AvatarComponent],
+  imports: [AvatarComponent, PriorityIndicatorComponent],
   templateUrl: './backlog-card-grid.component.html',
   styleUrl: './backlog-card-grid.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,15 +26,4 @@ export class BacklogCardGridComponent {
     const yyyy = d.getFullYear();
     return `${mm}/${dd}/${yyyy}`;
   }
-
-  protected priorityDotColor(priority: string): string {
-    const map: Record<string, string> = {
-      Critical: '#dc2626',
-      High: '#f97316',
-      Medium: '#d97706',
-      Low: '#22c55e',
-    };
-    return map[priority] ?? '#94a3b8';
-  }
-
 }

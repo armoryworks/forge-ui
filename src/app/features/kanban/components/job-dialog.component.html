@@ -20,7 +20,10 @@
       </div>
 
       <div class="dialog-row">
-        <app-select data-testid="job-priority" [label]="'kanban.priority' | translate" formControlName="priority" [options]="priorityOptions" />
+        <div class="job-priority-field">
+          <app-select data-testid="job-priority" [label]="'kanban.priority' | translate" formControlName="priority" [options]="priorityOptions" />
+          <app-priority-indicator class="job-priority-field__preview" [priority]="priorityPreview() ?? 'Normal'" [showLabel]="true" />
+        </div>
         <app-datepicker data-testid="job-due-date" [label]="'kanban.dueDate' | translate" formControlName="dueDate" />
       </div>
 

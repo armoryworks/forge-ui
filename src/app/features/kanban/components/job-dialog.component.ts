@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy, Component, computed, DestroyRef, inject,
   input, OnInit, output, signal, ViewChild,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -22,6 +22,7 @@ import { FormValidationService } from '../../../shared/services/form-validation.
 import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
 import { DraftConfig } from '../../../shared/models/draft-config.model';
 import { toIsoDate } from '../../../shared/utils/date.utils';
+import { PriorityIndicatorComponent } from '../../../shared/components/priority-indicator/priority-indicator.component';
 import { PRIORITIES, PRIORITY_OPTIONS } from '../../../shared/models/priority.const';
 
 export type DialogMode = 'create' | 'edit';
@@ -38,6 +39,7 @@ export type DialogMode = 'create' | 'edit';
     DatepickerComponent,
     ToggleComponent,
     ValidationButtonComponent,
+    PriorityIndicatorComponent,
     TranslatePipe,
   ],
   templateUrl: './job-dialog.component.html',
@@ -111,6 +113,12 @@ export class JobDialogComponent implements OnInit {
   ]);
 
   protected readonly priorityOptions = PRIORITY_OPTIONS;
+
+  /** Live preview of the picked priority for the shape/color indicator next to the select. */
+  protected readonly priorityPreview = toSignal(
+    this.jobForm.controls.priority.valueChanges,
+    { initialValue: this.jobForm.controls.priority.value },
+  );
 
   protected get draftConfig(): DraftConfig {
     return {

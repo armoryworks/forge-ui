@@ -1,0 +1,57 @@
+@use 'styles/variables' as *;
+
+.priority-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-sm;
+  flex-shrink: 0;
+
+  &--sm {
+    --shape-size: #{$dot-size-sm};
+  }
+
+  &--md {
+    --shape-size: #{$dot-size-md};
+  }
+
+  &__shape {
+    display: inline-block;
+    width: var(--shape-size);
+    height: var(--shape-size);
+    flex-shrink: 0;
+
+    // Square: solid fill (sharp corners, matches the app aesthetic).
+    &--square {
+      background: var(--priority-color);
+    }
+
+    // Circle.
+    &--circle {
+      background: var(--priority-color);
+      border-radius: 50%;
+    }
+
+    // Diamond: rotated square via clip-path.
+    &--diamond {
+      background: var(--priority-color);
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    }
+
+    // Triangle (pointing up) via clip-path.
+    &--triangle {
+      background: var(--priority-color);
+      clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+    }
+  }
+
+  &__label {
+    color: var(--priority-color);
+    font-size: $font-size-sm;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  &--sm &__label {
+    font-size: $font-size-xxs;
+  }
+}

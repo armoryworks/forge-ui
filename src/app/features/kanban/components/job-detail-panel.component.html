@@ -332,8 +332,7 @@
           <div class="jd-detail-row">
             <span class="jd-detail-label">{{ 'kanban.priority' | translate }}</span>
             <span class="jd-detail-value">
-              <span class="meta-row__dot" [style.background]="priorityColor(j.priority)"></span>
-              {{ j.priority }}
+              <app-priority-indicator [priority]="j.priority" [showLabel]="true" />
             </span>
           </div>
           <div class="jd-detail-row jd-detail-row--clickable" [matMenuTriggerFor]="assignMenu">

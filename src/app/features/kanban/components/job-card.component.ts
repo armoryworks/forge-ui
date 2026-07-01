@@ -5,13 +5,14 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
+import { PriorityIndicatorComponent } from '../../../shared/components/priority-indicator/priority-indicator.component';
 import { KanbanJob } from '../models/kanban-job.model';
 import { PRIORITY_COLORS } from '../models/priority-colors.const';
 
 @Component({
   selector: 'app-job-card',
   standalone: true,
-  imports: [DatePipe, AvatarComponent, MatTooltipModule, TranslatePipe],
+  imports: [DatePipe, AvatarComponent, PriorityIndicatorComponent, MatTooltipModule, TranslatePipe],
   templateUrl: './job-card.component.html',
   styleUrl: './job-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
