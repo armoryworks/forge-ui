@@ -24,10 +24,3 @@ export interface UpdateRoleTemplateRequest {
   description?: string | null;
   includedRoleNames: string[];
 }
-
-export interface RoleTemplateAssignee {
-  userId: number;
-  email: string;
-  firstName: string;
-  lastName: string;
-}

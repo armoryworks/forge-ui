@@ -31,20 +31,14 @@
             <span class="text-muted">{{ user.email }}</span>
           </ng-template>
           <ng-template appColumnCell="role" let-user>
-            @if (user.roleTemplateName) {
-              <!-- Phase 3 / WU-06 / C1 — display the rollup template
-                   compactly with the underlying roles spelled out. -->
-              <span class="chip chip--primary"
-                    [matTooltip]="user.roleTemplateName + ': ' + (user.roleTemplateIncludedRoles?.join(' + ') || '')"
-                    matTooltipPosition="above">
-                <span class="material-icons-outlined chip__icon">layers</span>
-                {{ user.roleTemplateName }}
-                <span class="chip__detail">({{ user.roleTemplateIncludedRoles?.join(' + ') }})</span>
-              </span>
+            @if (user.roles.length) {
+              <div class="role-chips">
+                @for (r of user.roles; track r) {
+                  <span class="chip" [class.chip--primary]="r === 'Admin'">{{ r }}</span>
+                }
+              </div>
             } @else {
-              <span class="chip" [class.chip--primary]="user.roles.includes('Admin')">
-                {{ user.roles.length ? user.roles[0] : 'None' }}
-              </span>
+              <span class="chip">None</span>
             }
           </ng-template>
           <ng-template appColumnCell="compliance" let-user>
@@ -635,7 +629,7 @@
 <!-- User Dialog -->
 @if (showUserDialog()) {
   <app-dialog [title]="editingUser() ? ('admin.editUser' | translate) : ('admin.addUser' | translate)" width="520px" (closed)="closeUserDialog()">
-    <div [formGroup]="userForm">
+    <div class="user-form" [formGroup]="userForm">
       <div class="dialog-row">
         <app-input [label]="'admin.firstName' | translate" formControlName="firstName" [maxlength]="100" [required]="true" data-testid="user-first-name" />
         <app-input [label]="'admin.lastName' | translate" formControlName="lastName" [maxlength]="100" [required]="true" data-testid="user-last-name" />
@@ -647,18 +641,16 @@
 
       <div class="dialog-row">
         <app-input [label]="'admin.initials' | translate" formControlName="initials" [maxlength]="3" data-testid="user-initials" />
-        <app-select [label]="'admin.role' | translate" formControlName="role" [options]="roleOptions()" [required]="true" data-testid="user-role" />
+        <div class="roles-field">
+          <app-select [label]="'admin.roles' | translate" formControlName="roles" [multiple]="true" [options]="roleOptions()" [required]="true" data-testid="user-role" />
+          <button type="button" class="icon-btn roles-field__info"
+                  [attr.aria-label]="'admin.roleSuggestions.ariaLabel' | translate"
+                  [matTooltip]="'admin.roleSuggestions.ariaLabel' | translate" matTooltipPosition="above"
+                  (click)="toggleRoleSuggestions()">
+            <span class="material-icons-outlined">info_outline</span>
+          </button>
+        </div>
       </div>
-
-      <!-- Phase 3 / WU-06 / C1 — optional rollup template assignment.
-           When set, the backend grants every role listed in the template at login. -->
-      @if (roleTemplates().length > 0) {
-        <app-select label="Role Template (Rollup)"
-                    formControlName="roleTemplateId"
-                    [options]="roleTemplateOptions()"
-                    placeholder="Optional — pick a rollup if this user wears many hats"
-                    data-testid="user-role-template" />
-      }
 
       @if (editingUser() && locationOptions().length > 1) {
         <app-select [label]="'admin.workLocation' | translate" formControlName="workLocationId" [options]="locationOptions()" />
@@ -767,6 +759,30 @@
             [compact]="true" />
         }
       }
+
+      <!-- Roles info icon → suggested role combinations (guidance only) -->
+      <app-slideout
+        [open]="showRoleSuggestions()"
+        position="right"
+        size="300px"
+        icon="info_outline"
+        [title]="'admin.roleSuggestions.title' | translate"
+        [closeOnOutsideClick]="true"
+        (closed)="showRoleSuggestions.set(false)">
+        <p class="role-suggestions__hint">{{ 'admin.roleSuggestions.hint' | translate }}</p>
+        <div class="role-suggestions__list">
+          @for (s of roleSuggestions; track s.labelKey) {
+            <button type="button" class="role-suggestions__item" (click)="applyRoleSuggestion(s.roles)">
+              <span class="role-suggestions__label">{{ s.labelKey | translate }}</span>
+              <span class="role-chips">
+                @for (r of s.roles; track r) {
+                  <span class="chip chip--primary">{{ r }}</span>
+                }
+              </span>
+            </button>
+          }
+        </div>
+      </app-slideout>
     </div>
 
     @if (setupToken()) {

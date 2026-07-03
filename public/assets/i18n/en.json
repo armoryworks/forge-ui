@@ -2705,6 +2705,15 @@
     "selectUserPlaceholder": "-- Select a user --",
     "teams": "Teams & Kiosks",
     "roles": "Roles",
+    "roleSuggestions": {
+      "title": "Suggested role combinations",
+      "ariaLabel": "View suggested role combinations",
+      "hint": "Common shop personas to help you pick. Click a suggestion to add its roles to the selection.",
+      "ownerOperator": "Owner-operator",
+      "frontOffice": "Front office",
+      "floorLead": "Floor lead",
+      "complianceOfficer": "Compliance officer"
+    },
     "colName": "Name",
     "colEmail": "Email",
     "colRole": "Role",

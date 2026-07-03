@@ -31,7 +31,6 @@ import { OutboxEntry, OutboxProvider, OutboxStatus } from '../models/outbox-entr
 import { toIsoDate } from '../../../shared/utils/date.utils';
 import {
   RoleTemplate,
-  RoleTemplateAssignee,
   CreateRoleTemplateRequest,
   UpdateRoleTemplateRequest,
 } from '../models/role-template.model';
@@ -74,22 +73,6 @@ export class AdminService {
   deleteRoleTemplate(id: number): Observable<void> {
     return this.http.delete<void>(
       `${environment.apiUrl}/admin/role-templates/${id}`);
-  }
-
-  getRoleTemplateAssignees(id: number): Observable<RoleTemplateAssignee[]> {
-    return this.http.get<RoleTemplateAssignee[]>(
-      `${environment.apiUrl}/admin/role-templates/${id}/assignees`);
-  }
-
-  assignRoleTemplateToUser(userId: number, templateId: number): Observable<void> {
-    return this.http.post<void>(
-      `${environment.apiUrl}/admin/users/${userId}/role-template`,
-      { templateId });
-  }
-
-  unassignRoleTemplateFromUser(userId: number): Observable<void> {
-    return this.http.delete<void>(
-      `${environment.apiUrl}/admin/users/${userId}/role-template`);
   }
 
   // Track Types

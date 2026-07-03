@@ -66,7 +66,7 @@ import { AuthService } from '../../shared/services/auth.service';
 import { ReferenceDataService } from '../../shared/services/reference-data.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { CompanyLocation, CompanyProfile } from './models/company-location.model';
-import { RoleTemplate } from './models/role-template.model';
+import { SlideoutComponent } from '../../shared/components/slideout/slideout.component';
 
 @Component({
   selector: 'app-admin',
@@ -75,7 +75,7 @@ import { RoleTemplate } from './models/role-template.model';
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent, DatepickerComponent, DataTableComponent,
     ColumnCellDirective, ValidationButtonComponent, TrackTypeDialogComponent,
-    EmptyStateComponent, LoadingBlockDirective, AdminOverviewComponent, TrainingPanelComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, RoleTemplatesPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, AuditLogPanelComponent, TimeCorrectionsPanelComponent, EventsPanelComponent, AnnouncementsPanelComponent, EdiPanelComponent, MfaPolicyPanelComponent, DomainEventFailuresPanelComponent, IntegrationOutboxPanelComponent, AutoPoSettingsComponent, ExpenseSettingsPanelComponent, BiApiKeysPanelComponent, SystemApiKeysPanelComponent, ConnectionsPanelComponent, BarcodeInfoComponent, DatePipe, LowerCasePipe, TranslatePipe, MatTooltipModule,
+    EmptyStateComponent, LoadingBlockDirective, AdminOverviewComponent, TrainingPanelComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, RoleTemplatesPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, AuditLogPanelComponent, TimeCorrectionsPanelComponent, EventsPanelComponent, AnnouncementsPanelComponent, EdiPanelComponent, MfaPolicyPanelComponent, DomainEventFailuresPanelComponent, IntegrationOutboxPanelComponent, AutoPoSettingsComponent, ExpenseSettingsPanelComponent, BiApiKeysPanelComponent, SystemApiKeysPanelComponent, ConnectionsPanelComponent, BarcodeInfoComponent, SlideoutComponent, DatePipe, LowerCasePipe, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
@@ -142,16 +142,34 @@ export class AdminComponent implements OnInit {
     lastName: new FormControl('', [Validators.required, Validators.maxLength(100)]),
     email: new FormControl('', [Validators.required, Validators.email, Validators.maxLength(256)]),
     initials: new FormControl('', [Validators.maxLength(3)]),
-    role: new FormControl('Engineer', [Validators.required]),
+    roles: new FormControl<string[]>(['Engineer'], [Validators.required]),
     workLocationId: new FormControl<number | null>(null),
     isActive: new FormControl(true),
-    // Phase 3 / WU-06 / C1 — optional rollup template assignment.
-    roleTemplateId: new FormControl<number | null>(null),
   });
   protected readonly userViolations = FormValidationService.getViolations(this.userForm, {
     firstName: 'First Name', lastName: 'Last Name', email: 'Email',
-    initials: 'Initials', role: 'Role',
+    initials: 'Initials', roles: 'Roles',
   });
+
+  // Info-icon slideout: suggested role combinations (guidance only).
+  protected readonly showRoleSuggestions = signal(false);
+  protected readonly roleSuggestions: { labelKey: string; roles: string[] }[] = [
+    { labelKey: 'admin.roleSuggestions.ownerOperator', roles: ['Admin', 'Manager', 'Controller'] },
+    { labelKey: 'admin.roleSuggestions.frontOffice', roles: ['OfficeManager', 'Controller', 'IT Admin'] },
+    { labelKey: 'admin.roleSuggestions.floorLead', roles: ['PM', 'Production Manager', 'Production Planner'] },
+    { labelKey: 'admin.roleSuggestions.complianceOfficer', roles: ['ComplianceOfficer'] },
+  ];
+
+  protected toggleRoleSuggestions(): void {
+    this.showRoleSuggestions.update(v => !v);
+  }
+
+  protected applyRoleSuggestion(roles: string[]): void {
+    const current = this.userForm.controls.roles.value ?? [];
+    const merged = Array.from(new Set([...current, ...roles]));
+    this.userForm.controls.roles.setValue(merged);
+    this.userForm.controls.roles.markAsDirty();
+  }
 
   // Setup token shown after creating a user (so admin can share it)
   protected readonly setupToken = signal<string | null>(null);
@@ -275,16 +293,6 @@ export class AdminComponent implements OnInit {
 
   protected readonly roleOptions = signal<SelectOption[]>([]);
 
-  // Phase 3 / WU-06 / C1 — rollup templates available for assignment.
-  protected readonly roleTemplates = signal<RoleTemplate[]>([]);
-  protected readonly roleTemplateOptions = computed<SelectOption[]>(() => [
-    { value: null, label: '— None (use base role above) —' },
-    ...this.roleTemplates().map(t => ({
-      value: t.id,
-      label: `${t.name} (${t.includedRoleNames.join(' + ')})`,
-    })),
-  ]);
-
   protected readonly userColumns = computed<ColumnDef[]>(() => [
     { field: 'avatar', header: '', width: '36px' },
     { field: 'name', header: this.translate.instant('admin.colName'), sortable: true, sortField: 'lastName' },
@@ -314,12 +322,6 @@ export class AdminComponent implements OnInit {
   constructor() {
     // Load roles from API (used by user form select + column filter)
     this.refDataService.getRolesAsOptions().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(opts => this.roleOptions.set(opts));
-
-    // WU-06 / C1 — load active rollup templates for the user form picker.
-    this.adminService.getRoleTemplates().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (t) => this.roleTemplates.set(t),
-      error: () => {},
-    });
 
     effect(() => {
       const tab = this.activeTab();
@@ -401,9 +403,9 @@ export class AdminComponent implements OnInit {
     this.setupTokenExpiresAt.set(null);
     this.userForm.reset({
       firstName: '', lastName: '', email: '',
-      initials: '', role: 'Engineer', isActive: true,
-      roleTemplateId: null,
+      initials: '', roles: ['Engineer'], isActive: true,
     });
+    this.showRoleSuggestions.set(false);
     this.userForm.controls.email.enable();
     this.avatarColor.set('#0d9488');
     this.showUserDialog.set(true);
@@ -418,11 +420,11 @@ export class AdminComponent implements OnInit {
       lastName: user.lastName,
       email: user.email,
       initials: user.initials ?? '',
-      role: user.roles[0] ?? 'Engineer',
+      roles: user.roles.length ? [...user.roles] : ['Engineer'],
       workLocationId: user.workLocationId ?? null,
       isActive: user.isActive,
-      roleTemplateId: user.roleTemplateId ?? null,
     });
+    this.showRoleSuggestions.set(false);
     // Email is editable in edit mode so admins can correct a typo'd address
     // (it has no other write path — previously only fixable via direct DB edit).
     this.userForm.controls.email.enable();
@@ -453,32 +455,15 @@ export class AdminComponent implements OnInit {
         initials: form.initials || undefined,
         avatarColor: this.avatarColor(),
         isActive: form.isActive!,
-        role: form.role!,
+        roles: form.roles ?? [],
         email: form.email !== editing.email ? form.email! : undefined,
       }).subscribe({
         next: () => {
           // Update work location if changed
           const newLocId = form.workLocationId ?? null;
-          const newTemplateId = form.roleTemplateId ?? null;
-          const oldTemplateId = editing.roleTemplateId ?? null;
 
           const finalize = () => {
-            // WU-06 / C1 — sync rollup template assignment to backend.
-            if (newTemplateId !== oldTemplateId) {
-              const obs = newTemplateId
-                ? this.adminService.assignRoleTemplateToUser(editing.id, newTemplateId)
-                : this.adminService.unassignRoleTemplateFromUser(editing.id);
-              obs.subscribe({
-                next: () => { this.saving.set(false); this.closeUserDialog(); this.loadUsers(); },
-                error: () => {
-                  this.saving.set(false);
-                  this.snackbar.error('User saved, but role-template assignment failed.');
-                  this.closeUserDialog(); this.loadUsers();
-                },
-              });
-            } else {
-              this.saving.set(false); this.closeUserDialog(); this.loadUsers();
-            }
+            this.saving.set(false); this.closeUserDialog(); this.loadUsers();
           };
 
           if (newLocId !== editing.workLocationId) {
@@ -499,7 +484,7 @@ export class AdminComponent implements OnInit {
         lastName: form.lastName!,
         initials: form.initials || undefined,
         avatarColor: this.avatarColor(),
-        role: form.role!,
+        roles: form.roles ?? [],
       }).subscribe({
         next: (result) => {
           this.saving.set(false);
@@ -527,9 +512,6 @@ export class AdminComponent implements OnInit {
             workLocationId: null,
             workLocationName: null,
             i9Status: null,
-            roleTemplateId: null,
-            roleTemplateName: null,
-            roleTemplateIncludedRoles: null,
           };
           this.editingUser.set(newUser);
           this.setupToken.set(result.setupToken);

@@ -4,6 +4,6 @@ export interface UpdateUserRequest {
   initials?: string;
   avatarColor?: string;
   isActive?: boolean;
-  role?: string;
+  roles?: string[];
   email?: string;
 }

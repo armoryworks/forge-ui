@@ -4,7 +4,7 @@ export interface CreateUserRequest {
   lastName: string;
   initials?: string;
   avatarColor?: string;
-  role: string;
+  roles: string[];
 }
 
 export interface CreateUserResponse {

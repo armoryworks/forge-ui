@@ -2705,6 +2705,15 @@
     "selectUserPlaceholder": "-- Seleccione un usuario --",
     "teams": "Equipos y Kioscos",
     "roles": "Roles",
+    "roleSuggestions": {
+      "title": "Combinaciones de roles sugeridas",
+      "ariaLabel": "Ver combinaciones de roles sugeridas",
+      "hint": "Perfiles comunes de taller para ayudarte a elegir. Haz clic en una sugerencia para agregar sus roles a la selección.",
+      "ownerOperator": "Propietario-operador",
+      "frontOffice": "Oficina administrativa",
+      "floorLead": "Líder de planta",
+      "complianceOfficer": "Oficial de cumplimiento"
+    },
     "colName": "Nombre",
     "colEmail": "Correo",
     "colRole": "Rol",

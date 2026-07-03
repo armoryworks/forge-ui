@@ -74,7 +74,6 @@ export class RoleTemplatesPanelComponent implements OnInit {
     { field: 'name', header: 'Name', sortable: true },
     { field: 'description', header: 'Description', sortable: false },
     { field: 'includedRoleNames', header: 'Included Roles', sortable: false },
-    { field: 'assigneeCount', header: 'Assignees', sortable: true, width: '110px', align: 'center' },
     { field: 'isSystemDefault', header: 'Source', sortable: true, width: '110px' },
     { field: 'actions', header: 'Actions', width: '140px', align: 'right' },
   ];
@@ -158,9 +157,9 @@ export class RoleTemplatesPanelComponent implements OnInit {
     this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
-        title: 'Delete Role Template?',
-        message: `This will deactivate "${template.name}" and unassign all ${template.assigneeCount} user(s) currently using it. ` +
-                 `Their underlying Identity roles are unaffected.`,
+        title: 'Delete Role Bundle?',
+        message: `This will deactivate "${template.name}". Any System API keys scoped to this ` +
+                 `bundle will need to be re-scoped. The underlying roles are unaffected.`,
         confirmLabel: 'Delete',
         severity: 'danger',
       } satisfies ConfirmDialogData,

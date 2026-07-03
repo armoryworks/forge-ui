@@ -50,7 +50,7 @@ describe('AdminService', () => {
 
   describe('createUser', () => {
     it('should POST a new user and return the admin user', () => {
-      const request = { firstName: 'John', lastName: 'Doe', email: 'john@test.com', role: 'Engineer' } as any;
+      const request = { firstName: 'John', lastName: 'Doe', email: 'john@test.com', roles: ['Engineer'] };
       const mockResponse = { id: 2, firstName: 'John', lastName: 'Doe', email: 'john@test.com' };
       let result: unknown = null;
 
@@ -69,8 +69,8 @@ describe('AdminService', () => {
 
   describe('updateUser', () => {
     it('should PUT updated user fields', () => {
-      const request = { firstName: 'Jane', role: 'Manager' } as any;
-      const mockResponse = { id: 1, firstName: 'Jane', role: 'Manager' };
+      const request = { firstName: 'Jane', roles: ['Manager'] };
+      const mockResponse = { id: 1, firstName: 'Jane', roles: ['Manager'] };
       let result: unknown = null;
 
       service.updateUser(1, request).subscribe((user) => { result = user; });

@@ -9,9 +9,9 @@
 </div>
 
 <p class="panel-hint">
-  Role templates ("rollups") let you bundle several base roles under one name for users who wear many
-  hats — common in small shops. When a user is assigned a template, every included role is granted to them.
-  System defaults seed at install and are read-only; create your own to customize.
+  Role bundles ("rollups") group several base roles under one name — handy for scoping a System API key
+  to a set of roles without listing each one. System defaults seed at install and are read-only;
+  create your own to customize.
 </p>
 
 <div [appLoadingBlock]="loading()">
@@ -37,10 +37,6 @@
           <span class="chip chip--primary">{{ r }}</span>
         }
       </div>
-    </ng-template>
-
-    <ng-template appColumnCell="assigneeCount" let-row>
-      <span class="assignee-count">{{ row.assigneeCount }}</span>
     </ng-template>
 
     <ng-template appColumnCell="isSystemDefault" let-row>
@@ -87,8 +83,7 @@
                   [required]="true"
                   placeholder="Pick the underlying roles this template grants" />
       <p class="form-hint">
-        Pick at least one. The user assigned this template will receive every role listed above
-        in their JWT claims.
+        Pick at least one. A System API key scoped to this bundle is granted every role listed above.
       </p>
     </div>
 
