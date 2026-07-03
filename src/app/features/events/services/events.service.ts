@@ -38,6 +38,22 @@ export class EventsService {
     return this.http.post<void>(`${this.base}/${id}/respond`, { status });
   }
 
+  /** compliance-calendar A-4: set workflow status on a tracking-tier event. */
+  updateEventStatus(id: number, body: {
+    status: string;
+    ownerUserId?: number | null;
+    waivedReason?: string | null;
+    evidenceUrl?: string | null;
+    evidenceDocumentSetId?: number | null;
+  }): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/status`, body);
+  }
+
+  /** compliance-calendar A-4: acknowledge a forced-ack event. */
+  acknowledgeEvent(id: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/acknowledge`, {});
+  }
+
   getUpcomingEvents(): Observable<AppEvent[]> {
     return this.http.get<AppEvent[]>(`${this.base}/upcoming`);
   }

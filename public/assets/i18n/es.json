@@ -6667,6 +6667,8 @@
       "createEvent": "Crear Evento",
       "allTypes": "-- Todos los Tipos --",
       "calendarType": "Categoría del calendario",
+      "markDone": "Marcar como hecho",
+      "acknowledge": "Confirmar",
       "noCalendarType": "— Ninguno —",
       "types": {
         "meeting": "Reunión",
@@ -6686,6 +6688,8 @@
       },
       "snackbar": {
         "eventUpdated": "Evento actualizado",
+        "statusUpdated": "Estado actualizado",
+        "acknowledged": "Confirmado",
         "eventCreated": "Evento creado",
         "eventCancelled": "Evento cancelado",
         "eventDeleted": "Event deleted"

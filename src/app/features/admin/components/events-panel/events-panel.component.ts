@@ -236,6 +236,24 @@ export class EventsPanelComponent implements OnInit {
     });
   }
 
+  protected markDone(event: AppEvent): void {
+    this.eventsService.updateEventStatus(event.id, { status: 'Done' }).subscribe({
+      next: () => {
+        this.loadEvents();
+        this.snackbar.success(this.translate.instant('adminPanels.events.snackbar.statusUpdated'));
+      },
+    });
+  }
+
+  protected acknowledge(event: AppEvent): void {
+    this.eventsService.acknowledgeEvent(event.id).subscribe({
+      next: () => {
+        this.loadEvents();
+        this.snackbar.success(this.translate.instant('adminPanels.events.snackbar.acknowledged'));
+      },
+    });
+  }
+
   protected cancelEvent(event: AppEvent): void {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',

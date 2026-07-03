@@ -40,6 +40,16 @@
       </ng-template>
       <ng-template appColumnCell="actions" let-row>
         <div class="row-actions">
+          @if (row.status && row.status !== 'Done') {
+            <button class="icon-btn" [attr.aria-label]="'adminPanels.events.markDone' | translate" (click)="markDone(row); $event.stopPropagation()">
+              <span class="material-icons-outlined">task_alt</span>
+            </button>
+          }
+          @if (row.isBlocking && !row.acknowledgedAt) {
+            <button class="icon-btn icon-btn--active" [attr.aria-label]="'adminPanels.events.acknowledge' | translate" (click)="acknowledge(row); $event.stopPropagation()">
+              <span class="material-icons-outlined">notifications_active</span>
+            </button>
+          }
           <button class="icon-btn" aria-label="Edit event" (click)="openEdit(row); $event.stopPropagation()">
             <span class="material-icons-outlined">edit</span>
           </button>

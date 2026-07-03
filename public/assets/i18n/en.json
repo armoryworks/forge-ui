@@ -6674,6 +6674,8 @@
       "createEvent": "Create Event",
       "allTypes": "-- All Types --",
       "calendarType": "Calendar Category",
+      "markDone": "Mark done",
+      "acknowledge": "Acknowledge",
       "noCalendarType": "— None —",
       "types": {
         "meeting": "Meeting",
@@ -6693,6 +6695,8 @@
       },
       "snackbar": {
         "eventUpdated": "Event updated",
+        "statusUpdated": "Status updated",
+        "acknowledged": "Acknowledged",
         "eventCreated": "Event created",
         "eventCancelled": "Event cancelled",
         "eventDeleted": "Event deleted"
