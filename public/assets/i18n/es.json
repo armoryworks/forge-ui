@@ -6660,6 +6660,8 @@
       "saveChanges": "Guardar Cambios",
       "createEvent": "Crear Evento",
       "allTypes": "-- Todos los Tipos --",
+      "calendarType": "Categoría del calendario",
+      "noCalendarType": "— Ninguno —",
       "types": {
         "meeting": "Reunión",
         "training": "Capacitación",

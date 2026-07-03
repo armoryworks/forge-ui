@@ -64,6 +64,10 @@
       </div>
 
       <div class="dialog-row">
+        <app-select [label]="'adminPanels.events.calendarType' | translate" formControlName="calendarEventTypeId" [options]="eventTypeOptions()" data-testid="event-calendar-type" />
+      </div>
+
+      <div class="dialog-row">
         <app-datepicker [label]="'adminPanels.events.startDate' | translate" formControlName="startDate" [required]="true" data-testid="event-start-date" />
         <app-input [label]="'adminPanels.events.startTime' | translate" formControlName="startTime" placeholder="HH:MM" [required]="true" data-testid="event-start-time" />
       </div>

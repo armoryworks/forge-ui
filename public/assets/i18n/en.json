@@ -6667,6 +6667,8 @@
       "saveChanges": "Save Changes",
       "createEvent": "Create Event",
       "allTypes": "-- All Types --",
+      "calendarType": "Calendar Category",
+      "noCalendarType": "— None —",
       "types": {
         "meeting": "Meeting",
         "training": "Training",

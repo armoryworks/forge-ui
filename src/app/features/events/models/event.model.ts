@@ -6,6 +6,9 @@ export interface AppEvent {
   endTime: string;
   location: string | null;
   eventType: string;
+  // compliance-calendar A-1: configurable taxonomy (nullable during expand).
+  eventTypeId: number | null;
+  superGroupId: number | null;
   isRequired: boolean;
   isCancelled: boolean;
   createdByUserId: number;
@@ -29,6 +32,7 @@ export interface EventRequest {
   endTime: string;
   location?: string | null;
   eventType: string;
+  eventTypeId?: number | null;
   isRequired: boolean;
   attendeeUserIds: number[];
 }

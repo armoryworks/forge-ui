@@ -7,6 +7,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { EventsService } from '../../../events/services/events.service';
 import { AppEvent, EventRequest } from '../../../events/models/event.model';
+import { CalendarService } from '../../../calendar/services/calendar.service';
 import { AdminService } from '../../services/admin.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
@@ -47,6 +48,7 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
 })
 export class EventsPanelComponent implements OnInit {
   private readonly eventsService = inject(EventsService);
+  private readonly calendarService = inject(CalendarService);
   private readonly adminService = inject(AdminService);
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
@@ -58,6 +60,8 @@ export class EventsPanelComponent implements OnInit {
   protected readonly showDialog = signal(false);
   protected readonly editingEvent = signal<AppEvent | null>(null);
   protected readonly userOptions = signal<SelectOption[]>([]);
+  // compliance-calendar A-1: Super-Group → Event-Type options (flattened) for authoring.
+  protected readonly eventTypeOptions = signal<SelectOption[]>([]);
 
   protected readonly typeFilterControl = new FormControl<string>('');
 
@@ -85,6 +89,7 @@ export class EventsPanelComponent implements OnInit {
     endTime: new FormControl('10:00', [Validators.required]),
     location: new FormControl<string | null>(null),
     eventType: new FormControl('Meeting', [Validators.required]),
+    calendarEventTypeId: new FormControl<number | null>(null),
     isRequired: new FormControl(false),
     attendeeUserIds: new FormControl<number[]>([], { nonNullable: true }),
   });
@@ -113,6 +118,7 @@ export class EventsPanelComponent implements OnInit {
   ngOnInit(): void {
     this.loadEvents();
     this.loadUsers();
+    this.loadEventTypes();
     this.typeFilterControl.valueChanges.subscribe(() => this.loadEvents());
   }
 
@@ -140,10 +146,27 @@ export class EventsPanelComponent implements OnInit {
     });
   }
 
+  private loadEventTypes(): void {
+    this.calendarService.getSuperGroups().subscribe({
+      next: (groups) => {
+        const options: SelectOption[] = [
+          { value: null, label: this.translate.instant('adminPanels.events.noCalendarType') },
+        ];
+        for (const g of groups) {
+          for (const t of g.eventTypes) {
+            options.push({ value: t.id, label: `${g.name} — ${t.name}` });
+          }
+        }
+        this.eventTypeOptions.set(options);
+      },
+    });
+  }
+
   protected openCreate(): void {
     this.editingEvent.set(null);
     this.form.reset({
       eventType: 'Meeting',
+      calendarEventTypeId: null,
       startTime: '09:00',
       endTime: '10:00',
       isRequired: false,
@@ -165,6 +188,7 @@ export class EventsPanelComponent implements OnInit {
       endTime: `${String(end.getHours()).padStart(2, '0')}:${String(end.getMinutes()).padStart(2, '0')}`,
       location: event.location,
       eventType: event.eventType,
+      calendarEventTypeId: event.eventTypeId,
       isRequired: event.isRequired,
       attendeeUserIds: event.attendees.map(a => a.userId),
     });
@@ -191,6 +215,7 @@ export class EventsPanelComponent implements OnInit {
       endTime: endIso,
       location: val.location,
       eventType: val.eventType!,
+      eventTypeId: val.calendarEventTypeId,
       isRequired: val.isRequired!,
       attendeeUserIds: val.attendeeUserIds,
     };
