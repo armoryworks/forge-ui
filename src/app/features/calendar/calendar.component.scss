@@ -307,3 +307,20 @@
     @include truncate;
   }
 }
+
+.event-chip--week {
+  font-size: $font-size-sm;
+}
+
+// compliance-calendar A-3: event row in the day view
+.day-event {
+  padding: $sp-sm;
+  border-left: $border-width-accent solid var(--primary);
+  background: var(--surface);
+  margin-bottom: $sp-xs;
+
+  &__title {
+    font-size: $font-size-base;
+    color: var(--text);
+  }
+}

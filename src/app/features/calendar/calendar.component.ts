@@ -100,6 +100,9 @@ export class CalendarComponent {
 
   protected readonly currentDateKey = computed(() => this.toDateStr(this.currentDate()));
 
+  /** compliance-calendar A-3: layer-filtered events for the day view. */
+  protected readonly dayEvents = computed(() => this.eventsByDate().get(this.currentDateKey()) ?? []);
+
   protected readonly dayPoEvents = computed(() => {
     const dateStr = this.currentDateKey();
     return this.poEvents().filter(po => po.expectedDeliveryDate === dateStr);
