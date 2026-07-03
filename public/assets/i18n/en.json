@@ -3888,6 +3888,10 @@
     "selectUserHint": "Select a user to view compliance details"
   },
   "calendar": {
+    "layers": {
+      "title": "Layers",
+      "empty": "No layers available"
+    },
     "title": "Calendar",
     "subtitle": "Visualize job deadlines and milestones",
     "trackType": "Track Type",

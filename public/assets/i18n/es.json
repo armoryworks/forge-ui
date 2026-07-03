@@ -3888,6 +3888,10 @@
     "selectUserHint": "Seleccione un usuario para ver detalles de cumplimiento"
   },
   "calendar": {
+    "layers": {
+      "title": "Capas",
+      "empty": "No hay capas disponibles"
+    },
     "title": "Calendario",
     "subtitle": "Visualice plazos y hitos de trabajos",
     "trackType": "Tipo de Pista",

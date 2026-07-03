@@ -1,0 +1,57 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.calendar-layers {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+
+  &__title {
+    @include uppercase-label($font-size-xxs);
+    color: var(--text-muted);
+    padding: $sp-xs $sp-sm;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    padding: $sp-xs $sp-sm;
+    background: transparent;
+    border: $border-width-thin solid transparent;
+    cursor: pointer;
+    text-align: left;
+    color: var(--text-secondary);
+    font-size: $font-size-base;
+    transition: background $transition-fast;
+
+    &:hover {
+      background: var(--surface);
+    }
+
+    &--on {
+      color: var(--text);
+    }
+  }
+
+  &__check {
+    font-size: $icon-size-sm;
+    color: var(--primary);
+  }
+
+  &__swatch {
+    width: $dot-size-md;
+    height: $dot-size-md;
+    flex-shrink: 0;
+  }
+
+  &__name {
+    @include truncate;
+  }
+
+  &__empty {
+    padding: $sp-sm;
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+  }
+}
