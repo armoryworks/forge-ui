@@ -1,0 +1,23 @@
+<div class="calendar-layers">
+  <div class="calendar-layers__title">{{ 'calendar.layers.title' | translate }}</div>
+
+  @for (row of rows(); track row.id) {
+    <button
+      type="button"
+      class="calendar-layers__item"
+      [class.calendar-layers__item--on]="row.selected"
+      [attr.aria-pressed]="row.selected"
+      [attr.aria-label]="row.name"
+      (click)="toggled.emit(row.id)">
+      <span class="material-icons-outlined calendar-layers__check" aria-hidden="true">
+        {{ row.selected ? 'check_box' : 'check_box_outline_blank' }}
+      </span>
+      <span class="calendar-layers__swatch" [style.background]="row.color" aria-hidden="true"></span>
+      <span class="calendar-layers__name">{{ row.name }}</span>
+    </button>
+  }
+
+  @if (rows().length === 0) {
+    <div class="calendar-layers__empty">{{ 'calendar.layers.empty' | translate }}</div>
+  }
+</div>

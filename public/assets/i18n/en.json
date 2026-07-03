@@ -3888,6 +3888,16 @@
     "selectUserHint": "Select a user to view compliance details"
   },
   "calendar": {
+    "layers": {
+      "title": "Layers",
+      "empty": "No layers available"
+    },
+    "savedViews": {
+      "label": "Saved view",
+      "custom": "Custom",
+      "namePlaceholder": "New view name",
+      "save": "Save"
+    },
     "title": "Calendar",
     "subtitle": "Visualize job deadlines and milestones",
     "trackType": "Track Type",
@@ -6663,6 +6673,8 @@
       "saveChanges": "Save Changes",
       "createEvent": "Create Event",
       "allTypes": "-- All Types --",
+      "calendarType": "Calendar Category",
+      "noCalendarType": "— None —",
       "types": {
         "meeting": "Meeting",
         "training": "Training",

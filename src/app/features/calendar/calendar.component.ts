@@ -9,8 +9,13 @@ import { CalendarService } from './services/calendar.service';
 import { CalendarJob } from './models/calendar-job.model';
 import { CalendarDay } from './models/calendar-day.model';
 import { PoCalendarEvent } from './models/po-calendar-event.model';
+import { CalendarSuperGroup } from './models/calendar-super-group.model';
+import { CalendarEvent } from './models/calendar-event.model';
+import { CalendarSavedView } from './models/calendar-saved-view.model';
+import { CalendarLayersComponent } from './components/calendar-layers/calendar-layers.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
+import { InputComponent } from '../../shared/components/input/input.component';
 import { PriorityIndicatorComponent } from '../../shared/components/priority-indicator/priority-indicator.component';
 import { KanbanService } from '../kanban/services/kanban.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
@@ -20,7 +25,7 @@ export type CalendarView = 'month' | 'week' | 'day';
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [ReactiveFormsModule, MatTooltipModule, TranslatePipe, PageHeaderComponent, SelectComponent, PriorityIndicatorComponent],
+  imports: [ReactiveFormsModule, MatTooltipModule, TranslatePipe, PageHeaderComponent, SelectComponent, InputComponent, PriorityIndicatorComponent, CalendarLayersComponent],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,6 +50,21 @@ export class CalendarComponent {
   );
   protected readonly poEvents = signal<PoCalendarEvent[]>([]);
   protected readonly isLoadingPo = signal(false);
+
+  // compliance-calendar A-3: overlay Super-Group layers + selection (persisted).
+  protected readonly superGroups = signal<CalendarSuperGroup[]>([]);
+  protected readonly selectedLayerIds = signal<number[]>(
+    this.userPreferences.get<number[]>('calendar:layers') ?? []
+  );
+  protected readonly layersOpen = signal(false);
+  protected readonly events = signal<CalendarEvent[]>([]);
+  protected readonly savedViews = signal<CalendarSavedView[]>([]);
+  protected readonly savedViewOptions = computed<SelectOption[]>(() => [
+    { value: null, label: this.translate.instant('calendar.savedViews.custom') },
+    ...this.savedViews().map(v => ({ value: v.id, label: v.name })),
+  ]);
+  protected readonly selectedViewControl = new FormControl<number | null>(null);
+  protected readonly newViewNameControl = new FormControl<string>('', { nonNullable: true });
 
   protected readonly MAX_VISIBLE_JOBS = 3;
   protected readonly HOURS = Array.from({ length: 24 }, (_, i) => i);
@@ -89,6 +109,9 @@ export class CalendarComponent {
 
   protected readonly currentDateKey = computed(() => this.toDateStr(this.currentDate()));
 
+  /** compliance-calendar A-3: layer-filtered events for the day view. */
+  protected readonly dayEvents = computed(() => this.eventsByDate().get(this.currentDateKey()) ?? []);
+
   protected readonly dayPoEvents = computed(() => {
     const dateStr = this.currentDateKey();
     return this.poEvents().filter(po => po.expectedDeliveryDate === dateStr);
@@ -106,6 +129,25 @@ export class CalendarComponent {
     return map;
   });
 
+  /** compliance-calendar A-3: events grouped by day, filtered to selected layers, with layer colour. */
+  protected readonly eventsByDate = computed(() => {
+    const selected = new Set(this.selectedLayerIds());
+    const colorByGroup = new Map(this.superGroups().map(g => [g.id, g.color ?? 'var(--primary)']));
+    const map = new Map<string, { id: number; title: string; color: string }[]>();
+    for (const e of this.events()) {
+      if (e.superGroupId != null && !selected.has(e.superGroupId)) continue;
+      const key = this.toDateStr(new Date(e.startTime));
+      const list = map.get(key) ?? [];
+      list.push({
+        id: e.id,
+        title: e.title,
+        color: e.superGroupId != null ? (colorByGroup.get(e.superGroupId) ?? 'var(--primary)') : 'var(--text-muted)',
+      });
+      map.set(key, list);
+    }
+    return map;
+  });
+
   constructor() {
     this.loadJobs();
     this.kanbanService.getTrackTypes().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(types => {
@@ -114,6 +156,23 @@ export class CalendarComponent {
         ...types.map(t => ({ value: t.id, label: t.name })),
       ]);
     });
+
+    // compliance-calendar A-3: load the visibility-filtered layer list; default the
+    // selection to the default-visible groups if the user has no saved preference.
+    this.service.getSuperGroups().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (groups) => {
+        this.superGroups.set(groups);
+        if (this.userPreferences.get<number[]>('calendar:layers') == null) {
+          this.selectedLayerIds.set(groups.filter(g => g.defaultVisible).map(g => g.id));
+        }
+      },
+      error: () => this.superGroups.set([]),
+    });
+
+    this.loadSavedViews();
+    this.selectedViewControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(id => this.applyView(id));
 
     this.trackTypeControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.allJobs.update(j => [...j]);
@@ -124,6 +183,7 @@ export class CalendarComponent {
     // togglePoDeliveries() already calls loadPoEvents() directly on enable.
     effect(() => {
       this.currentDate(); // track dependency only
+      this.loadEvents();
       if (untracked(() => this.showPoDeliveries())) {
         this.loadPoEvents();
       }
@@ -136,6 +196,19 @@ export class CalendarComponent {
       next: (jobs) => { this.allJobs.set(jobs); this.loading.set(false); },
       error: () => this.loading.set(false),
     });
+  }
+
+  protected toggleLayersPanel(): void {
+    this.layersOpen.update(o => !o);
+  }
+
+  protected onLayerToggled(groupId: number): void {
+    const current = this.selectedLayerIds();
+    const next = current.includes(groupId)
+      ? current.filter(id => id !== groupId)
+      : [...current, groupId];
+    this.selectedLayerIds.set(next);
+    this.userPreferences.set('calendar:layers', next);
   }
 
   protected togglePoDeliveries(): void {
@@ -176,6 +249,70 @@ export class CalendarComponent {
         this.isLoadingPo.set(false);
       },
       error: () => this.isLoadingPo.set(false),
+    });
+  }
+
+  private loadEvents(): void {
+    const d = this.currentDate();
+    const year = d.getFullYear();
+    const month = d.getMonth();
+
+    const firstOfMonth = new Date(year, month, 1);
+    const lastOfMonth = new Date(year, month + 1, 0);
+    const startOffset = firstOfMonth.getDay();
+    const gridStart = new Date(year, month - 1, new Date(year, month, 0).getDate() - startOffset + 1);
+    const gridEnd = new Date(lastOfMonth);
+    const remaining = 7 - ((startOffset + lastOfMonth.getDate()) % 7);
+    if (remaining < 7) {
+      gridEnd.setDate(gridEnd.getDate() + remaining);
+    }
+
+    const from = this.toDateStr(gridStart);
+    const to = this.toDateStr(new Date(gridEnd.getFullYear(), gridEnd.getMonth(), gridEnd.getDate() + 1));
+
+    // Fire-and-forget GET (completes naturally); degrade to empty if events are gated/unavailable.
+    this.service.getEvents(from, to).subscribe({
+      next: events => this.events.set(events),
+      error: () => this.events.set([]),
+    });
+  }
+
+  private loadSavedViews(): void {
+    this.service.getSavedViews().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (views) => {
+        this.savedViews.set(views);
+        // Apply a role-default view when the user has no saved layer preference.
+        const def = views.find(v => v.isDefault);
+        if (def && this.userPreferences.get<number[]>('calendar:layers') == null) {
+          this.selectedLayerIds.set(def.selectedSuperGroupIds);
+        }
+      },
+      error: () => this.savedViews.set([]),
+    });
+  }
+
+  protected applyView(viewId: number | null): void {
+    if (viewId == null) return;
+    const view = this.savedViews().find(v => v.id === viewId);
+    if (!view) return;
+    this.selectedLayerIds.set(view.selectedSuperGroupIds);
+    this.userPreferences.set('calendar:layers', view.selectedSuperGroupIds);
+  }
+
+  protected saveCurrentView(): void {
+    const name = this.newViewNameControl.value.trim();
+    if (!name) return;
+    this.service.createSavedView({
+      name,
+      scope: 'master',
+      selectedSuperGroupIds: this.selectedLayerIds(),
+      selectedEventTypeIds: [],
+    }).subscribe({
+      next: (view) => {
+        this.savedViews.update(vs => [...vs, view]);
+        this.newViewNameControl.setValue('');
+        this.selectedViewControl.setValue(view.id, { emitEvent: false });
+      },
     });
   }
 

@@ -3888,6 +3888,16 @@
     "selectUserHint": "Seleccione un usuario para ver detalles de cumplimiento"
   },
   "calendar": {
+    "layers": {
+      "title": "Capas",
+      "empty": "No hay capas disponibles"
+    },
+    "savedViews": {
+      "label": "Vista guardada",
+      "custom": "Personalizada",
+      "namePlaceholder": "Nombre de la vista",
+      "save": "Guardar"
+    },
     "title": "Calendario",
     "subtitle": "Visualice plazos y hitos de trabajos",
     "trackType": "Tipo de Pista",
@@ -6656,6 +6666,8 @@
       "saveChanges": "Guardar Cambios",
       "createEvent": "Crear Evento",
       "allTypes": "-- Todos los Tipos --",
+      "calendarType": "Categoría del calendario",
+      "noCalendarType": "— Ninguno —",
       "types": {
         "meeting": "Reunión",
         "training": "Capacitación",

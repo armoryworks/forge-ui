@@ -282,3 +282,61 @@
     font-size: var(--font-size-sm); color: var(--text-secondary);
   }
 }
+
+// compliance-calendar A-3: overlay layer panel
+.calendar-layers-panel {
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+  padding: $sp-sm;
+  max-width: 280px;
+  margin: $sp-sm 0;
+}
+
+// compliance-calendar A-3: event chips (overlay layers) in day cells
+.event-chip {
+  display: flex;
+  align-items: center;
+  padding: $sp-xxs $sp-xs;
+  margin-top: $sp-xxs;
+  background: var(--surface);
+  border-left: $border-width-accent solid var(--primary);
+  font-size: $font-size-xs;
+  color: var(--text-secondary);
+
+  &__title {
+    @include truncate;
+  }
+}
+
+.event-chip--week {
+  font-size: $font-size-sm;
+}
+
+// compliance-calendar A-3: event row in the day view
+.day-event {
+  padding: $sp-sm;
+  border-left: $border-width-accent solid var(--primary);
+  background: var(--surface);
+  margin-bottom: $sp-xs;
+
+  &__title {
+    font-size: $font-size-base;
+    color: var(--text);
+  }
+}
+
+// compliance-calendar A-3: saved-views controls in the layer panel
+.calendar-saved-views {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding-bottom: $sp-sm;
+  margin-bottom: $sp-sm;
+  border-bottom: $border-width-thin solid var(--border);
+
+  &__save {
+    display: flex;
+    align-items: flex-end;
+    gap: $sp-sm;
+  }
+}

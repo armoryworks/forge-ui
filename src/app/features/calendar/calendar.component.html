@@ -23,8 +23,36 @@
       <span class="material-icons-outlined">local_shipping</span>
       {{ 'calendar.poDeliveries' | translate }}
     </button>
+    <button class="action-btn action-btn--sm"
+            [class.action-btn--primary]="layersOpen()"
+            (click)="toggleLayersPanel()"
+            [attr.aria-label]="'calendar.layers.title' | translate"
+            [matTooltip]="'calendar.layers.title' | translate"
+            matTooltipPosition="above">
+      <span class="material-icons-outlined">layers</span>
+      {{ 'calendar.layers.title' | translate }}
+    </button>
   </div>
 </app-page-header>
+
+@if (layersOpen()) {
+  <div class="calendar-layers-panel">
+    <div class="calendar-saved-views">
+      <app-select [label]="'calendar.savedViews.label' | translate" [formControl]="selectedViewControl" [options]="savedViewOptions()" />
+      <div class="calendar-saved-views__save">
+        <app-input [label]="'calendar.savedViews.namePlaceholder' | translate" [formControl]="newViewNameControl" />
+        <button class="action-btn action-btn--sm" (click)="saveCurrentView()" [attr.aria-label]="'calendar.savedViews.save' | translate">
+          <span class="material-icons-outlined">save</span>
+          {{ 'calendar.savedViews.save' | translate }}
+        </button>
+      </div>
+    </div>
+    <app-calendar-layers
+      [superGroups]="superGroups()"
+      [selectedGroupIds]="selectedLayerIds()"
+      (toggled)="onLayerToggled($event)" />
+  </div>
+}
 
 @if (loading()) {
   <div class="page-loading">
@@ -72,6 +100,11 @@
               }
               @if (overflowCount(day) > 0) {
                 <div class="job-overflow">{{ 'calendar.more' | translate: { count: overflowCount(day) } }}</div>
+              }
+              @for (evt of (eventsByDate().get(day.dateKey) ?? []); track evt.id) {
+                <div class="event-chip" [style.border-left-color]="evt.color" [title]="evt.title">
+                  <span class="event-chip__title">{{ evt.title }}</span>
+                </div>
               }
               @if (showPoDeliveries()) {
                 @for (po of (poEventsByDate().get(day.dateKey) ?? []); track po.id) {
@@ -147,7 +180,12 @@
                 </div>
               }
             }
-            @if (day.jobs.length === 0 && (poEventsByDate().get(day.dateKey) ?? []).length === 0) {
+            @for (evt of (eventsByDate().get(day.dateKey) ?? []); track evt.id) {
+              <div class="event-chip event-chip--week" [style.border-left-color]="evt.color" [title]="evt.title">
+                <span class="event-chip__title">{{ evt.title }}</span>
+              </div>
+            }
+            @if (day.jobs.length === 0 && (poEventsByDate().get(day.dateKey) ?? []).length === 0 && (eventsByDate().get(day.dateKey) ?? []).length === 0) {
               <span class="week-column__empty">{{ 'calendar.noJobs' | translate }}</span>
             }
           </div>
@@ -220,7 +258,12 @@
             </div>
           }
         }
-        @if (dayJobs().length === 0 && (!showPoDeliveries() || dayPoEvents().length === 0)) {
+        @for (evt of dayEvents(); track evt.id) {
+          <div class="day-event" [style.border-left-color]="evt.color">
+            <span class="day-event__title">{{ evt.title }}</span>
+          </div>
+        }
+        @if (dayJobs().length === 0 && (!showPoDeliveries() || dayPoEvents().length === 0) && dayEvents().length === 0) {
           <div class="day-view__empty">
             <span class="material-icons-outlined">event_available</span>
             <span>{{ 'calendar.noJobsDueOnDay' | translate }}</span>
