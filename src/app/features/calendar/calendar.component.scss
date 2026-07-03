@@ -324,3 +324,19 @@
     color: var(--text);
   }
 }
+
+// compliance-calendar A-3: saved-views controls in the layer panel
+.calendar-saved-views {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding-bottom: $sp-sm;
+  margin-bottom: $sp-sm;
+  border-bottom: $border-width-thin solid var(--border);
+
+  &__save {
+    display: flex;
+    align-items: flex-end;
+    gap: $sp-sm;
+  }
+}

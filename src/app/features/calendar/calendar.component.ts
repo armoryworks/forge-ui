@@ -11,9 +11,11 @@ import { CalendarDay } from './models/calendar-day.model';
 import { PoCalendarEvent } from './models/po-calendar-event.model';
 import { CalendarSuperGroup } from './models/calendar-super-group.model';
 import { CalendarEvent } from './models/calendar-event.model';
+import { CalendarSavedView } from './models/calendar-saved-view.model';
 import { CalendarLayersComponent } from './components/calendar-layers/calendar-layers.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
+import { InputComponent } from '../../shared/components/input/input.component';
 import { PriorityIndicatorComponent } from '../../shared/components/priority-indicator/priority-indicator.component';
 import { KanbanService } from '../kanban/services/kanban.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
@@ -23,7 +25,7 @@ export type CalendarView = 'month' | 'week' | 'day';
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [ReactiveFormsModule, MatTooltipModule, TranslatePipe, PageHeaderComponent, SelectComponent, PriorityIndicatorComponent, CalendarLayersComponent],
+  imports: [ReactiveFormsModule, MatTooltipModule, TranslatePipe, PageHeaderComponent, SelectComponent, InputComponent, PriorityIndicatorComponent, CalendarLayersComponent],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,6 +58,13 @@ export class CalendarComponent {
   );
   protected readonly layersOpen = signal(false);
   protected readonly events = signal<CalendarEvent[]>([]);
+  protected readonly savedViews = signal<CalendarSavedView[]>([]);
+  protected readonly savedViewOptions = computed<SelectOption[]>(() => [
+    { value: null, label: this.translate.instant('calendar.savedViews.custom') },
+    ...this.savedViews().map(v => ({ value: v.id, label: v.name })),
+  ]);
+  protected readonly selectedViewControl = new FormControl<number | null>(null);
+  protected readonly newViewNameControl = new FormControl<string>('', { nonNullable: true });
 
   protected readonly MAX_VISIBLE_JOBS = 3;
   protected readonly HOURS = Array.from({ length: 24 }, (_, i) => i);
@@ -160,6 +169,11 @@ export class CalendarComponent {
       error: () => this.superGroups.set([]),
     });
 
+    this.loadSavedViews();
+    this.selectedViewControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(id => this.applyView(id));
+
     this.trackTypeControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.allJobs.update(j => [...j]);
     });
@@ -260,6 +274,45 @@ export class CalendarComponent {
     this.service.getEvents(from, to).subscribe({
       next: events => this.events.set(events),
       error: () => this.events.set([]),
+    });
+  }
+
+  private loadSavedViews(): void {
+    this.service.getSavedViews().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (views) => {
+        this.savedViews.set(views);
+        // Apply a role-default view when the user has no saved layer preference.
+        const def = views.find(v => v.isDefault);
+        if (def && this.userPreferences.get<number[]>('calendar:layers') == null) {
+          this.selectedLayerIds.set(def.selectedSuperGroupIds);
+        }
+      },
+      error: () => this.savedViews.set([]),
+    });
+  }
+
+  protected applyView(viewId: number | null): void {
+    if (viewId == null) return;
+    const view = this.savedViews().find(v => v.id === viewId);
+    if (!view) return;
+    this.selectedLayerIds.set(view.selectedSuperGroupIds);
+    this.userPreferences.set('calendar:layers', view.selectedSuperGroupIds);
+  }
+
+  protected saveCurrentView(): void {
+    const name = this.newViewNameControl.value.trim();
+    if (!name) return;
+    this.service.createSavedView({
+      name,
+      scope: 'master',
+      selectedSuperGroupIds: this.selectedLayerIds(),
+      selectedEventTypeIds: [],
+    }).subscribe({
+      next: (view) => {
+        this.savedViews.update(vs => [...vs, view]);
+        this.newViewNameControl.setValue('');
+        this.selectedViewControl.setValue(view.id, { emitEvent: false });
+      },
     });
   }
 

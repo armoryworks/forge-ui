@@ -3892,6 +3892,12 @@
       "title": "Capas",
       "empty": "No hay capas disponibles"
     },
+    "savedViews": {
+      "label": "Vista guardada",
+      "custom": "Personalizada",
+      "namePlaceholder": "Nombre de la vista",
+      "save": "Guardar"
+    },
     "title": "Calendario",
     "subtitle": "Visualice plazos y hitos de trabajos",
     "trackType": "Tipo de Pista",

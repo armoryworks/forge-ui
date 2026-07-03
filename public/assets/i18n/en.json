@@ -3892,6 +3892,12 @@
       "title": "Layers",
       "empty": "No layers available"
     },
+    "savedViews": {
+      "label": "Saved view",
+      "custom": "Custom",
+      "namePlaceholder": "New view name",
+      "save": "Save"
+    },
     "title": "Calendar",
     "subtitle": "Visualize job deadlines and milestones",
     "trackType": "Track Type",
