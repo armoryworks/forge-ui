@@ -241,7 +241,15 @@ export class NavTreeService {
    */
   readonly breadcrumbTrail: Signal<NavItem[]> = computed(() => {
     const url = this.currentUrl();
-    return this.findTrail([...this.mainTree(), ...this.bottomTree()], url, /*requirePrefix*/ false);
+    const trail = this.findTrail([...this.mainTree(), ...this.bottomTree()], url, /*requirePrefix*/ false);
+    // Group crumbs (Operations, Sales, …) are organizational — they carry
+    // `children` but no `route`, so the header renders them as dead <span>s and
+    // clicking a mid-breadcrumb does nothing. Resolve each routeless group to
+    // its first navigable descendant leaf (the section's default landing page,
+    // matching the sidebar drill) so intermediate crumbs become clickable links.
+    return trail.map(item =>
+      item.route || !item.children ? item : { ...item, route: this.firstLeafRoute(item) },
+    );
   });
 
   /**
@@ -313,5 +321,15 @@ export class NavTreeService {
 
   private urlMatchesPrefix(url: string, prefix: string): boolean {
     return url === prefix || url.startsWith(prefix + '/');
+  }
+
+  /** First navigable route within an item's subtree (its own, else first descendant leaf). */
+  private firstLeafRoute(item: NavItem): string | undefined {
+    if (item.route) return item.route;
+    for (const child of item.children ?? []) {
+      const route = this.firstLeafRoute(child);
+      if (route) return route;
+    }
+    return undefined;
   }
 }

@@ -29,8 +29,8 @@
     }
     @for (crumb of visibleCrumbs(); track crumb.label; let last = $last) {
       <span class="material-icons-outlined breadcrumb__separator">chevron_right</span>
-      @if (crumb.route && last) {
-        <a [routerLink]="crumb.route" class="breadcrumb__link breadcrumb__current">{{ crumb.i18nKey! | translate }}</a>
+      @if (last) {
+        <span class="breadcrumb__link breadcrumb__current" aria-current="page">{{ crumb.i18nKey! | translate }}</span>
       } @else if (crumb.route) {
         <a [routerLink]="crumb.route" class="breadcrumb__link">{{ crumb.i18nKey! | translate }}</a>
       } @else {
