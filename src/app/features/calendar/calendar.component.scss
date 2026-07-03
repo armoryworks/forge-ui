@@ -291,3 +291,19 @@
   max-width: 280px;
   margin: $sp-sm 0;
 }
+
+// compliance-calendar A-3: event chips (overlay layers) in day cells
+.event-chip {
+  display: flex;
+  align-items: center;
+  padding: $sp-xxs $sp-xs;
+  margin-top: $sp-xxs;
+  background: var(--surface);
+  border-left: $border-width-accent solid var(--primary);
+  font-size: $font-size-xs;
+  color: var(--text-secondary);
+
+  &__title {
+    @include truncate;
+  }
+}

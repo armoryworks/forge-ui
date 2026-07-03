@@ -10,6 +10,7 @@ import { CalendarJob } from './models/calendar-job.model';
 import { CalendarDay } from './models/calendar-day.model';
 import { PoCalendarEvent } from './models/po-calendar-event.model';
 import { CalendarSuperGroup } from './models/calendar-super-group.model';
+import { CalendarEvent } from './models/calendar-event.model';
 import { CalendarLayersComponent } from './components/calendar-layers/calendar-layers.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
@@ -54,6 +55,7 @@ export class CalendarComponent {
     this.userPreferences.get<number[]>('calendar:layers') ?? []
   );
   protected readonly layersOpen = signal(false);
+  protected readonly events = signal<CalendarEvent[]>([]);
 
   protected readonly MAX_VISIBLE_JOBS = 3;
   protected readonly HOURS = Array.from({ length: 24 }, (_, i) => i);
@@ -115,6 +117,25 @@ export class CalendarComponent {
     return map;
   });
 
+  /** compliance-calendar A-3: events grouped by day, filtered to selected layers, with layer colour. */
+  protected readonly eventsByDate = computed(() => {
+    const selected = new Set(this.selectedLayerIds());
+    const colorByGroup = new Map(this.superGroups().map(g => [g.id, g.color ?? 'var(--primary)']));
+    const map = new Map<string, { id: number; title: string; color: string }[]>();
+    for (const e of this.events()) {
+      if (e.superGroupId != null && !selected.has(e.superGroupId)) continue;
+      const key = this.toDateStr(new Date(e.startTime));
+      const list = map.get(key) ?? [];
+      list.push({
+        id: e.id,
+        title: e.title,
+        color: e.superGroupId != null ? (colorByGroup.get(e.superGroupId) ?? 'var(--primary)') : 'var(--text-muted)',
+      });
+      map.set(key, list);
+    }
+    return map;
+  });
+
   constructor() {
     this.loadJobs();
     this.kanbanService.getTrackTypes().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(types => {
@@ -145,6 +166,7 @@ export class CalendarComponent {
     // togglePoDeliveries() already calls loadPoEvents() directly on enable.
     effect(() => {
       this.currentDate(); // track dependency only
+      this.loadEvents();
       if (untracked(() => this.showPoDeliveries())) {
         this.loadPoEvents();
       }
@@ -210,6 +232,31 @@ export class CalendarComponent {
         this.isLoadingPo.set(false);
       },
       error: () => this.isLoadingPo.set(false),
+    });
+  }
+
+  private loadEvents(): void {
+    const d = this.currentDate();
+    const year = d.getFullYear();
+    const month = d.getMonth();
+
+    const firstOfMonth = new Date(year, month, 1);
+    const lastOfMonth = new Date(year, month + 1, 0);
+    const startOffset = firstOfMonth.getDay();
+    const gridStart = new Date(year, month - 1, new Date(year, month, 0).getDate() - startOffset + 1);
+    const gridEnd = new Date(lastOfMonth);
+    const remaining = 7 - ((startOffset + lastOfMonth.getDate()) % 7);
+    if (remaining < 7) {
+      gridEnd.setDate(gridEnd.getDate() + remaining);
+    }
+
+    const from = this.toDateStr(gridStart);
+    const to = this.toDateStr(new Date(gridEnd.getFullYear(), gridEnd.getMonth(), gridEnd.getDate() + 1));
+
+    // Fire-and-forget GET (completes naturally); degrade to empty if events are gated/unavailable.
+    this.service.getEvents(from, to).subscribe({
+      next: events => this.events.set(events),
+      error: () => this.events.set([]),
     });
   }
 

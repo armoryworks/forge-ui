@@ -8,6 +8,7 @@ import { PagedResponse } from '../../../shared/models/paged-response.model';
 import { CalendarJob } from '../models/calendar-job.model';
 import { PoCalendarEvent } from '../models/po-calendar-event.model';
 import { CalendarSuperGroup } from '../models/calendar-super-group.model';
+import { CalendarEvent } from '../models/calendar-event.model';
 
 @Injectable({ providedIn: 'root' })
 export class CalendarService {
@@ -31,5 +32,12 @@ export class CalendarService {
   /** compliance-calendar A-3: overlay layer list — Super-Groups (with Event-Types) the user may see. */
   getSuperGroups(): Observable<CalendarSuperGroup[]> {
     return this.http.get<CalendarSuperGroup[]>(`${environment.apiUrl}/calendar/super-groups`);
+  }
+
+  /** compliance-calendar A-3: calendar events in a date window (already visibility-filtered server-side). */
+  getEvents(from: string, to: string): Observable<CalendarEvent[]> {
+    return this.http.get<CalendarEvent[]>(`${environment.apiUrl}/events`, {
+      params: { from, to },
+    });
   }
 }

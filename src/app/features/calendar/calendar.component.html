@@ -91,6 +91,11 @@
               @if (overflowCount(day) > 0) {
                 <div class="job-overflow">{{ 'calendar.more' | translate: { count: overflowCount(day) } }}</div>
               }
+              @for (evt of (eventsByDate().get(day.dateKey) ?? []); track evt.id) {
+                <div class="event-chip" [style.border-left-color]="evt.color" [title]="evt.title">
+                  <span class="event-chip__title">{{ evt.title }}</span>
+                </div>
+              }
               @if (showPoDeliveries()) {
                 @for (po of (poEventsByDate().get(day.dateKey) ?? []); track po.id) {
                   <div class="po-event"
