@@ -4,6 +4,7 @@
     "kanban": "Tablero",
     "backlog": "Pendientes",
     "calendar": "Calendario",
+    "compliance": "Cumplimiento",
     "parts": "Piezas",
     "inventory": "Inventario",
     "customers": "Clientes",
@@ -3895,6 +3896,10 @@
     "taxYear": "Año Fiscal",
     "saveTaxDocument": "Guardar Documento Fiscal",
     "selectUserHint": "Seleccione un usuario para ver detalles de cumplimiento"
+  },
+  "compliance": {
+    "title": "Cumplimiento",
+    "subtitle": "Calendario de cumplimiento normativo: plazos, presentaciones y eventos de seguridad."
   },
   "calendar": {
     "layers": {

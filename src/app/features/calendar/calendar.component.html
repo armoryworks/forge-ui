@@ -1,4 +1,4 @@
-<app-page-header [title]="'calendar.title' | translate" [subtitle]="'calendar.subtitle' | translate">
+<app-page-header [title]="titleKey() | translate" [subtitle]="subtitleKey() | translate">
   <div class="calendar-nav">
     <app-select [label]="'calendar.trackType' | translate" [formControl]="trackTypeControl" [options]="trackTypeOptions()" />
     <div class="view-toggle">

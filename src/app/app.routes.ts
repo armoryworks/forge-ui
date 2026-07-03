@@ -90,6 +90,12 @@ export const routes: Routes = [
           import('./features/parts/parts.routes').then((m) => m.PARTS_ROUTES),
       },
       {
+        path: 'compliance',
+        canActivate: [roleGuard('Admin', 'Manager', 'ComplianceOfficer', 'OfficeManager')],
+        loadChildren: () =>
+          import('./features/compliance/compliance.routes').then((m) => m.COMPLIANCE_ROUTES),
+      },
+      {
         path: 'inventory',
         canActivate: [roleGuard('Admin', 'Manager', 'Engineer', 'OfficeManager')],
         loadChildren: () =>

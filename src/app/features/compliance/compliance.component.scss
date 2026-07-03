@@ -1,0 +1,6 @@
+// Compliance module hosts the shared calendar unmodified (it renders its own
+// page-header + shell). No wrapper styling needed.
+:host {
+  display: block;
+  height: 100%;
+}

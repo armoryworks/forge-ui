@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, input, OnInit, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -30,7 +30,20 @@ export type CalendarView = 'month' | 'week' | 'day';
   styleUrl: './calendar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CalendarComponent {
+export class CalendarComponent implements OnInit {
+  /**
+   * Saved-view / layer scope. `'master'` (default) is the standalone calendar page.
+   * A module scope like `'module:compliance'` hosts the same calendar inside a
+   * feature module, which changes the default-layer behaviour (see ngOnInit /
+   * getSuperGroups) and namespaces saved views to that module.
+   */
+  readonly scope = input<string>('master');
+  // Host-overridable header text so an embedding module (e.g. /compliance) shows
+  // its own title in the calendar's single page-header instead of stacking a
+  // second header above it (space-efficiency rule — no redundant chrome).
+  readonly titleKey = input<string>('calendar.title');
+  readonly subtitleKey = input<string>('calendar.subtitle');
+
   private readonly service = inject(CalendarService);
   private readonly kanbanService = inject(KanbanService);
   private readonly router = inject(Router);
@@ -158,18 +171,24 @@ export class CalendarComponent {
     });
 
     // compliance-calendar A-3: load the visibility-filtered layer list; default the
-    // selection to the default-visible groups if the user has no saved preference.
+    // selection when the user has no saved preference. In the 'master' scope we
+    // default to the default-visible groups only; in a module scope (e.g.
+    // 'module:compliance') we default to ALL super-groups the user can see, so the
+    // regulatory/compliance buckets (which are defaultVisible: false) surface by
+    // default in the module context. The server already filters by visibility.
     this.service.getSuperGroups().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (groups) => {
         this.superGroups.set(groups);
         if (this.userPreferences.get<number[]>('calendar:layers') == null) {
-          this.selectedLayerIds.set(groups.filter(g => g.defaultVisible).map(g => g.id));
+          const defaults = this.scope() === 'master'
+            ? groups.filter(g => g.defaultVisible)
+            : groups;
+          this.selectedLayerIds.set(defaults.map(g => g.id));
         }
       },
       error: () => this.superGroups.set([]),
     });
 
-    this.loadSavedViews();
     this.selectedViewControl.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(id => this.applyView(id));
@@ -188,6 +207,13 @@ export class CalendarComponent {
         this.loadPoEvents();
       }
     });
+  }
+
+  ngOnInit(): void {
+    // Deferred to ngOnInit so the `scope` input binding is resolved before we
+    // pass it to the scoped saved-views endpoint (input signals hold their
+    // default during the constructor).
+    this.loadSavedViews();
   }
 
   protected loadJobs(): void {
@@ -278,7 +304,7 @@ export class CalendarComponent {
   }
 
   private loadSavedViews(): void {
-    this.service.getSavedViews().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.service.getSavedViews(this.scope()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (views) => {
         this.savedViews.set(views);
         // Apply a role-default view when the user has no saved layer preference.
@@ -304,7 +330,7 @@ export class CalendarComponent {
     if (!name) return;
     this.service.createSavedView({
       name,
-      scope: 'master',
+      scope: this.scope(),
       selectedSuperGroupIds: this.selectedLayerIds(),
       selectedEventTypeIds: [],
     }).subscribe({

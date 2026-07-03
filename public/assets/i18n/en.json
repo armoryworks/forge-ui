@@ -4,6 +4,7 @@
     "kanban": "Board",
     "backlog": "Backlog",
     "calendar": "Calendar",
+    "compliance": "Compliance",
     "parts": "Parts",
     "inventory": "Inventory",
     "customers": "Customers",
@@ -3895,6 +3896,10 @@
     "taxYear": "Tax Year",
     "saveTaxDocument": "Save Tax Document",
     "selectUserHint": "Select a user to view compliance details"
+  },
+  "compliance": {
+    "title": "Compliance",
+    "subtitle": "Regulatory compliance calendar — deadlines, filings, and safety events."
   },
   "calendar": {
     "layers": {
