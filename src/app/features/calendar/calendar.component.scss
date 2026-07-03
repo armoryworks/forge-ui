@@ -282,3 +282,12 @@
     font-size: var(--font-size-sm); color: var(--text-secondary);
   }
 }
+
+// compliance-calendar A-3: overlay layer panel
+.calendar-layers-panel {
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+  padding: $sp-sm;
+  max-width: 280px;
+  margin: $sp-sm 0;
+}

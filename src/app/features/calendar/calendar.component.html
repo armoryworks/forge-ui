@@ -23,8 +23,26 @@
       <span class="material-icons-outlined">local_shipping</span>
       {{ 'calendar.poDeliveries' | translate }}
     </button>
+    <button class="action-btn action-btn--sm"
+            [class.action-btn--primary]="layersOpen()"
+            (click)="toggleLayersPanel()"
+            [attr.aria-label]="'calendar.layers.title' | translate"
+            [matTooltip]="'calendar.layers.title' | translate"
+            matTooltipPosition="above">
+      <span class="material-icons-outlined">layers</span>
+      {{ 'calendar.layers.title' | translate }}
+    </button>
   </div>
 </app-page-header>
+
+@if (layersOpen()) {
+  <div class="calendar-layers-panel">
+    <app-calendar-layers
+      [superGroups]="superGroups()"
+      [selectedGroupIds]="selectedLayerIds()"
+      (toggled)="onLayerToggled($event)" />
+  </div>
+}
 
 @if (loading()) {
   <div class="page-loading">

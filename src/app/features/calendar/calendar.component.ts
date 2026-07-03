@@ -9,6 +9,8 @@ import { CalendarService } from './services/calendar.service';
 import { CalendarJob } from './models/calendar-job.model';
 import { CalendarDay } from './models/calendar-day.model';
 import { PoCalendarEvent } from './models/po-calendar-event.model';
+import { CalendarSuperGroup } from './models/calendar-super-group.model';
+import { CalendarLayersComponent } from './components/calendar-layers/calendar-layers.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { PriorityIndicatorComponent } from '../../shared/components/priority-indicator/priority-indicator.component';
@@ -20,7 +22,7 @@ export type CalendarView = 'month' | 'week' | 'day';
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [ReactiveFormsModule, MatTooltipModule, TranslatePipe, PageHeaderComponent, SelectComponent, PriorityIndicatorComponent],
+  imports: [ReactiveFormsModule, MatTooltipModule, TranslatePipe, PageHeaderComponent, SelectComponent, PriorityIndicatorComponent, CalendarLayersComponent],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,6 +47,13 @@ export class CalendarComponent {
   );
   protected readonly poEvents = signal<PoCalendarEvent[]>([]);
   protected readonly isLoadingPo = signal(false);
+
+  // compliance-calendar A-3: overlay Super-Group layers + selection (persisted).
+  protected readonly superGroups = signal<CalendarSuperGroup[]>([]);
+  protected readonly selectedLayerIds = signal<number[]>(
+    this.userPreferences.get<number[]>('calendar:layers') ?? []
+  );
+  protected readonly layersOpen = signal(false);
 
   protected readonly MAX_VISIBLE_JOBS = 3;
   protected readonly HOURS = Array.from({ length: 24 }, (_, i) => i);
@@ -115,6 +124,18 @@ export class CalendarComponent {
       ]);
     });
 
+    // compliance-calendar A-3: load the visibility-filtered layer list; default the
+    // selection to the default-visible groups if the user has no saved preference.
+    this.service.getSuperGroups().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (groups) => {
+        this.superGroups.set(groups);
+        if (this.userPreferences.get<number[]>('calendar:layers') == null) {
+          this.selectedLayerIds.set(groups.filter(g => g.defaultVisible).map(g => g.id));
+        }
+      },
+      error: () => this.superGroups.set([]),
+    });
+
     this.trackTypeControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.allJobs.update(j => [...j]);
     });
@@ -136,6 +157,19 @@ export class CalendarComponent {
       next: (jobs) => { this.allJobs.set(jobs); this.loading.set(false); },
       error: () => this.loading.set(false),
     });
+  }
+
+  protected toggleLayersPanel(): void {
+    this.layersOpen.update(o => !o);
+  }
+
+  protected onLayerToggled(groupId: number): void {
+    const current = this.selectedLayerIds();
+    const next = current.includes(groupId)
+      ? current.filter(id => id !== groupId)
+      : [...current, groupId];
+    this.selectedLayerIds.set(next);
+    this.userPreferences.set('calendar:layers', next);
   }
 
   protected togglePoDeliveries(): void {
