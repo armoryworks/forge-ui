@@ -7353,6 +7353,10 @@
     "dashboard": {
       "title": "Contabilidad",
       "subtitle": "Informes del libro mayor y cierre de período",
+      "ledger": "Libro mayor",
+      "ledgerDesc": "El registro del diario: cada asiento, con navegación y revisión por IA.",
+      "newEntry": "Nuevo asiento",
+      "newEntryDesc": "Componer y registrar un asiento manual cuadrado.",
       "trialBalance": "Balance de comprobación",
       "trialBalanceDesc": "Débitos y créditos por cuenta — comprueba que el libro mayor esté cuadrado.",
       "profitLoss": "Estado de resultados",

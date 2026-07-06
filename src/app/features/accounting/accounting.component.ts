@@ -28,6 +28,8 @@ export class AccountingComponent {
   private readonly translate = inject(TranslateService);
 
   protected readonly tiles: AccountingTile[] = [
+    { route: 'ledger', label: this.translate.instant('accounting.dashboard.ledger'), icon: 'receipt_long', description: this.translate.instant('accounting.dashboard.ledgerDesc') },
+    { route: 'journal-entries/new', label: this.translate.instant('accounting.dashboard.newEntry'), icon: 'note_add', description: this.translate.instant('accounting.dashboard.newEntryDesc') },
     { route: 'trial-balance', label: this.translate.instant('accounting.dashboard.trialBalance'), icon: 'balance', description: this.translate.instant('accounting.dashboard.trialBalanceDesc') },
     { route: 'profit-loss', label: this.translate.instant('accounting.dashboard.profitLoss'), icon: 'trending_up', description: this.translate.instant('accounting.dashboard.profitLossDesc') },
     { route: 'balance-sheet', label: this.translate.instant('accounting.dashboard.balanceSheet'), icon: 'account_balance', description: this.translate.instant('accounting.dashboard.balanceSheetDesc') },

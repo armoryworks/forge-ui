@@ -7353,6 +7353,10 @@
     "dashboard": {
       "title": "Accounting",
       "subtitle": "General ledger reports and period close",
+      "ledger": "Ledger",
+      "ledgerDesc": "The journal register — every posting, with drill-back and AI review.",
+      "newEntry": "New Journal Entry",
+      "newEntryDesc": "Compose and post a balanced manual entry.",
       "trialBalance": "Trial Balance",
       "trialBalanceDesc": "Debits and credits by account — proves the ledger is in balance.",
       "profitLoss": "Profit & Loss",
