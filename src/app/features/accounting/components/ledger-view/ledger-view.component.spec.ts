@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
 import { of, throwError } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -45,11 +46,13 @@ interface LedgerApi {
   scanAnomalies(): void;
   anomalyFlags(): Record<number, string[]>;
   anomalyCount(): number;
+  reverseEntry(entry: LedgerRegisterEntry): void;
 }
 
 describe('LedgerViewComponent', () => {
-  const gl = { getLedgerRegister: vi.fn(), explainJournalEntry: vi.fn(), getGlAnomalies: vi.fn() };
+  const gl = { getLedgerRegister: vi.fn(), explainJournalEntry: vi.fn(), getGlAnomalies: vi.fn(), reverseJournalEntry: vi.fn() };
   const snackbar = { error: vi.fn(), success: vi.fn() };
+  const dialog = { open: vi.fn() };
 
   function create(): LedgerApi {
     TestBed.resetTestingModule();
@@ -57,6 +60,7 @@ describe('LedgerViewComponent', () => {
       providers: [
         { provide: GeneralLedgerService, useValue: gl },
         { provide: SnackbarService, useValue: snackbar },
+        { provide: MatDialog, useValue: dialog },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
       ],
     });
@@ -75,6 +79,10 @@ describe('LedgerViewComponent', () => {
       of<JournalEntryExplanation>({ entryId: 1, explanation: 'A $100 cash sale.', aiAvailable: true, deterministicSummary: 'd' }),
     );
     gl.getGlAnomalies.mockReturnValue(of([]));
+    gl.reverseJournalEntry.mockReturnValue(
+      of({ id: 99, bookId: 1, entryNumber: 12, entryDate: '2026-02-01', status: 'Posted', memo: 'r' }),
+    );
+    dialog.open.mockReturnValue({ afterClosed: () => of({ reversalDate: '2026-02-01', reason: 'wrong account' }) });
   });
 
   it('loads the register for the default book on init', () => {
@@ -94,6 +102,15 @@ describe('LedgerViewComponent', () => {
     expect(gl.getGlAnomalies).toHaveBeenCalledWith(1);
     expect(api.anomalyCount()).toBe(1);
     expect(api.anomalyFlags()[1]).toEqual(['big']);
+  });
+
+  it('reverses an entry via the dialog result, then reloads', () => {
+    const api = create();
+    api.reverseEntry(ENTRY);
+    expect(dialog.open).toHaveBeenCalled();
+    expect(gl.reverseJournalEntry).toHaveBeenCalledWith(1, { reversalDate: '2026-02-01', reason: 'wrong account' });
+    expect(snackbar.success).toHaveBeenCalled();
+    expect(gl.getLedgerRegister).toHaveBeenCalledTimes(2); // initial load + reload after reverse
   });
 
   it('surfaces an error when the load fails', () => {

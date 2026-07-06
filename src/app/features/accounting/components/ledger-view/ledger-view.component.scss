@@ -20,6 +20,10 @@
   gap: $sp-sm;
 }
 
+.ledger-detail__actions {
+  display: flex;
+}
+
 .ledger-lines {
   width: 100%;
   border-collapse: collapse;

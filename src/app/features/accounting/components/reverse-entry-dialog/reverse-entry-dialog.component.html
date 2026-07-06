@@ -1,0 +1,29 @@
+<app-dialog
+  [title]="'accounting.reverse.title' | translate: { number: data.entryNumber }"
+  width="480px"
+  (closed)="close()">
+  <div [formGroup]="form">
+    <p>{{ 'accounting.reverse.note' | translate }}</p>
+    <app-datepicker [label]="'accounting.reverse.date' | translate" formControlName="reversalDate" [required]="true" />
+    <app-input
+      [label]="'accounting.reverse.reason' | translate"
+      formControlName="reason"
+      [required]="true"
+      data-testid="reverse-reason" />
+  </div>
+
+  <div dialog-footer>
+    <button type="button" class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations">
+      <button
+        type="button"
+        class="action-btn action-btn--destructive"
+        [disabled]="form.invalid"
+        (click)="confirm()"
+        data-testid="reverse-confirm">
+        <span class="material-icons-outlined" aria-hidden="true">undo</span>
+        {{ 'accounting.reverse.confirm' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

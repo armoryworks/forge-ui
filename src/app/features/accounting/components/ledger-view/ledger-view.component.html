@@ -91,6 +91,15 @@
             }
           }
         </div>
+
+        @if (row.status === 'Posted' && !row.reversedByEntryId) {
+          <div class="ledger-detail__actions">
+            <button type="button" class="action-btn action-btn--sm action-btn--danger" (click)="reverseEntry(row)">
+              <span class="material-icons-outlined" aria-hidden="true">undo</span>
+              {{ 'accounting.reverse.action' | translate }}
+            </button>
+          </div>
+        }
       </div>
     </ng-template>
   </app-data-table>

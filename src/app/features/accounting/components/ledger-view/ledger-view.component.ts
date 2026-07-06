@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatDialog } from '@angular/material/dialog';
 
+import { filter, switchMap } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
@@ -11,7 +13,8 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-refresh.util';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
-import { JournalEntryExplanation, LedgerRegisterEntry, LedgerRegisterPage } from '../../models/accounting.models';
+import { JournalEntryExplanation, LedgerRegisterEntry, LedgerRegisterPage, ReverseJournalEntryInput } from '../../models/accounting.models';
+import { ReverseEntryDialogComponent, ReverseEntryDialogData } from '../reverse-entry-dialog/reverse-entry-dialog.component';
 
 /** Default book — single-book Phase 2/3; a book selector arrives with multi-book support. */
 const DEFAULT_BOOK_ID = 1;
@@ -45,6 +48,7 @@ export class LedgerViewComponent implements OnInit {
   private readonly gl = inject(GeneralLedgerService);
   private readonly translate = inject(TranslateService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(false);
@@ -119,6 +123,26 @@ export class LedgerViewComponent implements OnInit {
         error: () => {
           this.snackbar.error(this.translate.instant('accounting.errors.anomalyScanFailed'));
           this.scanning.set(false);
+        },
+      });
+  }
+
+  protected reverseEntry(entry: LedgerRegisterEntry): void {
+    this.dialog
+      .open<ReverseEntryDialogComponent, ReverseEntryDialogData, ReverseJournalEntryInput | undefined>(
+        ReverseEntryDialogComponent,
+        { width: '480px', data: { entryNumber: entry.entryNumber } },
+      )
+      .afterClosed()
+      .pipe(
+        filter((result): result is ReverseJournalEntryInput => !!result),
+        switchMap((result) => this.gl.reverseJournalEntry(entry.id, result)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (reversal) => {
+          this.snackbar.success(this.translate.instant('accounting.reverse.done', { number: reversal.entryNumber }));
+          this.load();
         },
       });
   }

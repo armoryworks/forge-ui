@@ -7341,6 +7341,15 @@
       "post": "Post entry",
       "posted": "Entry #{{number}} posted"
     },
+    "reverse": {
+      "title": "Reverse entry #{{number}}",
+      "note": "This posts an equal-and-opposite entry. The original stays as evidence.",
+      "date": "Reversal date",
+      "reason": "Reason",
+      "confirm": "Reverse",
+      "action": "Reverse",
+      "done": "Reversed — entry #{{number}} posted"
+    },
     "dashboard": {
       "title": "Accounting",
       "subtitle": "General ledger reports and period close",

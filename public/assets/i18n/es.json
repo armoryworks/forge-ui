@@ -7341,6 +7341,15 @@
       "post": "Registrar asiento",
       "posted": "Asiento n.º {{number}} registrado"
     },
+    "reverse": {
+      "title": "Reversar el asiento n.º {{number}}",
+      "note": "Esto registra un asiento igual y opuesto. El original permanece como evidencia.",
+      "date": "Fecha de reversa",
+      "reason": "Motivo",
+      "confirm": "Reversar",
+      "action": "Reversar",
+      "done": "Reversado: se registró el asiento n.º {{number}}"
+    },
     "dashboard": {
       "title": "Contabilidad",
       "subtitle": "Informes del libro mayor y cierre de período",
