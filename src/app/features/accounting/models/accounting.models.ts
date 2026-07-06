@@ -270,3 +270,69 @@ export interface ImportBankStatementResultModel {
   duplicates: number;
   suggested: number;
 }
+
+// ── Ledger register (§5A) ──
+export type JournalEntryStatus = 'Draft' | 'PendingApproval' | 'Approved' | 'Posted' | 'Reversed';
+export type JournalSource =
+  | 'Manual'
+  | 'AR'
+  | 'AP'
+  | 'Inventory'
+  | 'Payroll'
+  | 'FX'
+  | 'Depreciation'
+  | 'Conversion'
+  | 'System';
+
+export interface LedgerRegisterLine {
+  id: number;
+  lineNumber: number;
+  glAccountId: number;
+  accountNumber: string;
+  accountName: string;
+  debit: number;
+  credit: number;
+  description: string | null;
+  jobId: number | null;
+  costCenterId: number | null;
+}
+
+export interface LedgerRegisterEntry {
+  id: number;
+  entryNumber: number;
+  entryDate: string;
+  source: JournalSource;
+  sourceType: string | null;
+  sourceId: number | null;
+  status: JournalEntryStatus;
+  memo: string | null;
+  reversalOfEntryId: number | null;
+  reversedByEntryId: number | null;
+  postedAt: string | null;
+  lines: LedgerRegisterLine[];
+}
+
+export interface LedgerRegisterPage {
+  data: LedgerRegisterEntry[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
+export interface LedgerRegisterFilter {
+  fromDate?: string | null;
+  toDate?: string | null;
+  status?: JournalEntryStatus | null;
+  glAccountId?: number | null;
+  page?: number;
+  pageSize?: number;
+}
+
+// ── Accounting-AI advisory (§5A) ──
+export interface JournalEntryExplanation {
+  entryId: number;
+  explanation: string;
+  aiAvailable: boolean;
+  deterministicSummary: string;
+}

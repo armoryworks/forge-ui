@@ -7306,7 +7306,24 @@
       "cashAccountsLoadFailed": "No se pudieron cargar las cuentas de efectivo.",
       "reconciliationsLoadFailed": "No se pudieron cargar las conciliaciones.",
       "pickAccountAndDate": "Seleccione una cuenta de efectivo y la fecha del estado de cuenta.",
-      "actionFailed": "No se pudo completar la acción."
+      "actionFailed": "No se pudo completar la acción.",
+      "ledgerLoadFailed": "No se pudo cargar el libro mayor.",
+      "explainFailed": "No se pudo generar una explicación."
+    },
+    "ledger": {
+      "title": "Libro mayor",
+      "subtitle": "El diario de solo anexión: cada asiento, del más reciente al más antiguo",
+      "entryNumber": "Asiento n.º",
+      "source": "Origen",
+      "memo": "Nota",
+      "account": "Cuenta",
+      "lines": "Líneas del asiento",
+      "reverses": "Reversa el n.º {{number}}",
+      "reversedBy": "Reversado por el n.º {{number}}",
+      "explain": "Explicar con IA",
+      "explaining": "Explicando…",
+      "aiOffline": "Asistente de IA sin conexión: se muestra un resumen simple",
+      "empty": "Sin asientos contables"
     },
     "dashboard": {
       "title": "Contabilidad",

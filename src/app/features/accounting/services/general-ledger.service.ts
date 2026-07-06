@@ -15,6 +15,9 @@ import {
   FiscalPeriodStatus,
   FiscalYearModel,
   GrniReconciliation,
+  JournalEntryExplanation,
+  LedgerRegisterFilter,
+  LedgerRegisterPage,
   ProfitAndLoss,
   TrialBalance,
   YearEndCloseResult,
@@ -128,5 +131,25 @@ export class GeneralLedgerService {
 
   finalizeBankReconciliation(reconciliationId: number): Observable<BankReconciliationWorksheet> {
     return this.http.post<BankReconciliationWorksheet>(`${this.base}/bank-reconciliations/${reconciliationId}/finalize`, {});
+  }
+
+  // ── Ledger register + AI advisory (§5A) ──
+  /** Time-ordered GL register for the ledger-view UI — newest first, paginated, optionally filtered. */
+  getLedgerRegister(bookId: number, filter?: LedgerRegisterFilter): Observable<LedgerRegisterPage> {
+    let params = new HttpParams().set('bookId', bookId);
+    if (filter?.fromDate) params = params.set('fromDate', filter.fromDate);
+    if (filter?.toDate) params = params.set('toDate', filter.toDate);
+    if (filter?.status) params = params.set('status', filter.status);
+    if (filter?.glAccountId) params = params.set('glAccountId', filter.glAccountId);
+    if (filter?.page) params = params.set('page', filter.page);
+    if (filter?.pageSize) params = params.set('pageSize', filter.pageSize);
+    return this.http.get<LedgerRegisterPage>(`${this.base}/ledger`, { params });
+  }
+
+  /** Read-only AI advisory: a plain-language explanation of a journal entry (degrades to a deterministic summary offline). */
+  explainJournalEntry(bookId: number, entryId: number): Observable<JournalEntryExplanation> {
+    return this.http.get<JournalEntryExplanation>(`${this.base}/journal-entries/${entryId}/explain`, {
+      params: new HttpParams().set('bookId', bookId),
+    });
   }
 }

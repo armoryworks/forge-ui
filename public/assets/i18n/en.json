@@ -7306,7 +7306,24 @@
       "cashAccountsLoadFailed": "Could not load cash accounts.",
       "reconciliationsLoadFailed": "Could not load reconciliations.",
       "pickAccountAndDate": "Pick a cash account and statement date.",
-      "actionFailed": "The action could not be completed."
+      "actionFailed": "The action could not be completed.",
+      "ledgerLoadFailed": "Could not load the ledger.",
+      "explainFailed": "Could not generate an explanation."
+    },
+    "ledger": {
+      "title": "Ledger",
+      "subtitle": "The append-only journal — every posting, newest first",
+      "entryNumber": "Entry #",
+      "source": "Source",
+      "memo": "Memo",
+      "account": "Account",
+      "lines": "Journal lines",
+      "reverses": "Reverses #{{number}}",
+      "reversedBy": "Reversed by #{{number}}",
+      "explain": "Explain with AI",
+      "explaining": "Explaining…",
+      "aiOffline": "AI assistant offline — showing a plain summary",
+      "empty": "No journal entries"
     },
     "dashboard": {
       "title": "Accounting",

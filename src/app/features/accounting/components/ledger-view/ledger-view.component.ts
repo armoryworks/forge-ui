@@ -1,0 +1,101 @@
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
+import { RowExpandDirective } from '../../../../shared/directives/row-expand.directive';
+import { ColumnDef } from '../../../../shared/models/column-def.model';
+import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-refresh.util';
+import { GeneralLedgerService } from '../../services/general-ledger.service';
+import { JournalEntryExplanation, LedgerRegisterEntry, LedgerRegisterPage } from '../../models/accounting.models';
+
+/** Default book — single-book Phase 2/3; a book selector arrives with multi-book support. */
+const DEFAULT_BOOK_ID = 1;
+/**
+ * First page is generous; per-book server-page navigation and the virtualized find-in-context
+ * scroller (ACCOUNTING_SUITE_PLAN §5A.1) are the follow-on. This interim register renders the most
+ * recent {@link PAGE_SIZE} entries and leans on the shared data-table for sort/filter/paginate.
+ */
+const PAGE_SIZE = 100;
+
+interface ExplainState {
+  loading: boolean;
+  result: JournalEntryExplanation | null;
+  failed: boolean;
+}
+
+/**
+ * §5A ledger view: the append-only journal register for a book — each entry expands to its balanced
+ * lines and drill-back refs, with a read-only "Explain with AI" advisory per entry. Read/operate only;
+ * corrections are posted as new reversing entries elsewhere (never edited here).
+ */
+@Component({
+  selector: 'app-ledger-view',
+  standalone: true,
+  imports: [TranslatePipe, PageHeaderComponent, DataTableComponent, CurrencyDisplayComponent, RowExpandDirective],
+  templateUrl: './ledger-view.component.html',
+  styleUrl: './ledger-view.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class LedgerViewComponent implements OnInit {
+  private readonly gl = inject(GeneralLedgerService);
+  private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  protected readonly loading = signal(false);
+  protected readonly error = signal<string | null>(null);
+  protected readonly page = signal<LedgerRegisterPage | null>(null);
+  protected readonly entries = computed<LedgerRegisterEntry[]>(() => this.page()?.data ?? []);
+  protected readonly explanations = signal<Record<number, ExplainState>>({});
+
+  protected readonly columns: ColumnDef[] = [
+    { field: 'entryNumber', header: this.translate.instant('accounting.ledger.entryNumber'), sortable: true, width: '90px' },
+    { field: 'entryDate', header: this.translate.instant('accounting.common.date'), sortable: true, type: 'date', width: '120px' },
+    { field: 'source', header: this.translate.instant('accounting.ledger.source'), sortable: true, filterable: true, type: 'enum', width: '120px' },
+    { field: 'status', header: this.translate.instant('accounting.common.status'), sortable: true, filterable: true, type: 'enum', width: '140px' },
+    { field: 'memo', header: this.translate.instant('accounting.ledger.memo'), sortable: true },
+  ];
+
+  constructor() {
+    autoRefreshOnGlChange(() => this.load());
+  }
+
+  ngOnInit(): void {
+    this.load();
+  }
+
+  protected load(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.gl
+      .getLedgerRegister(DEFAULT_BOOK_ID, { pageSize: PAGE_SIZE })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (p) => {
+          this.page.set(p);
+          this.explanations.set({});
+          this.loading.set(false);
+        },
+        error: () => {
+          this.error.set(this.translate.instant('accounting.errors.ledgerLoadFailed'));
+          this.loading.set(false);
+        },
+      });
+  }
+
+  protected explain(entry: LedgerRegisterEntry): void {
+    this.explanations.update((s) => ({ ...s, [entry.id]: { loading: true, result: null, failed: false } }));
+    this.gl
+      .explainJournalEntry(DEFAULT_BOOK_ID, entry.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (result) =>
+          this.explanations.update((s) => ({ ...s, [entry.id]: { loading: false, result, failed: false } })),
+        error: () =>
+          this.explanations.update((s) => ({ ...s, [entry.id]: { loading: false, result: null, failed: true } })),
+      });
+  }
+}

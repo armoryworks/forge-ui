@@ -57,4 +57,29 @@ describe('GeneralLedgerService', () => {
     expect(req.request.params.get('cleared')).toBe('true');
     req.flush({});
   });
+
+  it('requests the ledger register with only the book id by default', () => {
+    service.getLedgerRegister(1).subscribe();
+    const req = httpMock.expectOne((r) => r.url === `${base}/ledger`);
+    expect(req.request.params.get('bookId')).toBe('1');
+    expect(req.request.params.has('status')).toBe(false);
+    req.flush({ data: [], page: 1, pageSize: 25, totalCount: 0, totalPages: 0 });
+  });
+
+  it('passes ledger register filters as query params', () => {
+    service.getLedgerRegister(1, { status: 'Posted', glAccountId: 102, page: 2, pageSize: 50 }).subscribe();
+    const req = httpMock.expectOne((r) => r.url === `${base}/ledger`);
+    expect(req.request.params.get('status')).toBe('Posted');
+    expect(req.request.params.get('glAccountId')).toBe('102');
+    expect(req.request.params.get('page')).toBe('2');
+    expect(req.request.params.get('pageSize')).toBe('50');
+    req.flush({ data: [], page: 2, pageSize: 50, totalCount: 0, totalPages: 0 });
+  });
+
+  it('requests a journal-entry AI explanation by entry id + book', () => {
+    service.explainJournalEntry(1, 5001).subscribe();
+    const req = httpMock.expectOne((r) => r.url === `${base}/journal-entries/5001/explain`);
+    expect(req.request.params.get('bookId')).toBe('1');
+    req.flush({ entryId: 5001, explanation: 'x', aiAvailable: true, deterministicSummary: 'x' });
+  });
 });

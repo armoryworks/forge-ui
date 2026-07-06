@@ -1,0 +1,82 @@
+<app-page-header
+  [title]="'accounting.ledger.title' | translate"
+  [subtitle]="'accounting.ledger.subtitle' | translate"></app-page-header>
+
+<div class="page-content page-content--table">
+  @if (error()) {
+    <p class="acct-error" role="alert">{{ error() }}</p>
+  }
+
+  <app-data-table
+    tableId="acct-ledger"
+    [columns]="columns"
+    [data]="entries()"
+    [expandable]="true"
+    [loading]="loading()"
+    emptyIcon="receipt_long"
+    [emptyMessage]="'accounting.ledger.empty' | translate">
+    <ng-template appRowExpand let-row>
+      <div class="ledger-detail">
+        @if (row.reversalOfEntryId || row.reversedByEntryId) {
+          <div class="ledger-detail__refs">
+            @if (row.reversalOfEntryId) {
+              <span class="chip chip--info">{{ 'accounting.ledger.reverses' | translate: { number: row.reversalOfEntryId } }}</span>
+            }
+            @if (row.reversedByEntryId) {
+              <span class="chip chip--warning">{{ 'accounting.ledger.reversedBy' | translate: { number: row.reversedByEntryId } }}</span>
+            }
+          </div>
+        }
+
+        <table class="ledger-lines" [attr.aria-label]="'accounting.ledger.lines' | translate">
+          <thead>
+            <tr>
+              <th scope="col">{{ 'accounting.ledger.account' | translate }}</th>
+              <th scope="col" class="ledger-lines__num">{{ 'accounting.common.debit' | translate }}</th>
+              <th scope="col" class="ledger-lines__num">{{ 'accounting.common.credit' | translate }}</th>
+              <th scope="col">{{ 'accounting.common.description' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of row.lines; track line.id) {
+              <tr>
+                <td>{{ line.accountNumber }} — {{ line.accountName }}</td>
+                <td class="ledger-lines__num">
+                  @if (line.debit) { <app-currency-display [value]="line.debit" /> }
+                </td>
+                <td class="ledger-lines__num">
+                  @if (line.credit) { <app-currency-display [value]="line.credit" /> }
+                </td>
+                <td>{{ line.description }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <div class="ledger-detail__ai">
+          <button
+            type="button"
+            class="action-btn action-btn--sm"
+            [disabled]="!!explanations()[row.id]?.loading"
+            (click)="explain(row)">
+            <span class="material-icons-outlined" aria-hidden="true">auto_awesome</span>
+            {{ 'accounting.ledger.explain' | translate }}
+          </button>
+
+          @if (explanations()[row.id]; as ex) {
+            @if (ex.loading) {
+              <span class="ledger-detail__ai-status">{{ 'accounting.ledger.explaining' | translate }}</span>
+            } @else if (ex.failed) {
+              <span class="ledger-detail__ai-status ledger-detail__ai-status--error">{{ 'accounting.errors.explainFailed' | translate }}</span>
+            } @else if (ex.result) {
+              <p class="ledger-detail__ai-text">{{ ex.result.explanation }}</p>
+              @if (!ex.result.aiAvailable) {
+                <span class="ledger-detail__ai-status">{{ 'accounting.ledger.aiOffline' | translate }}</span>
+              }
+            }
+          }
+        </div>
+      </div>
+    </ng-template>
+  </app-data-table>
+</div>

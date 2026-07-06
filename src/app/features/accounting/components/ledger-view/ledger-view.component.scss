@@ -1,0 +1,61 @@
+@use 'styles/variables' as *;
+@use 'app/features/accounting/accounting-shared' as *;
+
+// Expanded-row detail for one journal entry: drill-back refs, its balanced lines, and the AI advisory.
+.ledger-detail {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md;
+}
+
+.ledger-detail__refs {
+  display: flex;
+  gap: $sp-sm;
+}
+
+.ledger-lines {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-sm;
+
+  th,
+  td {
+    padding: $sp-xs $sp-sm;
+    text-align: left;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  th {
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .ledger-lines__num {
+    text-align: right;
+    font-family: $font-family-mono;
+    white-space: nowrap;
+  }
+}
+
+.ledger-detail__ai {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  align-items: flex-start;
+}
+
+.ledger-detail__ai-status {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}
+
+.ledger-detail__ai-status--error {
+  color: var(--error);
+}
+
+.ledger-detail__ai-text {
+  margin: 0;
+  font-size: $font-size-base;
+  color: var(--text);
+}
