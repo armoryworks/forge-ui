@@ -1,0 +1,64 @@
+@use 'styles/variables' as *;
+
+.je-editor {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  max-width: 960px;
+}
+
+.je-editor__header {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: $sp-md;
+}
+
+.je-lines {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.je-lines__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.je-lines__title {
+  font-size: $font-size-xxs;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+// account | debit | credit | description | remove
+.je-line {
+  display: grid;
+  grid-template-columns: minmax(220px, 2fr) 150px 150px minmax(160px, 1.5fr) auto;
+  gap: $sp-sm;
+  align-items: start;
+}
+
+.je-line__del {
+  margin-top: $sp-sm;
+}
+
+.je-balance {
+  display: flex;
+  gap: $sp-lg;
+  align-items: center;
+  padding: $sp-sm $sp-md;
+  border-top: $border-width-thin solid var(--border);
+  font-family: $font-family-mono;
+}
+
+.je-balance__state {
+  margin-left: auto;
+  font-family: $font-family-primary;
+  color: var(--warning);
+}
+
+.je-balance--ok .je-balance__state {
+  color: var(--success);
+}

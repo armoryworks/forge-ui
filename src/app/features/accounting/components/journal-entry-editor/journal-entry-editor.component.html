@@ -1,0 +1,69 @@
+<app-page-layout [pageTitle]="'accounting.journalEditor.title' | translate">
+  <ng-container content>
+    <form [formGroup]="form" class="je-editor">
+      <div class="je-editor__header">
+        <app-datepicker [label]="'accounting.journalEditor.date' | translate" formControlName="entryDate" [required]="true" />
+        <app-input
+          [label]="'accounting.journalEditor.memo' | translate"
+          formControlName="memo"
+          [required]="true"
+          data-testid="je-memo" />
+      </div>
+
+      <div class="je-lines" formArrayName="lines">
+        <div class="je-lines__head">
+          <span class="je-lines__title">{{ 'accounting.journalEditor.lines' | translate }}</span>
+          <button type="button" class="action-btn action-btn--sm" (click)="addLine()" data-testid="je-add-line">
+            <span class="material-icons-outlined" aria-hidden="true">add</span>
+            {{ 'accounting.journalEditor.addLine' | translate }}
+          </button>
+        </div>
+
+        @for (line of lines.controls; track $index; let i = $index) {
+          <div class="je-line" [formGroupName]="i">
+            <app-select
+              class="je-line__account"
+              [label]="'accounting.journalEditor.account' | translate"
+              [options]="accountOptions()"
+              formControlName="glAccountId"
+              [required]="true" />
+            <app-currency-input class="je-line__amt" [label]="'accounting.common.debit' | translate" formControlName="debit" />
+            <app-currency-input class="je-line__amt" [label]="'accounting.common.credit' | translate" formControlName="credit" />
+            <app-input class="je-line__desc" [label]="'accounting.common.description' | translate" formControlName="description" />
+            <button
+              type="button"
+              class="icon-btn icon-btn--danger je-line__del"
+              [attr.aria-label]="'accounting.journalEditor.removeLine' | translate"
+              [disabled]="lines.length <= 2"
+              (click)="removeLine(i)">
+              <span class="material-icons-outlined" aria-hidden="true">delete</span>
+            </button>
+          </div>
+        }
+      </div>
+
+      <div class="je-balance" [class.je-balance--ok]="balanced()">
+        <span class="je-balance__metric">{{ 'accounting.common.debit' | translate }} <app-currency-display [value]="totalDebit()" /></span>
+        <span class="je-balance__metric">{{ 'accounting.common.credit' | translate }} <app-currency-display [value]="totalCredit()" /></span>
+        <span class="je-balance__state">
+          {{ (balanced() ? 'accounting.journalEditor.balanced' : 'accounting.common.outOfBalance') | translate }}
+        </span>
+      </div>
+    </form>
+  </ng-container>
+
+  <ng-container actions>
+    <button type="button" class="action-btn" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button
+        type="button"
+        class="action-btn action-btn--primary"
+        [disabled]="form.invalid || saving()"
+        (click)="save()"
+        data-testid="je-save">
+        <span class="material-icons-outlined" aria-hidden="true">save</span>
+        {{ 'accounting.journalEditor.post' | translate }}
+      </button>
+    </app-validation-button>
+  </ng-container>
+</app-page-layout>

@@ -7308,7 +7308,8 @@
       "pickAccountAndDate": "Pick a cash account and statement date.",
       "actionFailed": "The action could not be completed.",
       "ledgerLoadFailed": "Could not load the ledger.",
-      "explainFailed": "Could not generate an explanation."
+      "explainFailed": "Could not generate an explanation.",
+      "accountsLoadFailed": "Could not load accounts."
     },
     "ledger": {
       "title": "Ledger",
@@ -7324,6 +7325,18 @@
       "explaining": "Explaining…",
       "aiOffline": "AI assistant offline — showing a plain summary",
       "empty": "No journal entries"
+    },
+    "journalEditor": {
+      "title": "New Journal Entry",
+      "date": "Entry date",
+      "memo": "Memo",
+      "lines": "Lines",
+      "addLine": "Add line",
+      "removeLine": "Remove line",
+      "account": "Account",
+      "balanced": "Balanced",
+      "post": "Post entry",
+      "posted": "Entry #{{number}} posted"
     },
     "dashboard": {
       "title": "Accounting",

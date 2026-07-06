@@ -7308,7 +7308,8 @@
       "pickAccountAndDate": "Seleccione una cuenta de efectivo y la fecha del estado de cuenta.",
       "actionFailed": "No se pudo completar la acción.",
       "ledgerLoadFailed": "No se pudo cargar el libro mayor.",
-      "explainFailed": "No se pudo generar una explicación."
+      "explainFailed": "No se pudo generar una explicación.",
+      "accountsLoadFailed": "No se pudieron cargar las cuentas."
     },
     "ledger": {
       "title": "Libro mayor",
@@ -7324,6 +7325,18 @@
       "explaining": "Explicando…",
       "aiOffline": "Asistente de IA sin conexión: se muestra un resumen simple",
       "empty": "Sin asientos contables"
+    },
+    "journalEditor": {
+      "title": "Nuevo asiento contable",
+      "date": "Fecha del asiento",
+      "memo": "Nota",
+      "lines": "Líneas",
+      "addLine": "Agregar línea",
+      "removeLine": "Quitar línea",
+      "account": "Cuenta",
+      "balanced": "Cuadrado",
+      "post": "Registrar asiento",
+      "posted": "Asiento n.º {{number}} registrado"
     },
     "dashboard": {
       "title": "Contabilidad",
