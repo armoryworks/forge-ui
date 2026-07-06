@@ -393,3 +393,9 @@ export interface GlAnomalyFilter {
   toDate?: string | null;
   largeManualThreshold?: number;
 }
+
+// ── Reverse / correct (§5A) ──
+export interface ReverseJournalEntryInput {
+  reversalDate: string; // DateOnly on the wire: "YYYY-MM-DD"
+  reason: string;
+}

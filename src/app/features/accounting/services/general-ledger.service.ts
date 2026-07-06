@@ -24,6 +24,7 @@ import {
   ManualJournalEntryInput,
   ManualJournalEntryResult,
   ProfitAndLoss,
+  ReverseJournalEntryInput,
   TrialBalance,
   YearEndCloseResult,
 } from '../models/accounting.models';
@@ -177,5 +178,10 @@ export class GeneralLedgerService {
     if (filter?.toDate) params = params.set('toDate', filter.toDate);
     if (filter?.largeManualThreshold) params = params.set('largeManualThreshold', filter.largeManualThreshold);
     return this.http.get<GlAnomaly[]>(`${this.base}/anomalies`, { params });
+  }
+
+  /** Reverse a posted journal entry — posts an equal-and-opposite entry; the original is never edited. */
+  reverseJournalEntry(entryId: number, request: ReverseJournalEntryInput): Observable<ManualJournalEntryResult> {
+    return this.http.post<ManualJournalEntryResult>(`${this.base}/journal-entries/${entryId}/reverse`, request);
   }
 }

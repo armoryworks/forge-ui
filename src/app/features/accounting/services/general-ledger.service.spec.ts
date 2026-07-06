@@ -124,4 +124,12 @@ describe('GeneralLedgerService', () => {
     expect(req.request.params.get('largeManualThreshold')).toBe('5000');
     req.flush([]);
   });
+
+  it('reverses a journal entry via POST with a reason', () => {
+    service.reverseJournalEntry(11, { reversalDate: '2026-02-01', reason: 'wrong account' }).subscribe();
+    const req = httpMock.expectOne((r) => r.url === `${base}/journal-entries/11/reverse`);
+    expect(req.request.method).toBe('POST');
+    expect((req.request.body as { reason: string }).reason).toBe('wrong account');
+    req.flush({ id: 99, bookId: 1, entryNumber: 12, entryDate: '2026-02-01', status: 'Posted', memo: 'r' });
+  });
 });
