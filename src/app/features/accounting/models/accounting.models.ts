@@ -336,3 +336,44 @@ export interface JournalEntryExplanation {
   aiAvailable: boolean;
   deterministicSummary: string;
 }
+
+// ── Chart of accounts + manual journal entry (§5A editor) ──
+export interface GlAccount {
+  id: number;
+  accountNumber: string;
+  name: string;
+  accountType: string;
+  normalBalance: string;
+  isPostable: boolean;
+  isControlAccount: boolean;
+  requiresJob: boolean;
+  requiresCostCenter: boolean;
+}
+
+export interface ManualJournalLineInput {
+  glAccountId: number;
+  debit: number;
+  credit: number;
+  description?: string | null;
+  jobId?: number | null;
+  costCenterId?: number | null;
+}
+
+export interface ManualJournalEntryInput {
+  bookId: number;
+  entryDate: string; // DateOnly on the wire: "YYYY-MM-DD"
+  currencyId: number;
+  memo?: string | null;
+  allowSoftClosedOverride?: boolean;
+  lines: ManualJournalLineInput[];
+  approvedByUserId?: number | null;
+}
+
+export interface ManualJournalEntryResult {
+  id: number;
+  bookId: number;
+  entryNumber: number;
+  entryDate: string;
+  status: string;
+  memo: string | null;
+}

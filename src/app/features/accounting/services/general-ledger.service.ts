@@ -14,10 +14,13 @@ import {
   FiscalPeriodModel,
   FiscalPeriodStatus,
   FiscalYearModel,
+  GlAccount,
   GrniReconciliation,
   JournalEntryExplanation,
   LedgerRegisterFilter,
   LedgerRegisterPage,
+  ManualJournalEntryInput,
+  ManualJournalEntryResult,
   ProfitAndLoss,
   TrialBalance,
   YearEndCloseResult,
@@ -151,5 +154,17 @@ export class GeneralLedgerService {
     return this.http.get<JournalEntryExplanation>(`${this.base}/journal-entries/${entryId}/explain`, {
       params: new HttpParams().set('bookId', bookId),
     });
+  }
+
+  /** Chart of accounts for the manual-entry editor's account picker. `postableOnly` drops control accounts. */
+  getChartOfAccounts(bookId: number, postableOnly = false): Observable<GlAccount[]> {
+    let params = new HttpParams().set('bookId', bookId);
+    if (postableOnly) params = params.set('postableOnly', true);
+    return this.http.get<GlAccount[]>(`${this.base}/accounts`, { params });
+  }
+
+  /** Post a balanced manual journal entry via the GL posting engine. */
+  createManualJournalEntry(request: ManualJournalEntryInput): Observable<ManualJournalEntryResult> {
+    return this.http.post<ManualJournalEntryResult>(`${this.base}/journal-entries`, request);
   }
 }

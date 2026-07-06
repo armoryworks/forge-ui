@@ -82,4 +82,38 @@ describe('GeneralLedgerService', () => {
     expect(req.request.params.get('bookId')).toBe('1');
     req.flush({ entryId: 5001, explanation: 'x', aiAvailable: true, deterministicSummary: 'x' });
   });
+
+  it('requests the chart of accounts (all accounts by default)', () => {
+    service.getChartOfAccounts(1).subscribe();
+    const req = httpMock.expectOne((r) => r.url === `${base}/accounts`);
+    expect(req.request.params.get('bookId')).toBe('1');
+    expect(req.request.params.has('postableOnly')).toBe(false);
+    req.flush([]);
+  });
+
+  it('narrows the chart of accounts to postable when asked', () => {
+    service.getChartOfAccounts(1, true).subscribe();
+    const req = httpMock.expectOne((r) => r.url === `${base}/accounts`);
+    expect(req.request.params.get('postableOnly')).toBe('true');
+    req.flush([]);
+  });
+
+  it('posts a manual journal entry to the create endpoint', () => {
+    service
+      .createManualJournalEntry({
+        bookId: 1,
+        entryDate: '2026-01-10',
+        currencyId: 1,
+        memo: 'cash sale',
+        lines: [
+          { glAccountId: 100, debit: 100, credit: 0 },
+          { glAccountId: 101, debit: 0, credit: 100 },
+        ],
+      })
+      .subscribe();
+    const req = httpMock.expectOne((r) => r.url === `${base}/journal-entries`);
+    expect(req.request.method).toBe('POST');
+    expect((req.request.body as { lines: unknown[] }).lines).toHaveLength(2);
+    req.flush({ id: 5, bookId: 1, entryNumber: 1, entryDate: '2026-01-10', status: 'Posted', memo: 'cash sale' });
+  });
 });
