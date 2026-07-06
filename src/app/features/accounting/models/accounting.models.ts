@@ -377,3 +377,19 @@ export interface ManualJournalEntryResult {
   status: string;
   memo: string | null;
 }
+
+// ── Anomaly scan (§5A advisory) ──
+export interface GlAnomaly {
+  entryId: number;
+  entryNumber: number;
+  entryDate: string;
+  source: string;
+  totalDebit: number;
+  flags: string[];
+}
+
+export interface GlAnomalyFilter {
+  fromDate?: string | null;
+  toDate?: string | null;
+  largeManualThreshold?: number;
+}

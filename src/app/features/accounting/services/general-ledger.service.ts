@@ -15,6 +15,8 @@ import {
   FiscalPeriodStatus,
   FiscalYearModel,
   GlAccount,
+  GlAnomaly,
+  GlAnomalyFilter,
   GrniReconciliation,
   JournalEntryExplanation,
   LedgerRegisterFilter,
@@ -166,5 +168,14 @@ export class GeneralLedgerService {
   /** Post a balanced manual journal entry via the GL posting engine. */
   createManualJournalEntry(request: ManualJournalEntryInput): Observable<ManualJournalEntryResult> {
     return this.http.post<ManualJournalEntryResult>(`${this.base}/journal-entries`, request);
+  }
+
+  /** Deterministic reviewer anomaly scan over posted manual entries (feeds the AI-explain workflow). */
+  getGlAnomalies(bookId: number, filter?: GlAnomalyFilter): Observable<GlAnomaly[]> {
+    let params = new HttpParams().set('bookId', bookId);
+    if (filter?.fromDate) params = params.set('fromDate', filter.fromDate);
+    if (filter?.toDate) params = params.set('toDate', filter.toDate);
+    if (filter?.largeManualThreshold) params = params.set('largeManualThreshold', filter.largeManualThreshold);
+    return this.http.get<GlAnomaly[]>(`${this.base}/anomalies`, { params });
   }
 }

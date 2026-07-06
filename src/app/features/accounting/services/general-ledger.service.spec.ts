@@ -116,4 +116,12 @@ describe('GeneralLedgerService', () => {
     expect((req.request.body as { lines: unknown[] }).lines).toHaveLength(2);
     req.flush({ id: 5, bookId: 1, entryNumber: 1, entryDate: '2026-01-10', status: 'Posted', memo: 'cash sale' });
   });
+
+  it('requests the anomaly scan with the threshold', () => {
+    service.getGlAnomalies(1, { largeManualThreshold: 5000 }).subscribe();
+    const req = httpMock.expectOne((r) => r.url === `${base}/anomalies`);
+    expect(req.request.params.get('bookId')).toBe('1');
+    expect(req.request.params.get('largeManualThreshold')).toBe('5000');
+    req.flush([]);
+  });
 });
