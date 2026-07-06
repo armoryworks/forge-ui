@@ -7309,7 +7309,8 @@
       "actionFailed": "The action could not be completed.",
       "ledgerLoadFailed": "Could not load the ledger.",
       "explainFailed": "Could not generate an explanation.",
-      "accountsLoadFailed": "Could not load accounts."
+      "accountsLoadFailed": "Could not load accounts.",
+      "anomalyScanFailed": "Anomaly scan failed."
     },
     "ledger": {
       "title": "Ledger",
@@ -7324,6 +7325,8 @@
       "explain": "Explain with AI",
       "explaining": "Explaining…",
       "aiOffline": "AI assistant offline — showing a plain summary",
+      "scanAnomalies": "Scan for anomalies",
+      "flagged": "{{count}} flagged",
       "empty": "No journal entries"
     },
     "journalEditor": {

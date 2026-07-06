@@ -5,6 +5,7 @@ import { TranslateService } from '@ngx-translate/core';
 
 import { LedgerViewComponent } from './ledger-view.component';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import {
   JournalEntryExplanation,
   LedgerRegisterEntry,
@@ -41,16 +42,21 @@ interface LedgerApi {
   entries(): LedgerRegisterEntry[];
   explanations(): Record<number, ExplainState>;
   explain(entry: LedgerRegisterEntry): void;
+  scanAnomalies(): void;
+  anomalyFlags(): Record<number, string[]>;
+  anomalyCount(): number;
 }
 
 describe('LedgerViewComponent', () => {
-  const gl = { getLedgerRegister: vi.fn(), explainJournalEntry: vi.fn() };
+  const gl = { getLedgerRegister: vi.fn(), explainJournalEntry: vi.fn(), getGlAnomalies: vi.fn() };
+  const snackbar = { error: vi.fn(), success: vi.fn() };
 
   function create(): LedgerApi {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
         { provide: GeneralLedgerService, useValue: gl },
+        { provide: SnackbarService, useValue: snackbar },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
       ],
     });
@@ -68,6 +74,7 @@ describe('LedgerViewComponent', () => {
     gl.explainJournalEntry.mockReturnValue(
       of<JournalEntryExplanation>({ entryId: 1, explanation: 'A $100 cash sale.', aiAvailable: true, deterministicSummary: 'd' }),
     );
+    gl.getGlAnomalies.mockReturnValue(of([]));
   });
 
   it('loads the register for the default book on init', () => {
@@ -76,6 +83,17 @@ describe('LedgerViewComponent', () => {
     expect(api.entries()).toHaveLength(1);
     expect(api.loading()).toBe(false);
     expect(api.error()).toBeNull();
+  });
+
+  it('scans for anomalies and indexes the flags by entry', () => {
+    gl.getGlAnomalies.mockReturnValue(
+      of([{ entryId: 1, entryNumber: 1, entryDate: '2026-01-10', source: 'Manual', totalDebit: 100, flags: ['big'] }]),
+    );
+    const api = create();
+    api.scanAnomalies();
+    expect(gl.getGlAnomalies).toHaveBeenCalledWith(1);
+    expect(api.anomalyCount()).toBe(1);
+    expect(api.anomalyFlags()[1]).toEqual(['big']);
   });
 
   it('surfaces an error when the load fails', () => {

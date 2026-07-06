@@ -7309,7 +7309,8 @@
       "actionFailed": "No se pudo completar la acción.",
       "ledgerLoadFailed": "No se pudo cargar el libro mayor.",
       "explainFailed": "No se pudo generar una explicación.",
-      "accountsLoadFailed": "No se pudieron cargar las cuentas."
+      "accountsLoadFailed": "No se pudieron cargar las cuentas.",
+      "anomalyScanFailed": "Falló la búsqueda de anomalías."
     },
     "ledger": {
       "title": "Libro mayor",
@@ -7324,6 +7325,8 @@
       "explain": "Explicar con IA",
       "explaining": "Explicando…",
       "aiOffline": "Asistente de IA sin conexión: se muestra un resumen simple",
+      "scanAnomalies": "Buscar anomalías",
+      "flagged": "{{count}} marcados",
       "empty": "Sin asientos contables"
     },
     "journalEditor": {

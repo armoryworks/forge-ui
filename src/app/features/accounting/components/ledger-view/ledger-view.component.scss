@@ -14,6 +14,12 @@
   gap: $sp-sm;
 }
 
+.ledger-detail__flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-sm;
+}
+
 .ledger-lines {
   width: 100%;
   border-collapse: collapse;

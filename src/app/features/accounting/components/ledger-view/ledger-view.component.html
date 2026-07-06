@@ -1,6 +1,14 @@
 <app-page-header
   [title]="'accounting.ledger.title' | translate"
-  [subtitle]="'accounting.ledger.subtitle' | translate"></app-page-header>
+  [subtitle]="'accounting.ledger.subtitle' | translate">
+  <button type="button" class="action-btn action-btn--sm" [disabled]="scanning()" (click)="scanAnomalies()">
+    <span class="material-icons-outlined" aria-hidden="true">policy</span>
+    {{ 'accounting.ledger.scanAnomalies' | translate }}
+  </button>
+  @if (anomalyCount() > 0) {
+    <span class="chip chip--warning">{{ 'accounting.ledger.flagged' | translate: { count: anomalyCount() } }}</span>
+  }
+</app-page-header>
 
 <div class="page-content page-content--table">
   @if (error()) {
@@ -17,6 +25,13 @@
     [emptyMessage]="'accounting.ledger.empty' | translate">
     <ng-template appRowExpand let-row>
       <div class="ledger-detail">
+        @if (anomalyFlags()[row.id]; as flags) {
+          <div class="ledger-detail__flags">
+            @for (flag of flags; track flag) {
+              <span class="chip chip--warning">{{ flag }}</span>
+            }
+          </div>
+        }
         @if (row.reversalOfEntryId || row.reversedByEntryId) {
           <div class="ledger-detail__refs">
             @if (row.reversalOfEntryId) {

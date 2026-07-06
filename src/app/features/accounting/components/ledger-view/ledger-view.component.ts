@@ -9,6 +9,7 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
 import { RowExpandDirective } from '../../../../shared/directives/row-expand.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-refresh.util';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { JournalEntryExplanation, LedgerRegisterEntry, LedgerRegisterPage } from '../../models/accounting.models';
 
@@ -43,6 +44,7 @@ interface ExplainState {
 export class LedgerViewComponent implements OnInit {
   private readonly gl = inject(GeneralLedgerService);
   private readonly translate = inject(TranslateService);
+  private readonly snackbar = inject(SnackbarService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(false);
@@ -50,6 +52,9 @@ export class LedgerViewComponent implements OnInit {
   protected readonly page = signal<LedgerRegisterPage | null>(null);
   protected readonly entries = computed<LedgerRegisterEntry[]>(() => this.page()?.data ?? []);
   protected readonly explanations = signal<Record<number, ExplainState>>({});
+  protected readonly scanning = signal(false);
+  protected readonly anomalyFlags = signal<Record<number, string[]>>({});
+  protected readonly anomalyCount = computed(() => Object.keys(this.anomalyFlags()).length);
 
   protected readonly columns: ColumnDef[] = [
     { field: 'entryNumber', header: this.translate.instant('accounting.ledger.entryNumber'), sortable: true, width: '90px' },
@@ -96,6 +101,25 @@ export class LedgerViewComponent implements OnInit {
           this.explanations.update((s) => ({ ...s, [entry.id]: { loading: false, result, failed: false } })),
         error: () =>
           this.explanations.update((s) => ({ ...s, [entry.id]: { loading: false, result: null, failed: true } })),
+      });
+  }
+
+  protected scanAnomalies(): void {
+    this.scanning.set(true);
+    this.gl
+      .getGlAnomalies(DEFAULT_BOOK_ID)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (anomalies) => {
+          const flags: Record<number, string[]> = {};
+          for (const anomaly of anomalies) flags[anomaly.entryId] = anomaly.flags;
+          this.anomalyFlags.set(flags);
+          this.scanning.set(false);
+        },
+        error: () => {
+          this.snackbar.error(this.translate.instant('accounting.errors.anomalyScanFailed'));
+          this.scanning.set(false);
+        },
       });
   }
 }
