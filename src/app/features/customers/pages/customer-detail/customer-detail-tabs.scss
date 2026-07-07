@@ -247,8 +247,23 @@
 
 .address-card__header {
   display: flex;
+  align-items: center;
   gap: $sp-sm;
   margin-bottom: $sp-sm;
+}
+
+.address-card__actions {
+  margin-left: auto;
+  display: flex;
+  gap: $sp-xs;
+  align-items: center;
+}
+
+.address-card__label {
+  font-size: $font-size-base;
+  font-weight: 500;
+  color: var(--text);
+  margin: 0 0 $sp-xs;
 }
 
 .address-card__line {

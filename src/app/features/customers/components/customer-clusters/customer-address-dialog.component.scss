@@ -1,0 +1,7 @@
+@use '../../../../../styles/variables' as *;
+
+// The dialog body's auto flex-column handles the vertical rhythm; only the
+// nested address block needs a little breathing room from the label/type row.
+.address-dialog app-address-form {
+  margin-top: $sp-sm;
+}

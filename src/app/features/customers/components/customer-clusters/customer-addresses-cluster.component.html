@@ -1,3 +1,12 @@
+<div class="tab-toolbar">
+  <span class="tab-toolbar__spacer"></span>
+  <button class="action-btn action-btn--create" data-testid="add-address-btn" (click)="openAdd()"
+          [attr.aria-label]="'customers.addresses.addAddressAriaLabel' | translate">
+    <span class="material-icons-outlined">add</span>
+    {{ 'customers.addresses.addAddress' | translate }}
+  </button>
+</div>
+
 <div class="tab-content">
   @if (loading()) {
     <div class="tab-loading">
@@ -7,25 +16,47 @@
     <div class="tab-empty">
       <span class="material-icons-outlined">location_off</span>
       <p>{{ 'customers.tabs.noAddressesOnFile' | translate }}</p>
+      <button class="action-btn action-btn--create" (click)="openAdd()">
+        {{ 'customers.addresses.addFirst' | translate }}
+      </button>
     </div>
   } @else {
     <div class="address-list">
       @for (addr of addresses(); track addr.id) {
         <div class="address-card">
           <div class="address-card__header">
-            <span class="chip chip--muted">{{ addr.type }}</span>
+            <span class="chip chip--muted">{{ addr.addressType }}</span>
             @if (addr.isDefault) {
               <span class="chip chip--primary">{{ 'customers.tabs.addressDefault' | translate }}</span>
             }
+            <span class="address-card__actions">
+              <button class="icon-btn" data-testid="edit-address-btn" (click)="openEdit(addr)"
+                      [attr.aria-label]="'customers.addresses.editAddressAriaLabel' | translate">
+                <span class="material-icons-outlined">edit</span>
+              </button>
+              <button class="icon-btn icon-btn--danger" data-testid="delete-address-btn" (click)="deleteAddress(addr)"
+                      [attr.aria-label]="'customers.addresses.deleteAddressAriaLabel' | translate">
+                <span class="material-icons-outlined">delete</span>
+              </button>
+            </span>
           </div>
+          <p class="address-card__label">{{ addr.label }}</p>
           <p class="address-card__line">{{ addr.line1 }}</p>
           @if (addr.line2) {
             <p class="address-card__line">{{ addr.line2 }}</p>
           }
-          <p class="address-card__line">{{ addr.city }}, {{ addr.state }} {{ addr.zipCode }}</p>
+          <p class="address-card__line">{{ addr.city }}, {{ addr.state }} {{ addr.postalCode }}</p>
           <p class="address-card__line">{{ addr.country }}</p>
         </div>
       }
     </div>
   }
 </div>
+
+@if (showDialog()) {
+  <app-customer-address-dialog
+    [customerId]="customerId()"
+    [address]="editingAddress()"
+    (saved)="onDialogSaved()"
+    (closed)="closeDialog()" />
+}
