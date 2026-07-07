@@ -23,6 +23,11 @@ const DOCGEN_ARTIFACTS = [
 // Shared Chromium launch settings for both projects.
 const chromiumUse = {
   browserName: 'chromium' as const,
+  // PLAYWRIGHT_CHANNEL=chrome drives the system Google Chrome instead of the
+  // bundled chromium — needed on hosts where Playwright ships no chromium build
+  // (e.g. Ubuntu 26.04 + Playwright 1.58). Unset (the default) keeps the
+  // bundled browser for CI/containers.
+  ...(process.env.PLAYWRIGHT_CHANNEL ? { channel: process.env.PLAYWRIGHT_CHANNEL } : {}),
   // --use-fake-device-for-media-stream: getUserMedia returns a synthetic
   //   video track instead of failing in headless (no real camera).
   // --use-fake-ui-for-media-stream: skips the permission prompt; combined

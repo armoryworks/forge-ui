@@ -9,6 +9,7 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { RowExpandDirective } from '../../../../shared/directives/row-expand.directive';
+import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-refresh.util';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -39,7 +40,7 @@ interface ExplainState {
 @Component({
   selector: 'app-ledger-view',
   standalone: true,
-  imports: [TranslatePipe, PageHeaderComponent, DataTableComponent, CurrencyDisplayComponent, RowExpandDirective],
+  imports: [TranslatePipe, PageHeaderComponent, DataTableComponent, CurrencyDisplayComponent, RowExpandDirective, ColumnCellDirective],
   templateUrl: './ledger-view.component.html',
   styleUrl: './ledger-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -54,7 +55,17 @@ export class LedgerViewComponent implements OnInit {
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly page = signal<LedgerRegisterPage | null>(null);
-  protected readonly entries = computed<LedgerRegisterEntry[]>(() => this.page()?.data ?? []);
+  /**
+   * Register rows with a display-ready date. entryDate is a DateOnly ("YYYY-MM-DD") — reformatted
+   * purely as a string (MM/dd/yyyy) because `new Date("YYYY-MM-DD")` parses as UTC midnight and
+   * renders as the PREVIOUS day in any western timezone (caught by visual verification 2026-07-07).
+   */
+  protected readonly entries = computed<(LedgerRegisterEntry & { entryDateDisplay: string })[]>(() =>
+    (this.page()?.data ?? []).map((e) => {
+      const [y, m, d] = e.entryDate.split('-');
+      return { ...e, entryDateDisplay: `${m}/${d}/${y}` };
+    }),
+  );
   protected readonly explanations = signal<Record<number, ExplainState>>({});
   protected readonly scanning = signal(false);
   protected readonly anomalyFlags = signal<Record<number, string[]>>({});
@@ -62,7 +73,8 @@ export class LedgerViewComponent implements OnInit {
 
   protected readonly columns: ColumnDef[] = [
     { field: 'entryNumber', header: this.translate.instant('accounting.ledger.entryNumber'), sortable: true, width: '90px' },
-    { field: 'entryDate', header: this.translate.instant('accounting.common.date'), sortable: true, type: 'date', width: '120px' },
+    // NOT type:'date' — the shared date formatter is for timestamps (adds a time + TZ-shifts DateOnly).
+    { field: 'entryDate', header: this.translate.instant('accounting.common.date'), sortable: true, width: '110px' },
     { field: 'source', header: this.translate.instant('accounting.ledger.source'), sortable: true, filterable: true, type: 'enum', width: '120px' },
     { field: 'status', header: this.translate.instant('accounting.common.status'), sortable: true, filterable: true, type: 'enum', width: '140px' },
     { field: 'memo', header: this.translate.instant('accounting.ledger.memo'), sortable: true },

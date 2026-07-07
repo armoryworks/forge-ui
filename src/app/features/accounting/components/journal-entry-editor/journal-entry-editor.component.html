@@ -54,7 +54,7 @@
 
   <ng-container actions>
     <button type="button" class="action-btn" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
-    <app-validation-button [violations]="violations" [loading]="saving()">
+    <app-validation-button class="validation-button--inline" [violations]="violations" [loading]="saving()">
       <button
         type="button"
         class="action-btn action-btn--primary"

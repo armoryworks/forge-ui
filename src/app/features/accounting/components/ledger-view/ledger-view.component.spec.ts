@@ -93,6 +93,12 @@ describe('LedgerViewComponent', () => {
     expect(api.error()).toBeNull();
   });
 
+  it('formats the DateOnly entry date as a plain string (no timezone shift)', () => {
+    const api = create();
+    // "2026-01-10" must render 01/10/2026 — never TZ-shifted to the previous day.
+    expect((api.entries()[0] as { entryDateDisplay: string }).entryDateDisplay).toBe('01/10/2026');
+  });
+
   it('scans for anomalies and indexes the flags by entry', () => {
     gl.getGlAnomalies.mockReturnValue(
       of([{ entryId: 1, entryNumber: 1, entryDate: '2026-01-10', source: 'Manual', totalDebit: 100, flags: ['big'] }]),

@@ -23,6 +23,7 @@
     [loading]="loading()"
     emptyIcon="receipt_long"
     [emptyMessage]="'accounting.ledger.empty' | translate">
+    <ng-template appColumnCell="entryDate" let-row>{{ row.entryDateDisplay }}</ng-template>
     <ng-template appRowExpand let-row>
       <div class="ledger-detail">
         @if (anomalyFlags()[row.id]; as flags) {

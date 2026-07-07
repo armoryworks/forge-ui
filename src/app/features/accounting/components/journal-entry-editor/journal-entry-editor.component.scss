@@ -5,6 +5,9 @@
   flex-direction: column;
   gap: $sp-lg;
   max-width: 960px;
+  // Room for the Material floating labels on the first row — without this the
+  // "Entry date" label clips against the content area's top edge (visual-verify 2026-07-07).
+  padding-top: $sp-md;
 }
 
 .je-editor__header {
