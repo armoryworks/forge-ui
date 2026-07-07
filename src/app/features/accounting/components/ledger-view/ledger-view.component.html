@@ -1,6 +1,30 @@
 <app-page-header
   [title]="'accounting.ledger.title' | translate"
   [subtitle]="'accounting.ledger.subtitle' | translate">
+  <span class="ledger-find">
+    <app-input
+      [label]="'accounting.ledger.find' | translate"
+      [formControl]="findControl"
+      (keyup.enter)="onFindEnter()"
+      data-testid="ledger-find" />
+    @if (findControl.value.trim()) {
+      <span class="ledger-find__count">
+        @if (matches().length > 0) {
+          {{ 'accounting.ledger.matchOf' | translate: { current: currentMatchIndex() + 1, total: matches().length } }}
+        } @else {
+          {{ 'accounting.ledger.noMatches' | translate }}
+        }
+      </span>
+      <button type="button" class="icon-btn" [attr.aria-label]="'accounting.ledger.previousMatch' | translate"
+        [disabled]="matches().length === 0" (click)="findNext(-1)">
+        <span class="material-icons-outlined" aria-hidden="true">keyboard_arrow_up</span>
+      </button>
+      <button type="button" class="icon-btn" [attr.aria-label]="'accounting.ledger.nextMatch' | translate"
+        [disabled]="matches().length === 0" (click)="findNext(1)">
+        <span class="material-icons-outlined" aria-hidden="true">keyboard_arrow_down</span>
+      </button>
+    }
+  </span>
   <button type="button" class="action-btn action-btn--sm" [disabled]="scanning()" (click)="scanAnomalies()">
     <span class="material-icons-outlined" aria-hidden="true">policy</span>
     {{ 'accounting.ledger.scanAnomalies' | translate }}
@@ -28,6 +52,7 @@
     [data]="entries()"
     [expandable]="true"
     [loading]="loading()"
+    [rowClass]="rowClassFn()"
     emptyIcon="receipt_long"
     [emptyMessage]="'accounting.ledger.empty' | translate">
     <ng-template appColumnCell="entryDate" let-row>{{ row.entryDateDisplay }}</ng-template>

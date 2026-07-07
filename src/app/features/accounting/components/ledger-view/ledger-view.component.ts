@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal, viewChild } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -7,6 +8,7 @@ import { filter, forkJoin, switchMap } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
+import { InputComponent } from '../../../../shared/components/input/input.component';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { RowExpandDirective } from '../../../../shared/directives/row-expand.directive';
@@ -41,7 +43,7 @@ interface ExplainState {
 @Component({
   selector: 'app-ledger-view',
   standalone: true,
-  imports: [RouterLink, TranslatePipe, PageHeaderComponent, DataTableComponent, CurrencyDisplayComponent, RowExpandDirective, ColumnCellDirective],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, PageHeaderComponent, InputComponent, DataTableComponent, CurrencyDisplayComponent, RowExpandDirective, ColumnCellDirective],
   templateUrl: './ledger-view.component.html',
   styleUrl: './ledger-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -96,6 +98,71 @@ export class LedgerViewComponent implements OnInit {
   protected readonly anomalyFlags = signal<Record<number, string[]>>({});
   protected readonly anomalyCount = computed(() => Object.keys(this.anomalyFlags()).length);
 
+  // ── Find-in-context (§5A.1): matches are highlighted and navigated to, never filtered out. ──
+  private readonly table = viewChild(DataTableComponent);
+  protected readonly findControl = new FormControl<string>('', { nonNullable: true });
+  private readonly findTerm = toSignal(this.findControl.valueChanges, { initialValue: '' });
+  protected readonly matches = computed(() => {
+    const term = this.findTerm().trim().toLowerCase();
+    if (!term) return [];
+    return this.entries().filter((e) => this.entryMatches(e, term));
+  });
+  protected readonly currentMatchIndex = signal(0);
+  private located = false;
+  /**
+   * Fresh closure per find state so the OnPush data-table re-evaluates row classes when the
+   * match set or cursor moves (a stable fn reference would never re-render the child).
+   */
+  protected readonly rowClassFn = computed<(row: unknown) => string>(() => {
+    const matchIds = new Set(this.matches().map((m) => m.id));
+    const current = this.matches()[this.currentMatchIndex()]?.id;
+    return (row: unknown) => {
+      const id = (row as LedgerRegisterEntry).id;
+      if (id === current) return 'row--find-match row--find-current';
+      return matchIds.has(id) ? 'row--find-match' : '';
+    };
+  });
+
+  private entryMatches(entry: LedgerRegisterEntry & { entryDateDisplay: string }, term: string): boolean {
+    if (
+      String(entry.entryNumber).includes(term) ||
+      entry.entryDateDisplay.includes(term) ||
+      entry.source.toLowerCase().includes(term) ||
+      entry.status.toLowerCase().includes(term) ||
+      (entry.memo ?? '').toLowerCase().includes(term)
+    ) {
+      return true;
+    }
+    return entry.lines.some(
+      (l) =>
+        l.accountNumber.includes(term) ||
+        l.accountName.toLowerCase().includes(term) ||
+        (l.description ?? '').toLowerCase().includes(term) ||
+        (l.debit > 0 && String(l.debit).includes(term)) ||
+        (l.credit > 0 && String(l.credit).includes(term)),
+    );
+  }
+
+  protected findNext(step: 1 | -1 = 1): void {
+    const total = this.matches().length;
+    if (total === 0) return;
+    this.currentMatchIndex.update((i) => (i + step + total) % total);
+    const match = this.matches()[this.currentMatchIndex()];
+    if (match) this.table()?.scrollToRow(match);
+  }
+
+  /** Browser-find semantics: the first Enter after a term change locates match 1; repeats cycle. */
+  protected onFindEnter(): void {
+    if (this.matches().length === 0) return;
+    if (!this.located) {
+      this.located = true;
+      const match = this.matches()[this.currentMatchIndex()];
+      if (match) this.table()?.scrollToRow(match);
+      return;
+    }
+    this.findNext(1);
+  }
+
   protected readonly columns = computed<ColumnDef[]>(() => {
     const cols: ColumnDef[] = [
       { field: 'entryNumber', header: this.translate.instant('accounting.ledger.entryNumber'), sortable: true, width: '90px' },
@@ -113,6 +180,11 @@ export class LedgerViewComponent implements OnInit {
 
   constructor() {
     autoRefreshOnGlChange(() => this.load());
+    // A term change restarts the find cursor.
+    this.findControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.currentMatchIndex.set(0);
+      this.located = false;
+    });
   }
 
   ngOnInit(): void {

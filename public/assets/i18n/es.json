@@ -7330,6 +7330,11 @@
       "correct": "Corregir (nuevo asiento)",
       "balance": "Saldo",
       "allEntries": "Todos los asientos",
+      "find": "Buscar en el libro",
+      "matchOf": "{{current}} de {{total}}",
+      "noMatches": "Sin coincidencias",
+      "previousMatch": "Coincidencia anterior",
+      "nextMatch": "Siguiente coincidencia",
       "empty": "Sin asientos contables"
     },
     "journalEditor": {

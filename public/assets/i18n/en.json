@@ -7330,6 +7330,11 @@
       "correct": "Correct (new entry)",
       "balance": "Balance",
       "allEntries": "All entries",
+      "find": "Find in ledger",
+      "matchOf": "{{current}} of {{total}}",
+      "noMatches": "No matches",
+      "previousMatch": "Previous match",
+      "nextMatch": "Next match",
       "empty": "No journal entries"
     },
     "journalEditor": {

@@ -78,3 +78,16 @@
     text-decoration: underline;
   }
 }
+
+.ledger-find {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  margin-left: auto;
+}
+
+.ledger-find__count {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  white-space: nowrap;
+}

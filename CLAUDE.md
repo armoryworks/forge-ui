@@ -856,6 +856,8 @@ protected readonly partRowStyle = (row: unknown): Record<string, string> => {
 
 **Additional inputs:** `loading` (boolean, shows `LoadingBlockDirective` overlay on scroll area), `stickyFirstColumn` (boolean, keeps first data column visible during horizontal scroll), `expandable` (boolean, adds expand/collapse chevron column), `clickableRows` (boolean, adds pointer cursor + hover highlight on rows that have a `(rowClick)` handler)
 
+**Find-in-context (added 2026-07-07):** public method `scrollToRow(row)` pages the internal paginator to the row (respecting the active sort), centers it with `scrollIntoView`, and flashes a transient `data-table__row--located` highlight — locating without filtering peers away. Consumers pair it with `[rowClass]` returning the reserved classes `row--find-match` (every hit) / `row--find-current` (the cursor). Reference implementation: the GL ledger's find bar (`features/accounting/components/ledger-view/`). IMPORTANT: the `[rowClass]` fn must be a `computed()` returning a FRESH closure whenever the match state changes — a stable fn reference never re-renders the OnPush table.
+
 ```html
 <!-- Expandable rows (e.g., Inventory bin details) -->
 <app-data-table

@@ -12,7 +12,7 @@ import {
   signal,
   TemplateRef,
   viewChild,
-} from '@angular/core';
+ElementRef, } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDividerModule } from '@angular/material/divider';
@@ -61,6 +61,7 @@ import { formatDateTime } from '../../utils/date.utils';
 export class DataTableComponent implements OnInit {
   private readonly prefs = inject(UserPreferencesService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly host = inject(ElementRef<HTMLElement>);
 
   readonly tableId = input.required<string>();
   readonly columns = input.required<ColumnDef[]>();
@@ -417,6 +418,26 @@ export class DataTableComponent implements OnInit {
     return this.getTrackValue(row);
   }
 
+  /**
+   * Find-in-context (ACCOUNTING_SUITE_PLAN §5A.1, generalized): page to, center, and flash a row
+   * WITHOUT filtering its peers away. The row is located in the current sorted order (so it works
+   * with any active column sort), the internal paginator jumps to its page, and after render the
+   * row scrolls into view with a transient highlight.
+   */
+  scrollToRow(row: unknown): void {
+    const key = this.getTrackValue(row);
+    const index = this.sortedData().findIndex(r => this.getTrackValue(r) === key);
+    if (index < 0) return;
+    this.pageIndex.set(Math.floor(index / this.pageSize()));
+    setTimeout(() => {
+      const el = this.host.nativeElement.querySelector(`tr[data-row-key="${String(key)}"]`);
+      if (!el) return;
+      el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      el.classList.add('data-table__row--located');
+      setTimeout(() => el.classList.remove('data-table__row--located'), 1600);
+    }, 50);
+  }
+
   // ─── Expandable Rows ───
   toggleRowExpand(row: unknown, event?: Event): void {
     event?.stopPropagation();
@@ -680,7 +701,7 @@ export class DataTableComponent implements OnInit {
     this.saveTimer = setTimeout(() => this.savePreferences(), 500);
   }
 
-  private getTrackValue(row: unknown): unknown {
+  protected getTrackValue(row: unknown): unknown {
     return (row as Record<string, unknown>)[this.trackByField()];
   }
 

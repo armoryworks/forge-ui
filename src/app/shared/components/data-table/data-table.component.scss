@@ -230,6 +230,22 @@
   &--clickable {
     cursor: pointer;
   }
+
+  // Find-in-context row states — set via the [rowClass] input by consumers (e.g. the GL ledger):
+  // 'row--find-match' marks every hit, 'row--find-current' the cursor position.
+  &.row--find-match {
+    box-shadow: inset $border-width-accent 0 0 0 var(--info);
+  }
+
+  &.row--find-current {
+    background: var(--info-light) !important; /* the find cursor must beat the zebra/tint mixes */
+  }
+
+  // scrollToRow() flash: a brief locate highlight that fades back out (find-in-context).
+  &--located {
+    background: var(--info-light) !important; /* transient locate flash must beat the tint mixes above */
+    transition: background 1.2s ease;
+  }
 }
 
 .data-table__td {

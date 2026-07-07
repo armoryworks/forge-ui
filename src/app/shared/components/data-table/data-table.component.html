@@ -133,6 +133,7 @@
           @for (row of pagedData(); track trackByFn($index, row)) {
             <tr
               class="data-table__row"
+              [attr.data-row-key]="getTrackValue(row)"
               [class]="getRowClasses(row)"
               [class.data-table__row--clickable]="clickableRows()"
               [class.data-table__row--expanded]="expandable() && isRowExpanded(row)"
