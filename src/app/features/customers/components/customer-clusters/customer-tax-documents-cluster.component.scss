@@ -1,0 +1,105 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+// S1 — Tax Documents cluster. Shares the Documents tab with the general
+// documents cluster: both hosts are flex:1 columns inside `.cd-content`,
+// so the tab splits between them and each list scrolls independently.
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border-top: $border-width-thin solid var(--border);
+}
+
+.tax-docs {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.tax-docs__header {
+  padding: $sp-md $sp-xl 0;
+}
+
+.tax-docs__title {
+  @include uppercase-label($font-size-xxs);
+  color: var(--text-muted);
+}
+
+.tax-docs__content {
+  @include custom-scrollbar;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md $sp-xl $sp-xl;
+}
+
+.tax-docs__empty,
+.tax-docs__hint {
+  margin: 0;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}
+
+.tax-doc-item {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+}
+
+.tax-doc-item__icon {
+  font-size: $icon-size-lg;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.tax-doc-item__info {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+  flex: 1;
+  min-width: 0;
+}
+
+.tax-doc-item__name {
+  @include truncate;
+  font-size: $font-size-sm;
+  font-weight: 600;
+}
+
+.tax-doc-item__meta {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+}
+
+.tax-doc-item__rejection {
+  font-size: $font-size-xxs;
+  color: var(--error);
+}
+
+.tax-doc-item__expiry {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-xs;
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+  white-space: nowrap;
+
+  .material-icons-outlined {
+    font-size: $icon-size-xs;
+  }
+}
+
+.tax-doc-item__expiry--past {
+  color: var(--warning);
+}

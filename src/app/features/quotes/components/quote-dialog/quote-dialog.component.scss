@@ -8,3 +8,18 @@
 .add-line--4col {
   grid-template-columns: 1fr 90px 120px auto;
 }
+
+// S1 — tax-rate lock cue (no verified tax certificate on file for the customer).
+.tax-lock-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  font-size: $icon-size-xs;
+  color: var(--text-muted);
+}
+
+// S1 — override backed by a verified certificate (same overlay slot as .tax-badge).
+.tax-badge--cert {
+  background: var(--info);
+}

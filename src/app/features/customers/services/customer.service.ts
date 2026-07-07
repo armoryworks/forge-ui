@@ -15,6 +15,7 @@ import { CreateContactRequest } from '../models/create-contact-request.model';
 import { UpdateContactRequest } from '../models/update-contact-request.model';
 import { ContactInteraction, ContactInteractionRequest } from '../models/contact-interaction.model';
 import { CreditStatus } from '../models/credit-status.model';
+import { CustomerTaxEditability } from '../models/customer-tax-editability.model';
 import { FlatContactRow } from '../models/flat-contact.model';
 import { PortalAccessRow } from '../models/portal-access.model';
 
@@ -168,5 +169,11 @@ export class CustomerService {
 
   downloadFileUrl(fileId: number): string {
     return `${environment.apiUrl}/files/${fileId}/download`;
+  }
+
+  // S1 — quote tax-rate gate: the rate is editable only when the customer has
+  // a Verified, unexpired tax certificate (see CustomerTaxDocumentService).
+  getTaxEditability(customerId: number): Observable<CustomerTaxEditability> {
+    return this.http.get<CustomerTaxEditability>(`${this.base}/${customerId}/tax-editability`);
   }
 }

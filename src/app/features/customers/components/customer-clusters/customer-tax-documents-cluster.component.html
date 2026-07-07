@@ -1,0 +1,91 @@
+<div class="tax-docs">
+  <div class="tax-docs__header">
+    <span class="tax-docs__title">{{ 'customers.taxDocuments.title' | translate }}</span>
+  </div>
+
+  <div class="tax-docs__content" [appLoadingBlock]="loading()">
+    @if (rows().length === 0) {
+      <p class="tax-docs__empty">{{ 'customers.taxDocuments.empty' | translate }}</p>
+    }
+
+    @for (row of rows(); track row.doc.id) {
+      <div class="tax-doc-item" data-testid="tax-doc-row">
+        <span class="material-icons-outlined tax-doc-item__icon">verified_user</span>
+
+        <div class="tax-doc-item__info">
+          <span class="tax-doc-item__name">{{ row.doc.fileName }}</span>
+          <span class="tax-doc-item__meta">
+            {{ row.doc.stateCode }} · {{ row.typeKey | translate }}
+            @if (row.doc.certificateNumber) {
+              · {{ row.doc.certificateNumber }}
+            }
+            @if (row.doc.verifiedByName) {
+              · {{ 'customers.taxDocuments.verifiedBy' | translate }} {{ row.doc.verifiedByName }} {{ row.doc.verifiedAt | date:'MM/dd/yyyy' }}
+            }
+          </span>
+          @if (row.doc.rejectionReason) {
+            <span class="tax-doc-item__rejection">{{ row.doc.rejectionReason }}</span>
+          }
+        </div>
+
+        @if (row.doc.expirationDate) {
+          <span class="tax-doc-item__expiry" [class.tax-doc-item__expiry--past]="row.isExpired">
+            @if (row.isExpired) {
+              <span class="material-icons-outlined" role="img" [attr.aria-label]="'customers.taxDocuments.expired' | translate">warning</span>
+            }
+            {{ (row.isExpired ? 'customers.taxDocuments.expired' : 'customers.taxDocuments.expires') | translate }}
+            {{ row.doc.expirationDate | date:'MM/dd/yyyy' }}
+          </span>
+        }
+
+        <span [class]="row.chipClass">{{ row.statusKey | translate }}</span>
+
+        @if (isAdmin()) {
+          @if (row.canVerify) {
+            <button class="icon-btn" data-testid="tax-doc-verify-btn" (click)="verify(row.doc)"
+              [matTooltip]="'customers.taxDocuments.verify' | translate"
+              [attr.aria-label]="'customers.taxDocuments.verify' | translate">
+              <span class="material-icons-outlined">check_circle</span>
+            </button>
+          }
+          @if (row.canReject) {
+            <button class="icon-btn icon-btn--danger" data-testid="tax-doc-reject-open-btn" (click)="openReject(row.doc)"
+              [matTooltip]="'customers.taxDocuments.reject' | translate"
+              [attr.aria-label]="'customers.taxDocuments.reject' | translate">
+              <span class="material-icons-outlined">block</span>
+            </button>
+          }
+        }
+        <button class="icon-btn icon-btn--danger" data-testid="tax-doc-delete-btn" (click)="deleteDocument(row.doc)"
+          [matTooltip]="'common.delete' | translate"
+          [attr.aria-label]="'common.delete' | translate">
+          <span class="material-icons-outlined">delete</span>
+        </button>
+      </div>
+    }
+
+    <app-file-upload-zone
+      entityType="customers"
+      [entityId]="customerId()"
+      accept=".pdf,.jpg,.jpeg,.png"
+      [maxSizeMb]="25"
+      (uploaded)="onFileUploaded($event)" />
+    <p class="tax-docs__hint">{{ 'customers.taxDocuments.uploadHint' | translate }}</p>
+  </div>
+</div>
+
+@if (pendingUpload(); as upload) {
+  <app-customer-tax-document-dialog
+    [customerId]="customerId()"
+    [fileAttachmentId]="upload.id"
+    [fileName]="upload.fileName"
+    (saved)="onDialogSaved()"
+    (closed)="closeDialog()" />
+}
+
+@if (rejecting(); as doc) {
+  <app-customer-tax-document-reject-dialog
+    [document]="doc"
+    (rejected)="onRejected()"
+    (closed)="closeRejectDialog()" />
+}

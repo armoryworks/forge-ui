@@ -1,0 +1,35 @@
+<app-dialog [title]="'customers.taxDocuments.addTitle' | translate" width="520px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form" class="tax-doc-dialog">
+    @if (fileName()) {
+      <p class="tax-doc-dialog__file">
+        <span class="material-icons-outlined">attach_file</span>
+        {{ fileName() }}
+      </p>
+    }
+
+    <div class="dialog-row">
+      <app-input data-testid="tax-doc-state" [label]="'customers.taxDocuments.stateField' | translate"
+        formControlName="stateCode" [maxlength]="2" [required]="true" />
+      <app-select data-testid="tax-doc-type" [label]="'customers.taxDocuments.typeField' | translate"
+        formControlName="certificateType" [options]="typeOptions" [required]="true" />
+    </div>
+
+    <div class="dialog-row">
+      <app-input data-testid="tax-doc-number" [label]="'customers.taxDocuments.certificateNumberField' | translate"
+        formControlName="certificateNumber" [maxlength]="100" />
+      <app-datepicker data-testid="tax-doc-expiry" [label]="'customers.taxDocuments.expirationField' | translate"
+        formControlName="expirationDate" />
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" data-testid="tax-doc-save-btn"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        <span class="material-icons-outlined">save</span> {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

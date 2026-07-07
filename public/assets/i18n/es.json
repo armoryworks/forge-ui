@@ -1937,6 +1937,38 @@
         "hint": "Capture lo esencial en un solo formulario. Las direcciones pueden agregarse más tarde desde la página de detalle del cliente.",
         "saveFailed": "No se pudo guardar el cliente."
       }
+    },
+    "taxDocuments": {
+      "title": "Documentos fiscales",
+      "empty": "No hay certificados fiscales en el expediente.",
+      "uploadHint": "Suba un archivo de certificado para agregar un documento fiscal; a continuación se le pedirán sus datos.",
+      "verifiedBy": "Verificado por",
+      "expires": "Vence",
+      "expired": "Vencido",
+      "verify": "Verificar",
+      "reject": "Rechazar",
+      "statusPending": "Pendiente",
+      "statusVerified": "Verificado",
+      "statusRejected": "Rechazado",
+      "statusExpired": "Vencido",
+      "typeResale": "Reventa",
+      "typeExemption": "Exención",
+      "typeDirectPay": "Pago directo",
+      "typeOther": "Otro",
+      "addTitle": "Agregar documento fiscal",
+      "stateField": "Estado",
+      "typeField": "Tipo de certificado",
+      "certificateNumberField": "Número de certificado",
+      "expirationField": "Fecha de vencimiento",
+      "documentAdded": "Documento fiscal agregado; pendiente de verificación",
+      "documentVerified": "Documento fiscal verificado",
+      "rejectTitle": "¿Rechazar documento fiscal?",
+      "rejectMessage": "Indique el motivo para rechazar {{name}}.",
+      "rejectReasonField": "Motivo de rechazo",
+      "documentRejected": "Documento fiscal rechazado",
+      "deleteTitle": "¿Eliminar documento fiscal?",
+      "deleteMessage": "Esto eliminará {{name}} de los documentos fiscales del cliente. El archivo cargado permanece en Documentos.",
+      "documentDeleted": "Documento fiscal eliminado"
     }
   },
   "priceListEntry": {
@@ -4604,7 +4636,15 @@
       "exceptionSummary": "Todos los precios fuera de tarifa registrados como excepciones únicas para esta OC. Precio maestro del proveedor sin cambios.",
       "continue": "Continuar",
       "updateTierFailed": "No se pudo actualizar una o más tarifas del proveedor — la OC se creará igualmente."
-    }
+    },
+    "origin": "Origen",
+    "originManual": "Manual",
+    "originAutoMrp": "Auto (MRP)",
+    "originAutoQuote": "Auto (cotización)",
+    "originExternalIntegration": "Externo",
+    "originEdi": "EDI",
+    "originTooltipUser": "Creado por: {{name}}",
+    "originTooltipReference": "Referencia: {{reference}}"
   },
   "salesOrders": {
     "recurring": {
@@ -4832,7 +4872,10 @@
     "deleteLineTitle": "¿Eliminar línea?",
     "deleteLineMessage": "¿Eliminar \"{{description}}\" de esta cotización?",
     "confirmSendTitle": "¿Enviar cotización?",
-    "confirmSendMessage": "¿Enviar la cotización {{number}} al cliente?"
+    "confirmSendMessage": "¿Enviar la cotización {{number}} al cliente?",
+    "taxLockedTooltip": "La tasa de impuesto está bloqueada; para editarla se requiere un certificado fiscal estatal verificado en el expediente de este cliente.",
+    "certBacked": "CERT",
+    "certBackedTooltip": "Modificación respaldada por un certificado fiscal verificado."
   },
   "shipments": {
     "title": "Envíos",

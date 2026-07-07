@@ -11,6 +11,7 @@ import { CustomerService } from '../../../customers/services/customer.service';
 import { PartsService } from '../../../parts/services/parts.service';
 import { AdminService } from '../../../admin/services/admin.service';
 import { CustomerListItem } from '../../../customers/models/customer-list-item.model';
+import { CustomerTaxEditability } from '../../../customers/models/customer-tax-editability.model';
 import { PartListItem } from '../../../parts/models/part-list-item.model';
 import { CreateQuoteLineRequest } from '../../models/create-quote-line-request.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
@@ -69,6 +70,15 @@ export class QuoteDialogComponent {
   protected readonly taxAutoFilled = signal(false);
   /** Display label for the auto-filled tax rate (e.g. "CA 7.25%"). */
   protected readonly taxAutoLabel = signal('');
+  /** S1 — server verdict on whether this customer's tax rate may be overridden. */
+  protected readonly taxEditability = signal<CustomerTaxEditability | null>(null);
+  /** S1 — tax field locked: editability is known and no verified certificate is on file. */
+  protected readonly taxLocked = computed(() => this.taxEditability()?.canEditTax === false);
+  /** True once the user manually edits the tax rate away from the auto-filled default. */
+  protected readonly taxOverridden = signal(false);
+  /** S1 — the manual override is backed by a verified certificate (badge cue). */
+  protected readonly taxCertBacked = computed(
+    () => this.taxOverridden() && this.taxEditability()?.canEditTax === true);
 
   protected readonly customerOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('quotes.selectCustomer') },
@@ -143,6 +153,10 @@ export class QuoteDialogComponent {
     this.form.controls.customerId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((customerId) => {
       this.taxAutoFilled.set(false);
       this.taxAutoLabel.set('');
+      // S1 — reset the tax-override gate until the new customer's verdict arrives.
+      this.taxOverridden.set(false);
+      this.taxEditability.set(null);
+      this.form.controls.taxRate.enable({ emitEvent: false });
       if (customerId == null) return;
       this.adminService.getTaxRateForCustomer(customerId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (rate) => {
@@ -155,12 +169,25 @@ export class QuoteDialogComponent {
           );
         },
       });
+      // S1 — the tax rate stays editable only when the customer has a
+      // Verified, unexpired tax certificate; otherwise lock the control on
+      // the auto-filled default (the server enforces the same gate).
+      this.customerService.getTaxEditability(customerId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: (editability) => {
+          this.taxEditability.set(editability);
+          if (!editability.canEditTax) {
+            this.form.controls.taxRate.disable({ emitEvent: false });
+          }
+        },
+      });
     });
 
     // When tax rate is manually changed, clear the auto-fill indicator
     this.form.controls.taxRate.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.taxAutoFilled.set(false);
       this.taxAutoLabel.set('');
+      // S1 — a manual edit is an override (cert-backed badge when allowed).
+      this.taxOverridden.set(true);
     });
 
     // Pre-fill unit price from part's list price when a part is selected

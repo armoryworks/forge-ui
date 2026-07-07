@@ -1937,6 +1937,38 @@
         "hint": "Capture the essentials in one form. Addresses can be added later from the customer detail page.",
         "saveFailed": "Could not save the customer."
       }
+    },
+    "taxDocuments": {
+      "title": "Tax Documents",
+      "empty": "No tax certificates on file.",
+      "uploadHint": "Upload a certificate file to add a tax document — you'll be asked for its details next.",
+      "verifiedBy": "Verified by",
+      "expires": "Expires",
+      "expired": "Expired",
+      "verify": "Verify",
+      "reject": "Reject",
+      "statusPending": "Pending",
+      "statusVerified": "Verified",
+      "statusRejected": "Rejected",
+      "statusExpired": "Expired",
+      "typeResale": "Resale",
+      "typeExemption": "Exemption",
+      "typeDirectPay": "Direct Pay",
+      "typeOther": "Other",
+      "addTitle": "Add Tax Document",
+      "stateField": "State",
+      "typeField": "Certificate Type",
+      "certificateNumberField": "Certificate Number",
+      "expirationField": "Expiration Date",
+      "documentAdded": "Tax document added — pending verification",
+      "documentVerified": "Tax document verified",
+      "rejectTitle": "Reject Tax Document?",
+      "rejectMessage": "Provide a reason for rejecting {{name}}.",
+      "rejectReasonField": "Rejection Reason",
+      "documentRejected": "Tax document rejected",
+      "deleteTitle": "Delete Tax Document?",
+      "deleteMessage": "This will remove {{name}} from the customer's tax documents. The uploaded file remains in Documents.",
+      "documentDeleted": "Tax document deleted"
     }
   },
   "priceListEntry": {
@@ -4611,7 +4643,15 @@
       "exceptionSummary": "All off-tier prices recorded as one-off exceptions for this PO. Vendor master pricing unchanged.",
       "continue": "Continue",
       "updateTierFailed": "Couldn't update one or more vendor tiers — PO will still be created."
-    }
+    },
+    "origin": "Origin",
+    "originManual": "Manual",
+    "originAutoMrp": "Auto (MRP)",
+    "originAutoQuote": "Auto (Quote)",
+    "originExternalIntegration": "External",
+    "originEdi": "EDI",
+    "originTooltipUser": "Created by: {{name}}",
+    "originTooltipReference": "Reference: {{reference}}"
   },
   "salesOrders": {
     "recurring": {
@@ -4839,7 +4879,10 @@
     "deleteLineTitle": "Remove line?",
     "deleteLineMessage": "Remove \"{{description}}\" from this quote?",
     "confirmSendTitle": "Send Quote?",
-    "confirmSendMessage": "Send quote {{number}} to the customer?"
+    "confirmSendMessage": "Send quote {{number}} to the customer?",
+    "taxLockedTooltip": "Tax rate is locked — editing it requires a verified state tax certificate on file for this customer.",
+    "certBacked": "CERT",
+    "certBackedTooltip": "Override backed by a verified tax certificate."
   },
   "shipments": {
     "title": "Shipments",

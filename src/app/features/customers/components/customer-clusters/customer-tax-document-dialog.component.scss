@@ -1,0 +1,15 @@
+@use '../../../../../styles/variables' as *;
+
+.tax-doc-dialog__file {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  margin: 0;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+    color: var(--text-muted);
+  }
+}

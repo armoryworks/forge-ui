@@ -65,9 +65,17 @@
         <app-datepicker data-testid="quote-expiry" [label]="'quotes.expirationDate' | translate" formControlName="expirationDate" />
         <div class="tax-field">
           <app-input data-testid="quote-tax-rate" [label]="'quotes.taxRate' | translate" type="number" formControlName="taxRate" [required]="true"
-            suffix="%" [matTooltip]="taxAutoFilled() ? 'Auto-filled from customer state. Edit to override.' : ''" />
+            suffix="%" [matTooltip]="taxLocked() ? ('quotes.taxLockedTooltip' | translate) : (taxAutoFilled() ? 'Auto-filled from customer state. Edit to override.' : '')" />
+          @if (taxLocked()) {
+            <span class="material-icons-outlined tax-lock-icon" data-testid="quote-tax-lock"
+              [matTooltip]="'quotes.taxLockedTooltip' | translate" matTooltipPosition="above"
+              role="img" [attr.aria-label]="'quotes.taxLockedTooltip' | translate">lock</span>
+          }
           @if (taxAutoFilled()) {
             <span class="tax-badge" matTooltipPosition="above">{{ taxAutoLabel() }}</span>
+          } @else if (taxCertBacked()) {
+            <span class="tax-badge tax-badge--cert" data-testid="quote-tax-cert-badge"
+              [matTooltip]="'quotes.certBackedTooltip' | translate" matTooltipPosition="above">{{ 'quotes.certBacked' | translate }}</span>
           }
         </div>
         <app-input data-testid="quote-customer-po" [label]="'quotes.customerPo' | translate" formControlName="customerPO" [maxlength]="50" />

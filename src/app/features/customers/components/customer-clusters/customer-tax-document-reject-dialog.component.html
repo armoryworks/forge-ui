@@ -1,0 +1,18 @@
+<app-dialog [title]="'customers.taxDocuments.rejectTitle' | translate" width="420px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    <p>{{ 'customers.taxDocuments.rejectMessage' | translate: { name: document().fileName } }}</p>
+    <app-textarea data-testid="tax-doc-reject-reason" [label]="'customers.taxDocuments.rejectReasonField' | translate"
+      formControlName="reason" [rows]="3" [maxlength]="500" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--destructive" data-testid="tax-doc-reject-btn"
+        [disabled]="form.invalid || saving()"
+        (click)="reject()">
+        <span class="material-icons-outlined">block</span> {{ 'customers.taxDocuments.reject' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>
