@@ -18,7 +18,7 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
-import { GlAccount, LedgerRegisterPage, ManualJournalEntryInput } from '../../models/accounting.models';
+import { GlAccount, LedgerRegisterEntry, LedgerRegisterPage, ManualJournalEntryInput } from '../../models/accounting.models';
 
 const DEFAULT_BOOK_ID = 1;
 const DEFAULT_CURRENCY_ID = 1;
@@ -79,6 +79,8 @@ export class JournalEntryEditorComponent implements OnInit {
 
   protected readonly saving = signal(false);
   protected readonly accountOptions = signal<SelectOption[]>([]);
+  /** §5A.2 split-pane: the entry being corrected stays pinned above the compose form. */
+  protected readonly original = signal<LedgerRegisterEntry | null>(null);
 
   protected readonly form = new FormGroup(
     {
@@ -137,6 +139,7 @@ export class JournalEntryEditorComponent implements OnInit {
   private prefillFrom(page: LedgerRegisterPage, entryId: number): void {
     const original = page.data.find((e) => e.id === entryId);
     if (!original) return; // fell off the first page — user composes manually
+    this.original.set(original);
     this.form.controls.memo.setValue(
       this.translate.instant('accounting.journalEditor.correctionMemo', { number: original.entryNumber }),
     );

@@ -65,3 +65,50 @@
 .je-balance--ok .je-balance__state {
   color: var(--success);
 }
+
+// §5A.2 pinned original: the entry under correction stays in view above the compose pane.
+.je-original {
+  max-width: 960px;
+  margin-top: $sp-md;
+  padding: $sp-md;
+  border-left: $border-width-accent solid var(--info);
+  background: var(--surface);
+}
+
+.je-original__head {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  margin-bottom: $sp-sm;
+}
+
+.je-original__title {
+  font-size: $font-size-xxs;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.je-original__memo {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}
+
+.je-original__lines {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-sm;
+
+  th,
+  td {
+    padding: $sp-xs $sp-sm;
+    text-align: left;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  .je-original__num {
+    text-align: right;
+    font-family: $font-family-mono;
+    white-space: nowrap;
+  }
+}

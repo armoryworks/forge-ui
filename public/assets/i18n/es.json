@@ -7349,7 +7349,8 @@
       "balanced": "Cuadrado",
       "post": "Registrar asiento",
       "posted": "Asiento n.º {{number}} registrado",
-      "correctionMemo": "Corrección del asiento n.º {{number}}: "
+      "correctionMemo": "Corrección del asiento n.º {{number}}: ",
+      "correcting": "Corrigiendo el asiento n.º {{number}}"
     },
     "reverse": {
       "title": "Reversar el asiento n.º {{number}}",

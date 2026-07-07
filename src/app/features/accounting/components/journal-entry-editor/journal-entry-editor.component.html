@@ -1,5 +1,33 @@
 <app-page-layout [pageTitle]="'accounting.journalEditor.title' | translate">
   <ng-container content>
+    @if (original(); as o) {
+      <section class="je-original" [attr.aria-label]="'accounting.journalEditor.correcting' | translate: { number: o.entryNumber }">
+        <div class="je-original__head">
+          <span class="je-original__title">{{ 'accounting.journalEditor.correcting' | translate: { number: o.entryNumber } }}</span>
+          <span class="chip" [class.chip--warning]="o.status === 'Reversed'" [class.chip--success]="o.status === 'Posted'">{{ o.status }}</span>
+          <span class="je-original__memo">{{ o.memo }}</span>
+        </div>
+        <table class="je-original__lines">
+          <thead>
+            <tr>
+              <th scope="col">{{ 'accounting.journalEditor.account' | translate }}</th>
+              <th scope="col" class="je-original__num">{{ 'accounting.common.debit' | translate }}</th>
+              <th scope="col" class="je-original__num">{{ 'accounting.common.credit' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of o.lines; track line.id) {
+              <tr>
+                <td>{{ line.accountNumber }} — {{ line.accountName }}</td>
+                <td class="je-original__num">@if (line.debit) { <app-currency-display [value]="line.debit" /> }</td>
+                <td class="je-original__num">@if (line.credit) { <app-currency-display [value]="line.credit" /> }</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+    }
+
     <form [formGroup]="form" class="je-editor">
       <div class="je-editor__header">
         <app-datepicker [label]="'accounting.journalEditor.date' | translate" formControlName="entryDate" [required]="true" />

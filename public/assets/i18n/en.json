@@ -7349,7 +7349,8 @@
       "balanced": "Balanced",
       "post": "Post entry",
       "posted": "Entry #{{number}} posted",
-      "correctionMemo": "Correction of entry #{{number}}: "
+      "correctionMemo": "Correction of entry #{{number}}: ",
+      "correcting": "Correcting entry #{{number}}"
     },
     "reverse": {
       "title": "Reverse entry #{{number}}",
