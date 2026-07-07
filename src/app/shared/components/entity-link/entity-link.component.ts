@@ -24,7 +24,9 @@ const ENTITY_ROUTES: Record<LinkableEntityType, string> = {
   'quote': '/quotes',
   'lead': '/leads',
   'asset': '/assets',
-  'lot': '/quality',
+  // The lot ?detail= restore lives on /lots (lots.component.autoOpenFromUrl);
+  // /quality never restored it, so lot links landed on a page with no dialog.
+  'lot': '/lots',
   'rfq': '/purchasing',
   'customer-return': '/customer-returns',
   'training': '/training',

@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { catchError, debounceTime, distinctUntilChanged, filter, of, switchMap } from 'rxjs';
@@ -32,6 +32,8 @@ import { JobPart } from '../models/job-part.model';
 import { EntityLinkComponent } from '../../../shared/components/entity-link/entity-link.component';
 import { PartSearchResult } from '../models/part-search-result.model';
 import { ChildJob } from '../models/child-job.model';
+import { LotService } from '../../lots/services/lot.service';
+import { LotListItem } from '../../lots/models/lot-list-item.model';
 import { Stage } from '../../../shared/models/stage.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { StatusTimelineComponent } from '../../../shared/components/status-timeline/status-timeline.component';
@@ -43,13 +45,14 @@ import { OperationTimeTabComponent } from './operation-time-tab.component';
 @Component({
   selector: 'app-job-detail-panel',
   standalone: true,
-  imports: [DatePipe, ReactiveFormsModule, TranslatePipe, AvatarComponent, PriorityIndicatorComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, JobCostTabComponent, OperationTimeTabComponent, MatMenuModule, MatTooltipModule, EntityLinkComponent],
+  imports: [DatePipe, DecimalPipe, ReactiveFormsModule, TranslatePipe, AvatarComponent, PriorityIndicatorComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, JobCostTabComponent, OperationTimeTabComponent, MatMenuModule, MatTooltipModule, EntityLinkComponent],
   templateUrl: './job-detail-panel.component.html',
   styleUrl: './job-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class JobDetailPanelComponent implements OnInit {
   private readonly kanbanService = inject(KanbanService);
+  private readonly lotService = inject(LotService);
   private readonly timeTrackingService = inject(TimeTrackingService);
   private readonly snackbar = inject(SnackbarService);
   private readonly matDialog = inject(MatDialog);
@@ -83,6 +86,9 @@ export class JobDetailPanelComponent implements OnInit {
 
   // Child jobs
   protected readonly childJobs = signal<ChildJob[]>([]);
+
+  // Lots attached to this job (QA: lot data must surface on the parent job card)
+  protected readonly lots = signal<LotListItem[]>([]);
 
   // Part add form
   protected readonly jobParts = signal<JobPart[]>([]);
@@ -123,6 +129,12 @@ export class JobDetailPanelComponent implements OnInit {
       if (detail.childJobCount > 0) {
         this.kanbanService.getChildJobs(id).subscribe(children => this.childJobs.set(children));
       }
+      // Lots attached to this job — the QA walkthrough flagged that created
+      // lots never surfaced on the parent job card.
+      this.lotService.getLots(undefined, undefined, id).subscribe({
+        next: (lots) => this.lots.set(lots),
+        error: () => this.lots.set([]),
+      });
       // Phase 3 H4 / WU-20 — fetch the BOM-at-release pin once we know the
       // job has a part associated. Endpoint always answers 200 (with
       // bomRevisionId === null) when nothing is pinned, so we can safely

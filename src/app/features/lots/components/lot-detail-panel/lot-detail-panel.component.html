@@ -31,6 +31,9 @@
         }
       </div>
 
+      <!-- Scannable lot QR (barcode value == lot number) -->
+      <app-barcode-info entityType="Lot" [entityId]="lotId()" [naturalIdentifier]="lotNumber()" />
+
       <div class="trace-timeline">
         <h4 class="trace-timeline__title">{{ 'lots.traceHistory' | translate }}</h4>
         @if (t.events.length === 0) {

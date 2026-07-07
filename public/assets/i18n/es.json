@@ -389,6 +389,7 @@
     "rdIteration": "Iteración I+D",
     "statusTracking": "Seguimiento de Estado",
     "subJobs": "Sub-Trabajos",
+    "lots": "Lotes",
     "explodeBom": "Explotar BOM",
     "explodeBomConfirmTitle": "¿Explotar BOM?",
     "explodeBomConfirmMessage": "Esto creará sub-trabajos para todos los artículos \"Fabricar\" en la BOM de la pieza {{partNumber}}. Esta acción no se puede deshacer.",

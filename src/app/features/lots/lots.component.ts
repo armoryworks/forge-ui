@@ -79,9 +79,12 @@ export class LotsComponent implements OnInit {
   private autoOpenFromUrl(): void {
     const detail = this.detailDialog.getDetailFromUrl();
     if (detail?.entityType === 'lot') {
+      // Resolve the lot number from the freshly-loaded list — the detail panel
+      // traces by lot number, and an empty string left it blank forever.
+      const lotNumber = this.lots().find(l => l.id === detail.entityId)?.lotNumber ?? '';
       this.detailDialog.open<LotDetailDialogComponent, LotDetailDialogData>(
         'lot', detail.entityId, LotDetailDialogComponent,
-        { lotId: detail.entityId, lotNumber: '' },
+        { lotId: detail.entityId, lotNumber },
       );
     }
   }

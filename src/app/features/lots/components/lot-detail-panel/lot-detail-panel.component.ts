@@ -7,13 +7,14 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { LotService } from '../../services/lot.service';
 import { LotTrace } from '../../models/lot-trace.model';
+import { BarcodeInfoComponent } from '../../../../shared/components/barcode-info/barcode-info.component';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 
 @Component({
   selector: 'app-lot-detail-panel',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, MatTooltipModule, TranslatePipe, EntityActivitySectionComponent, LoadingBlockDirective],
+  imports: [DatePipe, DecimalPipe, MatTooltipModule, TranslatePipe, BarcodeInfoComponent, EntityActivitySectionComponent, LoadingBlockDirective],
   templateUrl: './lot-detail-panel.component.html',
   styleUrl: './lot-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -164,6 +164,29 @@
         </div>
       }
 
+      <!-- Lots -->
+      @if (lots().length > 0) {
+        <div class="jd-section">
+          <div class="jd-section__header">
+            <h3 class="jd-section__title">{{ 'kanban.lots' | translate }}</h3>
+            <span class="panel__section-count">{{ lots().length }}</span>
+          </div>
+          <div class="sub-jobs-list">
+            @for (lot of lots(); track lot.id) {
+              <div class="sub-job-item">
+                <span class="sub-job-item__number">
+                  <app-entity-link type="lot" [entityId]="lot.id">{{ lot.lotNumber }}</app-entity-link>
+                </span>
+                <span class="sub-job-item__title">{{ lot.partNumber }} · {{ lot.quantity | number:'1.0-4' }}</span>
+                @if (lot.expirationDate) {
+                  <span class="chip chip--muted">{{ 'lots.expires' | translate }} {{ lot.expirationDate | date:'MM/dd/yyyy' }}</span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+
       <!-- Explode BOM -->
       @if (j.partId && j.childJobCount === 0) {
         <div class="jd-section">

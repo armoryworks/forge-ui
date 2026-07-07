@@ -389,6 +389,7 @@
     "rdIteration": "R&D Iteration",
     "statusTracking": "Status Tracking",
     "subJobs": "Sub-Jobs",
+    "lots": "Lots",
     "explodeBom": "Explode BOM",
     "explodeBomConfirmTitle": "Explode BOM?",
     "explodeBomConfirmMessage": "This will create sub-jobs for all \"Make\" items in the BOM of part {{partNumber}}. This action cannot be undone.",
