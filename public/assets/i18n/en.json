@@ -7335,6 +7335,7 @@
       "noMatches": "No matches",
       "previousMatch": "Previous match",
       "nextMatch": "Next match",
+      "entryNotLoaded": "Entry id {{number}} is older than the loaded page",
       "empty": "No journal entries"
     },
     "journalEditor": {

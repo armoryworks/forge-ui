@@ -151,6 +151,17 @@ export class LedgerViewComponent implements OnInit {
     if (match) this.table()?.scrollToRow(match);
   }
 
+  /** Drill-back click-to-center (§5A.6 item 3): locate a related entry (reversal counterpart) in the register. */
+  protected locateEntry(entryId: number): void {
+    const target = this.entries().find((e) => e.id === entryId);
+    if (target) {
+      this.table()?.scrollToRow(target);
+      return;
+    }
+    // Older than the loaded page — tell the user instead of silently doing nothing.
+    this.snackbar.error(this.translate.instant('accounting.ledger.entryNotLoaded', { number: entryId }));
+  }
+
   /** Browser-find semantics: the first Enter after a term change locates match 1; repeats cycle. */
   protected onFindEnter(): void {
     if (this.matches().length === 0) return;

@@ -7335,6 +7335,7 @@
       "noMatches": "Sin coincidencias",
       "previousMatch": "Coincidencia anterior",
       "nextMatch": "Siguiente coincidencia",
+      "entryNotLoaded": "El asiento id {{number}} es anterior a la página cargada",
       "empty": "Sin asientos contables"
     },
     "journalEditor": {

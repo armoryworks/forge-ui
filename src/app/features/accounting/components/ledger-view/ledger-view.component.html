@@ -71,10 +71,14 @@
         @if (row.reversalOfEntryId || row.reversedByEntryId) {
           <div class="ledger-detail__refs">
             @if (row.reversalOfEntryId) {
-              <span class="chip chip--info">{{ 'accounting.ledger.reverses' | translate: { number: row.reversalOfEntryId } }}</span>
+              <button type="button" class="chip chip--info ledger-detail__ref-link" (click)="locateEntry(row.reversalOfEntryId)">
+                {{ 'accounting.ledger.reverses' | translate: { number: row.reversalOfEntryId } }}
+              </button>
             }
             @if (row.reversedByEntryId) {
-              <span class="chip chip--warning">{{ 'accounting.ledger.reversedBy' | translate: { number: row.reversedByEntryId } }}</span>
+              <button type="button" class="chip chip--warning ledger-detail__ref-link" (click)="locateEntry(row.reversedByEntryId)">
+                {{ 'accounting.ledger.reversedBy' | translate: { number: row.reversedByEntryId } }}
+              </button>
             }
           </div>
         }
