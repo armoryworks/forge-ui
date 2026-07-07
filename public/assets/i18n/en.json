@@ -353,6 +353,7 @@
     "clearSelection": "Clear selection",
     "overdue": "Overdue",
     "hasSubJobs": "Has sub-jobs",
+    "parentJobChip": "Sub-job of {{jobNumber}}",
     "jobAria": "Job {{jobNumber}}: {{title}}",
     "newJob": "New Job",
     "editJob": "Edit Job",

@@ -18,4 +18,6 @@ export interface KanbanJob {
   childJobCount: number;
   activeHolds: string[];
   coverPhotoUrl: string | null;
+  parentJobId: number | null;
+  parentJobNumber: string | null;
 }

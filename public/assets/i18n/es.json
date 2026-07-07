@@ -353,6 +353,7 @@
     "clearSelection": "Limpiar selección",
     "overdue": "Vencido",
     "hasSubJobs": "Tiene sub-trabajos",
+    "parentJobChip": "Subtrabajo de {{jobNumber}}",
     "jobAria": "Trabajo {{jobNumber}}: {{title}}",
     "newJob": "Nuevo Trabajo",
     "editJob": "Editar Trabajo",
