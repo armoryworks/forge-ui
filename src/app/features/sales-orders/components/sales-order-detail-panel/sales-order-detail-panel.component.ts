@@ -359,6 +359,26 @@ export class SalesOrderDetailPanelComponent {
 
   protected canConfirm(status: string): boolean { return status === 'Draft'; }
   protected canCancel(status: string): boolean { return status === 'Draft' || status === 'Confirmed'; }
+
+  /**
+   * F8 change control: a locked order (anything past Draft, not Cancelled)
+   * takes changes via a linked Draft addendum instead of edits. The server
+   * additionally rejects chaining addenda off addenda.
+   */
+  protected canCreateAddendum(so: SalesOrderDetail): boolean {
+    return so.status !== 'Draft' && so.status !== 'Cancelled';
+  }
+
+  protected createAddendum(): void {
+    const so = this.so();
+    if (!so) return;
+    this.soService.createAddendum(so.id).subscribe({
+      next: (created) => {
+        this.snackbar.success(this.translate.instant('salesOrders.addendumCreated', { number: created.orderNumber }));
+        this.changed.emit();
+      },
+    });
+  }
   protected canDelete(status: string): boolean { return status === 'Draft'; }
 
   // --- Line editing ---

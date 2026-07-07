@@ -152,6 +152,11 @@ export class SalesOrderService {
     return this.http.post<void>(`${this.base}/${id}/cancel`, {});
   }
 
+  /** F8 change control — new linked Draft addendum for a locked order. */
+  createAddendum(id: number): Observable<SalesOrderListItem> {
+    return this.http.post<SalesOrderListItem>(`${this.base}/${id}/addendum`, {});
+  }
+
   deleteSalesOrder(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
   }

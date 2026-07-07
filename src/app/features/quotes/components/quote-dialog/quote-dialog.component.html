@@ -70,6 +70,7 @@
             <span class="tax-badge" matTooltipPosition="above">{{ taxAutoLabel() }}</span>
           }
         </div>
+        <app-input data-testid="quote-customer-po" [label]="'quotes.customerPo' | translate" formControlName="customerPO" [maxlength]="50" />
       </div>
 
       <div class="dlg-sidebar-section">

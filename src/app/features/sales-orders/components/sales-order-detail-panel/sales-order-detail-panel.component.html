@@ -255,6 +255,12 @@
                 {{ 'salesOrders.confirm' | translate }}
               </button>
             }
+            @if (canCreateAddendum(so)) {
+              <button class="action-btn action-btn--create action-btn--sm" data-testid="so-addendum-btn" (click)="createAddendum()">
+                <span class="material-icons-outlined">add</span>
+                {{ 'salesOrders.createAddendum' | translate }}
+              </button>
+            }
           </div>
         </div>
       }

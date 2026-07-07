@@ -82,6 +82,7 @@ export class QuoteDialogComponent {
     customerId: new FormControl<number | null>(null, [Validators.required]),
     expirationDate: new FormControl<Date | null>(null),
     taxRate: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
+    customerPO: new FormControl('', [Validators.maxLength(50)]),
     notes: new FormControl(''),
   });
 
@@ -89,6 +90,7 @@ export class QuoteDialogComponent {
     customerId: 'Customer',
     expirationDate: 'Expiration Date',
     taxRate: 'Tax Rate',
+    customerPO: 'Customer P.O.',
     notes: 'Notes',
   });
 
@@ -231,6 +233,7 @@ export class QuoteDialogComponent {
       customerId: f.customerId!,
       expirationDate: f.expirationDate ? toIsoDate(f.expirationDate)! : undefined,
       taxRate: taxRateDecimal,
+      customerPO: f.customerPO || undefined,
       notes: f.notes || undefined,
       lines: lineRequests,
     }).subscribe({

@@ -6,5 +6,6 @@ export interface CreateQuoteRequest {
   expirationDate?: string;
   notes?: string;
   taxRate: number;
+  customerPO?: string;
   lines: CreateQuoteLineRequest[];
 }
