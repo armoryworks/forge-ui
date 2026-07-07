@@ -18,6 +18,7 @@ import { LoadingBlockDirective } from '../../shared/directives/loading-block.dir
 import { CurrencyDisplayComponent } from '../../shared/components/currency-display/currency-display.component';
 import { SoDialogComponent } from './components/so-dialog/so-dialog.component';
 import { SalesOrderDetailDialogComponent, SalesOrderDetailDialogData } from './components/sales-order-detail-dialog/sales-order-detail-dialog.component';
+import { JobDetailDialogComponent, JobDetailDialogData } from '../kanban/components/job-detail-dialog.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -119,9 +120,13 @@ export class SalesOrdersComponent implements OnInit {
         this.salesOrders.set(page.items);
         this.totalCount.set(page.totalCount);
         this.loading.set(false);
+        // URL restore — the detail param always carries the real target-entity
+        // id (SO id or Job id), never the ambiguous row id.
         const detail = this.detailDialog.getDetailFromUrl();
         if (detail?.entityType === 'sales-order') {
-          this.openSalesOrderDetail({ id: detail.entityId } as SalesOrderListItem);
+          this.openSoDetailDialog(detail.entityId);
+        } else if (detail?.entityType === 'job') {
+          this.openJobDetailDialog(detail.entityId);
         }
       },
       error: () => this.loading.set(false),
@@ -130,12 +135,36 @@ export class SalesOrdersComponent implements OnInit {
 
   protected applyFilters(): void { this.loadSalesOrders(); }
 
+  /**
+   * Route a row click to the record it actually represents. Job-projected rows
+   * carry the originating SalesOrder id when one exists; jobs created directly
+   * on the board have no SO, so those open the job detail instead of guessing
+   * (row `id` is NOT safe to send to /orders/{id} — see SalesOrderListItem).
+   */
   protected openSalesOrderDetail(item: SalesOrderListItem): void {
+    if (item.salesOrderId != null) {
+      this.openSoDetailDialog(item.salesOrderId);
+    } else if (item.jobId != null) {
+      this.openJobDetailDialog(item.jobId);
+    }
+  }
+
+  private openSoDetailDialog(salesOrderId: number): void {
     const ref = this.detailDialog.open<SalesOrderDetailDialogComponent, SalesOrderDetailDialogData>(
       'sales-order',
-      item.id,
+      salesOrderId,
       SalesOrderDetailDialogComponent,
-      { salesOrderId: item.id },
+      { salesOrderId },
+    );
+    ref.afterClosed().subscribe(() => this.loadSalesOrders());
+  }
+
+  private openJobDetailDialog(jobId: number): void {
+    const ref = this.detailDialog.open<JobDetailDialogComponent, JobDetailDialogData>(
+      'job',
+      jobId,
+      JobDetailDialogComponent,
+      { jobId },
     );
     ref.afterClosed().subscribe(() => this.loadSalesOrders());
   }

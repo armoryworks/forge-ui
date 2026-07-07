@@ -43,6 +43,15 @@ export async function synthesizeAggregate(
     }
   }
 
+  // Paged Job-projected list endpoint (/sales-orders). The demo store has no
+  // Job projection, so serve the entity-SO list wrapped in the PagedResponse
+  // envelope the UI reads ({ items, totalCount, ... }) — the generic fallback
+  // would hand back a bare entity array and the page would render empty.
+  if (head === 'sales-orders' && method === 'GET' && !sub) {
+    const rows = await synthesizeSalesOrderList(store, query);
+    return { items: rows, totalCount: rows.length, page: 1, pageSize: rows.length || 25 };
+  }
+
   // Sales orders live under /orders (not /sales-orders). Need list enrichment
   // (customerName, lineCount, total) and a detail shape with lines nested.
   if (head === 'orders') {
@@ -768,7 +777,8 @@ async function synthesizeSalesOrderList(store: DemoDataStore, query: URLSearchPa
 
   const customerFilter = query.get('customerId');
   const statusFilter = query.get('status');
-  const search = (query.get('search') ?? '').trim().toLowerCase();
+  // Legacy /orders uses ?search=; the paged /sales-orders endpoint uses ?q=.
+  const search = (query.get('q') ?? query.get('search') ?? '').trim().toLowerCase();
 
   return orders
     .filter(o => !customerFilter || String(o['customerId']) === String(customerFilter))
@@ -796,6 +806,10 @@ async function synthesizeSalesOrderList(store: DemoDataStore, query: URLSearchPa
         total,
         requestedDeliveryDate: o['requestedDeliveryDate'] ?? null,
         createdAt: o['createdAt'] ?? null,
+        // Demo rows are all real entity-SOs (no Job projection in the demo
+        // store), so the openable SalesOrder id is the row id itself.
+        salesOrderId: o['id'],
+        jobId: null,
       };
     });
 }

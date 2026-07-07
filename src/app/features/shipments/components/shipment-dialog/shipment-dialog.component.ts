@@ -57,11 +57,16 @@ export class ShipmentDialogComponent {
   protected readonly orderLines = signal<SalesOrderLine[]>([]);
   protected readonly lines = signal<LineEntry[]>([]);
 
+  // Only rows backed by a real SalesOrder are shippable — the row `id` may be
+  // a Job id on Job-projected rows (see SalesOrderListItem), so the option
+  // value must be the resolved salesOrderId, never the ambiguous row id.
   protected readonly salesOrderOptions = computed<AutocompleteOption[]>(() =>
-    this.salesOrders().map(so => ({
-      value: so.id,
-      label: `${so.orderNumber} — ${so.customerName}${so.customerPO ? ' (' + so.customerPO + ')' : ''}`,
-    })));
+    this.salesOrders()
+      .filter(so => so.salesOrderId != null)
+      .map(so => ({
+        value: so.salesOrderId,
+        label: `${so.orderNumber} — ${so.customerName}${so.customerPO ? ' (' + so.customerPO + ')' : ''}`,
+      })));
 
   // Remaining-to-ship on a SO line, net of what's already been added to this
   // shipment in the dialog.

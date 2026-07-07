@@ -65,6 +65,10 @@ export class CustomerOrdersTabComponent implements OnInit {
   }
 
   protected openOrder(order: SalesOrderListItem): void {
-    this.router.navigate(['/sales-orders'], { queryParams: { id: order.id } });
+    // `?detail=type:id` is the param the sales-orders page actually restores
+    // (DetailDialogService) — the previous `?id=` param was never read, so
+    // clicking an order landed on the bare list with no dialog. This tab reads
+    // the legacy /orders endpoint, so `order.id` is a real SalesOrder id.
+    this.router.navigate(['/sales-orders'], { queryParams: { detail: `sales-order:${order.id}` } });
   }
 }
