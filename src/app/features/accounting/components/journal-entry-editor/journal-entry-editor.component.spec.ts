@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { FormArray, FormGroup } from '@angular/forms';
 
@@ -27,9 +27,10 @@ const ACCOUNTS = [
 ];
 
 describe('JournalEntryEditorComponent', () => {
-  const gl = { getChartOfAccounts: vi.fn(), createManualJournalEntry: vi.fn() };
+  const gl = { getChartOfAccounts: vi.fn(), createManualJournalEntry: vi.fn(), getLedgerRegister: vi.fn() };
   const router = { navigate: vi.fn() };
   const snackbar = { success: vi.fn(), error: vi.fn() };
+  let queryParams: Record<string, string>;
 
   function create(): EditorApi {
     TestBed.resetTestingModule();
@@ -37,6 +38,10 @@ describe('JournalEntryEditorComponent', () => {
       providers: [
         { provide: GeneralLedgerService, useValue: gl },
         { provide: Router, useValue: router },
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { queryParamMap: { get: (k: string) => queryParams[k] ?? null } } },
+        },
         { provide: SnackbarService, useValue: snackbar },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
       ],
@@ -56,10 +61,38 @@ describe('JournalEntryEditorComponent', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    queryParams = {};
     gl.getChartOfAccounts.mockReturnValue(of(ACCOUNTS));
     gl.createManualJournalEntry.mockReturnValue(
       of({ id: 5, bookId: 1, entryNumber: 7, entryDate: '2026-01-10', status: 'Posted', memo: 'cash sale' }),
     );
+    gl.getLedgerRegister.mockReturnValue(of({ data: [], page: 1, pageSize: 100, totalCount: 0, totalPages: 0 }));
+  });
+
+  it('prefills lines and memo from ?correctionOf', () => {
+    queryParams = { correctionOf: '4' };
+    gl.getLedgerRegister.mockReturnValue(
+      of({
+        data: [
+          {
+            id: 4, entryNumber: 4, entryDate: '2026-07-06', source: 'Manual', sourceType: null, sourceId: null,
+            status: 'Reversed', memo: 'wrong', reversalOfEntryId: null, reversedByEntryId: 5, postedAt: null,
+            lines: [
+              { id: 1, lineNumber: 1, glAccountId: 100, accountNumber: '1000', accountName: 'Cash', debit: 95, credit: 0, description: 'cash', jobId: null, costCenterId: null },
+              { id: 2, lineNumber: 2, glAccountId: 101, accountNumber: '4000', accountName: 'Revenue', debit: 0, credit: 95, description: null, jobId: null, costCenterId: null },
+            ],
+          },
+        ],
+        page: 1, pageSize: 100, totalCount: 1, totalPages: 1,
+      }),
+    );
+    const api = create();
+    const lines = api.form.get('lines') as FormArray;
+    expect(lines.length).toBe(2);
+    expect(lines.at(0).value.glAccountId).toBe(100);
+    expect(lines.at(0).value.debit).toBe(95);
+    expect(lines.at(1).value.credit).toBe(95);
+    expect(api.form.get('memo')!.value).toBe('accounting.journalEditor.correctionMemo');
   });
 
   it('loads postable accounts into the picker on init', () => {

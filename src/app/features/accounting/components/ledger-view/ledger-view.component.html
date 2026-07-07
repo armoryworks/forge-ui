@@ -93,14 +93,21 @@
           }
         </div>
 
-        @if (row.status === 'Posted' && !row.reversedByEntryId) {
-          <div class="ledger-detail__actions">
+        <div class="ledger-detail__actions">
+          @if (row.status === 'Posted' && !row.reversedByEntryId) {
             <button type="button" class="action-btn action-btn--sm action-btn--danger" (click)="reverseEntry(row)">
               <span class="material-icons-outlined" aria-hidden="true">undo</span>
               {{ 'accounting.reverse.action' | translate }}
             </button>
-          </div>
-        }
+          }
+          <a
+            class="action-btn action-btn--sm"
+            routerLink="/accounting/journal-entries/new"
+            [queryParams]="{ correctionOf: row.id }">
+            <span class="material-icons-outlined" aria-hidden="true">edit_note</span>
+            {{ 'accounting.ledger.correct' | translate }}
+          </a>
+        </div>
       </div>
     </ng-template>
   </app-data-table>

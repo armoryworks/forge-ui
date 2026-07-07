@@ -7327,6 +7327,7 @@
       "aiOffline": "AI assistant offline — showing a plain summary",
       "scanAnomalies": "Scan for anomalies",
       "flagged": "{{count}} flagged",
+      "correct": "Correct (new entry)",
       "empty": "No journal entries"
     },
     "journalEditor": {
@@ -7339,7 +7340,8 @@
       "account": "Account",
       "balanced": "Balanced",
       "post": "Post entry",
-      "posted": "Entry #{{number}} posted"
+      "posted": "Entry #{{number}} posted",
+      "correctionMemo": "Correction of entry #{{number}}: "
     },
     "reverse": {
       "title": "Reverse entry #{{number}}",

@@ -7327,6 +7327,7 @@
       "aiOffline": "Asistente de IA sin conexión: se muestra un resumen simple",
       "scanAnomalies": "Buscar anomalías",
       "flagged": "{{count}} marcados",
+      "correct": "Corregir (nuevo asiento)",
       "empty": "Sin asientos contables"
     },
     "journalEditor": {
@@ -7339,7 +7340,8 @@
       "account": "Cuenta",
       "balanced": "Cuadrado",
       "post": "Registrar asiento",
-      "posted": "Asiento n.º {{number}} registrado"
+      "posted": "Asiento n.º {{number}} registrado",
+      "correctionMemo": "Corrección del asiento n.º {{number}}: "
     },
     "reverse": {
       "title": "Reversar el asiento n.º {{number}}",

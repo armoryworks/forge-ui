@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 
 import { filter, switchMap } from 'rxjs';
@@ -40,7 +41,7 @@ interface ExplainState {
 @Component({
   selector: 'app-ledger-view',
   standalone: true,
-  imports: [TranslatePipe, PageHeaderComponent, DataTableComponent, CurrencyDisplayComponent, RowExpandDirective, ColumnCellDirective],
+  imports: [RouterLink, TranslatePipe, PageHeaderComponent, DataTableComponent, CurrencyDisplayComponent, RowExpandDirective, ColumnCellDirective],
   templateUrl: './ledger-view.component.html',
   styleUrl: './ledger-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

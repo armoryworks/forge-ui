@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormArray, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+
+import { forkJoin } from 'rxjs';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -16,7 +18,7 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
-import { GlAccount, ManualJournalEntryInput } from '../../models/accounting.models';
+import { GlAccount, LedgerRegisterPage, ManualJournalEntryInput } from '../../models/accounting.models';
 
 const DEFAULT_BOOK_ID = 1;
 const DEFAULT_CURRENCY_ID = 1;
@@ -72,6 +74,7 @@ export class JournalEntryEditorComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly snackbar = inject(SnackbarService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly saving = signal(false);
@@ -104,13 +107,54 @@ export class JournalEntryEditorComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.gl
-      .getChartOfAccounts(DEFAULT_BOOK_ID, true)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (accounts) => this.accountOptions.set(accounts.map((a) => this.toOption(a))),
-        error: () => this.snackbar.error(this.translate.instant('accounting.errors.accountsLoadFailed')),
-      });
+    const accounts$ = this.gl.getChartOfAccounts(DEFAULT_BOOK_ID, true);
+
+    // §5A "Reverse / correct": ?correctionOf=<entryId> pre-seeds the form from the original entry
+    // (same lines, referencing memo) so the user fixes what was wrong and posts the replacement.
+    // URL is the source of truth — a shared/bookmarked link reopens the same correction.
+    // Options MUST be set before the lines are patched or the account selects render blank
+    // (value-vs-options race, caught by visual verification 2026-07-07) — hence the forkJoin.
+    const correctionOf = Number(this.route.snapshot.queryParamMap.get('correctionOf'));
+    if (correctionOf > 0) {
+      forkJoin([accounts$, this.gl.getLedgerRegister(DEFAULT_BOOK_ID, { pageSize: 100 })])
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: ([accounts, page]) => {
+            this.accountOptions.set(accounts.map((a) => this.toOption(a)));
+            this.prefillFrom(page, correctionOf);
+          },
+          error: () => this.snackbar.error(this.translate.instant('accounting.errors.accountsLoadFailed')),
+        });
+      return;
+    }
+
+    accounts$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (accounts) => this.accountOptions.set(accounts.map((a) => this.toOption(a))),
+      error: () => this.snackbar.error(this.translate.instant('accounting.errors.accountsLoadFailed')),
+    });
+  }
+
+  private prefillFrom(page: LedgerRegisterPage, entryId: number): void {
+    const original = page.data.find((e) => e.id === entryId);
+    if (!original) return; // fell off the first page — user composes manually
+    this.form.controls.memo.setValue(
+      this.translate.instant('accounting.journalEditor.correctionMemo', { number: original.entryNumber }),
+    );
+    // Resize then patch IN PLACE — never clear()+push(). The @for tracks $index, so replacing the
+    // controls under reused rows leaves formGroupName bound to the dead controls and the inputs
+    // render blank while the form state is correct (caught by visual verification 2026-07-07).
+    const needed = Math.max(original.lines.length, 2);
+    while (this.lines.length > needed) this.lines.removeAt(this.lines.length - 1);
+    while (this.lines.length < needed) this.lines.push(this.buildLine());
+    original.lines.forEach((line, i) =>
+      this.lines.at(i).patchValue({
+        glAccountId: line.glAccountId,
+        debit: line.debit || null,
+        credit: line.credit || null,
+        description: line.description ?? '',
+      }),
+    );
+    this.form.markAsDirty();
   }
 
   protected addLine(): void {
