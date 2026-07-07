@@ -353,6 +353,13 @@ export class LeadDetailPanelComponent {
     const lead = this.lead();
     if (!lead) return;
 
+    // Optimistic flip (mirrors updateStatus): show the Converted state
+    // immediately — the convert button gives way to the converted-info
+    // banner and the status chip turns green — so the rep gets visible
+    // feedback before the POST + navigate complete. Revert on failure.
+    const previous = lead.status;
+    this.lead.set({ ...lead, status: 'Converted' });
+
     this.saving.set(true);
     this.leadsService.convertLead(lead.id, { createJob: false }).subscribe({
       next: (result) => {
@@ -365,6 +372,9 @@ export class LeadDetailPanelComponent {
         }
       },
       error: () => {
+        // Revert the optimistic flip — the panel goes back to showing the
+        // convert button in the prior status.
+        this.lead.set({ ...lead, status: previous });
         this.saving.set(false);
         this.snackbar.error(this.translate.instant('leads.convertFailed'));
       },

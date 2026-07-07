@@ -37,10 +37,10 @@
     <ng-template appColumnCell="actions" let-row>
       <div class="row-actions">
         @if (!$any(row).generatedQuoteId) {
-          <button class="icon-btn" (click)="$event.stopPropagation(); convertToQuote($any(row))"
-                  [attr.aria-label]="'customers.estimates.convertToQuoteAriaLabel' | translate"
-                  [title]="'customers.estimates.convertToQuote' | translate">
+          <button class="action-btn action-btn--sm" (click)="$event.stopPropagation(); convertToQuote($any(row))"
+                  [attr.aria-label]="'customers.estimates.convertToQuoteAriaLabel' | translate">
             <span class="material-icons-outlined">forward</span>
+            {{ 'customers.estimates.convertToQuote' | translate }}
           </button>
         }
         <button class="icon-btn icon-btn--danger" (click)="$event.stopPropagation(); deleteEstimate($any(row))"
@@ -65,6 +65,9 @@
         <app-select [label]="'common.status' | translate" formControlName="status" [options]="statusOptions" />
       }
       <app-textarea [label]="'customers.estimates.notes' | translate" formControlName="notes" [rows]="2" />
+      @if (!isEditing()) {
+        <div class="estimate-lines__hint">{{ 'customers.estimates.linesAfterSaveHint' | translate }}</div>
+      }
     </div>
 
     @if (isEditing() && editingDetail()) {
@@ -133,7 +136,12 @@
             }
             <app-input [label]="'common.description' | translate" formControlName="description" [required]="true" />
             <app-input [label]="'customers.estimates.qty' | translate" type="number" formControlName="quantity" [required]="true" step="0.0001" min="0.0001" />
-            <app-currency-input [label]="'customers.estimates.amount' | translate" formControlName="unitPrice" [required]="true" />
+            <div class="price-field">
+              <app-currency-input [label]="'customers.estimates.amount' | translate" formControlName="unitPrice" [required]="true" />
+              @if (priceIsDefault()) {
+                <span class="price-badge" [matTooltip]="'List price — edit to override'" matTooltipPosition="above">LIST</span>
+              }
+            </div>
             <div class="line-edit-form__actions">
               <button type="button" class="action-btn" (click)="cancelLineEdit()">{{ 'common.cancel' | translate }}</button>
               <button type="submit" class="action-btn action-btn--primary" [disabled]="lineForm.invalid || savingLine()">{{ 'common.save' | translate }}</button>
@@ -148,6 +156,12 @@
     }
 
     <div dialog-footer>
+      @if (convertibleDetail(); as detail) {
+        <button class="action-btn action-btn--sm" (click)="convertToQuote(detail)">
+          <span class="material-icons-outlined">forward</span>
+          {{ 'customers.estimates.convertToQuote' | translate }}
+        </button>
+      }
       <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
       <app-validation-button [violations]="violations()" [loading]="saving()">
       <button class="action-btn action-btn--primary"

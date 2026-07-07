@@ -1851,6 +1851,8 @@
       "validUntil": "Válido hasta",
       "notes": "Notas",
       "estimateCreated": "Estimación creada",
+      "estimateCreatedAddLines": "Presupuesto creado — agregue partidas abajo.",
+      "linesAfterSaveHint": "Las partidas se pueden agregar después de guardar.",
       "estimateUpdated": "Estimación actualizada",
       "estimateDeleted": "Estimación eliminada",
       "deleteTitle": "¿Eliminar estimación?",
@@ -3043,7 +3045,9 @@
         "title": "¿Eliminar requisito?",
         "message": "Esto eliminará permanentemente el requisito \"{{requirementId}}\". El indicador de integridad se actualizará en la próxima representación."
       }
-    }
+    },
+    "confirmReminderTitle": "¿Enviar recordatorio?",
+    "confirmReminderMessage": "¿Enviar un correo de recordatorio de cumplimiento a este empleado?"
   },
   "teamsPanel": {
     "teams": "equipos",
@@ -3570,7 +3574,10 @@
     "soundDefault": "Predeterminado",
     "soundChime": "Campanilla",
     "soundBell": "Campana",
-    "soundPop": "Pop"
+    "soundPop": "Pop",
+    "emailAndSending": "Correo y envío",
+    "confirmBeforeSendLabel": "Confirmar antes de enviar",
+    "confirmBeforeSendHint": "Solicitar confirmación cada vez que se envíe algo a un cliente, proveedor o empleado. Desactívelo para enviar de inmediato."
   },
   "errors": {
     "generic": "Ocurrió un error. Intente de nuevo.",
@@ -3592,6 +3599,9 @@
     "deleteTitle": "¿Eliminar {item}?",
     "archiveTitle": "¿Archivar {item}?",
     "confirm": "Confirmar"
+  },
+  "confirmSend": {
+    "confirm": "Enviar"
   },
   "concurrencyConflict": {
     "title": "Registro modificado",
@@ -4290,7 +4300,9 @@
     "noCustomerAssigned": "Sin cliente asignado",
     "invoiceDetails": "Detalles de Factura",
     "loadingInvoice": "Cargando factura...",
-    "noLinesYet": "Sin líneas aún"
+    "noLinesYet": "Sin líneas aún",
+    "confirmSendTitle": "¿Enviar factura?",
+    "confirmSendMessage": "¿Enviar la factura {{number}} al cliente?"
   },
   "payments": {
     "title": "Pagos",
@@ -4681,6 +4693,8 @@
     "invoices": "Facturas",
     "noInvoices": "No hay facturas para esta orden",
     "createInvoice": "Crear factura",
+    "createAddendum": "Crear adenda",
+    "addendumCreated": "Adenda {{number}} creada como borrador — agregue las partidas del cambio allí.",
     "invoicesIntegratedMode": "Las facturas de este pedido se gestionan en su sistema de contabilidad conectado.",
     "amount": "Monto",
     "dueDate": "Fecha de Vencimiento",
@@ -4754,6 +4768,7 @@
     "deleteLineMessage": "¿Eliminar \"{{description}}\" de esta orden de venta?"
   },
   "quotes": {
+    "quoteLabel": "Cotización",
     "documents": "Documentos",
     "fileUploaded": "Archivo subido",
     "fileDeleted": "Archivo eliminado",
@@ -4803,6 +4818,7 @@
     "createQuote": "Crear Cotización",
     "selectCustomer": "Seleccionar cliente...",
     "taxRate": "Tasa de Impuesto (%)",
+    "customerPo": "O.C. del cliente",
     "partId": "ID de Pieza",
     "details": "Detalles de Cotización",
     "noLinesYet": "Sin líneas aún",
@@ -4814,7 +4830,9 @@
     "lineUpdated": "Línea actualizada",
     "lineRemoved": "Línea eliminada",
     "deleteLineTitle": "¿Eliminar línea?",
-    "deleteLineMessage": "¿Eliminar \"{{description}}\" de esta cotización?"
+    "deleteLineMessage": "¿Eliminar \"{{description}}\" de esta cotización?",
+    "confirmSendTitle": "¿Enviar cotización?",
+    "confirmSendMessage": "¿Enviar la cotización {{number}} al cliente?"
   },
   "shipments": {
     "title": "Envíos",
@@ -6242,7 +6260,11 @@
     "awardRfqMessage": "Award this RFQ to the selected vendor?",
     "awardRfqTitle": "Award RFQ",
     "leadTime": "Lead Time",
-    "selectPart": "Select Part"
+    "selectPart": "Select Part",
+    "rfq": {
+      "confirmSendTitle": "¿Enviar RFQ?",
+      "confirmSendMessage": "¿Enviar esta RFQ a {{count}} proveedor(es)?"
+    }
   },
   "approvals": {
     "title": "Aprobaciones",

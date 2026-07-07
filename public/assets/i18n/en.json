@@ -1856,6 +1856,8 @@
       "validUntil": "Valid Until",
       "notes": "Notes",
       "estimateCreated": "Estimate created",
+      "estimateCreatedAddLines": "Estimate created — add line items below.",
+      "linesAfterSaveHint": "Line items can be added after saving.",
       "estimateUpdated": "Estimate updated",
       "estimateDeleted": "Estimate deleted",
       "deleteTitle": "Delete Estimate?",
@@ -3043,7 +3045,9 @@
         "title": "Delete requirement?",
         "message": "This will permanently remove requirement \"{{requirementId}}\". The completeness chip will refresh on next render."
       }
-    }
+    },
+    "confirmReminderTitle": "Send Reminder?",
+    "confirmReminderMessage": "Send a compliance reminder email to this employee?"
   },
   "teamsPanel": {
     "teams": "teams",
@@ -3570,7 +3574,10 @@
     "soundDefault": "Default",
     "soundChime": "Chime",
     "soundBell": "Bell",
-    "soundPop": "Pop"
+    "soundPop": "Pop",
+    "emailAndSending": "Email & Sending",
+    "confirmBeforeSendLabel": "Confirm before sending",
+    "confirmBeforeSendHint": "Ask for confirmation whenever anything is sent to a customer, vendor, or employee. Turn off to send immediately."
   },
   "errors": {
     "generic": "An error occurred. Please try again.",
@@ -3592,6 +3599,9 @@
     "deleteTitle": "Delete {item}?",
     "archiveTitle": "Archive {item}?",
     "confirm": "Confirm"
+  },
+  "confirmSend": {
+    "confirm": "Send"
   },
   "concurrencyConflict": {
     "title": "Record Changed",
@@ -4297,7 +4307,9 @@
     "noCustomerAssigned": "No customer assigned",
     "invoiceDetails": "Invoice Details",
     "loadingInvoice": "Loading invoice...",
-    "noLinesYet": "No lines yet"
+    "noLinesYet": "No lines yet",
+    "confirmSendTitle": "Send Invoice?",
+    "confirmSendMessage": "Send invoice {{number}} to the customer?"
   },
   "payments": {
     "title": "Payments",
@@ -4709,6 +4721,8 @@
     "invoices": "Invoices",
     "noInvoices": "No invoices for this order",
     "createInvoice": "Create Invoice",
+    "createAddendum": "Create Addendum",
+    "addendumCreated": "Addendum {{number}} created as a Draft — add the change lines there.",
     "invoicesIntegratedMode": "Invoices for this order are managed in your connected accounting system.",
     "amount": "Amount",
     "dueDate": "Due Date",
@@ -4761,6 +4775,7 @@
     "deleteLineMessage": "Remove \"{{description}}\" from this order?"
   },
   "quotes": {
+    "quoteLabel": "Quote",
     "documents": "Documents",
     "fileUploaded": "File uploaded",
     "fileDeleted": "File deleted",
@@ -4810,6 +4825,7 @@
     "createQuote": "Create Quote",
     "selectCustomer": "Select customer...",
     "taxRate": "Tax Rate (%)",
+    "customerPo": "Customer P.O.",
     "partId": "Part ID",
     "details": "Quote Details",
     "noLinesYet": "No lines yet",
@@ -4821,7 +4837,9 @@
     "lineUpdated": "Line updated",
     "lineRemoved": "Line removed",
     "deleteLineTitle": "Remove line?",
-    "deleteLineMessage": "Remove \"{{description}}\" from this quote?"
+    "deleteLineMessage": "Remove \"{{description}}\" from this quote?",
+    "confirmSendTitle": "Send Quote?",
+    "confirmSendMessage": "Send quote {{number}} to the customer?"
   },
   "shipments": {
     "title": "Shipments",
@@ -6249,7 +6267,11 @@
     "toolingCost": "Tooling Cost",
     "unitPrice": "Unit Price",
     "vendorResponses": "Vendor Responses",
-    "vendors": "Vendors"
+    "vendors": "Vendors",
+    "rfq": {
+      "confirmSendTitle": "Send RFQ?",
+      "confirmSendMessage": "Send this RFQ to {{count}} vendor(s)?"
+    }
   },
   "approvals": {
     "title": "Approvals",

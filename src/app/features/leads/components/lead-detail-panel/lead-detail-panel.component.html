@@ -208,11 +208,11 @@
         <div class="convert-actions">
           <span class="info-label">{{ 'leads.convert' | translate }}</span>
           <div class="convert-btn-group">
-            <!-- Single Convert button — opens the stepper, where the user
-                 picks credit/tax/addresses and toggles "Also create a job"
-                 if desired. The previous two-button setup (Convert + Convert
-                 & Create Job) collapsed into one entry-point + a toggle in
-                 step 2 of the stepper. -->
+            <!-- One-click convert (the stepper was retired 2026-05-31 —
+                 see convertLead() in the .ts). A single click POSTs the
+                 atomic convert, optimistically flips the lead to Converted,
+                 then navigates to the new customer. Credit/tax/address
+                 details are edited on the customer page after conversion. -->
             <button data-testid="lead-convert-btn" class="action-btn action-btn--primary" [disabled]="saving()" (click)="convertLead()">
               <span class="material-icons-outlined">person_add</span>
               {{ 'leads.convertToCustomer' | translate }}

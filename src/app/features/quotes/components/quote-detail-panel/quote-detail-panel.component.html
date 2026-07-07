@@ -4,6 +4,7 @@
       <div class="detail-header__info">
         <span class="material-icons-outlined detail-icon">request_quote</span>
         <div>
+          <div class="detail-type">{{ 'quotes.quoteLabel' | translate }}</div>
           <div class="detail-name">{{ quote.quoteNumber }}</div>
           <div class="detail-customer"><app-entity-link type="customer" [entityId]="quote.customerId">{{ quote.customerName }}</app-entity-link></div>
         </div>

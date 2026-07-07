@@ -1,10 +1,13 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { EstimateService } from '../../../services/estimate.service';
+import { QuoteService } from '../../../../quotes/services/quote.service';
 import { Estimate, EstimateDetail, EstimateLine, EstimateStatus } from '../../../models/estimate.model';
 import { FormValidationService } from '../../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../../shared/services/snackbar.service';
@@ -36,7 +39,7 @@ const STATUS_OPTIONS: SelectOption[] = [
   selector: 'app-customer-estimates-tab',
   standalone: true,
   imports: [
-    DatePipe, DecimalPipe, ReactiveFormsModule, TranslatePipe,
+    DatePipe, DecimalPipe, ReactiveFormsModule, TranslatePipe, MatTooltipModule,
     DataTableComponent, ColumnCellDirective,
     InputComponent, CurrencyInputComponent, CurrencyDisplayComponent, SelectComponent, TextareaComponent, DatepickerComponent,
     DialogComponent, ValidationButtonComponent, EntityPickerComponent,
@@ -47,6 +50,7 @@ const STATUS_OPTIONS: SelectOption[] = [
 })
 export class CustomerEstimatesTabComponent implements OnInit {
   private readonly estimateService = inject(EstimateService);
+  private readonly quoteService = inject(QuoteService);
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
@@ -98,10 +102,29 @@ export class CustomerEstimatesTabComponent implements OnInit {
     unitPrice: new FormControl<number>(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
   });
 
+  /** True while the unit price reflects the resolved customer/list price and hasn't been manually edited. */
+  protected readonly priceIsDefault = signal(false);
+
+  constructor() {
+    // Manual price edit clears the "LIST" badge (mirrors quote-dialog).
+    // Programmatic pre-fills use emitEvent: false so they don't trip this.
+    this.lineForm.controls.unitPrice.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.priceIsDefault.set(false));
+  }
+
   // Lines are editable only on a saved, Draft, not-yet-converted estimate.
   protected readonly canEditLines = computed(() => {
     const d = this.editingDetail();
     return !!d && d.status === 'Draft' && !d.convertedAt;
+  });
+
+  // The open estimate, when it can still be converted to a quote (mirrors the
+  // row-level convert button's !generatedQuoteId condition). Null hides the
+  // dialog-footer convert button.
+  protected readonly convertibleDetail = computed(() => {
+    const d = this.editingDetail();
+    return d && !d.generatedQuoteId ? d : null;
   });
 
   protected readonly violations = computed(() =>
@@ -212,11 +235,21 @@ export class CustomerEstimatesTabComponent implements OnInit {
         validUntil: v.validUntil ? toIsoDate(v.validUntil) ?? undefined : undefined,
         notes: v.notes ?? undefined,
       }).subscribe({
-        next: () => {
+        next: created => {
           this.saving.set(false);
-          this.closeDialog();
+          // Don't close: transition the dialog in place to edit mode so line
+          // items can be added immediately (no save → reopen round-trip).
+          this.editingId.set(created.id);
+          this.estimateService.getEstimate(created.id).subscribe({
+            next: detail => {
+              this.editingDetail.set(detail);
+              this.estimateLines.set(detail.lines ?? []);
+              this.estimateForm.patchValue({ description: detail.description ?? '', notes: detail.notes ?? '' });
+            },
+          });
+          // Refresh the list behind the dialog in the background.
           this.loadEstimates();
-          this.snackbar.success(this.translate.instant('customers.estimates.estimateCreated'));
+          this.snackbar.success(this.translate.instant('customers.estimates.estimateCreatedAddLines'));
         },
         error: () => this.saving.set(false),
       });
@@ -263,13 +296,29 @@ export class CustomerEstimatesTabComponent implements OnInit {
     this.editingLineId.set(null);
   }
 
-  /** Prefill the description from the chosen catalog part when blank. */
+  /**
+   * Prefill the description from the chosen catalog part when blank, and pull
+   * the customer's resolved price-list unit price (same resolver the quote
+   * dialog uses). The price stays editable — estimates support lump-sum lines —
+   * and a manual edit clears the "LIST" badge via the valueChanges sub above.
+   */
   protected onPartSelected(part: Record<string, unknown> | null): void {
+    this.priceIsDefault.set(false);
     if (!part) return;
     const name = (part['name'] as string) ?? '';
     if (name && !this.lineForm.controls.description.value) {
       this.lineForm.controls.description.setValue(name);
     }
+    const partId = part['id'] as number | undefined;
+    if (!partId) return;
+    this.quoteService.resolvePrice(this.customerId(), partId).subscribe({
+      next: price => {
+        if (price != null && price > 0) {
+          this.lineForm.controls.unitPrice.setValue(price, { emitEvent: false });
+          this.priceIsDefault.set(true);
+        }
+      },
+    });
   }
 
   protected saveLine(): void {
@@ -345,8 +394,16 @@ export class CustomerEstimatesTabComponent implements OnInit {
       if (!confirmed) return;
       this.estimateService.convertToQuote(estimate.id).subscribe({
         next: result => {
-          this.loadEstimates();
           this.snackbar.success(this.translate.instant('customers.estimates.createdQuote', { number: result.quoteNumber ?? '' }));
+          if (this.editingId() === estimate.id) {
+            // Converted from the edit dialog: refresh the open detail in place
+            // (hides the footer convert button, locks lines) + reload the list.
+            this.estimateService.getEstimate(estimate.id).subscribe({
+              next: detail => this.applyDetail(detail),
+            });
+          } else {
+            this.loadEstimates();
+          }
         },
       });
     });

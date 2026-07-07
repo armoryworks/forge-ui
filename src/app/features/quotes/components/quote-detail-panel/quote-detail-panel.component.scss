@@ -26,6 +26,12 @@
 .detail-header__info { display: flex; align-items: center; gap: $sp-md; }
 .detail-header__actions { display: flex; gap: $sp-sm; }
 .detail-icon { font-size: $icon-size-xl; color: var(--text-muted); }
+// Entity-type eyebrow label (mirrors the asset detail panel's .detail-type;
+// small uppercase muted per the section-title convention).
+.detail-type {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  color: var(--text-muted);
+}
 .detail-name { font-weight: 700; }
 .detail-customer { font-size: $font-size-xs; color: var(--text-muted); }
 
