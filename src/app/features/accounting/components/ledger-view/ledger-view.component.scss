@@ -69,3 +69,12 @@
   font-size: $font-size-base;
   color: var(--text);
 }
+
+.ledger-lines__acct {
+  color: var(--primary);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

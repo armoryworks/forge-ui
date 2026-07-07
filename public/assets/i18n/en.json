@@ -7328,6 +7328,8 @@
       "scanAnomalies": "Scan for anomalies",
       "flagged": "{{count}} flagged",
       "correct": "Correct (new entry)",
+      "balance": "Balance",
+      "allEntries": "All entries",
       "empty": "No journal entries"
     },
     "journalEditor": {

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
+import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { of, throwError } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
@@ -40,25 +41,34 @@ interface LedgerApi {
   ngOnInit(): void;
   loading(): boolean;
   error(): string | null;
-  entries(): (LedgerRegisterEntry & { entryDateDisplay: string })[];
+  entries(): (LedgerRegisterEntry & { entryDateDisplay: string; balanceAfter?: number })[];
   explanations(): Record<number, ExplainState>;
   explain(entry: LedgerRegisterEntry): void;
   scanAnomalies(): void;
   anomalyFlags(): Record<number, string[]>;
   anomalyCount(): number;
   reverseEntry(entry: LedgerRegisterEntry): void;
+  lensAccount(): unknown;
 }
 
 describe('LedgerViewComponent', () => {
-  const gl = { getLedgerRegister: vi.fn(), explainJournalEntry: vi.fn(), getGlAnomalies: vi.fn(), reverseJournalEntry: vi.fn() };
+  const gl = {
+    getLedgerRegister: vi.fn(),
+    explainJournalEntry: vi.fn(),
+    getGlAnomalies: vi.fn(),
+    reverseJournalEntry: vi.fn(),
+    getTrialBalance: vi.fn(),
+  };
   const snackbar = { error: vi.fn(), success: vi.fn() };
   const dialog = { open: vi.fn() };
+  let routeParams: Record<string, string>;
 
   function create(): LedgerApi {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
         { provide: GeneralLedgerService, useValue: gl },
+        { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap(routeParams)) } },
         { provide: SnackbarService, useValue: snackbar },
         { provide: MatDialog, useValue: dialog },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
@@ -74,7 +84,9 @@ describe('LedgerViewComponent', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    routeParams = {};
     gl.getLedgerRegister.mockReturnValue(of(PAGE));
+    gl.getTrialBalance.mockReturnValue(of({ bookId: 1, rows: [], totalDebit: 0, totalCredit: 0, isBalanced: true }));
     gl.explainJournalEntry.mockReturnValue(
       of<JournalEntryExplanation>({ entryId: 1, explanation: 'A $100 cash sale.', aiAvailable: true, deterministicSummary: 'd' }),
     );
@@ -87,7 +99,7 @@ describe('LedgerViewComponent', () => {
 
   it('loads the register for the default book on init', () => {
     const api = create();
-    expect(gl.getLedgerRegister).toHaveBeenCalledWith(1, { pageSize: 100 });
+    expect(gl.getLedgerRegister).toHaveBeenCalledWith(1, { pageSize: 100, glAccountId: null });
     expect(api.entries()).toHaveLength(1);
     expect(api.loading()).toBe(false);
     expect(api.error()).toBeNull();
@@ -108,6 +120,37 @@ describe('LedgerViewComponent', () => {
     expect(gl.getGlAnomalies).toHaveBeenCalledWith(1);
     expect(api.anomalyCount()).toBe(1);
     expect(api.anomalyFlags()[1]).toEqual(['big']);
+  });
+
+  it('computes the running balance in the account lens, newest first', () => {
+    routeParams = { accountId: '1' };
+    const cashLine = (id: number, debit: number, credit: number) => ({
+      id, lineNumber: 1, glAccountId: 1, accountNumber: '10100', accountName: 'Cash',
+      debit, credit, description: null, jobId: null, costCenterId: null,
+    });
+    const otherLine = (id: number) => ({
+      id, lineNumber: 2, glAccountId: 23, accountNumber: '40000', accountName: 'Revenue',
+      debit: 0, credit: 0, description: null, jobId: null, costCenterId: null,
+    });
+    // newest first: +100 (entry 3), -30 (entry 2), +50 (entry 1); current balance = 120
+    gl.getLedgerRegister.mockReturnValue(of({
+      data: [
+        { ...ENTRY, id: 3, entryNumber: 3, lines: [cashLine(31, 100, 0), otherLine(32)] },
+        { ...ENTRY, id: 2, entryNumber: 2, lines: [cashLine(21, 0, 30), otherLine(22)] },
+        { ...ENTRY, id: 1, entryNumber: 1, lines: [cashLine(11, 50, 0), otherLine(12)] },
+      ],
+      page: 1, pageSize: 100, totalCount: 3, totalPages: 1,
+    }));
+    gl.getTrialBalance.mockReturnValue(of({
+      bookId: 1, totalDebit: 0, totalCredit: 0, isBalanced: true,
+      rows: [{ glAccountId: 1, accountNumber: '10100', accountName: 'Cash', debitTotal: 150, creditTotal: 30, netBalance: 120 }],
+    }));
+
+    const api = create();
+    expect(gl.getLedgerRegister).toHaveBeenCalledWith(1, { pageSize: 100, glAccountId: 1 });
+    expect(api.lensAccount()).toMatchObject({ glAccountId: 1, netBalance: 120 });
+    // balance AFTER each entry, walking newest -> oldest: 120, 20, 50
+    expect(api.entries().map((e) => e.balanceAfter)).toEqual([120, 20, 50]);
   });
 
   it('reverses an entry via the dialog result, then reloads', () => {

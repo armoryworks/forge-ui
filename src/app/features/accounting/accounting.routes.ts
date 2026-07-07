@@ -9,6 +9,11 @@ export const ACCOUNTING_ROUTES: Routes = [
       import('./components/ledger-view/ledger-view.component').then((m) => m.LedgerViewComponent),
   },
   {
+    path: 'ledger/:accountId',
+    loadComponent: () =>
+      import('./components/ledger-view/ledger-view.component').then((m) => m.LedgerViewComponent),
+  },
+  {
     path: 'journal-entries/new',
     loadComponent: () =>
       import('./components/journal-entry-editor/journal-entry-editor.component').then((m) => m.JournalEntryEditorComponent),

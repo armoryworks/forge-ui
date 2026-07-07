@@ -7328,6 +7328,8 @@
       "scanAnomalies": "Buscar anomalías",
       "flagged": "{{count}} marcados",
       "correct": "Corregir (nuevo asiento)",
+      "balance": "Saldo",
+      "allEntries": "Todos los asientos",
       "empty": "Sin asientos contables"
     },
     "journalEditor": {
