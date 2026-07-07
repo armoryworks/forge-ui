@@ -40,7 +40,7 @@ interface LedgerApi {
   ngOnInit(): void;
   loading(): boolean;
   error(): string | null;
-  entries(): LedgerRegisterEntry[];
+  entries(): (LedgerRegisterEntry & { entryDateDisplay: string })[];
   explanations(): Record<number, ExplainState>;
   explain(entry: LedgerRegisterEntry): void;
   scanAnomalies(): void;
@@ -96,7 +96,7 @@ describe('LedgerViewComponent', () => {
   it('formats the DateOnly entry date as a plain string (no timezone shift)', () => {
     const api = create();
     // "2026-01-10" must render 01/10/2026 — never TZ-shifted to the previous day.
-    expect((api.entries()[0] as { entryDateDisplay: string }).entryDateDisplay).toBe('01/10/2026');
+    expect(api.entries()[0].entryDateDisplay).toBe('01/10/2026');
   });
 
   it('scans for anomalies and indexes the flags by entry', () => {
