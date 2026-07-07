@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { FileAttachment } from '../../../shared/models/file.model';
 import { LeadItem } from '../models/lead-item.model';
 import { CreateLeadRequest } from '../models/create-lead-request.model';
 import { UpdateLeadRequest } from '../models/update-lead-request.model';
@@ -80,5 +81,20 @@ export class LeadsService {
 
   updateOutreachPreferences(leadId: number, request: UpdateOutreachPreferencesRequest): Observable<OutreachPreferences> {
     return this.http.put<OutreachPreferences>(`${this.base}/${leadId}/outreach-preferences`, request);
+  }
+
+  // Documents — shared files API (mirrors sales-order.service). Uploads go
+  // through <app-file-upload-zone>; list/delete/download live here.
+
+  getDocuments(leadId: number): Observable<FileAttachment[]> {
+    return this.http.get<FileAttachment[]>(`${this.base}/${leadId}/files`);
+  }
+
+  deleteFile(fileId: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/files/${fileId}`);
+  }
+
+  downloadFileUrl(fileId: number): string {
+    return `${environment.apiUrl}/files/${fileId}/download`;
   }
 }

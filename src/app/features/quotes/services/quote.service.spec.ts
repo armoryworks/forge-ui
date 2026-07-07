@@ -81,4 +81,24 @@ describe('QuoteService', () => {
       req.flush(null);
     });
   });
+
+  describe('documents', () => {
+    it('should GET the quote file list from the shared files API', () => {
+      service.getDocuments(6).subscribe();
+      const req = httpMock.expectOne(`${apiUrl}/quotes/6/files`);
+      expect(req.request.method).toBe('GET');
+      req.flush([]);
+    });
+
+    it('should DELETE a file by id', () => {
+      service.deleteFile(9).subscribe();
+      const req = httpMock.expectOne(`${apiUrl}/files/9`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush(null);
+    });
+
+    it('should build the download URL for a file', () => {
+      expect(service.downloadFileUrl(9)).toBe(`${apiUrl}/files/9/download`);
+    });
+  });
 });

@@ -141,6 +141,30 @@ describe('CustomerService', () => {
     });
   });
 
+  // ── documents ─────────────────────────────────────────────────────────────
+
+  describe('documents', () => {
+    it('should GET the customer file list from the shared files API', () => {
+      service.getDocuments(4).subscribe();
+
+      const req = httpMock.expectOne(`${baseUrl}/4/files`);
+      expect(req.request.method).toBe('GET');
+      req.flush([]);
+    });
+
+    it('should DELETE a file by id', () => {
+      service.deleteFile(9).subscribe();
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/files/9`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush(null);
+    });
+
+    it('should build the download URL for a file', () => {
+      expect(service.downloadFileUrl(9)).toBe(`${environment.apiUrl}/files/9/download`);
+    });
+  });
+
   // ── deleteContact ─────────────────────────────────────────────────────────
 
   describe('deleteContact', () => {

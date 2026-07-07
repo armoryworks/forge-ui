@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   ElementRef,
   inject,
   input,
@@ -58,6 +59,28 @@ export class FileUploadZoneComponent {
   protected readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
   protected readonly dragOver = signal(false);
   protected readonly uploads = signal<FileUploadProgress[]>([]);
+
+  /**
+   * Human-readable list of accepted types parsed from the `accept` input,
+   * e.g. ".pdf,.jpg,image/*" → "PDF, JPG, IMAGE". Empty string when the
+   * zone accepts everything (no hint rendered).
+   */
+  protected readonly acceptedTypes = computed(() => {
+    const accept = this.accept();
+    if (!accept) return '';
+    return accept
+      .split(',')
+      .map(token => token.trim())
+      .filter(token => token.length > 0)
+      .map(token => {
+        if (token.includes('/')) {
+          const [type, subtype] = token.split('/');
+          return (subtype === '*' || !subtype ? type : subtype).toUpperCase();
+        }
+        return token.replace(/^\./, '').toUpperCase();
+      })
+      .join(', ');
+  });
 
   protected onDragOver(event: DragEvent): void {
     event.preventDefault();

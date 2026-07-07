@@ -1,0 +1,62 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+// Documents cluster — layout matches the shared customer-detail tab shell
+// (`customer-detail-tabs.scss`); doc rows mirror the sales-order detail
+// panel's doc-list pattern.
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tab-content {
+  @include custom-scrollbar;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: $sp-xl;
+}
+
+.documents-section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.doc-item {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+}
+
+.doc-item__icon {
+  font-size: $icon-size-lg;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.doc-item__info {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+  flex: 1;
+  min-width: 0;
+}
+
+.doc-item__name {
+  @include truncate;
+  font-size: $font-size-sm;
+  font-weight: 600;
+}
+
+.doc-item__meta {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+}

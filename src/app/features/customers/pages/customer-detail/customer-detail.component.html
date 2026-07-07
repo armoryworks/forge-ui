@@ -143,6 +143,9 @@
         @case ('pricing') {
           <app-customer-pricing-tab [customerId]="c.id" />
         }
+        @case ('documents') {
+          <app-customer-documents-cluster [customerId]="c.id" />
+        }
         @case ('activity') {
           <!-- Pillar 5 — Activity cluster wraps shared entity-activity-section. -->
           <app-customer-activity-cluster [customerId]="c.id" />

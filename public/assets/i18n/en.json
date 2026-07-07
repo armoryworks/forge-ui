@@ -1469,6 +1469,12 @@
     }
   },
   "customers": {
+    "documents": {
+      "deleteFileTitle": "Delete File?",
+      "deleteFileMessage": "This will permanently delete \"{{name}}\".",
+      "fileDeleted": "File deleted",
+      "fileUploaded": "File uploaded"
+    },
     "title": "Customers",
     "subtitle": "Manage customer contacts and addresses",
     "createCustomer": "New Customer",
@@ -1593,7 +1599,24 @@
     "billingAddress": "Billing Address",
     "shippingAddress": "Shipping Address",
     "taxRate": "Tax Rate",
-    "addresses": "Addresses",
+    "addresses": {
+      "addAddress": "Add Address",
+      "addFirst": "Add First Address",
+      "editAddress": "Edit Address",
+      "deleteAddressTitle": "Delete Address?",
+      "deleteAddressMessage": "This will permanently remove \"{{label}}\" from this customer.",
+      "addressSaved": "Address saved",
+      "addressDeleted": "Address deleted",
+      "labelField": "Label",
+      "typeField": "Address Type",
+      "defaultField": "Default Address",
+      "typeBilling": "Billing",
+      "typeShipping": "Shipping",
+      "typeBoth": "Billing & Shipping",
+      "addAddressAriaLabel": "Add address",
+      "editAddressAriaLabel": "Edit address",
+      "deleteAddressAriaLabel": "Delete address"
+    },
     "orders": "Orders",
     "contacts": "Contacts",
     "searchPlaceholder": "Search customers...",
@@ -1660,6 +1683,7 @@
         "invoices": "Invoices",
         "interactions": "Interactions",
         "pricing": "Pricing",
+        "documents": "Documents",
         "activity": "Activity",
         "placeholderHelp": "This tab is coming in a follow-up dispatch."
       },
@@ -1976,6 +2000,11 @@
     "deleteList": "Delete list"
   },
   "leads": {
+    "documents": "Documents",
+    "fileUploaded": "File uploaded",
+    "fileDeleted": "File deleted",
+    "deleteFileTitle": "Delete File?",
+    "deleteFileMessage": "This will permanently delete \"{{name}}\".",
     "title": "Leads",
     "createLead": "New Lead",
     "createLeadMore": "More ways to add leads",
@@ -4068,7 +4097,8 @@
   "fileUpload": {
     "dragAndDrop": "Upload files — drag and drop or click to browse",
     "dragHere": "Drag files here or click to browse",
-    "maxSize": "Max {{size}}MB per file"
+    "maxSize": "Max {{size}}MB per file",
+    "acceptedTypes": "Accepted: {{types}}"
   },
   "syncConflict": {
     "title": "Sync Conflict",
@@ -4678,6 +4708,8 @@
     "documents": "Documents",
     "invoices": "Invoices",
     "noInvoices": "No invoices for this order",
+    "createInvoice": "Create Invoice",
+    "invoicesIntegratedMode": "Invoices for this order are managed in your connected accounting system.",
     "amount": "Amount",
     "dueDate": "Due Date",
     "paymentStatus": "Payment Status",
@@ -4729,6 +4761,11 @@
     "deleteLineMessage": "Remove \"{{description}}\" from this order?"
   },
   "quotes": {
+    "documents": "Documents",
+    "fileUploaded": "File uploaded",
+    "fileDeleted": "File deleted",
+    "deleteFileTitle": "Delete File?",
+    "deleteFileMessage": "This will permanently delete \"{{name}}\".",
     "title": "Quotes",
     "subtitle": "Create and manage customer price quotes",
     "newQuote": "New Quote",

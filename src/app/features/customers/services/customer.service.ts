@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { PagedResponse, PagedQuery } from '../../../shared/models/paged-response.model';
+import { FileAttachment } from '../../../shared/models/file.model';
 import { CustomerListItem } from '../models/customer-list-item.model';
 import { CustomerDetail } from '../models/customer-detail.model';
 import { CustomerSummary } from '../models/customer-summary.model';
@@ -152,5 +153,20 @@ export class CustomerService {
 
   provisionPortalAccess(contactId: number): Observable<PortalAccessRow> {
     return this.http.post<PortalAccessRow>(`${this.base}/portal-access`, { contactId });
+  }
+
+  // Documents — shared files API (mirrors sales-order.service). Uploads go
+  // through <app-file-upload-zone>; list/delete/download live here.
+
+  getDocuments(customerId: number): Observable<FileAttachment[]> {
+    return this.http.get<FileAttachment[]>(`${this.base}/${customerId}/files`);
+  }
+
+  deleteFile(fileId: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/files/${fileId}`);
+  }
+
+  downloadFileUrl(fileId: number): string {
+    return `${environment.apiUrl}/files/${fileId}/download`;
   }
 }

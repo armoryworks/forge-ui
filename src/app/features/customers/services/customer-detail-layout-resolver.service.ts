@@ -23,6 +23,7 @@ export type CustomerDetailTabId =
   | 'invoices'
   | 'interactions'
   | 'pricing'
+  | 'documents'
   | 'activity';
 
 /** A single tab descriptor returned by the resolver. */
@@ -47,6 +48,7 @@ const JOBS: TabLayoutEntry = { id: 'jobs', labelKey: 'customers.detail.tabs.jobs
 const INVOICES: TabLayoutEntry = { id: 'invoices', labelKey: 'customers.detail.tabs.invoices', iconName: 'receipt_long' };
 const INTERACTIONS: TabLayoutEntry = { id: 'interactions', labelKey: 'customers.detail.tabs.interactions', iconName: 'forum' };
 const PRICING: TabLayoutEntry = { id: 'pricing', labelKey: 'customers.detail.tabs.pricing', iconName: 'sell' };
+const DOCUMENTS: TabLayoutEntry = { id: 'documents', labelKey: 'customers.detail.tabs.documents', iconName: 'folder' };
 const ACTIVITY: TabLayoutEntry = { id: 'activity', labelKey: 'customers.detail.tabs.activity', iconName: 'timeline' };
 
 /**
@@ -69,15 +71,17 @@ export class CustomerDetailLayoutResolverService {
     if (lifecycle === 'Prospect') {
       // No active business yet — surface intake + sales-pipeline tabs only.
       // Pricing is omitted: prospects rarely have negotiated price lists.
-      return [CONTACTS, ADDRESSES, ESTIMATES, QUOTES, INTERACTIONS];
+      // Documents stays: NDAs / drawings arrive before the first order.
+      return [CONTACTS, ADDRESSES, ESTIMATES, QUOTES, INTERACTIONS, DOCUMENTS];
     }
     if (lifecycle === 'Archived') {
-      // Read-only history posture. Keep Invoices for unpaid balances.
-      return [CONTACTS, ADDRESSES, INVOICES, INTERACTIONS];
+      // Read-only history posture. Keep Invoices for unpaid balances and
+      // Documents for the attachment record.
+      return [CONTACTS, ADDRESSES, INVOICES, INTERACTIONS, DOCUMENTS];
     }
     // Active (default permissive layout). Pricing surfaces here so Office
     // Managers can adjust customer-specific price lists in-context.
-    return [CONTACTS, ADDRESSES, ESTIMATES, QUOTES, ORDERS, JOBS, INVOICES, PRICING, INTERACTIONS];
+    return [CONTACTS, ADDRESSES, ESTIMATES, QUOTES, ORDERS, JOBS, INVOICES, PRICING, INTERACTIONS, DOCUMENTS];
   }
 
   /**

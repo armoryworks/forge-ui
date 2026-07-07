@@ -236,6 +236,33 @@
         }
       </div>
 
+      <!-- Documents — doc-list pattern shared with the sales-order detail
+           panel. The upload zone always shows (no empty-state block). -->
+      <div class="documents-section">
+        <span class="info-label">{{ 'quotes.documents' | translate }}</span>
+        @for (doc of documents(); track doc.id) {
+          <div class="doc-item">
+            <span class="material-icons-outlined doc-item__icon">{{ getFileIcon(doc.contentType) }}</span>
+            <div class="doc-item__info">
+              <span class="doc-item__name">{{ doc.fileName }}</span>
+              <span class="doc-item__meta">{{ formatFileSize(doc.size) }} · {{ doc.createdAt | date:'MM/dd/yyyy' }}</span>
+            </div>
+            <button class="icon-btn" [attr.aria-label]="'common.download' | translate" (click)="downloadFile(doc)">
+              <span class="material-icons-outlined">download</span>
+            </button>
+            <button class="icon-btn icon-btn--danger" [attr.aria-label]="'common.delete' | translate" (click)="deleteFile(doc)">
+              <span class="material-icons-outlined">delete</span>
+            </button>
+          </div>
+        }
+        <app-file-upload-zone
+          entityType="quotes"
+          [entityId]="quote.id"
+          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv,.txt"
+          [maxSizeMb]="50"
+          (uploaded)="onFileUploaded($event)" />
+      </div>
+
       <!-- Activity -->
       <app-entity-activity-section entityType="Quote" [entityId]="quoteIdValue()" />
     </div>

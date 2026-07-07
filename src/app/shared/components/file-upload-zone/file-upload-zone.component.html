@@ -21,6 +21,9 @@
   <span class="material-icons-outlined upload-zone__icon">cloud_upload</span>
   <span class="upload-zone__text">{{ 'fileUpload.dragHere' | translate }}</span>
   <span class="upload-zone__hint">{{ 'fileUpload.maxSize' | translate:{ size: maxSizeMb() } }}</span>
+  @if (acceptedTypes()) {
+    <span class="upload-zone__hint">{{ 'fileUpload.acceptedTypes' | translate:{ types: acceptedTypes() } }}</span>
+  }
 </div>
 
 @if (uploads().length) {

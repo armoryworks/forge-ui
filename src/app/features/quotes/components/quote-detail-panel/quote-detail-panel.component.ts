@@ -11,6 +11,7 @@ import { QuoteDetail } from '../../models/quote-detail.model';
 import { QuoteLine } from '../../models/quote-line.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
+import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
@@ -18,6 +19,7 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
+import { FileAttachment } from '../../../../shared/models/file.model';
 
 @Component({
   selector: 'app-quote-detail-panel',
@@ -25,7 +27,7 @@ import { CurrencyInputComponent } from '../../../../shared/components/currency-i
   imports: [
     DatePipe, DecimalPipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
-    EntityActivitySectionComponent,
+    EntityActivitySectionComponent, FileUploadZoneComponent,
     EntityLinkComponent, CurrencyDisplayComponent,
     EntityPickerComponent, InputComponent, CurrencyInputComponent,
   ],
@@ -45,6 +47,7 @@ export class QuoteDetailPanelComponent {
 
   protected readonly loading = signal(false);
   protected readonly quote = signal<QuoteDetail | null>(null);
+  protected readonly documents = signal<FileAttachment[]>([]);
 
   protected readonly quoteIdValue = computed(() => this.quoteId());
 
@@ -62,7 +65,10 @@ export class QuoteDetailPanelComponent {
   constructor() {
     effect(() => {
       const id = this.quoteId();
-      if (id) this.loadQuote(id);
+      if (id) {
+        this.loadQuote(id);
+        this.loadDocuments(id);
+      }
     });
   }
 
@@ -257,6 +263,57 @@ export class QuoteDetailPanelComponent {
       },
       error: () => this.savingLine.set(false),
     });
+  }
+
+  // --- Documents (mirrors the sales-order detail panel's Documents tab) ---
+
+  private loadDocuments(id: number): void {
+    this.quoteService.getDocuments(id).subscribe({
+      next: (docs) => this.documents.set(docs),
+    });
+  }
+
+  protected downloadFile(doc: FileAttachment): void {
+    window.open(this.quoteService.downloadFileUrl(doc.id), '_blank');
+  }
+
+  protected deleteFile(doc: FileAttachment): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('quotes.deleteFileTitle'),
+        message: this.translate.instant('quotes.deleteFileMessage', { name: doc.fileName }),
+        confirmLabel: this.translate.instant('common.delete'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.quoteService.deleteFile(doc.id).subscribe({
+        next: () => {
+          this.documents.update(list => list.filter(f => f.id !== doc.id));
+          this.snackbar.success(this.translate.instant('quotes.fileDeleted'));
+        },
+      });
+    });
+  }
+
+  protected onFileUploaded(_file: UploadedFile): void {
+    this.loadDocuments(this.quoteId());
+    this.snackbar.success(this.translate.instant('quotes.fileUploaded'));
+  }
+
+  protected getFileIcon(contentType: string): string {
+    if (contentType.startsWith('image/')) return 'image';
+    if (contentType === 'application/pdf') return 'picture_as_pdf';
+    if (contentType.includes('spreadsheet') || contentType.includes('excel')) return 'table_chart';
+    if (contentType.includes('document') || contentType.includes('word')) return 'description';
+    return 'attach_file';
+  }
+
+  protected formatFileSize(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
   protected deleteLine(line: QuoteLine): void {

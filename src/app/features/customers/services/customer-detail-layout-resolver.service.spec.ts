@@ -30,32 +30,38 @@ describe('CustomerDetailLayoutResolverService', () => {
     service = TestBed.inject(CustomerDetailLayoutResolverService);
   });
 
-  it('Active → overview, contacts, addresses, estimates, quotes, orders, jobs, invoices, pricing, interactions, activity', () => {
+  it('Active → overview, contacts, addresses, estimates, quotes, orders, jobs, invoices, pricing, interactions, documents, activity', () => {
     const ids = service.resolve('Active').map(t => t.id);
     expect(ids).toEqual([
       'overview', 'contacts', 'addresses', 'estimates', 'quotes',
-      'orders', 'jobs', 'invoices', 'pricing', 'interactions', 'activity',
+      'orders', 'jobs', 'invoices', 'pricing', 'interactions', 'documents', 'activity',
     ]);
   });
 
-  it('Prospect → overview, contacts, addresses, estimates, quotes, interactions, activity (no orders/jobs/invoices)', () => {
+  it('Prospect → overview, contacts, addresses, estimates, quotes, interactions, documents, activity (no orders/jobs/invoices)', () => {
     const ids = service.resolve('Prospect').map(t => t.id);
     expect(ids).toEqual([
-      'overview', 'contacts', 'addresses', 'estimates', 'quotes', 'interactions', 'activity',
+      'overview', 'contacts', 'addresses', 'estimates', 'quotes', 'interactions', 'documents', 'activity',
     ]);
     expect(ids).not.toContain('orders');
     expect(ids).not.toContain('jobs');
   });
 
-  it('Archived → overview, contacts, addresses, invoices, interactions, activity (read-only history posture)', () => {
+  it('Archived → overview, contacts, addresses, invoices, interactions, documents, activity (read-only history posture)', () => {
     const ids = service.resolve('Archived').map(t => t.id);
     expect(ids).toEqual([
-      'overview', 'contacts', 'addresses', 'invoices', 'interactions', 'activity',
+      'overview', 'contacts', 'addresses', 'invoices', 'interactions', 'documents', 'activity',
     ]);
     expect(ids).not.toContain('estimates');
     expect(ids).not.toContain('quotes');
     expect(ids).not.toContain('orders');
     expect(ids).not.toContain('jobs');
+  });
+
+  it('Documents is present in every lifecycle (attachments precede and outlive active business)', () => {
+    for (const lc of ['Active', 'Prospect', 'Archived'] as const) {
+      expect(service.resolve(lc).map(t => t.id), `documents tab for ${lc}`).toContain('documents');
+    }
   });
 
   it('Identity (overview) always first; Activity always last across every lifecycle', () => {
@@ -74,7 +80,7 @@ describe('CustomerDetailLayoutResolverService', () => {
     const ids = service.resolve('Unknown' as never).map(t => t.id);
     expect(ids).toEqual([
       'overview', 'contacts', 'addresses', 'estimates', 'quotes',
-      'orders', 'jobs', 'invoices', 'pricing', 'interactions', 'activity',
+      'orders', 'jobs', 'invoices', 'pricing', 'interactions', 'documents', 'activity',
     ]);
   });
 

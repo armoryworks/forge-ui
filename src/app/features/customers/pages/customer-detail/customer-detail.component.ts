@@ -34,6 +34,7 @@ import { CustomerActivityClusterComponent } from '../../components/customer-clus
 import { CustomerContactsClusterComponent } from '../../components/customer-clusters/customer-contacts-cluster.component';
 import { CustomerAddressesClusterComponent } from '../../components/customer-clusters/customer-addresses-cluster.component';
 import { CustomerInteractionsClusterComponent } from '../../components/customer-clusters/customer-interactions-cluster.component';
+import { CustomerDocumentsClusterComponent } from '../../components/customer-clusters/customer-documents-cluster.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { EntityCompletenessChipComponent } from '../../../../shared/components/entity-completeness-chip/entity-completeness-chip.component';
 
@@ -64,6 +65,7 @@ import { EntityCompletenessChipComponent } from '../../../../shared/components/e
     CustomerPricingTabComponent,
     CustomerIdentityClusterComponent, CustomerActivityClusterComponent,
     CustomerContactsClusterComponent, CustomerAddressesClusterComponent, CustomerInteractionsClusterComponent,
+    CustomerDocumentsClusterComponent,
     CurrencyDisplayComponent,
     EntityCompletenessChipComponent,
   ],

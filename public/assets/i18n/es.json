@@ -1469,6 +1469,12 @@
     }
   },
   "customers": {
+    "documents": {
+      "deleteFileTitle": "¿Eliminar archivo?",
+      "deleteFileMessage": "Esto eliminará permanentemente \"{{name}}\".",
+      "fileDeleted": "Archivo eliminado",
+      "fileUploaded": "Archivo subido"
+    },
     "title": "Clientes",
     "subtitle": "Gestionar contactos y direcciones de clientes",
     "createCustomer": "Nuevo Cliente",
@@ -1588,7 +1594,24 @@
     "contactName": "Nombre de Contacto",
     "creditTerms": "Términos de Crédito",
     "taxRate": "Tasa de Impuesto",
-    "addresses": "Direcciones",
+    "addresses": {
+      "addAddress": "Agregar dirección",
+      "addFirst": "Agregar primera dirección",
+      "editAddress": "Editar dirección",
+      "deleteAddressTitle": "¿Eliminar dirección?",
+      "deleteAddressMessage": "Esto eliminará permanentemente \"{{label}}\" de este cliente.",
+      "addressSaved": "Dirección guardada",
+      "addressDeleted": "Dirección eliminada",
+      "labelField": "Etiqueta",
+      "typeField": "Tipo de dirección",
+      "defaultField": "Dirección predeterminada",
+      "typeBilling": "Facturación",
+      "typeShipping": "Envío",
+      "typeBoth": "Facturación y envío",
+      "addAddressAriaLabel": "Agregar dirección",
+      "editAddressAriaLabel": "Editar dirección",
+      "deleteAddressAriaLabel": "Eliminar dirección"
+    },
     "orders": "Pedidos",
     "contacts": "Contactos",
     "searchPlaceholder": "Buscar clientes...",
@@ -1655,6 +1678,7 @@
         "invoices": "Facturas",
         "interactions": "Interacciones",
         "pricing": "Precios",
+        "documents": "Documentos",
         "activity": "Actividad",
         "placeholderHelp": "Esta pestaña llegará en un próximo lanzamiento."
       },
@@ -1976,6 +2000,11 @@
     "deleteList": "Eliminar lista"
   },
   "leads": {
+    "documents": "Documentos",
+    "fileUploaded": "Archivo subido",
+    "fileDeleted": "Archivo eliminado",
+    "deleteFileTitle": "¿Eliminar archivo?",
+    "deleteFileMessage": "Esto eliminará permanentemente \"{{name}}\".",
     "title": "Prospectos",
     "createLead": "Nuevo Prospecto",
     "createLeadMore": "Más formas de agregar prospectos",
@@ -4061,7 +4090,8 @@
   "fileUpload": {
     "dragAndDrop": "Subir archivos — arrastrar y soltar o hacer clic para buscar",
     "dragHere": "Arrastre archivos aquí o haga clic para buscar",
-    "maxSize": "Máx {{size}}MB por archivo"
+    "maxSize": "Máx {{size}}MB por archivo",
+    "acceptedTypes": "Aceptados: {{types}}"
   },
   "syncConflict": {
     "title": "Conflicto de sincronización",
@@ -4650,6 +4680,8 @@
     "documents": "Documentos",
     "invoices": "Facturas",
     "noInvoices": "No hay facturas para esta orden",
+    "createInvoice": "Crear factura",
+    "invoicesIntegratedMode": "Las facturas de este pedido se gestionan en su sistema de contabilidad conectado.",
     "amount": "Monto",
     "dueDate": "Fecha de Vencimiento",
     "paymentStatus": "Estado de Pago",
@@ -4722,6 +4754,11 @@
     "deleteLineMessage": "¿Eliminar \"{{description}}\" de esta orden de venta?"
   },
   "quotes": {
+    "documents": "Documentos",
+    "fileUploaded": "Archivo subido",
+    "fileDeleted": "Archivo eliminado",
+    "deleteFileTitle": "¿Eliminar archivo?",
+    "deleteFileMessage": "Esto eliminará permanentemente \"{{name}}\".",
     "title": "Cotizaciones",
     "subtitle": "Crear y gestionar cotizaciones de precio para clientes",
     "newQuote": "Nueva Cotización",

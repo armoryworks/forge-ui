@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
+import { FileAttachment } from '../../../shared/models/file.model';
 import { QuoteListItem } from '../models/quote-list-item.model';
 import { QuoteDetail } from '../models/quote-detail.model';
 import { CreateQuoteRequest } from '../models/create-quote-request.model';
@@ -94,5 +95,20 @@ export class QuoteService {
 
   deleteQuote(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
+  }
+
+  // Documents — shared files API (mirrors sales-order.service). Uploads go
+  // through <app-file-upload-zone>; list/delete/download live here.
+
+  getDocuments(quoteId: number): Observable<FileAttachment[]> {
+    return this.http.get<FileAttachment[]>(`${this.base}/${quoteId}/files`);
+  }
+
+  deleteFile(fileId: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/files/${fileId}`);
+  }
+
+  downloadFileUrl(fileId: number): string {
+    return `${environment.apiUrl}/files/${fileId}/download`;
   }
 }

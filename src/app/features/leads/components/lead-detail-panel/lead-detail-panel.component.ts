@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
+import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -11,11 +12,14 @@ import { LeadsService } from '../../services/leads.service';
 import { OutreachCampaignsService } from '../../services/outreach-campaigns.service';
 import { LeadItem, CapabilityFitStatus, NdaState, ExportControlClearance } from '../../models/lead-item.model';
 import { LeadStatus } from '../../models/lead-status.type';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
+import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { FileAttachment } from '../../../../shared/models/file.model';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { RecentCommunicationsComponent } from '../../../../shared/components/recent-communications/recent-communications.component';
 
@@ -25,7 +29,7 @@ import { RecentCommunicationsComponent } from '../../../../shared/components/rec
   imports: [
     DatePipe, ReactiveFormsModule, TranslatePipe, MatTooltipModule, MatMenuModule,
     DialogComponent, TextareaComponent, ValidationButtonComponent, EntityActivitySectionComponent,
-    RecentCommunicationsComponent,
+    RecentCommunicationsComponent, FileUploadZoneComponent,
   ],
   templateUrl: './lead-detail-panel.component.html',
   styleUrl: './lead-detail-panel.component.scss',
@@ -37,6 +41,7 @@ export class LeadDetailPanelComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
 
   readonly leadId = input.required<number>();
   readonly closed = output<void>();
@@ -45,6 +50,7 @@ export class LeadDetailPanelComponent {
   protected readonly lead = signal<LeadItem | null>(null);
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
+  protected readonly documents = signal<FileAttachment[]>([]);
   /** Phase 1r — campaign name lookup. Loaded lazily; falls back to "Campaign #N". */
   protected readonly campaignNames = signal<Map<number, string>>(new Map());
 
@@ -68,6 +74,7 @@ export class LeadDetailPanelComponent {
       const id = this.leadId();
       if (id) {
         this.loadLead(id);
+        this.loadDocuments(id);
       }
     });
 
@@ -278,6 +285,57 @@ export class LeadDetailPanelComponent {
     const lead = this.lead();
     if (!lead) return;
     this.editRequested.emit(lead);
+  }
+
+  // --- Documents (mirrors the sales-order detail panel's Documents tab) ---
+
+  private loadDocuments(id: number): void {
+    this.leadsService.getDocuments(id).subscribe({
+      next: (docs) => this.documents.set(docs),
+    });
+  }
+
+  protected downloadFile(doc: FileAttachment): void {
+    window.open(this.leadsService.downloadFileUrl(doc.id), '_blank');
+  }
+
+  protected deleteFile(doc: FileAttachment): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('leads.deleteFileTitle'),
+        message: this.translate.instant('leads.deleteFileMessage', { name: doc.fileName }),
+        confirmLabel: this.translate.instant('common.delete'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.leadsService.deleteFile(doc.id).subscribe({
+        next: () => {
+          this.documents.update(list => list.filter(f => f.id !== doc.id));
+          this.snackbar.success(this.translate.instant('leads.fileDeleted'));
+        },
+      });
+    });
+  }
+
+  protected onFileUploaded(_file: UploadedFile): void {
+    this.loadDocuments(this.leadId());
+    this.snackbar.success(this.translate.instant('leads.fileUploaded'));
+  }
+
+  protected getFileIcon(contentType: string): string {
+    if (contentType.startsWith('image/')) return 'image';
+    if (contentType === 'application/pdf') return 'picture_as_pdf';
+    if (contentType.includes('spreadsheet') || contentType.includes('excel')) return 'table_chart';
+    if (contentType.includes('document') || contentType.includes('word')) return 'description';
+    return 'attach_file';
+  }
+
+  protected formatFileSize(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
   /**
