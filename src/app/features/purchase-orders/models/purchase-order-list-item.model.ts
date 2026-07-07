@@ -16,4 +16,11 @@ export interface PurchaseOrderListItem {
   // and the PO total falls below it. List renders a small warning chip;
   // detail panel renders a full banner with the threshold.
   belowVendorMinimum: boolean;
+  // S4b provenance — where the PO came from (Manual | AutoMrp | AutoQuote |
+  // ExternalIntegration | Edi), the creating user for Manual POs
+  // ("Last, First"), and the free-text reference (suggestion id, RFQ number,
+  // provider name).
+  originSource: string;
+  originUserName: string | null;
+  originReference: string | null;
 }

@@ -122,3 +122,15 @@
   margin-left: $sp-xs;
   cursor: help;
 }
+
+// S4b provenance — origin chip in the detail header (icon + label; the
+// reference/user detail is shown on hover via matTooltip).
+.detail-origin { margin-top: $sp-xs; }
+
+.po-origin-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-sm;
+}
+
+.po-origin-chip__icon { font-size: $icon-size-xs; }

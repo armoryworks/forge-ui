@@ -9,6 +9,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PurchaseOrderService } from './services/purchase-order.service';
 import { PurchaseOrderListItem } from './models/purchase-order-list-item.model';
+import { PO_ORIGIN_CHIP_CLASSES, PO_ORIGIN_ICONS, PO_ORIGIN_LABEL_KEYS } from './models/po-origin.const';
 import { VendorService } from '../vendors/services/vendor.service';
 import { VendorResponse } from '../vendors/models/vendor-response.model';
 import { PoDialogComponent } from './components/po-dialog/po-dialog.component';
@@ -101,11 +102,22 @@ export class PurchaseOrdersComponent implements OnInit {
     { value: 'Cancelled', label: this.translate.instant('status.cancelled') },
   ];
 
+  // S4b provenance — fixed server enum (PoOriginSource), so static options
+  // are acceptable here (same as statusOptions above).
+  protected readonly originFilterOptions: SelectOption[] = [
+    { value: 'Manual', label: this.translate.instant('purchaseOrders.originManual') },
+    { value: 'AutoMrp', label: this.translate.instant('purchaseOrders.originAutoMrp') },
+    { value: 'AutoQuote', label: this.translate.instant('purchaseOrders.originAutoQuote') },
+    { value: 'ExternalIntegration', label: this.translate.instant('purchaseOrders.originExternalIntegration') },
+    { value: 'Edi', label: this.translate.instant('purchaseOrders.originEdi') },
+  ];
+
   protected readonly poColumns: ColumnDef[] = [
     { field: 'poNumber', header: this.translate.instant('purchaseOrders.poNumber'), sortable: true, width: '120px' },
     { field: 'vendorName', header: this.translate.instant('purchaseOrders.vendor'), sortable: true },
     { field: 'jobNumber', header: this.translate.instant('purchaseOrders.job'), sortable: true, width: '100px' },
     { field: 'status', header: this.translate.instant('common.status'), sortable: true, filterable: true, type: 'enum', width: '140px', filterOptions: this.statusOptions.slice(1) },
+    { field: 'originSource', header: this.translate.instant('purchaseOrders.origin'), sortable: true, filterable: true, type: 'enum', width: '130px', filterOptions: this.originFilterOptions },
     { field: 'lineCount', header: this.translate.instant('purchaseOrders.lines'), sortable: true, width: '70px', align: 'center' },
     { field: 'totalOrdered', header: this.translate.instant('purchaseOrders.ordered'), sortable: true, width: '90px', align: 'center' },
     { field: 'totalReceived', header: this.translate.instant('purchaseOrders.received'), sortable: true, width: '90px', align: 'center' },
@@ -243,5 +255,23 @@ export class PurchaseOrdersComponent implements OnInit {
     const key = 'purchaseOrders.status' + status;
     const translated = this.translate.instant(key);
     return translated !== key ? translated : status;
+  }
+
+  // S4b provenance — Origin column chip helpers. Row-scoped rendering inside
+  // ng-templates follows the getStatusClass/getStatusLabel precedent above
+  // (computed signals can't take a row argument).
+  protected getOriginClass(source: string): string {
+    return `chip po-origin-chip ${PO_ORIGIN_CHIP_CLASSES[source] ?? 'chip--muted'}`;
+  }
+
+  protected getOriginIcon(source: string): string {
+    return PO_ORIGIN_ICONS[source] ?? 'person';
+  }
+
+  protected getOriginLabel(row: PurchaseOrderListItem): string {
+    if (row.originSource === 'Manual' && row.originUserName) return row.originUserName;
+    if (row.originSource === 'ExternalIntegration' && row.originReference) return row.originReference;
+    const key = PO_ORIGIN_LABEL_KEYS[row.originSource];
+    return key ? this.translate.instant(key) : row.originSource;
   }
 }

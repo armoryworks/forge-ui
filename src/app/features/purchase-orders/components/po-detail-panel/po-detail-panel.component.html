@@ -6,6 +6,13 @@
         <div>
           <div class="detail-name">{{ po.poNumber }}</div>
           <div class="detail-vendor"><app-entity-link type="vendor" [entityId]="po.vendorId">{{ po.vendorName }}</app-entity-link></div>
+          <!-- S4b provenance — origin chip; reference/user shown on hover. -->
+          <div class="detail-origin">
+            <span [class]="originChipClass()" [matTooltip]="originTooltip()" matTooltipPosition="above">
+              <span class="material-icons-outlined po-origin-chip__icon" aria-hidden="true">{{ originIcon() }}</span>
+              {{ originLabel() }}
+            </span>
+          </div>
         </div>
       </div>
       <div class="detail-header__actions">

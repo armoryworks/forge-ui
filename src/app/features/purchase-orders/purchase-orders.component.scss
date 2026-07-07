@@ -68,3 +68,12 @@
 
 // --- Cell Styles ---
 .po-number { font-family: $font-family-mono; font-weight: 600; }
+
+// S4b provenance — compact Origin chip (icon + label) in the Origin column.
+.po-origin-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-sm;
+}
+
+.po-origin-chip__icon { font-size: $icon-size-xs; }

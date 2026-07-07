@@ -37,4 +37,11 @@ export interface PurchaseOrderDetail {
   // set and the PO total falls below it. UI renders a non-blocking banner.
   belowVendorMinimum: boolean;
   vendorMinimumOrderAmount: number | null;
+  // S4b provenance — where the PO came from (Manual | AutoMrp | AutoQuote |
+  // ExternalIntegration | Edi), the creating user for Manual POs
+  // ("Last, First"), and the free-text reference (suggestion id, RFQ number,
+  // provider name).
+  originSource: string;
+  originUserName: string | null;
+  originReference: string | null;
 }

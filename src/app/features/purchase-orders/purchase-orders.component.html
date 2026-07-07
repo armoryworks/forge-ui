@@ -56,6 +56,12 @@
             <ng-template appColumnCell="status" let-row>
               <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
             </ng-template>
+            <ng-template appColumnCell="originSource" let-row>
+              <span [class]="getOriginClass(row.originSource)">
+                <span class="material-icons-outlined po-origin-chip__icon" aria-hidden="true">{{ getOriginIcon(row.originSource) }}</span>
+                {{ getOriginLabel(row) }}
+              </span>
+            </ng-template>
             <ng-template appColumnCell="expectedDeliveryDate" let-row>
               <span class="text-muted">{{ row.expectedDeliveryDate ? (row.expectedDeliveryDate | date:'MM/dd/yyyy') : '—' }}</span>
             </ng-template>

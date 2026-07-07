@@ -32,6 +32,7 @@ import { DataTableComponent } from '../../../../shared/components/data-table/dat
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { INCOTERM_OPTIONS } from '../../models/incoterm.const';
+import { PO_ORIGIN_CHIP_CLASSES, PO_ORIGIN_ICONS, PO_ORIGIN_LABEL_KEYS } from '../../models/po-origin.const';
 import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
 
 @Component({
@@ -83,6 +84,40 @@ export class PoDetailPanelComponent implements OnInit {
   protected readonly releases = signal<PurchaseOrderRelease[]>([]);
   protected readonly showCreateReleaseDialog = signal(false);
   protected readonly releaseSaving = signal(false);
+
+  // S4b provenance — header origin chip. Single-entity surface, so computed
+  // signals (not row-scoped helper functions) drive the bindings.
+  protected readonly originChipClass = computed(() => {
+    const source = this.po()?.originSource ?? 'Manual';
+    return `chip po-origin-chip ${PO_ORIGIN_CHIP_CLASSES[source] ?? 'chip--muted'}`;
+  });
+
+  protected readonly originIcon = computed(() => {
+    const source = this.po()?.originSource ?? 'Manual';
+    return PO_ORIGIN_ICONS[source] ?? 'person';
+  });
+
+  protected readonly originLabel = computed(() => {
+    const po = this.po();
+    if (!po) return '';
+    if (po.originSource === 'Manual' && po.originUserName) return po.originUserName;
+    if (po.originSource === 'ExternalIntegration' && po.originReference) return po.originReference;
+    const key = PO_ORIGIN_LABEL_KEYS[po.originSource];
+    return key ? this.translate.instant(key) : po.originSource;
+  });
+
+  protected readonly originTooltip = computed(() => {
+    const po = this.po();
+    if (!po) return '';
+    const parts: string[] = [];
+    if (po.originUserName)
+      parts.push(this.translate.instant('purchaseOrders.originTooltipUser', { name: po.originUserName }));
+    if (po.originReference)
+      parts.push(this.translate.instant('purchaseOrders.originTooltipReference', { reference: po.originReference }));
+    if (parts.length > 0) return parts.join(' — ');
+    const key = PO_ORIGIN_LABEL_KEYS[po.originSource];
+    return key ? this.translate.instant(key) : po.originSource;
+  });
 
   protected readonly releaseColumns: ColumnDef[] = [
     { field: 'releaseNumber', header: '#', sortable: true, width: '60px' },
