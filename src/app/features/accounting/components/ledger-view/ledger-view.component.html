@@ -1,7 +1,7 @@
 <app-page-header
   [title]="'accounting.ledger.title' | translate"
   [subtitle]="'accounting.ledger.subtitle' | translate">
-  <span class="ledger-find">
+  <span class="ledger-find" data-tour="find">
     <app-input
       [label]="'accounting.ledger.find' | translate"
       [formControl]="findControl"
@@ -25,7 +25,7 @@
       </button>
     }
   </span>
-  <button type="button" class="action-btn action-btn--sm" [disabled]="scanning()" (click)="scanAnomalies()">
+  <button type="button" class="action-btn action-btn--sm" data-tour="scan" [disabled]="scanning()" (click)="scanAnomalies()">
     <span class="material-icons-outlined" aria-hidden="true">policy</span>
     {{ 'accounting.ledger.scanAnomalies' | translate }}
   </button>
@@ -47,6 +47,7 @@
   }
 
   <app-data-table
+    data-tour="register"
     tableId="acct-ledger"
     [columns]="columns()"
     [data]="entries()"

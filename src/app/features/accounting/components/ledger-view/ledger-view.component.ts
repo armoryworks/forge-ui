@@ -20,7 +20,7 @@ import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { JournalEntryExplanation, LedgerRegisterEntry, LedgerRegisterPage, ReverseJournalEntryInput, TrialBalanceRow } from '../../models/accounting.models';
 import { ReverseEntryDialogComponent, ReverseEntryDialogData } from '../reverse-entry-dialog/reverse-entry-dialog.component';
 
-/** Default book — single-book Phase 2/3; a book selector arrives with multi-book support. */
+/** Default book; overridable via ?bookId= (the training sandbox is its own book — §5A.4). */
 const DEFAULT_BOOK_ID = 1;
 /**
  * First page is generous; per-book server-page navigation and the virtualized find-in-context
@@ -61,6 +61,8 @@ export class LedgerViewComponent implements OnInit {
   protected readonly page = signal<LedgerRegisterPage | null>(null);
   /** Account lens (§5A.1 `:accountId`): when set, the register is scoped to one account. */
   private readonly accountId = signal<number | null>(null);
+  /** Book context (?bookId=): defaults to the operating book; the training sandbox passes its own. */
+  protected readonly bookId = signal<number>(DEFAULT_BOOK_ID);
   protected readonly lensAccount = signal<TrialBalanceRow | null>(null);
   /**
    * Register rows with a display-ready date. entryDate is a DateOnly ("YYYY-MM-DD") — reformatted
@@ -203,15 +205,20 @@ export class LedgerViewComponent implements OnInit {
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       const id = Number(params.get('accountId'));
       this.accountId.set(id > 0 ? id : null);
+      const book = Number(this.route.snapshot.queryParamMap.get('bookId'));
+      this.bookId.set(book > 0 ? book : DEFAULT_BOOK_ID);
       this.load();
     });
+
+    // §5A.4 guided tour: ?tour=intro walks the register's key surfaces (driver.js, lazily imported).
+    if (this.route.snapshot.queryParamMap.get('tour') === 'intro') void this.runIntroTour();
   }
 
   protected load(): void {
     this.loading.set(true);
     this.error.set(null);
     const accountId = this.accountId();
-    const register$ = this.gl.getLedgerRegister(DEFAULT_BOOK_ID, {
+    const register$ = this.gl.getLedgerRegister(this.bookId(), {
       pageSize: PAGE_SIZE,
       glAccountId: accountId,
     });
@@ -234,7 +241,7 @@ export class LedgerViewComponent implements OnInit {
 
     // Lens: the trial balance supplies the account's label + current net balance, which seeds the
     // running-balance walk. Loaded together so the balance column never renders from stale data.
-    forkJoin([register$, this.gl.getTrialBalance(DEFAULT_BOOK_ID)])
+    forkJoin([register$, this.gl.getTrialBalance(this.bookId())])
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: ([p, tb]) => {
@@ -253,7 +260,7 @@ export class LedgerViewComponent implements OnInit {
   protected explain(entry: LedgerRegisterEntry): void {
     this.explanations.update((s) => ({ ...s, [entry.id]: { loading: true, result: null, failed: false } }));
     this.gl
-      .explainJournalEntry(DEFAULT_BOOK_ID, entry.id)
+      .explainJournalEntry(this.bookId(), entry.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) =>
@@ -266,7 +273,7 @@ export class LedgerViewComponent implements OnInit {
   protected scanAnomalies(): void {
     this.scanning.set(true);
     this.gl
-      .getGlAnomalies(DEFAULT_BOOK_ID)
+      .getGlAnomalies(this.bookId())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (anomalies) => {
@@ -280,6 +287,18 @@ export class LedgerViewComponent implements OnInit {
           this.scanning.set(false);
         },
       });
+  }
+
+  private async runIntroTour(): Promise<void> {
+    const { driver } = await import('driver.js');
+    driver({
+      showProgress: true,
+      steps: [
+        { element: '[data-tour="register"]', popover: { title: this.translate.instant('accounting.training.tour.registerTitle'), description: this.translate.instant('accounting.training.tour.registerBody') } },
+        { element: '[data-tour="find"]', popover: { title: this.translate.instant('accounting.training.tour.findTitle'), description: this.translate.instant('accounting.training.tour.findBody') } },
+        { element: '[data-tour="scan"]', popover: { title: this.translate.instant('accounting.training.tour.scanTitle'), description: this.translate.instant('accounting.training.tour.scanBody') } },
+      ],
+    }).drive();
   }
 
   protected reverseEntry(entry: LedgerRegisterEntry): void {

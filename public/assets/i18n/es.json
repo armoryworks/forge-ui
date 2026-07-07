@@ -7413,6 +7413,140 @@
       "correctionMemo": "Corrección del asiento n.º {{number}}: ",
       "correcting": "Corrigiendo el asiento n.º {{number}}"
     },
+    "training": {
+      "title": "Formación del libro mayor",
+      "subtitle": "Practica en un libro de pruebas: motor real, errores plantados, riesgo cero",
+      "entries": "{{count}} asientos de práctica",
+      "trackA": "Vía A: desde cero",
+      "trackB": "Vía B: desaprender QuickBooks",
+      "switchTrack": "Cambiar de vía",
+      "reset": "Reiniciar práctica",
+      "resetTitle": "¿Reiniciar el libro de práctica?",
+      "resetMessage": "Se borran tus asientos de práctica y se vuelve a sembrar el trimestre original (con sus errores plantados).",
+      "resetConfirm": "Reiniciar",
+      "resetDone": "Práctica resembrada",
+      "progress": "{{passed}} de {{total}} superados",
+      "tourStart": "Visita guiada",
+      "openLedger": "Abrir el libro de práctica",
+      "newEntry": "Registrar un asiento de práctica",
+      "scenariosTitle": "Escenarios de corrección",
+      "checkWork": "Revisar mi trabajo",
+      "showHint": "Pista",
+      "intake": {
+        "q": "¿Has llevado contabilidad antes?",
+        "optionA": "No: enséñame desde cero",
+        "optionADesc": "Débitos, créditos y por qué el libro nunca miente, construido en orden, como un libro en papel.",
+        "optionB": "Sí, en QuickBooks (o similar)",
+        "optionBDesc": "Poca teoría y mucho desaprender: cada reflejo de QB se nombra y se reemplaza."
+      },
+      "crosswalk": {
+        "title": "Si vienes de QuickBooks…",
+        "c1": {
+          "qb": "QB: editar la transacción",
+          "forge": "Forge: registra una reversa y luego el asiento correcto",
+          "why": "Los asientos registrados son evidencia: los auditores necesitan ambos."
+        },
+        "c2": {
+          "qb": "QB: eliminarlo",
+          "forge": "Forge: reversarlo",
+          "why": "La historia es de solo anexión; borrar oculta errores."
+        },
+        "c3": {
+          "qb": "QB: el registro es la verdad que sobrescribes",
+          "forge": "Forge: el registro es una VISTA del diario inmutable",
+          "why": "Diario y mayor son un mismo conjunto de datos con dos órdenes."
+        },
+        "c4": {
+          "qb": "QB: asiento directo a cuentas por cobrar o pagar",
+          "forge": "Forge: las cuentas de control solo se mueven por sus submayores",
+          "why": "Mantiene exacta la conciliación entre submayor y control."
+        },
+        "c5": {
+          "qb": "QB: conciliar = marcar casillas hasta cero",
+          "forge": "Forge: cada diferencia genera un asiento registrado",
+          "why": "El extracto bancario es una fuente de hallazgos, no la verdad."
+        },
+        "c6": {
+          "qb": "QB: anular un cheque",
+          "forge": "Forge: reversar el asiento del pago",
+          "why": "\"Anular\" es una reversa con motivo."
+        },
+        "c7": {
+          "qb": "QB: retro-fechar libremente",
+          "forge": "Forge: el estado del período gobierna el registro",
+          "why": "Cerrado significa cerrado; lo tardío entra en el período abierto."
+        },
+        "c8": {
+          "qb": "QB: el cajón de \"Opening Balance Equity\"",
+          "forge": "Forge: un único asiento de apertura cuadrado en la conversión",
+          "why": "El balance de apertura debe igualar el de cierre del sistema anterior."
+        }
+      },
+      "validators": {
+        "entryPosted": "Asiento correcto registrado",
+        "entryReversed": "Error reversado",
+        "entryLinked": "Reversa vinculada",
+        "memoRequired": "Nota escrita",
+        "accountBalance": "Saldo de cuenta correcto",
+        "trialBalanced": "El libro cuadra"
+      },
+      "tour": {
+        "registerTitle": "El registro",
+        "registerBody": "Cada asiento, del más reciente al más antiguo. Expande una fila para ver sus líneas cuadradas.",
+        "findTitle": "Buscar en el libro",
+        "findBody": "Las coincidencias se resaltan y centran, nunca se filtran fuera de su contexto.",
+        "scanTitle": "Buscar anomalías",
+        "scanBody": "Alertas deterministas: asientos manuales grandes, registros directos a cuentas de control."
+      },
+      "errors": {
+        "stateFailed": "No se pudo cargar la práctica.",
+        "scenariosFailed": "No se pudieron cargar los escenarios.",
+        "checkFailed": "Falló la revisión; inténtalo de nuevo.",
+        "resetFailed": "Falló el reinicio."
+      },
+      "scenarios": {
+        "firstEntry": {
+          "title": "Registra tu primer asiento",
+          "brief": "Registra cualquier asiento cuadrado en la práctica con la palabra 'practice' en la nota.",
+          "hint1": "Usa 'Registrar un asiento de práctica': dos líneas, débito y crédito iguales, y una nota que contenga 'practice'.",
+          "done": "Registrado: el libro aceptó tu primer asiento cuadrado."
+        },
+        "miscoded": {
+          "title": "Corrige el recibo de luz mal codificado",
+          "brief": "El recibo de luz de abril ($842.17) se codificó a Renta. Reviértelo y regístralo en Servicios.",
+          "bait": "En QuickBooks abrirías la transacción y editarías la cuenta. Inténtalo aquí y observa qué te ofrece el libro en su lugar.",
+          "hint1": "Encuentra el recibo de abril en el libro de práctica (prueba la búsqueda).",
+          "hint2": "Reviértelo con un motivo y usa 'Corregir (nuevo asiento)': cambia la cuenta de débito a 60300 Servicios.",
+          "done": "Corregido como corresponde: el error, su reversa y la corrección quedan visibles."
+        },
+        "duplicate": {
+          "title": "Elimina el recibo duplicado",
+          "brief": "El recibo de City Power de junio se registró dos veces. Reversa exactamente uno.",
+          "bait": "En QuickBooks simplemente borrarías el duplicado. Aquí no existe borrar: la evidencia permanece.",
+          "hint1": "Busca el importe 842.17: la búsqueda mantiene ambas coincidencias a la vista para comparar fechas.",
+          "done": "Uno queda, el otro se reversa, y ambos permanecen en el registro."
+        },
+        "nsf": {
+          "title": "Gestiona el cheque devuelto",
+          "brief": "El depósito del cheque de $1,900 fue devuelto (sin fondos). Reversa el asiento del depósito.",
+          "hint1": "Encuentra el asiento 'Customer check deposit' del 30 de mayo y reviértelo con motivo de devolución.",
+          "done": "La devolución quedó en libros: el banco y el mayor vuelven a coincidir."
+        },
+        "control": {
+          "title": "Deshaz el registro directo a cuentas por cobrar",
+          "brief": "Alguien registró $150 directamente en la cuenta de control de cobrar. Ejecuta el análisis de anomalías y reviértelo.",
+          "bait": "En QuickBooks un asiento a cuentas por cobrar es normal. Aquí el escáner lo marca: las cuentas de control se mueven por sus submayores.",
+          "hint1": "En el libro de práctica pulsa 'Buscar anomalías': el asiento marcado es tu objetivo.",
+          "done": "Cuenta de control restaurada: el submayor sigue siendo la única fuente de verdad de cobrar."
+        },
+        "narration": {
+          "title": "Documenta el ajuste misterioso",
+          "brief": "'adjust to match bank' no dice nada. Reviértelo y regístralo de nuevo con una nota útil para un revisor.",
+          "hint1": "Prueba antes 'Explicar con IA': fíjate en lo poco que puede decir incluso la IA sin narración.",
+          "done": "Disciplina de narración: tu yo futuro (y tu contador) ya pueden saber qué pasó."
+        }
+      }
+    },
     "reverse": {
       "title": "Reversar el asiento n.º {{number}}",
       "note": "Esto registra un asiento igual y opuesto. El original permanece como evidencia.",
@@ -7429,6 +7563,8 @@
       "ledgerDesc": "El registro del diario: cada asiento, con navegación y revisión por IA.",
       "newEntry": "Nuevo asiento",
       "newEntryDesc": "Componer y registrar un asiento manual cuadrado.",
+      "training": "Formación",
+      "trainingDesc": "Aprende (o desaprende) la partida doble en un libro de práctica sin riesgo.",
       "trialBalance": "Balance de comprobación",
       "trialBalanceDesc": "Débitos y créditos por cuenta — comprueba que el libro mayor esté cuadrado.",
       "profitLoss": "Estado de resultados",

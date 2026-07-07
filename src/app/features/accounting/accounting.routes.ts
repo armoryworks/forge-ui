@@ -14,6 +14,11 @@ export const ACCOUNTING_ROUTES: Routes = [
       import('./components/ledger-view/ledger-view.component').then((m) => m.LedgerViewComponent),
   },
   {
+    path: 'training',
+    loadComponent: () =>
+      import('./components/training/training.component').then((m) => m.TrainingComponent),
+  },
+  {
     path: 'journal-entries/new',
     loadComponent: () =>
       import('./components/journal-entry-editor/journal-entry-editor.component').then((m) => m.JournalEntryEditorComponent),

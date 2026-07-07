@@ -399,3 +399,37 @@ export interface ReverseJournalEntryInput {
   reversalDate: string; // DateOnly on the wire: "YYYY-MM-DD"
   reason: string;
 }
+
+// ── Training system (§5A.4) ──
+export interface TrainingSandboxState {
+  seeded: boolean;
+  bookId: number | null;
+  entryCount: number;
+}
+
+export interface ScenarioValidatorDef {
+  type: string;
+}
+
+export interface TrainingScenario {
+  id: string;
+  track: 'A' | 'B' | 'both';
+  order: number;
+  titleKey: string;
+  briefKey: string;
+  baitKey: string | null;
+  hintKeys: string[];
+  validators: ScenarioValidatorDef[];
+  successKey: string;
+}
+
+export interface ValidatorResult {
+  type: string;
+  passed: boolean;
+}
+
+export interface ScenarioCheckResult {
+  scenarioId: string;
+  passed: boolean;
+  validators: ValidatorResult[];
+}

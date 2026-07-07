@@ -1,0 +1,147 @@
+@use 'styles/variables' as *;
+
+.tr-intake {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  max-width: 720px;
+  padding-top: $sp-lg;
+}
+
+.tr-intake__q {
+  margin: 0;
+  font-size: $font-size-lg;
+}
+
+.tr-intake__options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-lg;
+}
+
+.tr-card {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding: $sp-lg;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  text-align: left;
+}
+
+.tr-card--btn {
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--primary);
+  }
+}
+
+.tr-card__icon {
+  font-size: $icon-size-xl;
+  color: var(--primary);
+}
+
+.tr-card__title {
+  font-weight: 700;
+}
+
+.tr-card__desc,
+.tr-card__why {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}
+
+.tr-card__qb {
+  font-size: $font-size-sm;
+  color: var(--warning);
+}
+
+.tr-card__forge {
+  font-size: $font-size-base;
+  font-weight: 600;
+}
+
+.tr-toolbar {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md 0;
+}
+
+.tr-progress {
+  margin-left: auto;
+  font-family: $font-family-mono;
+  color: var(--text-muted);
+}
+
+.tr-section-title {
+  margin: $sp-lg 0 $sp-sm;
+  font-size: $font-size-xxs;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.tr-crosswalk__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: $sp-md;
+}
+
+.tr-scenarios {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  max-width: 960px;
+}
+
+.tr-scenario {
+  padding: $sp-md;
+  background: var(--surface);
+  border-left: $border-width-accent solid var(--border);
+}
+
+.tr-scenario--passed {
+  border-left-color: var(--success);
+}
+
+.tr-scenario__head {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+}
+
+.tr-scenario__title {
+  flex: 1;
+  font-weight: 600;
+}
+
+.tr-scenario__bait {
+  margin: $sp-sm 0 0;
+  padding: $sp-sm $sp-md;
+  font-size: $font-size-sm;
+  color: var(--text);
+  border-left: $border-width-accent solid var(--warning);
+  background: var(--warning-light);
+}
+
+.tr-scenario__brief {
+  margin: $sp-sm 0;
+  font-size: $font-size-base;
+}
+
+.tr-scenario__hint {
+  margin: $sp-xs 0;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  border-left: $border-width-accent solid var(--info);
+  padding-left: $sp-md;
+}
+
+.tr-scenario__validators {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-sm;
+  margin-top: $sp-sm;
+}

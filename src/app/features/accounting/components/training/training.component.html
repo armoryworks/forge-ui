@@ -1,0 +1,115 @@
+<app-page-header
+  [title]="'accounting.training.title' | translate"
+  [subtitle]="'accounting.training.subtitle' | translate">
+  @if (state(); as s) {
+    <span class="chip chip--info">{{ 'accounting.training.entries' | translate: { count: s.entryCount } }}</span>
+  }
+  @if (track()) {
+    <span class="chip">{{ (track() === 'A' ? 'accounting.training.trackA' : 'accounting.training.trackB') | translate }}</span>
+    <button type="button" class="action-btn action-btn--sm" (click)="switchTrack()">{{ 'accounting.training.switchTrack' | translate }}</button>
+  }
+  <button type="button" class="action-btn action-btn--sm action-btn--warn" (click)="reset()">
+    <span class="material-icons-outlined" aria-hidden="true">restart_alt</span>
+    {{ 'accounting.training.reset' | translate }}
+  </button>
+</app-page-header>
+
+<div class="page-content">
+  @if (!track()) {
+    <!-- Intake router (design doc §4): two questions pick the track; always overridable. -->
+    <section class="tr-intake">
+      <h3 class="tr-intake__q">{{ 'accounting.training.intake.q' | translate }}</h3>
+      <div class="tr-intake__options">
+        <button type="button" class="tr-card tr-card--btn" (click)="chooseTrack('A')">
+          <span class="material-icons-outlined tr-card__icon" aria-hidden="true">school</span>
+          <span class="tr-card__title">{{ 'accounting.training.intake.optionA' | translate }}</span>
+          <span class="tr-card__desc">{{ 'accounting.training.intake.optionADesc' | translate }}</span>
+        </button>
+        <button type="button" class="tr-card tr-card--btn" (click)="chooseTrack('B')">
+          <span class="material-icons-outlined tr-card__icon" aria-hidden="true">sync_alt</span>
+          <span class="tr-card__title">{{ 'accounting.training.intake.optionB' | translate }}</span>
+          <span class="tr-card__desc">{{ 'accounting.training.intake.optionBDesc' | translate }}</span>
+        </button>
+      </div>
+    </section>
+  } @else {
+    <section class="tr-toolbar">
+      @if (state(); as s) {
+        <a class="action-btn" [routerLink]="['/accounting/ledger']" [queryParams]="{ bookId: s.bookId, tour: 'intro' }">
+          <span class="material-icons-outlined" aria-hidden="true">tour</span>
+          {{ 'accounting.training.tourStart' | translate }}
+        </a>
+        <a class="action-btn" [routerLink]="['/accounting/ledger']" [queryParams]="{ bookId: s.bookId }">
+          <span class="material-icons-outlined" aria-hidden="true">receipt_long</span>
+          {{ 'accounting.training.openLedger' | translate }}
+        </a>
+        <a class="action-btn" [routerLink]="['/accounting/journal-entries/new']" [queryParams]="{ bookId: s.bookId }">
+          <span class="material-icons-outlined" aria-hidden="true">note_add</span>
+          {{ 'accounting.training.newEntry' | translate }}
+        </a>
+      }
+      <span class="tr-progress">{{ 'accounting.training.progress' | translate: { passed: passedCount(), total: trackScenarios().length } }}</span>
+    </section>
+
+    @if (track() === 'B') {
+      <!-- Track B spine: the QuickBooks crosswalk (decision D5: names QB explicitly). -->
+      <section class="tr-crosswalk">
+        <h3 class="tr-section-title">{{ 'accounting.training.crosswalk.title' | translate }}</h3>
+        <div class="tr-crosswalk__grid">
+          @for (n of crosswalkCards; track n) {
+            <div class="tr-card">
+              <span class="tr-card__qb">{{ 'accounting.training.crosswalk.c' + n + '.qb' | translate }}</span>
+              <span class="tr-card__forge">{{ 'accounting.training.crosswalk.c' + n + '.forge' | translate }}</span>
+              <span class="tr-card__why">{{ 'accounting.training.crosswalk.c' + n + '.why' | translate }}</span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <section class="tr-scenarios">
+      <h3 class="tr-section-title">{{ 'accounting.training.scenariosTitle' | translate }}</h3>
+      @for (s of trackScenarios(); track s.id) {
+        <div class="tr-scenario" [class.tr-scenario--passed]="passedIds().has(s.id)">
+          <div class="tr-scenario__head">
+            <span class="material-icons-outlined" aria-hidden="true">{{ passedIds().has(s.id) ? 'check_circle' : 'radio_button_unchecked' }}</span>
+            <span class="tr-scenario__title">{{ s.titleKey | translate }}</span>
+            <button
+              type="button"
+              class="action-btn action-btn--sm action-btn--primary"
+              [disabled]="checking() === s.id"
+              (click)="check(s)">
+              {{ 'accounting.training.checkWork' | translate }}
+            </button>
+          </div>
+          @if (track() === 'B' && s.baitKey) {
+            <p class="tr-scenario__bait">{{ s.baitKey | translate }}</p>
+          }
+          <p class="tr-scenario__brief">{{ s.briefKey | translate }}</p>
+          @if (revealedHints()[s.id]; as shown) {
+            @for (hint of s.hintKeys.slice(0, shown); track hint) {
+              <p class="tr-scenario__hint">{{ hint | translate }}</p>
+            }
+          }
+          @if ((revealedHints()[s.id] ?? 0) < s.hintKeys.length) {
+            <button type="button" class="action-btn action-btn--sm" (click)="revealHint(s)">
+              <span class="material-icons-outlined" aria-hidden="true">lightbulb</span>
+              {{ 'accounting.training.showHint' | translate }}
+            </button>
+          }
+          @if (lastResult()?.scenarioId === s.id && lastResult(); as result) {
+            @if (!result.passed) {
+              <div class="tr-scenario__validators">
+                @for (v of result.validators; track v.type) {
+                  <span class="chip" [class.chip--success]="v.passed" [class.chip--warning]="!v.passed">
+                    {{ 'accounting.training.validators.' + v.type | translate }}
+                  </span>
+                }
+              </div>
+            }
+          }
+        </div>
+      }
+    </section>
+  }
+</div>

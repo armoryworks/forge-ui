@@ -68,7 +68,7 @@ describe('LedgerViewComponent', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: GeneralLedgerService, useValue: gl },
-        { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap(routeParams)) } },
+        { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap(routeParams)), snapshot: { queryParamMap: convertToParamMap({}) } } },
         { provide: SnackbarService, useValue: snackbar },
         { provide: MatDialog, useValue: dialog },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },

@@ -7413,6 +7413,140 @@
       "correctionMemo": "Correction of entry #{{number}}: ",
       "correcting": "Correcting entry #{{number}}"
     },
+    "training": {
+      "title": "GL Training",
+      "subtitle": "Practice on a sandbox ledger — real engine, planted mistakes, zero risk",
+      "entries": "{{count}} sandbox entries",
+      "trackA": "Track A — from scratch",
+      "trackB": "Track B — unlearn QuickBooks",
+      "switchTrack": "Switch track",
+      "reset": "Reset sandbox",
+      "resetTitle": "Reset the training sandbox?",
+      "resetMessage": "All your practice entries are wiped and the original quarter (with its planted mistakes) is reseeded.",
+      "resetConfirm": "Reset",
+      "resetDone": "Sandbox reseeded",
+      "progress": "{{passed}} of {{total}} passed",
+      "tourStart": "Guided tour",
+      "openLedger": "Open the sandbox ledger",
+      "newEntry": "Post a sandbox entry",
+      "scenariosTitle": "Fix-it scenarios",
+      "checkWork": "Check my work",
+      "showHint": "Hint",
+      "intake": {
+        "q": "Have you kept books before?",
+        "optionA": "No — teach me from scratch",
+        "optionADesc": "Debits, credits, and why the ledger never lies — built up in order, like a paper ledger.",
+        "optionB": "Yes — in QuickBooks (or similar)",
+        "optionBDesc": "Short on basics, heavy on un-learning: every QB reflex gets named and replaced."
+      },
+      "crosswalk": {
+        "title": "If you came from QuickBooks…",
+        "c1": {
+          "qb": "QB: edit the transaction",
+          "forge": "Forge: post a reversing entry, then the correct one",
+          "why": "Posted rows are evidence — auditors need both."
+        },
+        "c2": {
+          "qb": "QB: delete it",
+          "forge": "Forge: reverse it",
+          "why": "History is append-only; deletion hides mistakes."
+        },
+        "c3": {
+          "qb": "QB: the register is the truth you overwrite",
+          "forge": "Forge: the register is a VIEW of the immutable journal",
+          "why": "Journal and ledger are one dataset, two orderings."
+        },
+        "c4": {
+          "qb": "QB: journal entry straight to A/R or A/P",
+          "forge": "Forge: control accounts move only via their sub-ledgers",
+          "why": "Keeps sub-ledger and control reconciliation exact."
+        },
+        "c5": {
+          "qb": "QB: reconcile = tick boxes to zero",
+          "forge": "Forge: every difference gets a posted entry",
+          "why": "The bank feed is a source of discoveries, not truth."
+        },
+        "c6": {
+          "qb": "QB: void a check",
+          "forge": "Forge: reverse the payment entry",
+          "why": "\"Void\" is a reversal with a reason."
+        },
+        "c7": {
+          "qb": "QB: backdate freely",
+          "forge": "Forge: period status governs posting",
+          "why": "Close means closed; late postings land in the open period."
+        },
+        "c8": {
+          "qb": "QB: \"Opening Balance Equity\" dumping ground",
+          "forge": "Forge: one balanced opening journal at conversion",
+          "why": "Opening TB must equal the legacy closing TB."
+        }
+      },
+      "validators": {
+        "entryPosted": "Correct entry posted",
+        "entryReversed": "Mistake reversed",
+        "entryLinked": "Reversal linked",
+        "memoRequired": "Memo written",
+        "accountBalance": "Account balance right",
+        "trialBalanced": "Ledger balances"
+      },
+      "tour": {
+        "registerTitle": "The register",
+        "registerBody": "Every posting, newest first. Expand a row to see its balanced lines.",
+        "findTitle": "Find in ledger",
+        "findBody": "Matches are highlighted and centered — never filtered away from their neighbours.",
+        "scanTitle": "Anomaly scan",
+        "scanBody": "Deterministic reviewer flags: large manual entries, hand-posts to control accounts."
+      },
+      "errors": {
+        "stateFailed": "Could not load the sandbox.",
+        "scenariosFailed": "Could not load the scenarios.",
+        "checkFailed": "Check failed — try again.",
+        "resetFailed": "Reset failed."
+      },
+      "scenarios": {
+        "firstEntry": {
+          "title": "Post your first entry",
+          "brief": "Post any balanced entry in the sandbox with the word 'practice' in the memo.",
+          "hint1": "Use 'Post a sandbox entry' above — two lines, equal debit and credit, memo containing 'practice'.",
+          "done": "Posted — the ledger accepted your first balanced entry."
+        },
+        "miscoded": {
+          "title": "Fix the miscoded power bill",
+          "brief": "April's power bill ($842.17) was coded to Rent. Reverse it and post it to Utilities.",
+          "bait": "In QuickBooks you'd open the transaction and edit the account. Try that here — then notice what the ledger offers instead.",
+          "hint1": "Find the April power bill in the sandbox ledger (try the find bar).",
+          "hint2": "Reverse it with a reason, then use 'Correct (new entry)' — change the debit account to 60300 Utilities.",
+          "done": "Fixed the right way: the mistake, its reversal, and the correction all stay visible."
+        },
+        "duplicate": {
+          "title": "Remove the duplicate bill",
+          "brief": "June's City Power bill was posted twice. Reverse exactly one of them.",
+          "bait": "In QuickBooks you'd just delete the duplicate. Here, deletion doesn't exist — evidence stays.",
+          "hint1": "Search for the amount 842.17 — the find bar keeps both matches in view so you can compare dates.",
+          "done": "One stands, one is reversed — and both remain on the record."
+        },
+        "nsf": {
+          "title": "Handle the bounced check",
+          "brief": "The $1,900 customer check deposit bounced (NSF). Reverse the deposit entry.",
+          "hint1": "Find the 'Customer check deposit' entry from May 30 and reverse it with an NSF reason.",
+          "done": "The bounce is on the books — bank reality and ledger agree again."
+        },
+        "control": {
+          "title": "Undo the hand-post to AR",
+          "brief": "Someone posted $150 straight to the AR control account. Run the anomaly scan, then reverse it.",
+          "bait": "In QuickBooks a journal entry to Accounts Receivable is normal. Here the scanner flags it — control accounts move via their sub-ledgers.",
+          "hint1": "On the sandbox ledger, click 'Scan for anomalies' — the flagged entry is your target.",
+          "done": "Control account restored — the sub-ledger stays the single source of AR truth."
+        },
+        "narration": {
+          "title": "Document the mystery adjustment",
+          "brief": "'adjust to match bank' says nothing. Reverse it and repost with a memo a reviewer could act on.",
+          "hint1": "Try 'Explain with AI' on it first — notice how little even the AI can say without narration.",
+          "done": "Narration discipline: future-you (and your accountant) can now tell what happened."
+        }
+      }
+    },
     "reverse": {
       "title": "Reverse entry #{{number}}",
       "note": "This posts an equal-and-opposite entry. The original stays as evidence.",
@@ -7429,6 +7563,8 @@
       "ledgerDesc": "The journal register — every posting, with drill-back and AI review.",
       "newEntry": "New Journal Entry",
       "newEntryDesc": "Compose and post a balanced manual entry.",
+      "training": "Training",
+      "trainingDesc": "Learn (or unlearn) double-entry on a zero-risk sandbox ledger.",
       "trialBalance": "Trial Balance",
       "trialBalanceDesc": "Debits and credits by account — proves the ledger is in balance.",
       "profitLoss": "Profit & Loss",

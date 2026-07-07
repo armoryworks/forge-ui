@@ -20,7 +20,7 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { GlAccount, LedgerRegisterEntry, LedgerRegisterPage, ManualJournalEntryInput } from '../../models/accounting.models';
 
-const DEFAULT_BOOK_ID = 1;
+const DEFAULT_BOOK_ID = 1; // overridable via ?bookId= (training sandbox, §5A.4)
 const DEFAULT_CURRENCY_ID = 1;
 
 /** A line must carry exactly one non-zero side (debit XOR credit). */
@@ -78,6 +78,7 @@ export class JournalEntryEditorComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly saving = signal(false);
+  private bookId = DEFAULT_BOOK_ID;
   protected readonly accountOptions = signal<SelectOption[]>([]);
   /** §5A.2 split-pane: the entry being corrected stays pinned above the compose form. */
   protected readonly original = signal<LedgerRegisterEntry | null>(null);
@@ -109,7 +110,9 @@ export class JournalEntryEditorComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const accounts$ = this.gl.getChartOfAccounts(DEFAULT_BOOK_ID, true);
+    const book = Number(this.route.snapshot.queryParamMap.get('bookId'));
+    this.bookId = book > 0 ? book : DEFAULT_BOOK_ID;
+    const accounts$ = this.gl.getChartOfAccounts(this.bookId, true);
 
     // §5A "Reverse / correct": ?correctionOf=<entryId> pre-seeds the form from the original entry
     // (same lines, referencing memo) so the user fixes what was wrong and posts the replacement.
@@ -118,7 +121,7 @@ export class JournalEntryEditorComponent implements OnInit {
     // (value-vs-options race, caught by visual verification 2026-07-07) — hence the forkJoin.
     const correctionOf = Number(this.route.snapshot.queryParamMap.get('correctionOf'));
     if (correctionOf > 0) {
-      forkJoin([accounts$, this.gl.getLedgerRegister(DEFAULT_BOOK_ID, { pageSize: 100 })])
+      forkJoin([accounts$, this.gl.getLedgerRegister(this.bookId, { pageSize: 100 })])
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: ([accounts, page]) => {
@@ -176,7 +179,7 @@ export class JournalEntryEditorComponent implements OnInit {
     this.saving.set(true);
     const raw = this.form.getRawValue();
     const request: ManualJournalEntryInput = {
-      bookId: DEFAULT_BOOK_ID,
+      bookId: this.bookId,
       currencyId: DEFAULT_CURRENCY_ID,
       entryDate: (toIsoDate(raw.entryDate) ?? '').slice(0, 10),
       memo: raw.memo.trim(),
