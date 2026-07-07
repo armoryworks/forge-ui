@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, output, computed, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal, output, computed, ViewChild } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -58,6 +58,14 @@ export class InvoiceDialogComponent {
 
   readonly closed = output<void>();
   readonly saved = output<void>();
+
+  /**
+   * Optional pre-link: when the dialog is opened from a sales-order context
+   * (e.g. the SO Invoices tab) the customer and SO are fixed — the customer
+   * select is disabled to prevent a mismatched invoice.
+   */
+  readonly initialCustomerId = input<number | null>(null);
+  readonly initialSalesOrderId = input<number | null>(null);
 
   protected readonly saving = signal(false);
   protected readonly customers = signal<CustomerListItem[]>([]);
@@ -160,6 +168,20 @@ export class InvoiceDialogComponent {
   constructor() {
     this.customerService.getCustomers(undefined, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.customers.set(list),
+    });
+
+    // Apply the SO-context pre-link once inputs resolve. save() reads
+    // getRawValue(), so the disabled customer control still submits.
+    effect(() => {
+      const customerId = this.initialCustomerId();
+      const salesOrderId = this.initialSalesOrderId();
+      if (customerId != null && this.invoiceForm.controls.customerId.value === null) {
+        this.invoiceForm.controls.customerId.setValue(customerId);
+        this.invoiceForm.controls.customerId.disable();
+      }
+      if (salesOrderId != null && this.invoiceForm.controls.salesOrderId.value === null) {
+        this.invoiceForm.controls.salesOrderId.setValue(salesOrderId);
+      }
     });
 
     // Load active currencies; default the form to the base currency. The

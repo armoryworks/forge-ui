@@ -318,6 +318,12 @@
 }
 
 // --- Invoices ---
+.so-detail__invoice-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: $sp-md;
+}
+
 .so-detail__invoice-card {
   background: var(--surface);
   border: $border-width-thin solid var(--border);

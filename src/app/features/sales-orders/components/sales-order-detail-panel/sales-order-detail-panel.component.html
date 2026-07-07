@@ -656,12 +656,34 @@
       @if (activeTab() === 'invoices') {
         <div class="tab-panel" role="tabpanel">
           @if (invoices().length === 0) {
-            @if (hasUninvoicedShipments()) {
-              <app-empty-state icon="receipt_long" message="{{ 'salesOrders.invoicesUninvoicedEmpty' | translate }}" />
+            @if (!isStandalone()) {
+              <!-- ACCOUNTING BOUNDARY: integrated installs invoice in the connected system -->
+              <app-empty-state
+                icon="receipt_long"
+                message="{{ 'salesOrders.noInvoices' | translate }}"
+                helpText="{{ 'salesOrders.invoicesIntegratedMode' | translate }}" />
+            } @else if (hasUninvoicedShipments()) {
+              <app-empty-state
+                icon="receipt_long"
+                message="{{ 'salesOrders.invoicesUninvoicedEmpty' | translate }}"
+                [actionLabel]="'salesOrders.createInvoice' | translate"
+                (action)="openCreateInvoice()" />
             } @else {
-              <app-empty-state icon="receipt_long" message="{{ 'salesOrders.noInvoices' | translate }}" />
+              <app-empty-state
+                icon="receipt_long"
+                message="{{ 'salesOrders.noInvoices' | translate }}"
+                [actionLabel]="'salesOrders.createInvoice' | translate"
+                (action)="openCreateInvoice()" />
             }
           } @else {
+            @if (isStandalone()) {
+              <div class="so-detail__invoice-actions">
+                <button class="action-btn action-btn--create action-btn--sm" (click)="openCreateInvoice()">
+                  <span class="material-icons-outlined">add</span>
+                  {{ 'salesOrders.createInvoice' | translate }}
+                </button>
+              </div>
+            }
             @for (invoice of invoices(); track invoice.id) {
               <div class="so-detail__invoice-card">
                 <div class="so-detail__invoice-header">
@@ -715,5 +737,13 @@
         </div>
       }
     </div>
+
+    @if (showCreateInvoiceDialog()) {
+      <app-invoice-dialog
+        [initialCustomerId]="so.customerId"
+        [initialSalesOrderId]="so.id"
+        (closed)="closeCreateInvoice()"
+        (saved)="onInvoiceCreated()" />
+    }
   }
 </div>

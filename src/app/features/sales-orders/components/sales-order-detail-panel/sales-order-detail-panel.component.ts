@@ -30,6 +30,8 @@ import { FileAttachment } from '../../../../shared/models/file.model';
 import { CustomerAddress } from '../../../../shared/models/customer-address.model';
 import { ScheduleTimelineComponent } from '../schedule-timeline/schedule-timeline.component';
 import { ScheduleMilestone } from '../../models/schedule-milestone.model';
+import { AccountingService } from '../../../../shared/services/accounting.service';
+import { InvoiceDialogComponent } from '../../../invoices/components/invoice-dialog/invoice-dialog.component';
 
 type TabId = 'overview' | 'lines' | 'schedule' | 'shipments' | 'returns' | 'documents' | 'invoices' | 'activity';
 
@@ -42,7 +44,7 @@ type TabId = 'overview' | 'lines' | 'schedule' | 'shipments' | 'returns' | 'docu
     BarcodeInfoComponent, EntityActivitySectionComponent,
     EntityLinkComponent, CurrencyDisplayComponent, FileUploadZoneComponent, EmptyStateComponent,
     EntityPickerComponent, InputComponent, SelectComponent, DatepickerComponent, CurrencyInputComponent,
-    ScheduleTimelineComponent,
+    ScheduleTimelineComponent, InvoiceDialogComponent,
   ],
   templateUrl: './sales-order-detail-panel.component.html',
   styleUrl: './sales-order-detail-panel.component.scss',
@@ -53,6 +55,12 @@ export class SalesOrderDetailPanelComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly accountingService = inject(AccountingService);
+
+  // ---- ACCOUNTING BOUNDARY ---- invoice creation is standalone-mode-only;
+  // integrated installs manage invoices in the connected accounting system.
+  protected readonly isStandalone = this.accountingService.isStandalone;
+  protected readonly showCreateInvoiceDialog = signal(false);
 
   readonly salesOrderId = input.required<number>();
   readonly closed = output<void>();
@@ -195,6 +203,22 @@ export class SalesOrderDetailPanelComponent {
     this.soService.getInvoices(id).subscribe({
       next: (invs) => this.invoices.set(invs),
     });
+  }
+
+  // --- Invoice creation (standalone accounting mode only) ---
+  protected openCreateInvoice(): void {
+    if (!this.isStandalone()) return;
+    this.showCreateInvoiceDialog.set(true);
+  }
+
+  protected closeCreateInvoice(): void {
+    this.showCreateInvoiceDialog.set(false);
+  }
+
+  protected onInvoiceCreated(): void {
+    this.showCreateInvoiceDialog.set(false);
+    this.loadInvoices(this.salesOrderId());
+    this.changed.emit();
   }
 
   protected switchTab(tab: TabId): void {
