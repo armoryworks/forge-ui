@@ -104,6 +104,16 @@
     </div>
   </div>
 
+  <!-- Email & Sending -->
+  <div class="account-page__card">
+    <span class="account-page__section-label">{{ 'account.emailAndSending' | translate }}</span>
+    <p class="customization__hint">{{ 'account.confirmBeforeSendHint' | translate }}</p>
+
+    <app-toggle
+      [label]="'account.confirmBeforeSendLabel' | translate"
+      [formControl]="confirmBeforeSendControl" />
+  </div>
+
   <!-- Draft Retention -->
   <div class="account-page__card">
     <span class="account-page__section-label">Keep unsaved work for</span>

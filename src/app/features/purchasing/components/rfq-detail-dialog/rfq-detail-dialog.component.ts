@@ -19,6 +19,7 @@ import { DataTableComponent } from '../../../../shared/components/data-table/dat
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { ConfirmSendService } from '../../../../shared/services/confirm-send.service';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -49,6 +50,7 @@ export class RfqDetailDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<RfqDetailDialogComponent, boolean>);
   private readonly dialog = inject(MatDialog);
   private readonly purchasingService = inject(PurchasingService);
+  private readonly confirmSend = inject(ConfirmSendService);
   private readonly vendorService = inject(VendorService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -142,17 +144,24 @@ export class RfqDetailDialogComponent {
     const vendorIds = this.sendVendorControl.value;
     if (!vendorIds?.length) return;
 
-    this.saving.set(true);
-    this.purchasingService.sendToVendors(this.data.rfqId, { vendorIds }).subscribe({
-      next: () => {
-        this.snackbar.success(this.translate.instant('purchasing.snackbar.rfqSent'));
-        this.saving.set(false);
-        this.showSendForm.set(false);
-        this.sendVendorControl.reset([]);
-        this.hasChanged = true;
-        this.loadRfq();
-      },
-      error: () => this.saving.set(false),
+    this.confirmSend.confirmSend({
+      titleKey: 'purchasing.rfq.confirmSendTitle',
+      messageKey: 'purchasing.rfq.confirmSendMessage',
+      messageParams: { count: vendorIds.length },
+    }).subscribe(confirmed => {
+      if (!confirmed) return;
+      this.saving.set(true);
+      this.purchasingService.sendToVendors(this.data.rfqId, { vendorIds }).subscribe({
+        next: () => {
+          this.snackbar.success(this.translate.instant('purchasing.snackbar.rfqSent'));
+          this.saving.set(false);
+          this.showSendForm.set(false);
+          this.sendVendorControl.reset([]);
+          this.hasChanged = true;
+          this.loadRfq();
+        },
+        error: () => this.saving.set(false),
+      });
     });
   }
 

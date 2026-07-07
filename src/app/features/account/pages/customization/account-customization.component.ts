@@ -1,7 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
+import { CONFIRM_BEFORE_SEND_PREF_KEY } from '../../../../shared/services/confirm-send.service';
 import { FontScale, ThemeService } from '../../../../shared/services/theme.service';
 import { UserPreferencesService } from '../../../../shared/services/user-preferences.service';
 import { IdleService } from '../../../../shared/services/idle.service';
@@ -19,7 +23,7 @@ const DRAFT_TTL_PREF_KEY = 'draft:ttlMs';
 @Component({
   selector: 'app-account-customization',
   standalone: true,
-  imports: [TranslatePipe],
+  imports: [TranslatePipe, ReactiveFormsModule, ToggleComponent],
   templateUrl: './account-customization.component.html',
   styleUrl: './account-customization.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,7 +32,22 @@ export class AccountCustomizationComponent {
   private readonly themeService = inject(ThemeService);
   private readonly preferences = inject(UserPreferencesService);
   private readonly idleService = inject(IdleService);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly chatNotification = inject(ChatNotificationService);
+
+  /** Confirm-before-send safety prompt — ON by default when never set. */
+  protected readonly confirmBeforeSendControl = new FormControl<boolean>(
+    this.preferences.get<boolean>(CONFIRM_BEFORE_SEND_PREF_KEY) ?? true,
+    { nonNullable: true },
+  );
+
+  constructor() {
+    this.confirmBeforeSendControl.valueChanges.pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(enabled => {
+      this.preferences.set(CONFIRM_BEFORE_SEND_PREF_KEY, enabled);
+    });
+  }
 
   protected readonly theme = this.themeService.theme;
   protected readonly fontScale = this.themeService.fontScale;

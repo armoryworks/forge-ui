@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { ConfirmSendService } from '../../../../shared/services/confirm-send.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
@@ -33,6 +34,7 @@ import { PayStub, TaxDocument } from '../../../account/models/payroll.model';
 })
 export class UserCompliancePanelComponent {
   private readonly adminService = inject(AdminService);
+  private readonly confirmSend = inject(ConfirmSendService);
   private readonly payrollService = inject(PayrollService);
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
@@ -143,13 +145,19 @@ export class UserCompliancePanelComponent {
   protected sendReminder(): void {
     const id = this.userId();
     if (!id) return;
-    this.sending.set(true);
-    this.adminService.sendComplianceReminder(id).subscribe({
-      next: () => {
-        this.sending.set(false);
-        this.snackbar.success(this.translate.instant('admin.reminderSent'));
-      },
-      error: () => this.sending.set(false),
+    this.confirmSend.confirmSend({
+      titleKey: 'admin.confirmReminderTitle',
+      messageKey: 'admin.confirmReminderMessage',
+    }).subscribe(confirmed => {
+      if (!confirmed) return;
+      this.sending.set(true);
+      this.adminService.sendComplianceReminder(id).subscribe({
+        next: () => {
+          this.sending.set(false);
+          this.snackbar.success(this.translate.instant('admin.reminderSent'));
+        },
+        error: () => this.sending.set(false),
+      });
     });
   }
 

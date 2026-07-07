@@ -12,6 +12,7 @@ import { QuoteLine } from '../../models/quote-line.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
+import { ConfirmSendService } from '../../../../shared/services/confirm-send.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
@@ -37,6 +38,7 @@ import { FileAttachment } from '../../../../shared/models/file.model';
 })
 export class QuoteDetailPanelComponent {
   private readonly quoteService = inject(QuoteService);
+  private readonly confirmSend = inject(ConfirmSendService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -88,12 +90,19 @@ export class QuoteDetailPanelComponent {
   protected sendQuote(): void {
     const q = this.quote();
     if (!q) return;
-    this.quoteService.sendQuote(q.id).subscribe({
-      next: () => {
-        this.loadQuote(q.id);
-        this.changed.emit();
-        this.snackbar.success(this.translate.instant('quotes.quoteSent'));
-      },
+    this.confirmSend.confirmSend({
+      titleKey: 'quotes.confirmSendTitle',
+      messageKey: 'quotes.confirmSendMessage',
+      messageParams: { number: q.quoteNumber },
+    }).subscribe(confirmed => {
+      if (!confirmed) return;
+      this.quoteService.sendQuote(q.id).subscribe({
+        next: () => {
+          this.loadQuote(q.id);
+          this.changed.emit();
+          this.snackbar.success(this.translate.instant('quotes.quoteSent'));
+        },
+      });
     });
   }
 

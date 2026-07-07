@@ -11,6 +11,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/co
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
+import { ConfirmSendService } from '../../../../shared/services/confirm-send.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 
@@ -28,6 +29,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 })
 export class InvoiceDetailPanelComponent {
   private readonly invoiceService = inject(InvoiceService);
+  private readonly confirmSend = inject(ConfirmSendService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -57,12 +59,19 @@ export class InvoiceDetailPanelComponent {
   protected sendInvoice(): void {
     const inv = this.invoice();
     if (!inv) return;
-    this.invoiceService.sendInvoice(inv.id).subscribe({
-      next: () => {
-        this.loadInvoice(inv.id);
-        this.invoiceChanged.emit();
-        this.snackbar.success(this.translate.instant('invoices.invoiceSent'));
-      },
+    this.confirmSend.confirmSend({
+      titleKey: 'invoices.confirmSendTitle',
+      messageKey: 'invoices.confirmSendMessage',
+      messageParams: { number: inv.invoiceNumber },
+    }).subscribe(confirmed => {
+      if (!confirmed) return;
+      this.invoiceService.sendInvoice(inv.id).subscribe({
+        next: () => {
+          this.loadInvoice(inv.id);
+          this.invoiceChanged.emit();
+          this.snackbar.success(this.translate.instant('invoices.invoiceSent'));
+        },
+      });
     });
   }
 
