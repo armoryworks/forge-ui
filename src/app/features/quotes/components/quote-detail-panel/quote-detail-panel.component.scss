@@ -165,6 +165,37 @@
   font-family: $font-family-mono;
 }
 
+// --- Payment schedule (S2) ---
+.pay-section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.pay-section__head {
+  @include flex-between;
+}
+
+.pay-actions {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.pay-actions__row {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  font-size: $font-size-xs;
+}
+
+.pay-actions__name {
+  @include truncate;
+  flex: 1;
+  min-width: 0;
+  color: var(--text-secondary);
+}
+
 // --- Actions ---
 // Standard footer pattern: right-justified, primary furthest right, destructive
 // separated to far left via `margin-right: auto`. See CLAUDE.md "UI Layout Rules".

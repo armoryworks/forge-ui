@@ -1,0 +1,59 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.schedule-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.schedule-form__rows {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.schedule-form__footer {
+  @include flex-between;
+}
+
+// Live Σ% indicator — red until the schedule totals exactly 100%.
+.schedule-form__sum {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  font-weight: 700;
+}
+
+.schedule-form__sum--ok {
+  color: var(--success);
+}
+
+.schedule-form__sum--bad {
+  color: var(--error);
+}
+
+.ms-row {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--border);
+}
+
+.ms-row__head {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+}
+
+.ms-row__seq {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  color: var(--text-muted);
+}
+
+.ms-row__amount {
+  flex: 1;
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  text-align: right;
+}

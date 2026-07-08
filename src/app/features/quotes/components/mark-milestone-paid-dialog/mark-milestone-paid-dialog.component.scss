@@ -1,0 +1,33 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.mark-paid__context {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+}
+
+.mark-paid__name {
+  font-size: $font-size-sm;
+  font-weight: 700;
+}
+
+.mark-paid__facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: $sp-xs $sp-md;
+  align-items: baseline;
+}
+
+.mark-paid__fact-label {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  color: var(--text-muted);
+}
+
+.mark-paid__fact-value {
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+}

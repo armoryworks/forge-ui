@@ -1,0 +1,41 @@
+<app-dialog
+  [title]="'quotes.paymentSchedule.markPaidTitle' | translate"
+  [dirty]="form.dirty"
+  (closed)="close()">
+
+  <div class="mark-paid" [formGroup]="form">
+    <div class="mark-paid__context">
+      <span class="mark-paid__name">{{ data.milestone.name }}</span>
+      <div class="mark-paid__facts">
+        <span class="mark-paid__fact-label">{{ 'quotes.paymentSchedule.amountDue' | translate }}</span>
+        <app-currency-display class="mark-paid__fact-value" [value]="data.milestone.amountDue" [currency]="null" />
+        <span class="mark-paid__fact-label">{{ 'quotes.paymentSchedule.alreadyPaid' | translate }}</span>
+        <app-currency-display class="mark-paid__fact-value" [value]="data.milestone.paidAmount" [currency]="null" />
+      </div>
+    </div>
+
+    <app-currency-input
+      [label]="'quotes.paymentSchedule.paidAmount' | translate"
+      formControlName="paidAmount"
+      [required]="true"
+      [min]="0.01" />
+    <app-input
+      [label]="'quotes.paymentSchedule.paidReference' | translate"
+      formControlName="paidReference"
+      [maxlength]="100" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button
+        data-testid="mark-paid-save-btn"
+        class="action-btn action-btn--primary"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        <span class="material-icons-outlined">save</span>
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

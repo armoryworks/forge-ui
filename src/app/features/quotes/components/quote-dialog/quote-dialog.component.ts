@@ -35,6 +35,10 @@ interface LineEntry {
   unitPrice: number;
 }
 
+// S2 note: this dialog deliberately has NO payment-schedule editor. Schedules
+// attach to SAVED quotes (the PUT is addressed by quoteId), so the quote
+// detail panel's "Payment Schedule" section is the single home for authoring
+// and editing them (see payment-schedule-dialog.component.ts).
 @Component({
   selector: 'app-quote-dialog',
   standalone: true,

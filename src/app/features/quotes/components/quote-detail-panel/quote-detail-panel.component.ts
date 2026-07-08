@@ -7,8 +7,15 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { QuoteService } from '../../services/quote.service';
+import { PaymentScheduleService } from '../../services/payment-schedule.service';
 import { QuoteDetail } from '../../models/quote-detail.model';
 import { QuoteLine } from '../../models/quote-line.model';
+import {
+  MarkMilestonePaidDialogComponent, MarkMilestonePaidDialogData, MarkMilestonePaidDialogResult,
+} from '../mark-milestone-paid-dialog/mark-milestone-paid-dialog.component';
+import {
+  PaymentScheduleDialogComponent, PaymentScheduleDialogData, PaymentScheduleDialogResult,
+} from '../payment-schedule-dialog/payment-schedule-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
@@ -20,7 +27,19 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
+import { PaymentProgressComponent } from '../../../../shared/components/payment-progress/payment-progress.component';
+import { AccountingService } from '../../../../shared/services/accounting.service';
 import { FileAttachment } from '../../../../shared/models/file.model';
+import { PaymentMilestone } from '../../../../shared/models/payment-milestone.model';
+import { PaymentSchedule } from '../../../../shared/models/payment-schedule.model';
+
+/** Per-milestone action availability for the panel's schedule section. */
+interface MilestoneActionRow {
+  milestone: PaymentMilestone;
+  canMarkPaid: boolean;
+  canWaive: boolean;
+  canGenerateInvoice: boolean;
+}
 
 @Component({
   selector: 'app-quote-detail-panel',
@@ -31,6 +50,7 @@ import { FileAttachment } from '../../../../shared/models/file.model';
     EntityActivitySectionComponent, FileUploadZoneComponent,
     EntityLinkComponent, CurrencyDisplayComponent,
     EntityPickerComponent, InputComponent, CurrencyInputComponent,
+    PaymentProgressComponent,
   ],
   templateUrl: './quote-detail-panel.component.html',
   styleUrl: './quote-detail-panel.component.scss',
@@ -38,6 +58,8 @@ import { FileAttachment } from '../../../../shared/models/file.model';
 })
 export class QuoteDetailPanelComponent {
   private readonly quoteService = inject(QuoteService);
+  private readonly paymentScheduleService = inject(PaymentScheduleService);
+  private readonly accounting = inject(AccountingService);
   private readonly confirmSend = inject(ConfirmSendService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
@@ -50,6 +72,7 @@ export class QuoteDetailPanelComponent {
   protected readonly loading = signal(false);
   protected readonly quote = signal<QuoteDetail | null>(null);
   protected readonly documents = signal<FileAttachment[]>([]);
+  protected readonly paymentSchedule = signal<PaymentSchedule | null>(null);
 
   protected readonly quoteIdValue = computed(() => this.quoteId());
 
@@ -70,6 +93,7 @@ export class QuoteDetailPanelComponent {
       if (id) {
         this.loadQuote(id);
         this.loadDocuments(id);
+        this.loadPaymentSchedule(id);
       }
     });
   }
@@ -271,6 +295,105 @@ export class QuoteDetailPanelComponent {
         this.snackbar.success(this.translate.instant(editing === 0 ? 'quotes.lineAdded' : 'quotes.lineUpdated'));
       },
       error: () => this.savingLine.set(false),
+    });
+  }
+
+  // --- Payment schedule (S2) ---
+
+  /**
+   * Definition edits are only accepted server-side while no milestone is
+   * locked (Invoiced / PartiallyPaid / Paid) — hide the edit affordance in
+   * lock-step so users don't walk into the 409.
+   */
+  protected readonly canEditSchedule = computed(() => {
+    const schedule = this.paymentSchedule();
+    if (!schedule) return false;
+    return !schedule.milestones.some(
+      m => m.status === 'Invoiced' || m.status === 'PartiallyPaid' || m.status === 'Paid');
+  });
+
+  /**
+   * Milestone action availability mirrors the server guards: mark-paid on
+   * anything not Paid/Waived, waive on anything without recorded payments,
+   * generate-invoice only when the quote is linked to a sales order AND the
+   * install runs standalone accounting (⚡ 409 otherwise — hidden here).
+   */
+  protected readonly milestoneActionRows = computed<MilestoneActionRow[]>(() => {
+    const schedule = this.paymentSchedule();
+    const q = this.quote();
+    if (!schedule || !q) return [];
+    const canInvoice = this.accounting.isStandalone() && q.salesOrderId !== null;
+    return schedule.milestones
+      .map(m => ({
+        milestone: m,
+        canMarkPaid: m.status !== 'Paid' && m.status !== 'Waived',
+        canWaive: m.status !== 'Paid' && m.status !== 'PartiallyPaid' && m.status !== 'Waived',
+        canGenerateInvoice: canInvoice && m.invoiceId === null
+          && m.status !== 'Invoiced' && m.status !== 'Paid' && m.status !== 'Waived',
+      }))
+      .filter(r => r.canMarkPaid || r.canWaive || r.canGenerateInvoice);
+  });
+
+  private loadPaymentSchedule(id: number): void {
+    this.paymentScheduleService.getByQuote(id).subscribe({
+      next: (schedule) => this.paymentSchedule.set(schedule),
+      error: () => { /* non-404 failures already toasted by the global interceptor */ },
+    });
+  }
+
+  protected openScheduleDialog(): void {
+    const q = this.quote();
+    if (!q) return;
+    this.dialog.open(PaymentScheduleDialogComponent, {
+      width: '520px',
+      data: {
+        quoteId: q.id,
+        quoteTotal: q.total,
+        schedule: this.paymentSchedule(),
+      } satisfies PaymentScheduleDialogData,
+    }).afterClosed().subscribe((result: PaymentScheduleDialogResult | undefined) => {
+      if (result) this.paymentSchedule.set(result);
+    });
+  }
+
+  protected markMilestonePaid(milestone: PaymentMilestone): void {
+    this.dialog.open(MarkMilestonePaidDialogComponent, {
+      width: '420px',
+      data: { milestone } satisfies MarkMilestonePaidDialogData,
+    }).afterClosed().subscribe((result: MarkMilestonePaidDialogResult | undefined) => {
+      if (!result) return;
+      this.snackbar.success(this.translate.instant('quotes.paymentSchedule.paymentRecorded'));
+      this.loadPaymentSchedule(this.quoteId());
+    });
+  }
+
+  protected waiveMilestone(milestone: PaymentMilestone): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('quotes.paymentSchedule.waiveTitle'),
+        message: this.translate.instant('quotes.paymentSchedule.waiveMessage', { name: milestone.name }),
+        confirmLabel: this.translate.instant('quotes.paymentSchedule.waive'),
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.paymentScheduleService.waive(milestone.id).subscribe({
+        next: () => {
+          this.snackbar.success(this.translate.instant('quotes.paymentSchedule.milestoneWaived'));
+          this.loadPaymentSchedule(this.quoteId());
+        },
+      });
+    });
+  }
+
+  protected generateInvoice(milestone: PaymentMilestone): void {
+    this.paymentScheduleService.generateInvoice(milestone.id).subscribe({
+      next: (invoice) => {
+        this.snackbar.success(
+          this.translate.instant('quotes.paymentSchedule.invoiceGenerated', { number: invoice.invoiceNumber }));
+        this.loadPaymentSchedule(this.quoteId());
+      },
     });
   }
 

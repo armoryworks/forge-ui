@@ -1,0 +1,72 @@
+<app-dialog
+  [title]="'quotes.paymentSchedule.dialogTitle' | translate"
+  width="520px"
+  [dirty]="form.dirty"
+  (closed)="close()">
+
+  <form [formGroup]="form" class="schedule-form">
+    <div formArrayName="milestones" class="schedule-form__rows">
+      @for (row of rowViews(); track $index; let i = $index) {
+        <div class="ms-row" [formGroupName]="i">
+          <div class="ms-row__head">
+            <span class="ms-row__seq">{{ i + 1 }}</span>
+            <app-currency-display class="ms-row__amount" [value]="row.amount" [currency]="null" />
+            <button
+              type="button"
+              class="icon-btn icon-btn--danger"
+              [attr.aria-label]="'quotes.paymentSchedule.removeMilestone' | translate"
+              [disabled]="rowViews().length <= 1"
+              (click)="removeRow(i)">
+              <span class="material-icons-outlined">delete</span>
+            </button>
+          </div>
+          <div class="dialog-row">
+            <app-input [label]="'quotes.paymentSchedule.milestoneName' | translate" formControlName="name" [required]="true" [maxlength]="100" />
+            <app-input [label]="'quotes.paymentSchedule.percentage' | translate" type="number" formControlName="percentage" [required]="true" suffix="%" step="0.01" min="0.01" max="100" />
+          </div>
+          <div class="dialog-row">
+            <app-select [label]="'quotes.paymentSchedule.dueTrigger' | translate" formControlName="dueTrigger" [options]="triggerOptions" [required]="true" />
+            @if (row.trigger === 'FixedDate') {
+              <app-datepicker [label]="'quotes.paymentSchedule.dueDate' | translate" formControlName="dueDate" [required]="true" />
+            } @else if (row.trigger === 'NetDays') {
+              <app-input [label]="'quotes.paymentSchedule.netDays' | translate" type="number" formControlName="netDays" [required]="true" step="1" min="1" />
+            }
+          </div>
+          <app-input [label]="'common.notes' | translate" formControlName="notes" [maxlength]="500" />
+        </div>
+      }
+    </div>
+
+    <div class="schedule-form__footer">
+      <button
+        type="button"
+        class="action-btn action-btn--sm"
+        [disabled]="rowViews().length >= maxMilestones"
+        (click)="addRow()">
+        <span class="material-icons-outlined">add</span>
+        {{ 'quotes.paymentSchedule.addMilestone' | translate }}
+      </button>
+      <span
+        class="schedule-form__sum"
+        [class.schedule-form__sum--ok]="sumOk()"
+        [class.schedule-form__sum--bad]="!sumOk()"
+        aria-live="polite">
+        {{ 'quotes.paymentSchedule.percentTotal' | translate }}: {{ sumPct() | number:'1.0-2' }}%
+      </span>
+    </div>
+  </form>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button
+        data-testid="payment-schedule-save-btn"
+        class="action-btn action-btn--primary"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        <span class="material-icons-outlined">save</span>
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

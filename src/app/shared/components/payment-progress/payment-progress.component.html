@@ -1,0 +1,25 @@
+<div class="payment-progress">
+  <div class="payment-progress__bar" role="img" [attr.aria-label]="'shared.paymentProgress.progressAria' | translate">
+    <div class="payment-progress__segment payment-progress__segment--paid" [style.width.%]="paidPct()"></div>
+    <div class="payment-progress__segment payment-progress__segment--remaining" [style.width.%]="remainingPct()"></div>
+  </div>
+
+  <div class="payment-progress__summary">
+    <span class="payment-progress__summary-label">{{ 'shared.paymentProgress.paid' | translate }}</span>
+    <app-currency-display class="payment-progress__summary-value" [value]="schedule().totals.paidTotal" [currency]="null" />
+    <span class="payment-progress__summary-sep" aria-hidden="true">·</span>
+    <span class="payment-progress__summary-label">{{ 'shared.paymentProgress.remaining' | translate }}</span>
+    <app-currency-display class="payment-progress__summary-value" [value]="schedule().totals.remainingTotal" [currency]="null" />
+  </div>
+
+  <div class="payment-progress__milestones">
+    @for (m of milestoneViews(); track m.id) {
+      <div class="payment-progress__milestone" [class.payment-progress__milestone--waived]="m.waived">
+        <span class="payment-progress__name">{{ m.name }}</span>
+        <span class="payment-progress__pct">{{ m.percentage | number:'1.0-2' }}%</span>
+        <app-currency-display class="payment-progress__amount" [value]="m.amountDue" [currency]="null" />
+        <span [class]="m.chipClass">{{ m.statusKey | translate }}</span>
+      </div>
+    }
+  </div>
+</div>

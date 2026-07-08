@@ -701,6 +701,7 @@ All list views must show `<app-empty-state>` when data is empty — icon + messa
 | `AvatarComponent` | `shared/components/avatar/` | User avatar with initials fallback |
 | `KpiChipComponent` | `shared/components/kpi-chip/` | Compact metric display |
 | `StatusBadgeComponent` | `shared/components/status-badge/` | Colored status indicator |
+| `PaymentProgressComponent` | `shared/components/payment-progress/` | Dumb paid-vs-remaining bar + per-milestone status chips for S2 payment schedules (`[schedule]` = `PaymentSchedule` from `shared/models/`). Fits a 400px detail panel; used by the quote detail panel, designed to drop into the sales-order panel too |
 | `DashboardWidgetComponent` | `shared/components/dashboard-widget/` | Dashboard widget shell |
 | `ToastComponent` | `shared/components/toast/` | Stackable upper-right toasts |
 | `EmptyStateComponent` | `shared/components/empty-state/` | Icon + message + optional CTA for empty lists |

@@ -192,6 +192,53 @@
         </div>
       </div>
 
+      <!-- Payment Schedule (S2) — collapsed to header + [+] while empty
+           (collapsible-empty-sections rule); shows progress + per-milestone
+           actions once a schedule exists. -->
+      <div class="pay-section">
+        <div class="pay-section__head">
+          <span class="info-label">{{ 'quotes.paymentSchedule.title' | translate }}</span>
+          @if (!paymentSchedule()) {
+            <button data-testid="quote-add-payment-schedule-btn" class="action-btn action-btn--sm action-btn--create" (click)="openScheduleDialog()">
+              <span class="material-icons-outlined">add</span>
+              {{ 'quotes.paymentSchedule.addSchedule' | translate }}
+            </button>
+          } @else if (canEditSchedule()) {
+            <button data-testid="quote-edit-payment-schedule-btn" class="action-btn action-btn--sm" (click)="openScheduleDialog()">
+              <span class="material-icons-outlined">edit</span>
+              {{ 'quotes.paymentSchedule.editSchedule' | translate }}
+            </button>
+          }
+        </div>
+        @if (paymentSchedule(); as schedule) {
+          <app-payment-progress [schedule]="schedule" />
+          @if (milestoneActionRows().length > 0) {
+            <div class="pay-actions">
+              @for (row of milestoneActionRows(); track row.milestone.id) {
+                <div class="pay-actions__row">
+                  <span class="pay-actions__name">{{ row.milestone.name }}</span>
+                  @if (row.canMarkPaid) {
+                    <button class="icon-btn" [matTooltip]="'quotes.paymentSchedule.markPaid' | translate" matTooltipPosition="above" [attr.aria-label]="'quotes.paymentSchedule.markPaid' | translate" (click)="markMilestonePaid(row.milestone)">
+                      <span class="material-icons-outlined">payments</span>
+                    </button>
+                  }
+                  @if (row.canWaive) {
+                    <button class="icon-btn" [matTooltip]="'quotes.paymentSchedule.waive' | translate" matTooltipPosition="above" [attr.aria-label]="'quotes.paymentSchedule.waive' | translate" (click)="waiveMilestone(row.milestone)">
+                      <span class="material-icons-outlined">money_off</span>
+                    </button>
+                  }
+                  @if (row.canGenerateInvoice) {
+                    <button class="icon-btn" [matTooltip]="'quotes.paymentSchedule.generateInvoice' | translate" matTooltipPosition="above" [attr.aria-label]="'quotes.paymentSchedule.generateInvoice' | translate" (click)="generateInvoice(row.milestone)">
+                      <span class="material-icons-outlined">receipt_long</span>
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+
       <div class="info-grid">
         <div class="info-item">
           <span class="info-label">{{ 'common.created' | translate }}</span>

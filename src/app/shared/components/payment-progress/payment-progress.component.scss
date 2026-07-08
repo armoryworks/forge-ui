@@ -1,0 +1,86 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+// Dense by design — the whole block must sit comfortably inside a 400px
+// detail panel (dense-panel spacing scale: $sp-sm internal gaps).
+.payment-progress {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.payment-progress__bar {
+  display: flex;
+  height: $sp-md;
+  border: $border-width-thin solid var(--border);
+  overflow: hidden;
+}
+
+.payment-progress__segment {
+  height: 100%;
+}
+
+.payment-progress__segment--paid {
+  background: var(--success);
+}
+
+.payment-progress__segment--remaining {
+  background: var(--border);
+}
+
+.payment-progress__summary {
+  display: flex;
+  align-items: baseline;
+  gap: $sp-sm;
+  font-size: $font-size-xs;
+}
+
+.payment-progress__summary-label {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  color: var(--text-muted);
+}
+
+.payment-progress__summary-value {
+  font-family: $font-family-mono;
+}
+
+.payment-progress__summary-sep {
+  color: var(--text-muted);
+}
+
+.payment-progress__milestones {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.payment-progress__milestone {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  font-size: $font-size-xs;
+}
+
+.payment-progress__milestone--waived {
+  .payment-progress__name,
+  .chip {
+    text-decoration: line-through;
+    color: var(--text-muted);
+  }
+}
+
+.payment-progress__name {
+  @include truncate;
+  flex: 1;
+  min-width: 0;
+}
+
+.payment-progress__pct,
+.payment-progress__amount {
+  font-family: $font-family-mono;
+  white-space: nowrap;
+}
+
+.payment-progress__pct {
+  color: var(--text-muted);
+}
