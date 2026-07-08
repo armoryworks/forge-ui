@@ -2685,7 +2685,8 @@
       "capabilities": "Capacidades",
       "discovery": "Asistente de Descubrimiento",
       "presets": "Preajustes",
-      "entityCompleteness": "Integridad de Entidades"
+      "entityCompleteness": "Integridad de Entidades",
+      "terms": "Términos y condiciones"
     },
     "users": "Usuarios",
     "addUser": "Agregar Usuario",
@@ -4816,7 +4817,31 @@
     "lineUpdated": "Línea actualizada",
     "lineRemoved": "Línea eliminada",
     "deleteLineTitle": "¿Eliminar línea?",
-    "deleteLineMessage": "¿Eliminar \"{{description}}\" de esta orden de venta?"
+    "deleteLineMessage": "¿Eliminar \"{{description}}\" de esta orden de venta?",
+    "stages": {
+      "tab": "Etapas",
+      "notActivated": "Aún no hay programación por etapas",
+      "activateHint": "Divida este pedido en etapas de producción, envío y pago a partir del calendario.",
+      "activate": "Activar programación por etapas",
+      "activated": "Programación por etapas activada.",
+      "plannedShip": "Envío planificado",
+      "shipped": "Enviado",
+      "milestone": "Pago",
+      "markReady": "Marcar listo para enviar",
+      "ship": "Enviar etapa",
+      "shipTitle": "¿Enviar esta etapa?",
+      "shipMessage": "Marque esta etapa como enviada con la fecha de hoy. Esto puede activar su hito de pago vinculado."
+    },
+    "customerPoDoc": {
+      "tab": "O.C. del cliente",
+      "none": "No hay documento de O.C. del cliente",
+      "noneHint": "Genere un documento interno de orden de compra (solo lectura) vinculado a este pedido.",
+      "generate": "Generar O.C. del cliente",
+      "generated": "Documento de O.C. del cliente generado.",
+      "generatedOn": "Generado",
+      "downloadPdf": "Descargar PDF",
+      "liveNote": "Este documento refleja el estado actual del pedido de venta."
+    }
   },
   "quotes": {
     "quoteLabel": "Cotización",
@@ -4927,6 +4952,19 @@
       "milestoneWaived": "Hito exonerado",
       "generateInvoice": "Generar factura",
       "invoiceGenerated": "Factura {{number}} creada"
+    },
+    "sendEmail": {
+      "title": "Enviar cotización por correo",
+      "action": "Enviar correo",
+      "recipient": "Correo del destinatario",
+      "recipientPlaceholder": "comprador@ejemplo.com",
+      "message": "Mensaje",
+      "messageHint": "Nota opcional incluida en el cuerpo del correo.",
+      "termsPreview": "Vista previa de términos",
+      "noTerms": "No hay términos aplicables a esta cotización.",
+      "context": "Cotización {{ quote }} · {{ customer }}",
+      "send": "Enviar",
+      "sent": "Cotización enviada por correo."
     }
   },
   "shipments": {
@@ -7137,7 +7175,9 @@
     "sourceSOs": "Source SOs",
     "tabSettings": "Settings",
     "tabSuggestions": "Suggestions",
-    "vendor": "Vendor"
+    "vendor": "Vendor",
+    "autoCustomerPo": "Generar O.C. del cliente automáticamente al crear el pedido",
+    "autoCustomerPoHint": "Cuando una cotización se convierte en pedido de venta, genera automáticamente el documento interno de orden de compra del cliente (solo lectura)."
   },
   "expenseSettings": {
     "title": "Política de Gastos",
@@ -8050,6 +8090,65 @@
       "attestTitle": "¿Atestiguar la transferencia?",
       "attestMessage": "Confirme que la transferencia {{number}} se ingresó en el portal del banco. La atestación debe hacerla un usuario distinto al creador del pago, marca la transferencia como transmitida y compensa el efectivo en tránsito.",
       "attested": "Transferencia atestiguada — marcada como transmitida"
+    }
+  },
+  "terms": {
+    "scope": {
+      "company": "Empresa",
+      "customer": "Cliente",
+      "part": "Pieza",
+      "companyWide": "Toda la empresa"
+    },
+    "fields": {
+      "scope": "Ámbito",
+      "customer": "Cliente",
+      "part": "Pieza",
+      "title": "Título",
+      "summary": "Resumen",
+      "summaryHint": "Se muestra en línea / truncado en los correos",
+      "body": "Contenido",
+      "effectiveFrom": "Vigente desde",
+      "effectiveTo": "Vigente hasta",
+      "sortOrder": "Orden",
+      "isActive": "Activo",
+      "version": "Versión"
+    },
+    "dialog": {
+      "newTitle": "Nuevos términos",
+      "editTitle": "Editar términos"
+    },
+    "section": {
+      "customerTitle": "Términos del cliente",
+      "partTitle": "Términos de la pieza",
+      "add": "Agregar términos",
+      "empty": "Aún no hay términos."
+    },
+    "row": {
+      "effective": "Vigencia"
+    },
+    "columns": {
+      "title": "Título",
+      "target": "Aplica a",
+      "version": "Versión",
+      "effectiveFrom": "Vigente desde",
+      "effectiveTo": "Vigente hasta",
+      "sortOrder": "Orden"
+    },
+    "admin": {
+      "title": "Términos y condiciones",
+      "hint": "Términos de empresa, cliente y pieza usados en cotizaciones y pedidos.",
+      "empty": "No se encontraron términos."
+    },
+    "filters": {
+      "scope": "Ámbito"
+    },
+    "newTerms": "Nuevos términos",
+    "created": "Términos creados.",
+    "updated": "Términos actualizados.",
+    "deleted": "Términos eliminados.",
+    "delete": {
+      "title": "¿Eliminar términos?",
+      "message": "¿Eliminar «{{ title }}»? Esta acción no se puede deshacer."
     }
   }
 }

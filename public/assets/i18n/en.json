@@ -2685,7 +2685,8 @@
       "discovery": "Discovery Wizard",
       "presets": "Presets",
       "roleTemplates": "Role Templates",
-      "entityCompleteness": "Entity Completeness"
+      "entityCompleteness": "Entity Completeness",
+      "terms": "Terms & Conditions"
     },
     "users": "Users",
     "addUser": "Add User",
@@ -4823,7 +4824,31 @@
     "lineUpdated": "Line updated",
     "lineRemoved": "Line removed",
     "deleteLineTitle": "Remove line?",
-    "deleteLineMessage": "Remove \"{{description}}\" from this order?"
+    "deleteLineMessage": "Remove \"{{description}}\" from this order?",
+    "stages": {
+      "tab": "Stages",
+      "notActivated": "No staged schedule yet",
+      "activateHint": "Break this order into staged production, shipment, and payment stages seeded from the schedule.",
+      "activate": "Activate staged schedule",
+      "activated": "Staged schedule activated.",
+      "plannedShip": "Planned ship",
+      "shipped": "Shipped",
+      "milestone": "Payment",
+      "markReady": "Mark ready to ship",
+      "ship": "Ship stage",
+      "shipTitle": "Ship this stage?",
+      "shipMessage": "Mark this stage as shipped with today's date. This can trigger its linked payment milestone."
+    },
+    "customerPoDoc": {
+      "tab": "Customer P.O.",
+      "none": "No customer P.O. document",
+      "noneHint": "Generate an internal read-only purchase-order document linked to this order.",
+      "generate": "Generate customer P.O.",
+      "generated": "Customer P.O. document generated.",
+      "generatedOn": "Generated",
+      "downloadPdf": "Download PDF",
+      "liveNote": "This document reflects the current state of the sales order."
+    }
   },
   "quotes": {
     "quoteLabel": "Quote",
@@ -4934,6 +4959,19 @@
       "milestoneWaived": "Milestone waived",
       "generateInvoice": "Generate invoice",
       "invoiceGenerated": "Invoice {{number}} created"
+    },
+    "sendEmail": {
+      "title": "Send Quote Email",
+      "action": "Send email",
+      "recipient": "Recipient Email",
+      "recipientPlaceholder": "buyer@example.com",
+      "message": "Message",
+      "messageHint": "Optional note included in the email body.",
+      "termsPreview": "Terms Preview",
+      "noTerms": "No terms apply to this quote.",
+      "context": "Quote {{ quote }} · {{ customer }}",
+      "send": "Send",
+      "sent": "Quote email sent."
     }
   },
   "shipments": {
@@ -7144,7 +7182,9 @@
     "sourceSOs": "Source SOs",
     "tabSettings": "Settings",
     "tabSuggestions": "Suggestions",
-    "vendor": "Vendor"
+    "vendor": "Vendor",
+    "autoCustomerPo": "Auto-generate customer P.O. on order",
+    "autoCustomerPoHint": "When a quote is converted to a sales order, automatically generate the internal read-only customer purchase-order document."
   },
   "expenseSettings": {
     "title": "Expense Policy",
@@ -8050,6 +8090,65 @@
       "attestTitle": "Attest wire entry?",
       "attestMessage": "Confirm wire {{number}} was entered at the bank portal. Attestation must be done by a different user than the payment creator, marks the wire transmitted, and clears cash-in-transit.",
       "attested": "Wire attested — marked transmitted"
+    }
+  },
+  "terms": {
+    "scope": {
+      "company": "Company",
+      "customer": "Customer",
+      "part": "Part",
+      "companyWide": "Company-wide"
+    },
+    "fields": {
+      "scope": "Scope",
+      "customer": "Customer",
+      "part": "Part",
+      "title": "Title",
+      "summary": "Summary",
+      "summaryHint": "Shown inline / truncated in emails",
+      "body": "Body",
+      "effectiveFrom": "Effective From",
+      "effectiveTo": "Effective To",
+      "sortOrder": "Sort Order",
+      "isActive": "Active",
+      "version": "Version"
+    },
+    "dialog": {
+      "newTitle": "New Terms",
+      "editTitle": "Edit Terms"
+    },
+    "section": {
+      "customerTitle": "Customer Terms",
+      "partTitle": "Part Terms",
+      "add": "Add terms",
+      "empty": "No terms yet."
+    },
+    "row": {
+      "effective": "Effective"
+    },
+    "columns": {
+      "title": "Title",
+      "target": "Applies To",
+      "version": "Version",
+      "effectiveFrom": "Effective From",
+      "effectiveTo": "Effective To",
+      "sortOrder": "Sort"
+    },
+    "admin": {
+      "title": "Terms & Conditions",
+      "hint": "Company, customer, and part terms used on quotes and orders.",
+      "empty": "No terms found."
+    },
+    "filters": {
+      "scope": "Scope"
+    },
+    "newTerms": "New Terms",
+    "created": "Terms created.",
+    "updated": "Terms updated.",
+    "deleted": "Terms deleted.",
+    "delete": {
+      "title": "Delete terms?",
+      "message": "Delete \"{{ title }}\"? This can't be undone."
     }
   }
 }

@@ -46,6 +46,13 @@
         }
       </button>
       <button class="tab" role="tab"
+        [class.tab--active]="activeTab() === 'stages'"
+        [attr.aria-selected]="activeTab() === 'stages'"
+        (click)="switchTab('stages')"
+        aria-label="Staged schedule tab">
+        {{ 'salesOrders.stages.tab' | translate }}
+      </button>
+      <button class="tab" role="tab"
         [class.tab--active]="activeTab() === 'shipments'"
         [attr.aria-selected]="activeTab() === 'shipments'"
         (click)="switchTab('shipments')"
@@ -90,6 +97,13 @@
         @if (hasUninvoicedShipments()) {
           <span class="material-icons-outlined tab__warning" [matTooltip]="'salesOrders.tabWarning.uninvoiced' | translate" matTooltipPosition="above" [attr.aria-label]="'salesOrders.tabWarning.uninvoiced' | translate">warning</span>
         }
+      </button>
+      <button class="tab" role="tab"
+        [class.tab--active]="activeTab() === 'customer-po'"
+        [attr.aria-selected]="activeTab() === 'customer-po'"
+        (click)="switchTab('customer-po')"
+        aria-label="Customer P.O. tab">
+        {{ 'salesOrders.customerPoDoc.tab' | translate }}
       </button>
       <button class="tab" role="tab"
         [class.tab--active]="activeTab() === 'activity'"
@@ -435,6 +449,70 @@
         </div>
       }
 
+      <!-- Staged Schedule Tab (S4c) -->
+      @if (activeTab() === 'stages') {
+        <div class="tab-panel" role="tabpanel" [appLoadingBlock]="stagesLoading()">
+          @if (stages(); as st) {
+            @if (!st.isActivated) {
+              <app-empty-state
+                icon="linear_scale"
+                message="{{ 'salesOrders.stages.notActivated' | translate }}"
+                helpText="{{ 'salesOrders.stages.activateHint' | translate }}"
+                [actionLabel]="'salesOrders.stages.activate' | translate"
+                (action)="activateStagedSchedule()" />
+            } @else {
+              <div class="so-stages">
+                @for (stage of st.stages; track stage.id) {
+                  <div class="so-stage-card">
+                    <div class="so-stage-card__header">
+                      <span class="so-stage-card__seq">{{ stage.sequence }}</span>
+                      <span class="so-stage-card__name">{{ stage.name }}</span>
+                      <span [class]="stageStatusClass(stage.status)">{{ stage.status }}</span>
+                    </div>
+                    <div class="so-stage-card__meta">
+                      @if (stage.plannedShipDate) {
+                        <span>{{ 'salesOrders.stages.plannedShip' | translate }}: {{ stage.plannedShipDate | date:'MM/dd/yyyy' }}</span>
+                      }
+                      @if (stage.actualShipDate) {
+                        <span class="so-stage-card__shipped">{{ 'salesOrders.stages.shipped' | translate }}: {{ stage.actualShipDate | date:'MM/dd/yyyy' }}</span>
+                      }
+                      @if (stage.paymentMilestoneName) {
+                        <span>{{ 'salesOrders.stages.milestone' | translate }}: {{ stage.paymentMilestoneName }}</span>
+                      }
+                    </div>
+                    @if (stage.lines.length > 0) {
+                      <div class="so-stage-card__lines">
+                        @for (line of stage.lines; track line.id) {
+                          <span class="so-stage-card__line">{{ line.partNumber || line.description }} · {{ line.quantity | number:'1.0-4' }}</span>
+                        }
+                      </div>
+                    }
+                    @if (stage.lots.length > 0) {
+                      <div class="so-stage-card__lots">
+                        @for (lot of stage.lots; track lot.id) {
+                          <span class="chip chip--muted">{{ lot.lotNumber }}</span>
+                        }
+                      </div>
+                    }
+                    <div class="so-stage-card__actions">
+                      @if (stage.status === 'Planned' || stage.status === 'InProduction') {
+                        <button class="action-btn action-btn--sm" (click)="completeStage(stage.id)">{{ 'salesOrders.stages.markReady' | translate }}</button>
+                      }
+                      @if (stage.status === 'ReadyToShip') {
+                        <button class="action-btn action-btn--primary action-btn--sm" (click)="shipStage(stage.id)">
+                          <span class="material-icons-outlined">local_shipping</span>
+                          {{ 'salesOrders.stages.ship' | translate }}
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          }
+        </div>
+      }
+
       <!-- Shipments Tab -->
       @if (activeTab() === 'shipments') {
         <div class="tab-panel" role="tabpanel">
@@ -732,6 +810,59 @@
                 <span class="so-detail__invoice-value"><app-currency-display [value]="so.total" [currency]="null" /></span>
               </div>
             </div>
+          }
+        </div>
+      }
+
+      <!-- Customer P.O. Tab (S4a) -->
+      @if (activeTab() === 'customer-po') {
+        <div class="tab-panel" role="tabpanel" [appLoadingBlock]="customerPoLoading()">
+          @if (customerPo(); as cpo) {
+            <div class="so-cpo">
+              <div class="so-cpo__header">
+                <div>
+                  <span class="so-cpo__number">{{ cpo.documentNumber }}</span>
+                  <span class="so-cpo__meta">{{ 'salesOrders.customerPoDoc.generatedOn' | translate }} {{ cpo.generatedAt | date:'MM/dd/yyyy' }}</span>
+                </div>
+                <button class="action-btn action-btn--sm" (click)="downloadCustomerPoPdf()">
+                  <span class="material-icons-outlined">download</span>
+                  {{ 'salesOrders.customerPoDoc.downloadPdf' | translate }}
+                </button>
+              </div>
+              <p class="so-cpo__live-note">{{ 'salesOrders.customerPoDoc.liveNote' | translate }}</p>
+              <table class="so-cpo__lines" aria-label="Customer PO lines">
+                <thead>
+                  <tr>
+                    <th scope="col">{{ 'common.description' | translate }}</th>
+                    <th scope="col" class="so-cpo__num">{{ 'salesOrders.qty' | translate }}</th>
+                    <th scope="col" class="so-cpo__num">{{ 'salesOrders.unitPrice' | translate }}</th>
+                    <th scope="col" class="so-cpo__num">{{ 'common.total' | translate }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (line of cpo.lines; track line.lineNumber) {
+                    <tr>
+                      <td>{{ line.partNumber ? line.partNumber + ' — ' : '' }}{{ line.description }}</td>
+                      <td class="so-cpo__num">{{ line.quantity | number:'1.0-4' }}</td>
+                      <td class="so-cpo__num"><app-currency-display [value]="line.unitPrice" [currency]="null" /></td>
+                      <td class="so-cpo__num"><app-currency-display [value]="line.lineTotal" [currency]="null" /></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+              <div class="so-cpo__totals">
+                <div class="so-cpo__total-row"><span>{{ 'salesOrders.subtotal' | translate }}</span><app-currency-display [value]="cpo.subtotal" [currency]="null" /></div>
+                <div class="so-cpo__total-row"><span>{{ 'salesOrders.tax' | translate }}</span><app-currency-display [value]="cpo.taxAmount" [currency]="null" /></div>
+                <div class="so-cpo__total-row so-cpo__total-row--grand"><span>{{ 'common.total' | translate }}</span><app-currency-display [value]="cpo.total" [currency]="null" /></div>
+              </div>
+            </div>
+          } @else {
+            <app-empty-state
+              icon="request_quote"
+              message="{{ 'salesOrders.customerPoDoc.none' | translate }}"
+              helpText="{{ 'salesOrders.customerPoDoc.noneHint' | translate }}"
+              [actionLabel]="'salesOrders.customerPoDoc.generate' | translate"
+              (action)="generateCustomerPo()" />
           }
         </div>
       }

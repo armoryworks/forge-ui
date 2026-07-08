@@ -30,10 +30,12 @@ import { FileAttachment } from '../../../../shared/models/file.model';
 import { CustomerAddress } from '../../../../shared/models/customer-address.model';
 import { ScheduleTimelineComponent } from '../schedule-timeline/schedule-timeline.component';
 import { ScheduleMilestone } from '../../models/schedule-milestone.model';
+import { SalesOrderStages } from '../../models/sales-order-stage.model';
+import { CustomerPoDocument } from '../../models/customer-po-document.model';
 import { AccountingService } from '../../../../shared/services/accounting.service';
 import { InvoiceDialogComponent } from '../../../invoices/components/invoice-dialog/invoice-dialog.component';
 
-type TabId = 'overview' | 'lines' | 'schedule' | 'shipments' | 'returns' | 'documents' | 'invoices' | 'activity';
+type TabId = 'overview' | 'lines' | 'schedule' | 'stages' | 'shipments' | 'returns' | 'documents' | 'invoices' | 'customer-po' | 'activity';
 
 @Component({
   selector: 'app-sales-order-detail-panel',
@@ -85,6 +87,11 @@ export class SalesOrderDetailPanelComponent {
   protected readonly scheduleLoading = signal(false);
   protected readonly documents = signal<FileAttachment[]>([]);
   protected readonly invoices = signal<SalesOrderInvoice[]>([]);
+  // S4a customer-PO doc + S4c staged schedule
+  protected readonly customerPo = signal<CustomerPoDocument | null>(null);
+  protected readonly customerPoLoading = signal(false);
+  protected readonly stages = signal<SalesOrderStages | null>(null);
+  protected readonly stagesLoading = signal(false);
 
   protected readonly hasData = computed(() => this.so() !== null);
 
@@ -225,7 +232,85 @@ export class SalesOrderDetailPanelComponent {
     this.activeTab.set(tab);
     if (tab === 'schedule' && this.scheduleMilestones().length === 0) {
       this.loadSchedule(this.salesOrderId());
+    } else if (tab === 'stages' && this.stages() === null) {
+      this.loadStages(this.salesOrderId());
+    } else if (tab === 'customer-po' && this.customerPo() === null) {
+      this.loadCustomerPo(this.salesOrderId());
     }
+  }
+
+  // --- S4c: staged schedule ---
+  private loadStages(id: number): void {
+    this.stagesLoading.set(true);
+    this.soService.getStages(id).subscribe({
+      next: (s) => { this.stages.set(s); this.stagesLoading.set(false); },
+      error: () => this.stagesLoading.set(false),
+    });
+  }
+
+  protected activateStagedSchedule(): void {
+    this.stagesLoading.set(true);
+    this.soService.activateStagedSchedule(this.salesOrderId()).subscribe({
+      next: (s) => {
+        this.stages.set(s);
+        this.stagesLoading.set(false);
+        this.snackbar.success(this.translate.instant('salesOrders.stages.activated'));
+      },
+      error: () => this.stagesLoading.set(false),
+    });
+  }
+
+  protected completeStage(stageId: number): void {
+    this.soService.completeStage(stageId).subscribe({ next: () => this.loadStages(this.salesOrderId()) });
+  }
+
+  protected shipStage(stageId: number): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('salesOrders.stages.shipTitle'),
+        message: this.translate.instant('salesOrders.stages.shipMessage'),
+        confirmLabel: this.translate.instant('salesOrders.stages.ship'),
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(ok => {
+      if (!ok) return;
+      this.soService.shipStage(stageId).subscribe({
+        next: () => { this.loadStages(this.salesOrderId()); this.changed.emit(); },
+      });
+    });
+  }
+
+  protected stageStatusClass(status: string): string {
+    const map: Record<string, string> = {
+      Planned: 'chip--muted', InProduction: 'chip--info', ReadyToShip: 'chip--warning',
+      Shipped: 'chip--success', Closed: 'chip--muted',
+    };
+    return `chip ${map[status] ?? ''}`.trim();
+  }
+
+  // --- S4a: customer-PO document ---
+  private loadCustomerPo(id: number): void {
+    this.customerPoLoading.set(true);
+    this.soService.getCustomerPo(id).subscribe({
+      next: (doc) => { this.customerPo.set(doc); this.customerPoLoading.set(false); },
+      error: () => this.customerPoLoading.set(false),
+    });
+  }
+
+  protected generateCustomerPo(): void {
+    this.customerPoLoading.set(true);
+    this.soService.generateCustomerPo(this.salesOrderId()).subscribe({
+      next: () => {
+        this.loadCustomerPo(this.salesOrderId());
+        this.snackbar.success(this.translate.instant('salesOrders.customerPoDoc.generated'));
+      },
+      error: () => this.customerPoLoading.set(false),
+    });
+  }
+
+  protected downloadCustomerPoPdf(): void {
+    window.open(this.soService.customerPoPdfUrl(this.salesOrderId()), '_blank');
   }
 
   private loadSchedule(id: number): void {

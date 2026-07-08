@@ -34,6 +34,8 @@ export class AutoPoSettingsComponent {
     mode: new FormControl('Suggest'),
     bufferDays: new FormControl('3'),
     notifyChat: new FormControl(true),
+    // S4a — auto-generate the internal customer-PO document on quote→order convert.
+    autoCustomerPo: new FormControl(false),
   });
 
   protected readonly modeOptions: SelectOption[] = [
@@ -56,6 +58,7 @@ export class AutoPoSettingsComponent {
           mode: get('inventory:auto_po_mode') ?? 'Suggest',
           bufferDays: get('inventory:auto_po_buffer_days') ?? '3',
           notifyChat: get('inventory:auto_po_notify_chat') !== 'false',
+          autoCustomerPo: get('sales:auto_customer_po_enabled') === 'true',
         });
         this.loading.set(false);
       },
@@ -71,6 +74,7 @@ export class AutoPoSettingsComponent {
       { key: 'inventory:auto_po_mode', value: val.mode ?? 'Suggest' },
       { key: 'inventory:auto_po_buffer_days', value: val.bufferDays ?? '3' },
       { key: 'inventory:auto_po_notify_chat', value: String(val.notifyChat ?? true) },
+      { key: 'sales:auto_customer_po_enabled', value: String(val.autoCustomerPo ?? false) },
     ];
     this.adminService.updateSystemSettings(settings).subscribe({
       next: () => {

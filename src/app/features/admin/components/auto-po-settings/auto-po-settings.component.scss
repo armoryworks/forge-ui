@@ -11,4 +11,16 @@
 .settings-row {
   display: flex;
   flex-direction: column;
+
+  &--divider {
+    padding-top: $sp-lg;
+    border-top: $border-width-thin solid var(--border);
+    gap: $sp-sm;
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
 }

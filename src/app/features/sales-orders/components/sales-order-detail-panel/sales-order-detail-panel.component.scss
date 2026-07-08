@@ -401,3 +401,124 @@
   .action-btn--danger,
   .action-btn--destructive { margin-right: auto; }
 }
+
+// --- S4c staged schedule ---
+.so-stages {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md;
+}
+
+.so-stage-card {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+  }
+
+  &__seq {
+    @include flex-center;
+    width: 20px;
+    height: 20px;
+    background: var(--primary);
+    color: var(--surface);
+    font-size: $font-size-xs;
+  }
+
+  &__name {
+    flex: 1;
+    font-weight: 600;
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-md;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+
+  &__shipped { color: var(--success); }
+
+  &__lines, &__lots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-sm;
+    font-size: $font-size-xs;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $sp-sm;
+  }
+}
+
+// --- S4a customer-PO document ---
+.so-cpo {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md;
+
+  &__header {
+    @include flex-between;
+    align-items: flex-start;
+  }
+
+  &__number {
+    display: block;
+    font-family: $font-family-mono;
+    font-weight: 600;
+  }
+
+  &__meta { font-size: $font-size-xs; color: var(--text-muted); }
+
+  &__live-note {
+    margin: 0;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  &__lines {
+    width: 100%;
+    border-collapse: collapse;
+
+    th, td {
+      padding: $sp-sm;
+      border-bottom: $border-width-thin solid var(--border);
+      text-align: left;
+      font-size: $font-size-sm;
+    }
+  }
+
+  &__num { text-align: right; }
+
+  &__totals {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    align-self: flex-end;
+    min-width: 220px;
+  }
+
+  &__total-row {
+    @include flex-between;
+    font-size: $font-size-sm;
+
+    &--grand {
+      font-weight: 700;
+      border-top: $border-width-thin solid var(--border);
+      padding-top: $sp-xs;
+    }
+  }
+}

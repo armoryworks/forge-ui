@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, map, catchError, of } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 import { SalesOrderListItem } from '../models/sales-order-list-item.model';
@@ -9,8 +9,20 @@ import { SalesOrderInvoice } from '../models/sales-order-invoice.model';
 import { CreateSalesOrderRequest } from '../models/create-sales-order-request.model';
 import { FileAttachment } from '../../../shared/models/file.model';
 import { ScheduleMilestone } from '../models/schedule-milestone.model';
+import { SalesOrderStage, SalesOrderStages } from '../models/sales-order-stage.model';
+import { CustomerPoDocument } from '../models/customer-po-document.model';
 import { PagedQuery, PagedResponse } from '../../../shared/models/paged-response.model';
 import { CustomerAddress } from '../../../shared/models/customer-address.model';
+
+/** Payload to create/update a staged-schedule stage. */
+export interface UpsertStageInput {
+  name: string;
+  sequence: number;
+  plannedProductionComplete?: string | null;
+  plannedShipDate?: string | null;
+  notes?: string | null;
+  paymentMilestoneId?: number | null;
+}
 
 /** Phase 3 F1 partial / WU-18 — extra filter dimensions on the SO list. */
 export interface SalesOrderListQuery extends PagedQuery {
@@ -45,6 +57,8 @@ export class SalesOrderService {
    * `/api/v1/orders` SalesOrders surface (the canonical SalesOrder entity).
    */
   private readonly base = `${environment.apiUrl}/orders`;
+  /** S4c — per-stage mutations live under /api/v1/sales-order-stages/{id}. */
+  private readonly stageBase = `${environment.apiUrl}/sales-order-stages`;
   /**
    * Phase 3 F1 partial / WU-18 — read-only Job-projected list at
    * `/api/v1/sales-orders`. Returns the standard PagedResponse envelope.
@@ -179,5 +193,56 @@ export class SalesOrderService {
 
   downloadFileUrl(fileId: number): string {
     return `${environment.apiUrl}/files/${fileId}/download`;
+  }
+
+  // --- S4a: internal customer-PO document (live view) ---
+  getCustomerPo(orderId: number): Observable<CustomerPoDocument | null> {
+    return this.http.get<CustomerPoDocument>(`${this.base}/${orderId}/customer-po`)
+      .pipe(catchError(() => of(null)));
+  }
+
+  generateCustomerPo(orderId: number): Observable<unknown> {
+    return this.http.post(`${this.base}/${orderId}/customer-po`, {});
+  }
+
+  customerPoPdfUrl(orderId: number): string {
+    return `${this.base}/${orderId}/customer-po/pdf`;
+  }
+
+  // --- S4c: staged production/shipment/payment schedule ---
+  getStages(orderId: number): Observable<SalesOrderStages> {
+    return this.http.get<SalesOrderStages>(`${this.base}/${orderId}/stages`);
+  }
+
+  activateStagedSchedule(orderId: number): Observable<SalesOrderStages> {
+    return this.http.post<SalesOrderStages>(`${this.base}/${orderId}/stages/activate`, {});
+  }
+
+  createStage(orderId: number, body: UpsertStageInput): Observable<SalesOrderStage> {
+    return this.http.post<SalesOrderStage>(`${this.base}/${orderId}/stages`, body);
+  }
+
+  updateStage(stageId: number, body: UpsertStageInput): Observable<SalesOrderStage> {
+    return this.http.put<SalesOrderStage>(`${this.stageBase}/${stageId}`, body);
+  }
+
+  deleteStage(stageId: number): Observable<void> {
+    return this.http.delete<void>(`${this.stageBase}/${stageId}`);
+  }
+
+  assignStageLines(stageId: number, lines: { salesOrderLineId: number; quantity: number }[]): Observable<SalesOrderStage> {
+    return this.http.put<SalesOrderStage>(`${this.stageBase}/${stageId}/lines`, { lines });
+  }
+
+  assignStageLots(stageId: number, lotIds: number[]): Observable<SalesOrderStage> {
+    return this.http.put<SalesOrderStage>(`${this.stageBase}/${stageId}/lots`, { lotIds });
+  }
+
+  completeStage(stageId: number): Observable<SalesOrderStage> {
+    return this.http.post<SalesOrderStage>(`${this.stageBase}/${stageId}/complete`, {});
+  }
+
+  shipStage(stageId: number, shipmentId?: number): Observable<SalesOrderStage> {
+    return this.http.post<SalesOrderStage>(`${this.stageBase}/${stageId}/ship`, { shipmentId: shipmentId ?? null });
   }
 }

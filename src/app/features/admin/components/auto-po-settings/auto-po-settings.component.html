@@ -35,4 +35,11 @@
       [label]="'autoPo.notifyChat' | translate"
       formControlName="notifyChat" />
   </div>
+
+  <div class="settings-row settings-row--divider">
+    <app-toggle
+      [label]="'autoPo.autoCustomerPo' | translate"
+      formControlName="autoCustomerPo" />
+    <p class="settings-row__hint">{{ 'autoPo.autoCustomerPoHint' | translate }}</p>
+  </div>
 </div>
