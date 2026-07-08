@@ -1,0 +1,55 @@
+<app-page-layout [pageTitle]="'shipping.title' | translate" [pageSubtitle]="'shipping.subtitle' | translate">
+  <ng-container toolbar>
+    <a class="action-btn action-btn--sm" routerLink="/shipments">
+      <span class="material-icons-outlined">receipt_long</span>{{ 'shipping.allShipments' | translate }}
+    </a>
+    <button class="action-btn action-btn--sm" [disabled]="loading()" (click)="load()">
+      <span class="material-icons-outlined">refresh</span>{{ 'shipping.refresh' | translate }}
+    </button>
+  </ng-container>
+
+  <ng-container content>
+    <div class="sh-queue-head">
+      <span class="sh-queue-head__label">{{ 'shipping.readyToShip' | translate }}</span>
+      <span class="chip chip--info">{{ orders().length }}</span>
+    </div>
+
+    @if (orders().length === 0) {
+      <app-empty-state icon="local_shipping" [message]="'shipping.nothingToShip' | translate" />
+    } @else {
+      <div class="sh-queue">
+        @for (order of orders(); track order.salesOrderId) {
+          <div class="sh-order">
+            <div class="sh-order__head">
+              <span class="sh-order__number">{{ order.orderNumber }}</span>
+              <span class="sh-order__customer">{{ order.customerName }}</span>
+              <span class="chip chip--muted">{{ order.status }}</span>
+              @if (order.requestedDeliveryDate) {
+                <span class="sh-order__due">
+                  <span class="material-icons-outlined">event</span>{{ order.requestedDeliveryDate | date: 'MM/dd/yyyy' }}
+                </span>
+              }
+              <span class="sh-order__spacer"></span>
+              <button class="action-btn action-btn--sm action-btn--primary" (click)="openShip(order)">
+                <span class="material-icons-outlined">local_shipping</span>{{ 'shipping.ship' | translate }}
+              </button>
+            </div>
+            <div class="sh-order__lines">
+              @for (line of order.lines; track line.salesOrderLineId) {
+                <div class="sh-line">
+                  <span class="sh-line__part">{{ line.partNumber || line.description }}</span>
+                  <span class="sh-line__desc">{{ line.description }}</span>
+                  <span class="sh-line__qty">{{ line.remainingQuantity | number }} {{ 'shipping.remaining' | translate }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </ng-container>
+</app-page-layout>
+
+@if (shipOrderId() !== null) {
+  <app-shipment-dialog [initialSalesOrderId]="shipOrderId()" (closed)="onDialogClosed()" (saved)="onDialogSaved()" />
+}

@@ -5,6 +5,7 @@
     "backlog": "Backlog",
     "calendar": "Calendar",
     "compliance": "Compliance",
+    "watchtower": "Watchtower",
     "parts": "Parts",
     "inventory": "Inventory",
     "customers": "Customers",
@@ -33,6 +34,7 @@
     "salesOrders": "Sales Orders",
     "quotes": "Quotes",
     "shipments": "Shipments",
+    "shipping": "Shipping",
     "invoices": "Invoices",
     "payments": "Payments",
     "customerReturns": "Customer Returns",
@@ -3404,13 +3406,7 @@
     "confirmPassword": "Confirm Password",
     "minPasswordHint": "Minimum 8 characters",
     "passwordsDoNotMatch": "Passwords do not match",
-    "changeEmail": "Change Email Address",
-    "changeEmailDesc": "Update the email address you use to sign in. You'll be signed out and must sign in again with the new address.",
-    "newEmail": "New Email Address",
-    "confirmEmail": "Confirm New Email Address",
-    "emailsDoNotMatch": "Email addresses do not match",
     "emailChanged": "Email address changed",
-    "emailChangedSignOut": "Email address changed. Please sign in again with your new email.",
     "saving": "Saving...",
     "changing": "Changing...",
     "saveProfile": "Save Profile",
@@ -8160,5 +8156,51 @@
       "title": "Delete terms?",
       "message": "Delete \"{{ title }}\"? This can't be undone."
     }
+  },
+  "watchtower": {
+    "title": "Regulatory Watchtower",
+    "subtitle": "Monitored regulatory sources and proposed changes awaiting review.",
+    "pollNow": "Poll now",
+    "statusFilter": "Status",
+    "noProposals": "No proposals to review.",
+    "noSources": "No monitored sources.",
+    "viewSource": "View source",
+    "apply": "Apply",
+    "dismiss": "Dismiss",
+    "applied": "Proposal applied.",
+    "dismissed": "Proposal dismissed.",
+    "dismissTitle": "Dismiss proposal?",
+    "dismissMessage": "Dismiss \"{{title}}\"? It won't be added to the compliance calendar.",
+    "polled": "Polled sources — {{count}} new proposal(s).",
+    "active": "Active",
+    "inactive": "Inactive",
+    "lastPolled": "Last polled",
+    "never": "Never",
+    "tabs": {
+      "proposals": "Proposals",
+      "sources": "Sources"
+    },
+    "status": {
+      "pending": "Pending",
+      "applied": "Applied",
+      "dismissed": "Dismissed",
+      "all": "All"
+    },
+    "applyDialog": {
+      "title": "Apply Proposal",
+      "hint": "Optionally set a due date and target event type to add this to the compliance calendar as a deadline.",
+      "dueDate": "Due date",
+      "eventType": "Calendar event type"
+    }
+  },
+  "shipping": {
+    "title": "Shipping",
+    "subtitle": "Fulfillment workspace — orders ready to ship.",
+    "allShipments": "All shipments",
+    "refresh": "Refresh",
+    "readyToShip": "Ready to ship",
+    "nothingToShip": "Nothing to ship right now.",
+    "ship": "Ship",
+    "remaining": "remaining"
   }
 }

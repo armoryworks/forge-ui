@@ -1,0 +1,18 @@
+<app-dialog [title]="'watchtower.applyDialog.title' | translate" width="480px" (closed)="cancel()">
+  <div [formGroup]="form">
+    <p class="wt-apply__proposal">{{ data.proposalTitle }}</p>
+    <p class="wt-apply__hint">{{ 'watchtower.applyDialog.hint' | translate }}</p>
+    <div class="dialog-row">
+      <app-datepicker [label]="'watchtower.applyDialog.dueDate' | translate" formControlName="dueDate" />
+      <app-select [label]="'watchtower.applyDialog.eventType' | translate" formControlName="targetEventTypeId" [options]="eventTypeOptions" />
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
+    <button class="action-btn action-btn--primary" (click)="apply()">
+      <span class="material-icons-outlined">check</span>
+      {{ 'watchtower.apply' | translate }}
+    </button>
+  </div>
+</app-dialog>

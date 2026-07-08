@@ -41,6 +41,7 @@ export class NavTreeService {
         { icon: 'event_note', label: 'Planning', i18nKey: 'nav.planning', route: '/planning', capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'PM'] },
         { icon: 'calendar_month', label: 'Calendar', i18nKey: 'nav.calendar', route: '/calendar', capability: 'CAP-EXT-KANBAN' },
         { icon: 'fact_check', label: 'Compliance', i18nKey: 'nav.compliance', route: '/compliance', capability: 'CAP-EXT-WATCHTOWER', allowedRoles: ['Admin', 'Manager', 'ComplianceOfficer', 'OfficeManager'] },
+        { icon: 'radar', label: 'Watchtower', i18nKey: 'nav.watchtower', route: '/watchtower', capability: 'CAP-EXT-WATCHTOWER', allowedRoles: ['Admin', 'Manager'] },
         { icon: 'rule', label: 'Approvals', i18nKey: 'nav.approvals', route: '/approvals', capability: 'CAP-P2P-APPROVALS', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
       ],
     },
@@ -92,6 +93,9 @@ export class NavTreeService {
         { icon: 'payments', label: 'Payments', i18nKey: 'nav.payments', route: '/payments', capability: 'CAP-O2C-CASH', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
       ],
     },
+    // Shipping is a top-level workspace (the "what needs to ship" doing surface), a peer of the
+    // domain groups. The Shipments *history* stays a record view under Sales.
+    { icon: 'local_shipping', label: 'Shipping', i18nKey: 'nav.shipping', route: '/shipping', capability: 'CAP-O2C-SHIP', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
     {
       icon: 'precision_manufacturing', label: 'Production', i18nKey: 'navGroups.production',
       children: [

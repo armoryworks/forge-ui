@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, output, signal, Signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit, output, signal, Signal, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -39,8 +39,10 @@ interface LineEntry {
   styleUrl: './shipment-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ShipmentDialogComponent {
+export class ShipmentDialogComponent implements OnInit {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+  /** When set (e.g. opened from the Shipping workspace or a Sales Order), pre-selects that order. */
+  readonly initialSalesOrderId = input<number | null>(null);
   private readonly shipmentService = inject(ShipmentService);
   private readonly salesOrderService = inject(SalesOrderService);
   private readonly snackbar = inject(SnackbarService);
@@ -158,6 +160,14 @@ export class ShipmentDialogComponent {
         const remaining = this.remainingFor(lineId);
         if (remaining > 0) this.lineForm.controls.quantity.setValue(remaining);
       });
+  }
+
+  ngOnInit(): void {
+    // Scoped-open: pre-select the passed sales order (valueChanges then loads its lines).
+    const soId = this.initialSalesOrderId();
+    if (soId != null) {
+      this.shipmentForm.controls.salesOrderId.setValue(soId);
+    }
   }
 
   protected close(): void {

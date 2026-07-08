@@ -30,6 +30,7 @@ import { FileAttachment } from '../../../../shared/models/file.model';
 import { CustomerAddress } from '../../../../shared/models/customer-address.model';
 import { ScheduleTimelineComponent } from '../schedule-timeline/schedule-timeline.component';
 import { ScheduleMilestone } from '../../models/schedule-milestone.model';
+import { ShipmentDialogComponent } from '../../../shipments/components/shipment-dialog/shipment-dialog.component';
 import { SalesOrderStages } from '../../models/sales-order-stage.model';
 import { CustomerPoDocument } from '../../models/customer-po-document.model';
 import { AccountingService } from '../../../../shared/services/accounting.service';
@@ -46,7 +47,7 @@ type TabId = 'overview' | 'lines' | 'schedule' | 'stages' | 'shipments' | 'retur
     BarcodeInfoComponent, EntityActivitySectionComponent,
     EntityLinkComponent, CurrencyDisplayComponent, FileUploadZoneComponent, EmptyStateComponent,
     EntityPickerComponent, InputComponent, SelectComponent, DatepickerComponent, CurrencyInputComponent,
-    ScheduleTimelineComponent, InvoiceDialogComponent,
+    ScheduleTimelineComponent, InvoiceDialogComponent, ShipmentDialogComponent,
   ],
   templateUrl: './sales-order-detail-panel.component.html',
   styleUrl: './sales-order-detail-panel.component.scss',
@@ -63,6 +64,8 @@ export class SalesOrderDetailPanelComponent {
   // integrated installs manage invoices in the connected accounting system.
   protected readonly isStandalone = this.accountingService.isStandalone;
   protected readonly showCreateInvoiceDialog = signal(false);
+  // Ship hook — opens the shipment dialog pre-scoped to this order (flows into rate/label/mark-shipped).
+  protected readonly showShipDialog = signal(false);
 
   readonly salesOrderId = input.required<number>();
   readonly closed = output<void>();
@@ -279,6 +282,16 @@ export class SalesOrderDetailPanelComponent {
         next: () => { this.loadStages(this.salesOrderId()); this.changed.emit(); },
       });
     });
+  }
+
+  protected openShipDialog(): void {
+    this.showShipDialog.set(true);
+  }
+
+  protected onShipCreated(): void {
+    this.showShipDialog.set(false);
+    this.loadDetail(this.salesOrderId());
+    this.changed.emit();
   }
 
   protected stageStatusClass(status: string): string {

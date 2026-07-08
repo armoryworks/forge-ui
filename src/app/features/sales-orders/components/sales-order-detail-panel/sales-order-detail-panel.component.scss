@@ -522,3 +522,10 @@
     }
   }
 }
+
+// Ship hook — "Create shipment" toolbar at the top of the Shipments tab.
+.so-ship-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: $sp-md;
+}

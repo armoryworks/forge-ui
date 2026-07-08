@@ -39,41 +39,6 @@
       </div>
     </div>
 
-    <!-- Change Email Address -->
-    <div class="account-page__card">
-      <span class="account-page__section-label">{{ 'account.changeEmail' | translate }}</span>
-      <p class="security__hint">{{ 'account.changeEmailDesc' | translate }}</p>
-
-      <div [formGroup]="emailForm" class="account-page__form">
-        <app-input [label]="'account.currentPassword' | translate" type="password" formControlName="currentPassword" [required]="true" />
-        <app-input [label]="'account.newEmail' | translate" type="email" formControlName="newEmail" [required]="true" />
-        <app-input [label]="'account.confirmEmail' | translate" type="email" formControlName="confirmEmail" [required]="true" />
-        @if (emailMismatch()) {
-          <div class="security__error">
-            <span class="material-icons-outlined">warning</span>
-            {{ 'account.emailsDoNotMatch' | translate }}
-          </div>
-        }
-      </div>
-
-      <div class="account-page__actions">
-        <app-validation-button [violations]="emailViolations" [loading]="emailMismatch()">
-        <button class="action-btn action-btn--primary"
-          data-testid="change-email-btn"
-          [disabled]="emailForm.invalid || savingEmail() || emailMismatch()"
-          (click)="changeEmail()">
-          @if (savingEmail()) {
-            <span class="material-icons-outlined account-page__spinner">sync</span>
-            {{ 'account.changing' | translate }}
-          } @else {
-            <span class="material-icons-outlined">alternate_email</span>
-            {{ 'account.changeEmail' | translate }}
-          }
-        </button>
-        </app-validation-button>
-      </div>
-    </div>
-
     <!-- Set PIN -->
     <div class="account-page__card">
       <span class="account-page__section-label">{{ 'account.kioskPin' | translate }}</span>

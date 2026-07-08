@@ -16,11 +16,6 @@ export interface ChangePasswordRequest {
   newPassword: string;
 }
 
-export interface ChangeEmailRequest {
-  currentPassword: string;
-  newEmail: string;
-}
-
 @Injectable({ providedIn: 'root' })
 export class AccountService {
   private readonly http = inject(HttpClient);
@@ -32,9 +27,5 @@ export class AccountService {
 
   changePassword(request: ChangePasswordRequest): Observable<void> {
     return this.http.post<void>(`${this.base}/change-password`, request);
-  }
-
-  changeEmail(request: ChangeEmailRequest): Observable<void> {
-    return this.http.post<void>(`${this.base}/change-email`, request);
   }
 }

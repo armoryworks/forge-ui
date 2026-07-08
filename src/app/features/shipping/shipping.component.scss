@@ -1,0 +1,94 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.sh-queue-head {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  margin-bottom: $sp-md;
+
+  &__label {
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
+    color: var(--text-muted);
+  }
+}
+
+.sh-queue {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.sh-order {
+  border: $border-width-thin solid var(--border);
+  border-left: $border-width-accent solid var(--primary);
+  background: var(--surface);
+  padding: $sp-md $sp-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    flex-wrap: wrap;
+  }
+
+  &__number {
+    font-weight: 700;
+    font-size: var(--font-size-md);
+    font-family: $font-family-mono;
+  }
+
+  &__customer {
+    font-size: var(--font-size-base);
+    color: var(--text);
+  }
+
+  &__due {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    .material-icons-outlined { font-size: $icon-size-sm; }
+  }
+
+  &__spacer { flex: 1; }
+
+  &__lines {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    padding-top: $sp-sm;
+    border-top: $border-width-thin solid var(--border);
+  }
+}
+
+.sh-line {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  font-size: var(--font-size-sm);
+
+  &__part {
+    font-family: $font-family-mono;
+    font-weight: 600;
+    min-width: 120px;
+    flex-shrink: 0;
+    @include truncate;
+  }
+
+  &__desc {
+    color: var(--text-secondary);
+    flex: 1;
+    @include truncate;
+  }
+
+  &__qty {
+    color: var(--text);
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+}

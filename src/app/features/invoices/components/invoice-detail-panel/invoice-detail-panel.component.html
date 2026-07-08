@@ -141,6 +141,10 @@
             {{ 'invoices.void' | translate }}
           </button>
         }
+        <a class="action-btn" routerLink="/shipping">
+          <span class="material-icons-outlined">local_shipping</span>
+          {{ 'shipping.ship' | translate }}
+        </a>
         @if (canSend(inv.status)) {
           <button class="action-btn action-btn--primary" (click)="sendInvoice()">
             <span class="material-icons-outlined">send</span>

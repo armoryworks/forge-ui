@@ -96,6 +96,18 @@ export const routes: Routes = [
           import('./features/compliance/compliance.routes').then((m) => m.COMPLIANCE_ROUTES),
       },
       {
+        path: 'watchtower',
+        canActivate: [roleGuard('Admin', 'Manager'), capabilityGuard('CAP-EXT-WATCHTOWER')],
+        loadChildren: () =>
+          import('./features/watchtower/watchtower.routes').then((m) => m.WATCHTOWER_ROUTES),
+      },
+      {
+        path: 'shipping',
+        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager'), capabilityGuard('CAP-O2C-SHIP')],
+        loadChildren: () =>
+          import('./features/shipping/shipping.routes').then((m) => m.SHIPPING_ROUTES),
+      },
+      {
         path: 'inventory',
         canActivate: [roleGuard('Admin', 'Manager', 'Engineer', 'OfficeManager')],
         loadChildren: () =>

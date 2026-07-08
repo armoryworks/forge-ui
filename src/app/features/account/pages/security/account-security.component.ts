@@ -1,7 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 
 import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -31,12 +30,10 @@ export class AccountSecurityComponent implements OnInit {
   private readonly accountService = inject(AccountService);
   private readonly mfaService = inject(MfaService);
   private readonly dialog = inject(MatDialog);
-  private readonly router = inject(Router);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   protected readonly user = this.authService.user;
   protected readonly savingPassword = signal(false);
-  protected readonly savingEmail = signal(false);
   protected readonly savingPin = signal(false);
   protected readonly mfaStatus = signal<MfaStatus | null>(null);
   protected readonly mfaLoading = signal(true);
@@ -45,12 +42,6 @@ export class AccountSecurityComponent implements OnInit {
     currentPassword: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     newPassword: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(8)] }),
     confirmPassword: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-  });
-
-  protected readonly emailForm = new FormGroup({
-    currentPassword: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    newEmail: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
-    confirmEmail: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
   });
 
   protected readonly pinForm = new FormGroup({
@@ -64,22 +55,10 @@ export class AccountSecurityComponent implements OnInit {
     confirmPassword: 'Confirm Password',
   });
 
-  protected readonly emailViolations = FormValidationService.getViolations(this.emailForm, {
-    currentPassword: 'Current Password',
-    newEmail: 'New Email',
-    confirmEmail: 'Confirm Email',
-  });
-
   protected readonly passwordMismatch = computed(() => {
     const np = this.passwordForm.get('newPassword')?.value;
     const cp = this.passwordForm.get('confirmPassword')?.value;
     return np && cp && np !== cp;
-  });
-
-  protected readonly emailMismatch = computed(() => {
-    const ne = this.emailForm.get('newEmail')?.value;
-    const ce = this.emailForm.get('confirmEmail')?.value;
-    return ne && ce && ne !== ce;
   });
 
   protected readonly pinMismatch = computed(() => {
@@ -103,28 +82,6 @@ export class AccountSecurityComponent implements OnInit {
         this.snackbar.success(this.translate.instant('account.passwordChanged'));
       },
       error: () => this.savingPassword.set(false),
-    });
-  }
-
-  protected changeEmail(): void {
-    if (this.emailForm.invalid || this.savingEmail() || this.emailMismatch()) return;
-    const val = this.emailForm.getRawValue();
-    this.savingEmail.set(true);
-
-    this.accountService.changeEmail({
-      currentPassword: val.currentPassword,
-      newEmail: val.newEmail,
-    }).subscribe({
-      next: () => {
-        this.savingEmail.set(false);
-        this.emailForm.reset();
-        // The server revoked all sessions — the current token is now dead, and the
-        // login identity itself changed. Sign the user out and route to /login so
-        // they re-authenticate with the NEW email.
-        this.snackbar.success(this.translate.instant('account.emailChangedSignOut'));
-        void this.authService.logout().then(() => this.router.navigate(['/login']));
-      },
-      error: () => this.savingEmail.set(false),
     });
   }
 

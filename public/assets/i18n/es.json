@@ -5,6 +5,7 @@
     "backlog": "Pendientes",
     "calendar": "Calendario",
     "compliance": "Cumplimiento",
+    "watchtower": "Vigía",
     "parts": "Piezas",
     "inventory": "Inventario",
     "customers": "Clientes",
@@ -33,6 +34,7 @@
     "salesOrders": "Órdenes de Venta",
     "quotes": "Cotizaciones",
     "shipments": "Envíos",
+    "shipping": "Envío",
     "invoices": "Facturas",
     "payments": "Pagos",
     "customerReturns": "Devoluciones de Clientes",
@@ -3404,13 +3406,7 @@
     "confirmPassword": "Confirmar Contraseña",
     "minPasswordHint": "Mínimo 8 caracteres",
     "passwordsDoNotMatch": "Las contraseñas no coinciden",
-    "changeEmail": "Cambiar Correo Electrónico",
-    "changeEmailDesc": "Actualice el correo electrónico que usa para iniciar sesión. Se cerrará su sesión y deberá volver a iniciar sesión con la nueva dirección.",
-    "newEmail": "Nuevo Correo Electrónico",
-    "confirmEmail": "Confirmar Nuevo Correo Electrónico",
-    "emailsDoNotMatch": "Los correos electrónicos no coinciden",
     "emailChanged": "Correo electrónico cambiado",
-    "emailChangedSignOut": "Correo electrónico cambiado. Vuelva a iniciar sesión con su nuevo correo electrónico.",
     "saving": "Guardando...",
     "changing": "Cambiando...",
     "saveProfile": "Guardar Perfil",
@@ -8160,5 +8156,51 @@
       "title": "¿Eliminar términos?",
       "message": "¿Eliminar «{{ title }}»? Esta acción no se puede deshacer."
     }
+  },
+  "watchtower": {
+    "title": "Vigía Regulatorio",
+    "subtitle": "Fuentes regulatorias monitoreadas y cambios propuestos pendientes de revisión.",
+    "pollNow": "Consultar ahora",
+    "statusFilter": "Estado",
+    "noProposals": "No hay propuestas para revisar.",
+    "noSources": "No hay fuentes monitoreadas.",
+    "viewSource": "Ver fuente",
+    "apply": "Aplicar",
+    "dismiss": "Descartar",
+    "applied": "Propuesta aplicada.",
+    "dismissed": "Propuesta descartada.",
+    "dismissTitle": "¿Descartar propuesta?",
+    "dismissMessage": "¿Descartar «{{title}}»? No se agregará al calendario de cumplimiento.",
+    "polled": "Fuentes consultadas — {{count}} propuesta(s) nueva(s).",
+    "active": "Activa",
+    "inactive": "Inactiva",
+    "lastPolled": "Última consulta",
+    "never": "Nunca",
+    "tabs": {
+      "proposals": "Propuestas",
+      "sources": "Fuentes"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "applied": "Aplicada",
+      "dismissed": "Descartada",
+      "all": "Todas"
+    },
+    "applyDialog": {
+      "title": "Aplicar Propuesta",
+      "hint": "Opcionalmente, establezca una fecha límite y un tipo de evento para agregar esto al calendario de cumplimiento como fecha límite.",
+      "dueDate": "Fecha límite",
+      "eventType": "Tipo de evento del calendario"
+    }
+  },
+  "shipping": {
+    "title": "Envío",
+    "subtitle": "Espacio de cumplimiento — órdenes listas para enviar.",
+    "allShipments": "Todos los envíos",
+    "refresh": "Actualizar",
+    "readyToShip": "Listo para enviar",
+    "nothingToShip": "No hay nada para enviar en este momento.",
+    "ship": "Enviar",
+    "remaining": "restante"
   }
 }

@@ -516,6 +516,12 @@
       <!-- Shipments Tab -->
       @if (activeTab() === 'shipments') {
         <div class="tab-panel" role="tabpanel">
+          <div class="so-ship-toolbar">
+            <button class="action-btn action-btn--sm action-btn--primary" (click)="openShipDialog()">
+              <span class="material-icons-outlined">local_shipping</span>
+              {{ 'shipments.createShipment' | translate }}
+            </button>
+          </div>
           @if (so.shipments && so.shipments.length > 0) {
             @for (shipment of so.shipments; track shipment.id) {
               <div class="card">
@@ -881,6 +887,13 @@
         [initialSalesOrderId]="so.id"
         (closed)="closeCreateInvoice()"
         (saved)="onInvoiceCreated()" />
+    }
+
+    @if (showShipDialog()) {
+      <app-shipment-dialog
+        [initialSalesOrderId]="so.id"
+        (closed)="showShipDialog.set(false)"
+        (saved)="onShipCreated()" />
     }
   }
 </div>

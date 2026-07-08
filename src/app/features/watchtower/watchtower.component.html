@@ -1,0 +1,100 @@
+<app-page-layout [pageTitle]="'watchtower.title' | translate" [pageSubtitle]="'watchtower.subtitle' | translate">
+  <ng-container toolbar>
+    <button class="action-btn action-btn--sm" [disabled]="polling()" (click)="poll()">
+      <span class="material-icons-outlined" [class.wt-spin]="polling()">{{ polling() ? 'sync' : 'refresh' }}</span>
+      {{ 'watchtower.pollNow' | translate }}
+    </button>
+  </ng-container>
+
+  <ng-container content>
+    <div class="tab-bar">
+      <button class="tab" [class.tab--active]="activeTab() === 'proposals'" (click)="switchTab('proposals')">
+        {{ 'watchtower.tabs.proposals' | translate }}
+        @if (pendingCount() > 0) { <span class="chip chip--warning wt-tab-badge">{{ pendingCount() }}</span> }
+      </button>
+      <button class="tab" [class.tab--active]="activeTab() === 'sources'" (click)="switchTab('sources')">
+        {{ 'watchtower.tabs.sources' | translate }}
+      </button>
+    </div>
+
+    @if (activeTab() === 'proposals') {
+      <div class="tab-panel">
+        <div class="wt-filter">
+          <app-select [label]="'watchtower.statusFilter' | translate" [formControl]="statusControl" [options]="statusOptions" />
+        </div>
+
+        @if (filteredProposals().length === 0) {
+          <app-empty-state icon="verified" [message]="'watchtower.noProposals' | translate" />
+        } @else {
+          <div class="wt-list">
+            @for (p of filteredProposals(); track p.id) {
+              <div class="wt-card">
+                <div class="wt-card__head">
+                  <span class="chip chip--info wt-card__source">{{ p.sourceName }}</span>
+                  <span class="wt-card__title">{{ p.title }}</span>
+                  <span [class]="statusChipClass(p.status)">{{ p.status }}</span>
+                </div>
+                @if (p.details) { <p class="wt-card__details">{{ p.details }}</p> }
+                <div class="wt-card__foot">
+                  <span class="wt-card__date">{{ p.createdAt | date: 'MM/dd/yyyy' }}</span>
+                  @if (p.summaryUrl) {
+                    <a class="wt-card__link" [href]="p.summaryUrl" target="_blank" rel="noopener noreferrer">
+                      <span class="material-icons-outlined">open_in_new</span>{{ 'watchtower.viewSource' | translate }}
+                    </a>
+                  }
+                  <span class="wt-card__spacer"></span>
+                  @if (p.status === 'Pending') {
+                    <button class="action-btn action-btn--sm action-btn--warn" (click)="dismissProposal(p)">
+                      <span class="material-icons-outlined">close</span>{{ 'watchtower.dismiss' | translate }}
+                    </button>
+                    <button class="action-btn action-btn--sm action-btn--primary" (click)="applyProposal(p)">
+                      <span class="material-icons-outlined">check</span>{{ 'watchtower.apply' | translate }}
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    @if (activeTab() === 'sources') {
+      <div class="tab-panel">
+        @if (sources().length === 0) {
+          <app-empty-state icon="rss_feed" [message]="'watchtower.noSources' | translate" />
+        } @else {
+          <div class="wt-list">
+            @for (s of sources(); track s.id) {
+              <div class="wt-card">
+                <div class="wt-card__head">
+                  <span class="wt-card__title">{{ s.name }}</span>
+                  @if (s.isActive) {
+                    <span class="chip chip--success">{{ 'watchtower.active' | translate }}</span>
+                  } @else {
+                    <span class="chip chip--muted">{{ 'watchtower.inactive' | translate }}</span>
+                  }
+                </div>
+                <div class="wt-source__meta">
+                  @if (s.issuingBody) { <span>{{ s.issuingBody }}</span> }
+                  @if (s.domain) { <span>{{ s.domain }}</span> }
+                  <span>{{ s.feedType }}</span>
+                  @if (s.industryGate) { <span class="chip chip--muted">{{ s.industryGate }}</span> }
+                </div>
+                <div class="wt-card__foot">
+                  <a class="wt-card__link" [href]="s.url" target="_blank" rel="noopener noreferrer">
+                    <span class="material-icons-outlined">open_in_new</span>{{ s.url }}
+                  </a>
+                  <span class="wt-card__spacer"></span>
+                  <span class="wt-card__date">
+                    {{ 'watchtower.lastPolled' | translate }}: {{ s.lastPolledAt ? (s.lastPolledAt | date: 'MM/dd/yyyy hh:mm') : ('watchtower.never' | translate) }}
+                  </span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </ng-container>
+</app-page-layout>
