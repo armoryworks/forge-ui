@@ -1,0 +1,75 @@
+<app-page-layout [pageTitle]="'terms.admin.title' | translate">
+  <ng-container toolbar>
+    <app-toolbar>
+      <span class="terms-admin__hint">{{ 'terms.admin.hint' | translate }}</span>
+      <app-select
+        [label]="'terms.filters.scope' | translate"
+        [formControl]="scopeFilter"
+        [options]="scopeFilterOptions" />
+      <span appSpacer></span>
+      <button class="action-btn action-btn--create" (click)="openNew()" data-testid="terms-new-btn">
+        <span class="material-icons-outlined">add</span>
+        {{ 'terms.newTerms' | translate }}
+      </button>
+    </app-toolbar>
+  </ng-container>
+
+  <ng-container content>
+    <div [appLoadingBlock]="loading()">
+      <app-data-table
+        tableId="admin-terms"
+        [columns]="columns"
+        [data]="terms()"
+        emptyIcon="gavel"
+        [emptyMessage]="'terms.admin.empty' | translate">
+
+        <ng-template appColumnCell="target" let-row>
+          @switch (row.scope) {
+            @case ('Company') {
+              <span class="text-muted">{{ 'terms.scope.companyWide' | translate }}</span>
+            }
+            @case ('Customer') {
+              <span>{{ row.customerName ?? ('#' + row.customerId) }}</span>
+            }
+            @case ('Part') {
+              <span>{{ row.partName ?? ('#' + row.partId) }}</span>
+            }
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="effectiveFrom" let-row>
+          {{ row.effectiveFrom | date:'MM/dd/yyyy' }}
+        </ng-template>
+
+        <ng-template appColumnCell="effectiveTo" let-row>
+          @if (row.effectiveTo) {
+            {{ row.effectiveTo | date:'MM/dd/yyyy' }}
+          } @else {
+            <span class="text-muted">&mdash;</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="isActive" let-row>
+          @if (row.isActive) {
+            <span class="chip chip--success">{{ 'common.active' | translate }}</span>
+          } @else {
+            <span class="chip chip--muted">{{ 'common.inactive' | translate }}</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="actions" let-row>
+          @if (canMutate($any(row))) {
+            <button class="icon-btn" (click)="openEdit($any(row))"
+                    [attr.aria-label]="'common.edit' | translate" data-testid="terms-edit-btn">
+              <span class="material-icons-outlined">edit</span>
+            </button>
+            <button class="icon-btn icon-btn--danger" (click)="confirmDelete($any(row))"
+                    [attr.aria-label]="'common.delete' | translate" data-testid="terms-delete-btn">
+              <span class="material-icons-outlined">delete</span>
+            </button>
+          }
+        </ng-template>
+      </app-data-table>
+    </div>
+  </ng-container>
+</app-page-layout>

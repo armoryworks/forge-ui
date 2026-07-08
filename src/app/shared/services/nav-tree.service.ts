@@ -181,6 +181,7 @@ export class NavTreeService {
             { icon: 'fact_check', label: 'ICP Rubrics', i18nKey: 'admin.tabs.icpRubrics', route: '/admin/icp-rubrics', allowedRoles: ['Admin', 'Manager'] },
             { icon: 'alt_route', label: 'Assignment Rules', i18nKey: 'admin.tabs.assignmentRules', route: '/admin/assignment-rules', allowedRoles: ['Admin', 'Manager'] },
             { icon: 'payments', label: 'Currencies & FX', i18nKey: 'admin.tabs.currencies', route: '/admin/currencies', allowedRoles: ['Admin'] },
+            { icon: 'gavel', label: 'Terms & Conditions', i18nKey: 'admin.tabs.terms', route: '/admin/terms', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
           ],
         },
         {

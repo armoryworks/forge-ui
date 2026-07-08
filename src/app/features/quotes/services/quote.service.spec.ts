@@ -64,6 +64,25 @@ describe('QuoteService', () => {
     });
   });
 
+  describe('previewQuoteTerms', () => {
+    it('should GET the compiled terms preview', () => {
+      service.previewQuoteTerms(3).subscribe();
+      const req = httpMock.expectOne(`${apiUrl}/quotes/3/terms/preview`);
+      expect(req.request.method).toBe('GET');
+      req.flush({ sections: [] });
+    });
+  });
+
+  describe('sendQuoteEmail', () => {
+    it('should POST the send-email request', () => {
+      service.sendQuoteEmail(3, { recipientEmail: 'buyer@acme.com', message: 'Hi' }).subscribe();
+      const req = httpMock.expectOne(`${apiUrl}/quotes/3/send-email`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ recipientEmail: 'buyer@acme.com', message: 'Hi' });
+      req.flush(null);
+    });
+  });
+
   describe('convertToOrder', () => {
     it('should POST convert action', () => {
       service.convertToOrder(4).subscribe();

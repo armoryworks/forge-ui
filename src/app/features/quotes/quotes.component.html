@@ -33,6 +33,15 @@
         <ng-template appColumnCell="createdAt" let-row>
           <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
         </ng-template>
+        <ng-template appColumnCell="actions" let-row>
+          @if (row.status === 'Draft' || row.status === 'Sent') {
+            <button class="icon-btn" [matTooltip]="'quotes.sendEmail.action' | translate"
+              [attr.aria-label]="'quotes.sendEmail.action' | translate"
+              (click)="openSendEmail($any(row), $event)" data-testid="quote-send-email-btn">
+              <span class="material-icons-outlined">send</span>
+            </button>
+          }
+        </ng-template>
       </app-data-table>
     </div>
   </div>

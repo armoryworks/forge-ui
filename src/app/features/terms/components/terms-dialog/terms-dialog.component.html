@@ -1,0 +1,97 @@
+<app-dialog
+  [title]="(isEdit ? 'terms.dialog.editTitle' : 'terms.dialog.newTitle') | translate"
+  width="640px"
+  [dirty]="form.dirty"
+  (closed)="close()">
+
+  <div [formGroup]="form">
+    @if (scopeSelectable) {
+      <app-select
+        [label]="'terms.fields.scope' | translate"
+        formControlName="scope"
+        [options]="scopeOptions"
+        [required]="true" />
+    } @else {
+      <div class="terms-dialog__locked">
+        <span class="terms-dialog__locked-label">{{ 'terms.fields.scope' | translate }}</span>
+        <span class="terms-dialog__locked-value">
+          {{ lockedScopeLabel }}@if (lockedTargetLabel) { · {{ lockedTargetLabel }} }
+        </span>
+      </div>
+    }
+
+    @if (showCustomerPicker()) {
+      <app-entity-picker
+        [label]="'terms.fields.customer' | translate"
+        entityType="customers"
+        displayField="name"
+        formControlName="customerId" />
+    }
+    @if (showPartPicker()) {
+      <app-entity-picker
+        [label]="'terms.fields.part' | translate"
+        entityType="parts"
+        displayField="partNumber"
+        secondaryDisplayField="name"
+        formControlName="partId" />
+    }
+
+    <app-input
+      [label]="'terms.fields.title' | translate"
+      formControlName="title"
+      [required]="true"
+      [maxlength]="200" />
+
+    <app-textarea
+      [label]="'terms.fields.summary' | translate"
+      formControlName="summary"
+      [rows]="2"
+      [maxlength]="500"
+      [hint]="'terms.fields.summaryHint' | translate" />
+
+    <app-textarea
+      [label]="'terms.fields.body' | translate"
+      formControlName="bodyMarkdown"
+      [rows]="10" />
+
+    <div class="dialog-row">
+      <app-datepicker
+        [label]="'terms.fields.effectiveFrom' | translate"
+        formControlName="effectiveFrom"
+        [required]="true" />
+      <app-datepicker
+        [label]="'terms.fields.effectiveTo' | translate"
+        formControlName="effectiveTo" />
+    </div>
+
+    <div class="dialog-row">
+      <app-input
+        [label]="'terms.fields.sortOrder' | translate"
+        type="number"
+        formControlName="sortOrder"
+        [required]="true" />
+      <app-toggle
+        [label]="'terms.fields.isActive' | translate"
+        formControlName="isActive" />
+    </div>
+
+    @if (isEdit) {
+      <p class="terms-dialog__version">
+        {{ 'terms.fields.version' | translate }}: {{ data.terms?.version }}
+      </p>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button
+        class="action-btn action-btn--primary"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        <span class="material-icons-outlined">save</span>
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

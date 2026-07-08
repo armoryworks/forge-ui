@@ -129,6 +129,14 @@ export const ADMIN_ROUTES: Routes = [
     loadComponent: () =>
       import('./carriers/carriers.component').then((m) => m.CarriersComponent),
   },
+  // S3 — Terms & Conditions admin. Company-scope T&Cs plus a scope filter to
+  // browse/manage customer- and part-scoped terms. Company mutations are
+  // Admin-only (server-enforced + gated in-page). Lives in the terms feature.
+  {
+    path: 'terms',
+    loadComponent: () =>
+      import('../terms/admin/terms-admin.component').then((m) => m.TermsAdminComponent),
+  },
   // Phase 1m option-3 — /admin/configuration was the parallel admin
   // surface for the descriptor-driven settings. Retired: the existing
   // /admin/integrations page (rendered inside AdminComponent's

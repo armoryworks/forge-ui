@@ -1,0 +1,6 @@
+@use 'styles/variables' as *;
+
+.terms-admin__hint {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}

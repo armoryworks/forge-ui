@@ -8,6 +8,8 @@ import { QuoteListItem } from '../models/quote-list-item.model';
 import { QuoteDetail } from '../models/quote-detail.model';
 import { CreateQuoteRequest } from '../models/create-quote-request.model';
 import { SalesOrderListItem } from '../../sales-orders/models/sales-order-list-item.model';
+import { QuoteTermsPreview } from '../models/quote-terms-preview.model';
+import { SendQuoteEmailRequest } from '../models/send-quote-email-request.model';
 
 /** Payload to add a quote line (partId omitted = lump-sum / ad-hoc line). */
 export interface QuoteLineInput {
@@ -79,6 +81,22 @@ export class QuoteService {
 
   sendQuote(id: number): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/send`, {});
+  }
+
+  /**
+   * S3 — compiled company + customer + line-part terms for this quote, as the
+   * email preview shows them. Called when the send-email dialog opens.
+   */
+  previewQuoteTerms(id: number): Observable<QuoteTermsPreview> {
+    return this.http.get<QuoteTermsPreview>(`${this.base}/${id}/terms/preview`);
+  }
+
+  /**
+   * S3 — send the quote email (PDF + terms + public link) to the recipient and
+   * flip the quote to Sent.
+   */
+  sendQuoteEmail(id: number, request: SendQuoteEmailRequest): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/send-email`, request);
   }
 
   acceptQuote(id: number): Observable<void> {

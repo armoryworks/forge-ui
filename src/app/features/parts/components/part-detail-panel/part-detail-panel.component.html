@@ -328,6 +328,8 @@
 
         @case ('files') {
           <app-part-files-cluster [partId]="part.id" />
+          <!-- S3 — part-scope terms & conditions. -->
+          <app-terms-section scope="Part" [partId]="part.id" [targetName]="part.partNumber" />
         }
 
         @case ('serials') {

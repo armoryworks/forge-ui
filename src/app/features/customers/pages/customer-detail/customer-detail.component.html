@@ -147,6 +147,8 @@
           <app-customer-documents-cluster [customerId]="c.id" />
           <!-- S1 — tax certificates live below the general documents list. -->
           <app-customer-tax-documents-cluster [customerId]="c.id" />
+          <!-- S3 — customer-scope terms & conditions. -->
+          <app-terms-section scope="Customer" [customerId]="c.id" [targetName]="c.name" />
         }
         @case ('activity') {
           <!-- Pillar 5 — Activity cluster wraps shared entity-activity-section. -->

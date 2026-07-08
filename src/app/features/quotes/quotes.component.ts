@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
+import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -17,6 +18,7 @@ import { LoadingBlockDirective } from '../../shared/directives/loading-block.dir
 import { CurrencyDisplayComponent } from '../../shared/components/currency-display/currency-display.component';
 import { QuoteDialogComponent } from './components/quote-dialog/quote-dialog.component';
 import { QuoteDetailDialogComponent, QuoteDetailDialogData, QuoteDetailDialogResult } from './components/quote-detail-dialog/quote-detail-dialog.component';
+import { SendQuoteEmailDialogComponent, SendQuoteEmailDialogData, SendQuoteEmailDialogResult } from './components/send-quote-email-dialog/send-quote-email-dialog.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
 
@@ -36,6 +38,7 @@ import { DraftResumeService } from '../../shared/services/draft-resume.service';
 export class QuotesComponent implements OnInit {
   private readonly quoteService = inject(QuoteService);
   private readonly detailDialog = inject(DetailDialogService);
+  private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
   private readonly draftResume = inject(DraftResumeService);
 
@@ -65,6 +68,7 @@ export class QuotesComponent implements OnInit {
     { field: 'total', header: this.translate.instant('common.total'), sortable: true, width: '100px', align: 'right' },
     { field: 'expirationDate', header: this.translate.instant('quotes.expires'), sortable: true, type: 'date', width: '110px' },
     { field: 'createdAt', header: this.translate.instant('common.created'), sortable: true, type: 'date', width: '110px' },
+    { field: 'actions', header: '', width: '70px', align: 'center' },
   ];
 
   constructor() {
@@ -104,6 +108,20 @@ export class QuotesComponent implements OnInit {
     ).afterClosed().subscribe(result => {
       if (result?.changed) this.loadQuotes();
     });
+  }
+
+  // --- Send email (S3) ---
+  // The only in-app "Send" action lives on the off-limits quote detail panel,
+  // so the send-email opener is wired here as a quotes-list row action.
+  protected openSendEmail(item: QuoteListItem, event: Event): void {
+    event.stopPropagation();
+    this.dialog.open<SendQuoteEmailDialogComponent, SendQuoteEmailDialogData, SendQuoteEmailDialogResult | undefined>(
+      SendQuoteEmailDialogComponent,
+      {
+        width: '600px',
+        data: { quoteId: item.id, quoteNumber: item.quoteNumber, customerName: item.customerName },
+      },
+    ).afterClosed().subscribe(sent => { if (sent) this.loadQuotes(); });
   }
 
   // --- Create Dialog ---

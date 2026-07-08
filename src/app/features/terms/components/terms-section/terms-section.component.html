@@ -1,0 +1,47 @@
+<section class="terms-sec" [appLoadingBlock]="loading()">
+  <header class="terms-sec__header">
+    <h3 class="terms-sec__title">{{ titleKey() | translate }}</h3>
+    <button
+      class="action-btn action-btn--create action-btn--sm"
+      (click)="openAdd()"
+      [attr.aria-label]="'terms.section.add' | translate">
+      <span class="material-icons-outlined">add</span>
+      {{ 'terms.section.add' | translate }}
+    </button>
+  </header>
+
+  @if (terms().length === 0) {
+    <p class="terms-sec__empty">{{ 'terms.section.empty' | translate }}</p>
+  } @else {
+    <ul class="terms-sec__list">
+      @for (row of terms(); track row.id) {
+        <li class="terms-row">
+          <div class="terms-row__main">
+            <span class="terms-row__title">{{ row.title }}</span>
+            @if (row.summary) {
+              <span class="terms-row__summary">{{ row.summary }}</span>
+            }
+            <span class="terms-row__meta">
+              {{ 'terms.row.effective' | translate }}:
+              {{ row.effectiveFrom | date:'MM/dd/yyyy' }}@if (row.effectiveTo) { &ndash; {{ row.effectiveTo | date:'MM/dd/yyyy' }} }
+              · {{ 'terms.fields.version' | translate }} {{ row.version }}
+            </span>
+          </div>
+          <div class="terms-row__side">
+            @if (row.isActive) {
+              <span class="chip chip--success">{{ 'common.active' | translate }}</span>
+            } @else {
+              <span class="chip chip--muted">{{ 'common.inactive' | translate }}</span>
+            }
+            <button class="icon-btn" (click)="openEdit(row)" [attr.aria-label]="'common.edit' | translate">
+              <span class="material-icons-outlined">edit</span>
+            </button>
+            <button class="icon-btn icon-btn--danger" (click)="confirmDelete(row)" [attr.aria-label]="'common.delete' | translate">
+              <span class="material-icons-outlined">delete</span>
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>

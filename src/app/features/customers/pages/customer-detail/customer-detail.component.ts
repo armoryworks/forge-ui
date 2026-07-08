@@ -38,6 +38,9 @@ import { CustomerDocumentsClusterComponent } from '../../components/customer-clu
 // S1 — tax certificates co-located inside the Documents tab, below the
 // general documents list (they're files first; no dedicated tab needed).
 import { CustomerTaxDocumentsClusterComponent } from '../../components/customer-clusters/customer-tax-documents-cluster.component';
+// S3 — Customer-scope terms & conditions, co-located in the Documents tab
+// below the general documents + tax certificates. Reusable across parts too.
+import { TermsSectionComponent } from '../../../terms/components/terms-section/terms-section.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { EntityCompletenessChipComponent } from '../../../../shared/components/entity-completeness-chip/entity-completeness-chip.component';
 
@@ -70,6 +73,7 @@ import { EntityCompletenessChipComponent } from '../../../../shared/components/e
     CustomerContactsClusterComponent, CustomerAddressesClusterComponent, CustomerInteractionsClusterComponent,
     CustomerDocumentsClusterComponent,
     CustomerTaxDocumentsClusterComponent,
+    TermsSectionComponent,
     CurrencyDisplayComponent,
     EntityCompletenessChipComponent,
   ],

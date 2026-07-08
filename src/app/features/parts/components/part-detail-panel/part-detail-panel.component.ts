@@ -51,6 +51,9 @@ import { PartCostClusterComponent } from '../part-clusters/part-cost-cluster.com
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { PartPricingClusterComponent } from '../part-clusters/part-pricing-cluster/part-pricing-cluster.component';
 import { PartFilesClusterComponent } from '../part-clusters/part-files-cluster.component';
+// S3 — Part-scope terms & conditions, stacked in the Files tab (the panel's
+// documents area). Reuses the shared terms section from the terms feature.
+import { TermsSectionComponent } from '../../../terms/components/terms-section/terms-section.component';
 import { PartMaterialClusterComponent } from '../part-clusters/part-material-cluster/part-material-cluster.component';
 import { PartUomClusterComponent } from '../part-clusters/part-uom-cluster/part-uom-cluster.component';
 import { PartMrpClusterComponent } from '../part-clusters/part-mrp-cluster/part-mrp-cluster.component';
@@ -97,7 +100,7 @@ type BomViewMode = 'table' | 'tree';
     BomTreeComponent, BomRevisionHistoryComponent,
     SerialNumbersTabComponent, VendorSourcesPanelComponent, PartPurchaseUnitsClusterComponent,
     PartIdentityClusterComponent, PartInventoryClusterComponent, PartCostClusterComponent,
-    EntityActivitySectionComponent, PartFilesClusterComponent,
+    EntityActivitySectionComponent, PartFilesClusterComponent, TermsSectionComponent,
     PartMaterialClusterComponent, PartUomClusterComponent, PartMrpClusterComponent,
     PartRoutingClusterComponent, PartAlternatesClusterComponent,
     PartQualityClusterComponent, PartPricingClusterComponent,

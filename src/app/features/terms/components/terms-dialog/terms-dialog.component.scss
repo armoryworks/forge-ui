@@ -1,0 +1,28 @@
+@use 'styles/variables' as *;
+
+.terms-dialog__locked {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+}
+
+.terms-dialog__locked-label {
+  font-size: $font-size-xxs;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.terms-dialog__locked-value {
+  font-size: $font-size-base;
+  color: var(--text);
+}
+
+.terms-dialog__version {
+  margin: 0;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}

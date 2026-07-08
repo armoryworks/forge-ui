@@ -1,0 +1,70 @@
+<app-dialog
+  [title]="'quotes.sendEmail.title' | translate"
+  width="600px"
+  [dirty]="form.dirty"
+  (closed)="close()">
+
+  <div class="send-email" [formGroup]="form">
+    @if (data.quoteNumber || data.customerName) {
+      <p class="send-email__context">
+        {{ 'quotes.sendEmail.context' | translate: { quote: data.quoteNumber ?? '', customer: data.customerName ?? '' } }}
+      </p>
+    }
+
+    <app-input
+      type="email"
+      [label]="'quotes.sendEmail.recipient' | translate"
+      formControlName="recipientEmail"
+      [required]="true"
+      [placeholder]="'quotes.sendEmail.recipientPlaceholder' | translate" />
+
+    <app-textarea
+      [label]="'quotes.sendEmail.message' | translate"
+      formControlName="message"
+      [rows]="4"
+      [maxlength]="2000"
+      [hint]="'quotes.sendEmail.messageHint' | translate" />
+
+    <div class="send-email__preview">
+      <span class="send-email__preview-label">{{ 'quotes.sendEmail.termsPreview' | translate }}</span>
+      <div class="send-email__preview-body" [appLoadingBlock]="previewLoading()">
+        @if (!previewLoading() && sections().length === 0) {
+          <p class="send-email__preview-empty">{{ 'quotes.sendEmail.noTerms' | translate }}</p>
+        } @else {
+          @for (section of sections(); track $index) {
+            <div class="terms-preview-item">
+              <button
+                type="button"
+                class="terms-preview-item__header"
+                (click)="toggle($index)"
+                [attr.aria-expanded]="isExpanded($index)">
+                <span class="material-icons-outlined">{{ isExpanded($index) ? 'expand_less' : 'expand_more' }}</span>
+                <span class="terms-preview-item__title">{{ section.title }}</span>
+              </button>
+              @if (section.summary) {
+                <p class="terms-preview-item__summary">{{ section.summary }}</p>
+              }
+              @if (isExpanded($index)) {
+                <pre class="terms-preview-item__body">{{ section.bodyMarkdown }}</pre>
+              }
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button
+        data-testid="send-quote-email-btn"
+        class="action-btn action-btn--primary"
+        [disabled]="form.invalid || saving()"
+        (click)="send()">
+        <span class="material-icons-outlined">send</span>
+        {{ 'quotes.sendEmail.send' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>
