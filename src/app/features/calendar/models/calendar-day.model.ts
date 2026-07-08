@@ -5,5 +5,6 @@ export interface CalendarDay {
   dateKey: string; // YYYY-MM-DD
   isCurrentMonth: boolean;
   isToday: boolean;
+  isWeekend: boolean;
   jobs: CalendarJob[];
 }

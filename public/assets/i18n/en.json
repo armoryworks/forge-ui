@@ -4011,7 +4011,17 @@
     "sat": "Sat",
     "poDeliveries": "PO Deliveries",
     "poDeliveriesCount": "{{count}} deliveries",
-    "poLines": "PO Lines"
+    "poLines": "PO Lines",
+    "viewSwitchLabel": "Calendar view",
+    "dayDialog": {
+      "events": "Events",
+      "jobs": "Jobs due",
+      "deliveries": "PO deliveries",
+      "openDayView": "Open day view",
+      "required": "Required",
+      "allDay": "All day",
+      "empty": "Nothing scheduled for this day."
+    }
   },
   "entityPicker": {
     "createNew": "Create new {{label}} “{{term}}”"

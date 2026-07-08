@@ -1,39 +1,53 @@
-<app-page-header [title]="titleKey() | translate" [subtitle]="subtitleKey() | translate">
-  <div class="calendar-nav">
-    <app-select [label]="'calendar.trackType' | translate" [formControl]="trackTypeControl" [options]="trackTypeOptions()" />
-    <div class="view-toggle">
-      <button class="view-toggle__btn" [class.view-toggle__btn--active]="view() === 'month'" (click)="setView('month')">{{ 'calendar.month' | translate }}</button>
-      <button class="view-toggle__btn" [class.view-toggle__btn--active]="view() === 'week'" (click)="setView('week')">{{ 'calendar.week' | translate }}</button>
-      <button class="view-toggle__btn" [class.view-toggle__btn--active]="view() === 'day'" (click)="setView('day')">{{ 'calendar.day' | translate }}</button>
+<app-page-header [title]="titleKey() | translate" [subtitle]="subtitleKey() | translate" />
+
+<div class="calendar-toolbar">
+  <div class="calendar-toolbar__left">
+    <button class="action-btn action-btn--sm calendar-toolbar__today" (click)="today()">{{ 'calendar.today' | translate }}</button>
+    <div class="calendar-toolbar__nav">
+      <button class="icon-btn" (click)="prev()" [attr.aria-label]="'calendar.previousPeriod' | translate" [matTooltip]="'calendar.previousPeriod' | translate" matTooltipPosition="above">
+        <span class="material-icons-outlined">chevron_left</span>
+      </button>
+      <button class="icon-btn" (click)="next()" [attr.aria-label]="'calendar.nextPeriod' | translate" [matTooltip]="'calendar.nextPeriod' | translate" matTooltipPosition="above">
+        <span class="material-icons-outlined">chevron_right</span>
+      </button>
     </div>
-    <button class="icon-btn" (click)="prev()" [attr.aria-label]="'calendar.previousPeriod' | translate" [matTooltip]="'calendar.previousPeriod' | translate" matTooltipPosition="above">
-      <span class="material-icons-outlined">chevron_left</span>
-    </button>
-    <span class="month-label">{{ headerLabel() }}</span>
-    <button class="icon-btn" (click)="next()" [attr.aria-label]="'calendar.nextPeriod' | translate" [matTooltip]="'calendar.nextPeriod' | translate" matTooltipPosition="above">
-      <span class="material-icons-outlined">chevron_right</span>
-    </button>
-    <button class="action-btn action-btn--sm" (click)="today()">{{ 'calendar.today' | translate }}</button>
-    <button class="action-btn action-btn--sm"
-            [class.action-btn--primary]="showPoDeliveries()"
+    <h2 class="calendar-toolbar__period">{{ headerLabel() }}</h2>
+  </div>
+
+  <div class="calendar-toolbar__right">
+    <app-select class="calendar-toolbar__filter" [label]="'calendar.trackType' | translate" [formControl]="trackTypeControl" [options]="trackTypeOptions()" />
+
+    <button class="icon-btn" [class.icon-btn--active]="showPoDeliveries()"
             (click)="togglePoDeliveries()"
             [attr.aria-label]="(showPoDeliveries() ? 'calendar.hidePoDeliveries' : 'calendar.showPoDeliveries') | translate"
             [matTooltip]="(showPoDeliveries() ? 'calendar.hidePoDeliveries' : 'calendar.showPoDeliveries') | translate"
             matTooltipPosition="above">
       <span class="material-icons-outlined">local_shipping</span>
-      {{ 'calendar.poDeliveries' | translate }}
     </button>
-    <button class="action-btn action-btn--sm"
-            [class.action-btn--primary]="layersOpen()"
+    <button class="icon-btn" [class.icon-btn--active]="layersOpen()"
             (click)="toggleLayersPanel()"
             [attr.aria-label]="'calendar.layers.title' | translate"
             [matTooltip]="'calendar.layers.title' | translate"
             matTooltipPosition="above">
       <span class="material-icons-outlined">layers</span>
-      {{ 'calendar.layers.title' | translate }}
     </button>
+
+    <div class="view-switch" role="group" [attr.aria-label]="'calendar.viewSwitchLabel' | translate">
+      <button type="button" class="view-switch__btn" [class.view-switch__btn--active]="view() === 'month'" [attr.aria-pressed]="view() === 'month'" (click)="setView('month')">
+        <span class="material-icons-outlined view-switch__icon">calendar_view_month</span>
+        <span class="view-switch__label">{{ 'calendar.month' | translate }}</span>
+      </button>
+      <button type="button" class="view-switch__btn" [class.view-switch__btn--active]="view() === 'week'" [attr.aria-pressed]="view() === 'week'" (click)="setView('week')">
+        <span class="material-icons-outlined view-switch__icon">calendar_view_week</span>
+        <span class="view-switch__label">{{ 'calendar.week' | translate }}</span>
+      </button>
+      <button type="button" class="view-switch__btn" [class.view-switch__btn--active]="view() === 'day'" [attr.aria-pressed]="view() === 'day'" (click)="setView('day')">
+        <span class="material-icons-outlined view-switch__icon">calendar_view_day</span>
+        <span class="view-switch__label">{{ 'calendar.day' | translate }}</span>
+      </button>
+    </div>
   </div>
-</app-page-header>
+</div>
 
 @if (layersOpen()) {
   <div class="calendar-layers-panel">
@@ -73,6 +87,7 @@
           <div class="calendar-cell"
             [class.calendar-cell--other]="!day.isCurrentMonth"
             [class.calendar-cell--today]="day.isToday"
+            [class.calendar-cell--weekend]="day.isWeekend"
             role="button" tabindex="0"
             [attr.aria-label]="('calendar.selectDay' | translate) + ' ' + day.date.getDate()"
             (click)="onDayClick(day)" (keydown.enter)="onDayClick(day)">
@@ -99,7 +114,10 @@
                 </div>
               }
               @if (overflowCount(day) > 0) {
-                <div class="job-overflow">{{ 'calendar.more' | translate: { count: overflowCount(day) } }}</div>
+                <button type="button" class="job-overflow" (click)="onDayClick(day); $event.stopPropagation()"
+                        (keydown.enter)="onDayClick(day); $event.stopPropagation()">
+                  {{ 'calendar.more' | translate: { count: overflowCount(day) } }}
+                </button>
               }
               @for (evt of (eventsByDate().get(day.dateKey) ?? []); track evt.id) {
                 <div class="event-chip" [style.border-left-color]="evt.color" [title]="evt.title">

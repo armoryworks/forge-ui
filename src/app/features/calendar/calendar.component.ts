@@ -2,10 +2,12 @@ import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, injec
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { CalendarService } from './services/calendar.service';
+import { CalendarDayDialogComponent, CalendarDayDialogData, CalendarDayDialogResult, CalendarDayEvent } from './components/calendar-day-dialog/calendar-day-dialog.component';
 import { CalendarJob } from './models/calendar-job.model';
 import { CalendarDay } from './models/calendar-day.model';
 import { PoCalendarEvent } from './models/po-calendar-event.model';
@@ -47,6 +49,7 @@ export class CalendarComponent implements OnInit {
   private readonly service = inject(CalendarService);
   private readonly kanbanService = inject(KanbanService);
   private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
   private readonly userPreferences = inject(UserPreferencesService);
   private readonly destroyRef = inject(DestroyRef);
@@ -80,7 +83,6 @@ export class CalendarComponent implements OnInit {
   protected readonly newViewNameControl = new FormControl<string>('', { nonNullable: true });
 
   protected readonly MAX_VISIBLE_JOBS = 3;
-  protected readonly HOURS = Array.from({ length: 24 }, (_, i) => i);
 
   protected readonly weekdayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
@@ -346,9 +348,52 @@ export class CalendarComponent implements OnInit {
     this.router.navigate(['/kanban'], { queryParams: { jobId: job.id } });
   }
 
+  /**
+   * A day cell / week-header day was clicked → open the day-detail dialog summarising
+   * everything scheduled that day (compliance events, jobs due, PO deliveries). The
+   * dialog can hand back to the inline day view or navigate to a clicked job. The
+   * inline day view stays directly reachable via the view switcher.
+   */
   protected onDayClick(day: CalendarDay): void {
-    this.currentDate.set(day.date);
-    this.view.set('day');
+    const data: CalendarDayDialogData = {
+      date: day.date,
+      events: this.eventsForDay(day.dateKey),
+      jobs: day.jobs,
+      poEvents: this.poEventsByDate().get(day.dateKey) ?? [],
+    };
+    this.dialog
+      .open<CalendarDayDialogComponent, CalendarDayDialogData, CalendarDayDialogResult>(
+        CalendarDayDialogComponent, { width: '520px', data, autoFocus: false },
+      )
+      .afterClosed()
+      .subscribe(result => {
+        if (result?.action === 'job') {
+          this.onJobClick(result.job);
+        } else if (result?.action === 'day') {
+          this.currentDate.set(day.date);
+          this.view.set('day');
+        }
+      });
+  }
+
+  /** Layer-filtered, colour-tagged events for a single day — the richer shape the day dialog renders. */
+  private eventsForDay(dateKey: string): CalendarDayEvent[] {
+    const selected = new Set(this.selectedLayerIds());
+    const colorByGroup = new Map(this.superGroups().map(g => [g.id, g.color ?? 'var(--primary)']));
+    return this.events()
+      .filter(e => this.toDateStr(new Date(e.startTime)) === dateKey
+        && (e.superGroupId == null || selected.has(e.superGroupId)))
+      .map(e => ({
+        id: e.id,
+        title: e.title,
+        description: e.description,
+        location: e.location,
+        startTime: e.startTime,
+        endTime: e.endTime,
+        status: e.status,
+        isRequired: e.isRequired,
+        color: e.superGroupId != null ? (colorByGroup.get(e.superGroupId) ?? 'var(--primary)') : 'var(--text-muted)',
+      }));
   }
 
   protected overflowCount(day: CalendarDay): number {
@@ -383,13 +428,6 @@ export class CalendarComponent implements OnInit {
     this.currentDate.set(new Date());
   }
 
-  protected formatHour(h: number): string {
-    if (h === 0) return '12 AM';
-    if (h < 12) return `${h} AM`;
-    if (h === 12) return '12 PM';
-    return `${h - 12} PM`;
-  }
-
   /** Only High/Urgent jobs get a visible priority indicator in the calendar (preserves the original "flag high-priority only" intent, with correct enum keys). */
   protected isHighPriority(priority: string): boolean {
     return priority === 'High' || priority === 'Urgent';
@@ -417,6 +455,7 @@ export class CalendarComponent implements OnInit {
         dateKey,
         isCurrentMonth: date.getMonth() === current.getMonth(),
         isToday: dateKey === todayStr,
+        isWeekend: this.isWeekendDate(date),
         jobs: jobsByDate.get(dateKey) ?? [],
       };
     });
@@ -446,6 +485,7 @@ export class CalendarComponent implements OnInit {
         dateKey,
         isCurrentMonth: false,
         isToday: dateKey === todayStr,
+        isWeekend: this.isWeekendDate(date),
         jobs: jobsByDate.get(dateKey) ?? [],
       });
     }
@@ -459,6 +499,7 @@ export class CalendarComponent implements OnInit {
         dateKey,
         isCurrentMonth: true,
         isToday: dateKey === todayStr,
+        isWeekend: this.isWeekendDate(date),
         jobs: jobsByDate.get(dateKey) ?? [],
       });
     }
@@ -474,6 +515,7 @@ export class CalendarComponent implements OnInit {
           dateKey,
           isCurrentMonth: false,
           isToday: dateKey === todayStr,
+        isWeekend: this.isWeekendDate(date),
           jobs: jobsByDate.get(dateKey) ?? [],
         });
       }
@@ -492,6 +534,11 @@ export class CalendarComponent implements OnInit {
       map.set(dateKey, list);
     }
     return map;
+  }
+
+  private isWeekendDate(d: Date): boolean {
+    const day = d.getDay();
+    return day === 0 || day === 6;
   }
 
   private toDateStr(d: Date): string {

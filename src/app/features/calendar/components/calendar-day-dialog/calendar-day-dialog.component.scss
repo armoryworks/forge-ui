@@ -1,0 +1,192 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.day-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  max-height: 60vh;
+  overflow-y: auto;
+  @include custom-scrollbar(6px);
+}
+
+.day-dialog__section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.day-dialog__section-title {
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  margin: 0;
+}
+
+.day-dialog__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: $badge-size-md;
+  height: $badge-size-md;
+  padding: 0 $sp-xs;
+  background: var(--border);
+  color: var(--text-secondary);
+  font-size: var(--font-size-xxs);
+  font-weight: 700;
+}
+
+// Event rows
+.day-dialog__event {
+  border-left: $border-width-accent solid var(--primary);
+  background: var(--surface);
+  padding: $sp-sm $sp-md;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.day-dialog__event-head {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  flex-wrap: wrap;
+}
+
+.day-dialog__event-title {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.day-dialog__badge {
+  flex-shrink: 0;
+}
+
+.day-dialog__desc {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+// Shared meta row (events / jobs / POs)
+.day-dialog__meta {
+  display: flex;
+  align-items: center;
+  gap: $sp-lg;
+  flex-wrap: wrap;
+}
+
+.day-dialog__meta-item {
+  display: flex;
+  align-items: center;
+  gap: $sp-xs;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+
+  .material-icons-outlined { font-size: $icon-size-sm; }
+}
+
+// Job rows (clickable)
+.day-dialog__job {
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-left: $border-width-accent solid var(--border);
+  border-left-color: var(--job-tint, var(--border));
+  background: color-mix(in srgb, var(--job-tint, transparent) 10%, var(--surface));
+  padding: $sp-sm $sp-md;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  transition: background $transition-fast;
+
+  &:hover { background: color-mix(in srgb, var(--job-tint, transparent) 18%, var(--surface)); }
+  &:focus-visible { outline: $border-width solid var(--primary); outline-offset: -2px; }
+  &--high-priority { border-left-width: 4px; }
+}
+
+.day-dialog__job-head {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+}
+
+.day-dialog__job-number {
+  font-weight: 700;
+  font-size: var(--font-size-base);
+  flex-shrink: 0;
+  font-family: $font-family-mono;
+}
+
+.day-dialog__job-title {
+  font-size: var(--font-size-base);
+  color: var(--text);
+  flex: 1;
+  @include truncate;
+}
+
+.day-dialog__overdue {
+  font-size: $icon-size-sm;
+  color: var(--error);
+  flex-shrink: 0;
+}
+
+.day-dialog__chevron {
+  font-size: $icon-size-md;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+// PO rows
+.day-dialog__po {
+  border-left: $border-width-accent solid var(--warning);
+  background: color-mix(in srgb, var(--warning) 10%, var(--surface));
+  padding: $sp-sm $sp-md;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+
+  [data-theme='dark'] & { background: color-mix(in srgb, var(--warning) 15%, var(--surface)); }
+}
+
+.day-dialog__po-head {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+}
+
+.day-dialog__po-icon {
+  font-size: $icon-size-md;
+  color: var(--warning);
+  flex-shrink: 0;
+}
+
+.day-dialog__po-number {
+  font-weight: 700;
+  font-family: $font-family-mono;
+  flex-shrink: 0;
+}
+
+.day-dialog__po-vendor {
+  font-size: var(--font-size-base);
+  color: var(--text);
+  flex: 1;
+  @include truncate;
+}
+
+// Empty state
+.day-dialog__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-2xl;
+  color: var(--text-muted);
+  text-align: center;
+
+  .material-icons-outlined { font-size: $icon-size-hero; }
+}

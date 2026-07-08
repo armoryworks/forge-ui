@@ -3,8 +3,91 @@
 
 :host { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
 
-.calendar-nav { display: flex; align-items: center; gap: $sp-sm; }
-.month-label { font-weight: 700; font-size: var(--font-size-title); min-width: 180px; text-align: center; }
+// Calendar controls toolbar — Today + nav + period on the left, view switcher +
+// overlays + filter on the right (standard calendar layout).
+.calendar-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $sp-md;
+  flex-wrap: wrap;
+  padding: $sp-sm $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+  flex-shrink: 0;
+
+  &__left,
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+  }
+
+  &__today { flex-shrink: 0; }
+
+  &__nav {
+    display: flex;
+    align-items: center;
+    border: $border-width-thin solid var(--border);
+
+    .icon-btn + .icon-btn { border-left: $border-width-thin solid var(--border); }
+  }
+
+  &__period {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+    min-width: 200px;
+    white-space: nowrap;
+  }
+
+  // Track-type filter is a secondary control — keep it from dominating the bar.
+  &__filter { min-width: 150px; max-width: 190px; }
+}
+
+// Prominent segmented view switcher (Month / Week / Day). Larger + higher-contrast
+// than the previous 9px control so the active view is unmistakable.
+.view-switch {
+  display: flex;
+  align-items: stretch;
+  border: $border-width-thin solid var(--border);
+  overflow: hidden;
+  flex-shrink: 0;
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
+    padding: $sp-xs $sp-md;
+    min-height: $input-height;
+    background: var(--surface);
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    transition: background $transition-fast, color $transition-fast;
+
+    & + & { border-left: $border-width-thin solid var(--border); }
+    &:hover { background: var(--bg); color: var(--text); }
+    &:focus-visible { outline: $border-width solid var(--primary); outline-offset: -2px; }
+
+    &--active,
+    &--active:hover {
+      background: var(--primary);
+      color: var(--primary-btn-text);
+    }
+  }
+
+  &__icon { font-size: $icon-size-sm; }
+
+  // Collapse to icon-only on narrow viewports to keep the toolbar single-row.
+  @include mobile {
+    &__label { display: none; }
+    &__btn { padding: $sp-xs $sp-sm; }
+  }
+}
 
 .calendar-grid { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: auto; scrollbar-gutter: stable; }
 
@@ -24,9 +107,16 @@
   border-right: $border-width-thin solid var(--border);
   border-bottom: $border-width-thin solid var(--border);
   min-height: 100px; padding: $sp-xs; display: flex; flex-direction: column;
+  cursor: pointer;
+  transition: background $transition-fast;
 
+  &:hover { background: color-mix(in srgb, var(--primary) 6%, var(--surface)); }
+  &:focus-visible { outline: $border-width solid var(--primary); outline-offset: -2px; }
+
+  &--weekend { background: color-mix(in srgb, var(--text-muted) 5%, var(--surface)); }
   &--other { background: var(--bg); }
   &--other .cell-date { color: var(--text-muted); opacity: 0.5; }
+  &--today { background: color-mix(in srgb, var(--primary) 6%, var(--surface)); }
   &--today .cell-date {
     background: var(--primary); color: var(--primary-btn-text);
     border-radius: 50%; width: $btn-icon-size; height: $btn-icon-size;
@@ -72,22 +162,15 @@
 }
 
 .job-overflow {
-  font-size: var(--font-size-xxs); color: var(--text-muted); padding: $sp-xxs $sp-sm;
-  cursor: default; font-weight: 600;
-}
-
-// View toggle
-.view-toggle {
-  display: flex; border: $border-width-thin solid var(--border); overflow: hidden;
-
-  &__btn {
-    @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
-    padding: $sp-xs $sp-md; background: var(--surface); border: none; cursor: pointer;
-    color: var(--text-secondary); transition: background $transition-fast, color $transition-fast;
-    &:hover { background: var(--bg); }
-    &--active { background: var(--primary); color: var(--primary-btn-text); }
-    & + & { border-left: $border-width-thin solid var(--border); }
-  }
+  align-self: flex-start;
+  border: none;
+  background: transparent;
+  font-size: var(--font-size-xxs); color: var(--text-secondary);
+  padding: $sp-xxs $sp-sm;
+  cursor: pointer; font-weight: 700;
+  transition: color $transition-fast;
+  &:hover { color: var(--primary); text-decoration: underline; }
+  &:focus-visible { outline: $border-width-thin solid var(--primary); outline-offset: 1px; }
 }
 
 // Week View

@@ -1,0 +1,123 @@
+<app-dialog [title]="title" width="520px" (closed)="close()">
+  <div class="day-dialog">
+    @if (data.events.length) {
+      <section class="day-dialog__section">
+        <h3 class="day-dialog__section-title">
+          {{ 'calendar.dayDialog.events' | translate }}
+          <span class="day-dialog__count">{{ data.events.length }}</span>
+        </h3>
+        @for (evt of data.events; track evt.id) {
+          <div class="day-dialog__event" [style.border-left-color]="evt.color">
+            <div class="day-dialog__event-head">
+              <span class="day-dialog__event-title">{{ evt.title }}</span>
+              @if (evt.isRequired) {
+                <span class="chip chip--warning day-dialog__badge">{{ 'calendar.dayDialog.required' | translate }}</span>
+              }
+              @if (evt.status) {
+                <span class="chip chip--info day-dialog__badge">{{ evt.status }}</span>
+              }
+            </div>
+            <div class="day-dialog__meta">
+              <span class="day-dialog__meta-item">
+                <span class="material-icons-outlined">schedule</span>
+                @if (isAllDay(evt)) {
+                  {{ 'calendar.dayDialog.allDay' | translate }}
+                } @else {
+                  {{ eventTime(evt) }}
+                }
+              </span>
+              @if (evt.location) {
+                <span class="day-dialog__meta-item">
+                  <span class="material-icons-outlined">place</span>{{ evt.location }}
+                </span>
+              }
+            </div>
+            @if (evt.description) {
+              <p class="day-dialog__desc">{{ evt.description }}</p>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    @if (data.jobs.length) {
+      <section class="day-dialog__section">
+        <h3 class="day-dialog__section-title">
+          {{ 'calendar.dayDialog.jobs' | translate }}
+          <span class="day-dialog__count">{{ data.jobs.length }}</span>
+        </h3>
+        @for (job of data.jobs; track job.id) {
+          <button type="button" class="day-dialog__job"
+            [style.border-left-color]="job.stageColor"
+            [style.--job-tint]="getJobTint(job)"
+            [class.day-dialog__job--high-priority]="isHighPriority(job.priorityName)"
+            (click)="selectJob(job)">
+            <span class="day-dialog__job-head">
+              @if (isHighPriority(job.priorityName)) {
+                <app-priority-indicator [priority]="job.priorityName" size="sm" />
+              }
+              <span class="day-dialog__job-number">{{ job.jobNumber }}</span>
+              <span class="day-dialog__job-title">{{ job.title }}</span>
+              @if (job.isOverdue) {
+                <span class="material-icons-outlined day-dialog__overdue">warning</span>
+              }
+              <span class="material-icons-outlined day-dialog__chevron">chevron_right</span>
+            </span>
+            <span class="day-dialog__meta">
+              @if (job.customerName) {
+                <span class="day-dialog__meta-item">
+                  <span class="material-icons-outlined">person</span>{{ job.customerName }}
+                </span>
+              }
+              <span class="day-dialog__meta-item">
+                <span class="material-icons-outlined">view_kanban</span>{{ job.stageName }}
+              </span>
+              @if (job.assigneeInitials) {
+                <span class="day-dialog__meta-item">
+                  <span class="material-icons-outlined">assignment_ind</span>{{ job.assigneeInitials }}
+                </span>
+              }
+            </span>
+          </button>
+        }
+      </section>
+    }
+
+    @if (data.poEvents.length) {
+      <section class="day-dialog__section">
+        <h3 class="day-dialog__section-title">
+          {{ 'calendar.dayDialog.deliveries' | translate }}
+          <span class="day-dialog__count">{{ data.poEvents.length }}</span>
+        </h3>
+        @for (po of data.poEvents; track po.id) {
+          <div class="day-dialog__po">
+            <div class="day-dialog__po-head">
+              <span class="material-icons-outlined day-dialog__po-icon">local_shipping</span>
+              <span class="day-dialog__po-number">{{ po.poNumber }}</span>
+              <span class="day-dialog__po-vendor">{{ po.vendorName }}</span>
+              <span class="chip chip--warning day-dialog__badge">{{ po.status }}</span>
+            </div>
+            <div class="day-dialog__meta">
+              <span class="day-dialog__meta-item">{{ 'calendar.poLines' | translate: { count: po.lineCount } }}</span>
+            </div>
+          </div>
+        }
+      </section>
+    }
+
+    @if (!hasContent) {
+      <div class="day-dialog__empty">
+        <span class="material-icons-outlined">event_available</span>
+        <span>{{ 'calendar.dayDialog.empty' | translate }}</span>
+      </div>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="openDayView()">
+      <span class="material-icons-outlined">calendar_view_day</span>
+      {{ 'calendar.dayDialog.openDayView' | translate }}
+    </button>
+    <button class="action-btn action-btn--primary" (click)="close()">{{ 'common.close' | translate }}</button>
+  </div>
+</app-dialog>

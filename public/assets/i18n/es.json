@@ -4011,7 +4011,17 @@
     "sat": "Sáb",
     "poDeliveries": "Entregas de OC",
     "poDeliveriesCount": "{{count}} entregas",
-    "poLines": "Líneas de OC"
+    "poLines": "Líneas de OC",
+    "viewSwitchLabel": "Vista del calendario",
+    "dayDialog": {
+      "events": "Eventos",
+      "jobs": "Trabajos con vencimiento",
+      "deliveries": "Entregas de OC",
+      "openDayView": "Abrir vista del día",
+      "required": "Obligatorio",
+      "allDay": "Todo el día",
+      "empty": "No hay nada programado para este día."
+    }
   },
   "entityPicker": {
     "createNew": "Crear nuevo {{label}} «{{term}}»"
