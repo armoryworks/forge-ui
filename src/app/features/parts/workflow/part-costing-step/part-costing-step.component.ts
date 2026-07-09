@@ -16,10 +16,11 @@ import { PartsService } from '../../services/parts.service';
 /** Costing modes per the design doc D3 — Tier 1 always available, Tiers 2/3
  * gated by `CAP-COSTING-TIER2-DEPTRATES` and `CAP-COSTING-TIER3-ABC`
  * (registered in forge-api's CapabilityCatalog as of 2026-05-03).
- * Both default OFF; admin enables via /admin/capabilities. The actual
- * rate/driver/allocation engines are still pending — enabling the
- * capability today reveals the radio + a "configuration coming soon"
- * notice rather than a functional tier-switch. */
+ * Both default OFF; admin enables via /admin/capabilities.
+ * Tier 2 (departmental) is now a live engine: the rollup applies per-work-center
+ * overhead percentages configured shop-wide in Admin → Costing (the radio here is
+ * a per-part hint; the mode itself is a global costing-profile setting). Tier 3
+ * (ABC) is still pending — its radio reveals a "configuration coming soon" notice. */
 type CostingMode = 'flat' | 'departmental' | 'abc';
 
 /**
