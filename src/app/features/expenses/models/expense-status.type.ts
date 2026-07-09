@@ -1,1 +1,1 @@
-export type ExpenseStatus = 'Pending' | 'Approved' | 'Rejected' | 'SelfApproved' | 'NeedsRevision';
+export type ExpenseStatus = 'Pending' | 'Approved' | 'Rejected' | 'SelfApproved' | 'NeedsRevision' | 'Reimbursed';

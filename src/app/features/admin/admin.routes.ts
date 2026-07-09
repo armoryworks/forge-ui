@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AdminComponent } from './admin.component';
+import { capabilityGuard } from '../../shared/guards/capability.guard';
 
 export const ADMIN_ROUTES: Routes = [
   // Admin Overview is the landing surface for /admin. Previously redirected
@@ -136,6 +137,15 @@ export const ADMIN_ROUTES: Routes = [
     path: 'terms',
     loadComponent: () =>
       import('../terms/admin/terms-admin.component').then((m) => m.TermsAdminComponent),
+  },
+  // Costing Tier 2 — departmental cost rates. Switches the active costing profile
+  // to per-work-center overhead percentages of direct labor. Gated by
+  // CAP-COSTING-TIER2-DEPTRATES (route guard) + Admin/Manager on the server.
+  {
+    path: 'costing',
+    canActivate: [capabilityGuard('CAP-COSTING-TIER2-DEPTRATES')],
+    loadComponent: () =>
+      import('./costing/costing.component').then((m) => m.CostingComponent),
   },
   // Phase 1m option-3 — /admin/configuration was the parallel admin
   // surface for the descriptor-driven settings. Retired: the existing

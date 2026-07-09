@@ -72,6 +72,7 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   { prefix: 'company-locations', capability: 'CAP-MD-LOCATIONS' },
   { prefix: 'compliance-forms', capability: 'CAP-QC-COMPLIANCE-FORMS' },
   { prefix: 'consignment-agreements', capability: 'CAP-MD-CONTRACTS-CONSIGNMENT' },
+  { prefix: 'costing', capability: 'CAP-COSTING-TIER2-DEPTRATES' },
   { prefix: 'cpq', capability: 'CAP-O2C-CPQ' },
   { prefix: 'customer-returns', capability: 'CAP-O2C-RMA' },
   { prefix: 'customers', capability: 'CAP-MD-CUSTOMERS' },

@@ -116,12 +116,12 @@ export class ExpensesComponent implements OnInit {
     { field: 'status', header: this.translate.instant('expenses.colStatus'), sortable: true, filterable: true, type: 'enum', filterOptions: [
       { value: 'Pending', label: this.translate.instant('common.pending') }, { value: 'Approved', label: this.translate.instant('expenses.approved') },
       { value: 'Rejected', label: this.translate.instant('expenses.rejected') }, { value: 'SelfApproved', label: this.translate.instant('expenses.selfApproved') },
-      { value: 'NeedsRevision', label: this.translate.instant('expenses.needsRevision') },
+      { value: 'NeedsRevision', label: this.translate.instant('expenses.needsRevision') }, { value: 'Reimbursed', label: this.translate.instant('expenses.reimbursed') },
     ]},
     { field: 'actions', header: this.translate.instant('expenses.colActions'), width: '80px', align: 'right' },
   ];
 
-  protected readonly statuses: ExpenseStatus[] = ['Pending', 'Approved', 'Rejected', 'SelfApproved', 'NeedsRevision'];
+  protected readonly statuses: ExpenseStatus[] = ['Pending', 'Approved', 'Rejected', 'SelfApproved', 'NeedsRevision', 'Reimbursed'];
 
   protected readonly statusOptions: SelectOption[] = [
     { value: '', label: this.translate.instant('expenses.allStatuses') },
@@ -311,11 +311,19 @@ export class ExpensesComponent implements OnInit {
     });
   }
 
+  // F-EXP-03: reimbursement is the terminal state once an approved expense has been paid back.
+  // Server gates the action to approver roles (Admin/Manager/OfficeManager) + Approved/SelfApproved.
+  protected reimburseExpense(expense: ExpenseItem): void {
+    this.expensesService.reimburseExpense(expense.id).subscribe({
+      next: () => { this.loadExpenses(); this.snackbar.success(this.translate.instant('expenses.expenseReimbursed')); },
+    });
+  }
+
   protected getStatusClass(status: string): string {
     const map: Record<string, string> = {
       Pending: 'chip--warning', Approved: 'chip--success',
       Rejected: 'chip--error', SelfApproved: 'chip--success',
-      NeedsRevision: 'chip--warning',
+      NeedsRevision: 'chip--warning', Reimbursed: 'chip--info',
     };
     return `chip ${map[status] ?? ''}`.trim();
   }

@@ -50,8 +50,15 @@
     </label>
   </fieldset>
 
-  @if (mode() === 'departmental' || mode() === 'abc') {
-    <!-- Capability is enabled but the engine isn't built yet — be honest
+  @if (mode() === 'departmental') {
+    <!-- Tier 2 is implemented, but the rate config is a global (per-install) profile setting,
+         not a per-part value — point the user to the admin surface that drives it. -->
+    <div class="part-costing-step__not-implemented" role="status">
+      <span class="material-icons-outlined">info</span>
+      <span>{{ 'parts.workflow.costing.departmentalConfigured' | translate }}</span>
+    </div>
+  } @else if (mode() === 'abc') {
+    <!-- Tier 3 (ABC) capability is enabled but the engine isn't built yet — be honest
          about it rather than silently storing a tier the system can't act on. -->
     <div class="part-costing-step__not-implemented" role="status">
       <span class="material-icons-outlined">construction</span>

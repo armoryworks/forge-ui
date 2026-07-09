@@ -37,6 +37,11 @@ export class ExpensesService {
     return this.http.patch<ExpenseItem>(`${this.base}/${id}/status`, request);
   }
 
+  // F-EXP-03: mark an approved expense reimbursed (terminal). Accounting-role action server-side.
+  reimburseExpense(id: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/reimburse`, {});
+  }
+
   deleteExpense(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
   }

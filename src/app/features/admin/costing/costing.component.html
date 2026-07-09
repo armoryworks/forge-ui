@@ -1,0 +1,43 @@
+<app-page-layout [pageTitle]="'admin.costing.title' | translate">
+  <ng-container content>
+    <div class="costing" [appLoadingBlock]="loading()">
+      <p class="costing__intro">{{ 'admin.costing.intro' | translate }}</p>
+
+      <div class="costing__mode">
+        <app-toggle [formControl]="departmentalControl" [label]="'admin.costing.departmentalToggle' | translate" />
+        <p class="costing__hint">
+          {{ (departmental() ? 'admin.costing.departmentalHint' : 'admin.costing.flatHint') | translate }}
+        </p>
+      </div>
+
+      @if (departmental()) {
+        @if (hasWorkCenters()) {
+          <div class="costing__rates" [formGroup]="rateForm">
+            <p class="costing__rates-head">{{ 'admin.costing.ratePct' | translate }}</p>
+            @for (row of rows(); track row.id) {
+              <app-input
+                type="number"
+                suffix="%"
+                [min]="0"
+                [label]="row.label"
+                [formControlName]="row.key"
+                [placeholder]="'admin.costing.ratePlaceholder' | translate" />
+            }
+          </div>
+        } @else {
+          <app-empty-state
+            icon="precision_manufacturing"
+            [message]="'admin.costing.noWorkCenters' | translate" />
+        }
+      }
+    </div>
+  </ng-container>
+
+  <ng-container actions>
+    @if (canEdit) {
+      <button class="action-btn action-btn--primary" [disabled]="saving()" (click)="save()">
+        <span class="material-icons-outlined">save</span> {{ 'common.save' | translate }}
+      </button>
+    }
+  </ng-container>
+</app-page-layout>

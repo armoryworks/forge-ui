@@ -54,6 +54,12 @@
               <span class="material-icons-outlined">edit</span>
             </button>
           </div>
+        } @else if (expense.status === 'Approved' || expense.status === 'SelfApproved') {
+          <div class="action-cell">
+            <button data-testid="reimburse-expense-btn" class="icon-btn icon-btn--success" [matTooltip]="'expenses.markReimbursed' | translate" matTooltipPosition="above" (click)="reimburseExpense(expense); $event.stopPropagation()">
+              <span class="material-icons-outlined">paid</span>
+            </button>
+          </div>
         }
       </ng-template>
     </app-data-table>
