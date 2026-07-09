@@ -1,0 +1,89 @@
+<div class="pa">
+  <div class="pa__card">
+    @if (loading()) {
+      <div class="pa__state">
+        <span class="material-icons-outlined pa__state-icon pa__spin">hourglass_empty</span>
+        <p>{{ 'publicAcceptance.loading' | translate }}</p>
+      </div>
+    } @else if (loadError()) {
+      <div class="pa__state">
+        <span class="material-icons-outlined pa__state-icon pa__state-icon--warn">link_off</span>
+        <h1 class="pa__title">{{ 'publicAcceptance.invalidTitle' | translate }}</h1>
+        <p>{{ 'publicAcceptance.invalidMessage' | translate }}</p>
+      </div>
+    } @else if (data(); as d) {
+      @if (submitted()) {
+        <div class="pa__state">
+          <span class="material-icons-outlined pa__state-icon pa__state-icon--ok">check_circle</span>
+          <h1 class="pa__title">{{ 'publicAcceptance.acceptedTitle' | translate }}</h1>
+          <p>{{ 'publicAcceptance.acceptedMessage' | translate }}</p>
+        </div>
+      } @else {
+        <header class="pa__header">
+          <div class="pa__company">{{ d.companyName }}</div>
+          <div class="pa__order">
+            <span>{{ 'publicAcceptance.orderNumber' | translate }} {{ d.orderNumber }}</span>
+            <span class="pa__customer">{{ 'publicAcceptance.customer' | translate }}: {{ d.customerName }}</span>
+          </div>
+        </header>
+
+        <table class="pa__lines" aria-label="Order lines">
+          <thead>
+            <tr>
+              <th scope="col">{{ 'publicAcceptance.lineDescription' | translate }}</th>
+              <th scope="col" class="pa__num">{{ 'publicAcceptance.lineQty' | translate }}</th>
+              <th scope="col" class="pa__num">{{ 'publicAcceptance.lineUnitPrice' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of d.lines; track $index) {
+              <tr>
+                <td>{{ line.description }}</td>
+                <td class="pa__num">{{ line.quantity | number:'1.0-4' }}</td>
+                <td class="pa__num">{{ line.unitPrice | number:'1.2-2' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <div class="pa__total">
+          <span>{{ 'publicAcceptance.total' | translate }}</span>
+          <span class="pa__total-value">{{ d.total | number:'1.2-2' }}</span>
+        </div>
+
+        @if (closedMessage(); as msg) {
+          <div class="pa__closed">
+            <span class="material-icons-outlined">info</span>
+            <span>{{ msg }}</span>
+          </div>
+        } @else {
+          <div class="pa__form" [formGroup]="form">
+            <p class="pa__instructions">{{ 'publicAcceptance.reviewInstructions' | translate }}</p>
+            @if (d.requiresKey) {
+              <app-input
+                [label]="'publicAcceptance.verificationKey' | translate"
+                formControlName="verificationKey"
+                [info]="'publicAcceptance.verificationKeyRequired' | translate"
+                [required]="true" />
+            }
+            <app-input
+              [label]="'publicAcceptance.yourName' | translate"
+              formControlName="acceptedByName"
+              [required]="true" />
+
+            @if (submitError(); as err) {
+              <div class="pa__error">{{ err }}</div>
+            }
+
+            <button class="action-btn action-btn--primary pa__submit"
+              [disabled]="submitDisabled() || submitting()"
+              (click)="submit()">
+              <span class="material-icons-outlined">check</span>
+              {{ 'publicAcceptance.accept' | translate }}
+            </button>
+          </div>
+        }
+      }
+    }
+  </div>
+</div>

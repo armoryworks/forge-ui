@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -35,8 +36,18 @@ import { SalesOrderStages } from '../../models/sales-order-stage.model';
 import { CustomerPoDocument } from '../../models/customer-po-document.model';
 import { AccountingService } from '../../../../shared/services/accounting.service';
 import { InvoiceDialogComponent } from '../../../invoices/components/invoice-dialog/invoice-dialog.component';
+import { CapDirective } from '../../../../shared/directives/cap.directive';
+import { CapabilityService } from '../../../../shared/services/capability.service';
+import { AuthService } from '../../../../shared/services/auth.service';
+import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
+import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { SalesOrderAcceptanceService, RecordAcceptanceMethod } from '../../services/sales-order-acceptance.service';
+import { SalesOrderAcceptance } from '../../models/sales-order-acceptance.model';
 
-type TabId = 'overview' | 'lines' | 'schedule' | 'stages' | 'shipments' | 'returns' | 'documents' | 'invoices' | 'customer-po' | 'activity';
+/** Capability gating the whole customer-acceptance feature. */
+const CAP_SO_ACCEPTANCE = 'CAP-O2C-SO-ACCEPTANCE';
+
+type TabId = 'overview' | 'lines' | 'schedule' | 'stages' | 'shipments' | 'returns' | 'documents' | 'invoices' | 'customer-po' | 'acceptance' | 'activity';
 
 @Component({
   selector: 'app-sales-order-detail-panel',
@@ -48,6 +59,7 @@ type TabId = 'overview' | 'lines' | 'schedule' | 'stages' | 'shipments' | 'retur
     EntityLinkComponent, CurrencyDisplayComponent, FileUploadZoneComponent, EmptyStateComponent,
     EntityPickerComponent, InputComponent, SelectComponent, DatepickerComponent, CurrencyInputComponent,
     ScheduleTimelineComponent, InvoiceDialogComponent, ShipmentDialogComponent,
+    CapDirective, DialogComponent, TextareaComponent,
   ],
   templateUrl: './sales-order-detail-panel.component.html',
   styleUrl: './sales-order-detail-panel.component.scss',
@@ -55,10 +67,13 @@ type TabId = 'overview' | 'lines' | 'schedule' | 'stages' | 'shipments' | 'retur
 })
 export class SalesOrderDetailPanelComponent {
   private readonly soService = inject(SalesOrderService);
+  private readonly acceptanceService = inject(SalesOrderAcceptanceService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly accountingService = inject(AccountingService);
+  private readonly capabilityService = inject(CapabilityService);
+  private readonly auth = inject(AuthService);
 
   // ---- ACCOUNTING BOUNDARY ---- invoice creation is standalone-mode-only;
   // integrated installs manage invoices in the connected accounting system.
@@ -95,6 +110,62 @@ export class SalesOrderDetailPanelComponent {
   protected readonly customerPoLoading = signal(false);
   protected readonly stages = signal<SalesOrderStages | null>(null);
   protected readonly stagesLoading = signal(false);
+
+  // --- Customer acceptance (CAP-O2C-SO-ACCEPTANCE) ---
+  protected readonly acceptances = signal<SalesOrderAcceptance[]>([]);
+  protected readonly acceptanceLoading = signal(false);
+  protected readonly savingAcceptance = signal(false);
+  protected readonly showRecordDialog = signal(false);
+  protected readonly showSignatureDialog = signal(false);
+  protected readonly showPortalDialog = signal(false);
+  protected readonly showEmailIngestDialog = signal(false);
+  protected readonly signatureSubmitUrl = signal<string | null>(null);
+  protected readonly portalLink = signal<string | null>(null);
+  protected readonly recordFile = signal<File | null>(null);
+
+  /** Reactive to the capability descriptor snapshot (admin toggles, SignalR push). */
+  protected readonly acceptanceCapEnabled = computed(() => this.capabilityService.isEnabled(CAP_SO_ACCEPTANCE));
+  protected readonly isAdmin = computed(() => this.auth.hasRole('Admin'));
+  protected readonly acceptedAcceptance = computed(() => this.acceptances().find(a => a.status === 'Accepted') ?? null);
+  protected readonly hasAcceptedAcceptance = computed(() => this.acceptedAcceptance() !== null);
+  /**
+   * Pre-empt the server's 409: when the feature is on and no Accepted record
+   * exists, the Confirm/release action is blocked with a visible reason.
+   */
+  protected readonly confirmBlockedByAcceptance = computed(
+    () => this.acceptanceCapEnabled() && !this.hasAcceptedAcceptance(),
+  );
+
+  protected readonly recordForm = new FormGroup({
+    method: new FormControl<RecordAcceptanceMethod>('ManualUpload', { nonNullable: true, validators: [Validators.required] }),
+    note: new FormControl('', { nonNullable: true }),
+  });
+  private readonly recordMethod = toSignal(this.recordForm.controls.method.valueChanges, { initialValue: 'ManualUpload' as RecordAcceptanceMethod });
+  protected readonly recordNeedsFile = computed(() => this.recordMethod() !== 'Verbal');
+  protected readonly recordValid = computed(() => !this.recordNeedsFile() || this.recordFile() !== null);
+
+  protected readonly signatureForm = new FormGroup({
+    signerName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    signerEmail: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
+  });
+
+  protected readonly portalForm = new FormGroup({
+    recipientEmail: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
+    verificationKey: new FormControl('', { nonNullable: true }),
+    validDays: new FormControl<number | null>(null),
+  });
+
+  protected readonly emailIngestForm = new FormGroup({
+    fromEmail: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
+    note: new FormControl('', { nonNullable: true }),
+  });
+
+  protected readonly acceptanceMethodOptions = computed<SelectOption[]>(() => [
+    { value: 'ManualUpload', label: this.translate.instant('salesOrders.acceptance.methodManualUpload') },
+    { value: 'Fax', label: this.translate.instant('salesOrders.acceptance.methodFax') },
+    { value: 'Email', label: this.translate.instant('salesOrders.acceptance.methodEmail') },
+    { value: 'Verbal', label: this.translate.instant('salesOrders.acceptance.methodVerbal') },
+  ]);
 
   protected readonly hasData = computed(() => this.so() !== null);
 
@@ -198,6 +269,9 @@ export class SalesOrderDetailPanelComponent {
         this.loading.set(false);
         this.loadDocuments(id);
         this.loadInvoices(id);
+        // Load the acceptance list up front (when the feature is on) so the
+        // Confirm button can pre-empt release before the user opens the tab.
+        if (this.acceptanceCapEnabled()) this.loadAcceptances(id);
       },
       error: () => this.loading.set(false),
     });
@@ -239,7 +313,195 @@ export class SalesOrderDetailPanelComponent {
       this.loadStages(this.salesOrderId());
     } else if (tab === 'customer-po' && this.customerPo() === null) {
       this.loadCustomerPo(this.salesOrderId());
+    } else if (tab === 'acceptance') {
+      this.loadAcceptances(this.salesOrderId());
     }
+  }
+
+  // --- Customer acceptance ---
+  private loadAcceptances(id: number): void {
+    this.acceptanceLoading.set(true);
+    this.acceptanceService.list(id).subscribe({
+      next: (list) => { this.acceptances.set(list); this.acceptanceLoading.set(false); },
+      error: () => this.acceptanceLoading.set(false),
+    });
+  }
+
+  protected openRecordDialog(): void {
+    this.recordForm.reset({ method: 'ManualUpload', note: '' });
+    this.recordFile.set(null);
+    this.showRecordDialog.set(true);
+  }
+
+  protected onRecordFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.recordFile.set(input.files?.[0] ?? null);
+  }
+
+  protected saveRecord(): void {
+    const so = this.so();
+    if (!so || this.recordForm.invalid) return;
+    const method = this.recordForm.controls.method.value;
+    const file = this.recordFile();
+    if (method !== 'Verbal' && !file) return;
+    this.savingAcceptance.set(true);
+    this.acceptanceService.record(so.id, {
+      method,
+      note: this.recordForm.controls.note.value,
+      file: file ?? undefined,
+    }).subscribe({
+      next: () => {
+        this.savingAcceptance.set(false);
+        this.showRecordDialog.set(false);
+        this.loadAcceptances(so.id);
+        this.snackbar.success(this.translate.instant('salesOrders.acceptance.recorded'));
+      },
+      error: () => this.savingAcceptance.set(false),
+    });
+  }
+
+  protected openSignatureDialog(): void {
+    this.signatureForm.reset({ signerName: '', signerEmail: '' });
+    this.signatureSubmitUrl.set(null);
+    this.showSignatureDialog.set(true);
+  }
+
+  protected sendSignature(): void {
+    const so = this.so();
+    if (!so || this.signatureForm.invalid) return;
+    this.savingAcceptance.set(true);
+    this.acceptanceService.sendSignature(so.id, this.signatureForm.getRawValue()).subscribe({
+      next: (res) => {
+        this.savingAcceptance.set(false);
+        this.signatureSubmitUrl.set(res.submitUrl);
+        this.loadAcceptances(so.id);
+        this.snackbar.success(this.translate.instant('salesOrders.acceptance.signatureSent'));
+      },
+      error: () => this.savingAcceptance.set(false),
+    });
+  }
+
+  protected openPortalDialog(): void {
+    this.portalForm.reset({ recipientEmail: '', verificationKey: '', validDays: null });
+    this.portalLink.set(null);
+    this.showPortalDialog.set(true);
+  }
+
+  protected requestPortal(): void {
+    const so = this.so();
+    if (!so || this.portalForm.invalid) return;
+    const v = this.portalForm.getRawValue();
+    this.savingAcceptance.set(true);
+    this.acceptanceService.requestPortal(so.id, {
+      recipientEmail: v.recipientEmail,
+      verificationKey: v.verificationKey,
+      validDays: v.validDays ?? undefined,
+    }).subscribe({
+      next: (res) => {
+        this.savingAcceptance.set(false);
+        this.portalLink.set(`${window.location.origin}/accept/${res.token}`);
+        this.loadAcceptances(so.id);
+        this.snackbar.success(this.translate.instant('salesOrders.acceptance.portalLinkCreated'));
+      },
+      error: () => this.savingAcceptance.set(false),
+    });
+  }
+
+  protected openEmailIngestDialog(): void {
+    this.emailIngestForm.reset({ fromEmail: '', note: '' });
+    this.showEmailIngestDialog.set(true);
+  }
+
+  protected registerInboundEmail(): void {
+    const so = this.so();
+    if (!so || this.emailIngestForm.invalid) return;
+    this.savingAcceptance.set(true);
+    this.acceptanceService.emailIngest(so.id, {
+      fromEmail: this.emailIngestForm.controls.fromEmail.value,
+      note: this.emailIngestForm.controls.note.value || undefined,
+    }).subscribe({
+      next: () => {
+        this.savingAcceptance.set(false);
+        this.showEmailIngestDialog.set(false);
+        this.loadAcceptances(so.id);
+        this.snackbar.success(this.translate.instant('salesOrders.acceptance.emailRegistered'));
+      },
+      error: () => this.savingAcceptance.set(false),
+    });
+  }
+
+  protected checkSignature(a: SalesOrderAcceptance): void {
+    const so = this.so();
+    if (!so) return;
+    this.acceptanceService.checkSignature(so.id, a.id).subscribe({
+      next: () => this.loadAcceptances(so.id),
+    });
+  }
+
+  protected confirmEmail(a: SalesOrderAcceptance): void {
+    const so = this.so();
+    if (!so) return;
+    this.acceptanceService.confirmEmail(so.id, a.id).subscribe({
+      next: () => {
+        this.loadAcceptances(so.id);
+        this.snackbar.success(this.translate.instant('salesOrders.acceptance.emailConfirmed'));
+      },
+    });
+  }
+
+  protected revokeAcceptance(a: SalesOrderAcceptance): void {
+    const so = this.so();
+    if (!so) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('salesOrders.acceptance.revokeTitle'),
+        message: this.translate.instant('salesOrders.acceptance.revokeMessage'),
+        confirmLabel: this.translate.instant('salesOrders.acceptance.revoke'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.acceptanceService.revoke(so.id, a.id, this.translate.instant('salesOrders.acceptance.revokeReason')).subscribe({
+        next: () => {
+          this.loadAcceptances(so.id);
+          this.snackbar.success(this.translate.instant('salesOrders.acceptance.revoked'));
+        },
+      });
+    });
+  }
+
+  protected copyToClipboard(value: string | null): void {
+    if (!value) return;
+    navigator.clipboard?.writeText(value);
+    this.snackbar.success(this.translate.instant('salesOrders.acceptance.linkCopied'));
+  }
+
+  protected downloadAcceptanceFile(a: SalesOrderAcceptance): void {
+    if (a.fileAttachmentId) window.open(this.soService.downloadFileUrl(a.fileAttachmentId), '_blank');
+  }
+
+  protected acceptanceStatusClass(status: string): string {
+    const map: Record<string, string> = {
+      Accepted: 'chip--success',
+      Pending: 'chip--warning',
+      Declined: 'chip--error',
+      Revoked: 'chip--error',
+      Expired: 'chip--muted',
+    };
+    return `chip ${map[status] ?? 'chip--muted'}`.trim();
+  }
+
+  protected acceptanceMethodLabel(method: string): string {
+    const key = 'salesOrders.acceptance.method' + method;
+    const t = this.translate.instant(key);
+    return t !== key ? t : method;
+  }
+
+  protected acceptanceStatusLabel(status: string): string {
+    const key = 'salesOrders.acceptance.status' + status;
+    const t = this.translate.instant(key);
+    return t !== key ? t : status;
   }
 
   // --- S4c: staged schedule ---
@@ -358,6 +620,8 @@ export class SalesOrderDetailPanelComponent {
   protected confirmSo(): void {
     const so = this.so();
     if (!so) return;
+    // Pre-empt the server's 409 — no release until a customer acceptance is on file.
+    if (this.confirmBlockedByAcceptance()) return;
     this.soService.confirmSalesOrder(so.id).subscribe({
       next: () => {
         this.loadDetail(so.id);

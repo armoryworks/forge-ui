@@ -105,6 +105,16 @@
         aria-label="Customer P.O. tab">
         {{ 'salesOrders.customerPoDoc.tab' | translate }}
       </button>
+      <button *appCap="'CAP-O2C-SO-ACCEPTANCE'" class="tab" role="tab"
+        [class.tab--active]="activeTab() === 'acceptance'"
+        [attr.aria-selected]="activeTab() === 'acceptance'"
+        (click)="switchTab('acceptance')"
+        aria-label="Customer acceptance tab">
+        {{ 'salesOrders.acceptance.tab' | translate }}
+        @if (!hasAcceptedAcceptance()) {
+          <span class="material-icons-outlined tab__warning" [matTooltip]="'salesOrders.acceptance.noneBanner' | translate" matTooltipPosition="above" [attr.aria-label]="'salesOrders.acceptance.noneBanner' | translate">warning</span>
+        }
+      </button>
       <button class="tab" role="tab"
         [class.tab--active]="activeTab() === 'activity'"
         [attr.aria-selected]="activeTab() === 'activity'"
@@ -264,7 +274,11 @@
               </button>
             }
             @if (canConfirm(so.status)) {
-              <button class="action-btn action-btn--primary" data-testid="so-confirm-btn" (click)="confirmSo()">
+              <button class="action-btn action-btn--primary" data-testid="so-confirm-btn"
+                [disabled]="confirmBlockedByAcceptance()"
+                [matTooltip]="confirmBlockedByAcceptance() ? ('salesOrders.acceptance.confirmBlockedHint' | translate) : ''"
+                matTooltipPosition="above"
+                (click)="confirmSo()">
                 <span class="material-icons-outlined">check_circle</span>
                 {{ 'salesOrders.confirm' | translate }}
               </button>
@@ -276,6 +290,12 @@
               </button>
             }
           </div>
+          @if (canConfirm(so.status) && confirmBlockedByAcceptance()) {
+            <div class="acceptance-gate-hint" data-testid="so-confirm-gate-hint">
+              <span class="material-icons-outlined">info</span>
+              {{ 'salesOrders.acceptance.confirmBlockedHint' | translate }}
+            </div>
+          }
         </div>
       }
 
@@ -873,6 +893,107 @@
         </div>
       }
 
+      <!-- Customer Acceptance Tab (CAP-O2C-SO-ACCEPTANCE) -->
+      @if (activeTab() === 'acceptance') {
+        <div class="tab-panel" role="tabpanel" [appLoadingBlock]="acceptanceLoading()">
+          @if (acceptedAcceptance(); as acc) {
+            <div class="acceptance-banner acceptance-banner--ok">
+              <span class="material-icons-outlined">verified</span>
+              <span>{{ 'salesOrders.acceptance.acceptedBanner' | translate:{ method: acceptanceMethodLabel(acc.method), by: (acc.acceptedByName || acc.recordedByName || ''), date: (acc.acceptedAt | date:'MM/dd/yyyy') } }}</span>
+            </div>
+          } @else {
+            <div class="acceptance-banner acceptance-banner--warn">
+              <span class="material-icons-outlined">warning</span>
+              <span>{{ 'salesOrders.acceptance.noneBanner' | translate }}</span>
+            </div>
+          }
+
+          <div class="acceptance-actions">
+            <button class="action-btn action-btn--sm action-btn--create" (click)="openRecordDialog()">
+              <span class="material-icons-outlined">add</span>
+              {{ 'salesOrders.acceptance.record' | translate }}
+            </button>
+            <button class="action-btn action-btn--sm" (click)="openSignatureDialog()">
+              <span class="material-icons-outlined">draw</span>
+              {{ 'salesOrders.acceptance.sendSignature' | translate }}
+            </button>
+            <button class="action-btn action-btn--sm" (click)="openPortalDialog()">
+              <span class="material-icons-outlined">link</span>
+              {{ 'salesOrders.acceptance.requestLink' | translate }}
+            </button>
+            <button class="action-btn action-btn--sm" (click)="openEmailIngestDialog()">
+              <span class="material-icons-outlined">mail</span>
+              {{ 'salesOrders.acceptance.registerEmail' | translate }}
+            </button>
+          </div>
+
+          @if (acceptances().length > 0) {
+            <div class="acceptance-history">
+              @for (a of acceptances(); track a.id) {
+                <div class="acceptance-item">
+                  <div class="acceptance-item__head">
+                    <span class="chip chip--muted">{{ acceptanceMethodLabel(a.method) }}</span>
+                    <span [class]="acceptanceStatusClass(a.status)">{{ acceptanceStatusLabel(a.status) }}</span>
+                    <span class="acceptance-item__when">{{ a.createdAt | date:'MM/dd/yyyy hh:mm' }}</span>
+                  </div>
+                  <div class="acceptance-item__meta">
+                    @if (a.acceptedByName) {
+                      <span>{{ 'salesOrders.acceptance.acceptedBy' | translate }}: {{ a.acceptedByName }}</span>
+                    }
+                    @if (a.recordedByName) {
+                      <span>{{ 'salesOrders.acceptance.recordedBy' | translate }}: {{ a.recordedByName }}</span>
+                    }
+                    @if (a.sentTo) {
+                      <span>{{ 'salesOrders.acceptance.sentTo' | translate }}: {{ a.sentTo }}</span>
+                    }
+                    @if (a.provider) {
+                      <span>{{ a.provider }}{{ a.providerReference ? ' · ' + a.providerReference : '' }}</span>
+                    }
+                    @if (a.expiresAt) {
+                      <span>{{ 'salesOrders.acceptance.expires' | translate }}: {{ a.expiresAt | date:'MM/dd/yyyy' }}</span>
+                    }
+                  </div>
+                  @if (a.note) {
+                    <div class="acceptance-item__note">{{ a.note }}</div>
+                  }
+                  @if (a.fileName) {
+                    <button class="action-btn action-btn--link action-btn--sm acceptance-item__file" (click)="downloadAcceptanceFile(a)">
+                      <span class="material-icons-outlined">download</span>
+                      {{ a.fileName }}
+                    </button>
+                  }
+                  <div class="acceptance-item__actions">
+                    @if (a.status === 'Pending' && a.method === 'ESignature') {
+                      <button class="action-btn action-btn--sm" (click)="checkSignature(a)">
+                        <span class="material-icons-outlined">refresh</span>
+                        {{ 'salesOrders.acceptance.checkStatus' | translate }}
+                      </button>
+                    }
+                    @if (a.status === 'Pending' && a.method === 'Email') {
+                      <button class="action-btn action-btn--sm action-btn--primary" (click)="confirmEmail(a)">
+                        <span class="material-icons-outlined">check</span>
+                        {{ 'salesOrders.acceptance.confirm' | translate }}
+                      </button>
+                    }
+                    @if (isAdmin() && a.status !== 'Revoked') {
+                      <button class="action-btn action-btn--sm action-btn--danger" (click)="revokeAcceptance(a)">
+                        <span class="material-icons-outlined">block</span>
+                        {{ 'salesOrders.acceptance.revoke' | translate }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="empty-state">
+              <span class="material-icons-outlined empty-state__icon">fact_check</span>
+              <span class="empty-state__message">{{ 'salesOrders.acceptance.noRecords' | translate }}</span>
+            </div>
+          }
+        </div>
+      }
+
       <!-- Activity Tab -->
       @if (activeTab() === 'activity') {
         <div class="tab-panel" role="tabpanel">
@@ -894,6 +1015,112 @@
         [initialSalesOrderId]="so.id"
         (closed)="showShipDialog.set(false)"
         (saved)="onShipCreated()" />
+    }
+
+    <!-- Record acceptance dialog. Uses a plain file input (not app-file-upload-zone):
+         the acceptance POST is a single multipart body carrying method + note + file
+         to /orders/{id}/acceptance, whereas app-file-upload-zone posts file-only to a
+         fixed /{entity}/{id}/files endpoint and can't carry the sibling fields. -->
+    @if (showRecordDialog()) {
+      <app-dialog [title]="'salesOrders.acceptance.recordTitle' | translate" (closed)="showRecordDialog.set(false)">
+        <div [formGroup]="recordForm">
+          <app-select [label]="'salesOrders.acceptance.method' | translate" formControlName="method" [options]="acceptanceMethodOptions()" [required]="true" />
+          @if (recordNeedsFile()) {
+            <div class="acceptance-file">
+              <label class="acceptance-file__label" for="acceptanceFileInput">{{ 'salesOrders.acceptance.file' | translate }}</label>
+              <input id="acceptanceFileInput" type="file" class="acceptance-file__input"
+                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.tif,.tiff"
+                (change)="onRecordFileSelected($event)"
+                [attr.aria-label]="'salesOrders.acceptance.file' | translate" />
+              @if (recordFile(); as f) {
+                <span class="acceptance-file__name">{{ f.name }}</span>
+              }
+            </div>
+          }
+          <app-textarea [label]="'common.notes' | translate" formControlName="note" [rows]="3" />
+        </div>
+        <div dialog-footer>
+          <button class="action-btn" (click)="showRecordDialog.set(false)">{{ 'common.cancel' | translate }}</button>
+          <button class="action-btn action-btn--primary" [disabled]="recordForm.invalid || !recordValid() || savingAcceptance()" (click)="saveRecord()">
+            <span class="material-icons-outlined">save</span>
+            {{ 'common.save' | translate }}
+          </button>
+        </div>
+      </app-dialog>
+    }
+
+    <!-- Send for e-signature dialog -->
+    @if (showSignatureDialog()) {
+      <app-dialog [title]="'salesOrders.acceptance.signatureTitle' | translate" (closed)="showSignatureDialog.set(false)">
+        <div [formGroup]="signatureForm">
+          <app-input [label]="'salesOrders.acceptance.signerName' | translate" formControlName="signerName" [required]="true" />
+          <app-input [label]="'salesOrders.acceptance.signerEmail' | translate" type="email" formControlName="signerEmail" [required]="true" />
+        </div>
+        @if (signatureSubmitUrl(); as url) {
+          <div class="acceptance-link-result">
+            <span class="acceptance-link-result__label">{{ 'salesOrders.acceptance.submitUrl' | translate }}</span>
+            <div class="acceptance-link-result__row">
+              <a [href]="url" target="_blank" rel="noopener" class="acceptance-link-result__link">{{ url }}</a>
+              <button class="icon-btn" [attr.aria-label]="'salesOrders.acceptance.copyLink' | translate" [matTooltip]="'salesOrders.acceptance.copyLink' | translate" matTooltipPosition="above" (click)="copyToClipboard(url)">
+                <span class="material-icons-outlined">content_copy</span>
+              </button>
+            </div>
+          </div>
+        }
+        <div dialog-footer>
+          <button class="action-btn" (click)="showSignatureDialog.set(false)">{{ 'common.close' | translate }}</button>
+          <button class="action-btn action-btn--primary" [disabled]="signatureForm.invalid || savingAcceptance()" (click)="sendSignature()">
+            <span class="material-icons-outlined">send</span>
+            {{ 'salesOrders.acceptance.send' | translate }}
+          </button>
+        </div>
+      </app-dialog>
+    }
+
+    <!-- Request acceptance link dialog -->
+    @if (showPortalDialog()) {
+      <app-dialog [title]="'salesOrders.acceptance.portalTitle' | translate" (closed)="showPortalDialog.set(false)">
+        <div [formGroup]="portalForm">
+          <app-input [label]="'salesOrders.acceptance.recipientEmail' | translate" type="email" formControlName="recipientEmail" [required]="true" />
+          <app-input [label]="'salesOrders.acceptance.verificationKey' | translate" formControlName="verificationKey" [info]="'salesOrders.acceptance.verificationKeyHint' | translate" />
+          <app-input [label]="'salesOrders.acceptance.validDays' | translate" type="number" formControlName="validDays" />
+        </div>
+        @if (portalLink(); as link) {
+          <div class="acceptance-link-result">
+            <span class="acceptance-link-result__label">{{ 'salesOrders.acceptance.linkLabel' | translate }}</span>
+            <div class="acceptance-link-result__row">
+              <a [href]="link" target="_blank" rel="noopener" class="acceptance-link-result__link">{{ link }}</a>
+              <button class="icon-btn" [attr.aria-label]="'salesOrders.acceptance.copyLink' | translate" [matTooltip]="'salesOrders.acceptance.copyLink' | translate" matTooltipPosition="above" (click)="copyToClipboard(link)">
+                <span class="material-icons-outlined">content_copy</span>
+              </button>
+            </div>
+          </div>
+        }
+        <div dialog-footer>
+          <button class="action-btn" (click)="showPortalDialog.set(false)">{{ 'common.close' | translate }}</button>
+          <button class="action-btn action-btn--primary" [disabled]="portalForm.invalid || savingAcceptance()" (click)="requestPortal()">
+            <span class="material-icons-outlined">link</span>
+            {{ 'salesOrders.acceptance.generateLink' | translate }}
+          </button>
+        </div>
+      </app-dialog>
+    }
+
+    <!-- Register inbound email dialog (secondary flow) -->
+    @if (showEmailIngestDialog()) {
+      <app-dialog [title]="'salesOrders.acceptance.registerEmailTitle' | translate" (closed)="showEmailIngestDialog.set(false)">
+        <div [formGroup]="emailIngestForm">
+          <app-input [label]="'salesOrders.acceptance.fromEmail' | translate" type="email" formControlName="fromEmail" [required]="true" />
+          <app-textarea [label]="'common.notes' | translate" formControlName="note" [rows]="2" />
+        </div>
+        <div dialog-footer>
+          <button class="action-btn" (click)="showEmailIngestDialog.set(false)">{{ 'common.cancel' | translate }}</button>
+          <button class="action-btn action-btn--primary" [disabled]="emailIngestForm.invalid || savingAcceptance()" (click)="registerInboundEmail()">
+            <span class="material-icons-outlined">save</span>
+            {{ 'salesOrders.acceptance.register' | translate }}
+          </button>
+        </div>
+      </app-dialog>
     }
   }
 </div>

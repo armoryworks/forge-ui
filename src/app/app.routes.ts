@@ -28,6 +28,16 @@ export const routes: Routes = [
     path: 'portal',
     loadChildren: () => import('./features/portal/portal.routes').then(m => m.PORTAL_ROUTES),
   },
+  // Anonymous customer acceptance page (CAP-O2C-SO-ACCEPTANCE). Reached from
+  // an emailed link; lives OUTSIDE the auth-guarded shell so an unauthenticated
+  // customer can review the order and accept it. The public endpoints carry no
+  // employee token and are not gated by the capability interceptor.
+  {
+    path: 'accept/:token',
+    loadComponent: () =>
+      import('./features/sales-orders/pages/public-acceptance/public-acceptance.component')
+        .then(m => m.PublicAcceptanceComponent),
+  },
   // Phase 1m.7 — post-first-admin integration setup wizard. Shown
   // after the first admin completes initial account setup; walks
   // through optional integrations with "Set up" / "Skip" choices per

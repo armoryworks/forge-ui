@@ -529,3 +529,152 @@
   justify-content: flex-end;
   margin-bottom: $sp-md;
 }
+
+// --- Customer acceptance tab (CAP-O2C-SO-ACCEPTANCE) ---
+.acceptance-banner {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-md;
+  margin-bottom: $sp-md;
+  border-left: $border-width-accent solid var(--border);
+  font-size: $font-size-base;
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+  }
+
+  &--ok {
+    background: color-mix(in srgb, var(--success) 10%, transparent);
+    border-left-color: var(--success);
+    color: var(--success);
+  }
+
+  &--warn {
+    background: color-mix(in srgb, var(--warning) 10%, transparent);
+    border-left-color: var(--warning);
+    color: var(--warning);
+  }
+}
+
+.acceptance-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-sm;
+  margin-bottom: $sp-md;
+}
+
+.acceptance-history {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.acceptance-item {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--border);
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+  }
+
+  &__when {
+    margin-left: auto;
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-md;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+
+  &__note {
+    font-size: $font-size-base;
+    color: var(--text);
+  }
+
+  &__file {
+    align-self: flex-start;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-sm;
+  }
+}
+
+// Copyable link result surfaced inside the e-signature / request-link dialogs.
+.acceptance-link-result {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  margin-top: $sp-md;
+  padding: $sp-md;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+
+  &__label {
+    @include uppercase-label($font-size-xxs);
+    color: var(--text-muted);
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+  }
+
+  &__link {
+    flex: 1;
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    word-break: break-all;
+    color: var(--primary);
+  }
+}
+
+// Plain file input inside the record-acceptance dialog (see template comment).
+.acceptance-file {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+
+  &__label {
+    @include uppercase-label($font-size-xxs);
+    color: var(--text-muted);
+  }
+
+  &__input {
+    font-size: $font-size-sm;
+    color: var(--text);
+  }
+
+  &__name {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+}
+
+// Visible reason shown under the disabled Confirm button when acceptance is required.
+.acceptance-gate-hint {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  margin-top: $sp-sm;
+  font-size: $font-size-sm;
+  color: var(--warning);
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+  }
+}
