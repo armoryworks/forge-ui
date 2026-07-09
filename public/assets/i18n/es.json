@@ -1507,52 +1507,48 @@
     "segmentsPage": {
       "title": "Segmentos",
       "subtitle": "Conjuntos de filtros guardados entre clientes para marketing + reportes.",
-      "preview": "Próximamente — solo vista previa",
-      "placeholderHelp": "Define un filtro (p. ej. \"AR abierto > $10K Y industria = aeroespacial Y último pedido < 90 días\"), guárdalo como segmento nombrado, y reutilízalo en reportes, campañas de marketing y dashboards.",
-      "exampleSegments": "Segmentos de ejemplo",
-      "examples": {
-        "aerospaceHighValue": {
-          "name": "Aeroespacial de alto valor",
-          "description": "Clientes certificados AS9100 con > $10K de AR abierto. Útil para la cadencia trimestral de revisión de cuentas."
-        },
-        "itarReady": {
-          "name": "Pool de referencias autorizadas ITAR",
-          "description": "Clientes de defensa autorizados para trabajo ITAR que también han optado por ser referencias para prospectos similares."
-        },
-        "dormant90": {
-          "name": "Inactivos > 90 días",
-          "description": "Clientes activos sin pedido en el último trimestre. Objetivo de campaña de reactivación."
-        },
-        "creditWatch": {
-          "name": "Lista de vigilancia de crédito",
-          "description": "Clientes con bloqueo crediticio o utilización superior al 80%. Aparece en la revisión de antigüedad de AR."
-        }
-      }
+      "newSegment": "Nuevo segmento",
+      "empty": "Aún no hay segmentos. Cree uno para guardar un filtro de clientes reutilizable.",
+      "newTitle": "Nuevo Segmento",
+      "editTitle": "Editar Segmento",
+      "name": "Nombre",
+      "description": "Descripción",
+      "filterCriteria": "Criterios de filtro",
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "created": "Segmento creado.",
+      "updated": "Segmento actualizado.",
+      "deleted": "Segmento eliminado.",
+      "deleteTitle": "¿Eliminar segmento?",
+      "deleteMessage": "¿Eliminar «{{name}}»? Esta acción no se puede deshacer."
     },
     "importPage": {
       "title": "Importación Masiva",
-      "subtitle": "Sube un CSV de clientes + contactos, deduplica contra filas existentes.",
-      "preview": "Próximamente — solo vista previa",
-      "placeholderHelp": "Mismo patrón de asistente-de-deduplicación que la carga masiva de Prospectos — sube CSV, previsualiza coincidencias, valida calidad antes de confirmar. Difiere en que los clientes llevan direcciones de facturación/envío + términos de crédito + contactos como jerarquía.",
-      "flowTitle": "Flujo del asistente",
-      "expectedColumns": "Columnas CSV esperadas",
-      "steps": {
-        "upload": {
-          "title": "Subir CSV",
-          "description": "Arrastra y suelta o navega para seleccionar un CSV. Fila de encabezado requerida; alias de columnas detectados automáticamente."
-        },
-        "dedupe": {
-          "title": "Coincidir con filas existentes",
-          "description": "El servidor ejecuta la misma canalización de deduplicación que la captación masiva de leads — por email, luego teléfono, luego companyName + estado."
-        },
-        "review": {
-          "title": "Revisar estado por fila",
-          "description": "Cada fila obtiene un chip: Creado / DuplicadoExistente / Inválido / CampoRequeridoFaltante. El operador elige omitir o anular."
-        },
-        "commit": {
-          "title": "Confirmar",
-          "description": "Inserta las filas Creadas en una sola transacción. La jerarquía de direcciones + contactos se construye atómicamente junto con cada cliente."
-        }
+      "subtitle": "Sube un CSV de clientes, deduplica contra filas existentes y confirma.",
+      "step1": "1. Origen",
+      "step2": "2. Previsualizar y confirmar",
+      "columnsHint": "Columnas: name (requerido), company, email, phone, notes. Se requiere una fila de encabezado; los alias comunes se detectan automáticamente.",
+      "uploadCsv": "Subir CSV",
+      "or": "o",
+      "pasteLabel": "Pegar filas (CSV o separadas por tabulación)",
+      "parse": "Analizar",
+      "reset": "Restablecer",
+      "rowCount": "{{count}} filas",
+      "willCreate": "{{count}} por crear",
+      "willSkip": "{{count}} por omitir",
+      "name": "Nombre",
+      "company": "Empresa",
+      "email": "Correo",
+      "statusCol": "Estado",
+      "preview": "Previsualizar",
+      "commit": "Confirmar",
+      "committed": "Se importaron {{created}} de {{total}} clientes.",
+      "status": {
+        "Pending": "Sin previsualizar",
+        "Created": "Se creará",
+        "Invalid": "Inválido",
+        "DuplicateWithinBatch": "Duplicado en el archivo",
+        "DuplicateExistingCustomer": "Ya existe"
       }
     },
     "fork": {
@@ -4017,6 +4013,17 @@
       "required": "Obligatorio",
       "allDay": "Todo el día",
       "empty": "No hay nada programado para este día."
+    },
+    "eventStatus": {
+      "title": "Estado del Evento",
+      "setStatus": "Definir estado",
+      "statusLabel": "Estado",
+      "waivedReason": "Motivo de la exención",
+      "updated": "Estado del evento actualizado.",
+      "open": "Abierto",
+      "inProgress": "En Progreso",
+      "done": "Hecho",
+      "waived": "Exento"
     }
   },
   "entityPicker": {
@@ -5007,6 +5014,11 @@
     "customer": "Cliente",
     "salesOrder": "Orden de Venta",
     "carrier": "Transportista",
+    "carrierSelect": "Transportista (de la lista)",
+    "carrierNone": "— Ninguno (manual) —",
+    "carrierApi": "Integrado por API",
+    "carrierManual": "Manual",
+    "carrierScanRequired": "Escanear para enviar",
     "trackingNumber": "Seguimiento #",
     "shippedDate": "Enviado",
     "delivered": "Entregado",

@@ -190,3 +190,9 @@
 
   .material-icons-outlined { font-size: $icon-size-hero; }
 }
+
+// A-4: "Set status" action on tracking events — right-aligned in the event head row.
+.day-dialog__status-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+}

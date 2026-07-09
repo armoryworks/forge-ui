@@ -59,6 +59,20 @@
       <div class="dlg-sidebar-section">
         <span class="dlg-sidebar-section__title">{{ 'shipments.shipmentDetails' | translate }}</span>
         <app-autocomplete [label]="'shipments.salesOrder' | translate" [options]="salesOrderOptions()" displayField="label" valueField="value" formControlName="salesOrderId" [required]="true" data-testid="shipment-so" />
+        <app-select [label]="'shipments.carrierSelect' | translate" [options]="carrierOptions()" formControlName="carrierId" data-testid="shipment-carrier-id" />
+        @if (selectedCarrier(); as c) {
+          <div class="shipment-carrier-status">
+            <span class="chip" [class.chip--success]="c.integrationKind === 'Api'" [class.chip--muted]="c.integrationKind !== 'Api'">
+              {{ (c.integrationKind === 'Api' ? 'shipments.carrierApi' : 'shipments.carrierManual') | translate }}
+            </span>
+            @if (c.requiresScanToShip) {
+              <span class="chip chip--warning shipment-carrier-status__scan">
+                <span class="material-icons-outlined">qr_code_scanner</span>
+                {{ 'shipments.carrierScanRequired' | translate }}
+              </span>
+            }
+          </div>
+        }
         <app-input [label]="'shipments.carrier' | translate" formControlName="carrier" [placeholder]="'shipments.optional' | translate" data-testid="shipment-carrier" />
         <app-input [label]="'shipments.trackingNumber' | translate" formControlName="trackingNumber" [placeholder]="'shipments.optional' | translate" data-testid="shipment-tracking" />
         <app-input [label]="'shipments.weight' | translate" type="number" formControlName="weight" [placeholder]="'shipments.optional' | translate" data-testid="shipment-weight" />

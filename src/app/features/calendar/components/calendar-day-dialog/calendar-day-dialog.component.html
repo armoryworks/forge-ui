@@ -1,12 +1,12 @@
 <app-dialog [title]="title" width="520px" (closed)="close()">
   <div class="day-dialog">
-    @if (data.events.length) {
+    @if (events().length) {
       <section class="day-dialog__section">
         <h3 class="day-dialog__section-title">
           {{ 'calendar.dayDialog.events' | translate }}
-          <span class="day-dialog__count">{{ data.events.length }}</span>
+          <span class="day-dialog__count">{{ events().length }}</span>
         </h3>
-        @for (evt of data.events; track evt.id) {
+        @for (evt of events(); track evt.id) {
           <div class="day-dialog__event" [style.border-left-color]="evt.color">
             <div class="day-dialog__event-head">
               <span class="day-dialog__event-title">{{ evt.title }}</span>
@@ -15,6 +15,12 @@
               }
               @if (evt.status) {
                 <span class="chip chip--info day-dialog__badge">{{ evt.status }}</span>
+              }
+              @if (isTracking(evt)) {
+                <button class="action-btn action-btn--sm day-dialog__status-btn" (click)="openEventStatus(evt)">
+                  <span class="material-icons-outlined">edit</span>
+                  {{ 'calendar.eventStatus.setStatus' | translate }}
+                </button>
               }
             </div>
             <div class="day-dialog__meta">

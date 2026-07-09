@@ -4,6 +4,7 @@ export interface CreateShipmentRequest {
   salesOrderId: number;
   shippingAddressId?: number;
   carrier?: string;
+  carrierId?: number;
   trackingNumber?: string;
   shippingCost?: number;
   weight?: number;

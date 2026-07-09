@@ -63,4 +63,9 @@ export class CalendarService {
   deleteSavedView(id: number): Observable<void> {
     return this.http.delete<void>(`${environment.apiUrl}/calendar/saved-views/${id}`);
   }
+
+  /** compliance-calendar A-4: set the workflow status on a tracking-tier event. */
+  updateEventStatus(id: number, body: { status: string; waivedReason?: string | null }): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/events/${id}/status`, body);
+  }
 }

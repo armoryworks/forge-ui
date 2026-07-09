@@ -16,6 +16,7 @@ import { UpdateContactRequest } from '../models/update-contact-request.model';
 import { ContactInteraction, ContactInteractionRequest } from '../models/contact-interaction.model';
 import { CreditStatus } from '../models/credit-status.model';
 import { CustomerTaxEditability } from '../models/customer-tax-editability.model';
+import { BulkCustomerIntakeRequest, BulkCustomerIntakeResponse } from '../models/bulk-customer-intake.model';
 import { FlatContactRow } from '../models/flat-contact.model';
 import { PortalAccessRow } from '../models/portal-access.model';
 
@@ -175,5 +176,15 @@ export class CustomerService {
   // a Verified, unexpired tax certificate (see CustomerTaxDocumentService).
   getTaxEditability(customerId: number): Observable<CustomerTaxEditability> {
     return this.http.get<CustomerTaxEditability>(`${this.base}/${customerId}/tax-editability`);
+  }
+
+  // C2 — bulk customer intake: preview classifies rows (new / duplicate) without persisting;
+  // commit inserts the new ones. Same payload for both.
+  bulkIntakePreview(request: BulkCustomerIntakeRequest): Observable<BulkCustomerIntakeResponse> {
+    return this.http.post<BulkCustomerIntakeResponse>(`${this.base}/bulk-intake/preview`, request);
+  }
+
+  bulkIntakeCommit(request: BulkCustomerIntakeRequest): Observable<BulkCustomerIntakeResponse> {
+    return this.http.post<BulkCustomerIntakeResponse>(`${this.base}/bulk-intake/commit`, request);
   }
 }

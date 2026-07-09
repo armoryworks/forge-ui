@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit, output, signal, Signal, ViewChild } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -14,6 +14,9 @@ import { DialogComponent } from '../../../../shared/components/dialog/dialog.com
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
+import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { CarrierService } from '../../../admin/services/carrier.service';
+import { Carrier } from '../../../admin/models/carrier.model';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
@@ -33,7 +36,7 @@ interface LineEntry {
   imports: [
     ReactiveFormsModule, DecimalPipe,
     DialogComponent, InputComponent, TextareaComponent,
-    AutocompleteComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
+    AutocompleteComponent, SelectComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './shipment-dialog.component.html',
   styleUrl: './shipment-dialog.component.scss',
@@ -45,6 +48,7 @@ export class ShipmentDialogComponent implements OnInit {
   readonly initialSalesOrderId = input<number | null>(null);
   private readonly shipmentService = inject(ShipmentService);
   private readonly salesOrderService = inject(SalesOrderService);
+  private readonly carrierService = inject(CarrierService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -94,12 +98,26 @@ export class ShipmentDialogComponent implements OnInit {
 
   protected readonly shipmentForm = new FormGroup({
     salesOrderId: new FormControl<number | null>(null, [Validators.required]),
+    carrierId: new FormControl<number | null>(null),
     carrier: new FormControl(''),
     trackingNumber: new FormControl(''),
     shippingCost: new FormControl<number | null>(null),
     weight: new FormControl<number | null>(null),
     notes: new FormControl(''),
   });
+
+  // Master-data carriers (active) for the picker, so the operator sees whether a carrier is
+  // API-integrated (rates/label + scan-to-ship) or manual.
+  protected readonly carriers = signal<Carrier[]>([]);
+  protected readonly carrierOptions = computed<SelectOption[]>(() => [
+    { value: null, label: this.translate.instant('shipments.carrierNone') },
+    ...this.carriers().map(c => ({
+      value: c.id,
+      label: `${c.name} · ${c.integrationKind === 'Api' ? this.translate.instant('shipments.carrierApi') : this.translate.instant('shipments.carrierManual')}`,
+    })),
+  ]);
+  private readonly carrierIdSig = toSignal(this.shipmentForm.controls.carrierId.valueChanges, { initialValue: null });
+  protected readonly selectedCarrier = computed(() => this.carriers().find(c => c.id === this.carrierIdSig()) ?? null);
 
   private readonly formViolations = FormValidationService.getViolations(this.shipmentForm, {
     salesOrderId: 'Sales Order',
@@ -136,6 +154,10 @@ export class ShipmentDialogComponent implements OnInit {
   constructor() {
     this.salesOrderService.getSalesOrders().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.salesOrders.set(list),
+    });
+
+    this.carrierService.list(true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (cs) => this.carriers.set(cs),
     });
 
     // When the order changes, load its lines and clear any lines staged against
@@ -217,6 +239,7 @@ export class ShipmentDialogComponent implements OnInit {
 
     this.shipmentService.createShipment({
       salesOrderId: f.salesOrderId!,
+      carrierId: f.carrierId ?? undefined,
       carrier: f.carrier || undefined,
       trackingNumber: f.trackingNumber || undefined,
       shippingCost: f.shippingCost ?? undefined,

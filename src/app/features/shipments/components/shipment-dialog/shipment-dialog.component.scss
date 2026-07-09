@@ -7,3 +7,18 @@
 .add-line--3col {
   grid-template-columns: 1fr 90px auto;
 }
+
+// Carrier integration status (API/manual + scan-to-ship) under the carrier picker.
+.shipment-carrier-status {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  margin-top: -$sp-xs;
+
+  &__scan {
+    display: inline-flex;
+    align-items: center;
+    gap: $sp-xxs;
+    .material-icons-outlined { font-size: $icon-size-sm; }
+  }
+}

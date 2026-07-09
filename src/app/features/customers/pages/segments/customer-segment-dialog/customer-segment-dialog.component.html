@@ -1,0 +1,18 @@
+<app-dialog [title]="(isEdit ? 'customers.segmentsPage.editTitle' : 'customers.segmentsPage.newTitle') | translate" width="520px" (closed)="cancel()">
+  <div [formGroup]="form">
+    <app-input [label]="'customers.segmentsPage.name' | translate" formControlName="name" [maxlength]="100" [required]="true" />
+    <app-textarea [label]="'customers.segmentsPage.description' | translate" formControlName="description" [rows]="2" [maxlength]="500" />
+    <app-textarea [label]="'customers.segmentsPage.filterCriteria' | translate" formControlName="filterCriteria" [rows]="3" [maxlength]="2000" />
+    <app-toggle [label]="'customers.segmentsPage.active' | translate" formControlName="isActive" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" [disabled]="form.invalid || saving()" (click)="save()">
+        <span class="material-icons-outlined">save</span>
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

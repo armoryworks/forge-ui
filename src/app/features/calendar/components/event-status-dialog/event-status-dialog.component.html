@@ -1,0 +1,17 @@
+<app-dialog [title]="'calendar.eventStatus.title' | translate" width="480px" (closed)="cancel()">
+  <div [formGroup]="form">
+    <p class="es-event-title">{{ data.title }}</p>
+    <app-select [label]="'calendar.eventStatus.statusLabel' | translate" formControlName="status" [options]="statusOptions" />
+    @if (isWaived()) {
+      <app-textarea [label]="'calendar.eventStatus.waivedReason' | translate" formControlName="waivedReason" [rows]="3" [maxlength]="1000" [required]="true" />
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
+    <button class="action-btn action-btn--primary" [disabled]="!canSave() || saving()" (click)="save()">
+      <span class="material-icons-outlined">check</span>
+      {{ 'common.save' | translate }}
+    </button>
+  </div>
+</app-dialog>

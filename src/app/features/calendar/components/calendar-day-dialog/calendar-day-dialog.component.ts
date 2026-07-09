@@ -1,11 +1,16 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { PriorityIndicatorComponent } from '../../../../shared/components/priority-indicator/priority-indicator.component';
 import { CalendarJob } from '../../models/calendar-job.model';
 import { PoCalendarEvent } from '../../models/po-calendar-event.model';
+import {
+  EventStatusDialogComponent,
+  EventStatusDialogData,
+  EventStatusDialogResult,
+} from '../event-status-dialog/event-status-dialog.component';
 
 /** An event enriched with its layer colour for display in the day-detail dialog. */
 export interface CalendarDayEvent {
@@ -51,6 +56,10 @@ export type CalendarDayDialogResult =
 export class CalendarDayDialogComponent {
   protected readonly data = inject<CalendarDayDialogData>(MAT_DIALOG_DATA);
   private readonly dialogRef = inject(MatDialogRef<CalendarDayDialogComponent, CalendarDayDialogResult>);
+  private readonly dialog = inject(MatDialog);
+
+  // Events held in a signal so a status change reflects immediately without reopening.
+  protected readonly events = signal<CalendarDayEvent[]>(this.data.events);
 
   protected readonly title = this.data.date.toLocaleDateString('en-US', {
     weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
@@ -82,6 +91,21 @@ export class CalendarDayDialogComponent {
     const end = new Date(evt.endTime);
     const fmt = (d: Date) => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
     return end.getTime() > start.getTime() ? `${fmt(start)} – ${fmt(end)}` : fmt(start);
+  }
+
+  /** Tracking-tier events carry a workflow status; reminder-tier events have none. */
+  protected isTracking(evt: CalendarDayEvent): boolean {
+    return evt.status != null;
+  }
+
+  protected openEventStatus(evt: CalendarDayEvent): void {
+    this.dialog.open<EventStatusDialogComponent, EventStatusDialogData, EventStatusDialogResult>(
+      EventStatusDialogComponent,
+      { width: '480px', autoFocus: false, data: { eventId: evt.id, title: evt.title, currentStatus: evt.status } },
+    ).afterClosed().subscribe(result => {
+      if (!result) return;
+      this.events.update(list => list.map(e => (e.id === evt.id ? { ...e, status: result.status } : e)));
+    });
   }
 
   protected selectJob(job: CalendarJob): void {

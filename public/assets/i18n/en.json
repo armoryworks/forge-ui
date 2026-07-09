@@ -1507,52 +1507,48 @@
     "segmentsPage": {
       "title": "Segments",
       "subtitle": "Saved cross-customer filter sets for marketing + reporting.",
-      "preview": "Coming soon — preview only",
-      "placeholderHelp": "Define a filter (e.g. \"open AR > $10K AND industry = aerospace AND last order < 90 days\"), save it as a named segment, and reuse across reports, marketing campaigns, and dashboards.",
-      "exampleSegments": "Example segments",
-      "examples": {
-        "aerospaceHighValue": {
-          "name": "High-Value Aerospace",
-          "description": "AS9100-certified customers with > $10K open AR. Useful for the quarterly account-review cadence."
-        },
-        "itarReady": {
-          "name": "ITAR-cleared Reference Pool",
-          "description": "Defense customers cleared for ITAR work who have also opted in as references for similar prospects."
-        },
-        "dormant90": {
-          "name": "Dormant > 90 Days",
-          "description": "Active customers with no order in the last quarter. Re-engagement campaign target."
-        },
-        "creditWatch": {
-          "name": "Credit Watch List",
-          "description": "Customers on credit hold or with utilization above 80%. Surfaces in the AR aging review."
-        }
-      }
+      "newSegment": "New segment",
+      "empty": "No segments yet. Create one to save a reusable customer filter.",
+      "newTitle": "New Segment",
+      "editTitle": "Edit Segment",
+      "name": "Name",
+      "description": "Description",
+      "filterCriteria": "Filter criteria",
+      "active": "Active",
+      "inactive": "Inactive",
+      "created": "Segment created.",
+      "updated": "Segment updated.",
+      "deleted": "Segment deleted.",
+      "deleteTitle": "Delete segment?",
+      "deleteMessage": "Delete \"{{name}}\"? This can't be undone."
     },
     "importPage": {
       "title": "Bulk Import",
-      "subtitle": "Upload a CSV of customers + contacts, dedup against existing rows.",
-      "preview": "Coming soon — preview only",
-      "placeholderHelp": "Same dedup-wizard pattern as Leads bulk intake — upload CSV, preview matches, gate quality before commit. Differs in that customers carry billing/shipping addresses + credit terms + contacts as a hierarchy.",
-      "flowTitle": "Wizard Flow",
-      "expectedColumns": "Expected CSV columns",
-      "steps": {
-        "upload": {
-          "title": "Upload CSV",
-          "description": "Drag-and-drop or browse to select a CSV. Header row required; column aliases auto-detected."
-        },
-        "dedupe": {
-          "title": "Match against existing rows",
-          "description": "Server runs the same dedupe pipeline as leads bulk intake — by email, then phone, then companyName + state."
-        },
-        "review": {
-          "title": "Review per-row status",
-          "description": "Each row gets a chip: Created / DuplicateExisting / Invalid / MissingRequiredField. Operator chooses to skip or override."
-        },
-        "commit": {
-          "title": "Commit",
-          "description": "Inserts the Created rows in a single transaction. Address + contact hierarchy is built atomically alongside each customer."
-        }
+      "subtitle": "Upload a CSV of customers, dedupe against existing rows, then commit.",
+      "step1": "1. Source",
+      "step2": "2. Preview & commit",
+      "columnsHint": "Columns: name (required), company, email, phone, notes. A header row is required; common aliases are auto-detected.",
+      "uploadCsv": "Upload CSV",
+      "or": "or",
+      "pasteLabel": "Paste rows (CSV or tab-separated)",
+      "parse": "Parse",
+      "reset": "Reset",
+      "rowCount": "{{count}} rows",
+      "willCreate": "{{count}} to create",
+      "willSkip": "{{count}} to skip",
+      "name": "Name",
+      "company": "Company",
+      "email": "Email",
+      "statusCol": "Status",
+      "preview": "Preview",
+      "commit": "Commit",
+      "committed": "Imported {{created}} of {{total}} customers.",
+      "status": {
+        "Pending": "Not previewed",
+        "Created": "Will create",
+        "Invalid": "Invalid",
+        "DuplicateWithinBatch": "Duplicate in file",
+        "DuplicateExistingCustomer": "Already exists"
       }
     },
     "fork": {
@@ -4017,6 +4013,17 @@
       "required": "Required",
       "allDay": "All day",
       "empty": "Nothing scheduled for this day."
+    },
+    "eventStatus": {
+      "title": "Event Status",
+      "setStatus": "Set status",
+      "statusLabel": "Status",
+      "waivedReason": "Reason for waiver",
+      "updated": "Event status updated.",
+      "open": "Open",
+      "inProgress": "In Progress",
+      "done": "Done",
+      "waived": "Waived"
     }
   },
   "entityPicker": {
@@ -5014,6 +5021,11 @@
     "customer": "Customer",
     "salesOrder": "Sales Order",
     "carrier": "Carrier",
+    "carrierSelect": "Carrier (from list)",
+    "carrierNone": "— None (manual) —",
+    "carrierApi": "API-integrated",
+    "carrierManual": "Manual",
+    "carrierScanRequired": "Scan to ship",
     "trackingNumber": "Tracking #",
     "shippedDate": "Shipped",
     "delivered": "Delivered",

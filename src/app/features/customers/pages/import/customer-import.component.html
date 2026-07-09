@@ -1,36 +1,86 @@
-<app-page-header
-  [title]="'customers.importPage.title' | translate"
-  [subtitle]="'customers.importPage.subtitle' | translate" />
+<app-page-layout [pageTitle]="'customers.importPage.title' | translate" [pageSubtitle]="'customers.importPage.subtitle' | translate">
+  <ng-container content>
+    <div class="imp" [appLoadingBlock]="working() || committing()">
+      <!-- 1. Source -->
+      <section class="imp-card">
+        <h3 class="imp-card__title">{{ 'customers.importPage.step1' | translate }}</h3>
+        <p class="imp-card__hint">{{ 'customers.importPage.columnsHint' | translate }}</p>
+        <div class="imp-source">
+          <label class="action-btn action-btn--sm imp-upload">
+            <span class="material-icons-outlined">upload_file</span>
+            {{ 'customers.importPage.uploadCsv' | translate }}
+            <input type="file" accept=".csv,text/csv" (change)="onFileChange($event)" hidden />
+          </label>
+          <span class="imp-source__or">{{ 'customers.importPage.or' | translate }}</span>
+        </div>
+        <app-textarea [label]="'customers.importPage.pasteLabel' | translate" [formControl]="pasteControl" [rows]="5" />
+        <div class="imp-actions">
+          <button class="action-btn action-btn--sm" (click)="onPasteParse()">{{ 'customers.importPage.parse' | translate }}</button>
+          @if (parsedRows().length > 0) {
+            <button class="action-btn action-btn--sm" (click)="reset()">{{ 'customers.importPage.reset' | translate }}</button>
+          }
+        </div>
+        @if (parseErrors().length > 0) {
+          <ul class="imp-errors">
+            @for (err of parseErrors(); track $index) { <li>{{ err }}</li> }
+          </ul>
+        }
+      </section>
 
-<div class="page-body">
-  <div class="banner">
-    <span class="material-icons-outlined banner__icon">construction</span>
-    <div class="banner__content">
-      <div class="banner__title">{{ 'customers.importPage.preview' | translate }}</div>
-      <div class="banner__hint">{{ 'customers.importPage.placeholderHelp' | translate }}</div>
+      <!-- 2. Preview + commit -->
+      @if (parsedRows().length > 0) {
+        <section class="imp-card">
+          <h3 class="imp-card__title">
+            {{ 'customers.importPage.step2' | translate }}
+            <span class="chip chip--info">{{ 'customers.importPage.rowCount' | translate: { count: parsedRows().length } }}</span>
+          </h3>
+
+          @if (preview(); as p) {
+            <div class="imp-summary">
+              <span class="chip chip--success">{{ 'customers.importPage.willCreate' | translate: { count: p.createdCount } }}</span>
+              <span class="chip chip--warning">{{ 'customers.importPage.willSkip' | translate: { count: p.skippedCount } }}</span>
+            </div>
+          }
+
+          <div class="imp-table">
+            <table aria-label="Customer import rows">
+              <thead>
+                <tr>
+                  <th scope="col">{{ 'customers.importPage.name' | translate }}</th>
+                  <th scope="col">{{ 'customers.importPage.company' | translate }}</th>
+                  <th scope="col">{{ 'customers.importPage.email' | translate }}</th>
+                  <th scope="col">{{ 'customers.importPage.statusCol' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of parsedRows(); track row.externalRowKey) {
+                  <tr>
+                    <td>{{ row.name }}</td>
+                    <td>{{ row.companyName || '—' }}</td>
+                    <td>{{ row.email || '—' }}</td>
+                    <td>
+                      @if (resultFor(row.externalRowKey); as res) {
+                        <span [class]="statusChipClass(res.status)">{{ statusLabel(res.status) }}</span>
+                      } @else {
+                        <span class="chip chip--muted">{{ 'customers.importPage.status.Pending' | translate }}</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="imp-actions">
+            <button class="action-btn action-btn--sm" [disabled]="!canPreview()" (click)="runPreview()">
+              <span class="material-icons-outlined">visibility</span>{{ 'customers.importPage.preview' | translate }}
+            </button>
+            <button class="action-btn action-btn--sm action-btn--primary" [disabled]="!canCommit()" (click)="commit()">
+              <span class="material-icons-outlined">check</span>{{ 'customers.importPage.commit' | translate }}
+            </button>
+          </div>
+        </section>
+      }
     </div>
-  </div>
-
-  <h3 class="section-title">{{ 'customers.importPage.flowTitle' | translate }}</h3>
-  <ol class="step-list">
-    @for (step of steps; track step.number) {
-      <li class="step-item">
-        <div class="step-item__marker">
-          <span class="material-icons-outlined">{{ step.icon }}</span>
-          <span class="step-item__number">{{ step.number }}</span>
-        </div>
-        <div class="step-item__body">
-          <div class="step-item__title">{{ step.titleKey | translate }}</div>
-          <div class="step-item__description">{{ step.descriptionKey | translate }}</div>
-        </div>
-      </li>
-    }
-  </ol>
-
-  <h3 class="section-title">{{ 'customers.importPage.expectedColumns' | translate }}</h3>
-  <ul class="column-list">
-    @for (col of expectedColumns; track col) {
-      <li class="column-list__item"><code>{{ col }}</code></li>
-    }
-  </ul>
-</div>
+  </ng-container>
+</app-page-layout>
