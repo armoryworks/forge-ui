@@ -10,4 +10,6 @@ export interface CustomerAddress {
   postalCode: string;
   country: string;
   isDefault: boolean;
+  /** F3 address history — inactive addresses are retained but excluded from pickers. Admin-only visibility. */
+  isActive?: boolean;
 }

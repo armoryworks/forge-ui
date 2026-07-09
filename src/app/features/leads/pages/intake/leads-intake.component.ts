@@ -7,11 +7,13 @@ import { parse, ParseResult } from 'papaparse';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LeadsService } from '../../services/leads.service';
+import { OutreachCampaignsService } from '../../services/outreach-campaigns.service';
 import {
   BulkLeadIntakeRequest,
   BulkLeadIntakeResponse,
@@ -45,7 +47,7 @@ interface CsvParseRow {
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe,
-    PageHeaderComponent, InputComponent, SelectComponent, TextareaComponent,
+    PageHeaderComponent, InputComponent, SelectComponent, AutocompleteComponent, TextareaComponent,
     LoadingBlockDirective, EmptyStateComponent,
   ],
   templateUrl: './leads-intake.component.html',
@@ -54,6 +56,7 @@ interface CsvParseRow {
 })
 export class LeadsIntakeComponent {
   private readonly leadsService = inject(LeadsService);
+  private readonly campaignsService = inject(OutreachCampaignsService);
   private readonly snackbar = inject(SnackbarService);
   private readonly router = inject(Router);
   protected readonly translate = inject(TranslateService);
@@ -61,6 +64,18 @@ export class LeadsIntakeComponent {
   protected readonly strategyControl = new FormControl<BulkLeadIntakeStrategy>('ColdCall', { nonNullable: true });
   protected readonly campaignTagControl = new FormControl<string>('', { nonNullable: true });
   protected readonly pasteControl = new FormControl<string>('', { nonNullable: true });
+
+  // B4′ — suggest existing campaigns so tags stay consistent instead of free-typed sprawl. When no
+  // campaigns exist yet the template falls back to a plain text field (no regression on fresh installs).
+  protected readonly campaignOptions = signal<AutocompleteOption[]>([]);
+
+  constructor() {
+    this.campaignsService.list(true).subscribe({
+      next: (campaigns) => this.campaignOptions.set(
+        campaigns.map(c => ({ value: c.name, label: c.name }))),
+      error: () => this.campaignOptions.set([]),
+    });
+  }
 
   protected readonly strategyOptions: SelectOption[] = [
     { value: 'ColdCall', label: this.translate.instant('leads.intake.strategy.coldCall') },
@@ -149,7 +164,7 @@ export class LeadsIntakeComponent {
   protected runPreview(): void {
     const request: BulkLeadIntakeRequest = {
       strategy: this.strategyControl.value,
-      campaignTag: this.campaignTagControl.value.trim() || undefined,
+      campaignTag: (this.campaignTagControl.value ?? '').trim() || undefined,
       rows: this.parsedRows(),
     };
     this.working.set(true);
@@ -165,7 +180,7 @@ export class LeadsIntakeComponent {
   protected commit(): void {
     const request: BulkLeadIntakeRequest = {
       strategy: this.strategyControl.value,
-      campaignTag: this.campaignTagControl.value.trim() || undefined,
+      campaignTag: (this.campaignTagControl.value ?? '').trim() || undefined,
       rows: this.parsedRows(),
     };
     this.committing.set(true);

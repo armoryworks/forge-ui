@@ -243,6 +243,12 @@
   background: var(--surface);
   border: $border-width-thin solid var(--border);
   padding: $sp-md;
+
+  // F3 — retired (inactive) address: dimmed, still visible to admins for history.
+  &--inactive {
+    opacity: 0.62;
+    border-style: dashed;
+  }
 }
 
 .address-card__header {

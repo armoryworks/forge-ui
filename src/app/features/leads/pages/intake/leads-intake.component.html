@@ -13,10 +13,18 @@
         [label]="'leads.intake.fieldStrategy' | translate"
         [formControl]="strategyControl"
         [options]="strategyOptions" />
-      <app-input
-        [label]="'leads.intake.fieldCampaignTag' | translate"
-        [formControl]="campaignTagControl"
-        placeholder="e.g. IMTS-2026" />
+      @if (campaignOptions().length > 0) {
+        <app-autocomplete
+          [label]="'leads.intake.fieldCampaignTag' | translate"
+          [options]="campaignOptions()" displayField="label" valueField="value"
+          [formControl]="campaignTagControl"
+          [placeholder]="'leads.intake.campaignTagPlaceholder' | translate" />
+      } @else {
+        <app-input
+          [label]="'leads.intake.fieldCampaignTag' | translate"
+          [formControl]="campaignTagControl"
+          [placeholder]="'leads.intake.campaignTagPlaceholder' | translate" />
+      }
     </div>
     <p class="intake__hint">{{ 'leads.intake.strategyHint' | translate }}</p>
   </section>

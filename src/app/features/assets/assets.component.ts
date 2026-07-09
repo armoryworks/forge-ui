@@ -10,7 +10,9 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
+import { AutocompleteComponent, AutocompleteOption } from '../../shared/components/autocomplete/autocomplete.component';
 import { TextareaComponent } from '../../shared/components/textarea/textarea.component';
+import { SchedulingService } from '../scheduling/services/scheduling.service';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
@@ -28,7 +30,7 @@ import { DraftResumeService } from '../../shared/services/draft-resume.service';
 @Component({
   selector: 'app-assets',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, ToggleComponent, DataTableComponent, ColumnCellDirective, ValidationButtonComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, AutocompleteComponent, TextareaComponent, ToggleComponent, DataTableComponent, ColumnCellDirective, ValidationButtonComponent],
   templateUrl: './assets.component.html',
   styleUrl: './assets.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,6 +39,7 @@ export class AssetsComponent implements OnInit {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
 
   private readonly assetsService = inject(AssetsService);
+  private readonly schedulingService = inject(SchedulingService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -46,6 +49,9 @@ export class AssetsComponent implements OnInit {
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   protected readonly assets = signal<AssetItem[]>([]);
+  // A32 — work centers for the searchable "assign to work center" picker on the asset form.
+  // Loaded once; empty if the caller lacks CAP-MD-WORKCENTERS (picker degrades to no options).
+  protected readonly workCenterOptions = signal<AutocompleteOption[]>([]);
   protected draftConfig: DraftConfig = { entityType: 'asset', entityId: 'new', route: '/assets' };
 
   // Filters
@@ -146,6 +152,12 @@ export class AssetsComponent implements OnInit {
 
   constructor() {
     this.loadAssets();
+    // A32 — populate the work-center picker; silently empty if not permitted.
+    this.schedulingService.getWorkCenters().subscribe({
+      next: (wcs) => this.workCenterOptions.set(
+        wcs.filter(w => w.isActive).map(w => ({ value: w.id, label: `${w.code} — ${w.name}` }))),
+      error: () => this.workCenterOptions.set([]),
+    });
   }
 
   ngOnInit(): void {

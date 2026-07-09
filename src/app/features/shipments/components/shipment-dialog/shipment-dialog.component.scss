@@ -22,3 +22,38 @@
     .material-icons-outlined { font-size: $icon-size-sm; }
   }
 }
+
+// A27 — weight entry with a lbs/oz/kg unit toggle. Storage is canonical pounds;
+// toggling converts the entered value so the physical weight is preserved.
+.weight-field {
+  display: flex;
+  align-items: flex-end;
+  gap: $sp-sm;
+}
+
+.weight-unit {
+  display: inline-flex;
+  border: $border-width-thin solid var(--border);
+  flex: 0 0 auto;
+  height: $input-height;
+
+  &__btn {
+    font-family: $font-family-mono;
+    font-size: $font-size-xs;
+    padding: 0 $sp-sm;
+    background: var(--surface);
+    color: var(--text-secondary);
+    border: none;
+    border-right: $border-width-thin solid var(--border);
+    cursor: pointer;
+    transition: background $transition-fast, color $transition-fast;
+
+    &:last-child { border-right: none; }
+    &:hover { background: var(--surface-2, var(--bg)); }
+
+    &--active {
+      background: var(--primary);
+      color: var(--header, #fff);
+    }
+  }
+}

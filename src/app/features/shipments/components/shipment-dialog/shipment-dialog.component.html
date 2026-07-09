@@ -75,7 +75,17 @@
         }
         <app-input [label]="'shipments.carrier' | translate" formControlName="carrier" [placeholder]="'shipments.optional' | translate" data-testid="shipment-carrier" />
         <app-input [label]="'shipments.trackingNumber' | translate" formControlName="trackingNumber" [placeholder]="'shipments.optional' | translate" data-testid="shipment-tracking" />
-        <app-input [label]="'shipments.weight' | translate" type="number" formControlName="weight" [placeholder]="'shipments.optional' | translate" data-testid="shipment-weight" />
+        <div class="weight-field">
+          <app-input [label]="'shipments.weight' | translate" type="number" formControlName="weight" step="0.0001" min="0" data-testid="shipment-weight" />
+          <div class="weight-unit" role="group" [attr.aria-label]="'shipments.weightUnitLabel' | translate">
+            @for (u of weightUnits; track u) {
+              <button type="button" class="weight-unit__btn" [class.weight-unit__btn--active]="weightUnit() === u"
+                [attr.aria-pressed]="weightUnit() === u" (click)="setWeightUnit(u)" [attr.data-testid]="'shipment-weight-unit-' + u">
+                {{ ('shipments.unit_' + u) | translate }}
+              </button>
+            }
+          </div>
+        </div>
         <app-input [label]="'shipments.shippingCost' | translate" type="number" formControlName="shippingCost" [placeholder]="'shipments.optional' | translate" data-testid="shipment-cost" />
       </div>
 

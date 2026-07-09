@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, ViewChild, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, ViewChild, inject, input, output, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -7,9 +8,11 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
+import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
+import { AssetsService } from '../../../assets/services/assets.service';
 import { WorkCenter } from '../../models/scheduling.model';
 
 @Component({
@@ -17,7 +20,7 @@ import { WorkCenter } from '../../models/scheduling.model';
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, TextareaComponent,
-    ToggleComponent, CurrencyInputComponent, ValidationButtonComponent,
+    ToggleComponent, CurrencyInputComponent, AutocompleteComponent, ValidationButtonComponent,
   ],
   templateUrl: './work-center-dialog.component.html',
   styleUrl: './work-center-dialog.component.scss',
@@ -25,11 +28,16 @@ import { WorkCenter } from '../../models/scheduling.model';
 })
 export class WorkCenterDialogComponent implements OnInit {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+  private readonly assetsService = inject(AssetsService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly workCenter = input<WorkCenter | null>(null);
   readonly saving = input(false);
   readonly closed = output<void>();
   readonly saved = output<Partial<WorkCenter>>();
+
+  // A31 — assets available to link to this work center (establishes ownership: printer, tool, reader).
+  protected readonly assetOptions = signal<AutocompleteOption[]>([]);
 
   protected draftConfig: DraftConfig = {
     entityType: 'work-center',
@@ -47,6 +55,7 @@ export class WorkCenterDialogComponent implements OnInit {
     laborCostPerHour: new FormControl<number | null>(0),
     burdenRatePerHour: new FormControl<number | null>(0),
     sortOrder: new FormControl<number | null>(0),
+    assetId: new FormControl<number | null>(null),
     isActive: new FormControl(true),
   });
 
@@ -61,6 +70,11 @@ export class WorkCenterDialogComponent implements OnInit {
   protected readonly isEdit = signal(false);
 
   ngOnInit(): void {
+    this.assetsService.getAssets().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (assets) => this.assetOptions.set(assets.map(a => ({ value: a.id, label: a.name }))),
+      error: () => this.assetOptions.set([]),
+    });
+
     const wc = this.workCenter();
     if (wc) {
       this.isEdit.set(true);
@@ -75,6 +89,7 @@ export class WorkCenterDialogComponent implements OnInit {
         laborCostPerHour: wc.laborCostPerHour,
         burdenRatePerHour: wc.burdenRatePerHour,
         sortOrder: wc.sortOrder,
+        assetId: wc.assetId ?? null,
         isActive: wc.isActive,
       });
     }
@@ -87,8 +102,8 @@ export class WorkCenterDialogComponent implements OnInit {
     const existing = this.workCenter();
     this.dialogRef.clearDraft();
 
-    // AssetId / CompanyLocationId aren't surfaced in this form yet; preserve the
-    // existing linkage on edit (the PUT is a full replace) and leave null on create.
+    // AssetId is now editable in the form (A31). CompanyLocationId isn't surfaced yet —
+    // preserve the existing linkage on edit (the PUT is a full replace), null on create.
     this.saved.emit({
       code: v.code!.trim(),
       name: v.name!.trim(),
@@ -99,8 +114,7 @@ export class WorkCenterDialogComponent implements OnInit {
       laborCostPerHour: v.laborCostPerHour ?? 0,
       burdenRatePerHour: v.burdenRatePerHour ?? 0,
       sortOrder: v.sortOrder ?? 0,
-      isActive: v.isActive ?? true,
-      assetId: existing?.assetId ?? null,
+      assetId: v.assetId ?? null,
       companyLocationId: existing?.companyLocationId ?? null,
     });
   }

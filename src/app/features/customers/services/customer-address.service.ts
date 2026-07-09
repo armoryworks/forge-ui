@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { CustomerAddress } from '../../../shared/models/customer-address.model';
@@ -17,8 +17,11 @@ export class CustomerAddressService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiUrl}/customers`;
 
-  getAddresses(customerId: number): Observable<CustomerAddress[]> {
-    return this.http.get<CustomerAddress[]>(`${this.base}/${customerId}/addresses`);
+  getAddresses(customerId: number, includeInactive = false): Observable<CustomerAddress[]> {
+    // includeInactive is honored server-side only for Admins (F3 address history).
+    let params = new HttpParams();
+    if (includeInactive) params = params.set('includeInactive', 'true');
+    return this.http.get<CustomerAddress[]>(`${this.base}/${customerId}/addresses`, { params });
   }
 
   createAddress(customerId: number, request: CreateCustomerAddressRequest): Observable<CustomerAddress> {
@@ -31,5 +34,10 @@ export class CustomerAddressService {
 
   deleteAddress(customerId: number, addressId: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${customerId}/addresses/${addressId}`);
+  }
+
+  /** Admin-only active/inactive toggle (F3 address history). */
+  setAddressActive(customerId: number, addressId: number, isActive: boolean): Observable<void> {
+    return this.http.patch<void>(`${this.base}/${customerId}/addresses/${addressId}/active`, { isActive });
   }
 }

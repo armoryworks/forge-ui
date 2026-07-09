@@ -1,5 +1,13 @@
 <div class="tab-toolbar">
   <span class="tab-toolbar__spacer"></span>
+  @if (isAdmin) {
+    <button class="action-btn action-btn--sm" data-testid="toggle-inactive-addresses-btn" (click)="toggleShowInactive()"
+            [class.action-btn--active]="showInactive()"
+            [attr.aria-pressed]="showInactive()">
+      <span class="material-icons-outlined">{{ showInactive() ? 'visibility_off' : 'history' }}</span>
+      {{ (showInactive() ? 'customers.addresses.hideInactive' : 'customers.addresses.showInactive') | translate }}
+    </button>
+  }
   <button class="action-btn action-btn--create" data-testid="add-address-btn" (click)="openAdd()"
           [attr.aria-label]="'customers.addresses.addAddressAriaLabel' | translate">
     <span class="material-icons-outlined">add</span>
@@ -23,13 +31,31 @@
   } @else {
     <div class="address-list">
       @for (addr of addresses(); track addr.id) {
-        <div class="address-card">
+        <div class="address-card" [class.address-card--inactive]="addr.isActive === false">
           <div class="address-card__header">
             <span class="chip chip--muted">{{ addr.addressType }}</span>
             @if (addr.isDefault) {
               <span class="chip chip--primary">{{ 'customers.tabs.addressDefault' | translate }}</span>
             }
+            @if (addr.isActive === false) {
+              <span class="chip chip--warning">{{ 'customers.addresses.inactive' | translate }}</span>
+            }
             <span class="address-card__actions">
+              @if (isAdmin) {
+                @if (addr.isActive === false) {
+                  <button class="icon-btn" data-testid="reactivate-address-btn" (click)="setActive(addr, true)"
+                          [attr.aria-label]="'customers.addresses.reactivate' | translate"
+                          [matTooltip]="'customers.addresses.reactivate' | translate">
+                    <span class="material-icons-outlined">restore</span>
+                  </button>
+                } @else {
+                  <button class="icon-btn icon-btn--warn" data-testid="deactivate-address-btn" (click)="setActive(addr, false)"
+                          [attr.aria-label]="'customers.addresses.deactivate' | translate"
+                          [matTooltip]="'customers.addresses.deactivate' | translate">
+                    <span class="material-icons-outlined">visibility_off</span>
+                  </button>
+                }
+              }
               <button class="icon-btn" data-testid="edit-address-btn" (click)="openEdit(addr)"
                       [attr.aria-label]="'customers.addresses.editAddressAriaLabel' | translate">
                 <span class="material-icons-outlined">edit</span>

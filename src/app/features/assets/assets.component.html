@@ -86,8 +86,9 @@
             data-testid="asset-depreciation-method" />
         </div>
         <div class="dialog-row">
-          <app-input [label]="'assets.workCenterId' | translate"
-            type="number" formControlName="workCenterId"
+          <app-autocomplete [label]="'assets.workCenter' | translate"
+            [options]="workCenterOptions()" displayField="label" valueField="value"
+            formControlName="workCenterId"
             data-testid="asset-work-center-id" />
           <app-input [label]="'assets.glAccount' | translate"
             formControlName="glAccount"

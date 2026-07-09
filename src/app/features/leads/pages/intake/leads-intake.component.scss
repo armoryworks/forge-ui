@@ -139,7 +139,11 @@
   }
 
   &__table-wrap {
-    overflow-x: auto;
+    // B2′ — the preview grew unbounded and clipped rows past the viewport (only overflow-x
+    // was set, so the sticky header had nothing to scroll against). Bound it and scroll
+    // vertically inside the panel so every previewed row is reachable before commit.
+    overflow: auto;
+    max-height: 60vh;
     @include custom-scrollbar(6px);
   }
 

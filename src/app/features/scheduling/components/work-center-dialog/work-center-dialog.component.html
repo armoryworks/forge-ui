@@ -28,6 +28,10 @@
       <app-currency-input [label]="'workCenterDialog.burdenRatePerHour' | translate" formControlName="burdenRatePerHour" />
     </div>
 
+    <app-autocomplete [label]="'workCenterDialog.asset' | translate" [options]="assetOptions()"
+      displayField="label" valueField="value" formControlName="assetId"
+      [placeholder]="'workCenterDialog.assetPlaceholder' | translate" />
+
     @if (isEdit()) {
       <app-toggle [label]="'common.active' | translate" formControlName="isActive" />
     }

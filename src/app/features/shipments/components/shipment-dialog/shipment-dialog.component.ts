@@ -30,6 +30,9 @@ interface LineEntry {
   quantity: number;
 }
 
+/** Weight entry unit. Storage is canonical pounds; the toggle only changes entry/display. */
+type WeightUnit = 'lbs' | 'oz' | 'kg';
+
 @Component({
   selector: 'app-shipment-dialog',
   standalone: true,
@@ -102,9 +105,25 @@ export class ShipmentDialogComponent implements OnInit {
     carrier: new FormControl(''),
     trackingNumber: new FormControl(''),
     shippingCost: new FormControl<number | null>(null),
-    weight: new FormControl<number | null>(null),
+    weight: new FormControl<number>(0, { nonNullable: true }),
     notes: new FormControl(''),
   });
+
+  // Weight unit is display-only entry state (storage stays canonical pounds). Toggling converts
+  // the entered value so the physical weight is preserved — 0.425 kg ⇄ 0.937 lbs ⇄ 15 oz.
+  protected readonly weightUnit = signal<WeightUnit>('lbs');
+  protected readonly weightUnits: WeightUnit[] = ['lbs', 'oz', 'kg'];
+  private static readonly LBS_PER: Record<WeightUnit, number> = { lbs: 1, oz: 1 / 16, kg: 2.2046226218 };
+
+  protected setWeightUnit(unit: WeightUnit): void {
+    const current = this.weightUnit();
+    if (unit === current) return;
+    const entered = this.shipmentForm.controls.weight.value ?? 0;
+    const inLbs = entered * ShipmentDialogComponent.LBS_PER[current];
+    const converted = inLbs / ShipmentDialogComponent.LBS_PER[unit];
+    this.shipmentForm.controls.weight.setValue(Number(converted.toFixed(4)));
+    this.weightUnit.set(unit);
+  }
 
   // Master-data carriers (active) for the picker, so the operator sees whether a carrier is
   // API-integrated (rates/label + scan-to-ship) or manual.
@@ -237,13 +256,16 @@ export class ShipmentDialogComponent implements OnInit {
       quantity: l.quantity,
     }));
 
+    // Persist canonical pounds regardless of the entry unit; 0 = unspecified.
+    const weightLbs = (f.weight ?? 0) * ShipmentDialogComponent.LBS_PER[this.weightUnit()];
+
     this.shipmentService.createShipment({
       salesOrderId: f.salesOrderId!,
       carrierId: f.carrierId ?? undefined,
       carrier: f.carrier || undefined,
       trackingNumber: f.trackingNumber || undefined,
       shippingCost: f.shippingCost ?? undefined,
-      weight: f.weight ?? undefined,
+      weight: weightLbs > 0 ? Number(weightLbs.toFixed(4)) : undefined,
       notes: f.notes || undefined,
       lines: lineRequests,
     }).subscribe({
