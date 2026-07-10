@@ -1,11 +1,25 @@
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
 
+// Page-scroll contract, option (b) — see styles/_shared.scss. This page uses
+// app-page-header (not app-page-layout), so the host must give .intake a
+// bounded height for overflow-y to clip against.
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 .intake {
   display: flex;
   flex-direction: column;
   gap: $sp-lg;
   padding: $sp-md;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  @include custom-scrollbar(6px);
 
   &__step {
     background: var(--surface);
@@ -48,6 +62,10 @@
 
   &__row {
     display: flex;
+    // Explicit: __step-body sets column and shares specificity with this class,
+    // so without it a combined step-body+row div lays out as a column and the
+    // 200px flex-basis becomes each child's HEIGHT (the giant-select bug).
+    flex-direction: row;
     align-items: flex-start;
     gap: $sp-md;
     flex-wrap: wrap;
