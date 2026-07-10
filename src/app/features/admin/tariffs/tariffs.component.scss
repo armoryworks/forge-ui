@@ -1,7 +1,11 @@
 @use 'styles/variables' as *;
 
+// Page-scroll contract — see styles/_shared.scss.
 :host {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .toolbar__hint {

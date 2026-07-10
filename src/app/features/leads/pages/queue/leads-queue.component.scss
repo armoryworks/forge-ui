@@ -1,11 +1,23 @@
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
 
+// Page-scroll contract — see styles/_shared.scss. Routed page host must be a
+// bounded flex column or the inner scroll container has nothing to clip against.
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 .queue {
   display: flex;
   flex-direction: column;
   gap: $sp-md;
   padding: $sp-md;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
 
   &__empty-card {
     background: var(--surface);
