@@ -166,7 +166,11 @@ export class TrainingModuleComponent implements OnInit {
         this.completed.set(true);
         this.isCompleting.set(false);
       },
-      error: () => this.isCompleting.set(false),
+      error: () => {
+        // Don't lose the completion — replayed on the next authenticated session.
+        this.trainingService.queueCompletion(m.id);
+        this.isCompleting.set(false);
+      },
     });
   }
 
@@ -229,7 +233,10 @@ export class TrainingModuleComponent implements OnInit {
           ngZone.run(() => {
             if (numericModuleId) {
               trainingService.completeModule(numericModuleId).subscribe({
-                error: () => { /* swallow — navigation proceeds regardless */ },
+                // Shop-floor walkthroughs end with the session already cleared
+                // (kiosk ephemeralLogout), so this POST 401s — queue the
+                // completion and TrainingService replays it on next login.
+                error: () => trainingService.queueCompletion(numericModuleId),
               });
               // Carry ?from= back to the splash so its Back button still
               // returns to wherever the user originally opened it.
