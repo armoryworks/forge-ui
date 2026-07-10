@@ -6,6 +6,7 @@ import { filter, map } from 'rxjs';
 import { AuthService } from './auth.service';
 import { CapabilityService } from './capability.service';
 import { NavItem } from '../models/nav-item.model';
+import { NavLeaf } from '../models/nav-leaf.model';
 
 @Injectable({ providedIn: 'root' })
 export class NavTreeService {
@@ -238,6 +239,29 @@ export class NavTreeService {
   readonly pinnedTopTree: Signal<NavItem[]> = computed(() => this.filterTree(this.allPinnedTopTree));
   readonly mainTree: Signal<NavItem[]> = computed(() => this.filterTree(this.allMainTree));
   readonly bottomTree: Signal<NavItem[]> = computed(() => this.filterTree(this.allBottomTree));
+
+  /**
+   * Every navigable leaf the current user is allowed to see, flattened with
+   * its ancestor-group trail. Feeds the header search so pages (Watchtower,
+   * Bulk Intake, …) are findable via Ctrl+K, not just data entities. Built
+   * from the filtered trees, so capability gates and role checks apply.
+   */
+  readonly flatLeaves: Signal<NavLeaf[]> = computed(() => {
+    const collect = (items: NavItem[], trail: string[]): NavLeaf[] =>
+      items.flatMap(item => {
+        if (item.children?.length) {
+          return collect(item.children, [...trail, item.i18nKey ?? item.label]);
+        }
+        return item.route
+          ? [{ icon: item.icon, label: item.label, i18nKey: item.i18nKey, route: item.route, trailKeys: trail }]
+          : [];
+      });
+    return [
+      ...collect(this.pinnedTopTree(), []),
+      ...collect(this.mainTree(), []),
+      ...collect(this.bottomTree(), []),
+    ];
+  });
 
   /**
    * Full ancestor chain of the current URL, walking all groups (including

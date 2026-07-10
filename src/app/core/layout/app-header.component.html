@@ -43,7 +43,7 @@
   <div class="app-header__search hide-tablet" [class.app-header__search--focused]="searchFocused()">
     <span class="material-icons-outlined search-icon">search</span>
     <input class="search-input" data-testid="header-search-input" type="text" [placeholder]="'header.searchPlaceholder' | translate"
-           [formControl]="searchControl" (focus)="onSearchFocus()" (blur)="onSearchBlur()" />
+           [formControl]="searchControl" (focus)="onSearchFocus()" (blur)="onSearchBlur()" (keydown.enter)="onSearchEnter()" />
     <kbd>Ctrl+K</kbd>
 
     @if (showResults()) {
@@ -53,6 +53,18 @@
             <span class="material-icons-outlined">search</span>
             {{ 'header.results' | translate }}
           </div>
+          @for (page of navMatches(); track page.route) {
+            <button class="search-result" data-testid="search-page-item" (mousedown)="navigateToPage(page)">
+              <span class="material-icons-outlined search-result__icon">{{ page.icon }}</span>
+              <div class="search-result__content">
+                <span class="search-result__title">{{ (page.i18nKey ?? page.label) | translate }}</span>
+                @if (page.trailKeys.length > 0) {
+                  <span class="search-result__subtitle">{{ pageTrail(page) }}</span>
+                }
+              </div>
+              <span class="search-result__type">{{ 'header.pageResult' | translate }}</span>
+            </button>
+          }
           @for (result of searchResults(); track result.entityId + result.entityType) {
             <button class="search-result" data-testid="search-result-item" (mousedown)="navigateToResult(result)">
               <span class="material-icons-outlined search-result__icon">{{ result.icon }}</span>
@@ -65,7 +77,7 @@
               <span class="search-result__type">{{ result.entityType }}</span>
             </button>
           }
-          @if (searchResults().length === 0) {
+          @if (searchResults().length === 0 && navMatches().length === 0) {
             <div class="search-results__empty">{{ 'header.noMatches' | translate }}</div>
           }
         </div>

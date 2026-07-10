@@ -5,7 +5,7 @@ import { debounceTime, distinctUntilChanged, filter, map, switchMap, catchError,
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ThemeService } from '../../shared/services/theme.service';
 import { BrandingService } from '../../shared/services/branding.service';
@@ -19,6 +19,7 @@ import { LanguageService, SupportedLanguage } from '../../shared/services/langua
 import { VersionService } from '../../shared/services/version.service';
 import { CapabilityService } from '../../shared/services/capability.service';
 import { SearchResult } from '../../shared/models/search.model';
+import { NavLeaf } from '../../shared/models/nav-leaf.model';
 import { RagSearchResult } from '../../shared/models/rag-search-result.model';
 import { NotificationPanelComponent } from '../../shared/components/notification-panel/notification-panel.component';
 import { ChatComponent } from '../../features/chat/chat.component';
@@ -47,6 +48,7 @@ export class AppHeaderComponent implements OnInit {
   protected readonly versionService = inject(VersionService);
   private readonly capabilityService = inject(CapabilityService);
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
 
   protected readonly showAboutDialog = signal(false);
 
@@ -112,6 +114,23 @@ export class AppHeaderComponent implements OnInit {
 
   protected readonly searchControl = new FormControl('');
   protected readonly searchResults = signal<SearchResult[]>([]);
+  private readonly searchTerm = signal('');
+
+  /**
+   * Pages (nav leaves) matching the current term — rendered above entity
+   * results so a screen name like "watchtower" is findable via Ctrl+K.
+   * flatLeaves is already capability/role-filtered by NavTreeService.
+   */
+  protected readonly navMatches = computed<NavLeaf[]>(() => {
+    const term = this.searchTerm().trim().toLowerCase();
+    if (term.length < 2) return [];
+    return this.navTree.flatLeaves()
+      .filter(leaf =>
+        leaf.label.toLowerCase().includes(term)
+        || this.translate.instant(leaf.i18nKey ?? leaf.label).toLowerCase().includes(term)
+        || leaf.route.toLowerCase().includes(term))
+      .slice(0, 5);
+  });
   protected readonly aiSuggestions = signal<AiSearchSuggestion[]>([]);
   protected readonly ragResults = signal<RagSearchResult[]>([]);
   protected readonly ragAnswer = signal<string | null>(null);
@@ -125,6 +144,15 @@ export class AppHeaderComponent implements OnInit {
   }
 
   constructor() {
+    // Mirror the control into a signal so navMatches recomputes as the user
+    // types (no debounce — nav matching is pure client-side filtering).
+    this.searchControl.valueChanges.pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(v => {
+      this.searchTerm.set(v ?? '');
+      if (this.navMatches().length > 0) this.showResults.set(true);
+    });
+
     this.searchControl.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged(),
@@ -133,7 +161,7 @@ export class AppHeaderComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef),
     ).subscribe(results => {
       this.searchResults.set(results);
-      this.showResults.set(results.length > 0 || this.aiService.available() || this.aiSuggestions().length > 0);
+      this.showResults.set(results.length > 0 || this.navMatches().length > 0 || this.aiService.available() || this.aiSuggestions().length > 0);
     });
 
     this.searchControl.valueChanges.pipe(
@@ -182,9 +210,52 @@ export class AppHeaderComponent implements OnInit {
 
   protected onSearchFocus(): void {
     this.searchFocused.set(true);
-    if (this.searchResults().length > 0 || this.aiSuggestions().length > 0 || this.ragResults().length > 0 || this.ragAnswer()) {
+    if (this.searchResults().length > 0 || this.navMatches().length > 0 || this.aiSuggestions().length > 0 || this.ragResults().length > 0 || this.ragAnswer()) {
       this.showResults.set(true);
     }
+  }
+
+  /**
+   * Enter = "go to the best match": first page match wins, then the first
+   * entity result. If the debounced search hasn't fired yet, run it
+   * immediately so Enter never silently does nothing.
+   */
+  protected onSearchEnter(): void {
+    const pages = this.navMatches();
+    if (pages.length > 0) {
+      this.navigateToPage(pages[0]);
+      return;
+    }
+    const results = this.searchResults();
+    if (results.length > 0) {
+      this.navigateToResult(results[0]);
+      return;
+    }
+    const term = this.searchControl.value;
+    if ((term?.length ?? 0) >= 2) {
+      this.searchService.search(term!).pipe(
+        catchError(() => of([] as SearchResult[])),
+        takeUntilDestroyed(this.destroyRef),
+      ).subscribe(res => {
+        this.searchResults.set(res);
+        this.showResults.set(true);
+      });
+    }
+  }
+
+  protected navigateToPage(leaf: NavLeaf): void {
+    this.layout.closeMobileMenu();
+    this.showResults.set(false);
+    this.searchControl.setValue('', { emitEvent: false });
+    this.searchTerm.set('');
+    this.searchResults.set([]);
+    this.aiSuggestions.set([]);
+    this.router.navigateByUrl(leaf.route);
+  }
+
+  /** Translated ancestor trail for a page match, e.g. "Operations". */
+  protected pageTrail(leaf: NavLeaf): string {
+    return leaf.trailKeys.map(k => this.translate.instant(k)).join(' › ');
   }
 
   protected onSearchBlur(): void {

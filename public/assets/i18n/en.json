@@ -153,7 +153,8 @@
     "ctrlK": "Ctrl+K",
     "userMenu": "User menu",
     "closeUserMenu": "Close user menu",
-    "closeNotifications": "Close notifications"
+    "closeNotifications": "Close notifications",
+    "pageResult": "Page"
   },
   "app": {
     "updateAvailable": "A new version is available.",
@@ -2457,7 +2458,6 @@
     "expenseRejected": "Expense rejected.",
     "expenseReimbursed": "Expense marked reimbursed.",
     "expenseDeleted": "Expense deleted.",
-    "reimbursed": "Reimbursed",
     "markReimbursed": "Mark reimbursed",
     "colDate": "Date",
     "colCategory": "Category",
