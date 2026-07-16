@@ -7,6 +7,7 @@ import { getAuthSession } from '../../helpers/auth.helper';
 import type { WeekContext, WeekResult, SimulationReport } from '../types/simulation.types';
 import { runWeek } from '../scenarios/week-scenario';
 import { runWeekApi } from '../scenarios/week-scenario-api';
+import { runWeekNarrative } from '../scenarios/week-scenario-narrative';
 
 // ── Configuration ───────────────────────────────────────────────────────────
 const SIM_START = new Date(process.env['SIM_START'] ?? '2018-01-01T00:00:00Z');
@@ -21,10 +22,10 @@ const RESUME    = (process.env['SIM_RESUME'] ?? 'true').toLowerCase() !== 'false
  *   range  — run SIM_START to SIM_END exactly (set both via env vars)
  *   api    — like 'full' but uses API-direct scenario (fast, no browser needed)
  */
-const SIM_MODE = (process.env['SIM_MODE'] ?? 'full') as 'full' | 'resume' | 'gaps' | 'range' | 'api';
+const SIM_MODE = (process.env['SIM_MODE'] ?? 'full') as 'full' | 'resume' | 'gaps' | 'range' | 'api' | 'narrative';
 
-/** When true, use API-direct scenario instead of UI-driven */
-const USE_API = SIM_MODE === 'api' || (process.env['SIM_API'] ?? 'false').toLowerCase() === 'true';
+/** When true, use an API-direct scenario (no browser). Both 'api' and 'narrative' are browser-less. */
+const USE_API = SIM_MODE === 'api' || SIM_MODE === 'narrative' || (process.env['SIM_API'] ?? 'false').toLowerCase() === 'true';
 
 const ROLES: SimRole[] = ['admin', 'engineer', 'pm', 'manager', 'office', 'worker'];
 const SEED_PASSWORD = process.env['SEED_USER_PASSWORD'] ?? 'Test1234!';
@@ -405,7 +406,7 @@ export async function runSimulation(): Promise<SimulationReport> {
     const WEEK_TIMEOUT_MS = 30 * 60_000; // 30 minutes max per week
     try {
       result = await Promise.race([
-        USE_API ? runWeekApi(ctx) : runWeek(ctx),
+        SIM_MODE === 'narrative' ? runWeekNarrative(ctx) : USE_API ? runWeekApi(ctx) : runWeek(ctx),
         new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error(`Week timed out after ${WEEK_TIMEOUT_MS / 1000}s`)), WEEK_TIMEOUT_MS),
         ),
