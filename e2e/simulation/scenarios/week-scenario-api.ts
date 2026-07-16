@@ -27,11 +27,23 @@
  *   20. Create maintenance jobs from overdue schedules
  *   21. Dispose completed jobs (ship, scrap, inventory, capitalize)
  *   22. QC inspections on in-progress/QC-stage jobs
+ *
+ * Expanded coverage (26-35) — broadens the training corpus:
+ *   26. Standalone parts + BOM (Make parent ← Buy child)
+ *   27. Vendors (grow the supplier list)
+ *   28. Inventory: storage locations, stock receipts, lot records, movements
+ *   29. Purchase order lifecycle: submit → acknowledge → receive into bins
+ *   30. Compliance calendar: events + attendees + RSVP
+ *   31. Entity comments + notes (jobs / parts / customers)
+ *   32. Direct chat messages between the workforce
+ *   33. File attachments (drawings/docs on jobs, parts, assets)
+ *   34. AI / RAG: index entities + semantic search (document_embeddings)
+ *   35. Watchtower: apply/dismiss regulatory proposals (inert until seeded)
  */
 
 import type { WeekContext, WeekResult } from '../types/simulation.types';
 import { tryAction, type SimError } from '../helpers/sim-context.helper';
-import { apiCall } from '../helpers/api.helper';
+import { apiCall, apiUpload, fixturePdf } from '../helpers/api.helper';
 import {
   pick, seededInt,
   COMPANIES, CONTACT_FIRST, CONTACT_LAST,
@@ -41,6 +53,9 @@ import {
   JOB_COMMENTS,
   ASSET_NAMES, MAINTENANCE_TITLES, DOWNTIME_REASONS, DOWNTIME_RESOLUTIONS,
   SCRAP_REASONS,
+  PART_NAMES, VENDOR_NAMES, RAW_MATERIALS, PURCHASED_COMPONENTS,
+  STORAGE_LOCATION_NAMES, EVENT_TITLES, EVENT_LOCATIONS,
+  ENTITY_COMMENTS, CHAT_MESSAGES_GENERAL, CHAT_MESSAGES_JOB,
 } from '../data/scenario-data';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -58,15 +73,20 @@ function pct(weekIndex: number, salt: number, p: number): boolean {
 }
 
 /**
- * Normalize API responses — some endpoints return plain arrays,
- * others return { data: [...] }. This always returns an array.
+ * Normalize API responses — the list endpoints are inconsistent: some return a
+ * plain array (leads, quotes, orders, expenses), some `{ data: [...] }`, and the
+ * paged ones (jobs, customers, vendors, parts) return
+ * `{ items, totalCount, page, pageSize }`. This always returns the array —
+ * checking `data` AND `items` is essential: without the `items` branch the whole
+ * job / customer / vendor / part pipeline silently resolves to empty.
  */
 function asList<T>(resp: unknown): T[] {
   if (!resp) return [];
   if (Array.isArray(resp)) return resp as T[];
-  if (typeof resp === 'object' && 'data' in (resp as Record<string, unknown>)) {
-    const data = (resp as Record<string, unknown>).data;
-    return Array.isArray(data) ? data as T[] : [];
+  if (typeof resp === 'object') {
+    const obj = resp as Record<string, unknown>;
+    if (Array.isArray(obj['data'])) return obj['data'] as T[];
+    if (Array.isArray(obj['items'])) return obj['items'] as T[];
   }
   return [];
 }
@@ -175,12 +195,7 @@ export async function runWeekApi(ctx: WeekContext): Promise<WeekResult> {
   }
 
   // ── 5. Send draft quotes ───────────────────────────────────────────────────
-  const allQuotes = asList<{ id: number; status: string; quoteNumber: string }>(
-    await apiCall<unknown>('GET', 'quotes?pageSize=200', pm),
-  );
-  const draftQuotes = allQuotes.filter(q => q.status === 'Draft');
-
-  // Re-fetch quotes after creation to get accurate status
+  // Fetch after creation so newly-created drafts are included.
   const quotesForSend = asList<{ id: number; status: string }>(
     await apiCall<unknown>('GET', 'quotes?pageSize=200', pm),
   ).filter(q => q.status === 'Draft');
@@ -205,16 +220,25 @@ export async function runWeekApi(ctx: WeekContext): Promise<WeekResult> {
   }
 
   // ── 7. Convert accepted quotes → sales orders ─────────────────────────────
-  // Re-fetch after accepts
+  // Re-fetch after accepts. A converted quote KEEPS status 'Accepted' (the list
+  // has no converted flag), so we fetch detail and skip any that already carry a
+  // salesOrderId — otherwise the same seed quotes 409 ("already converted") every
+  // week. Convert up to 2 genuinely-unconverted quotes.
   const quotesForConvert = asList<{ id: number; status: string }>(
     await apiCall<unknown>('GET', 'quotes?pageSize=200', office),
   );
   const acceptedQuotes = quotesForConvert.filter(q => q.status === 'Accepted');
-  for (const quote of acceptedQuotes.slice(0, 2)) {
-    inc(await tryAction(`convert-quote-${quote.id}`, async () => {
+  let convertedThisWeek = 0;
+  for (const quote of acceptedQuotes) {
+    if (convertedThisWeek >= 2) break;
+    const detail = await apiCall<{ salesOrderId: number | null }>('GET', `quotes/${quote.id}`, office);
+    if (detail?.salesOrderId) continue; // already converted in a prior week/run
+    const ok = await tryAction(`convert-quote-${quote.id}`, async () => {
       const result = await apiCall('POST', `quotes/${quote.id}/convert`, office, {});
       if (!result) throw new Error(`Quote ${quote.id} convert failed`);
-    }, errors));
+    }, errors);
+    inc(ok);
+    if (ok) convertedThisWeek++;
   }
 
   // ── 7b. Confirm draft sales orders ──────────────────────────────────────────
@@ -237,7 +261,6 @@ export async function runWeekApi(ctx: WeekContext): Promise<WeekResult> {
   const allUsers = asList<{ id: number; email: string; firstName: string; lastName: string; roles: string[] }>(
     await apiCall<unknown>('GET', 'admin/users?pageSize=50', admin),
   );
-  const engineers = allUsers.filter(u => u.roles?.includes('Engineer') || u.roles?.includes('ProductionWorker'));
 
   if (defaultTrack) {
     const jobCount = seededInt(1, 2, w, 5);
@@ -338,19 +361,30 @@ export async function runWeekApi(ctx: WeekContext): Promise<WeekResult> {
   }
 
   // ── 12. Expenses ───────────────────────────────────────────────────────────
+  // Policy (expense_require_receipt) requires a receipt attachment: stage the
+  // receipt via POST /expenses/receipts (uploads with EntityId=0), then pass its
+  // id as receiptFileId — CreateExpense re-parents the file onto the new row.
+  // NOTE: the request field is `expenseDate` (not `date`), and Description must be
+  // >= 10 chars — both were silently wrong/defaulted before.
   const expenseCount = seededInt(1, 3, w, 6);
   for (let i = 0; i < expenseCount; i++) {
     const token = i === 0 ? engineer : worker;
     const category = pick(EXPENSE_CATEGORIES, w, i + 50);
-    const desc = pick(EXPENSE_DESCRIPTIONS, w, i + 55).replace('{q}', `${Math.ceil((ctx.weekStart.getUTCMonth() + 1) / 3)}`);
+    let desc = pick(EXPENSE_DESCRIPTIONS, w, i + 55).replace('{q}', `${Math.ceil((ctx.weekStart.getUTCMonth() + 1) / 3)}`);
+    if (desc.length < 10) desc = `${desc} — shop expense`;
     const amount = seededInt(15, 350, w, i + 60);
 
     inc(await tryAction(`expense-${i}`, async () => {
+      const receipt = await apiUpload<{ id: number }>(
+        'expenses/receipts', token, 'file',
+        `receipt-${ctx.weekLabel}-${i}.pdf`, fixturePdf(`Receipt ${desc.slice(0, 30)}`),
+      );
       const result = await apiCall('POST', 'expenses', token, {
         amount,
-        date: weekDay(ctx, i + 1),
+        expenseDate: weekDay(ctx, i + 1),
         category,
         description: desc,
+        receiptFileId: receipt?.id ? String(receipt.id) : undefined,
       });
       if (!result) throw new Error('Expense creation returned null');
     }, errors));
@@ -708,6 +742,346 @@ export async function runWeekApi(ctx: WeekContext): Promise<WeekResult> {
       }, errors));
     }
   }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  //  EXPANDED COVERAGE (26-35) — broadens the corpus into parts/BOM, vendors,
+  //  inventory + lots, PO receiving, compliance calendar, collaboration
+  //  (comments/notes/chat), file attachments, and AI/RAG indexing.
+  // ══════════════════════════════════════════════════════════════════════════
+
+  const userByEmail = (email: string) => allUsers.find(u => u.email === email);
+  const engUserId = userByEmail('akim@forge.local')?.id ?? null;
+  const wkUserId  = userByEmail('bkelly@forge.local')?.id ?? null;
+  const mgrUserId = userByEmail('lwilson@forge.local')?.id ?? null;
+  const offUserId = userByEmail('cthompson@forge.local')?.id ?? null;
+
+  // ── 26. Standalone parts + BOM ─────────────────────────────────────────────
+  // Grow the part catalog with a Make parent + a Buy child, then link them via a
+  // BOM line. New parts stay Draft (promotion to Active needs a routing, out of
+  // scope here) — Draft parts are still valid training data.
+  {
+    const makeChild = pct(w, 1000, 60);
+    const parentName = `${pick(PART_NAMES, w, 1000)} ${1000 + w}`;
+    const childName  = makeChild
+      ? `${pick(PURCHASED_COMPONENTS, w, 1001).name} ${1000 + w}`
+      : `${pick(RAW_MATERIALS, w, 1002).name} ${1000 + w}`;
+
+    // Create parent + child + BOM line as one chained action so ids flow through.
+    inc(await tryAction(`part-bom-${w}`, async () => {
+      const parent = await apiCall<{ id: number }>('POST', 'parts', engineer, {
+        name: parentName.slice(0, 120),
+        description: `Simulated assembly part introduced ${ctx.weekLabel}`,
+        revision: 'A',
+        procurementSource: 'Make',
+        inventoryClass: pick(['Subassembly', 'FinishedGood'], w, 1003),
+      });
+      if (!parent?.id) throw new Error('Parent part creation returned null');
+
+      const child = await apiCall<{ id: number }>('POST', 'parts', engineer, {
+        name: childName.slice(0, 120),
+        description: `Simulated ${makeChild ? 'purchased' : 'raw'} component ${ctx.weekLabel}`,
+        revision: 'A',
+        procurementSource: 'Buy',
+        inventoryClass: makeChild ? 'Component' : 'Raw',
+      });
+      if (!child?.id) throw new Error('Child part creation returned null');
+
+      await apiCall('POST', `parts/${parent.id}/bom`, engineer, {
+        childPartId: child.id,
+        quantity: seededInt(1, 8, w, 1004),
+        sourceType: makeChild ? 'Buy' : 'Stock',
+        referenceDesignator: `REF-${w}`,
+        notes: `BOM line added ${ctx.weekLabel}`,
+      });
+    }, errors));
+  }
+
+  // ── 27. Vendors — grow the supplier list ───────────────────────────────────
+  // The PO step only READ vendors; without new vendors the seed set never grows.
+  // Create one vendor for the first ~24 weeks, then occasionally after.
+  if (w < VENDOR_NAMES.length && (w < 24 || pct(w, 1100, 15))) {
+    const vname = VENDOR_NAMES[w % VENDOR_NAMES.length];
+    inc(await tryAction(`vendor-${w}`, async () => {
+      const first = pick(CONTACT_FIRST, w, 1101);
+      const last  = pick(CONTACT_LAST, w, 1102);
+      const result = await apiCall('POST', 'vendors', manager, {
+        companyName: vname,
+        contactName: `${first} ${last}`,
+        email: `${first.toLowerCase()}.${last.toLowerCase()}@${vname.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`,
+        phone: `(555) ${String(200 + (w % 700)).padStart(3, '0')}-${String(1000 + (w * 7) % 9000).padStart(4, '0')}`,
+        paymentTerms: pick(['Net30', 'Net45', 'Net60', 'Due on Receipt'], w, 1103),
+        notes: `Approved supplier onboarded ${ctx.weekLabel}`,
+      });
+      if (!result) throw new Error('Vendor creation returned null');
+    }, errors));
+  }
+
+  // ── 28. Inventory — storage locations, stock receipts, lots, movements ──────
+  // Build out an Area→Bin hierarchy in the early weeks, then receive stock,
+  // create lot records (FEFO), and occasionally adjust/place bin contents.
+  const bins = asList<{ id: number; name: string; locationType: string }>(
+    await apiCall<unknown>('GET', 'inventory/locations/bins?pageSize=100', manager),
+  );
+  if (bins.length < 8 && w < 12) {
+    inc(await tryAction(`storage-area-${w}`, async () => {
+      const areaName = pick(STORAGE_LOCATION_NAMES, w, 1200);
+      const area = await apiCall<{ id: number }>('POST', 'inventory/locations', manager, {
+        name: `${areaName} ${w}`, locationType: 'Area',
+      });
+      if (!area?.id) throw new Error('Area creation returned null');
+      // Two bins under the area.
+      for (let b = 0; b < 2; b++) {
+        await apiCall('POST', 'inventory/locations', manager, {
+          name: `${areaName.slice(0, 12)}-BIN-${w}-${b}`,
+          locationType: 'Bin',
+          parentId: area.id,
+        });
+      }
+    }, errors));
+  }
+
+  // Fresh parts + bins for stock ops (asList now correctly unwraps paged results).
+  const stockParts = asList<{ id: number; partNumber: string; inventoryClass: string }>(
+    await apiCall<unknown>('GET', 'parts?pageSize=200', manager),
+  );
+  const freshBins = asList<{ id: number; name: string }>(
+    await apiCall<unknown>('GET', 'inventory/locations/bins?pageSize=100', manager),
+  );
+  if (stockParts.length > 0 && freshBins.length > 0) {
+    // Receive stock for 1-2 parts into a rotating bin.
+    const receiveCount = seededInt(1, 2, w, 1210);
+    for (let i = 0; i < receiveCount; i++) {
+      const part = stockParts[(w * 3 + i) % stockParts.length];
+      const bin  = freshBins[(w + i) % freshBins.length];
+      const lotNo = `LOT-${ctx.weekLabel}-${part.id}`;
+      inc(await tryAction(`receive-stock-${i}`, async () => {
+        await apiCall('POST', 'inventory/receive-stock', manager, {
+          partId: part.id,
+          locationId: bin.id,
+          quantity: seededInt(25, 500, w, i + 1211),
+          reason: `Cycle receipt ${ctx.weekLabel}`,
+          lotNumber: lotNo,
+        });
+      }, errors));
+
+      // Create a matching lot record (FEFO tracking) for a subset.
+      if (pct(w, i + 1220, 55)) {
+        inc(await tryAction(`lot-${i}`, async () => {
+          const exp = new Date(ctx.weekStart);
+          exp.setUTCFullYear(exp.getUTCFullYear() + 2);
+          await apiCall('POST', 'lots', engineer, {
+            partId: part.id,
+            quantity: seededInt(25, 500, w, i + 1221),
+            supplierLotNumber: `SUP-${part.partNumber}-${w}`,
+            expirationDate: exp.toISOString(),
+            notes: `Lot received ${ctx.weekLabel}`,
+          });
+        }, errors));
+      }
+    }
+
+    // Occasional adjustment + bin-content placement for movement coverage.
+    if (pct(w, 1230, 30)) {
+      const bin = freshBins[w % freshBins.length];
+      const part = stockParts[(w * 5) % stockParts.length];
+      inc(await tryAction('bin-place', async () => {
+        await apiCall('POST', 'inventory/bin-contents', manager, {
+          locationId: bin.id,
+          entityType: 'part',
+          entityId: part.id,
+          quantity: seededInt(5, 60, w, 1231),
+          status: 'Stored',
+          notes: `Binned ${ctx.weekLabel}`,
+        });
+      }, errors));
+    }
+  }
+
+  // ── 29. Purchase order lifecycle — submit → acknowledge → receive ──────────
+  // The PO step leaves POs in Draft; advance a few each week and receive their
+  // lines into a bin so goods-receipt + PO status transitions populate.
+  if (freshBins.length > 0 && pct(w, 1300, 70)) {
+    const draftPOs = asList<{ id: number; status: string }>(
+      await apiCall<unknown>('GET', 'purchase-orders?pageSize=50', office),
+    ).filter(po => po.status === 'Draft');
+
+    for (const po of draftPOs.slice(0, 2)) {
+      inc(await tryAction(`po-submit-${po.id}`, async () => {
+        await apiCall('POST', `purchase-orders/${po.id}/submit`, office, {});
+      }, errors));
+      inc(await tryAction(`po-ack-${po.id}`, async () => {
+        await apiCall('POST', `purchase-orders/${po.id}/acknowledge`, office, {});
+      }, errors));
+      inc(await tryAction(`po-receive-${po.id}`, async () => {
+        const detail = await apiCall<{ id: number; status: string; lines: Array<{ id: number; remainingQuantity: number }> }>(
+          'GET', `purchase-orders/${po.id}`, office,
+        );
+        const receivable = (detail?.lines ?? []).filter(l => (l.remainingQuantity ?? 0) > 0);
+        if (receivable.length === 0) throw new Error('No receivable lines');
+        const bin = freshBins[w % freshBins.length];
+        await apiCall('POST', `purchase-orders/${po.id}/receive`, office, {
+          lines: receivable.map(l => ({
+            lineId: l.id,
+            quantity: l.remainingQuantity,
+            storageLocationId: bin.id,
+            notes: null,
+          })),
+          freightAllocationMethod: 'ByExtendedValue',
+        });
+      }, errors));
+    }
+  }
+
+  // ── 30. Compliance calendar — events + attendees + RSVP ────────────────────
+  // Events (safety/training/meeting) with the workforce as attendees; one
+  // attendee RSVPs. Recurrence + workflow-status need the seeded taxonomy
+  // (calendar_event_types) which is empty in dev, so we stay on the legacy enum.
+  if (pct(w, 1400, 50)) {
+    const attendees = [engUserId, wkUserId, mgrUserId, offUserId].filter((x): x is number => x !== null);
+    const eventTypes = ['Training', 'Safety', 'Meeting', 'Other'];
+    inc(await tryAction(`event-${w}`, async () => {
+      const start = new Date(ctx.weekStart);
+      start.setUTCDate(start.getUTCDate() + seededInt(1, 5, w, 1401));
+      start.setUTCHours(14, 0, 0, 0);
+      const end = new Date(start);
+      end.setUTCHours(16, 0, 0, 0);
+      const ev = await apiCall<{ id: number }>('POST', 'events', manager, {
+        title: pick(EVENT_TITLES, w, 1402),
+        description: `Recurring shop event scheduled ${ctx.weekLabel}`,
+        startTime: start.toISOString(),
+        endTime: end.toISOString(),
+        location: pick(EVENT_LOCATIONS, w, 1403),
+        eventType: pick(eventTypes, w, 1404),
+        isRequired: pct(w, 1405, 60),
+        attendeeUserIds: attendees,
+      });
+      if (!ev?.id) throw new Error('Event creation returned null');
+      // One attendee RSVPs "Accepted".
+      if (engUserId !== null) {
+        await apiCall('POST', `events/${ev.id}/respond`, engineer, { status: 'Accepted' });
+      }
+    }, errors));
+  }
+
+  // ── 31. Entity comments + notes — collaboration threads ────────────────────
+  // Comments (activity log) and notes on jobs / parts / customers. The generic
+  // EntityActivity controller requires the SINGULAR PascalCase entity type
+  // (Job/Part/Customer), not the plural route segment. mentionedUserIds is
+  // REQUIRED (send [] when nobody is @-mentioned).
+  {
+    const commentTargets: Array<{ type: string; id: number | undefined; pool: string[] }> = [
+      { type: 'Job', id: allJobs[w % Math.max(allJobs.length, 1)]?.id, pool: ENTITY_COMMENTS.job },
+      { type: 'Part', id: stockParts[w % Math.max(stockParts.length, 1)]?.id, pool: ENTITY_COMMENTS.part },
+      { type: 'Customer', id: customers[w % Math.max(customers.length, 1)]?.id, pool: ENTITY_COMMENTS.customer },
+    ];
+    for (let i = 0; i < commentTargets.length; i++) {
+      const t = commentTargets[i];
+      if (!t.id || !pct(w, i + 1500, 45)) continue;
+      inc(await tryAction(`comment-${t.type}-${t.id}`, async () => {
+        await apiCall('POST', `${t.type}/${t.id}/comments`, engineer, {
+          comment: pick(t.pool, w, i + 1501),
+          mentionedUserIds: [],
+        });
+      }, errors));
+      if (pct(w, i + 1510, 35)) {
+        inc(await tryAction(`note-${t.type}-${t.id}`, async () => {
+          await apiCall('POST', `${t.type}/${t.id}/notes`, manager, {
+            text: pick(t.pool, w, i + 1511),
+            mentionedUserIds: [],
+          });
+        }, errors));
+      }
+    }
+  }
+
+  // ── 32. Chat — direct messages between the workforce ───────────────────────
+  if (mgrUserId !== null && pct(w, 1600, 60)) {
+    inc(await tryAction('chat-general', async () => {
+      await apiCall('POST', 'chat/messages', worker, {
+        recipientId: mgrUserId,
+        content: pick(CHAT_MESSAGES_GENERAL, w, 1601),
+      });
+    }, errors));
+  }
+  if (engUserId !== null && pct(w, 1610, 40)) {
+    const job = allJobs[w % Math.max(allJobs.length, 1)];
+    inc(await tryAction('chat-job', async () => {
+      await apiCall('POST', 'chat/messages', manager, {
+        recipientId: engUserId,
+        content: pick(CHAT_MESSAGES_JOB, w, 1611),
+        linkedEntityType: job ? 'Job' : undefined,
+        linkedEntityId: job?.id,
+      });
+    }, errors));
+  }
+
+  // ── 33. File attachments — drawings/docs on jobs, parts, assets ────────────
+  // Generates FileAttachment rows + MinIO objects (also indexable by RAG).
+  {
+    const job = allJobs[(w * 2) % Math.max(allJobs.length, 1)];
+    const part = stockParts[(w * 2) % Math.max(stockParts.length, 1)];
+    if (job?.id && pct(w, 1700, 50)) {
+      inc(await tryAction(`attach-job-${job.id}`, async () => {
+        const r = await apiUpload('jobs/' + job.id + '/files', engineer, 'file',
+          `traveler-${ctx.weekLabel}.pdf`, fixturePdf(`Job traveler ${job.jobNumber ?? job.id}`));
+        if (!r) throw new Error('Job file upload returned null');
+      }, errors));
+    }
+    if (part?.id && pct(w, 1710, 40)) {
+      inc(await tryAction(`attach-part-${part.id}`, async () => {
+        const r = await apiUpload('parts/' + part.id + '/files', engineer, 'file',
+          `drawing-${ctx.weekLabel}.pdf`, fixturePdf(`Part drawing ${part.partNumber ?? part.id}`));
+        if (!r) throw new Error('Part file upload returned null');
+      }, errors));
+    }
+    const assetsForFiles = asList<{ id: number; name: string }>(
+      await apiCall<unknown>('GET', 'assets?status=Active', admin),
+    );
+    const asset = assetsForFiles[w % Math.max(assetsForFiles.length, 1)];
+    if (asset?.id && pct(w, 1720, 25)) {
+      inc(await tryAction(`attach-asset-${asset.id}`, async () => {
+        const r = await apiUpload('assets/' + asset.id + '/files', admin, 'file',
+          `manual-${ctx.weekLabel}.pdf`, fixturePdf(`Asset manual ${asset.name}`));
+        if (!r) throw new Error('Asset file upload returned null');
+      }, errors));
+    }
+  }
+
+  // ── 34. AI / RAG — index recent entities + run a semantic search ───────────
+  // Ollama is available in dev; index a job + a part into document_embeddings and
+  // exercise the RAG search path. Guarded so it no-ops cleanly if AI is offline.
+  if (pct(w, 1800, 35)) {
+    const aiStatus = await apiCall<{ available: boolean }>('GET', 'ai/status', manager);
+    if (aiStatus?.available) {
+      const job = allJobs[(w * 4) % Math.max(allJobs.length, 1)];
+      if (job?.id) {
+        inc(await tryAction(`ai-index-job-${job.id}`, async () => {
+          await apiCall('POST', 'ai/index', manager, { entityType: 'Job', entityId: job.id });
+        }, errors));
+      }
+      const part = stockParts[(w * 4) % Math.max(stockParts.length, 1)];
+      if (part?.id) {
+        inc(await tryAction(`ai-index-part-${part.id}`, async () => {
+          await apiCall('POST', 'ai/index', manager, { entityType: 'Part', entityId: part.id });
+        }, errors));
+      }
+      inc(await tryAction('ai-search', async () => {
+        const r = await apiCall('POST', 'ai/search', manager, {
+          query: pick(['aluminum bracket lead time', 'stainless valve tolerance', 'anodize finish spec', 'bearing housing part'], w, 1801),
+          includeAnswer: false,
+        });
+        if (!r) throw new Error('AI search returned null');
+      }, errors));
+    }
+  }
+
+  // ── 35. Watchtower (regulatory) — NOT DRIVEN ───────────────────────────────
+  // Intentionally omitted: the WatchtowerController gates on
+  // [RequiresCapability("CAP-EXT-WATCHTOWER")], but that capability code is not in
+  // the capability descriptor, so every watchtower route returns 404 regardless of
+  // toggles. Sources + change-proposals are also seed-only (no create endpoint)
+  // and the dev DB ships none. This domain cannot be exercised via API until the
+  // backend registers the capability and seeds proposals. See corpus-gap notes.
 
   return {
     weekLabel: ctx.weekLabel,
