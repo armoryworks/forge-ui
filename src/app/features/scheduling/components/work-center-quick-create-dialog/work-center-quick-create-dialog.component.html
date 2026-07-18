@@ -1,0 +1,20 @@
+<app-dialog [title]="title()" width="420px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    <app-input data-testid="wc-quick-code" [label]="'workCenterDialog.code' | translate"
+               formControlName="code" [required]="true" [maxlength]="50" />
+    <app-input data-testid="wc-quick-name" [label]="'workCenterDialog.name' | translate"
+               formControlName="name" [required]="true" [maxlength]="200" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--create" data-testid="wc-quick-save-btn"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        <span class="material-icons-outlined">add</span>
+        {{ 'common.create' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

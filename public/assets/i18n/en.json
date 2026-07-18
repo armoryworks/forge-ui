@@ -678,6 +678,8 @@
     "estMinutes": "Est. Minutes",
     "instructions": "Instructions",
     "workCenter": "Work Center",
+    "workCenterNone": "— None —",
+    "newWorkCenter": "New work center",
     "qcCheckpoint": "QC Checkpoint",
     "qcCriteria": "QC Pass/Fail Criteria",
     "isSubcontract": "Subcontract Operation",
@@ -7556,6 +7558,10 @@
     "empty": "No recent communications. Connect a mailbox or phone line under Account > Communications to start auto-logging.",
     "log": "Log",
     "logAriaLabel": "Log a contact interaction"
+  },
+  "workCenterQuickCreate": {
+    "title": "New Work Center",
+    "created": "Work center {{name}} created"
   },
   "setupIntegrations": {
     "title": "Set up your integrations",

@@ -667,6 +667,8 @@
     "estMinutes": "Min. Est.",
     "instructions": "Instrucciones",
     "workCenter": "Centro de Trabajo",
+    "workCenterNone": "— Ninguno —",
+    "newWorkCenter": "Nuevo centro de trabajo",
     "qcCheckpoint": "Punto de Control QC",
     "qcCriteria": "Criterios de Aprobación/Rechazo QC",
     "update": "Actualizar",
@@ -7556,6 +7558,10 @@
     "empty": "Sin comunicaciones recientes. Conecte un buzón o teléfono en Cuenta > Comunicaciones para empezar a registrarlas automáticamente.",
     "log": "Registrar",
     "logAriaLabel": "Registrar una interacción con el contacto"
+  },
+  "workCenterQuickCreate": {
+    "title": "Nuevo centro de trabajo",
+    "created": "Centro de trabajo {{name}} creado"
   },
   "setupIntegrations": {
     "title": "Configure sus integraciones",

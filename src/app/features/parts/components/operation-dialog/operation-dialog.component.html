@@ -39,7 +39,15 @@
       <app-textarea data-testid="op-instructions" [label]="'parts.instructions' | translate" formControlName="instructions" [rows]="5" [maxlength]="4000" />
 
       <div class="dialog-row">
-        <app-entity-picker data-testid="op-work-center" [label]="'parts.workCenter' | translate" entityType="assets" displayField="name" secondaryDisplayField="assetType" formControlName="workCenterId" />
+        <div class="op-work-center">
+          <app-select data-testid="op-work-center" [label]="'parts.workCenter' | translate" formControlName="workCenterId" [options]="workCenterOptions()" />
+          <button type="button" class="action-btn action-btn--create action-btn--sm op-work-center__new"
+            (click)="onCreateWorkCenter()"
+            [attr.aria-label]="'parts.newWorkCenter' | translate">
+            <span class="material-icons-outlined">add</span>
+            {{ 'parts.newWorkCenter' | translate }}
+          </button>
+        </div>
         <app-select data-testid="op-referenced-op" [label]="'parts.referencedOperation' | translate" formControlName="referencedOperationId" [options]="otherOperationOptions()" />
       </div>
 

@@ -6,6 +6,24 @@
   flex-direction: column;
 }
 
+// Work-center select + inline "New work center" affordance stacked in one
+// dialog-row cell. The button sits compact under the select, left-aligned.
+.op-work-center {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+
+  &__new {
+    align-self: flex-start;
+    height: 1.5rem;
+    font-size: $font-size-xxs;
+
+    .material-icons-outlined {
+      font-size: $icon-size-xs;
+    }
+  }
+}
+
 .operation-materials {
   display: flex;
   flex-direction: column;

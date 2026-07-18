@@ -25,6 +25,9 @@ import { ActivityItem } from '../../../../shared/models/activity.model';
 import { environment } from '../../../../../environments/environment';
 import { VendorQuickCreateDialogComponent, VendorQuickCreateDialogData } from '../../../vendors/components/vendor-quick-create-dialog/vendor-quick-create-dialog.component';
 import { VendorListItem } from '../../../vendors/models/vendor-list-item.model';
+import { SchedulingService } from '../../../scheduling/services/scheduling.service';
+import { WorkCenter } from '../../../scheduling/models/scheduling.model';
+import { WorkCenterQuickCreateDialogComponent, WorkCenterQuickCreateDialogData } from '../../../scheduling/components/work-center-quick-create-dialog/work-center-quick-create-dialog.component';
 
 export type OperationTab = 'details' | 'materials' | 'files' | 'activity';
 
@@ -56,6 +59,7 @@ export class OperationDialogComponent implements OnInit {
   @ViewChild('subcontractVendorPicker') protected subcontractVendorPicker?: EntityPickerComponent;
 
   private readonly partsService = inject(PartsService);
+  private readonly schedulingService = inject(SchedulingService);
   private readonly translate = inject(TranslateService);
   private readonly snackbar = inject(SnackbarService);
   private readonly matDialog = inject(MatDialog);
@@ -71,6 +75,13 @@ export class OperationDialogComponent implements OnInit {
   protected readonly materials = signal<OperationMaterial[]>(this.data.operation?.materials ?? []);
   protected readonly files = signal<FileAttachment[]>([]);
   protected readonly activities = signal<ActivityItem[]>([]);
+
+  /** Work centers for the details-tab select. Loaded eagerly (bounded set) so
+   *  the list is visible on open — the previous asset-typeahead surfaced the
+   *  wrong entity and never showed a list until the user typed. */
+  protected readonly workCenterOptions = signal<SelectOption[]>([
+    { value: null, label: this.translate.instant('parts.workCenterNone') },
+  ]);
 
   protected readonly draftConfig: DraftConfig = {
     entityType: 'operation',
@@ -131,10 +142,41 @@ export class OperationDialogComponent implements OnInit {
   protected readonly commentControl = new FormControl('');
 
   ngOnInit(): void {
+    this.loadWorkCenters();
     if (this.isEditMode) {
       this.loadFiles();
       this.loadActivity();
     }
+  }
+
+  private loadWorkCenters(): void {
+    this.schedulingService.getWorkCenters().subscribe({
+      next: (centers) => this.setWorkCenterOptions(centers),
+    });
+  }
+
+  /**
+   * Builds the select options from the loaded work centers, keeping the
+   * leading "None" option. If the operation being edited references a work
+   * center that isn't in the returned set (e.g. inactive), a synthetic option
+   * is added from the operation's stored name so the current value still
+   * renders instead of showing blank.
+   */
+  private setWorkCenterOptions(centers: WorkCenter[]): void {
+    const options: SelectOption[] = [
+      { value: null, label: this.translate.instant('parts.workCenterNone') },
+      ...centers.map(c => ({ value: c.id, label: c.code ? `${c.code} — ${c.name}` : c.name })),
+    ];
+
+    const currentId = this.data.operation?.workCenterId ?? this.formGroup.controls.workCenterId.value;
+    if (currentId != null && !centers.some(c => c.id === currentId)) {
+      options.push({
+        value: currentId,
+        label: this.data.operation?.workCenterName ?? `#${currentId}`,
+      });
+    }
+
+    this.workCenterOptions.set(options);
   }
 
   private loadFiles(): void {
@@ -290,6 +332,25 @@ export class OperationDialogComponent implements OnInit {
       if (!created) return;
       this.formGroup.controls.subcontractVendorId.setValue(created.id);
       this.subcontractVendorPicker?.setSelected(created.id, created.companyName);
+    });
+  }
+
+  /**
+   * "+ New work center" — opens the quick-create dialog so a routing engineer
+   * can add a missing work center inline without leaving the operation form.
+   * On create, the new center is appended to the select options and selected.
+   */
+  protected onCreateWorkCenter(): void {
+    this.matDialog.open<WorkCenterQuickCreateDialogComponent, WorkCenterQuickCreateDialogData, WorkCenter | null>(
+      WorkCenterQuickCreateDialogComponent,
+      { width: '420px', data: {} },
+    ).afterClosed().subscribe((created) => {
+      if (!created) return;
+      this.workCenterOptions.update(opts => [
+        ...opts,
+        { value: created.id, label: created.code ? `${created.code} — ${created.name}` : created.name },
+      ]);
+      this.formGroup.controls.workCenterId.setValue(created.id);
     });
   }
 }
