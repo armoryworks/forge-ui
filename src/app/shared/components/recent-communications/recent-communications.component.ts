@@ -1,5 +1,5 @@
 import {
-  ChangeDetectionStrategy, Component, computed, effect, inject, input, signal,
+  ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal,
 } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -43,6 +43,16 @@ export class RecentCommunicationsComponent {
   readonly entityId = input.required<number>();
   /** Cap on rendered entries — default 5 (compact section). */
   readonly maxItems = input(5);
+  /** When true, renders a "Log" affordance in the header. The parent owns the
+   *  logging flow (opens the contact-interaction dialog) and reacts to `add`.
+   *  Off by default so surfaces without a manual-log flow (e.g. leads) stay
+   *  read-only. */
+  readonly canAdd = input(false);
+  /** Bump from the parent (a signal) after logging an interaction to force a
+   *  re-fetch — the feed is otherwise only reloaded when the entity changes. */
+  readonly refreshKey = input(0);
+  /** Emitted when the user clicks the header "Log" affordance. */
+  readonly add = output<void>();
 
   protected readonly all = signal<ActivityItem[]>([]);
   protected readonly isLoading = signal(false);
@@ -59,6 +69,7 @@ export class RecentCommunicationsComponent {
     effect(() => {
       const id = this.entityId();
       const type = this.entityType();
+      this.refreshKey(); // tracked — bumping it re-runs the fetch
       if (!id || !type) return;
       this.isLoading.set(true);
       this.activityService.getActivity(type, id).subscribe({

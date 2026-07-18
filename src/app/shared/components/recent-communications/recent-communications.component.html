@@ -3,6 +3,14 @@
     <span class="material-icons-outlined recent-comms__header-icon">forum</span>
     <span class="recent-comms__header-title">{{ 'recentCommunications.title' | translate }}</span>
     <span class="recent-comms__header-count">{{ filtered().length }}</span>
+    @if (canAdd()) {
+      <button class="action-btn action-btn--create action-btn--sm recent-comms__add"
+        (click)="add.emit()"
+        [attr.aria-label]="'recentCommunications.logAriaLabel' | translate">
+        <span class="material-icons-outlined">add</span>
+        {{ 'recentCommunications.log' | translate }}
+      </button>
+    }
   </div>
 
   @if (isLoading() && filtered().length === 0) {

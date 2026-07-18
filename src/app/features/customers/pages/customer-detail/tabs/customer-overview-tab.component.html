@@ -140,8 +140,10 @@
       }
     </section>
 
-    <!-- Wave 8 — auto-logged email + voice from sales rep mailboxes / VoIP. -->
-    <app-recent-communications entityType="Customer" [entityId]="customer().id" />
+    <!-- Wave 8 — auto-logged email + voice from sales rep mailboxes / VoIP,
+         plus an inline "Log" affordance for manual contact interactions. -->
+    <app-recent-communications entityType="Customer" [entityId]="customer().id"
+      [canAdd]="true" [refreshKey]="commRefreshKey()" (add)="logInteraction()" />
 
   </div>
 </div>

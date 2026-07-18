@@ -37,8 +37,10 @@
       <app-input
         [label]="'account.communications.imap.password' | translate"
         type="password"
+        autocomplete="new-password"
         formControlName="password"
-        [required]="true" />
+        [required]="true"
+        [placeholder]="'account.communications.imap.passwordHint' | translate" />
 
       @if (isCustom()) {
         <div class="imap-form__row">

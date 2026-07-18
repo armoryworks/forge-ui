@@ -1762,6 +1762,7 @@
     "interactions": {
       "logInteraction": "Log Interaction",
       "editInteraction": "Edit Interaction",
+      "noContact": "— No contact —",
       "saveChanges": "Save Changes",
       "filterContact": "Contact",
       "filterType": "Type",
@@ -3533,7 +3534,8 @@
         "port": "Port",
         "useSsl": "Use SSL/TLS",
         "username": "Email Address",
-        "password": "Password",
+        "password": "Personal Access Token",
+        "passwordHint": "App password or access token — not your login password",
         "mailbox": "Mailbox Folder",
         "connectSuccess": "IMAP mailbox connected — first sync runs within 15 minutes.",
         "connectFailed": "Connection test failed. Verify host, port, and credentials.",
@@ -7551,7 +7553,9 @@
   "recentCommunications": {
     "title": "Recent Communications",
     "loading": "Loading…",
-    "empty": "No recent communications. Connect a mailbox or phone line under Account > Communications to start auto-logging."
+    "empty": "No recent communications. Connect a mailbox or phone line under Account > Communications to start auto-logging.",
+    "log": "Log",
+    "logAriaLabel": "Log a contact interaction"
   },
   "setupIntegrations": {
     "title": "Set up your integrations",

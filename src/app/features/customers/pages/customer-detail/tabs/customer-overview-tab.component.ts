@@ -1,12 +1,15 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { CustomerSummary } from '../../../models/customer-summary.model';
 import { CustomerService } from '../../../services/customer.service';
 import { CreditStatusCardComponent } from '../../../components/credit-status-card/credit-status-card.component';
+import { ContactInteractionDialogComponent, ContactInteractionDialogData } from '../../../components/contact-interaction-dialog/contact-interaction-dialog.component';
+import { ContactInteraction } from '../../../models/contact-interaction.model';
 import { CapDirective } from '../../../../../shared/directives/cap.directive';
 import { RecentCommunicationsComponent } from '../../../../../shared/components/recent-communications/recent-communications.component';
 import { TextareaComponent } from '../../../../../shared/components/textarea/textarea.component';
@@ -33,6 +36,7 @@ export class CustomerOverviewTabComponent {
   private readonly service = inject(CustomerService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(MatDialog);
 
   readonly customer = input.required<CustomerSummary>();
   readonly customerUpdated = output<void>();
@@ -40,6 +44,10 @@ export class CustomerOverviewTabComponent {
   protected readonly pendingFlags = signal<Set<string>>(new Set());
   protected readonly editingNotes = signal(false);
   protected readonly notesControl = new FormControl<string>('', { nonNullable: true });
+
+  /** Bumped after logging an interaction so the Recent Communications widget
+   *  re-fetches its feed to show the fresh entry. */
+  protected readonly commRefreshKey = signal(0);
 
   protected readonly complianceFlags: ComplianceFlagDef[] = [
     { key: 'isFdaRegulated', labelKey: 'customers.compliance.fdaRegulated', helpKey: 'customers.compliance.fdaRegulatedHelp' },
@@ -130,5 +138,22 @@ export class CustomerOverviewTabComponent {
     const pending = new Set(this.pendingFlags());
     pending.delete(key);
     this.pendingFlags.set(pending);
+  }
+
+  /**
+   * Opens the shared contact-interaction dialog from the Recent Communications
+   * widget's inline "Log" affordance. On save, bump the refresh key so the
+   * widget re-fetches and the just-logged interaction appears immediately.
+   */
+  protected logInteraction(): void {
+    this.dialog.open<ContactInteractionDialogComponent, ContactInteractionDialogData, ContactInteraction | null>(
+      ContactInteractionDialogComponent,
+      {
+        width: '520px',
+        data: { customerId: this.customer().id, interaction: null },
+      },
+    ).afterClosed().subscribe((saved) => {
+      if (saved) this.commRefreshKey.update(k => k + 1);
+    });
   }
 }

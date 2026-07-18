@@ -1757,6 +1757,7 @@
     "interactions": {
       "logInteraction": "Registrar interacción",
       "editInteraction": "Editar interacción",
+      "noContact": "— Sin contacto —",
       "saveChanges": "Guardar cambios",
       "filterContact": "Contacto",
       "filterType": "Tipo",
@@ -3533,7 +3534,8 @@
         "port": "Puerto",
         "useSsl": "Usar SSL/TLS",
         "username": "Dirección de correo",
-        "password": "Contraseña",
+        "password": "Token de acceso personal",
+        "passwordHint": "Contraseña de aplicación o token de acceso — no su contraseña de inicio de sesión",
         "mailbox": "Carpeta del buzón",
         "connectSuccess": "Buzón IMAP conectado — la primera sincronización se ejecuta en 15 minutos.",
         "connectFailed": "La prueba de conexión falló. Verifique servidor, puerto y credenciales.",
@@ -7551,7 +7553,9 @@
   "recentCommunications": {
     "title": "Comunicaciones recientes",
     "loading": "Cargando…",
-    "empty": "Sin comunicaciones recientes. Conecte un buzón o teléfono en Cuenta > Comunicaciones para empezar a registrarlas automáticamente."
+    "empty": "Sin comunicaciones recientes. Conecte un buzón o teléfono en Cuenta > Comunicaciones para empezar a registrarlas automáticamente.",
+    "log": "Registrar",
+    "logAriaLabel": "Registrar una interacción con el contacto"
   },
   "setupIntegrations": {
     "title": "Configure sus integraciones",

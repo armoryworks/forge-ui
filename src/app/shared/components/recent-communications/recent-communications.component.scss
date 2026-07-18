@@ -31,6 +31,17 @@
     color: var(--text-muted);
   }
 
+  // Compact header "Log" affordance — keep it short so the widget header
+  // stays dense per the space-efficiency rule.
+  &__add {
+    height: 1.5rem;
+    font-size: $font-size-xxs;
+
+    .material-icons-outlined {
+      font-size: $icon-size-xs;
+    }
+  }
+
   &__loading,
   &__empty {
     padding: $sp-md;
