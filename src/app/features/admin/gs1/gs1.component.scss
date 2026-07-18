@@ -1,0 +1,51 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+.gs1 {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  max-width: 640px;
+
+  &__intro {
+    color: var(--text-secondary);
+    font-size: $font-size-base;
+    margin: 0;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+    max-width: 360px;
+  }
+
+  &__hint {
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+    margin: 0;
+
+    &--muted {
+      font-style: italic;
+    }
+  }
+
+  &__capacity {
+    display: flex;
+    align-items: baseline;
+    gap: $sp-md;
+    padding-top: $sp-md;
+    border-top: $border-width-thin solid var(--border);
+  }
+
+  &__capacity-label {
+    @include uppercase-label($font-size-xxs);
+    color: var(--text-muted);
+  }
+
+  &__capacity-value {
+    font-family: $font-family-mono;
+    font-size: $font-size-lg;
+    color: var(--text);
+  }
+}

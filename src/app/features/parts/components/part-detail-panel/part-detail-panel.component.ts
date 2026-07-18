@@ -33,6 +33,8 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { StlViewerComponent } from '../../../../shared/components/stl-viewer/stl-viewer.component';
 import { BarcodeInfoComponent } from '../../../../shared/components/barcode-info/barcode-info.component';
+import { CapDirective } from '../../../../shared/directives/cap.directive';
+import { PartGtinSectionComponent } from '../part-gtin-section/part-gtin-section.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { PartQuickCreateDialogComponent, PartQuickCreateDialogData } from '../part-quick-create-dialog/part-quick-create-dialog.component';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
@@ -96,6 +98,7 @@ type BomViewMode = 'table' | 'tree';
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     EntityPickerComponent, EntityLinkComponent, LoadingBlockDirective, ValidationButtonComponent,
     StlViewerComponent, BarcodeInfoComponent,
+    CapDirective, PartGtinSectionComponent,
     DataTableComponent, ColumnCellDirective,
     BomTreeComponent, BomRevisionHistoryComponent,
     SerialNumbersTabComponent, VendorSourcesPanelComponent, PartPurchaseUnitsClusterComponent,
@@ -450,6 +453,12 @@ export class PartDetailPanelComponent {
 
   protected closePanel(): void {
     this.closed.emit();
+  }
+
+  /** GTIN assigned / removed on the Identity tab — reload so the bound part shows the change. */
+  protected onGtinChanged(): void {
+    const p = this.part();
+    if (p) this.loadDetail(p.id);
   }
 
   /**

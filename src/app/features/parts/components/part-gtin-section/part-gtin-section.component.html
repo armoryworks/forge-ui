@@ -1,0 +1,72 @@
+<div class="gtin">
+  <span class="gtin__label">{{ 'parts.gtin.label' | translate }}</span>
+
+  @if (gtin(); as code) {
+    <div class="gtin__assigned">
+      <span class="chip chip--success">{{ 'parts.gtin.chip' | translate }}</span>
+      <span class="gtin__code">{{ code }}</span>
+      <button class="action-btn action-btn--danger action-btn--sm" type="button"
+        data-testid="part-gtin-remove"
+        (click)="removeGtin()">
+        <span class="material-icons-outlined">delete</span>
+        {{ 'parts.gtin.remove' | translate }}
+      </button>
+    </div>
+  } @else {
+    <div class="gtin__unassigned">
+      <span class="gtin__hint">{{ 'parts.gtin.internalHint' | translate }}</span>
+      <button class="action-btn action-btn--sm" type="button"
+        data-testid="part-gtin-assign"
+        (click)="openAssign()">
+        <span class="material-icons-outlined">qr_code_2</span>
+        {{ 'parts.gtin.assign' | translate }}
+      </button>
+    </div>
+  }
+</div>
+
+@if (showAssignDialog()) {
+  <app-dialog [title]="'parts.gtin.assignTitle' | translate" width="440px" (closed)="closeAssign()">
+    <div class="gtin-assign">
+      <p class="gtin-assign__intro">{{ 'parts.gtin.assignIntro' | translate }}</p>
+
+      <div class="gtin-assign__path">
+        <h4 class="gtin-assign__path-title">{{ 'parts.gtin.autoTitle' | translate }}</h4>
+        <p class="gtin-assign__path-hint">{{ 'parts.gtin.autoHint' | translate }}</p>
+        <button class="action-btn action-btn--primary" type="button"
+          data-testid="part-gtin-auto"
+          [disabled]="assigning()"
+          (click)="autoAllocate()">
+          <span class="material-icons-outlined">auto_awesome</span>
+          {{ 'parts.gtin.autoCta' | translate }}
+        </button>
+      </div>
+
+      <div class="gtin-assign__divider">{{ 'parts.gtin.or' | translate }}</div>
+
+      <div class="gtin-assign__path" [formGroup]="manualForm">
+        <h4 class="gtin-assign__path-title">{{ 'parts.gtin.manualTitle' | translate }}</h4>
+        <app-input
+          type="text"
+          data-testid="part-gtin-manual-input"
+          [label]="'parts.gtin.manualLabel' | translate"
+          formControlName="manualGtin"
+          [maxlength]="14"
+          [placeholder]="'parts.gtin.manualPlaceholder' | translate" />
+        <app-validation-button [violations]="manualViolations" [loading]="assigning()">
+          <button class="action-btn" type="button"
+            data-testid="part-gtin-manual-assign"
+            [disabled]="manualForm.invalid || manualEmpty() || assigning()"
+            (click)="assignManual()">
+            <span class="material-icons-outlined">save</span>
+            {{ 'parts.gtin.manualCta' | translate }}
+          </button>
+        </app-validation-button>
+      </div>
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" type="button" (click)="closeAssign()">{{ 'common.cancel' | translate }}</button>
+    </div>
+  </app-dialog>
+}

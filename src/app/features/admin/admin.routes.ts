@@ -147,6 +147,16 @@ export const ADMIN_ROUTES: Routes = [
     loadComponent: () =>
       import('./costing/costing.component').then((m) => m.CostingComponent),
   },
+  // GS1 GTIN barcode identity — optional. Company-prefix settings that let
+  // parts be assigned globally-unique GTINs for retail / marketplace channels.
+  // Off by default; gated by CAP-MD-GS1 (route guard) + Admin/Manager on the
+  // server. Routed before the `:tab` catch-all so the literal segment wins.
+  {
+    path: 'gs1',
+    canActivate: [capabilityGuard('CAP-MD-GS1')],
+    loadComponent: () =>
+      import('./gs1/gs1.component').then((m) => m.Gs1Component),
+  },
   // Phase 1m option-3 — /admin/configuration was the parallel admin
   // surface for the descriptor-driven settings. Retired: the existing
   // /admin/integrations page (rendered inside AdminComponent's

@@ -1,0 +1,37 @@
+<app-page-layout [pageTitle]="'admin.gs1.title' | translate">
+  <ng-container content>
+    <div class="gs1" [appLoadingBlock]="loading()" [formGroup]="form">
+      <p class="gs1__intro">{{ 'admin.gs1.intro' | translate }}</p>
+
+      <div class="gs1__field">
+        <app-input
+          type="text"
+          [label]="'admin.gs1.companyPrefixLabel' | translate"
+          formControlName="companyPrefix"
+          [maxlength]="11"
+          [isReadonly]="!canEdit"
+          [placeholder]="'admin.gs1.companyPrefixPlaceholder' | translate" />
+        <p class="gs1__hint">{{ 'admin.gs1.companyPrefixHint' | translate }}</p>
+      </div>
+
+      @if (configured()) {
+        <div class="gs1__capacity">
+          <span class="gs1__capacity-label">{{ 'admin.gs1.remainingCapacity' | translate }}</span>
+          <span class="gs1__capacity-value">{{ remainingCapacity() | number }}</span>
+        </div>
+      } @else {
+        <p class="gs1__hint gs1__hint--muted">{{ 'admin.gs1.notConfigured' | translate }}</p>
+      }
+    </div>
+  </ng-container>
+
+  <ng-container actions>
+    @if (canEdit) {
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" [disabled]="form.invalid || saving()" (click)="save()">
+          <span class="material-icons-outlined">save</span> {{ 'common.save' | translate }}
+        </button>
+      </app-validation-button>
+    }
+  </ng-container>
+</app-page-layout>

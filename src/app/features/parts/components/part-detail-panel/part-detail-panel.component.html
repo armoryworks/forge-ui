@@ -89,6 +89,12 @@
             [naturalIdentifier]="part.partNumber"
             [compact]="true" />
 
+          <!-- GS1 GTIN identity — only when CAP-MD-GS1 is enabled. Off by
+               default; the part keeps its free internal barcode above. -->
+          <div *appCap="'CAP-MD-GS1'">
+            <app-part-gtin-section [part]="part" (changed)="onGtinChanged()" />
+          </div>
+
           <!-- Phase 5: Promote to Active (Draft-only, runs readiness validators) -->
           @if (part.status === 'Draft') {
             <div class="promote-section">

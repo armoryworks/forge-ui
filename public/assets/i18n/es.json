@@ -523,6 +523,28 @@
     "bulkAssign": "Asignar en Lote"
   },
   "parts": {
+    "gtin": {
+      "label": "GTIN de GS1",
+      "chip": "GS1",
+      "internalHint": "Usa el código de barras interno gratuito. Asigne un GTIN solo para piezas vendidas a comercios minoristas o mercados.",
+      "assign": "Asignar GTIN",
+      "remove": "Quitar",
+      "removeTitle": "¿Quitar GTIN?",
+      "removeMessage": "Esto borra el GTIN de la pieza y la revierte a su código de barras interno. Puede asignar un nuevo GTIN más tarde.",
+      "removedToast": "GTIN quitado. La pieza volvió a su código interno.",
+      "assignTitle": "Asignar GTIN",
+      "assignIntro": "Asigne a esta pieza un GTIN único a nivel mundial. Asigne uno automáticamente desde el prefijo de empresa GS1 o ingrese un GTIN que compró por separado.",
+      "autoTitle": "Asignar automáticamente desde el prefijo de empresa",
+      "autoHint": "Genera el siguiente GTIN disponible bajo su prefijo GS1 con licencia.",
+      "autoCta": "Asignar automáticamente",
+      "or": "o",
+      "manualTitle": "Ingresar un GTIN comprado",
+      "manualLabel": "GTIN",
+      "manualPlaceholder": "8 a 14 dígitos",
+      "manualCta": "Asignar GTIN",
+      "allocatedToast": "GTIN asignado desde su prefijo de empresa.",
+      "assignedToast": "GTIN asignado."
+    },
     "title": "Catálogo de Piezas",
     "part": "Pieza",
     "searchByPartNumber": "Buscar por número de pieza…",
@@ -2676,6 +2698,7 @@
       "teams": "Equipos y Kioscos",
       "salesTax": "Impuesto",
       "costing": "Costeo",
+      "gs1": "GS1 / GTIN",
       "leadSources": "Fuentes de Leads",
       "icpRubrics": "Rúbricas ICP",
       "assignmentRules": "Reglas de Asignación",
@@ -2912,6 +2935,16 @@
       "ratePlaceholder": "ej. 150",
       "noWorkCenters": "Aún no hay centros de trabajo activos. Agregue centros de trabajo antes de configurar tarifas departamentales.",
       "saved": "Perfil de costeo guardado."
+    },
+    "gs1": {
+      "title": "Identidad de Código de Barras GS1 GTIN",
+      "intro": "Los GTIN de GS1 son códigos de barras únicos a nivel mundial para las piezas que vende a través de comercios minoristas o mercados en línea. Ingrese su prefijo de empresa GS1 con licencia para comenzar a asignar GTIN; déjelo en blanco y cada pieza conservará su código de barras interno gratuito.",
+      "companyPrefixLabel": "Prefijo de empresa GS1",
+      "companyPrefixPlaceholder": "ej. 0614141",
+      "companyPrefixHint": "6 a 11 dígitos, exactamente como los licenció GS1. Borrarlo revierte cada pieza a su código de barras interno.",
+      "remainingCapacity": "Capacidad restante de GTIN",
+      "notConfigured": "No hay prefijo de empresa configurado: las piezas usan su código de barras interno hasta que agregue uno.",
+      "saved": "Configuración de GS1 guardada."
     },
     "carriers": {
       "title": "Transportistas",

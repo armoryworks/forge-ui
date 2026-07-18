@@ -1,0 +1,78 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.gtin {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  margin-top: $sp-md;
+
+  &__label {
+    @include uppercase-label($font-size-xxs);
+    color: var(--text-muted);
+  }
+
+  &__assigned,
+  &__unassigned {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    flex-wrap: wrap;
+  }
+
+  &__code {
+    font-family: $font-family-mono;
+    font-size: $font-size-base;
+    color: var(--text);
+  }
+
+  &__hint {
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+    font-style: italic;
+  }
+}
+
+.gtin-assign {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__intro {
+    color: var(--text-secondary);
+    font-size: $font-size-base;
+    margin: 0;
+  }
+
+  &__path {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__path-title {
+    @include uppercase-label($font-size-xxs);
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  &__path-hint {
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+    margin: 0;
+  }
+
+  &__divider {
+    @include flex-center;
+    @include uppercase-label($font-size-xxs);
+    color: var(--text-muted);
+    gap: $sp-md;
+
+    &::before,
+    &::after {
+      content: '';
+      flex: 1;
+      border-top: $border-width-thin solid var(--border);
+    }
+  }
+}

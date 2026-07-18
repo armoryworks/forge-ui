@@ -523,6 +523,28 @@
     "bulkAssign": "Bulk Assign"
   },
   "parts": {
+    "gtin": {
+      "label": "GS1 GTIN",
+      "chip": "GS1",
+      "internalHint": "Uses the free internal barcode. Assign a GTIN only for parts sold to retail or marketplaces.",
+      "assign": "Assign GTIN",
+      "remove": "Remove",
+      "removeTitle": "Remove GTIN?",
+      "removeMessage": "This clears the part's GTIN and reverts it to its internal barcode. You can assign a new GTIN later.",
+      "removedToast": "GTIN removed. Part reverted to its internal code.",
+      "assignTitle": "Assign GTIN",
+      "assignIntro": "Give this part a globally-unique GTIN. Auto-allocate one from your GS1 company prefix, or enter a GTIN you purchased separately.",
+      "autoTitle": "Auto-allocate from company prefix",
+      "autoHint": "Generates the next available GTIN under your licensed GS1 prefix.",
+      "autoCta": "Auto-allocate",
+      "or": "or",
+      "manualTitle": "Enter a purchased GTIN",
+      "manualLabel": "GTIN",
+      "manualPlaceholder": "8–14 digits",
+      "manualCta": "Assign GTIN",
+      "allocatedToast": "GTIN allocated from your company prefix.",
+      "assignedToast": "GTIN assigned."
+    },
     "title": "Parts Catalog",
     "part": "Part",
     "searchByPartNumber": "Search by part number…",
@@ -2676,6 +2698,7 @@
       "teams": "Teams & Kiosks",
       "salesTax": "Sales Tax",
       "costing": "Costing",
+      "gs1": "GS1 / GTIN",
       "leadSources": "Lead Sources",
       "icpRubrics": "ICP Rubrics",
       "assignmentRules": "Assignment Rules",
@@ -2912,6 +2935,16 @@
       "ratePlaceholder": "e.g. 150",
       "noWorkCenters": "No active work centers yet. Add work centers before configuring departmental rates.",
       "saved": "Costing profile saved."
+    },
+    "gs1": {
+      "title": "GS1 GTIN Barcode Identity",
+      "intro": "GS1 GTINs are globally-unique barcodes for parts you sell through retail or online marketplaces. Enter your licensed GS1 company prefix to start assigning GTINs; leave it blank and every part keeps its free internal barcode.",
+      "companyPrefixLabel": "GS1 company prefix",
+      "companyPrefixPlaceholder": "e.g. 0614141",
+      "companyPrefixHint": "6–11 digits, exactly as licensed by GS1. Clearing this reverts every part to its internal barcode.",
+      "remainingCapacity": "Remaining GTIN capacity",
+      "notConfigured": "No company prefix set — parts use their internal barcode until you add one.",
+      "saved": "GS1 settings saved."
     },
     "carriers": {
       "title": "Carriers",
