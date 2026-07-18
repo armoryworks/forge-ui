@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -14,6 +15,7 @@ import { ReferenceDataService } from '../../../../shared/services/reference-data
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate, todayStart } from '../../../../shared/utils/date.utils';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
+import { companyOrContactRequired } from '../../validators/company-or-contact.validator';
 import { CreateLeadRequest } from '../../models/create-lead-request.model';
 import { LeadEngagementShape } from '../../models/lead-engagement-shape.type';
 import { AccountsService } from '../../services/accounts.service';
@@ -93,7 +95,7 @@ export class NewLeadForkDialogComponent {
   // when the team's intake convention demands it. Today no extras are
   // required; expand as the team's convention firms up.
   protected readonly form = new FormGroup({
-    companyName: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(200)] }),
+    companyName: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(200), companyOrContactRequired(this.translate.instant('leads.companyOrContactRequired'))] }),
     contactName: new FormControl<string>('', { nonNullable: true }),
     email: new FormControl<string>('', { nonNullable: true, validators: [Validators.email] }),
     phone: new FormControl<string>('', { nonNullable: true }),
@@ -154,6 +156,12 @@ export class NewLeadForkDialogComponent {
     || this.showsReferenceJob() || this.showsPrototypeFields());
 
   constructor() {
+    // Re-validate the company/contact cross-field rule when the contact name
+    // changes (filling in a contact satisfies the "company OR contact" rule).
+    this.form.controls.contactName.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.form.controls.companyName.updateValueAndValidity());
+
     // Source options come from ref-data the same way the legacy create
     // dialog populated them — reused for parity (the team's existing
     // source taxonomy applies regardless of shape).

@@ -2316,6 +2316,8 @@
     "bulkAssignFailed": "Bulk assign failed.",
     "companyName": "Company Name",
     "contactName": "Contact Name",
+    "companyOrContactRequired": "Enter a company name or a contact name.",
+    "companyOrContactHint": "Leave the company blank for an individual — a contact name alone is fine.",
     "source": "Source",
     "followUpDate": "Follow-Up Date",
     "notes": "Notes",

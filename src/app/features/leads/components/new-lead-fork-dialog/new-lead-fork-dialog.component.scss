@@ -1,6 +1,12 @@
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
 
+.form-hint {
+  margin: 0;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}
+
 .lead-fork {
   display: flex;
   flex-direction: column;

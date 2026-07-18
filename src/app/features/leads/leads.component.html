@@ -89,7 +89,7 @@
           (selectionChange)="onLeadsSelectionChange($event)"
           (rowClick)="openLeadDetail($any($event).id)">
           <ng-template appColumnCell="companyName" let-lead>
-            <span class="company-name">{{ lead.companyName }}</span>
+            <span class="company-name">{{ lead.companyName || lead.contactName }}</span>
           </ng-template>
           <ng-template appColumnCell="contactName" let-lead>
             <span class="text-muted">{{ lead.contactName ?? '—' }}</span>
@@ -155,19 +155,21 @@
                 [cdkDragData]="lead"
                 (click)="openLeadDetail(lead.id)"
                 (keydown.enter)="openLeadDetail(lead.id)"
-                [attr.aria-label]="lead.companyName">
+                [attr.aria-label]="lead.companyName || lead.contactName">
 
                 <!-- Drag placeholder -->
                 <div class="pipeline-card__placeholder" *cdkDragPlaceholder></div>
 
                 <!-- Drag preview -->
                 <div class="pipeline-card__preview" *cdkDragPreview>
-                  <span class="pipeline-card__company">{{ lead.companyName }}</span>
+                  <span class="pipeline-card__company">{{ lead.companyName || lead.contactName }}</span>
                 </div>
 
-                <!-- Card body -->
-                <div class="pipeline-card__company">{{ lead.companyName }}</div>
-                @if (lead.contactName) {
+                <!-- Card body — for an individual (no company) the contact
+                     name is the primary label, so the contact sub-row only
+                     shows when there's a distinct company above it. -->
+                <div class="pipeline-card__company">{{ lead.companyName || lead.contactName }}</div>
+                @if (lead.companyName && lead.contactName) {
                   <div class="pipeline-card__contact">
                     <app-avatar [initials]="getInitials(lead.contactName)" size="sm" />
                     <span class="pipeline-card__contact-name">{{ lead.contactName }}</span>
@@ -210,6 +212,7 @@
       <app-input data-testid="lead-company-name" [label]="'leads.companyName' | translate" formControlName="companyName" />
 
       <app-input data-testid="lead-contact-name" [label]="'leads.contactName' | translate" formControlName="contactName" />
+      <p class="form-hint">{{ 'leads.companyOrContactHint' | translate }}</p>
 
       <div class="dialog-row">
         <app-input data-testid="lead-email" [label]="'common.email' | translate" type="email" formControlName="email" />

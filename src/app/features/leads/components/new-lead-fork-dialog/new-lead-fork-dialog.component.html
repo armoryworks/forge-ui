@@ -28,11 +28,13 @@
       <p class="step-hint step-hint--muted">{{ 'leads.fork.step2Hint' | translate }}</p>
 
       <div [formGroup]="form" class="form-grid">
-        <!-- Always-visible base fields. Same shape as the legacy flat dialog. -->
+        <!-- Always-visible base fields. Company OR contact is required —
+             individuals (no company) fill in only the contact name. -->
         <app-input data-testid="lead-company-name" [label]="'leads.companyName' | translate"
-                   formControlName="companyName" [required]="true" [maxlength]="200" />
+                   formControlName="companyName" [maxlength]="200" />
         <app-input data-testid="lead-contact-name" [label]="'leads.contactName' | translate"
                    formControlName="contactName" [maxlength]="200" />
+        <p class="form-hint">{{ 'leads.companyOrContactHint' | translate }}</p>
         <div class="form-row">
           <app-input data-testid="lead-email" [label]="'common.email' | translate"
                      formControlName="email" type="email" />

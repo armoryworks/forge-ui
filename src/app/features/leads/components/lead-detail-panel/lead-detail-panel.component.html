@@ -9,8 +9,8 @@
       <div class="detail-header__info">
         <span class="material-icons-outlined detail-icon">business</span>
         <div>
-          <div class="detail-company">{{ lead.companyName }}</div>
-          @if (lead.contactName) {
+          <div class="detail-company">{{ lead.companyName || lead.contactName }}</div>
+          @if (lead.companyName && lead.contactName) {
             <div class="detail-contact">{{ lead.contactName }}</div>
           }
         </div>

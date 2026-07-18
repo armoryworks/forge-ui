@@ -9,6 +9,7 @@ import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkDragPreview }
 
 import { LeadsService } from './services/leads.service';
 import { AccountsService } from './services/accounts.service';
+import { companyOrContactRequired } from './validators/company-or-contact.validator';
 import { LeadItem } from './models/lead-item.model';
 import { Account } from './models/account.model';
 import { LeadStatus } from './models/lead-status.type';
@@ -106,7 +107,7 @@ export class LeadsComponent implements OnInit {
   protected readonly showDialog = signal(false);
   protected readonly editingLead = signal<LeadItem | null>(null);
   protected readonly leadForm = new FormGroup({
-    companyName: new FormControl('', [Validators.required]),
+    companyName: new FormControl('', [companyOrContactRequired(this.translate.instant('leads.companyOrContactRequired'))]),
     contactName: new FormControl(''),
     email: new FormControl('', [Validators.email]),
     phone: new FormControl(''),
@@ -204,6 +205,12 @@ export class LeadsComponent implements OnInit {
   });
 
   constructor() {
+    // Re-validate the company/contact cross-field rule when the contact name
+    // changes (filling a contact satisfies the "company OR contact" rule).
+    this.leadForm.controls.contactName.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.leadForm.controls.companyName.updateValueAndValidity());
+
     // Wave 4 — URL-as-truth on filter state. Hydrate from query params on
     // mount so a refresh / shared link lands on the same filter pose, then
     // mirror back via syncUrl() on every change. replaceUrl prevents the

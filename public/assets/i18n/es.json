@@ -2316,6 +2316,8 @@
     "bulkAssignFailed": "Asignación masiva fallida.",
     "companyName": "Nombre de Empresa",
     "contactName": "Nombre de Contacto",
+    "companyOrContactRequired": "Ingrese un nombre de empresa o un nombre de contacto.",
+    "companyOrContactHint": "Deje la empresa en blanco para un particular — basta con un nombre de contacto.",
     "source": "Fuente",
     "followUpDate": "Fecha de Seguimiento",
     "notes": "Notas",
