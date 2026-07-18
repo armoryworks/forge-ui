@@ -8,6 +8,7 @@ import { PartListItem } from '../models/part-list-item.model';
 import { PartDetail } from '../models/part-detail.model';
 import { CreatePartRequest } from '../models/create-part-request.model';
 import { UpdatePartRequest } from '../models/update-part-request.model';
+import { BulkPartIntakeRequest, BulkPartIntakeResponse } from '../models/bulk-part-intake.model';
 import { CreateBOMLineRequest } from '../models/create-bom-line-request.model';
 import { UpdateBOMLineRequest } from '../models/update-bom-line-request.model';
 import { PartStatus } from '../models/part-status.type';
@@ -265,5 +266,15 @@ export class PartsService {
   /** Phase 3 H4 / WU-20 — read one immutable BOM revision in detail. */
   getBomRevisionById(partId: number, revisionId: number): Observable<BomRevisionDetail> {
     return this.http.get<BomRevisionDetail>(`${this.base}/${partId}/bom/revisions/${revisionId}`);
+  }
+
+  /** Bulk import — dry-run classification of uploaded rows (nothing persisted). */
+  bulkIntakePreview(request: BulkPartIntakeRequest): Observable<BulkPartIntakeResponse> {
+    return this.http.post<BulkPartIntakeResponse>(`${this.base}/bulk-intake/preview`, request);
+  }
+
+  /** Bulk import — persist the rows classified as new (server-issued part numbers + barcodes). */
+  bulkIntakeCommit(request: BulkPartIntakeRequest): Observable<BulkPartIntakeResponse> {
+    return this.http.post<BulkPartIntakeResponse>(`${this.base}/bulk-intake/commit`, request);
   }
 }

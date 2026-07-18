@@ -1,0 +1,105 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+// Page-scroll contract — see styles/_shared.scss. Routed page host must be a
+// bounded flex column or the inner scroll container has nothing to clip against.
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.imp {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  max-width: 900px;
+}
+
+.imp-card {
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+  padding: $sp-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__title {
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    margin: 0;
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+  }
+}
+
+.imp-source {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+
+  &__or {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+}
+
+.imp-upload {
+  cursor: pointer;
+}
+
+.imp-actions {
+  display: flex;
+  gap: $sp-sm;
+}
+
+.imp-summary {
+  display: flex;
+  gap: $sp-sm;
+}
+
+.imp-errors {
+  margin: 0;
+  padding-left: $sp-lg;
+  font-size: var(--font-size-sm);
+  color: var(--error);
+}
+
+.imp-partnum {
+  margin-left: $sp-sm;
+  font-family: $font-family-mono;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.imp-table {
+  overflow-x: auto;
+  @include custom-scrollbar(6px);
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-size-sm);
+  }
+
+  th, td {
+    text-align: left;
+    padding: $sp-xs $sp-sm;
+    border-bottom: $border-width-thin solid var(--border);
+    white-space: nowrap;
+  }
+
+  th {
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
+    color: var(--text-muted);
+  }
+}

@@ -1,4 +1,8 @@
 <app-page-header [title]="'parts.title' | translate" [subtitle]="'parts.subtitle' | translate" helpTourId="parts">
+  <button class="action-btn" data-testid="import-parts-btn" (click)="openImport()">
+    <span class="material-icons-outlined">upload_file</span>
+    {{ 'parts.importParts' | translate }}
+  </button>
   <button class="action-btn action-btn--create" data-testid="new-part-btn" (click)="openCreatePart()">
     <span class="material-icons-outlined">add</span>
     {{ 'parts.createPart' | translate }}

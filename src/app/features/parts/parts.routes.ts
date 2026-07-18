@@ -22,6 +22,13 @@ export const PARTS_ROUTES: Routes = [
     children: [
       { path: '', component: PartsComponent },
       { path: 'new', component: PartWorkflowPageComponent },
+      // Literal paths must precede the catch-all ':id' (which the workflow
+      // page treats as a part id).
+      {
+        path: 'import',
+        loadComponent: () =>
+          import('./pages/import/part-import.component').then(m => m.PartImportPageComponent),
+      },
       { path: ':id', component: PartWorkflowPageComponent },
     ],
   },

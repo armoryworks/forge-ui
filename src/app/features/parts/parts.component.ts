@@ -508,6 +508,11 @@ export class PartsComponent {
       });
   }
 
+  /** Navigates to the bulk part-import page (CSV upload / paste → preview → commit). */
+  protected openImport(): void {
+    this.router.navigate(['/parts/import']);
+  }
+
   /**
    * Maps a (procurement, inventory) combo to its canonical workflow
    * definition id. The 11 viable combos are seeded server-side; the fork
