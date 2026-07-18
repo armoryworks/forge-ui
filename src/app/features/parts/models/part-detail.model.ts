@@ -35,9 +35,10 @@ export interface PartDetail {
   externalId: string | null;
   externalRef: string | null;
   provider: string | null;
-  // GS1 GTIN barcode identity (CAP-MD-GS1). Null when the part uses its free
-  // internal barcode; set to a globally-unique GTIN once assigned/allocated.
-  gtin: string | null;
+  // GS1 GTIN barcode identity (CAP-MD-GS1). Absent/null when the part uses its
+  // free internal barcode; set to a globally-unique GTIN once assigned/allocated.
+  // Optional so existing part fixtures/constructions stay valid.
+  gtin?: string | null;
   preferredVendorId: number | null;
   preferredVendorName: string | null;
   minStockThreshold: number | null;
