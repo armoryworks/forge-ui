@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { catchError, forkJoin, interval, of } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -93,15 +93,23 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
   protected readonly kioskSession = inject(KioskSessionService);
 
-  // Training-preview mode — a guided training walkthrough launched this kiosk
-  // for the ALREADY-authenticated user, so the display renders as a preview and
-  // must NOT wipe/replace their session. Captured once in ngOnInit from the
-  // in-memory kiosk flag; see the SECURITY note there for the full gate.
-  protected readonly trainingMode = signal(false);
-  private isTrainingSession = false;
+  // Training PREVIEW mode. Sourced ONLY from static route data (the training
+  // walkthrough navigates to the `preview` child route, which sets
+  // `data.preview = true`); it is NOT a runtime flag, URL param, or in-memory
+  // state. The real kiosk route (`''`) never carries this data, so the kiosk's
+  // clear-on-entry stays UNCONDITIONAL — there is no runtime input that can
+  // make the real terminal skip it.
+  //
+  // In preview the component is deliberately inert: it renders representative
+  // MOCK data, never calls clearAuth / scanLogin / login / any mutation, and
+  // never touches the real backend. The trainee's own session is simply left
+  // alone (nothing clears it), so they return to the module still logged in —
+  // by construction, not by a security carve-out.
+  protected readonly previewMode = this.route.snapshot.data['preview'] === true;
 
   // Data
   protected readonly overview = signal<ShopFloorOverview | null>(null);
@@ -115,13 +123,12 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   // load shop-floor data (which would 401). In the static demo there's no
   // backend to pair against, so treat the kiosk as already paired and let the
   // mocked shop-floor data render instead of the setup screen.
-  // In a training preview the device isn't a paired kiosk — skip the pairing
-  // gate so the walkthrough can render the real shop-floor UI (the launching
-  // user is authenticated, so data loads normally).
+  // A training preview isn't a paired kiosk — skip the pairing gate so the
+  // walkthrough can render the (mock-populated) shop-floor UI.
   protected readonly isUnpaired = signal(
     !environment.demoMode
     && !localStorage.getItem('forge-kiosk-device-token')
-    && !this.kioskSession.isTrainingMode(),
+    && !this.previewMode,
   );
 
   // Live elapsed times — recomputed every second via tick signal
@@ -236,6 +243,10 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   // Passive scan listener — reacts to ScannerService signals
   private readonly scanEffect = effect(() => {
     const scan = this.scanner.lastScan();
+    // Preview is inert — never process a scan (it would hit identifyScan on the
+    // real backend). Preview also never sets scan context to 'shop-floor', but
+    // guard explicitly.
+    if (this.previewMode) return;
     if (!scan || scan.context !== 'shop-floor') return;
     this.scanner.clearLastScan();
 
@@ -252,31 +263,24 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   });
 
   ngOnInit(): void {
-    // The kiosk is a shared terminal, so it normally wipes any inherited
-    // session on entry — that's what stops worker A's token lingering for
-    // worker B. The ONE exception is a training preview:
-    //
-    //   SECURITY — skip the wipe only when BOTH hold, captured once here:
-    //   (a) kioskSession.isTrainingMode() — an IN-MEMORY flag set solely by the
-    //       in-app training-walkthrough launcher. It is never read from the URL,
-    //       localStorage, or IndexedDB and resets to false on every page load,
-    //       so a real/shared kiosk (direct load, new tab, refresh) always has it
-    //       false and still clears. It cannot be forged by navigating to
-    //       /display/shop-floor?walkthrough=… .
-    //   (b) authService.isAuthenticated() — a valid session already exists. We
-    //       only ever PRESERVE the launching user's own legitimate session;
-    //       we never MINT or GRANT one. No session ⇒ nothing to preserve ⇒
-    //       normal clear.
-    //
-    // Real sign-in (scanLogin/login) is disabled while this is true, and the
-    // flag is cleared on destroy, so training mode cannot switch identity or
-    // bleed into a later real kiosk session.
-    this.isTrainingSession = this.kioskSession.isTrainingMode() && this.authService.isAuthenticated();
-    this.trainingMode.set(this.isTrainingSession);
-
-    if (!this.isTrainingSession) {
-      this.authService.clearAuth();
+    // Training PREVIEW — a wholly inert path. It renders representative mock
+    // data for the guided tour and NEVER touches auth or the backend: no
+    // clearAuth (so the logged-in trainee's own session is left intact and they
+    // return to the module still signed in), no scanner-driven sign-in, no data
+    // loads. Returning early keeps the real kiosk path below completely
+    // unconditional — nothing about the preview can weaken it.
+    if (this.previewMode) {
+      this.loadPreviewData();
+      this.updateClock();
+      interval(1000)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => this.updateClock());
+      return;
     }
+
+    // Real shared-terminal kiosk: unconditionally wipe any inherited session on
+    // entry — this is what stops worker A's token lingering for worker B.
+    this.authService.clearAuth();
     this.updateClock();
 
     // If this device isn't paired yet, skip all data loads — the template
@@ -308,11 +312,34 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
       .subscribe(() => this.updateClock());
   }
 
+  /**
+   * Representative, entirely local data for the training preview — enough for
+   * the tour to highlight worker cards, the status summary, and the scan bar.
+   * No network, no real identities.
+   */
+  private loadPreviewData(): void {
+    this.workers.set([
+      {
+        userId: -1, name: 'Alex Morgan', email: '', initials: 'AM', avatarColor: '#2563eb',
+        isClockedIn: true, clockedInAt: null, status: 'In', currentTask: 'CNC Milling',
+        currentJobNumber: 'JOB-1042', timeOnTask: '1h 12m', statusSince: null, role: 'ProductionWorker',
+        assignments: [{
+          jobId: -1, jobNumber: 'JOB-1042', title: 'Precision Shaft Assembly', priorityName: 'High',
+          stageName: 'In Production', stageColor: '#16a34a', isOverdue: false, hasActiveTimer: true,
+        }],
+      },
+      {
+        userId: -2, name: 'Priya Shah', email: '', initials: 'PS', avatarColor: '#db2777',
+        isClockedIn: false, clockedInAt: null, status: 'Out', currentTask: null,
+        currentJobNumber: null, timeOnTask: '', statusSince: null, role: 'ProductionWorker', assignments: [],
+      },
+    ]);
+    this.overview.set({ activeJobs: [], workers: [], completedToday: 6, maintenanceAlerts: 0 });
+    this.upcomingEvents.set([]);
+    this.error.set(null);
+  }
+
   ngOnDestroy(): void {
-    // Belt-and-suspenders: leaving the kiosk always ends training mode, so it
-    // can never outlive this visit and affect a later real kiosk session in the
-    // same tab. (The training launcher also clears it on tour finish/cancel.)
-    this.kioskSession.disableTrainingMode();
     this.scanner.stop();
     // Restore the main site's <html data-theme> so leaving the kiosk doesn't
     // leak the kiosk's theme back into the main app shell.
@@ -365,6 +392,11 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   // ─── Worker Selection (tap on card → PIN) ───
 
   protected selectWorker(worker: ClockWorker): void {
+    // Preview: cards are illustrative only — never start a real sign-in.
+    if (this.previewMode) {
+      this.showScanFeedback('Sign-in is simulated during training');
+      return;
+    }
     // Tapping a card identifies the worker — still need PIN to authenticate
     this.enterPinPhase(worker, null);
   }
@@ -383,11 +415,10 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   protected onPinSubmit(): void {
     this.clearPhaseTimeout(); // User is actively submitting
 
-    // Training preview: never perform a real sign-in. A real scanLogin/login
-    // would mint a worker token and replace the launching user's preserved
-    // session (identity switch). The walkthrough doesn't require signing in, so
-    // just return to the main screen.
-    if (this.isTrainingSession) {
+    // Preview: never perform a real sign-in (defence-in-depth — the preview
+    // doesn't run the scanner or enter this phase, but if it ever does, a real
+    // scanLogin/login must not run and mint/replace a session).
+    if (this.previewMode) {
       this.showScanFeedback('Sign-in is simulated during training');
       this.resetToMain();
       return;
@@ -828,13 +859,10 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   // exiting must re-authenticate. Confirm first so a mis-tap on a shop-floor
   // screen doesn't drop the worker to login.
   protected exitKiosk(): void {
-    // Training preview: the user is still their authenticated self — leave their
-    // session intact and drop them back into the app rather than the shared-
-    // terminal "clear + /login" path. (End training mode so a later real kiosk
-    // use of this same tab starts clean.)
-    if (this.isTrainingSession) {
-      this.kioskSession.disableTrainingMode();
-      this.scanner.stop();
+    // Preview: the user is still their authenticated self — leave their session
+    // intact and drop them back into the app instead of the shared-terminal
+    // "clear + /login" path.
+    if (this.previewMode) {
       this.router.navigate(['/dashboard']);
       return;
     }
@@ -902,9 +930,10 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   private ephemeralLogout(): void {
     this.clearAutoLogoutTimer();
-    // In a training preview there is no ephemeral worker session to end and we
-    // must not touch the launching user's session — only reset the display.
-    if (!this.isTrainingSession) this.authService.clearAuth();
+    // Defence-in-depth: the preview never establishes a worker session (no
+    // sign-in) and doesn't reach here, but must never clear the trainee's own
+    // session if it somehow does — only reset the display.
+    if (!this.previewMode) this.authService.clearAuth();
     this.loadData();
     this.resetToMain();
   }
@@ -912,7 +941,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private resetToMain(): void {
     this.clearAutoLogoutTimer();
     this.clearPhaseTimeout();
-    if (!this.isTrainingSession) this.authService.clearAuth();
+    if (!this.previewMode) this.authService.clearAuth();
     this.selectedWorker.set(null);
     this.scannedValue.set(null);
     this.pinError.set(null);
@@ -922,9 +951,9 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   }
 
   private startAutoLogoutTimer(): void {
-    // No idle auto-logout during a training preview — it would reset the tour
-    // mid-step; there's no ephemeral worker session to time out anyway.
-    if (this.isTrainingSession) return;
+    // No idle auto-logout in the preview — nothing to time out, and it would
+    // reset the tour mid-step.
+    if (this.previewMode) return;
     this.clearAutoLogoutTimer();
     this.autoLogoutTimer = setTimeout(() => this.ephemeralLogout(), AUTO_LOGOUT_MS);
   }

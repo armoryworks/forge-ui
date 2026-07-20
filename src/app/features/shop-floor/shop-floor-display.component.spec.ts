@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { of } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
@@ -19,23 +19,21 @@ import { InventoryService } from '../inventory/services/inventory.service';
 import { ShipmentService } from '../shipments/services/shipment.service';
 
 /**
- * SECURITY-CRITICAL: the shop-floor kiosk is a shared terminal, so it wipes any
- * inherited session on entry. These tests pin the ONE exception — a training
- * preview — and prove the exception can only PRESERVE an already-authenticated
- * user's session, never GRANT one, and that it cannot switch identity. If any of
- * these flip, the kiosk has become a session-lingering back door.
+ * SECURITY-CRITICAL. The shop-floor kiosk is a shared terminal that wipes any
+ * inherited session on entry. The training tour uses a SEPARATE `preview` child
+ * route (static `data.preview = true`), so:
+ *   - the real kiosk route always clears on entry — there is no runtime input
+ *     (URL param, in-memory flag, storage) that can make it skip, and
+ *   - the preview is inert: mock data only, no clearAuth / scanLogin / login.
+ * If any of these flip, the kiosk has regressed into a session-lingering or
+ * identity-switch hazard.
  */
-describe('ShopFloorDisplayComponent — training-preview session handling', () => {
+describe('ShopFloorDisplayComponent — kiosk vs inert training preview', () => {
   const auth = {
     clearAuth: vi.fn(),
     isAuthenticated: vi.fn(() => true),
     scanLogin: vi.fn(() => of({})),
     login: vi.fn(() => of({})),
-  };
-  const kiosk = {
-    isTrainingMode: vi.fn(() => false),
-    enableTrainingMode: vi.fn(),
-    disableTrainingMode: vi.fn(),
   };
   const scanner = {
     setContext: vi.fn(), restart: vi.fn(), stop: vi.fn(), clearLastScan: vi.fn(),
@@ -50,18 +48,18 @@ describe('ShopFloorDisplayComponent — training-preview session handling', () =
     load: vi.fn(), isWorking: () => false, isOnBreakOrLunch: () => false,
     isClockedOut: () => false, isActive: () => false,
   };
+  const kiosk = { isTrainingMode: () => false };
+  const routeMock = { snapshot: { data: {} as Record<string, unknown> } };
   const noop = {};
 
-  function create(): ShopFloorDisplayComponent {
+  function create(preview: boolean): ShopFloorDisplayComponent {
+    routeMock.snapshot.data = preview ? { preview: true } : {};
     const fixture = TestBed.createComponent(ShopFloorDisplayComponent);
     return fixture.componentInstance;
   }
 
   beforeEach(() => {
     vi.clearAllMocks();
-    auth.isAuthenticated.mockReturnValue(true);
-    kiosk.isTrainingMode.mockReturnValue(false);
-    // No paired-kiosk token so the pairing gate is what training mode must lift.
     localStorage.removeItem('forge-kiosk-device-token');
 
     TestBed.configureTestingModule({
@@ -70,6 +68,7 @@ describe('ShopFloorDisplayComponent — training-preview session handling', () =
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: AuthService, useValue: auth },
+        { provide: ActivatedRoute, useValue: routeMock },
         { provide: KioskSessionService, useValue: kiosk },
         { provide: ScannerService, useValue: scanner },
         { provide: ShopFloorService, useValue: shopFloor },
@@ -84,55 +83,39 @@ describe('ShopFloorDisplayComponent — training-preview session handling', () =
         { provide: TranslateService, useValue: { instant: (k: string) => k } },
       ],
     });
-    // Strip the heavy kiosk template so no child components need mocking; the
-    // component's TypeScript (ngOnInit guards, etc.) is unchanged.
+    // Strip the heavy kiosk template so no child components need mocking.
     TestBed.overrideComponent(ShopFloorDisplayComponent, { set: { template: '', imports: [] } });
   });
 
-  it('clears the inherited session on entry when NOT a training preview', () => {
-    kiosk.isTrainingMode.mockReturnValue(false);
-    const c = create();
+  it('the REAL kiosk route unconditionally clears the inherited session on entry', () => {
+    const c = create(false); // route data has no `preview`
     c.ngOnInit();
     expect(auth.clearAuth).toHaveBeenCalled();
   });
 
-  it('PRESERVES the session when a training preview is launched by an authenticated user', () => {
-    kiosk.isTrainingMode.mockReturnValue(true);
-    auth.isAuthenticated.mockReturnValue(true);
-    const c = create();
+  it('the preview route NEVER touches auth (no clearAuth) so the trainee stays signed in', () => {
+    const c = create(true);
     c.ngOnInit();
     expect(auth.clearAuth).not.toHaveBeenCalled();
   });
 
-  it('SECURITY: still clears when the training flag is set but no session exists (never grants one)', () => {
-    kiosk.isTrainingMode.mockReturnValue(true);
-    auth.isAuthenticated.mockReturnValue(false); // nothing legitimate to preserve
-    const c = create();
+  it('the preview route hits no backend — renders local mock data instead', () => {
+    const c = create(true);
     c.ngOnInit();
-    expect(auth.clearAuth).toHaveBeenCalled();
+    expect(shopFloor.getClockStatus).not.toHaveBeenCalled();
+    expect(shopFloor.getOverview).not.toHaveBeenCalled();
+    // Representative cards exist for the tour to highlight.
+    expect((c as unknown as { workers: () => unknown[] }).workers().length).toBeGreaterThan(0);
   });
 
-  it('SECURITY: never performs a real sign-in during a training preview (no identity switch)', () => {
-    kiosk.isTrainingMode.mockReturnValue(true);
-    auth.isAuthenticated.mockReturnValue(true);
-    const c = create();
+  it('SECURITY: tapping a card in preview performs no real sign-in (no identity switch)', () => {
+    const c = create(true);
     c.ngOnInit();
-
-    // Simulate a scan+PIN attempt mid-tour.
-    (c as unknown as { scannedValue: { set: (v: string) => void } }).scannedValue.set('BADGE-123');
-    (c as unknown as { pinControl: { setValue: (v: string) => void } }).pinControl.setValue('1234');
+    const worker = (c as unknown as { workers: () => { userId: number }[] }).workers()[0];
+    (c as unknown as { selectWorker: (w: unknown) => void }).selectWorker(worker);
+    // And a defensive direct PIN submit is also a no-op.
     (c as unknown as { onPinSubmit: () => void }).onPinSubmit();
-
     expect(auth.scanLogin).not.toHaveBeenCalled();
     expect(auth.login).not.toHaveBeenCalled();
-  });
-
-  it('ends training mode when the kiosk is left (cannot outlive the visit)', () => {
-    kiosk.isTrainingMode.mockReturnValue(true);
-    auth.isAuthenticated.mockReturnValue(true);
-    const c = create();
-    c.ngOnInit();
-    c.ngOnDestroy();
-    expect(kiosk.disableTrainingMode).toHaveBeenCalled();
   });
 });
