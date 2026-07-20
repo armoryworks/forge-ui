@@ -9,6 +9,7 @@ import { LoadingBlockDirective } from '../../../shared/directives/loading-block.
 import { createTourSvg, clearTourConnector, updateTourConnector, attachScrollRefresh, setupPopoverDraggable } from '../../../shared/utils/tour-connector.utils';
 
 import { AuthService } from '../../../shared/services/auth.service';
+import { KioskSessionService } from '../../../shared/services/kiosk-session.service';
 import { TrainingService } from '../services/training.service';
 import { TrainingModuleDetail } from '../models/training-module.model';
 import { ArticleContent } from '../models/article-content.model';
@@ -29,6 +30,7 @@ import { attachAdvanceGate } from '../walkthrough-gate.util';
 export class TrainingModuleComponent implements OnInit {
   private readonly trainingService = inject(TrainingService);
   private readonly authService = inject(AuthService);
+  private readonly kioskSession = inject(KioskSessionService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -191,9 +193,19 @@ export class TrainingModuleComponent implements OnInit {
     // Capture references — component may be destroyed before tour ends
     const router = this.router;
     const trainingService = this.trainingService;
+    const kioskSession = this.kioskSession;
     const numericModuleId = this.module()?.id;
     const ngZone = this.ngZone;
     const fromUrl = this.fromUrl();
+
+    // Shop-floor walkthroughs run inside the shared-terminal kiosk, which wipes
+    // the session on entry. Mark this as a training preview (an IN-MEMORY flag,
+    // set here in-app right before navigating — never via the URL) so the kiosk
+    // preserves THIS already-authenticated user's session and drops them back on
+    // the module instead of forcing a re-login. Scoped to the shop-floor route;
+    // cleared on tour finish / cancel and by the kiosk on destroy.
+    const isShopFloorWalkthrough = content.appRoute.startsWith('/display/shop-floor');
+    if (isShopFloorWalkthrough) kioskSession.enableTrainingMode();
     // First run = never completed: interaction gates are HARD (no skip).
     // Repeat run (already completed): gates are advisory — Next stays available.
     const firstRun = !this.completed();
@@ -230,12 +242,14 @@ export class TrainingModuleComponent implements OnInit {
         const finishTour = () => {
           cleanup();
           gateDetach();
+          // End the training preview so the kiosk stops preserving the session
+          // once the tour is over (the kiosk also clears it on destroy).
+          if (isShopFloorWalkthrough) kioskSession.disableTrainingMode();
           ngZone.run(() => {
             if (numericModuleId) {
+              // With the session preserved (training preview) this POST now
+              // succeeds; the queue fallback stays for the token-expired case.
               trainingService.completeModule(numericModuleId).subscribe({
-                // Shop-floor walkthroughs end with the session already cleared
-                // (kiosk ephemeralLogout), so this POST 401s — queue the
-                // completion and TrainingService replays it on next login.
                 error: () => trainingService.queueCompletion(numericModuleId),
               });
               // Carry ?from= back to the splash so its Back button still
@@ -357,6 +371,9 @@ export class TrainingModuleComponent implements OnInit {
           .subscribe(() => {
             navSub.unsubscribe();
             cleanup();
+            // User bailed out of the tour (back button, sidebar, etc.) — end the
+            // training preview too so it doesn't linger.
+            if (isShopFloorWalkthrough) kioskSession.disableTrainingMode();
             setTimeout(() => { try { d.destroy(); } catch { /* already destroyed */ } }, 0);
           });
       }).catch(() => {

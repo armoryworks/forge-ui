@@ -96,8 +96,12 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private readonly dialog = inject(MatDialog);
   protected readonly kioskSession = inject(KioskSessionService);
 
-  // Training mode — when enabled, actions are simulated (no backend calls)
+  // Training-preview mode — a guided training walkthrough launched this kiosk
+  // for the ALREADY-authenticated user, so the display renders as a preview and
+  // must NOT wipe/replace their session. Captured once in ngOnInit from the
+  // in-memory kiosk flag; see the SECURITY note there for the full gate.
   protected readonly trainingMode = signal(false);
+  private isTrainingSession = false;
 
   // Data
   protected readonly overview = signal<ShopFloorOverview | null>(null);
@@ -111,8 +115,13 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   // load shop-floor data (which would 401). In the static demo there's no
   // backend to pair against, so treat the kiosk as already paired and let the
   // mocked shop-floor data render instead of the setup screen.
+  // In a training preview the device isn't a paired kiosk — skip the pairing
+  // gate so the walkthrough can render the real shop-floor UI (the launching
+  // user is authenticated, so data loads normally).
   protected readonly isUnpaired = signal(
-    !environment.demoMode && !localStorage.getItem('forge-kiosk-device-token'),
+    !environment.demoMode
+    && !localStorage.getItem('forge-kiosk-device-token')
+    && !this.kioskSession.isTrainingMode(),
   );
 
   // Live elapsed times — recomputed every second via tick signal
@@ -243,7 +252,31 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   });
 
   ngOnInit(): void {
-    this.authService.clearAuth();
+    // The kiosk is a shared terminal, so it normally wipes any inherited
+    // session on entry — that's what stops worker A's token lingering for
+    // worker B. The ONE exception is a training preview:
+    //
+    //   SECURITY — skip the wipe only when BOTH hold, captured once here:
+    //   (a) kioskSession.isTrainingMode() — an IN-MEMORY flag set solely by the
+    //       in-app training-walkthrough launcher. It is never read from the URL,
+    //       localStorage, or IndexedDB and resets to false on every page load,
+    //       so a real/shared kiosk (direct load, new tab, refresh) always has it
+    //       false and still clears. It cannot be forged by navigating to
+    //       /display/shop-floor?walkthrough=… .
+    //   (b) authService.isAuthenticated() — a valid session already exists. We
+    //       only ever PRESERVE the launching user's own legitimate session;
+    //       we never MINT or GRANT one. No session ⇒ nothing to preserve ⇒
+    //       normal clear.
+    //
+    // Real sign-in (scanLogin/login) is disabled while this is true, and the
+    // flag is cleared on destroy, so training mode cannot switch identity or
+    // bleed into a later real kiosk session.
+    this.isTrainingSession = this.kioskSession.isTrainingMode() && this.authService.isAuthenticated();
+    this.trainingMode.set(this.isTrainingSession);
+
+    if (!this.isTrainingSession) {
+      this.authService.clearAuth();
+    }
     this.updateClock();
 
     // If this device isn't paired yet, skip all data loads — the template
@@ -276,6 +309,10 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Belt-and-suspenders: leaving the kiosk always ends training mode, so it
+    // can never outlive this visit and affect a later real kiosk session in the
+    // same tab. (The training launcher also clears it on tour finish/cancel.)
+    this.kioskSession.disableTrainingMode();
     this.scanner.stop();
     // Restore the main site's <html data-theme> so leaving the kiosk doesn't
     // leak the kiosk's theme back into the main app shell.
@@ -345,6 +382,17 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   protected onPinSubmit(): void {
     this.clearPhaseTimeout(); // User is actively submitting
+
+    // Training preview: never perform a real sign-in. A real scanLogin/login
+    // would mint a worker token and replace the launching user's preserved
+    // session (identity switch). The walkthrough doesn't require signing in, so
+    // just return to the main screen.
+    if (this.isTrainingSession) {
+      this.showScanFeedback('Sign-in is simulated during training');
+      this.resetToMain();
+      return;
+    }
+
     const credential = this.pinControl.value?.trim();
     const scanValue = this.scannedValue();
     const worker = this.selectedWorker();
@@ -780,6 +828,17 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   // exiting must re-authenticate. Confirm first so a mis-tap on a shop-floor
   // screen doesn't drop the worker to login.
   protected exitKiosk(): void {
+    // Training preview: the user is still their authenticated self — leave their
+    // session intact and drop them back into the app rather than the shared-
+    // terminal "clear + /login" path. (End training mode so a later real kiosk
+    // use of this same tab starts clean.)
+    if (this.isTrainingSession) {
+      this.kioskSession.disableTrainingMode();
+      this.scanner.stop();
+      this.router.navigate(['/dashboard']);
+      return;
+    }
+
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
@@ -843,7 +902,9 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   private ephemeralLogout(): void {
     this.clearAutoLogoutTimer();
-    this.authService.clearAuth();
+    // In a training preview there is no ephemeral worker session to end and we
+    // must not touch the launching user's session — only reset the display.
+    if (!this.isTrainingSession) this.authService.clearAuth();
     this.loadData();
     this.resetToMain();
   }
@@ -851,7 +912,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private resetToMain(): void {
     this.clearAutoLogoutTimer();
     this.clearPhaseTimeout();
-    this.authService.clearAuth();
+    if (!this.isTrainingSession) this.authService.clearAuth();
     this.selectedWorker.set(null);
     this.scannedValue.set(null);
     this.pinError.set(null);
@@ -861,6 +922,9 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   }
 
   private startAutoLogoutTimer(): void {
+    // No idle auto-logout during a training preview — it would reset the tour
+    // mid-step; there's no ephemeral worker session to time out anyway.
+    if (this.isTrainingSession) return;
     this.clearAutoLogoutTimer();
     this.autoLogoutTimer = setTimeout(() => this.ephemeralLogout(), AUTO_LOGOUT_MS);
   }
