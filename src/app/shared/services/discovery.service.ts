@@ -90,8 +90,9 @@ export class DiscoveryService {
 
   /**
    * Filters the catalog down to the questions the current user should see —
-   * opening + branch-applicable + override + diagnostic + exit. Consultant
-   * deepdives are surfaced only when consultant mode is on.
+   * opening + branch-applicable + override + diagnostic. Consultant
+   * deepdives are surfaced only when consultant mode is on. Exit (Q-X1)
+   * is excluded — it's the header skip link, not a step.
    */
   readonly visibleQuestions = computed<DiscoveryQuestion[]>(() => {
     const branch = this.branch();
@@ -100,12 +101,17 @@ export class DiscoveryService {
     const all = this._questions();
 
     return all.filter((q) => {
-      // Opening, override, diagnostic, exit always visible.
+      // Exit (Q-X1) is the skip-to-Custom ramp, surfaced as the persistent
+      // header link (exitToCustom) — never as a numbered wizard step. Its
+      // text references preset descriptions that a sequential step never
+      // shows, so rendering it as a question reads as broken.
+      if (q.stage === 'Exit') return false;
+
+      // Opening, override, diagnostic always visible.
       if (
         q.stage === 'Opening' ||
         q.stage === 'Override' ||
-        q.stage === 'Diagnostic' ||
-        q.stage === 'Exit'
+        q.stage === 'Diagnostic'
       ) {
         // Consultant deepdive is filtered by category, not stage.
         if (q.category === 'ConsultantDeepdive' && !consultant) return false;
