@@ -13,4 +13,10 @@ export interface CreatePartRequest {
   procurementSource: ProcurementSource;
   inventoryClass: InventoryClass;
   materialSpecId?: number;
+  /**
+   * Optional caller-supplied part number. Honored only when the
+   * `parts.allow_manual_numbers` system setting is enabled; otherwise the
+   * server ignores it and auto-generates. Blank => auto-generated.
+   */
+  partNumber?: string;
 }

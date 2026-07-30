@@ -725,6 +725,10 @@
     "operationAdded": "Operation added.",
     "operationUpdated": "Operation updated.",
     "operationDeleted": "Operation deleted.",
+    "operationReordered": "Routing order updated.",
+    "operationReorderFailed": "Could not save the new routing order.",
+    "reorderOperation": "Drag to reorder",
+    "reorderOperationAria": "Drag to reorder operation",
     "operationDetails": "Details",
     "operationMaterials": "Materials",
     "operationFiles": "Files",
@@ -4135,6 +4139,9 @@
   "partQuickCreate": {
     "title": "Quick-create part",
     "hint": "Name, procurement, and inventory class — the minimum needed to reference this part. Finish the rest later from the part's detail page.",
+    "partNumberLabel": "Part Number",
+    "partNumberHint": "Leave blank to auto-generate",
+    "partNumberInfo": "Manual part numbers are enabled. Enter a custom number or leave blank to auto-generate one.",
     "create": "Create part",
     "created": "Part “{{name}}” created."
   },

@@ -30,9 +30,12 @@
     @if (operations().length === 0) {
       <app-empty-state icon="route" [message]="'parts.noOperations' | translate" />
     } @else {
-      <div class="routing__operations">
+      <div class="routing__operations" cdkDropList (cdkDropListDropped)="onReorderOperation($event)">
         @for (operation of operations(); track operation.id) {
-          <div class="operation-card">
+          <div class="operation-card" cdkDrag>
+            <span class="operation-card__drag material-icons-outlined" cdkDragHandle
+                  [matTooltip]="'parts.reorderOperation' | translate" matTooltipPosition="above"
+                  [attr.aria-label]="'parts.reorderOperationAria' | translate">drag_indicator</span>
             <div class="operation-card__number">{{ operation.stepNumber }}</div>
             <div class="operation-card__content">
               <div class="operation-card__title">

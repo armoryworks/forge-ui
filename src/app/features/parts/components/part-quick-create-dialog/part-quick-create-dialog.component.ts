@@ -37,11 +37,13 @@ export interface PartQuickCreateDialogData {
  * catalog context — Dan's call: default ProcurementSource but NOT
  * InventoryClass). User picks InventoryClass explicitly.
  *
- * PartNumber is server-assigned (PartsService doesn't accept one). Every
- * other detail field is left null and must be filled in via the full part
- * edit / workflow later — capability-indexed completeness (PR #3) will
- * surface the resulting part as "Incomplete for compliance" / etc., as
- * appropriate.
+ * PartNumber is normally server-assigned. When the `parts.allow_manual_numbers`
+ * system setting is enabled (surfaced via GET /parts/config), an optional
+ * Part Number field appears and, if filled, is sent to the server; blank still
+ * auto-generates. Every other detail field is left null and must be filled in
+ * via the full part edit / workflow later — capability-indexed completeness
+ * (PR #3) will surface the resulting part as "Incomplete for compliance" /
+ * etc., as appropriate.
  *
  * Returns the created PartDetail on resolve, or null on dismiss.
  */
@@ -65,6 +67,10 @@ export class PartQuickCreateDialogComponent {
 
   protected readonly saving = signal(false);
 
+  // Gated by the `parts.allow_manual_numbers` system setting (GET /parts/config).
+  // When false, the part-number field is hidden and the server auto-generates.
+  protected readonly allowManualPartNumber = signal(false);
+
   protected readonly form = new FormGroup({
     name: new FormControl<string>(
       this.data.initialName ?? '',
@@ -78,7 +84,20 @@ export class PartQuickCreateDialogComponent {
       null,
       [Validators.required],
     ),
+    // Optional; only surfaced/sent when manual part numbers are enabled.
+    partNumber: new FormControl<string>(
+      '',
+      { nonNullable: true, validators: [Validators.maxLength(50)] },
+    ),
   });
+
+  constructor() {
+    this.partsService.getPartsConfig().subscribe({
+      next: (cfg) => this.allowManualPartNumber.set(cfg.allowManualPartNumbers),
+      // On failure, leave manual entry off — the server still auto-generates.
+      error: () => this.allowManualPartNumber.set(false),
+    });
+  }
 
   protected readonly title = computed(() =>
     this.translate.instant('partQuickCreate.title'),
@@ -111,10 +130,15 @@ export class PartQuickCreateDialogComponent {
     if (this.form.invalid) return;
     this.saving.set(true);
     const v = this.form.getRawValue();
+    const manualPartNumber = v.partNumber.trim();
     this.partsService.createPart({
       name: v.name.trim(),
       procurementSource: v.procurementSource,
       inventoryClass: v.inventoryClass!,
+      // Only send when enabled and non-empty; blank => server auto-generates.
+      ...(this.allowManualPartNumber() && manualPartNumber
+        ? { partNumber: manualPartNumber }
+        : {}),
     }).subscribe({
       next: (created) => {
         this.saving.set(false);

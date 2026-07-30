@@ -35,6 +35,22 @@
   border: $border-width-thin solid var(--border);
   background: var(--surface);
 
+  &__drag {
+    align-self: center;
+    flex-shrink: 0;
+    cursor: grab;
+    color: var(--text-muted);
+    font-size: $icon-size-sm;
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    &:hover {
+      color: var(--text-secondary);
+    }
+  }
+
   &__number {
     min-width: 28px;
     height: 28px;
@@ -99,6 +115,23 @@
     gap: $sp-xs;
     flex-shrink: 0;
   }
+}
+
+// CDK drag-drop feedback for the routing step list.
+.operation-card.cdk-drag-preview {
+  box-shadow: var(--shadow-lg, 0 6px 16px rgba(0, 0, 0, 0.28));
+}
+
+.operation-card.cdk-drag-placeholder {
+  opacity: 0.4;
+}
+
+.cdk-drag-animating {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.routing__operations.cdk-drop-list-dragging .operation-card:not(.cdk-drag-placeholder) {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 .view-toggle {

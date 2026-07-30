@@ -1,4 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, effect, inject, input, signal } from '@angular/core';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+
+import { forkJoin } from 'rxjs';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -20,7 +23,7 @@ type RoutingViewMode = 'list' | 'flow';
 @Component({
   selector: 'app-routing',
   standalone: true,
-  imports: [EmptyStateComponent, LoadingBlockDirective, TranslatePipe, MatTooltipModule, RoutingFlowViewComponent],
+  imports: [EmptyStateComponent, LoadingBlockDirective, TranslatePipe, MatTooltipModule, RoutingFlowViewComponent, DragDropModule],
   templateUrl: './routing.component.html',
   styleUrl: './routing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -102,6 +105,36 @@ export class RoutingComponent implements OnInit {
         );
         this.snackbar.success(this.translate.instant('parts.operationUpdated'));
       }
+    });
+  }
+
+  // Drag-reorder of routing steps. There is no bulk reorder endpoint, so we
+  // renumber optimistically and PATCH each operation whose stepNumber changed —
+  // the same per-item persistence the kanban board uses for card positions.
+  protected onReorderOperation(event: CdkDragDrop<Operation[]>): void {
+    if (event.previousIndex === event.currentIndex) return;
+
+    const previousStepById = new Map(this.operations().map(op => [op.id, op.stepNumber]));
+
+    const reordered = [...this.operations()];
+    moveItemInArray(reordered, event.previousIndex, event.currentIndex);
+    const renumbered = reordered.map((op, index) => ({ ...op, stepNumber: index + 1 }));
+
+    // Apply the new order immediately for a responsive feel.
+    this.operations.set(renumbered);
+
+    const changed = renumbered.filter(op => previousStepById.get(op.id) !== op.stepNumber);
+    if (changed.length === 0) return;
+
+    forkJoin(
+      changed.map(op => this.partsService.updateOperation(this.partId(), op.id, { stepNumber: op.stepNumber })),
+    ).subscribe({
+      next: () => this.snackbar.success(this.translate.instant('parts.operationReordered')),
+      error: () => {
+        // Re-sync from the server so the UI can't drift from persisted order.
+        this.snackbar.error(this.translate.instant('parts.operationReorderFailed'));
+        this.loadOperations();
+      },
     });
   }
 

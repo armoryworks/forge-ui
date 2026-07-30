@@ -708,6 +708,10 @@
     "operationAdded": "Operación agregada.",
     "operationUpdated": "Operación actualizada.",
     "operationDeleted": "Operación eliminada.",
+    "operationReordered": "Orden de enrutamiento actualizado.",
+    "operationReorderFailed": "No se pudo guardar el nuevo orden de enrutamiento.",
+    "reorderOperation": "Arrastrar para reordenar",
+    "reorderOperationAria": "Arrastrar para reordenar operación",
     "operationDetails": "Detalles",
     "operationMaterials": "Materiales",
     "operationFiles": "Archivos",
@@ -4135,6 +4139,9 @@
   "partQuickCreate": {
     "title": "Crear pieza rápida",
     "hint": "Nombre, procuración y clase de inventario — lo mínimo para referenciar esta pieza. Completa el resto después.",
+    "partNumberLabel": "Número de Pieza",
+    "partNumberHint": "Dejar en blanco para autogenerar",
+    "partNumberInfo": "Los números de pieza manuales están habilitados. Ingresa un número personalizado o déjalo en blanco para autogenerar.",
     "create": "Crear pieza",
     "created": "Pieza «{{name}}» creada."
   },

@@ -7,6 +7,15 @@
       formControlName="name"
       [maxlength]="256"
       [required]="true" />
+    @if (allowManualPartNumber()) {
+      <app-input
+        data-testid="part-quick-create-part-number"
+        [label]="'partQuickCreate.partNumberLabel' | translate"
+        [placeholder]="'partQuickCreate.partNumberHint' | translate"
+        [info]="'partQuickCreate.partNumberInfo' | translate"
+        formControlName="partNumber"
+        [maxlength]="50" />
+    }
     <div class="dialog-row">
       <app-select
         data-testid="part-quick-create-procurement-source"
