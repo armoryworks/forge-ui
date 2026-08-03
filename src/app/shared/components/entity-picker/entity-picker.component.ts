@@ -15,8 +15,15 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
 import { debounceTime, distinctUntilChanged, filter, switchMap, catchError, of } from 'rxjs';
+
+import {
+  SimilarEntitiesDialogComponent,
+  SimilarEntitiesDialogData,
+  SimilarEntitiesDialogResult,
+} from '../similar-entities-dialog/similar-entities-dialog.component';
 
 @Component({
   selector: 'app-entity-picker',
@@ -36,6 +43,7 @@ import { debounceTime, distinctUntilChanged, filter, switchMap, catchError, of }
 export class EntityPickerComponent implements ControlValueAccessor, OnInit {
   private readonly http = inject(HttpClient);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly dialog = inject(MatDialog);
 
   readonly label = input.required<string>();
   readonly entityType = input.required<string>();
@@ -161,14 +169,65 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
       // the input, which previously leaked into the quick-create dialog
       // as the company name pre-fill (and ended up persisted in the DB).
       this.searchControl.setValue('', { emitEvent: false });
-      this.createNew.emit(term);
+      this.handleCreateNew(term);
       return;
     }
-    const entity = value as Record<string, unknown>;
+    this.selectEntity(value as Record<string, unknown>);
+  }
+
+  /** Commit a picked entity row as the selection (shared by result-click and
+   *  the "use this existing one" path of the near-duplicate guard). */
+  private selectEntity(entity: Record<string, unknown>): void {
     this.selectedValue = entity['id'];
     this.searchControl.setValue(String(entity[this.displayField()] ?? ''), { emitEvent: false });
     this.onChange(this.selectedValue);
     this.selected.emit(entity);
+  }
+
+  /**
+   * Near-duplicate guard. Before creating a new entity, look up existing
+   * entities with a similar name; if any, ask the user "did you mean one of
+   * these?" — picking one selects it (no duplicate), "create anyway" proceeds.
+   * Degrades gracefully: entity types with no `/similar` endpoint (or a failed
+   * lookup) fall straight through to create, so behaviour is unchanged there.
+   */
+  private handleCreateNew(term: string): void {
+    const params = new HttpParams().set('name', term);
+    this.http
+      .get<Record<string, unknown>[]>(`/api/v1/${this.entityType()}/similar`, { params })
+      .pipe(
+        catchError(() => of([] as Record<string, unknown>[])),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(candidates => {
+        if (!candidates || candidates.length === 0) {
+          this.createNew.emit(term);
+          return;
+        }
+        this.dialog
+          .open<SimilarEntitiesDialogComponent, SimilarEntitiesDialogData, SimilarEntitiesDialogResult>(
+            SimilarEntitiesDialogComponent,
+            {
+              width: '480px',
+              data: {
+                typedTerm: term,
+                createNewLabel: this.createNewLabel() ?? '',
+                displayField: this.displayField(),
+                secondaryDisplayField: this.secondaryDisplayField(),
+                candidates,
+              },
+            },
+          )
+          .afterClosed()
+          .subscribe(result => {
+            if (!result) return; // dismissed — neither select nor create
+            if (result.action === 'select') {
+              this.selectEntity(result.entity);
+            } else {
+              this.createNew.emit(term);
+            }
+          });
+      });
   }
 
   /**

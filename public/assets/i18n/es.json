@@ -4130,6 +4130,12 @@
   "entityPicker": {
     "createNew": "Crear nuevo {{label}} «{{term}}»"
   },
+  "similarEntities": {
+    "title": "¿Quisiste decir uno de estos?",
+    "intro": "Antes de crear {{label}} «{{term}}», revisa estos existentes que se parecen:",
+    "useThis": "Usar este",
+    "createAnyway": "No, crear «{{term}}»"
+  },
   "vendorQuickCreate": {
     "title": "Crear proveedor rápido",
     "hint": "Solo el nombre de la empresa — completa el resto después desde la página de detalle del proveedor.",

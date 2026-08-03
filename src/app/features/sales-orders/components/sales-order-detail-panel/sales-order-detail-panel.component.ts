@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal, ViewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -19,6 +19,8 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
+import { PartQuickCreateDialogComponent, PartQuickCreateDialogData } from '../../../parts/components/part-quick-create-dialog/part-quick-create-dialog.component';
+import { PartDetail } from '../../../parts/models/part-detail.model';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
@@ -763,6 +765,22 @@ export class SalesOrderDetailPanelComponent {
 
   protected cancelLineEdit(): void {
     this.editingLineId.set(null);
+  }
+
+  @ViewChild('soLinePartPicker') private soLinePartPicker?: EntityPickerComponent;
+
+  /** "+ Create new part" from the line picker (fires after the near-duplicate
+   *  guard) — quick-create the part and select it into the line. */
+  protected onCreateNewPart(term: string): void {
+    this.dialog.open<PartQuickCreateDialogComponent, PartQuickCreateDialogData, PartDetail | null>(
+      PartQuickCreateDialogComponent,
+      { width: '480px', data: { initialName: term } },
+    ).afterClosed().subscribe(created => {
+      if (!created) return;
+      this.lineForm.controls.partId.setValue(created.id);
+      this.soLinePartPicker?.setSelected(created.id, created.name);
+      this.onPartSelected(created as unknown as Record<string, unknown>);
+    });
   }
 
   /** Prefill description + customer-specific unit price from the chosen catalog part. */

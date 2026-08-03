@@ -1,5 +1,5 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, signal, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -23,6 +23,8 @@ import { DatepickerComponent } from '../../../../../shared/components/datepicker
 import { DialogComponent } from '../../../../../shared/components/dialog/dialog.component';
 import { ValidationButtonComponent } from '../../../../../shared/components/validation-button/validation-button.component';
 import { EntityPickerComponent } from '../../../../../shared/components/entity-picker/entity-picker.component';
+import { PartQuickCreateDialogComponent, PartQuickCreateDialogData } from '../../../../parts/components/part-quick-create-dialog/part-quick-create-dialog.component';
+import { PartDetail } from '../../../../parts/models/part-detail.model';
 import { ColumnDef } from '../../../../../shared/models/column-def.model';
 import { SelectOption } from '../../../../../shared/components/select/select.component';
 import { toIsoDate } from '../../../../../shared/utils/date.utils';
@@ -302,6 +304,22 @@ export class CustomerEstimatesTabComponent implements OnInit {
    * dialog uses). The price stays editable — estimates support lump-sum lines —
    * and a manual edit clears the "LIST" badge via the valueChanges sub above.
    */
+  @ViewChild('estimateLinePartPicker') private estimateLinePartPicker?: EntityPickerComponent;
+
+  /** "+ Create new part" from the line picker (fires after the near-duplicate
+   *  guard) — quick-create the part and select it into the line. */
+  protected onCreateNewPart(term: string): void {
+    this.dialog.open<PartQuickCreateDialogComponent, PartQuickCreateDialogData, PartDetail | null>(
+      PartQuickCreateDialogComponent,
+      { width: '480px', data: { initialName: term } },
+    ).afterClosed().subscribe(created => {
+      if (!created) return;
+      this.lineForm.controls.partId.setValue(created.id);
+      this.estimateLinePartPicker?.setSelected(created.id, created.name);
+      this.onPartSelected(created as unknown as Record<string, unknown>);
+    });
+  }
+
   protected onPartSelected(part: Record<string, unknown> | null): void {
     this.priceIsDefault.set(false);
     if (!part) return;

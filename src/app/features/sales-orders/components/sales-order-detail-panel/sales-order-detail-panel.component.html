@@ -435,12 +435,15 @@
               </div>
               @if (editingLineId() === 0) {
                 <app-entity-picker
+                  #soLinePartPicker
                   data-testid="so-line-part"
                   [label]="'common.part' | translate"
                   entityType="parts"
                   displayField="name"
                   secondaryDisplayField="partNumber"
                   formControlName="partId"
+                  [createNewLabel]="'common.part' | translate"
+                  (createNew)="onCreateNewPart($event)"
                   (selected)="onPartSelected($event)" />
               }
               <app-input [label]="'common.description' | translate" formControlName="description" [required]="true" />
