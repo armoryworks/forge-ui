@@ -96,11 +96,18 @@ export class CustomerDetailComponent {
    * returns the unfiltered logical layout; we drop tabs whose capability
    * isn't enabled before rendering, matching the gating already applied
    * to the corresponding controllers.
+   *
+   * `defaultOn` mirrors the server catalog's `IsDefaultOn` for each code
+   * (CapabilityCatalog.cs) and is passed to
+   * `isEnabled(code, defaultWhenUnknown)` so that when NO capability
+   * snapshot is available (descriptor fetch failed and no cached fallback),
+   * default-on tabs fail OPEN instead of silently disappearing — the
+   * regression symptom reported 2026-08-04.
    */
-  private readonly tabCapabilityMap: Partial<Record<CustomerDetailTabId, string>> = {
-    contacts: 'CAP-MD-CUSTOMER-CONTACTS',
-    addresses: 'CAP-MD-CUSTOMER-ADDRESSES',
-    interactions: 'CAP-MD-CUSTOMER-INTERACTIONS',
+  private readonly tabCapabilityMap: Partial<Record<CustomerDetailTabId, { code: string; defaultOn: boolean }>> = {
+    contacts: { code: 'CAP-MD-CUSTOMER-CONTACTS', defaultOn: true },
+    addresses: { code: 'CAP-MD-CUSTOMER-ADDRESSES', defaultOn: true },
+    interactions: { code: 'CAP-MD-CUSTOMER-INTERACTIONS', defaultOn: false },
   };
 
   protected readonly customerId = toSignal(
@@ -119,22 +126,34 @@ export class CustomerDetailComponent {
   protected readonly saving = signal(false);
 
   /**
-   * Pillar 5 — Resolved tab layout for the loaded Customer. Derived from the
-   * customer's lifecycle bucket via `deriveLifecycle(...)`.
+   * Pillar 5 — Resolved tab layout for the loaded Customer, split into the
+   * tabs we render and the tabs dropped by capability gating (kept for the
+   * diagnostics log below). Derived from the customer's lifecycle bucket via
+   * `deriveLifecycle(...)`. The capability snapshot is reactive; toggling a
+   * capability on/off remounts the layout without a manual reload.
    */
-  protected readonly tabLayout = computed<TabLayoutEntry[]>(() => {
+  private readonly tabGating = computed<{ visible: TabLayoutEntry[]; hidden: { tab: TabLayoutEntry; code: string }[] }>(() => {
     const c = this.customer();
-    if (!c) return [];
+    if (!c) return { visible: [], hidden: [] };
     const lifecycle = this.layoutResolver.deriveLifecycle(c);
     const layout = this.layoutResolver.resolve(lifecycle);
-    // Wave 5 — drop tabs whose backing capability is disabled. The
-    // capability snapshot is reactive; toggling a capability on/off
-    // remounts the layout without a manual reload.
-    return layout.filter(tab => {
-      const cap = this.tabCapabilityMap[tab.id];
-      return !cap || this.capabilityService.isEnabled(cap);
-    });
+    const visible: TabLayoutEntry[] = [];
+    const hidden: { tab: TabLayoutEntry; code: string }[] = [];
+    for (const tab of layout) {
+      const gate = this.tabCapabilityMap[tab.id];
+      if (!gate || this.capabilityService.isEnabled(gate.code, gate.defaultOn)) {
+        visible.push(tab);
+      } else {
+        hidden.push({ tab, code: gate.code });
+      }
+    }
+    return { visible, hidden };
   });
+
+  protected readonly tabLayout = computed<TabLayoutEntry[]>(() => this.tabGating().visible);
+
+  /** Last diagnostics line logged — avoids re-logging the same hidden set. */
+  private lastHiddenTabsLog = '';
 
   /**
    * Wave 5 — Bound to the credit-status card's `*appCap`. Returns true
@@ -148,6 +167,20 @@ export class CustomerDetailComponent {
     effect(() => {
       const id = this.customerId();
       if (id > 0) this.loadCustomer(id);
+    });
+
+    // Diagnostics — whenever tabs are dropped by capability gating, say so
+    // in the console with the exact capability code per tab. Turns "is the
+    // missing Contacts tab a flag or a bug?" into a seconds-long check:
+    // an admin opens the console (or /admin/capabilities-debug) instead of
+    // filing a regression.
+    effect(() => {
+      const hidden = this.tabGating().hidden;
+      const line = hidden.map(h => `${h.tab.id} (${h.code})`).join(', ');
+      if (line && line !== this.lastHiddenTabsLog) {
+        console.info(`[CAPABILITY] Customer detail: tabs hidden by disabled capabilities: ${line}`);
+      }
+      this.lastHiddenTabsLog = line;
     });
 
     // If the resolver no longer surfaces the active tab (e.g. customer

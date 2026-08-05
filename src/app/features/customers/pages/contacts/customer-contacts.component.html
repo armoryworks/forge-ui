@@ -1,6 +1,13 @@
 <app-page-header
   [title]="'customers.contactsPage.title' | translate"
-  [subtitle]="'customers.contactsPage.subtitle' | translate" />
+  [subtitle]="'customers.contactsPage.subtitle' | translate">
+  @if (canAddContact()) {
+    <button class="action-btn action-btn--create" data-testid="contacts-page-add-btn" (click)="openAdd()">
+      <span class="material-icons-outlined">add</span>
+      {{ 'customers.addContact' | translate }}
+    </button>
+  }
+</app-page-header>
 
 <div class="page-body" [appLoadingBlock]="loading()">
   <app-data-table
@@ -31,3 +38,9 @@
     </ng-template>
   </app-data-table>
 </div>
+
+@if (showAddDialog()) {
+  <app-customer-contact-dialog
+    (saved)="onContactSaved()"
+    (closed)="closeAdd()" />
+}

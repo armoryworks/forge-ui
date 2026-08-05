@@ -2,6 +2,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
+import { vi } from 'vitest';
+
 import { CapabilityService } from './capability.service';
 import { CapabilityDescriptor, CapabilityDescriptorEntry } from '../models/capability-descriptor.model';
 import { environment } from '../../../environments/environment';
@@ -32,6 +34,9 @@ describe('CapabilityService — Phase 4 Phase-C ETag handling', () => {
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
+    // The service persists a last-known snapshot to localStorage on load —
+    // clear it so ETag tests never see state from another test.
+    localStorage.removeItem('forge-capability-snapshot');
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -41,6 +46,7 @@ describe('CapabilityService — Phase 4 Phase-C ETag handling', () => {
 
   afterEach(() => {
     httpMock.verify();
+    localStorage.removeItem('forge-capability-snapshot');
   });
 
   function loadDescriptor(): void {
@@ -185,5 +191,130 @@ describe('CapabilityService — Phase 4 Phase-C ETag handling', () => {
         },
       ],
     });
+  });
+});
+
+describe('CapabilityService — snapshot fallback (fail-open, 2026-08)', () => {
+  const CACHE_KEY = 'forge-capability-snapshot';
+
+  beforeEach(() => {
+    localStorage.removeItem(CACHE_KEY);
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+  });
+
+  afterEach(() => {
+    localStorage.removeItem(CACHE_KEY);
+    vi.restoreAllMocks();
+  });
+
+  /** Inject AFTER any localStorage seeding — the constructor hydrates the cache. */
+  function inject() {
+    return {
+      service: TestBed.inject(CapabilityService),
+      httpMock: TestBed.inject(HttpTestingController),
+    };
+  }
+
+  function flushDescriptor(httpMock: HttpTestingController, capabilities: CapabilityDescriptorEntry[]): void {
+    const req = httpMock.expectOne(`${environment.apiUrl}/capabilities/descriptor`);
+    req.flush({
+      generatedAt: '2026-08-01T00:00:00Z',
+      totalCount: capabilities.length,
+      enabledCount: capabilities.filter((c) => c.enabled).length,
+      capabilities,
+    } satisfies CapabilityDescriptor);
+  }
+
+  function failDescriptor(httpMock: HttpTestingController): void {
+    const req = httpMock.expectOne(`${environment.apiUrl}/capabilities/descriptor`);
+    req.flush(null, { status: 500, statusText: 'Server Error' });
+  }
+
+  it('persists a compact last-known snapshot to localStorage on successful load', () => {
+    const { service, httpMock } = inject();
+    service.load().subscribe();
+    flushDescriptor(httpMock, [entry({ code: 'CAP-MD-CUSTOMER-CONTACTS', enabled: true, isDefaultOn: true })]);
+
+    const cached = JSON.parse(localStorage.getItem(CACHE_KEY)!) as { generatedAt: string; enabled: Record<string, boolean> };
+    expect(cached.generatedAt).toBe('2026-08-01T00:00:00Z');
+    expect(cached.enabled['CAP-MD-CUSTOMER-CONTACTS']).toBe(true);
+    // Compact shape only — no ETags / descriptor entries leak into storage.
+    expect(Object.keys(cached)).toEqual(['generatedAt', 'enabled']);
+  });
+
+  it('keeps the previous live snapshot when a refresh fetch fails', () => {
+    const { service, httpMock } = inject();
+    service.load().subscribe();
+    flushDescriptor(httpMock, [entry({ code: 'CAP-MD-CUSTOMER-CONTACTS', enabled: true })]);
+    expect(service.isEnabled('CAP-MD-CUSTOMER-CONTACTS')).toBe(true);
+
+    service.load().subscribe();
+    failDescriptor(httpMock);
+
+    // The good snapshot is NOT clobbered by the failed refresh.
+    expect(service.descriptor()).not.toBeNull();
+    expect(service.isEnabled('CAP-MD-CUSTOMER-CONTACTS')).toBe(true);
+  });
+
+  it('falls back to the cached last-known snapshot when the fetch fails with no live snapshot', () => {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({
+      generatedAt: '2026-07-31T00:00:00Z',
+      enabled: { 'CAP-MD-CUSTOMER-CONTACTS': true, 'CAP-MD-CUSTOMER-INTERACTIONS': false },
+    }));
+    const { service, httpMock } = inject();
+    service.load().subscribe();
+    failDescriptor(httpMock);
+
+    expect(service.isEnabled('CAP-MD-CUSTOMER-CONTACTS')).toBe(true);
+    // A cached explicit "disabled" wins over any caller-supplied default.
+    expect(service.isEnabled('CAP-MD-CUSTOMER-INTERACTIONS', true)).toBe(false);
+    // Degraded gating is visible in the console.
+    expect(console.warn).toHaveBeenCalled();
+  });
+
+  it('honors defaultWhenUnknown when neither a live nor a cached snapshot exists, warning once per code', () => {
+    const { service } = inject();
+
+    expect(service.isEnabled('CAP-MD-CUSTOMER-CONTACTS', true)).toBe(true);
+    expect(service.isEnabled('CAP-MD-CUSTOMER-CONTACTS', true)).toBe(true);
+    expect(service.isEnabled('CAP-MD-CUSTOMER-INTERACTIONS')).toBe(false);
+
+    // One warning per distinct code, not per call.
+    const warned = (console.warn as unknown as ReturnType<typeof vi.fn>).mock.calls
+      .filter(([msg]) => typeof msg === 'string' && msg.includes('Gating decision'));
+    expect(warned.length).toBe(2);
+  });
+
+  it('clear() drops the live snapshot but keeps the cached fallback for the next session', () => {
+    const { service, httpMock } = inject();
+    service.load().subscribe();
+    flushDescriptor(httpMock, [entry({ code: 'CAP-MD-CUSTOMER-CONTACTS', enabled: true })]);
+
+    service.clear();
+
+    expect(service.descriptor()).toBeNull();
+    // isKnown is live-snapshot-only (the layer-3 interceptor must never
+    // short-circuit off a stale cache) …
+    expect(service.isKnown('CAP-MD-CUSTOMER-CONTACTS')).toBe(false);
+    // … but gating decisions still serve the last-known state.
+    expect(service.isEnabled('CAP-MD-CUSTOMER-CONTACTS')).toBe(true);
+    expect(localStorage.getItem(CACHE_KEY)).not.toBeNull();
+  });
+
+  it('a fresh live snapshot overrides both the cache and defaults', () => {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({
+      generatedAt: '2026-07-31T00:00:00Z',
+      enabled: { 'CAP-MD-CUSTOMER-CONTACTS': true },
+    }));
+    const { service, httpMock } = inject();
+    service.load().subscribe();
+    flushDescriptor(httpMock, [entry({ code: 'CAP-MD-CUSTOMER-CONTACTS', enabled: false, isDefaultOn: true })]);
+
+    // Live truth (admin turned it off) beats the cached true AND the default-on.
+    expect(service.isEnabled('CAP-MD-CUSTOMER-CONTACTS', true)).toBe(false);
   });
 });

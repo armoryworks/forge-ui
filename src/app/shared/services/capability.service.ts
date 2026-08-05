@@ -7,6 +7,7 @@ import { environment } from '../../../environments/environment';
 import { CapabilityAuditEntry } from '../models/capability-audit-entry.model';
 import { CapabilityDescriptor, CapabilityDescriptorEntry } from '../models/capability-descriptor.model';
 import { CapabilityRelations } from '../models/capability-relations.model';
+import { CapabilitySnapshotCache } from '../models/capability-snapshot-cache.model';
 import {
   CapabilityValidationItem,
   CapabilityValidationResult,
@@ -26,14 +27,35 @@ import {
  * holds the current ETag per row so admin UI components don't have to
  * thread it through manually — the latest descriptor's ETag is always
  * available via `getETag(code)`.
+ *
+ * Snapshot fallback (2026-08) — the service persists a compact last-known
+ * `code → enabled` map to localStorage on every successful descriptor load.
+ * When the descriptor is unavailable (fetch failed, or gating decisions are
+ * made before `load()` resolves), `isEnabled` falls back to that cached
+ * snapshot instead of silently answering `false` for everything — which used
+ * to hide default-on features (e.g. the customer Contacts tab) with no
+ * indication anywhere that the snapshot was the reason. When neither a live
+ * nor a cached snapshot exists (first-ever login in a fresh browser AND the
+ * fetch failed), `isEnabled(code, defaultWhenUnknown)` returns the caller-
+ * supplied catalog default so default-on features fail OPEN. Every gating
+ * decision made without a live snapshot emits a one-time console warning.
+ * This is UX-only fallback: the server still enforces every gate with a 403.
  */
 @Injectable({ providedIn: 'root' })
 export class CapabilityService {
+  private static readonly CACHE_KEY = 'forge-capability-snapshot';
+
   private readonly http = inject(HttpClient);
 
   private readonly _descriptor = signal<CapabilityDescriptor | null>(null);
   private readonly _loading = signal(false);
   private _inFlight: Observable<void> | null = null;
+
+  /** Last-known snapshot hydrated from localStorage (per-install, survives reloads). */
+  private readonly _cachedSnapshot = signal<CapabilitySnapshotCache | null>(this.readCache());
+
+  /** One-time-per-code guard for the "gating without a live snapshot" warning. */
+  private readonly warnedCodes = new Set<string>();
 
   readonly descriptor = this._descriptor.asReadonly();
   readonly loading = this._loading.asReadonly();
@@ -60,14 +82,48 @@ export class CapabilityService {
     return map;
   });
 
-  /** Synchronous: is the capability enabled in the current snapshot? */
-  isEnabled(code: string): boolean {
-    return this._enabledByCode().get(code) === true;
+  /**
+   * Synchronous: is the capability enabled?
+   *
+   * Resolution order:
+   *  1. Live descriptor loaded → exact answer (unknown codes are `false`).
+   *  2. No live descriptor but a cached last-known snapshot exists → the
+   *     cached answer (stale cache is usable; refresh happens in background).
+   *  3. Neither → `defaultWhenUnknown`. Callers gating a default-on feature
+   *     pass `true` (mirroring the server catalog's `IsDefaultOn`) so those
+   *     features fail OPEN instead of silently disappearing.
+   *
+   * Paths 2 and 3 emit a one-time-per-code console warning so a degraded
+   * gating decision is always visible in the dev console.
+   */
+  isEnabled(code: string, defaultWhenUnknown = false): boolean {
+    if (this._descriptor() !== null) {
+      return this._enabledByCode().get(code) === true;
+    }
+    const cached = this._cachedSnapshot();
+    if (cached && code in cached.enabled) {
+      this.warnDegradedGating(
+        code,
+        `using last-known cached snapshot from ${cached.generatedAt} → ${cached.enabled[code] ? 'enabled' : 'disabled'}`,
+      );
+      return cached.enabled[code];
+    }
+    this.warnDegradedGating(
+      code,
+      `no cached snapshot either — falling back to defaultWhenUnknown=${defaultWhenUnknown}`,
+    );
+    return defaultWhenUnknown;
   }
 
-  /** Synchronous: does the catalog know about this capability code? */
+  /**
+   * Synchronous: does the LIVE descriptor know about this capability code?
+   * Deliberately ignores the cached fallback snapshot — the layer-3
+   * `capabilityGateInterceptor` uses `isKnown && !isEnabled` to short-circuit
+   * requests, and a stale cache must never block a request the server would
+   * allow. Without a live descriptor requests fall through to the server.
+   */
   isKnown(code: string): boolean {
-    return this._enabledByCode().has(code);
+    return this._descriptor() !== null && this._enabledByCode().has(code);
   }
 
   /** Phase 4 Phase-C — latest ETag for the row, or `null` if unknown. */
@@ -103,12 +159,28 @@ export class CapabilityService {
     this._inFlight = this.http
       .get<CapabilityDescriptor>(`${environment.apiUrl}/capabilities/descriptor`)
       .pipe(
-        tap((d) => this._descriptor.set(d)),
+        tap((d) => {
+          this._descriptor.set(d);
+          // A fresh live snapshot resets the degraded-gating warning guard
+          // and refreshes the last-known fallback cache.
+          this.warnedCodes.clear();
+          this.persistCache(d);
+        }),
         catchError(() => {
-          // Network / 401 / etc. — leave the snapshot empty so consumers fall
-          // back to "feature unknown → don't show". Errors flow through the
-          // global HTTP interceptor for user-facing toasts.
-          this._descriptor.set(null);
+          // Network / 401 / etc. — fail OPEN, not closed. Keep whatever live
+          // snapshot we already have (never clobber good state with null);
+          // with no live snapshot, `isEnabled` serves the cached last-known
+          // snapshot, then caller-supplied catalog defaults. Errors still
+          // flow through the global HTTP interceptor for user-facing toasts.
+          if (this._descriptor() === null) {
+            const cached = this._cachedSnapshot();
+            console.warn(
+              '[CAPABILITY] Descriptor fetch failed with no live snapshot — ' +
+              (cached
+                ? `gating falls back to the last-known snapshot from ${cached.generatedAt}.`
+                : 'gating falls back to per-call defaults (default-on capabilities fail open).'),
+            );
+          }
           return of(null);
         }),
         tap(() => this._loading.set(false)),
@@ -180,10 +252,62 @@ export class CapabilityService {
     });
   }
 
-  /** Clears the in-memory descriptor on logout. */
+  /**
+   * Clears the in-memory descriptor on logout. The localStorage fallback
+   * cache is deliberately KEPT — capabilities are per-install (single-tenant
+   * per database), not per-user, and keeping the cache closes the post-login
+   * gating race window (consumers see last-known state instead of
+   * "everything off" while the descriptor loads).
+   */
   clear(): void {
     this._inFlight = null;
     this._descriptor.set(null);
+  }
+
+  // ─── Last-known snapshot cache ─────────────────────────────────────────
+
+  private readCache(): CapabilitySnapshotCache | null {
+    try {
+      const raw = localStorage.getItem(CapabilityService.CACHE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as CapabilitySnapshotCache;
+      if (typeof parsed?.generatedAt !== 'string' || typeof parsed?.enabled !== 'object' || parsed.enabled === null) {
+        return null;
+      }
+      return parsed;
+    } catch {
+      // Corrupt / inaccessible storage — behave as if no cache exists.
+      return null;
+    }
+  }
+
+  private persistCache(descriptor: CapabilityDescriptor): void {
+    const cache: CapabilitySnapshotCache = {
+      generatedAt: descriptor.generatedAt,
+      enabled: Object.fromEntries(descriptor.capabilities.map((c) => [c.code, c.enabled])),
+    };
+    this._cachedSnapshot.set(cache);
+    try {
+      localStorage.setItem(CapabilityService.CACHE_KEY, JSON.stringify(cache));
+    } catch {
+      // Quota / private-mode failures are non-fatal — the in-memory copy
+      // still serves this session; the next successful load retries.
+    }
+  }
+
+  /**
+   * One-time-per-code dev-console warning for gating decisions made without
+   * a live snapshot. Reset whenever a live descriptor arrives so a later
+   * degraded phase warns again.
+   */
+  private warnDegradedGating(code: string, resolution: string): void {
+    if (this.warnedCodes.has(code)) return;
+    this.warnedCodes.add(code);
+    console.warn(
+      `[CAPABILITY] Gating decision for '${code}' made with no capability snapshot loaded ` +
+      `(descriptor fetch failed or not yet resolved); ${resolution}. ` +
+      'If a feature is unexpectedly hidden, this is why — check /admin/capabilities-debug.',
+    );
   }
 
   /**

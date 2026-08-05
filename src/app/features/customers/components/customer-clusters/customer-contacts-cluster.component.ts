@@ -1,45 +1,38 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, inject, input, OnInit, signal } from '@angular/core';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 
 import { CustomerService } from '../../services/customer.service';
-import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
-import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
-import { InputComponent } from '../../../../shared/components/input/input.component';
-import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
-import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
-import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
-import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { Contact } from '../../models/contact.model';
+import { CustomerContactDialogComponent } from './customer-contact-dialog.component';
 
 /**
  * Wave 6 — Customer Contacts cluster.
  *
  * Multi-row entity collection cluster (mirrors VendorSourcesPanelComponent's
- * shape on Parts). Renders the contact list + add/edit modal dialog;
- * mounted into the Contacts tab on the customer detail page.
+ * shape on Parts). Renders the contact list; mounted into the Contacts tab
+ * on the customer detail page.
  *
- * Was previously `CustomerContactsTabComponent` at
- * `pages/customer-detail/tabs/`. Moved to `components/customer-clusters/`
- * + renamed to match the cluster naming convention used everywhere else
- * (identity, activity, etc.) so the customer detail page's component
- * tree is uniform with Parts. The visible UX is unchanged.
+ * The add/edit modal was extracted to `CustomerContactDialogComponent`
+ * (sibling file, mirroring `CustomerAddressDialogComponent`) so the
+ * top-level /customers/contacts page can reuse the exact same dialog with
+ * a customer picker in front. The cluster binds `customerId`, which hides
+ * the picker — the visible UX here is unchanged.
  *
  * The cluster is gated server-side by CAP-MD-CUSTOMER-CONTACTS;
  * customer-detail.component.ts drops the corresponding tab from the
- * layout when the capability is disabled.
+ * layout when the capability is disabled (failing open to the catalog
+ * default when no capability snapshot is available).
  */
 @Component({
   selector: 'app-customer-contacts-cluster',
   standalone: true,
   imports: [
-    ReactiveFormsModule, TranslatePipe,
-    AvatarComponent, InputComponent, SelectComponent, ToggleComponent,
-    DialogComponent, ValidationButtonComponent,
+    TranslatePipe,
+    AvatarComponent, CustomerContactDialogComponent,
   ],
   templateUrl: './customer-contacts-cluster.component.html',
   styleUrl: '../../pages/customer-detail/customer-detail-tabs.scss',
@@ -47,7 +40,6 @@ import { Contact } from '../../models/contact.model';
 })
 export class CustomerContactsClusterComponent implements OnInit {
   private readonly customerService = inject(CustomerService);
-  private readonly refDataService = inject(ReferenceDataService);
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
@@ -56,43 +48,14 @@ export class CustomerContactsClusterComponent implements OnInit {
 
   protected readonly contacts = signal<Contact[]>([]);
   protected readonly loading = signal(false);
-  protected readonly saving = signal(false);
   protected readonly showDialog = signal(false);
-  protected readonly editingId = signal<number | null>(null);
-  protected readonly roleOptions = signal<SelectOption[]>([
-    { value: null, label: this.translate.instant('customers.roleOptions.none') },
-  ]);
-
-  protected readonly contactForm = new FormGroup({
-    firstName: new FormControl('', [Validators.required, Validators.maxLength(100)]),
-    lastName: new FormControl('', [Validators.required, Validators.maxLength(100)]),
-    email: new FormControl('', [Validators.email, Validators.maxLength(200)]),
-    phone: new FormControl(''),
-    role: new FormControl<string | null>(null),
-    isPrimary: new FormControl(false),
-  });
-
-  protected readonly violations = computed(() =>
-    FormValidationService.getViolations(this.contactForm, {
-      firstName: this.translate.instant('customers.contactsCluster.violations.firstName'),
-      lastName: this.translate.instant('customers.contactsCluster.violations.lastName'),
-      email: this.translate.instant('customers.contactsCluster.violations.email'),
-    })
-  );
-
-  protected readonly dialogTitle = computed(() =>
-    this.translate.instant(this.editingId() ? 'customers.editContact' : 'customers.newContact')
-  );
+  protected readonly editingContact = signal<Contact | null>(null);
 
   protected getInitials(c: Contact): string {
     return (c.firstName[0] ?? '') + (c.lastName[0] ?? '');
   }
 
   ngOnInit(): void {
-    this.refDataService.getAsOptions('contact_role', {
-      allLabel: this.translate.instant('customers.roleOptions.none'),
-      valueField: 'label',
-    }).subscribe(opts => this.roleOptions.set(opts));
     this.loadContacts();
   }
 
@@ -108,56 +71,23 @@ export class CustomerContactsClusterComponent implements OnInit {
   }
 
   protected openAdd(): void {
-    this.editingId.set(null);
-    this.contactForm.reset({ isPrimary: false });
+    this.editingContact.set(null);
     this.showDialog.set(true);
   }
 
   protected openEdit(contact: Contact): void {
-    this.editingId.set(contact.id);
-    this.contactForm.patchValue({
-      firstName: contact.firstName,
-      lastName: contact.lastName,
-      email: contact.email ?? '',
-      phone: contact.phone ?? '',
-      role: contact.role ?? null,
-      isPrimary: contact.isPrimary,
-    });
+    this.editingContact.set(contact);
     this.showDialog.set(true);
   }
 
   protected closeDialog(): void {
     this.showDialog.set(false);
-    this.contactForm.reset();
-    this.editingId.set(null);
+    this.editingContact.set(null);
   }
 
-  protected saveContact(): void {
-    if (this.contactForm.invalid || this.saving()) return;
-    const v = this.contactForm.value;
-    const payload = {
-      firstName: v.firstName!,
-      lastName: v.lastName!,
-      email: v.email ?? undefined,
-      phone: v.phone ?? undefined,
-      role: v.role ?? undefined,
-      isPrimary: v.isPrimary ?? false,
-    };
-    this.saving.set(true);
-    const id = this.editingId();
-    const obs = id
-      ? this.customerService.updateContact(this.customerId(), id, payload)
-      : this.customerService.createContact(this.customerId(), payload);
-
-    obs.subscribe({
-      next: () => {
-        this.saving.set(false);
-        this.closeDialog();
-        this.loadContacts();
-        this.snackbar.success(this.translate.instant(id ? 'customers.contactUpdated' : 'customers.contactCreated'));
-      },
-      error: () => this.saving.set(false),
-    });
+  protected onDialogSaved(): void {
+    this.closeDialog();
+    this.loadContacts();
   }
 
   protected deleteContact(contact: Contact): void {

@@ -63,28 +63,9 @@
 </div>
 
 @if (showDialog()) {
-  <app-dialog [title]="dialogTitle()" width="520px" (closed)="closeDialog()">
-    <div [formGroup]="contactForm">
-      <div class="dialog-row">
-        <app-input data-testid="contact-first-name" [label]="'customers.firstName' | translate" formControlName="firstName" [required]="true" />
-        <app-input data-testid="contact-last-name" [label]="'customers.lastName' | translate" formControlName="lastName" [required]="true" />
-      </div>
-      <div class="dialog-row">
-        <app-input data-testid="contact-email" [label]="'customers.colEmail' | translate" formControlName="email" type="email" />
-        <app-input data-testid="contact-phone" [label]="'customers.colPhone' | translate" formControlName="phone" mask="phone" />
-      </div>
-      <div class="dialog-row">
-        <app-select data-testid="contact-role" [label]="'customers.role' | translate" formControlName="role" [options]="roleOptions()" />
-        <app-toggle data-testid="contact-primary" [label]="'customers.primaryContact' | translate" formControlName="isPrimary" />
-      </div>
-    </div>
-    <div dialog-footer>
-      <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
-      <app-validation-button [violations]="violations()" [loading]="saving()">
-      <button class="action-btn action-btn--primary" data-testid="contact-save-btn"
-        [disabled]="contactForm.invalid || saving()"
-        (click)="saveContact()">{{ 'common.save' | translate }}</button>
-      </app-validation-button>
-    </div>
-  </app-dialog>
+  <app-customer-contact-dialog
+    [customerId]="customerId()"
+    [contact]="editingContact()"
+    (saved)="onDialogSaved()"
+    (closed)="closeDialog()" />
 }
