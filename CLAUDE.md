@@ -443,9 +443,17 @@ protected prevStep(): void {
 
 ### Client-Side Storage
 - **IndexedDB** (wrapper service): lookup data caches (customers, parts, track types, etc.) with `last_synced` timestamp
-- **localStorage**: JWT tokens, user preferences (theme, locale, sidebar state). Minimal — no large objects.
+- **localStorage**: JWT tokens, user preferences (theme, locale, sidebar state), capability snapshot cache (`forge-capability-snapshot`, compact code→enabled map). Minimal — no large objects.
 - **In-memory signals**: transient UI state (filters, scroll positions, form drafts). Lost on tab close.
 - Stale cache is usable — show cached data immediately, refresh in background
+
+### Capability Gating — Fail-Open for Default-On (2026-08-05)
+- `CapabilityService.isEnabled(code, defaultWhenUnknown = false)`: when no live descriptor exists it serves the localStorage snapshot cache; with no cache either, it returns `defaultWhenUnknown`. Callers gating **default-on** features (per server `CapabilityCatalog` `IsDefaultOn`) pass `true` so a failed/slow descriptor fetch can never silently hide them. UI gating is UX-only — the server still enforces 403s.
+- Never let a failed refresh clobber a live snapshot; `isKnown` stays live-descriptor-only (the request interceptor must not short-circuit off a stale cache).
+- When hiding UI behind a capability, log which surface was hidden and why (see `customer-detail.component.ts` `tabGating` for the pattern) — "flag or bug?" must be answerable from the console.
+
+### i18n Label Overrides (2026-08-05)
+- Tenant label overrides load via `shared/services/i18n-overrides.service.ts` after login (`GET /i18n/overrides/active`) and layer over shipped catalogs with `translate.setTranslation(lang, nested, /*merge*/ true)`; re-applied on every `onLangChange` because `translate.use()` replaces the catalog. Admin editing lives at `/admin/i18n-labels` (CAP-ADMIN-I18N). Shipped `public/assets/i18n/*.json` stay the source of truth for keys — overrides are values only.
 
 ### Lazy Loading & Bundles
 - Every feature module lazy-loaded via `loadComponent` in route config
