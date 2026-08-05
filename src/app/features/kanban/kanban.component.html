@@ -60,7 +60,8 @@
           [selectedJobIds]="selectedJobIds()"
           (dropped)="onCardDropped($event)"
           (cardClicked)="onCardClicked($event)"
-          (jobNumberClicked)="onJobNumberClicked($event)" />
+          (jobNumberClicked)="onJobNumberClicked($event)"
+          (accountingRefClicked)="onAccountingRefClicked($event)" />
       }
     </div>
   }
@@ -105,7 +106,8 @@
                 [cdkDragData]="job"
                 (cdkDragStarted)="onSwimlaneDragStarted($event)"
                 (cardClicked)="onCardClicked($event)"
-                (jobNumberClicked)="onJobNumberClicked($event)" />
+                (jobNumberClicked)="onJobNumberClicked($event)"
+                (accountingRefClicked)="onAccountingRefClicked($event)" />
             }
           </div>
         }
@@ -132,7 +134,8 @@
       </button>
       <mat-menu #moveMenu="matMenu">
         @for (stage of currentStages(); track stage.id) {
-          <button mat-menu-item (click)="bulkMoveToStage(stage)">
+          <button mat-menu-item (click)="bulkMoveToStage(stage)"
+                  [disabled]="disabledBulkStageIds().has(stage.id)">
             <span class="bulk-bar__stage-dot" [style.background]="stage.color"></span>
             {{ stage.name }}
           </button>

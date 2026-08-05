@@ -392,6 +392,14 @@
               }
             </span>
           </div>
+          @if (j.salesOrderId) {
+            <div class="jd-detail-row">
+              <span class="jd-detail-label">{{ 'kanban.salesOrder' | translate }}</span>
+              <span class="jd-detail-value">
+                <app-entity-link type="sales-order" [entityId]="j.salesOrderId">{{ j.salesOrderNumber }}</app-entity-link>
+              </span>
+            </div>
+          }
           <div class="jd-detail-row">
             <span class="jd-detail-label">{{ 'kanban.dueDate' | translate }}</span>
             <span class="jd-detail-value">{{ j.dueDate | date:'MM/dd/yyyy' }}</span>

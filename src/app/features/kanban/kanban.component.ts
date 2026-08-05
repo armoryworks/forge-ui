@@ -30,6 +30,7 @@ import { CapDirective } from '../../shared/directives/cap.directive';
 import { BoardHubService } from '../../shared/services/board-hub.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { ToastService } from '../../shared/services/toast.service';
 import { ScannerService } from '../../shared/services/scanner.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
@@ -60,6 +61,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
   private readonly boardHub = inject(BoardHubService);
   private readonly loadingService = inject(LoadingService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly toast = inject(ToastService);
   private readonly scanner = inject(ScannerService);
   private readonly dialog = inject(MatDialog);
   private readonly detailDialog = inject(DetailDialogService);
@@ -300,6 +302,16 @@ export class KanbanComponent implements OnInit, OnDestroy {
     this.openJobDetail(event.job.id);
   }
 
+  /**
+   * The card's accounting externalRef chip. There is no in-app viewer for the
+   * external provider's document itself, so the chip opens the job detail —
+   * its Cost Analysis section carries the accounting picture for the job.
+   */
+  protected onAccountingRefClicked(event: { job: KanbanJob; event: Event }): void {
+    if (this.swimlaneDragging) return;
+    this.openJobDetail(event.job.id);
+  }
+
   protected onCardClicked(event: { job: KanbanJob; event: Event }): void {
     if (this.swimlaneDragging) return;
     const e = event.event as MouseEvent | KeyboardEvent;
@@ -359,11 +371,57 @@ export class KanbanComponent implements OnInit, OnDestroy {
     this.showJobDialog.set(false);
   }
 
+  /**
+   * Stages that are invalid bulk-move targets for the ENTIRE current
+   * selection — same-stage no-ops, backward moves out of irreversible
+   * stages, and forward moves that would skip a mandatory stage. When at
+   * least one selected job can legally move, the target stays enabled and
+   * the server reports per-job failures (partial success).
+   */
+  protected readonly disabledBulkStageIds = computed<Set<number>>(() => {
+    const disabled = new Set<number>();
+    const selected = this.selectedJobIds();
+    if (selected.size === 0) return disabled;
+
+    const cols = this.columns();
+    const stages = cols.map(c => c.stage);
+    const stageByName = new Map(stages.map(s => [s.name, s]));
+    const selectedJobs = cols.flatMap(c => c.jobs).filter(j => selected.has(j.id));
+
+    for (const target of stages) {
+      const anyAllowed = selectedJobs.some(j => {
+        const current = stageByName.get(j.stageName);
+        if (!current || current.id === target.id) return false;
+        if (current.isIrreversible && target.sortOrder < current.sortOrder) return false;
+        if (target.sortOrder > current.sortOrder) {
+          const skipsMandatory = stages.some(s => s.isMandatory
+            && s.sortOrder > current.sortOrder && s.sortOrder < target.sortOrder);
+          if (skipsMandatory) return false;
+        }
+        return true;
+      });
+      if (!anyAllowed) disabled.add(target.id);
+    }
+    return disabled;
+  });
+
   protected bulkMoveToStage(stage: Stage): void {
     const ids = [...this.selectedJobIds()];
     this.kanbanService.bulkMoveStage(ids, stage.id).subscribe({
       next: (r) => {
-        this.snackbar.success(this.translate.instant('kanban.jobsMoved', { count: r.successCount, stage: stage.name }));
+        if (r.successCount > 0) {
+          this.snackbar.success(this.translate.instant('kanban.jobsMoved', { count: r.successCount, stage: stage.name }));
+        }
+        // Surface per-job validation failures (mandatory-stage skips,
+        // irreversible-stage guards, quality gates) with the server's messages.
+        if (r.failureCount > 0) {
+          this.toast.show({
+            severity: 'warning',
+            title: this.translate.instant('kanban.bulkMoveBlockedTitle'),
+            message: this.translate.instant('kanban.bulkMoveBlockedMessage', { count: r.failureCount, stage: stage.name }),
+            details: r.errors.map(e => e.message).join('\n'),
+          });
+        }
         this.clearSelection();
         this.reloadBoard();
       },

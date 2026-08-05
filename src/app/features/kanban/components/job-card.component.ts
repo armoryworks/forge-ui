@@ -5,6 +5,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
+import { EntityLinkComponent } from '../../../shared/components/entity-link/entity-link.component';
 import { PriorityIndicatorComponent } from '../../../shared/components/priority-indicator/priority-indicator.component';
 import { KanbanJob } from '../models/kanban-job.model';
 import { PRIORITY_COLORS } from '../models/priority-colors.const';
@@ -12,7 +13,7 @@ import { PRIORITY_COLORS } from '../models/priority-colors.const';
 @Component({
   selector: 'app-job-card',
   standalone: true,
-  imports: [DatePipe, AvatarComponent, PriorityIndicatorComponent, MatTooltipModule, TranslatePipe],
+  imports: [DatePipe, AvatarComponent, EntityLinkComponent, PriorityIndicatorComponent, MatTooltipModule, TranslatePipe],
   templateUrl: './job-card.component.html',
   styleUrl: './job-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,6 +23,8 @@ export class JobCardComponent {
   readonly selected = input(false);
   readonly cardClicked = output<{ job: KanbanJob; event: Event }>();
   readonly jobNumberClicked = output<{ job: KanbanJob; event: Event }>();
+  /** The accounting externalRef chip — opens the job's cost & accounting details. */
+  readonly accountingRefClicked = output<{ job: KanbanJob; event: Event }>();
 
   protected readonly priorityColor = computed(
     () => PRIORITY_COLORS[this.job().priorityName] ?? PRIORITY_COLORS['Normal'],

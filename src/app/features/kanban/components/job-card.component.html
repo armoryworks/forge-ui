@@ -38,8 +38,20 @@
         [color]="job().assigneeColor ?? '#0d9488'"
         size="sm" />
     }
-    @if (job().customerName) {
-      <span class="card__customer">{{ job().customerName }}</span>
+    @if (job().customerId !== null) {
+      <app-entity-link class="card__customer-link" type="customer" [entityId]="job().customerId!"
+        [matTooltip]="'kanban.openCustomer' | translate: { name: job().customerName }" matTooltipPosition="above">
+        <span class="card__customer">{{ job().customerName }}</span>
+      </app-entity-link>
+    } @else if (job().customerName) {
+      <span class="card__customer card__customer--plain">{{ job().customerName }}</span>
+    }
+    @if (job().salesOrderId !== null && job().salesOrderNumber) {
+      <app-entity-link class="card__so" type="sales-order" [entityId]="job().salesOrderId!"
+        [matTooltip]="'kanban.openSalesOrder' | translate: { number: job().salesOrderNumber }" matTooltipPosition="above">
+        <span class="material-icons-outlined card__so-icon">shopping_cart</span>
+        <span class="card__so-number">{{ job().salesOrderNumber }}</span>
+      </app-entity-link>
     }
     @if (job().billingStatus) {
       <span class="card__billing" [class.card__billing--invoiced]="job().billingStatus === 'Invoiced'" [class.card__billing--uninvoiced]="job().billingStatus === 'Uninvoiced'" [title]="job().billingStatus!">
@@ -47,10 +59,13 @@
       </span>
     }
     @if (job().externalRef) {
-      <span class="card__accounting" [title]="(job().accountingDocumentType ?? ('kanban.document' | translate)) + ' — ' + job().externalRef">
+      <button type="button" class="card__accounting" data-testid="job-card-accounting-ref"
+        [matTooltip]="'kanban.openAccountingDetails' | translate: { type: job().accountingDocumentType ?? ('kanban.document' | translate), ref: job().externalRef }"
+        matTooltipPosition="above"
+        (click)="accountingRefClicked.emit({ job: job(), event: $event }); $event.stopPropagation()">
         <span class="material-icons-outlined card__accounting-icon">receipt_long</span>
         <span class="card__accounting-ref">{{ job().externalRef }}</span>
-      </span>
+      </button>
     }
     @if (job().disposition) {
       <span class="card__disposition" [title]="job().disposition!">

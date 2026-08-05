@@ -118,11 +118,48 @@
   margin-top: $sp-sm;
 }
 
+.card__customer-link {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+
 .card__customer {
   font-size: var(--font-size-xxs);
   color: var(--text-muted);
   @include truncate;
-  flex: 1;
+
+  .card__customer-link &:hover {
+    color: var(--primary);
+    text-decoration: underline;
+  }
+
+  &--plain {
+    flex: 1;
+  }
+}
+
+.card__so {
+  display: flex;
+  align-items: center;
+  gap: $sp-xs;
+  font-size: var(--font-size-xxs);
+  color: var(--primary);
+  cursor: pointer;
+
+  &:hover .card__so-number {
+    text-decoration: underline;
+  }
+}
+
+.card__so-icon {
+  font-size: $icon-size-xs;
+}
+
+.card__so-number {
+  font-family: $font-family-mono;
+  @include truncate;
+  max-width: 60px;
 }
 
 .card__billing {
@@ -142,11 +179,20 @@
 }
 
 .card__accounting {
+  // Button reset — the chip is clickable (opens cost & accounting details).
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   display: flex;
   align-items: center;
   gap: $sp-xs;
   font-size: var(--font-size-xxs);
   color: var(--info);
+
+  &:hover .card__accounting-ref {
+    text-decoration: underline;
+  }
 }
 
 .card__accounting-icon {

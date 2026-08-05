@@ -24,6 +24,7 @@ export class BoardColumnComponent {
   readonly dropped = output<CdkDragDrop<KanbanJob[]>>();
   readonly cardClicked = output<{ job: KanbanJob; event: Event }>();
   readonly jobNumberClicked = output<{ job: KanbanJob; event: Event }>();
+  readonly accountingRefClicked = output<{ job: KanbanJob; event: Event }>();
 
   private dragging = false;
 
@@ -52,6 +53,11 @@ export class BoardColumnComponent {
   protected onJobNumberClicked(event: { job: KanbanJob; event: Event }): void {
     if (this.dragging) return;
     this.jobNumberClicked.emit(event);
+  }
+
+  protected onAccountingRefClicked(event: { job: KanbanJob; event: Event }): void {
+    if (this.dragging) return;
+    this.accountingRefClicked.emit(event);
   }
 
   protected canEnter = (drag: CdkDrag, drop: CdkDropList): boolean => {

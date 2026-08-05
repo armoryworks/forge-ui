@@ -11,6 +11,9 @@ export interface KanbanJob {
   dueDate: Date | null;
   isOverdue: boolean;
   customerName: string | null;
+  customerId: number | null;
+  salesOrderId: number | null;
+  salesOrderNumber: string | null;
   billingStatus: string | null;
   externalRef: string | null;
   accountingDocumentType: string | null;

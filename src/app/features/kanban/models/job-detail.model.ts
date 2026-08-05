@@ -30,6 +30,8 @@ export interface JobDetail {
   dispositionAt: Date | null;
   partId: number | null;
   partNumber: string | null;
+  salesOrderId: number | null;
+  salesOrderNumber: string | null;
   parentJobId: number | null;
   parentJobNumber: string | null;
   childJobCount: number;

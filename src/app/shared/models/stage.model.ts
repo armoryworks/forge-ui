@@ -7,4 +7,6 @@ export interface Stage {
   wipLimit: number | null;
   accountingDocumentType: string | null;
   isIrreversible: boolean;
+  /** Forward moves may not skip over an active mandatory stage. */
+  isMandatory: boolean;
 }
