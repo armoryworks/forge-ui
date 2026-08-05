@@ -43,6 +43,7 @@ import { DraftBroadcastService } from './shared/services/draft-broadcast.service
 import { AnnouncementService } from './shared/services/announcement.service';
 import { CapabilityService } from './shared/services/capability.service';
 import { CurrencyService } from './shared/services/currency.service';
+import { I18nOverridesService } from './shared/services/i18n-overrides.service';
 import { EmployeeProfileService } from './features/account/services/employee-profile.service';
 import { TrainingService } from './features/training/services/training.service';
 import { WalkthroughContent } from './features/training/models/walkthrough-content.model';
@@ -90,6 +91,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly announcementService = inject(AnnouncementService);
   private readonly capabilityService = inject(CapabilityService);
   private readonly currencyService = inject(CurrencyService);
+  private readonly i18nOverrides = inject(I18nOverridesService);
   private readonly employeeProfile = inject(EmployeeProfileService);
   private readonly trainingService = inject(TrainingService);
   private readonly ngZone = inject(NgZone);
@@ -146,6 +148,10 @@ export class AppComponent implements OnInit, OnDestroy {
             // disambiguate non-base currencies inline. Failures fall back
             // to USD inside the service; no need to chain anything.
             this.currencyService.load().subscribe();
+            // Tenant i18n label overrides — layered over the shipped catalogs
+            // (merge point: I18nOverridesService). Gated by CAP-ADMIN-I18N, so
+            // it must wait for the capability descriptor like the calls above.
+            this.i18nOverrides.load();
           },
         });
       } else {

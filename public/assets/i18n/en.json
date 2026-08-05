@@ -468,7 +468,13 @@
     "timerStopped": "Timer stopped",
     "uploadNewImage": "Upload New Image",
     "moveToStage": "Move to stage",
-    "movedToStage": "Moved to {{stage}}"
+    "movedToStage": "Moved to {{stage}}",
+    "openCustomer": "Open customer {{name}}",
+    "openSalesOrder": "Open sales order {{number}}",
+    "openAccountingDetails": "{{type}} {{ref}} — open cost & accounting details",
+    "salesOrder": "Sales Order",
+    "bulkMoveBlockedTitle": "Some jobs were not moved",
+    "bulkMoveBlockedMessage": "{{count}} job(s) could not be moved to {{stage}}"
   },
   "backlog": {
     "title": "Backlog",
@@ -1542,6 +1548,9 @@
     "subtitle": "Manage customer contacts and addresses",
     "createCustomer": "New Customer",
     "quickAddHint": "Just the essentials. Add credit terms, tax, and addresses later from the customer page — or use Guided setup for the full record.",
+    "contactDialog": {
+      "customerField": "Customer"
+    },
     "contactsPage": {
       "title": "All Contacts",
       "subtitle": "Flat cross-customer view of every contact — \"who do I know at company X?\".",
@@ -1947,7 +1956,20 @@
       "lineUpdated": "Line updated",
       "lineRemoved": "Line removed",
       "deleteLineTitle": "Remove line?",
-      "deleteLineMessage": "Remove \"{{description}}\" from this estimate?"
+      "deleteLineMessage": "Remove \"{{description}}\" from this estimate?",
+      "resolveLumpSum": {
+        "title": "Resolve Lump-Sum Lines",
+        "intro": "\"{{title}}\" has {{count}} lump-sum line(s) without a catalog part. Choose what happens to each before converting to a quote.",
+        "actionLabel": "Resolution",
+        "eliminate": "Eliminate line",
+        "replaceWithPart": "Replace with part",
+        "partLabel": "Catalog part",
+        "unitPriceLabel": "Unit price",
+        "confirm": "Convert to Quote",
+        "chooseActionViolation": "“{{description}}”: choose Eliminate or Replace with part",
+        "partRequiredViolation": "“{{description}}”: select a replacement part",
+        "keepOneLineViolation": "At least one line must remain on the quote"
+      }
     },
     "pricing": {
       "lists": "Price lists",
@@ -2740,6 +2762,7 @@
       "costing": "Costing",
       "gs1": "GS1 / GTIN",
       "leadSources": "Lead Sources",
+      "i18nLabels": "UI Labels",
       "icpRubrics": "ICP Rubrics",
       "assignmentRules": "Assignment Rules",
       "currencies": "Currencies & FX",
@@ -2964,6 +2987,32 @@
       "deleted": "Lead source deleted.",
       "deleteTitle": "Delete lead source?",
       "deleteMessage": "Soft-delete \"{{name}}\"? If any lead is attributed to this source, the server will refuse — deactivate instead."
+    },
+    "i18nLabels": {
+      "title": "UI Labels",
+      "hint": "Rename any UI label to match your vocabulary. Edits fan out as machine translations to the other languages.",
+      "language": "Language",
+      "searchPlaceholder": "Search key or value…",
+      "empty": "No labels match your search.",
+      "key": "Key",
+      "baseValue": "Base value",
+      "fieldValue": "Override value",
+      "statusDefault": "Default",
+      "statusCustomized": "Customized",
+      "statusMachine": "Machine",
+      "statusPending": "Pending",
+      "editTitle": "Edit Label",
+      "autoTranslate": "Auto-translate to other languages",
+      "autoTranslateHint": "Uses the self-hosted AI module. Generated translations are flagged and stay editable; existing manual overrides in other languages are never overwritten. If the AI service is unreachable, translations queue as pending and retry automatically.",
+      "saved": "Label override saved.",
+      "savedPending": "Label override saved. Translations for other languages are pending — the AI service is unreachable and will retry automatically.",
+      "revert": "Revert",
+      "revertTitle": "Revert to default?",
+      "revertMessage": "Remove the override for \"{{key}}\" and restore the shipped label? Machine translations generated from it are removed too.",
+      "reverted": "Label reverted to default.",
+      "pendingCount": "{{count}} pending translation(s)",
+      "retryPending": "Retry now",
+      "retryDone": "{{translated}} translated, {{pending}} still pending."
     },
     "costing": {
       "title": "Costing — Departmental Rates",

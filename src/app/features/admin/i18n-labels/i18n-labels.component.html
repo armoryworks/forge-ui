@@ -1,0 +1,119 @@
+<app-page-layout [pageTitle]="'admin.i18nLabels.title' | translate">
+  <ng-container toolbar>
+    <app-toolbar>
+      <app-select [label]="'admin.i18nLabels.language' | translate"
+        [formControl]="langControl"
+        [options]="languageOptions"
+        data-testid="i18n-labels-lang" />
+      <app-input [label]="'common.search' | translate"
+        [formControl]="searchControl"
+        [placeholder]="'admin.i18nLabels.searchPlaceholder' | translate"
+        data-testid="i18n-labels-search" />
+      <span class="toolbar__hint">{{ 'admin.i18nLabels.hint' | translate }}</span>
+      <span appSpacer></span>
+      @if (pendingCount() > 0) {
+        <span class="chip chip--warning" data-testid="i18n-labels-pending-chip">
+          {{ 'admin.i18nLabels.pendingCount' | translate: { count: pendingCount() } }}
+        </span>
+        <button class="action-btn action-btn--warn action-btn--sm"
+          [disabled]="retrying()"
+          (click)="retryPending()"
+          data-testid="i18n-labels-retry-btn">
+          <span class="material-icons-outlined">refresh</span>
+          {{ 'admin.i18nLabels.retryPending' | translate }}
+        </button>
+      }
+    </app-toolbar>
+  </ng-container>
+
+  <ng-container content>
+    <div class="i18n-labels__table" [appLoadingBlock]="loading()">
+      <app-data-table
+        tableId="admin-i18n-labels"
+        [columns]="columns"
+        [data]="filteredRows()"
+        emptyIcon="translate"
+        [emptyMessage]="'admin.i18nLabels.empty' | translate">
+
+        <ng-template appColumnCell="key" let-row>
+          <span class="i18n-labels__key">{{ row.key }}</span>
+        </ng-template>
+
+        <ng-template appColumnCell="baseValue" let-row>
+          <span class="i18n-labels__value">{{ row.baseValue }}</span>
+        </ng-template>
+
+        <ng-template appColumnCell="overrideValue" let-row>
+          @if (row.overrideValue !== null) {
+            <span class="i18n-labels__value i18n-labels__value--override">{{ row.overrideValue }}</span>
+          } @else {
+            <span class="i18n-labels__value i18n-labels__value--none">—</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="status" let-row>
+          @if (row.isPendingTranslation) {
+            <span class="chip chip--warning">{{ 'admin.i18nLabels.statusPending' | translate }}</span>
+          } @else if (row.isMachineTranslated) {
+            <span class="chip chip--info">{{ 'admin.i18nLabels.statusMachine' | translate }}</span>
+          } @else if (row.overrideId !== null) {
+            <span class="chip chip--primary">{{ 'admin.i18nLabels.statusCustomized' | translate }}</span>
+          } @else {
+            <span class="chip chip--muted">{{ 'admin.i18nLabels.statusDefault' | translate }}</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="actions" let-row>
+          <button class="icon-btn" [attr.aria-label]="'common.edit' | translate"
+                  (click)="openEdit($any(row))" data-testid="i18n-labels-edit-btn">
+            <span class="material-icons-outlined">edit</span>
+          </button>
+          @if (row.overrideId !== null) {
+            <button class="icon-btn icon-btn--danger" [attr.aria-label]="'admin.i18nLabels.revert' | translate"
+                    (click)="confirmRevert($any(row))" data-testid="i18n-labels-revert-btn">
+              <span class="material-icons-outlined">restart_alt</span>
+            </button>
+          }
+        </ng-template>
+      </app-data-table>
+    </div>
+  </ng-container>
+</app-page-layout>
+
+@if (showDialog()) {
+  <app-dialog
+    [title]="'admin.i18nLabels.editTitle' | translate"
+    width="520px"
+    (closed)="close()">
+    <div [formGroup]="form">
+      <div class="i18n-labels__meta">
+        <span class="i18n-labels__meta-label">{{ 'admin.i18nLabels.key' | translate }}</span>
+        <span class="i18n-labels__key">{{ editingRow()?.key }}</span>
+      </div>
+      <div class="i18n-labels__meta">
+        <span class="i18n-labels__meta-label">{{ 'admin.i18nLabels.baseValue' | translate }}</span>
+        <span>{{ editingRow()?.baseValue }}</span>
+      </div>
+      <app-textarea [label]="'admin.i18nLabels.fieldValue' | translate"
+        formControlName="value"
+        [rows]="3" [maxlength]="2000"
+        data-testid="i18n-labels-value" />
+      <app-toggle [label]="'admin.i18nLabels.autoTranslate' | translate"
+        formControlName="autoTranslate"
+        data-testid="i18n-labels-auto-translate" />
+      <p class="i18n-labels__auto-hint">{{ 'admin.i18nLabels.autoTranslateHint' | translate }}</p>
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--primary"
+          [disabled]="form.invalid || saving()"
+          (click)="save()"
+          data-testid="i18n-labels-save-btn">
+          <span class="material-icons-outlined">save</span>
+          {{ 'common.save' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}

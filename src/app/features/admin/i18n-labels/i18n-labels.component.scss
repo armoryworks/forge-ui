@@ -1,0 +1,54 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+// Page-scroll contract — see styles/_shared.scss. Routed page host must be a
+// bounded flex column or the inner scroll container has nothing to clip against.
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.toolbar__hint {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}
+
+.i18n-labels__key {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  word-break: break-all;
+}
+
+.i18n-labels__value {
+  display: inline-block;
+  max-width: 320px;
+  @include truncate;
+
+  &--override {
+    font-weight: 600;
+  }
+
+  &--none {
+    color: var(--text-muted);
+  }
+}
+
+.i18n-labels__meta {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.i18n-labels__meta-label {
+  @include uppercase-label($font-size-xxs);
+  color: var(--text-muted);
+}
+
+.i18n-labels__auto-hint {
+  margin: 0;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}

@@ -157,6 +157,17 @@ export const ADMIN_ROUTES: Routes = [
     loadComponent: () =>
       import('./gs1/gs1.component').then((m) => m.Gs1Component),
   },
+  // Admin i18n — tenant UI-label overrides editor. Lists every shipped catalog
+  // key with base vs. customized value per language; edits are stored in the
+  // DB and merged over the shipped JSON at load time (I18nOverridesService),
+  // with machine-translation fan-out to the other configured languages.
+  // Gated by CAP-ADMIN-I18N (route guard) + Admin on the server.
+  {
+    path: 'i18n-labels',
+    canActivate: [capabilityGuard('CAP-ADMIN-I18N')],
+    loadComponent: () =>
+      import('./i18n-labels/i18n-labels.component').then((m) => m.I18nLabelsComponent),
+  },
   // Phase 1m option-3 — /admin/configuration was the parallel admin
   // surface for the descriptor-driven settings. Retired: the existing
   // /admin/integrations page (rendered inside AdminComponent's

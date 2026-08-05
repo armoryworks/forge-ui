@@ -468,7 +468,13 @@
     "timerStopped": "Temporizador detenido",
     "uploadNewImage": "Subir Nueva Imagen",
     "moveToStage": "Mover a etapa",
-    "movedToStage": "Movido a {{stage}}"
+    "movedToStage": "Movido a {{stage}}",
+    "openCustomer": "Abrir cliente {{name}}",
+    "openSalesOrder": "Abrir orden de venta {{number}}",
+    "openAccountingDetails": "{{type}} {{ref}} — abrir detalles de costos y contabilidad",
+    "salesOrder": "Orden de Venta",
+    "bulkMoveBlockedTitle": "Algunos trabajos no se movieron",
+    "bulkMoveBlockedMessage": "{{count}} trabajo(s) no se pudieron mover a {{stage}}"
   },
   "backlog": {
     "title": "Pendientes",
@@ -1542,6 +1548,9 @@
     "subtitle": "Gestionar contactos y direcciones de clientes",
     "createCustomer": "Nuevo Cliente",
     "quickAddHint": "Solo lo esencial. Agrega términos de crédito, impuestos y direcciones más tarde desde la página del cliente — o usa la configuración guiada para el registro completo.",
+    "contactDialog": {
+      "customerField": "Cliente"
+    },
     "contactsPage": {
       "title": "Todos los Contactos",
       "subtitle": "Vista plana entre clientes de cada contacto — \"¿a quién conozco en la empresa X?\".",
@@ -1942,7 +1951,20 @@
       "lineUpdated": "Línea actualizada",
       "lineRemoved": "Línea eliminada",
       "deleteLineTitle": "¿Eliminar línea?",
-      "deleteLineMessage": "¿Eliminar \"{{description}}\" de esta estimación?"
+      "deleteLineMessage": "¿Eliminar \"{{description}}\" de esta estimación?",
+      "resolveLumpSum": {
+        "title": "Resolver líneas de suma global",
+        "intro": "\"{{title}}\" tiene {{count}} línea(s) de suma global sin pieza de catálogo. Elija qué hacer con cada una antes de convertir a cotización.",
+        "actionLabel": "Resolución",
+        "eliminate": "Eliminar línea",
+        "replaceWithPart": "Reemplazar con pieza",
+        "partLabel": "Pieza de catálogo",
+        "unitPriceLabel": "Precio unitario",
+        "confirm": "Convertir a cotización",
+        "chooseActionViolation": "“{{description}}”: elija Eliminar o Reemplazar con pieza",
+        "partRequiredViolation": "“{{description}}”: seleccione una pieza de reemplazo",
+        "keepOneLineViolation": "Al menos una línea debe permanecer en la cotización"
+      }
     },
     "pricing": {
       "lists": "Listas de precios",
@@ -2740,6 +2762,7 @@
       "costing": "Costeo",
       "gs1": "GS1 / GTIN",
       "leadSources": "Fuentes de Leads",
+      "i18nLabels": "Etiquetas de UI",
       "icpRubrics": "Rúbricas ICP",
       "assignmentRules": "Reglas de Asignación",
       "currencies": "Monedas y FX",
@@ -2964,6 +2987,32 @@
       "deleted": "Fuente de leads eliminada.",
       "deleteTitle": "¿Eliminar fuente de leads?",
       "deleteMessage": "¿Eliminar suavemente \"{{name}}\"? Si algún lead está atribuido a esta fuente, el servidor se negará — desactiva en su lugar."
+    },
+    "i18nLabels": {
+      "title": "Etiquetas de UI",
+      "hint": "Renombra cualquier etiqueta de la interfaz para que coincida con tu vocabulario. Las ediciones se propagan como traducciones automáticas a los demás idiomas.",
+      "language": "Idioma",
+      "searchPlaceholder": "Buscar clave o valor…",
+      "empty": "Ninguna etiqueta coincide con tu búsqueda.",
+      "key": "Clave",
+      "baseValue": "Valor base",
+      "fieldValue": "Valor personalizado",
+      "statusDefault": "Predeterminado",
+      "statusCustomized": "Personalizado",
+      "statusMachine": "Automática",
+      "statusPending": "Pendiente",
+      "editTitle": "Editar Etiqueta",
+      "autoTranslate": "Traducir automáticamente a otros idiomas",
+      "autoTranslateHint": "Usa el módulo de IA autoalojado. Las traducciones generadas quedan marcadas y siguen siendo editables; los valores manuales existentes en otros idiomas nunca se sobrescriben. Si el servicio de IA no está disponible, las traducciones quedan pendientes y se reintentan automáticamente.",
+      "saved": "Etiqueta personalizada guardada.",
+      "savedPending": "Etiqueta guardada. Las traducciones a otros idiomas quedan pendientes — el servicio de IA no está disponible y se reintentará automáticamente.",
+      "revert": "Revertir",
+      "revertTitle": "¿Revertir al valor predeterminado?",
+      "revertMessage": "¿Eliminar la personalización de \"{{key}}\" y restaurar la etiqueta original? Las traducciones automáticas generadas a partir de ella también se eliminan.",
+      "reverted": "Etiqueta revertida al valor predeterminado.",
+      "pendingCount": "{{count}} traducción(es) pendiente(s)",
+      "retryPending": "Reintentar ahora",
+      "retryDone": "{{translated}} traducida(s), {{pending}} aún pendiente(s)."
     },
     "costing": {
       "title": "Costeo — Tarifas Departamentales",

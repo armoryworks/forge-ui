@@ -180,6 +180,7 @@ export class NavTreeService {
           children: [
             { icon: 'dataset', label: 'Reference Data', i18nKey: 'admin.tabs.referenceData', route: '/admin/reference-data', allowedRoles: ['Admin'] },
             { icon: 'translate', label: 'Terminology', i18nKey: 'admin.tabs.terminology', route: '/admin/terminology', allowedRoles: ['Admin'] },
+            { icon: 'language', label: 'UI Labels', i18nKey: 'admin.tabs.i18nLabels', route: '/admin/i18n-labels', capability: 'CAP-ADMIN-I18N', allowedRoles: ['Admin'] },
             { icon: 'route', label: 'Track Types', i18nKey: 'admin.tabs.trackTypes', route: '/admin/track-types', allowedRoles: ['Admin'] },
             { icon: 'percent', label: 'Sales Tax', i18nKey: 'admin.tabs.salesTax', route: '/admin/sales-tax', allowedRoles: ['Admin'] },
             { icon: 'calculate', label: 'Costing', i18nKey: 'admin.tabs.costing', route: '/admin/costing', capability: 'CAP-COSTING-TIER2-DEPTRATES', allowedRoles: ['Admin', 'Manager'] },
