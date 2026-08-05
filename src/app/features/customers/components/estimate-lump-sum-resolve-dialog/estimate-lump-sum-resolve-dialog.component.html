@@ -1,0 +1,52 @@
+<app-dialog [title]="'customers.estimates.resolveLumpSum.title' | translate" width="560px" (closed)="close()">
+  <div class="resolve-lump-sum" [formGroup]="form">
+    <p class="resolve-lump-sum__intro">{{ intro }}</p>
+
+    <div formArrayName="resolutions" class="resolve-lump-sum__lines">
+      @for (line of data.lumpSumLines; track line.id; let i = $index) {
+        <div [formGroupName]="i" class="resolve-line">
+          <div class="resolve-line__summary">
+            <span class="resolve-line__description">{{ line.description }}</span>
+            <span class="resolve-line__amounts">
+              {{ line.quantity }} ×
+              <app-currency-display [value]="line.unitPrice" [currency]="null" />
+            </span>
+          </div>
+
+          <app-select
+            [label]="'customers.estimates.resolveLumpSum.actionLabel' | translate"
+            [options]="actionOptions"
+            formControlName="action"
+            [required]="true" />
+
+          @if (replaceFlags()[i]) {
+            <div class="dialog-row">
+              <app-entity-picker
+                [label]="'customers.estimates.resolveLumpSum.partLabel' | translate"
+                entityType="parts"
+                displayField="name"
+                secondaryDisplayField="partNumber"
+                formControlName="partId"
+                (selected)="onPartSelected(i, $event)" />
+              <app-currency-input
+                [label]="'customers.estimates.resolveLumpSum.unitPriceLabel' | translate"
+                formControlName="unitPrice" />
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary"
+        [disabled]="form.invalid || saving()"
+        (click)="confirm()">
+        <span class="material-icons-outlined">forward</span>
+        {{ 'customers.estimates.resolveLumpSum.confirm' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

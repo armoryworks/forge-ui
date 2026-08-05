@@ -8,7 +8,8 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { EstimateService } from '../../../services/estimate.service';
 import { QuoteService } from '../../../../quotes/services/quote.service';
-import { Estimate, EstimateDetail, EstimateLine, EstimateStatus } from '../../../models/estimate.model';
+import { Estimate, EstimateDetail, EstimateLine, EstimateLineResolution, EstimateStatus } from '../../../models/estimate.model';
+import { EstimateLumpSumResolveDialogComponent, EstimateLumpSumResolveDialogData } from '../../../components/estimate-lump-sum-resolve-dialog/estimate-lump-sum-resolve-dialog.component';
 import { FormValidationService } from '../../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../../shared/services/snackbar.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -400,6 +401,38 @@ export class CustomerEstimatesTabComponent implements OnInit {
   }
 
   protected convertToQuote(estimate: Estimate): void {
+    // #24: lump-sum lines (no catalog part) must be resolved per line —
+    // eliminated or replaced with a real part — before the convert. Fetch the
+    // detail first to know whether any exist; estimates without them keep the
+    // plain confirm → convert flow.
+    this.estimateService.getEstimate(estimate.id).subscribe({
+      next: detail => {
+        const lumpSumLines = (detail.lines ?? []).filter(l => l.partId == null);
+        if (lumpSumLines.length === 0) {
+          this.confirmConvert(estimate);
+          return;
+        }
+        this.dialog.open<EstimateLumpSumResolveDialogComponent, EstimateLumpSumResolveDialogData, EstimateLineResolution[] | null>(
+          EstimateLumpSumResolveDialogComponent,
+          {
+            width: '560px',
+            data: {
+              customerId: this.customerId(),
+              estimateTitle: detail.title,
+              lumpSumLines,
+              otherLineCount: (detail.lines ?? []).length - lumpSumLines.length,
+            },
+          },
+        ).afterClosed().subscribe(resolutions => {
+          if (!resolutions) return; // Cancelled → abort the convert entirely.
+          this.executeConvert(estimate, resolutions);
+        });
+      },
+    });
+  }
+
+  /** No lump-sum lines to resolve: plain confirm dialog, then convert. */
+  private confirmConvert(estimate: Estimate): void {
     this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
@@ -410,20 +443,24 @@ export class CustomerEstimatesTabComponent implements OnInit {
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
-      this.estimateService.convertToQuote(estimate.id).subscribe({
-        next: result => {
-          this.snackbar.success(this.translate.instant('customers.estimates.createdQuote', { number: result.quoteNumber ?? '' }));
-          if (this.editingId() === estimate.id) {
-            // Converted from the edit dialog: refresh the open detail in place
-            // (hides the footer convert button, locks lines) + reload the list.
-            this.estimateService.getEstimate(estimate.id).subscribe({
-              next: detail => this.applyDetail(detail),
-            });
-          } else {
-            this.loadEstimates();
-          }
-        },
-      });
+      this.executeConvert(estimate);
+    });
+  }
+
+  private executeConvert(estimate: Estimate, resolutions?: EstimateLineResolution[]): void {
+    this.estimateService.convertToQuote(estimate.id, resolutions).subscribe({
+      next: result => {
+        this.snackbar.success(this.translate.instant('customers.estimates.createdQuote', { number: result.quoteNumber ?? '' }));
+        if (this.editingId() === estimate.id) {
+          // Converted from the edit dialog: refresh the open detail in place
+          // (hides the footer convert button, locks lines) + reload the list.
+          this.estimateService.getEstimate(estimate.id).subscribe({
+            next: detail => this.applyDetail(detail),
+          });
+        } else {
+          this.loadEstimates();
+        }
+      },
     });
   }
 }

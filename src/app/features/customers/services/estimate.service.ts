@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-import { Estimate, EstimateDetail, EstimateLineInput, EstimateStatus } from '../models/estimate.model';
+import { Estimate, EstimateDetail, EstimateLineInput, EstimateLineResolution, EstimateStatus } from '../models/estimate.model';
 
 /** Payload to edit an existing estimate line (part link fixed at add time). */
 export interface UpdateEstimateLineInput {
@@ -59,8 +59,16 @@ export class EstimateService {
     return this.http.delete<void>(`${this.base}/${id}`);
   }
 
-  convertToQuote(id: number): Observable<{ id: number; quoteNumber: string }> {
-    return this.http.post<{ id: number; quoteNumber: string }>(`${this.base}/${id}/convert`, {});
+  /**
+   * Convert an estimate to a quote. #24: `lineResolutions` carries the user's
+   * per-lump-sum-line decisions (eliminate / replace-with-part); omitted =
+   * carry every line over unchanged.
+   */
+  convertToQuote(id: number, lineResolutions?: EstimateLineResolution[]): Observable<{ id: number; quoteNumber: string }> {
+    return this.http.post<{ id: number; quoteNumber: string }>(
+      `${this.base}/${id}/convert`,
+      lineResolutions?.length ? { lineResolutions } : {},
+    );
   }
 
   /** Add a line to an estimate (catalog part or lump-sum). Returns refreshed detail. */

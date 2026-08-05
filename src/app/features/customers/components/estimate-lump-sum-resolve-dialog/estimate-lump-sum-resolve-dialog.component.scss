@@ -1,0 +1,45 @@
+@use 'styles/variables' as *;
+
+.resolve-lump-sum {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.resolve-lump-sum__intro {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: $font-size-sm;
+}
+
+.resolve-lump-sum__lines {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.resolve-line {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--border);
+}
+
+.resolve-line__summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: $sp-md;
+}
+
+.resolve-line__description {
+  font-size: $font-size-base;
+  color: var(--text);
+}
+
+.resolve-line__amounts {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}

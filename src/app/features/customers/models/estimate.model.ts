@@ -47,3 +47,18 @@ export interface EstimateLineInput {
   unitPrice: number;
   notes?: string;
 }
+
+/** #24: what to do with a lump-sum line while converting the estimate to a quote. */
+export type EstimateLineResolutionAction = 'Keep' | 'Eliminate' | 'ReplaceWithPart';
+
+/**
+ * #24: one per-line convert decision. partId is required when the action is
+ * ReplaceWithPart; unitPrice is optional — the server prefills the customer's
+ * price-list price when omitted on a replace.
+ */
+export interface EstimateLineResolution {
+  estimateLineId: number;
+  action: EstimateLineResolutionAction;
+  partId?: number;
+  unitPrice?: number;
+}
