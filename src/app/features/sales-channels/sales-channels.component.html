@@ -11,6 +11,12 @@
       {{ 'salesChannels.showInactive' | translate }}
     </button>
     <span appSpacer></span>
+    @if (canTakeRetailOrder()) {
+      <button class="action-btn action-btn--sm" (click)="takeRetailOrder()">
+        <span class="material-icons-outlined">point_of_sale</span>
+        {{ 'retailOrder.takeOrder' | translate }}
+      </button>
+    }
     <button class="action-btn action-btn--sm action-btn--create" (click)="create()">
       <span class="material-icons-outlined">add</span>
       {{ 'salesChannels.newChannel' | translate }}

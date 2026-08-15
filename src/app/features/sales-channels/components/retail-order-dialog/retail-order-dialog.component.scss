@@ -1,0 +1,78 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.retail-order {
+  &__blocked {
+    margin: 0;
+    padding: $sp-md;
+    color: var(--error);
+    font-size: var(--font-size-sm);
+    border: $border-width-thin solid var(--error);
+    border-radius: $border-radius;
+  }
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+    padding-top: $sp-md;
+    border-top: $border-width-thin solid var(--border);
+  }
+
+  &__section-title {
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+  }
+
+  &__lines {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+  }
+
+  // Description gets the room; sku, qty and price are narrow and fixed so the
+  // columns stay aligned down the grid as lines are added.
+  &__line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 140px 90px 120px 32px;
+    gap: $sp-md;
+    align-items: center;
+  }
+
+  &__line-remove {
+    justify-self: center;
+  }
+
+  &__total {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: $sp-md;
+    padding-top: $sp-md;
+    border-top: $border-width-thin solid var(--border);
+  }
+
+  &__total-label {
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
+    color: var(--text-muted);
+  }
+
+  &__total-value {
+    font-size: var(--font-size-kpi);
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+  }
+}
+
+@media (max-width: 720px) {
+  .retail-order__line {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

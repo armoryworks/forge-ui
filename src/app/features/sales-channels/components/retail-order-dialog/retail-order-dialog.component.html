@@ -1,0 +1,161 @@
+<app-dialog [title]="title" width="800px" (closed)="close()">
+  <div [formGroup]="form">
+    @if (noRetailChannels()) {
+      <p class="retail-order__blocked">{{ 'retailOrder.noChannels' | translate }}</p>
+    }
+
+    <app-select
+      [label]="'retailOrder.fieldChannel' | translate"
+      formControlName="channelId"
+      [options]="channelOptions()"
+      [required]="true" />
+
+    <section class="retail-order__section">
+      <h3 class="retail-order__section-title">{{ 'retailOrder.buyerSection' | translate }}</h3>
+      <div class="dialog-row">
+        <app-input
+          [label]="'retailOrder.fieldBuyerName' | translate"
+          formControlName="buyerName"
+          [required]="true"
+          [maxlength]="200" />
+        <app-input
+          [label]="'retailOrder.fieldBuyerEmail' | translate"
+          formControlName="buyerEmail"
+          type="email"
+          [maxlength]="200" />
+      </div>
+      <div class="dialog-row">
+        <app-input
+          [label]="'retailOrder.fieldBuyerPhone' | translate"
+          formControlName="buyerPhone"
+          mask="phone"
+          [maxlength]="50" />
+        <app-toggle
+          [label]="'retailOrder.fieldMarketingConsent' | translate"
+          formControlName="marketingConsent" />
+      </div>
+      <p class="retail-order__hint">{{ 'retailOrder.consentHint' | translate }}</p>
+    </section>
+
+    <section class="retail-order__section">
+      <h3 class="retail-order__section-title">{{ 'retailOrder.shipToSection' | translate }}</h3>
+      <app-input
+        [label]="'retailOrder.fieldShipToName' | translate"
+        formControlName="shipToName"
+        [required]="true"
+        [maxlength]="200" />
+      <app-input
+        [label]="'retailOrder.fieldAddress' | translate"
+        formControlName="shipToLine1"
+        [required]="true"
+        [maxlength]="200" />
+      <app-input
+        [label]="'retailOrder.fieldAddress2' | translate"
+        formControlName="shipToLine2"
+        [maxlength]="200" />
+      <div class="dialog-row">
+        <app-input
+          [label]="'retailOrder.fieldCity' | translate"
+          formControlName="shipToCity"
+          [required]="true"
+          [maxlength]="100" />
+        <app-input
+          [label]="'retailOrder.fieldState' | translate"
+          formControlName="shipToState"
+          [required]="true"
+          [maxlength]="100" />
+      </div>
+      <div class="dialog-row">
+        <app-input
+          [label]="'retailOrder.fieldPostal' | translate"
+          formControlName="shipToPostalCode"
+          mask="zip"
+          [required]="true"
+          [maxlength]="20" />
+        <app-input
+          [label]="'retailOrder.fieldCountry' | translate"
+          formControlName="shipToCountry"
+          [required]="true"
+          [maxlength]="10" />
+      </div>
+    </section>
+
+    <section class="retail-order__section">
+      <h3 class="retail-order__section-title">{{ 'retailOrder.linesSection' | translate }}</h3>
+
+      <div formArrayName="lines" class="retail-order__lines">
+        @for (line of lines.controls; track $index) {
+          <div class="retail-order__line" [formGroupName]="$index">
+            <app-input
+              [label]="'retailOrder.lineDescription' | translate"
+              formControlName="description"
+              [required]="true"
+              [maxlength]="500" />
+            <app-input
+              [label]="'retailOrder.lineSku' | translate"
+              formControlName="externalSku"
+              [maxlength]="200" />
+            <app-input
+              [label]="'retailOrder.lineQuantity' | translate"
+              formControlName="quantity"
+              type="number"
+              [required]="true" />
+            <app-currency-input
+              [label]="'retailOrder.lineUnitPrice' | translate"
+              formControlName="unitPrice"
+              [required]="true" />
+            <button
+              class="icon-btn icon-btn--danger retail-order__line-remove"
+              type="button"
+              [disabled]="!canRemoveLine()"
+              (click)="removeLine($index)"
+              [attr.aria-label]="'retailOrder.removeLine' | translate">
+              <span class="material-icons-outlined">close</span>
+            </button>
+          </div>
+        }
+      </div>
+
+      <button class="action-btn action-btn--sm" type="button" (click)="addLine()">
+        <span class="material-icons-outlined">add</span>
+        {{ 'retailOrder.addLine' | translate }}
+      </button>
+
+      <p class="retail-order__hint">{{ 'retailOrder.priceHint' | translate }}</p>
+    </section>
+
+    <section class="retail-order__section">
+      <div class="dialog-row">
+        <app-currency-input
+          [label]="'retailOrder.fieldShipping' | translate"
+          formControlName="shippingAmount" />
+        <app-input
+          [label]="'retailOrder.fieldTaxRate' | translate"
+          formControlName="taxRatePercent"
+          type="number"
+          suffix="%" />
+      </div>
+      <app-input
+        [label]="'retailOrder.fieldNotes' | translate"
+        formControlName="notes"
+        [maxlength]="2000" />
+    </section>
+
+    <div class="retail-order__total">
+      <span class="retail-order__total-label">{{ 'retailOrder.total' | translate }}</span>
+      <span class="retail-order__total-value">{{ total() | currency }}</span>
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button
+        class="action-btn action-btn--primary"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        {{ 'retailOrder.createOrder' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

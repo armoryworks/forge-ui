@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -55,6 +56,7 @@ export class SalesChannelDialogComponent {
   private readonly customerService = inject(CustomerService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly isEdit = !!this.data.channel;
   protected readonly saving = signal(false);
@@ -122,10 +124,12 @@ export class SalesChannelDialogComponent {
     // Keep the house-account requirement in step with the selected type. Applied
     // on every change rather than once at init because the user can flip the
     // type freely while creating.
-    this.form.controls.channelType.valueChanges.subscribe((value) => {
-      this.channelType.set((value ?? 'DirectB2B') as SalesChannelType);
-      this.applyHouseAccountRequirement();
-    });
+    this.form.controls.channelType.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((value) => {
+        this.channelType.set((value ?? 'DirectB2B') as SalesChannelType);
+        this.applyHouseAccountRequirement();
+      });
 
     this.applyHouseAccountRequirement();
   }

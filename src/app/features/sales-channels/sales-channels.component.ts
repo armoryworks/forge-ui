@@ -21,6 +21,10 @@ import {
   SalesChannelDialogData,
   SalesChannelDialogResult,
 } from './components/sales-channel-dialog/sales-channel-dialog.component';
+import {
+  RetailOrderDialogComponent,
+  RetailOrderDialogResult,
+} from './components/retail-order-dialog/retail-order-dialog.component';
 
 /**
  * Sales-channel administration — the routing layer above sales orders.
@@ -71,6 +75,14 @@ export class SalesChannelsComponent {
 
   protected readonly isEmpty = computed(() => !this.loading() && this.channels().length === 0);
 
+  /**
+   * Manual retail entry is only meaningful once a retail channel exists —
+   * without one there is no house account for the receivable to land on.
+   */
+  protected readonly canTakeRetailOrder = computed(
+    () => this.retailChannels().some((c) => c.channel.isActive),
+  );
+
   constructor() {
     this.load();
   }
@@ -108,6 +120,19 @@ export class SalesChannelsComponent {
       .afterClosed()
       .subscribe((result) => {
         if (result) this.load();
+      });
+  }
+
+  /** Walk-in, phone and trade-show orders. Same endpoint the channel importers use. */
+  protected takeRetailOrder(): void {
+    this.dialog
+      .open<RetailOrderDialogComponent, undefined, RetailOrderDialogResult>(
+        RetailOrderDialogComponent,
+        { width: '800px', autoFocus: false },
+      )
+      .afterClosed()
+      .subscribe((order) => {
+        if (order) this.load();
       });
   }
 
