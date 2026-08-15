@@ -1,0 +1,142 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.settlement-detail {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  position: relative;
+  min-height: 120px;
+
+  &__head {
+    display: flex;
+    align-items: baseline;
+    gap: $sp-lg;
+    flex-wrap: wrap;
+  }
+
+  &__ident {
+    display: flex;
+    align-items: baseline;
+    gap: $sp-md;
+  }
+
+  &__batch {
+    font-family: $font-family-mono;
+    font-size: var(--font-size-base);
+  }
+
+  &__channel {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+  }
+
+  &__period {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+  }
+
+  &__totals {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-xl;
+    margin: 0;
+    padding: $sp-md;
+    background: var(--surface-alt);
+    border: $border-width-thin solid var(--border);
+    border-radius: $border-radius;
+  }
+
+  &__total {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+
+    dt {
+      @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
+      color: var(--text-muted);
+    }
+
+    dd {
+      margin: 0;
+      font-size: var(--font-size-md);
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+    }
+
+    // The variance and unmatched count are the reason the batch is open at all.
+    &--bad dd {
+      color: var(--error);
+    }
+  }
+
+  &__resolution {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+  }
+
+  &__resolution-label {
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
+    margin-right: $sp-md;
+  }
+
+  &__accept {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+    padding-top: $sp-md;
+    border-top: $border-width-thin solid var(--border);
+  }
+
+  &__accept-hint {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+  }
+}
+
+.settlement-lines {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+
+  th {
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
+    text-align: left;
+    color: var(--text-muted);
+    padding: $sp-sm $sp-md;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  td {
+    padding: $sp-sm $sp-md;
+    border-bottom: $border-width-thin solid var(--border);
+    color: var(--text);
+  }
+
+  &__amount-col {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__negative {
+    color: var(--text-muted);
+  }
+
+  &__muted {
+    color: var(--text-muted);
+  }
+
+  // An order-linked line whose order was never imported is real money we cannot
+  // attribute — it stays visible rather than being dropped from the batch.
+  &__row--unmatched {
+    background: color-mix(in srgb, var(--error) 8%, transparent);
+  }
+
+  &__unmatched {
+    color: var(--error);
+    font-family: $font-family-mono;
+    font-size: var(--font-size-xs);
+  }
+}

@@ -1,0 +1,30 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.buyers__count {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.buyer {
+  &__name {
+    font-size: var(--font-size-base);
+    margin-right: $sp-md;
+  }
+
+  &__email {
+    font-family: $font-family-mono;
+    font-size: var(--font-size-xs);
+  }
+
+  &__muted {
+    color: var(--text-muted);
+  }
+}

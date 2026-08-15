@@ -1551,6 +1551,40 @@ _(No pending enhancements — all planned DataTable and UserPreferences work is 
 
 
 <!-- ===== Accessibility (WCAG 2.2 AA) ===== -->
+## Sales Channels Feature (`features/sales-channels/`)
+
+The UI over the retail / marketplace lane. Four surfaces, each gated on its own capability so an
+install that only sells B2B sees just the channel list.
+
+| Route | Capability | What it is |
+|-------|-----------|------------|
+| `/sales-channels` | `CAP-O2C-CHANNELS` (default ON) | Channel admin. Cards, not a data table — a channel is configuration whose few decisions must read at a glance. |
+| `/sales-channels/listings` | `CAP-EXT-ECOMMERCE` | Listing triage: external SKUs with no part behind them. |
+| `/sales-channels/buyers` | `CAP-O2C-RETAIL` | Consumers behind channel orders, and the PII scrub action. |
+| `/sales-channels/settlements` | `CAP-O2C-SETTLEMENT` | Marketplace payouts and their reconciliation. |
+
+**Retail buyers are NOT customers and must never be merged into that list.** They have no credit, no
+terms, no price lists, and there are thousands of them — mixing them in would bury the few hundred
+real accounts every credit / statement / pricing surface is built around. See the server-side
+`Sales Channels & the Retail Lane` section in `forge-api/CLAUDE.md` for why the split exists.
+
+**Conventions worth copying from this feature:**
+
+- **Precomputed row view-models.** `SalesChannelCard`, `partRows`, `lineRows` resolve chip classes,
+  label keys and selected flags in a `computed()` rather than calling a component method from the
+  template. A method in a binding re-invokes on every change-detection pass.
+- **URL owns the filters.** Channel and unmapped filters live in query params; the reactive
+  `FormControl` writes to the URL and an `effect()` seeds the control back from it with
+  `emitEvent: false`, so the control never becomes a competing source of truth.
+- **Marketplace-only affordances stay marketplace-only.** The settlements channel picker lists
+  `Marketplace` channels exclusively — a storefront's money arrives through your own processor, so
+  offering an import there would promise something that can never return anything.
+- **Destructive actions state what survives.** The buyer scrub confirm says explicitly that orders
+  and totals are kept; the listing-unmap warning says historical lines keep their part. Both are
+  asymmetric operations and the copy carries that.
+
+---
+
 ## Accessibility — Full WCAG 2.2 AA Compliance (Non-Negotiable)
 
 **Every component, template, and page MUST be fully WCAG 2.2 AA compliant.** This is not aspirational — it is a hard requirement enforced by automated tooling.

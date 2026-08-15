@@ -1,0 +1,93 @@
+<app-page-layout
+  [pageTitle]="'settlements.title' | translate"
+  [pageSubtitle]="'settlements.subtitle' | translate">
+
+  <ng-container toolbar>
+    <app-select
+      [label]="'settlements.channel' | translate"
+      [options]="channelOptions()"
+      [formControl]="channelControl" />
+
+    @if (discrepancyCount() > 0) {
+      <span class="chip chip--warning">
+        {{ 'settlements.needsReview' | translate: { count: discrepancyCount() } }}
+      </span>
+    }
+
+    <span appSpacer></span>
+
+    <button
+      class="action-btn action-btn--sm"
+      [disabled]="!canImport()"
+      [matTooltip]="canImport() ? '' : ('settlements.pickChannelToImport' | translate)"
+      (click)="importSettlements()">
+      <span class="material-icons-outlined" [class.spin]="importing()">download</span>
+      {{ 'settlements.import' | translate }}
+    </button>
+  </ng-container>
+
+  <ng-container content>
+    @if (isEmpty()) {
+      <app-empty-state
+        icon="account_balance"
+        [message]="'settlements.empty' | translate"
+        [helpText]="'settlements.emptyHelp' | translate" />
+    } @else {
+      <app-data-table
+        tableId="channel-settlements"
+        [columns]="columns"
+        [data]="settlements()"
+        [loading]="loading()"
+        [clickableRows]="true"
+        emptyIcon="account_balance"
+        [emptyMessage]="'settlements.empty' | translate"
+        (rowClick)="openDetail($any($event))">
+
+        <ng-template appColumnCell="externalSettlementId" let-row>
+          <code class="settlement__batch">{{ row.externalSettlementId }}</code>
+        </ng-template>
+
+        <ng-template appColumnCell="periodEnd" let-row>
+          {{ row.periodStart | date:'MM/dd/yyyy' }} &ndash; {{ row.periodEnd | date:'MM/dd/yyyy' }}
+        </ng-template>
+
+        <ng-template appColumnCell="reportedNetAmount" let-row>
+          {{ row.reportedNetAmount | currency:row.currencyCode }}
+        </ng-template>
+
+        <ng-template appColumnCell="variance" let-row>
+          @if (row.variance === 0) {
+            <span class="settlement__tied">&mdash;</span>
+          } @else {
+            <span class="settlement__variance">{{ row.variance | currency:row.currencyCode }}</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="status" let-row>
+          @switch (row.status) {
+            @case ('Reconciled') {
+              <span class="chip chip--success">{{ 'settlements.status.Reconciled' | translate }}</span>
+            }
+            @case ('Discrepancy') {
+              <span
+                class="chip chip--error"
+                [matTooltip]="'settlements.discrepancyTooltip' | translate">
+                {{ 'settlements.status.Discrepancy' | translate }}
+              </span>
+            }
+            @case ('Accepted') {
+              <span
+                class="chip chip--muted"
+                [matTooltip]="row.resolutionNotes ?? ''">
+                {{ 'settlements.status.Accepted' | translate }}
+              </span>
+            }
+            @default {
+              <span class="chip chip--info">{{ 'settlements.status.Imported' | translate }}</span>
+            }
+          }
+        </ng-template>
+      </app-data-table>
+    }
+  </ng-container>
+</app-page-layout>

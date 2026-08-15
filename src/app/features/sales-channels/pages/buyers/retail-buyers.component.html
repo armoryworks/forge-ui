@@ -1,0 +1,73 @@
+<app-page-layout
+  [pageTitle]="'retailBuyers.title' | translate"
+  [pageSubtitle]="'retailBuyers.subtitle' | translate">
+
+  <ng-container toolbar>
+    <app-input [label]="'common.search' | translate" [formControl]="searchControl" />
+    <app-select
+      [label]="'retailBuyers.channel' | translate"
+      [options]="channelOptions()"
+      [formControl]="channelControl" />
+    <span appSpacer></span>
+    <span class="buyers__count">{{ 'retailBuyers.count' | translate: { count: totalCount() } }}</span>
+  </ng-container>
+
+  <ng-container content>
+    @if (isEmpty()) {
+      <app-empty-state
+        icon="person_outline"
+        [message]="'retailBuyers.empty' | translate"
+        [helpText]="'retailBuyers.emptyHelp' | translate" />
+    } @else {
+      <app-data-table
+        tableId="retail-buyers"
+        [columns]="columns"
+        [data]="buyers()"
+        [loading]="loading()"
+        emptyIcon="person_outline"
+        [emptyMessage]="'retailBuyers.empty' | translate">
+
+        <ng-template appColumnCell="displayName" let-row>
+          <span class="buyer__name">{{ row.displayName }}</span>
+          @if (row.purgedAt) {
+            <span class="chip chip--muted" [matTooltip]="'retailBuyers.purgedTooltip' | translate">
+              {{ 'retailBuyers.purged' | translate }}
+            </span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="contactEmail" let-row>
+          @if (row.contactEmail) {
+            <span class="buyer__email">{{ row.contactEmail }}</span>
+          } @else {
+            <span class="buyer__muted">&mdash;</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="lifetimeValue" let-row>
+          {{ row.lifetimeValue | currency }}
+        </ng-template>
+
+        <ng-template appColumnCell="lastOrderAt" let-row>
+          @if (row.lastOrderAt) {
+            {{ row.lastOrderAt | date:'MM/dd/yyyy' }}
+          } @else {
+            <span class="buyer__muted">&mdash;</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="actions" let-row>
+          @if (!row.purgedAt) {
+            <button
+              class="icon-btn icon-btn--danger"
+              [matTooltip]="'retailBuyers.purgeTooltip' | translate"
+              (click)="purge(row); $event.stopPropagation()"
+              [attr.aria-label]="'retailBuyers.purgeConfirm' | translate">
+              <span class="material-icons-outlined">person_off</span>
+            </button>
+          }
+        </ng-template>
+      </app-data-table>
+    }
+  </ng-container>
+</app-page-layout>

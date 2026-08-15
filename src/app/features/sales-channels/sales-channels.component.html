@@ -1,0 +1,130 @@
+<app-page-layout
+  [pageTitle]="'salesChannels.title' | translate"
+  [pageSubtitle]="'salesChannels.subtitle' | translate">
+
+  <ng-container toolbar>
+    <button
+      class="action-btn action-btn--sm"
+      [class.action-btn--active]="showInactive()"
+      (click)="toggleInactive()">
+      <span class="material-icons-outlined">visibility</span>
+      {{ 'salesChannels.showInactive' | translate }}
+    </button>
+    <span appSpacer></span>
+    <button class="action-btn action-btn--sm action-btn--create" (click)="create()">
+      <span class="material-icons-outlined">add</span>
+      {{ 'salesChannels.newChannel' | translate }}
+    </button>
+  </ng-container>
+
+  <ng-container content>
+    <div class="channels" [appLoadingBlock]="loading()">
+      @if (isEmpty()) {
+        <app-empty-state
+          icon="storefront"
+          [message]="'salesChannels.empty' | translate"
+          [helpText]="'salesChannels.emptyHelp' | translate" />
+      } @else {
+        @if (accountChannels().length > 0) {
+          <section class="channels__group">
+            <h2 class="channels__group-title">{{ 'salesChannels.groupAccount' | translate }}</h2>
+            <p class="channels__group-hint">{{ 'salesChannels.groupAccountHint' | translate }}</p>
+            <div class="channels__grid">
+              @for (card of accountChannels(); track card.channel.id) {
+                <ng-container [ngTemplateOutlet]="channelCard" [ngTemplateOutletContext]="{ $implicit: card }" />
+              }
+            </div>
+          </section>
+        }
+
+        @if (retailChannels().length > 0) {
+          <section class="channels__group">
+            <h2 class="channels__group-title">{{ 'salesChannels.groupRetail' | translate }}</h2>
+            <p class="channels__group-hint">{{ 'salesChannels.groupRetailHint' | translate }}</p>
+            <div class="channels__grid">
+              @for (card of retailChannels(); track card.channel.id) {
+                <ng-container [ngTemplateOutlet]="channelCard" [ngTemplateOutletContext]="{ $implicit: card }" />
+              }
+            </div>
+          </section>
+        }
+      }
+    </div>
+  </ng-container>
+</app-page-layout>
+
+<ng-template #channelCard let-card>
+  <article class="channel-card" [class.channel-card--inactive]="!card.channel.isActive">
+    <header class="channel-card__head">
+      <span class="channel-card__name">{{ card.channel.name }}</span>
+      <code class="channel-card__code">{{ card.channel.code }}</code>
+      <span appSpacer></span>
+      @if (card.channel.isDefault) {
+        <span class="chip chip--primary" [matTooltip]="'salesChannels.defaultTooltip' | translate">
+          {{ 'salesChannels.default' | translate }}
+        </span>
+      }
+      @if (!card.channel.isActive) {
+        <span class="chip chip--muted">{{ 'salesChannels.inactive' | translate }}</span>
+      }
+    </header>
+
+    <div class="channel-card__meta">
+      <span [class]="card.typeChipClass">{{ card.typeLabelKey | translate }}</span>
+      @if (card.channel.taxCollectedBy === 'Marketplace') {
+        <span class="chip chip--warning" [matTooltip]="'salesChannels.taxMarketplaceTooltip' | translate">
+          {{ 'salesChannels.taxMarketplace' | translate }}
+        </span>
+      }
+    </div>
+
+    @if (card.channel.description) {
+      <p class="channel-card__desc">{{ card.channel.description }}</p>
+    }
+
+    <dl class="channel-card__facts">
+      @if (card.channel.isRetail) {
+        <div class="channel-card__fact">
+          <dt>{{ 'salesChannels.billsTo' | translate }}</dt>
+          <dd>
+            @if (card.channel.soldToCustomerName) {
+              {{ card.channel.soldToCustomerName }}
+            } @else {
+              <span class="channel-card__missing">{{ 'salesChannels.noHouseAccount' | translate }}</span>
+            }
+          </dd>
+        </div>
+      }
+      <div class="channel-card__fact">
+        <dt>{{ 'salesChannels.orders' | translate }}</dt>
+        <dd>{{ card.channel.orderCount }}</dd>
+      </div>
+      @if (card.channel.isRetail) {
+        <div class="channel-card__fact">
+          <dt>{{ 'salesChannels.listings' | translate }}</dt>
+          <dd>{{ card.channel.listingCount }}</dd>
+        </div>
+      }
+    </dl>
+
+    <footer class="channel-card__actions">
+      @if (card.canMakeDefault) {
+        <button class="action-btn action-btn--sm" (click)="setDefault(card.channel)">
+          {{ 'salesChannels.makeDefault' | translate }}
+        </button>
+      }
+      <span appSpacer></span>
+      <button class="icon-btn" (click)="edit(card.channel)" [attr.aria-label]="'common.edit' | translate">
+        <span class="material-icons-outlined">edit</span>
+      </button>
+      <button
+        class="icon-btn icon-btn--danger"
+        [disabled]="!card.canDelete"
+        [matTooltip]="card.canDelete ? '' : ('salesChannels.cannotDeleteDefault' | translate)"
+        (click)="remove(card.channel)"
+        [attr.aria-label]="'common.delete' | translate">
+        <span class="material-icons-outlined">delete</span>
+      </button>
+    </footer>
+  </article>
+</ng-template>

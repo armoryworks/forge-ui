@@ -1,0 +1,28 @@
+@use 'styles/variables' as *;
+
+// Page-scroll contract — the routed host must be a bounded flex column so the
+// data table's internal scroll area has something to clip against.
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.listing {
+  &__sku {
+    font-family: $font-family-mono;
+    font-size: var(--font-size-xs);
+    color: var(--text);
+  }
+
+  &__part {
+    font-family: $font-family-mono;
+    font-size: var(--font-size-xs);
+  }
+
+  &__muted {
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+  }
+}

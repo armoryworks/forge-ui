@@ -1,0 +1,108 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.map-listing {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__subject {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: $sp-md;
+    padding: $sp-md;
+    background: var(--surface-alt);
+    border: $border-width-thin solid var(--border);
+    border-radius: $border-radius;
+  }
+
+  &__subject-label {
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
+    color: var(--text-muted);
+  }
+
+  &__sku {
+    font-family: $font-family-mono;
+    font-size: var(--font-size-base);
+    color: var(--text);
+  }
+
+  &__title {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+  }
+
+  &__results {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-height: 260px;
+    overflow-y: auto;
+    border: $border-width-thin solid var(--border);
+    border-radius: $border-radius;
+    @include custom-scrollbar;
+  }
+
+  &__none {
+    padding: $sp-lg;
+    margin: 0;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+  }
+
+  &__note,
+  &__warning {
+    margin: 0;
+    font-size: var(--font-size-sm);
+  }
+
+  &__note { color: var(--text-muted); }
+
+  // Clearing a mapping is not symmetrical with setting one — historical order
+  // lines keep their part, so the user needs to know the undo is partial.
+  &__warning { color: var(--warning); }
+}
+
+.part-row {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  width: 100%;
+  padding: $sp-md;
+  background: transparent;
+  border: 0;
+  border-bottom: $border-width-thin solid var(--border);
+  cursor: pointer;
+  text-align: left;
+  color: var(--text);
+
+  &:last-child { border-bottom: 0; }
+
+  &:hover { background: var(--surface-hover); }
+
+  &--selected {
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+  }
+
+  &__number {
+    font-family: $font-family-mono;
+    font-size: var(--font-size-xs);
+    min-width: 110px;
+  }
+
+  &__name {
+    flex: 1;
+    min-width: 0;
+    font-size: var(--font-size-base);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__check {
+    font-size: $icon-size-sm;
+    color: var(--primary);
+  }
+}

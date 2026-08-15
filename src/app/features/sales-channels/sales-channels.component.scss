@@ -1,0 +1,130 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+// Page-scroll contract — see styles/_shared.scss. Routed page host must be a
+// bounded flex column or the inner scroll container has nothing to clip against.
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.channels {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xl;
+  position: relative;
+
+  &__group {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__group-title {
+    @include uppercase-label(var(--font-size-xs), 0.5px, 600);
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  &__group-hint {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    margin: 0 0 $sp-sm;
+    max-width: 70ch;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: $sp-md;
+  }
+}
+
+.channel-card {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-lg;
+  border: $border-width-thin solid var(--border);
+  border-radius: $border-radius;
+  background: var(--surface);
+
+  // Retired channels stay readable but visibly out of play — they still hold
+  // order history, so hiding them outright would lose that context.
+  &--inactive {
+    opacity: 0.62;
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__name {
+    font-size: var(--font-size-title);
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &__code {
+    font-family: $font-family-mono;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-sm;
+  }
+
+  &__desc {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  &__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-lg;
+    margin: 0;
+  }
+
+  &__fact {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    min-width: 0;
+
+    dt {
+      @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
+      color: var(--text-muted);
+    }
+
+    dd {
+      margin: 0;
+      font-size: var(--font-size-base);
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  // A retail channel with no house account cannot take an order at all — the
+  // receivable has nowhere to land — so it reads as a fault, not a blank.
+  &__missing {
+    color: var(--error);
+    font-size: var(--font-size-sm);
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    padding-top: $sp-md;
+    border-top: $border-width-thin solid var(--border);
+  }
+}

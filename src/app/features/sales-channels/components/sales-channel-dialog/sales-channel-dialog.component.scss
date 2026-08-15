@@ -1,0 +1,15 @@
+@use 'styles/variables' as *;
+
+.channel-dialog {
+  // Inline guidance for the two rules the server enforces, so the user reads
+  // them while filling the form rather than discovering them on submit.
+  &__note {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    margin: -#{$sp-sm} 0 0;
+
+    &--emphasis {
+      color: var(--text);
+    }
+  }
+}

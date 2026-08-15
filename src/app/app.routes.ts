@@ -130,6 +130,20 @@ export const routes: Routes = [
           import('./features/customers/customers.routes').then((m) => m.CUSTOMERS_ROUTES),
       },
       {
+        // Sales channels — the retail / marketplace lane. Gated on
+        // CAP-O2C-CHANNELS, which ships default-ON and is behaviour-neutral on
+        // its own; the retail-specific sub-routes carry their own guards.
+        path: 'sales-channels',
+        canActivate: [
+          roleGuard('Admin', 'Manager', 'PM', 'OfficeManager'),
+          capabilityGuard('CAP-O2C-CHANNELS'),
+        ],
+        loadChildren: () =>
+          import('./features/sales-channels/sales-channels.routes').then(
+            (m) => m.SALES_CHANNELS_ROUTES,
+          ),
+      },
+      {
         path: 'leads',
         canActivate: [roleGuard('Admin', 'Manager', 'PM')],
         loadChildren: () =>

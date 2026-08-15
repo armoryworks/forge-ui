@@ -1,0 +1,56 @@
+<app-dialog [title]="title" width="520px" (closed)="close()">
+  <div class="map-listing">
+    <div class="map-listing__subject">
+      <span class="map-listing__subject-label">{{ 'channelListings.mappingFor' | translate }}</span>
+      <code class="map-listing__sku">{{ listingLabel }}</code>
+      @if (listing.title) {
+        <span class="map-listing__title">{{ listing.title }}</span>
+      }
+    </div>
+
+    <app-input
+      [label]="'channelListings.searchParts' | translate"
+      [formControl]="searchControl" />
+
+    <div class="map-listing__results" [appLoadingBlock]="searching()">
+      @if (partRows().length === 0) {
+        <p class="map-listing__none">{{ 'channelListings.noParts' | translate }}</p>
+      } @else {
+        @for (row of partRows(); track row.part.id) {
+          <button
+            type="button"
+            class="part-row"
+            [class.part-row--selected]="row.isSelected"
+            (click)="select(row.part)">
+            <span class="part-row__number">{{ row.part.partNumber }}</span>
+            <span class="part-row__name">{{ row.part.name }}</span>
+            @if (row.isSelected) {
+              <span class="material-icons-outlined part-row__check">check</span>
+            }
+          </button>
+        }
+      }
+    </div>
+
+    @if (isCleared()) {
+      <p class="map-listing__warning">{{ 'channelListings.clearingWarning' | translate }}</p>
+    } @else if (hasSelection()) {
+      <p class="map-listing__note">{{ 'channelListings.backfillNote' | translate }}</p>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    @if (listing.partId !== null) {
+      <button class="action-btn" (click)="clearMapping()">
+        {{ 'channelListings.clearMapping' | translate }}
+      </button>
+    }
+    <button
+      class="action-btn action-btn--primary"
+      [disabled]="saving()"
+      (click)="save()">
+      {{ saveLabelKey() | translate }}
+    </button>
+  </div>
+</app-dialog>

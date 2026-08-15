@@ -1,0 +1,72 @@
+<app-dialog [title]="titleKey | translate" width="560px" (closed)="close()">
+  <div [formGroup]="form">
+    <div class="dialog-row">
+      <app-input
+        [label]="'salesChannels.fieldName' | translate"
+        formControlName="name"
+        [required]="true"
+        [maxlength]="200" />
+      <app-input
+        [label]="'salesChannels.fieldCode' | translate"
+        formControlName="code"
+        [required]="true"
+        [isReadonly]="isEdit"
+        [maxlength]="40" />
+    </div>
+
+    @if (isEdit) {
+      <p class="channel-dialog__note">{{ 'salesChannels.codeImmutable' | translate }}</p>
+    }
+
+    <app-select
+      [label]="'salesChannels.fieldType' | translate"
+      formControlName="channelType"
+      [options]="typeOptions"
+      [required]="true"
+      [isReadonly]="isEdit" />
+
+    @if (isEdit) {
+      <p class="channel-dialog__note">{{ 'salesChannels.typeImmutable' | translate }}</p>
+    }
+
+    @if (isRetail()) {
+      <app-select
+        [label]="'salesChannels.fieldHouseAccount' | translate"
+        formControlName="soldToCustomerId"
+        [options]="customerOptions()"
+        [required]="true" />
+      <p class="channel-dialog__note channel-dialog__note--emphasis">
+        {{ 'salesChannels.houseAccountExplainer' | translate }}
+      </p>
+    }
+
+    <div class="dialog-row">
+      <app-select
+        [label]="'salesChannels.fieldTaxCollectedBy' | translate"
+        formControlName="taxCollectedBy"
+        [options]="taxOptions" />
+      <app-input
+        [label]="'salesChannels.fieldOrderPrefix' | translate"
+        formControlName="orderNumberPrefix"
+        [maxlength]="10" />
+    </div>
+
+    <app-textarea
+      [label]="'salesChannels.fieldDescription' | translate"
+      formControlName="description"
+      [rows]="2"
+      [maxlength]="1000" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button
+        class="action-btn action-btn--primary"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

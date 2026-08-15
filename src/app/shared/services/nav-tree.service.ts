@@ -66,6 +66,22 @@ export class NavTreeService {
             { icon: 'upload_file', label: 'Import', i18nKey: 'nav.customersImport', route: '/customers/import' },
           ],
         },
+        // Sales channels — the retail / marketplace lane. Sits beside Customers
+        // rather than under it: a channel is a route to market, not an account,
+        // and its children (listing triage, consumer buyers, payout
+        // reconciliation) each carry their own capability so an install that
+        // only sells B2B sees just the channel list.
+        {
+          icon: 'storefront', label: 'Sales Channels', i18nKey: 'nav.salesChannels',
+          capability: 'CAP-O2C-CHANNELS',
+          allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'],
+          children: [
+            { icon: 'list', label: 'All Channels', i18nKey: 'nav.salesChannelsAll', route: '/sales-channels' },
+            { icon: 'sell', label: 'Listings', i18nKey: 'nav.salesChannelsListings', route: '/sales-channels/listings', capability: 'CAP-EXT-ECOMMERCE' },
+            { icon: 'person_outline', label: 'Retail Buyers', i18nKey: 'nav.salesChannelsBuyers', route: '/sales-channels/buyers', capability: 'CAP-O2C-RETAIL' },
+            { icon: 'account_balance', label: 'Settlements', i18nKey: 'nav.salesChannelsSettlements', route: '/sales-channels/settlements', capability: 'CAP-O2C-SETTLEMENT' },
+          ],
+        },
         // Phase 1r — Leads is now a group with sub-routes for high-volume
         // marketing surfaces (bulk intake / worker queue / campaigns /
         // suppression). First child "All" routes to the original list page

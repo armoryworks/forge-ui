@@ -1,0 +1,112 @@
+<app-dialog [title]="title" width="820px" (closed)="close()">
+  <div class="settlement-detail" [appLoadingBlock]="loading()">
+    @if (settlement(); as s) {
+      <header class="settlement-detail__head">
+        <div class="settlement-detail__ident">
+          <code class="settlement-detail__batch">{{ s.externalSettlementId }}</code>
+          <span class="settlement-detail__channel">{{ s.channelName }}</span>
+        </div>
+        <span class="settlement-detail__period">
+          {{ s.periodStart | date:'MM/dd/yyyy' }} &ndash; {{ s.periodEnd | date:'MM/dd/yyyy' }}
+        </span>
+      </header>
+
+      <dl class="settlement-detail__totals">
+        <div class="settlement-detail__total">
+          <dt>{{ 'settlements.reported' | translate }}</dt>
+          <dd>{{ s.reportedNetAmount | currency:s.currencyCode }}</dd>
+        </div>
+        <div class="settlement-detail__total">
+          <dt>{{ 'settlements.computed' | translate }}</dt>
+          <dd>{{ s.computedNetAmount | currency:s.currencyCode }}</dd>
+        </div>
+        <div class="settlement-detail__total" [class.settlement-detail__total--bad]="hasVariance()">
+          <dt>{{ 'settlements.variance' | translate }}</dt>
+          <dd>{{ s.variance | currency:s.currencyCode }}</dd>
+        </div>
+        @if (s.unmatchedLineCount > 0) {
+          <div class="settlement-detail__total settlement-detail__total--bad">
+            <dt>{{ 'settlements.unmatched' | translate }}</dt>
+            <dd>{{ s.unmatchedLineCount }}</dd>
+          </div>
+        }
+      </dl>
+
+      @if (s.resolutionNotes) {
+        <p class="settlement-detail__resolution">
+          <span class="settlement-detail__resolution-label">{{ 'settlements.acceptedNote' | translate }}</span>
+          {{ s.resolutionNotes }}
+        </p>
+      }
+
+      <table class="settlement-lines">
+        <thead>
+          <tr>
+            <th>{{ 'settlements.lineTypeHeader' | translate }}</th>
+            <th>{{ 'settlements.lineOrder' | translate }}</th>
+            <th>{{ 'settlements.lineDescription' | translate }}</th>
+            <th class="settlement-lines__amount-col">{{ 'settlements.lineAmount' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of lineRows(); track row.line.id) {
+            <tr [class.settlement-lines__row--unmatched]="row.line.isUnmatched">
+              <td>{{ row.typeLabelKey | translate }}</td>
+              <td>
+                @if (row.line.salesOrderId) {
+                  <app-entity-link type="sales-order" [entityId]="row.line.salesOrderId">
+                    {{ row.line.salesOrderNumber }}
+                  </app-entity-link>
+                } @else if (row.line.externalOrderId) {
+                  <span
+                    class="settlement-lines__unmatched"
+                    [matTooltip]="'settlements.unmatchedTooltip' | translate">
+                    {{ row.line.externalOrderId }}
+                  </span>
+                } @else {
+                  <span class="settlement-lines__muted">&mdash;</span>
+                }
+              </td>
+              <td>{{ row.line.description }}</td>
+              <td
+                class="settlement-lines__amount-col"
+                [class.settlement-lines__negative]="row.isNegative">
+                {{ row.line.amount | currency:s.currencyCode }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (showAcceptForm()) {
+        <div class="settlement-detail__accept">
+          <p class="settlement-detail__accept-hint">{{ 'settlements.acceptHint' | translate }}</p>
+          <app-textarea
+            [label]="'settlements.acceptReason' | translate"
+            [formControl]="notesControl"
+            [rows]="2"
+            [maxlength]="2000" />
+        </div>
+      }
+    }
+  </div>
+
+  <div dialog-footer>
+    @if (showAcceptForm()) {
+      <button class="action-btn" (click)="cancelAccept()">{{ 'common.cancel' | translate }}</button>
+      <button
+        class="action-btn action-btn--primary"
+        [disabled]="notesControl.invalid || accepting()"
+        (click)="accept()">
+        {{ 'settlements.acceptConfirm' | translate }}
+      </button>
+    } @else {
+      <button class="action-btn" (click)="close()">{{ 'common.close' | translate }}</button>
+      @if (canAccept()) {
+        <button class="action-btn action-btn--primary" (click)="beginAccept()">
+          {{ 'settlements.acceptVariance' | translate }}
+        </button>
+      }
+    }
+  </div>
+</app-dialog>

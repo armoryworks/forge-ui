@@ -1,0 +1,26 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.settlement {
+  &__batch {
+    font-family: $font-family-mono;
+    font-size: var(--font-size-xs);
+  }
+
+  &__tied {
+    color: var(--text-muted);
+  }
+
+  // A non-zero variance is the whole reason to look at the row, so it reads as
+  // an exception rather than as another number in the column.
+  &__variance {
+    color: var(--error);
+    font-variant-numeric: tabular-nums;
+  }
+}

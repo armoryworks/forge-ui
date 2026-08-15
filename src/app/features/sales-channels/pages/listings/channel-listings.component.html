@@ -1,0 +1,74 @@
+<app-page-layout
+  [pageTitle]="'channelListings.title' | translate"
+  [pageSubtitle]="'channelListings.subtitle' | translate">
+
+  <ng-container toolbar>
+    <app-input
+      [label]="'common.search' | translate"
+      [formControl]="searchControl" />
+
+    <app-select
+      [label]="'channelListings.channel' | translate"
+      [options]="channelOptions()"
+      [formControl]="channelControl" />
+
+    <button
+      class="action-btn action-btn--sm"
+      [class.action-btn--active]="unmappedOnly()"
+      (click)="toggleUnmapped()">
+      <span class="material-icons-outlined">link_off</span>
+      {{ 'channelListings.unmappedOnly' | translate }}
+    </button>
+
+    <span appSpacer></span>
+
+    <button
+      class="action-btn action-btn--sm"
+      [disabled]="syncing() || selectedChannelId() === null"
+      [matTooltip]="selectedChannelId() === null ? ('channelListings.pickChannelToSync' | translate) : ''"
+      (click)="syncListings()">
+      <span class="material-icons-outlined" [class.spin]="syncing()">sync</span>
+      {{ 'channelListings.syncListings' | translate }}
+    </button>
+  </ng-container>
+
+  <ng-container content>
+    @if (isEmpty()) {
+      <app-empty-state
+        icon="sell"
+        [message]="emptyMessageKey() | translate"
+        [helpText]="'channelListings.emptyHelp' | translate" />
+    } @else {
+      <app-data-table
+        tableId="channel-listings"
+        [columns]="columns"
+        [data]="listings()"
+        [loading]="loading()"
+        [clickableRows]="true"
+        emptyIcon="sell"
+        [emptyMessage]="emptyMessageKey() | translate"
+        (rowClick)="mapListing($any($event))">
+
+        <ng-template appColumnCell="externalSku" let-row>
+          <code class="listing__sku">{{ row.externalSku ?? row.externalListingId }}</code>
+        </ng-template>
+
+        <ng-template appColumnCell="partNumber" let-row>
+          @if (row.partId) {
+            <span class="listing__part">{{ row.partNumber }}</span>
+          } @else {
+            <span class="chip chip--warning">{{ 'channelListings.unmapped' | translate }}</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="publishedQuantity" let-row>
+          @if (row.publishedQuantity === null) {
+            <span class="listing__muted">{{ 'channelListings.neverPushed' | translate }}</span>
+          } @else {
+            {{ row.publishedQuantity }}
+          }
+        </ng-template>
+      </app-data-table>
+    }
+  </ng-container>
+</app-page-layout>
