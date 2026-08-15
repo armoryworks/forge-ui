@@ -68,7 +68,8 @@
     "salesChannelsAll": "Todos los canales",
     "salesChannelsListings": "Publicaciones",
     "salesChannelsBuyers": "Compradores minoristas",
-    "salesChannelsSettlements": "Liquidaciones"
+    "salesChannelsSettlements": "Liquidaciones",
+    "salesChannelsConnections": "Conexiones"
   },
   "navGroups": {
     "operations": "Operaciones",
@@ -8575,7 +8576,10 @@
     },
     "importOrders": "Importar pedidos",
     "importDone": "{{imported}} importados, {{skipped}} ya vistos",
-    "importPartial": "{{imported}} importados, {{skipped}} ya vistos, {{failed}} fallidos: revisa el registro de sincronización"
+    "importPartial": "{{imported}} importados, {{skipped}} ya vistos, {{failed}} fallidos: revisa el registro de sincronización",
+    "fieldConnection": "Conexión de tienda",
+    "connectionExplainer": "Vincula una conexión de tienda para traer sus pedidos y publicaciones. Déjalo vacío para un canal manual: las ventas presenciales, por teléfono y en ferias se capturan directamente.",
+    "noConnectionOption": "-- Ninguna (captura manual) --"
   },
   "channelListings": {
     "title": "Publicaciones del canal",
@@ -8718,5 +8722,41 @@
     "fieldTaxRate": "Tasa de impuesto",
     "fieldNotes": "Notas",
     "total": "Total del pedido"
+  },
+  "connections": {
+    "title": "Conexiones de tienda",
+    "subtitle": "Credenciales de las tiendas y marketplaces que alimentan tus canales.",
+    "newConnection": "Nueva conexión",
+    "noConnectors": "Todavía no hay ningún conector construido para ninguna plataforma, así que no hay nada que conectar.",
+    "empty": "Todavía no hay conexiones de tienda",
+    "emptyHelp": "Una conexión guarda las credenciales de una cuenta de tienda. Vincúlala a un canal para empezar a importar sus pedidos.",
+    "inactive": "Desactivada",
+    "lastSync": "Última sincronización",
+    "never": "Nunca",
+    "ordersSynced": "Pedidos vistos",
+    "autoImport": "Importación automática",
+    "inventorySync": "Sincronización de inventario",
+    "test": "Probar conexión",
+    "testOk": "Conexión correcta",
+    "testFailed": "La conexión falló",
+    "createTitle": "Nueva conexión de tienda",
+    "editTitle": "Editar conexión de tienda",
+    "created": "Conexión guardada",
+    "updated": "Conexión actualizada",
+    "fieldName": "Nombre",
+    "fieldPlatform": "Plataforma",
+    "fieldStoreUrl": "URL de la tienda",
+    "fieldCredentials": "Credenciales",
+    "fieldCredentialsEdit": "Nuevas credenciales",
+    "fieldAutoImport": "Importar pedidos automáticamente",
+    "fieldSyncInventory": "Enviar niveles de inventario",
+    "fieldActive": "Activada",
+    "platformImmutable": "La plataforma no puede cambiar: las credenciales guardadas tienen el formato de esta API. Crea una conexión nueva en su lugar.",
+    "credentialsUnchanged": "Déjalo en blanco para conservar las credenciales ya guardadas. Nunca se muestran de vuelta.",
+    "hintShopify": "Pega el token de acceso de la Admin API (empieza por shpat_) de tu aplicación personalizada.",
+    "hintWooCommerce": "Pega la clave y el secreto de consumidor juntos como consumer_key:consumer_secret.",
+    "hintGeneric": "Pega las credenciales de API de esta plataforma.",
+    "hintShopifyUrl": "Tu host de myshopify, por ejemplo mi-tienda.myshopify.com",
+    "hintStoreUrl": "La URL base de la tienda."
   }
 }

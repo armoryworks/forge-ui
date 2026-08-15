@@ -68,7 +68,8 @@
     "salesChannelsAll": "All Channels",
     "salesChannelsListings": "Listings",
     "salesChannelsBuyers": "Retail Buyers",
-    "salesChannelsSettlements": "Settlements"
+    "salesChannelsSettlements": "Settlements",
+    "salesChannelsConnections": "Connections"
   },
   "navGroups": {
     "operations": "Operations",
@@ -8575,7 +8576,10 @@
     },
     "importOrders": "Import orders",
     "importDone": "{{imported}} imported, {{skipped}} already seen",
-    "importPartial": "{{imported}} imported, {{skipped}} already seen, {{failed}} failed — check the sync log"
+    "importPartial": "{{imported}} imported, {{skipped}} already seen, {{failed}} failed — check the sync log",
+    "fieldConnection": "Store connection",
+    "connectionExplainer": "Attach a store connection to poll orders and listings from it. Leave empty for a manual channel — walk-ins, phone orders and trade shows are keyed in directly.",
+    "noConnectionOption": "-- None (manual entry) --"
   },
   "channelListings": {
     "title": "Channel Listings",
@@ -8718,5 +8722,41 @@
     "fieldTaxRate": "Tax rate",
     "fieldNotes": "Notes",
     "total": "Order total"
+  },
+  "connections": {
+    "title": "Store Connections",
+    "subtitle": "Credentials for the storefronts and marketplaces that feed your channels.",
+    "newConnection": "New connection",
+    "noConnectors": "No connector is built for any platform yet, so there is nothing to connect.",
+    "empty": "No store connections yet",
+    "emptyHelp": "A connection holds credentials for one storefront account. Attach it to a channel to start importing orders from it.",
+    "inactive": "Disabled",
+    "lastSync": "Last sync",
+    "never": "Never",
+    "ordersSynced": "Orders seen",
+    "autoImport": "Auto-import",
+    "inventorySync": "Inventory sync",
+    "test": "Test connection",
+    "testOk": "Connection succeeded",
+    "testFailed": "Connection failed",
+    "createTitle": "New Store Connection",
+    "editTitle": "Edit Store Connection",
+    "created": "Connection saved",
+    "updated": "Connection updated",
+    "fieldName": "Name",
+    "fieldPlatform": "Platform",
+    "fieldStoreUrl": "Store URL",
+    "fieldCredentials": "Credentials",
+    "fieldCredentialsEdit": "New credentials",
+    "fieldAutoImport": "Import orders automatically",
+    "fieldSyncInventory": "Push inventory levels back",
+    "fieldActive": "Enabled",
+    "platformImmutable": "Platform cannot change — the stored credentials are shaped for this one API. Create a new connection instead.",
+    "credentialsUnchanged": "Leave blank to keep the credentials already stored. They are never shown back.",
+    "hintShopify": "Paste the Admin API access token (starts with shpat_) from your custom app.",
+    "hintWooCommerce": "Paste the consumer key and secret together as consumer_key:consumer_secret.",
+    "hintGeneric": "Paste the API credentials for this platform.",
+    "hintShopifyUrl": "Your myshopify host, e.g. my-store.myshopify.com",
+    "hintStoreUrl": "The store's base URL."
   }
 }

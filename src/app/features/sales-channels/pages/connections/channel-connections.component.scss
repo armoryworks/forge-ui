@@ -1,0 +1,101 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.connections {
+  position: relative;
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: $sp-md;
+  }
+}
+
+.conn-card {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-lg;
+  border: $border-width-thin solid var(--border);
+  border-radius: $border-radius;
+  background: var(--surface);
+
+  &--inactive { opacity: 0.62; }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__name {
+    font-size: var(--font-size-title);
+    font-weight: 600;
+  }
+
+  &__url {
+    font-family: $font-family-mono;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // A connection whose platform has no connector cannot be polled or tested.
+  // Saying so on the row beats letting someone press Test and read a generic
+  // failure they will spend an afternoon debugging.
+  &__unsupported {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--warning);
+  }
+
+  &__error {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--error);
+    font-family: $font-family-mono;
+    word-break: break-word;
+  }
+
+  &__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-lg;
+    margin: 0;
+  }
+
+  &__fact {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+
+    dt {
+      @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
+      color: var(--text-muted);
+    }
+
+    dd {
+      margin: 0;
+      font-size: var(--font-size-base);
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  &__muted { color: var(--text-muted); }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    padding-top: $sp-md;
+    border-top: $border-width-thin solid var(--border);
+  }
+}

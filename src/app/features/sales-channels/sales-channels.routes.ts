@@ -19,6 +19,18 @@ import { SalesChannelsComponent } from './sales-channels.component';
 export const SALES_CHANNELS_ROUTES: Routes = [
   { path: '', component: SalesChannelsComponent },
   {
+    // Store credentials. Sits under sales-channels rather than in the admin
+    // Integrations panel because that panel is catalog-driven over singleton
+    // settings keys, while a store connection is a row and a shop can hold
+    // several — two Shopify stores, or Shopify plus Etsy.
+    path: 'connections',
+    canActivate: [capabilityGuard('CAP-EXT-ECOMMERCE')],
+    loadComponent: () =>
+      import('./pages/connections/channel-connections.component').then(
+        (m) => m.ChannelConnectionsPageComponent,
+      ),
+  },
+  {
     path: 'listings',
     canActivate: [capabilityGuard('CAP-EXT-ECOMMERCE')],
     loadComponent: () =>

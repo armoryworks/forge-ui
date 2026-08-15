@@ -40,6 +40,14 @@
       </p>
     }
 
+    @if (isRetail()) {
+      <app-select
+        [label]="'salesChannels.fieldConnection' | translate"
+        formControlName="eCommerceIntegrationId"
+        [options]="connectionOptions()" />
+      <p class="channel-dialog__note">{{ 'salesChannels.connectionExplainer' | translate }}</p>
+    }
+
     <div class="dialog-row">
       <app-select
         [label]="'salesChannels.fieldTaxCollectedBy' | translate"

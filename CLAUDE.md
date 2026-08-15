@@ -1559,6 +1559,7 @@ install that only sells B2B sees just the channel list.
 | Route | Capability | What it is |
 |-------|-----------|------------|
 | `/sales-channels` | `CAP-O2C-CHANNELS` (default ON) | Channel admin. Cards, not a data table — a channel is configuration whose few decisions must read at a glance. |
+| `/sales-channels/connections` | `CAP-EXT-ECOMMERCE` | Storefront / marketplace credentials. |
 | `/sales-channels/listings` | `CAP-EXT-ECOMMERCE` | Listing triage: external SKUs with no part behind them. |
 | `/sales-channels/buyers` | `CAP-O2C-RETAIL` | Consumers behind channel orders, and the PII scrub action. |
 | `/sales-channels/settlements` | `CAP-O2C-SETTLEMENT` | Marketplace payouts and their reconciliation. |
@@ -1567,6 +1568,16 @@ install that only sells B2B sees just the channel list.
 terms, no price lists, and there are thousands of them — mixing them in would bury the few hundred
 real accounts every credit / statement / pricing surface is built around. See the server-side
 `Sales Channels & the Retail Lane` section in `forge-api/CLAUDE.md` for why the split exists.
+
+**Connections are NOT in the admin Integrations panel, deliberately.** That panel is catalog-driven over
+singleton settings keys — one QuickBooks, one SMTP. A store connection is a row, and a shop can hold
+several (two Shopify stores; Shopify plus Etsy), each feeding its own channel. A connection is
+credentials only: the channel is what decides where the receivable lands and who owes the tax, and a
+connection does nothing until a channel is attached to it.
+
+**Credentials are write-only across the API boundary.** The server never returns the stored secret, so
+on edit the field starts blank and blank means "leave it alone", not "clear it". The label says so —
+otherwise a blank secret field reads as "this connection has no credentials".
 
 **Conventions worth copying from this feature:**
 

@@ -1,0 +1,103 @@
+<app-page-layout
+  [pageTitle]="'connections.title' | translate"
+  [pageSubtitle]="'connections.subtitle' | translate">
+
+  <ng-container toolbar>
+    <span appSpacer></span>
+    <button
+      class="action-btn action-btn--sm action-btn--create"
+      [disabled]="!canCreate()"
+      [matTooltip]="canCreate() ? '' : ('connections.noConnectors' | translate)"
+      (click)="create()">
+      <span class="material-icons-outlined">add</span>
+      {{ 'connections.newConnection' | translate }}
+    </button>
+  </ng-container>
+
+  <ng-container content>
+    <div class="connections" [appLoadingBlock]="loading()">
+      @if (isEmpty()) {
+        <app-empty-state
+          icon="power"
+          [message]="'connections.empty' | translate"
+          [helpText]="'connections.emptyHelp' | translate" />
+      } @else {
+        <div class="connections__grid">
+          @for (row of rows(); track row.connection.id) {
+            <article class="conn-card" [class.conn-card--inactive]="!row.connection.isActive">
+              <header class="conn-card__head">
+                <span class="conn-card__name">{{ row.connection.name }}</span>
+                <span class="chip chip--info">{{ row.connection.platform }}</span>
+                <span appSpacer></span>
+                @if (!row.connection.isActive) {
+                  <span class="chip chip--muted">{{ 'connections.inactive' | translate }}</span>
+                }
+              </header>
+
+              @if (row.connection.storeUrl) {
+                <code class="conn-card__url">{{ row.connection.storeUrl }}</code>
+              }
+
+              @if (!row.isSupported) {
+                <p class="conn-card__unsupported">{{ row.unavailableReason }}</p>
+              }
+
+              <dl class="conn-card__facts">
+                <div class="conn-card__fact">
+                  <dt>{{ 'connections.lastSync' | translate }}</dt>
+                  <dd>
+                    @if (row.connection.lastSyncAt) {
+                      {{ row.connection.lastSyncAt | date:'MM/dd/yyyy hh:mm a' }}
+                    } @else {
+                      <span class="conn-card__muted">{{ 'connections.never' | translate }}</span>
+                    }
+                  </dd>
+                </div>
+                <div class="conn-card__fact">
+                  <dt>{{ 'connections.ordersSynced' | translate }}</dt>
+                  <dd>{{ row.connection.orderSyncCount }}</dd>
+                </div>
+                <div class="conn-card__fact">
+                  <dt>{{ 'connections.autoImport' | translate }}</dt>
+                  <dd>
+                    {{ (row.connection.autoImportOrders ? 'common.yes' : 'common.no') | translate }}
+                  </dd>
+                </div>
+                <div class="conn-card__fact">
+                  <dt>{{ 'connections.inventorySync' | translate }}</dt>
+                  <dd>
+                    {{ (row.connection.syncInventory ? 'common.yes' : 'common.no') | translate }}
+                  </dd>
+                </div>
+              </dl>
+
+              @if (row.connection.lastError) {
+                <p class="conn-card__error">{{ row.connection.lastError }}</p>
+              }
+
+              <footer class="conn-card__actions">
+                <button
+                  class="action-btn action-btn--sm"
+                  [disabled]="!row.isSupported || testingId() === row.connection.id"
+                  [matTooltip]="row.isSupported ? '' : (row.unavailableReason ?? '')"
+                  (click)="test(row.connection)">
+                  <span
+                    class="material-icons-outlined"
+                    [class.spin]="testingId() === row.connection.id">wifi_tethering</span>
+                  {{ 'connections.test' | translate }}
+                </button>
+                <span appSpacer></span>
+                <button
+                  class="icon-btn"
+                  (click)="edit(row.connection)"
+                  [attr.aria-label]="'common.edit' | translate">
+                  <span class="material-icons-outlined">edit</span>
+                </button>
+              </footer>
+            </article>
+          }
+        </div>
+      }
+    </div>
+  </ng-container>
+</app-page-layout>

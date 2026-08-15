@@ -77,6 +77,7 @@ export class NavTreeService {
           allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'],
           children: [
             { icon: 'list', label: 'All Channels', i18nKey: 'nav.salesChannelsAll', route: '/sales-channels' },
+            { icon: 'power', label: 'Connections', i18nKey: 'nav.salesChannelsConnections', route: '/sales-channels/connections', capability: 'CAP-EXT-ECOMMERCE' },
             { icon: 'sell', label: 'Listings', i18nKey: 'nav.salesChannelsListings', route: '/sales-channels/listings', capability: 'CAP-EXT-ECOMMERCE' },
             { icon: 'person_outline', label: 'Retail Buyers', i18nKey: 'nav.salesChannelsBuyers', route: '/sales-channels/buyers', capability: 'CAP-O2C-RETAIL' },
             { icon: 'account_balance', label: 'Settlements', i18nKey: 'nav.salesChannelsSettlements', route: '/sales-channels/settlements', capability: 'CAP-O2C-SETTLEMENT' },

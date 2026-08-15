@@ -1,0 +1,64 @@
+<app-dialog [title]="titleKey | translate" width="560px" (closed)="close()">
+  <div [formGroup]="form">
+    <div class="dialog-row">
+      <app-input
+        [label]="'connections.fieldName' | translate"
+        formControlName="name"
+        [required]="true"
+        [maxlength]="200" />
+      <app-select
+        [label]="'connections.fieldPlatform' | translate"
+        formControlName="platform"
+        [options]="platformOptions"
+        [required]="true"
+        [isReadonly]="isEdit" />
+    </div>
+
+    @if (isEdit) {
+      <p class="conn-dialog__note">{{ 'connections.platformImmutable' | translate }}</p>
+    }
+
+    <app-input
+      [label]="'connections.fieldStoreUrl' | translate"
+      formControlName="storeUrl"
+      [maxlength]="500" />
+    <p class="conn-dialog__note">{{ storeUrlHintKey() | translate }}</p>
+
+    <app-input
+      [label]="credentialsLabelKey | translate"
+      formControlName="credentials"
+      type="password"
+      [required]="!isEdit"
+      [maxlength]="4000" />
+    <p class="conn-dialog__note">{{ credentialsHintKey() | translate }}</p>
+    @if (isEdit) {
+      <p class="conn-dialog__note conn-dialog__note--emphasis">
+        {{ 'connections.credentialsUnchanged' | translate }}
+      </p>
+    }
+
+    <app-toggle
+      [label]="'connections.fieldAutoImport' | translate"
+      formControlName="autoImportOrders" />
+    <app-toggle
+      [label]="'connections.fieldSyncInventory' | translate"
+      formControlName="syncInventory" />
+    @if (isEdit) {
+      <app-toggle
+        [label]="'connections.fieldActive' | translate"
+        formControlName="isActive" />
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button
+        class="action-btn action-btn--primary"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

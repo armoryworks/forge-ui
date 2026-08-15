@@ -12,6 +12,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { CustomerService } from '../../../customers/services/customer.service';
+import { ECommerceConnectionService } from '../../services/ecommerce-connection.service';
 import { SalesChannelService } from '../../services/sales-channel.service';
 import { SalesChannel, SalesChannelType, TaxCollectedBy } from '../../models/sales-channel.model';
 
@@ -54,6 +55,7 @@ export class SalesChannelDialogComponent {
   private readonly data = inject<SalesChannelDialogData>(MAT_DIALOG_DATA);
   private readonly service = inject(SalesChannelService);
   private readonly customerService = inject(CustomerService);
+  private readonly connectionService = inject(ECommerceConnectionService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -61,6 +63,7 @@ export class SalesChannelDialogComponent {
   protected readonly isEdit = !!this.data.channel;
   protected readonly saving = signal(false);
   protected readonly customerOptions = signal<SelectOption[]>([]);
+  protected readonly connectionOptions = signal<SelectOption[]>([]);
 
   protected readonly form = this.fb.group({
     name: [this.data.channel?.name ?? '', [Validators.required, Validators.maxLength(200)]],
@@ -76,6 +79,7 @@ export class SalesChannelDialogComponent {
     soldToCustomerId: [this.data.channel?.soldToCustomerId ?? null as number | null],
     taxCollectedBy: [(this.data.channel?.taxCollectedBy ?? null) as TaxCollectedBy | null],
     orderNumberPrefix: [this.data.channel?.orderNumberPrefix ?? '', Validators.maxLength(10)],
+    eCommerceIntegrationId: [this.data.channel?.eCommerceIntegrationId ?? null as number | null],
   });
 
   /** Signal mirror of the type control, so the template can branch without calling a method. */
@@ -117,6 +121,20 @@ export class SalesChannelDialogComponent {
             value: c.id,
             label: c.companyName ? `${c.name} (${c.companyName})` : c.name,
           })),
+        ]);
+      },
+    });
+
+    // Only offer connections whose platform actually has a connector. Attaching
+    // one that cannot be polled turns the channel's Import action into a button
+    // that reports success and does nothing.
+    this.connectionService.getConnections().subscribe({
+      next: (connections) => {
+        this.connectionOptions.set([
+          { value: null, label: this.translate.instant('salesChannels.noConnectionOption') },
+          ...connections
+            .filter((c) => c.isActive)
+            .map((c) => ({ value: c.id, label: `${c.name} (${c.platform})` })),
         ]);
       },
     });
@@ -166,6 +184,7 @@ export class SalesChannelDialogComponent {
           soldToCustomerId: raw.soldToCustomerId ?? null,
           taxCollectedBy: raw.taxCollectedBy ?? null,
           orderNumberPrefix: prefix,
+          eCommerceIntegrationId: raw.eCommerceIntegrationId ?? null,
         })
       : this.service.createChannel({
           name: raw.name!.trim(),
@@ -175,7 +194,7 @@ export class SalesChannelDialogComponent {
           soldToCustomerId: raw.soldToCustomerId ?? null,
           taxCollectedBy: raw.taxCollectedBy ?? null,
           orderNumberPrefix: prefix,
-          eCommerceIntegrationId: null,
+          eCommerceIntegrationId: raw.eCommerceIntegrationId ?? null,
         });
 
     request$.subscribe({

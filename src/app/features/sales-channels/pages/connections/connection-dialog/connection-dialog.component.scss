@@ -1,0 +1,13 @@
+@use 'styles/variables' as *;
+
+.conn-dialog {
+  // Per-platform guidance sits directly under its field. Generic "credentials"
+  // wording is how people paste the wrong one of a storefront's several secrets.
+  &__note {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    margin: -#{$sp-sm} 0 0;
+
+    &--emphasis { color: var(--text); }
+  }
+}
