@@ -13,4 +13,6 @@ export interface SalesChannelCard {
   canMakeDefault: boolean;
   /** The default channel is the fallback for every order without an explicit one, so it cannot be removed. */
   canDelete: boolean;
+  /** Only a retail channel with a connector attached has anything to poll. */
+  canImport: boolean;
 }

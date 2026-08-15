@@ -14,6 +14,7 @@ import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { SpacerDirective } from '../../shared/directives/spacer.directive';
 import { SalesChannelService } from './services/sales-channel.service';
+import { ChannelListingService } from './services/channel-listing.service';
 import { SalesChannel } from './models/sales-channel.model';
 import { SalesChannelCard } from './models/sales-channel-card.model';
 import {
@@ -53,6 +54,7 @@ import {
 })
 export class SalesChannelsComponent {
   private readonly service = inject(SalesChannelService);
+  private readonly listingService = inject(ChannelListingService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -60,6 +62,9 @@ export class SalesChannelsComponent {
   protected readonly channels = signal<SalesChannel[]>([]);
   protected readonly loading = signal(false);
   protected readonly showInactive = signal(false);
+
+  /** Channel id currently importing, so only that card's button spins. */
+  protected readonly importingChannelId = signal<number | null>(null);
 
   /**
    * Account channels first, then retail. The two groups are read for different
@@ -121,6 +126,36 @@ export class SalesChannelsComponent {
       .subscribe((result) => {
         if (result) this.load();
       });
+  }
+
+  /**
+   * Pull orders from a connected channel. Reports the split rather than a bare
+   * success — a poll that imports nothing because everything was already seen is
+   * a different outcome from one that found nothing, and a failure count that
+   * disappears into a green toast is how bad imports go unnoticed.
+   */
+  protected importOrders(channel: SalesChannel): void {
+    this.importingChannelId.set(channel.id);
+    this.listingService.importOrders(channel.id).subscribe({
+      next: (results) => {
+        this.importingChannelId.set(null);
+        const imported = results.filter((r) => r.status === 'Imported').length;
+        const skipped = results.filter((r) => r.status === 'Skipped').length;
+        const failed = results.filter((r) => r.status === 'Failed').length;
+
+        if (failed > 0) {
+          this.snackbar.warn(
+            this.translate.instant('salesChannels.importPartial', { imported, skipped, failed }),
+          );
+        } else {
+          this.snackbar.success(
+            this.translate.instant('salesChannels.importDone', { imported, skipped }),
+          );
+        }
+        this.load();
+      },
+      error: () => this.importingChannelId.set(null),
+    });
   }
 
   /** Walk-in, phone and trade-show orders. Same endpoint the channel importers use. */
@@ -200,5 +235,6 @@ function toCard(channel: SalesChannel): SalesChannelCard {
     typeChipClass,
     canMakeDefault: !channel.isDefault && !channel.isRetail && channel.isActive,
     canDelete: !channel.isDefault,
+    canImport: channel.isRetail && channel.isActive && channel.eCommerceIntegrationId !== null,
   };
 }

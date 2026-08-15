@@ -114,6 +114,17 @@
     </dl>
 
     <footer class="channel-card__actions">
+      @if (card.canImport) {
+        <button
+          class="action-btn action-btn--sm"
+          [disabled]="importingChannelId() === card.channel.id"
+          (click)="importOrders(card.channel)">
+          <span
+            class="material-icons-outlined"
+            [class.spin]="importingChannelId() === card.channel.id">download</span>
+          {{ 'salesChannels.importOrders' | translate }}
+        </button>
+      }
       @if (card.canMakeDefault) {
         <button class="action-btn action-btn--sm" (click)="setDefault(card.channel)">
           {{ 'salesChannels.makeDefault' | translate }}

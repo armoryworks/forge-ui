@@ -8522,7 +8522,10 @@
       "DirectB2B": "Negocio con cuenta",
       "DirectRetail": "Minorista directo",
       "Marketplace": "Marketplace"
-    }
+    },
+    "importOrders": "Importar pedidos",
+    "importDone": "{{imported}} importados, {{skipped}} ya vistos",
+    "importPartial": "{{imported}} importados, {{skipped}} ya vistos, {{failed}} fallidos: revisa el registro de sincronización"
   },
   "channelListings": {
     "title": "Publicaciones del canal",

@@ -8522,7 +8522,10 @@
       "DirectB2B": "Account business",
       "DirectRetail": "Direct retail",
       "Marketplace": "Marketplace"
-    }
+    },
+    "importOrders": "Import orders",
+    "importDone": "{{imported}} imported, {{skipped}} already seen",
+    "importPartial": "{{imported}} imported, {{skipped}} already seen, {{failed}} failed — check the sync log"
   },
   "channelListings": {
     "title": "Channel Listings",

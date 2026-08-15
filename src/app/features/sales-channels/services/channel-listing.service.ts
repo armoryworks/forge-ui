@@ -46,6 +46,16 @@ export class ChannelListingService {
   syncListings(channelId: number): Observable<SyncListingsResult> {
     return this.http.post<SyncListingsResult>(`${this.adminBase}/channels/${channelId}/sync-listings`, {});
   }
+
+  /**
+   * Poll the channel's connector and import what it returns as retail orders.
+   * Keyed on the channel rather than the integration: the channel carries the
+   * house account the receivable lands on and the tax treatment the orders
+   * inherit.
+   */
+  importOrders(channelId: number): Observable<OrderSyncResult[]> {
+    return this.http.post<OrderSyncResult[]>(`${this.adminBase}/channels/${channelId}/import`, {});
+  }
 }
 
 export interface SyncListingsResult {
@@ -53,4 +63,15 @@ export interface SyncListingsResult {
   updated: number;
   deactivated: number;
   unmapped: number;
+}
+
+/** One imported order's outcome. Skipped means it was already imported on a previous poll. */
+export interface OrderSyncResult {
+  id: number;
+  externalOrderId: string;
+  externalOrderNumber: string;
+  salesOrderId: number | null;
+  status: 'Pending' | 'Imported' | 'Failed' | 'Skipped';
+  errorMessage: string | null;
+  importedAt: string;
 }
