@@ -133,6 +133,56 @@
       "title": "Actividad Reciente",
       "empty": "Aún no se ha registrado actividad de auditoría.",
       "cta": "Ver Registro Completo"
+    },
+    "database": {
+      "title": "Base de datos",
+      "hint": "Exporte los datos o reconstruya esta instalación desde un archivo.",
+      "cta": "Abrir transferencia"
+    }
+  },
+  "adminDatabase": {
+    "title": "Transferencia de base de datos",
+    "intro": "Exporte los datos de esta instalación como un archivo portátil, o reconstrúyala a partir de uno: el flujo de reconstrucción limpia. Los archivos son intercambiables con la línea de comandos de forge-db.",
+    "export": {
+      "title": "Exportar datos",
+      "description": "Descarga todas las tablas de la aplicación como un archivo zip. Solo lectura: no cambia nada en esta instalación.",
+      "loading": "Midiendo la base de datos…",
+      "tables": "Tablas",
+      "estRows": "Filas est.",
+      "size": "En disco",
+      "download": "Descargar volcado",
+      "preparing": "Preparando el volcado…",
+      "done": "Volcado descargado."
+    },
+    "import": {
+      "title": "Importar datos",
+      "description": "Carga un archivo en ESTA instalación, reemplazando los datos de todas las tablas que incluya. Haga una copia de seguridad primero.",
+      "chooseFile": "Elegir archivo",
+      "noFile": "Ningún archivo seleccionado",
+      "exclude": "Excluir tablas",
+      "excludePlaceholder": "audit_*, *_log",
+      "excludeHint": "Patrones de nombre separados por comas; * y ? son comodines. Las tablas coincidentes quedan fuera de la importación.",
+      "purge": "Eliminar filas borradas de forma lógica",
+      "allowOrphans": "Importar aunque haya filas sin su registro padre",
+      "run": "Importar archivo",
+      "running": "Importando…",
+      "confirmTitle": "¿Reemplazar los datos de esta instalación?",
+      "confirmMessage": "Todas las tablas de {{ file }} se vaciarán y se recargarán desde el archivo. Esto no se puede deshacer. Asegúrese de tener una copia de seguridad.",
+      "confirmLabel": "Reemplazar datos",
+      "done": "Importación completada."
+    },
+    "report": {
+      "successTitle": "Importación completada",
+      "orphanTitle": "Importado con filas huérfanas",
+      "loaded": "Tablas cargadas",
+      "excluded": "Excluidas",
+      "purged": "Borrados lógicos eliminados",
+      "missing": "No están en el esquema",
+      "orphanHint": "Estas filas apuntan a registros padre que no se importaron. Vuelva a ejecutar sin excluir la tabla padre, o elimínelas antes de confiar en estos datos.",
+      "colChild": "Tabla",
+      "colParent": "Apunta a",
+      "colConstraint": "Restricción",
+      "colRows": "Filas"
     }
   },
   "header": {

@@ -1,0 +1,145 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+.db-transfer {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  max-width: 1000px;
+
+  &__intro {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: $font-size-base;
+    max-width: 72ch;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $sp-md;
+    align-items: start;
+
+    @include tablet {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__card {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+    padding: $sp-md;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+  }
+
+  &__card-title {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
+    margin: 0;
+    font-size: $font-size-md;
+    font-weight: 600;
+
+    .material-icons-outlined {
+      font-size: 18px;
+      color: var(--primary);
+    }
+  }
+
+  &__hint {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: $font-size-sm;
+  }
+
+  &__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-md;
+    margin: 0;
+
+    dt {
+      @include uppercase-label;
+      color: var(--text-secondary);
+    }
+
+    dd {
+      margin: 0;
+      font-size: $font-size-lg;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  &__file-row {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+  }
+
+  // Visually hidden but focusable/AT-reachable; the styled label triggers it.
+  &__file-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+
+    &:focus-visible + .db-transfer__file-name {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+  }
+
+  &__file-name {
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    overflow-wrap: anywhere;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: $sp-xs;
+  }
+
+  // Orphans left behind: amber card + amber title icon, overriding the teal
+  // the card title uses in its normal (success) state.
+  &__report--warn {
+    border-color: var(--warning);
+
+    .db-transfer__card-title .material-icons-outlined {
+      color: var(--warning);
+    }
+  }
+
+  &__orphans {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: $font-size-sm;
+
+    th,
+    td {
+      text-align: left;
+      padding: $sp-xs $sp-sm;
+      border-bottom: $border-width-thin solid var(--border);
+      font-family: $font-family-mono;
+    }
+
+    th {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+  }
+
+  &__orphans-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+}

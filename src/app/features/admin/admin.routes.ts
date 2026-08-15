@@ -168,6 +168,15 @@ export const ADMIN_ROUTES: Routes = [
     loadComponent: () =>
       import('./i18n-labels/i18n-labels.component').then((m) => m.I18nLabelsComponent),
   },
+  // Database dump / clean-rebuild import — the UI face of forge-db's
+  // dump/import (same zip layout, archives interchangeable with the CLI).
+  // Admin-only via [Authorize(Roles="Admin")] on the API endpoints. Routed
+  // before the `:tab` catch-all so the literal segment wins.
+  {
+    path: 'database',
+    loadComponent: () =>
+      import('./database/database-transfer.component').then((m) => m.DatabaseTransferComponent),
+  },
   // Phase 1m option-3 — /admin/configuration was the parallel admin
   // surface for the descriptor-driven settings. Retired: the existing
   // /admin/integrations page (rendered inside AdminComponent's

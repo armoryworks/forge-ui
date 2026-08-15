@@ -1,0 +1,164 @@
+<app-page-layout [pageTitle]="'adminDatabase.title' | translate">
+  <ng-container content>
+    <div class="db-transfer" data-testid="database-transfer">
+      <p class="db-transfer__intro">{{ 'adminDatabase.intro' | translate }}</p>
+
+      <div class="db-transfer__grid">
+        <!-- ── Export ─────────────────────────────────────────────────────────────────── -->
+        <section class="db-transfer__card" data-testid="db-export-card" [attr.aria-busy]="dumping()">
+          <h2 class="db-transfer__card-title">
+            <span class="material-icons-outlined" aria-hidden="true">download</span>
+            {{ 'adminDatabase.export.title' | translate }}
+          </h2>
+          <p class="db-transfer__hint">{{ 'adminDatabase.export.description' | translate }}</p>
+
+          @if (loading()) {
+            <p class="db-transfer__hint">{{ 'adminDatabase.export.loading' | translate }}</p>
+          } @else if (summary(); as s) {
+            <dl class="db-transfer__stats" data-testid="db-export-stats">
+              <div>
+                <dt>{{ 'adminDatabase.export.tables' | translate }}</dt>
+                <dd>{{ s.tableCount }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'adminDatabase.export.estRows' | translate }}</dt>
+                <dd>{{ s.estimatedRows | number }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'adminDatabase.export.size' | translate }}</dt>
+                <dd>{{ totalMib() | number: '1.0-1' }} MiB</dd>
+              </div>
+            </dl>
+          }
+
+          <div class="db-transfer__actions">
+            <button
+              class="action-btn action-btn--primary"
+              data-testid="db-export-download-btn"
+              [disabled]="busy() || loading()"
+              (click)="downloadDump()"
+            >
+              <span class="material-icons-outlined" aria-hidden="true">download</span>
+              {{ (dumping() ? 'adminDatabase.export.preparing' : 'adminDatabase.export.download') | translate }}
+            </button>
+          </div>
+        </section>
+
+        <!-- ── Import ─────────────────────────────────────────────────────────────────── -->
+        <section class="db-transfer__card" data-testid="db-import-card" [attr.aria-busy]="importing()">
+          <h2 class="db-transfer__card-title">
+            <span class="material-icons-outlined" aria-hidden="true">upload</span>
+            {{ 'adminDatabase.import.title' | translate }}
+          </h2>
+          <p class="db-transfer__hint">{{ 'adminDatabase.import.description' | translate }}</p>
+
+          <div class="db-transfer__file-row">
+            <label class="action-btn" for="db-import-file">
+              <span class="material-icons-outlined" aria-hidden="true">folder_open</span>
+              {{ 'adminDatabase.import.chooseFile' | translate }}
+            </label>
+            <input
+              id="db-import-file"
+              class="db-transfer__file-input"
+              data-testid="db-import-file-input"
+              type="file"
+              accept=".zip,application/zip"
+              [attr.aria-label]="'adminDatabase.import.chooseFile' | translate"
+              (change)="onFileChosen($event)"
+            />
+            <span class="db-transfer__file-name" data-testid="db-import-file-name">
+              {{ selectedFile()?.name ?? ('adminDatabase.import.noFile' | translate) }}
+            </span>
+          </div>
+
+          <app-input
+            [label]="'adminDatabase.import.exclude' | translate"
+            [placeholder]="'adminDatabase.import.excludePlaceholder' | translate"
+            [formControl]="excludePatterns"
+          />
+          <p class="db-transfer__hint">{{ 'adminDatabase.import.excludeHint' | translate }}</p>
+
+          <app-toggle
+            [label]="'adminDatabase.import.purge' | translate"
+            [formControl]="purgeSoftDeleted"
+          />
+          <app-toggle
+            [label]="'adminDatabase.import.allowOrphans' | translate"
+            [formControl]="allowFkOrphans"
+          />
+
+          <div class="db-transfer__actions">
+            <button
+              class="action-btn action-btn--destructive"
+              data-testid="db-import-run-btn"
+              [disabled]="!selectedFile() || busy()"
+              (click)="confirmImport()"
+            >
+              <span class="material-icons-outlined" aria-hidden="true">restore_page</span>
+              {{ (importing() ? 'adminDatabase.import.running' : 'adminDatabase.import.run') | translate }}
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- ── Import report ──────────────────────────────────────────────────────────────── -->
+      @if (report(); as r) {
+        <section
+          class="db-transfer__card db-transfer__report"
+          [class.db-transfer__report--warn]="!r.success"
+          data-testid="db-import-report"
+        >
+          <h2 class="db-transfer__card-title">
+            <span class="material-icons-outlined" aria-hidden="true">
+              {{ r.success ? 'task_alt' : 'warning_amber' }}
+            </span>
+            {{ (r.success ? 'adminDatabase.report.successTitle' : 'adminDatabase.report.orphanTitle') | translate }}
+          </h2>
+
+          <dl class="db-transfer__stats">
+            <div>
+              <dt>{{ 'adminDatabase.report.loaded' | translate }}</dt>
+              <dd>{{ r.loaded.length }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'adminDatabase.report.excluded' | translate }}</dt>
+              <dd>{{ r.excluded.length }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'adminDatabase.report.purged' | translate }}</dt>
+              <dd>{{ r.softDeletedPurged | number }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'adminDatabase.report.missing' | translate }}</dt>
+              <dd>{{ r.missingInTarget.length }}</dd>
+            </div>
+          </dl>
+
+          @if (r.fkOrphans.length > 0) {
+            <p class="db-transfer__hint">{{ 'adminDatabase.report.orphanHint' | translate }}</p>
+            <table class="db-transfer__orphans" data-testid="db-import-orphans">
+              <thead>
+                <tr>
+                  <th scope="col">{{ 'adminDatabase.report.colChild' | translate }}</th>
+                  <th scope="col">{{ 'adminDatabase.report.colParent' | translate }}</th>
+                  <th scope="col">{{ 'adminDatabase.report.colConstraint' | translate }}</th>
+                  <th scope="col" class="db-transfer__orphans-num">{{ 'adminDatabase.report.colRows' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (orphan of r.fkOrphans; track orphan.constraint) {
+                  <tr>
+                    <td>{{ orphan.childTable }}</td>
+                    <td>{{ orphan.parentTable }}</td>
+                    <td>{{ orphan.constraint }}</td>
+                    <td class="db-transfer__orphans-num">{{ orphan.rows | number }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </section>
+      }
+    </div>
+  </ng-container>
+</app-page-layout>

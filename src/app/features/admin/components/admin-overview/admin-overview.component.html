@@ -167,6 +167,27 @@
       }
     </section>
 
+    <!-- Database transfer — Admin-only (the API is [Authorize(Roles="Admin")]) -->
+    @if (isAdmin) {
+      <section class="admin-overview-card" data-testid="overview-card-database">
+        <header class="admin-overview-card__header">
+          <span class="material-icons-outlined">database</span>
+          <h3>{{ 'adminOverview.database.title' | translate }}</h3>
+        </header>
+        <p class="admin-overview-card__sub admin-overview-card__sub--muted">
+          {{ 'adminOverview.database.hint' | translate }}
+        </p>
+        <footer class="admin-overview-card__footer">
+          <button class="action-btn action-btn--sm"
+            data-testid="overview-card-database-go"
+            (click)="goTo('/admin/database')">
+            {{ 'adminOverview.database.cta' | translate }}
+            <span class="material-icons-outlined">chevron_right</span>
+          </button>
+        </footer>
+      </section>
+    }
+
     <!-- Recent Audit -->
     <section class="admin-overview-card admin-overview-card--wide" data-testid="overview-card-audit">
       <header class="admin-overview-card__header">

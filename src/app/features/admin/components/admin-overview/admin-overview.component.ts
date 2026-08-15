@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
 import { isCapabilityDisabledError } from '../../../../shared/errors/capability-disabled.error';
 
@@ -57,6 +58,10 @@ export class AdminOverviewComponent implements OnInit {
   private readonly capabilityService = inject(CapabilityService);
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
+  private readonly auth = inject(AuthService);
+
+  /** The database card links to an Admin-only surface; Managers reaching Overview don't see it. */
+  protected readonly isAdmin = this.auth.hasRole('Admin');
 
   protected readonly isLoading = signal(true);
 

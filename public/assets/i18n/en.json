@@ -133,6 +133,56 @@
       "title": "Recent Audit",
       "empty": "No audit activity recorded yet.",
       "cta": "View Full Audit Log"
+    },
+    "database": {
+      "title": "Database",
+      "hint": "Export the data, or rebuild this install from an archive.",
+      "cta": "Open transfer"
+    }
+  },
+  "adminDatabase": {
+    "title": "Database Transfer",
+    "intro": "Export this install's data as a portable archive, or rebuild it from one — the clean-rebuild workflow. Archives are interchangeable with the forge-db command line.",
+    "export": {
+      "title": "Export data",
+      "description": "Downloads every application table as a zip archive. Read-only — nothing on this install changes.",
+      "loading": "Measuring database…",
+      "tables": "Tables",
+      "estRows": "Est. rows",
+      "size": "On disk",
+      "download": "Download dump",
+      "preparing": "Preparing dump…",
+      "done": "Dump downloaded."
+    },
+    "import": {
+      "title": "Import data",
+      "description": "Loads an archive into THIS install, replacing the data in every table it covers. Take a backup first.",
+      "chooseFile": "Choose archive",
+      "noFile": "No archive selected",
+      "exclude": "Exclude tables",
+      "excludePlaceholder": "audit_*, *_log",
+      "excludeHint": "Comma-separated name patterns; * and ? are wildcards. Matching tables are left out of the import entirely.",
+      "purge": "Delete soft-deleted rows",
+      "allowOrphans": "Import even if rows lose their parent",
+      "run": "Import archive",
+      "running": "Importing…",
+      "confirmTitle": "Replace this install's data?",
+      "confirmMessage": "Every table in {{ file }} will be emptied and reloaded from the archive. This cannot be undone. Make sure you have a backup.",
+      "confirmLabel": "Replace data",
+      "done": "Import complete."
+    },
+    "report": {
+      "successTitle": "Import complete",
+      "orphanTitle": "Imported with orphaned rows",
+      "loaded": "Tables loaded",
+      "excluded": "Excluded",
+      "purged": "Soft-deleted removed",
+      "missing": "Not in schema",
+      "orphanHint": "These rows point at parents that were not imported. Re-run without excluding the parent table, or clear them before relying on this data.",
+      "colChild": "Table",
+      "colParent": "Points at",
+      "colConstraint": "Constraint",
+      "colRows": "Rows"
     }
   },
   "header": {
