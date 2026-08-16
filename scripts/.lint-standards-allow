@@ -1,0 +1,5 @@
+# lint-standards HARD-rule exceptions. Format: <rule> <repo-relative path> — <reason>
+# An entry is a claim that the rule is WRONG for this file, not a permission slip
+# for debt. Debt goes in standards-baseline.json via the ratchet. Stale entries fail.
+
+console-log src/app/shared/utils/demo-mode.utils.ts — intentional styled "DEMO MODE" banner printed to the browser console for demo visitors; not diagnostic logging

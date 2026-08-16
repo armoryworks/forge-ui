@@ -28,9 +28,17 @@
 **No commit may add new lint warnings.** After any UI file edit, run `npm run lint` from `forge-ui` and ensure:
 
 - **Zero errors.** CI fails on errors via `ng lint`'s exit code; never push with a known error.
-- **Zero NEW non-spec warnings introduced by this commit.** Pre-existing warnings in unrelated files are acceptable to leave alone (separate cleanup PR), but the diff this commit ships must not add any. The standard `--fix` pass handles the easy ones (autofocus, lifecycle interfaces, stale eslint-disable directives).
+- **Zero NEW non-spec warnings introduced by this commit.** Pre-existing warnings in unrelated files are acceptable to leave alone (separate cleanup PR), but the diff this commit ships must not add any. The standard `--fix` pass handles the easy ones (autofocus, lifecycle interfaces, stale eslint-disable directives). **This is now mechanically enforced:** `npm run lint` is `ng lint --max-warnings=77` (the count on 2026-08-16). Adding a warning fails the build; when you remove warnings, lower the number in `package.json` in the same commit so it keeps ratcheting down.
 
 A PostToolUse hook in `.claude/settings.json` runs eslint on every UI .ts/.html edit so warnings surface immediately at authoring time rather than at commit. If the hook reports new warnings, fix them before continuing.
+
+### Enforced standards — `npm run lint:standards` (added 2026-08-16)
+
+The rules in this file that eslint can't see (hardcoded colours, `!important`, raw form controls, inline templates, `ngModel`, `console.log`) were measured and found eroding while every lint-enforced rule sat at zero. They are now `scripts/lint-standards.mjs`, run in CI after `lint:i18n`, same shape as that script:
+
+- **Hard rules** (`console.log` in non-spec code) must be zero. Genuine exceptions go in `scripts/.lint-standards-allow` with a reason — that file is a claim the rule is wrong for that file, not a permission slip; stale entries fail.
+- **Ratchet rules** (hex colours in scss, `!important` without an adjacent comment, inline `template:`, raw `<input>/<select>/<textarea>` in feature templates, `ngModel`/`FormsModule` in features) are tracked **per file** in `scripts/standards-baseline.json`. A file not in the baseline must be clean — new code follows the rule. A baselined file may not get worse. A file that improved fails with `RATCHET DOWN` until you rerun `FORGE_STANDARDS_UPDATE_BASELINE=1 npm run lint:standards` and commit the rewritten baseline **in the same commit**. It only tightens; never hand-edit a number upward.
+- **When you touch a baselined file for other reasons, fix its violations while you're there.** That is how the register drains without a dedicated cleanup effort. First payoff on day one: promoting the `ngModel` rule exposed a dead `(ngModelChange)` on a reactive control in `upcoming-expenses` — the classification filter never re-queried the server.
 
 For .NET: CI runs `dotnet build --configuration Release -warnaserror`. Compiler warnings break the build. There's no broader analyzer/StyleCop pack wired in today (CLAUDE.md previously claimed both — that was aspirational; only `Nullable enable` + `-warnaserror` are actually configured). Adding a real analyzer pack is a separate effort.
 
@@ -119,7 +127,7 @@ For these, the model is: branch off main → push → open PR with `--base main`
 
 **Local CI gate commands** (run before every `git push origin main`):
 
-- **UI repo (`forge-ui`):** `npm run lint && npm run lint:i18n && npm run test -- --watch=false`. The `lint:i18n` script (added 2026-05-03) catches the recurring "{key.path} renders raw because en.json is missing it" bug class — `tsc --noEmit`, `ng build`, and `vitest` all silently allow missing keys (vitest specs use a mocked TranslateLoader). When you add a `'foo.bar' | translate` reference, run this before pushing.
+- **UI repo (`forge-ui`):** `npm run lint && npm run lint:i18n && npm run lint:standards && npm run test -- --watch=false`. The `lint:i18n` script (added 2026-05-03) catches the recurring "{key.path} renders raw because en.json is missing it" bug class — `tsc --noEmit`, `ng build`, and `vitest` all silently allow missing keys (vitest specs use a mocked TranslateLoader). When you add a `'foo.bar' | translate` reference, run this before pushing.
 
   **i18n files live at `forge-ui/public/assets/i18n/{en,es}.json`. NEVER edit `src/assets/i18n/` — that path is intentionally non-existent.** Angular CLI's static-asset directory migrated from `src/assets/` to `public/` and the migrated project kept `public/assets/i18n/` as the only bundled source (per `angular.json`). For ~3 sessions before 2026-05-04, edits went to a phantom `src/assets/i18n/` that wasn't in any build — every new key showed up at runtime as a raw `foo.bar` token while `tsc`, `ng build`, `vitest`, AND the early `lint:i18n` all stayed green. The fix: deleted `src/assets/i18n/` and the lint script now hard-fails if it ever reappears. Don't recreate it. If you need to add a translation, the path is `public/assets/i18n/en.json` (and `es.json`). Server-supplied keys (workflow step labelKeys, validator displayNameKey/missingMessageKey) are scanned by `lint:i18n` from `forge-api/forge.api/Workflows/*.cs` automatically.
 

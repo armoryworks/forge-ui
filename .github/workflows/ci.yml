@@ -55,6 +55,12 @@ jobs:
         # Allowlist: scripts/.lint-i18n-allow for dynamic / server-supplied keys.
         run: npm run lint:i18n
 
+      - name: Lint standards (CLAUDE.md rules eslint can't see)
+        # Hard rules + a per-file ratchet over legacy debt (scripts/standards-baseline.json).
+        # New files must be clean; baselined files can't get worse; improvements must be
+        # recorded with FORGE_STANDARDS_UPDATE_BASELINE=1. See scripts/lint-standards.mjs.
+        run: npm run lint:standards
+
       - name: Build
         run: npm run build
 
