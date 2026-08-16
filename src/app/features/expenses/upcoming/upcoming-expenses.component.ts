@@ -1,12 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { formatDate } from '../../../shared/utils/date.utils';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { startWith } from 'rxjs';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged, startWith } from 'rxjs';
 
 import { ExpensesService } from '../services/expenses.service';
 import { RecurringExpense } from '../models/recurring-expense.model';
@@ -51,6 +51,7 @@ export class UpcomingExpensesComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly matDialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly activeTab = signal<LedgerTab>('upcoming');
   protected readonly loading = signal(false);
@@ -173,14 +174,17 @@ export class UpcomingExpensesComponent {
   constructor() {
     this.loadUpcoming();
     this.loadRecurring();
+
+    // The classification filter is a server-side parameter of loadUpcoming(). This used to be
+    // wired through (ngModelChange) on the reactive control, which never fires — so changing
+    // the filter never re-queried. Drive it from valueChanges instead.
+    this.classificationFilter.valueChanges
+      .pipe(debounceTime(250), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.loadUpcoming());
   }
 
   protected switchTab(tab: LedgerTab): void {
     this.activeTab.set(tab);
-  }
-
-  protected applyClassificationFilter(): void {
-    this.loadUpcoming();
   }
 
   protected isHighlighted(expense: UpcomingExpense): boolean {
