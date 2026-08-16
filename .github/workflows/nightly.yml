@@ -62,6 +62,21 @@ jobs:
           repository: armoryworks/forge-deploy
           path: forge-deploy
 
+      # The api-smoke and contract-drift specs read the backend's controller
+      # sources from the SIBLING checkout (`../forge-api/forge.api/Controllers`,
+      # mirroring the local ~/dev/forge layout) to enumerate routes. Without it
+      # both specs threw "Controllers directory not found" on every nightly since
+      # the workflow was created — two of the suite's most valuable gates were
+      # dead in CI. actions/checkout won't place a repo outside the workspace,
+      # so check out inside and symlink the sibling path the specs expect.
+      - name: Check out forge-api (route sources for smoke/contract-drift specs)
+        uses: actions/checkout@v4
+        with:
+          repository: armoryworks/forge-api
+          path: forge-api-src
+      - name: Expose forge-api as a sibling of the workspace
+        run: ln -sfn "$GITHUB_WORKSPACE/forge-api-src" "$GITHUB_WORKSPACE/../forge-api"
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -157,6 +172,21 @@ jobs:
         with:
           repository: armoryworks/forge-deploy
           path: forge-deploy
+
+      # The api-smoke and contract-drift specs read the backend's controller
+      # sources from the SIBLING checkout (`../forge-api/forge.api/Controllers`,
+      # mirroring the local ~/dev/forge layout) to enumerate routes. Without it
+      # both specs threw "Controllers directory not found" on every nightly since
+      # the workflow was created — two of the suite's most valuable gates were
+      # dead in CI. actions/checkout won't place a repo outside the workspace,
+      # so check out inside and symlink the sibling path the specs expect.
+      - name: Check out forge-api (route sources for smoke/contract-drift specs)
+        uses: actions/checkout@v4
+        with:
+          repository: armoryworks/forge-api
+          path: forge-api-src
+      - name: Expose forge-api as a sibling of the workspace
+        run: ln -sfn "$GITHUB_WORKSPACE/forge-api-src" "$GITHUB_WORKSPACE/../forge-api"
 
       - name: Set up Node
         uses: actions/setup-node@v4
