@@ -173,6 +173,17 @@ Same rule shape as the API: do not ask, just do it after `npm run lint` + `npm r
 
 Do not ask the user — just verify visually after every UI change.
 
+**Fallback when the Docker stack is unavailable** (no daemon access, CI, or a machine that isn't running the stack). Do NOT skip verification — substitute it:
+
+1. `npm run build`, then serve `dist/forge-ui/browser` on a scratch port with a small static server that falls back to `index.html` for SPA routes.
+2. Playwright `context.addInitScript()` to seed auth before bootstrap — `localStorage` `forge-token` (any string) and `forge-user` as JSON with the roles the page needs, e.g. `{"id":1,"email":"…","roles":["Admin"],"isActive":true}`. `AuthService.hasRole()` reads `roles` off that object.
+3. `context.route('**/api/v1/**', …)` to fulfil stubbed payloads per endpoint.
+4. Screenshot AND assert on the DOM — check `documentElement.scrollWidth <= clientWidth` for overflow, and grep the rendered text for un-resolved `foo.bar` i18n keys.
+
+This catches real layout, theme, and i18n bugs (it caught a warn card rendering a teal icon instead of amber). It does not catch anything that depends on the real API contract, so it is a substitute for the screenshot step only — the local gates (`lint`, `lint:i18n`, `test`, `build`) are still mandatory.
+
+Note the Playwright version trap: this repo's pinned Playwright may want a Chromium build that isn't in the local cache. If `browserType.launch` reports a missing executable, run the script against a scratch `npm install playwright@latest` via `NODE_PATH`, rather than downgrading the repo pin.
+
 ---
 
 
