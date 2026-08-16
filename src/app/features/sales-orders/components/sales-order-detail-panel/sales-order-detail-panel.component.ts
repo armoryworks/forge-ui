@@ -7,6 +7,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
+import { AuthorizedByComponent } from '../../../communications/components/authorized-by/authorized-by.component';
 import { SalesOrderService } from '../../services/sales-order.service';
 import { SalesOrderDetail } from '../../models/sales-order-detail.model';
 import { SalesOrderLine } from '../../models/sales-order-line.model';
@@ -62,6 +63,7 @@ type TabId = 'overview' | 'lines' | 'schedule' | 'stages' | 'shipments' | 'retur
     EntityPickerComponent, InputComponent, SelectComponent, DatepickerComponent, CurrencyInputComponent,
     ScheduleTimelineComponent, InvoiceDialogComponent, ShipmentDialogComponent,
     CapDirective, DialogComponent, TextareaComponent,
+    AuthorizedByComponent,
   ],
   templateUrl: './sales-order-detail-panel.component.html',
   styleUrl: './sales-order-detail-panel.component.scss',

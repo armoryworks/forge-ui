@@ -129,6 +129,11 @@
       <!-- Overview Tab -->
       @if (activeTab() === 'overview') {
         <div class="tab-panel" role="tabpanel">
+          <!-- Proof of intent. Renders nothing when the order has no authorizing
+               attestation, which is most of them — an empty state on every keyed-in
+               order would train people to ignore the line where it matters. -->
+          <app-authorized-by [salesOrderId]="so.id" />
+
           <div class="info-grid">
             <div class="info-item">
               <span class="info-label">{{ 'common.status' | translate }}</span>

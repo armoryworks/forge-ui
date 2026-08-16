@@ -130,6 +130,16 @@ export const routes: Routes = [
           import('./features/customers/customers.routes').then((m) => m.CUSTOMERS_ROUTES),
       },
       {
+        // Proof-of-intent review: an inbound message beside the draft it
+        // proposes. The only path from an email to an order runs through here.
+        path: 'communications',
+        canActivate: [roleGuard('Admin', 'Manager', 'PM', 'OfficeManager')],
+        loadChildren: () =>
+          import('./features/communications/communications.routes').then(
+            (m) => m.COMMUNICATIONS_ROUTES,
+          ),
+      },
+      {
         // Sales channels — the retail / marketplace lane. Gated on
         // CAP-O2C-CHANNELS, which ships default-ON and is behaviour-neutral on
         // its own; the retail-specific sub-routes carry their own guards.

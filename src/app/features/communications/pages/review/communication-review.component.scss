@@ -1,0 +1,158 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.review {
+  position: relative;
+
+  &__from { font-family: $font-family-mono; font-size: var(--font-size-xs); }
+  &__when { color: var(--text-muted); font-size: var(--font-size-sm); }
+
+  // Evidence beside draft. Side by side is the whole ergonomic argument: a
+  // reviewer checking a quantity should not have to leave the form to see the
+  // document it came from.
+  &__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: $sp-lg;
+    align-items: start;
+  }
+
+  &__panel {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+    padding: $sp-lg;
+    border: $border-width-thin solid var(--border);
+    border-radius: $border-radius;
+    background: var(--surface);
+  }
+
+  &__panel-title {
+    @include uppercase-label(var(--font-size-xs), 0.5px, 600);
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  &__section-title {
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
+    color: var(--text-muted);
+    margin: $sp-md 0 0;
+  }
+
+  &__message {
+    padding: $sp-md;
+    background: var(--surface-alt);
+    border-radius: $border-radius;
+  }
+
+  &__subject { font-weight: 600; margin-bottom: $sp-sm; }
+
+  &__body {
+    margin: 0;
+    font-family: $font-family-mono;
+    font-size: var(--font-size-xs);
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 280px;
+    overflow-y: auto;
+    @include custom-scrollbar;
+  }
+
+  &__artifacts,
+  &__agreements,
+  &__thread {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__artifact,
+  &__agreement,
+  &__thread-item {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    flex-wrap: wrap;
+  }
+
+  &__artifact-icon { font-size: $icon-size-sm; }
+  &__artifact-name { color: var(--text); }
+
+  &__artifact-hash {
+    font-family: $font-family-mono;
+    font-size: var(--font-size-xs);
+  }
+
+  &__agreement-type {
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
+    color: var(--text);
+  }
+
+  // An order authorized by a PO with no agreement behind it is the case worth
+  // pausing on, so it reads as a caution rather than a blank.
+  &__warning {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--warning);
+  }
+
+  &__blocked {
+    margin: 0;
+    padding: $sp-md;
+    font-size: var(--font-size-sm);
+    color: var(--error);
+    border: $border-width-thin solid var(--error);
+    border-radius: $border-radius;
+  }
+
+  &__hint {
+    margin: -#{$sp-sm} 0 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+  }
+
+  &__lines { display: flex; flex-direction: column; gap: $sp-md; }
+
+  &__line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 90px 120px 32px;
+    gap: $sp-md;
+    align-items: center;
+  }
+
+  &__total {
+    display: flex;
+    justify-content: flex-end;
+    align-items: baseline;
+    gap: $sp-md;
+    padding-top: $sp-md;
+    border-top: $border-width-thin solid var(--border);
+  }
+
+  &__total-label {
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
+    color: var(--text-muted);
+  }
+
+  &__total-value {
+    font-size: var(--font-size-kpi);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (max-width: 1100px) {
+  .review__grid { grid-template-columns: minmax(0, 1fr); }
+  .review__line { grid-template-columns: minmax(0, 1fr); }
+}

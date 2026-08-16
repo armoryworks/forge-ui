@@ -1,0 +1,86 @@
+@if (hasAuthorization()) {
+  @if (authorization(); as auth) {
+    <div class="authorized-by">
+      <div class="authorized-by__line">
+        <span class="material-icons-outlined authorized-by__icon">verified_user</span>
+
+        <span class="authorized-by__label">{{ 'authorizedBy.label' | translate }}</span>
+
+        @if (auth.artifactId) {
+          <a
+            class="authorized-by__doc"
+            [routerLink]="[]"
+            [queryParams]="{ artifact: auth.artifactId }"
+            queryParamsHandling="merge">
+            {{ documentLabel() }}
+          </a>
+        } @else {
+          <span class="authorized-by__doc">{{ documentLabel() }}</span>
+        }
+
+        @if (auth.capturedAt) {
+          <span class="authorized-by__sep">—</span>
+          <span class="authorized-by__received">
+            {{ 'authorizedBy.received' | translate }}
+            {{ auth.capturedAt | date:'MM/dd/yyyy hh:mm a' }}
+          </span>
+        }
+
+        @if (auth.fromAddress) {
+          <span class="authorized-by__sep">{{ 'authorizedBy.from' | translate }}</span>
+          @if (auth.communicationId) {
+            <a
+              class="authorized-by__sender"
+              [routerLink]="['/communications', auth.communicationId]">
+              {{ auth.fromAddress }}
+            </a>
+          } @else {
+            <span class="authorized-by__sender">{{ auth.fromAddress }}</span>
+          }
+        }
+
+        @if (shortHash()) {
+          <span class="authorized-by__sep">—</span>
+          <button
+            type="button"
+            class="authorized-by__hash"
+            [matTooltip]="auth.sha256 ?? ''"
+            (click)="copyHash()">
+            sha256:{{ shortHash() }}
+            <span class="material-icons-outlined authorized-by__copy">content_copy</span>
+          </button>
+        }
+      </div>
+
+      @if (chainCount() > 0) {
+        <button type="button" class="authorized-by__chain-toggle" (click)="toggleChain()">
+          <span class="material-icons-outlined">
+            {{ chainExpanded() ? 'expand_less' : 'expand_more' }}
+          </span>
+          {{ 'authorizedBy.chain' | translate: { count: chainCount() } }}
+        </button>
+
+        @if (chainExpanded()) {
+          <ol class="authorized-by__chain">
+            @for (link of auth.authorizationChain; track link.id) {
+              <li class="authorized-by__chain-item">
+                <span class="authorized-by__chain-type">{{ link.statementType }}</span>
+                @if (link.filename) {
+                  <span class="authorized-by__chain-file">{{ link.filename }}</span>
+                }
+                @if (link.capturedAt) {
+                  <span class="authorized-by__chain-date">{{ link.capturedAt | date:'MM/dd/yyyy' }}</span>
+                }
+                @if (link.sha256) {
+                  <code class="authorized-by__chain-hash" [matTooltip]="link.sha256">
+                    sha256:{{ link.sha256.slice(0, 12) }}…
+                  </code>
+                }
+              </li>
+            }
+          </ol>
+        }
+      }
+    </div>
+  }
+}

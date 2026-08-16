@@ -8758,5 +8758,48 @@
     "hintGeneric": "Paste the API credentials for this platform.",
     "hintShopifyUrl": "Your myshopify host, e.g. my-store.myshopify.com",
     "hintStoreUrl": "The store's base URL."
+  },
+  "authorizedBy": {
+    "label": "Authorized by",
+    "received": "received",
+    "from": "from",
+    "untitledDocument": "attached document",
+    "hashCopied": "Full SHA-256 copied",
+    "chain": "{{count}} prior agreement(s) behind this"
+  },
+  "review": {
+    "title": "Review Message",
+    "subtitle": "Check what arrived, correct anything wrong, then approve it into a draft order.",
+    "evidence": "What arrived",
+    "draft": "Proposed order",
+    "artifacts": "Stored documents",
+    "priorAgreements": "Prior agreements on file",
+    "noPriorAgreements": "No standing agreement is on file for this customer. A purchase order on its own may not be enough authorization — check before approving.",
+    "thread": "Rest of this conversation",
+    "fieldCustomer": "Customer",
+    "fieldAuthorizingDocument": "Authorizing document",
+    "authorizingDocumentHint": "Which of these documents IS the customer's authorization. Usually their purchase order.",
+    "fieldSupportingAgreement": "Backed by",
+    "noSupportingAgreement": "-- None --",
+    "fieldCustomerPo": "Customer PO",
+    "fieldNeedBy": "Need by",
+    "fieldLines": "Items",
+    "lineDescription": "Description",
+    "lineQuantity": "Qty",
+    "lineUnitPrice": "Unit price",
+    "addLine": "Add item",
+    "removeLine": "Remove item",
+    "fieldTaxRate": "Tax rate",
+    "fieldNote": "Note",
+    "total": "Order total",
+    "approve": "Approve into draft",
+    "approved": "Draft order {{number}} created",
+    "cannotApprove": "This message cannot be approved into an order. Only an exact sender match can authorize one — a domain match proves someone at the company wrote in, not who.",
+    "confidenceTooltip": "How firmly the sender was identified. Only an exact match can authorize an order.",
+    "confidence": {
+      "Exact": "Sender confirmed",
+      "Domain": "Domain only",
+      "Unmatched": "Unknown sender"
+    }
   }
 }

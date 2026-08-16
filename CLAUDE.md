@@ -1607,6 +1607,37 @@ otherwise a blank secret field reads as "this connection has no credentials".
 
 ---
 
+## Proof of Intent (`features/communications/`)
+
+The evidence trail behind a sales order. An inbound email or call becomes a `Communication` with
+hashed, immutable artifacts; a reviewer approves it into a draft order; the order carries the
+`Attestation` that authorizes it.
+
+| Surface | Where |
+|---|---|
+| `<app-authorized-by [salesOrderId]>` | Mounted on the SO detail panel's overview tab |
+| `/communications/:id` | The review screen — message beside the draft it proposes |
+
+**The one line this exists for:**
+`Authorized by PO-8832.pdf — received 08/15/2026 09:12 AM from bob@bobsparts.com — sha256:ab3f91…`
+Each part links to the document, the original message, and the agreement chain behind it.
+
+**Rules that must survive future edits:**
+
+- **`<app-authorized-by>` renders nothing when there is no attestation.** Most orders were keyed in
+  or converted from a quote. An empty state on every one of them trains people to ignore the line
+  where it matters.
+- **The hash copy action copies all 64 characters**, never the truncated display form. Verifying a
+  hash means running it against the stored bytes; a shortened value cannot do that.
+- **Only `matchConfidence === 'Exact'` may approve.** A domain match proves someone at the company
+  wrote in, not who. The approve button is disabled and says why.
+- **Approve sends the reviewer's line values, not the extraction's.** They may have corrected them
+  on screen; reading the extracted values back would make the review cosmetic.
+- **Evidence sits beside the form, not behind a tab.** A reviewer checking a quantity should not have
+  to leave the draft to see the document it came from.
+
+---
+
 ## Accessibility — Full WCAG 2.2 AA Compliance (Non-Negotiable)
 
 **Every component, template, and page MUST be fully WCAG 2.2 AA compliant.** This is not aspirational — it is a hard requirement enforced by automated tooling.

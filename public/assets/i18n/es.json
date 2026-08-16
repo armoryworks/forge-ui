@@ -8758,5 +8758,48 @@
     "hintGeneric": "Pega las credenciales de API de esta plataforma.",
     "hintShopifyUrl": "Tu host de myshopify, por ejemplo mi-tienda.myshopify.com",
     "hintStoreUrl": "La URL base de la tienda."
+  },
+  "authorizedBy": {
+    "label": "Autorizado por",
+    "received": "recibido",
+    "from": "de",
+    "untitledDocument": "documento adjunto",
+    "hashCopied": "SHA-256 completo copiado",
+    "chain": "{{count}} acuerdo(s) previo(s) detrás de esto"
+  },
+  "review": {
+    "title": "Revisar mensaje",
+    "subtitle": "Comprueba lo que llegó, corrige lo que esté mal y apruébalo como pedido borrador.",
+    "evidence": "Lo que llegó",
+    "draft": "Pedido propuesto",
+    "artifacts": "Documentos guardados",
+    "priorAgreements": "Acuerdos previos en archivo",
+    "noPriorAgreements": "No hay ningún acuerdo permanente en archivo para este cliente. Una orden de compra por sí sola puede no ser autorización suficiente: compruébalo antes de aprobar.",
+    "thread": "Resto de esta conversación",
+    "fieldCustomer": "Cliente",
+    "fieldAuthorizingDocument": "Documento de autorización",
+    "authorizingDocumentHint": "Cuál de estos documentos ES la autorización del cliente. Normalmente su orden de compra.",
+    "fieldSupportingAgreement": "Respaldado por",
+    "noSupportingAgreement": "-- Ninguno --",
+    "fieldCustomerPo": "OC del cliente",
+    "fieldNeedBy": "Necesario para",
+    "fieldLines": "Artículos",
+    "lineDescription": "Descripción",
+    "lineQuantity": "Cant.",
+    "lineUnitPrice": "Precio unitario",
+    "addLine": "Añadir artículo",
+    "removeLine": "Quitar artículo",
+    "fieldTaxRate": "Tasa de impuesto",
+    "fieldNote": "Nota",
+    "total": "Total del pedido",
+    "approve": "Aprobar como borrador",
+    "approved": "Pedido borrador {{number}} creado",
+    "cannotApprove": "Este mensaje no se puede aprobar como pedido. Solo una coincidencia exacta del remitente puede autorizar uno: una coincidencia de dominio prueba que alguien de la empresa escribió, no quién.",
+    "confidenceTooltip": "Con qué firmeza se identificó al remitente. Solo una coincidencia exacta puede autorizar un pedido.",
+    "confidence": {
+      "Exact": "Remitente confirmado",
+      "Domain": "Solo dominio",
+      "Unmatched": "Remitente desconocido"
+    }
   }
 }

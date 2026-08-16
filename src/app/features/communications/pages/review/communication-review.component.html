@@ -1,0 +1,182 @@
+<app-page-layout
+  [pageTitle]="'review.title' | translate"
+  [pageSubtitle]="'review.subtitle' | translate">
+
+  <ng-container toolbar>
+    @if (detail(); as d) {
+      <span [class]="confidenceClass()" [matTooltip]="'review.confidenceTooltip' | translate">
+        {{ confidenceKey() | translate }}
+      </span>
+      <span class="review__from">{{ d.fromAddress }}</span>
+      <span class="review__when">{{ d.occurredAt | date:'MM/dd/yyyy hh:mm a' }}</span>
+    }
+    <span appSpacer></span>
+  </ng-container>
+
+  <ng-container content>
+    <div class="review" [appLoadingBlock]="loading()">
+      @if (detail(); as d) {
+        <div class="review__grid">
+
+          <!-- Evidence. A reviewer approving an order asserts that a customer
+               authorized work; they cannot honestly do that without seeing the
+               document, its hash, and what it leans on. -->
+          <section class="review__panel">
+            <h2 class="review__panel-title">{{ 'review.evidence' | translate }}</h2>
+
+            <div class="review__message">
+              <div class="review__subject">{{ d.subject }}</div>
+              @if (d.body) {
+                <pre class="review__body">{{ d.body }}</pre>
+              }
+            </div>
+
+            <h3 class="review__section-title">{{ 'review.artifacts' | translate }}</h3>
+            <ul class="review__artifacts">
+              @for (a of d.artifacts; track a.id) {
+                <li class="review__artifact">
+                  <span class="material-icons-outlined review__artifact-icon">
+                    {{ a.kind === 'Message' ? 'mail' : 'description' }}
+                  </span>
+                  <span class="review__artifact-name">{{ a.originalFilename ?? a.kind }}</span>
+                  <code class="review__artifact-hash" [matTooltip]="a.sha256">
+                    sha256:{{ shortHash(a.sha256) }}
+                  </code>
+                  <span class="review__artifact-size">{{ a.byteSize | number }} B</span>
+                </li>
+              }
+            </ul>
+
+            @if (d.priorAgreements.length > 0) {
+              <h3 class="review__section-title">{{ 'review.priorAgreements' | translate }}</h3>
+              <ul class="review__agreements">
+                @for (p of d.priorAgreements; track p.id) {
+                  <li class="review__agreement">
+                    <span class="review__agreement-type">{{ p.statementType }}</span>
+                    @if (p.filename) { <span>{{ p.filename }}</span> }
+                    @if (p.capturedAt) { <span>{{ p.capturedAt | date:'MM/dd/yyyy' }}</span> }
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="review__warning">{{ 'review.noPriorAgreements' | translate }}</p>
+            }
+
+            @if (d.thread.length > 0) {
+              <h3 class="review__section-title">{{ 'review.thread' | translate }}</h3>
+              <ul class="review__thread">
+                @for (t of d.thread; track t.id) {
+                  <li class="review__thread-item">
+                    <span>{{ t.occurredAt | date:'MM/dd/yyyy' }}</span>
+                    <span>{{ t.subject }}</span>
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+
+          <!-- The draft. Pre-filled, entirely editable, and what is saved is what
+               is on screen — the system proposes, a person confirms. -->
+          <section class="review__panel" [formGroup]="form">
+            <h2 class="review__panel-title">{{ 'review.draft' | translate }}</h2>
+
+            @if (!canApprove()) {
+              <p class="review__blocked">{{ 'review.cannotApprove' | translate }}</p>
+            }
+
+            <app-select
+              [label]="'review.fieldCustomer' | translate"
+              formControlName="customerId"
+              [options]="customerOptions()"
+              [required]="true" />
+
+            <app-select
+              [label]="'review.fieldAuthorizingDocument' | translate"
+              formControlName="authorizingArtifactId"
+              [options]="artifactOptions()"
+              [required]="true" />
+            <p class="review__hint">{{ 'review.authorizingDocumentHint' | translate }}</p>
+
+            <app-select
+              [label]="'review.fieldSupportingAgreement' | translate"
+              formControlName="supportedByAttestationId"
+              [options]="agreementOptions()" />
+
+            <div class="dialog-row">
+              <app-input
+                [label]="'review.fieldCustomerPo' | translate"
+                formControlName="customerPo"
+                [maxlength]="50" />
+              <app-datepicker
+                [label]="'review.fieldNeedBy' | translate"
+                formControlName="requestedDeliveryDate" />
+            </div>
+
+            <h3 class="review__section-title">{{ 'review.fieldLines' | translate }}</h3>
+            <div formArrayName="lines" class="review__lines">
+              @for (line of lines.controls; track $index) {
+                <div class="review__line" [formGroupName]="$index">
+                  <app-input
+                    [label]="'review.lineDescription' | translate"
+                    formControlName="description"
+                    [required]="true"
+                    [maxlength]="500" />
+                  <app-input
+                    [label]="'review.lineQuantity' | translate"
+                    formControlName="quantity"
+                    type="number"
+                    [required]="true" />
+                  <app-currency-input
+                    [label]="'review.lineUnitPrice' | translate"
+                    formControlName="unitPrice"
+                    [required]="true" />
+                  <button
+                    class="icon-btn icon-btn--danger"
+                    type="button"
+                    [disabled]="!canRemoveLine()"
+                    (click)="removeLine($index)"
+                    [attr.aria-label]="'review.removeLine' | translate">
+                    <span class="material-icons-outlined">close</span>
+                  </button>
+                </div>
+              }
+            </div>
+
+            <button class="action-btn action-btn--sm" type="button" (click)="addLine()">
+              <span class="material-icons-outlined">add</span>
+              {{ 'review.addLine' | translate }}
+            </button>
+
+            <app-input
+              [label]="'review.fieldTaxRate' | translate"
+              formControlName="taxRatePercent"
+              type="number"
+              suffix="%" />
+
+            <app-input
+              [label]="'review.fieldNote' | translate"
+              formControlName="note"
+              [maxlength]="2000" />
+
+            <div class="review__total">
+              <span class="review__total-label">{{ 'review.total' | translate }}</span>
+              <span class="review__total-value">{{ total() | number:'1.2-2' }}</span>
+            </div>
+          </section>
+        </div>
+      }
+    </div>
+  </ng-container>
+
+  <ng-container actions>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button
+        class="action-btn action-btn--primary"
+        [disabled]="form.invalid || saving() || !canApprove()"
+        [matTooltip]="canApprove() ? '' : ('review.cannotApprove' | translate)"
+        (click)="approve()">
+        {{ 'review.approve' | translate }}
+      </button>
+    </app-validation-button>
+  </ng-container>
+</app-page-layout>
