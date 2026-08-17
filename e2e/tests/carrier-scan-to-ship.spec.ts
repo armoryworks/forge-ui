@@ -50,8 +50,8 @@ async function api(
 test.describe.serial('Carrier scan-to-ship gate', () => {
   let token: string;
   let customerId: number;
-  let upsCarrierId: number;
   let willCallCarrierId: number;
+  let probeCarrierId: number; // Manual + requiresScanToShip, created by test 1
   const createdSoIds: number[] = [];
 
   // Create + confirm an SO with one line; returns the SO id + first line id.
@@ -80,7 +80,6 @@ test.describe.serial('Carrier scan-to-ship gate', () => {
     expect(ups!.requiresScanToShip, 'UPS requires a scan').toBe(true);
     expect(willCall, 'Will Call carrier must be seeded').toBeTruthy();
     expect(willCall!.requiresScanToShip, 'Will Call opts out of the scan').toBe(false);
-    upsCarrierId = ups!.id;
     willCallCarrierId = willCall!.id;
 
     const c = await api(token, 'post', 'customers', { name: `SCAN-PROBE Co ${new Date().toISOString()}` });
@@ -105,12 +104,17 @@ test.describe.serial('Carrier scan-to-ship gate', () => {
     expect(status, `create carrier: ${JSON.stringify(body)}`).toBe(201);
     expect(String(body.integrationKind)).toBe('Manual');
     expect(body.requiresScanToShip).toBe(true);
+    probeCarrierId = body.id;
   });
 
   test('2. scan-required carrier: ship gated on the label scan', async () => {
+    // Use the Manual scan-required carrier from test 1, NOT UPS: since 57266932 an
+    // integrated (API) carrier can only ship by creating its label (which assigns the
+    // tracking number) — marking it shipped by hand 409s regardless of the scan. That's
+    // a different gate; this test is about the scan gate, so isolate it.
     const { soId, lineId } = await confirmedSO(5, 100);
     const ship = await api(token, 'post', 'shipments', {
-      salesOrderId: soId, carrierId: upsCarrierId,
+      salesOrderId: soId, carrierId: probeCarrierId,
       lines: [{ salesOrderLineId: lineId, quantity: 5 }],
     });
     expect(ship.status, `create shipment: ${JSON.stringify(ship.body)}`).toBe(201);

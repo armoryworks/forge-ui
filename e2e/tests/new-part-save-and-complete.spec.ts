@@ -84,10 +84,12 @@ test.describe('New Part — full save-and-complete (axis fork)', () => {
 
     // Cost is enforced server-side at the promote/complete step. Clicking Save
     // patches the step, but completeRun's hasCost gate rejects the missing
-    // cost: an error toast shows and we stay on the workflow (the part is NOT
-    // promoted — no navigation to the parts list).
+    // cost: the express form reports the missing validators via the Material
+    // SNACKBAR (SnackbarService.error → panelClass 'snackbar--error'), not the
+    // HttpErrorInterceptor's .toast--error (that one is for 5xx/network), and
+    // we stay on the workflow (the part is NOT promoted — no navigation).
     await saveBtn.click();
-    await expect(page.locator('.toast--error')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.snackbar--error')).toBeVisible({ timeout: 10000 });
     await expect(page).toHaveURL(/workflow=part-buy-raw-v1/);
   });
 
