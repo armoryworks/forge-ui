@@ -55,7 +55,7 @@ test.describe('New Part — full save-and-complete (axis fork)', () => {
     await expect(page.locator('text=' + uniqueName).first()).toBeVisible({ timeout: 10000 });
   });
 
-  test('Buy + Raw express: empty cost does NOT block Save, but is gated at promote', async ({ page }) => {
+  test('Buy + Raw express: empty cost does NOT block Save — express promotes with cost deferred', async ({ page }) => {
     await page.goto(`${BASE_URL}/parts`, { waitUntil: 'networkidle' });
     await page.locator('[data-testid="new-part-btn"]').click();
     await page.locator('[data-testid="fork-procurement-Buy"]').click();
@@ -82,15 +82,17 @@ test.describe('New Part — full save-and-complete (axis fork)', () => {
     // button.
     await expect(saveBtn).toBeEnabled();
 
-    // Cost is enforced server-side at the promote/complete step. Clicking Save
-    // patches the step, but completeRun's hasCost gate rejects the missing
-    // cost: the express form reports the missing validators via the Material
-    // SNACKBAR (SnackbarService.error → panelClass 'snackbar--error'), not the
-    // HttpErrorInterceptor's .toast--error (that one is for 5xx/network), and
-    // we stay on the workflow (the part is NOT promoted — no navigation).
+    // Express mode uses CONTEXTUAL gating (CompleteWorkflowRun, 00bfffac
+    // 2026-05-19): only the first step's gates (basics) are enforced, because
+    // the express form never renders the sourcing/inventory/costing steps and
+    // gating on fields the user can't fill here would dead-end them. Cost is
+    // deferred — the part promotes to Active and lands on the parts list; the
+    // user finishes cost on the detail page or by switching to Guided. This
+    // assertion previously expected a hasCost rejection at promote, which was
+    // authored a month AFTER that relaxation and could never pass.
     await saveBtn.click();
-    await expect(page.locator('.snackbar--error')).toBeVisible({ timeout: 10000 });
-    await expect(page).toHaveURL(/workflow=part-buy-raw-v1/);
+    await expect(page).toHaveURL(/\/parts(\?|$)/, { timeout: 15000 });
+    await expect(page.locator('.snackbar--error')).toHaveCount(0);
   });
 
   test('Buy + Raw express: empty name is blocked PRE-submit (form invalid)', async ({ page }) => {
