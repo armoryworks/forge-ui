@@ -11,7 +11,7 @@ describe('CommunicationService', () => {
   let httpMock: HttpTestingController;
 
   const base = `${environment.apiUrl}/communications`;
-  const orders = `${environment.apiUrl}/sales-orders`;
+  const orders = `${environment.apiUrl}/orders`;
 
   beforeEach(() => {
     TestBed.configureTestingModule({

@@ -29,7 +29,9 @@ export interface ApproveDraftRequest {
 export class CommunicationService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiUrl}/communications`;
-  private readonly ordersBase = `${environment.apiUrl}/sales-orders`;
+  // Sales-order detail routes live under `orders` (SalesOrdersController);
+  // `sales-orders` is the LIST controller and has no `{id}/authorization`.
+  private readonly ordersBase = `${environment.apiUrl}/orders`;
 
   getDetail(id: number): Observable<CommunicationDetail> {
     return this.http.get<CommunicationDetail>(`${this.base}/${id}`);
