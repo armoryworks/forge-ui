@@ -35,6 +35,7 @@ import { StlViewerComponent } from '../../../../shared/components/stl-viewer/stl
 import { BarcodeInfoComponent } from '../../../../shared/components/barcode-info/barcode-info.component';
 import { CapDirective } from '../../../../shared/directives/cap.directive';
 import { PartGtinSectionComponent } from '../part-gtin-section/part-gtin-section.component';
+import { PartBarcodesSectionComponent } from '../part-barcodes-section/part-barcodes-section.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { PartQuickCreateDialogComponent, PartQuickCreateDialogData } from '../part-quick-create-dialog/part-quick-create-dialog.component';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
@@ -98,7 +99,7 @@ type BomViewMode = 'table' | 'tree';
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     EntityPickerComponent, EntityLinkComponent, LoadingBlockDirective, ValidationButtonComponent,
     StlViewerComponent, BarcodeInfoComponent,
-    CapDirective, PartGtinSectionComponent,
+    CapDirective, PartGtinSectionComponent, PartBarcodesSectionComponent,
     DataTableComponent, ColumnCellDirective,
     BomTreeComponent, BomRevisionHistoryComponent,
     SerialNumbersTabComponent, VendorSourcesPanelComponent, PartPurchaseUnitsClusterComponent,

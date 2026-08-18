@@ -607,6 +607,22 @@
       "allocatedToast": "GTIN allocated from your company prefix.",
       "assignedToast": "GTIN assigned."
     },
+    "barcodes": {
+      "label": "Barcodes",
+      "autoChip": "Auto",
+      "gs1Chip": "GS1",
+      "manualChip": "Manual",
+      "hint": "Add manufacturer UPCs, vendor SKUs, or legacy label codes here — each one scans to this part alongside the auto-assigned code.",
+      "addLabel": "Barcode value",
+      "addPlaceholder": "e.g. a manufacturer UPC",
+      "addCta": "Add",
+      "added": "Barcode added.",
+      "addFailed": "Could not add the barcode.",
+      "removed": "Barcode removed.",
+      "removeFailed": "Could not remove the barcode.",
+      "removeConfirmTitle": "Remove barcode?",
+      "removeConfirmMessage": "Remove the alternate barcode \"{{value}}\"? It will no longer scan to this part."
+    },
     "title": "Parts Catalog",
     "part": "Part",
     "searchByPartNumber": "Search by part number…",

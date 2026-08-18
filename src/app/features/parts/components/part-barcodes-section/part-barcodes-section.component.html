@@ -1,0 +1,46 @@
+<div class="barcodes">
+  <span class="barcodes__label">{{ 'parts.barcodes.label' | translate }}</span>
+
+  <ul class="barcodes__list" data-testid="part-barcodes-list">
+    @if (systemCode(); as sys) {
+      <li class="barcodes__row">
+        <span class="chip chip--muted">{{ 'parts.barcodes.autoChip' | translate }}</span>
+        @if (sys.identityType === 'Gs1') {
+          <span class="chip chip--success">{{ 'parts.barcodes.gs1Chip' | translate }}</span>
+        }
+        <span class="barcodes__code">{{ sys.value }}</span>
+      </li>
+    }
+
+    @for (code of manualCodes(); track code.id) {
+      <li class="barcodes__row" data-testid="part-barcode-item">
+        <span class="chip">{{ 'parts.barcodes.manualChip' | translate }}</span>
+        <span class="barcodes__code">{{ code.value }}</span>
+        <button class="action-btn action-btn--danger action-btn--sm" type="button"
+          data-testid="part-barcode-remove"
+          (click)="remove(code)">
+          <span class="material-icons-outlined">delete</span>
+          {{ 'common.remove' | translate }}
+        </button>
+      </li>
+    }
+  </ul>
+
+  <p class="barcodes__hint">{{ 'parts.barcodes.hint' | translate }}</p>
+
+  <div class="barcodes__add">
+    <app-input
+      type="text"
+      data-testid="part-barcode-add-input"
+      [label]="'parts.barcodes.addLabel' | translate"
+      [formControl]="newValue"
+      [placeholder]="'parts.barcodes.addPlaceholder' | translate" />
+    <button class="action-btn action-btn--primary action-btn--sm" type="button"
+      data-testid="part-barcode-add-btn"
+      [disabled]="!newValue.value.trim() || saving()"
+      (click)="add()">
+      <span class="material-icons-outlined">add</span>
+      {{ 'parts.barcodes.addCta' | translate }}
+    </button>
+  </div>
+</div>

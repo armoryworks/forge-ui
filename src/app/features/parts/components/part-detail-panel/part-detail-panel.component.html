@@ -95,6 +95,10 @@
             <app-part-gtin-section [part]="part" (changed)="onGtinChanged()" />
           </div>
 
+          <!-- Manual alternate barcodes (manufacturer UPC, vendor SKU, legacy
+               label) on top of the auto-assigned code above. -->
+          <app-part-barcodes-section [part]="part" />
+
           <!-- Phase 5: Promote to Active (Draft-only, runs readiness validators) -->
           @if (part.status === 'Draft') {
             <div class="promote-section">

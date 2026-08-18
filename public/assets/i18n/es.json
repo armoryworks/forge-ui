@@ -607,6 +607,22 @@
       "allocatedToast": "GTIN asignado desde su prefijo de empresa.",
       "assignedToast": "GTIN asignado."
     },
+    "barcodes": {
+      "label": "Códigos de barras",
+      "autoChip": "Automático",
+      "gs1Chip": "GS1",
+      "manualChip": "Manual",
+      "hint": "Agregue aquí UPC de fabricante, SKU de proveedor o códigos de etiquetas antiguas: cada uno se escanea a esta pieza junto con el código asignado automáticamente.",
+      "addLabel": "Valor del código de barras",
+      "addPlaceholder": "p. ej. un UPC de fabricante",
+      "addCta": "Agregar",
+      "added": "Código de barras agregado.",
+      "addFailed": "No se pudo agregar el código de barras.",
+      "removed": "Código de barras eliminado.",
+      "removeFailed": "No se pudo eliminar el código de barras.",
+      "removeConfirmTitle": "¿Eliminar el código de barras?",
+      "removeConfirmMessage": "¿Eliminar el código de barras alternativo \"{{value}}\"? Ya no se escaneará a esta pieza."
+    },
     "title": "Catálogo de Piezas",
     "part": "Pieza",
     "searchByPartNumber": "Buscar por número de pieza…",
