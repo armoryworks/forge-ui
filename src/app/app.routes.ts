@@ -173,10 +173,12 @@ export const routes: Routes = [
           import('./features/expenses/expenses.routes').then((m) => m.EXPENSES_ROUTES),
       },
       {
-        // Dark GL accounting suite — guarded by CAP-ACCT-FULLGL so the whole area is unreachable by URL
+        // GL accounting suite — gated by CAP-ACCT-GL-VIEW (the read-only view surface) so the
+        // ledger/statements stay reachable read-only when a book is deactivated (FULLGL off,
+        // GL-VIEW on). Write screens (journal-entries/new) add a CAP-ACCT-FULLGL guard below.
         // until the capability is switched on (mirrors the server-side gate).
         path: 'accounting',
-        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager'), capabilityGuard('CAP-ACCT-FULLGL')],
+        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager'), capabilityGuard('CAP-ACCT-GL-VIEW')],
         loadChildren: () =>
           import('./features/accounting/accounting.routes').then((m) => m.ACCOUNTING_ROUTES),
       },

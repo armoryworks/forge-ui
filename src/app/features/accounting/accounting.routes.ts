@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AccountingComponent } from './accounting.component';
+import { capabilityGuard } from '../../shared/guards/capability.guard';
 
 export const ACCOUNTING_ROUTES: Routes = [
   { path: '', component: AccountingComponent },
@@ -19,7 +20,9 @@ export const ACCOUNTING_ROUTES: Routes = [
       import('./components/training/training.component').then((m) => m.TrainingComponent),
   },
   {
+    // Write surface — posting a manual journal entry needs full GL, not just the view capability.
     path: 'journal-entries/new',
+    canActivate: [capabilityGuard('CAP-ACCT-FULLGL')],
     loadComponent: () =>
       import('./components/journal-entry-editor/journal-entry-editor.component').then((m) => m.JournalEntryEditorComponent),
   },
