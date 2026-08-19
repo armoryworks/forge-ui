@@ -1,0 +1,13 @@
+@if (instances().length) {
+  <div class="jd-section jgs" data-testid="job-gates-section">
+    <div class="jgs__header">
+      <h3 class="jgs__title">{{ 'sequences.jobGates.title' | translate }}</h3>
+      <span class="jgs__count">{{ instances().length }}</span>
+    </div>
+    @for (inst of instances(); track inst.id) {
+      <div class="jgs__instance">
+        <app-sequence-instance-panel [instanceId]="inst.id" (changed)="onChanged()" />
+      </div>
+    }
+  </div>
+}

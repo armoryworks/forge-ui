@@ -4,6 +4,9 @@
     <div class="seq-page__filter">
       <app-select [label]="'common.status' | translate" [formControl]="statusFilter" [options]="statusOptions" />
     </div>
+    <a class="action-btn action-btn--primary" routerLink="/sequences/new" data-testid="sequence-new-definition">
+      <span class="material-icons-outlined">add</span>{{ 'sequences.editor.newDefinition' | translate }}
+    </a>
   </div>
 
   <div class="seq-page__body">
@@ -33,6 +36,8 @@
           <span class="chip" [class]="statusChipClass(def.status)">{{ def.status }}</span>
           <span class="seq-def__actions">
             @if (isDraft()) {
+              <a class="action-btn action-btn--sm" [routerLink]="['/sequences', def.id, 'edit']"
+                data-testid="sequence-edit">{{ 'sequences.editor.edit' | translate }}</a>
               <button class="action-btn action-btn--sm action-btn--primary" type="button"
                 data-testid="sequence-publish" [disabled]="busy()" (click)="publish()">{{ 'sequences.definitions.publish' | translate }}</button>
             }

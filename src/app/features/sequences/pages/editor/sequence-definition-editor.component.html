@@ -1,0 +1,96 @@
+<div class="seq-editor" [formGroup]="form" data-testid="sequence-editor">
+  <div class="seq-editor__toolbar">
+    <a class="action-btn action-btn--sm" routerLink="/sequences">
+      <span class="material-icons-outlined">arrow_back</span>{{ 'common.back' | translate }}
+    </a>
+    <h2 class="seq-editor__title">{{ title() }}</h2>
+    <button class="action-btn action-btn--primary" type="button" data-testid="sequence-editor-save"
+      [disabled]="saving()" (click)="save()">
+      <span class="material-icons-outlined">save</span>{{ 'common.save' | translate }}
+    </button>
+  </div>
+
+  <!-- Header -->
+  <section class="seq-editor__section seq-editor__grid">
+    <app-input [label]="'sequences.editor.code' | translate" formControlName="code" data-testid="sequence-editor-code" />
+    <app-input [label]="'sequences.editor.name' | translate" formControlName="name" data-testid="sequence-editor-name" />
+    <app-input [label]="'sequences.editor.subjectType' | translate" formControlName="subjectEntityType"
+      [placeholder]="'sequences.start.subjectTypePlaceholder' | translate" />
+    <app-select [label]="'sequences.editor.autoStart' | translate" formControlName="autoStartOnSubjectCreate" [options]="autoStartOptions" />
+    <app-input class="seq-editor__wide" [label]="'sequences.editor.description' | translate" formControlName="description" />
+  </section>
+
+  <!-- Steps -->
+  <section class="seq-editor__section" formArrayName="steps">
+    <div class="seq-editor__section-head">
+      <h3>{{ 'sequences.editor.steps' | translate }}</h3>
+      <button class="action-btn action-btn--sm" type="button" data-testid="sequence-editor-add-step" (click)="addStep()">
+        <span class="material-icons-outlined">add</span>{{ 'sequences.editor.addStep' | translate }}
+      </button>
+    </div>
+    @for (step of steps.controls; track $index; let i = $index) {
+      <div class="seq-editor__row" [formGroupName]="i" data-testid="sequence-editor-step-row">
+        <app-input class="c-key" [label]="'sequences.editor.stepKey' | translate" formControlName="key" />
+        <app-input class="c-name" [label]="'sequences.editor.stepName' | translate" formControlName="name" />
+        <app-input class="c-num" type="number" [label]="'sequences.editor.sortOrder' | translate" formControlName="sortOrder" />
+        <app-select class="c-sel" [label]="'sequences.editor.joinPolicy' | translate" formControlName="joinPolicy" [options]="joinPolicyOptions" />
+        <app-input class="c-num" type="number" [label]="'sequences.editor.maxDwell' | translate" formControlName="maxDwellMinutes" />
+        <app-select class="c-sel" [label]="'sequences.editor.dwellAction' | translate" formControlName="dwellExpiryAction" [options]="expiryOptions" />
+        <app-input class="c-role" [label]="'sequences.editor.escalateRole' | translate" formControlName="escalateRole" />
+        <button class="icon-btn icon-btn--danger" type="button" [attr.aria-label]="'common.remove' | translate" (click)="removeStep(i)">
+          <span class="material-icons-outlined">close</span>
+        </button>
+      </div>
+    }
+  </section>
+
+  <!-- Edges -->
+  <section class="seq-editor__section" formArrayName="edges">
+    <div class="seq-editor__section-head">
+      <h3>{{ 'sequences.editor.edges' | translate }}</h3>
+      <button class="action-btn action-btn--sm" type="button" data-testid="sequence-editor-add-edge" (click)="addEdge()">
+        <span class="material-icons-outlined">add</span>{{ 'sequences.editor.addEdge' | translate }}
+      </button>
+    </div>
+    @for (edge of edges.controls; track $index; let i = $index) {
+      <div class="seq-editor__row" [formGroupName]="i" data-testid="sequence-editor-edge-row">
+        <app-select class="c-sel" [label]="'sequences.editor.from' | translate" formControlName="fromStepKey" [options]="stepKeyOptions()" />
+        <app-select class="c-sel" [label]="'sequences.editor.to' | translate" formControlName="toStepKey" [options]="stepKeyOptions()" />
+        <app-select class="c-sel" [label]="'sequences.editor.isRework' | translate" formControlName="isRework" [options]="autoStartOptions" />
+        <button class="icon-btn icon-btn--danger" type="button" [attr.aria-label]="'common.remove' | translate" (click)="removeEdge(i)">
+          <span class="material-icons-outlined">close</span>
+        </button>
+      </div>
+    } @empty {
+      <p class="seq-editor__empty">{{ 'sequences.editor.noEdges' | translate }}</p>
+    }
+  </section>
+
+  <!-- Gates -->
+  <section class="seq-editor__section" formArrayName="gates">
+    <div class="seq-editor__section-head">
+      <h3>{{ 'sequences.editor.gates' | translate }}</h3>
+      <button class="action-btn action-btn--sm" type="button" data-testid="sequence-editor-add-gate" (click)="addGate()">
+        <span class="material-icons-outlined">add</span>{{ 'sequences.editor.addGate' | translate }}
+      </button>
+    </div>
+    @for (gate of gates.controls; track $index; let i = $index) {
+      <div class="seq-editor__gate" [formGroupName]="i" data-testid="sequence-editor-gate-row">
+        <div class="seq-editor__row">
+          <app-select class="c-sel" [label]="'sequences.editor.stepKey' | translate" formControlName="stepKey" [options]="stepKeyOptions()" />
+          <app-input class="c-key" [label]="'sequences.editor.gateKey' | translate" formControlName="key" />
+          <app-input class="c-name" [label]="'sequences.editor.gateName' | translate" formControlName="name" />
+          <app-select class="c-sel" [label]="'sequences.editor.sourceType' | translate" formControlName="sourceType" [options]="sourceTypeOptions" />
+          <app-select class="c-sel" [label]="'sequences.editor.expiryAction' | translate" formControlName="expiryAction" [options]="expiryOptions" />
+          <button class="icon-btn icon-btn--danger" type="button" [attr.aria-label]="'common.remove' | translate" (click)="removeGate(i)">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+        <app-textarea [label]="'sequences.editor.config' | translate" formControlName="configJson" [rows]="2" />
+        <p class="seq-editor__hint">{{ 'sequences.editor.configHintLabel' | translate }} <code>{{ configHint(gate) }}</code></p>
+      </div>
+    } @empty {
+      <p class="seq-editor__empty">{{ 'sequences.editor.noGates' | translate }}</p>
+    }
+  </section>
+</div>

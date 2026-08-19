@@ -135,3 +135,12 @@ export interface StartSequenceRequest {
   subjectEntityType?: string | null;
   subjectEntityId?: number | null;
 }
+
+export interface SequenceResourceClockRequest {
+  resourceType: string;
+  resourceId: number;
+  expiresAt: string;
+  expiryAction: SequenceExpiryAction;
+  escalateRole?: string | null;
+  note?: string | null;
+}

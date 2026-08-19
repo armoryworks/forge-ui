@@ -603,6 +603,9 @@
     "events": {
       "title": "Actividad"
     },
+    "jobGates": {
+      "title": "Compuertas"
+    },
     "cancel": {
       "action": "Cancelar ejecución",
       "title": "¿Cancelar esta secuencia?",
@@ -668,6 +671,44 @@
       "subject": "Sujeto",
       "autoStart": "Se inicia automáticamente cuando se crea el sujeto",
       "autoStartChip": "Auto-inicio"
+    },
+    "editor": {
+      "newDefinition": "Nueva definición",
+      "newTitle": "Nueva definición de secuencia",
+      "editTitle": "Editar definición de secuencia",
+      "edit": "Editar",
+      "code": "Código",
+      "name": "Nombre",
+      "description": "Descripción",
+      "subjectType": "Tipo de sujeto",
+      "autoStart": "Auto-inicio al crear el sujeto",
+      "steps": "Pasos",
+      "addStep": "Agregar paso",
+      "stepKey": "Clave",
+      "stepName": "Nombre",
+      "sortOrder": "Orden",
+      "joinPolicy": "Unión",
+      "maxDwell": "Espera máx. (min)",
+      "dwellAction": "Al vencer la espera",
+      "escalateRole": "Rol de escalamiento",
+      "edges": "Aristas",
+      "addEdge": "Agregar arista",
+      "from": "Desde",
+      "to": "Hasta",
+      "isRework": "¿Rehacer?",
+      "noEdges": "Aún no hay aristas: un paso sin arista entrante es un paso inicial.",
+      "gates": "Compuertas",
+      "addGate": "Agregar compuerta",
+      "gateKey": "Clave de compuerta",
+      "gateName": "Nombre de compuerta",
+      "sourceType": "Fuente",
+      "expiryAction": "Al vencer",
+      "config": "Configuración (JSON)",
+      "configHintLabel": "Ejemplo:",
+      "noGates": "Aún no hay compuertas: un paso sin compuerta inicia en cuanto terminan sus predecesores.",
+      "saved": "Definición guardada.",
+      "saveFailed": "No se pudo guardar la definición.",
+      "badConfig": "La compuerta \"{{gate}}\" tiene una configuración JSON inválida."
     }
   },
   "parts": {

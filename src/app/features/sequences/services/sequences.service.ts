@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
   SequenceDefinition, SequenceDefinitionRequest, SequenceDefinitionStatus, SequenceEvent, SequenceInstance,
-  SequenceInstanceStatus, SequenceResourceClock, StartSequenceRequest,
+  SequenceInstanceStatus, SequenceResourceClock, SequenceResourceClockRequest, StartSequenceRequest,
 } from '../models/sequence.model';
 
 /** Gated Sequence Engine client — `api/v1/sequences` (CAP-CROSS-SEQUENCES). */
@@ -106,5 +106,13 @@ export class SequencesService {
     if (resourceType) params = params.set('resourceType', resourceType);
     if (resourceId != null) params = params.set('resourceId', resourceId);
     return this.http.get<SequenceResourceClock[]>(`${this.base}/resource-clocks`, { params });
+  }
+
+  createResourceClock(model: SequenceResourceClockRequest): Observable<SequenceResourceClock> {
+    return this.http.post<SequenceResourceClock>(`${this.base}/resource-clocks`, model);
+  }
+
+  deleteResourceClock(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/resource-clocks/${id}`);
   }
 }

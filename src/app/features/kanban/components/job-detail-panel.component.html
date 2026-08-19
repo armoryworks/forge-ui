@@ -74,6 +74,9 @@
         }
       </div>
 
+      <!-- Gated sequences driving this job (CAP-CROSS-SEQUENCES) — self-hides when none -->
+      <app-job-gates-section [jobId]="j.id" *appCap="'CAP-CROSS-SEQUENCES'" />
+
       <!-- R&D Iteration badge (if applicable) -->
       @if (j.iterationCount > 0 || j.trackTypeName === 'R&D/Tooling') {
         <div class="jd-section">

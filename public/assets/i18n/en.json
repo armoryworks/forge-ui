@@ -603,6 +603,9 @@
     "events": {
       "title": "Activity"
     },
+    "jobGates": {
+      "title": "Gates"
+    },
     "cancel": {
       "action": "Cancel run",
       "title": "Cancel this sequence?",
@@ -668,6 +671,44 @@
       "subject": "Subject",
       "autoStart": "Auto-starts when the subject is created",
       "autoStartChip": "Auto-start"
+    },
+    "editor": {
+      "newDefinition": "New definition",
+      "newTitle": "New sequence definition",
+      "editTitle": "Edit sequence definition",
+      "edit": "Edit",
+      "code": "Code",
+      "name": "Name",
+      "description": "Description",
+      "subjectType": "Subject type",
+      "autoStart": "Auto-start on subject create",
+      "steps": "Steps",
+      "addStep": "Add step",
+      "stepKey": "Key",
+      "stepName": "Name",
+      "sortOrder": "Order",
+      "joinPolicy": "Join",
+      "maxDwell": "Max dwell (min)",
+      "dwellAction": "On dwell expiry",
+      "escalateRole": "Escalate role",
+      "edges": "Edges",
+      "addEdge": "Add edge",
+      "from": "From",
+      "to": "To",
+      "isRework": "Rework?",
+      "noEdges": "No edges yet — a step with no incoming edge is a start step.",
+      "gates": "Gates",
+      "addGate": "Add gate",
+      "gateKey": "Gate key",
+      "gateName": "Gate name",
+      "sourceType": "Source",
+      "expiryAction": "On expiry",
+      "config": "Config (JSON)",
+      "configHintLabel": "Example:",
+      "noGates": "No gates yet — a step with no gate starts as soon as its predecessors are done.",
+      "saved": "Definition saved.",
+      "saveFailed": "Could not save the definition.",
+      "badConfig": "Gate \"{{gate}}\" has invalid JSON config."
     }
   },
   "parts": {

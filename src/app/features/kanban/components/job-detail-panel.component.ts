@@ -8,6 +8,8 @@ import { TimeTrackingService } from '../../time-tracking/services/time-tracking.
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { FileUploadZoneComponent, UploadedFile } from '../../../shared/components/file-upload-zone/file-upload-zone.component';
 import { InputComponent } from '../../../shared/components/input/input.component';
+import { CapDirective } from '../../../shared/directives/cap.directive';
+import { JobGatesSectionComponent } from '../../sequences/components/job-gates-section/job-gates-section.component';
 import { SelectComponent } from '../../../shared/components/select/select.component';
 import { EntityActivitySectionComponent } from '../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { FileAttachment } from '../../../shared/models/file.model';
@@ -45,7 +47,7 @@ import { OperationTimeTabComponent } from './operation-time-tab.component';
 @Component({
   selector: 'app-job-detail-panel',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, ReactiveFormsModule, TranslatePipe, AvatarComponent, PriorityIndicatorComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, JobCostTabComponent, OperationTimeTabComponent, MatMenuModule, MatTooltipModule, EntityLinkComponent],
+  imports: [DatePipe, DecimalPipe, ReactiveFormsModule, TranslatePipe, AvatarComponent, PriorityIndicatorComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, JobCostTabComponent, OperationTimeTabComponent, MatMenuModule, MatTooltipModule, EntityLinkComponent, CapDirective, JobGatesSectionComponent],
   templateUrl: './job-detail-panel.component.html',
   styleUrl: './job-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

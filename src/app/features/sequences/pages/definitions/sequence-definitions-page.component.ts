@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -15,7 +16,7 @@ import { SequenceDefinition, SequenceDefinitionStatus, SequenceGateDefinition } 
 @Component({
   selector: 'app-sequence-definitions-page',
   standalone: true,
-  imports: [DatePipe, ReactiveFormsModule, TranslatePipe, SelectComponent],
+  imports: [DatePipe, ReactiveFormsModule, RouterLink, TranslatePipe, SelectComponent],
   templateUrl: './sequence-definitions-page.component.html',
   styleUrl: './sequence-definitions-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,9 +43,16 @@ export class SequenceDefinitionsPageComponent {
   protected readonly isDraft = computed(() => this.selected()?.status === 'Draft');
   protected readonly isPublished = computed(() => this.selected()?.status === 'Published');
 
+  private readonly route = inject(ActivatedRoute);
+
   constructor() {
     this.reload();
     this.statusFilter.valueChanges.subscribe(() => this.reload());
+    // Re-select a definition after the editor navigates back with ?selected=<id>.
+    const selectedId = Number(this.route.snapshot.queryParamMap.get('selected'));
+    if (selectedId > 0) {
+      this.service.getDefinition(selectedId).subscribe({ next: (full) => this.selected.set(full) });
+    }
   }
 
   protected reload(): void {
