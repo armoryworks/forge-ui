@@ -1,0 +1,72 @@
+.seq-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  &__loading { padding: 1rem; opacity: 0.7; }
+
+  &__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  &__title { display: flex; align-items: center; gap: 0.5rem; h3 { margin: 0; font-size: 1.05rem; } }
+  &__subject { font-size: 0.85rem; opacity: 0.8; }
+  &__started { margin-left: auto; font-size: 0.8rem; opacity: 0.65; }
+
+  &__actions { display: flex; gap: 0.5rem; }
+  &__cancel-reason { margin: 0; font-size: 0.85rem; color: var(--error); }
+}
+
+.seq-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+
+.seq-step {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.5rem 0.625rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+
+  &--blocked { border-color: var(--error); }
+
+  &__head { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  &__name { font-weight: 600; }
+  &__ops { margin-left: auto; display: flex; gap: 0.375rem; }
+  &__reason { margin: 0; font-size: 0.82rem; opacity: 0.8; }
+  &__dwell { display: inline-flex; align-items: center; gap: 0.2rem; font-size: 0.78rem; opacity: 0.75;
+    .material-icons-outlined { font-size: 1rem; }
+    &--fired { color: var(--error); opacity: 1; }
+  }
+}
+
+.seq-gate {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 0.25rem 0.5rem;
+  margin-left: 1rem;
+  font-size: 0.85rem;
+  border-left: 2px solid var(--border);
+
+  &__name { font-weight: 500; }
+  &__source { font-size: 0.75rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.03em; }
+  &__reason { opacity: 0.8; }
+  &__override { font-size: 0.78rem; opacity: 0.8; font-style: italic; }
+  &__ops { margin-left: auto; display: flex; gap: 0.375rem; }
+}
+
+.seq-panel__events { border-top: 1px solid var(--border); padding-top: 0.5rem; }
+.seq-panel__events-toggle {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  background: none; border: none; cursor: pointer; font: inherit; color: inherit; opacity: 0.85;
+  .material-icons-outlined { font-size: 1.1rem; }
+}
+.seq-events { list-style: none; margin: 0.375rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.2rem; }
+.seq-event { display: flex; gap: 0.5rem; font-size: 0.8rem;
+  &__time { opacity: 0.6; font-variant-numeric: tabular-nums; }
+  &__type { font-weight: 500; }
+  &__ref { opacity: 0.7; }
+}

@@ -54,6 +54,9 @@
     "scheduling": "Scheduling",
     "oee": "OEE",
     "approvals": "Approvals",
+    "sequences": "Sequences",
+    "sequencesDefinitions": "Definitions",
+    "sequencesInstances": "Instances",
     "back": "Back",
     "trialBalance": "Trial Balance",
     "profitLoss": "Profit & Loss",
@@ -583,6 +586,89 @@
     "onTime": "On Time",
     "bulkMove": "Bulk Move",
     "bulkAssign": "Bulk Assign"
+  },
+  "sequences": {
+    "actionFailed": "The action could not be completed.",
+    "blocked": "Blocked",
+    "startedAt": "Started",
+    "reevaluate": "Re-evaluate",
+    "cancelledBecause": "Cancelled:",
+    "reason": {
+      "label": "Reason",
+      "submit": "Submit"
+    },
+    "filter": {
+      "all": "All"
+    },
+    "events": {
+      "title": "Activity"
+    },
+    "cancel": {
+      "action": "Cancel run",
+      "title": "Cancel this sequence?",
+      "message": "Cancelling stops the run permanently. A reason is required.",
+      "confirm": "Cancel run"
+    },
+    "skip": {
+      "title": "Skip \"{{step}}\"?",
+      "message": "The step is marked skipped and counts as complete for the steps after it. A reason is required.",
+      "confirm": "Skip step"
+    },
+    "rework": {
+      "title": "Rework from \"{{step}}\"?",
+      "message": "This resets the step and everything after it back to pending. A reason is required.",
+      "confirm": "Rework"
+    },
+    "override": {
+      "title": "Override \"{{gate}}\"?",
+      "message": "This forces the gate to Go and it stays Go. A reason is required.",
+      "confirm": "Override gate"
+    },
+    "gate": {
+      "clear": "Clear",
+      "override": "Override",
+      "overridden": "Overridden"
+    },
+    "step": {
+      "start": "Start",
+      "complete": "Complete",
+      "skip": "Skip",
+      "rework": "Rework",
+      "skippedBecause": "Skipped:"
+    },
+    "start": {
+      "action": "Start run",
+      "definition": "Definition",
+      "pickDefinition": "Pick a published definition…",
+      "subjectType": "Subject type",
+      "subjectTypePlaceholder": "e.g. Job",
+      "subjectId": "Subject ID",
+      "confirm": "Start",
+      "started": "Sequence started.",
+      "failed": "Could not start the sequence."
+    },
+    "instances": {
+      "title": "Sequence Instances",
+      "empty": "No sequence instances.",
+      "selectHint": "Select an instance to view its steps and gates."
+    },
+    "definitions": {
+      "title": "Sequence Definitions",
+      "empty": "No sequence definitions.",
+      "selectHint": "Select a definition to view its steps and gates.",
+      "publish": "Publish",
+      "published": "Definition published.",
+      "newVersion": "New version",
+      "newVersionCreated": "New draft version created.",
+      "retire": "Retire",
+      "retired": "Definition retired.",
+      "retireTitle": "Retire this definition?",
+      "retireMessage": "Retiring \"{{name}}\" stops new runs from starting. In-flight runs keep going.",
+      "actionFailed": "The action could not be completed.",
+      "subject": "Subject",
+      "autoStart": "Auto-starts when the subject is created",
+      "autoStartChip": "Auto-start"
+    }
   },
   "parts": {
     "gtin": {

@@ -1,0 +1,21 @@
+<div class="reason-dialog" [class.reason-dialog--danger]="data.severity === 'danger'">
+  <h2 class="reason-dialog__title">{{ data.title }}</h2>
+  @if (data.message) {
+    <p class="reason-dialog__message">{{ data.message }}</p>
+  }
+  <app-textarea
+    data-testid="sequence-reason-input"
+    [label]="'sequences.reason.label' | translate"
+    [formControl]="reason"
+    [rows]="3"
+    [required]="true" />
+  <div class="reason-dialog__actions">
+    <button class="action-btn" type="button" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
+    <button class="action-btn action-btn--primary" type="button"
+      data-testid="sequence-reason-confirm"
+      [disabled]="reason.invalid"
+      (click)="confirm()">
+      {{ data.confirmLabel ?? ('sequences.reason.submit' | translate) }}
+    </button>
+  </div>
+</div>

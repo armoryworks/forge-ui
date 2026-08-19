@@ -1,0 +1,122 @@
+@if (loading()) {
+  <div class="seq-panel__loading">{{ 'common.loading' | translate }}</div>
+} @else if (instance(); as inst) {
+  <div class="seq-panel" data-testid="sequence-instance-panel">
+    <header class="seq-panel__header">
+      <div class="seq-panel__title">
+        <h3>{{ inst.definitionName }}</h3>
+        <span class="chip chip--muted">v{{ inst.definitionVersion }}</span>
+        <span class="chip"
+          [class.chip--info]="inst.status === 'Running'"
+          [class.chip--success]="inst.status === 'Completed'"
+          [class.chip--danger]="inst.status === 'Cancelled'">{{ inst.status }}</span>
+      </div>
+      @if (inst.subjectEntityType) {
+        <span class="seq-panel__subject">{{ inst.subjectEntityType }} #{{ inst.subjectEntityId }}</span>
+      }
+      <span class="seq-panel__started">{{ 'sequences.startedAt' | translate }} {{ inst.startedAt | date:'short' }}</span>
+    </header>
+
+    @if (isRunning()) {
+      <div class="seq-panel__actions">
+        <button class="action-btn action-btn--sm" type="button" data-testid="sequence-reevaluate"
+          [disabled]="busy()" (click)="reevaluate()">
+          <span class="material-icons-outlined">refresh</span>{{ 'sequences.reevaluate' | translate }}
+        </button>
+        <button class="action-btn action-btn--sm action-btn--danger" type="button" data-testid="sequence-cancel"
+          [disabled]="busy()" (click)="cancel()">
+          <span class="material-icons-outlined">cancel</span>{{ 'sequences.cancel.action' | translate }}
+        </button>
+      </div>
+    } @else if (inst.status === 'Cancelled' && inst.cancelReason) {
+      <p class="seq-panel__cancel-reason">{{ 'sequences.cancelledBecause' | translate }} {{ inst.cancelReason }}</p>
+    }
+
+    <ol class="seq-steps" data-testid="sequence-steps">
+      @for (step of inst.steps; track step.stepKey) {
+        <li class="seq-step" [class.seq-step--blocked]="step.isBlocked">
+          <div class="seq-step__head">
+            <span class="chip" [class]="stepChipClass(step.status)">{{ step.status }}</span>
+            <span class="seq-step__name">{{ step.name }}</span>
+            @if (step.isBlocked) {
+              <span class="chip chip--danger" data-testid="sequence-step-blocked">{{ 'sequences.blocked' | translate }}</span>
+            }
+            @if (step.dwellExpiresAt && step.status === 'InProgress') {
+              <span class="seq-step__dwell" [class.seq-step__dwell--fired]="step.dwellFiredAt">
+                <span class="material-icons-outlined">schedule</span>{{ step.dwellExpiresAt | date:'short' }}
+              </span>
+            }
+            @if (isRunning()) {
+              <span class="seq-step__ops">
+                @if (step.status === 'Ready') {
+                  <button class="action-btn action-btn--sm action-btn--primary" type="button"
+                    data-testid="sequence-step-start" [disabled]="busy()" (click)="startStep(step)">{{ 'sequences.step.start' | translate }}</button>
+                }
+                @if (step.status === 'InProgress') {
+                  <button class="action-btn action-btn--sm action-btn--primary" type="button"
+                    data-testid="sequence-step-complete" [disabled]="busy()" (click)="completeStep(step)">{{ 'sequences.step.complete' | translate }}</button>
+                }
+                @if (step.status === 'Pending' || step.status === 'Ready' || step.status === 'InProgress') {
+                  <button class="action-btn action-btn--sm" type="button"
+                    data-testid="sequence-step-skip" [disabled]="busy()" (click)="skipStep(step)">{{ 'sequences.step.skip' | translate }}</button>
+                }
+                @if (step.status === 'Complete' || step.status === 'Skipped') {
+                  <button class="action-btn action-btn--sm" type="button"
+                    data-testid="sequence-step-rework" [disabled]="busy()" (click)="rework(step)">{{ 'sequences.step.rework' | translate }}</button>
+                }
+              </span>
+            }
+          </div>
+
+          @if (step.isBlocked && step.blockedReason) {
+            <p class="seq-step__reason">{{ step.blockedReason }}</p>
+          }
+          @if (step.skipReason) {
+            <p class="seq-step__reason">{{ 'sequences.step.skippedBecause' | translate }} {{ step.skipReason }}</p>
+          }
+
+          @for (gate of gatesFor(step.stepKey); track gate.gateKey) {
+            <div class="seq-gate" data-testid="sequence-gate">
+              <span class="chip" [class]="verdictChipClass(gate.verdict)">{{ gate.verdict }}</span>
+              <span class="seq-gate__name">{{ gate.name }}</span>
+              <span class="seq-gate__source">{{ gate.sourceType }}</span>
+              @if (gate.reason) { <span class="seq-gate__reason">{{ gate.reason }}</span> }
+              @if (gate.overrideReason) {
+                <span class="seq-gate__override">{{ 'sequences.gate.overridden' | translate }}: {{ gate.overrideReason }}</span>
+              }
+              @if (isRunning() && gate.verdict !== 'Go') {
+                <span class="seq-gate__ops">
+                  @if (gate.sourceType === 'ManualClearance') {
+                    <button class="action-btn action-btn--sm action-btn--primary" type="button"
+                      data-testid="sequence-gate-clear" [disabled]="busy()" (click)="clearGate(gate)">{{ 'sequences.gate.clear' | translate }}</button>
+                  }
+                  <button class="action-btn action-btn--sm action-btn--danger" type="button"
+                    data-testid="sequence-gate-override" [disabled]="busy()" (click)="overrideGate(gate)">{{ 'sequences.gate.override' | translate }}</button>
+                </span>
+              }
+            </div>
+          }
+        </li>
+      }
+    </ol>
+
+    <div class="seq-panel__events">
+      <button class="seq-panel__events-toggle" type="button" data-testid="sequence-events-toggle" (click)="toggleEvents()">
+        <span class="material-icons-outlined">{{ showEvents() ? 'expand_less' : 'expand_more' }}</span>
+        {{ 'sequences.events.title' | translate }} ({{ events().length }})
+      </button>
+      @if (showEvents()) {
+        <ul class="seq-events">
+          @for (ev of events(); track ev.id) {
+            <li class="seq-event">
+              <span class="seq-event__time">{{ ev.occurredAt | date:'short' }}</span>
+              <span class="seq-event__type">{{ ev.type }}</span>
+              @if (ev.stepKey) { <span class="seq-event__ref">{{ ev.stepKey }}</span> }
+              @if (ev.gateKey) { <span class="seq-event__ref">/ {{ ev.gateKey }}</span> }
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  </div>
+}

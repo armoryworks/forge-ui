@@ -1,0 +1,78 @@
+<div class="seq-page" data-testid="sequence-definitions">
+  <div class="seq-page__toolbar">
+    <h2 class="seq-page__title">{{ 'sequences.definitions.title' | translate }}</h2>
+    <div class="seq-page__filter">
+      <app-select [label]="'common.status' | translate" [formControl]="statusFilter" [options]="statusOptions" />
+    </div>
+  </div>
+
+  <div class="seq-page__body">
+    <ul class="seq-list" data-testid="sequence-definitions-list">
+      @for (def of definitions(); track def.id) {
+        <li class="seq-list__item" [class.seq-list__item--active]="selected()?.id === def.id"
+          data-testid="sequence-definition-row" tabindex="0" role="button"
+          (click)="select(def)" (keyup.enter)="select(def)">
+          <span class="chip" [class]="statusChipClass(def.status)">{{ def.status }}</span>
+          <span class="seq-list__name">{{ def.name }}</span>
+          <span class="chip chip--muted">v{{ def.version }}</span>
+          <span class="seq-list__code">{{ def.code }}</span>
+          @if (def.autoStartOnSubjectCreate) {
+            <span class="chip chip--info" [title]="'sequences.definitions.autoStart' | translate">{{ 'sequences.definitions.autoStartChip' | translate }}</span>
+          }
+        </li>
+      } @empty {
+        <li class="seq-list__empty" data-testid="sequence-definitions-empty">{{ 'sequences.definitions.empty' | translate }}</li>
+      }
+    </ul>
+
+    <div class="seq-page__detail">
+      @if (selected(); as def) {
+        <header class="seq-def__head">
+          <h3>{{ def.name }}</h3>
+          <span class="chip chip--muted">v{{ def.version }}</span>
+          <span class="chip" [class]="statusChipClass(def.status)">{{ def.status }}</span>
+          <span class="seq-def__actions">
+            @if (isDraft()) {
+              <button class="action-btn action-btn--sm action-btn--primary" type="button"
+                data-testid="sequence-publish" [disabled]="busy()" (click)="publish()">{{ 'sequences.definitions.publish' | translate }}</button>
+            }
+            @if (isPublished()) {
+              <button class="action-btn action-btn--sm" type="button"
+                data-testid="sequence-new-version" [disabled]="busy()" (click)="newVersion()">{{ 'sequences.definitions.newVersion' | translate }}</button>
+              <button class="action-btn action-btn--sm action-btn--danger" type="button"
+                data-testid="sequence-retire" [disabled]="busy()" (click)="retire()">{{ 'sequences.definitions.retire' | translate }}</button>
+            }
+          </span>
+        </header>
+        @if (def.description) { <p class="seq-def__desc">{{ def.description }}</p> }
+        @if (def.subjectEntityType) {
+          <p class="seq-def__subject">{{ 'sequences.definitions.subject' | translate }}: {{ def.subjectEntityType }}</p>
+        }
+
+        <ol class="seq-steps">
+          @for (step of def.steps; track step.key) {
+            <li class="seq-step">
+              <div class="seq-step__head">
+                <span class="seq-step__order">{{ step.sortOrder }}</span>
+                <span class="seq-step__name">{{ step.name }}</span>
+                <span class="chip chip--muted">{{ step.joinPolicy }}</span>
+                @if (step.maxDwellMinutes) {
+                  <span class="seq-step__dwell"><span class="material-icons-outlined">schedule</span>{{ step.maxDwellMinutes }}m → {{ step.dwellExpiryAction }}</span>
+                }
+              </div>
+              @for (gate of gatesFor(step.key); track gate.key) {
+                <div class="seq-gate">
+                  <span class="seq-gate__name">{{ gate.name }}</span>
+                  <span class="seq-gate__source">{{ gate.sourceType }}</span>
+                  <code class="seq-gate__config">{{ gate.configJson }}</code>
+                </div>
+              }
+            </li>
+          }
+        </ol>
+      } @else {
+        <p class="seq-page__hint">{{ 'sequences.definitions.selectHint' | translate }}</p>
+      }
+    </div>
+  </div>
+</div>

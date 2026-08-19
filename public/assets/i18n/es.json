@@ -54,6 +54,9 @@
     "scheduling": "Programación",
     "oee": "OEE",
     "approvals": "Aprobaciones",
+    "sequences": "Secuencias",
+    "sequencesDefinitions": "Definiciones",
+    "sequencesInstances": "Instancias",
     "back": "Atrás",
     "trialBalance": "Balance de Comprobación",
     "profitLoss": "Pérdidas y Ganancias",
@@ -583,6 +586,89 @@
     "onTime": "A Tiempo",
     "bulkMove": "Mover en Lote",
     "bulkAssign": "Asignar en Lote"
+  },
+  "sequences": {
+    "actionFailed": "No se pudo completar la acción.",
+    "blocked": "Bloqueado",
+    "startedAt": "Iniciado",
+    "reevaluate": "Reevaluar",
+    "cancelledBecause": "Cancelado:",
+    "reason": {
+      "label": "Motivo",
+      "submit": "Enviar"
+    },
+    "filter": {
+      "all": "Todos"
+    },
+    "events": {
+      "title": "Actividad"
+    },
+    "cancel": {
+      "action": "Cancelar ejecución",
+      "title": "¿Cancelar esta secuencia?",
+      "message": "Cancelar detiene la ejecución de forma permanente. Se requiere un motivo.",
+      "confirm": "Cancelar ejecución"
+    },
+    "skip": {
+      "title": "¿Omitir \"{{step}}\"?",
+      "message": "El paso se marca como omitido y cuenta como completado para los pasos posteriores. Se requiere un motivo.",
+      "confirm": "Omitir paso"
+    },
+    "rework": {
+      "title": "¿Rehacer desde \"{{step}}\"?",
+      "message": "Esto restablece el paso y todo lo posterior a pendiente. Se requiere un motivo.",
+      "confirm": "Rehacer"
+    },
+    "override": {
+      "title": "¿Anular \"{{gate}}\"?",
+      "message": "Esto fuerza la compuerta a Adelante y permanece así. Se requiere un motivo.",
+      "confirm": "Anular compuerta"
+    },
+    "gate": {
+      "clear": "Autorizar",
+      "override": "Anular",
+      "overridden": "Anulada"
+    },
+    "step": {
+      "start": "Iniciar",
+      "complete": "Completar",
+      "skip": "Omitir",
+      "rework": "Rehacer",
+      "skippedBecause": "Omitido:"
+    },
+    "start": {
+      "action": "Iniciar ejecución",
+      "definition": "Definición",
+      "pickDefinition": "Elija una definición publicada…",
+      "subjectType": "Tipo de sujeto",
+      "subjectTypePlaceholder": "p. ej. Job",
+      "subjectId": "ID del sujeto",
+      "confirm": "Iniciar",
+      "started": "Secuencia iniciada.",
+      "failed": "No se pudo iniciar la secuencia."
+    },
+    "instances": {
+      "title": "Instancias de secuencia",
+      "empty": "No hay instancias de secuencia.",
+      "selectHint": "Seleccione una instancia para ver sus pasos y compuertas."
+    },
+    "definitions": {
+      "title": "Definiciones de secuencia",
+      "empty": "No hay definiciones de secuencia.",
+      "selectHint": "Seleccione una definición para ver sus pasos y compuertas.",
+      "publish": "Publicar",
+      "published": "Definición publicada.",
+      "newVersion": "Nueva versión",
+      "newVersionCreated": "Nueva versión de borrador creada.",
+      "retire": "Retirar",
+      "retired": "Definición retirada.",
+      "retireTitle": "¿Retirar esta definición?",
+      "retireMessage": "Retirar \"{{name}}\" impide iniciar nuevas ejecuciones. Las ejecuciones en curso continúan.",
+      "actionFailed": "No se pudo completar la acción.",
+      "subject": "Sujeto",
+      "autoStart": "Se inicia automáticamente cuando se crea el sujeto",
+      "autoStartChip": "Auto-inicio"
+    }
   },
   "parts": {
     "gtin": {

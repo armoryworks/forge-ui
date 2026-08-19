@@ -1,0 +1,13 @@
+.reason-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  min-width: 380px;
+  max-width: 480px;
+
+  &__title { margin: 0; font-size: 1.1rem; font-weight: 600; }
+  &__message { margin: 0; font-size: 0.9rem; opacity: 0.8; }
+  &__actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.25rem; }
+  &--danger &__title { color: var(--error); }
+}

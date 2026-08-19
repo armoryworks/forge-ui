@@ -1,0 +1,50 @@
+<div class="seq-page" data-testid="sequence-instances">
+  <div class="seq-page__toolbar">
+    <h2 class="seq-page__title">{{ 'sequences.instances.title' | translate }}</h2>
+    <div class="seq-page__filter">
+      <app-select [label]="'common.status' | translate" [formControl]="statusFilter" [options]="statusOptions" />
+    </div>
+    <button class="action-btn action-btn--primary" type="button" data-testid="sequence-start-btn" (click)="showStart.set(!showStart())">
+      <span class="material-icons-outlined">play_arrow</span>{{ 'sequences.start.action' | translate }}
+    </button>
+  </div>
+
+  @if (showStart()) {
+    <div class="seq-start" data-testid="sequence-start-form">
+      <app-select [label]="'sequences.start.definition' | translate" [formControl]="startDefId" [options]="defOptions()" />
+      <app-input [label]="'sequences.start.subjectType' | translate" [formControl]="startSubjectType"
+        [placeholder]="'sequences.start.subjectTypePlaceholder' | translate" />
+      <app-input type="number" [label]="'sequences.start.subjectId' | translate" [formControl]="startSubjectId" />
+      <button class="action-btn action-btn--primary" type="button" data-testid="sequence-start-confirm"
+        [disabled]="!startDefId.value || starting()" (click)="start()">{{ 'sequences.start.confirm' | translate }}</button>
+    </div>
+  }
+
+  <div class="seq-page__body">
+    <ul class="seq-list" data-testid="sequence-instances-list">
+      @for (inst of instances(); track inst.id) {
+        <li class="seq-list__item" [class.seq-list__item--active]="selectedId() === inst.id"
+          data-testid="sequence-instance-row" tabindex="0" role="button"
+          (click)="select(inst)" (keyup.enter)="select(inst)">
+          <span class="chip" [class]="statusChipClass(inst.status)">{{ inst.status }}</span>
+          <span class="seq-list__name">{{ inst.definitionName }}</span>
+          <span class="chip chip--muted">v{{ inst.definitionVersion }}</span>
+          @if (inst.subjectEntityType) {
+            <span class="seq-list__subject">{{ inst.subjectEntityType }} #{{ inst.subjectEntityId }}</span>
+          }
+          <span class="seq-list__date">{{ inst.startedAt | date:'short' }}</span>
+        </li>
+      } @empty {
+        <li class="seq-list__empty" data-testid="sequence-instances-empty">{{ 'sequences.instances.empty' | translate }}</li>
+      }
+    </ul>
+
+    <div class="seq-page__detail">
+      @if (selectedId(); as id) {
+        <app-sequence-instance-panel [instanceId]="id" (changed)="onChanged()" />
+      } @else {
+        <p class="seq-page__hint">{{ 'sequences.instances.selectHint' | translate }}</p>
+      }
+    </div>
+  </div>
+</div>

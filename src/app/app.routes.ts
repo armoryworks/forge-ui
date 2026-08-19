@@ -100,6 +100,14 @@ export const routes: Routes = [
           import('./features/parts/parts.routes').then((m) => m.PARTS_ROUTES),
       },
       {
+        // Gated Sequence Engine — dark by default (CAP-CROSS-SEQUENCES), so the
+        // whole area is unreachable by URL until the capability is enabled.
+        path: 'sequences',
+        canActivate: [roleGuard('Admin', 'Manager'), capabilityGuard('CAP-CROSS-SEQUENCES')],
+        loadChildren: () =>
+          import('./features/sequences/sequences.routes').then((m) => m.SEQUENCES_ROUTES),
+      },
+      {
         path: 'compliance',
         canActivate: [roleGuard('Admin', 'Manager', 'ComplianceOfficer', 'OfficeManager'), capabilityGuard('CAP-EXT-WATCHTOWER')],
         loadChildren: () =>

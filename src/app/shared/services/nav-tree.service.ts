@@ -44,6 +44,14 @@ export class NavTreeService {
         { icon: 'fact_check', label: 'Compliance', i18nKey: 'nav.compliance', route: '/compliance', capability: 'CAP-EXT-WATCHTOWER', allowedRoles: ['Admin', 'Manager', 'ComplianceOfficer', 'OfficeManager'] },
         { icon: 'radar', label: 'Watchtower', i18nKey: 'nav.watchtower', route: '/watchtower', capability: 'CAP-EXT-WATCHTOWER', allowedRoles: ['Admin', 'Manager'] },
         { icon: 'rule', label: 'Approvals', i18nKey: 'nav.approvals', route: '/approvals', capability: 'CAP-P2P-APPROVALS', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
+        {
+          icon: 'account_tree', label: 'Sequences', i18nKey: 'nav.sequences',
+          capability: 'CAP-CROSS-SEQUENCES', allowedRoles: ['Admin', 'Manager'],
+          children: [
+            { icon: 'schema', label: 'Definitions', i18nKey: 'nav.sequencesDefinitions', route: '/sequences' },
+            { icon: 'playlist_play', label: 'Instances', i18nKey: 'nav.sequencesInstances', route: '/sequences/instances' },
+          ],
+        },
       ],
     },
     {
