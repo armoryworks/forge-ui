@@ -20,7 +20,7 @@ export class MfaChallengeComponent implements OnInit {
   private readonly mfaService = inject(MfaService);
   private readonly snackbar = inject(SnackbarService);
 
-  readonly userId = input.required<number>();
+  readonly pendingToken = input.required<string>();
   readonly validated = output<MfaValidateResponse>();
   readonly cancelled = output<void>();
 
@@ -44,7 +44,7 @@ export class MfaChallengeComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.mfaService.createChallenge(this.userId()).subscribe({
+    this.mfaService.createChallenge(this.pendingToken()).subscribe({
       next: (challenge) => {
         this.challenge.set(challenge);
         this.loading.set(false);

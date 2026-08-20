@@ -78,14 +78,14 @@ describe('MfaService', () => {
   });
 
   describe('createChallenge', () => {
-    it('should POST to /auth/mfa/challenge with userId', () => {
+    it('should POST to /auth/mfa/challenge with the pre-auth token', () => {
       const mockChallenge = { challengeToken: 'tok123', hint: 'My Phone' };
-      service.createChallenge(42).subscribe(res => {
+      service.createChallenge('pending-abc').subscribe(res => {
         expect(res).toEqual(mockChallenge);
       });
       const req = httpMock.expectOne(`${base}/auth/mfa/challenge`);
       expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({ userId: 42 });
+      expect(req.request.body).toEqual({ mfaPendingToken: 'pending-abc' });
       req.flush(mockChallenge);
     });
   });

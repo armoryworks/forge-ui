@@ -55,7 +55,7 @@ export class LoginComponent implements OnInit {
   protected readonly showSetupCode = signal(false);
   protected readonly setupCodeControl = new FormControl('');
   protected readonly mfaRequired = signal(false);
-  protected readonly mfaUserId = signal<number | null>(null);
+  protected readonly mfaPendingToken = signal<string | null>(null);
 
   /** Intended destination captured from the auth guard redirect. */
   private returnUrl: string | null = null;
@@ -118,12 +118,14 @@ export class LoginComponent implements OnInit {
     this.loadingService.track(this.translate.instant('auth.signingIn'), this.authService.login({ email: email!, password: password! }))
       .subscribe({
         next: (response) => {
-          if (response.mfaRequired && response.mfaUserId) {
+          if (response.mfaRequired && response.mfaPendingToken) {
             this.mfaRequired.set(true);
-            this.mfaUserId.set(response.mfaUserId);
+            this.mfaPendingToken.set(response.mfaPendingToken);
             return;
           }
-          this.navigatePostLogin(response.user.profileComplete);
+          // Defensive: a non-MFA success always carries a user, but never crash the
+          // login flow (and silently stall) if the server omits it.
+          this.navigatePostLogin(response.user?.profileComplete ?? true);
         },
         error: (err: HttpErrorResponse) => this.handleError(err),
       });
@@ -132,7 +134,7 @@ export class LoginComponent implements OnInit {
   protected onMfaValidated(result: MfaValidateResponse): void {
     this.authService.completeMfaLogin(result.accessToken);
     this.mfaRequired.set(false);
-    this.mfaUserId.set(null);
+    this.mfaPendingToken.set(null);
     // Fetch user profile to determine navigation
     this.authService.refreshAccessToken().subscribe({
       next: () => {
@@ -148,7 +150,7 @@ export class LoginComponent implements OnInit {
 
   protected onMfaCancelled(): void {
     this.mfaRequired.set(false);
-    this.mfaUserId.set(null);
+    this.mfaPendingToken.set(null);
   }
 
   private navigatePostLogin(profileComplete: boolean): void {

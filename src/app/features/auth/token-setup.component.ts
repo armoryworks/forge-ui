@@ -98,7 +98,7 @@ export class TokenSetupComponent implements OnInit {
       next: (response) => {
         this.snackbar.success(this.translate.instant('auth.setupComplete'));
         const isMobile = window.innerWidth <= 768;
-        const dest = (!response.user.profileComplete && !isMobile) ? '/account/profile' : this.layout.getDefaultRoute();
+        const dest = (!(response.user?.profileComplete ?? true) && !isMobile) ? '/account/profile' : this.layout.getDefaultRoute();
         this.router.navigate([dest]);
       },
       error: (err: HttpErrorResponse) => {

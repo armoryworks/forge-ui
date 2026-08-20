@@ -52,8 +52,8 @@ export class MfaService {
 
   // ── MFA Login Flow (unauthenticated) ──
 
-  createChallenge(userId: number): Observable<MfaChallengeResponse> {
-    return this.http.post<MfaChallengeResponse>(`${environment.apiUrl}/auth/mfa/challenge`, { userId });
+  createChallenge(mfaPendingToken: string): Observable<MfaChallengeResponse> {
+    return this.http.post<MfaChallengeResponse>(`${environment.apiUrl}/auth/mfa/challenge`, { mfaPendingToken });
   }
 
   validateChallenge(request: MfaValidateRequest): Observable<MfaValidateResponse> {

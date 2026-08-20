@@ -24,12 +24,12 @@
         </button>
       </div>
     </mat-card>
-  } @else if (mfaRequired() && mfaUserId()) {
+  } @else if (mfaRequired() && mfaPendingToken()) {
     <mat-card appearance="outlined" class="auth-card">
       <div class="auth-card__header">
         <img class="auth-card__lockup" [src]="branding.marqueeUrl()" alt="Forge — Manufacturing Operations Platform" />
       </div>
-      <app-mfa-challenge [userId]="mfaUserId()!" (validated)="onMfaValidated($event)" (cancelled)="onMfaCancelled()" />
+      <app-mfa-challenge [pendingToken]="mfaPendingToken()!" (validated)="onMfaValidated($event)" (cancelled)="onMfaCancelled()" />
     </mat-card>
   } @else {
     <mat-card appearance="outlined" class="auth-card form-stack">

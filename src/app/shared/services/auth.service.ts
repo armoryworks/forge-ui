@@ -29,7 +29,8 @@ export interface LoginResponse {
   expiresAt: string;
   user: AuthUser;
   mfaRequired?: boolean;
-  mfaUserId?: number;
+  /** Short-lived pre-auth token issued when MFA is required; exchanged for a challenge. */
+  mfaPendingToken?: string;
 }
 
 export interface SetupStatusResponse {
