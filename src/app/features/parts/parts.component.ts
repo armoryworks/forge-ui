@@ -199,7 +199,11 @@ export class PartsComponent {
   protected readonly showPartDialog = signal(false);
   protected readonly editingPart = signal<PartDetail | null>(null);
 
+  // Gated by the `parts.allow_manual_numbers` system setting (GET /parts/config).
+  protected readonly allowManualPartNumbers = signal(false);
+
   protected readonly partForm = new FormGroup({
+    partNumber: new FormControl(''),
     name: new FormControl('', [Validators.required, Validators.maxLength(256)]),
     description: new FormControl('', [Validators.maxLength(2000)]),
     revision: new FormControl('A'),
@@ -253,6 +257,10 @@ export class PartsComponent {
     this.scanner.setContext('parts');
     this.loadParts();
     this.loadEntitylessDrafts();
+    this.partsService.getPartsConfig().subscribe({
+      next: (cfg) => this.allowManualPartNumbers.set(cfg.allowManualPartNumbers),
+      error: () => this.allowManualPartNumbers.set(false),
+    });
 
     effect(() => {
       const scan = this.scanner.lastScan();
@@ -584,6 +592,7 @@ export class PartsComponent {
   protected editPart(part: PartDetail): void {
     this.editingPart.set(part);
     this.partForm.patchValue({
+      partNumber: part.partNumber,
       name: part.name,
       description: part.description ?? '',
       revision: part.revision,
@@ -616,6 +625,7 @@ export class PartsComponent {
 
     if (editing) {
       this.partsService.updatePart(editing.id, {
+        partNumber: this.allowManualPartNumbers() ? (form.partNumber?.trim() || undefined) : undefined,
         name: form.name ?? '',
         description: form.description ?? '',
         revision: form.revision ?? 'A',

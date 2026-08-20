@@ -16,6 +16,8 @@ import { TraceabilityType } from './traceability-type.type';
 //     "no change", or set a new value.
 //   - bool?: undefined = no change; true/false sets the entity value explicitly.
 export interface UpdatePartRequest {
+  /** Optional new part number — only honored server-side when manual numbers are enabled; uniqueness-checked. */
+  partNumber?: string;
   /** Required short identifier (omit to leave unchanged). */
   name?: string;
   /** Optional long-form notes (empty string clears the value server-side). */
