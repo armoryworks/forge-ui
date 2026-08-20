@@ -12,6 +12,8 @@ const mockBarcode: BarcodeInfo = {
   entityType: 'part',
   isActive: true,
   createdAt: new Date('2025-01-01T00:00:00Z'),
+  source: 'System',
+  identityType: 'Internal',
 };
 
 describe('BarcodeService', () => {
