@@ -55,6 +55,27 @@
         }
       </div>
 
+      <!-- Quote-number rename (manual-numbers on AND Draft — server enforces Draft-only). -->
+      @if (canEditQuoteNumber()) {
+        @if (!editingNumber()) {
+          <div class="header-edit-trigger">
+            <button class="action-btn action-btn--sm" data-testid="quote-edit-number-btn" (click)="startEditNumber()">
+              <span class="material-icons-outlined">edit</span> {{ 'quotes.editNumber' | translate }}
+            </button>
+          </div>
+        } @else {
+          <form class="line-edit-form" [formGroup]="numberForm" (ngSubmit)="saveNumber()">
+            <div class="line-edit-form__title">{{ 'quotes.editNumber' | translate }}</div>
+            <app-input [label]="'quotes.quoteNumberLabel' | translate" formControlName="quoteNumber"
+              [maxlength]="20" data-testid="quote-number-edit" />
+            <div class="line-edit-form__actions">
+              <button type="button" class="action-btn" (click)="cancelNumberEdit()">{{ 'common.cancel' | translate }}</button>
+              <button type="submit" class="action-btn action-btn--primary" data-testid="quote-number-save" [disabled]="numberForm.invalid || savingNumber()">{{ 'common.save' | translate }}</button>
+            </div>
+          </form>
+        }
+      }
+
       @if (quote.notes) {
         <div class="info-section">
           <span class="info-label">{{ 'common.notes' | translate }}</span>

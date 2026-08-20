@@ -8,6 +8,7 @@ import { PagedResponse, PagedQuery } from '../../../shared/models/paged-response
 import { PaymentListItem } from '../models/payment-list-item.model';
 import { PaymentDetail } from '../models/payment-detail.model';
 import { CreatePaymentRequest } from '../models/create-payment-request.model';
+import { UpdatePaymentRequest } from '../models/update-payment-request.model';
 
 /** Phase 3 F7-broad / WU-22 — paged payment list query parameters. */
 export interface PaymentListPagedQuery extends PagedQuery {
@@ -53,6 +54,14 @@ export class PaymentService {
 
   createPayment(request: CreatePaymentRequest): Observable<PaymentDetail> {
     return this.http.post<PaymentDetail>(this.base, request);
+  }
+
+  /**
+   * Amends a recorded payment. The server permits a {@link UpdatePaymentRequest.paymentNumber}
+   * override only while the payment has no applications and manual numbers are enabled.
+   */
+  updatePayment(id: number, request: UpdatePaymentRequest): Observable<PaymentListItem> {
+    return this.http.put<PaymentListItem>(`${this.base}/${id}`, request);
   }
 
   deletePayment(id: number): Observable<void> {

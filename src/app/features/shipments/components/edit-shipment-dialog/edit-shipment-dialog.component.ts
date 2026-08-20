@@ -16,6 +16,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { CustomerAddress } from '../../../../shared/models/customer-address.model';
 import { Address } from '../../../../shared/models/address.model';
 
@@ -45,10 +46,21 @@ export class EditShipmentDialogComponent implements OnInit {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly manualNumberSettings = inject(ManualNumberSettingsService);
 
   readonly shipment = input.required<ShipmentDetail>();
   readonly closed = output<void>();
   readonly saved = output<void>();
+
+  /**
+   * Whether the shipment number may be renamed here: manual numbers enabled AND
+   * the shipment hasn't shipped yet (Pending/Packed). Server rejects a rename
+   * once Shipped/InTransit/Delivered/Cancelled; the UI matches that window.
+   */
+  protected readonly canEditShipmentNumber = computed(() => {
+    const status = this.shipment().status;
+    return this.manualNumberSettings.isEnabled('shipments') && (status === 'Pending' || status === 'Packed');
+  });
 
   protected readonly ADD_NEW = ADD_NEW;
   protected readonly addresses = signal<CustomerAddress[]>([]);
@@ -56,6 +68,7 @@ export class EditShipmentDialogComponent implements OnInit {
   protected readonly saving = signal(false);
 
   protected readonly form = new FormGroup({
+    shipmentNumber: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(20)] }),
     shipTo: new FormControl<number | null>(null, { validators: [Validators.required] }),
     trackingNumber: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(100)] }),
     shippingCost: new FormControl<number | null>(null),
@@ -113,6 +126,7 @@ export class EditShipmentDialogComponent implements OnInit {
   ngOnInit(): void {
     const s = this.shipment();
     this.form.patchValue({
+      shipmentNumber: s.shipmentNumber,
       shipTo: s.shippingAddressId,
       trackingNumber: s.trackingNumber ?? '',
       shippingCost: s.shippingCost,
@@ -167,6 +181,7 @@ export class EditShipmentDialogComponent implements OnInit {
   private persist(addressId: number): void {
     const v = this.form.getRawValue();
     this.shipmentService.updateShipment(this.shipment().id, {
+      shipmentNumber: this.canEditShipmentNumber() ? (v.shipmentNumber.trim() || undefined) : undefined,
       shippingAddressId: addressId,
       trackingNumber: v.trackingNumber.trim(),
       shippingCost: v.shippingCost ?? undefined,

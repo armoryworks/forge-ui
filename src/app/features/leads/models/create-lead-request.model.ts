@@ -2,6 +2,11 @@ import { LeadEngagementShape } from './lead-engagement-shape.type';
 
 export interface CreateLeadRequest {
   companyName: string;
+  /**
+   * Optional manual lead number. Blank/omitted → server auto-generates.
+   * Only honored when the `leads.allow_manual_numbers` setting is enabled.
+   */
+  leadNumber?: string;
   contactName?: string;
   email?: string;
   phone?: string;

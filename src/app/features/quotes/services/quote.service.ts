@@ -60,7 +60,7 @@ export class QuoteService {
     return this.http.post<QuoteDetail>(this.base, request);
   }
 
-  updateQuote(id: number, request: { shippingAddressId?: number; expirationDate?: string; notes?: string; taxRate?: number }): Observable<void> {
+  updateQuote(id: number, request: { quoteNumber?: string; shippingAddressId?: number; expirationDate?: string; notes?: string; taxRate?: number }): Observable<void> {
     return this.http.put<void>(`${this.base}/${id}`, request);
   }
 

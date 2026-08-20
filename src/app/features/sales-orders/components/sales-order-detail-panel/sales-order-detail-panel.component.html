@@ -190,6 +190,10 @@
             } @else {
               <form class="line-edit-form" [formGroup]="headerForm" (ngSubmit)="saveHeader()">
                 <div class="line-edit-form__title">{{ 'salesOrders.editDetails' | translate }}</div>
+                @if (allowManualOrderNumbers()) {
+                  <app-input [label]="'salesOrders.orderNumberLabel' | translate" formControlName="orderNumber"
+                    [maxlength]="20" data-testid="sales-order-number-edit" />
+                }
                 <app-input [label]="'salesOrders.customerPOLabel' | translate" formControlName="customerPO" data-testid="so-header-po" />
                 <app-select [label]="'salesOrders.creditTerms' | translate" formControlName="creditTerms" [options]="creditTermsOptions" data-testid="so-header-terms" />
                 <app-select [label]="'salesOrders.billingAddress' | translate" formControlName="billingAddressId" [options]="billingAddressOptions()" data-testid="so-header-billing" />

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -6,6 +6,7 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { CustomerSummary } from '../../models/customer-summary.model';
 
 /**
@@ -31,6 +32,7 @@ import { CustomerSummary } from '../../models/customer-summary.model';
 })
 export class CustomerIdentityClusterComponent {
   private readonly translate = inject(TranslateService);
+  private readonly manualNumberSettings = inject(ManualNumberSettingsService);
 
   readonly customer = input.required<CustomerSummary>();
   readonly editing = input(false);
@@ -39,8 +41,12 @@ export class CustomerIdentityClusterComponent {
   readonly save = output<Partial<CustomerSummary>>();
   readonly cancelled = output<void>();
 
+  /** Gated by the `customers.allow_manual_numbers` system setting. */
+  protected readonly allowManualCustomerNumbers = computed(() => this.manualNumberSettings.isEnabled('customers'));
+
   protected readonly form = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(200)] }),
+    customerNumber: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(50)] }),
     companyName: new FormControl<string>('', { nonNullable: true }),
     email: new FormControl<string>('', { nonNullable: true, validators: [Validators.email, Validators.maxLength(200)] }),
     phone: new FormControl<string>('', { nonNullable: true }),
@@ -57,6 +63,7 @@ export class CustomerIdentityClusterComponent {
       const c = this.customer();
       this.form.reset({
         name: c.name,
+        customerNumber: c.customerNumber ?? '',
         companyName: c.companyName ?? '',
         email: c.email ?? '',
         phone: c.phone ?? '',
@@ -75,6 +82,7 @@ export class CustomerIdentityClusterComponent {
     const v = this.form.getRawValue();
     this.save.emit({
       name: v.name,
+      customerNumber: this.allowManualCustomerNumbers() ? (v.customerNumber.trim() || undefined) : undefined,
       companyName: v.companyName || undefined,
       email: v.email || undefined,
       phone: v.phone || undefined,

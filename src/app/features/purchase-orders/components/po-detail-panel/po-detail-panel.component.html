@@ -4,7 +4,16 @@
       <div class="detail-header__info">
         <span class="material-icons-outlined detail-icon">description</span>
         <div>
-          <div class="detail-name">{{ po.poNumber }}</div>
+          <div class="detail-name">
+            {{ po.poNumber }}
+            @if (canEditPoNumber()) {
+              <button class="icon-btn" data-testid="po-number-edit-btn"
+                [matTooltip]="'purchaseOrders.editPoNumber' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'purchaseOrders.editPoNumber' | translate" (click)="openPoNumberDialog()">
+                <span class="material-icons-outlined">edit</span>
+              </button>
+            }
+          </div>
           <div class="detail-vendor"><app-entity-link type="vendor" [entityId]="po.vendorId">{{ po.vendorName }}</app-entity-link></div>
           <!-- S4b provenance — origin chip; reference/user shown on hover. -->
           <div class="detail-origin">
@@ -406,6 +415,27 @@
           {{ 'common.save' | translate }}
         </button>
       </app-validation-button>
+    </div>
+  </app-dialog>
+}
+
+<!-- Editable PO number dialog — Draft only, manual numbers enabled. -->
+@if (showPoNumberDialog()) {
+  <app-dialog [title]="'purchaseOrders.editPoNumber' | translate" width="420px" (closed)="showPoNumberDialog.set(false)">
+    <div>
+      <app-input [label]="'purchaseOrders.poNumberLabel' | translate"
+        [formControl]="poNumberCtrl" [maxlength]="20" [required]="true"
+        data-testid="po-number-edit" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="showPoNumberDialog.set(false)">{{ 'common.cancel' | translate }}</button>
+      <button class="action-btn action-btn--primary"
+        data-testid="po-number-save-btn"
+        [disabled]="poNumberCtrl.invalid || poNumberSaving()"
+        (click)="savePoNumber()">
+        <span class="material-icons-outlined">save</span>
+        {{ 'common.save' | translate }}
+      </button>
     </div>
   </app-dialog>
 }

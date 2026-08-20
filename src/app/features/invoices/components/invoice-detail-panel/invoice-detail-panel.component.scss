@@ -27,7 +27,15 @@
 .detail-header__info { display: flex; align-items: center; gap: $sp-md; }
 .detail-header__actions { display: flex; gap: $sp-sm; }
 .detail-icon { font-size: $icon-size-xl; color: var(--text-muted); }
-.detail-name { font-weight: 700; }
+.detail-name { font-weight: 700; display: flex; align-items: center; gap: $sp-sm; }
+
+.number-edit {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__actions { display: flex; justify-content: flex-end; gap: $sp-sm; }
+}
 .detail-customer { font-size: $font-size-xs; color: var(--text-muted); }
 
 .detail-body {

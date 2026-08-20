@@ -3,6 +3,7 @@ import { PurchaseOrderListItem } from '../../purchase-orders/models/purchase-ord
 export interface VendorDetail {
   id: number;
   companyName: string;
+  vendorNumber: string | null;
   contactName: string | null;
   email: string | null;
   phone: string | null;

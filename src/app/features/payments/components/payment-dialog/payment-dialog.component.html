@@ -69,6 +69,9 @@
     <div class="dlg-sidebar" [formGroup]="paymentForm">
       <div class="dlg-sidebar-section">
         <span class="dlg-sidebar-section__title">{{ 'payments.paymentDetails' | translate }}</span>
+        @if (allowManualPaymentNumbers()) {
+          <app-input [label]="'payments.paymentNumberLabel' | translate" formControlName="paymentNumber" [maxlength]="50" [placeholder]="'payments.optional' | translate" data-testid="payment-number-create" />
+        }
         <app-select [label]="'payments.customer' | translate" formControlName="customerId" [options]="customerOptions()" data-testid="payment-customer" />
         <app-select [label]="'payments.paymentMethod' | translate" formControlName="method" [options]="methodOptions" data-testid="payment-method" />
         <app-input [label]="'payments.amount' | translate" type="number" formControlName="amount" [placeholder]="'payments.amountPlaceholder' | translate" [required]="true" data-testid="payment-amount" />

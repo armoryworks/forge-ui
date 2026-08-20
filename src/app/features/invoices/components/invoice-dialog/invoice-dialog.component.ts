@@ -17,6 +17,7 @@ import { DatepickerComponent } from '../../../../shared/components/datepicker/da
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -55,6 +56,10 @@ export class InvoiceDialogComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly manualNumbers = inject(ManualNumberSettingsService);
+
+  /** Whether the tenant allows a manual invoice-number override on create. */
+  protected readonly allowManualInvoiceNumbers = computed(() => this.manualNumbers.isEnabled('invoices'));
 
   readonly closed = output<void>();
   readonly saved = output<void>();
@@ -94,6 +99,7 @@ export class InvoiceDialogComponent {
   );
 
   protected readonly invoiceForm = new FormGroup({
+    invoiceNumber: new FormControl(''),
     customerId: new FormControl<number | null>(null, [Validators.required]),
     salesOrderId: new FormControl<number | null>(null),
     shipmentId: new FormControl<number | null>(null),
@@ -248,6 +254,7 @@ export class InvoiceDialogComponent {
     const fxRate = isBase ? 1 : (f.fxRate ?? 1);
 
     this.invoiceService.createInvoice({
+      invoiceNumber: this.allowManualInvoiceNumbers() ? (f.invoiceNumber?.trim() || undefined) : undefined,
       customerId: f.customerId!,
       salesOrderId: f.salesOrderId ?? undefined,
       shipmentId: f.shipmentId ?? undefined,

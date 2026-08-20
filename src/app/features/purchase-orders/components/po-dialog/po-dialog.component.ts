@@ -34,6 +34,7 @@ import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 
 interface LineEntry {
   partId: number;
@@ -74,9 +75,13 @@ export class PoDialogComponent {
   private readonly auth = inject(AuthService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly manualNumberSettings = inject(ManualNumberSettingsService);
 
   readonly closed = output<void>();
   readonly saved = output<void>();
+
+  /** Whether the operator may supply a manual PO number override on create. */
+  protected readonly allowManualPoNumbers = computed(() => this.manualNumberSettings.isEnabled('purchaseOrders'));
 
   protected readonly saving = signal(false);
   protected readonly vendors = signal<VendorResponse[]>([]);
@@ -168,6 +173,7 @@ export class PoDialogComponent {
   protected readonly quoteCurrencyOptions = signal<SelectOption[]>([]);
 
   readonly form = new FormGroup({
+    poNumber: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(20)] }),
     vendorId: new FormControl<number | null>(null, [Validators.required]),
     jobId: new FormControl<number | null>(null),
     notes: new FormControl(''),
@@ -494,6 +500,7 @@ export class PoDialogComponent {
       vendorId: f.vendorId!,
       jobId: f.jobId ?? undefined,
       notes: f.notes || undefined,
+      poNumber: this.allowManualPoNumbers() ? (f.poNumber?.trim() || undefined) : undefined,
       lines: lineRequests,
       incoterm: f.incoterm,
       estimatedFreight: f.estimatedFreight ?? undefined,

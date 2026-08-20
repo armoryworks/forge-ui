@@ -6,6 +6,21 @@
        Customers do legitimately rename (typo / business rebrand)
        so we don't hard-lock the field; we just signal that it's
        the customer's identity and changes ripple downstream. -->
+  <!-- Customer number — editable (uniqueness-validated server-side) only when
+       `customers.allow_manual_numbers` is on; otherwise a read-only value. -->
+  @if (allowManualCustomerNumbers()) {
+    <div class="cluster__form-row">
+      <app-input data-testid="customer-number-edit" [label]="'customers.customerNumberLabel' | translate" formControlName="customerNumber" [maxlength]="50" [isReadonly]="!editing()" />
+    </div>
+  } @else if (customer().customerNumber) {
+    <div class="cluster__grid">
+      <div class="cluster__item">
+        <span class="cluster__label">{{ 'customers.customerNumberLabel' | translate }}</span>
+        <span class="cluster__value">{{ customer().customerNumber }}</span>
+      </div>
+    </div>
+  }
+
   <div class="cluster__form-row">
     <app-input data-testid="customer-identity-name" [label]="'customers.colName' | translate" formControlName="name" [required]="true" [isReadonly]="!editing()" />
     <app-input data-testid="customer-identity-company" [label]="'customers.companyName' | translate" formControlName="companyName" [isReadonly]="!editing()" />

@@ -1,5 +1,12 @@
 <app-dialog [title]="'shipments.edit.title' | translate" width="520px" (closed)="close()">
   <div [formGroup]="form" [appLoadingBlock]="loadingAddresses()">
+    @if (canEditShipmentNumber()) {
+      <app-input [label]="'shipments.shipmentNumberLabel' | translate" formControlName="shipmentNumber"
+        [maxlength]="20" data-testid="shipment-number-edit" />
+    } @else {
+      <app-input [label]="'shipments.shipmentNumberLabel' | translate" formControlName="shipmentNumber"
+        [isReadonly]="true" data-testid="shipment-number-edit" />
+    }
     <app-select
       [label]="'shipments.edit.shipTo' | translate"
       formControlName="shipTo"

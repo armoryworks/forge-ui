@@ -23,6 +23,7 @@ import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
 
@@ -53,7 +54,11 @@ export class SoDialogComponent {
   private readonly partsService = inject(PartsService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly manualNumberSettings = inject(ManualNumberSettingsService);
   private readonly destroyRef = inject(DestroyRef);
+
+  /** Whether the shop allows a manual order-number override on create/rename. */
+  protected readonly allowManualOrderNumbers = computed(() => this.manualNumberSettings.isEnabled('salesOrders'));
 
   readonly closed = output<void>();
   readonly saved = output<void>();
@@ -75,6 +80,8 @@ export class SoDialogComponent {
 
   readonly form = new FormGroup({
     customerId: new FormControl<number | null>(null, [Validators.required]),
+    // Optional manual override; blank → server auto-generates. Only surfaced when the setting is on.
+    orderNumber: new FormControl('', [Validators.maxLength(20)]),
     customerPO: new FormControl(''),
     creditTerms: new FormControl<string | null>(null),
     requestedDeliveryDate: new FormControl<Date | null>(null),
@@ -175,6 +182,7 @@ export class SoDialogComponent {
 
     this.soService.createSalesOrder({
       customerId: f.customerId!,
+      orderNumber: this.allowManualOrderNumbers() ? (f.orderNumber?.trim() || undefined) : undefined,
       creditTerms: f.creditTerms || undefined,
       requestedDeliveryDate: toIsoDate(f.requestedDeliveryDate) || undefined,
       customerPO: f.customerPO || undefined,

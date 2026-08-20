@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, of, switchMap, tap } from 'rxjs';
 
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { phoneValidator } from '../../../../shared/validators/phone.validator';
@@ -34,6 +35,7 @@ export class VendorIdentityStepComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly manualNumberSettings = inject(ManualNumberSettingsService);
 
   readonly stepId = input<string>('identity');
   readonly componentName = input<string>('VendorIdentityStepComponent');
@@ -42,9 +44,11 @@ export class VendorIdentityStepComponent {
   readonly entity = input<unknown>(null);
 
   protected readonly saving = signal(false);
+  protected readonly allowManualVendorNumbers = computed(() => this.manualNumberSettings.isEnabled('vendors'));
 
   protected readonly form = new FormGroup({
     companyName: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(200)] }),
+    vendorNumber: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(50)] }),
     contactName: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(200)] }),
     email: new FormControl<string>('', { nonNullable: true, validators: [Validators.email, Validators.maxLength(256)] }),
     phone: new FormControl<string>('', { nonNullable: true, validators: [phoneValidator] }),
@@ -56,6 +60,7 @@ export class VendorIdentityStepComponent {
       if (!vendor) return;
       this.form.patchValue({
         companyName: vendor.companyName ?? '',
+        vendorNumber: vendor.vendorNumber ?? '',
         contactName: vendor.contactName ?? '',
         email: vendor.email ?? '',
         phone: vendor.phone ?? '',
@@ -66,6 +71,7 @@ export class VendorIdentityStepComponent {
       this.form,
       {
         companyName: this.translate.instant('vendors.workflow.identity.companyNameLabel'),
+        vendorNumber: this.translate.instant('vendors.vendorNumberLabel'),
         contactName: this.translate.instant('vendors.workflow.identity.contactNameLabel'),
         email: this.translate.instant('vendors.workflow.identity.emailLabel'),
         phone: this.translate.instant('vendors.workflow.identity.phoneLabel'),
@@ -83,6 +89,7 @@ export class VendorIdentityStepComponent {
     this.saving.set(true);
     return this.workflowService.patchStep(runId, this.stepId(), {
       companyName: value.companyName.trim(),
+      vendorNumber: this.allowManualVendorNumbers() ? (value.vendorNumber.trim() || null) : null,
       contactName: value.contactName.trim() || null,
       email: value.email.trim() || null,
       phone: value.phone.trim() || null,

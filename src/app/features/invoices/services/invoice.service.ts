@@ -57,6 +57,14 @@ export class InvoiceService {
     return this.http.post<InvoiceDetail>(this.base, request);
   }
 
+  /**
+   * Renames an invoice's business number via the dedicated endpoint. The server
+   * only permits this while the invoice is in Draft status.
+   */
+  renameInvoiceNumber(id: number, invoiceNumber: string): Observable<void> {
+    return this.http.patch<void>(`${this.base}/${id}/number`, { invoiceNumber });
+  }
+
   sendInvoice(id: number): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/send`, {});
   }

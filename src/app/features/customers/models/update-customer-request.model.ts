@@ -1,5 +1,8 @@
 export interface UpdateCustomerRequest {
   name?: string;
+  /** User-settable business number. Only honored server-side when
+   *  `customers.allow_manual_numbers` is enabled; blank/undefined leaves it alone. */
+  customerNumber?: string;
   companyName?: string;
   email?: string;
   phone?: string;

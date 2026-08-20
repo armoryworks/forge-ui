@@ -94,6 +94,7 @@ export class KanbanService {
   }
 
   createJob(command: {
+    jobNumber?: string;
     title: string;
     description?: string;
     trackTypeId: number;

@@ -12,6 +12,7 @@ import { DatepickerComponent } from '../../../../shared/components/datepicker/da
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate, todayStart } from '../../../../shared/utils/date.utils';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
@@ -65,9 +66,13 @@ export class NewLeadForkDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<NewLeadForkDialogComponent, CreateLeadRequest | undefined>);
   protected readonly translate = inject(TranslateService);
   private readonly refDataService = inject(ReferenceDataService);
+  private readonly manualNumberSettings = inject(ManualNumberSettingsService);
   private readonly accountsService = inject(AccountsService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
+
+  /** Whether the tenant permits a manually-entered lead number on create. */
+  protected readonly allowManualLeadNumbers = computed(() => this.manualNumberSettings.isEnabled('leads'));
 
   protected readonly currentStep = signal(0);
   protected readonly shape = signal<LeadEngagementShape>('Unknown');
@@ -95,6 +100,7 @@ export class NewLeadForkDialogComponent {
   // when the team's intake convention demands it. Today no extras are
   // required; expand as the team's convention firms up.
   protected readonly form = new FormGroup({
+    leadNumber: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(50)] }),
     companyName: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(200), companyOrContactRequired(this.translate.instant('leads.companyOrContactRequired'))] }),
     contactName: new FormControl<string>('', { nonNullable: true }),
     email: new FormControl<string>('', { nonNullable: true, validators: [Validators.email] }),
@@ -242,6 +248,8 @@ export class NewLeadForkDialogComponent {
     }
 
     const request: CreateLeadRequest = {
+      // Blank (or setting disabled) → server auto-generates the number.
+      leadNumber: this.allowManualLeadNumbers() ? (v.leadNumber.trim() || undefined) : undefined,
       companyName: v.companyName,
       contactName: v.contactName.trim() || undefined,
       email: v.email.trim() || undefined,

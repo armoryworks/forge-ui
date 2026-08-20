@@ -17,6 +17,7 @@ import { LeadDetailDialogComponent, LeadDetailDialogData, LeadDetailDialogResult
 import { NewLeadForkDialogComponent } from './components/new-lead-fork-dialog/new-lead-fork-dialog.component';
 import { CreateLeadRequest } from './models/create-lead-request.model';
 import { ReferenceDataService } from '../../shared/services/reference-data.service';
+import { ManualNumberSettingsService } from '../../shared/services/manual-number-settings.service';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../shared/components/input/input.component';
@@ -65,6 +66,7 @@ export class LeadsComponent implements OnInit {
 
   private readonly leadsService = inject(LeadsService);
   private readonly accountsService = inject(AccountsService);
+  private readonly manualNumberSettings = inject(ManualNumberSettingsService);
   private readonly snackbar = inject(SnackbarService);
   private readonly refDataService = inject(ReferenceDataService);
   private readonly dialog = inject(MatDialog);
@@ -89,6 +91,8 @@ export class LeadsComponent implements OnInit {
    */
   protected readonly today = todayStart();
   protected readonly followUpMin = computed(() => this.editingLead() ? null : this.today);
+  /** Whether the tenant permits editing the lead number on the edit dialog. */
+  protected readonly allowManualLeadNumbers = computed(() => this.manualNumberSettings.isEnabled('leads'));
   protected draftConfig: DraftConfig = { entityType: 'lead', entityId: 'new', route: '/leads' };
 
   // View mode — persisted to localStorage
@@ -107,6 +111,7 @@ export class LeadsComponent implements OnInit {
   protected readonly showDialog = signal(false);
   protected readonly editingLead = signal<LeadItem | null>(null);
   protected readonly leadForm = new FormGroup({
+    leadNumber: new FormControl('', [Validators.maxLength(50)]),
     companyName: new FormControl('', [companyOrContactRequired(this.translate.instant('leads.companyOrContactRequired'))]),
     contactName: new FormControl(''),
     email: new FormControl('', [Validators.email]),
@@ -333,6 +338,7 @@ export class LeadsComponent implements OnInit {
     this.editingLead.set(lead);
     this.draftConfig = { entityType: 'lead', entityId: lead.id.toString(), route: '/leads' };
     this.leadForm.patchValue({
+      leadNumber: lead.leadNumber ?? '',
       companyName: lead.companyName,
       contactName: lead.contactName ?? '',
       email: lead.email ?? '',
@@ -460,6 +466,8 @@ export class LeadsComponent implements OnInit {
     // server. The other optional fields use undefined elision since they
     // have no "clear" semantics distinct from "leave alone".
     const payload = {
+      // Gated by `leads.allow_manual_numbers`; blank/disabled leaves it alone.
+      leadNumber: this.allowManualLeadNumbers() ? (form.leadNumber?.trim() || undefined) : undefined,
       companyName: form.companyName!,
       contactName: form.contactName || undefined,
       email: form.email || undefined,

@@ -21,6 +21,7 @@ import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 
 interface LineEntry {
   salesOrderLineId: number;
@@ -55,9 +56,13 @@ export class ShipmentDialogComponent implements OnInit {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly manualNumberSettings = inject(ManualNumberSettingsService);
 
   readonly closed = output<void>();
   readonly saved = output<void>();
+
+  /** Whether the operator may supply a manual shipment number override on create. */
+  protected readonly allowManualShipmentNumbers = computed(() => this.manualNumberSettings.isEnabled('shipments'));
 
   protected readonly saving = signal(false);
   protected readonly salesOrders = signal<SalesOrderListItem[]>([]);
@@ -100,6 +105,7 @@ export class ShipmentDialogComponent implements OnInit {
   });
 
   protected readonly shipmentForm = new FormGroup({
+    shipmentNumber: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(20)] }),
     salesOrderId: new FormControl<number | null>(null, [Validators.required]),
     carrierId: new FormControl<number | null>(null),
     carrier: new FormControl(''),
@@ -261,6 +267,7 @@ export class ShipmentDialogComponent implements OnInit {
 
     this.shipmentService.createShipment({
       salesOrderId: f.salesOrderId!,
+      shipmentNumber: this.allowManualShipmentNumbers() ? (f.shipmentNumber?.trim() || undefined) : undefined,
       carrierId: f.carrierId ?? undefined,
       carrier: f.carrier || undefined,
       trackingNumber: f.trackingNumber || undefined,

@@ -559,6 +559,8 @@
     "unarchiveFailed": "Error al restaurar trabajo(s)"
   },
   "jobs": {
+    "jobNumberLabel": "Número de trabajo",
+    "jobNumberPlaceholder": "Se asigna automáticamente si se deja en blanco",
     "title": "Trabajos",
     "createJob": "Nuevo Trabajo",
     "editJob": "Editar Trabajo",
@@ -1737,6 +1739,7 @@
     }
   },
   "customers": {
+    "customerNumberLabel": "Número de cliente",
     "documents": {
       "deleteFileTitle": "¿Eliminar archivo?",
       "deleteFileMessage": "Esto eliminará permanentemente \"{{name}}\".",
@@ -2324,6 +2327,7 @@
     "deleteList": "Eliminar lista"
   },
   "leads": {
+    "leadNumberLabel": "Número de prospecto",
     "documents": "Documentos",
     "fileUploaded": "Archivo subido",
     "fileDeleted": "Archivo eliminado",
@@ -4654,6 +4658,9 @@
     "invalidZip": "Código postal inválido"
   },
   "invoices": {
+    "invoiceNumberLabel": "Número de factura",
+    "editInvoiceNumber": "Editar número de factura",
+    "invoiceNumberUpdated": "Número de factura actualizado",
     "title": "Facturas",
     "subtitle": "Generar facturas y rastrear estado de facturación",
     "newInvoice": "Nueva Factura",
@@ -4720,6 +4727,9 @@
     "confirmSendMessage": "¿Enviar la factura {{number}} al cliente?"
   },
   "payments": {
+    "paymentNumberLabel": "Número de pago",
+    "editPaymentNumber": "Editar número de pago",
+    "paymentNumberUpdated": "Número de pago actualizado",
     "title": "Pagos",
     "subtitle": "Registrar y aplicar pagos de clientes",
     "newPayment": "Nuevo Pago",
@@ -4762,6 +4772,7 @@
     "paymentDetails": "Detalles de Pago"
   },
   "vendors": {
+    "vendorNumberLabel": "Número de proveedor",
     "title": "Proveedores",
     "vendor": "Proveedor",
     "searchByCompanyName": "Buscar por nombre de empresa…",
@@ -4919,6 +4930,9 @@
     }
   },
   "purchaseOrders": {
+    "poNumberLabel": "Número de OC",
+    "editPoNumber": "Editar número de OC",
+    "poNumberUpdated": "Número de OC actualizado",
     "title": "Órdenes de Compra",
     "subtitle": "Ordenar materiales y rastrear entregas de proveedores",
     "newPo": "Nueva OC",
@@ -5030,6 +5044,8 @@
     "originTooltipReference": "Referencia: {{reference}}"
   },
   "salesOrders": {
+    "orderNumberLabel": "Número de pedido",
+    "orderNumberPlaceholder": "Se genera automáticamente si se deja en blanco",
     "recurring": {
       "title": "Plantillas de Órdenes Recurrentes",
       "hint": "Plantillas que el job nocturno de Hangfire convierte en órdenes de venta nuevas. Cada plantilla lleva un cliente, un intervalo y las líneas a replicar.",
@@ -5296,6 +5312,10 @@
     "submitError": "No pudimos registrar su aceptación. Verifique la clave de verificación e inténtelo de nuevo."
   },
   "quotes": {
+    "quoteNumberLabel": "Número de cotización",
+    "quoteNumberPlaceholder": "Se genera automáticamente si se deja en blanco",
+    "editNumber": "Editar número",
+    "quoteUpdated": "Cotización actualizada.",
     "quoteLabel": "Cotización",
     "documents": "Documentos",
     "fileUploaded": "Archivo subido",
@@ -5420,6 +5440,7 @@
     }
   },
   "shipments": {
+    "shipmentNumberLabel": "Número de envío",
     "title": "Envíos",
     "subtitle": "Preparar, enviar y rastrear entregas salientes",
     "edit": {

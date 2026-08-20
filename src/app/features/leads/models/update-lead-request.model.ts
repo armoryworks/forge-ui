@@ -4,6 +4,12 @@ import { CapabilityFitStatus, NdaState, ExportControlClearance } from './lead-it
 
 export interface UpdateLeadRequest {
   companyName?: string;
+  /**
+   * Manual lead number override. Only honored when the
+   * `leads.allow_manual_numbers` setting is enabled; blank/omitted leaves
+   * the existing number untouched.
+   */
+  leadNumber?: string;
   contactName?: string;
   email?: string;
   phone?: string;

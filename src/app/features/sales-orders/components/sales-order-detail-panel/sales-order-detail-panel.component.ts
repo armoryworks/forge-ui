@@ -28,6 +28,7 @@ import { DatepickerComponent } from '../../../../shared/components/datepicker/da
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
 import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { FileAttachment } from '../../../../shared/models/file.model';
@@ -78,6 +79,10 @@ export class SalesOrderDetailPanelComponent {
   private readonly accountingService = inject(AccountingService);
   private readonly capabilityService = inject(CapabilityService);
   private readonly auth = inject(AuthService);
+  private readonly manualNumberSettings = inject(ManualNumberSettingsService);
+
+  /** Whether the shop allows editing the order number (only offered while Draft). */
+  protected readonly allowManualOrderNumbers = computed(() => this.manualNumberSettings.isEnabled('salesOrders'));
 
   // ---- ACCOUNTING BOUNDARY ---- invoice creation is standalone-mode-only;
   // integrated installs manage invoices in the connected accounting system.
@@ -236,6 +241,7 @@ export class SalesOrderDetailPanelComponent {
   protected readonly savingHeader = signal(false);
   protected readonly creditTermsOptions = CREDIT_TERMS_OPTIONS;
   protected readonly headerForm = new FormGroup({
+    orderNumber: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(20)] }),
     customerPO: new FormControl<string>('', { nonNullable: true }),
     creditTerms: new FormControl<string | null>(null),
     requestedDeliveryDate: new FormControl<Date | null>(null),
@@ -840,6 +846,7 @@ export class SalesOrderDetailPanelComponent {
     const so = this.so();
     if (!so) return;
     this.headerForm.reset({
+      orderNumber: so.orderNumber,
       customerPO: so.customerPO ?? '',
       creditTerms: so.creditTerms ?? null,
       requestedDeliveryDate: so.requestedDeliveryDate ? new Date(so.requestedDeliveryDate) : null,
@@ -868,6 +875,8 @@ export class SalesOrderDetailPanelComponent {
     // `|| undefined` so a blank field is omitted rather than sent — the server only
     // applies non-null fields, and an empty creditTerms string would fail enum-parse.
     this.soService.updateSalesOrder(so.id, {
+      // Rename only when the setting is on (server enforces Draft-only rename).
+      orderNumber: this.allowManualOrderNumbers() ? (v.orderNumber?.trim() || undefined) : undefined,
       customerPO: v.customerPO || undefined,
       creditTerms: v.creditTerms || undefined,
       requestedDeliveryDate: toIsoDate(v.requestedDeliveryDate) || undefined,

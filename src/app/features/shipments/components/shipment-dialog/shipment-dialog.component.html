@@ -58,6 +58,10 @@
     <div class="dlg-sidebar" [formGroup]="shipmentForm">
       <div class="dlg-sidebar-section">
         <span class="dlg-sidebar-section__title">{{ 'shipments.shipmentDetails' | translate }}</span>
+        @if (allowManualShipmentNumbers()) {
+          <app-input [label]="'shipments.shipmentNumberLabel' | translate" formControlName="shipmentNumber"
+            [maxlength]="20" [placeholder]="'shipments.optional' | translate" data-testid="shipment-number-create" />
+        }
         <app-autocomplete [label]="'shipments.salesOrder' | translate" [options]="salesOrderOptions()" displayField="label" valueField="value" formControlName="salesOrderId" [required]="true" data-testid="shipment-so" />
         <app-select [label]="'shipments.carrierSelect' | translate" [options]="carrierOptions()" formControlName="carrierId" data-testid="shipment-carrier-id" />
         @if (selectedCarrier(); as c) {

@@ -13,6 +13,7 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -50,6 +51,10 @@ export class PaymentDialogComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly manualNumbers = inject(ManualNumberSettingsService);
+
+  /** Whether the tenant allows a manual payment-number override on create. */
+  protected readonly allowManualPaymentNumbers = computed(() => this.manualNumbers.isEnabled('payments'));
 
   readonly closed = output<void>();
   readonly saved = output<void>();
@@ -84,6 +89,7 @@ export class PaymentDialogComponent {
   ];
 
   protected readonly paymentForm = new FormGroup({
+    paymentNumber: new FormControl(''),
     customerId: new FormControl<number | null>(null, [Validators.required]),
     method: new FormControl<string | null>(null, [Validators.required]),
     amount: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
@@ -181,6 +187,7 @@ export class PaymentDialogComponent {
     }));
 
     this.paymentService.createPayment({
+      paymentNumber: this.allowManualPaymentNumbers() ? (f.paymentNumber?.trim() || undefined) : undefined,
       customerId: f.customerId!,
       method: f.method!,
       amount: f.amount!,

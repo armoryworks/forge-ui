@@ -43,6 +43,12 @@
       <!-- Info Tab -->
       @if (activeTab() === 'info') {
         <div class="info-grid">
+          @if (vendor.vendorNumber) {
+            <div class="info-item">
+              <span class="info-label">{{ 'vendors.vendorNumberLabel' | translate }}</span>
+              <span class="info-value" data-testid="vendor-number-detail">{{ vendor.vendorNumber }}</span>
+            </div>
+          }
           <div class="info-item">
             <span class="info-label">{{ 'common.status' | translate }}</span>
             <span class="info-value">

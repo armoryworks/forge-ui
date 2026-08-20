@@ -34,6 +34,7 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { INCOTERM_OPTIONS } from '../../models/incoterm.const';
 import { PO_ORIGIN_CHIP_CLASSES, PO_ORIGIN_ICONS, PO_ORIGIN_LABEL_KEYS } from '../../models/po-origin.const';
 import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 
 @Component({
   selector: 'app-po-detail-panel',
@@ -60,6 +61,11 @@ export class PoDetailPanelComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly manualNumberSettings = inject(ManualNumberSettingsService);
+
+  /** Whether the PO number may be renamed (manual numbers on AND PO still in Draft). */
+  protected readonly allowManualPoNumbers = computed(() => this.manualNumberSettings.isEnabled('purchaseOrders'));
+  protected readonly canEditPoNumber = computed(() => this.allowManualPoNumbers() && this.po()?.status === 'Draft');
 
   constructor() {
     // Bought-parts effort PR2.5 — load currency options from reference-data
@@ -404,6 +410,41 @@ export class PoDetailPanelComponent implements OnInit {
         this.snackbar.success(this.translate.instant('purchaseOrders.shippingUpdated'));
       },
       error: () => this.shippingSaving.set(false),
+    });
+  }
+
+  // ─── Editable PO number (Draft only, manual numbers enabled) ─────────────
+  // Server enforces Draft-only + uniqueness; the UI only surfaces the edit
+  // inside that window (see canEditPoNumber).
+  protected readonly showPoNumberDialog = signal(false);
+  protected readonly poNumberSaving = signal(false);
+  protected readonly poNumberCtrl = new FormControl<string>('', {
+    nonNullable: true,
+    validators: [Validators.required, Validators.maxLength(20)],
+  });
+
+  protected openPoNumberDialog(): void {
+    const po = this.po();
+    if (!po) return;
+    this.poNumberCtrl.reset(po.poNumber);
+    this.showPoNumberDialog.set(true);
+  }
+
+  protected savePoNumber(): void {
+    const po = this.po();
+    if (!po || this.poNumberCtrl.invalid) return;
+    this.poNumberSaving.set(true);
+    this.poService.updatePurchaseOrder(po.id, {
+      poNumber: this.poNumberCtrl.value.trim() || undefined,
+    }).subscribe({
+      next: () => {
+        this.showPoNumberDialog.set(false);
+        this.poNumberSaving.set(false);
+        this.loadDetail();
+        this.changed.emit();
+        this.snackbar.success(this.translate.instant('purchaseOrders.poNumberUpdated'));
+      },
+      error: () => this.poNumberSaving.set(false),
     });
   }
 

@@ -4,6 +4,8 @@ import { CustomerJob } from './customer-job.model';
 export interface CustomerDetail {
   id: number;
   name: string;
+  /** Human-readable business number (auto-generated, or manual when enabled). */
+  customerNumber?: string | null;
   companyName: string | null;
   email: string | null;
   phone: string | null;

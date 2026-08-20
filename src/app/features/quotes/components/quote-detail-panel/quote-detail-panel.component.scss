@@ -265,3 +265,5 @@
   font-size: $font-size-xxs;
   color: var(--text-muted);
 }
+
+.header-edit-trigger { display: flex; justify-content: flex-end; margin-top: $sp-md; }

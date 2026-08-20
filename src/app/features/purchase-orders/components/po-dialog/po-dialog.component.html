@@ -101,6 +101,10 @@
     <div class="dlg-sidebar" [formGroup]="form">
       <div class="dlg-sidebar-section">
         <span class="dlg-sidebar-section__title">{{ 'purchaseOrders.orderDetails' | translate }}</span>
+        @if (allowManualPoNumbers()) {
+          <app-input data-testid="po-number-create" [label]="'purchaseOrders.poNumberLabel' | translate"
+            formControlName="poNumber" [maxlength]="20" [placeholder]="'salesOrders.optional' | translate" />
+        }
         <app-select data-testid="po-vendor" [label]="'purchaseOrders.vendor' | translate" formControlName="vendorId" [options]="vendorOptions()" [required]="true" />
         @if (selectedVendorWarning()) {
           <!-- Phase 3 H2 / WU-12: inline-error when chosen vendor is deactivated. -->

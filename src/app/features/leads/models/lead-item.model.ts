@@ -17,6 +17,8 @@ export type ExportControlClearance = 'NotApplicable' | 'Pending' | 'Cleared' | '
 
 export interface LeadItem {
   id: number;
+  /** Human-facing business identifier (auto-generated or manually assigned). */
+  leadNumber?: string | null;
   companyName: string;
   contactName: string | null;
   email: string | null;

@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, of, switchMap, tap } from 'rxjs';
 
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { SelectComponent } from '../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { PAYMENT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
@@ -40,6 +41,7 @@ export class VendorExpressFormComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly manualNumberSettings = inject(ManualNumberSettingsService);
 
   readonly stepId = input<string>('express');
   readonly componentName = input<string>('VendorExpressFormComponent');
@@ -48,10 +50,12 @@ export class VendorExpressFormComponent {
   readonly entity = input<unknown>(null);
 
   protected readonly saving = signal(false);
+  protected readonly allowManualVendorNumbers = computed(() => this.manualNumberSettings.isEnabled('vendors'));
   protected readonly paymentTermsOptions = PAYMENT_TERMS_OPTIONS;
 
   protected readonly form = new FormGroup({
     companyName: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(200)] }),
+    vendorNumber: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(50)] }),
     contactName: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(200)] }),
     email: new FormControl<string>('', { nonNullable: true, validators: [Validators.email, Validators.maxLength(256)] }),
     phone: new FormControl<string>('', { nonNullable: true, validators: [phoneValidator] }),
@@ -65,6 +69,7 @@ export class VendorExpressFormComponent {
       if (!vendor) return;
       this.form.patchValue({
         companyName: vendor.companyName ?? '',
+        vendorNumber: vendor.vendorNumber ?? '',
         contactName: vendor.contactName ?? '',
         email: vendor.email ?? '',
         phone: vendor.phone ?? '',
@@ -77,6 +82,7 @@ export class VendorExpressFormComponent {
       this.form,
       {
         companyName: this.translate.instant('vendors.workflow.identity.companyNameLabel'),
+        vendorNumber: this.translate.instant('vendors.vendorNumberLabel'),
         contactName: this.translate.instant('vendors.workflow.identity.contactNameLabel'),
         email: this.translate.instant('vendors.workflow.identity.emailLabel'),
         phone: this.translate.instant('vendors.workflow.identity.phoneLabel'),
@@ -99,6 +105,7 @@ export class VendorExpressFormComponent {
     // step "owns" it. This matches PartExpressFormComponent's shape.
     return this.workflowService.patchStep(runId, 'identity', {
       companyName: value.companyName.trim(),
+      vendorNumber: this.allowManualVendorNumbers() ? (value.vendorNumber.trim() || null) : null,
       contactName: value.contactName.trim() || null,
       email: value.email.trim() || null,
       phone: value.phone.trim() || null,

@@ -132,6 +132,7 @@ export class SalesOrderService {
   }
 
   updateSalesOrder(id: number, request: {
+    orderNumber?: string;
     shippingAddressId?: number;
     billingAddressId?: number;
     creditTerms?: string;

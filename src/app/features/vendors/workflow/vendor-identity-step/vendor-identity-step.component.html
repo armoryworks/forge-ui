@@ -11,6 +11,13 @@
       [required]="true"
       [maxlength]="200"
       data-testid="vendor-identity-company-name" />
+    @if (allowManualVendorNumbers()) {
+      <app-input
+        [label]="'vendors.vendorNumberLabel' | translate"
+        formControlName="vendorNumber"
+        [maxlength]="50"
+        data-testid="vendor-number-workflow" />
+    }
     <app-input
       [label]="'vendors.workflow.identity.contactNameLabel' | translate"
       formControlName="contactName"

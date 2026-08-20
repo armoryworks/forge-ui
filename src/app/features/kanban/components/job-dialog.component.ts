@@ -21,6 +21,7 @@ import { DialogComponent } from '../../../shared/components/dialog/dialog.compon
 import { FormValidationService } from '../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
 import { DraftConfig } from '../../../shared/models/draft-config.model';
+import { ManualNumberSettingsService } from '../../../shared/services/manual-number-settings.service';
 import { toIsoDate } from '../../../shared/utils/date.utils';
 import { PriorityIndicatorComponent } from '../../../shared/components/priority-indicator/priority-indicator.component';
 import { PRIORITIES, PRIORITY_OPTIONS } from '../../../shared/models/priority.const';
@@ -51,6 +52,10 @@ export class JobDialogComponent implements OnInit {
   private readonly kanbanService = inject(KanbanService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly manualNumbers = inject(ManualNumberSettingsService);
+
+  /** Whether the tenant allows manually assigning/overriding job numbers. */
+  protected readonly allowManualJobNumbers = computed(() => this.manualNumbers.isEnabled('jobs'));
 
   readonly mode = input.required<DialogMode>();
   readonly job = input<JobDetail | null>(null);
@@ -70,6 +75,7 @@ export class JobDialogComponent implements OnInit {
   protected readonly showAssignedControl = new FormControl(false, { nonNullable: true });
 
   protected readonly jobForm = new FormGroup({
+    jobNumber: new FormControl(''),
     title: new FormControl('', [Validators.required, Validators.maxLength(200)]),
     description: new FormControl(''),
     trackTypeId: new FormControl<number>(0, [Validators.required]),
@@ -132,6 +138,7 @@ export class JobDialogComponent implements OnInit {
     const j = this.job();
     if (j) {
       this.jobForm.patchValue({
+        jobNumber: j.jobNumber,
         title: j.title,
         description: j.description ?? '',
         trackTypeId: j.trackTypeId,
@@ -192,6 +199,7 @@ export class JobDialogComponent implements OnInit {
 
     if (this.mode() === 'create') {
       this.kanbanService.createJob({
+        jobNumber: this.allowManualJobNumbers() ? (f.jobNumber?.trim() || undefined) : undefined,
         title: f.title!.trim(),
         description: f.description || undefined,
         trackTypeId: f.trackTypeId!,
@@ -209,8 +217,13 @@ export class JobDialogComponent implements OnInit {
         error: () => this.saving.set(false),
       });
     } else {
-      const jobId = this.job()!.id;
+      const current = this.job()!;
+      const jobId = current.id;
+      // JobNumber is editable only while the job is not disposed/closed.
+      const canRenumber = this.allowManualJobNumbers() && !current.disposition;
+      const nextJobNumber = canRenumber ? (f.jobNumber?.trim() || current.jobNumber) : current.jobNumber;
       this.kanbanService.updateJob(jobId, {
+        jobNumber: canRenumber ? (f.jobNumber?.trim() || undefined) : undefined,
         title: f.title!.trim(),
         description: f.description || null,
         assigneeId: f.assigneeId,
@@ -222,7 +235,8 @@ export class JobDialogComponent implements OnInit {
           this.saving.set(false);
           this.dialogRef.clearDraft();
           const updated: JobDetail = {
-            ...this.job()!,
+            ...current,
+            jobNumber: nextJobNumber,
             title: f.title!.trim(),
             description: f.description || null,
             assigneeId: f.assigneeId,

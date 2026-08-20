@@ -7,6 +7,18 @@
     </div>
   } @else {
     <div [formGroup]="jobForm">
+      @if (mode() === 'edit') {
+        @if (allowManualJobNumbers() && !job()?.disposition) {
+          <app-input data-testid="job-number-edit" [label]="'jobs.jobNumberLabel' | translate" formControlName="jobNumber" [maxlength]="50" />
+        } @else {
+          <div class="auto-number">
+            <span class="auto-number__label">{{ 'jobs.jobNumberLabel' | translate }}</span>
+            <span class="auto-number__value">{{ job()?.jobNumber }}</span>
+          </div>
+        }
+      } @else if (allowManualJobNumbers()) {
+        <app-input data-testid="job-number-create" [label]="'jobs.jobNumberLabel' | translate" formControlName="jobNumber" [maxlength]="50" [placeholder]="'jobs.jobNumberPlaceholder' | translate" />
+      }
       <app-input data-testid="job-title" [label]="'kanban.jobTitle' | translate" formControlName="title" [maxlength]="200" [placeholder]="'kanban.jobTitlePlaceholder' | translate" />
       <app-textarea data-testid="job-description" [label]="'kanban.jobDescription' | translate" formControlName="description" [rows]="3" />
 

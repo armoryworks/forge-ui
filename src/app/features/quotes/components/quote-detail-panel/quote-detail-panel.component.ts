@@ -21,6 +21,7 @@ import { EntityActivitySectionComponent } from '../../../../shared/components/en
 import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
 import { ConfirmSendService } from '../../../../shared/services/confirm-send.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
@@ -66,6 +67,7 @@ export class QuoteDetailPanelComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly manualNumberSettings = inject(ManualNumberSettingsService);
 
   readonly quoteId = input.required<number>();
   readonly closed = output<void>();
@@ -77,6 +79,16 @@ export class QuoteDetailPanelComponent {
   protected readonly paymentSchedule = signal<PaymentSchedule | null>(null);
 
   protected readonly quoteIdValue = computed(() => this.quoteId());
+
+  // --- Quote-number edit (manual-numbers on AND Draft only; server enforces Draft-only rename) ---
+  protected readonly editingNumber = signal(false);
+  protected readonly savingNumber = signal(false);
+  protected readonly numberForm = new FormGroup({
+    quoteNumber: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(20)] }),
+  });
+  protected readonly allowManualQuoteNumbers = computed(() => this.manualNumberSettings.isEnabled('quotes'));
+  protected readonly canEditQuoteNumber = computed(
+    () => this.allowManualQuoteNumbers() && this.quote()?.status === 'Draft');
 
   // --- Line editing (Draft only) ---
   // editingLineId: null = editor closed, 0 = adding a new line, >0 = editing that line.
@@ -226,6 +238,36 @@ export class QuoteDetailPanelComponent {
   protected canReject(status: string): boolean { return status === 'Sent'; }
   protected canConvert(status: string): boolean { return status === 'Accepted'; }
   protected canDelete(status: string): boolean { return status === 'Draft'; }
+
+  // --- Quote-number edit ---
+  protected startEditNumber(): void {
+    const q = this.quote();
+    if (!q) return;
+    this.numberForm.reset({ quoteNumber: q.quoteNumber });
+    this.editingNumber.set(true);
+  }
+
+  protected cancelNumberEdit(): void {
+    this.editingNumber.set(false);
+  }
+
+  protected saveNumber(): void {
+    const q = this.quote();
+    if (!q || this.numberForm.invalid) return;
+    this.savingNumber.set(true);
+    this.quoteService.updateQuote(q.id, {
+      quoteNumber: this.numberForm.controls.quoteNumber.value.trim() || undefined,
+    }).subscribe({
+      next: () => {
+        this.savingNumber.set(false);
+        this.editingNumber.set(false);
+        this.loadQuote(q.id);
+        this.changed.emit();
+        this.snackbar.success(this.translate.instant('quotes.quoteUpdated'));
+      },
+      error: () => this.savingNumber.set(false),
+    });
+  }
 
   // --- Line editing ---
   protected canEditLines(status: string): boolean { return status === 'Draft'; }

@@ -11,6 +11,13 @@
       [required]="true"
       [maxlength]="200"
       data-testid="customer-identity-name" />
+    @if (allowManualCustomerNumbers()) {
+      <app-input
+        [label]="'customers.customerNumberLabel' | translate"
+        formControlName="customerNumber"
+        [maxlength]="50"
+        data-testid="customer-number-workflow" />
+    }
     <app-input
       [label]="'customers.workflow.identity.companyNameLabel' | translate"
       formControlName="companyName"

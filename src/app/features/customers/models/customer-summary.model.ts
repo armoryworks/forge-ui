@@ -1,6 +1,8 @@
 export interface CustomerSummary {
   id: number;
   name: string;
+  /** Human-readable business number (auto-generated, or manual when enabled). */
+  customerNumber?: string;
   companyName?: string;
   email?: string;
   phone?: string;

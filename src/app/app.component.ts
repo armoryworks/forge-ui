@@ -27,6 +27,7 @@ import { NotificationHubService } from './shared/services/notification-hub.servi
 import { ChatHubService } from './shared/services/chat-hub.service';
 import { NotificationService } from './shared/services/notification.service';
 import { UserPreferencesService } from './shared/services/user-preferences.service';
+import { ManualNumberSettingsService } from './shared/services/manual-number-settings.service';
 import { LoadingService } from './shared/services/loading.service';
 import { AppUpdateService } from './shared/services/app-update.service';
 import { RouteLoadingService } from './shared/services/route-loading.service';
@@ -76,6 +77,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly chatHub = inject(ChatHubService);
   private readonly notificationService = inject(NotificationService);
   private readonly userPreferences = inject(UserPreferencesService);
+  private readonly manualNumberSettings = inject(ManualNumberSettingsService);
   private readonly loadingService = inject(LoadingService);
   private readonly routeLoading = inject(RouteLoadingService);
   private readonly themeService = inject(ThemeService);
@@ -130,6 +132,7 @@ export class AppComponent implements OnInit, OnDestroy {
         this.notificationHub.connect();
         this.chatHub.connect();
         this.userPreferences.load();
+        this.manualNumberSettings.load();
         this.scanner.start();
         this.draftRecovery.onLogin();
 

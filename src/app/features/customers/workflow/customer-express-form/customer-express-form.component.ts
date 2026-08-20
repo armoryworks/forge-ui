@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, of, switchMap, tap } from 'rxjs';
@@ -6,6 +6,7 @@ import { Observable, of, switchMap, tap } from 'rxjs';
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -38,6 +39,7 @@ export class CustomerExpressFormComponent {
   private readonly workflowService = inject(WorkflowService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly manualNumberSettings = inject(ManualNumberSettingsService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly stepId = input<string>('express');
@@ -47,6 +49,11 @@ export class CustomerExpressFormComponent {
   readonly entity = input<unknown>(null);
 
   protected readonly saving = signal(false);
+
+  /** Gated by the `customers.allow_manual_numbers` system setting. Optional here —
+   *  a blank value lets the server auto-generate the number. */
+  protected readonly allowManualCustomerNumbers = computed(() => this.manualNumberSettings.isEnabled('customers'));
+
   protected readonly currencyOptions: SelectOption[] = [
     { value: 'USD', label: this.translate.instant('leads.convertStepper.currencyUSD') },
     { value: 'EUR', label: this.translate.instant('leads.convertStepper.currencyEUR') },
@@ -57,6 +64,7 @@ export class CustomerExpressFormComponent {
 
   protected readonly form = new FormGroup({
     name: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(200)] }),
+    customerNumber: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(50)] }),
     companyName: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(200)] }),
     email: new FormControl<string>('', { nonNullable: true, validators: [Validators.email, Validators.maxLength(256)] }),
     phone: new FormControl<string>('', { nonNullable: true, validators: [phoneValidator] }),
@@ -72,6 +80,7 @@ export class CustomerExpressFormComponent {
       if (!customer) return;
       this.form.patchValue({
         name: customer.name ?? '',
+        customerNumber: customer.customerNumber ?? '',
         companyName: customer.companyName ?? '',
         email: customer.email ?? '',
         phone: customer.phone ?? '',
@@ -93,6 +102,7 @@ export class CustomerExpressFormComponent {
       this.form,
       {
         name: this.translate.instant('customers.workflow.identity.nameLabel'),
+        customerNumber: this.translate.instant('customers.customerNumberLabel'),
         companyName: this.translate.instant('customers.workflow.identity.companyNameLabel'),
         email: this.translate.instant('customers.workflow.identity.emailLabel'),
         phone: this.translate.instant('customers.workflow.identity.phoneLabel'),
@@ -114,6 +124,7 @@ export class CustomerExpressFormComponent {
     this.saving.set(true);
     return this.workflowService.patchStep(runId, 'identity', {
       name: value.name.trim(),
+      customerNumber: this.allowManualCustomerNumbers() ? (value.customerNumber.trim() || null) : null,
       companyName: value.companyName.trim() || null,
       email: value.email.trim() || null,
       phone: value.phone.trim() || null,

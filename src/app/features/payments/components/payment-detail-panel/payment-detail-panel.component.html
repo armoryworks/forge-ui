@@ -4,7 +4,28 @@
       <div class="detail-header__info">
         <span class="material-icons-outlined detail-icon">payments</span>
         <div>
-          <div class="detail-name">{{ payment.paymentNumber }}</div>
+          @if (editingNumber()) {
+            <div class="number-edit">
+              <app-input [label]="'payments.paymentNumberLabel' | translate" [formControl]="numberControl" [maxlength]="50" data-testid="payment-number-edit" />
+              <div class="number-edit__actions">
+                <button class="action-btn action-btn--sm" (click)="cancelEditNumber()" [disabled]="savingNumber()">{{ 'common.cancel' | translate }}</button>
+                <button class="action-btn action-btn--sm action-btn--primary" (click)="saveNumber()" [disabled]="savingNumber() || !numberControl.value?.trim()">
+                  <span class="material-icons-outlined">save</span> {{ 'common.save' | translate }}
+                </button>
+              </div>
+            </div>
+          } @else {
+            <div class="detail-name">
+              {{ payment.paymentNumber }}
+              @if (canEditNumber()) {
+                <button class="icon-btn" data-testid="payment-number-edit-btn" (click)="startEditNumber()"
+                  [matTooltip]="'payments.editPaymentNumber' | translate" matTooltipPosition="above"
+                  [attr.aria-label]="'payments.editPaymentNumber' | translate">
+                  <span class="material-icons-outlined">edit</span>
+                </button>
+              }
+            </div>
+          }
           <div class="detail-customer">{{ payment.customerName }}</div>
         </div>
       </div>

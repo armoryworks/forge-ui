@@ -238,6 +238,10 @@ export class CustomerDetailComponent {
     this.saving.set(true);
     this.customerService.updateCustomer(c.id, {
       name: patch.name ?? c.name,
+      // Manual customer number: pass through only when the cluster supplied one
+      // (it sends undefined when blank or when manual numbers are disabled), so
+      // the server leaves the existing number alone in those cases.
+      customerNumber: patch.customerNumber,
       companyName: patch.companyName ?? c.companyName,
       email: patch.email ?? c.email,
       phone: patch.phone ?? c.phone,

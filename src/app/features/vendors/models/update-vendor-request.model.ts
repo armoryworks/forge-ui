@@ -1,5 +1,11 @@
 export interface UpdateVendorRequest {
   companyName?: string;
+  /**
+   * User-settable business number. Sent only when manual vendor numbers are
+   * enabled (`vendors.allow_manual_numbers`); omit/undefined to leave the
+   * current number untouched.
+   */
+  vendorNumber?: string;
   contactName?: string;
   email?: string;
   phone?: string;

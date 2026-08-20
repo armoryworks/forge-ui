@@ -1,6 +1,8 @@
 import { CreateInvoiceLineRequest } from './create-invoice-line-request.model';
 
 export interface CreateInvoiceRequest {
+  /** Optional manual override for the invoice number (gated by tenant settings). */
+  invoiceNumber?: string;
   customerId: number;
   salesOrderId?: number;
   shipmentId?: number;

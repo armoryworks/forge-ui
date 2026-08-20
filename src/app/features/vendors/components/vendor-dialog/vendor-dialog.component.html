@@ -5,6 +5,17 @@
     <div class="dlg-main">
       <div class="dlg-section">
         <span class="dlg-section__title">{{ 'vendors.contact' | translate }}</span>
+        @if (isEditing) {
+          @if (allowManualVendorNumbers()) {
+            <app-input [label]="'vendors.vendorNumberLabel' | translate" formControlName="vendorNumber"
+              [maxlength]="50" data-testid="vendor-number-edit" />
+          } @else {
+            <div class="dlg-readonly-field">
+              <span class="dlg-readonly-field__label">{{ 'vendors.vendorNumberLabel' | translate }}</span>
+              <span class="dlg-readonly-field__value">{{ vendor()?.vendorNumber }}</span>
+            </div>
+          }
+        }
         <app-input [label]="'vendors.companyName' | translate" formControlName="companyName" [required]="true" data-testid="vendor-company" />
         <app-input [label]="'vendors.contactName' | translate" formControlName="contactName" data-testid="vendor-contact" />
         <app-input [label]="'common.email' | translate" type="email" formControlName="email" data-testid="vendor-email" />

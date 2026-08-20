@@ -16,6 +16,19 @@
   animation: spin 0.8s linear infinite;
 }
 
+.auto-number {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  padding: $sp-md;
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+  margin-bottom: $sp-md;
+
+  &__label { @include uppercase-label($font-size-xxs, 0.5px, 700); color: var(--text-muted); }
+  &__value { font-size: $font-size-sm; }
+}
+
 .job-priority-field {
   display: flex;
   flex-direction: column;

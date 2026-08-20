@@ -65,6 +65,9 @@
     <div class="dlg-sidebar" [formGroup]="invoiceForm">
       <div class="dlg-sidebar-section">
         <span class="dlg-sidebar-section__title">{{ 'invoices.invoiceDetails' | translate }}</span>
+        @if (allowManualInvoiceNumbers()) {
+          <app-input [label]="'invoices.invoiceNumberLabel' | translate" formControlName="invoiceNumber" [maxlength]="50" [placeholder]="'common.optional' | translate" data-testid="invoice-number-create" />
+        }
         <app-select [label]="'invoices.customer' | translate" formControlName="customerId" [options]="customerOptions()" [required]="true" data-testid="invoice-customer" />
         <app-input [label]="'invoices.salesOrderId' | translate" type="number" formControlName="salesOrderId" [placeholder]="'common.optional' | translate" />
         <app-datepicker [label]="'invoices.invoiceDate' | translate" formControlName="invoiceDate" [max]="today" data-testid="invoice-date" />

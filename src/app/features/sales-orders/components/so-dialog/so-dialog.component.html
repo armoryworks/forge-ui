@@ -59,6 +59,10 @@
     <div class="dlg-sidebar" [formGroup]="form">
       <div class="dlg-sidebar-section">
         <span class="dlg-sidebar-section__title">{{ 'salesOrders.orderDetails' | translate }}</span>
+        @if (allowManualOrderNumbers()) {
+          <app-input [label]="'salesOrders.orderNumberLabel' | translate" formControlName="orderNumber"
+            [maxlength]="20" [placeholder]="'salesOrders.orderNumberPlaceholder' | translate" data-testid="sales-order-number-create" />
+        }
         <app-select [label]="'salesOrders.customer' | translate" formControlName="customerId" [options]="customerOptions()" [required]="true" data-testid="so-customer" />
         <app-input [label]="'salesOrders.customerPOLabel' | translate" formControlName="customerPO" [placeholder]="'salesOrders.optional' | translate" data-testid="so-customer-po" />
         <app-select [label]="'salesOrders.creditTerms' | translate" formControlName="creditTerms" [options]="creditTermsOptions" data-testid="so-credit-terms" />

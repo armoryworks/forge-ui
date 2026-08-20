@@ -25,6 +25,7 @@ import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 
 interface LineEntry {
@@ -59,7 +60,11 @@ export class QuoteDialogComponent {
   private readonly adminService = inject(AdminService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly manualNumberSettings = inject(ManualNumberSettingsService);
   private readonly destroyRef = inject(DestroyRef);
+
+  /** Whether the shop allows a manual quote-number override on create/rename. */
+  protected readonly allowManualQuoteNumbers = computed(() => this.manualNumberSettings.isEnabled('quotes'));
 
   readonly closed = output<void>();
   readonly saved = output<void>();
@@ -94,6 +99,8 @@ export class QuoteDialogComponent {
 
   readonly form = new FormGroup({
     customerId: new FormControl<number | null>(null, [Validators.required]),
+    // Optional manual override; blank → server auto-generates. Only surfaced when the setting is on.
+    quoteNumber: new FormControl('', [Validators.maxLength(20)]),
     expirationDate: new FormControl<Date | null>(null),
     taxRate: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
     customerPO: new FormControl('', [Validators.maxLength(50)]),
@@ -262,6 +269,7 @@ export class QuoteDialogComponent {
 
     this.quoteService.createQuote({
       customerId: f.customerId!,
+      quoteNumber: this.allowManualQuoteNumbers() ? (f.quoteNumber?.trim() || undefined) : undefined,
       expirationDate: f.expirationDate ? toIsoDate(f.expirationDate)! : undefined,
       taxRate: taxRateDecimal,
       customerPO: f.customerPO || undefined,

@@ -58,6 +58,12 @@
       }
 
       <div class="info-grid">
+        @if (lead.leadNumber) {
+          <div class="info-item">
+            <span class="info-label">{{ 'leads.leadNumberLabel' | translate }}</span>
+            <span class="info-value" data-testid="lead-number-detail">{{ lead.leadNumber }}</span>
+          </div>
+        }
         <div class="info-item">
           <span class="info-label">{{ 'common.status' | translate }}</span>
           <span class="info-value">

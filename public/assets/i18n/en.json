@@ -559,6 +559,8 @@
     "unarchiveFailed": "Failed to restore job(s)"
   },
   "jobs": {
+    "jobNumberLabel": "Job Number",
+    "jobNumberPlaceholder": "Auto-assigned if left blank",
     "title": "Jobs",
     "createJob": "New Job",
     "editJob": "Edit Job",
@@ -1737,6 +1739,7 @@
     }
   },
   "customers": {
+    "customerNumberLabel": "Customer Number",
     "documents": {
       "deleteFileTitle": "Delete File?",
       "deleteFileMessage": "This will permanently delete \"{{name}}\".",
@@ -2324,6 +2327,7 @@
     "deleteList": "Delete list"
   },
   "leads": {
+    "leadNumberLabel": "Lead Number",
     "documents": "Documents",
     "fileUploaded": "File uploaded",
     "fileDeleted": "File deleted",
@@ -4661,6 +4665,9 @@
     "invalidZip": "Invalid ZIP code"
   },
   "invoices": {
+    "invoiceNumberLabel": "Invoice Number",
+    "editInvoiceNumber": "Edit invoice number",
+    "invoiceNumberUpdated": "Invoice number updated",
     "title": "Invoices",
     "subtitle": "Generate invoices and track billing status",
     "newInvoice": "New Invoice",
@@ -4727,6 +4734,9 @@
     "confirmSendMessage": "Send invoice {{number}} to the customer?"
   },
   "payments": {
+    "paymentNumberLabel": "Payment Number",
+    "editPaymentNumber": "Edit payment number",
+    "paymentNumberUpdated": "Payment number updated",
     "title": "Payments",
     "subtitle": "Record and apply customer payments",
     "newPayment": "New Payment",
@@ -4769,6 +4779,7 @@
     "paymentDetails": "Payment Details"
   },
   "vendors": {
+    "vendorNumberLabel": "Vendor Number",
     "title": "Vendors",
     "vendor": "Vendor",
     "searchByCompanyName": "Search by company name…",
@@ -4926,6 +4937,9 @@
     }
   },
   "purchaseOrders": {
+    "poNumberLabel": "PO Number",
+    "editPoNumber": "Edit PO Number",
+    "poNumberUpdated": "PO number updated",
     "title": "Purchase Orders",
     "subtitle": "Order materials and track vendor deliveries",
     "newPo": "New PO",
@@ -5037,6 +5051,8 @@
     "originTooltipReference": "Reference: {{reference}}"
   },
   "salesOrders": {
+    "orderNumberLabel": "Order Number",
+    "orderNumberPlaceholder": "Auto-generated if blank",
     "recurring": {
       "title": "Recurring Order Templates",
       "hint": "Templates the nightly Hangfire job spins into fresh sales orders. Each template carries a customer, an interval, and the lines to replicate.",
@@ -5303,6 +5319,10 @@
     "submitError": "We couldn't record your acceptance. Please check the verification key and try again."
   },
   "quotes": {
+    "quoteNumberLabel": "Quote Number",
+    "quoteNumberPlaceholder": "Auto-generated if blank",
+    "editNumber": "Edit Number",
+    "quoteUpdated": "Quote updated.",
     "quoteLabel": "Quote",
     "documents": "Documents",
     "fileUploaded": "File uploaded",
@@ -5427,6 +5447,7 @@
     }
   },
   "shipments": {
+    "shipmentNumberLabel": "Shipment Number",
     "title": "Shipments",
     "subtitle": "Prepare, ship, and track outbound deliveries",
     "edit": {

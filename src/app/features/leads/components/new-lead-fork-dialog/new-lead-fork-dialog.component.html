@@ -28,6 +28,13 @@
       <p class="step-hint step-hint--muted">{{ 'leads.fork.step2Hint' | translate }}</p>
 
       <div [formGroup]="form" class="form-grid">
+        <!-- Optional manual lead number — only offered when the tenant enables
+             `leads.allow_manual_numbers`. Blank → server auto-generates. -->
+        @if (allowManualLeadNumbers()) {
+          <app-input data-testid="lead-number-create"
+                     [label]="'leads.leadNumberLabel' | translate"
+                     formControlName="leadNumber" [maxlength]="50" />
+        }
         <!-- Always-visible base fields. Company OR contact is required —
              individuals (no company) fill in only the contact name. -->
         <app-input data-testid="lead-company-name" [label]="'leads.companyName' | translate"

@@ -4,7 +4,28 @@
       <div class="detail-header__info">
         <span class="material-icons-outlined detail-icon">receipt_long</span>
         <div>
-          <div class="detail-name">{{ inv.invoiceNumber }}</div>
+          @if (editingNumber()) {
+            <div class="number-edit">
+              <app-input [label]="'invoices.invoiceNumberLabel' | translate" [formControl]="numberControl" [maxlength]="50" data-testid="invoice-number-edit" />
+              <div class="number-edit__actions">
+                <button class="action-btn action-btn--sm" (click)="cancelEditNumber()" [disabled]="savingNumber()">{{ 'common.cancel' | translate }}</button>
+                <button class="action-btn action-btn--sm action-btn--primary" (click)="saveNumber()" [disabled]="savingNumber() || !numberControl.value?.trim()">
+                  <span class="material-icons-outlined">save</span> {{ 'common.save' | translate }}
+                </button>
+              </div>
+            </div>
+          } @else {
+            <div class="detail-name">
+              {{ inv.invoiceNumber }}
+              @if (canEditNumber()) {
+                <button class="icon-btn" data-testid="invoice-number-edit-btn" (click)="startEditNumber()"
+                  [matTooltip]="'invoices.editInvoiceNumber' | translate" matTooltipPosition="above"
+                  [attr.aria-label]="'invoices.editInvoiceNumber' | translate">
+                  <span class="material-icons-outlined">edit</span>
+                </button>
+              }
+            </div>
+          }
           <div class="detail-customer"><app-entity-link type="customer" [entityId]="inv.customerId">{{ inv.customerName }}</app-entity-link></div>
         </div>
       </div>

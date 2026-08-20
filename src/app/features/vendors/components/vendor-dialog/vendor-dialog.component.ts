@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, input, output, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { VendorService } from '../../services/vendor.service';
 import { VendorDetail } from '../../models/vendor-detail.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
@@ -35,12 +36,14 @@ export class VendorDialogComponent {
   private readonly vendorService = inject(VendorService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly manualNumberSettings = inject(ManualNumberSettingsService);
 
   readonly vendor = input<VendorDetail | null>(null);
   readonly closed = output<void>();
   readonly saved = output<void>();
 
   protected readonly saving = signal(false);
+  protected readonly allowManualVendorNumbers = computed(() => this.manualNumberSettings.isEnabled('vendors'));
 
   protected get draftConfig(): DraftConfig {
     return {
@@ -52,6 +55,7 @@ export class VendorDialogComponent {
 
   readonly form = new FormGroup({
     companyName: new FormControl('', [Validators.required]),
+    vendorNumber: new FormControl('', [Validators.maxLength(50)]),
     contactName: new FormControl(''),
     email: new FormControl('', [Validators.email]),
     phone: new FormControl(''),
@@ -81,6 +85,7 @@ export class VendorDialogComponent {
     if (v) {
       this.form.patchValue({
         companyName: v.companyName,
+        vendorNumber: v.vendorNumber ?? '',
         contactName: v.contactName ?? '',
         email: v.email ?? '',
         phone: v.phone ?? '',
@@ -122,6 +127,7 @@ export class VendorDialogComponent {
     if (v) {
       this.vendorService.updateVendor(v.id, {
         ...payload,
+        vendorNumber: this.allowManualVendorNumbers() ? (f.vendorNumber?.trim() || undefined) : undefined,
         isActive: f.isActive ?? true,
       }).subscribe({
         next: () => {

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -10,17 +11,20 @@ import { PaymentDetail } from '../../models/payment-detail.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EntityActivitySectionComponent, ActivityFilterTab } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
+import { InputComponent } from '../../../../shared/components/input/input.component';
+import { toIsoDate } from '../../../../shared/utils/date.utils';
 
 @Component({
   selector: 'app-payment-detail-panel',
   standalone: true,
   imports: [
-    DatePipe, TranslatePipe,
+    DatePipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
-    EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent,
+    EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent, InputComponent,
   ],
   templateUrl: './payment-detail-panel.component.html',
   styleUrl: './payment-detail-panel.component.scss',
@@ -31,6 +35,7 @@ export class PaymentDetailPanelComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly manualNumbers = inject(ManualNumberSettingsService);
 
   readonly paymentId = input.required<number>();
   readonly closed = output<void>();
@@ -41,6 +46,16 @@ export class PaymentDetailPanelComponent {
 
   protected readonly paymentIdValue = computed(() => this.payment()?.id ?? 0);
   protected readonly activityTabs: ActivityFilterTab[] = ['history'];
+
+  // Inline rename of the payment number — only offered when manual numbers are
+  // enabled and the payment has no applications (matches the server's rule).
+  protected readonly numberControl = new FormControl('');
+  protected readonly editingNumber = signal(false);
+  protected readonly savingNumber = signal(false);
+  protected readonly canEditNumber = computed(() => {
+    const p = this.payment();
+    return this.manualNumbers.isEnabled('payments') && !!p && p.applications.length === 0;
+  });
 
   constructor() {
     effect(() => {
@@ -53,6 +68,39 @@ export class PaymentDetailPanelComponent {
 
   protected close(): void {
     this.closed.emit();
+  }
+
+  protected startEditNumber(): void {
+    this.numberControl.setValue(this.payment()?.paymentNumber ?? '');
+    this.editingNumber.set(true);
+  }
+
+  protected cancelEditNumber(): void {
+    this.editingNumber.set(false);
+  }
+
+  protected saveNumber(): void {
+    const p = this.payment();
+    const next = this.numberControl.value?.trim();
+    if (!p || !next) return;
+    this.savingNumber.set(true);
+    this.paymentService.updatePayment(p.id, {
+      method: p.method,
+      amount: p.amount,
+      paymentDate: toIsoDate(p.paymentDate)!,
+      referenceNumber: p.referenceNumber ?? undefined,
+      notes: p.notes ?? undefined,
+      paymentNumber: next,
+    }).subscribe({
+      next: () => {
+        this.savingNumber.set(false);
+        this.editingNumber.set(false);
+        this.loadPayment(p.id);
+        this.paymentChanged.emit();
+        this.snackbar.success(this.translate.instant('payments.paymentNumberUpdated'));
+      },
+      error: () => this.savingNumber.set(false),
+    });
   }
 
   protected getMethodLabel(method: string): string {
