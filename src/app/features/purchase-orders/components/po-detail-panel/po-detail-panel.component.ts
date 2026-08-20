@@ -416,18 +416,22 @@ export class PoDetailPanelComponent implements OnInit {
   // ─── Editable PO number (Draft only, manual numbers enabled) ─────────────
   // Server enforces Draft-only + uniqueness; the UI only surfaces the edit
   // inside that window (see canEditPoNumber).
-  protected readonly showPoNumberDialog = signal(false);
+  protected readonly editingPoNumber = signal(false);
   protected readonly poNumberSaving = signal(false);
   protected readonly poNumberCtrl = new FormControl<string>('', {
     nonNullable: true,
     validators: [Validators.required, Validators.maxLength(20)],
   });
 
-  protected openPoNumberDialog(): void {
+  protected startEditPoNumber(): void {
     const po = this.po();
     if (!po) return;
     this.poNumberCtrl.reset(po.poNumber);
-    this.showPoNumberDialog.set(true);
+    this.editingPoNumber.set(true);
+  }
+
+  protected cancelEditPoNumber(): void {
+    this.editingPoNumber.set(false);
   }
 
   protected savePoNumber(): void {
@@ -438,7 +442,7 @@ export class PoDetailPanelComponent implements OnInit {
       poNumber: this.poNumberCtrl.value.trim() || undefined,
     }).subscribe({
       next: () => {
-        this.showPoNumberDialog.set(false);
+        this.editingPoNumber.set(false);
         this.poNumberSaving.set(false);
         this.loadDetail();
         this.changed.emit();

@@ -266,4 +266,10 @@
   color: var(--text-muted);
 }
 
-.header-edit-trigger { display: flex; justify-content: flex-end; margin-top: $sp-md; }
+.number-edit {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__actions { display: flex; justify-content: flex-end; gap: $sp-sm; }
+}

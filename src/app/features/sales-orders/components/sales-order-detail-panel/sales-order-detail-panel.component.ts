@@ -241,13 +241,53 @@ export class SalesOrderDetailPanelComponent {
   protected readonly savingHeader = signal(false);
   protected readonly creditTermsOptions = CREDIT_TERMS_OPTIONS;
   protected readonly headerForm = new FormGroup({
-    orderNumber: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(20)] }),
     customerPO: new FormControl<string>('', { nonNullable: true }),
     creditTerms: new FormControl<string | null>(null),
     requestedDeliveryDate: new FormControl<Date | null>(null),
     billingAddressId: new FormControl<number | null>(null),
   });
   protected readonly canEditHeader = computed(() => this.so()?.status === 'Draft');
+
+  // Inline order-number rename — the displayed number itself becomes an input
+  // when manual numbers are on and the order is still Draft (server enforces
+  // Draft-only + uniqueness). Reuses the header element, not a separate field.
+  protected readonly editingOrderNumber = signal(false);
+  protected readonly savingOrderNumber = signal(false);
+  protected readonly orderNumberCtrl = new FormControl<string>('', {
+    nonNullable: true,
+    validators: [Validators.required, Validators.maxLength(20)],
+  });
+  protected readonly canEditOrderNumber = computed(
+    () => this.allowManualOrderNumbers() && this.so()?.status === 'Draft');
+
+  protected startEditOrderNumber(): void {
+    const so = this.so();
+    if (!so) return;
+    this.orderNumberCtrl.reset(so.orderNumber);
+    this.editingOrderNumber.set(true);
+  }
+
+  protected cancelEditOrderNumber(): void {
+    this.editingOrderNumber.set(false);
+  }
+
+  protected saveOrderNumber(): void {
+    const so = this.so();
+    if (!so || this.orderNumberCtrl.invalid) return;
+    this.savingOrderNumber.set(true);
+    this.soService.updateSalesOrder(so.id, {
+      orderNumber: this.orderNumberCtrl.value.trim() || undefined,
+    }).subscribe({
+      next: () => {
+        this.savingOrderNumber.set(false);
+        this.editingOrderNumber.set(false);
+        this.loadDetail(so.id);
+        this.changed.emit();
+        this.snackbar.success(this.translate.instant('salesOrders.headerUpdated'));
+      },
+      error: () => this.savingOrderNumber.set(false),
+    });
+  }
 
   // Billing-address picker options for the Draft header edit (#8 / SO-8). Loaded
   // lazily when the user enters edit mode (the customer's saved addresses).
@@ -846,7 +886,6 @@ export class SalesOrderDetailPanelComponent {
     const so = this.so();
     if (!so) return;
     this.headerForm.reset({
-      orderNumber: so.orderNumber,
       customerPO: so.customerPO ?? '',
       creditTerms: so.creditTerms ?? null,
       requestedDeliveryDate: so.requestedDeliveryDate ? new Date(so.requestedDeliveryDate) : null,
@@ -875,8 +914,6 @@ export class SalesOrderDetailPanelComponent {
     // `|| undefined` so a blank field is omitted rather than sent — the server only
     // applies non-null fields, and an empty creditTerms string would fail enum-parse.
     this.soService.updateSalesOrder(so.id, {
-      // Rename only when the setting is on (server enforces Draft-only rename).
-      orderNumber: this.allowManualOrderNumbers() ? (v.orderNumber?.trim() || undefined) : undefined,
       customerPO: v.customerPO || undefined,
       creditTerms: v.creditTerms || undefined,
       requestedDeliveryDate: toIsoDate(v.requestedDeliveryDate) || undefined,

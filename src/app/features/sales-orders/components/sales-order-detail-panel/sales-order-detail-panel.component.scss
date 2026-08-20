@@ -27,6 +27,14 @@
 .detail-header__actions { display: flex; gap: $sp-sm; }
 .detail-icon { font-size: $icon-size-xl; color: var(--text-muted); }
 .detail-name { font-weight: 700; }
+
+.number-edit {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__actions { display: flex; justify-content: flex-end; gap: $sp-sm; }
+}
 .detail-customer { font-size: $font-size-xs; color: var(--text-muted); }
 
 // --- Tab Bar ---
