@@ -4044,7 +4044,12 @@
     "useStandalone": "Usar Independiente",
     "reconfigure": "Reconfigurar",
     "activate": "Activar",
-    "connectionTestFailed": "La prueba de conexión falló"
+    "connectionTestFailed": "La prueba de conexión falló",
+    "readiness": {
+      "mockInProd": "MockIntegrations está ACTIVADO en Producción — todas las integraciones externas devuelven datos simulados. Establezca MockIntegrations=false y configure proveedores reales antes de atender a usuarios reales.",
+      "gapSummary": "Estas capacidades están activadas pero su integración no está configurada. Configure cada una o desactive la capacidad.",
+      "setupRequired": "Configuración requerida"
+    }
   },
   "complianceTemplates": {
     "templates": "plantillas de cumplimiento",

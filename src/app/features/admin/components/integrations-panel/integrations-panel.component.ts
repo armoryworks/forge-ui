@@ -72,6 +72,15 @@ export class IntegrationsPanelComponent implements OnInit {
   readonly testingProvider = signal<string | null>(null);
   readonly logoErrors = signal<string[]>([]);
 
+  readonly productionPosture = signal(false);
+  readonly mockIntegrationsInProduction = signal(false);
+  readonly gapCount = signal(0);
+
+  readonly gapIntegrations = computed(() => this.integrations().filter(i => i.readiness === 'Gap'));
+  readonly showReadinessBanner = computed(
+    () => this.mockIntegrationsInProduction() || this.gapCount() > 0,
+  );
+
   readonly qbIntegration = computed(() => this.integrations().find(i => i.provider === 'quickbooks') ?? null);
 
   /** Accounting providers enriched with logo URLs from the static map. */
@@ -109,6 +118,9 @@ export class IntegrationsPanelComponent implements OnInit {
       next: (result) => {
         this.integrations.set(result.integrations);
         this.showSandboxGuides.set(result.showSandboxGuides);
+        this.productionPosture.set(result.productionPosture ?? false);
+        this.mockIntegrationsInProduction.set(result.mockIntegrationsInProduction ?? false);
+        this.gapCount.set(result.gapCount ?? 0);
       },
     });
   }

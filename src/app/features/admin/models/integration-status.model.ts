@@ -16,6 +16,8 @@ export interface IntegrationSettingField {
   description?: string | null;
 }
 
+export type IntegrationReadiness = 'NotNeeded' | 'Configured' | 'Mock' | 'Gap' | 'Optional';
+
 export interface IntegrationStatus {
   provider: string;
   name: string;
@@ -27,11 +29,23 @@ export interface IntegrationStatus {
   sandboxSteps: string[] | null;
   sandboxUrl: string | null;
   logoUrl: string | null;
+  /** Capability whose being ON makes this integration needed. Null = infrastructure. */
+  capabilityCode?: string | null;
+  /** Whether that gating capability is enabled (true when there is none). */
+  capabilityEnabled?: boolean;
+  /** Readiness verdict; 'Gap' is the actionable state (cap on, unconfigured, in prod). */
+  readiness?: IntegrationReadiness;
 }
 
 export interface IntegrationSettingsResult {
   showSandboxGuides: boolean;
   integrations: IntegrationStatus[];
+  /** Production posture — a production env not globally forced to mock. */
+  productionPosture?: boolean;
+  /** MockIntegrations=true while running Production — a misconfiguration to warn about. */
+  mockIntegrationsInProduction?: boolean;
+  /** Count of integrations in the 'Gap' state. */
+  gapCount?: number;
 }
 
 export interface TestIntegrationResult {

@@ -4044,7 +4044,12 @@
     "useStandalone": "Use Standalone",
     "reconfigure": "Reconfigure",
     "activate": "Activate",
-    "connectionTestFailed": "Connection test failed"
+    "connectionTestFailed": "Connection test failed",
+    "readiness": {
+      "mockInProd": "MockIntegrations is ON in Production — every external integration is returning canned data. Set MockIntegrations=false and configure real providers before serving real users.",
+      "gapSummary": "These capabilities are on but their integration is not configured. Configure each one, or turn the capability off.",
+      "setupRequired": "Setup required"
+    }
   },
   "complianceTemplates": {
     "templates": "compliance templates",

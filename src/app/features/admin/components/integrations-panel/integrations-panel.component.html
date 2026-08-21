@@ -2,6 +2,31 @@
   <p class="integrations-tabs__lead">
     Services <strong>forge connects to</strong> — accounting, shipping carriers, and other external APIs.
   </p>
+
+  @if (showReadinessBanner()) {
+    <div class="readiness-banner" role="status">
+      <span class="material-icons-outlined readiness-banner__icon">warning_amber</span>
+      <div class="readiness-banner__body">
+        @if (mockIntegrationsInProduction()) {
+          <p class="readiness-banner__line readiness-banner__line--strong">
+            {{ 'integrations.readiness.mockInProd' | translate }}
+          </p>
+        }
+        @if (gapCount() > 0) {
+          <p class="readiness-banner__line">{{ 'integrations.readiness.gapSummary' | translate }}</p>
+          <ul class="readiness-banner__gaps">
+            @for (g of gapIntegrations(); track g.provider) {
+              <li>
+                <strong>{{ g.name }}</strong>
+                <span class="readiness-banner__cap">{{ g.capabilityCode }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+  }
+
 <div class="integrations-grid">
   <!-- ─── Accounting Providers ─────────────────────────────────────────── -->
   <div class="section-header">
@@ -167,6 +192,12 @@
           <div class="integration-card__info">
             <h3 class="integration-card__name">{{ integration.name }}</h3>
             <p class="integration-card__desc">{{ integration.description }}</p>
+            @if (integration.readiness === 'Gap') {
+              <span class="readiness-chip readiness-chip--gap">
+                <span class="material-icons-outlined">error_outline</span>
+                {{ 'integrations.readiness.setupRequired' | translate }}
+              </span>
+            }
           </div>
         </div>
         <div class="integration-card__footer">
