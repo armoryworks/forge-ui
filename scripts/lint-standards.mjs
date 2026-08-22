@@ -148,6 +148,37 @@ function rawFormControlsInFeatures() {
   return out;
 }
 
+function tableMissingA11yInFeatures() {
+  // A data <table> must be labelled: a <caption> inside, or aria-label/aria-labelledby
+  // on the element (WCAG). Counts feature tables that have neither.
+  const out = new Map();
+  for (const f of walk(SRC, ['.html'])) {
+    if (!inFeatures(f)) continue;
+    const src = stripHtmlComments(read(f));
+    let n = 0;
+    for (const m of src.matchAll(/<table\b([^>]*)>([\s\S]*?)<\/table>/g)) {
+      // Accept static (aria-label=) and Angular bindings ([attr.aria-label]= / [attr.aria-labelledby]=).
+      const hasLabel = /aria-label(?:ledby)?\]?\s*=/.test(m[1]);
+      const hasCaption = /<caption\b/.test(m[2]);
+      if (!hasLabel && !hasCaption) n++;
+    }
+    if (n) out.set(rel(f), n);
+  }
+  return out;
+}
+
+function rawTablesInFeatures() {
+  // Prefer <app-data-table> for entity lists; a raw <table> (line-item / statement)
+  // is debt that must at least be deliberate + labelled. Capped by the ratchet.
+  const out = new Map();
+  for (const f of walk(SRC, ['.html'])) {
+    if (!inFeatures(f)) continue;
+    const n = (stripHtmlComments(read(f)).match(/<table\b/g) ?? []).length;
+    if (n) out.set(rel(f), n);
+  }
+  return out;
+}
+
 // ── evaluation ───────────────────────────────────────────────────────────────
 
 const HARD = [
@@ -160,6 +191,8 @@ const RATCHET = [
   ['unjustified-important', '`!important` without an adjacent justifying comment', unjustifiedImportant],
   ['inline-templates', 'inline `template:` (use templateUrl)', inlineTemplates],
   ['raw-form-controls-in-features', 'raw <input>/<select>/<textarea> in a feature template (use the shared wrappers)', rawFormControlsInFeatures],
+  ['table-missing-a11y', 'feature <table> without a <caption> or aria-label (WCAG 2.2)', tableMissingA11yInFeatures],
+  ['raw-table-in-features', 'raw <table> in a feature (prefer <app-data-table> for entity lists)', rawTablesInFeatures],
 ];
 
 function loadAllow() {
