@@ -104,9 +104,7 @@
     "src/app/features/shop-floor/components/pin-prompt-dialog/pin-prompt-dialog.component.html": 1,
     "src/app/features/workflow-demo/workflow-shell-demo.component.html": 4
   },
-  "table-missing-a11y": {
-    "src/app/features/costing/costing.component.html": 4
-  },
+  "table-missing-a11y": {},
   "raw-table-in-features": {
     "src/app/features/accounting/components/balance-sheet/balance-sheet.component.html": 1,
     "src/app/features/accounting/components/bank-rec/bank-rec.component.html": 1,
@@ -123,7 +121,6 @@
     "src/app/features/admin/database/database-transfer.component.html": 1,
     "src/app/features/admin/presets/preset-compare/preset-compare.component.html": 1,
     "src/app/features/admin/working-calendars/working-calendars.component.html": 2,
-    "src/app/features/costing/costing.component.html": 4,
     "src/app/features/customers/pages/customer-detail/tabs/customer-estimates-tab.component.html": 1,
     "src/app/features/customers/pages/import/customer-import.component.html": 1,
     "src/app/features/inventory/inventory.component.html": 3,

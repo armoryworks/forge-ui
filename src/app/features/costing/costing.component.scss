@@ -1,18 +1,9 @@
 @use 'styles/variables' as *;
 
-.costing {
-  padding: $sp-lg;
-
-  &__title {
-    font-size: $font-size-xl;
-    margin: 0;
-  }
-
-  &__subtitle {
-    font-size: $font-size-md;
-    margin: $sp-lg 0 $sp-sm;
-    color: var(--text-secondary);
-  }
+.costing__subtitle {
+  font-size: $font-size-md;
+  margin: $sp-lg 0 $sp-sm;
+  color: var(--text-secondary);
 }
 
 .create-row {
@@ -24,36 +15,8 @@
   &--wrap { flex-wrap: wrap; }
 }
 
-.grid {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: $font-size-base;
-
-  th,
-  td {
-    text-align: left;
-    padding: $sp-sm $sp-md;
-    border-bottom: $border-width-thin solid var(--border);
-  }
-
-  th {
-    color: var(--text-muted);
-    font-weight: 600;
-  }
-
-  &__actions {
-    display: flex;
-    gap: $sp-sm;
-  }
-
-  &__empty {
-    color: var(--text-muted);
-    text-align: center;
-    padding: $sp-lg;
-  }
-}
-
-.num {
-  text-align: right;
-  font-family: $font-family-mono;
+.row-actions {
+  display: flex;
+  gap: $sp-sm;
+  justify-content: flex-end;
 }

@@ -10,6 +10,10 @@ import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { DatepickerComponent } from '../../shared/components/datepicker/datepicker.component';
 import { ToggleComponent } from '../../shared/components/toggle/toggle.component';
+import { PageLayoutComponent } from '../../shared/components/page-layout/page-layout.component';
+import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
+import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
+import { ColumnDef } from '../../shared/models/column-def.model';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { toIsoDate } from '../../shared/utils/date.utils';
 
@@ -26,7 +30,10 @@ type CostingTab = 'periods' | 'cost-centers' | 'pools';
 @Component({
   selector: 'app-costing',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent, DatepickerComponent, ToggleComponent],
+  imports: [
+    ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent, DatepickerComponent,
+    ToggleComponent, PageLayoutComponent, DataTableComponent, ColumnCellDirective,
+  ],
   templateUrl: './costing.component.html',
   styleUrl: './costing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -67,6 +74,36 @@ export class CostingComponent {
     { value: 'MaterialDollar', label: 'Material dollar' },
     { value: 'Unit', label: 'Unit' },
     { value: 'ReceiptCount', label: 'Receipt count' },
+  ];
+
+  protected readonly periodColumns: ColumnDef[] = [
+    { field: 'startDate', header: 'Start', sortable: true, type: 'date', width: '120px' },
+    { field: 'endDate', header: 'End', sortable: true, type: 'date', width: '120px' },
+    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum' },
+    { field: 'frozenAt', header: 'Frozen', sortable: true, type: 'date', width: '120px' },
+    { field: 'actions', header: '', align: 'right' },
+  ];
+  protected readonly rateColumns: ColumnDef[] = [
+    { field: 'workCenterId', header: 'Work Center', sortable: true },
+    { field: 'laborRate', header: 'Labor', type: 'number', align: 'right' },
+    { field: 'laborOhRate', header: 'Labor OH', type: 'number', align: 'right' },
+    { field: 'machineRate', header: 'Machine', type: 'number', align: 'right' },
+    { field: 'machineOhVarRate', header: 'Mch OH Var', type: 'number', align: 'right' },
+    { field: 'machineOhFixedRate', header: 'Mch OH Fixed', type: 'number', align: 'right' },
+  ];
+  protected readonly costCenterColumns: ColumnDef[] = [
+    { field: 'code', header: 'Code', sortable: true },
+    { field: 'name', header: 'Name', sortable: true },
+    { field: 'type', header: 'Type', sortable: true, filterable: true, type: 'enum' },
+    { field: 'sqft', header: 'Sq Ft', type: 'number', align: 'right' },
+    { field: 'headcount', header: 'Headcount', type: 'number', align: 'right' },
+    { field: 'isInventoriable', header: 'Inventoriable', align: 'center' },
+  ];
+  protected readonly poolColumns: ColumnDef[] = [
+    { field: 'code', header: 'Code', sortable: true },
+    { field: 'name', header: 'Name', sortable: true },
+    { field: 'behavior', header: 'Behavior', sortable: true, filterable: true, type: 'enum' },
+    { field: 'driver', header: 'Driver', sortable: true, filterable: true, type: 'enum' },
   ];
 
   protected readonly costCenterOptions = computed<SelectOption[]>(() =>
