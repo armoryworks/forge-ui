@@ -72,7 +72,8 @@
     "salesChannelsListings": "Publicaciones",
     "salesChannelsBuyers": "Compradores minoristas",
     "salesChannelsSettlements": "Liquidaciones",
-    "salesChannelsConnections": "Conexiones"
+    "salesChannelsConnections": "Conexiones",
+    "costing": "Costeo"
   },
   "navGroups": {
     "operations": "Operaciones",
@@ -84,7 +85,11 @@
     "purchasing": "Compras",
     "people": "Personas",
     "insights": "Análisis",
-    "accounting": "Contabilidad"
+    "accounting": "Contabilidad",
+    "equipment": "Equipos",
+    "fulfillment": "Cumplimiento",
+    "financials": "Finanzas",
+    "quality": "Calidad"
   },
   "adminGroups": {
     "usersAccess": "Usuarios y Acceso",

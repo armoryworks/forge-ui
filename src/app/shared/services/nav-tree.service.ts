@@ -27,41 +27,28 @@ export class NavTreeService {
   // below for Dashboard's home as a top-level peer (not workflow-domain-bound).
   private readonly allPinnedTopTree: NavItem[] = [];
 
+  // IA (redesigned 2026-08-22): grouped by the value streams a manufacturer
+  // recognizes — Sell, Make, Buy, Stock, Equipment, Ship, Money, Quality,
+  // People, Insights — rather than by internal module boundaries. Key moves vs
+  // the prior tree: (1) all money consolidated into one Financials home
+  // (Invoices/Payments/Expenses/Payables/Costing/aging/GL were scattered across
+  // five groups); (2) the "Operations" grab-bag dissolved — execution → Make,
+  // Compliance/Watchtower → Quality, Approvals → Purchasing, Sequences → Make;
+  // (3) Shipping de-duplicated into one Fulfillment group (was a top-level leaf
+  // AND a Shipments record under Sales); (4) asset reliability unified under
+  // Equipment (Assets/Maintenance/OEE were split across Inventory + Production);
+  // (5) Quality surfaced (it had no nav entry); (6) Costing promoted to a
+  // first-class Financials entry (Tier-3, capability-gated).
   private readonly allMainTree: NavItem[] = [
-    // Dashboard sits at the top of the main tree as a peer of Operations / Sales
-    // / Production / etc. — NOT as a child of any one functional area. The
-    // dashboard is per-user, customized to the signed-in user's role and main
-    // job function (engineer, PM, office manager, production worker), so
-    // bucketing it under any single domain misrepresents what it shows.
+    // Dashboard is per-user (role + job-function customised), so it sits as a
+    // top-level peer, not under any single domain.
     { icon: 'dashboard', label: 'Dashboard', i18nKey: 'nav.dashboard', route: '/dashboard', shortcut: ['Q', 'D'] },
-    {
-      icon: 'space_dashboard', label: 'Operations', i18nKey: 'navGroups.operations',
-      children: [
-        { icon: 'view_kanban', label: 'Board', i18nKey: 'nav.kanban', route: '/kanban', shortcut: ['Q', 'K'], capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'Engineer', 'ProductionWorker'] },
-        { icon: 'inbox', label: 'Backlog', i18nKey: 'nav.backlog', route: '/backlog', shortcut: ['Q', 'B'], capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'PM', 'Engineer'] },
-        { icon: 'event_note', label: 'Planning', i18nKey: 'nav.planning', route: '/planning', capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'PM'] },
-        { icon: 'calendar_month', label: 'Calendar', i18nKey: 'nav.calendar', route: '/calendar', capability: 'CAP-EXT-KANBAN' },
-        { icon: 'fact_check', label: 'Compliance', i18nKey: 'nav.compliance', route: '/compliance', capability: 'CAP-EXT-WATCHTOWER', allowedRoles: ['Admin', 'Manager', 'ComplianceOfficer', 'OfficeManager'] },
-        { icon: 'radar', label: 'Watchtower', i18nKey: 'nav.watchtower', route: '/watchtower', capability: 'CAP-EXT-WATCHTOWER', allowedRoles: ['Admin', 'Manager'] },
-        { icon: 'rule', label: 'Approvals', i18nKey: 'nav.approvals', route: '/approvals', capability: 'CAP-P2P-APPROVALS', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
-        {
-          icon: 'account_tree', label: 'Sequences', i18nKey: 'nav.sequences',
-          capability: 'CAP-CROSS-SEQUENCES', allowedRoles: ['Admin', 'Manager'],
-          children: [
-            { icon: 'schema', label: 'Definitions', i18nKey: 'nav.sequencesDefinitions', route: '/sequences' },
-            { icon: 'playlist_play', label: 'Instances', i18nKey: 'nav.sequencesInstances', route: '/sequences/instances' },
-          ],
-        },
-      ],
-    },
+
+    // ── SELL — demand + customer capture (CRM through order). Deliberately no
+    // money and no fulfilment here; those get their own homes below. ──
     {
       icon: 'sell', label: 'Sales', i18nKey: 'navGroups.sales',
       children: [
-        // Phase 1r — Customers is now a group with sub-routes for
-        // account-management surfaces (flat cross-customer contact view,
-        // portal-access admin, saved segments, bulk import). Same
-        // submenu shape Leads uses but customer-specific children since
-        // customer work is *management*, not *acquisition*.
         {
           icon: 'people', label: 'Customers', i18nKey: 'nav.customers',
           capability: 'CAP-MD-CUSTOMERS',
@@ -74,28 +61,6 @@ export class NavTreeService {
             { icon: 'upload_file', label: 'Import', i18nKey: 'nav.customersImport', route: '/customers/import' },
           ],
         },
-        // Sales channels — the retail / marketplace lane. Sits beside Customers
-        // rather than under it: a channel is a route to market, not an account,
-        // and its children (listing triage, consumer buyers, payout
-        // reconciliation) each carry their own capability so an install that
-        // only sells B2B sees just the channel list.
-        {
-          icon: 'storefront', label: 'Sales Channels', i18nKey: 'nav.salesChannels',
-          capability: 'CAP-O2C-CHANNELS',
-          allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'],
-          children: [
-            { icon: 'list', label: 'All Channels', i18nKey: 'nav.salesChannelsAll', route: '/sales-channels' },
-            { icon: 'power', label: 'Connections', i18nKey: 'nav.salesChannelsConnections', route: '/sales-channels/connections', capability: 'CAP-EXT-ECOMMERCE' },
-            { icon: 'sell', label: 'Listings', i18nKey: 'nav.salesChannelsListings', route: '/sales-channels/listings', capability: 'CAP-EXT-ECOMMERCE' },
-            { icon: 'person_outline', label: 'Retail Buyers', i18nKey: 'nav.salesChannelsBuyers', route: '/sales-channels/buyers', capability: 'CAP-O2C-RETAIL' },
-            { icon: 'account_balance', label: 'Settlements', i18nKey: 'nav.salesChannelsSettlements', route: '/sales-channels/settlements', capability: 'CAP-O2C-SETTLEMENT' },
-          ],
-        },
-        // Phase 1r — Leads is now a group with sub-routes for high-volume
-        // marketing surfaces (bulk intake / worker queue / campaigns /
-        // suppression). First child "All" routes to the original list page
-        // so /leads still resolves cleanly for existing bookmarks + cross-
-        // entity links. Same submenu pattern Admin uses.
         {
           icon: 'people_outline', label: 'Leads', i18nKey: 'nav.leads',
           capability: 'CAP-O2C-LEAD',
@@ -110,76 +75,150 @@ export class NavTreeService {
             { icon: 'business', label: 'Accounts', i18nKey: 'nav.leadsAccounts', route: '/leads/accounts' },
           ],
         },
+        {
+          icon: 'storefront', label: 'Sales Channels', i18nKey: 'nav.salesChannels',
+          capability: 'CAP-O2C-CHANNELS',
+          allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'],
+          children: [
+            { icon: 'list', label: 'All Channels', i18nKey: 'nav.salesChannelsAll', route: '/sales-channels' },
+            { icon: 'power', label: 'Connections', i18nKey: 'nav.salesChannelsConnections', route: '/sales-channels/connections', capability: 'CAP-EXT-ECOMMERCE' },
+            { icon: 'sell', label: 'Listings', i18nKey: 'nav.salesChannelsListings', route: '/sales-channels/listings', capability: 'CAP-EXT-ECOMMERCE' },
+            { icon: 'person_outline', label: 'Retail Buyers', i18nKey: 'nav.salesChannelsBuyers', route: '/sales-channels/buyers', capability: 'CAP-O2C-RETAIL' },
+            { icon: 'account_balance', label: 'Settlements', i18nKey: 'nav.salesChannelsSettlements', route: '/sales-channels/settlements', capability: 'CAP-O2C-SETTLEMENT' },
+          ],
+        },
         { icon: 'request_quote', label: 'Quotes', i18nKey: 'nav.quotes', route: '/quotes', capability: 'CAP-O2C-QUOTE', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
         { icon: 'shopping_cart', label: 'Sales Orders', i18nKey: 'nav.salesOrders', route: '/sales-orders', capability: 'CAP-O2C-SO', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
         { icon: 'event_repeat', label: 'Recurring Orders', i18nKey: 'nav.recurringOrders', route: '/sales-orders/recurring', capability: 'CAP-O2C-RECURRING', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'outbox', label: 'Shipments', i18nKey: 'nav.shipments', route: '/shipments', capability: 'CAP-O2C-SHIP', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'assignment_return', label: 'Customer Returns', i18nKey: 'nav.customerReturns', route: '/customer-returns', capability: 'CAP-O2C-RMA', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
-        { icon: 'receipt', label: 'Invoices', i18nKey: 'nav.invoices', route: '/invoices', capability: 'CAP-O2C-INVOICE', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'payments', label: 'Payments', i18nKey: 'nav.payments', route: '/payments', capability: 'CAP-O2C-CASH', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
       ],
     },
-    // Shipping is a top-level workspace (the "what needs to ship" doing surface), a peer of the
-    // domain groups. The Shipments *history* stays a record view under Sales.
-    { icon: 'local_shipping', label: 'Shipping', i18nKey: 'nav.shipping', route: '/shipping', capability: 'CAP-O2C-SHIP', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+
+    // ── MAKE — planning + tracking the work, and the product/process data
+    // behind it. Absorbs the old Operations execution surfaces. ──
     {
       icon: 'precision_manufacturing', label: 'Production', i18nKey: 'navGroups.production',
       children: [
+        { icon: 'view_kanban', label: 'Board', i18nKey: 'nav.kanban', route: '/kanban', shortcut: ['Q', 'K'], capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'Engineer', 'ProductionWorker'] },
+        { icon: 'inbox', label: 'Backlog', i18nKey: 'nav.backlog', route: '/backlog', shortcut: ['Q', 'B'], capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'PM', 'Engineer'] },
+        { icon: 'event_note', label: 'Planning', i18nKey: 'nav.planning', route: '/planning', capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'PM'] },
+        { icon: 'event_available', label: 'Scheduling', i18nKey: 'nav.scheduling', route: '/scheduling', capability: 'CAP-PLAN-CAPACITY', allowedRoles: ['Admin', 'Manager'] },
+        { icon: 'calendar_month', label: 'Calendar', i18nKey: 'nav.calendar', route: '/calendar', capability: 'CAP-EXT-KANBAN' },
         { icon: 'category', label: 'Parts', i18nKey: 'nav.parts', route: '/parts', shortcut: ['Q', 'P'], allowedRoles: ['Admin', 'Manager', 'Engineer', 'PM'] },
         { icon: 'hub', label: 'MRP', i18nKey: 'nav.mrp', route: '/mrp', capability: 'CAP-PLAN-MRP', allowedRoles: ['Admin', 'Manager'] },
-        { icon: 'event_available', label: 'Scheduling', i18nKey: 'nav.scheduling', route: '/scheduling', capability: 'CAP-PLAN-CAPACITY', allowedRoles: ['Admin', 'Manager'] },
         { icon: 'batch_prediction', label: 'Lots', i18nKey: 'nav.lots', route: '/lots', capability: 'CAP-INV-LOTS', allowedRoles: ['Admin', 'Manager', 'Engineer'] },
-        { icon: 'speed', label: 'OEE', i18nKey: 'nav.oee', route: '/oee', capability: 'CAP-RPT-OEE', allowedRoles: ['Admin', 'Manager'] },
+        {
+          icon: 'account_tree', label: 'Sequences', i18nKey: 'nav.sequences',
+          capability: 'CAP-CROSS-SEQUENCES', allowedRoles: ['Admin', 'Manager'],
+          children: [
+            { icon: 'schema', label: 'Definitions', i18nKey: 'nav.sequencesDefinitions', route: '/sequences' },
+            { icon: 'playlist_play', label: 'Instances', i18nKey: 'nav.sequencesInstances', route: '/sequences/instances' },
+          ],
+        },
       ],
     },
+
+    // ── BUY — procurement. Approvals lives here (it is the procure-to-pay gate). ──
     {
-      icon: 'inventory_2', label: 'Inventory', i18nKey: 'navGroups.inventory',
-      children: [
-        { icon: 'inventory', label: 'Stock', i18nKey: 'nav.inventory', route: '/inventory', shortcut: ['Q', 'I'], allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
-        { icon: 'build', label: 'Assets', i18nKey: 'nav.assets', route: '/assets', capability: 'CAP-MD-ASSETS', allowedRoles: ['Admin', 'Manager'] },
-        { icon: 'precision_manufacturing', label: 'Maintenance', i18nKey: 'nav.maintenance', route: '/maintenance/predictions', capability: 'CAP-MAINT-PM', allowedRoles: ['Admin', 'Manager'] },
-      ],
-    },
-    {
-      icon: 'local_shipping', label: 'Purchasing', i18nKey: 'navGroups.purchasing',
+      icon: 'shopping_bag', label: 'Purchasing', i18nKey: 'navGroups.purchasing',
       children: [
         { icon: 'storefront', label: 'Vendors', i18nKey: 'nav.vendors', route: '/vendors', capability: 'CAP-MD-VENDORS', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'description', label: 'Purchase Orders', i18nKey: 'nav.purchaseOrders', route: '/purchase-orders', capability: 'CAP-P2P-PO', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'request_page', label: 'RFQs', i18nKey: 'nav.purchasing', route: '/purchasing', capability: 'CAP-P2P-RFQ', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'request_quote', label: 'Payables', i18nKey: 'nav.payables', route: '/payables', capability: 'CAP-P2P-BILL', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'rule', label: 'Approvals', i18nKey: 'nav.approvals', route: '/approvals', capability: 'CAP-P2P-APPROVALS', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
       ],
     },
+
+    // ── STOCK — physical goods on hand. ──
+    {
+      icon: 'inventory_2', label: 'Inventory', i18nKey: 'navGroups.inventory',
+      children: [
+        { icon: 'inventory', label: 'Stock', i18nKey: 'nav.inventory', route: '/inventory', shortcut: ['Q', 'I'], allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
+      ],
+    },
+
+    // ── EQUIPMENT — asset reliability, unified (was split Inventory/Production). ──
+    {
+      icon: 'construction', label: 'Equipment', i18nKey: 'navGroups.equipment',
+      children: [
+        { icon: 'build', label: 'Assets', i18nKey: 'nav.assets', route: '/assets', capability: 'CAP-MD-ASSETS', allowedRoles: ['Admin', 'Manager'] },
+        { icon: 'handyman', label: 'Maintenance', i18nKey: 'nav.maintenance', route: '/maintenance/predictions', capability: 'CAP-MAINT-PM', allowedRoles: ['Admin', 'Manager'] },
+        { icon: 'speed', label: 'OEE', i18nKey: 'nav.oee', route: '/oee', capability: 'CAP-RPT-OEE', allowedRoles: ['Admin', 'Manager'] },
+      ],
+    },
+
+    // ── SHIP — getting goods to the customer. Consolidates the shipping
+    // workspace, the shipments record, and returns. ──
+    {
+      icon: 'local_shipping', label: 'Fulfillment', i18nKey: 'navGroups.fulfillment',
+      children: [
+        { icon: 'local_shipping', label: 'Shipping', i18nKey: 'nav.shipping', route: '/shipping', capability: 'CAP-O2C-SHIP', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'outbox', label: 'Shipments', i18nKey: 'nav.shipments', route: '/shipments', capability: 'CAP-O2C-SHIP', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'assignment_return', label: 'Customer Returns', i18nKey: 'nav.customerReturns', route: '/customer-returns', capability: 'CAP-O2C-RMA', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
+      ],
+    },
+
+    // ── MONEY — the single home for everything financial: receivables, payables,
+    // expenses, standard costing, and (dark) the full GL suite. This is the
+    // biggest IA win — the money layer was previously spread across Sales,
+    // People, Purchasing, Admin, and its own group. ──
+    {
+      icon: 'account_balance_wallet', label: 'Financials', i18nKey: 'navGroups.financials',
+      children: [
+        { icon: 'receipt', label: 'Invoices', i18nKey: 'nav.invoices', route: '/invoices', capability: 'CAP-O2C-INVOICE', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'payments', label: 'Payments', i18nKey: 'nav.payments', route: '/payments', capability: 'CAP-O2C-CASH', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'request_quote', label: 'Payables', i18nKey: 'nav.payables', route: '/payables', capability: 'CAP-P2P-BILL', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'receipt_long', label: 'Expenses', i18nKey: 'nav.expenses', route: '/expenses', capability: 'CAP-ACCT-EXPENSES', allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
+        // Tier-3 standard costing (overhead pools, budgets, freeze, rates).
+        // Capability-gated (default OFF) — the feature only appears when the
+        // install opts into activity-based costing.
+        { icon: 'calculate', label: 'Costing', i18nKey: 'nav.costing', route: '/costing', capability: 'CAP-COSTING-TIER3-ABC', allowedRoles: ['Admin', 'Manager'] },
+        {
+          // Dark GL accounting suite — hidden unless CAP-ACCT-FULLGL is enabled.
+          icon: 'account_balance', label: 'Accounting', i18nKey: 'navGroups.accounting',
+          capability: 'CAP-ACCT-FULLGL',
+          allowedRoles: ['Admin', 'Manager', 'OfficeManager'],
+          children: [
+            { icon: 'balance', label: 'Trial Balance', i18nKey: 'nav.trialBalance', route: '/accounting/trial-balance' },
+            { icon: 'trending_up', label: 'Profit & Loss', i18nKey: 'nav.profitLoss', route: '/accounting/profit-loss' },
+            { icon: 'account_balance', label: 'Balance Sheet', i18nKey: 'nav.balanceSheet', route: '/accounting/balance-sheet' },
+            { icon: 'waterfall_chart', label: 'Cash Flow', i18nKey: 'nav.cashFlow', route: '/accounting/cash-flow' },
+            { icon: 'trending_flat', label: 'AR Aging', i18nKey: 'nav.arAging', route: '/accounting/ar-aging' },
+            { icon: 'schedule', label: 'AP Aging', i18nKey: 'nav.apAging', route: '/accounting/ap-aging' },
+            { icon: 'inventory_2', label: 'GRNI', i18nKey: 'nav.grni', route: '/accounting/grni' },
+            { icon: 'event_available', label: 'Period Close', i18nKey: 'nav.periodClose', route: '/accounting/period-close', allowedRoles: ['Admin', 'Manager'] },
+            { icon: 'account_balance_wallet', label: 'Bank Reconciliation', i18nKey: 'nav.bankRec', route: '/accounting/bank-rec', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+          ],
+        },
+      ],
+    },
+
+    // ── QUALITY — inspection + regulatory. Quality was previously unreachable
+    // from the nav; Compliance/Watchtower moved here from the Operations bag. ──
+    {
+      icon: 'verified', label: 'Quality', i18nKey: 'navGroups.quality',
+      children: [
+        { icon: 'checklist', label: 'Quality', i18nKey: 'nav.quality', route: '/quality', capability: 'CAP-QC-INSPECTION', allowedRoles: ['Admin', 'Manager', 'Engineer'] },
+        { icon: 'fact_check', label: 'Compliance', i18nKey: 'nav.compliance', route: '/compliance', capability: 'CAP-EXT-WATCHTOWER', allowedRoles: ['Admin', 'Manager', 'ComplianceOfficer', 'OfficeManager'] },
+        { icon: 'radar', label: 'Watchtower', i18nKey: 'nav.watchtower', route: '/watchtower', capability: 'CAP-EXT-WATCHTOWER', allowedRoles: ['Admin', 'Manager'] },
+      ],
+    },
+
+    // ── PEOPLE — HR (expenses moved to Financials). ──
     {
       icon: 'groups', label: 'People', i18nKey: 'navGroups.people',
       children: [
         { icon: 'badge', label: 'Employees', i18nKey: 'nav.employees', route: '/employees', capability: 'CAP-MD-EMPLOYEES', allowedRoles: ['Admin', 'Manager'] },
         { icon: 'schedule', label: 'Time', i18nKey: 'nav.timeTracking', route: '/time-tracking', shortcut: ['Q', 'T'], capability: 'CAP-HR-TIMETRACK' },
-        { icon: 'receipt_long', label: 'Expenses', i18nKey: 'nav.expenses', route: '/expenses', capability: 'CAP-ACCT-EXPENSES', allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
         { icon: 'school', label: 'Training', i18nKey: 'nav.training', route: '/training/library' },
       ],
     },
+
+    // ── INSIGHTS — reporting + AI. ──
     {
       icon: 'insights', label: 'Insights', i18nKey: 'navGroups.insights',
       children: [
         { icon: 'bar_chart', label: 'Reports', i18nKey: 'nav.reports', route: '/reports', shortcut: ['Q', 'R'], allowedRoles: ['Admin', 'Manager', 'PM'] },
         { icon: 'smart_toy', label: 'AI', i18nKey: 'nav.ai', route: '/ai', capability: 'CAP-EXT-AI-ASSISTANT' },
-      ],
-    },
-    {
-      // Dark GL accounting suite — the whole group is hidden unless CAP-ACCT-FULLGL is enabled.
-      icon: 'account_balance', label: 'Accounting', i18nKey: 'navGroups.accounting',
-      capability: 'CAP-ACCT-FULLGL',
-      allowedRoles: ['Admin', 'Manager', 'OfficeManager'],
-      children: [
-        { icon: 'balance', label: 'Trial Balance', i18nKey: 'nav.trialBalance', route: '/accounting/trial-balance' },
-        { icon: 'trending_up', label: 'Profit & Loss', i18nKey: 'nav.profitLoss', route: '/accounting/profit-loss' },
-        { icon: 'account_balance', label: 'Balance Sheet', i18nKey: 'nav.balanceSheet', route: '/accounting/balance-sheet' },
-        { icon: 'waterfall_chart', label: 'Cash Flow', i18nKey: 'nav.cashFlow', route: '/accounting/cash-flow' },
-        { icon: 'trending_flat', label: 'AR Aging', i18nKey: 'nav.arAging', route: '/accounting/ar-aging' },
-        { icon: 'schedule', label: 'AP Aging', i18nKey: 'nav.apAging', route: '/accounting/ap-aging' },
-        { icon: 'inventory_2', label: 'GRNI', i18nKey: 'nav.grni', route: '/accounting/grni' },
-        { icon: 'event_available', label: 'Period Close', i18nKey: 'nav.periodClose', route: '/accounting/period-close', allowedRoles: ['Admin', 'Manager'] },
-        { icon: 'account_balance_wallet', label: 'Bank Reconciliation', i18nKey: 'nav.bankRec', route: '/accounting/bank-rec', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
       ],
     },
   ];

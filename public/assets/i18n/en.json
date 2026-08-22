@@ -72,7 +72,8 @@
     "salesChannelsListings": "Listings",
     "salesChannelsBuyers": "Retail Buyers",
     "salesChannelsSettlements": "Settlements",
-    "salesChannelsConnections": "Connections"
+    "salesChannelsConnections": "Connections",
+    "costing": "Costing"
   },
   "navGroups": {
     "operations": "Operations",
@@ -84,7 +85,11 @@
     "purchasing": "Purchasing",
     "people": "People",
     "insights": "Insights",
-    "accounting": "Accounting"
+    "accounting": "Accounting",
+    "equipment": "Equipment",
+    "fulfillment": "Fulfillment",
+    "financials": "Financials",
+    "quality": "Quality"
   },
   "adminGroups": {
     "usersAccess": "Users & Access",
