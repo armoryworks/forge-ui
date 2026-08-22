@@ -100,7 +100,7 @@
             @if (sel.holidays.length === 0) {
               <p class="working-calendars__holidays-empty">No holidays configured.</p>
             } @else {
-              <table class="working-calendars__holidays-table">
+              <table class="working-calendars__holidays-table" aria-label="Holidays table">
                 <thead>
                   <tr>
                     <th>Date</th>
@@ -160,7 +160,7 @@
             @if (!sel.shifts || sel.shifts.length === 0) {
               <p class="working-calendars__shifts-empty">No shifts configured. Add one below.</p>
             } @else {
-              <table class="working-calendars__holidays-table">
+              <table class="working-calendars__holidays-table" aria-label="Holidays table 2">
                 <thead>
                   <tr>
                     <th>Name</th>

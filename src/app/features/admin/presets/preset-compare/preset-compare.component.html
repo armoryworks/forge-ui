@@ -22,7 +22,7 @@
     <div class="preset-compare" [appLoadingBlock]="loading()">
       @if (response(); as r) {
         <div class="preset-compare__matrix" data-testid="preset-compare-matrix">
-          <table class="preset-compare__table">
+          <table class="preset-compare__table" aria-label="Table table">
             <thead>
               <tr>
                 <th class="preset-compare__th preset-compare__th--row">Capability</th>

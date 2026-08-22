@@ -42,7 +42,7 @@
                 @if (expandedDetail()!.entries.length === 0) {
                   <div class="bom-rev-detail__empty">{{ 'parts.bomRevisionEmptySnapshot' | translate }}</div>
                 } @else {
-                  <table class="bom-rev-table">
+                  <table class="bom-rev-table" aria-label="Bom rev table">
                     <thead>
                       <tr>
                         <th>{{ 'parts.bomPart' | translate }}</th>

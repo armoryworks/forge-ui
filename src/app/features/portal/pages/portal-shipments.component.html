@@ -8,7 +8,7 @@
     <app-empty-state icon="local_shipping" [message]="'portal.shipments.empty' | translate" />
   } @else {
     <div class="portal-list__table-wrap">
-      <table class="portal-list__table">
+      <table class="portal-list__table" [attr.aria-label]="'portal.shipments.title' | translate">
         <thead>
           <tr>
             <th>{{ 'portal.shipments.colNumber' | translate }}</th>

@@ -133,7 +133,7 @@
           </ng-template>
 
           <ng-template appRowExpand let-row>
-            <table class="bin-detail-table">
+            <table class="bin-detail-table" aria-label="Bin detail table">
               <thead>
                 <tr>
                   <th>{{ 'inventory.binDetailHeaders.binLocation' | translate }}</th>
@@ -319,7 +319,7 @@
             @if (loc.locationType === 'Bin' && binContents().length > 0) {
               <div class="contents-section">
                 <span class="section-title">{{ 'inventory.contents' | translate }} ({{ binContents().length }})</span>
-                <table class="bin-detail-table">
+                <table class="bin-detail-table" aria-label="Bin detail table 2">
                   <thead>
                     <tr>
                       <th>{{ 'inventory.binContentHeaders.item' | translate }}</th>
@@ -655,7 +655,7 @@
       </div>
     </div>
 
-    <table class="bin-detail-table">
+    <table class="bin-detail-table" aria-label="Bin detail table 3">
       <thead>
         <tr>
           <th>{{ 'inventory.binContentHeaders.item' | translate }}</th>

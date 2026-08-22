@@ -5,7 +5,7 @@
     @if (!loading() && rows().length === 0) {
       <app-empty-state icon="bar_chart" [message]="'mrp.mpsActual.empty' | translate" />
     } @else {
-      <table class="mps-actual__table">
+      <table class="mps-actual__table" aria-label="Table table">
         <thead>
           <tr>
             <th>{{ 'mrp.cols.partNumber' | translate }}</th>

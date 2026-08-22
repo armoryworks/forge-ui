@@ -8,7 +8,7 @@
     <app-empty-state icon="request_quote" [message]="'portal.quotes.empty' | translate" />
   } @else {
     <div class="portal-list__table-wrap">
-      <table class="portal-list__table">
+      <table class="portal-list__table" [attr.aria-label]="'portal.quotes.title' | translate">
         <thead>
           <tr>
             <th>{{ 'portal.quotes.colNumber' | translate }}</th>

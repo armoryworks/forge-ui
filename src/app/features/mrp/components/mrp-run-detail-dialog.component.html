@@ -71,7 +71,7 @@
           <h4 class="run-detail__section-title">{{ 'mrp.runDetail.timeBuckets' | translate }}</h4>
           @if (partPlan(); as plan) {
             <div class="run-detail__buckets">
-              <table class="run-detail__bucket-table">
+              <table class="run-detail__bucket-table" aria-label="Bucket table">
                 <thead>
                   <tr>
                     <th>{{ 'mrp.runDetail.bucketStart' | translate }}</th>
@@ -102,7 +102,7 @@
 
           @if (pegging().length > 0) {
             <h4 class="run-detail__section-title">{{ 'mrp.runDetail.pegging' | translate }}</h4>
-            <table class="run-detail__bucket-table">
+            <table class="run-detail__bucket-table" aria-label="Bucket table 2">
               <thead>
                 <tr>
                   <th>{{ 'mrp.runDetail.demandSource' | translate }}</th>

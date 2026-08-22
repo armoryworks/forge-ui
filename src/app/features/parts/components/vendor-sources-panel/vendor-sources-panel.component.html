@@ -72,7 +72,7 @@
           <span>{{ (showTierHistory() ? 'vendorSources.tier.hideHistory' : 'vendorSources.tier.showHistory') | translate }}</span>
         </button>
       </header>
-      <table class="vendor-sources__pricing-table">
+      <table class="vendor-sources__pricing-table" aria-label="Pricing table">
         <thead>
           <tr>
             <th>{{ 'vendorSources.pricing.col.vendor' | translate }}</th>
@@ -429,7 +429,7 @@
       </p>
     } @else {
       <table class="vendor-source__tier-table"
-        [class.vendor-source__tier-table--with-history]="showTierHistory()">
+        [class.vendor-source__tier-table--with-history]="showTierHistory()" aria-label="Tier table 2">
         <colgroup>
           <col class="vendor-source__tier-col--qty" />
           <col class="vendor-source__tier-col--price" />

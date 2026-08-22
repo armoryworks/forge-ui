@@ -136,7 +136,7 @@
 
           @if (r.fkOrphans.length > 0) {
             <p class="db-transfer__hint">{{ 'adminDatabase.report.orphanHint' | translate }}</p>
-            <table class="db-transfer__orphans" data-testid="db-import-orphans">
+            <table class="db-transfer__orphans" data-testid="db-import-orphans" aria-label="Orphans table">
               <thead>
                 <tr>
                   <th scope="col">{{ 'adminDatabase.report.colChild' | translate }}</th>

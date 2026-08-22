@@ -8,7 +8,7 @@
     <app-empty-state icon="receipt_long" [message]="'portal.orders.empty' | translate" />
   } @else {
     <div class="portal-list__table-wrap">
-      <table class="portal-list__table">
+      <table class="portal-list__table" [attr.aria-label]="'portal.orders.title' | translate">
         <thead>
           <tr>
             <th>{{ 'portal.orders.colNumber' | translate }}</th>

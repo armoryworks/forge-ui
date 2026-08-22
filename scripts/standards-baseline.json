@@ -105,26 +105,7 @@
     "src/app/features/workflow-demo/workflow-shell-demo.component.html": 4
   },
   "table-missing-a11y": {
-    "src/app/features/accounting/components/journal-entry-editor/journal-entry-editor.component.html": 1,
-    "src/app/features/admin/admin.component.html": 3,
-    "src/app/features/admin/database/database-transfer.component.html": 1,
-    "src/app/features/admin/presets/preset-compare/preset-compare.component.html": 1,
-    "src/app/features/admin/working-calendars/working-calendars.component.html": 2,
-    "src/app/features/costing/costing.component.html": 4,
-    "src/app/features/inventory/inventory.component.html": 3,
-    "src/app/features/leads/pages/intake/leads-intake.component.html": 2,
-    "src/app/features/mrp/components/mps-vs-actual-dialog.component.html": 1,
-    "src/app/features/mrp/components/mrp-run-detail-dialog.component.html": 2,
-    "src/app/features/parts/components/bom-revision-history/bom-revision-history.component.html": 1,
-    "src/app/features/parts/components/part-clusters/part-purchase-units-cluster/part-purchase-units-cluster.component.html": 1,
-    "src/app/features/parts/components/vendor-sources-panel/vendor-sources-panel.component.html": 2,
-    "src/app/features/portal/pages/portal-invoices.component.html": 1,
-    "src/app/features/portal/pages/portal-orders.component.html": 1,
-    "src/app/features/portal/pages/portal-quotes.component.html": 1,
-    "src/app/features/portal/pages/portal-shipments.component.html": 1,
-    "src/app/features/purchase-orders/components/receive-dialog/receive-dialog.component.html": 1,
-    "src/app/features/sales-channels/pages/settlements/settlement-detail-dialog/settlement-detail-dialog.component.html": 1,
-    "src/app/features/shipments/components/shipping-rates-dialog/shipping-rates-dialog.component.html": 1
+    "src/app/features/costing/costing.component.html": 4
   },
   "raw-table-in-features": {
     "src/app/features/accounting/components/balance-sheet/balance-sheet.component.html": 1,

@@ -132,7 +132,7 @@
                   @if (track.description) {
                     <p class="track-description">{{ track.description }}</p>
                   }
-                  <table class="admin-table admin-table--nested">
+                  <table class="admin-table admin-table--nested" aria-label="Admin table">
                     <thead>
                       <tr>
                         <th>{{ 'admin.order' | translate }}</th>
@@ -193,7 +193,7 @@
         @if (terminologyEntries().length === 0) {
           <app-empty-state icon="translate" [message]="'admin.noTerminology' | translate" />
         } @else {
-          <table class="admin-table">
+          <table class="admin-table" aria-label="Admin table 2">
             <thead>
               <tr>
                 <th>{{ 'admin.key' | translate }}</th>
@@ -580,7 +580,7 @@
 
               @if (expandedGroup() === group.groupCode) {
                 <div class="accordion-body">
-                  <table class="admin-table admin-table--nested">
+                  <table class="admin-table admin-table--nested" aria-label="Admin table 3">
                     <thead>
                       <tr>
                         <th>{{ 'admin.order' | translate }}</th>

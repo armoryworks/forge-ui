@@ -7,7 +7,7 @@
           <span class="chip" [class.chip--warning]="o.status === 'Reversed'" [class.chip--success]="o.status === 'Posted'">{{ o.status }}</span>
           <span class="je-original__memo">{{ o.memo }}</span>
         </div>
-        <table class="je-original__lines">
+        <table class="je-original__lines" aria-label="Lines table">
           <thead>
             <tr>
               <th scope="col">{{ 'accounting.journalEditor.account' | translate }}</th>
