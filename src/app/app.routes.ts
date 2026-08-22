@@ -100,6 +100,12 @@ export const routes: Routes = [
           import('./features/parts/parts.routes').then((m) => m.PARTS_ROUTES),
       },
       {
+        path: 'costing',
+        canActivate: [roleGuard('Admin', 'Manager')],
+        loadChildren: () =>
+          import('./features/costing/costing.routes').then((m) => m.COSTING_ROUTES),
+      },
+      {
         // Gated Sequence Engine — dark by default (CAP-CROSS-SEQUENCES), so the
         // whole area is unreachable by URL until the capability is enabled.
         path: 'sequences',

@@ -8970,5 +8970,61 @@
       "Domain": "Solo dominio",
       "Unmatched": "Remitente desconocido"
     }
+  },
+  "costing": {
+    "title": "Costeo (Nivel 3)",
+    "tabs": {
+      "periods": "Periodos",
+      "costCenters": "Centros de Costo",
+      "pools": "Fondos de Gastos Generales"
+    },
+    "periods": {
+      "start": "Inicio",
+      "end": "Fin",
+      "create": "Nuevo Periodo",
+      "status": "Estado",
+      "frozen": "Congelado",
+      "freeze": "Congelar",
+      "viewRates": "Ver Tasas",
+      "noneYet": "Aún no hay periodos"
+    },
+    "rates": {
+      "title": "Tasas Congeladas por Centro de Trabajo",
+      "workCenter": "Centro de Trabajo",
+      "labor": "Mano de Obra",
+      "laborOh": "GG Mano de Obra",
+      "machine": "Máquina",
+      "mchVar": "GG Máq. Var.",
+      "mchFixed": "GG Máq. Fijo",
+      "noneYet": "Sin tasas — congele el periodo primero"
+    },
+    "costCenters": {
+      "code": "Código",
+      "name": "Nombre",
+      "type": "Tipo",
+      "sqft": "Pies²",
+      "headcount": "Personal",
+      "inventoriable": "Inventariable",
+      "create": "Agregar Centro de Costo",
+      "noneYet": "Aún no hay centros de costo"
+    },
+    "pools": {
+      "costCenter": "Centro de Costo",
+      "code": "Código",
+      "name": "Nombre",
+      "behavior": "Comportamiento",
+      "fixedPortion": "Porción Fija",
+      "driver": "Generador",
+      "create": "Agregar Fondo",
+      "noneYet": "Aún no hay fondos"
+    },
+    "budget": {
+      "title": "Establecer Presupuesto",
+      "pool": "Fondo",
+      "period": "Periodo",
+      "amount": "Monto Presupuestado",
+      "qty": "Cant. Generador",
+      "set": "Establecer Presupuesto"
+    }
   }
 }

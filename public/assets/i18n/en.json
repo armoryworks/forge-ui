@@ -8970,5 +8970,61 @@
       "Domain": "Domain only",
       "Unmatched": "Unknown sender"
     }
+  },
+  "costing": {
+    "title": "Costing (Tier 3)",
+    "tabs": {
+      "periods": "Periods",
+      "costCenters": "Cost Centers",
+      "pools": "Overhead Pools"
+    },
+    "periods": {
+      "start": "Start",
+      "end": "End",
+      "create": "New Period",
+      "status": "Status",
+      "frozen": "Frozen",
+      "freeze": "Freeze",
+      "viewRates": "View Rates",
+      "noneYet": "No periods yet"
+    },
+    "rates": {
+      "title": "Frozen Work-Center Rates",
+      "workCenter": "Work Center",
+      "labor": "Labor",
+      "laborOh": "Labor OH",
+      "machine": "Machine",
+      "mchVar": "Mch OH Var",
+      "mchFixed": "Mch OH Fixed",
+      "noneYet": "No rates — freeze the period first"
+    },
+    "costCenters": {
+      "code": "Code",
+      "name": "Name",
+      "type": "Type",
+      "sqft": "Sq Ft",
+      "headcount": "Headcount",
+      "inventoriable": "Inventoriable",
+      "create": "Add Cost Center",
+      "noneYet": "No cost centers yet"
+    },
+    "pools": {
+      "costCenter": "Cost Center",
+      "code": "Code",
+      "name": "Name",
+      "behavior": "Behavior",
+      "fixedPortion": "Fixed Portion",
+      "driver": "Driver",
+      "create": "Add Pool",
+      "noneYet": "No pools yet"
+    },
+    "budget": {
+      "title": "Set Pool Budget",
+      "pool": "Pool",
+      "period": "Period",
+      "amount": "Budget Amount",
+      "qty": "Driver Qty",
+      "set": "Set Budget"
+    }
   }
 }

@@ -1,0 +1,186 @@
+<div class="costing">
+  <div class="page-header">
+    <h1 class="costing__title">{{ 'costing.title' | translate }}</h1>
+  </div>
+
+  <div class="tab-bar" role="tablist">
+    <button class="tab" role="tab" [class.tab--active]="activeTab() === 'periods'" (click)="switchTab('periods')">
+      {{ 'costing.tabs.periods' | translate }}
+    </button>
+    <button class="tab" role="tab" [class.tab--active]="activeTab() === 'cost-centers'" (click)="switchTab('cost-centers')">
+      {{ 'costing.tabs.costCenters' | translate }}
+    </button>
+    <button class="tab" role="tab" [class.tab--active]="activeTab() === 'pools'" (click)="switchTab('pools')">
+      {{ 'costing.tabs.pools' | translate }}
+    </button>
+  </div>
+
+  @if (activeTab() === 'periods') {
+    <section class="tab-panel">
+      <div class="create-row" [formGroup]="periodForm">
+        <app-datepicker [label]="'costing.periods.start' | translate" formControlName="start" [required]="true" />
+        <app-datepicker [label]="'costing.periods.end' | translate" formControlName="end" [required]="true" />
+        <button class="action-btn action-btn--create" [disabled]="periodForm.invalid" (click)="createPeriod()">
+          {{ 'costing.periods.create' | translate }}
+        </button>
+      </div>
+
+      <table class="grid">
+        <thead>
+          <tr>
+            <th scope="col">{{ 'costing.periods.start' | translate }}</th>
+            <th scope="col">{{ 'costing.periods.end' | translate }}</th>
+            <th scope="col">{{ 'costing.periods.status' | translate }}</th>
+            <th scope="col">{{ 'costing.periods.frozen' | translate }}</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of periods(); track p.id) {
+            <tr>
+              <td>{{ fmt(p.startDate) }}</td>
+              <td>{{ fmt(p.endDate) }}</td>
+              <td><span class="chip">{{ p.status }}</span></td>
+              <td>{{ fmt(p.frozenAt) }}</td>
+              <td class="grid__actions">
+                @if (p.status === 'Open') {
+                  <button class="action-btn action-btn--sm action-btn--primary" (click)="freeze(p)">
+                    {{ 'costing.periods.freeze' | translate }}
+                  </button>
+                }
+                <button class="action-btn action-btn--sm" (click)="viewRates(p.id)">
+                  {{ 'costing.periods.viewRates' | translate }}
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="grid__empty">{{ 'costing.periods.noneYet' | translate }}</td></tr>
+          }
+        </tbody>
+      </table>
+
+      @if (ratesPeriodId() !== null) {
+        <h2 class="costing__subtitle">{{ 'costing.rates.title' | translate }}</h2>
+        <table class="grid">
+          <thead>
+            <tr>
+              <th scope="col">{{ 'costing.rates.workCenter' | translate }}</th>
+              <th scope="col">{{ 'costing.rates.labor' | translate }}</th>
+              <th scope="col">{{ 'costing.rates.laborOh' | translate }}</th>
+              <th scope="col">{{ 'costing.rates.machine' | translate }}</th>
+              <th scope="col">{{ 'costing.rates.mchVar' | translate }}</th>
+              <th scope="col">{{ 'costing.rates.mchFixed' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of rates(); track r.id) {
+              <tr>
+                <td>#{{ r.workCenterId }}</td>
+                <td class="num">{{ r.laborRate }}</td>
+                <td class="num">{{ r.laborOhRate }}</td>
+                <td class="num">{{ r.machineRate }}</td>
+                <td class="num">{{ r.machineOhVarRate }}</td>
+                <td class="num">{{ r.machineOhFixedRate }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" class="grid__empty">{{ 'costing.rates.noneYet' | translate }}</td></tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
+  }
+
+  @if (activeTab() === 'cost-centers') {
+    <section class="tab-panel">
+      <div class="create-row create-row--wrap" [formGroup]="costCenterForm">
+        <app-input [label]="'costing.costCenters.code' | translate" formControlName="code" [required]="true" />
+        <app-input [label]="'costing.costCenters.name' | translate" formControlName="name" [required]="true" />
+        <app-select [label]="'costing.costCenters.type' | translate" formControlName="type" [options]="typeOptions" />
+        <app-input [label]="'costing.costCenters.sqft' | translate" type="number" formControlName="sqft" />
+        <app-input [label]="'costing.costCenters.headcount' | translate" type="number" formControlName="headcount" />
+        <app-toggle [label]="'costing.costCenters.inventoriable' | translate" formControlName="isInventoriable" />
+        <button class="action-btn action-btn--create" [disabled]="costCenterForm.invalid" (click)="createCostCenter()">
+          {{ 'costing.costCenters.create' | translate }}
+        </button>
+      </div>
+
+      <table class="grid">
+        <thead>
+          <tr>
+            <th scope="col">{{ 'costing.costCenters.code' | translate }}</th>
+            <th scope="col">{{ 'costing.costCenters.name' | translate }}</th>
+            <th scope="col">{{ 'costing.costCenters.type' | translate }}</th>
+            <th scope="col">{{ 'costing.costCenters.sqft' | translate }}</th>
+            <th scope="col">{{ 'costing.costCenters.headcount' | translate }}</th>
+            <th scope="col">{{ 'costing.costCenters.inventoriable' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of costCenters(); track c.id) {
+            <tr>
+              <td>{{ c.code }}</td>
+              <td>{{ c.name }}</td>
+              <td>{{ c.type }}</td>
+              <td class="num">{{ c.sqft }}</td>
+              <td class="num">{{ c.headcount }}</td>
+              <td>{{ c.isInventoriable ? '✓' : '' }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="grid__empty">{{ 'costing.costCenters.noneYet' | translate }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  }
+
+  @if (activeTab() === 'pools') {
+    <section class="tab-panel">
+      <div class="create-row create-row--wrap" [formGroup]="poolForm">
+        <app-select [label]="'costing.pools.costCenter' | translate" formControlName="costingCostCenterId" [options]="costCenterOptions()" />
+        <app-input [label]="'costing.pools.code' | translate" formControlName="code" [required]="true" />
+        <app-input [label]="'costing.pools.name' | translate" formControlName="name" [required]="true" />
+        <app-select [label]="'costing.pools.behavior' | translate" formControlName="behavior" [options]="behaviorOptions" />
+        <app-input [label]="'costing.pools.fixedPortion' | translate" type="number" formControlName="fixedPortion" />
+        <app-select [label]="'costing.pools.driver' | translate" formControlName="driver" [options]="driverOptions" />
+        <button class="action-btn action-btn--create" [disabled]="poolForm.invalid" (click)="createPool()">
+          {{ 'costing.pools.create' | translate }}
+        </button>
+      </div>
+
+      <table class="grid">
+        <thead>
+          <tr>
+            <th scope="col">{{ 'costing.pools.code' | translate }}</th>
+            <th scope="col">{{ 'costing.pools.name' | translate }}</th>
+            <th scope="col">{{ 'costing.pools.behavior' | translate }}</th>
+            <th scope="col">{{ 'costing.pools.driver' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of pools(); track p.id) {
+            <tr>
+              <td>{{ p.code }}</td>
+              <td>{{ p.name }}</td>
+              <td>{{ p.behavior }}</td>
+              <td>{{ p.driver }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="grid__empty">{{ 'costing.pools.noneYet' | translate }}</td></tr>
+          }
+        </tbody>
+      </table>
+
+      <h2 class="costing__subtitle">{{ 'costing.budget.title' | translate }}</h2>
+      <div class="create-row create-row--wrap" [formGroup]="budgetForm">
+        <app-select [label]="'costing.budget.pool' | translate" formControlName="overheadCostPoolId" [options]="poolOptions()" />
+        <app-select [label]="'costing.budget.period' | translate" formControlName="costingPeriodId" [options]="periodOptions()" />
+        <app-input [label]="'costing.budget.amount' | translate" type="number" formControlName="budgetAmount" [required]="true" />
+        <app-input [label]="'costing.budget.qty' | translate" type="number" formControlName="budgetDriverQty" [required]="true" />
+        <button class="action-btn action-btn--primary" [disabled]="budgetForm.invalid" (click)="setBudget()">
+          {{ 'costing.budget.set' | translate }}
+        </button>
+      </div>
+    </section>
+  }
+</div>
