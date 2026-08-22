@@ -1,8 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
+
+import { format } from 'date-fns';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -32,7 +35,7 @@ type CostingTab = 'periods' | 'cost-centers' | 'pools';
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent, DatepickerComponent,
-    ToggleComponent, PageLayoutComponent, DataTableComponent, ColumnCellDirective,
+    ToggleComponent, PageLayoutComponent, DataTableComponent, ColumnCellDirective, DatePipe,
   ],
   templateUrl: './costing.component.html',
   styleUrl: './costing.component.scss',
@@ -157,8 +160,9 @@ export class CostingComponent {
     this.router.navigate(['..', tab], { relativeTo: this.route });
   }
 
+  /** MM/dd/yyyy for select labels (templates use the date pipe directly). */
   protected fmt(iso: string | null): string {
-    return iso ? new Date(iso).toLocaleDateString('en-US') : '';
+    return iso ? format(new Date(iso), 'MM/dd/yyyy') : '';
   }
 
   private loadPeriods(): void {

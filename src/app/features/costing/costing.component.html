@@ -26,9 +26,9 @@
 
       <app-data-table tableId="costing-periods" [columns]="periodColumns" [data]="periods()"
         emptyIcon="event_note" [emptyMessage]="'costing.periods.noneYet' | translate">
-        <ng-template appColumnCell="startDate" let-row>{{ fmt(row.startDate) }}</ng-template>
-        <ng-template appColumnCell="endDate" let-row>{{ fmt(row.endDate) }}</ng-template>
-        <ng-template appColumnCell="frozenAt" let-row>{{ fmt(row.frozenAt) }}</ng-template>
+        <ng-template appColumnCell="startDate" let-row>{{ row.startDate | date:'MM/dd/yyyy' }}</ng-template>
+        <ng-template appColumnCell="endDate" let-row>{{ row.endDate | date:'MM/dd/yyyy' }}</ng-template>
+        <ng-template appColumnCell="frozenAt" let-row>{{ row.frozenAt | date:'MM/dd/yyyy' }}</ng-template>
         <ng-template appColumnCell="status" let-row><span class="chip">{{ row.status }}</span></ng-template>
         <ng-template appColumnCell="actions" let-row>
           <div class="row-actions">
