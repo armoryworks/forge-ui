@@ -73,7 +73,11 @@
     "salesChannelsBuyers": "Retail Buyers",
     "salesChannelsSettlements": "Settlements",
     "salesChannelsConnections": "Connections",
-    "costing": "Costing"
+    "costing": "Costing",
+    "journalEntries": "Journal Entries",
+    "ledger": "Ledger",
+    "bankStatements": "Bank Statements",
+    "exports": "QBO Export"
   },
   "navGroups": {
     "operations": "Operations",

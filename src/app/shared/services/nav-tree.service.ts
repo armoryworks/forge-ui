@@ -178,15 +178,25 @@ export class NavTreeService {
           capability: 'CAP-ACCT-FULLGL',
           allowedRoles: ['Admin', 'Manager', 'OfficeManager'],
           children: [
+            // Data-entry surfaces first — these exist on main but were previously
+            // absent from the nav, so the GL looked read-only. Posting journals is
+            // a controller/manager function, so it's role-gated tighter than reports.
+            { icon: 'post_add', label: 'Journal Entries', i18nKey: 'nav.journalEntries', route: '/accounting/journal-entries/new', allowedRoles: ['Admin', 'Manager'] },
+            { icon: 'menu_book', label: 'Ledger', i18nKey: 'nav.ledger', route: '/accounting/ledger' },
+            // Financial statements.
             { icon: 'balance', label: 'Trial Balance', i18nKey: 'nav.trialBalance', route: '/accounting/trial-balance' },
             { icon: 'trending_up', label: 'Profit & Loss', i18nKey: 'nav.profitLoss', route: '/accounting/profit-loss' },
             { icon: 'account_balance', label: 'Balance Sheet', i18nKey: 'nav.balanceSheet', route: '/accounting/balance-sheet' },
             { icon: 'waterfall_chart', label: 'Cash Flow', i18nKey: 'nav.cashFlow', route: '/accounting/cash-flow' },
+            // Sub-ledgers / aging.
             { icon: 'trending_flat', label: 'AR Aging', i18nKey: 'nav.arAging', route: '/accounting/ar-aging' },
             { icon: 'schedule', label: 'AP Aging', i18nKey: 'nav.apAging', route: '/accounting/ap-aging' },
             { icon: 'inventory_2', label: 'GRNI', i18nKey: 'nav.grni', route: '/accounting/grni' },
-            { icon: 'event_available', label: 'Period Close', i18nKey: 'nav.periodClose', route: '/accounting/period-close', allowedRoles: ['Admin', 'Manager'] },
+            // Bank + period + export.
             { icon: 'account_balance_wallet', label: 'Bank Reconciliation', i18nKey: 'nav.bankRec', route: '/accounting/bank-rec', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+            { icon: 'receipt_long', label: 'Bank Statements', i18nKey: 'nav.bankStatements', route: '/accounting/bank-statements', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+            { icon: 'event_available', label: 'Period Close', i18nKey: 'nav.periodClose', route: '/accounting/period-close', allowedRoles: ['Admin', 'Manager'] },
+            { icon: 'sync_alt', label: 'QBO Export', i18nKey: 'nav.exports', route: '/accounting/exports', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
           ],
         },
       ],

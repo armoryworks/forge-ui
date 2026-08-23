@@ -73,7 +73,11 @@
     "salesChannelsBuyers": "Compradores minoristas",
     "salesChannelsSettlements": "Liquidaciones",
     "salesChannelsConnections": "Conexiones",
-    "costing": "Costeo"
+    "costing": "Costeo",
+    "journalEntries": "Asientos Contables",
+    "ledger": "Libro Mayor",
+    "bankStatements": "Extractos Bancarios",
+    "exports": "Exportar a QBO"
   },
   "navGroups": {
     "operations": "Operaciones",
