@@ -3,6 +3,10 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 
+import { AuthService } from './auth.service';
+import { UserPreferencesService } from './user-preferences.service';
+import { LANDING_ROUTE_PREF_KEY, resolveRoleLanding } from '../models/role-landing.model';
+
 const MOBILE_BREAKPOINT = 768;
 
 @Injectable({ providedIn: 'root' })
@@ -10,6 +14,8 @@ export class LayoutService {
   private readonly ngZone = inject(NgZone);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
+  private readonly userPreferences = inject(UserPreferencesService);
 
   private readonly _sidebarCollapsed = signal(this.loadCollapsedState());
   private readonly _mobileMenuOpen = signal(false);
@@ -140,8 +146,17 @@ export class LayoutService {
    * Returns the default post-login route: `/m` for mobile devices, `/dashboard` for desktop.
    * Use this everywhere a login flow redirects the user.
    */
+  /**
+   * The post-login / root landing route. Mobile devices go to `/m`. Otherwise an
+   * explicit per-user preference wins; failing that, a user with a single mapped
+   * role lands on that role's most relevant screen; everyone else lands on the
+   * dashboard. A mapped screen gated off by capability falls back via its guard.
+   */
   getDefaultRoute(): string {
-    return this.isMobileDevice() ? '/m' : '/dashboard';
+    if (this.isMobileDevice()) return '/m';
+    const explicit = this.userPreferences.get<string>(LANDING_ROUTE_PREF_KEY);
+    if (explicit) return explicit;
+    return resolveRoleLanding(this.auth.user()?.roles ?? []) ?? '/dashboard';
   }
 
   private detectMobileDevice(): boolean {

@@ -2,9 +2,11 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
+import { LANDING_OPTIONS, LANDING_ROUTE_PREF_KEY } from '../../../../shared/models/role-landing.model';
 import { CONFIRM_BEFORE_SEND_PREF_KEY } from '../../../../shared/services/confirm-send.service';
 import { FontScale, ThemeService } from '../../../../shared/services/theme.service';
 import { UserPreferencesService } from '../../../../shared/services/user-preferences.service';
@@ -23,7 +25,7 @@ const DRAFT_TTL_PREF_KEY = 'draft:ttlMs';
 @Component({
   selector: 'app-account-customization',
   standalone: true,
-  imports: [TranslatePipe, ReactiveFormsModule, ToggleComponent],
+  imports: [TranslatePipe, ReactiveFormsModule, ToggleComponent, SelectComponent],
   templateUrl: './account-customization.component.html',
   styleUrl: './account-customization.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,7 +35,18 @@ export class AccountCustomizationComponent {
   private readonly preferences = inject(UserPreferencesService);
   private readonly idleService = inject(IdleService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
   protected readonly chatNotification = inject(ChatNotificationService);
+
+  /** Default landing screen. 'auto' clears the preference → role-based landing. */
+  protected readonly landingOptions: SelectOption[] = LANDING_OPTIONS.map((o) => ({
+    value: o.value,
+    label: this.translate.instant(o.labelKey),
+  }));
+  protected readonly landingControl = new FormControl<string>(
+    this.preferences.get<string>(LANDING_ROUTE_PREF_KEY) ?? 'auto',
+    { nonNullable: true },
+  );
 
   /** Confirm-before-send safety prompt — ON by default when never set. */
   protected readonly confirmBeforeSendControl = new FormControl<boolean>(
@@ -46,6 +59,16 @@ export class AccountCustomizationComponent {
       takeUntilDestroyed(this.destroyRef),
     ).subscribe(enabled => {
       this.preferences.set(CONFIRM_BEFORE_SEND_PREF_KEY, enabled);
+    });
+
+    this.landingControl.valueChanges.pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(value => {
+      if (value === 'auto') {
+        this.preferences.reset(LANDING_ROUTE_PREF_KEY);
+      } else {
+        this.preferences.set(LANDING_ROUTE_PREF_KEY, value);
+      }
     });
   }
 

@@ -34,6 +34,16 @@
     </div>
   </div>
 
+  <!-- Landing screen -->
+  <div class="account-page__card">
+    <span class="account-page__section-label">{{ 'account.landingScreen' | translate }}</span>
+    <p class="customization__hint">{{ 'account.landingScreenHint' | translate }}</p>
+    <app-select
+      [label]="'account.landingScreen' | translate"
+      [options]="landingOptions"
+      [formControl]="landingControl" />
+  </div>
+
   <!-- Text Size -->
   <div class="account-page__card">
     <span class="account-page__section-label">{{ 'account.displayPreferences' | translate }}</span>
