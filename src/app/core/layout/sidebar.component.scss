@@ -281,9 +281,11 @@
   }
 }
 
-// The active parent's label, rotated to run vertically down the rail (top-to-bottom).
+// The active parent's label, rotated to run vertically down the rail with the
+// top of the letters on the left (reads bottom-to-top, like a left-edge tab).
 .rail-item__vlabel {
   writing-mode: vertical-rl;
+  transform: rotate(180deg);
   @include uppercase-label($font-size-xs, 0.1em, 700);
   color: var(--primary);
   white-space: nowrap;
