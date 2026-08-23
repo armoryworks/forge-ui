@@ -433,3 +433,50 @@ export interface ScenarioCheckResult {
   passed: boolean;
   validators: ValidatorResult[];
 }
+
+/** A chart-of-accounts row for the management screen — full editable surface + HasPostings lock flag. */
+export interface GlAccountAdmin {
+  id: number;
+  accountNumber: string;
+  name: string;
+  accountType: string;
+  normalBalance: string;
+  parentAccountId: number | null;
+  isPostable: boolean;
+  isControlAccount: boolean;
+  isActive: boolean;
+  requiresJob: boolean;
+  requiresCostCenter: boolean;
+  cashFlowCategory: string | null;
+  description: string | null;
+  hasPostings: boolean;
+}
+
+/** Create payload for a new GL account. */
+export interface CreateGlAccountRequest {
+  bookId: number;
+  accountNumber: string;
+  name: string;
+  accountType: string;
+  normalBalance: string;
+  parentAccountId: number | null;
+  requiresJob: boolean;
+  requiresCostCenter: boolean;
+  cashFlowCategory: string | null;
+  description: string | null;
+}
+
+/** Update payload — structural fields (accountNumber/accountType/normalBalance) applied only when unposted. */
+export interface UpdateGlAccountRequest {
+  id: number;
+  name: string;
+  parentAccountId: number | null;
+  requiresJob: boolean;
+  requiresCostCenter: boolean;
+  cashFlowCategory: string | null;
+  description: string | null;
+  isActive: boolean;
+  accountNumber: string | null;
+  accountType: string | null;
+  normalBalance: string | null;
+}

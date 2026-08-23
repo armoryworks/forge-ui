@@ -15,6 +15,9 @@ import {
   FiscalPeriodStatus,
   FiscalYearModel,
   GlAccount,
+  GlAccountAdmin,
+  CreateGlAccountRequest,
+  UpdateGlAccountRequest,
   GlAnomaly,
   GlAnomalyFilter,
   GrniReconciliation,
@@ -169,6 +172,21 @@ export class GeneralLedgerService {
   /** Post a balanced manual journal entry via the GL posting engine. */
   createManualJournalEntry(request: ManualJournalEntryInput): Observable<ManualJournalEntryResult> {
     return this.http.post<ManualJournalEntryResult>(`${this.base}/journal-entries`, request);
+  }
+
+  /** Full chart of accounts (incl. inactive + HasPostings) for the management screen. */
+  listGlAccountsForManagement(bookId: number): Observable<GlAccountAdmin[]> {
+    return this.http.get<GlAccountAdmin[]>(`${this.base}/accounts/manage`, { params: new HttpParams().set('bookId', bookId) });
+  }
+
+  /** Create a new postable GL account. */
+  createGlAccount(request: CreateGlAccountRequest): Observable<GlAccountAdmin> {
+    return this.http.post<GlAccountAdmin>(`${this.base}/accounts`, request);
+  }
+
+  /** Edit a GL account (structural fields locked once it has postings). */
+  updateGlAccount(request: UpdateGlAccountRequest): Observable<GlAccountAdmin> {
+    return this.http.put<GlAccountAdmin>(`${this.base}/accounts/${request.id}`, request);
   }
 
   /** Deterministic reviewer anomaly scan over posted manual entries (feeds the AI-explain workflow). */

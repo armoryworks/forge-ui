@@ -77,7 +77,8 @@
     "journalEntries": "Asientos Contables",
     "ledger": "Libro Mayor",
     "bankStatements": "Extractos Bancarios",
-    "exports": "Exportar a QBO"
+    "exports": "Exportar a QBO",
+    "chartOfAccounts": "Plan de Cuentas"
   },
   "navGroups": {
     "operations": "Operaciones",
@@ -8402,6 +8403,25 @@
       "confirm": "Confirmar coincidencia",
       "ignore": "Ignorar",
       "unmatch": "Deshacer coincidencia"
+    },
+    "coa": {
+      "title": "Plan de Cuentas",
+      "newAccount": "Nueva Cuenta",
+      "none": "Aún no hay cuentas",
+      "control": "Control",
+      "createTitle": "Nueva Cuenta",
+      "editTitle": "Editar Cuenta",
+      "number": "Número de Cuenta",
+      "name": "Nombre",
+      "type": "Tipo",
+      "normalBalance": "Saldo Normal",
+      "parent": "Cuenta Padre",
+      "cashFlow": "Categoría de Flujo de Efectivo",
+      "requiresJob": "Requiere Trabajo",
+      "requiresCostCenter": "Requiere Centro de Costo",
+      "active": "Activa",
+      "description": "Descripción",
+      "lockedNote": "Esta cuenta tiene asientos — su número, tipo y saldo normal están bloqueados. Cree una cuenta nueva para cambios estructurales."
     }
   },
   "payables": {

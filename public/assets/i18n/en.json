@@ -77,7 +77,8 @@
     "journalEntries": "Journal Entries",
     "ledger": "Ledger",
     "bankStatements": "Bank Statements",
-    "exports": "QBO Export"
+    "exports": "QBO Export",
+    "chartOfAccounts": "Chart of Accounts"
   },
   "navGroups": {
     "operations": "Operations",
@@ -8402,6 +8403,25 @@
       "confirm": "Confirm match",
       "ignore": "Ignore",
       "unmatch": "Unmatch"
+    },
+    "coa": {
+      "title": "Chart of Accounts",
+      "newAccount": "New Account",
+      "none": "No accounts yet",
+      "control": "Control",
+      "createTitle": "New Account",
+      "editTitle": "Edit Account",
+      "number": "Account Number",
+      "name": "Name",
+      "type": "Type",
+      "normalBalance": "Normal Balance",
+      "parent": "Parent Account",
+      "cashFlow": "Cash Flow Category",
+      "requiresJob": "Requires Job",
+      "requiresCostCenter": "Requires Cost Center",
+      "active": "Active",
+      "description": "Description",
+      "lockedNote": "This account has postings — its number, type, and normal balance are locked. Create a new account for structural changes."
     }
   },
   "payables": {

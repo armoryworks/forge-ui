@@ -1,0 +1,67 @@
+<app-page-layout [pageTitle]="'accounting.coa.title' | translate">
+  <ng-container toolbar>
+    <button class="action-btn action-btn--create" (click)="openCreate()" data-testid="coa-new">
+      <span class="material-icons-outlined">add</span> {{ 'accounting.coa.newAccount' | translate }}
+    </button>
+  </ng-container>
+
+  <ng-container content>
+    <app-data-table tableId="chart-of-accounts" [columns]="columns" [data]="accounts()" [loading]="loading()"
+      emptyIcon="account_balance" [emptyMessage]="'accounting.coa.none' | translate" [clickableRows]="true"
+      (rowClick)="openEdit($any($event))">
+      <ng-template appColumnCell="isPostable" let-row>{{ row.isPostable ? '✓' : '' }}</ng-template>
+      <ng-template appColumnCell="isActive" let-row>{{ row.isActive ? '✓' : '—' }}</ng-template>
+      <ng-template appColumnCell="name" let-row>
+        {{ row.name }}
+        @if (row.isControlAccount) { <span class="coa-chip">{{ 'accounting.coa.control' | translate }}</span> }
+      </ng-template>
+      <ng-template appColumnCell="actions" let-row>
+        @if (!row.isControlAccount) {
+          <button class="action-btn action-btn--sm" (click)="openEdit(row); $event.stopPropagation()"
+            [attr.data-testid]="'coa-edit-' + row.id">{{ 'common.edit' | translate }}</button>
+        }
+      </ng-template>
+    </app-data-table>
+  </ng-container>
+</app-page-layout>
+
+@if (dialogOpen()) {
+  <app-dialog [title]="(editing() ? 'accounting.coa.editTitle' : 'accounting.coa.createTitle') | translate"
+    width="520px" (closed)="close()">
+    <div [formGroup]="form">
+      @if (structuralLocked()) {
+        <p class="coa-lock-note">
+          <span class="material-icons-outlined">lock</span>
+          {{ 'accounting.coa.lockedNote' | translate }}
+        </p>
+      }
+      <div class="dialog-row">
+        <app-input [label]="'accounting.coa.number' | translate" formControlName="accountNumber" [required]="true"
+          [isReadonly]="structuralLocked()" data-testid="coa-number" />
+        <app-input [label]="'accounting.coa.name' | translate" formControlName="name" [required]="true" data-testid="coa-name" />
+      </div>
+      <div class="dialog-row">
+        <app-select [label]="'accounting.coa.type' | translate" formControlName="accountType" [options]="typeOptions"
+          (valueChange)="onTypeChange()" data-testid="coa-type" />
+        <app-select [label]="'accounting.coa.normalBalance' | translate" formControlName="normalBalance" [options]="balanceOptions" data-testid="coa-balance" />
+      </div>
+      <div class="dialog-row">
+        <app-select [label]="'accounting.coa.parent' | translate" formControlName="parentAccountId" [options]="parentOptions()" data-testid="coa-parent" />
+        <app-select [label]="'accounting.coa.cashFlow' | translate" formControlName="cashFlowCategory" [options]="cashFlowOptions" data-testid="coa-cashflow" />
+      </div>
+      <div class="dialog-row">
+        <app-toggle [label]="'accounting.coa.requiresJob' | translate" formControlName="requiresJob" data-testid="coa-requires-job" />
+        <app-toggle [label]="'accounting.coa.requiresCostCenter' | translate" formControlName="requiresCostCenter" data-testid="coa-requires-cc" />
+      </div>
+      <app-toggle [label]="'accounting.coa.active' | translate" formControlName="isActive" data-testid="coa-active" />
+      <app-textarea [label]="'accounting.coa.description' | translate" formControlName="description" [rows]="2" data-testid="coa-description" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+      <button class="action-btn action-btn--primary" [disabled]="form.invalid || saving()" (click)="save()" data-testid="coa-save">
+        {{ 'common.save' | translate }}
+      </button>
+    </div>
+  </app-dialog>
+}

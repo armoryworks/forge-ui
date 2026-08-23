@@ -181,6 +181,7 @@ export class NavTreeService {
             // Data-entry surfaces first — these exist on main but were previously
             // absent from the nav, so the GL looked read-only. Posting journals is
             // a controller/manager function, so it's role-gated tighter than reports.
+            { icon: 'account_tree', label: 'Chart of Accounts', i18nKey: 'nav.chartOfAccounts', route: '/accounting/chart-of-accounts', allowedRoles: ['Admin', 'Manager'] },
             { icon: 'post_add', label: 'Journal Entries', i18nKey: 'nav.journalEntries', route: '/accounting/journal-entries/new', allowedRoles: ['Admin', 'Manager'] },
             { icon: 'menu_book', label: 'Ledger', i18nKey: 'nav.ledger', route: '/accounting/ledger' },
             // Financial statements.

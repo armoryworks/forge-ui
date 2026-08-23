@@ -21,6 +21,12 @@ export const ACCOUNTING_ROUTES: Routes = [
   },
   {
     // Write surface — posting a manual journal entry needs full GL, not just the view capability.
+    path: 'chart-of-accounts',
+    canActivate: [capabilityGuard('CAP-ACCT-FULLGL')],
+    loadComponent: () =>
+      import('./components/chart-of-accounts/chart-of-accounts.component').then((m) => m.ChartOfAccountsComponent),
+  },
+  {
     path: 'journal-entries/new',
     canActivate: [capabilityGuard('CAP-ACCT-FULLGL')],
     loadComponent: () =>
