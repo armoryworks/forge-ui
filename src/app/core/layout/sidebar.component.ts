@@ -54,6 +54,9 @@ export class SidebarComponent {
     this.drillPath().map(i => i.label).join('/') || '__root__',
   );
 
+  /** The top-level group being drilled into — anchors the collapsed icon rail. */
+  protected readonly railTop = computed(() => this.drillPath()[0] ?? null);
+
   constructor() {
     // Reset the manual drill-in only when the user navigates AWAY from it.
     // While they navigate WITHIN the drilled group (e.g. clicking "Sales" lands
@@ -126,6 +129,20 @@ export class SidebarComponent {
     this.slideDirection.set('back');
     const current = this.drillPath();
     this.drillOverride.set(current.slice(0, -1));
+  }
+
+  /** Rail click (drilled state): jump straight to a top-level sibling — a group opens its
+   * children, a leaf (Dashboard) navigates and exits the drill. */
+  protected onRailClick(item: NavItem): void {
+    if (this.isGroup(item)) {
+      this.slideDirection.set('forward');
+      this.drillOverride.set([item]);
+      this.navigateToDefault(item);
+    } else {
+      this.drillOverride.set([]);
+      if (item.route) this.router.navigateByUrl(item.route);
+      this.onLeafClick();
+    }
   }
 
   protected onLeafClick(): void {

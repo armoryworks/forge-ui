@@ -206,3 +206,77 @@
 .sidebar__spacer {
   flex: 1;
 }
+
+// ── Drilled state: icon rail of top-level siblings | children column ──────────
+.sidebar--drilled {
+  width: calc(#{$sidebar-width-collapsed} + #{$sidebar-width-expanded});
+}
+
+.sidebar__drill {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.sidebar__rail {
+  width: $sidebar-width-collapsed;
+  flex-shrink: 0;
+  border-right: $border-width-thin solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidebar__column {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.rail-item {
+  position: relative;
+  width: $sidebar-width-collapsed;
+  min-height: $sidebar-nav-height;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $sp-sm 0;
+  gap: $sp-xs;
+  transition: color $transition-fast, background $transition-fast;
+
+  .material-icons-outlined { font-size: $sidebar-icon-size; }
+
+  &:hover { color: var(--text); background: color-mix(in srgb, var(--primary) 8%, transparent); }
+
+  &--back { color: var(--text-muted); }
+
+  &--active {
+    color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+    border-left: $border-width-accent solid var(--primary);
+    // Give the rotated label room to read.
+    min-height: 128px;
+    padding: $sp-md 0;
+    gap: $sp-sm;
+  }
+}
+
+// The active parent's label, rotated to run vertically down the rail (bottom-to-top).
+.rail-item__vlabel {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  @include uppercase-label($font-size-xs, 0.1em, 700);
+  color: var(--primary);
+  white-space: nowrap;
+  max-height: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

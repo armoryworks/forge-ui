@@ -1,137 +1,120 @@
-<aside class="sidebar" [class.sidebar--expanded]="!collapsed()">
-  @if (!drillHeader()) {
-    <button class="nav-item nav-item--toggle" (click)="toggleCollapse()" [matTooltip]="(collapsed() ? 'nav.expand' : 'nav.collapse') | translate" matTooltipPosition="right" [attr.aria-label]="(collapsed() ? 'nav.expand' : 'nav.collapse') | translate">
+<aside class="sidebar" [class.sidebar--expanded]="!collapsed()" [class.sidebar--drilled]="!!railTop()">
+  @if (!railTop()) {
+    <!-- ROOT: collapse toggle + the vertical top-level list. Groups drill; leaves (Dashboard) navigate. -->
+    <button class="nav-item nav-item--toggle" (click)="toggleCollapse()"
+            [matTooltip]="(collapsed() ? 'nav.expand' : 'nav.collapse') | translate" matTooltipPosition="right"
+            [attr.aria-label]="(collapsed() ? 'nav.expand' : 'nav.collapse') | translate">
       <span class="material-icons-outlined">{{ collapsed() ? 'chevron_right' : 'chevron_left' }}</span>
-      @if (!collapsed()) {
-        <span class="nav-item__label">{{ 'nav.collapse' | translate }}</span>
-      }
+      @if (!collapsed()) { <span class="nav-item__label">{{ 'nav.collapse' | translate }}</span> }
     </button>
-  }
 
-  @if (drillHeader(); as header) {
-    <button class="nav-item nav-item--back" (click)="onBackClick()" [matTooltip]="'nav.back' | translate" matTooltipPosition="right" [attr.aria-label]="'nav.back' | translate">
-      <span class="material-icons-outlined">arrow_back</span>
-      @if (!collapsed()) {
-        <span class="nav-item__label nav-item__label--header">{{ header.i18nKey! | translate }}</span>
-      }
-    </button>
-  }
-
-  <!-- Pinned top: Dashboard. Always visible regardless of drill state so the
-       landing page is one click from anywhere. -->
-  @if (pinnedTopTree().length > 0) {
     @for (item of pinnedTopTree(); track item.label) {
-      <a class="nav-item"
-         [routerLink]="item.route"
-         routerLinkActive="nav-item--active"
-         [matTooltip]="collapsed() ? (item.i18nKey! | translate) : ''"
-         matTooltipPosition="right"
-         [attr.aria-label]="item.i18nKey! | translate"
-         (click)="onLeafClick()">
+      <a class="nav-item" [routerLink]="item.route" routerLinkActive="nav-item--active"
+         [matTooltip]="collapsed() ? (item.i18nKey! | translate) : ''" matTooltipPosition="right"
+         [attr.aria-label]="item.i18nKey! | translate" (click)="onLeafClick()">
         <span class="material-icons-outlined">{{ item.icon }}</span>
-        @if (!collapsed()) {
-          <span class="nav-item__label">{{ item.i18nKey! | translate }}</span>
-          @if (item.badge) {
-            <span class="nav-item__badge">{{ item.badge }}</span>
-          } @else if (item.shortcut) {
-            <kbd class="kbd-hint">{{ item.shortcut.join('+') }}</kbd>
-          }
-        }
+        @if (!collapsed()) { <span class="nav-item__label">{{ item.i18nKey! | translate }}</span> }
       </a>
     }
-    <div class="sidebar__divider"></div>
-  }
+    @if (pinnedTopTree().length > 0) { <div class="sidebar__divider"></div> }
 
-  @for (k of [drillKey()]; track k) {
-    <div class="sidebar__panel"
-         [class.sidebar__panel--forward]="slideDirection() === 'forward' && k !== '__root__'"
-         [class.sidebar__panel--back]="slideDirection() === 'back'">
-      @if (currentItems(); as items) {
-        @for (item of items; track item.label) {
-          @if (isGroup(item)) {
-            <button class="nav-item nav-item--group"
-                    [class.nav-item--active]="isInActiveTrail(item)"
-                    (click)="onGroupClick(item)"
-                    [matTooltip]="collapsed() ? (item.i18nKey! | translate) : ''"
-                    matTooltipPosition="right"
-                    [attr.aria-label]="item.i18nKey! | translate">
-              <span class="material-icons-outlined">{{ item.icon }}</span>
-              @if (!collapsed()) {
-                <span class="nav-item__label">{{ item.i18nKey! | translate }}</span>
-                <span class="material-icons-outlined nav-item__chevron">chevron_right</span>
-              }
-            </button>
-          } @else {
-            <a class="nav-item"
-               [routerLink]="item.route"
-               routerLinkActive="nav-item--active"
-               [matTooltip]="collapsed() ? (item.i18nKey! | translate) : ''"
-               matTooltipPosition="right"
-               [attr.aria-label]="item.i18nKey! | translate"
-               (click)="onLeafClick()">
-              <span class="material-icons-outlined">{{ item.icon }}</span>
-              @if (!collapsed()) {
-                <span class="nav-item__label">{{ item.i18nKey! | translate }}</span>
-                @if (item.badge) {
-                  <span class="nav-item__badge">{{ item.badge }}</span>
-                } @else if (item.shortcut) {
-                  <kbd class="kbd-hint">{{ item.shortcut.join('+') }}</kbd>
-                }
-              }
-            </a>
+    @for (item of mainTree(); track item.label) {
+      @if (isGroup(item)) {
+        <button class="nav-item nav-item--group" [class.nav-item--active]="isInActiveTrail(item)"
+                (click)="onGroupClick(item)"
+                [matTooltip]="collapsed() ? (item.i18nKey! | translate) : ''" matTooltipPosition="right"
+                [attr.aria-label]="item.i18nKey! | translate">
+          <span class="material-icons-outlined">{{ item.icon }}</span>
+          @if (!collapsed()) {
+            <span class="nav-item__label">{{ item.i18nKey! | translate }}</span>
+            <span class="material-icons-outlined nav-item__chevron">chevron_right</span>
           }
-        }
+        </button>
       } @else {
-        @for (item of mainTree(); track item.label) {
-          <button class="nav-item nav-item--group"
-                  [class.nav-item--active]="isInActiveTrail(item)"
-                  (click)="onGroupClick(item)"
-                  [matTooltip]="collapsed() ? (item.i18nKey! | translate) : ''"
-                  matTooltipPosition="right"
-                  [attr.aria-label]="item.i18nKey! | translate">
-            <span class="material-icons-outlined">{{ item.icon }}</span>
-            @if (!collapsed()) {
-              <span class="nav-item__label">{{ item.i18nKey! | translate }}</span>
-              <span class="material-icons-outlined nav-item__chevron">chevron_right</span>
+        <a class="nav-item" [routerLink]="item.route" routerLinkActive="nav-item--active"
+           [matTooltip]="collapsed() ? (item.i18nKey! | translate) : ''" matTooltipPosition="right"
+           [attr.aria-label]="item.i18nKey! | translate" (click)="onLeafClick()">
+          <span class="material-icons-outlined">{{ item.icon }}</span>
+          @if (!collapsed()) {
+            <span class="nav-item__label">{{ item.i18nKey! | translate }}</span>
+            @if (item.badge) { <span class="nav-item__badge">{{ item.badge }}</span> }
+            @else if (item.shortcut) { <kbd class="kbd-hint">{{ item.shortcut.join('+') }}</kbd> }
+          }
+        </a>
+      }
+    }
+  } @else {
+    <!-- DRILLED: left rail of top-level siblings (icons + active parent's vertical label) | children column. -->
+    <div class="sidebar__drill">
+      <div class="sidebar__rail">
+        <button class="rail-item rail-item--back" (click)="onBackClick()"
+                [matTooltip]="'nav.back' | translate" matTooltipPosition="right" [attr.aria-label]="'nav.back' | translate">
+          <span class="material-icons-outlined">arrow_back</span>
+        </button>
+        @for (top of mainTree(); track top.label) {
+          <button class="rail-item" [class.rail-item--active]="top === railTop()"
+                  (click)="onRailClick(top)"
+                  [matTooltip]="top === railTop() ? '' : (top.i18nKey! | translate)" matTooltipPosition="right"
+                  [attr.aria-label]="top.i18nKey! | translate">
+            <span class="material-icons-outlined">{{ top.icon }}</span>
+            @if (top === railTop()) {
+              <span class="rail-item__vlabel">{{ top.i18nKey! | translate }}</span>
             }
           </button>
         }
-      }
+      </div>
+
+      <div class="sidebar__column">
+        @for (k of [drillKey()]; track k) {
+          <div class="sidebar__panel"
+               [class.sidebar__panel--forward]="slideDirection() === 'forward'"
+               [class.sidebar__panel--back]="slideDirection() === 'back'">
+            @for (item of currentItems() ?? []; track item.label) {
+              @if (isGroup(item)) {
+                <button class="nav-item nav-item--group" [class.nav-item--active]="isInActiveTrail(item)"
+                        (click)="onGroupClick(item)" [attr.aria-label]="item.i18nKey! | translate">
+                  <span class="material-icons-outlined">{{ item.icon }}</span>
+                  <span class="nav-item__label">{{ item.i18nKey! | translate }}</span>
+                  <span class="material-icons-outlined nav-item__chevron">chevron_right</span>
+                </button>
+              } @else {
+                <a class="nav-item" [routerLink]="item.route" routerLinkActive="nav-item--active"
+                   [attr.aria-label]="item.i18nKey! | translate" (click)="onLeafClick()">
+                  <span class="material-icons-outlined">{{ item.icon }}</span>
+                  <span class="nav-item__label">{{ item.i18nKey! | translate }}</span>
+                  @if (item.badge) { <span class="nav-item__badge">{{ item.badge }}</span> }
+                  @else if (item.shortcut) { <kbd class="kbd-hint">{{ item.shortcut.join('+') }}</kbd> }
+                </a>
+              }
+            }
+          </div>
+        }
+      </div>
     </div>
   }
 
-  <!-- Pinned bottom: Shop Floor + Admin. Always visible regardless of drill
-       state. Group clicks here reset the drill rather than append, so user
-       drilled into Operations can jump cleanly to Admin's children. -->
+  <!-- Pinned bottom: Shop Floor + Admin. Always visible; group clicks reset the drill. -->
   <div class="sidebar__spacer"></div>
   <div class="sidebar__divider"></div>
   @for (item of bottomTree(); track item.label) {
     @if (isGroup(item)) {
-      <button class="nav-item nav-item--group"
-              [class.nav-item--active]="isInActiveTrail(item)"
+      <button class="nav-item nav-item--group" [class.nav-item--active]="isInActiveTrail(item)"
               (click)="onPinnedGroupClick(item)"
-              [matTooltip]="collapsed() ? (item.i18nKey! | translate) : ''"
-              matTooltipPosition="right"
+              [matTooltip]="(collapsed() || !!railTop()) ? (item.i18nKey! | translate) : ''" matTooltipPosition="right"
               [attr.aria-label]="item.i18nKey! | translate">
         <span class="material-icons-outlined">{{ item.icon }}</span>
-        @if (!collapsed()) {
+        @if (!collapsed() && !railTop()) {
           <span class="nav-item__label">{{ item.i18nKey! | translate }}</span>
           <span class="material-icons-outlined nav-item__chevron">chevron_right</span>
         }
       </button>
     } @else {
-      <a class="nav-item"
-         [routerLink]="item.route"
-         routerLinkActive="nav-item--active"
+      <a class="nav-item" [routerLink]="item.route" routerLinkActive="nav-item--active"
          [routerLinkActiveOptions]="{ exact: false }"
-         [matTooltip]="collapsed() ? (item.i18nKey! | translate) : ''"
-         matTooltipPosition="right"
-         [attr.aria-label]="item.i18nKey! | translate"
-         (click)="onLeafClick()">
+         [matTooltip]="(collapsed() || !!railTop()) ? (item.i18nKey! | translate) : ''" matTooltipPosition="right"
+         [attr.aria-label]="item.i18nKey! | translate" (click)="onLeafClick()">
         <span class="material-icons-outlined">{{ item.icon }}</span>
-        @if (!collapsed()) {
-          <span class="nav-item__label">{{ item.i18nKey! | translate }}</span>
-        }
+        @if (!collapsed() && !railTop()) { <span class="nav-item__label">{{ item.i18nKey! | translate }}</span> }
       </a>
     }
   }
