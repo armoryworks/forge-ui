@@ -226,14 +226,26 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
+// Pure clipping wrapper — the inner .sidebar__panel is the single vertical scroll region
+// (avoids a nested column+panel double scrollbar); horizontal never appears anywhere.
 .sidebar__column {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
+
+  // In the drilled column, items always read left-aligned with a truncating label,
+  // independent of the collapse state (which only governs the root list).
+  .nav-item {
+    justify-content: flex-start;
+    padding: 0 $sp-lg;
+    gap: $sp-md;
+    min-width: 0;
+  }
 }
 
 .rail-item {
