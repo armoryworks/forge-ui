@@ -48,8 +48,10 @@
           }
         </ng-template>
         <ng-template appColumnCell="jobNumber" let-entry>
-          @if (entry.jobNumber) {
-            <span class="job-badge">{{ entry.jobNumber }}</span>
+          @if (entry.jobId) {
+            <app-entity-link type="job" [entityId]="entry.jobId">
+              <span class="job-badge">{{ entry.jobNumber }}</span>
+            </app-entity-link>
           } @else {
             <span class="text-muted">—</span>
           }

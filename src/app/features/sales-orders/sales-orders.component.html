@@ -24,7 +24,9 @@
           <span class="so-number">{{ row.orderNumber }}</span>
         </ng-template>
         <ng-template appColumnCell="customerName" let-row>
-          <span>{{ row.customerName }}</span>
+          <app-entity-link type="customer" [entityId]="row.customerId">
+            <span>{{ row.customerName }}</span>
+          </app-entity-link>
         </ng-template>
         <ng-template appColumnCell="customerPO" let-row>
           <span class="text-muted">{{ row.customerPO ?? '—' }}</span>

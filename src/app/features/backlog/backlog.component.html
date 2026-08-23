@@ -69,7 +69,13 @@
         }
       </ng-template>
       <ng-template appColumnCell="customerName" let-job>
-        {{ job.customerName ?? '—' }}
+        @if (job.customerId) {
+          <app-entity-link type="customer" [entityId]="job.customerId">
+            <span>{{ job.customerName }}</span>
+          </app-entity-link>
+        } @else {
+          <span class="text-muted">—</span>
+        }
       </ng-template>
       <ng-template appColumnCell="dueDate" let-job>
         <span [class.overdue-text]="job.isOverdue">{{ job.dueDate | date:'MM/dd/yyyy' }}</span>

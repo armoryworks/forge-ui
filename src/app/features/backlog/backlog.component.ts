@@ -35,6 +35,7 @@ import { ColumnCellDirective } from '../../shared/directives/column-cell.directi
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { BacklogCardGridComponent } from './components/backlog-card-grid/backlog-card-grid.component';
 import { PriorityIndicatorComponent } from '../../shared/components/priority-indicator/priority-indicator.component';
+import { EntityLinkComponent } from '../../shared/components/entity-link/entity-link.component';
 
 type ViewMode = 'table' | 'card';
 
@@ -46,7 +47,7 @@ type ViewMode = 'table' | 'card';
     JobDialogComponent, AvatarComponent,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
-    BacklogCardGridComponent, PriorityIndicatorComponent,
+    BacklogCardGridComponent, PriorityIndicatorComponent, EntityLinkComponent,
   ],
   templateUrl: './backlog.component.html',
   styleUrl: './backlog.component.scss',

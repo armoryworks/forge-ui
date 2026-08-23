@@ -233,7 +233,9 @@
             <tbody>
               @for (line of po.lines; track line.id) {
                 <tr>
-                  <td class="lines-table__mono">{{ line.partNumber }}</td>
+                  <td class="lines-table__mono">
+                    <app-entity-link type="part" [entityId]="line.partId">{{ line.partNumber }}</app-entity-link>
+                  </td>
                   <td>{{ line.description }}</td>
                   <!-- Phase 3 / WU-10 — fractional quantities; display up to 4 decimals,
                        trim trailing zeros for clarity (1.5, not 1.5000). -->

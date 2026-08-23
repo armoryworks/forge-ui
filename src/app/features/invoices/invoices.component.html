@@ -49,7 +49,9 @@
           <span class="inv-number">{{ row.invoiceNumber }}</span>
         </ng-template>
         <ng-template appColumnCell="customerName" let-row>
-          <span>{{ row.customerName }}</span>
+          <app-entity-link type="customer" [entityId]="row.customerId">
+            <span>{{ row.customerName }}</span>
+          </app-entity-link>
         </ng-template>
         <ng-template appColumnCell="status" let-row>
           <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>

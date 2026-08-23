@@ -15,6 +15,7 @@ import { ColumnCellDirective } from '../../shared/directives/column-cell.directi
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
+import { EntityLinkComponent } from '../../shared/components/entity-link/entity-link.component';
 import { DraftConfig } from '../../shared/models/draft-config.model';
 import { toDateOnly } from '../../shared/utils/date.utils';
 import { TimerHubService } from '../../shared/services/timer-hub.service';
@@ -39,6 +40,7 @@ import { DraftResumeService } from '../../shared/services/draft-resume.service';
     DataTableComponent,
     ColumnCellDirective,
     ValidationButtonComponent,
+    EntityLinkComponent,
     TranslatePipe,
     MatTooltipModule,
   ],

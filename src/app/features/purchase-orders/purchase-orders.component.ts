@@ -23,6 +23,7 @@ import { DataTableComponent } from '../../shared/components/data-table/data-tabl
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { EntityLinkComponent } from '../../shared/components/entity-link/entity-link.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
@@ -36,7 +37,7 @@ type PoTab = 'orders' | 'suggestions' | 'settings';
     ReactiveFormsModule, DatePipe, TranslatePipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective,
-    PoDialogComponent, LoadingBlockDirective,
+    PoDialogComponent, LoadingBlockDirective, EntityLinkComponent,
     AutoPoPanelComponent, AutoPoSettingsPanelComponent,
   ],
   templateUrl: './purchase-orders.component.html',

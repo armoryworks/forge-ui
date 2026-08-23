@@ -16,6 +16,7 @@ import { ColumnCellDirective } from '../../shared/directives/column-cell.directi
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { EntityLinkComponent } from '../../shared/components/entity-link/entity-link.component';
 import { ShipmentDialogComponent } from './components/shipment-dialog/shipment-dialog.component';
 import { ShipmentDetailDialogComponent, ShipmentDetailDialogData } from './components/shipment-detail-dialog/shipment-detail-dialog.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
@@ -28,7 +29,7 @@ import { DraftResumeService } from '../../shared/services/draft-resume.service';
     ReactiveFormsModule, DatePipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
-    ShipmentDialogComponent, TranslatePipe,
+    EntityLinkComponent, ShipmentDialogComponent, TranslatePipe,
   ],
   templateUrl: './shipments.component.html',
   styleUrl: './shipments.component.scss',

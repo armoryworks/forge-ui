@@ -13,6 +13,7 @@ import { DataTableComponent } from '../../shared/components/data-table/data-tabl
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { EntityLinkComponent } from '../../shared/components/entity-link/entity-link.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
@@ -24,7 +25,7 @@ import { DraftResumeService } from '../../shared/services/draft-resume.service';
     ReactiveFormsModule,
     PageHeaderComponent, InputComponent,
     DataTableComponent, ColumnCellDirective,
-    LotDialogComponent, LoadingBlockDirective, TranslatePipe, MatTooltipModule,
+    LotDialogComponent, LoadingBlockDirective, EntityLinkComponent, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './lots.component.html',
   styleUrl: './lots.component.scss',

@@ -21,7 +21,9 @@
           <span class="sh-number">{{ row.shipmentNumber }}</span>
         </ng-template>
         <ng-template appColumnCell="salesOrderNumber" let-row>
-          <span class="sh-number">{{ row.salesOrderNumber }}</span>
+          <app-entity-link type="sales-order" [entityId]="row.salesOrderId">
+            <span class="sh-number">{{ row.salesOrderNumber }}</span>
+          </app-entity-link>
         </ng-template>
         <ng-template appColumnCell="status" let-row>
           <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>

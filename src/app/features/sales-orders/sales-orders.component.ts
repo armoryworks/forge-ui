@@ -16,6 +16,7 @@ import { ColumnCellDirective } from '../../shared/directives/column-cell.directi
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { CurrencyDisplayComponent } from '../../shared/components/currency-display/currency-display.component';
+import { EntityLinkComponent } from '../../shared/components/entity-link/entity-link.component';
 import { SoDialogComponent } from './components/so-dialog/so-dialog.component';
 import { SalesOrderDetailDialogComponent, SalesOrderDetailDialogData } from './components/sales-order-detail-dialog/sales-order-detail-dialog.component';
 import { JobDetailDialogComponent, JobDetailDialogData } from '../kanban/components/job-detail-dialog.component';
@@ -30,7 +31,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
     ReactiveFormsModule, DatePipe, TranslatePipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
-    CurrencyDisplayComponent, SoDialogComponent,
+    CurrencyDisplayComponent, EntityLinkComponent, SoDialogComponent,
   ],
   templateUrl: './sales-orders.component.html',
   styleUrl: './sales-orders.component.scss',

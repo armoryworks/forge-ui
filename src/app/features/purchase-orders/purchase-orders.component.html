@@ -48,10 +48,18 @@
               <span class="po-number">{{ row.poNumber }}</span>
             </ng-template>
             <ng-template appColumnCell="vendorName" let-row>
-              <span>{{ row.vendorName }}</span>
+              <app-entity-link type="vendor" [entityId]="row.vendorId">
+                <span>{{ row.vendorName }}</span>
+              </app-entity-link>
             </ng-template>
             <ng-template appColumnCell="jobNumber" let-row>
-              <span class="text-muted">{{ row.jobNumber ?? '—' }}</span>
+              @if (row.jobId) {
+                <app-entity-link type="job" [entityId]="row.jobId">
+                  <span>{{ row.jobNumber }}</span>
+                </app-entity-link>
+              } @else {
+                <span class="text-muted">—</span>
+              }
             </ng-template>
             <ng-template appColumnCell="status" let-row>
               <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
