@@ -1,0 +1,38 @@
+<div class="bs-visual">
+  <div class="bs-visual__kpis">
+    <div class="bs-kpi">
+      <span class="bs-kpi__label">{{ 'accounting.balanceSheet.totalAssets' | translate }}</span>
+      <span class="bs-kpi__value bs-kpi__value--assets">
+        <app-currency-display [value]="report().totalAssets" />
+      </span>
+    </div>
+    <div class="bs-kpi">
+      <span class="bs-kpi__label">{{ 'accounting.balanceSheet.totalLiabilities' | translate }}</span>
+      <span class="bs-kpi__value bs-kpi__value--liabilities">
+        <app-currency-display [value]="report().totalLiabilities" />
+      </span>
+    </div>
+    <div class="bs-kpi">
+      <span class="bs-kpi__label">{{ 'accounting.balanceSheet.totalEquity' | translate }}</span>
+      <span class="bs-kpi__value bs-kpi__value--equity">
+        <app-currency-display [value]="report().totalEquityWithEarnings" />
+      </span>
+    </div>
+  </div>
+
+  @if (!report().cogsPosted && report().marginCaveat) {
+    <p class="acct-caveat">
+      <span class="material-icons-outlined">info</span>
+      {{ report().marginCaveat }}
+    </p>
+  }
+
+  <div class="bs-visual__chart">
+    <canvas baseChart
+      [type]="chartConfig().type"
+      [data]="chartConfig().data"
+      [options]="chartConfig().options"
+      [attr.aria-label]="'accounting.balanceSheet.chartLabel' | translate">
+    </canvas>
+  </div>
+</div>

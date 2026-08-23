@@ -8311,7 +8311,9 @@
       "equity": "Equity",
       "currentYearEarnings": "Current-year earnings",
       "totalEquity": "Total equity",
-      "totalLiabilitiesAndEquity": "Total liabilities & equity"
+      "totalLiabilitiesAndEquity": "Total liabilities & equity",
+      "liabilitiesAndEquity": "Liabilities & equity",
+      "chartLabel": "Balance sheet composition chart"
     },
     "cashFlow": {
       "title": "Cash Flow",
@@ -8325,20 +8327,26 @@
       "noFinancing": "No financing activity.",
       "netCashFromFinancing": "Net cash from financing",
       "netChangeInCash": "Net change in cash",
-      "actualCashMovement": "Actual cash movement"
+      "actualCashMovement": "Actual cash movement",
+      "operatingAdjustments": "Operating adjustments",
+      "chartLabel": "Cash flow waterfall chart"
     },
     "arAging": {
       "title": "AR Aging",
       "subtitle": "Open receivables by customer and age",
       "customer": "Customer",
       "tiesToControl": "Ties to AR control",
-      "empty": "No open receivables"
+      "empty": "No open receivables",
+      "totalOutstanding": "Total outstanding",
+      "chartLabel": "AR aging by bucket chart"
     },
     "apAging": {
       "title": "AP Aging",
       "subtitle": "Open payables by vendor and age",
       "tiesToControl": "Ties to AP control",
-      "empty": "No open payables"
+      "empty": "No open payables",
+      "totalOutstanding": "Total outstanding",
+      "chartLabel": "AP aging by bucket chart"
     },
     "grni": {
       "title": "GRNI Reconciliation",

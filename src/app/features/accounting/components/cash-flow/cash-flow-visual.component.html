@@ -1,0 +1,49 @@
+<div class="cf-visual">
+  <div class="cf-visual__kpis">
+    <div class="cf-kpi">
+      <span class="cf-kpi__label">{{ 'accounting.cashFlow.netCashFromOperating' | translate }}</span>
+      <span
+        class="cf-kpi__value"
+        [class.cf-kpi__value--positive]="report().netCashFromOperating >= 0"
+        [class.cf-kpi__value--negative]="report().netCashFromOperating < 0">
+        <app-currency-display [value]="report().netCashFromOperating" />
+      </span>
+    </div>
+    <div class="cf-kpi">
+      <span class="cf-kpi__label">{{ 'accounting.cashFlow.netCashFromInvesting' | translate }}</span>
+      <span
+        class="cf-kpi__value"
+        [class.cf-kpi__value--positive]="report().netCashFromInvesting >= 0"
+        [class.cf-kpi__value--negative]="report().netCashFromInvesting < 0">
+        <app-currency-display [value]="report().netCashFromInvesting" />
+      </span>
+    </div>
+    <div class="cf-kpi">
+      <span class="cf-kpi__label">{{ 'accounting.cashFlow.netCashFromFinancing' | translate }}</span>
+      <span
+        class="cf-kpi__value"
+        [class.cf-kpi__value--positive]="report().netCashFromFinancing >= 0"
+        [class.cf-kpi__value--negative]="report().netCashFromFinancing < 0">
+        <app-currency-display [value]="report().netCashFromFinancing" />
+      </span>
+    </div>
+    <div class="cf-kpi">
+      <span class="cf-kpi__label">{{ 'accounting.cashFlow.netChangeInCash' | translate }}</span>
+      <span
+        class="cf-kpi__value"
+        [class.cf-kpi__value--positive]="report().netChangeInCash >= 0"
+        [class.cf-kpi__value--negative]="report().netChangeInCash < 0">
+        <app-currency-display [value]="report().netChangeInCash" />
+      </span>
+    </div>
+  </div>
+
+  <div class="cf-visual__chart">
+    <canvas baseChart
+      [type]="chartConfig().type"
+      [data]="chartConfig().data"
+      [options]="chartConfig().options"
+      [attr.aria-label]="'accounting.cashFlow.chartLabel' | translate">
+    </canvas>
+  </div>
+</div>

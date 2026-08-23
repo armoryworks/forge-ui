@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
+import { map } from 'rxjs';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -8,9 +10,17 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
+import { ViewModeToggleComponent } from '../../../../shared/components/view-mode-toggle/view-mode-toggle.component';
+import { UserPreferencesService } from '../../../../shared/services/user-preferences.service';
+import {
+  ACCOUNTING_VIEW_PREF_KEY,
+  AccountingViewMode,
+  DEFAULT_ACCOUNTING_VIEW,
+} from '../../../../shared/models/accounting-view.model';
 import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-refresh.util';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { ApAging } from '../../models/accounting.models';
+import { ApAgingVisualComponent } from './ap-aging-visual.component';
 
 const DEFAULT_BOOK_ID = 1;
 
@@ -24,7 +34,15 @@ interface AgingTableRow {
 @Component({
   selector: 'app-ap-aging',
   standalone: true,
-  imports: [TranslatePipe, PageHeaderComponent, CurrencyDisplayComponent, DataTableComponent, ColumnCellDirective],
+  imports: [
+    TranslatePipe,
+    PageHeaderComponent,
+    CurrencyDisplayComponent,
+    DataTableComponent,
+    ColumnCellDirective,
+    ViewModeToggleComponent,
+    ApAgingVisualComponent,
+  ],
   templateUrl: './ap-aging.component.html',
   styleUrl: './ap-aging.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,10 +51,32 @@ export class ApAgingComponent implements OnInit {
   private readonly gl = inject(GeneralLedgerService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly preferences = inject(UserPreferencesService);
 
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly report = signal<ApAging | null>(null);
+
+  /** URL ?view= wins; otherwise the user's saved accounting-view default; else classic. */
+  private readonly preferredView = (): AccountingViewMode =>
+    this.preferences.get<AccountingViewMode>(ACCOUNTING_VIEW_PREF_KEY) ?? DEFAULT_ACCOUNTING_VIEW;
+  protected readonly viewMode = toSignal(
+    this.route.queryParamMap.pipe(
+      map((p) => (p.get('view') as AccountingViewMode) ?? this.preferredView()),
+    ),
+    { initialValue: this.preferredView() },
+  );
+
+  protected setViewMode(mode: AccountingViewMode): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { view: mode === DEFAULT_ACCOUNTING_VIEW ? null : mode },
+      queryParamsHandling: 'merge',
+    });
+    this.preferences.set(ACCOUNTING_VIEW_PREF_KEY, mode);
+  }
 
   /** Dynamic columns: Vendor + one per aging bucket + Open, derived from the report's bucket set. */
   protected readonly columns = computed<ColumnDef[]>(() => {

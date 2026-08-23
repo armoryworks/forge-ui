@@ -8311,7 +8311,9 @@
       "equity": "Patrimonio",
       "currentYearEarnings": "Utilidades del ejercicio actual",
       "totalEquity": "Total de patrimonio",
-      "totalLiabilitiesAndEquity": "Total de pasivos y patrimonio"
+      "totalLiabilitiesAndEquity": "Total de pasivos y patrimonio",
+      "liabilitiesAndEquity": "Pasivos y patrimonio",
+      "chartLabel": "Gráfico de composición del balance"
     },
     "cashFlow": {
       "title": "Flujo de efectivo",
@@ -8325,20 +8327,26 @@
       "noFinancing": "Sin actividad de financiamiento.",
       "netCashFromFinancing": "Efectivo neto de financiamiento",
       "netChangeInCash": "Variación neta de efectivo",
-      "actualCashMovement": "Movimiento real de efectivo"
+      "actualCashMovement": "Movimiento real de efectivo",
+      "operatingAdjustments": "Ajustes de operación",
+      "chartLabel": "Gráfico de cascada de flujo de efectivo"
     },
     "arAging": {
       "title": "Antigüedad de cuentas por cobrar",
       "subtitle": "Cuentas por cobrar abiertas por cliente y antigüedad",
       "customer": "Cliente",
       "tiesToControl": "Cuadra con el control de CxC",
-      "empty": "Sin cuentas por cobrar abiertas"
+      "empty": "Sin cuentas por cobrar abiertas",
+      "totalOutstanding": "Total pendiente",
+      "chartLabel": "Gráfico de antigüedad de cuentas por cobrar por rango"
     },
     "apAging": {
       "title": "Antigüedad de cuentas por pagar",
       "subtitle": "Cuentas por pagar abiertas por proveedor y antigüedad",
       "tiesToControl": "Cuadra con el control de CxP",
-      "empty": "Sin cuentas por pagar abiertas"
+      "empty": "Sin cuentas por pagar abiertas",
+      "totalOutstanding": "Total pendiente",
+      "chartLabel": "Gráfico de antigüedad de cuentas por pagar por rango"
     },
     "grni": {
       "title": "Conciliación de MRNF",

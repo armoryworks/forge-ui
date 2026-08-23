@@ -13,6 +13,13 @@
   @if (loading() && !report()) {
     <p class="acct-muted">{{ 'accounting.common.loading' | translate }}</p>
   } @else if (report(); as r) {
+    <div class="acct-view-bar">
+      <app-view-mode-toggle [mode]="viewMode()" (modeChange)="setViewMode($event)" />
+    </div>
+
+    @if (viewMode() === 'visual') {
+      <app-balance-sheet-visual [report]="r" />
+    } @else {
     <table class="statement" aria-label="Balance sheet">
       <tbody>
         <tr class="statement__section"><td colspan="2">{{ 'accounting.balanceSheet.assets' | translate }}</td></tr>
@@ -66,5 +73,6 @@
         </tr>
       </tfoot>
     </table>
+    }
   }
 </div>

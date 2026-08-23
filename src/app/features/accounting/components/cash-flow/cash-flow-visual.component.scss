@@ -1,0 +1,48 @@
+@use 'app/features/accounting/accounting-shared' as *;
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.cf-visual {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+}
+
+.cf-visual__kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: $sp-md;
+}
+
+.cf-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  padding: $sp-md $sp-lg;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+}
+
+.cf-kpi__label {
+  @include uppercase-label($font-size-xxs, 0.05em, 600);
+  color: var(--text-muted);
+}
+
+.cf-kpi__value {
+  font-size: $font-size-kpi;
+  font-weight: 700;
+  color: var(--text);
+
+  &--positive {
+    color: var(--success);
+  }
+
+  &--negative {
+    color: var(--error);
+  }
+}
+
+.cf-visual__chart {
+  position: relative;
+  height: 340px;
+}

@@ -10,6 +10,17 @@
     <p class="acct-error" role="alert">{{ error() }}</p>
   }
 
+  @if (report(); as r) {
+    <div class="acct-view-bar">
+      <app-view-mode-toggle [mode]="viewMode()" (modeChange)="setViewMode($event)" />
+    </div>
+  }
+
+  @if (viewMode() === 'visual') {
+    @if (report(); as r) {
+      <app-ap-aging-visual [report]="r" />
+    }
+  } @else {
   <app-data-table
     tableId="acct-ap-aging"
     [columns]="columns()"
@@ -41,5 +52,6 @@
       }
       <span class="totals-strip__metric">{{ 'accounting.common.open' | translate }} <app-currency-display [value]="r.grandTotal" /></span>
     </div>
+  }
   }
 </div>

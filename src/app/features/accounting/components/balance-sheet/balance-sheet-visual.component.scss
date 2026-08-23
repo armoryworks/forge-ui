@@ -1,0 +1,52 @@
+@use 'app/features/accounting/accounting-shared' as *;
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.bs-visual {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+}
+
+.bs-visual__kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $sp-md;
+}
+
+.bs-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  padding: $sp-md $sp-lg;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+}
+
+.bs-kpi__label {
+  @include uppercase-label($font-size-xxs, 0.05em, 600);
+  color: var(--text-muted);
+}
+
+.bs-kpi__value {
+  font-size: $font-size-kpi;
+  font-weight: 700;
+  color: var(--text);
+
+  &--assets {
+    color: var(--success);
+  }
+
+  &--liabilities {
+    color: var(--warning);
+  }
+
+  &--equity {
+    color: var(--info);
+  }
+}
+
+.bs-visual__chart {
+  position: relative;
+  height: 340px;
+}

@@ -1,0 +1,19 @@
+<div class="aging-visual">
+  <div class="aging-visual__kpis">
+    <div class="aging-kpi">
+      <span class="aging-kpi__label">{{ 'accounting.apAging.totalOutstanding' | translate }}</span>
+      <span class="aging-kpi__value">
+        <app-currency-display [value]="report().grandTotal" />
+      </span>
+    </div>
+  </div>
+
+  <div class="aging-visual__chart">
+    <canvas baseChart
+      [type]="chartConfig().type"
+      [data]="chartConfig().data"
+      [options]="chartConfig().options"
+      [attr.aria-label]="'accounting.apAging.chartLabel' | translate">
+    </canvas>
+  </div>
+</div>
