@@ -231,6 +231,9 @@
   },
   "common": {
     "save": "Guardar",
+    "viewMode": "Modo de vista",
+    "viewClassic": "Clásico",
+    "viewVisual": "Visual",
     "saveAndClose": "Guardar y Cerrar",
     "saved": "Guardado",
     "lastUpdated": "Última Actualización",
@@ -3858,6 +3861,10 @@
     "landingScheduling": "Programación",
     "landingReports": "Informes",
     "landingAccounting": "Contabilidad",
+    "accountingView": "Vista contable predeterminada",
+    "accountingViewHint": "Cómo se abren las pantallas financieras por defecto. Visual muestra gráficos para una lectura rápida; Clásico muestra tablas detalladas. Puedes cambiar en cualquier pantalla.",
+    "accountingViewClassic": "Clásico (tablas)",
+    "accountingViewVisual": "Visual (gráficos)",
     "colorTheme": "Tema de color",
     "colorThemeHint": "Elige entre modo claro y oscuro.",
     "themeLight": "Claro",
@@ -8282,6 +8289,7 @@
     "profitLoss": {
       "title": "Estado de resultados",
       "subtitle": "Ingresos y gastos durante el período",
+      "waterfallLabel": "Gráfico de cascada de pérdidas y ganancias",
       "income": "Ingresos",
       "totalIncome": "Total de ingresos",
       "noIncome": "Sin ingresos.",

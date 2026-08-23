@@ -1,0 +1,45 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.view-mode-toggle {
+  display: inline-flex;
+  border: $border-width-thin solid var(--border);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.view-mode-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: 0 $sp-md;
+  height: $input-height;
+  background: var(--surface);
+  color: var(--text-muted);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color $transition-fast, background $transition-fast;
+
+  & + & {
+    border-left: $border-width-thin solid var(--border);
+  }
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+  }
+
+  &:hover {
+    color: var(--text);
+    background: var(--bg);
+  }
+
+  &--active {
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+}
+
+.view-mode-toggle__label {
+  @include uppercase-label($font-size-xs, 0.05em, 600);
+}

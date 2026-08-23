@@ -7,6 +7,12 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { LANDING_OPTIONS, LANDING_ROUTE_PREF_KEY } from '../../../../shared/models/role-landing.model';
+import {
+  ACCOUNTING_VIEW_OPTIONS,
+  ACCOUNTING_VIEW_PREF_KEY,
+  AccountingViewMode,
+  DEFAULT_ACCOUNTING_VIEW,
+} from '../../../../shared/models/accounting-view.model';
 import { CONFIRM_BEFORE_SEND_PREF_KEY } from '../../../../shared/services/confirm-send.service';
 import { FontScale, ThemeService } from '../../../../shared/services/theme.service';
 import { UserPreferencesService } from '../../../../shared/services/user-preferences.service';
@@ -48,6 +54,16 @@ export class AccountCustomizationComponent {
     { nonNullable: true },
   );
 
+  /** Default accounting presentation (Classic tables vs Visual charts). */
+  protected readonly accountingViewOptions: SelectOption[] = ACCOUNTING_VIEW_OPTIONS.map((o) => ({
+    value: o.value,
+    label: this.translate.instant(o.labelKey),
+  }));
+  protected readonly accountingViewControl = new FormControl<AccountingViewMode>(
+    this.preferences.get<AccountingViewMode>(ACCOUNTING_VIEW_PREF_KEY) ?? DEFAULT_ACCOUNTING_VIEW,
+    { nonNullable: true },
+  );
+
   /** Confirm-before-send safety prompt — ON by default when never set. */
   protected readonly confirmBeforeSendControl = new FormControl<boolean>(
     this.preferences.get<boolean>(CONFIRM_BEFORE_SEND_PREF_KEY) ?? true,
@@ -69,6 +85,12 @@ export class AccountCustomizationComponent {
       } else {
         this.preferences.set(LANDING_ROUTE_PREF_KEY, value);
       }
+    });
+
+    this.accountingViewControl.valueChanges.pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(value => {
+      this.preferences.set(ACCOUNTING_VIEW_PREF_KEY, value);
     });
   }
 

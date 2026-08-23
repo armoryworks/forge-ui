@@ -1,0 +1,20 @@
+<div class="view-mode-toggle" role="group" [attr.aria-label]="'common.viewMode' | translate">
+  <button
+    type="button"
+    class="view-mode-toggle__btn"
+    [class.view-mode-toggle__btn--active]="mode() === 'classic'"
+    [attr.aria-pressed]="mode() === 'classic'"
+    (click)="select('classic')">
+    <span class="material-icons-outlined">table_rows</span>
+    <span class="view-mode-toggle__label">{{ 'common.viewClassic' | translate }}</span>
+  </button>
+  <button
+    type="button"
+    class="view-mode-toggle__btn"
+    [class.view-mode-toggle__btn--active]="mode() === 'visual'"
+    [attr.aria-pressed]="mode() === 'visual'"
+    (click)="select('visual')">
+    <span class="material-icons-outlined">insights</span>
+    <span class="view-mode-toggle__label">{{ 'common.viewVisual' | translate }}</span>
+  </button>
+</div>

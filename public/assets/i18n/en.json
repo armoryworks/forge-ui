@@ -231,6 +231,9 @@
   },
   "common": {
     "save": "Save",
+    "viewMode": "View mode",
+    "viewClassic": "Classic",
+    "viewVisual": "Visual",
     "saveAndClose": "Save & Close",
     "saved": "Saved",
     "lastUpdated": "Last Updated",
@@ -3858,6 +3861,10 @@
     "landingScheduling": "Scheduling",
     "landingReports": "Reports",
     "landingAccounting": "Accounting",
+    "accountingView": "Default accounting view",
+    "accountingViewHint": "How financial screens open by default. Visual shows charts for at-a-glance reading; Classic shows detailed tables. You can switch on any screen.",
+    "accountingViewClassic": "Classic (tables)",
+    "accountingViewVisual": "Visual (charts)",
     "colorTheme": "Color Theme",
     "colorThemeHint": "Choose between light and dark mode.",
     "themeLight": "Light",
@@ -8282,6 +8289,7 @@
     "profitLoss": {
       "title": "Profit & Loss",
       "subtitle": "Income and expense over the period",
+      "waterfallLabel": "Profit and loss waterfall chart",
       "income": "Income",
       "totalIncome": "Total income",
       "noIncome": "No income.",

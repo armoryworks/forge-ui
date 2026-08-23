@@ -1,0 +1,64 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.pnl-visual {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+}
+
+.pnl-visual__kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $sp-md;
+}
+
+.pnl-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  padding: $sp-md $sp-lg;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+}
+
+.pnl-kpi__label {
+  @include uppercase-label($font-size-xxs, 0.05em, 600);
+  color: var(--text-muted);
+}
+
+.pnl-kpi__value {
+  font-size: $font-size-kpi;
+  font-weight: 700;
+  color: var(--text);
+
+  &--income,
+  &--positive {
+    color: var(--success);
+  }
+
+  &--expense {
+    color: var(--error);
+  }
+}
+
+.pnl-visual__caveat {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  margin: 0;
+  padding: $sp-sm $sp-md;
+  background: var(--warning-light);
+  color: var(--text);
+  font-size: $font-size-sm;
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+    color: var(--warning);
+  }
+}
+
+.pnl-visual__chart {
+  position: relative;
+  height: 340px;
+}

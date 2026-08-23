@@ -1,0 +1,41 @@
+<div class="pnl-visual">
+  <div class="pnl-visual__kpis">
+    <div class="pnl-kpi">
+      <span class="pnl-kpi__label">{{ 'accounting.profitLoss.totalIncome' | translate }}</span>
+      <span class="pnl-kpi__value pnl-kpi__value--income">
+        <app-currency-display [value]="report().totalIncome" />
+      </span>
+    </div>
+    <div class="pnl-kpi">
+      <span class="pnl-kpi__label">{{ 'accounting.profitLoss.totalExpense' | translate }}</span>
+      <span class="pnl-kpi__value pnl-kpi__value--expense">
+        <app-currency-display [value]="report().totalExpense" />
+      </span>
+    </div>
+    <div class="pnl-kpi">
+      <span class="pnl-kpi__label">{{ 'accounting.profitLoss.netIncome' | translate }}</span>
+      <span
+        class="pnl-kpi__value"
+        [class.pnl-kpi__value--positive]="report().netIncome >= 0"
+        [class.pnl-kpi__value--expense]="report().netIncome < 0">
+        <app-currency-display [value]="report().netIncome" />
+      </span>
+    </div>
+  </div>
+
+  @if (!report().cogsPosted && report().marginCaveat) {
+    <p class="pnl-visual__caveat">
+      <span class="material-icons-outlined">info</span>
+      {{ report().marginCaveat }}
+    </p>
+  }
+
+  <div class="pnl-visual__chart">
+    <canvas baseChart
+      [type]="chartConfig().type"
+      [data]="chartConfig().data"
+      [options]="chartConfig().options"
+      [attr.aria-label]="'accounting.profitLoss.waterfallLabel' | translate">
+    </canvas>
+  </div>
+</div>
