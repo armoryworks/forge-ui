@@ -67,6 +67,11 @@ export const ACCOUNTING_ROUTES: Routes = [
     loadComponent: () => import('./components/grni/grni.component').then((m) => m.GrniComponent),
   },
   {
+    path: 'sales-tax-liability',
+    loadComponent: () =>
+      import('./components/sales-tax-liability/sales-tax-liability.component').then((m) => m.SalesTaxLiabilityComponent),
+  },
+  {
     path: 'period-close',
     loadComponent: () =>
       import('./components/period-close/period-close.component').then((m) => m.PeriodCloseComponent),

@@ -28,6 +28,7 @@ import {
   ManualJournalEntryResult,
   ProfitAndLoss,
   ReverseJournalEntryInput,
+  SalesTaxLiabilityReport,
   TrialBalance,
   YearEndCloseResult,
 } from '../models/accounting.models';
@@ -112,6 +113,17 @@ export class GeneralLedgerService {
     let params = new HttpParams().set('bookId', bookId);
     if (asOfDate) params = params.set('asOfDate', asOfDate);
     return this.http.get<ApAging>(`${this.base}/ap-aging`, { params });
+  }
+
+  /**
+   * Sales-tax liability by jurisdiction over an optional date range. Amounts are the seller's own
+   * liability (marketplace-facilitator tax the platform remits is excluded); not book-scoped.
+   */
+  getSalesTaxLiability(fromDate?: string | null, toDate?: string | null): Observable<SalesTaxLiabilityReport> {
+    let params = new HttpParams();
+    if (fromDate) params = params.set('fromDate', fromDate);
+    if (toDate) params = params.set('toDate', toDate);
+    return this.http.get<SalesTaxLiabilityReport>(`${this.base}/sales-tax-liability`, { params });
   }
 
   getGrniReconciliation(bookId: number, asOfDate?: string | null): Observable<GrniReconciliation> {

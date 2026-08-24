@@ -157,6 +157,32 @@ export interface ArAging {
   reconciliation: AgingReconciliation;
 }
 
+/**
+ * One jurisdiction row of the sales-tax liability report: the seller sales-tax
+ * owed for orders shipping to a single US state. `jurisdiction` is null when the
+ * order carries no ship-to state on record (the "unassigned" bucket).
+ */
+export interface SalesTaxLiabilityJurisdictionRow {
+  jurisdiction: string | null;
+  taxableBase: number;
+  liability: number;
+  orderCount: number;
+}
+
+/**
+ * Sales-tax liability report — what the business owes a taxing authority,
+ * grouped by jurisdiction over an optional date range. Amounts sum the seller's
+ * own liability (marketplace-facilitator tax the platform remits is excluded).
+ */
+export interface SalesTaxLiabilityReport {
+  fromDate: string | null;
+  toDate: string | null;
+  jurisdictions: SalesTaxLiabilityJurisdictionRow[];
+  totalTaxableBase: number;
+  totalLiability: number;
+  totalOrderCount: number;
+}
+
 // ── GRNI reconciliation ────────────────────────────────────────────────────
 export interface GrniPoRow {
   purchaseOrderId: number;

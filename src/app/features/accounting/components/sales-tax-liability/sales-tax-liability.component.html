@@ -1,0 +1,50 @@
+<app-page-header
+  [title]="'accounting.salesTaxLiability.title' | translate"
+  [subtitle]="'accounting.salesTaxLiability.subtitle' | translate">
+</app-page-header>
+
+<div class="page-content page-content--table">
+  <div class="stl-toolbar">
+    <app-date-range-picker
+      [label]="'accounting.salesTaxLiability.range' | translate"
+      [presets]="['This Month', 'Last 30 Days']"
+      [formControl]="rangeControl" />
+  </div>
+
+  @if (error()) {
+    <p class="acct-error" role="alert">{{ error() }}</p>
+  }
+
+  <app-data-table
+    tableId="acct-sales-tax-liability"
+    [columns]="columns()"
+    [data]="rows()"
+    [loading]="loading()"
+    [stickyFirstColumn]="true"
+    emptyIcon="percent"
+    [emptyMessage]="'accounting.salesTaxLiability.empty' | translate">
+    <ng-template appColumnCell="taxableBase" let-row>
+      <app-currency-display [value]="row.taxableBase" />
+    </ng-template>
+    <ng-template appColumnCell="liability" let-row>
+      <app-currency-display [value]="row.liability" />
+    </ng-template>
+  </app-data-table>
+
+  @if (report(); as r) {
+    <div class="totals-strip">
+      <span class="totals-strip__label">{{ 'accounting.common.total' | translate }}</span>
+      <span class="totals-strip__metric">
+        {{ 'accounting.salesTaxLiability.taxableBase' | translate }}
+        <app-currency-display [value]="r.totalTaxableBase" />
+      </span>
+      <span class="totals-strip__metric">
+        {{ 'accounting.salesTaxLiability.orders' | translate }} {{ r.totalOrderCount }}
+      </span>
+      <span class="totals-strip__metric totals-strip__metric--strong">
+        {{ 'accounting.salesTaxLiability.liability' | translate }}
+        <app-currency-display [value]="r.totalLiability" />
+      </span>
+    </div>
+  }
+</div>

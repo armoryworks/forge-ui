@@ -65,6 +65,7 @@
     "arAging": "AR Aging",
     "apAging": "AP Aging",
     "grni": "GRNI",
+    "salesTaxLiability": "Sales Tax Liability",
     "periodClose": "Period Close",
     "bankRec": "Bank Reconciliation",
     "salesChannels": "Sales Channels",
@@ -8041,6 +8042,7 @@
       "arAgingLoadFailed": "Could not load the AR aging.",
       "apAgingLoadFailed": "Could not load the AP aging.",
       "grniLoadFailed": "Could not load the GRNI reconciliation.",
+      "salesTaxLiabilityLoadFailed": "Could not load the sales-tax liability report.",
       "fiscalCalendarLoadFailed": "Could not load the fiscal calendar.",
       "cashAccountsLoadFailed": "Could not load cash accounts.",
       "reconciliationsLoadFailed": "Could not load reconciliations.",
@@ -8257,6 +8259,8 @@
       "apAgingDesc": "Open payables by vendor and age bucket.",
       "grni": "GRNI Reconciliation",
       "grniDesc": "Goods received not invoiced — GL vs operational.",
+      "salesTaxLiability": "Sales Tax Liability",
+      "salesTaxLiabilityDesc": "Sales tax owed by jurisdiction and period.",
       "periodClose": "Period Close",
       "periodCloseDesc": "Soft/hard-close periods, reopen, and run the year-end close.",
       "bankRec": "Bank Reconciliation",
@@ -8397,6 +8401,17 @@
       "qty": "Qty",
       "received": "Received",
       "reason": "Reason"
+    },
+    "salesTaxLiability": {
+      "title": "Sales Tax Liability",
+      "subtitle": "Sales tax owed by jurisdiction",
+      "jurisdiction": "Jurisdiction",
+      "taxableBase": "Taxable base",
+      "liability": "Liability",
+      "orders": "Orders",
+      "unassigned": "Unassigned",
+      "range": "Date range",
+      "empty": "No sales-tax liability in this period"
     },
     "periodClose": {
       "title": "Period Close",
