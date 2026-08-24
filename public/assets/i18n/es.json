@@ -4544,6 +4544,9 @@
       "statusPartiallyPaid": "Pago parcial",
       "statusPaid": "Pagado",
       "statusWaived": "Exonerado"
+    },
+    "preview": {
+      "open": "Abrir"
     }
   },
   "addressForm": {

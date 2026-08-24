@@ -71,7 +71,6 @@
     "src/app/shared/components/dynamic-form/controls/dynamic-qb-toggle.component.ts": 1,
     "src/app/shared/components/dynamic-form/dynamic-qb-form-control.component.ts": 1,
     "src/app/shared/components/dynamic-form/dynamic-qb-form.component.ts": 1,
-    "src/app/shared/components/entity-link/entity-link.component.ts": 1,
     "src/app/shared/components/similar-entities-dialog/similar-entities-dialog.component.ts": 1,
     "src/app/shared/components/stub-page/stub-page.component.ts": 1,
     "src/app/shared/components/workflow/workflow-step-stub.component.ts": 1

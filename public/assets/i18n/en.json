@@ -4544,6 +4544,9 @@
       "statusPartiallyPaid": "Partially paid",
       "statusPaid": "Paid",
       "statusWaived": "Waived"
+    },
+    "preview": {
+      "open": "Open"
     }
   },
   "address": {

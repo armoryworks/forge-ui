@@ -1,0 +1,66 @@
+<a
+  #trigger="cdkOverlayOrigin"
+  cdkOverlayOrigin
+  class="entity-link"
+  tabindex="0"
+  role="link"
+  (click)="navigate($event)"
+  (keydown.enter)="navigate($event)"
+  (keydown.escape)="close()"
+  (mouseenter)="scheduleOpen()"
+  (mouseleave)="scheduleClose()"
+  (focus)="scheduleOpen()"
+  (blur)="scheduleClose()"><ng-content /></a>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="trigger"
+  [cdkConnectedOverlayOpen]="open()"
+  [cdkConnectedOverlayPositions]="positions"
+  [cdkConnectedOverlayPush]="true"
+  [cdkConnectedOverlayHasBackdrop]="false"
+  (overlayOutsideClick)="close()"
+  (detach)="close()">
+  <div
+    class="entity-preview"
+    role="group"
+    [attr.aria-label]="preview()?.title"
+    (mouseenter)="cancelClose()"
+    (mouseleave)="scheduleClose()"
+    (focusin)="cancelClose()"
+    (focusout)="scheduleClose()"
+    (keydown.escape)="close()">
+    @if (loading()) {
+      <div class="entity-preview__loading">{{ 'common.loading' | translate }}</div>
+    } @else if (preview(); as p) {
+      <div class="entity-preview__title">{{ p.title }}</div>
+      @if (p.subtitle) {
+        <div class="entity-preview__subtitle">{{ p.subtitle }}</div>
+      }
+      @if (p.fields.length) {
+        <dl class="entity-preview__fields">
+          @for (f of p.fields; track f.label) {
+            <div class="entity-preview__field">
+              <dt class="entity-preview__field-label">{{ f.label }}</dt>
+              <dd class="entity-preview__field-value">{{ f.value }}</dd>
+            </div>
+          }
+        </dl>
+      }
+      @if (p.links.length) {
+        <div class="entity-preview__links">
+          @for (l of p.links; track l.type + ':' + l.id) {
+            <button
+              type="button"
+              class="entity-preview__link"
+              [attr.aria-label]="('shared.preview.open' | translate) + ' ' + l.label"
+              (click)="onLinkClick($event, l)">
+              <span class="material-icons-outlined entity-preview__link-icon" aria-hidden="true">open_in_new</span>
+              {{ l.label }}
+            </button>
+          }
+        </div>
+      }
+    }
+  </div>
+</ng-template>
