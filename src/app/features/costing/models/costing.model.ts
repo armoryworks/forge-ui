@@ -62,3 +62,30 @@ export interface FreezeCostingPeriodResult {
   budgetsRated: number;
   workCentersRated: number;
 }
+
+/** Answers for the prepackaged costing quick-start. */
+export interface CostingQuickStartRequest {
+  fiscalYear: number;
+  directHeadcount: number;
+  averageHourlyWage: number;
+  payrollTaxPercent: number;
+  benefitsMonthlyPerEmployee: number;
+  utilitiesMonthly: number;
+  facilitiesMonthly: number;
+  equipmentAnnual: number;
+  createGlBudgets: boolean;
+  setDefaultLaborRates: boolean;
+}
+
+/** What the quick-start configured, and the resulting absorption rate. */
+export interface CostingQuickStartResult {
+  costingCostCenterId: number;
+  costingPeriodId: number;
+  poolsConfigured: string[];
+  annualDirectLaborHours: number;
+  totalAnnualOverhead: number;
+  overheadRatePerLaborHour: number;
+  glBudgetsCreated: boolean;
+  laborRatesSet: number;
+  notes: string[];
+}

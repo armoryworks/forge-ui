@@ -9199,6 +9199,24 @@
       "amount": "Monto Presupuestado",
       "qty": "Cant. Generador",
       "set": "Establecer Presupuesto"
+    },
+    "quickStart": {
+      "button": "Inicio rápido",
+      "title": "Inicio rápido de costeo",
+      "lead": "Responde unas preguntas y se rellenan el centro de costos de planta, el periodo de costeo del año, los grupos de gastos generales estándar con sus presupuestos y (con el libro mayor completo activo) las cuentas de gastos y líneas de presupuesto del GL correspondientes.",
+      "fiscalYear": "Año fiscal",
+      "headcount": "Personal directo",
+      "wage": "Salario promedio por hora",
+      "payrollTax": "Impuesto de nómina del empleador",
+      "benefits": "Beneficios / empleado / mes",
+      "utilities": "Servicios / mes",
+      "facilities": "Instalaciones y renta / mes",
+      "equipment": "Equipo y depreciación / año",
+      "createGlBudgets": "Crear también cuentas de gastos y líneas de presupuesto del GL",
+      "setLaborRates": "Asignar tarifas de mano de obra predeterminadas a usuarios sin una",
+      "apply": "Aplicar",
+      "failed": "El inicio rápido falló: no se cambió nada.",
+      "applied": "Inicio rápido aplicado: {{pools}} grupos presupuestados, gastos generales {{rate}}/hora de mano de obra."
     }
   }
 }

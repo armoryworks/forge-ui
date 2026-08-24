@@ -7,7 +7,7 @@ import { map } from 'rxjs';
 
 import { format } from 'date-fns';
 
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
@@ -19,11 +19,16 @@ import { ColumnCellDirective } from '../../shared/directives/column-cell.directi
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { ViewModeToggleComponent } from '../../shared/components/view-mode-toggle/view-mode-toggle.component';
 import { ViewMode, DEFAULT_VIEW_MODE } from '../../shared/models/view-mode.model';
+import { MatDialog } from '@angular/material/dialog';
+
+import { SpacerDirective } from '../../shared/directives/spacer.directive';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { ToastService } from '../../shared/services/toast.service';
 import { toIsoDate } from '../../shared/utils/date.utils';
 
 import { CostingService } from './services/costing.service';
 import { CostingRatesVisualComponent } from './components/costing-rates-visual/costing-rates-visual.component';
+import { CostingQuickStartDialogComponent } from './components/costing-quick-start-dialog/costing-quick-start-dialog.component';
 import {
   CostingPeriod,
   CostingCostCenter,
@@ -39,7 +44,7 @@ type CostingTab = 'periods' | 'cost-centers' | 'pools';
   imports: [
     ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent, DatepickerComponent,
     ToggleComponent, PageLayoutComponent, DataTableComponent, ColumnCellDirective, DatePipe,
-    ViewModeToggleComponent, CostingRatesVisualComponent,
+    ViewModeToggleComponent, CostingRatesVisualComponent, SpacerDirective,
   ],
   templateUrl: './costing.component.html',
   styleUrl: './costing.component.scss',
@@ -51,6 +56,9 @@ export class CostingComponent {
   private readonly fb = inject(FormBuilder);
   private readonly service = inject(CostingService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly toast = inject(ToastService);
+  private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(MatDialog);
 
   protected readonly activeTab = toSignal(
     this.route.paramMap.pipe(map(p => (p.get('tab') as CostingTab) ?? 'periods')),
@@ -181,6 +189,28 @@ export class CostingComponent {
   /** MM/dd/yyyy for select labels (templates use the date pipe directly). */
   protected fmt(iso: string | null): string {
     return iso ? format(new Date(iso), 'MM/dd/yyyy') : '';
+  }
+
+  /** Prepackaged setup: a few answers populate pools, budgets, and GL budget lines. */
+  protected openQuickStart(): void {
+    this.dialog.open(CostingQuickStartDialogComponent, { width: '520px' })
+      .afterClosed().subscribe((result) => {
+        if (!result) return;
+        this.snackbar.success(this.translate.instant('costing.quickStart.applied', {
+          pools: result.poolsConfigured.length,
+          rate: result.overheadRatePerLaborHour,
+        }));
+        if (result.notes.length) {
+          this.toast.show({
+            severity: 'info',
+            title: this.translate.instant('costing.quickStart.title'),
+            message: result.notes.join('\n'),
+          });
+        }
+        this.loadPeriods();
+        this.loadCostCenters();
+        this.loadPools();
+      });
   }
 
   private loadPeriods(): void {

@@ -10,6 +10,8 @@ import {
   OverheadPoolBudget,
   WorkCenterCostRate,
   FreezeCostingPeriodResult,
+  CostingQuickStartRequest,
+  CostingQuickStartResult,
 } from '../models/costing.model';
 
 /** Tier-3 activity-based costing API (`/api/v1/costing/tier3`, gated by CAP-COSTING-TIER3-ABC). */
@@ -64,5 +66,10 @@ export class CostingService {
       budgetAmount,
       budgetDriverQty,
     });
+  }
+
+  /** Prepackaged setup: a few answers populate pools, budgets, and (FULLGL on) GL budget lines. */
+  applyQuickStart(request: CostingQuickStartRequest): Observable<CostingQuickStartResult> {
+    return this.http.post<CostingQuickStartResult>(`${this.base}/quick-start`, request);
   }
 }

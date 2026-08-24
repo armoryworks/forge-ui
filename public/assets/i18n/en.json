@@ -9199,6 +9199,24 @@
       "amount": "Budget Amount",
       "qty": "Driver Qty",
       "set": "Set Budget"
+    },
+    "quickStart": {
+      "button": "Quick start",
+      "title": "Costing quick start",
+      "lead": "Answer a few questions and NOM-style setup populates the plant cost center, this year’s costing period, the standard overhead pools with budgets, and (with full GL on) matching expense accounts + GL budget lines.",
+      "fiscalYear": "Fiscal year",
+      "headcount": "Direct headcount",
+      "wage": "Average hourly wage",
+      "payrollTax": "Employer payroll tax",
+      "benefits": "Benefits / employee / month",
+      "utilities": "Utilities / month",
+      "facilities": "Facilities & rent / month",
+      "equipment": "Equipment & depreciation / year",
+      "createGlBudgets": "Also create GL expense accounts + budget lines",
+      "setLaborRates": "Set default labor rates for users without one",
+      "apply": "Apply",
+      "failed": "Quick start failed — nothing was changed.",
+      "applied": "Costing quick start applied: {{pools}} pools budgeted, overhead {{rate}}/labor-hour."
     }
   }
 }

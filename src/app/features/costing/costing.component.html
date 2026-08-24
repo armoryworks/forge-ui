@@ -1,4 +1,12 @@
 <app-page-layout [pageTitle]="'costing.title' | translate">
+  <ng-container toolbar>
+    <span appSpacer></span>
+    <button class="action-btn" (click)="openQuickStart()" data-testid="costing-quick-start">
+      <span class="material-icons-outlined">auto_fix_high</span>
+      {{ 'costing.quickStart.button' | translate }}
+    </button>
+  </ng-container>
+
   <ng-container content>
     <div class="tab-bar" role="tablist">
       <button class="tab" role="tab" [attr.aria-selected]="activeTab() === 'periods'"
