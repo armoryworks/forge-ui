@@ -4,6 +4,8 @@
 </app-page-header>
 
 <div class="page-content">
+  <app-financial-ratios-strip *appCap="'CAP-ACCT-GL-VIEW'" />
+
   <div class="tile-grid">
     @for (tile of tiles; track tile.route) {
       <a class="tile" [routerLink]="tile.route">

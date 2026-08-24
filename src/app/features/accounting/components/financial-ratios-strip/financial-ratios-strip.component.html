@@ -1,0 +1,18 @@
+@if (!failed()) {
+  <div class="ratios-strip" [appLoadingBlock]="loading()">
+    <h2 class="ratios-strip__title">{{ 'accounting.ratios.title' | translate }}</h2>
+    <div class="ratios-strip__grid">
+      @for (card of cards(); track card.labelKey) {
+        <div class="ratio-card">
+          <span class="ratio-card__label">{{ card.labelKey | translate }}</span>
+          <span
+            class="ratio-card__value"
+            [class]="card.hint ? 'ratio-card__value--' + card.hint : ''">
+            {{ card.display }}
+          </span>
+        </div>
+      }
+    </div>
+    <p class="ratios-strip__caption">{{ 'accounting.ratios.currentPeriodNote' | translate }}</p>
+  </div>
+}

@@ -1,0 +1,67 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.ratios-strip {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  min-height: $sp-4xl;
+}
+
+.ratios-strip__title {
+  @include uppercase-label($font-size-xxs, 0.05em, 700);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.ratios-strip__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $sp-md;
+
+  @include tablet {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ratio-card {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  padding: $sp-md $sp-lg;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+}
+
+.ratio-card__label {
+  @include uppercase-label($font-size-xxs, 0.05em, 600);
+  color: var(--text-muted);
+}
+
+.ratio-card__value {
+  font-size: $font-size-kpi;
+  font-weight: 700;
+  color: var(--text);
+
+  &--good {
+    color: var(--success);
+  }
+
+  &--warn {
+    color: var(--warning);
+  }
+
+  &--bad {
+    color: var(--error);
+  }
+}
+
+.ratios-strip__caption {
+  margin: 0;
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+}

@@ -4,6 +4,8 @@ import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { CapDirective } from '../../shared/directives/cap.directive';
+import { FinancialRatiosStripComponent } from './components/financial-ratios-strip/financial-ratios-strip.component';
 
 interface AccountingTile {
   route: string;
@@ -19,7 +21,7 @@ interface AccountingTile {
 @Component({
   selector: 'app-accounting',
   standalone: true,
-  imports: [RouterLink, TranslatePipe, PageHeaderComponent],
+  imports: [RouterLink, TranslatePipe, PageHeaderComponent, CapDirective, FinancialRatiosStripComponent],
   templateUrl: './accounting.component.html',
   styleUrl: './accounting.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

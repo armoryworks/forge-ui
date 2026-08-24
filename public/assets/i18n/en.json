@@ -8315,6 +8315,14 @@
       "noExpense": "No expense.",
       "netIncome": "Net income"
     },
+    "ratios": {
+      "title": "Financial health",
+      "netMargin": "Net profit margin",
+      "roa": "Return on assets",
+      "debtToEquity": "Debt-to-equity",
+      "expenseRatio": "Expense ratio",
+      "currentPeriodNote": "Current period P&L and balance sheet as of today."
+    },
     "comparison": {
       "compareToPrior": "Compare to prior period",
       "priorPeriod": "Prior period",

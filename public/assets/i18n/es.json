@@ -8315,6 +8315,14 @@
       "noExpense": "Sin gastos.",
       "netIncome": "Utilidad neta"
     },
+    "ratios": {
+      "title": "Salud financiera",
+      "netMargin": "Margen de utilidad neta",
+      "roa": "Rendimiento sobre activos",
+      "debtToEquity": "Deuda sobre capital",
+      "expenseRatio": "Índice de gastos",
+      "currentPeriodNote": "Estado de resultados del período actual y balance general a la fecha de hoy."
+    },
     "comparison": {
       "compareToPrior": "Comparar con el período anterior",
       "priorPeriod": "Período anterior",
