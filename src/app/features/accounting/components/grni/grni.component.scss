@@ -1,4 +1,5 @@
 @use 'app/features/accounting/accounting-shared' as *;
+@use 'styles/variables' as *;
 
 // Page-scroll contract — see styles/_shared.scss. Routed page host must be a
 // bounded flex column or the inner scroll container has nothing to clip against.
@@ -7,4 +8,10 @@
   flex-direction: column;
   flex: 1;
   min-height: 0;
+}
+
+.acct-view-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: $sp-md;
 }

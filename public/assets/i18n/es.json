@@ -8400,7 +8400,9 @@
       "receipt": "Recepción",
       "qty": "Cant.",
       "received": "Recibido",
-      "reason": "Motivo"
+      "reason": "Motivo",
+      "totalOpen": "Total de MRNF abierto",
+      "chartLabel": "Gráfico de MRNF abierto por proveedor"
     },
     "salesTaxLiability": {
       "title": "Impuesto sobre ventas por pagar",
@@ -9105,7 +9107,9 @@
       "machine": "Máquina",
       "mchVar": "GG Máq. Var.",
       "mchFixed": "GG Máq. Fijo",
-      "noneYet": "Sin tasas — congele el periodo primero"
+      "noneYet": "Sin tasas — congele el periodo primero",
+      "ratedCount": "Centros de trabajo tasados",
+      "chartLabel": "Gráfico de composición de tasas de costo por centro de trabajo"
     },
     "costCenters": {
       "code": "Código",

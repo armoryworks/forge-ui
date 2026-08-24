@@ -6,6 +6,13 @@
   color: var(--text-secondary);
 }
 
+.costing__rates-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $sp-md;
+}
+
 .create-row {
   display: flex;
   gap: $sp-md;

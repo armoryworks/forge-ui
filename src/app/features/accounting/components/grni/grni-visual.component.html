@@ -1,0 +1,27 @@
+<div class="grni-visual">
+  <div class="grni-visual__kpis">
+    <div class="grni-kpi">
+      <span class="grni-kpi__label">{{ 'accounting.grni.totalOpen' | translate }}</span>
+      <span class="grni-kpi__value">
+        <app-currency-display [value]="report().grandTotal" />
+      </span>
+    </div>
+    <div class="grni-kpi">
+      <span class="grni-kpi__label">{{ 'accounting.grni.variance' | translate }}</span>
+      <span
+        class="grni-kpi__value"
+        [class.grni-kpi__value--warn]="!report().isReconciled">
+        <app-currency-display [value]="report().variance" />
+      </span>
+    </div>
+  </div>
+
+  <div class="grni-visual__chart">
+    <canvas baseChart
+      [type]="chartConfig().type"
+      [data]="chartConfig().data"
+      [options]="chartConfig().options"
+      [attr.aria-label]="'accounting.grni.chartLabel' | translate">
+    </canvas>
+  </div>
+</div>

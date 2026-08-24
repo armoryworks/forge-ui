@@ -1,0 +1,44 @@
+@use 'app/features/accounting/accounting-shared' as *;
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.grni-visual {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+}
+
+.grni-visual__kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: $sp-md;
+}
+
+.grni-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  padding: $sp-md $sp-lg;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+}
+
+.grni-kpi__label {
+  @include uppercase-label($font-size-xxs, 0.05em, 600);
+  color: var(--text-muted);
+}
+
+.grni-kpi__value {
+  font-size: $font-size-kpi;
+  font-weight: 700;
+  color: var(--text);
+
+  &--warn {
+    color: var(--warning);
+  }
+}
+
+.grni-visual__chart {
+  position: relative;
+  height: 340px;
+}

@@ -17,10 +17,13 @@ import { PageLayoutComponent } from '../../shared/components/page-layout/page-la
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
+import { ViewModeToggleComponent } from '../../shared/components/view-mode-toggle/view-mode-toggle.component';
+import { ViewMode, DEFAULT_VIEW_MODE } from '../../shared/models/view-mode.model';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { toIsoDate } from '../../shared/utils/date.utils';
 
 import { CostingService } from './services/costing.service';
+import { CostingRatesVisualComponent } from './components/costing-rates-visual/costing-rates-visual.component';
 import {
   CostingPeriod,
   CostingCostCenter,
@@ -36,6 +39,7 @@ type CostingTab = 'periods' | 'cost-centers' | 'pools';
   imports: [
     ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent, DatepickerComponent,
     ToggleComponent, PageLayoutComponent, DataTableComponent, ColumnCellDirective, DatePipe,
+    ViewModeToggleComponent, CostingRatesVisualComponent,
   ],
   templateUrl: './costing.component.html',
   styleUrl: './costing.component.scss',
@@ -52,6 +56,20 @@ export class CostingComponent {
     this.route.paramMap.pipe(map(p => (p.get('tab') as CostingTab) ?? 'periods')),
     { initialValue: 'periods' as CostingTab },
   );
+
+  /** Local Classic/Visual toggle for the frozen-rates section — URL-only, no accounting pref. */
+  protected readonly viewMode = toSignal(
+    this.route.queryParamMap.pipe(map(p => (p.get('view') as ViewMode) ?? DEFAULT_VIEW_MODE)),
+    { initialValue: DEFAULT_VIEW_MODE },
+  );
+
+  protected setViewMode(mode: ViewMode): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { view: mode === DEFAULT_VIEW_MODE ? null : mode },
+      queryParamsHandling: 'merge',
+    });
+  }
 
   protected readonly periods = signal<CostingPeriod[]>([]);
   protected readonly costCenters = signal<CostingCostCenter[]>([]);

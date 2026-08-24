@@ -13,6 +13,13 @@
   @if (loading() && !report()) {
     <p class="acct-muted">{{ 'accounting.common.loading' | translate }}</p>
   } @else if (report(); as r) {
+    <div class="acct-view-bar">
+      <app-view-mode-toggle [mode]="viewMode()" (modeChange)="setViewMode($event)" />
+    </div>
+
+    @if (viewMode() === 'visual') {
+      <app-grni-visual [report]="r" />
+    } @else {
     <table class="summary-table" aria-label="GRNI summary">
       <tbody>
         <tr>
@@ -77,6 +84,7 @@
           </ng-template>
         </app-data-table>
       </div>
+    }
     }
   }
 </div>

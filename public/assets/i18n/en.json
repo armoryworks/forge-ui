@@ -8400,7 +8400,9 @@
       "receipt": "Receipt",
       "qty": "Qty",
       "received": "Received",
-      "reason": "Reason"
+      "reason": "Reason",
+      "totalOpen": "Total open GRNI",
+      "chartLabel": "Open GRNI by vendor chart"
     },
     "salesTaxLiability": {
       "title": "Sales Tax Liability",
@@ -9105,7 +9107,9 @@
       "machine": "Machine",
       "mchVar": "Mch OH Var",
       "mchFixed": "Mch OH Fixed",
-      "noneYet": "No rates — freeze the period first"
+      "noneYet": "No rates — freeze the period first",
+      "ratedCount": "Work centers rated",
+      "chartLabel": "Work-center cost-rate composition chart"
     },
     "costCenters": {
       "code": "Code",

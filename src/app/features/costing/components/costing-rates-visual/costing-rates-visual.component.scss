@@ -1,0 +1,39 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.rates-visual {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+}
+
+.rates-visual__kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: $sp-md;
+}
+
+.rates-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  padding: $sp-md $sp-lg;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+}
+
+.rates-kpi__label {
+  @include uppercase-label($font-size-xxs, 0.05em, 600);
+  color: var(--text-muted);
+}
+
+.rates-kpi__value {
+  font-size: $font-size-kpi;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.rates-visual__chart {
+  position: relative;
+  height: 340px;
+}

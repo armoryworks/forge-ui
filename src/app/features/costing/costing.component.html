@@ -43,11 +43,20 @@
       </app-data-table>
 
       @if (ratesPeriodId() !== null) {
-        <h2 class="costing__subtitle">{{ 'costing.rates.title' | translate }}</h2>
-        <app-data-table tableId="costing-rates" [columns]="rateColumns" [data]="rates()"
-          emptyIcon="table_chart" [emptyMessage]="'costing.rates.noneYet' | translate">
-          <ng-template appColumnCell="workCenterId" let-row>#{{ row.workCenterId }}</ng-template>
-        </app-data-table>
+        <div class="costing__rates-head">
+          <h2 class="costing__subtitle">{{ 'costing.rates.title' | translate }}</h2>
+          @if (rates().length) {
+            <app-view-mode-toggle [mode]="viewMode()" (modeChange)="setViewMode($event)" />
+          }
+        </div>
+        @if (viewMode() === 'visual' && rates().length) {
+          <app-costing-rates-visual [rates]="rates()" />
+        } @else {
+          <app-data-table tableId="costing-rates" [columns]="rateColumns" [data]="rates()"
+            emptyIcon="table_chart" [emptyMessage]="'costing.rates.noneYet' | translate">
+            <ng-template appColumnCell="workCenterId" let-row>#{{ row.workCenterId }}</ng-template>
+          </app-data-table>
+        }
       }
     }
 

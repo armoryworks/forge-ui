@@ -1,0 +1,17 @@
+<div class="rates-visual">
+  <div class="rates-visual__kpis">
+    <div class="rates-kpi">
+      <span class="rates-kpi__label">{{ 'costing.rates.ratedCount' | translate }}</span>
+      <span class="rates-kpi__value">{{ ratedCount() }}</span>
+    </div>
+  </div>
+
+  <div class="rates-visual__chart">
+    <canvas baseChart
+      [type]="chartConfig().type"
+      [data]="chartConfig().data"
+      [options]="chartConfig().options"
+      [attr.aria-label]="'costing.rates.chartLabel' | translate">
+    </canvas>
+  </div>
+</div>
