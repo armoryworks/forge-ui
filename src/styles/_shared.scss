@@ -134,6 +134,29 @@
     }
   }
 
+  // Filled "beta bar" green — spotlight a single, highest-value call to action that
+  // should out-shout even the primary button. Light-blue on hover. Use sparingly.
+  &--attention {
+    background: var(--attention);
+    border-color: var(--attention);
+    color: var(--attention-text);
+    min-width: 140px;
+
+    &:hover {
+      background: var(--attention-hover);
+      border-color: var(--attention-hover);
+      color: var(--attention-hover-text);
+    }
+
+    &:disabled,
+    &[disabled] {
+      background: var(--text-muted);
+      border-color: var(--text-muted);
+      color: var(--attention-text);
+      opacity: 0.5;
+    }
+  }
+
   // Filled red — Delete / Archive / Block. The primary destructive action in a confirm dialog.
   &--destructive {
     background: var(--action-destructive);

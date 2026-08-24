@@ -54,12 +54,9 @@
         @for (top of mainTree(); track top.label) {
           <button class="rail-item" [class.rail-item--active]="top === railTop()"
                   (click)="onRailClick(top)"
-                  [matTooltip]="top === railTop() ? '' : (top.i18nKey! | translate)" matTooltipPosition="right"
                   [attr.aria-label]="top.i18nKey! | translate">
             <span class="material-icons-outlined">{{ top.icon }}</span>
-            @if (top === railTop()) {
-              <span class="rail-item__vlabel">{{ top.i18nKey! | translate }}</span>
-            }
+            <span class="rail-item__vlabel">{{ top.i18nKey! | translate }}</span>
           </button>
         }
       </div>

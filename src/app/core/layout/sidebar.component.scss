@@ -262,34 +262,53 @@
   justify-content: center;
   padding: $sp-sm 0;
   gap: $sp-xs;
-  transition: color $transition-fast, background $transition-fast;
+  // Smoothly grow/shrink as the vertical label reveals on hover / active.
+  transition: color $transition-normal, background $transition-normal,
+    min-height $transition-normal, padding $transition-normal, gap $transition-normal;
 
-  .material-icons-outlined { font-size: $sidebar-icon-size; }
+  .material-icons-outlined { font-size: $sidebar-icon-size; flex-shrink: 0; }
 
-  &:hover { color: var(--text); background: color-mix(in srgb, var(--primary) 8%, transparent); }
+  &--back {
+    color: var(--text-muted);
+    &:hover { color: var(--text); background: var(--bg); }
+  }
 
-  &--back { color: var(--text-muted); }
-
-  &--active {
-    color: var(--primary);
-    background: color-mix(in srgb, var(--primary) 12%, transparent);
-    border-left: $border-width-accent solid var(--primary);
-    // Give the rotated label room to read.
+  // Hover on a non-active parent: expand and reveal its name vertically in the
+  // light-blue hover tone (replaces the old tooltip). The icon stays put.
+  &:not(.rail-item--active):not(.rail-item--back):hover {
+    color: var(--attention);
+    background: color-mix(in srgb, var(--attention-hover) 35%, transparent);
     min-height: 128px;
     padding: $sp-md 0;
     gap: $sp-sm;
+
+    .rail-item__vlabel { max-height: 150px; opacity: 1; }
+  }
+
+  // Active parent: the "beta bar" green fills the item, label + icon go light.
+  &--active {
+    color: var(--attention-text);
+    background: var(--attention);
+    border-left: $border-width-accent solid var(--attention);
+    min-height: 128px;
+    padding: $sp-md 0;
+    gap: $sp-sm;
+
+    .rail-item__vlabel { max-height: 150px; opacity: 1; color: var(--attention-text); }
   }
 }
 
-// The active parent's label, rotated to run vertically down the rail with the
-// top of the letters on the left (reads bottom-to-top, like a left-edge tab).
+// Rail label, rotated to run vertically (top of letters on the left). Collapsed to
+// zero height by default; the hover / active rules above animate it open.
 .rail-item__vlabel {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   @include uppercase-label($font-size-xs, 0.1em, 700);
-  color: var(--primary);
+  color: var(--attention);
   white-space: nowrap;
-  max-height: 150px;
+  max-height: 0;
+  opacity: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: max-height $transition-normal, opacity $transition-normal;
 }

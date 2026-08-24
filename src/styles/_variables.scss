@@ -57,6 +57,12 @@
   --action-create-hover: #15803d;
   --action-destructive: #dc2626;
   --action-destructive-hover: #b91c1c;
+  // Attention: the "beta bar" green used to spotlight the highest-value action /
+  // the active nav item; light-blue on hover.
+  --attention: #115e59;
+  --attention-text: #ffffff;
+  --attention-hover: #7dd3fc;
+  --attention-hover-text: #0c4a6e;
 }
 
 [data-theme='dark'] {
@@ -98,6 +104,10 @@
   --action-create-hover: #2ea043;
   --action-destructive: #ef4444;
   --action-destructive-hover: #dc2626;
+  --attention: #0f766e;
+  --attention-text: #ffffff;
+  --attention-hover: #38bdf8;
+  --attention-hover-text: #082f49;
 }
 
 // ─── Spacing Scale ───
