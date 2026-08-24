@@ -9148,7 +9148,8 @@
     "tabs": {
       "periods": "Periodos",
       "costCenters": "Centros de Costo",
-      "pools": "Fondos de Gastos Generales"
+      "pools": "Fondos de Gastos Generales",
+      "templates": "Plantillas"
     },
     "periods": {
       "start": "Inicio",
@@ -9216,7 +9217,64 @@
       "setLaborRates": "Asignar tarifas de mano de obra predeterminadas a usuarios sin una",
       "apply": "Aplicar",
       "failed": "El inicio rápido falló: no se cambió nada.",
-      "applied": "Inicio rápido aplicado: {{pools}} grupos presupuestados, gastos generales {{rate}}/hora de mano de obra."
+      "applied": "Inicio rápido aplicado: {{pools}} grupos presupuestados, gastos generales {{rate}}/hora de mano de obra.",
+      "template": "Plantilla",
+      "basisSuffix": {
+        "AnnualAmount": "/ año",
+        "MonthlyAmount": "/ mes",
+        "MonthlyPerEmployee": "/ empleado / mes",
+        "PercentOfWages": "(% de salarios)"
+      }
+    },
+    "templates": {
+      "hint": "Las plantillas definen las categorías de gastos generales que pregunta el inicio rápido. La plantilla del sistema viene con el producto; crea las tuyas para tu taller.",
+      "new": "Nueva plantilla",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "system": "Sistema",
+      "lines": "Líneas",
+      "noneYet": "Aún no hay plantillas.",
+      "loadFailed": "No se pudieron cargar las plantillas de costeo.",
+      "newTitle": "Nueva plantilla de costeo",
+      "editTitle": "Editar plantilla de costeo",
+      "name": "Nombre de la plantilla",
+      "description": "Descripción",
+      "addLine": "Agregar línea",
+      "removeLine": "Quitar línea",
+      "noLines": "Agrega al menos una línea de categoría de gastos generales.",
+      "code": "Código",
+      "lineName": "Categoría",
+      "behaviorLabel": "Comportamiento",
+      "driverLabel": "Inductor",
+      "basisLabel": "Se pregunta como",
+      "defaultValue": "Predeterminado",
+      "glNumber": "Cuenta GL #",
+      "glName": "Nombre de cuenta GL",
+      "save": "Guardar plantilla",
+      "saveFailed": "No se pudo guardar la plantilla.",
+      "saved": "Plantilla «{{name}}» guardada.",
+      "deleteTitle": "¿Eliminar plantilla?",
+      "deleteMessage": "¿Eliminar la plantilla de costeo «{{name}}»? Los presupuestos aplicados se conservan.",
+      "deleteConfirm": "Eliminar",
+      "deleteFailed": "No se pudo eliminar la plantilla.",
+      "behavior": {
+        "Fixed": "Fijo",
+        "Variable": "Variable",
+        "Semi": "Semivariable"
+      },
+      "driver": {
+        "LaborHour": "Horas de mano de obra",
+        "MachineHour": "Horas máquina",
+        "LaborDollar": "Dólares de mano de obra",
+        "MaterialDollar": "Dólares de material",
+        "Unit": "Unidades"
+      },
+      "basis": {
+        "MonthlyAmount": "Monto mensual",
+        "AnnualAmount": "Monto anual",
+        "MonthlyPerEmployee": "Por empleado / mes",
+        "PercentOfWages": "Porcentaje de salarios"
+      }
     }
   }
 }

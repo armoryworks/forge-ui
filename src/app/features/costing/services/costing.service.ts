@@ -10,7 +10,9 @@ import {
   OverheadPoolBudget,
   WorkCenterCostRate,
   FreezeCostingPeriodResult,
-  CostingQuickStartRequest,
+  CostingTemplate,
+  SaveCostingTemplateRequest,
+  ApplyCostingTemplateRequest,
   CostingQuickStartResult,
 } from '../models/costing.model';
 
@@ -68,8 +70,22 @@ export class CostingService {
     });
   }
 
-  /** Prepackaged setup: a few answers populate pools, budgets, and (FULLGL on) GL budget lines. */
-  applyQuickStart(request: CostingQuickStartRequest): Observable<CostingQuickStartResult> {
-    return this.http.post<CostingQuickStartResult>(`${this.base}/quick-start`, request);
+  /** Costing templates (quick-start packages), system first. */
+  getTemplates(): Observable<CostingTemplate[]> {
+    return this.http.get<CostingTemplate[]>(`${this.base}/templates`);
+  }
+
+  /** Whole-graph create (no id) or replace (id). */
+  saveTemplate(request: SaveCostingTemplateRequest): Observable<CostingTemplate> {
+    return this.http.post<CostingTemplate>(`${this.base}/templates`, request);
+  }
+
+  deleteTemplate(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/templates/${id}`);
+  }
+
+  /** Applies a template: answers populate pools, budgets, and (FULLGL on) GL budget lines. */
+  applyTemplate(id: number, request: ApplyCostingTemplateRequest): Observable<CostingQuickStartResult> {
+    return this.http.post<CostingQuickStartResult>(`${this.base}/templates/${id}/apply`, request);
   }
 }

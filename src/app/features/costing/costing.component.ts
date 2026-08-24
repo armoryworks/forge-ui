@@ -29,14 +29,17 @@ import { toIsoDate } from '../../shared/utils/date.utils';
 import { CostingService } from './services/costing.service';
 import { CostingRatesVisualComponent } from './components/costing-rates-visual/costing-rates-visual.component';
 import { CostingQuickStartDialogComponent } from './components/costing-quick-start-dialog/costing-quick-start-dialog.component';
+import { CostingTemplateEditorDialogComponent, CostingTemplateEditorData } from './components/costing-template-editor-dialog/costing-template-editor-dialog.component';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import {
   CostingPeriod,
   CostingCostCenter,
   OverheadPool,
   WorkCenterCostRate,
+  CostingTemplate,
 } from './models/costing.model';
 
-type CostingTab = 'periods' | 'cost-centers' | 'pools';
+type CostingTab = 'periods' | 'cost-centers' | 'pools' | 'templates';
 
 @Component({
   selector: 'app-costing',
@@ -84,6 +87,7 @@ export class CostingComponent {
   protected readonly pools = signal<OverheadPool[]>([]);
   protected readonly rates = signal<WorkCenterCostRate[]>([]);
   protected readonly ratesPeriodId = signal<number | null>(null);
+  protected readonly costingTemplates = signal<CostingTemplate[]>([]);
 
   protected readonly typeOptions: SelectOption[] = [
     { value: 'Production', label: 'Production' },
@@ -103,6 +107,14 @@ export class CostingComponent {
     { value: 'MaterialDollar', label: 'Material dollar' },
     { value: 'Unit', label: 'Unit' },
     { value: 'ReceiptCount', label: 'Receipt count' },
+  ];
+
+  protected readonly templateColumns: ColumnDef[] = [
+    { field: 'name', header: 'Name', sortable: true },
+    { field: 'description', header: 'Description' },
+    { field: 'lines', header: 'Lines', width: '70px', align: 'center' },
+    { field: 'isSystem', header: '', width: '90px' },
+    { field: 'actions', header: '', width: '160px' },
   ];
 
   protected readonly periodColumns: ColumnDef[] = [
@@ -179,6 +191,7 @@ export class CostingComponent {
       if (tab === 'periods') this.loadPeriods();
       else if (tab === 'cost-centers') this.loadCostCenters();
       else if (tab === 'pools') { this.loadPools(); this.loadCostCenters(); this.loadPeriods(); }
+      else if (tab === 'templates') this.loadTemplates();
     });
   }
 
@@ -189,6 +202,42 @@ export class CostingComponent {
   /** MM/dd/yyyy for select labels (templates use the date pipe directly). */
   protected fmt(iso: string | null): string {
     return iso ? format(new Date(iso), 'MM/dd/yyyy') : '';
+  }
+
+  protected loadTemplates(): void {
+    this.service.getTemplates().subscribe({
+      next: (templates) => this.costingTemplates.set(templates),
+      error: () => this.snackbar.error(this.translate.instant('costing.templates.loadFailed')),
+    });
+  }
+
+  protected openTemplateEditor(template: CostingTemplate | null): void {
+    this.dialog.open(CostingTemplateEditorDialogComponent, {
+      width: '800px',
+      data: { template } satisfies CostingTemplateEditorData,
+    }).afterClosed().subscribe((saved) => {
+      if (!saved) return;
+      this.snackbar.success(this.translate.instant('costing.templates.saved', { name: saved.name }));
+      this.loadTemplates();
+    });
+  }
+
+  protected deleteTemplate(template: CostingTemplate): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('costing.templates.deleteTitle'),
+        message: this.translate.instant('costing.templates.deleteMessage', { name: template.name }),
+        confirmLabel: this.translate.instant('costing.templates.deleteConfirm'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe((confirmed) => {
+      if (!confirmed) return;
+      this.service.deleteTemplate(template.id).subscribe({
+        next: () => this.loadTemplates(),
+        error: () => this.snackbar.error(this.translate.instant('costing.templates.deleteFailed')),
+      });
+    });
   }
 
   /** Prepackaged setup: a few answers populate pools, budgets, and GL budget lines. */

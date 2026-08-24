@@ -1,0 +1,67 @@
+<app-dialog
+  [title]="(editing ? 'costing.templates.editTitle' : 'costing.templates.newTitle') | translate"
+  width="800px" (closed)="cancel()">
+  <div [formGroup]="form">
+    <div class="dialog-row">
+      <app-input [label]="'costing.templates.name' | translate" formControlName="name"
+        [required]="true" data-testid="tpl-name" />
+      <app-input [label]="'costing.templates.description' | translate" formControlName="description"
+        data-testid="tpl-description" />
+    </div>
+
+    <div class="tpl-lines" formArrayName="lines">
+      <div class="tpl-lines__head">
+        <span class="tpl-lines__title">{{ 'costing.templates.lines' | translate }}</span>
+        <button class="action-btn action-btn--sm" type="button" (click)="addLine()" data-testid="tpl-add-line">
+          <span class="material-icons-outlined">add</span>
+          {{ 'costing.templates.addLine' | translate }}
+        </button>
+      </div>
+
+      @if (lines.length === 0) {
+        <p class="tpl-lines__empty">{{ 'costing.templates.noLines' | translate }}</p>
+      }
+
+      @for (line of lines.controls; track $index) {
+        <div class="tpl-lines__row" [formGroupName]="$index">
+          <app-input [label]="'costing.templates.code' | translate" formControlName="code"
+            [required]="true" [attr.data-testid]="'tpl-code-' + $index" />
+          <app-input [label]="'costing.templates.lineName' | translate" formControlName="name"
+            [required]="true" [attr.data-testid]="'tpl-line-name-' + $index" />
+          <app-select [label]="'costing.templates.behaviorLabel' | translate" formControlName="behavior"
+            [options]="behaviorOptions" />
+          <app-select [label]="'costing.templates.driverLabel' | translate" formControlName="driver"
+            [options]="driverOptions" />
+          <app-select [label]="'costing.templates.basisLabel' | translate" formControlName="amountBasis"
+            [options]="basisOptions" />
+          <app-currency-input [label]="'costing.templates.defaultValue' | translate"
+            formControlName="defaultValue" />
+          <app-input [label]="'costing.templates.glNumber' | translate" formControlName="glAccountNumber" />
+          <app-input [label]="'costing.templates.glName' | translate" formControlName="glAccountName" />
+          <button class="icon-btn icon-btn--danger tpl-lines__remove" type="button"
+            (click)="removeLine($index)" [attr.aria-label]="'costing.templates.removeLine' | translate"
+            [attr.data-testid]="'tpl-remove-' + $index">
+            <span class="material-icons-outlined">delete</span>
+          </button>
+        </div>
+      }
+    </div>
+
+    @if (error()) {
+      <p class="tpl-lines__error">{{ 'costing.templates.saveFailed' | translate }}</p>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="cancel()" data-testid="tpl-cancel">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary"
+        [disabled]="form.invalid || lines.length === 0 || saving()"
+        (click)="save()" data-testid="tpl-save">
+        {{ 'costing.templates.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

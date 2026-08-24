@@ -9148,7 +9148,8 @@
     "tabs": {
       "periods": "Periods",
       "costCenters": "Cost Centers",
-      "pools": "Overhead Pools"
+      "pools": "Overhead Pools",
+      "templates": "Templates"
     },
     "periods": {
       "start": "Start",
@@ -9216,7 +9217,64 @@
       "setLaborRates": "Set default labor rates for users without one",
       "apply": "Apply",
       "failed": "Quick start failed — nothing was changed.",
-      "applied": "Costing quick start applied: {{pools}} pools budgeted, overhead {{rate}}/labor-hour."
+      "applied": "Costing quick start applied: {{pools}} pools budgeted, overhead {{rate}}/labor-hour.",
+      "template": "Template",
+      "basisSuffix": {
+        "AnnualAmount": "/ year",
+        "MonthlyAmount": "/ month",
+        "MonthlyPerEmployee": "/ employee / month",
+        "PercentOfWages": "(% of wages)"
+      }
+    },
+    "templates": {
+      "hint": "Templates define the overhead categories the quick start asks about. The system template ships with the product; build your own for your shop.",
+      "new": "New template",
+      "edit": "Edit",
+      "delete": "Delete",
+      "system": "System",
+      "lines": "Lines",
+      "noneYet": "No templates yet.",
+      "loadFailed": "Could not load costing templates.",
+      "newTitle": "New costing template",
+      "editTitle": "Edit costing template",
+      "name": "Template name",
+      "description": "Description",
+      "addLine": "Add line",
+      "removeLine": "Remove line",
+      "noLines": "Add at least one overhead category line.",
+      "code": "Code",
+      "lineName": "Category",
+      "behaviorLabel": "Behavior",
+      "driverLabel": "Driver",
+      "basisLabel": "Asked as",
+      "defaultValue": "Default",
+      "glNumber": "GL account #",
+      "glName": "GL account name",
+      "save": "Save template",
+      "saveFailed": "Could not save the template.",
+      "saved": "Template \"{{name}}\" saved.",
+      "deleteTitle": "Delete template?",
+      "deleteMessage": "Delete costing template \"{{name}}\"? Applied budgets are kept.",
+      "deleteConfirm": "Delete",
+      "deleteFailed": "Could not delete the template.",
+      "behavior": {
+        "Fixed": "Fixed",
+        "Variable": "Variable",
+        "Semi": "Semi-variable"
+      },
+      "driver": {
+        "LaborHour": "Labor hours",
+        "MachineHour": "Machine hours",
+        "LaborDollar": "Labor dollars",
+        "MaterialDollar": "Material dollars",
+        "Unit": "Units"
+      },
+      "basis": {
+        "MonthlyAmount": "Monthly amount",
+        "AnnualAmount": "Annual amount",
+        "MonthlyPerEmployee": "Per employee / month",
+        "PercentOfWages": "Percent of wages"
+      }
     }
   }
 }
