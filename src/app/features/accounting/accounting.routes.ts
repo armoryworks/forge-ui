@@ -48,6 +48,13 @@ export const ACCOUNTING_ROUTES: Routes = [
       import('./components/balance-sheet/balance-sheet.component').then((m) => m.BalanceSheetComponent),
   },
   {
+    // Budget entry is a write surface — needs full GL, like chart-of-accounts.
+    path: 'budgets',
+    canActivate: [capabilityGuard('CAP-ACCT-FULLGL')],
+    loadComponent: () =>
+      import('./components/budgets/budgets.component').then((m) => m.BudgetsComponent),
+  },
+  {
     path: 'cash-flow',
     loadComponent: () =>
       import('./components/cash-flow/cash-flow.component').then((m) => m.CashFlowComponent),

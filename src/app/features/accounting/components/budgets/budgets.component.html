@@ -1,0 +1,115 @@
+<app-page-header [title]="'accounting.budget.title' | translate" [subtitle]="'accounting.budget.subtitle' | translate"></app-page-header>
+
+<div class="page-content">
+  <div class="acct-view-bar">
+    <div class="budget-controls">
+      <div class="year-stepper">
+        <button type="button" class="icon-btn" (click)="stepYear(-1)" [attr.aria-label]="'accounting.budget.prevYear' | translate">
+          <span class="material-icons-outlined" aria-hidden="true">chevron_left</span>
+        </button>
+        <span class="year-label">{{ fiscalYear() }}</span>
+        <button type="button" class="icon-btn" (click)="stepYear(1)" [attr.aria-label]="'accounting.budget.nextYear' | translate">
+          <span class="material-icons-outlined" aria-hidden="true">chevron_right</span>
+        </button>
+      </div>
+
+      @if (mode() === 'vs-actual') {
+        <app-select class="month-select" [label]="'accounting.budget.period' | translate" [options]="monthOptions()" [formControl]="monthControl" />
+      }
+    </div>
+
+    <div class="tab-bar" role="tablist">
+      <button type="button" role="tab" class="tab" [class.tab--active]="mode() === 'entry'" [attr.aria-selected]="mode() === 'entry'" (click)="setMode('entry')">
+        {{ 'accounting.budget.entryTab' | translate }}
+      </button>
+      <button type="button" role="tab" class="tab" [class.tab--active]="mode() === 'vs-actual'" [attr.aria-selected]="mode() === 'vs-actual'" (click)="setMode('vs-actual')">
+        {{ 'accounting.budget.vsActualTab' | translate }}
+      </button>
+    </div>
+  </div>
+
+  @if (error()) {
+    <p class="acct-error" role="alert">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="acct-muted">{{ 'accounting.common.loading' | translate }}</p>
+  } @else if (mode() === 'entry') {
+    <form [formGroup]="form()" (ngSubmit)="save()">
+      <table class="statement" [attr.aria-label]="'accounting.budget.entryTab' | translate">
+        <thead>
+          <tr>
+            <th scope="col">{{ 'accounting.comparison.account' | translate }}</th>
+            <th scope="col" class="num">{{ 'accounting.budget.amount' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.account.id) {
+            <tr>
+              <td>{{ row.account.accountNumber }} · {{ row.account.name }}</td>
+              <td class="num budget-amount-cell">
+                <app-currency-input [label]="'accounting.budget.amount' | translate" [formControlName]="row.controlName" />
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="2" class="acct-muted">{{ 'accounting.budget.noAccounts' | translate }}</td></tr>
+          }
+        </tbody>
+      </table>
+
+      @if (rows().length > 0) {
+        <div class="budget-actions">
+          <button type="submit" class="action-btn action-btn--primary" [disabled]="saving()">
+            {{ (saving() ? 'accounting.budget.saving' : 'accounting.budget.save') | translate }}
+          </button>
+        </div>
+      }
+    </form>
+  } @else if (comparison(); as c) {
+    <p class="acct-muted stmt-compare-note">
+      {{ 'accounting.comparison.priorPeriod' | translate }}: {{ c.fromDate }} – {{ c.toDate }}
+    </p>
+
+    <table class="statement" [attr.aria-label]="'accounting.budget.vsActualTab' | translate">
+      <thead>
+        <tr>
+          <th scope="col">{{ 'accounting.comparison.account' | translate }}</th>
+          <th scope="col" class="num">{{ 'accounting.budget.budget' | translate }}</th>
+          <th scope="col" class="num">{{ 'accounting.budget.actual' | translate }}</th>
+          <th scope="col" class="num">{{ 'accounting.comparison.variance' | translate }}</th>
+          <th scope="col" class="num">{{ 'accounting.comparison.variancePercent' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (line of c.lines; track line.glAccountId) {
+          <tr>
+            <td>{{ line.accountNumber }} · {{ line.accountName }}</td>
+            <td class="num"><app-currency-display [value]="line.budgetAmount" /></td>
+            <td class="num"><app-currency-display [value]="line.actualAmount" /></td>
+            <td class="num" [class.stmt-variance--pos]="(line.variance ?? 0) >= 0" [class.stmt-variance--neg]="(line.variance ?? 0) < 0">
+              <app-currency-display [value]="line.variance ?? 0" />
+            </td>
+            <td class="num" [class.stmt-variance--pos]="(line.variance ?? 0) >= 0" [class.stmt-variance--neg]="(line.variance ?? 0) < 0">
+              @if (line.variancePercent !== null && line.variancePercent !== undefined) { {{ line.variancePercent | number: '1.0-1' }}% } @else { <span class="acct-muted">—</span> }
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="5" class="acct-muted">{{ 'accounting.budget.noData' | translate }}</td></tr>
+        }
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>{{ 'accounting.budget.total' | translate }}</td>
+          <td class="num"><app-currency-display [value]="c.totalBudget" /></td>
+          <td class="num"><app-currency-display [value]="c.totalActual" /></td>
+          <td class="num" [class.stmt-variance--pos]="(c.totalVariance ?? 0) >= 0" [class.stmt-variance--neg]="(c.totalVariance ?? 0) < 0">
+            <app-currency-display [value]="c.totalVariance ?? 0" />
+          </td>
+          <td class="num" [class.stmt-variance--pos]="(c.totalVariance ?? 0) >= 0" [class.stmt-variance--neg]="(c.totalVariance ?? 0) < 0">
+            @if (c.totalVariancePercent !== null && c.totalVariancePercent !== undefined) { {{ c.totalVariancePercent | number: '1.0-1' }}% } @else { <span class="acct-muted">—</span> }
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  }
+</div>

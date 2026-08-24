@@ -36,6 +36,7 @@ export class AccountingComponent {
     { route: 'trial-balance', label: this.translate.instant('accounting.dashboard.trialBalance'), icon: 'balance', description: this.translate.instant('accounting.dashboard.trialBalanceDesc') },
     { route: 'profit-loss', label: this.translate.instant('accounting.dashboard.profitLoss'), icon: 'trending_up', description: this.translate.instant('accounting.dashboard.profitLossDesc') },
     { route: 'balance-sheet', label: this.translate.instant('accounting.dashboard.balanceSheet'), icon: 'account_balance', description: this.translate.instant('accounting.dashboard.balanceSheetDesc') },
+    { route: 'budgets', label: this.translate.instant('accounting.dashboard.budgets'), icon: 'savings', description: this.translate.instant('accounting.dashboard.budgetsDesc') },
     { route: 'cash-flow', label: this.translate.instant('accounting.dashboard.cashFlow'), icon: 'waterfall_chart', description: this.translate.instant('accounting.dashboard.cashFlowDesc') },
     { route: 'ar-aging', label: this.translate.instant('accounting.dashboard.arAging'), icon: 'trending_flat', description: this.translate.instant('accounting.dashboard.arAgingDesc') },
     { route: 'ap-aging', label: this.translate.instant('accounting.dashboard.apAging'), icon: 'schedule', description: this.translate.instant('accounting.dashboard.apAgingDesc') },

@@ -1,0 +1,63 @@
+@use 'app/features/accounting/accounting-shared' as *;
+@use 'styles/variables' as *;
+
+// Page-scroll contract — see styles/_shared.scss.
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.acct-view-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $sp-md;
+  margin-bottom: $sp-md;
+  flex-wrap: wrap;
+}
+
+.budget-controls {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+}
+
+.year-stepper {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+}
+
+.year-label {
+  font-weight: 600;
+  min-width: 3.5rem;
+  text-align: center;
+}
+
+.month-select {
+  min-width: 12rem;
+}
+
+.budget-amount-cell {
+  width: 12rem;
+}
+
+.budget-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: $sp-md;
+}
+
+.stmt-compare-note {
+  margin: 0 0 $sp-sm;
+}
+
+.stmt-variance--pos {
+  color: var(--success);
+}
+
+.stmt-variance--neg {
+  color: var(--error);
+}

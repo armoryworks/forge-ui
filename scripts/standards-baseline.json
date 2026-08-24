@@ -108,6 +108,7 @@
   "raw-table-in-features": {
     "src/app/features/accounting/components/balance-sheet/balance-sheet.component.html": 1,
     "src/app/features/accounting/components/bank-rec/bank-rec.component.html": 1,
+    "src/app/features/accounting/components/budgets/budgets.component.html": 2,
     "src/app/features/accounting/components/cash-flow/cash-flow.component.html": 1,
     "src/app/features/accounting/components/exports/exports.component.html": 1,
     "src/app/features/accounting/components/grni/grni.component.html": 1,

@@ -7,6 +7,9 @@ import {
   ApAging,
   ArAging,
   BalanceSheet,
+  BudgetLine,
+  BudgetVsActual,
+  UpsertBudgetRequest,
   BankReconciliationSummary,
   BankReconciliationWorksheet,
   CashAccountModel,
@@ -244,5 +247,29 @@ export class GeneralLedgerService {
   /** Reverse a posted journal entry — posts an equal-and-opposite entry; the original is never edited. */
   reverseJournalEntry(entryId: number, request: ReverseJournalEntryInput): Observable<ManualJournalEntryResult> {
     return this.http.post<ManualJournalEntryResult>(`${this.base}/journal-entries/${entryId}/reverse`, request);
+  }
+
+  // ── Budgets + budget-vs-actual (CAP-ACCT-FULLGL) ──
+  /** A book's budget lines for a fiscal year (full-year and monthly rows). */
+  listBudgets(bookId: number, fiscalYear: number): Observable<BudgetLine[]> {
+    const params = new HttpParams().set('bookId', bookId).set('fiscalYear', fiscalYear);
+    return this.http.get<BudgetLine[]>(`${this.base}/budgets`, { params });
+  }
+
+  /** Create or update a budget line (upsert by book/account/year/month). */
+  upsertBudget(request: UpsertBudgetRequest): Observable<BudgetLine> {
+    return this.http.post<BudgetLine>(`${this.base}/budgets`, request);
+  }
+
+  /** Soft-delete a budget line. */
+  deleteBudget(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/budgets/${id}`);
+  }
+
+  /** Budget-vs-actual P&L comparison for a fiscal year (optionally a single month). */
+  getBudgetVsActual(bookId: number, fiscalYear: number, periodMonth?: number | null): Observable<BudgetVsActual> {
+    let params = new HttpParams().set('bookId', bookId).set('fiscalYear', fiscalYear);
+    if (periodMonth) params = params.set('periodMonth', periodMonth);
+    return this.http.get<BudgetVsActual>(`${this.base}/budget-vs-actual`, { params });
   }
 }

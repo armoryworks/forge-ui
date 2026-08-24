@@ -542,3 +542,50 @@ export interface UpdateGlAccountRequest {
   accountType: string | null;
   normalBalance: string | null;
 }
+
+// ── Budgets + budget-vs-actual ───────────────────────────────────────────────
+/** One stored budget line for a GL account in a fiscal year (full-year when `periodMonth` is null). */
+export interface BudgetLine {
+  id: number;
+  bookId: number;
+  glAccountId: number;
+  accountNumber: string;
+  accountName: string;
+  fiscalYear: number;
+  periodMonth?: number | null;
+  amount: number;
+}
+
+/** Create-or-update payload for a budget line (upsert by book/account/year/month). */
+export interface UpsertBudgetRequest {
+  bookId: number;
+  glAccountId: number;
+  fiscalYear: number;
+  periodMonth?: number | null;
+  amount: number;
+}
+
+/** One GL account's budget-vs-actual comparison. Variance = actual − budget; percent null when budget is zero. */
+export interface BudgetVsActualLine {
+  glAccountId: number;
+  accountNumber: string;
+  accountName: string;
+  budgetAmount: number;
+  actualAmount: number;
+  variance?: number | null;
+  variancePercent?: number | null;
+}
+
+/** Budget-vs-actual P&L comparison for a book over a fiscal year (or a single month). */
+export interface BudgetVsActual {
+  bookId: number;
+  fiscalYear: number;
+  periodMonth?: number | null;
+  fromDate: string;
+  toDate: string;
+  lines: BudgetVsActualLine[];
+  totalBudget: number;
+  totalActual: number;
+  totalVariance?: number | null;
+  totalVariancePercent?: number | null;
+}
