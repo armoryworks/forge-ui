@@ -205,6 +205,14 @@
 
 .sidebar__spacer {
   flex: 1;
+
+  // Drilled: the drill region (rail + children) is itself flex: 1 — a growing
+  // spacer would split the free height 50/50 with it, stranding the menu in the
+  // top half of the sidebar. Collapse it; the drill pushes the pinned-bottom
+  // items down by growing instead.
+  .sidebar--drilled & {
+    flex: 0 0 0;
+  }
 }
 
 // ── Drilled state: icon rail of top-level siblings | children column ──────────
@@ -252,6 +260,10 @@
   position: relative;
   width: $sidebar-width-collapsed;
   min-height: $sidebar-nav-height;
+  // The parent rail scales to occupy the full drill height: every top-level
+  // sibling shares it equally (labels always visible), shrinking back toward
+  // the icon-only minimum on short viewports (the rail then scrolls).
+  flex: 1 1 0;
   border: none;
   background: transparent;
   color: var(--text-secondary);
@@ -260,29 +272,25 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: $sp-sm 0;
-  gap: $sp-xs;
-  // Smoothly grow/shrink as the vertical label reveals on hover / active.
-  transition: color $transition-normal, background $transition-normal,
-    min-height $transition-normal, padding $transition-normal, gap $transition-normal;
+  padding: $sp-md 0;
+  gap: $sp-sm;
+  overflow: hidden;
+  transition: color $transition-normal, background $transition-normal;
 
   .material-icons-outlined { font-size: $sidebar-icon-size; flex-shrink: 0; }
 
   &--back {
+    flex: 0 0 auto;
+    padding: $sp-sm 0;
     color: var(--text-muted);
     &:hover { color: var(--text); background: var(--bg); }
   }
 
-  // Hover on a non-active parent: expand and reveal its name vertically in the
-  // light-blue hover tone (replaces the old tooltip). The icon stays put.
+  // Hover on a non-active parent: the light-blue attention tone (replaces the old
+  // grow-on-hover — the rail items are already full-height).
   &:not(.rail-item--active):not(.rail-item--back):hover {
     color: var(--attention);
     background: color-mix(in srgb, var(--attention-hover) 35%, transparent);
-    min-height: 128px;
-    padding: $sp-md 0;
-    gap: $sp-sm;
-
-    .rail-item__vlabel { max-height: 150px; opacity: 1; }
   }
 
   // Active parent: the "beta bar" green fills the item, label + icon go light.
@@ -290,25 +298,21 @@
     color: var(--attention-text);
     background: var(--attention);
     border-left: $border-width-accent solid var(--attention);
-    min-height: 128px;
-    padding: $sp-md 0;
-    gap: $sp-sm;
 
-    .rail-item__vlabel { max-height: 150px; opacity: 1; color: var(--attention-text); }
+    .rail-item__vlabel { color: var(--attention-text); }
   }
 }
 
-// Rail label, rotated to run vertically (top of letters on the left). Collapsed to
-// zero height by default; the hover / active rules above animate it open.
+// Rail label, rotated to run vertically (top of letters on the left). Always
+// visible; clipped by the item (overflow: hidden) when a short viewport
+// compresses the rail items toward their icon-only minimum.
 .rail-item__vlabel {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   @include uppercase-label($font-size-xs, 0.1em, 700);
   color: var(--attention);
   white-space: nowrap;
-  max-height: 0;
-  opacity: 0;
+  min-height: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: max-height $transition-normal, opacity $transition-normal;
 }
