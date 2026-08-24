@@ -223,6 +223,7 @@ export class NavTreeService {
       children: [
         { icon: 'badge', label: 'Employees', i18nKey: 'nav.employees', route: '/employees', capability: 'CAP-MD-EMPLOYEES', allowedRoles: ['Admin', 'Manager'] },
         { icon: 'schedule', label: 'Time', i18nKey: 'nav.timeTracking', route: '/time-tracking', shortcut: ['Q', 'T'], capability: 'CAP-HR-TIMETRACK' },
+        { icon: 'request_quote', label: 'Piece Rates', i18nKey: 'nav.pieceRates', route: '/piece-rates', capability: 'CAP-HR-PIECE-RATES', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'school', label: 'Training', i18nKey: 'nav.training', route: '/training/library' },
       ],
     },

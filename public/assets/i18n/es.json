@@ -81,7 +81,8 @@
     "ledger": "Libro Mayor",
     "bankStatements": "Extractos Bancarios",
     "exports": "Exportar a QBO",
-    "chartOfAccounts": "Plan de Cuentas"
+    "chartOfAccounts": "Plan de Cuentas",
+    "pieceRates": "Tarifas por pieza"
   },
   "navGroups": {
     "operations": "Operaciones",
@@ -9276,5 +9277,34 @@
         "PercentOfWages": "Porcentaje de salarios"
       }
     }
+  },
+  "pieceRates": {
+    "title": "Tarifas por pieza",
+    "ratesTitle": "Tarifas",
+    "part": "Parte",
+    "ratePerPiece": "Tarifa por pieza",
+    "effectiveFrom": "Vigente desde (hoy por defecto)",
+    "setRate": "Fijar tarifa",
+    "ratesHint": "Una tarifa es una línea de tiempo, no un número: fijar una inicia una nueva fila desde la fecha de vigencia; el trabajo anterior conserva la tarifa con la que se ganó. Expande una fila para ver su historial.",
+    "noneYet": "Aún no hay tarifas por pieza: fija la primera arriba.",
+    "current": "vigente",
+    "logTitle": "Registrar piezas",
+    "worker": "Trabajador",
+    "workDate": "Fecha",
+    "quantity": "Piezas",
+    "logPieces": "Registrar piezas",
+    "noWork": "No hay piezas registradas esta semana.",
+    "deleteEntry": "Eliminar registro",
+    "complianceTitle": "Verificación semanal de salario mínimo",
+    "week": "Cualquier fecha de la semana",
+    "complianceHint": "Ganancias por pieza vs horas × el mínimo de la jurisdicción (ubicación de trabajo del trabajador, si no la ubicación predeterminada, si no el federal). Promedio semanal simple: los esquemas estatales más estrictos (p. ej. CA AB 1513) requieren su propia revisión. Asistencia, no asesoría legal.",
+    "totalMakeup": "Compensación adeudada",
+    "noCompliance": "No hay trabajo por pieza en esta semana.",
+    "loadFailed": "No se pudieron cargar los datos de tarifas por pieza.",
+    "rateSet": "Tarifa fijada.",
+    "rateSetFailed": "No se pudo fijar la tarifa.",
+    "workLogged": "Registrado: ganó {{earnings}}.",
+    "workLogFailed": "No se pudieron registrar las piezas (¿hay una tarifa vigente para esa fecha?).",
+    "deleteFailed": "No se pudo eliminar el registro."
   }
 }

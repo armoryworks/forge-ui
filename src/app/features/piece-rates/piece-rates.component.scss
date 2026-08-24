@@ -1,0 +1,48 @@
+@use 'styles/variables' as *;
+
+.piece-rates__section {
+  margin: $sp-xl 0 $sp-md;
+  font-size: $font-size-lg;
+
+  &:first-of-type {
+    margin-top: $sp-md;
+  }
+}
+
+.piece-rates__hint {
+  margin: $sp-sm 0 $sp-md;
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+}
+
+.create-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $sp-md;
+}
+
+.piece-rates__history {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  padding: $sp-sm $sp-lg;
+}
+
+.piece-rates__history-row {
+  display: flex;
+  gap: $sp-lg;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}
+
+.piece-rates__week-head {
+  display: flex;
+  align-items: center;
+  gap: $sp-lg;
+  margin-top: $sp-xl;
+
+  .piece-rates__section {
+    margin: 0;
+  }
+}

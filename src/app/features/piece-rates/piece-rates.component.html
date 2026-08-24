@@ -1,0 +1,100 @@
+<app-page-layout [pageTitle]="'pieceRates.title' | translate">
+  <ng-container content>
+    <!-- ── 1. Rates: timeline-backed; setting a rate starts a new row. ── -->
+    <h2 class="piece-rates__section">{{ 'pieceRates.ratesTitle' | translate }}</h2>
+    <div class="create-row" [formGroup]="rateForm">
+      <app-entity-picker [label]="'pieceRates.part' | translate" entityType="parts"
+        displayField="partNumber" formControlName="partId" />
+      <app-currency-input [label]="'pieceRates.ratePerPiece' | translate" formControlName="rate" [required]="true" />
+      <app-datepicker [label]="'pieceRates.effectiveFrom' | translate" formControlName="effectiveFrom" />
+      <button class="action-btn action-btn--primary" [disabled]="rateForm.invalid || savingRate()"
+        (click)="setRate()" data-testid="piece-rate-set">
+        {{ 'pieceRates.setRate' | translate }}
+      </button>
+    </div>
+    <p class="piece-rates__hint">{{ 'pieceRates.ratesHint' | translate }}</p>
+
+    <app-data-table tableId="piece-rates" [columns]="rateColumns" [data]="rates()"
+      [expandable]="true" trackByField="partId"
+      emptyIcon="request_quote" [emptyMessage]="'pieceRates.noneYet' | translate">
+      <ng-template appColumnCell="current" let-row>
+        @if ($any(row).current; as current) {
+          {{ current.ratePerPiece | currency:'USD':'symbol':'1.2-4' }}
+        } @else { — }
+      </ng-template>
+      <ng-template appColumnCell="since" let-row>
+        @if ($any(row).current; as current) {
+          {{ current.effectiveFrom | date:'MM/dd/yyyy' }}
+        }
+      </ng-template>
+      <ng-template appRowExpand let-row>
+        <div class="piece-rates__history">
+          @for (rate of $any(row).history; track rate.id) {
+            <div class="piece-rates__history-row">
+              <span>{{ rate.ratePerPiece | currency:'USD':'symbol':'1.2-4' }}</span>
+              <span>{{ rate.effectiveFrom | date:'MM/dd/yyyy' }}
+                – {{ rate.effectiveTo ? (rate.effectiveTo | date:'MM/dd/yyyy') : ('pieceRates.current' | translate) }}</span>
+            </div>
+          }
+        </div>
+      </ng-template>
+    </app-data-table>
+
+    <!-- ── 2. Log pieces at the rate in force that day. ── -->
+    <h2 class="piece-rates__section">{{ 'pieceRates.logTitle' | translate }}</h2>
+    <div class="create-row" [formGroup]="workForm">
+      <app-select [label]="'pieceRates.worker' | translate" formControlName="userId" [options]="userOptions()" />
+      <app-entity-picker [label]="'pieceRates.part' | translate" entityType="parts"
+        displayField="partNumber" formControlName="partId" />
+      <app-datepicker [label]="'pieceRates.workDate' | translate" formControlName="date" />
+      <app-input [label]="'pieceRates.quantity' | translate" type="number" formControlName="quantity" [required]="true" />
+      <button class="action-btn action-btn--primary" [disabled]="workForm.invalid || savingWork()"
+        (click)="logWork()" data-testid="piece-work-log">
+        {{ 'pieceRates.logPieces' | translate }}
+      </button>
+    </div>
+
+    <app-data-table tableId="piece-work-week" [columns]="workColumns" [data]="work()"
+      emptyIcon="fact_check" [emptyMessage]="'pieceRates.noWork' | translate">
+      <ng-template appColumnCell="workDate" let-row>{{ $any(row).workDate | date:'MM/dd/yyyy' }}</ng-template>
+      <ng-template appColumnCell="quantity" let-row>{{ $any(row).quantity | number:'1.0-2' }}</ng-template>
+      <ng-template appColumnCell="rateSnapshot" let-row>{{ $any(row).rateSnapshot | currency:'USD':'symbol':'1.2-4' }}</ng-template>
+      <ng-template appColumnCell="earnings" let-row>{{ $any(row).earnings | currency }}</ng-template>
+      <ng-template appColumnCell="actions" let-row>
+        <button class="icon-btn icon-btn--danger" (click)="deleteWork($any(row))"
+          [attr.aria-label]="'pieceRates.deleteEntry' | translate"
+          [attr.data-testid]="'piece-work-delete-' + $any(row).id">
+          <span class="material-icons-outlined">delete</span>
+        </button>
+      </ng-template>
+    </app-data-table>
+
+    <!-- ── 3. Weekly minimum-wage make-up check. ── -->
+    <div class="piece-rates__week-head">
+      <h2 class="piece-rates__section">{{ 'pieceRates.complianceTitle' | translate }}</h2>
+      <app-datepicker [label]="'pieceRates.week' | translate" [formControl]="weekControl" />
+      @if (compliance(); as report) {
+        <span class="chip" [class.chip--error]="totalMakeup() > 0" [class.chip--success]="totalMakeup() === 0">
+          {{ 'pieceRates.totalMakeup' | translate }}: {{ report.totalMakeupOwed | currency }}
+        </span>
+      }
+    </div>
+    <p class="piece-rates__hint">{{ 'pieceRates.complianceHint' | translate }}</p>
+
+    <app-data-table tableId="piece-rate-compliance" [columns]="complianceColumns"
+      [data]="compliance()?.rows ?? []"
+      emptyIcon="verified" [emptyMessage]="'pieceRates.noCompliance' | translate">
+      <ng-template appColumnCell="stateCode" let-row>{{ $any(row).stateCode ?? 'US' }}</ng-template>
+      <ng-template appColumnCell="minimumWage" let-row>{{ $any(row).minimumWage | currency }}</ng-template>
+      <ng-template appColumnCell="hoursWorked" let-row>{{ $any(row).hoursWorked | number:'1.0-2' }}</ng-template>
+      <ng-template appColumnCell="pieceEarnings" let-row>{{ $any(row).pieceEarnings | currency }}</ng-template>
+      <ng-template appColumnCell="requiredFloor" let-row>{{ $any(row).requiredFloor | currency }}</ng-template>
+      <ng-template appColumnCell="makeupOwed" let-row>
+        <span class="chip" [class.chip--error]="$any(row).makeupOwed > 0" [class.chip--success]="$any(row).makeupOwed === 0">
+          {{ $any(row).makeupOwed | currency }}
+        </span>
+      </ng-template>
+      <ng-template appColumnCell="effectiveHourly" let-row>{{ $any(row).effectiveHourly | currency }}</ng-template>
+    </app-data-table>
+  </ng-container>
+</app-page-layout>

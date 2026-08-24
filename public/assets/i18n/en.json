@@ -81,7 +81,8 @@
     "ledger": "Ledger",
     "bankStatements": "Bank Statements",
     "exports": "QBO Export",
-    "chartOfAccounts": "Chart of Accounts"
+    "chartOfAccounts": "Chart of Accounts",
+    "pieceRates": "Piece Rates"
   },
   "navGroups": {
     "operations": "Operations",
@@ -9276,5 +9277,34 @@
         "PercentOfWages": "Percent of wages"
       }
     }
+  },
+  "pieceRates": {
+    "title": "Piece rates",
+    "ratesTitle": "Rates",
+    "part": "Part",
+    "ratePerPiece": "Rate per piece",
+    "effectiveFrom": "Effective from (default today)",
+    "setRate": "Set rate",
+    "ratesHint": "A rate is a timeline, not a number — setting one starts a new row from the effective date; earlier work keeps the rate it was earned under. Expand a row for its history.",
+    "noneYet": "No piece rates yet — set the first one above.",
+    "current": "current",
+    "logTitle": "Log pieces",
+    "worker": "Worker",
+    "workDate": "Date",
+    "quantity": "Pieces",
+    "logPieces": "Log pieces",
+    "noWork": "No pieces logged this week.",
+    "deleteEntry": "Delete entry",
+    "complianceTitle": "Weekly minimum-wage check",
+    "week": "Any date in the week",
+    "complianceHint": "Piece earnings vs hours × the jurisdiction minimum (worker’s work location, else the default location, else federal). Simple weekly averaging — stricter state schemes (e.g. CA AB 1513) need their own review. Assistance, not legal advice.",
+    "totalMakeup": "Make-up owed",
+    "noCompliance": "No piece work in this week.",
+    "loadFailed": "Could not load piece-rate data.",
+    "rateSet": "Rate set.",
+    "rateSetFailed": "Could not set the rate.",
+    "workLogged": "Logged — earned {{earnings}}.",
+    "workLogFailed": "Could not log pieces (is a rate in force for that date?).",
+    "deleteFailed": "Could not delete the entry."
   }
 }

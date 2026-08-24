@@ -206,6 +206,12 @@ export const routes: Routes = [
           import('./features/time-tracking/time-tracking.routes').then((m) => m.TIME_TRACKING_ROUTES),
       },
       {
+        path: 'piece-rates',
+        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager'), capabilityGuard('CAP-HR-PIECE-RATES')],
+        loadComponent: () =>
+          import('./features/piece-rates/piece-rates.component').then((m) => m.PieceRatesComponent),
+      },
+      {
         path: 'employees',
         canActivate: [roleGuard('Admin', 'Manager')],
         loadChildren: () =>
