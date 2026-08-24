@@ -40,13 +40,16 @@ import { EmptyStateComponent } from '../../shared/components/empty-state/empty-s
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barcode-info.component';
 import { UomManagementComponent } from './components/uom-management/uom-management.component';
+import { ViewModeToggleComponent } from '../../shared/components/view-mode-toggle/view-mode-toggle.component';
+import { ViewMode, DEFAULT_VIEW_MODE } from '../../shared/models/view-mode.model';
+import { InventoryReorderVisualComponent } from './components/inventory-reorder-visual/inventory-reorder-visual.component';
 
 type InventoryTab = 'stock' | 'locations' | 'movements' | 'receiving' | 'stockOps' | 'cycleCounts' | 'reservations' | 'replenishment' | 'uom';
 
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [ReactiveFormsModule, CurrencyPipe, DatePipe, DecimalPipe, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, DataTableComponent, ColumnCellDirective, RowExpandDirective, ValidationButtonComponent, EmptyStateComponent, LoadingBlockDirective, BarcodeInfoComponent, MatTooltipModule, UomManagementComponent],
+  imports: [ReactiveFormsModule, CurrencyPipe, DatePipe, DecimalPipe, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, DataTableComponent, ColumnCellDirective, RowExpandDirective, ValidationButtonComponent, EmptyStateComponent, LoadingBlockDirective, BarcodeInfoComponent, MatTooltipModule, UomManagementComponent, ViewModeToggleComponent, InventoryReorderVisualComponent],
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -72,6 +75,20 @@ export class InventoryComponent {
     })),
     { initialValue: 'stock' },
   );
+
+  /** Classic (table) vs Visual (chart) presentation of the Stock Levels tab. URL ?view= is the whole source of truth; no persisted preference. */
+  protected readonly viewMode = toSignal(
+    this.route.queryParamMap.pipe(map(p => (p.get('view') as ViewMode) ?? DEFAULT_VIEW_MODE)),
+    { initialValue: DEFAULT_VIEW_MODE },
+  );
+
+  protected setViewMode(mode: ViewMode): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { view: mode === DEFAULT_VIEW_MODE ? null : mode },
+      queryParamsHandling: 'merge',
+    });
+  }
 
   // Stock tab
   protected readonly partSummaries = signal<InventoryPartSummary[]>([]);

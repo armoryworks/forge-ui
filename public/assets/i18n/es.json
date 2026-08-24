@@ -1749,6 +1749,13 @@
       "cycleCountRejected": "Conteo cíclico rechazado",
       "reservationCreated": "Reserva creada",
       "reservationReleased": "Reserva liberada"
+    },
+    "reorderVisual": {
+      "availableLabel": "Disponible",
+      "reorderPointLabel": "Punto de pedido",
+      "chartLabel": "Existencias disponibles frente al punto de pedido para las piezas de mayor riesgo",
+      "topNNote": "Mostrando las {{count}} piezas de mayor riesgo de {{total}} en o por debajo de su punto de pedido.",
+      "empty": "Todas las piezas rastreadas están por encima de su punto de pedido."
     }
   },
   "customers": {
@@ -6530,6 +6537,11 @@
       "actual": "Real",
       "variance": "Variancia",
       "variancePct": "Variancia %"
+    },
+    "flowVisual": {
+      "subtitle": "Órdenes planificadas por abastecimiento (fabricar o comprar) y estado del ciclo de vida",
+      "chartLabel": "Diagrama Sankey del flujo de órdenes planificadas desde el tipo de abastecimiento hasta el estado del ciclo de vida",
+      "empty": "No hay órdenes planificadas para visualizar. Ejecute MRP para generar un plan."
     }
   },
   "portal": {
@@ -6720,6 +6732,11 @@
     "deleteWorkCenter": {
       "title": "¿Eliminar Centro de Trabajo?",
       "message": "¿Eliminar el centro de trabajo \"{{name}}\"? Se quitará de la programación. Puede recrearlo más tarde."
+    },
+    "timeline": {
+      "chartLabel": "Cronograma de operaciones programadas por centro de trabajo a lo largo del tiempo",
+      "empty": "No hay operaciones programadas para mostrar.",
+      "noWorkCenter": "Sin asignar"
     }
   },
   "workCenterDialog": {

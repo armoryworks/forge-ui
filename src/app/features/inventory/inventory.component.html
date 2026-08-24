@@ -96,6 +96,13 @@
           </div>
         }
 
+        <div class="inv-view-bar">
+          <app-view-mode-toggle [mode]="viewMode()" (modeChange)="setViewMode($event)" />
+        </div>
+
+        @if (viewMode() === 'visual') {
+          <app-inventory-reorder-visual [parts]="partSummaries()" [alerts]="lowStockAlerts()" />
+        } @else {
         <div class="panel-header">
           <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'inventory.searchPlaceholder' | translate" />
           @if (searchControl.value) {
@@ -185,6 +192,7 @@
             </table>
           </ng-template>
         </app-data-table>
+        }
       </div>
     }
 

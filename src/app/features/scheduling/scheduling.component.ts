@@ -20,8 +20,11 @@ import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
+import { ViewModeToggleComponent } from '../../shared/components/view-mode-toggle/view-mode-toggle.component';
+import { ViewMode, DEFAULT_VIEW_MODE } from '../../shared/models/view-mode.model';
 import { SchedulingService } from './services/scheduling.service';
 import { WorkCenterDialogComponent } from './components/work-center-dialog/work-center-dialog.component';
+import { SchedulingTimelineComponent } from './components/scheduling-timeline/scheduling-timeline.component';
 import { toDateOnly } from '../../shared/utils/date.utils';
 import {
   ScheduleRun,
@@ -53,6 +56,8 @@ const VALID_TABS = new Set<SchedulingTab>(['gantt', 'dispatch', 'work-centers', 
     LoadingBlockDirective,
     WorkCenterDialogComponent,
     TranslatePipe,
+    ViewModeToggleComponent,
+    SchedulingTimelineComponent,
   ],
   templateUrl: './scheduling.component.html',
   styleUrl: './scheduling.component.scss',
@@ -77,6 +82,20 @@ export class SchedulingComponent implements OnInit {
     ),
     { initialValue: 'gantt' as SchedulingTab },
   );
+
+  /** Classic (table) vs Visual (timeline) presentation of the Schedule tab. URL ?view= is the whole source of truth; no persisted preference. */
+  protected readonly viewMode = toSignal(
+    this.route.queryParamMap.pipe(map(p => (p.get('view') as ViewMode) ?? DEFAULT_VIEW_MODE)),
+    { initialValue: DEFAULT_VIEW_MODE },
+  );
+
+  protected setViewMode(mode: ViewMode): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { view: mode === DEFAULT_VIEW_MODE ? null : mode },
+      queryParamsHandling: 'merge',
+    });
+  }
 
   // Data signals
   protected readonly ganttOps = signal<ScheduledOperation[]>([]);

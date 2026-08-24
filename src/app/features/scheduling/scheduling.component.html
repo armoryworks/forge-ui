@@ -24,9 +24,13 @@
         <button class="action-btn action-btn--primary" (click)="executeSchedule()" data-testid="scheduling-run-btn" aria-label="Run scheduler">
           <span class="material-icons-outlined">play_arrow</span> {{ 'scheduling.runScheduler' | translate }}
         </button>
+        <span appSpacer></span>
+        <app-view-mode-toggle [mode]="viewMode()" (modeChange)="setViewMode($event)" />
       </app-toolbar>
 
-      @if (ganttOps().length === 0 && !loading()) {
+      @if (viewMode() === 'visual') {
+        <app-scheduling-timeline [operations]="ganttOps()" />
+      } @else if (ganttOps().length === 0 && !loading()) {
         <app-empty-state icon="event_note" [message]="'scheduling.noOps' | translate" />
       } @else {
         <app-data-table

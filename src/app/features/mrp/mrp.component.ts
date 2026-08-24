@@ -19,6 +19,9 @@ import { LoadingBlockDirective } from '../../shared/directives/loading-block.dir
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { SelectOption } from '../../shared/components/select/select.component';
+import { ViewModeToggleComponent } from '../../shared/components/view-mode-toggle/view-mode-toggle.component';
+import { ViewMode, DEFAULT_VIEW_MODE } from '../../shared/models/view-mode.model';
+import { MrpFlowVisualComponent } from './components/mrp-flow-visual/mrp-flow-visual.component';
 
 import { MrpService } from './services/mrp.service';
 import {
@@ -72,6 +75,8 @@ const VALID_TABS = new Set<MrpTab>(['dashboard', 'planned-orders', 'exceptions',
     SpacerDirective,
     EmptyStateComponent,
     LoadingBlockDirective,
+    ViewModeToggleComponent,
+    MrpFlowVisualComponent,
   ],
   templateUrl: './mrp.component.html',
   styleUrl: './mrp.component.scss',
@@ -95,6 +100,20 @@ export class MrpComponent {
     ),
     { initialValue: 'dashboard' as MrpTab },
   );
+
+  /** Classic (tables) vs Visual (Sankey) presentation of the dashboard. URL ?view= is the whole source of truth; no persisted preference. */
+  protected readonly viewMode = toSignal(
+    this.route.queryParamMap.pipe(map(p => (p.get('view') as ViewMode) ?? DEFAULT_VIEW_MODE)),
+    { initialValue: DEFAULT_VIEW_MODE },
+  );
+
+  protected setViewMode(mode: ViewMode): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { view: mode === DEFAULT_VIEW_MODE ? null : mode },
+      queryParamsHandling: 'merge',
+    });
+  }
 
   // Loading states
   protected readonly loadingRuns = signal(false);

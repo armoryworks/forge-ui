@@ -1,0 +1,44 @@
+@use 'styles/variables' as *;
+
+.reorder-visual {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.reorder-visual__note {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  margin: 0;
+  padding: $sp-sm $sp-md;
+  background: var(--warning-light);
+  color: var(--text);
+  font-size: $font-size-sm;
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+    color: var(--warning);
+  }
+}
+
+.reorder-visual__chart {
+  position: relative;
+  width: 100%;
+}
+
+.reorder-visual__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-3xl;
+  color: var(--text-muted);
+  font-size: $font-size-sm;
+
+  .material-icons-outlined {
+    font-size: $icon-size-hero;
+    color: var(--success);
+    opacity: 0.6;
+  }
+}

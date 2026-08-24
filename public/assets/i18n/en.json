@@ -1749,6 +1749,13 @@
       "cycleCountRejected": "Cycle count rejected",
       "reservationCreated": "Reservation created",
       "reservationReleased": "Reservation released"
+    },
+    "reorderVisual": {
+      "availableLabel": "Available",
+      "reorderPointLabel": "Reorder point",
+      "chartLabel": "Available stock versus reorder point for the most at-risk parts",
+      "topNNote": "Showing the {{count}} most at-risk parts of {{total}} at or below their reorder point.",
+      "empty": "All tracked parts are above their reorder point."
     }
   },
   "customers": {
@@ -6537,6 +6544,11 @@
       "actual": "Actual",
       "variance": "Variance",
       "variancePct": "Variance %"
+    },
+    "flowVisual": {
+      "subtitle": "Planned orders by sourcing (make vs buy) and lifecycle status",
+      "chartLabel": "Sankey flow of planned orders from sourcing type to lifecycle status",
+      "empty": "No planned orders to visualize. Run MRP to generate a plan."
     }
   },
   "portal": {
@@ -6727,6 +6739,11 @@
     "deleteWorkCenter": {
       "title": "Delete Work Center?",
       "message": "Delete work center \"{{name}}\"? This removes it from scheduling. You can recreate it later."
+    },
+    "timeline": {
+      "chartLabel": "Timeline of scheduled operations by work center over time",
+      "empty": "No scheduled operations to plot.",
+      "noWorkCenter": "Unassigned"
     }
   },
   "workCenterDialog": {

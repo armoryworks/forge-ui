@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { AccountingViewMode } from '../../models/accounting-view.model';
+import { ViewMode } from '../../models/view-mode.model';
 
 /**
  * Dumb segmented toggle between the Classic (table) and Visual (chart) view of a
@@ -18,10 +18,10 @@ import { AccountingViewMode } from '../../models/accounting-view.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ViewModeToggleComponent {
-  readonly mode = input.required<AccountingViewMode>();
-  readonly modeChange = output<AccountingViewMode>();
+  readonly mode = input.required<ViewMode>();
+  readonly modeChange = output<ViewMode>();
 
-  protected select(mode: AccountingViewMode): void {
+  protected select(mode: ViewMode): void {
     if (mode !== this.mode()) this.modeChange.emit(mode);
   }
 }

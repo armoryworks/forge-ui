@@ -420,3 +420,9 @@
 }
 
 .text-center { text-align: center; }
+
+.inv-view-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: $sp-md;
+}

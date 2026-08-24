@@ -1,0 +1,13 @@
+<div class="mrp-flow">
+  @if (flows().length > 0) {
+    <p class="mrp-flow__caption">{{ 'mrp.flowVisual.subtitle' | translate }}</p>
+    <div class="mrp-flow__chart" role="img" [attr.aria-label]="'mrp.flowVisual.chartLabel' | translate">
+      <app-sankey-chart [data]="flows()" [height]="360" />
+    </div>
+  } @else {
+    <div class="mrp-flow__empty">
+      <span class="material-icons-outlined">analytics</span>
+      <span>{{ 'mrp.flowVisual.empty' | translate }}</span>
+    </div>
+  }
+</div>

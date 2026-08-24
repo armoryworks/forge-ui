@@ -12,6 +12,13 @@
 <!-- Dashboard Tab -->
 @if (activeTab() === 'dashboard') {
   <div class="mrp__dashboard">
+    <div class="mrp__view-bar">
+      <app-view-mode-toggle [mode]="viewMode()" (modeChange)="setViewMode($event)" />
+    </div>
+
+    @if (viewMode() === 'visual') {
+      <app-mrp-flow-visual [plannedOrders]="plannedOrders()" />
+    } @else {
     <div class="mrp__kpis">
       <app-kpi-chip [label]="'mrp.kpi.latestRun' | translate" [value]="latestRun()?.runNumber ?? ('mrp.kpi.none' | translate)" />
       <app-kpi-chip [label]="'mrp.kpi.plannedOrders' | translate" [value]="plannedOrderCount().toString()" valueColor="primary" />
@@ -92,6 +99,7 @@
           </ng-template>
         </app-data-table>
       </div>
+    }
     }
   </div>
 }

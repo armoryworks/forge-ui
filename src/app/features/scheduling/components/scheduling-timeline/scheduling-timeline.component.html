@@ -1,0 +1,45 @@
+<div class="sched-timeline">
+  @if (rows().length > 0) {
+    <div class="sched-timeline__axis">
+      @for (t of axisTicks(); track t.pct) {
+        <span class="sched-timeline__tick" [style.left.%]="t.pct">{{ t.date | date: 'MM/dd' }}</span>
+      }
+    </div>
+
+    <div class="sched-timeline__rows" role="img" [attr.aria-label]="'scheduling.timeline.chartLabel' | translate">
+      @for (row of rows(); track row.workCenterName) {
+        <div class="sched-timeline__row">
+          <div class="sched-timeline__label" [title]="row.workCenterName">{{ row.workCenterName }}</div>
+          <div class="sched-timeline__track">
+            @for (bar of row.bars; track bar.id) {
+              <div class="sched-timeline__bar {{ bar.statusClass }}"
+                [style.left.%]="bar.startPct"
+                [style.width.%]="bar.widthPct"
+                [title]="bar.tooltip"
+                [attr.aria-label]="bar.tooltip">
+                <span class="sched-timeline__bar-label">{{ bar.label }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="sched-timeline__legend">
+      <span class="sched-timeline__legend-item">
+        <span class="sched-timeline__swatch sched-timeline__swatch--info"></span>{{ 'scheduling.statuses.scheduled' | translate }}
+      </span>
+      <span class="sched-timeline__legend-item">
+        <span class="sched-timeline__swatch sched-timeline__swatch--warning"></span>{{ 'scheduling.statuses.inProgress' | translate }}
+      </span>
+      <span class="sched-timeline__legend-item">
+        <span class="sched-timeline__swatch sched-timeline__swatch--success"></span>{{ 'scheduling.statuses.complete' | translate }}
+      </span>
+    </div>
+  } @else {
+    <div class="sched-timeline__empty">
+      <span class="material-icons-outlined">event_busy</span>
+      <span>{{ 'scheduling.timeline.empty' | translate }}</span>
+    </div>
+  }
+</div>
