@@ -29,6 +29,7 @@ import {
   LedgerRegisterPage,
   ManualJournalEntryInput,
   ManualJournalEntryResult,
+  Form1099Report,
   ProfitAndLoss,
   ReverseJournalEntryInput,
   SalesTaxLiabilityReport,
@@ -127,6 +128,15 @@ export class GeneralLedgerService {
     if (fromDate) params = params.set('fromDate', fromDate);
     if (toDate) params = params.set('toDate', toDate);
     return this.http.get<SalesTaxLiabilityReport>(`${this.base}/sales-tax-liability`, { params });
+  }
+
+  /**
+   * 1099 report for a calendar year — every 1099-flagged vendor with its total cash paid and the
+   * IRS $600 threshold flag. Not book-scoped.
+   */
+  get1099Report(year: number): Observable<Form1099Report> {
+    const params = new HttpParams().set('year', year);
+    return this.http.get<Form1099Report>(`${this.base}/1099-report`, { params });
   }
 
   getGrniReconciliation(bookId: number, asOfDate?: string | null): Observable<GrniReconciliation> {

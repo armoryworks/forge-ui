@@ -42,6 +42,7 @@ export class AccountingComponent {
     { route: 'ap-aging', label: this.translate.instant('accounting.dashboard.apAging'), icon: 'schedule', description: this.translate.instant('accounting.dashboard.apAgingDesc') },
     { route: 'grni', label: this.translate.instant('accounting.dashboard.grni'), icon: 'inventory_2', description: this.translate.instant('accounting.dashboard.grniDesc') },
     { route: 'sales-tax-liability', label: this.translate.instant('accounting.dashboard.salesTaxLiability'), icon: 'percent', description: this.translate.instant('accounting.dashboard.salesTaxLiabilityDesc') },
+    { route: '1099-report', label: this.translate.instant('accounting.dashboard.form1099'), icon: 'badge', description: this.translate.instant('accounting.dashboard.form1099Desc') },
     { route: 'period-close', label: this.translate.instant('accounting.dashboard.periodClose'), icon: 'event_available', description: this.translate.instant('accounting.dashboard.periodCloseDesc') },
     { route: 'bank-rec', label: this.translate.instant('accounting.dashboard.bankRec'), icon: 'account_balance_wallet', description: this.translate.instant('accounting.dashboard.bankRecDesc') },
     { route: 'bank-statements', label: this.translate.instant('accounting.dashboard.bankStatements'), icon: 'upload_file', description: this.translate.instant('accounting.dashboard.bankStatementsDesc') },

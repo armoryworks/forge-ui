@@ -10,4 +10,6 @@ export interface CreateVendorRequest {
   country?: string;
   paymentTerms?: string;
   notes?: string;
+  is1099?: boolean;
+  taxId?: string;
 }

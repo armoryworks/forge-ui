@@ -53,6 +53,13 @@
           min="0"
           [placeholder]="'vendors.offTierVariancePctPlaceholder' | translate"
           data-testid="vendor-off-tier-variance" />
+        <app-toggle [label]="'accounting.form1099.vendorToggle' | translate" formControlName="is1099"
+          data-testid="vendor-is-1099" />
+        @if (form.controls.is1099.value) {
+          <app-input [label]="'accounting.form1099.taxIdLabel' | translate" formControlName="taxId"
+            [maxlength]="32" [placeholder]="'accounting.form1099.taxIdPlaceholder' | translate"
+            data-testid="vendor-tax-id" />
+        }
         @if (isEditing) {
           <app-toggle [label]="'common.active' | translate" formControlName="isActive" />
         }

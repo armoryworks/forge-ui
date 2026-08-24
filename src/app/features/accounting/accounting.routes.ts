@@ -79,6 +79,11 @@ export const ACCOUNTING_ROUTES: Routes = [
       import('./components/sales-tax-liability/sales-tax-liability.component').then((m) => m.SalesTaxLiabilityComponent),
   },
   {
+    path: '1099-report',
+    loadComponent: () =>
+      import('./components/form-1099/form-1099.component').then((m) => m.Form1099Component),
+  },
+  {
     path: 'period-close',
     loadComponent: () =>
       import('./components/period-close/period-close.component').then((m) => m.PeriodCloseComponent),

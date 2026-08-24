@@ -1,0 +1,50 @@
+<app-page-header
+  [title]="'accounting.form1099.title' | translate"
+  [subtitle]="'accounting.form1099.subtitle' | translate">
+</app-page-header>
+
+<div class="page-content page-content--table">
+  <div class="f1099-toolbar">
+    <app-select
+      [label]="'accounting.form1099.year' | translate"
+      [options]="yearOptions"
+      [formControl]="yearControl" />
+  </div>
+
+  @if (error()) {
+    <p class="acct-error" role="alert">{{ error() }}</p>
+  }
+
+  <app-data-table
+    tableId="acct-form-1099"
+    [columns]="columns()"
+    [data]="rows()"
+    [loading]="loading()"
+    [stickyFirstColumn]="true"
+    emptyIcon="badge"
+    [emptyMessage]="'accounting.form1099.empty' | translate">
+    <ng-template appColumnCell="totalPayments" let-row>
+      <app-currency-display [value]="row.totalPayments" />
+    </ng-template>
+    <ng-template appColumnCell="meetsThreshold" let-row>
+      @if (row.meetsThreshold) {
+        <app-status-badge [status]="'accounting.form1099.reportable' | translate" statusColor="completed" />
+      } @else {
+        <app-status-badge [status]="'accounting.form1099.underThreshold' | translate" statusColor="upcoming" />
+      }
+    </ng-template>
+  </app-data-table>
+
+  @if (report(); as r) {
+    <div class="totals-strip">
+      <span class="totals-strip__label">{{ 'accounting.common.total' | translate }}</span>
+      <span class="totals-strip__metric">
+        {{ 'accounting.form1099.reportableVendors' | translate }} {{ r.reportableVendorCount }}
+      </span>
+      <span class="totals-strip__metric totals-strip__metric--strong">
+        {{ 'accounting.form1099.totalPayments' | translate }}
+        <app-currency-display [value]="r.totalPayments" />
+      </span>
+    </div>
+  }
+</div>

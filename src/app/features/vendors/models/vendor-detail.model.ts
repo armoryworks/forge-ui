@@ -15,6 +15,10 @@ export interface VendorDetail {
   paymentTerms: string | null;
   notes: string | null;
   isActive: boolean;
+  /** Marks the vendor as a 1099 payee (drives the 1099 report). */
+  is1099: boolean;
+  /** Vendor TIN/EIN/SSN for 1099 filing; full value, masked on display. */
+  taxId: string | null;
   externalId: string | null;
   createdAt: Date;
   updatedAt: Date;

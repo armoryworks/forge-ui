@@ -183,6 +183,33 @@ export interface SalesTaxLiabilityReport {
   totalOrderCount: number;
 }
 
+// ── 1099 report ─────────────────────────────────────────────────────────────
+/**
+ * One 1099-flagged vendor's line: total cash paid in the calendar year and
+ * whether it reaches the IRS 1099-NEC reporting threshold ($600). `taxId` is the
+ * full TIN; the UI masks all but the last four digits.
+ */
+export interface Form1099VendorRow {
+  vendorId: number;
+  vendorName: string;
+  vendorNumber: string | null;
+  taxId: string | null;
+  totalPayments: number;
+  meetsThreshold: boolean;
+}
+
+/**
+ * 1099 report — every vendor flagged as a 1099 payee with its total cash paid in
+ * the calendar year, for preparing Form 1099-NEC filings.
+ */
+export interface Form1099Report {
+  year: number;
+  threshold: number;
+  vendors: Form1099VendorRow[];
+  totalPayments: number;
+  reportableVendorCount: number;
+}
+
 // ── GRNI reconciliation ────────────────────────────────────────────────────
 export interface GrniPoRow {
   purchaseOrderId: number;

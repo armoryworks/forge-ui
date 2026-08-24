@@ -63,6 +63,8 @@ export class VendorDialogComponent {
     paymentTerms: new FormControl(''),
     notes: new FormControl(''),
     isActive: new FormControl(true),
+    is1099: new FormControl(false),
+    taxId: new FormControl('', [Validators.maxLength(32)]),
     // Bought-parts effort PR4 — per-vendor variance threshold override.
     offTierVariancePct: new FormControl<number | null>(null, [Validators.min(0)]),
   });
@@ -75,6 +77,8 @@ export class VendorDialogComponent {
     paymentTerms: 'Payment Terms',
     notes: 'Notes',
     isActive: 'Active',
+    is1099: '1099 Vendor',
+    taxId: 'Tax ID',
     offTierVariancePct: 'Off-Tier Variance %',
   });
 
@@ -93,6 +97,8 @@ export class VendorDialogComponent {
         paymentTerms: v.paymentTerms ?? '',
         notes: v.notes ?? '',
         isActive: v.isActive,
+        is1099: v.is1099 ?? false,
+        taxId: v.taxId ?? '',
         offTierVariancePct: (v as { offTierVariancePct?: number | null }).offTierVariancePct ?? null,
       });
     }
@@ -121,6 +127,8 @@ export class VendorDialogComponent {
       ...fromAddressToVendor(addr),
       paymentTerms: f.paymentTerms || undefined,
       notes: f.notes || undefined,
+      is1099: f.is1099 ?? false,
+      taxId: f.taxId?.trim() || undefined,
       offTierVariancePct: f.offTierVariancePct,
     };
 

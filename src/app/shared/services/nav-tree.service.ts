@@ -195,6 +195,7 @@ export class NavTreeService {
             { icon: 'schedule', label: 'AP Aging', i18nKey: 'nav.apAging', route: '/accounting/ap-aging' },
             { icon: 'inventory_2', label: 'GRNI', i18nKey: 'nav.grni', route: '/accounting/grni' },
             { icon: 'percent', label: 'Sales Tax Liability', i18nKey: 'nav.salesTaxLiability', route: '/accounting/sales-tax-liability' },
+            { icon: 'badge', label: '1099 Report', i18nKey: 'nav.form1099', route: '/accounting/1099-report' },
             // Bank + period + export.
             { icon: 'account_balance_wallet', label: 'Bank Reconciliation', i18nKey: 'nav.bankRec', route: '/accounting/bank-rec', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
             { icon: 'receipt_long', label: 'Bank Statements', i18nKey: 'nav.bankStatements', route: '/accounting/bank-statements', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
