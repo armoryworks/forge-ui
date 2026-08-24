@@ -54,15 +54,46 @@ export class GeneralLedgerService {
     return this.http.get<TrialBalance>(`${this.base}/trial-balance`, { params: this.range(bookId, fromDate, toDate) });
   }
 
-  getProfitAndLoss(bookId: number, fromDate?: string | null, toDate?: string | null): Observable<ProfitAndLoss> {
+  /**
+   * Profit & Loss. When `compare` is true the response carries prior-period and variance
+   * figures per line and per total; an explicit prior window (compareFromDate/compareToDate)
+   * overrides the server's immediately-preceding-equal-length default.
+   */
+  getProfitAndLoss(
+    bookId: number,
+    fromDate?: string | null,
+    toDate?: string | null,
+    compare = false,
+    compareFromDate?: string | null,
+    compareToDate?: string | null,
+  ): Observable<ProfitAndLoss> {
     // Server route is /accounting/pnl (AccountingGlController [HttpGet("pnl")]); the old
     // /profit-and-loss path 404'd.
-    return this.http.get<ProfitAndLoss>(`${this.base}/pnl`, { params: this.range(bookId, fromDate, toDate) });
+    let params = this.range(bookId, fromDate, toDate);
+    if (compare) {
+      params = params.set('compare', true);
+      if (compareFromDate) params = params.set('compareFromDate', compareFromDate);
+      if (compareToDate) params = params.set('compareToDate', compareToDate);
+    }
+    return this.http.get<ProfitAndLoss>(`${this.base}/pnl`, { params });
   }
 
-  getBalanceSheet(bookId: number, asOfDate?: string | null): Observable<BalanceSheet> {
+  /**
+   * Balance Sheet. When `compare` is true the response carries prior-date and variance
+   * figures; an explicit `compareAsOfDate` overrides the server's same-date-one-year-prior default.
+   */
+  getBalanceSheet(
+    bookId: number,
+    asOfDate?: string | null,
+    compare = false,
+    compareAsOfDate?: string | null,
+  ): Observable<BalanceSheet> {
     let params = new HttpParams().set('bookId', bookId);
     if (asOfDate) params = params.set('asOfDate', asOfDate);
+    if (compare) {
+      params = params.set('compare', true);
+      if (compareAsOfDate) params = params.set('compareAsOfDate', compareAsOfDate);
+    }
     return this.http.get<BalanceSheet>(`${this.base}/balance-sheet`, { params });
   }
 

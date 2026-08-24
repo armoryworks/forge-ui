@@ -8315,6 +8315,16 @@
       "noExpense": "Sin gastos.",
       "netIncome": "Utilidad neta"
     },
+    "comparison": {
+      "compareToPrior": "Comparar con el período anterior",
+      "priorPeriod": "Período anterior",
+      "priorDate": "Fecha anterior",
+      "account": "Cuenta",
+      "current": "Actual",
+      "prior": "Anterior",
+      "variance": "Variación",
+      "variancePercent": "Variación %"
+    },
     "balanceSheet": {
       "title": "Balance general",
       "subtitle": "Activos, pasivos y patrimonio a la fecha",

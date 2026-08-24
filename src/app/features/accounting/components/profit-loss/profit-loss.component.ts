@@ -1,12 +1,16 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
+
+import { DecimalPipe } from '@angular/common';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
+import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { ViewModeToggleComponent } from '../../../../shared/components/view-mode-toggle/view-mode-toggle.component';
 import { UserPreferencesService } from '../../../../shared/services/user-preferences.service';
 import {
@@ -25,9 +29,12 @@ const DEFAULT_BOOK_ID = 1;
   selector: 'app-profit-loss',
   standalone: true,
   imports: [
+    DecimalPipe,
+    ReactiveFormsModule,
     TranslatePipe,
     PageHeaderComponent,
     CurrencyDisplayComponent,
+    ToggleComponent,
     ViewModeToggleComponent,
     ProfitLossVisualComponent,
   ],
@@ -35,7 +42,7 @@ const DEFAULT_BOOK_ID = 1;
   styleUrl: './profit-loss.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProfitLossComponent implements OnInit {
+export class ProfitLossComponent {
   private readonly gl = inject(GeneralLedgerService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -57,6 +64,13 @@ export class ProfitLossComponent implements OnInit {
     { initialValue: this.preferredView() },
   );
 
+  /** Prior-period comparison state, mirrored to `?compare=1` (URL is source of truth). */
+  protected readonly compare = toSignal(
+    this.route.queryParamMap.pipe(map((p) => p.get('compare') === '1')),
+    { initialValue: false },
+  );
+  protected readonly compareControl = new FormControl<boolean>(false, { nonNullable: true });
+
   protected setViewMode(mode: AccountingViewMode): void {
     this.router.navigate([], {
       relativeTo: this.route,
@@ -68,17 +82,34 @@ export class ProfitLossComponent implements OnInit {
 
   constructor() {
     autoRefreshOnGlChange(() => this.load());
-  }
 
-  ngOnInit(): void {
-    this.load();
+    // Keep the toggle control in sync with the URL without looping back.
+    effect(() => {
+      const on = this.compare();
+      if (this.compareControl.value !== on) this.compareControl.setValue(on, { emitEvent: false });
+    });
+
+    // Toggle → URL.
+    this.compareControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((on) => {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { compare: on ? '1' : null },
+        queryParamsHandling: 'merge',
+      });
+    });
+
+    // URL compare state drives the (re)load. Runs on init and whenever it flips.
+    effect(() => {
+      this.compare();
+      this.load();
+    });
   }
 
   protected load(): void {
     this.loading.set(true);
     this.error.set(null);
     this.gl
-      .getProfitAndLoss(DEFAULT_BOOK_ID)
+      .getProfitAndLoss(DEFAULT_BOOK_ID, null, null, this.compare())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (r) => {

@@ -6,6 +6,11 @@ export interface StatementAccountLine {
   accountNumber: string;
   accountName: string;
   amount: number;
+  /** Comparative-period fields — present only when the statement was requested with `compare=true`. */
+  priorAmount?: number | null;
+  variance?: number | null;
+  /** Signed percentage movement vs prior; null when no comparison or prior is zero. */
+  variancePercent?: number | null;
 }
 
 // ── Trial balance ──────────────────────────────────────────────────────────
@@ -40,6 +45,19 @@ export interface ProfitAndLoss {
   netIncome: number;
   cogsPosted: boolean;
   marginCaveat: string;
+  // Comparative period (present only when compare=true).
+  compareFromDate?: string | null;
+  compareToDate?: string | null;
+  hasComparison?: boolean;
+  priorTotalIncome?: number | null;
+  priorTotalExpense?: number | null;
+  priorNetIncome?: number | null;
+  totalIncomeVariance?: number | null;
+  totalIncomeVariancePercent?: number | null;
+  totalExpenseVariance?: number | null;
+  totalExpenseVariancePercent?: number | null;
+  netIncomeVariance?: number | null;
+  netIncomeVariancePercent?: number | null;
 }
 
 // ── Balance sheet ──────────────────────────────────────────────────────────
@@ -58,6 +76,24 @@ export interface BalanceSheet {
   isBalanced: boolean;
   cogsPosted: boolean;
   marginCaveat: string;
+  // Comparative period (present only when compare=true).
+  compareAsOfDate?: string | null;
+  hasComparison?: boolean;
+  priorTotalAssets?: number | null;
+  priorTotalLiabilities?: number | null;
+  priorCurrentYearEarnings?: number | null;
+  priorTotalEquityWithEarnings?: number | null;
+  priorTotalLiabilitiesAndEquity?: number | null;
+  totalAssetsVariance?: number | null;
+  totalAssetsVariancePercent?: number | null;
+  totalLiabilitiesVariance?: number | null;
+  totalLiabilitiesVariancePercent?: number | null;
+  currentYearEarningsVariance?: number | null;
+  currentYearEarningsVariancePercent?: number | null;
+  totalEquityWithEarningsVariance?: number | null;
+  totalEquityWithEarningsVariancePercent?: number | null;
+  totalLiabilitiesAndEquityVariance?: number | null;
+  totalLiabilitiesAndEquityVariancePercent?: number | null;
 }
 
 // ── Cash flow (indirect) ───────────────────────────────────────────────────

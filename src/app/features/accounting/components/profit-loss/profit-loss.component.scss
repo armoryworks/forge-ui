@@ -12,6 +12,25 @@
 
 .acct-view-bar {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   margin-bottom: $sp-md;
+}
+
+// Pushed to the left so the view-mode toggle stays right-aligned.
+.acct-compare-toggle {
+  margin-right: auto;
+}
+
+.stmt-compare-note {
+  margin: 0 0 $sp-sm;
+}
+
+// Subtle sign colouring for the variance columns (theme vars, not hardcoded hex).
+.stmt-variance--pos {
+  color: var(--success);
+}
+
+.stmt-variance--neg {
+  color: var(--error);
 }

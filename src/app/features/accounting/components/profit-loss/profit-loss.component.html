@@ -9,6 +9,9 @@
     <p class="acct-muted">{{ 'accounting.common.loading' | translate }}</p>
   } @else if (report(); as r) {
     <div class="acct-view-bar">
+      @if (viewMode() !== 'visual') {
+        <app-toggle class="acct-compare-toggle" [label]="'accounting.comparison.compareToPrior' | translate" [formControl]="compareControl" />
+      }
       <app-view-mode-toggle [mode]="viewMode()" (modeChange)="setViewMode($event)" />
     </div>
 
@@ -19,40 +22,102 @@
       <p class="acct-caveat">{{ r.marginCaveat }}</p>
     }
 
+    @if (compare() && r.hasComparison && r.compareFromDate && r.compareToDate) {
+      <p class="acct-muted stmt-compare-note">
+        {{ 'accounting.comparison.priorPeriod' | translate }}: {{ r.compareFromDate }} – {{ r.compareToDate }}
+      </p>
+    }
+
     <table class="statement" aria-label="Profit and loss statement">
+      @if (compare()) {
+        <thead>
+          <tr>
+            <th scope="col">{{ 'accounting.comparison.account' | translate }}</th>
+            <th scope="col" class="num">{{ 'accounting.comparison.current' | translate }}</th>
+            <th scope="col" class="num">{{ 'accounting.comparison.prior' | translate }}</th>
+            <th scope="col" class="num">{{ 'accounting.comparison.variance' | translate }}</th>
+            <th scope="col" class="num">{{ 'accounting.comparison.variancePercent' | translate }}</th>
+          </tr>
+        </thead>
+      }
       <tbody>
-        <tr class="statement__section"><td colspan="2">{{ 'accounting.profitLoss.income' | translate }}</td></tr>
+        <tr class="statement__section"><td [attr.colspan]="compare() ? 5 : 2">{{ 'accounting.profitLoss.income' | translate }}</td></tr>
         @for (line of r.income; track line.glAccountId) {
           <tr>
             <td>{{ line.accountNumber }} · {{ line.accountName }}</td>
             <td class="num"><app-currency-display [value]="line.amount" /></td>
+            @if (compare()) {
+              <td class="num"><app-currency-display [value]="line.priorAmount ?? 0" /></td>
+              <td class="num" [class.stmt-variance--pos]="(line.variance ?? 0) >= 0" [class.stmt-variance--neg]="(line.variance ?? 0) < 0">
+                <app-currency-display [value]="line.variance ?? 0" />
+              </td>
+              <td class="num" [class.stmt-variance--pos]="(line.variance ?? 0) >= 0" [class.stmt-variance--neg]="(line.variance ?? 0) < 0">
+                @if (line.variancePercent !== null && line.variancePercent !== undefined) { {{ line.variancePercent | number: '1.0-1' }}% } @else { <span class="acct-muted">—</span> }
+              </td>
+            }
           </tr>
         } @empty {
-          <tr><td colspan="2" class="acct-muted">{{ 'accounting.profitLoss.noIncome' | translate }}</td></tr>
+          <tr><td [attr.colspan]="compare() ? 5 : 2" class="acct-muted">{{ 'accounting.profitLoss.noIncome' | translate }}</td></tr>
         }
         <tr class="statement__subtotal">
           <td>{{ 'accounting.profitLoss.totalIncome' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.totalIncome" /></td>
+          @if (compare()) {
+            <td class="num"><app-currency-display [value]="r.priorTotalIncome ?? 0" /></td>
+            <td class="num" [class.stmt-variance--pos]="(r.totalIncomeVariance ?? 0) >= 0" [class.stmt-variance--neg]="(r.totalIncomeVariance ?? 0) < 0">
+              <app-currency-display [value]="r.totalIncomeVariance ?? 0" />
+            </td>
+            <td class="num" [class.stmt-variance--pos]="(r.totalIncomeVariance ?? 0) >= 0" [class.stmt-variance--neg]="(r.totalIncomeVariance ?? 0) < 0">
+              @if (r.totalIncomeVariancePercent !== null && r.totalIncomeVariancePercent !== undefined) { {{ r.totalIncomeVariancePercent | number: '1.0-1' }}% } @else { <span class="acct-muted">—</span> }
+            </td>
+          }
         </tr>
 
-        <tr class="statement__section"><td colspan="2">{{ 'accounting.profitLoss.expense' | translate }}</td></tr>
+        <tr class="statement__section"><td [attr.colspan]="compare() ? 5 : 2">{{ 'accounting.profitLoss.expense' | translate }}</td></tr>
         @for (line of r.expense; track line.glAccountId) {
           <tr>
             <td>{{ line.accountNumber }} · {{ line.accountName }}</td>
             <td class="num"><app-currency-display [value]="line.amount" /></td>
+            @if (compare()) {
+              <td class="num"><app-currency-display [value]="line.priorAmount ?? 0" /></td>
+              <td class="num" [class.stmt-variance--pos]="(line.variance ?? 0) >= 0" [class.stmt-variance--neg]="(line.variance ?? 0) < 0">
+                <app-currency-display [value]="line.variance ?? 0" />
+              </td>
+              <td class="num" [class.stmt-variance--pos]="(line.variance ?? 0) >= 0" [class.stmt-variance--neg]="(line.variance ?? 0) < 0">
+                @if (line.variancePercent !== null && line.variancePercent !== undefined) { {{ line.variancePercent | number: '1.0-1' }}% } @else { <span class="acct-muted">—</span> }
+              </td>
+            }
           </tr>
         } @empty {
-          <tr><td colspan="2" class="acct-muted">{{ 'accounting.profitLoss.noExpense' | translate }}</td></tr>
+          <tr><td [attr.colspan]="compare() ? 5 : 2" class="acct-muted">{{ 'accounting.profitLoss.noExpense' | translate }}</td></tr>
         }
         <tr class="statement__subtotal">
           <td>{{ 'accounting.profitLoss.totalExpense' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.totalExpense" /></td>
+          @if (compare()) {
+            <td class="num"><app-currency-display [value]="r.priorTotalExpense ?? 0" /></td>
+            <td class="num" [class.stmt-variance--pos]="(r.totalExpenseVariance ?? 0) >= 0" [class.stmt-variance--neg]="(r.totalExpenseVariance ?? 0) < 0">
+              <app-currency-display [value]="r.totalExpenseVariance ?? 0" />
+            </td>
+            <td class="num" [class.stmt-variance--pos]="(r.totalExpenseVariance ?? 0) >= 0" [class.stmt-variance--neg]="(r.totalExpenseVariance ?? 0) < 0">
+              @if (r.totalExpenseVariancePercent !== null && r.totalExpenseVariancePercent !== undefined) { {{ r.totalExpenseVariancePercent | number: '1.0-1' }}% } @else { <span class="acct-muted">—</span> }
+            </td>
+          }
         </tr>
       </tbody>
       <tfoot>
         <tr>
           <td>{{ 'accounting.profitLoss.netIncome' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.netIncome" /></td>
+          @if (compare()) {
+            <td class="num"><app-currency-display [value]="r.priorNetIncome ?? 0" /></td>
+            <td class="num" [class.stmt-variance--pos]="(r.netIncomeVariance ?? 0) >= 0" [class.stmt-variance--neg]="(r.netIncomeVariance ?? 0) < 0">
+              <app-currency-display [value]="r.netIncomeVariance ?? 0" />
+            </td>
+            <td class="num" [class.stmt-variance--pos]="(r.netIncomeVariance ?? 0) >= 0" [class.stmt-variance--neg]="(r.netIncomeVariance ?? 0) < 0">
+              @if (r.netIncomeVariancePercent !== null && r.netIncomeVariancePercent !== undefined) { {{ r.netIncomeVariancePercent | number: '1.0-1' }}% } @else { <span class="acct-muted">—</span> }
+            </td>
+          }
         </tr>
       </tfoot>
     </table>

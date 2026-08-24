@@ -8315,6 +8315,16 @@
       "noExpense": "No expense.",
       "netIncome": "Net income"
     },
+    "comparison": {
+      "compareToPrior": "Compare to prior period",
+      "priorPeriod": "Prior period",
+      "priorDate": "Prior date",
+      "account": "Account",
+      "current": "Current",
+      "prior": "Prior",
+      "variance": "Variance",
+      "variancePercent": "Variance %"
+    },
     "balanceSheet": {
       "title": "Balance Sheet",
       "subtitle": "Assets, liabilities and equity as of date",
