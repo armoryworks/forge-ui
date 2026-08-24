@@ -23,6 +23,8 @@ export interface MfaValidateResponse {
   accessToken: string;
   refreshToken: string;
   expiresAt: string;
+  /** Present when "remember this device for 30 days" was checked; stored and sent on next login. */
+  trustedDeviceToken?: string | null;
 }
 
 export interface MfaStatus {

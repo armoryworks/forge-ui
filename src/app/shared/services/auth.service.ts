@@ -110,8 +110,11 @@ export class AuthService {
   }
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
+    // Present the "remember this device for 30 days" trusted-device token (if
+    // this browser earned one) so the server can skip the MFA challenge.
+    const trustedDeviceToken = localStorage.getItem('forge-trusted-device') ?? undefined;
     return this.http
-      .post<LoginResponse>(`${environment.apiUrl}/auth/login`, credentials)
+      .post<LoginResponse>(`${environment.apiUrl}/auth/login`, { ...credentials, trustedDeviceToken })
       .pipe(
         tap((response) => {
           // Don't persist auth when MFA verification is still needed
@@ -125,17 +128,28 @@ export class AuthService {
       );
   }
 
-  /** Complete auth after successful MFA validation. */
-  completeMfaLogin(token: string): void {
+  /**
+   * Complete auth after successful MFA validation. When a trusted-device token
+   * is returned (user chose "remember this device for 30 days"), persist it so
+   * the next login skips the challenge. It deliberately SURVIVES logout — it is
+   * device-level, not session-level.
+   */
+  completeMfaLogin(token: string, trustedDeviceToken?: string | null): Observable<AuthUser> {
     this._token.set(token);
     localStorage.setItem('forge-token', token);
-    // Fetch user profile from /me endpoint
-    this.http.get<AuthUser>(`${environment.apiUrl}/auth/me`).subscribe({
-      next: (user) => {
+    if (trustedDeviceToken) {
+      localStorage.setItem('forge-trusted-device', trustedDeviceToken);
+    }
+    // Resolve the user profile BEFORE the caller navigates, so the app doesn't
+    // bootstrap the dashboard (and its request burst) mid-transition — that race
+    // produced a 401 storm and the "already signed in" bounce. Returns the /me
+    // fetch so the login flow can wait for it and navigate once, cleanly.
+    return this.http.get<AuthUser>(`${environment.apiUrl}/auth/me`).pipe(
+      tap((user) => {
         this._user.set(user);
         localStorage.setItem('forge-user', JSON.stringify(user));
-      },
-    });
+      }),
+    );
   }
 
   checkSetupStatus(): Observable<SetupStatusResponse> {

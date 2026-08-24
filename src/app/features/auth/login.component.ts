@@ -132,13 +132,13 @@ export class LoginComponent implements OnInit {
   }
 
   protected onMfaValidated(result: MfaValidateResponse): void {
-    this.authService.completeMfaLogin(result.accessToken);
     this.mfaRequired.set(false);
     this.mfaPendingToken.set(null);
-    // Fetch user profile to determine navigation
-    this.authService.refreshAccessToken().subscribe({
-      next: () => {
-        const user = this.authService.user();
+    // Set the token + load the user, THEN navigate — a single coordinated flow
+    // (no redundant token refresh) so the dashboard doesn't bootstrap before the
+    // session is fully in place.
+    this.authService.completeMfaLogin(result.accessToken, result.trustedDeviceToken).subscribe({
+      next: (user) => {
         this.navigatePostLogin(user?.profileComplete ?? true);
       },
       error: () => {
