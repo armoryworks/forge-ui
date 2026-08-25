@@ -3453,7 +3453,29 @@
       }
     },
     "confirmReminderTitle": "Send Reminder?",
-    "confirmReminderMessage": "Send a compliance reminder email to this employee?"
+    "confirmReminderMessage": "Send a compliance reminder email to this employee?",
+    "devices": {
+      "addTitle": "Add a device — {{name}}",
+      "addAction": "Add a device",
+      "scanHint": "On the phone, open the Forge app and scan this code. It works once and expires quickly.",
+      "issuing": "Generating code…",
+      "codeExpired": "Code expired",
+      "expiresIn": "Expires in {{seconds}}s",
+      "newCode": "New code",
+      "enrolled": "Enrolled devices",
+      "none": "No devices enrolled.",
+      "lastSeen": "Last seen",
+      "neverSeen": "Never checked in",
+      "flagged": "Flagged",
+      "stale": "Stale",
+      "revokedChip": "Revoked",
+      "revoke": "Revoke",
+      "revokeTitle": "Revoke this device?",
+      "revokeMessage": "{{name}} will be signed out and wiped the next time it contacts this server.",
+      "revoked": "Device revoked",
+      "revokeFailed": "Could not revoke the device. Try again.",
+      "issueFailed": "Could not generate an enrollment code. Try again."
+    }
   },
   "teamsPanel": {
     "teams": "teams",

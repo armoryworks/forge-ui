@@ -3453,7 +3453,29 @@
       }
     },
     "confirmReminderTitle": "¿Enviar recordatorio?",
-    "confirmReminderMessage": "¿Enviar un correo de recordatorio de cumplimiento a este empleado?"
+    "confirmReminderMessage": "¿Enviar un correo de recordatorio de cumplimiento a este empleado?",
+    "devices": {
+      "addTitle": "Agregar un dispositivo — {{name}}",
+      "addAction": "Agregar un dispositivo",
+      "scanHint": "En el teléfono, abra la aplicación Forge y escanee este código. Funciona una sola vez y caduca pronto.",
+      "issuing": "Generando código…",
+      "codeExpired": "Código caducado",
+      "expiresIn": "Caduca en {{seconds}}s",
+      "newCode": "Nuevo código",
+      "enrolled": "Dispositivos inscritos",
+      "none": "No hay dispositivos inscritos.",
+      "lastSeen": "Visto por última vez",
+      "neverSeen": "Nunca se ha conectado",
+      "flagged": "Marcado",
+      "stale": "Inactivo",
+      "revokedChip": "Revocado",
+      "revoke": "Revocar",
+      "revokeTitle": "¿Revocar este dispositivo?",
+      "revokeMessage": "{{name}} se cerrará la sesión y se borrará la próxima vez que contacte este servidor.",
+      "revoked": "Dispositivo revocado",
+      "revokeFailed": "No se pudo revocar el dispositivo. Inténtelo de nuevo.",
+      "issueFailed": "No se pudo generar un código de inscripción. Inténtelo de nuevo."
+    }
   },
   "teamsPanel": {
     "teams": "equipos",

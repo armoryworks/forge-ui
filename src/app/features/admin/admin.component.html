@@ -82,6 +82,9 @@
               <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" (click)="openEditUser(user); $event.stopPropagation()">
                 <span class="material-icons-outlined">edit</span>
               </button>
+              <button *appCap="'CAP-MOBILE-CORE'" class="icon-btn" data-testid="admin-user-add-device" [matTooltip]="'admin.devices.addAction' | translate" matTooltipPosition="above" (click)="deviceUser.set(user); $event.stopPropagation()">
+                <span class="material-icons-outlined">smartphone</span>
+              </button>
               <button class="icon-btn" [matTooltip]="user.isActive ? ('admin.deactivate' | translate) : ('admin.activate' | translate)" matTooltipPosition="above" (click)="toggleUserActive(user); $event.stopPropagation()">
                 <span class="material-icons-outlined">{{ user.isActive ? 'person_off' : 'person' }}</span>
               </button>
@@ -846,4 +849,8 @@
     [saving]="saving()"
     (closed)="closeLocationDialog()"
     (saved)="saveLocation($event)" />
+}
+
+@if (deviceUser(); as devUser) {
+  <app-admin-add-device-dialog [user]="devUser" (closed)="deviceUser.set(null)" />
 }
