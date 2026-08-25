@@ -5,7 +5,7 @@
   </header>
 
   <form [formGroup]="form" class="part-basics-step__form">
-    @if (manualNumbers.isEnabled('parts') && entityId() == null) {
+    @if (manualNumbers.isEnabled('parts') && (entityId() === null || entityId() === undefined)) {
       <app-input
         [label]="'parts.partNumberLabel' | translate"
         formControlName="partNumber"
