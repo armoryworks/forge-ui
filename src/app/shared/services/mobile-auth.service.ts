@@ -9,6 +9,7 @@ import { MobileInstance } from '../models/mobile-instance.model';
 import { AuthService } from './auth.service';
 import { InstanceService } from './instance.service';
 import { PlatformService } from './platform.service';
+import { TlsPinService } from './tls-pin.service';
 
 /**
  * Enrollment and device-token refresh for the native shell. The QR path
@@ -24,6 +25,7 @@ export class MobileAuthService {
   private readonly auth = inject(AuthService);
   private readonly instances = inject(InstanceService);
   private readonly platform = inject(PlatformService);
+  private readonly tlsPin = inject(TlsPinService);
 
   discover(serverUrl: string): Observable<ForgeWellKnown> {
     const origin = MobileAuthService.normalizeOrigin(serverUrl);
@@ -32,7 +34,8 @@ export class MobileAuthService {
 
   enrollWithQr(payload: EnrollmentQrPayload): Observable<MobileAuthResponse> {
     const origin = MobileAuthService.normalizeOrigin(payload.server);
-    return from(this.deviceProfile()).pipe(
+    return from(this.tlsPin.assertPinned(origin, payload.certSha256)).pipe(
+      switchMap(() => this.deviceProfile()),
       switchMap((profile) =>
         this.http.post<MobileAuthResponse>(`${origin}/api/v1/devices/enroll`, {
           token: payload.token,
@@ -47,7 +50,8 @@ export class MobileAuthService {
   /** Shared device: enrolled to the instance; the device credential replaces user tokens. */
   enrollSharedWithQr(payload: EnrollmentQrPayload): Observable<SharedDeviceEnrollResponse> {
     const origin = MobileAuthService.normalizeOrigin(payload.server);
-    return from(this.deviceProfile()).pipe(
+    return from(this.tlsPin.assertPinned(origin, payload.certSha256)).pipe(
+      switchMap(() => this.deviceProfile()),
       switchMap((profile) =>
         this.http.post<SharedDeviceEnrollResponse>(`${origin}/api/v1/devices/enroll-shared`, {
           token: payload.token,
@@ -73,7 +77,8 @@ export class MobileAuthService {
   enrollAuthenticated(
     origin: string, instanceName: string, certSha256: string | null, accessToken: string,
   ): Observable<MobileAuthResponse> {
-    return from(this.deviceProfile()).pipe(
+    return from(this.tlsPin.assertPinned(origin, certSha256)).pipe(
+      switchMap(() => this.deviceProfile()),
       switchMap((profile) =>
         this.http.post<MobileAuthResponse>(`${origin}/api/v1/devices/enroll-mine`, profile, {
           headers: { Authorization: `Bearer ${accessToken}` },
@@ -93,7 +98,8 @@ export class MobileAuthService {
     const instance = this.instances.instance();
     if (!instance) return of(null);
 
-    return from(this.instances.getRefreshToken()).pipe(
+    return from(this.tlsPin.assertPinned(instance.serverUrl, instance.certSha256)).pipe(
+      switchMap(() => this.instances.getRefreshToken()),
       switchMap((refreshToken) => {
         if (!refreshToken) return of(null);
         return this.http.post<MobileAuthResponse>(

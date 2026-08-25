@@ -9263,7 +9263,8 @@
       "totpFailed": "Ese código no se verificó. Pruebe el siguiente.",
       "loginFailed": "El inicio de sesión falló. Verifique el correo y la contraseña.",
       "backToScan": "Volver al escaneo de código",
-      "usePasskey": "Usar una llave de acceso"
+      "usePasskey": "Usar una llave de acceso",
+      "certMismatch": "El certificado de este servidor no coincide con el que fijó su administrador. Deténgase y consulte con su administrador antes de continuar."
     },
     "lock": {
       "enterPin": "Ingrese su PIN",

@@ -17,6 +17,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { LanguageToggleComponent } from '../../../shared/components/language-toggle/language-toggle.component';
 import { EnrollmentQrPayload } from '../../../shared/models/mobile-auth.model';
 import { MobileAuthService } from '../../../shared/services/mobile-auth.service';
+import { TlsPinMismatchError } from '../../../shared/services/tls-pin.service';
 
 /**
  * First run: a viewfinder waiting for the admin's enrollment QR, and one
@@ -88,10 +89,13 @@ export class EnrollScanComponent implements AfterViewInit, OnDestroy {
       : this.mobileAuth.enrollWithQr(payload);
     enroll$.subscribe({
       next: () => this.router.navigate([payload.shared ? '/app/scan' : '/app/setup-lock']),
-      error: () => {
+      error: (error: unknown) => {
         this.exchanging = false;
         this.enrolling.set(false);
-        this.enrollError.set(this.translate.instant('mobileApp.enroll.enrollFailed'));
+        this.enrollError.set(this.translate.instant(
+          error instanceof TlsPinMismatchError
+            ? 'mobileApp.enroll.certMismatch'
+            : 'mobileApp.enroll.enrollFailed'));
       },
     });
   }

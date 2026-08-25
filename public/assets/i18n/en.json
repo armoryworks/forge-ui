@@ -9263,7 +9263,8 @@
       "totpFailed": "That code did not verify. Try the next one.",
       "loginFailed": "Sign-in failed. Check the email and password.",
       "backToScan": "Back to code scanning",
-      "usePasskey": "Use a passkey instead"
+      "usePasskey": "Use a passkey instead",
+      "certMismatch": "This server's certificate does not match the one your admin pinned. Stop and check with your admin before continuing."
     },
     "lock": {
       "enterPin": "Enter your PIN",
