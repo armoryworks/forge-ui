@@ -1,5 +1,7 @@
 import { APP_INITIALIZER, ApplicationConfig, isDevMode, inject, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
+
+import { environment } from '../environments/environment';
 import { provideRouter } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideServiceWorker } from '@angular/service-worker';
@@ -16,6 +18,8 @@ Chart.register(SankeyController, Flow);
 
 import { routes } from './app.routes';
 import { authInterceptor } from './shared/interceptors/auth.interceptor';
+import { apiBaseInterceptor } from './shared/interceptors/api-base.interceptor';
+import { InstanceService } from './shared/services/instance.service';
 import { capabilityGateInterceptor } from './shared/interceptors/capability-gate.interceptor';
 import { etagInterceptor } from './shared/interceptors/etag.interceptor';
 import { httpErrorInterceptor } from './shared/interceptors/http-error.interceptor';
@@ -38,7 +42,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideAnimationsAsync(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([demoApiInterceptor, portalAuthInterceptor, authInterceptor, kioskTokenInterceptor, capabilityGateInterceptor, trainingLangInterceptor, etagInterceptor, httpErrorInterceptor, dateTransformInterceptor])),
+    provideHttpClient(withInterceptors([demoApiInterceptor, portalAuthInterceptor, authInterceptor, kioskTokenInterceptor, capabilityGateInterceptor, trainingLangInterceptor, etagInterceptor, httpErrorInterceptor, dateTransformInterceptor, apiBaseInterceptor])),
     provideCharts(withDefaultRegisterables()),
     provideMarkdown(),
     provideServiceWorker('ngsw-worker.js', {
@@ -55,6 +59,16 @@ export const appConfig: ApplicationConfig = {
     {
       provide: APP_INITIALIZER,
       useFactory: initTranslations,
+      multi: true,
+    },
+    {
+      // Native shell: hydrate the enrolled instance + credentials from
+      // secure storage before the router (and its auth guards) start.
+      provide: APP_INITIALIZER,
+      useFactory: () => {
+        const instances = inject(InstanceService);
+        return () => (environment.mobileShell ? instances.init() : Promise.resolve());
+      },
       multi: true,
     },
     {

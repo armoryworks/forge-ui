@@ -344,7 +344,8 @@
     "units": "units",
     "overview": "Resumen",
     "activity": "Actividad",
-    "archived": "Archivado"
+    "archived": "Archivado",
+    "continue": "Continuar"
   },
   "dashboard": {
     "title": "Panel",
@@ -9234,6 +9235,31 @@
     },
     "scan": {
       "placeholder": "Apunte la cámara a un trabajo, pieza, ubicación o credencial. El escaneo llega en una próxima versión."
+    },
+    "enroll": {
+      "scanTitle": "Escanee el código de su administrador",
+      "cameraError": "La cámara no está disponible. Use la ruta de dirección del servidor abajo.",
+      "connecting": "Conectando…",
+      "notAnEnrollmentCode": "Ese no es un código de inscripción de Forge.",
+      "enrollFailed": "La inscripción falló. Pida a su administrador un código nuevo.",
+      "enterAddressInstead": "Ingresar la dirección del servidor",
+      "addressTitle": "Conéctese a su servidor Forge",
+      "serverAddress": "Dirección del servidor",
+      "httpsRequired": "Se requiere TLS — se rechaza HTTP sin cifrar.",
+      "discoveryFailed": "Ningún servidor Forge respondió en esa dirección.",
+      "trustTitle": "¿Confiar en este servidor?",
+      "certificate": "Certificado",
+      "noCertificatePin": "Este servidor no publica una huella de certificado para fijar.",
+      "trust": "Confiar",
+      "loginTitle": "Inicie sesión en {{name}}",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "signIn": "Iniciar sesión",
+      "totpTitle": "Ingrese su código de 6 dígitos",
+      "totpCode": "Código del autenticador",
+      "totpFailed": "Ese código no se verificó. Pruebe el siguiente.",
+      "loginFailed": "El inicio de sesión falló. Verifique el correo y la contraseña.",
+      "backToScan": "Volver al escaneo de código"
     }
   }
 }

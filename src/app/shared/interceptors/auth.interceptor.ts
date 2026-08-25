@@ -2,18 +2,21 @@ import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, switchMap, throwError } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { AuthService } from '../services/auth.service';
 import { LayoutService } from '../services/layout.service';
+import { MobileAuthService } from '../services/mobile-auth.service';
 
 const OWN_API_PATTERN = /^(\/api\/|https?:\/\/localhost)/;
 
 /** URLs that should never trigger a refresh attempt. */
-const NO_REFRESH_URLS = ['/auth/login', '/auth/refresh', '/auth/logout', '/auth/setup', '/auth/complete-setup'];
+const NO_REFRESH_URLS = ['/auth/login', '/auth/refresh', '/auth/logout', '/auth/setup', '/auth/complete-setup', '/devices/enroll', '/devices/refresh'];
 
 let isRefreshing = false;
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
+  const mobileAuth = inject(MobileAuthService);
   const router = inject(Router);
   const layout = inject(LayoutService);
   const token = authService.token();
@@ -34,6 +37,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
    *  also gets the cleanup. Don't duplicate that here. */
   const redirectToLogin = () => {
     authService.clearAuth();
+    if (environment.mobileShell) {
+      // The shell has no /login — a dead session goes back to enrollment.
+      router.navigate(['/app/enroll'], { queryParams: { reason: 'session_expired' } });
+      return;
+    }
     const currentUrl = router.url;
     const queryParams: Record<string, string> = { reason: 'session_expired' };
     // Preserve current route so user returns here after re-login
@@ -59,7 +67,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         }
 
         isRefreshing = true;
-        return authService.refreshAccessToken().pipe(
+        // Native shell sessions refresh with the device-bound rotating
+        // token; web sessions with the JTI-rotation endpoint.
+        const refresh$ = environment.mobileShell
+          ? mobileAuth.refreshAccessToken()
+          : authService.refreshAccessToken();
+        return refresh$.pipe(
           switchMap((newToken) => {
             isRefreshing = false;
             if (newToken) {

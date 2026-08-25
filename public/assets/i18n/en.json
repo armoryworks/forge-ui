@@ -344,7 +344,8 @@
     "overview": "Overview",
     "activity": "Activity",
     "archived": "Archived",
-    "units": "units"
+    "units": "units",
+    "continue": "Continue"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -9234,6 +9235,31 @@
     },
     "scan": {
       "placeholder": "Point the camera at a job, part, bin, or badge. Scanning arrives in a later build."
+    },
+    "enroll": {
+      "scanTitle": "Scan the code from your admin",
+      "cameraError": "The camera is not available. Use the server-address path below.",
+      "connecting": "Connecting…",
+      "notAnEnrollmentCode": "That is not a Forge enrollment code.",
+      "enrollFailed": "Enrollment failed. Ask your admin for a fresh code.",
+      "enterAddressInstead": "Enter server address instead",
+      "addressTitle": "Connect to your Forge server",
+      "serverAddress": "Server address",
+      "httpsRequired": "TLS is required — plain HTTP is refused.",
+      "discoveryFailed": "No Forge server answered at that address.",
+      "trustTitle": "Trust this server?",
+      "certificate": "Certificate",
+      "noCertificatePin": "This server publishes no certificate fingerprint to pin.",
+      "trust": "Trust",
+      "loginTitle": "Sign in to {{name}}",
+      "email": "Email",
+      "password": "Password",
+      "signIn": "Sign in",
+      "totpTitle": "Enter your 6-digit code",
+      "totpCode": "Authenticator code",
+      "totpFailed": "That code did not verify. Try the next one.",
+      "loginFailed": "Sign-in failed. Check the email and password.",
+      "backToScan": "Back to code scanning"
     }
   }
 }

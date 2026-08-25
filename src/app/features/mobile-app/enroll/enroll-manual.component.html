@@ -1,0 +1,115 @@
+<div class="enroll-manual" data-testid="mobile-app-enroll-manual">
+  @switch (step()) {
+    @case ('address') {
+      <h1 class="enroll-manual__title">{{ 'mobileApp.enroll.addressTitle' | translate }}</h1>
+      <form class="enroll-manual__form" [formGroup]="addressForm" (ngSubmit)="discover()">
+        <app-input
+          [label]="'mobileApp.enroll.serverAddress' | translate"
+          type="text"
+          placeholder="shop.example.com"
+          formControlName="server"
+          [required]="true"
+          data-testid="enroll-server-input"
+        />
+        <div class="enroll-manual__actions">
+          <app-validation-button [violations]="addressViolations" [loading]="busy()">
+            <button
+              type="submit"
+              class="action-btn action-btn--primary"
+              [disabled]="addressForm.invalid || busy()"
+              data-testid="enroll-server-continue"
+            >
+              {{ 'common.continue' | translate }}
+            </button>
+          </app-validation-button>
+        </div>
+      </form>
+    }
+    @case ('trust') {
+      <h1 class="enroll-manual__title">{{ 'mobileApp.enroll.trustTitle' | translate }}</h1>
+      <div class="enroll-manual__trust">
+        <p class="enroll-manual__trust-name">{{ wellKnown()?.name }}</p>
+        <p class="enroll-manual__trust-server">{{ origin() }}</p>
+        @if (fingerprintDisplay(); as fingerprint) {
+          <p class="enroll-manual__trust-cert">
+            {{ 'mobileApp.enroll.certificate' | translate }}
+            <code>{{ fingerprint }}</code>
+          </p>
+        } @else {
+          <p class="enroll-manual__trust-cert enroll-manual__trust-cert--none">
+            {{ 'mobileApp.enroll.noCertificatePin' | translate }}
+          </p>
+        }
+      </div>
+      <div class="enroll-manual__actions">
+        <button type="button" class="action-btn action-btn--primary" (click)="trust()" data-testid="enroll-trust">
+          {{ 'mobileApp.enroll.trust' | translate }}
+        </button>
+      </div>
+    }
+    @case ('login') {
+      <h1 class="enroll-manual__title">{{ 'mobileApp.enroll.loginTitle' | translate: { name: wellKnown()?.name ?? '' } }}</h1>
+      <form class="enroll-manual__form" [formGroup]="loginForm" (ngSubmit)="login()">
+        <app-input
+          [label]="'mobileApp.enroll.email' | translate"
+          type="email"
+          formControlName="email"
+          [required]="true"
+          data-testid="enroll-email-input"
+        />
+        <app-input
+          [label]="'mobileApp.enroll.password' | translate"
+          type="password"
+          formControlName="password"
+          [required]="true"
+          data-testid="enroll-password-input"
+        />
+        <div class="enroll-manual__actions">
+          <app-validation-button [violations]="loginViolations" [loading]="busy()">
+            <button
+              type="submit"
+              class="action-btn action-btn--primary"
+              [disabled]="loginForm.invalid || busy()"
+              data-testid="enroll-login-submit"
+            >
+              {{ 'mobileApp.enroll.signIn' | translate }}
+            </button>
+          </app-validation-button>
+        </div>
+      </form>
+    }
+    @case ('totp') {
+      <h1 class="enroll-manual__title">{{ 'mobileApp.enroll.totpTitle' | translate }}</h1>
+      <form class="enroll-manual__form" [formGroup]="totpForm" (ngSubmit)="validateTotp()">
+        <app-input
+          [label]="'mobileApp.enroll.totpCode' | translate"
+          type="text"
+          formControlName="code"
+          [required]="true"
+          [maxlength]="6"
+          data-testid="enroll-totp-input"
+        />
+        <div class="enroll-manual__actions">
+          <app-validation-button [violations]="totpViolations" [loading]="busy()">
+            <button
+              type="submit"
+              class="action-btn action-btn--primary"
+              [disabled]="totpForm.invalid || busy()"
+              data-testid="enroll-totp-submit"
+            >
+              {{ 'common.continue' | translate }}
+            </button>
+          </app-validation-button>
+        </div>
+      </form>
+    }
+  }
+
+  @if (error(); as message) {
+    <p class="enroll-manual__error" role="alert">{{ message }}</p>
+  }
+
+  <a class="enroll-manual__back" routerLink="/app/enroll" data-testid="enroll-back-to-scan">
+    {{ 'mobileApp.enroll.backToScan' | translate }}
+  </a>
+</div>
