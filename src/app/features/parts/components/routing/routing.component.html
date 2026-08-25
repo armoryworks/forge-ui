@@ -54,10 +54,10 @@
                     {{ operation.workCenterName }}
                   </span>
                 }
-                @if (operation.estimatedMinutes) {
+                @if (operation.estimatedMs) {
                   <span class="operation-card__tag">
                     <span class="material-icons-outlined">schedule</span>
-                    {{ operation.estimatedMinutes }}min
+                    {{ operation.estimatedMs | durationMs }}
                   </span>
                 }
                 <!-- Phase 3 H5 / WU-13 — surface subcontract metadata. -->

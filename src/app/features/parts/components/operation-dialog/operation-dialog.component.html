@@ -31,10 +31,17 @@
   <!-- Details Tab -->
   @if (activeTab() === 'details') {
     <div [formGroup]="formGroup" class="operation-form">
-      <div class="dialog-row">
-        <app-input data-testid="op-step-number" [label]="'parts.stepNumber' | translate" type="number" formControlName="stepNumber" [required]="true" />
-        <app-input data-testid="op-est-minutes" [label]="'parts.estMinutes' | translate" type="number" formControlName="estimatedMinutes" />
+      <app-input data-testid="op-step-number" [label]="'parts.stepNumber' | translate" type="number" formControlName="stepNumber" [required]="true" />
+
+      <div class="est-time-group" role="group" [attr.aria-label]="'parts.estTime' | translate">
+        <span class="est-time-group__label">{{ 'parts.estTime' | translate }}</span>
+        <div class="est-time-group__fields">
+          <app-input data-testid="op-est-hours" [label]="'parts.estHours' | translate" type="number" [min]="0" formControlName="estHours" />
+          <app-input data-testid="op-est-minutes" [label]="'parts.estMinutes' | translate" type="number" [min]="0" formControlName="estMinutes" />
+          <app-input data-testid="op-est-ms" [label]="'parts.estMilliseconds' | translate" type="number" [min]="0" formControlName="estMs" />
+        </div>
       </div>
+
       <app-input data-testid="op-title" [label]="'common.title' | translate" formControlName="title" [maxlength]="200" [required]="true" />
       <app-textarea data-testid="op-instructions" [label]="'parts.instructions' | translate" formControlName="instructions" [rows]="5" [maxlength]="4000" />
 

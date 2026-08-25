@@ -15,10 +15,10 @@
             {{ operation.workCenterName }}
           </div>
         }
-        @if (operation.estimatedMinutes) {
+        @if (operation.estimatedMs) {
           <div class="routing-flow__operation-meta">
             <span class="material-icons-outlined" aria-hidden="true">schedule</span>
-            {{ operation.estimatedMinutes }}min
+            {{ operation.estimatedMs | durationMs }}
           </div>
         }
         <!-- Phase 3 H5 / WU-13 — subcontract metadata in flow view. -->

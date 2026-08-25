@@ -6,7 +6,7 @@ export interface Operation {
   instructions: string | null;
   workCenterId: number | null;
   workCenterName: string | null;
-  estimatedMinutes: number | null;
+  estimatedMs: number | null;
   isQcCheckpoint: boolean;
   qcCriteria: string | null;
   referencedOperationId: number | null;

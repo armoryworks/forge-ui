@@ -89,12 +89,20 @@ export class OperationDialogComponent implements OnInit {
     route: `/parts?detail=part:${this.data.partId}`,
   };
 
+  /** Decomposed Hours / Minutes / Milliseconds seeded from the canonical
+   *  `estimatedMs` for edit mode. Sub-minute remainder (0–59999) lands in `ms`. */
+  private readonly estParts = OperationDialogComponent.decomposeMs(this.data.operation?.estimatedMs ?? null);
+
   protected readonly formGroup = new FormGroup({
     stepNumber: new FormControl<number>(this.data.operation?.stepNumber ?? this.data.nextStepNumber ?? 1, [Validators.required, Validators.min(1)]),
     title: new FormControl(this.data.operation?.title ?? '', [Validators.required, Validators.maxLength(200)]),
     instructions: new FormControl(this.data.operation?.instructions ?? ''),
     workCenterId: new FormControl<number | null>(this.data.operation?.workCenterId ?? null),
-    estimatedMinutes: new FormControl<number | null>(this.data.operation?.estimatedMinutes ?? null, [Validators.min(1)]),
+    // Composable estimated time — canonically stored in milliseconds; composed on save,
+    // decomposed on load. Each field is optional and non-negative.
+    estHours: new FormControl<number | null>(this.estParts.hours, [Validators.min(0)]),
+    estMinutes: new FormControl<number | null>(this.estParts.minutes, [Validators.min(0)]),
+    estMs: new FormControl<number | null>(this.estParts.ms, [Validators.min(0)]),
     isQcCheckpoint: new FormControl(this.data.operation?.isQcCheckpoint ?? false),
     qcCriteria: new FormControl(this.data.operation?.qcCriteria ?? ''),
     referencedOperationId: new FormControl<number | null>(this.data.operation?.referencedOperationId ?? null),
@@ -109,7 +117,9 @@ export class OperationDialogComponent implements OnInit {
   protected readonly violations = FormValidationService.getViolations(this.formGroup, {
     stepNumber: this.translate.instant('parts.stepNumber'),
     title: this.translate.instant('common.title'),
-    estimatedMinutes: this.translate.instant('parts.estMinutes'),
+    estHours: this.translate.instant('parts.estHours'),
+    estMinutes: this.translate.instant('parts.estMinutes'),
+    estMs: this.translate.instant('parts.estMilliseconds'),
     subcontractVendorId: this.translate.instant('parts.subcontractVendor'),
     subcontractTurnTimeDays: this.translate.instant('parts.subcontractTurnTimeDays'),
   });
@@ -199,6 +209,11 @@ export class OperationDialogComponent implements OnInit {
 
     const raw = this.formGroup.getRawValue();
 
+    // Compose the canonical estimate in milliseconds from the three fields; a zero /
+    // all-blank composition sends no estimate.
+    const composedMs = ((raw.estHours ?? 0) * 3_600_000) + ((raw.estMinutes ?? 0) * 60_000) + (raw.estMs ?? 0);
+    const estimatedMs = composedMs > 0 ? composedMs : undefined;
+
     // Phase 3 H5 / WU-13 — only send subcontract metadata when the toggle is
     // on; when off, send the flag as false + clear vendor/turn-time so the
     // server-side patch handler resets historical values.
@@ -212,7 +227,7 @@ export class OperationDialogComponent implements OnInit {
         title: raw.title ?? undefined,
         instructions: raw.instructions || undefined,
         workCenterId: raw.workCenterId ?? undefined,
-        estimatedMinutes: raw.estimatedMinutes ?? undefined,
+        estimatedMs,
         isQcCheckpoint: raw.isQcCheckpoint ?? undefined,
         qcCriteria: raw.qcCriteria || undefined,
         referencedOperationId: raw.referencedOperationId ?? 0,
@@ -233,7 +248,7 @@ export class OperationDialogComponent implements OnInit {
         title: raw.title!,
         instructions: raw.instructions || undefined,
         workCenterId: raw.workCenterId ?? undefined,
-        estimatedMinutes: raw.estimatedMinutes ?? undefined,
+        estimatedMs,
         isQcCheckpoint: raw.isQcCheckpoint ?? false,
         qcCriteria: raw.qcCriteria || undefined,
         referencedOperationId: raw.referencedOperationId ?? undefined,
@@ -352,5 +367,18 @@ export class OperationDialogComponent implements OnInit {
       ]);
       this.formGroup.controls.workCenterId.setValue(created.id);
     });
+  }
+
+  /**
+   * Splits a canonical millisecond estimate into Hours / Minutes / Milliseconds for the
+   * composable editor. The `ms` field carries the sub-minute remainder (0–59999).
+   */
+  private static decomposeMs(ms: number | null): { hours: number | null; minutes: number | null; ms: number | null } {
+    if (ms == null) return { hours: null, minutes: null, ms: null };
+    return {
+      hours: Math.floor(ms / 3_600_000),
+      minutes: Math.floor((ms % 3_600_000) / 60_000),
+      ms: ms % 60_000,
+    };
   }
 }
