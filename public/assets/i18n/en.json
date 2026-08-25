@@ -3475,7 +3475,10 @@
       "revokeMessage": "{{name}} will be signed out and wiped the next time it contacts this server.",
       "revoked": "Device revoked",
       "revokeFailed": "Could not revoke the device. Try again.",
-      "issueFailed": "Could not generate an enrollment code. Try again."
+      "issueFailed": "Could not generate an enrollment code. Try again.",
+      "addSharedTitle": "Add a shared device",
+      "sharedHint": "A shared device belongs to the shop, not a person. Each action on it starts with a badge scan and PIN.",
+      "sharedAction": "Shared device"
     }
   },
   "teamsPanel": {
@@ -9275,6 +9278,12 @@
       "biometricHint": "Faster than the PIN. The PIN stays as the fallback.",
       "enableBiometric": "Enable",
       "notNow": "Not now"
+    },
+    "identity": {
+      "scanBadge": "Scan your badge",
+      "enterPin": "Enter your PIN",
+      "cameraError": "The camera is not available on this device.",
+      "failed": "Badge and PIN did not match."
     }
   }
 }

@@ -3475,7 +3475,10 @@
       "revokeMessage": "{{name}} se cerrará la sesión y se borrará la próxima vez que contacte este servidor.",
       "revoked": "Dispositivo revocado",
       "revokeFailed": "No se pudo revocar el dispositivo. Inténtelo de nuevo.",
-      "issueFailed": "No se pudo generar un código de inscripción. Inténtelo de nuevo."
+      "issueFailed": "No se pudo generar un código de inscripción. Inténtelo de nuevo.",
+      "addSharedTitle": "Agregar un dispositivo compartido",
+      "sharedHint": "Un dispositivo compartido pertenece al taller, no a una persona. Cada acción comienza con un escaneo de credencial y un PIN.",
+      "sharedAction": "Dispositivo compartido"
     }
   },
   "teamsPanel": {
@@ -9275,6 +9278,12 @@
       "biometricHint": "Más rápido que el PIN. El PIN queda como respaldo.",
       "enableBiometric": "Activar",
       "notNow": "Ahora no"
+    },
+    "identity": {
+      "scanBadge": "Escanee su credencial",
+      "enterPin": "Ingrese su PIN",
+      "cameraError": "La cámara no está disponible en este dispositivo.",
+      "failed": "La credencial y el PIN no coinciden."
     }
   }
 }

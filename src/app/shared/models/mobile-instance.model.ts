@@ -11,4 +11,6 @@ export interface MobileInstance {
   deviceUuid: string;
   deviceId: number;
   deviceName: string;
+  /** Enrolled to the instance, not a person: every transaction starts with badge + PIN. */
+  shared: boolean;
 }

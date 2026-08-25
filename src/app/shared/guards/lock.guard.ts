@@ -2,6 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateChildFn, Router } from '@angular/router';
 
 import { environment } from '../../../environments/environment';
+import { InstanceService } from '../services/instance.service';
 import { LocalLockService } from '../services/local-lock.service';
 
 /**
@@ -10,6 +11,8 @@ import { LocalLockService } from '../services/local-lock.service';
  */
 export const lockGuard: CanActivateChildFn = () => {
   if (!environment.mobileShell) return true;
+
+  if (inject(InstanceService).instance()?.shared) return true;
 
   const lock = inject(LocalLockService);
   const router = inject(Router);

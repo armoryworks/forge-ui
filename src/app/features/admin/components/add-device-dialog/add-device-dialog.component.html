@@ -1,10 +1,10 @@
 <app-dialog
-  [title]="'admin.devices.addTitle' | translate: { name: user().firstName + ' ' + user().lastName }"
+  [title]="user() ? ('admin.devices.addTitle' | translate: { name: user()!.firstName + ' ' + user()!.lastName }) : ('admin.devices.addSharedTitle' | translate)"
   width="520px"
   (closed)="close()"
 >
   <div class="add-device">
-    <p class="add-device__hint">{{ 'admin.devices.scanHint' | translate }}</p>
+    <p class="add-device__hint">{{ (user() ? 'admin.devices.scanHint' : 'admin.devices.sharedHint') | translate }}</p>
 
     <div class="add-device__qr" [class.add-device__qr--expired]="expired()">
       @if (enrollment() && !expired()) {

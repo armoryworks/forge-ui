@@ -4,6 +4,7 @@ import { SetupComponent } from './features/auth/setup.component';
 import { TokenSetupComponent } from './features/auth/token-setup.component';
 import { authGuard } from './shared/guards/auth.guard';
 import { instanceGuard } from './shared/guards/instance.guard';
+import { shellAuthGuard } from './shared/guards/shell-auth.guard';
 import { capabilityGuard } from './shared/guards/capability.guard';
 import { demoOnlyGuard } from './shared/guards/demo-only.guard';
 import { mobileRedirectGuard } from './shared/guards/mobile-redirect.guard';
@@ -389,7 +390,7 @@ export const routes: Routes = [
   },
   {
     path: 'app',
-    canActivate: [instanceGuard, authGuard],
+    canActivate: [instanceGuard, shellAuthGuard],
     loadChildren: () =>
       import('./features/mobile-app/mobile-app.routes').then((m) => m.MOBILE_APP_ROUTES),
   },

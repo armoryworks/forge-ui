@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
+import { Observable } from 'rxjs';
 import { Html5Qrcode, Html5QrcodeScannerState } from 'html5-qrcode';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -82,8 +83,11 @@ export class EnrollScanComponent implements AfterViewInit, OnDestroy {
     this.enrolling.set(true);
     this.enrollError.set(null);
 
-    this.mobileAuth.enrollWithQr(payload).subscribe({
-      next: () => this.router.navigate(['/app/setup-lock']),
+    const enroll$: Observable<unknown> = payload.shared
+      ? this.mobileAuth.enrollSharedWithQr(payload)
+      : this.mobileAuth.enrollWithQr(payload);
+    enroll$.subscribe({
+      next: () => this.router.navigate([payload.shared ? '/app/scan' : '/app/setup-lock']),
       error: () => {
         this.exchanging = false;
         this.enrolling.set(false);

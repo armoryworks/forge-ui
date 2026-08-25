@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 import { environment } from '../../../environments/environment';
+import { InstanceService } from './instance.service';
 import { MobileAuthService } from './mobile-auth.service';
 import { PlatformService } from './platform.service';
 import { SecureStorageService } from './secure-storage.service';
@@ -26,6 +27,7 @@ export class LocalLockService {
   private readonly secureStorage = inject(SecureStorageService);
   private readonly platform = inject(PlatformService);
   private readonly mobileAuth = inject(MobileAuthService);
+  private readonly instances = inject(InstanceService);
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
 
@@ -53,7 +55,8 @@ export class LocalLockService {
    * enrolled instance exists. No-op outside the native shell build.
    */
   async start(): Promise<void> {
-    if (!environment.mobileShell || this.watching) return;
+    // Shared devices identify per transaction (badge + PIN); no device lock.
+    if (!environment.mobileShell || this.watching || this.instances.instance()?.shared) return;
     this.watching = true;
 
     this._pinConfigured.set(await this.secureStorage.getItem(PIN_HASH_KEY) !== null);

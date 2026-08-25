@@ -16,6 +16,14 @@ export interface EnrollmentQrPayload {
   token: string;
   name: string;
   certSha256: string | null;
+  shared?: boolean;
+}
+
+export interface SharedDeviceEnrollResponse {
+  deviceId: number;
+  deviceName: string;
+  deviceToken: string;
+  instanceName: string;
 }
 
 /** /.well-known/forge.json — instance discovery for the manual path. */

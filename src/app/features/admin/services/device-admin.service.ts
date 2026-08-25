@@ -11,13 +11,15 @@ export class DeviceAdminService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/devices`;
 
-  createEnrollmentToken(targetUserId: number): Observable<EnrollmentToken> {
-    return this.http.post<EnrollmentToken>(`${this.baseUrl}/enrollment-tokens`, { targetUserId });
+  createEnrollmentToken(targetUserId: number | null): Observable<EnrollmentToken> {
+    return this.http.post<EnrollmentToken>(`${this.baseUrl}/enrollment-tokens`,
+      targetUserId === null ? { targetUserId: 0, isShared: true } : { targetUserId });
   }
 
-  listDevices(userId?: number): Observable<AdminDevice[]> {
+  listDevices(userId?: number, sharedOnly = false): Observable<AdminDevice[]> {
     let params = new HttpParams();
     if (userId != null) params = params.set('userId', userId);
+    if (sharedOnly) params = params.set('shared', true);
     return this.http.get<AdminDevice[]>(this.baseUrl, { params });
   }
 

@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 
 import { Observable, catchError, from, map, of, switchMap } from 'rxjs';
 
-import { EnrollmentQrPayload, ForgeWellKnown, MobileAuthResponse } from '../models/mobile-auth.model';
+import { EnrollmentQrPayload, ForgeWellKnown, MobileAuthResponse, SharedDeviceEnrollResponse } from '../models/mobile-auth.model';
 import { MobileInstance } from '../models/mobile-instance.model';
 import { AuthService } from './auth.service';
 import { InstanceService } from './instance.service';
@@ -41,6 +41,30 @@ export class MobileAuthService {
       switchMap((response) =>
         from(this.installSession(origin, payload.name, payload.certSha256, response))
           .pipe(map(() => response))),
+    );
+  }
+
+  /** Shared device: enrolled to the instance; the device credential replaces user tokens. */
+  enrollSharedWithQr(payload: EnrollmentQrPayload): Observable<SharedDeviceEnrollResponse> {
+    const origin = MobileAuthService.normalizeOrigin(payload.server);
+    return from(this.deviceProfile()).pipe(
+      switchMap((profile) =>
+        this.http.post<SharedDeviceEnrollResponse>(`${origin}/api/v1/devices/enroll-shared`, {
+          token: payload.token,
+          ...profile,
+        })),
+      switchMap((response) =>
+        from(this.instances.getOrCreateDeviceUuid()).pipe(map((deviceUuid) => ({ response, deviceUuid })))),
+      switchMap(({ response, deviceUuid }) =>
+        from(this.instances.setSharedInstance({
+          serverUrl: origin,
+          name: payload.name,
+          certSha256: payload.certSha256,
+          deviceUuid,
+          deviceId: response.deviceId,
+          deviceName: response.deviceName,
+          shared: true,
+        }, response.deviceToken)).pipe(map(() => response))),
     );
   }
 
@@ -108,6 +132,7 @@ export class MobileAuthService {
       deviceUuid: await this.instances.getOrCreateDeviceUuid(),
       deviceId: response.deviceId,
       deviceName: response.deviceName,
+      shared: false,
     };
     await this.instances.setInstance(instance, response.refreshToken);
     this.auth.setSession(response.accessToken, response.user);

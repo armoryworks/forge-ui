@@ -12,9 +12,14 @@ import { InstanceService } from '../services/instance.service';
 export const apiBaseInterceptor: HttpInterceptorFn = (req, next) => {
   if (!environment.mobileShell) return next(req);
 
-  const instance = inject(InstanceService).instance();
+  const instances = inject(InstanceService);
+  const instance = instances.instance();
   if (instance && (req.url.startsWith('/api/') || req.url.startsWith('/hubs/'))) {
-    return next(req.clone({ url: `${instance.serverUrl}${req.url}` }));
+    const deviceToken = instance.shared ? instances.getDeviceToken() : null;
+    return next(req.clone({
+      url: `${instance.serverUrl}${req.url}`,
+      setHeaders: deviceToken ? { 'X-Device-Token': deviceToken } : {},
+    }));
   }
   return next(req);
 };

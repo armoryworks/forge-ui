@@ -3,6 +3,7 @@ export interface EnrollmentToken {
   expiresAt: string;
   instanceName: string;
   certSha256: string | null;
+  isShared: boolean;
 }
 
 export interface AdminDevice {

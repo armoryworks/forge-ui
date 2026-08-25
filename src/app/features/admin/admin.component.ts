@@ -139,6 +139,7 @@ export class AdminComponent implements OnInit {
   protected readonly showUserDialog = signal(false);
   protected readonly editingUser = signal<AdminUser | null>(null);
   protected readonly deviceUser = signal<AdminUser | null>(null);
+  protected readonly sharedDeviceOpen = signal(false);
 
   protected readonly userForm = new FormGroup({
     firstName: new FormControl('', [Validators.required, Validators.maxLength(100)]),

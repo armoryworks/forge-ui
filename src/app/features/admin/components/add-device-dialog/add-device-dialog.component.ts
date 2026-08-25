@@ -45,7 +45,8 @@ export class AddDeviceDialogComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly user = input.required<AdminUser>();
+  /** Null = enroll a shared device to the instance rather than to a person. */
+  readonly user = input<AdminUser | null>(null);
   readonly closed = output<void>();
 
   protected readonly enrollment = signal<EnrollmentToken | null>(null);
@@ -61,6 +62,7 @@ export class AddDeviceDialogComponent implements OnInit {
       token: token.token,
       name: token.instanceName,
       certSha256: token.certSha256,
+      shared: token.isShared,
     });
   });
 
@@ -76,7 +78,7 @@ export class AddDeviceDialogComponent implements OnInit {
 
   protected issueCode(): void {
     this.issuing.set(true);
-    this.deviceAdmin.createEnrollmentToken(this.user().id).subscribe({
+    this.deviceAdmin.createEnrollmentToken(this.user()?.id ?? null).subscribe({
       next: (token) => {
         this.enrollment.set(token);
         this.issuing.set(false);
@@ -115,7 +117,7 @@ export class AddDeviceDialogComponent implements OnInit {
   }
 
   private loadDevices(): void {
-    this.deviceAdmin.listDevices(this.user().id).subscribe({
+    this.deviceAdmin.listDevices(this.user()?.id ?? undefined, !this.user()).subscribe({
       next: (devices) => this.devices.set(devices),
       error: () => this.devices.set([]),
     });
