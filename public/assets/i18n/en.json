@@ -9256,7 +9256,8 @@
         "purchaseOrder": "Purchase order",
         "asset": "Asset",
         "enrollment": "Enrollment code",
-        "unknown": "Unknown"
+        "unknown": "Unknown",
+        "customer": "Customer"
       },
       "actions": {
         "start": "Start",
@@ -9341,6 +9342,60 @@
     "undo": {
       "action": "Undo",
       "failed": "Undo did not go through."
+    },
+    "clock": {
+      "identifyFirst": "Scan your badge to clock in or out.",
+      "since": "since",
+      "failed": "That punch did not go through. Try again.",
+      "state": {
+        "out": "OUT",
+        "in": "IN",
+        "break": "ON BREAK",
+        "unknown": "—"
+      },
+      "action": {
+        "ClockIn": "Clock in",
+        "ClockOut": "Clock out",
+        "BreakStart": "Start break",
+        "BreakEnd": "End break"
+      },
+      "done": {
+        "ClockIn": "Clocked in",
+        "ClockOut": "Clocked out",
+        "BreakStart": "Break started",
+        "BreakEnd": "Break ended"
+      }
+    },
+    "move": {
+      "part": "Part",
+      "from": "From bin",
+      "to": "To bin",
+      "lot": "Lot",
+      "quantity": "Quantity",
+      "onHand": "{{qty}} on hand",
+      "less": "Less",
+      "more": "More",
+      "noLots": "No lots at this bin.",
+      "startOver": "Start over",
+      "doneAction": "Done",
+      "sameBin": "That is the same bin. Scan the destination.",
+      "done": "Moved {{qty}} × {{part}} to {{to}}",
+      "failed": "The move did not go through. Try again.",
+      "prompt": {
+        "part": "Scan the part",
+        "from": "Scan the bin it is in",
+        "to": "Scan the bin it is going to"
+      },
+      "expect": {
+        "part": "That is not a part label.",
+        "bin": "That is not a bin label."
+      }
+    },
+    "lookup": {
+      "placeholder": "Job, part, customer, or bin",
+      "voice": "Search by voice",
+      "hint": "Type or say a job number, part, customer, or bin.",
+      "none": "Nothing matched."
     }
   }
 }

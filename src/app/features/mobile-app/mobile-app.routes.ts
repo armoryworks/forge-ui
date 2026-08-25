@@ -23,6 +23,18 @@ export const MOBILE_APP_ROUTES: Routes = [
         loadComponent: () => import('./pages/app-scan.component').then((m) => m.AppScanComponent),
       },
       {
+        path: 'clock',
+        loadComponent: () => import('./pages/app-clock.component').then((m) => m.AppClockComponent),
+      },
+      {
+        path: 'move',
+        loadComponent: () => import('./pages/app-move-stock.component').then((m) => m.AppMoveStockComponent),
+      },
+      {
+        path: 'lookup',
+        loadComponent: () => import('./pages/app-lookup.component').then((m) => m.AppLookupComponent),
+      },
+      {
         path: 'jobs',
         loadComponent: () => import('./pages/app-jobs-home.component').then((m) => m.AppJobsHomeComponent),
       },

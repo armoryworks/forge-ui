@@ -149,7 +149,14 @@ export class LocalLockService {
 
   /** The guard records where a locked navigation was headed so unlock lands there. */
   rememberReturnUrl(url: string): void {
-    if (url.startsWith('/app') && !url.startsWith('/app/lock')) this.returnUrl = url;
+    if (url.startsWith('/app') && !url.startsWith('/app/lock') && !url.startsWith('/app/setup-lock')) this.returnUrl = url;
+  }
+
+  /** Where PIN setup should land once done: the deep link that triggered it, else Scan. */
+  takeReturnUrl(): string {
+    const url = this.returnUrl ?? '/app/scan';
+    this.returnUrl = null;
+    return url;
   }
 
   lock(): void {
@@ -165,8 +172,7 @@ export class LocalLockService {
   private unlock(): void {
     this._locked.set(false);
     this.lastActivity = Date.now();
-    this.router.navigateByUrl(this.returnUrl ?? '/app/scan');
-    this.returnUrl = null;
+    this.router.navigateByUrl(this.takeReturnUrl());
   }
 
   private async wipe(): Promise<void> {

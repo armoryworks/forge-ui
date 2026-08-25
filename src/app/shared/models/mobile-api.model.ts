@@ -52,3 +52,42 @@ export interface UploadedJobFile {
   id: number;
   fileName: string;
 }
+
+export interface ClockState {
+  state: 'out' | 'in' | 'break';
+  lastEventType: string | null;
+  lastEventAt: string | null;
+  lastEventId: number | null;
+}
+
+export interface ClockPunchResult {
+  eventId: number;
+  state: ClockState;
+}
+
+export interface OnHand {
+  partId: number;
+  partNumber: string;
+  locationId: number;
+  locationName: string;
+  quantity: number;
+  lotTracked: boolean;
+  lots: { lotNumber: string; quantity: number }[];
+}
+
+export interface StockMoveRequest {
+  partId: number;
+  fromLocationId: number;
+  toLocationId: number;
+  quantity: number;
+  lotNumber: string | null;
+}
+
+export interface StockMoveResult {
+  partNumber: string;
+  fromLocationName: string;
+  toLocationName: string;
+  quantity: number;
+  lotNumber: string | null;
+  undo: StockMoveRequest;
+}

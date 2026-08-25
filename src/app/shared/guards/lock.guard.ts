@@ -17,7 +17,10 @@ export const lockGuard: CanActivateChildFn = (_route, state) => {
   const lock = inject(LocalLockService);
   const router = inject(Router);
 
-  if (!lock.pinConfigured()) return router.parseUrl('/app/setup-lock');
+  if (!lock.pinConfigured()) {
+    lock.rememberReturnUrl(state.url);
+    return router.parseUrl('/app/setup-lock');
+  }
   if (lock.locked()) {
     lock.rememberReturnUrl(state.url);
     return router.parseUrl('/app/lock');

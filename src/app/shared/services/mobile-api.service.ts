@@ -4,7 +4,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, catchError, map, of } from 'rxjs';
 
 import {
-  JobAdvanceResult, JobNote, JobStatus, ScanResolveResult, UploadedJobFile,
+  ClockPunchResult, ClockState, JobAdvanceResult, JobNote, JobStatus, OnHand,
+  ScanResolveResult, StockMoveRequest, StockMoveResult, UploadedJobFile,
 } from '../models/mobile-api.model';
 
 /**
@@ -65,6 +66,33 @@ export class MobileApiService {
   /** Compensating action for attachPhoto. */
   deleteFile(fileId: number): Observable<unknown> {
     return this.http.delete(`/api/v1/files/${fileId}`, { headers: this.idempotent() });
+  }
+
+  clockState(): Observable<ClockState> {
+    return this.http.get<ClockState>('/api/v1/mobile/clock/state');
+  }
+
+  clockPunch(eventType: 'ClockIn' | 'ClockOut' | 'BreakStart' | 'BreakEnd'): Observable<ClockPunchResult> {
+    return this.http.post<ClockPunchResult>(
+      '/api/v1/mobile/clock/punch', { eventType }, { headers: this.idempotent() });
+  }
+
+  /** Compensating action for clockPunch (own latest event, inside the window). */
+  undoClockPunch(eventId: number): Observable<ClockState> {
+    return this.http.delete<ClockState>(`/api/v1/mobile/clock/events/${eventId}`, { headers: this.idempotent() });
+  }
+
+  onHand(partId: number, locationId: number): Observable<OnHand> {
+    return this.http.get<OnHand>('/api/v1/mobile/stock/on-hand', { params: { partId, locationId } });
+  }
+
+  /** Also the compensating action: call again with the result's `undo`. */
+  moveStock(request: StockMoveRequest): Observable<StockMoveResult> {
+    return this.http.post<StockMoveResult>('/api/v1/mobile/stock/move', request, { headers: this.idempotent() });
+  }
+
+  lookup(term: string): Observable<ScanResolveResult[]> {
+    return this.http.get<ScanResolveResult[]>('/api/v1/mobile/lookup', { params: { q: term } });
   }
 
   /** Canned floor notes from reference data (group mobile_note_presets); empty when none configured. */

@@ -1,0 +1,98 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host { flex: 1; display: flex; flex-direction: column; }
+
+.lookup {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-lg;
+
+  &__bar {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+
+    app-input { flex: 1; }
+  }
+
+  &__voice {
+    @include flex-center;
+    width: 56px;
+    height: 56px;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    color: var(--text);
+    cursor: pointer;
+
+    &--on { background: var(--primary); color: var(--bg); }
+  }
+
+  &__results {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+    overflow-y: auto;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    min-height: 64px;
+    padding: $sp-md $sp-lg;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    color: var(--text);
+    font-family: $font-family-primary;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  &__row-icon { color: var(--text-muted); }
+
+  &__row-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__row-label {
+    @include truncate;
+    font-size: $font-size-lg;
+    font-weight: 600;
+  }
+
+  &__row-sub {
+    @include truncate;
+    font-size: $font-size-base;
+    color: var(--text-muted);
+  }
+
+  &__row-kind {
+    font-family: $font-family-mono;
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  &__hint {
+    margin: $sp-xl 0;
+    text-align: center;
+    font-size: $font-size-md;
+    color: var(--text-muted);
+  }
+
+  &__sheet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: $z-dialog;
+  }
+}

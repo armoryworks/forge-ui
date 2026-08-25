@@ -9256,7 +9256,8 @@
         "purchaseOrder": "Orden de compra",
         "asset": "Activo",
         "enrollment": "Código de inscripción",
-        "unknown": "Desconocido"
+        "unknown": "Desconocido",
+        "customer": "Cliente"
       },
       "actions": {
         "start": "Iniciar",
@@ -9341,6 +9342,60 @@
     "undo": {
       "action": "Deshacer",
       "failed": "No se pudo deshacer."
+    },
+    "clock": {
+      "identifyFirst": "Escanee su credencial para marcar entrada o salida.",
+      "since": "desde",
+      "failed": "Esa marcación no se registró. Inténtelo de nuevo.",
+      "state": {
+        "out": "FUERA",
+        "in": "DENTRO",
+        "break": "EN DESCANSO",
+        "unknown": "—"
+      },
+      "action": {
+        "ClockIn": "Marcar entrada",
+        "ClockOut": "Marcar salida",
+        "BreakStart": "Iniciar descanso",
+        "BreakEnd": "Terminar descanso"
+      },
+      "done": {
+        "ClockIn": "Entrada registrada",
+        "ClockOut": "Salida registrada",
+        "BreakStart": "Descanso iniciado",
+        "BreakEnd": "Descanso terminado"
+      }
+    },
+    "move": {
+      "part": "Pieza",
+      "from": "Ubicación origen",
+      "to": "Ubicación destino",
+      "lot": "Lote",
+      "quantity": "Cantidad",
+      "onHand": "{{qty}} disponibles",
+      "less": "Menos",
+      "more": "Más",
+      "noLots": "No hay lotes en esta ubicación.",
+      "startOver": "Empezar de nuevo",
+      "doneAction": "Listo",
+      "sameBin": "Es la misma ubicación. Escanee el destino.",
+      "done": "Movido {{qty}} × {{part}} a {{to}}",
+      "failed": "El movimiento no se registró. Inténtelo de nuevo.",
+      "prompt": {
+        "part": "Escanee la pieza",
+        "from": "Escanee la ubicación donde está",
+        "to": "Escanee la ubicación a donde va"
+      },
+      "expect": {
+        "part": "Esa no es una etiqueta de pieza.",
+        "bin": "Esa no es una etiqueta de ubicación."
+      }
+    },
+    "lookup": {
+      "placeholder": "Trabajo, pieza, cliente o ubicación",
+      "voice": "Buscar por voz",
+      "hint": "Escriba o diga un número de trabajo, pieza, cliente o ubicación.",
+      "none": "Nada coincidió."
     }
   }
 }

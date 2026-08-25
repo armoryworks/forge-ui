@@ -59,6 +59,6 @@ export class LockSetupComponent implements OnInit {
 
   protected async finish(enableBiometric: boolean): Promise<void> {
     await this.lock.setBiometricEnabled(enableBiometric);
-    await this.router.navigate(['/app/scan']);
+    await this.router.navigateByUrl(this.lock.takeReturnUrl());
   }
 }

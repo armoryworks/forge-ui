@@ -1,0 +1,71 @@
+<div class="move" data-testid="mobile-app-move-stock">
+  <ol class="move__steps" aria-label="Move stock steps">
+    <li class="move__step" [class.move__step--done]="part()" [class.move__step--active]="step() === 'part'">
+      <span class="move__step-label">{{ 'mobileApp.move.part' | translate }}</span>
+      <span class="move__step-value">{{ part()?.label ?? '—' }}</span>
+    </li>
+    <li class="move__step" [class.move__step--done]="from()" [class.move__step--active]="step() === 'from'">
+      <span class="move__step-label">{{ 'mobileApp.move.from' | translate }}</span>
+      <span class="move__step-value">{{ from()?.label ?? '—' }}</span>
+    </li>
+    <li class="move__step" [class.move__step--done]="to()" [class.move__step--active]="step() === 'to'">
+      <span class="move__step-label">{{ 'mobileApp.move.to' | translate }}</span>
+      <span class="move__step-value">{{ to()?.label ?? '—' }}</span>
+    </li>
+  </ol>
+
+  @if (scanning()) {
+    <div class="move__stage">
+      <div id="move-stock-viewfinder" class="move__viewfinder"></div>
+      <p class="move__prompt">{{ ('mobileApp.move.prompt.' + step()) | translate }}</p>
+    </div>
+    @if (cameraError()) {
+      <p class="move__notice" role="alert">{{ 'mobileApp.scan.cameraError' | translate }}</p>
+    }
+  } @else {
+    <div class="move__quantity">
+      @if (onHand()?.lotTracked) {
+        <span class="move__label">{{ 'mobileApp.move.lot' | translate }}</span>
+        <div class="move__lots">
+          @for (lotItem of onHand()!.lots; track lotItem.lotNumber) {
+            <button
+              type="button"
+              class="move__lot"
+              [class.move__lot--picked]="lot() === lotItem.lotNumber"
+              [attr.aria-pressed]="lot() === lotItem.lotNumber"
+              (click)="pickLot(lotItem.lotNumber)"
+            >{{ lotItem.lotNumber }} <small>{{ lotItem.quantity }}</small></button>
+          } @empty {
+            <p class="move__notice">{{ 'mobileApp.move.noLots' | translate }}</p>
+          }
+        </div>
+      }
+      <span class="move__label">{{ 'mobileApp.move.quantity' | translate }} · {{ 'mobileApp.move.onHand' | translate: { qty: onHand()?.quantity ?? 0 } }}</span>
+      <div class="move__stepper">
+        <button type="button" class="move__stepper-btn" [attr.aria-label]="'mobileApp.move.less' | translate" data-testid="move-qty-minus" (click)="bump(-1)">−</button>
+        <span class="move__stepper-value" data-testid="move-qty">{{ quantity() }}</span>
+        <button type="button" class="move__stepper-btn" [attr.aria-label]="'mobileApp.move.more' | translate" data-testid="move-qty-plus" (click)="bump(1)">+</button>
+      </div>
+    </div>
+  }
+
+  @if (notice(); as message) {
+    <p class="move__notice" role="status">{{ message }}</p>
+  }
+
+  <div class="move__actions">
+    <button type="button" class="move__reset" data-testid="move-restart" (click)="restart()">{{ 'mobileApp.move.startOver' | translate }}</button>
+    @if (!scanning()) {
+      <button type="button" class="move__done" [disabled]="busy() || !canFinish()" data-testid="move-done" (click)="finish()">
+        <span class="material-icons-outlined" aria-hidden="true">check</span>
+        {{ 'mobileApp.move.doneAction' | translate }}
+      </button>
+    }
+  </div>
+
+  @if (identifying()) {
+    <div class="move__sheet">
+      <app-identity-prompt (identified)="onIdentified()" (cancelled)="onIdentityCancelled()" />
+    </div>
+  }
+</div>
