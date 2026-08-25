@@ -3,6 +3,8 @@
  * secure storage; nothing about an instance is shared with any other.
  */
 export interface MobileInstance {
+  /** Stable key derived from the server host; namespaces this instance's credentials. */
+  id: string;
   /** Origin of the server, e.g. https://shop.example.com — no trailing slash. */
   serverUrl: string;
   name: string;

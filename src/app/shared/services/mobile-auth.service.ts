@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 
-import { Observable, catchError, from, map, of, switchMap } from 'rxjs';
+import { Observable, catchError, firstValueFrom, from, map, of, switchMap } from 'rxjs';
 
 import { EnrollmentQrPayload, ForgeWellKnown, MobileAuthResponse, SharedDeviceEnrollResponse } from '../models/mobile-auth.model';
 import { MobileInstance } from '../models/mobile-instance.model';
@@ -57,6 +57,7 @@ export class MobileAuthService {
         from(this.instances.getOrCreateDeviceUuid()).pipe(map((deviceUuid) => ({ response, deviceUuid })))),
       switchMap(({ response, deviceUuid }) =>
         from(this.instances.setSharedInstance({
+          id: InstanceService.idFor(origin),
           serverUrl: origin,
           name: payload.name,
           certSha256: payload.certSha256,
@@ -116,6 +117,20 @@ export class MobileAuthService {
     );
   }
 
+  /**
+   * One-tap instance switch: swaps the active instance, then re-establishes
+   * its session — via the device refresh token for a personal device;
+   * shared devices need no session until a person identifies.
+   */
+  async switchInstance(id: string): Promise<boolean> {
+    await this.instances.activate(id);
+    const active = this.instances.instance();
+    if (!active) return false;
+    if (active.shared) return true;
+    const token = await firstValueFrom(this.refreshAccessToken());
+    return token !== null;
+  }
+
   async wipeAndRestart(): Promise<void> {
     await this.instances.wipe();
     this.auth.clearAuth();
@@ -126,6 +141,7 @@ export class MobileAuthService {
     origin: string, name: string, certSha256: string | null, response: MobileAuthResponse,
   ): Promise<void> {
     const instance: MobileInstance = {
+      id: InstanceService.idFor(origin),
       serverUrl: origin,
       name,
       certSha256,
