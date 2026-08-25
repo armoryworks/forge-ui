@@ -200,7 +200,7 @@ export class EnrollManualComponent {
     this.mobileAuth.enrollAuthenticated(
       this.origin()!, wellKnown.name, wellKnown.cert_sha256, accessToken,
     ).subscribe({
-      next: () => this.router.navigate(['/app/scan']),
+      next: () => this.router.navigate(['/app/setup-lock']),
       error: () => {
         this.busy.set(false);
         this.error.set(this.translate.instant('mobileApp.enroll.enrollFailed'));

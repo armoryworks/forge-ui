@@ -1,0 +1,63 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+$key-size: 72px;
+
+.pin-pad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-xl;
+
+  &__dots {
+    display: flex;
+    gap: $sp-lg;
+  }
+
+  &__dot {
+    width: $dot-size-md;
+    height: $dot-size-md;
+    border-radius: 50%;
+    border: $border-width-thin solid var(--text-muted);
+
+    &--filled {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, $key-size);
+    gap: $sp-lg;
+  }
+
+  &__key {
+    @include flex-center;
+    width: $key-size;
+    height: $key-size;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    color: var(--text);
+    font-family: $font-family-primary;
+    font-size: $font-size-kpi;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:active {
+      background: var(--primary);
+      color: var(--bg);
+    }
+
+    &--action {
+      background: none;
+      border-color: transparent;
+      color: var(--text-muted);
+    }
+  }
+
+  &__spacer {
+    width: $key-size;
+    height: $key-size;
+  }
+}

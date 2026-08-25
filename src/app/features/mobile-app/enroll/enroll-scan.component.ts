@@ -83,7 +83,7 @@ export class EnrollScanComponent implements AfterViewInit, OnDestroy {
     this.enrollError.set(null);
 
     this.mobileAuth.enrollWithQr(payload).subscribe({
-      next: () => this.router.navigate(['/app/scan']),
+      next: () => this.router.navigate(['/app/setup-lock']),
       error: () => {
         this.exchanging = false;
         this.enrolling.set(false);

@@ -1,0 +1,29 @@
+<div class="lock-setup" data-testid="mobile-app-lock-setup">
+  @switch (stage()) {
+    @case ('create') {
+      <h1 class="lock-setup__title">{{ 'mobileApp.lock.createPin' | translate }}</h1>
+      <p class="lock-setup__hint">{{ 'mobileApp.lock.createPinHint' | translate }}</p>
+      @if (mismatch()) {
+        <p class="lock-setup__error" role="alert">{{ 'mobileApp.lock.pinMismatch' | translate }}</p>
+      }
+      <app-pin-pad (completed)="onPin($event)" />
+    }
+    @case ('confirm') {
+      <h1 class="lock-setup__title">{{ 'mobileApp.lock.confirmPin' | translate }}</h1>
+      <app-pin-pad (completed)="onPin($event)" />
+    }
+    @case ('biometric') {
+      <span class="material-icons-outlined lock-setup__icon" aria-hidden="true">fingerprint</span>
+      <h1 class="lock-setup__title">{{ 'mobileApp.lock.biometricTitle' | translate }}</h1>
+      <p class="lock-setup__hint">{{ 'mobileApp.lock.biometricHint' | translate }}</p>
+      <div class="lock-setup__actions">
+        <button type="button" class="action-btn" data-testid="lock-setup-skip-biometric" (click)="finish(false)">
+          {{ 'mobileApp.lock.notNow' | translate }}
+        </button>
+        <button type="button" class="action-btn action-btn--primary" data-testid="lock-setup-enable-biometric" (click)="finish(true)">
+          {{ 'mobileApp.lock.enableBiometric' | translate }}
+        </button>
+      </div>
+    }
+  }
+</div>

@@ -9260,6 +9260,20 @@
       "totpFailed": "Ese código no se verificó. Pruebe el siguiente.",
       "loginFailed": "El inicio de sesión falló. Verifique el correo y la contraseña.",
       "backToScan": "Volver al escaneo de código"
+    },
+    "lock": {
+      "enterPin": "Ingrese su PIN",
+      "wrongPin": "PIN incorrecto.",
+      "attemptsLeft": "{{count}} intentos restantes antes de que este dispositivo se borre.",
+      "useBiometric": "Desbloquear con biometría",
+      "createPin": "Cree un PIN de 6 dígitos",
+      "createPinHint": "El PIN desbloquea esta aplicación cuando la biometría no está disponible.",
+      "confirmPin": "Ingrese el PIN de nuevo",
+      "pinMismatch": "Los PIN no coincidieron. Comience de nuevo.",
+      "biometricTitle": "¿Desbloquear con su huella o rostro?",
+      "biometricHint": "Más rápido que el PIN. El PIN queda como respaldo.",
+      "enableBiometric": "Activar",
+      "notNow": "Ahora no"
     }
   }
 }

@@ -9260,6 +9260,20 @@
       "totpFailed": "That code did not verify. Try the next one.",
       "loginFailed": "Sign-in failed. Check the email and password.",
       "backToScan": "Back to code scanning"
+    },
+    "lock": {
+      "enterPin": "Enter your PIN",
+      "wrongPin": "Wrong PIN.",
+      "attemptsLeft": "{{count}} attempts left before this device is wiped.",
+      "useBiometric": "Unlock with biometrics",
+      "createPin": "Create a 6-digit PIN",
+      "createPinHint": "The PIN unlocks this app when biometrics are unavailable.",
+      "confirmPin": "Enter the PIN again",
+      "pinMismatch": "The PINs did not match. Start over.",
+      "biometricTitle": "Unlock with your fingerprint or face?",
+      "biometricHint": "Faster than the PIN. The PIN stays as the fallback.",
+      "enableBiometric": "Enable",
+      "notNow": "Not now"
     }
   }
 }

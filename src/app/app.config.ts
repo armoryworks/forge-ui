@@ -20,6 +20,7 @@ import { routes } from './app.routes';
 import { authInterceptor } from './shared/interceptors/auth.interceptor';
 import { apiBaseInterceptor } from './shared/interceptors/api-base.interceptor';
 import { InstanceService } from './shared/services/instance.service';
+import { LocalLockService } from './shared/services/local-lock.service';
 import { capabilityGateInterceptor } from './shared/interceptors/capability-gate.interceptor';
 import { etagInterceptor } from './shared/interceptors/etag.interceptor';
 import { httpErrorInterceptor } from './shared/interceptors/http-error.interceptor';
@@ -67,7 +68,9 @@ export const appConfig: ApplicationConfig = {
       provide: APP_INITIALIZER,
       useFactory: () => {
         const instances = inject(InstanceService);
-        return () => (environment.mobileShell ? instances.init() : Promise.resolve());
+        const lock = inject(LocalLockService);
+        return () =>
+          environment.mobileShell ? instances.init().then(() => lock.start()) : Promise.resolve();
       },
       multi: true,
     },
