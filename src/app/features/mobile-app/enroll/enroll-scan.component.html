@@ -23,6 +23,8 @@
     <p class="enroll-scan__fail" role="alert">{{ error }}</p>
   }
 
+  <app-language-toggle />
+
   <a class="enroll-scan__manual" routerLink="/app/enroll/manual" data-testid="mobile-app-enroll-manual-link">
     {{ 'mobileApp.enroll.enterAddressInstead' | translate }}
   </a>

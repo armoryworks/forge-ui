@@ -1,0 +1,14 @@
+<div class="lang-toggle" role="group" [attr.aria-label]="'header.language' | translate">
+  @for (lang of languages; track lang.code) {
+    <button
+      type="button"
+      class="lang-toggle__option"
+      [class.lang-toggle__option--active]="current() === lang.code"
+      [attr.aria-pressed]="current() === lang.code"
+      [attr.data-testid]="'language-toggle-' + lang.code"
+      (click)="languageService.setLanguage(lang.code)"
+    >
+      {{ lang.label }}
+    </button>
+  }
+</div>

@@ -1,0 +1,24 @@
+@use 'styles/variables' as *;
+
+.lang-toggle {
+  display: inline-flex;
+  border: $border-width-thin solid var(--border);
+
+  &__option {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0 $sp-lg;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: $font-family-primary;
+    font-size: $font-size-base;
+    font-weight: 500;
+    cursor: pointer;
+
+    &--active {
+      background: var(--primary);
+      color: var(--bg);
+    }
+  }
+}

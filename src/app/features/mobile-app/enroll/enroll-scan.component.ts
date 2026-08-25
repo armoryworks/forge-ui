@@ -13,6 +13,7 @@ import { Router, RouterLink } from '@angular/router';
 import { Html5Qrcode, Html5QrcodeScannerState } from 'html5-qrcode';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { LanguageToggleComponent } from '../../../shared/components/language-toggle/language-toggle.component';
 import { EnrollmentQrPayload } from '../../../shared/models/mobile-auth.model';
 import { MobileAuthService } from '../../../shared/services/mobile-auth.service';
 
@@ -24,7 +25,7 @@ import { MobileAuthService } from '../../../shared/services/mobile-auth.service'
 @Component({
   selector: 'app-enroll-scan',
   standalone: true,
-  imports: [RouterLink, TranslatePipe],
+  imports: [RouterLink, TranslatePipe, LanguageToggleComponent],
   templateUrl: './enroll-scan.component.html',
   styleUrl: './enroll-scan.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

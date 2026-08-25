@@ -3,6 +3,8 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { LanguageToggleComponent } from '../../shared/components/language-toggle/language-toggle.component';
+
 interface MobileAppTab {
   path: string;
   labelKey: string;
@@ -18,7 +20,7 @@ interface MobileAppTab {
 @Component({
   selector: 'app-mobile-app-shell',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe, LanguageToggleComponent],
   templateUrl: './mobile-app-shell.component.html',
   styleUrl: './mobile-app-shell.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

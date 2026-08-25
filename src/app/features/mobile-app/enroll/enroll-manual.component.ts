@@ -8,6 +8,7 @@ import { map } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InputComponent } from '../../../shared/components/input/input.component';
+import { LanguageToggleComponent } from '../../../shared/components/language-toggle/language-toggle.component';
 import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
 import { ForgeWellKnown } from '../../../shared/models/mobile-auth.model';
 import { LoginResponse } from '../../../shared/services/auth.service';
@@ -35,7 +36,7 @@ interface MfaValidateResponse {
 @Component({
   selector: 'app-enroll-manual',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, InputComponent, ValidationButtonComponent],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, InputComponent, ValidationButtonComponent, LanguageToggleComponent],
   templateUrl: './enroll-manual.component.html',
   styleUrl: './enroll-manual.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -21,6 +21,10 @@ $tab-min-target: 56px;
     border-bottom: $border-width-thin solid var(--border);
   }
 
+  &__lang {
+    margin-left: auto;
+  }
+
   &__logo {
     font-family: $font-family-primary;
     font-size: $font-size-xl;
