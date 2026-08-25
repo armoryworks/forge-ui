@@ -9259,7 +9259,8 @@
       "totpCode": "Authenticator code",
       "totpFailed": "That code did not verify. Try the next one.",
       "loginFailed": "Sign-in failed. Check the email and password.",
-      "backToScan": "Back to code scanning"
+      "backToScan": "Back to code scanning",
+      "usePasskey": "Use a passkey instead"
     },
     "lock": {
       "enterPin": "Enter your PIN",

@@ -13,6 +13,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { AccountService } from '../../services/account.service';
 import { MfaService } from '../../services/mfa.service';
+import { PasskeyService } from '../../../../shared/services/passkey.service';
 import { MfaSetupDialogComponent } from '../../components/mfa-setup-dialog/mfa-setup-dialog.component';
 import { MfaRecoveryCodesDialogComponent } from '../../components/mfa-recovery-codes-dialog/mfa-recovery-codes-dialog.component';
 import { MfaStatus, MfaDeviceSummary } from '../../models/mfa.model';
@@ -29,6 +30,7 @@ export class AccountSecurityComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly accountService = inject(AccountService);
   private readonly mfaService = inject(MfaService);
+  private readonly passkeyService = inject(PasskeyService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -104,6 +106,20 @@ export class AccountSecurityComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadMfaStatus();
+  }
+
+  protected async addPasskey(): Promise<void> {
+    if (!this.passkeyService.supported()) {
+      this.snackbar.error('This browser does not support passkeys.');
+      return;
+    }
+    try {
+      const name = await this.passkeyService.register();
+      this.snackbar.success(`Passkey "${name}" added.`);
+      this.loadMfaStatus();
+    } catch {
+      this.snackbar.error('Passkey registration was not completed.');
+    }
   }
 
   private loadMfaStatus(): void {

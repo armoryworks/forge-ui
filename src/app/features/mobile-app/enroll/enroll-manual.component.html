@@ -80,6 +80,16 @@
     }
     @case ('totp') {
       <h1 class="enroll-manual__title">{{ 'mobileApp.enroll.totpTitle' | translate }}</h1>
+      <button
+        type="button"
+        class="action-btn"
+        data-testid="enroll-use-passkey"
+        [disabled]="busy()"
+        (click)="tryPasskeyThenTotp()"
+      >
+        <span class="material-icons-outlined" aria-hidden="true">key</span>
+        {{ 'mobileApp.enroll.usePasskey' | translate }}
+      </button>
       <form class="enroll-manual__form" [formGroup]="totpForm" (ngSubmit)="validateTotp()">
         <app-input
           [label]="'mobileApp.enroll.totpCode' | translate"

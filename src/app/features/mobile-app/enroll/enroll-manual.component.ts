@@ -13,6 +13,7 @@ import { ValidationButtonComponent } from '../../../shared/components/validation
 import { ForgeWellKnown } from '../../../shared/models/mobile-auth.model';
 import { LoginResponse } from '../../../shared/services/auth.service';
 import { FormValidationService } from '../../../shared/services/form-validation.service';
+import { PasskeyService } from '../../../shared/services/passkey.service';
 import { MobileAuthService } from '../../../shared/services/mobile-auth.service';
 
 type ManualStep = 'address' | 'trust' | 'login' | 'totp';
@@ -47,6 +48,7 @@ export class EnrollManualComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
+  private readonly passkeyService = inject(PasskeyService);
 
   protected readonly step = toSignal(
     this.route.queryParamMap.pipe(map((p) => (p.get('step') ?? 'address') as ManualStep)),
@@ -149,7 +151,7 @@ export class EnrollManualComponent {
       next: (response) => {
         if (response.mfaRequired && response.mfaPendingToken) {
           this.mfaPendingToken.set(response.mfaPendingToken);
-          this.beginTotpChallenge();
+          void this.tryPasskeyThenTotp();
           return;
         }
         this.enroll(response.token);
@@ -177,6 +179,20 @@ export class EnrollManualComponent {
         this.error.set(this.translate.instant('mobileApp.enroll.totpFailed'));
       },
     });
+  }
+
+  /** Passkeys are the preferred second factor; TOTP is the fallback. */
+  protected async tryPasskeyThenTotp(): Promise<void> {
+    this.busy.set(true);
+    if (this.passkeyService.supported()) {
+      const result = await this.passkeyService.assertForMfa(
+        this.mfaPendingToken()!, `${this.origin()}/api/v1`);
+      if (result) {
+        this.enroll(result.accessToken);
+        return;
+      }
+    }
+    this.beginTotpChallenge();
   }
 
   private beginTotpChallenge(): void {
