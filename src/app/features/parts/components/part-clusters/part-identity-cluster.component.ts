@@ -36,12 +36,15 @@ export class PartIdentityClusterComponent {
   readonly part = input.required<PartDetail>();
   readonly editing = input(false);
   readonly saving = input(false);
+  /** `parts.allow_manual_numbers` — when true, Part Number is editable in edit mode. */
+  readonly allowManualNumbers = input(false);
 
   readonly save = output<Partial<PartDetail>>();
   readonly saveAndClose = output<Partial<PartDetail>>();
   readonly cancelled = output<void>();
 
   protected readonly form = new FormGroup({
+    partNumber: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(50)] }),
     name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     description: new FormControl<string | null>(null),
     revision: new FormControl('', { nonNullable: true }),
@@ -66,6 +69,7 @@ export class PartIdentityClusterComponent {
     effect(() => {
       const p = this.part();
       this.form.reset({
+        partNumber: p.partNumber,
         name: p.name,
         description: p.description,
         revision: p.revision,
@@ -82,12 +86,16 @@ export class PartIdentityClusterComponent {
   protected onSave(close = false): void {
     if (this.form.invalid) return;
     const v = this.form.getRawValue();
-    (close ? this.saveAndClose : this.save).emit({
+    const patch: Partial<PartDetail> = {
       name: v.name,
       description: v.description ?? null,
       revision: v.revision,
       status: v.status,
-    });
+    };
+    if (this.allowManualNumbers() && v.partNumber.trim() && v.partNumber.trim() !== this.part().partNumber) {
+      patch.partNumber = v.partNumber.trim();
+    }
+    (close ? this.saveAndClose : this.save).emit(patch);
   }
 
   protected onCancel(): void {

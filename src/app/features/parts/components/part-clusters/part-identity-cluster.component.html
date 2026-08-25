@@ -8,10 +8,18 @@
        when toggling Edit. The classification axes are changed via
        dedicated tools (workflow / migration helpers), not inline. -->
   <div class="cluster__grid">
-    <div class="cluster__item">
-      <span class="cluster__label">{{ 'parts.detail.clusters.identity.partNumber' | translate }}</span>
-      <span class="cluster__value">{{ part().partNumber }}</span>
-    </div>
+    @if (editing() && allowManualNumbers()) {
+      <div class="cluster__item">
+        <app-input data-testid="part-identity-part-number"
+          [label]="'parts.detail.clusters.identity.partNumber' | translate"
+          formControlName="partNumber" [required]="true" [maxlength]="50" />
+      </div>
+    } @else {
+      <div class="cluster__item">
+        <span class="cluster__label">{{ 'parts.detail.clusters.identity.partNumber' | translate }}</span>
+        <span class="cluster__value">{{ part().partNumber }}</span>
+      </div>
+    }
     <div class="cluster__item">
       <span class="cluster__label">{{ 'parts.detail.clusters.identity.procurementSource' | translate }}</span>
       <span class="cluster__value">{{ procurementLabel() }}</span>

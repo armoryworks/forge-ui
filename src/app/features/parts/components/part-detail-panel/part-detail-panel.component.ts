@@ -116,6 +116,7 @@ type BomViewMode = 'table' | 'tree';
 })
 export class PartDetailPanelComponent {
   protected readonly partsService = inject(PartsService);
+  protected readonly allowManualPartNumbers = signal(false);
   private readonly destroyRef = inject(DestroyRef);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
@@ -260,6 +261,9 @@ export class PartDetailPanelComponent {
   ];
 
   constructor() {
+    this.partsService.getPartsConfig().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (cfg) => this.allowManualPartNumbers.set(cfg.allowManualPartNumbers),
+    });
     this.inventoryService.getUnitsOfMeasure().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (uoms) => {
         const options: SelectOption[] = [{ value: null, label: '-- None --' }];
@@ -407,6 +411,7 @@ export class PartDetailPanelComponent {
     if ('weightDisplayUnit' in patch) request['weightDisplayUnit'] = patch.weightDisplayUnit;
     if ('lengthMm' in patch) request['lengthMm'] = patch.lengthMm;
     if ('widthMm' in patch) request['widthMm'] = patch.widthMm;
+    if ('partNumber' in patch) request['partNumber'] = patch.partNumber;
     if ('heightMm' in patch) request['heightMm'] = patch.heightMm;
     if ('dimensionDisplayUnit' in patch) request['dimensionDisplayUnit'] = patch.dimensionDisplayUnit;
     if ('volumeMl' in patch) request['volumeMl'] = patch.volumeMl;

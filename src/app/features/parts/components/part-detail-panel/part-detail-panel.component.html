@@ -77,6 +77,7 @@
             [part]="part"
             [editing]="editing()"
             [saving]="saving()"
+            [allowManualNumbers]="allowManualPartNumbers()"
             (save)="saveClusterPatch($event)"
             (saveAndClose)="saveClusterPatch($event, true)"
             (cancelled)="cancelEdit()" />
