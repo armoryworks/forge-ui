@@ -9,6 +9,7 @@
 export const environment = {
   production: true,
   demoMode: true,
+  mobileShell: false,
   apiUrl: '',
   hubUrl: '',
 };

@@ -9200,5 +9200,18 @@
       "qty": "Cant. Generador",
       "set": "Establecer Presupuesto"
     }
+  },
+  "mobileApp": {
+    "navLabel": "Navegación de la aplicación",
+    "tabs": {
+      "scan": "Escanear",
+      "clock": "Reloj",
+      "jobs": "Trabajos",
+      "move": "Mover",
+      "lookup": "Buscar"
+    },
+    "scan": {
+      "placeholder": "Apunte la cámara a un trabajo, pieza, ubicación o credencial. El escaneo llega en una próxima versión."
+    }
   }
 }

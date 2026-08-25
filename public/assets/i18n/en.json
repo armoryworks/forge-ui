@@ -9200,5 +9200,18 @@
       "qty": "Driver Qty",
       "set": "Set Budget"
     }
+  },
+  "mobileApp": {
+    "navLabel": "App navigation",
+    "tabs": {
+      "scan": "Scan",
+      "clock": "Clock",
+      "jobs": "Jobs",
+      "move": "Move",
+      "lookup": "Lookup"
+    },
+    "scan": {
+      "placeholder": "Point the camera at a job, part, bin, or badge. Scanning arrives in a later build."
+    }
   }
 }
