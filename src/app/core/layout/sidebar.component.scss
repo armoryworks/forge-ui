@@ -260,10 +260,11 @@
   position: relative;
   width: $sidebar-width-collapsed;
   min-height: $sidebar-nav-height;
-  // The parent rail scales to occupy the full drill height: every top-level
-  // sibling shares it equally (labels always visible), shrinking back toward
-  // the icon-only minimum on short viewports (the rail then scrolls).
-  flex: 1 1 0;
+  // Compact / icon-only by default so N siblings never manufacture a scrollbar
+  // while the sidebar has room. The vertical label reveals — and the item grows —
+  // only on hover or for the active parent. The rail scrolls only when a genuinely
+  // short viewport can't fit the icons.
+  flex: 0 0 auto;
   border: none;
   background: transparent;
   color: var(--text-secondary);
@@ -272,10 +273,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: $sp-md 0;
-  gap: $sp-sm;
+  padding: $sp-sm 0;
+  gap: $sp-xs;
   overflow: hidden;
-  transition: color $transition-normal, background $transition-normal;
+  transition: color $transition-normal, background $transition-normal,
+    min-height $transition-normal, padding $transition-normal, gap $transition-normal;
 
   .material-icons-outlined { font-size: $sidebar-icon-size; flex-shrink: 0; }
 
@@ -286,11 +288,16 @@
     &:hover { color: var(--text); background: var(--bg); }
   }
 
-  // Hover on a non-active parent: the light-blue attention tone (replaces the old
-  // grow-on-hover — the rail items are already full-height).
+  // Hover a non-active parent: grow to reveal its name vertically in the
+  // light-blue attention tone (the icon stays put).
   &:not(.rail-item--active):not(.rail-item--back):hover {
     color: var(--attention);
     background: color-mix(in srgb, var(--attention-hover) 35%, transparent);
+    min-height: 128px;
+    padding: $sp-md 0;
+    gap: $sp-sm;
+
+    .rail-item__vlabel { max-height: 150px; opacity: 1; }
   }
 
   // Active parent: the "beta bar" green fills the item, label + icon go light.
@@ -298,21 +305,25 @@
     color: var(--attention-text);
     background: var(--attention);
     border-left: $border-width-accent solid var(--attention);
+    min-height: 128px;
+    padding: $sp-md 0;
+    gap: $sp-sm;
 
-    .rail-item__vlabel { color: var(--attention-text); }
+    .rail-item__vlabel { max-height: 150px; opacity: 1; color: var(--attention-text); }
   }
 }
 
-// Rail label, rotated to run vertically (top of letters on the left). Always
-// visible; clipped by the item (overflow: hidden) when a short viewport
-// compresses the rail items toward their icon-only minimum.
+// Rail label, rotated to run vertically (top of letters on the left). Collapsed
+// to zero height by default; the hover / active rules above animate it open.
 .rail-item__vlabel {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   @include uppercase-label($font-size-xs, 0.1em, 700);
   color: var(--attention);
   white-space: nowrap;
-  min-height: 0;
+  max-height: 0;
+  opacity: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: max-height $transition-normal, opacity $transition-normal;
 }
