@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ManualNumberSettingsService } from '../../shared/services/manual-number-settings.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -48,6 +49,7 @@ import { LeadsService } from '../leads/services/leads.service';
 })
 export class CustomersComponent {
   private readonly customerService = inject(CustomerService);
+  protected readonly manualNumbers = inject(ManualNumberSettingsService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
@@ -85,6 +87,7 @@ export class CustomersComponent {
   protected readonly showDialog = signal(false);
   protected readonly customerForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
+    customerNumber: new FormControl('', [Validators.maxLength(50)]),
     companyName: new FormControl(''),
     email: new FormControl('', [Validators.email]),
     phone: new FormControl(''),
@@ -359,6 +362,7 @@ export class CustomersComponent {
 
     this.customerService.createCustomer({
       name: form.name!,
+      customerNumber: this.manualNumbers.isEnabled('customers') ? (form.customerNumber?.trim() || undefined) : undefined,
       companyName: form.companyName || undefined,
       email: form.email || undefined,
       phone: form.phone || undefined,

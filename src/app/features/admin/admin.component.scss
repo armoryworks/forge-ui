@@ -314,6 +314,35 @@
   p { margin: 0; font-size: var(--font-size-sm); }
 }
 
+// ─── System Settings tab: bounded panel, scrolling body, pinned Save footer ───
+// Fills the admin body height and clips, so the body scrolls internally and the
+// Save footer stays visible at any scroll position.
+.tab-panel--settings {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.settings-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: $sp-sm;
+}
+
+.settings-footer {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  border-top: $border-width-thin solid var(--border);
+  background: var(--surface);
+}
+
 // ─── Settings Sections ───
 .settings-section {
   padding: 0 0 $sp-xl;

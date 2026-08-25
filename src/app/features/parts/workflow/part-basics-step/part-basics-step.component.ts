@@ -8,6 +8,7 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { PartDetail } from '../../models/part-detail.model';
 import { PartsService } from '../../services/parts.service';
 
@@ -41,6 +42,7 @@ import { PartsService } from '../../services/parts.service';
 export class PartBasicsStepComponent {
   private readonly partsService = inject(PartsService);
   private readonly workflowService = inject(WorkflowService);
+  protected readonly manualNumbers = inject(ManualNumberSettingsService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -55,6 +57,7 @@ export class PartBasicsStepComponent {
   protected readonly saving = signal(false);
 
   protected readonly form = new FormGroup({
+    partNumber: new FormControl('', [Validators.maxLength(50)]),
     name: new FormControl('', [Validators.required, Validators.maxLength(256)]),
     description: new FormControl('', [Validators.maxLength(2000)]),
   });
@@ -104,6 +107,7 @@ export class PartBasicsStepComponent {
     const value = this.form.getRawValue();
     this.saving.set(true);
     return this.workflowService.patchStep(runId, this.stepId(), {
+      partNumber: (this.manualNumbers.isEnabled('parts') && this.entityId() == null) ? (value.partNumber?.trim() || undefined) : undefined,
       name: value.name ?? undefined,
       description: value.description ?? '',
     }).pipe(

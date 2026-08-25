@@ -6,6 +6,8 @@
  */
 export interface CreateCustomerRequest {
   name: string;
+  /** Honored only when `customers.allow_manual_numbers` is enabled; otherwise auto-numbered. */
+  customerNumber?: string;
   companyName?: string;
   email?: string;
   phone?: string;

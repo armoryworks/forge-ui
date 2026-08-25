@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ViewChild, computed, effect, inject, input, output, signal } from '@angular/core';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -116,7 +117,8 @@ type BomViewMode = 'table' | 'tree';
 })
 export class PartDetailPanelComponent {
   protected readonly partsService = inject(PartsService);
-  protected readonly allowManualPartNumbers = signal(false);
+  protected readonly manualNumbers = inject(ManualNumberSettingsService);
+  protected readonly allowManualPartNumbers = computed(() => this.manualNumbers.isEnabled('parts'));
   private readonly destroyRef = inject(DestroyRef);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
@@ -261,9 +263,6 @@ export class PartDetailPanelComponent {
   ];
 
   constructor() {
-    this.partsService.getPartsConfig().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (cfg) => this.allowManualPartNumbers.set(cfg.allowManualPartNumbers),
-    });
     this.inventoryService.getUnitsOfMeasure().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (uoms) => {
         const options: SelectOption[] = [{ value: null, label: '-- None --' }];

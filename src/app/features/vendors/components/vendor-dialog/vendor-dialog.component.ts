@@ -150,6 +150,7 @@ export class VendorDialogComponent {
       this.vendorService.createVendor({
         ...payload,
         companyName: f.companyName!,
+        vendorNumber: this.allowManualVendorNumbers() ? (f.vendorNumber?.trim() || undefined) : undefined,
       }).subscribe({
         next: () => {
           this.saving.set(false);

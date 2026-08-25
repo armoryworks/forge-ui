@@ -12,6 +12,13 @@
   </header>
 
   <form [formGroup]="form" class="part-express-form__form" #formEl>
+    @if (manualNumbers.isEnabled('parts') && !part()) {
+      <app-input
+        [label]="'parts.partNumberLabel' | translate"
+        formControlName="partNumber"
+        [maxlength]="50"
+        data-testid="express-part-number" />
+    }
     <app-input
       [label]="'parts.workflow.basics.nameLabel' | translate"
       formControlName="name"
