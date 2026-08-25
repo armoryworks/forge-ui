@@ -1,9 +1,47 @@
-<div class="app-scan" data-testid="mobile-app-scan-placeholder">
+<div class="app-scan" data-testid="mobile-app-scan">
+  <div id="app-scan-viewfinder" class="app-scan__viewfinder" data-testid="mobile-app-scan-placeholder"></div>
+
   <div class="app-scan__frame" aria-hidden="true">
     <span class="app-scan__corner app-scan__corner--tl"></span>
     <span class="app-scan__corner app-scan__corner--tr"></span>
     <span class="app-scan__corner app-scan__corner--bl"></span>
     <span class="app-scan__corner app-scan__corner--br"></span>
   </div>
-  <p class="app-scan__hint">{{ 'mobileApp.scan.placeholder' | translate }}</p>
+
+  @if (cameraError()) {
+    <p class="app-scan__hint" role="alert">{{ 'mobileApp.scan.cameraError' | translate }}</p>
+  } @else if (notice(); as message) {
+    <p class="app-scan__hint" role="status">{{ message }}</p>
+  } @else if (resolving()) {
+    <p class="app-scan__hint" role="status">{{ 'mobileApp.scan.resolving' | translate }}</p>
+  } @else if (!result()) {
+    <p class="app-scan__hint">{{ 'mobileApp.scan.prompt' | translate }}</p>
+  }
+
+  <button
+    type="button"
+    class="app-scan__torch"
+    [class.app-scan__torch--on]="torchOn()"
+    [attr.aria-label]="'mobileApp.scan.torch' | translate"
+    [attr.aria-pressed]="torchOn()"
+    data-testid="scan-torch"
+    (click)="toggleTorch()"
+  >
+    <span class="material-icons-outlined" aria-hidden="true">{{ torchOn() ? 'flashlight_on' : 'flashlight_off' }}</span>
+  </button>
+
+  @if (result(); as resolved) {
+    <div class="app-scan__sheet">
+      @if (identifying()) {
+        <app-identity-prompt (identified)="onIdentified()" (cancelled)="onIdentityCancelled()" />
+      } @else {
+        <app-scan-action-sheet
+          [result]="resolved"
+          [busy]="busy()"
+          (chosen)="onAction($event)"
+          (dismissed)="dismiss()"
+        />
+      }
+    </div>
+  }
 </div>

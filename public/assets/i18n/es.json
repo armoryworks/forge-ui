@@ -9237,7 +9237,36 @@
       "lookup": "Buscar"
     },
     "scan": {
-      "placeholder": "Apunte la cámara a un trabajo, pieza, ubicación o credencial. El escaneo llega en una próxima versión."
+      "prompt": "Apunte a un viajero de trabajo, pieza, ubicación o credencial.",
+      "resolving": "Buscando…",
+      "unknownCode": "No es un código de Forge.",
+      "lookupFailed": "No se pudo buscar. Revise la conexión.",
+      "enrollmentCodeHere": "Ese es un código de inscripción. Abra Cuenta para agregar una instancia.",
+      "collapsed": "Ya hecho — escaneo duplicado ignorado.",
+      "openOnDesktopHint": "Abra este registro en la aplicación de escritorio.",
+      "cameraError": "La cámara no está disponible.",
+      "torch": "Linterna",
+      "kind": {
+        "job": "Trabajo",
+        "part": "Pieza",
+        "bin": "Ubicación",
+        "lot": "Lote",
+        "badge": "Credencial",
+        "salesOrder": "Orden de venta",
+        "purchaseOrder": "Orden de compra",
+        "asset": "Activo",
+        "enrollment": "Código de inscripción",
+        "unknown": "Desconocido"
+      },
+      "actions": {
+        "start": "Iniciar",
+        "complete": "Completar",
+        "move": "Mover",
+        "details": "Detalles",
+        "moveStock": "Mover inventario",
+        "identify": "Identificar",
+        "openOnDesktop": "Abrir en escritorio"
+      }
     },
     "enroll": {
       "scanTitle": "Escanee el código de su administrador",
@@ -9285,6 +9314,33 @@
       "enterPin": "Ingrese su PIN",
       "cameraError": "La cámara no está disponible en este dispositivo.",
       "failed": "La credencial y el PIN no coinciden."
+    },
+    "jobs": {
+      "backToScan": "Volver a escanear",
+      "loadFailed": "No se pudo cargar este trabajo.",
+      "column": "Columna",
+      "due": "Vence",
+      "noDue": "Sin fecha",
+      "nextStep": "Siguiente paso",
+      "lastColumn": "Última columna",
+      "recent": "Actividad reciente",
+      "noActivity": "Sin actividad todavía.",
+      "advanceTo": "Avanzar a {{column}}",
+      "movedTo": "Movido a {{column}}",
+      "timerStarted": "Temporizador iniciado",
+      "noteAdded": "Nota agregada",
+      "photoAttached": "Foto adjuntada",
+      "actionFailed": "Eso no se completó. Inténtelo de nuevo.",
+      "noteByVoice": "Nota por voz",
+      "listening": "Escuchando…",
+      "noteFromList": "Nota de la lista",
+      "noPresets": "No hay notas predefinidas configuradas.",
+      "attachPhoto": "Adjuntar foto",
+      "homeHint": "Escanee un viajero de trabajo o búsquelo para ver su estado."
+    },
+    "undo": {
+      "action": "Deshacer",
+      "failed": "No se pudo deshacer."
     }
   }
 }

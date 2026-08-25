@@ -29,7 +29,7 @@ export class MobileAppShellComponent {
   protected readonly tabs: MobileAppTab[] = [
     { path: '/app/scan', labelKey: 'mobileApp.tabs.scan', icon: 'qr_code_scanner', enabled: true },
     { path: '/app/clock', labelKey: 'mobileApp.tabs.clock', icon: 'schedule', enabled: false },
-    { path: '/app/jobs', labelKey: 'mobileApp.tabs.jobs', icon: 'work', enabled: false },
+    { path: '/app/jobs', labelKey: 'mobileApp.tabs.jobs', icon: 'work', enabled: true },
     { path: '/app/move', labelKey: 'mobileApp.tabs.move', icon: 'swap_horiz', enabled: false },
     { path: '/app/lookup', labelKey: 'mobileApp.tabs.lookup', icon: 'search', enabled: false },
   ];

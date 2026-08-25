@@ -1,0 +1,27 @@
+@use 'styles/variables' as *;
+
+:host { flex: 1; display: flex; flex-direction: column; }
+
+.jobs-home {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-lg;
+  padding: $sp-xl;
+  text-align: center;
+
+  &__icon { font-size: $icon-size-hero; color: var(--text-muted); }
+  &__text { margin: 0; font-size: $font-size-md; color: var(--text-muted); }
+  &__link {
+    min-height: 56px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 $sp-xl;
+    background: var(--primary);
+    color: var(--bg);
+    font-weight: 600;
+    text-decoration: none;
+  }
+}

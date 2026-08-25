@@ -147,6 +147,11 @@ export class LocalLockService {
     }
   }
 
+  /** The guard records where a locked navigation was headed so unlock lands there. */
+  rememberReturnUrl(url: string): void {
+    if (url.startsWith('/app') && !url.startsWith('/app/lock')) this.returnUrl = url;
+  }
+
   lock(): void {
     if (this._locked() || !this._pinConfigured()) return;
     this._locked.set(true);

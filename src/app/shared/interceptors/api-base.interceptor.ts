@@ -18,7 +18,10 @@ export const apiBaseInterceptor: HttpInterceptorFn = (req, next) => {
     const deviceToken = instance.shared ? instances.getDeviceToken() : null;
     return next(req.clone({
       url: `${instance.serverUrl}${req.url}`,
-      setHeaders: deviceToken ? { 'X-Device-Token': deviceToken } : {},
+      setHeaders: {
+        'X-Device-Uuid': instance.deviceUuid,
+        ...(deviceToken ? { 'X-Device-Token': deviceToken } : {}),
+      },
     }));
   }
   return next(req);

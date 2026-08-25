@@ -1,0 +1,96 @@
+<div class="job-status" data-testid="mobile-app-job-status">
+  <button type="button" class="job-status__back" data-testid="job-status-back" (click)="back()">
+    <span class="material-icons-outlined" aria-hidden="true">arrow_back</span>
+    {{ 'mobileApp.jobs.backToScan' | translate }}
+  </button>
+
+  @if (loading()) {
+    <p class="job-status__hint" role="status">{{ 'common.loading' | translate }}</p>
+  } @else if (failed() || !job()) {
+    <p class="job-status__hint" role="alert">{{ 'mobileApp.jobs.loadFailed' | translate }}</p>
+  } @else if (job(); as job) {
+    <header class="job-status__head">
+      <span class="job-status__number">{{ job.jobNumber }}</span>
+      <span class="job-status__title">{{ job.title }}</span>
+      @if (job.customerName) {
+        <span class="job-status__customer">{{ job.customerName }}</span>
+      }
+    </header>
+
+    <dl class="job-status__facts">
+      <div class="job-status__fact">
+        <dt>{{ 'mobileApp.jobs.column' | translate }}</dt>
+        <dd><span class="job-status__stage" [style.--stage-color]="job.stageColor">{{ job.stageName }}</span></dd>
+      </div>
+      <div class="job-status__fact">
+        <dt>{{ 'mobileApp.jobs.due' | translate }}</dt>
+        <dd [class.job-status__overdue]="job.isOverdue">
+          {{ job.dueDate ? (job.dueDate | date: 'MM/dd/yyyy') : ('mobileApp.jobs.noDue' | translate) }}
+        </dd>
+      </div>
+      <div class="job-status__fact">
+        <dt>{{ 'mobileApp.jobs.nextStep' | translate }}</dt>
+        <dd>{{ job.nextStageName ?? ('mobileApp.jobs.lastColumn' | translate) }}</dd>
+      </div>
+    </dl>
+
+    <section class="job-status__timeline" [attr.aria-label]="'mobileApp.jobs.recent' | translate">
+      @for (entry of job.recentActivity; track entry.id) {
+        <div class="job-status__entry">
+          <span class="job-status__entry-when">{{ entry.createdAt | date: 'MM/dd hh:mm' }}</span>
+          <span class="job-status__entry-text">{{ entry.description }}</span>
+        </div>
+      } @empty {
+        <p class="job-status__hint">{{ 'mobileApp.jobs.noActivity' | translate }}</p>
+      }
+    </section>
+
+    <div class="job-status__actions">
+      <button
+        type="button"
+        class="job-status__advance"
+        [disabled]="busy() || job.nextStageId === null"
+        data-testid="job-status-advance"
+        (click)="advance()"
+      >
+        <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+        {{ job.nextStageName ? ('mobileApp.jobs.advanceTo' | translate: { column: job.nextStageName }) : ('mobileApp.jobs.lastColumn' | translate) }}
+      </button>
+      <div class="job-status__secondary">
+        @if (voiceSupported()) {
+          <button type="button" class="job-status__btn" [disabled]="busy() || listening()" data-testid="job-status-dictate" (click)="dictateNote()">
+            <span class="material-icons-outlined" aria-hidden="true">{{ listening() ? 'graphic_eq' : 'mic' }}</span>
+            {{ (listening() ? 'mobileApp.jobs.listening' : 'mobileApp.jobs.noteByVoice') | translate }}
+          </button>
+        }
+        <button type="button" class="job-status__btn" [disabled]="busy()" data-testid="job-status-note-picker" (click)="openNotePicker()">
+          <span class="material-icons-outlined" aria-hidden="true">sticky_note_2</span>
+          {{ 'mobileApp.jobs.noteFromList' | translate }}
+        </button>
+        <button type="button" class="job-status__btn" [disabled]="busy()" data-testid="job-status-photo" (click)="attachPhoto()">
+          <span class="material-icons-outlined" aria-hidden="true">photo_camera</span>
+          {{ 'mobileApp.jobs.attachPhoto' | translate }}
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (notePicker()) {
+    <div class="job-status__sheet" role="dialog" [attr.aria-label]="'mobileApp.jobs.noteFromList' | translate">
+      @for (preset of notePresets(); track preset) {
+        <button type="button" class="job-status__preset" (click)="pickNote(preset)">{{ preset }}</button>
+      } @empty {
+        <p class="job-status__hint">{{ 'mobileApp.jobs.noPresets' | translate }}</p>
+      }
+      <button type="button" class="job-status__btn" data-testid="note-picker-cancel" (click)="notePicker.set(false)">
+        {{ 'common.cancel' | translate }}
+      </button>
+    </div>
+  }
+
+  @if (identifying()) {
+    <div class="job-status__sheet">
+      <app-identity-prompt (identified)="onIdentified()" (cancelled)="onIdentityCancelled()" />
+    </div>
+  }
+</div>

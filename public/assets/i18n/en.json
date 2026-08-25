@@ -9237,7 +9237,36 @@
       "lookup": "Lookup"
     },
     "scan": {
-      "placeholder": "Point the camera at a job, part, bin, or badge. Scanning arrives in a later build."
+      "prompt": "Point at a job traveler, part, bin, or badge.",
+      "resolving": "Looking up…",
+      "unknownCode": "Not a Forge code.",
+      "lookupFailed": "Could not look that up. Check the connection.",
+      "enrollmentCodeHere": "That is an enrollment code. Open Account to add an instance.",
+      "collapsed": "Already done — duplicate scan ignored.",
+      "openOnDesktopHint": "Open this record on the desktop app.",
+      "cameraError": "The camera is not available.",
+      "torch": "Torch",
+      "kind": {
+        "job": "Job",
+        "part": "Part",
+        "bin": "Bin",
+        "lot": "Lot",
+        "badge": "Badge",
+        "salesOrder": "Sales order",
+        "purchaseOrder": "Purchase order",
+        "asset": "Asset",
+        "enrollment": "Enrollment code",
+        "unknown": "Unknown"
+      },
+      "actions": {
+        "start": "Start",
+        "complete": "Complete",
+        "move": "Move",
+        "details": "Details",
+        "moveStock": "Move stock",
+        "identify": "Identify",
+        "openOnDesktop": "Open on desktop"
+      }
     },
     "enroll": {
       "scanTitle": "Scan the code from your admin",
@@ -9285,6 +9314,33 @@
       "enterPin": "Enter your PIN",
       "cameraError": "The camera is not available on this device.",
       "failed": "Badge and PIN did not match."
+    },
+    "jobs": {
+      "backToScan": "Back to scan",
+      "loadFailed": "Could not load this job.",
+      "column": "Column",
+      "due": "Due",
+      "noDue": "No date",
+      "nextStep": "Next step",
+      "lastColumn": "Last column",
+      "recent": "Recent activity",
+      "noActivity": "No activity yet.",
+      "advanceTo": "Advance to {{column}}",
+      "movedTo": "Moved to {{column}}",
+      "timerStarted": "Timer started",
+      "noteAdded": "Note added",
+      "photoAttached": "Photo attached",
+      "actionFailed": "That did not go through. Try again.",
+      "noteByVoice": "Note by voice",
+      "listening": "Listening…",
+      "noteFromList": "Note from list",
+      "noPresets": "No preset notes configured.",
+      "attachPhoto": "Attach photo",
+      "homeHint": "Scan a job traveler or look one up to see its status."
+    },
+    "undo": {
+      "action": "Undo",
+      "failed": "Undo did not go through."
     }
   }
 }

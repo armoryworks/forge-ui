@@ -22,6 +22,14 @@ export const MOBILE_APP_ROUTES: Routes = [
         path: 'scan',
         loadComponent: () => import('./pages/app-scan.component').then((m) => m.AppScanComponent),
       },
+      {
+        path: 'jobs',
+        loadComponent: () => import('./pages/app-jobs-home.component').then((m) => m.AppJobsHomeComponent),
+      },
+      {
+        path: 'jobs/:id',
+        loadComponent: () => import('./pages/app-job-status.component').then((m) => m.AppJobStatusComponent),
+      },
     ],
   },
 ];

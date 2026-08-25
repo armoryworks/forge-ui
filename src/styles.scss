@@ -632,3 +632,6 @@ html[data-font-size='xl'] {
 .line-edit-form__actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
 .estimate-lines { margin-top: 1rem; }
 .estimate-lines__hint { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; }
+
+// Native ML Kit scanning renders the camera behind the WebView: the page must be see-through.
+body.mlkit-scanning, body.mlkit-scanning app-root { background: transparent; }
