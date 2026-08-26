@@ -9414,6 +9414,34 @@
       "dismiss": "Descartar",
       "discard": "Descartar",
       "retry": "Sincronizar ahora"
+    },
+    "account": {
+      "title": "Cuenta",
+      "sharedDevice": "Dispositivo compartido",
+      "sharedTag": "compartido",
+      "instances": "Instancias en este teléfono",
+      "addInstance": "Agregar otro Forge",
+      "remove": "Quitar de este teléfono",
+      "confirmRemove": "Quitar",
+      "switchFailed": "No se pudo cambiar. Revise la conexión e inténtelo de nuevo.",
+      "devices": "Mis dispositivos",
+      "thisDevice": "este teléfono",
+      "lastSeen": "visto",
+      "signOutDevice": "Cerrar sesión en ese dispositivo",
+      "confirmSignOut": "Cerrar sesión",
+      "noDevices": "No hay dispositivos inscritos.",
+      "security": "Seguridad",
+      "changePin": "Cambiar PIN",
+      "biometric": "Desbloquear con huella o rostro",
+      "language": "Idioma",
+      "diagnostics": "Diagnóstico",
+      "sendCrashReports": "Enviar informes de fallos a este Forge",
+      "diagnosticsHint": "Los informes van solo al servidor Forge de su empresa — a ningún otro lugar — y nunca incluyen sus datos.",
+      "reportProblem": "Reportar un problema",
+      "problemLabel": "¿Qué salió mal?",
+      "send": "Enviar",
+      "problemSent": "Enviado. Sus administradores lo tienen.",
+      "problemFailed": "No se pudo enviar. Inténtelo cuando tenga conexión."
     }
   }
 }

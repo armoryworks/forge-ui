@@ -9414,6 +9414,34 @@
       "dismiss": "Dismiss",
       "discard": "Discard",
       "retry": "Sync now"
+    },
+    "account": {
+      "title": "Account",
+      "sharedDevice": "Shared device",
+      "sharedTag": "shared",
+      "instances": "Instances on this phone",
+      "addInstance": "Add another Forge",
+      "remove": "Remove from this phone",
+      "confirmRemove": "Remove",
+      "switchFailed": "Could not switch. Check the connection and try again.",
+      "devices": "My devices",
+      "thisDevice": "this phone",
+      "lastSeen": "seen",
+      "signOutDevice": "Sign out that device",
+      "confirmSignOut": "Sign out",
+      "noDevices": "No devices enrolled.",
+      "security": "Security",
+      "changePin": "Change PIN",
+      "biometric": "Unlock with fingerprint or face",
+      "language": "Language",
+      "diagnostics": "Diagnostics",
+      "sendCrashReports": "Send crash reports to this Forge",
+      "diagnosticsHint": "Reports go only to your company's own Forge server — never anywhere else — and never include your data.",
+      "reportProblem": "Report a problem",
+      "problemLabel": "What went wrong?",
+      "send": "Send",
+      "problemSent": "Sent. Your admins have it.",
+      "problemFailed": "Could not send. Try again when online."
     }
   }
 }

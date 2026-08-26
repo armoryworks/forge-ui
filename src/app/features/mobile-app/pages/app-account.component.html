@@ -1,0 +1,105 @@
+<div class="account" data-testid="mobile-app-account-page">
+  <section class="account__section">
+    @if (shared()) {
+      <span class="account__who">{{ 'mobileApp.account.sharedDevice' | translate }}</span>
+      <span class="account__sub">{{ active()?.deviceName }}</span>
+    } @else if (user(); as person) {
+      <span class="account__who">{{ person.lastName }}, {{ person.firstName }}</span>
+      <span class="account__sub">{{ person.email }}</span>
+    }
+  </section>
+
+  <section class="account__section">
+    <h2 class="account__heading">{{ 'mobileApp.account.instances' | translate }}</h2>
+    <ul class="account__list">
+      @for (item of instances.instances(); track item.id) {
+        <li class="account__row" [class.account__row--active]="item.id === active()?.id">
+          <button type="button" class="account__row-main" [disabled]="busy()" [attr.data-testid]="'account-instance-' + item.id" (click)="switchTo(item.id)">
+            <span class="account__row-title">{{ item.name }}</span>
+            <span class="account__row-sub">{{ item.serverUrl }}@if (item.shared) { · {{ 'mobileApp.account.sharedTag' | translate }}}</span>
+          </button>
+          @if (item.id === active()?.id) {
+            <span class="material-icons-outlined account__check" aria-hidden="true">check</span>
+          }
+          @if (pendingRemoval() === item.id) {
+            <button type="button" class="account__row-action account__row-action--danger" (click)="remove(item.id)">{{ 'mobileApp.account.confirmRemove' | translate }}</button>
+          } @else {
+            <button type="button" class="account__row-action" [attr.aria-label]="'mobileApp.account.remove' | translate" (click)="askRemove(item.id)">
+              <span class="material-icons-outlined" aria-hidden="true">delete</span>
+            </button>
+          }
+        </li>
+      }
+    </ul>
+    <button type="button" class="account__button" data-testid="account-add-instance" (click)="addInstance()">
+      <span class="material-icons-outlined" aria-hidden="true">add</span>
+      {{ 'mobileApp.account.addInstance' | translate }}
+    </button>
+  </section>
+
+  @if (!shared()) {
+    <section class="account__section">
+      <h2 class="account__heading">{{ 'mobileApp.account.devices' | translate }}</h2>
+      <ul class="account__list">
+        @for (device of myDevices(); track device.id) {
+          <li class="account__row">
+            <span class="account__row-main account__row-main--static">
+              <span class="account__row-title">{{ device.name }}@if (isCurrentDevice(device)) { · {{ 'mobileApp.account.thisDevice' | translate }}}</span>
+              <span class="account__row-sub">{{ device.platform }} {{ device.appVersion ?? '' }} · {{ 'mobileApp.account.lastSeen' | translate }} {{ device.lastSeenAt ? (device.lastSeenAt | date: 'MM/dd/yyyy hh:mm') : '—' }}</span>
+            </span>
+            @if (pendingRevoke() === device.id) {
+              <button type="button" class="account__row-action account__row-action--danger" (click)="revoke(device)">{{ 'mobileApp.account.confirmSignOut' | translate }}</button>
+            } @else {
+              <button type="button" class="account__row-action" [attr.aria-label]="'mobileApp.account.signOutDevice' | translate" (click)="askRevoke(device.id)">
+                <span class="material-icons-outlined" aria-hidden="true">logout</span>
+              </button>
+            }
+          </li>
+        } @empty {
+          <li class="account__empty">{{ 'mobileApp.account.noDevices' | translate }}</li>
+        }
+      </ul>
+    </section>
+
+    <section class="account__section">
+      <h2 class="account__heading">{{ 'mobileApp.account.security' | translate }}</h2>
+      <button type="button" class="account__button" data-testid="account-change-pin" (click)="changePin()">
+        <span class="material-icons-outlined" aria-hidden="true">pin</span>
+        {{ 'mobileApp.account.changePin' | translate }}
+      </button>
+      <button type="button" class="account__switch" role="switch" [attr.aria-checked]="lock.biometricEnabled()" data-testid="account-biometric" (click)="toggleBiometric()">
+        <span>{{ 'mobileApp.account.biometric' | translate }}</span>
+        <span class="material-icons-outlined" aria-hidden="true">{{ lock.biometricEnabled() ? 'toggle_on' : 'toggle_off' }}</span>
+      </button>
+    </section>
+  }
+
+  <section class="account__section">
+    <h2 class="account__heading">{{ 'mobileApp.account.language' | translate }}</h2>
+    <app-language-toggle />
+  </section>
+
+  @if (crash.available()) {
+    <section class="account__section">
+      <h2 class="account__heading">{{ 'mobileApp.account.diagnostics' | translate }}</h2>
+      <button type="button" class="account__switch" role="switch" [attr.aria-checked]="crash.enabled()" data-testid="account-diagnostics" (click)="toggleDiagnostics()">
+        <span>{{ 'mobileApp.account.sendCrashReports' | translate }}</span>
+        <span class="material-icons-outlined" aria-hidden="true">{{ crash.enabled() ? 'toggle_on' : 'toggle_off' }}</span>
+      </button>
+      <p class="account__hint">{{ 'mobileApp.account.diagnosticsHint' | translate }}</p>
+    </section>
+  }
+
+  <section class="account__section">
+    <h2 class="account__heading">{{ 'mobileApp.account.reportProblem' | translate }}</h2>
+    <app-textarea [label]="'mobileApp.account.problemLabel' | translate" [rows]="3" [formControl]="problemControl" />
+    <button type="button" class="account__button account__button--primary" [disabled]="problemControl.invalid || busy()" data-testid="account-send-problem" (click)="sendProblem()">
+      <span class="material-icons-outlined" aria-hidden="true">send</span>
+      {{ 'mobileApp.account.send' | translate }}
+    </button>
+  </section>
+
+  <section class="account__section account__section--about">
+    <span class="account__sub">Forge {{ appInfo.version() }}@if (appInfo.build(); as build) { ({{ build }})} · {{ platform.name }}</span>
+  </section>
+</div>

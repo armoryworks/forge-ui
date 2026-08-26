@@ -3,6 +3,15 @@
     <span class="app-shell__logo">Forge</span>
     <app-sync-indicator class="app-shell__sync" />
     <app-language-toggle class="app-shell__lang" />
+    <a
+      class="app-shell__gear"
+      routerLink="/app/account"
+      routerLinkActive="app-shell__gear--active"
+      [attr.aria-label]="'mobileApp.account.title' | translate"
+      data-testid="mobile-app-account"
+    >
+      <span class="material-icons-outlined" aria-hidden="true">settings</span>
+    </a>
   </header>
 
   <main class="app-shell__content">
@@ -10,28 +19,16 @@
   </main>
 
   <nav class="app-shell__nav" [attr.aria-label]="'mobileApp.navLabel' | translate">
-    @for (tab of tabs; track tab.path) {
-      @if (tab.enabled) {
-        <a
-          class="app-shell__tab"
-          [routerLink]="tab.path"
-          routerLinkActive="app-shell__tab--active"
-          [attr.data-testid]="'mobile-app-tab-' + tab.icon"
-        >
-          <span class="material-icons-outlined app-shell__tab-icon" aria-hidden="true">{{ tab.icon }}</span>
-          <span class="app-shell__tab-label">{{ tab.labelKey | translate }}</span>
-        </a>
-      } @else {
-        <button
-          type="button"
-          class="app-shell__tab"
-          disabled
-          [attr.data-testid]="'mobile-app-tab-' + tab.icon"
-        >
-          <span class="material-icons-outlined app-shell__tab-icon" aria-hidden="true">{{ tab.icon }}</span>
-          <span class="app-shell__tab-label">{{ tab.labelKey | translate }}</span>
-        </button>
-      }
+    @for (tab of tabs(); track tab.path) {
+      <a
+        class="app-shell__tab"
+        [routerLink]="tab.path"
+        routerLinkActive="app-shell__tab--active"
+        [attr.data-testid]="'mobile-app-tab-' + tab.icon"
+      >
+        <span class="material-icons-outlined app-shell__tab-icon" aria-hidden="true">{{ tab.icon }}</span>
+        <span class="app-shell__tab-label">{{ tab.labelKey | translate }}</span>
+      </a>
     }
   </nav>
 </div>

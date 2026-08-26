@@ -1,4 +1,4 @@
-import { APP_INITIALIZER, ApplicationConfig, isDevMode, inject, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { APP_INITIALIZER, ApplicationConfig, isDevMode, inject, provideBrowserGlobalErrorListeners, ErrorHandler } from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 import { environment } from '../environments/environment';
@@ -20,6 +20,7 @@ import { routes } from './app.routes';
 import { authInterceptor } from './shared/interceptors/auth.interceptor';
 import { apiBaseInterceptor } from './shared/interceptors/api-base.interceptor';
 import { InstanceService } from './shared/services/instance.service';
+import { MobileErrorHandler } from './shared/services/mobile-error-handler.service';
 import { LocalLockService } from './shared/services/local-lock.service';
 import { capabilityGateInterceptor } from './shared/interceptors/capability-gate.interceptor';
 import { etagInterceptor } from './shared/interceptors/etag.interceptor';
@@ -41,6 +42,7 @@ function initTranslations(): () => Promise<void> {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    { provide: ErrorHandler, useClass: MobileErrorHandler },
     provideAnimationsAsync(),
     provideRouter(routes),
     provideHttpClient(withInterceptors([demoApiInterceptor, portalAuthInterceptor, authInterceptor, kioskTokenInterceptor, capabilityGateInterceptor, trainingLangInterceptor, etagInterceptor, httpErrorInterceptor, dateTransformInterceptor, apiBaseInterceptor])),

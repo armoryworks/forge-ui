@@ -33,4 +33,6 @@ export interface ForgeWellKnown {
   auth: string[];
   cert_sha256: string | null;
   min_app_version: string;
+  /** Sentry-compatible DSN of the instance's own crash service, or null. */
+  crash_dsn?: string | null;
 }
