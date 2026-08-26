@@ -1,22 +1,30 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { Observable, catchError, map, of } from 'rxjs';
+import { Observable, catchError, from, map, of } from 'rxjs';
 
+import { environment } from '../../../environments/environment';
 import {
-  ClockPunchResult, ClockState, JobAdvanceResult, JobNote, JobStatus, OnHand,
+  ClockPunchResult, ClockState, JobAdvanceResult, JobNote, JobStatus, OnHand, QueuedOffline,
   ScanResolveResult, StockMoveRequest, StockMoveResult, UploadedJobFile,
 } from '../models/mobile-api.model';
+import { InstanceService } from './instance.service';
+import { OfflineQueueService } from './offline-queue.service';
+
+type Method = 'POST' | 'PATCH' | 'DELETE';
 
 /**
  * The shell's API surface. Every mutation carries a fresh Idempotency-Key
  * (the server replays stored results for retries) and exposes its
  * compensating action so the undo toast can reverse it with the same
- * scheme.
+ * scheme. Offline, a mutation goes to the per-instance queue with that
+ * same key and resolves to `QueuedOffline`; lookups stay online-only.
  */
 @Injectable({ providedIn: 'root' })
 export class MobileApiService {
   private readonly http = inject(HttpClient);
+  private readonly queue = inject(OfflineQueueService);
+  private readonly instances = inject(InstanceService);
 
   resolveScan(code: string): Observable<ScanResolveResult> {
     return this.http.post<ScanResolveResult>('/api/v1/mobile/scan/resolve', { code });
@@ -26,34 +34,30 @@ export class MobileApiService {
     return this.http.get<JobStatus>(`/api/v1/mobile/jobs/${jobId}/status`);
   }
 
-  advanceJob(jobId: number, scanCode: string | null): Observable<JobAdvanceResult> {
-    return this.http.post<JobAdvanceResult>(
-      `/api/v1/mobile/jobs/${jobId}/advance`, { scanCode }, { headers: this.idempotent() });
+  advanceJob(jobId: number, scanCode: string | null): Observable<JobAdvanceResult | QueuedOffline> {
+    return this.mutate<JobAdvanceResult>('POST', `/api/v1/mobile/jobs/${jobId}/advance`, { scanCode }, `Advance job ${jobId}`);
   }
 
   /** Compensating action for advance: move back to the column it came from. */
-  moveJobToStage(jobId: number, stageId: number): Observable<JobStatus> {
-    return this.http.patch<JobStatus>(
-      `/api/v1/jobs/${jobId}/stage`, { stageId }, { headers: this.idempotent() });
+  moveJobToStage(jobId: number, stageId: number): Observable<JobStatus | QueuedOffline> {
+    return this.mutate<JobStatus>('PATCH', `/api/v1/jobs/${jobId}/stage`, { stageId }, `Move job ${jobId} back`);
   }
 
-  startTimer(jobId: number): Observable<{ id: number }> {
-    return this.http.post<{ id: number }>(
-      '/api/v1/time-tracking/timer/start', { jobId }, { headers: this.idempotent() });
+  startTimer(jobId: number): Observable<{ id: number } | QueuedOffline> {
+    return this.mutate<{ id: number }>('POST', '/api/v1/time-tracking/timer/start', { jobId }, `Start timer on job ${jobId}`);
   }
 
   stopTimer(): Observable<unknown> {
-    return this.http.post('/api/v1/time-tracking/timer/stop', {}, { headers: this.idempotent() });
+    return this.mutate<unknown>('POST', '/api/v1/time-tracking/timer/stop', {}, 'Stop timer');
   }
 
-  addNote(jobId: number, text: string): Observable<JobNote> {
-    return this.http.post<JobNote>(
-      `/api/v1/jobs/${jobId}/notes`, { text }, { headers: this.idempotent() });
+  addNote(jobId: number, text: string): Observable<JobNote | QueuedOffline> {
+    return this.mutate<JobNote>('POST', `/api/v1/jobs/${jobId}/notes`, { text }, `Note on job ${jobId}`);
   }
 
   /** Compensating action for addNote. */
   deleteNote(jobId: number, noteId: number): Observable<unknown> {
-    return this.http.delete(`/api/v1/jobs/${jobId}/notes/${noteId}`, { headers: this.idempotent() });
+    return this.mutate<unknown>('DELETE', `/api/v1/jobs/${jobId}/notes/${noteId}`, null, `Remove note on job ${jobId}`);
   }
 
   attachPhoto(jobId: number, blob: Blob, fileName: string): Observable<UploadedJobFile> {
@@ -72,14 +76,13 @@ export class MobileApiService {
     return this.http.get<ClockState>('/api/v1/mobile/clock/state');
   }
 
-  clockPunch(eventType: 'ClockIn' | 'ClockOut' | 'BreakStart' | 'BreakEnd'): Observable<ClockPunchResult> {
-    return this.http.post<ClockPunchResult>(
-      '/api/v1/mobile/clock/punch', { eventType }, { headers: this.idempotent() });
+  clockPunch(eventType: 'ClockIn' | 'ClockOut' | 'BreakStart' | 'BreakEnd'): Observable<ClockPunchResult | QueuedOffline> {
+    return this.mutate<ClockPunchResult>('POST', '/api/v1/mobile/clock/punch', { eventType }, `Clock: ${eventType}`);
   }
 
   /** Compensating action for clockPunch (own latest event, inside the window). */
-  undoClockPunch(eventId: number): Observable<ClockState> {
-    return this.http.delete<ClockState>(`/api/v1/mobile/clock/events/${eventId}`, { headers: this.idempotent() });
+  undoClockPunch(eventId: number): Observable<ClockState | QueuedOffline> {
+    return this.mutate<ClockState>('DELETE', `/api/v1/mobile/clock/events/${eventId}`, null, 'Undo clock punch');
   }
 
   onHand(partId: number, locationId: number): Observable<OnHand> {
@@ -87,8 +90,9 @@ export class MobileApiService {
   }
 
   /** Also the compensating action: call again with the result's `undo`. */
-  moveStock(request: StockMoveRequest): Observable<StockMoveResult> {
-    return this.http.post<StockMoveResult>('/api/v1/mobile/stock/move', request, { headers: this.idempotent() });
+  moveStock(request: StockMoveRequest): Observable<StockMoveResult | QueuedOffline> {
+    return this.mutate<StockMoveResult>(
+      'POST', '/api/v1/mobile/stock/move', request, `Move ${request.quantity} of part ${request.partId}`);
   }
 
   lookup(term: string): Observable<ScanResolveResult[]> {
@@ -105,10 +109,29 @@ export class MobileApiService {
     );
   }
 
+  private mutate<T>(method: Method, url: string, body: unknown, description: string): Observable<T | QueuedOffline> {
+    const headers = this.idempotentHeaders();
+    if (environment.mobileShell && !navigator.onLine) {
+      return from(this.queue.enqueue(method, url, body, description, {
+        headers, instanceId: this.instances.instance()?.id ?? null,
+      })).pipe(map((entryId) => ({ queued: true as const, entryId })));
+    }
+    const options = { headers: new HttpHeaders(headers) };
+    switch (method) {
+      case 'POST': return this.http.post<T>(url, body, options);
+      case 'PATCH': return this.http.patch<T>(url, body, options);
+      case 'DELETE': return this.http.delete<T>(url, options);
+    }
+  }
+
   private idempotent(): HttpHeaders {
-    return new HttpHeaders({
+    return new HttpHeaders(this.idempotentHeaders());
+  }
+
+  private idempotentHeaders(): Record<string, string> {
+    return {
       'Idempotency-Key': crypto.randomUUID(),
       'X-Client-Timestamp': new Date().toISOString(),
-    });
+    };
   }
 }

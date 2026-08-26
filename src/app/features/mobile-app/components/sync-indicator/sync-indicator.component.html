@@ -1,0 +1,65 @@
+@if (visible()) {
+  <button
+    type="button"
+    class="sync"
+    [class.sync--offline]="state() === 'offline'"
+    [class.sync--syncing]="state() === 'syncing'"
+    [class.sync--rejected]="state() === 'rejected'"
+    [attr.aria-label]="('mobileApp.sync.state.' + state()) | translate"
+    [attr.aria-expanded]="open()"
+    data-testid="sync-indicator"
+    (click)="toggle()"
+  >
+    <span class="material-icons-outlined sync__icon" [class.sync__icon--spin]="state() === 'syncing'" aria-hidden="true">{{ icon() }}</span>
+    @if (state() === 'rejected') {
+      <span class="sync__count">{{ rejected().length }}</span>
+    } @else if (pendingCount() > 0) {
+      <span class="sync__count">{{ pendingCount() }}</span>
+    }
+  </button>
+}
+
+@if (open()) {
+  <div class="sync-sheet" role="dialog" [attr.aria-label]="'mobileApp.sync.title' | translate" data-testid="sync-sheet">
+    <div class="sync-sheet__head">
+      <span class="sync-sheet__title">{{ ('mobileApp.sync.state.' + state()) | translate }}</span>
+      <button type="button" class="sync-sheet__close" [attr.aria-label]="'common.close' | translate" (click)="toggle()">
+        <span class="material-icons-outlined" aria-hidden="true">close</span>
+      </button>
+    </div>
+
+    @if (rejected().length > 0) {
+      <p class="sync-sheet__hint">{{ 'mobileApp.sync.rejectedHint' | translate }}</p>
+      <ul class="sync-sheet__list">
+        @for (item of rejected(); track item.id) {
+          <li class="sync-sheet__row sync-sheet__row--rejected">
+            <span class="sync-sheet__desc">{{ item.description }}</span>
+            <span class="sync-sheet__meta">{{ item.timestamp | date: 'MM/dd/yyyy hh:mm' }} · {{ item.status }} {{ item.message }}</span>
+            <button type="button" class="sync-sheet__action" (click)="dismiss(item.id)">{{ 'mobileApp.sync.dismiss' | translate }}</button>
+          </li>
+        }
+      </ul>
+    }
+
+    @if (pending().length > 0) {
+      <p class="sync-sheet__hint">{{ 'mobileApp.sync.pendingHint' | translate }}</p>
+      <ul class="sync-sheet__list">
+        @for (item of pending(); track item.id) {
+          <li class="sync-sheet__row">
+            <span class="sync-sheet__desc">{{ item.description }}</span>
+            <span class="sync-sheet__meta">{{ item.timestamp | date: 'MM/dd/yyyy hh:mm' }}</span>
+            <button type="button" class="sync-sheet__action" (click)="discard(item.id)">{{ 'mobileApp.sync.discard' | translate }}</button>
+          </li>
+        }
+      </ul>
+      @if (online() && state() !== 'syncing') {
+        <button type="button" class="sync-sheet__retry" (click)="retry()">
+          <span class="material-icons-outlined" aria-hidden="true">refresh</span>
+          {{ 'mobileApp.sync.retry' | translate }}
+        </button>
+      }
+    } @else if (rejected().length === 0) {
+      <p class="sync-sheet__hint">{{ 'mobileApp.sync.nothingWaiting' | translate }}</p>
+    }
+  </div>
+}

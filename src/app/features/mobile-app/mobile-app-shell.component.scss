@@ -21,8 +21,13 @@ $tab-min-target: 56px;
     border-bottom: $border-width-thin solid var(--border);
   }
 
-  &__lang {
+  &__sync {
     margin-left: auto;
+    margin-right: $sp-md;
+  }
+
+  &__lang {
+    margin-left: 0;
   }
 
   &__logo {

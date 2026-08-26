@@ -5,9 +5,10 @@ import { DatePipe } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { ClockState } from '../../../shared/models/mobile-api.model';
+import { ClockState, isQueued } from '../../../shared/models/mobile-api.model';
 import { InstanceService } from '../../../shared/services/instance.service';
 import { MobileApiService } from '../../../shared/services/mobile-api.service';
+import { OfflineQueueService } from '../../../shared/services/offline-queue.service';
 import { SharedIdentityService } from '../../../shared/services/shared-identity.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { UndoService } from '../../../shared/services/undo.service';
@@ -31,6 +32,7 @@ type Punch = 'ClockIn' | 'ClockOut' | 'BreakStart' | 'BreakEnd';
 export class AppClockComponent {
   private readonly api = inject(MobileApiService);
   private readonly undo = inject(UndoService);
+  private readonly queue = inject(OfflineQueueService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly identity = inject(SharedIdentityService);
@@ -60,9 +62,34 @@ export class AppClockComponent {
 
   protected load(): void {
     this.api.clockState().subscribe({
-      next: (state) => this.state.set(state),
-      error: () => this.state.set(null),
+      next: (state) => {
+        this.state.set(state);
+        this.cache(state);
+      },
+      error: () => this.state.set(this.cached()),
     });
+  }
+
+  private cacheKey(): string {
+    return `forge-mobile-clock:${this.instances.instance()?.id ?? 'default'}`;
+  }
+
+  private cache(state: ClockState): void {
+    try { localStorage.setItem(this.cacheKey(), JSON.stringify(state)); } catch { /* best effort */ }
+  }
+
+  private cached(): ClockState | null {
+    try {
+      const raw = localStorage.getItem(this.cacheKey());
+      return raw ? JSON.parse(raw) as ClockState : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private stateAfter(kind: Punch): ClockState {
+    const next = kind === 'ClockOut' ? 'out' : kind === 'BreakStart' ? 'break' : 'in';
+    return { state: next, lastEventType: kind, lastEventAt: new Date().toISOString(), lastEventId: null };
   }
 
   protected punch(kind: Punch): void {
@@ -96,14 +123,30 @@ export class AppClockComponent {
     this.busy.set(true);
     try {
       const result = await firstValueFrom(this.api.clockPunch(kind));
-      this.state.set(result.state);
-      this.undo.offer(
-        this.translate.instant(`mobileApp.clock.done.${kind}`),
-        async () => {
-          const reverted = await firstValueFrom(this.api.undoClockPunch(result.eventId));
-          this.state.set(reverted);
-        },
-      );
+      if (isQueued(result)) {
+        const before = this.state();
+        const optimistic = this.stateAfter(kind);
+        this.state.set(optimistic);
+        this.cache(optimistic);
+        this.undo.offer(this.translate.instant('mobileApp.offline.queued'), async () => {
+          await this.queue.remove(result.entryId);
+          this.state.set(before);
+          if (before) this.cache(before);
+        });
+      } else {
+        this.state.set(result.state);
+        this.cache(result.state);
+        this.undo.offer(
+          this.translate.instant(`mobileApp.clock.done.${kind}`),
+          async () => {
+            const reverted = await firstValueFrom(this.api.undoClockPunch(result.eventId));
+            if (!isQueued(reverted)) {
+              this.state.set(reverted);
+              this.cache(reverted);
+            }
+          },
+        );
+      }
       if (this.shared()) this.identity.clear();
     } catch {
       this.snackbar.error(this.translate.instant('mobileApp.clock.failed'));

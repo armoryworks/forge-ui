@@ -7,8 +7,9 @@ import { debounceTime, distinctUntilChanged, firstValueFrom, switchMap, of, catc
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InputComponent } from '../../../shared/components/input/input.component';
-import { ScanResolveResult } from '../../../shared/models/mobile-api.model';
+import { ScanResolveResult, isQueued } from '../../../shared/models/mobile-api.model';
 import { MobileApiService } from '../../../shared/services/mobile-api.service';
+import { OfflineQueueService } from '../../../shared/services/offline-queue.service';
 import { UndoService } from '../../../shared/services/undo.service';
 import { ScanAction, ScanActionSheetComponent } from '../components/scan-action-sheet/scan-action-sheet.component';
 
@@ -28,6 +29,7 @@ import { ScanAction, ScanActionSheetComponent } from '../components/scan-action-
 export class AppLookupComponent {
   private readonly api = inject(MobileApiService);
   private readonly undo = inject(UndoService);
+  private readonly queue = inject(OfflineQueueService);
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
 
@@ -107,7 +109,9 @@ export class AppLookupComponent {
           break;
         case 'move': {
           const outcome = await firstValueFrom(this.api.advanceJob(result.id, null));
-          if (!outcome.collapsed) {
+          if (isQueued(outcome)) {
+            this.offerQueuedUndo(outcome.entryId);
+          } else if (!outcome.collapsed) {
             this.undo.offer(
               this.translate.instant('mobileApp.jobs.movedTo', { column: outcome.status.stageName }),
               () => firstValueFrom(this.api.moveJobToStage(result.id!, outcome.previousStageId)),
@@ -116,11 +120,13 @@ export class AppLookupComponent {
           this.selected.set(null);
           break;
         }
-        case 'start':
-          await firstValueFrom(this.api.startTimer(result.id));
-          this.undo.offer(this.translate.instant('mobileApp.jobs.timerStarted'), () => firstValueFrom(this.api.stopTimer()));
+        case 'start': {
+          const entry = await firstValueFrom(this.api.startTimer(result.id));
+          if (isQueued(entry)) this.offerQueuedUndo(entry.entryId);
+          else this.undo.offer(this.translate.instant('mobileApp.jobs.timerStarted'), () => firstValueFrom(this.api.stopTimer()));
           this.selected.set(null);
           break;
+        }
         case 'complete':
           await firstValueFrom(this.api.stopTimer()).catch(() => undefined);
           await this.onAction('move');
@@ -134,6 +140,10 @@ export class AppLookupComponent {
     } finally {
       this.busy.set(false);
     }
+  }
+
+  private offerQueuedUndo(entryId: string): void {
+    this.undo.offer(this.translate.instant('mobileApp.offline.queued'), () => this.queue.remove(entryId));
   }
 }
 

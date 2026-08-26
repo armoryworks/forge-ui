@@ -7,10 +7,11 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { firstValueFrom, map } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { OnHand, ScanResolveResult } from '../../../shared/models/mobile-api.model';
+import { OnHand, ScanResolveResult, isQueued } from '../../../shared/models/mobile-api.model';
 import { CameraScannerService } from '../../../shared/services/camera-scanner.service';
 import { InstanceService } from '../../../shared/services/instance.service';
 import { MobileApiService } from '../../../shared/services/mobile-api.service';
+import { OfflineQueueService } from '../../../shared/services/offline-queue.service';
 import { ScanFeedbackService } from '../../../shared/services/scan-feedback.service';
 import { SharedIdentityService } from '../../../shared/services/shared-identity.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
@@ -37,6 +38,7 @@ export class AppMoveStockComponent implements AfterViewInit, OnDestroy {
   private readonly api = inject(MobileApiService);
   private readonly feedback = inject(ScanFeedbackService);
   private readonly undo = inject(UndoService);
+  private readonly queue = inject(OfflineQueueService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly identity = inject(SharedIdentityService);
@@ -125,12 +127,16 @@ export class AppMoveStockComponent implements AfterViewInit, OnDestroy {
         partId: part.id, fromLocationId: from.id, toLocationId: to.id,
         quantity: this.quantity(), lotNumber: this.lot(),
       }));
-      this.undo.offer(
-        this.translate.instant('mobileApp.move.done', {
-          qty: result.quantity, part: result.partNumber, to: result.toLocationName,
-        }),
-        () => firstValueFrom(this.api.moveStock(result.undo)),
-      );
+      if (isQueued(result)) {
+        this.undo.offer(this.translate.instant('mobileApp.offline.queued'), () => this.queue.remove(result.entryId));
+      } else {
+        this.undo.offer(
+          this.translate.instant('mobileApp.move.done', {
+            qty: result.quantity, part: result.partNumber, to: result.toLocationName,
+          }),
+          () => firstValueFrom(this.api.moveStock(result.undo)),
+        );
+      }
       this.restart();
     } catch {
       this.snackbar.error(this.translate.instant('mobileApp.move.failed'));

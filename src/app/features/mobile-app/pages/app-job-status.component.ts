@@ -7,9 +7,10 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DatePipe } from '@angular/common';
 
-import { JobStatus } from '../../../shared/models/mobile-api.model';
+import { JobStatus, isQueued } from '../../../shared/models/mobile-api.model';
 import { InstanceService } from '../../../shared/services/instance.service';
 import { MobileApiService } from '../../../shared/services/mobile-api.service';
+import { OfflineQueueService } from '../../../shared/services/offline-queue.service';
 import { PlatformService } from '../../../shared/services/platform.service';
 import { SharedIdentityService } from '../../../shared/services/shared-identity.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
@@ -35,6 +36,7 @@ type PendingAction = 'advance' | 'note' | 'photo';
 export class AppJobStatusComponent {
   private readonly api = inject(MobileApiService);
   private readonly undo = inject(UndoService);
+  private readonly queue = inject(OfflineQueueService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly platform = inject(PlatformService);
@@ -167,6 +169,10 @@ export class AppJobStatusComponent {
   private async doAdvance(job: JobStatus): Promise<void> {
     if (job.nextStageId === null) return;
     const outcome = await firstValueFrom(this.api.advanceJob(job.id, null));
+    if (isQueued(outcome)) {
+      this.offerQueuedUndo(outcome.entryId);
+      return;
+    }
     this.job.set(outcome.status);
     if (outcome.collapsed) return;
     this.undo.offer(
@@ -183,6 +189,10 @@ export class AppJobStatusComponent {
     this.pendingNote = null;
     if (!text) return;
     const note = await firstValueFrom(this.api.addNote(job.id, text));
+    if (isQueued(note)) {
+      this.offerQueuedUndo(note.entryId);
+      return;
+    }
     this.load();
     this.undo.offer(
       this.translate.instant('mobileApp.jobs.noteAdded'),
@@ -191,6 +201,10 @@ export class AppJobStatusComponent {
         this.load();
       },
     );
+  }
+
+  private offerQueuedUndo(entryId: string): void {
+    this.undo.offer(this.translate.instant('mobileApp.offline.queued'), () => this.queue.remove(entryId));
   }
 
   private async doPhoto(job: JobStatus): Promise<void> {

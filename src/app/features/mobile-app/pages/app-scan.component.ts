@@ -6,10 +6,11 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { ScanResolveResult } from '../../../shared/models/mobile-api.model';
+import { ScanResolveResult, isQueued } from '../../../shared/models/mobile-api.model';
 import { CameraScannerService } from '../../../shared/services/camera-scanner.service';
 import { InstanceService } from '../../../shared/services/instance.service';
 import { MobileApiService } from '../../../shared/services/mobile-api.service';
+import { OfflineQueueService } from '../../../shared/services/offline-queue.service';
 import { ScanFeedbackService } from '../../../shared/services/scan-feedback.service';
 import { SharedIdentityService } from '../../../shared/services/shared-identity.service';
 import { UndoService } from '../../../shared/services/undo.service';
@@ -35,6 +36,7 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
   private readonly api = inject(MobileApiService);
   private readonly feedback = inject(ScanFeedbackService);
   private readonly undo = inject(UndoService);
+  private readonly queue = inject(OfflineQueueService);
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
   private readonly identity = inject(SharedIdentityService);
@@ -126,6 +128,12 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
   private async advance(jobId: number, code: string): Promise<void> {
     const outcome = await firstValueFrom(this.api.advanceJob(jobId, code));
     if (!outcome) return;
+    if (isQueued(outcome)) {
+      this.offerQueuedUndo(outcome.entryId);
+      this.result.set(null);
+      await this.startScanner();
+      return;
+    }
     if (outcome.collapsed) {
       this.notice.set(this.translate.instant('mobileApp.scan.collapsed'));
       return;
@@ -141,6 +149,12 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
   private async startTimer(jobId: number): Promise<void> {
     const entry = await firstValueFrom(this.api.startTimer(jobId));
     if (!entry) return;
+    if (isQueued(entry)) {
+      this.offerQueuedUndo(entry.entryId);
+      this.result.set(null);
+      await this.startScanner();
+      return;
+    }
     this.undo.offer(
       this.translate.instant('mobileApp.jobs.timerStarted'),
       () => firstValueFrom(this.api.stopTimer()),
@@ -152,6 +166,10 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
   private async complete(jobId: number, code: string): Promise<void> {
     await firstValueFrom(this.api.stopTimer()).catch(() => undefined);
     await this.advance(jobId, code);
+  }
+
+  private offerQueuedUndo(entryId: string): void {
+    this.undo.offer(this.translate.instant('mobileApp.offline.queued'), () => this.queue.remove(entryId));
   }
 
   private async startScanner(): Promise<void> {

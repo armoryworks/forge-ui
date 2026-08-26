@@ -9396,6 +9396,24 @@
       "voice": "Search by voice",
       "hint": "Type or say a job number, part, customer, or bin.",
       "none": "Nothing matched."
+    },
+    "offline": {
+      "queued": "Saved on this phone. It will sync when you are back online."
+    },
+    "sync": {
+      "title": "Sync",
+      "state": {
+        "online": "Waiting to sync",
+        "offline": "Offline",
+        "syncing": "Syncing",
+        "rejected": "Needs attention"
+      },
+      "rejectedHint": "The server did not accept these when they synced. Fix them on the desktop.",
+      "pendingHint": "These will send in order once the phone is online.",
+      "nothingWaiting": "Nothing waiting.",
+      "dismiss": "Dismiss",
+      "discard": "Discard",
+      "retry": "Sync now"
     }
   }
 }

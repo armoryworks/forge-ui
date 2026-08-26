@@ -9396,6 +9396,24 @@
       "voice": "Buscar por voz",
       "hint": "Escriba o diga un número de trabajo, pieza, cliente o ubicación.",
       "none": "Nada coincidió."
+    },
+    "offline": {
+      "queued": "Guardado en este teléfono. Se sincronizará cuando vuelva la conexión."
+    },
+    "sync": {
+      "title": "Sincronización",
+      "state": {
+        "online": "Pendiente de sincronizar",
+        "offline": "Sin conexión",
+        "syncing": "Sincronizando",
+        "rejected": "Requiere atención"
+      },
+      "rejectedHint": "El servidor no aceptó estos cambios al sincronizar. Corríjalos en el escritorio.",
+      "pendingHint": "Se enviarán en orden cuando el teléfono tenga conexión.",
+      "nothingWaiting": "Nada pendiente.",
+      "dismiss": "Descartar",
+      "discard": "Descartar",
+      "retry": "Sincronizar ahora"
     }
   }
 }

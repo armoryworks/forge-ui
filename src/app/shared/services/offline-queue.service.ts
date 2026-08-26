@@ -2,9 +2,12 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { computed, Injectable, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
+import { environment } from '../../../environments/environment';
 import { DrainResult, OfflineQueueEntry } from '../models/offline-queue-entry.model';
+import { RejectedQueueEntry } from '../models/rejected-queue-entry.model';
 import { SyncConflict } from '../models/sync-conflict.model';
 import { SyncResult } from '../models/sync-result.model';
+import { InstanceService } from './instance.service';
 
 const DB_NAME = 'forge-offline-queue';
 const DB_VERSION = 1;
@@ -13,6 +16,7 @@ const STORE_NAME = 'queue';
 @Injectable({ providedIn: 'root' })
 export class OfflineQueueService {
   private readonly http = inject(HttpClient);
+  private readonly instances = inject(InstanceService);
   private dbPromise: Promise<IDBDatabase> | null = null;
   private isDraining = false;
 
@@ -22,16 +26,26 @@ export class OfflineQueueService {
   readonly syncing = signal(false);
   readonly lastSyncResult = signal<SyncResult | null>(null);
   readonly conflict = signal<SyncConflict | null>(null);
+  /** Mobile shell: replays the server refused (4xx). Shown until dismissed; the fix happens on the desktop. */
+  readonly rejected = signal<RejectedQueueEntry[]>([]);
 
   constructor() {
     window.addEventListener('online', () => {
       this.drain();
     });
+    if (environment.mobileShell) {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && navigator.onLine) this.drain();
+      });
+    }
 
     this.refreshQueueSize();
   }
 
-  async enqueue(method: string, url: string, body?: unknown, description?: string): Promise<void> {
+  async enqueue(
+    method: string, url: string, body?: unknown, description?: string,
+    options?: { headers?: Record<string, string>; instanceId?: string | null },
+  ): Promise<string> {
     const entry: OfflineQueueEntry = {
       id: crypto.randomUUID(),
       method,
@@ -39,6 +53,8 @@ export class OfflineQueueService {
       body: body ?? null,
       timestamp: Date.now(),
       description: description ?? `${method.toUpperCase()} ${url}`,
+      headers: options?.headers,
+      instanceId: options?.instanceId ?? null,
     };
 
     const db = await this.openDb();
@@ -52,6 +68,22 @@ export class OfflineQueueService {
     });
 
     await this.refreshQueueSize();
+    return entry.id;
+  }
+
+  /** Drop a queued change before it replays — the undo for an offline action. */
+  async remove(id: string): Promise<void> {
+    await this.removeEntry(id);
+    await this.refreshQueueSize();
+  }
+
+  /** Pending entries for the active instance, oldest first. */
+  listPending(): Promise<OfflineQueueEntry[]> {
+    return this.getAllEntries();
+  }
+
+  dismissRejected(id: string): void {
+    this.rejected.update((list) => list.filter((r) => r.id !== id));
   }
 
   async drain(): Promise<DrainResult> {
@@ -75,6 +107,18 @@ export class OfflineQueueService {
           processed++;
           await this.refreshQueueSize();
         } catch (err) {
+          if (environment.mobileShell && err instanceof HttpErrorResponse && err.status >= 400 && err.status < 500) {
+            this.rejected.update((list) => [...list, {
+              id: entry.id,
+              description: entry.description ?? `${entry.method.toUpperCase()} ${entry.url}`,
+              status: err.status,
+              message: err.error?.detail ?? err.error?.title ?? '',
+              timestamp: entry.timestamp,
+            }]);
+            await this.removeEntry(entry.id);
+            failed++;
+            continue;
+          }
           if (err instanceof HttpErrorResponse && err.status === 409) {
             // Conflict — pause drain and emit for UI
             const conflictData: SyncConflict = {
@@ -213,9 +257,10 @@ export class OfflineQueueService {
       const request = store.getAll();
 
       request.onsuccess = () => {
-        const entries = (request.result as OfflineQueueEntry[]).sort(
-          (a, b) => a.timestamp - b.timestamp
-        );
+        const activeInstance = environment.mobileShell ? (this.instances.instance()?.id ?? null) : null;
+        const entries = (request.result as OfflineQueueEntry[])
+          .filter((e) => !environment.mobileShell || (e.instanceId ?? null) === activeInstance)
+          .sort((a, b) => a.timestamp - b.timestamp);
         resolve(entries);
       };
       request.onerror = () => reject(request.error);
@@ -236,7 +281,7 @@ export class OfflineQueueService {
 
   private executeRequest(entry: OfflineQueueEntry, force = false): Promise<unknown> {
     const method = entry.method.toUpperCase();
-    const headers = force ? { 'X-Force-Overwrite': 'true' } : undefined;
+    const headers = { ...(entry.headers ?? {}), ...(force ? { 'X-Force-Overwrite': 'true' } : {}) };
 
     switch (method) {
       case 'POST':

@@ -91,3 +91,13 @@ export interface StockMoveResult {
   lotNumber: string | null;
   undo: StockMoveRequest;
 }
+
+/** Returned in place of a result when the device is offline and the change was queued. */
+export interface QueuedOffline {
+  queued: true;
+  entryId: string;
+}
+
+export function isQueued<T>(value: T | QueuedOffline): value is QueuedOffline {
+  return typeof value === 'object' && value !== null && (value as QueuedOffline).queued === true;
+}
