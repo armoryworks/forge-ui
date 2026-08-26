@@ -4784,7 +4784,8 @@
     "loadingInvoice": "Loading invoice...",
     "noLinesYet": "No lines yet",
     "confirmSendTitle": "Send Invoice?",
-    "confirmSendMessage": "Send invoice {{number}} to the customer?"
+    "confirmSendMessage": "Send invoice {{number}} to the customer?",
+    "numberLockedReason": "An invoice number can only be changed while the invoice is a draft. This one has been sent or posted, so the number is now on record with the customer and in the ledger."
   },
   "payments": {
     "paymentNumberLabel": "Payment Number",
@@ -4829,7 +4830,8 @@
     "optional": "Optional",
     "amountPlaceholder": "0.00",
     "noApplicationsYet": "No payment applications yet",
-    "paymentDetails": "Payment Details"
+    "paymentDetails": "Payment Details",
+    "numberLockedReason": "A payment number can only be changed before the payment is applied. This one is already applied to an invoice, so the number is part of the settled record."
   },
   "vendors": {
     "vendorNumberLabel": "Vendor Number",
@@ -5101,7 +5103,8 @@
     "originExternalIntegration": "External",
     "originEdi": "EDI",
     "originTooltipUser": "Created by: {{name}}",
-    "originTooltipReference": "Reference: {{reference}}"
+    "originTooltipReference": "Reference: {{reference}}",
+    "numberLockedReason": "A PO number can only be changed while the purchase order is a draft. This one has been issued, so the vendor is already referencing this number."
   },
   "salesOrders": {
     "orderNumberLabel": "Order Number",
@@ -5348,7 +5351,8 @@
       "fromEmail": "From email",
       "register": "Register",
       "confirmBlockedHint": "Attach customer acceptance before releasing to production."
-    }
+    },
+    "numberLockedReason": "An order number can only be changed while the order is a draft. This one has been confirmed, so the number is already shared with the customer and downstream records."
   },
   "publicAcceptance": {
     "loading": "Loading…",
@@ -5497,7 +5501,8 @@
       "context": "Quote {{ quote }} · {{ customer }}",
       "send": "Send",
       "sent": "Quote email sent."
-    }
+    },
+    "numberLockedReason": "A quote number can only be changed while the quote is a draft. This one has been sent, so the customer already has the number."
   },
   "shipments": {
     "shipmentNumberLabel": "Shipment Number",

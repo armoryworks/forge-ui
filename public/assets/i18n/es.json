@@ -4777,7 +4777,8 @@
     "loadingInvoice": "Cargando factura...",
     "noLinesYet": "Sin líneas aún",
     "confirmSendTitle": "¿Enviar factura?",
-    "confirmSendMessage": "¿Enviar la factura {{number}} al cliente?"
+    "confirmSendMessage": "¿Enviar la factura {{number}} al cliente?",
+    "numberLockedReason": "El número de factura solo se puede cambiar mientras la factura es un borrador. Esta ya se envió o se contabilizó, por lo que el número ya consta ante el cliente y en el libro mayor."
   },
   "payments": {
     "paymentNumberLabel": "Número de pago",
@@ -4822,7 +4823,8 @@
     "optional": "Opcional",
     "amountPlaceholder": "0.00",
     "noApplicationsYet": "Sin aplicaciones de pago aún",
-    "paymentDetails": "Detalles de Pago"
+    "paymentDetails": "Detalles de Pago",
+    "numberLockedReason": "El número de pago solo se puede cambiar antes de aplicar el pago. Este ya se aplicó a una factura, por lo que el número forma parte del registro liquidado."
   },
   "vendors": {
     "vendorNumberLabel": "Número de proveedor",
@@ -5094,7 +5096,8 @@
     "originExternalIntegration": "Externo",
     "originEdi": "EDI",
     "originTooltipUser": "Creado por: {{name}}",
-    "originTooltipReference": "Referencia: {{reference}}"
+    "originTooltipReference": "Referencia: {{reference}}",
+    "numberLockedReason": "El número de orden de compra solo se puede cambiar mientras la orden es un borrador. Esta ya se emitió, por lo que el proveedor ya utiliza este número."
   },
   "salesOrders": {
     "orderNumberLabel": "Número de pedido",
@@ -5341,7 +5344,8 @@
       "fromEmail": "Correo de origen",
       "register": "Registrar",
       "confirmBlockedHint": "Adjunte la aceptación del cliente antes de liberar a producción."
-    }
+    },
+    "numberLockedReason": "El número de pedido solo se puede cambiar mientras el pedido es un borrador. Este ya se confirmó, por lo que el número ya se compartió con el cliente y con los registros posteriores."
   },
   "publicAcceptance": {
     "loading": "Cargando…",
@@ -5490,7 +5494,8 @@
       "context": "Cotización {{ quote }} · {{ customer }}",
       "send": "Enviar",
       "sent": "Cotización enviada por correo."
-    }
+    },
+    "numberLockedReason": "El número de cotización solo se puede cambiar mientras la cotización es un borrador. Esta ya se envió, por lo que el cliente ya tiene el número."
   },
   "shipments": {
     "shipmentNumberLabel": "Número de envío",

@@ -3,6 +3,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 
 import { SettingsCatalogEntry } from '../models/setting-entry.model';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 
 /**
  * Phase 1m — admin settings service. Wraps /api/v1/admin/settings.
@@ -12,6 +13,7 @@ import { SettingsCatalogEntry } from '../models/setting-entry.model';
 @Injectable({ providedIn: 'root' })
 export class AdminSettingsService {
   private readonly http = inject(HttpClient);
+  private readonly manualNumbers = inject(ManualNumberSettingsService);
   private readonly base = '/api/v1/admin/settings';
 
   readonly groups = signal<string[]>([]);
@@ -46,7 +48,10 @@ export class AdminSettingsService {
       // typically only edited one field and the masked-value display
       // is the same regardless. Re-call loadGroup() if a stale state
       // becomes a problem.
-      tap(() => undefined),
+      // Exception: the manual-number flags are cached app-wide and gate
+      // editable business-number fields, so they must re-read here or the
+      // toggle appears to do nothing until a full reload.
+      tap(() => { if (key.endsWith('.allow_manual_numbers')) this.manualNumbers.refresh(); }),
     );
   }
 }

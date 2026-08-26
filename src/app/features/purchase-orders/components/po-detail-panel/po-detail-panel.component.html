@@ -24,6 +24,8 @@
                   [attr.aria-label]="'purchaseOrders.editPoNumber' | translate" (click)="startEditPoNumber()">
                   <span class="material-icons-outlined">edit</span>
                 </button>
+              } @else if (poNumberLocked()) {
+                <app-number-lock-info [reason]="'purchaseOrders.numberLockedReason' | translate" />
               }
             </div>
           }

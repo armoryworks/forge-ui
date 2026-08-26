@@ -35,6 +35,7 @@ import { AccountingService } from '../../../../shared/services/accounting.servic
 import { FileAttachment } from '../../../../shared/models/file.model';
 import { PaymentMilestone } from '../../../../shared/models/payment-milestone.model';
 import { PaymentSchedule } from '../../../../shared/models/payment-schedule.model';
+import { NumberLockInfoComponent } from '../../../../shared/components/number-lock-info/number-lock-info.component';
 
 /** Per-milestone action availability for the panel's schedule section. */
 interface MilestoneActionRow {
@@ -47,7 +48,7 @@ interface MilestoneActionRow {
 @Component({
   selector: 'app-quote-detail-panel',
   standalone: true,
-  imports: [
+  imports: [NumberLockInfoComponent, 
     DatePipe, DecimalPipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent, FileUploadZoneComponent,
@@ -87,6 +88,8 @@ export class QuoteDetailPanelComponent {
     quoteNumber: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(20)] }),
   });
   protected readonly allowManualQuoteNumbers = computed(() => this.manualNumberSettings.isEnabled('quotes'));
+  /** Manual numbering is on, but this record's lifecycle fixes the number. */
+  protected readonly quoteNumberLocked = computed(() => this.allowManualQuoteNumbers() && !this.canEditQuoteNumber());
   protected readonly canEditQuoteNumber = computed(
     () => this.allowManualQuoteNumbers() && this.quote()?.status === 'Draft');
 

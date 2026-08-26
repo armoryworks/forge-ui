@@ -25,6 +25,8 @@
                   [attr.aria-label]="'quotes.editNumber' | translate">
                   <span class="material-icons-outlined">edit</span>
                 </button>
+              } @else if (quoteNumberLocked()) {
+                <app-number-lock-info [reason]="'quotes.numberLockedReason' | translate" />
               }
             </div>
           }

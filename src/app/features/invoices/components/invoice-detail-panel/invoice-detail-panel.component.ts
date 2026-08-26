@@ -18,11 +18,12 @@ import { ConfirmSendService } from '../../../../shared/services/confirm-send.ser
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { NumberLockInfoComponent } from '../../../../shared/components/number-lock-info/number-lock-info.component';
 
 @Component({
   selector: 'app-invoice-detail-panel',
   standalone: true,
-  imports: [
+  imports: [NumberLockInfoComponent, 
     DatePipe, DecimalPipe, TranslatePipe, RouterLink, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent, InputComponent,
@@ -53,6 +54,8 @@ export class InvoiceDetailPanelComponent {
   protected readonly numberControl = new FormControl('');
   protected readonly editingNumber = signal(false);
   protected readonly savingNumber = signal(false);
+  /** Manual numbering is on, but this record's lifecycle fixes the number. */
+  protected readonly numberLocked = computed(() => this.manualNumbers.isEnabled('invoices') && !this.canEditNumber());
   protected readonly canEditNumber = computed(() =>
     this.manualNumbers.isEnabled('invoices') && this.invoice()?.status === 'Draft',
   );

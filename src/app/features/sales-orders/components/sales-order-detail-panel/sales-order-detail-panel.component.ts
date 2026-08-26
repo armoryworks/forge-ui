@@ -47,6 +47,7 @@ import { DialogComponent } from '../../../../shared/components/dialog/dialog.com
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { SalesOrderAcceptanceService, RecordAcceptanceMethod } from '../../services/sales-order-acceptance.service';
 import { SalesOrderAcceptance } from '../../models/sales-order-acceptance.model';
+import { NumberLockInfoComponent } from '../../../../shared/components/number-lock-info/number-lock-info.component';
 
 /** Capability gating the whole customer-acceptance feature. */
 const CAP_SO_ACCEPTANCE = 'CAP-O2C-SO-ACCEPTANCE';
@@ -56,7 +57,7 @@ type TabId = 'overview' | 'lines' | 'schedule' | 'stages' | 'shipments' | 'retur
 @Component({
   selector: 'app-sales-order-detail-panel',
   standalone: true,
-  imports: [
+  imports: [NumberLockInfoComponent, 
     DatePipe, DecimalPipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
     BarcodeInfoComponent, EntityActivitySectionComponent,
@@ -257,6 +258,8 @@ export class SalesOrderDetailPanelComponent {
     nonNullable: true,
     validators: [Validators.required, Validators.maxLength(20)],
   });
+  /** Manual numbering is on, but this record's lifecycle fixes the number. */
+  protected readonly orderNumberLocked = computed(() => this.allowManualOrderNumbers() && !this.canEditOrderNumber());
   protected readonly canEditOrderNumber = computed(
     () => this.allowManualOrderNumbers() && this.so()?.status === 'Draft');
 

@@ -17,11 +17,12 @@ import { EntityLinkComponent } from '../../../../shared/components/entity-link/e
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { NumberLockInfoComponent } from '../../../../shared/components/number-lock-info/number-lock-info.component';
 
 @Component({
   selector: 'app-payment-detail-panel',
   standalone: true,
-  imports: [
+  imports: [NumberLockInfoComponent, 
     DatePipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent, InputComponent,
@@ -52,6 +53,8 @@ export class PaymentDetailPanelComponent {
   protected readonly numberControl = new FormControl('');
   protected readonly editingNumber = signal(false);
   protected readonly savingNumber = signal(false);
+  /** Manual numbering is on, but this record's lifecycle fixes the number. */
+  protected readonly numberLocked = computed(() => this.manualNumbers.isEnabled('payments') && !this.canEditNumber());
   protected readonly canEditNumber = computed(() => {
     const p = this.payment();
     return this.manualNumbers.isEnabled('payments') && !!p && p.applications.length === 0;

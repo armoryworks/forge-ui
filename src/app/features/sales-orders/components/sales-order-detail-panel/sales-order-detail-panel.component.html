@@ -24,6 +24,8 @@
                   [attr.aria-label]="'salesOrders.orderNumberLabel' | translate">
                   <span class="material-icons-outlined">edit</span>
                 </button>
+              } @else if (orderNumberLocked()) {
+                <app-number-lock-info [reason]="'salesOrders.numberLockedReason' | translate" />
               }
             </div>
           }

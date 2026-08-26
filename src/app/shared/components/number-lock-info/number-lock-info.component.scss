@@ -1,0 +1,12 @@
+@use 'styles/variables' as *;
+
+.number-lock {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-muted);
+  cursor: help;
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+  }
+}

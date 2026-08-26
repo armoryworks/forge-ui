@@ -35,11 +35,12 @@ import { INCOTERM_OPTIONS } from '../../models/incoterm.const';
 import { PO_ORIGIN_CHIP_CLASSES, PO_ORIGIN_ICONS, PO_ORIGIN_LABEL_KEYS } from '../../models/po-origin.const';
 import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
+import { NumberLockInfoComponent } from '../../../../shared/components/number-lock-info/number-lock-info.component';
 
 @Component({
   selector: 'app-po-detail-panel',
   standalone: true,
-  imports: [
+  imports: [NumberLockInfoComponent, 
     DatePipe, DecimalPipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule,
     BarcodeInfoComponent, EntityActivitySectionComponent,
@@ -65,6 +66,8 @@ export class PoDetailPanelComponent implements OnInit {
 
   /** Whether the PO number may be renamed (manual numbers on AND PO still in Draft). */
   protected readonly allowManualPoNumbers = computed(() => this.manualNumberSettings.isEnabled('purchaseOrders'));
+  /** Manual numbering is on, but this record's lifecycle fixes the number. */
+  protected readonly poNumberLocked = computed(() => this.allowManualPoNumbers() && !this.canEditPoNumber());
   protected readonly canEditPoNumber = computed(() => this.allowManualPoNumbers() && this.po()?.status === 'Draft');
 
   constructor() {

@@ -23,6 +23,8 @@
                   [attr.aria-label]="'payments.editPaymentNumber' | translate">
                   <span class="material-icons-outlined">edit</span>
                 </button>
+              } @else if (numberLocked()) {
+                <app-number-lock-info [reason]="'payments.numberLockedReason' | translate" />
               }
             </div>
           }
