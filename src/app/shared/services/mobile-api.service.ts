@@ -3,13 +3,13 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { Observable, catchError, from, map, of } from 'rxjs';
 
-import { environment } from '../../../environments/environment';
 import {
   ClockPunchResult, ClockState, JobAdvanceResult, JobNote, JobStatus, OnHand, QueuedOffline,
   ScanResolveResult, StockMoveRequest, StockMoveResult, UploadedJobFile,
 } from '../models/mobile-api.model';
 import { InstanceService } from './instance.service';
 import { OfflineQueueService } from './offline-queue.service';
+import { PlatformService } from './platform.service';
 
 type Method = 'POST' | 'PATCH' | 'DELETE';
 
@@ -25,6 +25,7 @@ export class MobileApiService {
   private readonly http = inject(HttpClient);
   private readonly queue = inject(OfflineQueueService);
   private readonly instances = inject(InstanceService);
+  private readonly platform = inject(PlatformService);
 
   resolveScan(code: string): Observable<ScanResolveResult> {
     return this.http.post<ScanResolveResult>('/api/v1/mobile/scan/resolve', { code });
@@ -111,7 +112,7 @@ export class MobileApiService {
 
   private mutate<T>(method: Method, url: string, body: unknown, description: string): Observable<T | QueuedOffline> {
     const headers = this.idempotentHeaders();
-    if (environment.mobileShell && !navigator.onLine) {
+    if (this.platform.mobileShell && !navigator.onLine) {
       return from(this.queue.enqueue(method, url, body, description, {
         headers, instanceId: this.instances.instance()?.id ?? null,
       })).pipe(map((entryId) => ({ queued: true as const, entryId })));

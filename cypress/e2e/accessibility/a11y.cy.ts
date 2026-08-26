@@ -84,4 +84,67 @@ describe('Accessibility', () => {
       includedImpacts: ['critical', 'serious'],
     });
   });
+
+  it('mobile app scan should have no critical accessibility violations', () => {
+    cy.viewport(390, 844);
+    cy.visit('/app/scan');
+    cy.injectAxe();
+    cy.checkA11y(null, {
+      includedImpacts: ['critical', 'serious'],
+    });
+  });
+
+  it('mobile app clock should have no critical accessibility violations', () => {
+    cy.viewport(390, 844);
+    cy.visit('/app/clock');
+    cy.injectAxe();
+    cy.checkA11y(null, {
+      includedImpacts: ['critical', 'serious'],
+    });
+  });
+
+  it('mobile app jobs should have no critical accessibility violations', () => {
+    cy.viewport(390, 844);
+    cy.visit('/app/jobs');
+    cy.injectAxe();
+    cy.checkA11y(null, {
+      includedImpacts: ['critical', 'serious'],
+    });
+  });
+
+  it('mobile app move stock should have no critical accessibility violations', () => {
+    cy.viewport(390, 844);
+    cy.visit('/app/move');
+    cy.injectAxe();
+    cy.checkA11y(null, {
+      includedImpacts: ['critical', 'serious'],
+    });
+  });
+
+  it('mobile app lookup should have no critical accessibility violations', () => {
+    cy.viewport(390, 844);
+    cy.visit('/app/lookup');
+    cy.injectAxe();
+    cy.checkA11y(null, {
+      includedImpacts: ['critical', 'serious'],
+    });
+  });
+
+  it('mobile app account should have no critical accessibility violations', () => {
+    cy.viewport(390, 844);
+    cy.visit('/app/account');
+    cy.injectAxe();
+    cy.checkA11y(null, {
+      includedImpacts: ['critical', 'serious'],
+    });
+  });
+
+  it('mobile app enrollment should have no critical accessibility violations', () => {
+    cy.viewport(390, 844);
+    cy.visit('/app/enroll');
+    cy.injectAxe();
+    cy.checkA11y(null, {
+      includedImpacts: ['critical', 'serious'],
+    });
+  });
 });

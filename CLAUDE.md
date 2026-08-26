@@ -1684,6 +1684,40 @@ Each part links to the document, the original message, and the agreement chain b
 
 
 <!-- ===== Multi-Tab + Offline Resilience ===== -->
+## Mobile app — native shell (`features/mobile-app/`, added 2026-08-25)
+
+The Capacitor app (`com.armoryworks.forge`, `npm run build:mobile` → `dist/forge-ui-mobile`,
+`environment.mobile.ts` with `mobileShell: true`) mounts a five-tab shell at `/app` — Scan,
+Clock, Jobs, Move, Lookup — plus `/app/account` behind the gear and `/app/enroll` outside the
+shell. The legacy `/m` PWA is untouched. Rules that must survive edits:
+
+- **One text field in the whole app**: Lookup's search (plus the server address at manual
+  enrollment and the problem-report textarea). Everything else is a scan or a big button.
+  Every action shows a 30-second undo toast (`UndoService`) backed by a compensating call —
+  never a confirmation dialog.
+- **Every mutation goes through `MobileApiService.mutate()`**: it mints `Idempotency-Key` +
+  `X-Client-Timestamp`, and when `navigator.onLine` is false it queues the request in
+  `OfflineQueueService` (per instance, headers replayed verbatim) and returns a
+  `QueuedOffline` marker — check it with `isQueued()` and offer an undo that calls
+  `queue.remove(entryId)`. Reads never queue. A 4xx on replay lands in `queue.rejected`
+  (the fix is on the desktop), never blocks the queue.
+- **URLs are relative `/api/v1/...`**; `apiBaseInterceptor` (registered LAST) prefixes the
+  enrolled instance's origin and adds `X-Device-Uuid` / `X-Device-Token`. `environment.apiUrl`
+  is `/api/v1` in the mobile build for exactly that reason — never a host.
+- **No third-party traffic.** Fonts and icons are bundled (`@fontsource`). Crash reports go
+  only to the DSN the instance publishes in `/.well-known/forge.json` (`CrashReportingService`,
+  toggle on Account); no DSN → nothing sent. `MobileErrorHandler` is the only hook.
+- **Screens are gated by `CAP-MOBILE-SCAN/CLOCK/JOBS/STOCK/LOOKUP`** (`mobileScreenGuard`,
+  shell tabs). Gating fails open on an unknown snapshot; the server still 403s.
+- **Shared devices** (`instance.shared`): no PIN lock; `SharedIdentityService` +
+  `IdentityPromptComponent` identify the person before any mutation; clear after 60 s idle
+  and right after a clock punch.
+- **Secrets live in `SecureStorageService`** (Keychain / EncryptedSharedPreferences on native,
+  localStorage on web) namespaced per instance by `InstanceService`; access tokens stay in
+  memory (`TokenStorageService`). Never touch `localStorage` directly in shell code.
+- Verify with the stub-driven Playwright spec (`npx playwright test mobile-shell`) and the
+  a11y gate at 390×844; the hands-on list is `forge/docs/mobile-test-matrix.md`.
+
 ## Multi-Tab Handling
 - Auth sync across tabs via `BroadcastChannel` / `storage` event — logout propagates to all tabs
 - Theme sync via `storage` event on `themeMode` key

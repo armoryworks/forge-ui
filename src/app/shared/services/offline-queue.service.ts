@@ -2,12 +2,12 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { computed, Injectable, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-import { environment } from '../../../environments/environment';
 import { DrainResult, OfflineQueueEntry } from '../models/offline-queue-entry.model';
 import { RejectedQueueEntry } from '../models/rejected-queue-entry.model';
 import { SyncConflict } from '../models/sync-conflict.model';
 import { SyncResult } from '../models/sync-result.model';
 import { InstanceService } from './instance.service';
+import { PlatformService } from './platform.service';
 
 const DB_NAME = 'forge-offline-queue';
 const DB_VERSION = 1;
@@ -17,6 +17,7 @@ const STORE_NAME = 'queue';
 export class OfflineQueueService {
   private readonly http = inject(HttpClient);
   private readonly instances = inject(InstanceService);
+  private readonly platform = inject(PlatformService);
   private dbPromise: Promise<IDBDatabase> | null = null;
   private isDraining = false;
 
@@ -33,7 +34,7 @@ export class OfflineQueueService {
     window.addEventListener('online', () => {
       this.drain();
     });
-    if (environment.mobileShell) {
+    if (this.platform.mobileShell) {
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible' && navigator.onLine) this.drain();
       });
@@ -107,7 +108,7 @@ export class OfflineQueueService {
           processed++;
           await this.refreshQueueSize();
         } catch (err) {
-          if (environment.mobileShell && err instanceof HttpErrorResponse && err.status >= 400 && err.status < 500) {
+          if (this.platform.mobileShell && err instanceof HttpErrorResponse && err.status >= 400 && err.status < 500) {
             this.rejected.update((list) => [...list, {
               id: entry.id,
               description: entry.description ?? `${entry.method.toUpperCase()} ${entry.url}`,
@@ -257,9 +258,9 @@ export class OfflineQueueService {
       const request = store.getAll();
 
       request.onsuccess = () => {
-        const activeInstance = environment.mobileShell ? (this.instances.instance()?.id ?? null) : null;
+        const activeInstance = this.platform.mobileShell ? (this.instances.instance()?.id ?? null) : null;
         const entries = (request.result as OfflineQueueEntry[])
-          .filter((e) => !environment.mobileShell || (e.instanceId ?? null) === activeInstance)
+          .filter((e) => !this.platform.mobileShell || (e.instanceId ?? null) === activeInstance)
           .sort((a, b) => a.timestamp - b.timestamp);
         resolve(entries);
       };
