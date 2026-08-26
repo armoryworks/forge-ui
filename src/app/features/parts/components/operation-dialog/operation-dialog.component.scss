@@ -6,6 +6,23 @@
   flex-direction: column;
 }
 
+.est-time-group {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__label {
+    @include uppercase-label($font-size-xxs);
+    color: var(--text-muted);
+  }
+
+  &__fields {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $sp-md;
+  }
+}
+
 // Work-center select + inline "New work center" affordance stacked in one
 // dialog-row cell. The button sits compact under the select, left-aligned.
 .op-work-center {

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -60,6 +61,7 @@ export interface PartQuickCreateDialogData {
 })
 export class PartQuickCreateDialogComponent {
   private readonly partsService = inject(PartsService);
+  protected readonly manualNumbers = inject(ManualNumberSettingsService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly dialogRef = inject(MatDialogRef<PartQuickCreateDialogComponent, PartDetail | null>);
@@ -69,7 +71,7 @@ export class PartQuickCreateDialogComponent {
 
   // Gated by the `parts.allow_manual_numbers` system setting (GET /parts/config).
   // When false, the part-number field is hidden and the server auto-generates.
-  protected readonly allowManualPartNumber = signal(false);
+  protected readonly allowManualPartNumber = computed(() => this.manualNumbers.isEnabled('parts'));
 
   protected readonly form = new FormGroup({
     name: new FormControl<string>(
@@ -92,11 +94,6 @@ export class PartQuickCreateDialogComponent {
   });
 
   constructor() {
-    this.partsService.getPartsConfig().subscribe({
-      next: (cfg) => this.allowManualPartNumber.set(cfg.allowManualPartNumbers),
-      // On failure, leave manual entry off — the server still auto-generates.
-      error: () => this.allowManualPartNumber.set(false),
-    });
   }
 
   protected readonly title = computed(() =>

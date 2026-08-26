@@ -228,7 +228,8 @@
 
     <!-- System Settings Tab -->
     @if (activeTab() === 'settings') {
-      <div class="tab-panel">
+      <div class="tab-panel tab-panel--settings">
+        <div class="settings-scroll">
 
         <!-- Company Profile -->
         <div class="settings-section">
@@ -329,10 +330,6 @@
               <span class="material-icons-outlined">settings</span>
               {{ 'admin.systemSettings' | translate }}
             </h3>
-            <button class="action-btn action-btn--primary action-btn--sm" [disabled]="saving() || !hasSettingsChanges()" (click)="saveSettings()">
-              <span class="material-icons-outlined">save</span>
-              {{ 'common.saveChanges' | translate }}
-            </button>
           </div>
         </div>
 
@@ -417,6 +414,14 @@
               </div>
             </div>
           }
+        </div>
+        </div>
+
+        <div class="settings-footer">
+          <button class="action-btn action-btn--primary" [disabled]="saving() || !hasSettingsChanges()" (click)="saveSettings()">
+            <span class="material-icons-outlined">save</span>
+            {{ 'common.saveChanges' | translate }}
+          </button>
         </div>
       </div>
     }

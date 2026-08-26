@@ -3,7 +3,7 @@ export interface CreateOperationRequest {
   title: string;
   instructions?: string;
   workCenterId?: number;
-  estimatedMinutes?: number;
+  estimatedMs?: number;
   isQcCheckpoint: boolean;
   qcCriteria?: string;
   referencedOperationId?: number;

@@ -1,0 +1,26 @@
+@use 'styles/variables' as *;
+
+.quick-start__lead {
+  margin: 0 0 $sp-md;
+  font-size: $font-size-base;
+  color: var(--text-secondary);
+}
+
+.quick-start__error {
+  margin: $sp-md 0 0;
+  font-size: $font-size-base;
+  color: var(--error);
+}
+
+.quick-start__hint {
+  margin: 0 0 $sp-md;
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+}
+
+.quick-start__lines {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  margin: $sp-md 0;
+}

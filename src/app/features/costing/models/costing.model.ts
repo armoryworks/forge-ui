@@ -62,3 +62,66 @@ export interface FreezeCostingPeriodResult {
   budgetsRated: number;
   workCentersRated: number;
 }
+
+/** One overhead category of a costing template. */
+export interface CostingTemplateLine {
+  id: number;
+  code: string;
+  name: string;
+  behavior: 'Fixed' | 'Variable' | 'Semi';
+  driver: 'MachineHour' | 'LaborHour' | 'LaborDollar' | 'MaterialDollar' | 'Unit';
+  amountBasis: 'AnnualAmount' | 'MonthlyAmount' | 'MonthlyPerEmployee' | 'PercentOfWages';
+  defaultValue: number | null;
+  glAccountNumber: string | null;
+  glAccountName: string | null;
+  sortOrder: number;
+}
+
+/** A costing template (quick-start package) with its lines. */
+export interface CostingTemplate {
+  id: number;
+  name: string;
+  description: string | null;
+  isSystem: boolean;
+  lines: CostingTemplateLine[];
+}
+
+/** Save payload: whole-graph create (no id) or replace (id). */
+export interface SaveCostingTemplateRequest {
+  id: number | null;
+  name: string;
+  description: string | null;
+  lines: {
+    code: string;
+    name: string;
+    behavior: CostingTemplateLine['behavior'];
+    driver: CostingTemplateLine['driver'];
+    amountBasis: CostingTemplateLine['amountBasis'];
+    defaultValue: number | null;
+    glAccountNumber: string | null;
+    glAccountName: string | null;
+  }[];
+}
+
+/** Answers for applying a costing template. */
+export interface ApplyCostingTemplateRequest {
+  fiscalYear: number;
+  directHeadcount: number;
+  averageHourlyWage: number;
+  values: Record<string, number>;
+  createGlBudgets: boolean;
+  setDefaultLaborRates: boolean;
+}
+
+/** What the apply configured, and the resulting absorption rate. */
+export interface CostingQuickStartResult {
+  costingCostCenterId: number;
+  costingPeriodId: number;
+  poolsConfigured: string[];
+  annualDirectLaborHours: number;
+  totalAnnualOverhead: number;
+  overheadRatePerLaborHour: number;
+  glBudgetsCreated: boolean;
+  laborRatesSet: number;
+  notes: string[];
+}

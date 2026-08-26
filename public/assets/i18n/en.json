@@ -81,7 +81,8 @@
     "ledger": "Ledger",
     "bankStatements": "Bank Statements",
     "exports": "QBO Export",
-    "chartOfAccounts": "Chart of Accounts"
+    "chartOfAccounts": "Chart of Accounts",
+    "pieceRates": "Piece Rates"
   },
   "navGroups": {
     "operations": "Operations",
@@ -930,7 +931,7 @@
     "deleteOperationAria": "Delete operation",
     "addStep": "Add Operation",
     "stepNumber": "Step #",
-    "estMinutes": "Est. Minutes",
+    "estMinutes": "Minutes",
     "instructions": "Instructions",
     "workCenter": "Work Center",
     "workCenterNone": "— None —",
@@ -1408,7 +1409,10 @@
       "vendorCompare": "Vendor comparison",
       "lastReceiptAt": "Last receipt",
       "cheapestSource": "Cheapest"
-    }
+    },
+    "estTime": "Estimated time",
+    "estHours": "Hours",
+    "estMilliseconds": "Milliseconds"
   },
   "vendorSources": {
     "preferred": "Preferred",
@@ -9174,7 +9178,8 @@
     "tabs": {
       "periods": "Periods",
       "costCenters": "Cost Centers",
-      "pools": "Overhead Pools"
+      "pools": "Overhead Pools",
+      "templates": "Templates"
     },
     "periods": {
       "start": "Start",
@@ -9225,6 +9230,81 @@
       "amount": "Budget Amount",
       "qty": "Driver Qty",
       "set": "Set Budget"
+    },
+    "quickStart": {
+      "button": "Quick start",
+      "title": "Costing quick start",
+      "lead": "Answer a few questions and NOM-style setup populates the plant cost center, this year’s costing period, the standard overhead pools with budgets, and (with full GL on) matching expense accounts + GL budget lines.",
+      "fiscalYear": "Fiscal year",
+      "headcount": "Direct headcount",
+      "wage": "Average hourly wage",
+      "payrollTax": "Employer payroll tax",
+      "benefits": "Benefits / employee / month",
+      "utilities": "Utilities / month",
+      "facilities": "Facilities & rent / month",
+      "equipment": "Equipment & depreciation / year",
+      "createGlBudgets": "Also create GL expense accounts + budget lines",
+      "setLaborRates": "Set default labor rates for users without one",
+      "apply": "Apply",
+      "failed": "Quick start failed — nothing was changed.",
+      "applied": "Costing quick start applied: {{pools}} pools budgeted, overhead {{rate}}/labor-hour.",
+      "template": "Template",
+      "basisSuffix": {
+        "AnnualAmount": "/ year",
+        "MonthlyAmount": "/ month",
+        "MonthlyPerEmployee": "/ employee / month",
+        "PercentOfWages": "(% of wages)"
+      }
+    },
+    "templates": {
+      "hint": "Templates define the overhead categories the quick start asks about. The system template ships with the product; build your own for your shop.",
+      "new": "New template",
+      "edit": "Edit",
+      "delete": "Delete",
+      "system": "System",
+      "lines": "Lines",
+      "noneYet": "No templates yet.",
+      "loadFailed": "Could not load costing templates.",
+      "newTitle": "New costing template",
+      "editTitle": "Edit costing template",
+      "name": "Template name",
+      "description": "Description",
+      "addLine": "Add line",
+      "removeLine": "Remove line",
+      "noLines": "Add at least one overhead category line.",
+      "code": "Code",
+      "lineName": "Category",
+      "behaviorLabel": "Behavior",
+      "driverLabel": "Driver",
+      "basisLabel": "Asked as",
+      "defaultValue": "Default",
+      "glNumber": "GL account #",
+      "glName": "GL account name",
+      "save": "Save template",
+      "saveFailed": "Could not save the template.",
+      "saved": "Template \"{{name}}\" saved.",
+      "deleteTitle": "Delete template?",
+      "deleteMessage": "Delete costing template \"{{name}}\"? Applied budgets are kept.",
+      "deleteConfirm": "Delete",
+      "deleteFailed": "Could not delete the template.",
+      "behavior": {
+        "Fixed": "Fixed",
+        "Variable": "Variable",
+        "Semi": "Semi-variable"
+      },
+      "driver": {
+        "LaborHour": "Labor hours",
+        "MachineHour": "Machine hours",
+        "LaborDollar": "Labor dollars",
+        "MaterialDollar": "Material dollars",
+        "Unit": "Units"
+      },
+      "basis": {
+        "MonthlyAmount": "Monthly amount",
+        "AnnualAmount": "Annual amount",
+        "MonthlyPerEmployee": "Per employee / month",
+        "PercentOfWages": "Percent of wages"
+      }
     }
   },
   "mobileApp": {
@@ -9448,5 +9528,34 @@
       "problemSent": "Sent. Your admins have it.",
       "problemFailed": "Could not send. Try again when online."
     }
+  },
+  "pieceRates": {
+    "title": "Piece rates",
+    "ratesTitle": "Rates",
+    "part": "Part",
+    "ratePerPiece": "Rate per piece",
+    "effectiveFrom": "Effective from (default today)",
+    "setRate": "Set rate",
+    "ratesHint": "A rate is a timeline, not a number — setting one starts a new row from the effective date; earlier work keeps the rate it was earned under. Expand a row for its history.",
+    "noneYet": "No piece rates yet — set the first one above.",
+    "current": "current",
+    "logTitle": "Log pieces",
+    "worker": "Worker",
+    "workDate": "Date",
+    "quantity": "Pieces",
+    "logPieces": "Log pieces",
+    "noWork": "No pieces logged this week.",
+    "deleteEntry": "Delete entry",
+    "complianceTitle": "Weekly minimum-wage check",
+    "week": "Any date in the week",
+    "complianceHint": "Piece earnings vs hours × the jurisdiction minimum (worker’s work location, else the default location, else federal). Simple weekly averaging — stricter state schemes (e.g. CA AB 1513) need their own review. Assistance, not legal advice.",
+    "totalMakeup": "Make-up owed",
+    "noCompliance": "No piece work in this week.",
+    "loadFailed": "Could not load piece-rate data.",
+    "rateSet": "Rate set.",
+    "rateSetFailed": "Could not set the rate.",
+    "workLogged": "Logged — earned {{earnings}}.",
+    "workLogFailed": "Could not log pieces (is a rate in force for that date?).",
+    "deleteFailed": "Could not delete the entry."
   }
 }

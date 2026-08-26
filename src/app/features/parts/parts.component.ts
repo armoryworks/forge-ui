@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ManualNumberSettingsService } from '../../shared/services/manual-number-settings.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs';
@@ -65,6 +66,7 @@ type ViewMode = 'table' | 'cards';
 })
 export class PartsComponent {
   protected readonly partsService = inject(PartsService);
+  protected readonly manualNumbers = inject(ManualNumberSettingsService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly scanner = inject(ScannerService);
@@ -200,7 +202,7 @@ export class PartsComponent {
   protected readonly editingPart = signal<PartDetail | null>(null);
 
   // Gated by the `parts.allow_manual_numbers` system setting (GET /parts/config).
-  protected readonly allowManualPartNumbers = signal(false);
+  protected readonly allowManualPartNumbers = computed(() => this.manualNumbers.isEnabled('parts'));
 
   protected readonly partForm = new FormGroup({
     partNumber: new FormControl(''),
@@ -257,10 +259,6 @@ export class PartsComponent {
     this.scanner.setContext('parts');
     this.loadParts();
     this.loadEntitylessDrafts();
-    this.partsService.getPartsConfig().subscribe({
-      next: (cfg) => this.allowManualPartNumbers.set(cfg.allowManualPartNumbers),
-      error: () => this.allowManualPartNumbers.set(false),
-    });
 
     effect(() => {
       const scan = this.scanner.lastScan();

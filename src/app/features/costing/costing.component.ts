@@ -7,7 +7,7 @@ import { map } from 'rxjs';
 
 import { format } from 'date-fns';
 
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
@@ -19,19 +19,27 @@ import { ColumnCellDirective } from '../../shared/directives/column-cell.directi
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { ViewModeToggleComponent } from '../../shared/components/view-mode-toggle/view-mode-toggle.component';
 import { ViewMode, DEFAULT_VIEW_MODE } from '../../shared/models/view-mode.model';
+import { MatDialog } from '@angular/material/dialog';
+
+import { SpacerDirective } from '../../shared/directives/spacer.directive';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { ToastService } from '../../shared/services/toast.service';
 import { toIsoDate } from '../../shared/utils/date.utils';
 
 import { CostingService } from './services/costing.service';
 import { CostingRatesVisualComponent } from './components/costing-rates-visual/costing-rates-visual.component';
+import { CostingQuickStartDialogComponent } from './components/costing-quick-start-dialog/costing-quick-start-dialog.component';
+import { CostingTemplateEditorDialogComponent, CostingTemplateEditorData } from './components/costing-template-editor-dialog/costing-template-editor-dialog.component';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import {
   CostingPeriod,
   CostingCostCenter,
   OverheadPool,
   WorkCenterCostRate,
+  CostingTemplate,
 } from './models/costing.model';
 
-type CostingTab = 'periods' | 'cost-centers' | 'pools';
+type CostingTab = 'periods' | 'cost-centers' | 'pools' | 'templates';
 
 @Component({
   selector: 'app-costing',
@@ -39,7 +47,7 @@ type CostingTab = 'periods' | 'cost-centers' | 'pools';
   imports: [
     ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent, DatepickerComponent,
     ToggleComponent, PageLayoutComponent, DataTableComponent, ColumnCellDirective, DatePipe,
-    ViewModeToggleComponent, CostingRatesVisualComponent,
+    ViewModeToggleComponent, CostingRatesVisualComponent, SpacerDirective,
   ],
   templateUrl: './costing.component.html',
   styleUrl: './costing.component.scss',
@@ -51,6 +59,9 @@ export class CostingComponent {
   private readonly fb = inject(FormBuilder);
   private readonly service = inject(CostingService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly toast = inject(ToastService);
+  private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(MatDialog);
 
   protected readonly activeTab = toSignal(
     this.route.paramMap.pipe(map(p => (p.get('tab') as CostingTab) ?? 'periods')),
@@ -76,6 +87,7 @@ export class CostingComponent {
   protected readonly pools = signal<OverheadPool[]>([]);
   protected readonly rates = signal<WorkCenterCostRate[]>([]);
   protected readonly ratesPeriodId = signal<number | null>(null);
+  protected readonly costingTemplates = signal<CostingTemplate[]>([]);
 
   protected readonly typeOptions: SelectOption[] = [
     { value: 'Production', label: 'Production' },
@@ -95,6 +107,14 @@ export class CostingComponent {
     { value: 'MaterialDollar', label: 'Material dollar' },
     { value: 'Unit', label: 'Unit' },
     { value: 'ReceiptCount', label: 'Receipt count' },
+  ];
+
+  protected readonly templateColumns: ColumnDef[] = [
+    { field: 'name', header: 'Name', sortable: true },
+    { field: 'description', header: 'Description' },
+    { field: 'lines', header: 'Lines', width: '70px', align: 'center' },
+    { field: 'isSystem', header: '', width: '90px' },
+    { field: 'actions', header: '', width: '160px' },
   ];
 
   protected readonly periodColumns: ColumnDef[] = [
@@ -171,6 +191,7 @@ export class CostingComponent {
       if (tab === 'periods') this.loadPeriods();
       else if (tab === 'cost-centers') this.loadCostCenters();
       else if (tab === 'pools') { this.loadPools(); this.loadCostCenters(); this.loadPeriods(); }
+      else if (tab === 'templates') this.loadTemplates();
     });
   }
 
@@ -181,6 +202,64 @@ export class CostingComponent {
   /** MM/dd/yyyy for select labels (templates use the date pipe directly). */
   protected fmt(iso: string | null): string {
     return iso ? format(new Date(iso), 'MM/dd/yyyy') : '';
+  }
+
+  protected loadTemplates(): void {
+    this.service.getTemplates().subscribe({
+      next: (templates) => this.costingTemplates.set(templates),
+      error: () => this.snackbar.error(this.translate.instant('costing.templates.loadFailed')),
+    });
+  }
+
+  protected openTemplateEditor(template: CostingTemplate | null): void {
+    this.dialog.open(CostingTemplateEditorDialogComponent, {
+      width: '800px',
+      data: { template } satisfies CostingTemplateEditorData,
+    }).afterClosed().subscribe((saved) => {
+      if (!saved) return;
+      this.snackbar.success(this.translate.instant('costing.templates.saved', { name: saved.name }));
+      this.loadTemplates();
+    });
+  }
+
+  protected deleteTemplate(template: CostingTemplate): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('costing.templates.deleteTitle'),
+        message: this.translate.instant('costing.templates.deleteMessage', { name: template.name }),
+        confirmLabel: this.translate.instant('costing.templates.deleteConfirm'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe((confirmed) => {
+      if (!confirmed) return;
+      this.service.deleteTemplate(template.id).subscribe({
+        next: () => this.loadTemplates(),
+        error: () => this.snackbar.error(this.translate.instant('costing.templates.deleteFailed')),
+      });
+    });
+  }
+
+  /** Prepackaged setup: a few answers populate pools, budgets, and GL budget lines. */
+  protected openQuickStart(): void {
+    this.dialog.open(CostingQuickStartDialogComponent, { width: '520px' })
+      .afterClosed().subscribe((result) => {
+        if (!result) return;
+        this.snackbar.success(this.translate.instant('costing.quickStart.applied', {
+          pools: result.poolsConfigured.length,
+          rate: result.overheadRatePerLaborHour,
+        }));
+        if (result.notes.length) {
+          this.toast.show({
+            severity: 'info',
+            title: this.translate.instant('costing.quickStart.title'),
+            message: result.notes.join('\n'),
+          });
+        }
+        this.loadPeriods();
+        this.loadCostCenters();
+        this.loadPools();
+      });
   }
 
   private loadPeriods(): void {

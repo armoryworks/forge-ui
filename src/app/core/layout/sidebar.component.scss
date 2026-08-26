@@ -205,6 +205,14 @@
 
 .sidebar__spacer {
   flex: 1;
+
+  // Drilled: the drill region (rail + children) is itself flex: 1 — a growing
+  // spacer would split the free height 50/50 with it, stranding the menu in the
+  // top half of the sidebar. Collapse it; the drill pushes the pinned-bottom
+  // items down by growing instead.
+  .sidebar--drilled & {
+    flex: 0 0 0;
+  }
 }
 
 // ── Drilled state: icon rail of top-level siblings | children column ──────────
@@ -252,6 +260,11 @@
   position: relative;
   width: $sidebar-width-collapsed;
   min-height: $sidebar-nav-height;
+  // Compact / icon-only by default so N siblings never manufacture a scrollbar
+  // while the sidebar has room. The vertical label reveals — and the item grows —
+  // only on hover or for the active parent. The rail scrolls only when a genuinely
+  // short viewport can't fit the icons.
+  flex: 0 0 auto;
   border: none;
   background: transparent;
   color: var(--text-secondary);
@@ -262,19 +275,21 @@
   justify-content: center;
   padding: $sp-sm 0;
   gap: $sp-xs;
-  // Smoothly grow/shrink as the vertical label reveals on hover / active.
+  overflow: hidden;
   transition: color $transition-normal, background $transition-normal,
     min-height $transition-normal, padding $transition-normal, gap $transition-normal;
 
   .material-icons-outlined { font-size: $sidebar-icon-size; flex-shrink: 0; }
 
   &--back {
+    flex: 0 0 auto;
+    padding: $sp-sm 0;
     color: var(--text-muted);
     &:hover { color: var(--text); background: var(--bg); }
   }
 
-  // Hover on a non-active parent: expand and reveal its name vertically in the
-  // light-blue hover tone (replaces the old tooltip). The icon stays put.
+  // Hover a non-active parent: grow to reveal its name vertically in the
+  // light-blue attention tone (the icon stays put).
   &:not(.rail-item--active):not(.rail-item--back):hover {
     color: var(--attention);
     background: color-mix(in srgb, var(--attention-hover) 35%, transparent);
@@ -298,8 +313,8 @@
   }
 }
 
-// Rail label, rotated to run vertically (top of letters on the left). Collapsed to
-// zero height by default; the hover / active rules above animate it open.
+// Rail label, rotated to run vertically (top of letters on the left). Collapsed
+// to zero height by default; the hover / active rules above animate it open.
 .rail-item__vlabel {
   writing-mode: vertical-rl;
   transform: rotate(180deg);

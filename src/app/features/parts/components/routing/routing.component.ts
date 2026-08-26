@@ -17,13 +17,14 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DraftResumeService } from '../../../../shared/services/draft-resume.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { DurationMsPipe } from '../../../../shared/pipes/duration-ms.pipe';
 
 type RoutingViewMode = 'list' | 'flow';
 
 @Component({
   selector: 'app-routing',
   standalone: true,
-  imports: [EmptyStateComponent, LoadingBlockDirective, TranslatePipe, MatTooltipModule, RoutingFlowViewComponent, DragDropModule],
+  imports: [EmptyStateComponent, LoadingBlockDirective, TranslatePipe, MatTooltipModule, RoutingFlowViewComponent, DragDropModule, DurationMsPipe],
   templateUrl: './routing.component.html',
   styleUrl: './routing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

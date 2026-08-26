@@ -97,10 +97,10 @@
     @if (isGroup(item)) {
       <button class="nav-item nav-item--group" [class.nav-item--active]="isInActiveTrail(item)"
               (click)="onPinnedGroupClick(item)"
-              [matTooltip]="(collapsed() || !!railTop()) ? (item.i18nKey! | translate) : ''" matTooltipPosition="right"
+              [matTooltip]="(collapsed() && !railTop()) ? (item.i18nKey! | translate) : ''" matTooltipPosition="right"
               [attr.aria-label]="item.i18nKey! | translate">
         <span class="material-icons-outlined">{{ item.icon }}</span>
-        @if (!collapsed() && !railTop()) {
+        @if (!collapsed() || !!railTop()) {
           <span class="nav-item__label">{{ item.i18nKey! | translate }}</span>
           <span class="material-icons-outlined nav-item__chevron">chevron_right</span>
         }
@@ -108,10 +108,10 @@
     } @else {
       <a class="nav-item" [routerLink]="item.route" routerLinkActive="nav-item--active"
          [routerLinkActiveOptions]="{ exact: false }"
-         [matTooltip]="(collapsed() || !!railTop()) ? (item.i18nKey! | translate) : ''" matTooltipPosition="right"
+         [matTooltip]="(collapsed() && !railTop()) ? (item.i18nKey! | translate) : ''" matTooltipPosition="right"
          [attr.aria-label]="item.i18nKey! | translate" (click)="onLeafClick()">
         <span class="material-icons-outlined">{{ item.icon }}</span>
-        @if (!collapsed() && !railTop()) { <span class="nav-item__label">{{ item.i18nKey! | translate }}</span> }
+        @if (!collapsed() || !!railTop()) { <span class="nav-item__label">{{ item.i18nKey! | translate }}</span> }
       </a>
     }
   }

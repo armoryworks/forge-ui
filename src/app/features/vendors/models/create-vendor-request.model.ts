@@ -1,5 +1,7 @@
 export interface CreateVendorRequest {
   companyName: string;
+  /** Honored only when `vendors.allow_manual_numbers` is enabled; otherwise auto-numbered. */
+  vendorNumber?: string;
   contactName?: string;
   email?: string;
   phone?: string;

@@ -5,6 +5,13 @@
   </header>
 
   <form [formGroup]="form" class="part-basics-step__form">
+    @if (manualNumbers.isEnabled('parts') && (entityId() === null || entityId() === undefined)) {
+      <app-input
+        [label]="'parts.partNumberLabel' | translate"
+        formControlName="partNumber"
+        [maxlength]="50"
+        data-testid="basics-part-number" />
+    }
     <app-input
       [label]="'parts.workflow.basics.nameLabel' | translate"
       formControlName="name"

@@ -1,0 +1,62 @@
+<app-dialog [title]="'costing.quickStart.title' | translate" width="520px" (closed)="cancel()">
+  <p class="quick-start__lead">{{ 'costing.quickStart.lead' | translate }}</p>
+
+  <app-select [label]="'costing.quickStart.template' | translate" [formControl]="templateControl"
+    [options]="templateOptions()" data-testid="qs-template" />
+  @if (selectedTemplate(); as template) {
+    @if (template.description) {
+      <p class="quick-start__hint">{{ template.description }}</p>
+    }
+  }
+
+  <div [formGroup]="form">
+    <div class="dialog-row">
+      <app-input [label]="'costing.quickStart.fiscalYear' | translate" type="number"
+        formControlName="fiscalYear" [required]="true" data-testid="qs-fiscal-year" />
+      <app-input [label]="'costing.quickStart.headcount' | translate" type="number"
+        formControlName="directHeadcount" [required]="true" data-testid="qs-headcount" />
+    </div>
+    <div class="dialog-row">
+      <app-currency-input [label]="'costing.quickStart.wage' | translate"
+        formControlName="averageHourlyWage" [required]="true" data-testid="qs-wage" />
+    </div>
+  </div>
+
+  @if (selectedTemplate(); as template) {
+    <div [formGroup]="valuesForm()" class="quick-start__lines">
+      @for (line of template.lines; track line.code) {
+        @if (isPercent(line)) {
+          <app-input [label]="line.name + ' ' + lineSuffix(line)" type="number"
+            [formControlName]="line.code" suffix="%" [attr.data-testid]="'qs-line-' + line.code" />
+        } @else {
+          <app-currency-input [label]="line.name + ' ' + lineSuffix(line)"
+            [formControlName]="line.code" [attr.data-testid]="'qs-line-' + line.code" />
+        }
+      }
+    </div>
+  }
+
+  <div [formGroup]="form">
+    <app-toggle [label]="'costing.quickStart.createGlBudgets' | translate"
+      formControlName="createGlBudgets" data-testid="qs-gl-budgets" />
+    <app-toggle [label]="'costing.quickStart.setLaborRates' | translate"
+      formControlName="setDefaultLaborRates" data-testid="qs-labor-rates" />
+
+    @if (error()) {
+      <p class="quick-start__error">{{ 'costing.quickStart.failed' | translate }}</p>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="cancel()" data-testid="qs-cancel">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary"
+        [disabled]="form.invalid || !selectedTemplate() || saving()"
+        (click)="apply()" data-testid="qs-apply">
+        {{ 'costing.quickStart.apply' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

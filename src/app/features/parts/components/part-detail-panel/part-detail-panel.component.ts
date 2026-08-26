@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ViewChild, computed, effect, inject, input, output, signal } from '@angular/core';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -116,6 +117,8 @@ type BomViewMode = 'table' | 'tree';
 })
 export class PartDetailPanelComponent {
   protected readonly partsService = inject(PartsService);
+  protected readonly manualNumbers = inject(ManualNumberSettingsService);
+  protected readonly allowManualPartNumbers = computed(() => this.manualNumbers.isEnabled('parts'));
   private readonly destroyRef = inject(DestroyRef);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
@@ -407,6 +410,7 @@ export class PartDetailPanelComponent {
     if ('weightDisplayUnit' in patch) request['weightDisplayUnit'] = patch.weightDisplayUnit;
     if ('lengthMm' in patch) request['lengthMm'] = patch.lengthMm;
     if ('widthMm' in patch) request['widthMm'] = patch.widthMm;
+    if ('partNumber' in patch) request['partNumber'] = patch.partNumber;
     if ('heightMm' in patch) request['heightMm'] = patch.heightMm;
     if ('dimensionDisplayUnit' in patch) request['dimensionDisplayUnit'] = patch.dimensionDisplayUnit;
     if ('volumeMl' in patch) request['volumeMl'] = patch.volumeMl;

@@ -4,11 +4,12 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { Operation } from '../../models/operation.model';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { DurationMsPipe } from '../../../../shared/pipes/duration-ms.pipe';
 
 @Component({
   selector: 'app-routing-flow-view',
   standalone: true,
-  imports: [TranslatePipe, EmptyStateComponent],
+  imports: [TranslatePipe, EmptyStateComponent, DurationMsPipe],
   templateUrl: './routing-flow-view.component.html',
   styleUrl: './routing-flow-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,4 +1,12 @@
 <app-page-layout [pageTitle]="'costing.title' | translate">
+  <ng-container toolbar>
+    <span appSpacer></span>
+    <button class="action-btn" (click)="openQuickStart()" data-testid="costing-quick-start">
+      <span class="material-icons-outlined">auto_fix_high</span>
+      {{ 'costing.quickStart.button' | translate }}
+    </button>
+  </ng-container>
+
   <ng-container content>
     <div class="tab-bar" role="tablist">
       <button class="tab" role="tab" [attr.aria-selected]="activeTab() === 'periods'"
@@ -13,7 +21,40 @@
         [class.tab--active]="activeTab() === 'pools'" (click)="switchTab('pools')" data-testid="costing-tab-pools">
         {{ 'costing.tabs.pools' | translate }}
       </button>
+      <button class="tab" role="tab" [attr.aria-selected]="activeTab() === 'templates'"
+        [class.tab--active]="activeTab() === 'templates'" (click)="switchTab('templates')" data-testid="costing-tab-templates">
+        {{ 'costing.tabs.templates' | translate }}
+      </button>
     </div>
+
+    @if (activeTab() === 'templates') {
+      <div class="create-row">
+        <span class="costing__templates-hint">{{ 'costing.templates.hint' | translate }}</span>
+        <button class="action-btn action-btn--create" (click)="openTemplateEditor(null)" data-testid="costing-template-new">
+          <span class="material-icons-outlined">add</span>
+          {{ 'costing.templates.new' | translate }}
+        </button>
+      </div>
+
+      <app-data-table tableId="costing-templates"
+        [columns]="templateColumns" [data]="costingTemplates()"
+        emptyIcon="dashboard_customize" [emptyMessage]="'costing.templates.noneYet' | translate">
+        <ng-template appColumnCell="isSystem" let-row>
+          @if (row.isSystem) { <span class="chip chip--info">{{ 'costing.templates.system' | translate }}</span> }
+        </ng-template>
+        <ng-template appColumnCell="lines" let-row>{{ row.lines.length }}</ng-template>
+        <ng-template appColumnCell="actions" let-row>
+          <div class="row-actions">
+            <button class="action-btn action-btn--sm" (click)="openTemplateEditor(row)"
+              [attr.data-testid]="'costing-template-edit-' + row.id">{{ 'costing.templates.edit' | translate }}</button>
+            @if (!row.isSystem) {
+              <button class="action-btn action-btn--sm action-btn--danger" (click)="deleteTemplate(row)"
+                [attr.data-testid]="'costing-template-delete-' + row.id">{{ 'costing.templates.delete' | translate }}</button>
+            }
+          </div>
+        </ng-template>
+      </app-data-table>
+    }
 
     @if (activeTab() === 'periods') {
       <div class="create-row" [formGroup]="periodForm">

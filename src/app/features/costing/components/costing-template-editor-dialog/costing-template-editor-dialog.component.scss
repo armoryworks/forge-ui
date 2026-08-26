@@ -1,0 +1,55 @@
+@use 'styles/variables' as *;
+
+.tpl-lines {
+  margin-top: $sp-md;
+}
+
+.tpl-lines__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $sp-sm;
+}
+
+.tpl-lines__title {
+  font-size: $font-size-xxs;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.tpl-lines__empty {
+  margin: $sp-md 0;
+  font-size: $font-size-base;
+  color: var(--text-muted);
+}
+
+.tpl-lines__row {
+  display: grid;
+  grid-template-columns: 90px 1.4fr 1fr 1fr 1.2fr 1fr 90px 1fr auto;
+  gap: $sp-sm;
+  align-items: center;
+  padding: $sp-sm 0;
+  border-bottom: $border-width-thin solid var(--border);
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+}
+
+.tpl-lines__remove {
+  align-self: center;
+}
+
+.tpl-lines__error {
+  margin: $sp-md 0 0;
+  font-size: $font-size-base;
+  color: var(--error);
+}
+
+@media (max-width: $breakpoint-tablet) {
+  .tpl-lines__row {
+    grid-template-columns: 1fr 1fr;
+  }
+}

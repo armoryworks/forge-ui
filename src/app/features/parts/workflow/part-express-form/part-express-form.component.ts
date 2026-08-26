@@ -13,6 +13,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
+import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { AbcClass } from '../../models/abc-class.type';
 import { PartDetail } from '../../models/part-detail.model';
 import { PartsService } from '../../services/parts.service';
@@ -44,6 +45,7 @@ import { TraceabilityType } from '../../models/traceability-type.type';
 })
 export class PartExpressFormComponent {
   private readonly workflowService = inject(WorkflowService);
+  protected readonly manualNumbers = inject(ManualNumberSettingsService);
   private readonly partsService = inject(PartsService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -72,6 +74,7 @@ export class PartExpressFormComponent {
   });
 
   protected readonly form = new FormGroup({
+    partNumber: new FormControl('', [Validators.maxLength(50)]),
     name: new FormControl('', [Validators.required, Validators.maxLength(256)]),
     description: new FormControl('', [Validators.maxLength(2000)]),
     // Tier 0 — replaces legacy isSerialTracked boolean. Defaults None.
@@ -132,6 +135,7 @@ export class PartExpressFormComponent {
     // Map FormControl name → the data-testid suffix used in the template.
     // Most match 1:1; cost is the one renamed legacy.
     const map: Record<string, string> = {
+      partNumber: 'part-number',
       name: 'name',
       description: 'description',
       traceabilityType: 'traceability',
@@ -247,6 +251,9 @@ export class PartExpressFormComponent {
   private fieldsFromForm(): Record<string, unknown> {
     const v = this.form.getRawValue();
     return {
+      // Only meaningful at materialization; the adapter gates it on
+      // parts.allow_manual_numbers and ignores it after the part exists.
+      partNumber: (this.manualNumbers.isEnabled('parts') && !this.part()) ? (v.partNumber?.trim() || undefined) : undefined,
       name: v.name ?? undefined,
       description: v.description ?? '',
       // Tier 0 — traceability + ABC class. (OEM identity captured per-vendor
