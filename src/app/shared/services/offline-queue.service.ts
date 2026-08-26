@@ -13,6 +13,8 @@ const DB_NAME = 'forge-offline-queue';
 const DB_VERSION = 1;
 const STORE_NAME = 'queue';
 
+let nextSequence = 0;
+
 @Injectable({ providedIn: 'root' })
 export class OfflineQueueService {
   private readonly http = inject(HttpClient);
@@ -53,6 +55,7 @@ export class OfflineQueueService {
       url,
       body: body ?? null,
       timestamp: Date.now(),
+      sequence: nextSequence++,
       description: description ?? `${method.toUpperCase()} ${url}`,
       headers: options?.headers,
       instanceId: options?.instanceId ?? null,
@@ -261,7 +264,7 @@ export class OfflineQueueService {
         const activeInstance = this.platform.mobileShell ? (this.instances.instance()?.id ?? null) : null;
         const entries = (request.result as OfflineQueueEntry[])
           .filter((e) => !this.platform.mobileShell || (e.instanceId ?? null) === activeInstance)
-          .sort((a, b) => a.timestamp - b.timestamp);
+          .sort((a, b) => a.timestamp - b.timestamp || (a.sequence ?? 0) - (b.sequence ?? 0));
         resolve(entries);
       };
       request.onerror = () => reject(request.error);

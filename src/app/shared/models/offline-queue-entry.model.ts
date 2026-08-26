@@ -4,6 +4,8 @@ export interface OfflineQueueEntry {
   url: string;
   body: unknown;
   timestamp: number;
+  /** Tie-breaker for entries queued in the same millisecond — replay order must match action order. */
+  sequence?: number;
   description?: string;
   /** Replayed verbatim — carries the Idempotency-Key the request was minted with. */
   headers?: Record<string, string>;

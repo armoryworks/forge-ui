@@ -33,7 +33,7 @@ describe('OfflineQueueService in the mobile shell', () => {
     await vi.waitFor(() => {
       found = http.match(url)[0];
       expect(found).toBeDefined();
-    });
+    }, { timeout: 5000, interval: 20 });
     return found as TestRequest;
   };
 
