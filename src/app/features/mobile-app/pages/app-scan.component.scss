@@ -79,6 +79,24 @@ $torch-size: 72px;
     }
   }
 
+  &__manual {
+    @include flex-center;
+    gap: $sp-sm;
+    position: absolute;
+    right: $sp-lg;
+    bottom: calc(#{$sp-lg} + env(safe-area-inset-bottom));
+    min-height: 44px;
+    padding: 0 $sp-md;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: $font-family-primary;
+    font-size: $font-size-sm;
+    cursor: pointer;
+
+    .material-icons-outlined { font-size: $icon-size-md; }
+  }
+
   &__sheet {
     position: absolute;
     left: 0;

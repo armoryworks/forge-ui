@@ -16,6 +16,7 @@ import { ScanFeedbackService } from '../../../shared/services/scan-feedback.serv
 import { SharedIdentityService } from '../../../shared/services/shared-identity.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { UndoService } from '../../../shared/services/undo.service';
+import { ManualCodeEntryComponent } from '../components/manual-code-entry/manual-code-entry.component';
 import { IdentityPromptComponent } from '../identity/identity-prompt.component';
 
 type Step = 'part' | 'from' | 'to' | 'quantity';
@@ -28,7 +29,7 @@ type Step = 'part' | 'from' | 'to' | 'quantity';
 @Component({
   selector: 'app-app-move-stock',
   standalone: true,
-  imports: [TranslatePipe, IdentityPromptComponent],
+  imports: [TranslatePipe, IdentityPromptComponent, ManualCodeEntryComponent],
   templateUrl: './app-move-stock.component.html',
   styleUrl: './app-move-stock.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -59,6 +60,7 @@ export class AppMoveStockComponent implements AfterViewInit, OnDestroy {
   protected readonly notice = signal<string | null>(null);
   protected readonly cameraError = signal(false);
   protected readonly identifying = signal(false);
+  protected readonly typing = signal(false);
 
   protected readonly scanning = computed(() => this.step() !== 'quantity');
   protected readonly canFinish = computed(() =>
@@ -81,6 +83,19 @@ export class AppMoveStockComponent implements AfterViewInit, OnDestroy {
 
   async ngOnDestroy(): Promise<void> {
     await this.scanner.stop();
+  }
+
+  protected openManual(): void {
+    this.typing.set(true);
+  }
+
+  protected closeManual(): void {
+    this.typing.set(false);
+  }
+
+  protected async submitManual(code: string): Promise<void> {
+    this.typing.set(false);
+    await this.accept(code);
   }
 
   protected bump(delta: number): void {

@@ -1,0 +1,43 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.manual {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-lg;
+  padding-bottom: calc(#{$sp-lg} + env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-top: $border-width-accent solid var(--primary);
+
+  &__actions {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: $sp-md;
+  }
+
+  &__cancel {
+    min-height: 56px;
+    background: transparent;
+    border: $border-width-thin solid var(--border);
+    color: var(--text-muted);
+    font-family: $font-family-primary;
+    font-size: $font-size-md;
+    cursor: pointer;
+  }
+
+  &__go {
+    @include flex-center;
+    gap: $sp-md;
+    min-height: 56px;
+    background: var(--primary);
+    border: none;
+    color: var(--bg);
+    font-family: $font-family-primary;
+    font-size: $font-size-md;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:disabled { opacity: 0.5; cursor: default; }
+  }
+}

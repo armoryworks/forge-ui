@@ -30,6 +30,19 @@
     <span class="material-icons-outlined" aria-hidden="true">{{ torchOn() ? 'flashlight_on' : 'flashlight_off' }}</span>
   </button>
 
+  @if (!result() && !typing()) {
+    <button type="button" class="app-scan__manual" data-testid="scan-type-it" (click)="openManual()">
+      <span class="material-icons-outlined" aria-hidden="true">keyboard</span>
+      {{ 'mobileApp.scan.manual.open' | translate }}
+    </button>
+  }
+
+  @if (typing()) {
+    <div class="app-scan__sheet">
+      <app-manual-code-entry (submitted)="submitManual($event)" (dismissed)="closeManual()" />
+    </div>
+  }
+
   @if (result(); as resolved) {
     <div class="app-scan__sheet">
       @if (identifying()) {

@@ -75,6 +75,24 @@
     text-align: center;
   }
 
+  &__manual {
+    @include flex-center;
+    gap: $sp-sm;
+    position: absolute;
+    top: $sp-md;
+    right: $sp-md;
+    min-height: 44px;
+    padding: 0 $sp-md;
+    background: rgba(0, 0, 0, 0.45);
+    border: none;
+    color: var(--text-muted);
+    font-family: $font-family-primary;
+    font-size: $font-size-sm;
+    cursor: pointer;
+
+    .material-icons-outlined { font-size: $icon-size-md; }
+  }
+
   &__quantity {
     flex: 1;
     display: flex;

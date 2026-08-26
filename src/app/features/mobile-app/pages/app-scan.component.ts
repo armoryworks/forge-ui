@@ -16,6 +16,7 @@ import { SharedIdentityService } from '../../../shared/services/shared-identity.
 import { UndoService } from '../../../shared/services/undo.service';
 import { hintScanKind } from '../../../shared/utils/scan-code';
 import { IdentityPromptComponent } from '../identity/identity-prompt.component';
+import { ManualCodeEntryComponent } from '../components/manual-code-entry/manual-code-entry.component';
 import { ScanAction, ScanActionSheetComponent } from '../components/scan-action-sheet/scan-action-sheet.component';
 
 /**
@@ -26,7 +27,7 @@ import { ScanAction, ScanActionSheetComponent } from '../components/scan-action-
 @Component({
   selector: 'app-app-scan',
   standalone: true,
-  imports: [TranslatePipe, ScanActionSheetComponent, IdentityPromptComponent],
+  imports: [TranslatePipe, ScanActionSheetComponent, IdentityPromptComponent, ManualCodeEntryComponent],
   templateUrl: './app-scan.component.html',
   styleUrl: './app-scan.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,6 +50,7 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
   protected readonly torchOn = signal(false);
   protected readonly cameraError = signal(false);
   protected readonly identifying = signal(false);
+  protected readonly typing = signal(false);
 
   private pendingAction: ScanAction | null = null;
 
@@ -62,6 +64,19 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
 
   protected async toggleTorch(): Promise<void> {
     this.torchOn.set(await this.scanner.toggleTorch());
+  }
+
+  protected openManual(): void {
+    this.typing.set(true);
+  }
+
+  protected closeManual(): void {
+    this.typing.set(false);
+  }
+
+  protected async submitManual(code: string): Promise<void> {
+    this.typing.set(false);
+    await this.onDecode(code);
   }
 
   protected dismiss(): void {

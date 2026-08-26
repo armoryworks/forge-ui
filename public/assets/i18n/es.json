@@ -9267,6 +9267,11 @@
         "moveStock": "Mover inventario",
         "identify": "Identificar",
         "openOnDesktop": "Abrir en escritorio"
+      },
+      "manual": {
+        "open": "Escribirlo",
+        "label": "Id de etiqueta (p. ej. JOB-1042)",
+        "go": "Buscar"
       }
     },
     "enroll": {

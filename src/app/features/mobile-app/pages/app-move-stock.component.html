@@ -18,6 +18,10 @@
     <div class="move__stage">
       <div id="move-stock-viewfinder" class="move__viewfinder"></div>
       <p class="move__prompt">{{ ('mobileApp.move.prompt.' + step()) | translate }}</p>
+      <button type="button" class="move__manual" data-testid="move-type-it" (click)="openManual()">
+        <span class="material-icons-outlined" aria-hidden="true">keyboard</span>
+        {{ 'mobileApp.scan.manual.open' | translate }}
+      </button>
     </div>
     @if (cameraError()) {
       <p class="move__notice" role="alert">{{ 'mobileApp.scan.cameraError' | translate }}</p>
@@ -62,6 +66,12 @@
       </button>
     }
   </div>
+
+  @if (typing()) {
+    <div class="move__sheet">
+      <app-manual-code-entry (submitted)="submitManual($event)" (dismissed)="closeManual()" />
+    </div>
+  }
 
   @if (identifying()) {
     <div class="move__sheet">

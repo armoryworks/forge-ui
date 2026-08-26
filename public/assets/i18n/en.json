@@ -9267,6 +9267,11 @@
         "moveStock": "Move stock",
         "identify": "Identify",
         "openOnDesktop": "Open on desktop"
+      },
+      "manual": {
+        "open": "Type it in",
+        "label": "Label id (e.g. JOB-1042)",
+        "go": "Look up"
       }
     },
     "enroll": {
