@@ -33,8 +33,6 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
@@ -45,5 +43,20 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Forge scans job, part, bin and badge labels and attaches photos to jobs.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Unlock Forge without typing your PIN.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Dictate a job note or a lookup instead of typing it.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Turns what you say into a job note or a search.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+	</dict>
 </dict>
 </plist>
