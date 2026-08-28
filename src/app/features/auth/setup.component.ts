@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, ReactiveFormsModule, FormGroup, FormControl, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -30,12 +31,33 @@ import { ToastService } from '../../shared/services/toast.service';
 export class SetupComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly layout = inject(LayoutService);
   private readonly loadingService = inject(LoadingService);
   private readonly snackbar = inject(SnackbarService);
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
   protected readonly branding = inject(BrandingService);
+
+  // ── Activation gate ──
+  // An install AWT provisioned for a customer is claimed, not merely found: until
+  // the code their contact at Forge holds is entered, the wizard isn't shown at
+  // all. A self-hosted install reports activationRequired=false and never sees it.
+  protected readonly activationRequired = signal(false);
+  // Nothing renders until the status call answers: showing the wizard's first step
+  // and then swapping it for the gate would flash the very screen the gate exists
+  // to withhold.
+  protected readonly statusChecked = signal(false);
+  protected readonly activationChecking = signal(false);
+  private activationCode: string | null = null;
+
+  protected readonly activationForm = new FormGroup({
+    code: new FormControl('', [Validators.required]),
+  });
+
+  protected readonly activationViolations = FormValidationService.getViolations(this.activationForm, {
+    code: 'Activation Code',
+  });
 
   // step 0 = the fork (choose path), 1 = admin account, 2 = company,
   // 3 = module picker (quick branch only). The first step is a mutually
@@ -96,9 +118,51 @@ export class SetupComponent {
     // When the password changes, re-run confirmPassword's validators so
     // the popover stays in sync with the latest match state (otherwise
     // confirmPassword's validator only fires on its own valueChanges).
-    this.accountForm.controls.password.valueChanges.subscribe(() => {
-      this.accountForm.controls.confirmPassword.updateValueAndValidity({ emitEvent: false });
-    });
+    this.accountForm.controls.password.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.accountForm.controls.confirmPassword.updateValueAndValidity({ emitEvent: false });
+      });
+
+    // A failed status call leaves the gate down: the route guard already proved
+    // setup is open, and locking a customer out beats letting a stranger in.
+    this.authService.checkSetupStatus()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (status) => {
+          this.activationRequired.set(status.activationRequired);
+          this.statusChecked.set(true);
+        },
+        error: () => {
+          this.activationRequired.set(true);
+          this.statusChecked.set(true);
+        },
+      });
+  }
+
+  /// Gate submit: prove the code, then reveal the wizard from its first step.
+  protected unlock(): void {
+    if (this.activationForm.invalid || this.activationChecking()) return;
+    const code = this.activationForm.controls.code.value!.trim();
+
+    this.activationChecking.set(true);
+    this.authService.verifyActivation(code)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (result) => {
+          this.activationChecking.set(false);
+          if (!result.valid) {
+            this.snackbar.error(this.translate.instant('auth.activation.invalid'));
+            return;
+          }
+          this.activationCode = code;
+          this.activationRequired.set(false);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.activationChecking.set(false);
+          this.handleError(err);
+        },
+      });
   }
 
   // Step 2: Company Details
@@ -205,6 +269,7 @@ export class SetupComponent {
       locationState: address?.['state'] || undefined,
       locationPostalCode: address?.['postalCode'] || undefined,
       selectedModules,
+      activationCode: this.activationCode ?? undefined,
     })).subscribe({
       next: () => {
         // Quick branch: land on the home that fits the chosen modules. Full

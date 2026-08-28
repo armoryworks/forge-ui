@@ -4,13 +4,46 @@
       <img class="auth-card__lockup" [src]="branding.marqueeUrl()" alt="Forge — Manufacturing Operations Platform" />
     </div>
     <p class="auth-card__status">
-      @if (step() === 0) {
+      @if (!statusChecked()) {
+        {{ 'common.loading' | translate }}
+      } @else if (activationRequired()) {
+        {{ 'auth.activation.title' | translate }}
+      } @else if (step() === 0) {
         {{ 'auth.setupForkTitle' | translate }}
       } @else {
         {{ 'auth.stepCounter' | translate:{ current: step(), total: totalSteps() } }} — {{ stepTitleKey() | translate }}
       }
     </p>
 
+    @if (!statusChecked()) {
+      <!-- Deliberately blank: the status call decides which of the two screens
+           below is the right one to show first. -->
+    } @else if (activationRequired()) {
+      <!-- The gate. A provisioned install shows this INSTEAD of the wizard: the
+           person standing it up has a contact at Forge, and that contact holds
+           the code. -->
+      <form class="auth-card__form" [formGroup]="activationForm" (ngSubmit)="unlock()">
+        <p class="setup-gate__lede">{{ 'auth.activation.lede' | translate }}</p>
+        <p class="setup-gate__hint">{{ 'auth.activation.hint' | translate }}</p>
+
+        <app-input [label]="'auth.activation.codeLabel' | translate" formControlName="code"
+          autocomplete="one-time-code" [required]="true"
+          [placeholder]="'auth.activation.codePlaceholder' | translate" />
+
+        <div class="auth-card__buttons auth-card__buttons--single">
+          <app-validation-button [violations]="activationViolations" [loading]="activationChecking()">
+          <button mat-flat-button color="primary" type="submit"
+            [disabled]="activationForm.invalid || activationChecking()">
+            @if (activationChecking()) {
+              {{ 'auth.activation.checking' | translate }}
+            } @else {
+              {{ 'auth.activation.unlock' | translate }}
+            }
+          </button>
+          </app-validation-button>
+        </div>
+      </form>
+    } @else {
     @switch (step()) {
       <!-- Step 0: the fork — choose the setup path (mutually exclusive) -->
       @case (0) {
@@ -132,6 +165,7 @@
           </div>
         </div>
       }
+    }
     }
   </mat-card>
 </div>

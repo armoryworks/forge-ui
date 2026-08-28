@@ -4685,6 +4685,16 @@
       "fullName": "Full guided setup",
       "fullDesc": "Walk through every area step by step and let Forge recommend a fit."
     },
+    "activation": {
+      "title": "Activation required",
+      "lede": "This Forge instance was set up for your company by Armory Works. Before you can create the first account, we need the activation code that came with it.",
+      "hint": "You don't have it yet? Reach out to your contact at Forge — the person who arranged this install. They have your code on hand and can read it to you.",
+      "codeLabel": "Activation Code",
+      "codePlaceholder": "XXXX-XXXX-XXXX",
+      "unlock": "Continue",
+      "checking": "Checking...",
+      "invalid": "That activation code isn't right. Check it with your contact at Forge."
+    },
     "modulesTitle": "Which modules do you want?",
     "modulesHint": "Turn on what you need now. Anything off can be turned on later from Admin.",
     "login": "Log In",

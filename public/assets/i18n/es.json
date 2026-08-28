@@ -4678,6 +4678,16 @@
       "fullName": "Configuración guiada completa",
       "fullDesc": "Recorra cada área paso a paso y deje que Forge recomiende lo más adecuado."
     },
+    "activation": {
+      "title": "Se requiere activación",
+      "lede": "Armory Works configuró esta instancia de Forge para su empresa. Antes de crear la primera cuenta, necesitamos el código de activación que la acompaña.",
+      "hint": "¿Todavía no lo tiene? Comuníquese con su contacto en Forge, la persona que gestionó esta instalación. Tiene su código a mano y puede dictárselo.",
+      "codeLabel": "Código de activación",
+      "codePlaceholder": "XXXX-XXXX-XXXX",
+      "unlock": "Continuar",
+      "checking": "Verificando...",
+      "invalid": "Ese código de activación no es correcto. Verifíquelo con su contacto en Forge."
+    },
     "modulesTitle": "¿Qué módulos desea?",
     "modulesHint": "Active lo que necesita ahora. Lo que quede apagado puede activarse después desde Administración.",
     "login": "Iniciar sesión",

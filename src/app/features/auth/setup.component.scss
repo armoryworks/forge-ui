@@ -59,6 +59,26 @@
     button {
       width: 100%;
     }
+
+    // The gate has nothing to go back to.
+    &--single {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+// ── The activation gate (shown INSTEAD of the wizard on a provisioned install) ──
+.setup-gate {
+  &__lede {
+    font-size: $font-size-md;
+    color: var(--text);
+    margin: 0;
+  }
+
+  &__hint {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    margin: 0;
   }
 }
 

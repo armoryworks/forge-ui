@@ -35,6 +35,12 @@ export interface LoginResponse {
 
 export interface SetupStatusResponse {
   setupRequired: boolean;
+  /** This install was provisioned for someone — the wizard needs an activation code first. */
+  activationRequired: boolean;
+}
+
+export interface VerifyActivationResponse {
+  valid: boolean;
 }
 
 export interface SetupRequest {
@@ -55,6 +61,8 @@ export interface SetupRequest {
   locationPostalCode?: string;
   // Quick-start branch: the module ids the shop chose. Omitted on the Full branch.
   selectedModules?: string[];
+  /** Required on a provisioned install; obtained from the customer's contact at Forge. */
+  activationCode?: string;
 }
 
 export interface SetupModule {
@@ -154,6 +162,12 @@ export class AuthService {
 
   checkSetupStatus(): Observable<SetupStatusResponse> {
     return this.http.get<SetupStatusResponse>(`${environment.apiUrl}/auth/status`);
+  }
+
+  /** Check an activation code before the wizard collects anything. */
+  verifyActivation(code: string): Observable<VerifyActivationResponse> {
+    return this.http.post<VerifyActivationResponse>(
+      `${environment.apiUrl}/auth/setup/verify-activation`, { code });
   }
 
   // The first-run module picker list (anonymous — shown during setup).
