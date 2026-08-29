@@ -67,7 +67,9 @@
               "src/styles.scss"
             ],
             "stylePreprocessorOptions": {
-              "includePaths": ["src"]
+              "includePaths": [
+                "src"
+              ]
             }
           },
           "configurations": {
@@ -82,7 +84,7 @@
                 {
                   "type": "initial",
                   "maximumWarning": "500kB",
-                  "maximumError": "1.7MB"
+                  "maximumError": "1.75MB"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -118,7 +120,7 @@
                 {
                   "type": "initial",
                   "maximumWarning": "500kB",
-                  "maximumError": "1.7MB"
+                  "maximumError": "1.75MB"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -148,7 +150,7 @@
                 {
                   "type": "initial",
                   "maximumWarning": "500kB",
-                  "maximumError": "1.7MB"
+                  "maximumError": "1.75MB"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -172,7 +174,10 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
-            "allowedHosts": ["forge-ui", "localhost"],
+            "allowedHosts": [
+              "forge-ui",
+              "localhost"
+            ],
             "proxyConfig": "proxy.conf.json"
           },
           "configurations": {

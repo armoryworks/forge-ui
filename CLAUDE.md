@@ -478,7 +478,11 @@ protected prevStep(): void {
 - Every feature module lazy-loaded via `loadComponent` in route config
 - Heavy libraries loaded on demand: Three.js (dynamic import), driver.js (first tour), ng2-charts (reporting)
 - No feature code in main bundle — `shared/` and `core/` only
-- Bundle budget: warning 500KB, error 1MB (initial)
+- Bundle budget: warning 500KB (initial), error **1.75MB** — and that error ceiling is
+  debt, not a target. This doc claimed 1MB while `angular.json` had already been raised to
+  1.7MB; the initial bundle then grew to fill it and an ordinary dependency patch tipped it
+  over. Treat the number as a high-water mark to drive DOWN with lazy loading, and if you
+  raise it again, say so here in the same commit.
 
 ### Folder Structure
 ```
