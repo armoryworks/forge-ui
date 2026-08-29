@@ -1,0 +1,91 @@
+.updates {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+
+  &__intro { margin: 0.25rem 0 0; opacity: 0.75; }
+
+  &__card {
+    padding: 1rem;
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 10px;
+  }
+
+  &__tiers {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__tier {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    align-items: baseline;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+    &:last-child { border-bottom: 0; }
+
+    // A running tag that differs from the recorded one means the box was
+    // changed outside the gated deploy path — worth colouring, not hiding.
+    &--drift .updates__tier-version { color: var(--mat-sys-error); }
+  }
+
+  &__tier-name { min-width: 7rem; font-weight: 500; }
+  &__tier-version { font-variant-numeric: tabular-nums; }
+
+  &__availability { margin: 0.75rem 0; }
+
+  &__actions { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+
+  &__steps {
+    list-style: none;
+    margin: 0 0 0.75rem;
+    padding: 0;
+
+    li { display: flex; gap: 0.75rem; align-items: baseline; padding: 0.15rem 0; }
+  }
+
+  &__box { min-width: 6rem; font-weight: 500; }
+
+  &__state--succeeded { color: var(--mat-sys-primary); }
+  &__state--failed,
+  &__state--halted-destructive { color: var(--mat-sys-error); }
+
+  &__notice {
+    padding: 0.75rem;
+    border-radius: 8px;
+    background: var(--mat-sys-surface-container);
+
+    &--warn { border: 1px solid var(--mat-sys-error); }
+  }
+
+  &__approval {
+    margin: 0.75rem 0;
+    padding: 0.9rem;
+    border: 1px solid var(--mat-sys-error);
+    border-radius: 8px;
+  }
+
+  &__statements code { word-break: break-all; }
+
+  &__confirm { display: flex; gap: 0.6rem; align-items: center; margin-top: 0.4rem; }
+
+  &__error { color: var(--mat-sys-error); }
+
+  &__dim { opacity: 0.7; font-size: 0.875rem; }
+
+  &__log {
+    max-height: 24rem;
+    margin: 0.75rem 0 0;
+    padding: 0.75rem;
+    overflow: auto;
+    border-radius: 8px;
+    background: var(--mat-sys-surface-container-highest);
+    color: var(--mat-sys-on-surface);
+    font-size: 0.8rem;
+    white-space: pre-wrap;
+  }
+}

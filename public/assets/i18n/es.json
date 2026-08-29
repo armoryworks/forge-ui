@@ -3017,7 +3017,8 @@
       "discovery": "Asistente de Descubrimiento",
       "presets": "Preajustes",
       "entityCompleteness": "Integridad de Entidades",
-      "terms": "Términos y condiciones"
+      "terms": "Términos y condiciones",
+      "updates": "Actualizaciones"
     },
     "users": "Usuarios",
     "addUser": "Agregar Usuario",
@@ -9557,5 +9558,55 @@
     "workLogged": "Registrado: ganó {{earnings}}.",
     "workLogFailed": "No se pudieron registrar las piezas (¿hay una tarifa vigente para esa fecha?).",
     "deleteFailed": "No se pudo eliminar el registro."
+  },
+  "upgradeLock": {
+    "title": "Forge se está actualizando",
+    "working": "Esto tardará unos minutos. Todo lo que guardó está a salvo.",
+    "restarting": "Forge se está reiniciando como parte de la actualización. Reconectando…",
+    "hint": "Esta pantalla volverá por sí sola."
+  },
+  "adminUpdates": {
+    "title": "Actualizaciones",
+    "intro": "Lo que esta instalación está ejecutando y cómo avanzarla. Las actualizaciones siguen la misma ruta controlada que la línea de comandos: copia de seguridad, reconciliación del esquema, comprobación de estado y reversión automática.",
+    "tier": "Componente",
+    "running": "En ejecución",
+    "recorded": "Registrado",
+    "deployedAt": "Desplegado",
+    "noTiers": "No se reportaron componentes.",
+    "tiers": {
+      "api": "API",
+      "ui": "Interfaz web",
+      "test": "Sitio de pruebas",
+      "demo": "Sitio de demostración"
+    },
+    "checking": "Buscando actualizaciones…",
+    "current": "Está al día.",
+    "behind": "Hay una versión más reciente disponible: {{version}}",
+    "unknown": "No se pudo comprobar si hay actualizaciones.",
+    "checkAction": "Buscar actualizaciones",
+    "upgradeAction": "Actualizar a la más reciente",
+    "rollbackAction": "Revertir",
+    "progress": "Progreso de la actualización",
+    "reconnecting": "Forge se está reiniciando como parte de la actualización. Reconectando…",
+    "partial": "Actualización parcial: {{completed}} terminó, {{incomplete}} no.",
+    "states": {
+      "pending": "en espera",
+      "running": "en ejecución",
+      "succeeded": "listo",
+      "failed": "falló",
+      "halted-destructive": "requiere aprobación"
+    },
+    "noAgent": {
+      "title": "Las actualizaciones no están disponibles desde aquí",
+      "body": "No hay un agente de actualización instalado en este equipo. Actualice desde el servidor:"
+    },
+    "destructive": {
+      "title": "La actualización se detuvo antes de cambiar nada",
+      "body": "Aplicar esta versión eliminaría o reescribiría las estructuras de base de datos que se enumeran a continuación. Primero se tomó una copia de seguridad. No se ha cambiado nada y no se ha ejecutado ningún cambio destructivo.",
+      "preMigrate": "Algunos cambios preparatorios ya se confirmaron, por lo que la base de datos está por delante de la aplicación en ejecución. Continúe hacia adelante o restaure la copia de seguridad tomada arriba.",
+      "dispositions": "Para cada elemento, decida: {{list}}.",
+      "confirmLabel": "Escriba APPLY para aceptar estos cambios y continuar.",
+      "approveAction": "Aprobar y continuar"
+    }
   }
 }

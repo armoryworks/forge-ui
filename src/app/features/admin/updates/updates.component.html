@@ -1,0 +1,122 @@
+<section class="updates">
+  <header class="updates__header">
+    <h1>{{ 'adminUpdates.title' | translate }}</h1>
+    <p class="updates__intro">{{ 'adminUpdates.intro' | translate }}</p>
+  </header>
+
+  @if (!agentAvailable()) {
+    <div class="updates__notice updates__notice--warn" data-testid="updates-no-agent">
+      <strong>{{ 'adminUpdates.noAgent.title' | translate }}</strong>
+      <p>{{ 'adminUpdates.noAgent.body' | translate }}</p>
+      <code>./forge-upgrade.sh</code>
+    </div>
+  } @else {
+    <div class="updates__card">
+      <ul class="updates__tiers" data-testid="updates-tiers">
+        @for (tier of state()?.tiers ?? []; track tier.service) {
+          <li class="updates__tier" [class.updates__tier--drift]="tier.running && tier.configured && tier.running !== tier.configured">
+            <span class="updates__tier-name">{{ 'adminUpdates.tiers.' + tier.service | translate }}</span>
+            <span class="updates__tier-version">{{ tier.running ?? '—' }}</span>
+            <span class="updates__dim">
+              {{ 'adminUpdates.recorded' | translate }}: {{ tier.configured ?? '—' }}
+              @if (tier.deployedAt) { · {{ tier.deployedAt | date: 'short' }} }
+            </span>
+          </li>
+        } @empty {
+          <li>{{ 'adminUpdates.noTiers' | translate }}</li>
+        }
+      </ul>
+
+      <p class="updates__availability" data-testid="updates-availability">
+        @if (checking()) {
+          {{ 'adminUpdates.checking' | translate }}
+        } @else if (availability(); as a) {
+          @switch (a.status) {
+            @case ('current') { {{ 'adminUpdates.current' | translate }} }
+            @case ('behind') { <strong>{{ 'adminUpdates.behind' | translate: { version: a.newestRelease } }}</strong> }
+            @default { {{ 'adminUpdates.unknown' | translate }} <span class="updates__dim">{{ a.message }}</span> }
+          }
+        }
+      </p>
+
+      <div class="updates__actions">
+        <button type="button" (click)="check()" [disabled]="checking() || running()" data-testid="updates-check">
+          {{ 'adminUpdates.checkAction' | translate }}
+        </button>
+        <button type="button" class="primary" (click)="upgrade()" [disabled]="starting() || running()" data-testid="updates-upgrade">
+          {{ 'adminUpdates.upgradeAction' | translate }}
+        </button>
+        <button type="button" (click)="rollback()" [disabled]="starting() || running()" data-testid="updates-rollback">
+          {{ 'adminUpdates.rollbackAction' | translate }}
+        </button>
+      </div>
+
+      @if (error(); as e) {
+        <p class="updates__error" data-testid="updates-error">{{ e }}</p>
+      }
+    </div>
+  }
+
+  @if (job(); as j) {
+    <div class="updates__card" data-testid="updates-job">
+      <h2>{{ 'adminUpdates.progress' | translate }}</h2>
+
+      @if (!apiReachable()) {
+        <p class="updates__notice" data-testid="updates-reconnecting">
+          {{ 'adminUpdates.reconnecting' | translate }}
+        </p>
+      }
+
+      @if (crossBox()) {
+        <ul class="updates__steps" data-testid="updates-steps">
+          @for (step of j.steps; track step.box) {
+            <li>
+              <span class="updates__box">{{ step.box }}</span>
+              <span class="updates__state updates__state--{{ step.state }}">{{ 'adminUpdates.states.' + step.state | translate }}</span>
+              @if (step.reason) { <span class="updates__dim">{{ step.reason }}</span> }
+            </li>
+          }
+        </ul>
+      }
+
+      @if (partial(); as p) {
+        <div class="updates__notice updates__notice--warn" data-testid="updates-partial">
+          {{ 'adminUpdates.partial' | translate: { completed: p.completed.join(', '), incomplete: p.incomplete.join(', ') } }}
+        </div>
+      }
+
+      @if (halted() && approval(); as a) {
+        <div class="updates__approval" data-testid="updates-approval">
+          <p><strong>{{ 'adminUpdates.destructive.title' | translate }}</strong></p>
+          <p>{{ 'adminUpdates.destructive.body' | translate }}</p>
+          @if (a.preMigrateCommitted) {
+            <p class="updates__error">{{ 'adminUpdates.destructive.preMigrate' | translate }}</p>
+          }
+          <ol class="updates__statements">
+            @for (s of a.statements; track s.number) {
+              <li><code>{{ s.statement }}</code></li>
+            }
+          </ol>
+          <p class="updates__dim">{{ 'adminUpdates.destructive.dispositions' | translate: { list: a.dispositions.join(' / ') } }}</p>
+          <div class="updates__confirm" [formGroup]="approvalForm">
+            <app-input
+              [label]="'adminUpdates.destructive.confirmLabel' | translate"
+              formControlName="confirmWord"
+              placeholder="APPLY"
+              data-testid="updates-confirm-word" />
+            <button
+              type="button"
+              class="danger"
+              (click)="approveDestructive()"
+              [disabled]="!confirmed()"
+              data-testid="updates-approve">
+              {{ 'adminUpdates.destructive.approveAction' | translate }}
+            </button>
+          </div>
+        </div>
+      }
+
+      <pre class="updates__log" data-testid="updates-log">{{ log() }}</pre>
+    </div>
+  }
+</section>

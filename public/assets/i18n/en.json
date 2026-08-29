@@ -3017,7 +3017,8 @@
       "presets": "Presets",
       "roleTemplates": "Role Templates",
       "entityCompleteness": "Entity Completeness",
-      "terms": "Terms & Conditions"
+      "terms": "Terms & Conditions",
+      "updates": "Updates"
     },
     "users": "Users",
     "addUser": "Add User",
@@ -9557,5 +9558,55 @@
     "workLogged": "Logged — earned {{earnings}}.",
     "workLogFailed": "Could not log pieces (is a rate in force for that date?).",
     "deleteFailed": "Could not delete the entry."
+  },
+  "upgradeLock": {
+    "title": "Forge is being updated",
+    "working": "This will take a few minutes. Anything you saved is safe.",
+    "restarting": "Forge is restarting as part of the update. Reconnecting…",
+    "hint": "This screen will come back on its own."
+  },
+  "adminUpdates": {
+    "title": "Updates",
+    "intro": "What this install is running, and how to move it forward. Upgrades run the same gated path as the command line: backup, schema reconcile, health check, automatic rollback.",
+    "tier": "Component",
+    "running": "Running",
+    "recorded": "Recorded",
+    "deployedAt": "Deployed",
+    "noTiers": "No components reported.",
+    "tiers": {
+      "api": "API",
+      "ui": "Web UI",
+      "test": "Test site",
+      "demo": "Demo site"
+    },
+    "checking": "Checking for updates…",
+    "current": "Up to date.",
+    "behind": "A newer release is available: {{version}}",
+    "unknown": "Could not check for updates.",
+    "checkAction": "Check for updates",
+    "upgradeAction": "Upgrade to newest",
+    "rollbackAction": "Roll back",
+    "progress": "Update progress",
+    "reconnecting": "Forge is restarting as part of the update. Reconnecting…",
+    "partial": "Partial update: {{completed}} finished, {{incomplete}} did not.",
+    "states": {
+      "pending": "waiting",
+      "running": "running",
+      "succeeded": "done",
+      "failed": "failed",
+      "halted-destructive": "needs approval"
+    },
+    "noAgent": {
+      "title": "Upgrades are not available from here",
+      "body": "No upgrade agent is installed on this box. Upgrade from the server instead:"
+    },
+    "destructive": {
+      "title": "The update stopped before changing anything",
+      "body": "Applying this release would delete or rewrite the database structures listed below. A backup was taken first. Nothing has been swapped and no destructive change has run.",
+      "preMigrate": "Some preparatory changes were already committed, so the database has moved ahead of the running application. Continue forward, or restore the backup taken above.",
+      "dispositions": "For each item, decide: {{list}}.",
+      "confirmLabel": "Type APPLY to accept these changes and continue.",
+      "approveAction": "Approve and continue"
+    }
   }
 }
