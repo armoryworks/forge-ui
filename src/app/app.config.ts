@@ -1,5 +1,12 @@
-import { APP_INITIALIZER, ApplicationConfig, isDevMode, inject, provideBrowserGlobalErrorListeners, ErrorHandler } from '@angular/core';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import {
+  APP_INITIALIZER,
+  ApplicationConfig,
+  isDevMode,
+  inject,
+  provideBrowserGlobalErrorListeners,
+  ErrorHandler,
+} from '@angular/core';
+import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
 
 import { environment } from '../environments/environment';
 import { provideRouter } from '@angular/router';
@@ -45,7 +52,21 @@ export const appConfig: ApplicationConfig = {
     { provide: ErrorHandler, useClass: MobileErrorHandler },
     provideAnimationsAsync(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([demoApiInterceptor, portalAuthInterceptor, authInterceptor, kioskTokenInterceptor, capabilityGateInterceptor, trainingLangInterceptor, etagInterceptor, httpErrorInterceptor, dateTransformInterceptor, apiBaseInterceptor])),
+    provideHttpClient(
+      withXhr(),
+      withInterceptors([
+        demoApiInterceptor,
+        portalAuthInterceptor,
+        authInterceptor,
+        kioskTokenInterceptor,
+        capabilityGateInterceptor,
+        trainingLangInterceptor,
+        etagInterceptor,
+        httpErrorInterceptor,
+        dateTransformInterceptor,
+        apiBaseInterceptor,
+      ]),
+    ),
     provideCharts(withDefaultRegisterables()),
     provideMarkdown(),
     provideServiceWorker('ngsw-worker.js', {
@@ -86,5 +107,5 @@ export const appConfig: ApplicationConfig = {
       provide: MAT_DIALOG_DEFAULT_OPTIONS,
       useValue: { disableClose: true } satisfies MatDialogConfig,
     },
-  ]
+  ],
 };

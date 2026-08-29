@@ -1,21 +1,37 @@
 <div class="announcements-panel">
   <div class="panel-header">
     <div class="tab-bar">
-      <button class="tab" [class.tab--active]="activeView() === 'announcements'" (click)="switchView('announcements')">
+      <button
+        class="tab"
+        [class.tab--active]="activeView() === 'announcements'"
+        (click)="switchView('announcements')"
+      >
         Announcements
       </button>
-      <button class="tab" [class.tab--active]="activeView() === 'templates'" (click)="switchView('templates')">
+      <button
+        class="tab"
+        [class.tab--active]="activeView() === 'templates'"
+        (click)="switchView('templates')"
+      >
         Templates
       </button>
     </div>
     <span class="announcements-panel__spacer"></span>
     @if (activeView() === 'announcements') {
-      <button class="action-btn action-btn--create" data-testid="new-announcement-btn" (click)="openCreateAnnouncement()">
+      <button
+        class="action-btn action-btn--create"
+        data-testid="new-announcement-btn"
+        (click)="openCreateAnnouncement()"
+      >
         <span class="material-icons-outlined">campaign</span>
         New Announcement
       </button>
     } @else {
-      <button class="action-btn action-btn--create" data-testid="new-template-btn" (click)="openCreateTemplate()">
+      <button
+        class="action-btn action-btn--create"
+        data-testid="new-template-btn"
+        (click)="openCreateTemplate()"
+      >
         <span class="material-icons-outlined">add</span>
         New Template
       </button>
@@ -31,15 +47,20 @@
         emptyIcon="campaign"
         emptyMessage="No announcements sent yet"
         [clickableRows]="true"
-        (rowClick)="viewAcknowledgments($any($event))">
+        (rowClick)="viewAcknowledgments($any($event))"
+      >
         <ng-template appColumnCell="severity" let-row>
           <span [class]="severityChipClass(row.severity)">{{ row.severity }}</span>
         </ng-template>
         <ng-template appColumnCell="createdAt" let-row>
-          {{ row.createdAt | date:'MM/dd/yyyy hh:mm' }}
+          {{ row.createdAt | date: 'MM/dd/yyyy hh:mm' }}
         </ng-template>
         <ng-template appColumnCell="actions" let-row>
-          <button class="icon-btn" aria-label="View acknowledgments" (click)="viewAcknowledgments(row); $event.stopPropagation()">
+          <button
+            class="icon-btn"
+            aria-label="View acknowledgments"
+            (click)="viewAcknowledgments(row); $event.stopPropagation()"
+          >
             <span class="material-icons-outlined">visibility</span>
           </button>
         </ng-template>
@@ -51,7 +72,8 @@
       [columns]="templateColumns"
       [data]="templates()"
       emptyIcon="description"
-      emptyMessage="No templates created yet">
+      emptyMessage="No templates created yet"
+    >
       <ng-template appColumnCell="defaultSeverity" let-row>
         <span [class]="severityChipClass(row.defaultSeverity)">{{ row.defaultSeverity }}</span>
       </ng-template>
@@ -63,7 +85,11 @@
         }
       </ng-template>
       <ng-template appColumnCell="actions" let-row>
-        <button class="icon-btn icon-btn--danger" aria-label="Delete template" (click)="deleteTemplate(row); $event.stopPropagation()">
+        <button
+          class="icon-btn icon-btn--danger"
+          aria-label="Delete template"
+          (click)="deleteTemplate(row); $event.stopPropagation()"
+        >
           <span class="material-icons-outlined">delete</span>
         </button>
       </ng-template>
@@ -73,7 +99,11 @@
 
 <!-- Acknowledgments Dialog -->
 @if (showAckDialog()) {
-  <app-dialog [title]="'Acknowledgments — ' + selectedAnnouncement()?.title" width="520px" (closed)="closeAckDialog()">
+  <app-dialog
+    [title]="'Acknowledgments — ' + selectedAnnouncement()?.title"
+    width="520px"
+    (closed)="closeAckDialog()"
+  >
     <div class="ack-summary">
       <span class="ack-summary__count">{{ acknowledgments().length }} acknowledged</span>
       @if (selectedAnnouncement()?.requiresAcknowledgment) {
@@ -87,7 +117,7 @@
         @for (ack of acknowledgments(); track ack.userId) {
           <div class="ack-item">
             <span class="ack-item__name">{{ ack.userName }}</span>
-            <span class="ack-item__time">{{ ack.acknowledgedAt | date:'MM/dd/yyyy hh:mm' }}</span>
+            <span class="ack-item__time">{{ ack.acknowledgedAt | date: 'MM/dd/yyyy hh:mm' }}</span>
           </div>
         }
       </div>
@@ -102,24 +132,52 @@
 @if (showTemplateDialog()) {
   <app-dialog title="New Template" width="520px" (closed)="closeTemplateDialog()">
     <div [formGroup]="templateForm">
-      <app-input label="Name" formControlName="name" [required]="true" [maxlength]="200" data-testid="template-name" />
-      <app-textarea label="Content" formControlName="content" [required]="true" [rows]="4" [maxlength]="5000" data-testid="template-content" />
+      <app-input
+        label="Name"
+        formControlName="name"
+        [required]="true"
+        [maxlength]="200"
+        data-testid="template-name"
+      />
+      <app-textarea
+        label="Content"
+        formControlName="content"
+        [required]="true"
+        [rows]="4"
+        [maxlength]="5000"
+        data-testid="template-content"
+      />
       <div class="dialog-row">
-        <app-select label="Default Severity" formControlName="defaultSeverity" [options]="severityOptions" [required]="true" />
-        <app-select label="Default Scope" formControlName="defaultScope" [options]="scopeOptions" [required]="true" />
+        <app-select
+          label="Default Severity"
+          formControlName="defaultSeverity"
+          [options]="severityOptions"
+          [required]="true"
+        />
+        <app-select
+          label="Default Scope"
+          formControlName="defaultScope"
+          [options]="scopeOptions"
+          [required]="true"
+        />
       </div>
-      <app-toggle label="Require Acknowledgment by Default" formControlName="defaultRequiresAcknowledgment" />
+      <app-toggle
+        label="Require Acknowledgment by Default"
+        formControlName="defaultRequiresAcknowledgment"
+      />
     </div>
     <div dialog-footer>
       <button class="action-btn" (click)="closeTemplateDialog()">Cancel</button>
       <app-validation-button [violations]="templateViolations" [loading]="savingTemplate()">
-      <button class="action-btn action-btn--primary"
-        data-testid="template-save-btn"
-        [disabled]="templateForm.invalid || savingTemplate()"
-        (click)="saveTemplate()">
-        <span class="material-icons-outlined">save</span>
-        Create Template
-      </button>
+        <button
+          class="action-btn action-btn--primary"
+          data-testid="template-save-btn"
+          [disabled]="templateForm.invalid || savingTemplate()"
+          (click)="saveTemplate()"
+        >
+          <span class="material-icons-outlined">save</span>
+          Create Template
+        </button>
       </app-validation-button>
     </div>
   </app-dialog>
