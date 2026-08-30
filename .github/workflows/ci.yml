@@ -1,6 +1,6 @@
 # PR + push CI for forge-ui
 #
-# Runs on: every PR into develop or main, every push to develop or main.
+# Runs on: every PR into main, every push to main.
 # Steps: install, lint, build, unit test (Vitest).
 # E2E (Playwright) is in nightly.yml — too slow for every PR.
 
@@ -13,9 +13,9 @@ on:
     # umbrella CLAUDE.md). Add them so the per-feature CI gates actually
     # run; previously feature-into-effort PRs had 0 required checks and
     # auto-merged immediately, defeating the lint:i18n + build + test gates.
-    branches: [develop, main, "effort/*"]
+    branches: [main, "effort/*"]
   push:
-    branches: [develop, main, "effort/*"]
+    branches: [main, "effort/*"]
 
 permissions:
   contents: read
