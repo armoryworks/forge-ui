@@ -345,7 +345,8 @@
     "overview": "Overview",
     "activity": "Activity",
     "archived": "Archived",
-    "units": "units"
+    "units": "units",
+    "continue": "Continue"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -930,10 +931,7 @@
     "deleteOperationAria": "Delete operation",
     "addStep": "Add Operation",
     "stepNumber": "Step #",
-    "estTime": "Estimated time",
-    "estHours": "Hours",
     "estMinutes": "Minutes",
-    "estMilliseconds": "Milliseconds",
     "instructions": "Instructions",
     "workCenter": "Work Center",
     "workCenterNone": "— None —",
@@ -1411,7 +1409,10 @@
       "vendorCompare": "Vendor comparison",
       "lastReceiptAt": "Last receipt",
       "cheapestSource": "Cheapest"
-    }
+    },
+    "estTime": "Estimated time",
+    "estHours": "Hours",
+    "estMilliseconds": "Milliseconds"
   },
   "vendorSources": {
     "preferred": "Preferred",
@@ -3016,7 +3017,8 @@
       "presets": "Presets",
       "roleTemplates": "Role Templates",
       "entityCompleteness": "Entity Completeness",
-      "terms": "Terms & Conditions"
+      "terms": "Terms & Conditions",
+      "updates": "Updates"
     },
     "users": "Users",
     "addUser": "Add User",
@@ -3457,7 +3459,32 @@
       }
     },
     "confirmReminderTitle": "Send Reminder?",
-    "confirmReminderMessage": "Send a compliance reminder email to this employee?"
+    "confirmReminderMessage": "Send a compliance reminder email to this employee?",
+    "devices": {
+      "addTitle": "Add a device — {{name}}",
+      "addAction": "Add a device",
+      "scanHint": "On the phone, open the Forge app and scan this code. It works once and expires quickly.",
+      "issuing": "Generating code…",
+      "codeExpired": "Code expired",
+      "expiresIn": "Expires in {{seconds}}s",
+      "newCode": "New code",
+      "enrolled": "Enrolled devices",
+      "none": "No devices enrolled.",
+      "lastSeen": "Last seen",
+      "neverSeen": "Never checked in",
+      "flagged": "Flagged",
+      "stale": "Stale",
+      "revokedChip": "Revoked",
+      "revoke": "Revoke",
+      "revokeTitle": "Revoke this device?",
+      "revokeMessage": "{{name}} will be signed out and wiped the next time it contacts this server.",
+      "revoked": "Device revoked",
+      "revokeFailed": "Could not revoke the device. Try again.",
+      "issueFailed": "Could not generate an enrollment code. Try again.",
+      "addSharedTitle": "Add a shared device",
+      "sharedHint": "A shared device belongs to the shop, not a person. Each action on it starts with a badge scan and PIN.",
+      "sharedAction": "Shared device"
+    }
   },
   "teamsPanel": {
     "teams": "teams",
@@ -9296,6 +9323,228 @@
       }
     }
   },
+  "mobileApp": {
+    "navLabel": "App navigation",
+    "tabs": {
+      "scan": "Scan",
+      "clock": "Clock",
+      "jobs": "Jobs",
+      "move": "Move",
+      "lookup": "Lookup"
+    },
+    "scan": {
+      "prompt": "Point at a job traveler, part, bin, or badge.",
+      "resolving": "Looking up…",
+      "unknownCode": "Not a Forge code.",
+      "lookupFailed": "Could not look that up. Check the connection.",
+      "enrollmentCodeHere": "That is an enrollment code. Open Account to add an instance.",
+      "collapsed": "Already done — duplicate scan ignored.",
+      "openOnDesktopHint": "Open this record on the desktop app.",
+      "cameraError": "The camera is not available.",
+      "torch": "Torch",
+      "kind": {
+        "job": "Job",
+        "part": "Part",
+        "bin": "Bin",
+        "lot": "Lot",
+        "badge": "Badge",
+        "salesOrder": "Sales order",
+        "purchaseOrder": "Purchase order",
+        "asset": "Asset",
+        "enrollment": "Enrollment code",
+        "unknown": "Unknown",
+        "customer": "Customer"
+      },
+      "actions": {
+        "start": "Start",
+        "complete": "Complete",
+        "move": "Move",
+        "details": "Details",
+        "moveStock": "Move stock",
+        "identify": "Identify",
+        "openOnDesktop": "Open on desktop"
+      },
+      "manual": {
+        "open": "Type it in",
+        "label": "Label id (e.g. JOB-1042)",
+        "go": "Look up"
+      }
+    },
+    "enroll": {
+      "scanTitle": "Scan the code from your admin",
+      "cameraError": "The camera is not available. Use the server-address path below.",
+      "connecting": "Connecting…",
+      "notAnEnrollmentCode": "That is not a Forge enrollment code.",
+      "enrollFailed": "Enrollment failed. Ask your admin for a fresh code.",
+      "enterAddressInstead": "Enter server address instead",
+      "addressTitle": "Connect to your Forge server",
+      "serverAddress": "Server address",
+      "httpsRequired": "TLS is required — plain HTTP is refused.",
+      "discoveryFailed": "No Forge server answered at that address.",
+      "trustTitle": "Trust this server?",
+      "certificate": "Certificate",
+      "noCertificatePin": "This server publishes no certificate fingerprint to pin.",
+      "trust": "Trust",
+      "loginTitle": "Sign in to {{name}}",
+      "email": "Email",
+      "password": "Password",
+      "signIn": "Sign in",
+      "totpTitle": "Enter your 6-digit code",
+      "totpCode": "Authenticator code",
+      "totpFailed": "That code did not verify. Try the next one.",
+      "loginFailed": "Sign-in failed. Check the email and password.",
+      "backToScan": "Back to code scanning",
+      "usePasskey": "Use a passkey instead",
+      "certMismatch": "This server's certificate does not match the one your admin pinned. Stop and check with your admin before continuing."
+    },
+    "lock": {
+      "enterPin": "Enter your PIN",
+      "wrongPin": "Wrong PIN.",
+      "attemptsLeft": "{{count}} attempts left before this device is wiped.",
+      "useBiometric": "Unlock with biometrics",
+      "createPin": "Create a 6-digit PIN",
+      "createPinHint": "The PIN unlocks this app when biometrics are unavailable.",
+      "confirmPin": "Enter the PIN again",
+      "pinMismatch": "The PINs did not match. Start over.",
+      "biometricTitle": "Unlock with your fingerprint or face?",
+      "biometricHint": "Faster than the PIN. The PIN stays as the fallback.",
+      "enableBiometric": "Enable",
+      "notNow": "Not now"
+    },
+    "identity": {
+      "scanBadge": "Scan your badge",
+      "enterPin": "Enter your PIN",
+      "cameraError": "The camera is not available on this device.",
+      "failed": "Badge and PIN did not match."
+    },
+    "jobs": {
+      "backToScan": "Back to scan",
+      "loadFailed": "Could not load this job.",
+      "column": "Column",
+      "due": "Due",
+      "noDue": "No date",
+      "nextStep": "Next step",
+      "lastColumn": "Last column",
+      "recent": "Recent activity",
+      "noActivity": "No activity yet.",
+      "advanceTo": "Advance to {{column}}",
+      "movedTo": "Moved to {{column}}",
+      "timerStarted": "Timer started",
+      "noteAdded": "Note added",
+      "photoAttached": "Photo attached",
+      "actionFailed": "That did not go through. Try again.",
+      "noteByVoice": "Note by voice",
+      "listening": "Listening…",
+      "noteFromList": "Note from list",
+      "noPresets": "No preset notes configured.",
+      "attachPhoto": "Attach photo",
+      "homeHint": "Scan a job traveler or look one up to see its status."
+    },
+    "undo": {
+      "action": "Undo",
+      "failed": "Undo did not go through."
+    },
+    "clock": {
+      "identifyFirst": "Scan your badge to clock in or out.",
+      "since": "since",
+      "failed": "That punch did not go through. Try again.",
+      "state": {
+        "out": "OUT",
+        "in": "IN",
+        "break": "ON BREAK",
+        "unknown": "—"
+      },
+      "action": {
+        "ClockIn": "Clock in",
+        "ClockOut": "Clock out",
+        "BreakStart": "Start break",
+        "BreakEnd": "End break"
+      },
+      "done": {
+        "ClockIn": "Clocked in",
+        "ClockOut": "Clocked out",
+        "BreakStart": "Break started",
+        "BreakEnd": "Break ended"
+      }
+    },
+    "move": {
+      "part": "Part",
+      "from": "From bin",
+      "to": "To bin",
+      "lot": "Lot",
+      "quantity": "Quantity",
+      "onHand": "{{qty}} on hand",
+      "less": "Less",
+      "more": "More",
+      "noLots": "No lots at this bin.",
+      "startOver": "Start over",
+      "doneAction": "Done",
+      "sameBin": "That is the same bin. Scan the destination.",
+      "done": "Moved {{qty}} × {{part}} to {{to}}",
+      "failed": "The move did not go through. Try again.",
+      "prompt": {
+        "part": "Scan the part",
+        "from": "Scan the bin it is in",
+        "to": "Scan the bin it is going to"
+      },
+      "expect": {
+        "part": "That is not a part label.",
+        "bin": "That is not a bin label."
+      }
+    },
+    "lookup": {
+      "placeholder": "Job, part, customer, or bin",
+      "voice": "Search by voice",
+      "hint": "Type or say a job number, part, customer, or bin.",
+      "none": "Nothing matched."
+    },
+    "offline": {
+      "queued": "Saved on this phone. It will sync when you are back online."
+    },
+    "sync": {
+      "title": "Sync",
+      "state": {
+        "online": "Waiting to sync",
+        "offline": "Offline",
+        "syncing": "Syncing",
+        "rejected": "Needs attention"
+      },
+      "rejectedHint": "The server did not accept these when they synced. Fix them on the desktop.",
+      "pendingHint": "These will send in order once the phone is online.",
+      "nothingWaiting": "Nothing waiting.",
+      "dismiss": "Dismiss",
+      "discard": "Discard",
+      "retry": "Sync now"
+    },
+    "account": {
+      "title": "Account",
+      "sharedDevice": "Shared device",
+      "sharedTag": "shared",
+      "instances": "Instances on this phone",
+      "addInstance": "Add another Forge",
+      "remove": "Remove from this phone",
+      "confirmRemove": "Remove",
+      "switchFailed": "Could not switch. Check the connection and try again.",
+      "devices": "My devices",
+      "thisDevice": "this phone",
+      "lastSeen": "seen",
+      "signOutDevice": "Sign out that device",
+      "confirmSignOut": "Sign out",
+      "noDevices": "No devices enrolled.",
+      "security": "Security",
+      "changePin": "Change PIN",
+      "biometric": "Unlock with fingerprint or face",
+      "language": "Language",
+      "diagnostics": "Diagnostics",
+      "sendCrashReports": "Send crash reports to this Forge",
+      "diagnosticsHint": "Reports go only to your company's own Forge server — never anywhere else — and never include your data.",
+      "reportProblem": "Report a problem",
+      "problemLabel": "What went wrong?",
+      "send": "Send",
+      "problemSent": "Sent. Your admins have it.",
+      "problemFailed": "Could not send. Try again when online."
+    }
+  },
   "pieceRates": {
     "title": "Piece rates",
     "ratesTitle": "Rates",
@@ -9324,5 +9573,55 @@
     "workLogged": "Logged — earned {{earnings}}.",
     "workLogFailed": "Could not log pieces (is a rate in force for that date?).",
     "deleteFailed": "Could not delete the entry."
+  },
+  "upgradeLock": {
+    "title": "Forge is being updated",
+    "working": "This will take a few minutes. Anything you saved is safe.",
+    "restarting": "Forge is restarting as part of the update. Reconnecting…",
+    "hint": "This screen will come back on its own."
+  },
+  "adminUpdates": {
+    "title": "Updates",
+    "intro": "What this install is running, and how to move it forward. Upgrades run the same gated path as the command line: backup, schema reconcile, health check, automatic rollback.",
+    "tier": "Component",
+    "running": "Running",
+    "recorded": "Recorded",
+    "deployedAt": "Deployed",
+    "noTiers": "No components reported.",
+    "tiers": {
+      "api": "API",
+      "ui": "Web UI",
+      "test": "Test site",
+      "demo": "Demo site"
+    },
+    "checking": "Checking for updates…",
+    "current": "Up to date.",
+    "behind": "A newer release is available: {{version}}",
+    "unknown": "Could not check for updates.",
+    "checkAction": "Check for updates",
+    "upgradeAction": "Upgrade to newest",
+    "rollbackAction": "Roll back",
+    "progress": "Update progress",
+    "reconnecting": "Forge is restarting as part of the update. Reconnecting…",
+    "partial": "Partial update: {{completed}} finished, {{incomplete}} did not.",
+    "states": {
+      "pending": "waiting",
+      "running": "running",
+      "succeeded": "done",
+      "failed": "failed",
+      "halted-destructive": "needs approval"
+    },
+    "noAgent": {
+      "title": "Upgrades are not available from here",
+      "body": "No upgrade agent is installed on this box. Upgrade from the server instead:"
+    },
+    "destructive": {
+      "title": "The update stopped before changing anything",
+      "body": "Applying this release would delete or rewrite the database structures listed below. A backup was taken first. Nothing has been swapped and no destructive change has run.",
+      "preMigrate": "Some preparatory changes were already committed, so the database has moved ahead of the running application. Continue forward, or restore the backup taken above.",
+      "dispositions": "For each item, decide: {{list}}.",
+      "confirmLabel": "Type APPLY to accept these changes and continue.",
+      "approveAction": "Approve and continue"
+    }
   }
 }

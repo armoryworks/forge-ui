@@ -1,0 +1,125 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host { display: contents; }
+
+.sync {
+  @include flex-center;
+  gap: $sp-xs;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 $sp-md;
+  background: transparent;
+  border: $border-width-thin solid var(--border);
+  color: var(--text-muted);
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  cursor: pointer;
+
+  &--offline { color: var(--warning); border-color: var(--warning); }
+  &--syncing { color: var(--info); border-color: var(--info); }
+  &--rejected { color: var(--error); border-color: var(--error); }
+
+  &__icon { font-size: $icon-size-lg; }
+  &__icon--spin { animation: spin 1s linear infinite; }
+}
+
+.sync-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: calc(#{$header-height} + env(safe-area-inset-top));
+  z-index: $z-dropdown;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: $sp-lg;
+  background: var(--surface);
+  border-bottom: $border-width-accent solid var(--primary);
+
+  &__head {
+    @include flex-between;
+    margin-bottom: $sp-md;
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &__close {
+    @include flex-center;
+    width: 44px;
+    height: 44px;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  &__hint {
+    margin: 0 0 $sp-md;
+    font-size: $font-size-base;
+    color: var(--text-muted);
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0 0 $sp-lg;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: $sp-xs $sp-md;
+    padding: $sp-md;
+    border: $border-width-thin solid var(--border);
+    border-left: $border-width-accent solid var(--info);
+
+    &--rejected { border-left-color: var(--error); }
+  }
+
+  &__desc {
+    font-size: $font-size-md;
+    color: var(--text);
+  }
+
+  &__meta {
+    grid-column: 1;
+    font-family: $font-family-mono;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+
+  &__action {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+    min-height: 44px;
+    padding: 0 $sp-md;
+    background: transparent;
+    border: $border-width-thin solid var(--border);
+    color: var(--text);
+    font-family: $font-family-primary;
+    font-size: $font-size-base;
+    cursor: pointer;
+  }
+
+  &__retry {
+    @include flex-center;
+    gap: $sp-md;
+    width: 100%;
+    min-height: 56px;
+    background: var(--primary);
+    border: none;
+    color: var(--bg);
+    font-family: $font-family-primary;
+    font-size: $font-size-md;
+    font-weight: 600;
+    cursor: pointer;
+  }
+}

@@ -1,0 +1,29 @@
+<div class="pin-pad">
+  <div class="pin-pad__dots" aria-hidden="true">
+    @for (filled of dots(); track $index) {
+      <span class="pin-pad__dot" [class.pin-pad__dot--filled]="filled"></span>
+    }
+  </div>
+
+  <div class="pin-pad__grid">
+    @for (key of keys; track key) {
+      <button
+        type="button"
+        class="pin-pad__key"
+        [attr.data-testid]="'pin-key-' + key"
+        (click)="press(key)"
+      >{{ key }}</button>
+    }
+    <span class="pin-pad__spacer" aria-hidden="true"></span>
+    <button type="button" class="pin-pad__key" data-testid="pin-key-0" (click)="press('0')">0</button>
+    <button
+      type="button"
+      class="pin-pad__key pin-pad__key--action"
+      aria-label="Backspace"
+      data-testid="pin-key-backspace"
+      (click)="backspace()"
+    >
+      <span class="material-icons-outlined" aria-hidden="true">backspace</span>
+    </button>
+  </div>
+</div>

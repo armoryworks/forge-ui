@@ -345,7 +345,8 @@
     "units": "units",
     "overview": "Resumen",
     "activity": "Actividad",
-    "archived": "Archivado"
+    "archived": "Archivado",
+    "continue": "Continuar"
   },
   "dashboard": {
     "title": "Panel",
@@ -919,10 +920,7 @@
     "deleteOperationAria": "Eliminar operación",
     "addStep": "Agregar Operación",
     "stepNumber": "Paso #",
-    "estTime": "Tiempo estimado",
-    "estHours": "Horas",
     "estMinutes": "Minutos",
-    "estMilliseconds": "Milisegundos",
     "instructions": "Instrucciones",
     "workCenter": "Centro de Trabajo",
     "workCenterNone": "— Ninguno —",
@@ -1411,7 +1409,10 @@
       "vendorCompare": "Comparación de proveedores",
       "lastReceiptAt": "Última recepción",
       "cheapestSource": "Más barato"
-    }
+    },
+    "estTime": "Tiempo estimado",
+    "estHours": "Horas",
+    "estMilliseconds": "Milisegundos"
   },
   "vendorSources": {
     "preferred": "Preferido",
@@ -3016,7 +3017,8 @@
       "discovery": "Asistente de Descubrimiento",
       "presets": "Preajustes",
       "entityCompleteness": "Integridad de Entidades",
-      "terms": "Términos y condiciones"
+      "terms": "Términos y condiciones",
+      "updates": "Actualizaciones"
     },
     "users": "Usuarios",
     "addUser": "Agregar Usuario",
@@ -3457,7 +3459,32 @@
       }
     },
     "confirmReminderTitle": "¿Enviar recordatorio?",
-    "confirmReminderMessage": "¿Enviar un correo de recordatorio de cumplimiento a este empleado?"
+    "confirmReminderMessage": "¿Enviar un correo de recordatorio de cumplimiento a este empleado?",
+    "devices": {
+      "addTitle": "Agregar un dispositivo — {{name}}",
+      "addAction": "Agregar un dispositivo",
+      "scanHint": "En el teléfono, abra la aplicación Forge y escanee este código. Funciona una sola vez y caduca pronto.",
+      "issuing": "Generando código…",
+      "codeExpired": "Código caducado",
+      "expiresIn": "Caduca en {{seconds}}s",
+      "newCode": "Nuevo código",
+      "enrolled": "Dispositivos inscritos",
+      "none": "No hay dispositivos inscritos.",
+      "lastSeen": "Visto por última vez",
+      "neverSeen": "Nunca se ha conectado",
+      "flagged": "Marcado",
+      "stale": "Inactivo",
+      "revokedChip": "Revocado",
+      "revoke": "Revocar",
+      "revokeTitle": "¿Revocar este dispositivo?",
+      "revokeMessage": "{{name}} se cerrará la sesión y se borrará la próxima vez que contacte este servidor.",
+      "revoked": "Dispositivo revocado",
+      "revokeFailed": "No se pudo revocar el dispositivo. Inténtelo de nuevo.",
+      "issueFailed": "No se pudo generar un código de inscripción. Inténtelo de nuevo.",
+      "addSharedTitle": "Agregar un dispositivo compartido",
+      "sharedHint": "Un dispositivo compartido pertenece al taller, no a una persona. Cada acción comienza con un escaneo de credencial y un PIN.",
+      "sharedAction": "Dispositivo compartido"
+    }
   },
   "teamsPanel": {
     "teams": "equipos",
@@ -9296,6 +9323,228 @@
       }
     }
   },
+  "mobileApp": {
+    "navLabel": "Navegación de la aplicación",
+    "tabs": {
+      "scan": "Escanear",
+      "clock": "Reloj",
+      "jobs": "Trabajos",
+      "move": "Mover",
+      "lookup": "Buscar"
+    },
+    "scan": {
+      "prompt": "Apunte a un viajero de trabajo, pieza, ubicación o credencial.",
+      "resolving": "Buscando…",
+      "unknownCode": "No es un código de Forge.",
+      "lookupFailed": "No se pudo buscar. Revise la conexión.",
+      "enrollmentCodeHere": "Ese es un código de inscripción. Abra Cuenta para agregar una instancia.",
+      "collapsed": "Ya hecho — escaneo duplicado ignorado.",
+      "openOnDesktopHint": "Abra este registro en la aplicación de escritorio.",
+      "cameraError": "La cámara no está disponible.",
+      "torch": "Linterna",
+      "kind": {
+        "job": "Trabajo",
+        "part": "Pieza",
+        "bin": "Ubicación",
+        "lot": "Lote",
+        "badge": "Credencial",
+        "salesOrder": "Orden de venta",
+        "purchaseOrder": "Orden de compra",
+        "asset": "Activo",
+        "enrollment": "Código de inscripción",
+        "unknown": "Desconocido",
+        "customer": "Cliente"
+      },
+      "actions": {
+        "start": "Iniciar",
+        "complete": "Completar",
+        "move": "Mover",
+        "details": "Detalles",
+        "moveStock": "Mover inventario",
+        "identify": "Identificar",
+        "openOnDesktop": "Abrir en escritorio"
+      },
+      "manual": {
+        "open": "Escribirlo",
+        "label": "Id de etiqueta (p. ej. JOB-1042)",
+        "go": "Buscar"
+      }
+    },
+    "enroll": {
+      "scanTitle": "Escanee el código de su administrador",
+      "cameraError": "La cámara no está disponible. Use la ruta de dirección del servidor abajo.",
+      "connecting": "Conectando…",
+      "notAnEnrollmentCode": "Ese no es un código de inscripción de Forge.",
+      "enrollFailed": "La inscripción falló. Pida a su administrador un código nuevo.",
+      "enterAddressInstead": "Ingresar la dirección del servidor",
+      "addressTitle": "Conéctese a su servidor Forge",
+      "serverAddress": "Dirección del servidor",
+      "httpsRequired": "Se requiere TLS — se rechaza HTTP sin cifrar.",
+      "discoveryFailed": "Ningún servidor Forge respondió en esa dirección.",
+      "trustTitle": "¿Confiar en este servidor?",
+      "certificate": "Certificado",
+      "noCertificatePin": "Este servidor no publica una huella de certificado para fijar.",
+      "trust": "Confiar",
+      "loginTitle": "Inicie sesión en {{name}}",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "signIn": "Iniciar sesión",
+      "totpTitle": "Ingrese su código de 6 dígitos",
+      "totpCode": "Código del autenticador",
+      "totpFailed": "Ese código no se verificó. Pruebe el siguiente.",
+      "loginFailed": "El inicio de sesión falló. Verifique el correo y la contraseña.",
+      "backToScan": "Volver al escaneo de código",
+      "usePasskey": "Usar una llave de acceso",
+      "certMismatch": "El certificado de este servidor no coincide con el que fijó su administrador. Deténgase y consulte con su administrador antes de continuar."
+    },
+    "lock": {
+      "enterPin": "Ingrese su PIN",
+      "wrongPin": "PIN incorrecto.",
+      "attemptsLeft": "{{count}} intentos restantes antes de que este dispositivo se borre.",
+      "useBiometric": "Desbloquear con biometría",
+      "createPin": "Cree un PIN de 6 dígitos",
+      "createPinHint": "El PIN desbloquea esta aplicación cuando la biometría no está disponible.",
+      "confirmPin": "Ingrese el PIN de nuevo",
+      "pinMismatch": "Los PIN no coincidieron. Comience de nuevo.",
+      "biometricTitle": "¿Desbloquear con su huella o rostro?",
+      "biometricHint": "Más rápido que el PIN. El PIN queda como respaldo.",
+      "enableBiometric": "Activar",
+      "notNow": "Ahora no"
+    },
+    "identity": {
+      "scanBadge": "Escanee su credencial",
+      "enterPin": "Ingrese su PIN",
+      "cameraError": "La cámara no está disponible en este dispositivo.",
+      "failed": "La credencial y el PIN no coinciden."
+    },
+    "jobs": {
+      "backToScan": "Volver a escanear",
+      "loadFailed": "No se pudo cargar este trabajo.",
+      "column": "Columna",
+      "due": "Vence",
+      "noDue": "Sin fecha",
+      "nextStep": "Siguiente paso",
+      "lastColumn": "Última columna",
+      "recent": "Actividad reciente",
+      "noActivity": "Sin actividad todavía.",
+      "advanceTo": "Avanzar a {{column}}",
+      "movedTo": "Movido a {{column}}",
+      "timerStarted": "Temporizador iniciado",
+      "noteAdded": "Nota agregada",
+      "photoAttached": "Foto adjuntada",
+      "actionFailed": "Eso no se completó. Inténtelo de nuevo.",
+      "noteByVoice": "Nota por voz",
+      "listening": "Escuchando…",
+      "noteFromList": "Nota de la lista",
+      "noPresets": "No hay notas predefinidas configuradas.",
+      "attachPhoto": "Adjuntar foto",
+      "homeHint": "Escanee un viajero de trabajo o búsquelo para ver su estado."
+    },
+    "undo": {
+      "action": "Deshacer",
+      "failed": "No se pudo deshacer."
+    },
+    "clock": {
+      "identifyFirst": "Escanee su credencial para marcar entrada o salida.",
+      "since": "desde",
+      "failed": "Esa marcación no se registró. Inténtelo de nuevo.",
+      "state": {
+        "out": "FUERA",
+        "in": "DENTRO",
+        "break": "EN DESCANSO",
+        "unknown": "—"
+      },
+      "action": {
+        "ClockIn": "Marcar entrada",
+        "ClockOut": "Marcar salida",
+        "BreakStart": "Iniciar descanso",
+        "BreakEnd": "Terminar descanso"
+      },
+      "done": {
+        "ClockIn": "Entrada registrada",
+        "ClockOut": "Salida registrada",
+        "BreakStart": "Descanso iniciado",
+        "BreakEnd": "Descanso terminado"
+      }
+    },
+    "move": {
+      "part": "Pieza",
+      "from": "Ubicación origen",
+      "to": "Ubicación destino",
+      "lot": "Lote",
+      "quantity": "Cantidad",
+      "onHand": "{{qty}} disponibles",
+      "less": "Menos",
+      "more": "Más",
+      "noLots": "No hay lotes en esta ubicación.",
+      "startOver": "Empezar de nuevo",
+      "doneAction": "Listo",
+      "sameBin": "Es la misma ubicación. Escanee el destino.",
+      "done": "Movido {{qty}} × {{part}} a {{to}}",
+      "failed": "El movimiento no se registró. Inténtelo de nuevo.",
+      "prompt": {
+        "part": "Escanee la pieza",
+        "from": "Escanee la ubicación donde está",
+        "to": "Escanee la ubicación a donde va"
+      },
+      "expect": {
+        "part": "Esa no es una etiqueta de pieza.",
+        "bin": "Esa no es una etiqueta de ubicación."
+      }
+    },
+    "lookup": {
+      "placeholder": "Trabajo, pieza, cliente o ubicación",
+      "voice": "Buscar por voz",
+      "hint": "Escriba o diga un número de trabajo, pieza, cliente o ubicación.",
+      "none": "Nada coincidió."
+    },
+    "offline": {
+      "queued": "Guardado en este teléfono. Se sincronizará cuando vuelva la conexión."
+    },
+    "sync": {
+      "title": "Sincronización",
+      "state": {
+        "online": "Pendiente de sincronizar",
+        "offline": "Sin conexión",
+        "syncing": "Sincronizando",
+        "rejected": "Requiere atención"
+      },
+      "rejectedHint": "El servidor no aceptó estos cambios al sincronizar. Corríjalos en el escritorio.",
+      "pendingHint": "Se enviarán en orden cuando el teléfono tenga conexión.",
+      "nothingWaiting": "Nada pendiente.",
+      "dismiss": "Descartar",
+      "discard": "Descartar",
+      "retry": "Sincronizar ahora"
+    },
+    "account": {
+      "title": "Cuenta",
+      "sharedDevice": "Dispositivo compartido",
+      "sharedTag": "compartido",
+      "instances": "Instancias en este teléfono",
+      "addInstance": "Agregar otro Forge",
+      "remove": "Quitar de este teléfono",
+      "confirmRemove": "Quitar",
+      "switchFailed": "No se pudo cambiar. Revise la conexión e inténtelo de nuevo.",
+      "devices": "Mis dispositivos",
+      "thisDevice": "este teléfono",
+      "lastSeen": "visto",
+      "signOutDevice": "Cerrar sesión en ese dispositivo",
+      "confirmSignOut": "Cerrar sesión",
+      "noDevices": "No hay dispositivos inscritos.",
+      "security": "Seguridad",
+      "changePin": "Cambiar PIN",
+      "biometric": "Desbloquear con huella o rostro",
+      "language": "Idioma",
+      "diagnostics": "Diagnóstico",
+      "sendCrashReports": "Enviar informes de fallos a este Forge",
+      "diagnosticsHint": "Los informes van solo al servidor Forge de su empresa — a ningún otro lugar — y nunca incluyen sus datos.",
+      "reportProblem": "Reportar un problema",
+      "problemLabel": "¿Qué salió mal?",
+      "send": "Enviar",
+      "problemSent": "Enviado. Sus administradores lo tienen.",
+      "problemFailed": "No se pudo enviar. Inténtelo cuando tenga conexión."
+    }
+  },
   "pieceRates": {
     "title": "Tarifas por pieza",
     "ratesTitle": "Tarifas",
@@ -9324,5 +9573,55 @@
     "workLogged": "Registrado: ganó {{earnings}}.",
     "workLogFailed": "No se pudieron registrar las piezas (¿hay una tarifa vigente para esa fecha?).",
     "deleteFailed": "No se pudo eliminar el registro."
+  },
+  "upgradeLock": {
+    "title": "Forge se está actualizando",
+    "working": "Esto tardará unos minutos. Todo lo que guardó está a salvo.",
+    "restarting": "Forge se está reiniciando como parte de la actualización. Reconectando…",
+    "hint": "Esta pantalla volverá por sí sola."
+  },
+  "adminUpdates": {
+    "title": "Actualizaciones",
+    "intro": "Lo que esta instalación está ejecutando y cómo avanzarla. Las actualizaciones siguen la misma ruta controlada que la línea de comandos: copia de seguridad, reconciliación del esquema, comprobación de estado y reversión automática.",
+    "tier": "Componente",
+    "running": "En ejecución",
+    "recorded": "Registrado",
+    "deployedAt": "Desplegado",
+    "noTiers": "No se reportaron componentes.",
+    "tiers": {
+      "api": "API",
+      "ui": "Interfaz web",
+      "test": "Sitio de pruebas",
+      "demo": "Sitio de demostración"
+    },
+    "checking": "Buscando actualizaciones…",
+    "current": "Está al día.",
+    "behind": "Hay una versión más reciente disponible: {{version}}",
+    "unknown": "No se pudo comprobar si hay actualizaciones.",
+    "checkAction": "Buscar actualizaciones",
+    "upgradeAction": "Actualizar a la más reciente",
+    "rollbackAction": "Revertir",
+    "progress": "Progreso de la actualización",
+    "reconnecting": "Forge se está reiniciando como parte de la actualización. Reconectando…",
+    "partial": "Actualización parcial: {{completed}} terminó, {{incomplete}} no.",
+    "states": {
+      "pending": "en espera",
+      "running": "en ejecución",
+      "succeeded": "listo",
+      "failed": "falló",
+      "halted-destructive": "requiere aprobación"
+    },
+    "noAgent": {
+      "title": "Las actualizaciones no están disponibles desde aquí",
+      "body": "No hay un agente de actualización instalado en este equipo. Actualice desde el servidor:"
+    },
+    "destructive": {
+      "title": "La actualización se detuvo antes de cambiar nada",
+      "body": "Aplicar esta versión eliminaría o reescribiría las estructuras de base de datos que se enumeran a continuación. Primero se tomó una copia de seguridad. No se ha cambiado nada y no se ha ejecutado ningún cambio destructivo.",
+      "preMigrate": "Algunos cambios preparatorios ya se confirmaron, por lo que la base de datos está por delante de la aplicación en ejecución. Continúe hacia adelante o restaure la copia de seguridad tomada arriba.",
+      "dispositions": "Para cada elemento, decida: {{list}}.",
+      "confirmLabel": "Escriba APPLY para aceptar estos cambios y continuar.",
+      "approveAction": "Aprobar y continuar"
+    }
   }
 }

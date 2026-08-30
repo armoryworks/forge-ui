@@ -1,0 +1,26 @@
+<div class="identity" data-testid="mobile-app-identity-prompt">
+  @switch (stage()) {
+    @case ('badge') {
+      <h2 class="identity__title">{{ 'mobileApp.identity.scanBadge' | translate }}</h2>
+      <div class="identity__stage">
+        <div #badgeViewfinder id="identity-badge-viewfinder" class="identity__viewfinder"></div>
+        @if (cameraError(); as message) {
+          <div class="identity__error-overlay" role="alert">
+            <span class="material-icons-outlined" aria-hidden="true">videocam_off</span>
+            <span>{{ message }}</span>
+          </div>
+        }
+      </div>
+    }
+    @case ('pin') {
+      <h2 class="identity__title">{{ 'mobileApp.identity.enterPin' | translate }}</h2>
+      <app-pin-pad [length]="4" (completed)="onPin($event)" />
+      @if (error(); as message) {
+        <p class="identity__error" role="alert">{{ message }}</p>
+      }
+    }
+  }
+  <button type="button" class="identity__cancel" data-testid="identity-cancel" (click)="cancel()">
+    {{ 'common.cancel' | translate }}
+  </button>
+</div>

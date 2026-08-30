@@ -23,6 +23,13 @@ export const ADMIN_ROUTES: Routes = [
   // detail page at `/admin/capabilities/:id`. Detail route MUST be listed
   // before the `:tab` catch-all so the AdminComponent doesn't intercept the
   // capability code as a tab name. Both lazy-loaded.
+  // Self-service upgrade. Before the `:tab` catch-all so it is not read as a
+  // tab name. Admin-only via [Authorize(Roles="Admin")] on the API; the screen
+  // itself degrades to "no agent on this box" where upgrades are not local.
+  {
+    path: 'updates',
+    loadComponent: () => import('./updates/updates.component').then((m) => m.UpdatesComponent),
+  },
   {
     path: 'capabilities',
     loadComponent: () =>

@@ -15,7 +15,9 @@ import { ReferenceDataGroup } from './models/reference-data-group.model';
 import { TerminologyEntryItem } from './models/terminology-entry-item.model';
 import { TrackType } from '../../shared/models/track-type.model';
 import { TrackTypeDialogComponent } from './components/track-type-dialog.component';
+import { AddDeviceDialogComponent } from './components/add-device-dialog/add-device-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { CapDirective } from '../../shared/directives/cap.directive';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SnackbarService } from '../../shared/services/snackbar.service';
@@ -75,7 +77,7 @@ import { SlideoutComponent } from '../../shared/components/slideout/slideout.com
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent, DatepickerComponent, DataTableComponent,
     ColumnCellDirective, ValidationButtonComponent, TrackTypeDialogComponent,
-    EmptyStateComponent, LoadingBlockDirective, AdminOverviewComponent, TrainingPanelComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, RoleTemplatesPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, AuditLogPanelComponent, TimeCorrectionsPanelComponent, EventsPanelComponent, AnnouncementsPanelComponent, EdiPanelComponent, MfaPolicyPanelComponent, DomainEventFailuresPanelComponent, IntegrationOutboxPanelComponent, AutoPoSettingsComponent, ExpenseSettingsPanelComponent, BiApiKeysPanelComponent, SystemApiKeysPanelComponent, ConnectionsPanelComponent, BarcodeInfoComponent, SlideoutComponent, DatePipe, LowerCasePipe, TranslatePipe, MatTooltipModule,
+    EmptyStateComponent, LoadingBlockDirective, AdminOverviewComponent, TrainingPanelComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, RoleTemplatesPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, AuditLogPanelComponent, TimeCorrectionsPanelComponent, EventsPanelComponent, AnnouncementsPanelComponent, EdiPanelComponent, MfaPolicyPanelComponent, DomainEventFailuresPanelComponent, IntegrationOutboxPanelComponent, AutoPoSettingsComponent, ExpenseSettingsPanelComponent, BiApiKeysPanelComponent, SystemApiKeysPanelComponent, ConnectionsPanelComponent, BarcodeInfoComponent, SlideoutComponent, DatePipe, LowerCasePipe, TranslatePipe, MatTooltipModule, AddDeviceDialogComponent, CapDirective,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
@@ -136,6 +138,8 @@ export class AdminComponent implements OnInit {
   protected readonly users = signal<AdminUser[]>([]);
   protected readonly showUserDialog = signal(false);
   protected readonly editingUser = signal<AdminUser | null>(null);
+  protected readonly deviceUser = signal<AdminUser | null>(null);
+  protected readonly sharedDeviceOpen = signal(false);
 
   protected readonly userForm = new FormGroup({
     firstName: new FormControl('', [Validators.required, Validators.maxLength(100)]),

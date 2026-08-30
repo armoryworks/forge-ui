@@ -1,0 +1,12 @@
+@if (locked()) {
+  <div class="upgrade-lock" role="alertdialog" aria-modal="true" [attr.aria-label]="'upgradeLock.title' | translate">
+    <div class="upgrade-lock__panel">
+      <div class="upgrade-lock__spinner" aria-hidden="true"></div>
+      <h2 class="upgrade-lock__title">{{ 'upgradeLock.title' | translate }}</h2>
+      <p class="upgrade-lock__body">
+        {{ (apiUnreachable() ? 'upgradeLock.restarting' : 'upgradeLock.working') | translate }}
+      </p>
+      <p class="upgrade-lock__hint">{{ 'upgradeLock.hint' | translate }}</p>
+    </div>
+  </div>
+}

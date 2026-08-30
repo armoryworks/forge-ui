@@ -21,18 +21,25 @@
   } @else if (reviewPhase() !== 'idle' && formsToSign().length > 0) {
     <!-- ── Per-form review + sign loop ────────────────────────────────────── -->
     <div class="onboarding__signing">
-
       <!-- Progress indicator -->
       <div class="onboarding__signing-header">
         <h2>{{ 'onboarding.reviewTitle' | translate }}</h2>
         <p>{{ 'onboarding.reviewSubtitle' | translate }}</p>
         <div class="onboarding__signing-progress">
           @for (item of formsToSign(); track item.formType; let i = $index) {
-            <span class="onboarding__signing-step"
+            <span
+              class="onboarding__signing-step"
               [class.onboarding__signing-step--active]="i === currentFormIndex()"
-              [class.onboarding__signing-step--done]="signedFormIndices().has(i)">
+              [class.onboarding__signing-step--done]="signedFormIndices().has(i)"
+            >
               <span class="material-icons-outlined">
-                {{ signedFormIndices().has(i) ? 'check_circle' : (i === currentFormIndex() ? 'radio_button_checked' : 'radio_button_unchecked') }}
+                {{
+                  signedFormIndices().has(i)
+                    ? 'check_circle'
+                    : i === currentFormIndex()
+                      ? 'radio_button_checked'
+                      : 'radio_button_unchecked'
+                }}
               </span>
               {{ item.formName }}
             </span>
@@ -47,7 +54,8 @@
             <span class="material-icons-outlined">description</span>
             <h3>{{ currentForm()?.formName }}</h3>
             <span class="onboarding__signing-doc-count">
-              {{ 'onboarding.formCounter' | translate }} {{ currentFormIndex() + 1 }} of {{ formsToSign().length }}
+              {{ 'onboarding.formCounter' | translate }} {{ currentFormIndex() + 1 }} of
+              {{ formsToSign().length }}
             </span>
           </div>
 
@@ -66,7 +74,8 @@
               [src]="pdfSafeUrl()"
               type="application/pdf"
               class="onboarding__pdf-embed"
-              aria-label="Pre-filled {{ currentForm()?.formName }} for review" />
+              aria-label="Pre-filled {{ currentForm()?.formName }} for review"
+            />
           } @else {
             <p class="onboarding__review-warn">
               <span class="material-icons-outlined">info</span>
@@ -75,23 +84,56 @@
             <div class="onboarding__review-summary">
               @switch (currentForm()?.formType) {
                 @case ('W4') {
-                  <div class="onboarding__review-row"><span>{{ 'onboarding.filingStatus' | translate }}</span><strong>{{ w4FilingLabel() }}</strong></div>
-                  <div class="onboarding__review-row"><span>{{ 'onboarding.multipleJobs' | translate }}</span><strong>{{ _w4Val().multipleJobs ? ('onboarding.yes' | translate) : ('onboarding.no' | translate) }}</strong></div>
-                  <div class="onboarding__review-row"><span>{{ 'onboarding.exemptWithholding' | translate }}</span><strong>{{ _w4Val().exemptFromWithholding ? ('onboarding.yes' | translate) : ('onboarding.no' | translate) }}</strong></div>
+                  <div class="onboarding__review-row">
+                    <span>{{ 'onboarding.filingStatus' | translate }}</span
+                    ><strong>{{ w4FilingLabel() }}</strong>
+                  </div>
+                  <div class="onboarding__review-row">
+                    <span>{{ 'onboarding.multipleJobs' | translate }}</span
+                    ><strong>{{
+                      _w4Val().multipleJobs
+                        ? ('onboarding.yes' | translate)
+                        : ('onboarding.no' | translate)
+                    }}</strong>
+                  </div>
+                  <div class="onboarding__review-row">
+                    <span>{{ 'onboarding.exemptWithholding' | translate }}</span
+                    ><strong>{{
+                      _w4Val().exemptFromWithholding
+                        ? ('onboarding.yes' | translate)
+                        : ('onboarding.no' | translate)
+                    }}</strong>
+                  </div>
                 }
                 @case ('StateWithholding') {
-                  <div class="onboarding__review-row"><span>{{ 'onboarding.state' | translate }}</span><strong>{{ selectedStateName() }}</strong></div>
-                  <div class="onboarding__review-row"><span>{{ 'onboarding.filingStatus' | translate }}</span><strong>{{ stateFilingLabel() }}</strong></div>
-                  <div class="onboarding__review-row"><span>{{ 'onboarding.allowances' | translate }}</span><strong>{{ _stateVal().stateAllowances ?? 0 }}</strong></div>
+                  <div class="onboarding__review-row">
+                    <span>{{ 'onboarding.state' | translate }}</span
+                    ><strong>{{ selectedStateName() }}</strong>
+                  </div>
+                  <div class="onboarding__review-row">
+                    <span>{{ 'onboarding.filingStatus' | translate }}</span
+                    ><strong>{{ stateFilingLabel() }}</strong>
+                  </div>
+                  <div class="onboarding__review-row">
+                    <span>{{ 'onboarding.allowances' | translate }}</span
+                    ><strong>{{ _stateVal().stateAllowances ?? 0 }}</strong>
+                  </div>
                 }
                 @case ('I9') {
-                  <div class="onboarding__review-row"><span>{{ 'onboarding.citizenshipAuth' | translate }}</span><strong>{{ citizenshipLabel() }}</strong></div>
+                  <div class="onboarding__review-row">
+                    <span>{{ 'onboarding.citizenshipAuth' | translate }}</span
+                    ><strong>{{ citizenshipLabel() }}</strong>
+                  </div>
                   <div class="onboarding__review-row">
                     <span>{{ 'onboarding.identityDocuments' | translate }}</span>
                     <strong>
-                      @if (_i9Val().documentChoice === 'A') { {{ 'onboarding.listADocProvided' | translate }} }
-                      @else if (_i9Val().documentChoice === 'BC') { {{ 'onboarding.listBCDocProvided' | translate }} }
-                      @else { {{ 'onboarding.notSpecified' | translate }} }
+                      @if (_i9Val().documentChoice === 'A') {
+                        {{ 'onboarding.listADocProvided' | translate }}
+                      } @else if (_i9Val().documentChoice === 'BC') {
+                        {{ 'onboarding.listBCDocProvided' | translate }}
+                      } @else {
+                        {{ 'onboarding.notSpecified' | translate }}
+                      }
                     </strong>
                   </div>
                 }
@@ -100,13 +142,18 @@
           }
 
           <div class="onboarding__review-actions">
-            <button class="action-btn" (click)="goBackToStep(currentForm()?.formType)">
+            <button
+              class="action-btn"
+              (click)="goBackToStep(currentForm()?.formType)"
+            >
               <span class="material-icons-outlined">arrow_back</span>
               {{ 'onboarding.goBackToEdit' | translate }}
             </button>
-            <button class="action-btn action-btn--primary"
+            <button
+              class="action-btn action-btn--primary"
               [disabled]="loadingPreview()"
-              (click)="proceedToSign()">
+              (click)="proceedToSign()"
+            >
               <span class="material-icons-outlined">draw</span>
               {{ 'onboarding.signForm' | translate }}
             </button>
@@ -121,7 +168,8 @@
             <span class="material-icons-outlined">draw</span>
             <h3>{{ 'onboarding.signPrefix' | translate }} {{ currentForm()?.formName }}</h3>
             <span class="onboarding__signing-doc-count">
-              {{ 'onboarding.formCounter' | translate }} {{ currentFormIndex() + 1 }} of {{ formsToSign().length }}
+              {{ 'onboarding.formCounter' | translate }} {{ currentFormIndex() + 1 }} of
+              {{ formsToSign().length }}
             </span>
           </div>
 
@@ -139,7 +187,8 @@
               [attr.data-src]="currentSigningUrl()"
               (submit)="onDocuSealSubmit()"
               class="onboarding__docuseal-embed"
-              aria-label="Document signing form for {{ currentForm()?.formName }}">
+              aria-label="Document signing form for {{ currentForm()?.formName }}"
+            >
             </docuseal-form>
           }
 
@@ -150,7 +199,10 @@
                 {{ 'onboarding.backToPreview' | translate }}
               </button>
             } @else {
-              <button class="action-btn" (click)="goBackToStep(currentForm()?.formType)">
+              <button
+                class="action-btn"
+                (click)="goBackToStep(currentForm()?.formType)"
+              >
                 <span class="material-icons-outlined">arrow_back</span>
                 {{ 'onboarding.goBackToEdit' | translate }}
               </button>
@@ -164,7 +216,6 @@
           </div>
         </div>
       }
-
     </div>
   } @else {
     <!-- ── Wizard steps ───────────────────────────────────────────────────── -->
@@ -172,35 +223,71 @@
          each step's stepControl validity). selectionChange routes the URL so
          the click round-trips through ?step= and keeps the URL the source of
          truth. -->
-    <mat-stepper class="onboarding__stepper" orientation="horizontal"
-      [linear]="true" [selectedIndex]="currentStepIndex()"
-      (selectionChange)="onStepperSelectionChange($event.selectedIndex)">
+    <mat-stepper
+      class="onboarding__stepper"
+      orientation="horizontal"
+      [linear]="true"
+      [selectedIndex]="currentStepIndex()"
+      (selectionChange)="onStepperSelectionChange($event.selectedIndex)"
+    >
       <!-- Override the default "create" (pencil) edit icon with step numbers -->
       <ng-template matStepperIcon="edit" let-index="index">{{ index + 1 }}</ng-template>
 
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <!-- Step 1: Personal Information                                        -->
       <!-- ─────────────────────────────────────────────────────────────────── -->
-      <mat-step [stepControl]="personalForm" [label]="'onboarding.steps.personalInfo' | translate"
-        aria-label="Personal Information">
+      <mat-step
+        [stepControl]="personalForm"
+        [label]="'onboarding.steps.personalInfo' | translate"
+        aria-label="Personal Information"
+      >
         <div class="step-content" [formGroup]="personalForm">
           <h2 class="step-content__title">{{ 'onboarding.personal.title' | translate }}</h2>
           <p class="step-content__desc">{{ 'onboarding.personal.desc' | translate }}</p>
 
           <div class="step-row step-row--3">
-            <app-input [label]="'onboarding.personal.firstName' | translate" formControlName="firstName" [required]="true" data-testid="onboarding-first-name" />
-            <app-input [label]="'onboarding.personal.middleName' | translate" formControlName="middleName" data-testid="onboarding-middle-name" />
-            <app-input [label]="'onboarding.personal.lastName' | translate" formControlName="lastName" [required]="true" data-testid="onboarding-last-name" />
+            <app-input
+              [label]="'onboarding.personal.firstName' | translate"
+              formControlName="firstName"
+              [required]="true"
+              data-testid="onboarding-first-name"
+            />
+            <app-input
+              [label]="'onboarding.personal.middleName' | translate"
+              formControlName="middleName"
+              data-testid="onboarding-middle-name"
+            />
+            <app-input
+              [label]="'onboarding.personal.lastName' | translate"
+              formControlName="lastName"
+              [required]="true"
+              data-testid="onboarding-last-name"
+            />
           </div>
 
-          <app-input [label]="'onboarding.personal.otherLastNames' | translate" formControlName="otherLastNames"
-            [placeholder]="'onboarding.personal.otherLastNamesPlaceholder' | translate" data-testid="onboarding-other-last-names" />
+          <app-input
+            [label]="'onboarding.personal.otherLastNames' | translate"
+            formControlName="otherLastNames"
+            [placeholder]="'onboarding.personal.otherLastNamesPlaceholder' | translate"
+            data-testid="onboarding-other-last-names"
+          />
 
           <div class="step-row">
-            <app-datepicker [label]="'onboarding.personal.dateOfBirth' | translate" formControlName="dateOfBirth" [required]="true" data-testid="onboarding-dob" />
+            <app-datepicker
+              [label]="'onboarding.personal.dateOfBirth' | translate"
+              formControlName="dateOfBirth"
+              [required]="true"
+              data-testid="onboarding-dob"
+            />
             <div class="secure-field">
-              <app-input [label]="'onboarding.personal.ssn' | translate" formControlName="ssn"
-                mask="ssn" [required]="!hasStoredSsn()" [placeholder]="'onboarding.personal.ssnPlaceholder' | translate" data-testid="onboarding-ssn" />
+              <app-input
+                [label]="'onboarding.personal.ssn' | translate"
+                formControlName="ssn"
+                mask="ssn"
+                [required]="!hasStoredSsn()"
+                [placeholder]="'onboarding.personal.ssnPlaceholder' | translate"
+                data-testid="onboarding-ssn"
+              />
               @if (hasStoredSsn()) {
                 <p class="secure-field__hint">
                   <span class="material-icons-outlined">lock</span>
@@ -211,10 +298,20 @@
           </div>
 
           <div class="step-row">
-            <app-input [label]="'onboarding.personal.email' | translate" formControlName="email"
-              type="email" [required]="true" data-testid="onboarding-email" />
-            <app-input [label]="'onboarding.personal.phone' | translate" formControlName="phone"
-              mask="phone" [required]="true" data-testid="onboarding-phone" />
+            <app-input
+              [label]="'onboarding.personal.email' | translate"
+              formControlName="email"
+              type="email"
+              [required]="true"
+              data-testid="onboarding-email"
+            />
+            <app-input
+              [label]="'onboarding.personal.phone' | translate"
+              formControlName="phone"
+              mask="phone"
+              [required]="true"
+              data-testid="onboarding-phone"
+            />
           </div>
 
           <p class="step-content__note">
@@ -227,22 +324,50 @@
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <!-- Step 2: Home Address                                                -->
       <!-- ─────────────────────────────────────────────────────────────────── -->
-      <mat-step [stepControl]="addressForm" [label]="'onboarding.steps.address' | translate"
-        aria-label="Home Address">
+      <mat-step
+        [stepControl]="addressForm"
+        [label]="'onboarding.steps.address' | translate"
+        aria-label="Home Address"
+      >
         <div class="step-content" [formGroup]="addressForm">
           <h2 class="step-content__title">{{ 'onboarding.addressStep.title' | translate }}</h2>
           <p class="step-content__desc">{{ 'onboarding.addressStep.desc' | translate }}</p>
 
-          <app-input [label]="'onboarding.addressStep.street1' | translate" formControlName="street1" [required]="true" data-testid="onboarding-street1" />
-          <app-input [label]="'onboarding.addressStep.street2' | translate" formControlName="street2" data-testid="onboarding-street2" />
+          <app-input
+            [label]="'onboarding.addressStep.street1' | translate"
+            formControlName="street1"
+            [required]="true"
+            data-testid="onboarding-street1"
+          />
+          <app-input
+            [label]="'onboarding.addressStep.street2' | translate"
+            formControlName="street2"
+            data-testid="onboarding-street2"
+          />
 
           <div class="step-row">
-            <app-input [label]="'onboarding.addressStep.city' | translate" formControlName="city" [required]="true" data-testid="onboarding-city" />
-            <app-select [label]="'onboarding.addressStep.state' | translate" formControlName="state"
-              [options]="usStateOptions" [required]="true"
-              [placeholder]="'onboarding.addressStep.statePlaceholder' | translate" data-testid="onboarding-state" />
-            <app-input [label]="'onboarding.addressStep.zipCode' | translate" formControlName="zipCode"
-              mask="zip" [required]="true" [placeholder]="'onboarding.addressStep.zipPlaceholder' | translate" data-testid="onboarding-zip" />
+            <app-input
+              [label]="'onboarding.addressStep.city' | translate"
+              formControlName="city"
+              [required]="true"
+              data-testid="onboarding-city"
+            />
+            <app-select
+              [label]="'onboarding.addressStep.state' | translate"
+              formControlName="state"
+              [options]="usStateOptions"
+              [required]="true"
+              [placeholder]="'onboarding.addressStep.statePlaceholder' | translate"
+              data-testid="onboarding-state"
+            />
+            <app-input
+              [label]="'onboarding.addressStep.zipCode' | translate"
+              formControlName="zipCode"
+              mask="zip"
+              [required]="true"
+              [placeholder]="'onboarding.addressStep.zipPlaceholder' | translate"
+              data-testid="onboarding-zip"
+            />
           </div>
         </div>
       </mat-step>
@@ -250,87 +375,133 @@
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <!-- Step 3: Federal Tax Withholding (W-4)                              -->
       <!-- ─────────────────────────────────────────────────────────────────── -->
-      <mat-step [stepControl]="w4Form" [label]="'onboarding.steps.federalTax' | translate"
-        aria-label="W-4 Federal Tax Withholding">
+      <mat-step
+        [stepControl]="w4Form"
+        [label]="'onboarding.steps.federalTax' | translate"
+        aria-label="W-4 Federal Tax Withholding"
+      >
         <div class="step-content" [formGroup]="w4Form">
           <h2 class="step-content__title">{{ 'onboarding.w4.title' | translate }}</h2>
 
           <div class="step-content__instructions">
             <h3>{{ 'onboarding.w4.howToComplete' | translate }}</h3>
             <p>
-              <strong>{{ 'onboarding.w4.filingStatusInstructions' | translate }}</strong> {{ 'onboarding.w4.filingStatusDesc' | translate }}
+              <strong>{{ 'onboarding.w4.filingStatusInstructions' | translate }}</strong>
+              {{ 'onboarding.w4.filingStatusDesc' | translate }}
             </p>
             <p>
-              <strong>{{ 'onboarding.w4.multipleJobsInstructions' | translate }}</strong> {{ 'onboarding.w4.multipleJobsDesc' | translate }}
+              <strong>{{ 'onboarding.w4.multipleJobsInstructions' | translate }}</strong>
+              {{ 'onboarding.w4.multipleJobsDesc' | translate }}
             </p>
             <p>
-              <strong>{{ 'onboarding.w4.dependentsInstructions' | translate }}</strong> {{ 'onboarding.w4.dependentsDesc' | translate }}
+              <strong>{{ 'onboarding.w4.dependentsInstructions' | translate }}</strong>
+              {{ 'onboarding.w4.dependentsDesc' | translate }}
             </p>
             <p>
-              <strong>{{ 'onboarding.w4.otherAdjustmentsInstructions' | translate }}</strong> {{ 'onboarding.w4.otherAdjustmentsDesc' | translate }}
+              <strong>{{ 'onboarding.w4.otherAdjustmentsInstructions' | translate }}</strong>
+              {{ 'onboarding.w4.otherAdjustmentsDesc' | translate }}
             </p>
             <p>
-              <strong>{{ 'onboarding.w4.exemptInstructions' | translate }}</strong> {{ 'onboarding.w4.exemptDesc' | translate }}
+              <strong>{{ 'onboarding.w4.exemptInstructions' | translate }}</strong>
+              {{ 'onboarding.w4.exemptDesc' | translate }}
             </p>
           </div>
 
-          <app-select [label]="'onboarding.w4.filingStatusLabel' | translate"
+          <app-select
+            [label]="'onboarding.w4.filingStatusLabel' | translate"
             formControlName="filingStatus"
             [options]="filingStatusOptions"
-            [required]="true" data-testid="onboarding-w4-filing-status" />
+            [required]="true"
+            data-testid="onboarding-w4-filing-status"
+          />
 
-          <app-toggle [label]="'onboarding.w4.multipleJobsLabel' | translate"
-            formControlName="multipleJobs" data-testid="onboarding-w4-multiple-jobs" />
+          <app-toggle
+            [label]="'onboarding.w4.multipleJobsLabel' | translate"
+            formControlName="multipleJobs"
+            data-testid="onboarding-w4-multiple-jobs"
+          />
 
           <!-- Step 3: Claim Dependents -->
           <div class="step-content__subsection">
-            <div class="step-content__subsection-title">{{ 'onboarding.w4.step3Title' | translate }}</div>
+            <div class="step-content__subsection-title">
+              {{ 'onboarding.w4.step3Title' | translate }}
+            </div>
 
             <div class="step-content__calc-grid">
               <div class="step-content__calc-row">
-                <app-input [label]="'onboarding.w4.qualifyingChildren' | translate"
-                  formControlName="qualifyingChildren" type="number" [required]="true" data-testid="onboarding-w4-qualifying-children" />
+                <app-input
+                  [label]="'onboarding.w4.qualifyingChildren' | translate"
+                  formControlName="qualifyingChildren"
+                  type="number"
+                  [required]="true"
+                  data-testid="onboarding-w4-qualifying-children"
+                />
                 <div class="step-content__calc-display">
                   <span class="step-content__calc-op">× $2,000 =</span>
-                  <span class="step-content__calc-result">{{ w4Step3a() | currency:'USD':'symbol':'1.0-0' }}</span>
+                  <span class="step-content__calc-result">{{
+                    w4Step3a() | currency: 'USD' : 'symbol' : '1.0-0'
+                  }}</span>
                 </div>
               </div>
 
               <div class="step-content__calc-row">
-                <app-input [label]="'onboarding.w4.otherDependents' | translate"
-                  formControlName="otherDependents" type="number" [required]="true" data-testid="onboarding-w4-other-dependents" />
+                <app-input
+                  [label]="'onboarding.w4.otherDependents' | translate"
+                  formControlName="otherDependents"
+                  type="number"
+                  [required]="true"
+                  data-testid="onboarding-w4-other-dependents"
+                />
                 <div class="step-content__calc-display">
                   <span class="step-content__calc-op">× $500 =</span>
-                  <span class="step-content__calc-result">{{ w4Step3b() | currency:'USD':'symbol':'1.0-0' }}</span>
+                  <span class="step-content__calc-result">{{
+                    w4Step3b() | currency: 'USD' : 'symbol' : '1.0-0'
+                  }}</span>
                 </div>
               </div>
             </div>
 
             <div class="step-content__calc-total">
               <span>{{ 'onboarding.w4.totalCredit' | translate }}</span>
-              <strong>{{ w4Step3Total() | currency:'USD':'symbol':'1.0-0' }}</strong>
+              <strong>{{ w4Step3Total() | currency: 'USD' : 'symbol' : '1.0-0' }}</strong>
             </div>
           </div>
 
           <!-- Step 4: Other Adjustments (optional) -->
           <div class="step-content__subsection">
-            <div class="step-content__subsection-title">{{ 'onboarding.w4.step4Title' | translate }}</div>
-            <div class="step-row">
-              <app-currency-input [label]="'onboarding.w4.otherIncome' | translate"
-                formControlName="otherIncome" data-testid="onboarding-w4-other-income" />
-              <app-currency-input [label]="'onboarding.w4.deductions' | translate"
-                formControlName="deductions" data-testid="onboarding-w4-deductions" />
+            <div class="step-content__subsection-title">
+              {{ 'onboarding.w4.step4Title' | translate }}
             </div>
-            <app-currency-input [label]="'onboarding.w4.extraWithholding' | translate"
-              formControlName="extraWithholding" data-testid="onboarding-w4-extra-withholding" />
+            <div class="step-row">
+              <app-currency-input
+                [label]="'onboarding.w4.otherIncome' | translate"
+                formControlName="otherIncome"
+                data-testid="onboarding-w4-other-income"
+              />
+              <app-currency-input
+                [label]="'onboarding.w4.deductions' | translate"
+                formControlName="deductions"
+                data-testid="onboarding-w4-deductions"
+              />
+            </div>
+            <app-currency-input
+              [label]="'onboarding.w4.extraWithholding' | translate"
+              formControlName="extraWithholding"
+              data-testid="onboarding-w4-extra-withholding"
+            />
           </div>
 
-          <app-toggle [label]="'onboarding.w4.exemptLabel' | translate"
-            formControlName="exemptFromWithholding" data-testid="onboarding-w4-exempt" />
+          <app-toggle
+            [label]="'onboarding.w4.exemptLabel' | translate"
+            formControlName="exemptFromWithholding"
+            data-testid="onboarding-w4-exempt"
+          />
 
           <p class="step-content__note">
             <span class="material-icons-outlined">calculate</span>
-            {{ 'onboarding.w4.irsNote' | translate }} <strong>{{ 'onboarding.w4.irsUrl' | translate }}</strong> {{ 'onboarding.w4.irsNoteSuffix' | translate }}
+            {{ 'onboarding.w4.irsNote' | translate }}
+            <strong>{{ 'onboarding.w4.irsUrl' | translate }}</strong>
+            {{ 'onboarding.w4.irsNoteSuffix' | translate }}
           </p>
         </div>
       </mat-step>
@@ -338,9 +509,13 @@
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <!-- Step 4: State Withholding                                           -->
       <!-- ─────────────────────────────────────────────────────────────────── -->
-      <mat-step [label]="'onboarding.steps.stateTax' | translate" aria-label="State Tax Withholding">
+      <mat-step
+        [label]="'onboarding.steps.stateTax' | translate"
+        aria-label="State Tax Withholding"
+      >
         <div class="step-content" [formGroup]="stateForm">
-          <h2 class="step-content__title">{{ 'onboarding.stateTax.title' | translate }}
+          <h2 class="step-content__title">
+            {{ 'onboarding.stateTax.title' | translate }}
             @if (selectedStateName()) {
               <span class="step-content__state-badge">— {{ selectedStateName() }}</span>
             }
@@ -350,7 +525,9 @@
             <div class="step-content__skip-notice">
               <span class="material-icons-outlined">check_circle</span>
               <div>
-                <strong>{{ 'onboarding.stateTax.noIncomeTaxTitle' | translate:{ state: selectedStateName() } }}</strong>
+                <strong>{{
+                  'onboarding.stateTax.noIncomeTaxTitle' | translate: { state: selectedStateName() }
+                }}</strong>
                 <p>{{ 'onboarding.stateTax.noIncomeTaxDesc' | translate }}</p>
               </div>
             </div>
@@ -359,25 +536,40 @@
               <h3>{{ 'onboarding.stateTax.instructionsTitle' | translate }}</h3>
               <p>{{ 'onboarding.stateTax.instructionsDesc' | translate }}</p>
               <p>
-                <strong>{{ 'onboarding.stateTax.allowancesDesc' | translate }}</strong> {{ 'onboarding.stateTax.allowancesExplain' | translate }}
+                <strong>{{ 'onboarding.stateTax.allowancesDesc' | translate }}</strong>
+                {{ 'onboarding.stateTax.allowancesExplain' | translate }}
               </p>
               <p>
-                <strong>{{ 'onboarding.stateTax.exemptDesc' | translate }}</strong> {{ 'onboarding.stateTax.exemptExplain' | translate }}
+                <strong>{{ 'onboarding.stateTax.exemptDesc' | translate }}</strong>
+                {{ 'onboarding.stateTax.exemptExplain' | translate }}
               </p>
             </div>
 
             <div class="step-row">
-              <app-select [label]="'onboarding.stateTax.filingStatusLabel' | translate"
+              <app-select
+                [label]="'onboarding.stateTax.filingStatusLabel' | translate"
                 formControlName="stateFilingStatus"
                 [options]="stateFilingOptions"
-                [required]="!stateExempt()" data-testid="onboarding-state-filing-status" />
-              <app-input [label]="'onboarding.stateTax.allowancesLabel' | translate"
-                formControlName="stateAllowances" type="number" data-testid="onboarding-state-allowances" />
+                [required]="!stateExempt()"
+                data-testid="onboarding-state-filing-status"
+              />
+              <app-input
+                [label]="'onboarding.stateTax.allowancesLabel' | translate"
+                formControlName="stateAllowances"
+                type="number"
+                data-testid="onboarding-state-allowances"
+              />
             </div>
-            <app-currency-input [label]="'onboarding.stateTax.additionalWithholding' | translate"
-              formControlName="stateAdditionalWithholding" data-testid="onboarding-state-extra-withholding" />
-            <app-toggle [label]="'onboarding.stateTax.exemptLabel' | translate"
-              formControlName="stateExempt" data-testid="onboarding-state-exempt" />
+            <app-currency-input
+              [label]="'onboarding.stateTax.additionalWithholding' | translate"
+              formControlName="stateAdditionalWithholding"
+              data-testid="onboarding-state-extra-withholding"
+            />
+            <app-toggle
+              [label]="'onboarding.stateTax.exemptLabel' | translate"
+              formControlName="stateExempt"
+              data-testid="onboarding-state-exempt"
+            />
           }
         </div>
       </mat-step>
@@ -385,8 +577,11 @@
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <!-- Step 5: I-9 Employment Eligibility                                 -->
       <!-- ─────────────────────────────────────────────────────────────────── -->
-      <mat-step [stepControl]="i9Form" [label]="'onboarding.steps.i9' | translate"
-        aria-label="I-9 Employment Eligibility">
+      <mat-step
+        [stepControl]="i9Form"
+        [label]="'onboarding.steps.i9' | translate"
+        aria-label="I-9 Employment Eligibility"
+      >
         <div class="step-content" [formGroup]="i9Form">
           <h2 class="step-content__title">{{ 'onboarding.i9.title' | translate }}</h2>
 
@@ -394,13 +589,16 @@
             <h3>{{ 'onboarding.i9.section1Title' | translate }}</h3>
             <p>
               {{ 'onboarding.i9.section1Desc' | translate }}
-              <strong>{{ 'onboarding.i9.section1Days' | translate }}</strong> {{ 'onboarding.i9.section1Suffix' | translate }}
+              <strong>{{ 'onboarding.i9.section1Days' | translate }}</strong>
+              {{ 'onboarding.i9.section1Suffix' | translate }}
             </p>
             <p>
-              <strong>{{ 'onboarding.i9.lprInstructions' | translate }}</strong> {{ 'onboarding.i9.lprDesc' | translate }}
+              <strong>{{ 'onboarding.i9.lprInstructions' | translate }}</strong>
+              {{ 'onboarding.i9.lprDesc' | translate }}
             </p>
             <p>
-              <strong>{{ 'onboarding.i9.alienInstructions' | translate }}</strong> {{ 'onboarding.i9.alienDesc' | translate }}
+              <strong>{{ 'onboarding.i9.alienInstructions' | translate }}</strong>
+              {{ 'onboarding.i9.alienDesc' | translate }}
             </p>
           </div>
 
@@ -411,18 +609,22 @@
             </div>
             <div class="step-content__doc-columns">
               <div class="step-content__doc-col">
-                <div class="step-content__doc-col-title">{{ 'onboarding.i9.listATitle' | translate }}</div>
+                <div class="step-content__doc-col-title">
+                  {{ 'onboarding.i9.listATitle' | translate }}
+                </div>
                 <ul>
-                  @for (item of ('onboarding.i9.listAItems' | translate); track item) {
+                  @for (item of 'onboarding.i9.listAItems' | translate; track item) {
                     <li>{{ item }}</li>
                   }
                 </ul>
               </div>
               <div class="step-content__doc-or">{{ 'onboarding.i9.or' | translate }}</div>
               <div class="step-content__doc-col">
-                <div class="step-content__doc-col-title">{{ 'onboarding.i9.listBCTitle' | translate }}</div>
+                <div class="step-content__doc-col-title">
+                  {{ 'onboarding.i9.listBCTitle' | translate }}
+                </div>
                 <ul>
-                  @for (item of ('onboarding.i9.listBCItems' | translate); track item) {
+                  @for (item of 'onboarding.i9.listBCItems' | translate; track item) {
                     <li>{{ item }}</li>
                   }
                 </ul>
@@ -430,16 +632,22 @@
             </div>
           </div>
 
-          <app-select [label]="'onboarding.i9.citizenshipLabel' | translate"
+          <app-select
+            [label]="'onboarding.i9.citizenshipLabel' | translate"
             formControlName="citizenshipStatus"
             [options]="citizenshipOptions"
-            [required]="true" data-testid="onboarding-i9-citizenship" />
+            [required]="true"
+            data-testid="onboarding-i9-citizenship"
+          />
 
           @if (i9NeedsAlienInfo()) {
             <div class="step-row">
               <div class="secure-field">
-                <app-input [label]="'onboarding.i9.alienRegNumber' | translate"
-                  formControlName="alienRegNumber" [placeholder]="'onboarding.i9.alienRegPlaceholder' | translate" />
+                <app-input
+                  [label]="'onboarding.i9.alienRegNumber' | translate"
+                  formControlName="alienRegNumber"
+                  [placeholder]="'onboarding.i9.alienRegPlaceholder' | translate"
+                />
                 @if (hasStoredAlienReg()) {
                   <p class="secure-field__hint">
                     <span class="material-icons-outlined">lock</span>
@@ -448,8 +656,10 @@
                 }
               </div>
               <div class="secure-field">
-                <app-input [label]="'onboarding.i9.i94Number' | translate"
-                  formControlName="i94Number" />
+                <app-input
+                  [label]="'onboarding.i9.i94Number' | translate"
+                  formControlName="i94Number"
+                />
                 @if (hasStoredI94()) {
                   <p class="secure-field__hint">
                     <span class="material-icons-outlined">lock</span>
@@ -460,8 +670,10 @@
             </div>
             <div class="step-row">
               <div class="secure-field">
-                <app-input [label]="'onboarding.i9.foreignPassport' | translate"
-                  formControlName="foreignPassportNumber" />
+                <app-input
+                  [label]="'onboarding.i9.foreignPassport' | translate"
+                  formControlName="foreignPassportNumber"
+                />
                 @if (hasStoredForeignPassport()) {
                   <p class="secure-field__hint">
                     <span class="material-icons-outlined">lock</span>
@@ -469,25 +681,32 @@
                   </p>
                 }
               </div>
-              <app-input [label]="'onboarding.i9.countryOfIssuance' | translate"
-                formControlName="foreignPassportCountry" />
+              <app-input
+                [label]="'onboarding.i9.countryOfIssuance' | translate"
+                formControlName="foreignPassportCountry"
+              />
             </div>
-            <app-datepicker [label]="'onboarding.i9.workAuthExpiry' | translate"
-              formControlName="workAuthExpiry" />
+            <app-datepicker
+              [label]="'onboarding.i9.workAuthExpiry' | translate"
+              formControlName="workAuthExpiry"
+            />
           }
 
           <!-- Document Verification -->
           <div class="step-section">
-            <p class="step-content__desc" style="margin:0">
+            <p class="step-content__desc" style="margin: 0">
               {{ 'onboarding.i9.docUploadDesc' | translate }}
             </p>
 
             <div class="doc-choice">
-              <button type="button" class="doc-choice__btn"
+              <button
+                type="button"
+                class="doc-choice__btn"
                 [class.doc-choice__btn--active]="i9DocumentChoice() === 'A'"
                 (click)="setDocumentChoice('A')"
                 data-testid="onboarding-i9-list-a-btn"
-                aria-label="Select one List A document">
+                aria-label="Select one List A document"
+              >
                 <span class="material-icons-outlined">badge</span>
                 <div class="doc-choice__text">
                   <strong>{{ 'onboarding.i9.listAChoice' | translate }}</strong>
@@ -495,11 +714,14 @@
                 </div>
               </button>
               <div class="doc-choice__or">{{ 'onboarding.i9.or' | translate }}</div>
-              <button type="button" class="doc-choice__btn"
+              <button
+                type="button"
+                class="doc-choice__btn"
                 [class.doc-choice__btn--active]="i9DocumentChoice() === 'BC'"
                 (click)="setDocumentChoice('BC')"
                 data-testid="onboarding-i9-list-bc-btn"
-                aria-label="Select List B and List C documents">
+                aria-label="Select List B and List C documents"
+              >
                 <span class="material-icons-outlined">perm_identity</span>
                 <div class="doc-choice__text">
                   <strong>{{ 'onboarding.i9.listBCChoice' | translate }}</strong>
@@ -510,12 +732,22 @@
 
             @if (i9DocumentChoice() === 'A') {
               <div class="step-content__subsection">
-                <div class="step-content__subsection-title">{{ 'onboarding.i9.listASubTitle' | translate }}</div>
-                <app-select [label]="'onboarding.i9.docType' | translate" formControlName="listAType"
-                  [options]="listATypeOptions" data-testid="onboarding-i9-list-a-type" />
+                <div class="step-content__subsection-title">
+                  {{ 'onboarding.i9.listASubTitle' | translate }}
+                </div>
+                <app-select
+                  [label]="'onboarding.i9.docType' | translate"
+                  formControlName="listAType"
+                  [options]="listATypeOptions"
+                  data-testid="onboarding-i9-list-a-type"
+                />
                 <div class="step-row">
                   <div class="secure-field">
-                    <app-input [label]="'onboarding.i9.docNumber' | translate" formControlName="listADocNumber" data-testid="onboarding-i9-list-a-doc-number" />
+                    <app-input
+                      [label]="'onboarding.i9.docNumber' | translate"
+                      formControlName="listADocNumber"
+                      data-testid="onboarding-i9-list-a-doc-number"
+                    />
                     @if (hasStoredListADocNum()) {
                       <p class="secure-field__hint">
                         <span class="material-icons-outlined">lock</span>
@@ -523,22 +755,35 @@
                       </p>
                     }
                   </div>
-                  <app-input [label]="'onboarding.i9.issuingAuthority' | translate" formControlName="listAAuthority" data-testid="onboarding-i9-list-a-authority" />
+                  <app-input
+                    [label]="'onboarding.i9.issuingAuthority' | translate"
+                    formControlName="listAAuthority"
+                    data-testid="onboarding-i9-list-a-authority"
+                  />
                 </div>
-                <app-datepicker [label]="'onboarding.i9.expirationDate' | translate"
-                  formControlName="listAExpiry" data-testid="onboarding-i9-list-a-expiry" />
+                <app-datepicker
+                  [label]="'onboarding.i9.expirationDate' | translate"
+                  formControlName="listAExpiry"
+                  data-testid="onboarding-i9-list-a-expiry"
+                />
                 @if (listAAttachment() || _i9Val().listAFileId) {
                   <div class="doc-upload__chip">
                     <span class="material-icons-outlined">attach_file</span>
                     {{ listAAttachment()?.name ?? ('onboarding.i9.documentUploaded' | translate) }}
-                    <button type="button" class="icon-btn" (click)="clearList('A')"
-                      aria-label="Remove uploaded file">
+                    <button
+                      type="button"
+                      class="icon-btn"
+                      (click)="clearList('A')"
+                      aria-label="Remove uploaded file"
+                    >
                       <span class="material-icons-outlined">close</span>
                     </button>
                   </div>
                 } @else {
-                  <label class="doc-upload__zone"
-                    [class.doc-upload__zone--loading]="uploadingListA()">
+                  <label
+                    class="doc-upload__zone"
+                    [class.doc-upload__zone--loading]="uploadingListA()"
+                  >
                     @if (uploadingListA()) {
                       <span class="material-icons-outlined spin">sync</span>
                       {{ 'onboarding.i9.uploading' | translate }}
@@ -546,8 +791,11 @@
                       <span class="material-icons-outlined">cloud_upload</span>
                       {{ 'onboarding.i9.uploadListA' | translate }}
                     }
-                    <input type="file" accept="image/*,.pdf"
-                      (change)="onFileSelected($event, 'A')" />
+                    <input
+                      type="file"
+                      accept="image/*,.pdf"
+                      (change)="onFileSelected($event, 'A')"
+                    />
                   </label>
                 }
               </div>
@@ -555,12 +803,22 @@
 
             @if (i9DocumentChoice() === 'BC') {
               <div class="step-content__subsection">
-                <div class="step-content__subsection-title">{{ 'onboarding.i9.listBSubTitle' | translate }}</div>
-                <app-select [label]="'onboarding.i9.docType' | translate" formControlName="listBType"
-                  [options]="listBTypeOptions" data-testid="onboarding-i9-list-b-type" />
+                <div class="step-content__subsection-title">
+                  {{ 'onboarding.i9.listBSubTitle' | translate }}
+                </div>
+                <app-select
+                  [label]="'onboarding.i9.docType' | translate"
+                  formControlName="listBType"
+                  [options]="listBTypeOptions"
+                  data-testid="onboarding-i9-list-b-type"
+                />
                 <div class="step-row">
                   <div class="secure-field">
-                    <app-input [label]="'onboarding.i9.docNumber' | translate" formControlName="listBDocNumber" data-testid="onboarding-i9-list-b-doc-number" />
+                    <app-input
+                      [label]="'onboarding.i9.docNumber' | translate"
+                      formControlName="listBDocNumber"
+                      data-testid="onboarding-i9-list-b-doc-number"
+                    />
                     @if (hasStoredListBDocNum()) {
                       <p class="secure-field__hint">
                         <span class="material-icons-outlined">lock</span>
@@ -568,22 +826,35 @@
                       </p>
                     }
                   </div>
-                  <app-input [label]="'onboarding.i9.issuingAuthority' | translate" formControlName="listBAuthority" data-testid="onboarding-i9-list-b-authority" />
+                  <app-input
+                    [label]="'onboarding.i9.issuingAuthority' | translate"
+                    formControlName="listBAuthority"
+                    data-testid="onboarding-i9-list-b-authority"
+                  />
                 </div>
-                <app-datepicker [label]="'onboarding.i9.expirationDateShort' | translate"
-                  formControlName="listBExpiry" data-testid="onboarding-i9-list-b-expiry" />
+                <app-datepicker
+                  [label]="'onboarding.i9.expirationDateShort' | translate"
+                  formControlName="listBExpiry"
+                  data-testid="onboarding-i9-list-b-expiry"
+                />
                 @if (listBAttachment() || _i9Val().listBFileId) {
                   <div class="doc-upload__chip">
                     <span class="material-icons-outlined">attach_file</span>
                     {{ listBAttachment()?.name ?? ('onboarding.i9.documentUploaded' | translate) }}
-                    <button type="button" class="icon-btn" (click)="clearList('B')"
-                      aria-label="Remove uploaded file">
+                    <button
+                      type="button"
+                      class="icon-btn"
+                      (click)="clearList('B')"
+                      aria-label="Remove uploaded file"
+                    >
                       <span class="material-icons-outlined">close</span>
                     </button>
                   </div>
                 } @else {
-                  <label class="doc-upload__zone"
-                    [class.doc-upload__zone--loading]="uploadingListB()">
+                  <label
+                    class="doc-upload__zone"
+                    [class.doc-upload__zone--loading]="uploadingListB()"
+                  >
                     @if (uploadingListB()) {
                       <span class="material-icons-outlined spin">sync</span>
                       {{ 'onboarding.i9.uploading' | translate }}
@@ -591,19 +862,32 @@
                       <span class="material-icons-outlined">cloud_upload</span>
                       {{ 'onboarding.i9.uploadListB' | translate }}
                     }
-                    <input type="file" accept="image/*,.pdf"
-                      (change)="onFileSelected($event, 'B')" />
+                    <input
+                      type="file"
+                      accept="image/*,.pdf"
+                      (change)="onFileSelected($event, 'B')"
+                    />
                   </label>
                 }
               </div>
 
               <div class="step-content__subsection">
-                <div class="step-content__subsection-title">{{ 'onboarding.i9.listCSubTitle' | translate }}</div>
-                <app-select [label]="'onboarding.i9.docType' | translate" formControlName="listCType"
-                  [options]="listCTypeOptions" data-testid="onboarding-i9-list-c-type" />
+                <div class="step-content__subsection-title">
+                  {{ 'onboarding.i9.listCSubTitle' | translate }}
+                </div>
+                <app-select
+                  [label]="'onboarding.i9.docType' | translate"
+                  formControlName="listCType"
+                  [options]="listCTypeOptions"
+                  data-testid="onboarding-i9-list-c-type"
+                />
                 <div class="step-row">
                   <div class="secure-field">
-                    <app-input [label]="'onboarding.i9.docNumber' | translate" formControlName="listCDocNumber" data-testid="onboarding-i9-list-c-doc-number" />
+                    <app-input
+                      [label]="'onboarding.i9.docNumber' | translate"
+                      formControlName="listCDocNumber"
+                      data-testid="onboarding-i9-list-c-doc-number"
+                    />
                     @if (hasStoredListCDocNum()) {
                       <p class="secure-field__hint">
                         <span class="material-icons-outlined">lock</span>
@@ -611,22 +895,35 @@
                       </p>
                     }
                   </div>
-                  <app-input [label]="'onboarding.i9.issuingAuthority' | translate" formControlName="listCAuthority" data-testid="onboarding-i9-list-c-authority" />
+                  <app-input
+                    [label]="'onboarding.i9.issuingAuthority' | translate"
+                    formControlName="listCAuthority"
+                    data-testid="onboarding-i9-list-c-authority"
+                  />
                 </div>
-                <app-datepicker [label]="'onboarding.i9.expirationDate' | translate"
-                  formControlName="listCExpiry" data-testid="onboarding-i9-list-c-expiry" />
+                <app-datepicker
+                  [label]="'onboarding.i9.expirationDate' | translate"
+                  formControlName="listCExpiry"
+                  data-testid="onboarding-i9-list-c-expiry"
+                />
                 @if (listCAttachment() || _i9Val().listCFileId) {
                   <div class="doc-upload__chip">
                     <span class="material-icons-outlined">attach_file</span>
                     {{ listCAttachment()?.name ?? ('onboarding.i9.documentUploaded' | translate) }}
-                    <button type="button" class="icon-btn" (click)="clearList('C')"
-                      aria-label="Remove uploaded file">
+                    <button
+                      type="button"
+                      class="icon-btn"
+                      (click)="clearList('C')"
+                      aria-label="Remove uploaded file"
+                    >
                       <span class="material-icons-outlined">close</span>
                     </button>
                   </div>
                 } @else {
-                  <label class="doc-upload__zone"
-                    [class.doc-upload__zone--loading]="uploadingListC()">
+                  <label
+                    class="doc-upload__zone"
+                    [class.doc-upload__zone--loading]="uploadingListC()"
+                  >
                     @if (uploadingListC()) {
                       <span class="material-icons-outlined spin">sync</span>
                       {{ 'onboarding.i9.uploading' | translate }}
@@ -634,8 +931,11 @@
                       <span class="material-icons-outlined">cloud_upload</span>
                       {{ 'onboarding.i9.uploadListC' | translate }}
                     }
-                    <input type="file" accept="image/*,.pdf"
-                      (change)="onFileSelected($event, 'C')" />
+                    <input
+                      type="file"
+                      accept="image/*,.pdf"
+                      (change)="onFileSelected($event, 'C')"
+                    />
                   </label>
                 }
               </div>
@@ -644,25 +944,41 @@
 
           <!-- Preparer / Translator -->
           <div class="step-section">
-            <app-toggle [label]="'onboarding.i9.preparerToggle' | translate"
-              formControlName="preparedByPreparer" />
+            <app-toggle
+              [label]="'onboarding.i9.preparerToggle' | translate"
+              formControlName="preparedByPreparer"
+            />
 
             @if (i9PreparedByPreparer()) {
               <div class="step-row">
-                <app-input [label]="'onboarding.i9.preparerFirstName' | translate"
-                  formControlName="preparerFirstName" />
-                <app-input [label]="'onboarding.i9.preparerLastName' | translate"
-                  formControlName="preparerLastName" />
+                <app-input
+                  [label]="'onboarding.i9.preparerFirstName' | translate"
+                  formControlName="preparerFirstName"
+                />
+                <app-input
+                  [label]="'onboarding.i9.preparerLastName' | translate"
+                  formControlName="preparerLastName"
+                />
               </div>
-              <app-input [label]="'onboarding.i9.preparerStreet' | translate"
-                formControlName="preparerAddress" />
+              <app-input
+                [label]="'onboarding.i9.preparerStreet' | translate"
+                formControlName="preparerAddress"
+              />
               <div class="step-row">
-                <app-input [label]="'onboarding.i9.preparerCity' | translate"
-                  formControlName="preparerCity" />
-                <app-select [label]="'onboarding.i9.preparerState' | translate" formControlName="preparerState"
-                  [options]="usStateOptions" />
-                <app-input [label]="'onboarding.i9.preparerZip' | translate" formControlName="preparerZip"
-                  mask="zip" />
+                <app-input
+                  [label]="'onboarding.i9.preparerCity' | translate"
+                  formControlName="preparerCity"
+                />
+                <app-select
+                  [label]="'onboarding.i9.preparerState' | translate"
+                  formControlName="preparerState"
+                  [options]="usStateOptions"
+                />
+                <app-input
+                  [label]="'onboarding.i9.preparerZip' | translate"
+                  formControlName="preparerZip"
+                  mask="zip"
+                />
               </div>
             }
           </div>
@@ -672,8 +988,11 @@
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <!-- Step 6: Direct Deposit                                              -->
       <!-- ─────────────────────────────────────────────────────────────────── -->
-      <mat-step [stepControl]="depositForm" [label]="'onboarding.steps.directDeposit' | translate"
-        aria-label="Direct Deposit Authorization">
+      <mat-step
+        [stepControl]="depositForm"
+        [label]="'onboarding.steps.directDeposit' | translate"
+        aria-label="Direct Deposit Authorization"
+      >
         <div class="step-content" [formGroup]="depositForm">
           <h2 class="step-content__title">{{ 'onboarding.deposit.title' | translate }}</h2>
           <p class="step-content__desc">{{ 'onboarding.deposit.desc' | translate }}</p>
@@ -681,24 +1000,46 @@
           <div class="step-content__check-hint">
             <div class="step-content__check-diagram">
               <div class="check-field check-field--routing">
-                <div class="check-field__label">{{ 'onboarding.deposit.routingLabel' | translate }}</div>
-                <div class="check-field__value">{{ 'onboarding.deposit.routingValue' | translate }}</div>
-                <div class="check-field__desc">{{ 'onboarding.deposit.routingDesc' | translate }}</div>
+                <div class="check-field__label">
+                  {{ 'onboarding.deposit.routingLabel' | translate }}
+                </div>
+                <div class="check-field__value">
+                  {{ 'onboarding.deposit.routingValue' | translate }}
+                </div>
+                <div class="check-field__desc">
+                  {{ 'onboarding.deposit.routingDesc' | translate }}
+                </div>
               </div>
               <div class="check-field check-field--account">
-                <div class="check-field__label">{{ 'onboarding.deposit.accountLabel' | translate }}</div>
-                <div class="check-field__value">{{ 'onboarding.deposit.accountValue' | translate }}</div>
-                <div class="check-field__desc">{{ 'onboarding.deposit.accountDesc' | translate }}</div>
+                <div class="check-field__label">
+                  {{ 'onboarding.deposit.accountLabel' | translate }}
+                </div>
+                <div class="check-field__value">
+                  {{ 'onboarding.deposit.accountValue' | translate }}
+                </div>
+                <div class="check-field__desc">
+                  {{ 'onboarding.deposit.accountDesc' | translate }}
+                </div>
               </div>
             </div>
           </div>
 
-          <app-input [label]="'onboarding.deposit.bankName' | translate" formControlName="bankName" [required]="true" data-testid="onboarding-bank-name" />
+          <app-input
+            [label]="'onboarding.deposit.bankName' | translate"
+            formControlName="bankName"
+            [required]="true"
+            data-testid="onboarding-bank-name"
+          />
           <div class="step-row">
             <div class="secure-field">
-              <app-input [label]="'onboarding.deposit.routingNumber' | translate"
-                formControlName="routingNumber" [required]="!hasStoredBankRouting()"
-                [placeholder]="'onboarding.deposit.routingPlaceholder' | translate" [maxlength]="9" data-testid="onboarding-routing-number" />
+              <app-input
+                [label]="'onboarding.deposit.routingNumber' | translate"
+                formControlName="routingNumber"
+                [required]="!hasStoredBankRouting()"
+                [placeholder]="'onboarding.deposit.routingPlaceholder' | translate"
+                [maxlength]="9"
+                data-testid="onboarding-routing-number"
+              />
               @if (hasStoredBankRouting()) {
                 <p class="secure-field__hint">
                   <span class="material-icons-outlined">lock</span>
@@ -707,8 +1048,12 @@
               }
             </div>
             <div class="secure-field">
-              <app-input [label]="'onboarding.deposit.accountNumber' | translate"
-                formControlName="accountNumber" [required]="!hasStoredBankAccount()" data-testid="onboarding-account-number" />
+              <app-input
+                [label]="'onboarding.deposit.accountNumber' | translate"
+                formControlName="accountNumber"
+                [required]="!hasStoredBankAccount()"
+                data-testid="onboarding-account-number"
+              />
               @if (hasStoredBankAccount()) {
                 <p class="secure-field__hint">
                   <span class="material-icons-outlined">lock</span>
@@ -717,18 +1062,24 @@
               }
             </div>
           </div>
-          <app-select [label]="'onboarding.deposit.accountType' | translate"
+          <app-select
+            [label]="'onboarding.deposit.accountType' | translate"
             formControlName="accountType"
             [options]="accountTypeOptions"
-            [required]="true" data-testid="onboarding-account-type" />
+            [required]="true"
+            data-testid="onboarding-account-type"
+          />
         </div>
       </mat-step>
 
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <!-- Step 7: Acknowledgments                                             -->
       <!-- ─────────────────────────────────────────────────────────────────── -->
-      <mat-step [stepControl]="ackForm" [label]="'onboarding.steps.acknowledge' | translate"
-        aria-label="Acknowledgments">
+      <mat-step
+        [stepControl]="ackForm"
+        [label]="'onboarding.steps.acknowledge' | translate"
+        aria-label="Acknowledgments"
+      >
         <div class="step-content" [formGroup]="ackForm">
           <h2 class="step-content__title">{{ 'onboarding.ack.title' | translate }}</h2>
           <p class="step-content__desc">{{ 'onboarding.ack.desc' | translate }}</p>
@@ -745,8 +1096,11 @@
                 {{ 'onboarding.ack.workersCompLink' | translate }}
               </a>
             }
-            <app-toggle [label]="'onboarding.ack.workersCompToggle' | translate"
-              formControlName="workersComp" data-testid="onboarding-ack-workers-comp" />
+            <app-toggle
+              [label]="'onboarding.ack.workersCompToggle' | translate"
+              formControlName="workersComp"
+              data-testid="onboarding-ack-workers-comp"
+            />
           </div>
 
           @if (hasHandbook()) {
@@ -756,12 +1110,20 @@
                 <strong>{{ 'onboarding.ack.handbookTitle' | translate }}</strong>
               </div>
               <p class="ack-card__body">{{ 'onboarding.ack.handbookBody' | translate }}</p>
-              <a class="ack-card__doc-link" [href]="policyDocs().handbookDocUrl!" target="_blank" rel="noopener">
+              <a
+                class="ack-card__doc-link"
+                [href]="policyDocs().handbookDocUrl!"
+                target="_blank"
+                rel="noopener"
+              >
                 <span class="material-icons-outlined">picture_as_pdf</span>
                 {{ 'onboarding.ack.handbookLink' | translate }}
               </a>
-              <app-toggle [label]="'onboarding.ack.handbookToggle' | translate"
-                formControlName="handbook" data-testid="onboarding-ack-handbook" />
+              <app-toggle
+                [label]="'onboarding.ack.handbookToggle' | translate"
+                formControlName="handbook"
+                data-testid="onboarding-ack-handbook"
+              />
             </div>
           }
 
@@ -771,39 +1133,44 @@
           </p>
         </div>
       </mat-step>
-
     </mat-stepper>
 
     <!-- Fixed footer — always at the bottom of the card regardless of step content length -->
     <div class="onboarding__actions">
       @if (currentStepIndex() > 0) {
         <button class="action-btn" (click)="prevStep()" data-testid="onboarding-back-btn">
-          <span class="material-icons-outlined">arrow_back</span> {{ 'onboarding.actions.back' | translate }}
+          <span class="material-icons-outlined">arrow_back</span>
+          {{ 'onboarding.actions.back' | translate }}
         </button>
       }
       @if (currentStepIndex() < 6) {
         <app-validation-button [violations]="currentViolations">
-        <button class="action-btn action-btn--primary"
-          [disabled]="currentFormInvalid()"
-          (click)="nextStep()"
-          data-testid="onboarding-continue-btn">
-          {{ 'onboarding.actions.continue' | translate }} <span class="material-icons-outlined">arrow_forward</span>
-        </button>
+          <button
+            class="action-btn action-btn--primary"
+            [disabled]="currentFormInvalid()"
+            (click)="nextStep()"
+            data-testid="onboarding-continue-btn"
+          >
+            {{ 'onboarding.actions.continue' | translate }}
+            <span class="material-icons-outlined">arrow_forward</span>
+          </button>
         </app-validation-button>
       } @else {
         <app-validation-button [violations]="ackViolations">
-        <button class="action-btn action-btn--primary"
-          [disabled]="currentFormInvalid()"
-          (click)="submit()"
-          data-testid="onboarding-submit-btn">
-          @if (submitting()) {
-            <span class="material-icons-outlined spin">sync</span>
-            {{ 'onboarding.actions.preparingDocuments' | translate }}
-          } @else {
-            <span class="material-icons-outlined">send</span>
-            {{ 'onboarding.actions.submitAndSign' | translate }}
-          }
-        </button>
+          <button
+            class="action-btn action-btn--primary"
+            [disabled]="currentFormInvalid()"
+            (click)="submit()"
+            data-testid="onboarding-submit-btn"
+          >
+            @if (submitting()) {
+              <span class="material-icons-outlined spin">sync</span>
+              {{ 'onboarding.actions.preparingDocuments' | translate }}
+            } @else {
+              <span class="material-icons-outlined">send</span>
+              {{ 'onboarding.actions.submitAndSign' | translate }}
+            }
+          </button>
         </app-validation-button>
       }
     </div>

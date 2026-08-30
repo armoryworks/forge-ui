@@ -1,0 +1,101 @@
+@use 'styles/variables' as *;
+
+:host {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.enroll-manual {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: $sp-xl;
+  padding: $sp-xl;
+  padding-top: calc(#{$sp-xl} + env(safe-area-inset-top));
+  padding-bottom: calc(#{$sp-xl} + env(safe-area-inset-bottom));
+  min-height: 100dvh;
+  max-width: 420px;
+  width: 100%;
+  margin: 0 auto;
+  background: var(--bg);
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-xl;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-lg;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+
+    .action-btn {
+      min-height: 56px;
+      min-width: 56px;
+    }
+  }
+
+  &__trust {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+    padding: $sp-lg;
+    border: $border-width-thin solid var(--border);
+    background: var(--surface);
+  }
+
+  &__trust-name {
+    margin: 0;
+    font-size: $font-size-lg;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &__trust-server {
+    margin: 0;
+    font-family: $font-family-mono;
+    font-size: $font-size-base;
+    color: var(--text-secondary);
+    overflow-wrap: anywhere;
+  }
+
+  &__trust-cert {
+    margin: 0;
+    font-size: $font-size-base;
+    color: var(--text-secondary);
+
+    code {
+      font-family: $font-family-mono;
+      color: var(--text);
+    }
+
+    &--none {
+      color: var(--warning);
+    }
+  }
+
+  &__error {
+    margin: 0;
+    color: var(--error);
+    font-size: $font-size-md;
+  }
+
+  &__back {
+    min-height: 56px;
+    display: inline-flex;
+    align-items: center;
+    color: var(--primary);
+    font-size: $font-size-md;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}

@@ -1,0 +1,87 @@
+<app-dialog
+  [title]="user() ? ('admin.devices.addTitle' | translate: { name: user()!.firstName + ' ' + user()!.lastName }) : ('admin.devices.addSharedTitle' | translate)"
+  width="520px"
+  (closed)="close()"
+>
+  <div class="add-device">
+    <p class="add-device__hint">{{ (user() ? 'admin.devices.scanHint' : 'admin.devices.sharedHint') | translate }}</p>
+
+    <div class="add-device__qr" [class.add-device__qr--expired]="expired()">
+      @if (enrollment() && !expired()) {
+        <app-qr-code [value]="qrPayload()" [size]="220" errorCorrectionLevel="Q" />
+      } @else if (expired()) {
+        <div class="add-device__expired" role="status">
+          <span class="material-icons-outlined" aria-hidden="true">timer_off</span>
+          <span>{{ 'admin.devices.codeExpired' | translate }}</span>
+        </div>
+      } @else {
+        <div class="add-device__expired" role="status">
+          <span class="material-icons-outlined" aria-hidden="true">hourglass_empty</span>
+          <span>{{ 'admin.devices.issuing' | translate }}</span>
+        </div>
+      }
+    </div>
+
+    @if (enrollment() && !expired()) {
+      <p class="add-device__expiry">
+        {{ 'admin.devices.expiresIn' | translate: { seconds: secondsLeft() } }}
+      </p>
+    }
+
+    <div class="add-device__list">
+      <h4 class="add-device__list-title">{{ 'admin.devices.enrolled' | translate }}</h4>
+      @if (devices().length === 0) {
+        <p class="add-device__empty">{{ 'admin.devices.none' | translate }}</p>
+      } @else {
+        @for (device of devices(); track device.id) {
+          <div class="add-device__row" [class.add-device__row--revoked]="device.revokedAt">
+            <span class="material-icons-outlined add-device__row-icon" aria-hidden="true">
+              {{ device.platform === 'ios' ? 'phone_iphone' : 'phone_android' }}
+            </span>
+            <div class="add-device__row-body">
+              <span class="add-device__row-name">
+                {{ device.name }}
+                @if (device.isFlagged) {
+                  <span class="chip chip--error">{{ 'admin.devices.flagged' | translate }}</span>
+                }
+                @if (device.isStale) {
+                  <span class="chip chip--warning">{{ 'admin.devices.stale' | translate }}</span>
+                }
+                @if (device.revokedAt) {
+                  <span class="chip chip--muted">{{ 'admin.devices.revokedChip' | translate }}</span>
+                }
+              </span>
+              <span class="add-device__row-meta">
+                @if (device.lastSeenAt) {
+                  {{ 'admin.devices.lastSeen' | translate }} {{ device.lastSeenAt | date: 'MM/dd/yyyy HH:mm' }}
+                } @else {
+                  {{ 'admin.devices.neverSeen' | translate }}
+                }
+              </span>
+            </div>
+            @if (!device.revokedAt) {
+              <button
+                class="icon-btn icon-btn--danger"
+                [attr.aria-label]="'admin.devices.revoke' | translate"
+                data-testid="admin-device-revoke"
+                (click)="revoke(device)"
+              >
+                <span class="material-icons-outlined" aria-hidden="true">block</span>
+              </button>
+            }
+          </div>
+        }
+      }
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" data-testid="admin-device-new-code" [disabled]="issuing()" (click)="issueCode()">
+      <span class="material-icons-outlined" aria-hidden="true">refresh</span>
+      {{ 'admin.devices.newCode' | translate }}
+    </button>
+    <button class="action-btn action-btn--primary" data-testid="admin-device-done" (click)="close()">
+      {{ 'common.done' | translate }}
+    </button>
+  </div>
+</app-dialog>

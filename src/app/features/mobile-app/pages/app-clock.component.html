@@ -1,0 +1,46 @@
+<div class="clock" data-testid="mobile-app-clock">
+  @if (needsIdentity() && !identifying()) {
+    <div class="clock__identify">
+      <span class="material-icons-outlined clock__icon" aria-hidden="true">badge</span>
+      <p class="clock__hint">{{ 'mobileApp.clock.identifyFirst' | translate }}</p>
+      <button type="button" class="clock__primary" data-testid="clock-identify" (click)="identify()">
+        {{ 'mobileApp.identity.scanBadge' | translate }}
+      </button>
+    </div>
+  } @else if (!identifying()) {
+    @if (person(); as who) {
+      <span class="clock__who">{{ who.lastName }}, {{ who.firstName }}</span>
+    }
+    <div class="clock__state" [attr.data-state]="state()?.state ?? 'unknown'" data-testid="clock-state">
+      {{ ('mobileApp.clock.state.' + (state()?.state ?? 'unknown')) | translate }}
+    </div>
+    @if (state()?.lastEventAt; as since) {
+      <span class="clock__since">{{ 'mobileApp.clock.since' | translate }} {{ since | date: 'hh:mm a' }}</span>
+    }
+
+    <div class="clock__actions">
+      <button
+        type="button"
+        class="clock__primary"
+        [class.clock__primary--out]="primaryPunch() === 'ClockOut'"
+        [disabled]="busy()"
+        data-testid="clock-primary"
+        (click)="punch(primaryPunch())"
+      >
+        {{ ('mobileApp.clock.action.' + primaryPunch()) | translate }}
+      </button>
+      @if (state()?.state === 'in') {
+        <button type="button" class="clock__secondary" [disabled]="busy()" data-testid="clock-break" (click)="punch('BreakStart')">
+          <span class="material-icons-outlined" aria-hidden="true">coffee</span>
+          {{ 'mobileApp.clock.action.BreakStart' | translate }}
+        </button>
+      }
+    </div>
+  }
+
+  @if (identifying()) {
+    <div class="clock__sheet">
+      <app-identity-prompt (identified)="onIdentified()" (cancelled)="onIdentityCancelled()" />
+    </div>
+  }
+</div>

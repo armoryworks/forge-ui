@@ -1,0 +1,31 @@
+<div class="enroll-scan" data-testid="mobile-app-enroll-scan">
+  <h1 class="enroll-scan__title">{{ 'mobileApp.enroll.scanTitle' | translate }}</h1>
+
+  <div class="enroll-scan__stage">
+    <div #viewfinder id="enroll-viewfinder" class="enroll-scan__viewfinder"></div>
+
+    @if (cameraError(); as error) {
+      <div class="enroll-scan__error" role="alert">
+        <span class="material-icons-outlined" aria-hidden="true">videocam_off</span>
+        <span>{{ error }}</span>
+      </div>
+    }
+
+    @if (enrolling()) {
+      <div class="enroll-scan__busy" role="status">
+        <span class="material-icons-outlined enroll-scan__busy-icon" aria-hidden="true">sync</span>
+        <span>{{ 'mobileApp.enroll.connecting' | translate }}</span>
+      </div>
+    }
+  </div>
+
+  @if (enrollError(); as error) {
+    <p class="enroll-scan__fail" role="alert">{{ error }}</p>
+  }
+
+  <app-language-toggle />
+
+  <a class="enroll-scan__manual" routerLink="/app/enroll/manual" data-testid="mobile-app-enroll-manual-link">
+    {{ 'mobileApp.enroll.enterAddressInstead' | translate }}
+  </a>
+</div>

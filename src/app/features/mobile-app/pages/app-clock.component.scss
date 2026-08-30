@@ -1,0 +1,101 @@
+@use 'styles/variables' as *;
+
+:host { flex: 1; display: flex; flex-direction: column; }
+
+.clock {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-xl;
+  padding: $sp-xl;
+  padding-bottom: calc(#{$sp-xl} + env(safe-area-inset-bottom));
+
+  &__identify {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $sp-lg;
+  }
+
+  &__icon { font-size: $icon-size-hero; color: var(--primary); }
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-md;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  &__who {
+    font-size: $font-size-lg;
+    color: var(--text-secondary);
+  }
+
+  &__state {
+    font-size: 56px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+
+    &[data-state='in'] { color: var(--success); }
+    &[data-state='break'] { color: var(--warning); }
+    &[data-state='out'] { color: var(--text); }
+  }
+
+  &__since {
+    font-family: $font-family-mono;
+    font-size: $font-size-md;
+    color: var(--text-muted);
+  }
+
+  &__actions {
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+  }
+
+  &__primary {
+    min-height: 96px;
+    background: var(--success);
+    border: none;
+    color: var(--bg);
+    font-family: $font-family-primary;
+    font-size: $font-size-kpi;
+    font-weight: 700;
+    cursor: pointer;
+
+    &--out { background: var(--error); }
+    &:disabled { opacity: 0.5; }
+  }
+
+  &__secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $sp-md;
+    min-height: 64px;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    color: var(--text);
+    font-family: $font-family-primary;
+    font-size: $font-size-lg;
+    cursor: pointer;
+
+    &:disabled { opacity: 0.5; }
+  }
+
+  &__sheet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: $z-dialog;
+    background: var(--surface);
+    border-top: $border-width-accent solid var(--primary);
+  }
+}

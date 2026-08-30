@@ -1,0 +1,30 @@
+<div class="lock-screen" data-testid="mobile-app-lock-screen">
+  <div class="lock-screen__head">
+    <span class="material-icons-outlined lock-screen__icon" aria-hidden="true">lock</span>
+    <h1 class="lock-screen__title">{{ instances.instance()?.name || 'Forge' }}</h1>
+    <p class="lock-screen__hint">{{ 'mobileApp.lock.enterPin' | translate }}</p>
+  </div>
+
+  <app-pin-pad (completed)="onPin($event)" />
+
+  @if (lastFailed()) {
+    <p class="lock-screen__error" role="alert">
+      {{ 'mobileApp.lock.wrongPin' | translate }}
+      @if (showAttemptsLeft()) {
+        {{ 'mobileApp.lock.attemptsLeft' | translate: { count: attemptsLeft() } }}
+      }
+    </p>
+  }
+
+  @if (biometricEnabled()) {
+    <button
+      type="button"
+      class="lock-screen__biometric"
+      data-testid="lock-biometric-retry"
+      (click)="retryBiometric()"
+    >
+      <span class="material-icons-outlined" aria-hidden="true">fingerprint</span>
+      {{ 'mobileApp.lock.useBiometric' | translate }}
+    </button>
+  }
+</div>

@@ -1,0 +1,10 @@
+<div class="manual" data-testid="manual-code-entry">
+  <app-input [label]="'mobileApp.scan.manual.label' | translate" [formControl]="control" autocomplete="off" data-testid="manual-code-input" (keydown.enter)="submit()" />
+  <div class="manual__actions">
+    <button type="button" class="manual__cancel" (click)="dismissed.emit()">{{ 'common.cancel' | translate }}</button>
+    <button type="button" class="manual__go" [disabled]="!control.value.trim()" data-testid="manual-code-go" (click)="submit()">
+      <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+      {{ 'mobileApp.scan.manual.go' | translate }}
+    </button>
+  </div>
+</div>

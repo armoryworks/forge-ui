@@ -1,0 +1,207 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host { flex: 1; display: flex; flex-direction: column; }
+
+.move {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: $sp-lg;
+  padding-bottom: calc(#{$sp-lg} + env(safe-area-inset-bottom));
+
+  &__steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $sp-md;
+  }
+
+  &__step {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    padding: $sp-md;
+    border: $border-width-thin solid var(--border);
+    border-top: $border-width-accent solid var(--border);
+
+    &--active { border-top-color: var(--primary); }
+    &--done { border-top-color: var(--success); }
+  }
+
+  &__step-label {
+    font-family: $font-family-mono;
+    font-size: $font-size-xs;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  &__step-value {
+    @include truncate;
+    font-size: $font-size-md;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &__stage {
+    position: relative;
+    flex: 1;
+    min-height: 260px;
+    background: var(--header);
+    overflow: hidden;
+  }
+
+  &__viewfinder {
+    position: absolute;
+    inset: 0;
+    video { width: 100%; height: 100%; object-fit: cover; }
+  }
+
+  &__prompt {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: $sp-md $sp-lg;
+    background: rgba(0, 0, 0, 0.55);
+    color: var(--text);
+    font-size: $font-size-lg;
+    text-align: center;
+  }
+
+  &__manual {
+    @include flex-center;
+    gap: $sp-sm;
+    position: absolute;
+    top: $sp-md;
+    right: $sp-md;
+    min-height: 44px;
+    padding: 0 $sp-md;
+    background: rgba(0, 0, 0, 0.45);
+    border: none;
+    color: var(--text-muted);
+    font-family: $font-family-primary;
+    font-size: $font-size-sm;
+    cursor: pointer;
+
+    .material-icons-outlined { font-size: $icon-size-md; }
+  }
+
+  &__quantity {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: $sp-lg;
+  }
+
+  &__label {
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  &__lots {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: $sp-md;
+  }
+
+  &__lot {
+    min-height: 56px;
+    padding: 0 $sp-lg;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    color: var(--text);
+    font-family: $font-family-mono;
+    font-size: $font-size-md;
+    cursor: pointer;
+
+    small { color: var(--text-muted); margin-left: $sp-md; }
+    &--picked { border-color: var(--primary); background: var(--primary); color: var(--bg); }
+  }
+
+  &__stepper {
+    display: flex;
+    align-items: center;
+    gap: $sp-lg;
+  }
+
+  &__stepper-btn {
+    @include flex-center;
+    width: 88px;
+    height: 88px;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    color: var(--text);
+    font-size: $font-size-heading;
+    cursor: pointer;
+  }
+
+  &__stepper-value {
+    min-width: 96px;
+    text-align: center;
+    font-family: $font-family-mono;
+    font-size: 56px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  &__notice {
+    margin: 0;
+    font-size: $font-size-md;
+    color: var(--warning);
+    text-align: center;
+  }
+
+  &__actions {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: $sp-md;
+  }
+
+  &__reset {
+    min-height: 72px;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    color: var(--text-muted);
+    font-family: $font-family-primary;
+    font-size: $font-size-md;
+    cursor: pointer;
+  }
+
+  &__done {
+    @include flex-center;
+    gap: $sp-md;
+    min-height: 72px;
+    background: var(--primary);
+    border: none;
+    color: var(--bg);
+    font-family: $font-family-primary;
+    font-size: $font-size-xl;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:disabled { opacity: 0.5; cursor: default; }
+  }
+
+  &__sheet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: $z-dialog;
+    background: var(--surface);
+    border-top: $border-width-accent solid var(--primary);
+  }
+}

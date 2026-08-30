@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 
+import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
 import { UserPreferencesService } from './user-preferences.service';
 import { LANDING_ROUTE_PREF_KEY, resolveRoleLanding } from '../models/role-landing.model';
@@ -119,7 +120,15 @@ export class LayoutService {
   }
 
   private checkDisplayRoute(url: string): boolean {
-    return url.startsWith('/display/') || url.startsWith('/__render-form') || url.startsWith('/m/') || url === '/m' || url.startsWith('/chat/popout');
+    return (
+      url.startsWith('/display/') ||
+      url.startsWith('/__render-form') ||
+      url.startsWith('/m/') ||
+      url === '/m' ||
+      url.startsWith('/app/') ||
+      url === '/app' ||
+      url.startsWith('/chat/popout')
+    );
   }
 
   private checkAccountRoute(url: string): boolean {
@@ -153,6 +162,7 @@ export class LayoutService {
    * dashboard. A mapped screen gated off by capability falls back via its guard.
    */
   getDefaultRoute(): string {
+    if (environment.mobileShell) return '/app';
     if (this.isMobileDevice()) return '/m';
     const explicit = this.userPreferences.get<string>(LANDING_ROUTE_PREF_KEY);
     if (explicit) return explicit;

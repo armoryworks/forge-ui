@@ -311,6 +311,7 @@ export class NavTreeService {
             { icon: 'key', label: 'System API Keys', i18nKey: 'admin.tabs.systemApiKeys', route: '/admin/system-api-keys', allowedRoles: ['Admin'] },
             { icon: 'lan', label: 'Connections', i18nKey: 'admin.tabs.connections', route: '/admin/connections', allowedRoles: ['Admin'] },
             { icon: 'edit_note', label: 'Time Corrections', i18nKey: 'admin.tabs.timeCorrections', route: '/admin/time-corrections', allowedRoles: ['Admin', 'Manager'] },
+            { icon: 'system_update_alt', label: 'Updates', i18nKey: 'admin.tabs.updates', route: '/admin/updates', allowedRoles: ['Admin'] },
           ],
         },
       ],

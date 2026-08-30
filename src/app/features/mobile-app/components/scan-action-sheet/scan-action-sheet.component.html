@@ -1,0 +1,29 @@
+<div class="sheet" role="dialog" [attr.aria-label]="titleKey() | translate" data-testid="scan-action-sheet">
+  <div class="sheet__head">
+    <span class="sheet__kind">{{ titleKey() | translate }}</span>
+    <span class="sheet__label">{{ result().label }}</span>
+    @if (result().subtitle; as subtitle) {
+      <span class="sheet__subtitle">{{ subtitle }}</span>
+    }
+  </div>
+
+  <div class="sheet__actions">
+    @for (item of actions(); track item.action) {
+      <button
+        type="button"
+        class="sheet__action"
+        [class.sheet__action--primary]="item.primary"
+        [disabled]="busy()"
+        [attr.data-testid]="'scan-action-' + item.action"
+        (click)="chosen.emit(item.action)"
+      >
+        <span class="material-icons-outlined" aria-hidden="true">{{ item.icon }}</span>
+        {{ item.labelKey | translate }}
+      </button>
+    }
+  </div>
+
+  <button type="button" class="sheet__dismiss" data-testid="scan-action-dismiss" (click)="dismissed.emit()">
+    {{ 'common.cancel' | translate }}
+  </button>
+</div>

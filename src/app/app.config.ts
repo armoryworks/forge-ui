@@ -1,5 +1,14 @@
-import { APP_INITIALIZER, ApplicationConfig, isDevMode, inject, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import {
+  APP_INITIALIZER,
+  ApplicationConfig,
+  isDevMode,
+  inject,
+  provideBrowserGlobalErrorListeners,
+  ErrorHandler,
+} from '@angular/core';
+import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
+
+import { environment } from '../environments/environment';
 import { provideRouter } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideServiceWorker } from '@angular/service-worker';
@@ -16,6 +25,10 @@ Chart.register(SankeyController, Flow);
 
 import { routes } from './app.routes';
 import { authInterceptor } from './shared/interceptors/auth.interceptor';
+import { apiBaseInterceptor } from './shared/interceptors/api-base.interceptor';
+import { InstanceService } from './shared/services/instance.service';
+import { MobileErrorHandler } from './shared/services/mobile-error-handler.service';
+import { LocalLockService } from './shared/services/local-lock.service';
 import { capabilityGateInterceptor } from './shared/interceptors/capability-gate.interceptor';
 import { etagInterceptor } from './shared/interceptors/etag.interceptor';
 import { httpErrorInterceptor } from './shared/interceptors/http-error.interceptor';
@@ -36,9 +49,24 @@ function initTranslations(): () => Promise<void> {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    { provide: ErrorHandler, useClass: MobileErrorHandler },
     provideAnimationsAsync(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([demoApiInterceptor, portalAuthInterceptor, authInterceptor, kioskTokenInterceptor, capabilityGateInterceptor, trainingLangInterceptor, etagInterceptor, httpErrorInterceptor, dateTransformInterceptor])),
+    provideHttpClient(
+      withXhr(),
+      withInterceptors([
+        demoApiInterceptor,
+        portalAuthInterceptor,
+        authInterceptor,
+        kioskTokenInterceptor,
+        capabilityGateInterceptor,
+        trainingLangInterceptor,
+        etagInterceptor,
+        httpErrorInterceptor,
+        dateTransformInterceptor,
+        apiBaseInterceptor,
+      ]),
+    ),
     provideCharts(withDefaultRegisterables()),
     provideMarkdown(),
     provideServiceWorker('ngsw-worker.js', {
@@ -58,6 +86,18 @@ export const appConfig: ApplicationConfig = {
       multi: true,
     },
     {
+      // Native shell: hydrate the enrolled instance + credentials from
+      // secure storage before the router (and its auth guards) start.
+      provide: APP_INITIALIZER,
+      useFactory: () => {
+        const instances = inject(InstanceService);
+        const lock = inject(LocalLockService);
+        return () =>
+          environment.mobileShell ? instances.init().then(() => lock.start()) : Promise.resolve();
+      },
+      multi: true,
+    },
+    {
       // App-wide dialog defaults: backdrop click + ESC do NOT auto-close.
       // Per Dan: clicking the CDK overlay area shouldn't close a dialog
       // out from under work in progress. Each dialog still owns its
@@ -67,5 +107,5 @@ export const appConfig: ApplicationConfig = {
       provide: MAT_DIALOG_DEFAULT_OPTIONS,
       useValue: { disableClose: true } satisfies MatDialogConfig,
     },
-  ]
+  ],
 };

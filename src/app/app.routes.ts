@@ -3,6 +3,8 @@ import { LoginComponent } from './features/auth/login.component';
 import { SetupComponent } from './features/auth/setup.component';
 import { TokenSetupComponent } from './features/auth/token-setup.component';
 import { authGuard } from './shared/guards/auth.guard';
+import { instanceGuard } from './shared/guards/instance.guard';
+import { shellAuthGuard } from './shared/guards/shell-auth.guard';
 import { capabilityGuard } from './shared/guards/capability.guard';
 import { demoOnlyGuard } from './shared/guards/demo-only.guard';
 import { mobileRedirectGuard } from './shared/guards/mobile-redirect.guard';
@@ -386,6 +388,17 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadChildren: () =>
       import('./features/mobile/mobile.routes').then((m) => m.MOBILE_ROUTES),
+  },
+  {
+    path: 'app/enroll',
+    loadChildren: () =>
+      import('./features/mobile-app/enroll/enroll.routes').then((m) => m.ENROLL_ROUTES),
+  },
+  {
+    path: 'app',
+    canActivate: [instanceGuard, shellAuthGuard],
+    loadChildren: () =>
+      import('./features/mobile-app/mobile-app.routes').then((m) => m.MOBILE_APP_ROUTES),
   },
   {
     path: 'display/shop-floor',

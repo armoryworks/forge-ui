@@ -1,0 +1,196 @@
+@use 'styles/variables' as *;
+
+:host {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.job-status {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: $sp-lg;
+  padding-bottom: calc(#{$sp-lg} + env(safe-area-inset-bottom));
+  overflow-y: auto;
+
+  &__back {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: $sp-md;
+    min-height: 56px;
+    padding: 0 $sp-md;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: $font-family-primary;
+    font-size: $font-size-md;
+    cursor: pointer;
+  }
+
+  &__head {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__number {
+    font-family: $font-family-mono;
+    font-size: $font-size-heading;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+    color: var(--text);
+  }
+
+  &__customer {
+    font-size: $font-size-md;
+    color: var(--text-secondary);
+  }
+
+  &__facts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $sp-md;
+    margin: 0;
+  }
+
+  &__fact {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    padding: $sp-md;
+    border: $border-width-thin solid var(--border);
+
+    dt {
+      font-family: $font-family-mono;
+      font-size: $font-size-xs;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    dd {
+      margin: 0;
+      font-size: $font-size-md;
+      font-weight: 600;
+      color: var(--text);
+    }
+  }
+
+  &__stage {
+    display: inline-block;
+    padding: $sp-xs $sp-md;
+    border-left: $border-width-accent solid var(--stage-color, var(--primary));
+    background: var(--surface);
+  }
+
+  &__overdue { color: var(--error); }
+
+  &__timeline {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__entry {
+    display: flex;
+    gap: $sp-md;
+    padding: $sp-md;
+    background: var(--surface);
+  }
+
+  &__entry-when {
+    flex-shrink: 0;
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+  }
+
+  &__entry-text {
+    font-size: $font-size-md;
+    color: var(--text);
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-md;
+    color: var(--text-muted);
+  }
+
+  &__actions {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+  }
+
+  &__advance {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $sp-md;
+    min-height: 72px;
+    background: var(--primary);
+    border: none;
+    color: var(--bg);
+    font-family: $font-family-primary;
+    font-size: $font-size-xl;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:disabled { opacity: 0.5; cursor: default; }
+  }
+
+  &__secondary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $sp-md;
+  }
+
+  &__btn,
+  &__preset {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: $sp-xs;
+    min-height: 64px;
+    padding: $sp-md;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    color: var(--text);
+    font-family: $font-family-primary;
+    font-size: $font-size-base;
+    cursor: pointer;
+
+    &:disabled { opacity: 0.5; }
+  }
+
+  &__preset {
+    font-size: $font-size-md;
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  &__sheet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: $z-dialog;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+    padding: $sp-lg;
+    padding-bottom: calc(#{$sp-lg} + env(safe-area-inset-bottom));
+    background: var(--surface);
+    border-top: $border-width-accent solid var(--primary);
+  }
+}

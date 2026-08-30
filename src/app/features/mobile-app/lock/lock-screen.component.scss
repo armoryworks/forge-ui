@@ -1,0 +1,67 @@
+@use 'styles/variables' as *;
+
+:host {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.lock-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-2xl;
+  padding: $sp-xl;
+  padding-top: calc(#{$sp-xl} + env(safe-area-inset-top));
+  padding-bottom: calc(#{$sp-xl} + env(safe-area-inset-bottom));
+  min-height: 100dvh;
+  background: var(--bg);
+
+  &__head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__icon {
+    font-size: $icon-size-hero;
+    color: var(--primary);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-xl;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-md;
+    color: var(--text-muted);
+  }
+
+  &__error {
+    margin: 0;
+    color: var(--error);
+    font-size: $font-size-md;
+    text-align: center;
+  }
+
+  &__biometric {
+    display: inline-flex;
+    align-items: center;
+    gap: $sp-md;
+    min-height: 56px;
+    padding: 0 $sp-xl;
+    background: none;
+    border: $border-width-thin solid var(--border);
+    color: var(--text);
+    font-family: $font-family-primary;
+    font-size: $font-size-md;
+    cursor: pointer;
+  }
+}

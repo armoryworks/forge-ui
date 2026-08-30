@@ -1,0 +1,79 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.enroll-scan {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-xl;
+  padding: $sp-xl;
+  padding-top: calc(#{$sp-xl} + env(safe-area-inset-top));
+  padding-bottom: calc(#{$sp-xl} + env(safe-area-inset-bottom));
+  min-height: 100dvh;
+  background: var(--header);
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-xl;
+    font-weight: 600;
+    color: var(--text);
+    text-align: center;
+  }
+
+  &__stage {
+    position: relative;
+    width: min(320px, 84vw);
+  }
+
+  &__viewfinder {
+    width: 100%;
+    min-height: 280px;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    overflow: hidden;
+  }
+
+  &__error,
+  &__busy {
+    position: absolute;
+    inset: 0;
+    @include flex-center;
+    flex-direction: column;
+    gap: $sp-md;
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: $font-size-md;
+    text-align: center;
+    padding: $sp-lg;
+  }
+
+  &__busy-icon {
+    font-size: $icon-size-xxl;
+    animation: spin 1s linear infinite;
+  }
+
+  &__fail {
+    margin: 0;
+    color: var(--error);
+    font-size: $font-size-md;
+    text-align: center;
+  }
+
+  &__manual {
+    min-height: 56px;
+    display: inline-flex;
+    align-items: center;
+    color: var(--primary-light);
+    font-size: $font-size-md;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}

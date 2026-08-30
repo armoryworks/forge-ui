@@ -1,0 +1,45 @@
+<div class="lookup" data-testid="mobile-app-lookup">
+  <div class="lookup__bar">
+    <app-input
+      [label]="'mobileApp.lookup.placeholder' | translate"
+      [formControl]="searchControl"
+      data-testid="lookup-input"
+    />
+    @if (voiceSupported()) {
+      <button
+        type="button"
+        class="lookup__voice"
+        [class.lookup__voice--on]="listening()"
+        [attr.aria-label]="'mobileApp.lookup.voice' | translate"
+        [attr.aria-pressed]="listening()"
+        data-testid="lookup-voice"
+        (click)="dictate()"
+      >
+        <span class="material-icons-outlined" aria-hidden="true">{{ listening() ? 'graphic_eq' : 'mic' }}</span>
+      </button>
+    }
+  </div>
+
+  <div class="lookup__results" role="list">
+    @for (item of results(); track item.kind + item.id) {
+      <button type="button" class="lookup__row" role="listitem" [attr.data-testid]="'lookup-row-' + item.id" (click)="select(item)">
+        <span class="material-icons-outlined lookup__row-icon" aria-hidden="true">{{ iconFor(item.kind) }}</span>
+        <span class="lookup__row-body">
+          <span class="lookup__row-label">{{ item.label }}</span>
+          @if (item.subtitle) { <span class="lookup__row-sub">{{ item.subtitle }}</span> }
+        </span>
+        <span class="lookup__row-kind">{{ ('mobileApp.scan.kind.' + item.kind) | translate }}</span>
+      </button>
+    } @empty {
+      <p class="lookup__hint">
+        {{ (searching() ? 'mobileApp.scan.resolving' : (searchControl.value.length < 2 ? 'mobileApp.lookup.hint' : 'mobileApp.lookup.none')) | translate }}
+      </p>
+    }
+  </div>
+
+  @if (selected(); as chosen) {
+    <div class="lookup__sheet">
+      <app-scan-action-sheet [result]="chosen" [busy]="busy()" (chosen)="onAction($event)" (dismissed)="dismiss()" />
+    </div>
+  }
+</div>

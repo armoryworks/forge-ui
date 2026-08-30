@@ -1,0 +1,75 @@
+@use 'styles/variables' as *;
+
+.sheet {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: $sp-lg;
+  padding-bottom: calc(#{$sp-lg} + env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-top: $border-width-accent solid var(--primary);
+
+  &__head {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__kind {
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  &__label {
+    font-size: $font-size-kpi;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &__subtitle {
+    font-size: $font-size-md;
+    color: var(--text-secondary);
+  }
+
+  &__actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $sp-md;
+  }
+
+  &__action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $sp-md;
+    min-height: 64px;
+    background: var(--bg);
+    border: $border-width-thin solid var(--border);
+    color: var(--text);
+    font-family: $font-family-primary;
+    font-size: $font-size-lg;
+    font-weight: 600;
+    cursor: pointer;
+
+    &--primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--bg);
+    }
+
+    &:disabled { opacity: 0.5; }
+  }
+
+  &__dismiss {
+    min-height: 56px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: $font-family-primary;
+    font-size: $font-size-md;
+    cursor: pointer;
+  }
+}

@@ -7,6 +7,7 @@ import { Observable, tap, catchError, of, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { SsoProvider } from '../models/sso-provider.model';
 import { LinkedSsoProvider } from '../models/linked-sso-provider.model';
+import { TokenStorageService } from './token-storage.service';
 
 export interface AuthUser {
   id: number;
@@ -87,6 +88,7 @@ export interface SetupTokenInfo {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  private readonly tokenStorage = inject(TokenStorageService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly _token = signal<string | null>(this.loadToken());
@@ -108,6 +110,18 @@ export class AuthService {
     effect(() => this.scheduleExpiryCheck(this._token()));
   }
 
+  /**
+   * Installs a session obtained outside the normal login flow (device
+   * enrollment, device-token refresh). Persists through the same storage
+   * facade the login path uses.
+   */
+  setSession(token: string, user: AuthUser): void {
+    this._token.set(token);
+    this._user.set(user);
+    this.tokenStorage.set('forge-token', token);
+    this.tokenStorage.set('forge-user', JSON.stringify(user));
+  }
+
   hasRole(role: string): boolean {
     return this._user()?.roles.includes(role) ?? false;
   }
@@ -120,7 +134,7 @@ export class AuthService {
   login(credentials: LoginRequest): Observable<LoginResponse> {
     // Present the "remember this device for 30 days" trusted-device token (if
     // this browser earned one) so the server can skip the MFA challenge.
-    const trustedDeviceToken = localStorage.getItem('forge-trusted-device') ?? undefined;
+    const trustedDeviceToken = this.tokenStorage.get('forge-trusted-device') ?? undefined;
     return this.http
       .post<LoginResponse>(`${environment.apiUrl}/auth/login`, { ...credentials, trustedDeviceToken })
       .pipe(
@@ -130,8 +144,8 @@ export class AuthService {
 
           this._token.set(response.token);
           this._user.set(response.user);
-          localStorage.setItem('forge-token', response.token);
-          localStorage.setItem('forge-user', JSON.stringify(response.user));
+          this.tokenStorage.set('forge-token', response.token);
+          this.tokenStorage.set('forge-user', JSON.stringify(response.user));
         }),
       );
   }
@@ -144,9 +158,9 @@ export class AuthService {
    */
   completeMfaLogin(token: string, trustedDeviceToken?: string | null): Observable<AuthUser> {
     this._token.set(token);
-    localStorage.setItem('forge-token', token);
+    this.tokenStorage.set('forge-token', token);
     if (trustedDeviceToken) {
-      localStorage.setItem('forge-trusted-device', trustedDeviceToken);
+      this.tokenStorage.set('forge-trusted-device', trustedDeviceToken);
     }
     // Resolve the user profile BEFORE the caller navigates, so the app doesn't
     // bootstrap the dashboard (and its request burst) mid-transition — that race
@@ -155,7 +169,7 @@ export class AuthService {
     return this.http.get<AuthUser>(`${environment.apiUrl}/auth/me`).pipe(
       tap((user) => {
         this._user.set(user);
-        localStorage.setItem('forge-user', JSON.stringify(user));
+        this.tokenStorage.set('forge-user', JSON.stringify(user));
       }),
     );
   }
@@ -182,8 +196,8 @@ export class AuthService {
         tap((response) => {
           this._token.set(response.token);
           this._user.set(response.user);
-          localStorage.setItem('forge-token', response.token);
-          localStorage.setItem('forge-user', JSON.stringify(response.user));
+          this.tokenStorage.set('forge-token', response.token);
+          this.tokenStorage.set('forge-user', JSON.stringify(response.user));
         }),
       );
   }
@@ -199,8 +213,8 @@ export class AuthService {
         tap((response) => {
           this._token.set(response.token);
           this._user.set(response.user);
-          localStorage.setItem('forge-token', response.token);
-          localStorage.setItem('forge-user', JSON.stringify(response.user));
+          this.tokenStorage.set('forge-token', response.token);
+          this.tokenStorage.set('forge-user', JSON.stringify(response.user));
         }),
       );
   }
@@ -216,8 +230,8 @@ export class AuthService {
         tap((response) => {
           this._token.set(response.token);
           this._user.set(response.user);
-          localStorage.setItem('forge-token', response.token);
-          localStorage.setItem('forge-user', JSON.stringify(response.user));
+          this.tokenStorage.set('forge-token', response.token);
+          this.tokenStorage.set('forge-user', JSON.stringify(response.user));
         }),
       );
   }
@@ -233,8 +247,8 @@ export class AuthService {
         tap((response) => {
           this._token.set(response.token);
           this._user.set(response.user);
-          localStorage.setItem('forge-token', response.token);
-          localStorage.setItem('forge-user', JSON.stringify(response.user));
+          this.tokenStorage.set('forge-token', response.token);
+          this.tokenStorage.set('forge-user', JSON.stringify(response.user));
         }),
       );
   }
@@ -262,8 +276,8 @@ export class AuthService {
         tap((response) => {
           this._token.set(response.token);
           this._user.set(response.user);
-          localStorage.setItem('forge-token', response.token);
-          localStorage.setItem('forge-user', JSON.stringify(response.user));
+          this.tokenStorage.set('forge-token', response.token);
+          this.tokenStorage.set('forge-user', JSON.stringify(response.user));
         }),
       );
   }
@@ -282,8 +296,8 @@ export class AuthService {
       tap((response) => {
         this._token.set(response.token);
         this._user.set(response.user);
-        localStorage.setItem('forge-token', response.token);
-        localStorage.setItem('forge-user', JSON.stringify(response.user));
+        this.tokenStorage.set('forge-token', response.token);
+        this.tokenStorage.set('forge-user', JSON.stringify(response.user));
       }),
       map((response) => response.token),
       catchError(() => of(null)),
@@ -307,8 +321,8 @@ export class AuthService {
   clearAuth(): void {
     this._token.set(null);
     this._user.set(null);
-    localStorage.removeItem('forge-token');
-    localStorage.removeItem('forge-user');
+    this.tokenStorage.remove('forge-token');
+    this.tokenStorage.remove('forge-user');
     // Close any open MatDialog (detail dialogs, confirms, etc.) — every
     // auth-loss path funnels through here (interceptor 401 redirect,
     // explicit logout, cross-tab broadcast, SignalR auth failure, kiosk
@@ -382,7 +396,7 @@ export class AuthService {
     if (!current) return;
     const merged = { ...current, ...updated };
     this._user.set(merged);
-    localStorage.setItem('forge-user', JSON.stringify(merged));
+    this.tokenStorage.set('forge-user', JSON.stringify(merged));
   }
 
   /** Set by BroadcastService to avoid circular dependency. */
@@ -401,11 +415,11 @@ export class AuthService {
   }
 
   private loadToken(): string | null {
-    return localStorage.getItem('forge-token');
+    return this.tokenStorage.get('forge-token');
   }
 
   private loadUser(): AuthUser | null {
-    const raw = localStorage.getItem('forge-user');
+    const raw = this.tokenStorage.get('forge-user');
     return raw ? JSON.parse(raw) : null;
   }
 }

@@ -17,12 +17,14 @@ import { LoadingOverlayComponent } from './shared/components/loading-overlay/loa
 import { KeyboardShortcutsHelpComponent } from './shared/components/keyboard-shortcuts-help/keyboard-shortcuts-help.component';
 import { DemoMarkerComponent } from './shared/components/demo-marker/demo-marker.component';
 import { DemoModuleSwitcherComponent } from './shared/components/demo-module-switcher/demo-module-switcher.component';
+import { UpgradeLockComponent } from './shared/components/upgrade-lock/upgrade-lock.component';
 import { initDemoMode } from './shared/utils/demo-mode.utils';
 import { SyncConflictDialogComponent, SyncConflictDialogData } from './shared/components/sync-conflict-dialog/sync-conflict-dialog.component';
 import { SyncConflict, SyncConflictResolution } from './shared/models/sync-conflict.model';
 import { AuthService } from './shared/services/auth.service';
 import { LayoutService } from './shared/services/layout.service';
 import { SignalrService } from './shared/services/signalr.service';
+import { UpgradeLockService } from './shared/services/upgrade-lock.service';
 import { NotificationHubService } from './shared/services/notification-hub.service';
 import { ChatHubService } from './shared/services/chat-hub.service';
 import { NotificationService } from './shared/services/notification.service';
@@ -43,6 +45,7 @@ import { DraftRecoveryService } from './shared/services/draft-recovery.service';
 import { DraftBroadcastService } from './shared/services/draft-broadcast.service';
 import { AnnouncementService } from './shared/services/announcement.service';
 import { CapabilityService } from './shared/services/capability.service';
+import { environment } from '../environments/environment';
 import { CurrencyService } from './shared/services/currency.service';
 import { I18nOverridesService } from './shared/services/i18n-overrides.service';
 import { EmployeeProfileService } from './features/account/services/employee-profile.service';
@@ -63,7 +66,7 @@ import { PLANNING_TOUR } from './shared/tours/planning-tour';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, TranslatePipe, AppHeaderComponent, SidebarComponent, ToastContainerComponent, ConnectionBannerComponent, AnnouncementOverlayComponent, OnboardingBannerComponent, OfflineBannerComponent, LoadingOverlayComponent, KeyboardShortcutsHelpComponent, ChatPreviewPopupComponent, DemoMarkerComponent, DemoModuleSwitcherComponent],
+  imports: [RouterOutlet, TranslatePipe, AppHeaderComponent, SidebarComponent, ToastContainerComponent, ConnectionBannerComponent, AnnouncementOverlayComponent, OnboardingBannerComponent, OfflineBannerComponent, LoadingOverlayComponent, KeyboardShortcutsHelpComponent, ChatPreviewPopupComponent, DemoMarkerComponent, DemoModuleSwitcherComponent, UpgradeLockComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -74,6 +77,7 @@ export class AppComponent implements OnInit, OnDestroy {
   protected readonly layout = inject(LayoutService);
   private readonly signalr = inject(SignalrService);
   private readonly notificationHub = inject(NotificationHubService);
+  private readonly upgradeLock = inject(UpgradeLockService);
   private readonly chatHub = inject(ChatHubService);
   private readonly notificationService = inject(NotificationService);
   private readonly userPreferences = inject(UserPreferencesService);
@@ -128,13 +132,16 @@ export class AppComponent implements OnInit, OnDestroy {
         this.wasAuthenticated = true;
 
         // Hub connections + non-capability-gated init runs immediately —
-        // these don't depend on the capability descriptor.
-        this.notificationHub.connect();
-        this.chatHub.connect();
+        // these don't depend on the capability descriptor. The native shell
+        // needs only the capability snapshot, preferences and label overrides.
+        if (!environment.mobileShell) {
+          this.notificationHub.connect();
+          this.chatHub.connect();
+          this.manualNumberSettings.load();
+          this.scanner.start();
+          this.draftRecovery.onLogin();
+        }
         this.userPreferences.load();
-        this.manualNumberSettings.load();
-        this.scanner.start();
-        this.draftRecovery.onLogin();
 
         // Capability descriptor MUST resolve before any capability-gated
         // service makes HTTP calls. Otherwise the layer-3 interceptor can't
@@ -143,10 +150,12 @@ export class AppComponent implements OnInit, OnDestroy {
         // errors. Chaining via the load() Observable closes the race.
         this.capabilityService.load().subscribe({
           next: () => {
-            this.notificationService.load();
-            this.accountingService.load();
-            this.employeeProfile.load();
-            this.announcementService.loadActive();
+            if (!environment.mobileShell) {
+              this.notificationService.load();
+              this.accountingService.load();
+              this.employeeProfile.load();
+              this.announcementService.loadActive();
+            }
             // Base currency — load once after auth so currency-display can
             // disambiguate non-base currencies inline. Failures fall back
             // to USD inside the service; no need to chain anything.
@@ -187,6 +196,12 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     initDemoMode();
+
+    // Unconditional, and before any auth check: an upgrade locks every console,
+    // and a browser sitting on the login screen while the box upgrades needs the
+    // same notice as a signed-in one. It reads the static marker when the hub is
+    // unavailable, which is exactly the window an upgrade creates.
+    this.upgradeLock.start();
     this.routeLoading.initialize();
     this.broadcast.initialize();
     this.draftBroadcast.initialize();
