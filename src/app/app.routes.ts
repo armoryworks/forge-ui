@@ -1,7 +1,5 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './features/auth/login.component';
-import { SetupComponent } from './features/auth/setup.component';
-import { TokenSetupComponent } from './features/auth/token-setup.component';
 import { authGuard } from './shared/guards/auth.guard';
 import { instanceGuard } from './shared/guards/instance.guard';
 import { shellAuthGuard } from './shared/guards/shell-auth.guard';
@@ -20,8 +18,19 @@ export const routes: Routes = [
     canActivate: [demoOnlyGuard],
     loadComponent: () => import('./features/welcome/welcome.component').then(m => m.WelcomeComponent),
   },
-  { path: 'setup', canActivate: [setupRequiredGuard], component: SetupComponent },
-  { path: 'setup/:token', component: TokenSetupComponent },
+  // Lazy: the first-run wizard is reachable exactly once in an install's life, and
+  // the token flow only from an invite link — neither belongs in the bundle every
+  // user downloads on every visit. Login stays eager; it IS the common first paint,
+  // and deferring it would trade bundle size for a round trip on the hot path.
+  {
+    path: 'setup',
+    canActivate: [setupRequiredGuard],
+    loadComponent: () => import('./features/auth/setup.component').then((m) => m.SetupComponent),
+  },
+  {
+    path: 'setup/:token',
+    loadComponent: () => import('./features/auth/token-setup.component').then((m) => m.TokenSetupComponent),
+  },
   // Phase 1q — customer portal lives outside the employee app shell. Has
   // its own auth flow (passwordless magic link) and its own layout (no
   // sidebar, distinct chrome). Routes are reachable without an employee
