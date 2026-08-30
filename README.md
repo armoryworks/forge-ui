@@ -29,7 +29,7 @@ Built by **[Armory Works](https://armoryworks.com)**.
 
 ## Prerequisites
 
-- **Node.js 20 or newer** with npm. (CI builds on Node 20; the container images build on Node 24.)
+- **Node.js 24** with npm — the version CI and the container images both build on.
 - **A running Forge API.** The SPA has no backend of its own — see the next section.
 - For the native shell only: Android Studio (Android) and/or Xcode (iOS).
 
@@ -176,8 +176,8 @@ Forge is deployed and updated through **[`@armoryworks/forge-deploy`](https://gi
 **Install (Ubuntu):**
 
 ```bash
-# Node.js 22 LTS (ships npm)
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+# Node.js 24 LTS (ships npm)
+curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
 # the deploy CLI

@@ -50,14 +50,14 @@ jobs:
     timeout-minutes: 60
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # The E2E backing stack lives in the sibling forge-deploy repo
       # (compose-e2e.yml). forge-deploy is public, so the default token can
       # clone it; if it is ever made private, supply a read-only PAT via
       #   token: ${{ secrets.FORGE_DEPLOY_RO_TOKEN }}
       - name: Check out forge-deploy (compose-e2e.yml)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: armoryworks/forge-deploy
           path: forge-deploy
@@ -70,7 +70,7 @@ jobs:
       # dead in CI. actions/checkout won't place a repo outside the workspace,
       # so check out inside and symlink the sibling path the specs expect.
       - name: Check out forge-api (route sources for smoke/contract-drift specs)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: armoryworks/forge-api
           path: forge-api-src
@@ -78,9 +78,9 @@ jobs:
         run: ln -sfn "$GITHUB_WORKSPACE/forge-api-src" "$GITHUB_WORKSPACE/../forge-api"
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -95,7 +95,7 @@ jobs:
       # The full Docker stack is needed for Playwright to hit a real backend.
       # We pull the latest published images rather than building from scratch.
       - name: Log in to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -116,7 +116,7 @@ jobs:
 
       - name: Upload blob report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: blob-report-${{ matrix.shard }}
           path: blob-report/
@@ -128,19 +128,19 @@ jobs:
     needs: [e2e]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
       - name: Download all blob reports
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: all-blob-reports
           pattern: blob-report-*
@@ -150,7 +150,7 @@ jobs:
         run: npx playwright merge-reports --reporter=html ./all-blob-reports
 
       - name: Upload merged HTML report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report-merged-${{ github.run_id }}
           path: playwright-report/
@@ -165,10 +165,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Check out forge-deploy (compose-e2e.yml)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: armoryworks/forge-deploy
           path: forge-deploy
@@ -181,7 +181,7 @@ jobs:
       # dead in CI. actions/checkout won't place a repo outside the workspace,
       # so check out inside and symlink the sibling path the specs expect.
       - name: Check out forge-api (route sources for smoke/contract-drift specs)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: armoryworks/forge-api
           path: forge-api-src
@@ -189,9 +189,9 @@ jobs:
         run: ln -sfn "$GITHUB_WORKSPACE/forge-api-src" "$GITHUB_WORKSPACE/../forge-api"
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -204,7 +204,7 @@ jobs:
         run: npm run build
 
       - name: Log in to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -222,7 +222,7 @@ jobs:
 
       - name: Upload generated artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: docgen-artifacts-${{ github.run_id }}
           path: |
