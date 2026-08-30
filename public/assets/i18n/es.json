@@ -3484,6 +3484,42 @@
       "addSharedTitle": "Agregar un dispositivo compartido",
       "sharedHint": "Un dispositivo compartido pertenece al taller, no a una persona. Cada acción comienza con un escaneo de credencial y un PIN.",
       "sharedAction": "Dispositivo compartido"
+    },
+    "telemetry": {
+      "title": "Supervisión remota del estado",
+      "description": "Permita que Armory Works vea si este sistema está funcionando, para que puedan detectar un problema, idealmente antes que usted. Es opcional, está desactivado salvo que lo active, y solo incluye información de estado.",
+      "turnOn": "Revisar y activar",
+      "turnOff": "Desactivar",
+      "reviewTerms": "Revisar los términos actualizados",
+      "consentLede": "Antes de activarlo, lea qué se compartiría. No se envía nada sin su consentimiento.",
+      "whatIsShared": "Qué se compartiría",
+      "whatIsNotShared": "Qué nunca se compartiría",
+      "terms": "Términos",
+      "showPayload": "Ver exactamente qué se envía",
+      "hidePayload": "Ocultar el ejemplo",
+      "agreementVersion": "Versión del acuerdo {{version}}",
+      "accept": "Acepto: activarlo",
+      "decline": "No, gracias",
+      "accepted": "La supervisión remota del estado está activada.",
+      "declined": "La supervisión remota del estado está desactivada. Su decisión ha quedado registrada.",
+      "saveFailed": "No se pudo guardar esa decisión. Inténtelo de nuevo.",
+      "agreementLoadFailed": "No se pudo cargar el acuerdo.",
+      "stateOff": "Desactivada: no se envía nada.",
+      "stateEnrolling": "Activada: contactando con Armory Works.",
+      "statePending": "Activada: esperando a que Armory Works acepte este sistema.",
+      "stateActive": "Activada: informando con normalidad.",
+      "stateRejected": "Armory Works rechazó supervisar este sistema.",
+      "stateTermsChanged": "En pausa: los términos cambiaron y deben revisarse.",
+      "pendingHint": "Todavía no se envía nada. Armory Works debe aceptar este sistema primero.",
+      "termsChangedHint": "Lo que se comparte ha cambiado desde que dio su consentimiento. Los informes están en pausa hasta que revise los nuevos términos.",
+      "lastDecision": "Última decisión: {{decision}} por {{by}} el",
+      "lastReport": "Último informe",
+      "history": "Historial de decisiones",
+      "decision": {
+        "accepted": "Aceptado",
+        "declined": "Rechazado",
+        "unknown": "Desconocido"
+      }
     }
   },
   "teamsPanel": {

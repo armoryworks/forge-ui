@@ -3484,6 +3484,42 @@
       "addSharedTitle": "Add a shared device",
       "sharedHint": "A shared device belongs to the shop, not a person. Each action on it starts with a badge scan and PIN.",
       "sharedAction": "Shared device"
+    },
+    "telemetry": {
+      "title": "Remote health monitoring",
+      "description": "Let Armory Works see whether this system is running, so they can spot a problem — ideally before you do. Optional, off unless you turn it on, and health information only.",
+      "turnOn": "Review and turn on",
+      "turnOff": "Turn off",
+      "reviewTerms": "Review updated terms",
+      "consentLede": "Before turning this on, please read what would be shared. Nothing is sent unless you agree.",
+      "whatIsShared": "What would be shared",
+      "whatIsNotShared": "What would never be shared",
+      "terms": "Terms",
+      "showPayload": "Show exactly what is sent",
+      "hidePayload": "Hide the example",
+      "agreementVersion": "Agreement version {{version}}",
+      "accept": "I agree — turn it on",
+      "decline": "No thanks",
+      "accepted": "Remote health monitoring is on.",
+      "declined": "Remote health monitoring is off. Your decision has been recorded.",
+      "saveFailed": "Could not save that decision. Please try again.",
+      "agreementLoadFailed": "Could not load the agreement.",
+      "stateOff": "Off — nothing is being sent.",
+      "stateEnrolling": "On — contacting Armory Works.",
+      "statePending": "On — waiting for Armory Works to accept this system.",
+      "stateActive": "On — reporting normally.",
+      "stateRejected": "Armory Works declined to monitor this system.",
+      "stateTermsChanged": "Paused — the terms changed and need reviewing.",
+      "pendingHint": "Nothing is being sent yet. Armory Works has to accept this system first.",
+      "termsChangedHint": "What gets shared has changed since you agreed. Reporting is paused until you review the new terms.",
+      "lastDecision": "Last decision: {{decision}} by {{by}} on",
+      "lastReport": "Last reported",
+      "history": "Decision history",
+      "decision": {
+        "accepted": "Agreed",
+        "declined": "Declined",
+        "unknown": "Unknown"
+      }
     }
   },
   "teamsPanel": {

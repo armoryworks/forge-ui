@@ -16,6 +16,9 @@ import { TerminologyEntryItem } from './models/terminology-entry-item.model';
 import { TrackType } from '../../shared/models/track-type.model';
 import { TrackTypeDialogComponent } from './components/track-type-dialog.component';
 import { AddDeviceDialogComponent } from './components/add-device-dialog/add-device-dialog.component';
+import { TelemetryConsentDialogComponent } from './components/telemetry-consent-dialog/telemetry-consent-dialog.component';
+import { TelemetryService } from './services/telemetry.service';
+import { TelemetryAgreement, TelemetryConsentRecord, TelemetryStatus } from './models/telemetry.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { CapDirective } from '../../shared/directives/cap.directive';
 import { MatDialog } from '@angular/material/dialog';
@@ -77,7 +80,7 @@ import { SlideoutComponent } from '../../shared/components/slideout/slideout.com
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent, DatepickerComponent, DataTableComponent,
     ColumnCellDirective, ValidationButtonComponent, TrackTypeDialogComponent,
-    EmptyStateComponent, LoadingBlockDirective, AdminOverviewComponent, TrainingPanelComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, RoleTemplatesPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, AuditLogPanelComponent, TimeCorrectionsPanelComponent, EventsPanelComponent, AnnouncementsPanelComponent, EdiPanelComponent, MfaPolicyPanelComponent, DomainEventFailuresPanelComponent, IntegrationOutboxPanelComponent, AutoPoSettingsComponent, ExpenseSettingsPanelComponent, BiApiKeysPanelComponent, SystemApiKeysPanelComponent, ConnectionsPanelComponent, BarcodeInfoComponent, SlideoutComponent, DatePipe, LowerCasePipe, TranslatePipe, MatTooltipModule, AddDeviceDialogComponent, CapDirective,
+    EmptyStateComponent, LoadingBlockDirective, AdminOverviewComponent, TrainingPanelComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, RoleTemplatesPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, AuditLogPanelComponent, TimeCorrectionsPanelComponent, EventsPanelComponent, AnnouncementsPanelComponent, EdiPanelComponent, MfaPolicyPanelComponent, DomainEventFailuresPanelComponent, IntegrationOutboxPanelComponent, AutoPoSettingsComponent, ExpenseSettingsPanelComponent, BiApiKeysPanelComponent, SystemApiKeysPanelComponent, ConnectionsPanelComponent, BarcodeInfoComponent, SlideoutComponent, DatePipe, LowerCasePipe, TranslatePipe, MatTooltipModule, AddDeviceDialogComponent, CapDirective, TelemetryConsentDialogComponent,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
@@ -338,6 +341,7 @@ export class AdminComponent implements OnInit {
       if (tab === 'settings' && !this.settingsLoaded()) this.loadSystemSettings();
       if (tab === 'settings' && !this.profileLoaded()) this.loadCompanyProfile();
       if (tab === 'settings' && !this.locationsLoaded()) this.loadCompanyLocations();
+      if (tab === 'settings' && this.telemetryStatus() === null) this.loadTelemetry();
       if (tab === 'compliance' && this.users().length === 0) this.loadUsers();
     });
 
@@ -853,6 +857,85 @@ export class AdminComponent implements OnInit {
       },
       error: () => this.snackbar.error(this.translate.instant('admin.companyProfileLoadFailed')),
     });
+  }
+
+  // ── Remote health monitoring (opt-in) ──
+  // Lives here on the settings tab rather than in the capability system: this is the
+  // business owner deciding whether data about their system leaves the building, not
+  // an integrator switching a feature on.
+
+  private readonly telemetryService = inject(TelemetryService);
+
+  protected readonly telemetryStatus = signal<TelemetryStatus | null>(null);
+  protected readonly telemetryAgreement = signal<TelemetryAgreement | null>(null);
+  protected readonly telemetryHistory = signal<TelemetryConsentRecord[]>([]);
+  protected readonly telemetryConsentOpen = signal(false);
+  protected readonly telemetrySaving = signal(false);
+
+  /// What the enrollment state means in plain terms, so "Pending" doesn't read as
+  /// something the customer has to fix.
+  protected readonly telemetryStateKey = computed(() => {
+    const status = this.telemetryStatus();
+    if (!status || !status.enabled) return 'admin.telemetry.stateOff';
+    if (status.agreementOutOfDate) return 'admin.telemetry.stateTermsChanged';
+    switch (status.enrollmentStatus) {
+      case 'Accepted': return 'admin.telemetry.stateActive';
+      case 'Rejected': return 'admin.telemetry.stateRejected';
+      case 'Pending': return 'admin.telemetry.statePending';
+      default: return 'admin.telemetry.stateEnrolling';
+    }
+  });
+
+  protected loadTelemetry(): void {
+    this.telemetryService.getStatus()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (status) => this.telemetryStatus.set(status),
+        error: () => this.telemetryStatus.set(null),
+      });
+    this.telemetryService.getConsentHistory()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: (rows) => this.telemetryHistory.set(rows), error: () => this.telemetryHistory.set([]) });
+  }
+
+  /// Opening always fetches the current agreement: the operator must decide against
+  /// the text this build actually ships, not a cached copy.
+  protected openTelemetryConsent(): void {
+    this.telemetryService.getAgreement()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (agreement) => {
+          this.telemetryAgreement.set(agreement);
+          this.telemetryConsentOpen.set(true);
+        },
+        error: () => this.snackbar.error(this.translate.instant('admin.telemetry.agreementLoadFailed')),
+      });
+  }
+
+  protected recordTelemetryConsent(accepted: boolean): void {
+    this.telemetrySaving.set(true);
+    this.telemetryService.recordConsent(accepted, this.authService.user()?.email ?? null)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (status) => {
+          this.telemetryStatus.set(status);
+          this.telemetrySaving.set(false);
+          this.telemetryConsentOpen.set(false);
+          this.snackbar.success(this.translate.instant(
+            accepted ? 'admin.telemetry.accepted' : 'admin.telemetry.declined'));
+          this.loadTelemetry();
+        },
+        error: () => {
+          this.telemetrySaving.set(false);
+          this.snackbar.error(this.translate.instant('admin.telemetry.saveFailed'));
+        },
+      });
+  }
+
+  /// Switching off is a decline — recorded exactly like one, so the history shows
+  /// consent being withdrawn rather than the row simply disappearing.
+  protected disableTelemetry(): void {
+    this.recordTelemetryConsent(false);
   }
 
   protected saveCompanyProfile(): void {

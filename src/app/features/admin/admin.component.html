@@ -323,6 +323,80 @@
           <p class="settings-hint">{{ 'admin.lockPeriodHint' | translate }}</p>
         </div>
 
+        <!-- Remote health monitoring — an opt-in consent decision, not a capability -->
+        <div class="settings-section">
+          <div class="settings-section__header">
+            <h3 class="settings-section__title">
+              <span class="material-icons-outlined">monitor_heart</span>
+              {{ 'admin.telemetry.title' | translate }}
+            </h3>
+            @if (telemetryStatus(); as t) {
+              @if (t.enabled && !t.agreementOutOfDate) {
+                <button class="action-btn action-btn--sm" [disabled]="telemetrySaving()" (click)="disableTelemetry()">
+                  <span class="material-icons-outlined">link_off</span>
+                  {{ 'admin.telemetry.turnOff' | translate }}
+                </button>
+              } @else {
+                <button class="action-btn action-btn--primary action-btn--sm" (click)="openTelemetryConsent()">
+                  <span class="material-icons-outlined">shield</span>
+                  {{ (t.agreementOutOfDate ? 'admin.telemetry.reviewTerms' : 'admin.telemetry.turnOn') | translate }}
+                </button>
+              }
+            }
+          </div>
+
+          <p class="settings-hint">{{ 'admin.telemetry.description' | translate }}</p>
+
+          @if (telemetryStatus(); as t) {
+            <div class="telemetry-state">
+              <span class="telemetry-state__dot"
+                [class.telemetry-state__dot--on]="t.enabled && t.enrollmentStatus === 'Accepted' && !t.agreementOutOfDate"
+                [class.telemetry-state__dot--pending]="t.enabled && t.enrollmentStatus !== 'Accepted'"></span>
+              <span class="telemetry-state__label">{{ telemetryStateKey() | translate }}</span>
+            </div>
+
+            @if (t.agreementOutOfDate) {
+              <p class="settings-hint settings-hint--warn">{{ 'admin.telemetry.termsChangedHint' | translate }}</p>
+            }
+            @if (t.enabled && t.enrollmentStatus === 'Pending') {
+              <p class="settings-hint">{{ 'admin.telemetry.pendingHint' | translate }}</p>
+            }
+            @if (t.consentDecision) {
+              <p class="settings-hint">
+                {{ 'admin.telemetry.lastDecision' | translate: {
+                     decision: t.consentDecision, by: t.consentBy || '—' } }}
+                {{ t.consentAt | date: 'MM/dd/yyyy hh:mm' }}
+              </p>
+            }
+            @if (t.lastHeartbeatAt) {
+              <p class="settings-hint">
+                {{ 'admin.telemetry.lastReport' | translate }} {{ t.lastHeartbeatAt | date: 'MM/dd/yyyy hh:mm' }}
+              </p>
+            }
+            @if (t.lastError) {
+              <p class="settings-hint settings-hint--warn">{{ t.lastError }}</p>
+            }
+          }
+
+          @if (telemetryHistory().length > 0) {
+            <h4 class="settings-item__label">{{ 'admin.telemetry.history' | translate }}</h4>
+            <ul class="telemetry-history">
+              @for (row of telemetryHistory(); track row.at) {
+                <li class="telemetry-history__row">
+                  <span class="telemetry-history__decision"
+                    [class.telemetry-history__decision--accepted]="row.decision === 'accepted'">
+                    {{ ('admin.telemetry.decision.' + row.decision) | translate }}
+                  </span>
+                  <span class="telemetry-history__meta">
+                    {{ row.at | date: 'MM/dd/yyyy hh:mm' }} · {{ row.by || '—' }}
+                    · {{ 'admin.telemetry.agreementVersion' | translate: { version: row.version } }}
+                  </span>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+
         <!-- System Settings -->
         <div class="settings-section">
           <div class="settings-section__header">
@@ -865,4 +939,12 @@
 }
 @if (sharedDeviceOpen()) {
   <app-admin-add-device-dialog [user]="null" (closed)="sharedDeviceOpen.set(false)" />
+}
+
+@if (telemetryConsentOpen() && telemetryAgreement(); as agreement) {
+  <app-telemetry-consent-dialog
+    [agreement]="agreement"
+    [saving]="telemetrySaving()"
+    (decided)="recordTelemetryConsent($event)"
+    (closed)="telemetryConsentOpen.set(false)" />
 }

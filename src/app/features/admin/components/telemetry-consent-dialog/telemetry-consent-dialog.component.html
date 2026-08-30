@@ -1,0 +1,67 @@
+@if (agreement(); as a) {
+<app-dialog [title]="a.title" width="640px" (closed)="closed.emit()">
+  <div class="consent">
+    <p class="consent__lede">{{ 'admin.telemetry.consentLede' | translate }}</p>
+
+    <section class="consent__section consent__section--shared">
+      <h4 class="consent__heading">
+        <span class="material-icons-outlined">upload</span>
+        {{ 'admin.telemetry.whatIsShared' | translate }}
+      </h4>
+      <ul class="consent__list">
+        @for (item of a.shared; track item) {
+          <li>{{ item }}</li>
+        }
+      </ul>
+    </section>
+
+    <section class="consent__section consent__section--not-shared">
+      <h4 class="consent__heading">
+        <span class="material-icons-outlined">block</span>
+        {{ 'admin.telemetry.whatIsNotShared' | translate }}
+      </h4>
+      <ul class="consent__list">
+        @for (item of a.notShared; track item) {
+          <li>{{ item }}</li>
+        }
+      </ul>
+    </section>
+
+    <section class="consent__section">
+      <h4 class="consent__heading">
+        <span class="material-icons-outlined">gavel</span>
+        {{ 'admin.telemetry.terms' | translate }}
+      </h4>
+      <ul class="consent__list">
+        @for (item of a.terms; track item) {
+          <li>{{ item }}</li>
+        }
+      </ul>
+    </section>
+
+    <!-- The claim above, made checkable. -->
+    <section class="consent__section">
+      <button type="button" class="consent__payload-toggle" (click)="togglePayload()">
+        <span class="material-icons-outlined">{{ showPayload() ? 'expand_less' : 'expand_more' }}</span>
+        {{ payloadToggleKey() | translate }}
+      </button>
+      @if (showPayload()) {
+        <pre class="consent__payload">{{ a.samplePayload }}</pre>
+      }
+    </section>
+
+    <p class="consent__version">
+      {{ 'admin.telemetry.agreementVersion' | translate: { version: a.version } }}
+    </p>
+  </div>
+
+  <div dialog-footer class="consent__actions">
+    <button type="button" class="action-btn" [disabled]="saving()" (click)="decided.emit(false)">
+      {{ 'admin.telemetry.decline' | translate }}
+    </button>
+    <button type="button" class="action-btn action-btn--primary" [disabled]="saving()" (click)="decided.emit(true)">
+      {{ 'admin.telemetry.accept' | translate }}
+    </button>
+  </div>
+</app-dialog>
+}

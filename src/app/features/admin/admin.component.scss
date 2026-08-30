@@ -800,4 +800,62 @@
   margin: $sp-xs 0 0;
   font-size: var(--font-size-xs);
   color: var(--text-muted);
+
+  // Something the operator needs to act on (paused terms, a reporting error)
+  // rather than passive explanation.
+  &--warn { color: var(--warning); }
+}
+
+// ── Remote health monitoring (settings tab) ──
+.telemetry-state {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  margin: $sp-md 0;
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    flex: none;
+    background: var(--text-dim);
+
+    &--on { background: var(--success); }
+    &--pending { background: var(--warning); }
+  }
+
+  &__label {
+    font-size: $font-size-base;
+    color: var(--text);
+  }
+}
+
+.telemetry-history {
+  list-style: none;
+  margin: $sp-md 0 0;
+  padding: 0;
+
+  &__row {
+    display: flex;
+    align-items: baseline;
+    gap: $sp-md;
+    padding: $sp-sm 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  &__decision {
+    flex: none;
+    min-width: 72px;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+
+    &--accepted { color: var(--success); }
+  }
+
+  &__meta {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
 }

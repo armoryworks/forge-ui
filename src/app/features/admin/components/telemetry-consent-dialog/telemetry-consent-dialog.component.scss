@@ -1,0 +1,94 @@
+@use 'styles/variables' as *;
+
+.consent {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+
+  &__lede {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: $font-size-sm;
+  }
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__heading {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    margin: 0;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: var(--text);
+
+    .material-icons-outlined {
+      font-size: 18px;
+    }
+  }
+
+  // The two lists carry opposite meanings, so they shouldn't look identical.
+  &__section--shared &__heading .material-icons-outlined {
+    color: var(--warning);
+  }
+
+  &__section--not-shared &__heading .material-icons-outlined {
+    color: var(--success);
+  }
+
+  &__list {
+    margin: 0;
+    padding-left: $sp-lg;
+    color: var(--text-secondary);
+    font-size: $font-size-sm;
+    line-height: 1.55;
+
+    li + li {
+      margin-top: 2px;
+    }
+  }
+
+  &__payload-toggle {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    padding: 0;
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: $font-size-sm;
+    cursor: pointer;
+
+    .material-icons-outlined {
+      font-size: 18px;
+    }
+  }
+
+  &__payload {
+    margin: $sp-sm 0 0;
+    padding: $sp-md;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-family: $font-family-mono;
+    font-size: 12px;
+    line-height: 1.5;
+    overflow-x: auto;
+  }
+
+  &__version {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $sp-md;
+  }
+}
