@@ -88,7 +88,7 @@
     "angularx-qrcode": "^22.0.1",
     "bwip-js": "^4.8.0",
     "chart.js": "^4.5.1",
-    "chartjs-chart-sankey": "^0.14.0",
+    "chartjs-chart-sankey": "^0.15.0",
     "date-fns": "^4.1.0",
     "driver.js": "^1.4.0",
     "gridstack": "^12.4.2",
@@ -102,7 +102,7 @@
     "papaparse": "^5.5.3",
     "quill": "^2.0.3",
     "rxjs": "~7.8.0",
-    "three": "^0.183.2",
+    "three": "^0.185.1",
     "tslib": "^2.3.0",
     "write-excel-file": "^4.0.6"
   },
