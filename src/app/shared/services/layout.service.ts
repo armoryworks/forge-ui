@@ -10,6 +10,11 @@ import { LANDING_ROUTE_PREF_KEY, resolveRoleLanding } from '../models/role-landi
 
 const MOBILE_BREAKPOINT = 768;
 
+// Route signals below are evaluated during construction. A test environment can
+// hand back a window whose location has no pathname, and a throw there fails the
+// whole injector, not just this service.
+const currentPath = (): string => globalThis.window?.location?.pathname ?? '/';
+
 @Injectable({ providedIn: 'root' })
 export class LayoutService {
   private readonly ngZone = inject(NgZone);
@@ -33,10 +38,10 @@ export class LayoutService {
     this._isMobile();
     return this.detectMobileDevice();
   });
-  private readonly _isDisplayRoute = signal(this.checkDisplayRoute(window.location.pathname));
-  private readonly _isAccountRoute = signal(this.checkAccountRoute(window.location.pathname));
-  private readonly _isAuthRoute = signal(this.checkAuthRoute(window.location.pathname));
-  private readonly _isOnboardingRoute = signal(this.checkOnboardingRoute(window.location.pathname));
+  private readonly _isDisplayRoute = signal(this.checkDisplayRoute(currentPath()));
+  private readonly _isAccountRoute = signal(this.checkAccountRoute(currentPath()));
+  private readonly _isAuthRoute = signal(this.checkAuthRoute(currentPath()));
+  private readonly _isOnboardingRoute = signal(this.checkOnboardingRoute(currentPath()));
 
   readonly sidebarCollapsed = this._sidebarCollapsed.asReadonly();
   readonly mobileMenuOpen = this._mobileMenuOpen.asReadonly();
