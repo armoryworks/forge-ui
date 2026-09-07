@@ -69,7 +69,7 @@
     "@capacitor/app": "^7.1.2",
     "@capacitor/camera": "^7.0.5",
     "@capacitor/core": "^7.6.8",
-    "@capacitor/device": "^7.0.5",
+    "@capacitor/device": "^8.0.3",
     "@capacitor/haptics": "^7.0.5",
     "@capacitor/ios": "^7.6.8",
     "@capacitor/network": "^7.0.4",
