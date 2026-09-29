@@ -3520,6 +3520,14 @@
         "declined": "Rechazado",
         "unknown": "Desconocido"
       }
+    },
+    "nonEmployee": {
+      "setAction": "Marcar como no empleado",
+      "clearAction": "Marcar como empleado",
+      "confirmTitle": "¿Marcar como no empleado?",
+      "confirmMessage": "La documentación de contratación — W-4, I-9 y retención estatal — dejará de solicitarse y de reclamarse para esta persona, y podrá recibir trabajo asignado sin ella. Utilícelo para cuentas de servicio, contratistas y consultores que no sean sus empleados.\n\nSi SÍ es un empleado, nunca se recopilarán los registros que la ley le obliga a conservar. Puede deshacer esto en cualquier momento; lo ya registrado se conserva.",
+      "confirmAction": "Marcar como no empleado",
+      "updateFailed": "No se pudo cambiar el estado de empleado de este usuario."
     }
   },
   "teamsPanel": {

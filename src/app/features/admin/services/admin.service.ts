@@ -256,6 +256,10 @@ export class AdminService {
     return this.http.post<void>(`${environment.apiUrl}/admin/users/${userId}/reactivate`, {});
   }
 
+  setUserNonEmployee(userId: number, isNonEmployee: boolean): Observable<void> {
+    return this.http.patch<void>(`${environment.apiUrl}/admin/users/${userId}/non-employee`, { isNonEmployee });
+  }
+
   // Scan Identifiers (RFID, NFC, barcode, biometric)
   getScanIdentifiers(userId: number): Observable<ScanIdentifier[]> {
     return this.http.get<ScanIdentifier[]>(`${environment.apiUrl}/admin/users/${userId}/scan-identifiers`);

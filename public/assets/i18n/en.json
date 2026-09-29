@@ -3520,6 +3520,14 @@
         "declined": "Declined",
         "unknown": "Unknown"
       }
+    },
+    "nonEmployee": {
+      "setAction": "Mark as not an employee",
+      "clearAction": "Mark as an employee",
+      "confirmTitle": "Mark as not an employee?",
+      "confirmMessage": "Hiring paperwork — W-4, I-9 and state withholding — will no longer be collected or chased for this person, and they can be assigned work without it. Use this for service accounts, contractors and consultants who are not your employees.\n\nIf this IS an employee, records you are legally required to hold will never be collected. You can undo this at any time; anything already on file is kept.",
+      "confirmAction": "Mark as not an employee",
+      "updateFailed": "Could not change this user's employee status."
     }
   },
   "teamsPanel": {

@@ -89,6 +89,9 @@
               <button *appCap="'CAP-MOBILE-CORE'" class="icon-btn" data-testid="admin-user-add-device" [matTooltip]="'admin.devices.addAction' | translate" matTooltipPosition="above" (click)="deviceUser.set(user); $event.stopPropagation()">
                 <span class="material-icons-outlined">smartphone</span>
               </button>
+              <button class="icon-btn" [class.icon-btn--active]="user.isNonEmployee" data-testid="admin-user-non-employee" [matTooltip]="user.isNonEmployee ? ('admin.nonEmployee.clearAction' | translate) : ('admin.nonEmployee.setAction' | translate)" matTooltipPosition="above" (click)="toggleNonEmployee(user); $event.stopPropagation()">
+                <span class="material-icons-outlined">{{ user.isNonEmployee ? 'badge' : 'work_outline' }}</span>
+              </button>
               <button class="icon-btn" [matTooltip]="user.isActive ? ('admin.deactivate' | translate) : ('admin.activate' | translate)" matTooltipPosition="above" (click)="toggleUserActive(user); $event.stopPropagation()">
                 <span class="material-icons-outlined">{{ user.isActive ? 'person_off' : 'person' }}</span>
               </button>

@@ -588,6 +588,33 @@ export class AdminComponent implements OnInit {
     });
   }
 
+  protected toggleNonEmployee(user: AdminUser): void {
+    const turningOn = !user.isNonEmployee;
+    if (!turningOn) {
+      this.applyNonEmployee(user, false);
+      return;
+    }
+
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '460px',
+      data: {
+        title: this.translate.instant('admin.nonEmployee.confirmTitle'),
+        message: this.translate.instant('admin.nonEmployee.confirmMessage'),
+        confirmLabel: this.translate.instant('admin.nonEmployee.confirmAction'),
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe((confirmed) => {
+      if (confirmed) this.applyNonEmployee(user, true);
+    });
+  }
+
+  private applyNonEmployee(user: AdminUser, value: boolean): void {
+    this.adminService.setUserNonEmployee(user.id, value).subscribe({
+      next: () => this.loadUsers(),
+      error: () => this.error.set(this.translate.instant('admin.nonEmployee.updateFailed')),
+    });
+  }
+
   // ── Scan Identifiers ──
   private loadScanIdentifiers(userId: number): void {
     this.scanIdLoading.set(true);

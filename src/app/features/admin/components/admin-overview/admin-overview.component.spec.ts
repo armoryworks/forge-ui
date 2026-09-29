@@ -95,6 +95,7 @@ function makeUser(overrides: Partial<AdminUser> = {}): AdminUser {
     complianceCompletedItems: 0, complianceTotalItems: 0, missingComplianceItems: [],
     workLocationId: null, workLocationName: null,
     i9Status: null,
+    isNonEmployee: false,
     ...overrides,
   };
 }
