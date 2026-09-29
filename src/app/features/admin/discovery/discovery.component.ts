@@ -311,7 +311,7 @@ export class DiscoveryComponent implements OnInit {
     const q = this.currentQuestion();
     if (!q) return false;
     // Free-text and YesNoWithDetail are optional (the user can submit empty).
-    if (q.type === 'FreeText') return true;
+    if (q.type === 'FreeText' || q.type === 'MultiChoice') return true;
     return this.isAnswered(q.id);
   }
 
