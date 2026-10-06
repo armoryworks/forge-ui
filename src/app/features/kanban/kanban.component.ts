@@ -291,6 +291,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
     this.boardHub.onJobMovedEvent(reloadBoard);
     this.boardHub.onJobUpdatedEvent(reloadBoard);
     this.boardHub.onJobPositionChangedEvent(reloadBoard);
+    this.boardHub.onBoardUpdatedEvent(reloadBoard);
   }
 
   protected onSwimlaneDragStarted(_event: CdkDragStart): void {

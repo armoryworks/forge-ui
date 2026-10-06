@@ -16,6 +16,7 @@ export class BoardHubService {
   private onJobUpdated: ((event: unknown) => void) | null = null;
   private onJobPositionChanged: ((event: unknown) => void) | null = null;
   private onSubtaskChanged: ((event: unknown) => void) | null = null;
+  private onBoardUpdated: ((event: unknown) => void) | null = null;
 
   async connect(): Promise<void> {
     this.connection = this.signalr.getOrCreateConnection('board');
@@ -99,6 +100,10 @@ export class BoardHubService {
     this.onSubtaskChanged = callback;
   }
 
+  onBoardUpdatedEvent(callback: (event: unknown) => void): void {
+    this.onBoardUpdated = callback;
+  }
+
   private registerHandlers(): void {
     if (!this.connection) return;
 
@@ -110,6 +115,7 @@ export class BoardHubService {
     this.connection.on('jobUpdated', (event) => this.onJobUpdated?.(event));
     this.connection.on('jobPositionChanged', (event) => this.onJobPositionChanged?.(event));
     this.connection.on('subtaskChanged', (event) => this.onSubtaskChanged?.(event));
+    this.connection.on('boardUpdated', (event) => this.onBoardUpdated?.(event));
   }
 
   private unregisterHandlers(): void {
@@ -119,6 +125,7 @@ export class BoardHubService {
     this.connection.off('jobUpdated');
     this.connection.off('jobPositionChanged');
     this.connection.off('subtaskChanged');
+    this.connection.off('boardUpdated');
   }
 
   private async rejoinGroups(): Promise<void> {
