@@ -323,7 +323,7 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     c.selectJob({ id: 9, jobNumber: 'JOB-0009' });
 
     expect(c.actionFeedback()).toEqual({
-      workerId: 5, success: false, message: 'shopFloor.assignFailed', detail: 'Only supervisors can assign.',
+      workerId: 5, success: false, message: 'shopFloor.display.assignFailed {"jobNumber":"JOB-0009"}', detail: 'Only supervisors can assign.',
     });
     vi.advanceTimersByTime(2_000);
     expect(c.phase()).toBe('main');

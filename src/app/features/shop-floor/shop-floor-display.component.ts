@@ -605,7 +605,8 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
       error: (err: HttpErrorResponse) => {
         this.processing.set(null);
         this.clearPhaseTimeout();
-        this.showActionFeedback(worker.userId, false, this.translate.instant('shopFloor.assignFailed'), this.serverReason(err));
+        this.showActionFeedback(worker.userId, false,
+          this.translate.instant('shopFloor.display.assignFailed', { jobNumber: job.jobNumber }), this.serverReason(err));
         this.scheduleTransition(() => this.ephemeralLogout(), FEEDBACK_VISIBLE_MS);
       },
     });
