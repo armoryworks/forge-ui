@@ -1,10 +1,12 @@
 import { TestBed } from '@angular/core/testing';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { Subject } from 'rxjs';
 
+import { CapabilityDisabledError } from '../../../shared/errors/capability-disabled.error';
 import { ScanResolveResult } from '../../../shared/models/mobile-api.model';
-import { MobileApiService } from '../../../shared/services/mobile-api.service';
 import { ScannerService } from '../../../shared/services/scanner.service';
 import { MobileScanComponent } from './mobile-scan.component';
 
@@ -14,22 +16,24 @@ interface ScanInternals {
   lookupError: () => string | null;
   resolving: () => boolean;
   submitManual(): void;
+  resumeScanning(): void;
 }
 
 describe('MobileScanComponent', () => {
   const navigate = vi.fn();
-  const resolveScan = vi.fn();
+  const post = vi.fn();
   let response: Subject<ScanResolveResult>;
   let component: ScanInternals;
 
   beforeEach(() => {
     vi.clearAllMocks();
     response = new Subject<ScanResolveResult>();
-    resolveScan.mockReturnValue(response);
+    post.mockReturnValue(response);
     TestBed.configureTestingModule({
       providers: [
         { provide: Router, useValue: { navigate } },
-        { provide: MobileApiService, useValue: { resolveScan } },
+        { provide: HttpClient, useValue: { post } },
+        provideTranslateService(),
         { provide: ScannerService, useValue: { setContext: vi.fn() } },
       ],
     });
@@ -41,9 +45,9 @@ describe('MobileScanComponent', () => {
     component.submitManual();
   };
 
-  it('asks the server to resolve the trimmed code', () => {
+  it('asks the default-on scanner route to resolve the trimmed code', () => {
     submit('  job-1042 ');
-    expect(resolveScan).toHaveBeenCalledWith('job-1042');
+    expect(post).toHaveBeenCalledWith('/api/v1/scanner/resolve', { code: 'job-1042' });
     expect(component.resolving()).toBe(true);
   });
 
@@ -73,11 +77,40 @@ describe('MobileScanComponent', () => {
     expect(component.lastResult()?.kind).toBe('unknown');
   });
 
-  it('reports a failed lookup', () => {
+  it('reports a failed lookup as a connection problem', () => {
     submit('JOB-1');
     response.error(new Error('offline'));
 
-    expect(component.lookupError()).not.toBeNull();
+    expect(component.lookupError()).toBe('mobileWeb.scan.lookupFailed');
     expect(component.resolving()).toBe(false);
+  });
+
+  it('says scanning is turned off when the capability gate refuses the lookup', () => {
+    submit('JOB-1');
+    response.error(new CapabilityDisabledError('CAP-MFG-SHOPFLOOR', 'This capability is disabled for this installation.'));
+
+    expect(component.lookupError()).toBe('mobileWeb.scan.disabled');
+  });
+
+  it('offers Scan Again on a failed lookup and clears the error with it', async () => {
+    const fixture = TestBed.createComponent(MobileScanComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const rendered = fixture.componentInstance as unknown as ScanInternals;
+
+    rendered.manualValue.set('JOB-1');
+    rendered.submitManual();
+    response.error(new Error('offline'));
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+    const again = root.querySelector<HTMLButtonElement>('[data-testid="scan-error-again-btn"]');
+    expect(again).not.toBeNull();
+
+    again!.click();
+    fixture.detectChanges();
+
+    expect(rendered.lookupError()).toBeNull();
+    expect(root.querySelector('[data-testid="scan-lookup-error"]')).toBeNull();
   });
 });

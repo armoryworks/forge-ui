@@ -3,6 +3,7 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { HttpClient } from '@angular/common/http';
 
 import { AuthService } from '../../shared/services/auth.service';
+import { CapabilityService } from '../../shared/services/capability.service';
 import { MobileClockStateService } from './services/mobile-clock-state.service';
 
 interface MobileTab {
@@ -10,6 +11,7 @@ interface MobileTab {
   label: string;
   icon: string;
   roles?: string[];
+  capability?: string;
   requiresClockedIn?: boolean;
   isScan?: boolean;
 }
@@ -25,6 +27,7 @@ interface MobileTab {
 export class MobileLayoutComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly http = inject(HttpClient);
+  private readonly capabilities = inject(CapabilityService);
   protected readonly router = inject(Router);
   protected readonly clockState = inject(MobileClockStateService);
 
@@ -35,7 +38,7 @@ export class MobileLayoutComponent implements OnInit {
   private readonly allTabs: MobileTab[] = [
     { path: '/m/chat', label: 'Chat', icon: 'chat' },
     { path: '/m/jobs', label: 'My Jobs', icon: 'work', requiresClockedIn: true },
-    { path: '/m/scan', label: 'Scan', icon: 'qr_code_scanner', isScan: true, requiresClockedIn: true },
+    { path: '/m/scan', label: 'Scan', icon: 'qr_code_scanner', isScan: true, requiresClockedIn: true, capability: 'CAP-MFG-SHOPFLOOR' },
     { path: '/m/clock', label: 'Clock', icon: 'schedule' },
     { path: '/m/account', label: 'Account', icon: 'person' },
   ];
@@ -45,6 +48,7 @@ export class MobileLayoutComponent implements OnInit {
     if (!user) return [];
 
     return this.allTabs.filter(tab => {
+      if (tab.capability && !this.capabilities.isEnabled(tab.capability, true)) return false;
       if (!tab.roles) return true;
       return tab.roles.some(r => user.roles?.includes(r));
     });

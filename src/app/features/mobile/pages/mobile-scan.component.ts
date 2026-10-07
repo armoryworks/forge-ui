@@ -8,24 +8,27 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Html5Qrcode, Html5QrcodeScannerState } from 'html5-qrcode'; // camera scanner
 
+import { isCapabilityDisabledError } from '../../../shared/errors/capability-disabled.error';
 import { ScanResolveResult } from '../../../shared/models/mobile-api.model';
-import { MobileApiService } from '../../../shared/services/mobile-api.service';
 import { ScannerService } from '../../../shared/services/scanner.service';
 
 @Component({
   selector: 'app-mobile-scan',
   standalone: true,
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './mobile-scan.component.html',
   styleUrl: './mobile-scan.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MobileScanComponent implements AfterViewInit, OnDestroy {
   private readonly router = inject(Router);
-  private readonly mobileApi = inject(MobileApiService);
+  private readonly http = inject(HttpClient);
+  private readonly translate = inject(TranslateService);
   private readonly scanner = inject(ScannerService);
 
   private html5Qrcode: Html5Qrcode | null = null;
@@ -128,7 +131,7 @@ export class MobileScanComponent implements AfterViewInit, OnDestroy {
     this.resolving.set(true);
     this.lookupError.set(null);
     this.lastResult.set(null);
-    this.mobileApi.resolveScan(code).subscribe({
+    this.http.post<ScanResolveResult>('/api/v1/scanner/resolve', { code }).subscribe({
       next: (result) => {
         this.resolving.set(false);
         if (result.kind === 'job' && result.id !== null) {
@@ -137,9 +140,11 @@ export class MobileScanComponent implements AfterViewInit, OnDestroy {
         }
         this.lastResult.set(result);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.resolving.set(false);
-        this.lookupError.set('Could not look that code up. Check your connection and try again.');
+        this.lookupError.set(this.translate.instant(
+          isCapabilityDisabledError(err) ? 'mobileWeb.scan.disabled' : 'mobileWeb.scan.lookupFailed',
+        ));
       },
     });
   }

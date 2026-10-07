@@ -9871,5 +9871,14 @@
       "confirmLabel": "Type APPLY to accept these changes and continue.",
       "approveAction": "Approve and continue"
     }
+  },
+  "mobileWeb": {
+    "scan": {
+      "resolving": "Looking up code...",
+      "noMatch": "Nothing in Forge matches that code. Check the label or type it in.",
+      "lookupFailed": "Could not look that code up. Check your connection and try again.",
+      "disabled": "Scanning is turned off for this shop. Ask an admin to turn on shop-floor execution.",
+      "scanAgain": "Scan Again"
+    }
   }
 }

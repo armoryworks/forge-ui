@@ -65,7 +65,7 @@
       <div class="scan-result__header">
         <span class="material-icons-outlined scan-result__type-icon spin">sync</span>
         <div class="scan-result__info">
-          <span class="scan-result__label">Looking up code...</span>
+          <span class="scan-result__label">{{ 'mobileWeb.scan.resolving' | translate }}</span>
         </div>
       </div>
     </div>
@@ -89,7 +89,7 @@
         </span>
         <div class="scan-result__info">
           @if (result.kind === 'unknown') {
-            <span class="scan-result__label" data-testid="scan-no-match">Nothing in Forge matches that code. Check the label or type it in.</span>
+            <span class="scan-result__label" data-testid="scan-no-match">{{ 'mobileWeb.scan.noMatch' | translate }}</span>
           } @else {
             <span class="scan-result__label">{{ result.label }}</span>
             @if (result.subtitle) {
@@ -100,9 +100,9 @@
         </div>
       </div>
       <div class="scan-result__actions">
-        <button class="action-btn" (click)="resumeScanning()" aria-label="Scan again" data-testid="scan-again-btn">
+        <button class="action-btn" (click)="resumeScanning()" [attr.aria-label]="'mobileWeb.scan.scanAgain' | translate" data-testid="scan-again-btn">
           <span class="material-icons-outlined">refresh</span>
-          Scan Again
+          {{ 'mobileWeb.scan.scanAgain' | translate }}
         </button>
       </div>
     </div>
@@ -112,6 +112,12 @@
     <div class="scan-error" role="alert" data-testid="scan-lookup-error">
       <span class="material-icons-outlined">warning</span>
       {{ message }}
+    </div>
+    <div class="scan-result__actions">
+      <button class="action-btn" (click)="resumeScanning()" [attr.aria-label]="'mobileWeb.scan.scanAgain' | translate" data-testid="scan-error-again-btn">
+        <span class="material-icons-outlined">refresh</span>
+        {{ 'mobileWeb.scan.scanAgain' | translate }}
+      </button>
     </div>
   }
 
