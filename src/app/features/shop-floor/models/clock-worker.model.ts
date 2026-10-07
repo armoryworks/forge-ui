@@ -24,4 +24,6 @@ export interface ClockWorker {
   statusSince: string | null;
   assignments: WorkerAssignment[];
   role: string;
+  openFromPriorShift?: boolean;
+  openSince?: string | null;
 }

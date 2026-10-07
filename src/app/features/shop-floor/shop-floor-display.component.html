@@ -1,5 +1,5 @@
 @if (isUnpaired()) {
-  <app-kiosk-setup (configured)="onTerminalConfigured()" />
+  <app-kiosk-setup (configured)="onTerminalConfigured($event)" />
 } @else if (error()) {
   <div class="sf-error">
     <span class="material-icons-outlined sf-error__icon">error_outline</span>
@@ -9,59 +9,72 @@
   <app-training-mode-banner [visible]="previewMode" />
   <app-kiosk-session-bar />
   <header class="sf-header">
-    <h1 class="sf-header__title">Shop Floor</h1>
+    <div class="sf-header__identity">
+      <h1 class="sf-header__title">{{ 'shopFloor.title' | translate }}</h1>
+      @if (terminal(); as t) {
+        <span class="sf-header__terminal" data-testid="sf-terminal-name">{{ t.name }} · {{ t.teamName }}</span>
+      }
+    </div>
     <app-kiosk-search-bar />
     <div class="sf-header__stats">
       <div class="sf-stat sf-stat--success">
         <span class="sf-stat__value">{{ workersIn().length }}</span>
-        <span class="sf-stat__label">Working</span>
+        <span class="sf-stat__label">{{ 'shopFloor.working' | translate }}</span>
       </div>
       <div class="sf-stat sf-stat--warning">
         <span class="sf-stat__value">{{ workersOnBreak().length }}</span>
-        <span class="sf-stat__label">On Break</span>
+        <span class="sf-stat__label">{{ 'shopFloor.onBreak' | translate }}</span>
       </div>
       <div class="sf-stat">
         <span class="sf-stat__value">{{ unassignedJobs().length }}</span>
-        <span class="sf-stat__label">Unassigned</span>
+        <span class="sf-stat__label">{{ 'shopFloor.unassigned' | translate }}</span>
       </div>
       <div class="sf-stat sf-stat--accent">
         <span class="sf-stat__value">{{ completedToday() }}</span>
-        <span class="sf-stat__label">Done Today</span>
+        <span class="sf-stat__label">{{ 'shopFloor.doneToday' | translate }}</span>
       </div>
       @if (maintenanceAlerts() > 0) {
         <div class="sf-stat sf-stat--error">
           <span class="sf-stat__value">{{ maintenanceAlerts() }}</span>
-          <span class="sf-stat__label">Alerts</span>
+          <span class="sf-stat__label">{{ 'shopFloor.maintenanceAlerts' | translate }}</span>
         </div>
       }
     </div>
     <div class="sf-header__controls">
+      @if (fullscreenSupported) {
+        <button class="sf-header__control-btn" (click)="enterFullscreen()"
+                [attr.aria-label]="'shopFloor.fullscreen' | translate"
+                [title]="'shopFloor.fullscreen' | translate"
+                data-testid="sf-fullscreen">
+          <span class="material-icons-outlined">fullscreen</span>
+        </button>
+      }
       <button class="sf-header__control-btn" (click)="decreaseFontSize()"
-              [disabled]="fontSizeIndex() === 0" aria-label="Decrease font size">
+              [disabled]="fontSizeIndex() === 0" [attr.aria-label]="'shopFloor.display.decreaseFontSize' | translate">
         <span class="material-icons-outlined">text_decrease</span>
       </button>
       <span class="sf-header__font-label">{{ fontSize() }}px</span>
       <button class="sf-header__control-btn" (click)="increaseFontSize()"
-              [disabled]="fontSizeIndex() === 4" aria-label="Increase font size">
+              [disabled]="fontSizeIndex() === maxFontSizeIndex" [attr.aria-label]="'shopFloor.display.increaseFontSize' | translate">
         <span class="material-icons-outlined">text_increase</span>
       </button>
       <button class="sf-header__control-btn" (click)="showDailyLog.set(!showDailyLog())"
               [class.sf-header__control-btn--active]="showDailyLog()"
-              aria-label="Toggle scan log">
+              [attr.aria-label]="'shopFloor.dailyLog.title' | translate">
         <span class="material-icons-outlined">receipt_long</span>
       </button>
       <button class="sf-header__control-btn" (click)="showDevicesPanel.set(!showDevicesPanel())"
               [class.sf-header__control-btn--active]="showDevicesPanel()"
-              aria-label="Toggle scanner devices panel">
+              [attr.aria-label]="'shopFloor.devices' | translate">
         <span class="material-icons-outlined">devices</span>
       </button>
       <button class="sf-header__control-btn" (click)="toggleUndoPanel()"
               [class.sf-header__control-btn--active]="undoPanelOpen()"
-              aria-label="Toggle undo panel">
+              [attr.aria-label]="'shopFloor.undoList.title' | translate">
         <span class="material-icons-outlined">undo</span>
       </button>
       <button class="sf-header__control-btn" (click)="toggleTheme()"
-              [attr.aria-label]="theme() === 'light' ? 'Switch to dark theme' : 'Switch to light theme'">
+              [attr.aria-label]="'header.toggleTheme' | translate">
         <span class="material-icons-outlined">{{ theme() === 'light' ? 'dark_mode' : 'light_mode' }}</span>
       </button>
       <button class="sf-header__control-btn sf-header__control-btn--exit" (click)="exitKiosk()"
@@ -79,7 +92,7 @@
     @if (workers().length > 0) {
       <div class="sf-cta">
         <span class="material-icons-outlined">contactless</span>
-        Scan your badge and enter your PIN, or tap your name and enter your password
+        {{ 'shopFloor.display.signInPrompt' | translate }}
       </div>
 
       <div class="sf-grid">
@@ -88,13 +101,9 @@
                [class.sf-card--in]="clockTypes.isWorking(worker.status)"
                [class.sf-card--break]="clockTypes.isOnBreakOrLunch(worker.status)"
                [class.sf-card--out]="clockTypes.isClockedOut(worker.status)"
-               [class.sf-card--drop-target]="dropTargetUserId() === worker.userId"
                [class.sf-card--feedback-success]="feedbackSuccess(worker.userId)"
                [class.sf-card--feedback-fail]="hasFeedback(worker.userId) && !feedbackSuccess(worker.userId)"
                (click)="selectWorker(worker)"
-               (dragover)="onDragOverCard($event, worker)"
-               (dragleave)="onDragLeaveCard()"
-               (drop)="onDropCard($event, worker)"
                [attr.aria-label]="worker.name + ' - ' + clockTypes.getLabel(worker.status)"
                [attr.data-testid]="'sf-worker-' + worker.userId">
 
@@ -112,6 +121,11 @@
                     <span class="sf-card__time">{{ workerTimes()[worker.userId] }}</span>
                   }
                 </div>
+                @if (worker.openFromPriorShift && worker.openSince) {
+                  <span class="sf-card__prior-shift" [attr.data-testid]="'sf-prior-shift-' + worker.userId">
+                    {{ 'shopFloor.stillClockedInSince' | translate: { date: (worker.openSince | date: 'short') } }}
+                  </span>
+                }
               </div>
             </div>
 
@@ -133,7 +147,7 @@
                   }
                 }
                 @if (worker.assignments.length > maxVisibleJobs) {
-                  <span class="sf-card__job-overflow">+{{ worker.assignments.length - maxVisibleJobs }} more</span>
+                  <span class="sf-card__job-overflow">{{ 'dashboard.moreEntries' | translate: { count: worker.assignments.length - maxVisibleJobs } }}</span>
                 }
               </div>
             }
@@ -143,7 +157,7 @@
     } @else {
       <div class="sf-empty">
         <span class="material-icons-outlined sf-empty__icon">person_off</span>
-        <p>No employees found</p>
+        <p>{{ 'shopFloor.noEmployees' | translate }}</p>
       </div>
     }
 
@@ -152,18 +166,14 @@
       <section class="sf-section">
         <div class="sf-section__header">
           <span class="material-icons-outlined">assignment_late</span>
-          <h2>Unassigned Jobs</h2>
+          <h2>{{ 'shopFloor.unassignedWorkOrders' | translate }}</h2>
           <span class="sf-section__count">{{ unassignedJobs().length }}</span>
         </div>
 
         <div class="sf-unassigned-grid">
           @for (job of unassignedJobs(); track job.id) {
             <div class="sf-unassigned-card"
-                 [class.sf-unassigned-card--overdue]="job.isOverdue"
-                 [class.sf-unassigned-card--dragging]="draggingJobId() === job.id"
-                 draggable="true"
-                 (dragstart)="onDragStart($event, job)"
-                 (dragend)="onDragEnd()">
+                 [class.sf-unassigned-card--overdue]="job.isOverdue">
               <div class="sf-unassigned-card__dot" [style.background]="job.stageColor"></div>
               <div class="sf-unassigned-card__main">
                 <span class="sf-unassigned-card__number">{{ job.jobNumber }}</span>
@@ -173,7 +183,6 @@
               <span class="sf-unassigned-card__priority" [class]="priorityClass(job.priorityName)">
                 {{ job.priorityName }}
               </span>
-              <span class="material-icons-outlined sf-unassigned-card__drag-handle">drag_indicator</span>
             </div>
           }
         </div>
@@ -185,7 +194,7 @@
       <section class="sf-section">
         <div class="sf-section__header">
           <span class="material-icons-outlined">event</span>
-          <h2>Upcoming Events</h2>
+          <h2>{{ 'shopFloor.display.upcomingEvents' | translate }}</h2>
           <span class="sf-section__count">{{ upcomingEvents().length }}</span>
         </div>
 
@@ -208,7 +217,7 @@
                 }
               </div>
               @if (event.isRequired) {
-                <span class="sf-event-card__badge">Required</span>
+                <span class="sf-event-card__badge">{{ 'common.required' | translate }}</span>
               }
             </div>
           }
@@ -221,7 +230,7 @@
   <div class="sf-action-bar">
     <div class="sf-action-bar__hint">
       <span class="material-icons-outlined">contactless</span>
-      Scan your badge or RFID to clock in
+      {{ 'shopFloor.display.scanToClockIn' | translate }}
     </div>
     @if (scanFeedback(); as feedback) {
       <span class="sf-action-bar__feedback">{{ feedback }}</span>
@@ -230,10 +239,10 @@
 
   <!-- ─── PIN Overlay ─── -->
   @if (phase() === 'pin') {
-    <div class="sf-overlay" role="button" tabindex="0" aria-label="Cancel PIN entry" (click)="cancelPin()" (keydown.escape)="cancelPin()">
+    <div class="sf-overlay" role="button" tabindex="0" [attr.aria-label]="'common.cancel' | translate" (click)="cancelPin()" (keydown.escape)="cancelPin()">
       <div class="sf-auth-card" role="dialog" aria-modal="true" tabindex="-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
         <span class="material-icons-outlined sf-auth-card__icon">lock</span>
-        <h2 class="sf-auth-card__title">{{ isPasswordAuth() ? 'Enter Password' : 'Enter PIN' }}</h2>
+        <h2 class="sf-auth-card__title">{{ (isPasswordAuth() ? 'shopFloor.enterPassword' : 'shopFloor.enterPin') | translate }}</h2>
 
         @if (selectedWorker(); as worker) {
           <div class="sf-auth-card__worker">
@@ -255,9 +264,9 @@
           </div>
         }
 
-        <div class="sf-auth-card__field" role="group" aria-label="PIN entry" tabindex="-1" (keydown.enter)="onPinSubmit()">
-          <app-input [label]="isPasswordAuth() ? 'Password' : 'PIN'" type="password" [formControl]="pinControl"
-            [placeholder]="isPasswordAuth() ? 'Enter your password' : 'Enter your PIN'" [maxlength]="isPasswordAuth() ? 128 : 8" data-testid="sf-pin-input" />
+        <div class="sf-auth-card__field" role="group" [attr.aria-label]="(isPasswordAuth() ? 'auth.password' : 'shopFloor.pin') | translate" tabindex="-1" (keydown.enter)="onPinSubmit()">
+          <app-input [label]="(isPasswordAuth() ? 'auth.password' : 'shopFloor.pin') | translate" type="password" [formControl]="pinControl"
+            [placeholder]="(isPasswordAuth() ? 'shopFloor.enterPasswordPlaceholder' : 'shopFloor.enterPinPlaceholder') | translate" [maxlength]="isPasswordAuth() ? 128 : 8" data-testid="sf-pin-input" />
         </div>
 
         @if (!isPasswordAuth()) {
@@ -270,21 +279,20 @@
 
         <div class="sf-auth-card__actions">
           <button class="action-btn" (click)="cancelPin()" [disabled]="authenticating()"
-                  aria-label="Cancel" data-testid="sf-pin-cancel">
+                  data-testid="sf-pin-cancel">
             <span class="material-icons-outlined">arrow_back</span>
-            Cancel
+            {{ 'common.cancel' | translate }}
           </button>
           <button class="action-btn action-btn--primary"
             [disabled]="authenticating() || !pinControl.value"
             (click)="onPinSubmit()"
-            [attr.aria-label]="isPasswordAuth() ? 'Submit Password' : 'Submit PIN'"
             data-testid="sf-pin-submit">
             @if (authenticating()) {
               <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
-              Verifying...
+              {{ 'shopFloor.authenticating' | translate }}
             } @else {
               <span class="material-icons-outlined">login</span>
-              Submit
+              {{ 'shopFloor.submit' | translate }}
             }
           </button>
         </div>
@@ -310,21 +318,26 @@
             </div>
           </div>
 
-          @if (hasFeedback(worker.userId)) {
+          @if (feedbackFor(worker.userId); as fb) {
             <div class="sf-actions-card__feedback"
-                 [class.sf-actions-card__feedback--success]="feedbackSuccess(worker.userId)"
-                 [class.sf-actions-card__feedback--fail]="!feedbackSuccess(worker.userId)">
-              <span class="material-icons-outlined">
-                {{ feedbackSuccess(worker.userId) ? 'check_circle' : 'error' }}
-              </span>
-              {{ feedbackSuccess(worker.userId) ? 'Done!' : 'Action failed. Try again.' }}
+                 [class.sf-actions-card__feedback--success]="fb.success"
+                 [class.sf-actions-card__feedback--fail]="!fb.success"
+                 role="status" aria-live="assertive"
+                 data-testid="sf-action-feedback">
+              <span class="material-icons-outlined">{{ fb.success ? 'check_circle' : 'error' }}</span>
+              <div class="sf-actions-card__feedback-text">
+                <span>{{ fb.message }}</span>
+                @if (fb.detail) {
+                  <span class="sf-actions-card__feedback-detail">{{ fb.detail }}</span>
+                }
+              </div>
             </div>
           }
 
           <!-- Assigned Jobs -->
           @if (worker.assignments.length > 0) {
             <div class="sf-actions-card__jobs">
-              <h3 class="sf-actions-card__section-title">YOUR JOBS</h3>
+              <h3 class="sf-actions-card__section-title">{{ 'shopFloor.yourWorkOrders' | translate }}</h3>
               @for (assignment of worker.assignments; track assignment.jobId) {
                 <div class="sf-actions-card__job"
                      [class.sf-actions-card__job--active]="assignment.hasActiveTimer">
@@ -338,42 +351,44 @@
                     @if (assignment.hasActiveTimer) {
                       <button class="sf-action-btn sf-action-btn--stop-timer"
                               [disabled]="processing() !== null"
-                              (click)="stopJobTimer()"
-                              aria-label="Stop timer on {{ assignment.jobNumber }}"
+                              (click)="stopJobTimer(assignment)"
+                              [attr.aria-label]="'shopFloor.display.stopTimerOn' | translate: { jobNumber: assignment.jobNumber }"
                               data-testid="sf-stop-timer">
                         @if (processing() === 'timer-stop') {
                           <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
                         } @else {
                           <span class="material-icons-outlined">stop_circle</span>
                         }
-                        <span class="sf-action-btn__label">Stop</span>
+                        <span class="sf-action-btn__label">{{ 'shopFloor.jobFlow.stopTimer' | translate }}</span>
                       </button>
                     } @else {
                       <button class="sf-action-btn sf-action-btn--start-timer"
                               [disabled]="processing() !== null"
                               (click)="startJobTimer(assignment)"
-                              aria-label="Start timer on {{ assignment.jobNumber }}"
+                              [attr.aria-label]="'shopFloor.display.startTimerOn' | translate: { jobNumber: assignment.jobNumber }"
                               data-testid="sf-start-timer">
                         @if (processing() === 'timer-start-' + assignment.jobId) {
                           <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
                         } @else {
                           <span class="material-icons-outlined">play_circle</span>
                         }
-                        <span class="sf-action-btn__label">Start</span>
+                        <span class="sf-action-btn__label">{{ 'shopFloor.jobFlow.startTimer' | translate }}</span>
                       </button>
                     }
-                    <button class="sf-action-btn sf-action-btn--complete"
-                            [disabled]="processing() !== null"
-                            (click)="completeJob(assignment)"
-                            aria-label="Mark {{ assignment.jobNumber }} complete"
-                            data-testid="sf-complete-job">
-                      @if (processing() === 'complete-' + assignment.jobId) {
-                        <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
-                      } @else {
-                        <span class="material-icons-outlined">check_circle</span>
-                      }
-                      <span class="sf-action-btn__label">Done</span>
-                    </button>
+                    @if (canSupervise()) {
+                      <button class="sf-action-btn sf-action-btn--complete"
+                              [disabled]="processing() !== null"
+                              (click)="confirmNextStatus(assignment)"
+                              [attr.aria-label]="'shopFloor.confirmNextStatus' | translate: { jobNumber: assignment.jobNumber }"
+                              data-testid="sf-complete-job">
+                        @if (processing() === 'complete-' + assignment.jobId) {
+                          <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
+                        } @else {
+                          <span class="material-icons-outlined">skip_next</span>
+                        }
+                        <span class="sf-action-btn__label">{{ 'shopFloor.nextStatus' | translate }}</span>
+                      </button>
+                    }
                   </div>
                 </div>
               }
@@ -399,7 +414,7 @@
             } @empty {
               <div class="sf-actions-card__empty">
                 <span class="material-icons-outlined">info</span>
-                <span>No clock actions available. Ask an admin to check the Clock Event Type reference data.</span>
+                <span>{{ 'shopFloor.display.noClockActions' | translate }}</span>
               </div>
             }
           </div>
@@ -411,29 +426,27 @@
                 <button class="sf-action-btn sf-action-btn--receive"
                         [disabled]="processing() !== null"
                         (click)="enterReceiving()"
-                        aria-label="Receive goods"
                         data-testid="sf-receive-btn">
                   <span class="material-icons-outlined">move_to_inbox</span>
-                  <span class="sf-action-btn__label">Receive Goods</span>
+                  <span class="sf-action-btn__label">{{ 'inventory.receiveGoods' | translate }}</span>
                 </button>
               }
               @if (canShip()) {
                 <button class="sf-action-btn sf-action-btn--ship"
                         [disabled]="processing() !== null"
                         (click)="enterShipping()"
-                        aria-label="Ship goods"
                         data-testid="sf-ship-btn">
                   <span class="material-icons-outlined">local_shipping</span>
-                  <span class="sf-action-btn__label">Ship Goods</span>
+                  <span class="sf-action-btn__label">{{ 'shopFloor.display.shipGoods' | translate }}</span>
                 </button>
               }
             </div>
           }
 
           <button class="action-btn sf-actions-card__cancel" (click)="cancelActions()"
-                  aria-label="Cancel" data-testid="sf-cancel-btn">
+                  data-testid="sf-cancel-btn">
             <span class="material-icons-outlined">arrow_back</span>
-            Cancel
+            {{ 'common.cancel' | translate }}
           </button>
         }
       </div>
@@ -446,13 +459,31 @@
       <div class="sf-job-select-card">
         <div class="sf-job-select-card__header">
           <span class="material-icons-outlined">assignment</span>
-          <h2>Pick a Job</h2>
+          <h2>{{ 'shopFloor.pickWorkOrder' | translate }}</h2>
           @if (jobSelectWorker(); as w) {
-            <span class="sf-job-select-card__worker">for {{ w.name }}</span>
+            <span class="sf-job-select-card__worker">{{ w.name }}</span>
           }
         </div>
 
-        <p class="sf-job-select-card__hint">Select an unassigned job to work on, or skip to clock in without one.</p>
+        <p class="sf-job-select-card__hint">{{ 'shopFloor.pickWorkOrderHint' | translate }}</p>
+
+        @if (jobSelectWorker(); as w) {
+          @if (feedbackFor(w.userId); as fb) {
+            <div class="sf-actions-card__feedback"
+                 [class.sf-actions-card__feedback--success]="fb.success"
+                 [class.sf-actions-card__feedback--fail]="!fb.success"
+                 role="status" aria-live="assertive"
+                 data-testid="sf-assign-feedback">
+              <span class="material-icons-outlined">{{ fb.success ? 'check_circle' : 'error' }}</span>
+              <div class="sf-actions-card__feedback-text">
+                <span>{{ fb.message }}</span>
+                @if (fb.detail) {
+                  <span class="sf-actions-card__feedback-detail">{{ fb.detail }}</span>
+                }
+              </div>
+            </div>
+          }
+        }
 
         <div class="sf-job-select-card__list">
           @for (job of unassignedJobs(); track job.id) {
@@ -460,7 +491,7 @@
                     [class.sf-job-select-card__job--overdue]="job.isOverdue"
                     [disabled]="processing() !== null"
                     (click)="selectJob(job)"
-                    [attr.aria-label]="'Assign ' + job.jobNumber + ' - ' + job.title">
+                    [attr.aria-label]="job.jobNumber + ' - ' + job.title">
               <div class="sf-job-select-card__job-dot" [style.background]="job.stageColor"></div>
               <div class="sf-job-select-card__job-main">
                 <span class="sf-job-select-card__job-number">{{ job.jobNumber }}</span>
@@ -477,15 +508,14 @@
           } @empty {
             <div class="sf-empty">
               <span class="material-icons-outlined sf-empty__icon">work_off</span>
-              <p>No unassigned jobs available</p>
+              <p>{{ 'shopFloor.noUnassignedWorkOrders' | translate }}</p>
             </div>
           }
         </div>
 
-        <button class="action-btn sf-job-select-card__skip" (click)="skipJobSelect()"
-                aria-label="Skip job selection">
+        <button class="action-btn sf-job-select-card__skip" (click)="skipJobSelect()">
           <span class="material-icons-outlined">skip_next</span>
-          Skip
+          {{ 'shopFloor.display.skip' | translate }}
         </button>
       </div>
     </div>
@@ -497,27 +527,26 @@
       <div class="sf-receiving-card">
         <div class="sf-receiving-card__header">
           <span class="material-icons-outlined">local_shipping</span>
-          <h2>Receive Goods</h2>
+          <h2>{{ 'inventory.receiveGoods' | translate }}</h2>
         </div>
 
         @if (!selectedPO()) {
           <!-- PO Selection -->
-          <p class="sf-receiving-card__hint">Select a purchase order to receive items from.</p>
+          <p class="sf-receiving-card__hint">{{ 'shopFloor.display.selectPoHint' | translate }}</p>
           <div class="sf-receiving-card__po-list">
             @for (po of receivablePOs(); track po.id) {
               <button class="sf-receiving-card__po-item"
-                      (click)="selectPOForReceiving(po)"
-                      attr.aria-label="Select PO {{ po.poNumber }}">
+                      (click)="selectPOForReceiving(po)">
                 <div class="sf-receiving-card__po-info">
                   <span class="sf-receiving-card__po-number">{{ po.poNumber }}</span>
                   <span class="sf-receiving-card__po-vendor">{{ po.vendorName }}</span>
                 </div>
-                <span class="sf-receiving-card__po-lines">{{ po.lines.length }} lines</span>
+                <span class="sf-receiving-card__po-lines">{{ 'shopFloor.display.lineCount' | translate: { count: po.lines.length } }}</span>
               </button>
             } @empty {
               <div class="sf-empty">
                 <span class="material-icons-outlined sf-empty__icon">inventory</span>
-                <p>No open purchase orders to receive</p>
+                <p>{{ 'shopFloor.display.noOpenPos' | translate }}</p>
               </div>
             }
           </div>
@@ -535,13 +564,13 @@
                   <span class="sf-receiving-card__line-desc">{{ item.line.description }}</span>
                 </div>
                 <div class="sf-receiving-card__line-qty">
-                  <span class="sf-receiving-card__line-remaining">{{ item.line.remainingQuantity }} remaining</span>
+                  <span class="sf-receiving-card__line-remaining">{{ 'shopFloor.display.remainingQty' | translate: { quantity: item.line.remainingQuantity } }}</span>
                   <div class="sf-receiving-card__qty-input">
                     <button class="sf-qty-btn" (click)="updateReceiveQty(item.line.id, item.receiveQty - 1)"
-                            [disabled]="item.receiveQty <= 0" aria-label="Decrease quantity">−</button>
+                            [disabled]="item.receiveQty <= 0" [attr.aria-label]="'shopFloor.display.decreaseQty' | translate">−</button>
                     <span class="sf-receiving-card__qty-value">{{ item.receiveQty }}</span>
                     <button class="sf-qty-btn" (click)="updateReceiveQty(item.line.id, item.receiveQty + 1)"
-                            [disabled]="item.receiveQty >= item.line.remainingQuantity" aria-label="Increase quantity">+</button>
+                            [disabled]="item.receiveQty >= item.line.remainingQuantity" [attr.aria-label]="'shopFloor.display.increaseQty' | translate">+</button>
                   </div>
                 </div>
               </div>
@@ -550,31 +579,29 @@
 
           @if (binLocationOptions().length > 0) {
             <div class="sf-receiving-card__bin">
-              <app-select label="Bin Location" [formControl]="receiveBinId" [options]="binLocationOptions()" />
+              <app-select [label]="'inventory.dialogs.binLocation' | translate" [formControl]="receiveBinId" [options]="binLocationOptions()" data-testid="sf-receive-bin" />
             </div>
           }
 
           <div class="sf-receiving-card__actions">
-            <button class="action-btn" (click)="selectedPO.set(null)" aria-label="Back to PO list">
-              <span class="material-icons-outlined">arrow_back</span> Back
+            <button class="action-btn" (click)="selectedPO.set(null)">
+              <span class="material-icons-outlined">arrow_back</span> {{ 'common.back' | translate }}
             </button>
             <button class="action-btn action-btn--primary"
                     [disabled]="receivingSubmitting()"
-                    (click)="submitReceiving()"
-                    aria-label="Confirm receiving">
+                    (click)="submitReceiving()">
               @if (receivingSubmitting()) {
                 <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
               } @else {
                 <span class="material-icons-outlined">check</span>
               }
-              Receive All
+              {{ 'purchaseOrders.receiveAll' | translate }}
             </button>
           </div>
         }
 
-        <button class="action-btn sf-receiving-card__cancel" (click)="cancelReceiving()"
-                aria-label="Cancel receiving">
-          <span class="material-icons-outlined">close</span> Cancel
+        <button class="action-btn sf-receiving-card__cancel" (click)="cancelReceiving()">
+          <span class="material-icons-outlined">close</span> {{ 'common.cancel' | translate }}
         </button>
       </div>
     </div>
@@ -585,7 +612,7 @@
 
   <!-- ─── Location View (triggered by scanning a storage location) ─── -->
   @if (scannedLocationId(); as locId) {
-    <div class="sf-overlay" role="button" tabindex="0" aria-label="Close location view" (click)="closeLocationView()" (keydown.escape)="closeLocationView()">
+    <div class="sf-overlay" role="button" tabindex="0" [attr.aria-label]="'common.close' | translate" (click)="closeLocationView()" (keydown.escape)="closeLocationView()">
       <div class="sf-location-view-container" role="dialog" aria-modal="true" tabindex="-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
         <app-scan-location-view
           [locationId]="locId"
@@ -597,7 +624,7 @@
 
   <!-- ─── Daily Log Panel ─── -->
   @if (showDailyLog()) {
-    <div class="sf-overlay" role="button" tabindex="0" aria-label="Close daily log" (click)="showDailyLog.set(false)" (keydown.escape)="showDailyLog.set(false)">
+    <div class="sf-overlay" role="button" tabindex="0" [attr.aria-label]="'common.close' | translate" (click)="showDailyLog.set(false)" (keydown.escape)="showDailyLog.set(false)">
       <div class="sf-panel-container" role="dialog" aria-modal="true" tabindex="-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
         <app-scan-daily-log (closed)="showDailyLog.set(false)" />
       </div>
@@ -606,7 +633,7 @@
 
   <!-- ─── Devices Panel ─── -->
   @if (showDevicesPanel()) {
-    <div class="sf-overlay" role="button" tabindex="0" aria-label="Close devices panel" (click)="showDevicesPanel.set(false)" (keydown.escape)="showDevicesPanel.set(false)">
+    <div class="sf-overlay" role="button" tabindex="0" [attr.aria-label]="'common.close' | translate" (click)="showDevicesPanel.set(false)" (keydown.escape)="showDevicesPanel.set(false)">
       <div class="sf-panel-container sf-panel-container--narrow" role="dialog" aria-modal="true" tabindex="-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
         <app-scan-devices-panel (closed)="showDevicesPanel.set(false)" />
       </div>
@@ -626,30 +653,29 @@
       <div class="sf-shipping-card">
         <div class="sf-shipping-card__header">
           <span class="material-icons-outlined">local_shipping</span>
-          <h2>Ship Goods</h2>
+          <h2>{{ 'shopFloor.display.shipGoods' | translate }}</h2>
         </div>
 
         @if (!selectedShipment()) {
           <!-- Shipment Selection -->
-          <p class="sf-shipping-card__hint">Select a shipment to ship out.</p>
+          <p class="sf-shipping-card__hint">{{ 'shopFloor.display.selectShipmentHint' | translate }}</p>
           <div class="sf-shipping-card__list">
             @for (shipment of shippableShipments(); track shipment.id) {
               <button class="sf-shipping-card__item"
-                      (click)="selectShipmentForShipping(shipment)"
-                      [attr.aria-label]="'Select shipment ' + shipment.shipmentNumber">
+                      (click)="selectShipmentForShipping(shipment)">
                 <div class="sf-shipping-card__item-info">
                   <span class="sf-shipping-card__item-number">{{ shipment.shipmentNumber }}</span>
                   <span class="sf-shipping-card__item-customer">{{ shipment.customerName }}</span>
                 </div>
                 <div class="sf-shipping-card__item-meta">
-                  <span class="sf-shipping-card__item-so">SO {{ shipment.salesOrderNumber }}</span>
+                  <span class="sf-shipping-card__item-so">{{ 'shopFloor.display.salesOrderNumber' | translate: { number: shipment.salesOrderNumber } }}</span>
                   <span class="sf-shipping-card__item-status chip chip--info">{{ shipment.status }}</span>
                 </div>
               </button>
             } @empty {
               <div class="sf-empty">
                 <span class="material-icons-outlined sf-empty__icon">inventory_2</span>
-                <p>No shipments ready to ship</p>
+                <p>{{ 'shopFloor.display.noShipmentsReady' | translate }}</p>
               </div>
             }
           </div>
@@ -658,7 +684,7 @@
           <div class="sf-shipping-card__detail-header">
             <strong>{{ selectedShipment()!.shipmentNumber }}</strong>
             <span class="sf-shipping-card__detail-customer">{{ selectedShipment()!.customerName }}</span>
-            <span class="sf-shipping-card__detail-so">SO {{ selectedShipment()!.salesOrderNumber }}</span>
+            <span class="sf-shipping-card__detail-so">{{ 'shopFloor.display.salesOrderNumber' | translate: { number: selectedShipment()!.salesOrderNumber } }}</span>
           </div>
 
           @if (selectedShipment()!.carrier) {
@@ -681,30 +707,27 @@
           </div>
 
           <div class="sf-shipping-card__actions">
-            <button class="action-btn" (click)="selectedShipment.set(null)" aria-label="Back to shipment list">
-              <span class="material-icons-outlined">arrow_back</span> Back
+            <button class="action-btn" (click)="selectedShipment.set(null)">
+              <span class="material-icons-outlined">arrow_back</span> {{ 'common.back' | translate }}
             </button>
-            <button class="action-btn" (click)="printPackingSlip()"
-                    aria-label="Print packing slip">
-              <span class="material-icons-outlined">print</span> Packing Slip
+            <button class="action-btn" (click)="printPackingSlip()">
+              <span class="material-icons-outlined">print</span> {{ 'shopFloor.display.packingSlip' | translate }}
             </button>
             <button class="action-btn action-btn--primary"
                     [disabled]="shippingSubmitting()"
-                    (click)="confirmShip()"
-                    aria-label="Mark as shipped">
+                    (click)="confirmShip()">
               @if (shippingSubmitting()) {
                 <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
               } @else {
                 <span class="material-icons-outlined">check</span>
               }
-              Mark Shipped
+              {{ 'shipments.markShipped' | translate }}
             </button>
           </div>
         }
 
-        <button class="action-btn sf-shipping-card__cancel" (click)="cancelShipping()"
-                aria-label="Cancel shipping">
-          <span class="material-icons-outlined">close</span> Cancel
+        <button class="action-btn sf-shipping-card__cancel" (click)="cancelShipping()">
+          <span class="material-icons-outlined">close</span> {{ 'common.cancel' | translate }}
         </button>
       </div>
     </div>

@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 import { ShopFloorDisplayComponent } from './shop-floor-display.component';
@@ -117,5 +117,297 @@ describe('ShopFloorDisplayComponent — kiosk vs inert training preview', () => 
     (c as unknown as { onPinSubmit: () => void }).onPinSubmit();
     expect(auth.scanLogin).not.toHaveBeenCalled();
     expect(auth.login).not.toHaveBeenCalled();
+  });
+});
+
+describe('ShopFloorDisplayComponent — kiosk actions', () => {
+  type Feedback = { workerId: number; success: boolean; message: string; detail: string | null } | null;
+  interface Internals {
+    selectedWorker: { set: (w: unknown) => void };
+    jobSelectWorker: { set: (w: unknown) => void };
+    phase: { (): string; set: (p: string) => void };
+    actionFeedback: () => Feedback;
+    canSupervise: () => boolean;
+    terminal: () => { teamId: number; teamName: string } | null;
+    fontSize: () => number;
+    maxFontSizeIndex: number;
+    clockAction: (w: unknown, code: string) => void;
+    selectJob: (j: unknown) => void;
+    startJobTimer: (a: unknown) => void;
+    stopJobTimer: (a: unknown) => void;
+    confirmNextStatus: (a: unknown) => void;
+    onTerminalConfigured: (t: unknown) => void;
+    handleScanValue: (v: string) => void;
+  }
+
+  const terminal = { id: 3, name: 'Bay 2', deviceToken: 'tok', teamId: 7, teamName: 'Assembly', teamColor: null };
+  const assignment = {
+    jobId: 41, jobNumber: 'JOB-0041', title: 'Bracket', priorityName: 'High',
+    stageName: 'In Production', stageColor: '#000', isOverdue: false, hasActiveTimer: false,
+  };
+  const makeWorker = (role: string, assignments: unknown[] = []) => ({
+    userId: 5, name: 'Pat Doe', email: 'p@x.test', initials: 'PD', avatarColor: '#000', isClockedIn: false,
+    clockedInAt: null, status: 'Out', currentTask: null, currentJobNumber: null, timeOnTask: '',
+    statusSince: null, role, assignments,
+  });
+  const problem = (detail: string) => throwError(() => new HttpErrorResponse({ status: 400, error: { detail } }));
+
+  const auth = { clearAuth: vi.fn(), isAuthenticated: vi.fn(() => false), scanLogin: vi.fn(), login: vi.fn() };
+  const scanner = {
+    setContext: vi.fn(), restart: vi.fn(), stop: vi.fn(), clearLastScan: vi.fn(),
+    lastScan: () => null,
+  };
+  const shopFloor = {
+    getOverview: vi.fn(() => of({ activeJobs: [], workers: [], completedToday: 0, maintenanceAlerts: 0 })),
+    getClockStatus: vi.fn(() => of([])),
+    getTerminal: vi.fn(() => of(terminal)),
+    clockInOut: vi.fn(() => of(undefined)),
+    assignJob: vi.fn(() => of(undefined)),
+    startTimer: vi.fn(() => of({})),
+    stopTimer: vi.fn(() => of({})),
+    completeJob: vi.fn(() => of(undefined)),
+    identifyScan: vi.fn(() => of({})),
+  };
+  const events = { getUpcomingEvents: vi.fn(() => of([])) };
+  const clockTypes = {
+    load: vi.fn(), isWorking: () => false, isOnBreakOrLunch: () => false,
+    isClockedOut: () => true, isActive: () => false,
+    definitions: () => [{ code: 'IN', statusMapping: 'In', category: 'work' }],
+  };
+  const dialog = { open: vi.fn(() => ({ afterClosed: () => of(true) })) };
+  const loading = { track: (_label: string, obs: unknown) => obs };
+  const translate = {
+    instant: (k: string, p?: Record<string, unknown>) => (p ? `${k} ${JSON.stringify(p)}` : k),
+  };
+  const noop = {};
+
+  function create(): Internals {
+    const fixture = TestBed.createComponent(ShopFloorDisplayComponent);
+    return fixture.componentInstance as unknown as Internals;
+  }
+
+  function init(c: Internals): void {
+    (c as unknown as { ngOnInit: () => void }).ngOnInit();
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.removeItem('forge-kiosk-device-token');
+    localStorage.removeItem('forge-kiosk-terminal');
+    localStorage.removeItem('sf-font-index');
+
+    TestBed.configureTestingModule({
+      imports: [ShopFloorDisplayComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: AuthService, useValue: auth },
+        { provide: ActivatedRoute, useValue: { snapshot: { data: {} } } },
+        { provide: KioskSessionService, useValue: { isTrainingMode: () => false } },
+        { provide: ScannerService, useValue: scanner },
+        { provide: ShopFloorService, useValue: shopFloor },
+        { provide: EventsService, useValue: events },
+        { provide: ClockEventTypeService, useValue: clockTypes },
+        { provide: LoadingService, useValue: loading },
+        { provide: PurchaseOrderService, useValue: noop },
+        { provide: InventoryService, useValue: noop },
+        { provide: ShipmentService, useValue: noop },
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: MatDialog, useValue: dialog },
+        { provide: TranslateService, useValue: translate },
+      ],
+    });
+    TestBed.overrideComponent(ShopFloorDisplayComponent, { set: { template: '', imports: [] } });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('only Admin and Manager can supervise (move status, pick work)', () => {
+    const c = create();
+    c.selectedWorker.set(makeWorker('ProductionWorker'));
+    expect(c.canSupervise()).toBe(false);
+    c.selectedWorker.set(makeWorker('OfficeManager'));
+    expect(c.canSupervise()).toBe(false);
+    c.selectedWorker.set(makeWorker('Manager'));
+    expect(c.canSupervise()).toBe(true);
+    c.selectedWorker.set(makeWorker('Admin'));
+    expect(c.canSupervise()).toBe(true);
+  });
+
+  it('a production worker cannot move a work order to the next status', () => {
+    const c = create();
+    c.selectedWorker.set(makeWorker('ProductionWorker', [assignment]));
+    c.confirmNextStatus(assignment);
+    expect(dialog.open).not.toHaveBeenCalled();
+    expect(shopFloor.completeJob).not.toHaveBeenCalled();
+  });
+
+  it('a supervisor confirms before the work order moves, then sees the result for 2 s before sign-out', () => {
+    vi.useFakeTimers();
+    const c = create();
+    c.selectedWorker.set(makeWorker('Manager', [assignment]));
+    c.phase.set('actions');
+    c.confirmNextStatus(assignment);
+
+    expect(dialog.open).toHaveBeenCalledTimes(1);
+    expect(shopFloor.completeJob).toHaveBeenCalledWith(41);
+    expect(c.actionFeedback()?.message).toBe('shopFloor.movedNext {"jobNumber":"JOB-0041"}');
+
+    vi.advanceTimersByTime(1_900);
+    expect(c.phase()).toBe('actions');
+    vi.advanceTimersByTime(200);
+    expect(c.phase()).toBe('main');
+  });
+
+  it('a failed move shows the server reason', () => {
+    shopFloor.completeJob.mockReturnValueOnce(problem('The next status, Invoiced, is an office status.'));
+    const c = create();
+    c.selectedWorker.set(makeWorker('Admin', [assignment]));
+    c.confirmNextStatus(assignment);
+    const fb = c.actionFeedback();
+    expect(fb?.success).toBe(false);
+    expect(fb?.message).toContain('shopFloor.moveFailed');
+    expect(fb?.message).toContain('The next status, Invoiced, is an office status.');
+  });
+
+  it('a production worker clocking in without work is told to ask a lead and signed out, never shown the picker', () => {
+    vi.useFakeTimers();
+    const c = create();
+    const worker = makeWorker('ProductionWorker');
+    c.selectedWorker.set(worker);
+    c.phase.set('actions');
+    c.clockAction(worker, 'IN');
+
+    expect(c.actionFeedback()?.message).toBe('shopFloor.noAssignmentAskLead');
+    vi.advanceTimersByTime(2_000);
+    expect(c.phase()).toBe('main');
+    expect(auth.clearAuth).toHaveBeenCalled();
+  });
+
+  it('a supervisor clocking in without work gets the work order picker', () => {
+    vi.useFakeTimers();
+    const c = create();
+    const worker = makeWorker('Manager');
+    c.selectedWorker.set(worker);
+    c.phase.set('actions');
+    c.clockAction(worker, 'IN');
+    vi.advanceTimersByTime(800);
+    expect(c.phase()).toBe('job-select');
+  });
+
+  it('a failed punch keeps the failure and the server reason on the card', () => {
+    shopFloor.clockInOut.mockReturnValueOnce(problem('Not your badge.'));
+    const c = create();
+    const worker = makeWorker('ProductionWorker');
+    c.selectedWorker.set(worker);
+    c.clockAction(worker, 'IN');
+    expect(c.actionFeedback()).toEqual({
+      workerId: 5, success: false, message: 'shopFloor.actionFailed', detail: 'Not your badge.',
+    });
+  });
+
+  it('a refused assignment says so with the server reason and signs the worker out', () => {
+    vi.useFakeTimers();
+    shopFloor.assignJob.mockReturnValueOnce(problem('Only supervisors can assign.'));
+    const c = create();
+    const worker = makeWorker('Manager');
+    c.jobSelectWorker.set(worker);
+    c.phase.set('job-select');
+    c.selectJob({ id: 9, jobNumber: 'JOB-0009' });
+
+    expect(c.actionFeedback()).toEqual({
+      workerId: 5, success: false, message: 'shopFloor.assignFailed', detail: 'Only supervisors can assign.',
+    });
+    vi.advanceTimersByTime(2_000);
+    expect(c.phase()).toBe('main');
+    expect(auth.clearAuth).toHaveBeenCalled();
+  });
+
+  it('a failed timer start shows the server reason in the actions card', () => {
+    shopFloor.startTimer.mockReturnValueOnce(problem('Clock in first.'));
+    const c = create();
+    c.selectedWorker.set(makeWorker('ProductionWorker', [assignment]));
+    c.startJobTimer(assignment);
+    const fb = c.actionFeedback();
+    expect(fb?.success).toBe(false);
+    expect(fb?.message).toBe('shopFloor.timerStartFailed {"jobNumber":"JOB-0041","reason":"Clock in first."}');
+  });
+
+  it('timer start and stop confirm with the work order number', () => {
+    const c = create();
+    c.selectedWorker.set(makeWorker('ProductionWorker', [assignment]));
+    c.startJobTimer(assignment);
+    expect(c.actionFeedback()?.message).toBe('shopFloor.timerStartedOn {"jobNumber":"JOB-0041"}');
+    c.stopJobTimer(assignment);
+    expect(c.actionFeedback()?.message).toBe('shopFloor.timerStoppedOn {"jobNumber":"JOB-0041"}');
+  });
+
+  it('an unidentified scan asks for a PIN with no leftover worker and times out', () => {
+    vi.useFakeTimers();
+    shopFloor.identifyScan.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 500 })));
+    const c = create();
+    c.selectedWorker.set(makeWorker('Admin'));
+    c.handleScanValue('BADGE-1');
+    expect(c.phase()).toBe('pin');
+    expect((c as unknown as { selectedWorker: () => unknown }).selectedWorker()).toBeNull();
+    vi.advanceTimersByTime(20_000);
+    expect(c.phase()).toBe('main');
+  });
+
+  it('a paired display loads only its own team', () => {
+    localStorage.setItem('forge-kiosk-device-token', 'tok');
+    localStorage.setItem('forge-kiosk-terminal', JSON.stringify(terminal));
+    const c = create();
+    init(c);
+    expect(shopFloor.getTerminal).toHaveBeenCalledWith('tok');
+    expect(shopFloor.getOverview).toHaveBeenCalledWith(7);
+    expect(shopFloor.getClockStatus).toHaveBeenCalledWith(7);
+    expect(c.terminal()?.teamName).toBe('Assembly');
+  });
+
+  it('a paired display with no cached terminal waits for the terminal before loading', () => {
+    localStorage.setItem('forge-kiosk-device-token', 'tok');
+    const c = create();
+    init(c);
+    expect(shopFloor.getOverview).toHaveBeenCalledTimes(1);
+    expect(shopFloor.getOverview).toHaveBeenCalledWith(7);
+    expect(JSON.parse(localStorage.getItem('forge-kiosk-terminal') ?? 'null')?.teamId).toBe(7);
+  });
+
+  it('a newly configured terminal scopes the board to the chosen team', () => {
+    const c = create();
+    c.onTerminalConfigured({ ...terminal, teamId: 12, teamName: 'Paint' });
+    expect(shopFloor.getOverview).toHaveBeenCalledWith(12);
+    expect(shopFloor.getClockStatus).toHaveBeenCalledWith(12);
+  });
+
+  it('keeps the screen awake while paired and lets go on destroy', async () => {
+    const release = vi.fn(() => Promise.resolve());
+    const request = vi.fn(() => Promise.resolve({ released: false, release }));
+    Object.defineProperty(navigator, 'wakeLock', { value: { request }, configurable: true });
+    try {
+      localStorage.setItem('forge-kiosk-device-token', 'tok');
+      localStorage.setItem('forge-kiosk-terminal', JSON.stringify(terminal));
+      const fixture = TestBed.createComponent(ShopFloorDisplayComponent);
+      (fixture.componentInstance as unknown as { ngOnInit: () => void }).ngOnInit();
+      expect(request).toHaveBeenCalledWith('screen');
+      await Promise.resolve();
+      fixture.destroy();
+      expect(release).toHaveBeenCalled();
+    } finally {
+      delete (navigator as unknown as Record<string, unknown>)['wakeLock'];
+    }
+  });
+
+  it('offers bigger text sizes and applies the saved size before the first render', () => {
+    localStorage.setItem('sf-font-index', '6');
+    const fixture = TestBed.createComponent(ShopFloorDisplayComponent);
+    const c = fixture.componentInstance as unknown as Internals;
+    expect(c.maxFontSizeIndex).toBe(6);
+    expect(c.fontSize()).toBe(28);
+    const host = fixture.nativeElement as HTMLElement;
+    expect(host.style.getPropertyValue('--sf-zoom')).toBe(`${28 / 12}`);
   });
 });
