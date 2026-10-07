@@ -380,12 +380,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     this.shopFloorService.identifyScan(scanValue).subscribe({
       next: (result) => {
         if (result.scanType === 'employee') {
-          const worker = this.workers().find(w => w.userId === result.entityId);
-          if (worker) {
-            this.enterPinPhase(worker, scanValue);
-          } else {
-            this.showScanFeedback(this.translate.instant('shopFloor.display.employeeNotOnTeam'));
-          }
+          this.signInScannedEmployee(result.entityId, scanValue);
         } else if (result.scanType === 'job') {
           this.showScanFeedback(this.translate.instant('shopFloor.display.workOrderScanned', { number: result.entityNumber, title: result.entityTitle }));
         } else if (result.scanType === 'storage-location') {
@@ -406,6 +401,30 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
         this.selectedWorker.set(null);
         this.startPhaseTimeout(PIN_TIMEOUT_MS);
       },
+    });
+  }
+
+  private signInScannedEmployee(userId: number | undefined, scanValue: string): void {
+    const teamMember = this.workers().find(w => w.userId === userId);
+    if (teamMember) {
+      this.enterPinPhase(teamMember, scanValue);
+      return;
+    }
+    const notOnTeam = (): void => this.showScanFeedback(this.translate.instant('shopFloor.display.employeeNotOnTeam'));
+    if (!this.terminal()) {
+      notOnTeam();
+      return;
+    }
+    this.shopFloorService.getClockStatus().subscribe({
+      next: (everyone) => {
+        const supervisor = everyone.find(w => w.userId === userId && this.SUPERVISE_ROLES.has(w.role));
+        if (supervisor && this.phase() === 'main') {
+          this.enterPinPhase(supervisor, scanValue);
+        } else if (!supervisor) {
+          notOnTeam();
+        }
+      },
+      error: () => notOnTeam(),
     });
   }
 
@@ -1053,12 +1072,15 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
       return;
     }
     const teamId = this.terminal()?.teamId;
+    const signedIn = this.selectedWorker();
+    const signedInOffTeam = !!teamId && !!signedIn && !this.workers().some(w => w.userId === signedIn.userId);
     forkJoin({
       overview: this.shopFloorService.getOverview(teamId),
       workers: this.shopFloorService.getClockStatus(teamId),
+      everyone: signedInOffTeam ? this.shopFloorService.getClockStatus().pipe(catchError(() => of(null))) : of(null),
       events: this.eventsService.getUpcomingEvents().pipe(catchError(() => of([]))),
     }).subscribe({
-      next: ({ overview, workers, events }) => {
+      next: ({ overview, workers, everyone, events }) => {
         this.overview.set(overview);
         this.workers.set(workers);
         this.upcomingEvents.set(events);
@@ -1067,7 +1089,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
         // Refresh selectedWorker with updated data (timer status, assignments, etc.)
         const current = this.selectedWorker();
         if (current) {
-          const updated = workers.find(w => w.userId === current.userId);
+          const updated = workers.find(w => w.userId === current.userId) ?? everyone?.find(w => w.userId === current.userId);
           if (updated) this.selectedWorker.set(updated);
         }
       },

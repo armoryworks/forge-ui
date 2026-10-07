@@ -123,7 +123,7 @@ describe('ShopFloorDisplayComponent — kiosk vs inert training preview', () => 
 describe('ShopFloorDisplayComponent — kiosk actions', () => {
   type Feedback = { workerId: number; success: boolean; message: string; detail: string | null } | null;
   interface Internals {
-    selectedWorker: { set: (w: unknown) => void };
+    selectedWorker: { (): { userId: number } | null; set: (w: unknown) => void };
     jobSelectWorker: { set: (w: unknown) => void };
     phase: { (): string; set: (p: string) => void };
     actionFeedback: () => Feedback;
@@ -138,6 +138,9 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     confirmNextStatus: (a: unknown) => void;
     onTerminalConfigured: (t: unknown) => void;
     handleScanValue: (v: string) => void;
+    onPinSubmit: () => void;
+    pinControl: { setValue: (v: string) => void };
+    scanFeedback: () => string | null;
   }
 
   const terminal = { id: 3, name: 'Bay 2', deviceToken: 'tok', teamId: 7, teamName: 'Assembly', teamColor: null };
@@ -159,7 +162,7 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
   };
   const shopFloor = {
     getOverview: vi.fn(() => of({ activeJobs: [], workers: [], completedToday: 0, maintenanceAlerts: 0 })),
-    getClockStatus: vi.fn(() => of([])),
+    getClockStatus: vi.fn((_teamId?: number) => of([] as unknown[])),
     getTerminal: vi.fn(() => of(terminal)),
     clockInOut: vi.fn(() => of(undefined)),
     assignJob: vi.fn(() => of(undefined)),
@@ -333,6 +336,49 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     const fb = c.actionFeedback();
     expect(fb?.success).toBe(false);
     expect(fb?.message).toBe('shopFloor.timerStartFailed {"jobNumber":"JOB-0041","reason":"Clock in first."}');
+  });
+
+  it('a manager from another team can badge in on a team display and move work', () => {
+    localStorage.setItem('forge-kiosk-device-token', 'tok');
+    localStorage.setItem('forge-kiosk-terminal', JSON.stringify(terminal));
+    const teammate = { ...makeWorker('ProductionWorker'), userId: 6 };
+    const manager = { ...makeWorker('Manager', [assignment]), userId: 20 };
+    shopFloor.getClockStatus.mockImplementation((teamId?: number) => of(teamId ? [teammate] : [teammate, manager]));
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'employee', entityId: 20 }));
+    auth.scanLogin.mockReturnValueOnce(of({}));
+    try {
+      const c = create();
+      init(c);
+      c.handleScanValue('BADGE-20');
+      expect(c.phase()).toBe('pin');
+      c.pinControl.setValue('1234');
+      c.onPinSubmit();
+      expect(c.phase()).toBe('actions');
+      expect(c.selectedWorker()?.userId).toBe(20);
+      expect(c.canSupervise()).toBe(true);
+      expect(shopFloor.getClockStatus).toHaveBeenLastCalledWith();
+      c.confirmNextStatus(assignment);
+      expect(shopFloor.completeJob).toHaveBeenCalledWith(41);
+    } finally {
+      shopFloor.getClockStatus.mockImplementation(() => of([]));
+    }
+  });
+
+  it('an off-team production worker is told they are not on this team', () => {
+    localStorage.setItem('forge-kiosk-device-token', 'tok');
+    localStorage.setItem('forge-kiosk-terminal', JSON.stringify(terminal));
+    const outsider = { ...makeWorker('ProductionWorker'), userId: 30 };
+    shopFloor.getClockStatus.mockImplementation((teamId?: number) => of(teamId ? [] : [outsider]));
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'employee', entityId: 30 }));
+    try {
+      const c = create();
+      init(c);
+      c.handleScanValue('BADGE-30');
+      expect(c.phase()).toBe('main');
+      expect(c.scanFeedback()).toBe('shopFloor.display.employeeNotOnTeam');
+    } finally {
+      shopFloor.getClockStatus.mockImplementation(() => of([]));
+    }
   });
 
   it('timer start and stop confirm with the work order number', () => {
