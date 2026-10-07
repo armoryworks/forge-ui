@@ -24,10 +24,22 @@
 
       @if (mode() === 'create') {
         <app-select data-testid="job-track-type" [label]="'kanban.trackType' | translate" formControlName="trackTypeId" [options]="trackTypeOptions()" />
+
+        <div class="dialog-row">
+          <app-entity-picker data-testid="job-part" [label]="'kanban.part' | translate" entityType="parts"
+            displayField="partNumber" secondaryDisplayField="name" formControlName="partId" />
+          <app-input data-testid="job-quantity" [label]="'kanban.quantityToMake' | translate" type="number"
+            formControlName="quantity" [min]="1" [step]="1" />
+        </div>
       }
 
       <div class="dialog-row">
-        <app-select data-testid="job-customer" [label]="'kanban.customer' | translate" formControlName="customerId" [options]="customerOptions()" />
+        <div class="job-customer-field">
+          <app-select data-testid="job-customer" [label]="'kanban.customer' | translate" formControlName="customerId" [options]="customerOptions()" />
+          @if (mode() === 'create') {
+            <p class="field-hint">{{ 'kanban.customerOptionalHint' | translate }}</p>
+          }
+        </div>
         <app-select data-testid="job-assignee" [label]="'kanban.assignee' | translate" formControlName="assigneeId" [options]="assigneeOptions()" />
       </div>
 
@@ -43,6 +55,9 @@
         <div class="so-line-assoc">
           <app-select data-testid="job-so-line" [label]="'kanban.salesOrderLine' | translate" formControlName="salesOrderLineId" [options]="salesOrderLineOptions()" />
           <app-toggle data-testid="job-so-line-show-assigned" [label]="'kanban.showAssignedLines' | translate" [formControl]="showAssignedControl" />
+          @if (filledFromSoLine()) {
+            <p class="field-hint" data-testid="job-so-line-filled">{{ 'kanban.fromSoLine' | translate }}</p>
+          }
         </div>
       }
     </div>

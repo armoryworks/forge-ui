@@ -38,3 +38,19 @@
     padding-left: $sp-xs;
   }
 }
+
+.job-customer-field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.dialog-row app-entity-picker {
+  min-width: 0;
+}
+
+.field-hint {
+  margin: 0 0 $sp-sm;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}

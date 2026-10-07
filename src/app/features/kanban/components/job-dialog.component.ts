@@ -18,6 +18,7 @@ import { TextareaComponent } from '../../../shared/components/textarea/textarea.
 import { DatepickerComponent } from '../../../shared/components/datepicker/datepicker.component';
 import { ToggleComponent } from '../../../shared/components/toggle/toggle.component';
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
+import { EntityPickerComponent } from '../../../shared/components/entity-picker/entity-picker.component';
 import { FormValidationService } from '../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
 import { DraftConfig } from '../../../shared/models/draft-config.model';
@@ -25,6 +26,7 @@ import { ManualNumberSettingsService } from '../../../shared/services/manual-num
 import { toIsoDate } from '../../../shared/utils/date.utils';
 import { PriorityIndicatorComponent } from '../../../shared/components/priority-indicator/priority-indicator.component';
 import { PRIORITIES, PRIORITY_OPTIONS } from '../../../shared/models/priority.const';
+import { SalesOrderService } from '../../sales-orders/services/sales-order.service';
 
 export type DialogMode = 'create' | 'edit';
 
@@ -38,6 +40,7 @@ export type DialogMode = 'create' | 'edit';
     SelectComponent,
     TextareaComponent,
     DatepickerComponent,
+    EntityPickerComponent,
     ToggleComponent,
     ValidationButtonComponent,
     PriorityIndicatorComponent,
@@ -49,10 +52,12 @@ export type DialogMode = 'create' | 'edit';
 })
 export class JobDialogComponent implements OnInit {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+  @ViewChild(EntityPickerComponent) private partPicker?: EntityPickerComponent;
   private readonly kanbanService = inject(KanbanService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly manualNumbers = inject(ManualNumberSettingsService);
+  private readonly salesOrderService = inject(SalesOrderService);
 
   /** Whether the tenant allows manually assigning/overriding job numbers. */
   protected readonly allowManualJobNumbers = computed(() => this.manualNumbers.isEnabled('jobs'));
@@ -73,6 +78,8 @@ export class JobDialogComponent implements OnInit {
   // #27 — inline association of the new job with an open sales-order line.
   protected readonly salesOrderLines = signal<AssignableSalesOrderLine[]>([]);
   protected readonly showAssignedControl = new FormControl(false, { nonNullable: true });
+  protected readonly filledFromSoLine = signal(false);
+  private autoTitle: string | null = null;
 
   protected readonly jobForm = new FormGroup({
     jobNumber: new FormControl(''),
@@ -84,6 +91,8 @@ export class JobDialogComponent implements OnInit {
     priority: new FormControl('Normal'),
     dueDate: new FormControl<Date | null>(null),
     salesOrderLineId: new FormControl<number | null>(null),
+    partId: new FormControl<number | null>(null),
+    quantity: new FormControl<number | null>({ value: 1, disabled: true }, [Validators.min(1)]),
   });
 
   protected readonly salesOrderLineOptions = computed<SelectOption[]>(() => [
@@ -99,6 +108,7 @@ export class JobDialogComponent implements OnInit {
   protected readonly violations = FormValidationService.getViolations(this.jobForm, {
     title: 'Title',
     trackTypeId: 'Track Type',
+    quantity: 'Quantity to make',
   });
 
   protected readonly trackTypeOptions = computed<SelectOption[]>(() =>
@@ -145,7 +155,7 @@ export class JobDialogComponent implements OnInit {
         customerId: j.customerId,
         assigneeId: j.assigneeId,
         priority: j.priority,
-        dueDate: j.dueDate ?? null,
+        dueDate: this.utcCalendarDate(j.dueDate),
       });
     } else {
       const types = this.trackTypes();
@@ -171,7 +181,90 @@ export class JobDialogComponent implements OnInit {
       this.showAssignedControl.valueChanges
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(show => this.loadAssignableSoLines(show));
+      this.jobForm.controls.partId.valueChanges
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(partId => this.syncQuantityEnabled(partId));
+      this.jobForm.controls.salesOrderLineId.valueChanges
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(lineId => this.applySoLineDefaults(lineId));
     }
+  }
+
+  private syncQuantityEnabled(partId: number | null): void {
+    const quantity = this.jobForm.controls.quantity;
+    if (partId == null) {
+      quantity.reset(1);
+      quantity.disable({ emitEvent: false });
+    } else if (quantity.disabled) {
+      if (quantity.value == null) quantity.setValue(1);
+      quantity.enable({ emitEvent: false });
+    }
+  }
+
+  private applySoLineDefaults(lineId: number | null): void {
+    const line = lineId == null ? undefined : this.salesOrderLines().find(l => l.id === lineId);
+    if (!line) {
+      this.filledFromSoLine.set(false);
+      return;
+    }
+
+    const controls = this.jobForm.controls;
+    let filled = false;
+
+    if (controls.partId.value == null && line.partId != null) {
+      if (this.partPicker) {
+        this.partPicker.setSelected(line.partId, line.partNumber ?? '');
+      } else {
+        controls.partId.setValue(line.partId);
+      }
+      filled = true;
+    }
+
+    if (controls.partId.value != null && line.remainingQuantity != null && line.remainingQuantity > 0
+      && (controls.quantity.value == null || !controls.quantity.dirty)) {
+      controls.quantity.setValue(line.remainingQuantity);
+      filled = true;
+    }
+
+    const title = line.partNumber ? `${line.partNumber} — ${line.description}` : line.description;
+    const currentTitle = controls.title.value?.trim() ?? '';
+    if (title && (currentTitle === '' || currentTitle === this.autoTitle)) {
+      controls.title.setValue(title);
+      this.autoTitle = title;
+      filled = true;
+    }
+
+    if (controls.dueDate.value == null && line.requestedDeliveryDate) {
+      controls.dueDate.setValue(this.utcCalendarDate(line.requestedDeliveryDate));
+      filled = true;
+    }
+
+    this.filledFromSoLine.set(filled);
+
+    if (controls.customerId.value != null && controls.dueDate.value != null) return;
+    this.salesOrderService.getSalesOrderById(line.salesOrderId).subscribe({
+      next: so => {
+        if (controls.salesOrderLineId.value !== line.id) return;
+        let soFilled = false;
+        if (controls.customerId.value == null && so.customerId != null) {
+          controls.customerId.setValue(so.customerId);
+          soFilled = true;
+        }
+        if (controls.dueDate.value == null && so.requestedDeliveryDate) {
+          controls.dueDate.setValue(this.utcCalendarDate(so.requestedDeliveryDate));
+          soFilled = true;
+        }
+        if (soFilled) this.filledFromSoLine.set(true);
+      },
+      error: () => this.filledFromSoLine.set(filled),
+    });
+  }
+
+  private utcCalendarDate(value: Date | string | null | undefined): Date | null {
+    if (!value) return null;
+    const d = typeof value === 'string' ? new Date(value) : value;
+    if (isNaN(d.getTime())) return null;
+    return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
   }
 
   private loadAssignableSoLines(includeAssigned: boolean): void {
@@ -208,6 +301,8 @@ export class JobDialogComponent implements OnInit {
         priority: f.priority ?? 'Normal',
         dueDate: dueDateIso,
         salesOrderLineId: f.salesOrderLineId,
+        partId: f.partId,
+        quantity: f.partId != null ? (f.quantity ?? 1) : null,
       }).subscribe({
         next: (detail) => {
           this.saving.set(false);
@@ -229,7 +324,7 @@ export class JobDialogComponent implements OnInit {
         assigneeId: f.assigneeId,
         customerId: f.customerId,
         priority: f.priority ?? 'Normal',
-        dueDate: dueDateObj,
+        dueDate: dueDateIso,
       }).subscribe({
         next: () => {
           this.saving.set(false);
