@@ -3,6 +3,11 @@ import { describe, it, expect } from 'vitest';
 import {
   resolveAutoLinePrice,
   classifyManualOverride,
+  commitLinePrice,
+  confirmLinePriceReason,
+  cancelLinePriceReason,
+  LinePriceGateState,
+  LinePriceGateContext,
   PricingVendorRow,
 } from './po-line-price.util';
 
@@ -85,5 +90,65 @@ describe('classifyManualOverride (forge#8 — override permission + reason gatin
   it('requires a reason when a privileged user changes a default price', () => {
     expect(classifyManualOverride({ ...base, priceIsDefault: true, canOverride: true }))
       .toBe('needs-reason');
+  });
+});
+
+describe('commitLinePrice / reason dialog (price edit gate on blur and Add)', () => {
+  const ctx: LinePriceGateContext = { canOverride: true, lastComputedPrice: 10, defaultFilledPrice: 10 };
+  const edited: LinePriceGateState = { unitPrice: 12, priceIsDefault: true, reasonDialogOpen: false, overrideReason: null };
+
+  it('blocks Add and changes nothing while the reason dialog is open', () => {
+    const open = { ...edited, reasonDialogOpen: true };
+    const result = commitLinePrice(open, ctx);
+    expect(result.canAdd).toBe(false);
+    expect(result.notice).toBeNull();
+    expect(result.state).toEqual(open);
+  });
+
+  it('opens the reason dialog and blocks Add when a privileged user edits a default price', () => {
+    const result = commitLinePrice(edited, ctx);
+    expect(result.canAdd).toBe(false);
+    expect(result.state.reasonDialogOpen).toBe(true);
+    expect(result.state.unitPrice).toBe(12);
+  });
+
+  it('reverts to the computed price and blocks Add when the user lacks override rights', () => {
+    const result = commitLinePrice(edited, { ...ctx, canOverride: false });
+    expect(result.canAdd).toBe(false);
+    expect(result.state.unitPrice).toBe(10);
+    expect(result.state.reasonDialogOpen).toBe(false);
+    expect(result.notice).toBe('purchaseOrders.overrideRequiresPermission');
+  });
+
+  it('accepts an unchanged default price and keeps it marked as default', () => {
+    const result = commitLinePrice({ ...edited, unitPrice: 10 }, ctx);
+    expect(result.canAdd).toBe(true);
+    expect(result.state.priceIsDefault).toBe(true);
+  });
+
+  it('accepts a price typed with no computed baseline and clears the default marker', () => {
+    const result = commitLinePrice(edited, { ...ctx, lastComputedPrice: null });
+    expect(result.canAdd).toBe(true);
+    expect(result.state.priceIsDefault).toBe(false);
+  });
+
+  it('keeps the edited price and records the reason on confirm', () => {
+    const opened = commitLinePrice(edited, ctx).state;
+    const result = confirmLinePriceReason(opened, 'Vendor quote 2026-10');
+    expect(result.state).toEqual({ unitPrice: 12, priceIsDefault: false, reasonDialogOpen: false, overrideReason: 'Vendor quote 2026-10' });
+    expect(result.notice).toBe('purchaseOrders.overrideRecorded');
+    expect(commitLinePrice(result.state, ctx).canAdd).toBe(true);
+  });
+
+  it('restores the computed price on cancel, after which Add goes ahead at that price', () => {
+    const opened = commitLinePrice(edited, ctx).state;
+    const result = cancelLinePriceReason(opened, ctx);
+    expect(result.state.unitPrice).toBe(10);
+    expect(result.state.reasonDialogOpen).toBe(false);
+    expect(result.state.overrideReason).toBeNull();
+    expect(result.notice).toBe('purchaseOrders.overrideRequiresReason');
+    const retry = commitLinePrice(result.state, ctx);
+    expect(retry.canAdd).toBe(true);
+    expect(retry.state.priceIsDefault).toBe(true);
   });
 });

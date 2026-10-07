@@ -74,3 +74,80 @@ export function classifyManualOverride(params: {
   if (!changed) return 'accept';
   return canOverride ? 'needs-reason' : 'deny-permission';
 }
+
+/** The add-line row's price state that the override gate reads and rewrites. */
+export interface LinePriceGateState {
+  unitPrice: number | null;
+  priceIsDefault: boolean;
+  reasonDialogOpen: boolean;
+  overrideReason: string | null;
+}
+
+/** Inputs to the override gate that it never changes. */
+export interface LinePriceGateContext {
+  canOverride: boolean;
+  lastComputedPrice: number | null;
+  defaultFilledPrice: number | null;
+}
+
+/** Translation key of the snackbar to show after a gate step (null = none). */
+export type LinePriceGateNotice =
+  | 'purchaseOrders.overrideRequiresPermission'
+  | 'purchaseOrders.overrideRequiresReason'
+  | 'purchaseOrders.overrideRecorded'
+  | null;
+
+/** Next state, the snackbar to show, and whether the pending Add may go ahead. */
+export interface LinePriceGateResult {
+  state: LinePriceGateState;
+  notice: LinePriceGateNotice;
+  canAdd: boolean;
+}
+
+/**
+ * The price field lost focus or Add was clicked. While the reason dialog is
+ * open nothing changes and Add waits; a denied edit reverts to the computed
+ * price; a privileged edit opens the reason dialog; anything else is accepted.
+ */
+export function commitLinePrice(state: LinePriceGateState, ctx: LinePriceGateContext): LinePriceGateResult {
+  if (state.reasonDialogOpen) return { state, notice: null, canAdd: false };
+  const classification = classifyManualOverride({
+    priceIsDefault: state.priceIsDefault,
+    canOverride: ctx.canOverride,
+    lastComputedPrice: ctx.lastComputedPrice,
+    newValue: state.unitPrice,
+  });
+  if (classification === 'deny-permission') {
+    return {
+      state: { ...state, unitPrice: ctx.lastComputedPrice },
+      notice: 'purchaseOrders.overrideRequiresPermission',
+      canAdd: false,
+    };
+  }
+  if (classification === 'needs-reason') {
+    return { state: { ...state, reasonDialogOpen: true }, notice: null, canAdd: false };
+  }
+  return {
+    state: { ...state, priceIsDefault: state.priceIsDefault && state.unitPrice === ctx.defaultFilledPrice },
+    notice: null,
+    canAdd: true,
+  };
+}
+
+/** The reason dialog was confirmed: keep the edited price and remember the reason. */
+export function confirmLinePriceReason(state: LinePriceGateState, reason: string): LinePriceGateResult {
+  return {
+    state: { ...state, reasonDialogOpen: false, priceIsDefault: false, overrideReason: reason },
+    notice: 'purchaseOrders.overrideRecorded',
+    canAdd: false,
+  };
+}
+
+/** The reason dialog was cancelled: put the computed price back. */
+export function cancelLinePriceReason(state: LinePriceGateState, ctx: LinePriceGateContext): LinePriceGateResult {
+  return {
+    state: { ...state, reasonDialogOpen: false, unitPrice: ctx.lastComputedPrice },
+    notice: 'purchaseOrders.overrideRequiresReason',
+    canAdd: false,
+  };
+}

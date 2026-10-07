@@ -19,7 +19,15 @@ import { PurchaseUnitsService } from '../../../parts/services/purchase-units.ser
 import { PartPurchaseUnit } from '../../../parts/models/part-purchase-unit.model';
 import { OffTierPromptDialogComponent, OffTierPromptResult } from '../off-tier-prompt-dialog/off-tier-prompt-dialog.component';
 import { PriceOverrideReasonDialogComponent } from '../price-override-reason-dialog/price-override-reason-dialog.component';
-import { resolveAutoLinePrice, classifyManualOverride } from './po-line-price.util';
+import {
+  resolveAutoLinePrice,
+  commitLinePrice,
+  confirmLinePriceReason,
+  cancelLinePriceReason,
+  LinePriceGateResult,
+  LinePriceGateState,
+  LinePriceGateContext,
+} from './po-line-price.util';
 import { toCreateLineRequest, toTierVarianceLines } from './po-line-request.util';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { forkJoin, of } from 'rxjs';
@@ -276,42 +284,44 @@ export class PoDialogComponent {
       .subscribe(() => this.maybeRecomputePrice((price) => this.lastComputedPrice = price));
   }
 
-  protected onPriceCommitted(): void {
-    if (this.showPriceReasonDialog()) return;
-    const value = this.lineForm.controls.unitPrice.value;
-    // Permission + reason gating for editing a default-filled price. The
-    // branch decision lives in classifyManualOverride (unit-tested, forge#8).
-    const classification = classifyManualOverride({
-      priceIsDefault: this.priceIsDefault(),
-      canOverride: this.auth.hasRole('Admin') || this.auth.hasRole('Manager'),
-      lastComputedPrice: this.lastComputedPrice,
-      newValue: value,
-    });
-    if (classification === 'deny-permission') {
-      this.lineForm.controls.unitPrice.setValue(this.lastComputedPrice, { emitEvent: false });
-      this.snackbar.error(this.translate.instant('purchaseOrders.overrideRequiresPermission'));
-      return;
-    }
-    if (classification === 'needs-reason') {
-      this.showPriceReasonDialog.set(true);
-      return;
-    }
-    if (this.priceIsDefault() && value !== this.defaultFilledPrice) {
-      this.priceIsDefault.set(false);
-    }
+  protected onPriceCommitted(): boolean {
+    return this.applyPriceGate(commitLinePrice(this.priceGateState(), this.priceGateContext()));
   }
 
   protected onPriceReasonConfirmed(reason: string): void {
-    this.showPriceReasonDialog.set(false);
-    this.pendingLineOverrideReason.set(reason);
-    this.priceIsDefault.set(false);
-    this.snackbar.info(this.translate.instant('purchaseOrders.overrideRecorded'));
+    this.applyPriceGate(confirmLinePriceReason(this.priceGateState(), reason));
   }
 
   protected onPriceReasonCancelled(): void {
-    this.showPriceReasonDialog.set(false);
-    this.lineForm.controls.unitPrice.setValue(this.lastComputedPrice, { emitEvent: false });
-    this.snackbar.error(this.translate.instant('purchaseOrders.overrideRequiresReason'));
+    this.applyPriceGate(cancelLinePriceReason(this.priceGateState(), this.priceGateContext()));
+  }
+
+  private priceGateState(): LinePriceGateState {
+    return {
+      unitPrice: this.lineForm.controls.unitPrice.value,
+      priceIsDefault: this.priceIsDefault(),
+      reasonDialogOpen: this.showPriceReasonDialog(),
+      overrideReason: this.pendingLineOverrideReason(),
+    };
+  }
+
+  private priceGateContext(): LinePriceGateContext {
+    return {
+      canOverride: this.auth.hasRole('Admin') || this.auth.hasRole('Manager'),
+      lastComputedPrice: this.lastComputedPrice,
+      defaultFilledPrice: this.defaultFilledPrice,
+    };
+  }
+
+  private applyPriceGate({ state, notice, canAdd }: LinePriceGateResult): boolean {
+    const price = this.lineForm.controls.unitPrice;
+    if (price.value !== state.unitPrice) price.setValue(state.unitPrice, { emitEvent: false });
+    this.priceIsDefault.set(state.priceIsDefault);
+    this.showPriceReasonDialog.set(state.reasonDialogOpen);
+    this.pendingLineOverrideReason.set(state.overrideReason);
+    if (notice === 'purchaseOrders.overrideRecorded') this.snackbar.info(this.translate.instant(notice));
+    else if (notice) this.snackbar.error(this.translate.instant(notice));
+    return canAdd;
   }
 
   private applyNonStockMode(nonStock: boolean): void {
@@ -395,8 +405,7 @@ export class PoDialogComponent {
   }
 
   protected addLine(): void {
-    this.onPriceCommitted();
-    if (this.lineForm.invalid || this.showPriceReasonDialog()) return;
+    if (!this.onPriceCommitted() || this.lineForm.invalid) return;
     const f = this.lineForm.getRawValue();
     const notes = f.notes.trim() || null;
     if (f.nonStock) {
