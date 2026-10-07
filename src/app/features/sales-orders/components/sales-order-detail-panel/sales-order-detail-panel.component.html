@@ -445,7 +445,7 @@
                         {{ 'salesOrders.noJobCreated' | translate }}
                         @if (canCreateWorkOrder(line)) {
                           <button class="action-btn action-btn--sm line-warning-action" *appCap="'CAP-MFG-WO-RELEASE'"
-                            data-testid="so-line-create-work-order-btn"
+                            [attr.data-testid]="'so-line-create-work-order-btn-' + line.id"
                             [disabled]="creatingJobs()" (click)="createWorkOrders(line)">
                             <span class="material-icons-outlined">add</span>
                             {{ 'salesOrders.createWorkOrder' | translate }}
