@@ -404,7 +404,6 @@ export class JobDialogComponent implements OnInit {
 
     const f = this.jobForm.getRawValue();
     const dueDateIso = toIsoDate(f.dueDate);
-    const dueDateObj = f.dueDate ?? null;
 
     if (this.mode() === 'create') {
       this.kanbanService.createJob({
@@ -453,7 +452,7 @@ export class JobDialogComponent implements OnInit {
             assigneeId: f.assigneeId,
             customerId: f.customerId,
             priority: f.priority ?? 'Normal',
-            dueDate: dueDateObj,
+            dueDate: dueDateIso ? new Date(dueDateIso) : null,
           };
           this.saved.emit(updated);
         },

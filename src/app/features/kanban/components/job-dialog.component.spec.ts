@@ -354,7 +354,16 @@ describe('JobDialogComponent', () => {
     const due = component.jobForm.controls.dueDate.value!;
     expect([due.getFullYear(), due.getMonth(), due.getDate()]).toEqual([2026, 9, 7]);
 
+    const savedJobs: JobDetail[] = [];
+    fixture.componentInstance.saved.subscribe(j => savedJobs.push(j));
+    const update = new Subject<void>();
+    updateJob.mockReturnValue(update);
+    (fixture.componentInstance as unknown as { dialogRef: { clearDraft(): void } }).dialogRef = { clearDraft: vi.fn() };
+
     component.onSubmit();
     expect(updateJob.mock.calls[0][1].dueDate).toBe('2026-10-07T00:00:00Z');
+
+    update.next();
+    expect(new Date(savedJobs[0].dueDate!).toISOString()).toBe('2026-10-07T00:00:00.000Z');
   });
 });
