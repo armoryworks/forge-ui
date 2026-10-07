@@ -63,6 +63,19 @@ describe('MobileApiService', () => {
     http.expectNone('/api/v1/mobile/clock/punch');
   });
 
+  it('sends a punch undo with the given token and never queues it offline', async () => {
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+
+    service.undoClockPunch(77, 'person-token').subscribe({ error: () => undefined });
+
+    const req = http.expectOne('/api/v1/mobile/clock/events/77');
+    expect(req.request.method).toBe('DELETE');
+    expect(req.request.headers.get('Authorization')).toBe('Bearer person-token');
+    expect(req.request.headers.get('Idempotency-Key')).toBeTruthy();
+    expect(enqueue).not.toHaveBeenCalled();
+    req.flush({ state: 'out', lastEventType: null, lastEventAt: null, lastEventId: null });
+  });
+
   it('never queues a lookup — reads stay online-only', async () => {
     vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
     service.lookup('brack').subscribe();

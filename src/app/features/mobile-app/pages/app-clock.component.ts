@@ -6,6 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ClockState, isQueued } from '../../../shared/models/mobile-api.model';
+import { AuthService } from '../../../shared/services/auth.service';
 import { InstanceService } from '../../../shared/services/instance.service';
 import { MobileApiService } from '../../../shared/services/mobile-api.service';
 import { OfflineQueueService } from '../../../shared/services/offline-queue.service';
@@ -36,6 +37,7 @@ export class AppClockComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly identity = inject(SharedIdentityService);
+  private readonly auth = inject(AuthService);
   protected readonly instances = inject(InstanceService);
 
   protected readonly state = signal<ClockState | null>(null);
@@ -121,6 +123,7 @@ export class AppClockComponent {
   private async doPunch(kind: Punch): Promise<void> {
     if (this.busy()) return;
     this.busy.set(true);
+    const token = this.shared() ? this.auth.token() ?? undefined : undefined;
     try {
       const result = await firstValueFrom(this.api.clockPunch(kind));
       if (isQueued(result)) {
@@ -139,7 +142,7 @@ export class AppClockComponent {
         this.undo.offer(
           this.translate.instant(`mobileApp.clock.done.${kind}`),
           async () => {
-            const reverted = await firstValueFrom(this.api.undoClockPunch(result.eventId));
+            const reverted = await firstValueFrom(this.api.undoClockPunch(result.eventId, token));
             if (!isQueued(reverted)) {
               this.state.set(reverted);
               this.cache(reverted);

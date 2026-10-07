@@ -19,6 +19,8 @@ type Method = 'POST' | 'PATCH' | 'DELETE';
  * compensating action so the undo toast can reverse it with the same
  * scheme. Offline, a mutation goes to the per-instance queue with that
  * same key and resolves to `QueuedOffline`; lookups stay online-only.
+ * A compensation sent with an explicit token never queues: the queue
+ * replays under whoever holds the session at sync time.
  */
 @Injectable({ providedIn: 'root' })
 export class MobileApiService {
@@ -81,9 +83,13 @@ export class MobileApiService {
     return this.mutate<ClockPunchResult>('POST', '/api/v1/mobile/clock/punch', { eventType }, `Clock: ${eventType}`);
   }
 
-  /** Compensating action for clockPunch (own latest event, inside the window). */
-  undoClockPunch(eventId: number): Observable<ClockState | QueuedOffline> {
-    return this.mutate<ClockState>('DELETE', `/api/v1/mobile/clock/events/${eventId}`, null, 'Undo clock punch');
+  /**
+   * Compensating action for clockPunch (own latest event, inside the window).
+   * A shared device passes the token of the person who punched, since their
+   * session has already left the device.
+   */
+  undoClockPunch(eventId: number, token?: string): Observable<ClockState | QueuedOffline> {
+    return this.mutate<ClockState>('DELETE', `/api/v1/mobile/clock/events/${eventId}`, null, 'Undo clock punch', token);
   }
 
   onHand(partId: number, locationId: number): Observable<OnHand> {
@@ -110,9 +116,13 @@ export class MobileApiService {
     );
   }
 
-  private mutate<T>(method: Method, url: string, body: unknown, description: string): Observable<T | QueuedOffline> {
+  private mutate<T>(
+    method: Method, url: string, body: unknown, description: string, token?: string,
+  ): Observable<T | QueuedOffline> {
     const headers = this.idempotentHeaders();
-    if (this.platform.mobileShell && !navigator.onLine) {
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    } else if (this.platform.mobileShell && !navigator.onLine) {
       return from(this.queue.enqueue(method, url, body, description, {
         headers, instanceId: this.instances.instance()?.id ?? null,
       })).pipe(map((entryId) => ({ queued: true as const, entryId })));
