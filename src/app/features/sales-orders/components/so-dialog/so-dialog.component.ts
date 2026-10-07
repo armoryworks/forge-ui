@@ -205,12 +205,10 @@ export class SoDialogComponent {
       switchMap(() => this.lookupPendingPrice()),
       takeUntilDestroyed(this.destroyRef),
     ).subscribe(price => {
-      if (price == null) {
-        this.priceIsListPrice.set(false);
-        return;
-      }
-      this.lineForm.controls.unitPrice.setValue(price, { emitEvent: false });
-      this.priceIsListPrice.set(true);
+      const unitPrice = this.lineForm.controls.unitPrice;
+      if (unitPrice.dirty) return;
+      unitPrice.setValue(price ?? 0, { emitEvent: false });
+      this.priceIsListPrice.set(price != null);
     });
 
     this.lineForm.controls.unitPrice.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {

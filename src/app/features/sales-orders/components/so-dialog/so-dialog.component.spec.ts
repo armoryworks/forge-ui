@@ -243,6 +243,50 @@ describe('SoDialogComponent', () => {
       httpMock.verify();
     });
 
+    it('resets the price to 0 when the next part has no price', () => {
+      const { component, internals, httpMock } = setup([part({ id: 20 }), part({ id: 21, partNumber: 'P-21' })]);
+      selectCustomer(component, httpMock);
+      internals.lineForm.controls.partId.setValue(20);
+      expectPriceLookup(httpMock, 5, 20, 25);
+
+      internals.lineForm.controls.partId.setValue(21);
+      expectPriceLookup(httpMock, 5, 21, null);
+
+      expect(internals.lineForm.controls.unitPrice.value).toBe(0);
+      expect(internals.priceIsListPrice()).toBe(false);
+      httpMock.verify();
+    });
+
+    it('resets the price to 0 when the new customer has no price', () => {
+      const { component, internals, httpMock } = setup();
+      selectCustomer(component, httpMock);
+      internals.lineForm.controls.partId.setValue(20);
+      expectPriceLookup(httpMock, 5, 20, 25);
+
+      component.form.controls.customerId.setValue(6);
+      httpMock.expectOne(r => r.url === `${api}/customers/6/addresses`).flush([]);
+      httpMock.expectOne(`${api}/customers/6/credit-status`).flush(creditStatus({ customerId: 6 }));
+      expectPriceLookup(httpMock, 6, 20, null);
+
+      expect(internals.lineForm.controls.unitPrice.value).toBe(0);
+      expect(internals.priceIsListPrice()).toBe(false);
+      httpMock.verify();
+    });
+
+    it('does not overwrite a price typed while the lookup was in flight', () => {
+      const { component, internals, httpMock } = setup();
+      selectCustomer(component, httpMock);
+      internals.lineForm.controls.partId.setValue(20);
+      internals.lineForm.controls.unitPrice.setValue(8);
+      internals.lineForm.controls.unitPrice.markAsDirty();
+
+      expectPriceLookup(httpMock, 5, 20, 25);
+
+      expect(internals.lineForm.controls.unitPrice.value).toBe(8);
+      expect(internals.priceIsListPrice()).toBe(false);
+      httpMock.verify();
+    });
+
     it('keeps a price the user typed when the customer changes', () => {
       const { component, internals, httpMock } = setup();
       selectCustomer(component, httpMock);
