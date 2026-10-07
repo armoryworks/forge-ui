@@ -9,6 +9,7 @@ import { SelectComponent } from '../../../../shared/components/select/select.com
 import { AuthService } from '../../../../shared/services/auth.service';
 import { ShopFloorService } from '../../services/shop-floor.service';
 import { KioskTerminal, Team } from '../../models/kiosk-terminal.model';
+import { randomId } from '../../../../shared/utils/random-id';
 
 type SetupPhase = 'admin-login' | 'configure';
 
@@ -151,7 +152,7 @@ export class KioskSetupComponent {
   private getDeviceToken(): string {
     let token = localStorage.getItem('forge-kiosk-device-token');
     if (!token) {
-      token = crypto.randomUUID();
+      token = randomId();
       localStorage.setItem('forge-kiosk-device-token', token);
     }
     return token;

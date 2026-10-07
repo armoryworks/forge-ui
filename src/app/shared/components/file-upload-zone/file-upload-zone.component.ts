@@ -13,6 +13,8 @@ import { HttpClient, HttpEventType } from '@angular/common/http';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { randomId } from '../../utils/random-id';
+
 export interface UploadedFile {
   id: string;
   fileName: string;
@@ -182,7 +184,7 @@ export class FileUploadZoneComponent {
   // ── Chunked-upload path ──────────────────────────────────────────────────────
 
   private uploadFileChunked(file: File, chunkBytes: number): void {
-    const uploadId = crypto.randomUUID();
+    const uploadId = randomId();
     const totalChunks = Math.ceil(file.size / chunkBytes);
     const progress: FileUploadProgress = { fileName: file.name, progress: 0, chunked: true };
     this.uploads.update(list => [...list, progress]);

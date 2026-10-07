@@ -8,6 +8,7 @@ import { InstanceService } from './instance.service';
 import { MobileAuthService } from './mobile-auth.service';
 import { PlatformService } from './platform.service';
 import { SecureStorageService } from './secure-storage.service';
+import { randomId } from '../utils/random-id';
 
 const DIAGNOSTICS_KEY = 'forge-diagnostics';
 
@@ -54,7 +55,7 @@ export class CrashReportingService {
     if (!this.dsn || !this.enabled()) return;
     const err = error instanceof Error ? error : new Error(String(error));
     const body = {
-      event_id: crypto.randomUUID().replace(/-/g, ''),
+      event_id: randomId().replace(/-/g, ''),
       timestamp: new Date().toISOString(),
       platform: 'javascript',
       level: 'error',
