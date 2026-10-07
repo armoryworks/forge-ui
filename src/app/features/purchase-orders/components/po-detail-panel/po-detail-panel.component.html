@@ -103,36 +103,36 @@
       @if (po.isBlanket) {
         <div class="info-grid">
           <div class="info-item">
-            <span class="info-label">Type</span>
-            <span class="info-value"><span class="chip chip--primary">Blanket PO</span></span>
+            <span class="info-label">{{ 'purchaseOrders.blanket.type' | translate }}</span>
+            <span class="info-value"><span class="chip chip--primary">{{ 'purchaseOrders.blanket.blanketPo' | translate }}</span></span>
           </div>
           @if (po.blanketTotalQuantity !== null) {
             <div class="info-item">
-              <span class="info-label">Total Qty</span>
+              <span class="info-label">{{ 'purchaseOrders.blanket.totalQty' | translate }}</span>
               <span class="info-value">{{ po.blanketTotalQuantity }}</span>
             </div>
           }
           @if (po.blanketReleasedQuantity !== null) {
             <div class="info-item">
-              <span class="info-label">Released</span>
+              <span class="info-label">{{ 'purchaseOrders.blanket.released' | translate }}</span>
               <span class="info-value">{{ po.blanketReleasedQuantity }}</span>
             </div>
           }
           @if (po.blanketRemainingQuantity !== null) {
             <div class="info-item">
-              <span class="info-label">Remaining</span>
+              <span class="info-label">{{ 'purchaseOrders.blanket.remaining' | translate }}</span>
               <span class="info-value">{{ po.blanketRemainingQuantity }}</span>
             </div>
           }
           @if (po.agreedUnitPrice !== null) {
             <div class="info-item">
-              <span class="info-label">Agreed Price</span>
+              <span class="info-label">{{ 'purchaseOrders.blanket.agreedPrice' | translate }}</span>
               <span class="info-value"><app-currency-display [value]="po.agreedUnitPrice" [currency]="null" /></span>
             </div>
           }
           @if (po.blanketExpirationDate) {
             <div class="info-item">
-              <span class="info-label">Expires</span>
+              <span class="info-label">{{ 'purchaseOrders.blanket.expires' | translate }}</span>
               <span class="info-value">{{ po.blanketExpirationDate | date:'MM/dd/yyyy' }}</span>
             </div>
           }
