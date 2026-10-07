@@ -91,6 +91,28 @@ describe('PurchaseOrderService', () => {
     });
   });
 
+  describe('acknowledgePurchaseOrder', () => {
+    it('should POST the vendor promised date', () => {
+      service.acknowledgePurchaseOrder(5, '2026-10-15T00:00:00Z').subscribe();
+
+      const req = httpMock.expectOne(`${apiUrl}/purchase-orders/5/acknowledge`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ expectedDeliveryDate: '2026-10-15T00:00:00Z' });
+      req.flush(null);
+    });
+  });
+
+  describe('updatePurchaseOrder', () => {
+    it('should PUT only the expected delivery date', () => {
+      service.updatePurchaseOrder(5, { expectedDeliveryDate: '2026-10-20T00:00:00Z' }).subscribe();
+
+      const req = httpMock.expectOne(`${apiUrl}/purchase-orders/5`);
+      expect(req.request.method).toBe('PUT');
+      expect(req.request.body).toEqual({ expectedDeliveryDate: '2026-10-20T00:00:00Z' });
+      req.flush(null);
+    });
+  });
+
   describe('deletePurchaseOrder', () => {
     it('should DELETE PO', () => {
       service.deletePurchaseOrder(3).subscribe();

@@ -179,15 +179,66 @@ export class PoDetailPanelComponent implements OnInit {
     });
   }
 
+  protected readonly showAcknowledgeDialog = signal(false);
+  protected readonly acknowledgeSaving = signal(false);
+  protected readonly promisedDateCtrl = new FormControl<Date | null>(null);
+
   protected acknowledgePo(): void {
     const po = this.po();
     if (!po) return;
-    this.poService.acknowledgePurchaseOrder(po.id).subscribe({
+    this.promisedDateCtrl.reset(this.toCalendarDate(po.expectedDeliveryDate));
+    this.showAcknowledgeDialog.set(true);
+  }
+
+  protected confirmAcknowledge(): void {
+    const po = this.po();
+    if (!po) return;
+    this.acknowledgeSaving.set(true);
+    this.poService.acknowledgePurchaseOrder(po.id, toIsoDate(this.promisedDateCtrl.value) ?? undefined).subscribe({
       next: () => {
+        this.showAcknowledgeDialog.set(false);
+        this.acknowledgeSaving.set(false);
         this.loadDetail();
         this.changed.emit();
         this.snackbar.success(this.translate.instant('purchaseOrders.poAcknowledged'));
       },
+      error: () => this.acknowledgeSaving.set(false),
+    });
+  }
+
+  protected readonly editingExpectedDate = signal(false);
+  protected readonly expectedDateSaving = signal(false);
+  protected readonly expectedDateCtrl = new FormControl<Date | null>(null, [Validators.required]);
+
+  protected canEditExpectedDate(status: string): boolean {
+    return status === 'Draft' || status === 'Submitted' || status === 'Acknowledged' || status === 'PartiallyReceived';
+  }
+
+  protected startEditExpectedDate(): void {
+    const po = this.po();
+    if (!po) return;
+    this.expectedDateCtrl.reset(this.toCalendarDate(po.expectedDeliveryDate));
+    this.editingExpectedDate.set(true);
+  }
+
+  protected cancelEditExpectedDate(): void {
+    this.editingExpectedDate.set(false);
+  }
+
+  protected saveExpectedDate(): void {
+    const po = this.po();
+    const expectedDeliveryDate = toIsoDate(this.expectedDateCtrl.value);
+    if (!po || !expectedDeliveryDate) return;
+    this.expectedDateSaving.set(true);
+    this.poService.updatePurchaseOrder(po.id, { expectedDeliveryDate }).subscribe({
+      next: () => {
+        this.editingExpectedDate.set(false);
+        this.expectedDateSaving.set(false);
+        this.loadDetail();
+        this.changed.emit();
+        this.snackbar.success(this.translate.instant('common.saved'));
+      },
+      error: () => this.expectedDateSaving.set(false),
     });
   }
 
@@ -209,6 +260,13 @@ export class PoDetailPanelComponent implements OnInit {
       },
       error: () => this.printing.set(false),
     });
+  }
+
+  private toCalendarDate(value: Date | string | null): Date | null {
+    if (!value) return null;
+    const iso = typeof value === 'string' ? value : value.toISOString();
+    const [year, month, day] = iso.slice(0, 10).split('-').map(Number);
+    return year && month && day ? new Date(year, month - 1, day) : null;
   }
 
   protected cancelPo(): void {

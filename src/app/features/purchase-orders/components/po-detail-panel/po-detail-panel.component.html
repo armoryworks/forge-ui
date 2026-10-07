@@ -73,10 +73,40 @@
             </span>
           </div>
         }
-        @if (po.expectedDeliveryDate) {
+        @if (editingExpectedDate()) {
+          <div class="info-item">
+            <div class="number-edit">
+              <app-datepicker [label]="'purchaseOrders.expectedDelivery' | translate" [formControl]="expectedDateCtrl"
+                [required]="true" data-testid="po-expected-date-edit" />
+              <div class="number-edit__actions">
+                <button class="action-btn action-btn--sm" (click)="cancelEditExpectedDate()" [disabled]="expectedDateSaving()">{{ 'common.cancel' | translate }}</button>
+                <button class="action-btn action-btn--sm action-btn--primary" data-testid="po-expected-date-save-btn"
+                  (click)="saveExpectedDate()" [disabled]="expectedDateCtrl.invalid || expectedDateSaving()">
+                  <span class="material-icons-outlined">save</span> {{ 'common.save' | translate }}
+                </button>
+              </div>
+            </div>
+          </div>
+        } @else if (po.expectedDeliveryDate || canEditExpectedDate(po.status)) {
           <div class="info-item">
             <span class="info-label">{{ 'purchaseOrders.expectedDelivery' | translate }}</span>
-            <span class="info-value">{{ po.expectedDeliveryDate | date:'MM/dd/yyyy' }}</span>
+            <span class="info-value">
+              @if (po.expectedDeliveryDate) {
+                {{ po.expectedDeliveryDate | date:'MM/dd/yyyy':'UTC' }}
+                @if (canEditExpectedDate(po.status)) {
+                  <button class="icon-btn" data-testid="po-expected-date-edit-btn"
+                    [matTooltip]="'common.edit' | translate" matTooltipPosition="above"
+                    [attr.aria-label]="'common.edit' | translate" (click)="startEditExpectedDate()">
+                    <span class="material-icons-outlined">edit_calendar</span>
+                  </button>
+                }
+              } @else {
+                <button class="action-btn action-btn--sm" data-testid="po-expected-date-set-btn" (click)="startEditExpectedDate()">
+                  <span class="material-icons-outlined">event</span>
+                  {{ 'common.add' | translate }}
+                </button>
+              }
+            </span>
           </div>
         }
         @if (po.submittedDate) {
@@ -381,6 +411,25 @@
     [purchaseOrder]="po()!"
     (closed)="closeReceiveDialog()"
     (saved)="onReceiveSaved()" />
+}
+
+@if (showAcknowledgeDialog()) {
+  <app-dialog [title]="'purchaseOrders.acknowledge' | translate" width="420px" (closed)="showAcknowledgeDialog.set(false)">
+    <div>
+      <app-datepicker [label]="'purchaseOrders.vendorPromisedDate' | translate" [formControl]="promisedDateCtrl"
+        data-testid="po-acknowledge-promised-date" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="showAcknowledgeDialog.set(false)">{{ 'common.cancel' | translate }}</button>
+      <button class="action-btn action-btn--primary"
+        data-testid="po-acknowledge-confirm"
+        [disabled]="acknowledgeSaving()"
+        (click)="confirmAcknowledge()">
+        <span class="material-icons-outlined">thumb_up</span>
+        {{ 'purchaseOrders.acknowledge' | translate }}
+      </button>
+    </div>
+  </app-dialog>
 }
 
 <!-- Phase 3 / WU-14 / H3 — Short Close Dialog -->
