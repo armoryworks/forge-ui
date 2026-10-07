@@ -46,6 +46,7 @@ export interface DiscoveryQuestion {
   whyAsking: string;
   choices: DiscoveryChoice[] | null;
   branch: string | null;
+  internalNote?: string | null;
 }
 
 export interface DiscoveryQuestionsResponse {

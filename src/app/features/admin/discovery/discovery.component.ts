@@ -255,6 +255,7 @@ export class DiscoveryComponent implements OnInit {
           deltas: preview.deltas,
           violations: preview.violations,
           noOp: preview.deltaCount === 0,
+          hideCodes: !this.consultantModeEnabled(),
         };
         this.dialog
           .open<PresetApplyDialogComponent, PresetApplyDialogData, PresetApplyDialogResult>(
@@ -277,10 +278,12 @@ export class DiscoveryComponent implements OnInit {
   private commitApply(chosenPresetId: string, chosenPresetName: string): void {
     this.discovery.apply(chosenPresetId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.snackbar.success(`Discovery applied — ${chosenPresetName}.`);
         this.installState.dismiss();
         this.capabilityService.load().subscribe();
-        this.router.navigate(['/admin/capabilities']);
+        this.router.navigate(['/dashboard']).then(() => {
+          this.snackbar.successWithNav(
+            `Discovery applied — ${chosenPresetName}.`, '/admin/capabilities', 'Review capabilities');
+        });
       },
       error: () => {
         this.snackbar.error('Failed to apply discovery — check capability constraints.');

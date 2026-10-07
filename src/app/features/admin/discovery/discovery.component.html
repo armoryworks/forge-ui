@@ -53,7 +53,12 @@
                     <summary>{{ rec.factors.length }} factor(s) drove this recommendation</summary>
                     <ul>
                       @for (factor of rec.factors; track factor.questionId) {
-                        <li><code>{{ factor.questionId }}</code> — {{ factor.description }}</li>
+                        <li>
+                          @if (consultantModeEnabled()) {
+                            <code>{{ factor.questionId }}</code> —
+                          }
+                          {{ factor.description }}
+                        </li>
                       }
                     </ul>
                   </details>
@@ -102,7 +107,9 @@
                           {{ d.willBeEnabled ? 'add_circle' : 'remove_circle' }}
                         </span>
                         <span class="delta-list__name">{{ d.name }}</span>
-                        <code class="delta-list__code">{{ d.code }}</code>
+                        @if (consultantModeEnabled()) {
+                          <code class="delta-list__code">{{ d.code }}</code>
+                        }
                       </li>
                     }
                   </ul>
@@ -131,12 +138,20 @@
             <!-- Per-question card -->
             <article class="question-card" [attr.data-question-id]="q.id" data-testid="discovery-question">
               <header class="question-card__header">
-                <span class="question-card__id"><code>{{ q.id }}</code></span>
+                @if (consultantModeEnabled()) {
+                  <span class="question-card__id" data-testid="discovery-question-id"><code>{{ q.id }}</code></span>
+                }
                 <h2 class="question-card__text">{{ q.text }}</h2>
                 <p class="question-card__why">
                   <span class="material-icons-outlined">info</span>
                   {{ q.whyAsking }}
                 </p>
+                @if (consultantModeEnabled() && q.internalNote) {
+                  <p class="question-card__internal-note" data-testid="discovery-internal-note">
+                    <span class="material-icons-outlined">engineering</span>
+                    {{ q.internalNote }}
+                  </p>
+                }
               </header>
 
               <div class="question-card__body">
@@ -298,7 +313,9 @@
 
           <div class="discovery-page__branch">
             @if (branch()) {
-              <span class="discovery-page__branch-label">Branch {{ branch() }}</span>
+              @if (consultantModeEnabled()) {
+                <span class="discovery-page__branch-label">Branch {{ branch() }}</span>
+              }
               <span class="discovery-page__branch-detail">
                 @switch (branch()) {
                   @case ('A') { Small (1–25) }

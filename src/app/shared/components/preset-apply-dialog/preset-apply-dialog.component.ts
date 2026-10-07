@@ -26,6 +26,8 @@ export interface PresetApplyDialogData {
   violations: PresetApplyViolation[];
   /** When true, the dialog displays the no-op state — "everything already matches" */
   noOp?: boolean;
+  /** When true, delta rows show only the capability name, not its internal code (self-serve discovery). */
+  hideCodes?: boolean;
 }
 
 export interface PresetApplyDialogResult {

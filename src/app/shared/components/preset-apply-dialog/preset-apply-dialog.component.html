@@ -35,7 +35,13 @@
           </h4>
           <ul class="preset-apply-dialog__list">
             @for (delta of enableDeltas(); track delta.code) {
-              <li><span class="capability-area">{{ delta.area }}</span> {{ delta.code }} — {{ delta.name }}</li>
+              <li>
+                <span class="capability-area">{{ delta.area }}</span>
+                @if (!data.hideCodes) {
+                  {{ delta.code }} —
+                }
+                {{ delta.name }}
+              </li>
             }
           </ul>
         </section>
@@ -48,7 +54,13 @@
           </h4>
           <ul class="preset-apply-dialog__list">
             @for (delta of disableDeltas(); track delta.code) {
-              <li><span class="capability-area">{{ delta.area }}</span> {{ delta.code }} — {{ delta.name }}</li>
+              <li>
+                <span class="capability-area">{{ delta.area }}</span>
+                @if (!data.hideCodes) {
+                  {{ delta.code }} —
+                }
+                {{ delta.name }}
+              </li>
             }
           </ul>
         </section>
