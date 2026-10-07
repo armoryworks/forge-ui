@@ -14,7 +14,7 @@ export class UndoService {
   private readonly snackBar = inject(MatSnackBar);
   private readonly translate = inject(TranslateService);
 
-  offer(message: string, compensate: () => Promise<unknown>): void {
+  offer(message: string, compensate: () => Promise<unknown>, closed?: () => void): void {
     const ref = this.snackBar.open(message, this.translate.instant('mobileApp.undo.action'), {
       duration: UNDO_WINDOW_MS,
       panelClass: ['snackbar--info', 'snackbar--undo'],
@@ -27,5 +27,6 @@ export class UndoService {
         });
       });
     });
+    if (closed) ref.afterDismissed().subscribe(() => closed());
   }
 }

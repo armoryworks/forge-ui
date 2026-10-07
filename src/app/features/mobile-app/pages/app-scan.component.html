@@ -52,8 +52,10 @@
           [result]="resolved"
           [busy]="busy()"
           [runningJobId]="runningJobId()"
+          [actingAs]="actingAs()"
           (chosen)="onAction($event)"
           (dismissed)="dismiss()"
+          (notYou)="notYou()"
         />
       }
     </div>

@@ -5,6 +5,14 @@
     @if (result().subtitle; as subtitle) {
       <span class="sheet__subtitle">{{ subtitle }}</span>
     }
+    @if (actingAs(); as name) {
+      <span class="sheet__acting" data-testid="scan-acting-as">
+        {{ 'mobileApp.scan.actingAs' | translate: { name } }}
+        <button type="button" class="sheet__not-you" data-testid="scan-not-you" (click)="notYou.emit()">
+          {{ 'mobileApp.scan.notYou' | translate }}
+        </button>
+      </span>
+    }
   </div>
 
   <div class="sheet__actions">

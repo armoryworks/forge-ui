@@ -31,8 +31,10 @@ export class ScanActionSheetComponent {
   readonly result = input.required<ScanResolveResult>();
   readonly busy = input<boolean>(false);
   readonly runningJobId = input<number | null>(null);
+  readonly actingAs = input<string | null>(null);
   readonly chosen = output<ScanAction>();
   readonly dismissed = output<void>();
+  readonly notYou = output<void>();
 
   protected readonly titleKey = computed(() => `mobileApp.scan.kind.${this.result().kind}`);
 

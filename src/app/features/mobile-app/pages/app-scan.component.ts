@@ -7,6 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ScanResolveResult, isQueued } from '../../../shared/models/mobile-api.model';
+import { AuthService } from '../../../shared/services/auth.service';
 import { CameraScannerService } from '../../../shared/services/camera-scanner.service';
 import { InstanceService } from '../../../shared/services/instance.service';
 import { MobileApiService } from '../../../shared/services/mobile-api.service';
@@ -23,7 +24,9 @@ import { ScanAction, ScanActionSheetComponent } from '../components/scan-action-
 /**
  * Scan is home: the viewfinder opens immediately. A decode ticks, resolves
  * on the server, and offers one contextual action sheet — never a detail
- * page by itself. Unknown codes double-buzz. Torch bottom-left.
+ * page by itself. Unknown codes double-buzz. Torch bottom-left. On a shared
+ * device a start, move or complete ends the person's identity once its undo
+ * toast closes; the undo itself runs with the token captured beforehand.
  */
 @Component({
   selector: 'app-app-scan',
@@ -42,6 +45,7 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
   private readonly identity = inject(SharedIdentityService);
+  private readonly auth = inject(AuthService);
   private readonly timer = inject(MobileTimerService);
   protected readonly instances = inject(InstanceService);
 
@@ -55,6 +59,11 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
   protected readonly typing = signal(false);
 
   protected readonly runningJobId = computed(() => this.timer.active()?.jobId ?? null);
+  protected readonly actingAs = computed(() => {
+    if (!this.instances.instance()?.shared || !this.identity.identified()) return null;
+    const person = this.identity.person();
+    return person ? `${person.firstName} ${person.lastName}`.trim() : null;
+  });
 
   private pendingAction: ScanAction | null = null;
 
@@ -114,8 +123,14 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
     this.pendingAction = null;
   }
 
+  protected notYou(): void {
+    this.identity.clear();
+  }
+
   private async perform(action: ScanAction, result: ScanResolveResult): Promise<void> {
     this.busy.set(true);
+    const token = this.sharedToken();
+    let ended = false;
     try {
       switch (action) {
         case 'details':
@@ -123,16 +138,16 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
           else this.notice.set(this.translate.instant('mobileApp.scan.openOnDesktopHint'));
           break;
         case 'move':
-          if (result.id) await this.advance(result.id, result.code);
+          if (result.id) ended = await this.advance(result.id, result.code, token);
           break;
         case 'start':
-          if (result.id) await this.startTimer(result.id, result.label);
+          if (result.id) ended = await this.startTimer(result.id, result.label, token);
           break;
         case 'stop':
-          await this.stopTimer();
+          ended = await this.stopTimer(token);
           break;
         case 'complete':
-          if (result.id) await this.complete(result.id, result.code);
+          if (result.id) ended = await this.complete(result.id, result.code, token);
           break;
         case 'moveStock':
           await this.router.navigate(['/app/move'], { queryParams: { code: result.code } });
@@ -145,61 +160,81 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
       this.notice.set(this.translate.instant('mobileApp.jobs.actionFailed'));
     } finally {
       this.busy.set(false);
-      if (action !== 'identify') this.identity.touch();
+      if (action !== 'identify' && !ended) this.identity.touch();
     }
   }
 
-  private async advance(jobId: number, code: string): Promise<void> {
+  private sharedToken(): string | undefined {
+    if (!this.instances.instance()?.shared || !this.identity.identified()) return undefined;
+    return this.auth.token() ?? undefined;
+  }
+
+  private endIdentity(token: string | undefined): (() => void) | undefined {
+    return token ? () => this.identity.clear() : undefined;
+  }
+
+  private async advance(jobId: number, code: string, token: string | undefined): Promise<boolean> {
     const outcome = await firstValueFrom(this.api.advanceJob(jobId, code));
-    if (!outcome) return;
+    if (!outcome) return false;
     if (isQueued(outcome)) {
-      this.offerQueuedUndo(outcome.entryId);
+      this.offerQueuedUndo([outcome.entryId], token);
       this.result.set(null);
       await this.startScanner();
-      return;
+      return !!token;
     }
     if (outcome.collapsed) {
       this.notice.set(this.translate.instant('mobileApp.scan.collapsed'));
-      return;
+      return false;
     }
     this.undo.offer(
       this.translate.instant('mobileApp.jobs.movedTo', { column: outcome.status.stageName }),
-      () => firstValueFrom(this.api.moveJobToStage(jobId, outcome.previousStageId)),
+      () => firstValueFrom(this.api.moveJobToStage(jobId, outcome.previousStageId, token)),
+      this.endIdentity(token),
     );
     this.result.set(null);
     await this.startScanner();
+    return !!token;
   }
 
-  private async startTimer(jobId: number, label: string): Promise<void> {
+  private async startTimer(jobId: number, label: string, token: string | undefined): Promise<boolean> {
     const outcome = await this.timer.start(jobId, label);
-    if (!outcome) return;
+    if (!outcome) return false;
     const entryId = outcome.entryId;
     if (entryId === null) {
-      this.offerQueuedUndo(...outcome.queuedIds);
+      this.offerQueuedUndo(outcome.queuedIds, token);
     } else {
-      this.undo.offer(this.translate.instant('mobileApp.jobs.timerStarted'), () => this.timer.undoStart(entryId));
+      this.undo.offer(
+        this.translate.instant('mobileApp.jobs.timerStarted'),
+        () => this.timer.undoStart(entryId, token),
+        this.endIdentity(token),
+      );
     }
     this.result.set(null);
     await this.startScanner();
+    return !!token;
   }
 
-  private async stopTimer(): Promise<void> {
+  private async stopTimer(token: string | undefined): Promise<boolean> {
     const stopped = await this.timer.stop();
     this.result.set(null);
     await this.startScanner();
     this.notice.set(this.translate.instant('mobileApp.timer.stopped', { jobNumber: stopped?.jobNumber ?? '' }));
+    if (!token) return false;
+    this.identity.clear();
+    return true;
   }
 
-  private async complete(jobId: number, code: string): Promise<void> {
+  private async complete(jobId: number, code: string, token: string | undefined): Promise<boolean> {
     await firstValueFrom(this.api.stopTimer()).catch(() => undefined);
     void this.timer.refresh();
-    await this.advance(jobId, code);
+    return this.advance(jobId, code, token);
   }
 
-  private offerQueuedUndo(...entryIds: string[]): void {
+  private offerQueuedUndo(entryIds: string[], token?: string): void {
     this.undo.offer(
       this.translate.instant('mobileApp.offline.queued'),
       () => Promise.all(entryIds.map((id) => this.queue.remove(id))),
+      this.endIdentity(token),
     );
   }
 

@@ -34,6 +34,28 @@
     color: var(--text-secondary);
   }
 
+  &__acting {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: $sp-md;
+    font-size: $font-size-md;
+    color: var(--text-secondary);
+  }
+
+  &__not-you {
+    min-height: 44px;
+    padding: 0;
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-family: $font-family-primary;
+    font-size: $font-size-md;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
   &__actions {
     display: grid;
     grid-template-columns: repeat(2, 1fr);

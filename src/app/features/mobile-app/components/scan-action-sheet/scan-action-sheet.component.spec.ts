@@ -15,10 +15,11 @@ const job: ScanResolveResult = { kind: 'job', id: 42, code: 'JOB-42', label: 'JO
 describe('ScanActionSheetComponent', () => {
   let fixture: ComponentFixture<ScanActionSheetComponent>;
 
-  function render(runningJobId: number | null): HTMLElement {
+  function render(runningJobId: number | null, actingAs: string | null = null): HTMLElement {
     fixture = TestBed.createComponent(ScanActionSheetComponent);
     fixture.componentRef.setInput('result', job);
     fixture.componentRef.setInput('runningJobId', runningJobId);
+    fixture.componentRef.setInput('actingAs', actingAs);
     fixture.detectChanges();
     return fixture.nativeElement as HTMLElement;
   }
@@ -45,5 +46,20 @@ describe('ScanActionSheetComponent', () => {
     el.querySelector<HTMLButtonElement>('[data-testid="scan-action-stop"]')!.click();
 
     expect(chosen).toHaveBeenCalledWith('stop');
+  });
+
+  it('shows who is acting and lets someone else say it is not them', () => {
+    const el = render(null, 'Ana Ruiz');
+    const notYou = vi.fn();
+    fixture.componentInstance.notYou.subscribe(notYou);
+
+    expect(el.querySelector('[data-testid="scan-acting-as"]')).not.toBeNull();
+    el.querySelector<HTMLButtonElement>('[data-testid="scan-not-you"]')!.click();
+
+    expect(notYou).toHaveBeenCalledOnce();
+  });
+
+  it('hides the acting-as line when nobody is identified', () => {
+    expect(render(null).querySelector('[data-testid="scan-acting-as"]')).toBeNull();
   });
 });
