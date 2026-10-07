@@ -303,7 +303,8 @@ export class PartWorkflowPageComponent {
     // entity snapshot. saveCurrentStep is a no-op when nothing is
     // registered or the form is pristine.
     this.workflowService.saveCurrentStep().subscribe({
-      next: () => {
+      next: (saveResult) => {
+        if (!saveResult.ok) return;
         this.workflowService.setMode(run.id, mode).subscribe({
           next: (updated) => {
             this.run.set(updated);
