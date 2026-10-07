@@ -4,6 +4,8 @@ export interface UpdateOperationRequest {
   instructions?: string;
   workCenterId?: number;
   estimatedMs?: number;
+  setupMinutes?: number;
+  runMinutesLot?: number;
   isQcCheckpoint?: boolean;
   qcCriteria?: string;
   referencedOperationId?: number;

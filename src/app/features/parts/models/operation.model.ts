@@ -7,6 +7,8 @@ export interface Operation {
   workCenterId: number | null;
   workCenterName: string | null;
   estimatedMs: number | null;
+  setupMinutes: number;
+  runMinutesLot: number;
   isQcCheckpoint: boolean;
   qcCriteria: string | null;
   referencedOperationId: number | null;

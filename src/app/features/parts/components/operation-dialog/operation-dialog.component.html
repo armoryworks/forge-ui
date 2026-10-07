@@ -38,8 +38,13 @@
         <div class="est-time-group__fields">
           <app-input data-testid="op-est-hours" [label]="'parts.estHours' | translate" type="number" [min]="0" formControlName="estHours" />
           <app-input data-testid="op-est-minutes" [label]="'parts.estMinutes' | translate" type="number" [min]="0" formControlName="estMinutes" />
-          <app-input data-testid="op-est-ms" [label]="'parts.estMilliseconds' | translate" type="number" [min]="0" formControlName="estMs" />
+          <app-input data-testid="op-est-seconds" [label]="'parts.estSeconds' | translate" type="number" [min]="0" [max]="59.999" step="any" formControlName="estSeconds" />
         </div>
+      </div>
+
+      <div class="dialog-row">
+        <app-input data-testid="op-setup-minutes" [label]="'parts.setupTime' | translate" type="number" [min]="0" step="any" formControlName="setupMinutes" />
+        <app-input data-testid="op-run-minutes-lot" [label]="'parts.lotTime' | translate" type="number" [min]="0" step="any" formControlName="runMinutesLot" />
       </div>
 
       <app-input data-testid="op-title" [label]="'common.title' | translate" formControlName="title" [maxlength]="200" [required]="true" />
