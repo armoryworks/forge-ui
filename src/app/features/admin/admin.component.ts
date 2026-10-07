@@ -104,8 +104,8 @@ export class AdminComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
 
-  private static readonly VALID_TABS = new Set(['overview', 'users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'role-templates', 'compliance', 'sales-tax', 'audit-log', 'time-corrections', 'events', 'announcements', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'bi-api-keys', 'system-api-keys', 'connections']);
-  private static readonly ADMIN_ONLY_TABS = new Set(['overview', 'users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'ai-assistants', 'teams', 'role-templates', 'sales-tax', 'audit-log', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'bi-api-keys', 'system-api-keys', 'connections']);
+  private static readonly VALID_TABS = new Set(['overview', 'users', 'track-types', 'reference-data', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'role-templates', 'compliance', 'sales-tax', 'audit-log', 'time-corrections', 'events', 'announcements', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'bi-api-keys', 'system-api-keys', 'connections']);
+  private static readonly ADMIN_ONLY_TABS = new Set(['overview', 'users', 'track-types', 'reference-data', 'settings', 'integrations', 'ai-assistants', 'teams', 'role-templates', 'sales-tax', 'audit-log', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'bi-api-keys', 'system-api-keys', 'connections']);
   private static readonly MANAGER_AND_ADMIN_TABS = new Set(['training', 'time-corrections', 'events', 'announcements']);
 
   protected readonly isAdmin = computed(() => this.authService.hasRole('Admin'));

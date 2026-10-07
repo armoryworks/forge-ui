@@ -5,12 +5,12 @@ export const ADMIN_TOUR: TourDefinition = {
   steps: [
     {
       title: 'Admin Settings',
-      description: 'Configure users, track types, reference data, terminology, and system settings.',
+      description: 'Configure users, track types, reference data, and system settings.',
     },
     {
       element: '.tab-bar',
       title: 'Settings Tabs',
-      description: 'Switch between Users, Track Types, Reference Data, Terminology, Branding, and System Settings.',
+      description: 'Switch between Users, Track Types, Reference Data, Branding, and System Settings.',
       side: 'bottom',
     },
     {

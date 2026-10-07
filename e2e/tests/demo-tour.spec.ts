@@ -62,7 +62,6 @@ const PAGES: { name: string; path: string; waitFor?: string; note?: string }[] =
   { name: '44-admin-users', path: '/admin/users' },
   { name: '45-admin-track-types', path: '/admin/track-types' },
   { name: '46-admin-reference-data', path: '/admin/reference-data' },
-  { name: '47-admin-terminology', path: '/admin/terminology' },
   { name: '48-admin-integrations', path: '/admin/integrations' },
   { name: '49-admin-settings', path: '/admin/settings' },
   { name: '50-admin-audit-log', path: '/admin/audit-log' },

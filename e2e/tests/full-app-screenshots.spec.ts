@@ -28,7 +28,6 @@ const PAGES = [
   { name: 'admin-users', path: '/admin/users' },
   { name: 'admin-track-types', path: '/admin/track-types' },
   { name: 'admin-reference-data', path: '/admin/reference-data' },
-  { name: 'admin-terminology', path: '/admin/terminology' },
   { name: 'admin-integrations', path: '/admin/integrations' },
   { name: 'admin-system', path: '/admin/system' },
   { name: 'admin-compliance', path: '/admin/compliance' },
