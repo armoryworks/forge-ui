@@ -264,7 +264,7 @@ export class SalesOrderDetailPanelComponent {
     if (!so) return [];
     const status = so.status;
     if (status === 'Draft' || status === 'Cancelled') return [];
-    return so.lines.filter(l => l.jobs.length === 0);
+    return so.lines.filter(l => l.partId != null && l.jobs.length === 0);
   });
 
   protected readonly linesNeedingWorkOrders = computed(() => {

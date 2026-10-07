@@ -328,6 +328,20 @@ describe('SalesOrderDetailPanelComponent', () => {
     expect(soService['createMissingJobs']).not.toHaveBeenCalled();
   });
 
+  it('offers work orders only on lines with a part', () => {
+    const make = line();
+    const freight = line({ id: 12, lineNumber: 2, partId: null, partNumber: null, description: 'Freight' });
+    const panel = build(order({ status: 'Confirmed', lines: [make, freight] }));
+
+    expect(panel['linesWithNoJobs']()).toEqual([make]);
+    expect(panel['linesNeedingWorkOrders']()).toEqual([make]);
+    expect(panel['canCreateWorkOrder'](make)).toBe(true);
+    expect(panel['canCreateWorkOrder'](freight)).toBe(false);
+
+    panel['createWorkOrders']();
+    expect(soService['createMissingJobs'].mock.calls).toEqual([[7, 11]]);
+  });
+
   it('says so when nothing was created and nothing was skipped', () => {
     soService['createMissingJobs'].mockReturnValue(of({ created: 0, skipped: [] }));
     const panel = build(order({ status: 'Confirmed' }));
