@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
@@ -356,13 +356,14 @@ describe('KanbanComponent', () => {
   });
 
   describe('reordering cards', () => {
-    it('saves the dragged order and keeps hidden work orders after the visible ones', () => {
+    it('saves the dragged order and leaves hidden work orders where they were', () => {
       component.columns.set([{
         stage: stage({ id: 1, name: 'Queued', sortOrder: 1 }),
         jobs: [
           boardJob(1, 'Queued', { boardPosition: 0 }),
           boardJob(2, 'Queued', { boardPosition: 1, disposition: 'Scrap' }),
           boardJob(3, 'Queued', { boardPosition: 2 }),
+          boardJob(4, 'Queued', { boardPosition: 3, disposition: 'Scrap' }),
         ],
       }]);
       const visible = component.filteredColumns()[0].jobs;
@@ -375,9 +376,55 @@ describe('KanbanComponent', () => {
         currentIndex: 0,
       } as unknown as CdkDragDrop<KanbanJob[]>);
 
+      expect(component.columns()[0].jobs.map(j => j.id)).toEqual([3, 2, 1, 4]);
+      expect(component.columns()[0].jobs.map(j => j.boardPosition)).toEqual([0, 1, 2, 3]);
+      expect(updateJobPosition.mock.calls).toEqual([[3, 0], [1, 2]]);
+    });
+
+    it('reuses the existing positions of the swapped cards when they have gaps', () => {
+      component.columns.set([{
+        stage: stage({ id: 1, name: 'Queued', sortOrder: 1 }),
+        jobs: [
+          boardJob(1, 'Queued', { boardPosition: 4 }),
+          boardJob(2, 'Queued', { boardPosition: 7, disposition: 'Scrap' }),
+          boardJob(3, 'Queued', { boardPosition: 9 }),
+        ],
+      }]);
+      const container = { id: 'column-0', data: component.filteredColumns()[0].jobs } as unknown as CdkDropList<KanbanJob[]>;
+
+      component.onCardDropped({
+        previousContainer: container,
+        container,
+        previousIndex: 0,
+        currentIndex: 1,
+      } as unknown as CdkDragDrop<KanbanJob[]>);
+
+      expect(component.columns()[0].jobs.map(j => j.id)).toEqual([3, 2, 1]);
+      expect(updateJobPosition.mock.calls).toEqual([[3, 4], [1, 9]]);
+    });
+
+    it('spreads cards that share a position so the new order sticks', () => {
+      component.toggleActiveOnly();
+      component.columns.set([{
+        stage: stage({ id: 1, name: 'Queued', sortOrder: 1 }),
+        jobs: [
+          boardJob(1, 'Queued', { boardPosition: 0 }),
+          boardJob(2, 'Queued', { boardPosition: 0 }),
+          boardJob(3, 'Queued', { boardPosition: 0 }),
+        ],
+      }]);
+      const container = { id: 'column-0', data: component.filteredColumns()[0].jobs } as unknown as CdkDropList<KanbanJob[]>;
+
+      component.onCardDropped({
+        previousContainer: container,
+        container,
+        previousIndex: 2,
+        currentIndex: 0,
+      } as unknown as CdkDragDrop<KanbanJob[]>);
+
       expect(component.columns()[0].jobs.map(j => j.id)).toEqual([3, 1, 2]);
       expect(component.columns()[0].jobs.map(j => j.boardPosition)).toEqual([0, 1, 2]);
-      expect(updateJobPosition.mock.calls).toEqual([[3, 0], [1, 1], [2, 2]]);
+      expect(updateJobPosition.mock.calls).toEqual([[1, 1], [2, 2]]);
     });
 
     it('does not re-save cards whose position did not change', () => {
@@ -431,6 +478,78 @@ describe('KanbanComponent', () => {
       expect(component.columns()[0].jobs.map(j => j.id)).toEqual([1]);
       expect(component.columns()[1].jobs.map(j => j.id)).toEqual([3, 2]);
       expect(component.columns()[1].jobs[1].stageName).toBe('Running');
+    });
+
+    it('drops a moved card next to its visible neighbour without shifting hidden cards above it', () => {
+      component.columns.set([
+        {
+          stage: stage({ id: 1, name: 'Queued', sortOrder: 1 }),
+          jobs: [boardJob(1, 'Queued', { boardPosition: 0 })],
+        },
+        {
+          stage: stage({ id: 2, name: 'Running', sortOrder: 2 }),
+          jobs: [
+            boardJob(3, 'Running', { boardPosition: 0, disposition: 'Scrap' }),
+            boardJob(4, 'Running', { boardPosition: 5 }),
+            boardJob(5, 'Running', { boardPosition: 8 }),
+          ],
+        },
+      ]);
+      const cols = component.filteredColumns();
+      const source = { id: 'column-0', data: cols[0].jobs } as unknown as CdkDropList<KanbanJob[]>;
+      const target = { id: 'column-1', data: cols[1].jobs } as unknown as CdkDropList<KanbanJob[]>;
+
+      component.onCardDropped({
+        previousContainer: source,
+        container: target,
+        previousIndex: 0,
+        currentIndex: 1,
+      } as unknown as CdkDragDrop<KanbanJob[]>);
+
+      expect(component.columns()[1].jobs.map(j => j.id)).toEqual([3, 4, 1, 5]);
+      expect(component.columns()[1].jobs.map(j => j.boardPosition)).toEqual([0, 5, 6, 8]);
+      expect(updateJobPosition.mock.calls).toEqual([[1, 6]]);
+    });
+
+    it('saves the drop slot even when a board reload lands before the move response', () => {
+      const moveResponse = new Subject<void>();
+      moveJobStage.mockReturnValue(moveResponse);
+      component.columns.set([
+        {
+          stage: stage({ id: 1, name: 'Queued', sortOrder: 1 }),
+          jobs: [boardJob(1, 'Queued', { boardPosition: 0 })],
+        },
+        {
+          stage: stage({ id: 2, name: 'Running', sortOrder: 2 }),
+          jobs: [boardJob(3, 'Running', { boardPosition: 0 }), boardJob(4, 'Running', { boardPosition: 1 })],
+        },
+      ]);
+      const cols = component.filteredColumns();
+      const source = { id: 'column-0', data: cols[0].jobs } as unknown as CdkDropList<KanbanJob[]>;
+      const target = { id: 'column-1', data: cols[1].jobs } as unknown as CdkDropList<KanbanJob[]>;
+
+      component.onCardDropped({
+        previousContainer: source,
+        container: target,
+        previousIndex: 0,
+        currentIndex: 0,
+      } as unknown as CdkDragDrop<KanbanJob[]>);
+
+      component.columns.set([
+        { stage: stage({ id: 1, name: 'Queued', sortOrder: 1 }), jobs: [] },
+        {
+          stage: stage({ id: 2, name: 'Running', sortOrder: 2 }),
+          jobs: [
+            boardJob(3, 'Running', { boardPosition: 0 }),
+            boardJob(4, 'Running', { boardPosition: 1 }),
+            boardJob(1, 'Running', { boardPosition: 2 }),
+          ],
+        },
+      ]);
+      moveResponse.next();
+      moveResponse.complete();
+
+      expect(updateJobPosition.mock.calls).toEqual([[1, 0], [3, 1], [4, 2]]);
     });
   });
 });

@@ -517,28 +517,68 @@ export class KanbanComponent implements OnInit, OnDestroy {
     this.columns.update(cols => cols.map((col, i) => changes.has(i) ? { ...col, jobs: changes.get(i)! } : col));
   }
 
-  private orderedColumnJobs(columnIndex: number, visibleOrder: KanbanJob[]): KanbanJob[] {
+  private mergeIntoSlots(full: KanbanJob[], visibleOrder: KanbanJob[]): KanbanJob[] {
     const visibleIds = new Set(visibleOrder.map(j => j.id));
-    const hidden = (this.columns()[columnIndex]?.jobs ?? []).filter(j => !visibleIds.has(j.id));
-    return [...visibleOrder, ...hidden];
+    const slots = full.flatMap((j, i) => visibleIds.has(j.id) ? [i] : []);
+    if (slots.length !== visibleOrder.length) return full;
+    const merged = [...full];
+    slots.forEach((slot, k) => {
+      merged[slot] = { ...visibleOrder[k], boardPosition: full[slot].boardPosition };
+    });
+    return merged;
   }
 
-  private persistPositions(jobs: KanbanJob[], alwaysPersistJobId: number | null = null): KanbanJob[] {
-    return jobs.map((job, index) => {
-      if (job.boardPosition === index && job.id !== alwaysPersistJobId) return job;
-      this.kanbanService.updateJobPosition(job.id, index).subscribe();
-      return { ...job, boardPosition: index };
+  private insertAtVisibleSlot(full: KanbanJob[], visibleOrder: KanbanJob[], moved: KanbanJob): KanbanJob[] {
+    const rest = full.filter(j => j.id !== moved.id);
+    const visibleIndex = visibleOrder.findIndex(j => j.id === moved.id);
+    const before = visibleIndex > 0 ? visibleOrder[visibleIndex - 1] : undefined;
+    const after = visibleIndex >= 0 ? visibleOrder[visibleIndex + 1] : undefined;
+    let at = rest.length;
+    if (before) {
+      const i = rest.findIndex(j => j.id === before.id);
+      if (i >= 0) at = i + 1;
+    } else if (after) {
+      const i = rest.findIndex(j => j.id === after.id);
+      if (i >= 0) at = i;
+    }
+    const position = at > 0
+      ? rest[at - 1].boardPosition + 1
+      : Math.max(0, (rest[0]?.boardPosition ?? 1) - 1);
+    return [...rest.slice(0, at), { ...moved, boardPosition: position }, ...rest.slice(at)];
+  }
+
+  private normalizePositions(jobs: KanbanJob[]): KanbanJob[] {
+    let previous = -1;
+    return jobs.map(job => {
+      const position = job.boardPosition > previous ? job.boardPosition : previous + 1;
+      previous = position;
+      return position === job.boardPosition ? job : { ...job, boardPosition: position };
     });
+  }
+
+  private changedPositions(before: KanbanJob[], after: KanbanJob[]): KanbanJob[] {
+    const original = new Map(before.map(j => [j.id, j.boardPosition]));
+    return after.filter(j => original.get(j.id) !== j.boardPosition);
+  }
+
+  private persistPositions(jobs: KanbanJob[]): void {
+    for (const job of jobs) {
+      this.kanbanService.updateJobPosition(job.id, job.boardPosition).subscribe();
+    }
   }
 
   // ── Board View Drop ──
   protected onCardDropped(event: CdkDragDrop<KanbanJob[]>): void {
     const targetColumnIndex = this.dropListIds().indexOf(event.container.id);
+    const targetFull = [...(this.columns()[targetColumnIndex]?.jobs ?? [])];
+
     if (event.previousContainer === event.container) {
       if (targetColumnIndex < 0) return;
-      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-      const ordered = this.persistPositions(this.orderedColumnJobs(targetColumnIndex, event.container.data));
+      const visible = [...event.container.data];
+      moveItemInArray(visible, event.previousIndex, event.currentIndex);
+      const ordered = this.normalizePositions(this.mergeIntoSlots(targetFull, visible));
       this.replaceColumnJobs(new Map([[targetColumnIndex, ordered]]));
+      this.persistPositions(this.changedPositions(targetFull, ordered));
       return;
     }
 
@@ -546,18 +586,13 @@ export class KanbanComponent implements OnInit, OnDestroy {
     const sourceColumnIndex = this.dropListIds().indexOf(event.previousContainer.id);
     const targetStage = this.columns()[targetColumnIndex]?.stage;
 
-    if (!targetStage || targetStage.isIrreversible || sourceColumnIndex < 0) return;
-
-    transferArrayItem(
-      event.previousContainer.data,
-      event.container.data,
-      event.previousIndex,
-      event.currentIndex,
-    );
+    if (!job || !targetStage || targetStage.isIrreversible || sourceColumnIndex < 0) return;
 
     const movedJob: KanbanJob = { ...job, stageName: targetStage.name, stageColor: targetStage.color };
-    const targetVisible = event.container.data.map(j => j.id === job.id ? movedJob : j);
-    const targetOrdered = this.orderedColumnJobs(targetColumnIndex, targetVisible);
+    const targetVisible = [...event.container.data];
+    targetVisible.splice(event.currentIndex, 0, movedJob);
+    const targetOrdered = this.normalizePositions(this.insertAtVisibleSlot(targetFull, targetVisible, movedJob));
+    const toPersist = this.changedPositions(targetFull, targetOrdered);
     const sourceRemaining = (this.columns()[sourceColumnIndex]?.jobs ?? []).filter(j => j.id !== job.id);
     this.replaceColumnJobs(new Map([
       [sourceColumnIndex, sourceRemaining],
@@ -568,10 +603,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
     this.kanbanService.getJobDetail(job.id).pipe(
       switchMap(() => this.kanbanService.moveJobStage(job.id, targetStage.id)),
     ).subscribe({
-      next: () => {
-        const current = this.columns()[targetColumnIndex]?.jobs ?? [];
-        this.replaceColumnJobs(new Map([[targetColumnIndex, this.persistPositions(current, job.id)]]));
-      },
+      next: () => this.persistPositions(toPersist),
       error: () => this.reloadBoard(),
     });
   }
