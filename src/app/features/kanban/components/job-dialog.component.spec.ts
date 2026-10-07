@@ -1,13 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, FormGroup } from '@angular/forms';
-import { Observable, Subject, of } from 'rxjs';
+import { Observable, Subject, of, throwError } from 'rxjs';
 
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { JobDialogComponent } from './job-dialog.component';
 import { KanbanService } from '../services/kanban.service';
 import { SalesOrderService } from '../../sales-orders/services/sales-order.service';
+import { PartsService } from '../../parts/services/parts.service';
 import { ManualNumberSettingsService } from '../../../shared/services/manual-number-settings.service';
 import { AssignableSalesOrderLine } from '../models/assignable-sales-order-line.model';
 import { JobDetail } from '../models/job-detail.model';
@@ -27,6 +28,8 @@ interface DialogInternals {
     quantity: FormControl<number | null>;
   }>;
   filledFromSoLine: () => boolean;
+  partLabel: () => { id: number; text: string } | null;
+  draftConfig: { restoreFn?: (data: Record<string, unknown>) => void };
   onSubmit(): void;
 }
 
@@ -55,6 +58,12 @@ describe('JobDialogComponent', () => {
   let createJob: ReturnType<typeof vi.fn>;
   let updateJob: ReturnType<typeof vi.fn>;
   let getSalesOrderById: ReturnType<typeof vi.fn>;
+  let getPartById: ReturnType<typeof vi.fn>;
+  const parts: Record<number, { id: number; partNumber: string; name: string }> = {
+    12: { id: 12, partNumber: 'BRK-100', name: 'Bracket, mounting' },
+    13: { id: 13, partNumber: 'PLT-7', name: 'Plate, base' },
+    99: { id: 99, partNumber: 'SPC-99', name: 'Spacer' },
+  };
   let lines: AssignableSalesOrderLine[];
 
   function render(mode: 'create' | 'edit', job: JobDetail | null = null): void {
@@ -70,7 +79,10 @@ describe('JobDialogComponent', () => {
     lines = [soLine()];
     createJob = vi.fn(() => new Subject());
     updateJob = vi.fn(() => new Subject());
-    getSalesOrderById = vi.fn(() => of({ id: 9, customerId: 77, requestedDeliveryDate: '2026-11-02T00:00:00Z' }));
+    getSalesOrderById = vi.fn((id: number) => of(id === 9
+      ? { id: 9, customerId: 77, requestedDeliveryDate: '2026-11-02T00:00:00Z' }
+      : { id, customerId: 88, requestedDeliveryDate: '2026-12-01T00:00:00Z' }));
+    getPartById = vi.fn((id: number) => parts[id] ? of(parts[id]) : throwError(() => new Error('not found')));
 
     TestBed.configureTestingModule({
       imports: [JobDialogComponent],
@@ -86,6 +98,7 @@ describe('JobDialogComponent', () => {
           },
         },
         { provide: SalesOrderService, useValue: { getSalesOrderById } },
+        { provide: PartsService, useValue: { getPartById } },
         { provide: ManualNumberSettingsService, useValue: { isEnabled: () => false } },
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
       ],
@@ -142,7 +155,7 @@ describe('JobDialogComponent', () => {
 
     expect(f.partId.value).toBe(12);
     expect(f.quantity.value).toBe(500);
-    expect(f.title.value).toBe('BRK-100 — Mounting bracket');
+    expect(f.title.value).toBe('BRK-100 — Bracket, mounting');
     expect(f.customerId.value).toBe(77);
     const due = f.dueDate.value!;
     expect([due.getFullYear(), due.getMonth(), due.getDate()]).toEqual([2026, 10, 2]);
@@ -169,15 +182,113 @@ describe('JobDialogComponent', () => {
     expect(getSalesOrderById).not.toHaveBeenCalled();
   });
 
-  it('replaces a title it filled itself when a different SO line is picked', () => {
-    lines = [soLine(), soLine({ id: 41, partNumber: 'PLT-7', description: 'Base plate' })];
+  it('falls back to the line description in the title when the part cannot be loaded', () => {
+    getPartById.mockReturnValue(throwError(() => new Error('offline')));
+    render('create');
+
+    component.jobForm.controls.salesOrderLineId.setValue(40);
+
+    expect(component.jobForm.controls.title.value).toBe('BRK-100 — Mounting bracket');
+  });
+
+  it('replaces everything it filled from the first line when a different line is picked', () => {
+    lines = [
+      soLine(),
+      soLine({
+        id: 41, salesOrderId: 10, partId: 13, partNumber: 'PLT-7', description: 'Base plate',
+        remainingQuantity: 40, requestedDeliveryDate: '2026-12-15T00:00:00Z',
+      }),
+    ];
     render('create');
     const f = component.jobForm.controls;
 
     f.salesOrderLineId.setValue(40);
     f.salesOrderLineId.setValue(41);
 
-    expect(f.title.value).toBe('PLT-7 — Base plate');
+    expect(f.partId.value).toBe(13);
+    expect(f.quantity.value).toBe(40);
+    expect(f.title.value).toBe('PLT-7 — Plate, base');
+    expect(f.customerId.value).toBe(88);
+    const due = f.dueDate.value!;
+    expect([due.getFullYear(), due.getMonth(), due.getDate()]).toEqual([2026, 11, 15]);
+
+    component.onSubmit();
+    const payload = createJob.mock.calls[0][0];
+    expect(payload).toMatchObject({
+      salesOrderLineId: 41, partId: 13, quantity: 40, customerId: 88,
+      title: 'PLT-7 — Plate, base', dueDate: '2026-12-15T00:00:00Z',
+    });
+  });
+
+  it('keeps the customer when the next line is on the same sales order', () => {
+    lines = [soLine(), soLine({ id: 41, lineNumber: 2, partId: 13, partNumber: 'PLT-7', description: 'Base plate' })];
+    render('create');
+    const f = component.jobForm.controls;
+
+    f.salesOrderLineId.setValue(40);
+    f.salesOrderLineId.setValue(41);
+
+    expect(f.customerId.value).toBe(77);
+    expect(getSalesOrderById).toHaveBeenCalledOnce();
+  });
+
+  it('clears what it filled when the SO line is cleared, but keeps what the user typed', () => {
+    render('create');
+    const f = component.jobForm.controls;
+    f.salesOrderLineId.setValue(40);
+    f.dueDate.setValue(new Date(2026, 9, 20));
+
+    f.salesOrderLineId.setValue(null);
+
+    expect(f.partId.value).toBeNull();
+    expect(f.quantity.disabled).toBe(true);
+    expect(f.title.value).toBe('');
+    expect(f.customerId.value).toBeNull();
+    expect(f.dueDate.value!.getDate()).toBe(20);
+    expect(component.filledFromSoLine()).toBe(false);
+  });
+
+  it('does not take the line quantity for a part the user chose that differs from the line', () => {
+    render('create');
+    const f = component.jobForm.controls;
+    f.partId.setValue(99);
+
+    f.salesOrderLineId.setValue(40);
+
+    expect(f.partId.value).toBe(99);
+    expect(f.quantity.value).toBe(1);
+  });
+
+  it('accepts a fractional remaining quantity from the line', () => {
+    lines = [soLine({ remainingQuantity: 0.5 })];
+    render('create');
+    const f = component.jobForm.controls;
+
+    f.salesOrderLineId.setValue(40);
+
+    expect(f.quantity.value).toBe(0.5);
+    expect(f.quantity.valid).toBe(true);
+  });
+
+  it('labels a part restored from a draft with its part number', () => {
+    render('create');
+
+    component.draftConfig.restoreFn!({ title: 'Saved draft', partId: 12, quantity: 30 });
+
+    const f = component.jobForm.controls;
+    expect(f.partId.value).toBe(12);
+    expect(f.quantity.value).toBe(30);
+    expect(f.quantity.enabled).toBe(true);
+    expect(getPartById).toHaveBeenCalledWith(12);
+    expect(component.partLabel()).toEqual({ id: 12, text: 'BRK-100' });
+  });
+
+  it('drops a restored part that no longer exists', () => {
+    render('create');
+
+    component.draftConfig.restoreFn!({ title: 'Saved draft', partId: 404, quantity: 30 });
+
+    expect(component.jobForm.controls.partId.value).toBeNull();
   });
 
   it('uses the line due date as the same calendar day', () => {

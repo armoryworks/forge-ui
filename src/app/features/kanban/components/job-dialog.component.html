@@ -29,7 +29,7 @@
           <app-entity-picker data-testid="job-part" [label]="'kanban.part' | translate" entityType="parts"
             displayField="partNumber" secondaryDisplayField="name" formControlName="partId" />
           <app-input data-testid="job-quantity" [label]="'kanban.quantityToMake' | translate" type="number"
-            formControlName="quantity" [min]="1" [step]="1" />
+            formControlName="quantity" [min]="0.0001" step="any" />
         </div>
       }
 

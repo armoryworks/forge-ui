@@ -1,6 +1,6 @@
 import {
-  ChangeDetectionStrategy, Component, computed, DestroyRef, inject,
-  input, OnInit, output, signal, ViewChild,
+  ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject,
+  input, OnInit, output, signal, untracked, ViewChild, viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -11,6 +11,7 @@ import { JobDetail } from '../models/job-detail.model';
 import { CustomerRef } from '../models/customer-ref.model';
 import { UserRef } from '../models/user-ref.model';
 import { AssignableSalesOrderLine } from '../models/assignable-sales-order-line.model';
+import { SoLineAutoFill } from '../models/so-line-auto-fill.model';
 import { TrackType } from '../../../shared/models/track-type.model';
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../shared/components/select/select.component';
@@ -27,8 +28,13 @@ import { toIsoDate } from '../../../shared/utils/date.utils';
 import { PriorityIndicatorComponent } from '../../../shared/components/priority-indicator/priority-indicator.component';
 import { PRIORITIES, PRIORITY_OPTIONS } from '../../../shared/models/priority.const';
 import { SalesOrderService } from '../../sales-orders/services/sales-order.service';
+import { PartsService } from '../../parts/services/parts.service';
 
 export type DialogMode = 'create' | 'edit';
+
+const EMPTY_AUTO_FILL: SoLineAutoFill = {
+  salesOrderId: null, partId: null, quantity: null, title: null, customerId: null, dueDate: null,
+};
 
 @Component({
   selector: 'app-job-dialog',
@@ -52,12 +58,13 @@ export type DialogMode = 'create' | 'edit';
 })
 export class JobDialogComponent implements OnInit {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
-  @ViewChild(EntityPickerComponent) private partPicker?: EntityPickerComponent;
+  private readonly partPicker = viewChild(EntityPickerComponent);
   private readonly kanbanService = inject(KanbanService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly manualNumbers = inject(ManualNumberSettingsService);
   private readonly salesOrderService = inject(SalesOrderService);
+  private readonly partsService = inject(PartsService);
 
   /** Whether the tenant allows manually assigning/overriding job numbers. */
   protected readonly allowManualJobNumbers = computed(() => this.manualNumbers.isEnabled('jobs'));
@@ -79,7 +86,9 @@ export class JobDialogComponent implements OnInit {
   protected readonly salesOrderLines = signal<AssignableSalesOrderLine[]>([]);
   protected readonly showAssignedControl = new FormControl(false, { nonNullable: true });
   protected readonly filledFromSoLine = signal(false);
-  private autoTitle: string | null = null;
+  private autoFilled: SoLineAutoFill = { ...EMPTY_AUTO_FILL };
+  private restoringDraft = false;
+  private readonly partLabel = signal<{ id: number; text: string } | null>(null);
 
   protected readonly jobForm = new FormGroup({
     jobNumber: new FormControl(''),
@@ -92,7 +101,7 @@ export class JobDialogComponent implements OnInit {
     dueDate: new FormControl<Date | null>(null),
     salesOrderLineId: new FormControl<number | null>(null),
     partId: new FormControl<number | null>(null),
-    quantity: new FormControl<number | null>({ value: 1, disabled: true }, [Validators.min(1)]),
+    quantity: new FormControl<number | null>({ value: 1, disabled: true }, [Validators.min(0.0001)]),
   });
 
   protected readonly salesOrderLineOptions = computed<SelectOption[]>(() => [
@@ -141,8 +150,18 @@ export class JobDialogComponent implements OnInit {
       entityType: 'job',
       entityId: this.job()?.id?.toString() ?? 'new',
       route: '/board',
+      restoreFn: data => this.restoreDraft(data),
     };
   }
+
+  private readonly partLabelEffect = effect(() => {
+    const picker = this.partPicker();
+    const label = this.partLabel();
+    if (!picker || !label) return;
+    untracked(() => {
+      if (this.jobForm.controls.partId.value === label.id) picker.setSelected(label.id, label.text);
+    });
+  });
 
   ngOnInit(): void {
     const j = this.job();
@@ -201,63 +220,153 @@ export class JobDialogComponent implements OnInit {
     }
   }
 
+  private restoreDraft(data: Record<string, unknown>): void {
+    this.restoringDraft = true;
+    this.jobForm.patchValue(data);
+    this.restoringDraft = false;
+    const partId = this.jobForm.controls.partId.value;
+    if (partId == null) return;
+    this.partsService.getPartById(partId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: part => this.partLabel.set({ id: partId, text: part.partNumber }),
+        error: () => this.setPart(null, null),
+      });
+  }
+
+  private setPart(partId: number | null, label: string | null): void {
+    this.partLabel.set(partId != null && label ? { id: partId, text: label } : null);
+    this.jobForm.controls.partId.setValue(partId);
+  }
+
+  private holdsAuto<T>(value: T | null, auto: T | null): boolean {
+    return auto != null && value === auto;
+  }
+
+  private holdsAutoDate(value: Date | null, auto: number | null): boolean {
+    return auto != null && value != null && value.getTime() === auto;
+  }
+
+  private quantityReplaceable(): boolean {
+    const quantity = this.jobForm.controls.quantity;
+    return quantity.value == null || !quantity.dirty;
+  }
+
+  private lineTitle(line: AssignableSalesOrderLine, partName: string | null = null): string {
+    const name = partName || line.description;
+    return line.partNumber ? `${line.partNumber} — ${name}` : name;
+  }
+
   private applySoLineDefaults(lineId: number | null): void {
+    if (this.restoringDraft) return;
     const line = lineId == null ? undefined : this.salesOrderLines().find(l => l.id === lineId);
+    const controls = this.jobForm.controls;
+    const previous = this.autoFilled;
+    this.autoFilled = { ...EMPTY_AUTO_FILL };
+
     if (!line) {
+      if (this.holdsAuto(controls.partId.value, previous.partId)) this.setPart(null, null);
+      if (controls.partId.value != null && this.holdsAuto(controls.quantity.value, previous.quantity)
+        && this.quantityReplaceable()) {
+        controls.quantity.setValue(1);
+      }
+      if (this.holdsAuto(controls.title.value?.trim() ?? '', previous.title)) controls.title.setValue('');
+      if (this.holdsAuto(controls.customerId.value, previous.customerId)) controls.customerId.setValue(null);
+      if (this.holdsAutoDate(controls.dueDate.value, previous.dueDate)) controls.dueDate.setValue(null);
       this.filledFromSoLine.set(false);
       return;
     }
 
-    const controls = this.jobForm.controls;
     let filled = false;
+    this.autoFilled.salesOrderId = line.salesOrderId;
 
-    if (controls.partId.value == null && line.partId != null) {
-      if (this.partPicker) {
-        this.partPicker.setSelected(line.partId, line.partNumber ?? '');
-      } else {
-        controls.partId.setValue(line.partId);
+    if (controls.partId.value == null || this.holdsAuto(controls.partId.value, previous.partId)) {
+      if (line.partId != null) {
+        this.setPart(line.partId, line.partNumber);
+        this.autoFilled.partId = line.partId;
+        filled = true;
+      } else if (controls.partId.value != null) {
+        this.setPart(null, null);
       }
-      filled = true;
     }
 
-    if (controls.partId.value != null && line.remainingQuantity != null && line.remainingQuantity > 0
-      && (controls.quantity.value == null || !controls.quantity.dirty)) {
-      controls.quantity.setValue(line.remainingQuantity);
-      filled = true;
+    if (controls.partId.value != null && this.quantityReplaceable()) {
+      const remaining = line.remainingQuantity;
+      if (controls.partId.value === line.partId && remaining != null && remaining > 0) {
+        controls.quantity.setValue(remaining);
+        this.autoFilled.quantity = remaining;
+        filled = true;
+      } else if (this.holdsAuto(controls.quantity.value, previous.quantity)) {
+        controls.quantity.setValue(1);
+      }
     }
 
-    const title = line.partNumber ? `${line.partNumber} — ${line.description}` : line.description;
     const currentTitle = controls.title.value?.trim() ?? '';
-    if (title && (currentTitle === '' || currentTitle === this.autoTitle)) {
+    if (currentTitle === '' || this.holdsAuto(currentTitle, previous.title)) {
+      const title = this.lineTitle(line);
       controls.title.setValue(title);
-      this.autoTitle = title;
-      filled = true;
+      this.autoFilled.title = title || null;
+      if (title) filled = true;
     }
 
-    if (controls.dueDate.value == null && line.requestedDeliveryDate) {
-      controls.dueDate.setValue(this.utcCalendarDate(line.requestedDeliveryDate));
+    const lineDue = this.utcCalendarDate(line.requestedDeliveryDate);
+    const dueReplaceable = controls.dueDate.value == null || this.holdsAutoDate(controls.dueDate.value, previous.dueDate);
+    if (dueReplaceable) {
+      controls.dueDate.setValue(lineDue);
+      this.autoFilled.dueDate = lineDue?.getTime() ?? null;
+      if (lineDue) filled = true;
+    }
+
+    const customerIsAuto = this.holdsAuto(controls.customerId.value, previous.customerId);
+    if (customerIsAuto && previous.salesOrderId === line.salesOrderId) {
+      this.autoFilled.customerId = previous.customerId;
       filled = true;
+    } else if (customerIsAuto) {
+      controls.customerId.setValue(null);
     }
 
     this.filledFromSoLine.set(filled);
 
+    if (line.partId != null && this.autoFilled.title != null) this.applyPartNameToTitle(line);
+
     if (controls.customerId.value != null && controls.dueDate.value != null) return;
-    this.salesOrderService.getSalesOrderById(line.salesOrderId).subscribe({
-      next: so => {
-        if (controls.salesOrderLineId.value !== line.id) return;
-        let soFilled = false;
-        if (controls.customerId.value == null && so.customerId != null) {
-          controls.customerId.setValue(so.customerId);
-          soFilled = true;
-        }
-        if (controls.dueDate.value == null && so.requestedDeliveryDate) {
-          controls.dueDate.setValue(this.utcCalendarDate(so.requestedDeliveryDate));
-          soFilled = true;
-        }
-        if (soFilled) this.filledFromSoLine.set(true);
-      },
-      error: () => this.filledFromSoLine.set(filled),
-    });
+    this.salesOrderService.getSalesOrderById(line.salesOrderId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: so => {
+          if (controls.salesOrderLineId.value !== line.id) return;
+          let soFilled = false;
+          if (controls.customerId.value == null && so.customerId != null) {
+            controls.customerId.setValue(so.customerId);
+            this.autoFilled.customerId = so.customerId;
+            soFilled = true;
+          }
+          if (controls.dueDate.value == null && so.requestedDeliveryDate) {
+            const due = this.utcCalendarDate(so.requestedDeliveryDate);
+            controls.dueDate.setValue(due);
+            this.autoFilled.dueDate = due?.getTime() ?? null;
+            soFilled = true;
+          }
+          if (soFilled) this.filledFromSoLine.set(true);
+        },
+        error: () => this.filledFromSoLine.set(filled),
+      });
+  }
+
+  private applyPartNameToTitle(line: AssignableSalesOrderLine): void {
+    this.partsService.getPartById(line.partId!)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: part => {
+          const controls = this.jobForm.controls;
+          if (controls.salesOrderLineId.value !== line.id || !part.name) return;
+          if (!this.holdsAuto(controls.title.value?.trim() ?? '', this.autoFilled.title)) return;
+          const title = this.lineTitle(line, part.name);
+          controls.title.setValue(title);
+          this.autoFilled.title = title;
+        },
+        error: () => undefined,
+      });
   }
 
   private utcCalendarDate(value: Date | string | null | undefined): Date | null {
