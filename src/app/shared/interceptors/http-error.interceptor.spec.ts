@@ -135,4 +135,25 @@ describe('httpErrorInterceptor — capability-gate resilience', () => {
       expect.objectContaining({ severity: 'error', message: 'Server exploded' }),
     );
   });
+
+  it('shows the detail of a 400 validation problem instead of its generic title', () => {
+    http.post('/api/v1/parts', {}).subscribe({
+      next: () => {},
+      error: () => {},
+    });
+
+    const req = httpMock.expectOne('/api/v1/parts');
+    req.flush(
+      {
+        type: 'about:blank',
+        title: 'Validation failed',
+        status: 400,
+        detail: 'Manual part numbers are turned off.',
+        errors: { partNumber: ['Manual part numbers are turned off.'] },
+      },
+      { status: 400, statusText: 'Bad Request' },
+    );
+
+    expect(snackbar.error).toHaveBeenCalledWith('Manual part numbers are turned off.');
+  });
 });

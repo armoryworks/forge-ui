@@ -4,6 +4,8 @@ import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
+
 import { environment } from '../../../../../environments/environment';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { PartDetail } from '../../models/part-detail.model';
@@ -147,5 +149,48 @@ describe('PartBasicsStepComponent (Phase 5 — save-on-Continue)', () => {
 
     httpMock.verify();
     expect(saveResult).toEqual({ ok: true });
+  });
+
+  function editAndSave(): void {
+    const component = TestBed.runInInjectionContext(() => new PartBasicsStepComponent());
+    mockSignalInputs(component, {
+      stepId: 'basics', componentName: 'PartBasicsStepComponent',
+      runId: 7, entityId: 42, entity: buildPart({ name: 'Initial' }),
+    });
+    TestBed.flushEffects();
+    const form = (component as unknown as { form: { patchValue(v: unknown): void; markAsDirty(): void } }).form;
+    form.patchValue({ name: 'Updated name' });
+    form.markAsDirty();
+    workflowService.saveCurrentStep().subscribe();
+  }
+
+  it('leaves the server validation message on screen instead of replacing it with the generic save failure', () => {
+    const snackbar = TestBed.inject(SnackbarService);
+    const errorSpy = vi.spyOn(snackbar, 'error').mockImplementation(() => {});
+    editAndSave();
+
+    httpMock.expectOne(`${environment.apiUrl}/workflows/7/step`).flush(
+      {
+        title: 'Validation failed',
+        detail: "Part number 'P-1' belongs to a deleted part. Restore that part or choose another number.",
+        errors: { partNumber: ["Part number 'P-1' belongs to a deleted part. Restore that part or choose another number."] },
+      },
+      { status: 400, statusText: 'Bad Request' },
+    );
+
+    expect(errorSpy).not.toHaveBeenCalled();
+  });
+
+  it('still shows the generic save failure when the server gives no message', () => {
+    const snackbar = TestBed.inject(SnackbarService);
+    const errorSpy = vi.spyOn(snackbar, 'error').mockImplementation(() => {});
+    editAndSave();
+
+    httpMock.expectOne(`${environment.apiUrl}/workflows/7/step`).flush(
+      { title: 'An error occurred' },
+      { status: 500, statusText: 'Server Error' },
+    );
+
+    expect(errorSpy).toHaveBeenCalledWith('parts.workflow.basics.saveFailed');
   });
 });

@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -122,11 +123,20 @@ export class PartBasicsStepComponent {
           this.saving.set(false);
           this.form.markAsPristine();
         },
-        error: () => {
+        error: (err: unknown) => {
           this.saving.set(false);
-          this.snackbar.error(this.translate.instant('parts.workflow.basics.saveFailed'));
+          if (!hasServerValidationDetail(err)) {
+            this.snackbar.error(this.translate.instant('parts.workflow.basics.saveFailed'));
+          }
         },
       }),
     );
   }
+}
+
+function hasServerValidationDetail(err: unknown): boolean {
+  return err instanceof HttpErrorResponse
+    && err.status === 400
+    && typeof err.error?.detail === 'string'
+    && err.error.detail.length > 0;
 }
