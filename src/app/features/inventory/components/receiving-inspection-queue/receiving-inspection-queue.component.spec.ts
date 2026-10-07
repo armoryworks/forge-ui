@@ -135,6 +135,26 @@ describe('ReceivingInspectionQueueComponent', () => {
     expect(internals.inspectForm.valid).toBe(false);
   });
 
+  it('is invalid for a pass that rejects anything', () => {
+    const { internals } = setup();
+    internals.openInspect(item);
+
+    internals.inspectForm.patchValue({ acceptedQuantity: 8, rejectedQuantity: 2 });
+
+    expect(internals.inspectForm.hasError('passedWithRejects')).toBe(true);
+    expect(internals.inspectViolations()).toHaveLength(1);
+  });
+
+  it('is invalid for a fail that accepts anything', () => {
+    const { internals } = setup();
+    internals.openInspect(item);
+
+    internals.inspectForm.patchValue({ result: 'Failed' });
+    internals.inspectForm.patchValue({ acceptedQuantity: 3, rejectedQuantity: 7 });
+
+    expect(internals.inspectForm.hasError('failedWithAccepts')).toBe(true);
+  });
+
   it('records the result, closes the dialog and reloads the queue', () => {
     const { internals, inventory, snackbar } = setup();
     internals.openInspect(item);

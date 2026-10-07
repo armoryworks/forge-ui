@@ -1830,6 +1830,8 @@
       },
       "quantityMismatch": "Aceptado más rechazado debe ser igual a los {{quantity}} recibidos",
       "partialNeedsBoth": "Una aceptación parcial requiere cantidades aceptadas y rechazadas mayores que cero",
+      "passedWithRejects": "Una inspección aprobada no puede rechazar piezas. Elija aceptación parcial.",
+      "failedWithAccepts": "Una inspección rechazada no puede aceptar piezas. Elija aceptación parcial.",
       "recordResult": "Registrar resultado",
       "recorded": "Inspección registrada",
       "waived": "Inspección dispensada"

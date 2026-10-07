@@ -1830,6 +1830,8 @@
       },
       "quantityMismatch": "Accepted plus rejected must equal the {{quantity}} received",
       "partialNeedsBoth": "A partial accept needs both accepted and rejected above zero",
+      "passedWithRejects": "A passed inspection cannot reject anything. Choose partial accept instead.",
+      "failedWithAccepts": "A failed inspection cannot accept anything. Choose partial accept instead.",
       "recordResult": "Record result",
       "recorded": "Inspection recorded",
       "waived": "Inspection waived"

@@ -190,10 +190,13 @@ export class ReceivingInspectionQueueComponent implements OnInit {
     const accepted = control.get('acceptedQuantity')?.value as number | null;
     const rejected = control.get('rejectedQuantity')?.value as number | null;
     if (received == null || accepted == null || rejected == null) return null;
-    if (control.get('result')?.value === 'PartialAccept' && (accepted <= 0 || rejected <= 0)) {
+    const result = control.get('result')?.value as InspectionResult;
+    if (result === 'PartialAccept' && (accepted <= 0 || rejected <= 0)) {
       return { partialNeedsBoth: true };
     }
     if (Math.abs(accepted + rejected - received) > 1e-9) return { quantityMismatch: true };
+    if (result === 'Passed' && rejected > 0) return { passedWithRejects: true };
+    if (result === 'Failed' && accepted > 0) return { failedWithAccepts: true };
     return null;
   }
 
@@ -201,6 +204,12 @@ export class ReceivingInspectionQueueComponent implements OnInit {
     const errors = this.inspectForm.errors;
     if (errors?.['partialNeedsBoth']) {
       return this.translate.instant('inventory.receivingInspection.partialNeedsBoth');
+    }
+    if (errors?.['passedWithRejects']) {
+      return this.translate.instant('inventory.receivingInspection.passedWithRejects');
+    }
+    if (errors?.['failedWithAccepts']) {
+      return this.translate.instant('inventory.receivingInspection.failedWithAccepts');
     }
     if (errors?.['quantityMismatch']) {
       return this.translate.instant('inventory.receivingInspection.quantityMismatch', {
