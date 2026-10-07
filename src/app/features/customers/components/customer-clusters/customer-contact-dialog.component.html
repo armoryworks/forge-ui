@@ -19,6 +19,9 @@
       <app-input data-testid="contact-phone" [label]="'customers.colPhone' | translate" formControlName="phone" mask="phone" />
     </div>
     <div class="dialog-row">
+      <app-input data-testid="contact-fax" [label]="'common.fax' | translate" formControlName="fax" mask="phone" [maxlength]="50" />
+    </div>
+    <div class="dialog-row">
       <app-select data-testid="contact-role" [label]="'customers.role' | translate" formControlName="role" [options]="roleOptions()" />
       <app-toggle data-testid="contact-primary" [label]="'customers.primaryContact' | translate" formControlName="isPrimary" />
     </div>

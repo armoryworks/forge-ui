@@ -9,6 +9,7 @@ export interface CustomerDetail {
   companyName: string | null;
   email: string | null;
   phone: string | null;
+  fax?: string | null;
   isActive: boolean;
   externalId: string | null;
   externalRef: string | null;

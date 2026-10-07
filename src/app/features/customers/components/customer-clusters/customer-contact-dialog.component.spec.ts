@@ -126,6 +126,19 @@ describe('CustomerContactDialogComponent', () => {
     httpMock.verify();
   });
 
+  it('hydrates the fax number and sends an edited one on save', () => {
+    const { internals, httpMock } = setup(42, makeContact({ fax: '(555) 123-4500' }));
+    expect(internals.form.getRawValue()['fax']).toBe('(555) 123-4500');
+
+    internals.form.patchValue({ fax: '(555) 123-4599' });
+    internals.save();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/customers/42/contacts/10`);
+    expect(req.request.body).toMatchObject({ fax: '(555) 123-4599' });
+    req.flush(makeContact({ fax: '(555) 123-4599' }));
+    httpMock.verify();
+  });
+
   it('does not call the API when the form is invalid', () => {
     const { internals, httpMock } = setup(null);
     internals.save();

@@ -78,6 +78,7 @@ export class CustomerContactDialogComponent implements OnInit {
     lastName: new FormControl('', [Validators.required, Validators.maxLength(100)]),
     email: new FormControl('', [Validators.email, Validators.maxLength(200)]),
     phone: new FormControl(''),
+    fax: new FormControl('', [Validators.maxLength(50)]),
     role: new FormControl<string | null>(null),
     isPrimary: new FormControl(false),
   });
@@ -104,6 +105,7 @@ export class CustomerContactDialogComponent implements OnInit {
         lastName: c.lastName,
         email: c.email ?? '',
         phone: c.phone ?? '',
+        fax: c.fax ?? '',
         role: c.role ?? null,
         isPrimary: c.isPrimary,
       });
@@ -130,6 +132,7 @@ export class CustomerContactDialogComponent implements OnInit {
       lastName: v.lastName!,
       email: v.email || undefined,
       phone: v.phone || undefined,
+      fax: v.fax?.trim() || undefined,
       role: v.role ?? undefined,
       isPrimary: v.isPrimary ?? false,
     };

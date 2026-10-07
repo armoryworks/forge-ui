@@ -18,6 +18,7 @@
         <app-input [label]="'vendors.contactName' | translate" formControlName="contactName" data-testid="vendor-contact" />
         <app-input [label]="'common.email' | translate" type="email" formControlName="email" data-testid="vendor-email" />
         <app-input [label]="'common.phone' | translate" formControlName="phone" data-testid="vendor-phone" />
+        <app-input [label]="'common.fax' | translate" formControlName="fax" [maxlength]="50" data-testid="vendor-fax" />
       </div>
 
       <div class="dlg-section">

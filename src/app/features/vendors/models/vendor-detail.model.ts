@@ -7,6 +7,7 @@ export interface VendorDetail {
   contactName: string | null;
   email: string | null;
   phone: string | null;
+  fax: string | null;
   address: string | null;
   city: string | null;
   state: string | null;

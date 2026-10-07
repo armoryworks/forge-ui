@@ -4,6 +4,7 @@ export interface Contact {
   lastName: string;
   email: string | null;
   phone: string | null;
+  fax?: string | null;
   role: string | null;
   isPrimary: boolean;
 }

@@ -11,6 +11,7 @@ export interface CreateCustomerRequest {
   companyName?: string;
   email?: string;
   phone?: string;
+  fax?: string;
   // F3 — full-record fields. All optional.
   creditLimit?: number;
   defaultTaxCodeId?: number;

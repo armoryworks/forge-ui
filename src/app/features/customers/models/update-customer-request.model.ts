@@ -6,6 +6,7 @@ export interface UpdateCustomerRequest {
   companyName?: string;
   email?: string;
   phone?: string;
+  fax?: string;
   isActive?: boolean;
   // Phase 1r / Batch 15-16 — regulated-industry flags + reference-customer consent.
   isFdaRegulated?: boolean;

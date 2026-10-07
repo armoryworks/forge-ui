@@ -45,6 +45,11 @@
                 <span class="material-icons-outlined">phone</span>{{ contact.phone }}
               </a>
             }
+            @if (contact.fax) {
+              <span class="contact-card__detail" data-testid="contact-card-fax">
+                <span class="material-icons-outlined">fax</span>{{ contact.fax }}
+              </span>
+            }
           </div>
           <div class="contact-card__actions">
             <button class="icon-btn" (click)="openEdit(contact)"

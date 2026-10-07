@@ -9,6 +9,7 @@ export interface UpdateVendorRequest {
   contactName?: string;
   email?: string;
   phone?: string;
+  fax?: string;
   address?: string;
   city?: string;
   state?: string;

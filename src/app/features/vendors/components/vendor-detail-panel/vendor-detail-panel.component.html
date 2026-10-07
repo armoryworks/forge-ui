@@ -69,6 +69,12 @@
               <span class="info-value">{{ vendor.phone }}</span>
             </div>
           }
+          @if (vendor.fax) {
+            <div class="info-item">
+              <span class="info-label">{{ 'common.fax' | translate }}</span>
+              <span class="info-value" data-testid="vendor-detail-fax">{{ vendor.fax }}</span>
+            </div>
+          }
           @if (vendor.paymentTerms) {
             <div class="info-item">
               <span class="info-label">{{ 'vendors.paymentTerms' | translate }}</span>

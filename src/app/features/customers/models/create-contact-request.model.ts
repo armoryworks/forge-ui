@@ -3,6 +3,7 @@ export interface CreateContactRequest {
   lastName: string;
   email?: string;
   phone?: string;
+  fax?: string;
   role?: string;
   isPrimary: boolean;
 }
