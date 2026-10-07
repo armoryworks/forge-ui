@@ -11,8 +11,8 @@
           <p class="dispose-job__hint" data-testid="dispose-job-already-recorded">{{ 'kanban.dispositionAlreadyRecorded' | translate: { received: recorded.receivedQuantity, recorded: recorded.recordedQuantity } }}</p>
         }
       }
-      <app-input [label]="'kanban.dispositionGoodQuantity' | translate" formControlName="goodQuantity" type="number" [min]="1" [step]="1" [required]="true" data-testid="dispose-job-good-quantity" />
-      <app-select [label]="'inventory.bin' | translate" formControlName="locationId" [options]="binOptions()" data-testid="dispose-job-bin" />
+      <app-input [label]="'kanban.goodQuantity' | translate" formControlName="goodQuantity" type="number" [min]="1" [step]="1" [required]="true" data-testid="dispose-job-good-quantity" />
+      <app-select [label]="'kanban.destinationBin' | translate" formControlName="locationId" [options]="binOptions()" data-testid="dispose-job-bin" />
     }
     <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="3" [maxlength]="2000" data-testid="dispose-job-notes" />
   </div>

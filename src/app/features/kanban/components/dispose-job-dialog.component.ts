@@ -69,6 +69,9 @@ export class DisposeJobDialogComponent {
   private readonly stockingEnabled = this.capabilityService.isEnabled(STOCKING_CAPABILITY, true);
   private stockRequested = false;
 
+  private readonly reasonRequired: ValidatorFn = control =>
+    (control.value ?? '').trim() ? null : { required: { message: this.translate.instant('kanban.dispositionNotesRequired') } };
+
   protected readonly draftConfig: DraftConfig = {
     entityType: 'job-disposition',
     entityId: this.data.jobId.toString(),
@@ -84,8 +87,8 @@ export class DisposeJobDialogComponent {
 
   readonly violations = FormValidationService.getViolations(this.formGroup, {
     disposition: this.translate.instant('jobs.disposition'),
-    goodQuantity: this.translate.instant('kanban.dispositionGoodQuantity'),
-    locationId: this.translate.instant('inventory.bin'),
+    goodQuantity: this.translate.instant('kanban.goodQuantity'),
+    locationId: this.translate.instant('kanban.destinationBin'),
     notes: this.translate.instant('common.notes'),
   });
 
@@ -128,9 +131,9 @@ export class DisposeJobDialogComponent {
     const { notes } = this.formGroup.controls;
 
     if (disposition && REASON_REQUIRED.includes(disposition)) {
-      notes.addValidators(Validators.required);
+      notes.addValidators(this.reasonRequired);
     } else {
-      notes.removeValidators(Validators.required);
+      notes.removeValidators(this.reasonRequired);
     }
     notes.updateValueAndValidity();
 

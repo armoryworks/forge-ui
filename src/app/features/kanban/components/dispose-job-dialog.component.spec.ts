@@ -89,7 +89,15 @@ describe('DisposeJobDialogComponent', () => {
     component.formGroup.controls.disposition.setValue(disposition);
 
     expect(component.formGroup.controls.notes.hasError('required')).toBe(true);
+    expect(component.formGroup.controls.notes.getError('required')).toEqual({ message: 'kanban.dispositionNotesRequired' });
 
+    component.formGroup.controls.notes.setValue('   ');
+    expect(component.formGroup.controls.notes.hasError('required')).toBe(true);
+
+    component.formGroup.controls.notes.setValue('cracked housing');
+    expect(component.formGroup.controls.notes.valid).toBe(true);
+
+    component.formGroup.controls.notes.setValue('');
     component.formGroup.controls.disposition.setValue('ShipToCustomer');
 
     expect(component.formGroup.controls.notes.hasError('required')).toBe(false);
