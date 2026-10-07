@@ -1,0 +1,19 @@
+<app-dialog [title]="'purchaseOrders.priceOverridden' | translate" width="460px" (closed)="cancel()">
+  <div [formGroup]="form">
+    <app-textarea data-testid="po-price-reason"
+      [label]="'purchaseOrders.priceChangeReason' | translate"
+      formControlName="reason" [rows]="3" [maxlength]="500" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" type="button" data-testid="po-price-reason-cancel" (click)="cancel()">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <app-validation-button [violations]="violations">
+      <button class="action-btn action-btn--primary" type="button" data-testid="po-price-reason-confirm"
+        [disabled]="form.invalid" (click)="confirm()">
+        {{ 'common.confirm' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

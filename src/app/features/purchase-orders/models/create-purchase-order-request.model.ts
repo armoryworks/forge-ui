@@ -10,9 +10,11 @@ export interface CreatePurchaseOrderRequest {
   poNumber?: string;
   lines: CreatePurchaseOrderLineRequest[];
   // Bought-parts effort PR2.5 — landed cost header fields. All optional;
-  // when omitted, the server defaults Incoterm + QuoteCurrency from the
-  // preferred VendorPart of the first line's part.
+  // when omitted, the server defaults Incoterm + QuoteCurrency (and the
+  // expected delivery date, from its lead time) from the preferred
+  // VendorPart of the first line's part.
   incoterm?: string;
   estimatedFreight?: number;
   quoteCurrency?: string;
+  expectedDeliveryDate?: string;
 }

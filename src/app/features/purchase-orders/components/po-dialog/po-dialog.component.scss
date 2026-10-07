@@ -28,6 +28,20 @@
   position: relative;
 }
 
+.add-line-mode {
+  margin-bottom: $sp-sm;
+}
+
+.add-line-note {
+  margin-top: $sp-sm;
+}
+
+.po-line-note {
+  font-size: $font-size-xxs;
+  color: var(--text-secondary);
+  white-space: pre-line;
+}
+
 // Phase 3 H2 / WU-12 — deactivated master-data warnings on PO create.
 .lifecycle-warning {
   margin: 0.25rem 0 0.25rem;

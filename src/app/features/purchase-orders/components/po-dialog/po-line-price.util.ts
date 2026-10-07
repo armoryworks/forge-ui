@@ -1,7 +1,7 @@
 /**
  * Pure pricing helpers for the PO add-line row, extracted from
  * PoDialogComponent so the auto-fill + manual-override rules are unit-testable
- * without the dialog's HTTP / form / window.prompt plumbing (forge#8).
+ * without the dialog's HTTP / form / reason-dialog plumbing (forge#8).
  */
 
 /** Minimal structural shapes — VendorPart / VendorPartPriceTier satisfy these. */

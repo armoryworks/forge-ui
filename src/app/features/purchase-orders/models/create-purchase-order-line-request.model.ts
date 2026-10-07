@@ -1,5 +1,7 @@
 export interface CreatePurchaseOrderLineRequest {
-  partId: number;
+  partId: number | null;
+  /** Required when partId is null: the line is a service or non-stock item described in words. */
+  description?: string;
   quantity: number;
   unitPrice: number;
   notes?: string;

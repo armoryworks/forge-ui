@@ -10,7 +10,7 @@ import { VendorService } from '../../../vendors/services/vendor.service';
 import { PartsService } from '../../../parts/services/parts.service';
 import { VendorResponse } from '../../../vendors/models/vendor-response.model';
 import { PartListItem } from '../../../parts/models/part-list-item.model';
-import { CreatePurchaseOrderLineRequest } from '../../models/create-purchase-order-line-request.model';
+import { PoLineEntry } from '../../models/po-line-entry.model';
 import { CheckTierVarianceResult } from '../../models/tier-variance-check.model';
 import { INCOTERM_OPTIONS } from '../../models/incoterm.const';
 import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
@@ -18,7 +18,9 @@ import { VendorPartsService } from '../../../parts/services/vendor-parts.service
 import { PurchaseUnitsService } from '../../../parts/services/purchase-units.service';
 import { PartPurchaseUnit } from '../../../parts/models/part-purchase-unit.model';
 import { OffTierPromptDialogComponent, OffTierPromptResult } from '../off-tier-prompt-dialog/off-tier-prompt-dialog.component';
+import { PriceOverrideReasonDialogComponent } from '../price-override-reason-dialog/price-override-reason-dialog.component';
 import { resolveAutoLinePrice, classifyManualOverride } from './po-line-price.util';
+import { toCreateLineRequest, toTierVarianceLines } from './po-line-request.util';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map, debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -27,6 +29,9 @@ import { DialogComponent } from '../../../../shared/components/dialog/dialog.com
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
+import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
+import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
@@ -36,19 +41,6 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 
-interface LineEntry {
-  partId: number;
-  partNumber: string;
-  description: string;
-  orderedQuantity: number;
-  unitPrice: number;
-  // UoM purchase-units effort — the ordered size/form (null = per base unit).
-  purchaseUnitId: number | null;
-  purchaseUnitLabel: string | null;
-  /** Reason supplied when the unit price was manually overridden. */
-  overrideReason?: string | null;
-}
-
 @Component({
   selector: 'app-po-dialog',
   standalone: true,
@@ -56,8 +48,9 @@ interface LineEntry {
     ReactiveFormsModule, DecimalPipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     AutocompleteComponent, CurrencyDisplayComponent, CurrencyInputComponent,
+    DatepickerComponent, EntityPickerComponent, ToggleComponent,
     ValidationButtonComponent, TranslatePipe, MatTooltipModule,
-    OffTierPromptDialogComponent,
+    OffTierPromptDialogComponent, PriceOverrideReasonDialogComponent,
   ],
   templateUrl: './po-dialog.component.html',
   styleUrl: './po-dialog.component.scss',
@@ -86,11 +79,14 @@ export class PoDialogComponent {
   protected readonly saving = signal(false);
   protected readonly vendors = signal<VendorResponse[]>([]);
   protected readonly parts = signal<PartListItem[]>([]);
-  protected readonly lines = signal<LineEntry[]>([]);
+  protected readonly lines = signal<PoLineEntry[]>([]);
   /** True while the unit price reflects the part's list price and hasn't been manually edited. */
   protected readonly priceIsDefault = signal(false);
   /** Temporary storage for an override reason supplied while editing the add-line row. */
   protected readonly pendingLineOverrideReason = signal<string | null>(null);
+  protected readonly showPriceReasonDialog = signal(false);
+  private lastComputedPrice: number | null = null;
+  private defaultFilledPrice: number | null = null;
 
   /**
    * Phase 3 H2 / WU-12 — when false (default), the vendor & part pickers
@@ -110,7 +106,7 @@ export class PoDialogComponent {
       { value: null, label: this.translate.instant('purchaseOrders.selectVendor') },
       ...list.map(v => ({
         value: v.id,
-        label: v.isActive ? v.companyName : `${v.companyName} (deactivated)`,
+        label: v.isActive ? v.companyName : `${v.companyName} ${this.translate.instant('common.deactivatedSuffix')}`,
       })),
     ];
   });
@@ -124,7 +120,7 @@ export class PoDialogComponent {
         return {
           value: p.id,
           label: p.status === 'Obsolete'
-            ? `${p.partNumber} — ${displayName} (deactivated)`
+            ? `${p.partNumber} — ${displayName} ${this.translate.instant('common.deactivatedSuffix')}`
             : `${p.partNumber} — ${displayName}`,
         };
       });
@@ -142,8 +138,7 @@ export class PoDialogComponent {
     if (id == null) return null;
     const v = this.vendors().find(x => x.id === id);
     if (v && !v.isActive) {
-      return this.translate.instant('purchaseOrders.vendorDeactivatedWarning', { name: v.companyName })
-        || `Vendor '${v.companyName}' is deactivated.`;
+      return this.translate.instant('purchaseOrders.vendorDeactivatedWarning', { name: v.companyName });
     }
     return null;
   });
@@ -155,11 +150,12 @@ export class PoDialogComponent {
   protected readonly inactiveLineWarning = computed<string | null>(() => {
     const obsoleteRefs: string[] = [];
     for (const line of this.lines()) {
+      if (line.partId == null) continue;
       const p = this.parts().find(x => x.id === line.partId);
       if (p && p.status === 'Obsolete') obsoleteRefs.push(p.partNumber);
     }
     if (obsoleteRefs.length === 0) return null;
-    return `One or more lines reference obsolete parts: ${obsoleteRefs.join(', ')}`;
+    return this.translate.instant('purchaseOrders.obsoleteLinesWarning', { parts: obsoleteRefs.join(', ') });
   });
 
   // Bought-parts effort PR2.5 — landed cost header. Defaults: Incoterm
@@ -176,6 +172,7 @@ export class PoDialogComponent {
     poNumber: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(20)] }),
     vendorId: new FormControl<number | null>(null, [Validators.required]),
     jobId: new FormControl<number | null>(null),
+    expectedDeliveryDate: new FormControl<Date | null>(null),
     notes: new FormControl(''),
     incoterm: new FormControl<string>('FOB_Origin', { nonNullable: true }),
     estimatedFreight: new FormControl<number | null>(null, [Validators.min(0)]),
@@ -185,6 +182,7 @@ export class PoDialogComponent {
   private readonly formViolations = FormValidationService.getViolations(this.form, {
     vendorId: 'Vendor',
     jobId: 'Job',
+    expectedDeliveryDate: 'Expected Delivery',
     notes: 'Notes',
     incoterm: 'Incoterm',
     estimatedFreight: 'Estimated Freight',
@@ -193,7 +191,7 @@ export class PoDialogComponent {
 
   protected readonly violations: Signal<string[]> = computed(() => [
     ...this.formViolations(),
-    ...(this.lines().length === 0 ? ['At least one line item is required'] : []),
+    ...(this.lines().length === 0 ? [this.translate.instant('purchaseOrders.lineRequired')] : []),
     // Phase 3 H2 / WU-12: surface deactivated-master-data warnings inline
     // and block submit when present (the server would reject anyway with a
     // 400; this saves a round trip and gives a friendlier message).
@@ -202,7 +200,10 @@ export class PoDialogComponent {
   ]);
 
   protected readonly lineForm = new FormGroup({
+    nonStock: new FormControl<boolean>(false, { nonNullable: true }),
     partId: new FormControl<number | null>(null, [Validators.required]),
+    description: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
+    notes: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(1000)] }),
     purchaseUnitId: new FormControl<number | null>(null),
     // Phase 3 / WU-10 / F8-partial — fractional qty allowed (decimal(18,4) on
     // server). Min is 0.0001 — no zero / negative. Default still 1 for the
@@ -234,7 +235,7 @@ export class PoDialogComponent {
     snapshotFn: () => ({ ...this.form.getRawValue(), lines: this.lines() }),
     restoreFn: (data) => {
       this.form.patchValue(data);
-      if (Array.isArray(data['lines'])) this.lines.set(data['lines'] as LineEntry[]);
+      if (Array.isArray(data['lines'])) this.lines.set(data['lines'] as PoLineEntry[]);
       this.form.markAsDirty();
     },
   };
@@ -258,54 +259,78 @@ export class PoDialogComponent {
       this.onPartSelected(partId);
     });
 
-    // When price is manually changed, clear the "list price" indicator
-    let lastComputedPrice: number | null = null;
-    this.lineForm.controls.unitPrice.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((val) => {
-      // If the change came from our computed update (we set with emitEvent:false),
-      // just flip the flag to indicate default price.
-      // Permission + reason gating for editing a default-filled price. The
-      // branch decision lives in classifyManualOverride (unit-tested, forge#8).
-      const userCanOverride = this.auth.hasRole('Admin') || this.auth.hasRole('Manager');
-      const classification = classifyManualOverride({
-        priceIsDefault: this.priceIsDefault(),
-        canOverride: userCanOverride,
-        lastComputedPrice,
-        newValue: val,
-      });
-      if (classification === 'deny-permission') {
-        this.lineForm.controls.unitPrice.setValue(lastComputedPrice, { emitEvent: false });
-        this.snackbar.error(this.translate.instant('purchaseOrders.overrideRequiresPermission'));
-        return;
-      }
-      if (classification === 'needs-reason') {
-        const reason = window.prompt(this.translate.instant('purchaseOrders.enterOverrideReason') || 'Please provide a reason for the manual price override');
-        if (!reason || reason.trim().length === 0) {
-          this.lineForm.controls.unitPrice.setValue(lastComputedPrice, { emitEvent: false });
-          this.snackbar.error(this.translate.instant('purchaseOrders.overrideRequiresReason'));
-          return;
-        }
-        // Record the reason for the pending add-line (attached when the line is added).
-        this.pendingLineOverrideReason.set(reason.trim());
-        this.snackbar.info(this.translate.instant('purchaseOrders.overrideRecorded'));
-      }
-      this.priceIsDefault.set(false);
+    this.lineForm.controls.nonStock.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((nonStock) => {
+      this.applyNonStockMode(nonStock);
     });
 
     // Recompute price when quantity or purchase unit changes (if price still default).
     // Debounce to avoid cascading requests during form reset or rapid user input.
     this.lineForm.controls.orderedQuantity.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.maybeRecomputePrice((price) => lastComputedPrice = price));
+      .subscribe(() => this.maybeRecomputePrice((price) => this.lastComputedPrice = price));
     this.lineForm.controls.purchaseUnitId.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.maybeRecomputePrice((price) => lastComputedPrice = price));
+      .subscribe(() => this.maybeRecomputePrice((price) => this.lastComputedPrice = price));
     this.form.controls.vendorId.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.maybeRecomputePrice((price) => lastComputedPrice = price));
+      .subscribe(() => this.maybeRecomputePrice((price) => this.lastComputedPrice = price));
+  }
+
+  protected onPriceCommitted(): void {
+    if (this.showPriceReasonDialog()) return;
+    const value = this.lineForm.controls.unitPrice.value;
+    // Permission + reason gating for editing a default-filled price. The
+    // branch decision lives in classifyManualOverride (unit-tested, forge#8).
+    const classification = classifyManualOverride({
+      priceIsDefault: this.priceIsDefault(),
+      canOverride: this.auth.hasRole('Admin') || this.auth.hasRole('Manager'),
+      lastComputedPrice: this.lastComputedPrice,
+      newValue: value,
+    });
+    if (classification === 'deny-permission') {
+      this.lineForm.controls.unitPrice.setValue(this.lastComputedPrice, { emitEvent: false });
+      this.snackbar.error(this.translate.instant('purchaseOrders.overrideRequiresPermission'));
+      return;
+    }
+    if (classification === 'needs-reason') {
+      this.showPriceReasonDialog.set(true);
+      return;
+    }
+    if (this.priceIsDefault() && value !== this.defaultFilledPrice) {
+      this.priceIsDefault.set(false);
+    }
+  }
+
+  protected onPriceReasonConfirmed(reason: string): void {
+    this.showPriceReasonDialog.set(false);
+    this.pendingLineOverrideReason.set(reason);
+    this.priceIsDefault.set(false);
+    this.snackbar.info(this.translate.instant('purchaseOrders.overrideRecorded'));
+  }
+
+  protected onPriceReasonCancelled(): void {
+    this.showPriceReasonDialog.set(false);
+    this.lineForm.controls.unitPrice.setValue(this.lastComputedPrice, { emitEvent: false });
+    this.snackbar.error(this.translate.instant('purchaseOrders.overrideRequiresReason'));
+  }
+
+  private applyNonStockMode(nonStock: boolean): void {
+    const { partId, description } = this.lineForm.controls;
+    if (nonStock) {
+      partId.setValue(null);
+      partId.setValidators([]);
+      description.setValidators([Validators.required, Validators.pattern(/\S/), Validators.maxLength(500)]);
+    } else {
+      description.setValue('');
+      partId.setValidators([Validators.required]);
+      description.setValidators([Validators.maxLength(500)]);
+    }
+    partId.updateValueAndValidity({ emitEvent: false });
+    description.updateValueAndValidity();
   }
 
   private maybeRecomputePrice(snapshotLastComputed?: (price: number | null) => void): void {
-    if (!this.priceIsDefault()) return;
+    if (!this.priceIsDefault() || this.showPriceReasonDialog()) return;
     const partId = this.lineForm.controls.partId.value;
     const vendorId = this.form.controls.vendorId.value;
     const qty = this.lineForm.controls.orderedQuantity.value ?? 1;
@@ -324,6 +349,7 @@ export class PoDialogComponent {
         if (chosenPrice != null) {
           this.lineForm.controls.unitPrice.setValue(chosenPrice, { emitEvent: false });
           this.priceIsDefault.set(true);
+          this.defaultFilledPrice = chosenPrice;
           if (snapshotLastComputed) snapshotLastComputed(chosenPrice);
         }
       },
@@ -342,6 +368,9 @@ export class PoDialogComponent {
     // Reset the option selector for the newly chosen part, then load its options.
     this.lineForm.controls.purchaseUnitId.setValue(null, { emitEvent: false });
     this.lineOptions.set([]);
+    this.lastComputedPrice = null;
+    this.defaultFilledPrice = null;
+    this.pendingLineOverrideReason.set(null);
     if (partId == null) {
       this.priceIsDefault.set(false);
       return;
@@ -359,14 +388,31 @@ export class PoDialogComponent {
     if (part && part.effectivePriceSource !== 'Default' && part.effectivePrice > 0) {
       this.lineForm.controls.unitPrice.setValue(part.effectivePrice, { emitEvent: false });
       this.priceIsDefault.set(true);
+      this.defaultFilledPrice = part.effectivePrice;
     } else {
       this.priceIsDefault.set(false);
     }
   }
 
   protected addLine(): void {
-    if (this.lineForm.invalid) return;
+    this.onPriceCommitted();
+    if (this.lineForm.invalid || this.showPriceReasonDialog()) return;
     const f = this.lineForm.getRawValue();
+    const notes = f.notes.trim() || null;
+    if (f.nonStock) {
+      this.lines.update(prev => [...prev, {
+        partId: null,
+        partNumber: null,
+        description: f.description.trim(),
+        orderedQuantity: f.orderedQuantity!,
+        unitPrice: f.unitPrice!,
+        purchaseUnitId: null,
+        purchaseUnitLabel: null,
+        notes,
+      }]);
+      this.resetLineForm(true);
+      return;
+    }
     const part = this.parts().find(p => p.id === f.partId);
     if (!part) return;
     const option = f.purchaseUnitId != null ? this.lineOptions().find(o => o.id === f.purchaseUnitId) : undefined;
@@ -380,11 +426,21 @@ export class PoDialogComponent {
       unitPrice: f.unitPrice!,
       purchaseUnitId: f.purchaseUnitId ?? null,
       purchaseUnitLabel: option ? option.label : null,
+      notes,
       overrideReason: this.pendingLineOverrideReason(),
     }]);
-    this.lineForm.reset({ partId: null, purchaseUnitId: null, orderedQuantity: 1, unitPrice: 0 });
+    this.resetLineForm(false);
+  }
+
+  private resetLineForm(nonStock: boolean): void {
+    this.lineForm.reset(
+      { nonStock, partId: null, description: '', notes: '', purchaseUnitId: null, orderedQuantity: 1, unitPrice: 0 },
+      { emitEvent: false },
+    );
     this.lineOptions.set([]);
     this.priceIsDefault.set(false);
+    this.lastComputedPrice = null;
+    this.defaultFilledPrice = null;
     this.pendingLineOverrideReason.set(null);
   }
 
@@ -415,18 +471,18 @@ export class PoDialogComponent {
     this.saving.set(true);
 
     // Bought-parts effort PR4 — variance check before submit. One round
-    // trip evaluates every line; if any are off-tier the prompt fires
+    // trip evaluates every part line; if any are off-tier the prompt fires
     // before the PO is created.
     const f = this.form.getRawValue();
     const vendorId = f.vendorId!;
+    const varianceLines = toTierVarianceLines(this.lines());
+    if (varianceLines.length === 0) {
+      this.submitPo();
+      return;
+    }
     this.vendorPartsService.checkTierVariance({
       vendorId,
-      lines: this.lines().map(l => ({
-        partId: l.partId,
-        quantity: l.orderedQuantity,
-        unitPrice: l.unitPrice,
-        purchaseUnitId: l.purchaseUnitId ?? null,
-      })),
+      lines: varianceLines,
     }).subscribe({
       next: (result) => {
         const offTier = result.lines.filter(l => l.isOffTier);
@@ -488,23 +544,18 @@ export class PoDialogComponent {
   private submitPo(): void {
     this.saving.set(true);
     const f = this.form.getRawValue();
-    const lineRequests: CreatePurchaseOrderLineRequest[] = this.lines().map(l => ({
-      partId: l.partId,
-      quantity: l.orderedQuantity,
-      unitPrice: l.unitPrice,
-      purchaseUnitId: l.purchaseUnitId ?? null,
-      manualOverrideReason: l.overrideReason ?? undefined,
-    }));
+    const controls = this.form.controls;
 
     this.poService.createPurchaseOrder({
       vendorId: f.vendorId!,
       jobId: f.jobId ?? undefined,
       notes: f.notes || undefined,
       poNumber: this.allowManualPoNumbers() ? (f.poNumber?.trim() || undefined) : undefined,
-      lines: lineRequests,
-      incoterm: f.incoterm,
+      lines: this.lines().map(toCreateLineRequest),
+      incoterm: controls.incoterm.dirty ? f.incoterm : undefined,
       estimatedFreight: f.estimatedFreight ?? undefined,
-      quoteCurrency: f.quoteCurrency,
+      quoteCurrency: controls.quoteCurrency.dirty ? f.quoteCurrency : undefined,
+      expectedDeliveryDate: toIsoDate(f.expectedDeliveryDate) ?? undefined,
     }).subscribe({
       next: () => {
         this.saving.set(false);

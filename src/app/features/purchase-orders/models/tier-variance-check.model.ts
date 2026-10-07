@@ -4,7 +4,7 @@
  * `CheckTierVarianceResponseModel` exactly.
  *
  * The PO dialog calls `POST /api/v1/vendor-parts/check-tier-variance`
- * at save time with every line. Lines flagged `isOffTier` drive the
+ * at save time with every part line. Lines flagged `isOffTier` drive the
  * consolidated off-tier prompt — one dialog for the whole PO, not
  * one prompt per line.
  */
