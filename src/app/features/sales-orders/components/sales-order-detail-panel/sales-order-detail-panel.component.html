@@ -1089,10 +1089,12 @@
     @if (showCancelDialog()) {
       <app-dialog [title]="'salesOrders.cancelSoTitle' | translate" (closed)="showCancelDialog.set(false)">
         <p class="cancel-dialog__message">{{ cancelMessage() }}</p>
-        <div [formGroup]="cancelForm">
-          <app-currency-input [label]="'salesOrders.cancelFee' | translate" formControlName="feeAmount" data-testid="so-cancel-fee" />
-          <app-input [label]="'salesOrders.cancelReason' | translate" formControlName="feeReason" [maxlength]="500" data-testid="so-cancel-reason" />
-        </div>
+        @if (cancelFeeAllowed()) {
+          <div [formGroup]="cancelForm">
+            <app-currency-input [label]="'salesOrders.cancelFee' | translate" formControlName="feeAmount" data-testid="so-cancel-fee" />
+            <app-input [label]="'salesOrders.cancelReason' | translate" formControlName="feeReason" [maxlength]="500" data-testid="so-cancel-reason" />
+          </div>
+        }
         <div dialog-footer>
           <button class="action-btn" (click)="showCancelDialog.set(false)">{{ 'common.close' | translate }}</button>
           <button class="action-btn action-btn--warn" data-testid="so-cancel-confirm-btn" [disabled]="cancelForm.invalid || cancelling()" (click)="submitCancel()">

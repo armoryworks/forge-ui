@@ -92,6 +92,7 @@ interface Panel {
   cancelSo(): void;
   submitCancel(): void;
   showCancelDialog: Signal<boolean>;
+  cancelFeeAllowed: Signal<boolean>;
   cancelForm: { setValue(value: { feeAmount: number | null; feeReason: string }): void };
 }
 
@@ -102,6 +103,7 @@ describe('SalesOrderDetailPanelComponent', () => {
   let dialogOpen: ReturnType<typeof vi.fn>;
   let dialogResult: boolean;
   let enabledCaps: Set<string>;
+  let standalone: WritableSignal<boolean>;
 
   function build(detail: SalesOrderDetail): Panel {
     const panel = TestBed.runInInjectionContext(() => new SalesOrderDetailPanelComponent()) as unknown as Panel;
@@ -113,6 +115,7 @@ describe('SalesOrderDetailPanelComponent', () => {
     TestBed.resetTestingModule();
     dialogResult = true;
     enabledCaps = new Set();
+    standalone = signal(true);
     soService = {
       getSalesOrderById: vi.fn(() => of(order())),
       getDocuments: vi.fn(() => of([])),
@@ -137,7 +140,7 @@ describe('SalesOrderDetailPanelComponent', () => {
           provide: TranslateService,
           useValue: { instant: (key: string, params?: object) => (params ? `${key} ${JSON.stringify(params)}` : key) },
         },
-        { provide: AccountingService, useValue: { isStandalone: signal(true) } },
+        { provide: AccountingService, useValue: { isStandalone: standalone } },
         { provide: CapabilityService, useValue: { isEnabled: (code: string) => enabledCaps.has(code) } },
         { provide: AuthService, useValue: { hasRole: () => false } },
         { provide: ManualNumberSettingsService, useValue: { isEnabled: () => true } },
@@ -338,7 +341,9 @@ describe('SalesOrderDetailPanelComponent', () => {
   });
 
   it('cancels with the fee and reason', () => {
+    enabledCaps.add('CAP-O2C-INVOICE');
     const panel = build(order({ status: 'Confirmed' }));
+    expect(panel['cancelFeeAllowed']()).toBe(true);
     panel['cancelSo']();
     expect(panel['showCancelDialog']()).toBe(true);
 
@@ -354,6 +359,30 @@ describe('SalesOrderDetailPanelComponent', () => {
     const panel = build(order());
     panel['cancelSo']();
     panel['submitCancel']();
-    expect(soService['cancelSalesOrder']).toHaveBeenCalledWith(7, { feeAmount: undefined, feeReason: undefined });
+    expect(soService['cancelSalesOrder']).toHaveBeenCalledWith(7, {});
+  });
+
+  it('cancels without a fee when invoices are kept in the accounting system', () => {
+    enabledCaps.add('CAP-O2C-INVOICE');
+    standalone.set(false);
+    const panel = build(order({ status: 'Confirmed' }));
+    expect(panel['cancelFeeAllowed']()).toBe(false);
+
+    panel['cancelSo']();
+    panel['cancelForm'].setValue({ feeAmount: 150, feeReason: 'Material bought' });
+    panel['submitCancel']();
+
+    expect(soService['cancelSalesOrder']).toHaveBeenCalledWith(7, {});
+  });
+
+  it('cancels without a fee when Forge invoicing is off', () => {
+    const panel = build(order({ status: 'Confirmed' }));
+    expect(panel['cancelFeeAllowed']()).toBe(false);
+
+    panel['cancelSo']();
+    panel['cancelForm'].setValue({ feeAmount: 150, feeReason: 'Material bought' });
+    panel['submitCancel']();
+
+    expect(soService['cancelSalesOrder']).toHaveBeenCalledWith(7, {});
   });
 });

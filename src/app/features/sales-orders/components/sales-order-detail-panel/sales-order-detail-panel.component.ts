@@ -53,11 +53,14 @@ import { CustomerService } from '../../../customers/services/customer.service';
 import { CreditStatus } from '../../../customers/models/credit-status.model';
 import { CreateMissingJobsResponse } from '../../models/create-missing-jobs-response.model';
 import { ConfirmSalesOrderResponse } from '../../models/confirm-sales-order-response.model';
+import { CancelSalesOrderRequest } from '../../models/cancel-sales-order-request.model';
 
 /** Capability gating the whole customer-acceptance feature. */
 const CAP_SO_ACCEPTANCE = 'CAP-O2C-SO-ACCEPTANCE';
 /** Capability gating customer credit limits and credit holds. */
 const CAP_CREDIT_LIMITS = 'CAP-O2C-CREDIT-LIMITS';
+/** Capability gating Forge-side invoicing, which a cancellation fee is billed through. */
+const CAP_INVOICE = 'CAP-O2C-INVOICE';
 
 const SKIP_REASON_KEYS: Record<string, string> = {
   'No part on this line': 'salesOrders.workOrderSkipNoPart',
@@ -286,6 +289,7 @@ export class SalesOrderDetailPanelComponent {
 
   protected readonly taxPercent = computed(() => Math.round((this.so()?.taxRate ?? 0) * 1_000_000) / 10_000);
 
+  protected readonly cancelFeeAllowed = computed(() => this.isStandalone() && this.capabilityService.isEnabled(CAP_INVOICE));
   protected readonly showCancelDialog = signal(false);
   protected readonly cancelling = signal(false);
   protected readonly cancelForm = new FormGroup({
@@ -872,12 +876,13 @@ export class SalesOrderDetailPanelComponent {
     const so = this.so();
     if (!so || this.cancelForm.invalid) return;
     const { feeAmount, feeReason } = this.cancelForm.getRawValue();
-    const charge = feeAmount != null && feeAmount > 0;
+    const request: CancelSalesOrderRequest = {};
+    if (this.cancelFeeAllowed() && feeAmount != null && feeAmount > 0) {
+      request.feeAmount = feeAmount;
+      if (feeReason.trim()) request.feeReason = feeReason.trim();
+    }
     this.cancelling.set(true);
-    this.soService.cancelSalesOrder(so.id, {
-      feeAmount: charge ? feeAmount : undefined,
-      feeReason: charge && feeReason.trim() ? feeReason.trim() : undefined,
-    }).subscribe({
+    this.soService.cancelSalesOrder(so.id, request).subscribe({
       next: () => {
         this.cancelling.set(false);
         this.showCancelDialog.set(false);
