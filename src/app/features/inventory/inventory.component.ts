@@ -135,13 +135,13 @@ export class InventoryComponent {
   protected readonly receivingHistory = signal<ReceivingRecord[]>([]);
 
   protected readonly receivingColumns: ColumnDef[] = [
-    { field: 'purchaseOrderNumber', header: 'PO #', sortable: true, width: '110px' },
-    { field: 'partNumber', header: 'Part #', sortable: true, width: '120px' },
-    { field: 'quantityReceived', header: 'Qty', sortable: true, width: '70px', align: 'right' },
-    { field: 'receivedBy', header: 'Received By', sortable: true },
-    { field: 'storageLocationName', header: 'Location', sortable: true },
-    { field: 'lotNumber', header: 'Lot #', sortable: true, width: '100px' },
-    { field: 'createdAt', header: 'Date', sortable: true, type: 'date', width: '120px' },
+    { field: 'purchaseOrderNumber', header: this.translate.instant('inventory.columns.poNumber'), sortable: true, width: '110px' },
+    { field: 'partNumber', header: this.translate.instant('inventory.columns.partNumber'), sortable: true, width: '120px' },
+    { field: 'quantityReceived', header: this.translate.instant('inventory.columns.qty'), sortable: true, width: '70px', align: 'right' },
+    { field: 'receivedBy', header: this.translate.instant('inventory.columns.receivedBy'), sortable: true },
+    { field: 'storageLocationName', header: this.translate.instant('inventory.location'), sortable: true },
+    { field: 'lotNumber', header: this.translate.instant('inventory.columns.lotNumber'), sortable: true, width: '100px' },
+    { field: 'createdAt', header: this.translate.instant('common.date'), sortable: true, type: 'date', width: '120px' },
   ];
 
   // Cycle Counts tab
