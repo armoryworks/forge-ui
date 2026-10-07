@@ -338,6 +338,21 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     expect(fb?.message).toBe('shopFloor.timerStartFailed {"jobNumber":"JOB-0041","reason":"Clock in first."}');
   });
 
+  it('a proxy error page or an oversized body never reaches the screen', () => {
+    const c = create();
+    const worker = makeWorker('ProductionWorker');
+    c.selectedWorker.set(worker);
+    shopFloor.clockInOut.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 502, error: '<html><body>Bad Gateway</body></html>' })));
+    c.clockAction(worker, 'IN');
+    expect(c.actionFeedback()?.detail).toBe('errors.serverError {"status":502}');
+    shopFloor.clockInOut.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 500, error: 'x'.repeat(201) })));
+    c.clockAction(worker, 'IN');
+    expect(c.actionFeedback()?.detail).toBe('errors.serverError {"status":500}');
+    shopFloor.clockInOut.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 409, error: 'Already clocked in.' })));
+    c.clockAction(worker, 'IN');
+    expect(c.actionFeedback()?.detail).toBe('Already clocked in.');
+  });
+
   it('a manager from another team can badge in on a team display and move work', () => {
     localStorage.setItem('forge-kiosk-device-token', 'tok');
     localStorage.setItem('forge-kiosk-terminal', JSON.stringify(terminal));

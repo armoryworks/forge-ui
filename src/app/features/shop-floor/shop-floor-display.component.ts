@@ -52,6 +52,7 @@ const PIN_TIMEOUT_MS = 20_000;
 const JOB_SELECT_TIMEOUT_MS = 15_000;
 const FEEDBACK_VISIBLE_MS = 2_000;
 const FEEDBACK_CLEAR_MS = 4_000;
+const MAX_SERVER_REASON_LENGTH = 200;
 const DEVICE_TOKEN_KEY = 'forge-kiosk-device-token';
 const TERMINAL_KEY = 'forge-kiosk-terminal';
 
@@ -1055,13 +1056,14 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   }
 
   private serverReason(err: HttpErrorResponse): string {
-    const body = err?.error as { detail?: string; title?: string } | string | null | undefined;
-    if (typeof body === 'string' && body.trim()) return body;
-    if (body && typeof body === 'object') {
-      const reason = body.detail ?? body.title;
-      if (reason) return reason;
-    }
-    return this.translate.instant('errors.serverError', { status: err?.status ?? 0 });
+    const body = err?.error as { detail?: unknown; title?: unknown } | string | null | undefined;
+    const candidates = typeof body === 'string' ? [body] : body && typeof body === 'object' ? [body.detail, body.title] : [];
+    const reason = candidates.map(c => typeof c === 'string' ? c.trim() : '').find(c => this.isPresentableReason(c));
+    return reason ?? this.translate.instant('errors.serverError', { status: err?.status ?? 0 });
+  }
+
+  private isPresentableReason(text: string): boolean {
+    return text.length > 0 && text.length <= MAX_SERVER_REASON_LENGTH && !text.startsWith('<');
   }
 
   // ─── Data ───
