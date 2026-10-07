@@ -6,6 +6,7 @@ import { TranslateService } from '@ngx-translate/core';
 export interface ConfirmDialogData {
   title: string;
   message: string;
+  details?: string[];
   confirmLabel?: string;
   cancelLabel?: string;
   severity?: 'info' | 'warn' | 'danger';

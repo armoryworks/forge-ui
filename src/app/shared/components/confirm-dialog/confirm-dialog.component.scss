@@ -27,6 +27,14 @@
   margin: 0;
 }
 
+.confirm-dialog__details {
+  margin: $sp-md 0 0;
+  padding-left: $sp-lg;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
 .confirm-dialog__footer {
   display: flex;
   padding: $sp-md $sp-lg;
