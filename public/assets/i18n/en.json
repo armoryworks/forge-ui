@@ -1416,7 +1416,7 @@
     "duplicatePart": "Duplicate part",
     "clone": {
       "title": "Duplicate {{partNumber}}",
-      "hint": "Creates a new Draft part with the same engineering details. Inventory, prices, revisions, attachments and alternates are not copied.",
+      "hint": "Creates a new Draft part with the same engineering details. Inventory, prices, revisions, attachments, alternates, piece rates and SPC characteristics are not copied.",
       "defaultName": "{{name}} (copy)",
       "copyBom": "Copy bill of materials",
       "copyRouting": "Copy routing",

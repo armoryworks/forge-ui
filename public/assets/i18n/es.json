@@ -1416,7 +1416,7 @@
     "duplicatePart": "Duplicar pieza",
     "clone": {
       "title": "Duplicar {{partNumber}}",
-      "hint": "Crea una nueva pieza en Borrador con los mismos datos de ingeniería. No se copian el inventario, los precios, las revisiones, los adjuntos ni las alternativas.",
+      "hint": "Crea una nueva pieza en Borrador con los mismos datos de ingeniería. No se copian el inventario, los precios, las revisiones, los adjuntos, las alternativas, las tarifas por pieza ni las características de SPC.",
       "defaultName": "{{name}} (copia)",
       "copyBom": "Copiar lista de materiales",
       "copyRouting": "Copiar enrutamiento",
