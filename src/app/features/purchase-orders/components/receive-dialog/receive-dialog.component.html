@@ -38,18 +38,25 @@
                 class="receive-qty-input" />
             </td>
             <td class="receive-table__bin">
-              <app-select
-                [label]="'purchaseOrders.receiveBin' | translate"
-                [formControl]="binControls()[i]"
-                [options]="binOptions()"
-                [attr.data-testid]="'receive-bin-' + line.id" />
+              @if (line.partId) {
+                <app-entity-picker #binPicker
+                  [label]="'purchaseOrders.receiveBin' | translate"
+                  entityType="inventory/locations/bins"
+                  displayField="locationPath"
+                  [filters]="binPickerFilters"
+                  [formControl]="binControls()[i]"
+                  (selected)="onBinSelected(i, $event)"
+                  [attr.data-testid]="'receive-bin-' + line.id" />
+              }
             </td>
             <td class="receive-table__lot">
-              <app-input
-                [label]="'purchaseOrders.receiveLot' | translate"
-                [formControl]="lotControls()[i]"
-                [maxlength]="100"
-                [attr.data-testid]="'receive-lot-' + line.id" />
+              @if (line.partId) {
+                <app-input
+                  [label]="'purchaseOrders.receiveLot' | translate"
+                  [formControl]="lotControls()[i]"
+                  [maxlength]="100"
+                  [attr.data-testid]="'receive-lot-' + line.id" />
+              }
             </td>
             <td class="receive-table__toggle">
               <button type="button" class="icon-btn"

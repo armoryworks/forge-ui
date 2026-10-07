@@ -19,4 +19,5 @@ export interface PurchaseOrderLine {
   /** Reason captured when the unit price was manually overridden (null otherwise). */
   manualOverrideReason: string | null;
   partDefaultBinId: number | null;
+  partDefaultBinPath: string | null;
 }

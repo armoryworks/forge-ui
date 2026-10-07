@@ -5,12 +5,11 @@ import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
 import { PurchaseOrderService } from '../../services/purchase-order.service';
-import { InventoryService } from '../../../inventory/services/inventory.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { PurchaseOrderDetail } from '../../models/purchase-order-detail.model';
 import { PurchaseOrderLine } from '../../models/purchase-order-line.model';
 import { ReceiveItemsRequest } from '../../models/receive-items-request.model';
-import { SelectOption } from '../../../../shared/components/select/select.component';
+import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { ReceiveDialogComponent } from './receive-dialog.component';
 
 class FakeLoader implements TranslateLoader {
@@ -22,9 +21,14 @@ interface DialogInternals {
   dialogRef: { clearDraft: () => void };
   lineControls(): FormControl<number>[];
   binControls(): FormControl<number | null>[];
+  binLabels(): (string | null)[];
+  binPickerFilters: Record<string, string>;
+  binPickers: () => { setSelected: (id: number, label: string) => void }[];
+  draftConfig: DraftConfig;
   lotControls(): FormControl<string>[];
   noteControls(): FormControl<string>[];
-  binOptions(): SelectOption[];
+  onBinSelected(index: number, entity: Record<string, unknown> | null): void;
+  ngAfterViewInit(): void;
   isNoteOpen(lineId: number): boolean;
   toggleNote(lineId: number): void;
   save(): void;
@@ -49,6 +53,7 @@ function line(overrides: Partial<PurchaseOrderLine>): PurchaseOrderLine {
     purchaseUnitLabel: null,
     manualOverrideReason: null,
     partDefaultBinId: null,
+    partDefaultBinPath: null,
     ...overrides,
   };
 }
@@ -60,15 +65,6 @@ function setup(lines: PurchaseOrderLine[]) {
     providers: [
       provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
       { provide: PurchaseOrderService, useValue: { receiveItems } },
-      {
-        provide: InventoryService,
-        useValue: {
-          getBinLocations: () => of([
-            { id: 7, name: 'A-1', locationType: 'Bin', barcode: null, locationPath: 'Rack A / A-1' },
-            { id: 9, name: 'B-2', locationType: 'Bin', barcode: null, locationPath: '' },
-          ]),
-        },
-      },
       { provide: SnackbarService, useValue: { success: vi.fn() } },
     ],
   });
@@ -85,17 +81,78 @@ function setup(lines: PurchaseOrderLine[]) {
 describe('ReceiveDialogComponent — bin, lot and note per line', () => {
   beforeEach(() => TestBed.resetTestingModule());
 
-  it('defaults each line bin to the part default bin and lists bins by path', () => {
+  it('defaults each stocked line bin to the part default bin with its path', () => {
     const { internals } = setup([
-      line({ id: 1, partDefaultBinId: 7 }),
+      line({ id: 1, partDefaultBinId: 7, partDefaultBinPath: 'Rack A / A-1' }),
       line({ id: 2, partDefaultBinId: null }),
     ]);
 
     expect(internals.binControls().map(c => c.value)).toEqual([7, null]);
-    expect(internals.binOptions()).toEqual([
-      { value: 7, label: 'Rack A / A-1' },
-      { value: 9, label: 'B-2' },
+    expect(internals.binLabels()).toEqual(['Rack A / A-1', null]);
+  });
+
+  it('searches active bins only so an inactive bin cannot be picked', () => {
+    const { internals } = setup([line({ id: 1 })]);
+
+    expect(internals.binPickerFilters).toEqual({ activeOnly: 'true' });
+  });
+
+  it('shows the preselected default bin in the picker of each stocked line', () => {
+    const { internals } = setup([
+      line({ id: 1, partId: null as unknown as number, partDefaultBinId: null }),
+      line({ id: 2, partDefaultBinId: 7, partDefaultBinPath: 'Rack A / A-1' }),
+      line({ id: 3, partDefaultBinId: null }),
     ]);
+    const first = { setSelected: vi.fn() };
+    const second = { setSelected: vi.fn() };
+    internals.binPickers = () => [first, second];
+
+    internals.ngAfterViewInit();
+
+    expect(first.setSelected).toHaveBeenCalledWith(7, 'Rack A / A-1');
+    expect(second.setSelected).not.toHaveBeenCalled();
+  });
+
+  it('falls back to automatic placement once the picked bin is cleared', () => {
+    const { internals, receiveItems } = setup([line({ id: 1, partDefaultBinId: 7, partDefaultBinPath: 'Rack A / A-1' })]);
+
+    internals.lineControls()[0].setValue(1);
+    internals.binControls()[0].setValue(null);
+    internals.onBinSelected(0, null);
+    internals.save();
+
+    expect(internals.binLabels()).toEqual([null]);
+    expect(receiveItems.mock.calls[0][1].lines[0].storageLocationId).toBeUndefined();
+  });
+
+  it('sends no bin or lot for a line without a part', () => {
+    const { internals, receiveItems } = setup([
+      line({ id: 1, partId: null as unknown as number, partDefaultBinId: 7 }),
+    ]);
+
+    internals.lineControls()[0].setValue(1);
+    internals.binControls()[0].setValue(7);
+    internals.lotControls()[0].setValue('HT-1');
+    internals.save();
+
+    expect(receiveItems.mock.calls[0][1].lines).toEqual([
+      { lineId: 1, quantity: 1, storageLocationId: undefined, lotNumber: undefined, notes: undefined },
+    ]);
+  });
+
+  it('restores the drafted bin with its label, including a cleared bin', () => {
+    const { internals } = setup([
+      line({ id: 1, partDefaultBinId: 7, partDefaultBinPath: 'Rack A / A-1' }),
+      line({ id: 2 }),
+    ]);
+
+    internals.draftConfig.restoreFn!({
+      'bin:1': null, 'binLabel:1': 'Rack A / A-1',
+      'bin:2': 9, 'binLabel:2': 'Rack B / B-2',
+    });
+
+    expect(internals.binControls().map(c => c.value)).toEqual([null, 9]);
+    expect(internals.binLabels()).toEqual([null, 'Rack B / B-2']);
   });
 
   it('sends the chosen bin, trimmed lot and note for lines being received', () => {

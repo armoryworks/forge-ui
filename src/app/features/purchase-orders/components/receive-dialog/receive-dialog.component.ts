@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, signal, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, signal, ViewChild, viewChildren } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -17,7 +17,7 @@ import { CurrencyInputComponent } from '../../../../shared/components/currency-i
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
-import { InventoryService } from '../../../inventory/services/inventory.service';
+import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 
 @Component({
   selector: 'app-receive-dialog',
@@ -25,18 +25,19 @@ import { InventoryService } from '../../../inventory/services/inventory.service'
   imports: [
     ReactiveFormsModule, DecimalPipe,
     DialogComponent, EmptyStateComponent, CurrencyInputComponent, SelectComponent,
-    InputComponent, TextareaComponent,
+    InputComponent, TextareaComponent, EntityPickerComponent,
     TranslatePipe,
   ],
   templateUrl: './receive-dialog.component.html',
   styleUrl: './receive-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ReceiveDialogComponent implements OnInit {
+export class ReceiveDialogComponent implements OnInit, AfterViewInit {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
 
+  private readonly binPickers = viewChildren<EntityPickerComponent>('binPicker');
+
   private readonly poService = inject(PurchaseOrderService);
-  private readonly inventoryService = inject(InventoryService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
 
@@ -48,10 +49,11 @@ export class ReceiveDialogComponent implements OnInit {
   protected readonly receivableLines = signal<PurchaseOrderLine[]>([]);
   protected readonly lineControls = signal<FormControl<number>[]>([]);
   protected readonly binControls = signal<FormControl<number | null>[]>([]);
+  protected readonly binLabels = signal<(string | null)[]>([]);
+  protected readonly binPickerFilters: Record<string, string> = { activeOnly: 'true' };
   protected readonly lotControls = signal<FormControl<string>[]>([]);
   protected readonly noteControls = signal<FormControl<string>[]>([]);
   protected readonly openNotes = signal<ReadonlySet<number>>(new Set());
-  protected readonly binOptions = signal<SelectOption[]>([]);
 
   // Bought-parts effort PR3 — receipt-level freight capture. ActualFreight
   // defaults from PO.EstimatedFreight on init so the "matches estimate"
@@ -88,12 +90,10 @@ export class ReceiveDialogComponent implements OnInit {
         validators: [Validators.min(0), Validators.max(l.remainingQuantity)],
       }))
     );
-    this.binControls.set(lines.map(l => new FormControl<number | null>(l.partDefaultBinId ?? null)));
+    this.binControls.set(lines.map(l => new FormControl<number | null>(l.partId ? l.partDefaultBinId ?? null : null)));
+    this.binLabels.set(lines.map(l => (l.partId ? l.partDefaultBinPath ?? null : null)));
     this.lotControls.set(lines.map(() => new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(100)] })));
     this.noteControls.set(lines.map(() => new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(1000)] })));
-    this.inventoryService.getBinLocations().subscribe(bins => {
-      this.binOptions.set(bins.map(b => ({ value: b.id, label: b.locationPath || b.name })));
-    });
     // Default actual freight to the PO's estimate so the common case is
     // one-click. Buyer can override.
     if (po.estimatedFreight != null) {
@@ -109,11 +109,13 @@ export class ReceiveDialogComponent implements OnInit {
         const ls = this.receivableLines();
         const cs = this.lineControls();
         const bins = this.binControls();
+        const binLabels = this.binLabels();
         const lots = this.lotControls();
         const notes = this.noteControls();
         ls.forEach((l, i) => {
           snapshot[l.id.toString()] = cs[i].value;
           snapshot[`bin:${l.id}`] = bins[i].value;
+          snapshot[`binLabel:${l.id}`] = binLabels[i];
           snapshot[`lot:${l.id}`] = lots[i].value;
           snapshot[`note:${l.id}`] = notes[i].value;
         });
@@ -129,7 +131,11 @@ export class ReceiveDialogComponent implements OnInit {
             cs[i].markAsDirty();
           }
           const bin = data[`bin:${l.id}`];
-          if (typeof bin === 'number') this.binControls()[i].setValue(bin);
+          if (l.partId && (bin === null || typeof bin === 'number')) {
+            const label = data[`binLabel:${l.id}`];
+            this.binControls()[i].setValue(bin);
+            this.setBinLabel(i, bin !== null && typeof label === 'string' ? label : null);
+          }
           const lot = data[`lot:${l.id}`];
           if (typeof lot === 'string') this.lotControls()[i].setValue(lot);
           const note = data[`note:${l.id}`];
@@ -138,8 +144,37 @@ export class ReceiveDialogComponent implements OnInit {
             this.openNotes.update(open => new Set(open).add(l.id));
           }
         });
+        this.syncBinPickers();
       },
     };
+  }
+
+  ngAfterViewInit(): void {
+    this.syncBinPickers();
+  }
+
+  protected onBinSelected(index: number, entity: Record<string, unknown> | null): void {
+    const path = entity?.['locationPath'];
+    this.setBinLabel(index, typeof path === 'string' ? path : null);
+  }
+
+  private setBinLabel(index: number, label: string | null): void {
+    this.binLabels.update(labels => labels.map((existing, i) => (i === index ? label : existing)));
+  }
+
+  private syncBinPickers(): void {
+    const pickers = this.binPickers();
+    const bins = this.binControls();
+    const labels = this.binLabels();
+    this.receivableLines()
+      .map((l, i) => ({ l, i }))
+      .filter(({ l }) => !!l.partId)
+      .forEach(({ i }, pickerIndex) => {
+        const picker = pickers[pickerIndex];
+        const binId = bins[i].value;
+        const label = labels[i];
+        if (picker && binId != null && label) picker.setSelected(binId, label);
+      });
   }
 
   protected get hasAnyQuantity(): boolean {
@@ -184,12 +219,13 @@ export class ReceiveDialogComponent implements OnInit {
     lines.forEach((l, i) => {
       const qty = controls[i].value ?? 0;
       if (qty > 0) {
-        const lot = lots[i].value.trim();
+        const stocked = !!l.partId;
+        const lot = stocked ? lots[i].value.trim() : '';
         const note = notes[i].value.trim();
         receiveLines.push({
           lineId: l.id,
           quantity: qty,
-          storageLocationId: bins[i].value ?? undefined,
+          storageLocationId: stocked ? bins[i].value ?? undefined : undefined,
           lotNumber: lot || undefined,
           notes: note || undefined,
         });
