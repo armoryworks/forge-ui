@@ -95,9 +95,11 @@ interface ComponentInternals {
   columns: { set(cols: BoardColumn[]): void; (): BoardColumn[] };
   filteredColumns: () => BoardColumn[];
   swimlaneRows: () => { cells: { jobs: KanbanJob[] }[] }[];
+  activeOnly: () => boolean;
   boardTruncated: () => boolean;
   boardTotalCount: () => number;
   boardLoadedCount: () => number;
+  toggleActiveOnly(): void;
   selectTrackType(trackTypeId: number): void;
   onCardDropped(event: CdkDragDrop<KanbanJob[]>): void;
   selectedJobIds: { set(ids: Set<number>): void };
@@ -116,6 +118,8 @@ describe('KanbanComponent', () => {
   let getBoard: ReturnType<typeof vi.fn>;
   let updateJobPosition: ReturnType<typeof vi.fn>;
   let moveJobStage: ReturnType<typeof vi.fn>;
+  let prefsSet: ReturnType<typeof vi.fn>;
+  let storedPrefs: Record<string, unknown>;
 
   function createComponent(): void {
     component = TestBed.createComponent(KanbanComponent)
@@ -126,7 +130,8 @@ describe('KanbanComponent', () => {
     getBoard = vi.fn(() => of({ columns: [], totalCount: 0, loadedCount: 0 }));
     updateJobPosition = vi.fn(() => of(undefined));
     moveJobStage = vi.fn(() => of(undefined));
-
+    prefsSet = vi.fn();
+    storedPrefs = {};
     detailDialogOpen = vi.fn(() => ({ afterClosed: () => of(undefined) }));
     bulkMoveStage = vi.fn(() => of({ successCount: 0, failureCount: 0, errors: [] }));
     snackbarSuccess = vi.fn();
@@ -166,7 +171,7 @@ describe('KanbanComponent', () => {
         { provide: DetailDialogService, useValue: { open: detailDialogOpen, getDetailFromUrl: () => null } },
         { provide: MatDialog, useValue: { open: vi.fn() } },
         { provide: AuthService, useValue: { user: () => null } },
-        { provide: UserPreferencesService, useValue: { get: () => null, set: vi.fn() } },
+        { provide: UserPreferencesService, useValue: { get: (key: string) => storedPrefs[key] ?? null, set: prefsSet } },
         { provide: DraftResumeService, useValue: { consume: () => false } },
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
         { provide: Router, useValue: { navigate: vi.fn() } },
@@ -290,6 +295,46 @@ describe('KanbanComponent', () => {
     expect(toastShow).toHaveBeenCalledOnce();
   });
 
+  describe('active only filter', () => {
+    function mixedBoard(): BoardColumn[] {
+      return [{
+        stage: stage({ id: 1, name: 'Shipped', sortOrder: 1 }),
+        jobs: [
+          boardJob(1, 'Shipped'),
+          boardJob(2, 'Shipped', { disposition: 'ShipToCustomer' }),
+          boardJob(3, 'Shipped', { completedDate: '2026-10-01T00:00:00Z' }),
+        ],
+      }];
+    }
+
+    it('is on by default and hides completed and disposed work orders on the board and in swimlanes', () => {
+      component.columns.set(mixedBoard());
+
+      expect(component.activeOnly()).toBe(true);
+      expect(component.filteredColumns()[0].jobs.map(j => j.id)).toEqual([1]);
+      const swimJobs = component.swimlaneRows().flatMap(r => r.cells.flatMap(c => c.jobs.map(j => j.id)));
+      expect(swimJobs).toEqual([1]);
+    });
+
+    it('shows every work order once toggled off and remembers the choice', () => {
+      component.columns.set(mixedBoard());
+
+      component.toggleActiveOnly();
+
+      expect(component.filteredColumns()[0].jobs.map(j => j.id)).toEqual([1, 2, 3]);
+      expect(prefsSet).toHaveBeenCalledWith('kanban:activeOnly', false);
+    });
+
+    it('starts off when the saved preference is off', () => {
+      storedPrefs['kanban:activeOnly'] = false;
+      createComponent();
+      component.columns.set(mixedBoard());
+
+      expect(component.activeOnly()).toBe(false);
+      expect(component.filteredColumns()[0].jobs.length).toBe(3);
+    });
+  });
+
   describe('board truncation', () => {
     it('flags the board as truncated when the server holds more jobs than were loaded', () => {
       getBoard.mockReturnValue(of({ columns: productionBoard(), totalCount: 245, loadedCount: 200 }));
@@ -311,7 +356,32 @@ describe('KanbanComponent', () => {
   });
 
   describe('reordering cards', () => {
+    it('saves the dragged order and keeps hidden work orders after the visible ones', () => {
+      component.columns.set([{
+        stage: stage({ id: 1, name: 'Queued', sortOrder: 1 }),
+        jobs: [
+          boardJob(1, 'Queued', { boardPosition: 0 }),
+          boardJob(2, 'Queued', { boardPosition: 1, disposition: 'Scrap' }),
+          boardJob(3, 'Queued', { boardPosition: 2 }),
+        ],
+      }]);
+      const visible = component.filteredColumns()[0].jobs;
+      const container = { id: 'column-0', data: visible } as unknown as CdkDropList<KanbanJob[]>;
+
+      component.onCardDropped({
+        previousContainer: container,
+        container,
+        previousIndex: 1,
+        currentIndex: 0,
+      } as unknown as CdkDragDrop<KanbanJob[]>);
+
+      expect(component.columns()[0].jobs.map(j => j.id)).toEqual([3, 1, 2]);
+      expect(component.columns()[0].jobs.map(j => j.boardPosition)).toEqual([0, 1, 2]);
+      expect(updateJobPosition.mock.calls).toEqual([[3, 0], [1, 1], [2, 2]]);
+    });
+
     it('does not re-save cards whose position did not change', () => {
+      component.toggleActiveOnly();
       component.columns.set([{
         stage: stage({ id: 1, name: 'Queued', sortOrder: 1 }),
         jobs: [

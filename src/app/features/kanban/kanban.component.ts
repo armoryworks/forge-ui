@@ -105,6 +105,18 @@ export class KanbanComponent implements OnInit, OnDestroy {
     this.userPreferences.set('kanban:myWorkOnly', next);
   }
 
+  protected readonly activeOnly = signal(this.userPreferences.get<boolean>('kanban:activeOnly') ?? true);
+
+  protected toggleActiveOnly(): void {
+    const next = !this.activeOnly();
+    this.activeOnly.set(next);
+    this.userPreferences.set('kanban:activeOnly', next);
+  }
+
+  private isActiveJob(job: KanbanJob): boolean {
+    return !job.completedDate && !job.disposition;
+  }
+
   // ── View Mode ──
   protected readonly viewMode = signal<ViewMode>('board');
   protected readonly teamUserIds = new FormControl<number[]>([]);
@@ -119,16 +131,18 @@ export class KanbanComponent implements OnInit, OnDestroy {
     const cols = this.columns();
     const selectedIds = this.teamUserIdsSignal() ?? [];
     const myWork = this.myWorkOnly();
+    const activeOnly = this.activeOnly();
     const currentUserId = this.authService.user()?.id;
 
-    if (selectedIds.length === 0 && !myWork) return cols;
+    if (selectedIds.length === 0 && !myWork && !activeOnly) return cols;
 
     return cols.map(col => ({
       ...col,
       jobs: col.jobs.filter(j => {
         const matchesTeam = selectedIds.length === 0 || (j.assigneeId != null && selectedIds.includes(j.assigneeId));
         const matchesMyWork = !myWork || (currentUserId != null && j.assigneeId === currentUserId);
-        return matchesTeam && matchesMyWork;
+        const matchesActive = !activeOnly || this.isActiveJob(j);
+        return matchesTeam && matchesMyWork && matchesActive;
       }),
     }));
   });
@@ -143,7 +157,10 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
   // ── Swimlane Data ──
   protected readonly swimlaneRows = computed<SwimlaneRow[]>(() => {
-    const cols = this.columns();
+    const activeOnly = this.activeOnly();
+    const cols = activeOnly
+      ? this.columns().map(col => ({ ...col, jobs: col.jobs.filter(j => this.isActiveJob(j)) }))
+      : this.columns();
     const allJobs = cols.flatMap(c => c.jobs);
     const selectedIds = this.teamUserIdsSignal() ?? [];
     const allUsers = this.users();

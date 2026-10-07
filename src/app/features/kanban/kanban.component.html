@@ -36,6 +36,13 @@
       {{ myWorkOnly() ? ('kanban.allJobs' | translate) : ('kanban.myWork' | translate) }}
     </button>
 
+    <button class="my-work-btn" data-testid="active-only-btn" [class.my-work-btn--active]="activeOnly()"
+            (click)="toggleActiveOnly()"
+            [attr.aria-pressed]="activeOnly()">
+      <span class="material-icons-outlined">filter_alt</span>
+      {{ 'kanban.activeOnly' | translate }}
+    </button>
+
     <button *appCap="'CAP-MFG-WO-RELEASE'" data-testid="new-job-btn" class="new-job-btn" (click)="openCreateDialog()">
       <span class="material-icons-outlined">add</span>
       {{ 'jobs.createJob' | translate }}
