@@ -6,7 +6,7 @@ import { TranslateService } from '@ngx-translate/core';
 
 import { ConfirmDialogComponent, ConfirmDialogData } from '../components/confirm-dialog/confirm-dialog.component';
 import {
-  ActiveTimer, TimerStartOutcome, TimerStopOutcome, TimerToggleOutcome, isQueued,
+  ActiveTimer, QueuedOffline, StartedTimeEntry, TimerStartOutcome, TimerStopOutcome, TimerToggleOutcome, isQueued,
 } from '../models/mobile-api.model';
 import { AuthService } from './auth.service';
 import { MobileApiService } from './mobile-api.service';
@@ -162,7 +162,13 @@ export class MobileTimerService {
       else this.clear();
     }
 
-    const entry = await firstValueFrom(this.api.startTimer(jobId));
+    let entry: StartedTimeEntry | QueuedOffline;
+    try {
+      entry = await firstValueFrom(this.api.startTimer(jobId));
+    } catch (err) {
+      if (previous) await this.putBack(previous, queuedIds[0] ?? null);
+      throw err;
+    }
     if (isQueued(entry)) return { entryId: null, queuedIds: [...queuedIds, entry.entryId], previous };
 
     this.loads++;
@@ -174,6 +180,15 @@ export class MobileTimerService {
       timerStart: entry.timerStart ?? new Date(),
     });
     return { entryId: entry.id, queuedIds, previous };
+  }
+
+  /** A switch whose start failed must not leave the person's earlier timer stopped. */
+  private async putBack(previous: ActiveTimer, queuedStop: string | null): Promise<void> {
+    if (queuedStop !== null) {
+      await this.queue.remove(queuedStop).catch(() => undefined);
+      return;
+    }
+    await this.restart(previous).catch(() => this.refresh());
   }
 
   private offline(): boolean {

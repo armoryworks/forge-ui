@@ -296,4 +296,28 @@ describe('MobileTimerService', () => {
     expect(api.activeTimer).not.toHaveBeenCalled();
     expect(open).toHaveBeenCalledOnce();
   });
+
+  it('puts the earlier timer back when the start after a switch fails', async () => {
+    api.activeTimer.mockReturnValue(of(running(7, 'JOB-7')));
+    api.startTimer
+      .mockReturnValueOnce(throwError(() => new Error('400')))
+      .mockReturnValue(of({ id: 12, jobId: 7, jobNumber: 'JOB-7', timerStart: new Date() }));
+
+    await expect(service.toggle(42, 'JOB-42')).rejects.toThrow('400');
+
+    expect(api.startTimer).toHaveBeenLastCalledWith(7, undefined, null);
+    expect(service.active()?.jobId).toBe(7);
+  });
+
+  it('drops the queued stop when the start after a switch fails', async () => {
+    api.activeTimer.mockReturnValue(of(running(7, 'JOB-7')));
+    api.stopTimer.mockReturnValue(of({ queued: true, entryId: 'q-stop' }));
+    api.startTimer.mockReturnValue(throwError(() => new Error('quota')));
+
+    await expect(service.toggle(42, 'JOB-42')).rejects.toThrow('quota');
+
+    expect(remove).toHaveBeenCalledWith('q-stop');
+    expect(api.startTimer).toHaveBeenCalledOnce();
+    expect(service.active()?.jobId).toBe(7);
+  });
 });
