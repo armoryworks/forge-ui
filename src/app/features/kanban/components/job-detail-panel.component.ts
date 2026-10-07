@@ -394,7 +394,12 @@ export class JobDetailPanelComponent implements OnInit {
     if (!j) return;
     this.matDialog.open(DisposeJobDialogComponent, {
       width: '520px',
-      data: { jobId: j.id, jobNumber: j.jobNumber } satisfies DisposeJobDialogData,
+      data: {
+        jobId: j.id,
+        jobNumber: j.jobNumber,
+        partId: j.partId,
+        currentDisposition: j.disposition,
+      } satisfies DisposeJobDialogData,
     }).afterClosed().subscribe(result => {
       if (result) {
         this.job.set(result);

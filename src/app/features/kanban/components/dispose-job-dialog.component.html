@@ -1,8 +1,15 @@
 <app-dialog [title]="('kanban.disposeJobTitle' | translate) + ' — ' + data.jobNumber" width="520px" [draftConfig]="draftConfig" [draftFormGroup]="formGroup" (closed)="matDialogRef.close()">
 
   <div [formGroup]="formGroup">
-    <app-select [label]="'jobs.disposition' | translate" formControlName="disposition" [options]="dispositionOptions" />
-    <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="3" [maxlength]="2000" />
+    <app-select [label]="'jobs.disposition' | translate" formControlName="disposition" [options]="dispositionOptions" data-testid="dispose-job-disposition" />
+    @if (formGroup.controls.disposition.hasError('noPart')) {
+      <p class="dispose-job__error" data-testid="dispose-job-no-part">{{ 'kanban.dispositionNoPart' | translate }}</p>
+    }
+    @if (addingToInventory()) {
+      <app-input [label]="'kanban.dispositionGoodQuantity' | translate" formControlName="goodQuantity" type="number" [min]="1" [step]="1" [required]="true" data-testid="dispose-job-good-quantity" />
+      <app-select [label]="'inventory.bin' | translate" formControlName="locationId" [options]="binOptions()" data-testid="dispose-job-bin" />
+    }
+    <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="3" [maxlength]="2000" data-testid="dispose-job-notes" />
   </div>
 
   <div dialog-footer>

@@ -1,1 +1,8 @@
-export type JobDisposition = 'ShipToCustomer' | 'AddToInventory' | 'CapitalizeAsAsset' | 'Scrap' | 'HoldForReview';
+export type JobDisposition =
+  | 'ShipToCustomer'
+  | 'AddToInventory'
+  | 'CapitalizeAsAsset'
+  | 'Scrap'
+  | 'HoldForReview'
+  | 'EnteredInError'
+  | 'Other';
