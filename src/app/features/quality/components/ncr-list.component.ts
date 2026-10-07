@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 
 import { NcrCapaService } from '../services/ncr-capa.service';
 import { NonConformance } from '../models/non-conformance.model';
@@ -18,6 +19,11 @@ import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { FormValidationService } from '../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
+
+const NOTES_REQUIRED_CODES: readonly NcrDispositionCode[] = ['UseAsIs', 'Reject'];
+
+const requiredText = (control: AbstractControl): ValidationErrors | null =>
+  typeof control.value === 'string' && control.value.trim() ? null : { required: true };
 
 @Component({
   selector: 'app-ncr-list',
@@ -110,11 +116,28 @@ export class NcrListComponent implements OnInit {
     reworkInstructions: new FormControl(''),
   });
 
+  protected readonly dispositionCode = toSignal(this.dispositionForm.controls.code.valueChanges, {
+    initialValue: this.dispositionForm.controls.code.value,
+  });
+  protected readonly notesRequired = computed(() => NOTES_REQUIRED_CODES.includes(this.dispositionCode()));
+
+  protected readonly dispositionViolations = FormValidationService.getViolations(this.dispositionForm, {
+    notes: 'Notes',
+    reworkInstructions: 'Rework Instructions',
+  });
+
   protected readonly createViolations = FormValidationService.getViolations(this.createForm, {
     partId: 'Part ID',
     description: 'Description',
     affectedQuantity: 'Affected Quantity',
   });
+
+  constructor() {
+    this.dispositionForm.controls.code.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(code => this.applyDispositionValidators(code));
+    this.applyDispositionValidators(this.dispositionForm.controls.code.value);
+  }
 
   ngOnInit(): void {
     this.loadNcrs();
@@ -160,7 +183,7 @@ export class NcrListComponent implements OnInit {
 
   saveDisposition(): void {
     const ncr = this.dispositionNcr();
-    if (!ncr) return;
+    if (!ncr || this.dispositionForm.invalid) return;
     this.saving.set(true);
     const formVal = this.dispositionForm.getRawValue();
     this.ncrCapaService.dispositionNcr(ncr.id, {
@@ -176,6 +199,14 @@ export class NcrListComponent implements OnInit {
       },
       error: () => this.saving.set(false),
     });
+  }
+
+  private applyDispositionValidators(code: NcrDispositionCode): void {
+    const { notes, reworkInstructions } = this.dispositionForm.controls;
+    notes.setValidators(NOTES_REQUIRED_CODES.includes(code) ? requiredText : null);
+    reworkInstructions.setValidators(code === 'Rework' ? requiredText : null);
+    notes.updateValueAndValidity();
+    reworkInstructions.updateValueAndValidity();
   }
 
   createCapa(ncr: NonConformance): void {

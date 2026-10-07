@@ -64,17 +64,21 @@
 @if (showDispositionDialog()) {
   <app-dialog title="Disposition NCR" width="420px" (closed)="showDispositionDialog.set(false)">
     <div [formGroup]="dispositionForm">
-      <app-select label="Disposition Code" formControlName="code" [options]="dispositionCodeOptions" [required]="true" />
-      <app-textarea label="Notes" formControlName="notes" />
-      @if (dispositionForm.controls.code.value === 'Rework') {
-        <app-textarea label="Rework Instructions" formControlName="reworkInstructions" [required]="true" />
+      <app-select label="Disposition Code" formControlName="code" [options]="dispositionCodeOptions" [required]="true"
+        data-testid="ncr-disposition-code" />
+      <app-textarea label="Notes" formControlName="notes" [required]="notesRequired()" data-testid="ncr-disposition-notes" />
+      @if (dispositionCode() === 'Rework') {
+        <app-textarea label="Rework Instructions" formControlName="reworkInstructions" [required]="true"
+          data-testid="ncr-disposition-rework-instructions" />
       }
     </div>
     <div dialog-footer>
       <button class="action-btn" (click)="showDispositionDialog.set(false)">Cancel</button>
+      <app-validation-button [violations]="dispositionViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [disabled]="saving()"
+        [disabled]="dispositionForm.invalid || saving()"
         (click)="saveDisposition()">Record Disposition</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }
