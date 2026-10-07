@@ -16,10 +16,12 @@ import {
 import {
   PaymentScheduleDialogComponent, PaymentScheduleDialogData, PaymentScheduleDialogResult,
 } from '../payment-schedule-dialog/payment-schedule-dialog.component';
+import {
+  SendQuoteEmailDialogComponent, SendQuoteEmailDialogData, SendQuoteEmailDialogResult,
+} from '../send-quote-email-dialog/send-quote-email-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
-import { ConfirmSendService } from '../../../../shared/services/confirm-send.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
@@ -64,7 +66,6 @@ export class QuoteDetailPanelComponent {
   private readonly quoteService = inject(QuoteService);
   private readonly paymentScheduleService = inject(PaymentScheduleService);
   private readonly accounting = inject(AccountingService);
-  private readonly confirmSend = inject(ConfirmSendService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -131,19 +132,54 @@ export class QuoteDetailPanelComponent {
   protected sendQuote(): void {
     const q = this.quote();
     if (!q) return;
-    this.confirmSend.confirmSend({
-      titleKey: 'quotes.confirmSendTitle',
-      messageKey: 'quotes.confirmSendMessage',
-      messageParams: { number: q.quoteNumber },
-    }).subscribe(confirmed => {
+    this.quoteService.getRecipientEmail(q.customerId).subscribe(recipientEmail => {
+      this.dialog.open<SendQuoteEmailDialogComponent, SendQuoteEmailDialogData, SendQuoteEmailDialogResult | undefined>(
+        SendQuoteEmailDialogComponent,
+        {
+          width: '600px',
+          data: { quoteId: q.id, quoteNumber: q.quoteNumber, customerName: q.customerName, recipientEmail },
+        },
+      ).afterClosed().subscribe(sent => {
+        this.loadQuote(q.id);
+        if (sent) this.changed.emit();
+      });
+    });
+  }
+
+  protected markSent(): void {
+    const q = this.quote();
+    if (!q) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('quotes.confirmMarkSentTitle'),
+        message: this.translate.instant('quotes.confirmMarkSentMessage', { number: q.quoteNumber }),
+        confirmLabel: this.translate.instant('quotes.markSent'),
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
       this.quoteService.sendQuote(q.id).subscribe({
         next: () => {
           this.loadQuote(q.id);
           this.changed.emit();
-          this.snackbar.success(this.translate.instant('quotes.quoteSent'));
+          this.snackbar.success(this.translate.instant('quotes.quoteMarkedSent'));
         },
       });
+    });
+  }
+
+  protected downloadPdf(): void {
+    const q = this.quote();
+    if (!q) return;
+    this.quoteService.getQuotePdf(q.id).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Quote-${q.quoteNumber || q.id}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
     });
   }
 
@@ -236,7 +272,8 @@ export class QuoteDetailPanelComponent {
     return translated !== key ? translated : status;
   }
 
-  protected canSend(status: string): boolean { return status === 'Draft'; }
+  protected canSend(status: string): boolean { return status === 'Draft' || status === 'Sent'; }
+  protected canMarkSent(status: string): boolean { return status === 'Draft'; }
   protected canAccept(status: string): boolean { return status === 'Sent'; }
   protected canReject(status: string): boolean { return status === 'Sent'; }
   protected canConvert(status: string): boolean { return status === 'Accepted'; }

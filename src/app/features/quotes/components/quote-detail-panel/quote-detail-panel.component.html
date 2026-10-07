@@ -291,8 +291,18 @@
             {{ 'quotes.reject' | translate }}
           </button>
         }
+        <button data-testid="quote-download-pdf-btn" class="action-btn" (click)="downloadPdf()">
+          <span class="material-icons-outlined">picture_as_pdf</span>
+          {{ 'quotes.downloadPdf' | translate }}
+        </button>
+        @if (canMarkSent(quote.status)) {
+          <button data-testid="quote-mark-sent-btn" class="action-btn" (click)="markSent()">
+            <span class="material-icons-outlined">task_alt</span>
+            {{ 'quotes.markSent' | translate }}
+          </button>
+        }
         @if (canSend(quote.status)) {
-          <button data-testid="quote-send-btn" class="action-btn action-btn--primary" (click)="sendQuote()">
+          <button data-testid="quote-send-btn" class="action-btn" [class.action-btn--primary]="quote.status === 'Draft'" (click)="sendQuote()">
             <span class="material-icons-outlined">send</span>
             {{ 'quotes.send' | translate }}
           </button>
