@@ -115,9 +115,9 @@ export class JobDialogComponent implements OnInit {
   ]);
 
   protected readonly violations = FormValidationService.getViolations(this.jobForm, {
-    title: 'Title',
-    trackTypeId: 'Track Type',
-    quantity: 'Quantity to make',
+    title: this.translate.instant('kanban.jobTitle'),
+    trackTypeId: this.translate.instant('kanban.trackType'),
+    quantity: this.translate.instant('kanban.quantityToMake'),
   });
 
   protected readonly trackTypeOptions = computed<SelectOption[]>(() =>
