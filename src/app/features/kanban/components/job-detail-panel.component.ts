@@ -95,6 +95,8 @@ export class JobDetailPanelComponent implements OnInit {
   // Part add form
   protected readonly jobParts = signal<JobPart[]>([]);
   protected readonly partSearchControl = new FormControl('');
+  protected readonly partQtyControl = new FormControl<number | null>(1);
+  private readonly partQtyEditControls = new Map<number, FormControl<number | null>>();
   protected readonly partSearchResults = signal<PartSearchResult[]>([]);
   protected readonly selectedPart = signal<PartSearchResult | null>(null);
   protected readonly showPartResults = signal(false);
@@ -286,25 +288,68 @@ export class JobDetailPanelComponent implements OnInit {
 
   protected selectPart(part: PartSearchResult): void {
     this.selectedPart.set(part);
-    this.partSearchControl.setValue(part.partNumber + ' — ' + part.description, { emitEvent: false });
+    this.partSearchControl.setValue(`${part.partNumber} — ${part.name}`, { emitEvent: false });
     this.showPartResults.set(false);
   }
 
   protected addPart(): void {
     const part = this.selectedPart();
-    if (!part) return;
+    const qty = this.partQtyControl.value;
+    if (!part || !this.isValidQty(qty)) return;
 
-    this.kanbanService.addJobPart(this.jobId(), part.id).subscribe(jp => {
+    this.kanbanService.addJobPart(this.jobId(), part.id, qty).subscribe(jp => {
       this.jobParts.update(list => [...list, jp]);
       this.selectedPart.set(null);
       this.partSearchControl.reset();
+      this.partQtyControl.setValue(1);
       this.snackbar.success(this.translate.instant('kanban.partAdded'));
     });
+  }
+
+  protected canAddPart(): boolean {
+    return this.selectedPart() !== null && this.isValidQty(this.partQtyControl.value);
+  }
+
+  protected partQtyEditControl(jp: JobPart): FormControl<number | null> {
+    let control = this.partQtyEditControls.get(jp.id);
+    if (!control) {
+      control = new FormControl<number | null>(jp.quantity);
+      this.partQtyEditControls.set(jp.id, control);
+    }
+    return control;
+  }
+
+  protected commitPartQtyOnEnter(event: Event): void {
+    (event.target as HTMLElement).blur();
+  }
+
+  protected savePartQty(jp: JobPart): void {
+    const control = this.partQtyEditControl(jp);
+    const qty = control.value;
+    if (!this.isValidQty(qty)) {
+      control.setValue(jp.quantity);
+      return;
+    }
+    if (qty === jp.quantity) return;
+
+    this.kanbanService.updateJobPart(this.jobId(), jp.id, qty, jp.notes).subscribe({
+      next: updated => {
+        this.jobParts.update(list => list.map(p => (p.id === jp.id ? updated : p)));
+        control.setValue(updated.quantity);
+        this.snackbar.success(this.translate.instant('parts.partUpdated'));
+      },
+      error: () => control.setValue(jp.quantity),
+    });
+  }
+
+  private isValidQty(qty: number | null): qty is number {
+    return typeof qty === 'number' && Number.isFinite(qty) && qty > 0;
   }
 
   protected removePart(jp: JobPart): void {
     this.kanbanService.removeJobPart(this.jobId(), jp.id).subscribe(() => {
       this.jobParts.update(list => list.filter(p => p.id !== jp.id));
+      this.partQtyEditControls.delete(jp.id);
       this.snackbar.success(this.translate.instant('kanban.partRemoved'));
     });
   }
@@ -357,6 +402,10 @@ export class JobDetailPanelComponent implements OnInit {
     });
   }
 
+  protected canDispose(disposition: string | null): boolean {
+    return !disposition || disposition === 'HoldForReview';
+  }
+
   protected formatDisposition(disposition: string): string {
     const keyMap: Record<string, string> = {
       ShipToCustomer: 'kanban.dispositionShipToCustomer',
@@ -364,6 +413,8 @@ export class JobDetailPanelComponent implements OnInit {
       CapitalizeAsAsset: 'kanban.dispositionCapitalizeAsAsset',
       Scrap: 'kanban.dispositionScrap',
       HoldForReview: 'kanban.dispositionHoldForReview',
+      EnteredInError: 'kanban.dispositionEnteredInError',
+      Other: 'kanban.dispositionOther',
     };
     const key = keyMap[disposition];
     return key ? this.translate.instant(key) : disposition;

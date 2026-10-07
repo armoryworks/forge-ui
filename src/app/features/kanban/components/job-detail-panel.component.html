@@ -160,6 +160,12 @@
                   <app-entity-link type="job" [entityId]="child.id">{{ child.jobNumber }}</app-entity-link>
                 </span>
                 <span class="sub-job-item__title">{{ child.title }}</span>
+                @if (child.quantity !== null) {
+                  <span class="sub-job-item__meta">{{ 'kanban.childQty' | translate: { quantity: (child.quantity | number:'1.0-4') } }}</span>
+                }
+                @if (child.dueDate) {
+                  <span class="sub-job-item__meta">{{ 'kanban.childDue' | translate: { date: (child.dueDate | date:'MM/dd/yyyy':'UTC') } }}</span>
+                }
                 <span class="chip chip--muted">{{ child.stage }}</span>
               </div>
             }
@@ -272,7 +278,13 @@
                   </span>
                   <span class="part-item__description">{{ jp.partDescription }}</span>
                 </div>
-                <span class="part-item__qty">x{{ jp.quantity }}</span>
+                <span class="part-item__qty">
+                  x
+                  <app-input class="part-item__qty-input" type="number" [min]="0.0001" step="any"
+                    [label]="'kanban.addPartQty' | translate" [formControl]="partQtyEditControl(jp)"
+                    (focusout)="savePartQty(jp)" (keydown.enter)="commitPartQtyOnEnter($event)"
+                    data-testid="job-part-qty" />
+                </span>
                 <button class="part-item__delete" (click)="removePart(jp)"
                   [matTooltip]="'kanban.removePart' | translate" matTooltipPosition="above"
                   [attr.aria-label]="'kanban.removePart' | translate">
@@ -285,19 +297,22 @@
         <div class="part-add">
           <div class="part-add__search-wrap">
             <app-input [label]="'kanban.parts' | translate" [placeholder]="'kanban.searchPartsPlaceholder' | translate"
-              [formControl]="partSearchControl" (blur)="dismissPartResults()" />
+              [formControl]="partSearchControl" (blur)="dismissPartResults()" data-testid="job-part-search" />
             @if (showPartResults() && partSearchResults().length) {
               <div class="part-add__results">
                 @for (p of partSearchResults(); track p.id) {
                   <button class="part-add__result" (mousedown)="selectPart(p)">
                     <span class="part-add__result-number">{{ p.partNumber }}</span>
-                    <span class="part-add__result-desc">{{ p.description }}</span>
+                    <span class="part-add__result-desc">{{ p.name }}</span>
                   </button>
                 }
               </div>
             }
           </div>
-          <button class="part-add__btn" (click)="addPart()" [disabled]="!selectedPart()"
+          <app-input class="part-add__qty" type="number" [min]="0.0001" step="any"
+            [label]="'kanban.addPartQty' | translate" [formControl]="partQtyControl"
+            (keydown.enter)="addPart()" data-testid="job-part-add-qty" />
+          <button class="part-add__btn" (click)="addPart()" [disabled]="!canAddPart()"
             [attr.aria-label]="'kanban.addPart' | translate"
             [matTooltip]="'kanban.addPart' | translate" matTooltipPosition="above">
             <span class="material-icons-outlined">add</span>
@@ -332,8 +347,9 @@
       <!-- Status Actions -->
       <div class="jd-sidebar-section jd-sidebar-section--actions">
         <app-status-timeline entityType="Job" [entityId]="j.id" />
+        <p class="jd-sidebar-hint">{{ 'kanban.workflowStatusHint' | translate }}</p>
         <div class="jd-sidebar-actions">
-          @if (!j.disposition) {
+          @if (canDispose(j.disposition)) {
             <button class="action-btn" (click)="openDispose()">
               <span class="material-icons-outlined">assignment_turned_in</span> {{ 'kanban.dispose' | translate }}
             </button>
@@ -405,12 +421,14 @@
           }
           <div class="jd-detail-row">
             <span class="jd-detail-label">{{ 'kanban.dueDate' | translate }}</span>
-            <span class="jd-detail-value">{{ j.dueDate | date:'MM/dd/yyyy' }}</span>
+            <span class="jd-detail-value">{{ j.dueDate | date:'MM/dd/yyyy':'UTC' }}</span>
           </div>
-          <div class="jd-detail-row">
-            <span class="jd-detail-label">{{ 'jobs.startDate' | translate }}</span>
-            <span class="jd-detail-value">{{ j.startDate | date:'MM/dd/yyyy' }}</span>
-          </div>
+          @if (j.startDate) {
+            <div class="jd-detail-row">
+              <span class="jd-detail-label">{{ 'jobs.startDate' | translate }}</span>
+              <span class="jd-detail-value">{{ j.startDate | date:'MM/dd/yyyy':'UTC' }}</span>
+            </div>
+          }
           <div class="jd-detail-row">
             <span class="jd-detail-label">{{ 'jobs.track' | translate }}</span>
             <span class="jd-detail-value">{{ j.trackTypeName }}</span>

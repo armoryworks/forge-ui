@@ -260,6 +260,7 @@
   letter-spacing: 0;
 }
 .jd-sidebar-actions { display: flex; flex-direction: column; gap: $sp-sm; }
+.jd-sidebar-hint { margin: $sp-sm 0; font-size: var(--font-size-xs); color: var(--text-muted); }
 
 // ─── Details property list (sidebar) ───
 .jd-details { display: flex; flex-direction: column; gap: $sp-xs; }
@@ -370,6 +371,7 @@
 .link-add__result-title, .part-add__result-desc { @include truncate; color: var(--text-secondary); }
 
 .link-add app-select { flex-shrink: 0; width: 120px; }
+.part-add app-input.part-add__qty { flex: 0 0 96px; }
 
 %hover-delete {
   @include flex-center;
@@ -396,6 +398,7 @@
   border: $border-width-thin solid var(--border); font-size: var(--font-size-sm);
   &__number { font-family: $font-family-mono; font-weight: 600; color: var(--primary); flex-shrink: 0; }
   &__title { flex: 1; @include truncate; }
+  &__meta { font-size: var(--font-size-xs); color: var(--text-secondary); flex-shrink: 0; }
 }
 
 // ─── Linked Cards ───
@@ -421,7 +424,12 @@
   &__info { display: flex; flex-direction: column; gap: $sp-xxs; min-width: 0; flex: 1; }
   &__number { font-size: var(--font-size-xs); font-weight: 600; color: var(--text); }
   &__description { font-size: var(--font-size-xxs); color: var(--text-secondary); @include truncate; }
-  &__qty { @include uppercase-label(var(--font-size-xxs), 0, 600); font-family: $font-family-mono; color: var(--text-muted); flex-shrink: 0; }
+  &__qty {
+    @include uppercase-label(var(--font-size-xxs), 0, 600);
+    display: flex; align-items: center; gap: $sp-xs;
+    font-family: $font-family-mono; color: var(--text-muted); flex-shrink: 0;
+  }
+  &__qty-input { width: 96px; }
   &__delete { @extend %hover-delete; }
 }
 

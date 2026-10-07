@@ -1,7 +1,8 @@
 export interface PartSearchResult {
   id: number;
   partNumber: string;
-  description: string;
+  name: string;
+  description: string | null;
   revision: string;
   status: string;
   procurementSource: string;
