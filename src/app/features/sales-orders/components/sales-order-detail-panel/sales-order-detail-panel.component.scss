@@ -186,6 +186,22 @@
   margin-right: $sp-xs;
 }
 
+.line-warning-action {
+  margin-left: $sp-sm;
+  vertical-align: middle;
+}
+
+.so-lines-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: $sp-md;
+}
+
+.cancel-dialog__message {
+  margin: 0 0 $sp-md;
+  font-size: $font-size-sm;
+}
+
 // --- Job Rows ---
 .job-row {
   background: color-mix(in srgb, var(--primary) 4%, transparent);

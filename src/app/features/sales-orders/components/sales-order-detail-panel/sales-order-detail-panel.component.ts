@@ -48,9 +48,15 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { SalesOrderAcceptanceService, RecordAcceptanceMethod } from '../../services/sales-order-acceptance.service';
 import { SalesOrderAcceptance } from '../../models/sales-order-acceptance.model';
 import { NumberLockInfoComponent } from '../../../../shared/components/number-lock-info/number-lock-info.component';
+import { CustomerService } from '../../../customers/services/customer.service';
+import { CreditStatus } from '../../../customers/models/credit-status.model';
+import { CreateMissingJobsResponse } from '../../models/create-missing-jobs-response.model';
+import { ConfirmSalesOrderResponse } from '../../models/confirm-sales-order-response.model';
 
 /** Capability gating the whole customer-acceptance feature. */
 const CAP_SO_ACCEPTANCE = 'CAP-O2C-SO-ACCEPTANCE';
+/** Capability gating customer credit limits and credit holds. */
+const CAP_CREDIT_LIMITS = 'CAP-O2C-CREDIT-LIMITS';
 
 type TabId = 'overview' | 'lines' | 'schedule' | 'stages' | 'shipments' | 'returns' | 'documents' | 'invoices' | 'customer-po' | 'acceptance' | 'activity';
 
@@ -81,6 +87,7 @@ export class SalesOrderDetailPanelComponent {
   private readonly capabilityService = inject(CapabilityService);
   private readonly auth = inject(AuthService);
   private readonly manualNumberSettings = inject(ManualNumberSettingsService);
+  private readonly customerService = inject(CustomerService);
 
   /** Whether the shop allows editing the order number (only offered while Draft). */
   protected readonly allowManualOrderNumbers = computed(() => this.manualNumberSettings.isEnabled('salesOrders'));
@@ -145,6 +152,10 @@ export class SalesOrderDetailPanelComponent {
   protected readonly confirmBlockedByAcceptance = computed(
     () => this.acceptanceCapEnabled() && !this.hasAcceptedAcceptance(),
   );
+
+  protected readonly creditStatus = signal<CreditStatus | null>(null);
+  protected readonly creditHold = computed(() => this.creditStatus()?.isOnHold === true);
+  protected readonly confirmDisabled = computed(() => this.confirmBlockedByAcceptance() || this.creditHold());
 
   protected readonly recordForm = new FormGroup({
     method: new FormControl<RecordAcceptanceMethod>('ManualUpload', { nonNullable: true, validators: [Validators.required] }),
@@ -234,7 +245,24 @@ export class SalesOrderDetailPanelComponent {
     return so.lines.filter(l => l.jobs.length === 0);
   });
 
-  // --- Header editing (#8 / SO-8 / AUDIT-S3b — Draft only) ---
+  protected readonly creatingJobs = signal(false);
+
+  protected readonly openLinkedJobCount = computed(() => {
+    const so = this.so();
+    if (!so) return 0;
+    return so.lines
+      .filter(l => !l.isFullyShipped)
+      .reduce((sum, l) => sum + l.jobs.filter(j => !j.isArchived).length, 0);
+  });
+
+  protected readonly showCancelDialog = signal(false);
+  protected readonly cancelling = signal(false);
+  protected readonly cancelForm = new FormGroup({
+    feeAmount: new FormControl<number | null>(null, [Validators.min(0)]),
+    feeReason: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
+  });
+
+  // --- Header editing (#8 / SO-8 / AUDIT-S3b — Draft or Confirmed) ---
   // SO-only header fields (CustomerPO / CreditTerms / RequestedDelivery) had no edit
   // path after a quote→order convert; the overview rendered them read-only and only
   // when already set, so post-convert (all null) there was no way to populate them.
@@ -247,7 +275,10 @@ export class SalesOrderDetailPanelComponent {
     requestedDeliveryDate: new FormControl<Date | null>(null),
     billingAddressId: new FormControl<number | null>(null),
   });
-  protected readonly canEditHeader = computed(() => this.so()?.status === 'Draft');
+  protected readonly canEditHeader = computed(() => {
+    const status = this.so()?.status;
+    return status === 'Draft' || status === 'Confirmed';
+  });
 
   // Inline order-number rename — the displayed number itself becomes an input
   // when manual numbers are on and the order is still Draft (server enforces
@@ -292,9 +323,11 @@ export class SalesOrderDetailPanelComponent {
     });
   }
 
-  // Billing-address picker options for the Draft header edit (#8 / SO-8). Loaded
-  // lazily when the user enters edit mode (the customer's saved addresses).
+  // Billing-address picker options for the header edit (#8 / SO-8), from the
+  // customer's saved addresses (also shown read-only as ship-to / bill-to).
   protected readonly customerAddresses = signal<CustomerAddress[]>([]);
+  protected readonly shippingAddress = computed(() => this.findAddress(this.so()?.shippingAddressId));
+  protected readonly billingAddress = computed(() => this.findAddress(this.so()?.billingAddressId));
   protected readonly billingAddressOptions = computed<SelectOption[]>(() => {
     const opts: SelectOption[] = this.customerAddresses()
       .filter(a => a.addressType === 'Billing' || a.addressType === 'Both')
@@ -322,12 +355,35 @@ export class SalesOrderDetailPanelComponent {
         this.loading.set(false);
         this.loadDocuments(id);
         this.loadInvoices(id);
+        this.loadCustomerAddresses(detail.customerId);
+        this.loadCreditStatus(detail.customerId);
         // Load the acceptance list up front (when the feature is on) so the
         // Confirm button can pre-empt release before the user opens the tab.
         if (this.acceptanceCapEnabled()) this.loadAcceptances(id);
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  private loadCreditStatus(customerId: number): void {
+    if (!this.capabilityService.isEnabled(CAP_CREDIT_LIMITS)) {
+      this.creditStatus.set(null);
+      return;
+    }
+    this.customerService.getCreditStatus(customerId).subscribe({
+      next: (status) => this.creditStatus.set(status),
+      error: () => this.creditStatus.set(null),
+    });
+  }
+
+  private findAddress(id: number | null | undefined): CustomerAddress | null {
+    if (id == null) return null;
+    return this.customerAddresses().find(a => a.id === id) ?? null;
+  }
+
+  protected formatAddress(a: CustomerAddress): string {
+    const cityLine = [a.city, a.state, a.postalCode].filter(Boolean).join(' ');
+    return [a.label, a.line1, a.line2, cityLine].filter(Boolean).join(', ');
   }
 
   private loadDocuments(id: number): void {
@@ -673,37 +729,100 @@ export class SalesOrderDetailPanelComponent {
   protected confirmSo(): void {
     const so = this.so();
     if (!so) return;
-    // Pre-empt the server's 409 — no release until a customer acceptance is on file.
-    if (this.confirmBlockedByAcceptance()) return;
-    this.soService.confirmSalesOrder(so.id).subscribe({
-      next: () => {
-        this.loadDetail(so.id);
-        this.changed.emit();
-        this.snackbar.success(this.translate.instant('salesOrders.soConfirmed'));
-      },
-    });
-  }
-
-  protected cancelSo(): void {
-    const so = this.so();
-    if (!so) return;
+    // Pre-empt the server's 409 — no release until a customer acceptance is on file
+    // and the customer is off credit hold.
+    if (this.confirmDisabled()) return;
     this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
+      width: '440px',
       data: {
-        title: this.translate.instant('salesOrders.cancelSoTitle'),
-        message: this.translate.instant('salesOrders.cancelSoMessage', { number: so.orderNumber }),
-        confirmLabel: this.translate.instant('salesOrders.cancelOrder'),
-        severity: 'warn',
+        title: this.translate.instant('salesOrders.confirmSoTitle'),
+        message: this.translate.instant('salesOrders.confirmSoMessage', {
+          number: so.orderNumber,
+          count: so.lines.filter(l => l.partId != null).length,
+        }),
+        details: this.confirmWarnings(so),
+        confirmLabel: this.translate.instant('salesOrders.confirm'),
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
-      this.soService.cancelSalesOrder(so.id).subscribe({
-        next: () => {
+      this.soService.confirmSalesOrder(so.id).subscribe({
+        next: (result) => {
           this.loadDetail(so.id);
           this.changed.emit();
-          this.snackbar.success(this.translate.instant('salesOrders.soCancelled'));
+          this.reportConfirmed(so, result);
         },
       });
+    });
+  }
+
+  private confirmWarnings(so: SalesOrderDetail): string[] {
+    const warnings: string[] = [];
+    const zeroPriced = so.lines.filter(l => l.unitPrice === 0).length;
+    if (zeroPriced > 0) warnings.push(this.translate.instant('salesOrders.confirmWarnZeroPrice', { count: zeroPriced }));
+    if (so.shippingAddressId == null) warnings.push(this.translate.instant('salesOrders.confirmWarnNoShipTo'));
+    if (!so.requestedDeliveryDate) warnings.push(this.translate.instant('salesOrders.confirmWarnNoDate'));
+    return warnings;
+  }
+
+  private reportConfirmed(so: SalesOrderDetail, result: ConfirmSalesOrderResponse | null): void {
+    const count = result?.jobsCreated;
+    if (count == null) {
+      this.snackbar.success(this.translate.instant('salesOrders.soConfirmed'));
+    } else if (count > 0) {
+      this.snackbar.success(this.translate.instant('salesOrders.soConfirmedWithJobs', { number: so.orderNumber, count }));
+    } else {
+      this.snackbar.warn(this.translate.instant('salesOrders.soConfirmedNoJobs'));
+    }
+  }
+
+  protected createWorkOrders(line?: SalesOrderLine): void {
+    const so = this.so();
+    if (!so || this.creatingJobs()) return;
+    this.creatingJobs.set(true);
+    this.soService.createMissingJobs(so.id, line?.id).subscribe({
+      next: (result) => {
+        this.creatingJobs.set(false);
+        this.loadDetail(so.id);
+        this.changed.emit();
+        this.reportCreatedJobs(result);
+      },
+      error: () => this.creatingJobs.set(false),
+    });
+  }
+
+  private reportCreatedJobs(result: CreateMissingJobsResponse): void {
+    if (result.created > 0) {
+      this.snackbar.success(this.translate.instant('salesOrders.workOrdersCreated', { count: result.created }));
+    }
+    if (result.skipped?.length) {
+      this.snackbar.warn(result.skipped.map(s => `#${s.lineNumber}: ${s.reason}`).join(' · '));
+    }
+  }
+
+  protected cancelSo(): void {
+    if (!this.so()) return;
+    this.cancelForm.reset({ feeAmount: null, feeReason: '' });
+    this.showCancelDialog.set(true);
+  }
+
+  protected submitCancel(): void {
+    const so = this.so();
+    if (!so || this.cancelForm.invalid) return;
+    const { feeAmount, feeReason } = this.cancelForm.getRawValue();
+    const charge = feeAmount != null && feeAmount > 0;
+    this.cancelling.set(true);
+    this.soService.cancelSalesOrder(so.id, {
+      feeAmount: charge ? feeAmount : undefined,
+      feeReason: charge && feeReason.trim() ? feeReason.trim() : undefined,
+    }).subscribe({
+      next: () => {
+        this.cancelling.set(false);
+        this.showCancelDialog.set(false);
+        this.loadDetail(so.id);
+        this.changed.emit();
+        this.snackbar.success(this.translate.instant('salesOrders.soCancelled'));
+      },
+      error: () => this.cancelling.set(false),
     });
   }
 
@@ -773,7 +892,9 @@ export class SalesOrderDetailPanelComponent {
   }
 
   protected canConfirm(status: string): boolean { return status === 'Draft'; }
-  protected canCancel(status: string): boolean { return status === 'Draft' || status === 'Confirmed'; }
+  protected canCancel(status: string): boolean {
+    return status === 'Draft' || status === 'Confirmed' || status === 'PartiallyShipped';
+  }
 
   /**
    * F8 change control: a locked order (anything past Draft, not Cancelled)

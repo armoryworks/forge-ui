@@ -109,8 +109,8 @@ export class SalesOrderService {
   }
 
   /**
-   * A customer's saved addresses, for the Draft header-edit Billing Address picker
-   * (#8 / SO-8). Mirrors the customer-addresses surface used elsewhere
+   * A customer's saved addresses, for the header-edit Billing Address picker
+   * (#8 / SO-8) and the overview's ship-to / bill-to. Mirrors the customer-addresses surface used elsewhere
    * (`/customers/{id}/addresses` → CustomerAddressResponseModel list).
    */
   getCustomerAddresses(customerId: number): Observable<CustomerAddress[]> {
