@@ -9,6 +9,7 @@ import { SnackbarService } from '../services/snackbar.service';
 import { ToastService } from '../services/toast.service';
 import { parseServerValidationEnvelope } from '../utils/server-validation.utils';
 import { markHttpErrorShown } from '../utils/shown-http-errors';
+import { SILENT_HTTP_ERRORS } from './silent-http-errors.token';
 
 export const SUPPRESS_VALIDATION_SNACKBAR = new HttpContextToken<boolean>(() => false);
 
@@ -25,7 +26,7 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (isExternal) {
+      if (isExternal || req.context.get(SILENT_HTTP_ERRORS)) {
         return throwError(() => error);
       }
       switch (error.status) {

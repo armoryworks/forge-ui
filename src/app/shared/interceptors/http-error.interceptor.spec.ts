@@ -15,6 +15,7 @@ import { SnackbarService } from '../services/snackbar.service';
 import { ToastService } from '../services/toast.service';
 import { wasHttpErrorShown } from '../utils/shown-http-errors';
 import { httpErrorInterceptor, SUPPRESS_VALIDATION_SNACKBAR } from './http-error.interceptor';
+import { SILENT_HTTP_ERRORS } from './silent-http-errors.token';
 
 describe('httpErrorInterceptor', () => {
   let http: HttpClient;
@@ -244,5 +245,18 @@ describe('httpErrorInterceptor', () => {
         message: 'That number was just taken by another record. Save again to get the next number.',
       }));
     });
+  });
+
+  it('shows nothing for a request marked silent, and still passes the error on', () => {
+    let captured: unknown;
+    http.delete('/api/v1/time-tracking/entries/9', { context: new HttpContext().set(SILENT_HTTP_ERRORS, true) })
+      .subscribe({ error: (err) => { captured = err; } });
+
+    httpMock.expectOne('/api/v1/time-tracking/entries/9')
+      .flush({ detail: 'Entry is locked' }, { status: 409, statusText: 'Conflict' });
+
+    expect(toast.show).not.toHaveBeenCalled();
+    expect(snackbar.error).not.toHaveBeenCalled();
+    expect(captured).toBeInstanceOf(HttpErrorResponse);
   });
 });
