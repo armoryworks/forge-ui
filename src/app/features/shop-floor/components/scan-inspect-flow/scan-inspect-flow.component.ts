@@ -5,6 +5,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { QcInspection } from '../../../quality/models/qc-inspection.model';
 import { QualityService } from '../../../quality/services/quality.service';
 
 type InspectStep = 'inspect' | 'submitting' | 'done';
@@ -35,6 +36,7 @@ export class ScanInspectFlowComponent {
   protected readonly notesControl = new FormControl('');
   protected readonly submitting = signal(false);
   protected readonly error = signal<string | null>(null);
+  private pendingInspection: QcInspection | null = null;
 
   protected setResult(value: 'Pass' | 'Fail'): void {
     this.result.set(value);
@@ -48,32 +50,54 @@ export class ScanInspectFlowComponent {
     this.error.set(null);
     this.step.set('submitting');
 
+    if (this.pendingInspection) {
+      this.completeInspection(this.pendingInspection, inspectionResult);
+      return;
+    }
+
     this.qualityService.createInspection({
       templateId: this.qcTemplateId() ?? undefined,
       notes: this.notesControl.value || undefined,
     }).subscribe({
       next: (inspection) => {
-        // Update the inspection with the pass/fail result
-        this.qualityService.updateInspection(inspection.id, {
-          status: inspectionResult === 'Pass' ? 'Passed' : 'Failed',
-          notes: this.notesControl.value || undefined,
-        }).subscribe({
-          next: () => {
-            this.submitting.set(false);
-            this.step.set('done');
-            setTimeout(() => this.completed.emit(), 1500);
-          },
-          error: () => {
-            this.submitting.set(false);
-            this.step.set('inspect');
-            this.error.set('Failed to update inspection result');
-          },
-        });
+        this.pendingInspection = inspection;
+        this.completeInspection(inspection, inspectionResult);
       },
       error: () => {
         this.submitting.set(false);
         this.step.set('inspect');
         this.error.set('Failed to create inspection');
+      },
+    });
+  }
+
+  private completeInspection(inspection: QcInspection, inspectionResult: 'Pass' | 'Fail'): void {
+    const attestedResults = inspectionResult === 'Pass' && inspection.results.length > 0
+      ? inspection.results.map(r => ({
+        id: r.id,
+        checklistItemId: r.checklistItemId ?? undefined,
+        description: r.description,
+        passed: true,
+        measuredValue: r.measuredValue ?? undefined,
+        notes: r.notes ?? undefined,
+      }))
+      : undefined;
+
+    this.qualityService.updateInspection(inspection.id, {
+      status: inspectionResult === 'Pass' ? 'Passed' : 'Failed',
+      notes: this.notesControl.value || undefined,
+      results: attestedResults,
+    }).subscribe({
+      next: () => {
+        this.pendingInspection = null;
+        this.submitting.set(false);
+        this.step.set('done');
+        setTimeout(() => this.completed.emit(), 1500);
+      },
+      error: () => {
+        this.submitting.set(false);
+        this.step.set('inspect');
+        this.error.set('Failed to update inspection result');
       },
     });
   }
