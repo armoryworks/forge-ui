@@ -240,10 +240,17 @@ export class PoDialogComponent {
     entityType: 'purchase-order',
     entityId: 'new',
     route: '/purchase-orders',
-    snapshotFn: () => ({ ...this.form.getRawValue(), lines: this.lines() }),
+    snapshotFn: () => ({
+      ...this.form.getRawValue(),
+      lines: this.lines(),
+      incotermChosen: this.form.controls.incoterm.dirty,
+      quoteCurrencyChosen: this.form.controls.quoteCurrency.dirty,
+    }),
     restoreFn: (data) => {
       this.form.patchValue(data);
       if (Array.isArray(data['lines'])) this.lines.set(data['lines'] as PoLineEntry[]);
+      this.restoreChosen(this.form.controls.incoterm, data['incotermChosen']);
+      this.restoreChosen(this.form.controls.quoteCurrency, data['quoteCurrencyChosen']);
       this.form.markAsDirty();
     },
   };
@@ -282,6 +289,10 @@ export class PoDialogComponent {
     this.form.controls.vendorId.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.maybeRecomputePrice((price) => this.lastComputedPrice = price));
+  }
+
+  private restoreChosen(control: FormControl<string>, chosen: unknown): void {
+    if (chosen === true || control.value !== control.defaultValue) control.markAsDirty();
   }
 
   protected onPriceCommitted(): boolean {
@@ -328,6 +339,7 @@ export class PoDialogComponent {
     const { partId, description } = this.lineForm.controls;
     if (nonStock) {
       partId.setValue(null);
+      this.lineForm.controls.unitPrice.setValue(0, { emitEvent: false });
       partId.setValidators([]);
       description.setValidators([Validators.required, Validators.pattern(/\S/), Validators.maxLength(500)]);
     } else {
