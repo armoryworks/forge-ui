@@ -3,6 +3,7 @@ import {
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { finalize } from 'rxjs';
 
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent } from '../../../../shared/components/select/select.component';
@@ -108,6 +109,7 @@ export class KioskSetupComponent {
 
     this.shopFloorService.createTeam(teamName).subscribe({
       next: (team) => {
+        this.selectCreatedTeam(team);
         this.saveTerminal(terminalName, team.id);
       },
       error: () => {
@@ -121,30 +123,54 @@ export class KioskSetupComponent {
     this.saving.set(true);
     this.configError.set(null);
 
-    const deviceToken = this.getDeviceToken();
+    let deviceToken: string;
+    try {
+      deviceToken = this.getDeviceToken();
+    } catch {
+      this.failSave();
+      return;
+    }
 
-    this.shopFloorService.setupTerminal(name, deviceToken, teamId).subscribe({
+    this.shopFloorService.setupTerminal(name, deviceToken, teamId).pipe(
+      finalize(() => this.saving.set(false)),
+    ).subscribe({
       next: (terminal) => {
-        this.saving.set(false);
-        localStorage.setItem('forge-kiosk-device-token', deviceToken);
-        localStorage.setItem('forge-kiosk-terminal', JSON.stringify(terminal));
+        try {
+          localStorage.setItem('forge-kiosk-device-token', deviceToken);
+          localStorage.setItem('forge-kiosk-terminal', JSON.stringify(terminal));
+        } catch {
+          this.failSave();
+          return;
+        }
         this.authService.clearAuth(); // Clear admin session
         this.configured.emit(terminal);
       },
-      error: () => {
-        this.saving.set(false);
-        this.configError.set(this.translate.instant('shopFloor.saveTerminalFailed'));
-      },
+      error: () => this.failSave(),
     });
+  }
+
+  private failSave(): void {
+    this.saving.set(false);
+    this.configError.set(this.translate.instant('shopFloor.saveTerminalFailed'));
+  }
+
+  private selectCreatedTeam(team: Team): void {
+    this.teams.update(teams => [...teams, team]);
+    this.teamOptions.update(options => [...options, this.toTeamOption(team)]);
+    this.teamControl.setValue(team.id);
+    this.newTeamNameControl.setValue('');
+    this.showNewTeam.set(false);
+  }
+
+  private toTeamOption(team: Team): { value: unknown; label: string } {
+    return { value: team.id, label: `${team.name} (${team.memberCount} members)` };
   }
 
   private loadTeams(): void {
     this.shopFloorService.getTeams().subscribe({
       next: (teams) => {
         this.teams.set(teams);
-        this.teamOptions.set(
-          teams.map(t => ({ value: t.id, label: `${t.name} (${t.memberCount} members)` })),
-        );
+        this.teamOptions.set(teams.map(t => this.toTeamOption(t)));
       },
     });
   }
