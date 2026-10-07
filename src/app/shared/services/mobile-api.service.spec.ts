@@ -66,7 +66,9 @@ describe('MobileApiService', () => {
 
   it('reads the running timer and treats 204 as none running', async () => {
     const running = firstValueFrom(service.activeTimer());
-    http.expectOne('/api/v1/time-tracking/timer/active')
+    const req = http.expectOne('/api/v1/time-tracking/timer/active');
+    expect(req.request.context.get(SILENT_HTTP_ERRORS)).toBe(true);
+    req
       .flush({ timeEntryId: 9, jobId: 42, jobNumber: 'JOB-42', operationId: null, timerStart: '2026-10-07T10:00:00Z' });
     expect((await running)?.timeEntryId).toBe(9);
 

@@ -47,9 +47,14 @@ export class MobileApiService {
     return this.mutate<JobStatus>('PATCH', `/api/v1/jobs/${jobId}/stage`, { stageId }, `Move job ${jobId} back`, token);
   }
 
-  /** The caller's running timer, or null when none is running. */
+  /**
+   * The caller's running timer, or null when none is running. A failure is
+   * not shown: the caller keeps the timer it last knew about.
+   */
   activeTimer(): Observable<ActiveTimer | null> {
-    return this.http.get<ActiveTimer | null>('/api/v1/time-tracking/timer/active');
+    return this.http.get<ActiveTimer | null>('/api/v1/time-tracking/timer/active', {
+      context: new HttpContext().set(SILENT_HTTP_ERRORS, true),
+    });
   }
 
   startTimer(jobId: number | null, token?: string, operationId: number | null = null): Observable<StartedTimeEntry | QueuedOffline> {

@@ -9,6 +9,7 @@ import { AuthService } from './auth.service';
 import { MobileApiService } from './mobile-api.service';
 import { MobileTimerService } from './mobile-timer.service';
 import { OfflineQueueService } from './offline-queue.service';
+import { PlatformService } from './platform.service';
 
 function running(jobId: number, jobNumber: string, timeEntryId = 3): ActiveTimer {
   return { timeEntryId, jobId, jobNumber, operationId: null, timerStart: new Date('2026-10-07T10:00:00Z') };
@@ -42,12 +43,15 @@ describe('MobileTimerService', () => {
         { provide: MobileApiService, useValue: api },
         { provide: AuthService, useValue: { isAuthenticated: () => authenticated } },
         { provide: OfflineQueueService, useValue: { remove } },
+        { provide: PlatformService, useValue: { mobileShell: true } },
         { provide: MatDialog, useValue: { open } },
         { provide: TranslateService, useValue: { instant } },
       ],
     });
     service = TestBed.inject(MobileTimerService);
   });
+
+  afterEach(() => vi.restoreAllMocks());
 
   it('loads the running timer, and shows none without a session', async () => {
     api.activeTimer.mockReturnValue(of(running(42, 'JOB-42')));
@@ -265,5 +269,31 @@ describe('MobileTimerService', () => {
     expect(remove).toHaveBeenCalledWith('q-stop');
     expect(api.startTimer).not.toHaveBeenCalled();
     expect(service.active()?.jobId).toBe(42);
+  });
+
+  it('offline, starts from the last known timer without asking the server', async () => {
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    api.startTimer.mockReturnValue(of({ queued: true, entryId: 'q-start' }));
+
+    await service.refresh();
+    const outcome = await service.toggle(42, 'JOB-42');
+
+    expect(api.activeTimer).not.toHaveBeenCalled();
+    expect(api.startTimer).toHaveBeenCalledWith(42);
+    expect(outcome).toEqual({ started: { entryId: null, queuedIds: ['q-start'], previous: null } });
+  });
+
+  it('offline, keeps the cached timer on resume and still offers the switch', async () => {
+    api.activeTimer.mockReturnValue(of(running(7, 'JOB-7')));
+    await service.refresh();
+    api.activeTimer.mockClear();
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+
+    await service.refresh();
+    expect(service.active()?.jobId).toBe(7);
+
+    await service.toggle(42, 'JOB-42');
+    expect(api.activeTimer).not.toHaveBeenCalled();
+    expect(open).toHaveBeenCalledOnce();
   });
 });

@@ -11,6 +11,7 @@ import {
 import { AuthService } from './auth.service';
 import { MobileApiService } from './mobile-api.service';
 import { OfflineQueueService } from './offline-queue.service';
+import { PlatformService } from './platform.service';
 
 /**
  * The signed-in person's running timer in the native shell, shared by the
@@ -19,12 +20,14 @@ import { OfflineQueueService } from './offline-queue.service';
  * agrees to switch. Undoing a start deletes the entry rather than stopping
  * it, so no zero-minute row is left behind, and puts back the timer a
  * switch stopped. Undoing a stop starts the same job and operation again.
+ * Offline, the last known timer stands in for the server's.
  */
 @Injectable({ providedIn: 'root' })
 export class MobileTimerService {
   private readonly api = inject(MobileApiService);
   private readonly auth = inject(AuthService);
   private readonly queue = inject(OfflineQueueService);
+  private readonly platform = inject(PlatformService);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
 
@@ -39,6 +42,7 @@ export class MobileTimerService {
       this._active.set(null);
       return;
     }
+    if (this.offline()) return;
     const timer = await firstValueFrom(this.api.activeTimer()).catch(() => undefined);
     if (timer === undefined || load !== this.loads) return;
     this._active.set(timer ?? null);
@@ -138,6 +142,7 @@ export class MobileTimerService {
   }
 
   private async load(): Promise<void> {
+    if (this.offline()) return;
     const timer = await firstValueFrom(this.api.activeTimer()).catch(() => undefined);
     if (timer === undefined) return;
     this.loads++;
@@ -169,6 +174,10 @@ export class MobileTimerService {
       timerStart: entry.timerStart ?? new Date(),
     });
     return { entryId: entry.id, queuedIds, previous };
+  }
+
+  private offline(): boolean {
+    return this.platform.mobileShell && !navigator.onLine;
   }
 
   private async confirmSwitch(current: string, next: string): Promise<boolean> {
