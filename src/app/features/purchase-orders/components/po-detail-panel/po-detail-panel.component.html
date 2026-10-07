@@ -40,6 +40,12 @@
         </div>
       </div>
       <div class="detail-header__actions">
+        <button class="icon-btn" data-testid="po-print-btn"
+          [matTooltip]="'purchaseOrders.printPo' | translate" matTooltipPosition="above"
+          [attr.aria-label]="'purchaseOrders.printPo' | translate"
+          [disabled]="printing()" (click)="printPo()">
+          <span class="material-icons-outlined">picture_as_pdf</span>
+        </button>
         <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" [attr.aria-label]="'common.close' | translate" (click)="close()">
           <span class="material-icons-outlined">close</span>
         </button>

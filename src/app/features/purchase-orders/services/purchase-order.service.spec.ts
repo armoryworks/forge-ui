@@ -77,6 +77,20 @@ describe('PurchaseOrderService', () => {
     });
   });
 
+  describe('getPurchaseOrderPdf', () => {
+    it('should GET the PO document as a blob', () => {
+      const pdf = new Blob(['%PDF'], { type: 'application/pdf' });
+      let result: Blob | null = null;
+      service.getPurchaseOrderPdf(7).subscribe(r => { result = r; });
+
+      const req = httpMock.expectOne(`${apiUrl}/purchase-orders/7/pdf`);
+      expect(req.request.method).toBe('GET');
+      expect(req.request.responseType).toBe('blob');
+      req.flush(pdf);
+      expect(result).toBe(pdf);
+    });
+  });
+
   describe('deletePurchaseOrder', () => {
     it('should DELETE PO', () => {
       service.deletePurchaseOrder(3).subscribe();

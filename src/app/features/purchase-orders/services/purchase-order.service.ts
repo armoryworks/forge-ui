@@ -63,6 +63,10 @@ export class PurchaseOrderService {
     return this.http.get<PurchaseOrderDetail>(`${this.base}/${id}`);
   }
 
+  getPurchaseOrderPdf(id: number): Observable<Blob> {
+    return this.http.get(`${this.base}/${id}/pdf`, { responseType: 'blob' });
+  }
+
   createPurchaseOrder(request: CreatePurchaseOrderRequest): Observable<PurchaseOrderDetail> {
     return this.http.post<PurchaseOrderDetail>(this.base, request);
   }

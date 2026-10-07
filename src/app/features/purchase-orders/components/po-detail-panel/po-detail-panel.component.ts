@@ -191,6 +191,26 @@ export class PoDetailPanelComponent implements OnInit {
     });
   }
 
+  protected readonly printing = signal(false);
+
+  protected printPo(): void {
+    const po = this.po();
+    if (!po) return;
+    this.printing.set(true);
+    this.poService.getPurchaseOrderPdf(po.id).subscribe({
+      next: (blob) => {
+        this.printing.set(false);
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${po.poNumber}.pdf`;
+        link.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => this.printing.set(false),
+    });
+  }
+
   protected cancelPo(): void {
     const po = this.po();
     if (!po) return;
