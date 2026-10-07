@@ -59,7 +59,7 @@ describe('NcrCapaService', () => {
   });
 
   it('updateNcr(id, request) sends PATCH to /ncrs/{id}', () => {
-    const patch = { status: 'Closed' as const };
+    const patch = { description: 'Burr on edge', laborCost: 15 };
     service.updateNcr(3, patch).subscribe();
     const req = httpMock.expectOne(`${ncrsUrl}/3`);
     expect(req.request.method).toBe('PATCH');

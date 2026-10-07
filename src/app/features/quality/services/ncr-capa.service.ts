@@ -9,6 +9,7 @@ import { CorrectiveAction } from '../models/corrective-action.model';
 import { NcrStatus } from '../models/ncr-status.model';
 import { NcrType } from '../models/ncr-type.model';
 import { NonConformance } from '../models/non-conformance.model';
+import { UpdateNcrRequest } from '../models/update-ncr-request.model';
 
 @Injectable({ providedIn: 'root' })
 export class NcrCapaService {
@@ -47,7 +48,7 @@ export class NcrCapaService {
     return this.http.post<NonConformance>(`${this.baseUrl}/ncrs`, request);
   }
 
-  updateNcr(id: number, request: Partial<NonConformance>): Observable<void> {
+  updateNcr(id: number, request: UpdateNcrRequest): Observable<void> {
     return this.http.patch<void>(`${this.baseUrl}/ncrs/${id}`, request);
   }
 
