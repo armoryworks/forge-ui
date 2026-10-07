@@ -1,10 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, OnInit } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AuthService } from '../../shared/services/auth.service';
 import { CapabilityService } from '../../shared/services/capability.service';
 import { DesktopPreferenceService } from '../../shared/services/desktop-preference.service';
+import { SnackbarService } from '../../shared/services/snackbar.service';
 import { MobileClockStateService } from './services/mobile-clock-state.service';
 
 interface MobileTab {
@@ -20,7 +22,7 @@ interface MobileTab {
 @Component({
   selector: 'app-mobile-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe],
   templateUrl: './mobile-layout.component.html',
   styleUrl: './mobile-layout.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,12 +32,16 @@ export class MobileLayoutComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly capabilities = inject(CapabilityService);
   private readonly desktopPreference = inject(DesktopPreferenceService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
   protected readonly router = inject(Router);
   protected readonly clockState = inject(MobileClockStateService);
 
   protected readonly user = this.authService.user;
   protected readonly isClockedIn = this.clockState.isClockedIn;
   protected readonly clockCheckDone = this.clockState.checkDone;
+  protected readonly desktopReturnUrl = signal<string | null>(null);
 
   private readonly allTabs: MobileTab[] = [
     { path: '/m/chat', label: 'Chat', icon: 'chat' },
@@ -75,7 +81,22 @@ export class MobileLayoutComponent implements OnInit {
 
   ngOnInit(): void {
     this.desktopPreference.clear();
+    this.desktopReturnUrl.set(desktopUrl(this.route.snapshot.queryParamMap.get('returnUrl')));
     this.checkClockStatus();
+  }
+
+  protected openOnDesktop(): void {
+    const url = this.desktopReturnUrl();
+    if (!url) return;
+    if (!this.desktopPreference.prefer()) {
+      this.snackbar.error(this.translate.instant('mobileWeb.desktopLink.storageBlocked'));
+      return;
+    }
+    this.router.navigateByUrl(url);
+  }
+
+  protected dismissDesktopLink(): void {
+    this.desktopReturnUrl.set(null);
   }
 
   protected isTabDisabled(tab: MobileTab): boolean {
@@ -116,4 +137,10 @@ export class MobileLayoutComponent implements OnInit {
   protected logout(): void {
     this.authService.logout();
   }
+}
+
+function desktopUrl(returnUrl: string | null): string | null {
+  if (!returnUrl || !returnUrl.startsWith('/') || returnUrl.startsWith('//')) return null;
+  if (/^\/m(\/|\?|#|$)/.test(returnUrl)) return null;
+  return returnUrl;
 }

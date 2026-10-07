@@ -9890,6 +9890,11 @@
       "stopRunning": "Detener el temporizador en curso",
       "stoppedButNotStarted": "Se detuvo el temporizador de {{jobNumber}}, pero este no pudo iniciarse: {{reason}}",
       "stoppedButNotStartedUnknown": "Se detuvo el temporizador en curso, pero este no pudo iniciarse: {{reason}}"
+    },
+    "desktopLink": {
+      "message": "Esa página está en el sitio de escritorio.",
+      "open": "Abrir el sitio de escritorio",
+      "storageBlocked": "Este navegador bloquea el almacenamiento del sitio, así que no se puede recordar la vista de escritorio."
     }
   }
 }

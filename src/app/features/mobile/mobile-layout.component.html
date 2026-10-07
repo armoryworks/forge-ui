@@ -8,6 +8,21 @@
   </header>
 
   <main class="mobile-content">
+    @if (desktopReturnUrl()) {
+      <div class="desktop-link-banner" data-testid="mobile-desktop-link-banner">
+        <span class="material-icons-outlined desktop-link-banner__icon">desktop_windows</span>
+        <span class="desktop-link-banner__text">{{ 'mobileWeb.desktopLink.message' | translate }}</span>
+        <button class="desktop-link-banner__open" (click)="openOnDesktop()" data-testid="mobile-desktop-link-open">
+          {{ 'mobileWeb.desktopLink.open' | translate }}
+        </button>
+        <button class="desktop-link-banner__dismiss"
+                (click)="dismissDesktopLink()"
+                [attr.aria-label]="'common.close' | translate"
+                data-testid="mobile-desktop-link-dismiss">
+          <span class="material-icons-outlined">close</span>
+        </button>
+      </div>
+    }
     @if (!isClockedIn() && clockCheckDone()) {
       <div class="clock-gate-banner">
         <span class="material-icons-outlined clock-gate-banner__icon">schedule</span>

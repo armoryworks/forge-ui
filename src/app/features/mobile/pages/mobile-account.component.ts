@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 
 import { AuthService } from '../../../shared/services/auth.service';
 import { DesktopPreferenceService } from '../../../shared/services/desktop-preference.service';
@@ -21,13 +22,14 @@ export class MobileAccountComponent {
   private readonly themeService = inject(ThemeService);
   private readonly snackbar = inject(SnackbarService);
   private readonly desktopPreference = inject(DesktopPreferenceService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly user = this.authService.user;
   protected readonly theme = this.themeService.theme;
 
   protected openDesktop(): void {
     if (!this.desktopPreference.prefer()) {
-      this.snackbar.error('This browser is blocking site storage, so the desktop view cannot be remembered.');
+      this.snackbar.error(this.translate.instant('mobileWeb.desktopLink.storageBlocked'));
       return;
     }
     this.router.navigate(['/dashboard']);

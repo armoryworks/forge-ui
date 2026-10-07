@@ -9890,6 +9890,11 @@
       "stopRunning": "Stop the running timer",
       "stoppedButNotStarted": "The timer on {{jobNumber}} was stopped, but this one could not start: {{reason}}",
       "stoppedButNotStartedUnknown": "The running timer was stopped, but this one could not start: {{reason}}"
+    },
+    "desktopLink": {
+      "message": "That page is on the desktop site.",
+      "open": "Open desktop site",
+      "storageBlocked": "This browser is blocking site storage, so the desktop view cannot be remembered."
     }
   }
 }
