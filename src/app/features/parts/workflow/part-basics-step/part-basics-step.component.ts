@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -10,6 +9,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
+import { hasServerValidationDetail } from '../../../../shared/utils/server-validation.utils';
 import { PartDetail } from '../../models/part-detail.model';
 import { PartsService } from '../../services/parts.service';
 
@@ -132,11 +132,4 @@ export class PartBasicsStepComponent {
       }),
     );
   }
-}
-
-function hasServerValidationDetail(err: unknown): boolean {
-  return err instanceof HttpErrorResponse
-    && err.status === 400
-    && typeof err.error?.detail === 'string'
-    && err.error.detail.length > 0;
 }

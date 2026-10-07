@@ -6,6 +6,8 @@ import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { PartDetail } from '../../models/part-detail.model';
 import { mockSignalInputs } from '../../../../../testing/signal-input-harness';
 import { PartExpressFormComponent } from './part-express-form.component';
@@ -214,5 +216,72 @@ describe('PartExpressFormComponent (Phase 5)', () => {
     });
     c.save();
     httpMock.verify(); // No requests fired.
+  });
+
+  const deletedPartMessage = "Part number 'P-1' belongs to a deleted part. Restore that part or choose another number.";
+
+  function buildSavingComponent(): { form: { patchValue(v: unknown): void; markAsDirty(): void }; save(): void } {
+    const component = TestBed.runInInjectionContext(() => new PartExpressFormComponent());
+    mockSignalInputs(component, {
+      stepId: 'all', componentName: 'PartExpressFormComponent',
+      runId: 7, entityId: 99, entity: buildPart(),
+    });
+    TestBed.flushEffects();
+    const c = component as unknown as { form: { patchValue(v: unknown): void; markAsDirty(): void }; save(): void };
+    c.form.patchValue({ name: 'Steel bar', manualCostOverride: 8.75 });
+    c.form.markAsDirty();
+    return c;
+  }
+
+  it('save() leaves the server validation message on screen instead of the generic save failure', () => {
+    const errorSpy = vi.spyOn(TestBed.inject(SnackbarService), 'error').mockImplementation(() => {});
+    buildSavingComponent().save();
+
+    httpMock.expectOne(`${environment.apiUrl}/workflows/7/step`).flush(
+      { title: 'Validation failed', detail: deletedPartMessage, errors: { partNumber: [deletedPartMessage] } },
+      { status: 400, statusText: 'Bad Request' },
+    );
+
+    expect(errorSpy).not.toHaveBeenCalled();
+  });
+
+  it('save() shows the generic save failure when the server gives no message', () => {
+    const errorSpy = vi.spyOn(TestBed.inject(SnackbarService), 'error').mockImplementation(() => {});
+    buildSavingComponent().save();
+
+    httpMock.expectOne(`${environment.apiUrl}/workflows/7/step`).flush(
+      { title: 'An error occurred' },
+      { status: 500, statusText: 'Server Error' },
+    );
+
+    expect(errorSpy).toHaveBeenCalledWith('parts.workflow.express.saveFailed');
+  });
+
+  it('the mode-switch save reports failure and keeps the server validation message', () => {
+    const errorSpy = vi.spyOn(TestBed.inject(SnackbarService), 'error').mockImplementation(() => {});
+    buildSavingComponent();
+    let result: { ok: boolean } | undefined;
+    TestBed.inject(WorkflowService).saveCurrentStep().subscribe(r => (result = r));
+
+    httpMock.expectOne(`${environment.apiUrl}/workflows/7/step`).flush(
+      { title: 'Validation failed', detail: deletedPartMessage, errors: { partNumber: [deletedPartMessage] } },
+      { status: 400, statusText: 'Bad Request' },
+    );
+
+    expect(result?.ok).toBe(false);
+    expect(errorSpy).not.toHaveBeenCalled();
+  });
+
+  it('the mode-switch save shows the generic save failure when the server gives no message', () => {
+    const errorSpy = vi.spyOn(TestBed.inject(SnackbarService), 'error').mockImplementation(() => {});
+    buildSavingComponent();
+    TestBed.inject(WorkflowService).saveCurrentStep().subscribe();
+
+    httpMock.expectOne(`${environment.apiUrl}/workflows/7/step`).flush(
+      { title: 'An error occurred' },
+      { status: 500, statusText: 'Server Error' },
+    );
+
+    expect(errorSpy).toHaveBeenCalledWith('parts.workflow.express.saveFailed');
   });
 });

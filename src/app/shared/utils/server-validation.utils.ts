@@ -58,6 +58,19 @@ export function parseServerValidationEnvelope(
 }
 
 /**
+ * True when the error is a 400 whose problem body carries a non-empty
+ * `detail`. The HTTP error interceptor has already shown that detail, so
+ * callers use this to skip a generic "save failed" message that would
+ * replace it.
+ */
+export function hasServerValidationDetail(error: HttpErrorResponse | unknown): boolean {
+  return error instanceof HttpErrorResponse
+    && error.status === 400
+    && typeof error.error?.detail === 'string'
+    && error.error.detail.length > 0;
+}
+
+/**
  * Resolve a dotted `field` path produced by the server (e.g. `address.line1`,
  * `lineItems[0].quantity`) to the matching `AbstractControl`, or `null` when no
  * matching control exists. Falls back to a case-insensitive lookup on the

@@ -14,6 +14,7 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
+import { hasServerValidationDetail } from '../../../../shared/utils/server-validation.utils';
 import { AbcClass } from '../../models/abc-class.type';
 import { PartDetail } from '../../models/part-detail.model';
 import { PartsService } from '../../services/parts.service';
@@ -195,7 +196,10 @@ export class PartExpressFormComponent {
           tap((detail) => this.workflowService.currentEntity.set(detail)),
         );
       }),
-      tap(() => this.form.markAsPristine()),
+      tap({
+        next: () => this.form.markAsPristine(),
+        error: (err: unknown) => this.reportSaveFailure(err),
+      }),
     );
   }
 
@@ -235,24 +239,29 @@ export class PartExpressFormComponent {
               }));
             }
           },
-          error: () => {
+          error: (err: unknown) => {
             this.saving.set(false);
-            this.snackbar.error(this.translate.instant('parts.workflow.express.saveFailed'));
+            this.reportSaveFailure(err);
           },
         });
       },
-      error: () => {
+      error: (err: unknown) => {
         this.saving.set(false);
-        this.snackbar.error(this.translate.instant('parts.workflow.express.saveFailed'));
+        this.reportSaveFailure(err);
       },
     });
+  }
+
+  private reportSaveFailure(err: unknown): void {
+    if (hasServerValidationDetail(err)) return;
+    this.snackbar.error(this.translate.instant('parts.workflow.express.saveFailed'));
   }
 
   private fieldsFromForm(): Record<string, unknown> {
     const v = this.form.getRawValue();
     return {
-      // Only meaningful at materialization; the adapter gates it on
-      // parts.allow_manual_numbers and ignores it after the part exists.
+      // Only sent before the part exists; the adapter rejects a typed number
+      // when parts.allow_manual_numbers is off.
       partNumber: (this.manualNumbers.isEnabled('parts') && !this.part()) ? (v.partNumber?.trim() || undefined) : undefined,
       name: v.name ?? undefined,
       description: v.description ?? '',
