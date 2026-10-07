@@ -19,6 +19,7 @@ import { DataTableComponent } from '../../shared/components/data-table/data-tabl
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
+import { formValidationContext } from '../../shared/interceptors/http-error.interceptor';
 import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ScannerService } from '../../shared/services/scanner.service';
@@ -374,7 +375,7 @@ export class CustomersComponent {
       defaultCurrency: form.defaultCurrency || undefined,
       billingAddress: this.extractAddress(form.billingAddress),
       shippingAddress: this.extractAddress(form.shippingAddress),
-    }).subscribe({
+    }, formValidationContext()).subscribe({
       next: (created) => {
         this.saving.set(false);
         this.closeDialog();
@@ -386,7 +387,10 @@ export class CustomersComponent {
         // Phase 3 / WU-02: surface per-field server errors against the form
         // so the validation popover lights up; legacy non-envelope errors
         // fall through to the central interceptor's snackbar.
-        FormValidationService.applyServerError(this.customerForm, err);
+        const applied = FormValidationService.applyServerError(this.customerForm, err);
+        if (applied?.unmatched.length) {
+          this.snackbar.error(applied.unmatched[0].message);
+        }
       },
     });
   }

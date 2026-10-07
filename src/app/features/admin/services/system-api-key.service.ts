@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
@@ -27,8 +27,8 @@ export class SystemApiKeyService {
     return this.http.get<SystemApiKey[]>(this.base);
   }
 
-  create(request: CreateSystemApiKeyRequest): Observable<CreateSystemApiKeyResponse> {
-    return this.http.post<CreateSystemApiKeyResponse>(this.base, request);
+  create(request: CreateSystemApiKeyRequest, context?: HttpContext): Observable<CreateSystemApiKeyResponse> {
+    return this.http.post<CreateSystemApiKeyResponse>(this.base, request, { context });
   }
 
   revoke(id: number): Observable<void> {

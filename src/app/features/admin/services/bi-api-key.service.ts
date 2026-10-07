@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
@@ -23,8 +23,8 @@ export class BiApiKeyService {
     return this.http.get<BiApiKey[]>(this.base);
   }
 
-  create(request: CreateBiApiKeyRequest): Observable<CreateBiApiKeyResponse> {
-    return this.http.post<CreateBiApiKeyResponse>(this.base, request);
+  create(request: CreateBiApiKeyRequest, context?: HttpContext): Observable<CreateBiApiKeyResponse> {
+    return this.http.post<CreateBiApiKeyResponse>(this.base, request, { context });
   }
 
   revoke(id: number): Observable<void> {

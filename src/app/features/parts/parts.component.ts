@@ -30,6 +30,7 @@ import { EntityPickerComponent } from '../../shared/components/entity-picker/ent
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
+import { formValidationContext } from '../../shared/interceptors/http-error.interceptor';
 import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -638,7 +639,7 @@ export class PartsComponent {
         safetyStockDays: form.safetyStockDays ?? undefined,
         traceabilityType: (form.traceabilityType as TraceabilityType) ?? 'None',
         abcClass: (form.abcClass as AbcClass | null) ?? null,
-      }).subscribe({
+      }, formValidationContext()).subscribe({
         next: () => {
           this.closePartDialog();
           this.loadParts();
@@ -650,7 +651,10 @@ export class PartsComponent {
           // (e.g. partType). Legacy non-envelope errors fall through to the
           // central interceptor's snackbar. Keep the dialog open so the user
           // can correct the field rather than losing their input.
-          FormValidationService.applyServerError(this.partForm, err);
+          const applied = FormValidationService.applyServerError(this.partForm, err);
+          if (applied?.unmatched.length) {
+            this.snackbar.error(applied.unmatched[0].message);
+          }
         },
       });
     } else {
@@ -660,7 +664,7 @@ export class PartsComponent {
         revision: form.revision || undefined,
         procurementSource: (form.procurementSource as ProcurementSource) ?? 'Buy',
         inventoryClass: (form.inventoryClass as InventoryClass) ?? 'Component',
-      }).subscribe({
+      }, formValidationContext()).subscribe({
         next: (detail) => {
           this.closePartDialog();
           this.loadParts();
@@ -670,7 +674,10 @@ export class PartsComponent {
         },
         error: (err: HttpErrorResponse) => {
           // Phase 3 / WU-02 / F6: see updatePart error handler for details.
-          FormValidationService.applyServerError(this.partForm, err);
+          const applied = FormValidationService.applyServerError(this.partForm, err);
+          if (applied?.unmatched.length) {
+            this.snackbar.error(applied.unmatched[0].message);
+          }
         },
       });
     }

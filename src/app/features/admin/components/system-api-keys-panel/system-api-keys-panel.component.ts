@@ -20,6 +20,7 @@ import {
   ConfirmDialogData,
 } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { isCapabilityDisabledError } from '../../../../shared/errors/capability-disabled.error';
+import { formValidationContext } from '../../../../shared/interceptors/http-error.interceptor';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -192,7 +193,7 @@ export class SystemApiKeysPanelComponent implements OnInit {
       expiresAt: v.expiresAt ? toIsoDate(v.expiresAt) : null,
     };
 
-    this.service.create(request).subscribe({
+    this.service.create(request, formValidationContext()).subscribe({
       next: (response) => {
         this.creating.set(false);
         this.closeCreate();
@@ -213,7 +214,10 @@ export class SystemApiKeysPanelComponent implements OnInit {
           );
           return;
         }
-        FormValidationService.applyServerError(this.form, err);
+        const applied = FormValidationService.applyServerError(this.form, err);
+        if (applied?.unmatched.length) {
+          this.snackbar.error(applied.unmatched[0].message);
+        }
       },
     });
   }

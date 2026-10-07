@@ -1,8 +1,11 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar, MatSnackBarRef, TextOnlySnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 
+import { markHttpErrorShown } from '../utils/shown-http-errors';
 import { SnackbarService } from './snackbar.service';
 
 describe('SnackbarService', () => {
@@ -36,6 +39,10 @@ describe('SnackbarService', () => {
       providers: [
         { provide: MatSnackBar, useValue: snackBarSpy },
         { provide: Router, useValue: routerSpy },
+        {
+          provide: TranslateService,
+          useValue: { instant: (key: string) => (key === 'common.dismiss' ? 'Dismiss' : key) },
+        },
       ],
     });
 
@@ -108,6 +115,46 @@ describe('SnackbarService', () => {
       service.successWithNav('Job created', '/jobs/42', 'View Job');
 
       expect(routerSpy.navigate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('errorFrom', () => {
+    const errorPanel = { duration: 10000, panelClass: ['snackbar--error'] };
+
+    it('shows the problem detail', () => {
+      const err = new HttpErrorResponse({
+        status: 409,
+        error: { title: 'Action not allowed', detail: 'Cannot delete order with active shipments' },
+      });
+
+      service.errorFrom(err, 'orders.deleteFailed');
+
+      expect(snackBarSpy.open).toHaveBeenCalledWith('Cannot delete order with active shipments', 'Dismiss', errorPanel);
+    });
+
+    it('falls back to the problem title when there is no detail', () => {
+      const err = new HttpErrorResponse({ status: 400, error: { title: 'Validation failed' } });
+
+      service.errorFrom(err, 'orders.saveFailed');
+
+      expect(snackBarSpy.open).toHaveBeenCalledWith('Validation failed', 'Dismiss', errorPanel);
+    });
+
+    it('falls back to the translated key when the body carries no text', () => {
+      service.errorFrom(new HttpErrorResponse({ status: 404, error: null }), 'orders.saveFailed');
+      service.errorFrom(new Error('boom'), 'orders.saveFailed');
+
+      expect(snackBarSpy.open).toHaveBeenNthCalledWith(1, 'orders.saveFailed', 'Dismiss', errorPanel);
+      expect(snackBarSpy.open).toHaveBeenNthCalledWith(2, 'orders.saveFailed', 'Dismiss', errorPanel);
+    });
+
+    it('does nothing when the interceptor already showed the error', () => {
+      const err = new HttpErrorResponse({ status: 400, error: { detail: 'Quantity must be greater than zero.' } });
+      markHttpErrorShown(err);
+
+      service.errorFrom(err, 'orders.saveFailed');
+
+      expect(snackBarSpy.open).not.toHaveBeenCalled();
     });
   });
 });

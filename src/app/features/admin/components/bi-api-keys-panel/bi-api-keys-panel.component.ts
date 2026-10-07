@@ -18,6 +18,7 @@ import {
   ConfirmDialogData,
 } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { isCapabilityDisabledError } from '../../../../shared/errors/capability-disabled.error';
+import { formValidationContext } from '../../../../shared/interceptors/http-error.interceptor';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -150,7 +151,7 @@ export class BiApiKeysPanelComponent implements OnInit {
       expiresAt: v.expiresAt ? toIsoDate(v.expiresAt) : null,
     };
 
-    this.biApiKeyService.create(request).subscribe({
+    this.biApiKeyService.create(request, formValidationContext()).subscribe({
       next: (response) => {
         this.creating.set(false);
         this.closeCreate();
@@ -178,7 +179,10 @@ export class BiApiKeysPanelComponent implements OnInit {
           return;
         }
         // Phase 3 / WU-02 envelope — surface per-field errors back on the form.
-        FormValidationService.applyServerError(this.form, err);
+        const applied = FormValidationService.applyServerError(this.form, err);
+        if (applied?.unmatched.length) {
+          this.snackbar.error(applied.unmatched[0].message);
+        }
       },
     });
   }

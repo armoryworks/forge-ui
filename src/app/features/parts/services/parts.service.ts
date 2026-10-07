@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
@@ -91,8 +91,8 @@ export class PartsService {
     return this.http.get<PartDetail>(`${this.base}/${id}`);
   }
 
-  createPart(request: CreatePartRequest): Observable<PartDetail> {
-    return this.http.post<PartDetail>(this.base, request);
+  createPart(request: CreatePartRequest, context?: HttpContext): Observable<PartDetail> {
+    return this.http.post<PartDetail>(this.base, request, { context });
   }
 
   clonePart(id: number, request: ClonePartRequest): Observable<PartDetail> {
@@ -104,8 +104,8 @@ export class PartsService {
     return this.http.get<PartsConfig>(`${this.base}/config`);
   }
 
-  updatePart(id: number, request: UpdatePartRequest): Observable<PartDetail> {
-    return this.http.patch<PartDetail>(`${this.base}/${id}`, request);
+  updatePart(id: number, request: UpdatePartRequest, context?: HttpContext): Observable<PartDetail> {
+    return this.http.patch<PartDetail>(`${this.base}/${id}`, request, { context });
   }
 
   createBOMLine(partId: number, request: CreateBOMLineRequest): Observable<PartDetail> {

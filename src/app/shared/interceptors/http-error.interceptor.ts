@@ -1,4 +1,4 @@
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { HttpContext, HttpContextToken, HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 
@@ -8,6 +8,13 @@ import { CapabilityDisabledError } from '../errors/capability-disabled.error';
 import { SnackbarService } from '../services/snackbar.service';
 import { ToastService } from '../services/toast.service';
 import { parseServerValidationEnvelope } from '../utils/server-validation.utils';
+import { markHttpErrorShown } from '../utils/shown-http-errors';
+
+export const SUPPRESS_VALIDATION_SNACKBAR = new HttpContextToken<boolean>(() => false);
+
+export function formValidationContext(): HttpContext {
+  return new HttpContext().set(SUPPRESS_VALIDATION_SNACKBAR, true);
+}
 
 export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
   const snackbar = inject(SnackbarService);
@@ -23,21 +30,14 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
       }
       switch (error.status) {
         case 400: {
-          // Phase 3 / WU-02 retrofit: server now returns
-          //   { errors: [ { field, message, rejectedValue }, ... ] }
-          // on model-binding rejection. The interceptor's job is only to NOT
-          // surface a generic toast when callers will display per-field
-          // errors against form controls — the calling component pulls the
-          // envelope out of the error and applies it via
-          // `applyServerErrorsToForm`.
-          //
-          // Legacy non-envelope 400 responses still get a snackbar fallback
-          // so the user is not left guessing.
-          if (parseServerValidationEnvelope(error) === null) {
-            const message = extractMessage(error);
-            if (message) {
-              snackbar.error(message);
-            }
+          const fieldErrors = parseServerValidationEnvelope(error);
+          if (fieldErrors !== null && req.context.get(SUPPRESS_VALIDATION_SNACKBAR)) {
+            break;
+          }
+          const message = problemDetail(error) ?? fieldErrors?.[0].message ?? extractMessage(error);
+          if (message) {
+            snackbar.error(message);
+            markHttpErrorShown(error);
           }
           break;
         }
@@ -69,6 +69,7 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
             return throwError(() => new CapabilityDisabledError(cap.capability, cap.message));
           }
           snackbar.error(translate.instant('errors.accessDenied'));
+          markHttpErrorShown(error);
           break;
         }
 
@@ -80,9 +81,10 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
           // Business conflict — extract message from response body.
           toast.show({
             severity: 'warning',
-            title: translate.instant('errors.conflict'),
+            title: translate.instant(isBusinessRule(error) ? 'errors.ruleViolation' : 'errors.conflict'),
             message: extractMessage(error) ?? translate.instant('errors.resourceModified'),
           });
+          markHttpErrorShown(error);
           break;
 
         case 422:
@@ -98,6 +100,7 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
             title: translate.instant('errors.connectionLost'),
             message: translate.instant('errors.unableToReachServer'),
           });
+          markHttpErrorShown(error);
           break;
 
         default:
@@ -110,6 +113,7 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
               message,
               details,
             });
+            markHttpErrorShown(error);
           }
           break;
       }
@@ -118,6 +122,18 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
     }),
   );
 };
+
+function problemDetail(error: HttpErrorResponse): string | null {
+  const body = error.error;
+  return body && typeof body === 'object' && typeof body.detail === 'string' && body.detail
+    ? body.detail
+    : null;
+}
+
+function isBusinessRule(error: HttpErrorResponse): boolean {
+  const body = error.error;
+  return !!body && typeof body === 'object' && body.code === 'business-rule';
+}
 
 function extractMessage(error: HttpErrorResponse): string | null {
   const body = error.error;

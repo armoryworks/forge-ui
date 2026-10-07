@@ -1,5 +1,6 @@
 import {
   HttpClient,
+  HttpContext,
   HttpErrorResponse,
   provideHttpClient,
   withInterceptors,
@@ -12,9 +13,10 @@ import { TranslateService } from '@ngx-translate/core';
 import { CapabilityDisabledError } from '../errors/capability-disabled.error';
 import { SnackbarService } from '../services/snackbar.service';
 import { ToastService } from '../services/toast.service';
-import { httpErrorInterceptor } from './http-error.interceptor';
+import { wasHttpErrorShown } from '../utils/shown-http-errors';
+import { httpErrorInterceptor, SUPPRESS_VALIDATION_SNACKBAR } from './http-error.interceptor';
 
-describe('httpErrorInterceptor — capability-gate resilience', () => {
+describe('httpErrorInterceptor', () => {
   let http: HttpClient;
   let httpMock: HttpTestingController;
   let snackbar: { error: ReturnType<typeof vi.fn>; warn: ReturnType<typeof vi.fn>; success: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
@@ -155,5 +157,92 @@ describe('httpErrorInterceptor — capability-gate resilience', () => {
     );
 
     expect(snackbar.error).toHaveBeenCalledWith('Manual part numbers are turned off.');
+  });
+
+  describe('400 validation errors', () => {
+    const handlerValidatorBody = {
+      status: 400,
+      title: 'Validation failed',
+      detail: 'Quantity must be greater than zero.',
+      errors: [{ field: 'quantity', message: 'Quantity must be greater than zero.', rejectedValue: '0' }],
+    };
+
+    function post(context?: HttpContext): () => unknown {
+      let captured: unknown;
+      http.post('/api/v1/sales-orders', {}, { context }).subscribe({
+        next: () => {},
+        error: (err) => { captured = err; },
+      });
+      return () => captured;
+    }
+
+    it('shows the server detail when no form handles the error', () => {
+      const captured = post();
+      httpMock.expectOne('/api/v1/sales-orders')
+        .flush(handlerValidatorBody, { status: 400, statusText: 'Bad Request' });
+
+      expect(snackbar.error).toHaveBeenCalledWith('Quantity must be greater than zero.');
+      expect(wasHttpErrorShown(captured())).toBe(true);
+    });
+
+    it('falls back to the first field message when the envelope has no detail', () => {
+      post();
+      httpMock.expectOne('/api/v1/sales-orders').flush(
+        { errors: [{ field: 'dueDate', message: 'Date is not valid', rejectedValue: '2025-02-29' }] },
+        { status: 400, statusText: 'Bad Request' },
+      );
+
+      expect(snackbar.error).toHaveBeenCalledWith('Date is not valid');
+    });
+
+    it('stays quiet when the caller applies the field errors to its form', () => {
+      const captured = post(new HttpContext().set(SUPPRESS_VALIDATION_SNACKBAR, true));
+      httpMock.expectOne('/api/v1/sales-orders')
+        .flush(handlerValidatorBody, { status: 400, statusText: 'Bad Request' });
+
+      expect(snackbar.error).not.toHaveBeenCalled();
+      expect(wasHttpErrorShown(captured())).toBe(false);
+    });
+
+    it('still shows a non-envelope 400 even when the caller handles field errors', () => {
+      post(new HttpContext().set(SUPPRESS_VALIDATION_SNACKBAR, true));
+      httpMock.expectOne('/api/v1/sales-orders').flush(
+        { title: 'Bad request', detail: 'Ship date cannot precede the order date.' },
+        { status: 400, statusText: 'Bad Request' },
+      );
+
+      expect(snackbar.error).toHaveBeenCalledWith('Ship date cannot precede the order date.');
+    });
+  });
+
+  describe('409 conflicts', () => {
+    it('titles a business-rule rejection with the rule-violation key', () => {
+      let captured: unknown;
+      http.delete('/api/v1/sales-orders/4').subscribe({ error: (err) => { captured = err; } });
+      httpMock.expectOne('/api/v1/sales-orders/4').flush(
+        { title: 'Action not allowed', detail: 'Cannot delete order with active shipments', code: 'business-rule' },
+        { status: 409, statusText: 'Conflict' },
+      );
+
+      expect(toast.show).toHaveBeenCalledWith(expect.objectContaining({
+        severity: 'warning',
+        title: 'errors.ruleViolation',
+        message: 'Cannot delete order with active shipments',
+      }));
+      expect(wasHttpErrorShown(captured)).toBe(true);
+    });
+
+    it('keeps the conflict title for other 409s', () => {
+      http.post('/api/v1/invoices', {}).subscribe({ error: () => {} });
+      httpMock.expectOne('/api/v1/invoices').flush(
+        { title: 'Duplicate number', detail: 'That number was just taken by another record. Save again to get the next number.', code: 'duplicate' },
+        { status: 409, statusText: 'Conflict' },
+      );
+
+      expect(toast.show).toHaveBeenCalledWith(expect.objectContaining({
+        title: 'errors.conflict',
+        message: 'That number was just taken by another record. Save again to get the next number.',
+      }));
+    });
   });
 });

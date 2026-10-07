@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
@@ -73,8 +73,8 @@ export class CustomerService {
     return this.http.get<CustomerDetail>(`${this.base}/${id}`);
   }
 
-  createCustomer(request: CreateCustomerRequest): Observable<CustomerListItem> {
-    return this.http.post<CustomerListItem>(this.base, request);
+  createCustomer(request: CreateCustomerRequest, context?: HttpContext): Observable<CustomerListItem> {
+    return this.http.post<CustomerListItem>(this.base, request, { context });
   }
 
   updateCustomer(id: number, request: UpdateCustomerRequest): Observable<void> {
