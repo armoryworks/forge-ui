@@ -242,6 +242,16 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
     this.onChange(id);
   }
 
+  /**
+   * Programmatic clear of the selected value + display text, the
+   * counterpart of setSelected for consumers restoring a cleared choice
+   * whose bound control is already null.
+   */
+  clearSelected(): void {
+    this.selectedValue = null;
+    this.searchControl.setValue('', { emitEvent: false });
+  }
+
   protected onInput(): void {
     if (this.selectedValue !== null) {
       this.selectedValue = null;

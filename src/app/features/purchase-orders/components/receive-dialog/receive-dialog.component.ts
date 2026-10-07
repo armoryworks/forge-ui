@@ -177,7 +177,9 @@ export class ReceiveDialogComponent implements OnInit, AfterViewInit {
         const picker = pickers[pickerIndex];
         const binId = bins[i].value;
         const label = labels[i];
-        if (picker && binId != null && label) picker.setSelected(binId, label);
+        if (!picker) return;
+        if (binId == null) picker.clearSelected();
+        else if (label) picker.setSelected(binId, label);
       });
   }
 

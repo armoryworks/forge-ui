@@ -25,7 +25,7 @@ interface DialogInternals {
   binLabels(): (string | null)[];
   binPickerFilters: Record<string, string>;
   binsEnabled(): boolean;
-  binPickers: () => { setSelected: (id: number, label: string) => void }[];
+  binPickers: () => { setSelected: (id: number, label: string) => void; clearSelected: () => void }[];
   draftConfig: DraftConfig;
   lotControls(): FormControl<string>[];
   noteControls(): FormControl<string>[];
@@ -106,8 +106,8 @@ describe('ReceiveDialogComponent — bin, lot and note per line', () => {
       line({ id: 2, partDefaultBinId: 7, partDefaultBinPath: 'Rack A / A-1' }),
       line({ id: 3, partDefaultBinId: null }),
     ]);
-    const first = { setSelected: vi.fn() };
-    const second = { setSelected: vi.fn() };
+    const first = { setSelected: vi.fn(), clearSelected: vi.fn() };
+    const second = { setSelected: vi.fn(), clearSelected: vi.fn() };
     internals.binPickers = () => [first, second];
 
     internals.ngAfterViewInit();
@@ -156,6 +156,25 @@ describe('ReceiveDialogComponent — bin, lot and note per line', () => {
 
     expect(internals.binControls().map(c => c.value)).toEqual([null, 9]);
     expect(internals.binLabels()).toEqual([null, 'Rack B / B-2']);
+  });
+
+  it('clears the picker display when the drafted bin was cleared', () => {
+    const { internals } = setup([
+      line({ id: 1, partDefaultBinId: 7, partDefaultBinPath: 'Rack A / A-1' }),
+      line({ id: 2 }),
+    ]);
+    const first = { setSelected: vi.fn(), clearSelected: vi.fn() };
+    const second = { setSelected: vi.fn(), clearSelected: vi.fn() };
+    internals.binPickers = () => [first, second];
+
+    internals.draftConfig.restoreFn!({
+      'bin:1': null, 'binLabel:1': 'Rack A / A-1',
+      'bin:2': 9, 'binLabel:2': 'Rack B / B-2',
+    });
+
+    expect(first.clearSelected).toHaveBeenCalled();
+    expect(first.setSelected).not.toHaveBeenCalled();
+    expect(second.setSelected).toHaveBeenCalledWith(9, 'Rack B / B-2');
   });
 
   it('sends the chosen bin, trimmed lot and note for lines being received', () => {
