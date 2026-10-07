@@ -397,7 +397,6 @@ export class JobDetailPanelComponent implements OnInit {
       data: {
         jobId: j.id,
         jobNumber: j.jobNumber,
-        partId: j.partId,
         currentDisposition: j.disposition,
       } satisfies DisposeJobDialogData,
     }).afterClosed().subscribe(result => {

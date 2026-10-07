@@ -1,8 +1,13 @@
 @use 'styles/variables' as *;
-// Minimal — dialog shell handles layout
 
 .dispose-job__error {
   margin: 0 0 $sp-md;
   color: var(--error);
+  font-size: var(--font-size-sm);
+}
+
+.dispose-job__hint {
+  margin: 0 0 $sp-md;
+  color: var(--text-muted);
   font-size: var(--font-size-sm);
 }

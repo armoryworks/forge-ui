@@ -24,6 +24,7 @@ import { PartSearchResult } from '../models/part-search-result.model';
 import { AssignableSalesOrderLine } from '../models/assignable-sales-order-line.model';
 import { CustomFieldValues } from '../models/custom-field-values.model';
 import { DisposeJobRequest } from '../models/dispose-job-request.model';
+import { JobDispositionStock } from '../models/job-disposition-stock.model';
 import { ChildJob } from '../models/child-job.model';
 import { BomExplosionResponse } from '../models/bom-explosion-response.model';
 import { JobBomAtRelease } from '../../parts/models/bom-revision.model';
@@ -234,6 +235,10 @@ export class KanbanService {
   /** Single-job convenience over the bulk endpoint. Admin-only on the server. */
   unarchiveJob(jobId: number): Observable<BulkResult> {
     return this.http.post<BulkResult>(`${environment.apiUrl}/jobs/${jobId}/unarchive`, {});
+  }
+
+  getDispositionStock(jobId: number): Observable<JobDispositionStock> {
+    return this.http.get<JobDispositionStock>(`${environment.apiUrl}/jobs/${jobId}/disposition-stock`);
   }
 
   disposeJob(jobId: number, request: DisposeJobRequest): Observable<JobDetail> {

@@ -6,4 +6,5 @@ export interface StorageLocationFlat {
   locationType: LocationType;
   barcode: string | null;
   locationPath: string;
+  isActive: boolean;
 }
