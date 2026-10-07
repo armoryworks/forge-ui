@@ -21,6 +21,7 @@ import { Reservation } from '../models/reservation.model';
 import { CreateReservationRequest } from '../models/create-reservation-request.model';
 import { LowStockAlert } from '../models/low-stock-alert.model';
 import { PendingInspectionItem } from '../models/pending-inspection.model';
+import { InspectionResultRequest } from '../models/inspection-result-request.model';
 import { UnitOfMeasure } from '../models/unit-of-measure.model';
 import { UomConversion } from '../models/uom-conversion.model';
 
@@ -158,15 +159,12 @@ export class InventoryService {
     return this.http.get<PendingInspectionItem[]>(`${this.base}/pending-inspection`);
   }
 
-  recordInspectionResult(receivingRecordId: number, data: {
-    result: string; acceptedQuantity?: number; rejectedQuantity?: number;
-    notes?: string; createNcrOnReject?: boolean; qcInspectionId?: number;
-  }): Observable<void> {
+  recordInspectionResult(receivingRecordId: number, data: InspectionResultRequest): Observable<void> {
     return this.http.post<void>(`${this.base}/inspect/${receivingRecordId}`, data);
   }
 
-  waiveInspection(receivingRecordId: number): Observable<void> {
-    return this.http.post<void>(`${this.base}/inspect/${receivingRecordId}/waive`, {});
+  waiveInspection(receivingRecordId: number, reason: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/inspect/${receivingRecordId}/waive`, { reason });
   }
 
   // ── Units of Measure ──

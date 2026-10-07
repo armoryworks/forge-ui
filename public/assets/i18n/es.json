@@ -1663,7 +1663,8 @@
       "receiving": "Recepción",
       "stockOps": "Operaciones de Stock",
       "cycleCounts": "Conteos Cíclicos",
-      "reservations": "Reservas"
+      "reservations": "Reservas",
+      "inspection": "Inspección"
     },
     "subtitle": "Seguimiento de niveles de stock, ubicaciones y movimientos",
     "addLocation": "Agregar Ubicación",
@@ -1813,7 +1814,25 @@
       "result": "Resultado",
       "acceptedQty": "Cant. aceptada",
       "rejectedQty": "Cant. rechazada",
-      "createNcr": "Levantar una no conformidad por las piezas rechazadas"
+      "createNcr": "Levantar una no conformidad por las piezas rechazadas",
+      "columns": {
+        "vendor": "Proveedor",
+        "received": "Recibido",
+        "days": "Días"
+      },
+      "inspectTitle": "Registrar inspección",
+      "waiveTitle": "Dispensar inspección",
+      "summary": "{{partNumber}} en {{poNumber}}: {{quantity}} recibidos",
+      "results": {
+        "passed": "Aprobado",
+        "failed": "Rechazado",
+        "partialAccept": "Aceptación parcial"
+      },
+      "quantityMismatch": "Aceptado más rechazado debe ser igual a los {{quantity}} recibidos",
+      "partialNeedsBoth": "Una aceptación parcial requiere cantidades aceptadas y rechazadas mayores que cero",
+      "recordResult": "Registrar resultado",
+      "recorded": "Inspección registrada",
+      "waived": "Inspección dispensada"
     }
   },
   "customers": {

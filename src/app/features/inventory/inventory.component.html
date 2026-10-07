@@ -54,6 +54,12 @@
       <span class="material-icons-outlined">local_shipping</span>
       {{ 'inventory.tabs.receiving' | translate }}
     </button>
+    @if (inspectionEnabled()) {
+      <button class="tab" data-testid="inventory-tab-inspection" [class.tab--active]="activeTab() === 'inspection'" (click)="switchTab('inspection')">
+        <span class="material-icons-outlined">verified</span>
+        {{ 'inventory.tabs.inspection' | translate }}
+      </button>
+    }
     <button class="tab" [class.tab--active]="activeTab() === 'stockOps'" (click)="switchTab('stockOps')">
       <span class="material-icons-outlined">tune</span>
       {{ 'inventory.tabs.stockOps' | translate }}
@@ -416,6 +422,12 @@
             <span class="text-muted">{{ $any(row).createdAt | date:'MM/dd/yyyy hh:mm a' }}</span>
           </ng-template>
         </app-data-table>
+      </div>
+    }
+
+    @if (activeTab() === 'inspection' && inspectionEnabled()) {
+      <div class="tab-panel">
+        <app-receiving-inspection-queue />
       </div>
     }
 

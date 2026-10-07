@@ -43,13 +43,15 @@ import { UomManagementComponent } from './components/uom-management/uom-manageme
 import { ViewModeToggleComponent } from '../../shared/components/view-mode-toggle/view-mode-toggle.component';
 import { ViewMode, DEFAULT_VIEW_MODE } from '../../shared/models/view-mode.model';
 import { InventoryReorderVisualComponent } from './components/inventory-reorder-visual/inventory-reorder-visual.component';
+import { ReceivingInspectionQueueComponent } from './components/receiving-inspection-queue/receiving-inspection-queue.component';
+import { CapabilityService } from '../../shared/services/capability.service';
 
-type InventoryTab = 'stock' | 'locations' | 'movements' | 'receiving' | 'stockOps' | 'cycleCounts' | 'reservations' | 'replenishment' | 'uom';
+type InventoryTab = 'stock' | 'locations' | 'movements' | 'receiving' | 'inspection' | 'stockOps' | 'cycleCounts' | 'reservations' | 'replenishment' | 'uom';
 
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [ReactiveFormsModule, CurrencyPipe, DatePipe, DecimalPipe, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, DataTableComponent, ColumnCellDirective, RowExpandDirective, ValidationButtonComponent, EmptyStateComponent, LoadingBlockDirective, BarcodeInfoComponent, MatTooltipModule, UomManagementComponent, ViewModeToggleComponent, InventoryReorderVisualComponent],
+  imports: [ReactiveFormsModule, CurrencyPipe, DatePipe, DecimalPipe, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, DataTableComponent, ColumnCellDirective, RowExpandDirective, ValidationButtonComponent, EmptyStateComponent, LoadingBlockDirective, BarcodeInfoComponent, MatTooltipModule, UomManagementComponent, ViewModeToggleComponent, InventoryReorderVisualComponent, ReceivingInspectionQueueComponent],
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -63,8 +65,9 @@ export class InventoryComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
+  private readonly capabilities = inject(CapabilityService);
 
-  private static readonly VALID_TABS: InventoryTab[] = ['stock', 'locations', 'movements', 'receiving', 'stockOps', 'cycleCounts', 'reservations', 'replenishment', 'uom'];
+  private static readonly VALID_TABS: InventoryTab[] = ['stock', 'locations', 'movements', 'receiving', 'inspection', 'stockOps', 'cycleCounts', 'reservations', 'replenishment', 'uom'];
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -75,6 +78,8 @@ export class InventoryComponent {
     })),
     { initialValue: 'stock' },
   );
+
+  protected readonly inspectionEnabled = computed(() => this.capabilities.isEnabled('CAP-QC-INSPECTION'));
 
   /** Classic (table) vs Visual (chart) presentation of the Stock Levels tab. URL ?view= is the whole source of truth; no persisted preference. */
   protected readonly viewMode = toSignal(

@@ -8,6 +8,7 @@ import { CreateReservationRequest } from '../models/create-reservation-request.m
 import { CycleCount } from '../models/cycle-count.model';
 import { TransferStockRequest } from '../models/transfer-stock-request.model';
 import { AdjustStockRequest } from '../models/adjust-stock-request.model';
+import { InspectionResultRequest } from '../models/inspection-result-request.model';
 import { environment } from '../../../../environments/environment';
 
 describe('InventoryService', () => {
@@ -239,6 +240,31 @@ describe('InventoryService', () => {
       req.flush(null);
 
       expect(completed).toBe(true);
+    });
+  });
+
+  describe('recordInspectionResult', () => {
+    it('should POST the inspection result for the receiving record', () => {
+      const request: InspectionResultRequest = {
+        result: 'PartialAccept', acceptedQuantity: 8, rejectedQuantity: 2, notes: 'Burrs', createNcrOnReject: true,
+      };
+      service.recordInspectionResult(12, request).subscribe();
+
+      const req = httpMock.expectOne(`${baseUrl}/inspect/12`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(request);
+      req.flush(null);
+    });
+  });
+
+  describe('waiveInspection', () => {
+    it('should POST the waive reason in the body', () => {
+      service.waiveInspection(12, 'Certified lot').subscribe();
+
+      const req = httpMock.expectOne(`${baseUrl}/inspect/12/waive`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ reason: 'Certified lot' });
+      req.flush(null);
     });
   });
 

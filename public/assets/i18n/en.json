@@ -1663,7 +1663,8 @@
       "receiving": "Receiving",
       "stockOps": "Stock Ops",
       "cycleCounts": "Cycle Counts",
-      "reservations": "Reservations"
+      "reservations": "Reservations",
+      "inspection": "Inspection"
     },
     "subtitle": "Track stock levels, locations, and movements",
     "addLocation": "Add Location",
@@ -1813,7 +1814,25 @@
       "result": "Result",
       "acceptedQty": "Accepted qty",
       "rejectedQty": "Rejected qty",
-      "createNcr": "Raise a non-conformance for rejected parts"
+      "createNcr": "Raise a non-conformance for rejected parts",
+      "columns": {
+        "vendor": "Vendor",
+        "received": "Received",
+        "days": "Days"
+      },
+      "inspectTitle": "Record inspection",
+      "waiveTitle": "Waive inspection",
+      "summary": "{{partNumber}} on {{poNumber}}: {{quantity}} received",
+      "results": {
+        "passed": "Passed",
+        "failed": "Failed",
+        "partialAccept": "Partial accept"
+      },
+      "quantityMismatch": "Accepted plus rejected must equal the {{quantity}} received",
+      "partialNeedsBoth": "A partial accept needs both accepted and rejected above zero",
+      "recordResult": "Record result",
+      "recorded": "Inspection recorded",
+      "waived": "Inspection waived"
     }
   },
   "customers": {

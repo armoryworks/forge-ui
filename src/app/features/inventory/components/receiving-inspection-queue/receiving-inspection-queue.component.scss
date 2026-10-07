@@ -4,6 +4,24 @@
   display: block;
 }
 
+.inspection-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: $sp-sm;
+}
+
+.inspection-summary {
+  margin: 0 0 $sp-md;
+  color: var(--text-secondary);
+}
+
+.inspection-quantities {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-md;
+}
+
 :host ::ng-deep {
   .row--overdue-warning {
     background-color: color-mix(in srgb, var(--warning) 8%, transparent);

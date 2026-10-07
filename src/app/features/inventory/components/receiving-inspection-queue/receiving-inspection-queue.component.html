@@ -1,6 +1,6 @@
 <div [appLoadingBlock]="loading()">
   @if (items().length === 0 && !loading()) {
-    <app-empty-state icon="fact_check" message="No items pending inspection" />
+    <app-empty-state icon="fact_check" [message]="'inventory.receivingInspection.empty' | translate" />
   } @else {
     <app-data-table
       tableId="receiving-inspection-queue"
@@ -8,10 +8,81 @@
       [data]="items()"
       [rowClass]="rowClass"
       emptyIcon="fact_check"
-      emptyMessage="No items pending inspection">
+      [emptyMessage]="'inventory.receivingInspection.empty' | translate">
       <ng-template appColumnCell="receivedAt" let-row>
         {{ row.receivedAt | date:'MM/dd/yyyy' }}
+      </ng-template>
+      <ng-template appColumnCell="actions" let-row>
+        <div class="inspection-actions">
+          <button class="icon-btn" data-testid="inspection-inspect-btn"
+            [disabled]="saving()"
+            (click)="openInspect(row); $event.stopPropagation()"
+            [attr.aria-label]="'inventory.receivingInspection.inspect' | translate"
+            [matTooltip]="'inventory.receivingInspection.inspect' | translate" matTooltipPosition="above">
+            <span class="material-icons-outlined">fact_check</span>
+          </button>
+          @if (canWaive()) {
+            <button class="icon-btn" data-testid="inspection-waive-btn"
+              [disabled]="saving()"
+              (click)="openWaive(row); $event.stopPropagation()"
+              [attr.aria-label]="'inventory.receivingInspection.waive' | translate"
+              [matTooltip]="'inventory.receivingInspection.waive' | translate" matTooltipPosition="above">
+              <span class="material-icons-outlined">do_not_disturb_on</span>
+            </button>
+          }
+        </div>
       </ng-template>
     </app-data-table>
   }
 </div>
+
+@if (inspecting(); as item) {
+  <app-dialog [title]="'inventory.receivingInspection.inspectTitle' | translate" width="480px" (closed)="closeInspect()">
+    <p class="inspection-summary">
+      {{ 'inventory.receivingInspection.summary' | translate: { partNumber: item.partNumber, poNumber: item.poNumber, quantity: item.receivedQuantity } }}
+    </p>
+    <div [formGroup]="inspectForm">
+      <app-select data-testid="inspection-result" [label]="'inventory.receivingInspection.result' | translate"
+        formControlName="result" [options]="resultOptions" />
+      <div class="inspection-quantities">
+        <app-input data-testid="inspection-accepted-qty" [label]="'inventory.receivingInspection.acceptedQty' | translate"
+          formControlName="acceptedQuantity" type="number" min="0" />
+        <app-input data-testid="inspection-rejected-qty" [label]="'inventory.receivingInspection.rejectedQty' | translate"
+          formControlName="rejectedQuantity" type="number" min="0" />
+      </div>
+      <app-textarea data-testid="inspection-notes" [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
+      <app-toggle data-testid="inspection-create-ncr" [label]="'inventory.receivingInspection.createNcr' | translate"
+        formControlName="createNcrOnReject" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeInspect()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="inspectViolations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" data-testid="inspection-save-btn"
+          [disabled]="inspectForm.invalid || saving()"
+          (click)="submitInspect()">{{ 'inventory.receivingInspection.recordResult' | translate }}</button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}
+
+@if (waiving(); as item) {
+  <app-dialog [title]="'inventory.receivingInspection.waiveTitle' | translate" width="440px" (closed)="closeWaive()">
+    <p class="inspection-summary">
+      {{ 'inventory.receivingInspection.summary' | translate: { partNumber: item.partNumber, poNumber: item.poNumber, quantity: item.receivedQuantity } }}
+    </p>
+    <div [formGroup]="waiveForm">
+      <app-textarea data-testid="inspection-waive-reason" [label]="'inventory.receivingInspection.waiveReason' | translate"
+        formControlName="reason" [rows]="3" [maxlength]="2000" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeWaive()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="waiveViolations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" data-testid="inspection-waive-save-btn"
+          [disabled]="waiveForm.invalid || saving()"
+          (click)="submitWaive()">{{ 'inventory.receivingInspection.waive' | translate }}</button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}
