@@ -157,7 +157,11 @@
     } @else {
       <div class="sf-empty">
         <span class="material-icons-outlined sf-empty__icon">person_off</span>
-        <p>{{ 'shopFloor.noEmployees' | translate }}</p>
+        @if (terminal(); as t) {
+          <p data-testid="sf-no-team-members">{{ 'shopFloor.display.noTeamMembers' | translate: { team: t.teamName } }}</p>
+        } @else {
+          <p>{{ 'shopFloor.noEmployees' | translate }}</p>
+        }
       </div>
     }
 
