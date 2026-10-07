@@ -167,6 +167,11 @@ export class SalesOrderDetailPanelComponent {
 
   protected readonly creditStatus = signal<CreditStatus | null>(null);
   protected readonly creditHold = computed(() => this.creditStatus()?.isOnHold === true);
+  protected readonly showCreditHoldBanner = computed(() => {
+    const status = this.so()?.status;
+    return this.creditHold()
+      && (status === 'Draft' || status === 'Confirmed' || status === 'InProduction' || status === 'PartiallyShipped');
+  });
   protected readonly creditHoldMessage = computed(() => {
     const status = this.creditStatus();
     if (!status?.isOnHold) return '';
@@ -178,6 +183,10 @@ export class SalesOrderDetailPanelComponent {
     return this.translate.instant(draft ? 'salesOrders.creditHoldWarningNoReason' : 'salesOrders.creditHoldWarningOpenNoReason');
   });
   protected readonly confirmDisabled = computed(() => this.confirmBlockedByAcceptance() || this.creditHold());
+  protected readonly confirmTooltip = computed(() => {
+    if (this.confirmBlockedByAcceptance()) return this.translate.instant('salesOrders.acceptance.confirmBlockedHint');
+    return this.creditHold() ? this.creditHoldMessage() : '';
+  });
 
   protected readonly recordForm = new FormGroup({
     method: new FormControl<RecordAcceptanceMethod>('ManualUpload', { nonNullable: true, validators: [Validators.required] }),

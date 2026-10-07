@@ -78,6 +78,8 @@ interface Panel {
   loadDetail(id: number): void;
   creditHold: Signal<boolean>;
   creditHoldMessage: Signal<string>;
+  showCreditHoldBanner: Signal<boolean>;
+  confirmTooltip: Signal<string>;
   confirmDisabled: Signal<boolean>;
   shippingAddress: Signal<CustomerAddress | null>;
   billingAddress: Signal<CustomerAddress | null>;
@@ -233,6 +235,30 @@ describe('SalesOrderDetailPanelComponent', () => {
 
     panel['so'].set(order({ status: 'Confirmed' }));
     expect(panel['creditHoldMessage']()).toBe('salesOrders.creditHoldWarningOpenNoReason');
+  });
+
+  it('explains the credit hold on the disabled Confirm', () => {
+    enabledCaps.add('CAP-O2C-CREDIT-LIMITS');
+    customerService.getCreditStatus.mockReturnValue(of({ isOnHold: true, holdReason: 'Past due' }));
+    const panel = build(order());
+    panel['loadDetail'](7);
+    expect(panel['confirmTooltip']()).toBe('salesOrders.creditHoldWarning {"reason":"Past due"}');
+  });
+
+  it('shows the credit hold banner only while the order can still ship', () => {
+    enabledCaps.add('CAP-O2C-CREDIT-LIMITS');
+    customerService.getCreditStatus.mockReturnValue(of({ isOnHold: true, holdReason: null }));
+    const panel = build(order());
+    panel['loadDetail'](7);
+
+    for (const status of ['Draft', 'Confirmed', 'InProduction', 'PartiallyShipped']) {
+      panel['so'].set(order({ status }));
+      expect(panel['showCreditHoldBanner']()).toBe(true);
+    }
+    for (const status of ['Shipped', 'Completed', 'Cancelled']) {
+      panel['so'].set(order({ status }));
+      expect(panel['showCreditHoldBanner']()).toBe(false);
+    }
   });
 
   it('skips the credit check when credit limits are off', () => {
