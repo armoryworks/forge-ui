@@ -1,5 +1,5 @@
 import {
-  AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, inject, signal,
+  AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, computed, inject, signal,
 } from '@angular/core';
 import { Router } from '@angular/router';
 
@@ -10,6 +10,7 @@ import { ScanResolveResult, isQueued } from '../../../shared/models/mobile-api.m
 import { CameraScannerService } from '../../../shared/services/camera-scanner.service';
 import { InstanceService } from '../../../shared/services/instance.service';
 import { MobileApiService } from '../../../shared/services/mobile-api.service';
+import { MobileTimerService } from '../../../shared/services/mobile-timer.service';
 import { OfflineQueueService } from '../../../shared/services/offline-queue.service';
 import { ScanFeedbackService } from '../../../shared/services/scan-feedback.service';
 import { SharedIdentityService } from '../../../shared/services/shared-identity.service';
@@ -41,6 +42,7 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
   private readonly identity = inject(SharedIdentityService);
+  private readonly timer = inject(MobileTimerService);
   protected readonly instances = inject(InstanceService);
 
   protected readonly result = signal<ScanResolveResult | null>(null);
@@ -51,6 +53,8 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
   protected readonly cameraError = signal(false);
   protected readonly identifying = signal(false);
   protected readonly typing = signal(false);
+
+  protected readonly runningJobId = computed(() => this.timer.active()?.jobId ?? null);
 
   private pendingAction: ScanAction | null = null;
 
@@ -122,7 +126,10 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
           if (result.id) await this.advance(result.id, result.code);
           break;
         case 'start':
-          if (result.id) await this.startTimer(result.id);
+          if (result.id) await this.startTimer(result.id, result.label);
+          break;
+        case 'stop':
+          await this.stopTimer();
           break;
         case 'complete':
           if (result.id) await this.complete(result.id, result.code);
@@ -134,6 +141,8 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
           this.identifying.set(true);
           break;
       }
+    } catch {
+      this.notice.set(this.translate.instant('mobileApp.jobs.actionFailed'));
     } finally {
       this.busy.set(false);
       if (action !== 'identify') this.identity.touch();
@@ -161,30 +170,37 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
     await this.startScanner();
   }
 
-  private async startTimer(jobId: number): Promise<void> {
-    const entry = await firstValueFrom(this.api.startTimer(jobId));
-    if (!entry) return;
-    if (isQueued(entry)) {
-      this.offerQueuedUndo(entry.entryId);
-      this.result.set(null);
-      await this.startScanner();
-      return;
+  private async startTimer(jobId: number, label: string): Promise<void> {
+    const outcome = await this.timer.start(jobId, label);
+    if (!outcome) return;
+    const entryId = outcome.entryId;
+    if (entryId === null) {
+      this.offerQueuedUndo(...outcome.queuedIds);
+    } else {
+      this.undo.offer(this.translate.instant('mobileApp.jobs.timerStarted'), () => this.timer.undoStart(entryId));
     }
-    this.undo.offer(
-      this.translate.instant('mobileApp.jobs.timerStarted'),
-      () => firstValueFrom(this.api.stopTimer()),
-    );
     this.result.set(null);
     await this.startScanner();
   }
 
+  private async stopTimer(): Promise<void> {
+    const stopped = await this.timer.stop();
+    this.result.set(null);
+    await this.startScanner();
+    this.notice.set(this.translate.instant('mobileApp.timer.stopped', { jobNumber: stopped?.jobNumber ?? '' }));
+  }
+
   private async complete(jobId: number, code: string): Promise<void> {
     await firstValueFrom(this.api.stopTimer()).catch(() => undefined);
+    void this.timer.refresh();
     await this.advance(jobId, code);
   }
 
-  private offerQueuedUndo(entryId: string): void {
-    this.undo.offer(this.translate.instant('mobileApp.offline.queued'), () => this.queue.remove(entryId));
+  private offerQueuedUndo(...entryIds: string[]): void {
+    this.undo.offer(
+      this.translate.instant('mobileApp.offline.queued'),
+      () => Promise.all(entryIds.map((id) => this.queue.remove(id))),
+    );
   }
 
   private async startScanner(): Promise<void> {

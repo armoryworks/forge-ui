@@ -9,7 +9,9 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { ScanResolveResult, isQueued } from '../../../shared/models/mobile-api.model';
 import { MobileApiService } from '../../../shared/services/mobile-api.service';
+import { MobileTimerService } from '../../../shared/services/mobile-timer.service';
 import { OfflineQueueService } from '../../../shared/services/offline-queue.service';
+import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { UndoService } from '../../../shared/services/undo.service';
 import { ScanAction, ScanActionSheetComponent } from '../components/scan-action-sheet/scan-action-sheet.component';
 
@@ -28,8 +30,10 @@ import { ScanAction, ScanActionSheetComponent } from '../components/scan-action-
 })
 export class AppLookupComponent {
   private readonly api = inject(MobileApiService);
+  private readonly timer = inject(MobileTimerService);
   private readonly undo = inject(UndoService);
   private readonly queue = inject(OfflineQueueService);
+  private readonly snackbar = inject(SnackbarService);
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
 
@@ -39,6 +43,7 @@ export class AppLookupComponent {
   protected readonly selected = signal<ScanResolveResult | null>(null);
   protected readonly busy = signal(false);
   protected readonly listening = signal(false);
+  protected readonly runningJobId = computed(() => this.timer.active()?.jobId ?? null);
 
   protected readonly voiceSupported = computed(() =>
     typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window));
@@ -121,14 +126,23 @@ export class AppLookupComponent {
           break;
         }
         case 'start': {
-          const entry = await firstValueFrom(this.api.startTimer(result.id));
-          if (isQueued(entry)) this.offerQueuedUndo(entry.entryId);
-          else this.undo.offer(this.translate.instant('mobileApp.jobs.timerStarted'), () => firstValueFrom(this.api.stopTimer()));
+          const outcome = await this.timer.start(result.id, result.label);
+          if (!outcome) break;
+          const entryId = outcome.entryId;
+          if (entryId === null) this.offerQueuedUndo(...outcome.queuedIds);
+          else this.undo.offer(this.translate.instant('mobileApp.jobs.timerStarted'), () => this.timer.undoStart(entryId));
+          this.selected.set(null);
+          break;
+        }
+        case 'stop': {
+          const stopped = await this.timer.stop();
+          this.snackbar.success(this.translate.instant('mobileApp.timer.stopped', { jobNumber: stopped?.jobNumber ?? '' }));
           this.selected.set(null);
           break;
         }
         case 'complete':
           await firstValueFrom(this.api.stopTimer()).catch(() => undefined);
+          void this.timer.refresh();
           await this.onAction('move');
           break;
         case 'moveStock':
@@ -137,13 +151,18 @@ export class AppLookupComponent {
         default:
           this.selected.set(null);
       }
+    } catch {
+      this.snackbar.error(this.translate.instant('mobileApp.jobs.actionFailed'));
     } finally {
       this.busy.set(false);
     }
   }
 
-  private offerQueuedUndo(entryId: string): void {
-    this.undo.offer(this.translate.instant('mobileApp.offline.queued'), () => this.queue.remove(entryId));
+  private offerQueuedUndo(...entryIds: string[]): void {
+    this.undo.offer(
+      this.translate.instant('mobileApp.offline.queued'),
+      () => Promise.all(entryIds.map((id) => this.queue.remove(id))),
+    );
   }
 }
 

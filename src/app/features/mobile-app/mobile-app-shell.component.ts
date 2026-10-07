@@ -1,11 +1,19 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal, untracked,
+} from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { CapabilityService } from '../../shared/services/capability.service';
 import { CrashReportingService } from '../../shared/services/crash-reporting.service';
 import { AppInfoService } from '../../shared/services/app-info.service';
+import { AuthService } from '../../shared/services/auth.service';
+import { InstanceService } from '../../shared/services/instance.service';
+import { MobileTimerService } from '../../shared/services/mobile-timer.service';
+import { PlatformService } from '../../shared/services/platform.service';
+import { SnackbarService } from '../../shared/services/snackbar.service';
+import { TimerHubService } from '../../shared/services/timer-hub.service';
 import { LanguageToggleComponent } from '../../shared/components/language-toggle/language-toggle.component';
 import { SyncIndicatorComponent } from './components/sync-indicator/sync-indicator.component';
 
@@ -19,7 +27,8 @@ interface MobileAppTab {
 /**
  * Native-shell chrome: top bar + five-tab bottom bar (Scan, Clock, Jobs,
  * Move, Lookup), each tab shown only while its CAP-MOBILE-* flag is on for
- * this instance. Account lives behind the gear, never a tab.
+ * this instance. Account lives behind the gear, never a tab. While a timer
+ * runs, a strip above the tab bar shows it ticking with a Stop button.
  */
 @Component({
   selector: 'app-mobile-app-shell',
@@ -45,8 +54,93 @@ export class MobileAppShellComponent {
   protected readonly tabs = computed(() =>
     this.allTabs.filter((tab) => this.capabilities.isEnabled(tab.capability, true)));
 
+  protected readonly timer = inject(MobileTimerService);
+  private readonly timerHub = inject(TimerHubService);
+  private readonly auth = inject(AuthService);
+  private readonly instances = inject(InstanceService);
+  private readonly platform = inject(PlatformService);
+  private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  private readonly now = signal(Date.now());
+  protected readonly stopping = signal(false);
+
+  protected readonly elapsed = computed(() => {
+    const running = this.timer.active();
+    if (!running) return '';
+    const seconds = Math.max(0, Math.floor((this.now() - new Date(running.timerStart).getTime()) / 1000));
+    const pad = (n: number): string => String(n).padStart(2, '0');
+    return `${Math.floor(seconds / 3600)}:${pad(Math.floor(seconds / 60) % 60)}:${pad(seconds % 60)}`;
+  });
+
+  private hubStarted = false;
+
   constructor() {
     void this.appInfo.load();
     void this.crash.init();
+
+    effect(() => {
+      const token = this.auth.token();
+      untracked(() => {
+        void this.timer.refresh();
+        if (token) this.listenForTimerEvents();
+      });
+    });
+
+    effect((onCleanup) => {
+      if (!this.timer.active()) return;
+      untracked(() => this.now.set(Date.now()));
+      const tick = setInterval(() => this.now.set(Date.now()), 1000);
+      onCleanup(() => clearInterval(tick));
+    });
+
+    this.refreshOnResume();
+    this.destroyRef.onDestroy(() => this.timerHub.clearCallbacks());
+  }
+
+  protected async stopTimer(): Promise<void> {
+    if (this.stopping()) return;
+    this.stopping.set(true);
+    try {
+      const stopped = await this.timer.stop();
+      this.snackbar.success(this.translate.instant('mobileApp.timer.stopped', { jobNumber: stopped?.jobNumber ?? '' }));
+    } catch {
+      this.snackbar.error(this.translate.instant('mobileApp.jobs.actionFailed'));
+    } finally {
+      this.stopping.set(false);
+    }
+  }
+
+  private listenForTimerEvents(): void {
+    if (this.hubStarted || this.instances.instance()?.shared) return;
+    this.hubStarted = true;
+    this.timerHub.onTimerStartedEvent(() => void this.timer.refresh());
+    this.timerHub.onTimerStoppedEvent(() => void this.timer.refresh());
+    void this.timerHub.connect().catch(() => undefined);
+  }
+
+  private refreshOnResume(): void {
+    if (this.platform.isNative) {
+      let destroyed = false;
+      let remove: (() => Promise<void>) | null = null;
+      this.destroyRef.onDestroy(() => {
+        destroyed = true;
+        void remove?.();
+      });
+      void import('@capacitor/app').then(async ({ App }) => {
+        const handle = await App.addListener('appStateChange', ({ isActive }) => {
+          if (isActive) void this.timer.refresh();
+        });
+        remove = () => handle.remove();
+        if (destroyed) void remove();
+      });
+      return;
+    }
+    const onVisible = (): void => {
+      if (document.visibilityState === 'visible') void this.timer.refresh();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    this.destroyRef.onDestroy(() => document.removeEventListener('visibilitychange', onVisible));
   }
 }

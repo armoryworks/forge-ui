@@ -39,7 +39,13 @@
 
   @if (selected(); as chosen) {
     <div class="lookup__sheet">
-      <app-scan-action-sheet [result]="chosen" [busy]="busy()" (chosen)="onAction($event)" (dismissed)="dismiss()" />
+      <app-scan-action-sheet
+        [result]="chosen"
+        [busy]="busy()"
+        [runningJobId]="runningJobId()"
+        (chosen)="onAction($event)"
+        (dismissed)="dismiss()"
+      />
     </div>
   }
 </div>

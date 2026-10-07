@@ -51,6 +51,7 @@
         <app-scan-action-sheet
           [result]="resolved"
           [busy]="busy()"
+          [runningJobId]="runningJobId()"
           (chosen)="onAction($event)"
           (dismissed)="dismiss()"
         />

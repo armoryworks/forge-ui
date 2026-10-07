@@ -4,8 +4,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, catchError, from, map, of } from 'rxjs';
 
 import {
-  ClockPunchResult, ClockState, JobAdvanceResult, JobNote, JobStatus, OnHand, QueuedOffline,
-  ScanResolveResult, StockMoveRequest, StockMoveResult, UploadedJobFile,
+  ActiveTimer, ClockPunchResult, ClockState, JobAdvanceResult, JobNote, JobStatus, OnHand, QueuedOffline,
+  ScanResolveResult, StartedTimeEntry, StockMoveRequest, StockMoveResult, UploadedJobFile,
 } from '../models/mobile-api.model';
 import { InstanceService } from './instance.service';
 import { OfflineQueueService } from './offline-queue.service';
@@ -42,16 +42,26 @@ export class MobileApiService {
   }
 
   /** Compensating action for advance: move back to the column it came from. */
-  moveJobToStage(jobId: number, stageId: number): Observable<JobStatus | QueuedOffline> {
-    return this.mutate<JobStatus>('PATCH', `/api/v1/jobs/${jobId}/stage`, { stageId }, `Move job ${jobId} back`);
+  moveJobToStage(jobId: number, stageId: number, token?: string): Observable<JobStatus | QueuedOffline> {
+    return this.mutate<JobStatus>('PATCH', `/api/v1/jobs/${jobId}/stage`, { stageId }, `Move job ${jobId} back`, token);
   }
 
-  startTimer(jobId: number): Observable<{ id: number } | QueuedOffline> {
-    return this.mutate<{ id: number }>('POST', '/api/v1/time-tracking/timer/start', { jobId }, `Start timer on job ${jobId}`);
+  /** The caller's running timer, or null when none is running. */
+  activeTimer(): Observable<ActiveTimer | null> {
+    return this.http.get<ActiveTimer | null>('/api/v1/time-tracking/timer/active');
   }
 
-  stopTimer(): Observable<unknown> {
-    return this.mutate<unknown>('POST', '/api/v1/time-tracking/timer/stop', {}, 'Stop timer');
+  startTimer(jobId: number): Observable<StartedTimeEntry | QueuedOffline> {
+    return this.mutate<StartedTimeEntry>('POST', '/api/v1/time-tracking/timer/start', { jobId }, `Start timer on job ${jobId}`);
+  }
+
+  stopTimer(token?: string): Observable<unknown> {
+    return this.mutate<unknown>('POST', '/api/v1/time-tracking/timer/stop', {}, 'Stop timer', token);
+  }
+
+  /** Compensating action for startTimer: removes the entry so no zero-minute row is kept. */
+  deleteTimeEntry(entryId: number, token?: string): Observable<unknown> {
+    return this.mutate<unknown>('DELETE', `/api/v1/time-tracking/entries/${entryId}`, null, `Remove time entry ${entryId}`, token);
   }
 
   addNote(jobId: number, text: string): Observable<JobNote | QueuedOffline> {

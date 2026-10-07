@@ -92,6 +92,27 @@ export interface StockMoveResult {
   undo: StockMoveRequest;
 }
 
+export interface ActiveTimer {
+  timeEntryId: number;
+  jobId: number | null;
+  jobNumber: string | null;
+  operationId: number | null;
+  timerStart: Date;
+}
+
+export interface StartedTimeEntry {
+  id: number;
+  jobId: number | null;
+  jobNumber: string | null;
+  timerStart: Date | null;
+}
+
+/** `entryId` is null when the start was queued offline; `queuedIds` holds the queue entries it made. */
+export interface TimerStartOutcome {
+  entryId: number | null;
+  queuedIds: string[];
+}
+
 /** Returned in place of a result when the device is offline and the change was queued. */
 export interface QueuedOffline {
   queued: true;

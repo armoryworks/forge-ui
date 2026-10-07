@@ -57,6 +57,10 @@
         {{ job.nextStageName ? ('mobileApp.jobs.advanceTo' | translate: { column: job.nextStageName }) : ('mobileApp.jobs.lastColumn' | translate) }}
       </button>
       <div class="job-status__secondary">
+        <button type="button" class="job-status__btn" [disabled]="busy()" data-testid="job-status-timer" (click)="toggleTimer()">
+          <span class="material-icons-outlined" aria-hidden="true">{{ timerRunningHere() ? 'stop' : 'play_arrow' }}</span>
+          {{ (timerRunningHere() ? 'mobileApp.scan.actions.stop' : 'mobileApp.scan.actions.start') | translate }}
+        </button>
         @if (voiceSupported()) {
           <button type="button" class="job-status__btn" [disabled]="busy() || listening()" data-testid="job-status-dictate" (click)="dictateNote()">
             <span class="material-icons-outlined" aria-hidden="true">{{ listening() ? 'graphic_eq' : 'mic' }}</span>

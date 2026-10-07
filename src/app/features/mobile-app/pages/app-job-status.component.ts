@@ -10,6 +10,7 @@ import { DatePipe } from '@angular/common';
 import { JobStatus, isQueued } from '../../../shared/models/mobile-api.model';
 import { InstanceService } from '../../../shared/services/instance.service';
 import { MobileApiService } from '../../../shared/services/mobile-api.service';
+import { MobileTimerService } from '../../../shared/services/mobile-timer.service';
 import { OfflineQueueService } from '../../../shared/services/offline-queue.service';
 import { PlatformService } from '../../../shared/services/platform.service';
 import { SharedIdentityService } from '../../../shared/services/shared-identity.service';
@@ -17,13 +18,14 @@ import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { UndoService } from '../../../shared/services/undo.service';
 import { IdentityPromptComponent } from '../identity/identity-prompt.component';
 
-type PendingAction = 'advance' | 'note' | 'photo';
+type PendingAction = 'advance' | 'note' | 'photo' | 'timer';
 
 /**
  * Job Status: reached from Scan or Lookup. Job number, customer, current
  * column, due date, next step, last three timeline entries. Advancing asks
  * nothing and shows an undo toast; notes come from voice or a preset
- * picker; photos from the camera. Never a keyboard.
+ * picker; photos from the camera; the timer button reads Stop while the
+ * person's timer runs on this job. Never a keyboard.
  */
 @Component({
   selector: 'app-app-job-status',
@@ -35,6 +37,7 @@ type PendingAction = 'advance' | 'note' | 'photo';
 })
 export class AppJobStatusComponent {
   private readonly api = inject(MobileApiService);
+  private readonly timer = inject(MobileTimerService);
   private readonly undo = inject(UndoService);
   private readonly queue = inject(OfflineQueueService);
   private readonly snackbar = inject(SnackbarService);
@@ -56,6 +59,7 @@ export class AppJobStatusComponent {
   protected readonly notePresets = signal<string[]>([]);
   protected readonly listening = signal(false);
   protected readonly identifying = signal(false);
+  protected readonly timerRunningHere = computed(() => this.timer.runningOn(this.job()?.id));
 
   protected readonly voiceSupported = computed(() =>
     typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window));
@@ -127,6 +131,10 @@ export class AppJobStatusComponent {
     void this.guarded('photo');
   }
 
+  protected toggleTimer(): void {
+    void this.guarded('timer');
+  }
+
   protected onIdentified(): void {
     this.identifying.set(false);
     const action = this.pending;
@@ -157,6 +165,7 @@ export class AppJobStatusComponent {
         case 'advance': await this.doAdvance(job); break;
         case 'note': await this.doNote(job); break;
         case 'photo': await this.doPhoto(job); break;
+        case 'timer': await this.doTimer(job); break;
       }
     } catch {
       this.snackbar.error(this.translate.instant('mobileApp.jobs.actionFailed'));
@@ -203,8 +212,28 @@ export class AppJobStatusComponent {
     );
   }
 
-  private offerQueuedUndo(entryId: string): void {
-    this.undo.offer(this.translate.instant('mobileApp.offline.queued'), () => this.queue.remove(entryId));
+  private async doTimer(job: JobStatus): Promise<void> {
+    if (this.timer.runningOn(job.id)) {
+      const stopped = await this.timer.stop();
+      this.snackbar.success(
+        this.translate.instant('mobileApp.timer.stopped', { jobNumber: stopped?.jobNumber ?? job.jobNumber }));
+      return;
+    }
+    const outcome = await this.timer.start(job.id, job.jobNumber);
+    if (!outcome) return;
+    const entryId = outcome.entryId;
+    if (entryId === null) {
+      this.offerQueuedUndo(...outcome.queuedIds);
+      return;
+    }
+    this.undo.offer(this.translate.instant('mobileApp.jobs.timerStarted'), () => this.timer.undoStart(entryId));
+  }
+
+  private offerQueuedUndo(...entryIds: string[]): void {
+    this.undo.offer(
+      this.translate.instant('mobileApp.offline.queued'),
+      () => Promise.all(entryIds.map((id) => this.queue.remove(id))),
+    );
   }
 
   private async doPhoto(job: JobStatus): Promise<void> {

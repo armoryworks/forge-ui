@@ -18,6 +18,25 @@
     <router-outlet />
   </main>
 
+  @if (timer.active(); as running) {
+    <div class="app-shell__timer" data-testid="mobile-app-timer-strip">
+      <span class="material-icons-outlined app-shell__timer-icon" aria-hidden="true">timer</span>
+      <span class="app-shell__timer-text">
+        {{ 'mobileApp.timer.running' | translate: { jobNumber: running.jobNumber ?? '', elapsed: elapsed() } }}
+      </span>
+      <button
+        type="button"
+        class="app-shell__timer-stop"
+        [disabled]="stopping()"
+        data-testid="mobile-app-timer-stop"
+        (click)="stopTimer()"
+      >
+        <span class="material-icons-outlined" aria-hidden="true">stop</span>
+        {{ 'mobileApp.timer.stop' | translate }}
+      </button>
+    </div>
+  }
+
   <nav class="app-shell__nav" [attr.aria-label]="'mobileApp.navLabel' | translate">
     @for (tab of tabs(); track tab.path) {
       <a

@@ -63,6 +63,25 @@ describe('MobileApiService', () => {
     http.expectNone('/api/v1/mobile/clock/punch');
   });
 
+  it('reads the running timer and treats 204 as none running', async () => {
+    const running = firstValueFrom(service.activeTimer());
+    http.expectOne('/api/v1/time-tracking/timer/active')
+      .flush({ timeEntryId: 9, jobId: 42, jobNumber: 'JOB-42', operationId: null, timerStart: '2026-10-07T10:00:00Z' });
+    expect((await running)?.timeEntryId).toBe(9);
+
+    const none = firstValueFrom(service.activeTimer());
+    http.expectOne('/api/v1/time-tracking/timer/active').flush(null, { status: 204, statusText: 'No Content' });
+    expect(await none).toBeNull();
+  });
+
+  it('deletes a time entry by id', () => {
+    service.deleteTimeEntry(9).subscribe();
+    const req = http.expectOne('/api/v1/time-tracking/entries/9');
+    expect(req.request.method).toBe('DELETE');
+    expect(req.request.headers.has('Authorization')).toBe(false);
+    req.flush(null, { status: 204, statusText: 'No Content' });
+  });
+
   it('sends a punch undo with the given token and never queues it offline', async () => {
     vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
 
