@@ -3,18 +3,35 @@ import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { LotService } from '../../services/lot.service';
-import { LotTrace } from '../../models/lot-trace.model';
+import { LotTrace, LotTraceEvent } from '../../models/lot-trace.model';
 import { BarcodeInfoComponent } from '../../../../shared/components/barcode-info/barcode-info.component';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
+import { ColumnDef } from '../../../../shared/models/column-def.model';
+
+const STATUS_KEYS: Record<string, Record<string, string>> = {
+  QcInspection: {
+    InProgress: 'quality.statusInProgress',
+    Passed: 'quality.statusPassed',
+    Failed: 'quality.statusFailed',
+  },
+  ProductionRun: {
+    Planned: 'status.planned',
+    InProgress: 'status.inProgress',
+    Completed: 'status.completed',
+    Cancelled: 'status.cancelled',
+  },
+};
 
 @Component({
   selector: 'app-lot-detail-panel',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, MatTooltipModule, TranslatePipe, BarcodeInfoComponent, EntityActivitySectionComponent, LoadingBlockDirective],
+  imports: [DatePipe, DecimalPipe, MatTooltipModule, TranslatePipe, BarcodeInfoComponent, EntityActivitySectionComponent, LoadingBlockDirective, DataTableComponent, ColumnCellDirective],
   templateUrl: './lot-detail-panel.component.html',
   styleUrl: './lot-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,6 +39,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 export class LotDetailPanelComponent {
   private readonly service = inject(LotService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   readonly lotId = input.required<number>();
   readonly lotNumber = input.required<string>();
@@ -29,6 +47,13 @@ export class LotDetailPanelComponent {
 
   protected readonly trace = signal<LotTrace | null>(null);
   protected readonly loading = signal(true);
+
+  protected readonly shippedToColumns: ColumnDef[] = [
+    { field: 'customerName', header: this.translate.instant('lots.colCustomer'), sortable: true },
+    { field: 'shipmentNumber', header: this.translate.instant('lots.colShipment'), sortable: true, width: '120px' },
+    { field: 'shippedDate', header: this.translate.instant('lots.colShipDate'), sortable: true, type: 'date', width: '110px' },
+    { field: 'quantity', header: this.translate.instant('lots.colQty'), sortable: true, type: 'number', width: '80px', align: 'right' },
+  ];
 
   constructor() {
     effect(() => {
@@ -51,5 +76,10 @@ export class LotDetailPanelComponent {
       QcInspection: 'fact_check',
     };
     return map[type] ?? 'circle';
+  }
+
+  protected statusKey(event: LotTraceEvent): string | null {
+    if (!event.statusCode) return null;
+    return STATUS_KEYS[event.type]?.[event.statusCode] ?? null;
   }
 }

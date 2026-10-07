@@ -4219,6 +4219,7 @@
     "draft": "Borrador",
     "active": "Activo",
     "pending": "Pendiente",
+    "planned": "Planificado",
     "inProgress": "En Progreso",
     "completed": "Completado",
     "cancelled": "Cancelado",

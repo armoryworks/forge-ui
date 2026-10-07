@@ -127,3 +127,11 @@
   font-size: $font-size-xs;
   color: var(--text-muted);
 }
+
+.trace-shipments {
+  padding: 0 $sp-lg $sp-lg;
+}
+
+.trace-shipments__ref {
+  font-family: $font-family-mono;
+}

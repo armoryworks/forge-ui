@@ -46,12 +46,38 @@
             </div>
             <div class="trace-event__body">
               <span class="trace-event__ref">{{ event.referenceNumber }}</span>
-              <span class="trace-event__desc">{{ event.description }}</span>
+              @if (statusKey(event); as key) {
+                <span class="trace-event__desc">{{ key | translate }}{{ event.actor ? ' — ' + event.actor : '' }}</span>
+              } @else {
+                <span class="trace-event__desc">{{ event.description }}</span>
+              }
               <span class="trace-event__date">{{ event.date | date:'MM/dd/yyyy' }}</span>
             </div>
           </div>
         }
       </div>
+
+      @if (t.shippedTo?.length) {
+        <div class="trace-shipments">
+          <h4 class="trace-timeline__title">{{ 'lots.shippedTo' | translate }}</h4>
+          <app-data-table
+            tableId="lot-shipped-to"
+            [columns]="shippedToColumns"
+            [data]="t.shippedTo ?? []"
+            trackByField="shipmentId"
+            data-testid="lot-shipped-to">
+            <ng-template appColumnCell="shipmentNumber" let-row>
+              <span class="trace-shipments__ref">{{ row.shipmentNumber }}</span>
+            </ng-template>
+            <ng-template appColumnCell="shippedDate" let-row>
+              {{ row.shippedDate | date:'MM/dd/yyyy' }}
+            </ng-template>
+            <ng-template appColumnCell="quantity" let-row>
+              {{ row.quantity | number:'1.0-4' }}
+            </ng-template>
+          </app-data-table>
+        </div>
+      }
     }
 
     <div class="detail-panel__activity">
