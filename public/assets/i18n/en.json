@@ -5583,7 +5583,12 @@
       "send": "Send",
       "sent": "Quote email sent."
     },
-    "numberLockedReason": "A quote number can only be changed while the quote is a draft. This one has been sent, so the customer already has the number."
+    "numberLockedReason": "A quote number can only be changed while the quote is a draft. This one has been sent, so the customer already has the number.",
+    "markSent": "Mark as sent",
+    "confirmMarkSentTitle": "Mark Quote as Sent?",
+    "confirmMarkSentMessage": "Mark quote {{number}} as sent? Use this when you delivered it yourself (fax, mail, in person). Nothing will be emailed.",
+    "quoteMarkedSent": "Quote marked as sent.",
+    "downloadPdf": "Download PDF"
   },
   "shipments": {
     "shipmentNumberLabel": "Shipment Number",

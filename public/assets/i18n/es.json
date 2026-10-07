@@ -5576,7 +5576,12 @@
       "send": "Enviar",
       "sent": "Cotización enviada por correo."
     },
-    "numberLockedReason": "El número de cotización solo se puede cambiar mientras la cotización es un borrador. Esta ya se envió, por lo que el cliente ya tiene el número."
+    "numberLockedReason": "El número de cotización solo se puede cambiar mientras la cotización es un borrador. Esta ya se envió, por lo que el cliente ya tiene el número.",
+    "markSent": "Marcar como enviada",
+    "confirmMarkSentTitle": "¿Marcar Cotización como Enviada?",
+    "confirmMarkSentMessage": "¿Marcar la cotización {{number}} como enviada? Use esto cuando la entregó usted mismo (fax, correo postal, en persona). No se enviará ningún correo electrónico.",
+    "quoteMarkedSent": "Cotización marcada como enviada.",
+    "downloadPdf": "Descargar PDF"
   },
   "shipments": {
     "shipmentNumberLabel": "Número de envío",
