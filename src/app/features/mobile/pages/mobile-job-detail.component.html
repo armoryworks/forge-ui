@@ -50,22 +50,45 @@
 
     <!-- Timer Control -->
     <div class="timer-section">
-      <button class="timer-btn"
-              [class.timer-btn--active]="j.hasActiveTimer"
-              [disabled]="submitting()"
-              (click)="toggleTimer()"
-              [attr.aria-label]="j.hasActiveTimer ? 'Stop timer' : 'Start timer'"
-              data-testid="mjob-timer-btn">
-        <span class="material-icons-outlined timer-btn__icon">
-          {{ j.hasActiveTimer ? 'stop' : 'play_arrow' }}
-        </span>
-        <span class="timer-btn__label">
-          {{ j.hasActiveTimer ? 'Stop Timer' : 'Start Timer' }}
-        </span>
-        @if (j.timerStartedAt) {
-          <span class="timer-btn__since">Since {{ j.timerStartedAt | date:'shortTime' }}</span>
+      @if (timerOnThisJob()) {
+        <button class="timer-btn timer-btn--active"
+                [disabled]="submitting()"
+                (click)="stopTimer()"
+                aria-label="Stop timer"
+                data-testid="mjob-timer-btn">
+          <span class="material-icons-outlined timer-btn__icon">stop</span>
+          <span class="timer-btn__label">Stop Timer</span>
+          @if (activeTimer(); as t) {
+            <span class="timer-btn__since">Since {{ t.timerStart | date:'shortTime' }}</span>
+          }
+        </button>
+      } @else {
+        @if (timerElsewhere()) {
+          @if (activeTimer(); as t) {
+            <div class="timer-elsewhere" data-testid="mjob-timer-elsewhere">
+              <span class="timer-elsewhere__text">
+                {{ t.jobNumber ? 'Running on ' + t.jobNumber : 'A timer is running' }}
+              </span>
+              <button class="action-btn timer-elsewhere__stop"
+                      [disabled]="submitting()"
+                      (click)="stopTimer()"
+                      aria-label="Stop the running timer"
+                      data-testid="mjob-timer-elsewhere-stop-btn">
+                <span class="material-icons-outlined">stop</span>
+                Stop
+              </button>
+            </div>
+          }
         }
-      </button>
+        <button class="timer-btn"
+                [disabled]="submitting()"
+                (click)="startTimer()"
+                aria-label="Start timer"
+                data-testid="mjob-timer-btn">
+          <span class="material-icons-outlined timer-btn__icon">play_arrow</span>
+          <span class="timer-btn__label">Start Timer</span>
+        </button>
+      }
     </div>
 
     <!-- Description -->
