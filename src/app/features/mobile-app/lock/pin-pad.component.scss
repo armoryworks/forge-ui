@@ -54,6 +54,21 @@ $key-size: 72px;
       border-color: transparent;
       color: var(--text-muted);
     }
+
+    &--ok {
+      grid-column: 1 / -1;
+      width: 100%;
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--bg);
+
+      &:disabled {
+        background: var(--surface);
+        border-color: var(--border);
+        color: var(--text-muted);
+        cursor: not-allowed;
+      }
+    }
   }
 
   &__spacer {

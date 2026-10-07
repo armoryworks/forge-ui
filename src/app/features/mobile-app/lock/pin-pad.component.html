@@ -25,5 +25,15 @@
     >
       <span class="material-icons-outlined" aria-hidden="true">backspace</span>
     </button>
+    @if (variable()) {
+      <button
+        type="button"
+        class="pin-pad__key pin-pad__key--ok"
+        [disabled]="!canSubmit()"
+        [attr.aria-label]="'common.confirm' | translate"
+        data-testid="pin-key-ok"
+        (click)="submit()"
+      >OK</button>
+    }
   </div>
 </div>

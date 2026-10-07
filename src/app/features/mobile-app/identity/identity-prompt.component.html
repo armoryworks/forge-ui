@@ -14,7 +14,7 @@
     }
     @case ('pin') {
       <h2 class="identity__title">{{ 'mobileApp.identity.enterPin' | translate }}</h2>
-      <app-pin-pad [length]="4" (completed)="onPin($event)" />
+      <app-pin-pad [minLength]="4" [maxLength]="8" (completed)="onPin($event)" />
       @if (error(); as message) {
         <p class="identity__error" role="alert">{{ message }}</p>
       }
