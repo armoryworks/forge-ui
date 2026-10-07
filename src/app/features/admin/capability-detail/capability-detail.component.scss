@@ -124,26 +124,6 @@
     gap: $sp-md;
   }
 
-  &__config-payload {
-    font-family: $font-family-mono;
-    font-size: $font-size-xs;
-    color: var(--text-secondary);
-    background: var(--bg);
-    border: $border-width-thin solid var(--border);
-    padding: $sp-sm;
-    margin: 0;
-    overflow-x: auto;
-    white-space: pre-wrap;
-    word-break: break-all;
-  }
-
-  &__config-hint,
-  &__config-empty {
-    font-size: $font-size-xs;
-    color: var(--text-muted);
-    margin: 0;
-  }
-
   &__audit-empty {
     color: var(--text-muted);
     font-size: $font-size-sm;
@@ -272,4 +252,8 @@
     color: var(--text-muted);
     @include truncate;
   }
+}
+
+.related-setting-link {
+  text-decoration: none;
 }

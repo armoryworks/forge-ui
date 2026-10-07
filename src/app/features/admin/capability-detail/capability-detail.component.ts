@@ -14,6 +14,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { CapabilityService } from '../../../shared/services/capability.service';
 import { ConsultantModeService } from '../../../shared/services/consultant-mode.service';
@@ -27,6 +28,8 @@ import { CapabilityDescriptorEntry } from '../../../shared/models/capability-des
 
 import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
+import { CAPABILITY_RELATED_SETTINGS } from '../models/capability-related-settings.const';
+import { NUMBERING_SETTING_LABELS } from '../models/numbering-setting-labels.const';
 
 interface CapabilityViolation {
   code: string;
@@ -42,8 +45,8 @@ interface CapabilityViolation {
  *
  * Routed at `/admin/capabilities/:id`. Shows the capability's name, code,
  * area, current enabled state with toggle, dependency graph (depends-on +
- * depended-by + mutex), config payload (read-only for now), and scoped
- * audit history (per 4E-decisions-log #8).
+ * depended-by + mutex), links to the admin settings that shape it, and
+ * scoped audit history (per 4E-decisions-log #8).
  *
  * Uses three of the new Phase E endpoints:
  *   • `GET /api/v1/capabilities/{id}/relations` — the dependency graph.
@@ -61,6 +64,7 @@ interface CapabilityViolation {
     MatTooltipModule,
     PageLayoutComponent,
     LoadingBlockDirective,
+    TranslatePipe,
   ],
   templateUrl: './capability-detail.component.html',
   styleUrl: './capability-detail.component.scss',
@@ -86,6 +90,14 @@ export class CapabilityDetailComponent implements OnInit {
     const code = this.code();
     if (!code) return undefined;
     return this.capabilityService.getEntry(code);
+  });
+
+  /** Admin settings that change how this capability behaves, linked to Admin > Settings. */
+  protected readonly relatedSettings = computed(() => {
+    const labels = new Map(NUMBERING_SETTING_LABELS.map((l) => [l.key, l.labelKey]));
+    return (CAPABILITY_RELATED_SETTINGS[this.code()] ?? [])
+      .filter((key) => labels.has(key))
+      .map((key) => ({ key, labelKey: labels.get(key)! }));
   });
 
   protected readonly relations = signal<CapabilityRelations | null>(null);

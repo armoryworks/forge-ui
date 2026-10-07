@@ -162,22 +162,26 @@
           }
         </section>
 
-        <section class="cap-detail__section">
-          <div class="cap-detail__section-header">
-            <span class="cap-detail__section-title">Configuration</span>
-          </div>
-          <div class="cap-detail__config">
-            @if (entry()!.configId) {
-              <pre class="cap-detail__config-payload" data-testid="capability-detail-config">{{ entry()!.configETag ?? '(no ETag)' }}</pre>
-              <p class="cap-detail__config-hint">
-                Config payload is opaque JSON. Editing UI lands in a future iteration; for now,
-                payload changes are submitted via the API directly.
-              </p>
-            } @else {
-              <p class="cap-detail__config-empty">No configuration row exists for this capability yet.</p>
-            }
-          </div>
-        </section>
+        @if (relatedSettings().length > 0) {
+          <section class="cap-detail__section" data-testid="capability-detail-related-settings">
+            <div class="cap-detail__section-header">
+              <span class="cap-detail__section-title">{{ 'admin.capability.relatedSettings' | translate }}</span>
+            </div>
+            <ul class="relation-list" role="list">
+              @for (setting of relatedSettings(); track setting.key) {
+                <li role="listitem">
+                  <a class="relation-chip related-setting-link"
+                    [routerLink]="['/admin/settings']"
+                    [queryParams]="{ highlight: setting.key }"
+                    [attr.data-testid]="'related-setting-' + setting.key">
+                    <span class="material-icons-outlined relation-chip__state">tune</span>
+                    <span class="relation-chip__name">{{ setting.labelKey | translate }}</span>
+                  </a>
+                </li>
+              }
+            </ul>
+          </section>
+        }
 
         <section class="cap-detail__section" [appLoadingBlock]="auditLoading()">
           <div class="cap-detail__section-header">
