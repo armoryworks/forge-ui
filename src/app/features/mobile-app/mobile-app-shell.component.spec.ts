@@ -37,7 +37,9 @@ describe('MobileAppShellComponent timer strip', () => {
     elapsedOf: (running: ActiveTimer, now: number) => `${Math.floor((now - new Date(running.timerStart).getTime()) / 1000)}s`,
     stoppedMessage: vi.fn(() => 'stopped-message'),
   };
-  const hub = { connect: vi.fn(), onTimerStartedEvent: vi.fn(), onTimerStoppedEvent: vi.fn(), clearCallbacks: vi.fn() };
+  const hub = {
+    connect: vi.fn(), disconnect: vi.fn(), onTimerStartedEvent: vi.fn(), onTimerStoppedEvent: vi.fn(), clearCallbacks: vi.fn(),
+  };
   const offer = vi.fn();
   const snackbar = { success: vi.fn(), error: vi.fn() };
   const instant = vi.fn((key: string) => key);
@@ -58,6 +60,7 @@ describe('MobileAppShellComponent timer strip', () => {
     timer.stop.mockReset();
     timer.undoStop.mockReset().mockResolvedValue(undefined);
     hub.connect.mockReset().mockResolvedValue(undefined);
+    hub.disconnect.mockReset().mockResolvedValue(undefined);
     offer.mockReset();
     hub.onTimerStartedEvent.mockReset();
     hub.onTimerStoppedEvent.mockReset();
@@ -141,6 +144,19 @@ describe('MobileAppShellComponent timer strip', () => {
     expect(message).toBe('stopped-message');
     await compensate();
     expect(timer.undoStop).toHaveBeenCalledWith(outcome);
+  });
+
+  it('drops the timer hub on sign-out and reconnects for the next session', () => {
+    create();
+    expect(hub.connect).toHaveBeenCalledOnce();
+
+    token.set(null);
+    TestBed.tick();
+    expect(hub.disconnect).toHaveBeenCalledOnce();
+
+    token.set('next-session-token');
+    TestBed.tick();
+    expect(hub.connect).toHaveBeenCalledTimes(2);
   });
 
   it('names a timer with no job instead of leaving the label empty', () => {

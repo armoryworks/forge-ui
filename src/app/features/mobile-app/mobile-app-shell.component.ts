@@ -91,6 +91,7 @@ export class MobileAppShellComponent {
       untracked(() => {
         void this.timer.refresh();
         if (token) this.listenForTimerEvents();
+        else this.stopListeningForTimerEvents();
       });
     });
 
@@ -128,6 +129,12 @@ export class MobileAppShellComponent {
     this.timerHub.onTimerStartedEvent(() => void this.timer.refresh());
     this.timerHub.onTimerStoppedEvent(() => void this.timer.refresh());
     void this.timerHub.connect().catch(() => undefined);
+  }
+
+  private stopListeningForTimerEvents(): void {
+    if (!this.hubStarted) return;
+    this.hubStarted = false;
+    void this.timerHub.disconnect().catch(() => undefined);
   }
 
   private refreshOnResume(): void {
