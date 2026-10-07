@@ -20,6 +20,11 @@ describe('DashboardService', () => {
     kpis: {} as DashboardData['kpis'],
     customerCount: 0,
     trackTypeCount: 0,
+    workCenterCount: 0,
+    partsWithOperationsCount: 0,
+    quoteCount: 0,
+    shipmentCount: 0,
+    totalJobCount: 0,
   };
 
   const mockLayout: DashboardLayout = {

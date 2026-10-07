@@ -14,4 +14,9 @@ export interface DashboardData {
   kpis: DashboardKPIs;
   customerCount: number;
   trackTypeCount: number;
+  workCenterCount: number;
+  partsWithOperationsCount: number;
+  quoteCount: number;
+  shipmentCount: number;
+  totalJobCount: number;
 }

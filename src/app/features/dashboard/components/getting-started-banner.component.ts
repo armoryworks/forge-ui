@@ -14,8 +14,8 @@ interface SetupStep {
   done: boolean;
   /** Optional query params for the navigation (e.g. open the New Job form). */
   queryParams?: Record<string, string>;
-  /** Capability gating this step. Omitted = universal. */
-  capability?: string;
+  /** Capability gating this step. */
+  capability: string;
 }
 
 const PREF_KEY = 'dashboard:getting-started-dismissed';
@@ -43,17 +43,15 @@ export class GettingStartedBannerComponent {
     // Only surface steps whose module is enabled, so an inventory-only install
     // isn't told to create jobs or add customers.
     return [
+      { label: this.translate.instant('dashboard.addWorkCenters'), route: '/scheduling/work-centers', done: d.workCenterCount > 0, capability: 'CAP-MD-WORKCENTERS' },
+      { label: this.translate.instant('dashboard.addCustomer'), route: '/customers', done: d.customerCount > 0, capability: 'CAP-MD-CUSTOMERS' },
+      { label: this.translate.instant('dashboard.addFirstPart'), route: '/parts', done: d.partsWithOperationsCount > 0, capability: 'CAP-MD-ROUTING' },
+      { label: this.translate.instant('dashboard.sendFirstQuote'), route: '/quotes', done: d.quoteCount > 0, capability: 'CAP-O2C-QUOTE' },
       // CTA opens the New Job form directly (via ?new=job) rather than just
       // landing the user on the board to hunt for the button.
-      { label: this.translate.instant('dashboard.createFirstJob'), route: '/kanban', queryParams: { new: 'job' }, done: d.kpis.activeCount > 0, capability: 'CAP-EXT-KANBAN' },
-      // Completion keys off real counts, not unrelated kanban stage counts.
-      { label: this.translate.instant('dashboard.addCustomer'), route: '/customers', done: (d.customerCount ?? 0) > 0, capability: 'CAP-MD-CUSTOMERS' },
-      // 3 track types are seeded by default (Production / R&D / Maintenance);
-      // "done" means the user added one of their own beyond those.
-      { label: this.translate.instant('dashboard.setUpTrackTypes'), route: '/admin/track-types', done: (d.trackTypeCount ?? 0) > 3, capability: 'CAP-EXT-KANBAN' },
-      { label: this.translate.instant('dashboard.receiveFirstStock'), route: '/inventory/home/kiosk', done: false, capability: 'CAP-INV-CORE' },
-      { label: this.translate.instant('dashboard.exploreReports'), route: '/reports', done: false },
-    ].filter(s => !s.capability || this.capabilities.isEnabled(s.capability));
+      { label: this.translate.instant('dashboard.createFirstJob'), route: '/kanban', queryParams: { new: 'job' }, done: d.totalJobCount > 0, capability: 'CAP-EXT-KANBAN' },
+      { label: this.translate.instant('dashboard.shipFirstOrder'), route: '/shipments', done: d.shipmentCount > 0, capability: 'CAP-O2C-SHIP' },
+    ].filter(s => this.capabilities.isEnabled(s.capability));
   }
 
   protected get completedCount(): number {
@@ -61,9 +59,7 @@ export class GettingStartedBannerComponent {
   }
 
   protected get allDone(): boolean {
-    // Hide once "enough" steps are done — capped to the visible step count so a
-    // module-narrowed banner (fewer steps) can still complete.
-    return this.completedCount >= Math.min(3, this.steps.length);
+    return this.steps.every(s => s.done);
   }
 
   protected get visible(): boolean {
