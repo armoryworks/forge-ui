@@ -8,6 +8,7 @@ import { ActiveTimer } from '../models/mobile-api.model';
 import { AuthService } from './auth.service';
 import { MobileApiService } from './mobile-api.service';
 import { MobileTimerService } from './mobile-timer.service';
+import { OfflineQueueService } from './offline-queue.service';
 
 function running(jobId: number, jobNumber: string, timeEntryId = 3): ActiveTimer {
   return { timeEntryId, jobId, jobNumber, operationId: null, timerStart: new Date('2026-10-07T10:00:00Z') };
@@ -22,6 +23,7 @@ describe('MobileTimerService', () => {
     stopTimer: vi.fn(),
     deleteTimeEntry: vi.fn(),
   };
+  const remove = vi.fn();
   const open = vi.fn();
   const instant = vi.fn((key: string) => key);
 
@@ -32,12 +34,14 @@ describe('MobileTimerService', () => {
       of({ id: 11, jobId: 42, jobNumber: 'JOB-42', timerStart: new Date('2026-10-07T11:00:00Z') }));
     api.stopTimer.mockReset().mockReturnValue(of({}));
     api.deleteTimeEntry.mockReset().mockReturnValue(of(null));
+    remove.mockReset().mockResolvedValue(undefined);
     open.mockReset().mockReturnValue({ afterClosed: () => of(true) });
     instant.mockClear();
     TestBed.configureTestingModule({
       providers: [
         { provide: MobileApiService, useValue: api },
         { provide: AuthService, useValue: { isAuthenticated: () => authenticated } },
+        { provide: OfflineQueueService, useValue: { remove } },
         { provide: MatDialog, useValue: { open } },
         { provide: TranslateService, useValue: { instant } },
       ],
@@ -70,7 +74,7 @@ describe('MobileTimerService', () => {
 
     expect(open).not.toHaveBeenCalled();
     expect(api.stopTimer).not.toHaveBeenCalled();
-    expect(outcome).toEqual({ started: { entryId: 11, queuedIds: [], previousJobId: null } });
+    expect(outcome).toEqual({ started: { entryId: 11, queuedIds: [], previous: null } });
     expect(service.active()).toEqual(expect.objectContaining({ timeEntryId: 11, jobId: 42, jobNumber: 'JOB-42' }));
   });
 
@@ -83,7 +87,7 @@ describe('MobileTimerService', () => {
     expect(api.stopTimer).toHaveBeenCalledOnce();
     expect(api.startTimer).toHaveBeenCalledWith(42);
     expect(api.stopTimer.mock.invocationCallOrder[0]).toBeLessThan(api.startTimer.mock.invocationCallOrder[0]);
-    expect(outcome).toEqual({ started: { entryId: 11, queuedIds: [], previousJobId: 7 } });
+    expect(outcome).toEqual({ started: { entryId: 11, queuedIds: [], previous: running(7, 'JOB-7') } });
     expect(service.active()?.jobId).toBe(42);
   });
 
@@ -99,7 +103,7 @@ describe('MobileTimerService', () => {
     expect(api.startTimer).toHaveBeenCalledWith(42);
   });
 
-  it('stops instead of starting when the server says the timer already runs on that job', async () => {
+  it('leaves the timer running when the server says it already runs on that job', async () => {
     expect(service.active()).toBeNull();
     api.activeTimer.mockReturnValue(of(running(42, 'JOB-42')));
 
@@ -107,9 +111,18 @@ describe('MobileTimerService', () => {
 
     expect(open).not.toHaveBeenCalled();
     expect(api.startTimer).not.toHaveBeenCalled();
-    expect(api.stopTimer).toHaveBeenCalledOnce();
-    expect(outcome).toEqual({ stopped: expect.objectContaining({ jobId: 42, jobNumber: 'JOB-42' }) });
-    expect(service.active()).toBeNull();
+    expect(api.stopTimer).not.toHaveBeenCalled();
+    expect(outcome).toEqual({ alreadyRunning: running(42, 'JOB-42') });
+    expect(service.active()?.jobId).toBe(42);
+  });
+
+  it('describes a running timer with its job and elapsed time', () => {
+    const timer = running(42, 'JOB-42');
+    expect(service.elapsedOf(timer, new Date('2026-10-07T11:02:05Z').getTime())).toBe('1:02:05');
+
+    service.runningMessage(timer);
+
+    expect(instant).toHaveBeenLastCalledWith('mobileApp.timer.running', { jobNumber: 'JOB-42', elapsed: expect.any(String) });
   });
 
   it('uses the server answer even when an older refresh is still in flight', async () => {
@@ -152,7 +165,7 @@ describe('MobileTimerService', () => {
     api.startTimer.mockReturnValue(of({ queued: true, entryId: 'q-start' }));
 
     expect(await service.toggle(42, 'JOB-42'))
-      .toEqual({ started: { entryId: null, queuedIds: ['q-stop', 'q-start'], previousJobId: 7 } });
+      .toEqual({ started: { entryId: null, queuedIds: ['q-stop', 'q-start'], previous: running(7, 'JOB-7') } });
     expect(service.active()?.jobId).toBe(7);
   });
 
@@ -181,12 +194,22 @@ describe('MobileTimerService', () => {
     api.startTimer.mockClear().mockReturnValue(of({ id: 12, jobId: 7, jobNumber: 'JOB-7', timerStart: new Date() }));
     api.activeTimer.mockReturnValue(of(running(7, 'JOB-7', 12)));
 
-    await service.undoStart(11, 7, 'person-token');
+    await service.undoStart(11, running(7, 'JOB-7'), 'person-token');
 
     expect(api.deleteTimeEntry).toHaveBeenCalledWith(11, 'person-token');
-    expect(api.startTimer).toHaveBeenCalledWith(7, 'person-token');
+    expect(api.startTimer).toHaveBeenCalledWith(7, 'person-token', null);
     expect(api.deleteTimeEntry.mock.invocationCallOrder[0]).toBeLessThan(api.startTimer.mock.invocationCallOrder[0]);
     expect(service.active()?.timeEntryId).toBe(12);
+  });
+
+  it('undoing a switch restores the previous operation, and a timer with no job', async () => {
+    const onOperation = { ...running(7, 'JOB-7'), operationId: 5 };
+    await service.undoStart(11, onOperation, 'person-token');
+    expect(api.startTimer).toHaveBeenLastCalledWith(7, 'person-token', 5);
+
+    const indirect = { ...running(7, 'JOB-7'), jobId: null, jobNumber: null };
+    await service.undoStart(11, indirect, 'person-token');
+    expect(api.startTimer).toHaveBeenLastCalledWith(null, 'person-token', null);
   });
 
   it('says which job a stop ended, or that a timer with no job stopped', () => {
@@ -199,9 +222,48 @@ describe('MobileTimerService', () => {
     api.activeTimer.mockReturnValue(of(running(42, 'JOB-42')));
     await service.refresh();
 
-    const stopped = await service.stop();
+    const outcome = await service.stop();
 
-    expect(stopped?.jobNumber).toBe('JOB-42');
+    expect(outcome).toEqual({ stopped: running(42, 'JOB-42'), queuedId: null });
     expect(service.active()).toBeNull();
+  });
+
+  it('reloads the timer when a stop fails, so a timer that ended elsewhere disappears', async () => {
+    api.activeTimer.mockReturnValue(of(running(42, 'JOB-42')));
+    await service.refresh();
+    api.stopTimer.mockReturnValue(throwError(() => new Error('400')));
+    api.activeTimer.mockReturnValue(of(null));
+
+    await expect(service.stop()).rejects.toThrow('400');
+
+    expect(service.active()).toBeNull();
+  });
+
+  it('undoing a stop starts the same job and operation again as the same person', async () => {
+    const onOperation = { ...running(42, 'JOB-42'), operationId: 5 };
+    api.activeTimer.mockReturnValue(of(onOperation));
+    await service.refresh();
+    const outcome = await service.stop();
+    api.activeTimer.mockReturnValue(of({ ...onOperation, timeEntryId: 12 }));
+
+    await service.undoStop(outcome, 'person-token');
+
+    expect(api.startTimer).toHaveBeenCalledWith(42, 'person-token', 5);
+    expect(service.active()?.timeEntryId).toBe(12);
+  });
+
+  it('undoing a stop queued offline drops it and shows the timer again', async () => {
+    api.activeTimer.mockReturnValue(of(running(42, 'JOB-42')));
+    await service.refresh();
+    api.stopTimer.mockReturnValue(of({ queued: true, entryId: 'q-stop' }));
+    const outcome = await service.stop();
+    expect(outcome.queuedId).toBe('q-stop');
+    expect(service.active()).toBeNull();
+
+    await service.undoStop(outcome);
+
+    expect(remove).toHaveBeenCalledWith('q-stop');
+    expect(api.startTimer).not.toHaveBeenCalled();
+    expect(service.active()?.jobId).toBe(42);
   });
 });

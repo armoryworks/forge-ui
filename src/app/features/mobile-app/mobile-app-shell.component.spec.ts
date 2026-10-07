@@ -14,6 +14,7 @@ import { OfflineQueueService } from '../../shared/services/offline-queue.service
 import { PlatformService } from '../../shared/services/platform.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { TimerHubService } from '../../shared/services/timer-hub.service';
+import { UndoService } from '../../shared/services/undo.service';
 import { MobileAppShellComponent } from './mobile-app-shell.component';
 
 interface ShellInternals {
@@ -31,10 +32,13 @@ describe('MobileAppShellComponent timer strip', () => {
     active,
     refresh: vi.fn(),
     stop: vi.fn(),
+    undoStop: vi.fn(),
     labelOf: (running: ActiveTimer) => running.jobNumber ?? 'timeTracking.timer',
+    elapsedOf: (running: ActiveTimer, now: number) => `${Math.floor((now - new Date(running.timerStart).getTime()) / 1000)}s`,
     stoppedMessage: vi.fn(() => 'stopped-message'),
   };
   const hub = { connect: vi.fn(), onTimerStartedEvent: vi.fn(), onTimerStoppedEvent: vi.fn(), clearCallbacks: vi.fn() };
+  const offer = vi.fn();
   const snackbar = { success: vi.fn(), error: vi.fn() };
   const instant = vi.fn((key: string) => key);
 
@@ -52,7 +56,9 @@ describe('MobileAppShellComponent timer strip', () => {
     timer.stoppedMessage.mockClear();
     timer.refresh.mockReset().mockResolvedValue(undefined);
     timer.stop.mockReset();
+    timer.undoStop.mockReset().mockResolvedValue(undefined);
     hub.connect.mockReset().mockResolvedValue(undefined);
+    offer.mockReset();
     hub.onTimerStartedEvent.mockReset();
     hub.onTimerStoppedEvent.mockReset();
     snackbar.success.mockReset();
@@ -70,6 +76,7 @@ describe('MobileAppShellComponent timer strip', () => {
         { provide: InstanceService, useValue: { instance: () => ({ id: 'shop', shared }) } },
         { provide: PlatformService, useValue: { isNative: false, mobileShell: true } },
         { provide: SnackbarService, useValue: snackbar },
+        { provide: UndoService, useValue: { offer } },
         { provide: TranslateService, useValue: { instant } },
       ],
     });
@@ -115,21 +122,25 @@ describe('MobileAppShellComponent timer strip', () => {
 
     active.set({ timeEntryId: 3, jobId: 42, jobNumber: 'JOB-42', operationId: null, timerStart: new Date('2026-10-07T10:00:00Z') });
     TestBed.tick();
-    expect(shell.elapsed()).toBe('1:05:09');
+    expect(shell.elapsed()).toBe('3909s');
 
     vi.advanceTimersByTime(2000);
-    expect(shell.elapsed()).toBe('1:05:11');
+    expect(shell.elapsed()).toBe('3911s');
   });
 
-  it('Stop ends the timer and says which job it stopped on', async () => {
-    timer.stop.mockResolvedValue({ jobNumber: 'JOB-42' });
+  it('Stop ends the timer, says which job it stopped on, and offers Undo', async () => {
+    const outcome = { stopped: { jobNumber: 'JOB-42' }, queuedId: null };
+    timer.stop.mockResolvedValue(outcome);
     const shell = create();
 
     await shell.stopTimer();
 
     expect(timer.stop).toHaveBeenCalledOnce();
     expect(timer.stoppedMessage).toHaveBeenCalledWith({ jobNumber: 'JOB-42' });
-    expect(snackbar.success).toHaveBeenCalledWith('stopped-message');
+    const [message, compensate] = offer.mock.calls[0];
+    expect(message).toBe('stopped-message');
+    await compensate();
+    expect(timer.undoStop).toHaveBeenCalledWith(outcome);
   });
 
   it('names a timer with no job instead of leaving the label empty', () => {

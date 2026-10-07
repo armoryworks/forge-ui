@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { ActiveTimer, ScanResolveResult, isQueued } from '../../../shared/models/mobile-api.model';
+import { ScanResolveResult, isQueued } from '../../../shared/models/mobile-api.model';
 import { AuthService } from '../../../shared/services/auth.service';
 import { CameraScannerService } from '../../../shared/services/camera-scanner.service';
 import { InstanceService } from '../../../shared/services/instance.service';
@@ -25,8 +25,8 @@ import { ScanAction, ScanActionSheetComponent } from '../components/scan-action-
  * Scan is home: the viewfinder opens immediately. A decode ticks, resolves
  * on the server, and offers one contextual action sheet — never a detail
  * page by itself. Unknown codes double-buzz. Torch bottom-left. On a shared
- * device a start, move or complete ends the person's identity once its undo
- * toast closes; the undo itself runs with the token captured beforehand.
+ * device a start, stop, move or complete ends the person's identity once its
+ * undo toast closes; the undo itself runs with the token captured beforehand.
  */
 @Component({
   selector: 'app-app-scan',
@@ -199,14 +199,19 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
   private async startTimer(jobId: number, label: string, token: string | undefined): Promise<boolean> {
     const outcome = await this.timer.toggle(jobId, label);
     if (!outcome) return false;
-    if ('stopped' in outcome) return this.showStopped(outcome.stopped, token);
-    const { entryId, queuedIds, previousJobId } = outcome.started;
+    if ('alreadyRunning' in outcome) {
+      this.result.set(null);
+      await this.startScanner();
+      this.notice.set(this.timer.runningMessage(outcome.alreadyRunning));
+      return false;
+    }
+    const { entryId, queuedIds, previous } = outcome.started;
     if (entryId === null) {
       this.offerQueuedUndo(queuedIds, token);
     } else {
       this.undo.offer(
         this.translate.instant('mobileApp.jobs.timerStarted'),
-        () => this.timer.undoStart(entryId, previousJobId, token),
+        () => this.timer.undoStart(entryId, previous, token),
         this.endIdentity(token),
       );
     }
@@ -216,16 +221,15 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
   }
 
   private async stopTimer(token: string | undefined): Promise<boolean> {
-    return this.showStopped(await this.timer.stop(), token);
-  }
-
-  private async showStopped(stopped: ActiveTimer | null, token: string | undefined): Promise<boolean> {
+    const outcome = await this.timer.stop();
+    this.undo.offer(
+      this.timer.stoppedMessage(outcome.stopped),
+      () => this.timer.undoStop(outcome, token),
+      this.endIdentity(token),
+    );
     this.result.set(null);
     await this.startScanner();
-    this.notice.set(this.timer.stoppedMessage(stopped));
-    if (!token) return false;
-    this.identity.clear();
-    return true;
+    return !!token;
   }
 
   private async complete(jobId: number, code: string, token: string | undefined): Promise<boolean> {

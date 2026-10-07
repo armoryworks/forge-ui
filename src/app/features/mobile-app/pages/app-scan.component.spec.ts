@@ -44,7 +44,9 @@ describe('AppScanComponent', () => {
     toggle: vi.fn(),
     stop: vi.fn(),
     stoppedMessage: vi.fn(() => 'stopped-message'),
+    runningMessage: vi.fn(() => 'running-message'),
     undoStart: vi.fn(),
+    undoStop: vi.fn(),
     refresh: vi.fn(),
   };
   const api = {
@@ -66,9 +68,10 @@ describe('AppScanComponent', () => {
     identity.identified.set(true);
     identity.clear.mockReset();
     identity.touch.mockReset();
-    timer.toggle.mockReset().mockResolvedValue({ started: { entryId: 11, queuedIds: [], previousJobId: null } });
-    timer.stop.mockReset().mockResolvedValue({ jobNumber: 'JOB-42' });
+    timer.toggle.mockReset().mockResolvedValue({ started: { entryId: 11, queuedIds: [], previous: null } });
+    timer.stop.mockReset().mockResolvedValue({ stopped: { jobNumber: 'JOB-42' }, queuedId: null });
     timer.undoStart.mockReset().mockResolvedValue(undefined);
+    timer.undoStop.mockReset().mockResolvedValue(undefined);
     api.advanceJob.mockReset().mockReturnValue(of({
       status: { stageName: 'Machining' }, previousStageId: 3, previousStageName: 'Queued', collapsed: false,
     }));
@@ -120,28 +123,31 @@ describe('AppScanComponent', () => {
     expect(timer.toggle).toHaveBeenCalledWith(42, 'JOB-42');
   });
 
-  it('turns Start into a stop when the identified person already runs a timer on that job', async () => {
+  it('leaves the timer alone when the identified person already runs it on that job', async () => {
     identity.identified.set(false);
-    timer.toggle.mockResolvedValue({ stopped: { jobNumber: 'JOB-42' } });
+    const running = { jobId: 42, jobNumber: 'JOB-42' };
+    timer.toggle.mockResolvedValue({ alreadyRunning: running });
     const scan = create();
 
     await scan.onAction('start');
     identity.identified.set(true);
     scan.onIdentified();
-    await vi.waitFor(() => expect(identity.clear).toHaveBeenCalledOnce());
+    await vi.waitFor(() => expect(scan.notice()).toBe('running-message'));
 
+    expect(timer.stop).not.toHaveBeenCalled();
     expect(offer).not.toHaveBeenCalled();
-    expect(timer.stoppedMessage).toHaveBeenCalledWith({ jobNumber: 'JOB-42' });
-    expect(scan.notice()).toBe('stopped-message');
+    expect(timer.runningMessage).toHaveBeenCalledWith(running);
+    expect(identity.clear).not.toHaveBeenCalled();
   });
 
-  it('undoing a switch hands the previous job to the compensation', async () => {
-    timer.toggle.mockResolvedValue({ started: { entryId: 11, queuedIds: [], previousJobId: 7 } });
+  it('undoing a switch hands the previous timer to the compensation', async () => {
+    const previous = { jobId: 7, jobNumber: 'JOB-7', operationId: 5 };
+    timer.toggle.mockResolvedValue({ started: { entryId: 11, queuedIds: [], previous } });
 
     await create().onAction('start');
 
     await offer.mock.calls[0][1]();
-    expect(timer.undoStart).toHaveBeenCalledWith(11, 7, 'person-token');
+    expect(timer.undoStart).toHaveBeenCalledWith(11, previous, 'person-token');
   });
 
   it('undoes a shared-device move with the captured token', async () => {
@@ -171,11 +177,19 @@ describe('AppScanComponent', () => {
     expect(timer.undoStart).toHaveBeenCalledWith(11, null, undefined);
   });
 
-  it('stops the timer without changing the stage', async () => {
+  it('stops the timer without changing the stage, offers Undo, and ends the identity when the toast closes', async () => {
     await create().onAction('stop');
 
     expect(timer.stop).toHaveBeenCalledOnce();
     expect(api.advanceJob).not.toHaveBeenCalled();
+    const [message, compensate, closed] = offer.mock.calls[0];
+    expect(message).toBe('stopped-message');
+    expect(identity.clear).not.toHaveBeenCalled();
+    expect(identity.touch).not.toHaveBeenCalled();
+
+    await compensate();
+    expect(timer.undoStop).toHaveBeenCalledWith({ stopped: { jobNumber: 'JOB-42' }, queuedId: null }, 'person-token');
+    closed();
     expect(identity.clear).toHaveBeenCalledOnce();
   });
 

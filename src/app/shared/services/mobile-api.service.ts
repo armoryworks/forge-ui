@@ -52,9 +52,10 @@ export class MobileApiService {
     return this.http.get<ActiveTimer | null>('/api/v1/time-tracking/timer/active');
   }
 
-  startTimer(jobId: number, token?: string): Observable<StartedTimeEntry | QueuedOffline> {
+  startTimer(jobId: number | null, token?: string, operationId: number | null = null): Observable<StartedTimeEntry | QueuedOffline> {
     return this.mutate<StartedTimeEntry>(
-      'POST', '/api/v1/time-tracking/timer/start', { jobId }, `Start timer on job ${jobId}`, token);
+      'POST', '/api/v1/time-tracking/timer/start', { jobId, operationId },
+      jobId === null ? 'Start timer' : `Start timer on job ${jobId}`, token);
   }
 
   stopTimer(token?: string): Observable<unknown> {

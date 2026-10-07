@@ -15,6 +15,7 @@ import { OfflineQueueService } from '../../shared/services/offline-queue.service
 import { PlatformService } from '../../shared/services/platform.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { TimerHubService } from '../../shared/services/timer-hub.service';
+import { UndoService } from '../../shared/services/undo.service';
 import { LanguageToggleComponent } from '../../shared/components/language-toggle/language-toggle.component';
 import { SyncIndicatorComponent } from './components/sync-indicator/sync-indicator.component';
 
@@ -62,6 +63,7 @@ export class MobileAppShellComponent {
   private readonly instances = inject(InstanceService);
   private readonly platform = inject(PlatformService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly undo = inject(UndoService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -75,10 +77,7 @@ export class MobileAppShellComponent {
 
   protected readonly elapsed = computed(() => {
     const running = this.timer.active();
-    if (!running) return '';
-    const seconds = Math.max(0, Math.floor((this.now() - new Date(running.timerStart).getTime()) / 1000));
-    const pad = (n: number): string => String(n).padStart(2, '0');
-    return `${Math.floor(seconds / 3600)}:${pad(Math.floor(seconds / 60) % 60)}:${pad(seconds % 60)}`;
+    return running ? this.timer.elapsedOf(running, this.now()) : '';
   });
 
   private hubStarted = false;
@@ -114,8 +113,8 @@ export class MobileAppShellComponent {
     if (this.stopping()) return;
     this.stopping.set(true);
     try {
-      const stopped = await this.timer.stop();
-      this.snackbar.success(this.timer.stoppedMessage(stopped));
+      const outcome = await this.timer.stop();
+      this.undo.offer(this.timer.stoppedMessage(outcome.stopped), () => this.timer.undoStop(outcome));
     } catch {
       this.snackbar.error(this.translate.instant('mobileApp.jobs.actionFailed'));
     } finally {

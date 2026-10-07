@@ -88,9 +88,17 @@ describe('MobileApiService', () => {
     service.startTimer(7, 'person-token').subscribe();
     const req = http.expectOne('/api/v1/time-tracking/timer/start');
     expect(req.request.headers.get('Authorization')).toBe('Bearer person-token');
-    expect(req.request.body).toEqual({ jobId: 7 });
+    expect(req.request.body).toEqual({ jobId: 7, operationId: null });
     expect(req.request.context.get(SILENT_HTTP_ERRORS)).toBe(false);
     req.flush({ id: 12 });
+  });
+
+  it('restarts a timer on its operation, or with no job', () => {
+    service.startTimer(7, 'person-token', 5).subscribe();
+    expect(http.expectOne('/api/v1/time-tracking/timer/start').request.body).toEqual({ jobId: 7, operationId: 5 });
+
+    service.startTimer(null, 'person-token').subscribe();
+    expect(http.expectOne('/api/v1/time-tracking/timer/start').request.body).toEqual({ jobId: null, operationId: null });
   });
 
   it('sends a punch undo with the given token and never queues it offline', async () => {
