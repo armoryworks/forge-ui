@@ -7,6 +7,7 @@ import { ShopFloorOverview } from '../models/shop-floor-overview.model';
 import { ClockWorker } from '../models/clock-worker.model';
 import { KioskTerminal, Team } from '../models/kiosk-terminal.model';
 import { ScanIdentification } from '../models/scan-identification.model';
+import { JobAdvanceResult, JobStatus } from '../../../shared/models/mobile-api.model';
 
 @Injectable({ providedIn: 'root' })
 export class ShopFloorService {
@@ -47,8 +48,16 @@ export class ShopFloorService {
     return this.http.post(`${environment.apiUrl}/time-tracking/timer/stop`, { notes: null });
   }
 
-  completeJob(jobId: number): Observable<void> {
-    return this.http.post<void>(`${this.base}/complete-job`, { jobId });
+  completeJob(jobId: number): Observable<{ stageName: string }> {
+    return this.http.post<{ stageName: string }>(`${this.base}/complete-job`, { jobId });
+  }
+
+  getJobStatus(jobId: number): Observable<JobStatus> {
+    return this.http.get<JobStatus>(`${this.base}/jobs/${jobId}/status`);
+  }
+
+  advanceJob(jobId: number): Observable<JobAdvanceResult> {
+    return this.http.post<JobAdvanceResult>(`${this.base}/jobs/${jobId}/advance`, {});
   }
 
   // Teams

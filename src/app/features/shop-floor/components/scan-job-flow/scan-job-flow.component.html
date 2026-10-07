@@ -49,10 +49,14 @@
 
       <button class="scan-job__action-btn scan-job__action-btn--advance"
               (click)="showAdvanceStage()"
-              aria-label="Advance stage"
+              [disabled]="!canAdvance()"
+              [attr.aria-label]="'shopFloor.jobFlow.advanceStage' | translate"
               data-testid="job-advance-btn">
         <span class="material-icons-outlined">skip_next</span>
         <span class="scan-job__action-label">{{ 'shopFloor.jobFlow.advanceStage' | translate }}</span>
+        @if (!statusLoading() && !hasNextStage() && jobStatus()) {
+          <span class="scan-job__action-hint" data-testid="job-no-next-stage">{{ 'shopFloor.jobFlow.noNextStage' | translate }}</span>
+        }
       </button>
 
       <button class="scan-job__action-btn scan-job__action-btn--note"
@@ -74,8 +78,11 @@
   @if (step() === 'confirm-advance') {
     <div class="scan-job__confirm">
       <span class="material-icons-outlined scan-job__confirm-icon">skip_next</span>
-      <p class="scan-job__confirm-text">{{ 'shopFloor.jobFlow.confirmAdvanceStage' | translate }}</p>
-      <p class="scan-job__confirm-detail">{{ jobNumber() }} — {{ currentStage() }}</p>
+      <p class="scan-job__confirm-text">{{ 'shopFloor.jobFlow.confirmAdvanceStage' | translate: {
+        jobNumber: jobNumber(),
+        currentStage: jobStatus()?.stageName ?? currentStage(),
+        nextStage: jobStatus()?.nextStageName ?? ''
+      } }}</p>
 
       <div class="scan-job__confirm-actions">
         <button class="action-btn" (click)="backToActions()" aria-label="Cancel advance">
@@ -144,7 +151,7 @@
           <p class="scan-job__done-text">{{ 'shopFloor.jobFlow.timerStopped' | translate }}</p>
         }
         @case ('stage-advanced') {
-          <p class="scan-job__done-text">{{ 'shopFloor.jobFlow.stageAdvanced' | translate }}</p>
+          <p class="scan-job__done-text">{{ 'shopFloor.jobFlow.stageAdvanced' | translate: { stageName: advancedTo() } }}</p>
         }
         @case ('note-logged') {
           <p class="scan-job__done-text">{{ 'shopFloor.jobFlow.noteLogged' | translate }}</p>

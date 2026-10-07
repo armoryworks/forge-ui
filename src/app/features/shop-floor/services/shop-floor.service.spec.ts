@@ -98,12 +98,32 @@ describe('ShopFloorService', () => {
   });
 
   describe('completeJob', () => {
-    it('should POST complete job', () => {
-      service.completeJob(5).subscribe();
+    it('should POST complete job and return the new status name', () => {
+      let stageName: string | undefined;
+      service.completeJob(5).subscribe(r => (stageName = r.stageName));
       const req = httpMock.expectOne(`${base}/complete-job`);
       expect(req.request.method).toBe('POST');
       expect(req.request.body.jobId).toBe(5);
-      req.flush(null);
+      req.flush({ stageName: 'QC/Review' });
+      expect(stageName).toBe('QC/Review');
+    });
+  });
+
+  describe('getJobStatus', () => {
+    it('should GET the job status from the kiosk surface', () => {
+      service.getJobStatus(5).subscribe();
+      const req = httpMock.expectOne(`${base}/jobs/5/status`);
+      expect(req.request.method).toBe('GET');
+      req.flush({});
+    });
+  });
+
+  describe('advanceJob', () => {
+    it('should POST advance for the job', () => {
+      service.advanceJob(5).subscribe();
+      const req = httpMock.expectOne(`${base}/jobs/5/advance`);
+      expect(req.request.method).toBe('POST');
+      req.flush({});
     });
   });
 
