@@ -89,6 +89,23 @@ describe('PartsService', () => {
     });
   });
 
+  describe('clonePart', () => {
+    it('should POST the clone options to the source part and return the new detail', () => {
+      const request = { name: 'Valve body', copyBom: true, copyRouting: true, copyVendorSources: false };
+      const mockResponse = { id: 9, partNumber: 'ASM-00009', name: 'Valve body' };
+      let result: unknown = null;
+
+      service.clonePart(4, request).subscribe((p) => { result = p; });
+
+      const req = httpMock.expectOne(`${baseUrl}/4/clone`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(request);
+      req.flush(mockResponse);
+
+      expect(result).toEqual(mockResponse);
+    });
+  });
+
   // ── updatePart ────────────────────────────────────────────────────────────
 
   describe('updatePart', () => {

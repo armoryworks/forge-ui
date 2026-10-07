@@ -39,6 +39,7 @@ import { PartGtinSectionComponent } from '../part-gtin-section/part-gtin-section
 import { PartBarcodesSectionComponent } from '../part-barcodes-section/part-barcodes-section.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { PartQuickCreateDialogComponent, PartQuickCreateDialogData } from '../part-quick-create-dialog/part-quick-create-dialog.component';
+import { ClonePartDialogComponent, ClonePartDialogData } from '../clone-part-dialog/clone-part-dialog.component';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
@@ -458,6 +459,24 @@ export class PartDetailPanelComponent {
 
   protected closePanel(): void {
     this.closed.emit();
+  }
+
+  protected openDuplicatePart(): void {
+    const p = this.part();
+    if (!p) return;
+    this.dialog.open<ClonePartDialogComponent, ClonePartDialogData, PartDetail | null>(
+      ClonePartDialogComponent,
+      { width: '520px', data: { part: p } },
+    ).afterClosed().subscribe((created) => {
+      if (!created) return;
+      this.loadDetail(created.id);
+      this.router?.navigate([], {
+        relativeTo: this.route,
+        queryParams: { detail: `part:${created.id}` },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    });
   }
 
   /** GTIN assigned / removed on the Identity tab — reload so the bound part shows the change. */

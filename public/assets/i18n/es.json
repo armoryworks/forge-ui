@@ -1412,7 +1412,19 @@
     },
     "estTime": "Tiempo estimado",
     "estHours": "Horas",
-    "estMilliseconds": "Milisegundos"
+    "estMilliseconds": "Milisegundos",
+    "duplicatePart": "Duplicar pieza",
+    "clone": {
+      "title": "Duplicar {{partNumber}}",
+      "hint": "Crea una nueva pieza en Borrador con los mismos datos de ingeniería. No se copian el inventario, los precios, las revisiones, los adjuntos ni las alternativas.",
+      "defaultName": "{{name}} (copia)",
+      "copyBom": "Copiar lista de materiales",
+      "copyRouting": "Copiar enrutamiento",
+      "copyVendorSources": "Copiar fuentes de proveedor",
+      "materialsNeedBom": "Los materiales de las operaciones solo se copian junto con la lista de materiales.",
+      "submit": "Duplicar",
+      "created": "Se creó {{partNumber}}."
+    }
   },
   "vendorSources": {
     "preferred": "Preferido",

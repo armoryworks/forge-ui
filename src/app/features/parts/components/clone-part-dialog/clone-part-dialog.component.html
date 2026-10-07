@@ -1,0 +1,49 @@
+<app-dialog [title]="title" width="520px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form" class="clone-part">
+    <p class="clone-part__hint">{{ 'parts.clone.hint' | translate }}</p>
+    <app-input
+      data-testid="clone-part-name"
+      [label]="'parts.workflow.basics.nameLabel' | translate"
+      formControlName="name"
+      [maxlength]="256"
+      [required]="true" />
+    @if (allowManualPartNumber()) {
+      <app-input
+        data-testid="clone-part-part-number"
+        [label]="'partQuickCreate.partNumberLabel' | translate"
+        [placeholder]="'partQuickCreate.partNumberHint' | translate"
+        [info]="'partQuickCreate.partNumberInfo' | translate"
+        formControlName="partNumber"
+        [maxlength]="50" />
+    }
+    <app-textarea
+      data-testid="clone-part-description"
+      [label]="'common.description' | translate"
+      formControlName="description"
+      [rows]="3"
+      [maxlength]="2000" />
+    <div class="clone-part__options">
+      <app-toggle data-testid="clone-part-copy-bom" [label]="'parts.clone.copyBom' | translate" formControlName="copyBom" />
+      <app-toggle data-testid="clone-part-copy-routing" [label]="'parts.clone.copyRouting' | translate" formControlName="copyRouting" />
+      <app-toggle data-testid="clone-part-copy-vendor-sources" [label]="'parts.clone.copyVendorSources' | translate" formControlName="copyVendorSources" />
+    </div>
+    @if (materialsDropped()) {
+      <p class="clone-part__hint" data-testid="clone-part-materials-hint">{{ 'parts.clone.materialsNeedBom' | translate }}</p>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" data-testid="clone-part-cancel-btn" (click)="close()">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--create"
+        data-testid="clone-part-save-btn"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        <span class="material-icons-outlined">content_copy</span>
+        {{ 'parts.clone.submit' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

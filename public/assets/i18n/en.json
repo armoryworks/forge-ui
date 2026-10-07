@@ -1412,7 +1412,19 @@
     },
     "estTime": "Estimated time",
     "estHours": "Hours",
-    "estMilliseconds": "Milliseconds"
+    "estMilliseconds": "Milliseconds",
+    "duplicatePart": "Duplicate part",
+    "clone": {
+      "title": "Duplicate {{partNumber}}",
+      "hint": "Creates a new Draft part with the same engineering details. Inventory, prices, revisions, attachments and alternates are not copied.",
+      "defaultName": "{{name}} (copy)",
+      "copyBom": "Copy bill of materials",
+      "copyRouting": "Copy routing",
+      "copyVendorSources": "Copy vendor sources",
+      "materialsNeedBom": "Operation materials are only copied together with the bill of materials.",
+      "submit": "Duplicate",
+      "created": "Created {{partNumber}}."
+    }
   },
   "vendorSources": {
     "preferred": "Preferred",

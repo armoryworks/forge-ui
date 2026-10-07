@@ -7,6 +7,7 @@ import { PagedResponse, PagedQuery } from '../../../shared/models/paged-response
 import { PartListItem } from '../models/part-list-item.model';
 import { PartDetail } from '../models/part-detail.model';
 import { CreatePartRequest } from '../models/create-part-request.model';
+import { ClonePartRequest } from '../models/clone-part-request.model';
 import { PartsConfig } from '../models/parts-config.model';
 import { UpdatePartRequest } from '../models/update-part-request.model';
 import { BulkPartIntakeRequest, BulkPartIntakeResponse } from '../models/bulk-part-intake.model';
@@ -92,6 +93,10 @@ export class PartsService {
 
   createPart(request: CreatePartRequest): Observable<PartDetail> {
     return this.http.post<PartDetail>(this.base, request);
+  }
+
+  clonePart(id: number, request: ClonePartRequest): Observable<PartDetail> {
+    return this.http.post<PartDetail>(`${this.base}/${id}/clone`, request);
   }
 
   /** Client-facing parts config (e.g. whether manual part numbers are allowed). */

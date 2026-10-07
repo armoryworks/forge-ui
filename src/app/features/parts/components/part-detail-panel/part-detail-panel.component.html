@@ -24,6 +24,14 @@
           [attr.aria-label]="editing() ? ('common.cancel' | translate) : ('common.edit' | translate)">
           <span class="material-icons-outlined">{{ editing() ? 'cancel' : 'edit' }}</span>
         </button>
+        <button class="icon-btn"
+          [matTooltip]="'parts.duplicatePart' | translate"
+          matTooltipPosition="above"
+          data-testid="part-detail-duplicate"
+          (click)="openDuplicatePart()"
+          [attr.aria-label]="'parts.duplicatePart' | translate">
+          <span class="material-icons-outlined">content_copy</span>
+        </button>
         <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" (click)="closePanel()" aria-label="Close panel">
           <span class="material-icons-outlined">close</span>
         </button>
