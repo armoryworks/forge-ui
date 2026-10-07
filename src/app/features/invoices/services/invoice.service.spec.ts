@@ -103,6 +103,16 @@ describe('InvoiceService', () => {
     });
   });
 
+  describe('getInvoiceSources', () => {
+    it('should GET the customer\'s invoice sources', () => {
+      service.getInvoiceSources(7).subscribe();
+      const req = httpMock.expectOne(r => r.url === `${base}/sources`);
+      expect(req.request.method).toBe('GET');
+      expect(req.request.params.get('customerId')).toBe('7');
+      req.flush({ salesOrders: [], shipments: [] });
+    });
+  });
+
   describe('getUninvoicedJobs', () => {
     it('should GET uninvoiced jobs', () => {
       service.getUninvoicedJobs().subscribe();

@@ -9,6 +9,7 @@ import { InvoiceListItem } from '../models/invoice-list-item.model';
 import { InvoiceDetail } from '../models/invoice-detail.model';
 import { CreateInvoiceRequest } from '../models/create-invoice-request.model';
 import { UninvoicedJob } from '../models/uninvoiced-job.model';
+import { InvoiceSources } from '../models/invoice-sources.model';
 import { InvoiceQueueSettings } from '../models/invoice-queue-settings.model';
 
 /** Phase 3 F7-broad / WU-22 — paged invoice list query parameters. */
@@ -75,6 +76,11 @@ export class InvoiceService {
 
   deleteInvoice(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
+  }
+
+  getInvoiceSources(customerId: number): Observable<InvoiceSources> {
+    const params = new HttpParams().set('customerId', String(customerId));
+    return this.http.get<InvoiceSources>(`${this.base}/sources`, { params });
   }
 
   getUninvoicedJobs(): Observable<UninvoicedJob[]> {
