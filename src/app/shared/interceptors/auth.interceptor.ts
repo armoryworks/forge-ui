@@ -15,6 +15,8 @@ const NO_REFRESH_URLS = ['/auth/login', '/auth/refresh', '/auth/logout', '/auth/
 let isRefreshing = false;
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  if (req.headers.has('Authorization')) return next(req);
+
   const authService = inject(AuthService);
   const mobileAuth = inject(MobileAuthService);
   const router = inject(Router);
