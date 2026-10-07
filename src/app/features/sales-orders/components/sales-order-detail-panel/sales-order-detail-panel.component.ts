@@ -374,6 +374,8 @@ export class SalesOrderDetailPanelComponent {
   private addressesCustomerId: number | null = null;
   protected readonly shippingAddress = computed(() => this.findAddress(this.so()?.shippingAddressId));
   protected readonly billingAddress = computed(() => this.findAddress(this.so()?.billingAddressId));
+  protected readonly showShipTo = computed(() => this.so()?.shippingAddressId == null || this.shippingAddress() !== null);
+  protected readonly showBillTo = computed(() => this.so()?.billingAddressId == null || this.billingAddress() !== null);
   protected readonly billingAddressOptions = computed<SelectOption[]>(() => {
     const opts: SelectOption[] = this.customerAddresses()
       .filter(a => a.addressType === 'Billing' || a.addressType === 'Both')
@@ -1093,6 +1095,8 @@ export class SalesOrderDetailPanelComponent {
       requestedDeliveryDate: so.requestedDeliveryDate ? new Date(so.requestedDeliveryDate) : null,
       billingAddressId: so.billingAddressId ?? null,
     });
+    this.addressesCustomerId = null;
+    this.loadCustomerAddresses(so.customerId);
     this.editingHeader.set(true);
   }
 

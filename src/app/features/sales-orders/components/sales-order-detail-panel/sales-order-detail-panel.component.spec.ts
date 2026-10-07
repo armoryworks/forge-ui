@@ -80,6 +80,9 @@ interface Panel {
   creditHoldMessage: Signal<string>;
   showCreditHoldBanner: Signal<boolean>;
   confirmTooltip: Signal<string>;
+  startEditHeader(): void;
+  showShipTo: Signal<boolean>;
+  showBillTo: Signal<boolean>;
   confirmDisabled: Signal<boolean>;
   shippingAddress: Signal<CustomerAddress | null>;
   billingAddress: Signal<CustomerAddress | null>;
@@ -283,6 +286,21 @@ describe('SalesOrderDetailPanelComponent', () => {
     panel['loadDetail'](7);
     panel['loadDetail'](7);
     expect(soService['getCustomerAddresses']).toHaveBeenCalledTimes(1);
+  });
+
+  it('refetches the customer addresses when the header edit opens', () => {
+    const panel = build(order());
+    panel['loadDetail'](7);
+    panel['startEditHeader']();
+    expect(soService['getCustomerAddresses']).toHaveBeenCalledTimes(2);
+  });
+
+  it('hides an address row whose address cannot be resolved', () => {
+    const panel = build(order({ shippingAddressId: 21, billingAddressId: null }));
+    panel['loadDetail'](7);
+    panel['so'].set(order({ shippingAddressId: 21, billingAddressId: null }));
+    expect(panel['showShipTo']()).toBe(false);
+    expect(panel['showBillTo']()).toBe(true);
   });
 
   it('shows the tax rate as a percentage', () => {

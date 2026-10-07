@@ -208,26 +208,30 @@
                 <span class="info-value">{{ so.confirmedDate | date:'MM/dd/yyyy' }}</span>
               </div>
             }
-            <div class="info-item" data-testid="so-ship-to">
-              <span class="info-label">{{ 'salesOrders.shipTo' | translate }}</span>
-              <span class="info-value">
-                @if (shippingAddress(); as addr) {
-                  {{ formatAddress(addr) }}
-                } @else {
-                  —
-                }
-              </span>
-            </div>
-            <div class="info-item" data-testid="so-bill-to">
-              <span class="info-label">{{ 'salesOrders.billTo' | translate }}</span>
-              <span class="info-value">
-                @if (billingAddress(); as addr) {
-                  {{ formatAddress(addr) }}
-                } @else {
-                  —
-                }
-              </span>
-            </div>
+            @if (showShipTo()) {
+              <div class="info-item" data-testid="so-ship-to">
+                <span class="info-label">{{ 'salesOrders.shipTo' | translate }}</span>
+                <span class="info-value">
+                  @if (shippingAddress(); as addr) {
+                    {{ formatAddress(addr) }}
+                  } @else {
+                    —
+                  }
+                </span>
+              </div>
+            }
+            @if (showBillTo()) {
+              <div class="info-item" data-testid="so-bill-to">
+                <span class="info-label">{{ 'salesOrders.billTo' | translate }}</span>
+                <span class="info-value">
+                  @if (billingAddress(); as addr) {
+                    {{ formatAddress(addr) }}
+                  } @else {
+                    —
+                  }
+                </span>
+              </div>
+            }
           </div>
 
           <!-- SO-only header fields edit (#8 / SO-8 / AUDIT-S3b — Draft or Confirmed) -->
