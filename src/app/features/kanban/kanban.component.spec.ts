@@ -303,6 +303,7 @@ describe('KanbanComponent', () => {
           boardJob(1, 'Shipped'),
           boardJob(2, 'Shipped', { disposition: 'ShipToCustomer' }),
           boardJob(3, 'Shipped', { completedDate: '2026-10-01T00:00:00Z' }),
+          boardJob(4, 'Shipped', { billingStatus: 'Uninvoiced' }),
         ],
       }];
     }
@@ -321,7 +322,7 @@ describe('KanbanComponent', () => {
 
       component.toggleActiveOnly();
 
-      expect(component.filteredColumns()[0].jobs.map(j => j.id)).toEqual([1, 2, 3]);
+      expect(component.filteredColumns()[0].jobs.map(j => j.id)).toEqual([1, 2, 3, 4]);
       expect(prefsSet).toHaveBeenCalledWith('kanban:activeOnly', false);
     });
 
@@ -331,7 +332,7 @@ describe('KanbanComponent', () => {
       component.columns.set(mixedBoard());
 
       expect(component.activeOnly()).toBe(false);
-      expect(component.filteredColumns()[0].jobs.length).toBe(3);
+      expect(component.filteredColumns()[0].jobs.length).toBe(4);
     });
   });
 

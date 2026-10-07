@@ -114,7 +114,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
   }
 
   private isActiveJob(job: KanbanJob): boolean {
-    return !job.completedDate && !job.disposition;
+    return !job.completedDate && !job.billingStatus && !job.disposition;
   }
 
   // ── View Mode ──
