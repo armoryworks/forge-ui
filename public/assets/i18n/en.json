@@ -5419,6 +5419,7 @@
     "createInvoice": "Create Invoice",
     "createAddendum": "Create Addendum",
     "addendumCreated": "Addendum {{number}} created as a Draft — add the change lines there.",
+    "workOrdersCreated": "{{count}} work order(s) created.",
     "invoicesIntegratedMode": "Invoices for this order are managed in your connected accounting system.",
     "amount": "Amount",
     "dueDate": "Due Date",

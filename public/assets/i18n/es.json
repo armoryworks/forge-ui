@@ -5391,6 +5391,7 @@
     "createInvoice": "Crear factura",
     "createAddendum": "Crear adenda",
     "addendumCreated": "Adenda {{number}} creada como borrador — agregue las partidas del cambio allí.",
+    "workOrdersCreated": "{{count}} orden(es) de trabajo creada(s).",
     "invoicesIntegratedMode": "Las facturas de este pedido se gestionan en su sistema de contabilidad conectado.",
     "amount": "Monto",
     "dueDate": "Fecha de Vencimiento",
