@@ -134,6 +134,18 @@
       @case (3) {
         <div class="auth-card__form">
           <p class="setup-modules__hint">{{ 'auth.modulesHint' | translate }}</p>
+          @if (bundleChips().length > 0) {
+            <div class="setup-bundles">
+              @for (b of bundleChips(); track b.id) {
+                <button type="button" class="setup-bundle" [class.setup-bundle--on]="b.selected"
+                  [attr.aria-pressed]="b.selected" [attr.data-testid]="'setup-bundle-' + b.id"
+                  (click)="applyBundle(b)">
+                  <span class="material-icons-outlined setup-bundle__icon">auto_awesome</span>
+                  {{ b.labelKey ? (b.labelKey | translate) : b.name }}
+                </button>
+              }
+            </div>
+          }
           <div class="setup-modules">
             @for (m of moduleCards(); track m.id) {
               <button type="button" class="setup-module" [class.setup-module--on]="m.selected"

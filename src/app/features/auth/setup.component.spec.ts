@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { Component, input } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { Component, WritableSignal, input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, FormGroup, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
@@ -12,6 +12,7 @@ import { Observable, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
+import { LayoutService } from '../../shared/services/layout.service';
 import { SetupComponent } from './setup.component';
 
 class FakeLoader implements TranslateLoader {
@@ -73,7 +74,8 @@ interface SetupInternals {
   activationRequired(): boolean;
   activationChecking(): boolean;
   activationForm: FormGroup<{ code: FormControl<string | null> }>;
-  step(): number;
+  step: WritableSignal<number>;
+  selectedModuleIds(): Set<string>;
   unlock(): void;
   choosePath(path: 'quick' | 'full'): void;
   onSubmit(): void;
@@ -84,6 +86,17 @@ interface SetupInternals {
 const STATUS_URL = `${environment.apiUrl}/auth/status`;
 const VERIFY_URL = `${environment.apiUrl}/auth/setup/verify-activation`;
 const SETUP_URL = `${environment.apiUrl}/auth/setup`;
+const MODULES_URL = `${environment.apiUrl}/auth/setup/modules`;
+
+const MODULES_RESPONSE = {
+  modules: ['inventory', 'purchasing', 'sales', 'production', 'shipping', 'invoicing', 'quality', 'planning', 'people']
+    .map(id => ({ id, name: id, summary: '', prerequisiteNote: '', defaultSelected: id === 'inventory' })),
+  bundles: [{
+    id: 'job-shop',
+    name: 'Job shop',
+    moduleIds: ['sales', 'production', 'purchasing', 'shipping', 'invoicing', 'inventory'],
+  }],
+};
 
 function configure(): void {
   TestBed.resetTestingModule();
@@ -312,3 +325,59 @@ function fillWizard(component: SetupInternals): void {
     address: { line1: '1 Mill St', city: 'Provo', state: 'UT', postalCode: '84601' },
   });
 }
+
+describe('SetupComponent — module bundles', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+  afterEach(() => localStorage.clear());
+
+  it('keeps the default selection until a bundle is chosen', () => {
+    const { component, httpMock } = setup();
+    flushStatus(httpMock, { setupRequired: true, activationRequired: false });
+
+    component.choosePath('quick');
+    httpMock.expectOne(MODULES_URL).flush(MODULES_RESPONSE);
+
+    expect([...component.selectedModuleIds()]).toEqual(['inventory']);
+  });
+
+  it('checks the six job-shop modules when the Job shop chip is clicked', () => {
+    const { fixture, httpMock } = render();
+    flushStatus(httpMock, { setupRequired: true, activationRequired: false });
+    const component = fixture.componentInstance as unknown as SetupInternals;
+
+    component.choosePath('quick');
+    httpMock.expectOne(MODULES_URL).flush(MODULES_RESPONSE);
+    component.step.set(3);
+    fixture.detectChanges();
+
+    const chip = (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>('[data-testid="setup-bundle-job-shop"]');
+    expect(chip?.textContent).toContain('auth.bundleJobShop');
+    chip!.click();
+    fixture.detectChanges();
+
+    expect([...component.selectedModuleIds()].sort()).toEqual(
+      ['inventory', 'invoicing', 'production', 'purchasing', 'sales', 'shipping']);
+    expect(chip!.getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('submits the bundle and lands on the dashboard', async () => {
+    const { component, httpMock } = setup();
+    flushStatus(httpMock, { setupRequired: true, activationRequired: false });
+    vi.spyOn(TestBed.inject(LayoutService), 'getDefaultRoute').mockReturnValue('/dashboard');
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
+    component.choosePath('quick');
+    httpMock.expectOne(MODULES_URL).flush(MODULES_RESPONSE);
+    (component as unknown as { applyBundle(b: unknown): void }).applyBundle(MODULES_RESPONSE.bundles[0]);
+    fillWizard(component);
+    component.onSubmit();
+
+    const req = httpMock.expectOne(SETUP_URL);
+    expect(req.request.body.selectedModules).toHaveLength(6);
+    req.flush({ token: 't', user: {} });
+    await Promise.resolve();
+
+    expect(navigate).toHaveBeenCalledWith(['/dashboard']);
+  });
+});

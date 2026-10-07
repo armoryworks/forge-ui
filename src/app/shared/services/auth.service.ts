@@ -74,6 +74,17 @@ export interface SetupModule {
   defaultSelected: boolean;
 }
 
+export interface SetupModuleBundle {
+  id: string;
+  name: string;
+  moduleIds: string[];
+}
+
+export interface SetupModulesResponse {
+  modules: SetupModule[];
+  bundles: SetupModuleBundle[];
+}
+
 export interface CompleteSetupRequest {
   token: string;
   password: string;
@@ -185,8 +196,8 @@ export class AuthService {
   }
 
   // The first-run module picker list (anonymous — shown during setup).
-  getSetupModules(): Observable<SetupModule[]> {
-    return this.http.get<SetupModule[]>(`${environment.apiUrl}/auth/setup/modules`);
+  getSetupModules(): Observable<SetupModulesResponse> {
+    return this.http.get<SetupModulesResponse>(`${environment.apiUrl}/auth/setup/modules`);
   }
 
   setup(data: SetupRequest): Observable<LoginResponse> {

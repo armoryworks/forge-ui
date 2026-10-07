@@ -6,7 +6,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { AuthService, SetupModule } from '../../shared/services/auth.service';
+import { AuthService, SetupModule, SetupModuleBundle } from '../../shared/services/auth.service';
 import { BrandingService } from '../../shared/services/branding.service';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { AddressFormComponent } from '../../shared/components/address-form/address-form.component';
@@ -16,6 +16,10 @@ import { LayoutService } from '../../shared/services/layout.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ToastService } from '../../shared/services/toast.service';
+
+const BUNDLE_LABEL_KEYS: Record<string, string> = {
+  'job-shop': 'auth.bundleJobShop',
+};
 
 @Component({
   selector: 'app-setup',
@@ -72,6 +76,15 @@ export class SetupComponent {
   protected readonly moduleCards = computed(() => {
     const selected = this.selectedModuleIds();
     return this.modules().map(m => ({ ...m, selected: selected.has(m.id) }));
+  });
+  protected readonly bundles = signal<SetupModuleBundle[]>([]);
+  protected readonly bundleChips = computed(() => {
+    const selected = this.selectedModuleIds();
+    return this.bundles().map(b => ({
+      ...b,
+      labelKey: BUNDLE_LABEL_KEYS[b.id] ?? null,
+      selected: b.moduleIds.length === selected.size && b.moduleIds.every(id => selected.has(id)),
+    }));
   });
 
   // Branch-aware step counter: the quick branch has 3 steps (admin, company,
@@ -199,12 +212,18 @@ export class SetupComponent {
   private loadModules(): void {
     if (this.modules().length > 0) return;
     this.authService.getSetupModules().subscribe({
-      next: (mods) => {
-        this.modules.set(mods);
-        this.selectedModuleIds.set(new Set(mods.filter(m => m.defaultSelected).map(m => m.id)));
+      next: ({ modules, bundles }) => {
+        this.modules.set(modules);
+        this.bundles.set(bundles);
+        this.selectedModuleIds.set(new Set(modules.filter(m => m.defaultSelected).map(m => m.id)));
       },
       error: () => { /* leave empty; the user can still finish on catalog defaults */ },
     });
+  }
+
+  protected applyBundle(bundle: SetupModuleBundle): void {
+    const known = new Set(this.modules().map(m => m.id));
+    this.selectedModuleIds.set(new Set(bundle.moduleIds.filter(id => known.has(id))));
   }
 
   protected toggleModule(id: string): void {
