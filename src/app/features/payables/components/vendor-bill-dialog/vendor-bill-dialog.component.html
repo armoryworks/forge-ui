@@ -43,7 +43,7 @@
             @for (group of poLines.controls; track group; let i = $index) {
               <div class="po-line" [formGroupName]="i">
                 <span class="po-line__part">
-                  <span class="po-line__part-number">{{ poLineMeta()[i].partNumber }}</span>
+                  <span class="po-line__part-number">{{ poLineMeta()[i].partNumber ?? '—' }}</span>
                   <span class="po-line__desc">{{ poLineMeta()[i].description }}</span>
                 </span>
                 <span class="po-line__right">{{ poLineMeta()[i].receivedQuantity | number:'1.0-4' }}</span>

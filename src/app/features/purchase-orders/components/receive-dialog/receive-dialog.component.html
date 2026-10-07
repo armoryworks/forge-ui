@@ -24,7 +24,7 @@
       <tbody>
         @for (line of receivableLines(); track line.id; let i = $index) {
           <tr>
-            <td class="receive-table__mono">{{ line.partNumber }}</td>
+            <td class="receive-table__mono">{{ line.partNumber ?? '—' }}</td>
             <td>{{ line.description }}</td>
             <td class="receive-table__right">{{ line.orderedQuantity }}</td>
             <td class="receive-table__right">{{ line.receivedQuantity }}</td>

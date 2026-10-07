@@ -374,7 +374,7 @@ export class PoDetailPanelComponent implements OnInit {
   protected readonly lineOptions = computed<SelectOption[]>(() => {
     const po = this.po();
     if (!po) return [];
-    return po.lines.map(l => ({ value: l.id, label: `${l.partNumber} — ${l.description}` }));
+    return po.lines.map(l => ({ value: l.id, label: l.partNumber ? `${l.partNumber} — ${l.description}` : l.description }));
   });
 
   protected readonly releaseForm = new FormGroup({

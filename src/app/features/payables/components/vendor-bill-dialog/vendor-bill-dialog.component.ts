@@ -30,8 +30,8 @@ import { toIsoDate, todayEnd } from '../../../../shared/utils/date.utils';
 /** Static (non-form) metadata for one billable PO line row. */
 interface PoLineMeta {
   purchaseOrderLineId: number;
-  partId: number;
-  partNumber: string;
+  partId: number | null;
+  partNumber: string | null;
   description: string;
   receivedQuantity: number;
   unbilledReceivedQuantity: number;
@@ -522,7 +522,7 @@ export class VendorBillDialogComponent {
         .map((g, i) => ({ value: g.getRawValue(), meta: meta[i] }))
         .filter(x => x.value.quantityToBill > 0)
         .map(x => ({
-          partId: x.meta.partId,
+          partId: x.meta.partId ?? undefined,
           description: x.meta.description,
           quantity: x.value.quantityToBill,
           unitPrice: x.value.unitPrice,

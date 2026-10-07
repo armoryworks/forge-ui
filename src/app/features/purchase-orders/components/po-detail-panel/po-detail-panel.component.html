@@ -272,7 +272,11 @@
               @for (line of po.lines; track line.id) {
                 <tr>
                   <td class="lines-table__mono">
-                    <app-entity-link type="part" [entityId]="line.partId">{{ line.partNumber }}</app-entity-link>
+                    @if (line.partId) {
+                      <app-entity-link type="part" [entityId]="line.partId">{{ line.partNumber }}</app-entity-link>
+                    } @else {
+                      &mdash;
+                    }
                   </td>
                   <td>{{ line.description }}</td>
                   <!-- Phase 3 / WU-10 — fractional quantities; display up to 4 decimals,
@@ -326,7 +330,7 @@
             emptyMessage="No releases yet">
 
             <ng-template appColumnCell="partNumber" let-row>
-              <span class="lines-table__mono">{{ $any(row).partNumber }}</span>
+              <span class="lines-table__mono">{{ $any(row).partNumber ?? '—' }}</span>
             </ng-template>
 
             <ng-template appColumnCell="requestedDeliveryDate" let-row>

@@ -1,7 +1,7 @@
 export interface PurchaseOrderLine {
   id: number;
-  partId: number;
-  partNumber: string;
+  partId: number | null;
+  partNumber: string | null;
   description: string;
   orderedQuantity: number;
   receivedQuantity: number;

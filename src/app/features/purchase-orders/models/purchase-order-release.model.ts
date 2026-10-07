@@ -4,7 +4,7 @@ export interface PurchaseOrderRelease {
   id: number;
   releaseNumber: number;
   purchaseOrderLineId: number;
-  partNumber: string;
+  partNumber: string | null;
   partDescription: string;
   quantity: number;
   requestedDeliveryDate: string;
