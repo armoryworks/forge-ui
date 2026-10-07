@@ -3,6 +3,9 @@ import { Directive, input, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
+import { provideTranslateService, TranslateLoader, TranslationObject } from '@ngx-translate/core';
+
+import { Observable, of } from 'rxjs';
 
 import { AuthService } from '../../../shared/services/auth.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
@@ -12,6 +15,21 @@ import { MobileJobDetailComponent } from './mobile-job-detail.component';
 @Directive({ selector: '[appLoadingBlock]', standalone: true })
 class StubLoadingBlockDirective {
   readonly appLoadingBlock = input(false);
+}
+
+class TimerStringsLoader implements TranslateLoader {
+  getTranslation(): Observable<TranslationObject> {
+    return of({
+      mobileWeb: {
+        timer: {
+          runningOn: 'Running on {{jobNumber}}',
+          switchHint: 'Switching stops the timer on {{jobNumber}}.',
+          switchHere: 'Switch Timer Here',
+          stoppedButNotStarted: 'The timer on {{jobNumber}} was stopped, but this one could not start: {{reason}}',
+        },
+      },
+    });
+  }
 }
 
 describe('MobileJobDetailComponent', () => {
@@ -37,6 +55,7 @@ describe('MobileJobDetailComponent', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: TimerStringsLoader }, lang: 'en' }),
         { provide: AuthService, useValue: { user: signal({ id: 1 }) } },
         { provide: SnackbarService, useValue: snackbar },
         { provide: Router, useValue: { navigate: vi.fn() } },
@@ -96,7 +115,9 @@ describe('MobileJobDetailComponent', () => {
     render(timerOn(9, 'J-2001'));
 
     expect(el().querySelector('[data-testid="mjob-timer-elsewhere"]')!.textContent).toContain('Running on J-2001');
-    expect(timerButton().textContent).toContain('Start Timer');
+    expect(el().querySelector('[data-testid="mjob-timer-switch-hint"]')!.textContent)
+      .toContain('Switching stops the timer on J-2001.');
+    expect(timerButton().textContent).toContain('Switch Timer Here');
 
     timerButton().click();
     http.expectOne('/api/v1/time-tracking/timer/stop').flush({});
@@ -119,6 +140,22 @@ describe('MobileJobDetailComponent', () => {
     fixture.detectChanges();
 
     expect(el().querySelector('[data-testid="mjob-timer-elsewhere"]')).toBeNull();
+  });
+
+  it('says the other timer was stopped when the switch fails to start this one', () => {
+    render(timerOn(9, 'J-2001'));
+
+    timerButton().click();
+    http.expectOne('/api/v1/time-tracking/timer/stop').flush({});
+    http.expectOne('/api/v1/time-tracking/timer/start').flush(
+      { title: 'Validation', detail: 'This job is on hold.' },
+      { status: 400, statusText: 'Bad Request' },
+    );
+    http.expectOne('/api/v1/time-tracking/timer/active').flush(null, { status: 204, statusText: 'No Content' });
+
+    expect(snackbar.error).toHaveBeenCalledWith(
+      'The timer on J-2001 was stopped, but this one could not start: This job is on hold.',
+    );
   });
 
   it('shows the server message when starting fails', () => {

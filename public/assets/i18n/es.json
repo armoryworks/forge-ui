@@ -9879,6 +9879,17 @@
       "lookupFailed": "No se pudo buscar ese código. Revise la conexión e inténtelo de nuevo.",
       "disabled": "El escaneo está desactivado en este taller. Pida a un administrador que active la ejecución en planta.",
       "scanAgain": "Escanear de nuevo"
+    },
+    "timer": {
+      "runningOn": "En curso en {{jobNumber}}",
+      "runningElsewhere": "Hay un temporizador en curso en otro trabajo",
+      "switchHint": "Al cambiar se detiene el temporizador de {{jobNumber}}.",
+      "switchHintUnknown": "Al cambiar se detiene el temporizador en curso.",
+      "switchHere": "Cambiar el temporizador aquí",
+      "stop": "Detener",
+      "stopRunning": "Detener el temporizador en curso",
+      "stoppedButNotStarted": "Se detuvo el temporizador de {{jobNumber}}, pero este no pudo iniciarse: {{reason}}",
+      "stoppedButNotStartedUnknown": "Se detuvo el temporizador en curso, pero este no pudo iniciarse: {{reason}}"
     }
   }
 }

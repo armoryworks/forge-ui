@@ -2,8 +2,9 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { Observable, of, switchMap } from 'rxjs';
+import { Observable, of, switchMap, tap } from 'rxjs';
 
 import { AuthService } from '../../../shared/services/auth.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
@@ -36,7 +37,7 @@ interface ActiveTimer {
 @Component({
   selector: 'app-mobile-job-detail',
   standalone: true,
-  imports: [DatePipe, LoadingBlockDirective],
+  imports: [DatePipe, TranslatePipe, LoadingBlockDirective],
   templateUrl: './mobile-job-detail.component.html',
   styleUrl: './mobile-job-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,6 +48,7 @@ export class MobileJobDetailComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly authService = inject(AuthService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(true);
   protected readonly job = signal<JobDetail | null>(null);
@@ -118,8 +120,10 @@ export class MobileJobDetailComponent implements OnInit {
     if (!j || this.submitting() || this.timerOnThisJob()) return;
 
     this.submitting.set(true);
-    const stopOther: Observable<unknown> = this.activeTimer()
-      ? this.http.post('/api/v1/time-tracking/timer/stop', {})
+    const previous = this.activeTimer();
+    let stoppedPrevious = false;
+    const stopOther: Observable<unknown> = previous
+      ? this.http.post('/api/v1/time-tracking/timer/stop', {}).pipe(tap(() => (stoppedPrevious = true)))
       : of(null);
     stopOther.pipe(
       switchMap(() => this.http.post('/api/v1/time-tracking/timer/start', { jobId: j.id })),
@@ -131,7 +135,8 @@ export class MobileJobDetailComponent implements OnInit {
       },
       error: (err: unknown) => {
         this.submitting.set(false);
-        this.snackbar.error(this.serverMessage(err, 'Failed to start timer'));
+        const reason = this.serverMessage(err, 'Failed to start timer');
+        this.snackbar.error(stoppedPrevious && previous ? this.stoppedButNotStarted(previous, reason) : reason);
         this.loadTimer();
       },
     });
@@ -165,6 +170,12 @@ export class MobileJobDetailComponent implements OnInit {
         this.snackbar.error('Failed to add note');
       },
     });
+  }
+
+  private stoppedButNotStarted(previous: ActiveTimer, reason: string): string {
+    return previous.jobNumber
+      ? this.translate.instant('mobileWeb.timer.stoppedButNotStarted', { jobNumber: previous.jobNumber, reason })
+      : this.translate.instant('mobileWeb.timer.stoppedButNotStartedUnknown', { reason });
   }
 
   private serverMessage(err: unknown, fallback: string): string {

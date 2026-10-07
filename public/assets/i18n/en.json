@@ -9879,6 +9879,17 @@
       "lookupFailed": "Could not look that code up. Check your connection and try again.",
       "disabled": "Scanning is turned off for this shop. Ask an admin to turn on shop-floor execution.",
       "scanAgain": "Scan Again"
+    },
+    "timer": {
+      "runningOn": "Running on {{jobNumber}}",
+      "runningElsewhere": "A timer is running on another job",
+      "switchHint": "Switching stops the timer on {{jobNumber}}.",
+      "switchHintUnknown": "Switching stops the running timer.",
+      "switchHere": "Switch Timer Here",
+      "stop": "Stop",
+      "stopRunning": "Stop the running timer",
+      "stoppedButNotStarted": "The timer on {{jobNumber}} was stopped, but this one could not start: {{reason}}",
+      "stoppedButNotStartedUnknown": "The running timer was stopped, but this one could not start: {{reason}}"
     }
   }
 }

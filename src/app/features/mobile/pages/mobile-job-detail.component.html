@@ -66,16 +66,29 @@
         @if (timerElsewhere()) {
           @if (activeTimer(); as t) {
             <div class="timer-elsewhere" data-testid="mjob-timer-elsewhere">
-              <span class="timer-elsewhere__text">
-                {{ t.jobNumber ? 'Running on ' + t.jobNumber : 'A timer is running' }}
-              </span>
+              <div class="timer-elsewhere__info">
+                <span class="timer-elsewhere__text">
+                  @if (t.jobNumber) {
+                    {{ 'mobileWeb.timer.runningOn' | translate: { jobNumber: t.jobNumber } }}
+                  } @else {
+                    {{ 'mobileWeb.timer.runningElsewhere' | translate }}
+                  }
+                </span>
+                <span class="timer-elsewhere__hint" data-testid="mjob-timer-switch-hint">
+                  @if (t.jobNumber) {
+                    {{ 'mobileWeb.timer.switchHint' | translate: { jobNumber: t.jobNumber } }}
+                  } @else {
+                    {{ 'mobileWeb.timer.switchHintUnknown' | translate }}
+                  }
+                </span>
+              </div>
               <button class="action-btn timer-elsewhere__stop"
                       [disabled]="submitting()"
                       (click)="stopTimer()"
-                      aria-label="Stop the running timer"
+                      [attr.aria-label]="'mobileWeb.timer.stopRunning' | translate"
                       data-testid="mjob-timer-elsewhere-stop-btn">
                 <span class="material-icons-outlined">stop</span>
-                Stop
+                {{ 'mobileWeb.timer.stop' | translate }}
               </button>
             </div>
           }
@@ -83,10 +96,10 @@
         <button class="timer-btn"
                 [disabled]="submitting()"
                 (click)="startTimer()"
-                aria-label="Start timer"
+                [attr.aria-label]="timerElsewhere() ? ('mobileWeb.timer.switchHere' | translate) : 'Start timer'"
                 data-testid="mjob-timer-btn">
-          <span class="material-icons-outlined timer-btn__icon">play_arrow</span>
-          <span class="timer-btn__label">Start Timer</span>
+          <span class="material-icons-outlined timer-btn__icon">{{ timerElsewhere() ? 'swap_horiz' : 'play_arrow' }}</span>
+          <span class="timer-btn__label">{{ timerElsewhere() ? ('mobileWeb.timer.switchHere' | translate) : 'Start Timer' }}</span>
         </button>
       }
     </div>

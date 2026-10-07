@@ -104,10 +104,21 @@
   border: $border-width-thin solid var(--warning);
   background: color-mix(in srgb, var(--warning) 8%, var(--surface));
 
-  &__text {
+  &__info {
     flex: 1;
+    min-width: 0;
+  }
+
+  &__text {
+    display: block;
     font-size: $font-size-sm;
     font-weight: 600;
+  }
+
+  &__hint {
+    display: block;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
   }
 }
 
