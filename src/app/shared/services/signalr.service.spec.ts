@@ -2,8 +2,10 @@ import { TestBed } from '@angular/core/testing';
 import { HubConnection, HubConnectionState } from '@microsoft/signalr';
 
 import { createMockHubConnection } from '../../../testing/signalr.mock';
+import { environment } from '../../../environments/environment';
 import { SignalrService } from './signalr.service';
 import { AuthService } from './auth.service';
+import { InstanceService } from './instance.service';
 
 // This spec mocks SignalrService's HubConnection at the SERVICE boundary
 // instead of at the module boundary. SignalrService exposes a protected
@@ -44,6 +46,7 @@ describe('SignalrService', () => {
       providers: [
         SignalrService,
         { provide: AuthService, useValue: mockAuthService },
+        { provide: InstanceService, useValue: { instance: () => ({ serverUrl: 'https://forge.example.test' }) } },
       ],
     });
 
@@ -139,6 +142,24 @@ describe('SignalrService', () => {
     it('should set connectionState to disconnected', async () => {
       await service.stopAll();
       expect(service.connectionState()).toBe('disconnected');
+    });
+  });
+
+  describe('hubUrl', () => {
+    const hubUrl = (path: string): string =>
+      (service as unknown as { hubUrl: (hubPath: string) => string }).hubUrl(path);
+
+    afterEach(() => {
+      environment.mobileShell = false;
+    });
+
+    it('uses the configured hub base in the browser', () => {
+      expect(hubUrl('timer')).toBe(`${environment.hubUrl}/timer`);
+    });
+
+    it('points the native shell at the enrolled instance, not the webview', () => {
+      environment.mobileShell = true;
+      expect(hubUrl('timer')).toBe(`https://forge.example.test${environment.hubUrl}/timer`);
     });
   });
 });

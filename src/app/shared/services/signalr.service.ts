@@ -1,13 +1,15 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, Injector, inject, signal } from '@angular/core';
 import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
 
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
+import { InstanceService } from './instance.service';
 import { ConnectionState } from '../models/signalr.model';
 
 @Injectable({ providedIn: 'root' })
 export class SignalrService {
   private readonly authService = inject(AuthService);
+  private readonly injector = inject(Injector);
   private readonly connections = new Map<string, HubConnection>();
   private readonly startPromises = new Map<string, Promise<void>>();
   private readonly _connectionState = signal<ConnectionState>('disconnected');
@@ -99,7 +101,7 @@ export class SignalrService {
    */
   protected buildHubConnection(hubPath: string): HubConnection {
     return new HubConnectionBuilder()
-      .withUrl(`${environment.hubUrl}/${hubPath}`, {
+      .withUrl(this.hubUrl(hubPath), {
         accessTokenFactory: () => this.authService.token() ?? '',
       })
       // F24 — retry quickly and indefinitely (capped at 5s) instead of a
@@ -114,6 +116,19 @@ export class SignalrService {
       })
       .configureLogging(environment.production ? LogLevel.Warning : LogLevel.Information)
       .build();
+  }
+
+  /**
+   * The native shell serves its pages from the binary, so a relative hub path
+   * would point at the webview. SignalR makes its own requests, which the
+   * apiBaseInterceptor never sees, so the enrolled instance's origin is
+   * prefixed here instead.
+   */
+  protected hubUrl(hubPath: string): string {
+    const base = environment.mobileShell
+      ? `${this.injector.get(InstanceService).instance()?.serverUrl ?? ''}${environment.hubUrl}`
+      : environment.hubUrl;
+    return `${base}/${hubPath}`;
   }
 
   /**
