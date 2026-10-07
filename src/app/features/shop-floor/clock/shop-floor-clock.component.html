@@ -365,6 +365,12 @@
         </div>
       }
 
+      @if (notSetUpForWorker()) {
+        <p class="sf-clock-actions__empty" role="status" data-testid="sf-terminal-not-for-worker">
+          {{ 'shopFloor.terminalNotForWorker' | translate }}
+        </p>
+      }
+
       <ng-template #punchButtons let-worker>
         @for (action of clockTypes.getAvailableActions(worker.status); track action.code) {
           <button class="sf-action-btn"

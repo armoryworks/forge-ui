@@ -6540,7 +6540,8 @@
     "noAssignmentAskLead": "Entrada registrada. No tiene orden de trabajo asignada. Pregunte a su líder.",
     "assignFailed": "No puede tomar esta orden de trabajo. Pregunte a un supervisor.",
     "fullscreen": "Pantalla completa",
-    "setupFullscreenHint": "Toque Pantalla completa en la pantalla después de la configuración para que el tablero ocupe toda la pantalla."
+    "setupFullscreenHint": "Toque Pantalla completa en la pantalla después de la configuración para que el tablero ocupe toda la pantalla.",
+    "terminalNotForWorker": "Esta terminal no está configurada para su equipo. Use la terminal de su equipo o pregunte a su supervisor."
   },
   "customerReturns": {
     "allStatuses": "Todos los Estados",

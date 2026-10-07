@@ -99,6 +99,8 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
     this.workers().find(w => w.userId === this.signedInUserId()) ?? null);
   protected readonly otherWorkers = computed(() =>
     this.canSupervise() ? this.workers().filter(w => w.userId !== this.signedInUserId()) : []);
+  protected readonly notSetUpForWorker = computed(() =>
+    this.selfWorker() === null && this.otherWorkers().length === 0);
   protected readonly punchError = signal<{ detail: string } | null>(null);
   protected readonly punchRecorded = signal<string | null>(null);
 

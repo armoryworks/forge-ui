@@ -6547,7 +6547,8 @@
     "noAssignmentAskLead": "Clocked in. No work order assigned. Ask your lead.",
     "assignFailed": "You can't take this work order. Ask a supervisor.",
     "fullscreen": "Full screen",
-    "setupFullscreenHint": "Tap Full screen on the display after setup so the board fills the screen."
+    "setupFullscreenHint": "Tap Full screen on the display after setup so the board fills the screen.",
+    "terminalNotForWorker": "This terminal is not set up for your team. Use your team's terminal or ask your supervisor."
   },
   "customerReturns": {
     "allStatuses": "All Statuses",

@@ -18,6 +18,7 @@ interface ClockInternals {
   kioskPhase: () => string;
   selfWorker: () => ClockWorker | null;
   otherWorkers: () => ClockWorker[];
+  notSetUpForWorker: () => boolean;
   punchError: () => { detail: string } | null;
   punchRecorded: () => string | null;
   clockAction(worker: ClockWorker, action: ClockEventTypeDef): void;
@@ -97,6 +98,20 @@ describe('ShopFloorClockComponent — clock phase', () => {
     const c = create();
     expect(c.selfWorker()?.userId).toBe(1);
     expect(c.otherWorkers().map(w => w.userId)).toEqual([2]);
+  });
+
+  it('a worker who is not on this terminal\'s team is told so instead of seeing no buttons', () => {
+    signIn(9, ['ProductionWorker']);
+    const c = create();
+    expect(c.selfWorker()).toBeNull();
+    expect(c.otherWorkers()).toEqual([]);
+    expect(c.notSetUpForWorker()).toBe(true);
+  });
+
+  it('a worker on this terminal\'s team gets no not-set-up message', () => {
+    signIn(1, ['ProductionWorker']);
+    const c = create();
+    expect(c.notSetUpForWorker()).toBe(false);
   });
 
   it('a failed punch keeps the worker on the clock screen with the server reason', () => {
