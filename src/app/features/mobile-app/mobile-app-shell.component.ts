@@ -13,6 +13,7 @@ import { InstanceService } from '../../shared/services/instance.service';
 import { MobileTimerService } from '../../shared/services/mobile-timer.service';
 import { OfflineQueueService } from '../../shared/services/offline-queue.service';
 import { PlatformService } from '../../shared/services/platform.service';
+import { SharedIdentityService } from '../../shared/services/shared-identity.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { TimerHubService } from '../../shared/services/timer-hub.service';
 import { UndoService } from '../../shared/services/undo.service';
@@ -30,7 +31,9 @@ interface MobileAppTab {
  * Native-shell chrome: top bar + five-tab bottom bar (Scan, Clock, Jobs,
  * Move, Lookup), each tab shown only while its CAP-MOBILE-* flag is on for
  * this instance. Account lives behind the gear, never a tab. While a timer
- * runs, a strip above the tab bar shows it ticking with a Stop button.
+ * runs, a strip above the tab bar shows it ticking with a Stop button. On a
+ * shared device, a Stop from the strip ends the person's identity once its
+ * undo toast closes, and the undo runs with the token captured beforehand.
  */
 @Component({
   selector: 'app-mobile-app-shell',
@@ -62,6 +65,7 @@ export class MobileAppShellComponent {
   private readonly auth = inject(AuthService);
   private readonly instances = inject(InstanceService);
   private readonly platform = inject(PlatformService);
+  private readonly identity = inject(SharedIdentityService);
   private readonly snackbar = inject(SnackbarService);
   private readonly undo = inject(UndoService);
   private readonly translate = inject(TranslateService);
@@ -114,13 +118,23 @@ export class MobileAppShellComponent {
     if (this.stopping()) return;
     this.stopping.set(true);
     try {
+      const personToken = this.sharedToken();
       const outcome = await this.timer.stop();
-      this.undo.offer(this.timer.stoppedMessage(outcome.stopped), () => this.timer.undoStop(outcome));
+      this.undo.offer(
+        this.timer.stoppedMessage(outcome.stopped),
+        () => this.timer.undoStop(outcome, personToken),
+        personToken ? () => this.identity.clear() : undefined,
+      );
     } catch {
       this.snackbar.error(this.translate.instant('mobileApp.jobs.actionFailed'));
     } finally {
       this.stopping.set(false);
     }
+  }
+
+  private sharedToken(): string | undefined {
+    if (!this.instances.instance()?.shared || !this.identity.identified()) return undefined;
+    return this.auth.token() ?? undefined;
   }
 
   private listenForTimerEvents(): void {

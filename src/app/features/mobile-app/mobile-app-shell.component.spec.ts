@@ -12,6 +12,7 @@ import { InstanceService } from '../../shared/services/instance.service';
 import { MobileTimerService } from '../../shared/services/mobile-timer.service';
 import { OfflineQueueService } from '../../shared/services/offline-queue.service';
 import { PlatformService } from '../../shared/services/platform.service';
+import { SharedIdentityService } from '../../shared/services/shared-identity.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { TimerHubService } from '../../shared/services/timer-hub.service';
 import { UndoService } from '../../shared/services/undo.service';
@@ -41,6 +42,8 @@ describe('MobileAppShellComponent timer strip', () => {
     connect: vi.fn(), disconnect: vi.fn(), onTimerStartedEvent: vi.fn(), onTimerStoppedEvent: vi.fn(), clearCallbacks: vi.fn(),
   };
   const offer = vi.fn();
+  const identified = signal(false);
+  const identity = { identified, clear: vi.fn() };
   const snackbar = { success: vi.fn(), error: vi.fn() };
   const instant = vi.fn((key: string) => key);
 
@@ -62,6 +65,8 @@ describe('MobileAppShellComponent timer strip', () => {
     hub.connect.mockReset().mockResolvedValue(undefined);
     hub.disconnect.mockReset().mockResolvedValue(undefined);
     offer.mockReset();
+    identified.set(false);
+    identity.clear.mockReset();
     hub.onTimerStartedEvent.mockReset();
     hub.onTimerStoppedEvent.mockReset();
     snackbar.success.mockReset();
@@ -78,6 +83,7 @@ describe('MobileAppShellComponent timer strip', () => {
         { provide: AuthService, useValue: { token } },
         { provide: InstanceService, useValue: { instance: () => ({ id: 'shop', shared }) } },
         { provide: PlatformService, useValue: { isNative: false, mobileShell: true } },
+        { provide: SharedIdentityService, useValue: identity },
         { provide: SnackbarService, useValue: snackbar },
         { provide: UndoService, useValue: { offer } },
         { provide: TranslateService, useValue: { instant } },
@@ -140,10 +146,32 @@ describe('MobileAppShellComponent timer strip', () => {
 
     expect(timer.stop).toHaveBeenCalledOnce();
     expect(timer.stoppedMessage).toHaveBeenCalledWith({ jobNumber: 'JOB-42' });
-    const [message, compensate] = offer.mock.calls[0];
+    const [message, compensate, closed] = offer.mock.calls[0];
     expect(message).toBe('stopped-message');
+    expect(closed).toBeUndefined();
     await compensate();
-    expect(timer.undoStop).toHaveBeenCalledWith(outcome);
+    expect(timer.undoStop).toHaveBeenCalledWith(outcome, undefined);
+  });
+
+  it('on a shared device, Stop undoes as the person who stopped and ends their identity after', async () => {
+    shared = true;
+    identified.set(true);
+    token.set('person-token');
+    const outcome = { stopped: { jobNumber: 'JOB-42' }, queuedId: null };
+    timer.stop.mockImplementation(async () => {
+      token.set(null);
+      return outcome;
+    });
+    const shell = create();
+
+    await shell.stopTimer();
+
+    const [, compensate, closed] = offer.mock.calls[0];
+    await compensate();
+    expect(timer.undoStop).toHaveBeenCalledWith(outcome, 'person-token');
+    expect(identity.clear).not.toHaveBeenCalled();
+    closed();
+    expect(identity.clear).toHaveBeenCalledOnce();
   });
 
   it('drops the timer hub on sign-out and reconnects for the next session', () => {
