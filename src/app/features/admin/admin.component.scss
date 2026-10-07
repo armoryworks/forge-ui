@@ -420,6 +420,28 @@
   }
 }
 
+.settings-item--highlight {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.numbering-toggles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: $sp-xs $sp-lg;
+
+  &__item {
+    padding: $sp-xs $sp-sm;
+    border: $border-width-thin solid transparent;
+    border-radius: $border-radius;
+
+    &--highlight {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+  }
+}
+
 .settings-input,
 .settings-select {
   width: 100%;

@@ -29,6 +29,7 @@ export class ManualNumberSettingsService {
   private readonly _settings = signal<ManualNumberSettings>(ALL_DISABLED);
   private loaded = false;
   private inFlight = false;
+  private refetchAfterFlight = false;
 
   /** Current flags (all-disabled until a load succeeds). */
   readonly settings = this._settings.asReadonly();
@@ -42,7 +43,11 @@ export class ManualNumberSettingsService {
   /** Re-reads the flags, e.g. after an admin toggles one in settings. */
   refresh(): void {
     this.loaded = false;
-    if (!this.inFlight) this.fetch();
+    if (this.inFlight) {
+      this.refetchAfterFlight = true;
+      return;
+    }
+    this.fetch();
   }
 
   /** Whether manual numbers are enabled for the given entity. */
@@ -58,8 +63,15 @@ export class ManualNumberSettingsService {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: (s) => { this._settings.set({ ...ALL_DISABLED, ...s }); this.loaded = true; this.inFlight = false; },
-        error: () => { this.inFlight = false; },
+        next: (s) => { this._settings.set({ ...ALL_DISABLED, ...s }); this.loaded = true; this.settle(); },
+        error: () => this.settle(),
       });
+  }
+
+  private settle(): void {
+    this.inFlight = false;
+    if (!this.refetchAfterFlight) return;
+    this.refetchAfterFlight = false;
+    this.fetch();
   }
 }

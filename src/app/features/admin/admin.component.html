@@ -400,6 +400,27 @@
           }
         </div>
 
+        <div class="settings-section" data-testid="numbering-settings">
+          <div class="settings-section__header">
+            <h3 class="settings-section__title">
+              <span class="material-icons-outlined">pin</span>
+              {{ 'admin.numbering.title' | translate }}
+            </h3>
+          </div>
+          <div class="numbering-toggles">
+            @for (row of numberingRows(); track row.key) {
+              <div class="numbering-toggles__item"
+                [attr.data-setting-key]="row.key"
+                [class.numbering-toggles__item--highlight]="highlightedSetting() === row.key">
+                <app-toggle
+                  [label]="row.labelKey ? (row.labelKey | translate) : row.displayName"
+                  [formControl]="row.control"
+                  [attr.data-testid]="'numbering-toggle-' + row.key" />
+              </div>
+            }
+          </div>
+        </div>
+
         <!-- System Settings -->
         <div class="settings-section">
           <div class="settings-section__header">
@@ -467,7 +488,9 @@
 
         <div class="settings-grid">
           @for (def of settingDefinitions; track def.key) {
-            <div class="settings-item">
+            <div class="settings-item"
+              [attr.data-setting-key]="def.key"
+              [class.settings-item--highlight]="highlightedSetting() === def.key">
               <div class="settings-item__header">
                 <label class="settings-item__label" [for]="'setting-' + def.key">{{ def.label }}</label>
                 <span class="settings-item__description">{{ def.description }}</span>

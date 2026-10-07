@@ -1,6 +1,6 @@
 import { DatePipe, LowerCasePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, OnInit, signal } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, inject, Injector, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -13,6 +13,9 @@ import { SystemSetting } from './models/system-setting.model';
 import { StageRequest } from './models/stage-request.model';
 import { ReferenceDataGroup } from './models/reference-data-group.model';
 import { TerminologyEntryItem } from './models/terminology-entry-item.model';
+import { NumberingSettingRow } from './models/numbering-setting-row.model';
+import { NUMBERING_SETTING_LABELS } from './models/numbering-setting-labels.const';
+import { AdminSettingsService } from './settings/services/admin-settings.service';
 import { TrackType } from '../../shared/models/track-type.model';
 import { TrackTypeDialogComponent } from './components/track-type-dialog.component';
 import { AddDeviceDialogComponent } from './components/add-device-dialog/add-device-dialog.component';
@@ -103,6 +106,9 @@ export class AdminComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
+  private readonly adminSettings = inject(AdminSettingsService);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
 
   private static readonly VALID_TABS = new Set(['overview', 'users', 'track-types', 'reference-data', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'role-templates', 'compliance', 'sales-tax', 'audit-log', 'time-corrections', 'events', 'announcements', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'bi-api-keys', 'system-api-keys', 'connections']);
   private static readonly ADMIN_ONLY_TABS = new Set(['overview', 'users', 'track-types', 'reference-data', 'settings', 'integrations', 'ai-assistants', 'teams', 'role-templates', 'sales-tax', 'audit-log', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'bi-api-keys', 'system-api-keys', 'connections']);
@@ -222,6 +228,12 @@ export class AdminComponent implements OnInit {
   private readonly settingsLoaded = signal(false);
   protected readonly systemSettings = signal<SystemSetting[]>([]);
   protected readonly settingsEdits = signal<Map<string, string>>(new Map());
+  private readonly numberingLoaded = signal(false);
+  protected readonly numberingRows = signal<NumberingSettingRow[]>([]);
+  protected readonly highlightedSetting = toSignal(
+    this.route.queryParamMap.pipe(map(params => params.get('highlight'))),
+    { initialValue: null },
+  );
 
   // Company Profile
   private readonly profileLoaded = signal(false);
@@ -287,13 +299,11 @@ export class AdminComponent implements OnInit {
 
   protected readonly settingDefinitions: { key: string; label: string; description: string; type: 'text' | 'number' | 'boolean' }[] = [
     { key: 'app.name', label: 'Application Name', description: 'Name displayed in the header and browser tab', type: 'text' },
-    { key: 'app.company_name', label: 'Company Name', description: 'Your company name for documents and invoices', type: 'text' },
     { key: 'planning.cycle_duration_days', label: 'Planning Cycle (Days)', description: 'Default planning cycle length in days', type: 'number' },
     { key: 'planning.nudge_hour', label: 'Daily Nudge Hour (24h)', description: 'Hour of day for daily planning nudge (0-23)', type: 'number' },
     { key: 'files.max_upload_size_mb', label: 'Max Upload Size (MB)', description: 'Maximum file upload size in megabytes', type: 'number' },
     { key: 'jobs.default_priority', label: 'Default Job Priority', description: 'Default priority for new jobs (Low, Normal, High, Urgent)', type: 'text' },
     { key: 'jobs.auto_archive_days', label: 'Auto-Archive After (Days)', description: 'Days after completion before auto-archiving jobs (0 = disabled)', type: 'number' },
-    { key: 'parts.allow_manual_numbers', label: 'Manual Part Numbers', description: 'Allow entering a custom part number when creating a part (leave blank to auto-generate)', type: 'boolean' },
     { key: 'notifications.email_enabled', label: 'Email Notifications', description: 'Enable email notifications for mentions and assignments', type: 'boolean' },
     { key: 'theme.primary_color', label: 'Primary Brand Color', description: 'Primary theme color (hex, e.g. #0d9488)', type: 'text' },
     { key: 'theme.accent_color', label: 'Accent Brand Color', description: 'Accent theme color (hex, e.g. #7c3aed)', type: 'text' },
@@ -339,6 +349,7 @@ export class AdminComponent implements OnInit {
       if (tab === 'reference-data' && this.referenceDataGroups().length === 0) this.loadReferenceData();
       if (tab === 'terminology' && this.terminologyEntries().length === 0) this.loadTerminology();
       if (tab === 'settings' && !this.settingsLoaded()) this.loadSystemSettings();
+      if (tab === 'settings' && !this.numberingLoaded()) this.loadNumberingSettings();
       if (tab === 'settings' && !this.profileLoaded()) this.loadCompanyProfile();
       if (tab === 'settings' && !this.locationsLoaded()) this.loadCompanyLocations();
       if (tab === 'settings' && this.telemetryStatus() === null) this.loadTelemetry();
@@ -820,6 +831,54 @@ export class AdminComponent implements OnInit {
       },
       error: () => { this.error.set(this.translate.instant('admin.loadSettingsFailed')); this.loading.set(false); },
     });
+  }
+
+  private loadNumberingSettings(): void {
+    this.numberingLoaded.set(true);
+    const labels = new Map(NUMBERING_SETTING_LABELS.map(l => [l.key, l.labelKey]));
+    this.adminSettings.getGroup('Numbering').subscribe({
+      next: (entries) => {
+        const rows = [...entries]
+          .sort((a, b) => a.sortOrder - b.sortOrder)
+          .map(entry => {
+            const control = new FormControl(entry.value?.toLowerCase() === 'true', { nonNullable: true });
+            control.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+              .subscribe(enabled => this.saveNumberingSetting(entry.key, enabled, control));
+            return { key: entry.key, labelKey: labels.get(entry.key) ?? null, displayName: entry.displayName, control };
+          });
+        this.numberingRows.set(rows);
+        this.scrollToHighlightedSetting();
+      },
+      error: () => {
+        this.numberingLoaded.set(false);
+        this.snackbar.error(this.translate.instant('admin.loadSettingsFailed'));
+      },
+    });
+  }
+
+  private saveNumberingSetting(key: string, enabled: boolean, control: FormControl<boolean>): void {
+    control.disable({ emitEvent: false });
+    this.adminSettings.updateSetting(key, String(enabled)).subscribe({
+      next: () => {
+        control.enable({ emitEvent: false });
+        this.snackbar.success(this.translate.instant('admin.settingsSaved'));
+      },
+      error: () => {
+        control.setValue(!enabled, { emitEvent: false });
+        control.enable({ emitEvent: false });
+        this.snackbar.error(this.translate.instant('admin.settingsSaveFailed'));
+      },
+    });
+  }
+
+  private scrollToHighlightedSetting(): void {
+    const key = this.highlightedSetting();
+    if (!key) return;
+    afterNextRender(() => {
+      const target = Array.from(this.host.nativeElement.querySelectorAll<HTMLElement>('[data-setting-key]'))
+        .find(el => el.dataset['settingKey'] === key);
+      target?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }, { injector: this.injector });
   }
 
   protected onSettingChange(key: string, value: string): void {

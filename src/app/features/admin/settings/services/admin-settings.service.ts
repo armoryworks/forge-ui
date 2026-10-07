@@ -26,10 +26,14 @@ export class AdminSettingsService {
     });
   }
 
+  getGroup(group: string): Observable<SettingsCatalogEntry[]> {
+    const params = new URLSearchParams({ group });
+    return this.http.get<SettingsCatalogEntry[]>(`${this.base}?${params}`);
+  }
+
   loadGroup(group: string): void {
     this.loading.set(true);
-    const params = new URLSearchParams({ group });
-    this.http.get<SettingsCatalogEntry[]>(`${this.base}?${params}`).subscribe({
+    this.getGroup(group).subscribe({
       next: (entries) => {
         this.entries.set(entries);
         this.loading.set(false);
