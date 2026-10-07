@@ -2,6 +2,8 @@ import {
   ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, OnDestroy, OnInit, signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -15,7 +17,7 @@ import { KioskSearchBarComponent } from '../components/kiosk-search-bar/kiosk-se
 import { KioskSetupComponent } from '../components/kiosk-setup/kiosk-setup.component';
 import { ShopFloorService } from '../services/shop-floor.service';
 import { AuthService } from '../../../shared/services/auth.service';
-import { ClockEventTypeService } from '../../../shared/services/clock-event-type.service';
+import { ClockEventTypeDef, ClockEventTypeService } from '../../../shared/services/clock-event-type.service';
 import { WebHidRfidService } from '../../../shared/services/web-hid-rfid.service';
 import { ClockWorker } from '../models/clock-worker.model';
 import { ShopFloorOverview } from '../models/shop-floor-overview.model';
@@ -25,13 +27,15 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
 
 const REFRESH_INTERVAL_MS = 15_000;
 const AUTO_LOGOUT_MS = 30_000;
+const PUNCH_FEEDBACK_MS = 2_000;
+const SUPERVISE_ROLES = ['Admin', 'Manager'];
 
 type KioskPhase = 'setup' | 'dashboard' | 'identifying' | 'pin' | 'job-scanned' | 'manual-login' | 'clock';
 
 @Component({
   selector: 'app-shop-floor-clock',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe, AvatarComponent, InputComponent, BarcodeScanInputComponent, KioskSearchBarComponent, KioskSetupComponent],
+  imports: [ReactiveFormsModule, DatePipe, NgTemplateOutlet, TranslatePipe, AvatarComponent, InputComponent, BarcodeScanInputComponent, KioskSearchBarComponent, KioskSetupComponent],
   templateUrl: './shop-floor-clock.component.html',
   styleUrl: './shop-floor-clock.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -88,8 +92,18 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
   // Clock phase
   protected readonly clockedIn = computed(() => this.workers().filter(w => w.isClockedIn));
   protected readonly clockedOut = computed(() => this.workers().filter(w => !w.isClockedIn));
+  private readonly signedInUserId = computed(() => this.authService.user()?.id ?? null);
+  protected readonly canSupervise = computed(() =>
+    this.authService.user()?.roles.some(r => SUPERVISE_ROLES.includes(r)) ?? false);
+  protected readonly selfWorker = computed(() =>
+    this.workers().find(w => w.userId === this.signedInUserId()) ?? null);
+  protected readonly otherWorkers = computed(() =>
+    this.canSupervise() ? this.workers().filter(w => w.userId !== this.signedInUserId()) : []);
+  protected readonly punchError = signal<{ detail: string } | null>(null);
+  protected readonly punchRecorded = signal<string | null>(null);
 
   private autoLogoutTimer: ReturnType<typeof setTimeout> | null = null;
+  private punchFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
 
   // Bridge RFID relay scans into the kiosk scan flow
   private readonly rfidBridge = effect(() => {
@@ -120,6 +134,8 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.rfid.disconnect();
+    this.clearAutoLogoutTimer();
+    this.clearPunchFeedbackTimer();
   }
 
   private checkTerminalConfig(): void {
@@ -292,19 +308,25 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
     this.startAutoLogoutTimer();
   }
 
-  protected clockAction(worker: ClockWorker, eventType: string): void {
-    if (this.processing()) return;
+  protected clockAction(worker: ClockWorker, action: ClockEventTypeDef): void {
+    if (this.processing() !== null || this.punchRecorded() !== null) return;
     this.processing.set(worker.userId);
+    this.punchError.set(null);
     this.resetAutoLogoutTimer();
 
-    this.shopFloorService.clockInOut(worker.userId, eventType).subscribe({
+    this.shopFloorService.clockInOut(worker.userId, action.code).subscribe({
       next: () => {
         this.processing.set(null);
-        this.ephemeralLogout();
+        this.clearAutoLogoutTimer();
+        this.punchRecorded.set(this.translate.instant('shopFloor.punchRecorded', {
+          event: action.label,
+          time: this.formatTime(new Date().toISOString()),
+        }));
+        this.punchFeedbackTimer = setTimeout(() => this.ephemeralLogout(), PUNCH_FEEDBACK_MS);
       },
-      error: () => {
+      error: (err: HttpErrorResponse) => {
         this.processing.set(null);
-        this.ephemeralLogout();
+        this.punchError.set({ detail: err?.error?.detail ?? err?.error?.title ?? '' });
       },
     });
   }
@@ -319,6 +341,9 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
 
   protected resetToDashboard(): void {
     this.clearAutoLogoutTimer();
+    this.clearPunchFeedbackTimer();
+    this.punchError.set(null);
+    this.punchRecorded.set(null);
     this.authService.clearAuth();
     this.scannedBarcode.set(null);
     this.scannedJob.set(null);
@@ -367,6 +392,13 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
     if (this.autoLogoutTimer) {
       clearTimeout(this.autoLogoutTimer);
       this.autoLogoutTimer = null;
+    }
+  }
+
+  private clearPunchFeedbackTimer(): void {
+    if (this.punchFeedbackTimer) {
+      clearTimeout(this.punchFeedbackTimer);
+      this.punchFeedbackTimer = null;
     }
   }
 

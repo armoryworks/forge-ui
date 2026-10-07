@@ -331,24 +331,59 @@
         </div>
       }
 
-      <div class="sf-clock-actions__grid">
-        @for (worker of workers(); track worker.userId) {
-          @for (action of clockTypes.getAvailableActions(worker.status); track action.code) {
-            <button class="sf-action-btn"
-              [style.--btn-color]="action.color"
-              [disabled]="processing() !== null"
-              (click)="clockAction(worker, action.code)">
-              @if (processing() === worker.userId) {
-                <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
-              } @else {
-                <span class="material-icons-outlined">{{ action.icon }}</span>
-              }
-              <span class="sf-action-btn__label">{{ action.label }}</span>
-              <span class="sf-action-btn__name">{{ worker.name }}</span>
-            </button>
+      @if (punchError(); as failure) {
+        <div class="sf-auth-card__error sf-clock-actions__error" role="alert" data-testid="sf-punch-error">
+          <span class="material-icons-outlined">error</span>
+          <span>
+            {{ 'shopFloor.punchNotRecorded' | translate }}
+            @if (failure.detail) {
+              <span class="sf-clock-actions__error-detail">{{ failure.detail }}</span>
+            }
+          </span>
+        </div>
+      }
+
+      @if (punchRecorded(); as message) {
+        <div class="sf-clock-actions__success" role="status" data-testid="sf-punch-recorded">
+          <span class="material-icons-outlined">check_circle</span>
+          {{ message }}
+        </div>
+      }
+
+      @if (selfWorker(); as worker) {
+        <div class="sf-clock-actions__grid" data-testid="sf-self-punch">
+          <ng-container *ngTemplateOutlet="punchButtons; context: { $implicit: worker }" />
+        </div>
+      }
+
+      @if (otherWorkers().length > 0) {
+        <h3 class="sf-clock-actions__subtitle">{{ 'shopFloor.supervisorPunch' | translate }}</h3>
+        <div class="sf-clock-actions__grid" data-testid="sf-supervisor-punch">
+          @for (worker of otherWorkers(); track worker.userId) {
+            <ng-container *ngTemplateOutlet="punchButtons; context: { $implicit: worker }" />
           }
+        </div>
+      }
+
+      <ng-template #punchButtons let-worker>
+        @for (action of clockTypes.getAvailableActions(worker.status); track action.code) {
+          <button class="sf-action-btn"
+            [style.--btn-color]="action.color"
+            [disabled]="processing() !== null || punchRecorded() !== null"
+            (click)="clockAction(worker, action)">
+            @if (processing() === worker.userId) {
+              <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
+            } @else {
+              <span class="material-icons-outlined">{{ action.icon }}</span>
+            }
+            <span class="sf-action-btn__label">{{ action.label }}</span>
+            <span class="sf-action-btn__name">{{ worker.name }}</span>
+            @if (worker.openFromPriorShift && worker.openSince) {
+              <span class="sf-action-btn__warning">{{ 'shopFloor.stillClockedInSince' | translate: { date: (worker.openSince | date: 'short') } }}</span>
+            }
+          </button>
         }
-      </div>
+      </ng-template>
       <button class="action-btn sf-clock-actions__cancel" (click)="resetToDashboard()">
         <span class="material-icons-outlined">arrow_back</span>
         {{ 'common.cancel' | translate }}

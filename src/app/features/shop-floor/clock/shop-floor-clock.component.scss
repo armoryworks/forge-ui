@@ -499,6 +499,46 @@
   color: var(--text-muted);
 }
 
+.sf-action-btn__warning {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--warning);
+}
+
+.sf-clock-actions__subtitle {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: 0;
+  align-self: flex-start;
+}
+
+.sf-clock-actions__error {
+  font-size: var(--font-size-lg);
+}
+
+.sf-clock-actions__error-detail {
+  display: block;
+  font-weight: 400;
+}
+
+.sf-clock-actions__success {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  width: 100%;
+  background: var(--success-light);
+  color: var(--success);
+  border: $border-width-thin solid var(--success);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+  }
+}
+
 // ─── Shared ───
 .sf-empty {
   font-size: var(--font-size-md);
