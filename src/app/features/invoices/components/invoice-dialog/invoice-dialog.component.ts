@@ -99,7 +99,7 @@ export class InvoiceDialogComponent {
   );
 
   protected readonly invoiceForm = new FormGroup({
-    invoiceNumber: new FormControl(''),
+    invoiceNumber: new FormControl('', [Validators.maxLength(20)]),
     customerId: new FormControl<number | null>(null, [Validators.required]),
     salesOrderId: new FormControl<number | null>(null),
     shipmentId: new FormControl<number | null>(null),

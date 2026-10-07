@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -51,7 +51,7 @@ export class InvoiceDetailPanelComponent {
 
   // Inline rename of the invoice number — only offered while Draft and when the
   // tenant allows manual numbers. Backed by the dedicated rename endpoint.
-  protected readonly numberControl = new FormControl('');
+  protected readonly numberControl = new FormControl('', [Validators.maxLength(20)]);
   protected readonly editingNumber = signal(false);
   protected readonly savingNumber = signal(false);
   /** Manual numbering is on, but this record's lifecycle fixes the number. */
