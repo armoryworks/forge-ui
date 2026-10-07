@@ -78,9 +78,15 @@ export class OperationTimeTabComponent {
   }
 
   formatMinutes(minutes: number): string {
-    const h = Math.floor(minutes / 60);
-    const m = Math.round(minutes % 60);
-    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+    const totalSeconds = Math.round(minutes * 60);
+    if (totalSeconds < 60) return `${totalSeconds}s`;
+    if (totalSeconds < 3600) {
+      const m = Math.floor(totalSeconds / 60);
+      const s = totalSeconds % 60;
+      return `${m}m ${String(s).padStart(2, '0')}s`;
+    }
+    const totalMinutes = Math.round(minutes);
+    return `${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60}m`;
   }
 
   getVarianceClass(variance: number): string {
