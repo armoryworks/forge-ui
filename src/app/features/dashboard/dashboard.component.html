@@ -54,7 +54,7 @@
               @for (widget of availableWidgets(); track widget.id) {
                 <button class="widget-add-menu__item" (click)="addWidget(widget)">
                   <span class="material-icons-outlined widget-add-menu__icon">{{ widget.icon }}</span>
-                  <span class="widget-add-menu__label">{{ widget.title }}</span>
+                  <span class="widget-add-menu__label">{{ widget.titleKey ? (widget.titleKey | translate) : widget.title }}</span>
                 </button>
               }
             </div>
@@ -120,7 +120,7 @@
               }
 
               <app-dashboard-widget
-                [title]="widget.title"
+                [title]="widget.titleKey ? (widget.titleKey | translate) : (widget.title ?? '')"
                 [icon]="widget.icon"
                 [widgetKey]="widget.id"
                 [viewAllLink]="widget.viewAllLink ?? null"

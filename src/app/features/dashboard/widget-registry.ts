@@ -19,7 +19,7 @@ export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
   },
   {
     id: 'jobs-by-stage',
-    title: 'Jobs by Stage',
+    titleKey: 'dashboard.jobsByStage',
     icon: 'bar_chart',
     component: 'jobs-by-stage',
     capability: 'CAP-EXT-KANBAN',

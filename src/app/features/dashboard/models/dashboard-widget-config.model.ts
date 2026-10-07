@@ -1,6 +1,7 @@
 export interface DashboardWidgetConfig {
   id: string;
-  title: string;
+  title?: string;
+  titleKey?: string;
   icon: string;
   component: string;
   /**
