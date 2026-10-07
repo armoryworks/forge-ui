@@ -7,7 +7,8 @@ const UNDO_WINDOW_MS = 30_000;
 
 /**
  * Every action shows an undo toast for thirty seconds; tapping Undo runs
- * the compensating action. No confirmation dialogs anywhere in the shell.
+ * the compensating action. The only confirmation in the shell is the prompt
+ * before a timer switches from one job to another.
  */
 @Injectable({ providedIn: 'root' })
 export class UndoService {
