@@ -85,7 +85,9 @@ export class SoDialogComponent {
   protected readonly creditHoldMessage = computed(() => {
     const status = this.creditStatus();
     return status?.isOnHold
-      ? this.translate.instant('salesOrders.creditHoldWarning', { reason: status.holdReason ?? '' })
+      ? this.translate.instant('salesOrders.creditHoldWarning', {
+        reason: status.holdReason?.trim() || this.translate.instant('onboarding.notSpecified'),
+      })
       : null;
   });
 

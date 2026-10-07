@@ -5,7 +5,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { MatDialog } from '@angular/material/dialog';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader, TranslateService } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
@@ -346,6 +346,23 @@ describe('SoDialogComponent', () => {
 
       expect(internals.creditHoldMessage()).not.toBeNull();
       expect(component.form.valid).toBe(true);
+      httpMock.verify();
+    });
+
+    it('names the hold reason, or says it was not specified', () => {
+      const { component, internals, httpMock } = setup();
+      const translate = TestBed.inject(TranslateService);
+      translate.setTranslation('en', {
+        salesOrders: { creditHoldWarning: 'On hold ({{reason}})' },
+        onboarding: { notSpecified: 'Not specified' },
+      });
+      translate.use('en');
+
+      selectCustomer(component, httpMock, [], creditStatus({ isOnHold: true, holdReason: 'Past due' }));
+      expect(internals.creditHoldMessage()).toBe('On hold (Past due)');
+
+      selectCustomer(component, httpMock, [], creditStatus({ customerId: 6, isOnHold: true, holdReason: ' ' }), 6);
+      expect(internals.creditHoldMessage()).toBe('On hold (Not specified)');
       httpMock.verify();
     });
 
