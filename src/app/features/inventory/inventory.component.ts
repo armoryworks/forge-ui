@@ -71,15 +71,20 @@ export class InventoryComponent {
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
-  protected readonly activeTab = toSignal(
+  private readonly routeTab = toSignal(
     this.route.paramMap.pipe(map(p => {
       const tab = p.get('tab') as InventoryTab;
       return InventoryComponent.VALID_TABS.includes(tab) ? tab : 'stock';
     })),
-    { initialValue: 'stock' },
+    { initialValue: 'stock' as InventoryTab },
   );
 
   protected readonly inspectionEnabled = computed(() => this.capabilities.isEnabled('CAP-QC-INSPECTION'));
+
+  protected readonly activeTab = computed<InventoryTab>(() => {
+    const tab = this.routeTab();
+    return tab === 'inspection' && !this.inspectionEnabled() ? 'stock' : tab;
+  });
 
   /** Classic (table) vs Visual (chart) presentation of the Stock Levels tab. URL ?view= is the whole source of truth; no persisted preference. */
   protected readonly viewMode = toSignal(
