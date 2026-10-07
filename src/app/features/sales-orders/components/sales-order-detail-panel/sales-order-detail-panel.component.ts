@@ -6,6 +6,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { concatMap, from, toArray } from 'rxjs';
 
 import { AuthorizedByComponent } from '../../../communications/components/authorized-by/authorized-by.component';
 import { SalesOrderService } from '../../services/sales-order.service';
@@ -57,6 +58,13 @@ import { ConfirmSalesOrderResponse } from '../../models/confirm-sales-order-resp
 const CAP_SO_ACCEPTANCE = 'CAP-O2C-SO-ACCEPTANCE';
 /** Capability gating customer credit limits and credit holds. */
 const CAP_CREDIT_LIMITS = 'CAP-O2C-CREDIT-LIMITS';
+
+const SKIP_REASON_KEYS: Record<string, string> = {
+  'No part on this line': 'salesOrders.workOrderSkipNoPart',
+  'Bought part with no routing': 'salesOrders.workOrderSkipBuyNoRouting',
+  'Phantom part with no routing': 'salesOrders.workOrderSkipPhantomNoRouting',
+  'Already has a job': 'salesOrders.workOrderSkipHasJob',
+};
 
 type TabId = 'overview' | 'lines' | 'schedule' | 'stages' | 'shipments' | 'returns' | 'documents' | 'invoices' | 'customer-po' | 'acceptance' | 'activity';
 
@@ -155,6 +163,16 @@ export class SalesOrderDetailPanelComponent {
 
   protected readonly creditStatus = signal<CreditStatus | null>(null);
   protected readonly creditHold = computed(() => this.creditStatus()?.isOnHold === true);
+  protected readonly creditHoldMessage = computed(() => {
+    const status = this.creditStatus();
+    if (!status?.isOnHold) return '';
+    const draft = this.so()?.status === 'Draft';
+    const reason = status.holdReason?.trim();
+    if (reason) {
+      return this.translate.instant(draft ? 'salesOrders.creditHoldWarning' : 'salesOrders.creditHoldWarningOpen', { reason });
+    }
+    return this.translate.instant(draft ? 'salesOrders.creditHoldWarningNoReason' : 'salesOrders.creditHoldWarningOpenNoReason');
+  });
   protected readonly confirmDisabled = computed(() => this.confirmBlockedByAcceptance() || this.creditHold());
 
   protected readonly recordForm = new FormGroup({
@@ -245,15 +263,28 @@ export class SalesOrderDetailPanelComponent {
     return so.lines.filter(l => l.jobs.length === 0);
   });
 
+  protected readonly linesNeedingWorkOrders = computed(() => {
+    const status = this.so()?.status;
+    if (status !== 'Confirmed' && status !== 'InProduction' && status !== 'PartiallyShipped') return [];
+    return this.linesWithNoJobs().filter(l => !l.isFullyShipped);
+  });
+
   protected readonly creatingJobs = signal(false);
 
-  protected readonly openLinkedJobCount = computed(() => {
+  protected readonly hasOpenLinkedJobs = computed(() => {
     const so = this.so();
-    if (!so) return 0;
-    return so.lines
-      .filter(l => !l.isFullyShipped)
-      .reduce((sum, l) => sum + l.jobs.filter(j => !j.isArchived).length, 0);
+    if (!so) return false;
+    return so.lines.some(l => !l.isFullyShipped && l.jobs.some(j => !j.isArchived));
   });
+
+  protected readonly cancelMessage = computed(() => {
+    const so = this.so();
+    if (!so) return '';
+    const key = this.hasOpenLinkedJobs() ? 'salesOrders.cancelSoMessageHold' : 'salesOrders.cancelSoMessageNoJobs';
+    return this.translate.instant(key, { number: so.orderNumber });
+  });
+
+  protected readonly taxPercent = computed(() => Math.round((this.so()?.taxRate ?? 0) * 1_000_000) / 10_000);
 
   protected readonly showCancelDialog = signal(false);
   protected readonly cancelling = signal(false);
@@ -326,6 +357,7 @@ export class SalesOrderDetailPanelComponent {
   // Billing-address picker options for the header edit (#8 / SO-8), from the
   // customer's saved addresses (also shown read-only as ship-to / bill-to).
   protected readonly customerAddresses = signal<CustomerAddress[]>([]);
+  private addressesCustomerId: number | null = null;
   protected readonly shippingAddress = computed(() => this.findAddress(this.so()?.shippingAddressId));
   protected readonly billingAddress = computed(() => this.findAddress(this.so()?.billingAddressId));
   protected readonly billingAddressOptions = computed<SelectOption[]>(() => {
@@ -601,6 +633,12 @@ export class SalesOrderDetailPanelComponent {
     return `chip ${map[status] ?? 'chip--muted'}`.trim();
   }
 
+  protected acceptedBannerKey(acceptance: SalesOrderAcceptance): string {
+    return acceptance.acceptedByName || acceptance.recordedByName
+      ? 'salesOrders.acceptance.acceptedBanner'
+      : 'salesOrders.acceptance.acceptedBannerNoName';
+  }
+
   protected acceptanceMethodLabel(method: string): string {
     const key = 'salesOrders.acceptance.method' + method;
     const t = this.translate.instant(key);
@@ -736,7 +774,7 @@ export class SalesOrderDetailPanelComponent {
       width: '440px',
       data: {
         title: this.translate.instant('salesOrders.confirmSoTitle'),
-        message: this.translate.instant('salesOrders.confirmSoMessage', {
+        message: this.translate.instant('salesOrders.confirmSoReleaseMessage', {
           number: so.orderNumber,
           count: so.lines.filter(l => l.partId != null).length,
         }),
@@ -775,18 +813,34 @@ export class SalesOrderDetailPanelComponent {
     }
   }
 
+  protected canCreateWorkOrder(line: SalesOrderLine): boolean {
+    return this.linesNeedingWorkOrders().some(l => l.id === line.id);
+  }
+
   protected createWorkOrders(line?: SalesOrderLine): void {
     const so = this.so();
     if (!so || this.creatingJobs()) return;
+    const lineIds = line ? [line.id] : this.linesNeedingWorkOrders().map(l => l.id);
+    if (lineIds.length === 0) return;
     this.creatingJobs.set(true);
-    this.soService.createMissingJobs(so.id, line?.id).subscribe({
-      next: (result) => {
+    from(lineIds).pipe(
+      concatMap(lineId => this.soService.createMissingJobs(so.id, lineId)),
+      toArray(),
+    ).subscribe({
+      next: (results) => {
         this.creatingJobs.set(false);
         this.loadDetail(so.id);
         this.changed.emit();
-        this.reportCreatedJobs(result);
+        this.reportCreatedJobs({
+          created: results.reduce((sum, r) => sum + r.created, 0),
+          skipped: results.flatMap(r => r.skipped ?? []),
+        });
       },
-      error: () => this.creatingJobs.set(false),
+      error: () => {
+        this.creatingJobs.set(false);
+        this.loadDetail(so.id);
+        this.changed.emit();
+      },
     });
   }
 
@@ -794,9 +848,18 @@ export class SalesOrderDetailPanelComponent {
     if (result.created > 0) {
       this.snackbar.success(this.translate.instant('salesOrders.workOrdersCreated', { count: result.created }));
     }
-    if (result.skipped?.length) {
-      this.snackbar.warn(result.skipped.map(s => `#${s.lineNumber}: ${s.reason}`).join(' · '));
+    if (result.skipped.length) {
+      this.snackbar.warn(result.skipped
+        .map(s => this.translate.instant('salesOrders.workOrderSkippedLine', { line: s.lineNumber, reason: this.skipReasonLabel(s.reason) }))
+        .join(' · '));
+    } else if (result.created === 0) {
+      this.snackbar.info(this.translate.instant('salesOrders.noWorkOrdersCreated'));
     }
+  }
+
+  private skipReasonLabel(reason: string): string {
+    const key = SKIP_REASON_KEYS[reason];
+    return key ? this.translate.instant(key) : reason;
   }
 
   protected cancelSo(): void {
@@ -1015,14 +1078,18 @@ export class SalesOrderDetailPanelComponent {
       requestedDeliveryDate: so.requestedDeliveryDate ? new Date(so.requestedDeliveryDate) : null,
       billingAddressId: so.billingAddressId ?? null,
     });
-    this.loadCustomerAddresses(so.customerId);
     this.editingHeader.set(true);
   }
 
   private loadCustomerAddresses(customerId: number): void {
+    if (this.addressesCustomerId === customerId) return;
+    this.addressesCustomerId = customerId;
     this.soService.getCustomerAddresses(customerId).subscribe({
       next: (addresses) => this.customerAddresses.set(addresses),
-      error: () => this.customerAddresses.set([]),
+      error: () => {
+        this.addressesCustomerId = null;
+        this.customerAddresses.set([]);
+      },
     });
   }
 

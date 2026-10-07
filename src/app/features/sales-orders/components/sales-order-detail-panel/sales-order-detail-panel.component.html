@@ -161,7 +161,7 @@
           @if (creditHold()) {
             <div class="acceptance-banner acceptance-banner--warn" data-testid="so-credit-hold-banner">
               <span class="material-icons-outlined">block</span>
-              <span>{{ 'salesOrders.creditHoldWarning' | translate:{ reason: creditStatus()?.holdReason ?? '' } }}</span>
+              <span>{{ creditHoldMessage() }}</span>
             </div>
           }
 
@@ -281,7 +281,7 @@
               <span class="info-value"><app-currency-display [value]="so.subtotal" [currency]="null" /></span>
             </div>
             <div class="info-item">
-              <span class="info-label">{{ 'salesOrders.tax' | translate }} ({{ so.taxRate * 100 | number:'1.0-4' }}%)</span>
+              <span class="info-label">{{ 'salesOrders.tax' | translate }} ({{ taxPercent() | number:'1.0-4' }}%)</span>
               <span class="info-value"><app-currency-display [value]="so.taxAmount" [currency]="null" /></span>
             </div>
             <div class="info-item">
@@ -358,7 +358,7 @@
       <!-- Line Items Tab -->
       @if (activeTab() === 'lines') {
         <div class="tab-panel" role="tabpanel">
-          @if (linesWithNoJobs().length > 1) {
+          @if (linesNeedingWorkOrders().length > 1) {
             <div class="so-lines-toolbar" *appCap="'CAP-MFG-WO-RELEASE'">
               <button class="action-btn action-btn--sm action-btn--primary" data-testid="so-create-missing-work-orders-btn"
                 [disabled]="creatingJobs()" (click)="createWorkOrders()">
@@ -439,12 +439,14 @@
                       <td colspan="8">
                         <span class="material-icons-outlined line-warning-icon">warning</span>
                         {{ 'salesOrders.noJobCreated' | translate }}
-                        <button class="action-btn action-btn--sm line-warning-action" *appCap="'CAP-MFG-WO-RELEASE'"
-                          data-testid="so-line-create-work-order-btn"
-                          [disabled]="creatingJobs()" (click)="createWorkOrders(line)">
-                          <span class="material-icons-outlined">add</span>
-                          {{ 'salesOrders.createWorkOrder' | translate }}
-                        </button>
+                        @if (canCreateWorkOrder(line)) {
+                          <button class="action-btn action-btn--sm line-warning-action" *appCap="'CAP-MFG-WO-RELEASE'"
+                            data-testid="so-line-create-work-order-btn"
+                            [disabled]="creatingJobs()" (click)="createWorkOrders(line)">
+                            <span class="material-icons-outlined">add</span>
+                            {{ 'salesOrders.createWorkOrder' | translate }}
+                          </button>
+                        }
                       </td>
                     </tr>
                   }
@@ -973,11 +975,7 @@
           @if (acceptedAcceptance(); as acc) {
             <div class="acceptance-banner acceptance-banner--ok">
               <span class="material-icons-outlined">verified</span>
-              @if (acc.acceptedByName || acc.recordedByName) {
-                <span>{{ 'salesOrders.acceptance.acceptedBanner' | translate:{ method: acceptanceMethodLabel(acc.method), by: (acc.acceptedByName || acc.recordedByName), date: (acc.acceptedAt | date:'MM/dd/yyyy') } }}</span>
-              } @else {
-                <span>{{ 'salesOrders.acceptance.acceptedBannerNoName' | translate:{ method: acceptanceMethodLabel(acc.method), date: (acc.acceptedAt | date:'MM/dd/yyyy') } }}</span>
-              }
+              <span>{{ acceptedBannerKey(acc) | translate:{ method: acceptanceMethodLabel(acc.method), by: (acc.acceptedByName || acc.recordedByName), date: (acc.acceptedAt | date:'MM/dd/yyyy') } }}</span>
             </div>
           } @else {
             <div class="acceptance-banner acceptance-banner--warn">
@@ -1090,7 +1088,7 @@
 
     @if (showCancelDialog()) {
       <app-dialog [title]="'salesOrders.cancelSoTitle' | translate" (closed)="showCancelDialog.set(false)">
-        <p class="cancel-dialog__message">{{ 'salesOrders.cancelSoMessage' | translate:{ number: so.orderNumber, jobCount: openLinkedJobCount() } }}</p>
+        <p class="cancel-dialog__message">{{ cancelMessage() }}</p>
         <div [formGroup]="cancelForm">
           <app-currency-input [label]="'salesOrders.cancelFee' | translate" formControlName="feeAmount" data-testid="so-cancel-fee" />
           <app-input [label]="'salesOrders.cancelReason' | translate" formControlName="feeReason" [maxlength]="500" data-testid="so-cancel-reason" />
