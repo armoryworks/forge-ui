@@ -521,6 +521,7 @@ export class AdminComponent implements OnInit {
             workLocationId: null,
             workLocationName: null,
             i9Status: null,
+            isNonEmployee: false,
           };
           this.editingUser.set(newUser);
           this.setupToken.set(result.setupToken);
