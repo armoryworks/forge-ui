@@ -60,36 +60,58 @@
   }
 
   <!-- Scan Result Card -->
+  @if (resolving()) {
+    <div class="scan-result" data-testid="scan-resolving">
+      <div class="scan-result__header">
+        <span class="material-icons-outlined scan-result__type-icon spin">sync</span>
+        <div class="scan-result__info">
+          <span class="scan-result__label">Looking up code...</span>
+        </div>
+      </div>
+    </div>
+  }
+
   @if (lastResult(); as result) {
-    <div class="scan-result" [class.scan-result--match]="result.route">
+    <div class="scan-result" [class.scan-result--match]="result.kind !== 'unknown'" data-testid="scan-result">
       <div class="scan-result__header">
         <span class="material-icons-outlined scan-result__type-icon">
-          @switch (result.type) {
+          @switch (result.kind) {
             @case ('job') { work }
             @case ('part') { inventory_2 }
+            @case ('bin') { shelves }
+            @case ('lot') { qr_code_2 }
+            @case ('badge') { badge }
+            @case ('salesOrder') { receipt_long }
+            @case ('purchaseOrder') { local_shipping }
             @case ('asset') { precision_manufacturing }
             @default { qr_code }
           }
         </span>
         <div class="scan-result__info">
-          <span class="scan-result__label">{{ result.label }}</span>
-          <span class="scan-result__value">{{ result.value }}</span>
+          @if (result.kind === 'unknown') {
+            <span class="scan-result__label" data-testid="scan-no-match">Nothing in Forge matches that code. Check the label or type it in.</span>
+          } @else {
+            <span class="scan-result__label">{{ result.label }}</span>
+            @if (result.subtitle) {
+              <span class="scan-result__subtitle">{{ result.subtitle }}</span>
+            }
+          }
+          <span class="scan-result__value">{{ result.code }}</span>
         </div>
       </div>
       <div class="scan-result__actions">
-        @if (result.route) {
-          <button class="action-btn action-btn--primary" (click)="navigateToResult()" aria-label="Go to scanned entity" data-testid="scan-open-btn">
-            <span class="material-icons-outlined">open_in_new</span>
-            Open
-          </button>
-        } @else {
-          <span class="scan-result__no-match">No matching entity</span>
-        }
         <button class="action-btn" (click)="resumeScanning()" aria-label="Scan again" data-testid="scan-again-btn">
           <span class="material-icons-outlined">refresh</span>
           Scan Again
         </button>
       </div>
+    </div>
+  }
+
+  @if (lookupError(); as message) {
+    <div class="scan-error" role="alert" data-testid="scan-lookup-error">
+      <span class="material-icons-outlined">warning</span>
+      {{ message }}
     </div>
   }
 

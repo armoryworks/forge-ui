@@ -11,15 +11,9 @@ import {
 import { Router } from '@angular/router';
 import { Html5Qrcode, Html5QrcodeScannerState } from 'html5-qrcode'; // camera scanner
 
-import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { ScanResolveResult } from '../../../shared/models/mobile-api.model';
+import { MobileApiService } from '../../../shared/services/mobile-api.service';
 import { ScannerService } from '../../../shared/services/scanner.service';
-
-interface ScanResult {
-  value: string;
-  type: 'job' | 'part' | 'asset' | 'unknown';
-  label: string;
-  route: string | null;
-}
 
 @Component({
   selector: 'app-mobile-scan',
@@ -31,14 +25,16 @@ interface ScanResult {
 })
 export class MobileScanComponent implements AfterViewInit, OnDestroy {
   private readonly router = inject(Router);
-  private readonly snackbar = inject(SnackbarService);
+  private readonly mobileApi = inject(MobileApiService);
   private readonly scanner = inject(ScannerService);
 
   private html5Qrcode: Html5Qrcode | null = null;
   private readonly readerEl = viewChild<ElementRef<HTMLDivElement>>('reader');
 
   protected readonly scanning = signal(false);
-  protected readonly lastResult = signal<ScanResult | null>(null);
+  protected readonly lastResult = signal<ScanResolveResult | null>(null);
+  protected readonly resolving = signal(false);
+  protected readonly lookupError = signal<string | null>(null);
   protected readonly error = signal<string | null>(null);
   protected readonly manualValue = signal('');
   protected readonly showManual = signal(false);
@@ -119,83 +115,38 @@ export class MobileScanComponent implements AfterViewInit, OnDestroy {
       this.html5Qrcode.pause(true);
     }
 
-    const result = this.parseScannedValue(value);
-    this.lastResult.set(result);
+    this.resolve(value);
 
     // Also emit to global scanner service for other consumers
     this.scanner.setContext('global');
   }
 
-  protected parseScannedValue(value: string): ScanResult {
-    const trimmed = value.trim();
+  private resolve(value: string): void {
+    const code = value.trim();
+    if (!code) return;
 
-    // Job number pattern: JOB-XXXX or job number
-    const jobMatch = trimmed.match(/^JOB-(\d+)$/i);
-    if (jobMatch) {
-      return {
-        value: trimmed,
-        type: 'job',
-        label: `Job ${trimmed}`,
-        route: `/m/jobs`,
-      };
-    }
-
-    // Part number pattern: letters + numbers (e.g., PT-1234, PART-5678)
-    const partMatch = trimmed.match(/^(PT|PART|PRT)-(\d+)$/i);
-    if (partMatch) {
-      return {
-        value: trimmed,
-        type: 'part',
-        label: `Part ${trimmed}`,
-        route: `/parts`,
-      };
-    }
-
-    // Asset tag pattern: AST-XXXX or ASSET-XXXX
-    const assetMatch = trimmed.match(/^(AST|ASSET)-(\d+)$/i);
-    if (assetMatch) {
-      return {
-        value: trimmed,
-        type: 'asset',
-        label: `Asset ${trimmed}`,
-        route: `/assets`,
-      };
-    }
-
-    // URL-based routing (QR codes with full URLs)
-    if (trimmed.includes('/m/') || trimmed.includes('/parts/') || trimmed.includes('/jobs/')) {
-      try {
-        const url = new URL(trimmed);
-        return {
-          value: trimmed,
-          type: 'unknown',
-          label: `Navigate to ${url.pathname}`,
-          route: url.pathname,
-        };
-      } catch {
-        // Not a valid URL, fall through
-      }
-    }
-
-    return {
-      value: trimmed,
-      type: 'unknown',
-      label: `Scanned: ${trimmed}`,
-      route: null,
-    };
-  }
-
-  protected navigateToResult(): void {
-    const result = this.lastResult();
-    if (!result?.route) {
-      this.snackbar.info('No matching entity found for this scan');
-      return;
-    }
-    this.router.navigateByUrl(result.route);
+    this.resolving.set(true);
+    this.lookupError.set(null);
+    this.lastResult.set(null);
+    this.mobileApi.resolveScan(code).subscribe({
+      next: (result) => {
+        this.resolving.set(false);
+        if (result.kind === 'job' && result.id !== null) {
+          this.router.navigate(['/m/jobs', result.id]);
+          return;
+        }
+        this.lastResult.set(result);
+      },
+      error: () => {
+        this.resolving.set(false);
+        this.lookupError.set('Could not look that code up. Check your connection and try again.');
+      },
+    });
   }
 
   protected resumeScanning(): void {
     this.lastResult.set(null);
+    this.lookupError.set(null);
     if (this.html5Qrcode?.getState() === Html5QrcodeScannerState.PAUSED) {
       this.html5Qrcode.resume();
     }
@@ -220,8 +171,7 @@ export class MobileScanComponent implements AfterViewInit, OnDestroy {
     const value = this.manualValue().trim();
     if (!value) return;
 
-    const result = this.parseScannedValue(value);
-    this.lastResult.set(result);
+    this.resolve(value);
     this.manualValue.set('');
   }
 
