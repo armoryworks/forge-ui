@@ -108,6 +108,62 @@ describe('LayoutService', () => {
     });
   });
 
+  describe('mobile device detection', () => {
+    const overridden: [object, string, PropertyDescriptor | undefined][] = [];
+    const override = (target: object, key: string, value: unknown): void => {
+      overridden.push([target, key, Object.getOwnPropertyDescriptor(target, key)]);
+      Object.defineProperty(target, key, { configurable: true, get: () => value });
+    };
+
+    const detect = (opts: { ua: string; touch: number; width: number; height: number; standalone?: boolean }): boolean => {
+      override(navigator, 'userAgent', opts.ua);
+      override(navigator, 'maxTouchPoints', opts.touch);
+      override(window, 'innerWidth', opts.width);
+      override(window, 'innerHeight', opts.height);
+      vi.spyOn(window, 'matchMedia').mockReturnValue({ matches: !!opts.standalone } as MediaQueryList);
+      return (service as unknown as { detectMobileDevice(): boolean }).detectMobileDevice();
+    };
+
+    const androidPhone = 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/126.0 Mobile Safari/537.36';
+    const androidTablet = 'Mozilla/5.0 (Linux; Android 14; SM-X910) AppleWebKit/537.36 Chrome/126.0 Safari/537.36';
+    const iPhone = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148';
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+      for (const [target, key, original] of overridden.splice(0).reverse()) {
+        if (original) {
+          Object.defineProperty(target, key, original);
+        } else {
+          delete (target as Record<string, unknown>)[key];
+        }
+      }
+    });
+
+    it('treats an Android tablet as desktop', () => {
+      expect(detect({ ua: androidTablet, touch: 10, width: 1280, height: 800 })).toBe(false);
+    });
+
+    it('treats an Android phone as mobile even in a wide landscape viewport', () => {
+      expect(detect({ ua: androidPhone, touch: 5, width: 915, height: 800 })).toBe(true);
+    });
+
+    it('treats an iPhone as mobile', () => {
+      expect(detect({ ua: iPhone, touch: 5, width: 1024, height: 900 })).toBe(true);
+    });
+
+    it('treats any narrow touch device as mobile', () => {
+      expect(detect({ ua: androidTablet, touch: 10, width: 600, height: 900 })).toBe(true);
+    });
+
+    it('treats an installed app on a large screen as desktop', () => {
+      expect(detect({ ua: 'Mozilla/5.0 (X11; Linux x86_64)', touch: 0, width: 1920, height: 1080, standalone: true })).toBe(false);
+    });
+
+    it('treats an installed app on a phone-size screen as mobile', () => {
+      expect(detect({ ua: 'Mozilla/5.0 (X11; Linux x86_64)', touch: 0, width: 400, height: 800, standalone: true })).toBe(true);
+    });
+  });
+
   describe('getDefaultRoute', () => {
     it('should return /dashboard on desktop', () => {
       // Test environment is desktop-like

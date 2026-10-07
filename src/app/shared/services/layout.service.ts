@@ -180,11 +180,8 @@ export class LayoutService {
     // but the shorter dimension (height in landscape, width in portrait) reveals the phone form factor
     const narrowDimension = Math.min(window.innerWidth, window.innerHeight);
     const isPhoneSize = narrowDimension < MOBILE_BREAKPOINT;
-    // User-agent fallback for edge cases (e.g., desktop touchscreen monitors)
-    const mobileUA = /Android|iPhone|iPod|webOS|BlackBerry|Opera Mini/i.test(navigator.userAgent);
-    // Standalone PWA or Capacitor native always counts as mobile device
+    const phoneUA = /Android.*Mobile|iPhone|iPod/.test(navigator.userAgent);
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-    const result = (hasTouch && isPhoneSize) || (hasTouch && mobileUA) || isStandalone;
-    return result;
+    return (hasTouch && isPhoneSize) || (hasTouch && phoneUA) || (isStandalone && isPhoneSize);
   }
 }
