@@ -3,7 +3,7 @@ import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { of, throwError } from 'rxjs';
+import { NEVER, of, throwError } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 import { ShopFloorDisplayComponent } from './shop-floor-display.component';
@@ -138,6 +138,7 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     confirmNextStatus: (a: unknown) => void;
     onTerminalConfigured: (t: unknown) => void;
     handleScanValue: (v: string) => void;
+    cancelActions: () => void;
     onPinSubmit: () => void;
     pinControl: { setValue: (v: string) => void };
     scanFeedback: () => string | null;
@@ -177,7 +178,8 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     isClockedOut: () => true, isActive: () => false,
     definitions: () => [{ code: 'IN', statusMapping: 'In', category: 'work' }],
   };
-  const dialog = { open: vi.fn(() => ({ afterClosed: () => of(true) })) };
+  const dialogClose = vi.fn();
+  const dialog = { open: vi.fn(() => ({ afterClosed: () => of(true), close: dialogClose })) };
   const loading = { track: (_label: string, obs: unknown) => obs };
   const translate = {
     instant: (k: string, p?: Record<string, unknown>) => (p ? `${k} ${JSON.stringify(p)}` : k),
@@ -351,6 +353,18 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     shopFloor.clockInOut.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 409, error: 'Already clocked in.' })));
     c.clockAction(worker, 'IN');
     expect(c.actionFeedback()?.detail).toBe('Already clocked in.');
+  });
+
+  it('closes an open next-status dialog when the session resets', () => {
+    dialog.open.mockReturnValueOnce({ afterClosed: () => NEVER, close: dialogClose });
+    const c = create();
+    c.selectedWorker.set(makeWorker('Manager', [assignment]));
+    c.phase.set('actions');
+    c.confirmNextStatus(assignment);
+    expect(dialogClose).not.toHaveBeenCalled();
+    c.cancelActions();
+    expect(dialogClose).toHaveBeenCalled();
+    expect(shopFloor.completeJob).not.toHaveBeenCalled();
   });
 
   it('a manager from another team can badge in on a team display and move work', () => {

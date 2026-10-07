@@ -6,7 +6,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { catchError, forkJoin, interval, of } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -244,6 +244,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private phaseTimeoutTimer: ReturnType<typeof setTimeout> | null = null;
   private feedbackTimer: ReturnType<typeof setTimeout> | null = null;
   private transitionTimer: ReturnType<typeof setTimeout> | null = null;
+  private nextStatusDialog: MatDialogRef<ConfirmDialogComponent, boolean> | null = null;
 
   private readonly onVisibilityChange = (): void => {
     if (document.visibilityState === 'visible') this.acquireWakeLock();
@@ -640,14 +641,17 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   protected confirmNextStatus(assignment: WorkerAssignment): void {
     if (this.processing() || !this.canSupervise()) return;
     this.resetAutoLogoutTimer();
-    this.dialog.open(ConfirmDialogComponent, {
+    const ref = this.dialog.open<ConfirmDialogComponent, ConfirmDialogData, boolean>(ConfirmDialogComponent, {
       width: '400px',
       data: {
         title: this.translate.instant('shopFloor.nextStatus'),
         message: this.translate.instant('shopFloor.confirmNextStatus', { jobNumber: assignment.jobNumber }),
         confirmLabel: this.translate.instant('shopFloor.nextStatus'),
-      } satisfies ConfirmDialogData,
-    }).afterClosed().subscribe(confirmed => {
+      },
+    });
+    this.nextStatusDialog = ref;
+    ref.afterClosed().subscribe(confirmed => {
+      if (this.nextStatusDialog === ref) this.nextStatusDialog = null;
       if (confirmed) this.completeJob(assignment);
     });
   }
@@ -983,6 +987,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     this.clearAutoLogoutTimer();
     this.clearPhaseTimeout();
     this.clearTransitionTimer();
+    this.closeNextStatusDialog();
     this.jobSelectWorker.set(null);
     if (!this.previewMode) this.authService.clearAuth();
     this.selectedWorker.set(null);
@@ -1053,6 +1058,12 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
       clearTimeout(this.transitionTimer);
       this.transitionTimer = null;
     }
+  }
+
+  private closeNextStatusDialog(): void {
+    const ref = this.nextStatusDialog;
+    this.nextStatusDialog = null;
+    ref?.close();
   }
 
   private serverReason(err: HttpErrorResponse): string {
