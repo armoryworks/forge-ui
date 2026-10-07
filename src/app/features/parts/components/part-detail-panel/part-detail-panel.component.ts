@@ -136,6 +136,7 @@ export class PartDetailPanelComponent {
   readonly partId = input.required<number>();
   readonly closed = output<void>();
   readonly editRequested = output<PartDetail>();
+  readonly partCreated = output<PartDetail>();
 
   protected readonly part = signal<PartDetail | null>(null);
   protected readonly detailLoading = signal(false);
@@ -469,6 +470,7 @@ export class PartDetailPanelComponent {
       { width: '520px', data: { part: p } },
     ).afterClosed().subscribe((created) => {
       if (!created) return;
+      this.partCreated.emit(created);
       this.loadDetail(created.id);
       this.router?.navigate([], {
         relativeTo: this.route,

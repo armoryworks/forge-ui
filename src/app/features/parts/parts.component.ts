@@ -449,9 +449,11 @@ export class PartsComponent {
   }
 
   private openDetailDialog(partId: number): void {
-    this.detailDialog.open<PartDetailDialogComponent, PartDetailDialogData, { action: string; part: PartDetail } | undefined>(
+    const ref = this.detailDialog.open<PartDetailDialogComponent, PartDetailDialogData, { action: string; part: PartDetail } | undefined>(
       'part', partId, PartDetailDialogComponent, { partId }
-    ).afterClosed().subscribe(result => {
+    );
+    ref.componentInstance.partCreated.subscribe(() => this.loadParts());
+    ref.afterClosed().subscribe(result => {
       if (result?.action === 'edit') {
         this.editPart(result.part);
       }

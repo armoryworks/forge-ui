@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, output } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { PartDetailPanelComponent } from '../part-detail-panel/part-detail-panel.component';
@@ -18,6 +18,7 @@ export interface PartDetailDialogData {
 export class PartDetailDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<PartDetailDialogComponent>);
   protected readonly data = inject<PartDetailDialogData>(MAT_DIALOG_DATA);
+  readonly partCreated = output<void>();
 
   protected close(): void {
     this.dialogRef.close();

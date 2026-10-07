@@ -1,4 +1,5 @@
 <app-part-detail-panel
   [partId]="data.partId"
   (closed)="close()"
-  (editRequested)="onEditRequested($event)" />
+  (editRequested)="onEditRequested($event)"
+  (partCreated)="partCreated.emit()" />
