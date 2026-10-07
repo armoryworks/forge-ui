@@ -285,6 +285,15 @@ describe('SalesOrderDetailPanelComponent', () => {
     expect(snackbar['success']).not.toHaveBeenCalled();
   });
 
+  it('translates the already-shipped skip reason', () => {
+    soService['createMissingJobs'].mockReturnValue(of({ created: 0, skipped: [{ lineNumber: 1, reason: 'Already shipped' }] }));
+    const panel = build(order({ status: 'Confirmed' }));
+
+    panel['createWorkOrders'](line());
+
+    expect(snackbar['warn']).toHaveBeenCalledWith('salesOrders.workOrderSkippedLine {"line":1,"reason":"salesOrders.workOrderSkipAlreadyShipped"}');
+  });
+
   it('creates the work orders for every unlinked line', () => {
     const panel = build(order({ status: 'Confirmed', lines: [line(), line({ id: 12, lineNumber: 2 })] }));
 

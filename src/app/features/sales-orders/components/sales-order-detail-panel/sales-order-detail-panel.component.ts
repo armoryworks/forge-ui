@@ -67,6 +67,7 @@ const SKIP_REASON_KEYS: Record<string, string> = {
   'Bought part with no routing': 'salesOrders.workOrderSkipBuyNoRouting',
   'Phantom part with no routing': 'salesOrders.workOrderSkipPhantomNoRouting',
   'Already has a job': 'salesOrders.workOrderSkipHasJob',
+  'Already shipped': 'salesOrders.workOrderSkipAlreadyShipped',
 };
 
 type TabId = 'overview' | 'lines' | 'schedule' | 'stages' | 'shipments' | 'returns' | 'documents' | 'invoices' | 'customer-po' | 'acceptance' | 'activity';

@@ -5426,6 +5426,7 @@
     "workOrderSkipBuyNoRouting": "Bought part with no routing",
     "workOrderSkipPhantomNoRouting": "Phantom part with no routing",
     "workOrderSkipHasJob": "Already has a work order",
+    "workOrderSkipAlreadyShipped": "Already shipped",
     "confirmSoReleaseMessage": "Confirm {{number}}? {{count}} line(s) with a part will be released to production, and the order number locks. Bought or phantom parts with no routing don't get a work order.",
     "cancelSoMessageHold": "Cancel {{number}}? Its open work orders on lines not yet shipped will be put on hold. This can't be undone.",
     "cancelSoMessageNoJobs": "Cancel {{number}}? This can't be undone.",

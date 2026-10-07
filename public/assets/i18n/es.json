@@ -5398,6 +5398,7 @@
     "workOrderSkipBuyNoRouting": "Pieza comprada sin ruta de fabricación",
     "workOrderSkipPhantomNoRouting": "Pieza fantasma sin ruta de fabricación",
     "workOrderSkipHasJob": "Ya tiene una orden de trabajo",
+    "workOrderSkipAlreadyShipped": "Ya se envió",
     "confirmSoReleaseMessage": "¿Confirmar {{number}}? Se liberarán a producción {{count}} línea(s) con pieza y el número de orden quedará bloqueado. Las piezas compradas o fantasma sin ruta de fabricación no generan orden de trabajo.",
     "cancelSoMessageHold": "¿Cancelar {{number}}? Sus órdenes de trabajo abiertas en líneas aún no enviadas quedarán en espera. Esto no se puede deshacer.",
     "cancelSoMessageNoJobs": "¿Cancelar {{number}}? Esto no se puede deshacer.",
