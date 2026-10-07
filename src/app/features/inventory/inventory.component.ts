@@ -86,6 +86,11 @@ export class InventoryComponent {
     return tab === 'inspection' && !this.inspectionEnabled() ? 'stock' : tab;
   });
 
+  private readonly disabledInspectionRedirect = effect(() => {
+    if (this.routeTab() !== 'inspection' || this.capabilities.descriptor() === null || this.inspectionEnabled()) return;
+    untracked(() => this.router.navigate(['..', 'stock'], { relativeTo: this.route, replaceUrl: true }));
+  });
+
   /** Classic (table) vs Visual (chart) presentation of the Stock Levels tab. URL ?view= is the whole source of truth; no persisted preference. */
   protected readonly viewMode = toSignal(
     this.route.queryParamMap.pipe(map(p => (p.get('view') as ViewMode) ?? DEFAULT_VIEW_MODE)),
