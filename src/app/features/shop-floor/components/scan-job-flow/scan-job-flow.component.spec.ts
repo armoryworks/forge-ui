@@ -17,11 +17,12 @@ interface FlowInternals {
   confirmAdvanceStage(): void;
 }
 
-function status(nextStageId: number | null): JobStatus {
+function status(nextStageId: number | null, nextStageName = 'QC/Review', nextStageIsShopFloor = true): JobStatus {
   return {
     id: 5, jobNumber: 'JOB-0005', title: 'Bracket', customerName: null,
     stageId: 6, stageName: 'In Production', stageColor: '#000', dueDate: null, isOverdue: false,
-    nextStageId, nextStageName: nextStageId ? 'QC/Review' : null,
+    nextStageId, nextStageName: nextStageId ? nextStageName : null,
+    nextStageIsShopFloor: nextStageId ? nextStageIsShopFloor : false,
     previousStageId: null, previousStageName: null, rowVersion: 1, recentActivity: [],
   };
 }
@@ -80,6 +81,25 @@ describe('ScanJobFlowComponent — next status', () => {
     expect(c.canAdvance()).toBe(false);
     c.showAdvanceStage();
     expect(c.step()).toBe('actions');
+  });
+
+  it('cannot advance when the next status is an office status', () => {
+    shopFloor.getJobStatus.mockReturnValue(of({ ...status(9, 'Invoiced/Sent', false), stageName: 'Shipped' }));
+    const c = create();
+
+    expect(c.canAdvance()).toBe(false);
+    c.showAdvanceStage();
+    expect(c.step()).toBe('actions');
+    expect(shopFloor.advanceJob).not.toHaveBeenCalled();
+  });
+
+  it('reports a status that failed to load without claiming a move was tried', () => {
+    shopFloor.getJobStatus.mockReturnValue(throwError(() =>
+      new HttpErrorResponse({ status: 404, error: { detail: 'Job 5 not found' } })));
+    const c = create();
+
+    expect(c.canAdvance()).toBe(false);
+    expect(c.error()).toBe('shopFloor.jobFlow.statusLoadFailed:{"reason":"Job 5 not found"}');
   });
 
   it('shows the server reason when the move is refused', () => {

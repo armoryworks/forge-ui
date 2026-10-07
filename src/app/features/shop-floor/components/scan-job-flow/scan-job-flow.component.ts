@@ -47,8 +47,11 @@ export class ScanJobFlowComponent implements OnInit {
   protected readonly jobStatus = signal<JobStatus | null>(null);
   protected readonly statusLoading = signal(true);
   protected readonly advancedTo = signal<string | null>(null);
-  protected readonly hasNextStage = computed(() => this.jobStatus()?.nextStageId != null);
-  protected readonly canAdvance = computed(() => !this.statusLoading() && this.hasNextStage());
+  protected readonly hasShopFloorNextStage = computed(() => {
+    const status = this.jobStatus();
+    return status?.nextStageId != null && status.nextStageIsShopFloor === true;
+  });
+  protected readonly canAdvance = computed(() => !this.statusLoading() && this.hasShopFloorNextStage());
 
   ngOnInit(): void {
     this.loadStatus();
@@ -63,7 +66,7 @@ export class ScanJobFlowComponent implements OnInit {
       },
       error: (err: HttpErrorResponse) => {
         this.statusLoading.set(false);
-        this.error.set(this.translate.instant('shopFloor.jobFlow.advanceFailed', { reason: this.serverReason(err) }));
+        this.error.set(this.translate.instant('shopFloor.jobFlow.statusLoadFailed', { reason: this.serverReason(err) }));
       },
     });
   }

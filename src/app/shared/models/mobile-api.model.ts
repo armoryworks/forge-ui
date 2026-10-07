@@ -29,6 +29,7 @@ export interface JobStatus {
   isOverdue: boolean;
   nextStageId: number | null;
   nextStageName: string | null;
+  nextStageIsShopFloor?: boolean;
   previousStageId: number | null;
   previousStageName: string | null;
   rowVersion: number;

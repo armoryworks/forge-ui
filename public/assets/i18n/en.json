@@ -6467,7 +6467,8 @@
       "stageAdvanced": "Moved to {{stageName}}",
       "noteLogged": "Note logged",
       "advanceFailed": "Could not move to the next status: {{reason}}",
-      "noNextStage": "This work order is at its last shop-floor status."
+      "noNextStage": "This work order is at its last shop-floor status.",
+      "statusLoadFailed": "Could not load this work order's status: {{reason}}"
     },
     "returnFlow": {
       "title": "Return Items",

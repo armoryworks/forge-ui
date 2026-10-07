@@ -6449,7 +6449,8 @@
       "stageAdvanced": "Movida a {{stageName}}",
       "noteLogged": "Nota registrada",
       "advanceFailed": "No se pudo mover al siguiente estado: {{reason}}",
-      "noNextStage": "Esta orden de trabajo está en su último estado de planta."
+      "noNextStage": "Esta orden de trabajo está en su último estado de planta.",
+      "statusLoadFailed": "No se pudo cargar el estado de esta orden de trabajo: {{reason}}"
     },
     "returnFlow": {
       "title": "Devolver Artículos",

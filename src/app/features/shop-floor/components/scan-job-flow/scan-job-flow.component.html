@@ -54,7 +54,7 @@
               data-testid="job-advance-btn">
         <span class="material-icons-outlined">skip_next</span>
         <span class="scan-job__action-label">{{ 'shopFloor.jobFlow.advanceStage' | translate }}</span>
-        @if (!statusLoading() && !hasNextStage() && jobStatus()) {
+        @if (!statusLoading() && !hasShopFloorNextStage() && jobStatus()) {
           <span class="scan-job__action-hint" data-testid="job-no-next-stage">{{ 'shopFloor.jobFlow.noNextStage' | translate }}</span>
         }
       </button>
