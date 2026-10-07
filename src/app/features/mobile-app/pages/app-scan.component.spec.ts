@@ -21,7 +21,10 @@ import { AppScanComponent } from './app-scan.component';
 interface ScanInternals {
   result: WritableSignal<ScanResolveResult | null>;
   actingAs: Signal<string | null>;
+  identifying: Signal<boolean>;
+  notice: Signal<string | null>;
   onAction(action: ScanAction): Promise<void>;
+  onIdentified(): void;
   notYou(): void;
 }
 
@@ -38,8 +41,9 @@ describe('AppScanComponent', () => {
   };
   const timer = {
     active: signal(null),
-    start: vi.fn(),
+    toggle: vi.fn(),
     stop: vi.fn(),
+    stoppedMessage: vi.fn(() => 'stopped-message'),
     undoStart: vi.fn(),
     refresh: vi.fn(),
   };
@@ -62,7 +66,7 @@ describe('AppScanComponent', () => {
     identity.identified.set(true);
     identity.clear.mockReset();
     identity.touch.mockReset();
-    timer.start.mockReset().mockResolvedValue({ entryId: 11, queuedIds: [] });
+    timer.toggle.mockReset().mockResolvedValue({ started: { entryId: 11, queuedIds: [], previousJobId: null } });
     timer.stop.mockReset().mockResolvedValue({ jobNumber: 'JOB-42' });
     timer.undoStart.mockReset().mockResolvedValue(undefined);
     api.advanceJob.mockReset().mockReturnValue(of({
@@ -89,7 +93,7 @@ describe('AppScanComponent', () => {
   it('on a shared device, ends the identity when the undo toast closes after a start', async () => {
     await create().onAction('start');
 
-    expect(timer.start).toHaveBeenCalledWith(42, 'JOB-42');
+    expect(timer.toggle).toHaveBeenCalledWith(42, 'JOB-42');
     const [, compensate, closed] = offer.mock.calls[0];
     expect(identity.touch).not.toHaveBeenCalled();
     expect(identity.clear).not.toHaveBeenCalled();
@@ -98,7 +102,46 @@ describe('AppScanComponent', () => {
     expect(identity.clear).toHaveBeenCalledOnce();
 
     await compensate();
-    expect(timer.undoStart).toHaveBeenCalledWith(11, 'person-token');
+    expect(timer.undoStart).toHaveBeenCalledWith(11, null, 'person-token');
+  });
+
+  it('on a shared device, identifies first and then starts with the server-side timer state', async () => {
+    identity.identified.set(false);
+    const scan = create();
+
+    await scan.onAction('start');
+    expect(scan.identifying()).toBe(true);
+    expect(timer.toggle).not.toHaveBeenCalled();
+
+    identity.identified.set(true);
+    scan.onIdentified();
+    await vi.waitFor(() => expect(offer).toHaveBeenCalledOnce());
+
+    expect(timer.toggle).toHaveBeenCalledWith(42, 'JOB-42');
+  });
+
+  it('turns Start into a stop when the identified person already runs a timer on that job', async () => {
+    identity.identified.set(false);
+    timer.toggle.mockResolvedValue({ stopped: { jobNumber: 'JOB-42' } });
+    const scan = create();
+
+    await scan.onAction('start');
+    identity.identified.set(true);
+    scan.onIdentified();
+    await vi.waitFor(() => expect(identity.clear).toHaveBeenCalledOnce());
+
+    expect(offer).not.toHaveBeenCalled();
+    expect(timer.stoppedMessage).toHaveBeenCalledWith({ jobNumber: 'JOB-42' });
+    expect(scan.notice()).toBe('stopped-message');
+  });
+
+  it('undoing a switch hands the previous job to the compensation', async () => {
+    timer.toggle.mockResolvedValue({ started: { entryId: 11, queuedIds: [], previousJobId: 7 } });
+
+    await create().onAction('start');
+
+    await offer.mock.calls[0][1]();
+    expect(timer.undoStart).toHaveBeenCalledWith(11, 7, 'person-token');
   });
 
   it('undoes a shared-device move with the captured token', async () => {
@@ -125,7 +168,7 @@ describe('AppScanComponent', () => {
     const [, compensate, closed] = offer.mock.calls[0];
     expect(closed).toBeUndefined();
     await compensate();
-    expect(timer.undoStart).toHaveBeenCalledWith(11, undefined);
+    expect(timer.undoStart).toHaveBeenCalledWith(11, null, undefined);
   });
 
   it('stops the timer without changing the stage', async () => {

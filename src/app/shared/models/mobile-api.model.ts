@@ -107,11 +107,19 @@ export interface StartedTimeEntry {
   timerStart: Date | null;
 }
 
-/** `entryId` is null when the start was queued offline; `queuedIds` holds the queue entries it made. */
+/**
+ * `entryId` is null when the start was queued offline; `queuedIds` holds the
+ * queue entries it made. `previousJobId` is the job whose timer a switch
+ * stopped, so undoing the start can put it back.
+ */
 export interface TimerStartOutcome {
   entryId: number | null;
   queuedIds: string[];
+  previousJobId: number | null;
 }
+
+/** What a Start press did once the server's running timer was known: started, or stopped the timer already on that job. */
+export type TimerToggleOutcome = { started: TimerStartOutcome } | { stopped: ActiveTimer | null };
 
 /** Returned in place of a result when the device is offline and the change was queued. */
 export interface QueuedOffline {

@@ -18,11 +18,11 @@
     <router-outlet />
   </main>
 
-  @if (timer.active(); as running) {
+  @if (timer.active()) {
     <div class="app-shell__timer" data-testid="mobile-app-timer-strip">
       <span class="material-icons-outlined app-shell__timer-icon" aria-hidden="true">timer</span>
       <span class="app-shell__timer-text">
-        {{ 'mobileApp.timer.running' | translate: { jobNumber: running.jobNumber ?? '', elapsed: elapsed() } }}
+        {{ 'mobileApp.timer.running' | translate: { jobNumber: runningLabel(), elapsed: elapsed() } }}
       </span>
       <button
         type="button"

@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { ScanResolveResult, isQueued } from '../../../shared/models/mobile-api.model';
+import { ActiveTimer, ScanResolveResult, isQueued } from '../../../shared/models/mobile-api.model';
 import { AuthService } from '../../../shared/services/auth.service';
 import { CameraScannerService } from '../../../shared/services/camera-scanner.service';
 import { InstanceService } from '../../../shared/services/instance.service';
@@ -197,15 +197,16 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
   }
 
   private async startTimer(jobId: number, label: string, token: string | undefined): Promise<boolean> {
-    const outcome = await this.timer.start(jobId, label);
+    const outcome = await this.timer.toggle(jobId, label);
     if (!outcome) return false;
-    const entryId = outcome.entryId;
+    if ('stopped' in outcome) return this.showStopped(outcome.stopped, token);
+    const { entryId, queuedIds, previousJobId } = outcome.started;
     if (entryId === null) {
-      this.offerQueuedUndo(outcome.queuedIds, token);
+      this.offerQueuedUndo(queuedIds, token);
     } else {
       this.undo.offer(
         this.translate.instant('mobileApp.jobs.timerStarted'),
-        () => this.timer.undoStart(entryId, token),
+        () => this.timer.undoStart(entryId, previousJobId, token),
         this.endIdentity(token),
       );
     }
@@ -215,10 +216,13 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
   }
 
   private async stopTimer(token: string | undefined): Promise<boolean> {
-    const stopped = await this.timer.stop();
+    return this.showStopped(await this.timer.stop(), token);
+  }
+
+  private async showStopped(stopped: ActiveTimer | null, token: string | undefined): Promise<boolean> {
     this.result.set(null);
     await this.startScanner();
-    this.notice.set(this.translate.instant('mobileApp.timer.stopped', { jobNumber: stopped?.jobNumber ?? '' }));
+    this.notice.set(this.timer.stoppedMessage(stopped));
     if (!token) return false;
     this.identity.clear();
     return true;

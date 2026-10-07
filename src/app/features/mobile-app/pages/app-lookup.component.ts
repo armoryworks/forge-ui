@@ -126,17 +126,26 @@ export class AppLookupComponent {
           break;
         }
         case 'start': {
-          const outcome = await this.timer.start(result.id, result.label);
+          const outcome = await this.timer.toggle(result.id, result.label);
           if (!outcome) break;
-          const entryId = outcome.entryId;
-          if (entryId === null) this.offerQueuedUndo(...outcome.queuedIds);
-          else this.undo.offer(this.translate.instant('mobileApp.jobs.timerStarted'), () => this.timer.undoStart(entryId));
+          if ('stopped' in outcome) {
+            this.snackbar.success(this.timer.stoppedMessage(outcome.stopped));
+          } else {
+            const { entryId, queuedIds, previousJobId } = outcome.started;
+            if (entryId === null) {
+              this.offerQueuedUndo(...queuedIds);
+            } else {
+              this.undo.offer(
+                this.translate.instant('mobileApp.jobs.timerStarted'),
+                () => this.timer.undoStart(entryId, previousJobId),
+              );
+            }
+          }
           this.selected.set(null);
           break;
         }
         case 'stop': {
-          const stopped = await this.timer.stop();
-          this.snackbar.success(this.translate.instant('mobileApp.timer.stopped', { jobNumber: stopped?.jobNumber ?? '' }));
+          this.snackbar.success(this.timer.stoppedMessage(await this.timer.stop()));
           this.selected.set(null);
           break;
         }

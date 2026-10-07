@@ -4,6 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 
 import { firstValueFrom } from 'rxjs';
 
+import { SILENT_HTTP_ERRORS } from '../interceptors/silent-http-errors.token';
 import { isQueued } from '../models/mobile-api.model';
 import { InstanceService } from './instance.service';
 import { MobileApiService } from './mobile-api.service';
@@ -74,12 +75,22 @@ describe('MobileApiService', () => {
     expect(await none).toBeNull();
   });
 
-  it('deletes a time entry by id', () => {
+  it('deletes a time entry by id, keeping a refusal off the global error surface', () => {
     service.deleteTimeEntry(9).subscribe();
     const req = http.expectOne('/api/v1/time-tracking/entries/9');
     expect(req.request.method).toBe('DELETE');
     expect(req.request.headers.has('Authorization')).toBe(false);
+    expect(req.request.context.get(SILENT_HTTP_ERRORS)).toBe(true);
     req.flush(null, { status: 204, statusText: 'No Content' });
+  });
+
+  it('restarts a timer as the given person and leaves other errors visible', () => {
+    service.startTimer(7, 'person-token').subscribe();
+    const req = http.expectOne('/api/v1/time-tracking/timer/start');
+    expect(req.request.headers.get('Authorization')).toBe('Bearer person-token');
+    expect(req.request.body).toEqual({ jobId: 7 });
+    expect(req.request.context.get(SILENT_HTTP_ERRORS)).toBe(false);
+    req.flush({ id: 12 });
   });
 
   it('sends a punch undo with the given token and never queues it offline', async () => {

@@ -213,20 +213,23 @@ export class AppJobStatusComponent {
   }
 
   private async doTimer(job: JobStatus): Promise<void> {
-    if (this.timer.runningOn(job.id)) {
-      const stopped = await this.timer.stop();
-      this.snackbar.success(
-        this.translate.instant('mobileApp.timer.stopped', { jobNumber: stopped?.jobNumber ?? job.jobNumber }));
-      return;
-    }
-    const outcome = await this.timer.start(job.id, job.jobNumber);
+    const outcome = this.timer.runningOn(job.id)
+      ? { stopped: await this.timer.stop() }
+      : await this.timer.toggle(job.id, job.jobNumber);
     if (!outcome) return;
-    const entryId = outcome.entryId;
-    if (entryId === null) {
-      this.offerQueuedUndo(...outcome.queuedIds);
+    if ('stopped' in outcome) {
+      this.snackbar.success(this.timer.stoppedMessage(outcome.stopped));
       return;
     }
-    this.undo.offer(this.translate.instant('mobileApp.jobs.timerStarted'), () => this.timer.undoStart(entryId));
+    const { entryId, queuedIds, previousJobId } = outcome.started;
+    if (entryId === null) {
+      this.offerQueuedUndo(...queuedIds);
+      return;
+    }
+    this.undo.offer(
+      this.translate.instant('mobileApp.jobs.timerStarted'),
+      () => this.timer.undoStart(entryId, previousJobId),
+    );
   }
 
   private offerQueuedUndo(...entryIds: string[]): void {

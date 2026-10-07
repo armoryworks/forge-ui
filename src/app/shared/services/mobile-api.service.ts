@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpHeaders } from '@angular/common/http';
 
 import { Observable, catchError, from, map, of } from 'rxjs';
 
@@ -7,6 +7,7 @@ import {
   ActiveTimer, ClockPunchResult, ClockState, JobAdvanceResult, JobNote, JobStatus, OnHand, QueuedOffline,
   ScanResolveResult, StartedTimeEntry, StockMoveRequest, StockMoveResult, UploadedJobFile,
 } from '../models/mobile-api.model';
+import { SILENT_HTTP_ERRORS } from '../interceptors/silent-http-errors.token';
 import { InstanceService } from './instance.service';
 import { OfflineQueueService } from './offline-queue.service';
 import { PlatformService } from './platform.service';
@@ -51,17 +52,23 @@ export class MobileApiService {
     return this.http.get<ActiveTimer | null>('/api/v1/time-tracking/timer/active');
   }
 
-  startTimer(jobId: number): Observable<StartedTimeEntry | QueuedOffline> {
-    return this.mutate<StartedTimeEntry>('POST', '/api/v1/time-tracking/timer/start', { jobId }, `Start timer on job ${jobId}`);
+  startTimer(jobId: number, token?: string): Observable<StartedTimeEntry | QueuedOffline> {
+    return this.mutate<StartedTimeEntry>(
+      'POST', '/api/v1/time-tracking/timer/start', { jobId }, `Start timer on job ${jobId}`, token);
   }
 
   stopTimer(token?: string): Observable<unknown> {
     return this.mutate<unknown>('POST', '/api/v1/time-tracking/timer/stop', {}, 'Stop timer', token);
   }
 
-  /** Compensating action for startTimer: removes the entry so no zero-minute row is kept. */
+  /**
+   * Compensating action for startTimer: removes the entry so no zero-minute
+   * row is kept. A refusal is not shown, since the caller falls back to
+   * stopping the timer.
+   */
   deleteTimeEntry(entryId: number, token?: string): Observable<unknown> {
-    return this.mutate<unknown>('DELETE', `/api/v1/time-tracking/entries/${entryId}`, null, `Remove time entry ${entryId}`, token);
+    return this.mutate<unknown>(
+      'DELETE', `/api/v1/time-tracking/entries/${entryId}`, null, `Remove time entry ${entryId}`, token, true);
   }
 
   addNote(jobId: number, text: string): Observable<JobNote | QueuedOffline> {
@@ -127,7 +134,7 @@ export class MobileApiService {
   }
 
   private mutate<T>(
-    method: Method, url: string, body: unknown, description: string, token?: string,
+    method: Method, url: string, body: unknown, description: string, token?: string, silent = false,
   ): Observable<T | QueuedOffline> {
     const headers = this.idempotentHeaders();
     if (token) {
@@ -137,7 +144,10 @@ export class MobileApiService {
         headers, instanceId: this.instances.instance()?.id ?? null,
       })).pipe(map((entryId) => ({ queued: true as const, entryId })));
     }
-    const options = { headers: new HttpHeaders(headers) };
+    const options = {
+      headers: new HttpHeaders(headers),
+      context: new HttpContext().set(SILENT_HTTP_ERRORS, silent),
+    };
     switch (method) {
       case 'POST': return this.http.post<T>(url, body, options);
       case 'PATCH': return this.http.patch<T>(url, body, options);

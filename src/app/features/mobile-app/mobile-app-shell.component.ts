@@ -11,6 +11,7 @@ import { AppInfoService } from '../../shared/services/app-info.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { InstanceService } from '../../shared/services/instance.service';
 import { MobileTimerService } from '../../shared/services/mobile-timer.service';
+import { OfflineQueueService } from '../../shared/services/offline-queue.service';
 import { PlatformService } from '../../shared/services/platform.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { TimerHubService } from '../../shared/services/timer-hub.service';
@@ -56,6 +57,7 @@ export class MobileAppShellComponent {
 
   protected readonly timer = inject(MobileTimerService);
   private readonly timerHub = inject(TimerHubService);
+  private readonly queue = inject(OfflineQueueService);
   private readonly auth = inject(AuthService);
   private readonly instances = inject(InstanceService);
   private readonly platform = inject(PlatformService);
@@ -65,6 +67,11 @@ export class MobileAppShellComponent {
 
   private readonly now = signal(Date.now());
   protected readonly stopping = signal(false);
+
+  protected readonly runningLabel = computed(() => {
+    const running = this.timer.active();
+    return running ? this.timer.labelOf(running) : '';
+  });
 
   protected readonly elapsed = computed(() => {
     const running = this.timer.active();
@@ -88,6 +95,10 @@ export class MobileAppShellComponent {
       });
     });
 
+    effect(() => {
+      if (this.queue.lastSyncResult()) untracked(() => void this.timer.refresh());
+    });
+
     effect((onCleanup) => {
       if (!this.timer.active()) return;
       untracked(() => this.now.set(Date.now()));
@@ -104,7 +115,7 @@ export class MobileAppShellComponent {
     this.stopping.set(true);
     try {
       const stopped = await this.timer.stop();
-      this.snackbar.success(this.translate.instant('mobileApp.timer.stopped', { jobNumber: stopped?.jobNumber ?? '' }));
+      this.snackbar.success(this.timer.stoppedMessage(stopped));
     } catch {
       this.snackbar.error(this.translate.instant('mobileApp.jobs.actionFailed'));
     } finally {

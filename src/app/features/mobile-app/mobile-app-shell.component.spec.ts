@@ -10,6 +10,7 @@ import { CapabilityService } from '../../shared/services/capability.service';
 import { CrashReportingService } from '../../shared/services/crash-reporting.service';
 import { InstanceService } from '../../shared/services/instance.service';
 import { MobileTimerService } from '../../shared/services/mobile-timer.service';
+import { OfflineQueueService } from '../../shared/services/offline-queue.service';
 import { PlatformService } from '../../shared/services/platform.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { TimerHubService } from '../../shared/services/timer-hub.service';
@@ -17,6 +18,7 @@ import { MobileAppShellComponent } from './mobile-app-shell.component';
 
 interface ShellInternals {
   elapsed: Signal<string>;
+  runningLabel: Signal<string>;
   stopTimer(): Promise<void>;
 }
 
@@ -24,7 +26,14 @@ describe('MobileAppShellComponent timer strip', () => {
   let shared: boolean;
   const token = signal<string | null>('session-token');
   const active = signal<ActiveTimer | null>(null);
-  const timer = { active, refresh: vi.fn(), stop: vi.fn() };
+  const lastSyncResult = signal<object | null>(null);
+  const timer = {
+    active,
+    refresh: vi.fn(),
+    stop: vi.fn(),
+    labelOf: (running: ActiveTimer) => running.jobNumber ?? 'timeTracking.timer',
+    stoppedMessage: vi.fn(() => 'stopped-message'),
+  };
   const hub = { connect: vi.fn(), onTimerStartedEvent: vi.fn(), onTimerStoppedEvent: vi.fn(), clearCallbacks: vi.fn() };
   const snackbar = { success: vi.fn(), error: vi.fn() };
   const instant = vi.fn((key: string) => key);
@@ -39,6 +48,8 @@ describe('MobileAppShellComponent timer strip', () => {
     shared = false;
     token.set('session-token');
     active.set(null);
+    lastSyncResult.set(null);
+    timer.stoppedMessage.mockClear();
     timer.refresh.mockReset().mockResolvedValue(undefined);
     timer.stop.mockReset();
     hub.connect.mockReset().mockResolvedValue(undefined);
@@ -54,6 +65,7 @@ describe('MobileAppShellComponent timer strip', () => {
         { provide: AppInfoService, useValue: { load: vi.fn().mockResolvedValue(undefined) } },
         { provide: MobileTimerService, useValue: timer },
         { provide: TimerHubService, useValue: hub },
+        { provide: OfflineQueueService, useValue: { lastSyncResult } },
         { provide: AuthService, useValue: { token } },
         { provide: InstanceService, useValue: { instance: () => ({ id: 'shop', shared }) } },
         { provide: PlatformService, useValue: { isNative: false, mobileShell: true } },
@@ -116,8 +128,26 @@ describe('MobileAppShellComponent timer strip', () => {
     await shell.stopTimer();
 
     expect(timer.stop).toHaveBeenCalledOnce();
-    expect(instant).toHaveBeenCalledWith('mobileApp.timer.stopped', { jobNumber: 'JOB-42' });
-    expect(snackbar.success).toHaveBeenCalledOnce();
+    expect(timer.stoppedMessage).toHaveBeenCalledWith({ jobNumber: 'JOB-42' });
+    expect(snackbar.success).toHaveBeenCalledWith('stopped-message');
+  });
+
+  it('names a timer with no job instead of leaving the label empty', () => {
+    const shell = create();
+
+    active.set({ timeEntryId: 5, jobId: null, jobNumber: null, operationId: null, timerStart: new Date() });
+
+    expect(shell.runningLabel()).toBe('timeTracking.timer');
+  });
+
+  it('reloads the timer once queued changes have synced', () => {
+    create();
+    timer.refresh.mockClear();
+
+    lastSyncResult.set({});
+    TestBed.tick();
+
+    expect(timer.refresh).toHaveBeenCalledOnce();
   });
 
   it('reports a failed Stop', async () => {
