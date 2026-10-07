@@ -6,6 +6,7 @@ import { Observable, of } from 'rxjs';
 
 import { PurchaseOrderService } from '../../services/purchase-order.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { CapabilityService } from '../../../../shared/services/capability.service';
 import { PurchaseOrderDetail } from '../../models/purchase-order-detail.model';
 import { PurchaseOrderLine } from '../../models/purchase-order-line.model';
 import { ReceiveItemsRequest } from '../../models/receive-items-request.model';
@@ -23,6 +24,7 @@ interface DialogInternals {
   binControls(): FormControl<number | null>[];
   binLabels(): (string | null)[];
   binPickerFilters: Record<string, string>;
+  binsEnabled(): boolean;
   binPickers: () => { setSelected: (id: number, label: string) => void }[];
   draftConfig: DraftConfig;
   lotControls(): FormControl<string>[];
@@ -58,7 +60,7 @@ function line(overrides: Partial<PurchaseOrderLine>): PurchaseOrderLine {
   };
 }
 
-function setup(lines: PurchaseOrderLine[]) {
+function setup(lines: PurchaseOrderLine[], disabledCapabilities: string[] = []) {
   const receiveItems = vi.fn((_id: number, _req: ReceiveItemsRequest) => of(undefined));
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
@@ -66,6 +68,7 @@ function setup(lines: PurchaseOrderLine[]) {
       provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
       { provide: PurchaseOrderService, useValue: { receiveItems } },
       { provide: SnackbarService, useValue: { success: vi.fn() } },
+      { provide: CapabilityService, useValue: { isEnabled: (code: string) => !disabledCapabilities.includes(code) } },
     ],
   });
 
@@ -205,5 +208,21 @@ describe('ReceiveDialogComponent — bin, lot and note per line', () => {
     internals.save();
 
     expect(receiveItems).not.toHaveBeenCalled();
+  });
+
+  it.each(['CAP-INV-MULTILOC', 'CAP-INV-CORE'])('hides the bin picker and lets the server place stock when %s is off', (code) => {
+    const { internals, receiveItems } = setup(
+      [line({ id: 1, partDefaultBinId: 7, partDefaultBinPath: 'Rack A / A-1' })],
+      [code],
+    );
+    internals.lineControls()[0].setValue(2);
+    internals.lotControls()[0].setValue('HEAT-A');
+
+    internals.save();
+
+    expect(internals.binsEnabled()).toBe(false);
+    const sent = receiveItems.mock.calls[0][1].lines[0];
+    expect(sent.storageLocationId).toBeUndefined();
+    expect(sent.lotNumber).toBe('HEAT-A');
   });
 });

@@ -19,7 +19,9 @@
           <th class="receive-table__right">{{ 'purchaseOrders.received' | translate }}</th>
           <th class="receive-table__right">{{ 'purchaseOrders.remaining' | translate }}</th>
           <th class="receive-table__right">{{ 'purchaseOrders.receiveQty' | translate }}</th>
-          <th>{{ 'purchaseOrders.receiveBin' | translate }}</th>
+          @if (binsEnabled()) {
+            <th>{{ 'purchaseOrders.receiveBin' | translate }}</th>
+          }
           <th>{{ 'purchaseOrders.receiveLot' | translate }}</th>
           <th class="receive-table__toggle" [attr.aria-label]="'purchaseOrders.receiveNote' | translate"></th>
         </tr>
@@ -37,18 +39,20 @@
                 [min]="0" [max]="line.remainingQuantity"
                 class="receive-qty-input" />
             </td>
-            <td class="receive-table__bin">
-              @if (line.partId) {
-                <app-entity-picker #binPicker
-                  [label]="'purchaseOrders.receiveBin' | translate"
-                  entityType="inventory/locations/bins"
-                  displayField="locationPath"
-                  [filters]="binPickerFilters"
-                  [formControl]="binControls()[i]"
-                  (selected)="onBinSelected(i, $event)"
-                  [attr.data-testid]="'receive-bin-' + line.id" />
-              }
-            </td>
+            @if (binsEnabled()) {
+              <td class="receive-table__bin">
+                @if (line.partId) {
+                  <app-entity-picker #binPicker
+                    [label]="'purchaseOrders.receiveBin' | translate"
+                    entityType="inventory/locations/bins"
+                    displayField="locationPath"
+                    [filters]="binPickerFilters"
+                    [formControl]="binControls()[i]"
+                    (selected)="onBinSelected(i, $event)"
+                    [attr.data-testid]="'receive-bin-' + line.id" />
+                }
+              </td>
+            }
             <td class="receive-table__lot">
               @if (line.partId) {
                 <app-input
@@ -71,7 +75,7 @@
           </tr>
           @if (isNoteOpen(line.id)) {
             <tr class="receive-table__note-row">
-              <td colspan="9">
+              <td [attr.colspan]="binsEnabled() ? 9 : 8">
                 <app-textarea
                   [label]="'purchaseOrders.receiveNote' | translate"
                   [formControl]="noteControls()[i]"

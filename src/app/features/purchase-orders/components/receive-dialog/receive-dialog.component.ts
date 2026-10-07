@@ -11,6 +11,7 @@ import { ReceiveLineRequest } from '../../models/receive-line-request.model';
 import { FreightAllocationMethod } from '../../models/receive-items-request.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { CapabilityService } from '../../../../shared/services/capability.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
@@ -40,12 +41,15 @@ export class ReceiveDialogComponent implements OnInit, AfterViewInit {
   private readonly poService = inject(PurchaseOrderService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly capabilities = inject(CapabilityService);
 
   readonly purchaseOrder = input.required<PurchaseOrderDetail>();
   readonly closed = output<void>();
   readonly saved = output<void>();
 
   protected readonly saving = signal(false);
+  protected readonly binsEnabled = computed(() =>
+    this.capabilities.isEnabled('CAP-INV-CORE') && this.capabilities.isEnabled('CAP-INV-MULTILOC'));
   protected readonly receivableLines = signal<PurchaseOrderLine[]>([]);
   protected readonly lineControls = signal<FormControl<number>[]>([]);
   protected readonly binControls = signal<FormControl<number | null>[]>([]);
@@ -225,7 +229,7 @@ export class ReceiveDialogComponent implements OnInit, AfterViewInit {
         receiveLines.push({
           lineId: l.id,
           quantity: qty,
-          storageLocationId: stocked ? bins[i].value ?? undefined : undefined,
+          storageLocationId: stocked && this.binsEnabled() ? bins[i].value ?? undefined : undefined,
           lotNumber: lot || undefined,
           notes: note || undefined,
         });
