@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -31,7 +31,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
   styleUrl: './vendor-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class VendorDialogComponent {
+export class VendorDialogComponent implements OnInit {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   private readonly vendorService = inject(VendorService);
   private readonly snackbar = inject(SnackbarService);
@@ -84,7 +84,7 @@ export class VendorDialogComponent {
 
   protected readonly paymentTermsOptions = PAYMENT_TERMS_OPTIONS;
 
-  constructor() {
+  ngOnInit(): void {
     const v = this.vendor();
     if (v) {
       this.form.patchValue({
@@ -99,7 +99,7 @@ export class VendorDialogComponent {
         isActive: v.isActive,
         is1099: v.is1099 ?? false,
         taxId: v.taxId ?? '',
-        offTierVariancePct: (v as { offTierVariancePct?: number | null }).offTierVariancePct ?? null,
+        offTierVariancePct: v.offTierVariancePct ?? null,
       });
     }
   }
