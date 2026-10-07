@@ -58,6 +58,49 @@ describe('SalesOrderService', () => {
       expect(req.request.method).toBe('POST');
       req.flush(null);
     });
+
+    it('should return the number of work orders created', () => {
+      let result: unknown;
+      service.confirmSalesOrder(5).subscribe(r => (result = r));
+      httpMock.expectOne(`${apiUrl}/orders/5/confirm`).flush({ jobsCreated: 2 });
+      expect(result).toEqual({ jobsCreated: 2 });
+    });
+  });
+
+  describe('createMissingJobs', () => {
+    it('should POST for every unlinked line when no line is given', () => {
+      let result: unknown;
+      service.createMissingJobs(5).subscribe(r => (result = r));
+      const req = httpMock.expectOne(r => r.url === `${apiUrl}/orders/5/create-missing-jobs`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.params.has('lineId')).toBe(false);
+      req.flush({ created: 1, skipped: [{ lineNumber: 2, reason: 'No part' }] });
+      expect(result).toEqual({ created: 1, skipped: [{ lineNumber: 2, reason: 'No part' }] });
+    });
+
+    it('should send the line id when one line is given', () => {
+      service.createMissingJobs(5, 41).subscribe();
+      const req = httpMock.expectOne(r => r.url === `${apiUrl}/orders/5/create-missing-jobs`);
+      expect(req.request.params.get('lineId')).toBe('41');
+      req.flush({ created: 1, skipped: [] });
+    });
+  });
+
+  describe('cancelSalesOrder', () => {
+    it('should POST an empty body when no fee is charged', () => {
+      service.cancelSalesOrder(5).subscribe();
+      const req = httpMock.expectOne(`${apiUrl}/orders/5/cancel`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({});
+      req.flush(null);
+    });
+
+    it('should send the fee and reason', () => {
+      service.cancelSalesOrder(5, { feeAmount: 150, feeReason: 'Material bought' }).subscribe();
+      const req = httpMock.expectOne(`${apiUrl}/orders/5/cancel`);
+      expect(req.request.body).toEqual({ feeAmount: 150, feeReason: 'Material bought' });
+      req.flush(null);
+    });
   });
 
   describe('deleteSalesOrder', () => {

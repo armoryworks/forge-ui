@@ -13,6 +13,9 @@ import { SalesOrderStage, SalesOrderStages } from '../models/sales-order-stage.m
 import { CustomerPoDocument } from '../models/customer-po-document.model';
 import { PagedQuery, PagedResponse } from '../../../shared/models/paged-response.model';
 import { CustomerAddress } from '../../../shared/models/customer-address.model';
+import { ConfirmSalesOrderResponse } from '../models/confirm-sales-order-response.model';
+import { CreateMissingJobsResponse } from '../models/create-missing-jobs-response.model';
+import { CancelSalesOrderRequest } from '../models/cancel-sales-order-request.model';
 
 /** Payload to create/update a staged-schedule stage. */
 export interface UpsertStageInput {
@@ -159,12 +162,19 @@ export class SalesOrderService {
     return this.http.delete<SalesOrderDetail>(`${this.base}/${id}/lines/${lineId}`);
   }
 
-  confirmSalesOrder(id: number): Observable<void> {
-    return this.http.post<void>(`${this.base}/${id}/confirm`, {});
+  confirmSalesOrder(id: number): Observable<ConfirmSalesOrderResponse | null> {
+    return this.http.post<ConfirmSalesOrderResponse | null>(`${this.base}/${id}/confirm`, {});
   }
 
-  cancelSalesOrder(id: number): Observable<void> {
-    return this.http.post<void>(`${this.base}/${id}/cancel`, {});
+  /** Create work orders for confirmed lines that have none; `lineId` limits it to one line. */
+  createMissingJobs(id: number, lineId?: number): Observable<CreateMissingJobsResponse> {
+    let params = new HttpParams();
+    if (lineId != null) params = params.set('lineId', String(lineId));
+    return this.http.post<CreateMissingJobsResponse>(`${this.base}/${id}/create-missing-jobs`, {}, { params });
+  }
+
+  cancelSalesOrder(id: number, request: CancelSalesOrderRequest = {}): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/cancel`, request);
   }
 
   /** F8 change control — new linked Draft addendum for a locked order. */
