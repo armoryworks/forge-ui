@@ -215,7 +215,7 @@ describe('JobDialogComponent', () => {
     component.onSubmit();
     const payload = createJob.mock.calls[0][0];
     expect(payload).toMatchObject({
-      salesOrderLineId: 41, partId: 13, quantity: 40, customerId: 88,
+      salesOrderLineId: 41, partId: 13, quantity: null, customerId: 88,
       title: 'PLT-7 — Plate, base', dueDate: '2026-12-15T00:00:00Z',
     });
   });
@@ -268,6 +268,42 @@ describe('JobDialogComponent', () => {
 
     expect(f.quantity.value).toBe(0.5);
     expect(f.quantity.valid).toBe(true);
+  });
+
+  it('leaves an untouched line quantity to the server, which knows the line and part units', () => {
+    render('create');
+    const f = component.jobForm.controls;
+    f.salesOrderLineId.setValue(40);
+    expect(f.quantity.value).toBe(500);
+
+    component.onSubmit();
+
+    expect(createJob.mock.calls[0][0]).toMatchObject({ salesOrderLineId: 40, partId: 12, quantity: null });
+  });
+
+  it('sends the quantity the user typed over the line quantity', () => {
+    render('create');
+    const f = component.jobForm.controls;
+    f.salesOrderLineId.setValue(40);
+    f.quantity.setValue(120);
+    f.quantity.markAsDirty();
+
+    component.onSubmit();
+
+    expect(createJob.mock.calls[0][0]).toMatchObject({ salesOrderLineId: 40, partId: 12, quantity: 120 });
+  });
+
+  it('keeps the default quantity when the line has no remaining quantity to offer', () => {
+    lines = [soLine({ remainingQuantity: null })];
+    render('create');
+    const f = component.jobForm.controls;
+
+    f.salesOrderLineId.setValue(40);
+
+    expect(f.partId.value).toBe(12);
+    expect(f.quantity.value).toBe(1);
+    component.onSubmit();
+    expect(createJob.mock.calls[0][0]).toMatchObject({ partId: 12, quantity: 1 });
   });
 
   it('labels a part restored from a draft with its part number', () => {

@@ -390,6 +390,13 @@ export class JobDialogComponent implements OnInit {
     });
   }
 
+  private submittedQuantity(partId: number | null, lineId: number | null, quantity: number | null): number | null {
+    if (partId == null) return null;
+    const control = this.jobForm.controls.quantity;
+    if (lineId != null && !control.dirty && this.holdsAuto(quantity, this.autoFilled.quantity)) return null;
+    return quantity ?? 1;
+  }
+
   protected onSubmit(): void {
     if (this.jobForm.invalid) return;
 
@@ -411,7 +418,7 @@ export class JobDialogComponent implements OnInit {
         dueDate: dueDateIso,
         salesOrderLineId: f.salesOrderLineId,
         partId: f.partId,
-        quantity: f.partId != null ? (f.quantity ?? 1) : null,
+        quantity: this.submittedQuantity(f.partId, f.salesOrderLineId, f.quantity),
       }).subscribe({
         next: (detail) => {
           this.saving.set(false);
