@@ -1,24 +1,25 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 
+import { DesktopPreferenceService } from '../services/desktop-preference.service';
 import { LayoutService } from '../services/layout.service';
 import { mobileRedirectGuard } from './mobile-redirect.guard';
 
 describe('mobileRedirectGuard', () => {
   const isMobileDevice = vi.fn<() => boolean>();
+  const isPreferred = vi.fn<() => boolean>();
 
   beforeEach(() => {
     isMobileDevice.mockReset();
     isMobileDevice.mockReturnValue(true);
-    localStorage.removeItem('preferDesktop');
+    isPreferred.mockReset();
+    isPreferred.mockReturnValue(false);
     TestBed.configureTestingModule({
-      providers: [{ provide: LayoutService, useValue: { isMobileDevice } }],
+      providers: [
+        { provide: LayoutService, useValue: { isMobileDevice } },
+        { provide: DesktopPreferenceService, useValue: { isPreferred } },
+      ],
     });
-  });
-
-  afterEach(() => {
-    localStorage.removeItem('preferDesktop');
-    vi.restoreAllMocks();
   });
 
   const run = (url: string): boolean | UrlTree =>
@@ -63,15 +64,8 @@ describe('mobileRedirectGuard', () => {
     expect(run('/account/profile')).toBe(true);
   });
 
-  it('honours a stored desktop preference', () => {
-    localStorage.setItem('preferDesktop', 'true');
+  it('honours the user\'s desktop preference', () => {
+    isPreferred.mockReturnValue(true);
     expect(run('/jobs/42')).toBe(true);
-  });
-
-  it('still redirects when storage cannot be read', () => {
-    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
-      throw new Error('blocked');
-    });
-    expect(target('/jobs/42')).toBe('/m/jobs/42');
   });
 });

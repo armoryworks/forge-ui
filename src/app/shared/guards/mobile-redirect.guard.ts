@@ -1,5 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
+import { DesktopPreferenceService } from '../services/desktop-preference.service';
 import { LayoutService } from '../services/layout.service';
 
 /** Desktop routes that work fine on mobile — don't redirect these. */
@@ -10,14 +11,15 @@ const MOBILE_EXEMPT_PREFIXES = ['/account', '/onboarding'];
  * Applied to desktop routes only — mobile routes don't use this guard.
  * A job deep link (`/jobs/:id`, `/kanban?detail=job:N`) opens that job in
  * `/m`; anything else lands on `/m` carrying the original URL as `returnUrl`.
- * Users can opt out by setting `preferDesktop` in localStorage
- * (e.g., via a "View Desktop Site" link in the mobile UI).
+ * A signed-in user can opt out per browser with "View Desktop Site" in the
+ * mobile UI ({@link DesktopPreferenceService}); opening `/m` again opts back in.
  */
 export const mobileRedirectGuard: CanActivateFn = (_route, state: RouterStateSnapshot) => {
   const layout = inject(LayoutService);
   const router = inject(Router);
+  const desktopPreference = inject(DesktopPreferenceService);
 
-  if (layout.isMobileDevice() && !prefersDesktop()) {
+  if (layout.isMobileDevice() && !desktopPreference.isPreferred()) {
     if (MOBILE_EXEMPT_PREFIXES.some(prefix => state.url.startsWith(prefix))) {
       return true;
     }
@@ -42,12 +44,4 @@ function mobileTarget(router: Router, url: string): UrlTree {
   }
 
   return router.createUrlTree(['/m'], { queryParams: { returnUrl: url } });
-}
-
-function prefersDesktop(): boolean {
-  try {
-    return localStorage.getItem('preferDesktop') === 'true';
-  } catch {
-    return false;
-  }
 }

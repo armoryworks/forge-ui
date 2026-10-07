@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
+import { DesktopPreferenceService } from './desktop-preference.service';
 import { LayoutService } from './layout.service';
 
 describe('LayoutService', () => {
@@ -167,6 +168,17 @@ describe('LayoutService', () => {
   describe('getDefaultRoute', () => {
     it('should return /dashboard on desktop', () => {
       // Test environment is desktop-like
+      expect(service.getDefaultRoute()).toBe('/dashboard');
+    });
+
+    it('sends a phone to /m', () => {
+      vi.spyOn(service, 'isMobileDevice').mockReturnValue(true);
+      expect(service.getDefaultRoute()).toBe('/m');
+    });
+
+    it('keeps a phone on the desktop site once the user chose it', () => {
+      vi.spyOn(service, 'isMobileDevice').mockReturnValue(true);
+      vi.spyOn(TestBed.inject(DesktopPreferenceService), 'isPreferred').mockReturnValue(true);
       expect(service.getDefaultRoute()).toBe('/dashboard');
     });
   });

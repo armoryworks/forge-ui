@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 
 import { AuthService } from '../../shared/services/auth.service';
 import { CapabilityService } from '../../shared/services/capability.service';
+import { DesktopPreferenceService } from '../../shared/services/desktop-preference.service';
 import { MobileClockStateService } from './services/mobile-clock-state.service';
 
 interface MobileTab {
@@ -28,6 +29,7 @@ export class MobileLayoutComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly http = inject(HttpClient);
   private readonly capabilities = inject(CapabilityService);
+  private readonly desktopPreference = inject(DesktopPreferenceService);
   protected readonly router = inject(Router);
   protected readonly clockState = inject(MobileClockStateService);
 
@@ -72,6 +74,7 @@ export class MobileLayoutComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.desktopPreference.clear();
     this.checkClockStatus();
   }
 

@@ -5,6 +5,7 @@ import { filter } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
+import { DesktopPreferenceService } from './desktop-preference.service';
 import { UserPreferencesService } from './user-preferences.service';
 import { LANDING_ROUTE_PREF_KEY, resolveRoleLanding } from '../models/role-landing.model';
 
@@ -22,6 +23,7 @@ export class LayoutService {
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
   private readonly userPreferences = inject(UserPreferencesService);
+  private readonly desktopPreference = inject(DesktopPreferenceService);
 
   private readonly _sidebarCollapsed = signal(this.loadCollapsedState());
   private readonly _mobileMenuOpen = signal(false);
@@ -157,18 +159,15 @@ export class LayoutService {
   }
 
   /**
-   * Returns the default post-login route: `/m` for mobile devices, `/dashboard` for desktop.
-   * Use this everywhere a login flow redirects the user.
-   */
-  /**
-   * The post-login / root landing route. Mobile devices go to `/m`. Otherwise an
-   * explicit per-user preference wins; failing that, a user with a single mapped
-   * role lands on that role's most relevant screen; everyone else lands on the
-   * dashboard. A mapped screen gated off by capability falls back via its guard.
+   * The post-login / root landing route. Mobile devices go to `/m` unless the
+   * user chose "View Desktop Site". Otherwise an explicit per-user preference
+   * wins; failing that, a user with a single mapped role lands on that role's
+   * most relevant screen; everyone else lands on the dashboard. A mapped screen
+   * gated off by capability falls back via its guard.
    */
   getDefaultRoute(): string {
     if (environment.mobileShell) return '/app';
-    if (this.isMobileDevice()) return '/m';
+    if (this.isMobileDevice() && !this.desktopPreference.isPreferred()) return '/m';
     const explicit = this.userPreferences.get<string>(LANDING_ROUTE_PREF_KEY);
     if (explicit) return explicit;
     return resolveRoleLanding(this.auth.user()?.roles ?? []) ?? '/dashboard';
