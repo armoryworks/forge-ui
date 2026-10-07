@@ -7076,7 +7076,7 @@
     "description": "Descripción",
     "specialInstructions": "Instrucciones Especiales",
     "notes": "Notas",
-    "sendToVendors": "Enviar a Proveedores",
+    "sendToVendors": "Agregar Proveedores",
     "recordResponse": "Registrar Respuesta",
     "recordVendorResponse": "Registrar Respuesta del Proveedor",
     "vendors": "Proveedores",
@@ -7184,8 +7184,8 @@
     "leadTime": "Lead Time",
     "selectPart": "Select Part",
     "rfq": {
-      "confirmSendTitle": "¿Enviar RFQ?",
-      "confirmSendMessage": "¿Enviar esta RFQ a {{count}} proveedor(es)?"
+      "confirmSendTitle": "¿Agregar proveedores a la RFQ?",
+      "confirmSendMessage": "¿Agregar {{count}} proveedor(es) a esta RFQ? Usted mismo se la enviará."
     }
   },
   "approvals": {

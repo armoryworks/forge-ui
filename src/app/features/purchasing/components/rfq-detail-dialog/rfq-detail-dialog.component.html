@@ -68,8 +68,8 @@
       <!-- Action Buttons -->
       <div class="rfq-detail__actions">
         @if (canSend()) {
-          <button class="action-btn action-btn--sm" (click)="toggleSendForm()" aria-label="Send to vendors">
-            <span class="material-icons-outlined">send</span> {{ 'purchasing.sendToVendors' | translate }}
+          <button class="action-btn action-btn--sm" (click)="toggleSendForm()" [attr.aria-label]="'purchasing.sendToVendors' | translate">
+            <span class="material-icons-outlined">person_add</span> {{ 'purchasing.sendToVendors' | translate }}
           </button>
         }
         @if (canRecordResponse()) {
@@ -89,7 +89,7 @@
             <button class="action-btn action-btn--sm action-btn--primary"
               [disabled]="!sendVendorControl.value?.length || saving()"
               (click)="sendToVendors()">
-              <span class="material-icons-outlined">send</span> {{ 'purchasing.send' | translate }}
+              <span class="material-icons-outlined">add</span> {{ 'common.add' | translate }}
             </button>
           </div>
         </div>

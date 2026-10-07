@@ -7183,7 +7183,7 @@
     "responseDeadline": "Response Deadline",
     "selectPart": "Select Part",
     "send": "Send",
-    "sendToVendors": "Send to Vendors",
+    "sendToVendors": "Add Vendors",
     "sentAt": "Sent At",
     "specialInstructions": "Special Instructions",
     "toolingCost": "Tooling Cost",
@@ -7191,8 +7191,8 @@
     "vendorResponses": "Vendor Responses",
     "vendors": "Vendors",
     "rfq": {
-      "confirmSendTitle": "Send RFQ?",
-      "confirmSendMessage": "Send this RFQ to {{count}} vendor(s)?"
+      "confirmSendTitle": "Add vendors to RFQ?",
+      "confirmSendMessage": "Add {{count}} vendor(s) to this RFQ? You will send it to them yourself."
     }
   },
   "approvals": {

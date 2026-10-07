@@ -148,6 +148,7 @@ export class RfqDetailDialogComponent {
       titleKey: 'purchasing.rfq.confirmSendTitle',
       messageKey: 'purchasing.rfq.confirmSendMessage',
       messageParams: { count: vendorIds.length },
+      confirmLabelKey: 'common.add',
     }).subscribe(confirmed => {
       if (!confirmed) return;
       this.saving.set(true);
