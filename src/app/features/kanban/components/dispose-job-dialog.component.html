@@ -4,6 +4,9 @@
     <app-select [label]="'jobs.disposition' | translate" formControlName="disposition" [options]="dispositionOptions" data-testid="dispose-job-disposition" />
     @if (formGroup.controls.disposition.value === 'AddToInventory' && stockProblemKey(); as problemKey) {
       <p class="dispose-job__error" data-testid="dispose-job-stock-problem">{{ problemKey | translate }}</p>
+      @if (stockLoadFailed()) {
+        <button type="button" class="action-btn" (click)="retryStock()" data-testid="dispose-job-stock-retry">{{ 'kanban.dispositionStockRetry' | translate }}</button>
+      }
     }
     @if (addingToInventory()) {
       @if (stock(); as recorded) {
@@ -12,7 +15,9 @@
         }
       }
       <app-input [label]="'kanban.goodQuantity' | translate" formControlName="goodQuantity" type="number" [min]="1" [step]="1" [required]="true" data-testid="dispose-job-good-quantity" />
-      <app-select [label]="'kanban.destinationBin' | translate" formControlName="locationId" [options]="binOptions()" data-testid="dispose-job-bin" />
+      @if (locationsEnabled) {
+        <app-select [label]="'kanban.destinationBin' | translate" formControlName="locationId" [options]="binOptions()" data-testid="dispose-job-bin" />
+      }
     }
     <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="3" [maxlength]="2000" data-testid="dispose-job-notes" />
   </div>

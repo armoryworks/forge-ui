@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 
 import { provideTranslateService, TranslateLoader, TranslateService } from '@ngx-translate/core';
 
@@ -160,6 +160,35 @@ describe('DisposeJobDialogComponent', () => {
 
     expect(component.formGroup.controls.disposition.getError('stockProblem')).toEqual({ message });
     expect(component.formGroup.controls.goodQuantity.validator).toBeNull();
+  });
+
+  it('skips the bin choice and lets the server pick the main location when multi-location is off', () => {
+    isEnabled.mockImplementation((code: string) => code !== 'CAP-INV-MULTILOC');
+    const component = create();
+    component.formGroup.controls.disposition.setValue('AddToInventory');
+
+    expect(getBinLocations).not.toHaveBeenCalled();
+    expect(component.formGroup.controls.locationId.value).toBeNull();
+
+    component.formGroup.controls.goodQuantity.setValue(500);
+    component.save();
+
+    expect(disposeJob).toHaveBeenCalledWith(7, expect.objectContaining({ goodQuantity: 500, locationId: undefined }));
+  });
+
+  it('says the stock check failed and retries it on request', () => {
+    getDispositionStock.mockReturnValueOnce(throwError(() => new Error('boom')));
+    const component = create();
+    component.formGroup.controls.disposition.setValue('AddToInventory');
+
+    expect(component.formGroup.controls.disposition.getError('stockProblem'))
+      .toEqual({ message: 'kanban.dispositionStockLoadFailed' });
+
+    (component as unknown as { retryStock: () => void }).retryStock();
+
+    expect(getDispositionStock).toHaveBeenCalledTimes(2);
+    expect(component.formGroup.controls.disposition.valid).toBe(true);
+    expect(component.formGroup.controls.goodQuantity.hasError('required')).toBe(true);
   });
 
   it('only stamps the job when production completion is turned off', () => {

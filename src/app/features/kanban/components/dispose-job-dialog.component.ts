@@ -4,7 +4,7 @@ import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validatio
 
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
 
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../shared/components/input/input.component';
@@ -28,6 +28,8 @@ export interface DisposeJobDialogData {
 }
 
 const STOCKING_CAPABILITY = 'CAP-MFG-COMPLETE';
+const MULTI_LOCATION_CAPABILITY = 'CAP-INV-MULTILOC';
+const STOCK_LOAD_FAILED_KEY = 'kanban.dispositionStockLoadFailed';
 
 const REASON_REQUIRED: readonly JobDisposition[] = ['Scrap', 'HoldForReview', 'EnteredInError'];
 
@@ -67,6 +69,7 @@ export class DisposeJobDialogComponent {
   protected readonly stock = signal<JobDispositionStock | null>(null);
   protected readonly stockProblemKey = signal<string | null>(null);
   private readonly stockingEnabled = this.capabilityService.isEnabled(STOCKING_CAPABILITY, true);
+  protected readonly locationsEnabled = this.capabilityService.isEnabled(MULTI_LOCATION_CAPABILITY);
   private stockRequested = false;
 
   private readonly reasonRequired: ValidatorFn = control =>
@@ -113,7 +116,7 @@ export class DisposeJobDialogComponent {
       disposition,
       notes: raw.notes?.trim() || undefined,
       goodQuantity: stocking ? raw.goodQuantity ?? undefined : undefined,
-      locationId: stocking ? raw.locationId ?? undefined : undefined,
+      locationId: stocking && this.locationsEnabled ? raw.locationId ?? undefined : undefined,
     }).subscribe({
       next: (result: JobDetail) => {
         this.saving.set(false);
@@ -125,6 +128,14 @@ export class DisposeJobDialogComponent {
       },
       error: () => this.saving.set(false),
     });
+  }
+
+  protected retryStock(): void {
+    this.loadStock();
+  }
+
+  protected stockLoadFailed(): boolean {
+    return this.stockProblemKey() === STOCK_LOAD_FAILED_KEY;
   }
 
   private applyDisposition(disposition: JobDisposition | null): void {
@@ -167,10 +178,11 @@ export class DisposeJobDialogComponent {
   private loadStock(): void {
     if (this.stockRequested) return;
     this.stockRequested = true;
+    this.stockProblemKey.set(null);
 
     forkJoin({
       stock: this.kanbanService.getDispositionStock(this.data.jobId),
-      bins: this.inventoryService.getBinLocations(),
+      bins: this.locationsEnabled ? this.inventoryService.getBinLocations() : of([]),
     }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: ({ stock, bins }) => {
         const activeBins = bins.filter(bin => bin.isActive);
@@ -191,6 +203,8 @@ export class DisposeJobDialogComponent {
       },
       error: () => {
         this.stockRequested = false;
+        this.stockProblemKey.set(STOCK_LOAD_FAILED_KEY);
+        this.formGroup.controls.disposition.updateValueAndValidity({ emitEvent: false });
       },
     });
   }
@@ -205,11 +219,11 @@ export class DisposeJobDialogComponent {
   private stockReadyForInventory(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       if (control.value !== 'AddToInventory' || !this.stockingEnabled) return null;
-      if (this.stock() == null) {
-        return { stockPending: { message: this.translate.instant('common.loading') } };
-      }
       const problemKey = this.stockProblemKey();
-      return problemKey ? { stockProblem: { message: this.translate.instant(problemKey) } } : null;
+      if (problemKey) {
+        return { stockProblem: { message: this.translate.instant(problemKey) } };
+      }
+      return this.stock() == null ? { stockPending: { message: this.translate.instant('common.loading') } } : null;
     };
   }
 }
