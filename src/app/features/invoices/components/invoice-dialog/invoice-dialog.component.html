@@ -48,7 +48,7 @@
 
         <!-- Add Line Form -->
         <div class="add-line add-line--5col" [formGroup]="lineForm">
-          <app-autocomplete [label]="'invoices.partId' | translate" [options]="partOptions()" displayField="label" valueField="value" formControlName="partId" [minChars]="0" [placeholder]="'common.optional' | translate" data-testid="invoice-line-part" />
+          <app-entity-picker [label]="'invoices.partId' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name" formControlName="partId" [placeholder]="'common.optional' | translate" (selected)="onPartPicked($event)" data-testid="invoice-line-part" />
           <app-input [label]="'common.description' | translate" formControlName="description" data-testid="invoice-line-desc" />
           <app-input [label]="'invoices.qty' | translate" type="number" formControlName="quantity" step="0.0001" min="0.0001" data-testid="invoice-line-qty" />
           <app-input [label]="'common.price' | translate" type="number" formControlName="unitPrice" step="0.0001" min="0" data-testid="invoice-line-price" />

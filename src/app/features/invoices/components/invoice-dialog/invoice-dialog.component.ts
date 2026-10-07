@@ -9,14 +9,13 @@ import { EMPTY, catchError, distinctUntilChanged, of, startWith, switchMap } fro
 import { InvoiceService } from '../../services/invoice.service';
 import { CustomerService } from '../../../customers/services/customer.service';
 import { CustomerListItem } from '../../../customers/models/customer-list-item.model';
-import { PartsService } from '../../../parts/services/parts.service';
 import { PartListItem } from '../../../parts/models/part-list-item.model';
 import { InvoiceSources } from '../../models/invoice-sources.model';
 import { CreateInvoiceLineRequest } from '../../models/create-invoice-line-request.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
-import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
+import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
@@ -45,7 +44,7 @@ interface LineEntry {
   standalone: true,
   imports: [
     ReactiveFormsModule, DecimalPipe, TranslatePipe,
-    DialogComponent, InputComponent, SelectComponent, AutocompleteComponent, DatepickerComponent, TextareaComponent,
+    DialogComponent, InputComponent, SelectComponent, EntityPickerComponent, DatepickerComponent, TextareaComponent,
     CurrencyDisplayComponent, ValidationButtonComponent, MatTooltipModule,
   ],
   templateUrl: './invoice-dialog.component.html',
@@ -56,7 +55,6 @@ export class InvoiceDialogComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   private readonly invoiceService = inject(InvoiceService);
   private readonly customerService = inject(CustomerService);
-  private readonly partsService = inject(PartsService);
   private readonly currencyService = inject(ActiveCurrencyService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -82,16 +80,12 @@ export class InvoiceDialogComponent {
   /** Phase 1l — invoice issue date is when it was issued; not future. */
   protected readonly today = todayEnd();
   protected readonly lines = signal<LineEntry[]>([]);
-  protected readonly parts = signal<PartListItem[]>([]);
   protected readonly sources = signal<InvoiceSources>({ salesOrders: [], shipments: [] });
 
   protected readonly customerOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('invoices.selectCustomer') },
     ...this.customers().map(c => ({ value: c.id, label: c.name })),
   ]);
-
-  protected readonly partOptions = computed<AutocompleteOption[]>(() =>
-    this.parts().map(p => ({ value: p.id, label: `${p.partNumber} — ${p.name}` })));
 
   protected readonly salesOrderOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('common.none') },
@@ -212,10 +206,6 @@ export class InvoiceDialogComponent {
       next: (list) => this.customers.set(list),
     });
 
-    this.partsService.getParts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (list) => this.parts.set(list),
-    });
-
     const controls = this.invoiceForm.controls;
     controls.customerId.valueChanges.pipe(
       startWith(controls.customerId.value),
@@ -246,10 +236,6 @@ export class InvoiceDialogComponent {
       if (shipment && controls.salesOrderId.value == null) {
         controls.salesOrderId.setValue(shipment.salesOrderId);
       }
-    });
-
-    this.lineForm.controls.partId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((partId) => {
-      this.onPartSelected(partId);
     });
 
     // Apply the SO-context pre-link once inputs resolve. save() reads
@@ -293,8 +279,8 @@ export class InvoiceDialogComponent {
     this.closed.emit();
   }
 
-  private onPartSelected(partId: number | null): void {
-    const part = partId == null ? undefined : this.parts().find(p => p.id === partId);
+  protected onPartPicked(entity: Record<string, unknown> | null): void {
+    const part = entity as PartListItem | null;
     if (!part) {
       this.lineForm.controls.partNumber.setValue('');
       return;

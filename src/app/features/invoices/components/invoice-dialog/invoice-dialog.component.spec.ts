@@ -33,6 +33,7 @@ interface DialogInternals {
   }>;
   salesOrderOptions(): SelectOption[];
   shipmentOptions(): SelectOption[];
+  onPartPicked(entity: Record<string, unknown> | null): void;
 }
 
 const emptyPage = { items: [], totalCount: 0, page: 1, pageSize: 200 };
@@ -49,7 +50,7 @@ const acmeSources: InvoiceSources = {
 };
 
 const bracket = {
-  id: 11,
+  id: 4711,
   partNumber: 'PN-1001',
   name: 'Bracket',
   description: null,
@@ -73,7 +74,6 @@ function setup() {
   const httpMock = TestBed.inject(HttpTestingController);
 
   httpMock.expectOne(r => r.url === `${environment.apiUrl}/customers`).flush(emptyPage);
-  httpMock.expectOne(r => r.url === `${environment.apiUrl}/parts`).flush({ ...emptyPage, items: [bracket] });
   httpMock.match(r => r.url === `${environment.apiUrl}/system/currencies`).forEach(r => r.flush([]));
 
   return { internals: component as unknown as DialogInternals, httpMock };
@@ -137,14 +137,41 @@ describe('InvoiceDialogComponent — order, shipment and part pickers', () => {
     expect(internals.salesOrderOptions()).toHaveLength(1);
   });
 
-  it('fills the part number, description and price from a picked part', () => {
+  it('does not preload a slice of the part catalogue', () => {
+    const { httpMock } = setup();
+
+    httpMock.expectNone(r => r.url.includes('/parts'));
+    httpMock.verify();
+  });
+
+  it('fills the part number, description and price from a part found by search', () => {
     const { internals } = setup();
 
-    internals.lineForm.controls.partId.setValue(11);
+    internals.lineForm.controls.partId.setValue(bracket.id);
+    internals.onPartPicked(bracket as unknown as Record<string, unknown>);
 
     expect(internals.lineForm.getRawValue()).toMatchObject({
-      partId: 11, partNumber: 'PN-1001', description: 'Bracket', unitPrice: 12.5,
+      partId: 4711, partNumber: 'PN-1001', description: 'Bracket', unitPrice: 12.5,
     });
+  });
+
+  it('keeps the typed price when the part has no sales price', () => {
+    const { internals } = setup();
+    internals.lineForm.controls.unitPrice.setValue(9);
+
+    internals.onPartPicked({ ...bracket, effectivePrice: 0, effectivePriceSource: 'Default' } as unknown as Record<string, unknown>);
+
+    expect(internals.lineForm.controls.unitPrice.value).toBe(9);
+  });
+
+  it('clears the part number when the part selection is cleared', () => {
+    const { internals } = setup();
+    internals.onPartPicked(bracket as unknown as Record<string, unknown>);
+
+    internals.lineForm.controls.partId.setValue(null);
+    internals.onPartPicked(null);
+
+    expect(internals.lineForm.controls.partNumber.value).toBe('');
   });
 
   it('keeps free-text lines with no part valid', () => {
