@@ -111,6 +111,13 @@
   @include truncate;
 }
 
+.card__part {
+  margin-top: $sp-xxs;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  @include truncate;
+}
+
 .card__footer {
   display: flex;
   align-items: center;

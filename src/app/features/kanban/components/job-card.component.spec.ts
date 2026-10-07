@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader, TranslateService } from '@ngx-translate/core';
 
 import { JobCardComponent } from './job-card.component';
 import { KanbanJob } from '../models/kanban-job.model';
@@ -38,6 +38,9 @@ function job(overrides: Partial<KanbanJob> = {}): KanbanJob {
     coverPhotoUrl: null,
     parentJobId: null,
     parentJobNumber: null,
+    boardPosition: 0,
+    partNumber: null,
+    quantity: null,
     ...overrides,
   };
 }
@@ -194,5 +197,38 @@ describe('JobCardComponent', () => {
     el().querySelector<HTMLAnchorElement>('.card__so a.entity-link')!.click();
 
     expect(cardClicked).not.toHaveBeenCalled();
+  });
+
+  it('renders the part number and quantity under the title', () => {
+    render(job({ partNumber: 'BRK-100', quantity: 500 }));
+
+    const line = el().querySelector('[data-testid="job-card-part-qty"]');
+    expect(line).not.toBeNull();
+    expect(line!.textContent).toContain('kanban.partQty');
+  });
+
+  it('passes the part number and quantity to the part line translation', () => {
+    TestBed.inject(TranslateService).setTranslation('en', { kanban: { partQty: '{{partNumber}} · Qty {{quantity}}' } });
+    TestBed.inject(TranslateService).use('en');
+    render(job({ partNumber: 'BRK-100', quantity: 500 }));
+
+    expect(el().querySelector('[data-testid="job-card-part-qty"]')!.textContent!.trim()).toBe('BRK-100 · Qty 500');
+  });
+
+  it('shows the part number alone when the work order has no quantity', () => {
+    render(job({ partNumber: 'BRK-100', quantity: null }));
+
+    expect(el().querySelector('[data-testid="job-card-part-qty"]')!.textContent!.trim()).toBe('BRK-100');
+  });
+
+  it('omits the part line when the work order has no part', () => {
+    render(job());
+    expect(el().querySelector('[data-testid="job-card-part-qty"]')).toBeNull();
+  });
+
+  it('renders the due date as the stored UTC calendar day', () => {
+    render(job({ dueDate: '2026-10-07T00:00:00Z' as unknown as Date }));
+
+    expect(el().querySelector('.card__due')!.textContent!.trim()).toBe('10/07/2026');
   });
 });

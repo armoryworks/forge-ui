@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { TranslatePipe } from '@ngx-translate/core';
@@ -13,7 +13,7 @@ import { PRIORITY_COLORS } from '../models/priority-colors.const';
 @Component({
   selector: 'app-job-card',
   standalone: true,
-  imports: [DatePipe, AvatarComponent, EntityLinkComponent, PriorityIndicatorComponent, MatTooltipModule, TranslatePipe],
+  imports: [DatePipe, DecimalPipe, AvatarComponent, EntityLinkComponent, PriorityIndicatorComponent, MatTooltipModule, TranslatePipe],
   templateUrl: './job-card.component.html',
   styleUrl: './job-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

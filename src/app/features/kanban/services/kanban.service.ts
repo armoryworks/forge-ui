@@ -8,6 +8,7 @@ import { TrackType } from '../../../shared/models/track-type.model';
 import { ActivityItem } from '../../../shared/models/activity.model';
 import { KanbanJob } from '../models/kanban-job.model';
 import { BoardColumn } from '../models/board-column.model';
+import { KanbanBoard } from '../models/kanban-board.model';
 import { JobDetail } from '../models/job-detail.model';
 import { Subtask } from '../models/subtask.model';
 import { Activity } from '../models/activity.model';
@@ -35,17 +36,25 @@ export class KanbanService {
     return this.http.get<TrackType[]>(`${environment.apiUrl}/track-types`);
   }
 
-  getBoard(trackTypeId: number): Observable<BoardColumn[]> {
-    // Phase 3 F7-broad / WU-22 — server now returns the paged envelope on
-    // /jobs. The kanban board still wants the full set so we request the
-    // server cap (200) and unwrap. Boards beyond 200 jobs are out of scope
-    // for the WU-22 sweep — kanban remains a specialised view by design.
+  getBoard(trackTypeId: number): Observable<KanbanBoard> {
     return forkJoin({
       trackType: this.http.get<TrackType>(`${environment.apiUrl}/track-types/${trackTypeId}`),
-      jobs: this.http.get<PagedResponse<KanbanJob>>(`${environment.apiUrl}/jobs`, {
-        params: { trackTypeId: trackTypeId.toString(), isArchived: 'false', pageSize: '200' },
-      }).pipe(map(p => p.items)),
-    }).pipe(map(({ trackType, jobs }) => this.buildBoard(trackType, jobs)));
+      page: this.http.get<PagedResponse<KanbanJob>>(`${environment.apiUrl}/jobs`, {
+        params: { trackTypeId: trackTypeId.toString(), isArchived: 'false', pageSize: '200', sort: 'board' },
+      }),
+    }).pipe(map(({ trackType, page }) => {
+      const jobs = page.items.map(j => ({
+        ...j,
+        boardPosition: j.boardPosition ?? 0,
+        partNumber: j.partNumber ?? null,
+        quantity: j.quantity ?? null,
+      }));
+      return {
+        columns: this.buildBoard(trackType, jobs),
+        totalCount: Math.max(page.totalCount ?? jobs.length, jobs.length),
+        loadedCount: jobs.length,
+      };
+    }));
   }
 
   moveJobStage(jobId: number, stageId: number): Observable<unknown> {
@@ -103,6 +112,8 @@ export class KanbanService {
     priority?: string;
     dueDate?: string | null;
     salesOrderLineId?: number | null;
+    partId?: number | null;
+    quantity?: number | null;
   }): Observable<JobDetail> {
     return this.http.post<JobDetail>(`${environment.apiUrl}/jobs`, command);
   }
@@ -118,7 +129,7 @@ export class KanbanService {
       `${environment.apiUrl}/orders/assignable-lines`, { params });
   }
 
-  updateJob(id: number, changes: Partial<JobDetail>): Observable<unknown> {
+  updateJob(id: number, changes: Partial<Omit<JobDetail, 'dueDate'>> & { dueDate?: Date | string | null }): Observable<unknown> {
     return this.http.put(`${environment.apiUrl}/jobs/${id}`, changes);
   }
 
@@ -276,7 +287,7 @@ export class KanbanService {
     }
     return trackType.stages.map(stage => ({
       stage,
-      jobs: jobsByStage.get(stage.name) ?? [],
+      jobs: (jobsByStage.get(stage.name) ?? []).sort((a, b) => a.boardPosition - b.boardPosition || a.id - b.id),
     }));
   }
 }

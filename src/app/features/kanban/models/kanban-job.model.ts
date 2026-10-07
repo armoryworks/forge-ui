@@ -23,4 +23,8 @@ export interface KanbanJob {
   coverPhotoUrl: string | null;
   parentJobId: number | null;
   parentJobNumber: string | null;
+  boardPosition: number;
+  partNumber: string | null;
+  quantity: number | null;
+  completedDate?: string | null;
 }

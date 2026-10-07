@@ -13,4 +13,6 @@ export interface AssignableSalesOrderLine {
   description: string;
   quantity: number;
   assignedJobCount: number;
+  remainingQuantity: number | null;
+  requestedDeliveryDate: string | null;
 }

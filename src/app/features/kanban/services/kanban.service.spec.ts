@@ -3,6 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { KanbanService } from './kanban.service';
+import { KanbanBoard } from '../models/kanban-board.model';
 import { environment } from '../../../../environments/environment';
 
 describe('KanbanService', () => {
@@ -30,13 +31,8 @@ describe('KanbanService', () => {
   // ── getBoard ──────────────────────────────────────────────────────────────
 
   describe('getBoard', () => {
-    it('should GET track type and jobs then build board columns', () => {
-      let result: unknown[] = [];
-      service.getBoard(1).subscribe((columns) => { result = columns; });
-
-      const trackTypeReq = httpMock.expectOne(`${apiUrl}/track-types/1`);
-      expect(trackTypeReq.request.method).toBe('GET');
-      trackTypeReq.flush({
+    function flushTrackType(): void {
+      httpMock.expectOne(`${apiUrl}/track-types/1`).flush({
         id: 1,
         name: 'Production',
         stages: [
@@ -44,12 +40,19 @@ describe('KanbanService', () => {
           { id: 11, name: 'In Production', sortOrder: 1 },
         ],
       });
+    }
+
+    it('should GET track type and jobs then build board columns', () => {
+      let result: KanbanBoard | null = null;
+      service.getBoard(1).subscribe((board) => { result = board; });
+
+      flushTrackType();
 
       const jobsReq = httpMock.expectOne((r) => r.url === `${apiUrl}/jobs`);
       expect(jobsReq.request.method).toBe('GET');
       expect(jobsReq.request.params.get('trackTypeId')).toBe('1');
       expect(jobsReq.request.params.get('isArchived')).toBe('false');
-      // Phase 3 F7-broad / WU-22 — server returns the paged envelope on /jobs.
+      expect(jobsReq.request.params.get('sort')).toBe('board');
       jobsReq.flush({
         items: [
           { id: 100, title: 'Job A', stageName: 'Quoting' },
@@ -60,7 +63,54 @@ describe('KanbanService', () => {
         pageSize: 200,
       });
 
-      expect(result.length).toBe(2);
+      const board = result as unknown as KanbanBoard;
+      expect(board.columns.length).toBe(2);
+      expect(board.totalCount).toBe(2);
+      expect(board.loadedCount).toBe(2);
+    });
+
+    it('orders each column by board position, then id, and maps part and quantity', () => {
+      let result: KanbanBoard | null = null;
+      service.getBoard(1).subscribe((board) => { result = board; });
+
+      flushTrackType();
+      httpMock.expectOne((r) => r.url === `${apiUrl}/jobs`).flush({
+        items: [
+          { id: 7, stageName: 'Quoting', boardPosition: 2 },
+          { id: 9, stageName: 'Quoting', boardPosition: 0, partNumber: 'BRK-100', quantity: 500 },
+          { id: 3, stageName: 'Quoting', boardPosition: 2 },
+          { id: 4, stageName: 'Quoting' },
+        ],
+        totalCount: 4,
+        page: 1,
+        pageSize: 200,
+      });
+
+      const quoting = (result as unknown as KanbanBoard).columns[0].jobs;
+      expect(quoting.map(j => j.id)).toEqual([4, 9, 3, 7]);
+      const part = quoting.find(j => j.id === 9)!;
+      expect(part.partNumber).toBe('BRK-100');
+      expect(part.quantity).toBe(500);
+      const bare = quoting.find(j => j.id === 4)!;
+      expect(bare.boardPosition).toBe(0);
+      expect(bare.partNumber).toBeNull();
+      expect(bare.quantity).toBeNull();
+    });
+
+    it('reports the server total when the board holds more jobs than one page', () => {
+      let result: KanbanBoard | null = null;
+      service.getBoard(1).subscribe((board) => { result = board; });
+
+      flushTrackType();
+      httpMock.expectOne((r) => r.url === `${apiUrl}/jobs`).flush({
+        items: [{ id: 1, stageName: 'Quoting', boardPosition: 0 }],
+        totalCount: 245,
+        page: 1,
+        pageSize: 200,
+      });
+
+      expect((result as unknown as KanbanBoard).totalCount).toBe(245);
+      expect((result as unknown as KanbanBoard).loadedCount).toBe(1);
     });
   });
 
@@ -101,7 +151,7 @@ describe('KanbanService', () => {
 
   describe('createJob', () => {
     it('should POST a new job and return the detail', () => {
-      const command = { title: 'New Job', trackTypeId: 1, priority: 'Medium' };
+      const command = { title: 'New Job', trackTypeId: 1, priority: 'Medium', partId: 12, quantity: 500 };
       const mockResponse = { id: 99, title: 'New Job', trackTypeId: 1 };
       let result: unknown = null;
 

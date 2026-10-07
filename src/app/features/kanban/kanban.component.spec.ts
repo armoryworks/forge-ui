@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, of } from 'rxjs';
+import { CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
@@ -63,6 +64,9 @@ function boardJob(id: number, stageName: string, overrides: Partial<KanbanJob> =
     coverPhotoUrl: null,
     parentJobId: null,
     parentJobNumber: null,
+    boardPosition: 0,
+    partNumber: null,
+    quantity: null,
     ...overrides,
   };
 }
@@ -88,7 +92,14 @@ function productionBoard(): BoardColumn[] {
 }
 
 interface ComponentInternals {
-  columns: { set(cols: BoardColumn[]): void };
+  columns: { set(cols: BoardColumn[]): void; (): BoardColumn[] };
+  filteredColumns: () => BoardColumn[];
+  swimlaneRows: () => { cells: { jobs: KanbanJob[] }[] }[];
+  boardTruncated: () => boolean;
+  boardTotalCount: () => number;
+  boardLoadedCount: () => number;
+  selectTrackType(trackTypeId: number): void;
+  onCardDropped(event: CdkDragDrop<KanbanJob[]>): void;
   selectedJobIds: { set(ids: Set<number>): void };
   disabledBulkStageIds: () => Set<number>;
   onJobNumberClicked(event: { job: KanbanJob; event: Event }): void;
@@ -102,8 +113,20 @@ describe('KanbanComponent', () => {
   let bulkMoveStage: ReturnType<typeof vi.fn>;
   let snackbarSuccess: ReturnType<typeof vi.fn>;
   let toastShow: ReturnType<typeof vi.fn>;
+  let getBoard: ReturnType<typeof vi.fn>;
+  let updateJobPosition: ReturnType<typeof vi.fn>;
+  let moveJobStage: ReturnType<typeof vi.fn>;
+
+  function createComponent(): void {
+    component = TestBed.createComponent(KanbanComponent)
+      .componentInstance as unknown as ComponentInternals;
+  }
 
   beforeEach(() => {
+    getBoard = vi.fn(() => of({ columns: [], totalCount: 0, loadedCount: 0 }));
+    updateJobPosition = vi.fn(() => of(undefined));
+    moveJobStage = vi.fn(() => of(undefined));
+
     detailDialogOpen = vi.fn(() => ({ afterClosed: () => of(undefined) }));
     bulkMoveStage = vi.fn(() => of({ successCount: 0, failureCount: 0, errors: [] }));
     snackbarSuccess = vi.fn();
@@ -116,9 +139,12 @@ describe('KanbanComponent', () => {
           provide: KanbanService,
           useValue: {
             getTrackTypes: () => of([]),
-            getBoard: () => of([]),
+            getBoard,
             getUsers: () => of([]),
             bulkMoveStage,
+            updateJobPosition,
+            getJobDetail: () => of({}),
+            moveJobStage,
           },
         },
         {
@@ -157,8 +183,7 @@ describe('KanbanComponent', () => {
     // Class-logic spec — the (heavy, child-component-laden) template is not
     // under test here; job-card.component.spec.ts covers the card DOM.
     TestBed.overrideComponent(KanbanComponent, { set: { template: '' } });
-    component = TestBed.createComponent(KanbanComponent)
-      .componentInstance as unknown as ComponentInternals;
+    createComponent();
   });
 
   // ── Task 3: the job-number click opens the detail in EVERY column ──
@@ -263,5 +288,79 @@ describe('KanbanComponent', () => {
 
     expect(snackbarSuccess).not.toHaveBeenCalled();
     expect(toastShow).toHaveBeenCalledOnce();
+  });
+
+  describe('board truncation', () => {
+    it('flags the board as truncated when the server holds more jobs than were loaded', () => {
+      getBoard.mockReturnValue(of({ columns: productionBoard(), totalCount: 245, loadedCount: 200 }));
+
+      component.selectTrackType(1);
+
+      expect(component.boardTruncated()).toBe(true);
+      expect(component.boardTotalCount()).toBe(245);
+      expect(component.boardLoadedCount()).toBe(200);
+    });
+
+    it('does not flag a board that loaded every job', () => {
+      getBoard.mockReturnValue(of({ columns: productionBoard(), totalCount: 4, loadedCount: 4 }));
+
+      component.selectTrackType(1);
+
+      expect(component.boardTruncated()).toBe(false);
+    });
+  });
+
+  describe('reordering cards', () => {
+    it('does not re-save cards whose position did not change', () => {
+      component.columns.set([{
+        stage: stage({ id: 1, name: 'Queued', sortOrder: 1 }),
+        jobs: [
+          boardJob(1, 'Queued', { boardPosition: 0 }),
+          boardJob(2, 'Queued', { boardPosition: 1 }),
+          boardJob(3, 'Queued', { boardPosition: 2 }),
+        ],
+      }]);
+      const container = { id: 'column-0', data: component.filteredColumns()[0].jobs } as unknown as CdkDropList<KanbanJob[]>;
+
+      component.onCardDropped({
+        previousContainer: container,
+        container,
+        previousIndex: 2,
+        currentIndex: 1,
+      } as unknown as CdkDragDrop<KanbanJob[]>);
+
+      expect(component.columns()[0].jobs.map(j => j.id)).toEqual([1, 3, 2]);
+      expect(updateJobPosition.mock.calls).toEqual([[3, 1], [2, 2]]);
+    });
+
+    it('moves the card to the new status first, then saves the target column order', () => {
+      component.columns.set([
+        {
+          stage: stage({ id: 1, name: 'Queued', sortOrder: 1 }),
+          jobs: [boardJob(1, 'Queued', { boardPosition: 0 }), boardJob(2, 'Queued', { boardPosition: 1 })],
+        },
+        {
+          stage: stage({ id: 2, name: 'Running', sortOrder: 2 }),
+          jobs: [boardJob(3, 'Running', { boardPosition: 0 })],
+        },
+      ]);
+      const cols = component.filteredColumns();
+      const source = { id: 'column-0', data: cols[0].jobs } as unknown as CdkDropList<KanbanJob[]>;
+      const target = { id: 'column-1', data: cols[1].jobs } as unknown as CdkDropList<KanbanJob[]>;
+
+      component.onCardDropped({
+        previousContainer: source,
+        container: target,
+        previousIndex: 1,
+        currentIndex: 1,
+      } as unknown as CdkDragDrop<KanbanJob[]>);
+
+      expect(moveJobStage).toHaveBeenCalledWith(2, 2);
+      expect(moveJobStage.mock.invocationCallOrder[0]).toBeLessThan(updateJobPosition.mock.invocationCallOrder[0]);
+      expect(updateJobPosition.mock.calls).toEqual([[2, 1]]);
+      expect(component.columns()[0].jobs.map(j => j.id)).toEqual([1]);
+      expect(component.columns()[1].jobs.map(j => j.id)).toEqual([3, 2]);
+      expect(component.columns()[1].jobs[1].stageName).toBe('Running');
+    });
   });
 });

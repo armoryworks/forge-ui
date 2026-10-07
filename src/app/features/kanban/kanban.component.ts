@@ -15,6 +15,7 @@ import { JobDialogComponent, DialogMode } from './components/job-dialog.componen
 import { JobCardComponent } from './components/job-card.component';
 import { KanbanService } from './services/kanban.service';
 import { BoardColumn } from './models/board-column.model';
+import { KanbanBoard } from './models/kanban-board.model';
 import { JobDetail } from './models/job-detail.model';
 import { KanbanJob } from './models/kanban-job.model';
 import { SwimlaneRow } from './models/swimlane-row.model';
@@ -75,6 +76,9 @@ export class KanbanComponent implements OnInit, OnDestroy {
   protected readonly trackTypes = signal<TrackType[]>([]);
   protected readonly selectedTrackTypeId = signal<number | null>(null);
   protected readonly columns = signal<BoardColumn[]>([]);
+  protected readonly boardTotalCount = signal(0);
+  protected readonly boardLoadedCount = signal(0);
+  protected readonly boardTruncated = computed(() => this.boardTotalCount() > this.boardLoadedCount());
   protected readonly error = signal<string | null>(null);
   protected readonly showJobDialog = signal(false);
   protected readonly dialogMode = signal<DialogMode>('create');
@@ -268,7 +272,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
     this.loadingService.track('Loading board...', this.kanbanService.getBoard(trackTypeId))
       .subscribe({
-        next: (columns) => this.columns.set(columns),
+        next: (board) => this.applyBoard(board),
         // A cancelled in-flight request surfaces as status 0 — e.g. a
         // SignalR-driven reloadBoard() superseded this load. That's not a
         // failure; the surviving load owns the result. Only surface real errors.
@@ -482,49 +486,77 @@ export class KanbanComponent implements OnInit, OnDestroy {
     const trackTypeId = this.selectedTrackTypeId();
     if (!trackTypeId) return;
     this.kanbanService.getBoard(trackTypeId).subscribe({
-      next: (columns) => this.columns.set(columns),
+      next: (board) => this.applyBoard(board),
+    });
+  }
+
+  private applyBoard(board: KanbanBoard): void {
+    this.columns.set(board.columns);
+    this.boardTotalCount.set(board.totalCount);
+    this.boardLoadedCount.set(board.loadedCount);
+  }
+
+  private replaceColumnJobs(changes: Map<number, KanbanJob[]>): void {
+    this.columns.update(cols => cols.map((col, i) => changes.has(i) ? { ...col, jobs: changes.get(i)! } : col));
+  }
+
+  private orderedColumnJobs(columnIndex: number, visibleOrder: KanbanJob[]): KanbanJob[] {
+    const visibleIds = new Set(visibleOrder.map(j => j.id));
+    const hidden = (this.columns()[columnIndex]?.jobs ?? []).filter(j => !visibleIds.has(j.id));
+    return [...visibleOrder, ...hidden];
+  }
+
+  private persistPositions(jobs: KanbanJob[], alwaysPersistJobId: number | null = null): KanbanJob[] {
+    return jobs.map((job, index) => {
+      if (job.boardPosition === index && job.id !== alwaysPersistJobId) return job;
+      this.kanbanService.updateJobPosition(job.id, index).subscribe();
+      return { ...job, boardPosition: index };
     });
   }
 
   // ── Board View Drop ──
   protected onCardDropped(event: CdkDragDrop<KanbanJob[]>): void {
+    const targetColumnIndex = this.dropListIds().indexOf(event.container.id);
     if (event.previousContainer === event.container) {
+      if (targetColumnIndex < 0) return;
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-      event.container.data.forEach((job, index) => {
-        this.kanbanService.updateJobPosition(job.id, index).subscribe();
-      });
-    } else {
-      const job = event.previousContainer.data[event.previousIndex];
-      const targetColumnIndex = this.dropListIds().indexOf(event.container.id);
-      const targetStage = this.columns()[targetColumnIndex]?.stage;
-
-      if (!targetStage || targetStage.isIrreversible) return;
-
-      transferArrayItem(
-        event.previousContainer.data,
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex,
-      );
-
-      // JIT GET seeds the ETag cache so the PATCH carries If-Match.
-      this.kanbanService.getJobDetail(job.id).pipe(
-        switchMap(() => this.kanbanService.moveJobStage(job.id, targetStage.id)),
-      ).subscribe({
-        error: () => {
-          transferArrayItem(
-            event.container.data,
-            event.previousContainer.data,
-            event.currentIndex,
-            event.previousIndex,
-          );
-        },
-      });
-
-      event.container.data.forEach((j, index) => {
-        this.kanbanService.updateJobPosition(j.id, index).subscribe();
-      });
+      const ordered = this.persistPositions(this.orderedColumnJobs(targetColumnIndex, event.container.data));
+      this.replaceColumnJobs(new Map([[targetColumnIndex, ordered]]));
+      return;
     }
+
+    const job = event.previousContainer.data[event.previousIndex];
+    const sourceColumnIndex = this.dropListIds().indexOf(event.previousContainer.id);
+    const targetStage = this.columns()[targetColumnIndex]?.stage;
+
+    if (!targetStage || targetStage.isIrreversible || sourceColumnIndex < 0) return;
+
+    transferArrayItem(
+      event.previousContainer.data,
+      event.container.data,
+      event.previousIndex,
+      event.currentIndex,
+    );
+
+    const movedJob: KanbanJob = { ...job, stageName: targetStage.name, stageColor: targetStage.color };
+    const targetVisible = event.container.data.map(j => j.id === job.id ? movedJob : j);
+    const targetOrdered = this.orderedColumnJobs(targetColumnIndex, targetVisible);
+    const sourceRemaining = (this.columns()[sourceColumnIndex]?.jobs ?? []).filter(j => j.id !== job.id);
+    this.replaceColumnJobs(new Map([
+      [sourceColumnIndex, sourceRemaining],
+      [targetColumnIndex, targetOrdered],
+    ]));
+
+    // JIT GET seeds the ETag cache so the PATCH carries If-Match.
+    this.kanbanService.getJobDetail(job.id).pipe(
+      switchMap(() => this.kanbanService.moveJobStage(job.id, targetStage.id)),
+    ).subscribe({
+      next: () => {
+        const current = this.columns()[targetColumnIndex]?.jobs ?? [];
+        this.replaceColumnJobs(new Map([[targetColumnIndex, this.persistPositions(current, job.id)]]));
+      },
+      error: () => this.reloadBoard(),
+    });
   }
 
   // ── Swimlane Drop Handler ──

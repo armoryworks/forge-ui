@@ -30,6 +30,15 @@
     </span>
   </div>
   <div class="card__title">{{ job().title }}</div>
+  @if (job().partNumber) {
+    <div class="card__part" data-testid="job-card-part-qty">
+      @if (job().quantity !== null) {
+        {{ 'kanban.partQty' | translate: { partNumber: job().partNumber, quantity: (job().quantity | number:'1.0-4') } }}
+      } @else {
+        {{ job().partNumber }}
+      }
+    </div>
+  }
   <div class="card__footer">
     <app-priority-indicator [priority]="job().priorityName" size="sm" />
     @if (job().assigneeInitials) {
@@ -86,7 +95,7 @@
     }
     @if (job().dueDate) {
       <span class="card__due" [class.card__due--overdue]="job().isOverdue">
-        {{ job().dueDate | date:'MM/dd/yyyy' }}
+        {{ job().dueDate | date:'MM/dd/yyyy':'UTC' }}
       </span>
     }
   </div>

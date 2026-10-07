@@ -49,6 +49,13 @@
     </div>
   }
 
+  @if (boardTruncated()) {
+    <div class="board-truncated" data-testid="board-truncated-banner" role="status">
+      <span class="material-icons-outlined board-truncated__icon">warning_amber</span>
+      <span class="board-truncated__text">{{ 'kanban.boardTruncated' | translate: { shown: boardLoadedCount(), total: boardTotalCount() } }}</span>
+    </div>
+  }
+
   <!-- Board View -->
   @if (viewMode() === 'board') {
     <div class="board">
