@@ -18,7 +18,7 @@
           <span class="material-icons-outlined">account_tree</span>
         </button>
       </div>
-      <button class="action-btn action-btn--sm" (click)="openAddOperation()">
+      <button class="action-btn action-btn--create action-btn--sm" data-testid="routing-add-operation" (click)="openAddOperation()">
         <span class="material-icons-outlined">add</span> {{ 'parts.addOperation' | translate }}
       </button>
     </div>
@@ -45,7 +45,9 @@
                 }
               </div>
               @if (operation.instructions) {
-                <div class="operation-card__instructions">{{ operation.instructions }}</div>
+                <div class="operation-card__instructions"
+                     [class.operation-card__instructions--expanded]="expandedInstructions().has(operation.id)"
+                     [attr.id]="'op-instructions-' + operation.id">{{ operation.instructions }}</div>
               }
               <div class="operation-card__meta">
                 @if (operation.workCenterName) {
@@ -70,6 +72,16 @@
               </div>
             </div>
             <div class="operation-card__actions">
+              @if (operation.instructions) {
+                <button class="icon-btn" data-testid="op-toggle-instructions"
+                        (click)="toggleInstructions(operation.id)"
+                        [matTooltip]="(expandedInstructions().has(operation.id) ? 'parts.hideInstructions' : 'parts.showInstructions') | translate" matTooltipPosition="above"
+                        [attr.aria-label]="(expandedInstructions().has(operation.id) ? 'parts.hideInstructions' : 'parts.showInstructions') | translate"
+                        [attr.aria-expanded]="expandedInstructions().has(operation.id)"
+                        [attr.aria-controls]="'op-instructions-' + operation.id">
+                  <span class="material-icons-outlined">{{ expandedInstructions().has(operation.id) ? 'expand_less' : 'expand_more' }}</span>
+                </button>
+              }
               <button class="icon-btn" (click)="openEditOperation(operation)" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" [attr.aria-label]="'parts.editOperationAria' | translate">
                 <span class="material-icons-outlined">edit</span>
               </button>

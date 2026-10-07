@@ -42,6 +42,7 @@ export class RoutingComponent implements OnInit {
   protected readonly operations = signal<Operation[]>([]);
   protected readonly loading = signal(false);
   protected readonly routingViewMode = signal<RoutingViewMode>('list');
+  protected readonly expandedInstructions = signal<ReadonlySet<number>>(new Set());
 
   constructor() {
     effect(() => {
@@ -70,6 +71,14 @@ export class RoutingComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
+    });
+  }
+
+  protected toggleInstructions(operationId: number): void {
+    this.expandedInstructions.update(ids => {
+      const next = new Set(ids);
+      if (!next.delete(operationId)) next.add(operationId);
+      return next;
     });
   }
 
