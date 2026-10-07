@@ -41,6 +41,30 @@
     text-align: right;
     width: 90px;
   }
+
+  &__bin {
+    width: 200px;
+  }
+
+  &__lot {
+    width: 160px;
+  }
+
+  &__bin,
+  &__lot {
+    padding-top: $sp-xs;
+    padding-bottom: 0;
+  }
+
+  &__toggle {
+    width: $btn-icon-size;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  &__note-row td {
+    padding-top: 0;
+  }
 }
 
 .receive-qty-input {

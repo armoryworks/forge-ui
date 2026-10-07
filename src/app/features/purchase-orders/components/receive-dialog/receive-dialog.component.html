@@ -1,4 +1,4 @@
-<app-dialog [title]="('purchaseOrders.receiveTitle' | translate: { number: purchaseOrder().poNumber })" width="700px" [draftConfig]="draftConfig" [draftFormGroup]="formGroup" (closed)="close()">
+<app-dialog [title]="('purchaseOrders.receiveTitle' | translate: { number: purchaseOrder().poNumber })" width="1040px" [draftConfig]="draftConfig" [draftFormGroup]="formGroup" (closed)="close()">
 
   @if (receivableLines().length === 0) {
     <app-empty-state icon="check_circle" [message]="'purchaseOrders.allReceived' | translate" />
@@ -19,6 +19,9 @@
           <th class="receive-table__right">{{ 'purchaseOrders.received' | translate }}</th>
           <th class="receive-table__right">{{ 'purchaseOrders.remaining' | translate }}</th>
           <th class="receive-table__right">{{ 'purchaseOrders.receiveQty' | translate }}</th>
+          <th>{{ 'purchaseOrders.receiveBin' | translate }}</th>
+          <th>{{ 'purchaseOrders.receiveLot' | translate }}</th>
+          <th class="receive-table__toggle" [attr.aria-label]="'purchaseOrders.receiveNote' | translate"></th>
         </tr>
       </thead>
       <tbody>
@@ -34,7 +37,42 @@
                 [min]="0" [max]="line.remainingQuantity"
                 class="receive-qty-input" />
             </td>
+            <td class="receive-table__bin">
+              <app-select
+                [label]="'purchaseOrders.receiveBin' | translate"
+                [formControl]="binControls()[i]"
+                [options]="binOptions()"
+                [attr.data-testid]="'receive-bin-' + line.id" />
+            </td>
+            <td class="receive-table__lot">
+              <app-input
+                [label]="'purchaseOrders.receiveLot' | translate"
+                [formControl]="lotControls()[i]"
+                [maxlength]="100"
+                [attr.data-testid]="'receive-lot-' + line.id" />
+            </td>
+            <td class="receive-table__toggle">
+              <button type="button" class="icon-btn"
+                [class.icon-btn--active]="isNoteOpen(line.id) || noteControls()[i].value"
+                [attr.aria-expanded]="isNoteOpen(line.id)"
+                [attr.aria-label]="'purchaseOrders.receiveNote' | translate"
+                [attr.data-testid]="'receive-note-toggle-' + line.id"
+                (click)="toggleNote(line.id)">
+                <span class="material-icons-outlined">{{ isNoteOpen(line.id) ? 'expand_less' : 'sticky_note_2' }}</span>
+              </button>
+            </td>
           </tr>
+          @if (isNoteOpen(line.id)) {
+            <tr class="receive-table__note-row">
+              <td colspan="9">
+                <app-textarea
+                  [label]="'purchaseOrders.receiveNote' | translate"
+                  [formControl]="noteControls()[i]"
+                  [rows]="2"
+                  [attr.data-testid]="'receive-note-' + line.id" />
+              </td>
+            </tr>
+          }
         }
       </tbody>
     </table>
@@ -71,7 +109,7 @@
   <div dialog-footer>
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <button data-testid="receive-save-btn" class="action-btn action-btn--primary"
-      [disabled]="!hasAnyQuantity || saving()"
+      [disabled]="!hasAnyQuantity || hasInvalidLineField || saving()"
       (click)="save()">
       {{ 'purchaseOrders.receiveItems' | translate }}
     </button>

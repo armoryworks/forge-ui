@@ -15,6 +15,9 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { InputComponent } from '../../../../shared/components/input/input.component';
+import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { InventoryService } from '../../../inventory/services/inventory.service';
 
 @Component({
   selector: 'app-receive-dialog',
@@ -22,6 +25,7 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
   imports: [
     ReactiveFormsModule, DecimalPipe,
     DialogComponent, EmptyStateComponent, CurrencyInputComponent, SelectComponent,
+    InputComponent, TextareaComponent,
     TranslatePipe,
   ],
   templateUrl: './receive-dialog.component.html',
@@ -32,6 +36,7 @@ export class ReceiveDialogComponent implements OnInit {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
 
   private readonly poService = inject(PurchaseOrderService);
+  private readonly inventoryService = inject(InventoryService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
 
@@ -42,6 +47,11 @@ export class ReceiveDialogComponent implements OnInit {
   protected readonly saving = signal(false);
   protected readonly receivableLines = signal<PurchaseOrderLine[]>([]);
   protected readonly lineControls = signal<FormControl<number>[]>([]);
+  protected readonly binControls = signal<FormControl<number | null>[]>([]);
+  protected readonly lotControls = signal<FormControl<string>[]>([]);
+  protected readonly noteControls = signal<FormControl<string>[]>([]);
+  protected readonly openNotes = signal<ReadonlySet<number>>(new Set());
+  protected readonly binOptions = signal<SelectOption[]>([]);
 
   // Bought-parts effort PR3 — receipt-level freight capture. ActualFreight
   // defaults from PO.EstimatedFreight on init so the "matches estimate"
@@ -78,6 +88,12 @@ export class ReceiveDialogComponent implements OnInit {
         validators: [Validators.min(0), Validators.max(l.remainingQuantity)],
       }))
     );
+    this.binControls.set(lines.map(l => new FormControl<number | null>(l.partDefaultBinId ?? null)));
+    this.lotControls.set(lines.map(() => new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(100)] })));
+    this.noteControls.set(lines.map(() => new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(1000)] })));
+    this.inventoryService.getBinLocations().subscribe(bins => {
+      this.binOptions.set(bins.map(b => ({ value: b.id, label: b.locationPath || b.name })));
+    });
     // Default actual freight to the PO's estimate so the common case is
     // one-click. Buyer can override.
     if (po.estimatedFreight != null) {
@@ -92,7 +108,15 @@ export class ReceiveDialogComponent implements OnInit {
         const snapshot: Record<string, unknown> = {};
         const ls = this.receivableLines();
         const cs = this.lineControls();
-        ls.forEach((l, i) => { snapshot[l.id.toString()] = cs[i].value; });
+        const bins = this.binControls();
+        const lots = this.lotControls();
+        const notes = this.noteControls();
+        ls.forEach((l, i) => {
+          snapshot[l.id.toString()] = cs[i].value;
+          snapshot[`bin:${l.id}`] = bins[i].value;
+          snapshot[`lot:${l.id}`] = lots[i].value;
+          snapshot[`note:${l.id}`] = notes[i].value;
+        });
         return snapshot;
       },
       restoreFn: (data: Record<string, unknown>) => {
@@ -104,6 +128,15 @@ export class ReceiveDialogComponent implements OnInit {
             cs[i].setValue(val);
             cs[i].markAsDirty();
           }
+          const bin = data[`bin:${l.id}`];
+          if (typeof bin === 'number') this.binControls()[i].setValue(bin);
+          const lot = data[`lot:${l.id}`];
+          if (typeof lot === 'string') this.lotControls()[i].setValue(lot);
+          const note = data[`note:${l.id}`];
+          if (typeof note === 'string' && note) {
+            this.noteControls()[i].setValue(note);
+            this.openNotes.update(open => new Set(open).add(l.id));
+          }
         });
       },
     };
@@ -111,6 +144,23 @@ export class ReceiveDialogComponent implements OnInit {
 
   protected get hasAnyQuantity(): boolean {
     return this.lineControls().some(c => (c.value ?? 0) > 0);
+  }
+
+  protected get hasInvalidLineField(): boolean {
+    return this.lotControls().some(c => c.invalid) || this.noteControls().some(c => c.invalid);
+  }
+
+  protected isNoteOpen(lineId: number): boolean {
+    return this.openNotes().has(lineId);
+  }
+
+  protected toggleNote(lineId: number): void {
+    this.openNotes.update(open => {
+      const next = new Set(open);
+      if (next.has(lineId)) next.delete(lineId);
+      else next.add(lineId);
+      return next;
+    });
   }
 
   protected close(): void {
@@ -126,16 +176,27 @@ export class ReceiveDialogComponent implements OnInit {
   protected save(): void {
     const lines = this.receivableLines();
     const controls = this.lineControls();
+    const bins = this.binControls();
+    const lots = this.lotControls();
+    const notes = this.noteControls();
 
     const receiveLines: ReceiveLineRequest[] = [];
     lines.forEach((l, i) => {
       const qty = controls[i].value ?? 0;
       if (qty > 0) {
-        receiveLines.push({ lineId: l.id, quantity: qty });
+        const lot = lots[i].value.trim();
+        const note = notes[i].value.trim();
+        receiveLines.push({
+          lineId: l.id,
+          quantity: qty,
+          storageLocationId: bins[i].value ?? undefined,
+          lotNumber: lot || undefined,
+          notes: note || undefined,
+        });
       }
     });
 
-    if (receiveLines.length === 0) return;
+    if (receiveLines.length === 0 || this.hasInvalidLineField) return;
 
     this.saving.set(true);
     this.poService.receiveItems(this.purchaseOrder().id, {
