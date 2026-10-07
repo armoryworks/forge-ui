@@ -346,7 +346,10 @@
     "overview": "Resumen",
     "activity": "Actividad",
     "archived": "Archivado",
-    "continue": "Continuar"
+    "continue": "Continuar",
+    "dismiss": "Descartar",
+    "fax": "Fax",
+    "deactivatedSuffix": "(desactivado)"
   },
   "dashboard": {
     "title": "Panel",
@@ -414,7 +417,11 @@
     "completeTask": "Complete Task",
     "dismissTask": "Dismiss Task",
     "noActionItems": "No action items",
-    "totalItems": "Total Items"
+    "totalItems": "Total Items",
+    "addWorkCenters": "Agregue sus centros de trabajo",
+    "addFirstPart": "Agregue una pieza con enrutamiento",
+    "sendFirstQuote": "Envíe su primera cotización",
+    "shipFirstOrder": "Envíe su primera orden"
   },
   "kanban": {
     "title": "Tablero",
@@ -551,7 +558,23 @@
     "openAccountingDetails": "{{type}} {{ref}} — abrir detalles de costos y contabilidad",
     "salesOrder": "Orden de Venta",
     "bulkMoveBlockedTitle": "Algunos trabajos no se movieron",
-    "bulkMoveBlockedMessage": "{{count}} trabajo(s) no se pudieron mover a {{stage}}"
+    "bulkMoveBlockedMessage": "{{count}} trabajo(s) no se pudieron mover a {{stage}}",
+    "partQty": "{{partNumber}} · Cant. {{quantity}}",
+    "boardTruncated": "Mostrando {{shown}} de {{total}} órdenes de trabajo. Archive el trabajo enviado para ver el resto.",
+    "activeOnly": "Solo activas",
+    "quantityToMake": "Cantidad a fabricar",
+    "customerOptionalHint": "Opcional. Déjelo en blanco para órdenes de inventario o internas.",
+    "fromSoLine": "Tomado de la línea de la orden de venta",
+    "addPartQty": "Cant.",
+    "childQty": "Cant. {{quantity}}",
+    "childDue": "Vence {{date}}",
+    "workflowStatusHint": "El estado del flujo de trabajo controla retenciones y documentación. El estado del tablero muestra dónde está la orden de trabajo.",
+    "dispositionEnteredInError": "Ingresada por error (anular)",
+    "dispositionOther": "Otra",
+    "dispositionNotesRequired": "Agregue un motivo para esta disposición.",
+    "goodQuantity": "Cantidad buena",
+    "destinationBin": "Guardar en ubicación",
+    "dispositionNoPart": "Esta orden de trabajo no tiene pieza, así que no se puede agregar nada al inventario."
   },
   "backlog": {
     "title": "Pendientes",
@@ -1413,6 +1436,11 @@
     "estTime": "Tiempo de ciclo (por pieza)",
     "estHours": "Horas",
     "estMilliseconds": "Milisegundos",
+    "estSeconds": "Segundos",
+    "setupTime": "Tiempo de preparación (minutos)",
+    "lotTime": "Tiempo por lote (minutos)",
+    "showInstructions": "Mostrar instrucciones",
+    "hideInstructions": "Ocultar instrucciones",
     "duplicatePart": "Duplicar pieza",
     "clone": {
       "title": "Duplicar {{partNumber}}",
@@ -1776,6 +1804,16 @@
       "chartLabel": "Existencias disponibles frente al punto de pedido para las piezas de mayor riesgo",
       "topNNote": "Mostrando las {{count}} piezas de mayor riesgo de {{total}} en o por debajo de su punto de pedido.",
       "empty": "Todas las piezas rastreadas están por encima de su punto de pedido."
+    },
+    "receivingInspection": {
+      "empty": "No hay recepciones pendientes de inspección",
+      "inspect": "Inspeccionar",
+      "waive": "Dispensar",
+      "waiveReason": "Motivo de la dispensa",
+      "result": "Resultado",
+      "acceptedQty": "Cant. aceptada",
+      "rejectedQty": "Cant. rechazada",
+      "createNcr": "Levantar una no conformidad por las piezas rechazadas"
     }
   },
   "customers": {
@@ -3540,6 +3578,23 @@
       "confirmMessage": "La documentación de contratación — W-4, I-9 y retención estatal — dejará de solicitarse y de reclamarse para esta persona, y podrá recibir trabajo asignado sin ella. Utilícelo para cuentas de servicio, contratistas y consultores que no sean sus empleados.\n\nSi SÍ es un empleado, nunca se recopilarán los registros que la ley le obliga a conservar. Puede deshacer esto en cualquier momento; lo ya registrado se conserva.",
       "confirmAction": "Marcar como no empleado",
       "updateFailed": "No se pudo cambiar el estado de empleado de este usuario."
+    },
+    "numbering": {
+      "title": "Numeración",
+      "parts": "Permitirme escribir mis propios números de pieza",
+      "customers": "Permitirme escribir mis propios números de cliente",
+      "vendors": "Permitirme escribir mis propios números de proveedor",
+      "leads": "Permitirme escribir mis propios números de prospecto",
+      "salesOrders": "Permitirme escribir mis propios números de orden de venta",
+      "quotes": "Permitirme escribir mis propios números de cotización",
+      "purchaseOrders": "Permitirme escribir mis propios números de orden de compra",
+      "shipments": "Permitirme escribir mis propios números de envío",
+      "jobs": "Permitirme escribir mis propios números de orden de trabajo",
+      "invoices": "Permitirme escribir mis propios números de factura",
+      "payments": "Permitirme escribir mis propios números de pago"
+    },
+    "capability": {
+      "relatedSettings": "Configuración relacionada"
     }
   },
   "teamsPanel": {
@@ -3823,7 +3878,12 @@
       "submissionFailed": "Falló el envío. Inténtalo de nuevo.",
       "previewFailed": "No se pudo cargar la vista previa del PDF. Inténtalo de nuevo.",
       "signingFailed": "No se pudo crear la sesión de firma. Inténtalo de nuevo."
-    }
+    },
+    "paperworkRemaining": "Su documentación de empleado no está terminada (faltan {{count}} secciones).",
+    "skip": "Omitir",
+    "skipConfirm": "¿Omitir la documentación de empleado por ahora?",
+    "cancel": "Cancelar",
+    "bypassFailed": "No se pudo omitir la documentación: {{reason}}"
   },
   "account": {
     "title": "Cuenta",
@@ -4097,7 +4157,9 @@
     "unexpectedError": "Ocurrió un error inesperado.",
     "connectionLost": "Conexión Perdida",
     "unableToReachServer": "No se puede comunicar con el servidor. Verifique su conexión de red.",
-    "timeout": "La solicitud expiró. Intente de nuevo."
+    "timeout": "La solicitud expiró. Intente de nuevo.",
+    "ruleViolation": "Acción no permitida",
+    "numberTaken": "Otro registro acaba de tomar ese número. Guarde de nuevo para obtener el siguiente número."
   },
   "confirmDialog": {
     "areYouSure": "¿Está seguro?",
@@ -4793,7 +4855,8 @@
     "noAccountFound": "No se encontró cuenta. Contacte a su administrador para crear una cuenta primero.",
     "ssoDomainNotPermitted": "Su dominio de correo no está permitido para el inicio de sesión SSO. Contacte a su administrador.",
     "invalidSetupLink": "Enlace de configuración inválido. Contacte a su administrador.",
-    "expiredSetupCode": "Código de configuración inválido o expirado. Contacte a su administrador."
+    "expiredSetupCode": "Código de configuración inválido o expirado. Contacte a su administrador.",
+    "bundleJobShop": "Taller por pedido: cotizar, fabricar, enviar, facturar"
   },
   "validation": {
     "required": "{field} es requerido",
@@ -5013,7 +5076,8 @@
       "catalogTab": "Catálogo",
       "catalogEmpty": "Este proveedor aún no tiene piezas en el catálogo.",
       "catalogEmptyHelp": "Añade una pieza que este proveedor suministre.",
-      "addPartToCatalog": "Añadir pieza"
+      "addPartToCatalog": "Añadir pieza",
+      "scorecardTab": "Evaluación"
     },
     "offTierVariancePct": "% Variación Fuera de Tarifa",
     "offTierVariancePctPlaceholder": "Predeterminado: 5%",
@@ -5190,7 +5254,30 @@
     "originEdi": "EDI",
     "originTooltipUser": "Creado por: {{name}}",
     "originTooltipReference": "Referencia: {{reference}}",
-    "numberLockedReason": "El número de orden de compra solo se puede cambiar mientras la orden es un borrador. Esta ya se emitió, por lo que el proveedor ya utiliza este número."
+    "numberLockedReason": "El número de orden de compra solo se puede cambiar mientras la orden es un borrador. Esta ya se emitió, por lo que el proveedor ya utiliza este número.",
+    "printPo": "Imprimir OC",
+    "vendorPromisedDate": "Fecha prometida por el proveedor",
+    "receiveBin": "Ubicación",
+    "receiveLot": "Lote / n.º de colada",
+    "receiveNote": "Nota",
+    "nonStockLine": "Línea sin inventario / de servicio",
+    "lineDescription": "Descripción",
+    "lineNote": "Nota de línea",
+    "priceChangeReason": "Motivo del cambio de precio",
+    "listPriceBadge": "Lista",
+    "listPriceTooltip": "Precio de lista. Edítelo para reemplazarlo.",
+    "addLineAria": "Agregar línea",
+    "obsoleteLinesWarning": "Estas líneas usan piezas obsoletas: {{parts}}",
+    "lineRequired": "Agregue al menos una línea",
+    "blanket": {
+      "type": "Tipo",
+      "blanketPo": "OC Abierta",
+      "totalQty": "Cant. Total",
+      "released": "Liberada",
+      "remaining": "Restante",
+      "agreedPrice": "Precio Acordado",
+      "expires": "Vence"
+    }
   },
   "salesOrders": {
     "orderNumberLabel": "Número de pedido",
@@ -5436,9 +5523,26 @@
       "portalLinkCreated": "Enlace de aceptación creado.",
       "fromEmail": "Correo de origen",
       "register": "Registrar",
-      "confirmBlockedHint": "Adjunte la aceptación del cliente antes de liberar a producción."
+      "confirmBlockedHint": "Adjunte la aceptación del cliente antes de liberar a producción.",
+      "acceptedBannerNoName": "Cliente aceptó ({{method}}, {{date}})."
     },
-    "numberLockedReason": "El número de pedido solo se puede cambiar mientras el pedido es un borrador. Este ya se confirmó, por lo que el número ya se compartió con el cliente y con los registros posteriores."
+    "numberLockedReason": "El número de pedido solo se puede cambiar mientras el pedido es un borrador. Este ya se confirmó, por lo que el número ya se compartió con el cliente y con los registros posteriores.",
+    "createWorkOrder": "Crear orden de trabajo",
+    "createMissingWorkOrders": "Crear órdenes de trabajo para las líneas sin vincular",
+    "confirmSoTitle": "¿Confirmar Orden de Venta?",
+    "confirmSoMessage": "¿Confirmar {{number}}? Esto crea {{count}} orden(es) de trabajo en el tablero de producción y bloquea el número de orden.",
+    "confirmWarnZeroPrice": "{{count}} línea(s) tienen precio de $0.00.",
+    "confirmWarnNoShipTo": "No hay dirección de envío.",
+    "confirmWarnNoDate": "No hay fecha de entrega solicitada. Las órdenes de trabajo no tendrán fecha de vencimiento.",
+    "soConfirmedWithJobs": "Orden {{number}} confirmada. {{count}} orden(es) de trabajo creada(s).",
+    "soConfirmedNoJobs": "Orden confirmada, pero no se crearon órdenes de trabajo.",
+    "creditHoldWarning": "Este cliente tiene una retención de crédito ({{reason}}). Puede guardar un borrador, pero no se puede confirmar ni enviar hasta que se libere la retención.",
+    "cancelFee": "Cargo por cancelación",
+    "cancelReason": "Motivo",
+    "shipTo": "Enviar a",
+    "billTo": "Facturar a",
+    "zeroPriceConfirm": "Esta línea tiene precio de $0.00. ¿Agregarla de todos modos?",
+    "listPrice": "Precio de lista"
   },
   "publicAcceptance": {
     "loading": "Cargando…",
@@ -6263,7 +6367,9 @@
       "timerStarted": "Temporizador iniciado",
       "timerStopped": "Temporizador detenido",
       "stageAdvanced": "Movida a {{stageName}}",
-      "noteLogged": "Nota registrada"
+      "noteLogged": "Nota registrada",
+      "advanceFailed": "No se pudo mover al siguiente estado: {{reason}}",
+      "noNextStage": "Esta orden de trabajo está en su último estado de planta."
     },
     "returnFlow": {
       "title": "Devolver Artículos",
@@ -6328,7 +6434,32 @@
     "locationEmpty": "Location Empty",
     "lot": "Lot",
     "scan": "Scan",
-    "devices": "Dispositivos lectores"
+    "devices": "Dispositivos lectores",
+    "punchNotRecorded": "Registro NO guardado. Intente de nuevo o avise a su supervisor.",
+    "punchRecorded": "{{event}} a las {{time}}",
+    "supervisorPunch": "Registrar por otro trabajador (supervisor)",
+    "stillClockedInSince": "Sigue con entrada registrada desde {{date}}",
+    "unassigned": "Sin asignar",
+    "unassignedWorkOrders": "Órdenes de Trabajo sin Asignar",
+    "yourWorkOrders": "Sus Órdenes de Trabajo",
+    "pickWorkOrder": "Elija una Orden de Trabajo",
+    "pickWorkOrderHint": "Seleccione una orden de trabajo sin asignar, u omita para registrar entrada sin una.",
+    "noUnassignedWorkOrders": "No hay órdenes de trabajo sin asignar",
+    "enterPassword": "Ingrese la Contraseña",
+    "actionDone": "¡Listo!",
+    "actionFailed": "No se guardó. Intente de nuevo o avise a su supervisor.",
+    "nextStatus": "Siguiente estado",
+    "confirmNextStatus": "¿Mover {{jobNumber}} al siguiente estado?",
+    "timerStartedOn": "Temporizador iniciado en {{jobNumber}}",
+    "timerStoppedOn": "Temporizador detenido en {{jobNumber}}",
+    "timerStartFailed": "No se pudo iniciar el temporizador en {{jobNumber}}: {{reason}}",
+    "timerStopFailed": "No se pudo detener el temporizador: {{reason}}",
+    "movedNext": "{{jobNumber}} pasó al siguiente estado",
+    "moveFailed": "No se pudo mover {{jobNumber}}: {{reason}}",
+    "noAssignmentAskLead": "Entrada registrada. No tiene orden de trabajo asignada. Pregunte a su líder.",
+    "assignFailed": "No puede tomar esta orden de trabajo. Pregunte a un supervisor.",
+    "fullscreen": "Pantalla completa",
+    "setupFullscreenHint": "Toque Pantalla completa en la pantalla después de la configuración para que el tablero ocupe toda la pantalla."
   },
   "customerReturns": {
     "allStatuses": "Todos los Estados",
@@ -6382,7 +6513,12 @@
     "subtitle": "Rastrear trazabilidad de lotes de producción",
     "supplierLot": "Lote del Proveedor",
     "title": "Lotes de Producción",
-    "traceHistory": "Historial de Trazabilidad"
+    "traceHistory": "Historial de Trazabilidad",
+    "shippedTo": "Enviado a",
+    "colCustomer": "Cliente",
+    "colShipment": "Envío",
+    "colShipDate": "Fecha de envío",
+    "colQty": "Cant."
   },
   "rfid": {
     "clientSetupDesc": "Descargue y ejecute el script de configuración del cliente RFID para habilitar el escaneo de credenciales NFC/RFID en esta estación.",
@@ -6655,6 +6791,9 @@
       "subtitle": "Órdenes planificadas por abastecimiento (fabricar o comprar) y estado del ciclo de vida",
       "chartLabel": "Diagrama Sankey del flujo de órdenes planificadas desde el tipo de abastecimiento hasta el estado del ciclo de vida",
       "empty": "No hay órdenes planificadas para visualizar. Ejecute MRP para generar un plan."
+    },
+    "supplySource": {
+      "job": "Orden de trabajo abierta"
     }
   },
   "portal": {
@@ -9423,13 +9562,16 @@
         "details": "Detalles",
         "moveStock": "Mover inventario",
         "identify": "Identificar",
-        "openOnDesktop": "Abrir en escritorio"
+        "openOnDesktop": "Abrir en escritorio",
+        "stop": "Detener"
       },
       "manual": {
         "open": "Escribirlo",
         "label": "Código de la etiqueta (p. ej. JOB-01042)",
         "go": "Buscar"
-      }
+      },
+      "actingAs": "Actuando como {{name}}",
+      "notYou": "¿No es usted?"
     },
     "enroll": {
       "scanTitle": "Escanee el código de su administrador",
@@ -9604,6 +9746,12 @@
       "send": "Enviar",
       "problemSent": "Enviado. Sus administradores lo tienen.",
       "problemFailed": "No se pudo enviar. Inténtelo cuando tenga conexión."
+    },
+    "timer": {
+      "running": "En curso: {{jobNumber}} · {{elapsed}}",
+      "stop": "Detener",
+      "stopped": "Temporizador detenido en {{jobNumber}}",
+      "switchConfirm": "Temporizador en curso en {{current}}. ¿Cambiar a {{next}}?"
     }
   },
   "pieceRates": {

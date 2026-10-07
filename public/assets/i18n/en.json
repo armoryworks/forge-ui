@@ -346,7 +346,10 @@
     "activity": "Activity",
     "archived": "Archived",
     "units": "units",
-    "continue": "Continue"
+    "continue": "Continue",
+    "dismiss": "Dismiss",
+    "fax": "Fax",
+    "deactivatedSuffix": "(deactivated)"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -414,7 +417,11 @@
     "completeTask": "Complete Task",
     "dismissTask": "Dismiss Task",
     "noActionItems": "No action items",
-    "totalItems": "Total Items"
+    "totalItems": "Total Items",
+    "addWorkCenters": "Add your work centers",
+    "addFirstPart": "Add a part with a routing",
+    "sendFirstQuote": "Send your first quote",
+    "shipFirstOrder": "Ship your first order"
   },
   "kanban": {
     "title": "Board",
@@ -551,7 +558,23 @@
     "openAccountingDetails": "{{type}} {{ref}} — open cost & accounting details",
     "salesOrder": "Sales Order",
     "bulkMoveBlockedTitle": "Some jobs were not moved",
-    "bulkMoveBlockedMessage": "{{count}} job(s) could not be moved to {{stage}}"
+    "bulkMoveBlockedMessage": "{{count}} job(s) could not be moved to {{stage}}",
+    "partQty": "{{partNumber}} · Qty {{quantity}}",
+    "boardTruncated": "Showing {{shown}} of {{total}} work orders. Archive shipped work to see the rest.",
+    "activeOnly": "Active only",
+    "quantityToMake": "Quantity to make",
+    "customerOptionalHint": "Optional. Leave blank for stock or internal orders.",
+    "fromSoLine": "Filled from the sales order line",
+    "addPartQty": "Qty",
+    "childQty": "Qty {{quantity}}",
+    "childDue": "Due {{date}}",
+    "workflowStatusHint": "Workflow status tracks holds and paperwork. The board status shows where the work order is.",
+    "dispositionEnteredInError": "Entered in error (void)",
+    "dispositionOther": "Other",
+    "dispositionNotesRequired": "Add a reason for this disposition.",
+    "goodQuantity": "Good quantity",
+    "destinationBin": "Put away to bin",
+    "dispositionNoPart": "This work order has no part, so nothing can be added to inventory."
   },
   "backlog": {
     "title": "Backlog",
@@ -1413,6 +1436,11 @@
     "estTime": "Cycle time (per piece)",
     "estHours": "Hours",
     "estMilliseconds": "Milliseconds",
+    "estSeconds": "Seconds",
+    "setupTime": "Setup time (minutes)",
+    "lotTime": "Per-lot time (minutes)",
+    "showInstructions": "Show instructions",
+    "hideInstructions": "Hide instructions",
     "duplicatePart": "Duplicate part",
     "clone": {
       "title": "Duplicate {{partNumber}}",
@@ -1776,6 +1804,16 @@
       "chartLabel": "Available stock versus reorder point for the most at-risk parts",
       "topNNote": "Showing the {{count}} most at-risk parts of {{total}} at or below their reorder point.",
       "empty": "All tracked parts are above their reorder point."
+    },
+    "receivingInspection": {
+      "empty": "No receipts waiting for inspection",
+      "inspect": "Inspect",
+      "waive": "Waive",
+      "waiveReason": "Reason for waiver",
+      "result": "Result",
+      "acceptedQty": "Accepted qty",
+      "rejectedQty": "Rejected qty",
+      "createNcr": "Raise a non-conformance for rejected parts"
     }
   },
   "customers": {
@@ -3540,6 +3578,23 @@
       "confirmMessage": "Hiring paperwork — W-4, I-9 and state withholding — will no longer be collected or chased for this person, and they can be assigned work without it. Use this for service accounts, contractors and consultants who are not your employees.\n\nIf this IS an employee, records you are legally required to hold will never be collected. You can undo this at any time; anything already on file is kept.",
       "confirmAction": "Mark as not an employee",
       "updateFailed": "Could not change this user's employee status."
+    },
+    "numbering": {
+      "title": "Numbering",
+      "parts": "Let me type my own part numbers",
+      "customers": "Let me type my own customer numbers",
+      "vendors": "Let me type my own vendor numbers",
+      "leads": "Let me type my own lead numbers",
+      "salesOrders": "Let me type my own sales order numbers",
+      "quotes": "Let me type my own quote numbers",
+      "purchaseOrders": "Let me type my own purchase order numbers",
+      "shipments": "Let me type my own shipment numbers",
+      "jobs": "Let me type my own work order numbers",
+      "invoices": "Let me type my own invoice numbers",
+      "payments": "Let me type my own payment numbers"
+    },
+    "capability": {
+      "relatedSettings": "Related settings"
     }
   },
   "teamsPanel": {
@@ -3823,7 +3878,12 @@
       "submissionFailed": "Submission failed. Please try again.",
       "previewFailed": "Could not load PDF preview. Please try again.",
       "signingFailed": "Could not create signing session. Please try again."
-    }
+    },
+    "paperworkRemaining": "Your employee paperwork isn't finished ({{count}} sections left).",
+    "skip": "Skip",
+    "skipConfirm": "Skip employee paperwork for now?",
+    "cancel": "Cancel",
+    "bypassFailed": "Could not skip paperwork: {{reason}}"
   },
   "account": {
     "title": "Account",
@@ -4097,7 +4157,9 @@
     "unexpectedError": "An unexpected error occurred.",
     "connectionLost": "Connection Lost",
     "unableToReachServer": "Unable to reach the server. Check your network connection.",
-    "timeout": "Request timed out. Please try again."
+    "timeout": "Request timed out. Please try again.",
+    "ruleViolation": "Action not allowed",
+    "numberTaken": "That number was just taken by another record. Save again to get the next number."
   },
   "confirmDialog": {
     "areYouSure": "Are you sure?",
@@ -4800,7 +4862,8 @@
     "noAccountFound": "No account found. Contact your administrator to create an account first.",
     "ssoDomainNotPermitted": "Your email domain isn't permitted for SSO sign-in. Contact your administrator.",
     "invalidSetupLink": "Invalid setup link. Please contact your administrator.",
-    "expiredSetupCode": "Invalid or expired setup code. Please contact your administrator."
+    "expiredSetupCode": "Invalid or expired setup code. Please contact your administrator.",
+    "bundleJobShop": "Job shop: quote, make, ship, invoice"
   },
   "validation": {
     "required": "{field} is required",
@@ -5020,7 +5083,8 @@
       "catalogTab": "Catalog",
       "catalogEmpty": "This vendor has no parts in the catalog yet.",
       "catalogEmptyHelp": "Add a part this vendor supplies.",
-      "addPartToCatalog": "Add Part"
+      "addPartToCatalog": "Add Part",
+      "scorecardTab": "Scorecard"
     },
     "offTierVariancePct": "Off-Tier Variance %",
     "offTierVariancePctPlaceholder": "Default: 5%",
@@ -5197,7 +5261,30 @@
     "originEdi": "EDI",
     "originTooltipUser": "Created by: {{name}}",
     "originTooltipReference": "Reference: {{reference}}",
-    "numberLockedReason": "A PO number can only be changed while the purchase order is a draft. This one has been issued, so the vendor is already referencing this number."
+    "numberLockedReason": "A PO number can only be changed while the purchase order is a draft. This one has been issued, so the vendor is already referencing this number.",
+    "printPo": "Print PO",
+    "vendorPromisedDate": "Vendor promised date",
+    "receiveBin": "Bin",
+    "receiveLot": "Lot / heat #",
+    "receiveNote": "Note",
+    "nonStockLine": "Non-stock / service line",
+    "lineDescription": "Description",
+    "lineNote": "Line note",
+    "priceChangeReason": "Reason for price change",
+    "listPriceBadge": "List",
+    "listPriceTooltip": "List price. Edit to override.",
+    "addLineAria": "Add line",
+    "obsoleteLinesWarning": "These lines use obsolete parts: {{parts}}",
+    "lineRequired": "Add at least one line",
+    "blanket": {
+      "type": "Type",
+      "blanketPo": "Blanket PO",
+      "totalQty": "Total Qty",
+      "released": "Released",
+      "remaining": "Remaining",
+      "agreedPrice": "Agreed Price",
+      "expires": "Expires"
+    }
   },
   "salesOrders": {
     "orderNumberLabel": "Order Number",
@@ -5443,9 +5530,26 @@
       "portalLinkCreated": "Acceptance link created.",
       "fromEmail": "From email",
       "register": "Register",
-      "confirmBlockedHint": "Attach customer acceptance before releasing to production."
+      "confirmBlockedHint": "Attach customer acceptance before releasing to production.",
+      "acceptedBannerNoName": "Customer accepted ({{method}}, {{date}})."
     },
-    "numberLockedReason": "An order number can only be changed while the order is a draft. This one has been confirmed, so the number is already shared with the customer and downstream records."
+    "numberLockedReason": "An order number can only be changed while the order is a draft. This one has been confirmed, so the number is already shared with the customer and downstream records.",
+    "createWorkOrder": "Create work order",
+    "createMissingWorkOrders": "Create work orders for unlinked lines",
+    "confirmSoTitle": "Confirm Sales Order?",
+    "confirmSoMessage": "Confirm {{number}}? This creates {{count}} work order(s) on the production board and locks the order number.",
+    "confirmWarnZeroPrice": "{{count}} line(s) are priced at $0.00.",
+    "confirmWarnNoShipTo": "No ship-to address is set.",
+    "confirmWarnNoDate": "No requested delivery date is set. Work orders will have no due date.",
+    "soConfirmedWithJobs": "Order {{number}} confirmed. {{count}} work order(s) created.",
+    "soConfirmedNoJobs": "Order confirmed, but no work orders were created.",
+    "creditHoldWarning": "This customer is on credit hold ({{reason}}). You can save a draft, but it can't be confirmed or shipped until the hold is released.",
+    "cancelFee": "Cancellation fee",
+    "cancelReason": "Reason",
+    "shipTo": "Ship to",
+    "billTo": "Bill to",
+    "zeroPriceConfirm": "This line is priced at $0.00. Add it anyway?",
+    "listPrice": "List price"
   },
   "publicAcceptance": {
     "loading": "Loading…",
@@ -6281,7 +6385,9 @@
       "timerStarted": "Timer started",
       "timerStopped": "Timer stopped",
       "stageAdvanced": "Moved to {{stageName}}",
-      "noteLogged": "Note logged"
+      "noteLogged": "Note logged",
+      "advanceFailed": "Could not move to the next status: {{reason}}",
+      "noNextStage": "This work order is at its last shop-floor status."
     },
     "returnFlow": {
       "title": "Return Items",
@@ -6335,7 +6441,32 @@
     },
     "locationEmpty": "Location Empty",
     "lot": "Lot",
-    "scan": "Scan"
+    "scan": "Scan",
+    "punchNotRecorded": "Punch NOT recorded. Try again or tell your supervisor.",
+    "punchRecorded": "{{event}} at {{time}}",
+    "supervisorPunch": "Punch for another worker (supervisor)",
+    "stillClockedInSince": "Still clocked in since {{date}}",
+    "unassigned": "Unassigned",
+    "unassignedWorkOrders": "Unassigned Work Orders",
+    "yourWorkOrders": "Your Work Orders",
+    "pickWorkOrder": "Pick a Work Order",
+    "pickWorkOrderHint": "Select an unassigned work order, or skip to clock in without one.",
+    "noUnassignedWorkOrders": "No unassigned work orders",
+    "enterPassword": "Enter Password",
+    "actionDone": "Done!",
+    "actionFailed": "That didn't save. Try again or tell your supervisor.",
+    "nextStatus": "Next status",
+    "confirmNextStatus": "Move {{jobNumber}} to the next status?",
+    "timerStartedOn": "Timer started on {{jobNumber}}",
+    "timerStoppedOn": "Timer stopped on {{jobNumber}}",
+    "timerStartFailed": "Could not start the timer on {{jobNumber}}: {{reason}}",
+    "timerStopFailed": "Could not stop the timer: {{reason}}",
+    "movedNext": "{{jobNumber}} moved to the next status",
+    "moveFailed": "Could not move {{jobNumber}}: {{reason}}",
+    "noAssignmentAskLead": "Clocked in. No work order assigned. Ask your lead.",
+    "assignFailed": "You can't take this work order. Ask a supervisor.",
+    "fullscreen": "Full screen",
+    "setupFullscreenHint": "Tap Full screen on the display after setup so the board fills the screen."
   },
   "customerReturns": {
     "allStatuses": "All Statuses",
@@ -6389,7 +6520,12 @@
     "subtitle": "Track production lot traceability",
     "supplierLot": "Supplier Lot",
     "title": "Production Lots",
-    "traceHistory": "Traceability History"
+    "traceHistory": "Traceability History",
+    "shippedTo": "Shipped to",
+    "colCustomer": "Customer",
+    "colShipment": "Shipment",
+    "colShipDate": "Ship date",
+    "colQty": "Qty"
   },
   "rfid": {
     "clientSetupDesc": "Download and run the RFID relay client setup script to enable NFC/RFID badge scanning on this workstation.",
@@ -6662,6 +6798,9 @@
       "subtitle": "Planned orders by sourcing (make vs buy) and lifecycle status",
       "chartLabel": "Sankey flow of planned orders from sourcing type to lifecycle status",
       "empty": "No planned orders to visualize. Run MRP to generate a plan."
+    },
+    "supplySource": {
+      "job": "Open work order"
     }
   },
   "portal": {
@@ -9423,13 +9562,16 @@
         "details": "Details",
         "moveStock": "Move stock",
         "identify": "Identify",
-        "openOnDesktop": "Open on desktop"
+        "openOnDesktop": "Open on desktop",
+        "stop": "Stop"
       },
       "manual": {
         "open": "Type it in",
         "label": "Code on the label (e.g. JOB-01042)",
         "go": "Look up"
-      }
+      },
+      "actingAs": "Acting as {{name}}",
+      "notYou": "Not you?"
     },
     "enroll": {
       "scanTitle": "Scan the code from your admin",
@@ -9604,6 +9746,12 @@
       "send": "Send",
       "problemSent": "Sent. Your admins have it.",
       "problemFailed": "Could not send. Try again when online."
+    },
+    "timer": {
+      "running": "Running: {{jobNumber}} · {{elapsed}}",
+      "stop": "Stop",
+      "stopped": "Timer stopped on {{jobNumber}}",
+      "switchConfirm": "Timer running on {{current}}. Switch to {{next}}?"
     }
   },
   "pieceRates": {
