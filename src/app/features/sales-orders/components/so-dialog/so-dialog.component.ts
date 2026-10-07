@@ -3,16 +3,21 @@ import { DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { startWith } from 'rxjs';
+import { catchError, map, Observable, of, startWith, Subject, switchMap } from 'rxjs';
 
 import { SalesOrderService } from '../../services/sales-order.service';
 import { CustomerService } from '../../../customers/services/customer.service';
+import { CustomerAddressService } from '../../../customers/services/customer-address.service';
+import { CreditStatus } from '../../../customers/models/credit-status.model';
+import { CustomerAddress } from '../../../../shared/models/customer-address.model';
 import { PartsService } from '../../../parts/services/parts.service';
 import { CustomerListItem } from '../../../customers/models/customer-list-item.model';
 import { PartListItem } from '../../../parts/models/part-list-item.model';
 import { CreateSalesOrderLineRequest } from '../../models/create-sales-order-line-request.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
@@ -51,6 +56,8 @@ export class SoDialogComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   private readonly soService = inject(SalesOrderService);
   private readonly customerService = inject(CustomerService);
+  private readonly addressService = inject(CustomerAddressService);
+  private readonly dialog = inject(MatDialog);
   private readonly partsService = inject(PartsService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -67,6 +74,20 @@ export class SoDialogComponent {
   protected readonly customers = signal<CustomerListItem[]>([]);
   protected readonly parts = signal<PartListItem[]>([]);
   protected readonly lines = signal<LineEntry[]>([]);
+  protected readonly addresses = signal<CustomerAddress[]>([]);
+  protected readonly creditStatus = signal<CreditStatus | null>(null);
+  protected readonly priceIsListPrice = signal(false);
+  private readonly priceLookups = new Subject<void>();
+
+  protected readonly shipToOptions = computed<SelectOption[]>(() => this.addressOptions('Shipping'));
+  protected readonly billToOptions = computed<SelectOption[]>(() => this.addressOptions('Billing'));
+
+  protected readonly creditHoldMessage = computed(() => {
+    const status = this.creditStatus();
+    return status?.isOnHold
+      ? this.translate.instant('salesOrders.creditHoldWarning', { reason: status.holdReason ?? '' })
+      : null;
+  });
 
   protected readonly customerOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('salesOrders.selectCustomer') },
@@ -80,6 +101,8 @@ export class SoDialogComponent {
 
   readonly form = new FormGroup({
     customerId: new FormControl<number | null>(null, [Validators.required]),
+    shippingAddressId: new FormControl<number | null>(null),
+    billingAddressId: new FormControl<number | null>(null),
     // Optional manual override; blank → server auto-generates. Only surfaced when the setting is on.
     orderNumber: new FormControl('', [Validators.maxLength(20)]),
     customerPO: new FormControl(''),
@@ -91,6 +114,8 @@ export class SoDialogComponent {
 
   private readonly formViolations = FormValidationService.getViolations(this.form, {
     customerId: 'Customer',
+    shippingAddressId: 'Ship to',
+    billingAddressId: 'Bill to',
     customerPO: 'Customer PO',
     creditTerms: 'Credit Terms',
     requestedDeliveryDate: 'Delivery Date',
@@ -141,6 +166,96 @@ export class SoDialogComponent {
     this.partsService.getParts('Active').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.parts.set(list),
     });
+
+    const customerChanges = this.form.controls.customerId.valueChanges;
+    customerChanges.pipe(
+      switchMap(customerId => {
+        this.addresses.set([]);
+        this.form.controls.shippingAddressId.setValue(null);
+        this.form.controls.billingAddressId.setValue(null);
+        return customerId == null
+          ? of<CustomerAddress[]>([])
+          : this.addressService.getAddresses(customerId).pipe(catchError(() => of<CustomerAddress[]>([])));
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(addresses => this.applyAddresses(addresses));
+
+    customerChanges.pipe(
+      switchMap(customerId => {
+        this.creditStatus.set(null);
+        return customerId == null
+          ? of(null)
+          : this.customerService.getCreditStatus(customerId).pipe(catchError(() => of(null)));
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(status => this.creditStatus.set(status));
+
+    customerChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      if (this.lineForm.controls.partId.value != null && !this.lineForm.controls.unitPrice.dirty) {
+        this.priceLookups.next();
+      }
+    });
+
+    this.lineForm.controls.partId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.lineForm.controls.unitPrice.markAsPristine();
+      this.priceLookups.next();
+    });
+
+    this.priceLookups.pipe(
+      switchMap(() => this.lookupPendingPrice()),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(price => {
+      if (price == null) {
+        this.priceIsListPrice.set(false);
+        return;
+      }
+      this.lineForm.controls.unitPrice.setValue(price, { emitEvent: false });
+      this.priceIsListPrice.set(true);
+    });
+
+    this.lineForm.controls.unitPrice.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.priceIsListPrice.set(false);
+    });
+  }
+
+  private addressOptions(type: 'Shipping' | 'Billing'): SelectOption[] {
+    const opts: SelectOption[] = this.addresses()
+      .filter(a => a.isActive !== false && (a.addressType === type || a.addressType === 'Both'))
+      .map(a => ({
+        value: a.id,
+        label: `${a.label} — ${a.line1}, ${a.city} ${a.state} ${a.postalCode}`.trim(),
+      }));
+    return [{ value: null, label: this.translate.instant('common.none') }, ...opts];
+  }
+
+  private applyAddresses(addresses: CustomerAddress[]): void {
+    const active = addresses.filter(a => a.isActive !== false);
+    this.addresses.set(active);
+    this.applyDefaultAddress(this.form.controls.shippingAddressId, active, 'Shipping');
+    this.applyDefaultAddress(this.form.controls.billingAddressId, active, 'Billing');
+  }
+
+  private applyDefaultAddress(control: FormControl<number | null>, addresses: CustomerAddress[], type: 'Shipping' | 'Billing'): void {
+    const current = control.value;
+    if (current != null && addresses.some(a => a.id === current && (a.addressType === type || a.addressType === 'Both'))) return;
+    const defaults = addresses.filter(a => a.isDefault);
+    const match = defaults.find(a => a.addressType === type) ?? defaults.find(a => a.addressType === 'Both');
+    control.setValue(match?.id ?? null);
+  }
+
+  private lookupPendingPrice(): Observable<number | null> {
+    const partId = this.lineForm.controls.partId.value;
+    if (partId == null) return of(null);
+    const part = this.parts().find(p => p.id === partId);
+    const fallback = part && part.effectivePriceSource !== 'Default' && part.effectivePrice > 0
+      ? part.effectivePrice
+      : null;
+    const customerId = this.form.controls.customerId.value;
+    if (customerId == null) return of(fallback);
+    return this.soService.resolvePrice(customerId, partId).pipe(
+      map(price => price ?? fallback),
+      catchError(() => of(fallback)),
+    );
   }
 
   protected close(): void {
@@ -148,6 +263,25 @@ export class SoDialogComponent {
   }
 
   protected addLine(): void {
+    if (this.lineForm.invalid) return;
+    if (Number(this.lineForm.controls.unitPrice.value) === 0) {
+      this.dialog.open(ConfirmDialogComponent, {
+        width: '400px',
+        data: {
+          title: this.translate.instant('salesOrders.addLine'),
+          message: this.translate.instant('salesOrders.zeroPriceConfirm'),
+          confirmLabel: this.translate.instant('common.add'),
+          severity: 'warn',
+        } satisfies ConfirmDialogData,
+      }).afterClosed().subscribe(confirmed => {
+        if (confirmed) this.commitLine();
+      });
+      return;
+    }
+    this.commitLine();
+  }
+
+  private commitLine(): void {
     if (this.lineForm.invalid) return;
     const f = this.lineForm.getRawValue();
     const part = this.parts().find(p => p.id === f.partId);
@@ -162,6 +296,7 @@ export class SoDialogComponent {
       unitPrice: f.unitPrice!,
     }]);
     this.lineForm.reset({ partId: null, quantity: 1, unitPrice: 0 });
+    this.priceIsListPrice.set(false);
   }
 
   protected removeLine(index: number): void {
@@ -182,6 +317,8 @@ export class SoDialogComponent {
 
     this.soService.createSalesOrder({
       customerId: f.customerId!,
+      shippingAddressId: f.shippingAddressId ?? undefined,
+      billingAddressId: f.billingAddressId ?? undefined,
       orderNumber: this.allowManualOrderNumbers() ? (f.orderNumber?.trim() || undefined) : undefined,
       creditTerms: f.creditTerms || undefined,
       requestedDeliveryDate: toIsoDate(f.requestedDeliveryDate) || undefined,

@@ -8,3 +8,18 @@
 .add-line--4col {
   grid-template-columns: 1fr 90px 120px auto;
 }
+
+.credit-hold-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-sm;
+  padding: $sp-sm $sp-md;
+  background: var(--warning-light);
+  border-left: 3px solid var(--warning);
+  font-size: $font-size-sm;
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+    color: var(--warning);
+  }
+}

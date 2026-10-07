@@ -46,7 +46,12 @@
           <!-- Phase 3 / WU-10 / F8-partial — qty + price are decimal(18,4); UoM-aware shops
                need fractional quantities. -->
           <app-input [label]="'salesOrders.qty' | translate" type="number" formControlName="quantity" [required]="true" step="0.0001" min="0.0001" data-testid="so-line-qty" />
-          <app-input [label]="'common.price' | translate" type="number" formControlName="unitPrice" [required]="true" step="0.0001" min="0" data-testid="so-line-price" />
+          <div class="price-field">
+            <app-input [label]="'common.price' | translate" type="number" formControlName="unitPrice" [required]="true" step="0.0001" min="0" data-testid="so-line-price" />
+            @if (priceIsListPrice()) {
+              <span class="price-badge" data-testid="so-line-list-price">{{ 'salesOrders.listPrice' | translate }}</span>
+            }
+          </div>
           <button class="action-btn action-btn--sm" data-testid="so-add-line-btn" (click)="addLine()" [disabled]="lineForm.invalid" aria-label="Add line item">
             <span class="material-icons-outlined">add</span>
             {{ 'common.add' | translate }}
@@ -64,6 +69,14 @@
             [maxlength]="20" [placeholder]="'salesOrders.orderNumberPlaceholder' | translate" data-testid="sales-order-number-create" />
         }
         <app-select [label]="'salesOrders.customer' | translate" formControlName="customerId" [options]="customerOptions()" [required]="true" data-testid="so-customer" />
+        @if (creditHoldMessage(); as message) {
+          <div class="credit-hold-warning" role="alert" data-testid="so-credit-hold-warning">
+            <span class="material-icons-outlined" aria-hidden="true">block</span>
+            <span>{{ message }}</span>
+          </div>
+        }
+        <app-select [label]="'salesOrders.shipTo' | translate" formControlName="shippingAddressId" [options]="shipToOptions()" data-testid="so-ship-to" />
+        <app-select [label]="'salesOrders.billTo' | translate" formControlName="billingAddressId" [options]="billToOptions()" data-testid="so-bill-to" />
         <app-input [label]="'salesOrders.customerPOLabel' | translate" formControlName="customerPO" [placeholder]="'salesOrders.optional' | translate" data-testid="so-customer-po" />
         <app-select [label]="'salesOrders.creditTerms' | translate" formControlName="creditTerms" [options]="creditTermsOptions" data-testid="so-credit-terms" />
         <app-datepicker [label]="'salesOrders.requestedDeliveryDate' | translate" formControlName="requestedDeliveryDate" data-testid="so-delivery-date" />
