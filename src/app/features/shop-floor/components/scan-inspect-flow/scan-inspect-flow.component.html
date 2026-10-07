@@ -14,6 +14,28 @@
       </div>
     }
 
+    @if (checklist().length > 0) {
+      <div class="scan-inspect__checklist" [formGroup]="checklistForm">
+        @for (item of checklist(); track item.id) {
+          <div class="scan-inspect__checklist-item">
+            <app-toggle
+              [label]="item.description"
+              [formControlName]="'' + item.id"
+              [attr.data-testid]="'inspect-item-' + item.id" />
+            @if (item.specification) {
+              <span class="scan-inspect__checklist-spec">{{ item.specification }}</span>
+            }
+            @if (item.isRequired) {
+              <span class="scan-inspect__checklist-required">{{ 'common.required' | translate }}</span>
+            }
+          </div>
+        }
+      </div>
+      @if (!requiredItemsChecked()) {
+        <p class="scan-inspect__checklist-hint">{{ 'shopFloor.inspectFlow.requiredItemsHint' | translate }}</p>
+      }
+    }
+
     @if (error()) {
       <div class="scan-inspect__error">
         <span class="material-icons-outlined">warning</span>
@@ -26,6 +48,7 @@
       <div class="scan-inspect__result-buttons">
         <button class="scan-inspect__result-btn scan-inspect__result-btn--pass"
                 [class.scan-inspect__result-btn--selected]="result() === 'Pass'"
+                [disabled]="!canPass()"
                 (click)="setResult('Pass')"
                 aria-label="Mark inspection as pass"
                 data-testid="inspect-pass-btn">
@@ -55,7 +78,7 @@
         {{ 'common.cancel' | translate }}
       </button>
       <button class="action-btn action-btn--primary"
-              [disabled]="!result()"
+              [disabled]="!canSubmit()"
               (click)="submitInspection()"
               aria-label="Submit inspection"
               data-testid="inspect-submit-btn">

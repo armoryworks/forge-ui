@@ -6452,7 +6452,8 @@
       "inspectionNotes": "Inspection Notes",
       "submitInspection": "Submit Inspection",
       "inspectionSubmitted": "Inspection submitted successfully",
-      "templateAssigned": "QC template assigned to this part"
+      "templateAssigned": "QC template assigned to this part",
+      "requiredItemsHint": "Check off every required item before you mark this part as passed."
     },
     "jobFlow": {
       "jobActions": "Job Actions",

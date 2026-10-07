@@ -6434,7 +6434,8 @@
       "inspectionNotes": "Notas de Inspección",
       "submitInspection": "Enviar Inspección",
       "inspectionSubmitted": "Inspección enviada exitosamente",
-      "templateAssigned": "Plantilla QC asignada a esta pieza"
+      "templateAssigned": "Plantilla QC asignada a esta pieza",
+      "requiredItemsHint": "Marque cada elemento obligatorio antes de aprobar esta pieza."
     },
     "jobFlow": {
       "jobActions": "Acciones del Trabajo",
