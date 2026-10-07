@@ -77,6 +77,7 @@ async function soStatus(token: string, soId: number): Promise<string> {
 test.describe.serial('Manufacturing golden path', () => {
   let token: string;
   let customerId: number;
+  let partId: number;
   let soId: number;
   let inProductionStageId: number;
   let shippedStageId: number;
@@ -97,6 +98,13 @@ test.describe.serial('Manufacturing golden path', () => {
     const c = await api(token, 'post', 'customers', { name: `MFG-GOLDEN Co ${new Date().toISOString()}` });
     if (c.status !== 201) throw new Error(`mfg-golden: customer create failed (${c.status}): ${JSON.stringify(c.body)}`);
     customerId = c.body.id;
+
+    const p = await api(token, 'post', 'parts', {
+      name: `MFG-GOLDEN widget ${new Date().toISOString()}`, revision: 'A',
+      procurementSource: 'Make', inventoryClass: 'FinishedGood',
+    });
+    if (p.status >= 300) throw new Error(`mfg-golden: part create failed (${p.status}): ${JSON.stringify(p.body)}`);
+    partId = p.body.id;
   });
 
   test.afterAll(async () => {
@@ -108,12 +116,13 @@ test.describe.serial('Manufacturing golden path', () => {
     if (soId) await api(token, 'post', `orders/${soId}/cancel`).catch(() => {});
     if (soId) await api(token, 'delete', `orders/${soId}`).catch(() => {});
     if (customerId) await api(token, 'delete', `customers/${customerId}`).catch(() => {});
+    if (partId) await api(token, 'delete', `parts/${partId}`).catch(() => {});
   });
 
   test('1. confirm an order → jobs auto-created; SO Confirmed', async () => {
     const so = await api(token, 'post', 'orders', {
       customerId, taxRate: 0,
-      lines: [{ description: 'MFG-GOLDEN widget — safe to delete', quantity: QTY, unitPrice: PRICE }],
+      lines: [{ partId, description: 'MFG-GOLDEN widget — safe to delete', quantity: QTY, unitPrice: PRICE }],
     });
     expect(so.status, `create SO: ${JSON.stringify(so.body)}`).toBe(201);
     soId = so.body.id;
@@ -122,7 +131,7 @@ test.describe.serial('Manufacturing golden path', () => {
     expect(confirm.status, `confirm: ${JSON.stringify(confirm.body)}`).toBeLessThan(300);
     expect(await soStatus(token, soId)).toBe('Confirmed');
 
-    // The confirm event auto-creates a production job per line.
+    // The confirm event auto-creates a production job per line that carries a made part.
     const jobs = (await api(token, 'get', `jobs?customerId=${customerId}&pageSize=100`)).body;
     const rows = (Array.isArray(jobs) ? jobs : (jobs?.data ?? jobs?.items ?? [])) as Array<{ id: number }>;
     jobIds = rows.map(j => j.id);
