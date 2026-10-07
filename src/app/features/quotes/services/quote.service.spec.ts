@@ -83,6 +83,50 @@ describe('QuoteService', () => {
     });
   });
 
+  describe('getQuotePdf', () => {
+    it('should GET the quote PDF as a blob', () => {
+      let result: Blob | undefined;
+      service.getQuotePdf(4).subscribe(b => (result = b));
+      const req = httpMock.expectOne(`${apiUrl}/quotes/4/pdf`);
+      expect(req.request.method).toBe('GET');
+      expect(req.request.responseType).toBe('blob');
+      req.flush(new Blob(['%PDF'], { type: 'application/pdf' }));
+      expect(result).toBeInstanceOf(Blob);
+    });
+  });
+
+  describe('getRecipientEmail', () => {
+    const contact = (id: number, email: string | null, isPrimary = false) =>
+      ({ id, firstName: 'A', lastName: 'B', email, phone: null, role: null, isPrimary });
+
+    it('should prefer the primary contact email', () => {
+      let result: string | undefined;
+      service.getRecipientEmail(9).subscribe(e => (result = e));
+      httpMock.expectOne(`${apiUrl}/customers/9`).flush({
+        id: 9,
+        contacts: [contact(1, 'first@acme.test'), contact(2, 'buyer@acme.test', true)],
+      });
+      expect(result).toBe('buyer@acme.test');
+    });
+
+    it('should fall back to the first contact with an email', () => {
+      let result: string | undefined;
+      service.getRecipientEmail(9).subscribe(e => (result = e));
+      httpMock.expectOne(`${apiUrl}/customers/9`).flush({
+        id: 9,
+        contacts: [contact(1, null, true), contact(2, ' '), contact(3, 'second@acme.test')],
+      });
+      expect(result).toBe('second@acme.test');
+    });
+
+    it('should resolve undefined when no contact has an email', () => {
+      let result: string | undefined = 'unset';
+      service.getRecipientEmail(9).subscribe(e => (result = e));
+      httpMock.expectOne(`${apiUrl}/customers/9`).flush({ id: 9, contacts: [contact(1, null)] });
+      expect(result).toBeUndefined();
+    });
+  });
+
   describe('convertToOrder', () => {
     it('should POST convert action', () => {
       service.convertToOrder(4).subscribe();

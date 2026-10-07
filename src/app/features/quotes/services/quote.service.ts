@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 import { environment } from '../../../../environments/environment';
 import { FileAttachment } from '../../../shared/models/file.model';
@@ -10,6 +11,7 @@ import { CreateQuoteRequest } from '../models/create-quote-request.model';
 import { SalesOrderListItem } from '../../sales-orders/models/sales-order-list-item.model';
 import { QuoteTermsPreview } from '../models/quote-terms-preview.model';
 import { SendQuoteEmailRequest } from '../models/send-quote-email-request.model';
+import { CustomerService } from '../../customers/services/customer.service';
 
 /** Payload to add a quote line (partId omitted = lump-sum / ad-hoc line). */
 export interface QuoteLineInput {
@@ -31,6 +33,7 @@ export interface UpdateLineInput {
 @Injectable({ providedIn: 'root' })
 export class QuoteService {
   private readonly http = inject(HttpClient);
+  private readonly customerService = inject(CustomerService);
   private readonly base = `${environment.apiUrl}/quotes`;
 
   getQuotes(customerId?: number, status?: string): Observable<QuoteListItem[]> {
@@ -97,6 +100,25 @@ export class QuoteService {
    */
   sendQuoteEmail(id: number, request: SendQuoteEmailRequest): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/send-email`, request);
+  }
+
+  /**
+   * The customer's primary contact email, else the first contact with an email,
+   * used to pre-fill the send-email dialog's recipient.
+   */
+  getRecipientEmail(customerId: number): Observable<string | undefined> {
+    return this.customerService.getCustomerById(customerId).pipe(
+      map(customer => {
+        const withEmail = (customer.contacts ?? []).filter(c => !!c.email?.trim());
+        return (withEmail.find(c => c.isPrimary) ?? withEmail[0])?.email?.trim();
+      }),
+      catchError(() => of(undefined)),
+    );
+  }
+
+  /** The quote PDF — the same document the send-email action attaches. */
+  getQuotePdf(id: number): Observable<Blob> {
+    return this.http.get(`${this.base}/${id}/pdf`, { responseType: 'blob' });
   }
 
   acceptQuote(id: number): Observable<void> {

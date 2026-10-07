@@ -111,17 +111,17 @@ export class QuotesComponent implements OnInit {
   }
 
   // --- Send email (S3) ---
-  // The only in-app "Send" action lives on the off-limits quote detail panel,
-  // so the send-email opener is wired here as a quotes-list row action.
   protected openSendEmail(item: QuoteListItem, event: Event): void {
     event.stopPropagation();
-    this.dialog.open<SendQuoteEmailDialogComponent, SendQuoteEmailDialogData, SendQuoteEmailDialogResult | undefined>(
-      SendQuoteEmailDialogComponent,
-      {
-        width: '600px',
-        data: { quoteId: item.id, quoteNumber: item.quoteNumber, customerName: item.customerName },
-      },
-    ).afterClosed().subscribe(sent => { if (sent) this.loadQuotes(); });
+    this.quoteService.getRecipientEmail(item.customerId).subscribe(recipientEmail => {
+      this.dialog.open<SendQuoteEmailDialogComponent, SendQuoteEmailDialogData, SendQuoteEmailDialogResult | undefined>(
+        SendQuoteEmailDialogComponent,
+        {
+          width: '600px',
+          data: { quoteId: item.id, quoteNumber: item.quoteNumber, customerName: item.customerName, recipientEmail },
+        },
+      ).afterClosed().subscribe(sent => { if (sent) this.loadQuotes(); });
+    });
   }
 
   // --- Create Dialog ---
