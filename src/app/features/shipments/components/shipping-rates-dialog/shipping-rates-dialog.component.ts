@@ -96,7 +96,7 @@ export class ShippingRatesDialogComponent implements OnInit {
         link.click();
         URL.revokeObjectURL(url);
       },
-      error: () => this.snackbar.error(this.translate.instant('shipments.shipDocFailed')),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'shipments.shipDocFailed'),
     });
   }
 

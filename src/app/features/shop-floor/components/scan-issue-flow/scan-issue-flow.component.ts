@@ -94,9 +94,9 @@ export class ScanIssueFlowComponent implements OnInit {
         }));
         this.completed.emit();
       },
-      error: () => {
+      error: (err: unknown) => {
         this.submitting.set(false);
-        this.snackbar.error(this.translate.instant('kioskFlows.issue.failed'));
+        this.snackbar.errorFrom(err, 'kioskFlows.issue.failed');
       },
     });
   }

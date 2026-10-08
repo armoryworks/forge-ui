@@ -444,7 +444,7 @@ export class PartsComponent {
           // Draft row that was being shown as a row.
           this.loadParts();
         },
-        error: () => this.snackbar.error(this.translate.instant('parts.workflow.abandonFailed')),
+        error: (err: unknown) => this.snackbar.errorFrom(err, 'parts.workflow.abandonFailed'),
       });
     });
   }
@@ -586,7 +586,7 @@ export class PartsComponent {
         }
         this.router.navigate(['/parts', 'new'], { queryParams });
       },
-      error: () => this.snackbar.error(this.translate.instant('parts.workflow.startFailed')),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'parts.workflow.startFailed'),
     });
   }
 

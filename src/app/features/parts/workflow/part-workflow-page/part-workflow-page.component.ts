@@ -213,9 +213,9 @@ export class PartWorkflowPageComponent {
         this.validators.set(validators);
         this.workflowService.setContext({ run, definition, entity: null, validators });
       },
-      error: () => {
+      error: (err: unknown) => {
         this.loading.stop('part-workflow');
-        this.snackbar.error(this.translate.instant('parts.workflow.page.loadFailed'));
+        this.snackbar.errorFrom(err, 'parts.workflow.page.loadFailed');
         this.router.navigate(['/parts']);
       },
     });
@@ -257,8 +257,8 @@ export class PartWorkflowPageComponent {
               this.validators.set(validators);
               this.workflowService.setContext({ run: created, definition, entity: part, validators });
             },
-            error: () => {
-              this.snackbar.error(this.translate.instant('parts.workflow.page.startFailed'));
+            error: (err: unknown) => {
+              this.snackbar.errorFrom(err, 'parts.workflow.page.startFailed');
               this.router.navigate(['/parts']);
             },
           });
@@ -282,9 +282,9 @@ export class PartWorkflowPageComponent {
           }
         }
       },
-      error: () => {
+      error: (err: unknown) => {
         this.loading.stop('part-workflow');
-        this.snackbar.error(this.translate.instant('parts.workflow.page.loadFailed'));
+        this.snackbar.errorFrom(err, 'parts.workflow.page.loadFailed');
         this.router.navigate(['/parts']);
       },
     });

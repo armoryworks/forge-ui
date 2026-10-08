@@ -124,9 +124,9 @@ export class PartSalesHooksStepComponent {
           this.saving.set(false);
           this.form.markAsPristine();
         },
-        error: () => {
+        error: (err: unknown) => {
           this.saving.set(false);
-          this.snackbar.error(this.translate.instant('parts.workflow.salesHooks.saveFailed'));
+          this.snackbar.errorFrom(err, 'parts.workflow.salesHooks.saveFailed');
         },
       }),
     );

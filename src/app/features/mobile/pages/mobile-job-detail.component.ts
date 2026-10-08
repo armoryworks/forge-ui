@@ -98,9 +98,9 @@ export class MobileJobDetailComponent implements OnInit {
         this.job.set(job);
         this.loading.set(false);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.loading.set(false);
-        this.snackbar.error(this.translate.instant('mobileLegacy.jobDetail.loadFailed'));
+        this.snackbar.errorFrom(err, 'mobileLegacy.jobDetail.loadFailed');
       },
     });
   }
@@ -122,7 +122,7 @@ export class MobileJobDetailComponent implements OnInit {
       },
       error: (err: unknown) => {
         this.submitting.set(false);
-        this.snackbar.error(this.serverMessage(err, this.translate.instant('mobileLegacy.jobDetail.stopFailed')));
+        this.snackbar.errorFrom(err, 'mobileLegacy.jobDetail.stopFailed');
         this.loadTimer();
       },
     });
@@ -149,8 +149,12 @@ export class MobileJobDetailComponent implements OnInit {
       },
       error: (err: unknown) => {
         this.submitting.set(false);
-        const reason = this.serverMessage(err, this.translate.instant('mobileLegacy.jobDetail.startFailed'));
-        this.snackbar.error(stoppedPrevious && previous ? this.stoppedButNotStarted(previous, reason) : reason);
+        if (stoppedPrevious && previous) {
+          const reason = this.serverMessage(err, this.translate.instant('mobileLegacy.jobDetail.startFailed'));
+          this.snackbar.error(this.stoppedButNotStarted(previous, reason));
+        } else {
+          this.snackbar.errorFrom(err, 'mobileLegacy.jobDetail.startFailed');
+        }
         this.loadTimer();
       },
     });
@@ -179,9 +183,9 @@ export class MobileJobDetailComponent implements OnInit {
         this.noteText.set('');
         this.snackbar.success(this.translate.instant('mobileLegacy.jobDetail.noteAdded'));
       },
-      error: () => {
+      error: (err: unknown) => {
         this.submitting.set(false);
-        this.snackbar.error(this.translate.instant('mobileLegacy.jobDetail.noteFailed'));
+        this.snackbar.errorFrom(err, 'mobileLegacy.jobDetail.noteFailed');
       },
     });
   }

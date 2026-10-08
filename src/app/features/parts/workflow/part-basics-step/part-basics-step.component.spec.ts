@@ -1,4 +1,4 @@
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
@@ -166,7 +166,7 @@ describe('PartBasicsStepComponent (Phase 5 — save-on-Continue)', () => {
 
   it('leaves the server validation message on screen instead of replacing it with the generic save failure', () => {
     const snackbar = TestBed.inject(SnackbarService);
-    const errorSpy = vi.spyOn(snackbar, 'error').mockImplementation(() => {});
+    const errorSpy = vi.spyOn(snackbar, 'errorFrom').mockImplementation(() => {});
     editAndSave();
 
     httpMock.expectOne(`${environment.apiUrl}/workflows/7/step`).flush(
@@ -181,9 +181,9 @@ describe('PartBasicsStepComponent (Phase 5 — save-on-Continue)', () => {
     expect(errorSpy).not.toHaveBeenCalled();
   });
 
-  it('still shows the generic save failure when the server gives no message', () => {
+  it('still hands a failure without validation detail to errorFrom', () => {
     const snackbar = TestBed.inject(SnackbarService);
-    const errorSpy = vi.spyOn(snackbar, 'error').mockImplementation(() => {});
+    const errorSpy = vi.spyOn(snackbar, 'errorFrom').mockImplementation(() => {});
     editAndSave();
 
     httpMock.expectOne(`${environment.apiUrl}/workflows/7/step`).flush(
@@ -191,6 +191,6 @@ describe('PartBasicsStepComponent (Phase 5 — save-on-Continue)', () => {
       { status: 500, statusText: 'Server Error' },
     );
 
-    expect(errorSpy).toHaveBeenCalledWith('parts.workflow.basics.saveFailed');
+    expect(errorSpy).toHaveBeenCalledWith(expect.any(HttpErrorResponse), 'parts.workflow.basics.saveFailed');
   });
 });

@@ -26,10 +26,11 @@ function setup(reverse: ScanActionService['reverseScanAction']) {
   const open = vi.fn((_component: unknown, _config: unknown) => ({ afterClosed: () => of('1234') }));
   const success = vi.fn();
   const error = vi.fn();
+  const errorFrom = vi.fn();
   TestBed.configureTestingModule({
     providers: [
       { provide: ScanActionService, useValue: { getScanLog: vi.fn(() => of([])), reverseScanAction: reverse } },
-      { provide: SnackbarService, useValue: { success, error } },
+      { provide: SnackbarService, useValue: { success, error, errorFrom } },
       { provide: MatDialog, useValue: { open } },
       {
         provide: TranslateService,
@@ -41,7 +42,7 @@ function setup(reverse: ScanActionService['reverseScanAction']) {
     ],
   });
   const list = TestBed.runInInjectionContext(() => new ScanUndoListComponent());
-  return { list, open, success, error };
+  return { list, open, success, error, errorFrom };
 }
 
 describe('ScanUndoListComponent', () => {
@@ -58,11 +59,13 @@ describe('ScanUndoListComponent', () => {
     );
   });
 
-  it('reports a failed reversal in the catalog wording', () => {
-    const { list, error } = setup(vi.fn(() => throwError(() => new Error('403'))));
+  it('hands a failed reversal to errorFrom with the catalog fallback', () => {
+    const err = new Error('403');
+    const { list, error, errorFrom } = setup(vi.fn(() => throwError(() => err)));
     list.reverseEntry(MOVE);
 
-    expect(error).toHaveBeenCalledWith('es:kioskFlows.undo.reverseFailed');
+    expect(errorFrom).toHaveBeenCalledWith(err, 'kioskFlows.undo.reverseFailed');
+    expect(error).not.toHaveBeenCalled();
   });
 
   it('labels the action type from the catalog', () => {

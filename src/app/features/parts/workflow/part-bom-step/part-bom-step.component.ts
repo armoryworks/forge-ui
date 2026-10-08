@@ -195,9 +195,9 @@ export class PartBomStepComponent {
         this.showAddDialog.set(false);
         this.snackbar.success(this.translate.instant('parts.bomLineAdded'));
       },
-      error: () => {
+      error: (err: unknown) => {
         this.saving.set(false);
-        this.snackbar.error(this.translate.instant('parts.workflow.bom.saveFailed'));
+        this.snackbar.errorFrom(err, 'parts.workflow.bom.saveFailed');
       },
     });
   }

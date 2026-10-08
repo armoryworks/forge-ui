@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Directive, input, signal } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { provideTranslateService, TranslateLoader, TranslationObject } from '@ngx-translate/core';
@@ -43,7 +43,7 @@ describe('MobileJobDetailComponent', () => {
   let fixture: ComponentFixture<MobileJobDetailComponent>;
   let http: HttpTestingController;
 
-  const snackbar = { success: vi.fn(), error: vi.fn() };
+  const snackbar = { success: vi.fn(), error: vi.fn(), errorFrom: vi.fn() };
 
   const job = {
     id: 5, jobNumber: 'J-1042', title: 'Bracket', description: null, stageName: 'Machining',
@@ -173,7 +173,7 @@ describe('MobileJobDetailComponent', () => {
     );
   });
 
-  it('shows the server message when starting fails', () => {
+  it('hands a failed start to errorFrom with the start fallback', () => {
     render(null);
 
     timerButton().click();
@@ -183,7 +183,8 @@ describe('MobileJobDetailComponent', () => {
     );
     http.expectOne('/api/v1/time-tracking/timer/active').flush(null, { status: 204, statusText: 'No Content' });
 
-    expect(snackbar.error).toHaveBeenCalledWith('A timer is already running. Stop it before starting a new one.');
+    expect(snackbar.errorFrom).toHaveBeenCalledWith(expect.any(HttpErrorResponse), 'mobileLegacy.jobDetail.startFailed');
+    expect(snackbar.error).not.toHaveBeenCalled();
   });
 
   it('shows the priority the job detail returns', () => {

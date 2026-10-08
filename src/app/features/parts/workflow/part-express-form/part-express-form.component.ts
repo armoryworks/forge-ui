@@ -255,7 +255,7 @@ export class PartExpressFormComponent {
 
   private reportSaveFailure(err: unknown): void {
     if (hasServerValidationDetail(err)) return;
-    this.snackbar.error(this.translate.instant('parts.workflow.express.saveFailed'));
+    this.snackbar.errorFrom(err, 'parts.workflow.express.saveFailed');
   }
 
   private fieldsFromForm(): Record<string, unknown> {

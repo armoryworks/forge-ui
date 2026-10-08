@@ -191,15 +191,15 @@ export class VendorWorkflowPageComponent {
               replaceUrl: true,
             });
           },
-          error: () => {
-            this.snackbar.error(this.translate.instant('vendors.workflow.page.startFailed'));
+          error: (err: unknown) => {
+            this.snackbar.errorFrom(err, 'vendors.workflow.page.startFailed');
             this.router.navigate(['/vendors']);
           },
         });
       },
-      error: () => {
+      error: (err: unknown) => {
         this.loading.stop('vendor-workflow');
-        this.snackbar.error(this.translate.instant('vendors.workflow.page.loadFailed'));
+        this.snackbar.errorFrom(err, 'vendors.workflow.page.loadFailed');
         this.router.navigate(['/vendors']);
       },
     });
@@ -238,9 +238,9 @@ export class VendorWorkflowPageComponent {
         this.validators.set(validators);
         this.workflowService.setContext({ run, definition, entity: null, validators });
       },
-      error: () => {
+      error: (err: unknown) => {
         this.loading.stop('vendor-workflow');
-        this.snackbar.error(this.translate.instant('vendors.workflow.page.loadFailed'));
+        this.snackbar.errorFrom(err, 'vendors.workflow.page.loadFailed');
         this.router.navigate(['/vendors']);
       },
     });
@@ -279,8 +279,8 @@ export class VendorWorkflowPageComponent {
               this.validators.set(validators);
               this.workflowService.setContext({ run: created, definition, entity: vendor, validators });
             },
-            error: () => {
-              this.snackbar.error(this.translate.instant('vendors.workflow.page.startFailed'));
+            error: (err: unknown) => {
+              this.snackbar.errorFrom(err, 'vendors.workflow.page.startFailed');
               this.router.navigate(['/vendors']);
             },
           });
@@ -301,9 +301,9 @@ export class VendorWorkflowPageComponent {
           });
         }
       },
-      error: () => {
+      error: (err: unknown) => {
         this.loading.stop('vendor-workflow');
-        this.snackbar.error(this.translate.instant('vendors.workflow.page.loadFailed'));
+        this.snackbar.errorFrom(err, 'vendors.workflow.page.loadFailed');
         this.router.navigate(['/vendors']);
       },
     });

@@ -102,9 +102,9 @@ export class VendorTermsStepComponent {
           this.saving.set(false);
           this.form.markAsPristine();
         },
-        error: () => {
+        error: (err: unknown) => {
           this.saving.set(false);
-          this.snackbar.error(this.translate.instant('vendors.workflow.terms.saveFailed'));
+          this.snackbar.errorFrom(err, 'vendors.workflow.terms.saveFailed');
         },
       }),
     );

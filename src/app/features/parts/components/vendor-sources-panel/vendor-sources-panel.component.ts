@@ -741,7 +741,7 @@ export class VendorSourcesPanelComponent {
           this.changed.emit();
         }),
         catchError((err) => {
-          this.snackbar.error(this.translate.instant('vendorSources.saveFailed'));
+          this.snackbar.errorFrom(err, 'vendorSources.saveFailed');
           return throwError(() => err);
         }),
       );
@@ -754,7 +754,7 @@ export class VendorSourcesPanelComponent {
       }),
       map(() => row),
       catchError((err) => {
-        this.snackbar.error(this.translate.instant('vendorSources.saveFailed'));
+        this.snackbar.errorFrom(err, 'vendorSources.saveFailed');
         return throwError(() => err);
       }),
     );
@@ -1180,7 +1180,7 @@ export class VendorSourcesPanelComponent {
         this.load(partId);
         this.changed.emit();
       },
-      error: () => this.snackbar.error(this.translate.instant('vendorSources.saveFailed')),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'vendorSources.saveFailed'),
     });
   }
 
@@ -1331,8 +1331,8 @@ export class VendorSourcesPanelComponent {
             // Plain "Save" stays in edit mode; only "Save & Close" exits.
             if (close) this.cancelled.emit();
           },
-          error: () => {
-            this.snackbar.error(this.translate.instant('vendorSources.tierSaveFailed'));
+          error: (err: unknown) => {
+            this.snackbar.errorFrom(err, 'vendorSources.tierSaveFailed');
             // Even on tier-save failure, the rows are saved — reload so
             // the UI matches server state, but DON'T clear the pending
             // list so the user sees what didn't land.

@@ -92,9 +92,9 @@ export class VendorAddressStepComponent {
           this.saving.set(false);
           this.form.markAsPristine();
         },
-        error: () => {
+        error: (err: unknown) => {
           this.saving.set(false);
-          this.snackbar.error(this.translate.instant('vendors.workflow.address.saveFailed'));
+          this.snackbar.errorFrom(err, 'vendors.workflow.address.saveFailed');
         },
       }),
     );

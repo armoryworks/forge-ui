@@ -102,7 +102,7 @@ export class SequenceInstancesPageComponent {
         this.selectedId.set(inst.id);
       },
       error: (err) => {
-        this.snackbar.error(err?.error?.detail ?? this.translate.instant('sequences.start.failed'));
+        this.snackbar.errorFrom(err, 'sequences.start.failed');
         this.starting.set(false);
       },
     });

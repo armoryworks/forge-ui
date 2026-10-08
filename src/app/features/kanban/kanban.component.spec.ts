@@ -127,6 +127,8 @@ describe('KanbanComponent', () => {
   let detailDialogOpen: ReturnType<typeof vi.fn>;
   let bulkMoveStage: ReturnType<typeof vi.fn>;
   let snackbarSuccess: ReturnType<typeof vi.fn>;
+  let snackbarError: ReturnType<typeof vi.fn>;
+  let snackbarErrorFrom: ReturnType<typeof vi.fn>;
   let toastShow: ReturnType<typeof vi.fn>;
   let getBoard: ReturnType<typeof vi.fn>;
   let updateJobPosition: ReturnType<typeof vi.fn>;
@@ -152,6 +154,8 @@ describe('KanbanComponent', () => {
     detailDialogOpen = vi.fn(() => ({ afterClosed: () => of(undefined) }));
     bulkMoveStage = vi.fn(() => of({ successCount: 0, failureCount: 0, errors: [] }));
     snackbarSuccess = vi.fn();
+    snackbarError = vi.fn();
+    snackbarErrorFrom = vi.fn();
     toastShow = vi.fn();
     queryParams = new BehaviorSubject<ParamMap>(convertToParamMap({}));
     navigate = vi.fn((_commands: unknown[], extras: NavigationExtras) => {
@@ -196,7 +200,7 @@ describe('KanbanComponent', () => {
           },
         },
         { provide: LoadingService, useValue: { track: (_m: string, obs: Observable<unknown>) => obs } },
-        { provide: SnackbarService, useValue: { success: snackbarSuccess, error: vi.fn(), info: vi.fn() } },
+        { provide: SnackbarService, useValue: { success: snackbarSuccess, error: snackbarError, errorFrom: snackbarErrorFrom, info: vi.fn() } },
         { provide: ToastService, useValue: { show: toastShow } },
         { provide: ScannerService, useValue: { setContext: vi.fn(), clearLastScan: vi.fn(), lastScan: () => null } },
         { provide: DetailDialogService, useValue: { open: detailDialogOpen, getDetailFromUrl: () => null } },
@@ -324,6 +328,20 @@ describe('KanbanComponent', () => {
 
     expect(snackbarSuccess).not.toHaveBeenCalled();
     expect(toastShow).toHaveBeenCalledOnce();
+  });
+
+  it('hands a failed bulk-move request to errorFrom with the move fallback', () => {
+    const board = productionBoard();
+    component.columns.set(board);
+    component.selectedJobIds.set(new Set([100]));
+    const err = new Error('offline');
+    bulkMoveStage.mockReturnValue(throwError(() => err));
+
+    component.bulkMoveToStage(board[3].stage);
+
+    expect(snackbarErrorFrom).toHaveBeenCalledWith(err, 'kanban.moveJobsFailed');
+    expect(snackbarError).not.toHaveBeenCalled();
+    expect(snackbarSuccess).not.toHaveBeenCalled();
   });
 
   describe('active only filter', () => {

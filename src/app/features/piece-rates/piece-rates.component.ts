@@ -120,7 +120,7 @@ export class PieceRatesComponent {
   private loadRates(): void {
     this.service.getRates().subscribe({
       next: (rates) => this.rates.set(rates),
-      error: () => this.snackbar.error(this.translate.instant('pieceRates.loadFailed')),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'pieceRates.loadFailed'),
     });
   }
 
@@ -140,7 +140,7 @@ export class PieceRatesComponent {
     });
     this.service.getCompliance(start).subscribe({
       next: (report) => this.compliance.set(report),
-      error: () => this.snackbar.error(this.translate.instant('pieceRates.loadFailed')),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'pieceRates.loadFailed'),
     });
   }
 
@@ -157,9 +157,9 @@ export class PieceRatesComponent {
           this.snackbar.success(this.translate.instant('pieceRates.rateSet'));
           this.loadRates();
         },
-        error: () => {
+        error: (err: unknown) => {
           this.savingRate.set(false);
-          this.snackbar.error(this.translate.instant('pieceRates.rateSetFailed'));
+          this.snackbar.errorFrom(err, 'pieceRates.rateSetFailed');
         },
       });
   }
@@ -177,9 +177,9 @@ export class PieceRatesComponent {
           this.snackbar.success(this.translate.instant('pieceRates.workLogged', { earnings: entry.earnings }));
           this.loadWeek();
         },
-        error: () => {
+        error: (err: unknown) => {
           this.savingWork.set(false);
-          this.snackbar.error(this.translate.instant('pieceRates.workLogFailed'));
+          this.snackbar.errorFrom(err, 'pieceRates.workLogFailed');
         },
       });
   }
@@ -187,7 +187,7 @@ export class PieceRatesComponent {
   protected deleteWork(entry: PieceWorkEntry): void {
     this.service.deleteWork(entry.id).subscribe({
       next: () => this.loadWeek(),
-      error: () => this.snackbar.error(this.translate.instant('pieceRates.deleteFailed')),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'pieceRates.deleteFailed'),
     });
   }
 }

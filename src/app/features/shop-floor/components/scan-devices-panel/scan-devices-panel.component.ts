@@ -76,9 +76,9 @@ export class ScanDevicesPanelComponent implements OnInit {
         this.snackbar.success(this.translate.instant('kioskFlows.devices.pairSuccess'));
         this.loadDevices();
       },
-      error: () => {
+      error: (err: unknown) => {
         this.pairing.set(false);
-        this.snackbar.error(this.translate.instant('kioskFlows.devices.pairFailed'));
+        this.snackbar.errorFrom(err, 'kioskFlows.devices.pairFailed');
       },
     });
   }
@@ -100,8 +100,8 @@ export class ScanDevicesPanelComponent implements OnInit {
           this.snackbar.success(this.translate.instant('kioskFlows.devices.unpairSuccess', { name: displayName }));
           this.loadDevices();
         },
-        error: () => {
-          this.snackbar.error(this.translate.instant('kioskFlows.devices.unpairFailed'));
+        error: (err: unknown) => {
+          this.snackbar.errorFrom(err, 'kioskFlows.devices.unpairFailed');
         },
       });
     });

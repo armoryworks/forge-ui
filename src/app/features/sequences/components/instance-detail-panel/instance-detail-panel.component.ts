@@ -78,7 +78,7 @@ export class SequenceInstancePanelComponent {
         this.service.getEvents(id).subscribe({ next: (e) => this.events.set(e) });
       },
       error: (err) => {
-        this.snackbar.error(err?.error?.detail ?? this.translate.instant('sequences.actionFailed'));
+        this.snackbar.errorFrom(err, 'sequences.actionFailed');
         this.busy.set(false);
       },
     });

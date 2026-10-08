@@ -116,9 +116,9 @@ export class ScanReceiveFlowComponent implements OnInit {
         }));
         this.completed.emit();
       },
-      error: () => {
+      error: (err: unknown) => {
         this.submitting.set(false);
-        this.snackbar.error(this.translate.instant('kioskFlows.receive.failed'));
+        this.snackbar.errorFrom(err, 'kioskFlows.receive.failed');
       },
     });
   }

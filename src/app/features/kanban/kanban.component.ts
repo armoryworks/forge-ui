@@ -558,7 +558,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
         this.clearSelection();
         this.reloadBoard();
       },
-      error: () => this.snackbar.error(this.translate.instant('kanban.moveJobsFailed')),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'kanban.moveJobsFailed'),
     });
   }
 
@@ -571,7 +571,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
         this.clearSelection();
         this.reloadBoard();
       },
-      error: () => this.snackbar.error(this.translate.instant('kanban.assignJobsFailed')),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'kanban.assignJobsFailed'),
     });
   }
 
@@ -583,7 +583,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
         this.clearSelection();
         this.reloadBoard();
       },
-      error: () => this.snackbar.error(this.translate.instant('kanban.setPriorityFailed')),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'kanban.setPriorityFailed'),
     });
   }
 
@@ -605,7 +605,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
           this.clearSelection();
           this.reloadBoard();
         },
-        error: () => this.snackbar.error(this.translate.instant('kanban.archiveJobsFailed')),
+        error: (err: unknown) => this.snackbar.errorFrom(err, 'kanban.archiveJobsFailed'),
       });
     });
   }

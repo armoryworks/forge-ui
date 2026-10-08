@@ -1,4 +1,4 @@
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
@@ -278,7 +278,7 @@ describe('PartExpressFormComponent (Phase 5)', () => {
   }
 
   it('save() leaves the server validation message on screen instead of the generic save failure', () => {
-    const errorSpy = vi.spyOn(TestBed.inject(SnackbarService), 'error').mockImplementation(() => {});
+    const errorSpy = vi.spyOn(TestBed.inject(SnackbarService), 'errorFrom').mockImplementation(() => {});
     buildSavingComponent().save();
 
     httpMock.expectOne(`${environment.apiUrl}/workflows/7/step`).flush(
@@ -289,8 +289,8 @@ describe('PartExpressFormComponent (Phase 5)', () => {
     expect(errorSpy).not.toHaveBeenCalled();
   });
 
-  it('save() shows the generic save failure when the server gives no message', () => {
-    const errorSpy = vi.spyOn(TestBed.inject(SnackbarService), 'error').mockImplementation(() => {});
+  it('save() hands a failure without validation detail to errorFrom', () => {
+    const errorSpy = vi.spyOn(TestBed.inject(SnackbarService), 'errorFrom').mockImplementation(() => {});
     buildSavingComponent().save();
 
     httpMock.expectOne(`${environment.apiUrl}/workflows/7/step`).flush(
@@ -298,11 +298,11 @@ describe('PartExpressFormComponent (Phase 5)', () => {
       { status: 500, statusText: 'Server Error' },
     );
 
-    expect(errorSpy).toHaveBeenCalledWith('parts.workflow.express.saveFailed');
+    expect(errorSpy).toHaveBeenCalledWith(expect.any(HttpErrorResponse), 'parts.workflow.express.saveFailed');
   });
 
   it('the mode-switch save reports failure and keeps the server validation message', () => {
-    const errorSpy = vi.spyOn(TestBed.inject(SnackbarService), 'error').mockImplementation(() => {});
+    const errorSpy = vi.spyOn(TestBed.inject(SnackbarService), 'errorFrom').mockImplementation(() => {});
     buildSavingComponent();
     let result: { ok: boolean } | undefined;
     TestBed.inject(WorkflowService).saveCurrentStep().subscribe(r => (result = r));
@@ -316,8 +316,8 @@ describe('PartExpressFormComponent (Phase 5)', () => {
     expect(errorSpy).not.toHaveBeenCalled();
   });
 
-  it('the mode-switch save shows the generic save failure when the server gives no message', () => {
-    const errorSpy = vi.spyOn(TestBed.inject(SnackbarService), 'error').mockImplementation(() => {});
+  it('the mode-switch save hands a failure without validation detail to errorFrom', () => {
+    const errorSpy = vi.spyOn(TestBed.inject(SnackbarService), 'errorFrom').mockImplementation(() => {});
     buildSavingComponent();
     TestBed.inject(WorkflowService).saveCurrentStep().subscribe();
 
@@ -326,6 +326,6 @@ describe('PartExpressFormComponent (Phase 5)', () => {
       { status: 500, statusText: 'Server Error' },
     );
 
-    expect(errorSpy).toHaveBeenCalledWith('parts.workflow.express.saveFailed');
+    expect(errorSpy).toHaveBeenCalledWith(expect.any(HttpErrorResponse), 'parts.workflow.express.saveFailed');
   });
 });

@@ -371,12 +371,12 @@ export class LeadDetailPanelComponent {
           this.loadLead(lead.id);
         }
       },
-      error: () => {
+      error: (err: unknown) => {
         // Revert the optimistic flip — the panel goes back to showing the
         // convert button in the prior status.
         this.lead.set({ ...lead, status: previous });
         this.saving.set(false);
-        this.snackbar.error(this.translate.instant('leads.convertFailed'));
+        this.snackbar.errorFrom(err, 'leads.convertFailed');
       },
     });
   }

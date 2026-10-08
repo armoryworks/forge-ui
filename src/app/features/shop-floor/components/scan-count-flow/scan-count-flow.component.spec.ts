@@ -29,10 +29,11 @@ interface CountInternals {
 function setup(count: ScanActionService['count'], context: ScanContext = CONTEXT) {
   const success = vi.fn();
   const error = vi.fn();
+  const errorFrom = vi.fn();
   TestBed.configureTestingModule({
     providers: [
       { provide: ScanActionService, useValue: { count } },
-      { provide: SnackbarService, useValue: { success, error } },
+      { provide: SnackbarService, useValue: { success, error, errorFrom } },
       {
         provide: TranslateService,
         useValue: {
@@ -46,7 +47,7 @@ function setup(count: ScanActionService['count'], context: ScanContext = CONTEXT
   mockSignalInputs(component, { context });
   const flow = component as unknown as CountInternals;
   flow.ngOnInit();
-  return { flow, success, error };
+  return { flow, success, error, errorFrom };
 }
 
 describe('ScanCountFlowComponent', () => {
@@ -68,10 +69,12 @@ describe('ScanCountFlowComponent', () => {
     expect(success).toHaveBeenCalledWith('kioskFlows.count.adjusted {"part":"P-5","difference":"+2"}');
   });
 
-  it('translates the failure and missing location messages', () => {
-    const failing = setup(vi.fn(() => throwError(() => new Error('500'))));
+  it('hands a failed count to errorFrom and translates the missing location message', () => {
+    const err = new Error('500');
+    const failing = setup(vi.fn(() => throwError(() => err)));
     failing.flow.confirmCount();
-    expect(failing.error).toHaveBeenCalledWith('es:kioskFlows.count.failed');
+    expect(failing.errorFrom).toHaveBeenCalledWith(err, 'kioskFlows.count.failed');
+    expect(failing.error).not.toHaveBeenCalled();
 
     TestBed.resetTestingModule();
     const unplaced = setup(vi.fn(), { ...CONTEXT, currentLocationId: null });

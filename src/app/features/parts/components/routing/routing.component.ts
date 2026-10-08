@@ -158,9 +158,9 @@ export class RoutingComponent implements OnInit {
       changed.map(op => this.partsService.updateOperation(this.partId(), op.id, { stepNumber: op.stepNumber })),
     ).subscribe({
       next: () => this.snackbar.success(this.translate.instant('parts.operationReordered')),
-      error: () => {
+      error: (err: unknown) => {
         // Re-sync from the server so the UI can't drift from persisted order.
-        this.snackbar.error(this.translate.instant('parts.operationReorderFailed'));
+        this.snackbar.errorFrom(err, 'parts.operationReorderFailed');
         this.loadOperations();
       },
     });

@@ -537,9 +537,9 @@ export class PartDetailPanelComponent {
           this.snackbar.error(this.translate.instant('parts.workflow.promote.missingShort'));
         }
       },
-      error: () => {
+      error: (err: unknown) => {
         this.promoting.set(false);
-        this.snackbar.error(this.translate.instant('parts.workflow.promote.failed'));
+        this.snackbar.errorFrom(err, 'parts.workflow.promote.failed');
       },
     });
   }

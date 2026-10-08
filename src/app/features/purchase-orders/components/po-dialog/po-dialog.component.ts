@@ -669,10 +669,10 @@ export class PoDialogComponent {
         }
         this.submitPo();
       },
-      error: () => {
+      error: (err: unknown) => {
         // Tier upsert failed — surface to user but don't block PO submit.
         // The PO is still legitimate; tier update can be retried later.
-        this.snackbar.error(this.translate.instant('purchaseOrders.offTier.updateTierFailed'));
+        this.snackbar.errorFrom(err, 'purchaseOrders.offTier.updateTierFailed');
         this.submitPo();
       },
     });

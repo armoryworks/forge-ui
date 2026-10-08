@@ -186,9 +186,9 @@ export class PartShippingStepComponent {
           this.saving.set(false);
           this.form.markAsPristine();
         },
-        error: () => {
+        error: (err: unknown) => {
           this.saving.set(false);
-          this.snackbar.error(this.translate.instant('parts.workflow.shipping.saveFailed'));
+          this.snackbar.errorFrom(err, 'parts.workflow.shipping.saveFailed');
         },
       }),
     );

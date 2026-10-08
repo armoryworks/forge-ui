@@ -76,9 +76,9 @@ export class ScanUndoListComponent implements OnInit {
           this.snackbar.success(this.translate.instant('kioskFlows.undo.reversedToast', { description: desc }));
           this.loadEntries();
         },
-        error: () => {
+        error: (err: unknown) => {
           this.reversing.set(null);
-          this.snackbar.error(this.translate.instant('kioskFlows.undo.reverseFailed'));
+          this.snackbar.errorFrom(err, 'kioskFlows.undo.reverseFailed');
         },
       });
     });

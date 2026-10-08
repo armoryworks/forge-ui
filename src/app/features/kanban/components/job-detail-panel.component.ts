@@ -454,7 +454,7 @@ export class JobDetailPanelComponent implements OnInit {
         });
         this.snackbar.success(user ? this.translate.instant('kanban.assignedTo', { name: user.name }) : this.translate.instant('kanban.unassignedSuccess'));
       },
-      error: () => this.snackbar.error(this.translate.instant('kanban.assignFailed')),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'kanban.assignFailed'),
     });
   }
 

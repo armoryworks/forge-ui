@@ -85,7 +85,7 @@ export class SequenceDefinitionsPageComponent {
         this.reload();
       },
       error: (err) => {
-        this.snackbar.error(err?.error?.detail ?? this.translate.instant('sequences.definitions.actionFailed'));
+        this.snackbar.errorFrom(err, 'sequences.definitions.actionFailed');
         this.busy.set(false);
       },
     });
@@ -126,7 +126,7 @@ export class SequenceDefinitionsPageComponent {
           this.reload();
         },
         error: (err) => {
-          this.snackbar.error(err?.error?.detail ?? this.translate.instant('sequences.definitions.actionFailed'));
+          this.snackbar.errorFrom(err, 'sequences.definitions.actionFailed');
           this.busy.set(false);
         },
       });

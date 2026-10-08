@@ -126,7 +126,7 @@ export class PartBasicsStepComponent {
         error: (err: unknown) => {
           this.saving.set(false);
           if (!hasServerValidationDetail(err)) {
-            this.snackbar.error(this.translate.instant('parts.workflow.basics.saveFailed'));
+            this.snackbar.errorFrom(err, 'parts.workflow.basics.saveFailed');
           }
         },
       }),

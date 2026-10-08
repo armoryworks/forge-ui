@@ -198,7 +198,7 @@ export class SequenceDefinitionEditorComponent {
         this.router.navigate(['/sequences'], { queryParams: { selected: def.id } });
       },
       error: (err) => {
-        this.snackbar.error(err?.error?.detail ?? this.translate.instant('sequences.editor.saveFailed'));
+        this.snackbar.errorFrom(err, 'sequences.editor.saveFailed');
         this.saving.set(false);
       },
     });

@@ -1,5 +1,5 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { provideTranslateService, TranslateLoader, TranslationObject } from '@ngx-translate/core';
@@ -53,6 +53,7 @@ describe('MobileClockComponent', () => {
   const mockSnackbar = {
     success: vi.fn(),
     error: vi.fn(),
+    errorFrom: vi.fn(),
   };
 
   const clockOutAction = { code: 'ClockOut', label: 'Clock Out', statusMapping: 'Out', oppositeCode: 'ClockIn', category: 'work', countsAsActive: false, isMismatchable: false, icon: 'logout', color: '#ef4444' };
@@ -230,7 +231,7 @@ describe('MobileClockComponent', () => {
       { status: 500, statusText: 'Internal Server Error' },
     );
 
-    expect(mockSnackbar.error).toHaveBeenCalledWith('Failed to record clock event');
+    expect(mockSnackbar.errorFrom).toHaveBeenCalledWith(expect.any(HttpErrorResponse), 'mobileLegacy.clock.recordFailed');
     expect(component['submitting']()).toBe(false);
   });
 

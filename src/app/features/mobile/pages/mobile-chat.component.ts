@@ -250,10 +250,10 @@ export class MobileChatComponent implements OnDestroy {
           this.pendingFileAttachmentId.set(attachment.id);
           this.isUploading.set(false);
         },
-        error: () => {
+        error: (err: unknown) => {
           this.pendingFile.set(null);
           this.isUploading.set(false);
-          this.snackbar.error(this.translate.instant('mobileLegacyPages.chat.uploadFailed'));
+          this.snackbar.errorFrom(err, 'mobileLegacyPages.chat.uploadFailed');
         },
       });
     }
@@ -367,9 +367,9 @@ export class MobileChatComponent implements OnDestroy {
             this.messageArea()?.scrollToBottom();
           });
         },
-        error: () => {
+        error: (err: unknown) => {
           this.isUploading.set(false);
-          this.snackbar.error(this.translate.instant('mobileLegacyPages.chat.uploadFailed'));
+          this.snackbar.errorFrom(err, 'mobileLegacyPages.chat.uploadFailed');
         },
       });
     } else if (conv) {
@@ -382,9 +382,9 @@ export class MobileChatComponent implements OnDestroy {
             this.messageArea()?.scrollToBottom();
           });
         },
-        error: () => {
+        error: (err: unknown) => {
           this.isUploading.set(false);
-          this.snackbar.error(this.translate.instant('mobileLegacyPages.chat.uploadFailed'));
+          this.snackbar.errorFrom(err, 'mobileLegacyPages.chat.uploadFailed');
         },
       });
     }

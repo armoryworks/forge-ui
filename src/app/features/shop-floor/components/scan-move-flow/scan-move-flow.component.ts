@@ -110,9 +110,9 @@ export class ScanMoveFlowComponent implements OnInit {
         this.snackbar.success(this.translate.instant('kioskFlows.move.success', { quantity: this.quantity(), part: ctx.partNumber }));
         this.completed.emit();
       },
-      error: () => {
+      error: (err: unknown) => {
         this.submitting.set(false);
-        this.snackbar.error(this.translate.instant('kioskFlows.move.failed'));
+        this.snackbar.errorFrom(err, 'kioskFlows.move.failed');
       },
     });
   }

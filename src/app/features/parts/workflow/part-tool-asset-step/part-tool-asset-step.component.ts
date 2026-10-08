@@ -89,9 +89,9 @@ export class PartToolAssetStepComponent {
           this.saving.set(false);
           this.form.markAsPristine();
         },
-        error: () => {
+        error: (err: unknown) => {
           this.saving.set(false);
-          this.snackbar.error(this.translate.instant('parts.workflow.toolAsset.saveFailed'));
+          this.snackbar.errorFrom(err, 'parts.workflow.toolAsset.saveFailed');
         },
       }),
     );

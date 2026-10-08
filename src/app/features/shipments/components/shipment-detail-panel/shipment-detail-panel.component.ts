@@ -106,9 +106,9 @@ export class ShipmentDetailPanelComponent implements OnInit {
         this.trackingData.set(tracking);
         this.trackingLoading.set(false);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.trackingLoading.set(false);
-        this.snackbar.error(this.translate.instant('shipments.failedTracking'));
+        this.snackbar.errorFrom(err, 'shipments.failedTracking');
       },
     });
   }
@@ -233,7 +233,7 @@ export class ShipmentDetailPanelComponent implements OnInit {
         // not JSON — fall through
       }
     }
-    this.snackbar.error(fallback);
+    this.snackbar.errorFrom(err, 'shipments.shipDocFailed');
   }
 
   private saveBlob(blob: Blob): void {

@@ -17,7 +17,7 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent } from '../../shared/components/select/select.component';
@@ -198,7 +198,6 @@ export class OnboardingWizardComponent {
   private readonly layout = inject(LayoutService);
   private readonly route = inject(ActivatedRoute);
   private readonly authService = inject(AuthService);
-  private readonly translate = inject(TranslateService);
   private readonly sanitizer = inject(DomSanitizer);
 
   // ── Step tracking — URL is source of truth (?step=0..6) ──────────────────
@@ -829,9 +828,9 @@ export class OnboardingWizardComponent {
           : this.i9Form.controls.listCFileId;
         fileCtrl.setValue(result.fileAttachmentId);
       },
-      error: () => {
+      error: (err: unknown) => {
         uploading.set(false);
-        this.snackbar.error(this.translate.instant('onboarding.errors.uploadFailed'));
+        this.snackbar.errorFrom(err, 'onboarding.errors.uploadFailed');
       },
     });
   }
@@ -940,9 +939,9 @@ export class OnboardingWizardComponent {
           this.signingComplete.set(true);
         }
       },
-      error: () => {
+      error: (err: unknown) => {
         this.submitting.set(false);
-        this.snackbar.error(this.translate.instant('onboarding.errors.submissionFailed'));
+        this.snackbar.errorFrom(err, 'onboarding.errors.submissionFailed');
       },
     });
   }
@@ -973,9 +972,9 @@ export class OnboardingWizardComponent {
           this.loadSigningUrlForCurrentForm();
         }
       },
-      error: () => {
+      error: (err: unknown) => {
         this.loadingPreview.set(false);
-        this.snackbar.error(this.translate.instant('onboarding.errors.previewFailed'));
+        this.snackbar.errorFrom(err, 'onboarding.errors.previewFailed');
       },
     });
   }
@@ -994,9 +993,9 @@ export class OnboardingWizardComponent {
         this.reviewPhase.set('signing');
         this.loadDocuSealScript(result.signingUrl);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.signingFormInProgress.set(false);
-        this.snackbar.error(this.translate.instant('onboarding.errors.signingFailed'));
+        this.snackbar.errorFrom(err, 'onboarding.errors.signingFailed');
       },
     });
   }

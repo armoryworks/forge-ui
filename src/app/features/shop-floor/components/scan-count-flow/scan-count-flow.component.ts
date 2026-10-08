@@ -85,9 +85,9 @@ export class ScanCountFlowComponent implements OnInit {
         this.snackbar.success(msg);
         this.completed.emit();
       },
-      error: () => {
+      error: (err: unknown) => {
         this.submitting.set(false);
-        this.snackbar.error(this.translate.instant('kioskFlows.count.failed'));
+        this.snackbar.errorFrom(err, 'kioskFlows.count.failed');
       },
     });
   }

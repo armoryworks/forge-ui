@@ -89,9 +89,9 @@ export class BarcodeInfoComponent {
         this.loading.set(false);
         this.snackbar.success(this.translate.instant('shared.barcodeRegenerated'));
       },
-      error: () => {
+      error: (err: unknown) => {
         this.loading.set(false);
-        this.snackbar.error(this.translate.instant('shared.barcodeRegenerateFailed'));
+        this.snackbar.errorFrom(err, 'shared.barcodeRegenerateFailed');
       },
     });
   }

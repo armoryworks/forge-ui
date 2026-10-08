@@ -134,9 +134,9 @@ export class PartCostingStepComponent {
           this.workflowService.currentEntity.set(detail);
           this.form.markAsPristine();
         },
-        error: () => {
+        error: (err: unknown) => {
           this.saving.set(false);
-          this.snackbar.error(this.translate.instant('parts.workflow.costing.saveFailed'));
+          this.snackbar.errorFrom(err, 'parts.workflow.costing.saveFailed');
         },
       }),
     );

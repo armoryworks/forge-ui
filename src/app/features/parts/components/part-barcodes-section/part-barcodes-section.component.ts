@@ -72,7 +72,7 @@ export class PartBarcodesSectionComponent {
         this.load(this.part().id);
       },
       error: (err) => {
-        this.snackbar.error(err?.error?.detail ?? this.translate.instant('parts.barcodes.addFailed'));
+        this.snackbar.errorFrom(err, 'parts.barcodes.addFailed');
         this.saving.set(false);
       },
     });
@@ -95,7 +95,7 @@ export class PartBarcodesSectionComponent {
           this.snackbar.success(this.translate.instant('parts.barcodes.removed'));
           this.load(this.part().id);
         },
-        error: (err) => this.snackbar.error(err?.error?.detail ?? this.translate.instant('parts.barcodes.removeFailed')),
+        error: (err) => this.snackbar.errorFrom(err, 'parts.barcodes.removeFailed'),
       });
     });
   }

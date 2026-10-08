@@ -288,9 +288,9 @@ export class EstimateFormDialogComponent {
         this.result.set(result);
         this.computing.set(false);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.computing.set(false);
-        this.snackbar.error(this.translate.instant('estimate.computeError'));
+        this.snackbar.errorFrom(err, 'estimate.computeError');
       },
     });
   }

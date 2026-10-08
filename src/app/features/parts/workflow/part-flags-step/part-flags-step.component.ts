@@ -103,9 +103,9 @@ export class PartFlagsStepComponent {
           this.saving.set(false);
           this.form.markAsPristine();
         },
-        error: () => {
+        error: (err: unknown) => {
           this.saving.set(false);
-          this.snackbar.error(this.translate.instant('parts.workflow.flags.saveFailed'));
+          this.snackbar.errorFrom(err, 'parts.workflow.flags.saveFailed');
         },
       }),
     );

@@ -97,9 +97,9 @@ export class MobileClockComponent implements OnInit {
         this.snackbar.success(this.recordedMessage(action, stopping));
         this.loadStatus();
       },
-      error: () => {
+      error: (err: unknown) => {
         this.submitting.set(false);
-        this.snackbar.error(this.translate.instant('mobileLegacy.clock.recordFailed'));
+        this.snackbar.errorFrom(err, 'mobileLegacy.clock.recordFailed');
       },
     });
   }

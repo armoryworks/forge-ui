@@ -112,7 +112,7 @@ export class SetupIntegrationsComponent implements OnInit {
           this.router.navigate(['/dashboard']);
           return;
         }
-        this.snackbar.error(this.translate.instant('setupIntegrations.loadFailed'));
+        this.snackbar.errorFrom(err, 'setupIntegrations.loadFailed');
       });
 
     // Restore previously-skipped integrations from sessionStorage so a
