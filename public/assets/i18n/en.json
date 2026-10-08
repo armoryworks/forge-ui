@@ -7120,7 +7120,8 @@
     "due": "Due {{date}}",
     "claiming": "Taking the job...",
     "claimed": "{{jobNumber}} is yours",
-    "claimFailed": "Could not take {{jobNumber}}"
+    "claimFailed": "Could not take {{jobNumber}}",
+    "boardShowing": "Showing {{shown}} of {{total}}"
   },
   "customerReturns": {
     "allStatuses": "All Statuses",

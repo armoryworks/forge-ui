@@ -1,9 +1,10 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { NEVER, of, throwError } from 'rxjs';
+import { NEVER, of, Subject, throwError } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 import { ShopFloorDisplayComponent } from './shop-floor-display.component';
@@ -13,6 +14,7 @@ import { ClockEventTypeService } from '../../shared/services/clock-event-type.se
 import { EventsService } from '../events/services/events.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { ScannerService } from '../../shared/services/scanner.service';
+import { WebHidRfidService } from '../../shared/services/web-hid-rfid.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { PurchaseOrderService } from '../purchase-orders/services/purchase-order.service';
 import { InventoryService } from '../inventory/services/inventory.service';
@@ -182,6 +184,7 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     toggleAssignSelection: (j: unknown) => void;
     onWorkerTile: (w: unknown) => void;
     finishAssign: () => void;
+    skipJobSelect: () => void;
     cancelPin: () => void;
     workers: { set: (w: unknown[]) => void };
     sortedWorkers: () => { name: string }[];
@@ -191,6 +194,7 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     shiftTimes: () => Record<number, string>;
     readyToStart: () => number;
     boardJobs: () => unknown[];
+    boardJobTotal: () => number;
     updateClock: () => void;
     isPastDue: (j: unknown) => boolean;
     startJobTimer: (a: unknown) => void;
@@ -527,12 +531,13 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     expect(c.boardJobs()).toEqual([availableJob]);
   });
 
-  it('a job reads as overdue only once its due date has passed', () => {
+  it('a job reads as overdue only once its due date has passed, by the same calendar day the server uses', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(2026, 9, 8, 9, 0, 0));
     const c = create();
-    expect(c.isPastDue({ ...availableJob, dueDate: new Date(2026, 9, 7, 12, 0, 0).toISOString() })).toBe(true);
-    expect(c.isPastDue({ ...availableJob, dueDate: new Date(2026, 9, 8, 6, 0, 0).toISOString() })).toBe(false);
+    expect(c.isPastDue({ ...availableJob, dueDate: '2026-10-07T00:00:00Z' })).toBe(true);
+    expect(c.isPastDue({ ...availableJob, dueDate: '2026-10-08T00:00:00Z' })).toBe(false);
+    expect(c.isPastDue({ ...availableJob, dueDate: '2026-10-09T00:00:00Z' })).toBe(false);
     expect(c.isPastDue({ ...availableJob, dueDate: null })).toBe(false);
   });
 
@@ -547,23 +552,115 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     expect(scanner.enable).toHaveBeenCalled();
   });
 
-  it('focus returns to the kiosk search box after the PIN dialog closes', () => {
+  it('focus returns to the search area, not into its text box, after the PIN dialog closes', () => {
     const fixture = TestBed.createComponent(ShopFloorDisplayComponent);
     const host = fixture.nativeElement as HTMLElement;
-    const search = document.createElement('input');
-    search.className = 'kiosk-search__input';
-    host.appendChild(search);
+    const searchArea = document.createElement('app-kiosk-search-bar');
+    searchArea.className = 'sf-header__search';
+    searchArea.tabIndex = -1;
+    const searchInput = document.createElement('input');
+    searchInput.className = 'kiosk-search__input';
+    searchArea.appendChild(searchInput);
+    host.appendChild(searchArea);
     document.body.appendChild(host);
     try {
       const c = fixture.componentInstance as unknown as Internals;
       c.onWorkerTile(makeWorker('ProductionWorker'));
       c.cancelPin();
-      expect(document.activeElement).not.toBe(search);
+      expect(document.activeElement).not.toBe(searchArea);
       TestBed.tick();
-      expect(document.activeElement).toBe(search);
+      expect(document.activeElement).toBe(searchArea);
     } finally {
       host.remove();
     }
+  });
+
+  it('a badge scanned right after a dialog closes still signs the next worker in', () => {
+    const rfid = { lastScan: signal(null), clearLastScan: vi.fn(), reconnect: vi.fn().mockResolvedValue(false), disconnect: vi.fn() };
+    TestBed.overrideProvider(WebHidRfidService, { useValue: rfid });
+    TestBed.overrideProvider(ScannerService, { useFactory: () => new ScannerService() });
+    vi.useFakeTimers();
+    localStorage.setItem('forge-kiosk-device-token', 'tok');
+    localStorage.setItem('forge-kiosk-terminal', JSON.stringify(terminal));
+    const worker = makeWorker('ProductionWorker');
+    shopFloor.getClockStatus.mockImplementation(() => of([worker]));
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'employee', entityId: 5 }));
+
+    const fixture = TestBed.createComponent(ShopFloorDisplayComponent);
+    const host = fixture.nativeElement as HTMLElement;
+    const searchArea = document.createElement('app-kiosk-search-bar');
+    searchArea.className = 'sf-header__search';
+    searchArea.tabIndex = -1;
+    host.appendChild(searchArea);
+    document.body.appendChild(host);
+    try {
+      const c = fixture.componentInstance as unknown as Internals;
+      init(c);
+      c.onWorkerTile(worker);
+      TestBed.tick();
+      c.cancelPin();
+      TestBed.tick();
+      expect(document.activeElement).toBe(searchArea);
+
+      for (const key of '12345678') {
+        document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+        vi.advanceTimersByTime(10);
+      }
+      document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      TestBed.tick();
+
+      expect(shopFloor.identifyScan).toHaveBeenCalledWith('12345678');
+      expect(c.phase()).toBe('pin');
+    } finally {
+      host.remove();
+      shopFloor.getClockStatus.mockImplementation(() => of([]));
+    }
+  });
+
+  it('skipping the picker while a claim is in flight waits for the claim', () => {
+    const claim = new Subject<undefined>();
+    shopFloor.claimJob.mockReturnValueOnce(claim);
+    const c = create();
+    const worker = makeWorker('ProductionWorker');
+    c.selectedWorker.set(worker);
+    c.jobSelectWorker.set(worker);
+    c.phase.set('job-select');
+    c.claimJob(availableJob);
+    c.skipJobSelect();
+    expect(c.phase()).toBe('job-select');
+    expect(auth.clearAuth).not.toHaveBeenCalled();
+    claim.next(undefined);
+    claim.complete();
+    expect(c.phase()).toBe('actions');
+    expect(c.selectedWorker()?.userId).toBe(5);
+  });
+
+  it('a claim that lands after the worker was signed out does not reopen an empty actions card', () => {
+    const claim = new Subject<undefined>();
+    shopFloor.claimJob.mockReturnValueOnce(claim);
+    const c = create();
+    const worker = makeWorker('ProductionWorker');
+    c.selectedWorker.set(worker);
+    c.jobSelectWorker.set(worker);
+    c.phase.set('job-select');
+    c.claimJob(availableJob);
+    c.selectedWorker.set(null);
+    c.jobSelectWorker.set(null);
+    c.phase.set('main');
+    claim.next(undefined);
+    claim.complete();
+    expect(c.phase()).toBe('main');
+  });
+
+  it('the board count is the full ready-to-start total even when only the first 50 are shown', () => {
+    localStorage.setItem('forge-kiosk-device-token', 'tok');
+    localStorage.setItem('forge-kiosk-terminal', JSON.stringify(terminal));
+    shopFloor.getOverview.mockReturnValueOnce(of({ activeJobs: [], workers: [], completedToday: 0, maintenanceAlerts: 0, readyToStartCount: 120 }));
+    shopFloor.getAvailableJobs.mockReturnValueOnce(of([availableJob]));
+    const c = create();
+    init(c);
+    expect(c.boardJobs().length).toBe(1);
+    expect(c.boardJobTotal()).toBe(120);
   });
 
   it('a failed timer start shows the server reason in the actions card', () => {

@@ -33,7 +33,7 @@
         <span class="sf-header__terminal" data-testid="sf-terminal-name">{{ t.name }} · {{ t.teamName }}</span>
       }
     </div>
-    <app-kiosk-search-bar />
+    <app-kiosk-search-bar class="sf-header__search" tabindex="-1" data-testid="sf-kiosk-search" />
     <div class="sf-header__stats">
       <div class="sf-stat sf-stat--success">
         <span class="sf-stat__value">{{ workersIn().length }}</span>
@@ -238,32 +238,47 @@
         <div class="sf-section__header">
           <span class="material-icons-outlined">assignment_late</span>
           <h2>{{ 'shopFloor.unassignedWorkOrders' | translate }}</h2>
-          <span class="sf-section__count">{{ boardJobs().length }}</span>
+          <span class="sf-section__count" data-testid="sf-board-count">{{ boardJobTotal() }}</span>
+          @if (boardJobs().length < boardJobTotal()) {
+            <span class="sf-section__note" data-testid="sf-board-showing">
+              {{ 'kioskDisplay.boardShowing' | translate: { shown: boardJobs().length, total: boardJobTotal() } }}
+            </span>
+          }
         </div>
 
         <div class="sf-unassigned-grid">
           @for (job of boardJobs(); track job.jobId) {
-            <button type="button" class="sf-unassigned-card"
-                    [class.sf-unassigned-card--overdue]="isPastDue(job)"
-                    [class.sf-unassigned-card--selectable]="phase() === 'assign'"
-                    [class.sf-unassigned-card--selected]="assignSelection()?.jobId === job.jobId"
-                    [disabled]="phase() !== 'assign' || processing() !== null"
-                    [attr.aria-pressed]="phase() === 'assign' ? assignSelection()?.jobId === job.jobId : null"
-                    (click)="toggleAssignSelection(job)"
-                    [attr.data-testid]="'sf-board-job-' + job.jobId">
-              <div class="sf-unassigned-card__main">
-                <span class="sf-unassigned-card__number">{{ job.jobNumber }}</span>
-                <span class="sf-unassigned-card__title">{{ job.title }}</span>
+            @if (phase() === 'assign') {
+              <button type="button" class="sf-unassigned-card sf-unassigned-card--selectable"
+                      [class.sf-unassigned-card--overdue]="isPastDue(job)"
+                      [class.sf-unassigned-card--selected]="assignSelection()?.jobId === job.jobId"
+                      [disabled]="processing() !== null"
+                      [attr.aria-pressed]="assignSelection()?.jobId === job.jobId"
+                      (click)="toggleAssignSelection(job)"
+                      [attr.data-testid]="'sf-board-job-' + job.jobId">
+                <ng-container *ngTemplateOutlet="boardJobBody; context: { $implicit: job }" />
+              </button>
+            } @else {
+              <div class="sf-unassigned-card" [class.sf-unassigned-card--overdue]="isPastDue(job)"
+                   [attr.data-testid]="'sf-board-job-' + job.jobId">
+                <ng-container *ngTemplateOutlet="boardJobBody; context: { $implicit: job }" />
               </div>
-              <span class="sf-unassigned-card__stage">{{ job.stageName }}</span>
-              <span class="sf-unassigned-card__priority" [class]="priorityClass(job.priorityName)">
-                {{ job.priorityName }}
-              </span>
-            </button>
+            }
           }
         </div>
       </section>
     }
+
+    <ng-template #boardJobBody let-job>
+      <div class="sf-unassigned-card__main">
+        <span class="sf-unassigned-card__number">{{ job.jobNumber }}</span>
+        <span class="sf-unassigned-card__title">{{ job.title }}</span>
+      </div>
+      <span class="sf-unassigned-card__stage">{{ job.stageName }}</span>
+      <span class="sf-unassigned-card__priority" [class]="priorityClass(job.priorityName)">
+        {{ job.priorityName }}
+      </span>
+    </ng-template>
 
     <!-- Upcoming Events -->
     @if (upcomingEvents().length > 0) {
@@ -641,7 +656,7 @@
                 <div class="sf-job-select-card__job-side">
                   @if (job.dueDate) {
                     <span class="sf-job-select-card__job-due" [class.sf-job-select-card__job-due--overdue]="pastDue">
-                      {{ 'kioskDisplay.due' | translate: { date: (job.dueDate | date: 'MMM d') } }}
+                      {{ 'kioskDisplay.due' | translate: { date: (job.dueDate | date: 'MMM d' : 'UTC') } }}
                     </span>
                   }
                   <span class="sf-job-select-card__job-priority" [class]="priorityClass(job.priorityName)">
@@ -678,7 +693,7 @@
           </div>
         </div>
 
-        <button type="button" class="action-btn sf-job-select-card__skip" (click)="skipJobSelect()" data-testid="sf-picker-skip">
+        <button type="button" class="action-btn sf-job-select-card__skip" [disabled]="processing() !== null" (click)="skipJobSelect()" data-testid="sf-picker-skip">
           <span class="material-icons-outlined">skip_next</span>
           {{ 'shopFloor.display.skip' | translate }}
         </button>

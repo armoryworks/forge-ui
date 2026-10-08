@@ -7113,7 +7113,8 @@
     "due": "Vence {{date}}",
     "claiming": "Tomando el trabajo...",
     "claimed": "{{jobNumber}} ahora es suya",
-    "claimFailed": "No se pudo tomar {{jobNumber}}"
+    "claimFailed": "No se pudo tomar {{jobNumber}}",
+    "boardShowing": "Mostrando {{shown}} de {{total}}"
   },
   "customerReturns": {
     "allStatuses": "Todos los Estados",

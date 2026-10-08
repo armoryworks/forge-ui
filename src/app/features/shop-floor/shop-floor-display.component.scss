@@ -170,7 +170,7 @@
 // ─── Worker Grid ───
 .sf-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--sf-tile-min, 300px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(var(--sf-tile-min, 300px), 1fr));
   align-items: start;
   gap: $sp-md;
 }
@@ -434,6 +434,11 @@
 
 .sf-section__count {
   font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+}
+
+.sf-section__note {
   font-size: $font-size-sm;
   color: var(--text-muted);
 }

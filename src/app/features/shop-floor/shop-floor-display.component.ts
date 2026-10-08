@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { A11yModule } from '@angular/cdk/a11y';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -65,7 +65,7 @@ type DisplayPhase = 'main' | 'pin' | 'actions' | 'job-select' | 'assign' | 'rece
 @Component({
   selector: 'app-shop-floor-display',
   standalone: true,
-  imports: [DatePipe, A11yModule, TranslatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, KioskSessionBarComponent, KioskSetupComponent, TrainingModeBannerComponent, ScanUndoListComponent, ScanActionOverlayComponent, ScanDailyLogComponent, ScanDevicesPanelComponent, ScanLocationViewComponent, NumericKeypadComponent],
+  imports: [DatePipe, NgTemplateOutlet, A11yModule, TranslatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, KioskSessionBarComponent, KioskSetupComponent, TrainingModeBannerComponent, ScanUndoListComponent, ScanActionOverlayComponent, ScanDailyLogComponent, ScanDevicesPanelComponent, ScanLocationViewComponent, NumericKeypadComponent],
   templateUrl: './shop-floor-display.component.html',
   styleUrl: './shop-floor-display.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -210,6 +210,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   });
   protected readonly boardJobs = signal<KioskAvailableJob[]>([]);
   protected readonly readyToStart = computed(() => this.overview()?.readyToStartCount ?? 0);
+  protected readonly boardJobTotal = computed(() => Math.max(this.readyToStart(), this.boardJobs().length));
   protected readonly completedToday = computed(() => this.overview()?.completedToday ?? 0);
   protected readonly maxVisibleJobs = computed(() => this.denseBoard() ? 2 : 4);
   protected readonly maintenanceAlerts = computed(() => this.overview()?.maintenanceAlerts ?? 0);
@@ -610,7 +611,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   protected cancelPin(): void {
     this.resetToMain();
-    this.focusKioskSearch();
+    this.focusSearchArea();
   }
 
   // ─── Keypad input (touchscreen PIN entry) ───
@@ -735,8 +736,9 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     this.loading.track(this.translate.instant('kioskDisplay.claiming'), this.shopFloorService.claimJob(job.jobId)).subscribe({
       next: () => {
         this.processing.set(null);
-        this.jobSelectWorker.set(null);
         this.loadData();
+        if (this.phase() !== 'job-select' || this.jobSelectWorker()?.userId !== worker.userId) return;
+        this.jobSelectWorker.set(null);
         this.phase.set('actions');
         this.startAutoLogoutTimer();
         this.showActionFeedback(worker.userId, true, this.translate.instant('kioskDisplay.claimed', { jobNumber: job.jobNumber }));
@@ -752,8 +754,9 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   }
 
   protected skipJobSelect(): void {
+    if (this.processing()) return;
     this.ephemeralLogout();
-    this.focusKioskSearch();
+    this.focusSearchArea();
   }
 
   protected enterAssignMode(): void {
@@ -808,7 +811,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   protected finishAssign(): void {
     this.ephemeralLogout();
-    this.focusKioskSearch();
+    this.focusSearchArea();
   }
 
   // ─── Job Timer Actions ───
@@ -900,7 +903,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   protected cancelActions(): void {
     this.ephemeralLogout();
-    this.focusKioskSearch();
+    this.focusSearchArea();
   }
 
   // ─── Receiving ───
@@ -1081,17 +1084,17 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   protected closeLocationView(): void {
     this.scannedLocationId.set(null);
     this.scannedLocationName.set(null);
-    this.focusKioskSearch();
+    this.focusSearchArea();
   }
 
   protected closeDailyLog(): void {
     this.showDailyLog.set(false);
-    this.focusKioskSearch();
+    this.focusSearchArea();
   }
 
   protected closeDevicesPanel(): void {
     this.showDevicesPanel.set(false);
-    this.focusKioskSearch();
+    this.focusSearchArea();
   }
 
   protected runningAssignment(worker: ClockWorker): WorkerAssignment | null {
@@ -1100,18 +1103,18 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   protected isPastDue(job: KioskAvailableJob): boolean {
     if (!job.dueDate) return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return new Date(job.dueDate).getTime() < today.getTime();
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    return new Date(job.dueDate).toISOString().slice(0, 10) < today;
   }
 
   protected jobKey(userId: number, jobId: number): string {
     return `${userId}:${jobId}`;
   }
 
-  private focusKioskSearch(): void {
+  private focusSearchArea(): void {
     afterNextRender(() => {
-      const search = (this.elRef.nativeElement as HTMLElement).querySelector<HTMLInputElement>('.kiosk-search__input');
+      const search = (this.elRef.nativeElement as HTMLElement).querySelector<HTMLElement>('.sf-header__search');
       search?.focus();
     }, { injector: this.injector });
   }
