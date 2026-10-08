@@ -4,7 +4,7 @@ import { signal } from '@angular/core';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 
 import { CapabilityService } from '../../shared/services/capability.service';
 import { ScannerService } from '../../shared/services/scanner.service';
@@ -31,10 +31,12 @@ interface InventoryInternals {
   assigneeControl: FormControl<number | null>;
   assigneeOptions(): { value: unknown; label: string }[];
   partBinOptions(): { value: unknown; label: string }[];
+  reservableBinOptions(): { value: unknown; label: string }[];
+  adjustBinOptions(): { value: unknown; label: string }[];
   reservationForm: FormGroup<{ partId: FormControl<number | null>; binContentId: FormControl<number | null> }>;
   transferForm: FormGroup<{ partId: FormControl<number | null>; sourceBinContentId: FormControl<number | null> }>;
   adjustForm: FormGroup<{ partId: FormControl<number | null>; binContentId: FormControl<number | null> }>;
-  showNoBinsHint(partId: number | null): boolean;
+  showNoBinsHint(partId: number | null, options: { value: unknown; label: string }[]): boolean;
 }
 
 type Overrides = Record<string, (...args: never[]) => unknown>;
@@ -196,6 +198,21 @@ describe('InventoryComponent replenishment', () => {
     expect(updateSettings).toHaveBeenLastCalledWith({ assigneeUserId: null });
     expect(snackbar.success).toHaveBeenCalledWith('replenishmentUi.assigneeSaved');
   });
+
+  it('puts the saved recipient back when saving a new pick fails', () => {
+    const { internals, snackbar } = setup('replenishment', { loaded: true, enabled: false }, {
+      replenishment: {
+        getSettings: () => of({ assigneeUserId: 4 }),
+        getAssigneeCandidates: () => of([{ id: 4, name: 'Avery Manager' }, { id: 9, name: 'Sam Admin' }]),
+        updateSettings: () => throwError(() => new Error('rejected')),
+      },
+    });
+
+    internals.assigneeControl.setValue(9);
+
+    expect(internals.assigneeControl.value).toBe(4);
+    expect(snackbar.success).not.toHaveBeenCalled();
+  });
 });
 
 describe('InventoryComponent stock dialogs', () => {
@@ -204,20 +221,50 @@ describe('InventoryComponent stock dialogs', () => {
   const bins: PartBinLocation[] = [
     { binContentId: 31, locationPath: 'Main / A1', quantity: 10, reservedQuantity: 4, availableQuantity: 6, lotNumber: 'HEAT-A', status: 'Stored' },
     { binContentId: 32, locationPath: 'Main / B2', quantity: 3, reservedQuantity: 0, availableQuantity: 3, lotNumber: null, status: 'Stored' },
+    { binContentId: 33, locationPath: 'QC / Q1', quantity: 2, reservedQuantity: 0, availableQuantity: 2, lotNumber: null, status: 'QcHold' },
   ];
 
-  it('loads the picked part\'s bins into the reserve bin select', () => {
+  it('loads the picked part\'s bins into the reserve bin select, leaving out QC-held stock', () => {
     const getPartBins = vi.fn(() => of(bins));
     const { internals } = setup('reservations', { loaded: true, enabled: false }, { inventory: { getPartBins } });
 
-    expect(internals.partBinOptions()).toEqual([]);
+    expect(internals.reservableBinOptions()).toEqual([]);
     internals.reservationForm.controls.partId.setValue(10);
 
     expect(getPartBins).toHaveBeenCalledWith(10);
-    expect(internals.partBinOptions()).toEqual([
+    expect(internals.reservableBinOptions()).toEqual([
       { value: 31, label: 'replenishmentUi.binOptionWithLot' },
       { value: 32, label: 'replenishmentUi.binOption' },
     ]);
+  });
+
+  it('shows a non-stored status on transfer bins and on-hand quantities on adjust bins', () => {
+    const getPartBins = vi.fn(() => of(bins));
+    const { internals } = setup('stockOps', { loaded: true, enabled: false }, { inventory: { getPartBins } });
+
+    internals.transferForm.controls.partId.setValue(10);
+
+    expect(internals.partBinOptions()).toEqual([
+      { value: 31, label: 'replenishmentUi.binOptionWithLot' },
+      { value: 32, label: 'replenishmentUi.binOption' },
+      { value: 33, label: 'replenishmentUi.binOption · inventory.statuses.qcHold' },
+    ]);
+    expect(internals.adjustBinOptions().map(o => o.label)).toEqual([
+      'replenishmentUi.binOptionOnHandWithLot',
+      'replenishmentUi.binOptionOnHand',
+      'replenishmentUi.binOptionOnHand · inventory.statuses.qcHold',
+    ]);
+  });
+
+  it('shows the reserve hint when every bin of the part is on QC hold', () => {
+    const getPartBins = vi.fn(() => of([bins[2]]));
+    const { internals } = setup('reservations', { loaded: true, enabled: false }, { inventory: { getPartBins } });
+
+    internals.reservationForm.controls.partId.setValue(10);
+
+    expect(internals.reservableBinOptions()).toEqual([]);
+    expect(internals.showNoBinsHint(10, internals.reservableBinOptions())).toBe(true);
+    expect(internals.showNoBinsHint(10, internals.partBinOptions())).toBe(false);
   });
 
   it('clears the chosen bin when the transfer part changes', () => {
@@ -231,7 +278,7 @@ describe('InventoryComponent stock dialogs', () => {
     expect(getPartBins).toHaveBeenLastCalledWith(11);
     expect(internals.transferForm.controls.sourceBinContentId.value).toBeNull();
     expect(internals.partBinOptions()).toEqual([]);
-    expect(internals.showNoBinsHint(11)).toBe(true);
+    expect(internals.showNoBinsHint(11, internals.partBinOptions())).toBe(true);
   });
 
   it('does not call the API when the adjust part is cleared', () => {
@@ -241,6 +288,6 @@ describe('InventoryComponent stock dialogs', () => {
     internals.adjustForm.controls.partId.setValue(null);
 
     expect(getPartBins).not.toHaveBeenCalled();
-    expect(internals.showNoBinsHint(null)).toBe(false);
+    expect(internals.showNoBinsHint(null, internals.adjustBinOptions())).toBe(false);
   });
 });

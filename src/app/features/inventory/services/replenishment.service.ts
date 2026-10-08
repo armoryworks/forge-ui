@@ -1,13 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
-import { Observable, catchError, map, of } from 'rxjs';
+import { Observable, catchError, of } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 import { BurnRate } from '../models/burn-rate.model';
 import { ReorderSuggestion, BulkApproveResult } from '../models/reorder-suggestion.model';
 import { ReplenishmentSettings } from '../models/replenishment-settings.model';
-import { AdminUser } from '../../admin/models/admin-user.model';
-import { UserRef } from '../../kanban/models/user-ref.model';
+import { ReplenishmentAssigneeCandidate } from '../models/replenishment-assignee-candidate.model';
 import { SILENT_HTTP_ERRORS } from '../../../shared/interceptors/silent-http-errors.token';
 
 @Injectable({ providedIn: 'root' })
@@ -41,28 +40,20 @@ export class ReplenishmentService {
   }
 
   getSettings(): Observable<ReplenishmentSettings> {
-    return this.http.get<ReplenishmentSettings>(`${this.base}/settings`);
+    return this.http.get<ReplenishmentSettings>(`${this.base}/settings`, {
+      context: new HttpContext().set(SILENT_HTTP_ERRORS, true),
+    });
   }
 
   updateSettings(settings: ReplenishmentSettings): Observable<ReplenishmentSettings> {
     return this.http.put<ReplenishmentSettings>(`${this.base}/settings`, settings);
   }
 
-  getAssigneeCandidates(): Observable<{ id: number; name: string }[]> {
+  getAssigneeCandidates(): Observable<ReplenishmentAssigneeCandidate[]> {
     return this.http
-      .get<AdminUser[]>(`${environment.apiUrl}/admin/users`, {
+      .get<ReplenishmentAssigneeCandidate[]>(`${this.base}/assignee-candidates`, {
         context: new HttpContext().set(SILENT_HTTP_ERRORS, true),
       })
-      .pipe(
-        map(users => users
-          .filter(u => u.isActive && (u.roles.includes('Admin') || u.roles.includes('Manager')))
-          .map(u => ({ id: u.id, name: `${u.firstName} ${u.lastName}`.trim() }))),
-        catchError(() => this.http
-          .get<UserRef[]>(`${environment.apiUrl}/users`)
-          .pipe(
-            map(users => users.map(u => ({ id: u.id, name: u.name }))),
-            catchError(() => of([])),
-          )),
-      );
+      .pipe(catchError(() => of([])));
   }
 }

@@ -220,7 +220,15 @@ export class InventoryComponent {
   protected readonly partBins = signal<PartBinLocation[]>([]);
   protected readonly partBinsLoading = signal(false);
   protected readonly partBinOptions = computed<SelectOption[]>(() =>
-    this.partBins().map(b => ({ value: b.binContentId, label: this.binOptionLabel(b) })),
+    this.partBins().map(b => ({ value: b.binContentId, label: this.binOptionLabel(b, 'available') })),
+  );
+  protected readonly reservableBinOptions = computed<SelectOption[]>(() =>
+    this.partBins()
+      .filter(b => b.status !== 'QcHold')
+      .map(b => ({ value: b.binContentId, label: this.binOptionLabel(b, 'available') })),
+  );
+  protected readonly adjustBinOptions = computed<SelectOption[]>(() =>
+    this.partBins().map(b => ({ value: b.binContentId, label: this.binOptionLabel(b, 'onHand') })),
   );
 
   // Transfer dialog
@@ -343,14 +351,19 @@ export class InventoryComponent {
     });
   }
 
-  private binOptionLabel(bin: PartBinLocation): string {
-    return bin.lotNumber
-      ? this.translate.instant('replenishmentUi.binOptionWithLot', { path: bin.locationPath, lot: bin.lotNumber, qty: bin.availableQuantity })
-      : this.translate.instant('replenishmentUi.binOption', { path: bin.locationPath, qty: bin.availableQuantity });
+  private binOptionLabel(bin: PartBinLocation, basis: 'available' | 'onHand'): string {
+    const onHand = basis === 'onHand';
+    const qty = onHand ? bin.quantity : bin.availableQuantity;
+    const label = bin.lotNumber
+      ? this.translate.instant(onHand ? 'replenishmentUi.binOptionOnHandWithLot' : 'replenishmentUi.binOptionWithLot', { path: bin.locationPath, lot: bin.lotNumber, qty })
+      : this.translate.instant(onHand ? 'replenishmentUi.binOptionOnHand' : 'replenishmentUi.binOption', { path: bin.locationPath, qty });
+    if (bin.status === 'Stored') return label;
+    const statusKey = bin.status.charAt(0).toLowerCase() + bin.status.slice(1);
+    return `${label} · ${this.translate.instant(`inventory.statuses.${statusKey}`)}`;
   }
 
-  protected showNoBinsHint(partId: number | null): boolean {
-    return partId != null && !this.partBinsLoading() && this.partBins().length === 0;
+  protected showNoBinsHint(partId: number | null, options: SelectOption[]): boolean {
+    return partId != null && !this.partBinsLoading() && options.length === 0;
   }
 
   protected switchTab(tab: InventoryTab): void {
@@ -588,15 +601,8 @@ export class InventoryComponent {
 
   // ── Stock Operations ──
 
-  protected openTransferDialog(binContent?: BinContentItem): void {
+  protected openTransferDialog(): void {
     this.transferForm.reset();
-    if (binContent) {
-      if (binContent.entityType === 'part') this.transferForm.controls.partId.setValue(binContent.entityId);
-      this.transferForm.patchValue({
-        sourceBinContentId: binContent.id,
-        quantity: binContent.quantity as number,
-      });
-    }
     this.showTransferDialog.set(true);
   }
 
@@ -624,15 +630,8 @@ export class InventoryComponent {
     });
   }
 
-  protected openAdjustDialog(binContent?: BinContentItem): void {
+  protected openAdjustDialog(): void {
     this.adjustForm.reset();
-    if (binContent) {
-      if (binContent.entityType === 'part') this.adjustForm.controls.partId.setValue(binContent.entityId);
-      this.adjustForm.patchValue({
-        binContentId: binContent.id,
-        newQuantity: binContent.quantity as number,
-      });
-    }
     this.showAdjustDialog.set(true);
   }
 
@@ -856,6 +855,7 @@ export class InventoryComponent {
   protected readonly dismissReasonControl = new FormControl('', [Validators.required, Validators.maxLength(500)]);
   protected readonly createdRecords = signal<{ type: LinkableEntityType; id: number; label: string }[]>([]);
   protected readonly assigneeControl = new FormControl<number | null>(null);
+  private savedAssigneeUserId: number | null = null;
   protected readonly assigneeOptions = signal<SelectOption[]>([
     { value: null, label: this.translate.instant('replenishmentUi.nobody') },
   ]);
@@ -914,13 +914,21 @@ export class InventoryComponent {
       ]),
     });
     this.replenishmentService.getSettings().subscribe({
-      next: (settings) => this.assigneeControl.setValue(settings.assigneeUserId ?? null, { emitEvent: false }),
+      next: (settings) => {
+        this.savedAssigneeUserId = settings.assigneeUserId ?? null;
+        this.assigneeControl.setValue(this.savedAssigneeUserId, { emitEvent: false });
+      },
     });
   }
 
   private saveAssignee(): void {
-    this.replenishmentService.updateSettings({ assigneeUserId: this.assigneeControl.value ?? null }).subscribe({
-      next: () => this.snackbar.success(this.translate.instant('replenishmentUi.assigneeSaved')),
+    const assigneeUserId = this.assigneeControl.value ?? null;
+    this.replenishmentService.updateSettings({ assigneeUserId }).subscribe({
+      next: (saved) => {
+        this.savedAssigneeUserId = saved.assigneeUserId ?? null;
+        this.snackbar.success(this.translate.instant('replenishmentUi.assigneeSaved'));
+      },
+      error: () => this.assigneeControl.setValue(this.savedAssigneeUserId, { emitEvent: false }),
     });
   }
 

@@ -531,9 +531,9 @@
   <app-dialog [title]="'inventory.dialogs.reserveStockTitle' | translate" width="520px" (closed)="closeReservationDialog()">
     <div [formGroup]="reservationForm">
       <app-entity-picker data-testid="reserve-part" [label]="'replenishmentUi.part' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name" formControlName="partId" />
-      <app-select data-testid="reserve-bin" [label]="'replenishmentUi.bin' | translate" formControlName="binContentId" [options]="partBinOptions()" [placeholder]="(reservationForm.controls.partId.value ? 'replenishmentUi.selectBin' : 'replenishmentUi.pickPartFirst') | translate" />
-      @if (showNoBinsHint(reservationForm.controls.partId.value)) {
-        <p class="dialog-hint" data-testid="reserve-no-bins">{{ 'replenishmentUi.noBins' | translate }}</p>
+      <app-select data-testid="reserve-bin" [label]="'replenishmentUi.bin' | translate" formControlName="binContentId" [options]="reservableBinOptions()" [placeholder]="(reservationForm.controls.partId.value ? 'replenishmentUi.selectBin' : 'replenishmentUi.pickPartFirst') | translate" />
+      @if (showNoBinsHint(reservationForm.controls.partId.value, reservableBinOptions())) {
+        <p class="dialog-hint" data-testid="reserve-no-bins">{{ (partBins().length ? 'replenishmentUi.allBinsOnHold' : 'replenishmentUi.noBins') | translate }}</p>
       }
       <app-entity-picker data-testid="reserve-job" [label]="'replenishmentUi.jobOptional' | translate" entityType="jobs" displayField="jobNumber" secondaryDisplayField="title" formControlName="jobId" />
       <app-input data-testid="reserve-quantity" [label]="'common.quantity' | translate" formControlName="quantity" type="number" />
@@ -605,7 +605,7 @@
     <div [formGroup]="transferForm">
       <app-entity-picker data-testid="transfer-part" [label]="'replenishmentUi.part' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name" formControlName="partId" />
       <app-select data-testid="transfer-source-bin" [label]="'replenishmentUi.sourceBin' | translate" formControlName="sourceBinContentId" [options]="partBinOptions()" [placeholder]="(transferForm.controls.partId.value ? 'replenishmentUi.selectBin' : 'replenishmentUi.pickPartFirst') | translate" />
-      @if (showNoBinsHint(transferForm.controls.partId.value)) {
+      @if (showNoBinsHint(transferForm.controls.partId.value, partBinOptions())) {
         <p class="dialog-hint" data-testid="transfer-no-bins">{{ 'replenishmentUi.noBins' | translate }}</p>
       }
       <app-select [label]="'inventory.dialogs.destinationLocation' | translate" formControlName="destinationLocationId" [options]="binLocationOptions()" />
@@ -629,8 +629,8 @@
   <app-dialog [title]="'inventory.dialogs.adjustStockTitle' | translate" width="520px" (closed)="closeAdjustDialog()">
     <div [formGroup]="adjustForm">
       <app-entity-picker data-testid="adjust-part" [label]="'replenishmentUi.part' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name" formControlName="partId" />
-      <app-select data-testid="adjust-bin" [label]="'replenishmentUi.bin' | translate" formControlName="binContentId" [options]="partBinOptions()" [placeholder]="(adjustForm.controls.partId.value ? 'replenishmentUi.selectBin' : 'replenishmentUi.pickPartFirst') | translate" />
-      @if (showNoBinsHint(adjustForm.controls.partId.value)) {
+      <app-select data-testid="adjust-bin" [label]="'replenishmentUi.bin' | translate" formControlName="binContentId" [options]="adjustBinOptions()" [placeholder]="(adjustForm.controls.partId.value ? 'replenishmentUi.selectBin' : 'replenishmentUi.pickPartFirst') | translate" />
+      @if (showNoBinsHint(adjustForm.controls.partId.value, adjustBinOptions())) {
         <p class="dialog-hint" data-testid="adjust-no-bins">{{ 'replenishmentUi.noBins' | translate }}</p>
       }
       <app-input data-testid="adjust-new-quantity" [label]="'inventory.dialogs.newQuantity' | translate" formControlName="newQuantity" type="number" />
