@@ -6599,6 +6599,8 @@
     "passedMessage": "Inspection passed.",
     "failedMessage": "Inspection failed.",
     "requiredNotPassed": "Required check not passed: {{item}}",
+    "requiredNotChecked": "Required check not checked yet: {{item}}",
+    "notChecked": "Not checked",
     "raiseNcr": "Raise NCR",
     "ncrTitle": "Raise a Non-Conformance",
     "ncrDescription": "Description",

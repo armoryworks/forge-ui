@@ -20,6 +20,7 @@ interface DialogView {
   ncrForm: FormGroup;
   isComplete: Signal<boolean>;
   passViolations: Signal<string[]>;
+  completeViolations: Signal<string[]>;
   linkedNcr: Signal<NonConformance | null>;
   showNcrForm: Signal<boolean>;
   markPassed(): void;
@@ -136,6 +137,58 @@ describe('QcInspectionDetailDialogComponent', () => {
       view.markFailed();
 
       expect(updateInspection).toHaveBeenCalledWith(12, expect.objectContaining({ status: 'Failed' }));
+    });
+  });
+
+  describe('an inspection whose rows have not been checked', () => {
+    let view: DialogView;
+
+    beforeEach(() => {
+      view = setup(makeInspection({
+        results: [
+          { id: 100, checklistItemId: 1, description: 'Length', specification: '10 mm', isRequired: true, passed: null, measuredValue: null, notes: null },
+          { id: 101, checklistItemId: 2, description: 'Finish', specification: null, isRequired: false, passed: null, measuredValue: null, notes: null },
+        ],
+      }));
+    });
+
+    it('keeps the unchecked rows unset rather than reading them as failed', () => {
+      expect(view.form.controls.results.getRawValue().map(r => r['passed'])).toEqual([null, null]);
+      expect(view.completeViolations()).toEqual(['qcInspections.requiredNotChecked']);
+      expect(view.passViolations()).toEqual(['qcInspections.requiredNotChecked']);
+    });
+
+    it('blocks both Pass and Fail until every required row is checked', () => {
+      view.markPassed();
+      view.markFailed();
+
+      expect(updateInspection).not.toHaveBeenCalled();
+    });
+
+    it('saves with the unchecked rows still unset', () => {
+      view.save();
+
+      expect(updateInspection).toHaveBeenCalledWith(12, expect.objectContaining({
+        results: [
+          expect.objectContaining({ id: 100, passed: null }),
+          expect.objectContaining({ id: 101, passed: null }),
+        ],
+      }));
+    });
+
+    it('fails once the required row is checked, leaving the optional row unset', () => {
+      view.form.controls.results.at(0).patchValue({ passed: false });
+      expect(view.completeViolations()).toEqual([]);
+
+      view.markFailed();
+
+      expect(updateInspection).toHaveBeenCalledWith(12, expect.objectContaining({
+        status: 'Failed',
+        results: [
+          expect.objectContaining({ id: 100, passed: false }),
+          expect.objectContaining({ id: 101, passed: null }),
+        ],
+      }));
     });
   });
 

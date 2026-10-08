@@ -66,13 +66,16 @@
                   @if (result.controls.isRequired.value) {
                     <span class="chip chip--muted">{{ 'qcInspections.required' | translate }}</span>
                   }
+                  @if (result.controls.passed.value === null) {
+                    <span class="chip" [attr.data-testid]="'qc-result-not-checked-' + i">{{ 'qcInspections.notChecked' | translate }}</span>
+                  }
                 </span>
                 <span class="qc-detail__spec">
                   {{ 'qcInspections.specification' | translate }}: {{ result.controls.specification.value || '—' }}
                 </span>
               </div>
               <app-select [label]="'qcInspections.outcome' | translate" formControlName="passed"
-                [options]="passFailOptions" [attr.data-testid]="'qc-result-passed-' + i" />
+                [placeholder]="'qcInspections.notChecked' | translate" [options]="passFailOptions" [attr.data-testid]="'qc-result-passed-' + i" />
               <app-input [label]="'qcInspections.measuredValue' | translate" formControlName="measuredValue"
                 [maxlength]="200" [attr.data-testid]="'qc-result-measured-' + i" />
               <app-input [label]="'qcInspections.resultNotes' | translate" formControlName="notes"
@@ -127,8 +130,11 @@
     @if (inspection() && !isComplete()) {
       <button class="action-btn" type="button" [disabled]="saving() || form.invalid" (click)="save()"
         data-testid="qc-detail-save">{{ 'common.save' | translate }}</button>
-      <button class="action-btn action-btn--danger" type="button" [disabled]="saving() || form.invalid"
-        (click)="markFailed()" data-testid="qc-detail-fail">{{ 'qcInspections.markFailed' | translate }}</button>
+      <app-validation-button [violations]="completeViolations" [loading]="saving()">
+        <button class="action-btn action-btn--danger" type="button"
+          [disabled]="saving() || form.invalid || completeViolations().length > 0"
+          (click)="markFailed()" data-testid="qc-detail-fail">{{ 'qcInspections.markFailed' | translate }}</button>
+      </app-validation-button>
       <app-validation-button [violations]="passViolations" [loading]="saving()">
         <button class="action-btn action-btn--primary" type="button"
           [disabled]="saving() || form.invalid || passViolations().length > 0"

@@ -6592,6 +6592,8 @@
     "passedMessage": "Inspección aprobada.",
     "failedMessage": "Inspección rechazada.",
     "requiredNotPassed": "Verificación obligatoria no aprobada: {{item}}",
+    "requiredNotChecked": "Verificación obligatoria aún sin revisar: {{item}}",
+    "notChecked": "Sin revisar",
     "raiseNcr": "Levantar NCR",
     "ncrTitle": "Levantar una no conformidad",
     "ncrDescription": "Descripción",

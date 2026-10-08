@@ -206,7 +206,7 @@ export class ScanInspectFlowComponent implements OnInit {
     for (const key of Object.keys(this.checklistForm.controls))
       this.checklistForm.removeControl(key, { emitEvent: false });
     for (const row of inspection.results)
-      this.checklistForm.addControl(String(row.id), new FormControl(row.passed, { nonNullable: true }), { emitEvent: false });
+      this.checklistForm.addControl(String(row.id), new FormControl(row.passed === true, { nonNullable: true }), { emitEvent: false });
     this.inspection.set(inspection);
     this.checklist.set(inspection.results);
     this.checkedItemIds.set(this.readCheckedItemIds());

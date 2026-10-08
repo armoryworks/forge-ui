@@ -36,8 +36,8 @@ const INSPECTION: QcInspection = {
   notes: null,
   completedAt: null,
   results: [
-    { id: 101, checklistItemId: 1, description: 'Visual', specification: null, isRequired: true, passed: false, measuredValue: null, notes: null },
-    { id: 102, checklistItemId: 2, description: 'Fit', specification: '2.5 mm', isRequired: false, passed: false, measuredValue: '2.5', notes: null },
+    { id: 101, checklistItemId: 1, description: 'Visual', specification: null, isRequired: true, passed: null, measuredValue: null, notes: null },
+    { id: 102, checklistItemId: 2, description: 'Fit', specification: '2.5 mm', isRequired: false, passed: null, measuredValue: '2.5', notes: null },
   ],
   createdAt: new Date('2026-09-01'),
 };
@@ -297,6 +297,7 @@ describe('ScanInspectFlowComponent', () => {
       flow.onReferenceScanned('J-1031');
 
       expect(flow.checklistForm.get('101')!.value).toBe(true);
+      expect(flow.checklistForm.get('102')!.value).toBe(false);
       expect(flow.canPass()).toBe(true);
     });
 

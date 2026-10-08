@@ -40,7 +40,7 @@ type ResultGroup = FormGroup<{
   description: FormControl<string>;
   specification: FormControl<string | null>;
   isRequired: FormControl<boolean>;
-  passed: FormControl<boolean>;
+  passed: FormControl<boolean | null>;
   measuredValue: FormControl<string>;
   notes: FormControl<string>;
 }>;
@@ -133,10 +133,17 @@ export class QcInspectionDetailDialogComponent {
     { initialValue: this.form.getRawValue() },
   );
 
-  protected readonly passViolations = computed<string[]>(() =>
+  protected readonly completeViolations = computed<string[]>(() =>
     this.formValue().results
-      .filter(r => r.isRequired && !r.passed)
-      .map(r => this.translate.instant('qcInspections.requiredNotPassed', { item: r.description })));
+      .filter(r => r.isRequired && r.passed === null)
+      .map(r => this.translate.instant('qcInspections.requiredNotChecked', { item: r.description })));
+
+  protected readonly passViolations = computed<string[]>(() => [
+    ...this.completeViolations(),
+    ...this.formValue().results
+      .filter(r => r.isRequired && r.passed === false)
+      .map(r => this.translate.instant('qcInspections.requiredNotPassed', { item: r.description })),
+  ]);
 
   protected readonly ncrForm = new FormGroup({
     partId: new FormControl<number | null>(null, [Validators.required]),
@@ -169,13 +176,14 @@ export class QcInspectionDetailDialogComponent {
   }
 
   protected markFailed(): void {
+    if (this.completeViolations().length > 0) return;
     this.submit('Failed', 'qcInspections.failedMessage');
   }
 
   protected openNcrForm(): void {
     const inspection = this.inspection();
     if (!inspection || !this.ncrEnabled()) return;
-    const failedChecks = inspection.results.filter(r => !r.passed).map(r => r.description);
+    const failedChecks = inspection.results.filter(r => r.passed === false).map(r => r.description);
     const description = [
       this.translate.instant('qcInspections.ncrDescriptionDefault', { id: inspection.id }),
       failedChecks.length > 0
@@ -305,7 +313,7 @@ export class QcInspectionDetailDialogComponent {
       description: new FormControl(result.description, { nonNullable: true }),
       specification: new FormControl<string | null>(result.specification ?? null),
       isRequired: new FormControl(result.isRequired ?? false, { nonNullable: true }),
-      passed: new FormControl(result.passed, { nonNullable: true }),
+      passed: new FormControl<boolean | null>(result.passed),
       measuredValue: new FormControl(result.measuredValue ?? '', { nonNullable: true, validators: [Validators.maxLength(200)] }),
       notes: new FormControl(result.notes ?? '', { nonNullable: true, validators: [Validators.maxLength(500)] }),
     });

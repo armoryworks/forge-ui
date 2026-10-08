@@ -81,7 +81,7 @@ export class QualityService {
       id?: number;
       checklistItemId?: number;
       description: string;
-      passed: boolean;
+      passed: boolean | null;
       measuredValue?: string;
       notes?: string;
     }[];

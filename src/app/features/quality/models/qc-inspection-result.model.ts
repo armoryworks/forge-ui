@@ -4,7 +4,7 @@ export interface QcInspectionResult {
   description: string;
   specification?: string | null;
   isRequired?: boolean;
-  passed: boolean;
+  passed: boolean | null;
   measuredValue: string | null;
   notes: string | null;
 }
