@@ -31,6 +31,9 @@ describe('MaterialSpecDialogComponent', () => {
     item(1, 'Aluminum', 10, null),
     item(3, '6061-T6', 10, 1),
     item(4, 'Retired', 30, null, false),
+    item(5, '1018', 10, 2),
+    item(6, 'Wood', 40, null),
+    item(7, 'Old grade', 10, 4, false),
   ];
   const created = item(9, '7075-T6', 20, 1);
   let create: ReturnType<typeof vi.fn>;
@@ -55,7 +58,7 @@ describe('MaterialSpecDialogComponent', () => {
     });
   });
 
-  it('offers no category, the active top-level rows in order, and a new category', () => {
+  it('offers no category, the active top-level rows that have children in order, and a new category', () => {
     const options = (build() as unknown as DialogInternals).categoryOptions;
 
     expect(options.map(o => o.value)).toEqual([null, 1, 2, NEW_MATERIAL_CATEGORY]);

@@ -7,7 +7,7 @@
       formControlName="materialSpecId"
       [options]="materialSpecOptions()"
       [isReadonly]="!editing()" />
-    @if (editing()) {
+    @if (editing() && canCreateMaterial()) {
       <button class="action-btn cluster__inline-action" type="button"
         data-testid="part-material-spec-new"
         (click)="openNewMaterial()">

@@ -10,6 +10,7 @@ import { Observable, of } from 'rxjs';
 import { mockSignalInputs } from '../../../../../../testing/signal-input-harness';
 import { PartMaterialClusterComponent } from './part-material-cluster.component';
 import { PartDetail } from '../../../models/part-detail.model';
+import { AuthService } from '../../../../../shared/services/auth.service';
 import { ReferenceDataItem, ReferenceDataService } from '../../../../../shared/services/reference-data.service';
 
 class FakeLoader implements TranslateLoader {
@@ -180,6 +181,24 @@ describe('PartMaterialClusterComponent', () => {
       (c as unknown as PartMaterialClusterComponent).save.subscribe(saved);
       c.onSave();
       expect(saved.mock.calls[0][0].materialSpecId).toBe(3);
+    });
+
+    function canCreateAs(roles: string[]): boolean {
+      TestBed.overrideProvider(AuthService, {
+        useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) },
+      });
+      const component = TestBed.runInInjectionContext(() => new PartMaterialClusterComponent());
+      mockSignalInputs(component, { part: makePart(), editing: true, saving: false });
+      TestBed.flushEffects();
+      return (component as unknown as { canCreateMaterial(): boolean }).canCreateMaterial();
+    }
+
+    it('offers New material to an engineer', () => {
+      expect(canCreateAs(['Engineer'])).toBe(true);
+    });
+
+    it('hides New material from a PM, whom the create endpoint does not allow', () => {
+      expect(canCreateAs(['PM'])).toBe(false);
     });
 
     it('leaves the selection and cache alone when the dialog is dismissed', () => {

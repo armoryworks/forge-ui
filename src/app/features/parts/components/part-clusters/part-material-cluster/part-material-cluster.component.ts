@@ -6,6 +6,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { InputComponent } from '../../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../../shared/components/select/select.component';
 import { ValidationButtonComponent } from '../../../../../shared/components/validation-button/validation-button.component';
+import { AuthService } from '../../../../../shared/services/auth.service';
 import { FormValidationService } from '../../../../../shared/services/form-validation.service';
 import { ReferenceDataItem, ReferenceDataService } from '../../../../../shared/services/reference-data.service';
 import { PartDetail } from '../../../models/part-detail.model';
@@ -15,6 +16,7 @@ import {
 import { buildMaterialSpecOptions } from './material-spec-options.util';
 
 const MATERIAL_SPEC_GROUP = 'part.material_spec';
+const MATERIAL_SPEC_CREATE_ROLES = ['Admin', 'Manager', 'Engineer'];
 
 /**
  * Pillar 4 Phase 2 — Material & physical cluster.
@@ -40,6 +42,7 @@ const MATERIAL_SPEC_GROUP = 'part.material_spec';
 export class PartMaterialClusterComponent implements OnInit {
   private readonly refData = inject(ReferenceDataService);
   private readonly dialog = inject(MatDialog);
+  private readonly auth = inject(AuthService);
 
   readonly part = input.required<PartDetail>();
   readonly editing = input(false);
@@ -107,6 +110,8 @@ export class PartMaterialClusterComponent implements OnInit {
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {});
+
+  protected readonly canCreateMaterial = computed(() => this.auth.hasAnyRole(MATERIAL_SPEC_CREATE_ROLES));
 
   protected readonly displayMaterial = computed(() => {
     const p = this.part();

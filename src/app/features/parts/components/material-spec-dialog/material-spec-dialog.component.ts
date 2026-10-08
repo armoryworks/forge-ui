@@ -42,10 +42,12 @@ export class MaterialSpecDialogComponent {
 
   protected readonly saving = signal(false);
 
+  private readonly parentIds = new Set(this.data.items.map(i => i.parentId).filter(id => id != null));
+
   protected readonly categoryOptions: SelectOption[] = [
     { value: null, label: this.translate.instant('materialSpecs.noCategory') },
     ...this.data.items
-      .filter(i => i.isActive && i.parentId == null)
+      .filter(i => i.isActive && i.parentId == null && this.parentIds.has(i.id))
       .sort((a, b) => a.sortOrder - b.sortOrder)
       .map(i => ({ value: i.id, label: i.label })),
     { value: NEW_MATERIAL_CATEGORY, label: this.translate.instant('materialSpecs.newCategory') },
