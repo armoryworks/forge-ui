@@ -64,6 +64,21 @@ const stagedTrackTypes = [
   },
 ] as unknown as TrackType[];
 
+const documentTrackTypes = [
+  {
+    id: 1, name: 'Production', isDefault: true,
+    stages: [
+      { id: 11, name: 'Quote Requested', code: 'quote_requested', sortOrder: 1, accountingDocumentType: null },
+      { id: 12, name: 'In Review', code: 'in_review', sortOrder: 2, accountingDocumentType: null },
+      { id: 13, name: 'Quoted', code: 'quoted', sortOrder: 3, accountingDocumentType: 'Estimate' },
+      { id: 14, name: 'Order Confirmed', code: 'order_confirmed', sortOrder: 4, accountingDocumentType: 'SalesOrder' },
+      { id: 15, name: 'Materials Ordered', code: 'materials_ordered', sortOrder: 5, accountingDocumentType: 'PurchaseOrder' },
+      { id: 16, name: 'Shipped', code: 'shipped', sortOrder: 6, isMandatory: true, accountingDocumentType: 'Invoice' },
+      { id: 17, name: 'Payment Received', code: 'payment_received', sortOrder: 7, accountingDocumentType: 'Payment' },
+    ],
+  },
+] as unknown as TrackType[];
+
 function soLine(overrides: Partial<AssignableSalesOrderLine> = {}): AssignableSalesOrderLine {
   return {
     id: 40,
@@ -415,6 +430,24 @@ describe('JobDialogComponent', () => {
 
     component.jobForm.controls.trackTypeId.setValue(2);
     expect(component.startStageOptions().map(o => o.value)).toEqual([21]);
+  });
+
+  it('offers no status at or past the first one that queues an accounting document', () => {
+    render('create', null, documentTrackTypes);
+    expect(component.startStageOptions().map(o => o.value)).toEqual([11, 12]);
+  });
+
+  it('still offers Order Confirmed for a job linked to a sales-order line, and nothing later', () => {
+    render('create', null, documentTrackTypes);
+    const f = component.jobForm.controls;
+
+    f.salesOrderLineId.setValue(40);
+    expect(component.startStageOptions().map(o => o.value)).toEqual([11, 12, 14]);
+    expect(f.initialStageId.value).toBe(14);
+
+    f.salesOrderLineId.setValue(null);
+    expect(component.startStageOptions().map(o => o.value)).toEqual([11, 12]);
+    expect(f.initialStageId.value).toBe(11);
   });
 
   it('moves the default to Order Confirmed once a sales-order line is picked', () => {

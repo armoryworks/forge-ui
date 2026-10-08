@@ -113,8 +113,14 @@ export class JobDialogComponent implements OnInit {
     { initialValue: this.jobForm.controls.trackTypeId.value },
   );
 
+  private readonly selectedSalesOrderLineId = toSignal(
+    this.jobForm.controls.salesOrderLineId.valueChanges,
+    { initialValue: this.jobForm.controls.salesOrderLineId.value },
+  );
+
   protected readonly startStageOptions = computed<SelectOption[]>(() =>
-    this.startableStages(this.selectedTrackTypeId()).map(s => ({ value: s.id, label: s.name }))
+    this.startableStages(this.selectedTrackTypeId(), this.selectedSalesOrderLineId() != null)
+      .map(s => ({ value: s.id, label: s.name }))
   );
 
   protected readonly salesOrderLineOptions = computed<SelectOption[]>(() => [
@@ -229,21 +235,26 @@ export class JobDialogComponent implements OnInit {
     }
   }
 
-  private startableStages(trackTypeId: number | null): Stage[] {
+  private startableStages(trackTypeId: number | null, linkedToSalesOrderLine: boolean): Stage[] {
     const trackType = this.trackTypes().find(t => t.id === trackTypeId);
     const stages = [...(trackType?.stages ?? [])].sort((a, b) => a.sortOrder - b.sortOrder);
     const firstMandatory = stages.find(s => s.isMandatory);
+    const firstDocument = stages.find(s => s.accountingDocumentType);
     const last = stages[stages.length - 1];
     return stages.filter((s, i) => i === 0
-      || ((!firstMandatory || s.sortOrder < firstMandatory.sortOrder) && s !== last));
+      || ((!firstMandatory || s.sortOrder < firstMandatory.sortOrder)
+        && s !== last
+        && (!firstDocument || s.sortOrder < firstDocument.sortOrder
+          || (linkedToSalesOrderLine && s.code === ORDER_CONFIRMED_STAGE_CODE))));
   }
 
   private applyDefaultStartStage(): void {
     if (this.restoringDraft) return;
     const control = this.jobForm.controls.initialStageId;
-    const stages = this.startableStages(this.jobForm.controls.trackTypeId.value);
+    const linkedToSalesOrderLine = this.jobForm.controls.salesOrderLineId.value != null;
+    const stages = this.startableStages(this.jobForm.controls.trackTypeId.value, linkedToSalesOrderLine);
     if (control.dirty && stages.some(s => s.id === control.value)) return;
-    const orderConfirmed = this.jobForm.controls.salesOrderLineId.value != null
+    const orderConfirmed = linkedToSalesOrderLine
       ? stages.find(s => s.code === ORDER_CONFIRMED_STAGE_CODE)
       : undefined;
     control.setValue((orderConfirmed ?? stages[0])?.id ?? null);
