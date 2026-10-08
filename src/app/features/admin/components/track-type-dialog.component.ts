@@ -116,7 +116,8 @@ export class TrackTypeDialogComponent {
             isIrreversible: s.isIrreversible,
             isActive: edited ? false : s.isActive,
           }));
-          this.stages.set([...kept, ...loaded].sort((a, b) => a.sortOrder - b.sortOrder));
+          const merged = [...kept, ...loaded].sort((a, b) => a.sortOrder - b.sortOrder);
+          this.stages.set(edited ? merged.map((s, i) => ({ ...s, sortOrder: i + 1 })) : merged);
         },
         error: () => undefined,
       });

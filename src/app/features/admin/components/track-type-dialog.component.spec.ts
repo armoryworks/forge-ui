@@ -24,6 +24,7 @@ interface DialogInternals {
   hideStage(index: number): void;
   showStage(index: number): void;
   removeStage(index: number): void;
+  moveStageUp(index: number): void;
   updateStage(index: number, field: keyof StageRequest, value: unknown): void;
   addStage(): void;
   onSubmit(): void;
@@ -147,6 +148,26 @@ describe('TrackTypeDialogComponent', () => {
       ['quoted', 'Quoted', false],
       ['order_confirmed', 'Confirmed', true],
       ['shipped', 'Shipped', true],
+    ]);
+  });
+
+  it('gives every status a distinct position when the list is reordered before it loads', async () => {
+    const response = new Subject<TrackTypeStageAdmin[]>();
+    getStages.mockReturnValue(response);
+    const withActive = {
+      ...production,
+      stages: allStages.filter(s => s.isActive).sort((a, b) => a.sortOrder - b.sortOrder),
+    } as unknown as TrackType;
+    await render(withActive);
+
+    component.moveStageUp(component.stages().findIndex(s => s.code === 'order_confirmed'));
+    response.next(allStages);
+
+    expect(component.stages().map(s => [s.code, s.sortOrder])).toEqual([
+      ['order_confirmed', 1],
+      ['quote_requested', 2],
+      ['quoted', 3],
+      ['shipped', 4],
     ]);
   });
 
