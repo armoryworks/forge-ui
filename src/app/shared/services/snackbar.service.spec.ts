@@ -168,6 +168,54 @@ describe('SnackbarService', () => {
       expect(snackBarSpy.open).toHaveBeenNthCalledWith(2, 'orders.saveFailed', 'Dismiss', errorPanel);
     });
 
+    it('uses the translated key instead of the reason phrase for a bare 404 problem', () => {
+      const err = new HttpErrorResponse({
+        status: 404,
+        error: { type: 'https://tools.ietf.org/html/rfc9110#section-15.5.5', title: 'Not Found', status: 404 },
+      });
+
+      service.errorFrom(err, 'orders.loadFailed');
+
+      expect(snackBarSpy.open).toHaveBeenCalledWith('orders.loadFailed', 'Dismiss', errorPanel);
+    });
+
+    it('shows the detail of a 409 conflict rather than its reason-phrase title', () => {
+      const err = new HttpErrorResponse({
+        status: 409,
+        error: { title: 'Conflict', status: 409, detail: 'Order SO-00042 was changed by someone else.' },
+      });
+
+      service.errorFrom(err, 'orders.saveFailed');
+
+      expect(snackBarSpy.open).toHaveBeenCalledWith('Order SO-00042 was changed by someone else.', 'Dismiss', errorPanel);
+    });
+
+    it('shows the title of a validation problem that carries errors', () => {
+      const err = new HttpErrorResponse({
+        status: 400,
+        error: {
+          title: 'One or more validation errors occurred.',
+          status: 400,
+          errors: { Quantity: ['Quantity must be greater than zero.'] },
+        },
+      });
+
+      service.errorFrom(err, 'orders.saveFailed');
+
+      expect(snackBarSpy.open).toHaveBeenCalledWith('One or more validation errors occurred.', 'Dismiss', errorPanel);
+    });
+
+    it('keeps a reason-phrase title when the problem carries errors', () => {
+      const err = new HttpErrorResponse({
+        status: 400,
+        error: { title: 'Bad Request', errors: { Name: ['Name is required.'] } },
+      });
+
+      service.errorFrom(err, 'orders.saveFailed');
+
+      expect(snackBarSpy.open).toHaveBeenCalledWith('Bad Request', 'Dismiss', errorPanel);
+    });
+
     it('does nothing when the interceptor already showed the error', () => {
       const err = new HttpErrorResponse({ status: 400, error: { detail: 'Quantity must be greater than zero.' } });
       markHttpErrorShown(err);

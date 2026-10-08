@@ -62,7 +62,7 @@ export class SnackbarService {
     const body: unknown = err instanceof HttpErrorResponse ? err.error : null;
     this.error(
       problemText(body, 'detail')
-      ?? problemText(body, 'title')
+      ?? meaningfulTitle(body)
       ?? this.translate.instant(fallbackKey),
     );
   }
@@ -89,6 +89,27 @@ export class SnackbarService {
   private dismissLabel(): string {
     return this.translate.instant('common.dismiss');
   }
+}
+
+const HTTP_REASON_PHRASES: ReadonlySet<string> = new Set([
+  'bad request', 'unauthorized', 'payment required', 'forbidden', 'not found',
+  'method not allowed', 'not acceptable', 'proxy authentication required', 'request timeout',
+  'conflict', 'gone', 'length required', 'precondition failed', 'payload too large',
+  'content too large', 'uri too long', 'unsupported media type', 'range not satisfiable',
+  'expectation failed', 'misdirected request', 'unprocessable entity', 'unprocessable content',
+  'locked', 'failed dependency', 'too early', 'upgrade required', 'precondition required',
+  'too many requests', 'request header fields too large', 'unavailable for legal reasons',
+  'internal server error', 'not implemented', 'bad gateway', 'service unavailable',
+  'gateway timeout', 'http version not supported', 'insufficient storage', 'loop detected',
+  'network authentication required',
+  'an error occurred while processing your request.',
+]);
+
+function meaningfulTitle(body: unknown): string | null {
+  const title = problemText(body, 'title');
+  if (title === null) return null;
+  const hasErrors = (body as Record<string, unknown>)['errors'] != null;
+  return hasErrors || !HTTP_REASON_PHRASES.has(title.trim().toLowerCase()) ? title : null;
 }
 
 function problemText(body: unknown, key: 'detail' | 'title'): string | null {
