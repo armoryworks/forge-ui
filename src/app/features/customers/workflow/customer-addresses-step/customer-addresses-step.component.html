@@ -9,6 +9,11 @@
       <span class="material-icons-outlined">location_off</span>
       <p>{{ 'guidedSetup.customerAddresses.unavailable' | translate }}</p>
     </div>
+  } @else if (!canManageAddresses()) {
+    <div class="customer-workflow-step__empty" data-testid="customer-addresses-step-no-permission">
+      <span class="material-icons-outlined">lock</span>
+      <p>{{ 'guidedSetup.customerAddresses.noPermission' | translate }}</p>
+    </div>
   } @else if (customerId(); as id) {
     <div class="customer-workflow-step__panel">
       <app-customer-addresses-cluster [customerId]="id" />

@@ -8708,11 +8708,13 @@
   "guidedSetup": {
     "customerIdentity": {
       "nameLabel": "Nombre del cliente (empresa)",
-      "displayNameLabel": "Nombre para mostrar"
+      "displayNameLabel": "Nombre para mostrar",
+      "displayNameHelp": "Opcional. Si se completa, este nombre se imprime en lugar del nombre del cliente en los albaranes, los conocimientos de embarque y otros documentos del cliente, y se envía a contabilidad como nombre de la empresa. Use el nombre completo de la empresa, no un apodo."
     },
     "customerAddresses": {
       "saveIdentityFirst": "Guarde primero la identidad del cliente y luego agregue las direcciones aquí.",
-      "unavailable": "Las direcciones de clientes están desactivadas en esta instalación."
+      "unavailable": "La libreta de direcciones de clientes está desactivada en esta instalación. Las direcciones de envío se ingresan en cada envío.",
+      "noPermission": "Su rol no puede editar direcciones de clientes. Alguien con rol de oficina, gerente o jefe de proyecto puede agregarlas más tarde desde la página del cliente."
     },
     "supplyItems": {
       "partLabel": "Pieza",
@@ -8722,6 +8724,7 @@
       "leadTimeDaysValue": "{{ days }} días de plazo de entrega",
       "add": "Agregar pieza",
       "added": "Pieza agregada a este proveedor.",
+      "priceNotSaved": "Pieza agregada a este proveedor, pero su precio no se guardó. Agregue el precio desde la lista de piezas del proveedor.",
       "empty": "Aún no se han agregado piezas. Este paso es opcional.",
       "saveIdentityFirst": "Guarde primero la identidad del proveedor y luego agregue aquí las piezas que suministra."
     },

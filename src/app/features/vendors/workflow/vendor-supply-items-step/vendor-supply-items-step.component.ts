@@ -1,8 +1,9 @@
 import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, map, of, switchMap, tap } from 'rxjs';
+import { Observable, catchError, finalize, map, of, startWith, switchMap, tap } from 'rxjs';
 
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
@@ -60,6 +61,19 @@ export class VendorSupplyItemsStepComponent {
     leadTimeDays: new FormControl<number | null>(null, [Validators.min(0)]),
   });
 
+  private readonly pickedPartId = toSignal(
+    this.form.controls.partId.valueChanges.pipe(startWith(this.form.controls.partId.value)),
+    { initialValue: null },
+  );
+  private readonly formStatus = toSignal(
+    this.form.statusChanges.pipe(startWith(this.form.status)),
+    { initialValue: this.form.status },
+  );
+
+  protected readonly canAdd = computed(
+    () => this.vendorId() != null && this.pickedPartId() != null && this.formStatus() === 'VALID' && !this.adding(),
+  );
+
   constructor() {
     effect(() => {
       const vendorId = this.vendorId();
@@ -78,10 +92,6 @@ export class VendorSupplyItemsStepComponent {
       () => this.save(),
     );
     this.destroyRef.onDestroy(() => this.workflowService.unregisterStepForm());
-  }
-
-  protected canAdd(): boolean {
-    return this.vendorId() != null && this.form.controls.partId.value != null && this.form.valid && !this.adding();
   }
 
   protected addItem(): void {
@@ -106,17 +116,24 @@ export class VendorSupplyItemsStepComponent {
       isApproved: true,
       isPreferred: false,
     }).pipe(
-      switchMap((created) => value.unitPrice == null
-        ? of(created)
-        : this.vendorPartsService.addPriceTier(created.id, { minQuantity: 1, unitPrice: value.unitPrice }).pipe(map(() => created))),
-      tap({
-        next: () => {
-          this.adding.set(false);
-          this.form.reset({ partId: null, vendorPartNumber: '', unitPrice: null, leadTimeDays: null });
-          this.snackbar.success(this.translate.instant('guidedSetup.supplyItems.added'));
-          this.loadItems(vendorId);
-        },
-        error: () => this.adding.set(false),
+      tap(() => this.form.reset({ partId: null, vendorPartNumber: '', unitPrice: null, leadTimeDays: null })),
+      switchMap((created) => this.addInitialPrice(created, value.unitPrice)),
+      tap(() => this.loadItems(vendorId)),
+      finalize(() => this.adding.set(false)),
+    );
+  }
+
+  private addInitialPrice(created: VendorPart, unitPrice: number | null): Observable<VendorPart> {
+    if (unitPrice == null) {
+      this.snackbar.success(this.translate.instant('guidedSetup.supplyItems.added'));
+      return of(created);
+    }
+    return this.vendorPartsService.addPriceTier(created.id, { minQuantity: 1, unitPrice }).pipe(
+      tap(() => this.snackbar.success(this.translate.instant('guidedSetup.supplyItems.added'))),
+      map(() => created),
+      catchError(() => {
+        this.snackbar.warn(this.translate.instant('guidedSetup.supplyItems.priceNotSaved'));
+        return of(created);
       }),
     );
   }

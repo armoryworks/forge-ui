@@ -23,7 +23,7 @@
 
   <div class="cluster__form-row">
     <app-input data-testid="customer-identity-name" [label]="'guidedSetup.customerIdentity.nameLabel' | translate" formControlName="name" [required]="true" [isReadonly]="!editing()" />
-    <app-input data-testid="customer-identity-company" [label]="'guidedSetup.customerIdentity.displayNameLabel' | translate" formControlName="companyName" [isReadonly]="!editing()" />
+    <app-input data-testid="customer-identity-company" [label]="'guidedSetup.customerIdentity.displayNameLabel' | translate" [info]="'guidedSetup.customerIdentity.displayNameHelp' | translate" formControlName="companyName" [isReadonly]="!editing()" />
   </div>
   @if (editing()) {
     <div class="cluster__hint" role="note">

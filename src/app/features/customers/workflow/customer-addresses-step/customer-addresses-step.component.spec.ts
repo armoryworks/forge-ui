@@ -6,6 +6,7 @@ import { Observable, of } from 'rxjs';
 import { vi } from 'vitest';
 
 import { mockSignalInputs } from '../../../../../testing/signal-input-harness';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { CustomerAddressesStepComponent } from './customer-addresses-step.component';
@@ -50,6 +51,13 @@ describe('CustomerAddressesStepComponent', () => {
     const component = build(31, null);
     expect((component as unknown as { addressesEnabled(): boolean }).addressesEnabled()).toBe(false);
     expect(spy).toHaveBeenCalledWith('CAP-MD-CUSTOMER-ADDRESSES', true);
+  });
+
+  it('offers the address editor only to roles the address endpoints accept', () => {
+    const spy = vi.spyOn(TestBed.inject(AuthService), 'hasAnyRole').mockReturnValue(false);
+    const component = build(31, null);
+    expect((component as unknown as { canManageAddresses(): boolean }).canManageAddresses()).toBe(false);
+    expect(spy).toHaveBeenCalledWith(['Admin', 'Manager', 'OfficeManager', 'PM']);
   });
 
   it('lets Continue through without saving anything', () => {

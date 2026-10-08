@@ -8715,11 +8715,13 @@
   "guidedSetup": {
     "customerIdentity": {
       "nameLabel": "Customer (company) name",
-      "displayNameLabel": "Display name"
+      "displayNameLabel": "Display name",
+      "displayNameHelp": "Optional. When filled in, this name prints instead of the customer name on packing slips, bills of lading and other customer documents, and is sent to accounting as the company name. Use the full company name, not a nickname."
     },
     "customerAddresses": {
       "saveIdentityFirst": "Save the customer's identity first, then add addresses here.",
-      "unavailable": "Customer addresses are turned off for this installation."
+      "unavailable": "The customer address book is turned off on this installation. Ship-to addresses are entered on each shipment instead.",
+      "noPermission": "Your role cannot edit customer addresses. Someone with an office, manager or project manager role can add them later from the customer's page."
     },
     "supplyItems": {
       "partLabel": "Part",
@@ -8729,6 +8731,7 @@
       "leadTimeDaysValue": "{{ days }} days lead time",
       "add": "Add part",
       "added": "Part added to this vendor.",
+      "priceNotSaved": "Part added to this vendor, but its price was not saved. Add the price from the vendor's parts list.",
       "empty": "No parts added yet. This step is optional.",
       "saveIdentityFirst": "Save the vendor's identity first, then add the parts it supplies here."
     },

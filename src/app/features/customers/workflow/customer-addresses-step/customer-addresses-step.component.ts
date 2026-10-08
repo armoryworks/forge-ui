@@ -3,6 +3,7 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
+import { AuthService } from '../../../../shared/services/auth.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 
@@ -26,6 +27,7 @@ import { CustomerDetail } from '../../models/customer-detail.model';
 export class CustomerAddressesStepComponent {
   private readonly workflowService = inject(WorkflowService);
   private readonly capabilityService = inject(CapabilityService);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly stepId = input<string>('addresses');
@@ -40,6 +42,10 @@ export class CustomerAddressesStepComponent {
 
   protected readonly addressesEnabled = computed(
     () => this.capabilityService.isEnabled('CAP-MD-CUSTOMER-ADDRESSES', true),
+  );
+
+  protected readonly canManageAddresses = computed(
+    () => this.auth.hasAnyRole(['Admin', 'Manager', 'OfficeManager', 'PM']),
   );
 
   protected readonly form = new FormGroup({});

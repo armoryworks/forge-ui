@@ -3,9 +3,11 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
+import { vi } from 'vitest';
 
 import { environment } from '../../../../../environments/environment';
 import { mockSignalInputs } from '../../../../../testing/signal-input-harness';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { VendorSupplyItemsStepComponent } from './vendor-supply-items-step.component';
 
@@ -101,5 +103,37 @@ describe('VendorSupplyItemsStepComponent', () => {
     create.flush({ id: 502 });
     httpMock.expectNone(`${environment.apiUrl}/vendor-parts/502/price-tiers`);
     httpMock.expectOne(`${environment.apiUrl}/vendors/9/vendor-parts`).flush([]);
+  });
+
+  it('keeps the created part when only its price fails, so Continue is not blocked', () => {
+    const component = build(9);
+    httpMock.expectOne(`${environment.apiUrl}/vendors/9/vendor-parts`).flush([]);
+    const warn = vi.spyOn(TestBed.inject(SnackbarService), 'warn').mockImplementation(() => undefined);
+    form(component).setValue({ partId: 77, vendorPartNumber: '', unitPrice: 4.5, leadTimeDays: null });
+
+    let result: unknown;
+    workflowService.saveCurrentStep().subscribe(r => (result = r));
+
+    httpMock.expectOne(`${environment.apiUrl}/vendor-parts`).flush({ id: 503 });
+    httpMock.expectOne(`${environment.apiUrl}/vendor-parts/503/price-tiers`)
+      .flush({ title: 'boom' }, { status: 500, statusText: 'Server Error' });
+    httpMock.expectOne(`${environment.apiUrl}/vendors/9/vendor-parts`).flush([]);
+
+    expect(warn).toHaveBeenCalledWith('guidedSetup.supplyItems.priceNotSaved');
+    expect(result).toEqual({ ok: true });
+    expect(form(component).controls.partId.value).toBeNull();
+    expect((component as unknown as { adding(): boolean }).adding()).toBe(false);
+  });
+
+  it('enables Add only once a part is picked and the row is valid', () => {
+    const component = build(9);
+    httpMock.expectOne(`${environment.apiUrl}/vendors/9/vendor-parts`).flush([]);
+    const canAdd = () => (component as unknown as { canAdd(): boolean }).canAdd();
+
+    expect(canAdd()).toBe(false);
+    form(component).controls.partId.setValue(77);
+    expect(canAdd()).toBe(true);
+    form(component).controls.leadTimeDays.setValue(-1);
+    expect(canAdd()).toBe(false);
   });
 });
