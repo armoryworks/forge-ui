@@ -1596,6 +1596,9 @@
       "created": "Created {{partNumber}}."
     }
   },
+  "partsCatalog": {
+    "duplicateRow": "Duplicate {{partNumber}}"
+  },
   "vendorSources": {
     "preferred": "Preferred",
     "setAsPreferred": "Set as preferred",

@@ -1,15 +1,16 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ManualNumberSettingsService } from '../../shared/services/manual-number-settings.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, filter, map, merge, startWith } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { PartsService } from './services/parts.service';
 import { PartListItem, PartListRow } from './models/part-list-item.model';
+import { buildDraftPartRows } from './draft-part-rows.util';
 import { PartDetail } from './models/part-detail.model';
 import { PartStatus } from './models/part-status.type';
 import { ProcurementSource } from './models/procurement-source.type';
@@ -44,6 +45,8 @@ import { WorkflowService } from '../../shared/services/workflow.service';
 import { NewPartForkDialogComponent, NewPartForkResult } from './workflow/new-part-fork-dialog/new-part-fork-dialog.component';
 import { EntityCompletenessChipComponent } from '../../shared/components/entity-completeness-chip/entity-completeness-chip.component';
 import { EntityCompletenessBadgeComponent } from '../../shared/components/entity-completeness-badge/entity-completeness-badge.component';
+import { EntityCompletenessService } from '../../shared/services/entity-completeness.service';
+import { ClonePartDialogComponent, ClonePartDialogData } from './components/clone-part-dialog/clone-part-dialog.component';
 
 type ViewMode = 'table' | 'cards';
 
@@ -77,9 +80,12 @@ export class PartsComponent {
   private readonly userPreferences = inject(UserPreferencesService);
   private readonly detailDialog = inject(DetailDialogService);
   private readonly workflowService = inject(WorkflowService);
+  private readonly completeness = inject(EntityCompletenessService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(false);
   protected readonly parts = signal<PartListItem[]>([]);
+  protected readonly duplicating = signal(false);
   /**
    * Entity-less workflow drafts the user has started but hasn't materialized
    * a Part row for yet. Surfaced as color-coded ghost rows at the top of the
@@ -90,45 +96,19 @@ export class PartsComponent {
 
   /**
    * Parts list with entity-less workflow drafts prepended as synthetic
-   * "ghost" rows. Each ghost has `_draftRun` set so cell templates can
-   * branch on it; the rest of the PartListItem fields are filled with
-   * sentinel values that read as "not applicable" (`---`, etc.).
+   * "ghost" rows (see {@link buildDraftPartRows}). Each ghost has `_draftRun`
+   * set so cell templates can branch on it, takes its label from the run's
+   * `draftPayload` when it carries a part number or name (otherwise "Unnamed
+   * draft"), and is filtered by the applied search like parts are.
    */
-  protected readonly combinedRows = computed<PartListRow[]>(() => {
-    const ghosts: PartListRow[] = this.entitylessDrafts().map(run => ({
-      // Negative id keeps it distinct from any real Part id and makes the
-      // type-cast in onRowClick unambiguous.
-      id: -run.id,
-      partNumber: '',
-      name: this.translate.instant('parts.drafts.unnamed'),
-      description: null,
-      revision: '',
-      status: 'Draft' as const,
-      // Reflect the variant the user picked in the New Part fork dialog (held
-      // in the run's DraftPayload until the entity materializes) rather than a
-      // generic Buy/Component default.
-      procurementSource: this.draftAxis<ProcurementSource>(run, 'procurementSource', 'Buy'),
-      inventoryClass: this.draftAxis<InventoryClass>(run, 'inventoryClass', 'Component'),
-      bomLineCount: 0,
-      createdAt: new Date(run.startedAt),
-      effectivePrice: 0,
-      effectivePriceCurrency: 'USD',
-      effectivePriceSource: 'Default' as const,
-      pendingWorkflow: null,
-      _draftRun: run,
-    }));
-    return [...ghosts, ...this.parts()];
-  });
-
-  /**
-   * Reads a string axis (procurementSource / inventoryClass) from a draft
-   * run's DraftPayload, falling back to a default when the run predates the
-   * payload-surfacing change or the key is absent.
-   */
-  private draftAxis<T extends string>(run: WorkflowRun, key: string, fallback: T): T {
-    const value = run.draftPayload?.[key];
-    return typeof value === 'string' ? (value as T) : fallback;
-  }
+  protected readonly combinedRows = computed<PartListRow[]>(() => [
+    ...buildDraftPartRows(
+      this.entitylessDrafts(),
+      this.appliedSearch(),
+      this.translate.instant('parts.drafts.unnamed'),
+    ),
+    ...this.parts(),
+  ]);
 
   // Phase 3 F7-partial / WU-17 — surfaces server-side totalCount.
   protected readonly totalCount = signal<number>(0);
@@ -151,7 +131,8 @@ export class PartsComponent {
   protected readonly procurementFilterControl = new FormControl<ProcurementSource | ''>('');
   protected readonly inventoryClassFilterControl = new FormControl<InventoryClass | ''>('');
 
-  private readonly searchTerm = toSignal(this.searchControl.valueChanges.pipe(startWith('')), { initialValue: '' });
+  protected readonly appliedSearch = signal('');
+  private readonly searchRequests = new Subject<string | null>();
   private readonly statusFilter = toSignal(this.statusFilterControl.valueChanges.pipe(startWith('Active' as PartStatus | '')), { initialValue: 'Active' as PartStatus | '' });
   private readonly procurementFilter = toSignal(this.procurementFilterControl.valueChanges.pipe(startWith('' as ProcurementSource | '')), { initialValue: '' as ProcurementSource | '' });
   private readonly inventoryClassFilter = toSignal(this.inventoryClassFilterControl.valueChanges.pipe(startWith('' as InventoryClass | '')), { initialValue: '' as InventoryClass | '' });
@@ -196,6 +177,7 @@ export class PartsComponent {
     // Hidden by default — power users opt in via column-manager. Renders the
     // full completeness chip (click → popover with per-capability gaps).
     { field: 'completeness', header: this.translate.instant('entityCompleteness.columnHeader'), width: '160px', align: 'center', visible: false },
+    { field: 'actions', header: this.translate.instant('common.actions'), width: '80px', align: 'center' },
   ];
 
   // ── Part Dialog ──
@@ -266,15 +248,25 @@ export class PartsComponent {
       if (!scan || scan.context !== 'parts') return;
       this.scanner.clearLastScan();
       this.searchControl.setValue(scan.value);
-      this.loadParts();
+      this.searchRequests.next(scan.value);
     });
 
     // Phase 3 F7-partial / WU-17 — debounced search + filter changes fire the
     // standardised `?q=`, `?status=`, `?type=` query params against the
     // server (300ms debounce per the WU-17 charter).
-    this.searchControl.valueChanges
-      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
-      .subscribe(() => this.loadParts());
+    merge(
+      this.searchControl.valueChanges.pipe(
+        debounceTime(300),
+        map(term => (term ?? '').trim()),
+        filter(term => term !== this.appliedSearch()),
+      ),
+      this.searchRequests.pipe(map(term => (term ?? '').trim())),
+    )
+      .pipe(takeUntilDestroyed())
+      .subscribe(term => {
+        this.appliedSearch.set(term);
+        this.loadParts();
+      });
 
     this.statusFilterControl.valueChanges
       .pipe(distinctUntilChanged(), takeUntilDestroyed())
@@ -296,7 +288,7 @@ export class PartsComponent {
     const status = (this.statusFilter() ?? '') || undefined;
     const procurementSource = (this.procurementFilter() ?? '') || undefined;
     const inventoryClass = (this.inventoryClassFilter() ?? '') || undefined;
-    const search = (this.searchTerm() ?? '').trim() || undefined;
+    const search = this.appliedSearch() || undefined;
     // Phase 3 F7-partial / WU-17 — paged endpoint with the standardised
     // contract; pageSize=200 matches the server cap. The data-table slices
     // client-side for now; switch to true server-paging if a tenant grows
@@ -311,6 +303,7 @@ export class PartsComponent {
       order: 'asc',
     }).subscribe({
       next: (paged) => {
+        this.completeness.prime('Part', paged.items.map(p => p.id));
         this.parts.set(paged.items);
         this.totalCount.set(paged.totalCount);
         this.loading.set(false);
@@ -332,12 +325,12 @@ export class PartsComponent {
   }
 
   protected applyFilters(): void {
-    this.loadParts();
+    this.searchRequests.next(this.searchControl.value);
   }
 
   protected clearSearch(): void {
     this.searchControl.setValue('');
-    this.loadParts();
+    this.searchRequests.next('');
   }
 
   // ── Detail Dialog ──
@@ -475,11 +468,12 @@ export class PartsComponent {
   };
 
   /**
-   * Pin predicate for the data-table — draft ghost rows always render at
-   * the top of the table regardless of the user's active sort column.
+   * Pin predicate for the data-table — with no search active, draft ghost
+   * rows render at the top of the table regardless of the user's active sort
+   * column. While a search is active they sort in with the matching parts.
    */
-  protected readonly isDraftRow = (row: unknown): boolean =>
-    !!(row as PartListRow)._draftRun;
+  protected readonly draftPinPredicate = computed<((row: unknown) => boolean) | null>(() =>
+    this.appliedSearch() ? null : (row: unknown) => !!(row as PartListRow)._draftRun);
 
   /**
    * Row-click dispatcher. Real part rows go to the detail (or resume an
@@ -492,6 +486,33 @@ export class PartsComponent {
       return;
     }
     this.openPartDetail(row.id);
+  }
+
+  /**
+   * Row action: opens the clone dialog for a listed part and, once the copy
+   * is created, refreshes the list and opens the new part.
+   */
+  protected duplicatePart(part: PartListItem): void {
+    if (this.duplicating()) return;
+    this.duplicating.set(true);
+    this.partsService.getPartById(part.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: detail => {
+        this.dialog.open<ClonePartDialogComponent, ClonePartDialogData, PartDetail | null>(
+          ClonePartDialogComponent,
+          { width: '520px', data: { part: detail } },
+        ).afterClosed().subscribe(created => {
+          this.duplicating.set(false);
+          if (!created) return;
+          this.loadParts();
+          if (created.status === 'Draft') {
+            this.tryResumeOrOpenDetail(created.id);
+          } else {
+            this.openDetailDialog(created.id);
+          }
+        });
+      },
+      error: () => this.duplicating.set(false),
+    });
   }
 
   // ── Part CRUD ──

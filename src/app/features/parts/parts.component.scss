@@ -101,6 +101,12 @@
   color: var(--text-secondary);
 }
 
+.part-number--draft {
+  margin-left: $sp-sm;
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
 .part-row__draft-meta {
   display: inline-block;
   margin-left: $sp-sm;

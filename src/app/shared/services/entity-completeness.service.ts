@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, shareReplay } from 'rxjs';
+import { Observable, map, of, shareReplay, tap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { EntityCompleteness } from '../models/entity-completeness.model';
@@ -20,6 +20,8 @@ import { EntityCompleteness } from '../models/entity-completeness.model';
 export class EntityCompletenessService {
   private readonly http = inject(HttpClient);
 
+  private static readonly maxBatchSize = 200;
+
   private readonly cache = new Map<string, Observable<EntityCompleteness>>();
 
   getCompleteness(entityType: string, entityId: number): Observable<EntityCompleteness> {
@@ -34,6 +36,50 @@ export class EntityCompletenessService {
       this.cache.set(key, cached);
     }
     return cached;
+  }
+
+  /**
+   * Prime the cache for a page of entities with one batch request
+   * (`GET /entities/{entityType}/completeness?ids=...`, chunked at 200 ids)
+   * so the chips and badges a list renders per row read from it instead of
+   * each issuing their own call. Ids already cached are skipped. The request
+   * goes out when the first consumer subscribes; an id the server does not
+   * return errors for its consumers, and a failed batch drops its entries so
+   * the next read retries.
+   */
+  prime(entityType: string, entityIds: readonly number[]): void {
+    const ids = [...new Set(entityIds)].filter(id => !this.cache.has(`${entityType}:${id}`));
+    for (let start = 0; start < ids.length; start += EntityCompletenessService.maxBatchSize) {
+      this.primeChunk(entityType, ids.slice(start, start + EntityCompletenessService.maxBatchSize));
+    }
+  }
+
+  private primeChunk(entityType: string, ids: number[]): void {
+    const batch = this.http
+      .get<EntityCompleteness[]>(
+        `${environment.apiUrl}/entities/${encodeURIComponent(entityType)}/completeness`,
+        { params: { ids: ids.join(',') } },
+      )
+      .pipe(
+        map(rows => new Map(rows.map(row => [row.entityId, row]))),
+        shareReplay({ bufferSize: 1, refCount: false }),
+      );
+    for (const id of ids) {
+      const key = `${entityType}:${id}`;
+      const entry: Observable<EntityCompleteness> = batch.pipe(
+        map(byId => {
+          const row = byId.get(id);
+          if (!row) throw new Error(`No completeness returned for ${key}`);
+          return row;
+        }),
+        tap({
+          error: () => {
+            if (this.cache.get(key) === entry) this.cache.delete(key);
+          },
+        }),
+      );
+      this.cache.set(key, entry);
+    }
   }
 
   /**
