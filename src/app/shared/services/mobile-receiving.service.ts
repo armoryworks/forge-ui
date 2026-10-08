@@ -6,7 +6,6 @@ import { Observable } from 'rxjs';
 import { PurchaseOrderDetail } from '../../features/purchase-orders/models/purchase-order-detail.model';
 import { SILENT_HTTP_ERRORS } from '../interceptors/silent-http-errors.token';
 import { MobileReceiptRequest } from '../models/mobile-receipt-request.model';
-import { randomId } from '../utils/random-id';
 
 /**
  * Dock receiving from the phone. Online only: a receipt never goes to the
@@ -21,9 +20,9 @@ export class MobileReceivingService {
     return this.http.get<PurchaseOrderDetail>(`/api/v1/purchase-orders/${id}`, { context: this.silent() });
   }
 
-  receive(purchaseOrderId: number, request: MobileReceiptRequest): Observable<void> {
+  receive(purchaseOrderId: number, request: MobileReceiptRequest, idempotencyKey: string): Observable<void> {
     return this.http.post<void>(`/api/v1/purchase-orders/${purchaseOrderId}/receive`, request, {
-      headers: new HttpHeaders({ 'Idempotency-Key': randomId() }),
+      headers: new HttpHeaders({ 'Idempotency-Key': idempotencyKey }),
       context: this.silent(),
     });
   }

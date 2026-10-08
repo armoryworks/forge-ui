@@ -214,6 +214,79 @@ describe('AppReceiveComponent', () => {
     expect(success).not.toHaveBeenCalled();
   });
 
+  it('shows the first rule from a validation failure rather than its generic title', async () => {
+    const receive = await create();
+    receive.form.controls.lines.at(0).controls.quantity.setValue(20);
+    receive.submit();
+
+    http.expectOne('/api/v1/purchase-orders/7/receive').flush(
+      { title: 'Validation failed', errors: { PackingSlipNumber: ['Packing slip number must be 100 characters or fewer.'] } },
+      { status: 400, statusText: 'Bad Request' },
+    );
+
+    await vi.waitFor(() => expect(receive.error()).toBe('Packing slip number must be 100 characters or fewer.'));
+  });
+
+  it('retries the same receipt with the same idempotency key, and a changed receipt with a new one', async () => {
+    const receive = await create();
+    receive.form.controls.lines.at(0).controls.quantity.setValue(10);
+    receive.submit();
+
+    const first = http.expectOne('/api/v1/purchase-orders/7/receive');
+    const key = first.request.headers.get('Idempotency-Key');
+    first.error(new ProgressEvent('error'), { status: 0, statusText: 'Unknown Error' });
+    await vi.waitFor(() => expect(receive.error()).not.toBeNull());
+
+    receive.submit();
+    const retry = http.expectOne('/api/v1/purchase-orders/7/receive');
+    expect(retry.request.headers.get('Idempotency-Key')).toBe(key);
+    retry.error(new ProgressEvent('error'), { status: 0, statusText: 'Unknown Error' });
+    await vi.waitFor(() => expect(receive.canSubmit()).toBe(true));
+
+    receive.form.controls.lines.at(0).controls.quantity.setValue(12);
+    receive.submit();
+    const changed = http.expectOne('/api/v1/purchase-orders/7/receive');
+    expect(changed.request.headers.get('Idempotency-Key')).not.toBe(key);
+    changed.flush(null);
+    await vi.waitFor(() => expect(success).toHaveBeenCalled());
+    http.expectOne('/api/v1/purchase-orders/7').flush(purchaseOrder());
+  });
+
+  it('rebinds fresh line controls after a partial receipt so the next receipt posts what is on screen', async () => {
+    const receive = await create();
+    TestBed.tick();
+    const before = receive.form.controls.lines;
+    before.at(0).setValue({ quantity: 10, binId: 142, lot: 'HT-1' });
+    receive.onBinSelected(0, { id: 142, locationPath: 'Yard / Bay 9 / 142' });
+    receive.submit();
+
+    http.expectOne('/api/v1/purchase-orders/7/receive').flush(null);
+    await vi.waitFor(() => expect(success).toHaveBeenCalled());
+    picker.setSelected.mockClear();
+    http.expectOne('/api/v1/purchase-orders/7').flush(purchaseOrder({
+      lines: [line({ receivedQuantity: 25, remainingQuantity: 15 })],
+    }));
+    await vi.waitFor(() => expect(receive.loading()).toBe(false));
+    TestBed.tick();
+
+    const after = receive.form.controls.lines;
+    expect(after).not.toBe(before);
+    expect(receive.form.get('lines')).toBe(after);
+    expect(after.at(0).getRawValue()).toEqual({ quantity: null, binId: 5, lot: '' });
+    expect(receive.binLabels()).toEqual(['Dock / Rack A / 1']);
+    expect(picker.setSelected).toHaveBeenCalledWith(5, 'Dock / Rack A / 1');
+
+    after.at(0).controls.quantity.setValue(15);
+    expect(receive.canSubmit()).toBe(true);
+    receive.submit();
+
+    const second = http.expectOne('/api/v1/purchase-orders/7/receive');
+    expect(second.request.body.lines).toEqual([{ lineId: 1, quantity: 15, storageLocationId: 5, lotNumber: null }]);
+    second.flush(null);
+    await vi.waitFor(() => expect(success).toHaveBeenCalledTimes(2));
+    http.expectOne('/api/v1/purchase-orders/7').flush(purchaseOrder({ status: 'Received', lines: [] }));
+  });
+
   it('blocks a quantity above what is still due', async () => {
     const receive = await create();
     receive.form.controls.lines.at(0).controls.quantity.setValue(26);

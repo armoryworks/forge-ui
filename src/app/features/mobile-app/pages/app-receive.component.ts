@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal, untracked, viewChildren } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, Injector, afterNextRender, computed, effect, inject, signal, untracked, viewChildren } from '@angular/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -18,6 +18,7 @@ import { InstanceService } from '../../../shared/services/instance.service';
 import { MobileReceivingService } from '../../../shared/services/mobile-receiving.service';
 import { SharedIdentityService } from '../../../shared/services/shared-identity.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { randomId } from '../../../shared/utils/random-id';
 import { IdentityPromptComponent } from '../identity/identity-prompt.component';
 
 type LineForm = FormGroup<{
@@ -52,6 +53,9 @@ export class AppReceiveComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly injector = inject(Injector);
+
+  private pendingReceipt: { body: string; key: string } | null = null;
 
   protected readonly poId = toSignal(
     this.route.paramMap.pipe(map((p) => Number(p.get('id')))), { initialValue: 0 });
@@ -167,6 +171,7 @@ export class AppReceiveComponent {
       const po = await firstValueFrom(this.receiving.purchaseOrder(id));
       this.po.set(po);
       this.buildForm();
+      afterNextRender(() => this.syncBinPickers(this.binPickers()), { injector: this.injector });
     } catch (err) {
       this.failed.set(true);
       this.forbidden.set(err instanceof HttpErrorResponse && err.status === 403);
@@ -176,15 +181,13 @@ export class AppReceiveComponent {
   }
 
   private buildForm(): void {
-    const array = this.form.controls.lines;
-    array.clear({ emitEvent: false });
-    for (const line of this.lines()) {
-      array.push(new FormGroup({
-        quantity: new FormControl<number | null>(null, [Validators.min(0), Validators.max(line.remainingQuantity)]),
-        binId: new FormControl<number | null>(line.partId ? line.partDefaultBinId : null),
-        lot: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(100)] }),
-      }), { emitEvent: false });
-    }
+    const groups: LineForm[] = this.lines().map((line) => new FormGroup({
+      quantity: new FormControl<number | null>(null, [Validators.min(0), Validators.max(line.remainingQuantity)]),
+      binId: new FormControl<number | null>(line.partId ? line.partDefaultBinId : null),
+      lot: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(100)] }),
+    }));
+    this.form.setControl('lines', new FormArray(groups), { emitEvent: false });
+    this.pendingReceipt = null;
     this.binLabels.set(this.lines().map((line) => (line.partId ? line.partDefaultBinPath : null)));
     this.form.controls.packingSlip.setValue('', { emitEvent: false });
     this.form.updateValueAndValidity();
@@ -230,10 +233,14 @@ export class AppReceiveComponent {
     if (!po || this.busy()) return;
     const request = this.buildRequest();
     if (request.lines.length === 0) return;
+    const body = JSON.stringify({ poId: po.id, request });
+    if (this.pendingReceipt?.body !== body) this.pendingReceipt = { body, key: randomId() };
+    const key = this.pendingReceipt.key;
     this.busy.set(true);
     this.error.set(null);
     try {
-      await firstValueFrom(this.receiving.receive(po.id, request));
+      await firstValueFrom(this.receiving.receive(po.id, request, key));
+      this.pendingReceipt = null;
       this.snackbar.success(this.translate.instant('mobileReceive.received', { number: po.poNumber }));
       await this.load();
     } catch (err) {
@@ -254,6 +261,10 @@ export class AppReceiveComponent {
     if (Array.isArray(problem.errors)) {
       const first = problem.errors[0] as { message?: unknown } | undefined;
       if (typeof first?.message === 'string' && first.message) return first.message;
+    } else if (problem.errors && typeof problem.errors === 'object') {
+      const firstField = Object.values(problem.errors)[0];
+      const message = Array.isArray(firstField) ? firstField[0] : firstField;
+      if (typeof message === 'string' && message) return message;
     }
     if (typeof problem.message === 'string' && problem.message) return problem.message;
     if (typeof problem.title === 'string' && problem.title) return problem.title;
