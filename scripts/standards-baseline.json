@@ -77,7 +77,7 @@
   },
   "raw-form-controls-in-features": {
     "src/app/features/account/components/compliance-form-renderer/compliance-form-renderer.component.html": 19,
-    "src/app/features/admin/admin.component.html": 3,
+    "src/app/features/admin/admin.component.html": 1,
     "src/app/features/admin/components/compliance-template-dialog/compliance-template-dialog.component.html": 1,
     "src/app/features/admin/components/edi-part-number-map-dialog/edi-part-number-map-dialog.component.html": 2,
     "src/app/features/admin/components/track-type-dialog.component.html": 3,

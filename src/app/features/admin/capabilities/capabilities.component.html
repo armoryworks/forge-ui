@@ -79,6 +79,26 @@
         }
       </div>
 
+      @if (settingsResults().length > 0) {
+        <ul class="settings-results" role="list" data-testid="capability-settings-results">
+          @for (topic of settingsResults(); track topic.highlight) {
+            <li role="listitem">
+              <a class="settings-result"
+                [routerLink]="['/admin/settings']"
+                [queryParams]="{ highlight: topic.highlight }"
+                [attr.data-testid]="'capability-settings-result-' + topic.highlight">
+                <span class="material-icons-outlined settings-result__icon">tune</span>
+                <span class="settings-result__tag">{{ 'capabilityAreas.settingsSearch.tag' | translate }}</span>
+                <span class="settings-result__text">
+                  <strong>{{ topic.titleKey | translate }}</strong>: {{ topic.descKey | translate }}
+                </span>
+                <span class="material-icons-outlined settings-result__chevron">chevron_right</span>
+              </a>
+            </li>
+          }
+        </ul>
+      }
+
       @if (filtered().length === 0) {
         <div class="capabilities-page__empty">
           <span class="material-icons-outlined">search_off</span>
@@ -93,11 +113,14 @@
                 type="button"
                 (click)="toggleAreaCollapse(group.area)"
                 [attr.aria-expanded]="!isAreaCollapsed(group.area)"
-                [attr.aria-label]="'Toggle ' + group.area + ' section'">
+                [attr.aria-label]="'Toggle ' + group.label + ' section'">
                 <span class="material-icons-outlined capability-area__chevron">
                   {{ isAreaCollapsed(group.area) ? 'chevron_right' : 'expand_more' }}
                 </span>
-                <span class="capability-area__name">{{ group.area }}</span>
+                <span class="capability-area__name">{{ group.label }}</span>
+                @if (consultantModeEnabled()) {
+                  <code class="capability-area__code" data-testid="capability-area-code">{{ group.area }}</code>
+                }
                 <span class="capability-area__count">{{ group.enabledCount }} / {{ group.totalCount }}</span>
               </button>
               @if (!isAreaCollapsed(group.area)) {

@@ -420,6 +420,17 @@
   }
 }
 
+.settings-section--highlight {
+  outline: $border-width-thin solid var(--primary);
+  outline-offset: $sp-sm;
+  background: var(--primary-light);
+}
+
+.settings-item__error {
+  font-size: var(--font-size-xs);
+  color: var(--error);
+}
+
 .settings-item--highlight {
   border-color: var(--primary);
   background: var(--primary-light);
@@ -440,20 +451,6 @@
       background: var(--primary-light);
     }
   }
-}
-
-.settings-input,
-.settings-select {
-  width: 100%;
-  padding: $sp-xs $sp-sm;
-  border: $border-width-thin solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  font-family: $font-family-primary;
-  font-size: var(--font-size-sm);
-  border-radius: $border-radius;
-  height: var(--input-height);
-  &:focus { outline: none; border-color: var(--primary); }
 }
 
 // ─── Logo Upload ───

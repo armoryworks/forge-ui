@@ -13,6 +13,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { CapabilityService } from '../../../shared/services/capability.service';
 import { CapabilityInstallStateService } from '../../../shared/services/capability-install-state.service';
@@ -26,6 +27,8 @@ import { ToggleComponent } from '../../../shared/components/toggle/toggle.compon
 import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
 import { SpacerDirective } from '../../../shared/directives/spacer.directive';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
+import { CAPABILITY_AREA_LABELS } from '../models/capability-area-labels.const';
+import { matchSettingsTopics } from '../models/settings-search-topics.const';
 
 interface CapabilityViolation {
   code: string;
@@ -38,6 +41,7 @@ interface CapabilityViolation {
 
 interface AreaGroup {
   area: string;
+  label: string;
   totalCount: number;
   enabledCount: number;
   capabilities: CapabilityDescriptorEntry[];
@@ -75,6 +79,7 @@ interface AreaGroup {
     PageLayoutComponent,
     SpacerDirective,
     LoadingBlockDirective,
+    TranslatePipe,
   ],
   templateUrl: './capabilities.component.html',
   styleUrl: './capabilities.component.scss',
@@ -86,6 +91,7 @@ export class CapabilitiesComponent implements OnInit {
   private readonly installState = inject(CapabilityInstallStateService);
   private readonly snackbar = inject(SnackbarService);
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = this.capabilityService.loading;
   protected readonly capabilities = this.capabilityService.capabilities;
@@ -110,18 +116,29 @@ export class CapabilitiesComponent implements OnInit {
     initialValue: false,
   });
 
+  private readonly areaLabelKeys = new Map(CAPABILITY_AREA_LABELS.map((l) => [l.area, l.labelKey]));
+  private readonly areaTranslations = toSignal(
+    this.translate.stream(CAPABILITY_AREA_LABELS.map((l) => l.labelKey)),
+    { initialValue: {} as Record<string, string> },
+  );
+
   // ─── Derived state ──────────────────────────────────────────────────────
 
   protected readonly enabledCount = computed(() => this.capabilities().filter((c) => c.enabled).length);
 
-  /** Distinct area codes for the filter dropdown (sorted asc). */
+  /** Distinct areas for the filter dropdown, by name. */
   protected readonly areaOptions = computed<SelectOption[]>(() => {
-    const areas = Array.from(new Set(this.capabilities().map((c) => c.area))).sort();
+    const areas = Array.from(new Set(this.capabilities().map((c) => c.area)))
+      .map((a) => ({ value: a, label: this.areaLabel(a) }))
+      .sort((a, b) => a.label.localeCompare(b.label));
     return [
-      { value: '', label: 'All areas' },
-      ...areas.map((a) => ({ value: a, label: a })),
+      { value: '', label: this.translate.instant('capabilityAreas.allAreas') },
+      ...areas,
     ];
   });
+
+  /** Admin > Settings sections whose topic matches the search text. */
+  protected readonly settingsResults = computed(() => matchSettingsTopics(this.searchSignal() ?? ''));
 
   /** Filtered capability list — applies search / area / enabled-only. */
   protected readonly filtered = computed<CapabilityDescriptorEntry[]>(() => {
@@ -149,16 +166,17 @@ export class CapabilitiesComponent implements OnInit {
       groups.set(cap.area, list);
     }
     return Array.from(groups.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
       .map(([area, caps]) => {
         const sorted = [...caps].sort((a, b) => a.name.localeCompare(b.name));
         return {
           area,
+          label: this.areaLabel(area),
           capabilities: sorted,
           totalCount: caps.length,
           enabledCount: caps.filter((c) => c.enabled).length,
         } satisfies AreaGroup;
-      });
+      })
+      .sort((a, b) => a.label.localeCompare(b.label));
   });
 
   /** Show the onboarding banner when fresh-install state hasn't been confirmed. */
@@ -188,6 +206,14 @@ export class CapabilitiesComponent implements OnInit {
   /** Phase 4 Phase-G — navigate to the preset browser from the onboarding banner. */
   protected browsePresets(): void {
     this.router.navigate(['/admin/presets']);
+  }
+
+  /** Display name for an area code; unmapped codes show as-is. */
+  protected areaLabel(area: string): string {
+    const key = this.areaLabelKeys.get(area);
+    if (!key) return area;
+    const translated = this.areaTranslations()?.[key];
+    return translated && translated !== key ? translated : area;
   }
 
   protected isAreaCollapsed(area: string): boolean {

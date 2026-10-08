@@ -15,6 +15,8 @@ import { ReferenceDataGroup } from './models/reference-data-group.model';
 import { TerminologyEntryItem } from './models/terminology-entry-item.model';
 import { NumberingSettingRow } from './models/numbering-setting-row.model';
 import { NUMBERING_SETTING_LABELS } from './models/numbering-setting-labels.const';
+import { SystemSettingDefinition } from './models/system-setting-definition.model';
+import { SYSTEM_SETTING_DEFAULTS } from './models/system-setting-defaults.const';
 import { AdminSettingsService } from './settings/services/admin-settings.service';
 import { TrackType } from '../../shared/models/track-type.model';
 import { TrackTypeDialogComponent } from './components/track-type-dialog.component';
@@ -297,16 +299,27 @@ export class AdminComponent implements OnInit {
     },
   ]);
 
-  protected readonly settingDefinitions: { key: string; label: string; description: string; type: 'text' | 'number' | 'boolean' }[] = [
-    { key: 'app.name', label: 'Application Name', description: 'Name displayed in the header and browser tab', type: 'text' },
-    { key: 'planning.cycle_duration_days', label: 'Planning Cycle (Days)', description: 'Default planning cycle length in days', type: 'number' },
-    { key: 'planning.nudge_hour', label: 'Daily Nudge Hour (24h)', description: 'Hour of day for daily planning nudge (0-23)', type: 'number' },
-    { key: 'files.max_upload_size_mb', label: 'Max Upload Size (MB)', description: 'Maximum file upload size in megabytes', type: 'number' },
-    { key: 'jobs.default_priority', label: 'Default Job Priority', description: 'Default priority for new jobs (Low, Normal, High, Urgent)', type: 'text' },
-    { key: 'jobs.auto_archive_days', label: 'Auto-Archive After (Days)', description: 'Days after completion before auto-archiving jobs (0 = disabled)', type: 'number' },
-    { key: 'notifications.email_enabled', label: 'Email Notifications', description: 'Enable email notifications for mentions and assignments', type: 'boolean' },
-    { key: 'theme.primary_color', label: 'Primary Brand Color', description: 'Primary theme color (hex, e.g. #0d9488)', type: 'text' },
-    { key: 'theme.accent_color', label: 'Accent Brand Color', description: 'Accent theme color (hex, e.g. #7c3aed)', type: 'text' },
+  protected readonly settingDefinitions: SystemSettingDefinition[] = [
+    { key: 'app.name', labelKey: 'capabilityAreas.systemSettings.appName', descKey: 'capabilityAreas.systemSettings.appNameDesc', type: 'text' },
+    { key: 'planning.cycle_duration_days', labelKey: 'capabilityAreas.systemSettings.cycleDays', descKey: 'capabilityAreas.systemSettings.cycleDaysDesc', type: 'number' },
+    { key: 'planning.nudge_hour', labelKey: 'capabilityAreas.systemSettings.nudgeHour', descKey: 'capabilityAreas.systemSettings.nudgeHourDesc', type: 'number' },
+    { key: 'files.max_upload_size_mb', labelKey: 'capabilityAreas.systemSettings.maxUpload', descKey: 'capabilityAreas.systemSettings.maxUploadDesc', type: 'number' },
+    { key: 'jobs.default_priority', labelKey: 'capabilityAreas.systemSettings.defaultPriority', descKey: 'capabilityAreas.systemSettings.defaultPriorityDesc', type: 'priority' },
+    { key: 'jobs.auto_archive_days', labelKey: 'capabilityAreas.systemSettings.autoArchive', descKey: 'capabilityAreas.systemSettings.autoArchiveDesc', type: 'number' },
+    { key: 'notifications.email_enabled', labelKey: 'capabilityAreas.systemSettings.emailNotifications', descKey: 'capabilityAreas.systemSettings.emailNotificationsDesc', type: 'boolean' },
+    { key: 'theme.primary_color', labelKey: 'capabilityAreas.systemSettings.primaryColor', descKey: 'capabilityAreas.systemSettings.primaryColorDesc', type: 'color' },
+    { key: 'theme.accent_color', labelKey: 'capabilityAreas.systemSettings.accentColor', descKey: 'capabilityAreas.systemSettings.accentColorDesc', type: 'color' },
+  ];
+  protected readonly settingDefaults = SYSTEM_SETTING_DEFAULTS;
+  protected readonly settingControls: Record<string, FormControl<string>> = Object.fromEntries(
+    this.settingDefinitions.map(def => [def.key, new FormControl('', { nonNullable: true, validators: AdminComponent.settingValidators(def) })]),
+  );
+  protected readonly invalidSettings = signal<ReadonlySet<string>>(new Set());
+  protected readonly priorityOptions: SelectOption[] = ['Low', 'Normal', 'High', 'Urgent']
+    .map(value => ({ value, label: this.translate.instant(`priority.${value.toLowerCase()}`) }));
+  protected readonly booleanOptions: SelectOption[] = [
+    { value: 'true', label: this.translate.instant('common.enabled') },
+    { value: 'false', label: this.translate.instant('common.disabled') },
   ];
 
   protected readonly roleOptions = signal<SelectOption[]>([]);
@@ -340,6 +353,11 @@ export class AdminComponent implements OnInit {
   constructor() {
     // Load roles from API (used by user form select + column filter)
     this.refDataService.getRolesAsOptions().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(opts => this.roleOptions.set(opts));
+
+    for (const def of this.settingDefinitions) {
+      this.settingControls[def.key].valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(value => this.onSettingChange(def.key, value));
+    }
 
     effect(() => {
       const tab = this.activeTab();
@@ -825,8 +843,7 @@ export class AdminComponent implements OnInit {
     this.loading.set(true);
     this.adminService.getSystemSettings().subscribe({
       next: (settings) => {
-        this.systemSettings.set(settings);
-        this.settingsEdits.set(new Map(settings.map(s => [s.key, s.value])));
+        this.applySystemSettings(settings);
         this.loading.set(false);
       },
       error: () => { this.error.set(this.translate.instant('admin.loadSettingsFailed')); this.loading.set(false); },
@@ -881,16 +898,43 @@ export class AdminComponent implements OnInit {
     }, { injector: this.injector });
   }
 
+  private static settingValidators(def: SystemSettingDefinition) {
+    if (def.type === 'color') return [Validators.pattern(/^#[0-9a-fA-F]{6}$/)];
+    if (def.type === 'number') return [Validators.pattern(/^\d+$/)];
+    return [];
+  }
+
+  private applySystemSettings(settings: SystemSetting[]): void {
+    this.systemSettings.set(settings);
+    this.settingsEdits.set(new Map(settings.map(s => [s.key, s.value])));
+    const values = new Map(settings.map(s => [s.key, s.value]));
+    for (const def of this.settingDefinitions) {
+      this.settingControls[def.key].setValue(values.get(def.key) ?? '', { emitEvent: false });
+    }
+    this.refreshInvalidSettings();
+  }
+
+  private refreshInvalidSettings(): void {
+    this.invalidSettings.set(new Set(
+      this.settingDefinitions.filter(def => this.settingControls[def.key].invalid).map(def => def.key),
+    ));
+  }
+
   protected onSettingChange(key: string, value: string): void {
     this.settingsEdits.update(map => {
       const updated = new Map(map);
       updated.set(key, value);
       return updated;
     });
+    this.refreshInvalidSettings();
   }
 
-  protected getSettingValue(key: string): string {
-    return this.settingsEdits().get(key) ?? '';
+  protected settingDefaultLabel(def: SystemSettingDefinition): string {
+    const value = this.settingDefaults[def.key];
+    if (value === undefined) return '';
+    if (def.type === 'boolean') return this.translate.instant(value === 'true' ? 'common.enabled' : 'common.disabled');
+    if (def.type === 'priority') return this.translate.instant(`priority.${value.toLowerCase()}`);
+    return value;
   }
 
   protected hasSettingsChanges(): boolean {
@@ -906,20 +950,20 @@ export class AdminComponent implements OnInit {
   }
 
   protected saveSettings(): void {
+    if (this.invalidSettings().size > 0) return;
     const edits = this.settingsEdits();
     const settings = this.settingDefinitions
       .filter(def => edits.has(def.key))
       .map(def => ({
         key: def.key,
         value: edits.get(def.key)!,
-        description: def.description,
+        description: this.translate.instant(def.descKey),
       }));
 
     this.saving.set(true);
     this.adminService.updateSystemSettings(settings).subscribe({
       next: (updated) => {
-        this.systemSettings.set(updated);
-        this.settingsEdits.set(new Map(updated.map(s => [s.key, s.value])));
+        this.applySystemSettings(updated);
         this.saving.set(false);
         this.snackbar.success(this.translate.instant('admin.settingsSaved'));
 

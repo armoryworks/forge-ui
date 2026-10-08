@@ -1,0 +1,18 @@
+export const CAPABILITY_AREA_LABELS: { area: string; labelKey: string }[] = [
+  { area: 'ACCT', labelKey: 'capabilityAreas.areas.accounting' },
+  { area: 'O2C', labelKey: 'capabilityAreas.areas.sales' },
+  { area: 'P2P', labelKey: 'capabilityAreas.areas.purchasing' },
+  { area: 'MFG', labelKey: 'capabilityAreas.areas.manufacturing' },
+  { area: 'PLAN', labelKey: 'capabilityAreas.areas.planning' },
+  { area: 'QC', labelKey: 'capabilityAreas.areas.quality' },
+  { area: 'INV', labelKey: 'capabilityAreas.areas.inventory' },
+  { area: 'MD', labelKey: 'capabilityAreas.areas.masterData' },
+  { area: 'HR', labelKey: 'capabilityAreas.areas.people' },
+  { area: 'EXT', labelKey: 'capabilityAreas.areas.integrations' },
+  { area: 'IDEN', labelKey: 'capabilityAreas.areas.identity' },
+  { area: 'CROSS', labelKey: 'capabilityAreas.areas.shared' },
+  { area: 'MAINT', labelKey: 'capabilityAreas.areas.maintenance' },
+  { area: 'MOBILE', labelKey: 'capabilityAreas.areas.mobile' },
+  { area: 'PS', labelKey: 'capabilityAreas.areas.professionalServices' },
+  { area: 'RPT', labelKey: 'capabilityAreas.areas.reports' },
+];

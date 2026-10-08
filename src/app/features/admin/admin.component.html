@@ -235,7 +235,9 @@
         <div class="settings-scroll">
 
         <!-- Company Profile -->
-        <div class="settings-section">
+        <div class="settings-section"
+          [attr.data-setting-key]="'company-profile'"
+          [class.settings-section--highlight]="highlightedSetting() === 'company-profile'">
           <div class="settings-section__header">
             <h3 class="settings-section__title">
               <span class="material-icons-outlined">business</span>
@@ -263,7 +265,9 @@
         </div>
 
         <!-- Company Locations -->
-        <div class="settings-section">
+        <div class="settings-section"
+          [attr.data-setting-key]="'company-locations'"
+          [class.settings-section--highlight]="highlightedSetting() === 'company-locations'">
           <div class="settings-section__header">
             <h3 class="settings-section__title">
               <span class="material-icons-outlined">location_on</span>
@@ -306,7 +310,9 @@
         </div>
 
         <!-- Pay Period Locking -->
-        <div class="settings-section">
+        <div class="settings-section"
+          [attr.data-setting-key]="'pay-period'"
+          [class.settings-section--highlight]="highlightedSetting() === 'pay-period'">
           <div class="settings-section__header">
             <h3 class="settings-section__title">
               <span class="material-icons-outlined">lock_clock</span>
@@ -400,7 +406,9 @@
           }
         </div>
 
-        <div class="settings-section" data-testid="numbering-settings">
+        <div class="settings-section" data-testid="numbering-settings"
+          [attr.data-setting-key]="'numbering'"
+          [class.settings-section--highlight]="highlightedSetting() === 'numbering'">
           <div class="settings-section__header">
             <h3 class="settings-section__title">
               <span class="material-icons-outlined">pin</span>
@@ -432,7 +440,9 @@
         </div>
 
         <!-- Logo Upload -->
-        <div class="settings-item settings-item--logo">
+        <div class="settings-item settings-item--logo"
+          [attr.data-setting-key]="'branding'"
+          [class.settings-item--highlight]="highlightedSetting() === 'branding'">
           <div class="settings-item__header">
             <label class="settings-item__label" for="logo-upload-input">{{ 'admin.companyLogo' | translate }}</label>
             <span class="settings-item__description">{{ 'admin.logoDescription' | translate }}</span>
@@ -492,24 +502,44 @@
               [attr.data-setting-key]="def.key"
               [class.settings-item--highlight]="highlightedSetting() === def.key">
               <div class="settings-item__header">
-                <label class="settings-item__label" [for]="'setting-' + def.key">{{ def.label }}</label>
-                <span class="settings-item__description">{{ def.description }}</span>
+                <span class="settings-item__label">{{ def.labelKey | translate }}</span>
+                <span class="settings-item__description">{{ def.descKey | translate }}</span>
+                @if (settingDefaultLabel(def); as defaultLabel) {
+                  <span class="settings-item__description" [attr.data-testid]="'setting-default-' + def.key">
+                    {{ 'capabilityAreas.systemSettings.defaultValue' | translate: { value: defaultLabel } }}
+                  </span>
+                }
+                @if (invalidSettings().has(def.key)) {
+                  <span class="settings-item__error" [attr.data-testid]="'setting-error-' + def.key">
+                    {{ (def.type === 'color' ? 'capabilityAreas.systemSettings.invalidColor' : 'capabilityAreas.systemSettings.invalidNumber') | translate }}
+                  </span>
+                }
               </div>
               <div class="settings-item__control">
-                @if (def.type === 'boolean') {
-                  <select class="settings-select"
-                    [id]="'setting-' + def.key"
-                    [value]="getSettingValue(def.key) || 'false'"
-                    (change)="onSettingChange(def.key, $any($event.target).value)">
-                    <option value="true">{{ 'common.enabled' | translate }}</option>
-                    <option value="false">{{ 'common.disabled' | translate }}</option>
-                  </select>
-                } @else {
-                  <input class="settings-input"
-                    [id]="'setting-' + def.key"
-                    [type]="def.type === 'number' ? 'number' : 'text'"
-                    [value]="getSettingValue(def.key)"
-                    (input)="onSettingChange(def.key, $any($event.target).value)" />
+                @switch (def.type) {
+                  @case ('boolean') {
+                    <app-select
+                      [label]="def.labelKey | translate"
+                      [options]="booleanOptions"
+                      [placeholder]="settingDefaultLabel(def)"
+                      [formControl]="settingControls[def.key]"
+                      [attr.data-testid]="'setting-' + def.key" />
+                  }
+                  @case ('priority') {
+                    <app-select
+                      [label]="def.labelKey | translate"
+                      [options]="priorityOptions"
+                      [placeholder]="settingDefaultLabel(def)"
+                      [formControl]="settingControls[def.key]"
+                      [attr.data-testid]="'setting-' + def.key" />
+                  }
+                  @default {
+                    <app-input
+                      [label]="def.labelKey | translate"
+                      [placeholder]="settingDefaults[def.key] ?? ''"
+                      [formControl]="settingControls[def.key]"
+                      [attr.data-testid]="'setting-' + def.key" />
+                  }
                 }
               </div>
             </div>
@@ -518,7 +548,7 @@
         </div>
 
         <div class="settings-footer">
-          <button class="action-btn action-btn--primary" [disabled]="saving() || !hasSettingsChanges()" (click)="saveSettings()">
+          <button class="action-btn action-btn--primary" [disabled]="saving() || !hasSettingsChanges() || invalidSettings().size > 0" (click)="saveSettings()">
             <span class="material-icons-outlined">save</span>
             {{ 'common.saveChanges' | translate }}
           </button>
