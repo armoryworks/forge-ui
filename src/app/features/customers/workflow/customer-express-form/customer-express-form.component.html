@@ -6,7 +6,7 @@
 
   <form [formGroup]="form" class="customer-workflow-step__form">
     <app-input
-      [label]="'customers.workflow.identity.nameLabel' | translate"
+      [label]="'guidedSetup.customerIdentity.nameLabel' | translate"
       formControlName="name"
       [required]="true"
       [maxlength]="200"
@@ -19,7 +19,7 @@
         data-testid="customer-number-workflow" />
     }
     <app-input
-      [label]="'customers.workflow.identity.companyNameLabel' | translate"
+      [label]="'guidedSetup.customerIdentity.displayNameLabel' | translate"
       formControlName="companyName"
       [maxlength]="200"
       data-testid="customer-express-company-name" />

@@ -1,4 +1,5 @@
 @use 'styles/variables' as *;
+@use 'styles/mixins' as *;
 
 .vendor-workflow-step {
   display: flex;
@@ -6,10 +7,57 @@
   align-items: center;
   gap: $sp-lg;
   padding: $sp-lg;
+  position: relative;
 
   &__header { display: flex; flex-direction: column; gap: $sp-xs; width: 100%; max-width: 720px; }
   &__title  { margin: 0; font-size: $font-size-lg; color: var(--text); }
   &__hint   { margin: 0; font-size: $font-size-sm; color: var(--text-secondary); }
+  &__form   { display: flex; flex-direction: column; gap: $sp-md; width: 100%; max-width: 720px; }
+
+  &__row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $sp-md;
+
+    @include mobile {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__actions { display: flex; justify-content: flex-end; }
+
+  &__none {
+    width: 100%;
+    max-width: 720px;
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+  }
+
+  &__items {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 720px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: $border-width-thin solid var(--border);
+  }
+
+  &__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: $sp-md;
+    padding: $sp-sm $sp-md;
+    font-size: $font-size-sm;
+
+    & + & { border-top: $border-width-thin solid var(--border); }
+  }
+
+  &__item-part { flex: 1 1 auto; color: var(--text); }
+  &__item-meta { color: var(--text-secondary); }
 
   &__empty {
     display: flex;

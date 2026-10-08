@@ -128,26 +128,22 @@ export class WorkflowComponent {
 
   /**
    * Highest step index the user has reached during this run instance.
-   * Pointer-based fallback for completion: a step with NO declared
-   * completionGates counts as complete once the user has visited
-   * past it (i.e., its index is < maxReachedIndex).
-   *
-   * Initialized + updated via the effect below from the run's
-   * currentStepId. Resets on remount (component lifecycle, page refresh)
-   * — the server doesn't track "highest reached" today, so fresh-mount
-   * behavior is "everything before the server's currentStepId is past".
-   * Good enough for the UX bug this fixes: when the user navigates
-   * backward inside a session, gateless steps stay marked complete
-   * instead of flipping back to unvisited.
-   *
-   * Proper fix is option A (predicate-based gates declared on every
-   * step in the workflow definition); this fallback handles steps
-   * that don't yet have meaningful predicates.
+   * Monotonic, so back-navigation inside a session keeps earlier steps
+   * marked complete. Resets on remount (component lifecycle, page
+   * refresh) — the server doesn't track "highest reached" today, so
+   * fresh-mount behavior is "everything up to the server's currentStepId
+   * has been visited".
    */
   private readonly maxReachedIndex = signal(0);
 
+  /**
+   * Highest visited index including the current pointer. Steps at or
+   * below it have been visited; steps strictly below it have been left
+   * behind.
+   */
+  private readonly reachedIndex = computed(() => Math.max(this.maxReachedIndex(), this.currentStepIndex()));
+
   constructor() {
-    // Bump maxReachedIndex whenever currentStepIndex advances.
     effect(() => {
       const current = this.currentStepIndex();
       if (current > this.maxReachedIndex()) {
@@ -157,54 +153,61 @@ export class WorkflowComponent {
   }
 
   /**
-   * Per-step completion. Two layers, evaluated per step:
-   *   1. PREDICATE-based — if `completionGates` are declared and the
-   *      entity is loaded, evaluate them. All must pass → complete.
-   *      All-pass takes precedence over the pointer-based fallback.
-   *   2. POINTER-based fallback — for steps with empty
-   *      `completionGates` (which is most of the part workflow today),
-   *      complete iff the user has navigated past it (idx < maxReached).
-   *      Handles back-navigation correctly because `maxReachedIndex` is
-   *      monotonic.
+   * Per-step predicate outcome for steps that declare `completionGates`
+   * (steps without gates are absent). Non-applicable validators count as
+   * satisfied, mirroring the server's EntityReadinessService so the rail
+   * matches the server's missing-validators answer.
+   */
+  private readonly gatesPassedMap = computed<Map<string, boolean>>(() => {
+    const def = this.definition();
+    const entity = this.entity();
+    const out = new Map<string, boolean>();
+    if (!def || !entity) return out;
+    const validatorsById = new Map<string, EntityValidator>();
+    for (const v of this.validators()) validatorsById.set(v.validatorId, v);
+    for (const step of def.steps) {
+      if (step.completionGates.length === 0) continue;
+      out.set(step.id, step.completionGates.every(gateId => {
+        const v = validatorsById.get(gateId);
+        if (!v) return false;
+        if (v.applicabilityPredicate && !this.evaluator.evaluateJson(v.applicabilityPredicate, entity)) {
+          return true;
+        }
+        return this.evaluator.evaluateJson(v.predicate, entity);
+      }));
+    }
+    return out;
+  });
+
+  /**
+   * Per-step completion shown on the rail. A step the user has moved past
+   * is complete. A step whose gates pass is complete once the user has
+   * visited it, so a trailing step that re-asserts an earlier gate (Review)
+   * is not ticked before the user gets there.
    *
    * Evaluated inline (no service writes from a computed — that's NG0600).
    */
   protected readonly completionMap = computed<Map<string, boolean>>(() => {
-    const def = this.definition();
-    const entity = this.entity();
-    const maxReached = this.maxReachedIndex();
     const out = new Map<string, boolean>();
-    if (!def) return out;
-    const validatorsById = new Map<string, EntityValidator>();
-    for (const v of this.validators()) validatorsById.set(v.validatorId, v);
-    def.steps.forEach((step, idx) => {
-      // Layer 1: predicate-based.
-      if (step.completionGates.length > 0 && entity) {
-        let allPass = true;
-        for (const gateId of step.completionGates) {
-          const v = validatorsById.get(gateId);
-          if (!v) { allPass = false; break; }
-          // Per-record applicability: when present, evaluate first.
-          // Non-applicable validators are treated as satisfied — there's
-          // nothing for them to gate on for this record. Mirrors the
-          // server's EntityReadinessService behavior so the rail
-          // matches the server's missing-validators answer.
-          if (v.applicabilityPredicate
-              && !this.evaluator.evaluateJson(v.applicabilityPredicate, entity)) {
-            continue;
-          }
-          if (!this.evaluator.evaluateJson(v.predicate, entity)) {
-            allPass = false;
-            break;
-          }
-        }
-        if (allPass) {
-          out.set(step.id, true);
-          return;
-        }
-      }
-      // Layer 2: pointer-based fallback.
-      out.set(step.id, idx < maxReached);
+    const passed = this.gatesPassedMap();
+    const reached = this.reachedIndex();
+    this.steps().forEach((step, idx) => {
+      out.set(step.id, idx < reached || (idx <= reached && passed.get(step.id) === true));
+    });
+    return out;
+  });
+
+  /**
+   * Whether a step no longer holds up the steps after it: its gates pass,
+   * or the user has already moved past it. Drives rail clickability, which
+   * may unlock a future step before it has been visited.
+   */
+  private readonly satisfiedMap = computed<Map<string, boolean>>(() => {
+    const out = new Map<string, boolean>();
+    const passed = this.gatesPassedMap();
+    const reached = this.reachedIndex();
+    this.steps().forEach((step, idx) => {
+      out.set(step.id, idx < reached || passed.get(step.id) === true);
     });
     return out;
   });
@@ -349,9 +352,7 @@ export class WorkflowComponent {
     const idx = this.steps().findIndex(s => s.id === step.id);
     const currentIdx = this.currentStepIndex();
     if (idx <= currentIdx) return true;
-    // Future steps: locked unless all preceding required steps' gates pass
-    // (rare — typically only true after a jump-back from a later step).
-    const map = this.completionMap();
+    const map = this.satisfiedMap();
     for (let i = 0; i < idx; i++) {
       const s = this.steps()[i];
       if (!s.required) continue;

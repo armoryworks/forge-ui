@@ -1,11 +1,77 @@
-<section class="vendor-workflow-step" data-testid="vendor-supply-items-step">
+<section class="vendor-workflow-step" [appLoadingBlock]="adding()" data-testid="vendor-supply-items-step">
   <header class="vendor-workflow-step__header">
     <h2 class="vendor-workflow-step__title">{{ 'vendors.workflow.supplyItems.title' | translate }}</h2>
     <p class="vendor-workflow-step__hint">{{ 'vendors.workflow.supplyItems.hint' | translate }}</p>
   </header>
 
-  <div class="vendor-workflow-step__empty">
-    <span class="material-icons-outlined">inventory_2</span>
-    <p>{{ 'vendors.workflow.supplyItems.followUpMessage' | translate }}</p>
-  </div>
+  @if (vendorId() === null) {
+    <div class="vendor-workflow-step__empty" data-testid="vendor-supply-items-no-vendor">
+      <span class="material-icons-outlined">inventory_2</span>
+      <p>{{ 'guidedSetup.supplyItems.saveIdentityFirst' | translate }}</p>
+    </div>
+  } @else {
+    <form [formGroup]="form" class="vendor-workflow-step__form" (ngSubmit)="addItem()">
+      <app-entity-picker
+        [label]="'guidedSetup.supplyItems.partLabel' | translate"
+        [placeholder]="'parts.searchByPartNumber' | translate"
+        entityType="parts"
+        displayField="partNumber"
+        secondaryDisplayField="name"
+        formControlName="partId"
+        data-testid="vendor-supply-item-part" />
+      <div class="vendor-workflow-step__row">
+        <app-input
+          [label]="'guidedSetup.supplyItems.vendorPartNumberLabel' | translate"
+          formControlName="vendorPartNumber"
+          [maxlength]="100"
+          data-testid="vendor-supply-item-vendor-pn" />
+        <app-currency-input
+          [label]="'guidedSetup.supplyItems.unitPriceLabel' | translate"
+          formControlName="unitPrice"
+          data-testid="vendor-supply-item-unit-price" />
+        <app-input
+          [label]="'guidedSetup.supplyItems.leadTimeDaysLabel' | translate"
+          type="number"
+          [min]="0"
+          formControlName="leadTimeDays"
+          data-testid="vendor-supply-item-lead-time" />
+      </div>
+      <div class="vendor-workflow-step__actions">
+        <button
+          type="submit"
+          class="action-btn action-btn--create"
+          [disabled]="!canAdd()"
+          data-testid="vendor-supply-item-add">
+          <span class="material-icons-outlined">add</span>
+          {{ 'guidedSetup.supplyItems.add' | translate }}
+        </button>
+      </div>
+    </form>
+
+    @if (items().length === 0) {
+      <p class="vendor-workflow-step__none" data-testid="vendor-supply-items-empty">
+        {{ 'guidedSetup.supplyItems.empty' | translate }}
+      </p>
+    } @else {
+      <ul class="vendor-workflow-step__items" data-testid="vendor-supply-items-list">
+        @for (item of items(); track item.id) {
+          <li class="vendor-workflow-step__item">
+            <span class="vendor-workflow-step__item-part">{{ item.partNumber }} — {{ item.partName }}</span>
+            @if (item.vendorPartNumber) {
+              <span class="vendor-workflow-step__item-meta">{{ item.vendorPartNumber }}</span>
+            }
+            @let price = unitPrice(item);
+            @if (price !== null) {
+              <span class="vendor-workflow-step__item-meta">{{ price | currency: item.currency }}</span>
+            }
+            @if (item.leadTimeDays !== null) {
+              <span class="vendor-workflow-step__item-meta">
+                {{ 'guidedSetup.supplyItems.leadTimeDaysValue' | translate: { days: item.leadTimeDays } }}
+              </span>
+            }
+          </li>
+        }
+      </ul>
+    }
+  }
 </section>

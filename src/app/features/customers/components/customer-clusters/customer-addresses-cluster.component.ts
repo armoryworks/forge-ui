@@ -16,7 +16,8 @@ import { CustomerAddressDialogComponent } from './customer-address-dialog.compon
  *
  * Address list + full CRUD (add/edit dialog, delete with confirm) against
  * CustomerAddressesController via CustomerAddressService. Mounted into the
- * Addresses tab on the customer detail page.
+ * Addresses tab on the customer detail page and the guided customer
+ * workflow's Addresses step.
  *
  * Was previously `CustomerAddressesTabComponent` at
  * `pages/customer-detail/tabs/`. Moved to `components/customer-clusters/`

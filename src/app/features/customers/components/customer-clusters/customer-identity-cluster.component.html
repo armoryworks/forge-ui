@@ -22,8 +22,8 @@
   }
 
   <div class="cluster__form-row">
-    <app-input data-testid="customer-identity-name" [label]="'customers.colName' | translate" formControlName="name" [required]="true" [isReadonly]="!editing()" />
-    <app-input data-testid="customer-identity-company" [label]="'customers.companyName' | translate" formControlName="companyName" [isReadonly]="!editing()" />
+    <app-input data-testid="customer-identity-name" [label]="'guidedSetup.customerIdentity.nameLabel' | translate" formControlName="name" [required]="true" [isReadonly]="!editing()" />
+    <app-input data-testid="customer-identity-company" [label]="'guidedSetup.customerIdentity.displayNameLabel' | translate" formControlName="companyName" [isReadonly]="!editing()" />
   </div>
   @if (editing()) {
     <div class="cluster__hint" role="note">
@@ -63,7 +63,7 @@
   @if (editing()) {
     <div class="cluster__actions">
       <button class="action-btn" type="button" (click)="onCancel()">{{ 'common.cancel' | translate }}</button>
-      <app-validation-button [violations]="violations" [loading]="saving()">
+      <app-validation-button class="validation-button--inline" [violations]="violations" [loading]="saving()">
         <button class="action-btn action-btn--primary" type="button"
           data-testid="customer-identity-save"
           [disabled]="form.invalid || saving()"

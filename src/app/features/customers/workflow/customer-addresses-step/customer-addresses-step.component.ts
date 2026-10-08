@@ -1,29 +1,31 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, input } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
+import { CapabilityService } from '../../../../shared/services/capability.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 
+import { CustomerAddressesClusterComponent } from '../../components/customer-clusters/customer-addresses-cluster.component';
+import { CustomerDetail } from '../../models/customer-detail.model';
+
 /**
- * Customer workflow addresses step. V1 stub — same shape as the vendor
- * supply-items step. Customer.Addresses is a collection entity
- * (CustomerAddress), so billing + shipping mutations are deferred to
- * the customer detail page's Addresses tab where the dedicated endpoints
- * exist. The legacy guided-customer-dialog bundled them into the create
- * payload; the new flow creates the Customer first and lets the admin
- * add addresses afterward.
+ * Customer workflow addresses step. Optional. Embeds the same address
+ * list + editor the customer detail page uses, scoped to the customer the
+ * identity step created; each address saves through its own dialog, so the
+ * step itself has nothing to persist on Continue.
  */
 @Component({
   selector: 'app-customer-addresses-step',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe],
+  imports: [ReactiveFormsModule, TranslatePipe, CustomerAddressesClusterComponent],
   templateUrl: './customer-addresses-step.component.html',
   styleUrl: './customer-addresses-step.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomerAddressesStepComponent {
   private readonly workflowService = inject(WorkflowService);
+  private readonly capabilityService = inject(CapabilityService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly stepId = input<string>('addresses');
@@ -31,6 +33,14 @@ export class CustomerAddressesStepComponent {
   readonly runId = input<number | null>(null);
   readonly entityId = input<number | null>(null);
   readonly entity = input<unknown>(null);
+
+  protected readonly customerId = computed<number | null>(
+    () => this.entityId() ?? (this.entity() as CustomerDetail | null)?.id ?? null,
+  );
+
+  protected readonly addressesEnabled = computed(
+    () => this.capabilityService.isEnabled('CAP-MD-CUSTOMER-ADDRESSES', true),
+  );
 
   protected readonly form = new FormGroup({});
 

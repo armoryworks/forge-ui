@@ -189,9 +189,9 @@ export class VendorsComponent implements OnInit {
   /**
    * Guided wizard — routes to the WorkflowComponent-backed vendor page
    * (mirrors the parts pattern). The old MatDialog-based guided wizard
-   * was retired 2026-05-31 along with the mat-stepper substrate; supply-
-   * items now happen on the vendor detail page after creation, so the
-   * caller doesn't need to chain VendorPart creates here anymore.
+   * was retired 2026-05-31 along with the mat-stepper substrate; the
+   * workflow's Supply Items step creates VendorParts itself, so the caller
+   * doesn't need to chain VendorPart creates here.
    */
   private openGuidedCreateVendor(): void {
     this.router.navigate(['/vendors/new'], {

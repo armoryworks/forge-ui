@@ -4,8 +4,19 @@
     <p class="customer-workflow-step__hint">{{ 'customers.workflow.addresses.hint' | translate }}</p>
   </header>
 
-  <div class="customer-workflow-step__empty">
-    <span class="material-icons-outlined">location_on</span>
-    <p>{{ 'customers.workflow.addresses.followUpMessage' | translate }}</p>
-  </div>
+  @if (!addressesEnabled()) {
+    <div class="customer-workflow-step__empty" data-testid="customer-addresses-step-unavailable">
+      <span class="material-icons-outlined">location_off</span>
+      <p>{{ 'guidedSetup.customerAddresses.unavailable' | translate }}</p>
+    </div>
+  } @else if (customerId(); as id) {
+    <div class="customer-workflow-step__panel">
+      <app-customer-addresses-cluster [customerId]="id" />
+    </div>
+  } @else {
+    <div class="customer-workflow-step__empty" data-testid="customer-addresses-step-no-customer">
+      <span class="material-icons-outlined">location_on</span>
+      <p>{{ 'guidedSetup.customerAddresses.saveIdentityFirst' | translate }}</p>
+    </div>
+  }
 </section>

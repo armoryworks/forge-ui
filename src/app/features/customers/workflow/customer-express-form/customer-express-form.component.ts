@@ -101,9 +101,9 @@ export class CustomerExpressFormComponent {
     this.workflowService.registerStepForm(
       this.form,
       {
-        name: this.translate.instant('customers.workflow.identity.nameLabel'),
+        name: this.translate.instant('guidedSetup.customerIdentity.nameLabel'),
         customerNumber: this.translate.instant('customers.customerNumberLabel'),
-        companyName: this.translate.instant('customers.workflow.identity.companyNameLabel'),
+        companyName: this.translate.instant('guidedSetup.customerIdentity.displayNameLabel'),
         email: this.translate.instant('customers.workflow.identity.emailLabel'),
         phone: this.translate.instant('customers.workflow.identity.phoneLabel'),
         creditLimit: this.translate.instant('customers.workflow.creditAndTax.creditLimitLabel'),

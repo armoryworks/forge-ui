@@ -84,6 +84,17 @@ function buildDef(): WorkflowDefinition {
   };
 }
 
+function buildDefWithReview(): WorkflowDefinition {
+  const def = buildDef();
+  return {
+    ...def,
+    steps: [
+      ...def.steps,
+      { id: 'review', labelKey: 'workflow.parts.steps.review', componentName: 'PartReviewStepComponent', required: true, completionGates: ['hasBasics'] },
+    ],
+  };
+}
+
 function buildValidators(): EntityValidator[] {
   return [
     {
@@ -350,5 +361,55 @@ describe('WorkflowComponent — shell logic (Phase 4)', () => {
     expect(isComplete.call(component, steps[0])).toBe(true);  // basics gate passes
     expect(isCurrent.call(component, steps[1])).toBe(true);   // bom is current
     expect(isCurrent.call(component, steps[0])).toBe(false);
+  });
+
+  it('a trailing step whose gates already pass is not complete before it is visited', () => {
+    const { component } = buildShell({
+      run: buildRun({ currentStepId: 'bom' }),
+      definition: buildDefWithReview(),
+      entity: { name: 'Widget', bomLines: [{ id: 1 }] },
+    });
+    const map = pick<() => Map<string, boolean>>(component, 'completionMap')();
+    expect(map.get('basics')).toBe(true);
+    expect(map.get('alternates')).toBe(false);
+    expect(map.get('review')).toBe(false);
+  });
+
+  it('a trailing step with passing gates is complete once the user is on it', () => {
+    const { component } = buildShell({
+      run: buildRun({ currentStepId: 'review' }),
+      definition: buildDefWithReview(),
+      entity: { name: 'Widget', bomLines: [{ id: 1 }] },
+    });
+    const map = pick<() => Map<string, boolean>>(component, 'completionMap')();
+    expect(map.get('alternates')).toBe(true);
+    expect(map.get('review')).toBe(true);
+  });
+
+  it('visited steps stay complete after jumping back to an earlier step', () => {
+    const run = signal<WorkflowRun | null>(buildRun({ currentStepId: 'review' }));
+    const { component } = buildShell({
+      definition: buildDefWithReview(),
+      entity: { name: 'Widget', bomLines: [{ id: 1 }] },
+    });
+    Object.defineProperty(component, 'run', { value: run, writable: true });
+    TestBed.tick();
+    run.set(buildRun({ currentStepId: 'basics' }));
+    const map = pick<() => Map<string, boolean>>(component, 'completionMap')();
+    expect(map.get('alternates')).toBe(true);
+    expect(map.get('review')).toBe(true);
+  });
+
+  it('an unvisited step whose predecessors pass stays reachable even though it is not ticked', () => {
+    const { component } = buildShell({
+      run: buildRun({ currentStepId: 'basics' }),
+      definition: buildDefWithReview(),
+      entity: { name: 'Widget', bomLines: [{ id: 1 }] },
+    });
+    const isClickable = pick<(s: WorkflowStepDefinition) => boolean>(component, 'isClickable');
+    const isComplete = pick<(s: WorkflowStepDefinition) => boolean>(component, 'isComplete');
+    const steps = pick<() => WorkflowStepDefinition[]>(component, 'steps')();
+    expect(isComplete.call(component, steps[1])).toBe(false);
+    expect(isClickable.call(component, steps[2])).toBe(true);
   });
 });

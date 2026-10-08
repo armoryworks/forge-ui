@@ -46,6 +46,7 @@
              prompt threshold at PO line entry. Empty = system default (5%). -->
         <app-input
           [label]="'vendors.offTierVariancePct' | translate"
+          [info]="'guidedSetup.priceToleranceHelp' | translate"
           type="number"
           formControlName="offTierVariancePct"
           step="0.1"

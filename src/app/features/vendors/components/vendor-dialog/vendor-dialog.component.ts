@@ -81,7 +81,7 @@ export class VendorDialogComponent implements OnInit {
     isActive: 'Active',
     is1099: '1099 Vendor',
     taxId: 'Tax ID',
-    offTierVariancePct: 'Off-Tier Variance %',
+    offTierVariancePct: this.translate.instant('vendors.offTierVariancePct'),
   });
 
   protected readonly paymentTermsOptions = PAYMENT_TERMS_OPTIONS;

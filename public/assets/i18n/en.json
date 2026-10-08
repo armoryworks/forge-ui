@@ -2115,7 +2115,7 @@
       "fromLeadTitle": "Convert from lead",
       "fromLeadDesc": "Pick an existing lead and run it through the convert stepper.",
       "guidedTitle": "Guided setup",
-      "guidedDesc": "Step through identity, engagement, addresses, and billing for a strategic account."
+      "guidedDesc": "Step through identity, addresses, and billing for a strategic account."
     },
     "leadPicker": {
       "title": "Pick a lead to convert",
@@ -2341,7 +2341,7 @@
       }
     },
     "identityCluster": {
-      "nameImmutabilityHint": "Identity field — changing this affects search, cross-entity references, and accounting links.",
+      "nameImmutabilityHint": "Renaming updates this customer everywhere.",
       "violations": {
         "name": "Name",
         "email": "Email"
@@ -5371,7 +5371,7 @@
       "addPartToCatalog": "Add Part",
       "scorecardTab": "Scorecard"
     },
-    "offTierVariancePct": "Off-Tier Variance %",
+    "offTierVariancePct": "Price tolerance vs. vendor price list (%)",
     "offTierVariancePctPlaceholder": "Default: 5%",
     "workflow": {
       "page": {
@@ -5412,7 +5412,7 @@
         "hint": "Payment terms, minimum order, and any internal notes.",
         "paymentTermsLabel": "Payment Terms",
         "minOrderAmountLabel": "Minimum Order Amount",
-        "offTierVariancePctLabel": "Off-Tier Variance %",
+        "offTierVariancePctLabel": "Price tolerance vs. vendor price list (%)",
         "notesLabel": "Notes",
         "saveFailed": "Could not save the vendor's terms."
       },
@@ -8711,6 +8711,29 @@
         "costMissing": "Cost not yet set."
       }
     }
+  },
+  "guidedSetup": {
+    "customerIdentity": {
+      "nameLabel": "Customer (company) name",
+      "displayNameLabel": "Display name"
+    },
+    "customerAddresses": {
+      "saveIdentityFirst": "Save the customer's identity first, then add addresses here.",
+      "unavailable": "Customer addresses are turned off for this installation."
+    },
+    "supplyItems": {
+      "partLabel": "Part",
+      "vendorPartNumberLabel": "Vendor's part number",
+      "unitPriceLabel": "Unit price",
+      "leadTimeDaysLabel": "Lead time (days)",
+      "leadTimeDaysValue": "{{ days }} days lead time",
+      "add": "Add part",
+      "added": "Part added to this vendor.",
+      "empty": "No parts added yet. This step is optional.",
+      "saveIdentityFirst": "Save the vendor's identity first, then add the parts it supplies here."
+    },
+    "priceToleranceHelp": "How far a purchase order price may differ from this vendor's price list before you are asked to confirm it. Leave blank to use the system default.",
+    "vendorCreated": "Vendor created"
   },
   "validators": {
     "parts": {

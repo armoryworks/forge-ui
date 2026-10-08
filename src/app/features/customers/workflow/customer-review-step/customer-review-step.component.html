@@ -6,11 +6,11 @@
 
   @if (customer(); as c) {
     <dl class="customer-workflow-step__summary">
-      <dt>{{ 'customers.workflow.identity.nameLabel' | translate }}</dt>
+      <dt>{{ 'guidedSetup.customerIdentity.nameLabel' | translate }}</dt>
       <dd>{{ c.name }}</dd>
 
       @if (c.companyName) {
-        <dt>{{ 'customers.workflow.identity.companyNameLabel' | translate }}</dt>
+        <dt>{{ 'guidedSetup.customerIdentity.displayNameLabel' | translate }}</dt>
         <dd>{{ c.companyName }}</dd>
       }
       @if (c.email) {

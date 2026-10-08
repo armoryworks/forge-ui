@@ -404,8 +404,13 @@ export class VendorWorkflowPageComponent {
         this.workflowService.completeRun(run.id).subscribe({
           next: (result) => {
             if (result.success) {
-              this.snackbar.success(this.translate.instant('vendors.workflow.page.completeSuccess'));
-              this.router.navigate(['/vendors']);
+              this.snackbar.success(this.translate.instant('guidedSetup.vendorCreated'));
+              const entityId = result.run.entityId ?? run.entityId ?? this.vendor()?.id ?? null;
+              if (entityId != null) {
+                this.router.navigate(['/vendors'], { queryParams: { detail: `vendor:${entityId}` } });
+              } else {
+                this.router.navigate(['/vendors']);
+              }
             } else {
               this.missingValidators.set(result.missing);
               const missingDescription = result.missing

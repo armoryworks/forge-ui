@@ -2115,7 +2115,7 @@
       "fromLeadTitle": "Convertir desde prospecto",
       "fromLeadDesc": "Elige un prospecto existente y pásalo por el asistente de conversión.",
       "guidedTitle": "Configuración guiada",
-      "guidedDesc": "Pasa por identidad, compromiso, direcciones y facturación para una cuenta estratégica."
+      "guidedDesc": "Pasa por identidad, direcciones y facturación para una cuenta estratégica."
     },
     "leadPicker": {
       "title": "Elige un prospecto para convertir",
@@ -2336,7 +2336,7 @@
       }
     },
     "identityCluster": {
-      "nameImmutabilityHint": "Campo de identidad — cambiarlo afecta la búsqueda, las referencias cruzadas y los enlaces contables.",
+      "nameImmutabilityHint": "Cambiar el nombre actualiza este cliente en todas partes.",
       "violations": {
         "name": "Nombre",
         "email": "Correo electrónico"
@@ -5364,7 +5364,7 @@
       "addPartToCatalog": "Añadir pieza",
       "scorecardTab": "Evaluación"
     },
-    "offTierVariancePct": "% Variación Fuera de Tarifa",
+    "offTierVariancePct": "Tolerancia de precio frente a la lista de precios del proveedor (%)",
     "offTierVariancePctPlaceholder": "Predeterminado: 5%",
     "workflow": {
       "page": {
@@ -5405,7 +5405,7 @@
         "hint": "Términos de pago, pedido mínimo y cualquier nota interna.",
         "paymentTermsLabel": "Términos de Pago",
         "minOrderAmountLabel": "Monto Mínimo de Pedido",
-        "offTierVariancePctLabel": "% Variación Fuera de Tarifa",
+        "offTierVariancePctLabel": "Tolerancia de precio frente a la lista de precios del proveedor (%)",
         "notesLabel": "Notas",
         "saveFailed": "No se pudieron guardar los términos del proveedor."
       },
@@ -8704,6 +8704,29 @@
         "costMissing": "Cost not yet set."
       }
     }
+  },
+  "guidedSetup": {
+    "customerIdentity": {
+      "nameLabel": "Nombre del cliente (empresa)",
+      "displayNameLabel": "Nombre para mostrar"
+    },
+    "customerAddresses": {
+      "saveIdentityFirst": "Guarde primero la identidad del cliente y luego agregue las direcciones aquí.",
+      "unavailable": "Las direcciones de clientes están desactivadas en esta instalación."
+    },
+    "supplyItems": {
+      "partLabel": "Pieza",
+      "vendorPartNumberLabel": "Número de pieza del proveedor",
+      "unitPriceLabel": "Precio unitario",
+      "leadTimeDaysLabel": "Plazo de entrega (días)",
+      "leadTimeDaysValue": "{{ days }} días de plazo de entrega",
+      "add": "Agregar pieza",
+      "added": "Pieza agregada a este proveedor.",
+      "empty": "Aún no se han agregado piezas. Este paso es opcional.",
+      "saveIdentityFirst": "Guarde primero la identidad del proveedor y luego agregue aquí las piezas que suministra."
+    },
+    "priceToleranceHelp": "Cuánto puede diferir el precio de una orden de compra de la lista de precios de este proveedor antes de que se le pida confirmarlo. Déjelo en blanco para usar el valor predeterminado del sistema.",
+    "vendorCreated": "Proveedor creado"
   },
   "validators": {
     "parts": {
