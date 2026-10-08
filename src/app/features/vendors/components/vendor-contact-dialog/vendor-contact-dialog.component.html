@@ -1,0 +1,38 @@
+<app-dialog [title]="title()" width="560px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    <div class="dialog-row">
+      <app-input data-testid="vendor-contact-first-name" [label]="'vendorContacts.contactDialog.firstName' | translate"
+        formControlName="firstName" [maxlength]="100" [required]="true" />
+      <app-input data-testid="vendor-contact-last-name" [label]="'vendorContacts.contactDialog.lastName' | translate"
+        formControlName="lastName" [maxlength]="100" [required]="true" />
+    </div>
+    <div class="dialog-row">
+      <app-select data-testid="vendor-contact-role" [label]="'vendorContacts.contactDialog.role' | translate"
+        formControlName="role" [options]="roleOptions()" />
+      <app-input data-testid="vendor-contact-email" [label]="'common.email' | translate"
+        formControlName="email" type="email" [maxlength]="200" />
+    </div>
+    <div class="dialog-row">
+      <app-input data-testid="vendor-contact-phone" [label]="'common.phone' | translate"
+        formControlName="phone" mask="phone" [maxlength]="50" />
+      <app-input data-testid="vendor-contact-mobile" [label]="'vendorContacts.contactDialog.mobile' | translate"
+        formControlName="mobile" mask="phone" [maxlength]="50" />
+    </div>
+    <div class="dialog-row">
+      <app-input data-testid="vendor-contact-fax" [label]="'common.fax' | translate"
+        formControlName="fax" mask="phone" [maxlength]="50" />
+      <app-toggle data-testid="vendor-contact-primary" [label]="'vendorContacts.contactDialog.primary' | translate"
+        formControlName="isPrimary" />
+    </div>
+    <app-textarea data-testid="vendor-contact-notes" [label]="'common.notes' | translate"
+      formControlName="notes" [rows]="3" [maxlength]="2000" />
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" data-testid="vendor-contact-cancel-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" data-testid="vendor-contact-save-btn"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">{{ 'common.save' | translate }}</button>
+    </app-validation-button>
+  </div>
+</app-dialog>

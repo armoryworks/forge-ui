@@ -27,6 +27,12 @@
     <!-- Tabs -->
     <div class="tab-bar">
       <button class="tab" [class.tab--active]="activeTab() === 'info'" (click)="activeTab.set('info')">{{ 'vendors.info' | translate }}</button>
+      <button class="tab" data-testid="vendor-tab-contacts" [class.tab--active]="activeTab() === 'contacts'" (click)="activeTab.set('contacts')">
+        {{ 'vendorContacts.contactsTab' | translate }}
+      </button>
+      <button class="tab" data-testid="vendor-tab-addresses" [class.tab--active]="activeTab() === 'addresses'" (click)="activeTab.set('addresses')">
+        {{ 'vendorContacts.addressesTab' | translate }}
+      </button>
       <button class="tab" [class.tab--active]="activeTab() === 'purchase-orders'" (click)="activeTab.set('purchase-orders')">
         {{ 'vendors.purchaseOrders' | translate }} ({{ vendor.purchaseOrders.length }})
       </button>
@@ -141,6 +147,14 @@
             {{ 'common.delete' | translate }}
           </button>
         </div>
+      }
+
+      @if (activeTab() === 'contacts') {
+        <app-vendor-contacts-tab [vendorId]="vendor.id" />
+      }
+
+      @if (activeTab() === 'addresses') {
+        <app-vendor-addresses-tab [vendorId]="vendor.id" />
       }
 
       <!-- Purchase Orders Tab -->

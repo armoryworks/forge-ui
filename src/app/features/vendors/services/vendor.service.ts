@@ -11,6 +11,10 @@ import { VendorResponse } from '../models/vendor-response.model';
 import { CreateVendorRequest } from '../models/create-vendor-request.model';
 import { UpdateVendorRequest } from '../models/update-vendor-request.model';
 import { VendorScorecard, VendorComparisonRow } from '../models/vendor-scorecard.model';
+import { VendorContact } from '../models/vendor-contact.model';
+import { VendorContactRequest } from '../models/vendor-contact-request.model';
+import { VendorAddress } from '../models/vendor-address.model';
+import { VendorAddressRequest } from '../models/vendor-address-request.model';
 
 /** Phase 3 F7-broad / WU-22 — paged vendor list query parameters. */
 export interface VendorListPagedQuery extends PagedQuery {
@@ -86,5 +90,37 @@ export class VendorService {
     if (dateFrom) params = params.set('dateFrom', dateFrom);
     if (dateTo) params = params.set('dateTo', dateTo);
     return this.http.get<VendorComparisonRow[]>(`${this.base}/performance-report`, { params });
+  }
+
+  getContacts(vendorId: number): Observable<VendorContact[]> {
+    return this.http.get<VendorContact[]>(`${this.base}/${vendorId}/contacts`);
+  }
+
+  createContact(vendorId: number, request: VendorContactRequest): Observable<VendorContact> {
+    return this.http.post<VendorContact>(`${this.base}/${vendorId}/contacts`, request);
+  }
+
+  updateContact(vendorId: number, contactId: number, request: VendorContactRequest): Observable<VendorContact> {
+    return this.http.put<VendorContact>(`${this.base}/${vendorId}/contacts/${contactId}`, request);
+  }
+
+  deleteContact(vendorId: number, contactId: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${vendorId}/contacts/${contactId}`);
+  }
+
+  getAddresses(vendorId: number): Observable<VendorAddress[]> {
+    return this.http.get<VendorAddress[]>(`${this.base}/${vendorId}/addresses`);
+  }
+
+  createAddress(vendorId: number, request: VendorAddressRequest): Observable<VendorAddress> {
+    return this.http.post<VendorAddress>(`${this.base}/${vendorId}/addresses`, request);
+  }
+
+  updateAddress(vendorId: number, addressId: number, request: VendorAddressRequest): Observable<VendorAddress> {
+    return this.http.put<VendorAddress>(`${this.base}/${vendorId}/addresses/${addressId}`, request);
+  }
+
+  deleteAddress(vendorId: number, addressId: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${vendorId}/addresses/${addressId}`);
   }
 }

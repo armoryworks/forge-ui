@@ -5145,6 +5145,51 @@
     "paymentDetails": "Payment Details",
     "numberLockedReason": "A payment number can only be changed before the payment is applied. This one is already applied to an invoice, so the number is part of the settled record."
   },
+  "vendorContacts": {
+    "contactsTab": "Contacts",
+    "addressesTab": "Addresses",
+    "addContact": "Add Contact",
+    "addAddress": "Add Address",
+    "noContacts": "No contacts for this vendor yet.",
+    "noAddresses": "No addresses for this vendor yet.",
+    "primary": "Primary",
+    "default": "Default",
+    "mobile": "Mobile",
+    "contactAdded": "Contact added.",
+    "contactUpdated": "Contact updated.",
+    "contactDeleted": "Contact deleted.",
+    "addressAdded": "Address added.",
+    "addressUpdated": "Address updated.",
+    "addressDeleted": "Address deleted.",
+    "deleteContactTitle": "Delete Contact",
+    "deleteContactMessage": "Delete the contact \"{{name}}\" from this vendor?",
+    "deleteAddressTitle": "Delete Address",
+    "deleteAddressMessage": "Delete the address \"{{address}}\" from this vendor?",
+    "contactDialog": {
+      "addTitle": "Add Vendor Contact",
+      "editTitle": "Edit Vendor Contact",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "role": "Role",
+      "noRole": "No role",
+      "mobile": "Mobile",
+      "primary": "Primary contact"
+    },
+    "addressDialog": {
+      "addTitle": "Add Vendor Address",
+      "editTitle": "Edit Vendor Address",
+      "type": "Address Type",
+      "label": "Label",
+      "default": "Default address"
+    },
+    "addressTypes": {
+      "remitTo": "Remit-to",
+      "orderFrom": "Order-from",
+      "shipFrom": "Ship-from",
+      "billing": "Billing",
+      "other": "Other"
+    }
+  },
   "vendors": {
     "vendorNumberLabel": "Vendor Number",
     "title": "Vendors",

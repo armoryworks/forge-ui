@@ -22,6 +22,8 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { VendorScorecardTabComponent } from '../vendor-scorecard-tab/vendor-scorecard-tab.component';
+import { VendorContactsTabComponent } from '../vendor-contacts-tab/vendor-contacts-tab.component';
+import { VendorAddressesTabComponent } from '../vendor-addresses-tab/vendor-addresses-tab.component';
 import { VendorPartListPanelComponent } from '../../../parts/components/vendor-parts-cluster/vendor-part-list-panel.component';
 import { VendorPartFormDialogComponent, VendorPartFormDialogData } from '../../../parts/components/vendor-parts-cluster/vendor-part-form-dialog.component';
 import { VendorPartBulkImportDialogComponent, VendorPartBulkImportDialogData } from '../../../parts/components/vendor-parts-cluster/vendor-part-bulk-import-dialog.component';
@@ -41,6 +43,7 @@ import { EntityCompletenessChipComponent } from '../../../../shared/components/e
     DataTableComponent, ColumnCellDirective,
     EmptyStateComponent, LoadingBlockDirective,
     VendorDialogComponent, EntityActivitySectionComponent, VendorScorecardTabComponent,
+    VendorContactsTabComponent, VendorAddressesTabComponent,
     VendorPartListPanelComponent,
     EntityCompletenessChipComponent,
   ],
@@ -61,7 +64,7 @@ export class VendorDetailPanelComponent {
 
   protected readonly loading = signal(false);
   protected readonly vendor = signal<VendorDetail | null>(null);
-  protected readonly activeTab = signal<'info' | 'purchase-orders' | 'scorecard' | 'catalog'>('info');
+  protected readonly activeTab = signal<'info' | 'contacts' | 'addresses' | 'purchase-orders' | 'scorecard' | 'catalog'>('info');
 
   // Catalog tab (Vendor Parts)
   private readonly vendorPartsService = inject(VendorPartsService);

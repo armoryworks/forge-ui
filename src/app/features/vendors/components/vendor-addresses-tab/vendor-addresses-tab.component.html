@@ -1,0 +1,59 @@
+<div class="tab-pane" [appLoadingBlock]="loading()">
+  @if (canManage()) {
+    <div class="tab-pane__toolbar">
+      <button class="action-btn action-btn--primary" data-testid="vendor-address-add-btn" (click)="openAdd()">
+        <span class="material-icons-outlined">add</span>
+        {{ 'vendorContacts.addAddress' | translate }}
+      </button>
+    </div>
+  }
+
+  @if (!loading() && addresses().length === 0) {
+    <app-empty-state icon="location_off" [message]="'vendorContacts.noAddresses' | translate" />
+  } @else {
+    <div class="row-list">
+      @for (address of addresses(); track address.id) {
+        <div class="row-item" data-testid="vendor-address-row">
+          <div class="row-item__main">
+            <div class="row-item__title">
+              <span class="chip chip--muted">{{ typeLabelKey(address.addressType) | translate }}</span>
+              @if (address.label) {
+                <span>{{ address.label }}</span>
+              }
+              @if (address.isDefault) {
+                <span class="chip chip--primary" data-testid="vendor-address-default-chip">{{ 'vendorContacts.default' | translate }}</span>
+              }
+            </div>
+            <div class="row-item__details">
+              <span class="row-item__detail">
+                <span class="material-icons-outlined">place</span>{{ oneLine(address) }}
+              </span>
+            </div>
+          </div>
+          @if (canManage()) {
+            <div class="row-item__actions">
+              <button class="icon-btn" data-testid="vendor-address-edit-btn"
+                [matTooltip]="'common.edit' | translate" [attr.aria-label]="'common.edit' | translate"
+                (click)="openEdit(address)">
+                <span class="material-icons-outlined">edit</span>
+              </button>
+              <button class="icon-btn icon-btn--danger" data-testid="vendor-address-delete-btn"
+                [matTooltip]="'common.delete' | translate" [attr.aria-label]="'common.delete' | translate"
+                (click)="deleteAddress(address)">
+                <span class="material-icons-outlined">delete</span>
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (showDialog()) {
+  <app-vendor-address-dialog
+    [vendorId]="vendorId()"
+    [address]="editingAddress()"
+    (saved)="onSaved()"
+    (closed)="closeDialog()" />
+}

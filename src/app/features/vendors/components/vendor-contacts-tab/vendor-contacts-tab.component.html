@@ -1,0 +1,76 @@
+<div class="tab-pane" [appLoadingBlock]="loading()">
+  @if (canManage()) {
+    <div class="tab-pane__toolbar">
+      <button class="action-btn action-btn--primary" data-testid="vendor-contact-add-btn" (click)="openAdd()">
+        <span class="material-icons-outlined">add</span>
+        {{ 'vendorContacts.addContact' | translate }}
+      </button>
+    </div>
+  }
+
+  @if (!loading() && contacts().length === 0) {
+    <app-empty-state icon="person_off" [message]="'vendorContacts.noContacts' | translate" />
+  } @else {
+    <div class="row-list">
+      @for (contact of contacts(); track contact.id) {
+        <div class="row-item" data-testid="vendor-contact-row">
+          <div class="row-item__main">
+            <div class="row-item__title">
+              <span>{{ contact.firstName }} {{ contact.lastName }}</span>
+              @if (contact.isPrimary) {
+                <span class="chip chip--primary" data-testid="vendor-contact-primary-chip">{{ 'vendorContacts.primary' | translate }}</span>
+              }
+              @if (contact.role) {
+                <span class="row-item__muted">{{ contact.role }}</span>
+              }
+            </div>
+            <div class="row-item__details">
+              @if (contact.phone) {
+                <span class="row-item__detail" [matTooltip]="'common.phone' | translate">
+                  <span class="material-icons-outlined">phone</span>{{ contact.phone }}
+                </span>
+              }
+              @if (contact.mobile) {
+                <span class="row-item__detail" [matTooltip]="'vendorContacts.mobile' | translate">
+                  <span class="material-icons-outlined">smartphone</span>{{ contact.mobile }}
+                </span>
+              }
+              @if (contact.fax) {
+                <span class="row-item__detail" [matTooltip]="'common.fax' | translate">
+                  <span class="material-icons-outlined">fax</span>{{ contact.fax }}
+                </span>
+              }
+              @if (contact.email) {
+                <a class="row-item__detail" [href]="'mailto:' + contact.email">
+                  <span class="material-icons-outlined">email</span>{{ contact.email }}
+                </a>
+              }
+            </div>
+          </div>
+          @if (canManage()) {
+            <div class="row-item__actions">
+              <button class="icon-btn" data-testid="vendor-contact-edit-btn"
+                [matTooltip]="'common.edit' | translate" [attr.aria-label]="'common.edit' | translate"
+                (click)="openEdit(contact)">
+                <span class="material-icons-outlined">edit</span>
+              </button>
+              <button class="icon-btn icon-btn--danger" data-testid="vendor-contact-delete-btn"
+                [matTooltip]="'common.delete' | translate" [attr.aria-label]="'common.delete' | translate"
+                (click)="deleteContact(contact)">
+                <span class="material-icons-outlined">delete</span>
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (showDialog()) {
+  <app-vendor-contact-dialog
+    [vendorId]="vendorId()"
+    [contact]="editingContact()"
+    (saved)="onSaved()"
+    (closed)="closeDialog()" />
+}

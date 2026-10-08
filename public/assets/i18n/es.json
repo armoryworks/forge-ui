@@ -5138,6 +5138,51 @@
     "paymentDetails": "Detalles de Pago",
     "numberLockedReason": "El número de pago solo se puede cambiar antes de aplicar el pago. Este ya se aplicó a una factura, por lo que el número forma parte del registro liquidado."
   },
+  "vendorContacts": {
+    "contactsTab": "Contactos",
+    "addressesTab": "Direcciones",
+    "addContact": "Agregar contacto",
+    "addAddress": "Agregar dirección",
+    "noContacts": "Este proveedor aún no tiene contactos.",
+    "noAddresses": "Este proveedor aún no tiene direcciones.",
+    "primary": "Principal",
+    "default": "Predeterminada",
+    "mobile": "Móvil",
+    "contactAdded": "Contacto agregado.",
+    "contactUpdated": "Contacto actualizado.",
+    "contactDeleted": "Contacto eliminado.",
+    "addressAdded": "Dirección agregada.",
+    "addressUpdated": "Dirección actualizada.",
+    "addressDeleted": "Dirección eliminada.",
+    "deleteContactTitle": "Eliminar contacto",
+    "deleteContactMessage": "¿Eliminar el contacto \"{{name}}\" de este proveedor?",
+    "deleteAddressTitle": "Eliminar dirección",
+    "deleteAddressMessage": "¿Eliminar la dirección \"{{address}}\" de este proveedor?",
+    "contactDialog": {
+      "addTitle": "Agregar contacto del proveedor",
+      "editTitle": "Editar contacto del proveedor",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "role": "Función",
+      "noRole": "Sin función",
+      "mobile": "Móvil",
+      "primary": "Contacto principal"
+    },
+    "addressDialog": {
+      "addTitle": "Agregar dirección del proveedor",
+      "editTitle": "Editar dirección del proveedor",
+      "type": "Tipo de dirección",
+      "label": "Etiqueta",
+      "default": "Dirección predeterminada"
+    },
+    "addressTypes": {
+      "remitTo": "Remitir pago a",
+      "orderFrom": "Pedidos a",
+      "shipFrom": "Envío desde",
+      "billing": "Facturación",
+      "other": "Otra"
+    }
+  },
   "vendors": {
     "vendorNumberLabel": "Número de proveedor",
     "title": "Proveedores",

@@ -1,0 +1,21 @@
+<app-dialog [title]="title()" width="560px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    <div class="dialog-row">
+      <app-select data-testid="vendor-address-type" [label]="'vendorContacts.addressDialog.type' | translate"
+        formControlName="addressType" [options]="typeOptions" [required]="true" />
+      <app-input data-testid="vendor-address-label" [label]="'vendorContacts.addressDialog.label' | translate"
+        formControlName="label" [maxlength]="100" />
+    </div>
+    <app-address-form data-testid="vendor-address-form" formControlName="address" />
+    <app-toggle data-testid="vendor-address-default" [label]="'vendorContacts.addressDialog.default' | translate"
+      formControlName="isDefault" />
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" data-testid="vendor-address-cancel-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" data-testid="vendor-address-save-btn"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">{{ 'common.save' | translate }}</button>
+    </app-validation-button>
+  </div>
+</app-dialog>
