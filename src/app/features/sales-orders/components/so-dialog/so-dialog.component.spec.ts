@@ -11,6 +11,7 @@ import { Observable, of } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { CustomerAddress } from '../../../../shared/models/customer-address.model';
 import { CreditStatus } from '../../../customers/models/credit-status.model';
+import { CustomerTaxEditability } from '../../../customers/models/customer-tax-editability.model';
 import { PartListItem } from '../../../parts/models/part-list-item.model';
 import { SoDialogComponent } from './so-dialog.component';
 
@@ -27,6 +28,9 @@ interface DialogInternals {
   lines(): { partId: number; unitPrice: number }[];
   priceIsListPrice(): boolean;
   creditHoldMessage(): string | null;
+  taxLocked(): boolean;
+  draftConfig: { snapshotFn(): Record<string, unknown>; restoreFn(data: Record<string, unknown>): void };
+  onCustomerSelected(customer: Record<string, unknown> | null): void;
   shipToOptions(): { value: unknown }[];
   billToOptions(): { value: unknown }[];
   addLine(): void;
@@ -88,10 +92,24 @@ function setup(parts: PartListItem[] = [part()], confirmed = true) {
   const component = TestBed.runInInjectionContext(() => new SoDialogComponent());
   const httpMock = TestBed.inject(HttpTestingController);
 
-  httpMock.expectOne(r => r.url === `${api}/customers`).flush({ items: [], totalCount: 0, page: 1, pageSize: 200 });
   httpMock.expectOne(r => r.url === `${api}/parts`).flush({ items: parts, totalCount: parts.length, page: 1, pageSize: 200 });
 
   return { component, internals: component as unknown as DialogInternals, httpMock, dialogOpen };
+}
+
+function editability(canEditTax: boolean): CustomerTaxEditability {
+  return { canEditTax, reason: null, activeDocumentId: null, stateCode: 'CO', expiresAt: null };
+}
+
+function flushTax(
+  httpMock: HttpTestingController,
+  customerId: number,
+  rate: number | null = null,
+  canEditTax = true,
+): void {
+  httpMock.expectOne(`${api}/sales-tax-rates/for-customer/${customerId}`)
+    .flush(rate == null ? null : { id: 1, name: 'State', code: 'CO', stateCode: 'CO', rate });
+  httpMock.expectOne(`${api}/customers/${customerId}/tax-editability`).flush(editability(canEditTax));
 }
 
 function selectCustomer(
@@ -104,6 +122,7 @@ function selectCustomer(
   component.form.controls.customerId.setValue(customerId);
   httpMock.expectOne(r => r.url === `${api}/customers/${customerId}/addresses`).flush(addresses);
   httpMock.expectOne(`${api}/customers/${customerId}/credit-status`).flush(status);
+  flushTax(httpMock, customerId);
 }
 
 function expectPriceLookup(httpMock: HttpTestingController, customerId: number, partId: number, price: number | null): void {
@@ -236,6 +255,7 @@ describe('SoDialogComponent', () => {
       component.form.controls.customerId.setValue(6);
       httpMock.expectOne(r => r.url === `${api}/customers/6/addresses`).flush([]);
       httpMock.expectOne(`${api}/customers/6/credit-status`).flush(creditStatus({ customerId: 6 }));
+      flushTax(httpMock, 6);
       expectPriceLookup(httpMock, 6, 21, 15);
 
       expect(internals.lineForm.controls.unitPrice.value).toBe(15);
@@ -266,6 +286,7 @@ describe('SoDialogComponent', () => {
       component.form.controls.customerId.setValue(6);
       httpMock.expectOne(r => r.url === `${api}/customers/6/addresses`).flush([]);
       httpMock.expectOne(`${api}/customers/6/credit-status`).flush(creditStatus({ customerId: 6 }));
+      flushTax(httpMock, 6);
       expectPriceLookup(httpMock, 6, 20, null);
 
       expect(internals.lineForm.controls.unitPrice.value).toBe(0);
@@ -372,6 +393,84 @@ describe('SoDialogComponent', () => {
       selectCustomer(component, httpMock);
 
       expect(internals.creditHoldMessage()).toBeNull();
+      httpMock.verify();
+    });
+  });
+
+  describe('tax rate', () => {
+    function pickCustomer(component: SoDialogComponent, httpMock: HttpTestingController, rate: number | null, canEditTax: boolean, customerId = 5): void {
+      component.form.controls.customerId.setValue(customerId);
+      httpMock.expectOne(r => r.url === `${api}/customers/${customerId}/addresses`).flush([]);
+      httpMock.expectOne(`${api}/customers/${customerId}/credit-status`).flush(creditStatus({ customerId }));
+      flushTax(httpMock, customerId, rate, canEditTax);
+    }
+
+    it('fills the customer rate and locks it without a verified certificate', () => {
+      const { component, internals, httpMock } = setup();
+
+      pickCustomer(component, httpMock, 0.0725, false);
+
+      expect(component.form.controls.taxRate.value).toBe(7.25);
+      expect(component.form.controls.taxRate.disabled).toBe(true);
+      expect(internals.taxLocked()).toBe(true);
+      httpMock.verify();
+    });
+
+    it('fills the rate but leaves it editable with a verified certificate', () => {
+      const { component, internals, httpMock } = setup();
+
+      pickCustomer(component, httpMock, 0.05, true);
+
+      expect(component.form.controls.taxRate.value).toBe(5);
+      expect(component.form.controls.taxRate.enabled).toBe(true);
+      expect(internals.taxLocked()).toBe(false);
+      httpMock.verify();
+    });
+
+    it('unlocks and refills when the customer changes', () => {
+      const { component, internals, httpMock } = setup();
+      pickCustomer(component, httpMock, 0.0725, false);
+
+      pickCustomer(component, httpMock, null, true, 6);
+
+      expect(component.form.controls.taxRate.value).toBe(0);
+      expect(component.form.controls.taxRate.enabled).toBe(true);
+      expect(internals.taxLocked()).toBe(false);
+      httpMock.verify();
+    });
+
+    it('sends the locked rate on save', () => {
+      const { component, internals, httpMock } = setup([part({ id: 20 })]);
+      internals.dialogRef = { clearDraft: vi.fn() };
+      pickCustomer(component, httpMock, 0.0725, false);
+      internals.lineForm.controls.partId.setValue(20);
+      expectPriceLookup(httpMock, 5, 20, 10);
+      internals.addLine();
+
+      internals.save();
+
+      const req = httpMock.expectOne(r => r.method === 'POST' && r.url === `${api}/orders`);
+      expect(req.request.body.taxRate).toBeCloseTo(0.0725, 6);
+      req.flush({});
+      httpMock.verify();
+    });
+  });
+
+  describe('draft', () => {
+    it('keeps the requested delivery day and the customer name through a draft', () => {
+      const { component, internals, httpMock } = setup();
+      internals.onCustomerSelected({ id: 5, name: 'Customer Five' });
+      component.form.controls.requestedDeliveryDate.setValue(new Date(2026, 9, 30));
+
+      const snapshot = JSON.parse(JSON.stringify(internals.draftConfig.snapshotFn())) as Record<string, unknown>;
+      expect(snapshot['requestedDeliveryDate']).toBe('2026-10-30T00:00:00Z');
+      expect(snapshot['customerName']).toBe('Customer Five');
+
+      component.form.controls.requestedDeliveryDate.setValue(null);
+      internals.draftConfig.restoreFn(snapshot);
+
+      const restored = component.form.controls.requestedDeliveryDate.value;
+      expect([restored?.getFullYear(), restored?.getMonth(), restored?.getDate()]).toEqual([2026, 9, 30]);
       httpMock.verify();
     });
   });

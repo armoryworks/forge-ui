@@ -7,4 +7,5 @@ export interface SalesOrderLineJob {
   priority: string | null;
   dueDate: Date | null;
   isArchived: boolean;
+  isComplete: boolean;
 }

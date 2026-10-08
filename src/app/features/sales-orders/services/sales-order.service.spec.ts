@@ -29,6 +29,14 @@ describe('SalesOrderService', () => {
       expect(req.request.params.get('pageSize')).toBe('200');
       req.flush({ items: [], totalCount: 0, page: 1, pageSize: 200 });
     });
+
+    it('should send the status filter as a sales order status name', () => {
+      service.getSalesOrdersPaged({ status: 'PartiallyShipped', customerId: 4 }).subscribe();
+      const req = httpMock.expectOne(r => r.url === `${apiUrl}/sales-orders`);
+      expect(req.request.params.get('status')).toBe('PartiallyShipped');
+      expect(req.request.params.get('customerId')).toBe('4');
+      req.flush({ items: [], totalCount: 0, page: 1, pageSize: 200 });
+    });
   });
 
   describe('getSalesOrderById', () => {

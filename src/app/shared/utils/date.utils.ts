@@ -24,6 +24,18 @@ export function toDateOnly(date: Date | string | null | undefined): string | nul
   return `${y}-${m}-${day}`;
 }
 
+/**
+ * Convert a date-only value the API sends as UTC midnight (e.g. "2026-10-30T00:00:00Z")
+ * to a local Date on the same calendar day, for loading into a datepicker.
+ * The inverse of toIsoDate(); new Date(value) would land on the previous day west of UTC.
+ */
+export function fromIsoDate(value: Date | string | null | undefined): Date | null {
+  if (!value) return null;
+  const d = typeof value === 'string' ? new Date(value) : value;
+  if (isNaN(d.getTime())) return null;
+  return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+}
+
 // ── Display format constants (project-wide standard) ──
 
 /** Angular DatePipe format: MM/dd/yyyy (e.g., "03/11/2026") */

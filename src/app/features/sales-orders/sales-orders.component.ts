@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, compute
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { startWith } from 'rxjs';
+import { merge, startWith } from 'rxjs';
 
 import { SalesOrderService } from './services/sales-order.service';
 import { SalesOrderListItem } from './models/sales-order-list-item.model';
@@ -19,7 +19,6 @@ import { CurrencyDisplayComponent } from '../../shared/components/currency-displ
 import { EntityLinkComponent } from '../../shared/components/entity-link/entity-link.component';
 import { SoDialogComponent } from './components/so-dialog/so-dialog.component';
 import { SalesOrderDetailDialogComponent, SalesOrderDetailDialogData } from './components/sales-order-detail-dialog/sales-order-detail-dialog.component';
-import { JobDetailDialogComponent, JobDetailDialogData } from '../kanban/components/job-detail-dialog.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -90,6 +89,9 @@ export class SalesOrdersComponent implements OnInit {
 
   constructor() {
     this.loadSalesOrders();
+    merge(this.customerFilterControl.valueChanges, this.statusFilterControl.valueChanges)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.loadSalesOrders());
     this.customerService.getCustomers(undefined, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.customers.set(list),
     });
@@ -106,9 +108,6 @@ export class SalesOrdersComponent implements OnInit {
     const search = (this.searchTerm() ?? '').trim() || undefined;
     const customerId = this.customerFilterControl.value ?? undefined;
     const status = this.statusFilterControl.value ?? undefined;
-    // Phase 3 F1 partial / WU-18 — consume the paged Job-projected list.
-    // The component still works in-memory inside the data-table within the
-    // 200-row server window; totalCount surfaces the full server-side count.
     this.soService.getSalesOrdersPaged({
       customerId,
       status,
@@ -121,13 +120,9 @@ export class SalesOrdersComponent implements OnInit {
         this.salesOrders.set(page.items);
         this.totalCount.set(page.totalCount);
         this.loading.set(false);
-        // URL restore — the detail param always carries the real target-entity
-        // id (SO id or Job id), never the ambiguous row id.
         const detail = this.detailDialog.getDetailFromUrl();
         if (detail?.entityType === 'sales-order') {
           this.openSoDetailDialog(detail.entityId);
-        } else if (detail?.entityType === 'job') {
-          this.openJobDetailDialog(detail.entityId);
         }
       },
       error: () => this.loading.set(false),
@@ -136,18 +131,8 @@ export class SalesOrdersComponent implements OnInit {
 
   protected applyFilters(): void { this.loadSalesOrders(); }
 
-  /**
-   * Route a row click to the record it actually represents. Job-projected rows
-   * carry the originating SalesOrder id when one exists; jobs created directly
-   * on the board have no SO, so those open the job detail instead of guessing
-   * (row `id` is NOT safe to send to /orders/{id} — see SalesOrderListItem).
-   */
   protected openSalesOrderDetail(item: SalesOrderListItem): void {
-    if (item.salesOrderId != null) {
-      this.openSoDetailDialog(item.salesOrderId);
-    } else if (item.jobId != null) {
-      this.openJobDetailDialog(item.jobId);
-    }
+    this.openSoDetailDialog(item.id);
   }
 
   private openSoDetailDialog(salesOrderId: number): void {
@@ -156,16 +141,6 @@ export class SalesOrdersComponent implements OnInit {
       salesOrderId,
       SalesOrderDetailDialogComponent,
       { salesOrderId },
-    );
-    ref.afterClosed().subscribe(() => this.loadSalesOrders());
-  }
-
-  private openJobDetailDialog(jobId: number): void {
-    const ref = this.detailDialog.open<JobDetailDialogComponent, JobDetailDialogData>(
-      'job',
-      jobId,
-      JobDetailDialogComponent,
-      { jobId },
     );
     ref.afterClosed().subscribe(() => this.loadSalesOrders());
   }

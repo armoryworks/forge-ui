@@ -5610,7 +5610,7 @@
       "deleteMessage": "¿Eliminar suavemente \"{{name}}\"? Las órdenes ya generadas se conservan; solo se detienen las generaciones futuras."
     },
     "title": "Órdenes de Venta",
-    "subtitle": "Rastrear órdenes confirmadas de clientes hasta su cumplimiento",
+    "subtitle": "Órdenes de clientes, del borrador a la entrega",
     "newOrder": "Nueva Orden",
     "searchPlaceholder": "Buscar órdenes...",
     "noOrdersFound": "No se encontraron órdenes de venta",
@@ -5857,6 +5857,9 @@
     "billTo": "Facturar a",
     "zeroPriceConfirm": "Esta línea tiene precio de $0.00. ¿Agregarla de todos modos?",
     "listPrice": "Precio de lista"
+  },
+  "salesOrderList": {
+    "cancelOrder": "Cancelar orden"
   },
   "publicAcceptance": {
     "loading": "Cargando…",

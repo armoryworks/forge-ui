@@ -5617,7 +5617,7 @@
       "deleteMessage": "Soft-delete \"{{name}}\"? Already-generated sales orders are kept; only future generations stop."
     },
     "title": "Sales Orders",
-    "subtitle": "Track confirmed customer orders through fulfillment",
+    "subtitle": "Customer orders from draft to delivery",
     "newOrder": "New Order",
     "searchPlaceholder": "Search orders...",
     "noOrdersFound": "No sales orders found",
@@ -5864,6 +5864,9 @@
     "billTo": "Bill to",
     "zeroPriceConfirm": "This line is priced at $0.00. Add it anyway?",
     "listPrice": "List price"
+  },
+  "salesOrderList": {
+    "cancelOrder": "Cancel order"
   },
   "publicAcceptance": {
     "loading": "Loading…",

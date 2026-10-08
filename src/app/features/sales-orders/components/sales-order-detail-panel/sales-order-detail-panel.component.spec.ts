@@ -3,7 +3,9 @@ import { TestBed } from '@angular/core/testing';
 import { Signal, WritableSignal, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { FormGroup } from '@angular/forms';
 
 import { SalesOrderDetailPanelComponent } from './sales-order-detail-panel.component';
 import { SalesOrderService } from '../../services/sales-order.service';
@@ -99,11 +101,17 @@ interface Panel {
   showCancelDialog: Signal<boolean>;
   cancelFeeAllowed: Signal<boolean>;
   cancelForm: { setValue(value: { feeAmount: number | null; feeReason: string }): void };
+  hasOpenLinkedJobs: Signal<boolean>;
+  headerForm: FormGroup;
+  headerTaxLocked: Signal<boolean>;
+  headerError: Signal<string | null>;
+  editingHeader: Signal<boolean>;
+  saveHeader(): void;
 }
 
 describe('SalesOrderDetailPanelComponent', () => {
   let soService: Record<string, ReturnType<typeof vi.fn>>;
-  let customerService: { getCreditStatus: ReturnType<typeof vi.fn> };
+  let customerService: { getCreditStatus: ReturnType<typeof vi.fn>; getTaxEditability: ReturnType<typeof vi.fn> };
   let snackbar: Record<string, ReturnType<typeof vi.fn>>;
   let dialogOpen: ReturnType<typeof vi.fn>;
   let dialogResult: boolean;
@@ -129,8 +137,12 @@ describe('SalesOrderDetailPanelComponent', () => {
       confirmSalesOrder: vi.fn(() => of({ jobsCreated: 2 })),
       createMissingJobs: vi.fn(() => of({ created: 1, skipped: [] })),
       cancelSalesOrder: vi.fn(() => of(undefined)),
+      updateSalesOrder: vi.fn(() => of(undefined)),
     };
-    customerService = { getCreditStatus: vi.fn() };
+    customerService = {
+      getCreditStatus: vi.fn(),
+      getTaxEditability: vi.fn(() => of({ canEditTax: false, reason: null, activeDocumentId: null, stateCode: 'UT', expiresAt: null })),
+    };
     snackbar = { success: vi.fn(), warn: vi.fn(), error: vi.fn(), info: vi.fn() };
     dialogOpen = vi.fn(() => ({ afterClosed: () => of(dialogResult) }));
 
@@ -451,5 +463,71 @@ describe('SalesOrderDetailPanelComponent', () => {
     panel['submitCancel']();
 
     expect(soService['cancelSalesOrder']).toHaveBeenCalledWith(7, {});
+  });
+
+  it('ignores completed work orders when deciding the cancel puts work on hold', () => {
+    const panel = build(order({
+      status: 'Confirmed',
+      lines: [line({ jobs: [{ id: 1, isArchived: false, isComplete: true } as never] })],
+    }));
+    expect(panel['hasOpenLinkedJobs']()).toBe(false);
+    expect(panel['cancelMessage']()).toBe('salesOrders.cancelSoMessageNoJobs {"number":"SO-00007"}');
+
+    panel['so'].set(order({
+      status: 'Confirmed',
+      lines: [line({ jobs: [{ id: 1, isArchived: false, isComplete: true } as never, { id: 2, isArchived: false, isComplete: false } as never] })],
+    }));
+    expect(panel['hasOpenLinkedJobs']()).toBe(true);
+  });
+
+  it('loads the requested delivery date into the header edit on the same calendar day', () => {
+    const panel = build(order({ requestedDeliveryDate: new Date('2026-10-30T00:00:00Z') }));
+
+    panel['startEditHeader']();
+
+    const loaded = panel['headerForm'].getRawValue().requestedDeliveryDate as Date;
+    expect([loaded.getFullYear(), loaded.getMonth(), loaded.getDate()]).toEqual([2026, 9, 30]);
+  });
+
+  it('locks the header tax rate without a verified certificate and leaves it out of the save', () => {
+    const panel = build(order({ status: 'Confirmed', taxRate: 0.0725 }));
+
+    panel['startEditHeader']();
+
+    expect(customerService.getTaxEditability).toHaveBeenCalledWith(4);
+    expect(panel['headerTaxLocked']()).toBe(true);
+    expect(panel['headerForm'].get('taxRate')!.disabled).toBe(true);
+    expect(panel['headerForm'].getRawValue().taxRate).toBe(7.25);
+
+    panel['saveHeader']();
+    expect(soService['updateSalesOrder'].mock.calls[0][1].taxRate).toBeUndefined();
+  });
+
+  it('sends a changed tax rate when a verified certificate is on file', () => {
+    customerService.getTaxEditability.mockReturnValue(of({ canEditTax: true, reason: null, activeDocumentId: 3, stateCode: 'UT', expiresAt: null }));
+    const panel = build(order({ status: 'Confirmed', taxRate: 0.0725 }));
+
+    panel['startEditHeader']();
+    expect(panel['headerTaxLocked']()).toBe(false);
+    panel['headerForm'].get('taxRate')!.setValue(0);
+    panel['saveHeader']();
+
+    expect(soService['updateSalesOrder'].mock.calls[0][1].taxRate).toBe(0);
+  });
+
+  it('shows the server message when the save is refused with a conflict', () => {
+    customerService.getTaxEditability.mockReturnValue(of({ canEditTax: true, reason: null, activeDocumentId: 3, stateCode: 'UT', expiresAt: null }));
+    soService['updateSalesOrder'].mockReturnValue(throwError(() => new HttpErrorResponse({
+      status: 409,
+      error: { title: 'Conflict', detail: 'A verified tax certificate is required to change the tax rate.' },
+    })));
+    const panel = build(order({ status: 'Confirmed' }));
+
+    panel['startEditHeader']();
+    panel['headerForm'].get('taxRate')!.setValue(0);
+    panel['saveHeader']();
+
+    expect(panel['headerError']()).toBe('A verified tax certificate is required to change the tax rate.');
+    expect(panel['editingHeader']()).toBe(true);
   });
 });

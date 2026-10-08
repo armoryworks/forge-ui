@@ -38,7 +38,7 @@
           <app-currency-display [value]="row.total" [currency]="null" />
         </ng-template>
         <ng-template appColumnCell="requestedDeliveryDate" let-row>
-          <span class="text-muted">{{ row.requestedDeliveryDate ? (row.requestedDeliveryDate | date:'MM/dd/yyyy') : '—' }}</span>
+          <span class="text-muted">{{ row.requestedDeliveryDate ? (row.requestedDeliveryDate | date:'MM/dd/yyyy':'UTC') : '—' }}</span>
         </ng-template>
         <ng-template appColumnCell="createdAt" let-row>
           <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>

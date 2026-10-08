@@ -199,7 +199,7 @@
             @if (so.requestedDeliveryDate) {
               <div class="info-item">
                 <span class="info-label">{{ 'salesOrders.requestedDelivery' | translate }}</span>
-                <span class="info-value">{{ so.requestedDeliveryDate | date:'MM/dd/yyyy' }}</span>
+                <span class="info-value">{{ so.requestedDeliveryDate | date:'MM/dd/yyyy':'UTC' }}</span>
               </div>
             }
             @if (so.confirmedDate) {
@@ -249,9 +249,24 @@
                 <app-select [label]="'salesOrders.creditTerms' | translate" formControlName="creditTerms" [options]="creditTermsOptions" data-testid="so-header-terms" />
                 <app-select [label]="'salesOrders.billingAddress' | translate" formControlName="billingAddressId" [options]="billingAddressOptions()" data-testid="so-header-billing" />
                 <app-datepicker [label]="'salesOrders.requestedDeliveryDate' | translate" formControlName="requestedDeliveryDate" data-testid="so-header-delivery" />
+                <div class="tax-field">
+                  <app-input [label]="'salesOrders.taxRate' | translate" type="number" formControlName="taxRate" [required]="true" suffix="%"
+                    [matTooltip]="headerTaxLocked() ? ('quotes.taxLockedTooltip' | translate) : ''" data-testid="so-header-tax-rate" />
+                  @if (headerTaxLocked()) {
+                    <span class="material-icons-outlined tax-lock-icon" data-testid="so-header-tax-lock"
+                      [matTooltip]="'quotes.taxLockedTooltip' | translate" matTooltipPosition="above"
+                      role="img" [attr.aria-label]="'quotes.taxLockedTooltip' | translate">lock</span>
+                  }
+                </div>
+                @if (headerError(); as message) {
+                  <div class="header-edit-error" role="alert" data-testid="so-header-error">
+                    <span class="material-icons-outlined" aria-hidden="true">error_outline</span>
+                    <span>{{ message }}</span>
+                  </div>
+                }
                 <div class="line-edit-form__actions">
                   <button type="button" class="action-btn" (click)="cancelHeaderEdit()">{{ 'common.cancel' | translate }}</button>
-                  <button type="submit" class="action-btn action-btn--primary" data-testid="so-header-save" [disabled]="savingHeader()">{{ 'common.save' | translate }}</button>
+                  <button type="submit" class="action-btn action-btn--primary" data-testid="so-header-save" [disabled]="savingHeader() || headerForm.invalid">{{ 'common.save' | translate }}</button>
                 </div>
               </form>
             }
@@ -321,17 +336,21 @@
 
           <!-- Actions — destructive on far left, primary furthest right. -->
           <div class="detail-actions">
-            @if (canDelete(so.status)) {
-              <button class="action-btn action-btn--danger" data-testid="so-delete-btn" (click)="deleteSo()">
-                <span class="material-icons-outlined">delete</span>
-                {{ 'common.delete' | translate }}
-              </button>
-            }
-            @if (canCancel(so.status)) {
-              <button class="action-btn" data-testid="so-cancel-btn" (click)="cancelSo()">
-                <span class="material-icons-outlined">block</span>
-                {{ 'common.cancel' | translate }}
-              </button>
+            @if (canDelete(so.status) || canCancel(so.status)) {
+              <div class="detail-actions__destructive">
+                @if (canDelete(so.status)) {
+                  <button class="action-btn action-btn--danger" data-testid="so-delete-btn" (click)="deleteSo()">
+                    <span class="material-icons-outlined">delete</span>
+                    {{ 'common.delete' | translate }}
+                  </button>
+                }
+                @if (canCancel(so.status)) {
+                  <button class="action-btn action-btn--danger" data-testid="so-cancel-btn" (click)="cancelSo()">
+                    <span class="material-icons-outlined">block</span>
+                    {{ 'salesOrderList.cancelOrder' | translate }}
+                  </button>
+                }
+              </div>
             }
             @if (canConfirm(so.status)) {
               <button class="action-btn action-btn--primary" data-testid="so-confirm-btn"

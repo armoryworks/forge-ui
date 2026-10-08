@@ -31,7 +31,7 @@ export interface UpsertStageInput {
 export interface SalesOrderListQuery extends PagedQuery {
   customerId?: number;
   status?: string;
-  /** "orderDate" (default; uses Job.CreatedAt) or "shipDate" (uses Job.DueDate). */
+  /** "orderDate" (default) or "shipDate" (the requested delivery date). */
   dateField?: 'orderDate' | 'shipDate';
 }
 
@@ -63,17 +63,16 @@ export class SalesOrderService {
   /** S4c — per-stage mutations live under /api/v1/sales-order-stages/{id}. */
   private readonly stageBase = `${environment.apiUrl}/sales-order-stages`;
   /**
-   * Phase 3 F1 partial / WU-18 — read-only Job-projected list at
+   * Phase 3 F1 partial / WU-18 — read-only sales-order list at
    * `/api/v1/sales-orders`. Returns the standard PagedResponse envelope.
    */
   private readonly listBase = `${environment.apiUrl}/sales-orders`;
 
   /**
-   * Phase 3 F1 partial / WU-18 — paged Job-projected sales-order list.
+   * Phase 3 F1 partial / WU-18 — paged sales-order list, one row per order.
    *
    * Returns the standard `{ items, totalCount, page, pageSize }` envelope.
-   * Underlying server endpoint filters Jobs to "Order Confirmed" stage and
-   * downstream production stages, projecting to the SO-shape DTO.
+   * `status` filters by SalesOrderStatus name (Draft, Confirmed, InProduction, ...).
    */
   getSalesOrdersPaged(query: SalesOrderListQuery = {}): Observable<PagedResponse<SalesOrderListItem>> {
     let params = new HttpParams();

@@ -5,7 +5,7 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { catchError, map, Observable, of, startWith, Subject, switchMap } from 'rxjs';
+import { catchError, EMPTY, map, Observable, of, startWith, Subject, switchMap } from 'rxjs';
 
 import { SalesOrderService } from '../../services/sales-order.service';
 import { CustomerService } from '../../../customers/services/customer.service';
@@ -13,7 +13,8 @@ import { CustomerAddressService } from '../../../customers/services/customer-add
 import { CreditStatus } from '../../../customers/models/credit-status.model';
 import { CustomerAddress } from '../../../../shared/models/customer-address.model';
 import { PartsService } from '../../../parts/services/parts.service';
-import { CustomerListItem } from '../../../customers/models/customer-list-item.model';
+import { CustomerTaxEditability } from '../../../customers/models/customer-tax-editability.model';
+import { AdminService } from '../../../admin/services/admin.service';
 import { PartListItem } from '../../../parts/models/part-list-item.model';
 import { CreateSalesOrderLineRequest } from '../../models/create-sales-order-line-request.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
@@ -23,13 +24,14 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
+import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
-import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { fromIsoDate, toIsoDate } from '../../../../shared/utils/date.utils';
 import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
 
 interface LineEntry {
@@ -46,7 +48,7 @@ interface LineEntry {
   imports: [
     ReactiveFormsModule, DecimalPipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
-    AutocompleteComponent, CurrencyDisplayComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
+    AutocompleteComponent, EntityPickerComponent, CurrencyDisplayComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './so-dialog.component.html',
   styleUrl: './so-dialog.component.scss',
@@ -54,8 +56,10 @@ interface LineEntry {
 })
 export class SoDialogComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+  @ViewChild(EntityPickerComponent) private customerPicker?: EntityPickerComponent;
   private readonly soService = inject(SalesOrderService);
   private readonly customerService = inject(CustomerService);
+  private readonly adminService = inject(AdminService);
   private readonly addressService = inject(CustomerAddressService);
   private readonly dialog = inject(MatDialog);
   private readonly partsService = inject(PartsService);
@@ -71,12 +75,14 @@ export class SoDialogComponent {
   readonly saved = output<void>();
 
   protected readonly saving = signal(false);
-  protected readonly customers = signal<CustomerListItem[]>([]);
   protected readonly parts = signal<PartListItem[]>([]);
   protected readonly lines = signal<LineEntry[]>([]);
   protected readonly addresses = signal<CustomerAddress[]>([]);
   protected readonly creditStatus = signal<CreditStatus | null>(null);
   protected readonly priceIsListPrice = signal(false);
+  protected readonly taxEditability = signal<CustomerTaxEditability | null>(null);
+  protected readonly taxLocked = computed(() => this.taxEditability()?.canEditTax === false);
+  private readonly customerName = signal('');
   private readonly priceLookups = new Subject<void>();
 
   protected readonly shipToOptions = computed<SelectOption[]>(() => this.addressOptions('Shipping'));
@@ -90,11 +96,6 @@ export class SoDialogComponent {
       })
       : null;
   });
-
-  protected readonly customerOptions = computed<SelectOption[]>(() => [
-    { value: null, label: this.translate.instant('salesOrders.selectCustomer') },
-    ...this.customers().map(c => ({ value: c.id, label: c.name })),
-  ]);
 
   protected readonly partOptions = computed<AutocompleteOption[]>(() =>
     this.parts().map(p => ({ value: p.id, label: `${p.partNumber} — ${p.name}` })));
@@ -153,18 +154,32 @@ export class SoDialogComponent {
     entityType: 'sales-order',
     entityId: 'new',
     route: '/sales-orders',
-    snapshotFn: () => ({ ...this.form.getRawValue(), lines: this.lines() }),
+    snapshotFn: () => {
+      const value = this.form.getRawValue();
+      return {
+        ...value,
+        requestedDeliveryDate: toIsoDate(value.requestedDeliveryDate),
+        customerName: this.customerName(),
+        lines: this.lines(),
+      };
+    },
     restoreFn: (data) => {
-      this.form.patchValue(data);
+      const customerId = typeof data['customerId'] === 'number' ? data['customerId'] : null;
+      const customerName = typeof data['customerName'] === 'string' ? data['customerName'] : '';
+      if (customerId != null && customerName) {
+        this.customerName.set(customerName);
+        this.customerPicker?.setSelected(customerId, customerName);
+      }
+      this.form.patchValue({
+        ...data,
+        requestedDeliveryDate: fromIsoDate(data['requestedDeliveryDate'] as string | null | undefined),
+      });
       if (Array.isArray(data['lines'])) this.lines.set(data['lines'] as LineEntry[]);
       this.form.markAsDirty();
     },
   };
 
   constructor() {
-    this.customerService.getCustomers().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (list) => this.customers.set(list),
-    });
     this.partsService.getParts('Active').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.parts.set(list),
     });
@@ -191,6 +206,27 @@ export class SoDialogComponent {
       }),
       takeUntilDestroyed(this.destroyRef),
     ).subscribe(status => this.creditStatus.set(status));
+
+    customerChanges.pipe(
+      switchMap(customerId => {
+        this.taxEditability.set(null);
+        this.form.controls.taxRate.enable({ emitEvent: false });
+        return customerId == null
+          ? EMPTY
+          : this.adminService.getTaxRateForCustomer(customerId).pipe(catchError(() => EMPTY));
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(rate => this.form.controls.taxRate.setValue(rate == null ? 0 : +(rate.rate * 100).toFixed(4)));
+
+    customerChanges.pipe(
+      switchMap(customerId => customerId == null
+        ? EMPTY
+        : this.customerService.getTaxEditability(customerId).pipe(catchError(() => EMPTY))),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(editability => {
+      this.taxEditability.set(editability);
+      if (!editability.canEditTax) this.form.controls.taxRate.disable({ emitEvent: false });
+    });
 
     customerChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       if (this.lineForm.controls.partId.value != null && !this.lineForm.controls.unitPrice.dirty) {
@@ -256,6 +292,10 @@ export class SoDialogComponent {
       map(price => price ?? fallback),
       catchError(() => of(fallback)),
     );
+  }
+
+  protected onCustomerSelected(customer: Record<string, unknown> | null): void {
+    this.customerName.set(customer ? String(customer['name'] ?? '') : '');
   }
 
   protected close(): void {

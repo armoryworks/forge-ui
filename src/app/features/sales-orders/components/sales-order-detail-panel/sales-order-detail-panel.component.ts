@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal, ViewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { HttpErrorResponse } from '@angular/common/http';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -30,7 +31,7 @@ import { CurrencyInputComponent } from '../../../../shared/components/currency-i
 import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
 import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
-import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { fromIsoDate, toIsoDate } from '../../../../shared/utils/date.utils';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { FileAttachment } from '../../../../shared/models/file.model';
 import { CustomerAddress } from '../../../../shared/models/customer-address.model';
@@ -51,6 +52,7 @@ import { SalesOrderAcceptance } from '../../models/sales-order-acceptance.model'
 import { NumberLockInfoComponent } from '../../../../shared/components/number-lock-info/number-lock-info.component';
 import { CustomerService } from '../../../customers/services/customer.service';
 import { CreditStatus } from '../../../customers/models/credit-status.model';
+import { CustomerTaxEditability } from '../../../customers/models/customer-tax-editability.model';
 import { CreateMissingJobsResponse } from '../../models/create-missing-jobs-response.model';
 import { ConfirmSalesOrderResponse } from '../../models/confirm-sales-order-response.model';
 import { CancelSalesOrderRequest } from '../../models/cancel-sales-order-request.model';
@@ -287,7 +289,7 @@ export class SalesOrderDetailPanelComponent {
   protected readonly hasOpenLinkedJobs = computed(() => {
     const so = this.so();
     if (!so) return false;
-    return so.lines.some(l => !l.isFullyShipped && l.jobs.some(j => !j.isArchived));
+    return so.lines.some(l => !l.isFullyShipped && l.jobs.some(j => !j.isArchived && !j.isComplete));
   });
 
   protected readonly cancelMessage = computed(() => {
@@ -319,7 +321,11 @@ export class SalesOrderDetailPanelComponent {
     creditTerms: new FormControl<string | null>(null),
     requestedDeliveryDate: new FormControl<Date | null>(null),
     billingAddressId: new FormControl<number | null>(null),
+    taxRate: new FormControl<number>(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
   });
+  protected readonly headerTaxEditability = signal<CustomerTaxEditability | null>(null);
+  protected readonly headerTaxLocked = computed(() => this.headerTaxEditability()?.canEditTax === false);
+  protected readonly headerError = signal<string | null>(null);
   protected readonly canEditHeader = computed(() => {
     const status = this.so()?.status;
     return status === 'Draft' || status === 'Confirmed';
@@ -1092,12 +1098,26 @@ export class SalesOrderDetailPanelComponent {
     this.headerForm.reset({
       customerPO: so.customerPO ?? '',
       creditTerms: so.creditTerms ?? null,
-      requestedDeliveryDate: so.requestedDeliveryDate ? new Date(so.requestedDeliveryDate) : null,
+      requestedDeliveryDate: fromIsoDate(so.requestedDeliveryDate),
       billingAddressId: so.billingAddressId ?? null,
+      taxRate: this.taxPercent(),
     });
+    this.headerError.set(null);
     this.addressesCustomerId = null;
     this.loadCustomerAddresses(so.customerId);
+    this.loadHeaderTaxEditability(so.customerId);
     this.editingHeader.set(true);
+  }
+
+  private loadHeaderTaxEditability(customerId: number): void {
+    this.headerTaxEditability.set(null);
+    this.headerForm.controls.taxRate.enable();
+    this.customerService.getTaxEditability(customerId).subscribe({
+      next: (editability) => {
+        this.headerTaxEditability.set(editability);
+        if (!editability.canEditTax) this.headerForm.controls.taxRate.disable();
+      },
+    });
   }
 
   private loadCustomerAddresses(customerId: number): void {
@@ -1113,6 +1133,7 @@ export class SalesOrderDetailPanelComponent {
   }
 
   protected cancelHeaderEdit(): void {
+    this.headerError.set(null);
     this.editingHeader.set(false);
   }
 
@@ -1120,6 +1141,8 @@ export class SalesOrderDetailPanelComponent {
     const so = this.so();
     if (!so) return;
     const v = this.headerForm.getRawValue();
+    const taxChanged = this.headerForm.controls.taxRate.enabled && Number(v.taxRate) !== this.taxPercent();
+    this.headerError.set(null);
     this.savingHeader.set(true);
     // `|| undefined` so a blank field is omitted rather than sent — the server only
     // applies non-null fields, and an empty creditTerms string would fail enum-parse.
@@ -1128,6 +1151,7 @@ export class SalesOrderDetailPanelComponent {
       creditTerms: v.creditTerms || undefined,
       requestedDeliveryDate: toIsoDate(v.requestedDeliveryDate) || undefined,
       billingAddressId: v.billingAddressId ?? undefined,
+      taxRate: taxChanged ? Number(v.taxRate) / 100 : undefined,
     }).subscribe({
       next: () => {
         this.savingHeader.set(false);
@@ -1136,8 +1160,25 @@ export class SalesOrderDetailPanelComponent {
         this.changed.emit();
         this.snackbar.success(this.translate.instant('salesOrders.headerUpdated'));
       },
-      error: () => this.savingHeader.set(false),
+      error: (err: unknown) => {
+        this.savingHeader.set(false);
+        if (err instanceof HttpErrorResponse && err.status === 409) {
+          this.headerError.set(this.conflictMessage(err));
+        }
+      },
     });
+  }
+
+  private conflictMessage(err: HttpErrorResponse): string | null {
+    const body: unknown = err.error;
+    if (typeof body === 'string') return body || null;
+    if (body && typeof body === 'object') {
+      const { detail, title, message } = body as { detail?: unknown; title?: unknown; message?: unknown };
+      for (const text of [detail, title, message]) {
+        if (typeof text === 'string' && text) return text;
+      }
+    }
+    return null;
   }
 
   protected deleteLine(line: SalesOrderLine): void {
