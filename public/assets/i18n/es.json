@@ -676,6 +676,24 @@
       "operationsRemaining": "faltan ~{{time}}"
     }
   },
+  "jobDetailExtras": {
+    "archive": "Archivar orden de trabajo",
+    "archiveTitle": "¿Archivar esta orden de trabajo?",
+    "archiveMessage": "La orden de trabajo {{jobNumber}} saldrá del tablero y de las listas activas. Un administrador puede restaurarla más tarde.",
+    "archiveConfirm": "Archivar",
+    "archived": "Orden de trabajo {{jobNumber}} archivada",
+    "archiveFailed": "No se pudo archivar la orden de trabajo",
+    "archivedChip": "Archivada",
+    "unarchive": "Desarchivar",
+    "unarchiveTitle": "¿Restaurar esta orden de trabajo?",
+    "unarchiveMessage": "La orden de trabajo {{jobNumber}} volverá al tablero y a las listas activas.",
+    "unarchived": "Orden de trabajo {{jobNumber}} restaurada",
+    "unarchiveFailed": "No se pudo restaurar la orden de trabajo",
+    "hideAddForm": "Ocultar el formulario para agregar",
+    "linkSelf": "Una orden de trabajo no puede vincularse consigo misma.",
+    "linkDuplicate": "Esa orden de trabajo ya está vinculada.",
+    "partDuplicate": "Esa pieza ya está en esta orden de trabajo."
+  },
   "backlog": {
     "title": "Pendientes",
     "subtitle": "Trabajos no programados esperando ser planificados",

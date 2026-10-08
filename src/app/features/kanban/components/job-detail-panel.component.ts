@@ -1,7 +1,6 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
-import { catchError, debounceTime, distinctUntilChanged, filter, of, switchMap } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { TimeTrackingService } from '../../time-tracking/services/time-tracking.service';
@@ -26,14 +25,13 @@ import { JobDetail } from '../models/job-detail.model';
 import { JobBomAtRelease } from '../../parts/models/bom-revision.model';
 import { Subtask } from '../models/subtask.model';
 import { JobLink } from '../models/job-link.model';
-import { KanbanJob } from '../models/kanban-job.model';
 import { PriorityIndicatorComponent } from '../../../shared/components/priority-indicator/priority-indicator.component';
 import { LINK_TYPE_OPTIONS } from '../models/link-type-options.const';
 import { LINK_TYPE_ICONS } from '../models/link-type-icons.const';
 import { LINK_TYPE_LABELS } from '../models/link-type-labels.const';
 import { JobPart } from '../models/job-part.model';
 import { EntityLinkComponent } from '../../../shared/components/entity-link/entity-link.component';
-import { PartSearchResult } from '../models/part-search-result.model';
+import { EntityPickerComponent } from '../../../shared/components/entity-picker/entity-picker.component';
 import { ChildJob } from '../models/child-job.model';
 import { LotService } from '../../lots/services/lot.service';
 import { LotListItem } from '../../lots/models/lot-list-item.model';
@@ -48,7 +46,7 @@ import { OperationTimeTabComponent } from './operation-time-tab.component';
 @Component({
   selector: 'app-job-detail-panel',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, ReactiveFormsModule, TranslatePipe, AvatarComponent, PriorityIndicatorComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, JobCostTabComponent, OperationTimeTabComponent, MatMenuModule, MatTooltipModule, EntityLinkComponent, CapDirective, JobGatesSectionComponent],
+  imports: [DatePipe, DecimalPipe, ReactiveFormsModule, TranslatePipe, AvatarComponent, PriorityIndicatorComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, JobCostTabComponent, OperationTimeTabComponent, MatMenuModule, MatTooltipModule, EntityLinkComponent, EntityPickerComponent, CapDirective, JobGatesSectionComponent],
   templateUrl: './job-detail-panel.component.html',
   styleUrl: './job-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -77,16 +75,17 @@ export class JobDetailPanelComponent implements OnInit {
   // the staleness flag (true if the part's BOM has advanced since).
   protected readonly bomAtRelease = signal<JobBomAtRelease | null>(null);
   protected readonly newSubtaskControl = new FormControl('');
+  protected readonly showSubtaskAdd = signal(false);
 
   // Link add form
-  protected readonly linkSearchControl = new FormControl('');
+  protected readonly showLinkAdd = signal(false);
+  protected readonly linkTargetControl = new FormControl<number | null>(null);
+  protected readonly linkPickerFilters = { isArchived: 'false' };
   protected readonly linkTypeControl = new FormControl('RelatedTo');
   protected readonly linkTypeOptions = LINK_TYPE_OPTIONS;
   protected readonly linkTypeIcons = LINK_TYPE_ICONS;
   protected readonly linkTypeLabels = LINK_TYPE_LABELS;
-  protected readonly linkSearchResults = signal<KanbanJob[]>([]);
-  protected readonly selectedLinkTarget = signal<KanbanJob | null>(null);
-  protected readonly showLinkResults = signal(false);
+  protected readonly selectedLinkTargetId = signal<number | null>(null);
 
   // Child jobs
   protected readonly childJobs = signal<ChildJob[]>([]);
@@ -96,12 +95,11 @@ export class JobDetailPanelComponent implements OnInit {
 
   // Part add form
   protected readonly jobParts = signal<JobPart[]>([]);
-  protected readonly partSearchControl = new FormControl('');
+  protected readonly showPartAdd = signal(false);
+  protected readonly partPickerControl = new FormControl<number | null>(null);
   protected readonly partQtyControl = new FormControl<number | null>(1);
   private readonly partQtyEditControls = new Map<number, FormControl<number | null>>();
-  protected readonly partSearchResults = signal<PartSearchResult[]>([]);
-  protected readonly selectedPart = signal<PartSearchResult | null>(null);
-  protected readonly showPartResults = signal(false);
+  protected readonly selectedPartId = signal<number | null>(null);
 
   // Activity (delegated to shared EntityActivitySectionComponent)
 
@@ -109,6 +107,9 @@ export class JobDetailPanelComponent implements OnInit {
   protected readonly availableStages = signal<Stage[]>([]);
 
   protected readonly isTimerLoading = signal(false);
+  protected readonly isArchiveSaving = signal(false);
+
+  protected readonly isAdmin = computed(() => this.auth.hasRole('Admin'));
 
   protected readonly myActiveTimer = computed(() => {
     const userId = this.auth.user()?.id;
@@ -168,36 +169,6 @@ export class JobDetailPanelComponent implements OnInit {
     this.kanbanService.getJobTimeEntries(id).subscribe(t => this.timeEntries.set(t));
     this.kanbanService.getJobParts(id).subscribe(p => this.jobParts.set(p));
 
-    this.partSearchControl.valueChanges.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      filter(v => (v?.length ?? 0) >= 2),
-      // catchError inside the switchMap so a transient search failure yields empty
-      // results instead of erroring (and permanently killing) the outer valueChanges
-      // subscription for the panel's lifetime — see issue #28.
-      switchMap(term => this.kanbanService.searchParts(term!).pipe(catchError(() => of([])))),
-    ).subscribe(results => {
-      const linkedPartIds = new Set(this.jobParts().map(jp => jp.partId));
-      this.partSearchResults.set(
-        results.filter(p => !linkedPartIds.has(p.id)).slice(0, 8)
-      );
-      this.showPartResults.set(true);
-    });
-
-    this.linkSearchControl.valueChanges.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      filter(v => (v?.length ?? 0) >= 2),
-      switchMap(term => this.kanbanService.searchJobs(term!)),
-    ).subscribe(results => {
-      // Exclude the current job and already-linked jobs
-      const currentId = this.jobId();
-      const linkedIds = new Set(this.links().map(l => l.linkedJobId));
-      this.linkSearchResults.set(
-        results.filter(j => j.id !== currentId && !linkedIds.has(j.id)).slice(0, 8)
-      );
-      this.showLinkResults.set(true);
-    });
   }
 
   protected completedCount(): number {
@@ -222,21 +193,39 @@ export class JobDetailPanelComponent implements OnInit {
     });
   }
 
-  protected selectLinkTarget(job: KanbanJob): void {
-    this.selectedLinkTarget.set(job);
-    this.linkSearchControl.setValue(job.jobNumber + ' — ' + job.title, { emitEvent: false });
-    this.showLinkResults.set(false);
+  protected toggleSubtaskAdd(): void {
+    this.showSubtaskAdd.update(open => !open);
+  }
+
+  protected toggleLinkAdd(): void {
+    this.showLinkAdd.update(open => !open);
+  }
+
+  protected togglePartAdd(): void {
+    this.showPartAdd.update(open => !open);
+  }
+
+  protected onLinkTargetPicked(row: Record<string, unknown> | null): void {
+    this.selectedLinkTargetId.set(row ? Number(row['id']) : null);
   }
 
   protected addLink(): void {
-    const target = this.selectedLinkTarget();
+    const targetId = this.selectedLinkTargetId();
     const linkType = this.linkTypeControl.value ?? 'RelatedTo';
-    if (!target) return;
+    if (targetId === null) return;
+    if (targetId === this.jobId()) {
+      this.snackbar.error(this.translate.instant('jobDetailExtras.linkSelf'));
+      return;
+    }
+    if (this.links().some(l => l.linkedJobId === targetId)) {
+      this.snackbar.error(this.translate.instant('jobDetailExtras.linkDuplicate'));
+      return;
+    }
 
-    this.kanbanService.createJobLink(this.jobId(), target.id, linkType).subscribe(link => {
+    this.kanbanService.createJobLink(this.jobId(), targetId, linkType).subscribe(link => {
       this.links.update(list => [...list, link]);
-      this.selectedLinkTarget.set(null);
-      this.linkSearchControl.reset();
+      this.selectedLinkTargetId.set(null);
+      this.linkTargetControl.reset();
       this.linkTypeControl.setValue('RelatedTo');
       this.snackbar.success(this.translate.instant('kanban.linkAdded'));
     });
@@ -247,11 +236,6 @@ export class JobDetailPanelComponent implements OnInit {
       this.links.update(list => list.filter(l => l.id !== link.id));
       this.snackbar.success(this.translate.instant('kanban.linkRemoved'));
     });
-  }
-
-  protected dismissLinkResults(): void {
-    // Small delay to allow click on result
-    setTimeout(() => this.showLinkResults.set(false), 200);
   }
 
 
@@ -293,28 +277,30 @@ export class JobDetailPanelComponent implements OnInit {
     return h > 0 ? (m > 0 ? `${h}h ${m}m` : `${h}h`) : `${m}m`;
   }
 
-  protected selectPart(part: PartSearchResult): void {
-    this.selectedPart.set(part);
-    this.partSearchControl.setValue(`${part.partNumber} — ${part.name}`, { emitEvent: false });
-    this.showPartResults.set(false);
+  protected onPartPicked(row: Record<string, unknown> | null): void {
+    this.selectedPartId.set(row ? Number(row['id']) : null);
   }
 
   protected addPart(): void {
-    const part = this.selectedPart();
+    const partId = this.selectedPartId();
     const qty = this.partQtyControl.value;
-    if (!part || !this.isValidQty(qty)) return;
+    if (partId === null || !this.isValidQty(qty)) return;
+    if (this.jobParts().some(jp => jp.partId === partId)) {
+      this.snackbar.error(this.translate.instant('jobDetailExtras.partDuplicate'));
+      return;
+    }
 
-    this.kanbanService.addJobPart(this.jobId(), part.id, qty).subscribe(jp => {
+    this.kanbanService.addJobPart(this.jobId(), partId, qty).subscribe(jp => {
       this.jobParts.update(list => [...list, jp]);
-      this.selectedPart.set(null);
-      this.partSearchControl.reset();
+      this.selectedPartId.set(null);
+      this.partPickerControl.reset();
       this.partQtyControl.setValue(1);
       this.snackbar.success(this.translate.instant('kanban.partAdded'));
     });
   }
 
   protected canAddPart(): boolean {
-    return this.selectedPart() !== null && this.isValidQty(this.partQtyControl.value);
+    return this.selectedPartId() !== null && this.isValidQty(this.partQtyControl.value);
   }
 
   protected partQtyEditControl(jp: JobPart): FormControl<number | null> {
@@ -359,10 +345,6 @@ export class JobDetailPanelComponent implements OnInit {
       this.partQtyEditControls.delete(jp.id);
       this.snackbar.success(this.translate.instant('kanban.partRemoved'));
     });
-  }
-
-  protected dismissPartResults(): void {
-    setTimeout(() => this.showPartResults.set(false), 200);
   }
 
   protected explodeBom(): void {
@@ -506,6 +488,70 @@ export class JobDetailPanelComponent implements OnInit {
         this.isTimerLoading.set(false);
       },
       error: () => this.isTimerLoading.set(false),
+    });
+  }
+
+  protected archiveJob(): void {
+    const j = this.job();
+    if (!j || j.isArchived) return;
+    this.matDialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('jobDetailExtras.archiveTitle'),
+        message: this.translate.instant('jobDetailExtras.archiveMessage', { jobNumber: j.jobNumber }),
+        confirmLabel: this.translate.instant('jobDetailExtras.archiveConfirm'),
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.isArchiveSaving.set(true);
+      this.kanbanService.bulkArchive([j.id]).subscribe({
+        next: result => {
+          this.isArchiveSaving.set(false);
+          if (result.successCount > 0) {
+            this.job.update(current => current ? { ...current, isArchived: true } : current);
+            this.snackbar.success(this.translate.instant('jobDetailExtras.archived', { jobNumber: j.jobNumber }));
+          } else {
+            this.snackbar.error(this.translate.instant('jobDetailExtras.archiveFailed'));
+          }
+        },
+        error: () => {
+          this.isArchiveSaving.set(false);
+          this.snackbar.error(this.translate.instant('jobDetailExtras.archiveFailed'));
+        },
+      });
+    });
+  }
+
+  protected unarchiveJob(): void {
+    const j = this.job();
+    if (!j || !j.isArchived || !this.isAdmin()) return;
+    this.matDialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('jobDetailExtras.unarchiveTitle'),
+        message: this.translate.instant('jobDetailExtras.unarchiveMessage', { jobNumber: j.jobNumber }),
+        confirmLabel: this.translate.instant('jobDetailExtras.unarchive'),
+        severity: 'info',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.isArchiveSaving.set(true);
+      this.kanbanService.unarchiveJob(j.id).subscribe({
+        next: result => {
+          this.isArchiveSaving.set(false);
+          if (result.successCount > 0) {
+            this.job.update(current => current ? { ...current, isArchived: false } : current);
+            this.snackbar.success(this.translate.instant('jobDetailExtras.unarchived', { jobNumber: j.jobNumber }));
+          } else {
+            this.snackbar.error(this.translate.instant('jobDetailExtras.unarchiveFailed'));
+          }
+        },
+        error: () => {
+          this.isArchiveSaving.set(false);
+          this.snackbar.error(this.translate.instant('jobDetailExtras.unarchiveFailed'));
+        },
+      });
     });
   }
 

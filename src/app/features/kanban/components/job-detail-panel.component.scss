@@ -50,7 +50,8 @@
 .panel__edit,
 .panel__close,
 .panel__timer-btn,
-.panel__cover-btn {
+.panel__cover-btn,
+.panel__archive-btn {
   @include flex-center;
   width: $avatar-size-md; height: $avatar-size-md;
   border: $border-width-thin solid var(--border);
@@ -136,6 +137,16 @@
 .jd-section__title {
   @include uppercase-label($font-size-xxs, 0.5px, 700);
   color: var(--text-muted);
+}
+.jd-section__header-end { display: flex; align-items: center; gap: $sp-sm; }
+.jd-section__add-toggle {
+  @include flex-center;
+  width: $icon-size-lg; height: $icon-size-lg;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface); color: var(--text-secondary); cursor: pointer;
+  .material-icons-outlined { font-size: $icon-size-xs; }
+  &:hover { background: var(--bg); color: var(--text); }
+  &--open { color: var(--text); background: var(--bg); }
 }
 
 // ─── Activity filter ───
@@ -332,7 +343,7 @@
   &:hover &__delete { opacity: 1; }
 }
 
-// ─── Shared: inline add row + search dropdown ───
+// ─── Shared: inline add row ───
 .subtask-add,
 .link-add,
 .part-add {
@@ -351,24 +362,7 @@
 }
 .subtask-add__btn, .link-add__btn, .part-add__btn { @extend %add-btn; }
 
-%search-wrap { flex: 1; position: relative; }
-%search-results {
-  position: absolute; top: 100%; left: 0; right: 0; background: var(--surface);
-  border: $border-width-thin solid var(--border); border-top: none;
-  z-index: $z-dropdown; max-height: 200px; overflow-y: auto;
-}
-%search-result {
-  display: flex; align-items: center; gap: $sp-sm; width: 100%; padding: $sp-sm $sp-md;
-  border: none; background: transparent; color: var(--text); font-size: var(--font-size-sm);
-  font-family: $font-family-primary; cursor: pointer; text-align: left;
-  &:hover { background: var(--bg); }
-}
-
-.link-add__search-wrap, .part-add__search-wrap { @extend %search-wrap; }
-.link-add__results, .part-add__results { @extend %search-results; }
-.link-add__result, .part-add__result { @extend %search-result; }
-.link-add__result-number, .part-add__result-number { font-weight: 600; flex-shrink: 0; }
-.link-add__result-title, .part-add__result-desc { @include truncate; color: var(--text-secondary); }
+.link-add__picker, .part-add__picker { flex: 1; min-width: 0; }
 
 .link-add app-select { flex-shrink: 0; width: 120px; }
 .part-add app-input.part-add__qty { flex: 0 0 96px; }

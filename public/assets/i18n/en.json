@@ -676,6 +676,24 @@
       "operationsRemaining": "~{{time}} left"
     }
   },
+  "jobDetailExtras": {
+    "archive": "Archive work order",
+    "archiveTitle": "Archive this work order?",
+    "archiveMessage": "Work order {{jobNumber}} will leave the board and the active lists. An Admin can restore it later.",
+    "archiveConfirm": "Archive",
+    "archived": "Archived work order {{jobNumber}}",
+    "archiveFailed": "Could not archive the work order",
+    "archivedChip": "Archived",
+    "unarchive": "Unarchive",
+    "unarchiveTitle": "Restore this work order?",
+    "unarchiveMessage": "Work order {{jobNumber}} will return to the board and the active lists.",
+    "unarchived": "Restored work order {{jobNumber}}",
+    "unarchiveFailed": "Could not restore the work order",
+    "hideAddForm": "Hide the add form",
+    "linkSelf": "A work order cannot link to itself.",
+    "linkDuplicate": "That work order is already linked.",
+    "partDuplicate": "That part is already on this work order."
+  },
   "backlog": {
     "title": "Backlog",
     "subtitle": "Unscheduled jobs waiting to be planned",

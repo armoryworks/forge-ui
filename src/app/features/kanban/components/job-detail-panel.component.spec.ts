@@ -13,9 +13,9 @@ import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { AuthService } from '../../../shared/services/auth.service';
 import { TimeEntry } from '../../time-tracking/models/time-entry.model';
 import { Stage } from '../../../shared/models/stage.model';
-import { JobDetail } from '../models/job-detail.model';
 import { JobPart } from '../models/job-part.model';
-import { PartSearchResult } from '../models/part-search-result.model';
+import { JobDetail } from '../models/job-detail.model';
+import { JobLink } from '../models/job-link.model';
 
 class FakeLoader implements TranslateLoader {
   getTranslation(): Observable<Record<string, string>> { return of({}); }
@@ -23,12 +23,27 @@ class FakeLoader implements TranslateLoader {
 
 interface PanelInternals {
   jobId: () => number;
+  job: { (): JobDetail | null; set(v: JobDetail | null): void };
   jobParts: { (): JobPart[]; set(v: JobPart[]): void };
-  selectedPart: { (): PartSearchResult | null; set(v: PartSearchResult | null): void };
-  partSearchControl: FormControl<string | null>;
+  links: { (): JobLink[]; set(v: JobLink[]): void };
+  selectedPartId: () => number | null;
+  selectedLinkTargetId: () => number | null;
+  partPickerControl: FormControl<number | null>;
+  linkTargetControl: FormControl<number | null>;
   partQtyControl: FormControl<number | null>;
-  selectPart(part: PartSearchResult): void;
+  showSubtaskAdd: () => boolean;
+  showLinkAdd: () => boolean;
+  showPartAdd: () => boolean;
+  isAdmin: () => boolean;
+  toggleSubtaskAdd(): void;
+  toggleLinkAdd(): void;
+  togglePartAdd(): void;
+  onPartPicked(row: Record<string, unknown> | null): void;
+  onLinkTargetPicked(row: Record<string, unknown> | null): void;
   addPart(): void;
+  addLink(): void;
+  archiveJob(): void;
+  unarchiveJob(): void;
   canAddPart(): boolean;
   partQtyEditControl(jp: JobPart): FormControl<number | null>;
   savePartQty(jp: JobPart): void;
@@ -37,27 +52,20 @@ interface PanelInternals {
   timeEntries: { set(v: TimeEntry[]): void };
   hasActiveTimer: () => boolean;
   stopTimerForJob(): void;
-  job: { set(v: JobDetail | null): void };
   availableStages: { set(v: Stage[]): void };
   onAllOperationsComplete(): void;
 }
 
 const JOB_ID = 42;
 
-function part(overrides: Partial<PartSearchResult> = {}): PartSearchResult {
-  return {
-    id: 9,
-    partNumber: '40-1700M',
-    name: 'Mounting bracket',
-    description: null,
-    revision: 'A',
-    status: 'Active',
-    procurementSource: 'Make',
-    inventoryClass: 'FinishedGood',
-    bomLineCount: 0,
-    createdAt: new Date('2026-01-01T00:00:00Z'),
-    ...overrides,
-  };
+const PART_ROW: Record<string, unknown> = { id: 9, partNumber: '40-1700M', name: 'Mounting bracket' };
+
+function jobDetail(overrides: Partial<JobDetail> = {}): JobDetail {
+  return { id: JOB_ID, jobNumber: 'WO-0042', isArchived: false, ...overrides } as JobDetail;
+}
+
+function jobLink(overrides: Partial<JobLink> = {}): JobLink {
+  return { id: 3, linkedJobId: 77, linkType: 'RelatedTo', ...overrides } as JobLink;
 }
 
 function jobPart(overrides: Partial<JobPart> = {}): JobPart {
@@ -74,17 +82,26 @@ function jobPart(overrides: Partial<JobPart> = {}): JobPart {
   };
 }
 
-function setup() {
+function setup(options: { admin?: boolean; confirm?: boolean } = {}) {
   const kanban = {
     addJobPart: vi.fn(),
     updateJobPart: vi.fn(),
+    createJobLink: vi.fn(),
+    bulkArchive: vi.fn(),
+    unarchiveJob: vi.fn(),
     getJobTimeEntries: vi.fn().mockReturnValue(of([])),
     moveJobStage: vi.fn().mockReturnValue(of(undefined)),
   };
   const snackbar = { success: vi.fn(), error: vi.fn() };
   const timeTracking = { stopTimer: vi.fn().mockReturnValue(of({})), startTimer: vi.fn() };
   const afterClosed = new Subject<unknown>();
-  const dialog = { open: vi.fn().mockReturnValue({ afterClosed: () => afterClosed }) };
+  const dialog = {
+    open: vi.fn(() => ({ afterClosed: () => (options.confirm === undefined ? afterClosed : of(options.confirm)) })),
+  };
+  const auth = {
+    user: () => ({ id: 1 }),
+    hasRole: vi.fn((role: string) => role === 'Admin' && !!options.admin),
+  };
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     providers: [
@@ -94,7 +111,7 @@ function setup() {
       { provide: TimeTrackingService, useValue: timeTracking },
       { provide: SnackbarService, useValue: snackbar },
       { provide: MatDialog, useValue: dialog },
-      { provide: AuthService, useValue: { user: () => ({ id: 1 }) } },
+      { provide: AuthService, useValue: auth },
     ],
   });
   const component = TestBed.runInInjectionContext(() => new JobDetailPanelComponent()) as unknown as PanelInternals;
@@ -105,17 +122,28 @@ function setup() {
 describe('JobDetailPanelComponent', () => {
   beforeEach(() => TestBed.resetTestingModule());
 
-  it('labels a selected part with its name when it has no description', () => {
+  it('keeps the subtask, link and part add forms hidden until [+] is pressed', () => {
     const { component } = setup();
-    component.selectPart(part());
-    expect(component.partSearchControl.value).toBe('40-1700M — Mounting bracket');
-    expect(component.partSearchControl.value).not.toContain('null');
+    expect(component.showSubtaskAdd()).toBe(false);
+    expect(component.showLinkAdd()).toBe(false);
+    expect(component.showPartAdd()).toBe(false);
+
+    component.toggleSubtaskAdd();
+    component.toggleLinkAdd();
+    component.togglePartAdd();
+    expect(component.showSubtaskAdd()).toBe(true);
+    expect(component.showLinkAdd()).toBe(true);
+    expect(component.showPartAdd()).toBe(true);
+
+    component.togglePartAdd();
+    expect(component.showPartAdd()).toBe(false);
   });
 
-  it('adds a part with the entered quantity and resets the quantity to 1', () => {
+  it('adds the picked part with the entered quantity and resets the picker', () => {
     const { component, kanban } = setup();
     kanban.addJobPart.mockReturnValue(of(jobPart({ quantity: 25 })));
-    component.selectPart(part());
+    component.partPickerControl.setValue(9);
+    component.onPartPicked(PART_ROW);
     component.partQtyControl.setValue(25);
 
     component.addPart();
@@ -123,12 +151,32 @@ describe('JobDetailPanelComponent', () => {
     expect(kanban.addJobPart).toHaveBeenCalledWith(JOB_ID, 9, 25);
     expect(component.jobParts().map(p => p.quantity)).toEqual([25]);
     expect(component.partQtyControl.value).toBe(1);
-    expect(component.selectedPart()).toBeNull();
+    expect(component.selectedPartId()).toBeNull();
+    expect(component.partPickerControl.value).toBeNull();
+  });
+
+  it('clears the picked part when the picker selection is cleared', () => {
+    const { component } = setup();
+    component.onPartPicked(PART_ROW);
+    component.onPartPicked(null);
+    expect(component.selectedPartId()).toBeNull();
+    expect(component.canAddPart()).toBe(false);
+  });
+
+  it('refuses to add a part that is already on the work order', () => {
+    const { component, kanban, snackbar } = setup();
+    component.jobParts.set([jobPart()]);
+    component.onPartPicked(PART_ROW);
+
+    component.addPart();
+
+    expect(kanban.addJobPart).not.toHaveBeenCalled();
+    expect(snackbar.error).toHaveBeenCalledWith('jobDetailExtras.partDuplicate');
   });
 
   it('refuses to add a part when the quantity is not above zero', () => {
     const { component, kanban } = setup();
-    component.selectPart(part());
+    component.onPartPicked(PART_ROW);
     component.partQtyControl.setValue(0);
 
     expect(component.canAddPart()).toBe(false);
@@ -227,6 +275,91 @@ describe('JobDetailPanelComponent', () => {
 
     component.onAllOperationsComplete();
     expect(dialog.open).not.toHaveBeenCalled();
+  });
+
+  it('links the picked work order and resets the picker', () => {
+    const { component, kanban } = setup();
+    kanban.createJobLink.mockReturnValue(of(jobLink({ linkedJobId: 77 })));
+    component.linkTargetControl.setValue(77);
+    component.onLinkTargetPicked({ id: 77, jobNumber: 'WO-0077', title: 'Fixture' });
+
+    component.addLink();
+
+    expect(kanban.createJobLink).toHaveBeenCalledWith(JOB_ID, 77, 'RelatedTo');
+    expect(component.links().map(l => l.linkedJobId)).toEqual([77]);
+    expect(component.selectedLinkTargetId()).toBeNull();
+    expect(component.linkTargetControl.value).toBeNull();
+  });
+
+  it('refuses to link a work order to itself or to one already linked', () => {
+    const { component, kanban, snackbar } = setup();
+    component.onLinkTargetPicked({ id: JOB_ID });
+    component.addLink();
+    expect(snackbar.error).toHaveBeenCalledWith('jobDetailExtras.linkSelf');
+
+    component.links.set([jobLink({ linkedJobId: 77 })]);
+    component.onLinkTargetPicked({ id: 77 });
+    component.addLink();
+    expect(snackbar.error).toHaveBeenCalledWith('jobDetailExtras.linkDuplicate');
+    expect(kanban.createJobLink).not.toHaveBeenCalled();
+  });
+
+  it('archives the work order through the bulk endpoint after confirming', () => {
+    const { component, kanban, snackbar, dialog } = setup({ confirm: true });
+    component.job.set(jobDetail());
+    kanban.bulkArchive.mockReturnValue(of({ successCount: 1, failureCount: 0, errors: [] }));
+
+    component.archiveJob();
+
+    expect(dialog.open).toHaveBeenCalledTimes(1);
+    expect(kanban.bulkArchive).toHaveBeenCalledWith([JOB_ID]);
+    expect(component.job()?.isArchived).toBe(true);
+    expect(snackbar.success).toHaveBeenCalledWith('jobDetailExtras.archived');
+  });
+
+  it('does not archive when the confirm dialog is cancelled', () => {
+    const { component, kanban } = setup({ confirm: false });
+    component.job.set(jobDetail());
+
+    component.archiveJob();
+
+    expect(kanban.bulkArchive).not.toHaveBeenCalled();
+    expect(component.job()?.isArchived).toBe(false);
+  });
+
+  it('keeps the work order active and reports an error when the server archives nothing', () => {
+    const { component, kanban, snackbar } = setup({ confirm: true });
+    component.job.set(jobDetail());
+    kanban.bulkArchive.mockReturnValue(of({ successCount: 0, failureCount: 1, errors: [{ jobId: JOB_ID, message: 'x' }] }));
+
+    component.archiveJob();
+
+    expect(component.job()?.isArchived).toBe(false);
+    expect(snackbar.error).toHaveBeenCalledWith('jobDetailExtras.archiveFailed');
+  });
+
+  it('lets an Admin unarchive an archived work order', () => {
+    const { component, kanban, snackbar } = setup({ admin: true, confirm: true });
+    component.job.set(jobDetail({ isArchived: true }));
+    kanban.unarchiveJob.mockReturnValue(of({ successCount: 1, failureCount: 0, errors: [] }));
+
+    expect(component.isAdmin()).toBe(true);
+    component.unarchiveJob();
+
+    expect(kanban.unarchiveJob).toHaveBeenCalledWith(JOB_ID);
+    expect(component.job()?.isArchived).toBe(false);
+    expect(snackbar.success).toHaveBeenCalledWith('jobDetailExtras.unarchived');
+  });
+
+  it('does not unarchive for a non-Admin', () => {
+    const { component, kanban, dialog } = setup({ admin: false });
+    component.job.set(jobDetail({ isArchived: true }));
+
+    expect(component.isAdmin()).toBe(false);
+    component.unarchiveJob();
+
+    expect(dialog.open).not.toHaveBeenCalled();
+    expect(kanban.unarchiveJob).not.toHaveBeenCalled();
   });
 });
 

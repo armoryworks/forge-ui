@@ -23,6 +23,9 @@
           </button>
         }
       </mat-menu>
+      @if (j.isArchived) {
+        <span class="chip chip--muted" data-testid="job-archived-chip">{{ 'jobDetailExtras.archivedChip' | translate }}</span>
+      }
     </div>
     <div class="panel__header-actions">
       @if (hasActiveTimer()) {
@@ -45,6 +48,21 @@
               [attr.aria-label]="'kanban.setCoverPhoto' | translate">
         <span class="material-icons-outlined">add_photo_alternate</span>
       </button>
+      @if (!j.isArchived) {
+        <button class="panel__archive-btn" [disabled]="isArchiveSaving()" (click)="archiveJob()"
+                data-testid="job-archive-btn"
+                [matTooltip]="'jobDetailExtras.archive' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'jobDetailExtras.archive' | translate">
+          <span class="material-icons-outlined">archive</span>
+        </button>
+      } @else if (isAdmin()) {
+        <button class="panel__archive-btn" [disabled]="isArchiveSaving()" (click)="unarchiveJob()"
+                data-testid="job-unarchive-btn"
+                [matTooltip]="'jobDetailExtras.unarchive' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'jobDetailExtras.unarchive' | translate">
+          <span class="material-icons-outlined">unarchive</span>
+        </button>
+      }
       <button class="panel__edit" (click)="editRequested.emit(job()!)"
               [matTooltip]="'kanban.editJob' | translate" matTooltipPosition="above"
               [attr.aria-label]="'kanban.editJobAria' | translate">
@@ -119,9 +137,17 @@
       <div class="jd-section">
         <div class="jd-section__header">
           <h3 class="jd-section__title">{{ 'jobs.subtasks' | translate }}</h3>
-          @if (subtasks().length) {
-            <span class="panel__section-count">{{ completedCount() }}/{{ subtasks().length }}</span>
-          }
+          <div class="jd-section__header-end">
+            @if (subtasks().length) {
+              <span class="panel__section-count">{{ completedCount() }}/{{ subtasks().length }}</span>
+            }
+            <button class="jd-section__add-toggle" (click)="toggleSubtaskAdd()" data-testid="job-subtask-add-toggle"
+              [class.jd-section__add-toggle--open]="showSubtaskAdd()" [attr.aria-expanded]="showSubtaskAdd()"
+              [attr.aria-label]="(showSubtaskAdd() ? 'jobDetailExtras.hideAddForm' : 'kanban.addSubtask') | translate"
+              [matTooltip]="(showSubtaskAdd() ? 'jobDetailExtras.hideAddForm' : 'kanban.addSubtask') | translate" matTooltipPosition="above">
+              <span class="material-icons-outlined">{{ showSubtaskAdd() ? 'close' : 'add' }}</span>
+            </button>
+          </div>
         </div>
         @if (subtasks().length) {
           <div class="subtask-list">
@@ -134,16 +160,18 @@
             }
           </div>
         }
-        <div class="subtask-add">
-          <app-input [label]="'jobs.subtasks' | translate" [placeholder]="'kanban.addSubtaskPlaceholder' | translate"
-            [formControl]="newSubtaskControl" (keydown.enter)="addSubtask()" />
-          <button class="subtask-add__btn" (click)="addSubtask()"
-            [disabled]="!newSubtaskControl.value?.trim()"
-            [attr.aria-label]="'kanban.addSubtask' | translate"
-            [matTooltip]="'kanban.addSubtask' | translate" matTooltipPosition="above">
-            <span class="material-icons-outlined">add</span>
-          </button>
-        </div>
+        @if (showSubtaskAdd()) {
+          <div class="subtask-add">
+            <app-input [label]="'jobs.subtasks' | translate" [placeholder]="'kanban.addSubtaskPlaceholder' | translate"
+              [formControl]="newSubtaskControl" (keydown.enter)="addSubtask()" data-testid="job-subtask-text" />
+            <button class="subtask-add__btn" (click)="addSubtask()"
+              [disabled]="!newSubtaskControl.value?.trim()"
+              [attr.aria-label]="'kanban.addSubtask' | translate"
+              [matTooltip]="'kanban.addSubtask' | translate" matTooltipPosition="above">
+              <span class="material-icons-outlined">add</span>
+            </button>
+          </div>
+        }
       </div>
 
       <!-- Sub-Jobs -->
@@ -209,9 +237,17 @@
       <div class="jd-section">
         <div class="jd-section__header">
           <h3 class="jd-section__title">{{ 'kanban.linkedCards' | translate }}</h3>
-          @if (links().length) {
-            <span class="panel__section-count">{{ links().length }}</span>
-          }
+          <div class="jd-section__header-end">
+            @if (links().length) {
+              <span class="panel__section-count">{{ links().length }}</span>
+            }
+            <button class="jd-section__add-toggle" (click)="toggleLinkAdd()" data-testid="job-link-add-toggle"
+              [class.jd-section__add-toggle--open]="showLinkAdd()" [attr.aria-expanded]="showLinkAdd()"
+              [attr.aria-label]="(showLinkAdd() ? 'jobDetailExtras.hideAddForm' : 'kanban.addLink') | translate"
+              [matTooltip]="(showLinkAdd() ? 'jobDetailExtras.hideAddForm' : 'kanban.addLink') | translate" matTooltipPosition="above">
+              <span class="material-icons-outlined">{{ showLinkAdd() ? 'close' : 'add' }}</span>
+            </button>
+          </div>
         </div>
         @if (links().length) {
           <div class="link-list">
@@ -235,37 +271,43 @@
             }
           </div>
         }
-        <div class="link-add">
-          <div class="link-add__search-wrap">
-            <app-input [label]="'kanban.linkedCards' | translate" [placeholder]="'kanban.searchJobsPlaceholder' | translate"
-              [formControl]="linkSearchControl" (blur)="dismissLinkResults()" />
-            @if (showLinkResults() && linkSearchResults().length) {
-              <div class="link-add__results">
-                @for (r of linkSearchResults(); track r.id) {
-                  <button class="link-add__result" (mousedown)="selectLinkTarget(r)">
-                    <span class="link-add__result-number">{{ r.jobNumber }}</span>
-                    <span class="link-add__result-title">{{ r.title }}</span>
-                  </button>
-                }
-              </div>
-            }
+        @if (showLinkAdd()) {
+          <div class="link-add">
+            <app-entity-picker class="link-add__picker" data-testid="job-link-target"
+              [label]="'kanban.linkedCards' | translate"
+              [placeholder]="'kanban.searchJobsPlaceholder' | translate"
+              entityType="jobs"
+              displayField="jobNumber"
+              secondaryDisplayField="title"
+              [filters]="linkPickerFilters"
+              [formControl]="linkTargetControl"
+              (selected)="onLinkTargetPicked($event)" />
+            <app-select [label]="'common.type' | translate" [options]="linkTypeOptions" [formControl]="linkTypeControl"
+              data-testid="job-link-type" />
+            <button class="link-add__btn" (click)="addLink()" [disabled]="selectedLinkTargetId() === null"
+              [attr.aria-label]="'kanban.addLink' | translate"
+              [matTooltip]="'kanban.addLink' | translate" matTooltipPosition="above">
+              <span class="material-icons-outlined">add</span>
+            </button>
           </div>
-          <app-select [label]="'common.type' | translate" [options]="linkTypeOptions" [formControl]="linkTypeControl" />
-          <button class="link-add__btn" (click)="addLink()" [disabled]="!selectedLinkTarget()"
-            [attr.aria-label]="'kanban.addLink' | translate"
-            [matTooltip]="'kanban.addLink' | translate" matTooltipPosition="above">
-            <span class="material-icons-outlined">add</span>
-          </button>
-        </div>
+        }
       </div>
 
       <!-- Parts -->
       <div class="jd-section">
         <div class="jd-section__header">
           <h3 class="jd-section__title">{{ 'kanban.parts' | translate }}</h3>
-          @if (jobParts().length) {
-            <span class="panel__section-count">{{ jobParts().length }}</span>
-          }
+          <div class="jd-section__header-end">
+            @if (jobParts().length) {
+              <span class="panel__section-count">{{ jobParts().length }}</span>
+            }
+            <button class="jd-section__add-toggle" (click)="togglePartAdd()" data-testid="job-part-add-toggle"
+              [class.jd-section__add-toggle--open]="showPartAdd()" [attr.aria-expanded]="showPartAdd()"
+              [attr.aria-label]="(showPartAdd() ? 'jobDetailExtras.hideAddForm' : 'kanban.addPart') | translate"
+              [matTooltip]="(showPartAdd() ? 'jobDetailExtras.hideAddForm' : 'kanban.addPart') | translate" matTooltipPosition="above">
+              <span class="material-icons-outlined">{{ showPartAdd() ? 'close' : 'add' }}</span>
+            </button>
+          </div>
         </div>
         @if (jobParts().length) {
           <div class="part-list">
@@ -294,30 +336,26 @@
             }
           </div>
         }
-        <div class="part-add">
-          <div class="part-add__search-wrap">
-            <app-input [label]="'kanban.parts' | translate" [placeholder]="'kanban.searchPartsPlaceholder' | translate"
-              [formControl]="partSearchControl" (blur)="dismissPartResults()" data-testid="job-part-search" />
-            @if (showPartResults() && partSearchResults().length) {
-              <div class="part-add__results">
-                @for (p of partSearchResults(); track p.id) {
-                  <button class="part-add__result" (mousedown)="selectPart(p)">
-                    <span class="part-add__result-number">{{ p.partNumber }}</span>
-                    <span class="part-add__result-desc">{{ p.name }}</span>
-                  </button>
-                }
-              </div>
-            }
+        @if (showPartAdd()) {
+          <div class="part-add">
+            <app-entity-picker class="part-add__picker" data-testid="job-part-search"
+              [label]="'kanban.parts' | translate"
+              [placeholder]="'kanban.searchPartsPlaceholder' | translate"
+              entityType="parts"
+              displayField="partNumber"
+              secondaryDisplayField="name"
+              [formControl]="partPickerControl"
+              (selected)="onPartPicked($event)" />
+            <app-input class="part-add__qty" type="number" [min]="0.0001" step="any"
+              [label]="'kanban.addPartQty' | translate" [formControl]="partQtyControl"
+              (keydown.enter)="addPart()" data-testid="job-part-add-qty" />
+            <button class="part-add__btn" (click)="addPart()" [disabled]="!canAddPart()"
+              [attr.aria-label]="'kanban.addPart' | translate"
+              [matTooltip]="'kanban.addPart' | translate" matTooltipPosition="above">
+              <span class="material-icons-outlined">add</span>
+            </button>
           </div>
-          <app-input class="part-add__qty" type="number" [min]="0.0001" step="any"
-            [label]="'kanban.addPartQty' | translate" [formControl]="partQtyControl"
-            (keydown.enter)="addPart()" data-testid="job-part-add-qty" />
-          <button class="part-add__btn" (click)="addPart()" [disabled]="!canAddPart()"
-            [attr.aria-label]="'kanban.addPart' | translate"
-            [matTooltip]="'kanban.addPart' | translate" matTooltipPosition="above">
-            <span class="material-icons-outlined">add</span>
-          </button>
-        </div>
+        }
       </div>
 
       <!-- Cost Summary -->
