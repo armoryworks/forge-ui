@@ -72,11 +72,19 @@ describe('PartInventoryStepComponent (Phase 5 — save-on-Continue)', () => {
 
   // The component loads the UoM and bin dropdown options from the API on construction.
   // Flush those GETs so each test's httpMock.verify() stays clean.
-  function flushOptionLoads(bins: { id: number; locationPath: string; isActive: boolean }[] = []): void {
+  function binRow(id: number, locationPath: string) {
+    return { id, locationPath, name: locationPath, locationType: 'Bin', barcode: null, isActive: true };
+  }
+
+  function flushOptionLoads(bins: { id: number; locationPath: string }[] = []): void {
     httpMock.expectOne(`${environment.apiUrl}/inventory/uom`).flush([]);
-    httpMock.expectOne(r => r.url === `${environment.apiUrl}/inventory/locations/bins`).flush({
-      items: bins.map(b => ({ ...b, name: b.locationPath, locationType: 'Bin', barcode: null })),
-    });
+    const req = httpMock.expectOne(r => r.url === `${environment.apiUrl}/inventory/locations/bins`);
+    expect(req.request.params.get('activeOnly')).toBe('true');
+    req.flush({ items: bins.map(b => binRow(b.id, b.locationPath)), totalCount: bins.length, page: 1, pageSize: 100 });
+  }
+
+  function binOptions(component: PartInventoryStepComponent): { value: unknown; label: string }[] {
+    return (component as unknown as { defaultBinOptions(): { value: unknown; label: string }[] }).defaultBinOptions();
   }
 
   it('renders without errors when entity is null', () => {
@@ -139,14 +147,45 @@ describe('PartInventoryStepComponent (Phase 5 — save-on-Continue)', () => {
     expect(saveResult).toEqual({ ok: true });
   });
 
-  it('offers only active bins for the default bin', () => {
+  it('asks the server for active bins only and offers them for the default bin', () => {
     const component = TestBed.runInInjectionContext(() => new PartInventoryStepComponent());
-    flushOptionLoads([
-      { id: 3, locationPath: 'Main / A / 01', isActive: true },
-      { id: 4, locationPath: 'Main / A / 02', isActive: false },
-    ]);
-    const options = (component as unknown as { defaultBinOptions(): { value: unknown; label: string }[] }).defaultBinOptions();
+    flushOptionLoads([{ id: 3, locationPath: 'Main / A / 01' }]);
+    const options = binOptions(component);
     expect(options.map(o => o.value)).toEqual([null, 3]);
     expect(options[1].label).toBe('Main / A / 01');
+  });
+
+  it('pages through every active bin when there are more than one page', () => {
+    const component = TestBed.runInInjectionContext(() => new PartInventoryStepComponent());
+    httpMock.expectOne(`${environment.apiUrl}/inventory/uom`).flush([]);
+    const firstPage = Array.from({ length: 100 }, (_, i) => binRow(i + 1, `Main / ${i + 1}`));
+    httpMock.expectOne(r => r.url === `${environment.apiUrl}/inventory/locations/bins` && r.params.get('page') === '1')
+      .flush({ items: firstPage, totalCount: 101, page: 1, pageSize: 100 });
+    httpMock.expectOne(r => r.url === `${environment.apiUrl}/inventory/locations/bins` && r.params.get('page') === '2')
+      .flush({ items: [binRow(101, 'Overflow / 01')], totalCount: 101, page: 2, pageSize: 100 });
+    const options = binOptions(component);
+    expect(options).toHaveLength(102);
+    expect(options[101]).toEqual({ value: 101, label: 'Overflow / 01' });
+  });
+
+  it('keeps a saved default bin that is no longer active among the options', () => {
+    const component = TestBed.runInInjectionContext(() => new PartInventoryStepComponent());
+    flushOptionLoads([{ id: 3, locationPath: 'Main / A / 01' }]);
+    mockSignalInputs(component, {
+      stepId: 'inventory', componentName: 'PartInventoryStepComponent',
+      runId: 7, entityId: 42, entity: buildPart({ defaultBinId: 9 }),
+    });
+    TestBed.flushEffects();
+    httpMock.expectOne(`${environment.apiUrl}/inventory/locations`).flush([
+      {
+        id: 1, name: 'Main', locationType: 'Area', parentId: null, barcode: null, description: null,
+        sortOrder: 0, isActive: true, locationPath: 'Main', contentCount: 0,
+        children: [{
+          id: 9, name: 'Old', locationType: 'Bin', parentId: 1, barcode: null, description: null,
+          sortOrder: 0, isActive: false, locationPath: 'Main / Old', contentCount: 0, children: [],
+        }],
+      },
+    ]);
+    expect(binOptions(component).map(o => o.value)).toEqual([null, 9, 3]);
   });
 });

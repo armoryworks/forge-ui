@@ -202,11 +202,6 @@ export class NewPartForkDialogComponent implements OnInit {
     return this.inventoryClass() === null ? null : this.effectiveMode();
   });
 
-  /** Steps 1 + 2 are both picked, so Continue can close the dialog. */
-  protected readonly canContinue = computed<boolean>(() => {
-    return this.procurement() !== null && this.inventoryClass() !== null;
-  });
-
   /** Set once Continue is pressed; the violations badge stays hidden until then. */
   protected readonly continueAttempted = signal(false);
 
@@ -296,7 +291,7 @@ export class NewPartForkDialogComponent implements OnInit {
     this.procurement.set(combo.procurement);
     this.inventoryClass.set(combo.inventoryClass);
     this.itemKindControl.setValue(typeof last.itemKindId === 'number' ? last.itemKindId : null);
-    if (last.mode === 'express' || last.mode === 'guided') {
+    if ((last.mode === 'express' || last.mode === 'guided') && last.mode !== combo.defaultMode) {
       this.modeOverride.set(last.mode);
     }
   }

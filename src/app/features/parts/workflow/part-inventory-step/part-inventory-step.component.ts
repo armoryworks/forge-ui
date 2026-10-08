@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, input, signal, untracked } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, of, switchMap, tap } from 'rxjs';
@@ -8,6 +8,7 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
+import { StorageLocation } from '../../../inventory/models/storage-location.model';
 import { InventoryService } from '../../../inventory/services/inventory.service';
 import { PartDetail } from '../../models/part-detail.model';
 import { PartsService } from '../../services/parts.service';
@@ -57,10 +58,18 @@ export class PartInventoryStepComponent {
   ]);
 
   private readonly bins = signal<{ id: number; locationPath: string }[]>([]);
-  protected readonly defaultBinOptions = computed<SelectOption[]>(() => [
-    { value: null, label: this.translate.instant('newPartFlow.defaultBinNone') },
-    ...this.bins().map(b => ({ value: b.id, label: b.locationPath })),
-  ]);
+  private readonly binsLoaded = signal(false);
+  private readonly savedBin = signal<{ id: number; locationPath: string } | null>(null);
+  private savedBinLookupId: number | null = null;
+  protected readonly defaultBinOptions = computed<SelectOption[]>(() => {
+    const bins = this.bins();
+    const saved = this.savedBin();
+    const extra = saved && !bins.some(b => b.id === saved.id) ? [saved] : [];
+    return [
+      { value: null, label: this.translate.instant('newPartFlow.defaultBinNone') },
+      ...[...extra, ...bins].map(b => ({ value: b.id, label: b.locationPath })),
+    ];
+  });
 
   protected readonly form = new FormGroup({
     minStockThreshold: new FormControl<number | null>(null, [Validators.min(0)]),
@@ -76,9 +85,18 @@ export class PartInventoryStepComponent {
       tap(list => this.uoms.set(list.map(u => ({ id: u.id, code: u.code, name: u.name })))),
     ).subscribe({ error: () => { /* dropdown stays "None"-only; non-fatal */ } });
 
-    this.inventoryService.getBinLocations().subscribe({
-      next: list => this.bins.set(list.filter(b => b.isActive).map(b => ({ id: b.id, locationPath: b.locationPath }))),
-      error: () => this.bins.set([]),
+    this.inventoryService.getAllActiveBinLocations().subscribe({
+      next: list => {
+        this.bins.set(list.map(b => ({ id: b.id, locationPath: b.locationPath })));
+        this.binsLoaded.set(true);
+      },
+      error: () => this.binsLoaded.set(true),
+    });
+
+    effect(() => {
+      const binId = (this.entity() as PartDetail | null)?.defaultBinId ?? null;
+      if (binId == null || !this.binsLoaded() || this.bins().some(b => b.id === binId)) return;
+      untracked(() => this.loadSavedBin(binId));
     });
 
     effect(() => {
@@ -107,6 +125,27 @@ export class PartInventoryStepComponent {
       () => this.save(),
     );
     this.destroyRef.onDestroy(() => this.workflowService.unregisterStepForm());
+  }
+
+  private loadSavedBin(binId: number): void {
+    if (this.savedBinLookupId === binId) return;
+    this.savedBinLookupId = binId;
+    this.inventoryService.getLocationTree().subscribe({
+      next: tree => {
+        const node = this.findLocation(tree, binId);
+        if (node) this.savedBin.set({ id: node.id, locationPath: node.locationPath });
+      },
+      error: () => this.savedBin.set(null),
+    });
+  }
+
+  private findLocation(nodes: StorageLocation[], id: number): StorageLocation | null {
+    for (const node of nodes) {
+      if (node.id === id) return node;
+      const child = this.findLocation(node.children ?? [], id);
+      if (child) return child;
+    }
+    return null;
   }
 
   private save(): Observable<unknown> {

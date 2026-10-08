@@ -74,4 +74,18 @@ describe('PartWorkflowPageComponent close', () => {
     httpMock.expectNone(`${environment.apiUrl}/workflows/7/abandon`);
     expect(navSpy).toHaveBeenCalledWith(['/parts']);
   });
+
+  it('does not abandon a run while its first save is still in flight', () => {
+    const navSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    workflowService.currentRun.set(buildRun());
+    workflowService.patchStep(7, 'basics', { name: 'Bracket' }).subscribe();
+    const patch = httpMock.expectOne(`${environment.apiUrl}/workflows/7/step`);
+
+    closePage();
+
+    httpMock.expectNone(`${environment.apiUrl}/workflows/7/abandon`);
+    expect(navSpy).toHaveBeenCalledWith(['/parts']);
+    patch.flush(buildRun({ entityId: 42 }));
+    expect(workflowService.stepSavePending()).toBe(false);
+  });
 });

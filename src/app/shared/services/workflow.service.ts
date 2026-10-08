@@ -2,7 +2,7 @@ import { HttpClient, HttpContext, HttpErrorResponse, HttpParams } from '@angular
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { Observable, Subscription, catchError, defer, map, of, shareReplay, tap, throwError } from 'rxjs';
+import { Observable, Subscription, catchError, defer, finalize, map, of, shareReplay, tap, throwError } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
@@ -73,6 +73,11 @@ export class WorkflowService {
   readonly currentStepViolations = signal<string[]>([]);
 
   private currentStepFormSub: Subscription | null = null;
+
+  private readonly pendingStepSaves = signal(0);
+
+  /** True while a step PATCH is in flight, so closing an empty run does not race the save that creates its entity. */
+  readonly stepSavePending = computed(() => this.pendingStepSaves() > 0);
 
   /**
    * Save callback registered by the currently-mounted step component. The
@@ -217,9 +222,15 @@ export class WorkflowService {
   }
 
   patchStep(runId: number, stepId: string, fields: unknown): Observable<WorkflowRun> {
-    return this.http
-      .patch<WorkflowRun>(`${environment.apiUrl}/workflows/${runId}/step`, { stepId, fields })
-      .pipe(tap(run => this.currentRun.set(run)));
+    return defer(() => {
+      this.pendingStepSaves.update(n => n + 1);
+      return this.http
+        .patch<WorkflowRun>(`${environment.apiUrl}/workflows/${runId}/step`, { stepId, fields })
+        .pipe(
+          tap(run => this.currentRun.set(run)),
+          finalize(() => this.pendingStepSaves.update(n => n - 1)),
+        );
+    });
   }
 
   /**

@@ -27,7 +27,6 @@ interface ForkInternals {
   modeOverride(): 'express' | 'guided' | null;
   recommendedMode(): 'express' | 'guided';
   effectiveMode(): 'express' | 'guided';
-  canContinue(): boolean;
   violations(): string[];
   inventoryChoices(): { value: InventoryClass; titleKey: string; descKey: string }[];
   inventoryCards(): { value: InventoryClass; enabled: boolean }[];
@@ -77,12 +76,11 @@ function setup(saved: Partial<NewPartForkResult> | null = null, itemKindIds: num
 describe('NewPartForkDialogComponent (pre-beta — axis-based picker)', () => {
   beforeEach(() => TestBed.resetTestingModule());
 
-  it('starts with no axis picks and Continue disabled', () => {
+  it('starts with no axis picks', () => {
     const { component } = setup();
     expect(component.procurement()).toBeNull();
     expect(component.inventoryClass()).toBeNull();
     expect(component.modeOverride()).toBeNull();
-    expect(component.canContinue()).toBe(false);
   });
 
   it('Step 1 (Buy) reveals 6 inventory class options (B1-B6 combos)', () => {
@@ -128,7 +126,6 @@ describe('NewPartForkDialogComponent (pre-beta — axis-based picker)', () => {
     component.pickInventoryClass('Raw');
     expect(component.recommendedMode()).toBe('express');
     expect(component.effectiveMode()).toBe('express');
-    expect(component.canContinue()).toBe(true);
   });
 
   it('Make + Subassembly recommends guided (audit Section 5.M2)', () => {
@@ -256,7 +253,13 @@ describe('NewPartForkDialogComponent (pre-beta — axis-based picker)', () => {
     expect(component.inventoryClass()).toBe('Component');
     expect(component.itemKindControl.value).toBe(7);
     expect(component.effectiveMode()).toBe('express');
-    expect(component.canContinue()).toBe(true);
+    expect(component.modeOverride()).toBe('express');
+  });
+
+  it('restores a remembered mode that matches the recommendation without overriding it', () => {
+    const { component } = setup({ procurementSource: 'Make', inventoryClass: 'Component', itemKindId: null, mode: 'guided' });
+    expect(component.effectiveMode()).toBe('guided');
+    expect(component.modeOverride()).toBeNull();
   });
 
   it('ignores a remembered choice that is no longer a viable combo', () => {

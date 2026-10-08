@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { EMPTY, Observable, expand, map, reduce } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { AtpResult, AtpBucket } from '../models/atp.model';
 import { StorageLocation } from '../models/storage-location.model';
@@ -44,6 +44,20 @@ export class InventoryService {
         params: { pageSize: '100' },
       })
       .pipe(map(res => res.items ?? []));
+  }
+
+  getAllActiveBinLocations(): Observable<StorageLocationFlat[]> {
+    const pageSize = 100;
+    const fetchPage = (page: number) => this.http.get<{ items: StorageLocationFlat[]; totalCount: number }>(
+      `${this.base}/locations/bins`,
+      { params: { activeOnly: 'true', page: String(page), pageSize: String(pageSize) } },
+    );
+    return fetchPage(1).pipe(
+      expand((res, index) => (res.items ?? []).length === pageSize && (index + 1) * pageSize < res.totalCount
+        ? fetchPage(index + 2)
+        : EMPTY),
+      reduce((all, res) => all.concat(res.items ?? []), [] as StorageLocationFlat[]),
+    );
   }
 
   createLocation(request: CreateStorageLocationRequest): Observable<StorageLocation> {

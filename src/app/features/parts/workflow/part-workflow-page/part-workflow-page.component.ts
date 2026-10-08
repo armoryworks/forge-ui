@@ -462,7 +462,8 @@ export class PartWorkflowPageComponent {
       this.router.navigate(['/parts']);
     };
     const run = this.workflowService.currentRun() ?? this.run();
-    if (!run || run.entityId != null || run.completedAt != null || run.abandonedAt != null) {
+    if (!run || run.entityId != null || run.completedAt != null || run.abandonedAt != null
+      || this.workflowService.stepSavePending()) {
       leave();
       return;
     }
