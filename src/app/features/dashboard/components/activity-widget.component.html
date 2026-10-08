@@ -3,7 +3,15 @@
     <span class="material-icons-outlined activity-item__icon" [style.color]="entry.iconColor">
       {{ entry.icon }}
     </span>
-    <span class="activity-item__text" [innerHTML]="entry.text | richText"></span>
+    <span class="activity-item__text">
+      @if (entry.actorName) {
+        <span class="activity-item__actor">{{ entry.actorName }}</span>
+      }
+      <span [innerHTML]="entry.text | richText"></span>
+    </span>
+    @if (entry.recordNumber) {
+      <span class="activity-item__record">{{ entry.recordNumber }}</span>
+    }
     <span class="activity-item__time">{{ entry.time }}</span>
   </div>
 }

@@ -3,4 +3,6 @@ export interface ActivityEntry {
   iconColor: string;
   text: string;
   time: string;
+  actorName?: string | null;
+  recordNumber?: string | null;
 }

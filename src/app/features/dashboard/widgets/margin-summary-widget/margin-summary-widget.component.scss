@@ -23,6 +23,11 @@
     &--negative {
       color: var(--error);
     }
+
+    &--missing {
+      font-size: var(--font-size-lg);
+      color: var(--text-muted);
+    }
   }
 
   &__label {
@@ -59,6 +64,10 @@
 
     &--negative {
       color: var(--error);
+    }
+
+    &--missing {
+      color: var(--text-muted);
     }
   }
 }

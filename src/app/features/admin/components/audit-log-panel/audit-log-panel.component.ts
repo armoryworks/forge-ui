@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
@@ -8,12 +9,15 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminService } from '../../services/admin.service';
 import { AuditLogEntry } from '../../models/audit-log-entry.model';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
+
+type AuditLogQuery = Parameters<AdminService['getAuditLog']>[0];
 
 @Component({
   selector: 'app-audit-log-panel',
@@ -22,6 +26,7 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
     ReactiveFormsModule,
     TranslatePipe,
     DataTableComponent,
+    EmptyStateComponent,
     InputComponent,
     SelectComponent,
     DatepickerComponent,
@@ -32,12 +37,13 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
   styleUrl: './audit-log-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AuditLogPanelComponent {
+export class AuditLogPanelComponent implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly isLoading = signal(false);
+  protected readonly loadError = signal<string | null>(null);
   protected readonly entries = signal<AuditLogEntry[]>([]);
   protected readonly totalCount = signal(0);
   protected readonly page = signal(1);
@@ -70,13 +76,24 @@ export class AuditLogPanelComponent {
     // the per-entity filter can scope to them.
     { value: 'ApplicationUser', label: this.translate.instant('adminPanels.auditLog.types.identity') },
     { value: 'BiApiKey', label: this.translate.instant('adminPanels.auditLog.types.biApiKey') },
+    { value: 'QcInspection', label: this.translate.instant('auditLogUi.types.qcInspection') },
+    { value: 'NonConformance', label: this.translate.instant('auditLogUi.types.nonConformance') },
+    { value: 'CorrectiveAction', label: this.translate.instant('auditLogUi.types.correctiveAction') },
+    { value: 'ReceivingInspection', label: this.translate.instant('auditLogUi.types.receivingInspection') },
+    { value: 'Gage', label: this.translate.instant('auditLogUi.types.gage') },
+    { value: 'EngineeringChangeOrder', label: this.translate.instant('auditLogUi.types.engineeringChangeOrder') },
+    { value: 'LotRecord', label: this.translate.instant('auditLogUi.types.lotRecord') },
+    { value: 'SerialNumber', label: this.translate.instant('auditLogUi.types.serialNumber') },
+    { value: 'StorageLocation', label: this.translate.instant('auditLogUi.types.storageLocation') },
+    { value: 'CycleCount', label: this.translate.instant('auditLogUi.types.cycleCount') },
+    { value: 'ReceivingRecord', label: this.translate.instant('auditLogUi.types.receivingRecord') },
   ];
 
   /**
    * Phase 3 / WU-03 retrofit — quick-pick presets for the system-wide events
    * that became visible in the audit log after WU-03 (login / MFA / role /
-   * BI key). Selecting a preset writes through to `actionControl`, which
-   * triggers the existing reload effect; "" clears the action filter.
+   * BI key). Selecting a preset writes through to `actionControl`, whose
+   * valueChanges subscription reloads; "" clears the action filter.
    */
   protected readonly actionPresetOptions: SelectOption[] = [
     { value: '', label: this.translate.instant('adminPanels.auditLog.presets.allActions') },
@@ -104,10 +121,6 @@ export class AuditLogPanelComponent {
   ];
 
   constructor() {
-    effect(() => {
-      this.load();
-    });
-
     this.entityTypeControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => { this.page.set(1); this.load(); });
     this.actionControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => { this.page.set(1); this.load(); });
     this.fromDateControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => { this.page.set(1); this.load(); });
@@ -123,29 +136,64 @@ export class AuditLogPanelComponent {
     });
   }
 
+  ngOnInit(): void {
+    this.load();
+  }
+
   protected load(): void {
     this.isLoading.set(true);
+    this.loadError.set(null);
 
-    const entityType = this.entityTypeControl.value || undefined;
-    const action = this.actionControl.value || undefined;
-    const fromDate = this.fromDateControl.value;
-    const toDate = this.toDateControl.value;
-
-    this.adminService.getAuditLog({
-      page: this.page(),
-      pageSize: this.pageSize(),
-      entityType,
-      action,
-      from: fromDate ? (toIsoDate(fromDate) ?? undefined) : undefined,
-      to: toDate ? (toIsoDate(toDate) ?? undefined) : undefined,
-    }).subscribe({
+    this.adminService.getAuditLog(this.buildQuery()).subscribe({
       next: (result) => {
         this.entries.set(result.data);
         this.totalCount.set(result.totalCount);
         this.isLoading.set(false);
       },
-      error: () => this.isLoading.set(false),
+      error: (error: unknown) => {
+        this.entries.set([]);
+        this.totalCount.set(0);
+        this.loadError.set(this.errorMessage(error));
+        this.isLoading.set(false);
+      },
     });
+  }
+
+  private buildQuery(): AuditLogQuery {
+    const query: AuditLogQuery = {
+      page: this.page(),
+      pageSize: this.pageSize(),
+    };
+
+    const entityType = this.entityTypeControl.value?.trim();
+    if (entityType) query.entityType = entityType;
+
+    const action = this.actionControl.value?.trim();
+    if (action) query.action = action;
+
+    const fromDate = this.fromDateControl.value;
+    const from = fromDate ? toIsoDate(fromDate) : null;
+    if (from) query.from = from;
+
+    const toDate = this.toDateControl.value;
+    const to = toDate ? toIsoDate(toDate) : null;
+    if (to) query.to = to;
+
+    return query;
+  }
+
+  private errorMessage(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      const body: unknown = error.error;
+      if (typeof body === 'string' && body.trim()) return body;
+      if (body && typeof body === 'object') {
+        const problem = body as { detail?: unknown; title?: unknown; message?: unknown };
+        for (const candidate of [problem.detail, problem.title, problem.message]) {
+          if (typeof candidate === 'string' && candidate.trim()) return candidate;
+        }
+      }
+    }
+    return this.translate.instant('auditLogUi.loadFailed');
   }
 
   protected onPageChange(event: PageEvent): void {

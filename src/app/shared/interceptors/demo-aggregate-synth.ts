@@ -376,6 +376,8 @@ async function synthesizeInventoryParts(store: DemoDataStore, query: URLSearchPa
           lotExpirationDate: null,
           supplierLotNumber: null,
         })),
+        minStockThreshold: p['minStockThreshold'] ?? null,
+        reorderPoint: p['reorderPoint'] ?? null,
       };
     });
 }

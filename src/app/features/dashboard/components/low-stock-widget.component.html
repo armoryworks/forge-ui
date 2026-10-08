@@ -24,7 +24,12 @@
         </div>
       }
     </div>
-  } @else {
+  } @else if (hasStockLevels() === false) {
+    <p class="inv-snapshot__ok inv-snapshot__ok--unset" data-testid="low-stock-no-minimums">
+      <span class="material-icons-outlined" aria-hidden="true">info</span>
+      {{ 'dashboardWidgets.lowStock.noMinimumsSet' | translate }}
+    </p>
+  } @else if (hasStockLevels()) {
     <p class="inv-snapshot__ok">
       <span class="material-icons-outlined" aria-hidden="true">check_circle</span>
       {{ 'dashboard.invAllStocked' | translate }}

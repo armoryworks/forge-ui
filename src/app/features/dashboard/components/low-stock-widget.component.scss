@@ -85,3 +85,7 @@
     color: var(--success);
   }
 }
+
+.inv-snapshot__ok--unset .material-icons-outlined {
+  color: var(--text-muted);
+}

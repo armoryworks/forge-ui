@@ -1,10 +1,16 @@
 @if (summary(); as s) {
   <div class="margin-summary">
     <div class="margin-stat">
-      <span class="margin-stat__value" [class.margin-stat__value--positive]="s.averageMarginPercentage >= 0"
-            [class.margin-stat__value--negative]="s.averageMarginPercentage < 0">
-        {{ s.averageMarginPercentage }}%
-      </span>
+      @if (costMissing()) {
+        <span class="margin-stat__value margin-stat__value--missing" data-testid="margin-cost-not-recorded">
+          {{ 'dashboardWidgets.margin.costNotRecorded' | translate }}
+        </span>
+      } @else {
+        <span class="margin-stat__value" [class.margin-stat__value--positive]="s.averageMarginPercentage >= 0"
+              [class.margin-stat__value--negative]="s.averageMarginPercentage < 0">
+          {{ s.averageMarginPercentage }}%
+        </span>
+      }
       <span class="margin-stat__label">{{ 'dashboard.avgMargin' | translate }}</span>
     </div>
     <div class="margin-breakdown">
@@ -18,15 +24,27 @@
       </div>
       <div class="margin-breakdown__row">
         <span class="margin-breakdown__label">{{ 'dashboard.margin' | translate }}</span>
-        <span class="margin-breakdown__count" [class.margin-breakdown__count--positive]="s.totalMargin >= 0"
-              [class.margin-breakdown__count--negative]="s.totalMargin < 0">
-          {{ s.totalMargin | currency }}
-        </span>
+        @if (costMissing()) {
+          <span class="margin-breakdown__count margin-breakdown__count--missing">
+            {{ 'dashboardWidgets.margin.costNotRecorded' | translate }}
+          </span>
+        } @else {
+          <span class="margin-breakdown__count" [class.margin-breakdown__count--positive]="s.totalMargin >= 0"
+                [class.margin-breakdown__count--negative]="s.totalMargin < 0">
+            {{ s.totalMargin | currency }}
+          </span>
+        }
       </div>
       <div class="margin-breakdown__row">
         <span class="margin-breakdown__label">{{ 'dashboard.jobs30d' | translate }}</span>
         <span class="margin-breakdown__count">{{ s.jobCount }}</span>
       </div>
+      @if (uncostedJobCount() > 0) {
+        <div class="margin-breakdown__row">
+          <span class="margin-breakdown__label">{{ 'dashboardWidgets.margin.jobsWithoutCost' | translate }}</span>
+          <span class="margin-breakdown__count margin-breakdown__count--missing">{{ uncostedJobCount() }}</span>
+        </div>
+      }
     </div>
   </div>
 }

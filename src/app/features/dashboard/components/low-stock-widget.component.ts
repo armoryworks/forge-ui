@@ -18,6 +18,8 @@ interface LowStockRow {
 interface PartSummary {
   partId: number;
   onHand: number;
+  minStockThreshold?: number | null;
+  reorderPoint?: number | null;
 }
 
 /**
@@ -39,6 +41,7 @@ export class LowStockWidgetComponent implements OnInit {
   protected readonly lowStock = signal<LowStockRow[]>([]);
   protected readonly partCount = signal(0);
   protected readonly totalOnHand = signal(0);
+  protected readonly hasStockLevels = signal<boolean | null>(null);
 
   protected readonly lowStockCount = computed(() => this.lowStock().length);
 
@@ -49,6 +52,7 @@ export class LowStockWidgetComponent implements OnInit {
       .subscribe(parts => {
         this.partCount.set(parts?.length ?? 0);
         this.totalOnHand.set((parts ?? []).reduce((sum, p) => sum + (p.onHand ?? 0), 0));
+        this.hasStockLevels.set((parts ?? []).some(p => p.minStockThreshold != null || p.reorderPoint != null));
       });
   }
 }

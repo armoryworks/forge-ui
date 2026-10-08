@@ -31,6 +31,20 @@
   }
 }
 
+.activity-item__actor {
+  margin-right: $sp-sm;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.activity-item__record {
+  flex-shrink: 0;
+  font-family: $font-family-mono;
+  font-size: var(--font-size-xxs);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
 .activity-item__time {
   flex-shrink: 0;
   font-size: var(--font-size-xxs);

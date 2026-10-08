@@ -3,30 +3,45 @@
     <app-select
       [label]="'adminPanels.auditLog.entityType' | translate"
       [formControl]="entityTypeControl"
-      [options]="entityTypeOptions" />
+      [options]="entityTypeOptions"
+      data-testid="audit-log-entity-type" />
     <app-select
       [label]="'adminPanels.auditLog.systemEvent' | translate"
       [formControl]="actionPresetControl"
-      [options]="actionPresetOptions" />
+      [options]="actionPresetOptions"
+      data-testid="audit-log-system-event" />
     <app-input
       [label]="'adminPanels.auditLog.action' | translate"
       [formControl]="actionControl"
-      [placeholder]="'adminPanels.auditLog.actionPlaceholder' | translate" />
+      [placeholder]="'adminPanels.auditLog.actionPlaceholder' | translate"
+      data-testid="audit-log-action" />
     <app-datepicker
       [label]="'adminPanels.auditLog.fromDate' | translate"
-      [formControl]="fromDateControl" />
+      [formControl]="fromDateControl"
+      data-testid="audit-log-from-date" />
     <app-datepicker
       [label]="'adminPanels.auditLog.toDate' | translate"
-      [formControl]="toDateControl" />
+      [formControl]="toDateControl"
+      data-testid="audit-log-to-date" />
   </div>
 
   <div [appLoadingBlock]="isLoading()">
-    <app-data-table
-      tableId="admin-audit-log"
-      [columns]="columns"
-      [data]="entries()"
-      emptyIcon="manage_search"
-      [emptyMessage]="'adminPanels.auditLog.noEntries' | translate" />
+    @if (loadError(); as message) {
+      <app-empty-state
+        data-testid="audit-log-load-error"
+        icon="error_outline"
+        [message]="message"
+        [helpText]="'auditLogUi.loadFailedHelp' | translate"
+        [actionLabel]="'auditLogUi.retry' | translate"
+        (action)="load()" />
+    } @else {
+      <app-data-table
+        tableId="admin-audit-log"
+        [columns]="columns"
+        [data]="entries()"
+        emptyIcon="manage_search"
+        [emptyMessage]="'adminPanels.auditLog.noEntries' | translate" />
+    }
   </div>
 
   <mat-paginator

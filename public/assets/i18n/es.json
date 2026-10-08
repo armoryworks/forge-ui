@@ -418,6 +418,15 @@
     "fax": "Fax",
     "deactivatedSuffix": "(desactivado)"
   },
+  "dashboardWidgets": {
+    "margin": {
+      "costNotRecorded": "Costo no registrado",
+      "jobsWithoutCost": "Trabajos sin costo registrado"
+    },
+    "lowStock": {
+      "noMinimumsSet": "No hay niveles mínimos de existencias definidos"
+    }
+  },
   "dashboard": {
     "title": "Panel",
     "subtitle": "Métricas clave y trabajo próximo de un vistazo",
@@ -7750,6 +7759,24 @@
       "visual": "Visual",
       "reading": "Lectura / Escritura",
       "handson": "Práctico / Kinestésico"
+    }
+  },
+  "auditLogUi": {
+    "loadFailed": "No se pudo cargar el registro de auditoría.",
+    "loadFailedHelp": "Revise los filtros e inténtelo de nuevo.",
+    "retry": "Reintentar",
+    "types": {
+      "qcInspection": "Inspección de Calidad",
+      "nonConformance": "No Conformidad",
+      "correctiveAction": "Acción Correctiva",
+      "receivingInspection": "Inspección de Recepción",
+      "gage": "Instrumento de Medición",
+      "engineeringChangeOrder": "Orden de Cambio de Ingeniería",
+      "lotRecord": "Lote",
+      "serialNumber": "Número de Serie",
+      "storageLocation": "Ubicación de Almacenamiento",
+      "cycleCount": "Conteo Cíclico",
+      "receivingRecord": "Registro de Recepción"
     }
   },
   "adminPanels": {

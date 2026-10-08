@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CurrencyPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -11,6 +11,7 @@ interface MarginSummary {
   totalMargin: number;
   averageMarginPercentage: number;
   jobCount: number;
+  costedJobCount: number;
 }
 
 @Component({
@@ -30,6 +31,17 @@ export class MarginSummaryWidgetComponent implements OnInit {
     totalMargin: 0,
     averageMarginPercentage: 0,
     jobCount: 0,
+    costedJobCount: 0,
+  });
+
+  protected readonly uncostedJobCount = computed(() => {
+    const s = this.summary();
+    return Math.max(s.jobCount - (s.costedJobCount ?? 0), 0);
+  });
+
+  protected readonly costMissing = computed(() => {
+    const s = this.summary();
+    return s.jobCount > 0 && (s.costedJobCount ?? 0) === 0;
   });
 
   ngOnInit(): void {

@@ -418,6 +418,15 @@
     "fax": "Fax",
     "deactivatedSuffix": "(deactivated)"
   },
+  "dashboardWidgets": {
+    "margin": {
+      "costNotRecorded": "Cost not recorded",
+      "jobsWithoutCost": "Jobs without recorded cost"
+    },
+    "lowStock": {
+      "noMinimumsSet": "No minimum stock levels set"
+    }
+  },
   "dashboard": {
     "title": "Dashboard",
     "subtitle": "Key metrics and upcoming work at a glance",
@@ -7757,6 +7766,24 @@
       "visual": "Visual",
       "reading": "Reading / Writing",
       "handson": "Hands-on / Kinesthetic"
+    }
+  },
+  "auditLogUi": {
+    "loadFailed": "The audit log could not be loaded.",
+    "loadFailedHelp": "Check the filters and try again.",
+    "retry": "Retry",
+    "types": {
+      "qcInspection": "QC Inspection",
+      "nonConformance": "Non-Conformance",
+      "correctiveAction": "Corrective Action",
+      "receivingInspection": "Receiving Inspection",
+      "gage": "Gage",
+      "engineeringChangeOrder": "Engineering Change Order",
+      "lotRecord": "Lot",
+      "serialNumber": "Serial Number",
+      "storageLocation": "Storage Location",
+      "cycleCount": "Cycle Count",
+      "receivingRecord": "Receiving Record"
     }
   },
   "adminPanels": {
