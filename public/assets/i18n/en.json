@@ -5354,6 +5354,21 @@
       }
     }
   },
+  "poCreate": {
+    "vendorContact": "Vendor contact",
+    "orderFromAddress": "Order-from address",
+    "shipTo": "Ship to",
+    "noContact": "No contact",
+    "noAddress": "No address",
+    "noShipTo": "No ship-to location",
+    "makePartOnly": "No buyable parts match. {{partNumber}} is made in-house.",
+    "sourceApproved": "Approved",
+    "sourceNotApproved": "Not approved",
+    "unapprovedSourceWarning": "This vendor is not an approved source for: {{parts}}. You can still create the PO.",
+    "noTierIntro": "This vendor has no price on file for the parts below. You can save the entered price as the vendor's price:",
+    "savePrice": "Save {{price}} as this vendor's price for {{part}}",
+    "savePriceFailed": "Could not save one or more vendor prices. The PO is still being created."
+  },
   "purchaseOrders": {
     "poNumberLabel": "PO Number",
     "editPoNumber": "Edit PO Number",

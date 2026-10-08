@@ -71,6 +71,12 @@
     font-size: var(--font-size-xs);
   }
 
+  &__no-tier {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
   &__summary {
     margin: 0;
     padding: $sp-sm $sp-md;

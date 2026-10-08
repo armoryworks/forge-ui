@@ -37,4 +37,5 @@ export interface CheckTierVarianceResult {
   currency: string | null;
   variancePct: number | null;
   isOffTier: boolean;
+  hasTier: boolean;
 }

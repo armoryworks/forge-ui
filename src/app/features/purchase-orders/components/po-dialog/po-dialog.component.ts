@@ -12,6 +12,8 @@ import { VendorResponse } from '../../../vendors/models/vendor-response.model';
 import { PartListItem } from '../../../parts/models/part-list-item.model';
 import { PoLineEntry } from '../../models/po-line-entry.model';
 import { CheckTierVarianceResult } from '../../models/tier-variance-check.model';
+import { PoVendorRef } from '../../models/po-vendor-ref.model';
+import { PoVendorRefsService } from '../../services/po-vendor-refs.service';
 import { INCOTERM_OPTIONS } from '../../models/incoterm.const';
 import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
 import { VendorPartsService } from '../../../parts/services/vendor-parts.service';
@@ -30,8 +32,8 @@ import {
 } from './po-line-price.util';
 import { toCreateLineRequest, toTierVarianceLines } from './po-line-request.util';
 import { AuthService } from '../../../../shared/services/auth.service';
-import { forkJoin, of } from 'rxjs';
-import { catchError, map, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { forkJoin, Observable, of } from 'rxjs';
+import { catchError, map, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -77,6 +79,7 @@ export class PoDialogComponent {
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly manualNumberSettings = inject(ManualNumberSettingsService);
+  private readonly vendorRefsService = inject(PoVendorRefsService);
 
   readonly closed = output<void>();
   readonly saved = output<void>();
@@ -86,7 +89,14 @@ export class PoDialogComponent {
 
   protected readonly saving = signal(false);
   protected readonly vendors = signal<VendorResponse[]>([]);
-  protected readonly parts = signal<PartListItem[]>([]);
+  private readonly allParts = signal<PartListItem[]>([]);
+  protected readonly parts = computed(() =>
+    this.allParts().filter(p => p.procurementSource === 'Buy' || p.procurementSource === 'Subcontract'));
+  protected readonly partSearch = signal('');
+  protected readonly vendorContacts = signal<PoVendorRef[]>([]);
+  protected readonly vendorAddresses = signal<PoVendorRef[]>([]);
+  protected readonly shipToLocations = signal<PoVendorRef[]>([]);
+  protected readonly vendorParts = signal<Map<number, boolean> | null>(null);
   protected readonly lines = signal<PoLineEntry[]>([]);
   /** True while the unit price reflects the part's list price and hasn't been manually edited. */
   protected readonly priceIsDefault = signal(false);
@@ -123,15 +133,34 @@ export class PoDialogComponent {
     const includeInactive = this.showInactiveParts();
     return this.parts()
       .filter(p => includeInactive || p.status !== 'Obsolete')
-      .map(p => {
-        const displayName = p.name ?? p.description ?? '(no name)';
-        return {
-          value: p.id,
-          label: p.status === 'Obsolete'
-            ? `${p.partNumber} — ${displayName} ${this.translate.instant('common.deactivatedSuffix')}`
-            : `${p.partNumber} — ${displayName}`,
-        };
-      });
+      .sort((a, b) => a.partNumber.localeCompare(b.partNumber, undefined, { numeric: true, sensitivity: 'base' }))
+      .map(p => ({ value: p.id, label: this.partLabel(p) }));
+  });
+
+  protected readonly makePartHint = computed<string | null>(() => {
+    const search = this.partSearch().trim().toLowerCase();
+    if (!search) return null;
+    const matches = (label: unknown) => String(label).toLowerCase().includes(search);
+    if (this.partOptions().some(o => matches(o['label']))) return null;
+    const makeParts = this.allParts().filter(p => p.procurementSource === 'Make');
+    const made = makeParts.find(p => p.partNumber.toLowerCase() === search)
+      ?? makeParts.find(p => matches(this.partLabel(p)));
+    return made ? this.translate.instant('poCreate.makePartOnly', { partNumber: made.partNumber }) : null;
+  });
+
+  protected readonly contactOptions = computed<SelectOption[]>(() =>
+    this.refOptions(this.vendorContacts(), 'poCreate.noContact'));
+  protected readonly addressOptions = computed<SelectOption[]>(() =>
+    this.refOptions(this.vendorAddresses(), 'poCreate.noAddress'));
+  protected readonly shipToOptions = computed<SelectOption[]>(() =>
+    this.refOptions(this.shipToLocations(), 'poCreate.noShipTo'));
+
+  protected readonly unapprovedSourceWarning = computed<string | null>(() => {
+    const parts = this.lines()
+      .filter(l => this.lineSourceApproved(l) === false)
+      .map(l => l.partNumber);
+    if (parts.length === 0) return null;
+    return this.translate.instant('poCreate.unapprovedSourceWarning', { parts: [...new Set(parts)].join(', ') });
   });
 
   /**
@@ -179,6 +208,9 @@ export class PoDialogComponent {
   readonly form = new FormGroup({
     poNumber: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(20)] }),
     vendorId: new FormControl<number | null>(null, [Validators.required]),
+    vendorContactId: new FormControl<number | null>(null),
+    vendorAddressId: new FormControl<number | null>(null),
+    shipToLocationId: new FormControl<number | null>(null),
     jobId: new FormControl<number | null>(null),
     expectedDeliveryDate: new FormControl<Date | null>(null),
     notes: new FormControl(''),
@@ -263,11 +295,23 @@ export class PoDialogComponent {
       next: (list) => this.vendors.set(list),
     });
     this.partsService.getParts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      // Pre-beta: filter on the procurement axis (the legacy single-axis
-      // PartType was retired). POs can target Buy or Subcontract parts;
-      // Make / Phantom never appear on a vendor PO line.
-      next: (list) => this.parts.set(list.filter(p => p.procurementSource === 'Buy' || p.procurementSource === 'Subcontract')),
+      next: (list) => this.allParts.set(list),
     });
+    this.vendorRefsService.getShipToLocations().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (locations) => {
+        this.shipToLocations.set(locations);
+        this.applyDefaultRef(this.form.controls.shipToLocationId, locations);
+      },
+    });
+    this.form.controls.vendorId.valueChanges
+      .pipe(distinctUntilChanged(), switchMap(vendorId => this.loadVendorRefs(vendorId)), takeUntilDestroyed(this.destroyRef))
+      .subscribe(({ contacts, addresses, vendorParts }) => {
+        this.vendorContacts.set(contacts);
+        this.vendorAddresses.set(addresses);
+        this.vendorParts.set(vendorParts);
+        this.applyDefaultRef(this.form.controls.vendorContactId, contacts);
+        this.applyDefaultRef(this.form.controls.vendorAddressId, addresses);
+      });
 
     // Pre-fill unit price from part's list price when a part is selected
     this.lineForm.controls.partId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((partId) => {
@@ -289,6 +333,49 @@ export class PoDialogComponent {
     this.form.controls.vendorId.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.maybeRecomputePrice((price) => this.lastComputedPrice = price));
+  }
+
+  private loadVendorRefs(vendorId: number | null): Observable<{
+    contacts: PoVendorRef[]; addresses: PoVendorRef[]; vendorParts: Map<number, boolean> | null;
+  }> {
+    if (vendorId == null) return of({ contacts: [], addresses: [], vendorParts: null });
+    return forkJoin({
+      contacts: this.vendorRefsService.getContacts(vendorId),
+      addresses: this.vendorRefsService.getOrderFromAddresses(vendorId),
+      vendorParts: this.vendorPartsService.listForVendor(vendorId).pipe(
+        map(list => new Map(list.map(vp => [vp.partId, vp.isApproved]))),
+        catchError(() => of(null)),
+      ),
+    });
+  }
+
+  private applyDefaultRef(control: FormControl<number | null>, refs: PoVendorRef[]): void {
+    if (control.value != null && refs.some(r => r.id === control.value)) return;
+    control.setValue(refs.find(r => r.isDefault)?.id ?? null);
+  }
+
+  private refOptions(refs: PoVendorRef[], noneKey: string): SelectOption[] {
+    return [
+      { value: null, label: this.translate.instant(noneKey) },
+      ...refs.map(r => ({ value: r.id, label: r.label })),
+    ];
+  }
+
+  private partLabel(p: PartListItem): string {
+    const displayName = p.name ?? p.description ?? '(no name)';
+    return p.status === 'Obsolete'
+      ? `${p.partNumber} — ${displayName} ${this.translate.instant('common.deactivatedSuffix')}`
+      : `${p.partNumber} — ${displayName}`;
+  }
+
+  protected lineSourceApproved(line: PoLineEntry): boolean | null {
+    const approvals = this.vendorParts();
+    if (line.partId == null || approvals == null) return null;
+    return approvals.get(line.partId) ?? false;
+  }
+
+  protected onPartSearch(event: Event): void {
+    this.partSearch.set((event.target as HTMLInputElement | null)?.value ?? '');
   }
 
   private restoreChosen(control: FormControl<string>, chosen: unknown): void {
@@ -337,6 +424,7 @@ export class PoDialogComponent {
 
   private applyNonStockMode(nonStock: boolean): void {
     const { partId, description } = this.lineForm.controls;
+    this.partSearch.set('');
     if (nonStock) {
       partId.setValue(null);
       this.lineForm.controls.unitPrice.setValue(0, { emitEvent: false });
@@ -463,6 +551,7 @@ export class PoDialogComponent {
     this.lastComputedPrice = null;
     this.defaultFilledPrice = null;
     this.pendingLineOverrideReason.set(null);
+    this.partSearch.set('');
   }
 
   protected removeLine(index: number): void {
@@ -474,6 +563,7 @@ export class PoDialogComponent {
   // pauses until the user confirms (or cancels).
   protected readonly showOffTierPrompt = signal(false);
   protected readonly offTierLines = signal<CheckTierVarianceResult[]>([]);
+  protected readonly noTierLines = signal<CheckTierVarianceResult[]>([]);
   protected readonly offTierThresholdPct = signal(5);
   protected readonly partLookup = computed(() => {
     const map = new Map<number, { partNumber: string; description: string }>();
@@ -506,12 +596,14 @@ export class PoDialogComponent {
       lines: varianceLines,
     }).subscribe({
       next: (result) => {
-        const offTier = result.lines.filter(l => l.isOffTier);
+        const offTier = result.lines.filter(l => l.isOffTier && l.hasTier !== false);
         if (offTier.length === 0) {
           this.submitPo();
           return;
         }
         this.offTierLines.set(offTier);
+        this.noTierLines.set(result.lines.filter((l, i, all) =>
+          l.hasTier === false && all.findIndex(o => o.hasTier === false && o.partId === l.partId) === i));
         this.offTierThresholdPct.set(result.thresholdPct);
         this.showOffTierPrompt.set(true);
         this.saving.set(false);
@@ -528,6 +620,7 @@ export class PoDialogComponent {
   protected onOffTierCancel(): void {
     this.showOffTierPrompt.set(false);
     this.offTierLines.set([]);
+    this.noTierLines.set([]);
   }
 
   protected onOffTierConfirm(result: OffTierPromptResult): void {
@@ -546,13 +639,20 @@ export class PoDialogComponent {
         effectiveFrom: toIsoDate(new Date()),
       }).pipe(catchError(() => of(null))));
 
-    if (tierUpserts.length === 0) {
+    const priceSaves = result.savePriceLines.map(l => this.saveVendorPrice(l));
+
+    if (tierUpserts.length === 0 && priceSaves.length === 0) {
       this.submitPo();
       return;
     }
 
-    forkJoin(tierUpserts).pipe(map(() => null)).subscribe({
-      next: () => this.submitPo(),
+    forkJoin([...tierUpserts, ...priceSaves]).subscribe({
+      next: (outcomes) => {
+        if (outcomes.slice(tierUpserts.length).some(saved => saved === false)) {
+          this.snackbar.error(this.translate.instant('poCreate.savePriceFailed'));
+        }
+        this.submitPo();
+      },
       error: () => {
         // Tier upsert failed — surface to user but don't block PO submit.
         // The PO is still legitimate; tier update can be retried later.
@@ -562,6 +662,31 @@ export class PoDialogComponent {
     });
   }
 
+  private saveVendorPrice(line: CheckTierVarianceResult): Observable<boolean> {
+    const f = this.form.getRawValue();
+    const poLine = this.lines().find(l =>
+      l.partId === line.partId && l.orderedQuantity === line.quantity && l.unitPrice === line.unitPrice);
+    const vendorPartId$ = line.vendorPartId !== null
+      ? of(line.vendorPartId)
+      : this.vendorPartsService.create({
+        vendorId: f.vendorId!,
+        partId: line.partId,
+        isApproved: false,
+        isPreferred: false,
+        currency: f.quoteCurrency,
+      }).pipe(map(vp => vp.id));
+    return vendorPartId$.pipe(
+      switchMap(vendorPartId => this.vendorPartsService.addPriceTier(vendorPartId, {
+        minQuantity: Math.min(1, line.quantity),
+        unitPrice: line.unitPrice,
+        effectiveFrom: toIsoDate(new Date()),
+        purchaseUnitId: poLine?.purchaseUnitId ?? null,
+      })),
+      map(() => true),
+      catchError(() => of(false)),
+    );
+  }
+
   private submitPo(): void {
     this.saving.set(true);
     const f = this.form.getRawValue();
@@ -569,6 +694,9 @@ export class PoDialogComponent {
 
     this.poService.createPurchaseOrder({
       vendorId: f.vendorId!,
+      vendorContactId: f.vendorContactId ?? undefined,
+      vendorAddressId: f.vendorAddressId ?? undefined,
+      shipToLocationId: f.shipToLocationId ?? undefined,
       jobId: f.jobId ?? undefined,
       notes: f.notes || undefined,
       poNumber: this.allowManualPoNumbers() ? (f.poNumber?.trim() || undefined) : undefined,

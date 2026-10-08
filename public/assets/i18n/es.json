@@ -5347,6 +5347,21 @@
       }
     }
   },
+  "poCreate": {
+    "vendorContact": "Contacto del proveedor",
+    "orderFromAddress": "Dirección de pedido",
+    "shipTo": "Enviar a",
+    "noContact": "Sin contacto",
+    "noAddress": "Sin dirección",
+    "noShipTo": "Sin ubicación de envío",
+    "makePartOnly": "Ninguna pieza comprable coincide. {{partNumber}} se fabrica internamente.",
+    "sourceApproved": "Aprobado",
+    "sourceNotApproved": "No aprobado",
+    "unapprovedSourceWarning": "Este proveedor no es una fuente aprobada para: {{parts}}. Aún puede crear la OC.",
+    "noTierIntro": "Este proveedor no tiene precio registrado para las piezas siguientes. Puede guardar el precio ingresado como precio del proveedor:",
+    "savePrice": "Guardar {{price}} como precio de este proveedor para {{part}}",
+    "savePriceFailed": "No se pudieron guardar uno o más precios del proveedor. La OC se sigue creando."
+  },
   "purchaseOrders": {
     "poNumberLabel": "Número de OC",
     "editPoNumber": "Editar número de OC",

@@ -2,6 +2,9 @@ import { CreatePurchaseOrderLineRequest } from './create-purchase-order-line-req
 
 export interface CreatePurchaseOrderRequest {
   vendorId: number;
+  vendorContactId?: number;
+  vendorAddressId?: number;
+  shipToLocationId?: number;
   jobId?: number;
   notes?: string;
   // Optional manual override for the auto-generated PO number. Only honored

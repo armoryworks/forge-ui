@@ -27,6 +27,14 @@
                     @if (line.purchaseUnitLabel) {
                       <span class="po-line-option-chip">{{ line.purchaseUnitLabel }}</span>
                     }
+                    @switch (lineSourceApproved(line)) {
+                      @case (true) {
+                        <span class="po-line-source po-line-source--approved" data-testid="po-line-source-approved">{{ 'poCreate.sourceApproved' | translate }}</span>
+                      }
+                      @case (false) {
+                        <span class="po-line-source po-line-source--not-approved" data-testid="po-line-source-not-approved">{{ 'poCreate.sourceNotApproved' | translate }}</span>
+                      }
+                    }
                     @if (line.notes) {
                       <div class="po-line-note">{{ line.notes }}</div>
                     }
@@ -88,7 +96,7 @@
           @if (lineForm.controls.nonStock.value) {
             <app-input data-testid="po-line-description" [label]="'purchaseOrders.lineDescription' | translate" formControlName="description" [required]="true" [maxlength]="500" />
           } @else {
-            <app-autocomplete data-testid="po-line-part" [label]="'common.part' | translate" [options]="partOptions()" displayField="label" valueField="value" formControlName="partId" [required]="true" [minChars]="0" />
+            <app-autocomplete data-testid="po-line-part" [label]="'common.part' | translate" [options]="partOptions()" displayField="label" valueField="value" formControlName="partId" [required]="true" [minChars]="0" (input)="onPartSearch($event)" />
           }
           <!-- Phase 3 / WU-10 / F8-partial — qty + price are decimal(18,4); UoM-aware shops
                need fractional quantities (lb, kg, hr, gal). 4 decimals on price is industry-
@@ -105,6 +113,9 @@
             {{ 'common.add' | translate }}
           </button>
         </div>
+        @if (!lineForm.controls.nonStock.value && makePartHint()) {
+          <p class="part-search-hint" data-testid="po-line-part-make-hint">{{ makePartHint() }}</p>
+        }
         <div class="add-line-note" [formGroup]="lineForm">
           <app-input data-testid="po-line-note" [label]="'purchaseOrders.lineNote' | translate" formControlName="notes" [maxlength]="1000" [placeholder]="'salesOrders.optional' | translate" />
         </div>
@@ -130,6 +141,8 @@
                  (change)="showInactiveVendors.set($any($event.target).checked)" />
           {{ 'purchaseOrders.showInactiveVendors' | translate }}
         </label>
+        <app-select data-testid="po-vendor-contact" [label]="'poCreate.vendorContact' | translate" formControlName="vendorContactId" [options]="contactOptions()" />
+        <app-select data-testid="po-vendor-address" [label]="'poCreate.orderFromAddress' | translate" formControlName="vendorAddressId" [options]="addressOptions()" />
         <app-entity-picker data-testid="po-job-id"
           [label]="'purchaseOrders.jobId' | translate"
           entityType="jobs"
@@ -137,6 +150,7 @@
           secondaryDisplayField="title"
           formControlName="jobId"
           [placeholder]="'salesOrders.optional' | translate" />
+        <app-select data-testid="po-ship-to" [label]="'poCreate.shipTo' | translate" formControlName="shipToLocationId" [options]="shipToOptions()" />
         <app-datepicker data-testid="po-expected-delivery" [label]="'purchaseOrders.expectedDelivery' | translate" formControlName="expectedDeliveryDate" />
       </div>
 
@@ -177,6 +191,10 @@
 
   </div>
 
+  @if (unapprovedSourceWarning()) {
+    <p class="source-warning" data-testid="po-unapproved-source-warning">{{ unapprovedSourceWarning() }}</p>
+  }
+
   <div dialog-footer>
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <app-validation-button [violations]="violations" [loading]="saving()">
@@ -195,6 +213,7 @@
     [lines]="offTierLines()"
     [thresholdPct]="offTierThresholdPct()"
     [partLookup]="partLookup()"
+    [noTierLines]="noTierLines()"
     (cancelled)="onOffTierCancel()"
     (confirmed)="onOffTierConfirm($event)" />
 }

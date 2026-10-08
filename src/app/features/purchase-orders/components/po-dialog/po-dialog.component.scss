@@ -24,6 +24,38 @@
   border: $border-width-thin solid var(--border);
 }
 
+.po-line-source {
+  display: inline-block;
+  margin-left: $sp-sm;
+  padding: 0 $sp-sm;
+  font-size: $font-size-xxs;
+  border: $border-width-thin solid currentColor;
+
+  &--approved {
+    color: var(--success);
+  }
+
+  &--not-approved {
+    color: var(--warning);
+  }
+}
+
+.part-search-hint {
+  margin: $sp-sm 0 0;
+  font-size: $font-size-xxs;
+  color: var(--text-secondary);
+}
+
+.source-warning {
+  margin: 0;
+  padding: $sp-sm $sp-xl;
+  font-size: $font-size-xxs;
+  color: var(--text);
+  background: color-mix(in srgb, var(--warning) 10%, transparent);
+  border-top: $border-width-thin solid var(--border);
+  border-left: $border-width-accent solid var(--warning);
+}
+
 .price-field {
   position: relative;
 }

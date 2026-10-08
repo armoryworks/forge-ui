@@ -20,6 +20,10 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
  *     price + line qty (effective today). Subsequent POs see the new
  *     baseline.
  *
+ * Lines the vendor has no price for are never off-tier. They are listed
+ * below the table with an opt-in action that saves the entered price as
+ * the vendor's price for that part.
+ *
  * Footer buttons: Cancel (returns to the PO dialog) / Continue (commits
  * the chosen action per row, then proceeds with PO submission).
  *
@@ -43,20 +47,32 @@ export class OffTierPromptDialogComponent {
   readonly thresholdPct = input.required<number>();
   /** Map of partNumber + description for display (key: partId). */
   readonly partLookup = input<Map<number, { partNumber: string; description: string }>>(new Map());
+  /** Lines with no price on file for this vendor; each can opt in to saving its entered price. */
+  readonly noTierLines = input<CheckTierVarianceResult[]>([]);
 
   /** User clicked Cancel — returns to the PO dialog without submitting. */
   readonly cancelled = output<void>();
-  /** User clicked Continue — emits the per-row "update tier" choice set. */
+  /** User clicked Continue — emits the per-row "update tier" and "save price" choice sets. */
   readonly confirmed = output<OffTierPromptResult>();
 
   /** Per-row "update tier" choice. Default false (one-off exception). */
   protected readonly updateTierByPart = signal<Record<number, boolean>>({});
+
+  /** Per-line "save price" choice for the no-tier lines. Default false. */
+  protected readonly savePriceByPart = signal<Record<number, boolean>>({});
 
   protected readonly tierUpdateCount = computed(() =>
     Object.values(this.updateTierByPart()).filter(Boolean).length);
 
   protected toggleUpdateTier(partId: number): void {
     this.updateTierByPart.update(current => ({
+      ...current,
+      [partId]: !current[partId],
+    }));
+  }
+
+  protected toggleSavePrice(partId: number): void {
+    this.savePriceByPart.update(current => ({
       ...current,
       [partId]: !current[partId],
     }));
@@ -73,11 +89,14 @@ export class OffTierPromptDialogComponent {
   protected onConfirm(): void {
     const map = this.updateTierByPart();
     const updateTierLines = this.lines().filter(l => map[l.partId]);
-    this.confirmed.emit({ updateTierLines });
+    const saveMap = this.savePriceByPart();
+    const savePriceLines = this.noTierLines().filter(l => saveMap[l.partId]);
+    this.confirmed.emit({ updateTierLines, savePriceLines });
   }
 }
 
-/** Emitted by Continue. Lines whose tier should be updated server-side. */
+/** Emitted by Continue. Lines whose tier should be updated, and no-tier lines whose price should be saved. */
 export interface OffTierPromptResult {
   updateTierLines: CheckTierVarianceResult[];
+  savePriceLines: CheckTierVarianceResult[];
 }

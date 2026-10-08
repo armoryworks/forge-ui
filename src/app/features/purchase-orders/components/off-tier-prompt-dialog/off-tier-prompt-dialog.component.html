@@ -57,6 +57,21 @@
       </tbody>
     </table>
 
+    @if (noTierLines().length > 0) {
+      <div class="off-tier__no-tier" data-testid="off-tier-no-tier">
+        <p class="off-tier__intro">{{ 'poCreate.noTierIntro' | translate }}</p>
+        @for (line of noTierLines(); track line.partId) {
+          <label class="off-tier__choice">
+            <input type="checkbox"
+              [attr.data-testid]="'off-tier-save-price-' + line.partId"
+              [checked]="!!$any(savePriceByPart())[line.partId]"
+              (change)="toggleSavePrice(line.partId)" />
+            {{ 'poCreate.savePrice' | translate:{ price: (line.unitPrice | number:'1.2-4'), part: partInfo(line.partId).partNumber } }}
+          </label>
+        }
+      </div>
+    }
+
     @if (tierUpdateCount() > 0) {
       <p class="off-tier__summary">
         {{ 'purchaseOrders.offTier.updateSummary' | translate:{ count: tierUpdateCount() } }}
