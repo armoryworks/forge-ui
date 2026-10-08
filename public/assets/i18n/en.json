@@ -1552,7 +1552,6 @@
     },
     "estTime": "Cycle time (per piece)",
     "estHours": "Hours",
-    "estMilliseconds": "Milliseconds",
     "estSeconds": "Seconds",
     "setupTime": "Setup time (minutes)",
     "lotTime": "Per-lot time (minutes)",
@@ -7531,6 +7530,17 @@
       "empty": "No scheduled operations to plot.",
       "noWorkCenter": "Unassigned"
     }
+  },
+  "routingTools": {
+    "totalCycle": "Cycle / piece",
+    "totalSetup": "Setup",
+    "totalLot": "Per lot",
+    "copyFromPart": "Copy routing from another part",
+    "copyTitle": "Copy routing from another part",
+    "copyHint": "Every step is copied with its work center, times and QC checkpoint. Material links carry over only for components that are also on this part's BOM.",
+    "sourcePart": "Copy from part",
+    "copySubmit": "Copy routing",
+    "copied": "Copied {{count}} steps"
   },
   "workCenterDialog": {
     "newTitle": "New Work Center",

@@ -1,0 +1,27 @@
+<app-dialog [title]="'routingTools.copyTitle' | translate" width="480px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    <p class="text-muted">{{ 'routingTools.copyHint' | translate }}</p>
+    <app-entity-picker
+      data-testid="routing-copy-source-part"
+      [label]="'routingTools.sourcePart' | translate"
+      entityType="parts"
+      displayField="partNumber"
+      secondaryDisplayField="name"
+      formControlName="sourcePartId" />
+  </div>
+
+  <div dialog-footer>
+    <button type="button" class="action-btn" data-testid="routing-copy-cancel-btn" (click)="close()">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button type="button" class="action-btn action-btn--create"
+        data-testid="routing-copy-submit-btn"
+        [disabled]="form.invalid || saving()"
+        (click)="copy()">
+        <span class="material-icons-outlined" aria-hidden="true">content_copy</span>
+        {{ 'routingTools.copySubmit' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

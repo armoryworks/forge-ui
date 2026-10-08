@@ -1,6 +1,24 @@
 <div class="routing" [appLoadingBlock]="loading()">
   <div class="routing__header">
-    <h4>{{ 'parts.routing' | translate }}</h4>
+    <div class="routing__title">
+      <h4>{{ 'parts.routing' | translate }}</h4>
+      @if (operations().length > 0) {
+        <dl class="routing__totals" data-testid="routing-totals">
+          <div class="routing__total">
+            <dt>{{ 'routingTools.totalCycle' | translate }}</dt>
+            <dd data-testid="routing-total-cycle">{{ (totalCycleMs() | durationMs) || '—' }}</dd>
+          </div>
+          <div class="routing__total">
+            <dt>{{ 'routingTools.totalSetup' | translate }}</dt>
+            <dd data-testid="routing-total-setup">{{ (totalSetupMs() | durationMs) || '—' }}</dd>
+          </div>
+          <div class="routing__total">
+            <dt>{{ 'routingTools.totalLot' | translate }}</dt>
+            <dd data-testid="routing-total-lot">{{ (totalLotMs() | durationMs) || '—' }}</dd>
+          </div>
+        </dl>
+      }
+    </div>
     <div class="routing__header-actions">
       <div class="view-toggle" role="group" [attr.aria-label]="'parts.viewModeLabel' | translate">
         <button class="icon-btn" [class.icon-btn--active]="routingViewMode() === 'list'"
@@ -28,7 +46,10 @@
     <app-routing-flow-view [operations]="operations()" />
   } @else {
     @if (operations().length === 0) {
-      <app-empty-state icon="route" [message]="'parts.noOperations' | translate" />
+      <app-empty-state icon="route" data-testid="routing-empty-state"
+                       [message]="'parts.noOperations' | translate"
+                       [actionLabel]="'routingTools.copyFromPart' | translate"
+                       (action)="openCopyRouting()" />
     } @else {
       <div class="routing__operations" cdkDropList (cdkDropListDropped)="onReorderOperation($event)">
         @for (operation of operations(); track operation.id) {

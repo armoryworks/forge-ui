@@ -1552,7 +1552,6 @@
     },
     "estTime": "Tiempo de ciclo (por pieza)",
     "estHours": "Horas",
-    "estMilliseconds": "Milisegundos",
     "estSeconds": "Segundos",
     "setupTime": "Tiempo de preparación (minutos)",
     "lotTime": "Tiempo por lote (minutos)",
@@ -7524,6 +7523,17 @@
       "empty": "No hay operaciones programadas para mostrar.",
       "noWorkCenter": "Sin asignar"
     }
+  },
+  "routingTools": {
+    "totalCycle": "Ciclo / pieza",
+    "totalSetup": "Preparación",
+    "totalLot": "Por lote",
+    "copyFromPart": "Copiar el enrutamiento de otra pieza",
+    "copyTitle": "Copiar el enrutamiento de otra pieza",
+    "copyHint": "Cada paso se copia con su centro de trabajo, sus tiempos y su punto de control de calidad. Los vínculos de materiales solo se conservan para los componentes que también están en la lista de materiales de esta pieza.",
+    "sourcePart": "Copiar de la pieza",
+    "copySubmit": "Copiar enrutamiento",
+    "copied": "Se copiaron {{count}} pasos"
   },
   "workCenterDialog": {
     "newTitle": "Nuevo Centro de Trabajo",

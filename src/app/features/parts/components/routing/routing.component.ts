@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, input, signal } from '@angular/core';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 
 import { forkJoin } from 'rxjs';
@@ -12,6 +12,7 @@ import { Operation } from '../../models/operation.model';
 import { BOMLine } from '../../models/bom-line.model';
 import { OperationDialogComponent, OperationDialogData } from '../operation-dialog/operation-dialog.component';
 import { RoutingFlowViewComponent } from '../routing-flow-view/routing-flow-view.component';
+import { RoutingCopyDialogComponent, RoutingCopyDialogData } from '../routing-copy-dialog/routing-copy-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DraftResumeService } from '../../../../shared/services/draft-resume.service';
@@ -43,6 +44,12 @@ export class RoutingComponent implements OnInit {
   protected readonly loading = signal(false);
   protected readonly routingViewMode = signal<RoutingViewMode>('list');
   protected readonly expandedInstructions = signal<ReadonlySet<number>>(new Set());
+  protected readonly totalCycleMs = computed(() =>
+    this.operations().reduce((sum, op) => sum + (op.estimatedMs ?? 0), 0));
+  protected readonly totalSetupMs = computed(() =>
+    this.operations().reduce((sum, op) => sum + (op.setupMinutes ?? 0), 0) * 60_000);
+  protected readonly totalLotMs = computed(() =>
+    this.operations().reduce((sum, op) => sum + (op.runMinutesLot ?? 0), 0) * 60_000);
 
   constructor() {
     effect(() => {
@@ -95,6 +102,17 @@ export class RoutingComponent implements OnInit {
       if (result) {
         this.operations.update(list => [...list, result].sort((a, b) => a.stepNumber - b.stepNumber));
         this.snackbar.success(this.translate.instant('parts.operationAdded'));
+      }
+    });
+  }
+
+  protected openCopyRouting(): void {
+    this.dialog.open(RoutingCopyDialogComponent, {
+      width: '480px',
+      data: { partId: this.partId() } satisfies RoutingCopyDialogData,
+    }).afterClosed().subscribe((result: Operation[] | null | undefined) => {
+      if (result) {
+        this.operations.set([...result].sort((a, b) => a.stepNumber - b.stepNumber));
       }
     });
   }
