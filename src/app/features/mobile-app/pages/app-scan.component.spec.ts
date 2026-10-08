@@ -13,6 +13,7 @@ import { AuthService } from '../../../shared/services/auth.service';
 import { CameraScannerService } from '../../../shared/services/camera-scanner.service';
 import { InstanceService } from '../../../shared/services/instance.service';
 import { MobileApiService } from '../../../shared/services/mobile-api.service';
+import { MobileMoveConfirmService } from '../../../shared/services/mobile-move-confirm.service';
 import { MobileTimerService } from '../../../shared/services/mobile-timer.service';
 import { OfflineQueueService } from '../../../shared/services/offline-queue.service';
 import { PlatformService } from '../../../shared/services/platform.service';
@@ -58,7 +59,14 @@ describe('AppScanComponent', () => {
     advanceJob: vi.fn(),
     moveJobToStage: vi.fn(),
     stopTimer: vi.fn(),
+    jobStatus: vi.fn(),
   };
+  const confirmMove = {
+    needed: vi.fn(),
+    ask: vi.fn(),
+    isConfirmRequired: vi.fn(() => false),
+  };
+  const router = { navigate: vi.fn() };
 
   function create(): ScanInternals {
     const component = TestBed.runInInjectionContext(() => new AppScanComponent());
@@ -84,6 +92,11 @@ describe('AppScanComponent', () => {
       status: { stageName: 'Machining' }, previousStageId: 3, previousStageName: 'Queued', collapsed: false,
     }));
     api.moveJobToStage.mockReset().mockReturnValue(of({}));
+    api.stopTimer.mockReset().mockReturnValue(of({}));
+    api.jobStatus.mockReset().mockReturnValue(of({ id: 42, nextStageName: 'Machining' }));
+    confirmMove.needed.mockReset().mockReturnValue(false);
+    confirmMove.ask.mockReset().mockResolvedValue(true);
+    router.navigate.mockReset().mockResolvedValue(true);
     TestBed.configureTestingModule({
       providers: [
         { provide: CameraScannerService, useValue: { start: vi.fn().mockResolvedValue(undefined), stop: vi.fn() } },
@@ -91,7 +104,8 @@ describe('AppScanComponent', () => {
         { provide: ScanFeedbackService, useValue: { tick: vi.fn(), doubleBuzz: vi.fn() } },
         { provide: UndoService, useValue: { offer } },
         { provide: OfflineQueueService, useValue: { remove: vi.fn() } },
-        { provide: Router, useValue: { navigate: vi.fn().mockResolvedValue(true) } },
+        { provide: Router, useValue: router },
+        { provide: MobileMoveConfirmService, useValue: confirmMove },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
         { provide: SharedIdentityService, useValue: identity },
         { provide: AuthService, useValue: { token: () => 'person-token' } },
@@ -224,6 +238,57 @@ describe('AppScanComponent', () => {
 
     scan.notYou();
     expect(identity.clear).toHaveBeenCalledOnce();
+  });
+
+  it('moves an ordinary column unconfirmed, the same request as before, with Undo', async () => {
+    await create().onAction('move');
+
+    expect(confirmMove.ask).not.toHaveBeenCalled();
+    expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', false);
+    expect(offer).toHaveBeenCalledOnce();
+  });
+
+  it('asks before moving into a column that creates an accounting document, then offers no Undo', async () => {
+    confirmMove.needed.mockReturnValue(true);
+    const scan = create();
+
+    await scan.onAction('move');
+
+    expect(confirmMove.ask).toHaveBeenCalledWith({ id: 42, nextStageName: 'Machining' });
+    expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', true);
+    expect(offer).not.toHaveBeenCalled();
+    expect(scan.notice()).toBe('mobileApp.jobs.movedTo');
+    expect(identity.clear).toHaveBeenCalledOnce();
+  });
+
+  it('moves nothing and keeps the timer when the person declines', async () => {
+    confirmMove.needed.mockReturnValue(true);
+    confirmMove.ask.mockResolvedValue(false);
+
+    await create().onAction('complete');
+
+    expect(api.stopTimer).not.toHaveBeenCalled();
+    expect(api.advanceJob).not.toHaveBeenCalled();
+    expect(offer).not.toHaveBeenCalled();
+  });
+
+  it('confirms a complete once, before stopping the timer', async () => {
+    confirmMove.needed.mockReturnValue(true);
+
+    await create().onAction('complete');
+
+    expect(confirmMove.ask).toHaveBeenCalledOnce();
+    expect(api.stopTimer).toHaveBeenCalledOnce();
+    expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', true);
+  });
+
+  it('opens receiving for a scanned purchase order', async () => {
+    const scan = create();
+    scan.result.set({ kind: 'purchaseOrder', id: 8, code: 'PO-1008', label: 'PO-1008', subtitle: null });
+
+    await scan.onAction('receive');
+
+    expect(router.navigate).toHaveBeenCalledWith(['/app/receive', 8]);
   });
 });
 

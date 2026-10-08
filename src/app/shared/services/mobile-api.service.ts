@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpContext, HttpHeaders } from '@angular/common/http';
 
-import { Observable, catchError, from, map, of } from 'rxjs';
+import { Observable, catchError, from, map, of, tap } from 'rxjs';
 
 import {
   ActiveTimer, ClockPunchResult, ClockState, JobAdvanceResult, JobNote, JobStatus, OnHand, QueuedOffline,
@@ -12,6 +12,8 @@ import { JobOperationTimerResult } from '../models/job-operation-timer-result.mo
 import { JobOperationTimerStop } from '../models/job-operation-timer-stop.model';
 import { JobOperations } from '../models/job-operations.model';
 import { JobOperationsConfig } from '../models/job-operations-config.model';
+import { MyJob } from '../models/my-job.model';
+import { QueuedActionLabel } from '../models/queued-action-label.model';
 import { RunningTimer } from '../models/running-timer.model';
 import { TimerStopTarget } from '../models/timer-stop-target.model';
 import { UpdateJobOperationProgressRequest } from '../models/update-job-operation-progress-request.model';
@@ -29,7 +31,9 @@ type Method = 'POST' | 'PATCH' | 'DELETE';
  * scheme. Offline, a mutation goes to the per-instance queue with that
  * same key and resolves to `QueuedOffline`; lookups stay online-only.
  * A compensation sent with an explicit token never queues: the queue
- * replays under whoever holds the session at sync time.
+ * replays under whoever holds the session at sync time. A queued change is
+ * named by a translation key and the job or part number this service last
+ * read for that id, so the sync sheet never shows an id.
  */
 @Injectable({ providedIn: 'root' })
 export class MobileApiService {
@@ -37,22 +41,40 @@ export class MobileApiService {
   private readonly queue = inject(OfflineQueueService);
   private readonly instances = inject(InstanceService);
   private readonly platform = inject(PlatformService);
+  private readonly jobNumbers = new Map<number, string>();
+  private readonly partNumbers = new Map<number, string>();
 
   resolveScan(code: string): Observable<ScanResolveResult> {
-    return this.http.post<ScanResolveResult>('/api/v1/mobile/scan/resolve', { code });
+    return this.http.post<ScanResolveResult>('/api/v1/mobile/scan/resolve', { code })
+      .pipe(tap((result) => this.rememberResult(result)));
   }
 
   jobStatus(jobId: number): Observable<JobStatus> {
-    return this.http.get<JobStatus>(`/api/v1/mobile/jobs/${jobId}/status`);
+    return this.http.get<JobStatus>(`/api/v1/mobile/jobs/${jobId}/status`)
+      .pipe(tap((job) => this.jobNumbers.set(job.id, job.jobNumber)));
   }
 
-  advanceJob(jobId: number, scanCode: string | null): Observable<JobAdvanceResult | QueuedOffline> {
-    return this.mutate<JobAdvanceResult>('POST', `/api/v1/mobile/jobs/${jobId}/advance`, { scanCode }, `Advance job ${jobId}`);
+  /** Open work orders assigned to the caller, due soonest first. */
+  myJobs(): Observable<MyJob[]> {
+    return this.http.get<MyJob[]>('/api/v1/mobile/jobs/mine')
+      .pipe(tap((jobs) => jobs.forEach((job) => this.jobNumbers.set(job.id, job.jobNumber))));
+  }
+
+  /**
+   * Moves the job to its next column. A column that can't be undone or that
+   * creates an accounting document needs `confirmed`; without it the server
+   * answers 400 with code `confirm-required`.
+   */
+  advanceJob(jobId: number, scanCode: string | null, confirmed = false): Observable<JobAdvanceResult | QueuedOffline> {
+    return this.mutate<JobAdvanceResult>(
+      'POST', `/api/v1/mobile/jobs/${jobId}/advance`, confirmed ? { scanCode, confirmed: true } : { scanCode },
+      this.jobLabel('advance', jobId));
   }
 
   /** Compensating action for advance: move back to the column it came from. */
   moveJobToStage(jobId: number, stageId: number, token?: string): Observable<JobStatus | QueuedOffline> {
-    return this.mutate<JobStatus>('PATCH', `/api/v1/jobs/${jobId}/stage`, { stageId }, `Move job ${jobId} back`, token);
+    return this.mutate<JobStatus>(
+      'PATCH', `/api/v1/jobs/${jobId}/stage`, { stageId }, this.jobLabel('moveBack', jobId), token);
   }
 
   /**
@@ -68,12 +90,13 @@ export class MobileApiService {
   startTimer(jobId: number | null, token?: string, operationId: number | null = null): Observable<StartedTimeEntry | QueuedOffline> {
     return this.mutate<StartedTimeEntry>(
       'POST', '/api/v1/time-tracking/timer/start', { jobId, operationId },
-      jobId === null ? 'Start timer' : `Start timer on job ${jobId}`, token);
+      jobId === null ? { key: 'mobileAppWork.sync.action.startTimerAny' } : this.jobLabel('startTimer', jobId), token);
   }
 
   /** Without a target the server stops the caller's newest job-level timer, as it always has. */
   stopTimer(token?: string, target?: TimerStopTarget): Observable<unknown> {
-    return this.mutate<unknown>('POST', '/api/v1/time-tracking/timer/stop', target ?? {}, 'Stop timer', token);
+    return this.mutate<unknown>('POST', '/api/v1/time-tracking/timer/stop', target ?? {},
+      { key: 'mobileAppWork.sync.action.stopTimer' }, token);
   }
 
   /** All of the caller's open timers, job-level and per operation. A failure is not shown. */
@@ -101,14 +124,14 @@ export class MobileApiService {
   ): Observable<JobOperationTimerResult | QueuedOffline> {
     return this.mutate<JobOperationTimerResult>(
       'POST', `/api/v1/jobs/${jobId}/operations/${operationId}/timer/start`, { entryType },
-      `Start operation ${operationId} on job ${jobId}`, token, true);
+      this.jobLabel('startOperation', jobId), token, true);
   }
 
   /** Also the compensating action for startOperationTimer. */
   stopOperationTimer(jobId: number, operationId: number, token?: string): Observable<JobOperationTimerStop | QueuedOffline> {
     return this.mutate<JobOperationTimerStop>(
       'POST', `/api/v1/jobs/${jobId}/operations/${operationId}/timer/stop`, {},
-      `Stop operation ${operationId} on job ${jobId}`, token, true);
+      this.jobLabel('stopOperation', jobId), token, true);
   }
 
   /** Quantities are absolute, so the same call with the earlier values is the compensating action. */
@@ -117,7 +140,7 @@ export class MobileApiService {
   ): Observable<JobOperationProgress | QueuedOffline> {
     return this.mutate<JobOperationProgress>(
       'PATCH', `/api/v1/jobs/${jobId}/operations/${operationId}`, request,
-      `Update operation ${operationId} on job ${jobId}`, token, true);
+      this.jobLabel('updateOperation', jobId), token, true);
   }
 
   /**
@@ -127,16 +150,18 @@ export class MobileApiService {
    */
   deleteTimeEntry(entryId: number, token?: string): Observable<unknown> {
     return this.mutate<unknown>(
-      'DELETE', `/api/v1/time-tracking/entries/${entryId}`, null, `Remove time entry ${entryId}`, token, true);
+      'DELETE', `/api/v1/time-tracking/entries/${entryId}`, null,
+      { key: 'mobileAppWork.sync.action.removeTimeEntry' }, token, true);
   }
 
   addNote(jobId: number, text: string): Observable<JobNote | QueuedOffline> {
-    return this.mutate<JobNote>('POST', `/api/v1/jobs/${jobId}/notes`, { text }, `Note on job ${jobId}`);
+    return this.mutate<JobNote>('POST', `/api/v1/jobs/${jobId}/notes`, { text }, this.jobLabel('addNote', jobId));
   }
 
   /** Compensating action for addNote. */
   deleteNote(jobId: number, noteId: number): Observable<unknown> {
-    return this.mutate<unknown>('DELETE', `/api/v1/jobs/${jobId}/notes/${noteId}`, null, `Remove note on job ${jobId}`);
+    return this.mutate<unknown>(
+      'DELETE', `/api/v1/jobs/${jobId}/notes/${noteId}`, null, this.jobLabel('removeNote', jobId));
   }
 
   attachPhoto(jobId: number, blob: Blob, fileName: string): Observable<UploadedJobFile> {
@@ -162,7 +187,8 @@ export class MobileApiService {
   }
 
   clockPunch(eventType: 'ClockIn' | 'ClockOut' | 'BreakStart' | 'BreakEnd'): Observable<ClockPunchResult | QueuedOffline> {
-    return this.mutate<ClockPunchResult>('POST', '/api/v1/mobile/clock/punch', { eventType }, `Clock: ${eventType}`);
+    return this.mutate<ClockPunchResult>(
+      'POST', '/api/v1/mobile/clock/punch', { eventType }, { key: `mobileAppWork.sync.action.clock.${eventType}` });
   }
 
   /**
@@ -173,21 +199,26 @@ export class MobileApiService {
    */
   undoClockPunch(eventId: number, token?: string, silent = false): Observable<ClockState | QueuedOffline> {
     return this.mutate<ClockState>(
-      'DELETE', `/api/v1/mobile/clock/events/${eventId}`, null, 'Undo clock punch', token, silent);
+      'DELETE', `/api/v1/mobile/clock/events/${eventId}`, null, { key: 'mobileAppWork.sync.action.undoClockPunch' }, token, silent);
   }
 
   onHand(partId: number, locationId: number): Observable<OnHand> {
-    return this.http.get<OnHand>('/api/v1/mobile/stock/on-hand', { params: { partId, locationId } });
+    return this.http.get<OnHand>('/api/v1/mobile/stock/on-hand', { params: { partId, locationId } })
+      .pipe(tap((stock) => this.partNumbers.set(stock.partId, stock.partNumber)));
   }
 
   /** Also the compensating action: call again with the result's `undo`. */
   moveStock(request: StockMoveRequest): Observable<StockMoveResult | QueuedOffline> {
+    const part = this.partNumbers.get(request.partId);
     return this.mutate<StockMoveResult>(
-      'POST', '/api/v1/mobile/stock/move', request, `Move ${request.quantity} of part ${request.partId}`);
+      'POST', '/api/v1/mobile/stock/move', request, part
+        ? { key: 'mobileAppWork.sync.action.moveStock', params: { quantity: request.quantity, part } }
+        : { key: 'mobileAppWork.sync.action.moveStockAny', params: { quantity: request.quantity } });
   }
 
   lookup(term: string): Observable<ScanResolveResult[]> {
-    return this.http.get<ScanResolveResult[]>('/api/v1/mobile/lookup', { params: { q: term } });
+    return this.http.get<ScanResolveResult[]>('/api/v1/mobile/lookup', { params: { q: term } })
+      .pipe(tap((results) => results.forEach((result) => this.rememberResult(result))));
   }
 
   /** Canned floor notes from reference data (group mobile_note_presets); empty when none configured. */
@@ -200,15 +231,28 @@ export class MobileApiService {
     );
   }
 
+  private rememberResult(result: ScanResolveResult): void {
+    if (result.id === null) return;
+    if (result.kind === 'job') this.jobNumbers.set(result.id, result.label);
+    else if (result.kind === 'part') this.partNumbers.set(result.id, result.label);
+  }
+
+  private jobLabel(action: string, jobId: number): QueuedActionLabel {
+    const job = this.jobNumbers.get(jobId);
+    return job
+      ? { key: `mobileAppWork.sync.action.${action}`, params: { job } }
+      : { key: `mobileAppWork.sync.action.${action}Any` };
+  }
+
   private mutate<T>(
-    method: Method, url: string, body: unknown, description: string, token?: string, silent = false,
+    method: Method, url: string, body: unknown, label: QueuedActionLabel, token?: string, silent = false,
   ): Observable<T | QueuedOffline> {
     const headers = this.idempotentHeaders();
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     } else if (this.platform.mobileShell && !navigator.onLine) {
-      return from(this.queue.enqueue(method, url, body, description, {
-        headers, instanceId: this.instances.instance()?.id ?? null,
+      return from(this.queue.enqueue(method, url, body, undefined, {
+        headers, instanceId: this.instances.instance()?.id ?? null, label,
       })).pipe(map((entryId) => ({ queued: true as const, entryId })));
     }
     const options = {

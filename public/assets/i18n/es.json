@@ -10988,6 +10988,83 @@
       "recordCount": "Registrar {{count}} y seguir"
     }
   },
+  "mobileAppWork": {
+    "account": {
+      "noScreens": "No hay pantallas del teléfono activadas en este taller. Pida a un administrador que active Mobile Clock o Mobile Jobs.",
+      "devicesForbidden": "No tiene acceso a la configuración de dispositivos"
+    },
+    "scan": {
+      "receive": "Recibir"
+    },
+    "confirmMove": {
+      "title": "¿Mover {{job}} a {{status}}?",
+      "irreversible": "Esto no se puede deshacer.",
+      "creates": "Esto crea {{document}} en contabilidad. No se puede deshacer desde el teléfono.",
+      "createsIrreversible": "Esto crea {{document}} y no se puede deshacer.",
+      "confirm": "Mover a {{status}}",
+      "changed": "Ahora este movimiento requiere confirmación. Revise la orden de trabajo e inténtelo de nuevo.",
+      "document": {
+        "Estimate": "un presupuesto",
+        "SalesOrder": "una orden de venta",
+        "PurchaseOrder": "una orden de compra",
+        "Invoice": "una factura",
+        "Payment": "un pago"
+      }
+    },
+    "myJobs": {
+      "title": "Mis órdenes de trabajo",
+      "scan": "Escanear un viajero",
+      "search": "Buscar trabajo, título o pieza",
+      "identifyHint": "Identifíquese para ver las órdenes de trabajo asignadas a usted.",
+      "loadFailed": "No se cargaron sus órdenes de trabajo.",
+      "none": "No tiene nada asignado por ahora. Escanee un viajero o busque un trabajo.",
+      "noMatch": "Ninguna orden de trabajo coincide.",
+      "overdue": "Atrasada",
+      "timerRunning": "Temporizador en marcha",
+      "partQuantity": "{{part}} × {{quantity}}",
+      "due": "Vence {{date}}"
+    },
+    "sync": {
+      "action": {
+        "advance": "Mover {{job}} a su siguiente estado",
+        "advanceAny": "Mover una orden de trabajo a su siguiente estado",
+        "moveBack": "Regresar {{job}}",
+        "moveBackAny": "Regresar una orden de trabajo",
+        "startTimer": "Iniciar el temporizador en {{job}}",
+        "startTimerAny": "Iniciar un temporizador",
+        "stopTimer": "Detener el temporizador",
+        "removeTimeEntry": "Quitar un registro de tiempo",
+        "startOperation": "Iniciar una operación en {{job}}",
+        "startOperationAny": "Iniciar una operación en una orden de trabajo",
+        "stopOperation": "Detener una operación en {{job}}",
+        "stopOperationAny": "Detener una operación en una orden de trabajo",
+        "updateOperation": "Actualizar una operación en {{job}}",
+        "updateOperationAny": "Actualizar una operación en una orden de trabajo",
+        "addNote": "Agregar una nota a {{job}}",
+        "addNoteAny": "Agregar una nota a una orden de trabajo",
+        "removeNote": "Quitar una nota de {{job}}",
+        "removeNoteAny": "Quitar una nota de una orden de trabajo",
+        "clock": {
+          "ClockIn": "Marcar entrada",
+          "ClockOut": "Marcar salida",
+          "BreakStart": "Iniciar un descanso",
+          "BreakEnd": "Terminar el descanso"
+        },
+        "undoClockPunch": "Deshacer una marcación",
+        "moveStock": "Mover {{quantity}} de {{part}}",
+        "moveStockAny": "Mover {{quantity}} de una pieza",
+        "unknown": "Un cambio hecho sin conexión"
+      },
+      "reason": {
+        "confirmRequired": "Este movimiento debe confirmarse. Hágalo de nuevo desde la orden de trabajo.",
+        "signedOut": "Se cerró su sesión antes de enviarlo. Inicie sesión y hágalo de nuevo.",
+        "forbidden": "No tiene permiso para este cambio.",
+        "notFound": "El registro ya no existe.",
+        "conflict": "Alguien cambió este registro primero. Revíselo y hágalo de nuevo.",
+        "refused": "El servidor no aceptó este cambio. Revise el registro y hágalo de nuevo."
+      }
+    }
+  },
   "pieceRates": {
     "title": "Tarifas por pieza",
     "ratesTitle": "Tarifas",

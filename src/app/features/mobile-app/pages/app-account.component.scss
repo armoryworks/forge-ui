@@ -36,6 +36,15 @@
     color: var(--text-muted);
   }
 
+  &__notice {
+    margin: 0;
+    padding: $sp-md $sp-lg;
+    border: $border-width-thin solid var(--warning);
+    border-left: $border-width-accent solid var(--warning);
+    font-size: $font-size-md;
+    color: var(--text);
+  }
+
   &__hint {
     margin: 0;
     font-size: $font-size-base;

@@ -11,6 +11,7 @@ import { AuthService } from '../../../shared/services/auth.service';
 import { CameraScannerService } from '../../../shared/services/camera-scanner.service';
 import { InstanceService } from '../../../shared/services/instance.service';
 import { MobileApiService } from '../../../shared/services/mobile-api.service';
+import { MobileMoveConfirmService } from '../../../shared/services/mobile-move-confirm.service';
 import { MobileTimerService } from '../../../shared/services/mobile-timer.service';
 import { OfflineQueueService } from '../../../shared/services/offline-queue.service';
 import { ScanFeedbackService } from '../../../shared/services/scan-feedback.service';
@@ -31,6 +32,9 @@ import { ScanAction, ScanActionSheetComponent } from '../components/scan-action-
  * With operation tracking on, a job's open operations sit under the sheet,
  * and Complete stops the person's timer on that job rather than whichever
  * one is newest.
+ * A move or complete into a column that can't be undone or that creates an
+ * accounting document asks first, offers no undo, and ends the identity at
+ * once.
  */
 @Component({
   selector: 'app-app-scan',
@@ -51,6 +55,7 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
   private readonly identity = inject(SharedIdentityService);
   private readonly auth = inject(AuthService);
   private readonly timer = inject(MobileTimerService);
+  private readonly confirmMove = inject(MobileMoveConfirmService);
   protected readonly instances = inject(InstanceService);
 
   protected readonly result = signal<ScanResolveResult | null>(null);
@@ -157,12 +162,17 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
         case 'moveStock':
           await this.router.navigate(['/app/move'], { queryParams: { code: result.code } });
           break;
+        case 'receive':
+          if (result.kind === 'purchaseOrder' && result.id) await this.router.navigate(['/app/receive', result.id]);
+          break;
         case 'identify':
           this.identifying.set(true);
           break;
       }
-    } catch {
-      this.notice.set(this.translate.instant('mobileApp.jobs.actionFailed'));
+    } catch (err) {
+      this.notice.set(this.translate.instant(this.confirmMove.isConfirmRequired(err)
+        ? 'mobileAppWork.confirmMove.changed'
+        : 'mobileApp.jobs.actionFailed'));
     } finally {
       this.busy.set(false);
       if (action !== 'identify' && !ended) this.identity.touch();
@@ -178,8 +188,19 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
     return token ? () => this.identity.clear() : undefined;
   }
 
-  private async advance(jobId: number, code: string, token: string | undefined): Promise<boolean> {
-    const outcome = await firstValueFrom(this.api.advanceJob(jobId, code));
+  private async confirmIfGated(jobId: number): Promise<boolean | null> {
+    if (!navigator.onLine) return false;
+    const status = await firstValueFrom(this.api.jobStatus(jobId)).catch(() => null);
+    if (!status || !this.confirmMove.needed(status)) return false;
+    return (await this.confirmMove.ask(status)) ? true : null;
+  }
+
+  private async advance(
+    jobId: number, code: string, token: string | undefined, confirmed?: boolean,
+  ): Promise<boolean> {
+    const gated = confirmed ?? await this.confirmIfGated(jobId);
+    if (gated === null) return false;
+    const outcome = await firstValueFrom(this.api.advanceJob(jobId, code, gated));
     if (!outcome) return false;
     if (isQueued(outcome)) {
       this.offerQueuedUndo([outcome.entryId], token);
@@ -190,6 +211,13 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
     if (outcome.collapsed) {
       this.notice.set(this.translate.instant('mobileApp.scan.collapsed'));
       return false;
+    }
+    if (gated) {
+      this.result.set(null);
+      await this.startScanner();
+      this.notice.set(this.translate.instant('mobileApp.jobs.movedTo', { column: outcome.status.stageName }));
+      if (token) this.identity.clear();
+      return !!token;
     }
     this.undo.offer(
       this.translate.instant('mobileApp.jobs.movedTo', { column: outcome.status.stageName }),
@@ -238,10 +266,12 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
   }
 
   private async complete(jobId: number, code: string, token: string | undefined): Promise<boolean> {
+    const confirmed = await this.confirmIfGated(jobId);
+    if (confirmed === null) return false;
     const stop = this.timer.operationTracking() ? this.api.stopTimer(undefined, { jobId }) : this.api.stopTimer();
     await firstValueFrom(stop).catch(() => undefined);
     void this.timer.refresh();
-    return this.advance(jobId, code, token);
+    return this.advance(jobId, code, token, confirmed);
   }
 
   private offerQueuedUndo(entryIds: string[], token?: string): void {

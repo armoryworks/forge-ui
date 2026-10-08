@@ -74,7 +74,10 @@ describe('OfflineQueueService in the mobile shell', () => {
     (await pending('/api/v1/second')).flush({});
     await drain;
 
-    expect(service.rejected()).toEqual([expect.objectContaining({ description: 'first', status: 422, message: 'Already clocked in' })]);
+    expect(service.rejected()).toEqual([expect.objectContaining({
+      label: { key: 'mobileAppWork.sync.action.unknown' },
+      reasonKey: 'mobileAppWork.sync.reason.refused',
+    })]);
     expect(await service.listPending()).toHaveLength(0);
     service.dismissRejected(service.rejected()[0].id);
     expect(service.rejected()).toHaveLength(0);
@@ -86,5 +89,25 @@ describe('OfflineQueueService in the mobile shell', () => {
     await service.remove(id);
     expect(service.pendingCount()).toBe(0);
     expect(HttpErrorResponse).toBeDefined();
+  });
+
+  it('keeps the label it was queued with and gives a plain reason for a refusal', async () => {
+    const label = { key: 'mobileAppWork.sync.action.advance', params: { job: 'JOB-1042' } };
+    await service.enqueue('POST', '/api/v1/mobile/jobs/42/advance', { scanCode: null }, undefined, { instanceId: 'shop', label });
+    await service.enqueue('POST', '/api/v1/mobile/clock/punch', {}, undefined, { instanceId: 'shop' });
+
+    expect((await service.listPending())[0].label).toEqual(label);
+
+    const drain = service.drain();
+    (await pending('/api/v1/mobile/jobs/42/advance'))
+      .flush({ title: 'Confirmation required', code: 'confirm-required' }, { status: 400, statusText: 'Bad Request' });
+    (await pending('/api/v1/mobile/clock/punch')).flush({}, { status: 403, statusText: 'Forbidden' });
+    await drain;
+
+    expect(service.rejected()).toEqual([
+      expect.objectContaining({ label, reasonKey: 'mobileAppWork.sync.reason.confirmRequired' }),
+      expect.objectContaining({ reasonKey: 'mobileAppWork.sync.reason.forbidden' }),
+    ]);
+    expect(Object.keys(service.rejected()[1]).sort()).toEqual(['id', 'label', 'reasonKey', 'timestamp']);
   });
 });

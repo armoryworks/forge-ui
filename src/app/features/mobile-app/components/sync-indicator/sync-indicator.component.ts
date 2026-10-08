@@ -5,6 +5,7 @@ import { DatePipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { OfflineQueueEntry } from '../../../../shared/models/offline-queue-entry.model';
+import { QueuedActionLabel } from '../../../../shared/models/queued-action-label.model';
 import { OfflineQueueService } from '../../../../shared/services/offline-queue.service';
 
 type SyncState = 'online' | 'offline' | 'syncing' | 'rejected';
@@ -12,7 +13,9 @@ type SyncState = 'online' | 'offline' | 'syncing' | 'rejected';
 /**
  * Header chip: nothing while online and clean; a count while offline with
  * queued changes; a spinner while draining; a warning when the server
- * refused a replay. Tapping opens the list of what is waiting or failed.
+ * refused a replay. Tapping opens the list of what is waiting or failed,
+ * each change named in the person's language with the job or part number
+ * it was queued for, and each refusal with a plain reason.
  */
 @Component({
   selector: 'app-sync-indicator',
@@ -69,6 +72,10 @@ export class SyncIndicatorComponent {
     }
     this.pending.set(await this.queue.listPending());
     this.open.set(true);
+  }
+
+  protected labelOf(entry: OfflineQueueEntry): QueuedActionLabel {
+    return entry.label ?? { key: 'mobileAppWork.sync.action.unknown' };
   }
 
   protected dismiss(id: string): void {

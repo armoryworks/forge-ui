@@ -18,24 +18,19 @@ import { SharedIdentityService } from '../../shared/services/shared-identity.ser
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { TimerHubService } from '../../shared/services/timer-hub.service';
 import { UndoService } from '../../shared/services/undo.service';
+import { MOBILE_APP_SCREENS } from '../../shared/utils/mobile-app-screens';
 import { LanguageToggleComponent } from '../../shared/components/language-toggle/language-toggle.component';
 import { SyncIndicatorComponent } from './components/sync-indicator/sync-indicator.component';
-
-interface MobileAppTab {
-  path: string;
-  labelKey: string;
-  icon: string;
-  capability: string;
-}
 
 /**
  * Native-shell chrome: top bar + five-tab bottom bar (Scan, Clock, Jobs,
  * Move, Lookup), each tab shown only while its CAP-MOBILE-* flag is on for
- * this instance. Account lives behind the gear, never a tab. While a timer
- * runs, a strip above the tab bar shows it ticking with a Stop button, one
- * row per running operation timer when operation tracking is on. On a
- * shared device, a Stop from the strip ends the person's identity once its
- * undo toast closes, and the undo runs with the token captured beforehand.
+ * this instance; with none on, the bar is not drawn. Account lives behind
+ * the gear, never a tab. While a timer runs, a strip above the tab bar
+ * shows it ticking with a Stop button, one row per running operation timer
+ * when operation tracking is on. On a shared device, a Stop from the strip
+ * ends the person's identity once its undo toast closes, and the undo runs
+ * with the token captured beforehand.
  */
 @Component({
   selector: 'app-mobile-app-shell',
@@ -50,16 +45,8 @@ export class MobileAppShellComponent {
   private readonly crash = inject(CrashReportingService);
   private readonly appInfo = inject(AppInfoService);
 
-  private readonly allTabs: MobileAppTab[] = [
-    { path: '/app/scan', labelKey: 'mobileApp.tabs.scan', icon: 'qr_code_scanner', capability: 'CAP-MOBILE-SCAN' },
-    { path: '/app/clock', labelKey: 'mobileApp.tabs.clock', icon: 'schedule', capability: 'CAP-MOBILE-CLOCK' },
-    { path: '/app/jobs', labelKey: 'mobileApp.tabs.jobs', icon: 'work', capability: 'CAP-MOBILE-JOBS' },
-    { path: '/app/move', labelKey: 'mobileApp.tabs.move', icon: 'swap_horiz', capability: 'CAP-MOBILE-STOCK' },
-    { path: '/app/lookup', labelKey: 'mobileApp.tabs.lookup', icon: 'search', capability: 'CAP-MOBILE-LOOKUP' },
-  ];
-
   protected readonly tabs = computed(() =>
-    this.allTabs.filter((tab) => this.capabilities.isEnabled(tab.capability, true)));
+    MOBILE_APP_SCREENS.filter((tab) => this.capabilities.isEnabled(tab.capability, true)));
 
   protected readonly timer = inject(MobileTimerService);
   private readonly timerHub = inject(TimerHubService);

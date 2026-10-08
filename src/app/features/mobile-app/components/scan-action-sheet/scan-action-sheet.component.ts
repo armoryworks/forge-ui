@@ -4,7 +4,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { ScanResolveResult } from '../../../../shared/models/mobile-api.model';
 
-export type ScanAction = 'start' | 'stop' | 'complete' | 'move' | 'details' | 'moveStock' | 'identify';
+export type ScanAction = 'start' | 'stop' | 'complete' | 'move' | 'details' | 'moveStock' | 'identify' | 'receive';
 
 interface ActionButton {
   action: ScanAction;
@@ -16,7 +16,7 @@ interface ActionButton {
 /**
  * The one contextual action sheet after a decode: "Job 4471 — Start /
  * Complete / Move / Details". Start becomes Stop while the person's timer
- * runs on this job. Dumb: the parent resolves the scan and performs the
+ * runs on this job; a purchase order offers Receive. Dumb: the parent resolves the scan and performs the
  * chosen action. Never navigates on its own.
  */
 @Component({
@@ -59,6 +59,11 @@ export class ScanActionSheetComponent {
         return [{ action: 'moveStock', labelKey: 'mobileApp.scan.actions.moveStock', icon: 'swap_horiz', primary: true }];
       case 'badge':
         return [{ action: 'identify', labelKey: 'mobileApp.scan.actions.identify', icon: 'badge', primary: true }];
+      case 'purchaseOrder':
+        return [
+          { action: 'receive', labelKey: 'mobileAppWork.scan.receive', icon: 'move_to_inbox', primary: true },
+          { action: 'details', labelKey: 'mobileApp.scan.actions.openOnDesktop', icon: 'open_in_new' },
+        ];
       default:
         return [{ action: 'details', labelKey: 'mobileApp.scan.actions.openOnDesktop', icon: 'open_in_new' }];
     }

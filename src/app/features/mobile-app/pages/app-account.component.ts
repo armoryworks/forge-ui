@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 import { DatePipe } from '@angular/common';
@@ -9,9 +10,11 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { LanguageToggleComponent } from '../../../shared/components/language-toggle/language-toggle.component';
 import { TextareaComponent } from '../../../shared/components/textarea/textarea.component';
+import { CapabilityDisabledError } from '../../../shared/errors/capability-disabled.error';
 import { MobileDevice } from '../../../shared/models/mobile-device.model';
 import { AppInfoService } from '../../../shared/services/app-info.service';
 import { AuthService } from '../../../shared/services/auth.service';
+import { CapabilityService } from '../../../shared/services/capability.service';
 import { CrashReportingService } from '../../../shared/services/crash-reporting.service';
 import { InstanceService } from '../../../shared/services/instance.service';
 import { LocalLockService } from '../../../shared/services/local-lock.service';
@@ -19,11 +22,14 @@ import { MobileAuthService } from '../../../shared/services/mobile-auth.service'
 import { MobileDevicesService } from '../../../shared/services/mobile-devices.service';
 import { PlatformService } from '../../../shared/services/platform.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { MOBILE_APP_SCREENS } from '../../../shared/utils/mobile-app-screens';
 
 /**
  * Account: who is signed in, the instances on this phone (switch / add /
  * remove), this person's devices, the lock and diagnostics toggles,
- * language, report-a-problem, and the app build. Never a tab.
+ * language, report-a-problem, and the app build. Never a tab. When no
+ * phone screen is turned on for the shop it says so, since this is where
+ * the screen guard sends the person.
  */
 @Component({
   selector: 'app-app-account',
@@ -40,6 +46,7 @@ export class AppAccountComponent {
   private readonly auth = inject(AuthService);
   private readonly mobileAuth = inject(MobileAuthService);
   private readonly devices = inject(MobileDevicesService);
+  private readonly capabilities = inject(CapabilityService);
   protected readonly instances = inject(InstanceService);
   protected readonly lock = inject(LocalLockService);
   protected readonly crash = inject(CrashReportingService);
@@ -49,7 +56,10 @@ export class AppAccountComponent {
   protected readonly user = this.auth.user;
   protected readonly active = this.instances.instance;
   protected readonly shared = computed(() => !!this.active()?.shared);
+  protected readonly noScreens = computed(() =>
+    !MOBILE_APP_SCREENS.some((screen) => this.capabilities.isEnabled(screen.capability, true)));
   protected readonly myDevices = signal<MobileDevice[]>([]);
+  protected readonly devicesForbidden = signal(false);
   protected readonly busy = signal(false);
   protected readonly pendingRemoval = signal<string | null>(null);
   protected readonly pendingRevoke = signal<number | null>(null);
@@ -61,7 +71,11 @@ export class AppAccountComponent {
     if (!this.shared()) {
       this.devices.mine().subscribe({
         next: (list) => this.myDevices.set(list.filter((d) => d.revokedAt === null)),
-        error: () => this.myDevices.set([]),
+        error: (err: unknown) => {
+          this.myDevices.set([]);
+          this.devicesForbidden.set(
+            err instanceof CapabilityDisabledError || (err instanceof HttpErrorResponse && err.status === 403));
+        },
       });
     }
   }

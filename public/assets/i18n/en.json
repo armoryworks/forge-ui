@@ -10988,6 +10988,83 @@
       "recordCount": "Record {{count}}, keep going"
     }
   },
+  "mobileAppWork": {
+    "account": {
+      "noScreens": "No phone screens are turned on for this shop. Ask an admin to turn on Mobile Clock or Mobile Jobs.",
+      "devicesForbidden": "You don't have access to device settings"
+    },
+    "scan": {
+      "receive": "Receive"
+    },
+    "confirmMove": {
+      "title": "Move {{job}} to {{status}}?",
+      "irreversible": "This can't be undone.",
+      "creates": "This creates {{document}} in accounting. It can't be undone from the phone.",
+      "createsIrreversible": "This creates {{document}} and can't be undone.",
+      "confirm": "Move to {{status}}",
+      "changed": "This move now needs confirming. Check the work order and try again.",
+      "document": {
+        "Estimate": "an estimate",
+        "SalesOrder": "a sales order",
+        "PurchaseOrder": "a purchase order",
+        "Invoice": "an invoice",
+        "Payment": "a payment"
+      }
+    },
+    "myJobs": {
+      "title": "My work orders",
+      "scan": "Scan a traveler",
+      "search": "Search job, title or part",
+      "identifyHint": "Identify yourself to see the work orders assigned to you.",
+      "loadFailed": "Your work orders didn't load.",
+      "none": "Nothing is assigned to you right now. Scan a traveler or look a job up.",
+      "noMatch": "No work orders match.",
+      "overdue": "Overdue",
+      "timerRunning": "Timer running",
+      "partQuantity": "{{part}} × {{quantity}}",
+      "due": "Due {{date}}"
+    },
+    "sync": {
+      "action": {
+        "advance": "Move {{job}} to its next status",
+        "advanceAny": "Move a work order to its next status",
+        "moveBack": "Move {{job}} back",
+        "moveBackAny": "Move a work order back",
+        "startTimer": "Start the timer on {{job}}",
+        "startTimerAny": "Start a timer",
+        "stopTimer": "Stop the timer",
+        "removeTimeEntry": "Remove a time entry",
+        "startOperation": "Start an operation on {{job}}",
+        "startOperationAny": "Start an operation on a work order",
+        "stopOperation": "Stop an operation on {{job}}",
+        "stopOperationAny": "Stop an operation on a work order",
+        "updateOperation": "Update an operation on {{job}}",
+        "updateOperationAny": "Update an operation on a work order",
+        "addNote": "Add a note to {{job}}",
+        "addNoteAny": "Add a note to a work order",
+        "removeNote": "Remove a note from {{job}}",
+        "removeNoteAny": "Remove a note from a work order",
+        "clock": {
+          "ClockIn": "Clock in",
+          "ClockOut": "Clock out",
+          "BreakStart": "Start a break",
+          "BreakEnd": "End the break"
+        },
+        "undoClockPunch": "Undo a clock punch",
+        "moveStock": "Move {{quantity}} of {{part}}",
+        "moveStockAny": "Move {{quantity}} of a part",
+        "unknown": "A change made offline"
+      },
+      "reason": {
+        "confirmRequired": "This move has to be confirmed. Do it again from the work order.",
+        "signedOut": "You were signed out before it was sent. Sign in and do it again.",
+        "forbidden": "You don't have permission for this change.",
+        "notFound": "The record no longer exists.",
+        "conflict": "Someone changed this record first. Check it and do it again.",
+        "refused": "The server didn't accept this change. Check the record and do it again."
+      }
+    }
+  },
   "pieceRates": {
     "title": "Piece rates",
     "ratesTitle": "Rates",

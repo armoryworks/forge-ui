@@ -1,4 +1,9 @@
 <div class="jobs-home" data-testid="mobile-app-jobs-home">
+  <a class="jobs-home__scan" routerLink="/app/scan" data-testid="jobs-home-scan">
+    <span class="material-icons-outlined" aria-hidden="true">qr_code_scanner</span>
+    {{ 'mobileAppWork.myJobs.scan' | translate }}
+  </a>
+
   @if (runningJobs().length) {
     <section class="jobs-home__running" [attr.aria-label]="'mobileApp.operations.runningNow' | translate">
       <span class="jobs-home__heading">{{ 'mobileApp.operations.runningNow' | translate }}</span>
@@ -18,7 +23,72 @@
       }
     </section>
   }
-  <span class="material-icons-outlined jobs-home__icon" aria-hidden="true">work</span>
-  <p class="jobs-home__text">{{ 'mobileApp.jobs.homeHint' | translate }}</p>
-  <a class="jobs-home__link" routerLink="/app/scan">{{ 'mobileApp.tabs.scan' | translate }}</a>
+
+  <h2 class="jobs-home__heading">{{ 'mobileAppWork.myJobs.title' | translate }}</h2>
+
+  @if (needsIdentity()) {
+    <p class="jobs-home__hint">{{ 'mobileAppWork.myJobs.identifyHint' | translate }}</p>
+    <button type="button" class="jobs-home__identify" data-testid="jobs-home-identify" (click)="identify()">
+      <span class="material-icons-outlined" aria-hidden="true">badge</span>
+      {{ 'mobileApp.scan.actions.identify' | translate }}
+    </button>
+  } @else {
+    <app-input
+      [label]="'mobileAppWork.myJobs.search' | translate"
+      [formControl]="searchControl"
+      data-testid="jobs-home-search"
+    />
+
+    @if (loading() && jobs().length === 0) {
+      <p class="jobs-home__hint" role="status">{{ 'common.loading' | translate }}</p>
+    } @else if (failed()) {
+      <p class="jobs-home__hint" role="alert">{{ 'mobileAppWork.myJobs.loadFailed' | translate }}</p>
+      <button type="button" class="jobs-home__retry" data-testid="jobs-home-retry" (click)="load()">
+        {{ 'mobileApp.sync.retry' | translate }}
+      </button>
+    } @else {
+      <ul class="jobs-home__list" [attr.aria-label]="'mobileAppWork.myJobs.title' | translate">
+        @for (job of visibleJobs(); track job.id) {
+          <li>
+            <a class="jobs-home__row" [routerLink]="['/app/jobs', job.id]" [attr.data-testid]="'jobs-home-row-' + job.id">
+              <span class="jobs-home__row-top">
+                <span class="jobs-home__number">{{ job.jobNumber }}</span>
+                @if (job.hasRunningTimer) {
+                  <span class="jobs-home__badge jobs-home__badge--timer" data-testid="jobs-home-timer-badge">
+                    <span class="material-icons-outlined" aria-hidden="true">timer</span>
+                    {{ 'mobileAppWork.myJobs.timerRunning' | translate }}
+                  </span>
+                }
+                @if (job.isOverdue) {
+                  <span class="jobs-home__badge jobs-home__badge--overdue" data-testid="jobs-home-overdue-badge">
+                    {{ 'mobileAppWork.myJobs.overdue' | translate }}
+                  </span>
+                }
+              </span>
+              <span class="jobs-home__title">{{ job.title }}</span>
+              <span class="jobs-home__meta">
+                @if (job.partNumber) {
+                  <span>{{ job.quantity !== null ? ('mobileAppWork.myJobs.partQuantity' | translate: { part: job.partNumber, quantity: job.quantity }) : job.partNumber }}</span>
+                }
+                <span>{{ job.stageName }}</span>
+                @if (job.dueDate) {
+                  <span>{{ 'mobileAppWork.myJobs.due' | translate: { date: (job.dueDate | date: 'MM/dd/yyyy') } }}</span>
+                }
+              </span>
+            </a>
+          </li>
+        } @empty {
+          <li class="jobs-home__hint">
+            {{ (jobs().length === 0 ? 'mobileAppWork.myJobs.none' : 'mobileAppWork.myJobs.noMatch') | translate }}
+          </li>
+        }
+      </ul>
+    }
+  }
+
+  @if (identifying()) {
+    <div class="jobs-home__sheet">
+      <app-identity-prompt (identified)="onIdentified()" (cancelled)="identifying.set(false)" />
+    </div>
+  }
 </div>

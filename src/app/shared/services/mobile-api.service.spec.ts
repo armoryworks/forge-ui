@@ -55,10 +55,11 @@ describe('MobileApiService', () => {
 
     expect(isQueued(result)).toBe(true);
     expect(enqueue).toHaveBeenCalledWith(
-      'POST', '/api/v1/mobile/clock/punch', { eventType: 'ClockIn' }, 'Clock: ClockIn',
+      'POST', '/api/v1/mobile/clock/punch', { eventType: 'ClockIn' }, undefined,
       expect.objectContaining({
         instanceId: 'shop',
         headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+        label: { key: 'mobileAppWork.sync.action.clock.ClockIn' },
       }),
     );
     http.expectNone('/api/v1/mobile/clock/punch');
@@ -206,6 +207,65 @@ describe('MobileApiService', () => {
 
     expect(isQueued(result)).toBe(true);
     expect(enqueue).toHaveBeenCalledWith(
-      'PATCH', '/api/v1/jobs/42/operations/20', { completedQuantity: 5 }, 'Update operation 20 on job 42', expect.any(Object));
+      'PATCH', '/api/v1/jobs/42/operations/20', { completedQuantity: 5 }, undefined,
+      expect.objectContaining({ label: { key: 'mobileAppWork.sync.action.updateOperationAny' } }));
+  });
+
+  it('with operation tracking off, sends the same advance and timer requests as before', () => {
+    service.advanceJob(42, 'JOB-42').subscribe();
+    const advance = http.expectOne('/api/v1/mobile/jobs/42/advance');
+    expect(advance.request.method).toBe('POST');
+    expect(advance.request.body).toEqual({ scanCode: 'JOB-42' });
+    advance.flush({});
+
+    service.startTimer(42).subscribe();
+    const start = http.expectOne('/api/v1/time-tracking/timer/start');
+    expect(start.request.body).toEqual({ jobId: 42, operationId: null });
+    start.flush({ id: 1 });
+
+    service.stopTimer().subscribe();
+    const stop = http.expectOne('/api/v1/time-tracking/timer/stop');
+    expect(stop.request.body).toEqual({});
+    stop.flush({});
+  });
+
+  it('sends confirmed only on a confirmed advance', () => {
+    service.advanceJob(42, null, true).subscribe();
+    const req = http.expectOne('/api/v1/mobile/jobs/42/advance');
+    expect(req.request.body).toEqual({ scanCode: null, confirmed: true });
+    req.flush({});
+  });
+
+  it('reads the caller\'s work orders', async () => {
+    const mine = firstValueFrom(service.myJobs());
+    http.expectOne('/api/v1/mobile/jobs/mine').flush([{ id: 42, jobNumber: 'JOB-42' }]);
+    expect(await mine).toEqual([{ id: 42, jobNumber: 'JOB-42' }]);
+  });
+
+  it('names a queued job change by the job number it last read, never the id', async () => {
+    service.jobStatus(42).subscribe();
+    http.expectOne('/api/v1/mobile/jobs/42/status').flush({ id: 42, jobNumber: 'JOB-1042' });
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+
+    await firstValueFrom(service.advanceJob(42, null));
+    await firstValueFrom(service.addNote(7, 'Checked'));
+
+    expect(enqueue.mock.calls[0][4]).toMatchObject({
+      label: { key: 'mobileAppWork.sync.action.advance', params: { job: 'JOB-1042' } },
+    });
+    expect(enqueue.mock.calls[1][4]).toMatchObject({ label: { key: 'mobileAppWork.sync.action.addNoteAny' } });
+  });
+
+  it('names a queued stock move by the part number it last read', async () => {
+    service.resolveScan('PRT-9').subscribe();
+    http.expectOne('/api/v1/mobile/scan/resolve')
+      .flush({ kind: 'part', id: 9, code: 'PRT-9', label: 'BRKT-100', subtitle: null });
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+
+    await firstValueFrom(service.moveStock({ partId: 9, fromLocationId: 1, toLocationId: 2, quantity: 5, lotNumber: null }));
+
+    expect(enqueue.mock.calls[0][4]).toMatchObject({
+      label: { key: 'mobileAppWork.sync.action.moveStock', params: { quantity: 5, part: 'BRKT-100' } },
+    });
   });
 });

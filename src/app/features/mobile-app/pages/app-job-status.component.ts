@@ -10,6 +10,7 @@ import { DatePipe } from '@angular/common';
 import { JobStatus, isQueued } from '../../../shared/models/mobile-api.model';
 import { InstanceService } from '../../../shared/services/instance.service';
 import { MobileApiService } from '../../../shared/services/mobile-api.service';
+import { MobileMoveConfirmService } from '../../../shared/services/mobile-move-confirm.service';
 import { MobileTimerService } from '../../../shared/services/mobile-timer.service';
 import { OfflineQueueService } from '../../../shared/services/offline-queue.service';
 import { PlatformService } from '../../../shared/services/platform.service';
@@ -22,13 +23,14 @@ import { JobOperationsComponent } from '../components/job-operations/job-operati
 type PendingAction = 'advance' | 'note' | 'photo' | 'timer';
 
 /**
- * Job Status: reached from Scan or Lookup. Job number, customer, current
- * column, due date, next step, last three timeline entries. Advancing asks
- * nothing and shows an undo toast; notes come from voice or a preset
- * picker; photos from the camera; the timer button reads Stop while the
- * person's timer runs on this job. With operation tracking on, the job's
- * routing operations are listed with their own timers and counts. Never a
- * keyboard.
+ * Job Status: reached from Scan, Lookup or My work orders. Job number,
+ * customer, current column, due date, next step, last three timeline
+ * entries. Advancing asks nothing and shows an undo toast, except into a
+ * column that can't be undone or that creates an accounting document: that
+ * asks first and offers no undo. Notes come from voice or a preset picker;
+ * photos from the camera; the timer button reads Stop while the person's
+ * timer runs on this job. With operation tracking on, the job's routing
+ * operations are listed with their own timers and counts. Never a keyboard.
  */
 @Component({
   selector: 'app-app-job-status',
@@ -41,6 +43,7 @@ type PendingAction = 'advance' | 'note' | 'photo' | 'timer';
 export class AppJobStatusComponent {
   private readonly api = inject(MobileApiService);
   private readonly timer = inject(MobileTimerService);
+  private readonly confirmMove = inject(MobileMoveConfirmService);
   private readonly undo = inject(UndoService);
   private readonly queue = inject(OfflineQueueService);
   private readonly snackbar = inject(SnackbarService);
@@ -171,8 +174,13 @@ export class AppJobStatusComponent {
         case 'photo': await this.doPhoto(job); break;
         case 'timer': await this.doTimer(job); break;
       }
-    } catch {
-      this.snackbar.error(this.translate.instant('mobileApp.jobs.actionFailed'));
+    } catch (err) {
+      if (this.confirmMove.isConfirmRequired(err)) {
+        this.snackbar.error(this.translate.instant('mobileAppWork.confirmMove.changed'));
+        this.load();
+      } else {
+        this.snackbar.error(this.translate.instant('mobileApp.jobs.actionFailed'));
+      }
     } finally {
       this.busy.set(false);
       this.identity.touch();
@@ -181,13 +189,19 @@ export class AppJobStatusComponent {
 
   private async doAdvance(job: JobStatus): Promise<void> {
     if (job.nextStageId === null) return;
-    const outcome = await firstValueFrom(this.api.advanceJob(job.id, null));
+    const confirmed = this.confirmMove.needed(job);
+    if (confirmed && !(await this.confirmMove.ask(job))) return;
+    const outcome = await firstValueFrom(this.api.advanceJob(job.id, null, confirmed));
     if (isQueued(outcome)) {
       this.offerQueuedUndo(outcome.entryId);
       return;
     }
     this.job.set(outcome.status);
     if (outcome.collapsed) return;
+    if (confirmed) {
+      this.snackbar.success(this.translate.instant('mobileApp.jobs.movedTo', { column: outcome.status.stageName }));
+      return;
+    }
     this.undo.offer(
       this.translate.instant('mobileApp.jobs.movedTo', { column: outcome.status.stageName }),
       async () => {

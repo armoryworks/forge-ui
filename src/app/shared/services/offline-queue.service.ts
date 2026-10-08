@@ -3,6 +3,7 @@ import { computed, Injectable, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { DrainResult, OfflineQueueEntry } from '../models/offline-queue-entry.model';
+import { QueuedActionLabel } from '../models/queued-action-label.model';
 import { RejectedQueueEntry } from '../models/rejected-queue-entry.model';
 import { SyncConflict } from '../models/sync-conflict.model';
 import { SyncResult } from '../models/sync-result.model';
@@ -12,6 +13,8 @@ import { PlatformService } from './platform.service';
 const DB_NAME = 'forge-offline-queue';
 const DB_VERSION = 1;
 const STORE_NAME = 'queue';
+
+const UNNAMED_CHANGE: QueuedActionLabel = { key: 'mobileAppWork.sync.action.unknown' };
 
 let nextSequence = 0;
 
@@ -47,7 +50,7 @@ export class OfflineQueueService {
 
   async enqueue(
     method: string, url: string, body?: unknown, description?: string,
-    options?: { headers?: Record<string, string>; instanceId?: string | null },
+    options?: { headers?: Record<string, string>; instanceId?: string | null; label?: QueuedActionLabel },
   ): Promise<string> {
     const entry: OfflineQueueEntry = {
       id: crypto.randomUUID(),
@@ -59,6 +62,7 @@ export class OfflineQueueService {
       description: description ?? `${method.toUpperCase()} ${url}`,
       headers: options?.headers,
       instanceId: options?.instanceId ?? null,
+      label: options?.label,
     };
 
     const db = await this.openDb();
@@ -114,9 +118,8 @@ export class OfflineQueueService {
           if (this.platform.mobileShell && err instanceof HttpErrorResponse && err.status >= 400 && err.status < 500) {
             this.rejected.update((list) => [...list, {
               id: entry.id,
-              description: entry.description ?? `${entry.method.toUpperCase()} ${entry.url}`,
-              status: err.status,
-              message: err.error?.detail ?? err.error?.title ?? '',
+              label: entry.label ?? UNNAMED_CHANGE,
+              reasonKey: this.rejectionReason(err),
               timestamp: entry.timestamp,
             }]);
             await this.removeEntry(entry.id);
@@ -298,6 +301,17 @@ export class OfflineQueueService {
         return firstValueFrom(this.http.delete(entry.url, { headers }));
       default:
         return Promise.reject(new Error(`Unsupported HTTP method: ${method}`));
+    }
+  }
+
+  private rejectionReason(err: HttpErrorResponse): string {
+    if (err.error?.code === 'confirm-required') return 'mobileAppWork.sync.reason.confirmRequired';
+    switch (err.status) {
+      case 401: return 'mobileAppWork.sync.reason.signedOut';
+      case 403: return 'mobileAppWork.sync.reason.forbidden';
+      case 404: return 'mobileAppWork.sync.reason.notFound';
+      case 409: return 'mobileAppWork.sync.reason.conflict';
+      default: return 'mobileAppWork.sync.reason.refused';
     }
   }
 

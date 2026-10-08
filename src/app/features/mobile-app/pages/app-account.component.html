@@ -1,4 +1,8 @@
 <div class="account" data-testid="mobile-app-account-page">
+  @if (noScreens()) {
+    <p class="account__notice" role="status" data-testid="account-no-screens">{{ 'mobileAppWork.account.noScreens' | translate }}</p>
+  }
+
   <section class="account__section">
     @if (shared()) {
       <span class="account__who">{{ 'mobileApp.account.sharedDevice' | translate }}</span>
@@ -56,7 +60,9 @@
             }
           </li>
         } @empty {
-          <li class="account__empty">{{ 'mobileApp.account.noDevices' | translate }}</li>
+          <li class="account__empty" data-testid="account-devices-empty">
+            {{ (devicesForbidden() ? 'mobileAppWork.account.devicesForbidden' : 'mobileApp.account.noDevices') | translate }}
+          </li>
         }
       </ul>
     </section>

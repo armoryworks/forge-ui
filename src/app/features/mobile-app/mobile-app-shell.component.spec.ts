@@ -20,6 +20,7 @@ import { UndoService } from '../../shared/services/undo.service';
 import { MobileAppShellComponent } from './mobile-app-shell.component';
 
 interface ShellInternals {
+  tabs: Signal<{ path: string }[]>;
   elapsed: Signal<string>;
   runningLabel: Signal<string>;
   stopTimer(): Promise<void>;
@@ -34,6 +35,7 @@ const deburr: RunningTimer = {
 
 describe('MobileAppShellComponent timer strip', () => {
   let shared: boolean;
+  let enabled: (code: string) => boolean;
   const token = signal<string | null>('session-token');
   const active = signal<ActiveTimer | null>(null);
   const operationTimers = signal<RunningTimer[]>([]);
@@ -68,6 +70,7 @@ describe('MobileAppShellComponent timer strip', () => {
 
   beforeEach(() => {
     shared = false;
+    enabled = () => true;
     token.set('session-token');
     active.set(null);
     operationTimers.set([]);
@@ -90,7 +93,7 @@ describe('MobileAppShellComponent timer strip', () => {
     instant.mockClear();
     TestBed.configureTestingModule({
       providers: [
-        { provide: CapabilityService, useValue: { isEnabled: () => true } },
+        { provide: CapabilityService, useValue: { isEnabled: (code: string) => enabled(code) } },
         { provide: CrashReportingService, useValue: { init: vi.fn().mockResolvedValue(undefined) } },
         { provide: AppInfoService, useValue: { load: vi.fn().mockResolvedValue(undefined) } },
         { provide: MobileTimerService, useValue: timer },
@@ -271,5 +274,13 @@ describe('MobileAppShellComponent timer strip', () => {
 
     expect(snackbar.error).toHaveBeenCalledOnce();
     expect(offer).not.toHaveBeenCalled();
+  });
+
+  it('shows a tab only for each screen that is on, and none when every screen is off', () => {
+    enabled = (code) => code === 'CAP-MOBILE-JOBS';
+    expect(create().tabs().map((tab) => tab.path)).toEqual(['/app/jobs']);
+
+    enabled = () => false;
+    expect(create().tabs()).toEqual([]);
   });
 });

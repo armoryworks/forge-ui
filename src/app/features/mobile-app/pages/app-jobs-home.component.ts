@@ -1,26 +1,41 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+
+import { DatePipe } from '@angular/common';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { InputComponent } from '../../../shared/components/input/input.component';
+import { MyJob } from '../../../shared/models/my-job.model';
+import { InstanceService } from '../../../shared/services/instance.service';
+import { MobileApiService } from '../../../shared/services/mobile-api.service';
 import { MobileTimerService } from '../../../shared/services/mobile-timer.service';
+import { SharedIdentityService } from '../../../shared/services/shared-identity.service';
+import { IdentityPromptComponent } from '../identity/identity-prompt.component';
 import { RunningJob } from '../models/running-job.model';
 
 /**
- * The Jobs tab without a job in hand: point at Scan or Lookup. With
- * operation tracking on, the jobs the person has timers running on are
- * listed first, each opening its Job Status; the strip above the tab bar
- * stops them.
+ * The Jobs tab: Scan at the top; with operation tracking on, the jobs the
+ * person has timers running on, each opening its Job Status (the strip
+ * above the tab bar stops them); then "My work orders" — the open jobs
+ * assigned to the person, searchable by job, title or part, each marked
+ * when overdue or when the person's timer runs on it. A row opens Job
+ * Status. On a shared device the person identifies before the list loads.
  */
 @Component({
   selector: 'app-app-jobs-home',
   standalone: true,
-  imports: [RouterLink, TranslatePipe],
+  imports: [RouterLink, ReactiveFormsModule, DatePipe, TranslatePipe, InputComponent, IdentityPromptComponent],
   templateUrl: './app-jobs-home.component.html',
   styleUrl: './app-jobs-home.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppJobsHomeComponent {
+  private readonly api = inject(MobileApiService);
+  private readonly instances = inject(InstanceService);
+  private readonly identity = inject(SharedIdentityService);
   private readonly timer = inject(MobileTimerService);
 
   protected readonly runningJobs = computed<RunningJob[]>(() => {
@@ -39,4 +54,49 @@ export class AppJobsHomeComponent {
     }
     return [...jobs.values()];
   });
+
+  protected readonly searchControl = new FormControl('', { nonNullable: true });
+  private readonly search = toSignal(this.searchControl.valueChanges, { initialValue: '' });
+
+  protected readonly jobs = signal<MyJob[]>([]);
+  protected readonly loading = signal(false);
+  protected readonly failed = signal(false);
+  protected readonly identifying = signal(false);
+
+  protected readonly needsIdentity = computed(() =>
+    !!this.instances.instance()?.shared && !this.identity.identified());
+
+  protected readonly visibleJobs = computed(() => {
+    const term = this.search().trim().toLowerCase();
+    if (!term) return this.jobs();
+    return this.jobs().filter((job) =>
+      [job.jobNumber, job.title, job.partNumber ?? ''].some((value) => value.toLowerCase().includes(term)));
+  });
+
+  constructor() {
+    effect(() => {
+      const needsIdentity = this.needsIdentity();
+      untracked(() => {
+        if (needsIdentity) this.jobs.set([]);
+        else this.load();
+      });
+    });
+  }
+
+  protected load(): void {
+    this.loading.set(true);
+    this.failed.set(false);
+    this.api.myJobs().subscribe({
+      next: (jobs) => { this.jobs.set(jobs); this.loading.set(false); },
+      error: () => { this.failed.set(true); this.loading.set(false); },
+    });
+  }
+
+  protected identify(): void {
+    this.identifying.set(true);
+  }
+
+  protected onIdentified(): void {
+    this.identifying.set(false);
+  }
 }

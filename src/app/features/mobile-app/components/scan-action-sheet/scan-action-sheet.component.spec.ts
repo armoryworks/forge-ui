@@ -11,13 +11,14 @@ class FakeLoader implements TranslateLoader {
 }
 
 const job: ScanResolveResult = { kind: 'job', id: 42, code: 'JOB-42', label: 'JOB-42', subtitle: null };
+const purchaseOrder: ScanResolveResult = { kind: 'purchaseOrder', id: 8, code: 'PO-1008', label: 'PO-1008', subtitle: null };
 
 describe('ScanActionSheetComponent', () => {
   let fixture: ComponentFixture<ScanActionSheetComponent>;
 
-  function render(runningJobId: number | null, actingAs: string | null = null): HTMLElement {
+  function render(runningJobId: number | null, actingAs: string | null = null, result = job): HTMLElement {
     fixture = TestBed.createComponent(ScanActionSheetComponent);
-    fixture.componentRef.setInput('result', job);
+    fixture.componentRef.setInput('result', result);
     fixture.componentRef.setInput('runningJobId', runningJobId);
     fixture.componentRef.setInput('actingAs', actingAs);
     fixture.detectChanges();
@@ -61,5 +62,18 @@ describe('ScanActionSheetComponent', () => {
 
   it('hides the acting-as line when nobody is identified', () => {
     expect(render(null).querySelector('[data-testid="scan-acting-as"]')).toBeNull();
+  });
+
+  it('offers Receive first for a purchase order', () => {
+    const el = render(null, null, purchaseOrder);
+    const chosen = vi.fn();
+    fixture.componentInstance.chosen.subscribe(chosen);
+
+    const receive = el.querySelector<HTMLButtonElement>('[data-testid="scan-action-receive"]')!;
+    expect(receive.classList).toContain('sheet__action--primary');
+    expect(el.querySelector('[data-testid="scan-action-start"]')).toBeNull();
+    receive.click();
+
+    expect(chosen).toHaveBeenCalledWith('receive');
   });
 });
