@@ -1563,6 +1563,31 @@
       "helpReadonly": "Haz clic en Editar para añadir un proveedor a esta pieza."
     }
   },
+  "partRevisions": {
+    "none": "ninguna",
+    "revisePart": "Revisar pieza",
+    "history": {
+      "title": "Historial de revisiones",
+      "empty": "Aún no hay revisiones registradas.",
+      "noReason": "Sin motivo indicado"
+    },
+    "dialog": {
+      "title": "Revisar {{partNumber}}",
+      "hint": "Revisión actual: {{current}}. La nueva revisión pasa a ser la revisión vigente de la pieza.",
+      "revision": "Nueva revisión",
+      "reason": "Motivo del cambio",
+      "effectiveDate": "Fecha de vigencia",
+      "submit": "Revisar pieza",
+      "created": "Revisión {{revision}} creada"
+    },
+    "classification": {
+      "confirmTitle": "¿Cambiar la clasificación de la pieza?",
+      "confirmMessage": "Esto cambia la pieza de {{from}} a {{to}}.",
+      "tabsChange": "Las pestañas de la pieza cambiarán en consecuencia. Por ejemplo, una pieza de tipo Fabricar muestra BOM y Ruta.",
+      "recordsUntouched": "Las órdenes de compra y órdenes de trabajo existentes no se modifican.",
+      "confirm": "Cambiar clasificación"
+    }
+  },
   "vendorPart": {
     "vendorPartNumber": "Pieza del proveedor",
     "vendorMpn": "MPN del proveedor",

@@ -1,12 +1,6 @@
 <div class="cluster" [formGroup]="form">
   <h3 class="cluster__title">{{ 'parts.detail.tabs.identity' | translate }}</h3>
 
-  <!-- ─── Always-derived identifiers ─────────────────────────────
-       Part Number, Procurement Source, Inventory Class, and Item
-       Kind aren't editable here — they're shown in BOTH modes via
-       the cluster label/value pattern so the layout doesn't reflow
-       when toggling Edit. The classification axes are changed via
-       dedicated tools (workflow / migration helpers), not inline. -->
   <div class="cluster__grid">
     @if (editing() && allowManualNumbers()) {
       <div class="cluster__item">
@@ -20,14 +14,27 @@
         <span class="cluster__value">{{ part().partNumber }}</span>
       </div>
     }
-    <div class="cluster__item">
-      <span class="cluster__label">{{ 'parts.detail.clusters.identity.procurementSource' | translate }}</span>
-      <span class="cluster__value">{{ procurementLabel() }}</span>
-    </div>
-    <div class="cluster__item">
-      <span class="cluster__label">{{ 'parts.detail.clusters.identity.inventoryClass' | translate }}</span>
-      <span class="cluster__value">{{ inventoryClassLabel() }}</span>
-    </div>
+    @if (editing()) {
+      <div class="cluster__item">
+        <app-select data-testid="part-identity-procurement-source"
+          [label]="'parts.detail.clusters.identity.procurementSource' | translate"
+          formControlName="procurementSource" [options]="procurementSourceOptions" [required]="true" />
+      </div>
+      <div class="cluster__item">
+        <app-select data-testid="part-identity-inventory-class"
+          [label]="'parts.detail.clusters.identity.inventoryClass' | translate"
+          formControlName="inventoryClass" [options]="inventoryClassOptions" [required]="true" />
+      </div>
+    } @else {
+      <div class="cluster__item">
+        <span class="cluster__label">{{ 'parts.detail.clusters.identity.procurementSource' | translate }}</span>
+        <span class="cluster__value">{{ procurementLabel() }}</span>
+      </div>
+      <div class="cluster__item">
+        <span class="cluster__label">{{ 'parts.detail.clusters.identity.inventoryClass' | translate }}</span>
+        <span class="cluster__value">{{ inventoryClassLabel() }}</span>
+      </div>
+    }
     @if (part().itemKindLabel) {
       <div class="cluster__item">
         <span class="cluster__label">{{ 'parts.detail.clusters.identity.itemKind' | translate }}</span>
@@ -39,7 +46,31 @@
   <!-- ─── Editable identity fields ──────────────────────────────── -->
   <div class="cluster__form-row">
     <app-input data-testid="part-identity-name" [label]="'parts.detail.clusters.identity.name' | translate" formControlName="name" [required]="true" [isReadonly]="!editing()" />
-    <app-input data-testid="part-identity-revision" [label]="'parts.detail.clusters.identity.revision' | translate" formControlName="revision" [isReadonly]="!editing()" />
+    <div class="revision-history">
+      <app-input data-testid="part-identity-revision" [label]="'parts.detail.clusters.identity.revision' | translate" formControlName="revision" [isReadonly]="!editing()" />
+      <div class="revision-history__header">
+        <span class="cluster__label">{{ 'partRevisions.history.title' | translate }}</span>
+        @if (canRevise() && !editing()) {
+          <button class="action-btn action-btn--sm" type="button" data-testid="part-identity-revise-btn" (click)="openRevise()">
+            <span class="material-icons-outlined">history_edu</span>
+            {{ 'partRevisions.revisePart' | translate }}
+          </button>
+        }
+      </div>
+      @if (revisions().length) {
+        <ul class="revision-history__list" data-testid="part-identity-revision-history">
+          @for (rev of revisions(); track rev.id) {
+            <li class="revision-history__item">
+              <span class="revision-history__code">{{ rev.revision }}</span>
+              <span class="revision-history__meta">{{ rev.effectiveDate | date: dateFormat }}</span>
+              <span class="revision-history__reason">{{ rev.changeReason || ('partRevisions.history.noReason' | translate) }}</span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <span class="cluster__value cluster__value--muted">{{ 'partRevisions.history.empty' | translate }}</span>
+      }
+    </div>
   </div>
 
   <app-textarea data-testid="part-identity-description" [label]="'parts.detail.clusters.identity.description' | translate" formControlName="description" [rows]="2" [isReadonly]="!editing()" />

@@ -1,0 +1,37 @@
+<app-dialog [title]="title" width="480px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    <p class="text-muted">{{ 'partRevisions.dialog.hint' | translate: { current: currentRevision } }}</p>
+    <app-input
+      data-testid="part-revise-revision"
+      [label]="'partRevisions.dialog.revision' | translate"
+      formControlName="revision"
+      [maxlength]="maxLength"
+      [required]="true" />
+    <app-textarea
+      data-testid="part-revise-reason"
+      [label]="'partRevisions.dialog.reason' | translate"
+      formControlName="changeReason"
+      [rows]="3"
+      [maxlength]="500" />
+    <app-datepicker
+      data-testid="part-revise-effective-date"
+      [label]="'partRevisions.dialog.effectiveDate' | translate"
+      formControlName="effectiveDate"
+      [required]="true" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" type="button" data-testid="part-revise-cancel-btn" (click)="close()">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--create" type="button"
+        data-testid="part-revise-save-btn"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        <span class="material-icons-outlined">history_edu</span>
+        {{ 'partRevisions.dialog.submit' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

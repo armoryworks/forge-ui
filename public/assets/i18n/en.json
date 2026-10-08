@@ -1563,6 +1563,31 @@
       "helpReadonly": "Click Edit to add a vendor source for this part."
     }
   },
+  "partRevisions": {
+    "none": "none",
+    "revisePart": "Revise part",
+    "history": {
+      "title": "Revision history",
+      "empty": "No revisions recorded yet.",
+      "noReason": "No reason given"
+    },
+    "dialog": {
+      "title": "Revise {{partNumber}}",
+      "hint": "Current revision: {{current}}. The new revision becomes the part's current revision.",
+      "revision": "New revision",
+      "reason": "Reason for change",
+      "effectiveDate": "Effective date",
+      "submit": "Revise part",
+      "created": "Revision {{revision}} created"
+    },
+    "classification": {
+      "confirmTitle": "Change part classification?",
+      "confirmMessage": "This changes the part from {{from}} to {{to}}.",
+      "tabsChange": "The part's tabs will change to match. A Make part shows BOM and Routing, for example.",
+      "recordsUntouched": "Existing purchase orders and work orders are not changed.",
+      "confirm": "Change classification"
+    }
+  },
   "vendorPart": {
     "vendorPartNumber": "Vendor Part # / External SKU",
     "manufacturerName": "Manufacturer",
