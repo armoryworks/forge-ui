@@ -4,6 +4,8 @@
  * Features/Discovery/Preview/PreviewDiscoveryRecommendation.cs.
  */
 
+import { DiscoveryCapabilityAdjustment } from './discovery-capability-adjustment.model';
+
 export interface DiscoveryRecommendationFactor {
   questionId: string;
   description: string;
@@ -33,6 +35,7 @@ export interface DiscoveryRecommendation {
   factors: DiscoveryRecommendationFactor[];
   alternatives: DiscoveryAlternative[];
   capabilityDeltas: CapabilityDelta[];
+  capabilityAdjustments: DiscoveryCapabilityAdjustment[];
 }
 
 export interface DiscoveryAnswer {

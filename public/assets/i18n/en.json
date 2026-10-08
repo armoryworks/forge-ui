@@ -8533,6 +8533,16 @@
       "everythingLink": "Or just show me everything"
     }
   },
+  "discoveryWizard": {
+    "consultantMode": "Consultant mode",
+    "selfServe": "Self-serve",
+    "applied": "Discovery applied — {{preset}}.",
+    "reviewCapabilities": "Review capabilities",
+    "applyFailed": "Failed to apply discovery — check capability constraints.",
+    "previewFailed": "Failed to preview discovery apply — check capability constraints.",
+    "followUpFailed": "{{preset}} was applied, but some changes from your answers could not be saved. Review your capabilities and numbering settings.",
+    "adjustmentsTitle": "Also changed because of your answers"
+  },
   "workflow": {
     "parts": {
       "definitions": {

@@ -26,9 +26,9 @@ const sampleCatalog: DiscoveryQuestionsResponse = {
       text: 'Headcount?',
       whyAsking: 'Headcount drives complexity',
       choices: [
-        { value: '1-2', label: '1-2' },
-        { value: '11-25', label: '11-25' },
-        { value: '51-200', label: '51-200' },
+        { value: '1-2', label: '1-2', exclusive: false },
+        { value: '11-25', label: '11-25', exclusive: false },
+        { value: '51-200', label: '51-200', exclusive: false },
       ],
       branch: null,
     },
@@ -40,9 +40,9 @@ const sampleCatalog: DiscoveryQuestionsResponse = {
       text: 'Make / resell / both?',
       whyAsking: 'Mode',
       choices: [
-        { value: 'make', label: 'Make' },
-        { value: 'resell', label: 'Resell' },
-        { value: 'both', label: 'Both' },
+        { value: 'make', label: 'Make', exclusive: false },
+        { value: 'resell', label: 'Resell', exclusive: false },
+        { value: 'both', label: 'Both', exclusive: false },
       ],
       branch: null,
     },
@@ -54,8 +54,8 @@ const sampleCatalog: DiscoveryQuestionsResponse = {
       text: 'Sites?',
       whyAsking: 'Sites',
       choices: [
-        { value: '1', label: '1' },
-        { value: '2', label: '2' },
+        { value: '1', label: '1', exclusive: false },
+        { value: '2', label: '2', exclusive: false },
       ],
       branch: null,
     },
@@ -66,7 +66,7 @@ const sampleCatalog: DiscoveryQuestionsResponse = {
       type: 'SingleChoice',
       text: 'Accounting?',
       whyAsking: 'Accounting mutex',
-      choices: [{ value: 'none', label: 'None' }],
+      choices: [{ value: 'none', label: 'None', exclusive: false }],
       branch: 'A',
     },
     {
@@ -76,7 +76,7 @@ const sampleCatalog: DiscoveryQuestionsResponse = {
       type: 'SingleChoice',
       text: 'Variance?',
       whyAsking: 'Variance review',
-      choices: [{ value: 'no', label: 'No' }],
+      choices: [{ value: 'no', label: 'No', exclusive: false }],
       branch: 'B',
     },
     {
@@ -86,7 +86,7 @@ const sampleCatalog: DiscoveryQuestionsResponse = {
       type: 'SingleChoice',
       text: 'Inter-site transfers?',
       whyAsking: 'Multi-site signal',
-      choices: [{ value: 'weekly', label: 'Weekly' }],
+      choices: [{ value: 'weekly', label: 'Weekly', exclusive: false }],
       branch: 'C',
     },
     {
@@ -96,7 +96,7 @@ const sampleCatalog: DiscoveryQuestionsResponse = {
       type: 'SingleChoice',
       text: 'Lots / serials?',
       whyAsking: 'Trace',
-      choices: [{ value: 'lots', label: 'Lots' }],
+      choices: [{ value: 'lots', label: 'Lots', exclusive: false }],
       branch: null,
     },
     {
@@ -106,6 +106,16 @@ const sampleCatalog: DiscoveryQuestionsResponse = {
       type: 'FreeText',
       text: 'Worst case audit?',
       whyAsking: 'Override probe',
+      choices: null,
+      branch: null,
+    },
+    {
+      id: 'Q-O6',
+      stage: 'Opening',
+      category: 'Opening',
+      type: 'FreeText',
+      text: 'Auditor?',
+      whyAsking: 'Audit pressure',
       choices: null,
       branch: null,
     },
@@ -200,6 +210,19 @@ describe('DiscoveryService', () => {
     expect(visible.find((q) => q.id === 'Q-A5')).toBeFalsy();
   });
 
+  it('hides the worst-case question once the auditor question is answered, copying the answer across', () => {
+    service.loadQuestions(false).subscribe();
+    httpMock.expectOne(`${BASE}/discovery/questions`).flush(sampleCatalog);
+
+    service.setAnswer('Q-O1', '1-2');
+    expect(service.visibleQuestions().find((q) => q.id === 'Q-V1')).toBeTruthy();
+
+    service.setAnswer('Q-O6', 'Lot trace for every shipment');
+
+    expect(service.visibleQuestions().find((q) => q.id === 'Q-V1')).toBeFalsy();
+    expect(service.answers().get('Q-V1')).toBe('Lot trace for every shipment');
+  });
+
   it('preview() calls /discovery/preview and stores recommendation', () => {
     service.loadQuestions(false).subscribe();
     httpMock.expectOne(`${BASE}/discovery/questions`).flush(sampleCatalog);
@@ -220,6 +243,7 @@ describe('DiscoveryService', () => {
       factors: [],
       alternatives: [],
       capabilityDeltas: [],
+      capabilityAdjustments: [],
     };
     previewReq.flush(sample);
     expect(service.recommendation()?.presetId).toBe('PRESET-01');
@@ -247,6 +271,7 @@ describe('DiscoveryService', () => {
       factors: [],
       alternatives: [],
       capabilityDeltas: [],
+      capabilityAdjustments: [],
     });
   });
 });

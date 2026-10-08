@@ -8526,6 +8526,16 @@
       "everythingLink": "O muéstrame todo"
     }
   },
+  "discoveryWizard": {
+    "consultantMode": "Modo consultor",
+    "selfServe": "Autoservicio",
+    "applied": "Descubrimiento aplicado: {{preset}}.",
+    "reviewCapabilities": "Revisar capacidades",
+    "applyFailed": "No se pudo aplicar el descubrimiento. Revise las restricciones de las capacidades.",
+    "previewFailed": "No se pudo previsualizar la aplicación del descubrimiento. Revise las restricciones de las capacidades.",
+    "followUpFailed": "Se aplicó {{preset}}, pero no se pudieron guardar algunos cambios de sus respuestas. Revise sus capacidades y la configuración de numeración.",
+    "adjustmentsTitle": "También cambia según sus respuestas"
+  },
   "workflow": {
     "parts": {
       "definitions": {

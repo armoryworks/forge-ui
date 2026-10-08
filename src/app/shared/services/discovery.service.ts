@@ -92,12 +92,15 @@ export class DiscoveryService {
    * Filters the catalog down to the questions the current user should see —
    * opening + branch-applicable + override + diagnostic. Consultant
    * deepdives are surfaced only when consultant mode is on. Exit (Q-X1)
-   * is excluded — it's the header skip link, not a step.
+   * is excluded — it's the header skip link, not a step. Q-V1 asks the
+   * same thing as Q-O6, so it is hidden once Q-O6 has an answer (which
+   * `setAnswer` copies across to Q-V1).
    */
   readonly visibleQuestions = computed<DiscoveryQuestion[]>(() => {
     const branch = this.branch();
     const consultant = this._consultantMode();
     const mode = this.mode();
+    const auditAnswered = !!this._answers().get('Q-O6')?.trim();
     const all = this._questions();
 
     return all.filter((q) => {
@@ -106,6 +109,7 @@ export class DiscoveryService {
       // text references preset descriptions that a sequential step never
       // shows, so rendering it as a question reads as broken.
       if (q.stage === 'Exit') return false;
+      if (q.id === 'Q-V1' && auditAnswered) return false;
 
       // Opening, override, diagnostic always visible.
       if (
@@ -165,6 +169,7 @@ export class DiscoveryService {
   setAnswer(questionId: string, value: string): void {
     const next = new Map(this._answers());
     next.set(questionId, value);
+    if (questionId === 'Q-O6') next.set('Q-V1', value);
     this._answers.set(next);
   }
 

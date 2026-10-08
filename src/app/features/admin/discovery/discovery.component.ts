@@ -15,7 +15,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { map } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Observable, catchError, forkJoin, map, of, switchMap, tap } from 'rxjs';
 
 import { CapabilityService } from '../../../shared/services/capability.service';
 import { CapabilityInstallStateService } from '../../../shared/services/capability-install-state.service';
@@ -23,12 +24,15 @@ import { ConsultantModeService } from '../../../shared/services/consultant-mode.
 import { DiscoveryService } from '../../../shared/services/discovery.service';
 import { PresetService } from '../../../shared/services/preset.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { AdminSettingsService } from '../settings/services/admin-settings.service';
 
 import {
+  CapabilityDelta,
   DiscoveryAlternative,
   DiscoveryRecommendation,
 } from '../../../shared/models/discovery-recommendation.model';
-import { DiscoveryQuestion } from '../../../shared/models/discovery-question.model';
+import { DiscoveryCapabilityAdjustment } from '../../../shared/models/discovery-capability-adjustment.model';
+import { DiscoveryChoice, DiscoveryQuestion } from '../../../shared/models/discovery-question.model';
 
 import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
 import {
@@ -59,6 +63,7 @@ import { LoadingBlockDirective } from '../../../shared/directives/loading-block.
     MatTooltipModule,
     MatRadioModule,
     MatCheckboxModule,
+    TranslatePipe,
     PageLayoutComponent,
     TextareaComponent,
     ToggleComponent,
@@ -75,6 +80,8 @@ export class DiscoveryComponent implements OnInit {
   private readonly installState = inject(CapabilityInstallStateService);
   private readonly presetService = inject(PresetService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly adminSettings = inject(AdminSettingsService);
+  private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
@@ -138,6 +145,13 @@ export class DiscoveryComponent implements OnInit {
     return { id: rec.presetId, name: rec.presetName, rationale: '' };
   });
 
+  protected readonly previewDeltas = computed<CapabilityDelta[]>(() => {
+    const rec = this.recommendation();
+    if (!rec) return [];
+    const adjusted = new Map(rec.capabilityAdjustments.map((a) => [a.code, a.enabled]));
+    return rec.capabilityDeltas.filter((d) => (adjusted.get(d.code) ?? d.willBeEnabled) === d.willBeEnabled);
+  });
+
   protected readonly textareaControls = new Map<string, FormControl<string | null>>();
 
   ngOnInit(): void {
@@ -176,6 +190,26 @@ export class DiscoveryComponent implements OnInit {
     const target = evt.target as HTMLTextAreaElement | null;
     if (!target) return;
     this.setFreeTextAnswer(questionId, target.value ?? '');
+  }
+
+  protected isChecked(questionId: string, value: string): boolean {
+    return this.selectedValues(questionId).includes(value);
+  }
+
+  protected toggleChoice(question: DiscoveryQuestion, choice: DiscoveryChoice, checked: boolean): void {
+    const current = this.selectedValues(question.id).filter((v) => v !== choice.value);
+    let next = current;
+    if (checked && choice.exclusive) {
+      next = [choice.value];
+    } else if (checked) {
+      const exclusive = new Set((question.choices ?? []).filter((c) => c.exclusive).map((c) => c.value));
+      next = [...current.filter((v) => !exclusive.has(v)), choice.value];
+    }
+    this.setAnswer(question.id, next.join(','));
+  }
+
+  private selectedValues(questionId: string): string[] {
+    return this.getAnswer(questionId).split(',').filter((v) => v !== '');
   }
 
   protected isAnswered(questionId: string): boolean {
@@ -270,25 +304,64 @@ export class DiscoveryComponent implements OnInit {
           });
       },
       error: () => {
-        this.snackbar.error('Failed to preview discovery apply — check capability constraints.');
+        this.snackbar.error(this.translate.instant('discoveryWizard.previewFailed'));
       },
     });
   }
 
   private commitApply(chosenPresetId: string, chosenPresetName: string): void {
-    this.discovery.apply(chosenPresetId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
-        this.installState.dismiss();
+    const adjustments = this.recommendation()?.capabilityAdjustments ?? [];
+    const manualNumberKeys = this.manualNumberSettingKeys();
+    this.discovery.apply(chosenPresetId).pipe(
+      tap(() => this.installState.dismiss()),
+      switchMap(() => this.applyAnswerFollowUps(adjustments, manualNumberKeys).pipe(
+        map(() => true),
+        catchError(() => of(false)),
+      )),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
+      next: (followUpsSaved) => {
         this.capabilityService.load().subscribe();
         this.router.navigate(['/dashboard']).then(() => {
-          this.snackbar.successWithNav(
-            `Discovery applied — ${chosenPresetName}.`, '/admin/capabilities', 'Review capabilities');
+          if (followUpsSaved) {
+            this.snackbar.successWithNav(
+              this.translate.instant('discoveryWizard.applied', { preset: chosenPresetName }),
+              '/admin/capabilities',
+              this.translate.instant('discoveryWizard.reviewCapabilities'));
+          } else {
+            this.snackbar.error(this.translate.instant('discoveryWizard.followUpFailed', { preset: chosenPresetName }));
+          }
         });
       },
       error: () => {
-        this.snackbar.error('Failed to apply discovery — check capability constraints.');
+        this.snackbar.error(this.translate.instant('discoveryWizard.applyFailed'));
       },
     });
+  }
+
+  private applyAnswerFollowUps(
+    adjustments: DiscoveryCapabilityAdjustment[],
+    manualNumberKeys: string[],
+  ): Observable<unknown> {
+    return this.capabilityService.load().pipe(
+      switchMap(() => {
+        const changed = adjustments.filter((a) => this.capabilityService.isEnabled(a.code) !== a.enabled);
+        const calls: Observable<unknown>[] = manualNumberKeys.map((key) => this.adminSettings.updateSetting(key, 'true'));
+        if (changed.length > 0) {
+          const reason = [...new Set(changed.map((a) => a.reason))].join(' ');
+          calls.push(this.capabilityService.bulkToggle(changed.map((a) => ({ id: a.code, enabled: a.enabled })), reason));
+        }
+        return calls.length > 0 ? forkJoin(calls) : of(null);
+      }),
+    );
+  }
+
+  private manualNumberSettingKeys(): string[] {
+    const question = this.discovery.questions().find((q) => q.id === 'Q-D8');
+    const offered = new Set((question?.choices ?? []).map((c) => c.value));
+    return this.selectedValues('Q-D8')
+      .filter((v) => offered.has(v))
+      .map((v) => `${v}.allow_manual_numbers`);
   }
 
   protected exitToCustom(): void {

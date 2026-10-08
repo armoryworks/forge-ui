@@ -35,6 +35,7 @@ export type DiscoveryCategory =
 export interface DiscoveryChoice {
   value: string;
   label: string;
+  exclusive: boolean;
 }
 
 export interface DiscoveryQuestion {
