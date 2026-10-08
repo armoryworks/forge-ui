@@ -12,6 +12,19 @@
   </div>
 }
 
+@if (punchUndoMessage(); as message) {
+  <div class="sf-punch-undo" role="status" data-testid="sf-punch-undo">
+    <span class="material-icons-outlined">{{ punchUndoState() === 'failed' ? 'error' : 'history' }}</span>
+    <span class="sf-punch-undo__message">{{ message }}</span>
+    @if (punchUndoState() === 'offered' || punchUndoState() === 'undoing') {
+      <button type="button" class="action-btn sf-punch-undo__btn" data-testid="sf-punch-undo-btn"
+        [disabled]="punchUndoState() === 'undoing'" (click)="undoPunch()">
+        {{ 'kioskSetup.punchUndo.undo' | translate }}
+      </button>
+    }
+  </div>
+}
+
 <header class="sf-header">
   <div class="sf-header__team">
     @if (terminal(); as t) {

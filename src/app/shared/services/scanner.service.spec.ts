@@ -109,6 +109,71 @@ describe('ScannerService', () => {
     });
   });
 
+  describe('keystrokes in editable fields', () => {
+    let host: HTMLElement;
+
+    function typeFast(target: HTMLElement, text: string): void {
+      for (const key of [...text, 'Enter']) {
+        target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
+        vi.advanceTimersByTime(10);
+      }
+    }
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      host = document.createElement('div');
+      document.body.appendChild(host);
+      service.start();
+    });
+
+    afterEach(() => {
+      host.remove();
+      vi.useRealTimers();
+    });
+
+    it('does not treat fast typing in a text box as a scan', () => {
+      const input = document.createElement('input');
+      input.type = 'text';
+      host.appendChild(input);
+
+      typeFast(input, 'J-2403');
+      vi.advanceTimersByTime(200);
+
+      expect(service.lastScan()).toBeNull();
+    });
+
+    it('does not carry a burst that began outside a text box into it', () => {
+      const input = document.createElement('input');
+      input.type = 'search';
+      host.appendChild(input);
+
+      document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'J', bubbles: true }));
+      vi.advanceTimersByTime(10);
+      typeFast(input, '-2403');
+      vi.advanceTimersByTime(200);
+
+      expect(service.lastScan()).toBeNull();
+    });
+
+    it('still reads a scan typed into a barcode scan input', () => {
+      const scanHost = document.createElement('app-barcode-scan-input');
+      const input = document.createElement('input');
+      input.type = 'text';
+      scanHost.appendChild(input);
+      host.appendChild(scanHost);
+
+      typeFast(input, 'J-2403');
+
+      expect(service.lastScan()?.value).toBe('J-2403');
+    });
+
+    it('reads a scan when no field has focus', () => {
+      typeFast(document.body, 'J-2403');
+
+      expect(service.lastScan()?.value).toBe('J-2403');
+    });
+  });
+
   describe('ngOnDestroy', () => {
     it('should stop listening on destroy', () => {
       service.start();

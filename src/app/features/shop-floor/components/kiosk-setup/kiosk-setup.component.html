@@ -13,26 +13,27 @@
         </div>
       }
 
-      <div class="setup__field">
-        <app-input [label]="'shopFloor.adminEmail' | translate" type="email" [formControl]="emailControl"
-          placeholder="admin@company.com" />
-      </div>
-      <div class="setup__field">
-        <app-input [label]="'auth.password' | translate" type="password" [formControl]="passwordControl"
-          [placeholder]="'shopFloor.enterPasswordPlaceholder' | translate" />
-      </div>
+      <form class="setup__form" [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()" data-testid="kiosk-setup-login-form">
+        <div class="setup__field">
+          <app-input [label]="'shopFloor.adminEmail' | translate" type="email" [formControl]="emailControl"
+            placeholder="admin@company.com" data-testid="kiosk-setup-email" />
+        </div>
+        <div class="setup__field">
+          <app-input [label]="'auth.password' | translate" type="password" [formControl]="passwordControl"
+            [placeholder]="'shopFloor.enterPasswordPlaceholder' | translate" data-testid="kiosk-setup-password" />
+        </div>
 
-      <button class="action-btn action-btn--primary setup__submit"
-        [disabled]="loggingIn() || !emailControl.value || !passwordControl.value"
-        (click)="onLoginSubmit()">
-        @if (loggingIn()) {
-          <span class="material-icons-outlined setup__spinner">sync</span>
-          {{ 'shopFloor.signingIn' | translate }}
-        } @else {
-          <span class="material-icons-outlined">login</span>
-          {{ 'shopFloor.signInAsAdmin' | translate }}
-        }
-      </button>
+        <button type="submit" class="action-btn action-btn--primary setup__submit" data-testid="kiosk-setup-sign-in"
+          [disabled]="loggingIn() || !emailControl.value || !passwordControl.value">
+          @if (loggingIn()) {
+            <span class="material-icons-outlined setup__spinner">sync</span>
+            {{ 'shopFloor.signingIn' | translate }}
+          } @else {
+            <span class="material-icons-outlined">login</span>
+            {{ 'shopFloor.signInAsAdmin' | translate }}
+          }
+        </button>
+      </form>
     </div>
   </div>
 }
@@ -54,31 +55,48 @@
 
       <div class="setup__field">
         <app-input [label]="'shopFloor.terminalName' | translate" [formControl]="terminalNameControl"
-          [placeholder]="'shopFloor.terminalNamePlaceholder' | translate" />
+          [placeholder]="'shopFloor.terminalNamePlaceholder' | translate" data-testid="kiosk-setup-terminal-name" />
       </div>
+
+      @if (teamsLoadFailed()) {
+        <div class="setup__error" role="alert" data-testid="kiosk-setup-teams-error">
+          <span class="material-icons-outlined">warning</span>
+          {{ 'kioskSetup.teamsLoadFailed' | translate }}
+          <button type="button" class="action-btn setup__retry" data-testid="kiosk-setup-teams-retry" (click)="retryTeams()">
+            {{ 'kioskSetup.retry' | translate }}
+          </button>
+        </div>
+      }
+
+      @if (noTeams()) {
+        <p class="setup__note" data-testid="kiosk-setup-no-teams">{{ 'kioskSetup.noTeamsYet' | translate }}</p>
+      }
 
       @if (!showNewTeam()) {
         <div class="setup__field">
           <app-select [label]="'shopFloor.team' | translate" [formControl]="teamControl"
-            [options]="teamOptions()" [placeholder]="'shopFloor.selectTeamPlaceholder' | translate" />
+            [options]="teamOptions()" [placeholder]="'shopFloor.selectTeamPlaceholder' | translate"
+            data-testid="kiosk-setup-team" />
         </div>
-        <button class="action-btn setup__toggle" (click)="toggleNewTeam()">
+        <button type="button" class="action-btn setup__toggle" data-testid="kiosk-setup-new-team-toggle" (click)="toggleNewTeam()">
           <span class="material-icons-outlined">add</span>
           {{ 'shopFloor.createNewTeam' | translate }}
         </button>
       } @else {
         <div class="setup__field">
           <app-input [label]="'shopFloor.newTeamName' | translate" [formControl]="newTeamNameControl"
-            [placeholder]="'shopFloor.newTeamNamePlaceholder' | translate" />
+            [placeholder]="'shopFloor.newTeamNamePlaceholder' | translate" data-testid="kiosk-setup-new-team-name" />
         </div>
-        <button class="action-btn setup__toggle" (click)="toggleNewTeam()">
-          <span class="material-icons-outlined">list</span>
-          {{ 'shopFloor.selectExistingTeam' | translate }}
-        </button>
+        @if (!noTeams()) {
+          <button type="button" class="action-btn setup__toggle" data-testid="kiosk-setup-existing-team-toggle" (click)="toggleNewTeam()">
+            <span class="material-icons-outlined">list</span>
+            {{ 'shopFloor.selectExistingTeam' | translate }}
+          </button>
+        }
       }
 
-      <button class="action-btn action-btn--primary setup__submit"
-        [disabled]="saving() || !terminalNameControl.value"
+      <button type="button" class="action-btn action-btn--primary setup__submit" data-testid="kiosk-setup-activate"
+        [disabled]="!canActivate()"
         (click)="onSave()">
         @if (saving()) {
           <span class="material-icons-outlined setup__spinner">sync</span>

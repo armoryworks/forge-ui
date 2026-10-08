@@ -7121,6 +7121,25 @@
     "askPlaceholder": "Haz una pregunta...",
     "errorMessage": "Lo siento, no pude procesar su pregunta. Por favor intente de nuevo."
   },
+  "kioskSetup": {
+    "noTeamsYet": "Todavía no hay equipos. Escriba un nombre aquí y el equipo se creará al activar esta terminal.",
+    "teamsLoadFailed": "No se pudieron cargar los equipos.",
+    "retry": "Reintentar",
+    "searchCard": {
+      "status": "Estado",
+      "dueDate": "Vence",
+      "noDueDate": "Sin fecha de entrega",
+      "loading": "Cargando...",
+      "loadFailed": "No se pudo cargar el estado de este trabajo.",
+      "startWorkHint": "Para empezar a trabajar en este trabajo, toque la tarjeta de un trabajador."
+    },
+    "punchUndo": {
+      "offer": "{{name}}: {{event}} a las {{time}}",
+      "undo": "Deshacer",
+      "undone": "Registro deshecho.",
+      "failed": "No se pudo deshacer el registro. Pida a su supervisor que lo corrija."
+    }
+  },
   "shopFloor": {
     "title": "Planta de Producción",
     "working": "Trabajando",

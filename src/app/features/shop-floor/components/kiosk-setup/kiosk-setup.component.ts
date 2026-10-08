@@ -1,7 +1,8 @@
 import {
-  ChangeDetectionStrategy, Component, inject, output, signal,
+  ChangeDetectionStrategy, Component, computed, inject, output, signal,
 } from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { finalize } from 'rxjs';
 
@@ -39,6 +40,10 @@ export class KioskSetupComponent {
   // Login form
   protected readonly emailControl = new FormControl('');
   protected readonly passwordControl = new FormControl('');
+  protected readonly loginForm = new FormGroup({
+    email: this.emailControl,
+    password: this.passwordControl,
+  });
 
   // Config form
   protected readonly terminalNameControl = new FormControl('');
@@ -47,16 +52,25 @@ export class KioskSetupComponent {
   protected readonly showNewTeam = signal(false);
 
   protected readonly teamOptions = signal<{ value: unknown; label: string }[]>([]);
+  protected readonly teamsLoaded = signal(false);
+  protected readonly teamsLoadFailed = signal(false);
+  protected readonly noTeams = computed(() => this.teamsLoaded() && this.teams().length === 0);
+
+  private readonly terminalName = toSignal(this.terminalNameControl.valueChanges, { initialValue: '' });
+  private readonly teamId = toSignal(this.teamControl.valueChanges, { initialValue: null });
+  private readonly newTeamName = toSignal(this.newTeamNameControl.valueChanges, { initialValue: '' });
+
+  protected readonly canActivate = computed(() => {
+    if (this.saving() || !this.terminalName()?.trim()) return false;
+    return this.showNewTeam() ? !!this.newTeamName()?.trim() : this.teamId() !== null;
+  });
 
   // Teams list is gated — load after admin login in onLoginSubmit().
 
   protected onLoginSubmit(): void {
     const email = this.emailControl.value?.trim();
     const password = this.passwordControl.value;
-    if (!email || !password) {
-      this.loginError.set(this.translate.instant('shopFloor.emailPasswordRequired'));
-      return;
-    }
+    if (this.loggingIn() || !email || !password) return;
 
     this.loggingIn.set(true);
     this.loginError.set(null);
@@ -75,7 +89,12 @@ export class KioskSetupComponent {
   }
 
   protected toggleNewTeam(): void {
+    if (this.noTeams()) return;
     this.showNewTeam.update(v => !v);
+  }
+
+  protected retryTeams(): void {
+    this.loadTeams();
   }
 
   protected onSave(): void {
@@ -167,11 +186,15 @@ export class KioskSetupComponent {
   }
 
   private loadTeams(): void {
+    this.teamsLoadFailed.set(false);
     this.shopFloorService.getTeams().subscribe({
       next: (teams) => {
         this.teams.set(teams);
         this.teamOptions.set(teams.map(t => this.toTeamOption(t)));
+        this.teamsLoaded.set(true);
+        if (teams.length === 0) this.showNewTeam.set(true);
       },
+      error: () => this.teamsLoadFailed.set(true),
     });
   }
 

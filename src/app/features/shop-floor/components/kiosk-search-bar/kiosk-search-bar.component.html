@@ -4,6 +4,7 @@
     <input
       class="kiosk-search__input"
       type="text"
+      data-testid="kiosk-search-input"
       [placeholder]="'shopFloor.searchPlaceholder' | translate"
       [formControl]="searchControl"
       (focus)="onFocus()"
@@ -13,7 +14,7 @@
   @if (showResults()) {
     <div class="kiosk-search__dropdown">
       @for (result of results(); track result.entityId + result.entityType) {
-        <button class="kiosk-search__result" (mousedown)="navigateTo(result)">
+        <button type="button" class="kiosk-search__result" data-testid="kiosk-search-result" (mousedown)="select(result)">
           <span class="material-icons-outlined kiosk-search__result-icon">{{ result.icon }}</span>
           <div class="kiosk-search__result-text">
             <span class="kiosk-search__result-title">{{ result.title }}</span>
@@ -23,6 +24,55 @@
           </div>
           <span class="kiosk-search__result-type">{{ result.entityType }}</span>
         </button>
+      }
+    </div>
+  }
+
+  @if (selected(); as result) {
+    <div class="kiosk-search__card" role="dialog" [attr.aria-label]="result.title" data-testid="kiosk-search-card">
+      <div class="kiosk-search__card-head">
+        <span class="material-icons-outlined kiosk-search__result-icon">{{ result.icon }}</span>
+        <div class="kiosk-search__result-text">
+          <span class="kiosk-search__card-number">{{ result.title }}</span>
+          @if (result.subtitle) {
+            <span class="kiosk-search__card-title">{{ result.subtitle }}</span>
+          }
+        </div>
+        <button type="button" class="kiosk-search__card-close" data-testid="kiosk-search-card-close"
+          [attr.aria-label]="'common.close' | translate" (click)="close()">
+          <span class="material-icons-outlined">close</span>
+        </button>
+      </div>
+
+      @if (isJob(result)) {
+        @if (jobStatus(); as status) {
+          <dl class="kiosk-search__card-facts">
+            <dt>{{ 'kioskSetup.searchCard.status' | translate }}</dt>
+            <dd data-testid="kiosk-search-card-status">
+              <span class="kiosk-search__card-dot" [style.background]="status.stageColor"></span>
+              {{ status.stageName }}
+            </dd>
+            <dt>{{ 'kioskSetup.searchCard.dueDate' | translate }}</dt>
+            <dd data-testid="kiosk-search-card-due" [class.kiosk-search__card-overdue]="status.isOverdue">
+              @if (status.dueDate) {
+                {{ status.dueDate | date: 'mediumDate' }}
+                @if (status.isOverdue) {
+                  · {{ 'shopFloor.overdue' | translate }}
+                }
+              } @else {
+                {{ 'kioskSetup.searchCard.noDueDate' | translate }}
+              }
+            </dd>
+          </dl>
+        } @else if (jobStatusLoading()) {
+          <p class="kiosk-search__card-note">{{ 'kioskSetup.searchCard.loading' | translate }}</p>
+        } @else if (jobStatusFailed()) {
+          <p class="kiosk-search__card-note" role="alert">{{ 'kioskSetup.searchCard.loadFailed' | translate }}</p>
+        }
+        <p class="kiosk-search__card-hint" data-testid="kiosk-search-card-hint">
+          <span class="material-icons-outlined">touch_app</span>
+          {{ 'kioskSetup.searchCard.startWorkHint' | translate }}
+        </p>
       }
     </div>
   }

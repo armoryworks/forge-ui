@@ -1,29 +1,38 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
-import { debounceTime, distinctUntilChanged, filter, switchMap, catchError, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, switchMap, catchError, of, Subscription } from 'rxjs';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { environment } from '../../../../../environments/environment';
 import { SearchResult } from '../../../../shared/models/search.model';
+import { JobStatus } from '../../../../shared/models/mobile-api.model';
+import { ShopFloorService } from '../../services/shop-floor.service';
 
 @Component({
   selector: 'app-kiosk-search-bar',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe],
+  imports: [ReactiveFormsModule, TranslatePipe, DatePipe],
   templateUrl: './kiosk-search-bar.component.html',
   styleUrl: './kiosk-search-bar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class KioskSearchBarComponent {
   private readonly http = inject(HttpClient);
-  private readonly router = inject(Router);
+  private readonly shopFloorService = inject(ShopFloorService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly searchControl = new FormControl('');
   protected readonly results = signal<SearchResult[]>([]);
   protected readonly showResults = signal(false);
+  protected readonly selected = signal<SearchResult | null>(null);
+  protected readonly jobStatus = signal<JobStatus | null>(null);
+  protected readonly jobStatusLoading = signal(false);
+  protected readonly jobStatusFailed = signal(false);
+
+  private jobStatusSub: Subscription | null = null;
 
   constructor() {
     this.searchControl.valueChanges.pipe(
@@ -59,10 +68,47 @@ export class KioskSearchBarComponent {
     setTimeout(() => this.showResults.set(false), 200);
   }
 
-  protected navigateTo(result: SearchResult): void {
+  protected select(result: SearchResult): void {
     this.showResults.set(false);
     this.searchControl.setValue('', { emitEvent: false });
     this.results.set([]);
-    this.router.navigateByUrl(result.url);
+    this.selected.set(result);
+    this.loadJobStatus(result);
+  }
+
+  protected isJob(result: SearchResult): boolean {
+    return result.entityType === 'Job';
+  }
+
+  protected close(): void {
+    this.jobStatusSub?.unsubscribe();
+    this.jobStatusSub = null;
+    this.selected.set(null);
+    this.jobStatus.set(null);
+    this.jobStatusLoading.set(false);
+    this.jobStatusFailed.set(false);
+  }
+
+  private loadJobStatus(result: SearchResult): void {
+    this.jobStatusSub?.unsubscribe();
+    this.jobStatus.set(null);
+    this.jobStatusFailed.set(false);
+    if (!this.isJob(result)) {
+      this.jobStatusLoading.set(false);
+      return;
+    }
+    this.jobStatusLoading.set(true);
+    this.jobStatusSub = this.shopFloorService.getJobStatus(result.entityId).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
+      next: status => {
+        this.jobStatus.set(status);
+        this.jobStatusLoading.set(false);
+      },
+      error: () => {
+        this.jobStatusFailed.set(true);
+        this.jobStatusLoading.set(false);
+      },
+    });
   }
 }

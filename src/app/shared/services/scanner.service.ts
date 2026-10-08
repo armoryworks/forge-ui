@@ -118,8 +118,11 @@ export class ScannerService implements OnDestroy {
   private onKeydown(event: KeyboardEvent): void {
     if (!this._enabled()) return;
 
-    const target = event.target as HTMLElement;
-    const inEditable = this.isEditableElement(target) && !target.closest('app-barcode-scan-input');
+    const target = event.target;
+    if (target instanceof HTMLElement && this.isEditableElement(target) && !target.closest('app-barcode-scan-input')) {
+      this.clearBuffer();
+      return;
+    }
 
     const now = Date.now();
 
@@ -142,11 +145,6 @@ export class ScannerService implements OnDestroy {
     if (elapsed < this.SCAN_THRESHOLD_MS) {
       this.buffer += event.key;
     } else {
-      // Gap too large — if in an editable element, this is normal typing; don't start a new buffer
-      if (inEditable) {
-        this.clearBuffer();
-        return;
-      }
       this.buffer = event.key;
     }
 

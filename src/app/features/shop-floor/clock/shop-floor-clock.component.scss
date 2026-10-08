@@ -642,3 +642,25 @@
   margin-bottom: $sp-md;
   border-left: $border-width-accent solid var(--info);
 }
+
+.sf-punch-undo {
+  position: fixed;
+  bottom: $sp-xl;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-xl;
+  background: var(--surface);
+  color: var(--text);
+  border: $border-width solid var(--border);
+  box-shadow: $shadow-dropdown;
+  z-index: $z-toast;
+  font-size: var(--font-size-md);
+  font-weight: 600;
+}
+
+.sf-punch-undo__btn {
+  color: var(--primary);
+}

@@ -7128,6 +7128,25 @@
     "askPlaceholder": "Ask a question...",
     "errorMessage": "Sorry, I was unable to process your question. Please try again."
   },
+  "kioskSetup": {
+    "noTeamsYet": "There are no teams yet. Name one here and it is created when you activate this terminal.",
+    "teamsLoadFailed": "Could not load the teams.",
+    "retry": "Retry",
+    "searchCard": {
+      "status": "Status",
+      "dueDate": "Due",
+      "noDueDate": "No due date",
+      "loading": "Loading...",
+      "loadFailed": "Could not load this job's status.",
+      "startWorkHint": "To start work on this job, tap a worker tile."
+    },
+    "punchUndo": {
+      "offer": "{{name}}: {{event}} at {{time}}",
+      "undo": "Undo",
+      "undone": "Punch undone.",
+      "failed": "Could not undo the punch. Ask your supervisor to correct it."
+    }
+  },
   "shopFloor": {
     "title": "Shop Floor",
     "working": "Working",

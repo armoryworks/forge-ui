@@ -11,6 +11,13 @@ import { ShopFloorService } from '../../services/shop-floor.service';
 import { KioskTerminal, Team } from '../../models/kiosk-terminal.model';
 
 interface KioskSetupHarness {
+  phase: WritableSignal<string>;
+  loggingIn: WritableSignal<boolean>;
+  noTeams(): boolean;
+  teamsLoadFailed(): boolean;
+  canActivate(): boolean;
+  emailControl: FormControl<string | null>;
+  passwordControl: FormControl<string | null>;
   saving: WritableSignal<boolean>;
   configError: WritableSignal<string | null>;
   showNewTeam: WritableSignal<boolean>;
@@ -47,7 +54,15 @@ function setup() {
   const component = fixture.componentInstance as unknown as KioskSetupHarness;
   const configured = vi.fn();
   fixture.componentInstance.configured.subscribe(configured);
-  return { component, shopFloor, auth, configured };
+  return { fixture, component, shopFloor, auth, configured };
+}
+
+function signIn(ctx: ReturnType<typeof setup>): void {
+  ctx.component.emailControl.setValue('admin@forge.local');
+  ctx.component.passwordControl.setValue('secret');
+  const form = ctx.fixture.nativeElement.querySelector('[data-testid="kiosk-setup-login-form"]') as HTMLFormElement;
+  form.dispatchEvent(new Event('submit', { cancelable: true }));
+  ctx.fixture.detectChanges();
 }
 
 describe('KioskSetupComponent', () => {
@@ -125,5 +140,75 @@ describe('KioskSetupComponent', () => {
     expect(shopFloor.createTeam).toHaveBeenCalledTimes(1);
     expect(shopFloor.setupTerminal).toHaveBeenCalledTimes(2);
     expect(shopFloor.setupTerminal).toHaveBeenLastCalledWith('Press 1', expect.any(String), 3);
+  });
+
+  it('signs in when the admin form is submitted with Enter', () => {
+    const ctx = setup();
+
+    signIn(ctx);
+
+    expect(ctx.auth.login).toHaveBeenCalledWith({ email: 'admin@forge.local', password: 'secret' });
+    expect(ctx.component.phase()).toBe('configure');
+  });
+
+  it('ignores a sign-in submit while a field is empty or a sign-in is running', () => {
+    const { component, auth } = setup();
+    const submit = () => (component as unknown as { onLoginSubmit(): void }).onLoginSubmit();
+
+    component.emailControl.setValue('admin@forge.local');
+    submit();
+    expect(auth.login).not.toHaveBeenCalled();
+
+    component.passwordControl.setValue('secret');
+    component.loggingIn.set(true);
+    submit();
+    expect(auth.login).not.toHaveBeenCalled();
+  });
+
+  it('asks for a new team name when the shop has no teams yet', () => {
+    const ctx = setup();
+    signIn(ctx);
+    const { component, shopFloor, configured } = ctx;
+
+    expect(component.noTeams()).toBe(true);
+    expect(component.showNewTeam()).toBe(true);
+    expect(ctx.fixture.nativeElement.querySelector('[data-testid="kiosk-setup-team"]')).toBeNull();
+    expect(ctx.fixture.nativeElement.querySelector('[data-testid="kiosk-setup-no-teams"]')).not.toBeNull();
+    expect(ctx.fixture.nativeElement.querySelector('[data-testid="kiosk-setup-existing-team-toggle"]')).toBeNull();
+
+    component.terminalNameControl.setValue('Press 1');
+    expect(component.canActivate()).toBe(false);
+    component.newTeamNameControl.setValue('Molding');
+    expect(component.canActivate()).toBe(true);
+
+    component.onSave();
+
+    expect(shopFloor.createTeam).toHaveBeenCalledWith('Molding');
+    expect(shopFloor.setupTerminal).toHaveBeenCalledWith('Press 1', expect.any(String), 3);
+    expect(configured).toHaveBeenCalledWith(terminal);
+  });
+
+  it('keeps activate disabled until an existing team is chosen', () => {
+    const ctx = setup();
+    ctx.shopFloor.getTeams.mockReturnValue(of([team]));
+    signIn(ctx);
+    const { component } = ctx;
+
+    expect(component.noTeams()).toBe(false);
+    expect(component.showNewTeam()).toBe(false);
+    component.terminalNameControl.setValue('Press 1');
+    expect(component.canActivate()).toBe(false);
+    component.teamControl.setValue(3);
+    expect(component.canActivate()).toBe(true);
+  });
+
+  it('shows an error when the teams cannot be loaded', () => {
+    const ctx = setup();
+    ctx.shopFloor.getTeams.mockReturnValue(throwError(() => new Error('boom')));
+    signIn(ctx);
+
+    expect(ctx.component.teamsLoadFailed()).toBe(true);
+    expect(ctx.component.noTeams()).toBe(false);
+    expect(ctx.fixture.nativeElement.querySelector('[data-testid="kiosk-setup-teams-error"]')).not.toBeNull();
   });
 });
