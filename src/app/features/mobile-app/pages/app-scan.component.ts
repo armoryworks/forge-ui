@@ -18,6 +18,7 @@ import { SharedIdentityService } from '../../../shared/services/shared-identity.
 import { UndoService } from '../../../shared/services/undo.service';
 import { hintScanKind } from '../../../shared/utils/scan-code';
 import { IdentityPromptComponent } from '../identity/identity-prompt.component';
+import { JobOperationsComponent } from '../components/job-operations/job-operations.component';
 import { ManualCodeEntryComponent } from '../components/manual-code-entry/manual-code-entry.component';
 import { ScanAction, ScanActionSheetComponent } from '../components/scan-action-sheet/scan-action-sheet.component';
 
@@ -27,11 +28,14 @@ import { ScanAction, ScanActionSheetComponent } from '../components/scan-action-
  * page by itself. Unknown codes double-buzz. Torch bottom-left. On a shared
  * device a start, stop, move or complete ends the person's identity once its
  * undo toast closes; the undo itself runs with the token captured beforehand.
+ * With operation tracking on, a job's open operations sit under the sheet,
+ * and Complete stops the person's timer on that job rather than whichever
+ * one is newest.
  */
 @Component({
   selector: 'app-app-scan',
   standalone: true,
-  imports: [TranslatePipe, ScanActionSheetComponent, IdentityPromptComponent, ManualCodeEntryComponent],
+  imports: [TranslatePipe, ScanActionSheetComponent, IdentityPromptComponent, ManualCodeEntryComponent, JobOperationsComponent],
   templateUrl: './app-scan.component.html',
   styleUrl: './app-scan.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -59,6 +63,7 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
   protected readonly typing = signal(false);
 
   protected readonly runningJobId = computed(() => this.timer.active()?.jobId ?? null);
+  protected readonly operationTracking = computed(() => this.timer.operationTracking());
   protected readonly actingAs = computed(() => {
     if (!this.instances.instance()?.shared || !this.identity.identified()) return null;
     const person = this.identity.person();
@@ -233,7 +238,8 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
   }
 
   private async complete(jobId: number, code: string, token: string | undefined): Promise<boolean> {
-    await firstValueFrom(this.api.stopTimer()).catch(() => undefined);
+    const stop = this.timer.operationTracking() ? this.api.stopTimer(undefined, { jobId }) : this.api.stopTimer();
+    await firstValueFrom(stop).catch(() => undefined);
     void this.timer.refresh();
     return this.advance(jobId, code, token);
   }

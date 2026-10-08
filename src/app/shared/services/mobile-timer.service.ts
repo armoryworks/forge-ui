@@ -1,13 +1,17 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 
-import { firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 import { ConfirmDialogComponent, ConfirmDialogData } from '../components/confirm-dialog/confirm-dialog.component';
 import {
   ActiveTimer, QueuedOffline, StartedTimeEntry, TimerStartOutcome, TimerStopOutcome, TimerToggleOutcome, isQueued,
 } from '../models/mobile-api.model';
+import { OperationTimerStopOutcome } from '../models/operation-timer-stop-outcome.model';
+import { RunningTimer } from '../models/running-timer.model';
+import { TimerStopTarget } from '../models/timer-stop-target.model';
 import { AuthService } from './auth.service';
 import { MobileApiService } from './mobile-api.service';
 import { OfflineQueueService } from './offline-queue.service';
@@ -21,6 +25,11 @@ import { PlatformService } from './platform.service';
  * it, so no zero-minute row is left behind, and puts back the timer a
  * switch stopped. Undoing a stop starts the same job and operation again.
  * Offline, the last known timer stands in for the server's.
+ *
+ * With operation tracking switched on (read once per session), the
+ * person's operation timers are loaded alongside, and every stop names the
+ * timer it ends. With it off, every request is the one sent before
+ * operation tracking existed.
  */
 @Injectable({ providedIn: 'root' })
 export class MobileTimerService {
@@ -34,23 +43,59 @@ export class MobileTimerService {
   private readonly _active = signal<ActiveTimer | null>(null);
   readonly active = this._active.asReadonly();
 
+  private readonly _operationTracking = signal(false);
+  readonly operationTracking = this._operationTracking.asReadonly();
+
+  private readonly _operationTimers = signal<RunningTimer[]>([]);
+  readonly operationTimers = this._operationTimers.asReadonly();
+
   private loads = 0;
+  private trackingKnown = false;
 
   async refresh(): Promise<void> {
     const load = ++this.loads;
     if (!this.auth.isAuthenticated()) {
       this._active.set(null);
+      this._operationTimers.set([]);
+      this._operationTracking.set(false);
+      this.trackingKnown = false;
       return;
     }
     if (this.offline()) return;
-    const timer = await firstValueFrom(this.api.activeTimer()).catch(() => undefined);
-    if (timer === undefined || load !== this.loads) return;
-    this._active.set(timer ?? null);
+    const tracking = this.loadTracking();
+    if (!this._operationTracking()) {
+      const timer = await firstValueFrom(this.api.activeTimer()).catch(() => undefined);
+      await tracking;
+      if (timer === undefined || load !== this.loads) return;
+      this._active.set(timer ?? null);
+      if (!this._operationTracking()) return;
+    }
+    await tracking;
+    const timers = await firstValueFrom(this.api.activeTimers()).catch(() => undefined);
+    if (timers === undefined || load !== this.loads) return;
+    this._active.set(this.toActiveTimer(timers.find((t) => t.jobOperationId === null) ?? null));
+    this._operationTimers.set(timers.filter((t) => t.jobOperationId !== null));
   }
 
   clear(): void {
     this.loads++;
     this._active.set(null);
+  }
+
+  /**
+   * A refusal (the install has op-by-op completion turned off) counts as off
+   * for the session; a failed request is asked again on the next refresh.
+   */
+  private async loadTracking(): Promise<void> {
+    if (this.trackingKnown) return;
+    try {
+      const config = await firstValueFrom(this.api.operationsConfig());
+      this._operationTracking.set(config?.operationTracking === true);
+      this.trackingKnown = true;
+    } catch (err) {
+      this._operationTracking.set(false);
+      this.trackingKnown = err instanceof HttpErrorResponse && err.status >= 400 && err.status < 500;
+    }
   }
 
   runningOn(jobId: number | null | undefined): boolean {
@@ -61,7 +106,7 @@ export class MobileTimerService {
     return timer.jobNumber ?? this.translate.instant('timeTracking.timer');
   }
 
-  elapsedOf(timer: ActiveTimer, now = Date.now()): string {
+  elapsedOf(timer: { timerStart: Date | string }, now = Date.now()): string {
     const seconds = Math.max(0, Math.floor((now - new Date(timer.timerStart).getTime()) / 1000));
     const pad = (n: number): string => String(n).padStart(2, '0');
     return `${Math.floor(seconds / 3600)}:${pad(Math.floor(seconds / 60) % 60)}:${pad(seconds % 60)}`;
@@ -88,7 +133,7 @@ export class MobileTimerService {
     const stopped = this._active();
     let result: unknown;
     try {
-      result = await firstValueFrom(this.api.stopTimer());
+      result = await firstValueFrom(this.stopRequest(stopped ? { timeEntryId: stopped.timeEntryId } : undefined));
     } catch (err) {
       await this.refresh();
       throw err;
@@ -119,7 +164,9 @@ export class MobileTimerService {
     try {
       await firstValueFrom(this.api.deleteTimeEntry(entryId, token));
     } catch {
-      await firstValueFrom(this.api.stopTimer(token));
+      await firstValueFrom(this._operationTracking()
+        ? this.api.stopTimer(token, { timeEntryId: entryId })
+        : this.api.stopTimer(token));
     }
     if (this._active()?.timeEntryId === entryId) this.clear();
     if (previous) await this.restart(previous, token);
@@ -134,6 +181,32 @@ export class MobileTimerService {
       return;
     }
     if (outcome.stopped) await this.restart(outcome.stopped, token);
+  }
+
+  /** Stops one operation timer by its entry, whoever's job it is on. */
+  async stopOperation(timer: RunningTimer, token?: string): Promise<OperationTimerStopOutcome> {
+    let result: unknown;
+    try {
+      result = await firstValueFrom(this.api.stopTimer(token, { timeEntryId: timer.id }));
+    } catch (err) {
+      await this.refresh();
+      throw err;
+    }
+    this._operationTimers.update((timers) => timers.filter((t) => t.id !== timer.id));
+    return { stopped: timer, queuedId: isQueued(result) ? result.entryId : null };
+  }
+
+  /** Compensation for stopOperation: drop the queued stop, or start the same operation again. */
+  async undoStopOperation(outcome: OperationTimerStopOutcome, token?: string): Promise<void> {
+    if (outcome.queuedId !== null) {
+      await this.queue.remove(outcome.queuedId);
+      this._operationTimers.update((timers) => [outcome.stopped, ...timers]);
+      return;
+    }
+    const { jobId, operationId, entryType } = outcome.stopped;
+    if (jobId === null || operationId === null) return;
+    await firstValueFrom(this.api.startOperationTimer(jobId, operationId, entryType === 'Setup' ? 'Setup' : 'Run', token));
+    await this.refresh();
   }
 
   private async restart(timer: ActiveTimer, token?: string): Promise<void> {
@@ -157,7 +230,7 @@ export class MobileTimerService {
 
     const queuedIds: string[] = [];
     if (switching) {
-      const stopped = await firstValueFrom(this.api.stopTimer());
+      const stopped = await firstValueFrom(this.stopRequest({ timeEntryId: running.timeEntryId }));
       if (isQueued(stopped)) queuedIds.push(stopped.entryId);
       else this.clear();
     }
@@ -189,6 +262,20 @@ export class MobileTimerService {
       return;
     }
     await this.restart(previous).catch(() => this.refresh());
+  }
+
+  private stopRequest(target: TimerStopTarget | undefined): Observable<unknown> {
+    return this._operationTracking() && target ? this.api.stopTimer(undefined, target) : this.api.stopTimer();
+  }
+
+  private toActiveTimer(timer: RunningTimer | null): ActiveTimer | null {
+    return timer && {
+      timeEntryId: timer.id,
+      jobId: timer.jobId,
+      jobNumber: timer.jobNumber,
+      operationId: timer.operationId,
+      timerStart: new Date(timer.timerStart),
+    };
   }
 
   private offline(): boolean {

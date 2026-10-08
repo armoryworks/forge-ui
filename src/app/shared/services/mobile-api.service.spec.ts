@@ -122,4 +122,70 @@ describe('MobileApiService', () => {
     http.expectOne((r) => r.url === '/api/v1/mobile/lookup').flush([]);
     expect(enqueue).not.toHaveBeenCalled();
   });
+
+  it('stops with an empty body unless a target is named', () => {
+    service.stopTimer().subscribe();
+    expect(http.expectOne('/api/v1/time-tracking/timer/stop').request.body).toEqual({});
+
+    service.stopTimer('person-token', { timeEntryId: 31 }).subscribe();
+    const named = http.expectOne('/api/v1/time-tracking/timer/stop');
+    expect(named.request.body).toEqual({ timeEntryId: 31 });
+    expect(named.request.headers.get('Authorization')).toBe('Bearer person-token');
+
+    service.stopTimer(undefined, { jobId: 42 }).subscribe();
+    expect(http.expectOne('/api/v1/time-tracking/timer/stop').request.body).toEqual({ jobId: 42 });
+  });
+
+  it('reads the setting, the open timers and the operations quietly, and never queues them', () => {
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+
+    service.operationsConfig().subscribe();
+    service.activeTimers().subscribe();
+    service.jobOperations(42).subscribe();
+
+    for (const url of ['/api/v1/job-operations/config', '/api/v1/time-tracking/timers/active', '/api/v1/jobs/42/operations']) {
+      const req = http.expectOne(url);
+      expect(req.request.method).toBe('GET');
+      expect(req.request.context.get(SILENT_HTTP_ERRORS)).toBe(true);
+      req.flush({});
+    }
+    expect(enqueue).not.toHaveBeenCalled();
+  });
+
+  it('starts, stops and updates an operation with idempotency keys', () => {
+    service.startOperationTimer(42, 20).subscribe();
+    const start = http.expectOne('/api/v1/jobs/42/operations/20/timer/start');
+    expect(start.request.method).toBe('POST');
+    expect(start.request.body).toEqual({ entryType: 'Run' });
+    expect(start.request.headers.get('Idempotency-Key')).toBeTruthy();
+    start.flush({});
+
+    service.startOperationTimer(42, 20, 'Setup', 'person-token').subscribe();
+    const setup = http.expectOne('/api/v1/jobs/42/operations/20/timer/start');
+    expect(setup.request.body).toEqual({ entryType: 'Setup' });
+    expect(setup.request.headers.get('Authorization')).toBe('Bearer person-token');
+    setup.flush({});
+
+    service.stopOperationTimer(42, 20).subscribe();
+    const stop = http.expectOne('/api/v1/jobs/42/operations/20/timer/stop');
+    expect(stop.request.body).toEqual({});
+    stop.flush({});
+
+    service.updateOperationProgress(42, 20, { completedQuantity: 39, scrapQuantity: 1, status: 'Complete', expectedVersion: 3 }).subscribe();
+    const patch = http.expectOne('/api/v1/jobs/42/operations/20');
+    expect(patch.request.method).toBe('PATCH');
+    expect(patch.request.body).toEqual({ completedQuantity: 39, scrapQuantity: 1, status: 'Complete', expectedVersion: 3 });
+    expect(patch.request.context.get(SILENT_HTTP_ERRORS)).toBe(true);
+    patch.flush({});
+  });
+
+  it('queues operation changes offline like any other mutation', async () => {
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+
+    const result = await firstValueFrom(service.updateOperationProgress(42, 20, { completedQuantity: 5 }));
+
+    expect(isQueued(result)).toBe(true);
+    expect(enqueue).toHaveBeenCalledWith(
+      'PATCH', '/api/v1/jobs/42/operations/20', { completedQuantity: 5 }, 'Update operation 20 on job 42', expect.any(Object));
+  });
 });

@@ -7,6 +7,14 @@ import {
   ActiveTimer, ClockPunchResult, ClockState, JobAdvanceResult, JobNote, JobStatus, OnHand, QueuedOffline,
   ScanResolveResult, StartedTimeEntry, StockMoveRequest, StockMoveResult, UploadedJobFile,
 } from '../models/mobile-api.model';
+import { JobOperationProgress } from '../models/job-operation-progress.model';
+import { JobOperationTimerResult } from '../models/job-operation-timer-result.model';
+import { JobOperationTimerStop } from '../models/job-operation-timer-stop.model';
+import { JobOperations } from '../models/job-operations.model';
+import { JobOperationsConfig } from '../models/job-operations-config.model';
+import { RunningTimer } from '../models/running-timer.model';
+import { TimerStopTarget } from '../models/timer-stop-target.model';
+import { UpdateJobOperationProgressRequest } from '../models/update-job-operation-progress-request.model';
 import { SILENT_HTTP_ERRORS } from '../interceptors/silent-http-errors.token';
 import { InstanceService } from './instance.service';
 import { OfflineQueueService } from './offline-queue.service';
@@ -63,8 +71,53 @@ export class MobileApiService {
       jobId === null ? 'Start timer' : `Start timer on job ${jobId}`, token);
   }
 
-  stopTimer(token?: string): Observable<unknown> {
-    return this.mutate<unknown>('POST', '/api/v1/time-tracking/timer/stop', {}, 'Stop timer', token);
+  /** Without a target the server stops the caller's newest job-level timer, as it always has. */
+  stopTimer(token?: string, target?: TimerStopTarget): Observable<unknown> {
+    return this.mutate<unknown>('POST', '/api/v1/time-tracking/timer/stop', target ?? {}, 'Stop timer', token);
+  }
+
+  /** All of the caller's open timers, job-level and per operation. A failure is not shown. */
+  activeTimers(): Observable<RunningTimer[]> {
+    return this.http.get<RunningTimer[]>('/api/v1/time-tracking/timers/active', {
+      context: new HttpContext().set(SILENT_HTTP_ERRORS, true),
+    });
+  }
+
+  /** Whether operation tracking is switched on. A refusal is not shown: the caller treats it as off. */
+  operationsConfig(): Observable<JobOperationsConfig> {
+    return this.http.get<JobOperationsConfig>('/api/v1/job-operations/config', {
+      context: new HttpContext().set(SILENT_HTTP_ERRORS, true),
+    });
+  }
+
+  jobOperations(jobId: number): Observable<JobOperations> {
+    return this.http.get<JobOperations>(`/api/v1/jobs/${jobId}/operations`, {
+      context: new HttpContext().set(SILENT_HTTP_ERRORS, true),
+    });
+  }
+
+  startOperationTimer(
+    jobId: number, operationId: number, entryType: 'Run' | 'Setup' = 'Run', token?: string,
+  ): Observable<JobOperationTimerResult | QueuedOffline> {
+    return this.mutate<JobOperationTimerResult>(
+      'POST', `/api/v1/jobs/${jobId}/operations/${operationId}/timer/start`, { entryType },
+      `Start operation ${operationId} on job ${jobId}`, token, true);
+  }
+
+  /** Also the compensating action for startOperationTimer. */
+  stopOperationTimer(jobId: number, operationId: number, token?: string): Observable<JobOperationTimerStop | QueuedOffline> {
+    return this.mutate<JobOperationTimerStop>(
+      'POST', `/api/v1/jobs/${jobId}/operations/${operationId}/timer/stop`, {},
+      `Stop operation ${operationId} on job ${jobId}`, token, true);
+  }
+
+  /** Quantities are absolute, so the same call with the earlier values is the compensating action. */
+  updateOperationProgress(
+    jobId: number, operationId: number, request: UpdateJobOperationProgressRequest, token?: string,
+  ): Observable<JobOperationProgress | QueuedOffline> {
+    return this.mutate<JobOperationProgress>(
+      'PATCH', `/api/v1/jobs/${jobId}/operations/${operationId}`, request,
+      `Update operation ${operationId} on job ${jobId}`, token, true);
   }
 
   /**

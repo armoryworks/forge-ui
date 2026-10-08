@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { TranslateService } from '@ngx-translate/core';
 
 import { ActiveTimer } from '../../shared/models/mobile-api.model';
+import { RunningTimer } from '../../shared/models/running-timer.model';
 import { AppInfoService } from '../../shared/services/app-info.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { CapabilityService } from '../../shared/services/capability.service';
@@ -22,20 +23,32 @@ interface ShellInternals {
   elapsed: Signal<string>;
   runningLabel: Signal<string>;
   stopTimer(): Promise<void>;
+  operationElapsed(running: RunningTimer): string;
+  stopOperation(running: RunningTimer): Promise<void>;
 }
+
+const deburr: RunningTimer = {
+  id: 31, jobId: 42, jobNumber: 'JOB-42', userId: 1, operationId: 20, jobOperationId: 8,
+  operationStepNumber: 20, operationTitle: 'Deburr', entryType: 'Run', timerStart: '2026-10-07T11:00:00Z',
+};
 
 describe('MobileAppShellComponent timer strip', () => {
   let shared: boolean;
   const token = signal<string | null>('session-token');
   const active = signal<ActiveTimer | null>(null);
+  const operationTimers = signal<RunningTimer[]>([]);
   const lastSyncResult = signal<object | null>(null);
   const timer = {
     active,
+    operationTimers,
     refresh: vi.fn(),
     stop: vi.fn(),
     undoStop: vi.fn(),
+    stopOperation: vi.fn(),
+    undoStopOperation: vi.fn(),
     labelOf: (running: ActiveTimer) => running.jobNumber ?? 'timeTracking.timer',
-    elapsedOf: (running: ActiveTimer, now: number) => `${Math.floor((now - new Date(running.timerStart).getTime()) / 1000)}s`,
+    elapsedOf: (running: { timerStart: Date | string }, now: number) =>
+      `${Math.floor((now - new Date(running.timerStart).getTime()) / 1000)}s`,
     stoppedMessage: vi.fn(() => 'stopped-message'),
   };
   const hub = {
@@ -57,6 +70,9 @@ describe('MobileAppShellComponent timer strip', () => {
     shared = false;
     token.set('session-token');
     active.set(null);
+    operationTimers.set([]);
+    timer.stopOperation.mockReset();
+    timer.undoStopOperation.mockReset().mockResolvedValue(undefined);
     lastSyncResult.set(null);
     timer.stoppedMessage.mockClear();
     timer.refresh.mockReset().mockResolvedValue(undefined);
@@ -212,5 +228,48 @@ describe('MobileAppShellComponent timer strip', () => {
     await shell.stopTimer();
 
     expect(snackbar.error).toHaveBeenCalledOnce();
+  });
+
+  it('ticks each running operation timer even with no job-level timer', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-10-07T11:00:05Z'));
+    const shell = create();
+
+    operationTimers.set([deburr]);
+    TestBed.tick();
+    expect(shell.operationElapsed(deburr)).toBe('5s');
+
+    vi.advanceTimersByTime(3000);
+    expect(shell.operationElapsed(deburr)).toBe('8s');
+  });
+
+  it('stops one operation timer, names it, and undoes as the person on a shared device', async () => {
+    shared = true;
+    identified.set(true);
+    token.set('person-token');
+    const outcome = { stopped: deburr, queuedId: null };
+    timer.stopOperation.mockResolvedValue(outcome);
+    const shell = create();
+
+    await shell.stopOperation(deburr);
+
+    expect(timer.stopOperation).toHaveBeenCalledWith(deburr);
+    expect(instant).toHaveBeenCalledWith('mobileApp.operations.timerLabel', { jobNumber: 'JOB-42', step: 20, title: 'Deburr' });
+    const [message, compensate, closed] = offer.mock.calls[0];
+    expect(message).toBe('mobileApp.operations.stopped');
+    await compensate();
+    expect(timer.undoStopOperation).toHaveBeenCalledWith(outcome, 'person-token');
+    closed();
+    expect(identity.clear).toHaveBeenCalledOnce();
+  });
+
+  it('reports a failed operation Stop', async () => {
+    timer.stopOperation.mockRejectedValue(new Error('offline'));
+    const shell = create();
+
+    await shell.stopOperation(deburr);
+
+    expect(snackbar.error).toHaveBeenCalledOnce();
+    expect(offer).not.toHaveBeenCalled();
   });
 });

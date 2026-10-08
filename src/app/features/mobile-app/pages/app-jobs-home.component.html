@@ -1,4 +1,23 @@
 <div class="jobs-home" data-testid="mobile-app-jobs-home">
+  @if (runningJobs().length) {
+    <section class="jobs-home__running" [attr.aria-label]="'mobileApp.operations.runningNow' | translate">
+      <span class="jobs-home__heading">{{ 'mobileApp.operations.runningNow' | translate }}</span>
+      @for (job of runningJobs(); track job.jobId) {
+        <a class="jobs-home__job" [routerLink]="['/app/jobs', job.jobId]" [attr.data-testid]="'jobs-home-running-' + job.jobId">
+          <span class="jobs-home__job-number">{{ job.jobNumber }}</span>
+          <span class="jobs-home__job-steps">
+            @if (job.jobLevel) {
+              <span class="jobs-home__job-step">{{ 'mobileApp.operations.jobTimer' | translate }}</span>
+            }
+            @for (step of job.steps; track $index) {
+              <span class="jobs-home__job-step">{{ step }}</span>
+            }
+          </span>
+          <span class="material-icons-outlined" aria-hidden="true">chevron_right</span>
+        </a>
+      }
+    </section>
+  }
   <span class="material-icons-outlined jobs-home__icon" aria-hidden="true">work</span>
   <p class="jobs-home__text">{{ 'mobileApp.jobs.homeHint' | translate }}</p>
   <a class="jobs-home__link" routerLink="/app/scan">{{ 'mobileApp.tabs.scan' | translate }}</a>

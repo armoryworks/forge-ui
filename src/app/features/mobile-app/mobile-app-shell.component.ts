@@ -5,6 +5,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { RunningTimer } from '../../shared/models/running-timer.model';
 import { CapabilityService } from '../../shared/services/capability.service';
 import { CrashReportingService } from '../../shared/services/crash-reporting.service';
 import { AppInfoService } from '../../shared/services/app-info.service';
@@ -31,7 +32,8 @@ interface MobileAppTab {
  * Native-shell chrome: top bar + five-tab bottom bar (Scan, Clock, Jobs,
  * Move, Lookup), each tab shown only while its CAP-MOBILE-* flag is on for
  * this instance. Account lives behind the gear, never a tab. While a timer
- * runs, a strip above the tab bar shows it ticking with a Stop button. On a
+ * runs, a strip above the tab bar shows it ticking with a Stop button, one
+ * row per running operation timer when operation tracking is on. On a
  * shared device, a Stop from the strip ends the person's identity once its
  * undo toast closes, and the undo runs with the token captured beforehand.
  */
@@ -73,6 +75,7 @@ export class MobileAppShellComponent {
 
   private readonly now = signal(Date.now());
   protected readonly stopping = signal(false);
+  protected readonly stoppingOperation = signal<number | null>(null);
 
   protected readonly runningLabel = computed(() => {
     const running = this.timer.active();
@@ -104,7 +107,7 @@ export class MobileAppShellComponent {
     });
 
     effect((onCleanup) => {
-      if (!this.timer.active()) return;
+      if (!this.timer.active() && this.timer.operationTimers().length === 0) return;
       untracked(() => this.now.set(Date.now()));
       const tick = setInterval(() => this.now.set(Date.now()), 1000);
       onCleanup(() => clearInterval(tick));
@@ -129,6 +132,36 @@ export class MobileAppShellComponent {
       this.snackbar.error(this.translate.instant('mobileApp.jobs.actionFailed'));
     } finally {
       this.stopping.set(false);
+    }
+  }
+
+  protected operationLabel(running: RunningTimer): string {
+    return this.translate.instant('mobileApp.operations.timerLabel', {
+      jobNumber: running.jobNumber ?? '',
+      step: running.operationStepNumber ?? '',
+      title: running.operationTitle ?? '',
+    });
+  }
+
+  protected operationElapsed(running: RunningTimer): string {
+    return this.timer.elapsedOf(running, this.now());
+  }
+
+  protected async stopOperation(running: RunningTimer): Promise<void> {
+    if (this.stoppingOperation() !== null) return;
+    this.stoppingOperation.set(running.id);
+    try {
+      const personToken = this.sharedToken();
+      const outcome = await this.timer.stopOperation(running);
+      this.undo.offer(
+        this.translate.instant('mobileApp.operations.stopped', { name: this.operationLabel(running) }),
+        () => this.timer.undoStopOperation(outcome, personToken),
+        personToken ? () => this.identity.clear() : undefined,
+      );
+    } catch {
+      this.snackbar.error(this.translate.instant('mobileApp.jobs.actionFailed'));
+    } finally {
+      this.stoppingOperation.set(null);
     }
   }
 

@@ -66,6 +66,10 @@ $tab-min-target: 56px;
     border-top: $border-width-accent solid var(--primary);
   }
 
+  &__timer + &__timer--operation {
+    border-top-width: $border-width-thin;
+  }
+
   &__timer-icon {
     color: var(--primary);
     font-size: $icon-size-xl;

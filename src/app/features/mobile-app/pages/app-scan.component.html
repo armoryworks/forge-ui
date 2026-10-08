@@ -57,6 +57,9 @@
           (dismissed)="dismiss()"
           (notYou)="notYou()"
         />
+        @if (operationTracking() && resolved.kind === 'job' && resolved.id !== null) {
+          <app-job-operations [jobId]="resolved.id" [compact]="true" (moveRequested)="onAction('move')" />
+        }
       }
     </div>
   }

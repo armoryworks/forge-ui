@@ -34,6 +34,10 @@
       </div>
     </dl>
 
+    @if (operationTracking()) {
+      <app-job-operations [jobId]="job.id" (moveRequested)="advance()" />
+    }
+
     <section class="job-status__timeline" [attr.aria-label]="'mobileApp.jobs.recent' | translate">
       @for (entry of job.recentActivity; track entry.id) {
         <div class="job-status__entry">

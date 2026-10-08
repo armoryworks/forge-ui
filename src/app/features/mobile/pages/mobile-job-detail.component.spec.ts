@@ -103,6 +103,7 @@ describe('MobileJobDetailComponent', () => {
     timerButton().click();
     const stop = http.expectOne('/api/v1/time-tracking/timer/stop');
     expect(stop.request.method).toBe('POST');
+    expect(stop.request.body).toEqual({ timeEntryId: 77 });
     stop.flush({});
     http.expectOne('/api/v1/time-tracking/timer/active').flush(null, { status: 204, statusText: 'No Content' });
     fixture.detectChanges();
@@ -120,7 +121,9 @@ describe('MobileJobDetailComponent', () => {
     expect(timerButton().textContent).toContain('Switch Timer Here');
 
     timerButton().click();
-    http.expectOne('/api/v1/time-tracking/timer/stop').flush({});
+    const stopOther = http.expectOne('/api/v1/time-tracking/timer/stop');
+    expect(stopOther.request.body).toEqual({ timeEntryId: 77 });
+    stopOther.flush({});
     const start = http.expectOne('/api/v1/time-tracking/timer/start');
     expect(start.request.body).toEqual({ jobId: 5 });
     start.flush({ id: 78 });
@@ -135,7 +138,9 @@ describe('MobileJobDetailComponent', () => {
     render(timerOn(9, 'J-2001'));
 
     el().querySelector<HTMLButtonElement>('[data-testid="mjob-timer-elsewhere-stop-btn"]')!.click();
-    http.expectOne('/api/v1/time-tracking/timer/stop').flush({});
+    const stop = http.expectOne('/api/v1/time-tracking/timer/stop');
+    expect(stop.request.body).toEqual({ timeEntryId: 77 });
+    stop.flush({});
     http.expectOne('/api/v1/time-tracking/timer/active').flush(null, { status: 204, statusText: 'No Content' });
     fixture.detectChanges();
 

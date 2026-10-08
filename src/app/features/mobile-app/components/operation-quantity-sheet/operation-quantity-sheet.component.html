@@ -1,0 +1,54 @@
+<div class="qty-sheet" role="dialog" [attr.aria-label]="label()" data-testid="operation-quantity-sheet">
+  <span class="qty-sheet__title">{{ label() }}</span>
+
+  <span class="qty-sheet__label">{{ 'mobileApp.operations.goodPieces' | translate: { total: jobQuantity() } }}</span>
+  <div class="qty-sheet__stepper">
+    <button type="button" class="qty-sheet__step qty-sheet__step--small" [attr.aria-label]="'mobileApp.operations.lessTen' | translate" data-testid="operation-qty-minus-10" (click)="bumpGood(-10)">−10</button>
+    <button type="button" class="qty-sheet__step" [attr.aria-label]="'mobileApp.move.less' | translate" data-testid="operation-qty-minus" (click)="bumpGood(-1)">−</button>
+    <span class="qty-sheet__value" data-testid="operation-qty-good">{{ goodCount() }}</span>
+    <button type="button" class="qty-sheet__step" [attr.aria-label]="'mobileApp.move.more' | translate" data-testid="operation-qty-plus" (click)="bumpGood(1)">+</button>
+    <button type="button" class="qty-sheet__step qty-sheet__step--small" [attr.aria-label]="'mobileApp.operations.moreTen' | translate" data-testid="operation-qty-plus-10" (click)="bumpGood(10)">+10</button>
+  </div>
+
+  @if (scrapOpen()) {
+    <span class="qty-sheet__label">{{ 'mobileApp.operations.scrap' | translate }}</span>
+    <div class="qty-sheet__stepper">
+      <button type="button" class="qty-sheet__step" [attr.aria-label]="'mobileApp.move.less' | translate" data-testid="operation-scrap-minus" (click)="bumpScrap(-1)">−</button>
+      <span class="qty-sheet__value qty-sheet__value--scrap" data-testid="operation-qty-scrap">{{ scrapCount() }}</span>
+      <button type="button" class="qty-sheet__step" [attr.aria-label]="'mobileApp.move.more' | translate" data-testid="operation-scrap-plus" (click)="bumpScrap(1)">+</button>
+    </div>
+  } @else {
+    <button type="button" class="qty-sheet__link" data-testid="operation-scrap-open" (click)="openScrap()">
+      {{ 'mobileApp.operations.addScrap' | translate }}
+    </button>
+  }
+
+  @if (over()) {
+    <p class="qty-sheet__warning" role="alert" data-testid="operation-qty-over">
+      {{ 'mobileApp.operations.overQuantity' | translate: { good: goodCount(), scrap: scrapCount(), total: jobQuantity() } }}
+    </p>
+  }
+
+  <button
+    type="button"
+    class="qty-sheet__primary"
+    [disabled]="over() || busy()"
+    data-testid="operation-qty-done"
+    (click)="submit(true)"
+  >
+    <span class="material-icons-outlined" aria-hidden="true">check</span>
+    {{ 'mobileApp.operations.doneCount' | translate: { count: goodCount(), total: jobQuantity() } }}
+  </button>
+  <button
+    type="button"
+    class="qty-sheet__secondary"
+    [disabled]="over() || busy()"
+    data-testid="operation-qty-record"
+    (click)="submit(false)"
+  >
+    {{ 'mobileApp.operations.recordCount' | translate: { count: goodCount() } }}
+  </button>
+  <button type="button" class="qty-sheet__dismiss" data-testid="operation-qty-cancel" (click)="cancelled.emit()">
+    {{ 'common.cancel' | translate }}
+  </button>
+</div>

@@ -17,6 +17,7 @@ import { SharedIdentityService } from '../../../shared/services/shared-identity.
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { UndoService } from '../../../shared/services/undo.service';
 import { IdentityPromptComponent } from '../identity/identity-prompt.component';
+import { JobOperationsComponent } from '../components/job-operations/job-operations.component';
 
 type PendingAction = 'advance' | 'note' | 'photo' | 'timer';
 
@@ -25,12 +26,14 @@ type PendingAction = 'advance' | 'note' | 'photo' | 'timer';
  * column, due date, next step, last three timeline entries. Advancing asks
  * nothing and shows an undo toast; notes come from voice or a preset
  * picker; photos from the camera; the timer button reads Stop while the
- * person's timer runs on this job. Never a keyboard.
+ * person's timer runs on this job. With operation tracking on, the job's
+ * routing operations are listed with their own timers and counts. Never a
+ * keyboard.
  */
 @Component({
   selector: 'app-app-job-status',
   standalone: true,
-  imports: [DatePipe, TranslatePipe, IdentityPromptComponent],
+  imports: [DatePipe, TranslatePipe, IdentityPromptComponent, JobOperationsComponent],
   templateUrl: './app-job-status.component.html',
   styleUrl: './app-job-status.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -60,6 +63,7 @@ export class AppJobStatusComponent {
   protected readonly listening = signal(false);
   protected readonly identifying = signal(false);
   protected readonly timerRunningHere = computed(() => this.timer.runningOn(this.job()?.id));
+  protected readonly operationTracking = computed(() => this.timer.operationTracking());
 
   protected readonly voiceSupported = computed(() =>
     typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window));

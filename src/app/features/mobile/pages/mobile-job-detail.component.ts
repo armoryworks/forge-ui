@@ -98,10 +98,11 @@ export class MobileJobDetailComponent implements OnInit {
   }
 
   protected stopTimer(): void {
-    if (!this.activeTimer() || this.submitting()) return;
+    const timer = this.activeTimer();
+    if (!timer || this.submitting()) return;
 
     this.submitting.set(true);
-    this.http.post('/api/v1/time-tracking/timer/stop', {}).subscribe({
+    this.http.post('/api/v1/time-tracking/timer/stop', { timeEntryId: timer.timeEntryId }).subscribe({
       next: () => {
         this.submitting.set(false);
         this.snackbar.success('Timer stopped');
@@ -123,7 +124,8 @@ export class MobileJobDetailComponent implements OnInit {
     const previous = this.activeTimer();
     let stoppedPrevious = false;
     const stopOther: Observable<unknown> = previous
-      ? this.http.post('/api/v1/time-tracking/timer/stop', {}).pipe(tap(() => (stoppedPrevious = true)))
+      ? this.http.post('/api/v1/time-tracking/timer/stop', { timeEntryId: previous.timeEntryId })
+        .pipe(tap(() => (stoppedPrevious = true)))
       : of(null);
     stopOther.pipe(
       switchMap(() => this.http.post('/api/v1/time-tracking/timer/start', { jobId: j.id })),

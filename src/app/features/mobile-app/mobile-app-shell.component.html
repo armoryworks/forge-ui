@@ -37,6 +37,24 @@
     </div>
   }
 
+  @for (running of timer.operationTimers(); track running.id) {
+    <div class="app-shell__timer app-shell__timer--operation" data-testid="mobile-app-operation-timer">
+      <span class="material-icons-outlined app-shell__timer-icon" aria-hidden="true">precision_manufacturing</span>
+      <span class="app-shell__timer-text">{{ operationLabel(running) }} {{ operationElapsed(running) }}</span>
+      <button
+        type="button"
+        class="app-shell__timer-stop"
+        [disabled]="stoppingOperation() !== null"
+        [attr.aria-label]="'mobileApp.operations.stopNamed' | translate: { name: operationLabel(running) }"
+        [attr.data-testid]="'mobile-app-operation-timer-stop-' + running.id"
+        (click)="stopOperation(running)"
+      >
+        <span class="material-icons-outlined" aria-hidden="true">stop</span>
+        {{ 'mobileApp.timer.stop' | translate }}
+      </button>
+    </div>
+  }
+
   <nav class="app-shell__nav" [attr.aria-label]="'mobileApp.navLabel' | translate">
     @for (tab of tabs(); track tab.path) {
       <a

@@ -1,0 +1,148 @@
+<section
+  class="ops"
+  [class.ops--compact]="compact()"
+  [attr.aria-label]="'mobileApp.operations.title' | translate"
+  data-testid="job-operations"
+>
+  @if (identifying()) {
+    <app-identity-prompt (identified)="onIdentified()" (cancelled)="onIdentityCancelled()" />
+  } @else if (editing(); as edit) {
+    <app-operation-quantity-sheet
+      [label]="edit.row.stepNumber + ' ' + edit.row.title"
+      [jobQuantity]="data()?.jobQuantity ?? 0"
+      [completed]="edit.row.completedQuantity"
+      [scrap]="edit.row.scrapQuantity"
+      [finishing]="edit.finishing"
+      [busy]="busy()"
+      (recorded)="record($event)"
+      (cancelled)="closeQuantity()"
+    />
+  } @else {
+    <header class="ops__head">
+      <span class="ops__heading">{{ 'mobileApp.operations.title' | translate }}</span>
+      @if (data(); as ops) {
+        <span class="ops__qty" data-testid="job-operations-quantity">
+          {{ 'mobileApp.operations.jobQuantity' | translate: { qty: ops.jobQuantity } }}
+        </span>
+      }
+    </header>
+
+    @if (loading()) {
+      <p class="ops__hint" role="status">{{ 'common.loading' | translate }}</p>
+    } @else if (failed()) {
+      <p class="ops__hint" role="alert">{{ 'mobileApp.operations.loadFailed' | translate }}</p>
+    } @else {
+      @if (notice(); as message) {
+        <p class="ops__notice" role="status" data-testid="job-operations-notice">{{ message }}</p>
+      }
+
+      @if (moveOffered()) {
+        <div class="ops__all-done" data-testid="job-operations-all-done">
+          <span>{{ 'mobileApp.operations.allDone' | translate }}</span>
+          <button type="button" class="ops__move" data-testid="job-operations-move" (click)="requestMove()">
+            <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+            {{ 'mobileApp.operations.moveNext' | translate }}
+          </button>
+        </div>
+      }
+
+      <div class="ops__list">
+        @for (view of rows(); track view.key) {
+          <div
+            class="ops__row"
+            [class.ops__row--running]="view.mine !== null"
+            [class.ops__row--done]="view.done"
+            [attr.data-testid]="'job-operation-' + view.row.stepNumber"
+          >
+            <div class="ops__info">
+              <span class="ops__step">{{ view.row.stepNumber }}</span>
+              <span class="ops__title">{{ view.row.title }}</span>
+              <span
+                class="ops__chip"
+                [class.ops__chip--active]="view.row.status === 'InProgress'"
+                [class.ops__chip--done]="view.done"
+              >{{ 'mobileApp.operations.status.' + view.row.status | translate }}</span>
+            </div>
+            <div class="ops__meta">
+              <span class="ops__count" [attr.data-testid]="'job-operation-count-' + view.row.stepNumber">
+                {{ view.row.completedQuantity }} / {{ data()?.jobQuantity }}
+              </span>
+              @if (view.elapsed; as elapsed) {
+                <span class="ops__elapsed" [attr.data-testid]="'job-operation-elapsed-' + view.row.stepNumber">{{ elapsed }}</span>
+              }
+              @if (view.others.length) {
+                <span class="ops__others" [attr.aria-label]="'mobileApp.operations.othersRunning' | translate: { names: view.others.join(', ') }">
+                  <span class="material-icons-outlined" aria-hidden="true">group</span>
+                  {{ view.others.join(' ') }}
+                </span>
+              }
+            </div>
+            @if (view.actionable) {
+              <div class="ops__actions">
+                @if (view.mine) {
+                  <button
+                    type="button"
+                    class="ops__btn ops__btn--primary"
+                    [disabled]="busy()"
+                    [attr.data-testid]="'job-operation-stop-' + view.row.stepNumber"
+                    (click)="stop(view)"
+                  >
+                    <span class="material-icons-outlined" aria-hidden="true">stop</span>
+                    {{ 'mobileApp.operations.stop' | translate }}
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="ops__btn ops__btn--primary"
+                    [disabled]="busy()"
+                    [attr.data-testid]="'job-operation-start-' + view.row.stepNumber"
+                    (click)="start(view)"
+                  >
+                    <span class="material-icons-outlined" aria-hidden="true">play_arrow</span>
+                    {{ 'mobileApp.operations.start' | translate }}
+                  </button>
+                  @if (!compact()) {
+                    <button
+                      type="button"
+                      class="ops__btn"
+                      [disabled]="busy()"
+                      [attr.data-testid]="'job-operation-setup-' + view.row.stepNumber"
+                      (click)="start(view, 'Setup')"
+                    >
+                      <span class="material-icons-outlined" aria-hidden="true">build</span>
+                      {{ 'mobileApp.operations.startSetup' | translate }}
+                    </button>
+                  }
+                }
+                <button
+                  type="button"
+                  class="ops__btn"
+                  [disabled]="busy()"
+                  [attr.data-testid]="'job-operation-qty-' + view.row.stepNumber"
+                  (click)="openQuantity(view, false)"
+                >
+                  <span class="material-icons-outlined" aria-hidden="true">exposure_plus_1</span>
+                  {{ 'mobileApp.operations.addQuantity' | translate }}
+                </button>
+                <button
+                  type="button"
+                  class="ops__btn"
+                  [disabled]="busy()"
+                  [attr.data-testid]="'job-operation-done-' + view.row.stepNumber"
+                  (click)="openQuantity(view, true)"
+                >
+                  <span class="material-icons-outlined" aria-hidden="true">check</span>
+                  {{ 'mobileApp.operations.done' | translate }}
+                </button>
+              </div>
+            }
+          </div>
+        } @empty {
+          <p class="ops__hint">
+            {{ (compact() && (data()?.operations ?? []).length > 0 ? 'mobileApp.operations.allDone' : 'mobileApp.operations.none') | translate }}
+          </p>
+        }
+      </div>
+    }
+  }
+</section>

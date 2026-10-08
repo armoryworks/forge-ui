@@ -1,4 +1,5 @@
 @use 'styles/variables' as *;
+@use 'styles/mixins' as *;
 
 :host { flex: 1; display: flex; flex-direction: column; }
 
@@ -11,6 +12,53 @@
   gap: $sp-lg;
   padding: $sp-xl;
   text-align: center;
+
+  &__running {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+    text-align: left;
+  }
+
+  &__heading {
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  &__job {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    min-height: 64px;
+    padding: $sp-md;
+    background: var(--surface);
+    border-left: $border-width-accent solid var(--primary);
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  &__job-number {
+    flex-shrink: 0;
+    font-family: $font-family-mono;
+    font-size: $font-size-lg;
+    font-weight: 700;
+  }
+
+  &__job-steps {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-xs $sp-md;
+    font-size: $font-size-md;
+    color: var(--text-secondary);
+  }
+
+  &__job-step { @include truncate; }
 
   &__icon { font-size: $icon-size-hero; color: var(--text-muted); }
   &__text { margin: 0; font-size: $font-size-md; color: var(--text-muted); }

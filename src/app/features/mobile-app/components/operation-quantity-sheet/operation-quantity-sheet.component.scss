@@ -1,0 +1,120 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.qty-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-lg;
+  padding-bottom: calc(#{$sp-lg} + env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-top: $border-width-accent solid var(--primary);
+
+  &__title {
+    @include truncate;
+    font-size: $font-size-kpi;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &__label {
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  &__stepper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $sp-md;
+  }
+
+  &__step {
+    @include flex-center;
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    background: var(--bg);
+    border: $border-width-thin solid var(--border);
+    color: var(--text);
+    font-family: $font-family-primary;
+    font-size: $font-size-heading;
+    cursor: pointer;
+
+    &--small {
+      width: 52px;
+      font-size: $font-size-lg;
+      font-weight: 600;
+    }
+  }
+
+  &__value {
+    min-width: 72px;
+    text-align: center;
+    font-family: $font-family-mono;
+    font-size: 44px;
+    font-weight: 700;
+    color: var(--text);
+
+    &--scrap { color: var(--warning); }
+  }
+
+  &__link {
+    align-self: flex-start;
+    min-height: 44px;
+    padding: 0;
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-family: $font-family-primary;
+    font-size: $font-size-md;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  &__warning {
+    margin: 0;
+    font-size: $font-size-md;
+    color: var(--error);
+  }
+
+  &__primary,
+  &__secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $sp-md;
+    min-height: 64px;
+    border: $border-width-thin solid var(--primary);
+    font-family: $font-family-primary;
+    font-size: $font-size-lg;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:disabled { opacity: 0.5; cursor: default; }
+  }
+
+  &__primary {
+    background: var(--primary);
+    color: var(--bg);
+  }
+
+  &__secondary {
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  &__dismiss {
+    min-height: 56px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: $font-family-primary;
+    font-size: $font-size-md;
+    cursor: pointer;
+  }
+}

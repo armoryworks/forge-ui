@@ -1,10 +1,12 @@
 import { TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 
 import { Subject, of, throwError } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 import { ActiveTimer } from '../models/mobile-api.model';
+import { RunningTimer } from '../models/running-timer.model';
 import { AuthService } from './auth.service';
 import { MobileApiService } from './mobile-api.service';
 import { MobileTimerService } from './mobile-timer.service';
@@ -15,6 +17,14 @@ function running(jobId: number, jobNumber: string, timeEntryId = 3): ActiveTimer
   return { timeEntryId, jobId, jobNumber, operationId: null, timerStart: new Date('2026-10-07T10:00:00Z') };
 }
 
+function entry(id: number, jobOperationId: number | null, entryType = 'Run'): RunningTimer {
+  return {
+    id, jobId: 42, jobNumber: 'JOB-42', userId: 1, operationId: jobOperationId === null ? null : 20,
+    jobOperationId, operationStepNumber: jobOperationId === null ? null : 20,
+    operationTitle: jobOperationId === null ? null : 'Deburr', entryType, timerStart: '2026-10-07T10:00:00Z',
+  };
+}
+
 describe('MobileTimerService', () => {
   let service: MobileTimerService;
   let authenticated: boolean;
@@ -23,6 +33,9 @@ describe('MobileTimerService', () => {
     startTimer: vi.fn(),
     stopTimer: vi.fn(),
     deleteTimeEntry: vi.fn(),
+    operationsConfig: vi.fn(),
+    activeTimers: vi.fn(),
+    startOperationTimer: vi.fn(),
   };
   const remove = vi.fn();
   const open = vi.fn();
@@ -35,6 +48,9 @@ describe('MobileTimerService', () => {
       of({ id: 11, jobId: 42, jobNumber: 'JOB-42', timerStart: new Date('2026-10-07T11:00:00Z') }));
     api.stopTimer.mockReset().mockReturnValue(of({}));
     api.deleteTimeEntry.mockReset().mockReturnValue(of(null));
+    api.operationsConfig.mockReset().mockReturnValue(of({ operationTracking: false }));
+    api.activeTimers.mockReset().mockReturnValue(of([]));
+    api.startOperationTimer.mockReset().mockReturnValue(of({}));
     remove.mockReset().mockResolvedValue(undefined);
     open.mockReset().mockReturnValue({ afterClosed: () => of(true) });
     instant.mockClear();
@@ -319,5 +335,105 @@ describe('MobileTimerService', () => {
     expect(remove).toHaveBeenCalledWith('q-stop');
     expect(api.startTimer).toHaveBeenCalledOnce();
     expect(service.active()?.jobId).toBe(7);
+  });
+
+  describe('with operation tracking off', () => {
+    it('sends the stop it always sent, with no body target', async () => {
+      api.activeTimer.mockReturnValue(of(running(42, 'JOB-42')));
+      await service.refresh();
+
+      await service.stop();
+      await service.toggle(7, 'JOB-7');
+      api.deleteTimeEntry.mockReturnValue(throwError(() => new Error('409')));
+      await service.undoStart(11, null, 'person-token');
+
+      expect(api.stopTimer.mock.calls).toEqual([[], [], ['person-token']]);
+      expect(api.activeTimers).not.toHaveBeenCalled();
+      expect(service.operationTracking()).toBe(false);
+    });
+
+    it('asks for the setting once per session', async () => {
+      await service.refresh();
+      await service.refresh();
+      expect(api.operationsConfig).toHaveBeenCalledOnce();
+
+      authenticated = false;
+      await service.refresh();
+      authenticated = true;
+      await service.refresh();
+      expect(api.operationsConfig).toHaveBeenCalledTimes(2);
+    });
+
+    it('treats a refusal as off for the session, and asks again after a failed request', async () => {
+      api.operationsConfig.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 0 })));
+      await service.refresh();
+      await service.refresh();
+      expect(api.operationsConfig).toHaveBeenCalledTimes(2);
+
+      api.operationsConfig.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 403 })));
+      await service.refresh();
+      await service.refresh();
+      expect(api.operationsConfig).toHaveBeenCalledTimes(3);
+      expect(service.operationTracking()).toBe(false);
+    });
+  });
+
+  describe('with operation tracking on', () => {
+    beforeEach(async () => {
+      api.operationsConfig.mockReturnValue(of({ operationTracking: true }));
+      api.activeTimers.mockReturnValue(of([entry(31, 8), entry(9, null)]));
+      await service.refresh();
+    });
+
+    it('loads every open timer and keeps the job-level one as the active timer', async () => {
+      expect(service.operationTracking()).toBe(true);
+      expect(service.active()).toEqual({
+        timeEntryId: 9, jobId: 42, jobNumber: 'JOB-42', operationId: null, timerStart: new Date('2026-10-07T10:00:00Z'),
+      });
+      expect(service.operationTimers().map((t) => t.id)).toEqual([31]);
+
+      api.activeTimer.mockClear();
+      await service.refresh();
+      expect(api.activeTimer).not.toHaveBeenCalled();
+    });
+
+    it('names the job-level timer it stops, switches away from, or falls back to stopping', async () => {
+      await service.stop();
+      expect(api.stopTimer).toHaveBeenLastCalledWith(undefined, { timeEntryId: 9 });
+
+      api.activeTimer.mockReturnValue(of(running(7, 'JOB-7', 4)));
+      await service.toggle(42, 'JOB-42');
+      expect(api.stopTimer).toHaveBeenLastCalledWith(undefined, { timeEntryId: 4 });
+
+      api.deleteTimeEntry.mockReturnValue(throwError(() => new Error('409')));
+      await service.undoStart(11, null, 'person-token');
+      expect(api.stopTimer).toHaveBeenLastCalledWith('person-token', { timeEntryId: 11 });
+    });
+
+    it('stops one operation timer by its entry and starts it again on undo', async () => {
+      const setup = entry(31, 8, 'Setup');
+
+      const outcome = await service.stopOperation(setup, 'person-token');
+
+      expect(api.stopTimer).toHaveBeenCalledWith('person-token', { timeEntryId: 31 });
+      expect(service.operationTimers()).toEqual([]);
+      expect(outcome).toEqual({ stopped: setup, queuedId: null });
+
+      await service.undoStopOperation(outcome, 'person-token');
+      expect(api.startOperationTimer).toHaveBeenCalledWith(42, 20, 'Setup', 'person-token');
+      expect(service.operationTimers().map((t) => t.id)).toEqual([31]);
+    });
+
+    it('undoing an operation stop queued offline drops it and shows the timer again', async () => {
+      api.stopTimer.mockReturnValue(of({ queued: true, entryId: 'q-stop' }));
+
+      const outcome = await service.stopOperation(entry(31, 8));
+      expect(service.operationTimers()).toEqual([]);
+
+      await service.undoStopOperation(outcome);
+      expect(remove).toHaveBeenCalledWith('q-stop');
+      expect(api.startOperationTimer).not.toHaveBeenCalled();
+      expect(service.operationTimers().map((t) => t.id)).toEqual([31]);
+    });
   });
 });
