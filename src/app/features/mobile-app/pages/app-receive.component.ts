@@ -1,16 +1,16 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal, untracked, viewChildren } from '@angular/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { firstValueFrom, map } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PurchaseOrderDetail } from '../../purchase-orders/models/purchase-order-detail.model';
 import { PurchaseOrderLine } from '../../purchase-orders/models/purchase-order-line.model';
-import { StorageLocationFlat } from '../../inventory/models/storage-location-flat.model';
+import { EntityPickerComponent } from '../../../shared/components/entity-picker/entity-picker.component';
 import { InputComponent } from '../../../shared/components/input/input.component';
-import { SelectComponent, SelectOption } from '../../../shared/components/select/select.component';
 import { MobileReceiptLine } from '../../../shared/models/mobile-receipt-line.model';
 import { MobileReceiptRequest } from '../../../shared/models/mobile-receipt-request.model';
 import { CapabilityService } from '../../../shared/services/capability.service';
@@ -37,7 +37,7 @@ const RECEIVABLE_STATUSES = ['Submitted', 'Acknowledged', 'PartiallyReceived'];
 @Component({
   selector: 'app-app-receive',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent, IdentityPromptComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, EntityPickerComponent, IdentityPromptComponent],
   templateUrl: './app-receive.component.html',
   styleUrl: './app-receive.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,10 +56,14 @@ export class AppReceiveComponent {
   protected readonly poId = toSignal(
     this.route.paramMap.pipe(map((p) => Number(p.get('id')))), { initialValue: 0 });
 
+  private readonly binPickers = viewChildren<EntityPickerComponent>('binPicker');
+
   protected readonly po = signal<PurchaseOrderDetail | null>(null);
-  protected readonly bins = signal<StorageLocationFlat[]>([]);
+  protected readonly binLabels = signal<(string | null)[]>([]);
+  protected readonly binPickerFilters: Record<string, string> = { activeOnly: 'true' };
   protected readonly loading = signal(true);
   protected readonly failed = signal(false);
+  protected readonly forbidden = signal(false);
   protected readonly busy = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly online = signal(navigator.onLine);
@@ -88,16 +92,8 @@ export class AppReceiveComponent {
     return label === key ? status : label;
   });
 
-  protected readonly lineBinOptions = computed<SelectOption[][]>(() => {
-    const base: SelectOption[] = [
-      { value: null, label: this.translate.instant('mobileReceive.noBin') },
-      ...this.bins().map((b) => ({ value: b.id, label: b.locationPath })),
-    ];
-    return this.lines().map((line) =>
-      line.partDefaultBinId !== null && !this.bins().some((b) => b.id === line.partDefaultBinId)
-        ? [...base, { value: line.partDefaultBinId, label: line.partDefaultBinPath ?? String(line.partDefaultBinId) }]
-        : base);
-  });
+  protected readonly fullyReceived = computed(() =>
+    this.po()?.status === 'Received' || (this.receivable() && this.lines().length === 0));
 
   protected readonly canSubmit = computed(() => {
     const value = this.formValue();
@@ -114,7 +110,16 @@ export class AppReceiveComponent {
       window.removeEventListener('online', onOnline);
       window.removeEventListener('offline', onOffline);
     });
+    effect(() => {
+      const pickers = this.binPickers();
+      untracked(() => this.syncBinPickers(pickers));
+    });
     void this.load();
+  }
+
+  protected onBinSelected(index: number, entity: Record<string, unknown> | null): void {
+    const path = entity?.['locationPath'];
+    this.binLabels.update((labels) => labels.map((existing, i) => (i === index ? (typeof path === 'string' ? path : null) : existing)));
   }
 
   protected lineGroup(index: number): LineForm {
@@ -157,16 +162,14 @@ export class AppReceiveComponent {
     }
     this.loading.set(true);
     this.failed.set(false);
+    this.forbidden.set(false);
     try {
-      const [po, bins] = await Promise.all([
-        firstValueFrom(this.receiving.purchaseOrder(id)),
-        this.binsEnabled() ? firstValueFrom(this.receiving.activeBins()).catch(() => []) : Promise.resolve([]),
-      ]);
-      this.bins.set(bins);
+      const po = await firstValueFrom(this.receiving.purchaseOrder(id));
       this.po.set(po);
       this.buildForm();
-    } catch {
+    } catch (err) {
       this.failed.set(true);
+      this.forbidden.set(err instanceof HttpErrorResponse && err.status === 403);
     } finally {
       this.loading.set(false);
     }
@@ -182,8 +185,24 @@ export class AppReceiveComponent {
         lot: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(100)] }),
       }), { emitEvent: false });
     }
+    this.binLabels.set(this.lines().map((line) => (line.partId ? line.partDefaultBinPath : null)));
     this.form.controls.packingSlip.setValue('', { emitEvent: false });
     this.form.updateValueAndValidity();
+  }
+
+  private syncBinPickers(pickers: readonly EntityPickerComponent[]): void {
+    const labels = this.binLabels();
+    this.lines()
+      .map((line, i) => ({ line, i }))
+      .filter(({ line }) => !!line.partId)
+      .forEach(({ i }, pickerIndex) => {
+        const picker = pickers[pickerIndex];
+        if (!picker) return;
+        const binId = this.lineGroup(i).controls.binId.value;
+        const label = labels[i];
+        if (binId == null) picker.clearSelected();
+        else if (label) picker.setSelected(binId, label);
+      });
   }
 
   private buildRequest(): MobileReceiptRequest {

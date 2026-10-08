@@ -1,12 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpContext, HttpHeaders } from '@angular/common/http';
 
-import { Observable, map } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { PurchaseOrderDetail } from '../../features/purchase-orders/models/purchase-order-detail.model';
-import { StorageLocationFlat } from '../../features/inventory/models/storage-location-flat.model';
 import { SILENT_HTTP_ERRORS } from '../interceptors/silent-http-errors.token';
 import { MobileReceiptRequest } from '../models/mobile-receipt-request.model';
+import { randomId } from '../utils/random-id';
 
 /**
  * Dock receiving from the phone. Online only: a receipt never goes to the
@@ -21,18 +21,9 @@ export class MobileReceivingService {
     return this.http.get<PurchaseOrderDetail>(`/api/v1/purchase-orders/${id}`, { context: this.silent() });
   }
 
-  activeBins(): Observable<StorageLocationFlat[]> {
-    return this.http
-      .get<{ items: StorageLocationFlat[] }>('/api/v1/inventory/locations/bins', {
-        params: { activeOnly: 'true', pageSize: '100' },
-        context: this.silent(),
-      })
-      .pipe(map((res) => res.items ?? []));
-  }
-
   receive(purchaseOrderId: number, request: MobileReceiptRequest): Observable<void> {
     return this.http.post<void>(`/api/v1/purchase-orders/${purchaseOrderId}/receive`, request, {
-      headers: new HttpHeaders({ 'Idempotency-Key': crypto.randomUUID() }),
+      headers: new HttpHeaders({ 'Idempotency-Key': randomId() }),
       context: this.silent(),
     });
   }

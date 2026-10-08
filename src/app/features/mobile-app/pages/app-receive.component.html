@@ -6,6 +6,8 @@
 
   @if (loading()) {
     <p class="receive__hint" role="status">{{ 'common.loading' | translate }}</p>
+  } @else if (forbidden()) {
+    <p class="receive__hint" role="alert" data-testid="receive-forbidden">{{ 'mobileReceive.notPermitted' | translate }}</p>
   } @else if (failed() || !po()) {
     <p class="receive__hint" role="alert">{{ 'mobileReceive.loadFailed' | translate }}</p>
     <button type="button" class="receive__retry" data-testid="receive-retry" (click)="load()">
@@ -18,12 +20,12 @@
       <span class="receive__status" data-testid="receive-po-status">{{ statusLabel() }}</span>
     </header>
 
-    @if (!receivable()) {
+    @if (fullyReceived()) {
+      <p class="receive__hint" role="status" data-testid="receive-all-received">{{ 'mobileReceive.allReceived' | translate }}</p>
+    } @else if (!receivable()) {
       <p class="receive__hint" role="status" data-testid="receive-not-receivable">
         {{ 'mobileReceive.notReceivable' | translate: { status: statusLabel() } }}
       </p>
-    } @else if (lines().length === 0) {
-      <p class="receive__hint" role="status" data-testid="receive-all-received">{{ 'mobileReceive.allReceived' | translate }}</p>
     } @else {
       <form class="receive__form" [formGroup]="form" (ngSubmit)="submit()">
         <div formArrayName="lines" class="receive__lines">
@@ -74,10 +76,15 @@
 
               @if (line.partId) {
                 @if (binsEnabled()) {
-                  <app-select
+                  <app-entity-picker
+                    #binPicker
                     formControlName="binId"
+                    entityType="inventory/locations/bins"
+                    displayField="locationPath"
+                    [filters]="binPickerFilters"
                     [label]="'mobileReceive.bin' | translate"
-                    [options]="lineBinOptions()[i]"
+                    [placeholder]="'mobileReceive.binPlaceholder' | translate"
+                    (selected)="onBinSelected(i, $event)"
                     [attr.data-testid]="'receive-bin-' + line.id"
                   />
                 }

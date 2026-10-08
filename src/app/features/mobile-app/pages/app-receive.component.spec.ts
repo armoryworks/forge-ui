@@ -31,10 +31,21 @@ interface ReceiveInternals {
   canSubmit: Signal<boolean>;
   identifying: Signal<boolean>;
   error: Signal<string | null>;
-  lineBinOptions: Signal<{ value: unknown; label: string }[][]>;
+  binLabels: Signal<(string | null)[]>;
+  binPickerFilters: Record<string, string>;
+  binPickers: Signal<FakePicker[]>;
+  fullyReceived: Signal<boolean>;
+  failed: Signal<boolean>;
+  forbidden: Signal<boolean>;
+  onBinSelected(index: number, entity: Record<string, unknown> | null): void;
   submit(): void;
   fillRemaining(index: number): void;
   onIdentified(): void;
+}
+
+interface FakePicker {
+  setSelected: ReturnType<typeof vi.fn>;
+  clearSelected: ReturnType<typeof vi.fn>;
 }
 
 function line(overrides: Partial<PurchaseOrderLine>): PurchaseOrderLine {
@@ -99,30 +110,56 @@ describe('AppReceiveComponent', () => {
     http.verify();
   });
 
-  async function create(po: PurchaseOrderDetail = purchaseOrder()): Promise<ReceiveInternals> {
+  let picker: FakePicker;
+
+  function construct(): ReceiveInternals {
     const component = TestBed.runInInjectionContext(() => new AppReceiveComponent());
     const internals = component as unknown as ReceiveInternals;
+    picker = { setSelected: vi.fn(), clearSelected: vi.fn() };
+    internals.binPickers = signal([picker]);
+    return internals;
+  }
+
+  async function create(po: PurchaseOrderDetail = purchaseOrder()): Promise<ReceiveInternals> {
+    const internals = construct();
     http.expectOne('/api/v1/purchase-orders/7').flush(po);
-    const bins = http.expectOne((req) => req.url === '/api/v1/inventory/locations/bins');
-    expect(bins.request.params.get('activeOnly')).toBe('true');
-    bins.flush({ items: [{ id: 9, name: 'B2', locationType: 'Bin', barcode: null, locationPath: 'Dock / Rack B / 2', isActive: true }] });
     await vi.waitFor(() => expect(internals.loading()).toBe(false));
     return internals;
   }
 
-  it('lists only the open lines, each with the active bins and its own default bin', async () => {
+  it('lists only the open lines and seeds the bin picker with the part default bin', async () => {
     const receive = await create();
+    TestBed.tick();
 
     expect(receive.lines().map((l) => l.id)).toEqual([1, 2]);
     expect(receive.form.controls.lines.at(0).controls.binId.value).toBe(5);
-    expect(receive.lineBinOptions()[0].map((o) => o.value)).toEqual([null, 9, 5]);
+    expect(receive.binLabels()).toEqual(['Dock / Rack A / 1', null]);
+    expect(picker.setSelected).toHaveBeenCalledWith(5, 'Dock / Rack A / 1');
+    expect(receive.binPickerFilters).toEqual({ activeOnly: 'true' });
     expect(receive.canSubmit()).toBe(false);
+  });
+
+  it('receives into any active bin the server search returns, not only a first page', async () => {
+    const receive = await create();
+    receive.form.controls.lines.at(0).controls.binId.setValue(142);
+    receive.onBinSelected(0, { id: 142, locationPath: 'Yard / Bay 9 / 142' });
+    receive.form.controls.lines.at(0).controls.quantity.setValue(25);
+
+    expect(receive.binLabels()[0]).toBe('Yard / Bay 9 / 142');
+    receive.submit();
+
+    const post = http.expectOne('/api/v1/purchase-orders/7/receive');
+    expect(post.request.body.lines).toEqual([{ lineId: 1, quantity: 25, storageLocationId: 142, lotNumber: null }]);
+    post.flush(null);
+    await vi.waitFor(() => expect(success).toHaveBeenCalled());
+    http.expectOne('/api/v1/purchase-orders/7').flush(purchaseOrder());
   });
 
   it('posts the quantity, bin, lot and packing slip and reloads the PO', async () => {
     const receive = await create();
     const first = receive.form.controls.lines.at(0);
     first.setValue({ quantity: 25, binId: 9, lot: '  HT-88812 ' });
+    receive.onBinSelected(0, { id: 9, locationPath: 'Dock / Rack B / 2' });
     receive.form.controls.packingSlip.setValue(' PS-1001 ');
 
     expect(receive.canSubmit()).toBe(true);
@@ -140,10 +177,11 @@ describe('AppReceiveComponent', () => {
 
     await vi.waitFor(() => expect(success).toHaveBeenCalledWith('mobileReceive.received'));
     http.expectOne('/api/v1/purchase-orders/7').flush(purchaseOrder({
+      status: 'Received',
       lines: [line({ remainingQuantity: 0, receivedQuantity: 40 })],
     }));
-    http.expectOne((req) => req.url === '/api/v1/inventory/locations/bins').flush({ items: [] });
     await vi.waitFor(() => expect(receive.lines()).toEqual([]));
+    expect(receive.fullyReceived()).toBe(true);
     expect(identity.touch).toHaveBeenCalled();
   });
 
@@ -160,7 +198,6 @@ describe('AppReceiveComponent', () => {
     post.flush(null);
     await vi.waitFor(() => expect(success).toHaveBeenCalled());
     http.expectOne('/api/v1/purchase-orders/7').flush(purchaseOrder());
-    http.expectOne((req) => req.url === '/api/v1/inventory/locations/bins').flush({ items: [] });
   });
 
   it('shows the server message when the receipt is refused', async () => {
@@ -209,7 +246,27 @@ describe('AppReceiveComponent', () => {
     http.expectOne('/api/v1/purchase-orders/7/receive').flush(null);
     await vi.waitFor(() => expect(success).toHaveBeenCalled());
     http.expectOne('/api/v1/purchase-orders/7').flush(purchaseOrder());
-    http.expectOne((req) => req.url === '/api/v1/inventory/locations/bins').flush({ items: [] });
+  });
+
+  it('says the PO is not permitted, without a retry, when the server refuses with 403', async () => {
+    const receive = construct();
+    http.expectOne('/api/v1/purchase-orders/7').flush(
+      { title: 'Forbidden' },
+      { status: 403, statusText: 'Forbidden' },
+    );
+
+    await vi.waitFor(() => expect(receive.loading()).toBe(false));
+    expect(receive.forbidden()).toBe(true);
+    expect(receive.failed()).toBe(true);
+  });
+
+  it('treats a load failure other than 403 as retryable', async () => {
+    const receive = construct();
+    http.expectOne('/api/v1/purchase-orders/7').flush(null, { status: 500, statusText: 'Server Error' });
+
+    await vi.waitFor(() => expect(receive.loading()).toBe(false));
+    expect(receive.failed()).toBe(true);
+    expect(receive.forbidden()).toBe(false);
   });
 
   it('offers no receive form for a PO that is not open for receiving', async () => {
@@ -217,5 +274,6 @@ describe('AppReceiveComponent', () => {
     receive.form.controls.lines.at(0).controls.quantity.setValue(5);
 
     expect(receive.canSubmit()).toBe(false);
+    expect(receive.fullyReceived()).toBe(false);
   });
 });
