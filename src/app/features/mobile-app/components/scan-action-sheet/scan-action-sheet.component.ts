@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { ScanResolveResult } from '../../../../shared/models/mobile-api.model';
+import { CapabilityService } from '../../../../shared/services/capability.service';
 
 export type ScanAction = 'start' | 'stop' | 'complete' | 'move' | 'details' | 'moveStock' | 'identify' | 'receive';
 
@@ -16,8 +17,9 @@ interface ActionButton {
 /**
  * The one contextual action sheet after a decode: "Job 4471 — Start /
  * Complete / Move / Details". Start becomes Stop while the person's timer
- * runs on this job; a purchase order offers Receive. Dumb: the parent resolves the scan and performs the
- * chosen action. Never navigates on its own.
+ * runs on this job; a purchase order offers Receive while purchasing is on.
+ * Dumb: the parent resolves the scan and performs the chosen action. Never
+ * navigates on its own.
  */
 @Component({
   selector: 'app-scan-action-sheet',
@@ -28,6 +30,8 @@ interface ActionButton {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ScanActionSheetComponent {
+  private readonly capabilities = inject(CapabilityService);
+
   readonly result = input.required<ScanResolveResult>();
   readonly busy = input<boolean>(false);
   readonly runningJobId = input<number | null>(null);
@@ -60,10 +64,12 @@ export class ScanActionSheetComponent {
       case 'badge':
         return [{ action: 'identify', labelKey: 'mobileApp.scan.actions.identify', icon: 'badge', primary: true }];
       case 'purchaseOrder':
-        return [
-          { action: 'receive', labelKey: 'mobileAppWork.scan.receive', icon: 'move_to_inbox', primary: true },
-          { action: 'details', labelKey: 'mobileApp.scan.actions.openOnDesktop', icon: 'open_in_new' },
-        ];
+        return this.capabilities.isEnabled('CAP-P2P-PO', true)
+          ? [
+            { action: 'receive', labelKey: 'mobileAppWork.scan.receive', icon: 'move_to_inbox', primary: true },
+            { action: 'details', labelKey: 'mobileApp.scan.actions.openOnDesktop', icon: 'open_in_new' },
+          ]
+          : [{ action: 'details', labelKey: 'mobileApp.scan.actions.openOnDesktop', icon: 'open_in_new' }];
       default:
         return [{ action: 'details', labelKey: 'mobileApp.scan.actions.openOnDesktop', icon: 'open_in_new' }];
     }

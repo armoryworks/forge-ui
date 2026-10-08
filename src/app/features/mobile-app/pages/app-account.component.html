@@ -61,7 +61,11 @@
           </li>
         } @empty {
           <li class="account__empty" data-testid="account-devices-empty">
-            {{ (devicesForbidden() ? 'mobileAppWork.account.devicesForbidden' : 'mobileApp.account.noDevices') | translate }}
+            @switch (devicesProblem()) {
+              @case ('forbidden') { {{ 'mobileAppWork.account.devicesForbidden' | translate }} }
+              @case ('failed') { {{ 'mobileAppWork.account.devicesFailed' | translate }} }
+              @default { {{ 'mobileApp.account.noDevices' | translate }} }
+            }
           </li>
         }
       </ul>

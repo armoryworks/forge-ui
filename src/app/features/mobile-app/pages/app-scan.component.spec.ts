@@ -5,7 +5,7 @@ import { HttpTestingController, TestRequest, provideHttpClientTesting } from '@a
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 import { ScanResolveResult } from '../../../shared/models/mobile-api.model';
@@ -64,9 +64,18 @@ describe('AppScanComponent', () => {
   const confirmMove = {
     needed: vi.fn(),
     ask: vi.fn(),
-    isConfirmRequired: vi.fn(() => false),
+    isConfirmRequired: vi.fn((_err: unknown) => false),
   };
   const router = { navigate: vi.fn() };
+
+  function refuseUnconfirmed(): void {
+    const refusal = { code: 'confirm-required' };
+    api.advanceJob.mockImplementation((_id: number, _code: string, confirmed: boolean) => confirmed
+      ? of({ status: { stageName: 'Invoiced' }, previousStageId: 3, previousStageName: 'Shipped', collapsed: false })
+      : throwError(() => refusal));
+    confirmMove.isConfirmRequired.mockImplementation((err: unknown) => err === refusal);
+    confirmMove.needed.mockReturnValue(true);
+  }
 
   function create(): ScanInternals {
     const component = TestBed.runInInjectionContext(() => new AppScanComponent());
@@ -96,6 +105,7 @@ describe('AppScanComponent', () => {
     api.jobStatus.mockReset().mockReturnValue(of({ id: 42, nextStageName: 'Machining' }));
     confirmMove.needed.mockReset().mockReturnValue(false);
     confirmMove.ask.mockReset().mockResolvedValue(true);
+    confirmMove.isConfirmRequired.mockReset().mockReturnValue(false);
     router.navigate.mockReset().mockResolvedValue(true);
     TestBed.configureTestingModule({
       providers: [
@@ -219,8 +229,8 @@ describe('AppScanComponent', () => {
     await create().onAction('complete');
 
     expect(api.stopTimer).toHaveBeenCalledWith();
-    expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42');
-    expect(api.stopTimer.mock.invocationCallOrder[0]).toBeLessThan(api.advanceJob.mock.invocationCallOrder[0]);
+    expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', false, true);
+    expect(api.advanceJob.mock.invocationCallOrder[0]).toBeLessThan(api.stopTimer.mock.invocationCallOrder[0]);
   });
 
   it('completes by stopping the person\'s timer on that job while operation tracking is on', async () => {
@@ -229,7 +239,7 @@ describe('AppScanComponent', () => {
     await create().onAction('complete');
 
     expect(api.stopTimer).toHaveBeenCalledWith(undefined, { jobId: 42 });
-    expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42');
+    expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', false, true);
   });
 
   it('names the identified person and clears them on Not you', () => {
@@ -240,46 +250,68 @@ describe('AppScanComponent', () => {
     expect(identity.clear).toHaveBeenCalledOnce();
   });
 
-  it('moves an ordinary column unconfirmed, the same request as before, with Undo', async () => {
+  it('moves an ordinary column with the one request it always sent, and offers Undo', async () => {
     await create().onAction('move');
 
+    expect(api.jobStatus).not.toHaveBeenCalled();
     expect(confirmMove.ask).not.toHaveBeenCalled();
-    expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', false);
+    expect(api.advanceJob).toHaveBeenCalledOnce();
+    expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', false, true);
     expect(offer).toHaveBeenCalledOnce();
   });
 
-  it('asks before moving into a column that creates an accounting document, then offers no Undo', async () => {
-    confirmMove.needed.mockReturnValue(true);
+  it('completes an ordinary column without reading the job status', async () => {
+    await create().onAction('complete');
+
+    expect(api.jobStatus).not.toHaveBeenCalled();
+    expect(api.advanceJob).toHaveBeenCalledOnce();
+    expect(api.stopTimer).toHaveBeenCalledOnce();
+    expect(offer).toHaveBeenCalledOnce();
+  });
+
+  it('asks when the server needs a move confirmed, resends it confirmed, then offers no Undo', async () => {
+    refuseUnconfirmed();
     const scan = create();
 
     await scan.onAction('move');
 
     expect(confirmMove.ask).toHaveBeenCalledWith({ id: 42, nextStageName: 'Machining' });
-    expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', true);
+    expect(api.advanceJob).toHaveBeenLastCalledWith(42, 'JOB-42', true);
     expect(offer).not.toHaveBeenCalled();
     expect(scan.notice()).toBe('mobileApp.jobs.movedTo');
     expect(identity.clear).toHaveBeenCalledOnce();
   });
 
   it('moves nothing and keeps the timer when the person declines', async () => {
-    confirmMove.needed.mockReturnValue(true);
+    refuseUnconfirmed();
     confirmMove.ask.mockResolvedValue(false);
 
     await create().onAction('complete');
 
     expect(api.stopTimer).not.toHaveBeenCalled();
-    expect(api.advanceJob).not.toHaveBeenCalled();
+    expect(api.advanceJob).toHaveBeenCalledOnce();
     expect(offer).not.toHaveBeenCalled();
   });
 
-  it('confirms a complete once, before stopping the timer', async () => {
-    confirmMove.needed.mockReturnValue(true);
+  it('confirms a complete once, then stops the timer', async () => {
+    refuseUnconfirmed();
 
     await create().onAction('complete');
 
     expect(confirmMove.ask).toHaveBeenCalledOnce();
     expect(api.stopTimer).toHaveBeenCalledOnce();
-    expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', true);
+    expect(api.advanceJob).toHaveBeenLastCalledWith(42, 'JOB-42', true);
+  });
+
+  it('still stops the timer when a complete fails for another reason', async () => {
+    api.advanceJob.mockReturnValue(throwError(() => new Error('down')));
+    const scan = create();
+
+    await scan.onAction('complete');
+
+    expect(api.stopTimer).toHaveBeenCalledOnce();
+    expect(confirmMove.ask).not.toHaveBeenCalled();
+    expect(scan.notice()).toBe('mobileApp.jobs.actionFailed');
   });
 
   it('opens receiving for a scanned purchase order', async () => {

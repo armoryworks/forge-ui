@@ -10991,7 +10991,8 @@
   "mobileAppWork": {
     "account": {
       "noScreens": "No phone screens are turned on for this shop. Ask an admin to turn on Mobile Clock or Mobile Jobs.",
-      "devicesForbidden": "You don't have access to device settings"
+      "devicesForbidden": "You don't have access to device settings",
+      "devicesFailed": "Your devices didn't load."
     },
     "scan": {
       "receive": "Receive"
@@ -11017,6 +11018,7 @@
       "search": "Search job, title or part",
       "identifyHint": "Identify yourself to see the work orders assigned to you.",
       "loadFailed": "Your work orders didn't load.",
+      "retry": "Try again",
       "none": "Nothing is assigned to you right now. Scan a traveler or look a job up.",
       "noMatch": "No work orders match.",
       "overdue": "Overdue",

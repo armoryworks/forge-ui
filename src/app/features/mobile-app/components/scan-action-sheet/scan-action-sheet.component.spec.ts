@@ -4,6 +4,7 @@ import { Observable, of } from 'rxjs';
 import { TranslateLoader, provideTranslateService } from '@ngx-translate/core';
 
 import { ScanResolveResult } from '../../../../shared/models/mobile-api.model';
+import { CapabilityService } from '../../../../shared/services/capability.service';
 import { ScanActionSheetComponent } from './scan-action-sheet.component';
 
 class FakeLoader implements TranslateLoader {
@@ -15,6 +16,7 @@ const purchaseOrder: ScanResolveResult = { kind: 'purchaseOrder', id: 8, code: '
 
 describe('ScanActionSheetComponent', () => {
   let fixture: ComponentFixture<ScanActionSheetComponent>;
+  let purchasing: boolean;
 
   function render(runningJobId: number | null, actingAs: string | null = null, result = job): HTMLElement {
     fixture = TestBed.createComponent(ScanActionSheetComponent);
@@ -26,9 +28,13 @@ describe('ScanActionSheetComponent', () => {
   }
 
   beforeEach(() => {
+    purchasing = true;
     TestBed.configureTestingModule({
       imports: [ScanActionSheetComponent],
-      providers: [provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } })],
+      providers: [
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        { provide: CapabilityService, useValue: { isEnabled: (code: string) => code !== 'CAP-P2P-PO' || purchasing } },
+      ],
     });
   });
 
@@ -75,5 +81,13 @@ describe('ScanActionSheetComponent', () => {
     receive.click();
 
     expect(chosen).toHaveBeenCalledWith('receive');
+  });
+
+  it('offers only Open on desktop for a purchase order while purchasing is off', () => {
+    purchasing = false;
+    const el = render(null, null, purchaseOrder);
+
+    expect(el.querySelector('[data-testid="scan-action-receive"]')).toBeNull();
+    expect(el.querySelector('[data-testid="scan-action-details"]')).not.toBeNull();
   });
 });

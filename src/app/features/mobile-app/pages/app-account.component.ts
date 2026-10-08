@@ -59,7 +59,7 @@ export class AppAccountComponent {
   protected readonly noScreens = computed(() =>
     !MOBILE_APP_SCREENS.some((screen) => this.capabilities.isEnabled(screen.capability, true)));
   protected readonly myDevices = signal<MobileDevice[]>([]);
-  protected readonly devicesForbidden = signal(false);
+  protected readonly devicesProblem = signal<'forbidden' | 'failed' | null>(null);
   protected readonly busy = signal(false);
   protected readonly pendingRemoval = signal<string | null>(null);
   protected readonly pendingRevoke = signal<number | null>(null);
@@ -73,8 +73,10 @@ export class AppAccountComponent {
         next: (list) => this.myDevices.set(list.filter((d) => d.revokedAt === null)),
         error: (err: unknown) => {
           this.myDevices.set([]);
-          this.devicesForbidden.set(
-            err instanceof CapabilityDisabledError || (err instanceof HttpErrorResponse && err.status === 403));
+          this.devicesProblem.set(
+            err instanceof CapabilityDisabledError || (err instanceof HttpErrorResponse && err.status === 403)
+              ? 'forbidden'
+              : 'failed');
         },
       });
     }

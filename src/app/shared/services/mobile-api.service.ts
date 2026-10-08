@@ -33,7 +33,7 @@ type Method = 'POST' | 'PATCH' | 'DELETE';
  * A compensation sent with an explicit token never queues: the queue
  * replays under whoever holds the session at sync time. A queued change is
  * named by a translation key and the job or part number this service last
- * read for that id, so the sync sheet never shows an id.
+ * read for that id on the same instance, so the sync sheet never shows an id.
  */
 @Injectable({ providedIn: 'root' })
 export class MobileApiService {
@@ -41,8 +41,8 @@ export class MobileApiService {
   private readonly queue = inject(OfflineQueueService);
   private readonly instances = inject(InstanceService);
   private readonly platform = inject(PlatformService);
-  private readonly jobNumbers = new Map<number, string>();
-  private readonly partNumbers = new Map<number, string>();
+  private readonly jobNumbers = new Map<string, string>();
+  private readonly partNumbers = new Map<string, string>();
 
   resolveScan(code: string): Observable<ScanResolveResult> {
     return this.http.post<ScanResolveResult>('/api/v1/mobile/scan/resolve', { code })
@@ -51,24 +51,27 @@ export class MobileApiService {
 
   jobStatus(jobId: number): Observable<JobStatus> {
     return this.http.get<JobStatus>(`/api/v1/mobile/jobs/${jobId}/status`)
-      .pipe(tap((job) => this.jobNumbers.set(job.id, job.jobNumber)));
+      .pipe(tap((job) => this.jobNumbers.set(this.key(job.id), job.jobNumber)));
   }
 
   /** Open work orders assigned to the caller, due soonest first. */
   myJobs(): Observable<MyJob[]> {
     return this.http.get<MyJob[]>('/api/v1/mobile/jobs/mine')
-      .pipe(tap((jobs) => jobs.forEach((job) => this.jobNumbers.set(job.id, job.jobNumber))));
+      .pipe(tap((jobs) => jobs.forEach((job) => this.jobNumbers.set(this.key(job.id), job.jobNumber))));
   }
 
   /**
    * Moves the job to its next column. A column that can't be undone or that
    * creates an accounting document needs `confirmed`; without it the server
-   * answers 400 with code `confirm-required`.
+   * answers 400 with code `confirm-required`. A `silent` caller shows its
+   * own message for a refusal.
    */
-  advanceJob(jobId: number, scanCode: string | null, confirmed = false): Observable<JobAdvanceResult | QueuedOffline> {
+  advanceJob(
+    jobId: number, scanCode: string | null, confirmed = false, silent = false,
+  ): Observable<JobAdvanceResult | QueuedOffline> {
     return this.mutate<JobAdvanceResult>(
       'POST', `/api/v1/mobile/jobs/${jobId}/advance`, confirmed ? { scanCode, confirmed: true } : { scanCode },
-      this.jobLabel('advance', jobId));
+      this.jobLabel('advance', jobId), undefined, silent);
   }
 
   /** Compensating action for advance: move back to the column it came from. */
@@ -204,12 +207,12 @@ export class MobileApiService {
 
   onHand(partId: number, locationId: number): Observable<OnHand> {
     return this.http.get<OnHand>('/api/v1/mobile/stock/on-hand', { params: { partId, locationId } })
-      .pipe(tap((stock) => this.partNumbers.set(stock.partId, stock.partNumber)));
+      .pipe(tap((stock) => this.partNumbers.set(this.key(stock.partId), stock.partNumber)));
   }
 
   /** Also the compensating action: call again with the result's `undo`. */
   moveStock(request: StockMoveRequest): Observable<StockMoveResult | QueuedOffline> {
-    const part = this.partNumbers.get(request.partId);
+    const part = this.partNumbers.get(this.key(request.partId));
     return this.mutate<StockMoveResult>(
       'POST', '/api/v1/mobile/stock/move', request, part
         ? { key: 'mobileAppWork.sync.action.moveStock', params: { quantity: request.quantity, part } }
@@ -233,12 +236,16 @@ export class MobileApiService {
 
   private rememberResult(result: ScanResolveResult): void {
     if (result.id === null) return;
-    if (result.kind === 'job') this.jobNumbers.set(result.id, result.label);
-    else if (result.kind === 'part') this.partNumbers.set(result.id, result.label);
+    if (result.kind === 'job') this.jobNumbers.set(this.key(result.id), result.label);
+    else if (result.kind === 'part') this.partNumbers.set(this.key(result.id), result.label);
+  }
+
+  private key(id: number): string {
+    return `${this.instances.instance()?.id ?? ''}:${id}`;
   }
 
   private jobLabel(action: string, jobId: number): QueuedActionLabel {
-    const job = this.jobNumbers.get(jobId);
+    const job = this.jobNumbers.get(this.key(jobId));
     return job
       ? { key: `mobileAppWork.sync.action.${action}`, params: { job } }
       : { key: `mobileAppWork.sync.action.${action}Any` };

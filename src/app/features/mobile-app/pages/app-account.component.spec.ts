@@ -22,7 +22,7 @@ import { AppAccountComponent } from './app-account.component';
 interface AccountInternals {
   noScreens: Signal<boolean>;
   myDevices: Signal<MobileDevice[]>;
-  devicesForbidden: Signal<boolean>;
+  devicesProblem: Signal<'forbidden' | 'failed' | null>;
 }
 
 describe('AppAccountComponent', () => {
@@ -68,12 +68,16 @@ describe('AppAccountComponent', () => {
     devices = () => throwError(() => new HttpErrorResponse({ status: 403 }));
     const account = create();
 
-    expect(account.devicesForbidden()).toBe(true);
+    expect(account.devicesProblem()).toBe('forbidden');
     expect(account.myDevices()).toEqual([]);
   });
 
-  it('keeps the empty-list message for any other failure', () => {
-    devices = () => throwError(() => new HttpErrorResponse({ status: 0 }));
-    expect(create().devicesForbidden()).toBe(false);
+  it('says the list did not load for any other failure', () => {
+    devices = () => throwError(() => new HttpErrorResponse({ status: 500 }));
+    expect(create().devicesProblem()).toBe('failed');
+  });
+
+  it('reports no problem when the list loads empty', () => {
+    expect(create().devicesProblem()).toBeNull();
   });
 });

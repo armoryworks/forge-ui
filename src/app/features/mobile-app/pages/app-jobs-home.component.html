@@ -44,7 +44,7 @@
     } @else if (failed()) {
       <p class="jobs-home__hint" role="alert">{{ 'mobileAppWork.myJobs.loadFailed' | translate }}</p>
       <button type="button" class="jobs-home__retry" data-testid="jobs-home-retry" (click)="load()">
-        {{ 'mobileApp.sync.retry' | translate }}
+        {{ 'mobileAppWork.myJobs.retry' | translate }}
       </button>
     } @else {
       <ul class="jobs-home__list" [attr.aria-label]="'mobileAppWork.myJobs.title' | translate">

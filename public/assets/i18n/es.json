@@ -10991,7 +10991,8 @@
   "mobileAppWork": {
     "account": {
       "noScreens": "No hay pantallas del teléfono activadas en este taller. Pida a un administrador que active Mobile Clock o Mobile Jobs.",
-      "devicesForbidden": "No tiene acceso a la configuración de dispositivos"
+      "devicesForbidden": "No tiene acceso a la configuración de dispositivos",
+      "devicesFailed": "No se cargaron sus dispositivos."
     },
     "scan": {
       "receive": "Recibir"
@@ -11017,6 +11018,7 @@
       "search": "Buscar trabajo, título o pieza",
       "identifyHint": "Identifíquese para ver las órdenes de trabajo asignadas a usted.",
       "loadFailed": "No se cargaron sus órdenes de trabajo.",
+      "retry": "Intentar de nuevo",
       "none": "No tiene nada asignado por ahora. Escanee un viajero o busque un trabajo.",
       "noMatch": "Ninguna orden de trabajo coincide.",
       "overdue": "Atrasada",

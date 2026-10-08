@@ -15,16 +15,18 @@ describe('MobileApiService', () => {
   let service: MobileApiService;
   let http: HttpTestingController;
   const enqueue = vi.fn<(...args: unknown[]) => Promise<string>>();
+  let instanceId: string;
 
   beforeEach(() => {
     enqueue.mockReset().mockResolvedValue('entry-1');
+    instanceId = 'shop';
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: PlatformService, useValue: { mobileShell: true, isNative: false, name: 'web' } },
         { provide: OfflineQueueService, useValue: { enqueue } },
-        { provide: InstanceService, useValue: { instance: () => ({ id: 'shop' }) } },
+        { provide: InstanceService, useValue: { instance: () => ({ id: instanceId }) } },
       ],
     });
     service = TestBed.inject(MobileApiService);
@@ -236,6 +238,19 @@ describe('MobileApiService', () => {
     req.flush({});
   });
 
+  it('keeps a silent advance off the global error surface and leaves others visible', () => {
+    service.advanceJob(42, 'JOB-42', false, true).subscribe({ error: () => undefined });
+    const silent = http.expectOne('/api/v1/mobile/jobs/42/advance');
+    expect(silent.request.context.get(SILENT_HTTP_ERRORS)).toBe(true);
+    expect(silent.request.body).toEqual({ scanCode: 'JOB-42' });
+    silent.flush({});
+
+    service.advanceJob(42, 'JOB-42', true).subscribe();
+    const visible = http.expectOne('/api/v1/mobile/jobs/42/advance');
+    expect(visible.request.context.get(SILENT_HTTP_ERRORS)).toBe(false);
+    visible.flush({});
+  });
+
   it('reads the caller\'s work orders', async () => {
     const mine = firstValueFrom(service.myJobs());
     http.expectOne('/api/v1/mobile/jobs/mine').flush([{ id: 42, jobNumber: 'JOB-42' }]);
@@ -254,6 +269,17 @@ describe('MobileApiService', () => {
       label: { key: 'mobileAppWork.sync.action.advance', params: { job: 'JOB-1042' } },
     });
     expect(enqueue.mock.calls[1][4]).toMatchObject({ label: { key: 'mobileAppWork.sync.action.addNoteAny' } });
+  });
+
+  it('never names a queued change by a number read on another instance', async () => {
+    service.jobStatus(42).subscribe();
+    http.expectOne('/api/v1/mobile/jobs/42/status').flush({ id: 42, jobNumber: 'JOB-1042' });
+    instanceId = 'other-shop';
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+
+    await firstValueFrom(service.advanceJob(42, null));
+
+    expect(enqueue.mock.calls[0][4]).toMatchObject({ label: { key: 'mobileAppWork.sync.action.advanceAny' } });
   });
 
   it('names a queued stock move by the part number it last read', async () => {

@@ -11,7 +11,7 @@ import { MobileDevice } from '../models/mobile-device.model';
 export class MobileDevicesService {
   private readonly http = inject(HttpClient);
 
-  /** A refusal is not shown here: Account says in place that the person has no access. */
+  /** A failure is not shown here: Account says in place why the list is empty. */
   mine(): Observable<MobileDevice[]> {
     return this.http.get<MobileDevice[]>('/api/v1/devices/mine', {
       context: new HttpContext().set(SILENT_HTTP_ERRORS, true),

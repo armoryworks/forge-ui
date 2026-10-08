@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { ScanResolveResult, isQueued } from '../../../shared/models/mobile-api.model';
+import { JobAdvanceResult, QueuedOffline, ScanResolveResult, isQueued } from '../../../shared/models/mobile-api.model';
 import { AuthService } from '../../../shared/services/auth.service';
 import { CameraScannerService } from '../../../shared/services/camera-scanner.service';
 import { InstanceService } from '../../../shared/services/instance.service';
@@ -31,10 +31,11 @@ import { ScanAction, ScanActionSheetComponent } from '../components/scan-action-
  * undo toast closes; the undo itself runs with the token captured beforehand.
  * With operation tracking on, a job's open operations sit under the sheet,
  * and Complete stops the person's timer on that job rather than whichever
- * one is newest.
- * A move or complete into a column that can't be undone or that creates an
- * accounting document asks first, offers no undo, and ends the identity at
- * once.
+ * one is newest. A move or complete is sent as it always was; when the
+ * server answers that the column can't be undone or creates an accounting
+ * document, the person is asked, the move is resent confirmed, offers no
+ * undo, and ends the identity at once. Complete stops the timer unless the
+ * person declines.
  */
 @Component({
   selector: 'app-app-scan',
@@ -188,20 +189,27 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
     return token ? () => this.identity.clear() : undefined;
   }
 
-  private async confirmIfGated(jobId: number): Promise<boolean | null> {
-    if (!navigator.onLine) return false;
-    const status = await firstValueFrom(this.api.jobStatus(jobId)).catch(() => null);
-    if (!status || !this.confirmMove.needed(status)) return false;
-    return (await this.confirmMove.ask(status)) ? true : null;
+  private async advance(jobId: number, code: string, token: string | undefined): Promise<boolean> {
+    const sent = await this.sendAdvance(jobId, code);
+    return sent ? this.afterAdvance(jobId, sent, token) : false;
   }
 
-  private async advance(
-    jobId: number, code: string, token: string | undefined, confirmed?: boolean,
-  ): Promise<boolean> {
-    const gated = confirmed ?? await this.confirmIfGated(jobId);
-    if (gated === null) return false;
-    const outcome = await firstValueFrom(this.api.advanceJob(jobId, code, gated));
-    if (!outcome) return false;
+  private async sendAdvance(jobId: number, code: string): Promise<{ outcome: JobAdvanceResult | QueuedOffline; confirmed: boolean } | null> {
+    try {
+      const outcome = await firstValueFrom(this.api.advanceJob(jobId, code, false, true));
+      return outcome ? { outcome, confirmed: false } : null;
+    } catch (err) {
+      if (!this.confirmMove.isConfirmRequired(err)) throw err;
+      const status = await firstValueFrom(this.api.jobStatus(jobId));
+      if (!this.confirmMove.needed(status)) throw err;
+      if (!(await this.confirmMove.ask(status))) return null;
+      const outcome = await firstValueFrom(this.api.advanceJob(jobId, code, true));
+      return outcome ? { outcome, confirmed: true } : null;
+    }
+  }
+
+  private async afterAdvance(jobId: number, sent: { outcome: JobAdvanceResult | QueuedOffline; confirmed: boolean }, token: string | undefined): Promise<boolean> {
+    const { outcome, confirmed } = sent;
     if (isQueued(outcome)) {
       this.offerQueuedUndo([outcome.entryId], token);
       this.result.set(null);
@@ -212,7 +220,7 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
       this.notice.set(this.translate.instant('mobileApp.scan.collapsed'));
       return false;
     }
-    if (gated) {
+    if (confirmed) {
       this.result.set(null);
       await this.startScanner();
       this.notice.set(this.translate.instant('mobileApp.jobs.movedTo', { column: outcome.status.stageName }));
@@ -266,12 +274,22 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
   }
 
   private async complete(jobId: number, code: string, token: string | undefined): Promise<boolean> {
-    const confirmed = await this.confirmIfGated(jobId);
-    if (confirmed === null) return false;
+    let sent: { outcome: JobAdvanceResult | QueuedOffline; confirmed: boolean } | null;
+    try {
+      sent = await this.sendAdvance(jobId, code);
+    } catch (err) {
+      await this.stopForComplete(jobId);
+      throw err;
+    }
+    if (!sent) return false;
+    await this.stopForComplete(jobId);
+    return this.afterAdvance(jobId, sent, token);
+  }
+
+  private async stopForComplete(jobId: number): Promise<void> {
     const stop = this.timer.operationTracking() ? this.api.stopTimer(undefined, { jobId }) : this.api.stopTimer();
     await firstValueFrom(stop).catch(() => undefined);
     void this.timer.refresh();
-    return this.advance(jobId, code, token, confirmed);
   }
 
   private offerQueuedUndo(entryIds: string[], token?: string): void {
