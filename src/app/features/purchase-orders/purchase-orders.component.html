@@ -71,7 +71,7 @@
               </span>
             </ng-template>
             <ng-template appColumnCell="expectedDeliveryDate" let-row>
-              <span class="text-muted">{{ row.expectedDeliveryDate ? (row.expectedDeliveryDate | date:'MM/dd/yyyy') : '—' }}</span>
+              <span class="text-muted">{{ row.expectedDeliveryDate ? (row.expectedDeliveryDate | dateOnly) : '—' }}</span>
             </ng-template>
             <ng-template appColumnCell="createdAt" let-row>
               <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>

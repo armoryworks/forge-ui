@@ -15,8 +15,8 @@
 
     <ng-template appColumnCell="total" let-row><app-currency-display [value]="$any(row).total" [currency]="null" /></ng-template>
 
-    <ng-template appColumnCell="requestedDate" let-row>
-      {{ $any(row).requestedDate | date:'MM/dd/yyyy' }}
+    <ng-template appColumnCell="requestedDeliveryDate" let-row>
+      {{ $any(row).requestedDeliveryDate | dateOnly }}
     </ng-template>
 
     <ng-template appColumnCell="createdAt" let-row>

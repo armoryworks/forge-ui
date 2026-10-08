@@ -44,12 +44,13 @@ import { VendorService } from '../../../vendors/services/vendor.service';
 import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { NumberLockInfoComponent } from '../../../../shared/components/number-lock-info/number-lock-info.component';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 
 @Component({
   selector: 'app-po-detail-panel',
   standalone: true,
   imports: [NumberLockInfoComponent, 
-    DatePipe, DecimalPipe, TranslatePipe, ReactiveFormsModule,
+    DatePipe, DateOnlyPipe, DecimalPipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule,
     BarcodeInfoComponent, EntityActivitySectionComponent,
     ReceiveDialogComponent, LoadingBlockDirective,

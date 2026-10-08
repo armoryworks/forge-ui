@@ -37,7 +37,7 @@
         <div class="status-card__row">
           <span class="status-card__label">{{ 'mobileLegacy.jobDetail.dueDate' | translate }}</span>
           <span class="status-card__value" [class.status-card__value--overdue]="overdue()" data-testid="mjob-due-date">
-            {{ j.dueDate | date:'MM/dd/yyyy' }}
+            {{ j.dueDate | date:'MM/dd/yyyy':'UTC' }}
             @if (overdue()) {
               <span class="material-icons-outlined status-card__overdue-icon" aria-hidden="true">warning</span>
               <span class="status-card__overdue-text" data-testid="mjob-overdue">{{ 'mobileLegacy.jobDetail.overdue' | translate }}</span>

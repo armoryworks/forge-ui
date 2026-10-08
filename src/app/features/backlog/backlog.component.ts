@@ -9,7 +9,6 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { DatePipe } from '@angular/common';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
@@ -36,6 +35,7 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { BacklogCardGridComponent } from './components/backlog-card-grid/backlog-card-grid.component';
 import { PriorityIndicatorComponent } from '../../shared/components/priority-indicator/priority-indicator.component';
 import { EntityLinkComponent } from '../../shared/components/entity-link/entity-link.component';
+import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
 
 type ViewMode = 'table' | 'card';
 
@@ -43,7 +43,7 @@ type ViewMode = 'table' | 'card';
   selector: 'app-backlog',
   standalone: true,
   imports: [
-    DatePipe, ReactiveFormsModule, TranslatePipe, MatTooltipModule,
+    DateOnlyPipe, ReactiveFormsModule, TranslatePipe, MatTooltipModule,
     JobDialogComponent, AvatarComponent,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,

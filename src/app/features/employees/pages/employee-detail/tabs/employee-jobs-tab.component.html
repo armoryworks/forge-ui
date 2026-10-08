@@ -15,7 +15,7 @@
       }
     </ng-template>
     <ng-template appColumnCell="dueDate" let-row>
-      {{ row.dueDate | date:'MM/dd/yyyy' }}
+      {{ row.dueDate | dateOnly }}
     </ng-template>
   </app-data-table>
 </div>

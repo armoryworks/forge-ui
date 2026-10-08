@@ -28,6 +28,7 @@ import { EntityLinkComponent } from '../../shared/components/entity-link/entity-
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
+import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
 
 type PoTab = 'orders' | 'suggestions' | 'settings';
 
@@ -35,7 +36,7 @@ type PoTab = 'orders' | 'suggestions' | 'settings';
   selector: 'app-purchase-orders',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe, TranslatePipe, MatTooltipModule,
+    ReactiveFormsModule, DatePipe, DateOnlyPipe, TranslatePipe, MatTooltipModule,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective,
     PoDialogComponent, LoadingBlockDirective, EntityLinkComponent,

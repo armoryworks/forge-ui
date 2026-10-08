@@ -78,7 +78,7 @@
         }
       </ng-template>
       <ng-template appColumnCell="dueDate" let-job>
-        <span [class.overdue-text]="job.isOverdue">{{ job.dueDate | date:'MM/dd/yyyy' }}</span>
+        <span [class.overdue-text]="job.isOverdue">{{ job.dueDate | dateOnly }}</span>
       </ng-template>
       <ng-template appColumnCell="actions" let-job>
         @if (showArchived() && isAdmin()) {

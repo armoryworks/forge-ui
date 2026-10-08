@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
@@ -7,11 +6,12 @@ import { EmployeeJob } from '../../../models/employee.model';
 import { DataTableComponent } from '../../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../../shared/models/column-def.model';
+import { DateOnlyPipe } from '../../../../../shared/pipes/date-only.pipe';
 
 @Component({
   selector: 'app-employee-jobs-tab',
   standalone: true,
-  imports: [DatePipe, DataTableComponent, ColumnCellDirective],
+  imports: [DateOnlyPipe, DataTableComponent, ColumnCellDirective],
   templateUrl: './employee-jobs-tab.component.html',
   styleUrl: '../employee-detail-tabs.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

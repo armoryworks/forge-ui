@@ -56,6 +56,7 @@ import { CustomerTaxEditability } from '../../../customers/models/customer-tax-e
 import { CreateMissingJobsResponse } from '../../models/create-missing-jobs-response.model';
 import { ConfirmSalesOrderResponse } from '../../models/confirm-sales-order-response.model';
 import { CancelSalesOrderRequest } from '../../models/cancel-sales-order-request.model';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 
 /** Capability gating the whole customer-acceptance feature. */
 const CAP_SO_ACCEPTANCE = 'CAP-O2C-SO-ACCEPTANCE';
@@ -78,7 +79,7 @@ type TabId = 'overview' | 'lines' | 'schedule' | 'stages' | 'shipments' | 'retur
   selector: 'app-sales-order-detail-panel',
   standalone: true,
   imports: [NumberLockInfoComponent, 
-    DatePipe, DecimalPipe, TranslatePipe, ReactiveFormsModule,
+    DatePipe, DateOnlyPipe, DecimalPipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
     BarcodeInfoComponent, EntityActivitySectionComponent,
     EntityLinkComponent, CurrencyDisplayComponent, FileUploadZoneComponent, EmptyStateComponent,

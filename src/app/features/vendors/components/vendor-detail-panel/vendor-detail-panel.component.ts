@@ -32,12 +32,13 @@ import { VendorPartPriceTierHistoryDialogComponent, VendorPartPriceTierHistoryDi
 import { VendorPartsService } from '../../../parts/services/vendor-parts.service';
 import { VendorPart } from '../../../parts/models/vendor-part.model';
 import { EntityCompletenessChipComponent } from '../../../../shared/components/entity-completeness-chip/entity-completeness-chip.component';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 
 @Component({
   selector: 'app-vendor-detail-panel',
   standalone: true,
   imports: [
-    DatePipe,
+    DatePipe, DateOnlyPipe,
     MatTooltipModule,
     TranslatePipe,
     DataTableComponent, ColumnCellDirective,

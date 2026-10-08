@@ -9,6 +9,7 @@ import { DataTableComponent } from '../../../../../shared/components/data-table/
 import { ColumnCellDirective } from '../../../../../shared/directives/column-cell.directive';
 import { CurrencyDisplayComponent } from '../../../../../shared/components/currency-display/currency-display.component';
 import { ColumnDef } from '../../../../../shared/models/column-def.model';
+import { DateOnlyPipe } from '../../../../../shared/pipes/date-only.pipe';
 
 interface SalesOrderListItem {
   id: number;
@@ -23,7 +24,7 @@ interface SalesOrderListItem {
 @Component({
   selector: 'app-customer-orders-tab',
   standalone: true,
-  imports: [DatePipe, TranslatePipe, DataTableComponent, ColumnCellDirective, CurrencyDisplayComponent],
+  imports: [DatePipe, DateOnlyPipe, TranslatePipe, DataTableComponent, ColumnCellDirective, CurrencyDisplayComponent],
   templateUrl: './customer-orders-tab.component.html',
   styleUrl: '../customer-detail-tabs.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

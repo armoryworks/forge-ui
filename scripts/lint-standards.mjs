@@ -330,6 +330,21 @@ function hardcodedTextInTemplates() {
   return out;
 }
 
+function dateOnlyFieldsInLocalTime() {
+  const out = new Map();
+  const binding = /\b(?:dueDate|\w*DeliveryDate|requestedDate)\s*\|\s*date\b((?:\s*:\s*(?:'[^']*'|"[^"]*"|[\w.]+))*)/g;
+  for (const f of walk(SRC, ['.html', '.ts'])) {
+    if (isSpec(f)) continue;
+    const src = f.endsWith('.ts') ? stripTsComments(read(f)) : stripHtmlComments(read(f));
+    let n = 0;
+    for (const m of src.matchAll(binding)) {
+      if (!/['"]UTC['"]/.test(m[1])) n++;
+    }
+    if (n) out.set(rel(f), n);
+  }
+  return out;
+}
+
 // ── evaluation ───────────────────────────────────────────────────────────────
 
 const HARD = [
@@ -344,6 +359,7 @@ const RATCHET = [
   ['raw-form-controls-in-features', 'raw <input>/<select>/<textarea> in a feature template (use the shared wrappers)', rawFormControlsInFeatures],
   ['table-missing-a11y', 'feature <table> without a <caption> or aria-label (WCAG 2.2)', tableMissingA11yInFeatures],
   ['raw-table-in-features', 'raw <table> in a feature (prefer <app-data-table> for entity lists)', rawTablesInFeatures],
+  ['date-only-in-local-time', 'due / delivery date rendered with the `date` pipe in local time (use `dateOnly`, or pass \'UTC\')', dateOnlyFieldsInLocalTime],
   ['hardcoded-text-in-templates', 'hardcoded user-facing text in a template (text node or title/placeholder/aria-label without the translate pipe)', hardcodedTextInTemplates],
 ];
 

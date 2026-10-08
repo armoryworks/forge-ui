@@ -503,7 +503,7 @@
                         </td>
                         <td class="lines-table__right">
                           @if (job.dueDate) {
-                            {{ job.dueDate | date:'MM/dd/yyyy' }}
+                            {{ job.dueDate | dateOnly }}
                           }
                         </td>
                         <td>

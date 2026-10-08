@@ -26,7 +26,7 @@
               <span class="chip chip--muted">{{ order.status }}</span>
               @if (order.requestedDeliveryDate) {
                 <span class="sh-order__due">
-                  <span class="material-icons-outlined">event</span>{{ order.requestedDeliveryDate | date: 'MM/dd/yyyy' }}
+                  <span class="material-icons-outlined">event</span>{{ order.requestedDeliveryDate | dateOnly }}
                 </span>
               }
               <span class="sh-order__spacer"></span>

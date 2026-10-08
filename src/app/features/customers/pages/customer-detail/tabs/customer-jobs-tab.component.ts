@@ -9,6 +9,7 @@ import { PagedResponse } from '../../../../../shared/models/paged-response.model
 import { DataTableComponent } from '../../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../../shared/models/column-def.model';
+import { DateOnlyPipe } from '../../../../../shared/pipes/date-only.pipe';
 
 interface CustomerJob {
   id: number;
@@ -24,7 +25,7 @@ interface CustomerJob {
 @Component({
   selector: 'app-customer-jobs-tab',
   standalone: true,
-  imports: [DatePipe, TranslatePipe, DataTableComponent, ColumnCellDirective],
+  imports: [DatePipe, DateOnlyPipe, TranslatePipe, DataTableComponent, ColumnCellDirective],
   templateUrl: './customer-jobs-tab.component.html',
   styleUrl: '../customer-detail-tabs.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

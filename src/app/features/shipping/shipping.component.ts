@@ -1,4 +1,4 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -8,6 +8,7 @@ import { EmptyStateComponent } from '../../shared/components/empty-state/empty-s
 import { ShipmentDialogComponent } from '../shipments/components/shipment-dialog/shipment-dialog.component';
 import { ShippingService } from './services/shipping.service';
 import { ReadyToShipOrder } from './models/ready-to-ship-order.model';
+import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
 
 /**
  * Shipping fulfillment workspace — the operational "what needs to ship" home. Shows the
@@ -18,7 +19,7 @@ import { ReadyToShipOrder } from './models/ready-to-ship-order.model';
 @Component({
   selector: 'app-shipping',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, RouterLink, TranslatePipe, PageLayoutComponent, EmptyStateComponent, ShipmentDialogComponent],
+  imports: [DateOnlyPipe, DecimalPipe, RouterLink, TranslatePipe, PageLayoutComponent, EmptyStateComponent, ShipmentDialogComponent],
   templateUrl: './shipping.component.html',
   styleUrl: './shipping.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
