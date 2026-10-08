@@ -7348,7 +7348,18 @@
       "noteLogged": "Nota registrada",
       "advanceFailed": "No se pudo mover al siguiente estado: {{reason}}",
       "noNextStage": "Esta orden de trabajo está en su último estado de planta.",
-      "statusLoadFailed": "No se pudo cargar el estado de esta orden de trabajo: {{reason}}"
+      "statusLoadFailed": "No se pudo cargar el estado de esta orden de trabajo: {{reason}}",
+      "problem": {
+        "button": "Problema",
+        "title": "¿Cuál es el problema?",
+        "stoppage": "Paro",
+        "quality": "Calidad",
+        "material": "Material",
+        "note": "Nota (opcional)",
+        "submit": "Enviar alerta",
+        "raised": "Alerta enviada a {{workCenter}}",
+        "failed": "No se pudo enviar la alerta: {{reason}}"
+      }
     },
     "operations": {
       "title": "Operaciones",

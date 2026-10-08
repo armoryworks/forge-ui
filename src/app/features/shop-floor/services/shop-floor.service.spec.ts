@@ -242,6 +242,17 @@ describe('ShopFloorService', () => {
     });
   });
 
+  describe('raiseAndon', () => {
+    it('posts the job, type and note to the terminal andon route without a global error toast', () => {
+      service.raiseAndon({ jobId: 41, type: 'Stoppage', notes: 'Spindle stalled' }).subscribe();
+      const req = httpMock.expectOne(`${base}/andon`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ jobId: 41, type: 'Stoppage', notes: 'Spindle stalled' });
+      expect(req.request.context.get(SILENT_HTTP_ERRORS)).toBe(true);
+      req.flush({ alertId: 1 });
+    });
+  });
+
   describe('getTeams', () => {
     it('should GET teams', () => {
       service.getTeams().subscribe();

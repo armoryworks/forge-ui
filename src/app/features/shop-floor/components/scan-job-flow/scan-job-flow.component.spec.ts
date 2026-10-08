@@ -7,6 +7,7 @@ import { ScanJobFlowComponent } from './scan-job-flow.component';
 import { ShopFloorService } from '../../services/shop-floor.service';
 import { KanbanService } from '../../../kanban/services/kanban.service';
 import { AuthService } from '../../../../shared/services/auth.service';
+import { CapabilityService } from '../../../../shared/services/capability.service';
 import { JobStatus } from '../../../../shared/models/mobile-api.model';
 import { JobOperationRow } from '../../models/job-operation-row.model';
 import { JobOperations } from '../../models/job-operations.model';
@@ -55,6 +56,7 @@ describe('ScanJobFlowComponent — next status', () => {
         { provide: ShopFloorService, useValue: shopFloor },
         { provide: KanbanService, useValue: {} },
         { provide: AuthService, useValue: { user: () => ({ id: 3 }) } },
+        { provide: CapabilityService, useValue: { isEnabled: () => false } },
         { provide: TranslateService, useValue: { instant: (k: string, p?: Record<string, string>) => p ? `${k}:${JSON.stringify(p)}` : k } },
       ],
     });
@@ -198,6 +200,7 @@ describe('ScanJobFlowComponent — operation tracking', () => {
         { provide: ShopFloorService, useValue: shopFloor },
         { provide: KanbanService, useValue: {} },
         { provide: AuthService, useValue: { user: () => ({ id: 3 }) } },
+        { provide: CapabilityService, useValue: { isEnabled: () => false } },
         { provide: TranslateService, useValue: { instant: (k: string, p?: Record<string, unknown>) => p ? `${k}:${JSON.stringify(p)}` : k } },
       ],
     });
@@ -357,5 +360,123 @@ describe('ScanJobFlowComponent — operation tracking', () => {
     expect(c.step()).toBe('actions');
     expect(c.error()).toContain('changed by someone else');
     expect(shopFloor.getOperations).toHaveBeenCalledTimes(2);
+  });
+});
+
+interface ProblemInternals {
+  step: () => string;
+  error: () => string | null;
+  andonEnabled: () => boolean;
+  problemType: () => string | null;
+  problemRaisedAt: () => string | null;
+  problemNoteControl: { setValue(value: string): void };
+  showProblem(): void;
+  selectProblemType(type: string): void;
+  submitProblem(): void;
+}
+
+describe('ScanJobFlowComponent — problem button', () => {
+  const shopFloor = {
+    getJobStatus: vi.fn(() => of(status(7))),
+    getConfig: vi.fn(() => of({ operationTracking: false })),
+    raiseAndon: vi.fn(),
+  };
+  let andonOn = true;
+
+  function create(): { flow: ProblemInternals; completed: ReturnType<typeof vi.fn> } {
+    const fixture = TestBed.createComponent(ScanJobFlowComponent);
+    fixture.componentRef.setInput('jobId', 5);
+    fixture.componentRef.setInput('jobNumber', 'JOB-0005');
+    fixture.componentRef.setInput('jobTitle', 'Bracket');
+    fixture.componentRef.setInput('currentStage', 'In Production');
+    const completed = vi.fn();
+    fixture.componentInstance.completed.subscribe(completed);
+    fixture.componentInstance.ngOnInit();
+    return { flow: fixture.componentInstance as unknown as ProblemInternals, completed };
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    andonOn = true;
+    TestBed.configureTestingModule({
+      imports: [ScanJobFlowComponent],
+      providers: [
+        { provide: ShopFloorService, useValue: shopFloor },
+        { provide: KanbanService, useValue: {} },
+        { provide: AuthService, useValue: { user: () => ({ id: 3 }) } },
+        { provide: CapabilityService, useValue: { isEnabled: (code: string) => code === 'CAP-EXT-ANDON' && andonOn } },
+        { provide: TranslateService, useValue: { instant: (k: string, p?: Record<string, unknown>) => p ? `${k}:${JSON.stringify(p)}` : k } },
+      ],
+    });
+    TestBed.overrideComponent(ScanJobFlowComponent, { set: { template: '', imports: [] } });
+  });
+
+  afterEach(() => vi.useRealTimers());
+
+  it('is unavailable when the andon capability is off', () => {
+    andonOn = false;
+    const { flow } = create();
+
+    expect(flow.andonEnabled()).toBe(false);
+    flow.showProblem();
+    expect(flow.step()).toBe('actions');
+  });
+
+  it('needs a type before it sends anything', () => {
+    const { flow } = create();
+
+    flow.showProblem();
+    expect(flow.step()).toBe('problem');
+    expect(flow.problemType()).toBeNull();
+    flow.submitProblem();
+
+    expect(shopFloor.raiseAndon).not.toHaveBeenCalled();
+    expect(flow.step()).toBe('problem');
+  });
+
+  it('raises the chosen type with the trimmed note and reports where it went', () => {
+    shopFloor.raiseAndon.mockReturnValue(of({ alertId: 11, workCenterName: 'Lathe' }));
+    const { flow, completed } = create();
+
+    flow.showProblem();
+    flow.selectProblemType('Stoppage');
+    flow.problemNoteControl.setValue('  Spindle stalled  ');
+    flow.submitProblem();
+
+    expect(shopFloor.raiseAndon).toHaveBeenCalledWith({ jobId: 5, type: 'Stoppage', notes: 'Spindle stalled' });
+    expect(flow.step()).toBe('done');
+    expect(flow.problemRaisedAt()).toBe('Lathe');
+    vi.advanceTimersByTime(1_500);
+    expect(completed).toHaveBeenCalledTimes(1);
+  });
+
+  it('sends no note when the note is blank', () => {
+    shopFloor.raiseAndon.mockReturnValue(of({ alertId: 12, workCenterName: 'Mill' }));
+    const { flow } = create();
+
+    flow.showProblem();
+    flow.selectProblemType('Material');
+    flow.problemNoteControl.setValue('   ');
+    flow.submitProblem();
+
+    expect(shopFloor.raiseAndon).toHaveBeenCalledWith({ jobId: 5, type: 'Material', notes: null });
+  });
+
+  it('stays on the picker with the server reason when the job has no work center', () => {
+    shopFloor.raiseAndon.mockReturnValue(throwError(() => new HttpErrorResponse({
+      status: 409, error: { detail: 'JOB-0005 has no work center on its current operation.' },
+    })));
+    const { flow, completed } = create();
+
+    flow.showProblem();
+    flow.selectProblemType('Quality');
+    flow.submitProblem();
+
+    expect(flow.step()).toBe('problem');
+    expect(flow.problemType()).toBe('Quality');
+    expect(flow.error()).toBe('shopFloor.jobFlow.problem.failed:{"reason":"JOB-0005 has no work center on its current operation."}');
+    vi.advanceTimersByTime(1_500);
+    expect(completed).not.toHaveBeenCalled();
   });
 });

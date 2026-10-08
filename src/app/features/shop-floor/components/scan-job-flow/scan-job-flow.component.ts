@@ -9,6 +9,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { AuthService } from '../../../../shared/services/auth.service';
+import { CapabilityService } from '../../../../shared/services/capability.service';
 import { ShopFloorService } from '../../services/shop-floor.service';
 import { KanbanService } from '../../../kanban/services/kanban.service';
 import { JobStatus } from '../../../../shared/models/mobile-api.model';
@@ -20,9 +21,16 @@ import { JobOperationRow } from '../../models/job-operation-row.model';
 import { OperationTimerEntryType } from '../../models/operation-timer-entry-type.type';
 import { RunningTimer } from '../../models/running-timer.model';
 import { UpdateJobOperationProgressRequest } from '../../models/update-job-operation-progress-request.model';
+import { KioskAndonType } from '../../models/kiosk-andon-type.type';
 
-type JobStep = 'actions' | 'confirm-advance' | 'log-note' | 'quantity' | 'processing' | 'done';
-type CompletedAction = 'timer-started' | 'timer-stopped' | 'stage-advanced' | 'note-logged';
+type JobStep = 'actions' | 'confirm-advance' | 'log-note' | 'problem' | 'quantity' | 'processing' | 'done';
+type CompletedAction = 'timer-started' | 'timer-stopped' | 'stage-advanced' | 'note-logged' | 'problem-raised';
+
+const PROBLEM_TYPES: readonly { type: KioskAndonType; icon: string; labelKey: string }[] = [
+  { type: 'Stoppage', icon: 'pan_tool', labelKey: 'shopFloor.jobFlow.problem.stoppage' },
+  { type: 'Quality', icon: 'rule', labelKey: 'shopFloor.jobFlow.problem.quality' },
+  { type: 'Material', icon: 'inventory_2', labelKey: 'shopFloor.jobFlow.problem.material' },
+];
 
 @Component({
   selector: 'app-scan-job-flow',
@@ -40,6 +48,7 @@ export class ScanJobFlowComponent implements OnInit {
   private readonly kanbanService = inject(KanbanService);
   private readonly translate = inject(TranslateService);
   private readonly auth = inject(AuthService);
+  private readonly capabilities = inject(CapabilityService);
   private readonly destroyRef = inject(DestroyRef);
 
   // Inputs
@@ -68,6 +77,11 @@ export class ScanJobFlowComponent implements OnInit {
     return status?.nextStageId != null && status.nextStageIsShopFloor === true;
   });
   protected readonly canAdvance = computed(() => !this.statusLoading() && this.hasShopFloorNextStage());
+  protected readonly andonEnabled = computed(() => this.capabilities.isEnabled('CAP-EXT-ANDON'));
+  protected readonly problemTypes = PROBLEM_TYPES;
+  protected readonly problemType = signal<KioskAndonType | null>(null);
+  protected readonly problemNoteControl = new FormControl('');
+  protected readonly problemRaisedAt = signal<string | null>(null);
 
   protected readonly tracking = signal(false);
   protected readonly jobOperations = signal<JobOperations | null>(null);
@@ -353,6 +367,43 @@ export class ScanJobFlowComponent implements OnInit {
         this.processing.set(false);
         this.error.set('Failed to log note');
         this.step.set('log-note');
+      },
+    });
+  }
+
+  protected showProblem(): void {
+    if (!this.andonEnabled()) return;
+    this.error.set(null);
+    this.problemType.set(null);
+    this.problemNoteControl.reset();
+    this.step.set('problem');
+  }
+
+  protected selectProblemType(type: KioskAndonType): void {
+    this.problemType.set(type);
+  }
+
+  protected submitProblem(): void {
+    const type = this.problemType();
+    if (!type || this.processing() || !this.andonEnabled()) return;
+
+    this.processing.set(true);
+    this.error.set(null);
+    this.step.set('processing');
+
+    const notes = this.problemNoteControl.value?.trim() || null;
+    this.shopFloorService.raiseAndon({ jobId: this.jobId(), type, notes }).subscribe({
+      next: (result) => {
+        this.processing.set(false);
+        this.problemRaisedAt.set(result.workCenterName);
+        this.completedAction.set('problem-raised');
+        this.step.set('done');
+        setTimeout(() => this.completed.emit(), 1500);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.processing.set(false);
+        this.error.set(this.translate.instant('shopFloor.jobFlow.problem.failed', { reason: this.serverReason(err) }));
+        this.step.set('problem');
       },
     });
   }

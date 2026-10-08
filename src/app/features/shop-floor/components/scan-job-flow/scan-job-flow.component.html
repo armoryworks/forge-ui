@@ -66,6 +66,15 @@
         <span class="material-icons-outlined">note_add</span>
         <span class="scan-job__action-label">{{ 'shopFloor.jobFlow.logNote' | translate }}</span>
       </button>
+
+      @if (andonEnabled()) {
+        <button class="scan-job__action-btn scan-job__action-btn--problem"
+                (click)="showProblem()"
+                data-testid="job-problem-btn">
+          <span class="material-icons-outlined">report_problem</span>
+          <span class="scan-job__action-label">{{ 'shopFloor.jobFlow.problem.button' | translate }}</span>
+        </button>
+      }
     </div>
 
     @if (tracking()) {
@@ -160,6 +169,52 @@
     </div>
   }
 
+  @if (step() === 'problem') {
+    <div class="scan-job__problem" data-testid="job-problem">
+      @if (error()) {
+        <div class="scan-job__error" data-testid="job-problem-error">
+          <span class="material-icons-outlined">warning</span>
+          {{ error() }}
+        </div>
+      }
+
+      <p class="scan-job__problem-title">{{ 'shopFloor.jobFlow.problem.title' | translate }}</p>
+
+      <div class="scan-job__problem-types" role="group" [attr.aria-label]="'shopFloor.jobFlow.problem.title' | translate">
+        @for (choice of problemTypes; track choice.type) {
+          <button class="scan-job__problem-type"
+                  [class.scan-job__problem-type--selected]="problemType() === choice.type"
+                  [attr.aria-pressed]="problemType() === choice.type"
+                  (click)="selectProblemType(choice.type)"
+                  [attr.data-testid]="'job-problem-type-' + choice.type.toLowerCase()">
+            <span class="material-icons-outlined">{{ choice.icon }}</span>
+            <span class="scan-job__action-label">{{ choice.labelKey | translate }}</span>
+          </button>
+        }
+      </div>
+
+      <app-textarea
+        [label]="'shopFloor.jobFlow.problem.note' | translate"
+        [formControl]="problemNoteControl"
+        [rows]="3"
+        data-testid="job-problem-note" />
+
+      <div class="scan-job__note-actions">
+        <button class="action-btn" (click)="backToActions()" data-testid="job-problem-back-btn">
+          <span class="material-icons-outlined">arrow_back</span>
+          {{ 'common.back' | translate }}
+        </button>
+        <button class="action-btn action-btn--primary"
+                [disabled]="!problemType()"
+                (click)="submitProblem()"
+                data-testid="job-problem-submit-btn">
+          <span class="material-icons-outlined">campaign</span>
+          {{ 'shopFloor.jobFlow.problem.submit' | translate }}
+        </button>
+      </div>
+    </div>
+  }
+
   @if (step() === 'quantity') {
     @if (quantityTarget(); as target) {
       <app-kiosk-operation-quantity
@@ -196,6 +251,9 @@
         }
         @case ('note-logged') {
           <p class="scan-job__done-text">{{ 'shopFloor.jobFlow.noteLogged' | translate }}</p>
+        }
+        @case ('problem-raised') {
+          <p class="scan-job__done-text" data-testid="job-problem-raised">{{ 'shopFloor.jobFlow.problem.raised' | translate: { workCenter: problemRaisedAt() } }}</p>
         }
       }
     </div>

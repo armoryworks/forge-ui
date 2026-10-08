@@ -17,6 +17,8 @@ import { UpdateJobOperationProgressRequest } from '../models/update-job-operatio
 import { OperationTimerEntryType } from '../models/operation-timer-entry-type.type';
 import { RunningTimer } from '../models/running-timer.model';
 import { StopTimerTarget } from '../models/stop-timer-target.model';
+import { RaiseKioskAndonRequest } from '../models/raise-kiosk-andon-request.model';
+import { RaiseKioskAndonResult } from '../models/raise-kiosk-andon-result.model';
 import { JobAdvanceResult, JobStatus } from '../../../shared/models/mobile-api.model';
 import { SILENT_HTTP_ERRORS } from '../../../shared/interceptors/silent-http-errors.token';
 
@@ -114,6 +116,10 @@ export class ShopFloorService {
 
   advanceJob(jobId: number): Observable<JobAdvanceResult> {
     return this.http.post<JobAdvanceResult>(`${this.base}/jobs/${jobId}/advance`, {});
+  }
+
+  raiseAndon(request: RaiseKioskAndonRequest): Observable<RaiseKioskAndonResult> {
+    return this.http.post<RaiseKioskAndonResult>(`${this.base}/andon`, request, this.silent());
   }
 
   // Teams
