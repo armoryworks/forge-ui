@@ -1,0 +1,20 @@
+<app-dialog [title]="'subcontractUi.receiveBackTitle' | translate: { operation: data.order.operationName }" width="440px" (closed)="matDialogRef.close()">
+  <div [formGroup]="formGroup">
+    <p class="text-muted" data-testid="subcontract-receive-back-summary">
+      {{ 'subcontractUi.receiveBackSummary' | translate: { quantity: (data.order.quantity | number:'1.0-4'), vendor: data.order.vendorName } }}
+    </p>
+    <div class="dialog-row">
+      <app-input [label]="'subcontractUi.goodQuantity' | translate" formControlName="goodQuantity" type="number" [min]="0" [required]="true" data-testid="subcontract-receive-back-good" />
+      <app-input [label]="'subcontractUi.scrapQuantity' | translate" formControlName="scrapQuantity" type="number" [min]="0" [required]="true" data-testid="subcontract-receive-back-scrap" />
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button type="button" class="action-btn" (click)="matDialogRef.close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button type="button" class="action-btn action-btn--primary" data-testid="subcontract-receive-back-save"
+        [disabled]="formGroup.invalid || saving()"
+        (click)="save()">{{ 'subcontractUi.receiveBack' | translate }}</button>
+    </app-validation-button>
+  </div>
+</app-dialog>

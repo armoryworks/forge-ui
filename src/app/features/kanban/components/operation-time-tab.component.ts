@@ -37,6 +37,7 @@ import {
   minutesToSecondsMs,
   toOperationTimeRows,
 } from '../utils/operation-time-rows.utils';
+import { SubcontractPanelComponent } from './subcontract-panel/subcontract-panel.component';
 
 @Component({
   selector: 'app-operation-time-tab',
@@ -51,6 +52,7 @@ import {
     ColumnCellDirective,
     LoadingBlockDirective,
     DurationMsPipe,
+    SubcontractPanelComponent,
   ],
   templateUrl: './operation-time-tab.component.html',
   styleUrl: './operation-time-tab.component.scss',

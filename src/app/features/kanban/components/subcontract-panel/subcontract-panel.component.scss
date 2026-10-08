@@ -1,0 +1,44 @@
+@use 'styles/variables' as *;
+
+.subcontract {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  margin-top: $sp-md;
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-sm;
+    font-weight: 600;
+  }
+
+  &__op {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $sp-md;
+    padding: $sp-sm $sp-md;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+  }
+
+  &__op-info {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: $sp-sm;
+  }
+
+  &__op-name {
+    font-weight: 600;
+  }
+
+  &__op-vendor {
+    color: var(--text-muted);
+  }
+
+  &__op-actions {
+    display: flex;
+    gap: $sp-sm;
+  }
+}

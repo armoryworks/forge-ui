@@ -1,0 +1,58 @@
+@if (visible()) {
+  <section class="subcontract" data-testid="subcontract-panel">
+    <h4 class="subcontract__title">{{ 'subcontractUi.title' | translate }}</h4>
+
+    @for (operation of operations(); track operation.operationId) {
+      <div class="subcontract__op" [attr.data-testid]="'subcontract-op-' + operation.stepNumber">
+        <div class="subcontract__op-info">
+          <span class="subcontract__op-name">{{ 'subcontractUi.operationLabel' | translate: { step: operation.stepNumber, title: operation.title } }}</span>
+          <span class="subcontract__op-vendor">{{ operation.vendorName }}</span>
+          @if (outQuantity(operation) > 0) {
+            <span class="chip chip--info" [attr.data-testid]="'subcontract-out-' + operation.stepNumber">
+              {{ 'subcontractUi.outCount' | translate: { quantity: (outQuantity(operation) | number:'1.0-4') } }}
+            </span>
+          }
+        </div>
+        <div class="subcontract__op-actions">
+          @if (oldestOpenOrder(operation); as open) {
+            <button type="button" class="action-btn action-btn--sm" [attr.data-testid]="'subcontract-receive-op-' + operation.stepNumber" (click)="receiveBack(open)">
+              <span class="material-icons-outlined" aria-hidden="true">move_to_inbox</span>
+              {{ 'subcontractUi.receiveBack' | translate }}
+            </button>
+          }
+          <button type="button" class="action-btn action-btn--sm" [attr.data-testid]="'subcontract-send-op-' + operation.stepNumber" (click)="sendOut(operation)">
+            <span class="material-icons-outlined" aria-hidden="true">local_shipping</span>
+            {{ 'subcontractUi.sendOut' | translate }}
+          </button>
+        </div>
+      </div>
+    }
+
+    @if (orders().length > 0) {
+      <app-data-table
+        tableId="job-subcontract-orders"
+        [columns]="orderColumns"
+        [data]="orders()"
+        emptyIcon="local_shipping"
+        [emptyMessage]="'subcontractUi.noOrders' | translate">
+        <ng-template appColumnCell="status" let-row>
+          <span [class]="statusChipClass(row.status)" [attr.data-testid]="'subcontract-order-status-' + row.id">{{ statusLabelKey(row.status) | translate }}</span>
+        </ng-template>
+        <ng-template appColumnCell="poNumber" let-row>
+          @if (row.purchaseOrderId) {
+            <app-entity-link type="purchase-order" [entityId]="row.purchaseOrderId">{{ row.poNumber }}</app-entity-link>
+          } @else {
+            <span class="text-muted">—</span>
+          }
+        </ng-template>
+        <ng-template appColumnCell="actions" let-row>
+          @if (isOpen(row)) {
+            <button type="button" class="action-btn action-btn--sm" [attr.data-testid]="'subcontract-receive-order-' + row.id" (click)="receiveBack(row)">
+              {{ 'subcontractUi.receiveBack' | translate }}
+            </button>
+          }
+        </ng-template>
+      </app-data-table>
+    }
+  </section>
+}
