@@ -3,6 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { provideTranslateService } from '@ngx-translate/core';
 import { Component } from '@angular/core';
 
 import { AuthService } from '../../../shared/services/auth.service';
@@ -31,7 +32,7 @@ describe('MobileHomeComponent', () => {
   };
 
   const mockClockTypes = {
-    getLabel: vi.fn().mockReturnValue('Currently Working'),
+    definitions: signal([{ statusMapping: 'Training' }]),
     getStatusCssClass: vi.fn().mockReturnValue('in'),
   };
 
@@ -44,6 +45,7 @@ describe('MobileHomeComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([]),
+        provideTranslateService(),
         { provide: AuthService, useValue: mockAuthService },
         { provide: ClockEventTypeService, useValue: mockClockTypes },
       ],
@@ -134,25 +136,51 @@ describe('MobileHomeComponent', () => {
     expect(component['loading']()).toBe(false);
   });
 
-  it('greeting should return correct time-based greeting', () => {
+  it('greetingKey should return the time-based greeting key', () => {
     createComponent();
     flushInitRequests();
 
-    const greeting = component['greeting'];
-    expect(['Good morning', 'Good afternoon', 'Good evening']).toContain(greeting);
+    expect([
+      'mobileLegacyPages.home.greetingMorning',
+      'mobileLegacyPages.home.greetingAfternoon',
+      'mobileLegacyPages.home.greetingEvening',
+    ]).toContain(component['greetingKey']);
   });
 
-  it('statusLabel should return correct label from clock types service', () => {
+  it('statusLabelKey should say not clocked in before the status loads', () => {
     createComponent();
 
-    httpTesting.expectOne('/api/v1/time-tracking/clock-status').flush({
-      isClockedIn: true, status: 'In', clockedInAt: '2026-04-10T08:00:00Z',
+    expect(component['statusLabelKey']).toBe('mobileLegacyPages.home.notClockedIn');
+
+    flushInitRequests();
+  });
+
+  it.each([
+    ['In', 'mobileLegacyPages.home.statusWorking'],
+    ['Out', 'mobileLegacyPages.home.statusClockedOut'],
+    ['OnBreak', 'mobileLegacyPages.home.statusOnBreak'],
+    ['OnLunch', 'mobileLegacyPages.home.statusOnLunch'],
+    ['Mystery', 'mobileLegacyPages.home.statusUnknown'],
+  ])('statusLabelKey should translate the %s status', (status, key) => {
+    createComponent();
+    flushInitRequests({
+      isClockedIn: true, status, clockedInAt: '2026-04-10T08:00:00Z',
       currentJobNumber: null, timeOnTask: '01:00',
     });
-    httpTesting.expectOne((req) => req.url === '/api/v1/jobs').flush({ items: [], totalCount: 0, page: 1, pageSize: 5 });
 
-    const label = component['statusLabel'];
-    expect(mockClockTypes.getLabel).toHaveBeenCalledWith('In');
-    expect(label).toBe('Currently Working');
+    expect(component['statusLabelKey']).toBe(key);
+  });
+
+  it('statusLabelKey should leave a status defined in reference data to show as configured', () => {
+    createComponent();
+    flushInitRequests({
+      isClockedIn: true, status: 'Training', clockedInAt: '2026-04-10T08:00:00Z',
+      currentJobNumber: null, timeOnTask: '01:00',
+    });
+    fixture.detectChanges();
+
+    expect(component['statusLabelKey']).toBeNull();
+    const label = (fixture.nativeElement as HTMLElement).querySelector('.clock-banner__label');
+    expect(label?.textContent?.trim()).toBe('Training');
   });
 });

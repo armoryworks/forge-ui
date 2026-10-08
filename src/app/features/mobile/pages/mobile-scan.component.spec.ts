@@ -113,4 +113,23 @@ describe('MobileScanComponent', () => {
     expect(rendered.lookupError()).toBeNull();
     expect(root.querySelector('[data-testid="scan-lookup-error"]')).toBeNull();
   });
+
+  it('shows the camera permission help from translations', async () => {
+    const fixture = TestBed.createComponent(MobileScanComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const rendered = fixture.componentInstance as unknown as {
+      cameraUnavailable: { set(v: boolean): void };
+      cameraError: { set(v: 'permission'): void };
+    };
+
+    rendered.cameraUnavailable.set(true);
+    rendered.cameraError.set('permission');
+    fixture.detectChanges();
+
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('mobileLegacyPages.scan.permissionTitle');
+    expect(text).toContain('mobileLegacyPages.scan.tryAgain');
+    expect(text).not.toContain('Camera Permission Required');
+  });
 });

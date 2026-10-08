@@ -1,5 +1,5 @@
 <div class="mobile-scan">
-  <h2 class="mobile-scan__title">Scanner</h2>
+  <h2 class="mobile-scan__title">{{ 'mobileLegacyPages.scan.title' | translate }}</h2>
 
   <!-- Camera Scanner -->
   @if (!cameraUnavailable()) {
@@ -8,7 +8,7 @@
       @if (!scanning() && !lastResult()) {
         <div class="scanner-viewport__loading">
           <span class="material-icons-outlined spin">sync</span>
-          <span>Starting camera...</span>
+          <span>{{ 'mobileLegacyPages.scan.startingCamera' | translate }}</span>
         </div>
       }
     </div>
@@ -17,44 +17,36 @@
       @switch (cameraError()) {
         @case ('permission') {
           <span class="material-icons-outlined scanner-fallback__icon">lock</span>
-          <p class="scanner-fallback__title">Camera Permission Required</p>
-          <p class="scanner-fallback__text">
-            To scan barcodes and QR codes, allow camera access for this site.
-          </p>
+          <p class="scanner-fallback__title">{{ 'mobileLegacyPages.scan.permissionTitle' | translate }}</p>
+          <p class="scanner-fallback__text">{{ 'mobileLegacyPages.scan.permissionText' | translate }}</p>
           <div class="scanner-fallback__steps">
-            <p class="scanner-fallback__step">1. Tap the lock icon in your browser's address bar</p>
-            <p class="scanner-fallback__step">2. Find "Camera" and set it to "Allow"</p>
-            <p class="scanner-fallback__step">3. Tap "Try Again" below</p>
+            <p class="scanner-fallback__step">{{ 'mobileLegacyPages.scan.permissionStep1' | translate }}</p>
+            <p class="scanner-fallback__step">{{ 'mobileLegacyPages.scan.permissionStep2' | translate }}</p>
+            <p class="scanner-fallback__step">{{ 'mobileLegacyPages.scan.permissionStep3' | translate }}</p>
           </div>
         }
         @case ('not-found') {
           <span class="material-icons-outlined scanner-fallback__icon">no_photography</span>
-          <p class="scanner-fallback__title">No Camera Detected</p>
-          <p class="scanner-fallback__text">
-            This device doesn't appear to have a camera, or it's not accessible.
-            Use the manual entry option below to type or paste a barcode value.
-          </p>
+          <p class="scanner-fallback__title">{{ 'mobileLegacyPages.scan.notFoundTitle' | translate }}</p>
+          <p class="scanner-fallback__text">{{ 'mobileLegacyPages.scan.notFoundText' | translate }}</p>
         }
         @case ('insecure') {
           <span class="material-icons-outlined scanner-fallback__icon">https</span>
-          <p class="scanner-fallback__title">Secure Connection Required</p>
+          <p class="scanner-fallback__title">{{ 'mobileLegacyPages.scan.insecureTitle' | translate }}</p>
           <p class="scanner-fallback__text">
-            Camera access requires a secure (HTTPS) connection.
-            Make sure the URL starts with <strong>https://</strong>.
+            {{ 'mobileLegacyPages.scan.insecureText' | translate }}
+            {{ 'mobileLegacyPages.scan.insecureUrlHint' | translate }} <strong>https://</strong>.
           </p>
         }
         @default {
           <span class="material-icons-outlined scanner-fallback__icon">videocam_off</span>
-          <p class="scanner-fallback__title">Camera Unavailable</p>
-          <p class="scanner-fallback__text">
-            Could not start the camera. It may be in use by another app.
-            Close other apps and try again.
-          </p>
+          <p class="scanner-fallback__title">{{ 'mobileLegacyPages.scan.unavailableTitle' | translate }}</p>
+          <p class="scanner-fallback__text">{{ 'mobileLegacyPages.scan.unavailableText' | translate }}</p>
         }
       }
-      <button class="action-btn action-btn--primary scanner-fallback__retry" (click)="retryCamera()" aria-label="Try camera again" data-testid="scan-retry-btn">
+      <button class="action-btn action-btn--primary scanner-fallback__retry" (click)="retryCamera()" [attr.aria-label]="'mobileLegacyPages.scan.tryAgainLabel' | translate" data-testid="scan-retry-btn">
         <span class="material-icons-outlined">refresh</span>
-        Try Again
+        {{ 'mobileLegacyPages.scan.tryAgain' | translate }}
       </button>
     </div>
   }
@@ -122,9 +114,9 @@
   }
 
   <!-- Manual Entry -->
-  <button class="manual-toggle" (click)="toggleManual()" aria-label="Toggle manual entry" data-testid="scan-manual-toggle">
+  <button class="manual-toggle" (click)="toggleManual()" [attr.aria-label]="'mobileLegacyPages.scan.manualToggleLabel' | translate" data-testid="scan-manual-toggle">
     <span class="material-icons-outlined">keyboard</span>
-    {{ showManual() ? 'Hide' : 'Manual Entry' }}
+    {{ (showManual() ? 'mobileLegacyPages.scan.hideManual' : 'mobileLegacyPages.scan.manualEntry') | translate }}
   </button>
 
   @if (showManual()) {
@@ -133,17 +125,17 @@
         <input
           type="text"
           class="manual-entry__input"
-          placeholder="Type or paste barcode/QR value..."
+          [placeholder]="'mobileLegacyPages.scan.manualPlaceholder' | translate"
           [value]="manualValue()"
           (input)="onManualInput($event)"
           (keydown)="onManualKeydown($event)"
-          aria-label="Manual barcode entry"
+          [attr.aria-label]="'mobileLegacyPages.scan.manualInputLabel' | translate"
           data-testid="scan-manual-input" />
         <button
           class="action-btn action-btn--primary"
           [disabled]="!manualValue().trim()"
           (click)="submitManual()"
-          aria-label="Submit manual entry"
+          [attr.aria-label]="'mobileLegacyPages.scan.manualSubmitLabel' | translate"
           data-testid="scan-manual-submit">
           <span class="material-icons-outlined">search</span>
         </button>

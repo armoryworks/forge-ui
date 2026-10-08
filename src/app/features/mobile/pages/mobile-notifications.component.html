@@ -1,16 +1,16 @@
 <div class="mobile-page">
   <div class="mobile-notif__header">
-    <h2 class="mobile-notif__title">Notifications</h2>
+    <h2 class="mobile-notif__title">{{ 'mobileLegacyPages.notifications.title' | translate }}</h2>
     @if (unreadCount() > 0) {
-      <button class="action-btn action-btn--sm" (click)="markAllRead()" aria-label="Mark all as read">
+      <button class="action-btn action-btn--sm" (click)="markAllRead()" [attr.aria-label]="'mobileLegacyPages.notifications.markAllReadLabel' | translate">
         <span class="material-icons-outlined">done_all</span>
-        Mark All Read
+        {{ 'mobileLegacyPages.notifications.markAllRead' | translate }}
       </button>
     }
   </div>
 
   @if (notifications().length === 0) {
-    <app-empty-state icon="notifications_none" message="No notifications" />
+    <app-empty-state icon="notifications_none" [message]="'mobileLegacyPages.notifications.empty' | translate" />
   } @else {
     <div class="mobile-notif__list">
       @for (n of notifications(); track n.id) {
@@ -29,7 +29,7 @@
             </div>
             <span class="notif-item__message">{{ n.message }}</span>
           </div>
-          <button class="icon-btn" (click)="dismiss(n.id, $event)" aria-label="Dismiss notification">
+          <button class="icon-btn" (click)="dismiss(n.id, $event)" [attr.aria-label]="'mobileLegacyPages.notifications.dismissLabel' | translate">
             <span class="material-icons-outlined">close</span>
           </button>
         </div>

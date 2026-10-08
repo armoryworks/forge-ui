@@ -81,19 +81,19 @@ export class MobileScanComponent implements AfterViewInit, OnDestroy {
 
       if (errorName === 'NotAllowedError' || errorMsg.includes('Permission')) {
         this.cameraError.set('permission');
-        this.error.set('Camera permission was denied.');
+        this.error.set(this.translate.instant('mobileLegacyPages.scan.errorPermission'));
       } else if (errorName === 'NotFoundError' || errorMsg.includes('no camera') || errorMsg.includes('Requested device not found')) {
         this.cameraError.set('not-found');
-        this.error.set('No camera detected on this device.');
+        this.error.set(this.translate.instant('mobileLegacyPages.scan.errorNotFound'));
       } else if (errorName === 'NotReadableError' || errorName === 'AbortError') {
         this.cameraError.set('generic');
-        this.error.set('Camera is in use by another app. Close other apps using the camera and try again.');
+        this.error.set(this.translate.instant('mobileLegacyPages.scan.errorInUse'));
       } else if (errorMsg.includes('insecure') || errorMsg.includes('secure context') || errorMsg.includes('https')) {
         this.cameraError.set('insecure');
-        this.error.set('Camera requires a secure (HTTPS) connection.');
+        this.error.set(this.translate.instant('mobileLegacyPages.scan.errorInsecure'));
       } else {
         this.cameraError.set('generic');
-        this.error.set('Camera is not available.');
+        this.error.set(this.translate.instant('mobileLegacyPages.scan.errorUnavailable'));
       }
     }
   }

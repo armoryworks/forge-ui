@@ -5,7 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ChatService } from '../../../chat/services/chat.service';
 import { ChatRoom, ChatRoomMember } from '../../../chat/models/chat-room.model';
 import { AuthService } from '../../../../shared/services/auth.service';
@@ -27,6 +27,7 @@ export class MobileChatChannelInfoComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly translate = inject(TranslateService);
 
   protected readonly channel = signal<ChatRoom | null>(null);
   protected readonly loading = signal(false);
@@ -59,15 +60,15 @@ export class MobileChatChannelInfoComponent implements OnInit {
     }
   }
 
-  protected getChannelTypeLabel(channel: ChatRoom): string {
+  protected getChannelTypeLabelKey(channel: ChatRoom): string {
     switch (channel.channelType) {
-      case 'Group': return 'Group Channel';
-      case 'TeamAuto': return 'Team Channel';
-      case 'System': return 'System Channel';
-      case 'Broadcast': return 'Broadcast Channel';
-      case 'Custom': return 'Custom Channel';
-      case 'DirectMessage': return 'Direct Message';
-      default: return 'Channel';
+      case 'Group': return 'mobileLegacyPages.channelInfo.typeGroup';
+      case 'TeamAuto': return 'mobileLegacyPages.channelInfo.typeTeam';
+      case 'System': return 'mobileLegacyPages.channelInfo.typeSystem';
+      case 'Broadcast': return 'mobileLegacyPages.channelInfo.typeBroadcast';
+      case 'Custom': return 'mobileLegacyPages.channelInfo.typeCustom';
+      case 'DirectMessage': return 'mobileLegacyPages.channelInfo.typeDirectMessage';
+      default: return 'mobileLegacyPages.channelInfo.typeChannel';
     }
   }
 
@@ -79,7 +80,7 @@ export class MobileChatChannelInfoComponent implements OnInit {
     this.chatService.muteChannel(ch.id, newMuted).subscribe({
       next: () => {
         this.isMuted.set(newMuted);
-        this.snackbar.info(newMuted ? 'Channel muted' : 'Channel unmuted');
+        this.snackbar.info(this.translate.instant(newMuted ? 'mobileLegacyPages.channelInfo.channelMuted' : 'mobileLegacyPages.channelInfo.channelUnmuted'));
       },
     });
   }
@@ -91,16 +92,16 @@ export class MobileChatChannelInfoComponent implements OnInit {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Leave Channel?',
-        message: `Are you sure you want to leave #${ch.name}? You can rejoin later.`,
-        confirmLabel: 'Leave',
+        title: this.translate.instant('mobileLegacyPages.channelInfo.leaveTitle'),
+        message: this.translate.instant('mobileLegacyPages.channelInfo.leaveMessage', { name: ch.name }),
+        confirmLabel: this.translate.instant('mobileLegacyPages.channelInfo.leaveConfirm'),
         severity: 'warn',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
       if (confirmed) {
         this.chatService.leaveChannel(ch.id).subscribe({
           next: () => {
-            this.snackbar.info(`Left #${ch.name}`);
+            this.snackbar.info(this.translate.instant('mobileLegacyPages.channelInfo.left', { name: ch.name }));
             this.router.navigate(['../../chat'], { relativeTo: this.route });
           },
         });
@@ -112,10 +113,10 @@ export class MobileChatChannelInfoComponent implements OnInit {
     return member.userId === this.currentUserId;
   }
 
-  protected getRoleBadge(role: string): string {
+  protected getRoleBadgeKey(role: string): string {
     switch (role) {
-      case 'Owner': return 'Owner';
-      case 'Admin': return 'Admin';
+      case 'Owner': return 'mobileLegacyPages.channelInfo.roleOwner';
+      case 'Admin': return 'mobileLegacyPages.channelInfo.roleAdmin';
       default: return '';
     }
   }

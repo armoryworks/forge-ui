@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AuthService } from '../../../shared/services/auth.service';
 import { DesktopPreferenceService } from '../../../shared/services/desktop-preference.service';
@@ -11,7 +11,7 @@ import { AvatarComponent } from '../../../shared/components/avatar/avatar.compon
 @Component({
   selector: 'app-mobile-account',
   standalone: true,
-  imports: [RouterLink, AvatarComponent],
+  imports: [RouterLink, TranslatePipe, AvatarComponent],
   templateUrl: './mobile-account.component.html',
   styleUrl: './mobile-account.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -11,53 +11,53 @@
   </div>
 
   <div class="account-section">
-    <span class="account-section__label">Quick Settings</span>
-    <button class="account-link" (click)="toggleTheme()" aria-label="Toggle theme">
+    <span class="account-section__label">{{ 'mobileLegacyPages.account.quickSettings' | translate }}</span>
+    <button class="account-link" (click)="toggleTheme()" [attr.aria-label]="'mobileLegacyPages.account.toggleThemeLabel' | translate">
       <span class="material-icons-outlined">{{ theme() === 'dark' ? 'light_mode' : 'dark_mode' }}</span>
-      <span>{{ theme() === 'dark' ? 'Light Mode' : 'Dark Mode' }}</span>
+      <span>{{ (theme() === 'dark' ? 'mobileLegacyPages.account.lightMode' : 'mobileLegacyPages.account.darkMode') | translate }}</span>
       <span class="material-icons-outlined account-link__chevron">chevron_right</span>
     </button>
   </div>
 
   <div class="account-section">
-    <span class="account-section__label">Account</span>
-    <nav class="account-links" aria-label="Account settings">
+    <span class="account-section__label">{{ 'mobileLegacyPages.account.account' | translate }}</span>
+    <nav class="account-links" [attr.aria-label]="'mobileLegacyPages.account.accountSettingsLabel' | translate">
       <a class="account-link" routerLink="/account/profile">
         <span class="material-icons-outlined">person</span>
-        <span>Profile</span>
+        <span>{{ 'mobileLegacyPages.account.profile' | translate }}</span>
         <span class="material-icons-outlined account-link__chevron">chevron_right</span>
       </a>
       <a class="account-link" routerLink="/account/integrations">
         <span class="material-icons-outlined">extension</span>
-        <span>Integrations</span>
+        <span>{{ 'mobileLegacyPages.account.integrations' | translate }}</span>
         <span class="material-icons-outlined account-link__chevron">chevron_right</span>
       </a>
       <a class="account-link" routerLink="/account/security">
         <span class="material-icons-outlined">lock</span>
-        <span>Security</span>
+        <span>{{ 'mobileLegacyPages.account.security' | translate }}</span>
         <span class="material-icons-outlined account-link__chevron">chevron_right</span>
       </a>
       <a class="account-link" routerLink="/account/customization">
         <span class="material-icons-outlined">palette</span>
-        <span>Customization</span>
+        <span>{{ 'mobileLegacyPages.account.customization' | translate }}</span>
         <span class="material-icons-outlined account-link__chevron">chevron_right</span>
       </a>
       <a class="account-link" routerLink="/onboarding">
         <span class="material-icons-outlined">school</span>
-        <span>Setup Wizard</span>
+        <span>{{ 'mobileLegacyPages.account.setupWizard' | translate }}</span>
         <span class="material-icons-outlined account-link__chevron">chevron_right</span>
       </a>
     </nav>
   </div>
 
   <div class="account-footer">
-    <button class="action-btn" (click)="openDesktop()" aria-label="Open desktop view">
+    <button class="action-btn" (click)="openDesktop()" [attr.aria-label]="'mobileLegacyPages.account.openDesktopLabel' | translate">
       <span class="material-icons-outlined">desktop_windows</span>
-      Open Desktop View
+      {{ 'mobileLegacyPages.account.openDesktop' | translate }}
     </button>
-    <button class="action-btn action-btn--danger" (click)="logout()" aria-label="Log out">
+    <button class="action-btn action-btn--danger" (click)="logout()" [attr.aria-label]="'mobileLegacyPages.account.logOutLabel' | translate">
       <span class="material-icons-outlined">logout</span>
-      Log Out
+      {{ 'mobileLegacyPages.account.logOut' | translate }}
     </button>
   </div>
 </div>

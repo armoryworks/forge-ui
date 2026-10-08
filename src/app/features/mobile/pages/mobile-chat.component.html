@@ -12,7 +12,7 @@
         type="text"
         [placeholder]="'chat.searchConversations' | translate"
         [formControl]="searchControl"
-        aria-label="Search conversations" />
+        [attr.aria-label]="'mobileLegacyPages.chat.searchLabel' | translate" />
     </div>
 
     <div class="mobile-chat__channel-list-wrapper">
@@ -58,7 +58,7 @@
 
   <!-- Mobile Thread View (full-screen slide-over) -->
   @if (threadParentMessage(); as parent) {
-    <div class="mobile-thread-overlay" role="dialog" aria-label="Thread">
+    <div class="mobile-thread-overlay" role="dialog" [attr.aria-label]="'mobileLegacyPages.chat.threadLabel' | translate">
       <div class="mobile-thread-overlay__content">
         <app-chat-thread-panel
           [parentMessage]="parent"

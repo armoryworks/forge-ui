@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { AuthService } from '../../../shared/services/auth.service';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
@@ -15,6 +16,13 @@ interface MobileClockStatus {
   timeOnTask: string;
 }
 
+const STATUS_LABEL_KEYS: Record<string, string> = {
+  In: 'mobileLegacyPages.home.statusWorking',
+  Out: 'mobileLegacyPages.home.statusClockedOut',
+  OnBreak: 'mobileLegacyPages.home.statusOnBreak',
+  OnLunch: 'mobileLegacyPages.home.statusOnLunch',
+};
+
 interface MobileJobSummary {
   id: number;
   jobNumber: string;
@@ -27,7 +35,7 @@ interface MobileJobSummary {
 @Component({
   selector: 'app-mobile-home',
   standalone: true,
-  imports: [RouterLink, EmptyStateComponent, LoadingBlockDirective],
+  imports: [RouterLink, TranslatePipe, EmptyStateComponent, LoadingBlockDirective],
   templateUrl: './mobile-home.component.html',
   styleUrl: './mobile-home.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -70,17 +78,21 @@ export class MobileHomeComponent implements OnInit {
     });
   }
 
-  protected get greeting(): string {
+  protected get greetingKey(): string {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
+    if (hour < 12) return 'mobileLegacyPages.home.greetingMorning';
+    if (hour < 17) return 'mobileLegacyPages.home.greetingAfternoon';
+    return 'mobileLegacyPages.home.greetingEvening';
   }
 
-  protected get statusLabel(): string {
+  protected get statusLabelKey(): string | null {
     const status = this.clockStatus();
-    if (!status) return 'Not clocked in';
-    return this.clockTypes.getLabel(status.status);
+    if (!status) return 'mobileLegacyPages.home.notClockedIn';
+    if (!status.status) return STATUS_LABEL_KEYS['Out'];
+    const known = STATUS_LABEL_KEYS[status.status];
+    if (known) return known;
+    if (this.clockTypes.definitions().some((d) => d.statusMapping === status.status)) return null;
+    return 'mobileLegacyPages.home.statusUnknown';
   }
 
   protected get statusClass(): string {

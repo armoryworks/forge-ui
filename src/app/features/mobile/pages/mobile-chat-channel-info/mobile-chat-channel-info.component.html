@@ -1,9 +1,9 @@
 <div class="channel-info">
   <div class="channel-info__header">
-    <button class="icon-btn" (click)="goBack()" aria-label="Back to messages">
+    <button class="icon-btn" (click)="goBack()" [attr.aria-label]="'mobileLegacyPages.channelInfo.backLabel' | translate">
       <span class="material-icons-outlined">arrow_back</span>
     </button>
-    <span class="channel-info__title">{{ 'chat.channelInfo' | translate }}</span>
+    <span class="channel-info__title">{{ 'mobileLegacyPages.channelInfo.title' | translate }}</span>
   </div>
 
   @if (loading()) {
@@ -18,34 +18,34 @@
           <span class="material-icons-outlined channel-info__icon">{{ getChannelIcon(ch) }}</span>
         </div>
         <h2 class="channel-info__name">{{ ch.name }}</h2>
-        <span class="channel-info__type">{{ getChannelTypeLabel(ch) }}</span>
+        <span class="channel-info__type">{{ getChannelTypeLabelKey(ch) | translate }}</span>
       </div>
 
       <!-- Description -->
       @if (ch.description) {
         <div class="channel-info__section">
-          <span class="channel-info__section-label">Description</span>
+          <span class="channel-info__section-label">{{ 'mobileLegacyPages.channelInfo.description' | translate }}</span>
           <p class="channel-info__description">{{ ch.description }}</p>
         </div>
       }
 
       <!-- Actions -->
       <div class="channel-info__actions">
-        <button class="channel-info__action-btn" (click)="toggleMute()" aria-label="Toggle mute">
+        <button class="channel-info__action-btn" (click)="toggleMute()" [attr.aria-label]="'mobileLegacyPages.channelInfo.toggleMuteLabel' | translate">
           <span class="material-icons-outlined">{{ isMuted() ? 'notifications_off' : 'notifications_active' }}</span>
-          <span>{{ isMuted() ? 'Unmute' : 'Mute' }}</span>
+          <span>{{ (isMuted() ? 'mobileLegacyPages.channelInfo.unmute' : 'mobileLegacyPages.channelInfo.mute') | translate }}</span>
         </button>
         @if (ch.channelType !== 'System' && ch.channelType !== 'Broadcast') {
-          <button class="channel-info__action-btn channel-info__action-btn--danger" (click)="leaveChannel()" aria-label="Leave channel">
+          <button class="channel-info__action-btn channel-info__action-btn--danger" (click)="leaveChannel()" [attr.aria-label]="'mobileLegacyPages.channelInfo.leaveLabel' | translate">
             <span class="material-icons-outlined">logout</span>
-            <span>Leave Channel</span>
+            <span>{{ 'mobileLegacyPages.channelInfo.leave' | translate }}</span>
           </button>
         }
       </div>
 
       <!-- Members -->
       <div class="channel-info__section">
-        <span class="channel-info__section-label">Members ({{ ch.members.length }})</span>
+        <span class="channel-info__section-label">{{ 'mobileLegacyPages.channelInfo.members' | translate: { count: ch.members.length } }}</span>
         <div class="channel-info__members">
           @for (member of ch.members; track member.userId) {
             <div class="channel-info__member" [class.channel-info__member--self]="isOwnMember(member)">
@@ -54,11 +54,11 @@
                 <span class="channel-info__member-name">
                   {{ member.displayName }}
                   @if (isOwnMember(member)) {
-                    <span class="channel-info__member-you">(you)</span>
+                    <span class="channel-info__member-you">{{ 'mobileLegacyPages.channelInfo.you' | translate }}</span>
                   }
                 </span>
-                @if (getRoleBadge(member.role); as badge) {
-                  <span class="channel-info__member-role">{{ badge }}</span>
+                @if (getRoleBadgeKey(member.role); as badgeKey) {
+                  <span class="channel-info__member-role">{{ badgeKey | translate }}</span>
                 }
               </div>
             </div>
@@ -68,7 +68,7 @@
 
       <!-- Created info -->
       <div class="channel-info__section">
-        <span class="channel-info__section-label">Created</span>
+        <span class="channel-info__section-label">{{ 'mobileLegacyPages.channelInfo.created' | translate }}</span>
         <span class="channel-info__meta">{{ ch.createdAt | date:'MM/dd/yyyy' }}</span>
       </div>
     </div>

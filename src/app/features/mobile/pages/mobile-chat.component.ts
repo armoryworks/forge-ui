@@ -6,7 +6,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { debounceTime } from 'rxjs';
 
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AuthService } from '../../../shared/services/auth.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
@@ -43,6 +43,7 @@ export class MobileChatComponent implements OnDestroy {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   private readonly messageArea = viewChild<ChatMessageAreaComponent>('messageArea');
 
@@ -137,7 +138,10 @@ export class MobileChatComponent implements OnDestroy {
 
   protected onMuteToggled(event: { channel: ChatRoom; mute: boolean }): void {
     this.chatService.muteChannel(event.channel.id, event.mute).subscribe(() => {
-      this.snackbar.info(event.mute ? `Muted #${event.channel.name}` : `Unmuted #${event.channel.name}`);
+      this.snackbar.info(this.translate.instant(
+        event.mute ? 'mobileLegacyPages.chat.muted' : 'mobileLegacyPages.chat.unmuted',
+        { name: event.channel.name },
+      ));
       this.loadChannels();
     });
   }
@@ -146,7 +150,10 @@ export class MobileChatComponent implements OnDestroy {
     const channel = this.selectedChannel();
     if (!channel) return;
     this.chatService.muteChannel(channel.id, mute).subscribe(() => {
-      this.snackbar.info(mute ? `Muted #${channel.name}` : `Unmuted #${channel.name}`);
+      this.snackbar.info(this.translate.instant(
+        mute ? 'mobileLegacyPages.chat.muted' : 'mobileLegacyPages.chat.unmuted',
+        { name: channel.name },
+      ));
       this.loadChannels();
     });
   }
@@ -246,7 +253,7 @@ export class MobileChatComponent implements OnDestroy {
         error: () => {
           this.pendingFile.set(null);
           this.isUploading.set(false);
-          this.snackbar.error('Failed to upload file');
+          this.snackbar.error(this.translate.instant('mobileLegacyPages.chat.uploadFailed'));
         },
       });
     }
@@ -362,7 +369,7 @@ export class MobileChatComponent implements OnDestroy {
         },
         error: () => {
           this.isUploading.set(false);
-          this.snackbar.error('Failed to upload file');
+          this.snackbar.error(this.translate.instant('mobileLegacyPages.chat.uploadFailed'));
         },
       });
     } else if (conv) {
@@ -377,7 +384,7 @@ export class MobileChatComponent implements OnDestroy {
         },
         error: () => {
           this.isUploading.set(false);
-          this.snackbar.error('Failed to upload file');
+          this.snackbar.error(this.translate.instant('mobileLegacyPages.chat.uploadFailed'));
         },
       });
     }
