@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -26,7 +26,7 @@ import { VendorContactDialogComponent } from '../vendor-contact-dialog/vendor-co
   styleUrl: './vendor-contacts-tab.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class VendorContactsTabComponent implements OnInit {
+export class VendorContactsTabComponent {
   private readonly vendorService = inject(VendorService);
   private readonly auth = inject(AuthService);
   private readonly dialog = inject(MatDialog);
@@ -43,16 +43,20 @@ export class VendorContactsTabComponent implements OnInit {
 
   protected readonly canManage = computed(() => this.auth.hasAnyRole(['Admin', 'Manager', 'OfficeManager']));
 
-  ngOnInit(): void {
-    this.loadContacts();
+  constructor() {
+    effect(() => {
+      const id = this.vendorId();
+      untracked(() => this.loadContacts(id));
+    });
   }
 
-  protected loadContacts(): void {
+  protected loadContacts(vendorId = this.vendorId()): void {
     this.loading.set(true);
-    this.vendorService.getContacts(this.vendorId())
+    this.vendorService.getContacts(vendorId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: list => {
+          if (vendorId !== this.vendorId()) return;
           this.contacts.set([...list].sort((a, b) =>
             Number(b.isPrimary) - Number(a.isPrimary)
             || a.lastName.localeCompare(b.lastName)

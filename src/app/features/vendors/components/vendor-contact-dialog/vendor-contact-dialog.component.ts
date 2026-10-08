@@ -114,20 +114,21 @@ export class VendorContactDialogComponent implements OnInit {
   protected save(): void {
     if (this.form.invalid || this.saving()) return;
     const v = this.form.getRawValue();
+    const existing = this.contact();
+    const blank = existing ? '' : null;
     const payload: VendorContactRequest = {
       firstName: v.firstName.trim(),
       lastName: v.lastName.trim(),
-      role: v.role,
-      email: v.email.trim() || null,
-      phone: v.phone.trim() || null,
-      mobile: v.mobile.trim() || null,
-      fax: v.fax.trim() || null,
+      role: v.role || blank,
+      email: v.email.trim() || blank,
+      phone: v.phone.trim() || blank,
+      mobile: v.mobile.trim() || blank,
+      fax: v.fax.trim() || blank,
       isPrimary: v.isPrimary,
-      notes: v.notes.trim() || null,
+      notes: v.notes.trim() || blank,
     };
 
     this.saving.set(true);
-    const existing = this.contact();
     const request: Observable<VendorContact> = existing
       ? this.vendorService.updateContact(this.vendorId(), existing.id, payload)
       : this.vendorService.createContact(this.vendorId(), payload);

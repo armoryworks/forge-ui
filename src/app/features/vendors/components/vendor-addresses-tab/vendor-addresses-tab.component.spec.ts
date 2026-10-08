@@ -25,7 +25,7 @@ interface TabInternals {
 
 function address(id: number, addressType: string, isDefault: boolean, overrides: Partial<VendorAddress> = {}): VendorAddress {
   return {
-    id, vendorId: 7, addressType, isDefault, label: null,
+    id, vendorId: 7, addressType, isDefault, label: `Address ${id}`,
     line1: '1 Main St', line2: null, city: 'Provo', state: 'UT', postalCode: '84601', country: 'US',
     ...overrides,
   };
@@ -43,17 +43,17 @@ function setup(roles: string[]) {
     ],
   });
   const component = TestBed.runInInjectionContext(() => new VendorAddressesTabComponent());
-  mockSignalInputs(component, { vendorId: 7 });
+  const inputs = mockSignalInputs(component, { vendorId: 7 });
   const httpMock = TestBed.inject(HttpTestingController);
-  return { component, internals: component as unknown as TabInternals, httpMock };
+  return { inputs, internals: component as unknown as TabInternals, httpMock };
 }
 
 describe('VendorAddressesTabComponent', () => {
   beforeEach(() => TestBed.resetTestingModule());
 
   it('loads addresses grouped by type with the default first', () => {
-    const { component, internals, httpMock } = setup(['Admin']);
-    component.ngOnInit();
+    const { internals, httpMock } = setup(['Admin']);
+    TestBed.flushEffects();
     httpMock.expectOne(`${environment.apiUrl}/vendors/7/addresses`).flush([
       address(1, 'OrderFrom', false),
       address(2, 'RemitTo', false),

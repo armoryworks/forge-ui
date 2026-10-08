@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -26,7 +26,7 @@ import { VENDOR_ADDRESS_TYPES, VendorAddressDialogComponent } from '../vendor-ad
   styleUrl: '../vendor-contacts-tab/vendor-contacts-tab.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class VendorAddressesTabComponent implements OnInit {
+export class VendorAddressesTabComponent {
   private readonly vendorService = inject(VendorService);
   private readonly auth = inject(AuthService);
   private readonly dialog = inject(MatDialog);
@@ -43,20 +43,24 @@ export class VendorAddressesTabComponent implements OnInit {
 
   protected readonly canManage = computed(() => this.auth.hasAnyRole(['Admin', 'Manager', 'OfficeManager']));
 
-  ngOnInit(): void {
-    this.loadAddresses();
+  constructor() {
+    effect(() => {
+      const id = this.vendorId();
+      untracked(() => this.loadAddresses(id));
+    });
   }
 
-  protected loadAddresses(): void {
+  protected loadAddresses(vendorId = this.vendorId()): void {
     this.loading.set(true);
-    this.vendorService.getAddresses(this.vendorId())
+    this.vendorService.getAddresses(vendorId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: list => {
+          if (vendorId !== this.vendorId()) return;
           this.addresses.set([...list].sort((a, b) =>
             this.typeRank(a.addressType) - this.typeRank(b.addressType)
             || Number(b.isDefault) - Number(a.isDefault)
-            || (a.label ?? '').localeCompare(b.label ?? '')));
+            || a.label.localeCompare(b.label)));
           this.loading.set(false);
         },
         error: () => this.loading.set(false),

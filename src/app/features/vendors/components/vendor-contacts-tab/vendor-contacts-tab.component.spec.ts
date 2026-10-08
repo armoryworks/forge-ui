@@ -40,23 +40,38 @@ function setup(roles: string[]) {
     ],
   });
   const component = TestBed.runInInjectionContext(() => new VendorContactsTabComponent());
-  mockSignalInputs(component, { vendorId: 7 });
+  const inputs = mockSignalInputs(component, { vendorId: 7 });
   const httpMock = TestBed.inject(HttpTestingController);
-  return { component, internals: component as unknown as TabInternals, httpMock };
+  return { inputs, internals: component as unknown as TabInternals, httpMock };
 }
 
 describe('VendorContactsTabComponent', () => {
   beforeEach(() => TestBed.resetTestingModule());
 
   it('loads the vendor contacts with the primary contact first', () => {
-    const { component, internals, httpMock } = setup(['Admin']);
-    component.ngOnInit();
+    const { internals, httpMock } = setup(['Admin']);
+    TestBed.flushEffects();
     httpMock.expectOne(`${environment.apiUrl}/vendors/7/contacts`).flush([
       contact(1, 'Bea', 'Adams', false),
       contact(2, 'Cal', 'Young', true),
       contact(3, 'Al', 'Adams', false),
     ]);
     expect(internals.contacts().map(c => c.id)).toEqual([2, 3, 1]);
+    httpMock.verify();
+  });
+
+  it('reloads when the vendor changes and ignores the previous vendor response', () => {
+    const { inputs, internals, httpMock } = setup(['Admin']);
+    TestBed.flushEffects();
+    const first = httpMock.expectOne(`${environment.apiUrl}/vendors/7/contacts`);
+
+    inputs.vendorId.set(8);
+    TestBed.flushEffects();
+    const second = httpMock.expectOne(`${environment.apiUrl}/vendors/8/contacts`);
+
+    second.flush([{ ...contact(5, 'Dee', 'Hall', true), vendorId: 8 }]);
+    first.flush([contact(1, 'Bea', 'Adams', true)]);
+    expect(internals.contacts().map(c => c.id)).toEqual([5]);
     httpMock.verify();
   });
 

@@ -5173,7 +5173,7 @@
       "editTitle": "Editar dirección del proveedor",
       "type": "Tipo de dirección",
       "label": "Etiqueta",
-      "default": "Dirección predeterminada"
+      "default": "Predeterminada para este tipo de dirección"
     },
     "addressTypes": {
       "remitTo": "Remitir pago a",

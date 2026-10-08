@@ -72,8 +72,17 @@ describe('VendorAddressDialogComponent', () => {
     expect(internals.typeOptions.map(o => o.value)).toEqual(['RemitTo', 'OrderFrom', 'ShipFrom', 'Billing', 'Other']);
   });
 
+  it('requires a label that is not blank', () => {
+    const { internals } = setup();
+    internals.form.patchValue({ address: fullAddress, label: '   ' });
+    expect(internals.form.invalid).toBe(true);
+    internals.form.patchValue({ label: 'Lockbox' });
+    expect(internals.form.invalid).toBe(false);
+  });
+
   it('rejects a partially filled address', () => {
     const { internals } = setup();
+    internals.form.patchValue({ label: 'Lockbox' });
     expect(internals.form.invalid).toBe(true);
     internals.form.patchValue({ address: { ...fullAddress, city: '' } });
     expect(internals.form.invalid).toBe(true);
@@ -83,7 +92,7 @@ describe('VendorAddressDialogComponent', () => {
 
   it('POSTs a new remit-to address flattened into the request', () => {
     const { component, internals, httpMock } = setup();
-    internals.form.patchValue({ address: fullAddress, isDefault: true });
+    internals.form.patchValue({ label: ' Lockbox ', address: fullAddress, isDefault: true });
 
     const savedCb = vi.fn();
     component.saved.subscribe(savedCb);
@@ -93,7 +102,7 @@ describe('VendorAddressDialogComponent', () => {
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({
       addressType: 'RemitTo',
-      label: null,
+      label: 'Lockbox',
       line1: '1 Main St',
       line2: null,
       city: 'Provo',

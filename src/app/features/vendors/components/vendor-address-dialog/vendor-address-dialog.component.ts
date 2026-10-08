@@ -60,7 +60,7 @@ export class VendorAddressDialogComponent {
 
   protected readonly form = new FormGroup({
     addressType: new FormControl('RemitTo', { nonNullable: true, validators: [Validators.required] }),
-    label: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(100)] }),
+    label: new FormControl('', { nonNullable: true, validators: [VendorAddressDialogComponent.notBlank, Validators.maxLength(100)] }),
     address: new FormControl<Address | null>(null, [Validators.required, VendorAddressDialogComponent.addressComplete]),
     isDefault: new FormControl(false, { nonNullable: true }),
   });
@@ -77,7 +77,7 @@ export class VendorAddressDialogComponent {
       if (!a) return;
       this.form.patchValue({
         addressType: a.addressType,
-        label: a.label ?? '',
+        label: a.label,
         address: {
           line1: a.line1,
           line2: a.line2 ?? null,
@@ -89,6 +89,11 @@ export class VendorAddressDialogComponent {
         isDefault: a.isDefault,
       });
     });
+  }
+
+  static notBlank(control: AbstractControl): ValidationErrors | null {
+    const value = control.value as string | null;
+    return value && value.trim() ? null : { required: true };
   }
 
   static addressComplete(control: AbstractControl): ValidationErrors | null {
@@ -108,7 +113,7 @@ export class VendorAddressDialogComponent {
     const addr = v.address!;
     const payload: VendorAddressRequest = {
       addressType: v.addressType,
-      label: v.label.trim() || null,
+      label: v.label.trim(),
       line1: addr.line1,
       line2: addr.line2 || null,
       city: addr.city,

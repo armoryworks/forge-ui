@@ -127,6 +127,17 @@ describe('VendorContactDialogComponent', () => {
     httpMock.verify();
   });
 
+  it('sends cleared fields as empty strings on update so the server clears them', () => {
+    const { internals, httpMock } = setup(makeContact());
+    internals.form.patchValue({ email: '', mobile: '  ', role: null });
+    internals.save();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/vendors/42/contacts/10`);
+    expect(req.request.body).toMatchObject({ email: '', mobile: '', fax: '', role: '', phone: '(555) 010-1000' });
+    req.flush(makeContact({ email: null, mobile: null, role: null }));
+    httpMock.verify();
+  });
+
   it('does not call the API when the form is invalid', () => {
     const { internals, httpMock } = setup();
     internals.save();

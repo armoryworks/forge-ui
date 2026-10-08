@@ -5180,7 +5180,7 @@
       "editTitle": "Edit Vendor Address",
       "type": "Address Type",
       "label": "Label",
-      "default": "Default address"
+      "default": "Default for this address type"
     },
     "addressTypes": {
       "remitTo": "Remit-to",

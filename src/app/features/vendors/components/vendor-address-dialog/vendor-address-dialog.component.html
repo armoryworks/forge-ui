@@ -4,7 +4,7 @@
       <app-select data-testid="vendor-address-type" [label]="'vendorContacts.addressDialog.type' | translate"
         formControlName="addressType" [options]="typeOptions" [required]="true" />
       <app-input data-testid="vendor-address-label" [label]="'vendorContacts.addressDialog.label' | translate"
-        formControlName="label" [maxlength]="100" />
+        formControlName="label" [maxlength]="100" [required]="true" />
     </div>
     <app-address-form data-testid="vendor-address-form" formControlName="address" />
     <app-toggle data-testid="vendor-address-default" [label]="'vendorContacts.addressDialog.default' | translate"

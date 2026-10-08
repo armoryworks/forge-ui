@@ -2,7 +2,7 @@ export interface VendorAddress {
   id: number;
   vendorId: number;
   addressType: string;
-  label: string | null;
+  label: string;
   line1: string;
   line2: string | null;
   city: string;
