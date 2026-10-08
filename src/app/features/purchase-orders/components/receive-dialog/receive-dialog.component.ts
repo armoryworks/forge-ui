@@ -58,6 +58,7 @@ export class ReceiveDialogComponent implements OnInit, AfterViewInit {
   protected readonly lotControls = signal<FormControl<string>[]>([]);
   protected readonly noteControls = signal<FormControl<string>[]>([]);
   protected readonly openNotes = signal<ReadonlySet<number>>(new Set());
+  protected readonly packingSlipCtrl = new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(100)] });
 
   // Bought-parts effort PR3 — receipt-level freight capture. ActualFreight
   // defaults from PO.EstimatedFreight on init so the "matches estimate"
@@ -123,9 +124,12 @@ export class ReceiveDialogComponent implements OnInit, AfterViewInit {
           snapshot[`lot:${l.id}`] = lots[i].value;
           snapshot[`note:${l.id}`] = notes[i].value;
         });
+        snapshot['packingSlip'] = this.packingSlipCtrl.value;
         return snapshot;
       },
       restoreFn: (data: Record<string, unknown>) => {
+        const slip = data['packingSlip'];
+        if (typeof slip === 'string') this.packingSlipCtrl.setValue(slip);
         const ls = this.receivableLines();
         const cs = this.lineControls();
         ls.forEach((l, i) => {
@@ -188,7 +192,9 @@ export class ReceiveDialogComponent implements OnInit, AfterViewInit {
   }
 
   protected get hasInvalidLineField(): boolean {
-    return this.lotControls().some(c => c.invalid) || this.noteControls().some(c => c.invalid);
+    return this.packingSlipCtrl.invalid
+      || this.lotControls().some(c => c.invalid)
+      || this.noteControls().some(c => c.invalid);
   }
 
   protected isNoteOpen(lineId: number): boolean {
@@ -241,10 +247,12 @@ export class ReceiveDialogComponent implements OnInit, AfterViewInit {
     if (receiveLines.length === 0 || this.hasInvalidLineField) return;
 
     this.saving.set(true);
+    const packingSlip = this.packingSlipCtrl.value.trim();
     this.poService.receiveItems(this.purchaseOrder().id, {
       lines: receiveLines,
       actualFreight: this.actualFreightCtrl.value ?? undefined,
       freightAllocationMethod: this.allocationMethodCtrl.value,
+      packingSlipNumber: packingSlip || undefined,
     }).subscribe({
       next: () => {
         this.saving.set(false);

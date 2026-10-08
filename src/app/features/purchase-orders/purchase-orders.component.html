@@ -65,7 +65,7 @@
               <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
             </ng-template>
             <ng-template appColumnCell="originSource" let-row>
-              <span [class]="getOriginClass(row.originSource)">
+              <span [class]="getOriginClass(row.originSource)" [matTooltip]="getOriginTooltip(row)" matTooltipPosition="above">
                 <span class="material-icons-outlined po-origin-chip__icon" aria-hidden="true">{{ getOriginIcon(row.originSource) }}</span>
                 {{ getOriginLabel(row) }}
               </span>

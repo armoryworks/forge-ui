@@ -4,6 +4,11 @@
     <app-empty-state icon="check_circle" [message]="'purchaseOrders.allReceived' | translate" />
   } @else {
     <div class="receive-actions-top">
+      <app-input class="receive-packing-slip"
+        [label]="'poManage.packingSlipNumber' | translate"
+        [formControl]="packingSlipCtrl"
+        [maxlength]="100"
+        data-testid="receive-packing-slip" />
       <button data-testid="receive-all-btn" class="action-btn action-btn--sm" (click)="receiveAll()">
         <span class="material-icons-outlined">done_all</span>
         {{ 'purchaseOrders.receiveAll' | translate }}

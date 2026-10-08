@@ -10,4 +10,5 @@ export interface ReceiveItemsRequest {
   // EstimatedFreight. AllocationMethod default is ByExtendedValue.
   actualFreight?: number;
   freightAllocationMethod?: FreightAllocationMethod;
+  packingSlipNumber?: string;
 }

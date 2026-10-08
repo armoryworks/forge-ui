@@ -5,11 +5,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs';
 
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PurchaseOrderService } from './services/purchase-order.service';
 import { PurchaseOrderListItem } from './models/purchase-order-list-item.model';
-import { PO_ORIGIN_CHIP_CLASSES, PO_ORIGIN_ICONS, PO_ORIGIN_LABEL_KEYS } from './models/po-origin.const';
+import { PO_ORIGIN_CHIP_CLASSES, PO_ORIGIN_ICONS, poOriginLabel, poOriginTooltip } from './models/po-origin.const';
 import { VendorService } from '../vendors/services/vendor.service';
 import { VendorResponse } from '../vendors/models/vendor-response.model';
 import { PoDialogComponent } from './components/po-dialog/po-dialog.component';
@@ -34,7 +35,7 @@ type PoTab = 'orders' | 'suggestions' | 'settings';
   selector: 'app-purchase-orders',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe, TranslatePipe,
+    ReactiveFormsModule, DatePipe, TranslatePipe, MatTooltipModule,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective,
     PoDialogComponent, LoadingBlockDirective, EntityLinkComponent,
@@ -270,9 +271,10 @@ export class PurchaseOrdersComponent implements OnInit {
   }
 
   protected getOriginLabel(row: PurchaseOrderListItem): string {
-    if (row.originSource === 'Manual' && row.originUserName) return row.originUserName;
-    if (row.originSource === 'ExternalIntegration' && row.originReference) return row.originReference;
-    const key = PO_ORIGIN_LABEL_KEYS[row.originSource];
-    return key ? this.translate.instant(key) : row.originSource;
+    return poOriginLabel(row, key => this.translate.instant(key));
+  }
+
+  protected getOriginTooltip(row: PurchaseOrderListItem): string {
+    return poOriginTooltip(row, (key, params) => this.translate.instant(key, params));
   }
 }

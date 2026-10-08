@@ -1,0 +1,46 @@
+<app-dialog
+  [title]="'poManage.emailTitle' | translate: { number: data.poNumber }"
+  width="600px"
+  [dirty]="form.dirty"
+  (closed)="close()">
+
+  <div class="send-po-email" [formGroup]="form">
+    <p class="send-po-email__context">
+      {{ 'poManage.emailContext' | translate: { number: data.poNumber, vendor: data.vendorName } }}
+    </p>
+
+    <app-input
+      type="email"
+      [label]="'poManage.emailTo' | translate"
+      formControlName="to"
+      [required]="true"
+      data-testid="po-email-to" />
+
+    <app-input
+      [label]="'poManage.emailCc' | translate"
+      formControlName="cc"
+      [info]="'poManage.emailCcHint' | translate"
+      data-testid="po-email-cc" />
+
+    <app-textarea
+      [label]="'poManage.emailMessage' | translate"
+      formControlName="message"
+      [rows]="4"
+      [maxlength]="2000"
+      data-testid="po-email-message" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button
+        data-testid="po-email-send-btn"
+        class="action-btn action-btn--primary"
+        [disabled]="form.invalid || saving()"
+        (click)="send()">
+        <span class="material-icons-outlined">send</span>
+        {{ 'poManage.emailSend' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

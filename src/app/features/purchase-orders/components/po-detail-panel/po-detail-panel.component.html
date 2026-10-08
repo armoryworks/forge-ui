@@ -40,6 +40,14 @@
         </div>
       </div>
       <div class="detail-header__actions">
+        @if (canEmail(po.status)) {
+          <button class="icon-btn" data-testid="po-email-btn"
+            [matTooltip]="'poManage.emailPo' | translate" matTooltipPosition="above"
+            [attr.aria-label]="'poManage.emailPo' | translate"
+            (click)="openEmailDialog()">
+            <span class="material-icons-outlined">email</span>
+          </button>
+        }
         <button class="icon-btn" data-testid="po-print-btn"
           [matTooltip]="'purchaseOrders.printPo' | translate" matTooltipPosition="above"
           [attr.aria-label]="'purchaseOrders.printPo' | translate"
@@ -129,6 +137,47 @@
         }
       </div>
 
+      @if (po.vendorContactName || po.vendorAddressText || po.shipToLocationName) {
+        <div class="info-grid" data-testid="po-parties">
+          @if (po.vendorContactName) {
+            <div class="info-item">
+              <span class="info-label">{{ 'poManage.vendorContact' | translate }}</span>
+              <span class="info-value party">
+                <span>{{ po.vendorContactName }}</span>
+                @if (po.vendorContactEmail) {
+                  <a class="party__line" [href]="'mailto:' + po.vendorContactEmail">{{ po.vendorContactEmail }}</a>
+                }
+                @if (po.vendorContactPhone) {
+                  <span class="party__line">{{ po.vendorContactPhone }}</span>
+                }
+              </span>
+            </div>
+          }
+          @if (po.vendorAddressText) {
+            <div class="info-item">
+              <span class="info-label">{{ 'poManage.orderFrom' | translate }}</span>
+              <span class="info-value party">
+                @if (po.vendorAddressLabel) {
+                  <span>{{ po.vendorAddressLabel }}</span>
+                }
+                <span class="party__line">{{ po.vendorAddressText }}</span>
+              </span>
+            </div>
+          }
+          @if (po.shipToLocationName) {
+            <div class="info-item">
+              <span class="info-label">{{ 'poManage.shipTo' | translate }}</span>
+              <span class="info-value party">
+                <span>{{ po.shipToLocationName }}</span>
+                @if (po.shipToAddressText) {
+                  <span class="party__line">{{ po.shipToAddressText }}</span>
+                }
+              </span>
+            </div>
+          }
+        </div>
+      }
+
       <!-- Blanket PO Info -->
       @if (po.isBlanket) {
         <div class="info-grid">
@@ -195,7 +244,7 @@
         <div class="info-grid">
           <div class="info-item">
             <span class="info-label">{{ 'purchaseOrders.incoterm' | translate }}</span>
-            <span class="info-value">{{ po.incoterm }}</span>
+            <span class="info-value" data-testid="po-incoterm">{{ incotermLabel() }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">{{ 'purchaseOrders.quoteCurrency' | translate }}</span>
@@ -207,7 +256,7 @@
               <span class="info-value"><app-currency-display [value]="po.estimatedFreight" [currency]="po.quoteCurrency" /></span>
             </div>
           }
-          @if (po.fxRate !== null) {
+          @if (showFxRate()) {
             <div class="info-item">
               <span class="info-label">{{ 'purchaseOrders.fxRate' | translate }}</span>
               <span class="info-value">{{ po.fxRate | number:'1.4-8' }}</span>
@@ -249,7 +298,15 @@
 
       <!-- Line Items -->
       <div class="lines-section">
-        <span class="info-label">{{ 'purchaseOrders.lineItems' | translate }} ({{ po.lines.length }})</span>
+        <div class="lines-section__header">
+          <span class="info-label">{{ 'purchaseOrders.lineItems' | translate }} ({{ po.lines.length }})</span>
+          @if (canEditLines(po.status)) {
+            <button class="action-btn action-btn--sm" data-testid="po-add-line-btn" (click)="openAddLine()">
+              <span class="material-icons-outlined">add</span>
+              {{ 'poManage.addLine' | translate }}
+            </button>
+          }
+        </div>
         @if (po.lines.length > 0) {
           <table class="lines-table" aria-label="Purchase order line items">
             <thead>
@@ -266,6 +323,9 @@
                 }
                 <th scope="col" class="lines-table__right">{{ 'purchaseOrders.unitPrice' | translate }}</th>
                 <th scope="col" class="lines-table__right">{{ 'common.total' | translate }}</th>
+                @if (canEditLines(po.status)) {
+                  <th scope="col" class="lines-table__action" [attr.aria-label]="'common.actions' | translate"></th>
+                }
               </tr>
             </thead>
             <tbody>
@@ -306,6 +366,16 @@
                     }
                   </td>
                   <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="null" /></td>
+                  @if (canEditLines(po.status)) {
+                    <td class="lines-table__action">
+                      <button class="icon-btn icon-btn--danger" [attr.data-testid]="'po-delete-line-' + line.id"
+                        [matTooltip]="'poManage.deleteLine' | translate" matTooltipPosition="above"
+                        [attr.aria-label]="'poManage.deleteLine' | translate"
+                        (click)="deleteLine(line)">
+                        <span class="material-icons-outlined">delete</span>
+                      </button>
+                    </td>
+                  }
                 </tr>
               }
             </tbody>
@@ -344,6 +414,32 @@
         </div>
       }
 
+      <div class="documents-section" data-testid="po-files">
+        <span class="info-label">{{ 'poManage.files' | translate }}</span>
+        <span class="documents-section__hint">{{ 'poManage.filesHint' | translate }}</span>
+        @for (doc of documents(); track doc.id) {
+          <div class="doc-item">
+            <span class="material-icons-outlined doc-item__icon">{{ getFileIcon(doc.contentType) }}</span>
+            <div class="doc-item__info">
+              <span class="doc-item__name">{{ doc.fileName }}</span>
+              <span class="doc-item__meta">{{ formatFileSize(doc.size) }} · {{ doc.createdAt | date:'MM/dd/yyyy' }}</span>
+            </div>
+            <button class="icon-btn" [attr.aria-label]="'common.download' | translate" (click)="downloadFile(doc)">
+              <span class="material-icons-outlined">download</span>
+            </button>
+            <button class="icon-btn icon-btn--danger" [attr.aria-label]="'common.delete' | translate" (click)="deleteFile(doc)">
+              <span class="material-icons-outlined">delete</span>
+            </button>
+          </div>
+        }
+        <app-file-upload-zone
+          entityType="purchase-orders"
+          [entityId]="po.id"
+          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv,.txt"
+          [maxSizeMb]="50"
+          (uploaded)="onFileUploaded()" />
+      </div>
+
       <div class="info-grid">
         <div class="info-item">
           <span class="info-label">{{ 'common.created' | translate }}</span>
@@ -357,17 +453,21 @@
 
       <!-- Actions — destructive on far left, primary furthest right. -->
       <div class="detail-actions">
-        @if (canDelete(po.status)) {
-          <button data-testid="po-delete-btn" class="action-btn action-btn--danger" (click)="deletePo()">
-            <span class="material-icons-outlined">delete</span>
-            {{ 'common.delete' | translate }}
-          </button>
-        }
-        @if (canCancel(po.status)) {
-          <button data-testid="po-cancel-btn" class="action-btn" (click)="cancelPo()">
-            <span class="material-icons-outlined">block</span>
-            {{ 'common.cancel' | translate }}
-          </button>
+        @if (canDelete(po.status) || canCancel(po.status)) {
+          <div class="detail-actions__destructive">
+            @if (canDelete(po.status)) {
+              <button data-testid="po-delete-btn" class="action-btn action-btn--danger" (click)="deletePo()">
+                <span class="material-icons-outlined">delete</span>
+                {{ 'common.delete' | translate }}
+              </button>
+            }
+            @if (canCancel(po.status)) {
+              <button data-testid="po-cancel-btn" class="action-btn action-btn--danger" (click)="cancelPo()">
+                <span class="material-icons-outlined">block</span>
+                {{ 'purchaseOrders.cancelPo' | translate }}
+              </button>
+            }
+          </div>
         }
         @if (canShortClose(po)) {
           <!-- Phase 3 / WU-14 / H3 — short-close action. Closes a partial PO when
@@ -489,6 +589,36 @@
                 (click)="saveShipping()">
           <span class="material-icons-outlined">save</span>
           {{ 'common.save' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}
+
+@if (showAddLineDialog() && po(); as po) {
+  <app-dialog [title]="'poManage.addLineTitle' | translate: { number: po.poNumber }" width="480px"
+    [dirty]="addLineForm.dirty" (closed)="showAddLineDialog.set(false)">
+    <div [formGroup]="addLineForm">
+      <app-entity-picker [label]="'common.part' | translate" entityType="parts"
+        displayField="partNumber" secondaryDisplayField="name" formControlName="partId"
+        [placeholder]="'common.optional' | translate" (selected)="onAddLinePartPicked($event)"
+        data-testid="po-add-line-part" />
+      <app-input [label]="'common.description' | translate" formControlName="description" [maxlength]="500"
+        [required]="addLineForm.controls.partId.value === null"
+        data-testid="po-add-line-description" />
+      <app-input [label]="'common.quantity' | translate" type="number" formControlName="quantity"
+        step="0.0001" min="0.0001" [required]="true" data-testid="po-add-line-quantity" />
+      <app-currency-input [label]="'purchaseOrders.unitPrice' | translate" formControlName="unitPrice"
+        [min]="0" [required]="true" data-testid="po-add-line-unit-price" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="showAddLineDialog.set(false)">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="addLineViolations" [loading]="addLineSaving()">
+        <button class="action-btn action-btn--primary" data-testid="po-add-line-save-btn"
+          [disabled]="addLineForm.invalid || addLineMissingDescription || addLineSaving()"
+          (click)="saveAddLine()">
+          <span class="material-icons-outlined">add</span>
+          {{ 'poManage.addLine' | translate }}
         </button>
       </app-validation-button>
     </div>

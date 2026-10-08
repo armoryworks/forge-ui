@@ -28,3 +28,29 @@ export const PO_ORIGIN_LABEL_KEYS: Record<string, string> = {
   ExternalIntegration: 'purchaseOrders.originExternalIntegration',
   Edi: 'purchaseOrders.originEdi',
 };
+
+export interface PoOriginFields {
+  originSource: string;
+  originUserName: string | null;
+  originReference: string | null;
+}
+
+export function poOriginLabel(origin: PoOriginFields, translate: (key: string) => string): string {
+  if (origin.originSource === 'ExternalIntegration' && origin.originReference) return origin.originReference;
+  const key = PO_ORIGIN_LABEL_KEYS[origin.originSource];
+  return key ? translate(key) : origin.originSource;
+}
+
+export function poOriginTooltip(
+  origin: PoOriginFields,
+  translate: (key: string, params?: Record<string, string>) => string,
+): string {
+  const parts: string[] = [];
+  if (origin.originUserName)
+    parts.push(translate('purchaseOrders.originTooltipUser', { name: origin.originUserName }));
+  if (origin.originReference)
+    parts.push(translate('purchaseOrders.originTooltipReference', { reference: origin.originReference }));
+  if (parts.length > 0) return parts.join(' — ');
+  const key = PO_ORIGIN_LABEL_KEYS[origin.originSource];
+  return key ? translate(key) : origin.originSource;
+}

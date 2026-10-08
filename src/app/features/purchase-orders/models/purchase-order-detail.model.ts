@@ -44,4 +44,16 @@ export interface PurchaseOrderDetail {
   originSource: string;
   originUserName: string | null;
   originReference: string | null;
+  vendorContactId?: number | null;
+  vendorContactName?: string | null;
+  vendorContactEmail?: string | null;
+  vendorContactPhone?: string | null;
+  vendorContactFax?: string | null;
+  vendorAddressId?: number | null;
+  vendorAddressType?: string | null;
+  vendorAddressLabel?: string | null;
+  vendorAddressText?: string | null;
+  shipToLocationId?: number | null;
+  shipToLocationName?: string | null;
+  shipToAddressText?: string | null;
 }

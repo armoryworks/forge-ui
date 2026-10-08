@@ -11,9 +11,12 @@ import { CreatePurchaseOrderRequest } from '../models/create-purchase-order-requ
 import { PriceOverrideReviewRequest, PriceOverrideReviewResponse } from '../models/price-override-review.model';
 import { UpdatePurchaseOrderRequest } from '../models/update-purchase-order-request.model';
 import { ReceiveItemsRequest } from '../models/receive-items-request.model';
+import { AddPurchaseOrderLineRequest } from '../models/add-purchase-order-line-request.model';
+import { SendPurchaseOrderEmailRequest } from '../models/send-purchase-order-email-request.model';
 import { PurchaseOrderRelease, CreatePurchaseOrderReleaseRequest, UpdatePurchaseOrderReleaseRequest } from '../models/purchase-order-release.model';
 import { AutoPoSuggestion } from '../models/auto-po-suggestion.model';
 import { AutoPoSettings, UpdateAutoPoSettingsRequest } from '../models/auto-po-settings.model';
+import { FileAttachment } from '../../../shared/models/file.model';
 
 /** Phase 3 F7-broad / WU-22 — paged purchase-order list query parameters. */
 export interface PurchaseOrderListPagedQuery extends PagedQuery {
@@ -84,6 +87,18 @@ export class PurchaseOrderService {
     return this.http.put<void>(`${this.base}/${id}`, request);
   }
 
+  addPurchaseOrderLine(id: number, request: AddPurchaseOrderLineRequest): Observable<PurchaseOrderDetail> {
+    return this.http.post<PurchaseOrderDetail>(`${this.base}/${id}/lines`, request);
+  }
+
+  deletePurchaseOrderLine(id: number, lineId: number): Observable<PurchaseOrderDetail> {
+    return this.http.delete<PurchaseOrderDetail>(`${this.base}/${id}/lines/${lineId}`);
+  }
+
+  sendPurchaseOrderEmail(id: number, request: SendPurchaseOrderEmailRequest): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/email`, request);
+  }
+
   submitPurchaseOrder(id: number): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/submit`, {});
   }
@@ -111,6 +126,18 @@ export class PurchaseOrderService {
 
   deletePurchaseOrder(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
+  }
+
+  getFiles(id: number): Observable<FileAttachment[]> {
+    return this.http.get<FileAttachment[]>(`${this.base}/${id}/files`);
+  }
+
+  deleteFile(fileId: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/files/${fileId}`);
+  }
+
+  downloadFileUrl(fileId: number): string {
+    return `${environment.apiUrl}/files/${fileId}/download`;
   }
 
   // ── Blanket PO Releases ──

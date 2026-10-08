@@ -29,6 +29,7 @@ interface DialogInternals {
   draftConfig: DraftConfig;
   lotControls(): FormControl<string>[];
   noteControls(): FormControl<string>[];
+  packingSlipCtrl: FormControl<string>;
   onBinSelected(index: number, entity: Record<string, unknown> | null): void;
   ngAfterViewInit(): void;
   isNoteOpen(lineId: number): boolean;
@@ -224,6 +225,46 @@ describe('ReceiveDialogComponent — bin, lot and note per line', () => {
 
     internals.lineControls()[0].setValue(1);
     internals.lotControls()[0].setValue('x'.repeat(101));
+    internals.save();
+
+    expect(receiveItems).not.toHaveBeenCalled();
+  });
+
+  it('sends the trimmed packing slip number with the receipt', () => {
+    const { internals, receiveItems } = setup([line({ id: 1 })]);
+
+    internals.lineControls()[0].setValue(2);
+    internals.packingSlipCtrl.setValue('  PS-4471 ');
+    internals.save();
+
+    expect(receiveItems.mock.calls[0][1].packingSlipNumber).toBe('PS-4471');
+  });
+
+  it('omits the packing slip number when none was entered', () => {
+    const { internals, receiveItems } = setup([line({ id: 1 })]);
+
+    internals.lineControls()[0].setValue(2);
+    internals.save();
+
+    expect(receiveItems.mock.calls[0][1].packingSlipNumber).toBeUndefined();
+  });
+
+  it('keeps the packing slip number in the saved draft', () => {
+    const { internals } = setup([line({ id: 1 })]);
+
+    internals.packingSlipCtrl.setValue('PS-9');
+    const snapshot = internals.draftConfig.snapshotFn!();
+    internals.packingSlipCtrl.setValue('');
+    internals.draftConfig.restoreFn!(snapshot);
+
+    expect(internals.packingSlipCtrl.value).toBe('PS-9');
+  });
+
+  it('does not submit when the packing slip number is too long', () => {
+    const { internals, receiveItems } = setup([line({ id: 1 })]);
+
+    internals.lineControls()[0].setValue(1);
+    internals.packingSlipCtrl.setValue('x'.repeat(101));
     internals.save();
 
     expect(receiveItems).not.toHaveBeenCalled();

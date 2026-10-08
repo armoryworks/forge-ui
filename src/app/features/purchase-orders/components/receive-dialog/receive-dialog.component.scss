@@ -7,8 +7,14 @@
 
 .receive-actions-top {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  gap: $sp-md;
   margin-bottom: $sp-md;
+}
+
+.receive-packing-slip {
+  flex: 0 1 280px;
 }
 
 .receive-table {

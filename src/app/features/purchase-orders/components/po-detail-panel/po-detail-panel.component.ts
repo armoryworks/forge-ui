@@ -32,7 +32,15 @@ import { DataTableComponent } from '../../../../shared/components/data-table/dat
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { INCOTERM_OPTIONS } from '../../models/incoterm.const';
-import { PO_ORIGIN_CHIP_CLASSES, PO_ORIGIN_ICONS, PO_ORIGIN_LABEL_KEYS } from '../../models/po-origin.const';
+import { PO_ORIGIN_CHIP_CLASSES, PO_ORIGIN_ICONS, poOriginLabel, poOriginTooltip } from '../../models/po-origin.const';
+import { PurchaseOrderLine } from '../../models/purchase-order-line.model';
+import { SendPoEmailDialogData } from '../../models/send-po-email-dialog-data.model';
+import { SendPoEmailDialogComponent } from '../send-po-email-dialog/send-po-email-dialog.component';
+import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
+import { FileUploadZoneComponent } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
+import { FileAttachment } from '../../../../shared/models/file.model';
+import { CurrencyService } from '../../../../shared/services/currency.service';
+import { VendorService } from '../../../vendors/services/vendor.service';
 import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { NumberLockInfoComponent } from '../../../../shared/components/number-lock-info/number-lock-info.component';
@@ -49,6 +57,7 @@ import { NumberLockInfoComponent } from '../../../../shared/components/number-lo
     ValidationButtonComponent,
     EntityLinkComponent, CurrencyDisplayComponent, CurrencyInputComponent,
     DataTableComponent, ColumnCellDirective,
+    EntityPickerComponent, FileUploadZoneComponent,
   ],
   templateUrl: './po-detail-panel.component.html',
   styleUrl: './po-detail-panel.component.scss',
@@ -63,6 +72,8 @@ export class PoDetailPanelComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly manualNumberSettings = inject(ManualNumberSettingsService);
+  private readonly currencyService = inject(CurrencyService);
+  private readonly vendorService = inject(VendorService);
 
   /** Whether the PO number may be renamed (manual numbers on AND PO still in Draft). */
   protected readonly allowManualPoNumbers = computed(() => this.manualNumberSettings.isEnabled('purchaseOrders'));
@@ -108,25 +119,26 @@ export class PoDetailPanelComponent implements OnInit {
 
   protected readonly originLabel = computed(() => {
     const po = this.po();
-    if (!po) return '';
-    if (po.originSource === 'Manual' && po.originUserName) return po.originUserName;
-    if (po.originSource === 'ExternalIntegration' && po.originReference) return po.originReference;
-    const key = PO_ORIGIN_LABEL_KEYS[po.originSource];
-    return key ? this.translate.instant(key) : po.originSource;
+    return po ? poOriginLabel(po, key => this.translate.instant(key)) : '';
   });
 
   protected readonly originTooltip = computed(() => {
     const po = this.po();
-    if (!po) return '';
-    const parts: string[] = [];
-    if (po.originUserName)
-      parts.push(this.translate.instant('purchaseOrders.originTooltipUser', { name: po.originUserName }));
-    if (po.originReference)
-      parts.push(this.translate.instant('purchaseOrders.originTooltipReference', { reference: po.originReference }));
-    if (parts.length > 0) return parts.join(' — ');
-    const key = PO_ORIGIN_LABEL_KEYS[po.originSource];
-    return key ? this.translate.instant(key) : po.originSource;
+    return po ? poOriginTooltip(po, (key, params) => this.translate.instant(key, params)) : '';
   });
+
+  protected readonly incotermLabel = computed(() => {
+    const incoterm = this.po()?.incoterm;
+    if (!incoterm) return '';
+    return INCOTERM_OPTIONS.find(o => o.value === incoterm)?.label ?? incoterm;
+  });
+
+  protected readonly showFxRate = computed(() => {
+    const po = this.po();
+    return !!po && po.fxRate !== null && po.quoteCurrency !== this.currencyService.baseCurrency();
+  });
+
+  protected readonly documents = signal<FileAttachment[]>([]);
 
   protected readonly releaseColumns: ColumnDef[] = [
     { field: 'releaseNumber', header: '#', sortable: true, width: '60px' },
@@ -147,6 +159,7 @@ export class PoDetailPanelComponent implements OnInit {
         this.po.set(detail);
         this.loading.set(false);
         if (detail.isBlanket) this.loadReleases();
+        this.loadDocuments(detail.id);
       },
       error: () => this.loading.set(false),
     });
@@ -567,7 +580,165 @@ export class PoDetailPanelComponent implements OnInit {
   protected canSubmit(status: string): boolean { return status === 'Draft'; }
   protected canAcknowledge(status: string): boolean { return status === 'Submitted'; }
   protected canReceive(status: string): boolean {
-    return status === 'Acknowledged' || status === 'PartiallyReceived';
+    return status === 'Submitted' || status === 'Acknowledged' || status === 'PartiallyReceived';
+  }
+  protected canEditLines(status: string): boolean { return status === 'Draft'; }
+  protected canEmail(status: string): boolean { return status !== 'Cancelled'; }
+
+  protected readonly showAddLineDialog = signal(false);
+  protected readonly addLineSaving = signal(false);
+
+  protected readonly addLineForm = new FormGroup({
+    partId: new FormControl<number | null>(null),
+    description: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
+    quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0.0001)]),
+    unitPrice: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
+  });
+
+  protected readonly addLineViolations = FormValidationService.getViolations(this.addLineForm, {
+    partId: this.translate.instant('common.part'),
+    description: this.translate.instant('common.description'),
+    quantity: this.translate.instant('common.quantity'),
+    unitPrice: this.translate.instant('purchaseOrders.unitPrice'),
+  });
+
+  protected get addLineMissingDescription(): boolean {
+    const f = this.addLineForm.getRawValue();
+    return f.partId == null && !f.description.trim();
+  }
+
+  protected openAddLine(): void {
+    this.addLineForm.reset({ partId: null, description: '', quantity: null, unitPrice: null });
+    this.showAddLineDialog.set(true);
+  }
+
+  protected onAddLinePartPicked(entity: Record<string, unknown> | null): void {
+    const name = entity?.['name'];
+    if (typeof name === 'string' && !this.addLineForm.controls.description.value.trim()) {
+      this.addLineForm.controls.description.setValue(name);
+    }
+  }
+
+  protected saveAddLine(): void {
+    const po = this.po();
+    if (!po || this.addLineForm.invalid || this.addLineMissingDescription) return;
+    const f = this.addLineForm.getRawValue();
+    this.addLineSaving.set(true);
+    this.poService.addPurchaseOrderLine(po.id, {
+      partId: f.partId ?? null,
+      description: f.description.trim() || undefined,
+      quantity: f.quantity!,
+      unitPrice: f.unitPrice!,
+    }).subscribe({
+      next: () => {
+        this.showAddLineDialog.set(false);
+        this.addLineSaving.set(false);
+        this.loadDetail();
+        this.changed.emit();
+        this.snackbar.success(this.translate.instant('poManage.lineAdded'));
+      },
+      error: () => this.addLineSaving.set(false),
+    });
+  }
+
+  protected deleteLine(line: PurchaseOrderLine): void {
+    const po = this.po();
+    if (!po) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('poManage.deleteLineTitle'),
+        message: this.translate.instant('poManage.deleteLineMessage', { line: line.partNumber ?? line.description, number: po.poNumber }),
+        confirmLabel: this.translate.instant('poManage.deleteLine'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.poService.deletePurchaseOrderLine(po.id, line.id).subscribe({
+        next: () => {
+          this.loadDetail();
+          this.changed.emit();
+          this.snackbar.success(this.translate.instant('poManage.lineDeleted'));
+        },
+      });
+    });
+  }
+
+  protected openEmailDialog(): void {
+    const po = this.po();
+    if (!po) return;
+    if (po.vendorContactEmail) {
+      this.launchEmailDialog(po, po.vendorContactEmail);
+      return;
+    }
+    this.vendorService.getVendorById(po.vendorId).subscribe({
+      next: (vendor) => this.launchEmailDialog(po, vendor.email ?? ''),
+      error: () => this.launchEmailDialog(po, ''),
+    });
+  }
+
+  private launchEmailDialog(po: PurchaseOrderDetail, recipientEmail: string): void {
+    this.dialog.open<SendPoEmailDialogComponent, SendPoEmailDialogData, boolean>(SendPoEmailDialogComponent, {
+      width: '600px',
+      data: {
+        purchaseOrderId: po.id,
+        poNumber: po.poNumber,
+        vendorName: po.vendorName,
+        recipientEmail,
+      },
+    }).afterClosed().subscribe(sent => {
+      if (sent) this.loadDetail();
+    });
+  }
+
+  private loadDocuments(id: number): void {
+    this.poService.getFiles(id).subscribe({
+      next: (docs) => this.documents.set(docs),
+    });
+  }
+
+  protected downloadFile(doc: FileAttachment): void {
+    window.open(this.poService.downloadFileUrl(doc.id), '_blank');
+  }
+
+  protected deleteFile(doc: FileAttachment): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('poManage.deleteFileTitle'),
+        message: this.translate.instant('poManage.deleteFileMessage', { name: doc.fileName }),
+        confirmLabel: this.translate.instant('common.delete'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.poService.deleteFile(doc.id).subscribe({
+        next: () => {
+          this.documents.update(list => list.filter(f => f.id !== doc.id));
+          this.snackbar.success(this.translate.instant('poManage.fileDeleted'));
+        },
+      });
+    });
+  }
+
+  protected onFileUploaded(): void {
+    const po = this.po();
+    if (po) this.loadDocuments(po.id);
+    this.snackbar.success(this.translate.instant('poManage.fileUploaded'));
+  }
+
+  protected getFileIcon(contentType: string): string {
+    if (contentType.startsWith('image/')) return 'image';
+    if (contentType === 'application/pdf') return 'picture_as_pdf';
+    if (contentType.includes('spreadsheet') || contentType.includes('excel')) return 'table_chart';
+    if (contentType.includes('document') || contentType.includes('word')) return 'description';
+    return 'attach_file';
+  }
+
+  protected formatFileSize(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
   protected canCancel(status: string): boolean {
     return status === 'Draft' || status === 'Submitted' || status === 'Acknowledged';

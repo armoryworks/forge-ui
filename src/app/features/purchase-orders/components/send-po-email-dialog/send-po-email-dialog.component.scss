@@ -1,0 +1,13 @@
+@use 'styles/variables' as *;
+
+.send-po-email {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.send-po-email__context {
+  margin: 0;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}

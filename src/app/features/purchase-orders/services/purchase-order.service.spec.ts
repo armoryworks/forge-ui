@@ -67,6 +67,62 @@ describe('PurchaseOrderService', () => {
     });
   });
 
+  describe('addPurchaseOrderLine', () => {
+    it('should POST the new line to the PO lines', () => {
+      const body = { partId: 7, quantity: 3, unitPrice: 12.5 };
+      service.addPurchaseOrderLine(5, body).subscribe();
+
+      const req = httpMock.expectOne(`${apiUrl}/purchase-orders/5/lines`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(body);
+      req.flush({ id: 5, lines: [] });
+    });
+  });
+
+  describe('deletePurchaseOrderLine', () => {
+    it('should DELETE the line from the PO', () => {
+      service.deletePurchaseOrderLine(5, 11).subscribe();
+
+      const req = httpMock.expectOne(`${apiUrl}/purchase-orders/5/lines/11`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush({ id: 5, lines: [] });
+    });
+  });
+
+  describe('sendPurchaseOrderEmail', () => {
+    it('should POST the recipients and message', () => {
+      const body = { to: 'buyer@vendor.test', cc: 'ap@vendor.test', message: 'Please confirm' };
+      service.sendPurchaseOrderEmail(5, body).subscribe();
+
+      const req = httpMock.expectOne(`${apiUrl}/purchase-orders/5/email`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(body);
+      req.flush(null);
+    });
+  });
+
+  describe('receiveItems', () => {
+    it('should POST the packing slip number with the receipt', () => {
+      const body = { lines: [{ lineId: 1, quantity: 2 }], packingSlipNumber: 'PS-42' };
+      service.receiveItems(5, body).subscribe();
+
+      const req = httpMock.expectOne(`${apiUrl}/purchase-orders/5/receive`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body.packingSlipNumber).toBe('PS-42');
+      req.flush(null);
+    });
+  });
+
+  describe('getFiles', () => {
+    it('should GET the files attached to the PO', () => {
+      service.getFiles(5).subscribe();
+
+      const req = httpMock.expectOne(`${apiUrl}/purchase-orders/5/files`);
+      expect(req.request.method).toBe('GET');
+      req.flush([]);
+    });
+  });
+
   describe('submitPurchaseOrder', () => {
     it('should POST submit action', () => {
       service.submitPurchaseOrder(5).subscribe();

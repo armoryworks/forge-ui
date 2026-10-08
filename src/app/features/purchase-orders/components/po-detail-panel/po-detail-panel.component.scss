@@ -101,6 +101,64 @@
 
   &__right { text-align: right; }
   &__mono { font-family: $font-family-mono; font-size: $font-size-xs; }
+  &__action { width: 1%; text-align: right; }
+}
+
+.party {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+
+  &__line {
+    font-size: $font-size-xs;
+    color: var(--text-secondary);
+    white-space: pre-line;
+  }
+}
+
+.documents-section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__hint {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+}
+
+.doc-item {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+}
+
+.doc-item__icon {
+  font-size: $icon-size-lg;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.doc-item__info {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+  flex: 1;
+  min-width: 0;
+}
+
+.doc-item__name {
+  @include truncate;
+  font-size: $font-size-sm;
+  font-weight: 600;
+}
+
+.doc-item__meta {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
 }
 
 .text-success { color: var(--success); }
@@ -117,8 +175,15 @@
   border-top: $border-width-thin solid var(--border);
   justify-content: flex-end;
 
-  .action-btn--danger,
-  .action-btn--destructive { margin-right: auto; }
+  > .action-btn--danger,
+  > .action-btn--destructive,
+  &__destructive { margin-right: auto; }
+
+  &__destructive {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-md;
+  }
 }
 
 // Inline indicator that a line's unit price was manually overridden; the
