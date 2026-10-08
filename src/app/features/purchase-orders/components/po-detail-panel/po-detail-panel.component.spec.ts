@@ -23,6 +23,7 @@ interface PanelInternals {
   po: ReturnType<typeof signal<PurchaseOrderDetail | null>>;
   canReceive(status: string): boolean;
   canEditLines(status: string): boolean;
+  canDeleteLine(po: PurchaseOrderDetail): boolean;
   canCancel(status: string): boolean;
   incotermLabel(): string;
   showFxRate(): boolean;
@@ -143,6 +144,13 @@ describe('PoDetailPanelComponent', () => {
       const panel = create(detail());
       expect(panel.canEditLines('Draft')).toBe(true);
       expect(panel.canEditLines('Submitted')).toBe(false);
+    });
+
+    it('offers line removal only on a draft PO with more than one line', () => {
+      const panel = create(detail());
+      expect(panel.canDeleteLine(detail({ lines: [line()] }))).toBe(false);
+      expect(panel.canDeleteLine(detail({ lines: [line(), line({ id: 12 })] }))).toBe(true);
+      expect(panel.canDeleteLine(detail({ status: 'Submitted', lines: [line(), line({ id: 12 })] }))).toBe(false);
     });
 
     it('adds a line through the service and reloads the PO', () => {

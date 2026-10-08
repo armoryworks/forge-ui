@@ -368,12 +368,14 @@
                   <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="null" /></td>
                   @if (canEditLines(po.status)) {
                     <td class="lines-table__action">
-                      <button class="icon-btn icon-btn--danger" [attr.data-testid]="'po-delete-line-' + line.id"
-                        [matTooltip]="'poManage.deleteLine' | translate" matTooltipPosition="above"
-                        [attr.aria-label]="'poManage.deleteLine' | translate"
-                        (click)="deleteLine(line)">
-                        <span class="material-icons-outlined">delete</span>
-                      </button>
+                      @if (canDeleteLine(po)) {
+                        <button class="icon-btn icon-btn--danger" [attr.data-testid]="'po-delete-line-' + line.id"
+                          [matTooltip]="'poManage.deleteLine' | translate" matTooltipPosition="above"
+                          [attr.aria-label]="'poManage.deleteLine' | translate"
+                          (click)="deleteLine(line)">
+                          <span class="material-icons-outlined">delete</span>
+                        </button>
+                      }
                     </td>
                   }
                 </tr>
@@ -490,7 +492,7 @@
           </button>
         }
         @if (canAcknowledge(po.status)) {
-          <button data-testid="po-acknowledge-btn" class="action-btn action-btn--primary" (click)="acknowledgePo()">
+          <button data-testid="po-acknowledge-btn" class="action-btn" (click)="acknowledgePo()">
             <span class="material-icons-outlined">thumb_up</span>
             {{ 'purchaseOrders.acknowledge' | translate }}
           </button>
@@ -601,6 +603,7 @@
     <div [formGroup]="addLineForm">
       <app-entity-picker [label]="'common.part' | translate" entityType="parts"
         displayField="partNumber" secondaryDisplayField="name" formControlName="partId"
+        [filters]="{ isActive: 'true' }"
         [placeholder]="'common.optional' | translate" (selected)="onAddLinePartPicked($event)"
         data-testid="po-add-line-part" />
       <app-input [label]="'common.description' | translate" formControlName="description" [maxlength]="500"
