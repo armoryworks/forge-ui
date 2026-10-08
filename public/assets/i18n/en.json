@@ -1940,6 +1940,11 @@
       "waived": "Inspection waived"
     }
   },
+  "contactFields": {
+    "mobile": "Mobile",
+    "dockContact": "Dock contact",
+    "dockPhone": "Dock phone"
+  },
   "customers": {
     "customerNumberLabel": "Customer Number",
     "documents": {

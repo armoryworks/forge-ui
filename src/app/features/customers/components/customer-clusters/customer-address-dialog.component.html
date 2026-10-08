@@ -9,6 +9,15 @@
 
     <app-address-form formControlName="address" />
 
+    @if (showsDockContact()) {
+      <div class="dialog-row">
+        <app-input data-testid="address-dock-contact" [label]="'contactFields.dockContact' | translate"
+          formControlName="contactName" [maxlength]="200" />
+        <app-input data-testid="address-dock-phone" [label]="'contactFields.dockPhone' | translate"
+          formControlName="phone" mask="phone" [maxlength]="50" />
+      </div>
+    }
+
     <app-toggle data-testid="address-default" [label]="'customers.addresses.defaultField' | translate"
       formControlName="isDefault" />
   </div>

@@ -19,6 +19,7 @@
       <app-input data-testid="contact-phone" [label]="'customers.colPhone' | translate" formControlName="phone" mask="phone" />
     </div>
     <div class="dialog-row">
+      <app-input data-testid="contact-mobile" [label]="'contactFields.mobile' | translate" formControlName="mobile" mask="phone" [maxlength]="50" />
       <app-input data-testid="contact-fax" [label]="'common.fax' | translate" formControlName="fax" mask="phone" [maxlength]="50" />
     </div>
     <div class="dialog-row">

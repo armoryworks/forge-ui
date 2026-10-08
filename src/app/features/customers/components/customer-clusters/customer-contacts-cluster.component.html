@@ -45,6 +45,12 @@
                 <span class="material-icons-outlined">phone</span>{{ contact.phone }}
               </a>
             }
+            @if (contact.mobile) {
+              <a class="contact-card__detail" data-testid="contact-card-mobile" [href]="'tel:' + contact.mobile"
+                 [attr.aria-label]="('contactFields.mobile' | translate) + ': ' + contact.mobile">
+                <span class="material-icons-outlined">smartphone</span>{{ contact.mobile }}
+              </a>
+            }
             @if (contact.fax) {
               <span class="contact-card__detail" data-testid="contact-card-fax">
                 <span class="material-icons-outlined">fax</span>{{ contact.fax }}

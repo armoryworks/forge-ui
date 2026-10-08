@@ -73,6 +73,15 @@
           }
           <p class="address-card__line">{{ addr.city }}, {{ addr.state }} {{ addr.postalCode }}</p>
           <p class="address-card__line">{{ addr.country }}</p>
+          @if (addr.contactName || addr.phone) {
+            <p class="address-card__line" data-testid="address-card-dock-contact">
+              {{ 'contactFields.dockContact' | translate }}:
+              {{ addr.contactName }}
+              @if (addr.phone) {
+                <a [href]="'tel:' + addr.phone">{{ addr.phone }}</a>
+              }
+            </p>
+          }
         </div>
       }
     </div>

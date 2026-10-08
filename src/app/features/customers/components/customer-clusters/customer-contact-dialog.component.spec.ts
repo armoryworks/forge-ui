@@ -22,6 +22,8 @@ interface DialogInternals {
     getRawValue(): Record<string, unknown>;
   };
   needsCustomerSelection(): boolean;
+  roleOptions(): { value: unknown; label: string }[];
+  ngOnInit(): void;
   save(): void;
   close(): void;
 }
@@ -136,6 +138,67 @@ describe('CustomerContactDialogComponent', () => {
     const req = httpMock.expectOne(`${environment.apiUrl}/customers/42/contacts/10`);
     expect(req.request.body).toMatchObject({ fax: '(555) 123-4599' });
     req.flush(makeContact({ fax: '(555) 123-4599' }));
+    httpMock.verify();
+  });
+
+  it('hydrates the mobile number and sends an edited one on save', () => {
+    const { internals, httpMock } = setup(42, makeContact({ mobile: '(555) 123-4511' }));
+    expect(internals.form.getRawValue()['mobile']).toBe('(555) 123-4511');
+
+    internals.form.patchValue({ mobile: '(555) 123-4522' });
+    internals.save();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/customers/42/contacts/10`);
+    expect(req.request.body).toMatchObject({ mobile: '(555) 123-4522' });
+    req.flush(makeContact({ mobile: '(555) 123-4522' }));
+    httpMock.verify();
+  });
+
+  it('sends an empty string for an emptied fax, phone and mobile in edit mode so the server clears them', () => {
+    const { internals, httpMock } = setup(42, makeContact({ fax: '(555) 123-4500', mobile: '(555) 123-4511' }));
+    internals.form.patchValue({ fax: '', phone: '', mobile: '' });
+    internals.save();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/customers/42/contacts/10`);
+    expect(req.request.body).toMatchObject({ fax: '', phone: '', mobile: '' });
+    req.flush(makeContact({ fax: null, phone: null, mobile: null }));
+    httpMock.verify();
+  });
+
+  it('omits empty optional fields in create mode', () => {
+    const { internals, httpMock } = setup(42);
+    internals.form.patchValue({ firstName: 'Ada', lastName: 'Lovelace' });
+    internals.save();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/customers/42/contacts`);
+    expect(req.request.body.fax).toBeUndefined();
+    expect(req.request.body.mobile).toBeUndefined();
+    req.flush(makeContact({ id: 99 }));
+    httpMock.verify();
+  });
+
+  const roleItems = [
+    { id: 1, groupCode: 'contact_role', code: 'primary', label: 'Primary', sortOrder: 1, isActive: true },
+    { id: 2, groupCode: 'contact_role', code: 'billing', label: 'Billing', sortOrder: 2, isActive: true },
+    { id: 3, groupCode: 'contact_role', code: 'retired', label: 'Retired', sortOrder: 3, isActive: false },
+  ];
+
+  it('leaves the primary role out of the role options', () => {
+    const { internals, httpMock } = setup(42);
+    internals.ngOnInit();
+    httpMock.expectOne(`${environment.apiUrl}/reference-data/contact_role`).flush(roleItems);
+
+    expect(internals.roleOptions().map(o => o.value)).toEqual([null, 'Billing']);
+    httpMock.verify();
+  });
+
+  it('keeps the primary role option for a contact that already has it stored', () => {
+    const { internals, httpMock } = setup(42, makeContact({ role: 'Primary' }));
+    internals.ngOnInit();
+    httpMock.expectOne(`${environment.apiUrl}/reference-data/contact_role`).flush(roleItems);
+
+    expect(internals.roleOptions().map(o => o.value)).toEqual([null, 'Primary', 'Billing']);
+    expect(internals.form.getRawValue()['role']).toBe('Primary');
     httpMock.verify();
   });
 

@@ -9,4 +9,6 @@ export interface UpdateCustomerAddressRequest {
   postalCode: string;
   country: string;
   isDefault: boolean;
+  contactName?: string | null;
+  phone?: string | null;
 }

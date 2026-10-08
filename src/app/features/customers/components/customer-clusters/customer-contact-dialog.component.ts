@@ -78,6 +78,7 @@ export class CustomerContactDialogComponent implements OnInit {
     lastName: new FormControl('', [Validators.required, Validators.maxLength(100)]),
     email: new FormControl('', [Validators.email, Validators.maxLength(200)]),
     phone: new FormControl(''),
+    mobile: new FormControl('', [Validators.maxLength(50)]),
     fax: new FormControl('', [Validators.maxLength(50)]),
     role: new FormControl<string | null>(null),
     isPrimary: new FormControl(false),
@@ -105,6 +106,7 @@ export class CustomerContactDialogComponent implements OnInit {
         lastName: c.lastName,
         email: c.email ?? '',
         phone: c.phone ?? '',
+        mobile: c.mobile ?? '',
         fax: c.fax ?? '',
         role: c.role ?? null,
         isPrimary: c.isPrimary,
@@ -113,10 +115,14 @@ export class CustomerContactDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.refDataService.getAsOptions('contact_role', {
-      allLabel: this.translate.instant('customers.roleOptions.none'),
-      valueField: 'label',
-    }).subscribe(opts => this.roleOptions.set(opts));
+    const storedRole = this.contact()?.role ?? null;
+    this.refDataService.getByGroup('contact_role').subscribe(items => this.roleOptions.set([
+      { value: null, label: this.translate.instant('customers.roleOptions.none') },
+      ...items
+        .filter(i => i.isActive && (i.code !== 'primary' || i.label === storedRole))
+        .sort((a, b) => a.sortOrder - b.sortOrder)
+        .map(i => ({ value: i.label, label: i.label })),
+    ]));
   }
 
   protected close(): void {
@@ -127,18 +133,20 @@ export class CustomerContactDialogComponent implements OnInit {
     if (this.form.invalid || this.saving()) return;
     const v = this.form.value;
     const targetCustomerId = v.customerId!;
+    const existing = this.contact();
+    const cleared = existing ? '' : undefined;
     const payload = {
       firstName: v.firstName!,
       lastName: v.lastName!,
-      email: v.email || undefined,
-      phone: v.phone || undefined,
-      fax: v.fax?.trim() || undefined,
+      email: v.email?.trim() || cleared,
+      phone: v.phone?.trim() || cleared,
+      mobile: v.mobile?.trim() || cleared,
+      fax: v.fax?.trim() || cleared,
       role: v.role ?? undefined,
       isPrimary: v.isPrimary ?? false,
     };
 
     this.saving.set(true);
-    const existing = this.contact();
     const obs = existing
       ? this.customerService.updateContact(targetCustomerId, existing.id, payload)
       : this.customerService.createContact(targetCustomerId, payload);

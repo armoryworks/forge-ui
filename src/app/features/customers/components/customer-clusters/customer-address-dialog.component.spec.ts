@@ -125,6 +125,8 @@ describe('CustomerAddressDialogComponent', () => {
       postalCode: '62701',
       country: 'US',
       isDefault: true,
+      contactName: null,
+      phone: null,
     });
     req.flush(makeAddress({ id: 99 }));
 
@@ -146,6 +148,46 @@ describe('CustomerAddressDialogComponent', () => {
     req.flush(null);
 
     expect(savedCb).toHaveBeenCalledTimes(1);
+    httpMock.verify();
+  });
+
+  it('hydrates the dock contact and phone and sends edited values for a shipping address', () => {
+    const { internals, httpMock } = setup(makeAddress({
+      id: 7, addressType: 'Shipping', contactName: 'Receiving desk', phone: '(555) 123-4500',
+    }));
+    const v = internals.form.getRawValue();
+    expect(v['contactName']).toBe('Receiving desk');
+    expect(v['phone']).toBe('(555) 123-4500');
+
+    internals.form.patchValue({ contactName: 'Night shift lead', phone: '(555) 123-4599' });
+    internals.save();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/customers/42/addresses/7`);
+    expect(req.request.body).toMatchObject({ contactName: 'Night shift lead', phone: '(555) 123-4599' });
+    req.flush(null);
+    httpMock.verify();
+  });
+
+  it('shows the dock fields only for shipping and both addresses', () => {
+    const { component } = setup();
+    const view = component as unknown as { showsDockContact(): boolean; form: { patchValue(v: Record<string, unknown>): void } };
+    expect(view.showsDockContact()).toBe(false);
+    view.form.patchValue({ addressType: 'Shipping' });
+    expect(view.showsDockContact()).toBe(true);
+    view.form.patchValue({ addressType: 'Both' });
+    expect(view.showsDockContact()).toBe(true);
+  });
+
+  it('clears the dock contact and phone when the address becomes billing only', () => {
+    const { internals, httpMock } = setup(makeAddress({
+      id: 7, addressType: 'Shipping', contactName: 'Receiving desk', phone: '(555) 123-4500',
+    }));
+    internals.form.patchValue({ addressType: 'Billing' });
+    internals.save();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/customers/42/addresses/7`);
+    expect(req.request.body).toMatchObject({ addressType: 'Billing', contactName: null, phone: null });
+    req.flush(null);
     httpMock.verify();
   });
 

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
@@ -78,7 +79,15 @@ export class CustomerAddressDialogComponent {
     addressType: new FormControl<string>('Billing', { nonNullable: true, validators: [Validators.required] }),
     address: new FormControl<Address | null>(null, [Validators.required, CustomerAddressDialogComponent.addressCompleteValidator]),
     isDefault: new FormControl<boolean>(false, { nonNullable: true }),
+    contactName: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(200)] }),
+    phone: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(50)] }),
   });
+
+  private readonly addressType = toSignal(this.form.controls.addressType.valueChanges, {
+    initialValue: this.form.controls.addressType.value,
+  });
+
+  protected readonly showsDockContact = computed(() => this.addressType() !== 'Billing');
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
     label: this.translate.instant('customers.addresses.labelField'),
@@ -104,6 +113,8 @@ export class CustomerAddressDialogComponent {
           country: addr.country,
         },
         isDefault: addr.isDefault,
+        contactName: addr.contactName ?? '',
+        phone: addr.phone ?? '',
       });
     });
   }
@@ -128,6 +139,7 @@ export class CustomerAddressDialogComponent {
     if (this.form.invalid || this.saving()) return;
     const v = this.form.getRawValue();
     const addr = v.address!;
+    const shipsHere = v.addressType !== 'Billing';
     // Create and Update payloads are shape-identical today; keep the save a
     // single PUT/POST of the whole record (no per-field patching).
     const payload: CreateCustomerAddressRequest & UpdateCustomerAddressRequest = {
@@ -140,6 +152,8 @@ export class CustomerAddressDialogComponent {
       postalCode: addr.postalCode,
       country: addr.country,
       isDefault: v.isDefault,
+      contactName: shipsHere ? v.contactName.trim() || null : null,
+      phone: shipsHere ? v.phone.trim() || null : null,
     };
 
     this.saving.set(true);

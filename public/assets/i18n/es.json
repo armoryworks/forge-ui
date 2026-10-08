@@ -1940,6 +1940,11 @@
       "waived": "Inspección dispensada"
     }
   },
+  "contactFields": {
+    "mobile": "Móvil",
+    "dockContact": "Contacto en el muelle",
+    "dockPhone": "Teléfono del muelle"
+  },
   "customers": {
     "customerNumberLabel": "Número de cliente",
     "documents": {
