@@ -26,8 +26,6 @@
             <td class="off-tier__right">
               @if (line.tierPrice !== null) {
                 <app-currency-display [value]="line.tierPrice" [currency]="line.currency" />
-              } @else {
-                <span class="off-tier__muted">{{ 'purchaseOrders.offTier.noTier' | translate }}</span>
               }
             </td>
             <td class="off-tier__right">

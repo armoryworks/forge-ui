@@ -33,7 +33,7 @@ import {
 import { toCreateLineRequest, toTierVarianceLines } from './po-line-request.util';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { forkJoin, Observable, of } from 'rxjs';
-import { catchError, map, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { catchError, map, debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -93,9 +93,9 @@ export class PoDialogComponent {
   protected readonly parts = computed(() =>
     this.allParts().filter(p => p.procurementSource === 'Buy' || p.procurementSource === 'Subcontract'));
   protected readonly partSearch = signal('');
-  protected readonly vendorContacts = signal<PoVendorRef[]>([]);
-  protected readonly vendorAddresses = signal<PoVendorRef[]>([]);
-  protected readonly shipToLocations = signal<PoVendorRef[]>([]);
+  protected readonly vendorContacts = signal<PoVendorRef[] | null>([]);
+  protected readonly vendorAddresses = signal<PoVendorRef[] | null>([]);
+  protected readonly shipToLocations = signal<PoVendorRef[] | null>(null);
   protected readonly vendorParts = signal<Map<number, boolean> | null>(null);
   protected readonly lines = signal<PoLineEntry[]>([]);
   /** True while the unit price reflects the part's list price and hasn't been manually edited. */
@@ -141,7 +141,7 @@ export class PoDialogComponent {
     const search = this.partSearch().trim().toLowerCase();
     if (!search) return null;
     const matches = (label: unknown) => String(label).toLowerCase().includes(search);
-    if (this.partOptions().some(o => matches(o['label']))) return null;
+    if (this.parts().some(p => matches(this.partLabel(p)))) return null;
     const makeParts = this.allParts().filter(p => p.procurementSource === 'Make');
     const made = makeParts.find(p => p.partNumber.toLowerCase() === search)
       ?? makeParts.find(p => matches(this.partLabel(p)));
@@ -149,11 +149,11 @@ export class PoDialogComponent {
   });
 
   protected readonly contactOptions = computed<SelectOption[]>(() =>
-    this.refOptions(this.vendorContacts(), 'poCreate.noContact'));
+    this.refOptions(this.vendorContacts(), 'poCreate.noContact', 'poCreate.defaultContact'));
   protected readonly addressOptions = computed<SelectOption[]>(() =>
-    this.refOptions(this.vendorAddresses(), 'poCreate.noAddress'));
+    this.refOptions(this.vendorAddresses(), 'poCreate.noAddress', 'poCreate.defaultAddress'));
   protected readonly shipToOptions = computed<SelectOption[]>(() =>
-    this.refOptions(this.shipToLocations(), 'poCreate.noShipTo'));
+    this.refOptions(this.shipToLocations(), 'poCreate.noShipTo', 'poCreate.defaultShipTo'));
 
   protected readonly unapprovedSourceWarning = computed<string | null>(() => {
     const parts = this.lines()
@@ -304,7 +304,12 @@ export class PoDialogComponent {
       },
     });
     this.form.controls.vendorId.valueChanges
-      .pipe(distinctUntilChanged(), switchMap(vendorId => this.loadVendorRefs(vendorId)), takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        distinctUntilChanged(),
+        tap(() => this.clearVendorRefs()),
+        switchMap(vendorId => this.loadVendorRefs(vendorId)),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe(({ contacts, addresses, vendorParts }) => {
         this.vendorContacts.set(contacts);
         this.vendorAddresses.set(addresses);
@@ -335,8 +340,16 @@ export class PoDialogComponent {
       .subscribe(() => this.maybeRecomputePrice((price) => this.lastComputedPrice = price));
   }
 
+  private clearVendorRefs(): void {
+    this.vendorContacts.set(null);
+    this.vendorAddresses.set(null);
+    this.vendorParts.set(null);
+    this.form.controls.vendorContactId.setValue(null);
+    this.form.controls.vendorAddressId.setValue(null);
+  }
+
   private loadVendorRefs(vendorId: number | null): Observable<{
-    contacts: PoVendorRef[]; addresses: PoVendorRef[]; vendorParts: Map<number, boolean> | null;
+    contacts: PoVendorRef[] | null; addresses: PoVendorRef[] | null; vendorParts: Map<number, boolean> | null;
   }> {
     if (vendorId == null) return of({ contacts: [], addresses: [], vendorParts: null });
     return forkJoin({
@@ -349,16 +362,20 @@ export class PoDialogComponent {
     });
   }
 
-  private applyDefaultRef(control: FormControl<number | null>, refs: PoVendorRef[]): void {
+  private applyDefaultRef(control: FormControl<number | null>, refs: PoVendorRef[] | null): void {
+    if (refs == null) {
+      control.setValue(null);
+      return;
+    }
     if (control.value != null && refs.some(r => r.id === control.value)) return;
     control.setValue(refs.find(r => r.isDefault)?.id ?? null);
   }
 
-  private refOptions(refs: PoVendorRef[], noneKey: string): SelectOption[] {
-    return [
-      { value: null, label: this.translate.instant(noneKey) },
-      ...refs.map(r => ({ value: r.id, label: r.label })),
-    ];
+  private refOptions(refs: PoVendorRef[] | null, noneKey: string, serverDefaultKey: string): SelectOption[] {
+    if (refs == null) return [{ value: null, label: this.translate.instant(serverDefaultKey) }];
+    const options = refs.map(r => ({ value: r.id, label: r.label }));
+    if (refs.some(r => r.isDefault)) return options;
+    return [{ value: null, label: this.translate.instant(noneKey) }, ...options];
   }
 
   private partLabel(p: PartListItem): string {
@@ -629,8 +646,7 @@ export class PoDialogComponent {
 
     // For lines flagged "update tier", upsert a new VendorPartPriceTier.
     // Skip lines that already exist with no VendorPartId — those need a
-    // VendorPart row first, which is admin-managed; we'd rather record
-    // the line as exception and leave the tier insert for a follow-up.
+    // VendorPart row first.
     const tierUpserts = result.updateTierLines
       .filter(l => l.vendorPartId !== null)
       .map(l => this.vendorPartsService.addPriceTier(l.vendorPartId!, {

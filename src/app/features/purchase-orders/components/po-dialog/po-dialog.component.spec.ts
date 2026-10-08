@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { FormGroup } from '@angular/forms';
 import { provideTranslateService, TranslateLoader, TranslateService } from '@ngx-translate/core';
-import { Observable, of } from 'rxjs';
+import { NEVER, Observable, of } from 'rxjs';
 
 import { PoDialogComponent } from './po-dialog.component';
 import { PurchaseOrderService } from '../../services/purchase-order.service';
@@ -35,6 +35,8 @@ interface DialogInternals {
   lines: { set(lines: PoLineEntry[]): void };
   partOptions(): AutocompleteOption[];
   contactOptions(): SelectOption[];
+  addressOptions(): SelectOption[];
+  shipToOptions(): SelectOption[];
   makePartHint(): string | null;
   unapprovedSourceWarning(): string | null;
   lineSourceApproved(line: PoLineEntry): boolean | null;
@@ -73,9 +75,10 @@ function tierResult(partId: number, overrides: Partial<CheckTierVarianceResult> 
 
 interface SetupOptions {
   parts?: PartListItem[];
-  contacts?: PoVendorRef[];
-  addresses?: PoVendorRef[];
-  locations?: PoVendorRef[];
+  contacts?: PoVendorRef[] | null;
+  addresses?: PoVendorRef[] | null;
+  locations?: PoVendorRef[] | null;
+  loadingVendorIds?: number[];
   vendorParts?: Partial<VendorPart>[];
   tierLines?: CheckTierVarianceResult[];
 }
@@ -112,9 +115,11 @@ function setup(opts: SetupOptions = {}) {
       {
         provide: PoVendorRefsService,
         useValue: {
-          getContacts: () => of(opts.contacts ?? []),
-          getOrderFromAddresses: () => of(opts.addresses ?? []),
-          getShipToLocations: () => of(opts.locations ?? []),
+          getContacts: (vendorId: number) =>
+            opts.loadingVendorIds?.includes(vendorId) ? NEVER : of(opts.contacts === undefined ? [] : opts.contacts),
+          getOrderFromAddresses: (vendorId: number) =>
+            opts.loadingVendorIds?.includes(vendorId) ? NEVER : of(opts.addresses === undefined ? [] : opts.addresses),
+          getShipToLocations: () => of(opts.locations === undefined ? [] : opts.locations),
         },
       },
     ],
@@ -125,6 +130,11 @@ function setup(opts: SetupOptions = {}) {
     poCreate: {
       makePartOnly: 'No buyable parts match. {{partNumber}} is made in-house.',
       noContact: 'No contact',
+      noAddress: 'No address',
+      noShipTo: 'No ship-to location',
+      defaultContact: "Vendor's primary contact, if any",
+      defaultAddress: "Vendor's default address, if any",
+      defaultShipTo: 'Default company location, if any',
       unapprovedSourceWarning: 'Not approved: {{parts}}',
     },
   });
@@ -159,24 +169,58 @@ describe('PoDialogComponent — vendor contact, order-from address and ship-to',
 
     expect(internals.form.controls['vendorContactId'].value).toBe(11);
     expect(internals.form.controls['vendorAddressId'].value).toBe(20);
-    expect(internals.contactOptions().map(o => o.label)).toEqual(['No contact', 'Sam Buyer', 'Pat Primary']);
+    expect(internals.contactOptions().map(o => o.label)).toEqual(['Sam Buyer', 'Pat Primary']);
+    expect(internals.addressOptions().map(o => o.label)).toEqual(['Order desk', 'Remit']);
   });
 
   it('keeps a restored contact that belongs to the vendor instead of the default', () => {
     const { internals } = setup({ contacts: [ref(10, 'Sam Buyer'), ref(11, 'Pat Primary', true)] });
 
-    internals.form.patchValue({ vendorContactId: 10 });
-    internals.form.controls['vendorId'].setValue(5);
+    internals.form.patchValue({ vendorId: 5, vendorContactId: 10 });
 
     expect(internals.form.controls['vendorContactId'].value).toBe(10);
   });
 
-  it('leaves the contact empty when the vendor has no primary contact', () => {
+  it('offers no contact only when the vendor has no primary contact', () => {
     const { internals } = setup({ contacts: [ref(10, 'Sam'), ref(12, 'Lee')] });
 
     internals.form.controls['vendorId'].setValue(5);
 
     expect(internals.form.controls['vendorContactId'].value).toBeNull();
+    expect(internals.contactOptions().map(o => o.label)).toEqual(['No contact', 'Sam', 'Lee']);
+  });
+
+  it('labels the empty choice as the server default when the lists cannot be read', () => {
+    const { internals } = setup({ contacts: null, addresses: null, locations: null });
+
+    internals.form.controls['vendorId'].setValue(5);
+
+    expect(internals.contactOptions()).toEqual([{ value: null, label: "Vendor's primary contact, if any" }]);
+    expect(internals.addressOptions()).toEqual([{ value: null, label: "Vendor's default address, if any" }]);
+    expect(internals.shipToOptions()).toEqual([{ value: null, label: 'Default company location, if any' }]);
+    expect(internals.form.controls['shipToLocationId'].value).toBeNull();
+  });
+
+  it('says there is no ship-to location only when the company has none', () => {
+    const { internals } = setup({ locations: [] });
+
+    expect(internals.shipToOptions()).toEqual([{ value: null, label: 'No ship-to location' }]);
+  });
+
+  it('drops the previous vendor\'s contact and address as soon as the vendor changes', () => {
+    const { internals } = setup({
+      contacts: [ref(11, 'Pat', true)],
+      addresses: [ref(20, 'Order desk', true)],
+      loadingVendorIds: [6],
+    });
+    internals.form.controls['vendorId'].setValue(5);
+    expect(internals.form.controls['vendorContactId'].value).toBe(11);
+
+    internals.form.controls['vendorId'].setValue(6);
+
+    expect(internals.form.controls['vendorContactId'].value).toBeNull();
+    expect(internals.form.controls['vendorAddressId'].value).toBeNull();
+    expect(internals.contactOptions()).toEqual([{ value: null, label: "Vendor's primary contact, if any" }]);
   });
 
   it('sends the chosen contact, address and ship-to ids on create', () => {
@@ -228,6 +272,16 @@ describe('PoDialogComponent — part picker', () => {
 
     searchFor(internals, 'ASM-200');
 
+    expect(internals.makePartHint()).toBeNull();
+  });
+
+  it('shows no explanation when the text matches a hidden obsolete buy part', () => {
+    const obsolete = { ...part(1, 'ASM-200-B', 'Buy'), status: 'Obsolete' } as PartListItem;
+    const { internals } = setup({ parts: [obsolete, part(2, 'ASM-200', 'Make')] });
+
+    searchFor(internals, 'ASM-200');
+
+    expect(internals.partOptions()).toEqual([]);
     expect(internals.makePartHint()).toBeNull();
   });
 

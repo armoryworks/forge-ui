@@ -11,8 +11,8 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
  *
  * Fires once per PO when one or more lines are flagged off-tier by the
  * server's `check-tier-variance` endpoint. Listed lines show the part,
- * the current tier price (or "no tier" when none exists), the entered
- * price, and the variance pct. Per row, the buyer chooses:
+ * the current tier price, the entered price, and the variance pct. Per
+ * row, the buyer chooses:
  *
  *   - Default: record the line at the entered price as a one-off
  *     exception. Doesn't touch master pricing.
