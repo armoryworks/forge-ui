@@ -4364,8 +4364,6 @@
     "costingPeriodsLoadFailed": "No se pudieron cargar los períodos de costeo",
     "costingRatesLoadFailed": "No se pudieron cargar las tasas",
     "disableMfaFailed": "No se pudo desactivar la autenticación de dos factores",
-    "discoveryApplyFailed": "No se pudo aplicar el descubrimiento; revise las restricciones de las capacidades.",
-    "discoveryPreviewFailed": "No se pudo generar la vista previa del descubrimiento; revise las restricciones de las capacidades.",
     "glAccountSaveFailed": "No se pudo guardar",
     "integrationConnectStartFailed": "No se pudo iniciar la conexión. Verifique que el Client ID y el Client Secret estén guardados.",
     "loginUnreachable": "No se puede conectar con el servidor.",

@@ -4364,8 +4364,6 @@
     "costingPeriodsLoadFailed": "Failed to load costing periods",
     "costingRatesLoadFailed": "Failed to load rates",
     "disableMfaFailed": "Failed to disable MFA",
-    "discoveryApplyFailed": "Failed to apply discovery — check capability constraints.",
-    "discoveryPreviewFailed": "Failed to preview discovery apply — check capability constraints.",
     "glAccountSaveFailed": "Save failed",
     "integrationConnectStartFailed": "Couldn't start the connect flow. Check that Client ID and Client Secret are saved.",
     "loginUnreachable": "Unable to connect to server.",
