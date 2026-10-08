@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { debounceTime, distinctUntilChanged, filter, switchMap, catchError, of, Subscription } from 'rxjs';
@@ -8,13 +7,14 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { environment } from '../../../../../environments/environment';
 import { SearchResult } from '../../../../shared/models/search.model';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { JobStatus } from '../../../../shared/models/mobile-api.model';
 import { ShopFloorService } from '../../services/shop-floor.service';
 
 @Component({
   selector: 'app-kiosk-search-bar',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe, DatePipe],
+  imports: [DateOnlyPipe, ReactiveFormsModule, TranslatePipe],
   templateUrl: './kiosk-search-bar.component.html',
   styleUrl: './kiosk-search-bar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

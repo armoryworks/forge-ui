@@ -72,7 +72,7 @@
                 }
                 <span>{{ job.stageName }}</span>
                 @if (job.dueDate) {
-                  <span>{{ 'mobileAppWork.myJobs.due' | translate: { date: (job.dueDate | date: 'MM/dd/yyyy') } }}</span>
+                  <span>{{ 'mobileAppWork.myJobs.due' | translate: { date: (job.dueDate | dateOnly) } }}</span>
                 }
               </span>
             </a>

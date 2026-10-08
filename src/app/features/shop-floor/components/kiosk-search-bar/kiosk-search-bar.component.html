@@ -55,7 +55,7 @@
             <dt>{{ 'kioskSetup.searchCard.dueDate' | translate }}</dt>
             <dd data-testid="kiosk-search-card-due" [class.kiosk-search__card-overdue]="status.isOverdue">
               @if (status.dueDate) {
-                {{ status.dueDate | date: 'mediumDate' }}
+                {{ status.dueDate | dateOnly }}
                 @if (status.isOverdue) {
                   · {{ 'shopFloor.overdue' | translate }}
                 }

@@ -3,11 +3,10 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-import { DatePipe } from '@angular/common';
-
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { InputComponent } from '../../../shared/components/input/input.component';
+import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
 import { MyJob } from '../../../shared/models/my-job.model';
 import { InstanceService } from '../../../shared/services/instance.service';
 import { MobileApiService } from '../../../shared/services/mobile-api.service';
@@ -27,7 +26,7 @@ import { RunningJob } from '../models/running-job.model';
 @Component({
   selector: 'app-app-jobs-home',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule, DatePipe, TranslatePipe, InputComponent, IdentityPromptComponent],
+  imports: [DateOnlyPipe, RouterLink, ReactiveFormsModule, TranslatePipe, InputComponent, IdentityPromptComponent],
   templateUrl: './app-jobs-home.component.html',
   styleUrl: './app-jobs-home.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
