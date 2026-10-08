@@ -10,7 +10,7 @@
       <app-input [label]="'addressForm.city' | translate" formControlName="city" [maxlength]="100" [required]="requireCity()" />
 
       @if (stateDropdown()) {
-        <app-autocomplete data-testid="address-form-state" [label]="'addressForm.state' | translate" formControlName="state" [options]="stateOptions" [minChars]="0" />
+        <app-autocomplete data-testid="address-form-state" [label]="'addressForm.state' | translate" formControlName="state" [options]="stateOptions" [minChars]="0" [autoSelectFields]="stateMatchFields" [required]="requireState()" />
       } @else {
         <app-input [label]="'addressForm.stateProvince' | translate" formControlName="state" [maxlength]="50" [required]="requireState()" />
       }

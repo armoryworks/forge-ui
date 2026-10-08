@@ -197,11 +197,10 @@ async function completeContact(page: Page) {
   await fillAppInput(page, 'Street Address', '123 Main St');
   await fillAppInput(page, 'City', 'Boise');
 
-  const stateSel = page.locator('app-address-form app-select').filter({ hasText: 'State' });
-  if (await stateSel.count() > 0) {
-    await stateSel.locator('mat-select').click();
-    // State options use 2-letter abbreviations (ID, CA, etc.)
-    await page.locator('mat-option').filter({ hasText: /^ID$/ }).first().click();
+  const stateInput = page.locator('[data-testid="address-form-state"] input');
+  if (await stateInput.count() > 0) {
+    await stateInput.fill('ID');
+    await page.locator('mat-option').filter({ hasText: 'ID - Idaho' }).first().click();
   }
 
   await fillAppInput(page, 'ZIP', '83702');

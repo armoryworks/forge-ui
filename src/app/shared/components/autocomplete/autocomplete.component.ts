@@ -2,16 +2,22 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  ElementRef,
   forwardRef,
   input,
   signal,
+  viewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import {
+  MatAutocompleteModule,
+  MatAutocompleteSelectedEvent,
+  MatAutocompleteTrigger,
+} from '@angular/material/autocomplete';
 
 export interface AutocompleteOption {
   [key: string]: unknown;
@@ -39,10 +45,15 @@ export class AutocompleteComponent implements ControlValueAccessor {
   readonly valueField = input<string>('value');
   readonly placeholder = input<string>('');
   readonly minChars = input<number>(1);
+  readonly required = input<boolean>(false);
+  readonly autoSelectFields = input<readonly string[]>([]);
 
   protected readonly searchControl = new FormControl('');
   protected readonly disabled = signal(false);
   private selectedValue: unknown = null;
+
+  private readonly trigger = viewChild.required(MatAutocompleteTrigger);
+  private readonly searchInput = viewChild.required<ElementRef<HTMLInputElement>>('searchInput');
 
   private readonly searchValue = toSignal(
     this.searchControl.valueChanges.pipe(startWith('')),
@@ -98,10 +109,7 @@ export class AutocompleteComponent implements ControlValueAccessor {
   }
 
   protected onOptionSelected(event: MatAutocompleteSelectedEvent): void {
-    const opt = event.option.value as AutocompleteOption;
-    this.selectedValue = opt[this.valueField()];
-    this.searchControl.setValue(String(opt[this.displayField()] ?? ''), { emitEvent: false });
-    this.onChange(this.selectedValue);
+    this.select(event.option.value as AutocompleteOption);
   }
 
   protected onInput(): void {
@@ -112,8 +120,40 @@ export class AutocompleteComponent implements ControlValueAccessor {
     }
   }
 
-  protected markTouched(): void {
+  protected onBlur(): void {
+    if (!this.trigger().panelOpen) this.resolveTypedText();
     this.onTouched();
+  }
+
+  protected onPanelClosed(): void {
+    if (document.activeElement !== this.searchInput().nativeElement) this.resolveTypedText();
+  }
+
+  protected onEnter(): void {
+    if (!this.trigger().activeOption) this.resolveTypedText();
+  }
+
+  private resolveTypedText(): void {
+    const fields = this.autoSelectFields();
+    if (fields.length === 0 || this.selectedValue !== null) return;
+    const raw = this.searchControl.value;
+    const text = typeof raw === 'string' ? raw.trim().toLowerCase() : '';
+    if (!text) return;
+    const exact = this.options().find(opt =>
+      fields.some(field => String(opt[field] ?? '').toLowerCase() === text));
+    const filtered = this.filteredOptions();
+    const match = exact ?? (filtered.length === 1 ? filtered[0] : undefined);
+    if (match) {
+      this.select(match);
+    } else {
+      this.searchControl.setValue('');
+    }
+  }
+
+  private select(opt: AutocompleteOption): void {
+    this.selectedValue = opt[this.valueField()];
+    this.searchControl.setValue(String(opt[this.displayField()] ?? ''), { emitEvent: false });
+    this.onChange(this.selectedValue);
   }
 
   protected displayFn = (): string => {

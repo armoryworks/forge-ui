@@ -161,8 +161,8 @@ test.describe('Smoke Test — Data Creation & Report Verification', () => {
     await page.getByRole('textbox', { name: 'Street Address', exact: true }).fill('123 Main Street');
     await fillInput(page, 'City', 'Springfield');
 
-    // State dropdown — options are state abbreviations (e.g. "OH"), not full names
-    await selectOption(page, 'State', 'OH');
+    await page.locator('[data-testid="address-form-state"] input').fill('OH');
+    await page.locator('mat-option').filter({ hasText: 'OH - Ohio' }).click();
 
     await page.getByLabel('ZIP / Postal Code', { exact: true }).fill('45501');
 

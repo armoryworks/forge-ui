@@ -1,10 +1,13 @@
 import {
-  ChangeDetectionStrategy, Component, forwardRef, inject, input, OnInit, signal,
+  AfterContentInit, ChangeDetectionStrategy, Component, DestroyRef, forwardRef, inject, Injector,
+  input, OnInit, signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
-  ControlValueAccessor, FormControl, FormGroup, NG_VALUE_ACCESSOR,
-  ReactiveFormsModule, Validators,
+  ControlValueAccessor, FormControl, FormGroup, FormGroupDirective, NG_VALUE_ACCESSOR,
+  NgControl, NgForm, ReactiveFormsModule, TouchedChangeEvent, Validators,
 } from '@angular/forms';
+import { EMPTY, filter, merge } from 'rxjs';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -66,7 +69,7 @@ const US_STATES: AutocompleteOption[] = ([
   ['WI', 'Wisconsin'],
   ['WY', 'Wyoming'],
   ['DC', 'District of Columbia'],
-] as const).map(([code, name]) => ({ value: code, label: `${code} - ${name}` }));
+] as const).map(([code, name]) => ({ value: code, name, label: `${code} - ${name}` }));
 
 const COUNTRY_OPTIONS: SelectOption[] = [
   { value: 'US', label: 'United States' },
@@ -93,8 +96,11 @@ const COUNTRY_OPTIONS: SelectOption[] = [
     multi: true,
   }],
 })
-export class AddressFormComponent implements ControlValueAccessor, OnInit {
+export class AddressFormComponent implements ControlValueAccessor, OnInit, AfterContentInit {
   private readonly addressService = inject(AddressService);
+  private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly parentForm = inject(FormGroupDirective, { optional: true }) ?? inject(NgForm, { optional: true });
 
   /** Which fields are required. Defaults: line1, city, state, postalCode all required. */
   readonly requireLine1 = input(true);
@@ -120,6 +126,7 @@ export class AddressFormComponent implements ControlValueAccessor, OnInit {
   readonly compact = input(false);
 
   protected readonly stateOptions: AutocompleteOption[] = US_STATES;
+  protected readonly stateMatchFields: readonly string[] = ['value', 'name', 'label'];
   protected readonly countryOptions: SelectOption[] = COUNTRY_OPTIONS;
 
   protected readonly verifying = signal(false);
@@ -137,6 +144,7 @@ export class AddressFormComponent implements ControlValueAccessor, OnInit {
 
   private onChange: (value: Address | null) => void = () => {};
   private onTouched: () => void = () => {};
+  private notifyingTouched = false;
 
   ngOnInit(): void {
     this.applyValidators();
@@ -152,6 +160,16 @@ export class AddressFormComponent implements ControlValueAccessor, OnInit {
       this.verifyResult.set(null);
       this.emitValue();
     });
+  }
+
+  ngAfterContentInit(): void {
+    const outer = this.injector.get(NgControl, null, { self: true, optional: true })?.control ?? null;
+    const outerTouched = outer?.events.pipe(
+      filter(event => event instanceof TouchedChangeEvent && event.touched && !this.notifyingTouched),
+    ) ?? EMPTY;
+    merge<unknown[]>(outerTouched, this.parentForm?.ngSubmit ?? EMPTY)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.form.markAllAsTouched());
   }
 
   writeValue(value: Address | null): void {
@@ -240,7 +258,9 @@ export class AddressFormComponent implements ControlValueAccessor, OnInit {
       country: val.country ?? 'US',
     } : null);
 
+    this.notifyingTouched = true;
     this.onTouched();
+    this.notifyingTouched = false;
   }
 
   private applyValidators(): void {
