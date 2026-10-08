@@ -1679,7 +1679,8 @@
     "history": {
       "title": "Historial de revisiones",
       "empty": "Aún no hay revisiones registradas.",
-      "noReason": "Sin motivo indicado"
+      "noReason": "Sin motivo indicado",
+      "unknownUser": "Desconocido"
     },
     "dialog": {
       "title": "Revisar {{partNumber}}",

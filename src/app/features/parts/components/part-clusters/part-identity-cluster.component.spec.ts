@@ -108,6 +108,7 @@ function makeRevision(overrides: Partial<PartRevision> = {}): PartRevision {
     isCurrent: true,
     fileCount: 0,
     createdAt: new Date('2026-01-01T00:00:00Z'),
+    createdByName: 'Dana Reyes',
     ...overrides,
   };
 }
@@ -270,6 +271,17 @@ describe('PartIdentityClusterComponent', () => {
 
     expect(getRevisions).toHaveBeenCalledWith(42);
     expect(c.revisions().map((r) => r.revision)).toEqual(['A']);
+  });
+
+  it('keeps who made each revision, including historic revisions with no recorded author', () => {
+    getRevisions.mockReturnValue(of([
+      makeRevision({ id: 2, revision: 'B' }),
+      makeRevision({ id: 1, revision: 'A', createdByName: null }),
+    ]));
+
+    const c = createEditing();
+
+    expect(c.revisions().map((r) => [r.revision, r.createdByName])).toEqual([['B', 'Dana Reyes'], ['A', null]]);
   });
 
   it('offers Revise part only to Admin, Manager and Engineer', () => {

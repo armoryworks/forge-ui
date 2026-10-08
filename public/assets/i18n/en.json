@@ -1679,7 +1679,8 @@
     "history": {
       "title": "Revision history",
       "empty": "No revisions recorded yet.",
-      "noReason": "No reason given"
+      "noReason": "No reason given",
+      "unknownUser": "Unknown"
     },
     "dialog": {
       "title": "Revise {{partNumber}}",

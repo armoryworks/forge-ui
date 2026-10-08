@@ -43,7 +43,7 @@ describe('PartReviseDialogComponent', () => {
   const created: PartRevision = {
     id: 9, partId: 4, revision: 'B', changeDescription: null, changeReason: 'Thicker wall',
     effectiveDate: new Date('2026-10-08T00:00:00Z'), isCurrent: true, fileCount: 0,
-    createdAt: new Date('2026-10-08T00:00:00Z'),
+    createdAt: new Date('2026-10-08T00:00:00Z'), createdByName: 'Dana Reyes',
   };
   let createRevision: ReturnType<typeof vi.fn>;
   let close: ReturnType<typeof vi.fn>;

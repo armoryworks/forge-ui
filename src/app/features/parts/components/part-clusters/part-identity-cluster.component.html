@@ -63,6 +63,7 @@
             <li class="revision-history__item">
               <span class="revision-history__code">{{ rev.revision }}</span>
               <span class="revision-history__meta">{{ rev.effectiveDate | date: dateFormat }}</span>
+              <span class="revision-history__meta" data-testid="part-identity-revision-created-by">{{ rev.createdByName || ('partRevisions.history.unknownUser' | translate) }}</span>
               <span class="revision-history__reason">{{ rev.changeReason || ('partRevisions.history.noReason' | translate) }}</span>
             </li>
           }

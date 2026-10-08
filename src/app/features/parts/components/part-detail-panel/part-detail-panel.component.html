@@ -88,7 +88,8 @@
             [allowManualNumbers]="allowManualPartNumbers()"
             (save)="saveClusterPatch($event)"
             (saveAndClose)="saveClusterPatch($event, true)"
-            (cancelled)="cancelEdit()" />
+            (cancelled)="cancelEdit()"
+            (revised)="onRevised()" />
 
           <div class="detail-body--padded">
           <app-barcode-info

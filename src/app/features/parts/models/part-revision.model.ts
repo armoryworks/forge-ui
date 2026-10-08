@@ -8,4 +8,5 @@ export interface PartRevision {
   isCurrent: boolean;
   fileCount: number;
   createdAt: Date;
+  createdByName: string | null;
 }

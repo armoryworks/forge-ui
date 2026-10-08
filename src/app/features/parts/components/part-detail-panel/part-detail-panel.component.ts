@@ -377,6 +377,12 @@ export class PartDetailPanelComponent {
     });
   }
 
+  /** Part revised on the Identity tab — reload so the header and other clusters show the new revision. */
+  protected onRevised(): void {
+    const p = this.part();
+    if (p) this.loadDetail(p.id);
+  }
+
   // ── Tab navigation ──
 
   protected selectTab(id: PartDetailTabId | 'serials' | 'viewer'): void {
