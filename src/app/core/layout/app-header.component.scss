@@ -625,11 +625,6 @@
   &__value {
     color: var(--text);
     word-break: break-all;
-
-    &.mono {
-      font-family: $font-family-mono;
-      font-size: $font-size-sm;
-    }
   }
 
   &__value--stack {
@@ -650,36 +645,6 @@
     color: var(--text-muted);
     font-size: $font-size-xxs;
     line-height: 1;
-  }
-
-  &__badge {
-    display: inline-flex;
-    align-items: center;
-    gap: $sp-xs;
-    font-size: $font-size-xs;
-    font-family: $font-family-primary;
-    padding: 1px $sp-sm;
-
-    .material-icons-outlined { font-size: $icon-size-sm; }
-
-    &--ok {
-      color: var(--success);
-      background: var(--success-light);
-    }
-
-    &--warn {
-      color: var(--warning);
-      background: var(--warning-light);
-    }
-  }
-
-  &__checking {
-    display: inline-flex;
-    align-items: center;
-    gap: $sp-xs;
-    font-size: $font-size-xs;
-    color: var(--text-muted);
-    .material-icons-outlined { font-size: $icon-size-sm; }
   }
 
   &__desc {

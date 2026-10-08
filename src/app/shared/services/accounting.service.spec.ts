@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { TranslateService } from '@ngx-translate/core';
 
 import { environment } from '../../../environments/environment';
 import { AccountingProviderInfo } from '../../features/admin/models/accounting-provider.model';
@@ -9,6 +10,11 @@ import { AccountingEmployee } from '../../features/admin/models/accounting-emplo
 import { AccountingItem } from '../../features/admin/models/accounting-item.model';
 import { AccountingSyncStatus } from '../../features/admin/models/accounting-sync-status.model';
 import { AccountingMode, AccountingService } from './accounting.service';
+import { CapabilityService } from './capability.service';
+import { SnackbarService } from './snackbar.service';
+import { ToastService } from './toast.service';
+import { capabilityGateInterceptor } from '../interceptors/capability-gate.interceptor';
+import { httpErrorInterceptor } from '../interceptors/http-error.interceptor';
 
 const BASE = environment.apiUrl;
 
@@ -291,5 +297,77 @@ describe('AccountingService', () => {
 
     expect(service.isConfigured()).toBe(false);
     expect(service.isStandalone()).toBe(true);
+  });
+});
+
+describe('AccountingService.load — external accounting gating', () => {
+  let service: AccountingService;
+  let httpMock: HttpTestingController;
+  let snackbar: { error: ReturnType<typeof vi.fn> };
+  let toast: { show: ReturnType<typeof vi.fn> };
+  let capability: { isKnown: ReturnType<typeof vi.fn>; isEnabled: ReturnType<typeof vi.fn> };
+  let consoleError: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    snackbar = { error: vi.fn() };
+    toast = { show: vi.fn() };
+    capability = { isKnown: vi.fn(() => false), isEnabled: vi.fn(() => false) };
+    consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    vi.spyOn(console, 'debug').mockImplementation(() => undefined);
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withInterceptors([capabilityGateInterceptor, httpErrorInterceptor])),
+        provideHttpClientTesting(),
+        { provide: CapabilityService, useValue: capability },
+        { provide: SnackbarService, useValue: snackbar },
+        { provide: ToastService, useValue: toast },
+        { provide: TranslateService, useValue: { instant: (k: string) => k } },
+      ],
+    });
+    service = TestBed.inject(AccountingService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+    vi.restoreAllMocks();
+  });
+
+  it('never sends the request when the descriptor says external accounting is off', () => {
+    capability.isKnown.mockReturnValue(true);
+    capability.isEnabled.mockReturnValue(false);
+
+    service.load();
+
+    httpMock.expectNone(`${BASE}/admin/accounting-mode`);
+    expect(capability.isEnabled).toHaveBeenCalledWith('CAP-ACCT-EXTERNAL');
+    expect(service.isStandalone()).toBe(true);
+    expect(consoleError).not.toHaveBeenCalled();
+  });
+
+  it('treats a capability-disabled 403 as standalone without surfacing an error', () => {
+    service.load();
+
+    httpMock.expectOne(`${BASE}/admin/accounting-mode`).flush(
+      { errors: [{ code: 'capability-disabled', capability: 'CAP-ACCT-EXTERNAL', message: 'External accounting is off.' }] },
+      { status: 403, statusText: 'Forbidden', headers: { 'X-Capability-Disabled': 'CAP-ACCT-EXTERNAL' } },
+    );
+
+    expect(service.isStandalone()).toBe(true);
+    expect(snackbar.error).not.toHaveBeenCalled();
+    expect(consoleError).not.toHaveBeenCalled();
+  });
+
+  it('treats a plain 403 as standalone without an access-denied snackbar', () => {
+    service.load();
+
+    httpMock.expectOne(`${BASE}/admin/accounting-mode`).flush(null, { status: 403, statusText: 'Forbidden' });
+
+    expect(service.isStandalone()).toBe(true);
+    expect(snackbar.error).not.toHaveBeenCalled();
+    expect(toast.show).not.toHaveBeenCalled();
+    expect(consoleError).not.toHaveBeenCalled();
   });
 });

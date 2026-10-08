@@ -43,7 +43,7 @@
 
         <app-validation-button [violations]="violations" [loading]="loading()">
           <button data-testid="login-submit" class="action-btn action-btn--primary" type="submit"
-            [disabled]="form.invalid || loading()">
+            [disabled]="loading()">
             @if (loading()) {
               <span class="material-icons-outlined spin">sync</span>
               {{ 'auth.signingIn' | translate }}

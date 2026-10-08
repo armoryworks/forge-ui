@@ -1,18 +1,26 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { EventsService } from './events.service';
+import { AuthService } from '../../../shared/services/auth.service';
 import { environment } from '../../../../environments/environment';
 
 describe('EventsService', () => {
   let service: EventsService;
   let httpMock: HttpTestingController;
   const base = `${environment.apiUrl}/events`;
+  const authenticated = signal(true);
 
   beforeEach(() => {
+    authenticated.set(true);
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: AuthService, useValue: { isAuthenticated: authenticated.asReadonly() } },
+      ],
     });
     service = TestBed.inject(EventsService);
     httpMock = TestBed.inject(HttpTestingController);
@@ -94,6 +102,16 @@ describe('EventsService', () => {
       const req = httpMock.expectOne(`${base}/upcoming`);
       expect(req.request.method).toBe('GET');
       req.flush([]);
+    });
+
+    it('answers empty without a request while signed out', () => {
+      authenticated.set(false);
+      let result: unknown;
+
+      service.getUpcomingEvents().subscribe(events => { result = events; });
+
+      httpMock.expectNone(`${base}/upcoming`);
+      expect(result).toEqual([]);
     });
   });
 

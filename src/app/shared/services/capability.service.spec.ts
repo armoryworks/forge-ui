@@ -200,6 +200,7 @@ describe('CapabilityService — snapshot fallback (fail-open, 2026-08)', () => {
   beforeEach(() => {
     localStorage.removeItem(CACHE_KEY);
     vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    vi.spyOn(console, 'info').mockImplementation(() => undefined);
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
@@ -272,21 +273,59 @@ describe('CapabilityService — snapshot fallback (fail-open, 2026-08)', () => {
     expect(service.isEnabled('CAP-MD-CUSTOMER-CONTACTS')).toBe(true);
     // A cached explicit "disabled" wins over any caller-supplied default.
     expect(service.isEnabled('CAP-MD-CUSTOMER-INTERACTIONS', true)).toBe(false);
-    // Degraded gating is visible in the console.
-    expect(console.warn).toHaveBeenCalled();
+    expect(console.warn).toHaveBeenCalledTimes(1);
   });
 
-  it('honors defaultWhenUnknown when neither a live nor a cached snapshot exists, warning once per code', () => {
+  it('honors defaultWhenUnknown when neither a live nor a cached snapshot exists, without a warning per call', () => {
     const { service } = inject();
 
     expect(service.isEnabled('CAP-MD-CUSTOMER-CONTACTS', true)).toBe(true);
     expect(service.isEnabled('CAP-MD-CUSTOMER-CONTACTS', true)).toBe(true);
     expect(service.isEnabled('CAP-MD-CUSTOMER-INTERACTIONS')).toBe(false);
 
-    // One warning per distinct code, not per call.
-    const warned = (console.warn as unknown as ReturnType<typeof vi.fn>).mock.calls
-      .filter(([msg]) => typeof msg === 'string' && msg.includes('Gating decision'));
-    expect(warned.length).toBe(2);
+    expect(console.warn).not.toHaveBeenCalled();
+    expect(console.info).not.toHaveBeenCalled();
+  });
+
+  it('summarizes gating made before the descriptor arrives in one line per load', () => {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({
+      generatedAt: '2026-07-31T00:00:00Z',
+      enabled: { 'CAP-MD-CUSTOMER-CONTACTS': true },
+    }));
+    const { service, httpMock } = inject();
+    service.load().subscribe();
+
+    service.isEnabled('CAP-MD-CUSTOMER-CONTACTS');
+    service.isEnabled('CAP-MD-CUSTOMER-CONTACTS');
+    service.isEnabled('CAP-EXT-CHAT');
+    service.isEnabled('CAP-ACCT-EXTERNAL');
+    flushDescriptor(httpMock, [entry({ code: 'CAP-MD-CUSTOMER-CONTACTS', enabled: true })]);
+
+    expect(console.warn).not.toHaveBeenCalled();
+    expect(console.info).toHaveBeenCalledTimes(1);
+    const [line] = (console.info as unknown as ReturnType<typeof vi.fn>).mock.calls[0] as [string];
+    expect(line).toContain('3 gating decision(s)');
+    expect(line).toContain('cached snapshot: CAP-MD-CUSTOMER-CONTACTS');
+    expect(line).toContain('caller default: CAP-EXT-CHAT, CAP-ACCT-EXTERNAL');
+
+    service.isEnabled('CAP-EXT-CHAT');
+    service.load().subscribe();
+    flushDescriptor(httpMock, [entry({ code: 'CAP-MD-CUSTOMER-CONTACTS', enabled: true })]);
+    expect(console.info).toHaveBeenCalledTimes(1);
+  });
+
+  it('folds the pre-load gating summary into the single fetch-failure warning', () => {
+    const { service, httpMock } = inject();
+    service.load().subscribe();
+
+    service.isEnabled('CAP-EXT-CHAT');
+    service.isEnabled('CAP-ACCT-EXTERNAL');
+    failDescriptor(httpMock);
+
+    expect(console.warn).toHaveBeenCalledTimes(1);
+    const [line] = (console.warn as unknown as ReturnType<typeof vi.fn>).mock.calls[0] as [string];
+    expect(line).toContain('Descriptor fetch failed');
+    expect(line).toContain('2 gating decision(s)');
   });
 
   it('clear() drops the live snapshot but keeps the cached fallback for the next session', () => {

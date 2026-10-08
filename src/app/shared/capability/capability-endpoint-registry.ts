@@ -44,6 +44,7 @@ export interface CapabilityEndpointEntry {
  */
 export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = [
   // ── Specific sub-paths first (must precede their parent prefix) ──
+  { prefix: 'admin/accounting-mode', capability: 'CAP-ACCT-EXTERNAL' },
   { prefix: 'admin/bi-api-keys', capability: 'CAP-IDEN-AUTH-API-KEYS' },
   { prefix: 'admin/currencies', capability: 'CAP-MD-CURRENCIES' },
   { prefix: 'admin/exchange-rates', capability: 'CAP-MD-CURRENCIES' },

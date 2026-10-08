@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, signal, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -6,7 +6,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { AuthService } from '../../shared/services/auth.service';
+import { AuthService, AuthUser } from '../../shared/services/auth.service';
 import { BrandingService } from '../../shared/services/branding.service';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
@@ -18,6 +18,7 @@ import { ToastService } from '../../shared/services/toast.service';
 import { SsoProvider } from '../../shared/models/sso-provider.model';
 import { MfaChallengeComponent } from './mfa-challenge.component';
 import { MfaValidateResponse } from '../account/models/mfa.model';
+import { needsProfileCompletion } from './post-login.utils';
 
 @Component({
   selector: 'app-login',
@@ -36,6 +37,7 @@ export class LoginComponent implements OnInit {
   private readonly snackbar = inject(SnackbarService);
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   protected readonly branding = inject(BrandingService);
 
   protected readonly form = new FormGroup({
@@ -96,7 +98,7 @@ export class LoginComponent implements OnInit {
   }
 
   protected goToDashboard(): void {
-    this.navigatePostLogin(true);
+    this.navigatePostLogin(null);
   }
 
   protected switchAccount(): void {
@@ -111,7 +113,12 @@ export class LoginComponent implements OnInit {
   }
 
   protected onSubmit(): void {
-    if (this.form.invalid) return;
+    if (this.loading()) return;
+    this.syncAutofilledValues();
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
     const { email, password } = this.form.getRawValue();
 
@@ -125,7 +132,7 @@ export class LoginComponent implements OnInit {
           }
           // Defensive: a non-MFA success always carries a user, but never crash the
           // login flow (and silently stall) if the server omits it.
-          this.navigatePostLogin(response.user?.profileComplete ?? true);
+          this.navigatePostLogin(response.user);
         },
         error: (err: HttpErrorResponse) => this.handleError(err),
       });
@@ -139,7 +146,7 @@ export class LoginComponent implements OnInit {
     // session is fully in place.
     this.authService.completeMfaLogin(result.accessToken, result.trustedDeviceToken).subscribe({
       next: (user) => {
-        this.navigatePostLogin(user?.profileComplete ?? true);
+        this.navigatePostLogin(user);
       },
       error: () => {
         // Token is valid, just navigate to dashboard
@@ -153,9 +160,19 @@ export class LoginComponent implements OnInit {
     this.mfaPendingToken.set(null);
   }
 
-  private navigatePostLogin(profileComplete: boolean): void {
-    const isMobile = window.innerWidth <= 768;
-    if (!profileComplete && !isMobile) {
+  private syncAutofilledValues(): void {
+    const fields = [['email', 'login-email'], ['password', 'login-password']] as const;
+    for (const [name, testId] of fields) {
+      const input = this.host.nativeElement.querySelector<HTMLInputElement>(`[data-testid="${testId}"] input`);
+      const control = this.form.controls[name];
+      if (input && input.value && input.value !== control.value) {
+        control.setValue(input.value);
+      }
+    }
+  }
+
+  private navigatePostLogin(user: AuthUser | null | undefined): void {
+    if (needsProfileCompletion(user, window.innerWidth)) {
       this.router.navigate(['/account/profile']);
       return;
     }

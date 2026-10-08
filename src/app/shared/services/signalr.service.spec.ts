@@ -138,6 +138,24 @@ describe('SignalrService', () => {
     });
   });
 
+  describe('stop during negotiation', () => {
+    it('resolves without scheduling a retry when the hub was stopped mid-start', async () => {
+      let rejectStart: (err: Error) => void = () => undefined;
+      mockConnection.start.mockImplementation(() => new Promise<void>((_, reject) => { rejectStart = reject; }));
+
+      const started = service.startConnection('notifications');
+      await service.stopConnection('notifications');
+      const abort = new Error('The connection was stopped during negotiation.');
+      abort.name = 'AbortError';
+      rejectStart(abort);
+      await started;
+
+      expect(mockConnection.start).toHaveBeenCalledTimes(1);
+      expect(mockAuthService.clearAuth).not.toHaveBeenCalled();
+      expect((service as unknown as { retryTimers: Map<string, unknown> }).retryTimers.size).toBe(0);
+    });
+  });
+
   describe('stopAll', () => {
     it('should set connectionState to disconnected', async () => {
       await service.stopAll();

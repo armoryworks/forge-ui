@@ -1,13 +1,15 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
+import { AuthService } from '../../../shared/services/auth.service';
 import { AppEvent, EventRequest } from '../models/event.model';
 
 @Injectable({ providedIn: 'root' })
 export class EventsService {
   private readonly http = inject(HttpClient);
+  private readonly auth = inject(AuthService);
   private readonly base = `${environment.apiUrl}/events`;
 
   getEvents(from?: string, to?: string, eventType?: string): Observable<AppEvent[]> {
@@ -55,6 +57,7 @@ export class EventsService {
   }
 
   getUpcomingEvents(): Observable<AppEvent[]> {
+    if (!this.auth.isAuthenticated()) return of([]);
     return this.http.get<AppEvent[]>(`${this.base}/upcoming`);
   }
 

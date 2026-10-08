@@ -149,22 +149,7 @@ export class AppComponent implements OnInit, OnDestroy {
         // and gated calls 403 before layer 2 catches them as red console
         // errors. Chaining via the load() Observable closes the race.
         this.capabilityService.load().subscribe({
-          next: () => {
-            if (!environment.mobileShell) {
-              this.notificationService.load();
-              this.accountingService.load();
-              this.employeeProfile.load();
-              this.announcementService.loadActive();
-            }
-            // Base currency — load once after auth so currency-display can
-            // disambiguate non-base currencies inline. Failures fall back
-            // to USD inside the service; no need to chain anything.
-            this.currencyService.load().subscribe();
-            // Tenant i18n label overrides — layered over the shipped catalogs
-            // (merge point: I18nOverridesService). Gated by CAP-ADMIN-I18N, so
-            // it must wait for the capability descriptor like the calls above.
-            this.i18nOverrides.load();
-          },
+          next: () => this.loadCapabilityGatedState(),
         });
       } else {
         this.capabilityService.clear();
@@ -192,6 +177,25 @@ export class AppComponent implements OnInit, OnDestroy {
         this.openConflictDialog(conflict);
       }
     });
+  }
+
+  private loadCapabilityGatedState(): void {
+    if (!environment.mobileShell) {
+      this.notificationService.load();
+      if (this.capabilityService.isEnabled('CAP-ACCT-EXTERNAL')) {
+        this.accountingService.load();
+      }
+      this.employeeProfile.load();
+      this.announcementService.loadActive();
+    }
+    // Base currency — load once after auth so currency-display can
+    // disambiguate non-base currencies inline. Failures fall back
+    // to USD inside the service; no need to chain anything.
+    this.currencyService.load().subscribe();
+    // Tenant i18n label overrides — layered over the shipped catalogs
+    // (merge point: I18nOverridesService). Gated by CAP-ADMIN-I18N, so
+    // it must wait for the capability descriptor like the calls above.
+    this.i18nOverrides.load();
   }
 
   ngOnInit(): void {

@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
 import { InstanceService } from './instance.service';
 import { ConnectionState } from '../models/signalr.model';
+import { SignalrConsoleLogger } from './signalr-console-logger';
 
 @Injectable({ providedIn: 'root' })
 export class SignalrService {
@@ -114,7 +115,7 @@ export class SignalrService {
         nextRetryDelayInMilliseconds: (ctx) =>
           Math.min(1000 * 2 ** Math.min(ctx.previousRetryCount, 2), 5000),
       })
-      .configureLogging(environment.production ? LogLevel.Warning : LogLevel.Information)
+      .configureLogging(new SignalrConsoleLogger(environment.production ? LogLevel.Warning : LogLevel.Information))
       .build();
   }
 
@@ -193,6 +194,7 @@ export class SignalrService {
           this.authService.clearAuth();
           return;
         }
+        if (this.connections.get(hubPath) !== connection) return;
         await new Promise<void>(resolve => {
           this.retryTimers.set(hubPath, setTimeout(resolve, 5000));
         });

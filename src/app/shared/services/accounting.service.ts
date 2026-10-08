@@ -1,11 +1,12 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 
 import { environment } from '../../../environments/environment';
 import { AccountingProviderInfo } from '../../features/admin/models/accounting-provider.model';
 import { AccountingEmployee } from '../../features/admin/models/accounting-employee.model';
 import { AccountingItem } from '../../features/admin/models/accounting-item.model';
 import { AccountingSyncStatus } from '../../features/admin/models/accounting-sync-status.model';
+import { SILENT_HTTP_ERRORS } from '../interceptors/silent-http-errors.token';
 
 export interface AccountingMode {
   isConfigured: boolean;
@@ -13,11 +14,13 @@ export interface AccountingMode {
   providerId: string | null;
 }
 
+const STANDALONE_MODE: AccountingMode = { isConfigured: false, providerName: null, providerId: null };
+
 @Injectable({ providedIn: 'root' })
 export class AccountingService {
   private readonly http = inject(HttpClient);
 
-  private readonly _mode = signal<AccountingMode>({ isConfigured: false, providerName: null, providerId: null });
+  private readonly _mode = signal<AccountingMode>(STANDALONE_MODE);
   private readonly _providers = signal<AccountingProviderInfo[]>([]);
   private readonly _employees = signal<AccountingEmployee[]>([]);
   private readonly _items = signal<AccountingItem[]>([]);
@@ -35,9 +38,11 @@ export class AccountingService {
   readonly loading = this._loading.asReadonly();
 
   load(): void {
-    this.http.get<AccountingMode>(`${environment.apiUrl}/admin/accounting-mode`).subscribe({
+    this.http.get<AccountingMode>(`${environment.apiUrl}/admin/accounting-mode`, {
+      context: new HttpContext().set(SILENT_HTTP_ERRORS, true),
+    }).subscribe({
       next: (mode) => this._mode.set(mode),
-      error: () => this._mode.set({ isConfigured: false, providerName: null, providerId: null }),
+      error: () => this._mode.set(STANDALONE_MODE),
     });
   }
 
@@ -103,7 +108,7 @@ export class AccountingService {
     this.http.post<void>(`${environment.apiUrl}/accounting/disconnect`, {}).subscribe({
       next: () => {
         this._loading.set(false);
-        this._mode.set({ isConfigured: false, providerName: null, providerId: null });
+        this._mode.set(STANDALONE_MODE);
         this.loadProviders();
       },
       error: () => this._loading.set(false),

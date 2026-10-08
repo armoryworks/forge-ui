@@ -32,6 +32,10 @@ describe('resolveCapabilityForUrl', () => {
       expect(resolveCapabilityForUrl('/api/v1/vendors/5')).toBe('CAP-MD-VENDORS');
     });
 
+    it('resolves the accounting mode to CAP-ACCT-EXTERNAL, not the GL view', () => {
+      expect(resolveCapabilityForUrl('/api/v1/admin/accounting-mode')).toBe('CAP-ACCT-EXTERNAL');
+    });
+
     it('handles absolute URLs by extracting the api/v1 segment', () => {
       expect(resolveCapabilityForUrl('http://localhost:5000/api/v1/announcements')).toBe('CAP-EXT-ANNOUNCEMENTS');
       expect(resolveCapabilityForUrl('https://example.com/api/v1/ai/status?foo=bar')).toBe('CAP-EXT-AI-ASSISTANT');

@@ -37,8 +37,9 @@ import {
  * indication anywhere that the snapshot was the reason. When neither a live
  * nor a cached snapshot exists (first-ever login in a fresh browser AND the
  * fetch failed), `isEnabled(code, defaultWhenUnknown)` returns the caller-
- * supplied catalog default so default-on features fail OPEN. Every gating
- * decision made without a live snapshot emits a one-time console warning.
+ * supplied catalog default so default-on features fail OPEN. Gating
+ * decisions made without a live snapshot are collected and reported as one
+ * console summary line when the next descriptor load settles.
  * This is UX-only fallback: the server still enforces every gate with a 403.
  */
 @Injectable({ providedIn: 'root' })
@@ -54,8 +55,8 @@ export class CapabilityService {
   /** Last-known snapshot hydrated from localStorage (per-install, survives reloads). */
   private readonly _cachedSnapshot = signal<CapabilitySnapshotCache | null>(this.readCache());
 
-  /** One-time-per-code guard for the "gating without a live snapshot" warning. */
-  private readonly warnedCodes = new Set<string>();
+  /** Codes gated without a live snapshot since the last load summary, and how each resolved. */
+  private readonly degradedCodes = new Map<string, 'cached' | 'default'>();
 
   readonly descriptor = this._descriptor.asReadonly();
   readonly loading = this._loading.asReadonly();
@@ -93,8 +94,8 @@ export class CapabilityService {
    *     pass `true` (mirroring the server catalog's `IsDefaultOn`) so those
    *     features fail OPEN instead of silently disappearing.
    *
-   * Paths 2 and 3 emit a one-time-per-code console warning so a degraded
-   * gating decision is always visible in the dev console.
+   * Paths 2 and 3 are recorded and reported in the load summary line so a
+   * degraded gating decision stays visible in the dev console.
    */
   isEnabled(code: string, defaultWhenUnknown = false): boolean {
     if (this._descriptor() !== null) {
@@ -102,16 +103,10 @@ export class CapabilityService {
     }
     const cached = this._cachedSnapshot();
     if (cached && code in cached.enabled) {
-      this.warnDegradedGating(
-        code,
-        `using last-known cached snapshot from ${cached.generatedAt} → ${cached.enabled[code] ? 'enabled' : 'disabled'}`,
-      );
+      this.degradedCodes.set(code, 'cached');
       return cached.enabled[code];
     }
-    this.warnDegradedGating(
-      code,
-      `no cached snapshot either — falling back to defaultWhenUnknown=${defaultWhenUnknown}`,
-    );
+    this.degradedCodes.set(code, 'default');
     return defaultWhenUnknown;
   }
 
@@ -161,10 +156,8 @@ export class CapabilityService {
       .pipe(
         tap((d) => {
           this._descriptor.set(d);
-          // A fresh live snapshot resets the degraded-gating warning guard
-          // and refreshes the last-known fallback cache.
-          this.warnedCodes.clear();
           this.persistCache(d);
+          this.reportDegradedGating(null);
         }),
         catchError(() => {
           // Network / 401 / etc. — fail OPEN, not closed. Keep whatever live
@@ -174,12 +167,14 @@ export class CapabilityService {
           // flow through the global HTTP interceptor for user-facing toasts.
           if (this._descriptor() === null) {
             const cached = this._cachedSnapshot();
-            console.warn(
+            this.reportDegradedGating(
               '[CAPABILITY] Descriptor fetch failed with no live snapshot — ' +
               (cached
                 ? `gating falls back to the last-known snapshot from ${cached.generatedAt}.`
                 : 'gating falls back to per-call defaults (default-on capabilities fail open).'),
             );
+          } else {
+            this.degradedCodes.clear();
           }
           return of(null);
         }),
@@ -296,18 +291,28 @@ export class CapabilityService {
   }
 
   /**
-   * One-time-per-code dev-console warning for gating decisions made without
-   * a live snapshot. Reset whenever a live descriptor arrives so a later
-   * degraded phase warns again.
+   * Emits one console line per descriptor load covering every gating decision
+   * made without a live snapshot since the previous load. A successful load
+   * reports at info level, since those decisions re-evaluate against the live
+   * descriptor; a failed load (`failure` set) reports as a warning.
    */
-  private warnDegradedGating(code: string, resolution: string): void {
-    if (this.warnedCodes.has(code)) return;
-    this.warnedCodes.add(code);
-    console.warn(
-      `[CAPABILITY] Gating decision for '${code}' made with no capability snapshot loaded ` +
-      `(descriptor fetch failed or not yet resolved); ${resolution}. ` +
-      'If a feature is unexpectedly hidden, this is why — check /admin/capabilities-debug.',
-    );
+  private reportDegradedGating(failure: string | null): void {
+    const codes = [...this.degradedCodes];
+    this.degradedCodes.clear();
+    if (failure === null && codes.length === 0) return;
+    const fromCache = codes.filter(([, source]) => source === 'cached').map(([code]) => code);
+    const fromDefault = codes.filter(([, source]) => source === 'default').map(([code]) => code);
+    const summary = codes.length === 0
+      ? ''
+      : ` ${codes.length} gating decision(s) made before the descriptor loaded` +
+        (fromCache.length ? `; cached snapshot: ${fromCache.join(', ')}` : '') +
+        (fromDefault.length ? `; caller default: ${fromDefault.join(', ')}` : '') +
+        '.';
+    if (failure !== null) {
+      console.warn(`${failure}${summary} If a feature is unexpectedly hidden, check /admin/capabilities-debug.`);
+    } else {
+      console.info(`[CAPABILITY]${summary}`);
+    }
   }
 
   /**

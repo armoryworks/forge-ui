@@ -26,6 +26,7 @@ import { ChatComponent } from '../../features/chat/chat.component';
 import { AiHelpPanelComponent } from '../../shared/components/ai-help-panel/ai-help-panel.component';
 import { TrainingContextPanelComponent } from '../../shared/components/training-context-panel/training-context-panel.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
+import { collapseRepeatedCrumbs } from './breadcrumb.utils';
 
 @Component({
   selector: 'app-header',
@@ -61,14 +62,16 @@ export class AppHeaderComponent implements OnInit {
    */
   protected readonly maxVisibleCrumbs = 2;
 
+  private readonly crumbTrail = computed(() => collapseRepeatedCrumbs(this.navTree.breadcrumbTrail()));
+
   protected readonly visibleCrumbs = computed(() => {
-    const trail = this.navTree.breadcrumbTrail();
+    const trail = this.crumbTrail();
     if (trail.length <= this.maxVisibleCrumbs) return trail;
     return trail.slice(-this.maxVisibleCrumbs);
   });
 
   protected readonly hiddenCrumbs = computed(() => {
-    const trail = this.navTree.breadcrumbTrail();
+    const trail = this.crumbTrail();
     if (trail.length <= this.maxVisibleCrumbs) return [];
     return trail.slice(0, trail.length - this.maxVisibleCrumbs);
   });

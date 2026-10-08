@@ -15,6 +15,7 @@ import { passwordStrengthValidator } from '../../shared/validators/password-stre
 import { LoadingService } from '../../shared/services/loading.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ToastService } from '../../shared/services/toast.service';
+import { needsProfileCompletion } from './post-login.utils';
 
 @Component({
   selector: 'app-token-setup',
@@ -97,8 +98,7 @@ export class TokenSetupComponent implements OnInit {
     })).subscribe({
       next: (response) => {
         this.snackbar.success(this.translate.instant('auth.setupComplete'));
-        const isMobile = window.innerWidth <= 768;
-        const dest = (!(response.user?.profileComplete ?? true) && !isMobile) ? '/account/profile' : this.layout.getDefaultRoute();
+        const dest = needsProfileCompletion(response.user, window.innerWidth) ? '/account/profile' : this.layout.getDefaultRoute();
         this.router.navigate([dest]);
       },
       error: (err: HttpErrorResponse) => {
