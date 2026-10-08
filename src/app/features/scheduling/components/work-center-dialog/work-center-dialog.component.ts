@@ -1,26 +1,28 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, ViewChild, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
+import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { AssetsService } from '../../../assets/services/assets.service';
 import { WorkCenter } from '../../models/scheduling.model';
+import { SchedulingService } from '../../services/scheduling.service';
 
 @Component({
   selector: 'app-work-center-dialog',
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, TextareaComponent,
-    ToggleComponent, CurrencyInputComponent, AutocompleteComponent, ValidationButtonComponent,
+    ToggleComponent, CurrencyInputComponent, AutocompleteComponent, SelectComponent, ValidationButtonComponent,
   ],
   templateUrl: './work-center-dialog.component.html',
   styleUrl: './work-center-dialog.component.scss',
@@ -29,6 +31,8 @@ import { WorkCenter } from '../../models/scheduling.model';
 export class WorkCenterDialogComponent implements OnInit {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   private readonly assetsService = inject(AssetsService);
+  private readonly schedulingService = inject(SchedulingService);
+  private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly workCenter = input<WorkCenter | null>(null);
@@ -38,6 +42,7 @@ export class WorkCenterDialogComponent implements OnInit {
 
   // A31 — assets available to link to this work center (establishes ownership: printer, tool, reader).
   protected readonly assetOptions = signal<AutocompleteOption[]>([]);
+  protected readonly teamOptions = signal<SelectOption[]>([]);
 
   protected draftConfig: DraftConfig = {
     entityType: 'work-center',
@@ -56,6 +61,7 @@ export class WorkCenterDialogComponent implements OnInit {
     burdenRatePerHour: new FormControl<number | null>(0),
     sortOrder: new FormControl<number | null>(0),
     assetId: new FormControl<number | null>(null),
+    teamId: new FormControl<number | null>(null),
     isActive: new FormControl(true),
   });
 
@@ -74,6 +80,13 @@ export class WorkCenterDialogComponent implements OnInit {
       next: (assets) => this.assetOptions.set(assets.map(a => ({ value: a.id, label: a.name }))),
       error: () => this.assetOptions.set([]),
     });
+    this.schedulingService.getTeams().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (teams) => this.teamOptions.set([
+        { value: null, label: this.translate.instant('workCenterDialog.noTeam') },
+        ...teams.map(t => ({ value: t.id, label: t.name })),
+      ]),
+      error: () => this.teamOptions.set([]),
+    });
 
     const wc = this.workCenter();
     if (wc) {
@@ -90,6 +103,7 @@ export class WorkCenterDialogComponent implements OnInit {
         burdenRatePerHour: wc.burdenRatePerHour,
         sortOrder: wc.sortOrder,
         assetId: wc.assetId ?? null,
+        teamId: wc.teamId ?? null,
         isActive: wc.isActive,
       });
     }
@@ -115,6 +129,8 @@ export class WorkCenterDialogComponent implements OnInit {
       burdenRatePerHour: v.burdenRatePerHour ?? 0,
       sortOrder: v.sortOrder ?? 0,
       assetId: v.assetId ?? null,
+      teamId: v.teamId ?? null,
+      isActive: v.isActive ?? true,
       companyLocationId: existing?.companyLocationId ?? null,
     });
   }

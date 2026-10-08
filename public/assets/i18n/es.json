@@ -430,6 +430,9 @@
     "teamView": "Vista de equipo",
     "teamMembers": "Miembros del Equipo",
     "allAssignedUsers": "Todos los usuarios asignados",
+    "teamFilter": "Equipo",
+    "allTeams": "Todos los equipos",
+    "teamFilterHint": "Mostrar los trabajos cuya operación actual está en un centro de trabajo de este equipo",
     "dragHint": "Arrastre tarjetas entre columnas para mover trabajos.",
     "multiSelectHint": "+Clic para selección múltiple y acciones en lote.",
     "team": "Equipo",
@@ -7137,6 +7140,8 @@
     "burdenRatePerHour": "Tasa de Carga / Hora",
     "asset": "Activo Asignado",
     "assetPlaceholder": "Buscar activos…",
+    "team": "Equipo responsable",
+    "noTeam": "Sin equipo",
     "create": "Crear Centro de Trabajo"
   },
   "oee": {

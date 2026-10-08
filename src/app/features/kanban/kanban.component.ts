@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
-import { map, switchMap } from 'rxjs';
+import { distinctUntilChanged, map, skip, switchMap } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CdkDragDrop, CdkDragStart, CdkDropList, CdkDrag, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { MatDialog } from '@angular/material/dialog';
@@ -23,6 +23,7 @@ import { PRIORITIES } from '../../shared/models/priority.const';
 import { UserRef } from './models/user-ref.model';
 import { Stage } from '../../shared/models/stage.model';
 import { TrackType } from '../../shared/models/track-type.model';
+import { TeamRef } from '../../shared/models/team-ref.model';
 import { SelectOption } from '../../shared/components/select/select.component';
 import { SelectComponent } from '../../shared/components/select/select.component';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
@@ -104,6 +105,37 @@ export class KanbanComponent implements OnInit, OnDestroy {
     });
     this.userPreferences.set('kanban:myWorkOnly', next);
   }
+
+  protected readonly teams = signal<TeamRef[]>([]);
+  protected readonly teamFilterOptions = computed<SelectOption[]>(() => [
+    { value: null, label: this.translate.instant('kanban.allTeams') },
+    ...this.teams().map(t => ({ value: t.id, label: t.name })),
+  ]);
+  private readonly teamFilterId$ = this.route.queryParamMap.pipe(
+    map(p => KanbanComponent.parseTeamId(p.get('team'))),
+    distinctUntilChanged(),
+  );
+  protected readonly teamFilterId = toSignal(this.teamFilterId$, {
+    initialValue: KanbanComponent.parseTeamId(this.route.snapshot.queryParamMap.get('team')),
+  });
+  protected readonly teamFilter = new FormControl<number | null>(this.teamFilterId());
+
+  private static parseTeamId(raw: string | null): number | null {
+    const id = Number(raw);
+    return raw && Number.isInteger(id) && id > 0 ? id : null;
+  }
+
+  private readonly teamFilterFromUrl = this.teamFilterId$.pipe(skip(1), takeUntilDestroyed()).subscribe(id => {
+    this.teamFilter.setValue(id, { emitEvent: false });
+    this.reloadBoard();
+  });
+
+  private readonly teamFilterToUrl = this.teamFilter.valueChanges.pipe(takeUntilDestroyed()).subscribe(id => {
+    this.router.navigate([], {
+      queryParams: { team: id ?? null },
+      queryParamsHandling: 'merge',
+    });
+  });
 
   protected readonly activeOnly = signal(this.userPreferences.get<boolean>('kanban:activeOnly') ?? true);
 
@@ -271,6 +303,10 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
     this.initBoardHub();
     this.kanbanService.getUsers().subscribe(u => this.users.set(u));
+    this.kanbanService.getTeams().subscribe({
+      next: t => this.teams.set(t),
+      error: () => this.teams.set([]),
+    });
   }
 
   ngOnDestroy(): void {
@@ -287,7 +323,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
     this.boardHub.joinBoard(trackTypeId);
 
-    this.loadingService.track('Loading board...', this.kanbanService.getBoard(trackTypeId))
+    this.loadingService.track('Loading board...', this.kanbanService.getBoard(trackTypeId, this.teamFilterId()))
       .subscribe({
         next: (board) => this.applyBoard(board),
         // A cancelled in-flight request surfaces as status 0 — e.g. a
@@ -502,7 +538,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
   private reloadBoard(): void {
     const trackTypeId = this.selectedTrackTypeId();
     if (!trackTypeId) return;
-    this.kanbanService.getBoard(trackTypeId).subscribe({
+    this.kanbanService.getBoard(trackTypeId, this.teamFilterId()).subscribe({
       next: (board) => this.applyBoard(board),
     });
   }

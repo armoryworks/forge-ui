@@ -53,6 +53,7 @@ describe('KanbanService', () => {
       expect(jobsReq.request.params.get('trackTypeId')).toBe('1');
       expect(jobsReq.request.params.get('isArchived')).toBe('false');
       expect(jobsReq.request.params.get('sort')).toBe('board');
+      expect(jobsReq.request.params.has('teamId')).toBe(false);
       jobsReq.flush({
         items: [
           { id: 100, title: 'Job A', stageName: 'Quoting' },
@@ -97,6 +98,16 @@ describe('KanbanService', () => {
       expect(bare.quantity).toBeNull();
     });
 
+    it('passes the team filter to the jobs query', () => {
+      service.getBoard(1, 4).subscribe();
+
+      flushTrackType();
+      const jobsReq = httpMock.expectOne((r) => r.url === `${apiUrl}/jobs`);
+      expect(jobsReq.request.params.get('teamId')).toBe('4');
+      expect(jobsReq.request.params.get('trackTypeId')).toBe('1');
+      jobsReq.flush({ items: [], totalCount: 0, page: 1, pageSize: 200 });
+    });
+
     it('reports the server total when the board holds more jobs than one page', () => {
       let result: KanbanBoard | null = null;
       service.getBoard(1).subscribe((board) => { result = board; });
@@ -111,6 +122,19 @@ describe('KanbanService', () => {
 
       expect((result as unknown as KanbanBoard).totalCount).toBe(245);
       expect((result as unknown as KanbanBoard).loadedCount).toBe(1);
+    });
+  });
+
+  describe('getTeams', () => {
+    it('should GET the shop-floor team list', () => {
+      let result: unknown = null;
+      service.getTeams().subscribe((teams) => { result = teams; });
+
+      const req = httpMock.expectOne(`${apiUrl}/display/shop-floor/teams`);
+      expect(req.request.method).toBe('GET');
+      req.flush([{ id: 2, name: 'Assembly', color: null }]);
+
+      expect(result).toEqual([{ id: 2, name: 'Assembly', color: null }]);
     });
   });
 

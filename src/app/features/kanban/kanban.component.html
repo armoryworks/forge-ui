@@ -27,6 +27,11 @@
 
     <app-select data-tour="board-filters" [label]="'kanban.teamMembers' | translate" [formControl]="teamUserIds" [options]="userOptions()" [multiple]="true" [placeholder]="'kanban.allAssignedUsers' | translate" />
 
+    @if (teams().length > 0 || teamFilterId() !== null) {
+      <app-select data-testid="board-team-filter" [label]="'kanban.teamFilter' | translate" [formControl]="teamFilter" [options]="teamFilterOptions()" [placeholder]="'kanban.allTeams' | translate"
+                  [matTooltip]="'kanban.teamFilterHint' | translate" matTooltipPosition="above" />
+    }
+
     <button class="my-work-btn" [class.my-work-btn--active]="myWorkOnly()"
             (click)="toggleMyWork()"
             [matTooltip]="myWorkOnly() ? ('kanban.allJobs' | translate) : ('kanban.myWork' | translate)"

@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router, convertToParamMap } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, of, Subject, throwError } from 'rxjs';
 import { CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
@@ -12,6 +12,7 @@ import { KanbanService } from './services/kanban.service';
 import { BoardColumn } from './models/board-column.model';
 import { KanbanJob } from './models/kanban-job.model';
 import { Stage } from '../../shared/models/stage.model';
+import { TeamRef } from '../../shared/models/team-ref.model';
 import { AuthService } from '../../shared/services/auth.service';
 import { BoardHubService } from '../../shared/services/board-hub.service';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
@@ -107,6 +108,10 @@ interface ComponentInternals {
   onJobNumberClicked(event: { job: KanbanJob; event: Event }): void;
   onAccountingRefClicked(event: { job: KanbanJob; event: Event }): void;
   bulkMoveToStage(stage: Stage): void;
+  teams: () => TeamRef[];
+  teamFilterOptions: () => { value: unknown; label: string }[];
+  teamFilterId: () => number | null;
+  teamFilter: { value: number | null; setValue(value: number | null): void };
 }
 
 describe('KanbanComponent', () => {
@@ -120,6 +125,9 @@ describe('KanbanComponent', () => {
   let moveJobStage: ReturnType<typeof vi.fn>;
   let prefsSet: ReturnType<typeof vi.fn>;
   let storedPrefs: Record<string, unknown>;
+  let getTeams: ReturnType<typeof vi.fn>;
+  let navigate: ReturnType<typeof vi.fn>;
+  let queryParams: BehaviorSubject<ParamMap>;
 
   function createComponent(): void {
     component = TestBed.createComponent(KanbanComponent)
@@ -128,6 +136,9 @@ describe('KanbanComponent', () => {
 
   beforeEach(() => {
     getBoard = vi.fn(() => of({ columns: [], totalCount: 0, loadedCount: 0 }));
+    getTeams = vi.fn(() => of([]));
+    navigate = vi.fn();
+    queryParams = new BehaviorSubject<ParamMap>(convertToParamMap({}));
     updateJobPosition = vi.fn(() => of(undefined));
     moveJobStage = vi.fn(() => of(undefined));
     prefsSet = vi.fn();
@@ -146,6 +157,7 @@ describe('KanbanComponent', () => {
             getTrackTypes: () => of([]),
             getBoard,
             getUsers: () => of([]),
+            getTeams,
             bulkMoveStage,
             updateJobPosition,
             getJobDetail: () => of({}),
@@ -162,6 +174,7 @@ describe('KanbanComponent', () => {
             onJobMovedEvent: vi.fn(),
             onJobUpdatedEvent: vi.fn(),
             onJobPositionChangedEvent: vi.fn(),
+            onBoardUpdatedEvent: vi.fn(),
           },
         },
         { provide: LoadingService, useValue: { track: (_m: string, obs: Observable<unknown>) => obs } },
@@ -174,12 +187,12 @@ describe('KanbanComponent', () => {
         { provide: UserPreferencesService, useValue: { get: (key: string) => storedPrefs[key] ?? null, set: prefsSet } },
         { provide: DraftResumeService, useValue: { consume: () => false } },
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
-        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: Router, useValue: { navigate } },
         {
           provide: ActivatedRoute,
           useValue: {
-            queryParamMap: of(convertToParamMap({})),
-            snapshot: { queryParamMap: convertToParamMap({}) },
+            queryParamMap: queryParams.asObservable(),
+            get snapshot() { return { queryParamMap: queryParams.value }; },
           },
         },
       ],
@@ -551,6 +564,85 @@ describe('KanbanComponent', () => {
       moveResponse.complete();
 
       expect(updateJobPosition.mock.calls).toEqual([[1, 0], [3, 1], [4, 2]]);
+    });
+  });
+
+  describe('team filter', () => {
+    const teams: TeamRef[] = [
+      { id: 3, name: 'Machining', color: null },
+      { id: 5, name: 'Finishing', color: '#22c55e' },
+    ];
+
+    it('offers every team after an all-teams choice', () => {
+      getTeams.mockReturnValue(of(teams));
+      createComponent();
+      (component as unknown as { ngOnInit(): void }).ngOnInit();
+
+      expect(component.teams()).toEqual(teams);
+      expect(component.teamFilterOptions().map(o => o.value)).toEqual([null, 3, 5]);
+    });
+
+    it('hides the filter quietly when the team list cannot be read', () => {
+      getTeams.mockReturnValue(throwError(() => new Error('capability off')));
+      createComponent();
+      (component as unknown as { ngOnInit(): void }).ngOnInit();
+
+      expect(component.teams()).toEqual([]);
+    });
+
+    it('loads the board for the team named in the URL', () => {
+      queryParams.next(convertToParamMap({ team: '5' }));
+      createComponent();
+
+      component.selectTrackType(1);
+
+      expect(component.teamFilterId()).toBe(5);
+      expect(component.teamFilter.value).toBe(5);
+      expect(getBoard).toHaveBeenLastCalledWith(1, 5);
+    });
+
+    it('ignores a team id in the URL that is not a positive whole number', () => {
+      queryParams.next(convertToParamMap({ team: 'abc' }));
+      createComponent();
+
+      component.selectTrackType(1);
+
+      expect(component.teamFilterId()).toBeNull();
+      expect(getBoard).toHaveBeenLastCalledWith(1, null);
+    });
+
+    it('writes the chosen team to the URL', () => {
+      component.teamFilter.setValue(3);
+
+      expect(navigate).toHaveBeenCalledWith([], { queryParams: { team: 3 }, queryParamsHandling: 'merge' });
+    });
+
+    it('clears the team from the URL when all teams is chosen', () => {
+      component.teamFilter.setValue(null);
+
+      expect(navigate).toHaveBeenCalledWith([], { queryParams: { team: null }, queryParamsHandling: 'merge' });
+    });
+
+    it('reloads the board and the picker when the URL team changes', () => {
+      component.selectTrackType(1);
+      getBoard.mockClear();
+      navigate.mockClear();
+
+      queryParams.next(convertToParamMap({ team: '3' }));
+
+      expect(getBoard).toHaveBeenCalledOnce();
+      expect(getBoard).toHaveBeenCalledWith(1, 3);
+      expect(component.teamFilter.value).toBe(3);
+      expect(navigate).not.toHaveBeenCalled();
+    });
+
+    it('does not reload when another query parameter changes', () => {
+      component.selectTrackType(1);
+      getBoard.mockClear();
+
+      queryParams.next(convertToParamMap({ myWork: 'true' }));
+
+      expect(getBoard).not.toHaveBeenCalled();
     });
   });
 });

@@ -12,6 +12,7 @@ import {
   WorkCenter,
   WorkCenterLoad,
 } from '../models/scheduling.model';
+import { TeamRef } from '../../../shared/models/team-ref.model';
 
 @Injectable({ providedIn: 'root' })
 export class SchedulingService {
@@ -60,6 +61,10 @@ export class SchedulingService {
   // Work centers
   getWorkCenters() {
     return this.http.get<WorkCenter[]>(`${this.baseUrl}/work-centers`);
+  }
+
+  getTeams() {
+    return this.http.get<TeamRef[]>(`${this.baseUrl}/display/shop-floor/teams`);
   }
 
   createWorkCenter(request: CreateWorkCenterRequest) {

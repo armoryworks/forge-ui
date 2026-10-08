@@ -32,6 +32,11 @@
       displayField="label" valueField="value" formControlName="assetId"
       [placeholder]="'workCenterDialog.assetPlaceholder' | translate" />
 
+    @if (teamOptions().length > 0) {
+      <app-select data-testid="work-center-team" [label]="'workCenterDialog.team' | translate" formControlName="teamId"
+        [options]="teamOptions()" [placeholder]="'workCenterDialog.noTeam' | translate" />
+    }
+
     @if (isEdit()) {
       <app-toggle [label]="'common.active' | translate" formControlName="isActive" />
     }

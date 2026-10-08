@@ -14,6 +14,8 @@ export interface WorkCenter {
   companyLocationId: number | null;
   locationName: string | null;
   sortOrder: number;
+  teamId: number | null;
+  teamName: string | null;
 }
 
 export interface Shift {
@@ -107,6 +109,7 @@ export interface CreateWorkCenterRequest {
   assetId: number | null;
   companyLocationId: number | null;
   sortOrder: number;
+  teamId?: number | null;
 }
 
 export interface CreateShiftRequest {

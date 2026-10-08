@@ -5,6 +5,7 @@ import { Observable, map, forkJoin } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { PagedResponse } from '../../../shared/models/paged-response.model';
 import { TrackType } from '../../../shared/models/track-type.model';
+import { TeamRef } from '../../../shared/models/team-ref.model';
 import { ActivityItem } from '../../../shared/models/activity.model';
 import { KanbanJob } from '../models/kanban-job.model';
 import { BoardColumn } from '../models/board-column.model';
@@ -37,12 +38,16 @@ export class KanbanService {
     return this.http.get<TrackType[]>(`${environment.apiUrl}/track-types`);
   }
 
-  getBoard(trackTypeId: number): Observable<KanbanBoard> {
+  getBoard(trackTypeId: number, teamId: number | null = null): Observable<KanbanBoard> {
+    let params = new HttpParams()
+      .set('trackTypeId', trackTypeId.toString())
+      .set('isArchived', 'false')
+      .set('pageSize', '200')
+      .set('sort', 'board');
+    if (teamId != null) params = params.set('teamId', teamId.toString());
     return forkJoin({
       trackType: this.http.get<TrackType>(`${environment.apiUrl}/track-types/${trackTypeId}`),
-      page: this.http.get<PagedResponse<KanbanJob>>(`${environment.apiUrl}/jobs`, {
-        params: { trackTypeId: trackTypeId.toString(), isArchived: 'false', pageSize: '200', sort: 'board' },
-      }),
+      page: this.http.get<PagedResponse<KanbanJob>>(`${environment.apiUrl}/jobs`, { params }),
     }).pipe(map(({ trackType, page }) => {
       const jobs = page.items.map(j => ({
         ...j,
@@ -97,6 +102,10 @@ export class KanbanService {
 
   getCustomers(): Observable<CustomerRef[]> {
     return this.http.get<CustomerRef[]>(`${environment.apiUrl}/customers/dropdown`);
+  }
+
+  getTeams(): Observable<TeamRef[]> {
+    return this.http.get<TeamRef[]>(`${environment.apiUrl}/display/shop-floor/teams`);
   }
 
   getUsers(): Observable<UserRef[]> {

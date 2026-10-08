@@ -430,6 +430,9 @@
     "teamView": "Team view",
     "teamMembers": "Team Members",
     "allAssignedUsers": "All assigned users",
+    "teamFilter": "Team",
+    "allTeams": "All teams",
+    "teamFilterHint": "Show jobs whose current operation is at a work center this team owns",
     "dragHint": "Drag cards between columns to move jobs.",
     "multiSelectHint": "+Click to multi-select for bulk actions.",
     "team": "Team",
@@ -7144,6 +7147,8 @@
     "burdenRatePerHour": "Burden Rate / Hour",
     "asset": "Assigned Asset",
     "assetPlaceholder": "Search assets…",
+    "team": "Owning team",
+    "noTeam": "No team",
     "create": "Create Work Center"
   },
   "oee": {
