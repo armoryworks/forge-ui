@@ -30,6 +30,7 @@ interface DialogInternals {
     initialStageId: FormControl<number | null>;
   }>;
   filledFromSoLine: () => boolean;
+  startStageOptions: () => { value: unknown }[];
   partLabel: () => { id: number; text: string } | null;
   draftConfig: { restoreFn?: (data: Record<string, unknown>) => void };
   onSubmit(): void;
@@ -44,6 +45,17 @@ const stagedTrackTypes = [
       { id: 13, name: 'Order Confirmed', code: 'order_confirmed', sortOrder: 3 },
       { id: 11, name: 'Quote Requested', code: 'quote_requested', sortOrder: 1 },
       { id: 14, name: 'Materials Ordered', code: 'materials_ordered', sortOrder: 4 },
+      { id: 15, name: 'Shipped', code: 'shipped', sortOrder: 5, isMandatory: true },
+      { id: 16, name: 'Invoiced/Sent', code: 'invoiced_sent', sortOrder: 6, isMandatory: true },
+      { id: 17, name: 'Payment Received', code: 'payment_received', sortOrder: 7 },
+    ],
+  },
+  {
+    id: 3, name: 'R&D', isDefault: false,
+    stages: [
+      { id: 31, name: 'Concept', code: 'concept', sortOrder: 1 },
+      { id: 32, name: 'Prototype', code: 'prototype', sortOrder: 2 },
+      { id: 33, name: 'Production Ready', code: 'production_ready', sortOrder: 3 },
     ],
   },
   {
@@ -392,6 +404,17 @@ describe('JobDialogComponent', () => {
 
     f.trackTypeId.setValue(2);
     expect(f.initialStageId.value).toBe(21);
+  });
+
+  it('offers only statuses before the first required status and never the final one', () => {
+    render('create', null, stagedTrackTypes);
+    expect(component.startStageOptions().map(o => o.value)).toEqual([11, 13, 14]);
+
+    component.jobForm.controls.trackTypeId.setValue(3);
+    expect(component.startStageOptions().map(o => o.value)).toEqual([31, 32]);
+
+    component.jobForm.controls.trackTypeId.setValue(2);
+    expect(component.startStageOptions().map(o => o.value)).toEqual([21]);
   });
 
   it('moves the default to Order Confirmed once a sales-order line is picked', () => {

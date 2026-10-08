@@ -81,7 +81,7 @@ export class TrackTypeDialogComponent {
           code: existing.code,
           description: existing.description ?? '',
         });
-        this.stages.set(existing.stages.map(s => ({
+        const initial = existing.stages.map(s => ({
           name: s.name,
           code: s.code,
           sortOrder: s.sortOrder,
@@ -89,27 +89,34 @@ export class TrackTypeDialogComponent {
           wipLimit: s.wipLimit,
           isIrreversible: s.isIrreversible,
           isActive: true,
-        })));
-        this.loadAllStages(existing.id);
+        }));
+        this.stages.set(initial);
+        this.savedStages.set(new Map(existing.stages.map(s => [s.code, { ...s, isActive: true, openJobCount: 0 }])));
+        this.loadAllStages(existing.id, initial);
       }
     });
   }
 
-  private loadAllStages(trackTypeId: number): void {
+  private loadAllStages(trackTypeId: number, initial: StageRequest[]): void {
     this.stagesService.getStages(trackTypeId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: all => {
           this.savedStages.set(new Map(all.map(s => [s.code, s])));
-          this.stages.set([...all].sort((a, b) => a.sortOrder - b.sortOrder).map(s => ({
+          const current = this.stages();
+          const edited = current !== initial;
+          const kept = edited ? current : [];
+          const keptCodes = new Set(kept.map(s => s.code));
+          const loaded = all.filter(s => !keptCodes.has(s.code)).map(s => ({
             name: s.name,
             code: s.code,
             sortOrder: s.sortOrder,
             color: s.color,
             wipLimit: s.wipLimit,
             isIrreversible: s.isIrreversible,
-            isActive: s.isActive,
-          })));
+            isActive: edited ? false : s.isActive,
+          }));
+          this.stages.set([...kept, ...loaded].sort((a, b) => a.sortOrder - b.sortOrder));
         },
         error: () => undefined,
       });

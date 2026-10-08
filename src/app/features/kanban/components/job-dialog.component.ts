@@ -114,7 +114,7 @@ export class JobDialogComponent implements OnInit {
   );
 
   protected readonly startStageOptions = computed<SelectOption[]>(() =>
-    this.visibleStages(this.selectedTrackTypeId()).map(s => ({ value: s.id, label: s.name }))
+    this.startableStages(this.selectedTrackTypeId()).map(s => ({ value: s.id, label: s.name }))
   );
 
   protected readonly salesOrderLineOptions = computed<SelectOption[]>(() => [
@@ -229,15 +229,19 @@ export class JobDialogComponent implements OnInit {
     }
   }
 
-  private visibleStages(trackTypeId: number | null): Stage[] {
+  private startableStages(trackTypeId: number | null): Stage[] {
     const trackType = this.trackTypes().find(t => t.id === trackTypeId);
-    return [...(trackType?.stages ?? [])].sort((a, b) => a.sortOrder - b.sortOrder);
+    const stages = [...(trackType?.stages ?? [])].sort((a, b) => a.sortOrder - b.sortOrder);
+    const firstMandatory = stages.find(s => s.isMandatory);
+    const last = stages[stages.length - 1];
+    return stages.filter((s, i) => i === 0
+      || ((!firstMandatory || s.sortOrder < firstMandatory.sortOrder) && s !== last));
   }
 
   private applyDefaultStartStage(): void {
     if (this.restoringDraft) return;
     const control = this.jobForm.controls.initialStageId;
-    const stages = this.visibleStages(this.jobForm.controls.trackTypeId.value);
+    const stages = this.startableStages(this.jobForm.controls.trackTypeId.value);
     if (control.dirty && stages.some(s => s.id === control.value)) return;
     const orderConfirmed = this.jobForm.controls.salesOrderLineId.value != null
       ? stages.find(s => s.code === ORDER_CONFIRMED_STAGE_CODE)

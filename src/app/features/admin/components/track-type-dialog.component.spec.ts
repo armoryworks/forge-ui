@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject, throwError } from 'rxjs';
 
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
@@ -23,6 +23,8 @@ interface DialogInternals {
   isSaved(stage: StageRequest): boolean;
   hideStage(index: number): void;
   showStage(index: number): void;
+  removeStage(index: number): void;
+  updateStage(index: number, field: keyof StageRequest, value: unknown): void;
   addStage(): void;
   onSubmit(): void;
 }
@@ -43,6 +45,7 @@ describe('TrackTypeDialogComponent', () => {
   let fixture: ComponentFixture<TrackTypeDialogComponent>;
   let component: DialogInternals;
   let allStages: TrackTypeStageAdmin[];
+  let getStages: ReturnType<typeof vi.fn>;
 
   async function render(trackType: TrackType | null): Promise<void> {
     fixture = TestBed.createComponent(TrackTypeDialogComponent);
@@ -60,10 +63,11 @@ describe('TrackTypeDialogComponent', () => {
       adminStage({ id: 4, name: 'Shipped', code: 'shipped', sortOrder: 4, isMandatory: true }),
     ];
 
+    getStages = vi.fn(() => of(allStages));
     TestBed.configureTestingModule({
       imports: [TrackTypeDialogComponent],
       providers: [
-        { provide: TrackTypeStagesService, useValue: { getStages: vi.fn(() => of(allStages)) } },
+        { provide: TrackTypeStagesService, useValue: { getStages } },
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
       ],
     });
@@ -123,6 +127,41 @@ describe('TrackTypeDialogComponent', () => {
     expect(component.isSaved(component.stages()[0])).toBe(true);
     expect(component.isSaved(added)).toBe(false);
     expect(added.isActive).toBe(true);
+  });
+
+  it('keeps edits made before the stage list loads and adds the hidden statuses', async () => {
+    const response = new Subject<TrackTypeStageAdmin[]>();
+    getStages.mockReturnValue(response);
+    const withActive = {
+      ...production,
+      stages: allStages.filter(s => s.isActive),
+    } as unknown as TrackType;
+    await render(withActive);
+
+    const confirmedIndex = component.stages().findIndex(s => s.code === 'order_confirmed');
+    component.updateStage(confirmedIndex, 'name', 'Confirmed');
+    response.next(allStages);
+
+    expect(component.stages().map(s => [s.code, s.name, s.isActive])).toEqual([
+      ['quote_requested', 'Quote Requested', true],
+      ['quoted', 'Quoted', false],
+      ['order_confirmed', 'Confirmed', true],
+      ['shipped', 'Shipped', true],
+    ]);
+  });
+
+  it('still treats the order type\'s statuses as saved when the stage list fails to load', async () => {
+    getStages.mockReturnValue(throwError(() => new Error('offline')));
+    const withActive = {
+      ...production,
+      stages: [{ id: 4, name: 'Shipped', code: 'shipped', sortOrder: 1, color: '#c2410c', wipLimit: null,
+        accountingDocumentType: 'Invoice', isIrreversible: false, isMandatory: true }],
+    } as unknown as TrackType;
+    await render(withActive);
+
+    expect(component.isSaved(component.stages()[0])).toBe(true);
+    component.hideStage(0);
+    expect(component.hideError()).toBe('trackStages.hideBlockedMandatory');
   });
 
   it('reports when no status would stay visible', async () => {
