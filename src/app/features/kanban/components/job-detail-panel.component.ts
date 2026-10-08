@@ -1,5 +1,5 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, signal, viewChild } from '@angular/core';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -86,6 +86,7 @@ export class JobDetailPanelComponent implements OnInit {
   protected readonly linkTypeIcons = LINK_TYPE_ICONS;
   protected readonly linkTypeLabels = LINK_TYPE_LABELS;
   protected readonly selectedLinkTargetId = signal<number | null>(null);
+  private readonly linkPicker = viewChild<EntityPickerComponent>('linkPicker');
 
   // Child jobs
   protected readonly childJobs = signal<ChildJob[]>([]);
@@ -100,6 +101,7 @@ export class JobDetailPanelComponent implements OnInit {
   protected readonly partQtyControl = new FormControl<number | null>(1);
   private readonly partQtyEditControls = new Map<number, FormControl<number | null>>();
   protected readonly selectedPartId = signal<number | null>(null);
+  private readonly partPicker = viewChild<EntityPickerComponent>('partPicker');
 
   // Activity (delegated to shared EntityActivitySectionComponent)
 
@@ -194,19 +196,32 @@ export class JobDetailPanelComponent implements OnInit {
   }
 
   protected toggleSubtaskAdd(): void {
+    if (this.showSubtaskAdd()) this.newSubtaskControl.reset();
     this.showSubtaskAdd.update(open => !open);
   }
 
   protected toggleLinkAdd(): void {
+    if (this.showLinkAdd()) this.resetLinkForm();
     this.showLinkAdd.update(open => !open);
   }
 
   protected togglePartAdd(): void {
+    if (this.showPartAdd()) this.resetPartForm();
     this.showPartAdd.update(open => !open);
   }
 
   protected onLinkTargetPicked(row: Record<string, unknown> | null): void {
-    this.selectedLinkTargetId.set(row ? Number(row['id']) : null);
+    const id = row ? Number(row['id']) : null;
+    this.selectedLinkTargetId.set(id);
+    if (row && id !== null) {
+      this.linkPicker()?.setSelected(id, this.pickedLabel(row['jobNumber'], row['title']));
+    }
+  }
+
+  private resetLinkForm(): void {
+    this.selectedLinkTargetId.set(null);
+    this.linkTargetControl.reset();
+    this.linkTypeControl.setValue('RelatedTo');
   }
 
   protected addLink(): void {
@@ -224,9 +239,7 @@ export class JobDetailPanelComponent implements OnInit {
 
     this.kanbanService.createJobLink(this.jobId(), targetId, linkType).subscribe(link => {
       this.links.update(list => [...list, link]);
-      this.selectedLinkTargetId.set(null);
-      this.linkTargetControl.reset();
-      this.linkTypeControl.setValue('RelatedTo');
+      this.resetLinkForm();
       this.snackbar.success(this.translate.instant('kanban.linkAdded'));
     });
   }
@@ -278,7 +291,22 @@ export class JobDetailPanelComponent implements OnInit {
   }
 
   protected onPartPicked(row: Record<string, unknown> | null): void {
-    this.selectedPartId.set(row ? Number(row['id']) : null);
+    const id = row ? Number(row['id']) : null;
+    this.selectedPartId.set(id);
+    if (row && id !== null) {
+      this.partPicker()?.setSelected(id, this.pickedLabel(row['partNumber'], row['name']));
+    }
+  }
+
+  private resetPartForm(): void {
+    this.selectedPartId.set(null);
+    this.partPickerControl.reset();
+    this.partQtyControl.setValue(1);
+  }
+
+  private pickedLabel(primary: unknown, secondary: unknown): string {
+    const head = String(primary ?? '');
+    return secondary ? `${head} — ${String(secondary)}` : head;
   }
 
   protected addPart(): void {
@@ -292,9 +320,7 @@ export class JobDetailPanelComponent implements OnInit {
 
     this.kanbanService.addJobPart(this.jobId(), partId, qty).subscribe(jp => {
       this.jobParts.update(list => [...list, jp]);
-      this.selectedPartId.set(null);
-      this.partPickerControl.reset();
-      this.partQtyControl.setValue(1);
+      this.resetPartForm();
       this.snackbar.success(this.translate.instant('kanban.partAdded'));
     });
   }

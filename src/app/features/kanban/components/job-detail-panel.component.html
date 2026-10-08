@@ -273,7 +273,7 @@
         }
         @if (showLinkAdd()) {
           <div class="link-add">
-            <app-entity-picker class="link-add__picker" data-testid="job-link-target"
+            <app-entity-picker #linkPicker class="link-add__picker" data-testid="job-link-target"
               [label]="'kanban.linkedCards' | translate"
               [placeholder]="'kanban.searchJobsPlaceholder' | translate"
               entityType="jobs"
@@ -338,7 +338,7 @@
         }
         @if (showPartAdd()) {
           <div class="part-add">
-            <app-entity-picker class="part-add__picker" data-testid="job-part-search"
+            <app-entity-picker #partPicker class="part-add__picker" data-testid="job-part-search"
               [label]="'kanban.parts' | translate"
               [placeholder]="'kanban.searchPartsPlaceholder' | translate"
               entityType="parts"

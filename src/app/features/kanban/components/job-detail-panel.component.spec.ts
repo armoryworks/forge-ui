@@ -139,6 +139,33 @@ describe('JobDetailPanelComponent', () => {
     expect(component.showPartAdd()).toBe(false);
   });
 
+  it('drops a hidden selection when an add form is closed with [x]', () => {
+    const { component, kanban } = setup();
+    component.togglePartAdd();
+    component.partPickerControl.setValue(9);
+    component.onPartPicked(PART_ROW);
+    component.partQtyControl.setValue(5);
+    component.toggleLinkAdd();
+    component.linkTargetControl.setValue(77);
+    component.onLinkTargetPicked({ id: 77, jobNumber: 'WO-0077', title: 'Fixture' });
+
+    component.togglePartAdd();
+    component.toggleLinkAdd();
+    component.togglePartAdd();
+    component.toggleLinkAdd();
+
+    expect(component.selectedPartId()).toBeNull();
+    expect(component.partPickerControl.value).toBeNull();
+    expect(component.partQtyControl.value).toBe(1);
+    expect(component.canAddPart()).toBe(false);
+    expect(component.selectedLinkTargetId()).toBeNull();
+    expect(component.linkTargetControl.value).toBeNull();
+    component.addPart();
+    component.addLink();
+    expect(kanban.addJobPart).not.toHaveBeenCalled();
+    expect(kanban.createJobLink).not.toHaveBeenCalled();
+  });
+
   it('adds the picked part with the entered quantity and resets the picker', () => {
     const { component, kanban } = setup();
     kanban.addJobPart.mockReturnValue(of(jobPart({ quantity: 25 })));
