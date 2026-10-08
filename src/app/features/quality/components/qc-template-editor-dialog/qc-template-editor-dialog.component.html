@@ -1,0 +1,73 @@
+<app-dialog
+  [title]="(editing ? 'qcInspections.editTemplate' : 'qcInspections.newTemplate') | translate"
+  width="800px" (closed)="cancel()">
+  <div [formGroup]="form">
+    <div class="dialog-row">
+      <app-input [label]="'qcInspections.templateName' | translate" formControlName="name"
+        [required]="true" [maxlength]="200" data-testid="qc-template-name" />
+      <app-entity-picker #partPicker
+        [label]="'qcInspections.templatePart' | translate"
+        entityType="parts"
+        displayField="partNumber"
+        secondaryDisplayField="name"
+        formControlName="partId"
+        [placeholder]="'qcInspections.optional' | translate"
+        data-testid="qc-template-part" />
+    </div>
+    <app-input [label]="'qcInspections.templateDescription' | translate" formControlName="description"
+      [maxlength]="500" data-testid="qc-template-description" />
+
+    <div class="dlg-section qc-template-items" formArrayName="items">
+      <div class="qc-template-items__head">
+        <span class="dlg-section__title">{{ 'qcInspections.items' | translate }}</span>
+        <button class="action-btn action-btn--sm" type="button" (click)="addItem()" data-testid="qc-template-add-item">
+          <span class="material-icons-outlined">add</span>
+          {{ 'qcInspections.addItem' | translate }}
+        </button>
+      </div>
+
+      @if (items.length === 0) {
+        <p class="lines-empty">{{ 'qcInspections.noItems' | translate }}</p>
+      }
+
+      @for (item of items.controls; track item; let i = $index, first = $first, last = $last) {
+        <div class="qc-template-items__row" [formGroupName]="i">
+          <span class="qc-template-items__index">{{ i + 1 }}</span>
+          <app-input [label]="'qcInspections.itemDescription' | translate" formControlName="description"
+            [required]="true" [maxlength]="200" [attr.data-testid]="'qc-template-item-description-' + i" />
+          <app-input [label]="'qcInspections.itemSpecification' | translate" formControlName="specification"
+            [maxlength]="500" [attr.data-testid]="'qc-template-item-specification-' + i" />
+          <app-toggle [label]="'qcInspections.itemRequired' | translate" formControlName="isRequired"
+            [attr.data-testid]="'qc-template-item-required-' + i" />
+          <div class="qc-template-items__actions">
+            <button class="icon-btn" type="button" [disabled]="first" (click)="moveItem(i, -1)"
+              [attr.aria-label]="'qcInspections.moveUp' | translate" [attr.data-testid]="'qc-template-item-up-' + i">
+              <span class="material-icons-outlined">arrow_upward</span>
+            </button>
+            <button class="icon-btn" type="button" [disabled]="last" (click)="moveItem(i, 1)"
+              [attr.aria-label]="'qcInspections.moveDown' | translate" [attr.data-testid]="'qc-template-item-down-' + i">
+              <span class="material-icons-outlined">arrow_downward</span>
+            </button>
+            <button class="icon-btn icon-btn--danger" type="button" (click)="removeItem(i)"
+              [attr.aria-label]="'qcInspections.removeItem' | translate" [attr.data-testid]="'qc-template-item-remove-' + i">
+              <span class="material-icons-outlined">delete</span>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" type="button" (click)="cancel()" data-testid="qc-template-cancel">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" type="button"
+        [disabled]="!canSave()"
+        (click)="save()" data-testid="qc-template-save">
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

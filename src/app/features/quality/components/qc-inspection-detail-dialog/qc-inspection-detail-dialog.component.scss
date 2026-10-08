@@ -1,0 +1,95 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.qc-detail {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  min-height: 120px;
+
+  &__header {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: $sp-md $sp-lg;
+    margin: 0;
+    padding: $sp-md;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+
+    dt {
+      @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
+      color: var(--text-muted);
+    }
+
+    dd {
+      margin: $sp-xs 0 0;
+      font-size: var(--font-size-base);
+      font-weight: 600;
+      color: var(--text);
+    }
+  }
+
+  &__secondary {
+    display: block;
+    font-size: var(--font-size-sm);
+    font-weight: 400;
+    color: var(--text-secondary);
+  }
+
+  &__mono {
+    font-family: $font-family-mono;
+  }
+
+  &__notice {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+  }
+
+  &__result {
+    display: grid;
+    grid-template-columns: 1.4fr 120px 1fr 1.2fr;
+    gap: $sp-sm;
+    align-items: center;
+    padding: $sp-xs 0;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  &__check {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    min-width: 0;
+  }
+
+  &__check-name {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    font-weight: 600;
+  }
+
+  &__spec {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+  }
+
+  &__ncr {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    padding: $sp-sm $sp-md;
+    border: $border-width-thin solid var(--border);
+    font-size: var(--font-size-sm);
+  }
+}
+
+@media (max-width: $breakpoint-tablet) {
+  .qc-detail__header {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .qc-detail__result {
+    grid-template-columns: 1fr 1fr;
+  }
+}

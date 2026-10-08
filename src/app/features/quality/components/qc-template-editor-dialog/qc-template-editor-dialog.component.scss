@@ -1,0 +1,41 @@
+@use 'styles/variables' as *;
+
+.qc-template-items {
+  margin-top: $sp-md;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 24px 1.4fr 1fr auto auto;
+    gap: $sp-sm;
+    align-items: center;
+    padding: $sp-xs 0;
+    border-bottom: $border-width-thin solid var(--border);
+
+    &:last-of-type {
+      border-bottom: none;
+    }
+  }
+
+  &__index {
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+    text-align: right;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $sp-xs;
+  }
+}
+
+@media (max-width: $breakpoint-tablet) {
+  .qc-template-items__row {
+    grid-template-columns: 24px 1fr;
+  }
+}

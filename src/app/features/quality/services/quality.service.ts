@@ -5,8 +5,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { QcTemplate } from '../models/qc-template.model';
 import { QcInspection } from '../models/qc-inspection.model';
+import { QcInspectionDetail } from '../models/qc-inspection-detail.model';
 import { LotRecord } from '../models/lot-record.model';
-import { LotTraceability } from '../models/lot-traceability.model';
 import { Gage, GageStatus, CalibrationRecord, CreateGageRequest, CreateCalibrationRecordRequest } from '../models/gage.model';
 
 @Injectable({ providedIn: 'root' })
@@ -30,22 +30,42 @@ export class QualityService {
     return this.http.post<QcTemplate>(`${this.qualityBase}/templates`, data);
   }
 
+  updateTemplate(id: number, data: {
+    name: string;
+    description?: string;
+    partId?: number;
+    items: { id?: number; description: string; specification?: string; sortOrder: number; isRequired: boolean }[];
+  }): Observable<QcTemplate> {
+    return this.http.put<QcTemplate>(`${this.qualityBase}/templates/${id}`, data);
+  }
+
+  deleteTemplate(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.qualityBase}/templates/${id}`);
+  }
+
   // ─── Inspections ───
 
   getInspections(params?: {
     jobId?: number;
     status?: string;
     lotNumber?: string;
+    search?: string;
   }): Observable<QcInspection[]> {
     let httpParams = new HttpParams();
     if (params?.jobId) httpParams = httpParams.set('jobId', params.jobId);
     if (params?.status) httpParams = httpParams.set('status', params.status);
     if (params?.lotNumber) httpParams = httpParams.set('lotNumber', params.lotNumber);
+    if (params?.search) httpParams = httpParams.set('search', params.search);
     return this.http.get<QcInspection[]>(`${this.qualityBase}/inspections`, { params: httpParams });
+  }
+
+  getInspection(id: number): Observable<QcInspectionDetail> {
+    return this.http.get<QcInspectionDetail>(`${this.qualityBase}/inspections/${id}`);
   }
 
   createInspection(data: {
     jobId?: number;
+    partId?: number;
     productionRunId?: number;
     templateId?: number;
     lotNumber?: string;
@@ -81,24 +101,6 @@ export class QualityService {
     if (params?.jobId) httpParams = httpParams.set('jobId', params.jobId);
     if (params?.search) httpParams = httpParams.set('search', params.search);
     return this.http.get<LotRecord[]>(this.lotsBase, { params: httpParams });
-  }
-
-  createLotRecord(data: {
-    lotNumber?: string;
-    partId: number;
-    jobId?: number;
-    productionRunId?: number;
-    purchaseOrderLineId?: number;
-    quantity: number;
-    expirationDate?: string;
-    supplierLotNumber?: string;
-    notes?: string;
-  }): Observable<LotRecord> {
-    return this.http.post<LotRecord>(this.lotsBase, data);
-  }
-
-  getLotTraceability(lotNumber: string): Observable<LotTraceability> {
-    return this.http.get<LotTraceability>(`${this.lotsBase}/${encodeURIComponent(lotNumber)}/trace`);
   }
 
   // ── Gages ──

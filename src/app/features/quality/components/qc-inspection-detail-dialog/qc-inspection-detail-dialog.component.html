@@ -1,0 +1,153 @@
+<app-dialog [title]="title()" width="960px" (closed)="close()">
+  <div class="qc-detail" [appLoadingBlock]="loading()">
+    @if (inspection(); as insp) {
+      <dl class="qc-detail__header" data-testid="qc-detail-header">
+        <div class="qc-detail__field">
+          <dt>{{ 'qcInspections.workOrder' | translate }}</dt>
+          <dd data-testid="qc-detail-work-order">
+            {{ insp.jobNumber ?? '—' }}
+            @if (insp.jobTitle) {
+              <span class="qc-detail__secondary">{{ insp.jobTitle }}</span>
+            }
+          </dd>
+        </div>
+        <div class="qc-detail__field">
+          <dt>{{ 'qcInspections.part' | translate }}</dt>
+          <dd data-testid="qc-detail-part">
+            {{ insp.partNumber ?? '—' }}
+            @if (insp.partName) {
+              <span class="qc-detail__secondary">{{ insp.partName }}</span>
+            }
+          </dd>
+        </div>
+        <div class="qc-detail__field">
+          <dt>{{ 'qcInspections.lot' | translate }}</dt>
+          <dd class="qc-detail__mono" data-testid="qc-detail-lot">{{ insp.lotNumber ?? '—' }}</dd>
+        </div>
+        <div class="qc-detail__field">
+          <dt>{{ 'quality.template' | translate }}</dt>
+          <dd data-testid="qc-detail-template">{{ insp.templateName ?? '—' }}</dd>
+        </div>
+        <div class="qc-detail__field">
+          <dt>{{ 'quality.inspector' | translate }}</dt>
+          <dd data-testid="qc-detail-inspector">{{ insp.inspectorName }}</dd>
+        </div>
+        <div class="qc-detail__field">
+          <dt>{{ 'common.status' | translate }}</dt>
+          <dd><span [class]="statusClass()" data-testid="qc-detail-status">{{ statusLabel() }}</span></dd>
+        </div>
+        <div class="qc-detail__field">
+          <dt>{{ 'common.created' | translate }}</dt>
+          <dd>{{ insp.createdAt | date:'MM/dd/yyyy' }}</dd>
+        </div>
+        @if (insp.completedAt) {
+          <div class="qc-detail__field">
+            <dt>{{ 'qcInspections.completedAt' | translate }}</dt>
+            <dd>{{ insp.completedAt | date:'MM/dd/yyyy' }}</dd>
+          </div>
+        }
+      </dl>
+
+      @if (isComplete()) {
+        <p class="qc-detail__notice" data-testid="qc-detail-readonly">{{ 'qcInspections.readOnly' | translate }}</p>
+      }
+
+      <div class="dlg-section" [formGroup]="form">
+        <span class="dlg-section__title">{{ 'qcInspections.results' | translate }}</span>
+        @if (results.length === 0) {
+          <p class="lines-empty" data-testid="qc-detail-no-results">{{ 'qcInspections.noResults' | translate }}</p>
+        }
+        <div formArrayName="results">
+          @for (result of results.controls; track result; let i = $index) {
+            <div class="qc-detail__result" [formGroupName]="i" [attr.data-testid]="'qc-result-row-' + i">
+              <div class="qc-detail__check">
+                <span class="qc-detail__check-name">
+                  {{ result.controls.description.value }}
+                  @if (result.controls.isRequired.value) {
+                    <span class="chip chip--muted">{{ 'qcInspections.required' | translate }}</span>
+                  }
+                </span>
+                <span class="qc-detail__spec">
+                  {{ 'qcInspections.specification' | translate }}: {{ result.controls.specification.value || '—' }}
+                </span>
+              </div>
+              <app-select [label]="'qcInspections.outcome' | translate" formControlName="passed"
+                [options]="passFailOptions" [attr.data-testid]="'qc-result-passed-' + i" />
+              <app-input [label]="'qcInspections.measuredValue' | translate" formControlName="measuredValue"
+                [maxlength]="200" [attr.data-testid]="'qc-result-measured-' + i" />
+              <app-input [label]="'qcInspections.resultNotes' | translate" formControlName="notes"
+                [maxlength]="500" [attr.data-testid]="'qc-result-notes-' + i" />
+            </div>
+          }
+        </div>
+        <app-textarea [label]="'qcInspections.inspectionNotes' | translate" formControlName="notes"
+          [rows]="2" [maxlength]="2000" data-testid="qc-detail-notes" />
+      </div>
+
+      @if (linkedNcr(); as ncr) {
+        <div class="qc-detail__ncr" data-testid="qc-detail-linked-ncr">
+          <span class="material-icons-outlined">report_problem</span>
+          <span>{{ 'qcInspections.linkedNcr' | translate }}</span>
+          <button class="action-btn action-btn--link" type="button" (click)="openNcr()" data-testid="qc-detail-open-ncr">
+            {{ ncr.ncrNumber }}
+          </button>
+        </div>
+      }
+
+      @if (showNcrForm()) {
+        <div class="dlg-section qc-detail__ncr-form" [formGroup]="ncrForm" data-testid="qc-detail-ncr-form">
+          <span class="dlg-section__title">{{ 'qcInspections.ncrTitle' | translate }}</span>
+          <div class="dialog-row">
+            @if (needsNcrPart()) {
+              <app-entity-picker [label]="'qcInspections.part' | translate" entityType="parts"
+                displayField="partNumber" secondaryDisplayField="name" formControlName="partId"
+                data-testid="qc-ncr-part" />
+            }
+            <app-select [label]="'qcInspections.ncrStage' | translate" formControlName="detectedAtStage"
+              [options]="stageOptions" data-testid="qc-ncr-stage" />
+            <app-input [label]="'qcInspections.ncrQuantity' | translate" type="number" formControlName="affectedQuantity"
+              [required]="true" min="0.0001" step="0.0001" data-testid="qc-ncr-quantity" />
+          </div>
+          <app-textarea [label]="'qcInspections.ncrDescription' | translate" formControlName="description"
+            [rows]="3" [maxlength]="4000" data-testid="qc-ncr-description" />
+        </div>
+      }
+
+      <div class="dlg-section qc-detail__activity">
+        <span class="dlg-section__title">{{ 'qcInspections.activity' | translate }}</span>
+        <app-entity-activity-section entityType="QcInspection" [entityId]="insp.id" />
+      </div>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" type="button" (click)="close()" data-testid="qc-detail-close">
+      {{ 'common.close' | translate }}
+    </button>
+    @if (inspection() && !isComplete()) {
+      <button class="action-btn" type="button" [disabled]="saving() || form.invalid" (click)="save()"
+        data-testid="qc-detail-save">{{ 'common.save' | translate }}</button>
+      <button class="action-btn action-btn--danger" type="button" [disabled]="saving() || form.invalid"
+        (click)="markFailed()" data-testid="qc-detail-fail">{{ 'qcInspections.markFailed' | translate }}</button>
+      <app-validation-button [violations]="passViolations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" type="button"
+          [disabled]="saving() || form.invalid || passViolations().length > 0"
+          (click)="markPassed()" data-testid="qc-detail-pass">{{ 'qcInspections.markPassed' | translate }}</button>
+      </app-validation-button>
+    }
+    @if (isFailed() && !linkedNcr() && !showNcrForm()) {
+      <button class="action-btn action-btn--primary" type="button" (click)="openNcrForm()"
+        data-testid="qc-detail-raise-ncr">{{ 'qcInspections.raiseNcr' | translate }}</button>
+    }
+    @if (showNcrForm()) {
+      <button class="action-btn" type="button" (click)="cancelNcrForm()" data-testid="qc-ncr-cancel">
+        {{ 'common.cancel' | translate }}
+      </button>
+      <app-validation-button [violations]="ncrViolations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" type="button"
+          [disabled]="ncrForm.invalid || saving()"
+          (click)="raiseNcr()" data-testid="qc-ncr-create">{{ 'qcInspections.createNcr' | translate }}</button>
+      </app-validation-button>
+    }
+  </div>
+</app-dialog>

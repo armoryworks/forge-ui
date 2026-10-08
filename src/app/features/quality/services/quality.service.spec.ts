@@ -50,6 +50,33 @@ describe('QualityService', () => {
     });
   });
 
+  describe('updateTemplate', () => {
+    it('should PUT the template with item ids so the server can update, add and remove', () => {
+      const data = {
+        name: 'Dimensional Check',
+        partId: 5,
+        items: [
+          { id: 3, description: 'Check length', specification: '10mm +/- 0.1', sortOrder: 0, isRequired: true },
+          { description: 'Check finish', sortOrder: 1, isRequired: false },
+        ],
+      };
+      service.updateTemplate(4, data).subscribe();
+      const req = httpMock.expectOne(`${qualityBase}/templates/4`);
+      expect(req.request.method).toBe('PUT');
+      expect(req.request.body).toEqual(data);
+      req.flush({ id: 4 });
+    });
+  });
+
+  describe('deleteTemplate', () => {
+    it('should DELETE the template', () => {
+      service.deleteTemplate(4).subscribe();
+      const req = httpMock.expectOne(`${qualityBase}/templates/4`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush(null);
+    });
+  });
+
   // ─── Inspections ───
 
   describe('getInspections', () => {
@@ -80,11 +107,28 @@ describe('QualityService', () => {
       expect(req.request.params.get('lotNumber')).toBe('LOT-001');
       req.flush([]);
     });
+
+    it('should pass the search text and leave out empty filters', () => {
+      service.getInspections({ search: 'J-3600', status: '' }).subscribe();
+      const req = httpMock.expectOne(r => r.url === `${qualityBase}/inspections`);
+      expect(req.request.params.get('search')).toBe('J-3600');
+      expect(req.request.params.has('status')).toBe(false);
+      req.flush([]);
+    });
+  });
+
+  describe('getInspection', () => {
+    it('should GET one inspection by id', () => {
+      service.getInspection(12).subscribe();
+      const req = httpMock.expectOne(`${qualityBase}/inspections/12`);
+      expect(req.request.method).toBe('GET');
+      req.flush({ id: 12 });
+    });
   });
 
   describe('createInspection', () => {
     it('should POST new inspection', () => {
-      const data = { jobId: 5, templateId: 2, lotNumber: 'LOT-001', notes: 'Initial' };
+      const data = { jobId: 5, partId: 8, templateId: 2, lotNumber: 'LOT-001', notes: 'Initial' };
       service.createInspection(data).subscribe();
       const req = httpMock.expectOne(`${qualityBase}/inspections`);
       expect(req.request.method).toBe('POST');
@@ -139,38 +183,6 @@ describe('QualityService', () => {
       const req = httpMock.expectOne(r => r.url === lotsBase);
       expect(req.request.params.get('search')).toBe('LOT-');
       req.flush([]);
-    });
-  });
-
-  describe('createLotRecord', () => {
-    it('should POST new lot record', () => {
-      const data = {
-        partId: 3,
-        quantity: 100,
-        lotNumber: 'LOT-002',
-        notes: 'Batch from supplier',
-      };
-      service.createLotRecord(data).subscribe();
-      const req = httpMock.expectOne(lotsBase);
-      expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual(data);
-      req.flush({ id: 1 });
-    });
-  });
-
-  describe('getLotTraceability', () => {
-    it('should GET lot traceability', () => {
-      service.getLotTraceability('LOT-001').subscribe();
-      const req = httpMock.expectOne(`${lotsBase}/LOT-001/trace`);
-      expect(req.request.method).toBe('GET');
-      req.flush({});
-    });
-
-    it('should encode special characters in lot number', () => {
-      service.getLotTraceability('LOT/001 A').subscribe();
-      const req = httpMock.expectOne(`${lotsBase}/${encodeURIComponent('LOT/001 A')}/trace`);
-      expect(req.request.method).toBe('GET');
-      req.flush({});
     });
   });
 });

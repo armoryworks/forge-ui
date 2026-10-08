@@ -5,100 +5,108 @@
       {{ 'quality.newInspection' | translate }}
     </button>
   }
-  @if (activeTab() === 'lots') {
-    <button class="action-btn action-btn--create" (click)="openCreateLot()">
+  @if (activeTab() === 'templates') {
+    <button class="action-btn action-btn--create" data-testid="new-qc-template-btn" (click)="openTemplateEditor(null)">
       <span class="material-icons-outlined">add</span>
-      {{ 'quality.newLot' | translate }}
+      {{ 'qcInspections.newTemplate' | translate }}
     </button>
   }
   @if (activeTab() === 'spc-charts' || activeTab() === 'spc-data') {
-    <button class="action-btn action-btn--create" (click)="spcCharsComponent?.openCreate()">
+    <button class="action-btn action-btn--create" data-testid="new-spc-characteristic-btn" (click)="spcCharsComponent?.openCreate()">
       <span class="material-icons-outlined">add</span>
-      New Characteristic
+      {{ 'qcInspections.newCharacteristic' | translate }}
     </button>
   }
   @if (activeTab() === 'ncrs') {
-    <button class="action-btn action-btn--create" (click)="ncrListComponent?.openCreate()">
+    <button class="action-btn action-btn--create" data-testid="new-ncr-btn" (click)="ncrListComponent?.openCreate()">
       <span class="material-icons-outlined">add</span>
-      New NCR
+      {{ 'qcInspections.newNcr' | translate }}
     </button>
   }
   @if (activeTab() === 'capas') {
-    <button class="action-btn action-btn--create" (click)="capaListComponent?.openCreate()">
+    <button class="action-btn action-btn--create" data-testid="new-capa-btn" (click)="capaListComponent?.openCreate()">
       <span class="material-icons-outlined">add</span>
-      New CAPA
+      {{ 'qcInspections.newCapa' | translate }}
     </button>
   }
   @if (activeTab() === 'ecos') {
-    <button class="action-btn action-btn--create" (click)="ecoListComponent?.openCreate()">
+    <button class="action-btn action-btn--create" data-testid="new-eco-btn" (click)="ecoListComponent?.openCreate()">
       <span class="material-icons-outlined">add</span>
-      New ECO
+      {{ 'qcInspections.newEco' | translate }}
     </button>
   }
   @if (activeTab() === 'gages') {
     <button class="action-btn action-btn--create" data-testid="new-gage-btn" (click)="gageListComponent?.openCreate()">
       <span class="material-icons-outlined">add</span>
-      New Gage
+      {{ 'qcInspections.newGage' | translate }}
     </button>
   }
 </app-page-header>
 
 <div class="quality-content">
-  <!-- Tabs -->
   <div class="tab-bar">
     <button class="tab" [class.tab--active]="activeTab() === 'inspections'" (click)="switchTab('inspections')">
       <span class="material-icons-outlined">fact_check</span>
       {{ 'quality.qcInspections' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'lots'" (click)="switchTab('lots')">
+    <button class="tab" [class.tab--active]="activeTab() === 'templates'" data-testid="qc-templates-tab" (click)="switchTab('templates')">
+      <span class="material-icons-outlined">checklist</span>
+      {{ 'qcInspections.tabTemplates' | translate }}
+    </button>
+    <button class="tab" data-testid="quality-lots-tab" (click)="openLots()">
       <span class="material-icons-outlined">qr_code_2</span>
       {{ 'quality.lotTracking' | translate }}
     </button>
     <button class="tab" [class.tab--active]="activeTab() === 'spc-charts'" (click)="switchTab('spc-charts')">
       <span class="material-icons-outlined">show_chart</span>
-      SPC Charts
+      {{ 'qcInspections.tabSpcCharts' | translate }}
     </button>
     <button class="tab" [class.tab--active]="activeTab() === 'spc-data'" (click)="switchTab('spc-data')">
       <span class="material-icons-outlined">edit_note</span>
-      SPC Data Entry
+      {{ 'qcInspections.tabSpcData' | translate }}
     </button>
     <button class="tab" [class.tab--active]="activeTab() === 'spc-ooc'" (click)="switchTab('spc-ooc')">
       <span class="material-icons-outlined">warning</span>
-      OOC Events
+      {{ 'qcInspections.tabOocEvents' | translate }}
     </button>
     <button class="tab" [class.tab--active]="activeTab() === 'ncrs'" (click)="switchTab('ncrs')">
       <span class="material-icons-outlined">report_problem</span>
-      NCRs
+      {{ 'qcInspections.tabNcrs' | translate }}
     </button>
     <button class="tab" [class.tab--active]="activeTab() === 'capas'" (click)="switchTab('capas')">
       <span class="material-icons-outlined">assignment_turned_in</span>
-      CAPAs
+      {{ 'qcInspections.tabCapas' | translate }}
     </button>
     <button class="tab" [class.tab--active]="activeTab() === 'ecos'" (click)="switchTab('ecos')">
       <span class="material-icons-outlined">engineering</span>
-      ECOs
+      {{ 'qcInspections.tabEcos' | translate }}
     </button>
     <button class="tab" [class.tab--active]="activeTab() === 'gages'" (click)="switchTab('gages')">
       <span class="material-icons-outlined">straighten</span>
-      Gages
+      {{ 'qcInspections.tabGages' | translate }}
     </button>
   </div>
 
-  <!-- Inspections Tab -->
   @if (activeTab() === 'inspections') {
     <div class="filters-bar">
+      <app-input [label]="'common.search' | translate" [formControl]="inspectionSearchControl"
+        [placeholder]="'qcInspections.searchPlaceholder' | translate" data-testid="qc-inspection-search" />
       <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusOptions"
-        (selectionChange)="applyInspectionFilters()" />
+        (selectionChange)="applyInspectionFilters()" data-testid="qc-inspection-status-filter" />
     </div>
 
     <div [appLoadingBlock]="loading()">
       <app-data-table tableId="qc-inspections" [columns]="inspectionColumns" [data]="inspections()"
+        [clickableRows]="true" (rowClick)="openInspection($event)"
         emptyIcon="fact_check" [emptyMessage]="'quality.noInspectionsFound' | translate">
         <ng-template appColumnCell="createdAt" let-row>
           <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
         </ng-template>
         <ng-template appColumnCell="jobNumber" let-row>
           <span class="text-muted">{{ row.jobNumber ?? '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="partNumber" let-row>
+          {{ row.partNumber ?? '—' }}
         </ng-template>
         <ng-template appColumnCell="templateName" let-row>
           {{ row.templateName ?? '—' }}
@@ -116,41 +124,28 @@
     </div>
   }
 
-  <!-- Lots Tab -->
-  @if (activeTab() === 'lots') {
-    <div class="filters-bar">
-      <app-input [label]="'common.search' | translate" [formControl]="lotSearchControl" [placeholder]="'quality.searchLotsPlaceholder' | translate"
-        (keyup.enter)="applyLotFilters()" />
-    </div>
-
-    <div [appLoadingBlock]="loading()">
-      <app-data-table tableId="lot-records" [columns]="lotColumns" [data]="lots()"
-        emptyIcon="qr_code_2" [emptyMessage]="'quality.noLotRecordsFound' | translate">
-        <ng-template appColumnCell="lotNumber" let-row>
-          <span class="quality__lot-number">{{ row.lotNumber }}</span>
-        </ng-template>
-        <ng-template appColumnCell="expirationDate" let-row>
-          <span class="text-muted">{{ row.expirationDate ? (row.expirationDate | date:'MM/dd/yyyy') : '—' }}</span>
-        </ng-template>
-        <ng-template appColumnCell="createdAt" let-row>
-          <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
-        </ng-template>
-        <ng-template appColumnCell="jobNumber" let-row>
-          <span class="text-muted">{{ row.jobNumber ?? '—' }}</span>
-        </ng-template>
-        <ng-template appColumnCell="supplierLotNumber" let-row>
-          <span class="text-muted">{{ row.supplierLotNumber ?? '—' }}</span>
-        </ng-template>
-        <ng-template appColumnCell="actions" let-row>
-          <button class="icon-btn" [matTooltip]="'quality.viewTraceability' | translate" matTooltipPosition="above" (click)="viewTraceability(row); $event.stopPropagation()">
-            <span class="material-icons-outlined">account_tree</span>
-          </button>
-        </ng-template>
-      </app-data-table>
-    </div>
+  @if (activeTab() === 'templates') {
+    <app-data-table tableId="qc-templates" [columns]="templateColumns" [data]="templateRows()"
+      [clickableRows]="true" (rowClick)="editTemplate($event)"
+      emptyIcon="checklist" [emptyMessage]="'qcInspections.noTemplatesFound' | translate">
+      <ng-template appColumnCell="partNumber" let-row>
+        {{ row.partNumber ?? '—' }}
+      </ng-template>
+      <ng-template appColumnCell="actions" let-row>
+        <button class="icon-btn" type="button" [matTooltip]="'qcInspections.editTemplate' | translate" matTooltipPosition="above"
+          [attr.aria-label]="'qcInspections.editTemplate' | translate" [attr.data-testid]="'qc-template-edit-' + row.id"
+          (click)="editTemplate(row); $event.stopPropagation()">
+          <span class="material-icons-outlined">edit</span>
+        </button>
+        <button class="icon-btn icon-btn--danger" type="button" [matTooltip]="'qcInspections.deleteTemplate' | translate" matTooltipPosition="above"
+          [attr.aria-label]="'qcInspections.deleteTemplate' | translate" [attr.data-testid]="'qc-template-delete-' + row.id"
+          (click)="deleteTemplate(row); $event.stopPropagation()">
+          <span class="material-icons-outlined">delete</span>
+        </button>
+      </ng-template>
+    </app-data-table>
   }
 
-  <!-- SPC Charts Tab -->
   @if (activeTab() === 'spc-charts') {
     <div class="spc-tab-content">
       @if (selectedCharacteristic(); as char) {
@@ -166,7 +161,6 @@
     </div>
   }
 
-  <!-- SPC Data Entry Tab -->
   @if (activeTab() === 'spc-data') {
     <div class="spc-tab-content">
       @if (selectedCharacteristic(); as char) {
@@ -182,197 +176,64 @@
     </div>
   }
 
-  <!-- SPC OOC Events Tab -->
   @if (activeTab() === 'spc-ooc') {
     <app-spc-ooc-list />
   }
 
-  <!-- NCRs Tab -->
   @if (activeTab() === 'ncrs') {
     <app-ncr-list />
   }
 
-  <!-- CAPAs Tab -->
   @if (activeTab() === 'capas') {
     <app-capa-list />
   }
 
-  <!-- ECOs Tab -->
   @if (activeTab() === 'ecos') {
     <app-eco-list />
   }
 
-  <!-- Gages Tab -->
   @if (activeTab() === 'gages') {
     <app-gage-list />
   }
 </div>
 
-<!-- Create Inspection Dialog -->
 @if (showInspectionDialog()) {
-  <app-dialog [title]="'quality.newQcInspection' | translate" (closed)="closeInspectionDialog()">
+  <app-dialog [title]="'quality.newQcInspection' | translate" width="520px" (closed)="closeInspectionDialog()">
     <div [formGroup]="inspectionForm">
-      <app-select [label]="'quality.template' | translate" formControlName="templateId" [options]="templateOptions()" data-testid="inspection-template" />
-
       <div class="dialog-row">
-        <app-input [label]="'quality.jobId' | translate" type="number" formControlName="jobId" data-testid="inspection-job" />
-        <app-input [label]="'quality.lotNumber' | translate" formControlName="lotNumber" data-testid="inspection-lot" />
+        <app-entity-picker [label]="'qcInspections.workOrder' | translate" entityType="jobs"
+          displayField="jobNumber" secondaryDisplayField="title" formControlName="jobId"
+          [placeholder]="'qcInspections.optional' | translate"
+          (selected)="onWorkOrderSelected($event)" data-testid="inspection-job" />
+        <app-entity-picker #inspectionPartPicker [label]="'qcInspections.part' | translate" entityType="parts"
+          displayField="partNumber" secondaryDisplayField="name" formControlName="partId"
+          [placeholder]="'qcInspections.optional' | translate" data-testid="inspection-part" />
       </div>
 
-      <app-textarea [label]="'common.notes' | translate" formControlName="notes" data-testid="inspection-notes" />
+      <app-select [label]="'quality.template' | translate" formControlName="templateId" [options]="templateOptions()" data-testid="inspection-template" />
+
+      <app-input [label]="'quality.lotNumber' | translate" formControlName="lotNumber" [maxlength]="100" data-testid="inspection-lot" />
+      @if (lotSuggestions().length > 0) {
+        <div class="quality__lot-suggestions" data-testid="inspection-lot-suggestions">
+          <span class="quality__lot-suggestions-label">{{ 'qcInspections.lotSuggestions' | translate }}</span>
+          @for (lot of lotSuggestions(); track lot) {
+            <button class="chip chip--muted quality__lot-chip" type="button" (click)="useLotSuggestion(lot)"
+              [attr.data-testid]="'inspection-lot-suggestion-' + lot">{{ lot }}</button>
+          }
+        </div>
+      }
+
+      <app-textarea [label]="'common.notes' | translate" formControlName="notes" [maxlength]="2000" data-testid="inspection-notes" />
     </div>
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeInspectionDialog()">{{ 'common.cancel' | translate }}</button>
-      <app-validation-button [violations]="inspectionViolations">
+      <app-validation-button [violations]="inspectionViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
         data-testid="inspection-save-btn"
         [disabled]="saving()"
         (click)="saveInspection()">{{ 'quality.createInspection' | translate }}</button>
       </app-validation-button>
-    </div>
-  </app-dialog>
-}
-
-<!-- Create Lot Dialog -->
-@if (showLotDialog()) {
-  <app-dialog [title]="'quality.newLotRecord' | translate" (closed)="closeLotDialog()">
-    <div [formGroup]="lotForm">
-      <div class="dialog-row">
-        <app-input [label]="'quality.partId' | translate" type="number" formControlName="partId" />
-        <app-input [label]="'common.quantity' | translate" type="number" formControlName="quantity" />
-      </div>
-
-      <app-input [label]="'quality.lotNumber' | translate" formControlName="lotNumber" [placeholder]="'quality.lotNumberPlaceholder' | translate" />
-
-      <div class="dialog-row">
-        <app-input [label]="'quality.jobId' | translate" type="number" formControlName="jobId" />
-        <app-input [label]="'quality.supplierLotNumber' | translate" formControlName="supplierLotNumber" />
-      </div>
-
-      <app-textarea [label]="'common.notes' | translate" formControlName="notes" />
-    </div>
-
-    <div dialog-footer>
-      <button class="action-btn" (click)="closeLotDialog()">{{ 'common.cancel' | translate }}</button>
-      <app-validation-button [violations]="lotViolations" [loading]="saving()">
-      <button class="action-btn action-btn--primary"
-        [disabled]="lotForm.invalid || saving()"
-        (click)="saveLot()">{{ 'quality.createLot' | translate }}</button>
-      </app-validation-button>
-    </div>
-  </app-dialog>
-}
-
-<!-- Traceability Dialog -->
-@if (showTraceDialog() && traceData()) {
-  <app-dialog [title]="'quality.traceabilityTitle' | translate:{ lot: traceData()!.lotNumber }" width="800px" (closed)="closeTraceDialog()">
-    <div class="trace-content">
-      <div class="trace-header">
-        <div class="trace-header__field">
-          <span class="trace-header__label">{{ 'common.part' | translate }}</span>
-          <span class="trace-header__value">{{ traceData()!.partNumber }}</span>
-        </div>
-        @if (traceData()!.partDescription) {
-          <div class="trace-header__field">
-            <span class="trace-header__label">{{ 'common.description' | translate }}</span>
-            <span class="trace-header__value">{{ traceData()!.partDescription }}</span>
-          </div>
-        }
-      </div>
-
-      <!-- Jobs -->
-      @if (traceData()!.jobs.length > 0) {
-        <div class="trace-section">
-          <h4 class="trace-section__title">
-            <span class="material-icons-outlined">work</span>
-            {{ 'quality.jobsSection' | translate }} ({{ traceData()!.jobs.length }})
-          </h4>
-          @for (job of traceData()!.jobs; track job.id) {
-            <div class="trace-section__item">
-              <span class="trace-section__item-label">{{ job.jobNumber }}</span>
-              <span class="trace-section__item-value">{{ job.title }}</span>
-            </div>
-          }
-        </div>
-      }
-
-      <!-- Production Runs -->
-      @if (traceData()!.productionRuns.length > 0) {
-        <div class="trace-section">
-          <h4 class="trace-section__title">
-            <span class="material-icons-outlined">precision_manufacturing</span>
-            {{ 'quality.productionRunsSection' | translate }} ({{ traceData()!.productionRuns.length }})
-          </h4>
-          @for (run of traceData()!.productionRuns; track run.id) {
-            <div class="trace-section__item">
-              <span class="trace-section__item-label">{{ run.runNumber }}</span>
-              <span class="chip chip--muted">{{ run.status }}</span>
-            </div>
-          }
-        </div>
-      }
-
-      <!-- Purchase Orders -->
-      @if (traceData()!.purchaseOrders.length > 0) {
-        <div class="trace-section">
-          <h4 class="trace-section__title">
-            <span class="material-icons-outlined">receipt_long</span>
-            {{ 'quality.purchaseOrdersSection' | translate }} ({{ traceData()!.purchaseOrders.length }})
-          </h4>
-          @for (po of traceData()!.purchaseOrders; track po.id) {
-            <div class="trace-section__item">
-              <span class="trace-section__item-label">{{ po.poNumber }}</span>
-              <span class="trace-section__item-value">{{ po.vendorName }}</span>
-            </div>
-          }
-        </div>
-      }
-
-      <!-- Bin Locations -->
-      @if (traceData()!.binLocations.length > 0) {
-        <div class="trace-section">
-          <h4 class="trace-section__title">
-            <span class="material-icons-outlined">warehouse</span>
-            {{ 'quality.binLocationsSection' | translate }} ({{ traceData()!.binLocations.length }})
-          </h4>
-          @for (bin of traceData()!.binLocations; track bin.locationId) {
-            <div class="trace-section__item">
-              <span class="trace-section__item-label">{{ bin.locationName }}</span>
-              <span class="trace-section__item-value">{{ 'quality.traceQty' | translate:{ qty: bin.quantity } }}</span>
-            </div>
-          }
-        </div>
-      }
-
-      <!-- QC Inspections -->
-      @if (traceData()!.inspections.length > 0) {
-        <div class="trace-section">
-          <h4 class="trace-section__title">
-            <span class="material-icons-outlined">fact_check</span>
-            {{ 'quality.qcInspectionsSection' | translate }} ({{ traceData()!.inspections.length }})
-          </h4>
-          @for (insp of traceData()!.inspections; track insp.id) {
-            <div class="trace-section__item">
-              <span [class]="getStatusClass(insp.status)">{{ getStatusLabel(insp.status) }}</span>
-              <span class="trace-section__item-value">{{ insp.inspectorName }} &middot; {{ insp.createdAt | date:'MM/dd/yyyy' }}</span>
-            </div>
-          }
-        </div>
-      }
-
-      @if (traceData()!.jobs.length === 0 && traceData()!.productionRuns.length === 0 &&
-           traceData()!.purchaseOrders.length === 0 && traceData()!.binLocations.length === 0 &&
-           traceData()!.inspections.length === 0) {
-        <div class="trace-empty">
-          <span class="material-icons-outlined">info</span>
-          {{ 'quality.noLinkedRecords' | translate }}
-        </div>
-      }
-    </div>
-
-    <div dialog-footer>
-      <button class="action-btn action-btn--primary" (click)="closeTraceDialog()">{{ 'common.close' | translate }}</button>
     </div>
   </app-dialog>
 }
