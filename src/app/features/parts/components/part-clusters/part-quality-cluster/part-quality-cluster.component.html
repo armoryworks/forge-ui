@@ -72,4 +72,97 @@
       </app-validation-button>
     </div>
   }
+
+  @if (showQualityRecords()) {
+    <section class="cluster__form" [appLoadingBlock]="summaryLoading()" data-testid="part-quality-records">
+      <h4 class="cluster__title">{{ 'partQuality.recentInspections' | translate }}</h4>
+      @if (!summary()?.recentInspections?.length) {
+        <app-empty-state icon="fact_check" [message]="'partQuality.noInspections' | translate" />
+      } @else {
+        <app-data-table
+          tableId="part-quality-inspections"
+          [columns]="inspectionColumns"
+          [data]="summary()!.recentInspections"
+          emptyIcon="fact_check"
+          [emptyMessage]="'partQuality.noInspections' | translate">
+          <ng-template appColumnCell="id" let-row>
+            <a routerLink="/quality/inspections" data-testid="part-quality-inspection-link">
+              {{ 'partQuality.inspectionRef' | translate: { id: row.id } }}
+            </a>
+          </ng-template>
+          <ng-template appColumnCell="templateName" let-row>{{ row.templateName ?? '—' }}</ng-template>
+          <ng-template appColumnCell="lotNumber" let-row>{{ row.lotNumber ?? '—' }}</ng-template>
+          <ng-template appColumnCell="results" let-row>
+            {{ 'partQuality.resultsSummary' | translate: { passed: row.passedCount, failed: row.failedCount } }}
+          </ng-template>
+        </app-data-table>
+      }
+
+      <h4 class="cluster__title">{{ 'partQuality.openNcrs' | translate }}</h4>
+      @if (!summary()?.openNcrs?.length) {
+        <app-empty-state icon="report_problem" [message]="'partQuality.noOpenNcrs' | translate" />
+      } @else {
+        <app-data-table
+          tableId="part-quality-ncrs"
+          [columns]="ncrColumns"
+          [data]="summary()!.openNcrs"
+          emptyIcon="report_problem"
+          [emptyMessage]="'partQuality.noOpenNcrs' | translate">
+          <ng-template appColumnCell="ncrNumber" let-row>
+            <a routerLink="/quality/ncrs" data-testid="part-quality-ncr-link">{{ row.ncrNumber }}</a>
+          </ng-template>
+          <ng-template appColumnCell="lotNumber" let-row>{{ row.lotNumber ?? '—' }}</ng-template>
+        </app-data-table>
+      }
+
+      <h4 class="cluster__title">{{ 'partQuality.lotsOnHand' | translate }}</h4>
+      @if (!summary()?.lots?.length) {
+        <app-empty-state icon="inventory_2" [message]="'partQuality.noLots' | translate" />
+      } @else {
+        <app-data-table
+          tableId="part-quality-lots"
+          [columns]="lotColumns"
+          [data]="summary()!.lots"
+          emptyIcon="inventory_2"
+          [emptyMessage]="'partQuality.noLots' | translate">
+          <ng-template appColumnCell="lotNumber" let-row>
+            <app-entity-link type="lot" [entityId]="row.id">{{ row.lotNumber }}</app-entity-link>
+          </ng-template>
+          <ng-template appColumnCell="hold" let-row>
+            @if (row.isOnHold) {
+              {{ 'partQuality.onHold' | translate: { quantity: row.heldQuantity } }}
+            } @else {
+              {{ 'partQuality.notOnHold' | translate }}
+            }
+          </ng-template>
+        </app-data-table>
+      }
+
+      <h4 class="cluster__title">{{ 'partQuality.inspectionTemplates' | translate }}</h4>
+      @if (!summary()?.inspectionTemplates?.length) {
+        <p class="cluster__value cluster__value--muted">{{ 'partQuality.noTemplates' | translate }}</p>
+      } @else {
+        <div class="cluster__grid">
+          @for (t of summary()!.inspectionTemplates; track t.id) {
+            <div class="cluster__item" data-testid="part-quality-template">
+              <span class="cluster__value">{{ t.name }}</span>
+              @if (t.isReceivingTemplate) {
+                <span class="cluster__value cluster__value--muted">{{ 'partQuality.receivingTemplate' | translate }}</span>
+              }
+              @if (!t.isActive) {
+                <span class="cluster__value cluster__value--muted">{{ 'partQuality.inactiveTemplate' | translate }}</span>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <div class="cluster__item">
+        <span class="cluster__label">{{ 'partQuality.spcCharacteristics' | translate }}</span>
+        <a class="cluster__value" routerLink="/quality/spc-charts" data-testid="part-quality-spc-link">
+          {{ summary()?.spcCharacteristicCount ?? 0 }}
+        </a>
+      </div>
+    </section>
+  }
 </div>
