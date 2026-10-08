@@ -3,7 +3,7 @@ import { signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 import { ShopFloorClockComponent } from './shop-floor-clock.component';
@@ -207,6 +207,53 @@ describe('ShopFloorClockComponent — clock phase', () => {
 
     expect(c.punchUndoState()).toBe('failed');
     expect(c.punchUndoMessage()).toBe('kioskSetup.punchUndo.failed');
+  });
+
+  it('keeps the bar while an undo near the deadline is in flight, then dismisses the result', () => {
+    signIn(1, ['ProductionWorker']);
+    shopFloor.clockInOut.mockReturnValue(of(undefined));
+    const pending = new Subject<{ state: string; lastEventType: null; lastEventAt: null; lastEventId: null }>();
+    mobileApi.undoClockPunch.mockReturnValueOnce(pending);
+    const c = create();
+    c.enterClockPhase();
+
+    c.clockAction(worker(1, 'Ana'), clockIn);
+    vi.advanceTimersByTime(9900);
+    c.undoPunch();
+    vi.advanceTimersByTime(500);
+    expect(c.punchUndoState()).toBe('undoing');
+
+    pending.next({ state: 'out', lastEventType: null, lastEventAt: null, lastEventId: null });
+    pending.complete();
+    expect(c.punchUndoState()).toBe('undone');
+
+    vi.advanceTimersByTime(4000);
+    expect(c.punchUndoMessage()).toBeNull();
+    expect(c.punchUndoState()).toBeNull();
+  });
+
+  it('ignores an undo response that arrives after the bar was replaced by a new punch', () => {
+    signIn(1, ['ProductionWorker']);
+    shopFloor.clockInOut.mockReturnValue(of(undefined));
+    const pending = new Subject<{ state: string; lastEventType: null; lastEventAt: null; lastEventId: null }>();
+    mobileApi.undoClockPunch.mockReturnValueOnce(pending);
+    mobileApi.clockState
+      .mockReturnValueOnce(of({ state: 'in', lastEventType: 'ClockIn', lastEventAt: null, lastEventId: 501 }))
+      .mockReturnValueOnce(throwError(() => new Error('disabled')));
+    const c = create();
+    c.enterClockPhase();
+
+    c.clockAction(worker(1, 'Ana'), clockIn);
+    c.undoPunch();
+    vi.advanceTimersByTime(2000);
+    c.enterClockPhase();
+    c.clockAction(worker(1, 'Ana'), clockIn);
+    expect(c.punchUndoMessage()).toBeNull();
+
+    pending.error(new Error('late'));
+
+    expect(c.punchUndoMessage()).toBeNull();
+    expect(c.punchUndoState()).toBeNull();
   });
 
   it('offers no undo when the clock state cannot be read', () => {

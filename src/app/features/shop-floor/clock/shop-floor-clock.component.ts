@@ -30,6 +30,7 @@ const REFRESH_INTERVAL_MS = 15_000;
 const AUTO_LOGOUT_MS = 30_000;
 const PUNCH_FEEDBACK_MS = 2_000;
 const PUNCH_UNDO_MS = 10_000;
+const PUNCH_UNDO_RESULT_MS = 4_000;
 const SUPERVISE_ROLES = ['Admin', 'Manager'];
 
 type KioskPhase = 'setup' | 'dashboard' | 'identifying' | 'pin' | 'job-scanned' | 'manual-login' | 'clock';
@@ -115,6 +116,7 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
   private punchUndoTimer: ReturnType<typeof setTimeout> | null = null;
   private punchUndoEventId: number | null = null;
   private punchUndoToken: string | null = null;
+  private punchUndoSeq = 0;
 
   // Bridge RFID relay scans into the kiosk scan flow
   private readonly rfidBridge = effect(() => {
@@ -351,24 +353,34 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
     const token = this.punchUndoToken;
     if (eventId === null || token === null || this.punchUndoState() !== 'offered') return;
     this.punchUndoState.set('undoing');
+    const seq = this.punchUndoSeq;
     this.mobileApi.undoClockPunch(eventId, token).subscribe({
       next: () => {
-        this.punchUndoState.set('undone');
-        this.punchUndoMessage.set(this.translate.instant('kioskSetup.punchUndo.undone'));
+        if (seq !== this.punchUndoSeq) return;
+        this.showPunchUndoResult('undone', 'kioskSetup.punchUndo.undone');
         this.loadData();
       },
       error: () => {
-        this.punchUndoState.set('failed');
-        this.punchUndoMessage.set(this.translate.instant('kioskSetup.punchUndo.failed'));
+        if (seq !== this.punchUndoSeq) return;
+        this.showPunchUndoResult('failed', 'kioskSetup.punchUndo.failed');
       },
     });
+  }
+
+  private showPunchUndoResult(state: PunchUndoState, messageKey: string): void {
+    if (this.punchUndoTimer) clearTimeout(this.punchUndoTimer);
+    this.punchUndoState.set(state);
+    this.punchUndoMessage.set(this.translate.instant(messageKey));
+    this.punchUndoTimer = setTimeout(() => this.clearPunchUndo(), PUNCH_UNDO_RESULT_MS);
   }
 
   private offerPunchUndo(message: string): void {
     this.clearPunchUndo();
     const token = this.authService.token();
     if (!token) return;
-    const timer = setTimeout(() => this.clearPunchUndo(), PUNCH_UNDO_MS);
+    const timer = setTimeout(() => {
+      if (this.punchUndoState() !== 'undoing') this.clearPunchUndo();
+    }, PUNCH_UNDO_MS);
     this.punchUndoTimer = timer;
     this.mobileApi.clockState().subscribe({
       next: (state) => {
@@ -385,6 +397,7 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
   }
 
   private clearPunchUndo(): void {
+    this.punchUndoSeq++;
     if (this.punchUndoTimer) {
       clearTimeout(this.punchUndoTimer);
       this.punchUndoTimer = null;

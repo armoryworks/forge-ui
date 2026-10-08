@@ -97,4 +97,26 @@ describe('KioskSearchBarComponent', () => {
 
     expect(query('kiosk-search-card')).toBeNull();
   });
+
+  it('closes the card when a new search is typed', () => {
+    const { fixture, select, query } = create();
+    select(jobResult);
+    const input = query('kiosk-search-input') as HTMLInputElement;
+
+    input.value = 'J';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(query('kiosk-search-card')).toBeNull();
+  });
+
+  it('closes the card when the search box gets focus', () => {
+    const { fixture, select, query } = create();
+    select(jobResult);
+
+    query('kiosk-search-input')?.dispatchEvent(new Event('focus'));
+    fixture.detectChanges();
+
+    expect(query('kiosk-search-card')).toBeNull();
+  });
 });

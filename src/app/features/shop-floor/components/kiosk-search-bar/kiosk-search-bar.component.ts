@@ -50,6 +50,11 @@ export class KioskSearchBarComponent {
     });
 
     this.searchControl.valueChanges.pipe(
+      filter(() => this.selected() !== null),
+      takeUntilDestroyed(),
+    ).subscribe(() => this.close());
+
+    this.searchControl.valueChanges.pipe(
       filter(v => !v || v.length < 2),
       takeUntilDestroyed(),
     ).subscribe(() => {
@@ -59,6 +64,7 @@ export class KioskSearchBarComponent {
   }
 
   protected onFocus(): void {
+    this.close();
     if (this.results().length > 0) {
       this.showResults.set(true);
     }
