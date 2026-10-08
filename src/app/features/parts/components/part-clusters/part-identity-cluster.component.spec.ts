@@ -291,10 +291,60 @@ describe('PartIdentityClusterComponent', () => {
     dialogResult = created;
 
     c.openRevise();
+    TestBed.flushEffects();
 
     expect(dialogOpen.mock.calls[0][0]).toBe(PartReviseDialogComponent);
     expect(c.form.controls.revision.value).toBe('B');
     expect(c.revisions().map((r) => r.revision)).toEqual(['B', 'A']);
     expect(cb).toHaveBeenCalledWith(created);
+  });
+
+  it('leaves the revision out of the patch when it was not edited', () => {
+    const c = createEditing({ revision: 'A' });
+    const cb = vi.fn();
+    c.save.subscribe(cb);
+    c.form.patchValue({ name: 'Renamed' });
+
+    c.onSave();
+
+    expect(cb.mock.calls[0][0]).not.toHaveProperty('revision');
+  });
+
+  it('does not revert a revision made through Revise part when the part input is stale', () => {
+    const component = TestBed.runInInjectionContext(() => new PartIdentityClusterComponent());
+    const inputs = mockSignalInputs(component, {
+      part: makePart({ revision: 'A' }),
+      editing: false,
+      saving: false,
+      allowManualNumbers: false,
+    });
+    TestBed.flushEffects();
+    const c = component as unknown as ClusterInternals & PartIdentityClusterComponent;
+    dialogResult = makeRevision({ id: 2, revision: 'B' });
+    c.openRevise();
+    TestBed.flushEffects();
+
+    inputs.editing.set(true);
+    TestBed.flushEffects();
+    expect(c.form.controls.revision.value).toBe('B');
+
+    const cb = vi.fn();
+    c.save.subscribe(cb);
+    c.form.patchValue({ name: 'Renamed' });
+    c.onSave();
+
+    expect(cb.mock.calls[0][0]).not.toHaveProperty('revision');
+    expect(cb.mock.calls[0][0].name).toBe('Renamed');
+  });
+
+  it('includes an edited revision in the patch', () => {
+    const c = createEditing({ revision: 'A' });
+    const cb = vi.fn();
+    c.save.subscribe(cb);
+    c.form.patchValue({ revision: ' C ' });
+
+    c.onSave();
+
+    expect(cb.mock.calls[0][0].revision).toBe('C');
   });
 });

@@ -99,6 +99,12 @@ export class PartIdentityClusterComponent {
   protected readonly revisions = signal<PartRevision[]>([]);
   protected readonly canRevise = computed(() => this.auth.hasAnyRole(['Admin', 'Manager', 'Engineer']));
   private readonly revisionKey = computed(() => `${this.part().id}:${this.part().revision}`);
+  private readonly localRevision = signal<{ partId: number; from: string; to: string } | null>(null);
+  private readonly currentRevision = computed(() => {
+    const p = this.part();
+    const local = this.localRevision();
+    return local && local.partId === p.id && local.from === p.revision ? local.to : p.revision;
+  });
 
   constructor() {
     effect(() => {
@@ -107,7 +113,7 @@ export class PartIdentityClusterComponent {
         partNumber: p.partNumber,
         name: p.name,
         description: p.description,
-        revision: p.revision,
+        revision: this.currentRevision(),
         status: p.status,
         procurementSource: p.procurementSource,
         inventoryClass: p.inventoryClass,
@@ -132,9 +138,11 @@ export class PartIdentityClusterComponent {
     const patch: Partial<PartDetail> = {
       name: v.name,
       description: v.description ?? null,
-      revision: v.revision,
       status: v.status,
     };
+    if (v.revision.trim() !== this.currentRevision().trim()) {
+      patch.revision = v.revision.trim();
+    }
     if (this.allowManualNumbers() && v.partNumber.trim() && v.partNumber.trim() !== p.partNumber) {
       patch.partNumber = v.partNumber.trim();
     }
@@ -179,7 +187,7 @@ export class PartIdentityClusterComponent {
       data: { part: p, revisions: this.revisions() },
     }).afterClosed().subscribe((created) => {
       if (!created) return;
-      this.form.controls.revision.setValue(created.revision);
+      this.localRevision.set({ partId: p.id, from: p.revision, to: created.revision });
       this.loadRevisions();
       this.revised.emit(created);
     });
