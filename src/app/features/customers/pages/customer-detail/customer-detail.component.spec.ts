@@ -63,14 +63,14 @@ describe('CustomerDetailComponent · saveClusterPatch', () => {
     vi.clearAllMocks();
   });
 
-  it('passes emptied company name, email and phone through to the update as empty strings', () => {
+  it('passes emptied email and phone through to the update as empty strings', () => {
     const component = setup();
 
     (component as unknown as { saveClusterPatch(p: Partial<CustomerSummary>): void })
-      .saveClusterPatch({ name: 'Acme Co', companyName: '', email: '', phone: '', isActive: true });
+      .saveClusterPatch({ name: 'Acme Co', companyName: undefined, email: '', phone: '', isActive: true });
 
     expect(customerService.updateCustomer).toHaveBeenCalledWith(5, expect.objectContaining({
-      companyName: '',
+      companyName: 'Acme Corp',
       email: '',
       phone: '',
     }));

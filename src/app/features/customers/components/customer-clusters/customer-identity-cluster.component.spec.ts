@@ -93,7 +93,7 @@ describe('CustomerIdentityClusterComponent', () => {
     expect(cb.mock.calls[0][0].name).toBe('Renamed');
   });
 
-  it('emits empty strings for emptied company name, email and phone so the save clears them', () => {
+  it('emits empty strings for emptied email and phone so the save clears them', () => {
     const component = TestBed.runInInjectionContext(() => new CustomerIdentityClusterComponent());
     mockSignalInputs(component, {
       customer: makeSummary(),
@@ -109,6 +109,7 @@ describe('CustomerIdentityClusterComponent', () => {
     const cb = vi.fn();
     component.save.subscribe(cb);
     c.onSave();
-    expect(cb.mock.calls[0][0]).toEqual(expect.objectContaining({ companyName: '', email: '', phone: '' }));
+    expect(cb.mock.calls[0][0]).toEqual(expect.objectContaining({ email: '', phone: '' }));
+    expect(cb.mock.calls[0][0].companyName).toBeUndefined();
   });
 });
