@@ -179,6 +179,157 @@ function rawTablesInFeatures() {
   return out;
 }
 
+const TEXT_ATTRS = new Set(['title', 'placeholder', 'aria-label']);
+const BOUND_TEXT_ATTRS = new Set(['[title]', '[placeholder]', '[aria-label]', '[attr.title]', '[attr.placeholder]', '[attr.aria-label]']);
+const ICON_CLASS = /\bmaterial-(?:icons|symbols)[\w-]*/;
+const ICON_TAGS = new Set(['mat-icon']);
+const RAW_TEXT_TAGS = new Set(['script', 'style']);
+const CONTROL_FLOW = /^@(?:else\s+if|if|else|for|switch|case|default|empty|defer|placeholder|loading|error)\b/;
+const hasWords = (s) => /\p{L}/u.test(s.replace(/&(?:[a-zA-Z]+|#\d+|#x[0-9a-fA-F]+);/g, ' '));
+const usesTranslate = (s) => /\|\s*translate\b/.test(s);
+
+function readTag(src, start) {
+  let i = start + 1;
+  let quote = null;
+  while (i < src.length) {
+    const c = src[i];
+    if (quote) {
+      if (c === quote) quote = null;
+    } else if (c === '"' || c === "'") {
+      quote = c;
+    } else if (c === '>') {
+      return i + 1;
+    }
+    i++;
+  }
+  return src.length;
+}
+
+function skipBalanced(src, i, open, close) {
+  let depth = 0;
+  let quote = null;
+  for (; i < src.length; i++) {
+    const c = src[i];
+    if (quote) {
+      if (c === quote) quote = null;
+    } else if (c === '"' || c === "'") {
+      quote = c;
+    } else if (c === open) {
+      depth++;
+    } else if (c === close && --depth === 0) {
+      return i + 1;
+    }
+  }
+  return src.length;
+}
+
+function textNodes(text) {
+  const nodes = [];
+  let current = '';
+  let i = 0;
+  const flush = () => {
+    nodes.push(current);
+    current = '';
+  };
+  while (i < text.length) {
+    if (text.startsWith('{{', i)) {
+      const end = text.indexOf('}}', i + 2);
+      i = end === -1 ? text.length : end + 2;
+      current += ' ';
+      continue;
+    }
+    if (text[i] === '@') {
+      const rest = text.slice(i);
+      const cf = rest.match(CONTROL_FLOW);
+      if (cf) {
+        flush();
+        i += cf[0].length;
+        while (/\s/.test(text[i] ?? '')) i++;
+        if (text[i] === '(') i = skipBalanced(text, i, '(', ')');
+        continue;
+      }
+      if (/^@let\s/.test(rest)) {
+        flush();
+        const end = text.indexOf(';', i);
+        i = end === -1 ? text.length : end + 1;
+        continue;
+      }
+    }
+    if (text[i] === '{' || text[i] === '}') {
+      flush();
+      i++;
+      continue;
+    }
+    current += text[i++];
+  }
+  flush();
+  return nodes.filter(hasWords);
+}
+
+function hardcodedAttributes(tag) {
+  let n = 0;
+  for (const m of tag.matchAll(/([^\s=/>"']+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g)) {
+    const name = m[1];
+    const value = m[2] ?? m[3] ?? '';
+    if (TEXT_ATTRS.has(name)) {
+      if (!usesTranslate(value) && hasWords(value.replace(/\{\{[\s\S]*?\}\}/g, ' '))) n++;
+    } else if (BOUND_TEXT_ATTRS.has(name)) {
+      if (!usesTranslate(value) && [...value.matchAll(/'([^']*)'|"([^"]*)"/g)].some((s) => hasWords(s[1] ?? s[2] ?? ''))) n++;
+    }
+  }
+  return n;
+}
+
+function countHardcodedText(html) {
+  const src = stripHtmlComments(html);
+  let n = 0;
+  let text = '';
+  let skipUntil = null;
+  let skipDepth = 0;
+  let i = 0;
+  const endText = () => {
+    if (!skipUntil) n += textNodes(text).length;
+    text = '';
+  };
+  while (i < src.length) {
+    if (src[i] === '<' && /[A-Za-z/]/.test(src[i + 1] ?? '')) {
+      endText();
+      const end = readTag(src, i);
+      const tag = src.slice(i, end);
+      i = end;
+      const closing = tag[1] === '/';
+      const name = (tag.match(/^<\/?([A-Za-z][\w-]*)/)?.[1] ?? '').toLowerCase();
+      if (skipUntil) {
+        if (name === skipUntil) skipDepth += closing ? -1 : tag.endsWith('/>') ? 0 : 1;
+        if (skipDepth === 0) skipUntil = null;
+        continue;
+      }
+      if (closing) continue;
+      n += hardcodedAttributes(tag);
+      const selfClosing = tag.endsWith('/>');
+      const classAttr = tag.match(/\sclass\s*=\s*(?:"([^"]*)"|'([^']*)')/);
+      const isIcon = ICON_TAGS.has(name) || ICON_CLASS.test(classAttr?.[1] ?? classAttr?.[2] ?? '');
+      if (!selfClosing && (isIcon || RAW_TEXT_TAGS.has(name))) {
+        skipUntil = name;
+        skipDepth = 1;
+      }
+      continue;
+    }
+    text += src[i++];
+  }
+  endText();
+  return n;
+}
+
+function hardcodedTextInTemplates() {
+  const out = new Map();
+  for (const f of walk(SRC, ['.html'])) {
+    const n = countHardcodedText(read(f));
+    if (n) out.set(rel(f), n);
+  }
+  return out;
+}
+
 // ── evaluation ───────────────────────────────────────────────────────────────
 
 const HARD = [
@@ -193,6 +344,7 @@ const RATCHET = [
   ['raw-form-controls-in-features', 'raw <input>/<select>/<textarea> in a feature template (use the shared wrappers)', rawFormControlsInFeatures],
   ['table-missing-a11y', 'feature <table> without a <caption> or aria-label (WCAG 2.2)', tableMissingA11yInFeatures],
   ['raw-table-in-features', 'raw <table> in a feature (prefer <app-data-table> for entity lists)', rawTablesInFeatures],
+  ['hardcoded-text-in-templates', 'hardcoded user-facing text in a template (text node or title/placeholder/aria-label without the translate pipe)', hardcodedTextInTemplates],
 ];
 
 function loadAllow() {
