@@ -5,9 +5,73 @@
     <span class="scan-inspect__part">{{ partNumber() }}</span>
   </div>
 
-  <!-- Step 1: Inspection Form -->
+  @if (target(); as linked) {
+    @if (linked.jobNumber || linked.lotNumber) {
+      <div class="scan-inspect__links" data-testid="inspect-links">
+        @if (linked.jobNumber) {
+          <span class="scan-inspect__link" data-testid="inspect-link-job">
+            <span class="material-icons-outlined">engineering</span>
+            {{ 'kioskInspect.workOrder' | translate: { number: linked.jobNumber } }}
+          </span>
+        }
+        @if (linked.lotNumber) {
+          <span class="scan-inspect__link" data-testid="inspect-link-lot">
+            <span class="material-icons-outlined">inventory_2</span>
+            {{ 'kioskInspect.lot' | translate: { number: linked.lotNumber } }}
+          </span>
+        }
+      </div>
+    }
+  }
+
+  @if (step() === 'reference') {
+    <p class="scan-inspect__prompt">{{ 'kioskInspect.referencePrompt' | translate }}</p>
+
+    <app-barcode-scan-input
+      [label]="'kioskInspect.referenceLabel' | translate"
+      [placeholder]="'kioskInspect.referencePlaceholder' | translate"
+      [autoFocus]="true"
+      (scanned)="onReferenceScanned($event)"
+      data-testid="inspect-reference-input" />
+
+    @if (lookingUp()) {
+      <div class="scan-inspect__loading scan-inspect__loading--inline">
+        <span class="material-icons-outlined scan-inspect__spinner">sync</span>
+        <p>{{ 'common.loading' | translate }}</p>
+      </div>
+    }
+
+    @if (referenceError()) {
+      <div class="scan-inspect__error" data-testid="inspect-reference-error">
+        <span class="material-icons-outlined">warning</span>
+        {{ referenceError() }}
+      </div>
+    }
+
+    <div class="scan-inspect__actions">
+      <button class="action-btn" (click)="cancel()" data-testid="inspect-cancel-btn">
+        <span class="material-icons-outlined">close</span>
+        {{ 'common.cancel' | translate }}
+      </button>
+      <button class="action-btn"
+              [disabled]="lookingUp()"
+              (click)="skipReference()"
+              data-testid="inspect-skip-reference-btn">
+        <span class="material-icons-outlined">skip_next</span>
+        {{ 'kioskInspect.skipReference' | translate }}
+      </button>
+    </div>
+  }
+
+  @if (step() === 'starting' || step() === 'submitting') {
+    <div class="scan-inspect__loading">
+      <span class="material-icons-outlined scan-inspect__spinner">sync</span>
+      <p>{{ 'common.loading' | translate }}</p>
+    </div>
+  }
+
   @if (step() === 'inspect') {
-    @if (qcTemplateId()) {
+    @if (inspection()?.templateId) {
       <div class="scan-inspect__template-info">
         <span class="material-icons-outlined">description</span>
         <span>{{ 'shopFloor.inspectFlow.templateAssigned' | translate }}</span>
@@ -88,15 +152,6 @@
     </div>
   }
 
-  <!-- Step 2: Submitting -->
-  @if (step() === 'submitting') {
-    <div class="scan-inspect__loading">
-      <span class="material-icons-outlined scan-inspect__spinner">sync</span>
-      <p>{{ 'common.loading' | translate }}</p>
-    </div>
-  }
-
-  <!-- Step 3: Done -->
   @if (step() === 'done') {
     <div class="scan-inspect__done">
       <span class="material-icons-outlined scan-inspect__done-icon"
@@ -110,6 +165,64 @@
          [class.scan-inspect__done-result--fail]="result() === 'Fail'">
         {{ result() === 'Pass' ? ('shopFloor.inspectFlow.pass' | translate) : ('shopFloor.inspectFlow.fail' | translate) }}
       </p>
+    </div>
+
+    @if (result() === 'Fail') {
+      <div class="scan-inspect__actions">
+        <button class="action-btn" (click)="finish()" data-testid="inspect-done-btn">
+          <span class="material-icons-outlined">done</span>
+          {{ 'common.done' | translate }}
+        </button>
+        <button class="action-btn action-btn--primary" (click)="openNcr()" data-testid="inspect-raise-ncr-btn">
+          <span class="material-icons-outlined">report_problem</span>
+          {{ 'kioskInspect.raiseNcr' | translate }}
+        </button>
+      </div>
+    }
+  }
+
+  @if (step() === 'ncr') {
+    <p class="scan-inspect__prompt">{{ 'kioskInspect.ncrPrompt' | translate }}</p>
+
+    <form class="scan-inspect__ncr" [formGroup]="ncrForm" (ngSubmit)="raiseNcr()">
+      <app-textarea
+        [label]="'kioskInspect.ncrDescription' | translate"
+        formControlName="description"
+        [rows]="6"
+        data-testid="inspect-ncr-description" />
+
+      <app-input
+        [label]="'kioskInspect.ncrAffectedQuantity' | translate"
+        type="number"
+        min="0"
+        formControlName="affectedQuantity"
+        [required]="true"
+        data-testid="inspect-ncr-quantity" />
+
+      @if (ncrError()) {
+        <div class="scan-inspect__error" data-testid="inspect-ncr-error">
+          <span class="material-icons-outlined">warning</span>
+          {{ ncrError() }}
+        </div>
+      }
+
+      <div class="scan-inspect__actions">
+        <button type="button" class="action-btn" [disabled]="ncrSaving()" (click)="backToResult()" data-testid="inspect-ncr-back-btn">
+          <span class="material-icons-outlined">arrow_back</span>
+          {{ 'common.back' | translate }}
+        </button>
+        <button type="submit" class="action-btn action-btn--primary" [disabled]="!canRaiseNcr()" data-testid="inspect-ncr-submit-btn">
+          <span class="material-icons-outlined">report_problem</span>
+          {{ 'kioskInspect.raiseNcr' | translate }}
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (step() === 'ncrRaised') {
+    <div class="scan-inspect__done" data-testid="inspect-ncr-raised">
+      <span class="material-icons-outlined scan-inspect__done-icon scan-inspect__done-icon--fail">report_problem</span>
+      <p class="scan-inspect__done-text">{{ 'kioskInspect.ncrRaised' | translate: { number: ncrNumber() } }}</p>
     </div>
   }
 </div>
