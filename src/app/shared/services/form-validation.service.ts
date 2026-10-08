@@ -96,9 +96,9 @@ export class FormValidationService {
 
   /**
    * Message text for a single validation error on a field labelled `label`.
-   * Shared by the violation summary and the per-field error line on
-   * app-input so both read the same. Returns null for an error object whose
-   * `message` is not a string.
+   * Shared by the violation summary and the per-field error lines on
+   * app-input and app-autocomplete so all read the same. Returns null for an
+   * error object whose `message` is not a string.
    */
   static messageFor(errorKey: string, errorValue: unknown, label: string): string | null {
     if (errorValue && typeof errorValue === 'object' && 'message' in errorValue) {

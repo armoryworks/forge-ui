@@ -1,23 +1,40 @@
 import {
+  AfterContentInit,
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
+  effect,
   ElementRef,
   forwardRef,
+  inject,
+  Injector,
   input,
   signal,
   viewChild,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR, ReactiveFormsModule, FormControl } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { startWith } from 'rxjs';
+import {
+  AbstractControl,
+  ControlValueAccessor,
+  FormControl,
+  FormGroupDirective,
+  NG_VALUE_ACCESSOR,
+  NgControl,
+  NgForm,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { EMPTY, merge, startWith } from 'rxjs';
+import { ErrorStateMatcher } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { MatInput, MatInputModule } from '@angular/material/input';
 import {
   MatAutocompleteModule,
   MatAutocompleteSelectedEvent,
   MatAutocompleteTrigger,
 } from '@angular/material/autocomplete';
+
+import { FormValidationService } from '../../services/form-validation.service';
 
 export interface AutocompleteOption {
   [key: string]: unknown;
@@ -38,7 +55,12 @@ export interface AutocompleteOption {
     },
   ],
 })
-export class AutocompleteComponent implements ControlValueAccessor {
+export class AutocompleteComponent implements ControlValueAccessor, AfterContentInit {
+  private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly parentForm = inject(FormGroupDirective, { optional: true }) ?? inject(NgForm, { optional: true });
+  private readonly defaultErrorState = inject(ErrorStateMatcher);
+
   readonly label = input.required<string>();
   readonly options = input.required<AutocompleteOption[]>();
   readonly displayField = input<string>('label');
@@ -52,6 +74,27 @@ export class AutocompleteComponent implements ControlValueAccessor {
   protected readonly disabled = signal(false);
   private selectedValue: unknown = null;
 
+  private readonly control = signal<AbstractControl | null>(null);
+  private readonly controlState = signal(0);
+
+  protected readonly errorMessage = computed(() => {
+    this.controlState();
+    const control = this.control();
+    if (!control?.invalid || !control.errors) return null;
+    if (!control.touched && !this.parentForm?.submitted) return null;
+    for (const [key, value] of Object.entries(control.errors)) {
+      const message = FormValidationService.messageFor(key, value, this.label());
+      if (message !== null) return message;
+    }
+    return null;
+  });
+
+  protected readonly errorStateMatcher: ErrorStateMatcher = {
+    isErrorState: (searchControl, form) =>
+      this.errorMessage() !== null || this.defaultErrorState.isErrorState(searchControl, form),
+  };
+
+  private readonly matInput = viewChild(MatInput);
   private readonly trigger = viewChild.required(MatAutocompleteTrigger);
   private readonly searchInput = viewChild.required<ElementRef<HTMLInputElement>>('searchInput');
 
@@ -81,6 +124,22 @@ export class AutocompleteComponent implements ControlValueAccessor {
       return text.toLowerCase().includes(lower);
     });
   });
+
+  constructor() {
+    effect(() => {
+      this.errorMessage();
+      this.matInput()?.updateErrorState();
+    });
+  }
+
+  ngAfterContentInit(): void {
+    const control = this.injector.get(NgControl, null, { self: true, optional: true })?.control ?? null;
+    if (!control) return;
+    this.control.set(control);
+    merge<unknown[]>(control.events, this.parentForm?.ngSubmit ?? EMPTY)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.controlState.update(v => v + 1));
+  }
 
   private onChange: (value: unknown) => void = () => {};
   private onTouched: () => void = () => {};

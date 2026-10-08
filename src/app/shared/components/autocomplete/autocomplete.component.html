@@ -6,6 +6,7 @@
     [placeholder]="placeholder()"
     [disabled]="disabled()"
     [required]="required()"
+    [errorStateMatcher]="errorStateMatcher"
     (input)="onInput()"
     (keydown.enter)="onEnter()"
     (blur)="onBlur()" />
@@ -18,3 +19,6 @@
     }
   </mat-autocomplete>
 </mat-form-field>
+@if (errorMessage(); as message) {
+  <span class="autocomplete__error" role="alert" data-testid="autocomplete-error">{{ message }}</span>
+}

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TestBed, ComponentFixture, ComponentFixtureAutoDetect } from '@angular/core/testing';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
@@ -145,5 +145,75 @@ describe('AutocompleteComponent · typed text on blur', () => {
     field.dispatchEvent(new Event('blur'));
     expect(fixture.componentInstance.part.value).toBeNull();
     expect(field.value).toBe('0000');
+  });
+});
+
+@Component({
+  selector: 'app-autocomplete-required-host',
+  standalone: true,
+  imports: [ReactiveFormsModule, AutocompleteComponent],
+  template: `
+    <form [formGroup]="form">
+      <app-autocomplete label="Vendor" formControlName="vendorId" [options]="options" [minChars]="0" [required]="true" />
+      <button type="submit">Save</button>
+    </form>
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+class RequiredHostComponent {
+  readonly form = new FormGroup({
+    vendorId: new FormControl<number | null>(null, Validators.required),
+  });
+  readonly options: AutocompleteOption[] = [{ value: 1, label: 'Acme' }];
+}
+
+describe('AutocompleteComponent · field error', () => {
+  let fixture: ComponentFixture<RequiredHostComponent>;
+  let el: HTMLElement;
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({ providers: [provideNoopAnimations()] });
+    fixture = TestBed.createComponent(RequiredHostComponent);
+    el = fixture.nativeElement;
+    await fixture.whenStable();
+    fixture.detectChanges();
+  });
+
+  function errorText(): string | null {
+    return el.querySelector('[data-testid="autocomplete-error"]')?.textContent?.trim() ?? null;
+  }
+
+  function isOutlinedInvalid(): boolean {
+    return el.querySelector('mat-form-field')?.classList.contains('mat-form-field-invalid') ?? false;
+  }
+
+  it('stays quiet while a required, empty control is untouched', () => {
+    expect(errorText()).toBeNull();
+    expect(isOutlinedInvalid()).toBe(false);
+  });
+
+  it('shows the required message and invalid outline once a required, empty control is touched', () => {
+    el.querySelector('input')!.dispatchEvent(new Event('blur'));
+    fixture.detectChanges();
+    expect(errorText()).toBe('Vendor is required');
+    expect(isOutlinedInvalid()).toBe(true);
+  });
+
+  it('shows the required message once the form is submitted', () => {
+    (el.querySelector('button[type="submit"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(errorText()).toBe('Vendor is required');
+    expect(isOutlinedInvalid()).toBe(true);
+  });
+
+  it('clears the message once a value is selected', () => {
+    const control = fixture.componentInstance.form.controls.vendorId;
+    control.markAsTouched();
+    fixture.detectChanges();
+    expect(errorText()).not.toBeNull();
+    control.setValue(1);
+    fixture.detectChanges();
+    expect(errorText()).toBeNull();
+    expect(isOutlinedInvalid()).toBe(false);
   });
 });
