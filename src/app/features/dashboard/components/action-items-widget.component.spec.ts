@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
@@ -13,6 +14,13 @@ class FakeLoader implements TranslateLoader {
 }
 
 interface WidgetInternals {
+  tasks: WritableSignal<FollowUpTask[]>;
+  currentTasks(): FollowUpTask[];
+  olderTasks(): FollowUpTask[];
+  visibleTasks(): FollowUpTask[];
+  totalCount(): number;
+  olderExpanded(): boolean;
+  toggleOlder(): void;
   getIcon(triggerType: string): string;
   getEntityType(sourceEntityType: string | null): string | null;
   getSourceLabel(task: FollowUpTask): string;
@@ -52,6 +60,53 @@ function setup() {
 
 describe('ActionItemsWidgetComponent', () => {
   beforeEach(() => vi.restoreAllMocks());
+  afterEach(() => vi.useRealTimers());
+
+  it('groups tasks due more than 90 days ago under Older, collapsed', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-10-08T12:00:00Z'));
+    const { internals } = setup();
+
+    internals.tasks.set([
+      task({ id: 1, dueDate: '2021-03-01T00:00:00Z' }),
+      task({ id: 2, dueDate: '2026-10-20T00:00:00Z' }),
+      task({ id: 3, dueDate: null }),
+      task({ id: 4, dueDate: '2026-07-01T00:00:00Z' }),
+      task({ id: 5, dueDate: '2026-07-15T00:00:00Z' }),
+      task({ id: 6, dueDate: '2025-12-31T00:00:00Z' }),
+    ]);
+
+    expect(internals.currentTasks().map(t => t.id)).toEqual([5, 2, 3]);
+    expect(internals.visibleTasks().map(t => t.id)).toEqual([5, 2, 3]);
+    expect(internals.totalCount()).toBe(3);
+    expect(internals.olderTasks().map(t => t.id)).toEqual([1, 6, 4]);
+    expect(internals.olderExpanded()).toBe(false);
+  });
+
+  it('expands and collapses the Older section', () => {
+    const { internals } = setup();
+
+    internals.toggleOlder();
+    expect(internals.olderExpanded()).toBe(true);
+
+    internals.toggleOlder();
+    expect(internals.olderExpanded()).toBe(false);
+  });
+
+  it('removes a completed older task from the Older group', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-10-08T12:00:00Z'));
+    const { internals } = setup();
+    internals.tasks.set([
+      task({ id: 1, dueDate: '2021-03-01T00:00:00Z' }),
+      task({ id: 2, dueDate: '2022-03-01T00:00:00Z' }),
+    ]);
+
+    internals.completeTask(task({ id: 1 }), new Event('click'));
+
+    expect(internals.olderTasks().map(t => t.id)).toEqual([2]);
+    expect(internals.currentTasks()).toEqual([]);
+  });
 
   it('maps PascalCase source types to linkable entity types', () => {
     const { internals } = setup();

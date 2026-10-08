@@ -346,8 +346,10 @@ function partOnHand(binRows: Row[]): number {
 async function synthesizeInventoryParts(store: DemoDataStore, query: URLSearchParams): Promise<unknown[]> {
   const { parts, byPart } = await loadPartStock(store);
   const search = (query.get('search') ?? '').trim().toLowerCase();
+  const status = query.get('status');
   return parts
     .filter(p => p['deletedAt'] == null)
+    .filter(p => !status || String(p['status'] ?? 'Active') === status)
     .filter(p => {
       if (!search) return true;
       return String(p['partNumber'] ?? '').toLowerCase().includes(search)

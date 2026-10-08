@@ -31,7 +31,7 @@ describe('LowStockWidgetComponent', () => {
     const { component, httpMock } = setup();
     expect(component.hasStockLevels()).toBeNull();
 
-    httpMock.expectOne(`${environment.apiUrl}/inventory/parts`).flush([
+    httpMock.expectOne(`${environment.apiUrl}/inventory/parts?status=Active`).flush([
       { partId: 1, onHand: 5, minStockThreshold: null, reorderPoint: null },
       { partId: 2, onHand: 0, minStockThreshold: null, reorderPoint: null },
     ]);
@@ -40,10 +40,23 @@ describe('LowStockWidgetComponent', () => {
     expect(component.hasStockLevels()).toBe(false);
   });
 
+  it('counts only Active parts so the snapshot matches the Parts list default', () => {
+    const { component, httpMock } = setup();
+
+    const req = httpMock.expectOne(r => r.url === `${environment.apiUrl}/inventory/parts`);
+    expect(req.request.params.get('status')).toBe('Active');
+    req.flush([
+      { partId: 1, onHand: 5, minStockThreshold: null, reorderPoint: null },
+      { partId: 2, onHand: 3, minStockThreshold: null, reorderPoint: null },
+    ]);
+
+    expect(component.partCount()).toBe(2);
+  });
+
   it('treats a reorder point alone as a stock level', () => {
     const { component, httpMock } = setup();
 
-    httpMock.expectOne(`${environment.apiUrl}/inventory/parts`).flush([
+    httpMock.expectOne(`${environment.apiUrl}/inventory/parts?status=Active`).flush([
       { partId: 1, onHand: 5, minStockThreshold: null, reorderPoint: 3 },
     ]);
 

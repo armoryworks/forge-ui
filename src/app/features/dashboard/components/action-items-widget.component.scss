@@ -83,3 +83,31 @@
   font-size: $font-size-xs;
   color: var(--text-muted);
 }
+
+.action-items__older {
+  display: flex;
+  flex-direction: column;
+  border-top: $border-width-thin solid var(--border);
+}
+
+.action-items__older-toggle {
+  display: flex;
+  align-items: center;
+  gap: $sp-xs;
+  width: 100%;
+  padding: $sp-sm $sp-lg;
+  border: none;
+  background: none;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    color: var(--text);
+  }
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+  }
+}

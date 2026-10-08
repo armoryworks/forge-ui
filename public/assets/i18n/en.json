@@ -491,6 +491,7 @@
     "completeTask": "Complete Task",
     "dismissTask": "Dismiss Task",
     "noActionItems": "No action items",
+    "olderActionItems": "Older ({{count}})",
     "totalItems": "Total Items",
     "addWorkCenters": "Add your work centers",
     "addFirstPart": "Add a part with a routing",

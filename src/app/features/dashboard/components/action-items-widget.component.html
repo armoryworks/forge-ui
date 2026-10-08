@@ -1,46 +1,9 @@
-@if (visibleTasks().length === 0 && !loading()) {
+@if (currentTasks().length === 0 && olderTasks().length === 0 && !loading()) {
   <app-empty-state icon="task_alt" [message]="'dashboard.noActionItems' | translate" />
 } @else {
   <div class="action-items">
     @for (task of visibleTasks(); track task.id) {
-      <div class="action-item" [class.action-item--overdue]="isOverdue(task.dueDate)">
-        <span class="material-icons-outlined action-item__icon">{{ getIcon(task.triggerType) }}</span>
-        <div class="action-item__content">
-          <span class="action-item__title">{{ task.title }}</span>
-          <div class="action-item__meta">
-            @if (task.dueDate) {
-              <span class="action-item__date" [class.action-item__date--overdue]="isOverdue(task.dueDate)">
-                {{ formatDate(task.dueDate) }}
-              </span>
-            }
-            @if (isReorderSuggestion(task)) {
-              <a routerLink="/inventory/replenishment" data-testid="action-item-review">{{ 'replenishmentUi.review' | translate }}</a>
-            } @else if (task.sourceEntityType && task.sourceEntityId) {
-              @if (getEntityType(task.sourceEntityType); as linkType) {
-                <app-entity-link [type]="linkType" [entityId]="task.sourceEntityId" data-testid="action-item-entity-link">
-                  {{ getSourceLabel(task) }}
-                </app-entity-link>
-              } @else {
-                <span data-testid="action-item-entity-label">{{ getSourceLabel(task) }}</span>
-              }
-            }
-          </div>
-        </div>
-        <div class="action-item__actions">
-          <button
-            class="icon-btn"
-            (click)="completeTask(task, $event)"
-            [attr.aria-label]="'dashboard.completeTask' | translate">
-            <span class="material-icons-outlined">check</span>
-          </button>
-          <button
-            class="icon-btn"
-            (click)="dismissTask(task, $event)"
-            [attr.aria-label]="'dashboard.dismissTask' | translate">
-            <span class="material-icons-outlined">close</span>
-          </button>
-        </div>
-      </div>
+      <ng-container [ngTemplateOutlet]="taskRow" [ngTemplateOutletContext]="{ $implicit: task }" />
     }
     @if (hasMore()) {
       <div class="action-items__footer">
@@ -49,5 +12,64 @@
         </span>
       </div>
     }
+    @if (olderTasks().length > 0) {
+      <div class="action-items__older" data-testid="action-items-older">
+        <button
+          type="button"
+          class="action-items__older-toggle"
+          data-testid="action-items-older-toggle"
+          [attr.aria-expanded]="olderExpanded()"
+          (click)="toggleOlder()">
+          <span class="material-icons-outlined" aria-hidden="true">{{ olderExpanded() ? 'expand_more' : 'chevron_right' }}</span>
+          <span>{{ 'dashboard.olderActionItems' | translate: { count: olderTasks().length } }}</span>
+        </button>
+        @if (olderExpanded()) {
+          @for (task of olderTasks(); track task.id) {
+            <ng-container [ngTemplateOutlet]="taskRow" [ngTemplateOutletContext]="{ $implicit: task }" />
+          }
+        }
+      </div>
+    }
   </div>
 }
+
+<ng-template #taskRow let-task>
+  <div class="action-item" [class.action-item--overdue]="isOverdue(task.dueDate)" data-testid="action-item">
+    <span class="material-icons-outlined action-item__icon">{{ getIcon(task.triggerType) }}</span>
+    <div class="action-item__content">
+      <span class="action-item__title">{{ task.title }}</span>
+      <div class="action-item__meta">
+        @if (task.dueDate) {
+          <span class="action-item__date" [class.action-item__date--overdue]="isOverdue(task.dueDate)">
+            {{ formatDate(task.dueDate) }}
+          </span>
+        }
+        @if (isReorderSuggestion(task)) {
+          <a routerLink="/inventory/replenishment" data-testid="action-item-review">{{ 'replenishmentUi.review' | translate }}</a>
+        } @else if (task.sourceEntityType && task.sourceEntityId) {
+          @if (getEntityType(task.sourceEntityType); as linkType) {
+            <app-entity-link [type]="linkType" [entityId]="task.sourceEntityId" data-testid="action-item-entity-link">
+              {{ getSourceLabel(task) }}
+            </app-entity-link>
+          } @else {
+            <span data-testid="action-item-entity-label">{{ getSourceLabel(task) }}</span>
+          }
+        }
+      </div>
+    </div>
+    <div class="action-item__actions">
+      <button
+        class="icon-btn"
+        (click)="completeTask(task, $event)"
+        [attr.aria-label]="'dashboard.completeTask' | translate">
+        <span class="material-icons-outlined">check</span>
+      </button>
+      <button
+        class="icon-btn"
+        (click)="dismissTask(task, $event)"
+        [attr.aria-label]="'dashboard.dismissTask' | translate">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+  </div>
+</ng-template>

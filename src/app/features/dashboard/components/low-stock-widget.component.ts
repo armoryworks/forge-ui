@@ -48,7 +48,7 @@ export class LowStockWidgetComponent implements OnInit {
   ngOnInit(): void {
     this.http.get<LowStockRow[]>(`${environment.apiUrl}/inventory/low-stock`)
       .subscribe(rows => this.lowStock.set(rows ?? []));
-    this.http.get<PartSummary[]>(`${environment.apiUrl}/inventory/parts`)
+    this.http.get<PartSummary[]>(`${environment.apiUrl}/inventory/parts`, { params: { status: 'Active' } })
       .subscribe(parts => {
         this.partCount.set(parts?.length ?? 0);
         this.totalOnHand.set((parts ?? []).reduce((sum, p) => sum + (p.onHand ?? 0), 0));

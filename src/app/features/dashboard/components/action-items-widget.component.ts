@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -10,6 +11,8 @@ import { FollowUpTaskService } from '../../../shared/services/follow-up-task.ser
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 
 const MAX_VISIBLE = 8;
+const OLDER_THAN_DAYS = 90;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 const TRIGGER_ICON_MAP: Record<string, string> = {
   QuoteExpiring: 'event_busy',
@@ -43,7 +46,7 @@ const SOURCE_ENTITY_LINK_TYPES: Record<string, LinkableEntityType> = {
 @Component({
   selector: 'app-action-items-widget',
   standalone: true,
-  imports: [EntityLinkComponent, EmptyStateComponent, TranslatePipe, RouterLink],
+  imports: [EntityLinkComponent, EmptyStateComponent, TranslatePipe, RouterLink, NgTemplateOutlet],
   templateUrl: './action-items-widget.component.html',
   styleUrl: './action-items-widget.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -55,6 +58,7 @@ export class ActionItemsWidgetComponent implements OnInit {
 
   protected readonly tasks = signal<FollowUpTask[]>([]);
   protected readonly loading = signal(false);
+  protected readonly olderExpanded = signal(false);
 
   protected readonly sortedTasks = computed(() => {
     const all = this.tasks();
@@ -66,16 +70,24 @@ export class ActionItemsWidgetComponent implements OnInit {
     });
   });
 
+  protected readonly currentTasks = computed(() =>
+    this.sortedTasks().filter(t => !this.isOlder(t.dueDate)),
+  );
+
+  protected readonly olderTasks = computed(() =>
+    this.sortedTasks().filter(t => this.isOlder(t.dueDate)),
+  );
+
   protected readonly visibleTasks = computed(() =>
-    this.sortedTasks().slice(0, MAX_VISIBLE),
+    this.currentTasks().slice(0, MAX_VISIBLE),
   );
 
   protected readonly hasMore = computed(() =>
-    this.sortedTasks().length > MAX_VISIBLE,
+    this.currentTasks().length > MAX_VISIBLE,
   );
 
   protected readonly totalCount = computed(() =>
-    this.sortedTasks().length,
+    this.currentTasks().length,
   );
 
   ngOnInit(): void {
@@ -97,6 +109,10 @@ export class ActionItemsWidgetComponent implements OnInit {
   protected isOverdue(dueDate: string | null): boolean {
     if (!dueDate) return false;
     return new Date(dueDate) < new Date();
+  }
+
+  protected toggleOlder(): void {
+    this.olderExpanded.update(expanded => !expanded);
   }
 
   protected getEntityType(sourceEntityType: string | null): LinkableEntityType | null {
@@ -125,6 +141,11 @@ export class ActionItemsWidgetComponent implements OnInit {
       this.tasks.update(list => list.filter(t => t.id !== task.id));
       this.snackbar.success(this.translate.instant('replenishmentUi.taskDismissed'));
     });
+  }
+
+  private isOlder(dueDate: string | null): boolean {
+    if (!dueDate) return false;
+    return new Date(dueDate).getTime() < Date.now() - OLDER_THAN_DAYS * DAY_MS;
   }
 
   private loadTasks(): void {

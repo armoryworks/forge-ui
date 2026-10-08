@@ -491,6 +491,7 @@
     "completeTask": "Complete Task",
     "dismissTask": "Dismiss Task",
     "noActionItems": "No action items",
+    "olderActionItems": "Anteriores ({{count}})",
     "totalItems": "Total Items",
     "addWorkCenters": "Agregue sus centros de trabajo",
     "addFirstPart": "Agregue una pieza con enrutamiento",
