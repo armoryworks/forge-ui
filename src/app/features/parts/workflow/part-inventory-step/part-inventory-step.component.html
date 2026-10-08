@@ -36,11 +36,10 @@
       data-testid="inventory-stock-uom" />
 
     <div class="part-inventory-step__field">
-      <app-entity-picker
-        [label]="'parts.workflow.inventory.defaultBinLabel' | translate"
-        entityType="inventory/locations/bins"
-        displayField="locationPath"
+      <app-select
+        [label]="'newPartFlow.defaultBinLabel' | translate"
         formControlName="defaultBinId"
+        [options]="defaultBinOptions()"
         data-testid="inventory-default-bin" />
       <p class="part-inventory-step__hint part-inventory-step__hint--field">
         {{ 'parts.workflow.inventory.defaultBinHelper' | translate }}

@@ -6,6 +6,7 @@ import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
+import { SILENT_HTTP_ERRORS } from '../../../../shared/interceptors/silent-http-errors.token';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { PartDetail } from '../../models/part-detail.model';
@@ -189,6 +190,7 @@ describe('PartExpressFormComponent (Phase 5)', () => {
     // Second request: complete the run (Draft → Active).
     const completeReq = httpMock.expectOne(`${environment.apiUrl}/workflows/7/complete`);
     expect(completeReq.request.method).toBe('POST');
+    expect(completeReq.request.context.get(SILENT_HTTP_ERRORS)).toBe(true);
     completeReq.flush({
       id: 7, entityType: 'Part', entityId: 99, definitionId: 'part-raw-material-express-v1',
       currentStepId: null, mode: 'express', startedAt: '', startedByUserId: 1,
@@ -196,7 +198,49 @@ describe('PartExpressFormComponent (Phase 5)', () => {
       lastActivityAt: '', version: 3,
     });
 
-    expect(navSpy).toHaveBeenCalledWith(['/parts']);
+    expect(navSpy).toHaveBeenCalledWith(['/parts'], { queryParams: { detail: 'part:99' } });
+  });
+
+  it('save() keeps Quick add and explains what is missing when readiness blocks promotion', async () => {
+    const navSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    const warnSpy = vi.spyOn(TestBed.inject(SnackbarService), 'warn').mockImplementation(() => {});
+    const errorSpy = vi.spyOn(TestBed.inject(SnackbarService), 'error').mockImplementation(() => {});
+    const workflowService = TestBed.inject(WorkflowService);
+
+    const component = TestBed.runInInjectionContext(() => new PartExpressFormComponent());
+    mockSignalInputs(component, {
+      stepId: 'express', componentName: 'PartExpressFormComponent',
+      runId: 7, entityId: null, entity: null,
+    });
+    TestBed.flushEffects();
+    const c = component as unknown as { form: { patchValue(v: unknown): void }; save(): void };
+    c.form.patchValue({ partNumber: 'P-100', name: 'Bracket' });
+    c.save();
+
+    httpMock.expectOne(`${environment.apiUrl}/workflows/7/step`).flush({
+      id: 7, entityType: 'Part', entityId: 123, definitionId: 'part-make-component-v1',
+      currentStepId: 'basics', mode: 'express', startedAt: '', startedByUserId: 1,
+      completedAt: null, abandonedAt: null, abandonedReason: null,
+      lastActivityAt: '', version: 2,
+    });
+    httpMock.expectOne(`${environment.apiUrl}/workflows/7/complete`).flush(
+      {
+        title: 'Finish the required steps first',
+        code: 'workflow-readiness-missing',
+        missing: [
+          { validatorId: 'hasRouting', displayNameKey: 'validators.parts.hasRouting', missingMessageKey: 'validators.parts.hasRoutingMissing' },
+        ],
+      },
+      { status: 409, statusText: 'Conflict' },
+    );
+
+    await navSpy.mock.results[0].value;
+
+    expect(navSpy).toHaveBeenCalledWith(['/parts'], { queryParams: { detail: 'part:123' } });
+    expect(warnSpy).toHaveBeenCalledWith('newPartFlow.savedAsDraft');
+    expect(errorSpy).not.toHaveBeenCalled();
+    expect(workflowService.mode()).toBe('express');
+    httpMock.expectNone(`${environment.apiUrl}/workflows/7/mode`);
   });
 
   it('save() is a no-op when runId is null (entity-less, before materialization)', () => {

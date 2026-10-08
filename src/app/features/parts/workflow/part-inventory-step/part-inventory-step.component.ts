@@ -3,7 +3,6 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, of, switchMap, tap } from 'rxjs';
 
-import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
@@ -16,7 +15,7 @@ import { PartsService } from '../../services/parts.service';
 /**
  * Pillar 6 follow-up — Inventory step. Captures stock thresholds (min /
  * reorder point / reorder qty / safety stock days), the stock UoM, and the
- * default bin id. Used by every non-Phantom combo.
+ * default bin (picked from the active bins). Used by every non-Phantom combo.
  *
  * Save model: explicit save-on-Continue (registered with WorkflowService).
  */
@@ -25,7 +24,7 @@ import { PartsService } from '../../services/parts.service';
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe,
-    EntityPickerComponent, InputComponent, SelectComponent, LoadingBlockDirective,
+    InputComponent, SelectComponent, LoadingBlockDirective,
   ],
   templateUrl: './part-inventory-step.component.html',
   styleUrl: './part-inventory-step.component.scss',
@@ -57,6 +56,12 @@ export class PartInventoryStepComponent {
     ...this.uoms().map(u => ({ value: u.id, label: `${u.name} (${u.code})` })),
   ]);
 
+  private readonly bins = signal<{ id: number; locationPath: string }[]>([]);
+  protected readonly defaultBinOptions = computed<SelectOption[]>(() => [
+    { value: null, label: this.translate.instant('newPartFlow.defaultBinNone') },
+    ...this.bins().map(b => ({ value: b.id, label: b.locationPath })),
+  ]);
+
   protected readonly form = new FormGroup({
     minStockThreshold: new FormControl<number | null>(null, [Validators.min(0)]),
     reorderPoint: new FormControl<number | null>(null, [Validators.min(0)]),
@@ -70,6 +75,11 @@ export class PartInventoryStepComponent {
     this.inventoryService.getUnitsOfMeasure().pipe(
       tap(list => this.uoms.set(list.map(u => ({ id: u.id, code: u.code, name: u.name })))),
     ).subscribe({ error: () => { /* dropdown stays "None"-only; non-fatal */ } });
+
+    this.inventoryService.getBinLocations().subscribe({
+      next: list => this.bins.set(list.filter(b => b.isActive).map(b => ({ id: b.id, locationPath: b.locationPath }))),
+      error: () => this.bins.set([]),
+    });
 
     effect(() => {
       const part = this.entity() as PartDetail | null;
@@ -92,7 +102,7 @@ export class PartInventoryStepComponent {
         reorderQuantity: this.translate.instant('parts.workflow.inventory.reorderQuantityLabel'),
         safetyStockDays: this.translate.instant('parts.workflow.inventory.safetyStockDaysLabel'),
         stockUomId: this.translate.instant('parts.workflow.inventory.stockUomLabel'),
-        defaultBinId: this.translate.instant('parts.workflow.inventory.defaultBinLabel'),
+        defaultBinId: this.translate.instant('newPartFlow.defaultBinLabel'),
       },
       () => this.save(),
     );

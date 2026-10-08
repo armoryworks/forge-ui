@@ -789,6 +789,12 @@
       "badConfig": "Gate \"{{gate}}\" has invalid JSON config."
     }
   },
+  "newPartFlow": {
+    "savedAsDraft": "Saved as a draft. Add {{missing}} before it can be active.",
+    "partNumberHint": "Leave blank to number it automatically",
+    "defaultBinLabel": "Default Bin",
+    "defaultBinNone": "— Not set —"
+  },
   "parts": {
     "gtin": {
       "label": "GS1 GTIN",
@@ -1219,7 +1225,7 @@
         "stockUomLabel": "Stock UoM",
         "stockUomNone": "— Not set —",
         "defaultBinLabel": "Default Bin (id)",
-        "defaultBinHelper": "Numeric bin id. Replaced by a real bin picker in a later release.",
+        "defaultBinHelper": "Where this part is usually stored.",
         "saveFailed": "Couldn't save inventory settings.",
         "rationale": "<strong>Stock UoM is the unit every other inventory transaction uses.</strong> Receipts, issues, transfers, counts — all denominated here. Pick wrong and conversions ripple through every downstream report. <br><br>Min / reorder / safety-stock are policy: they drive when MRP fires planned orders or when manual reorder reports highlight a part. Defaults okay if you don't know yet — adjust later as demand patterns emerge."
       },
@@ -8336,9 +8342,9 @@
         "close": "Close"
       },
       "mode": {
-        "express": "Express",
+        "express": "Quick add",
         "expressSublabel": "All at once",
-        "guided": "Guided",
+        "guided": "Step by step",
         "guidedSublabel": "Step by step",
         "toggle": "Mode"
       },

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -7,6 +7,7 @@ import { DialogComponent } from '../../../../shared/components/dialog/dialog.com
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
+import { UserPreferencesService } from '../../../../shared/services/user-preferences.service';
 import { InventoryClass } from '../../models/inventory-class.type';
 import { ProcurementSource } from '../../models/procurement-source.type';
 
@@ -46,6 +47,14 @@ interface InventoryChoice {
   descKey: string;
 }
 
+interface InventoryCard extends InventoryChoice {
+  enabled: boolean;
+}
+
+export const NEW_PART_FORK_PREF_KEY = 'parts:newPartFork';
+
+const INVENTORY_CLASS_ORDER: readonly InventoryClass[] = ['Raw', 'Component', 'Subassembly', 'FinishedGood', 'Consumable', 'Tool'];
+
 /** Per-(procurement,inventory) combo metadata: recommended mode default. */
 interface ComboMeta {
   procurement: ProcurementSource;
@@ -59,9 +68,14 @@ interface ComboMeta {
  * questions — Procurement → InventoryClass (filtered) → ItemKind → Mode.
  *
  * Step 2's options are filtered to the 11 viable combos per the audit.
- * Phantom + Raw / Phantom + Consumable / Phantom + Component etc. don't
- * appear because the underlying workflow definitions for those combos don't
- * exist server-side; the filter is the enforcement point.
+ * Phantom + Raw / Phantom + Consumable / Phantom + Component etc. render
+ * disabled because the underlying workflow definitions for those combos
+ * don't exist server-side; the filter is the enforcement point.
+ *
+ * Every section is always laid out and later ones stay disabled until the
+ * earlier picks exist, so nothing shifts under the cursor. The dialog pins
+ * itself near the top of the viewport and the last picks are remembered per
+ * user and preselected.
  */
 @Component({
   selector: 'app-new-part-fork-dialog',
@@ -78,6 +92,7 @@ export class NewPartForkDialogComponent implements OnInit {
   private readonly dialogRef = inject(MatDialogRef<NewPartForkDialogComponent, NewPartForkResult | undefined>);
   private readonly translate = inject(TranslateService);
   private readonly refData = inject(ReferenceDataService);
+  private readonly preferences = inject(UserPreferencesService);
 
   /** Step 1 — picked procurement source. Null until the user picks. */
   protected readonly procurement = signal<ProcurementSource | null>(null);
@@ -145,6 +160,17 @@ export class NewPartForkDialogComponent implements OnInit {
     Tool: { titleKey: 'parts.workflow.fork.step2Tool', descKey: 'parts.workflow.fork.step2ToolDesc' },
   };
 
+  /** Every inventory class card, enabled only when viable for the Step-1 pick. */
+  protected readonly inventoryCards = computed<InventoryCard[]>(() => {
+    const viable = new Set(this.inventoryChoices().map(c => c.value));
+    return INVENTORY_CLASS_ORDER.map<InventoryCard>(value => ({
+      value,
+      titleKey: this.inventoryLabels[value].titleKey,
+      descKey: this.inventoryLabels[value].descKey,
+      enabled: viable.has(value),
+    }));
+  });
+
   /** Step 2's filtered choices, derived from the Step-1 pick. */
   protected readonly inventoryChoices = computed<InventoryChoice[]>(() => {
     const p = this.procurement();
@@ -171,13 +197,22 @@ export class NewPartForkDialogComponent implements OnInit {
     return this.modeOverride() ?? this.recommendedMode();
   });
 
-  /** Continue is enabled once Steps 1 + 2 are both picked. */
+  /** The mode card shown as selected; none until Step 2 is picked. */
+  protected readonly selectedMode = computed<NewPartChoice | null>(() => {
+    return this.inventoryClass() === null ? null : this.effectiveMode();
+  });
+
+  /** Steps 1 + 2 are both picked, so Continue can close the dialog. */
   protected readonly canContinue = computed<boolean>(() => {
     return this.procurement() !== null && this.inventoryClass() !== null;
   });
 
+  /** Set once Continue is pressed; the violations badge stays hidden until then. */
+  protected readonly continueAttempted = signal(false);
+
   protected readonly violations = computed<string[]>(() => {
     const list: string[] = [];
+    if (!this.continueAttempted()) return list;
     if (this.procurement() === null) {
       list.push(this.translate.instant('parts.workflow.fork.violations.procurementRequired'));
     }
@@ -186,6 +221,18 @@ export class NewPartForkDialogComponent implements OnInit {
     }
     return list;
   });
+
+  constructor() {
+    this.dialogRef.updatePosition({ top: '8vh' });
+    this.restoreLastChoice();
+    effect(() => {
+      if (this.inventoryClass() === null) {
+        this.itemKindControl.disable({ emitEvent: false });
+      } else {
+        this.itemKindControl.enable({ emitEvent: false });
+      }
+    });
+  }
 
   ngOnInit(): void {
     // Optional kind tag — fallback to a "None" entry only if the load fails
@@ -199,6 +246,10 @@ export class NewPartForkDialogComponent implements OnInit {
           opts.push({ value: item.id, label: item.label });
         }
         this.itemKindOptions.set(opts);
+        const picked = this.itemKindControl.value;
+        if (picked !== null && !opts.some(o => o.value === picked)) {
+          this.itemKindControl.setValue(null);
+        }
       },
     });
   }
@@ -223,15 +274,31 @@ export class NewPartForkDialogComponent implements OnInit {
   }
 
   protected continue(): void {
+    this.continueAttempted.set(true);
     const p = this.procurement();
     const i = this.inventoryClass();
     if (!p || !i) return;
-    this.dialogRef.close({
+    const result: NewPartForkResult = {
       procurementSource: p,
       inventoryClass: i,
       itemKindId: this.itemKindControl.value ?? null,
       mode: this.effectiveMode(),
-    });
+    };
+    this.preferences.set(NEW_PART_FORK_PREF_KEY, result);
+    this.dialogRef.close(result);
+  }
+
+  private restoreLastChoice(): void {
+    const last = this.preferences.get<Partial<NewPartForkResult>>(NEW_PART_FORK_PREF_KEY);
+    if (!last) return;
+    const combo = this.viableCombos.find(c => c.procurement === last.procurementSource && c.inventoryClass === last.inventoryClass);
+    if (!combo) return;
+    this.procurement.set(combo.procurement);
+    this.inventoryClass.set(combo.inventoryClass);
+    this.itemKindControl.setValue(typeof last.itemKindId === 'number' ? last.itemKindId : null);
+    if (last.mode === 'express' || last.mode === 'guided') {
+      this.modeOverride.set(last.mode);
+    }
   }
 
   protected close(): void {

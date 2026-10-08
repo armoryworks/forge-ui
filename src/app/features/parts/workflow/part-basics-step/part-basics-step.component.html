@@ -6,11 +6,16 @@
 
   <form [formGroup]="form" class="part-basics-step__form">
     @if (manualNumbers.isEnabled('parts') && (entityId() === null || entityId() === undefined)) {
-      <app-input
-        [label]="'parts.partNumberLabel' | translate"
-        formControlName="partNumber"
-        [maxlength]="50"
-        data-testid="basics-part-number" />
+      <div class="part-basics-step__field">
+        <app-input
+          [label]="'parts.partNumberLabel' | translate"
+          formControlName="partNumber"
+          [maxlength]="50"
+          data-testid="basics-part-number" />
+        <p class="part-basics-step__hint part-basics-step__hint--field" data-testid="basics-part-number-hint">
+          {{ 'newPartFlow.partNumberHint' | translate }}
+        </p>
+      </div>
     }
     <app-input
       [label]="'parts.workflow.basics.nameLabel' | translate"

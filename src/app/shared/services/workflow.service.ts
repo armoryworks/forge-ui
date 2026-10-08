@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
@@ -6,6 +6,7 @@ import { Observable, Subscription, catchError, defer, map, of, shareReplay, tap,
 import { startWith } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
+import { SILENT_HTTP_ERRORS } from '../interceptors/silent-http-errors.token';
 import { EntityValidator } from '../models/entity-validator.model';
 import { MissingValidator } from '../models/workflow-missing-validator.model';
 import { WorkflowDefinition } from '../models/workflow-definition.model';
@@ -250,11 +251,14 @@ export class WorkflowService {
    * Mark Complete — server runs entity readiness validators, promotes if
    * they pass, otherwise returns 409 with `{ missing: MissingValidator[] }`.
    * The Observable resolves to a tagged result so the caller can branch
-   * without try/catch.
+   * without try/catch. Sent silently: the interceptor shows nothing, so
+   * callers surface every other failure from their own error path.
    */
   completeRun(runId: number): Observable<{ success: true; run: WorkflowRun } | { success: false; missing: MissingValidator[] }> {
     return this.http
-      .post<WorkflowRun>(`${environment.apiUrl}/workflows/${runId}/complete`, {})
+      .post<WorkflowRun>(`${environment.apiUrl}/workflows/${runId}/complete`, {}, {
+        context: new HttpContext().set(SILENT_HTTP_ERRORS, true),
+      })
       .pipe(
         tap(run => this.currentRun.set(run)),
         map(run => ({ success: true as const, run })),

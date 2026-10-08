@@ -51,13 +51,6 @@
     letter-spacing: 0.06em;
   }
 
-  // Reveal animation for steps that appear when the user picks the
-  // previous one. Soft fade + slide so the new section feels welcomed
-  // in rather than snapping into existence.
-  &__step--reveal {
-    animation: fork-step-reveal 250ms ease-out;
-  }
-
   &__helper {
     margin: 0;
     color: var(--text-secondary);
@@ -88,9 +81,14 @@
     font-family: inherit;
     transition: background-color $transition-fast, border-color $transition-fast;
 
-    &:hover {
+    &:hover:not(:disabled) {
       border-color: var(--primary);
       background: color-mix(in srgb, var(--primary) 6%, var(--surface));
+    }
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.45;
     }
 
     &:focus-visible {
@@ -140,6 +138,10 @@
     background: color-mix(in srgb, var(--primary) 12%, transparent);
     padding: $sp-xxs $sp-sm;
     border: $border-width-thin solid var(--primary);
+
+    &--hidden {
+      visibility: hidden;
+    }
   }
 
   // Selected card shows a check pseudo-element in the top-right corner
@@ -158,9 +160,4 @@
   &__card {
     position: relative;
   }
-}
-
-@keyframes fork-step-reveal {
-  0% { opacity: 0; transform: translateY(-4px); }
-  100% { opacity: 1; transform: translateY(0); }
 }

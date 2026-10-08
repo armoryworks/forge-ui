@@ -70,15 +70,18 @@ describe('PartInventoryStepComponent (Phase 5 — save-on-Continue)', () => {
     httpMock.verify();
   });
 
-  // The component loads the UoM dropdown options from the API on construction.
-  // Flush that GET so each test's httpMock.verify() stays clean.
-  function flushUomLoad(): void {
+  // The component loads the UoM and bin dropdown options from the API on construction.
+  // Flush those GETs so each test's httpMock.verify() stays clean.
+  function flushOptionLoads(bins: { id: number; locationPath: string; isActive: boolean }[] = []): void {
     httpMock.expectOne(`${environment.apiUrl}/inventory/uom`).flush([]);
+    httpMock.expectOne(r => r.url === `${environment.apiUrl}/inventory/locations/bins`).flush({
+      items: bins.map(b => ({ ...b, name: b.locationPath, locationType: 'Bin', barcode: null })),
+    });
   }
 
   it('renders without errors when entity is null', () => {
     const component = TestBed.runInInjectionContext(() => new PartInventoryStepComponent());
-    flushUomLoad();
+    flushOptionLoads();
     mockSignalInputs(component, {
       stepId: 'inventory', componentName: 'PartInventoryStepComponent',
       runId: null, entityId: null, entity: null,
@@ -89,7 +92,7 @@ describe('PartInventoryStepComponent (Phase 5 — save-on-Continue)', () => {
 
   it('PATCHes /workflows/:runId/step when WorkflowService.saveCurrentStep() fires after a user edit', () => {
     const component = TestBed.runInInjectionContext(() => new PartInventoryStepComponent());
-    flushUomLoad();
+    flushOptionLoads();
     mockSignalInputs(component, {
       stepId: 'inventory', componentName: 'PartInventoryStepComponent',
       runId: 7, entityId: 42, entity: buildPart(),
@@ -122,7 +125,7 @@ describe('PartInventoryStepComponent (Phase 5 — save-on-Continue)', () => {
 
   it('does NOT round-trip when the form is pristine — Back/Jump on a never-touched step is a no-op', () => {
     const component = TestBed.runInInjectionContext(() => new PartInventoryStepComponent());
-    flushUomLoad();
+    flushOptionLoads();
     mockSignalInputs(component, {
       stepId: 'inventory', componentName: 'PartInventoryStepComponent',
       runId: 7, entityId: 42, entity: buildPart(),
@@ -134,5 +137,16 @@ describe('PartInventoryStepComponent (Phase 5 — save-on-Continue)', () => {
 
     httpMock.verify();
     expect(saveResult).toEqual({ ok: true });
+  });
+
+  it('offers only active bins for the default bin', () => {
+    const component = TestBed.runInInjectionContext(() => new PartInventoryStepComponent());
+    flushOptionLoads([
+      { id: 3, locationPath: 'Main / A / 01', isActive: true },
+      { id: 4, locationPath: 'Main / A / 02', isActive: false },
+    ]);
+    const options = (component as unknown as { defaultBinOptions(): { value: unknown; label: string }[] }).defaultBinOptions();
+    expect(options.map(o => o.value)).toEqual([null, 3]);
+    expect(options[1].label).toBe('Main / A / 01');
   });
 });

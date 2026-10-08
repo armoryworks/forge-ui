@@ -317,6 +317,7 @@ export class CustomerWorkflowPageComponent {
               }));
             }
           },
+          error: (err: unknown) => this.snackbar.errorFrom(err, 'errors.unexpectedError'),
         });
       },
     });

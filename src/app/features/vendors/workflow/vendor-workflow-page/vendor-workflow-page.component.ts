@@ -416,6 +416,7 @@ export class VendorWorkflowPageComponent {
               }));
             }
           },
+          error: (err: unknown) => this.snackbar.errorFrom(err, 'errors.unexpectedError'),
         });
       },
     });

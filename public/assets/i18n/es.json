@@ -789,6 +789,12 @@
       "badConfig": "La compuerta \"{{gate}}\" tiene una configuración JSON inválida."
     }
   },
+  "newPartFlow": {
+    "savedAsDraft": "Guardada como borrador. Agregue {{missing}} antes de que pueda estar activa.",
+    "partNumberHint": "Déjelo en blanco para numerarla automáticamente",
+    "defaultBinLabel": "Ubicación predeterminada",
+    "defaultBinNone": "— Sin definir —"
+  },
   "parts": {
     "gtin": {
       "label": "GTIN de GS1",
@@ -1202,7 +1208,7 @@
         "stockUomLabel": "UoM de Stock",
         "stockUomNone": "— No establecido —",
         "defaultBinLabel": "Bin Predeterminado (id)",
-        "defaultBinHelper": "Id numérico. Reemplazado por un selector real de bin en una versión posterior.",
+        "defaultBinHelper": "Dónde se guarda normalmente esta pieza.",
         "saveFailed": "No se pudo guardar el inventario.",
         "rationale": "<strong>La UoM de inventario es la unidad que utilizan todas las demás transacciones de inventario.</strong> Recepciones, salidas, transferencias, conteos — todo se denomina aquí. Eligir mal y las conversiones se propagan por cada reporte aguas abajo. <br><br>Mín / reorden / stock de seguridad son política: determinan cuándo MRP dispara órdenes planificadas o cuándo los reportes manuales de reorden destacan una pieza. Los valores predeterminados están bien si aún no lo sabes — ajusta más tarde a medida que surjan los patrones de demanda."
       },
@@ -8329,9 +8335,9 @@
         "close": "Close"
       },
       "mode": {
-        "express": "Express",
+        "express": "Alta rápida",
         "expressSublabel": "Todo a la vez",
-        "guided": "Guiado",
+        "guided": "Paso a paso",
         "guidedSublabel": "Paso a paso",
         "toggle": "Modo"
       },

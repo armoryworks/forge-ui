@@ -207,7 +207,9 @@ export class PartExpressFormComponent {
    * Manual Save — express mode is one-form-one-click, so this submits AND
    * promotes. Patches the workflow step (which materializes the entity if
    * it doesn't exist yet, then applies fields), then completes the run
-   * (Draft → Active), then navigates to the parts list.
+   * (Draft → Active), then opens the saved part from the parts list. When
+   * readiness blocks promotion the part stays a draft, the run stays in
+   * Quick add, and the message names what is still missing.
    */
   protected save(): void {
     if (this.form.invalid) return;
@@ -221,27 +223,26 @@ export class PartExpressFormComponent {
           this.saving.set(false);
           return;
         }
+        const partId = run.entityId;
         this.workflowService.completeRun(runId).subscribe({
           next: (result) => {
             this.saving.set(false);
-            if (result.success) {
-              this.snackbar.success(this.translate.instant('parts.workflow.express.saveSuccess'));
-              this.router.navigate(['/parts']);
-            } else {
-              // Use the missingMessageKey when available (it's the
-              // human-readable "what specifically is needed" string per
-              // gate); fall back to the gate name otherwise.
-              const missingDescription = result.missing
-                .map(m => this.translate.instant(m.missingMessageKey ?? m.displayNameKey))
-                .join('; ');
-              this.snackbar.error(this.translate.instant('parts.workflow.page.missingValidators', {
-                missing: missingDescription,
-              }));
-            }
+            const message = result.success
+              ? this.translate.instant('parts.workflow.express.saveSuccess')
+              : this.translate.instant('newPartFlow.savedAsDraft', {
+                missing: result.missing.map(m => this.translate.instant(m.displayNameKey)).join(', '),
+              });
+            this.router.navigate(['/parts'], { queryParams: { detail: `part:${partId}` } }).then(() => {
+              if (result.success) {
+                this.snackbar.success(message);
+              } else {
+                this.snackbar.warn(message);
+              }
+            });
           },
           error: (err: unknown) => {
             this.saving.set(false);
-            this.reportSaveFailure(err);
+            this.snackbar.errorFrom(err, 'parts.workflow.express.saveFailed');
           },
         });
       },

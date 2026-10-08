@@ -445,6 +445,7 @@ export class PartWorkflowPageComponent {
               }));
             }
           },
+          error: (err: unknown) => this.snackbar.errorFrom(err, 'errors.unexpectedError'),
         });
       },
     });
@@ -456,7 +457,15 @@ export class PartWorkflowPageComponent {
     // route with nothing to show ("Loading workflow…" forever). Navigate
     // fully back to the parts list instead — the user's intent on close
     // is "I'm done with this", not "I want to stay on the same URL".
-    this.workflowService.clearContext();
-    this.router.navigate(['/parts']);
+    const leave = (): void => {
+      this.workflowService.clearContext();
+      this.router.navigate(['/parts']);
+    };
+    const run = this.workflowService.currentRun() ?? this.run();
+    if (!run || run.entityId != null || run.completedAt != null || run.abandonedAt != null) {
+      leave();
+      return;
+    }
+    this.workflowService.abandonRun(run.id, 'user').subscribe({ next: leave, error: leave });
   }
 }

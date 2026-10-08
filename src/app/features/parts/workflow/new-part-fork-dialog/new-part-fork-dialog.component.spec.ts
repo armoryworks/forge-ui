@@ -8,9 +8,11 @@ import { Observable, of } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
 
 import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
+import { UserPreferencesService } from '../../../../shared/services/user-preferences.service';
 import { InventoryClass } from '../../models/inventory-class.type';
 import { ProcurementSource } from '../../models/procurement-source.type';
 import {
+  NEW_PART_FORK_PREF_KEY,
   NewPartForkDialogComponent,
   NewPartForkResult,
 } from './new-part-fork-dialog.component';
@@ -26,24 +28,30 @@ interface ForkInternals {
   recommendedMode(): 'express' | 'guided';
   effectiveMode(): 'express' | 'guided';
   canContinue(): boolean;
+  violations(): string[];
   inventoryChoices(): { value: InventoryClass; titleKey: string; descKey: string }[];
+  inventoryCards(): { value: InventoryClass; enabled: boolean }[];
   pickProcurement(p: ProcurementSource): void;
   pickInventoryClass(c: InventoryClass): void;
   pickMode(m: 'express' | 'guided'): void;
   continue(): void;
   close(): void;
-  itemKindControl: { setValue(v: number | null): void };
+  itemKindControl: { value: number | null; disabled: boolean; setValue(v: number | null): void };
 }
 
-function setup() {
+function setup(saved: Partial<NewPartForkResult> | null = null, itemKindIds: number[] = []) {
   const dialogRef = {
     close: vi.fn(),
+    updatePosition: vi.fn(),
   } as unknown as MatDialogRef<NewPartForkDialogComponent, NewPartForkResult | undefined>;
 
+  const prefsStub = {
+    get: vi.fn((key: string) => (key === NEW_PART_FORK_PREF_KEY ? saved : null)),
+    set: vi.fn(),
+  };
+
   const refDataStub = {
-    // Pre-beta: the dialog calls getByGroup('part.item_kind'); a no-op
-    // observable is enough for these tests.
-    getByGroup: () => of([]),
+    getByGroup: () => of(itemKindIds.map((id, i) => ({ id, label: `Kind ${id}`, isActive: true, sortOrder: i }))),
   } as unknown as ReferenceDataService;
 
   TestBed.resetTestingModule();
@@ -52,6 +60,7 @@ function setup() {
     providers: [
       { provide: MatDialogRef, useValue: dialogRef },
       { provide: ReferenceDataService, useValue: refDataStub },
+      { provide: UserPreferencesService, useValue: prefsStub },
       provideHttpClient(),
       provideHttpClientTesting(),
       provideNoopAnimations(),
@@ -62,7 +71,7 @@ function setup() {
   const fixture = TestBed.createComponent(NewPartForkDialogComponent);
   fixture.detectChanges();
   const component = fixture.componentInstance as unknown as ForkInternals;
-  return { fixture, component, dialogRef };
+  return { fixture, component, dialogRef, prefsStub };
 }
 
 describe('NewPartForkDialogComponent (pre-beta — axis-based picker)', () => {
@@ -193,6 +202,73 @@ describe('NewPartForkDialogComponent (pre-beta — axis-based picker)', () => {
     component.pickInventoryClass('Component');
     component.continue();
     expect(dialogRef.close).toHaveBeenCalledTimes(1);
+  });
+
+  it('pins itself near the top of the viewport', () => {
+    const { dialogRef } = setup();
+    expect(dialogRef.updatePosition).toHaveBeenCalledWith({ top: '8vh' });
+  });
+
+  it('lays out every inventory class card and enables only the viable ones', () => {
+    const { component } = setup();
+    expect(component.inventoryCards().map(c => c.value))
+      .toEqual(['Raw', 'Component', 'Subassembly', 'FinishedGood', 'Consumable', 'Tool']);
+    expect(component.inventoryCards().every(c => !c.enabled)).toBe(true);
+
+    component.pickProcurement('Phantom');
+    expect(component.inventoryCards().filter(c => c.enabled).map(c => c.value))
+      .toEqual(['Subassembly', 'FinishedGood']);
+  });
+
+  it('keeps the item kind disabled until an inventory class is picked', () => {
+    const { component, fixture } = setup();
+    expect(component.itemKindControl.disabled).toBe(true);
+    component.pickProcurement('Buy');
+    component.pickInventoryClass('Raw');
+    fixture.detectChanges();
+    expect(component.itemKindControl.disabled).toBe(false);
+  });
+
+  it('shows no violations until Continue is pressed', () => {
+    const { component } = setup();
+    expect(component.violations()).toEqual([]);
+    component.continue();
+    expect(component.violations().length).toBe(2);
+  });
+
+  it('remembers the last choice and preselects it next time', () => {
+    const first = setup();
+    first.component.pickProcurement('Make');
+    first.component.pickInventoryClass('Component');
+    first.component.pickMode('express');
+    first.component.continue();
+    const saved = first.prefsStub.set.mock.calls[0];
+    expect(saved[0]).toBe(NEW_PART_FORK_PREF_KEY);
+    expect(saved[1]).toEqual({
+      procurementSource: 'Make',
+      inventoryClass: 'Component',
+      itemKindId: null,
+      mode: 'express',
+    });
+
+    const { component } = setup({ ...saved[1], itemKindId: 7 }, [7]);
+    expect(component.procurement()).toBe('Make');
+    expect(component.inventoryClass()).toBe('Component');
+    expect(component.itemKindControl.value).toBe(7);
+    expect(component.effectiveMode()).toBe('express');
+    expect(component.canContinue()).toBe(true);
+  });
+
+  it('ignores a remembered choice that is no longer a viable combo', () => {
+    const { component } = setup({ procurementSource: 'Phantom', inventoryClass: 'Raw', itemKindId: null, mode: 'express' });
+    expect(component.procurement()).toBeNull();
+    expect(component.inventoryClass()).toBeNull();
+  });
+
+  it('drops a remembered item kind that is no longer offered', () => {
+    const { component } = setup({ procurementSource: 'Buy', inventoryClass: 'Raw', itemKindId: 99, mode: 'express' });
+    expect(component.inventoryClass()).toBe('Raw');
+    expect(component.itemKindControl.value).toBeNull();
   });
 
   it('close() emits undefined', () => {
