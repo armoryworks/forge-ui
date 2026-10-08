@@ -176,9 +176,9 @@ export class AiAssistantDialogComponent implements OnInit {
         this.snackbar.success(this.isEdit() ? this.translate.instant('aiAssistants.assistantUpdated') : this.translate.instant('aiAssistants.assistantCreated'));
         this.matDialogRef.close(true);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.saving.set(false);
-        this.snackbar.error(this.isEdit() ? this.translate.instant('aiAssistants.assistantUpdateFailed') : this.translate.instant('aiAssistants.assistantCreateFailed'));
+        this.snackbar.errorFrom(err, this.isEdit() ? 'aiAssistants.assistantUpdateFailed' : 'aiAssistants.assistantCreateFailed');
       },
     });
   }
