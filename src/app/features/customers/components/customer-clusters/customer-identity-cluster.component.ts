@@ -83,9 +83,9 @@ export class CustomerIdentityClusterComponent {
     this.save.emit({
       name: v.name,
       customerNumber: this.allowManualCustomerNumbers() ? (v.customerNumber.trim() || undefined) : undefined,
-      companyName: v.companyName || undefined,
-      email: v.email || undefined,
-      phone: v.phone || undefined,
+      companyName: v.companyName.trim(),
+      email: v.email.trim(),
+      phone: v.phone.trim(),
       isActive: v.isActive,
     });
   }

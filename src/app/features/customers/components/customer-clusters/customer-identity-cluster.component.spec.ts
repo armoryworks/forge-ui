@@ -92,4 +92,23 @@ describe('CustomerIdentityClusterComponent', () => {
     expect(cb).toHaveBeenCalledTimes(1);
     expect(cb.mock.calls[0][0].name).toBe('Renamed');
   });
+
+  it('emits empty strings for emptied company name, email and phone so the save clears them', () => {
+    const component = TestBed.runInInjectionContext(() => new CustomerIdentityClusterComponent());
+    mockSignalInputs(component, {
+      customer: makeSummary(),
+      editing: true,
+      saving: false,
+    });
+    TestBed.flushEffects();
+    const c = component as unknown as {
+      form: { patchValue(v: Record<string, unknown>): void };
+      onSave(): void;
+    };
+    c.form.patchValue({ companyName: '', email: '', phone: '  ' });
+    const cb = vi.fn();
+    component.save.subscribe(cb);
+    c.onSave();
+    expect(cb.mock.calls[0][0]).toEqual(expect.objectContaining({ companyName: '', email: '', phone: '' }));
+  });
 });

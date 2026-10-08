@@ -114,4 +114,27 @@ describe('VendorDialogComponent', () => {
     expect(vendorService.createVendor).toHaveBeenCalledWith(
       expect.objectContaining({ companyName: 'New Co', fax: '555-0120' }));
   });
+
+  it('sends empty strings for an emptied email, phone and fax when saving an edited vendor', () => {
+    const component = setup(vendorDetail());
+    component.ngOnInit();
+    component.form.patchValue({ email: '', phone: '', fax: '  ' });
+
+    (component as unknown as { save(): void }).save();
+
+    expect(vendorService.updateVendor).toHaveBeenCalledWith(7, expect.objectContaining({ email: '', phone: '', fax: '' }));
+  });
+
+  it('omits blank email, phone and fax when creating a vendor', () => {
+    const component = setup(null);
+    component.ngOnInit();
+    component.form.patchValue({ companyName: 'New Co' });
+
+    (component as unknown as { save(): void }).save();
+
+    const body = (vendorService.createVendor.mock.calls[0] as unknown[])[0] as Record<string, unknown>;
+    expect(body['email']).toBeUndefined();
+    expect(body['phone']).toBeUndefined();
+    expect(body['fax']).toBeUndefined();
+  });
 });

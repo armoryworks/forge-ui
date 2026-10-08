@@ -121,13 +121,15 @@ export class VendorDialogComponent implements OnInit {
     const f = this.form.getRawValue();
     const addr = f.address;
     const v = this.vendor();
+    const contactValue = (value: string | null | undefined): string | undefined =>
+      value?.trim() || (v ? '' : undefined);
 
     const payload = {
       companyName: f.companyName || undefined,
       contactName: f.contactName || undefined,
-      email: f.email || undefined,
-      phone: f.phone || undefined,
-      fax: f.fax?.trim() || undefined,
+      email: contactValue(f.email),
+      phone: contactValue(f.phone),
+      fax: contactValue(f.fax),
       ...fromAddressToVendor(addr),
       paymentTerms: f.paymentTerms || undefined,
       notes: f.notes || undefined,
