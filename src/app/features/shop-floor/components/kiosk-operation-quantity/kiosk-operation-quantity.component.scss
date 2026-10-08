@@ -1,0 +1,49 @@
+@use 'styles/variables' as *;
+
+.op-qty {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.op-qty__title {
+  margin: 0;
+  font-size: $font-size-md;
+  font-weight: 600;
+}
+
+.op-qty__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: $sp-md;
+}
+
+.op-qty__field--active {
+  outline: $border-width solid var(--primary);
+  outline-offset: $sp-xs;
+}
+
+.op-qty__scrap-toggle {
+  align-self: flex-start;
+}
+
+.op-qty__warning {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-md;
+  background: var(--warning-light);
+  color: var(--warning);
+  font-size: $font-size-sm;
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+  }
+}
+
+.op-qty__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-md;
+  justify-content: flex-end;
+}

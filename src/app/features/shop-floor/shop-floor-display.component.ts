@@ -187,6 +187,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   // Action state
   protected readonly processing = signal<string | null>(null);
+  private readonly operationTracking = signal(false);
   protected readonly actionFeedback = signal<{ workerId: number; success: boolean; message: string; detail: string | null } | null>(null);
 
   // Job selection state (shown after clock-in if worker has no assignments)
@@ -548,6 +549,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private enterActionsPhase(): void {
     this.clearPhaseTimeout();
     this.loadData();
+    this.shopFloorService.getConfig().subscribe(config => this.operationTracking.set(config.operationTracking));
     this.phase.set('actions');
     this.startAutoLogoutTimer();
   }
@@ -685,7 +687,10 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     this.processing.set('timer-stop');
     this.resetAutoLogoutTimer();
 
-    this.loading.track(this.translate.instant('shopFloor.display.stoppingTimer'), this.shopFloorService.stopTimer()).subscribe({
+    const stop$ = this.operationTracking()
+      ? this.shopFloorService.stopTimer({ jobId: assignment.jobId })
+      : this.shopFloorService.stopTimer();
+    this.loading.track(this.translate.instant('shopFloor.display.stoppingTimer'), stop$).subscribe({
       next: () => {
         this.processing.set(null);
         this.loadData();
@@ -996,6 +1001,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     this.pinError.set(null);
     this.pinControl.reset();
     this.processing.set(null);
+    this.operationTracking.set(false);
     this.phase.set('main');
   }
 

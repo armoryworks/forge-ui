@@ -68,6 +68,35 @@
       </button>
     </div>
 
+    @if (tracking()) {
+      <div class="scan-job__operations" data-testid="job-operations">
+        @if (operationNotice()) {
+          <div class="scan-job__notice" role="status">
+            <span class="material-icons-outlined">check_circle</span>
+            {{ operationNotice() }}
+          </div>
+        }
+        <app-kiosk-running-timers
+          [timers]="runningTimers()"
+          [now]="now()"
+          [busy]="operationBusy()"
+          (stop)="stopRunningTimer($event)" />
+        @if (jobOperations(); as ops) {
+          <app-kiosk-operation-tiles
+            [operations]="ops.operations"
+            [jobQuantity]="ops.jobQuantity"
+            [currentUserId]="currentUserId()"
+            [now]="now()"
+            [busy]="operationBusy()"
+            (start)="startOperation($event)"
+            (startSetup)="startOperation($event, 'Setup')"
+            (stop)="stopOperation($event)"
+            (done)="openQuantity($event, true)"
+            (addQuantity)="openQuantity($event, false)" />
+        }
+      </div>
+    }
+
     <button class="action-btn scan-job__cancel" (click)="cancel()" aria-label="Cancel job actions">
       <span class="material-icons-outlined">close</span>
       {{ 'common.cancel' | translate }}
@@ -129,6 +158,18 @@
         </button>
       </div>
     </div>
+  }
+
+  @if (step() === 'quantity') {
+    @if (quantityTarget(); as target) {
+      <app-kiosk-operation-quantity
+        [operation]="target.row"
+        [jobQuantity]="jobOperations()?.jobQuantity ?? 0"
+        [prefillAll]="target.prefillAll"
+        [busy]="operationBusy()"
+        (submitted)="submitQuantity($event)"
+        (cancelled)="cancelQuantity()" />
+    }
   }
 
   <!-- Step 3: Processing -->

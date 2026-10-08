@@ -1,0 +1,70 @@
+<div class="op-qty">
+  <h3 class="op-qty__title">{{ 'shopFloor.operations.quantityTitle' | translate: { step: operation().stepNumber, title: operation().title } }}</h3>
+
+  <div class="op-qty__fields">
+    <div class="op-qty__field"
+         [class.op-qty__field--active]="scrapOpen() && activeField() === 'completed'"
+         (focusin)="activeField.set('completed')">
+      <app-input
+        [label]="'shopFloor.operations.completedLabel' | translate: { total: jobQuantity() }"
+        type="number"
+        [min]="0"
+        [formControl]="completedControl"
+        data-testid="kiosk-op-qty-completed" />
+    </div>
+
+    @if (scrapOpen()) {
+      <div class="op-qty__field"
+           [class.op-qty__field--active]="activeField() === 'scrap'"
+           (focusin)="activeField.set('scrap')">
+        <app-input
+          [label]="'shopFloor.operations.scrapLabel' | translate"
+          type="number"
+          [min]="0"
+          [formControl]="scrapControl"
+          data-testid="kiosk-op-qty-scrap" />
+      </div>
+    }
+  </div>
+
+  <button type="button" class="action-btn action-btn--link op-qty__scrap-toggle"
+          (click)="toggleScrap()"
+          [attr.aria-expanded]="scrapOpen()"
+          data-testid="kiosk-op-qty-scrap-toggle">
+    {{ (scrapOpen() ? 'shopFloor.operations.hideScrap' : 'shopFloor.operations.addScrap') | translate }}
+  </button>
+
+  @if (overLimit()) {
+    <div class="op-qty__warning" role="alert" data-testid="kiosk-op-qty-over">
+      <span class="material-icons-outlined">warning</span>
+      {{ 'shopFloor.operations.overQuantity' | translate: { completed: completed() ?? 0, scrap: scrap(), total: jobQuantity() } }}
+    </div>
+  }
+
+  <app-numeric-keypad
+    [disabled]="busy()"
+    (digit)="onDigit($event)"
+    (backspace)="onBackspace()"
+    (clear)="onClear()" />
+
+  <div class="op-qty__actions">
+    <button type="button" class="action-btn" (click)="cancelled.emit()" data-testid="kiosk-op-qty-cancel">
+      <span class="material-icons-outlined">arrow_back</span>
+      {{ 'common.back' | translate }}
+    </button>
+    <button type="button" class="action-btn"
+            [disabled]="!canSubmit()"
+            (click)="record()"
+            data-testid="kiosk-op-qty-record">
+      <span class="material-icons-outlined">save</span>
+      {{ 'shopFloor.operations.recordKeepGoing' | translate: { count: completed() ?? 0 } }}
+    </button>
+    <button type="button" class="action-btn action-btn--primary"
+            [disabled]="!canSubmit()"
+            (click)="finish()"
+            data-testid="kiosk-op-qty-done">
+      <span class="material-icons-outlined">task_alt</span>
+      {{ 'shopFloor.operations.doneCount' | translate: { count: completed() ?? 0, total: jobQuantity() } }}
+    </button>
+  </div>
+</div>

@@ -1,0 +1,22 @@
+@if (lines().length > 0) {
+  <section class="running-timers" [attr.aria-label]="'shopFloor.operations.runningTitle' | translate">
+    <h3 class="running-timers__title">{{ 'shopFloor.operations.runningTitle' | translate }}</h3>
+    <ul class="running-timers__list">
+      @for (line of lines(); track line.timer.id) {
+        <li class="running-timers__item" [attr.data-testid]="'kiosk-running-timer-' + line.timer.id">
+          <span class="running-timers__job">{{ line.timer.jobNumber }}</span>
+          <span class="running-timers__step">{{ line.stepLabel ?? ('shopFloor.operations.wholeJob' | translate) }}</span>
+          <span class="running-timers__elapsed">{{ line.elapsedMs | durationMs }}</span>
+          <button type="button" class="action-btn action-btn--danger action-btn--sm"
+                  [disabled]="busy()"
+                  (click)="stop.emit(line.timer)"
+                  [attr.aria-label]="'shopFloor.operations.stopTimerAria' | translate: { jobNumber: line.timer.jobNumber }"
+                  [attr.data-testid]="'kiosk-running-timer-stop-' + line.timer.id">
+            <span class="material-icons-outlined">stop_circle</span>
+            {{ 'shopFloor.operations.stop' | translate }}
+          </button>
+        </li>
+      }
+    </ul>
+  </section>
+}

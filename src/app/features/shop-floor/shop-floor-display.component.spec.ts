@@ -168,9 +168,10 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     clockInOut: vi.fn(() => of(undefined)),
     assignJob: vi.fn(() => of(undefined)),
     startTimer: vi.fn(() => of({})),
-    stopTimer: vi.fn(() => of({})),
+    stopTimer: vi.fn((_target?: unknown) => of({})),
     completeJob: vi.fn(() => of(undefined)),
     identifyScan: vi.fn(() => of({})),
+    getConfig: vi.fn(() => of({ operationTracking: false })),
   };
   const events = { getUpcomingEvents: vi.fn(() => of([])) };
   const clockTypes = {
@@ -417,6 +418,53 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     expect(c.actionFeedback()?.message).toBe('shopFloor.timerStartedOn {"jobNumber":"JOB-0041"}');
     c.stopJobTimer(assignment);
     expect(c.actionFeedback()?.message).toBe('shopFloor.timerStoppedOn {"jobNumber":"JOB-0041"}');
+  });
+
+  it('with operation tracking off, the card Stop sends today\'s empty stop after badge-in', () => {
+    localStorage.setItem('forge-kiosk-device-token', 'tok');
+    localStorage.setItem('forge-kiosk-terminal', JSON.stringify(terminal));
+    const worker = makeWorker('ProductionWorker', [{ ...assignment, hasActiveTimer: true }]);
+    shopFloor.getClockStatus.mockImplementation(() => of([worker]));
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'employee', entityId: 5 }));
+    auth.scanLogin.mockReturnValueOnce(of({}));
+    try {
+      const c = create();
+      init(c);
+      c.handleScanValue('BADGE-5');
+      c.pinControl.setValue('1234');
+      c.onPinSubmit();
+      expect(shopFloor.getConfig).toHaveBeenCalledTimes(1);
+      c.stopJobTimer(assignment);
+      expect(shopFloor.stopTimer.mock.calls[0]).toEqual([]);
+    } finally {
+      shopFloor.getClockStatus.mockImplementation(() => of([]));
+    }
+  });
+
+  it('with operation tracking on, the card Stop names the work order', () => {
+    localStorage.setItem('forge-kiosk-device-token', 'tok');
+    localStorage.setItem('forge-kiosk-terminal', JSON.stringify(terminal));
+    const worker = makeWorker('ProductionWorker', [{ ...assignment, hasActiveTimer: true }]);
+    shopFloor.getClockStatus.mockImplementation(() => of([worker]));
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'employee', entityId: 5 }));
+    shopFloor.getConfig.mockReturnValueOnce(of({ operationTracking: true }));
+    auth.scanLogin.mockReturnValueOnce(of({}));
+    try {
+      const c = create();
+      init(c);
+      c.handleScanValue('BADGE-5');
+      c.pinControl.setValue('1234');
+      c.onPinSubmit();
+      c.stopJobTimer(assignment);
+      expect(shopFloor.stopTimer).toHaveBeenCalledWith({ jobId: 41 });
+
+      c.cancelActions();
+      c.selectedWorker.set(worker);
+      c.stopJobTimer(assignment);
+      expect(shopFloor.stopTimer.mock.calls[1]).toEqual([]);
+    } finally {
+      shopFloor.getClockStatus.mockImplementation(() => of([]));
+    }
   });
 
   it('an unidentified scan asks for a PIN with no leftover worker and times out', () => {

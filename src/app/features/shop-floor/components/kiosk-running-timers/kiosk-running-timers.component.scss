@@ -1,0 +1,51 @@
+@use 'styles/variables' as *;
+
+.running-timers {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  padding: $sp-sm $sp-md;
+  background: var(--success-light);
+  border: $border-width-thin solid var(--success);
+}
+
+.running-timers__title {
+  margin: 0;
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: var(--success);
+}
+
+.running-timers__list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.running-timers__item {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  font-size: $font-size-sm;
+}
+
+.running-timers__job {
+  font-family: $font-family-mono;
+  font-weight: 700;
+}
+
+.running-timers__step {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.running-timers__elapsed {
+  font-family: $font-family-mono;
+  color: var(--success);
+}

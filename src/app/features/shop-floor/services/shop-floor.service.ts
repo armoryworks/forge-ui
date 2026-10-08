@@ -1,12 +1,21 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { catchError, Observable, of } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 import { ShopFloorOverview } from '../models/shop-floor-overview.model';
 import { ClockWorker } from '../models/clock-worker.model';
 import { KioskTerminal, Team } from '../models/kiosk-terminal.model';
 import { ScanIdentification } from '../models/scan-identification.model';
+import { JobOperations } from '../models/job-operations.model';
+import { JobOperationsConfig } from '../models/job-operations-config.model';
+import { JobOperationTimerResult } from '../models/job-operation-timer-result.model';
+import { JobOperationTimerStopResult } from '../models/job-operation-timer-stop-result.model';
+import { JobOperationProgressResult } from '../models/job-operation-progress-result.model';
+import { UpdateJobOperationProgressRequest } from '../models/update-job-operation-progress-request.model';
+import { OperationTimerEntryType } from '../models/operation-timer-entry-type.type';
+import { RunningTimer } from '../models/running-timer.model';
+import { StopTimerTarget } from '../models/stop-timer-target.model';
 import { JobAdvanceResult, JobStatus } from '../../../shared/models/mobile-api.model';
 
 @Injectable({ providedIn: 'root' })
@@ -44,8 +53,39 @@ export class ShopFloorService {
     });
   }
 
-  stopTimer(): Observable<unknown> {
-    return this.http.post(`${environment.apiUrl}/time-tracking/timer/stop`, { notes: null });
+  stopTimer(target?: StopTimerTarget): Observable<unknown> {
+    return this.http.post(`${environment.apiUrl}/time-tracking/timer/stop`, { notes: null, ...target });
+  }
+
+  getActiveTimers(): Observable<RunningTimer[]> {
+    return this.http.get<RunningTimer[]>(`${environment.apiUrl}/time-tracking/timers/active`);
+  }
+
+  getConfig(): Observable<JobOperationsConfig> {
+    return this.http.get<JobOperationsConfig>(`${environment.apiUrl}/job-operations/config`).pipe(
+      catchError(() => of({ operationTracking: false })),
+    );
+  }
+
+  getOperations(jobId: number): Observable<JobOperations> {
+    return this.http.get<JobOperations>(`${environment.apiUrl}/jobs/${jobId}/operations`);
+  }
+
+  startOperationTimer(jobId: number, operationId: number, entryType: OperationTimerEntryType = 'Run'): Observable<JobOperationTimerResult> {
+    return this.http.post<JobOperationTimerResult>(
+      `${environment.apiUrl}/jobs/${jobId}/operations/${operationId}/timer/start`, { entryType });
+  }
+
+  stopOperationTimer(jobId: number, operationId: number): Observable<JobOperationTimerStopResult> {
+    return this.http.post<JobOperationTimerStopResult>(
+      `${environment.apiUrl}/jobs/${jobId}/operations/${operationId}/timer/stop`, { notes: null });
+  }
+
+  updateOperationProgress(
+    jobId: number, operationId: number, request: UpdateJobOperationProgressRequest,
+  ): Observable<JobOperationProgressResult> {
+    return this.http.patch<JobOperationProgressResult>(
+      `${environment.apiUrl}/jobs/${jobId}/operations/${operationId}`, request);
   }
 
   completeJob(jobId: number): Observable<{ stageName: string }> {

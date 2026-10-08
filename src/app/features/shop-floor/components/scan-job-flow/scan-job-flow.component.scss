@@ -87,6 +87,26 @@
   }
 }
 
+.scan-job__notice {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-md;
+  background: var(--success-light);
+  color: var(--success);
+  font-size: $font-size-sm;
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+  }
+}
+
+.scan-job__operations {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
 .scan-job__action-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

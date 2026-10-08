@@ -1,0 +1,72 @@
+<ul class="op-tiles" [attr.aria-label]="'shopFloor.operations.title' | translate">
+  @for (tile of tiles(); track tile.row.operationId) {
+    <li class="op-tile"
+        [class.op-tile--running]="tile.row.openTimers.length > 0"
+        [class.op-tile--closed]="tile.closed"
+        [attr.data-testid]="'kiosk-op-tile-' + tile.row.stepNumber">
+      <div class="op-tile__head">
+        <span class="op-tile__step">{{ tile.row.stepNumber }}</span>
+        <span class="op-tile__title">{{ tile.row.title }}</span>
+        <span class="op-tile__status"
+              [class.op-tile__status--in-progress]="tile.row.status === 'InProgress'"
+              [class.op-tile__status--complete]="tile.row.status === 'Complete'">{{ tile.statusKey | translate }}</span>
+      </div>
+      <div class="op-tile__meta">
+        <span class="op-tile__qty">{{ 'shopFloor.operations.quantityOf' | translate: { count: tile.row.completedQuantity, total: jobQuantity() } }}</span>
+        @if (tile.elapsedMs !== null) {
+          <span class="op-tile__elapsed">
+            <span class="material-icons-outlined">timer</span>
+            {{ tile.elapsedMs | durationMs }}
+          </span>
+        }
+        @if (tile.othersInitials) {
+          <span class="op-tile__others">{{ 'shopFloor.operations.othersRunning' | translate: { names: tile.othersInitials } }}</span>
+        }
+      </div>
+      @if (!tile.closed) {
+        <div class="op-tile__actions">
+          @if (tile.mineRunning) {
+            <button type="button" class="op-tile__btn op-tile__btn--stop"
+                    [disabled]="busy()"
+                    (click)="stop.emit(tile.row)"
+                    [attr.data-testid]="'kiosk-op-stop-' + tile.row.stepNumber">
+              <span class="material-icons-outlined">stop_circle</span>
+              {{ 'shopFloor.operations.stop' | translate }}
+            </button>
+          } @else {
+            <button type="button" class="op-tile__btn op-tile__btn--start"
+                    [disabled]="busy()"
+                    (click)="start.emit(tile.row)"
+                    [attr.data-testid]="'kiosk-op-start-' + tile.row.stepNumber">
+              <span class="material-icons-outlined">play_circle</span>
+              {{ 'shopFloor.operations.start' | translate }}
+            </button>
+            <button type="button" class="op-tile__btn"
+                    [disabled]="busy()"
+                    (click)="startSetup.emit(tile.row)"
+                    [attr.data-testid]="'kiosk-op-start-setup-' + tile.row.stepNumber">
+              <span class="material-icons-outlined">build</span>
+              {{ 'shopFloor.operations.startSetup' | translate }}
+            </button>
+          }
+          <button type="button" class="op-tile__btn"
+                  [disabled]="busy()"
+                  (click)="addQuantity.emit(tile.row)"
+                  [attr.data-testid]="'kiosk-op-qty-' + tile.row.stepNumber">
+            <span class="material-icons-outlined">exposure_plus_1</span>
+            {{ 'shopFloor.operations.addQuantity' | translate }}
+          </button>
+          <button type="button" class="op-tile__btn op-tile__btn--done"
+                  [disabled]="busy()"
+                  (click)="done.emit(tile.row)"
+                  [attr.data-testid]="'kiosk-op-done-' + tile.row.stepNumber">
+            <span class="material-icons-outlined">task_alt</span>
+            {{ 'shopFloor.operations.done' | translate }}
+          </button>
+        </div>
+      }
+    </li>
+  } @empty {
+    <li class="op-tiles__empty">{{ 'shopFloor.operations.noRouting' | translate }}</li>
+  }
+</ul>

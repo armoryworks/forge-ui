@@ -95,6 +95,70 @@ describe('ShopFloorService', () => {
       expect(req.request.method).toBe('POST');
       req.flush(null);
     });
+
+    it('sends exactly today\'s body when no target is named', () => {
+      service.stopTimer().subscribe();
+      const req = httpMock.expectOne(`${apiUrl}/time-tracking/timer/stop`);
+      expect(req.request.body).toEqual({ notes: null });
+      req.flush(null);
+    });
+
+    it('names the job or the time entry to stop', () => {
+      service.stopTimer({ jobId: 41 }).subscribe();
+      httpMock.expectOne(`${apiUrl}/time-tracking/timer/stop`).flush(null);
+      service.stopTimer({ timeEntryId: 9 }).subscribe();
+      const req = httpMock.expectOne(`${apiUrl}/time-tracking/timer/stop`);
+      expect(req.request.body).toEqual({ notes: null, timeEntryId: 9 });
+      req.flush(null);
+    });
+  });
+
+  describe('operation tracking', () => {
+    it('reads the switch from the job-operations config', () => {
+      let tracking: boolean | undefined;
+      service.getConfig().subscribe(c => (tracking = c.operationTracking));
+      const req = httpMock.expectOne(`${apiUrl}/job-operations/config`);
+      expect(req.request.method).toBe('GET');
+      req.flush({ operationTracking: true });
+      expect(tracking).toBe(true);
+    });
+
+    it('treats a refused or failed config read as off', () => {
+      let tracking: boolean | undefined;
+      service.getConfig().subscribe(c => (tracking = c.operationTracking));
+      httpMock.expectOne(`${apiUrl}/job-operations/config`).flush(null, { status: 403, statusText: 'Forbidden' });
+      expect(tracking).toBe(false);
+    });
+
+    it('GETs the job operations and the caller\'s open timers', () => {
+      service.getOperations(41).subscribe();
+      expect(httpMock.expectOne(`${apiUrl}/jobs/41/operations`).request.method).toBe('GET');
+      service.getActiveTimers().subscribe();
+      expect(httpMock.expectOne(`${apiUrl}/time-tracking/timers/active`).request.method).toBe('GET');
+    });
+
+    it('starts a run timer by default and a setup timer on request', () => {
+      service.startOperationTimer(41, 7).subscribe();
+      const run = httpMock.expectOne(`${apiUrl}/jobs/41/operations/7/timer/start`);
+      expect(run.request.method).toBe('POST');
+      expect(run.request.body).toEqual({ entryType: 'Run' });
+      service.startOperationTimer(41, 7, 'Setup').subscribe();
+      expect(httpMock.expectOne(`${apiUrl}/jobs/41/operations/7/timer/start`).request.body).toEqual({ entryType: 'Setup' });
+    });
+
+    it('stops the caller\'s timer on one operation', () => {
+      service.stopOperationTimer(41, 7).subscribe();
+      const req = httpMock.expectOne(`${apiUrl}/jobs/41/operations/7/timer/stop`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ notes: null });
+    });
+
+    it('PATCHes absolute progress with the expected version', () => {
+      service.updateOperationProgress(41, 7, { completedQuantity: 20, scrapQuantity: 1, expectedVersion: 3 }).subscribe();
+      const req = httpMock.expectOne(`${apiUrl}/jobs/41/operations/7`);
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual({ completedQuantity: 20, scrapQuantity: 1, expectedVersion: 3 });
+    });
   });
 
   describe('completeJob', () => {
