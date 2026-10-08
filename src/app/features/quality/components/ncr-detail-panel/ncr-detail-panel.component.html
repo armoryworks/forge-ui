@@ -1,0 +1,178 @@
+<div class="ncr-detail" [appLoadingBlock]="loading()">
+  @if (ncr(); as n) {
+    <div class="detail-grid">
+      <div class="detail-item">
+        <span class="detail-label">{{ 'ncrDetail.ncrNumber' | translate }}</span>
+        <span class="detail-value" data-testid="ncr-detail-number">{{ n.ncrNumber }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">{{ 'ncrDetail.status' | translate }}</span>
+        <span [class]="getStatusClass(n.status)" data-testid="ncr-detail-status">{{ ('ncrDetail.statuses.' + n.status) | translate }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">{{ 'ncrDetail.type' | translate }}</span>
+        <span class="detail-value">{{ ('ncrDetail.types.' + n.type) | translate }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">{{ 'ncrDetail.detectionStage' | translate }}</span>
+        <span class="detail-value">{{ ('ncrDetail.stages.' + n.detectedAtStage) | translate }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">{{ 'ncrDetail.part' | translate }}</span>
+        <span class="detail-value">{{ n.partNumber }}</span>
+        @if (n.partDescription) {
+          <span class="detail-sub">{{ n.partDescription }}</span>
+        }
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">{{ 'ncrDetail.workOrder' | translate }}</span>
+        <span class="detail-value">{{ n.jobNumber ?? '—' }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">{{ 'ncrDetail.lotNumber' | translate }}</span>
+        <span class="detail-value">{{ n.lotNumber ?? '—' }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">{{ 'ncrDetail.detectedBy' | translate }}</span>
+        <span class="detail-value">{{ n.detectedByName }}</span>
+        <span class="detail-sub">{{ n.detectedAt | date:'MM/dd/yyyy' }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">{{ 'ncrDetail.affectedQuantity' | translate }}</span>
+        <span class="detail-value">{{ n.affectedQuantity | number }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">{{ 'ncrDetail.defectiveQuantity' | translate }}</span>
+        <span class="detail-value">{{ n.defectiveQuantity !== null ? (n.defectiveQuantity | number) : '—' }}</span>
+      </div>
+      @if (n.capaNumber) {
+        <div class="detail-item">
+          <span class="detail-label">{{ 'ncrDetail.capa' | translate }}</span>
+          <span class="detail-value">{{ n.capaNumber }}</span>
+        </div>
+      }
+      <div class="detail-item detail-item--full">
+        <span class="detail-label">{{ 'ncrDetail.description' | translate }}</span>
+        <span class="detail-value">{{ n.description }}</span>
+      </div>
+    </div>
+
+    <section class="ncr-detail__section">
+      <h3 class="ncr-detail__heading">{{ 'ncrDetail.containment' | translate }}</h3>
+      @if (canContain()) {
+        <app-textarea [label]="'ncrDetail.containmentActions' | translate" [formControl]="containmentControl"
+          [maxlength]="4000" data-testid="ncr-detail-containment" />
+        <div class="ncr-detail__actions">
+          <button class="action-btn action-btn--primary" data-testid="ncr-detail-contain-btn"
+            [disabled]="saving() || !containmentControl.value.trim() || containmentControl.invalid"
+            (click)="markContained()">
+            <span class="material-icons-outlined">shield</span>
+            {{ 'ncrDetail.markContained' | translate }}
+          </button>
+        </div>
+      } @else {
+        <span class="detail-value">{{ n.containmentActions ?? '—' }}</span>
+      }
+      @if (n.containmentAt) {
+        <span class="detail-sub">
+          {{ 'ncrDetail.containedBy' | translate: { name: n.containmentByName ?? '—', date: (n.containmentAt | date:'MM/dd/yyyy') } }}
+        </span>
+      }
+    </section>
+
+    <section class="ncr-detail__section">
+      <h3 class="ncr-detail__heading">{{ 'ncrDetail.costs' | translate }}</h3>
+      <div class="ncr-detail__row" [formGroup]="costForm">
+        <app-currency-input [label]="'ncrDetail.materialCost' | translate" formControlName="materialCost"
+          [isReadonly]="!costsEditable()" data-testid="ncr-detail-material-cost" />
+        <app-currency-input [label]="'ncrDetail.laborCost' | translate" formControlName="laborCost"
+          [isReadonly]="!costsEditable()" data-testid="ncr-detail-labor-cost" />
+      </div>
+      <div class="ncr-detail__total">
+        <span class="detail-label">{{ 'ncrDetail.totalCost' | translate }}</span>
+        <app-currency-display [value]="n.totalCostImpact ?? 0" />
+      </div>
+      @if (costsEditable()) {
+        <div class="ncr-detail__actions">
+          <app-validation-button [violations]="costViolations" [loading]="saving()">
+            <button class="action-btn" data-testid="ncr-detail-save-costs"
+              [disabled]="saving() || costForm.invalid || costForm.pristine"
+              (click)="saveCosts()">
+              <span class="material-icons-outlined">save</span>
+              {{ 'ncrDetail.saveCosts' | translate }}
+            </button>
+          </app-validation-button>
+        </div>
+      }
+    </section>
+
+    <section class="ncr-detail__section">
+      <h3 class="ncr-detail__heading">{{ 'ncrDetail.disposition' | translate }}</h3>
+      @if (n.dispositionCode) {
+        <span class="detail-value" data-testid="ncr-detail-disposition-code">{{ ('ncrDetail.dispositionCodes.' + n.dispositionCode) | translate }}</span>
+        @if (n.dispositionNotes) {
+          <span class="detail-value">{{ n.dispositionNotes }}</span>
+        }
+        @if (n.reworkInstructions) {
+          <div class="detail-item">
+            <span class="detail-label">{{ 'ncrDetail.reworkInstructions' | translate }}</span>
+            <span class="detail-value">{{ n.reworkInstructions }}</span>
+          </div>
+        }
+        @if (n.dispositionAt) {
+          <span class="detail-sub">
+            {{ 'ncrDetail.dispositionedBy' | translate: { name: n.dispositionByName ?? '—', date: (n.dispositionAt | date:'MM/dd/yyyy') } }}
+          </span>
+        }
+      }
+      <div class="ncr-detail__actions">
+        @if (canDisposition()) {
+          <button class="action-btn action-btn--primary" data-testid="ncr-detail-disposition-btn" (click)="requestDisposition()">
+            <span class="material-icons-outlined">gavel</span>
+            {{ 'ncrDetail.dispositionTitle' | translate }}
+          </button>
+        }
+        @if (canCloseOrReopen && n.status === 'Dispositioned') {
+          <button class="action-btn" data-testid="ncr-detail-close-btn" (click)="openStatusAction('close')">
+            <span class="material-icons-outlined">lock</span>
+            {{ 'ncrDetail.close' | translate }}
+          </button>
+        }
+        @if (canCloseOrReopen && n.status === 'Closed') {
+          <button class="action-btn" data-testid="ncr-detail-reopen-btn" (click)="openStatusAction('reopen')">
+            <span class="material-icons-outlined">lock_open</span>
+            {{ 'ncrDetail.reopen' | translate }}
+          </button>
+        }
+      </div>
+    </section>
+
+    <app-entity-activity-section entityType="NonConformance" [entityId]="n.id" />
+  }
+</div>
+
+@if (statusAction(); as action) {
+  <app-dialog
+    [title]="(action === 'close' ? 'ncrDetail.closeTitle' : 'ncrDetail.reopenTitle') | translate: { number: ncr()?.ncrNumber }"
+    width="420px"
+    (closed)="closeStatusAction()">
+    <div [formGroup]="reasonForm">
+      <app-textarea
+        [label]="(action === 'close' ? 'ncrDetail.closeReason' : 'ncrDetail.reopenReason') | translate"
+        formControlName="reason"
+        [required]="action === 'reopen'"
+        [maxlength]="2000"
+        data-testid="ncr-detail-status-reason" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeStatusAction()">{{ 'ncrDetail.cancel' | translate }}</button>
+      <app-validation-button [violations]="reasonViolations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" data-testid="ncr-detail-status-confirm"
+          [disabled]="saving() || reasonForm.invalid"
+          (click)="confirmStatusAction()">
+          {{ (action === 'close' ? 'ncrDetail.close' : 'ncrDetail.reopen') | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}

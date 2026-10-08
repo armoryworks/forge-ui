@@ -1,0 +1,71 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.ncr-detail {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+    padding-top: $sp-md;
+    border-top: $border-width-thin solid var(--border);
+  }
+
+  &__heading {
+    @include uppercase-label($font-size-xxs, 0.05em);
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $sp-md;
+  }
+
+  &__total {
+    @include flex-between;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-md;
+    justify-content: flex-end;
+  }
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-md;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+
+  &--full {
+    grid-column: 1 / -1;
+  }
+}
+
+.detail-label {
+  @include uppercase-label($font-size-xxs, 0.05em);
+  color: var(--text-muted);
+}
+
+.detail-value {
+  font-size: $font-size-base;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
+.detail-sub {
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+}

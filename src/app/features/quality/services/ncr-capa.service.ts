@@ -56,6 +56,18 @@ export class NcrCapaService {
     return this.http.post<void>(`${this.baseUrl}/ncrs/${id}/disposition`, disposition);
   }
 
+  containNcr(id: number, containmentActions?: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/ncrs/${id}/contain`, { containmentActions });
+  }
+
+  closeNcr(id: number, notes?: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/ncrs/${id}/close`, { notes });
+  }
+
+  reopenNcr(id: number, reason: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/ncrs/${id}/reopen`, { reason });
+  }
+
   createCapaFromNcr(ncrId: number, ownerId: number): Observable<CorrectiveAction> {
     return this.http.post<CorrectiveAction>(`${this.baseUrl}/ncrs/${ncrId}/create-capa`, { ownerId });
   }

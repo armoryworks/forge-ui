@@ -76,6 +76,38 @@ describe('NcrCapaService', () => {
     req.flush({});
   });
 
+  it('updateNcr(id, costs) sends only the cost fields', () => {
+    service.updateNcr(8, { materialCost: 120.5, laborCost: 0 }).subscribe();
+    const req = httpMock.expectOne(`${ncrsUrl}/8`);
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual({ materialCost: 120.5, laborCost: 0 });
+    req.flush(null);
+  });
+
+  it('containNcr(id, actions) sends POST to /ncrs/{id}/contain with the containment actions', () => {
+    service.containNcr(6, 'Quarantined lot 42').subscribe();
+    const req = httpMock.expectOne(`${ncrsUrl}/6/contain`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ containmentActions: 'Quarantined lot 42' });
+    req.flush(null);
+  });
+
+  it('closeNcr(id, notes) sends POST to /ncrs/{id}/close with the notes', () => {
+    service.closeNcr(6, 'Verified at final inspection').subscribe();
+    const req = httpMock.expectOne(`${ncrsUrl}/6/close`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ notes: 'Verified at final inspection' });
+    req.flush(null);
+  });
+
+  it('reopenNcr(id, reason) sends POST to /ncrs/{id}/reopen with the reason', () => {
+    service.reopenNcr(6, 'Defect recurred').subscribe();
+    const req = httpMock.expectOne(`${ncrsUrl}/6/reopen`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ reason: 'Defect recurred' });
+    req.flush(null);
+  });
+
   it('createCapaFromNcr(ncrId, ownerId) sends POST to /ncrs/{ncrId}/create-capa', () => {
     service.createCapaFromNcr(4, 99).subscribe();
     const req = httpMock.expectOne(`${ncrsUrl}/4/create-capa`);

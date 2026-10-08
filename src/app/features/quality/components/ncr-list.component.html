@@ -1,16 +1,22 @@
 <div class="filters-bar">
-  <app-select label="Type" [formControl]="typeFilter" [options]="typeOptions" (selectionChange)="loadNcrs()" />
-  <app-select label="Status" [formControl]="statusFilter" [options]="statusOptions" (selectionChange)="loadNcrs()" />
+  <app-select [label]="'ncrDetail.type' | translate" [formControl]="typeFilter" [options]="typeFilterOptions"
+    data-testid="ncr-filter-type" (selectionChange)="loadNcrs()" />
+  <app-select [label]="'ncrDetail.status' | translate" [formControl]="statusFilter" [options]="statusFilterOptions"
+    data-testid="ncr-filter-status" (selectionChange)="loadNcrs()" />
 </div>
 
 <div [appLoadingBlock]="loading()">
   <app-data-table tableId="ncr-list" [columns]="columns" [data]="ncrs()"
-    emptyIcon="report_problem" emptyMessage="No non-conformances found">
+    [clickableRows]="true" (rowClick)="openDetail($event)"
+    emptyIcon="report_problem" [emptyMessage]="'ncrDetail.empty' | translate">
     <ng-template appColumnCell="type" let-row>
-      <span class="chip chip--muted">{{ row.type }}</span>
+      <span class="chip chip--muted">{{ ('ncrDetail.types.' + row.type) | translate }}</span>
+    </ng-template>
+    <ng-template appColumnCell="detectedAtStage" let-row>
+      {{ ('ncrDetail.stages.' + row.detectedAtStage) | translate }}
     </ng-template>
     <ng-template appColumnCell="status" let-row>
-      <span [class]="getStatusClass(row.status)">{{ row.status }}</span>
+      <span [class]="getStatusClass(row.status)">{{ ('ncrDetail.statuses.' + row.status) | translate }}</span>
     </ng-template>
     <ng-template appColumnCell="detectedAt" let-row>
       {{ row.detectedAt | date:'MM/dd/yyyy' }}
@@ -18,12 +24,14 @@
     <ng-template appColumnCell="actions" let-row>
       <div class="ncr-list__actions">
         @if (row.status !== 'Dispositioned' && row.status !== 'Closed') {
-          <button class="icon-btn" aria-label="Disposition NCR" (click)="openDisposition(row); $event.stopPropagation()">
+          <button class="icon-btn" [attr.aria-label]="'ncrDetail.dispositionTitle' | translate"
+            (click)="openDisposition(row); $event.stopPropagation()">
             <span class="material-icons-outlined">gavel</span>
           </button>
         }
         @if (!row.capaId && row.status !== 'Closed') {
-          <button class="icon-btn" aria-label="Create CAPA" (click)="createCapa(row); $event.stopPropagation()">
+          <button class="icon-btn" [attr.aria-label]="'ncrDetail.createCapa' | translate"
+            (click)="createCapa(row); $event.stopPropagation()">
             <span class="material-icons-outlined">assignment_turned_in</span>
           </button>
         }
@@ -32,52 +40,80 @@
   </app-data-table>
 </div>
 
+<app-detail-side-panel [open]="selectedNcr() !== null" [title]="selectedNcr()?.ncrNumber ?? ''" (closed)="closeDetail()">
+  @if (selectedNcr(); as ncr) {
+    <app-ncr-detail-panel [ncrId]="ncr.id" [refresh]="detailRefresh()"
+      (dispositionRequested)="openDisposition($event)"
+      (changed)="loadNcrs()" />
+  }
+</app-detail-side-panel>
+
 @if (showCreateDialog()) {
-  <app-dialog title="Create Non-Conformance" width="520px" (closed)="showCreateDialog.set(false)">
+  <app-dialog [title]="'ncrDetail.createTitle' | translate" width="520px" (closed)="showCreateDialog.set(false)">
     <div [formGroup]="createForm">
       <div class="dialog-row">
-        <app-select label="Type" formControlName="type" [options]="typeOptions.slice(1)" [required]="true" />
-        <app-select label="Detection Stage" formControlName="detectedAtStage" [options]="detectionStageOptions" [required]="true" />
+        <app-select [label]="'ncrDetail.type' | translate" formControlName="type" [options]="typeOptions" [required]="true"
+          data-testid="ncr-create-type" />
+        <app-select [label]="'ncrDetail.detectionStage' | translate" formControlName="detectedAtStage"
+          [options]="detectionStageOptions" [required]="true" data-testid="ncr-create-stage" />
       </div>
+      <app-entity-picker data-testid="ncr-create-part"
+        [label]="'ncrDetail.part' | translate"
+        entityType="parts"
+        displayField="partNumber"
+        secondaryDisplayField="name"
+        formControlName="partId" />
       <div class="dialog-row">
-        <app-input label="Part ID" type="number" formControlName="partId" [required]="true" />
-        <app-input label="Job ID" type="number" formControlName="jobId" />
+        <app-entity-picker data-testid="ncr-create-work-order"
+          [label]="'ncrDetail.workOrder' | translate"
+          entityType="jobs"
+          displayField="jobNumber"
+          secondaryDisplayField="title"
+          formControlName="jobId"
+          [placeholder]="'ncrDetail.optional' | translate" />
+        <app-input [label]="'ncrDetail.lotNumber' | translate" formControlName="lotNumber" [maxlength]="100"
+          [placeholder]="'ncrDetail.optional' | translate" data-testid="ncr-create-lot" />
       </div>
-      <app-textarea label="Description" formControlName="description" [required]="true" />
+      <app-textarea [label]="'ncrDetail.description' | translate" formControlName="description" [required]="true"
+        data-testid="ncr-create-description" />
       <div class="dialog-row">
-        <app-input label="Affected Quantity" type="number" formControlName="affectedQuantity" [required]="true" />
-        <app-input label="Defective Quantity" type="number" formControlName="defectiveQuantity" />
+        <app-input [label]="'ncrDetail.affectedQuantity' | translate" type="number" formControlName="affectedQuantity"
+          [required]="true" data-testid="ncr-create-affected-qty" />
+        <app-input [label]="'ncrDetail.defectiveQuantity' | translate" type="number" formControlName="defectiveQuantity"
+          data-testid="ncr-create-defective-qty" />
       </div>
-      <app-textarea label="Containment Actions" formControlName="containmentActions" />
+      <app-textarea [label]="'ncrDetail.containmentActions' | translate" formControlName="containmentActions"
+        data-testid="ncr-create-containment" />
     </div>
     <div dialog-footer>
-      <button class="action-btn" (click)="showCreateDialog.set(false)">Cancel</button>
+      <button class="action-btn" (click)="showCreateDialog.set(false)">{{ 'ncrDetail.cancel' | translate }}</button>
       <app-validation-button [violations]="createViolations" [loading]="saving()">
-      <button class="action-btn action-btn--primary"
+      <button class="action-btn action-btn--primary" data-testid="ncr-create-save"
         [disabled]="createForm.invalid || saving()"
-        (click)="saveNcr()">Create</button>
+        (click)="saveNcr()">{{ 'ncrDetail.create' | translate }}</button>
       </app-validation-button>
     </div>
   </app-dialog>
 }
 
 @if (showDispositionDialog()) {
-  <app-dialog title="Disposition NCR" width="420px" (closed)="showDispositionDialog.set(false)">
+  <app-dialog [title]="'ncrDetail.dispositionTitle' | translate" width="420px" (closed)="showDispositionDialog.set(false)">
     <div [formGroup]="dispositionForm">
-      <app-select label="Disposition Code" formControlName="code" [options]="dispositionCodeOptions" [required]="true"
-        data-testid="ncr-disposition-code" />
-      <app-textarea label="Notes" formControlName="notes" [required]="notesRequired()" data-testid="ncr-disposition-notes" />
+      <app-select [label]="'ncrDetail.dispositionCode' | translate" formControlName="code" [options]="dispositionCodeOptions"
+        [required]="true" data-testid="ncr-disposition-code" />
+      <app-textarea [label]="'ncrDetail.notes' | translate" formControlName="notes" [required]="notesRequired()"
+        data-testid="ncr-disposition-notes" />
       @if (dispositionCode() === 'Rework') {
-        <app-textarea label="Rework Instructions" formControlName="reworkInstructions" [required]="true"
-          data-testid="ncr-disposition-rework-instructions" />
+        <app-textarea [label]="'ncrDetail.reworkInstructions' | translate" formControlName="reworkInstructions"
+          [required]="true" data-testid="ncr-disposition-rework-instructions" />
       }
     </div>
     <div dialog-footer>
-      <button class="action-btn" (click)="showDispositionDialog.set(false)">Cancel</button>
+      <button class="action-btn" (click)="showDispositionDialog.set(false)">{{ 'ncrDetail.cancel' | translate }}</button>
       <app-validation-button [violations]="dispositionViolations" [loading]="saving()">
-      <button class="action-btn action-btn--primary"
+      <button class="action-btn action-btn--primary" data-testid="ncr-disposition-save"
         [disabled]="dispositionForm.invalid || saving()"
-        (click)="saveDisposition()">Record Disposition</button>
+        (click)="saveDisposition()">{{ 'ncrDetail.recordDisposition' | translate }}</button>
       </app-validation-button>
     </div>
   </app-dialog>
