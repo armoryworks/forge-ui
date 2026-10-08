@@ -121,7 +121,16 @@ describe('LayoutService', () => {
       override(navigator, 'maxTouchPoints', opts.touch);
       override(window, 'innerWidth', opts.width);
       override(window, 'innerHeight', opts.height);
-      vi.spyOn(window, 'matchMedia').mockReturnValue({ matches: !!opts.standalone } as MediaQueryList);
+      vi.spyOn(window, 'matchMedia').mockImplementation((query: string) => ({
+        matches: !!opts.standalone,
+        media: query,
+        onchange: null,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => false,
+      }) as MediaQueryList);
       return (service as unknown as { detectMobileDevice(): boolean }).detectMobileDevice();
     };
 
