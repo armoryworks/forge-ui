@@ -139,7 +139,7 @@
       "notificationsTitle": "Email notifications",
       "notificationsDesc": "emails for mentions and assignments",
       "planningTitle": "Planning cycle",
-      "planningDesc": "default cycle length and the daily nudge hour",
+      "planningDesc": "default cycle length",
       "payPeriodTitle": "Pay period lock",
       "payPeriodDesc": "stop changes to time entries up to a date"
     },
@@ -151,8 +151,6 @@
       "appNameDesc": "Name shown in the header and browser tab",
       "cycleDays": "Planning cycle (days)",
       "cycleDaysDesc": "Default length of a planning cycle, in days",
-      "nudgeHour": "Daily nudge hour (24h)",
-      "nudgeHourDesc": "Hour of the day for the daily planning nudge (0-23)",
       "maxUpload": "Max upload size (MB)",
       "maxUploadDesc": "Largest file that can be uploaded, in megabytes",
       "defaultPriority": "Default job priority",

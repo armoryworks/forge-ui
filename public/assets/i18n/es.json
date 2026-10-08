@@ -139,7 +139,7 @@
       "notificationsTitle": "Notificaciones por correo",
       "notificationsDesc": "correos por menciones y asignaciones",
       "planningTitle": "Ciclo de planificación",
-      "planningDesc": "duración predeterminada del ciclo y hora del recordatorio diario",
+      "planningDesc": "duración predeterminada del ciclo",
       "payPeriodTitle": "Bloqueo del periodo de pago",
       "payPeriodDesc": "impide cambios en los registros de tiempo hasta una fecha"
     },
@@ -151,8 +151,6 @@
       "appNameDesc": "Nombre que aparece en el encabezado y en la pestaña del navegador",
       "cycleDays": "Ciclo de planificación (días)",
       "cycleDaysDesc": "Duración predeterminada de un ciclo de planificación, en días",
-      "nudgeHour": "Hora del recordatorio diario (24 h)",
-      "nudgeHourDesc": "Hora del día para el recordatorio diario de planificación (0-23)",
       "maxUpload": "Tamaño máximo de carga (MB)",
       "maxUploadDesc": "Archivo más grande que se puede cargar, en megabytes",
       "defaultPriority": "Prioridad predeterminada de trabajos",

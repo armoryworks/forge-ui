@@ -302,7 +302,6 @@ export class AdminComponent implements OnInit {
   protected readonly settingDefinitions: SystemSettingDefinition[] = [
     { key: 'app.name', labelKey: 'capabilityAreas.systemSettings.appName', descKey: 'capabilityAreas.systemSettings.appNameDesc', type: 'text' },
     { key: 'planning.cycle_duration_days', labelKey: 'capabilityAreas.systemSettings.cycleDays', descKey: 'capabilityAreas.systemSettings.cycleDaysDesc', type: 'number' },
-    { key: 'planning.nudge_hour', labelKey: 'capabilityAreas.systemSettings.nudgeHour', descKey: 'capabilityAreas.systemSettings.nudgeHourDesc', type: 'number' },
     { key: 'files.max_upload_size_mb', labelKey: 'capabilityAreas.systemSettings.maxUpload', descKey: 'capabilityAreas.systemSettings.maxUploadDesc', type: 'number' },
     { key: 'jobs.default_priority', labelKey: 'capabilityAreas.systemSettings.defaultPriority', descKey: 'capabilityAreas.systemSettings.defaultPriorityDesc', type: 'priority' },
     { key: 'jobs.auto_archive_days', labelKey: 'capabilityAreas.systemSettings.autoArchive', descKey: 'capabilityAreas.systemSettings.autoArchiveDesc', type: 'number' },

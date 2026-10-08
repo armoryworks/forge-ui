@@ -53,7 +53,7 @@ export const SETTINGS_SEARCH_TOPICS: SettingsSearchTopic[] = [
     highlight: 'planning.cycle_duration_days',
     titleKey: 'capabilityAreas.settingsSearch.planningTitle',
     descKey: 'capabilityAreas.settingsSearch.planningDesc',
-    keywords: ['planning', 'cycle', 'nudge'],
+    keywords: ['planning', 'cycle'],
   },
   {
     highlight: 'pay-period',
