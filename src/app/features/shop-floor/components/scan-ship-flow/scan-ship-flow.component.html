@@ -13,13 +13,13 @@
       @for (line of openShipmentLines(); track line.shipmentLineId) {
         <button class="scan-ship__line-item"
                 (click)="selectLine(line)"
-                [attr.aria-label]="'Select shipment ' + line.shipmentNumber"
+                [attr.aria-label]="'kioskFlows.common.selectShipmentAria' | translate: { number: line.shipmentNumber }"
                 data-testid="ship-line-item">
           <div class="scan-ship__line-info">
             <span class="scan-ship__line-shipment">{{ line.shipmentNumber }}</span>
-            <span class="scan-ship__line-so">SO {{ line.salesOrderNumber }}</span>
+            <span class="scan-ship__line-so">{{ 'kioskFlows.ship.salesOrderNumber' | translate: { number: line.salesOrderNumber } }}</span>
           </div>
-          <span class="scan-ship__line-qty">{{ line.requiredQuantity }} {{ 'common.units' | translate }}</span>
+          <span class="scan-ship__line-qty">{{ 'kioskFlows.ship.units' | translate: { count: line.requiredQuantity } }}</span>
         </button>
       } @empty {
         <div class="scan-ship__empty">
@@ -35,7 +35,7 @@
     @if (selectedLine(); as line) {
       <div class="scan-ship__selected">
         <span class="scan-ship__selected-label">{{ line.shipmentNumber }}</span>
-        <span class="scan-ship__selected-so">SO {{ line.salesOrderNumber }}</span>
+        <span class="scan-ship__selected-so">{{ 'kioskFlows.ship.salesOrderNumber' | translate: { number: line.salesOrderNumber } }}</span>
         <span class="scan-ship__selected-qty">{{ line.requiredQuantity }} {{ 'shopFloor.shipFlow.shippingQuantity' | translate }}</span>
       </div>
 
@@ -43,14 +43,14 @@
         <div class="scan-ship__qty-actions">
           <button class="action-btn action-btn--primary scan-ship__qty-btn"
                   (click)="shipAll()"
-                  aria-label="Ship all quantity"
+                  [attr.aria-label]="'kioskFlows.ship.shipAllAria' | translate"
                   data-testid="ship-all-btn">
             <span class="material-icons-outlined">check</span>
             {{ 'shopFloor.shipFlow.shipAll' | translate }} ({{ line.requiredQuantity }})
           </button>
           <button class="action-btn scan-ship__qty-btn"
                   (click)="showPartial()"
-                  aria-label="Enter partial quantity">
+                  [attr.aria-label]="'kioskFlows.ship.partialAria' | translate">
             <span class="material-icons-outlined">edit</span>
             {{ 'shopFloor.shipFlow.partialShip' | translate }}
           </button>
@@ -63,20 +63,20 @@
             [formControl]="partialQtyControl"
             data-testid="ship-partial-qty" />
           <div class="scan-ship__partial-actions">
-            <button class="action-btn" (click)="isPartial.set(false)" aria-label="Cancel partial">
+            <button class="action-btn" (click)="isPartial.set(false)" [attr.aria-label]="'kioskFlows.ship.cancelPartialAria' | translate">
               {{ 'common.cancel' | translate }}
             </button>
             <button class="action-btn action-btn--primary"
                     [disabled]="!partialQtyControl.value || partialQtyControl.value! <= 0 || partialQtyControl.value! > line.requiredQuantity"
                     (click)="confirmPartial()"
-                    aria-label="Confirm partial quantity">
+                    [attr.aria-label]="'kioskFlows.common.confirmPartialAria' | translate">
               {{ 'common.confirm' | translate }}
             </button>
           </div>
         </div>
       }
 
-      <button class="action-btn scan-ship__back" (click)="backToSelect()" aria-label="Back to line selection">
+      <button class="action-btn scan-ship__back" (click)="backToSelect()" [attr.aria-label]="'kioskFlows.ship.backToSelectAria' | translate">
         <span class="material-icons-outlined">arrow_back</span>
         {{ 'common.back' | translate }}
       </button>
@@ -94,7 +94,7 @@
           </div>
           <div class="scan-ship__confirm-row">
             <span class="scan-ship__confirm-label">{{ 'shopFloor.shipFlow.salesOrder' | translate }}</span>
-            <span class="scan-ship__confirm-value">SO {{ line.salesOrderNumber }}</span>
+            <span class="scan-ship__confirm-value">{{ 'kioskFlows.ship.salesOrderNumber' | translate: { number: line.salesOrderNumber } }}</span>
           </div>
           <div class="scan-ship__confirm-row">
             <span class="scan-ship__confirm-label">{{ 'shopFloor.shipFlow.quantity' | translate }}</span>
@@ -110,14 +110,14 @@
         }
 
         <div class="scan-ship__confirm-actions">
-          <button class="action-btn" (click)="backToQuantity()" [disabled]="submitting()" aria-label="Back to quantity">
+          <button class="action-btn" (click)="backToQuantity()" [disabled]="submitting()" [attr.aria-label]="'kioskFlows.ship.backToQuantityAria' | translate">
             <span class="material-icons-outlined">arrow_back</span>
             {{ 'common.back' | translate }}
           </button>
           <button class="action-btn action-btn--primary"
                   [disabled]="submitting()"
                   (click)="confirmShip()"
-                  aria-label="Confirm shipment"
+                  [attr.aria-label]="'kioskFlows.ship.confirmAria' | translate"
                   data-testid="ship-confirm-btn">
             @if (submitting()) {
               <span class="material-icons-outlined scan-ship__spinner">sync</span>
@@ -141,7 +141,7 @@
 
   <!-- Cancel button (always visible except done) -->
   @if (step() !== 'done') {
-    <button class="action-btn scan-ship__cancel" (click)="cancel()" aria-label="Cancel shipping flow">
+    <button class="action-btn scan-ship__cancel" (click)="cancel()" [attr.aria-label]="'kioskFlows.ship.cancelAria' | translate">
       <span class="material-icons-outlined">close</span>
       {{ 'common.cancel' | translate }}
     </button>

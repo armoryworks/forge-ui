@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ScanActionService } from '../../../../shared/services/scan-action.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -13,7 +14,7 @@ type CountStep = 'enter' | 'confirm';
 @Component({
   selector: 'app-scan-count-flow',
   standalone: true,
-  imports: [ReactiveFormsModule, InputComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, InputComponent],
   templateUrl: './scan-count-flow.component.html',
   styleUrl: './scan-count-flow.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -21,6 +22,7 @@ type CountStep = 'enter' | 'confirm';
 export class ScanCountFlowComponent implements OnInit {
   private readonly scanAction = inject(ScanActionService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   readonly context = input.required<ScanContext>();
   readonly completed = output<void>();
@@ -61,7 +63,7 @@ export class ScanCountFlowComponent implements OnInit {
   protected submit(): void {
     const ctx = this.context();
     if (!ctx.currentLocationId) {
-      this.snackbar.error('No location set for this part');
+      this.snackbar.error(this.translate.instant('kioskFlows.count.noLocation'));
       return;
     }
 
@@ -75,14 +77,17 @@ export class ScanCountFlowComponent implements OnInit {
         this.submitting.set(false);
         const diff = this.difference();
         const msg = diff === 0
-          ? `Count confirmed: ${ctx.partNumber}`
-          : `Count adjusted: ${ctx.partNumber} (${diff > 0 ? '+' : ''}${diff})`;
+          ? this.translate.instant('kioskFlows.count.confirmed', { part: ctx.partNumber })
+          : this.translate.instant('kioskFlows.count.adjusted', {
+            part: ctx.partNumber,
+            difference: `${diff > 0 ? '+' : ''}${diff}`,
+          });
         this.snackbar.success(msg);
         this.completed.emit();
       },
       error: () => {
         this.submitting.set(false);
-        this.snackbar.error('Count failed. Please try again.');
+        this.snackbar.error(this.translate.instant('kioskFlows.count.failed'));
       },
     });
   }

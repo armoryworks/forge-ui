@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ScanActionService } from '../../../../shared/services/scan-action.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -16,7 +17,7 @@ type MoveStep = 'quantity' | 'destination' | 'confirm';
 @Component({
   selector: 'app-scan-move-flow',
   standalone: true,
-  imports: [ReactiveFormsModule, SelectComponent, InputComponent, BarcodeScanInputComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, SelectComponent, InputComponent, BarcodeScanInputComponent],
   templateUrl: './scan-move-flow.component.html',
   styleUrl: './scan-move-flow.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,6 +25,7 @@ type MoveStep = 'quantity' | 'destination' | 'confirm';
 export class ScanMoveFlowComponent implements OnInit {
   private readonly scanAction = inject(ScanActionService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
   private readonly inventoryService = inject(InventoryService);
 
   readonly context = input.required<ScanContext>();
@@ -82,7 +84,7 @@ export class ScanMoveFlowComponent implements OnInit {
       this.scannedDestination.set(match.label);
     } else {
       this.scannedDestination.set(null);
-      this.snackbar.warn(`Location not found: ${value}`);
+      this.snackbar.warn(this.translate.instant('kioskFlows.move.locationNotFound', { value }));
     }
   }
 
@@ -105,12 +107,12 @@ export class ScanMoveFlowComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.snackbar.success(`Moved ${this.quantity()} x ${ctx.partNumber}`);
+        this.snackbar.success(this.translate.instant('kioskFlows.move.success', { quantity: this.quantity(), part: ctx.partNumber }));
         this.completed.emit();
       },
       error: () => {
         this.submitting.set(false);
-        this.snackbar.error('Move failed. Please try again.');
+        this.snackbar.error(this.translate.instant('kioskFlows.move.failed'));
       },
     });
   }
@@ -128,6 +130,6 @@ export class ScanMoveFlowComponent implements OnInit {
 
   protected getToLocationLabel(): string {
     const opt = this.locationOptions().find(o => o.value === this.toLocationId.value);
-    return opt?.label ?? 'Unknown';
+    return opt?.label ?? this.translate.instant('kioskFlows.common.unknown');
   }
 }

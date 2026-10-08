@@ -1,12 +1,12 @@
 @if (isVisible()) {
-  <div class="scan-overlay" data-testid="scan-overlay" role="button" tabindex="0" aria-label="Close scan overlay" (click)="close()" (keydown.enter)="close()" (keydown.escape)="close()">
+  <div class="scan-overlay" data-testid="scan-overlay" role="button" tabindex="0" [attr.aria-label]="'kioskFlows.overlay.closeAria' | translate" (click)="close()" (keydown.enter)="close()" (keydown.escape)="close()">
     <div class="scan-overlay__card" role="dialog" aria-modal="true" tabindex="-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
 
       <!-- Loading -->
       @if (phase() === 'loading') {
         <div class="scan-overlay__loading">
           <span class="material-icons-outlined scan-overlay__spinner">sync</span>
-          <p class="scan-overlay__loading-text">Looking up part...</p>
+          <p class="scan-overlay__loading-text">{{ 'kioskFlows.overlay.lookingUp' | translate }}</p>
         </div>
       }
 
@@ -31,7 +31,7 @@
             <div class="scan-overlay__stock-badge">
               <span class="material-icons-outlined">inventory_2</span>
               <span class="scan-overlay__stock-qty">{{ context()!.currentStock }}</span>
-              <span class="scan-overlay__stock-label">in stock</span>
+              <span class="scan-overlay__stock-label">{{ 'kioskFlows.overlay.inStock' | translate }}</span>
             </div>
             @if (context()!.currentLocationName) {
               <div class="scan-overlay__location">
@@ -54,7 +54,7 @@
           @if (!action.enabled && action.disabledReason) {
             <div class="scan-overlay__disabled-hint">
               <span class="material-icons-outlined">info_outline</span>
-              <strong>{{ action.action }}:</strong> {{ action.disabledReason }}
+              <strong>{{ actionLabel(action.action) }}:</strong> {{ disabledReasonLabel(action.disabledReason) }}
             </div>
           }
         }
@@ -64,13 +64,13 @@
                   [class.scan-overlay__multi-scan-btn--active]="multiScanMode()"
                   (click)="toggleMultiScan()"
                   data-testid="scan-multi-scan-btn"
-                  aria-label="Toggle multi-scan mode">
+                  [attr.aria-label]="'kioskFlows.overlay.multiScanAria' | translate">
             <span class="material-icons-outlined">repeat</span>
-            Multi-Scan
+            {{ 'kioskFlows.overlay.multiScan' | translate }}
           </button>
-          <button class="action-btn" (click)="close()" data-testid="scan-overlay-done" aria-label="Close scan overlay">
+          <button class="action-btn" (click)="close()" data-testid="scan-overlay-done" [attr.aria-label]="'kioskFlows.overlay.closeAria' | translate">
             <span class="material-icons-outlined">close</span>
-            Done
+            {{ 'common.done' | translate }}
           </button>
         </div>
       }

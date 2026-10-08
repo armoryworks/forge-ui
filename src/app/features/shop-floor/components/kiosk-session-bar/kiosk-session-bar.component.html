@@ -11,7 +11,7 @@
           <span class="session-bar__name">{{ session.userName }}</span>
           <div class="session-bar__meta">
             <span class="material-icons-outlined session-bar__mode-icon">{{ getModeIcon(session.mode) }}</span>
-            <span class="session-bar__mode">{{ getModeLabel(session.mode) }}</span>
+            <span class="session-bar__mode">{{ getModeLabelKey(session.mode) | translate }}</span>
             @if (!isForeground(session)) {
               <span class="session-bar__idle">{{ getIdleDisplay(session) }}</span>
             }
@@ -19,7 +19,7 @@
         </div>
         <button class="session-bar__dismiss"
                 (click)="dismiss($event, session)"
-                [attr.aria-label]="'Close session for ' + session.userName">
+                [attr.aria-label]="'kioskFlows.session.closeAria' | translate: { name: session.userName }">
           <span class="material-icons-outlined">close</span>
         </button>
       </button>

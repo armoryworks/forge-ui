@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 export type KeypadMode = 'auto' | 'always' | 'never';
 
@@ -20,6 +21,7 @@ function readMode(): KeypadMode {
 @Component({
   selector: 'app-numeric-keypad',
   standalone: true,
+  imports: [TranslatePipe],
   templateUrl: './numeric-keypad.component.html',
   styleUrl: './numeric-keypad.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -68,10 +70,10 @@ export class NumericKeypadComponent {
     localStorage.setItem(KEYPAD_MODE_KEY, next);
   }
 
-  protected modeLabel(): string {
+  protected modeLabelKey(): string {
     const m = this.mode();
-    if (m === 'always') return 'Keypad: Always';
-    if (m === 'never') return 'Keypad: Off';
-    return this.isTouch() ? 'Keypad: Auto (on)' : 'Keypad: Auto (off)';
+    if (m === 'always') return 'kioskFlows.keypad.modeAlways';
+    if (m === 'never') return 'kioskFlows.keypad.modeOff';
+    return this.isTouch() ? 'kioskFlows.keypad.modeAutoOn' : 'kioskFlows.keypad.modeAutoOff';
   }
 }

@@ -1,12 +1,12 @@
 @if (visible()) {
-  <div class="keypad" role="group" aria-label="Numeric keypad">
+  <div class="keypad" role="group" [attr.aria-label]="'kioskFlows.keypad.aria' | translate">
     @for (row of topRows; track $index) {
       <div class="keypad__row">
         @for (digit of row; track digit) {
           <button type="button" class="keypad__key"
                   [disabled]="disabled()"
                   (click)="onDigit(digit)"
-                  [attr.aria-label]="'Digit ' + digit">
+                  [attr.aria-label]="'kioskFlows.keypad.digitAria' | translate: { digit: digit }">
             {{ digit }}
           </button>
         }
@@ -16,19 +16,19 @@
       <button type="button" class="keypad__key keypad__key--secondary"
               [disabled]="disabled()"
               (click)="onClear()"
-              aria-label="Clear PIN">
+              [attr.aria-label]="'kioskFlows.keypad.clearAria' | translate">
         <span class="material-icons-outlined">clear</span>
       </button>
       <button type="button" class="keypad__key"
               [disabled]="disabled()"
               (click)="onDigit('0')"
-              aria-label="Digit 0">
+              [attr.aria-label]="'kioskFlows.keypad.digitAria' | translate: { digit: '0' }">
         0
       </button>
       <button type="button" class="keypad__key keypad__key--secondary"
               [disabled]="disabled()"
               (click)="onBackspace()"
-              aria-label="Delete last digit">
+              [attr.aria-label]="'kioskFlows.keypad.backspaceAria' | translate">
         <span class="material-icons-outlined">backspace</span>
       </button>
     </div>
@@ -37,7 +37,7 @@
 
 <button type="button" class="keypad__mode-toggle"
         (click)="cycleMode()"
-        [attr.aria-label]="modeLabel()">
+        [attr.aria-label]="modeLabelKey() | translate">
   <span class="material-icons-outlined">dialpad</span>
-  {{ modeLabel() }}
+  {{ modeLabelKey() | translate }}
 </button>

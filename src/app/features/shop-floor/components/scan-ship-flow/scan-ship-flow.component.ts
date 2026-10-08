@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy, Component, computed, inject, input, output, signal,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { ShipmentService } from '../../../shipments/services/shipment.service';
@@ -26,6 +26,7 @@ type ShipStep = 'select-line' | 'quantity' | 'confirming' | 'done';
 })
 export class ScanShipFlowComponent {
   private readonly shipmentService = inject(ShipmentService);
+  private readonly translate = inject(TranslateService);
 
   // Inputs
   readonly partId = input.required<number>();
@@ -95,7 +96,7 @@ export class ScanShipFlowComponent {
       },
       error: () => {
         this.submitting.set(false);
-        this.error.set('Failed to process shipment');
+        this.error.set(this.translate.instant('kioskFlows.ship.failed'));
       },
     });
   }

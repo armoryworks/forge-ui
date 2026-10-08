@@ -7,7 +7,7 @@
     <button
       class="icon-btn"
       (click)="onClose()"
-      aria-label="Close location view">
+      [attr.aria-label]="'kioskFlows.location.closeAria' | translate">
       <span class="material-icons-outlined">close</span>
     </button>
   </div>
@@ -25,16 +25,16 @@
   } @else if (!hasContents()) {
     <div class="scan-location__empty">
       <span class="material-icons-outlined scan-location__empty-icon">inventory_2</span>
-      <span>{{ 'shopFloor.locationEmpty' | translate }}</span>
+      <span>{{ 'kioskFlows.location.empty' | translate }}</span>
     </div>
   } @else {
-    <div class="scan-location__list" role="list" aria-label="Location contents">
+    <div class="scan-location__list" role="list" [attr.aria-label]="'kioskFlows.location.contentsAria' | translate">
       @for (item of contents(); track item.id) {
         <div class="scan-location__row" role="listitem">
           <div class="scan-location__part-info">
             <span class="scan-location__part-name">{{ item.entityName }}</span>
             @if (item.lotNumber) {
-              <span class="scan-location__lot">{{ 'shopFloor.lot' | translate }}: {{ item.lotNumber }}</span>
+              <span class="scan-location__lot">{{ 'kioskFlows.location.lot' | translate }}: {{ item.lotNumber }}</span>
             }
           </div>
           <div class="scan-location__qty">
@@ -43,9 +43,9 @@
           <button
             class="action-btn action-btn--sm"
             (click)="onScanPart(item)"
-            [attr.aria-label]="'Scan ' + item.entityName">
+            [attr.aria-label]="'kioskFlows.location.scanPartAria' | translate: { name: item.entityName }">
             <span class="material-icons-outlined">qr_code_scanner</span>
-            {{ 'shopFloor.scan' | translate }}
+            {{ 'kioskFlows.location.scan' | translate }}
           </button>
         </div>
       }

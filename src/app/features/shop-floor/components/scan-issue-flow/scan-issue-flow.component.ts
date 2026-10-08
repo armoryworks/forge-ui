@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ScanActionService } from '../../../../shared/services/scan-action.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -13,7 +14,7 @@ type IssueStep = 'select-job' | 'quantity' | 'confirm';
 @Component({
   selector: 'app-scan-issue-flow',
   standalone: true,
-  imports: [ReactiveFormsModule, InputComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, InputComponent],
   templateUrl: './scan-issue-flow.component.html',
   styleUrl: './scan-issue-flow.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -21,6 +22,7 @@ type IssueStep = 'select-job' | 'quantity' | 'confirm';
 export class ScanIssueFlowComponent implements OnInit {
   private readonly scanAction = inject(ScanActionService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   readonly context = input.required<ScanContext>();
   readonly completed = output<void>();
@@ -85,12 +87,16 @@ export class ScanIssueFlowComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.snackbar.success(`Issued ${this.quantity()} x ${ctx.partNumber} to ${job.jobNumber}`);
+        this.snackbar.success(this.translate.instant('kioskFlows.issue.success', {
+          quantity: this.quantity(),
+          part: ctx.partNumber,
+          workOrder: job.jobNumber,
+        }));
         this.completed.emit();
       },
       error: () => {
         this.submitting.set(false);
-        this.snackbar.error('Issue failed. Please try again.');
+        this.snackbar.error(this.translate.instant('kioskFlows.issue.failed'));
       },
     });
   }

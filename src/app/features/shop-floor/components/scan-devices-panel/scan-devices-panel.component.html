@@ -2,12 +2,12 @@
   <div class="devices-panel__header">
     <div class="devices-panel__title-row">
       <span class="material-icons-outlined">devices</span>
-      <h3 class="devices-panel__title">Paired Scanners</h3>
+      <h3 class="devices-panel__title">{{ 'kioskFlows.devices.title' | translate }}</h3>
     </div>
     <button class="action-btn action-btn--sm" (click)="togglePairForm()"
-            aria-label="Pair new device">
+            [attr.aria-label]="'kioskFlows.devices.pairNewAria' | translate">
       <span class="material-icons-outlined">{{ showPairForm() ? 'close' : 'add' }}</span>
-      {{ showPairForm() ? 'Cancel' : 'Pair New' }}
+      {{ (showPairForm() ? 'common.cancel' : 'kioskFlows.devices.pairNew') | translate }}
     </button>
   </div>
 
@@ -15,60 +15,62 @@
     <div class="devices-panel__pair-form">
       <div class="pair-instructions">
         <div class="pair-instructions__intro">
-          Focus the <strong>Device ID</strong> field, then follow the steps for your hardware. The scan auto-fills the field — Enter submits.
+          {{ 'kioskFlows.devices.introBefore' | translate }} <strong>{{ 'kioskFlows.devices.deviceId' | translate }}</strong> {{ 'kioskFlows.devices.introAfter' | translate }}
         </div>
 
         <div class="pair-instructions__type">
           <div class="pair-instructions__heading">
             <span class="material-icons-outlined">qr_code_scanner</span>
-            <span>USB Barcode Scanner (keyboard wedge)</span>
+            <span>{{ 'kioskFlows.devices.usbHeading' | translate }}</span>
           </div>
           <ol class="pair-instructions__steps">
-            <li>Plug the scanner into any USB port on the kiosk.</li>
-            <li>Click the Device ID field to give it focus.</li>
-            <li>Scan the <em>device serial barcode</em> on the scanner body (or any unique test barcode reserved for this unit).</li>
+            <li>{{ 'kioskFlows.devices.usbStep1' | translate }}</li>
+            <li>{{ 'kioskFlows.devices.focusField' | translate }}</li>
+            <li>{{ 'kioskFlows.devices.scanThe' | translate }} <em>{{ 'kioskFlows.devices.serialBarcode' | translate }}</em> {{ 'kioskFlows.devices.usbStep3After' | translate }}</li>
           </ol>
         </div>
 
         <div class="pair-instructions__type">
           <div class="pair-instructions__heading">
             <span class="material-icons-outlined">contactless</span>
-            <span>NFC Reader (ACR122U + NTAG215)</span>
+            <span>{{ 'kioskFlows.devices.nfcHeading' | translate }}</span>
           </div>
           <ol class="pair-instructions__steps">
-            <li>Plug the ACR122U reader into USB — wait for the solid green LED.</li>
-            <li>Click the Device ID field to give it focus.</li>
-            <li>Tap a dedicated NTAG215 sticker (one per reader, not a user badge) onto the reader. The UID populates the field.</li>
+            <li>{{ 'kioskFlows.devices.nfcStep1' | translate }}</li>
+            <li>{{ 'kioskFlows.devices.focusField' | translate }}</li>
+            <li>{{ 'kioskFlows.devices.nfcStep3' | translate }}</li>
           </ol>
         </div>
 
         <div class="pair-instructions__type">
           <div class="pair-instructions__heading">
             <span class="material-icons-outlined">bluetooth</span>
-            <span>Wireless / Bluetooth Scanner</span>
+            <span>{{ 'kioskFlows.devices.wirelessHeading' | translate }}</span>
           </div>
           <ol class="pair-instructions__steps">
-            <li>Pair the scanner to the kiosk via the OS Bluetooth settings first (HID mode).</li>
-            <li>Return here and click the Device ID field to give it focus.</li>
-            <li>Scan the <em>device serial barcode</em> on the scanner to capture its ID, then give it a friendly Device Name (e.g. "Receiving Cart 2").</li>
+            <li>{{ 'kioskFlows.devices.wirelessStep1' | translate }}</li>
+            <li>{{ 'kioskFlows.devices.wirelessStep2' | translate }}</li>
+            <li>{{ 'kioskFlows.devices.scanThe' | translate }} <em>{{ 'kioskFlows.devices.serialBarcode' | translate }}</em> {{ 'kioskFlows.devices.wirelessStep3After' | translate }}</li>
           </ol>
         </div>
       </div>
 
-      <app-input label="Device ID" [formControl]="deviceIdControl" [required]="true"
-                 placeholder="Scan or enter device ID" />
-      <app-input label="Device Name" [formControl]="deviceNameControl"
-                 placeholder="Optional display name" />
+      <app-input [label]="'kioskFlows.devices.deviceId' | translate" [formControl]="deviceIdControl" [required]="true"
+                 [placeholder]="'kioskFlows.devices.deviceIdPlaceholder' | translate"
+                 data-testid="scan-device-id" />
+      <app-input [label]="'kioskFlows.devices.deviceName' | translate" [formControl]="deviceNameControl"
+                 [placeholder]="'kioskFlows.devices.deviceNamePlaceholder' | translate"
+                 data-testid="scan-device-name" />
       <button class="action-btn action-btn--primary"
               [disabled]="deviceIdControl.invalid || pairing()"
               (click)="pairDevice()"
-              aria-label="Confirm pair device">
+              [attr.aria-label]="'kioskFlows.devices.confirmPairAria' | translate">
         @if (pairing()) {
           <span class="material-icons-outlined devices-panel__spinner">sync</span>
         } @else {
           <span class="material-icons-outlined">link</span>
         }
-        Pair Device
+        {{ 'kioskFlows.devices.pair' | translate }}
       </button>
     </div>
   }
@@ -76,10 +78,10 @@
   @if (loading()) {
     <div class="devices-panel__loading">
       <span class="material-icons-outlined devices-panel__spinner">sync</span>
-      Loading devices...
+      {{ 'kioskFlows.devices.loading' | translate }}
     </div>
   } @else if (devices().length === 0) {
-    <app-empty-state icon="devices" message="No paired devices" />
+    <app-empty-state icon="devices" [message]="'kioskFlows.devices.empty' | translate" />
   } @else {
     <div class="devices-panel__list">
       @for (device of devices(); track device.id) {
@@ -92,17 +94,17 @@
             @if (device.deviceName) {
               <span class="device-item__id">{{ device.deviceId }}</span>
             }
-            <span class="device-item__paired">Paired {{ device.pairedAt | date:'MM/dd/yyyy' }}</span>
+            <span class="device-item__paired">{{ 'kioskFlows.devices.pairedOn' | translate: { date: (device.pairedAt | date:'MM/dd/yyyy') } }}</span>
           </div>
           <div class="device-item__status">
             @if (device.isActive) {
-              <span class="device-item__active-badge">Active</span>
+              <span class="device-item__active-badge">{{ 'common.active' | translate }}</span>
             } @else {
-              <span class="device-item__inactive-badge">Inactive</span>
+              <span class="device-item__inactive-badge">{{ 'common.inactive' | translate }}</span>
             }
           </div>
           <button class="icon-btn icon-btn--danger" (click)="unpairDevice(device)"
-                  aria-label="Unpair device {{ device.deviceName || device.deviceId }}">
+                  [attr.aria-label]="'kioskFlows.devices.unpairAria' | translate: { name: device.deviceName || device.deviceId }">
             <span class="material-icons-outlined">link_off</span>
           </button>
         </div>

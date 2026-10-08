@@ -46,15 +46,15 @@ export class KioskSessionBarComponent {
     return `${hours}h ${minutes % 60}m`;
   }
 
-  protected getModeLabel(mode: ScanMode | null): string {
+  protected getModeLabelKey(mode: ScanMode | null): string {
     switch (mode) {
-      case 'move': return 'Moving';
-      case 'count': return 'Counting';
-      case 'receive': return 'Receiving';
-      case 'issue': return 'Issuing';
-      case 'ship': return 'Shipping';
-      case 'inspect': return 'Inspecting';
-      default: return 'Idle';
+      case 'move': return 'kioskFlows.session.modes.move';
+      case 'count': return 'kioskFlows.session.modes.count';
+      case 'receive': return 'kioskFlows.session.modes.receive';
+      case 'issue': return 'kioskFlows.session.modes.issue';
+      case 'ship': return 'kioskFlows.session.modes.ship';
+      case 'inspect': return 'kioskFlows.session.modes.inspect';
+      default: return 'kioskFlows.session.modes.idle';
     }
   }
 

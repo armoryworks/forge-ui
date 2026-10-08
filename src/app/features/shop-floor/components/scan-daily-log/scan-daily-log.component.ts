@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ScanActionService } from '../../../../shared/services/scan-action.service';
 import { ScanLogEntry } from '../../../../shared/models/scan-log.model';
@@ -14,15 +15,9 @@ import { ColumnCellDirective } from '../../../../shared/directives/column-cell.d
 import { PageLayoutComponent } from '../../../../shared/components/page-layout/page-layout.component';
 import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { SCAN_LOG_ACTION_LABEL_KEYS } from '../../models/scan-log-action-label-keys.const';
 
-const ACTION_TYPE_OPTIONS: SelectOption[] = [
-  { value: null, label: 'All' },
-  { value: 'Move', label: 'Move' },
-  { value: 'CycleCount', label: 'Count' },
-  { value: 'Receive', label: 'Receive' },
-  { value: 'Ship', label: 'Ship' },
-  { value: 'Issue', label: 'Issue' },
-];
+const ACTION_TYPE_FILTER_VALUES = ['Move', 'CycleCount', 'Receive', 'Ship', 'Issue'];
 
 @Component({
   selector: 'app-scan-daily-log',
@@ -30,6 +25,7 @@ const ACTION_TYPE_OPTIONS: SelectOption[] = [
   imports: [
     DatePipe,
     ReactiveFormsModule,
+    TranslatePipe,
     DataTableComponent,
     SelectComponent,
     DatepickerComponent,
@@ -43,6 +39,7 @@ const ACTION_TYPE_OPTIONS: SelectOption[] = [
 })
 export class ScanDailyLogComponent implements OnInit {
   private readonly scanActionService = inject(ScanActionService);
+  private readonly translate = inject(TranslateService);
 
   readonly closed = output<void>();
 
@@ -51,7 +48,10 @@ export class ScanDailyLogComponent implements OnInit {
 
   readonly dateControl = new FormControl(new Date());
   readonly actionTypeControl = new FormControl<string | null>(null);
-  readonly actionTypeOptions = ACTION_TYPE_OPTIONS;
+  readonly actionTypeOptions: SelectOption[] = [
+    { value: null, label: this.translate.instant('kioskFlows.dailyLog.all') },
+    ...ACTION_TYPE_FILTER_VALUES.map(value => ({ value, label: this.actionTypeLabel(value) })),
+  ];
 
   private readonly dateValue = toSignal(
     this.dateControl.valueChanges.pipe(startWith(this.dateControl.value)),
@@ -64,14 +64,14 @@ export class ScanDailyLogComponent implements OnInit {
   );
 
   readonly columns: ColumnDef[] = [
-    { field: 'createdAt', header: 'Time', sortable: true, type: 'date', width: '100px' },
-    { field: 'actionType', header: 'Action', sortable: true, width: '100px' },
-    { field: 'partNumber', header: 'Part', sortable: true, width: '120px' },
-    { field: 'quantity', header: 'Qty', sortable: true, type: 'number', width: '70px', align: 'right' },
-    { field: 'fromLocation', header: 'From', sortable: true, width: '120px' },
-    { field: 'toLocation', header: 'To', sortable: true, width: '120px' },
-    { field: 'relatedEntity', header: 'Related', sortable: true, width: '120px' },
-    { field: 'status', header: 'Status', sortable: false, width: '100px' },
+    { field: 'createdAt', header: this.translate.instant('kioskFlows.dailyLog.columns.time'), sortable: true, type: 'date', width: '100px' },
+    { field: 'actionType', header: this.translate.instant('kioskFlows.dailyLog.columns.action'), sortable: true, width: '100px' },
+    { field: 'partNumber', header: this.translate.instant('kioskFlows.dailyLog.columns.part'), sortable: true, width: '120px' },
+    { field: 'quantity', header: this.translate.instant('kioskFlows.dailyLog.columns.qty'), sortable: true, type: 'number', width: '70px', align: 'right' },
+    { field: 'fromLocation', header: this.translate.instant('kioskFlows.dailyLog.columns.from'), sortable: true, width: '120px' },
+    { field: 'toLocation', header: this.translate.instant('kioskFlows.dailyLog.columns.to'), sortable: true, width: '120px' },
+    { field: 'relatedEntity', header: this.translate.instant('kioskFlows.dailyLog.columns.related'), sortable: true, width: '120px' },
+    { field: 'status', header: this.translate.instant('kioskFlows.dailyLog.columns.status'), sortable: false, width: '100px' },
   ];
 
   // Summary stats
@@ -84,11 +84,11 @@ export class ScanDailyLogComponent implements OnInit {
 
   readonly summaryText = computed(() => {
     const parts: string[] = [];
-    if (this.moveCount() > 0) parts.push(`${this.moveCount()} moves`);
-    if (this.receiveCount() > 0) parts.push(`${this.receiveCount()} receives`);
-    if (this.issueCount() > 0) parts.push(`${this.issueCount()} issues`);
-    if (this.countCount() > 0) parts.push(`${this.countCount()} counts`);
-    if (this.shipCount() > 0) parts.push(`${this.shipCount()} ships`);
+    if (this.moveCount() > 0) parts.push(this.translate.instant('kioskFlows.dailyLog.moves', { count: this.moveCount() }));
+    if (this.receiveCount() > 0) parts.push(this.translate.instant('kioskFlows.dailyLog.receives', { count: this.receiveCount() }));
+    if (this.issueCount() > 0) parts.push(this.translate.instant('kioskFlows.dailyLog.issues', { count: this.issueCount() }));
+    if (this.countCount() > 0) parts.push(this.translate.instant('kioskFlows.dailyLog.counts', { count: this.countCount() }));
+    if (this.shipCount() > 0) parts.push(this.translate.instant('kioskFlows.dailyLog.ships', { count: this.shipCount() }));
     return parts.join(', ');
   });
 
@@ -119,5 +119,10 @@ export class ScanDailyLogComponent implements OnInit {
 
   onActionTypeChange(): void {
     this.loadData();
+  }
+
+  actionTypeLabel(actionType: string): string {
+    const key = SCAN_LOG_ACTION_LABEL_KEYS[actionType];
+    return key ? this.translate.instant(key) : actionType;
   }
 }

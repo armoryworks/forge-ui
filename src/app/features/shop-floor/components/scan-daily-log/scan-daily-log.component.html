@@ -1,18 +1,20 @@
-<app-page-layout pageTitle="Scan Log">
+<app-page-layout [pageTitle]="'kioskFlows.dailyLog.title' | translate">
   <ng-container toolbar>
     <app-toolbar>
-      <app-datepicker label="Date" [formControl]="dateControl"
-                      (dateChange)="onDateChange()" />
-      <app-select label="Action Type" [formControl]="actionTypeControl"
+      <app-datepicker [label]="'kioskFlows.dailyLog.date' | translate" [formControl]="dateControl"
+                      (dateChange)="onDateChange()"
+                      data-testid="scan-log-date" />
+      <app-select [label]="'kioskFlows.dailyLog.actionType' | translate" [formControl]="actionTypeControl"
                   [options]="actionTypeOptions"
-                  (selectionChange)="onActionTypeChange()" />
+                  (selectionChange)="onActionTypeChange()"
+                  data-testid="scan-log-action-type" />
     </app-toolbar>
   </ng-container>
 
   <ng-container content>
     @if (totalCount() > 0) {
       <div class="scan-log__summary">
-        <span class="scan-log__summary-total">{{ totalCount() }} scans today</span>
+        <span class="scan-log__summary-total">{{ 'kioskFlows.dailyLog.scansToday' | translate: { count: totalCount() } }}</span>
         @if (summaryText()) {
           <span class="scan-log__summary-breakdown"> &mdash; {{ summaryText() }}</span>
         }
@@ -25,14 +27,14 @@
       [data]="entries()"
       [loading]="loading()"
       emptyIcon="history"
-      emptyMessage="No scan activity for this date">
+      [emptyMessage]="'kioskFlows.dailyLog.empty' | translate">
 
       <ng-template appColumnCell="createdAt" let-row>
         {{ row.createdAt | date:'HH:mm:ss' }}
       </ng-template>
 
       <ng-template appColumnCell="actionType" let-row>
-        <span class="scan-log__action-chip">{{ row.actionType }}</span>
+        <span class="scan-log__action-chip">{{ actionTypeLabel(row.actionType) }}</span>
       </ng-template>
 
       <ng-template appColumnCell="partNumber" let-row>
@@ -69,7 +71,7 @@
 
       <ng-template appColumnCell="status" let-row>
         @if (row.isReversed) {
-          <span class="chip chip--error">Reversed</span>
+          <span class="chip chip--error">{{ 'kioskFlows.common.reversed' | translate }}</span>
         }
       </ng-template>
     </app-data-table>

@@ -59,6 +59,11 @@ export class ScanReturnFlowComponent {
     { value: 'Other', label: this.translate.instant('shopFloor.returnFlow.reasonOther') },
   ];
 
+  protected reasonLabel(): string {
+    const reason = this.reasonControl.value;
+    return this.reasonOptions.find(o => o.value === reason)?.label ?? reason ?? '';
+  }
+
   protected readonly canConfirm = computed(() => {
     return this.selectedShipment() !== null
       && this.returnQuantity() > 0

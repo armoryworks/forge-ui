@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy, Component, computed, effect, inject, output, signal,
 } from '@angular/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ScannerService } from '../../../../shared/services/scanner.service';
 import { ScanActionService } from '../../../../shared/services/scan-action.service';
@@ -38,6 +39,28 @@ const ACTION_ICONS: Record<string, string> = {
   Job: 'engineering',
 };
 
+const ACTION_LABEL_KEYS: Record<string, string> = {
+  Move: 'kioskFlows.actions.move',
+  Count: 'kioskFlows.actions.count',
+  Receive: 'kioskFlows.actions.receive',
+  Ship: 'kioskFlows.actions.ship',
+  Issue: 'kioskFlows.actions.issue',
+  Inspect: 'kioskFlows.actions.inspect',
+  Return: 'kioskFlows.actions.return',
+  Job: 'kioskFlows.actions.job',
+};
+
+const DISABLED_REASON_KEYS: Record<string, string> = {
+  'No stock available to move': 'kioskFlows.disabledReasons.noStockToMove',
+  'No open purchase order lines': 'kioskFlows.disabledReasons.noOpenPoLines',
+  'No stock available to ship': 'kioskFlows.disabledReasons.noStockToShip',
+  'No open shipment lines': 'kioskFlows.disabledReasons.noOpenShipmentLines',
+  'No stock available to issue': 'kioskFlows.disabledReasons.noStockToIssue',
+  'No active jobs require this part': 'kioskFlows.disabledReasons.noActiveWorkOrders',
+  'No QC template configured for this part': 'kioskFlows.disabledReasons.noQcTemplate',
+  'No stock available to return': 'kioskFlows.disabledReasons.noStockToReturn',
+};
+
 const ACTION_COLORS: Record<string, string> = {
   Move: 'var(--primary)',
   Count: 'var(--info)',
@@ -53,6 +76,7 @@ const ACTION_COLORS: Record<string, string> = {
   selector: 'app-scan-action-overlay',
   standalone: true,
   imports: [
+    TranslatePipe,
     QuickActionPanelComponent,
     ScanMoveFlowComponent,
     ScanCountFlowComponent,
@@ -71,6 +95,7 @@ export class ScanActionOverlayComponent {
   private readonly scanner = inject(ScannerService);
   private readonly scanAction = inject(ScanActionService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   readonly dismissed = output<void>();
 
@@ -86,7 +111,7 @@ export class ScanActionOverlayComponent {
     if (!ctx) return [];
     return ctx.availableActions.map(a => ({
       id: a.action,
-      label: a.action,
+      label: this.actionLabel(a.action),
       icon: ACTION_ICONS[a.action] ?? 'help_outline',
       color: ACTION_COLORS[a.action] ?? 'var(--primary)',
       disabled: !a.enabled,
@@ -171,7 +196,7 @@ export class ScanActionOverlayComponent {
         this.phase.set('actions');
       },
       error: () => {
-        this.error.set(`Part not found: ${identifier}`);
+        this.error.set(this.translate.instant('kioskFlows.overlay.partNotFound', { identifier }));
         this.phase.set('actions');
         setTimeout(() => this.close(), 3000);
       },
@@ -205,14 +230,14 @@ export class ScanActionOverlayComponent {
         this.startReturn();
         break;
       default:
-        this.snackbar.info(`${actionId} is not yet implemented`);
+        this.snackbar.info(this.translate.instant('kioskFlows.overlay.notImplemented', { action: this.actionLabel(actionId) }));
     }
   }
 
   protected startShip(): void {
     const lines = this.openShipmentLines();
     if (lines.length === 0) {
-      this.snackbar.info('No open shipment lines for this part');
+      this.snackbar.info(this.translate.instant('kioskFlows.overlay.noShipmentLines'));
       return;
     }
     this.phase.set('ship');
@@ -225,7 +250,7 @@ export class ScanActionOverlayComponent {
   protected startJob(): void {
     const job = this.jobContext();
     if (!job) {
-      this.snackbar.info('No job context available');
+      this.snackbar.info(this.translate.instant('kioskFlows.overlay.noWorkOrderContext'));
       return;
     }
     this.phase.set('job');
@@ -234,7 +259,7 @@ export class ScanActionOverlayComponent {
   protected startReturn(): void {
     const shipments = this.recentShipments();
     if (shipments.length === 0) {
-      this.snackbar.info('No recent shipments found for this part');
+      this.snackbar.info(this.translate.instant('kioskFlows.overlay.noRecentShipments'));
       return;
     }
     this.phase.set('return');
@@ -244,7 +269,7 @@ export class ScanActionOverlayComponent {
     if (this.multiScanMode()) {
       // Stay open, ready for next scan
       this.phase.set('actions');
-      this.snackbar.success('Ready for next scan');
+      this.snackbar.success(this.translate.instant('kioskFlows.overlay.readyForNext'));
     } else {
       this.close();
     }
@@ -252,6 +277,17 @@ export class ScanActionOverlayComponent {
 
   protected onFlowCancelled(): void {
     this.phase.set('actions');
+  }
+
+  protected actionLabel(action: string): string {
+    const key = ACTION_LABEL_KEYS[action];
+    return key ? this.translate.instant(key) : action;
+  }
+
+  protected disabledReasonLabel(reason: string | null): string {
+    if (!reason) return '';
+    const key = DISABLED_REASON_KEYS[reason];
+    return key ? this.translate.instant(key) : reason;
   }
 
   protected toggleMultiScan(): void {

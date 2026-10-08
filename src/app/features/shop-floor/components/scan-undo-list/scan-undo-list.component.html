@@ -2,10 +2,10 @@
   <div class="undo-panel__header">
     <div class="undo-panel__title-row">
       <span class="material-icons-outlined">undo</span>
-      <h3 class="undo-panel__title">Recent Scan Actions</h3>
+      <h3 class="undo-panel__title">{{ 'kioskFlows.undo.title' | translate }}</h3>
     </div>
-    <span class="undo-panel__summary">{{ todayCount() }} actions today</span>
-    <button class="icon-btn" (click)="close()" aria-label="Close undo panel">
+    <span class="undo-panel__summary">{{ 'kioskFlows.undo.actionsToday' | translate: { count: todayCount() } }}</span>
+    <button class="icon-btn" (click)="close()" [attr.aria-label]="'kioskFlows.undo.closeAria' | translate">
       <span class="material-icons-outlined">close</span>
     </button>
   </div>
@@ -13,12 +13,12 @@
   @if (loading()) {
     <div class="undo-panel__loading">
       <span class="material-icons-outlined undo-panel__spinner">sync</span>
-      Loading...
+      {{ 'common.loading' | translate }}
     </div>
   } @else if (recentEntries().length === 0) {
     <div class="undo-panel__empty">
       <span class="material-icons-outlined">history</span>
-      <p>No scan actions in the last 6 hours</p>
+      <p>{{ 'kioskFlows.undo.empty' | translate: { hours: lookbackHours } }}</p>
     </div>
   } @else {
     <div class="undo-panel__list">
@@ -27,7 +27,7 @@
           <div class="undo-entry__main">
             <span class="undo-entry__time">{{ entry.createdAt | date:'HH:mm' }}</span>
             <span class="undo-entry__user">{{ entry.userName }}</span>
-            <span class="undo-entry__action">{{ entry.actionType }}</span>
+            <span class="undo-entry__action">{{ actionTypeLabel(entry.actionType) }}</span>
           </div>
           <div class="undo-entry__detail">
             @if (entry.quantity) {
@@ -55,18 +55,18 @@
           </div>
           <div class="undo-entry__actions">
             @if (entry.isReversed) {
-              <span class="undo-entry__reversed-label">Reversed</span>
+              <span class="undo-entry__reversed-label">{{ 'kioskFlows.common.reversed' | translate }}</span>
             } @else {
               <button class="action-btn action-btn--sm undo-entry__reverse-btn"
                       [disabled]="reversing() === entry.id"
                       (click)="reverseEntry(entry)"
-                      aria-label="Reverse scan action">
+                      [attr.aria-label]="'kioskFlows.undo.reverseAria' | translate">
                 @if (reversing() === entry.id) {
                   <span class="material-icons-outlined undo-entry__spinner">sync</span>
                 } @else {
                   <span class="material-icons-outlined">undo</span>
                 }
-                Reverse
+                {{ 'kioskFlows.undo.reverse' | translate }}
               </button>
             }
           </div>

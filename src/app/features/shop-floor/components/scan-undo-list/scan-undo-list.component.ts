@@ -1,18 +1,20 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ScanActionService } from '../../../../shared/services/scan-action.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ScanLogEntry } from '../../../../shared/models/scan-log.model';
 import { PinPromptDialogComponent, PinPromptDialogData } from '../pin-prompt-dialog/pin-prompt-dialog.component';
+import { SCAN_LOG_ACTION_LABEL_KEYS } from '../../models/scan-log-action-label-keys.const';
 
 const DEFAULT_LOOKBACK_HOURS = 6;
 
 @Component({
   selector: 'app-scan-undo-list',
   standalone: true,
-  imports: [DatePipe],
+  imports: [DatePipe, TranslatePipe],
   templateUrl: './scan-undo-list.component.html',
   styleUrl: './scan-undo-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -21,8 +23,11 @@ export class ScanUndoListComponent implements OnInit {
   private readonly scanActionService = inject(ScanActionService);
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
+  private readonly translate = inject(TranslateService);
 
   readonly closed = output<void>();
+
+  protected readonly lookbackHours = DEFAULT_LOOKBACK_HOURS;
 
   readonly entries = signal<ScanLogEntry[]>([]);
   readonly loading = signal(false);
@@ -60,7 +65,7 @@ export class ScanUndoListComponent implements OnInit {
   reverseEntry(entry: ScanLogEntry): void {
     this.dialog.open(PinPromptDialogComponent, {
       width: '400px',
-      data: { title: 'Enter PIN to reverse' } satisfies PinPromptDialogData,
+      data: { title: this.translate.instant('kioskFlows.pin.title') } satisfies PinPromptDialogData,
     }).afterClosed().subscribe((pin: string | null) => {
       if (!pin) return;
       this.reversing.set(entry.id);
@@ -68,12 +73,12 @@ export class ScanUndoListComponent implements OnInit {
         next: () => {
           this.reversing.set(null);
           const desc = this.buildReversalDescription(entry);
-          this.snackbar.success(`Reversed: ${desc}`);
+          this.snackbar.success(this.translate.instant('kioskFlows.undo.reversedToast', { description: desc }));
           this.loadEntries();
         },
         error: () => {
           this.reversing.set(null);
-          this.snackbar.error('Failed to reverse action. Check your PIN.');
+          this.snackbar.error(this.translate.instant('kioskFlows.undo.reverseFailed'));
         },
       });
     });
@@ -83,13 +88,18 @@ export class ScanUndoListComponent implements OnInit {
     this.closed.emit();
   }
 
+  actionTypeLabel(actionType: string): string {
+    const key = SCAN_LOG_ACTION_LABEL_KEYS[actionType];
+    return key ? this.translate.instant(key) : actionType;
+  }
+
   private buildReversalDescription(entry: ScanLogEntry): string {
     const parts: string[] = [];
     if (entry.quantity) parts.push(`${entry.quantity}\u00D7`);
     if (entry.partNumber) parts.push(entry.partNumber);
     if (entry.actionType === 'Move' && entry.fromLocation) {
-      parts.push(`moved back to ${entry.fromLocation}`);
+      parts.push(this.translate.instant('kioskFlows.undo.movedBackTo', { location: entry.fromLocation }));
     }
-    return parts.join(' ') || entry.actionType;
+    return parts.join(' ') || this.actionTypeLabel(entry.actionType);
   }
 }

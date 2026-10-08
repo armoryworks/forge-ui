@@ -18,24 +18,24 @@
       pattern="[0-9]*"
       maxlength="6"
       [formControl]="pinControl"
-      placeholder="Enter PIN"
+      [placeholder]="'kioskFlows.pin.placeholder' | translate"
       class="pin-dialog__input"
-      aria-label="PIN"
-     
+      [attr.aria-label]="'kioskFlows.pin.aria' | translate"
+      data-testid="pin-prompt-input"
       (keydown.enter)="confirm()" />
   </div>
 
   <div class="pin-dialog__actions">
-    <button class="action-btn pin-dialog__btn" (click)="cancel()" aria-label="Cancel">
+    <button class="action-btn pin-dialog__btn" (click)="cancel()" [attr.aria-label]="'common.cancel' | translate">
       <span class="material-icons-outlined">close</span>
-      Cancel
+      {{ 'common.cancel' | translate }}
     </button>
     <button class="action-btn action-btn--primary pin-dialog__btn"
             [disabled]="pinControl.invalid"
             (click)="confirm()"
-            aria-label="Confirm PIN">
+            [attr.aria-label]="'kioskFlows.pin.confirmAria' | translate">
       <span class="material-icons-outlined">check</span>
-      Confirm
+      {{ 'common.confirm' | translate }}
     </button>
   </div>
 </div>

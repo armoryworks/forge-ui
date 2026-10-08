@@ -19,7 +19,7 @@
         @for (shipment of recentShipments(); track shipment.shipmentLineId) {
           <button class="return-flow__shipment-item"
                   (click)="selectShipment(shipment)"
-                  [attr.aria-label]="'Select shipment ' + shipment.shipmentNumber"
+                  [attr.aria-label]="'kioskFlows.common.selectShipmentAria' | translate: { number: shipment.shipmentNumber }"
                   data-testid="return-shipment-item">
             <div class="return-flow__shipment-info">
               <span class="return-flow__shipment-number">{{ shipment.shipmentNumber }}</span>
@@ -64,19 +64,19 @@
           <button class="sf-qty-btn"
                   (click)="partialQtyControl.setValue((partialQtyControl.value ?? 1) - 1)"
                   [disabled]="(partialQtyControl.value ?? 1) <= 1"
-                  aria-label="Decrease quantity">-</button>
+                  [attr.aria-label]="'kioskFlows.return.decreaseQtyAria' | translate">-</button>
           <span class="return-flow__qty-value">{{ partialQtyControl.value }}</span>
           <button class="sf-qty-btn"
                   (click)="partialQtyControl.setValue((partialQtyControl.value ?? 1) + 1)"
                   [disabled]="(partialQtyControl.value ?? 1) >= selectedShipment()!.quantity"
-                  aria-label="Increase quantity">+</button>
+                  [attr.aria-label]="'kioskFlows.return.increaseQtyAria' | translate">+</button>
         </div>
         <span class="return-flow__qty-max">/ {{ selectedShipment()!.quantity }}</span>
       </div>
       <button class="action-btn action-btn--primary"
               [disabled]="partialQtyControl.invalid"
               (click)="confirmPartialQty()"
-              aria-label="Confirm quantity"
+              [attr.aria-label]="'kioskFlows.return.confirmQtyAria' | translate"
               data-testid="return-confirm-qty-btn">
         <span class="material-icons-outlined">check</span>
         {{ 'common.confirm' | translate }}
@@ -107,7 +107,7 @@
     <button class="action-btn action-btn--primary"
             [disabled]="reasonControl.invalid"
             (click)="confirmReason()"
-            aria-label="Continue to confirmation"
+            [attr.aria-label]="'kioskFlows.return.continueAria' | translate"
             data-testid="return-continue-btn">
       <span class="material-icons-outlined">arrow_forward</span>
       {{ 'common.next' | translate }}
@@ -127,7 +127,7 @@
       </div>
       <div class="return-flow__confirm-row">
         <span class="return-flow__confirm-label">{{ 'shopFloor.returnFlow.reason' | translate }}</span>
-        <span class="return-flow__confirm-value">{{ reasonControl.value }}</span>
+        <span class="return-flow__confirm-value">{{ reasonLabel() }}</span>
       </div>
       @if (notesControl.value) {
         <div class="return-flow__confirm-row">

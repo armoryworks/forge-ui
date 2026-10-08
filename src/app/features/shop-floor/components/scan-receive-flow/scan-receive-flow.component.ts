@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ScanActionService } from '../../../../shared/services/scan-action.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -16,7 +17,7 @@ type ReceiveStep = 'select-po' | 'quantity' | 'destination' | 'confirm';
 @Component({
   selector: 'app-scan-receive-flow',
   standalone: true,
-  imports: [ReactiveFormsModule, SelectComponent, InputComponent, BarcodeScanInputComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, SelectComponent, InputComponent, BarcodeScanInputComponent],
   templateUrl: './scan-receive-flow.component.html',
   styleUrl: './scan-receive-flow.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,6 +25,7 @@ type ReceiveStep = 'select-po' | 'quantity' | 'destination' | 'confirm';
 export class ScanReceiveFlowComponent implements OnInit {
   private readonly scanAction = inject(ScanActionService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
   private readonly inventoryService = inject(InventoryService);
 
   readonly context = input.required<ScanContext>();
@@ -107,12 +109,16 @@ export class ScanReceiveFlowComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.snackbar.success(`Received ${this.quantity()} x ${this.context().partNumber} from ${line.poNumber}`);
+        this.snackbar.success(this.translate.instant('kioskFlows.receive.success', {
+          quantity: this.quantity(),
+          part: this.context().partNumber,
+          po: line.poNumber,
+        }));
         this.completed.emit();
       },
       error: () => {
         this.submitting.set(false);
-        this.snackbar.error('Receive failed. Please try again.');
+        this.snackbar.error(this.translate.instant('kioskFlows.receive.failed'));
       },
     });
   }
@@ -136,6 +142,6 @@ export class ScanReceiveFlowComponent implements OnInit {
 
   protected getToLocationLabel(): string {
     const opt = this.locationOptions().find(o => o.value === this.toLocationId.value);
-    return opt?.label ?? 'Unknown';
+    return opt?.label ?? this.translate.instant('kioskFlows.common.unknown');
   }
 }

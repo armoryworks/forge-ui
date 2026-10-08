@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InventoryService } from '../../../inventory/services/inventory.service';
 import { BinContentItem } from '../../../inventory/models/bin-content-item.model';
@@ -14,6 +14,7 @@ import { BinContentItem } from '../../../inventory/models/bin-content-item.model
 })
 export class ScanLocationViewComponent {
   private readonly inventoryService = inject(InventoryService);
+  private readonly translate = inject(TranslateService);
 
   readonly locationId = input.required<number>();
   readonly locationName = input.required<string>();
@@ -37,7 +38,7 @@ export class ScanLocationViewComponent {
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('Failed to load location contents');
+        this.error.set(this.translate.instant('kioskFlows.location.loadFailed'));
         this.loading.set(false);
       },
     });
