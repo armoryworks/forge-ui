@@ -3,6 +3,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
+import { LanguageService } from '../../../shared/services/language.service';
 import { NotificationService } from '../../../shared/services/notification.service';
 
 @Component({
@@ -16,6 +17,7 @@ import { NotificationService } from '../../../shared/services/notification.servi
 export class MobileNotificationsComponent implements OnInit {
   private readonly notificationService = inject(NotificationService);
   private readonly translate = inject(TranslateService);
+  private readonly languageService = inject(LanguageService);
 
   protected readonly notifications = this.notificationService.filteredNotifications;
   protected readonly unreadCount = this.notificationService.unreadCount;
@@ -49,7 +51,7 @@ export class MobileNotificationsComponent implements OnInit {
     if (hours < 24) return this.translate.instant('mobileLegacyPages.notifications.hoursAgo', { count: hours });
     const days = Math.floor(hours / 24);
     if (days < 7) return this.translate.instant('mobileLegacyPages.notifications.daysAgo', { count: days });
-    return d.toLocaleDateString();
+    return d.toLocaleDateString(this.languageService.currentLanguage());
   }
 
   protected getSeverityIcon(severity: string): string {

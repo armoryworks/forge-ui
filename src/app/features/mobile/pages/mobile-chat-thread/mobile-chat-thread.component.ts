@@ -5,6 +5,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
 import { AuthService } from '../../../../shared/services/auth.service';
+import { LanguageService } from '../../../../shared/services/language.service';
 import { ChatService } from '../../../chat/services/chat.service';
 import { ChatMessage } from '../../../chat/models/chat-message.model';
 import { MentionRenderPipe } from '../../../chat/pipes/mention-render.pipe';
@@ -20,6 +21,7 @@ import { MentionRenderPipe } from '../../../chat/pipes/mention-render.pipe';
 export class MobileChatThreadComponent implements OnInit {
   private readonly chatService = inject(ChatService);
   private readonly authService = inject(AuthService);
+  private readonly languageService = inject(LanguageService);
 
   private readonly repliesContainer = viewChild<ElementRef<HTMLElement>>('repliesContainer');
 
@@ -65,12 +67,12 @@ export class MobileChatThreadComponent implements OnInit {
 
   protected formatTime(date: Date | string): string {
     const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleTimeString(this.languageService.currentLanguage(), { hour: '2-digit', minute: '2-digit' });
   }
 
   protected formatDate(date: Date | string): string {
     const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+    return d.toLocaleDateString(this.languageService.currentLanguage(), { weekday: 'short', month: 'short', day: 'numeric' });
   }
 
   protected onKeydown(event: KeyboardEvent): void {

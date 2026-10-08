@@ -6739,17 +6739,17 @@
     "thread": {
       "replies": "Hilo",
       "replyPlaceholder": "Responder en el hilo...",
-      "noReplies": "Sin respuestas aun. Inicia la conversacion!",
+      "noReplies": "¡Aún no hay respuestas. Inicie la conversación!",
       "backToChat": "Volver al chat",
       "replyCount_one": "{{count}} respuesta",
       "replyCount_other": "{{count}} respuestas"
     },
-    "channelInfo": "Channel Info",
-    "noMentionResults": "No results",
-    "replies": "Replies",
-    "reply": "Reply",
-    "replyInThread": "Reply in thread",
-    "searching": "Searching…"
+    "channelInfo": "Información del canal",
+    "noMentionResults": "Sin resultados",
+    "replies": "Respuestas",
+    "reply": "Respuesta",
+    "replyInThread": "Responder en el hilo",
+    "searching": "Buscando…"
   },
   "ai": {
     "title": "Asistentes IA",

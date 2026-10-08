@@ -7,7 +7,7 @@
     <div class="chat-thread__header-info">
       <span class="chat-thread__header-title">{{ 'chat.thread.replies' | translate }}</span>
       <span class="chat-thread__header-count">
-        {{ replyCount() }} {{ (replyCount() === 1 ? 'chat.thread.replyCount_one' : 'chat.thread.replyCount_other') | translate: { count: replyCount() } }}
+        {{ (replyCount() === 1 ? 'chat.thread.replyCount_one' : 'chat.thread.replyCount_other') | translate: { count: replyCount() } }}
       </span>
     </div>
     <div class="chat-thread__participants">
@@ -57,7 +57,7 @@
       <div class="chat-thread__separator">
         <span class="chat-thread__separator-line"></span>
         <span class="chat-thread__separator-label">
-          {{ replyCount() }} {{ (replyCount() === 1 ? 'chat.thread.replyCount_one' : 'chat.thread.replyCount_other') | translate: { count: replyCount() } }}
+          {{ (replyCount() === 1 ? 'chat.thread.replyCount_one' : 'chat.thread.replyCount_other') | translate: { count: replyCount() } }}
         </span>
         <span class="chat-thread__separator-line"></span>
       </div>
