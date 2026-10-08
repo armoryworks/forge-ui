@@ -192,6 +192,10 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     denseBoard: () => boolean;
     timerElapsed: () => Record<string, string>;
     shiftTimes: () => Record<number, string>;
+    runningJobTimes: () => Record<number, string>;
+    runningJobNumber: (w: unknown) => string | null;
+    onPinKeydown: (e: KeyboardEvent) => void;
+    authenticating: () => boolean;
     readyToStart: () => number;
     boardJobs: () => unknown[];
     boardJobTotal: () => number;
@@ -509,14 +513,97 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
         status: 'In', clockedInAt: '2026-10-08T10:55:00Z',
       }]);
       expect(c.timerElapsed()['5:41']).toBe('1m 05s');
+      expect(c.runningJobTimes()[5]).toBe('1m 05s');
       expect(c.shiftTimes()[5]).toBe('1h 05m 00s');
       vi.setSystemTime(new Date('2026-10-08T12:00:01Z'));
       c.updateClock();
       expect(c.timerElapsed()['5:41']).toBe('1m 06s');
+      expect(c.runningJobTimes()[5]).toBe('1m 06s');
       expect(c.shiftTimes()[5]).toBe('1h 05m 01s');
     } finally {
       working.mockRestore();
     }
+  });
+
+  it('a timer started by scanning a traveler for a job nobody assigned still reads as running and counts up', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-10-08T12:00:00Z'));
+    const working = vi.spyOn(clockTypes, 'isWorking').mockReturnValue(true);
+    try {
+      const c = create();
+      const scanned = {
+        ...makeWorker('ProductionWorker'),
+        status: 'In', clockedInAt: '2026-10-08T10:55:00Z',
+        currentJobNumber: 'J-2403', statusSince: '2026-10-08T11:30:00Z',
+      };
+      c.workers.set([scanned]);
+      expect(c.runningJobNumber(scanned)).toBe('J-2403');
+      expect(c.runningJobTimes()[5]).toBe('30m 00s');
+      vi.setSystemTime(new Date('2026-10-08T12:00:01Z'));
+      c.updateClock();
+      expect(c.runningJobTimes()[5]).toBe('30m 01s');
+
+      const idle = { ...scanned, currentJobNumber: null };
+      c.workers.set([idle]);
+      expect(c.runningJobNumber(idle)).toBeNull();
+      expect(c.runningJobTimes()[5]).toBeUndefined();
+    } finally {
+      working.mockRestore();
+    }
+  });
+
+  it('Escape during a sign-in in flight leaves the PIN pad until the sign-in settles', () => {
+    const signIn = new Subject<unknown>();
+    auth.scanLogin.mockReturnValueOnce(signIn);
+    const c = create();
+    c.onWorkerTile(makeWorker('ProductionWorker'));
+    (c as unknown as { scannedValue: { set: (v: string) => void } }).scannedValue.set('BADGE-5');
+    c.pinControl.setValue('1234');
+    c.onPinSubmit();
+    expect(c.authenticating()).toBe(true);
+    c.cancelPin();
+    c.onPinSubmit();
+    expect(c.phase()).toBe('pin');
+    expect(auth.scanLogin).toHaveBeenCalledTimes(1);
+    signIn.next({});
+    signIn.complete();
+    expect(c.phase()).toBe('actions');
+    expect(c.selectedWorker()?.userId).toBe(5);
+  });
+
+  it('a second badge scanned into the PIN pad signs that badge in instead of submitting it as a PIN', () => {
+    vi.useFakeTimers();
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'employee', entityId: 6 }));
+    const c = create();
+    const next = { ...makeWorker('ProductionWorker'), userId: 6, name: 'Sam Roe' };
+    c.workers.set([makeWorker('ProductionWorker'), next]);
+    c.onWorkerTile(makeWorker('ProductionWorker'));
+    expect(c.phase()).toBe('pin');
+    for (const key of 'BADGE0006') {
+      c.onPinKeydown(new KeyboardEvent('keydown', { key }));
+      vi.advanceTimersByTime(10);
+    }
+    c.onPinKeydown(new KeyboardEvent('keydown', { key: 'Enter' }));
+    expect(auth.login).not.toHaveBeenCalled();
+    expect(auth.scanLogin).not.toHaveBeenCalled();
+    expect(shopFloor.identifyScan).toHaveBeenCalledWith('BADGE0006');
+    expect(c.phase()).toBe('pin');
+    expect(c.selectedWorker()?.userId).toBe(6);
+  });
+
+  it('a PIN typed by hand still submits on Enter', () => {
+    vi.useFakeTimers();
+    auth.login.mockReturnValueOnce(of({}));
+    const c = create();
+    c.onWorkerTile(makeWorker('ProductionWorker'));
+    for (const key of 'secret') {
+      c.onPinKeydown(new KeyboardEvent('keydown', { key }));
+      vi.advanceTimersByTime(120);
+    }
+    c.pinControl.setValue('secret');
+    c.onPinKeydown(new KeyboardEvent('keydown', { key: 'Enter' }));
+    expect(auth.login).toHaveBeenCalledWith({ email: 'p@x.test', password: 'secret' });
+    expect(shopFloor.identifyScan).not.toHaveBeenCalled();
   });
 
   it('the header counts work that is ready to start, and the board lists the open jobs', () => {

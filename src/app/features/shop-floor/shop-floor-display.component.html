@@ -144,11 +144,11 @@
 
       <div class="sf-grid" [class.sf-grid--dense]="denseBoard()" [style.--sf-tile-min]="tileMinWidth() + 'px'">
         @for (worker of sortedWorkers(); track worker.userId) {
-          @let running = runningAssignment(worker);
+          @let runningJob = runningJobNumber(worker);
           @let working = clockTypes.isWorking(worker.status);
           @let out = clockTypes.isClockedOut(worker.status);
           @let statusText = working
-            ? (running ? ('kioskDisplay.statusRunning' | translate: { jobNumber: running.jobNumber }) : ('kioskDisplay.statusClockedIn' | translate))
+            ? (runningJob ? ('kioskDisplay.statusRunning' | translate: { jobNumber: runningJob }) : ('kioskDisplay.statusClockedIn' | translate))
             : clockTypes.getShortLabel(worker.status);
           <button type="button" class="sf-card"
                [class.sf-card--in]="working"
@@ -178,9 +178,9 @@
                 @if (working) {
                   <div class="sf-card__times">
                     @if (shiftTimes()[worker.userId]; as shift) {
-                      <span class="sf-card__time">{{ 'kioskDisplay.onShift' | translate: { time: shift } }}</span>
+                      <span class="sf-card__time">{{ 'kioskDisplay.inFor' | translate: { time: shift } }}</span>
                     }
-                    @if (running && timerElapsed()[jobKey(worker.userId, running.jobId)]; as jobTime) {
+                    @if (runningJob && runningJobTimes()[worker.userId]; as jobTime) {
                       <span class="sf-card__time sf-card__time--job" [attr.data-testid]="'sf-job-elapsed-' + worker.userId">
                         {{ 'kioskDisplay.onJob' | translate: { time: jobTime } }}
                       </span>
@@ -357,7 +357,7 @@
           </div>
         }
 
-        <div class="sf-auth-card__field" role="group" [attr.aria-label]="(isPasswordAuth() ? 'auth.password' : 'shopFloor.pin') | translate" tabindex="-1" (keydown.enter)="onPinSubmit()">
+        <div class="sf-auth-card__field" role="group" [attr.aria-label]="(isPasswordAuth() ? 'auth.password' : 'shopFloor.pin') | translate" tabindex="-1" (keydown)="onPinKeydown($event)">
           <app-input [label]="(isPasswordAuth() ? 'auth.password' : 'shopFloor.pin') | translate" type="password" [formControl]="pinControl"
             [placeholder]="(isPasswordAuth() ? 'shopFloor.enterPasswordPlaceholder' : 'shopFloor.enterPinPlaceholder') | translate" [maxlength]="isPasswordAuth() ? 128 : 8" data-testid="sf-pin-input" />
         </div>
@@ -399,7 +399,7 @@
       <div class="sf-actions-card" role="dialog" aria-modal="true" aria-labelledby="sf-actions-title" tabindex="-1"
            cdkTrapFocus cdkTrapFocusAutoCapture (keydown.escape)="cancelActions()">
         @if (selectedWorker(); as worker) {
-          @let running = runningAssignment(worker);
+          @let runningJob = runningJobNumber(worker);
           <div class="sf-actions-card__header">
             <app-avatar [initials]="worker.initials" [color]="worker.avatarColor" size="lg" />
             <div class="sf-actions-card__worker-info">
@@ -411,8 +411,8 @@
                     data-testid="sf-actions-status">
                 @if (!clockTypes.isWorking(worker.status)) {
                   {{ clockTypes.getLabel(worker.status) }}
-                } @else if (running) {
-                  {{ 'kioskDisplay.statusRunning' | translate: { jobNumber: running.jobNumber } }}
+                } @else if (runningJob) {
+                  {{ 'kioskDisplay.statusRunning' | translate: { jobNumber: runningJob } }}
                 } @else {
                   {{ 'kioskDisplay.statusClockedIn' | translate }}
                 }
@@ -590,7 +590,7 @@
            cdkTrapFocus cdkTrapFocusAutoCapture (keydown.escape)="skipJobSelect()">
         <div class="sf-job-select-card__header">
           <span class="material-icons-outlined">assignment</span>
-          <h2 id="sf-job-select-title">{{ 'kioskDisplay.pickerTitle' | translate }}</h2>
+          <h2 id="sf-job-select-title" tabindex="-1" cdkFocusInitial>{{ 'kioskDisplay.pickerTitle' | translate }}</h2>
           @if (jobSelectWorker(); as w) {
             <span class="sf-job-select-card__worker">{{ w.name }}</span>
           }

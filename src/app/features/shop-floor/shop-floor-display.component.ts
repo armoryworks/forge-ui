@@ -58,6 +58,8 @@ const FEEDBACK_VISIBLE_MS = 2_000;
 const FEEDBACK_CLEAR_MS = 4_000;
 const MAX_SERVER_REASON_LENGTH = 200;
 const DEVICE_TOKEN_KEY = 'forge-kiosk-device-token';
+const WEDGE_KEY_GAP_MS = 50;
+const WEDGE_MIN_LENGTH = 4;
 const TERMINAL_KEY = 'forge-kiosk-terminal';
 
 type DisplayPhase = 'main' | 'pin' | 'actions' | 'job-select' | 'assign' | 'receiving' | 'shipping';
@@ -192,6 +194,17 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     }
     return map;
   });
+  protected readonly runningJobTimes = computed(() => {
+    this.tick();
+    const now = Date.now();
+    const map: Record<number, string> = {};
+    const signedIn = this.selectedWorker();
+    for (const w of signedIn ? [...this.workers(), signedIn] : this.workers()) {
+      const startedAt = this.runningJobStartedAt(w);
+      if (startedAt) map[w.userId] = this.formatDuration(now - new Date(startedAt).getTime());
+    }
+    return map;
+  });
 
   // Computed worker groups (using ClockEventTypeService for status checks)
   protected readonly workersIn = computed(() => this.workers().filter(w => this.clockTypes.isWorking(w.status)));
@@ -225,6 +238,8 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   protected readonly pinControl = new FormControl('');
   protected readonly pinError = signal<string | null>(null);
   protected readonly authenticating = signal(false);
+  private pinBurst = '';
+  private pinBurstLastKeyAt = 0;
 
   // Action state
   protected readonly processing = signal<string | null>(null);
@@ -555,6 +570,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   // ─── PIN Auth ───
 
   protected onPinSubmit(): void {
+    if (this.authenticating()) return;
     this.clearPhaseTimeout(); // User is actively submitting
 
     // Preview: never perform a real sign-in (defence-in-depth — the preview
@@ -610,8 +626,35 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   }
 
   protected cancelPin(): void {
+    if (this.authenticating()) return;
     this.resetToMain();
     this.focusSearchArea();
+  }
+
+  protected onPinKeydown(event: KeyboardEvent): void {
+    const now = Date.now();
+    const quick = now - this.pinBurstLastKeyAt < WEDGE_KEY_GAP_MS;
+    if (event.key === 'Enter') {
+      const badge = quick && this.pinBurst.length >= WEDGE_MIN_LENGTH ? this.pinBurst : null;
+      this.pinBurst = '';
+      this.pinBurstLastKeyAt = 0;
+      if (badge) {
+        event.preventDefault();
+        this.rescanDuringPin(badge);
+      } else {
+        this.onPinSubmit();
+      }
+      return;
+    }
+    if (event.key.length !== 1) return;
+    this.pinBurst = quick ? this.pinBurst + event.key : event.key;
+    this.pinBurstLastKeyAt = now;
+  }
+
+  private rescanDuringPin(badge: string): void {
+    if (this.authenticating() || this.previewMode) return;
+    this.resetToMain();
+    this.handleScanValue(badge);
   }
 
   // ─── Keypad input (touchscreen PIN entry) ───
@@ -1099,6 +1142,18 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   protected runningAssignment(worker: ClockWorker): WorkerAssignment | null {
     return worker.assignments.find(a => a.hasActiveTimer) ?? null;
+  }
+
+  protected runningJobNumber(worker: ClockWorker): string | null {
+    if (!this.clockTypes.isWorking(worker.status)) return null;
+    return this.runningAssignment(worker)?.jobNumber ?? (worker.currentJobNumber || null);
+  }
+
+  private runningJobStartedAt(worker: ClockWorker): string | null {
+    if (!this.clockTypes.isWorking(worker.status)) return null;
+    const assigned = this.runningAssignment(worker);
+    if (assigned) return assigned.timerStartedAt ?? null;
+    return worker.currentJobNumber ? worker.statusSince : null;
   }
 
   protected isPastDue(job: KioskAvailableJob): boolean {

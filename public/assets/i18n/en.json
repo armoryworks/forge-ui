@@ -7097,7 +7097,7 @@
     "readyToStart": "Ready to start",
     "statusClockedIn": "Clocked in",
     "statusRunning": "Running {{jobNumber}}",
-    "onShift": "On shift {{time}}",
+    "inFor": "In for {{time}}",
     "onJob": "On job {{time}}",
     "pickJob": "Pick a job",
     "assignWork": "Assign work",

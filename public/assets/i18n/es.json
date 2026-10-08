@@ -7090,7 +7090,7 @@
     "readyToStart": "Listas para empezar",
     "statusClockedIn": "Entrada registrada",
     "statusRunning": "Trabajando en {{jobNumber}}",
-    "onShift": "En turno {{time}}",
+    "inFor": "Dentro desde hace {{time}}",
     "onJob": "En la orden {{time}}",
     "pickJob": "Elegir trabajo",
     "assignWork": "Asignar trabajo",
