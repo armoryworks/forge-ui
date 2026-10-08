@@ -6783,7 +6783,8 @@
     "ncrWorkOrderLine": "Orden de trabajo: {{number}}",
     "ncrLotLine": "Lote: {{number}}",
     "ncrFailedItemsLine": "Puntos de la lista de verificación que no pasaron:",
-    "ncrNotesLine": "Notas del inspector: {{notes}}"
+    "ncrNotesLine": "Notas del inspector: {{notes}}",
+    "templatePrompt": "Esta pieza tiene más de una lista de verificación de inspección. Elija la que va a usar."
   },
   "worker": {
     "title": "Mis Tareas",

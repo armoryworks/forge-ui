@@ -61,6 +61,16 @@
   font-size: $font-size-md;
 }
 
+.scan-inspect__templates {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.scan-inspect__template-btn {
+  justify-content: flex-start;
+}
+
 .scan-inspect__ncr {
   display: flex;
   flex-direction: column;

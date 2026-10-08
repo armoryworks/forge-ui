@@ -8,7 +8,8 @@ export type ScanContext =
   | 'shipping'
   | 'quality'
   | 'customers'
-  | 'leads';
+  | 'leads'
+  | 'kiosk-inspect';
 
 export interface ScanEvent {
   value: string;

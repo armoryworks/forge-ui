@@ -6790,7 +6790,8 @@
     "ncrWorkOrderLine": "Work order: {{number}}",
     "ncrLotLine": "Lot: {{number}}",
     "ncrFailedItemsLine": "Checklist items that did not pass:",
-    "ncrNotesLine": "Inspector notes: {{notes}}"
+    "ncrNotesLine": "Inspector notes: {{notes}}",
+    "templatePrompt": "This part has more than one inspection checklist. Pick the one to use."
   },
   "worker": {
     "title": "My Tasks",

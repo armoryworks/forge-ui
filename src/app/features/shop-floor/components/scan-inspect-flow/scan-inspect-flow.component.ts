@@ -1,22 +1,28 @@
 import {
-  ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, input, output, signal,
+  ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, effect, inject, input, output, signal, untracked,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormControl, FormGroup, FormRecord, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
 
 import { BarcodeScanInputComponent } from '../../../../shared/components/barcode-scan-input/barcode-scan-input.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
+import { ScanContext } from '../../../../shared/models/scan-event.model';
+import { ScannerService } from '../../../../shared/services/scanner.service';
 import { QcInspection } from '../../../quality/models/qc-inspection.model';
 import { QcInspectionResult } from '../../../quality/models/qc-inspection-result.model';
+import { QcTemplate } from '../../../quality/models/qc-template.model';
 import { KioskInspectionTarget } from '../../models/kiosk-inspection-target.model';
 import { KioskInspectionService } from '../../services/kiosk-inspection.service';
 
-type InspectStep = 'reference' | 'starting' | 'inspect' | 'submitting' | 'done' | 'ncr' | 'ncrRaised';
+type InspectStep = 'reference' | 'starting' | 'template' | 'inspect' | 'submitting' | 'done' | 'ncr' | 'ncrRaised';
 
 const NO_TARGET: KioskInspectionTarget = { jobId: null, jobNumber: null, lotNumber: null, lotQuantity: null };
+const REFERENCE_SCAN_CONTEXT: ScanContext = 'kiosk-inspect';
+const NCR_DESCRIPTION_MAX = 4000;
 
 function positiveQuantity(control: AbstractControl<number | null>): ValidationErrors | null {
   return Number(control.value) > 0 ? null : { positive: true };
@@ -32,8 +38,11 @@ function positiveQuantity(control: AbstractControl<number | null>): ValidationEr
 })
 export class ScanInspectFlowComponent implements OnInit {
   private readonly kioskInspection = inject(KioskInspectionService);
+  private readonly scanner = inject(ScannerService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly hostScanContext = this.scanner.context();
+  private starting: Subscription | null = null;
 
   readonly partId = input.required<number>();
   readonly partNumber = input.required<string>();
@@ -46,6 +55,7 @@ export class ScanInspectFlowComponent implements OnInit {
   protected readonly lookingUp = signal(false);
   protected readonly referenceError = signal<string | null>(null);
   protected readonly target = signal<KioskInspectionTarget | null>(null);
+  protected readonly templates = signal<QcTemplate[]>([]);
   protected readonly inspection = signal<QcInspection | null>(null);
   protected readonly result = signal<'Pass' | 'Fail' | null>(null);
   protected readonly notesControl = new FormControl('');
@@ -57,13 +67,14 @@ export class ScanInspectFlowComponent implements OnInit {
   protected readonly failedItems = signal<string[]>([]);
 
   protected readonly ncrForm = new FormGroup({
-    description: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(4000)] }),
+    description: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(NCR_DESCRIPTION_MAX)] }),
     affectedQuantity: new FormControl<number | null>(1, { validators: [Validators.required, positiveQuantity] }),
   });
   private readonly ncrFormValid = signal(false);
   protected readonly ncrSaving = signal(false);
   protected readonly ncrError = signal<string | null>(null);
   protected readonly ncrNumber = signal<string | null>(null);
+  protected readonly ncrDescriptionMax = NCR_DESCRIPTION_MAX;
 
   protected readonly requiredItemsChecked = computed(() => {
     const checked = this.checkedItemIds();
@@ -75,6 +86,30 @@ export class ScanInspectFlowComponent implements OnInit {
     return this.inspection() !== null && (result === 'Fail' || (result === 'Pass' && this.canPass()));
   });
   protected readonly canRaiseNcr = computed(() => this.ncrFormValid() && !this.ncrSaving());
+
+  private readonly scanContextEffect = effect(() => {
+    const capturing = this.step() === 'reference';
+    untracked(() => {
+      if (capturing) this.scanner.setContext(REFERENCE_SCAN_CONTEXT);
+      else this.releaseScanContext();
+    });
+  });
+
+  private readonly referenceScanEffect = effect(() => {
+    const scan = this.scanner.lastScan();
+    if (!scan || scan.context !== REFERENCE_SCAN_CONTEXT) return;
+    untracked(() => {
+      this.scanner.clearLastScan();
+      if (this.step() === 'reference') this.onReferenceScanned(scan.value);
+    });
+  });
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.starting?.unsubscribe();
+      this.releaseScanContext();
+    });
+  }
 
   ngOnInit(): void {
     this.checklistForm.valueChanges
@@ -120,17 +155,51 @@ export class ScanInspectFlowComponent implements OnInit {
   private begin(target: KioskInspectionTarget): void {
     this.target.set(target);
     this.step.set('starting');
-    this.kioskInspection.openInspection(this.partId(), this.qcTemplateId(), target).subscribe({
+    const templateId = this.qcTemplateId();
+    if (templateId !== null) {
+      this.open(templateId);
+      return;
+    }
+    this.starting = this.kioskInspection.findTemplates(this.partId()).subscribe({
+      next: (templates) => {
+        if (templates.length > 1) {
+          this.templates.set(templates);
+          this.step.set('template');
+        } else {
+          this.open(templates[0]?.id ?? null);
+        }
+      },
+      error: (err: { error?: { detail?: string } }) => this.startFailed(err),
+    });
+  }
+
+  protected chooseTemplate(templateId: number): void {
+    if (this.step() !== 'template') return;
+    this.step.set('starting');
+    this.open(templateId);
+  }
+
+  private open(templateId: number | null): void {
+    const target = this.target() ?? NO_TARGET;
+    this.starting = this.kioskInspection.openInspection(this.partId(), templateId, target).subscribe({
       next: (inspection) => {
+        this.starting = null;
         this.setInspection(inspection);
         this.step.set('inspect');
       },
-      error: (err: { error?: { detail?: string } }) => {
-        this.target.set(null);
-        this.step.set('reference');
-        this.referenceError.set(err?.error?.detail ?? this.translate.instant('kioskInspect.startFailed'));
-      },
+      error: (err: { error?: { detail?: string } }) => this.startFailed(err),
     });
+  }
+
+  private startFailed(err: { error?: { detail?: string } }): void {
+    this.starting = null;
+    this.target.set(null);
+    this.step.set('reference');
+    this.referenceError.set(err?.error?.detail ?? this.translate.instant('kioskInspect.startFailed'));
+  }
+
+  private releaseScanContext(): void {
+    if (this.scanner.context() === REFERENCE_SCAN_CONTEXT) this.scanner.setContext(this.hostScanContext);
   }
 
   private setInspection(inspection: QcInspection): void {
@@ -229,6 +298,8 @@ export class ScanInspectFlowComponent implements OnInit {
   }
 
   protected cancel(): void {
+    this.starting?.unsubscribe();
+    this.starting = null;
     this.cancelled.emit();
   }
 
@@ -247,7 +318,7 @@ export class ScanInspectFlowComponent implements OnInit {
     }
     const notes = this.notesControl.value?.trim();
     if (notes) lines.push(this.translate.instant('kioskInspect.ncrNotesLine', { notes }));
-    return lines.join('\n');
+    return lines.join('\n').slice(0, NCR_DESCRIPTION_MAX);
   }
 
   private readCheckedItemIds(): Set<number> {

@@ -70,6 +70,37 @@
     </div>
   }
 
+  @if (step() === 'starting') {
+    <div class="scan-inspect__actions">
+      <button class="action-btn" (click)="cancel()" data-testid="inspect-starting-cancel-btn">
+        <span class="material-icons-outlined">close</span>
+        {{ 'common.cancel' | translate }}
+      </button>
+    </div>
+  }
+
+  @if (step() === 'template') {
+    <p class="scan-inspect__prompt">{{ 'kioskInspect.templatePrompt' | translate }}</p>
+
+    <div class="scan-inspect__templates">
+      @for (template of templates(); track template.id) {
+        <button class="action-btn scan-inspect__template-btn"
+                (click)="chooseTemplate(template.id)"
+                [attr.data-testid]="'inspect-template-' + template.id">
+          <span class="material-icons-outlined">description</span>
+          {{ template.name }}
+        </button>
+      }
+    </div>
+
+    <div class="scan-inspect__actions">
+      <button class="action-btn" (click)="cancel()" data-testid="inspect-template-cancel-btn">
+        <span class="material-icons-outlined">close</span>
+        {{ 'common.cancel' | translate }}
+      </button>
+    </div>
+  }
+
   @if (step() === 'inspect') {
     @if (inspection()?.templateId) {
       <div class="scan-inspect__template-info">
@@ -189,6 +220,7 @@
         [label]="'kioskInspect.ncrDescription' | translate"
         formControlName="description"
         [rows]="6"
+        [maxlength]="ncrDescriptionMax"
         data-testid="inspect-ncr-description" />
 
       <app-input

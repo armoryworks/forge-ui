@@ -1,14 +1,21 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { TranslateService } from '@ngx-translate/core';
-import { Observable, of, throwError } from 'rxjs';
+import { NEVER, Observable, Subject, of, throwError } from 'rxjs';
 
 import { mockSignalInputs } from '../../../../../testing/signal-input-harness';
+import { ScanActionService } from '../../../../shared/services/scan-action.service';
+import { ScannerService } from '../../../../shared/services/scanner.service';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { WebHidRfidService } from '../../../../shared/services/web-hid-rfid.service';
 import { NonConformance } from '../../../quality/models/non-conformance.model';
 import { QcInspection } from '../../../quality/models/qc-inspection.model';
+import { QcTemplate } from '../../../quality/models/qc-template.model';
 import { KioskInspectionLookup } from '../../models/kiosk-inspection-lookup.model';
 import { KioskInspectionTarget } from '../../models/kiosk-inspection-target.model';
 import { KioskInspectionService } from '../../services/kiosk-inspection.service';
+import { ScanActionOverlayComponent } from '../scan-action-overlay/scan-action-overlay.component';
 import { ScanInspectFlowComponent } from './scan-inspect-flow.component';
 
 const TARGET: KioskInspectionTarget = { jobId: 31, jobNumber: 'J-1031', lotNumber: 'LOT-7', lotQuantity: 40 };
@@ -39,6 +46,9 @@ interface FlowInternals {
   ngOnInit: () => void;
   onReferenceScanned: (value: string) => void;
   skipReference: () => void;
+  chooseTemplate: (templateId: number) => void;
+  cancel: () => void;
+  templates: () => QcTemplate[];
   setResult: (value: 'Pass' | 'Fail') => void;
   submitInspection: () => void;
   openNcr: () => void;
@@ -61,6 +71,7 @@ interface FlowInternals {
   canSubmit: () => boolean;
   canRaiseNcr: () => boolean;
   completed: { emit: () => void };
+  cancelled: { emit: () => void };
 }
 
 interface SetupOptions {
@@ -68,6 +79,17 @@ interface SetupOptions {
   open?: Observable<QcInspection>;
   completeResponses?: Observable<QcInspection>[];
   ncr?: Observable<NonConformance>;
+  templateId?: number | null;
+  templates?: QcTemplate[];
+}
+
+function template(id: number, name: string): QcTemplate {
+  return { id, name, description: null, partId: 5, partNumber: 'P-5', isActive: true, items: [] };
+}
+
+function wedgeScan(value: string): void {
+  for (const key of [...value, 'Enter'])
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
 }
 
 function setup(options: SetupOptions = {}) {
@@ -76,19 +98,34 @@ function setup(options: SetupOptions = {}) {
   const responses = options.completeResponses ?? [of(INSPECTION)];
   const completeInspection = vi.fn(() => responses.shift()!);
   const raiseNcr = vi.fn(() => options.ncr ?? of({ id: 9, ncrNumber: 'NCR-0009' } as NonConformance));
+  const findTemplates = vi.fn(() => of(options.templates ?? []));
+  const getContext = vi.fn(() => NEVER);
   TestBed.configureTestingModule({
     providers: [
-      { provide: KioskInspectionService, useValue: { findTarget, openInspection, completeInspection, raiseNcr } },
+      { provide: KioskInspectionService, useValue: { findTarget, findTemplates, openInspection, completeInspection, raiseNcr } },
       { provide: TranslateService, useValue: { instant: (k: string, p?: Record<string, unknown>) => p ? `${k}:${JSON.stringify(p)}` : k } },
+      { provide: WebHidRfidService, useValue: { lastScan: signal(null), clearLastScan: vi.fn(), reconnect: () => Promise.resolve(false) } },
+      { provide: ScanActionService, useValue: { getContext } },
+      { provide: SnackbarService, useValue: { info: vi.fn(), success: vi.fn(), warn: vi.fn() } },
     ],
   });
+  const scanner = TestBed.inject(ScannerService);
+  scanner.setContext('shop-floor');
   const component = TestBed.runInInjectionContext(() => new ScanInspectFlowComponent());
-  mockSignalInputs(component, { partId: 5, partNumber: 'P-5', qcTemplateId: 4 });
+  mockSignalInputs(component, {
+    partId: 5,
+    partNumber: 'P-5',
+    qcTemplateId: options.templateId === undefined ? 4 : options.templateId,
+  });
   const flow = component as unknown as FlowInternals;
   flow.ngOnInit();
   const emitted = vi.spyOn(flow.completed, 'emit');
+  const cancelled = vi.spyOn(flow.cancelled, 'emit');
   const check = (resultId: number) => flow.checklistForm.get(String(resultId))!.setValue(true);
-  return { flow, check, emitted, findTarget, openInspection, completeInspection, raiseNcr };
+  return {
+    flow, check, emitted, cancelled, scanner, getContext,
+    findTarget, findTemplates, openInspection, completeInspection, raiseNcr,
+  };
 }
 
 describe('ScanInspectFlowComponent', () => {
@@ -97,7 +134,10 @@ describe('ScanInspectFlowComponent', () => {
     vi.useFakeTimers();
   });
 
-  afterEach(() => vi.useRealTimers());
+  afterEach(() => {
+    TestBed.inject(ScannerService).stop();
+    vi.useRealTimers();
+  });
 
   describe('work order or lot', () => {
     it('asks for the work order or lot before anything is created', () => {
@@ -151,6 +191,38 @@ describe('ScanInspectFlowComponent', () => {
       expect(flow.referenceError()).toBe('Pick a work order that exists.');
     });
 
+    it('takes a hardware scan of the work order away from the kiosk and overlay', () => {
+      const { flow, scanner, findTarget, openInspection, getContext } = setup();
+      TestBed.runInInjectionContext(() => new ScanActionOverlayComponent());
+      scanner.start();
+      TestBed.tick();
+      expect(scanner.context()).toBe('kiosk-inspect');
+
+      wedgeScan('J-1031');
+      TestBed.tick();
+
+      expect(findTarget).toHaveBeenCalledWith(5, 'J-1031');
+      expect(openInspection).toHaveBeenCalledWith(5, 4, TARGET);
+      expect(getContext).not.toHaveBeenCalled();
+      expect(scanner.lastScan()).toBeNull();
+      expect(flow.step()).toBe('inspect');
+      expect(scanner.context()).toBe('shop-floor');
+    });
+
+    it('leaves scans to the host once the inspection has started', () => {
+      const { flow, scanner, findTarget, getContext } = setup();
+      TestBed.runInInjectionContext(() => new ScanActionOverlayComponent());
+      scanner.start();
+      flow.onReferenceScanned('J-1031');
+      TestBed.tick();
+
+      wedgeScan('P-5-BARCODE');
+      TestBed.tick();
+
+      expect(findTarget).toHaveBeenCalledTimes(1);
+      expect(getContext).toHaveBeenCalledWith('P-5-BARCODE');
+    });
+
     it('can still inspect without a work order', () => {
       const { flow, openInspection } = setup();
 
@@ -158,6 +230,53 @@ describe('ScanInspectFlowComponent', () => {
 
       expect(openInspection).toHaveBeenCalledWith(5, 4, { jobId: null, jobNumber: null, lotNumber: null, lotQuantity: null });
       expect(flow.step()).toBe('inspect');
+    });
+  });
+
+  describe('starting', () => {
+    it('asks which checklist to use when the part has several', () => {
+      const { flow, openInspection } = setup({ templateId: null, templates: [template(4, 'Final'), template(3, 'First article')] });
+
+      flow.onReferenceScanned('J-1031');
+
+      expect(flow.step()).toBe('template');
+      expect(flow.templates().map(t => t.id)).toEqual([4, 3]);
+      expect(openInspection).not.toHaveBeenCalled();
+
+      flow.chooseTemplate(3);
+
+      expect(openInspection).toHaveBeenCalledWith(5, 3, TARGET);
+      expect(flow.step()).toBe('inspect');
+    });
+
+    it('uses the only checklist of the part without asking', () => {
+      const { flow, openInspection } = setup({ templateId: null, templates: [template(4, 'Final')] });
+
+      flow.onReferenceScanned('J-1031');
+
+      expect(openInspection).toHaveBeenCalledWith(5, 4, TARGET);
+    });
+
+    it('starts without a checklist when the part has none', () => {
+      const { flow, openInspection, findTemplates } = setup({ templateId: null });
+
+      flow.skipReference();
+
+      expect(findTemplates).toHaveBeenCalledWith(5);
+      expect(openInspection).toHaveBeenCalledWith(5, null, { jobId: null, jobNumber: null, lotNumber: null, lotQuantity: null });
+    });
+
+    it('can be cancelled while the inspection is being opened', () => {
+      const pending = new Subject<QcInspection>();
+      const { flow, cancelled } = setup({ open: pending });
+
+      flow.onReferenceScanned('J-1031');
+      expect(flow.step()).toBe('starting');
+
+      flow.cancel();
+
+      expect(pending.observed).toBe(false);
+      expect(cancelled).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -290,6 +409,16 @@ describe('ScanInspectFlowComponent', () => {
         ].join('\n'),
         affectedQuantity: 40,
       });
+      expect(flow.canRaiseNcr()).toBe(true);
+    });
+
+    it('keeps a long prefilled description within the NCR limit', () => {
+      const { flow } = failInspection();
+      flow.notesControl.setValue('x'.repeat(5000));
+
+      flow.openNcr();
+
+      expect(flow.ncrForm.getRawValue().description.length).toBe(4000);
       expect(flow.canRaiseNcr()).toBe(true);
     });
 
