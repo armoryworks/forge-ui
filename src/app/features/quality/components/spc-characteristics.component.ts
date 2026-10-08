@@ -1,13 +1,18 @@
 import { ChangeDetectionStrategy, Component, inject, output, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
 
 import { SpcService } from '../services/spc.service';
 import { SpcCharacteristic } from '../models/spc.model';
+import { PartsService } from '../../parts/services/parts.service';
 import { DataTableComponent } from '../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../shared/models/column-def.model';
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
+import { EntityPickerComponent } from '../../../shared/components/entity-picker/entity-picker.component';
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../shared/components/textarea/textarea.component';
@@ -21,9 +26,9 @@ import { LoadingBlockDirective } from '../../../shared/directives/loading-block.
   selector: 'app-spc-characteristics',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe, DecimalPipe,
+    ReactiveFormsModule, DatePipe, DecimalPipe, TranslatePipe,
     DataTableComponent, ColumnCellDirective,
-    DialogComponent, InputComponent, SelectComponent,
+    DialogComponent, EntityPickerComponent, InputComponent, SelectComponent,
     TextareaComponent, ToggleComponent,
     ValidationButtonComponent, LoadingBlockDirective,
   ],
@@ -34,6 +39,8 @@ import { LoadingBlockDirective } from '../../../shared/directives/loading-block.
 export class SpcCharacteristicsComponent {
   private readonly spcService = inject(SpcService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly partsService = inject(PartsService);
+  private readonly translate = inject(TranslateService);
 
   readonly characteristicSelected = output<SpcCharacteristic>();
 
@@ -42,23 +49,26 @@ export class SpcCharacteristicsComponent {
   protected readonly characteristics = signal<SpcCharacteristic[]>([]);
   protected readonly showDialog = signal(false);
   protected readonly editingId = signal<number | null>(null);
+  protected readonly operationOptions = signal<SelectOption[]>([]);
+  protected readonly editingPartNumber = signal('');
+  private operationsSub: Subscription | null = null;
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'partNumber', header: 'Part #', sortable: true, width: '120px' },
-    { field: 'name', header: 'Characteristic', sortable: true },
-    { field: 'operationName', header: 'Operation', sortable: true, width: '140px' },
-    { field: 'nominalValue', header: 'Nominal', sortable: true, width: '90px', align: 'right' },
-    { field: 'specLimits', header: 'Spec Limits', width: '140px', align: 'center' },
-    { field: 'sampleSize', header: 'n', sortable: true, width: '50px', align: 'center' },
-    { field: 'measurementCount', header: 'Measurements', sortable: true, width: '110px', align: 'right' },
-    { field: 'latestCpk', header: 'Cpk', sortable: true, width: '80px', align: 'right' },
-    { field: 'isActive', header: 'Active', sortable: true, width: '70px', align: 'center' },
+    { field: 'partNumber', header: this.translate.instant('spc.characteristics.colPartNumber'), sortable: true, width: '120px' },
+    { field: 'name', header: this.translate.instant('spc.characteristics.colCharacteristic'), sortable: true },
+    { field: 'operationName', header: this.translate.instant('spc.characteristics.operation'), sortable: true, width: '140px' },
+    { field: 'nominalValue', header: this.translate.instant('spc.characteristics.colNominal'), sortable: true, width: '90px', align: 'right' },
+    { field: 'specLimits', header: this.translate.instant('spc.characteristics.colSpecLimits'), width: '140px', align: 'center' },
+    { field: 'sampleSize', header: this.translate.instant('spc.characteristics.colSampleSize'), sortable: true, width: '50px', align: 'center' },
+    { field: 'measurementCount', header: this.translate.instant('spc.characteristics.colMeasurements'), sortable: true, width: '110px', align: 'right' },
+    { field: 'latestCpk', header: this.translate.instant('spc.characteristics.colCpk'), sortable: true, width: '80px', align: 'right' },
+    { field: 'isActive', header: this.translate.instant('common.active'), sortable: true, width: '70px', align: 'center' },
     { field: 'actions', header: '', width: '50px', align: 'center' },
   ];
 
   protected readonly measurementTypeOptions: SelectOption[] = [
-    { value: 'Variable', label: 'Variable' },
-    { value: 'Attribute', label: 'Attribute' },
+    { value: 'Variable', label: this.translate.instant('spc.characteristics.measurementTypes.Variable') },
+    { value: 'Attribute', label: this.translate.instant('spc.characteristics.measurementTypes.Attribute') },
   ];
 
   protected readonly form = new FormGroup({
@@ -80,17 +90,21 @@ export class SpcCharacteristicsComponent {
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
-    partId: 'Part',
-    name: 'Name',
-    nominalValue: 'Nominal Value',
-    upperSpecLimit: 'Upper Spec Limit',
-    lowerSpecLimit: 'Lower Spec Limit',
-    decimalPlaces: 'Decimal Places',
-    sampleSize: 'Sample Size',
+    partId: this.translate.instant('spc.characteristics.part'),
+    name: this.translate.instant('common.name'),
+    nominalValue: this.translate.instant('spc.characteristics.nominalValue'),
+    upperSpecLimit: this.translate.instant('spc.characteristics.upperSpecLimit'),
+    lowerSpecLimit: this.translate.instant('spc.characteristics.lowerSpecLimit'),
+    decimalPlaces: this.translate.instant('spc.characteristics.decimalPlaces'),
+    sampleSize: this.translate.instant('spc.characteristics.sampleSize'),
   });
 
   constructor() {
     this.loadCharacteristics();
+    this.form.controls.partId.valueChanges.pipe(takeUntilDestroyed()).subscribe(partId => {
+      this.form.controls.operationId.setValue(null);
+      this.loadOperations(partId);
+    });
   }
 
   loadCharacteristics(): void {
@@ -103,12 +117,14 @@ export class SpcCharacteristicsComponent {
 
   openCreate(): void {
     this.editingId.set(null);
+    this.editingPartNumber.set('');
     this.form.reset({ measurementType: 'Variable', decimalPlaces: 4, sampleSize: 5, notifyOnOoc: true, isActive: true });
     this.showDialog.set(true);
   }
 
   protected openEdit(char: SpcCharacteristic): void {
     this.editingId.set(char.id);
+    this.editingPartNumber.set(char.partNumber);
     this.form.patchValue({
       partId: char.partId,
       operationId: char.operationId,
@@ -125,7 +141,9 @@ export class SpcCharacteristicsComponent {
       gageId: char.gageId,
       notifyOnOoc: char.notifyOnOoc,
       isActive: char.isActive,
-    });
+    }, { emitEvent: false });
+    this.loadOperations(char.partId);
+    this.form.updateValueAndValidity();
     this.showDialog.set(true);
   }
 
@@ -165,9 +183,24 @@ export class SpcCharacteristicsComponent {
         this.saving.set(false);
         this.closeDialog();
         this.loadCharacteristics();
-        this.snackbar.success(this.editingId() ? 'Characteristic updated' : 'Characteristic created');
+        this.snackbar.success(this.translate.instant(
+          this.editingId() ? 'spc.characteristics.updated' : 'spc.characteristics.created'));
       },
       error: () => this.saving.set(false),
+    });
+  }
+
+  private loadOperations(partId: number | null): void {
+    this.operationsSub?.unsubscribe();
+    this.operationOptions.set([]);
+    if (partId == null) return;
+    this.operationsSub = this.partsService.getOperations(partId).subscribe({
+      next: operations => this.operationOptions.set(operations.length === 0 ? [] : [
+        { value: null, label: this.translate.instant('spc.characteristics.noOperation') },
+        ...[...operations]
+          .sort((a, b) => a.stepNumber - b.stepNumber)
+          .map(op => ({ value: op.id, label: `${op.stepNumber} · ${op.title}` })),
+      ]),
     });
   }
 

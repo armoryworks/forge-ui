@@ -1,21 +1,28 @@
 <div class="spc-entry">
   <div class="spc-entry__header">
-    <h4 class="spc-entry__title">Record Subgroup — {{ characteristic().name }}</h4>
+    <h4 class="spc-entry__title">{{ 'spc.dataEntry.title' | translate: { name: characteristic().name } }}</h4>
     <span class="spc-entry__subtitle">
-      {{ characteristic().partNumber }} · n={{ characteristic().sampleSize }}
+      {{ 'spc.dataEntry.subtitle' | translate: { partNumber: characteristic().partNumber, sampleSize: characteristic().sampleSize } }}
       @if (characteristic().unitOfMeasure) { · {{ characteristic().unitOfMeasure }} }
     </span>
   </div>
 
   <div class="spc-entry__context">
-    <app-input label="Job ID" type="number" [formControl]="jobIdControl" />
-    <app-input label="Lot Number" [formControl]="lotNumberControl" />
+    <app-entity-picker data-testid="spc-entry-job"
+      [label]="'spc.dataEntry.workOrder' | translate"
+      entityType="jobs"
+      displayField="jobNumber"
+      secondaryDisplayField="title"
+      [formControl]="jobIdControl"
+      [placeholder]="'common.optional' | translate" />
+    <app-input [label]="'spc.dataEntry.lotNumber' | translate" [formControl]="lotNumberControl"
+      [placeholder]="'common.optional' | translate" data-testid="spc-entry-lot" />
   </div>
 
   <div class="spc-entry__grid">
     <div class="spc-entry__grid-header">
-      <span class="spc-entry__label">Reading</span>
-      <span class="spc-entry__label">Value</span>
+      <span class="spc-entry__label">{{ 'spc.dataEntry.reading' | translate }}</span>
+      <span class="spc-entry__label">{{ 'spc.dataEntry.value' | translate }}</span>
     </div>
     @for (i of sampleIndices(); track i) {
       <div class="spc-entry__row">
@@ -33,23 +40,23 @@
 
   <div class="spc-entry__computed">
     <div class="spc-entry__stat">
-      <span class="spc-entry__stat-label">Mean (X̄)</span>
+      <span class="spc-entry__stat-label">{{ 'spc.dataEntry.mean' | translate }}</span>
       <span class="spc-entry__stat-value">{{ computedMean() !== null ? formatValue(computedMean()) : '—' }}</span>
     </div>
     <div class="spc-entry__stat">
-      <span class="spc-entry__stat-label">Range (R)</span>
+      <span class="spc-entry__stat-label">{{ 'spc.dataEntry.range' | translate }}</span>
       <span class="spc-entry__stat-value">{{ computedRange() !== null ? formatValue(computedRange()) : '—' }}</span>
     </div>
   </div>
 
-  <app-textarea label="Notes" [formControl]="notes" [rows]="2" />
+  <app-textarea [label]="'common.notes' | translate" [formControl]="notes" [rows]="2" data-testid="spc-entry-notes" />
 
   <div class="spc-entry__actions">
-    <button class="action-btn" (click)="clearForm()">Clear</button>
-    <button class="action-btn action-btn--primary"
+    <button class="action-btn" data-testid="spc-entry-clear" (click)="clearForm()">{{ 'spc.dataEntry.clear' | translate }}</button>
+    <button class="action-btn action-btn--primary" data-testid="spc-entry-record"
       [disabled]="!allFilled() || saving()"
       (click)="submit()">
-      <span class="material-icons-outlined">save</span> Record Subgroup
+      <span class="material-icons-outlined">save</span> {{ 'spc.dataEntry.record' | translate }}
     </button>
   </div>
 </div>

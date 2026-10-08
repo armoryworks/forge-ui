@@ -176,6 +176,12 @@ describe('PartQualityClusterComponent', () => {
     expect(c.summary()?.openNcrs.map(n => n.ncrNumber)).toEqual(['NCR-1']);
   });
 
+  it('links each open NCR to its detail on the NCR list', () => {
+    const component = TestBed.runInInjectionContext(() => new PartQualityClusterComponent());
+    const c = component as unknown as { ncrDetailParams(ncrId: number): Record<string, string> };
+    expect(c.ncrDetailParams(41)).toEqual({ detail: 'ncr:41' });
+  });
+
   it('does not request the quality summary when CAP-QC-INSPECTION is disabled', () => {
     const cap = TestBed.inject(CapabilityService);
     vi.spyOn(cap, 'isEnabled').mockImplementation(() => false);

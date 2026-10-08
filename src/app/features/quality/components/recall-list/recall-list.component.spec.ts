@@ -9,22 +9,24 @@ import { RecallService } from '../../services/recall.service';
 import { Recall } from '../../models/recall.model';
 import { DetailDialogService } from '../../../../shared/services/detail-dialog.service';
 import { UserPreferencesService } from '../../../../shared/services/user-preferences.service';
+import { ColumnDef } from '../../../../shared/models/column-def.model';
 
 const RECALLS: Recall[] = [
   {
     id: 4, initiatedLotId: 12, initiatedLotNumber: 'LOT-12', reason: 'Contaminated resin',
-    recallDate: new Date('2026-10-01'), status: 'Active', affectedLotsCount: 3, affectedShipmentsCount: 2,
-    totalQuarantinedQuantity: 30, resolvedAt: null, createdAt: new Date('2026-10-01'),
+    recallDate: new Date('2026-10-01'), status: 'Active', affectedLotsCount: 3, affectedShipmentsCount: 3,
+    affectedCustomersCount: 2, totalQuarantinedQuantity: 30, resolvedAt: null, createdAt: new Date('2026-10-01'),
   },
   {
     id: 2, initiatedLotId: 7, initiatedLotNumber: 'LOT-7', reason: 'Out-of-spec hardness',
     recallDate: new Date('2026-08-01'), status: 'Resolved', affectedLotsCount: 1, affectedShipmentsCount: 0,
-    totalQuarantinedQuantity: 0, resolvedAt: new Date('2026-08-15'), createdAt: new Date('2026-08-01'),
+    affectedCustomersCount: 0, totalQuarantinedQuantity: 0, resolvedAt: new Date('2026-08-15'), createdAt: new Date('2026-08-01'),
   },
 ];
 
 interface ListApi {
   recalls(): Recall[];
+  columns: ColumnDef[];
   onRowClick(row: unknown): void;
 }
 
@@ -67,6 +69,16 @@ describe('RecallListComponent', () => {
     expect(html).toContain('LOT-7');
     expect(html).toContain('recalls.statusActive');
     expect(html).toContain('recalls.statusResolved');
+  });
+
+  it('shows how many distinct customers each recall reached', () => {
+    const { fixture, api } = create();
+    const html = (fixture.nativeElement as HTMLElement).textContent ?? '';
+
+    expect(api.columns.find(c => c.field === 'affectedCustomersCount')).toEqual(expect.objectContaining({
+      header: 'recalls.colCustomers', type: 'number',
+    }));
+    expect(html).toContain('recalls.colCustomers');
   });
 
   it('opens the recall detail on row click and reloads the list when it closes', () => {

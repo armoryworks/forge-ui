@@ -9,6 +9,7 @@ export interface Recall {
   status: RecallStatus;
   affectedLotsCount: number;
   affectedShipmentsCount: number;
+  affectedCustomersCount: number;
   totalQuarantinedQuantity: number;
   resolvedAt: Date | null;
   createdAt: Date;

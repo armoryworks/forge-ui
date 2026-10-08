@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { SpcService } from '../services/spc.service';
 import { SpcCharacteristic, SpcSubgroupEntry } from '../models/spc.model';
+import { EntityPickerComponent } from '../../../shared/components/entity-picker/entity-picker.component';
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { TextareaComponent } from '../../../shared/components/textarea/textarea.component';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
@@ -10,7 +12,7 @@ import { SnackbarService } from '../../../shared/services/snackbar.service';
 @Component({
   selector: 'app-spc-data-entry',
   standalone: true,
-  imports: [ReactiveFormsModule, InputComponent, TextareaComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, EntityPickerComponent, InputComponent, TextareaComponent],
   templateUrl: './spc-data-entry.component.html',
   styleUrl: './spc-data-entry.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -18,6 +20,7 @@ import { SnackbarService } from '../../../shared/services/snackbar.service';
 export class SpcDataEntryComponent {
   private readonly spcService = inject(SpcService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   readonly characteristic = input.required<SpcCharacteristic>();
   readonly measurementRecorded = output<void>();
@@ -95,8 +98,9 @@ export class SpcDataEntryComponent {
         this.saving.set(false);
         this.clearForm();
         const m = measurements[0];
-        const oocMsg = m?.isOutOfControl ? ` ⚠ OOC: ${m.oocRuleViolated}` : '';
-        this.snackbar.success(`Subgroup #${m?.subgroupNumber} recorded.${oocMsg}`);
+        this.snackbar.success(m?.isOutOfControl
+          ? this.translate.instant('spc.dataEntry.recordedOoc', { number: m.subgroupNumber, rule: m.oocRuleViolated })
+          : this.translate.instant('spc.dataEntry.recorded', { number: m?.subgroupNumber }));
         this.measurementRecorded.emit();
       },
       error: () => this.saving.set(false),

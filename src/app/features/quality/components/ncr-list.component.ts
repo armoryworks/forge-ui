@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -21,9 +22,12 @@ import { DialogComponent } from '../../../shared/components/dialog/dialog.compon
 import { EntityPickerComponent } from '../../../shared/components/entity-picker/entity-picker.component';
 import { DetailSidePanelComponent } from '../../../shared/components/detail-side-panel/detail-side-panel.component';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { DetailDialogService } from '../../../shared/services/detail-dialog.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { FormValidationService } from '../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
+
+const NCR_ENTITY_TYPE = 'ncr';
 
 const NOTES_REQUIRED_CODES: readonly NcrDispositionCode[] = ['UseAsIs', 'Reject'];
 
@@ -48,6 +52,9 @@ export class NcrListComponent implements OnInit {
   private readonly ncrCapaService = inject(NcrCapaService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly detailDialog = inject(DetailDialogService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -155,6 +162,7 @@ export class NcrListComponent implements OnInit {
       .pipe(takeUntilDestroyed())
       .subscribe(code => this.applyDispositionValidators(code));
     this.applyDispositionValidators(this.dispositionForm.controls.code.value);
+    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe(() => this.openDetailFromUrl());
   }
 
   ngOnInit(): void {
@@ -203,6 +211,19 @@ export class NcrListComponent implements OnInit {
 
   protected closeDetail(): void {
     this.selectedNcr.set(null);
+    if (this.detailDialog.getDetailFromUrl()?.entityType !== NCR_ENTITY_TYPE) return;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { detail: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  private openDetailFromUrl(): void {
+    const detail = this.detailDialog.getDetailFromUrl();
+    if (detail?.entityType !== NCR_ENTITY_TYPE || this.selectedNcr()?.id === detail.entityId) return;
+    this.ncrCapaService.getNcr(detail.entityId).subscribe(ncr => this.selectedNcr.set(ncr));
   }
 
   openDisposition(ncr: NonConformance): void {

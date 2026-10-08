@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Params, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 
@@ -190,5 +190,9 @@ export class PartQualityClusterComponent {
 
   protected onCancel(): void {
     this.cancelled.emit();
+  }
+
+  protected ncrDetailParams(ncrId: number): Params {
+    return { detail: `ncr:${ncrId}` };
   }
 }

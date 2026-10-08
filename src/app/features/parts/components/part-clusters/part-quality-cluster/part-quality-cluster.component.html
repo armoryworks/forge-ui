@@ -109,7 +109,7 @@
           emptyIcon="report_problem"
           [emptyMessage]="'partQuality.noOpenNcrs' | translate">
           <ng-template appColumnCell="ncrNumber" let-row>
-            <a routerLink="/quality/ncrs" data-testid="part-quality-ncr-link">{{ row.ncrNumber }}</a>
+            <a routerLink="/quality/ncrs" [queryParams]="ncrDetailParams(row.id)" data-testid="part-quality-ncr-link">{{ row.ncrNumber }}</a>
           </ng-template>
           <ng-template appColumnCell="lotNumber" let-row>{{ row.lotNumber ?? '—' }}</ng-template>
         </app-data-table>

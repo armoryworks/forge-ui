@@ -6617,6 +6617,55 @@
     "linkedNcr": "Non-conformance raised:",
     "activity": "Activity"
   },
+  "spc": {
+    "characteristics": {
+      "empty": "No SPC characteristics defined",
+      "edit": "Edit characteristic",
+      "newTitle": "New characteristic",
+      "editTitle": "Edit characteristic",
+      "update": "Update",
+      "created": "Characteristic created",
+      "updated": "Characteristic updated",
+      "part": "Part",
+      "operation": "Operation",
+      "noOperation": "No specific operation",
+      "measurementType": "Measurement type",
+      "measurementTypes": {
+        "Variable": "Variable",
+        "Attribute": "Attribute"
+      },
+      "nominalValue": "Nominal value",
+      "unitOfMeasure": "Unit of measure",
+      "lowerSpecLimit": "Lower spec limit",
+      "upperSpecLimit": "Upper spec limit",
+      "sampleSize": "Sample size (n)",
+      "decimalPlaces": "Decimal places",
+      "sampleFrequency": "Sample frequency",
+      "sampleFrequencyPlaceholder": "e.g., every 50 pieces",
+      "notifyOnOoc": "Notify when out of control",
+      "colPartNumber": "Part #",
+      "colCharacteristic": "Characteristic",
+      "colNominal": "Nominal",
+      "colSpecLimits": "Spec limits",
+      "colSampleSize": "n",
+      "colMeasurements": "Measurements",
+      "colCpk": "Cpk"
+    },
+    "dataEntry": {
+      "title": "Record subgroup: {{name}}",
+      "subtitle": "{{partNumber}} · n={{sampleSize}}",
+      "workOrder": "Work order",
+      "lotNumber": "Lot number",
+      "reading": "Reading",
+      "value": "Value",
+      "mean": "Mean (X̄)",
+      "range": "Range (R)",
+      "clear": "Clear",
+      "record": "Record subgroup",
+      "recorded": "Subgroup #{{number}} recorded.",
+      "recordedOoc": "Subgroup #{{number}} recorded. Out of control: {{rule}}"
+    }
+  },
   "quality": {
     "title": "Quality & Traceability",
     "subtitle": "Inspections, lot tracking, and compliance",

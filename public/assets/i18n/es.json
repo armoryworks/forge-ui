@@ -6610,6 +6610,55 @@
     "linkedNcr": "No conformidad levantada:",
     "activity": "Actividad"
   },
+  "spc": {
+    "characteristics": {
+      "empty": "No hay características SPC definidas",
+      "edit": "Editar característica",
+      "newTitle": "Nueva característica",
+      "editTitle": "Editar característica",
+      "update": "Actualizar",
+      "created": "Característica creada",
+      "updated": "Característica actualizada",
+      "part": "Pieza",
+      "operation": "Operación",
+      "noOperation": "Sin operación específica",
+      "measurementType": "Tipo de medición",
+      "measurementTypes": {
+        "Variable": "Variable",
+        "Attribute": "Atributo"
+      },
+      "nominalValue": "Valor nominal",
+      "unitOfMeasure": "Unidad de medida",
+      "lowerSpecLimit": "Límite inferior de especificación",
+      "upperSpecLimit": "Límite superior de especificación",
+      "sampleSize": "Tamaño de muestra (n)",
+      "decimalPlaces": "Decimales",
+      "sampleFrequency": "Frecuencia de muestreo",
+      "sampleFrequencyPlaceholder": "p. ej., cada 50 piezas",
+      "notifyOnOoc": "Notificar cuando esté fuera de control",
+      "colPartNumber": "N.º de pieza",
+      "colCharacteristic": "Característica",
+      "colNominal": "Nominal",
+      "colSpecLimits": "Límites de especificación",
+      "colSampleSize": "n",
+      "colMeasurements": "Mediciones",
+      "colCpk": "Cpk"
+    },
+    "dataEntry": {
+      "title": "Registrar subgrupo: {{name}}",
+      "subtitle": "{{partNumber}} · n={{sampleSize}}",
+      "workOrder": "Orden de trabajo",
+      "lotNumber": "Número de lote",
+      "reading": "Lectura",
+      "value": "Valor",
+      "mean": "Media (X̄)",
+      "range": "Rango (R)",
+      "clear": "Limpiar",
+      "record": "Registrar subgrupo",
+      "recorded": "Subgrupo n.º {{number}} registrado.",
+      "recordedOoc": "Subgrupo n.º {{number}} registrado. Fuera de control: {{rule}}"
+    }
+  },
   "quality": {
     "title": "Calidad y Trazabilidad",
     "subtitle": "Inspecciones, seguimiento de lotes y cumplimiento",

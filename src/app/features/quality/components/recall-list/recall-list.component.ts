@@ -49,6 +49,7 @@ export class RecallListComponent {
     { field: 'affectedLotsCount', header: this.translate.instant('recalls.colLots'), sortable: true, type: 'number', width: '80px', align: 'right' },
     { field: 'totalQuarantinedQuantity', header: this.translate.instant('recalls.colQuarantined'), sortable: true, type: 'number', width: '120px', align: 'right' },
     { field: 'affectedShipmentsCount', header: this.translate.instant('recalls.colShipments'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'affectedCustomersCount', header: this.translate.instant('recalls.colCustomers'), sortable: true, type: 'number', width: '100px', align: 'right' },
     { field: 'recallDate', header: this.translate.instant('recalls.recallDate'), sortable: true, type: 'date', width: '110px' },
   ];
 
