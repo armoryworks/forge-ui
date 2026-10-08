@@ -1,0 +1,210 @@
+@use 'styles/variables' as *;
+
+:host {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.receive {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: $sp-lg;
+  padding-bottom: calc(#{$sp-lg} + env(safe-area-inset-bottom));
+  overflow-y: auto;
+
+  &__back {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: $sp-md;
+    min-height: 56px;
+    padding: 0 $sp-md;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: $font-family-primary;
+    font-size: $font-size-md;
+    cursor: pointer;
+  }
+
+  &__head {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__number {
+    font-family: $font-family-mono;
+    font-size: $font-size-heading;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  &__vendor {
+    font-size: $font-size-lg;
+    color: var(--text);
+  }
+
+  &__status {
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-md;
+    color: var(--text-muted);
+  }
+
+  &__retry {
+    align-self: flex-start;
+    min-height: 56px;
+    padding: 0 $sp-lg;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    color: var(--text);
+    font-family: $font-family-primary;
+    font-size: $font-size-md;
+    cursor: pointer;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-lg;
+  }
+
+  &__lines {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-lg;
+  }
+
+  &__line {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+    padding: $sp-md;
+    border: $border-width-thin solid var(--border);
+    border-top: $border-width-accent solid var(--primary);
+    background: var(--surface);
+  }
+
+  &__line-head {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__part {
+    font-family: $font-family-mono;
+    font-size: $font-size-lg;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  &__description {
+    font-size: $font-size-md;
+    color: var(--text-secondary);
+  }
+
+  &__facts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $sp-sm;
+    margin: 0;
+  }
+
+  &__fact {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+
+    dt {
+      font-family: $font-family-mono;
+      font-size: $font-size-xs;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    dd {
+      margin: 0;
+      font-family: $font-family-mono;
+      font-size: $font-size-lg;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    &--due dd { color: var(--primary); }
+  }
+
+  &__qty {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    gap: $sp-md;
+  }
+
+  &__fill {
+    min-height: 56px;
+    min-width: 96px;
+    padding: 0 $sp-md;
+    background: var(--bg);
+    border: $border-width-thin solid var(--border);
+    color: var(--text);
+    font-family: $font-family-primary;
+    font-size: $font-size-md;
+    cursor: pointer;
+  }
+
+  &__notice {
+    margin: 0;
+    font-size: $font-size-md;
+    color: var(--warning);
+  }
+
+  &__error {
+    margin: 0;
+    padding: $sp-md;
+    border-left: $border-width-accent solid var(--error);
+    background: var(--surface);
+    font-size: $font-size-md;
+    color: var(--error);
+  }
+
+  &__submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $sp-md;
+    min-height: 72px;
+    background: var(--primary);
+    border: none;
+    color: var(--bg);
+    font-family: $font-family-primary;
+    font-size: $font-size-xl;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:disabled { opacity: 0.5; cursor: default; }
+  }
+
+  &__sheet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: $z-dialog;
+    background: var(--surface);
+    border-top: $border-width-accent solid var(--primary);
+  }
+}

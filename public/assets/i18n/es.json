@@ -10636,6 +10636,27 @@
     "workLogFailed": "No se pudieron registrar las piezas (¿hay una tarifa vigente para esa fecha?).",
     "deleteFailed": "No se pudo eliminar el registro."
   },
+  "mobileReceive": {
+    "backToScan": "Volver a escanear",
+    "loadFailed": "No se pudo cargar esta orden de compra.",
+    "retry": "Reintentar",
+    "notReceivable": "Esta orden de compra está en estado {{status}} y no se puede recibir.",
+    "allReceived": "Ya se recibió todo lo de esta orden de compra.",
+    "ordered": "Pedido",
+    "receivedSoFar": "Recibido",
+    "remaining": "Pendiente",
+    "quantity": "Cantidad a recibir",
+    "fillRemaining": "Todo ({{qty}})",
+    "bin": "Ubicación",
+    "noBin": "Sin ubicación",
+    "lot": "Lote / n.º de colada",
+    "packingSlip": "N.º de lista de empaque",
+    "offline": "Está sin conexión. Para recibir se necesita conexión.",
+    "receive": "Recibir",
+    "receiving": "Recibiendo…",
+    "received": "Recepción registrada en {{number}}.",
+    "failed": "La recepción no se completó. Inténtelo de nuevo."
+  },
   "upgradeLock": {
     "title": "Forge se está actualizando",
     "working": "Esto tardará unos minutos. Todo lo que guardó está a salvo.",

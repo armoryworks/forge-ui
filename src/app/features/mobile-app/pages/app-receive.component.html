@@ -1,0 +1,122 @@
+<div class="receive" data-testid="mobile-app-receive">
+  <button type="button" class="receive__back" data-testid="receive-back" (click)="back()">
+    <span class="material-icons-outlined" aria-hidden="true">arrow_back</span>
+    {{ 'mobileReceive.backToScan' | translate }}
+  </button>
+
+  @if (loading()) {
+    <p class="receive__hint" role="status">{{ 'common.loading' | translate }}</p>
+  } @else if (failed() || !po()) {
+    <p class="receive__hint" role="alert">{{ 'mobileReceive.loadFailed' | translate }}</p>
+    <button type="button" class="receive__retry" data-testid="receive-retry" (click)="load()">
+      {{ 'mobileReceive.retry' | translate }}
+    </button>
+  } @else if (po(); as po) {
+    <header class="receive__head">
+      <span class="receive__number" data-testid="receive-po-number">{{ po.poNumber }}</span>
+      <span class="receive__vendor">{{ po.vendorName }}</span>
+      <span class="receive__status" data-testid="receive-po-status">{{ statusLabel() }}</span>
+    </header>
+
+    @if (!receivable()) {
+      <p class="receive__hint" role="status" data-testid="receive-not-receivable">
+        {{ 'mobileReceive.notReceivable' | translate: { status: statusLabel() } }}
+      </p>
+    } @else if (lines().length === 0) {
+      <p class="receive__hint" role="status" data-testid="receive-all-received">{{ 'mobileReceive.allReceived' | translate }}</p>
+    } @else {
+      <form class="receive__form" [formGroup]="form" (ngSubmit)="submit()">
+        <div formArrayName="lines" class="receive__lines">
+          @for (line of lines(); track line.id; let i = $index) {
+            <section
+              class="receive__line"
+              [formGroupName]="i"
+              [attr.aria-label]="line.partNumber ?? line.description"
+              [attr.data-testid]="'receive-line-' + line.id"
+            >
+              <div class="receive__line-head">
+                <span class="receive__part">{{ line.partNumber ?? '—' }}</span>
+                <span class="receive__description">{{ line.description }}</span>
+              </div>
+
+              <dl class="receive__facts">
+                <div class="receive__fact">
+                  <dt>{{ 'mobileReceive.ordered' | translate }}</dt>
+                  <dd>{{ line.orderedQuantity }}</dd>
+                </div>
+                <div class="receive__fact">
+                  <dt>{{ 'mobileReceive.receivedSoFar' | translate }}</dt>
+                  <dd>{{ line.receivedQuantity }}</dd>
+                </div>
+                <div class="receive__fact receive__fact--due">
+                  <dt>{{ 'mobileReceive.remaining' | translate }}</dt>
+                  <dd>{{ line.remainingQuantity }}</dd>
+                </div>
+              </dl>
+
+              <div class="receive__qty">
+                <app-input
+                  formControlName="quantity"
+                  type="number"
+                  step="any"
+                  [min]="0"
+                  [max]="line.remainingQuantity"
+                  [label]="'mobileReceive.quantity' | translate"
+                  [attr.data-testid]="'receive-qty-' + line.id"
+                />
+                <button
+                  type="button"
+                  class="receive__fill"
+                  [attr.data-testid]="'receive-fill-' + line.id"
+                  (click)="fillRemaining(i)"
+                >{{ 'mobileReceive.fillRemaining' | translate: { qty: line.remainingQuantity } }}</button>
+              </div>
+
+              @if (line.partId) {
+                @if (binsEnabled()) {
+                  <app-select
+                    formControlName="binId"
+                    [label]="'mobileReceive.bin' | translate"
+                    [options]="lineBinOptions()[i]"
+                    [attr.data-testid]="'receive-bin-' + line.id"
+                  />
+                }
+                <app-input
+                  formControlName="lot"
+                  [maxlength]="100"
+                  [label]="'mobileReceive.lot' | translate"
+                  [attr.data-testid]="'receive-lot-' + line.id"
+                />
+              }
+            </section>
+          }
+        </div>
+
+        <app-input
+          formControlName="packingSlip"
+          [maxlength]="100"
+          [label]="'mobileReceive.packingSlip' | translate"
+          data-testid="receive-packing-slip"
+        />
+
+        @if (!online()) {
+          <p class="receive__notice" role="status" data-testid="receive-offline">{{ 'mobileReceive.offline' | translate }}</p>
+        }
+        @if (error(); as message) {
+          <p class="receive__error" role="alert" data-testid="receive-error">{{ message }}</p>
+        }
+
+        <button type="submit" class="receive__submit" data-testid="receive-submit" [disabled]="!canSubmit()">
+          <span class="material-icons-outlined" aria-hidden="true">inventory</span>
+          {{ (busy() ? 'mobileReceive.receiving' : 'mobileReceive.receive') | translate }}
+        </button>
+      </form>
+    }
+  }
+
+  @if (identifying()) {
+    <div class="receive__sheet">
+      <app-identity-prompt (identified)="onIdentified()" (cancelled)="onIdentityCancelled()" />
+    </div>
+  }
+</div>

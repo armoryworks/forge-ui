@@ -10636,6 +10636,27 @@
     "workLogFailed": "Could not log pieces (is a rate in force for that date?).",
     "deleteFailed": "Could not delete the entry."
   },
+  "mobileReceive": {
+    "backToScan": "Back to scan",
+    "loadFailed": "Could not load this purchase order.",
+    "retry": "Try again",
+    "notReceivable": "This purchase order is {{status}} and cannot be received.",
+    "allReceived": "Everything on this purchase order has been received.",
+    "ordered": "Ordered",
+    "receivedSoFar": "Received",
+    "remaining": "Remaining",
+    "quantity": "Receive quantity",
+    "fillRemaining": "All {{qty}}",
+    "bin": "Bin",
+    "noBin": "No bin",
+    "lot": "Lot / heat #",
+    "packingSlip": "Packing slip #",
+    "offline": "You are offline. Receiving needs a connection.",
+    "receive": "Receive",
+    "receiving": "Receiving…",
+    "received": "Receipt recorded on {{number}}.",
+    "failed": "The receipt did not go through. Try again."
+  },
   "upgradeLock": {
     "title": "Forge is being updated",
     "working": "This will take a few minutes. Anything you saved is safe.",

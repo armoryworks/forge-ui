@@ -44,6 +44,11 @@ export const MOBILE_APP_ROUTES: Routes = [
         loadComponent: () => import('./pages/app-lookup.component').then((m) => m.AppLookupComponent),
       },
       {
+        path: 'receive/:id',
+        canActivate: [mobileScreenGuard('CAP-MOBILE-SCAN'), mobileScreenGuard('CAP-P2P-PO')],
+        loadComponent: () => import('./pages/app-receive.component').then((m) => m.AppReceiveComponent),
+      },
+      {
         path: 'jobs',
         canActivate: [mobileScreenGuard('CAP-MOBILE-JOBS')],
         loadComponent: () => import('./pages/app-jobs-home.component').then((m) => m.AppJobsHomeComponent),
