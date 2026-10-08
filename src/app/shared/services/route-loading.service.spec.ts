@@ -59,7 +59,6 @@ describe('RouteLoadingService', () => {
 
     routerEvents$.next(new NavigationEnd(1, '/kanban', '/kanban'));
 
-    // May have a minimum display delay — advance timers to cover it
     vi.advanceTimersByTime(500);
 
     expect(loadingService.isLoading()).toBe(false);
@@ -90,5 +89,43 @@ describe('RouteLoadingService', () => {
 
     expect(loadingService.isLoading()).toBe(false);
     vi.useRealTimers();
+  });
+
+  it('blocks interaction while the route has no content', () => {
+    service.initialize();
+
+    routerEvents$.next(new NavigationStart(1, '/kanban'));
+
+    expect(loadingService.blocking()).toBe(true);
+  });
+
+  it('stops the moment navigation ends, with no minimum display', () => {
+    service.initialize();
+
+    routerEvents$.next(new NavigationStart(1, '/kanban'));
+    routerEvents$.next(new NavigationEnd(1, '/kanban', '/kanban'));
+
+    expect(loadingService.isLoading()).toBe(false);
+    expect(loadingService.blocking()).toBe(false);
+  });
+
+  it('ignores navigations that only change the query, such as opening a detail dialog', () => {
+    service.initialize();
+    routerEvents$.next(new NavigationStart(1, '/parts'));
+    routerEvents$.next(new NavigationEnd(1, '/parts', '/parts'));
+
+    routerEvents$.next(new NavigationStart(2, '/parts?detail=part:7'));
+
+    expect(loadingService.isLoading()).toBe(false);
+  });
+
+  it('measures the path after redirects', () => {
+    service.initialize();
+    routerEvents$.next(new NavigationStart(1, '/board?detail=job:3'));
+    routerEvents$.next(new NavigationEnd(1, '/board?detail=job:3', '/kanban?detail=job:3'));
+
+    routerEvents$.next(new NavigationStart(2, '/kanban'));
+
+    expect(loadingService.isLoading()).toBe(false);
   });
 });

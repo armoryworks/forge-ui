@@ -6,14 +6,13 @@ import { filter } from 'rxjs';
 import { LoadingService } from './loading.service';
 
 const ROUTE_LOADING_KEY = 'route-navigation';
-const MIN_DISPLAY_MS = 400;
 
 @Injectable({ providedIn: 'root' })
 export class RouteLoadingService {
   private readonly router = inject(Router);
   private readonly loading = inject(LoadingService);
   private readonly destroyRef = inject(DestroyRef);
-  private navigationStartTime = 0;
+  private currentPath: string | null = null;
 
   initialize(): void {
     this.router.events.pipe(
@@ -26,18 +25,18 @@ export class RouteLoadingService {
       takeUntilDestroyed(this.destroyRef),
     ).subscribe(event => {
       if (event instanceof NavigationStart) {
-        this.navigationStartTime = Date.now();
-        this.loading.start(ROUTE_LOADING_KEY, 'Loading...');
-      } else {
-        const elapsed = Date.now() - this.navigationStartTime;
-        const remaining = Math.max(0, MIN_DISPLAY_MS - elapsed);
-
-        if (remaining > 0) {
-          setTimeout(() => this.loading.stop(ROUTE_LOADING_KEY), remaining);
-        } else {
-          this.loading.stop(ROUTE_LOADING_KEY);
-        }
+        if (pathOf(event.url) === this.currentPath) return;
+        this.loading.start(ROUTE_LOADING_KEY, 'Loading...', { blocking: true });
+        return;
       }
+      if (event instanceof NavigationEnd) {
+        this.currentPath = pathOf(event.urlAfterRedirects);
+      }
+      this.loading.stop(ROUTE_LOADING_KEY);
     });
   }
+}
+
+function pathOf(url: string): string {
+  return url.split(/[?#]/, 1)[0];
 }

@@ -4,6 +4,7 @@ import { Observable, finalize } from 'rxjs';
 export interface LoadingCause {
   key: string;
   message: string;
+  blocking?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -12,6 +13,7 @@ export class LoadingService {
 
   readonly causes = this._causes.asReadonly();
   readonly isLoading = computed(() => this._causes().length > 0);
+  readonly blocking = computed(() => this._causes().some(c => c.blocking));
   readonly message = computed(() => {
     const causes = this._causes();
     return causes.length ? causes[causes.length - 1].message : '';
@@ -46,12 +48,14 @@ export class LoadingService {
 
   /**
    * Manually start a loading cause. Call stop(key) when done.
+   * Pass `{ blocking: true }` only while the page behind has nothing rendered to click.
    */
-  start(key: string, message: string): void {
+  start(key: string, message: string, options?: { blocking?: boolean }): void {
+    const cause: LoadingCause = options?.blocking ? { key, message, blocking: true } : { key, message };
     this._causes.update(causes => {
       // Replace existing key or append
       const filtered = causes.filter(c => c.key !== key);
-      return [...filtered, { key, message }];
+      return [...filtered, cause];
     });
   }
 

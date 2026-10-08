@@ -1,5 +1,5 @@
 import {
-  ChangeDetectionStrategy, Component, DestroyRef, HostListener, inject, input, OnInit, output, signal,
+  ChangeDetectionStrategy, Component, DestroyRef, DOCUMENT, HostListener, inject, input, OnInit, output, signal,
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
@@ -13,6 +13,8 @@ import { DraftRecoveryBannerComponent } from '../draft-recovery-banner/draft-rec
 import { DraftService } from '../../services/draft.service';
 import { DraftConfig } from '../../models/draft-config.model';
 
+const FIELD_OVERLAY_PANELS = '.mat-mdc-select-panel, .mat-mdc-autocomplete-panel.mat-mdc-autocomplete-visible, .mat-datepicker-content';
+
 @Component({
   selector: 'app-dialog',
   standalone: true,
@@ -25,6 +27,7 @@ export class DialogComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly draftService = inject(DraftService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly document = inject(DOCUMENT);
   // Non-null only when this <app-dialog> is itself rendered inside a MatDialog
   // overlay — in that case the CDK already handles Escape, so we must not
   // double-handle it. Null for the inline usage (rendered directly in a page
@@ -44,6 +47,16 @@ export class DialogComponent implements OnInit {
 
   protected readonly restoredDraftTimestamp = signal<number | null>(null);
   protected readonly isDraftEnabled = signal(false);
+
+  private escapeOwnedByFieldOverlay = false;
+
+  constructor() {
+    const snapshotFieldOverlay = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') this.escapeOwnedByFieldOverlay = this.hasOpenFieldOverlay();
+    };
+    this.document.addEventListener('keydown', snapshotFieldOverlay, true);
+    this.destroyRef.onDestroy(() => this.document.removeEventListener('keydown', snapshotFieldOverlay, true));
+  }
 
   ngOnInit(): void {
     const config = this.draftConfig();
@@ -103,14 +116,16 @@ export class DialogComponent implements OnInit {
 
   /**
    * Escape closes the dialog through the same path as the X button (incl. the
-   * unsaved-changes confirm). Only active for the inline usage — MatDialog-
-   * hosted dialogs get Escape from the CDK overlay, and a nested confirm
-   * owns Escape while it's open.
+   * unsaved-changes confirm). Only active for the inline usage — a MatDialog
+   * host decides what Escape does for its own content, and a nested confirm
+   * owns Escape while it's open. An open select, autocomplete or datepicker
+   * panel also owns Escape: that press closes the panel, not the form.
    */
   @HostListener('document:keydown.escape')
   protected onEscapeKey(): void {
     if (this.hostMatDialogRef) return;
     if (this.dialog.openDialogs.length > 0) return;
+    if (this.escapeOwnedByFieldOverlay) return;
     this.tryClose();
   }
 
@@ -137,6 +152,10 @@ export class DialogComponent implements OnInit {
           this.closed.emit();
         }
       });
+  }
+
+  private hasOpenFieldOverlay(): boolean {
+    return this.document.querySelector(FIELD_OVERLAY_PANELS) !== null;
   }
 
   private buildAdapter(config: DraftConfig, formGroup: FormGroup) {

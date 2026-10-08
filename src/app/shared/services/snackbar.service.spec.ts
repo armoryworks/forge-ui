@@ -7,6 +7,7 @@ import { Subject } from 'rxjs';
 
 import { markHttpErrorShown } from '../utils/shown-http-errors';
 import { SnackbarService } from './snackbar.service';
+import { ToastService } from './toast.service';
 
 describe('SnackbarService', () => {
   let service: SnackbarService;
@@ -57,6 +58,16 @@ describe('SnackbarService', () => {
         duration: 4000,
         panelClass: ['snackbar--success'],
       });
+    });
+
+    it('clears a stale error toast but keeps other notices', () => {
+      const toasts = TestBed.inject(ToastService);
+      toasts.show({ severity: 'error', title: 'Save failed' });
+      toasts.show({ severity: 'warning', title: 'Low stock' });
+
+      service.success('Job saved');
+
+      expect(toasts.toasts().map(t => t.title)).toEqual(['Low stock']);
     });
   });
 
@@ -109,6 +120,15 @@ describe('SnackbarService', () => {
       actionSubject.next();
 
       expect(routerSpy.navigate).toHaveBeenCalledWith(['/jobs/42']);
+    });
+
+    it('clears a stale error toast', () => {
+      const toasts = TestBed.inject(ToastService);
+      toasts.show({ severity: 'error', title: 'Create failed' });
+
+      service.successWithNav('Job created', '/jobs/42', 'View Job');
+
+      expect(toasts.toasts()).toEqual([]);
     });
 
     it('should not navigate if action is not clicked', () => {

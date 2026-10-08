@@ -14,6 +14,10 @@ $enter-duration: 300ms;
   z-index: $z-loading;
   background: color-mix(in srgb, var(--bg) 70%, transparent);
   animation: overlay-fade-in $enter-duration ease forwards;
+
+  &--passive {
+    pointer-events: none;
+  }
 }
 
 // ─── Spinner — fixed at viewport center, absolutely positioned ───

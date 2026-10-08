@@ -20,6 +20,7 @@ export class LoadingOverlayComponent {
   private exitCounter = 0;
 
   protected readonly visible = this.loadingService.isLoading;
+  protected readonly blocking = this.loadingService.blocking;
   protected readonly displayCauses = signal<DisplayCause[]>([]);
 
   constructor() {

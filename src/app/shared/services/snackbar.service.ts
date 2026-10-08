@@ -8,6 +8,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { Observable, filter } from 'rxjs';
 
 import { wasHttpErrorShown } from '../utils/shown-http-errors';
+import { ToastService } from './toast.service';
 
 @Injectable({ providedIn: 'root' })
 export class SnackbarService {
@@ -15,6 +16,7 @@ export class SnackbarService {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
+  private readonly toasts = inject(ToastService);
 
   constructor() {
     // Dismiss any open snackbar on route navigation
@@ -27,6 +29,7 @@ export class SnackbarService {
   }
 
   success(message: string): void {
+    this.toasts.clearErrors();
     this.snackBar.open(message, this.dismissLabel(), {
       duration: 4000,
       panelClass: ['snackbar--success'],
@@ -65,6 +68,7 @@ export class SnackbarService {
   }
 
   successWithNav(message: string, route: string, actionLabel: string): void {
+    this.toasts.clearErrors();
     const ref = this.snackBar.open(message, actionLabel, {
       duration: 4000,
       panelClass: ['snackbar--success'],

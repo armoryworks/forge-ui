@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, HostListener, inject, signal, untracked } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -20,6 +20,8 @@ export class SidebarComponent {
   protected readonly layout = inject(LayoutService);
   private readonly navTree = inject(NavTreeService);
   private readonly router = inject(Router);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly createdAt = performance.now();
 
   protected readonly collapsed = computed(() => !this.layout.sidebarExpanded());
   protected readonly pinnedTopTree = this.navTree.pinnedTopTree;
@@ -75,6 +77,20 @@ export class SidebarComponent {
   private isAncestorPrefix(prefix: NavItem[], trail: NavItem[]): boolean {
     if (prefix.length === 0 || prefix.length > trail.length) return false;
     return prefix.every((item, i) => item === trail[i]);
+  }
+
+  /**
+   * The mobile flyout closes when the user clicks anywhere outside it. The
+   * backdrop does not catch that click, so it still reaches its target. The
+   * click that opened the flyout predates this component and is ignored.
+   */
+  @HostListener('document:click', ['$event'])
+  protected onDocumentClick(event: MouseEvent): void {
+    if (!this.layout.isMobile() || !this.layout.mobileMenuOpen()) return;
+    if (event.timeStamp < this.createdAt) return;
+    const target = event.target;
+    if (target instanceof Node && this.host.nativeElement.contains(target)) return;
+    this.layout.closeMobileMenu();
   }
 
   protected toggleCollapse(): void {

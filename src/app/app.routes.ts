@@ -80,6 +80,7 @@ export const routes: Routes = [
       // address-bar guesses land somewhere sensible. (Inventory + Purchasing
       // already resolve to real leaf routes of the same name.)
       { path: 'operations', redirectTo: 'kanban', pathMatch: 'full' },
+      { path: 'board', redirectTo: 'kanban', pathMatch: 'full' },
       { path: 'sales', redirectTo: 'customers', pathMatch: 'full' },
       { path: 'production', redirectTo: 'parts', pathMatch: 'full' },
       { path: 'people', redirectTo: 'employees', pathMatch: 'full' },

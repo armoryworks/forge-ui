@@ -115,7 +115,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private wasAuthenticated = false;
 
   protected readonly showShell = computed(() => this.authService.isAuthenticated() && !this.layout.isDisplayRoute() && !this.layout.isAuthRoute());
-  protected readonly isGlobalLoading = this.loadingService.isLoading;
+  protected readonly isGlobalLoading = this.loadingService.blocking;
 
   constructor() {
     // Reactively connect/disconnect hubs based on auth state

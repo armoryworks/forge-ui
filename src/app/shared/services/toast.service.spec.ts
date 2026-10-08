@@ -71,6 +71,32 @@ describe('ToastService', () => {
     });
   });
 
+  describe('auto-dismiss', () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('dismisses an error toast after 10 seconds', () => {
+      vi.useFakeTimers();
+      service.show({ severity: 'error', title: 'Save failed' });
+
+      vi.advanceTimersByTime(9999);
+      expect(service.toasts().length).toBe(1);
+
+      vi.advanceTimersByTime(1);
+      expect(service.toasts()).toEqual([]);
+    });
+
+    it('clears error toasts when a later success arrives', () => {
+      service.show({ severity: 'error', title: 'Save failed' });
+      service.show({ severity: 'info', title: 'Heads up' });
+
+      service.show({ severity: 'success', title: 'Saved' });
+
+      expect(service.toasts().map(t => t.title)).toEqual(['Saved', 'Heads up']);
+    });
+  });
+
   describe('capability-gate resilience (Phase 4 Phase-D)', () => {
     it('should ignore a toast whose details carry a CapabilityDisabledError', () => {
       const capErr = new CapabilityDisabledError('CAP-EXT-AI-ASSISTANT', 'AI off.');

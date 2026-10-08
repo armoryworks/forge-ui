@@ -1,5 +1,5 @@
-@if (visible() || displayCauses().length > 0) {
-  <div class="loading-overlay" role="alert" aria-live="assertive" aria-label="Loading">
+@if (visible()) {
+  <div class="loading-overlay" [class.loading-overlay--passive]="!blocking()" data-testid="loading-overlay" role="alert" aria-live="assertive" aria-label="Loading">
     <!-- Spinner — fixed at center, never moves -->
     <div class="loading-overlay__spinner">
       <svg viewBox="0 0 48 48" class="loading-overlay__svg">

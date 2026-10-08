@@ -28,6 +28,25 @@ describe('LoadingService', () => {
     });
   });
 
+  describe('blocking', () => {
+    it('is false for a cause started without the blocking option', () => {
+      service.start('load-jobs', 'Loading jobs...');
+
+      expect(service.isLoading()).toBe(true);
+      expect(service.blocking()).toBe(false);
+    });
+
+    it('is true while a blocking cause is active', () => {
+      service.start('load-jobs', 'Loading jobs...');
+      service.start('route', 'Loading...', { blocking: true });
+
+      expect(service.blocking()).toBe(true);
+
+      service.stop('route');
+      expect(service.blocking()).toBe(false);
+    });
+  });
+
   describe('start and stop', () => {
     it('should set isLoading to true when a cause is started', () => {
       service.start('load-jobs', 'Loading jobs...');

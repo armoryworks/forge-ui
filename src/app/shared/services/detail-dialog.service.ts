@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { DOCUMENT, Injectable, inject } from '@angular/core';
 
 import { ComponentType } from '@angular/cdk/overlay';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -7,7 +7,8 @@ import { Router } from '@angular/router';
 /**
  * Centralized detail dialog opener with URL sync.
  *
- * Sets `?detail=entityType:entityId` on open, clears on close.
+ * Sets `?detail=entityType:entityId` on open; on close clears it and any `?tab=` the panel added.
+ * Only one detail dialog is open at a time: opening another replaces the current one.
  * Feature components call `getDetailFromUrl()` in init to auto-open
  * when the page loads with a detail param (shared links, bookmarks, refresh).
  */
@@ -15,9 +16,16 @@ import { Router } from '@angular/router';
 export class DetailDialogService {
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
+  private readonly document = inject(DOCUMENT);
+
+  private current: MatDialogRef<unknown, unknown> | null = null;
+  private focusOrigin: HTMLElement | null = null;
+  private pageTab: string | null = null;
 
   /**
-   * Open a detail dialog and sync the URL.
+   * Open a detail dialog and sync the URL. Closes any detail dialog that is
+   * already open, moves focus into the new dialog at once and returns it to
+   * the element that opened the first dialog in the chain on close.
    *
    * @returns MatDialogRef — callers can chain `.afterClosed()` for feature-specific logic.
    *
@@ -32,6 +40,15 @@ export class DetailDialogService {
     data: D,
     config?: { width?: string },
   ): MatDialogRef<T, R> {
+    const previous = this.current;
+    this.current = null;
+    if (previous) {
+      previous.close();
+    } else {
+      this.focusOrigin = this.activeElement();
+      this.pageTab = this.router.parseUrl(this.router.url).queryParams['tab'] ?? null;
+    }
+
     this.setDetailParam(entityType, entityId);
 
     const ref = this.dialog.open<T, D, R>(component, {
@@ -39,9 +56,20 @@ export class DetailDialogService {
       maxWidth: '95vw',
       panelClass: 'detail-dialog-panel',
       data,
+      enterAnimationDuration: '150ms',
+      autoFocus: 'dialog',
+      delayFocusTrap: false,
+      restoreFocus: this.focusOrigin ?? true,
     });
 
-    ref.afterClosed().subscribe(() => this.clearDetailParam());
+    this.current = ref as MatDialogRef<unknown, unknown>;
+    ref.afterClosed().subscribe(() => {
+      if (this.current !== (ref as MatDialogRef<unknown, unknown>)) return;
+      this.current = null;
+      this.focusOrigin = null;
+      this.clearDetailParam(this.pageTab);
+      this.pageTab = null;
+    });
 
     return ref;
   }
@@ -62,17 +90,27 @@ export class DetailDialogService {
     return { entityType: type, entityId: id };
   }
 
+  private activeElement(): HTMLElement | null {
+    const active = this.document.activeElement;
+    return active instanceof HTMLElement && active !== this.document.body ? active : null;
+  }
+
   private setDetailParam(entityType: string, entityId: number): void {
     const urlTree = this.router.parseUrl(this.router.url);
     urlTree.queryParams['detail'] = `${entityType}:${entityId}`;
     this.router.navigateByUrl(urlTree, { replaceUrl: true });
   }
 
-  private clearDetailParam(): void {
+  private clearDetailParam(pageTab: string | null): void {
     const urlTree = this.router.parseUrl(this.router.url);
-    if (urlTree.queryParams['detail']) {
-      delete urlTree.queryParams['detail'];
-      this.router.navigateByUrl(urlTree, { replaceUrl: true });
+    const params = urlTree.queryParams;
+    if (!params['detail'] && (params['tab'] ?? null) === pageTab) return;
+    delete params['detail'];
+    if (pageTab === null) {
+      delete params['tab'];
+    } else {
+      params['tab'] = pageTab;
     }
+    this.router.navigateByUrl(urlTree, { replaceUrl: true });
   }
 }

@@ -21,11 +21,11 @@ interface ToastOptions {
 }
 
 const MAX_VISIBLE = 5;
-const DEFAULT_DISMISS: Record<Toast['severity'], number | null> = {
+const DEFAULT_DISMISS: Record<Toast['severity'], number> = {
   info: 8000,
   success: 8000,
   warning: 12000,
-  error: null,
+  error: 10000,
 };
 
 let nextId = 0;
@@ -43,6 +43,10 @@ export class ToastService {
     // layer should be silently ignored.
     if (this.isCapabilityNoise(options)) {
       return;
+    }
+
+    if (options.severity === 'success') {
+      this.clearErrors();
     }
 
     const dismissMs = options.autoDismissMs ?? DEFAULT_DISMISS[options.severity];
@@ -65,13 +69,15 @@ export class ToastService {
       return updated.length > MAX_VISIBLE ? updated.slice(0, MAX_VISIBLE) : updated;
     });
 
-    if (dismissMs !== null) {
-      setTimeout(() => this.dismiss(id), dismissMs);
-    }
+    setTimeout(() => this.dismiss(id), dismissMs);
   }
 
   dismiss(id: number): void {
     this._toasts.update((list) => list.filter((t) => t.id !== id));
+  }
+
+  clearErrors(): void {
+    this._toasts.update((list) => list.filter((t) => t.severity !== 'error'));
   }
 
   /**

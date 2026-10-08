@@ -84,6 +84,7 @@ html {
 
   @include mat.select-overrides((
     arrow-transform: none,
+    panel-background-color: var(--surface),
   ));
 
   @include mat.datepicker-overrides((
@@ -104,6 +105,7 @@ html {
 
   @include mat.autocomplete-overrides((
     container-shape: 0px,
+    background-color: var(--surface),
   ));
 
   // ─── Card padding — consistent internal spacing on all cards ───
@@ -271,6 +273,11 @@ html {
   }
 }
 
+.cdk-overlay-pane:has(> .mat-mdc-select-panel),
+.cdk-overlay-pane:has(> .mat-mdc-autocomplete-panel) {
+  z-index: $z-toast + 1;
+}
+
 // ─── Dark Theme — Material tokens for dark mode ───
 html[data-theme='dark'] {
   @include mat.theme(
@@ -320,6 +327,7 @@ html[data-theme='dark'] {
 
   @include mat.select-overrides((
     arrow-transform: none,
+    panel-background-color: var(--surface),
   ));
 
   @include mat.datepicker-overrides((
@@ -340,6 +348,7 @@ html[data-theme='dark'] {
 
   @include mat.autocomplete-overrides((
     container-shape: 0px,
+    background-color: var(--surface),
   ));
 }
 
