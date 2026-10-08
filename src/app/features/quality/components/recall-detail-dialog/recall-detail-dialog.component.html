@@ -1,0 +1,134 @@
+<div class="detail-panel">
+  <div class="detail-panel__header">
+    <h2 class="detail-panel__title">{{ 'recalls.detailTitle' | translate: { id: data.recallId } }}</h2>
+    <button class="icon-btn" [attr.aria-label]="'common.close' | translate" (click)="close()" data-testid="recall-detail-x-btn">
+      <span class="material-icons-outlined">close</span>
+    </button>
+  </div>
+
+  <div class="detail-panel__body recall-detail" [appLoadingBlock]="loading()">
+    @if (recall(); as r) {
+      <div class="recall-summary">
+        <div class="recall-summary__item">
+          <span class="recall-summary__label">{{ 'common.status' | translate }}</span>
+          <span class="chip" [class]="statusChipClass(r.status)" data-testid="recall-status">{{ statusLabelKey(r.status) | translate }}</span>
+        </div>
+        <div class="recall-summary__item">
+          <span class="recall-summary__label">{{ 'recalls.colLot' | translate }}</span>
+          <span class="recall-summary__value recall-summary__value--mono">{{ r.initiatedLotNumber }}</span>
+        </div>
+        <div class="recall-summary__item">
+          <span class="recall-summary__label">{{ 'recalls.recallDate' | translate }}</span>
+          <span class="recall-summary__value">{{ r.recallDate | date:'MM/dd/yyyy' }}</span>
+        </div>
+        <div class="recall-summary__item">
+          <span class="recall-summary__label">{{ 'recalls.colLots' | translate }}</span>
+          <span class="recall-summary__value">{{ r.affectedLotsCount }}</span>
+        </div>
+        <div class="recall-summary__item">
+          <span class="recall-summary__label">{{ 'recalls.colQuarantined' | translate }}</span>
+          <span class="recall-summary__value">{{ r.totalQuarantinedQuantity | number:'1.0-4' }}</span>
+        </div>
+        <div class="recall-summary__item">
+          <span class="recall-summary__label">{{ 'recalls.colCustomers' | translate }}</span>
+          <span class="recall-summary__value">{{ affectedCustomerCount() }}</span>
+        </div>
+        <div class="recall-summary__item">
+          <span class="recall-summary__label">{{ 'recalls.colShipments' | translate }}</span>
+          <span class="recall-summary__value">{{ r.affectedShipmentsCount }}</span>
+        </div>
+        @if (r.resolvedAt) {
+          <div class="recall-summary__item">
+            <span class="recall-summary__label">{{ 'recalls.resolvedAt' | translate }}</span>
+            <span class="recall-summary__value">{{ r.resolvedAt | date:'MM/dd/yyyy' }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="dlg-section">
+        <span class="dlg-section__title">{{ 'recalls.reason' | translate }}</span>
+        <p class="recall-text">{{ r.reason }}</p>
+        @if (r.resolutionNotes) {
+          <span class="dlg-section__title">{{ 'recalls.resolutionNotes' | translate }}</span>
+          <p class="recall-text">{{ r.resolutionNotes }}</p>
+        }
+      </div>
+
+      <div class="dlg-section">
+        <span class="dlg-section__title">{{ 'recalls.affectedLots' | translate }}</span>
+        <app-data-table
+          tableId="recall-affected-lots"
+          [columns]="lotColumns"
+          [data]="r.affectedLots"
+          trackByField="lotId"
+          emptyIcon="inventory_2"
+          [emptyMessage]="'recalls.noAffectedLots' | translate"
+          data-testid="recall-affected-lots">
+          <ng-template appColumnCell="lotNumber" let-row>
+            <span class="recall-mono">{{ row.lotNumber }}</span>
+          </ng-template>
+          <ng-template appColumnCell="onHandQuantity" let-row>
+            {{ row.onHandQuantity | number:'1.0-4' }}
+          </ng-template>
+          <ng-template appColumnCell="quarantinedQuantity" let-row>
+            {{ row.quarantinedQuantity | number:'1.0-4' }}
+          </ng-template>
+        </app-data-table>
+      </div>
+
+      <div class="dlg-section">
+        <span class="dlg-section__title">{{ 'recalls.affectedShipments' | translate }}</span>
+        @if (approximateCount() > 0) {
+          <p class="text-muted" data-testid="recall-approximate-note">{{ 'recalls.approximateNote' | translate: { count: approximateCount() } }}</p>
+        }
+        <app-data-table
+          tableId="recall-affected-shipments"
+          [columns]="shipmentColumns"
+          [data]="r.affectedShipments"
+          trackByField="shipmentId"
+          emptyIcon="local_shipping"
+          [emptyMessage]="'recalls.noAffectedShipments' | translate"
+          data-testid="recall-affected-shipments">
+          <ng-template appColumnCell="shipmentNumber" let-row>
+            <span class="recall-mono">{{ row.shipmentNumber }}</span>
+            @if (row.isApproximate) {
+              <span class="chip chip--warning recall-approx"
+                [matTooltip]="'recalls.approximateTooltip' | translate"
+                data-testid="recall-approximate-badge">{{ 'recalls.approximate' | translate }}</span>
+            }
+          </ng-template>
+          <ng-template appColumnCell="shippedDate" let-row>
+            {{ row.shippedDate | date:'MM/dd/yyyy' }}
+          </ng-template>
+          <ng-template appColumnCell="affectedQuantity" let-row>
+            {{ row.affectedQuantity | number:'1.0-4' }}
+          </ng-template>
+          <ng-template appColumnCell="trackingNumber" let-row>
+            {{ row.trackingNumber ?? '—' }}
+          </ng-template>
+        </app-data-table>
+      </div>
+
+      @if (canResolve()) {
+        <div class="dlg-section" [formGroup]="resolveForm">
+          <span class="dlg-section__title">{{ 'recalls.resolveTitle' | translate }}</span>
+          <app-textarea [label]="'recalls.resolutionNotes' | translate"
+            formControlName="resolutionNotes" [rows]="3" [maxlength]="2000"
+            data-testid="recall-resolution-notes" />
+        </div>
+      }
+    }
+  </div>
+
+  <div class="detail-panel__footer">
+    <button class="action-btn" (click)="close()" data-testid="recall-detail-close-btn">{{ 'common.close' | translate }}</button>
+    @if (canResolve()) {
+      <button class="action-btn action-btn--primary"
+        [disabled]="resolveForm.invalid || resolving()"
+        (click)="resolve()" data-testid="recall-resolve-btn">
+        <span class="material-icons-outlined">task_alt</span>
+        {{ 'recalls.resolve' | translate }}
+      </button>
+    }
+  </div>
+</div>

@@ -1,0 +1,13 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.recall-number {
+  font-family: $font-family-mono;
+  font-size: var(--font-size-sm);
+}

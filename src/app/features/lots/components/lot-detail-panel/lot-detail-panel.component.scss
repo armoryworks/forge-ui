@@ -13,6 +13,31 @@
   border-bottom: $border-width-thin solid var(--border);
 }
 
+.detail-panel__actions {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+}
+
+.recall-banner {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+  background: var(--warning-light);
+  color: var(--text);
+
+  .material-icons-outlined {
+    color: var(--warning);
+  }
+
+  &__text {
+    flex: 1;
+    font-size: $font-size-base;
+  }
+}
+
 .detail-panel__title {
   font-size: $font-size-lg;
   font-family: $font-family-mono;
@@ -56,8 +81,16 @@
 }
 
 .trace-value {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
   font-size: $font-size-base;
   color: var(--text);
+}
+
+.trace-value__sub {
+  font-size: $font-size-sm;
+  color: var(--text-muted);
 }
 
 .trace-timeline {

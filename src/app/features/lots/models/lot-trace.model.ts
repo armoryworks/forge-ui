@@ -1,3 +1,7 @@
+import { LotTraceInspection } from './lot-trace-inspection.model';
+import { LotTraceJob } from './lot-trace-job.model';
+import { LotTraceNcr } from './lot-trace-ncr.model';
+import { LotTraceReceipt } from './lot-trace-receipt.model';
 import { LotTraceShipment } from './lot-trace-shipment.model';
 
 export interface LotTraceEvent {
@@ -19,4 +23,8 @@ export interface LotTrace {
   supplierLotNumber: string | null;
   events: LotTraceEvent[];
   shippedTo?: LotTraceShipment[];
+  receivedFrom?: LotTraceReceipt[];
+  inspections?: LotTraceInspection[];
+  nonConformances?: LotTraceNcr[];
+  producingJob?: LotTraceJob | null;
 }

@@ -1,10 +1,28 @@
 <div class="detail-panel">
   <div class="detail-panel__header">
     <h2 class="detail-panel__title">{{ lotNumber() }}</h2>
-    <button class="icon-btn" aria-label="Close detail" (click)="closed.emit()">
-      <span class="material-icons-outlined">close</span>
-    </button>
+    <div class="detail-panel__actions">
+      @if (canInitiateRecall()) {
+        <button class="action-btn action-btn--warn" (click)="openInitiateRecall()" data-testid="lot-initiate-recall-btn">
+          <span class="material-icons-outlined">report</span>
+          {{ 'recalls.initiate' | translate }}
+        </button>
+      }
+      <button class="icon-btn" aria-label="Close detail" (click)="closed.emit()">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
   </div>
+
+  @if (initiatedRecall(); as recall) {
+    <div class="recall-banner" data-testid="lot-recall-banner">
+      <span class="material-icons-outlined">report</span>
+      <span class="recall-banner__text">{{ 'recalls.startedBanner' | translate: { id: recall.id, shipments: recall.affectedShipmentsCount } }}</span>
+      <button class="action-btn" (click)="openRecall(recall.id)" data-testid="lot-view-recall-btn">
+        {{ 'recalls.viewRecall' | translate }}
+      </button>
+    </div>
+  }
 
   <div class="detail-panel__body" [appLoadingBlock]="loading()">
     @if (trace(); as t) {
@@ -27,6 +45,15 @@
           <div class="trace-meta">
             <span class="trace-label">{{ 'lots.expires' | translate }}</span>
             <span class="trace-value">{{ t.expirationDate | date:'MM/dd/yyyy' }}</span>
+          </div>
+        }
+        @if (t.producingJob; as job) {
+          <div class="trace-meta" data-testid="lot-producing-job">
+            <span class="trace-label">{{ 'recalls.trace.producingJob' | translate }}</span>
+            <span class="trace-value">
+              <app-entity-link type="job" [entityId]="job.id">{{ job.jobNumber }}</app-entity-link>
+              <span class="trace-value__sub">{{ job.title }}</span>
+            </span>
           </div>
         }
       </div>
@@ -57,13 +84,13 @@
         }
       </div>
 
-      @if (t.shippedTo?.length) {
+      @if (shippedTo().length) {
         <div class="trace-shipments">
           <h4 class="trace-timeline__title">{{ 'lots.shippedTo' | translate }}</h4>
           <app-data-table
             tableId="lot-shipped-to"
             [columns]="shippedToColumns"
-            [data]="t.shippedTo ?? []"
+            [data]="shippedTo()"
             trackByField="shipmentId"
             data-testid="lot-shipped-to">
             <ng-template appColumnCell="shipmentNumber" let-row>
@@ -74,6 +101,88 @@
             </ng-template>
             <ng-template appColumnCell="quantity" let-row>
               {{ row.quantity | number:'1.0-4' }}
+            </ng-template>
+          </app-data-table>
+        </div>
+      }
+
+      @if (receivedFrom().length) {
+        <div class="trace-shipments">
+          <h4 class="trace-timeline__title">{{ 'recalls.trace.receivedFrom' | translate }}</h4>
+          <app-data-table
+            tableId="lot-received-from"
+            [columns]="receivedFromColumns"
+            [data]="receivedFrom()"
+            trackByField="receivingRecordId"
+            data-testid="lot-received-from">
+            <ng-template appColumnCell="vendorName" let-row>
+              <app-entity-link type="vendor" [entityId]="row.vendorId">{{ row.vendorName }}</app-entity-link>
+            </ng-template>
+            <ng-template appColumnCell="poNumber" let-row>
+              <app-entity-link type="purchase-order" [entityId]="row.purchaseOrderId">
+                <span class="trace-shipments__ref">{{ row.poNumber }}</span>
+              </app-entity-link>
+            </ng-template>
+            <ng-template appColumnCell="receivedAt" let-row>
+              {{ row.receivedAt | date:'MM/dd/yyyy' }}
+            </ng-template>
+            <ng-template appColumnCell="quantity" let-row>
+              {{ row.quantity | number:'1.0-4' }}
+            </ng-template>
+            <ng-template appColumnCell="inspectionStatus" let-row>
+              {{ receiptStatusKey(row.inspectionStatus) | translate }}
+            </ng-template>
+          </app-data-table>
+        </div>
+      }
+
+      @if (inspections().length) {
+        <div class="trace-shipments">
+          <h4 class="trace-timeline__title">{{ 'recalls.trace.inspections' | translate }}</h4>
+          <app-data-table
+            tableId="lot-inspections"
+            [columns]="inspectionColumns"
+            [data]="inspections()"
+            data-testid="lot-inspections">
+            <ng-template appColumnCell="templateName" let-row>
+              {{ row.templateName ?? '—' }}
+            </ng-template>
+            <ng-template appColumnCell="status" let-row>
+              {{ inspectionStatusKey(row.status) | translate }}
+            </ng-template>
+            <ng-template appColumnCell="results" let-row>
+              @if (row.passedCount !== undefined) {
+                {{ 'recalls.trace.resultsSummary' | translate: { passed: row.passedCount, failed: row.failedCount ?? 0 } }}
+              } @else {
+                —
+              }
+            </ng-template>
+            <ng-template appColumnCell="createdAt" let-row>
+              {{ (row.completedAt ?? row.createdAt) | date:'MM/dd/yyyy' }}
+            </ng-template>
+          </app-data-table>
+        </div>
+      }
+
+      @if (nonConformances().length) {
+        <div class="trace-shipments">
+          <h4 class="trace-timeline__title">{{ 'recalls.trace.nonConformances' | translate }}</h4>
+          <app-data-table
+            tableId="lot-non-conformances"
+            [columns]="ncrColumns"
+            [data]="nonConformances()"
+            data-testid="lot-non-conformances">
+            <ng-template appColumnCell="ncrNumber" let-row>
+              <span class="trace-shipments__ref">{{ row.ncrNumber }}</span>
+            </ng-template>
+            <ng-template appColumnCell="status" let-row>
+              {{ ncrStatusKey(row.status) | translate }}
+            </ng-template>
+            <ng-template appColumnCell="affectedQuantity" let-row>
+              {{ row.affectedQuantity | number:'1.0-4' }}
+            </ng-template>
+            <ng-template appColumnCell="detectedAt" let-row>
+              {{ row.detectedAt | date:'MM/dd/yyyy' }}
             </ng-template>
           </app-data-table>
         </div>

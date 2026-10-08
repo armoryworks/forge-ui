@@ -1,0 +1,24 @@
+<app-dialog
+  [title]="'recalls.initiateTitle' | translate: { lotNumber: data.lotNumber }"
+  width="480px"
+  [dirty]="form.dirty"
+  (closed)="close()">
+  <div [formGroup]="form">
+    <p class="text-muted">{{ 'recalls.initiateHint' | translate }}</p>
+    <app-textarea [label]="'recalls.reason' | translate"
+      formControlName="reason" [rows]="4" [maxlength]="2000"
+      data-testid="recall-reason" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()" data-testid="recall-initiate-cancel-btn">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations">
+      <button class="action-btn action-btn--primary"
+        [disabled]="form.invalid || saving()"
+        (click)="confirm()" data-testid="recall-initiate-confirm-btn">
+        <span class="material-icons-outlined">report</span>
+        {{ 'recalls.initiate' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

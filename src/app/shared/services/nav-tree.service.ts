@@ -212,6 +212,7 @@ export class NavTreeService {
       icon: 'verified', label: 'Quality', i18nKey: 'navGroups.quality',
       children: [
         { icon: 'checklist', label: 'Quality', i18nKey: 'nav.quality', route: '/quality', capability: 'CAP-QC-INSPECTION', allowedRoles: ['Admin', 'Manager', 'Engineer'] },
+        { icon: 'report', label: 'Recalls', i18nKey: 'recalls.title', route: '/quality/recalls', capability: 'CAP-QC-RECALL', allowedRoles: ['Admin', 'Manager', 'Engineer'] },
         { icon: 'fact_check', label: 'Compliance', i18nKey: 'nav.compliance', route: '/compliance', capability: 'CAP-EXT-WATCHTOWER', allowedRoles: ['Admin', 'Manager', 'ComplianceOfficer', 'OfficeManager'] },
         { icon: 'radar', label: 'Watchtower', i18nKey: 'nav.watchtower', route: '/watchtower', capability: 'CAP-EXT-WATCHTOWER', allowedRoles: ['Admin', 'Manager'] },
       ],

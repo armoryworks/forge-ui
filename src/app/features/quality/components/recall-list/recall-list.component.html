@@ -1,0 +1,32 @@
+<app-page-header
+  [title]="'recalls.title' | translate"
+  [subtitle]="'recalls.subtitle' | translate" />
+
+<div class="page-content page-content--table" [appLoadingBlock]="loading()">
+  <app-data-table
+    tableId="recalls"
+    [columns]="columns"
+    [data]="recalls()"
+    emptyIcon="report"
+    [emptyMessage]="'recalls.noRecalls' | translate"
+    [emptyHelpText]="'recalls.noRecallsHelp' | translate"
+    [clickableRows]="true"
+    (rowClick)="onRowClick($event)"
+    data-testid="recall-list">
+    <ng-template appColumnCell="id" let-row>
+      <span class="recall-number">{{ 'recalls.number' | translate: { id: row.id } }}</span>
+    </ng-template>
+    <ng-template appColumnCell="status" let-row>
+      <span class="chip" [class]="statusChipClass(row.status)">{{ statusLabelKey(row.status) | translate }}</span>
+    </ng-template>
+    <ng-template appColumnCell="initiatedLotNumber" let-row>
+      <span class="recall-number">{{ row.initiatedLotNumber }}</span>
+    </ng-template>
+    <ng-template appColumnCell="totalQuarantinedQuantity" let-row>
+      {{ row.totalQuarantinedQuantity | number:'1.0-4' }}
+    </ng-template>
+    <ng-template appColumnCell="recallDate" let-row>
+      {{ row.recallDate | date:'MM/dd/yyyy' }}
+    </ng-template>
+  </app-data-table>
+</div>
