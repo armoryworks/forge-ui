@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, output, signal, ViewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -10,6 +11,8 @@ import { ValidationButtonComponent } from '../../../shared/components/validation
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { DraftConfig } from '../../../shared/models/draft-config.model';
 import { StageRequest } from '../models/stage-request.model';
+import { TrackTypeStageAdmin } from '../models/track-type-stage-admin.model';
+import { TrackTypeStagesService } from '../services/track-type-stages.service';
 import { TrackType } from '../../../shared/models/track-type.model';
 
 const STAGE_COLORS = [
@@ -29,6 +32,8 @@ export class TrackTypeDialogComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
 
   private readonly translate = inject(TranslateService);
+  private readonly stagesService = inject(TrackTypeStagesService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly trackType = input<TrackType | null>(null);
   readonly saving = input(false);
@@ -48,6 +53,16 @@ export class TrackTypeDialogComponent {
   protected readonly isEdit = computed(() => this.trackType() !== null);
   protected readonly title = computed(() => this.isEdit() ? this.translate.instant('trackTypeDialog.editTrackType') : this.translate.instant('trackTypeDialog.createTrackType'));
   protected readonly hasStages = computed(() => this.stages().length > 0);
+  protected readonly savedStages = signal<ReadonlyMap<string, TrackTypeStageAdmin>>(new Map());
+  protected readonly hideError = signal<string | null>(null);
+  protected readonly startStage = computed(() => this.stages().find(s => s.isActive) ?? null);
+  protected readonly hasVisibleStage = computed(() => this.startStage() !== null);
+  protected readonly accountingWarnings = computed(() => {
+    const saved = this.savedStages();
+    return this.stages()
+      .filter(s => !s.isActive && saved.get(s.code)?.isActive && saved.get(s.code)?.accountingDocumentType)
+      .map(s => s.name);
+  });
 
   protected readonly draftConfig = computed<DraftConfig>(() => ({
     entityType: 'track-type',
@@ -73,9 +88,57 @@ export class TrackTypeDialogComponent {
           color: s.color,
           wipLimit: s.wipLimit,
           isIrreversible: s.isIrreversible,
+          isActive: true,
         })));
+        this.loadAllStages(existing.id);
       }
     });
+  }
+
+  private loadAllStages(trackTypeId: number): void {
+    this.stagesService.getStages(trackTypeId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: all => {
+          this.savedStages.set(new Map(all.map(s => [s.code, s])));
+          this.stages.set([...all].sort((a, b) => a.sortOrder - b.sortOrder).map(s => ({
+            name: s.name,
+            code: s.code,
+            sortOrder: s.sortOrder,
+            color: s.color,
+            wipLimit: s.wipLimit,
+            isIrreversible: s.isIrreversible,
+            isActive: s.isActive,
+          })));
+        },
+        error: () => undefined,
+      });
+  }
+
+  protected isSaved(stage: StageRequest): boolean {
+    return this.savedStages().has(stage.code);
+  }
+
+  protected hideStage(index: number): void {
+    const stage = this.stages()[index];
+    const saved = this.savedStages().get(stage.code);
+    if (saved?.isMandatory) {
+      this.hideError.set(this.translate.instant('trackStages.hideBlockedMandatory', { stage: stage.name }));
+      return;
+    }
+    if (saved?.isActive && saved.openJobCount > 0) {
+      this.hideError.set(this.translate.instant(
+        saved.openJobCount === 1 ? 'trackStages.hideBlockedOpenJob' : 'trackStages.hideBlockedOpenJobs',
+        { count: saved.openJobCount, stage: stage.name }));
+      return;
+    }
+    this.hideError.set(null);
+    this.updateStage(index, 'isActive', false);
+  }
+
+  protected showStage(index: number): void {
+    this.hideError.set(null);
+    this.updateStage(index, 'isActive', true);
   }
 
   protected addStage(): void {
@@ -91,6 +154,7 @@ export class TrackTypeDialogComponent {
       color,
       wipLimit: null,
       isIrreversible: false,
+      isActive: true,
     }]);
   }
 
@@ -122,7 +186,7 @@ export class TrackTypeDialogComponent {
   }
 
   protected onSubmit(): void {
-    if (this.form.invalid || this.stages().length === 0) return;
+    if (this.form.invalid || this.stages().length === 0 || !this.hasVisibleStage()) return;
     this.dialogRef.clearDraft();
     const val = this.form.getRawValue();
     this.saved.emit({

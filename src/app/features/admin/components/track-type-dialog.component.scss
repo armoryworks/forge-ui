@@ -29,6 +29,15 @@
   gap: $sp-sm;
 }
 
+.stages-note {
+  margin: $sp-sm 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+
+  &--error { color: var(--error); }
+  &--warning { color: var(--warning); }
+}
+
 .stage-row {
   display: flex;
   align-items: center;
@@ -86,6 +95,16 @@
     &--name { flex: 2; }
     &--code { flex: 1; font-family: $font-family-mono; font-size: var(--font-size-xs); }
     &--wip { width: 52px; flex: none; text-align: center; }
+  }
+
+  &--hidden {
+    opacity: 0.55;
+    background: var(--surface);
+  }
+
+  &__hidden-tag {
+    @include uppercase-label(var(--font-size-xs), 0.5px, 700);
+    color: var(--text-muted);
   }
 
   &__irreversible {

@@ -4533,6 +4533,19 @@
     "statusReady": "Listo",
     "statusNeedsUpload": "Necesita Subida"
   },
+  "trackStages": {
+    "startIn": "Comenzar en",
+    "soLineConfirmedHint": "Solo se muestran las líneas de pedidos confirmados. Confirme el pedido para ver sus líneas.",
+    "newWorkOrdersStartIn": "Las nuevas órdenes de trabajo comienzan en: {{stage}}",
+    "noVisibleStage": "Al menos un estado debe permanecer visible.",
+    "hide": "Ocultar estado",
+    "show": "Mostrar estado",
+    "hidden": "Oculto",
+    "hideBlockedOpenJob": "Primero mueva la orden de trabajo que está en {{stage}} a otro estado.",
+    "hideBlockedOpenJobs": "Primero mueva las {{count}} órdenes de trabajo que están en {{stage}} a otro estado.",
+    "hideBlockedMandatory": "{{stage}} es un estado obligatorio y no se puede ocultar.",
+    "accountingWarning": "{{stage}} genera un documento contable. Mientras esté oculto, las nuevas órdenes de trabajo omiten ese paso."
+  },
   "trackTypeDialog": {
     "codeImmutableHint": "El código es fijo tras la creación y no se puede cambiar.",
     "editTrackType": "Editar Tipo de Orden",

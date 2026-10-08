@@ -124,6 +124,7 @@ export class KanbanService {
     salesOrderLineId?: number | null;
     partId?: number | null;
     quantity?: number | null;
+    initialStageId?: number | null;
   }): Observable<JobDetail> {
     return this.http.post<JobDetail>(`${environment.apiUrl}/jobs`, command);
   }

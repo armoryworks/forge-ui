@@ -24,7 +24,7 @@
     } @else {
       <div class="stages-list">
         @for (stage of stages(); track $index; let i = $index; let first = $first; let last = $last) {
-          <div class="stage-row">
+          <div class="stage-row" [class.stage-row--hidden]="!stage.isActive">
             <div class="stage-row__order">
               <button class="icon-btn" [disabled]="first" (click)="moveStageUp(i)" [matTooltip]="'trackTypeDialog.moveUp' | translate" matTooltipPosition="above">
                 <span class="material-icons-outlined">arrow_upward</span>
@@ -48,12 +48,37 @@
                 (change)="updateStage(i, 'isIrreversible', $any($event.target).checked)" />
               <span class="material-icons-outlined">lock</span>
             </label>
-            <button class="icon-btn icon-btn--danger" (click)="removeStage(i)" [matTooltip]="'trackTypeDialog.removeStage' | translate" matTooltipPosition="above">
-              <span class="material-icons-outlined">close</span>
-            </button>
+            @if (isSaved(stage)) {
+              @if (stage.isActive) {
+                <button class="icon-btn" data-testid="track-stage-hide" (click)="hideStage(i)" [matTooltip]="'trackStages.hide' | translate" matTooltipPosition="above">
+                  <span class="material-icons-outlined">visibility_off</span>
+                </button>
+              } @else {
+                <span class="stage-row__hidden-tag">{{ 'trackStages.hidden' | translate }}</span>
+                <button class="icon-btn" data-testid="track-stage-show" (click)="showStage(i)" [matTooltip]="'trackStages.show' | translate" matTooltipPosition="above">
+                  <span class="material-icons-outlined">visibility</span>
+                </button>
+              }
+            } @else {
+              <button class="icon-btn icon-btn--danger" (click)="removeStage(i)" [matTooltip]="'trackTypeDialog.removeStage' | translate" matTooltipPosition="above">
+                <span class="material-icons-outlined">close</span>
+              </button>
+            }
           </div>
         }
       </div>
+
+      @if (startStage(); as start) {
+        <p class="stages-note" data-testid="track-start-stage">{{ 'trackStages.newWorkOrdersStartIn' | translate: { stage: start.name } }}</p>
+      } @else {
+        <p class="stages-note stages-note--error">{{ 'trackStages.noVisibleStage' | translate }}</p>
+      }
+      @if (hideError(); as message) {
+        <p class="stages-note stages-note--error" data-testid="track-stage-hide-error">{{ message }}</p>
+      }
+      @for (name of accountingWarnings(); track $index) {
+        <p class="stages-note stages-note--warning">{{ 'trackStages.accountingWarning' | translate: { stage: name } }}</p>
+      }
     }
   </div>
 
@@ -61,7 +86,7 @@
     <button class="action-btn" (click)="closed.emit()">{{ 'common.cancel' | translate }}</button>
     <app-validation-button [violations]="violations" [loading]="saving()">
     <button class="action-btn action-btn--primary"
-      [disabled]="form.invalid || !hasStages() || saving()"
+      [disabled]="form.invalid || !hasStages() || !hasVisibleStage() || saving()"
       (click)="onSubmit()">
       <span class="material-icons-outlined">save</span>
       {{ isEdit() ? ('common.saveChanges' | translate) : ('common.create' | translate) }}

@@ -13,6 +13,7 @@ import { UserRef } from '../models/user-ref.model';
 import { AssignableSalesOrderLine } from '../models/assignable-sales-order-line.model';
 import { SoLineAutoFill } from '../models/so-line-auto-fill.model';
 import { TrackType } from '../../../shared/models/track-type.model';
+import { Stage } from '../../../shared/models/stage.model';
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../shared/components/textarea/textarea.component';
@@ -31,6 +32,8 @@ import { SalesOrderService } from '../../sales-orders/services/sales-order.servi
 import { PartsService } from '../../parts/services/parts.service';
 
 export type DialogMode = 'create' | 'edit';
+
+const ORDER_CONFIRMED_STAGE_CODE = 'order_confirmed';
 
 const EMPTY_AUTO_FILL: SoLineAutoFill = {
   salesOrderId: null, partId: null, quantity: null, title: null, customerId: null, dueDate: null,
@@ -102,7 +105,17 @@ export class JobDialogComponent implements OnInit {
     salesOrderLineId: new FormControl<number | null>(null),
     partId: new FormControl<number | null>(null),
     quantity: new FormControl<number | null>({ value: 1, disabled: true }, [Validators.min(0.0001)]),
+    initialStageId: new FormControl<number | null>(null),
   });
+
+  private readonly selectedTrackTypeId = toSignal(
+    this.jobForm.controls.trackTypeId.valueChanges,
+    { initialValue: this.jobForm.controls.trackTypeId.value },
+  );
+
+  protected readonly startStageOptions = computed<SelectOption[]>(() =>
+    this.visibleStages(this.selectedTrackTypeId()).map(s => ({ value: s.id, label: s.name }))
+  );
 
   protected readonly salesOrderLineOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('kanban.noneOption') },
@@ -196,6 +209,10 @@ export class JobDialogComponent implements OnInit {
     // #27 — SO-line association is offered only when creating a job. Default to the
     // unassigned lines; the toggle reloads to include already-assigned lines.
     if (this.mode() === 'create') {
+      this.applyDefaultStartStage();
+      this.jobForm.controls.trackTypeId.valueChanges
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => this.applyDefaultStartStage());
       this.loadAssignableSoLines(false);
       this.showAssignedControl.valueChanges
         .pipe(takeUntilDestroyed(this.destroyRef))
@@ -205,8 +222,28 @@ export class JobDialogComponent implements OnInit {
         .subscribe(partId => this.syncQuantityEnabled(partId));
       this.jobForm.controls.salesOrderLineId.valueChanges
         .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe(lineId => this.applySoLineDefaults(lineId));
+        .subscribe(lineId => {
+          this.applySoLineDefaults(lineId);
+          this.applyDefaultStartStage();
+        });
     }
+  }
+
+  private visibleStages(trackTypeId: number | null): Stage[] {
+    const trackType = this.trackTypes().find(t => t.id === trackTypeId);
+    return [...(trackType?.stages ?? [])].sort((a, b) => a.sortOrder - b.sortOrder);
+  }
+
+  private applyDefaultStartStage(): void {
+    if (this.restoringDraft) return;
+    const control = this.jobForm.controls.initialStageId;
+    const stages = this.visibleStages(this.jobForm.controls.trackTypeId.value);
+    if (control.dirty && stages.some(s => s.id === control.value)) return;
+    const orderConfirmed = this.jobForm.controls.salesOrderLineId.value != null
+      ? stages.find(s => s.code === ORDER_CONFIRMED_STAGE_CODE)
+      : undefined;
+    control.setValue((orderConfirmed ?? stages[0])?.id ?? null);
+    control.markAsPristine();
   }
 
   private syncQuantityEnabled(partId: number | null): void {
@@ -418,6 +455,7 @@ export class JobDialogComponent implements OnInit {
         salesOrderLineId: f.salesOrderLineId,
         partId: f.partId,
         quantity: this.submittedQuantity(f.partId, f.salesOrderLineId, f.quantity),
+        initialStageId: f.initialStageId,
       }).subscribe({
         next: (detail) => {
           this.saving.set(false);

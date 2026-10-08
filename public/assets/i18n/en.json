@@ -4533,6 +4533,19 @@
     "statusReady": "Ready",
     "statusNeedsUpload": "Needs Upload"
   },
+  "trackStages": {
+    "startIn": "Start in",
+    "soLineConfirmedHint": "Only lines from confirmed orders are listed. Confirm the order to see its lines.",
+    "newWorkOrdersStartIn": "New work orders start in: {{stage}}",
+    "noVisibleStage": "At least one status must stay visible.",
+    "hide": "Hide status",
+    "show": "Show status",
+    "hidden": "Hidden",
+    "hideBlockedOpenJob": "Move the 1 work order in {{stage}} to another status first.",
+    "hideBlockedOpenJobs": "Move the {{count}} work orders in {{stage}} to another status first.",
+    "hideBlockedMandatory": "{{stage}} is a required status and can't be hidden.",
+    "accountingWarning": "{{stage}} creates an accounting document. While it is hidden, new work orders skip that step."
+  },
   "trackTypeDialog": {
     "codeImmutableHint": "Code is fixed after creation and cannot be changed.",
     "editTrackType": "Edit Order Type",

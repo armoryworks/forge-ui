@@ -24,6 +24,7 @@
 
       @if (mode() === 'create') {
         <app-select data-testid="job-track-type" [label]="'kanban.trackType' | translate" formControlName="trackTypeId" [options]="trackTypeOptions()" />
+        <app-select data-testid="job-start-stage" [label]="'trackStages.startIn' | translate" formControlName="initialStageId" [options]="startStageOptions()" />
 
         <div class="dialog-row">
           <app-entity-picker data-testid="job-part" [label]="'kanban.part' | translate" entityType="parts"
@@ -54,6 +55,7 @@
       @if (mode() === 'create') {
         <div class="so-line-assoc">
           <app-select data-testid="job-so-line" [label]="'kanban.salesOrderLine' | translate" formControlName="salesOrderLineId" [options]="salesOrderLineOptions()" />
+          <p class="field-hint" data-testid="job-so-line-confirmed-hint">{{ 'trackStages.soLineConfirmedHint' | translate }}</p>
           <app-toggle data-testid="job-so-line-show-assigned" [label]="'kanban.showAssignedLines' | translate" [formControl]="showAssignedControl" />
           @if (filledFromSoLine()) {
             <p class="field-hint" data-testid="job-so-line-filled">{{ 'kanban.fromSoLine' | translate }}</p>

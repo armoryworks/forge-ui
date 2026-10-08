@@ -26,6 +26,8 @@ interface DialogInternals {
     salesOrderLineId: FormControl<number | null>;
     partId: FormControl<number | null>;
     quantity: FormControl<number | null>;
+    trackTypeId: FormControl<number | null>;
+    initialStageId: FormControl<number | null>;
   }>;
   filledFromSoLine: () => boolean;
   partLabel: () => { id: number; text: string } | null;
@@ -34,6 +36,21 @@ interface DialogInternals {
 }
 
 const trackTypes = [{ id: 1, name: 'Production', isDefault: true, stages: [] }] as unknown as TrackType[];
+
+const stagedTrackTypes = [
+  {
+    id: 1, name: 'Production', isDefault: true,
+    stages: [
+      { id: 13, name: 'Order Confirmed', code: 'order_confirmed', sortOrder: 3 },
+      { id: 11, name: 'Quote Requested', code: 'quote_requested', sortOrder: 1 },
+      { id: 14, name: 'Materials Ordered', code: 'materials_ordered', sortOrder: 4 },
+    ],
+  },
+  {
+    id: 2, name: 'Maintenance', isDefault: false,
+    stages: [{ id: 21, name: 'Requested', code: 'requested', sortOrder: 1 }],
+  },
+] as unknown as TrackType[];
 
 function soLine(overrides: Partial<AssignableSalesOrderLine> = {}): AssignableSalesOrderLine {
   return {
@@ -66,10 +83,10 @@ describe('JobDialogComponent', () => {
   };
   let lines: AssignableSalesOrderLine[];
 
-  function render(mode: 'create' | 'edit', job: JobDetail | null = null): void {
+  function render(mode: 'create' | 'edit', job: JobDetail | null = null, types: TrackType[] = trackTypes): void {
     fixture = TestBed.createComponent(JobDialogComponent);
     fixture.componentRef.setInput('mode', mode);
-    fixture.componentRef.setInput('trackTypes', trackTypes);
+    fixture.componentRef.setInput('trackTypes', types);
     fixture.componentRef.setInput('job', job);
     fixture.detectChanges();
     component = fixture.componentInstance as unknown as DialogInternals;
@@ -365,5 +382,40 @@ describe('JobDialogComponent', () => {
 
     update.next();
     expect(new Date(savedJobs[0].dueDate!).toISOString()).toBe('2026-10-07T00:00:00.000Z');
+  });
+
+  it('starts a new job in the first visible status of the chosen order type', () => {
+    render('create', null, stagedTrackTypes);
+    const f = component.jobForm.controls;
+
+    expect(f.initialStageId.value).toBe(11);
+
+    f.trackTypeId.setValue(2);
+    expect(f.initialStageId.value).toBe(21);
+  });
+
+  it('moves the default to Order Confirmed once a sales-order line is picked', () => {
+    render('create', null, stagedTrackTypes);
+    const f = component.jobForm.controls;
+
+    f.salesOrderLineId.setValue(40);
+    expect(f.initialStageId.value).toBe(13);
+
+    f.salesOrderLineId.setValue(null);
+    expect(f.initialStageId.value).toBe(11);
+  });
+
+  it('keeps a status the user picked and sends it as initialStageId', () => {
+    render('create', null, stagedTrackTypes);
+    const f = component.jobForm.controls;
+    f.title.setValue('Bracket run');
+    f.initialStageId.setValue(14);
+    f.initialStageId.markAsDirty();
+
+    f.salesOrderLineId.setValue(40);
+    expect(f.initialStageId.value).toBe(14);
+
+    component.onSubmit();
+    expect(createJob.mock.calls[0][0].initialStageId).toBe(14);
   });
 });
