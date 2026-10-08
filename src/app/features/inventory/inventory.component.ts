@@ -995,8 +995,12 @@ export class InventoryComponent {
     const jobIds = result.createdJobIds ?? [];
     const poIds = result.createdPoIds ?? [];
     this.addCreatedRecords([
-      ...jobIds.map(id => ({ type: 'job' as const, id, label: this.translate.instant('replenishmentUi.workOrderLink', { number: id }) })),
-      ...poIds.map(id => this.poRecord(id)),
+      ...jobIds.map((id, i) => ({
+        type: 'job' as const,
+        id,
+        label: this.translate.instant('replenishmentUi.workOrderLink', { number: result.createdJobNumbers?.[i] ?? id }),
+      })),
+      ...poIds.map((id, i) => this.poRecord(id, result.createdPoNumbers?.[i])),
     ]);
     this.snackbar.success(this.translate.instant('replenishmentUi.bulkApproved', {
       approved: result.approvedCount,
@@ -1005,8 +1009,11 @@ export class InventoryComponent {
     }));
   }
 
-  private poRecord(id: number): { type: LinkableEntityType; id: number; label: string } {
-    return { type: 'purchase-order', id, label: this.translate.instant('replenishmentUi.poLink', { number: id }) };
+  private poRecord(id: number, number?: string): { type: LinkableEntityType; id: number; label: string } {
+    const label = number
+      ? this.translate.instant('replenishmentUi.poNumberLink', { number })
+      : this.translate.instant('replenishmentUi.poLink', { number: id });
+    return { type: 'purchase-order', id, label };
   }
 
   private addCreatedRecords(records: { type: LinkableEntityType; id: number; label: string }[]): void {

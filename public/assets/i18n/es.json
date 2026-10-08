@@ -1797,6 +1797,7 @@
     "justCreated": "Recién creados:",
     "workOrderLink": "Orden de trabajo {{number}}",
     "poLink": "OC #{{number}}",
+    "poNumberLink": "Orden de compra {{number}}",
     "clearCreated": "Borrar esta lista",
     "review": "Revisar",
     "taskCompleted": "Tarea completada",

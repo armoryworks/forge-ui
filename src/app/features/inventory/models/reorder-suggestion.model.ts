@@ -38,4 +38,6 @@ export interface BulkApproveResult {
   skippedCount: number;
   createdPoIds: number[];
   createdJobIds: number[];
+  createdPoNumbers: string[];
+  createdJobNumbers: string[];
 }

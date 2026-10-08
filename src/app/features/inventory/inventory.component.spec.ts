@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader, TranslateService } from '@ngx-translate/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 
@@ -165,15 +165,30 @@ describe('InventoryComponent replenishment', () => {
     expect(snackbar.success).toHaveBeenCalledWith('replenishmentUi.poCreated');
   });
 
-  it('reports work orders and purchase orders separately after a bulk approve', () => {
-    const approveBulk = vi.fn(() => of({ approvedCount: 3, skippedCount: 0, createdPoIds: [12], createdJobIds: [58, 59] }));
+  it('reports work orders and purchase orders separately after a bulk approve, labelled by number', () => {
+    const approveBulk = vi.fn(() => of({
+      approvedCount: 3,
+      skippedCount: 0,
+      createdPoIds: [12],
+      createdJobIds: [58, 59],
+      createdPoNumbers: ['PO-00012'],
+      createdJobNumbers: ['J-0058', 'J-0059'],
+    }));
     const { internals, snackbar } = setup('replenishment', { loaded: true, enabled: false }, { replenishment: { approveBulk } });
+    const translate = TestBed.inject(TranslateService);
+    translate.setTranslation('en', {
+      replenishmentUi: { workOrderLink: 'Work order {{number}}', poNumberLink: 'Purchase order {{number}}' },
+    });
+    translate.use('en');
 
     internals.selectedSuggestionIds.set(new Set([1, 2, 3]));
     internals.approveBulk();
 
     expect(approveBulk).toHaveBeenCalledWith([1, 2, 3]);
     expect(internals.createdRecords().map(r => `${r.type}:${r.id}`)).toEqual(['job:58', 'job:59', 'purchase-order:12']);
+    expect(internals.createdRecords().map(r => r.label)).toEqual([
+      'Work order J-0058', 'Work order J-0059', 'Purchase order PO-00012',
+    ]);
     expect(snackbar.success).toHaveBeenCalledWith('replenishmentUi.bulkApproved');
   });
 

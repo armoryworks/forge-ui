@@ -1797,6 +1797,7 @@
     "justCreated": "Just created:",
     "workOrderLink": "Work order {{number}}",
     "poLink": "PO #{{number}}",
+    "poNumberLink": "Purchase order {{number}}",
     "clearCreated": "Clear this list",
     "review": "Review",
     "taskCompleted": "Task completed",
