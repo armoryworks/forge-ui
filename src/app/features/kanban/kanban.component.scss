@@ -86,7 +86,7 @@
 }
 
 // ─── Compact team filter in header ───
-:host ::ng-deep .page-header app-select mat-form-field {
+:host ::ng-deep .page-header :is(app-select, app-input) mat-form-field {
   // Match the height of neighboring buttons in the toolbar
   .mat-mdc-text-field-wrapper {
     padding-top: 0;

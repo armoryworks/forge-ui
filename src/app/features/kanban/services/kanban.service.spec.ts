@@ -99,7 +99,7 @@ describe('KanbanService', () => {
     });
 
     it('passes the team filter to the jobs query', () => {
-      service.getBoard(1, 4).subscribe();
+      service.getBoard(1, { teamId: 4 }).subscribe();
 
       flushTrackType();
       const jobsReq = httpMock.expectOne((r) => r.url === `${apiUrl}/jobs`);
@@ -122,6 +122,87 @@ describe('KanbanService', () => {
 
       expect((result as unknown as KanbanBoard).totalCount).toBe(245);
       expect((result as unknown as KanbanBoard).loadedCount).toBe(1);
+    });
+
+    function pageOf(page: number, count: number, totalCount: number): object {
+      const start = (page - 1) * 200;
+      return {
+        items: Array.from({ length: count }, (_, i) => ({ id: start + i + 1, stageName: 'Quoting', boardPosition: start + i })),
+        totalCount,
+        page,
+        pageSize: 200,
+      };
+    }
+
+    it('fetches further pages until every job the server counted is loaded', () => {
+      let result: KanbanBoard | null = null;
+      service.getBoard(1).subscribe((board) => { result = board; });
+
+      flushTrackType();
+      const first = httpMock.expectOne((r) => r.url === `${apiUrl}/jobs`);
+      expect(first.request.params.get('page')).toBe('1');
+      expect(first.request.params.get('pageSize')).toBe('200');
+      first.flush(pageOf(1, 200, 450));
+
+      const rest = httpMock.match((r) => r.url === `${apiUrl}/jobs`);
+      expect(rest.map(r => r.request.params.get('page'))).toEqual(['2', '3']);
+      expect(rest.every(r => r.request.params.get('sort') === 'board')).toBe(true);
+      rest[0].flush(pageOf(2, 200, 450));
+      rest[1].flush(pageOf(3, 50, 450));
+
+      const board = result as unknown as KanbanBoard;
+      expect(board.loadedCount).toBe(450);
+      expect(board.totalCount).toBe(450);
+      expect(board.columns[0].jobs.length).toBe(450);
+    });
+
+    it('stops at 2000 work orders and still reports the server total', () => {
+      let result: KanbanBoard | null = null;
+      service.getBoard(1).subscribe((board) => { result = board; });
+
+      flushTrackType();
+      httpMock.expectOne((r) => r.url === `${apiUrl}/jobs`).flush(pageOf(1, 200, 2600));
+
+      const rest = httpMock.match((r) => r.url === `${apiUrl}/jobs`);
+      expect(rest.map(r => r.request.params.get('page'))).toEqual(['2', '3', '4', '5', '6', '7', '8', '9', '10']);
+      rest.forEach((r, i) => r.flush(pageOf(i + 2, 200, 2600)));
+
+      const board = result as unknown as KanbanBoard;
+      expect(board.loadedCount).toBe(2000);
+      expect(board.totalCount).toBe(2600);
+    });
+
+    it('keeps one card per job when a later page repeats a job', () => {
+      let result: KanbanBoard | null = null;
+      service.getBoard(1).subscribe((board) => { result = board; });
+
+      flushTrackType();
+      httpMock.expectOne((r) => r.url === `${apiUrl}/jobs`).flush(pageOf(1, 200, 201));
+      const second = pageOf(2, 1, 201) as { items: { id: number }[] };
+      second.items[0].id = 200;
+      httpMock.expectOne((r) => r.url === `${apiUrl}/jobs` && r.params.get('page') === '2').flush(second);
+
+      expect((result as unknown as KanbanBoard).loadedCount).toBe(200);
+    });
+
+    it('sends the board filters to the server and leaves out the ones that are off', () => {
+      service.getBoard(1, { activeOnly: true, search: '  J-2403 ', customerId: 42, overdueOnly: true, onHoldOnly: true }).subscribe();
+      flushTrackType();
+      const filtered = httpMock.expectOne((r) => r.url === `${apiUrl}/jobs`);
+      expect(filtered.request.params.get('activeOnly')).toBe('true');
+      expect(filtered.request.params.get('q')).toBe('J-2403');
+      expect(filtered.request.params.get('customerId')).toBe('42');
+      expect(filtered.request.params.get('overdueOnly')).toBe('true');
+      expect(filtered.request.params.get('onHoldOnly')).toBe('true');
+      filtered.flush(pageOf(1, 0, 0));
+
+      service.getBoard(1, { activeOnly: false, search: '   ', customerId: null, overdueOnly: false, onHoldOnly: false, teamId: null }).subscribe();
+      flushTrackType();
+      const plain = httpMock.expectOne((r) => r.url === `${apiUrl}/jobs`);
+      for (const key of ['activeOnly', 'q', 'customerId', 'overdueOnly', 'onHoldOnly', 'teamId']) {
+        expect(plain.request.params.has(key)).toBe(false);
+      }
+      plain.flush(pageOf(1, 0, 0));
     });
   });
 

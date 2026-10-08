@@ -128,10 +128,12 @@
 .card__customer-link {
   flex: 1;
   min-width: 0;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .card__customer {
+  display: block;
   font-size: var(--font-size-xxs);
   color: var(--text-muted);
   @include truncate;
@@ -149,6 +151,7 @@
 .card__so {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   gap: $sp-xs;
   font-size: var(--font-size-xxs);
   color: var(--primary);
@@ -161,9 +164,12 @@
 
 .card__so-icon {
   font-size: $icon-size-xs;
+  vertical-align: middle;
 }
 
 .card__so-number {
+  display: inline-block;
+  vertical-align: middle;
   font-family: $font-family-mono;
   @include truncate;
   max-width: 60px;
@@ -233,6 +239,7 @@
   font-size: var(--font-size-xxs);
   color: var(--text-secondary);
   margin-left: auto;
+  flex-shrink: 0;
   white-space: nowrap;
 
   &--overdue {

@@ -1,10 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRoute, ParamMap, Router, convertToParamMap } from '@angular/router';
+import { ActivatedRoute, NavigationExtras, ParamMap, Router, convertToParamMap } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { BehaviorSubject, Observable, of, Subject, throwError } from 'rxjs';
 import { CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 
+import { FormControl } from '@angular/forms';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { KanbanComponent } from './kanban.component';
@@ -101,6 +102,13 @@ interface ComponentInternals {
   boardTotalCount: () => number;
   boardLoadedCount: () => number;
   toggleActiveOnly(): void;
+  toggleOverdue(): void;
+  toggleOnHold(): void;
+  overdueOnly: () => boolean;
+  onHoldOnly: () => boolean;
+  searchControl: FormControl<string>;
+  customerFilter: FormControl<number | null>;
+  customerOptions: () => { value: unknown; label: string }[];
   selectTrackType(trackTypeId: number): void;
   onCardDropped(event: CdkDragDrop<KanbanJob[]>): void;
   selectedJobIds: { set(ids: Set<number>): void };
@@ -137,8 +145,6 @@ describe('KanbanComponent', () => {
   beforeEach(() => {
     getBoard = vi.fn(() => of({ columns: [], totalCount: 0, loadedCount: 0 }));
     getTeams = vi.fn(() => of([]));
-    navigate = vi.fn();
-    queryParams = new BehaviorSubject<ParamMap>(convertToParamMap({}));
     updateJobPosition = vi.fn(() => of(undefined));
     moveJobStage = vi.fn(() => of(undefined));
     prefsSet = vi.fn();
@@ -147,6 +153,17 @@ describe('KanbanComponent', () => {
     bulkMoveStage = vi.fn(() => of({ successCount: 0, failureCount: 0, errors: [] }));
     snackbarSuccess = vi.fn();
     toastShow = vi.fn();
+    queryParams = new BehaviorSubject<ParamMap>(convertToParamMap({}));
+    navigate = vi.fn((_commands: unknown[], extras: NavigationExtras) => {
+      const merged: Record<string, string> = {};
+      for (const key of queryParams.value.keys) merged[key] = queryParams.value.get(key)!;
+      for (const [key, value] of Object.entries(extras.queryParams ?? {})) {
+        if (value == null) delete merged[key];
+        else merged[key] = String(value);
+      }
+      queryParams.next(convertToParamMap(merged));
+      return Promise.resolve(true);
+    });
 
     TestBed.configureTestingModule({
       imports: [KanbanComponent],
@@ -158,6 +175,7 @@ describe('KanbanComponent', () => {
             getBoard,
             getUsers: () => of([]),
             getTeams,
+            getCustomers: () => of([{ id: 42, name: 'Design partner' }]),
             bulkMoveStage,
             updateJobPosition,
             getJobDetail: () => of({}),
@@ -346,6 +364,122 @@ describe('KanbanComponent', () => {
 
       expect(component.activeOnly()).toBe(false);
       expect(component.filteredColumns()[0].jobs.length).toBe(4);
+    });
+  });
+
+  describe('board filters', () => {
+    function lastBoardFilters(): unknown {
+      return getBoard.mock.calls.at(-1)?.[1];
+    }
+
+    it('loads the board with the search, customer, overdue and on-hold filters from the URL', () => {
+      queryParams.next(convertToParamMap({ q: 'J-2403', customer: '42', overdue: 'true', onHold: 'true' }));
+      createComponent();
+
+      component.selectTrackType(1);
+
+      expect(getBoard).toHaveBeenLastCalledWith(1, {
+        activeOnly: true, search: 'J-2403', customerId: 42, overdueOnly: true, onHoldOnly: true, teamId: null,
+      });
+      expect(component.searchControl.value).toBe('J-2403');
+      expect(component.customerFilter.value).toBe(42);
+      expect(component.overdueOnly()).toBe(true);
+      expect(component.onHoldOnly()).toBe(true);
+    });
+
+    it('ignores a customer id in the URL that is not a positive whole number', () => {
+      queryParams.next(convertToParamMap({ customer: 'abc' }));
+      createComponent();
+
+      component.selectTrackType(1);
+
+      expect(lastBoardFilters()).toEqual(expect.objectContaining({ customerId: null }));
+    });
+
+    it('round-trips each filter through the URL and reloads the board on every change', () => {
+      component.selectTrackType(1);
+      getBoard.mockClear();
+
+      component.toggleOverdue();
+      expect(navigate).toHaveBeenLastCalledWith([], {
+        queryParams: { overdue: 'true' }, queryParamsHandling: 'merge', replaceUrl: true,
+      });
+      expect(lastBoardFilters()).toEqual(expect.objectContaining({ overdueOnly: true }));
+
+      component.customerFilter.setValue(42);
+      expect(queryParams.value.get('customer')).toBe('42');
+      expect(lastBoardFilters()).toEqual(expect.objectContaining({ customerId: 42, overdueOnly: true }));
+
+      component.toggleOnHold();
+      component.toggleOverdue();
+      expect(queryParams.value.has('overdue')).toBe(false);
+      expect(queryParams.value.get('onHold')).toBe('true');
+      expect(lastBoardFilters()).toEqual({
+        activeOnly: true, search: '', customerId: 42, overdueOnly: false, onHoldOnly: true, teamId: null,
+      });
+      expect(getBoard).toHaveBeenCalledTimes(4);
+    });
+
+    it('debounces the search box before writing it to the URL', () => {
+      vi.useFakeTimers();
+      try {
+        component.selectTrackType(1);
+        getBoard.mockClear();
+
+        component.searchControl.setValue('J-24');
+        component.searchControl.setValue('J-2403 ');
+        vi.advanceTimersByTime(299);
+        expect(queryParams.value.has('q')).toBe(false);
+        expect(getBoard).not.toHaveBeenCalled();
+
+        vi.advanceTimersByTime(1);
+        expect(queryParams.value.get('q')).toBe('J-2403');
+        expect(getBoard).toHaveBeenCalledTimes(1);
+        expect(lastBoardFilters()).toEqual(expect.objectContaining({ search: 'J-2403' }));
+
+        component.searchControl.setValue('');
+        vi.advanceTimersByTime(300);
+        expect(queryParams.value.has('q')).toBe(false);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('puts filters changed in the URL back into the toolbar controls', () => {
+      component.selectTrackType(1);
+
+      queryParams.next(convertToParamMap({ q: 'bracket', customer: '42' }));
+      expect(component.searchControl.value).toBe('bracket');
+      expect(component.customerFilter.value).toBe(42);
+
+      queryParams.next(convertToParamMap({}));
+      expect(component.searchControl.value).toBe('');
+      expect(component.customerFilter.value).toBeNull();
+      expect(lastBoardFilters()).toEqual(expect.objectContaining({ search: '', customerId: null }));
+    });
+
+    it('does not reload when an unrelated query parameter changes', () => {
+      component.selectTrackType(1);
+      getBoard.mockClear();
+
+      queryParams.next(convertToParamMap({ detail: 'job:7' }));
+
+      expect(getBoard).not.toHaveBeenCalled();
+    });
+
+    it('asks the server again when active only is toggled', () => {
+      component.selectTrackType(1);
+
+      component.toggleActiveOnly();
+
+      expect(lastBoardFilters()).toEqual(expect.objectContaining({ activeOnly: false }));
+    });
+
+    it('offers every customer plus an all-customers choice', async () => {
+      (component as unknown as { ngOnInit(): void }).ngOnInit();
+      await Promise.resolve();
+
+      expect(component.customerOptions().map(o => o.value)).toEqual([null, 42]);
     });
   });
 
@@ -598,7 +732,7 @@ describe('KanbanComponent', () => {
 
       expect(component.teamFilterId()).toBe(5);
       expect(component.teamFilter.value).toBe(5);
-      expect(getBoard).toHaveBeenLastCalledWith(1, 5);
+      expect(getBoard).toHaveBeenLastCalledWith(1, expect.objectContaining({ teamId: 5 }));
     });
 
     it('ignores a team id in the URL that is not a positive whole number', () => {
@@ -608,7 +742,7 @@ describe('KanbanComponent', () => {
       component.selectTrackType(1);
 
       expect(component.teamFilterId()).toBeNull();
-      expect(getBoard).toHaveBeenLastCalledWith(1, null);
+      expect(getBoard).toHaveBeenLastCalledWith(1, expect.objectContaining({ teamId: null }));
     });
 
     it('writes the chosen team to the URL', () => {
@@ -631,7 +765,7 @@ describe('KanbanComponent', () => {
       queryParams.next(convertToParamMap({ team: '3' }));
 
       expect(getBoard).toHaveBeenCalledOnce();
-      expect(getBoard).toHaveBeenCalledWith(1, 3);
+      expect(getBoard).toHaveBeenCalledWith(1, expect.objectContaining({ teamId: 3 }));
       expect(component.teamFilter.value).toBe(3);
       expect(navigate).not.toHaveBeenCalled();
     });

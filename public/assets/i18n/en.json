@@ -499,6 +499,14 @@
     "sendFirstQuote": "Send your first quote",
     "shipFirstOrder": "Ship your first order"
   },
+  "boardFilters": {
+    "search": "Search",
+    "searchPlaceholder": "Work order, title, part or customer",
+    "customer": "Customer",
+    "allCustomers": "All customers",
+    "overdue": "Overdue",
+    "onHold": "On hold"
+  },
   "kanban": {
     "title": "Board",
     "subtitle": "Drag work orders through your shop statuses",

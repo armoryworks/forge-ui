@@ -499,6 +499,14 @@
     "sendFirstQuote": "Envíe su primera cotización",
     "shipFirstOrder": "Envíe su primera orden"
   },
+  "boardFilters": {
+    "search": "Buscar",
+    "searchPlaceholder": "Orden de trabajo, título, pieza o cliente",
+    "customer": "Cliente",
+    "allCustomers": "Todos los clientes",
+    "overdue": "Vencidas",
+    "onHold": "En espera"
+  },
   "kanban": {
     "title": "Tablero",
     "subtitle": "Arrastre las órdenes de trabajo por los estados de su taller",

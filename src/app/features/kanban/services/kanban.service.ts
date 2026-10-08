@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, map, forkJoin } from 'rxjs';
+import { Observable, map, forkJoin, of, switchMap } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 import { PagedResponse } from '../../../shared/models/paged-response.model';
@@ -10,6 +10,7 @@ import { ActivityItem } from '../../../shared/models/activity.model';
 import { KanbanJob } from '../models/kanban-job.model';
 import { BoardColumn } from '../models/board-column.model';
 import { KanbanBoard } from '../models/kanban-board.model';
+import { BoardFilters } from '../models/board-filters.model';
 import { JobDetail } from '../models/job-detail.model';
 import { Subtask } from '../models/subtask.model';
 import { Activity } from '../models/activity.model';
@@ -30,6 +31,9 @@ import { ChildJob } from '../models/child-job.model';
 import { BomExplosionResponse } from '../models/bom-explosion-response.model';
 import { JobBomAtRelease } from '../../parts/models/bom-revision.model';
 
+const BOARD_PAGE_SIZE = 200;
+const BOARD_MAX_ROWS = 2000;
+
 @Injectable({ providedIn: 'root' })
 export class KanbanService {
   private readonly http = inject(HttpClient);
@@ -38,16 +42,10 @@ export class KanbanService {
     return this.http.get<TrackType[]>(`${environment.apiUrl}/track-types`);
   }
 
-  getBoard(trackTypeId: number, teamId: number | null = null): Observable<KanbanBoard> {
-    let params = new HttpParams()
-      .set('trackTypeId', trackTypeId.toString())
-      .set('isArchived', 'false')
-      .set('pageSize', '200')
-      .set('sort', 'board');
-    if (teamId != null) params = params.set('teamId', teamId.toString());
+  getBoard(trackTypeId: number, filters: Partial<BoardFilters> = {}): Observable<KanbanBoard> {
     return forkJoin({
       trackType: this.http.get<TrackType>(`${environment.apiUrl}/track-types/${trackTypeId}`),
-      page: this.http.get<PagedResponse<KanbanJob>>(`${environment.apiUrl}/jobs`, { params }),
+      page: this.getBoardJobs(this.boardParams(trackTypeId, filters)),
     }).pipe(map(({ trackType, page }) => {
       const jobs = page.items.map(j => ({
         ...j,
@@ -291,6 +289,43 @@ export class KanbanService {
   // History
   getHistory(jobId: number): Observable<ActivityItem[]> {
     return this.http.get<ActivityItem[]>(`${environment.apiUrl}/jobs/${jobId}/history`);
+  }
+
+  private boardParams(trackTypeId: number, filters: Partial<BoardFilters>): HttpParams {
+    let params = new HttpParams()
+      .set('trackTypeId', trackTypeId.toString())
+      .set('isArchived', 'false')
+      .set('pageSize', BOARD_PAGE_SIZE.toString())
+      .set('sort', 'board');
+    const search = filters.search?.trim();
+    if (filters.teamId != null) params = params.set('teamId', filters.teamId.toString());
+    if (filters.activeOnly) params = params.set('activeOnly', 'true');
+    if (search) params = params.set('q', search);
+    if (filters.customerId != null) params = params.set('customerId', filters.customerId.toString());
+    if (filters.overdueOnly) params = params.set('overdueOnly', 'true');
+    if (filters.onHoldOnly) params = params.set('onHoldOnly', 'true');
+    return params;
+  }
+
+  private getBoardJobs(params: HttpParams): Observable<Pick<PagedResponse<KanbanJob>, 'items' | 'totalCount'>> {
+    const fetchPage = (page: number) => this.http.get<PagedResponse<KanbanJob>>(`${environment.apiUrl}/jobs`, {
+      params: params.set('page', page.toString()),
+    });
+    return fetchPage(1).pipe(switchMap(first => {
+      const totalCount = first.totalCount ?? first.items.length;
+      const pageCount = Math.ceil(Math.min(totalCount, BOARD_MAX_ROWS) / BOARD_PAGE_SIZE);
+      if (pageCount <= 1 || first.items.length < BOARD_PAGE_SIZE) {
+        return of({ items: first.items, totalCount });
+      }
+      const rest = Array.from({ length: pageCount - 1 }, (_, i) => fetchPage(i + 2));
+      return forkJoin(rest).pipe(map(pages => {
+        const byId = new Map<number, KanbanJob>();
+        for (const job of [first, ...pages].flatMap(p => p.items)) {
+          if (!byId.has(job.id)) byId.set(job.id, job);
+        }
+        return { items: [...byId.values()], totalCount };
+      }));
+    }));
   }
 
   private buildBoard(trackType: TrackType, jobs: KanbanJob[]): BoardColumn[] {

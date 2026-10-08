@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy
 import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
-import { distinctUntilChanged, map, skip, switchMap } from 'rxjs';
-import { ActivatedRoute, Router } from '@angular/router';
+import { debounceTime, distinctUntilChanged, map, skip, Subscription, switchMap } from 'rxjs';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { CdkDragDrop, CdkDragStart, CdkDropList, CdkDrag, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { MatDialog } from '@angular/material/dialog';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
@@ -16,6 +16,8 @@ import { JobCardComponent } from './components/job-card.component';
 import { KanbanService } from './services/kanban.service';
 import { BoardColumn } from './models/board-column.model';
 import { KanbanBoard } from './models/kanban-board.model';
+import { BoardFilters } from './models/board-filters.model';
+import { CustomerRef } from './models/customer-ref.model';
 import { JobDetail } from './models/job-detail.model';
 import { KanbanJob } from './models/kanban-job.model';
 import { SwimlaneRow } from './models/swimlane-row.model';
@@ -26,6 +28,7 @@ import { TrackType } from '../../shared/models/track-type.model';
 import { TeamRef } from '../../shared/models/team-ref.model';
 import { SelectOption } from '../../shared/components/select/select.component';
 import { SelectComponent } from '../../shared/components/select/select.component';
+import { InputComponent } from '../../shared/components/input/input.component';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { CapDirective } from '../../shared/directives/cap.directive';
@@ -50,7 +53,7 @@ export type ViewMode = 'board' | 'team';
     BoardColumnComponent, JobDialogComponent, JobCardComponent,
     PageHeaderComponent, MatMenuModule, MatTooltipModule,
     CdkDropList, CdkDrag,
-    SelectComponent, AvatarComponent,
+    SelectComponent, InputComponent, AvatarComponent,
     CapDirective,
     TranslatePipe,
   ],
@@ -143,7 +146,75 @@ export class KanbanComponent implements OnInit, OnDestroy {
     const next = !this.activeOnly();
     this.activeOnly.set(next);
     this.userPreferences.set('kanban:activeOnly', next);
+    this.reloadBoard();
   }
+
+  private static readFilters(params: ParamMap): Omit<BoardFilters, 'activeOnly' | 'teamId'> {
+    const customerId = Number(params.get('customer'));
+    return {
+      search: params.get('q')?.trim() ?? '',
+      customerId: Number.isInteger(customerId) && customerId > 0 ? customerId : null,
+      overdueOnly: params.get('overdue') === 'true',
+      onHoldOnly: params.get('onHold') === 'true',
+    };
+  }
+
+  private static sameFilters(a: Omit<BoardFilters, 'activeOnly' | 'teamId'>, b: Omit<BoardFilters, 'activeOnly' | 'teamId'>): boolean {
+    return a.search === b.search && a.customerId === b.customerId
+      && a.overdueOnly === b.overdueOnly && a.onHoldOnly === b.onHoldOnly;
+  }
+
+  private readonly urlFilters$ = this.route.queryParamMap.pipe(
+    map(p => KanbanComponent.readFilters(p)),
+    distinctUntilChanged(KanbanComponent.sameFilters),
+  );
+  private readonly urlFilters = toSignal(this.urlFilters$, {
+    initialValue: KanbanComponent.readFilters(this.route.snapshot.queryParamMap),
+  });
+  protected readonly overdueOnly = computed(() => this.urlFilters().overdueOnly);
+  protected readonly onHoldOnly = computed(() => this.urlFilters().onHoldOnly);
+
+  protected readonly searchControl = new FormControl(this.urlFilters().search, { nonNullable: true });
+  protected readonly customerFilter = new FormControl<number | null>(this.urlFilters().customerId);
+  protected readonly customers = signal<CustomerRef[]>([]);
+  protected readonly customerOptions = computed<SelectOption[]>(() => [
+    { value: null, label: this.translate.instant('boardFilters.allCustomers') },
+    ...this.customers().map(c => ({ value: c.id, label: c.name })),
+  ]);
+
+  private readonly filtersFromUrl = this.urlFilters$.pipe(skip(1), takeUntilDestroyed()).subscribe(f => {
+    if (this.searchControl.value.trim() !== f.search) this.searchControl.setValue(f.search, { emitEvent: false });
+    this.customerFilter.setValue(f.customerId, { emitEvent: false });
+    this.reloadBoard();
+  });
+
+  private readonly searchToUrl = this.searchControl.valueChanges.pipe(
+    debounceTime(300),
+    map(v => v.trim()),
+    distinctUntilChanged(),
+    takeUntilDestroyed(),
+  ).subscribe(q => this.setFilterParams({ q: q || null }));
+
+  private readonly customerToUrl = this.customerFilter.valueChanges.pipe(takeUntilDestroyed())
+    .subscribe(id => this.setFilterParams({ customer: id ?? null }));
+
+  protected toggleOverdue(): void {
+    this.setFilterParams({ overdue: this.overdueOnly() ? null : 'true' });
+  }
+
+  protected toggleOnHold(): void {
+    this.setFilterParams({ onHold: this.onHoldOnly() ? null : 'true' });
+  }
+
+  private setFilterParams(queryParams: Record<string, string | number | null>): void {
+    this.router.navigate([], { queryParams, queryParamsHandling: 'merge', replaceUrl: true });
+  }
+
+  private boardFilters(): BoardFilters {
+    return { ...this.urlFilters(), teamId: this.teamFilterId(), activeOnly: this.activeOnly() };
+  }
+
+  private boardLoad: Subscription | null = null;
 
   private isActiveJob(job: KanbanJob): boolean {
     return !job.completedDate && !job.billingStatus && !job.disposition;
@@ -307,6 +378,10 @@ export class KanbanComponent implements OnInit, OnDestroy {
       next: t => this.teams.set(t),
       error: () => this.teams.set([]),
     });
+    this.kanbanService.getCustomers().subscribe({
+      next: c => this.customers.set(c),
+      error: () => this.customers.set([]),
+    });
   }
 
   ngOnDestroy(): void {
@@ -323,12 +398,12 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
     this.boardHub.joinBoard(trackTypeId);
 
-    this.loadingService.track('Loading board...', this.kanbanService.getBoard(trackTypeId, this.teamFilterId()))
+    this.boardLoad?.unsubscribe();
+    this.boardLoad = this.loadingService.track('Loading board...', this.kanbanService.getBoard(trackTypeId, this.boardFilters()))
       .subscribe({
         next: (board) => this.applyBoard(board),
-        // A cancelled in-flight request surfaces as status 0 — e.g. a
-        // SignalR-driven reloadBoard() superseded this load. That's not a
-        // failure; the surviving load owns the result. Only surface real errors.
+        // A cancelled in-flight request surfaces as status 0. That's not a
+        // failure; only surface real errors.
         error: (err: HttpErrorResponse) => {
           if (err?.status === 0) return;
           this.error.set(this.translate.instant('kanban.loadBoardFailed'));
@@ -538,7 +613,8 @@ export class KanbanComponent implements OnInit, OnDestroy {
   private reloadBoard(): void {
     const trackTypeId = this.selectedTrackTypeId();
     if (!trackTypeId) return;
-    this.kanbanService.getBoard(trackTypeId, this.teamFilterId()).subscribe({
+    this.boardLoad?.unsubscribe();
+    this.boardLoad = this.kanbanService.getBoard(trackTypeId, this.boardFilters()).subscribe({
       next: (board) => this.applyBoard(board),
     });
   }

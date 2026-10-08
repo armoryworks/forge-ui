@@ -25,6 +25,8 @@
       </button>
     </div>
 
+    <app-input data-testid="board-search" [label]="'boardFilters.search' | translate" [formControl]="searchControl" [placeholder]="'boardFilters.searchPlaceholder' | translate" prefix="search" />
+
     <app-select data-tour="board-filters" [label]="'kanban.teamMembers' | translate" [formControl]="teamUserIds" [options]="userOptions()" [multiple]="true" [placeholder]="'kanban.allAssignedUsers' | translate" />
 
     @if (teams().length > 0 || teamFilterId() !== null) {
@@ -46,6 +48,22 @@
             [attr.aria-pressed]="activeOnly()">
       <span class="material-icons-outlined">filter_alt</span>
       {{ 'kanban.activeOnly' | translate }}
+    </button>
+
+    <app-select data-testid="board-customer-filter" [label]="'boardFilters.customer' | translate" [formControl]="customerFilter" [options]="customerOptions()" [placeholder]="'boardFilters.allCustomers' | translate" />
+
+    <button class="my-work-btn" data-testid="board-overdue-btn" [class.my-work-btn--active]="overdueOnly()"
+            (click)="toggleOverdue()"
+            [attr.aria-pressed]="overdueOnly()">
+      <span class="material-icons-outlined">event_busy</span>
+      {{ 'boardFilters.overdue' | translate }}
+    </button>
+
+    <button class="my-work-btn" data-testid="board-on-hold-btn" [class.my-work-btn--active]="onHoldOnly()"
+            (click)="toggleOnHold()"
+            [attr.aria-pressed]="onHoldOnly()">
+      <span class="material-icons-outlined">pause_circle</span>
+      {{ 'boardFilters.onHold' | translate }}
     </button>
 
     <button *appCap="'CAP-MFG-WO-RELEASE'" data-testid="new-job-btn" class="new-job-btn" (click)="openCreateDialog()">
