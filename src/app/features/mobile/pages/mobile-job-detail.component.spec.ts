@@ -28,6 +28,7 @@ class TimerStringsLoader implements TranslateLoader {
           stoppedButNotStarted: 'The timer on {{jobNumber}} was stopped, but this one could not start: {{reason}}',
         },
       },
+      priority: { normal: 'Normal', high: 'Alta' },
       mobileLegacy: {
         jobDetail: {
           stopTimer: 'Stop Timer', startTimer: 'Start Timer', since: 'Since {{time}}', overdue: 'Overdue',
@@ -77,7 +78,10 @@ describe('MobileJobDetailComponent', () => {
     http = TestBed.inject(HttpTestingController);
   });
 
-  afterEach(() => http.verify());
+  afterEach(() => {
+    http.verify();
+    vi.useRealTimers();
+  });
 
   const render = (timer: ReturnType<typeof timerOn> | null, jobOverrides: Partial<typeof job> = {}): void => {
     fixture = TestBed.createComponent(MobileJobDetailComponent);
@@ -186,6 +190,28 @@ describe('MobileJobDetailComponent', () => {
     render(null);
 
     expect(el().querySelector('[data-testid="mjob-priority"]')!.textContent!.trim()).toBe('Normal');
+  });
+
+  it('shows the priority through its translation key', () => {
+    render(null, { priority: 'High' });
+
+    expect(el().querySelector('[data-testid="mjob-priority"]')!.textContent!.trim()).toBe('Alta');
+  });
+
+  it('does not call a job overdue on its due day', () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-10-08T23:30:00Z'));
+    render(null, { dueDate: '2026-10-08T00:00:00Z' });
+
+    expect(el().querySelector('[data-testid="mjob-overdue"]')).toBeNull();
+  });
+
+  it('calls a job overdue once its due day has passed', () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-10-09T00:30:00Z'));
+    render(null, { dueDate: '2026-10-08T00:00:00Z' });
+
+    expect(el().querySelector('[data-testid="mjob-overdue"]')).not.toBeNull();
   });
 
   it('says Overdue next to a due date that has passed on an open job', () => {

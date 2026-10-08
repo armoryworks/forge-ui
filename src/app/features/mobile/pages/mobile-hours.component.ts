@@ -72,11 +72,15 @@ export class MobileHoursComponent implements OnInit {
 
   protected readonly todayInProgress = computed(() => {
     if (!this.isCurrentWeek()) return null;
-    const today = toDateOnly(new Date(this.now()))!;
-    const running = this.entries().filter((e) => this.isRunning(e) && this.dayOf(e) === today);
-    if (running.length === 0) return null;
+    const starts = this.entries()
+      .flatMap((e) => (e.timerStart && !e.timerStop ? [new Date(e.timerStart).getTime()] : []))
+      .filter((ms) => !Number.isNaN(ms));
+    if (starts.length === 0) return null;
     const now = this.now();
-    return running.reduce((sum, e) => sum + this.minutesOf(e, now), 0);
+    const midnight = new Date(now);
+    midnight.setHours(0, 0, 0, 0);
+    const since = Math.max(midnight.getTime(), Math.min(...starts));
+    return Math.floor(elapsedMs(new Date(since), now) / 60000);
   });
 
   ngOnInit(): void {

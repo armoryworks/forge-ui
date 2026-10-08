@@ -32,6 +32,8 @@ interface ActiveTimer {
   timerStart: string;
 }
 
+const PRIORITY_KEYS = new Set(['low', 'normal', 'high', 'urgent']);
+
 @Component({
   selector: 'app-mobile-job-detail',
   standalone: true,
@@ -64,7 +66,14 @@ export class MobileJobDetailComponent implements OnInit {
 
   protected readonly overdue = computed(() => {
     const j = this.job();
-    return !!j?.dueDate && !j.completedDate && new Date(j.dueDate).getTime() < Date.now();
+    if (!j?.dueDate || j.completedDate) return false;
+    const utcDay = (d: Date) => d.toISOString().slice(0, 10);
+    return utcDay(new Date(j.dueDate)) < utcDay(new Date());
+  });
+
+  protected readonly priorityKey = computed(() => {
+    const priority = this.job()?.priority;
+    return priority && PRIORITY_KEYS.has(priority.toLowerCase()) ? `priority.${priority.toLowerCase()}` : null;
   });
 
   ngOnInit(): void {

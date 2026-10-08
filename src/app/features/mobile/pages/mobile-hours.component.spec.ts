@@ -111,6 +111,20 @@ describe('MobileHoursComponent', () => {
     expect(text('mhours-clocked-in-since')).toContain('7:02');
   });
 
+  it('counts parallel timers once in today\'s in-progress time', () => {
+    const opTimer = entry(5, { jobNumber: 'J-2403', date: '2026-10-08', timerStart: local(8, 9, 50) });
+    render([...weekEntries, opTimer], { isClockedIn: true, clockedInAt: local(8, 7, 2) });
+
+    expect(text('mhours-in-progress')).toContain('0h 12m');
+  });
+
+  it('counts a timer started before midnight from midnight in today\'s in-progress time', () => {
+    const overnight = entry(6, { jobNumber: 'J-2405', date: '2026-10-07', timerStart: local(7, 22, 0) });
+    render([overnight], { isClockedIn: true, clockedInAt: local(7, 21, 55) });
+
+    expect(text('mhours-in-progress')).toContain('10h');
+  });
+
   it('shows no today card when clocked out with nothing running', () => {
     render([weekEntries[0]], { isClockedIn: false, clockedInAt: null });
 

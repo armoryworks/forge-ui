@@ -19,7 +19,7 @@
       </div>
       <div class="status-card__row">
         <span class="status-card__label">{{ 'mobileLegacy.jobDetail.priority' | translate }}</span>
-        <span class="status-card__value" data-testid="mjob-priority">{{ j.priority }}</span>
+        <span class="status-card__value" data-testid="mjob-priority">{{ (priorityKey() ?? j.priority) | translate }}</span>
       </div>
       @if (j.customerName) {
         <div class="status-card__row">

@@ -75,6 +75,15 @@ describe('MobileLayoutComponent', () => {
     expect(tabs.map(t => t.path)).toEqual(['/m/chat', '/m/jobs', '/m/scan', '/m/clock', '/m/time', '/m/account']);
   });
 
+  it('hides My Hours when time tracking is off', () => {
+    isEnabled.mockImplementation((code: string) => code !== 'CAP-HR-TIMETRACK');
+
+    const paths = create().tabs().map(t => t.path);
+
+    expect(paths).not.toContain('/m/time');
+    expect(paths).toContain('/m/clock');
+  });
+
   it('drops the desktop preference when /m is opened', () => {
     isEnabled.mockReturnValue(true);
 

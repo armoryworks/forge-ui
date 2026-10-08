@@ -51,7 +51,7 @@ export class MobileLayoutComponent implements OnInit {
       capability: 'CAP-MFG-SHOPFLOOR',
     },
     { path: '/m/clock', labelKey: 'mobileLegacy.nav.clock', icon: 'schedule' },
-    { path: '/m/time', labelKey: 'mobileLegacy.nav.hours', icon: 'history' },
+    { path: '/m/time', labelKey: 'mobileLegacy.nav.hours', icon: 'history', capability: 'CAP-HR-TIMETRACK' },
     { path: '/m/account', labelKey: 'mobileLegacy.nav.account', icon: 'person' },
   ];
 
