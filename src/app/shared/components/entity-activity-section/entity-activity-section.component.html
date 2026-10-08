@@ -99,10 +99,9 @@
       <p class="ea-empty">No comments yet.</p>
     }
   } @else {
-    <!-- ALL: merged comments + notes sorted by date -->
     @if (allActivityItems().length) {
       <div class="ea-comment-list">
-        @for (item of allActivityItems(); track item.id) {
+        @for (item of allActivityItems(); track allItemKey(item)) {
           <div class="ea-comment-item">
             <div class="ea-comment-item__header">
               @if (item.userInitials) {

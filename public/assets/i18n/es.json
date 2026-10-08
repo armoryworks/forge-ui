@@ -4966,6 +4966,9 @@
     "keepServer": "Mantener servidor",
     "keepMine": "Mantener míos"
   },
+  "activityHistory": {
+    "system": "Sistema"
+  },
   "statusTimeline": {
     "currentStatus": "Estado actual",
     "activeHolds": "Retenciones activas",
@@ -4974,7 +4977,7 @@
     "addHold": "Agregar retención",
     "statusHistory": "Historial de estados",
     "hold": "Retención",
-    "active": "Activo"
+    "active": "Actual"
   },
   "setStatusDialog": {
     "title": "Cambiar estado",

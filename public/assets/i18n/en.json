@@ -4973,6 +4973,9 @@
     "keepServer": "Keep Server",
     "keepMine": "Keep Mine"
   },
+  "activityHistory": {
+    "system": "System"
+  },
   "statusTimeline": {
     "currentStatus": "Current Status",
     "activeHolds": "Active Holds",
@@ -4981,7 +4984,7 @@
     "addHold": "Add Hold",
     "statusHistory": "Status History",
     "hold": "Hold",
-    "active": "Active"
+    "active": "Current"
   },
   "setStatusDialog": {
     "title": "Change Status",

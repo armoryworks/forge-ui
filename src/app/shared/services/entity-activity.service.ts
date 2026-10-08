@@ -106,6 +106,7 @@ export class EntityActivityService {
       description: item.description,
       createdAt: new Date(item.createdAt),
       userInitials: item.userInitials ?? undefined,
+      userName: item.userName ?? undefined,
       action: item.action,
     };
   }

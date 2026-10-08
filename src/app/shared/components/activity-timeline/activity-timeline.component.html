@@ -21,18 +21,25 @@
 
 <div class="timeline" [class.timeline--compact]="compact()">
   @for (activity of displayActivities(); track activity.id) {
+    @let actor = activity.userName || activity.userInitials || ('activityHistory.system' | translate);
     <div class="timeline__item" [class.timeline__item--batch]="activity.batchedItems">
-      <div class="timeline__avatar">
+      <div class="timeline__avatar" role="img" [attr.aria-label]="actor"
+        [matTooltip]="actor" matTooltipPosition="above">
         @if (activity.userInitials) {
           <app-avatar
             [initials]="activity.userInitials"
             [color]="activity.userColor ?? '#64748b'"
             size="sm" />
         } @else {
-          <span class="material-icons-outlined timeline__system-icon">settings</span>
+          <span class="material-icons-outlined timeline__system-icon" aria-hidden="true">settings</span>
         }
       </div>
       <div class="timeline__content">
+        <div class="timeline__meta">
+          <span class="timeline__actor">{{ actor }}</span>
+          <span class="timeline__time" [matTooltip]="activity.createdAt | date:dateTimeFormat"
+            matTooltipPosition="above">{{ formatDate(activity.createdAt) }}</span>
+        </div>
         @if (activity.batchedItems) {
           <button class="timeline__batch-toggle" (click)="toggleBatch(activity.id)">
             <span class="material-icons-outlined timeline__batch-icon">
@@ -50,7 +57,6 @@
         } @else {
           <span class="timeline__desc" [innerHTML]="activity.description | richText"></span>
         }
-        <span class="timeline__time">{{ formatDate(activity.createdAt) }}</span>
       </div>
     </div>
   } @empty {

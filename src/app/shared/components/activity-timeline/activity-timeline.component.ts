@@ -1,8 +1,12 @@
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { AvatarComponent } from '../avatar/avatar.component';
 import { RichTextPipe } from '../../pipes/rich-text.pipe';
-import { formatDate } from '../../utils/date.utils';
+import { DATETIME_FORMAT, formatDate } from '../../utils/date.utils';
 import { ActivityItem } from '../../models/activity.model';
 
 export interface DisplayActivity {
@@ -10,6 +14,7 @@ export interface DisplayActivity {
   description: string;
   createdAt: Date;
   userInitials?: string;
+  userName?: string;
   userColor?: string;
   action?: string;
   batchedItems?: ActivityItem[];
@@ -18,7 +23,7 @@ export interface DisplayActivity {
 @Component({
   selector: 'app-activity-timeline',
   standalone: true,
-  imports: [AvatarComponent, RichTextPipe],
+  imports: [DatePipe, MatTooltipModule, TranslatePipe, AvatarComponent, RichTextPipe],
   templateUrl: './activity-timeline.component.html',
   styleUrl: './activity-timeline.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,6 +32,8 @@ export class ActivityTimelineComponent {
   readonly activities = input.required<ActivityItem[]>();
   readonly compact = input(false);
   readonly filterable = input(false);
+
+  protected readonly dateTimeFormat = DATETIME_FORMAT;
 
   protected readonly selectedAction = signal<string | null>(null);
   protected readonly selectedUser = signal<string | null>(null);
@@ -94,6 +101,7 @@ export class ActivityTimelineComponent {
           description: `Updated ${batch.length} fields`,
           createdAt: current.createdAt,
           userInitials: current.userInitials,
+          userName: current.userName,
           userColor: current.userColor,
           action: 'FieldChanged',
           batchedItems: batch,

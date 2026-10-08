@@ -3,6 +3,7 @@ export interface ActivityItem {
   description: string;
   createdAt: Date;
   userInitials?: string;
+  userName?: string;
   userColor?: string;
   action?: string;
 }

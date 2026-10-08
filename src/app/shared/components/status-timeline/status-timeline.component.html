@@ -62,9 +62,7 @@
                 @if (entry.endedAt) {
                   <span> &rarr; {{ entry.endedAt | date:'MM/dd/yyyy hh:mm a' }}</span>
                 }
-                @if (entry.setByName) {
-                  <span> &middot; {{ entry.setByName }}</span>
-                }
+                <span> &middot; {{ entry.setByName || ('activityHistory.system' | translate) }}</span>
               </div>
               @if (entry.notes) {
                 <div class="timeline-entry__notes">{{ entry.notes }}</div>

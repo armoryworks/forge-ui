@@ -66,7 +66,7 @@ export class EntityActivitySectionComponent implements OnInit {
       userInitials: n.authorInitials ?? undefined,
       action: 'note',
     }));
-    return [...comments, ...noteItems].sort(
+    return [...comments, ...noteItems, ...this.historyItems()].sort(
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
     );
   });
@@ -84,6 +84,10 @@ export class EntityActivitySectionComponent implements OnInit {
 
   ngOnInit(): void {
     this.activityService.getMentionUsers().subscribe(u => this.mentionUsers.set(u));
+  }
+
+  protected allItemKey(item: ActivityItem): string {
+    return `${item.action === 'note' ? 'note' : 'log'}-${item.id}`;
   }
 
   protected setFilter(tab: ActivityFilterTab): void {
@@ -137,7 +141,7 @@ export class EntityActivitySectionComponent implements OnInit {
         .subscribe(n => this.notes.set(n));
     }
 
-    if (availableTabs.includes('history')) {
+    if (availableTabs.includes('all') || availableTabs.includes('history')) {
       this.activityService.getHistory(entityType, entityId)
         .subscribe(h => this.historyItems.set(h));
     }
