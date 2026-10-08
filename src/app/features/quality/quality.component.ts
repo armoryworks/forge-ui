@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, signal, computed, ViewChild, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, signal, computed, untracked, ViewChild, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -27,6 +27,7 @@ import { ValidationButtonComponent } from '../../shared/components/validation-bu
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ScannerService } from '../../shared/services/scanner.service';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
+import { AuthService } from '../../shared/services/auth.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -56,6 +57,8 @@ const VALID_TABS: QualityTab[] = ['inspections', 'templates', 'spc-charts', 'spc
 const NEW_TEMPLATE_OPTION = -1;
 
 const INSPECTION_DETAIL_TYPE = 'qc-inspection';
+
+const TEMPLATE_AUTHOR_ROLES = ['Admin', 'Manager'];
 
 @Component({
   selector: 'app-quality',
@@ -87,6 +90,7 @@ export class QualityComponent {
   private readonly dialog = inject(MatDialog);
   private readonly detailDialog = inject(DetailDialogService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly auth = inject(AuthService);
 
   @ViewChild(SpcCharacteristicsComponent) spcCharsComponent?: SpcCharacteristicsComponent;
   @ViewChild(NcrListComponent) ncrListComponent?: NcrListComponent;
@@ -114,6 +118,7 @@ export class QualityComponent {
   protected readonly inspections = signal<QcInspection[]>([]);
   protected readonly templates = signal<QcTemplate[]>([]);
   protected readonly showInspectionDialog = signal(false);
+  protected readonly canAuthorTemplates = computed(() => this.auth.hasAnyRole(TEMPLATE_AUTHOR_ROLES));
   private detailRestored = false;
 
   protected readonly statusFilterControl = new FormControl<string>(this.route.snapshot.queryParamMap.get('status') ?? '', { nonNullable: true });
@@ -145,7 +150,9 @@ export class QualityComponent {
   protected readonly templateOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('common.none') },
     ...this.templates().map(t => ({ value: t.id, label: t.name })),
-    { value: NEW_TEMPLATE_OPTION, label: this.translate.instant('qcInspections.newTemplateOption') },
+    ...(this.canAuthorTemplates()
+      ? [{ value: NEW_TEMPLATE_OPTION, label: this.translate.instant('qcInspections.newTemplateOption') }]
+      : []),
   ]);
 
   protected readonly inspectionForm = new FormGroup({
@@ -188,25 +195,24 @@ export class QualityComponent {
       .slice(0, 8);
   });
 
-  protected readonly templateColumns: ColumnDef[] = [
+  protected readonly templateColumns = computed<ColumnDef[]>(() => [
     { field: 'name', header: this.translate.instant('qcInspections.templateName'), sortable: true },
     { field: 'partNumber', header: this.translate.instant('qcInspections.part'), sortable: true, width: '160px' },
     { field: 'itemCount', header: this.translate.instant('qcInspections.colItems'), sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'actions', header: '', width: '90px', align: 'center' },
-  ];
+    ...(this.canAuthorTemplates() ? [{ field: 'actions', header: '', width: '90px', align: 'center' } as ColumnDef] : []),
+  ]);
 
   protected readonly templateRows = computed(() =>
     this.templates().map(t => ({ ...t, itemCount: t.items.length })));
 
   constructor() {
     this.scanner.setContext('quality');
-    this.loadTemplates();
 
     effect(() => {
       const scan = this.scanner.lastScan();
       if (!scan || scan.context !== 'quality') return;
       this.scanner.clearLastScan();
-      this.inspectionSearchControl.setValue(scan.value);
+      if (untracked(this.activeTab) === 'inspections') this.inspectionSearchControl.setValue(scan.value);
     });
 
     effect(() => {
@@ -288,6 +294,7 @@ export class QualityComponent {
 
   protected openCreateInspection(): void {
     this.inspectionForm.reset({ jobId: null, partId: null, templateId: null, lotNumber: '', notes: '' });
+    this.loadTemplates();
     this.showInspectionDialog.set(true);
   }
 
@@ -334,6 +341,7 @@ export class QualityComponent {
   }
 
   protected openTemplateEditor(template: QcTemplate | null): void {
+    if (!this.canAuthorTemplates()) return;
     this.dialog.open<QcTemplateEditorDialogComponent, QcTemplateEditorDialogData, QcTemplate | undefined>(
       QcTemplateEditorDialogComponent,
       { width: '800px', maxWidth: '95vw', data: { template } },
@@ -348,6 +356,7 @@ export class QualityComponent {
   }
 
   protected deleteTemplate(row: QcTemplate): void {
+    if (!this.canAuthorTemplates()) return;
     this.dialog.open<ConfirmDialogComponent, ConfirmDialogData, boolean>(ConfirmDialogComponent, {
       width: '400px',
       data: {
@@ -393,6 +402,10 @@ export class QualityComponent {
 
   private createTemplateFromInspection(): void {
     const control = this.inspectionForm.controls.templateId;
+    if (!this.canAuthorTemplates()) {
+      control.setValue(null, { emitEvent: false });
+      return;
+    }
     this.dialog.open<QcTemplateEditorDialogComponent, QcTemplateEditorDialogData, QcTemplate | undefined>(
       QcTemplateEditorDialogComponent,
       { width: '800px', maxWidth: '95vw', data: { template: null } },
@@ -418,7 +431,7 @@ export class QualityComponent {
     this.detailDialog.open<QcInspectionDetailDialogComponent, QcInspectionDetailDialogData, QcInspectionDetailDialogResult>(
       INSPECTION_DETAIL_TYPE, id, QcInspectionDetailDialogComponent, { inspectionId: id }, { width: '960px' },
     ).afterClosed().subscribe(result => {
-      if (result?.changed) this.loadInspections();
+      if (!result || result.changed) this.loadInspections();
       if (result?.openNcrId != null) {
         this.router.navigate(['/quality', 'ncrs'], { queryParams: { detail: `ncr:${result.openNcrId}` } });
       }

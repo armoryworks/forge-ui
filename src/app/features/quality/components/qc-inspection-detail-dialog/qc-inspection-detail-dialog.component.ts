@@ -15,6 +15,7 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { CapabilityService } from '../../../../shared/services/capability.service';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { NcrDetectionStage } from '../../models/ncr-detection-stage.model';
@@ -44,6 +45,8 @@ type ResultGroup = FormGroup<{
   notes: FormControl<string>;
 }>;
 
+const NCR_CAPABILITY = 'CAP-QC-NCR';
+
 const DETECTION_STAGES: NcrDetectionStage[] = ['Receiving', 'InProcess', 'FinalInspection', 'Shipping', 'Customer', 'Audit'];
 
 @Component({
@@ -65,6 +68,7 @@ export class QcInspectionDetailDialogComponent {
   private readonly ncrCapaService = inject(NcrCapaService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly capabilities = inject(CapabilityService);
 
   protected readonly inspection = signal<QcInspectionDetail | null>(null);
   protected readonly loading = signal(true);
@@ -82,6 +86,8 @@ export class QcInspectionDetailDialogComponent {
   });
 
   protected readonly isFailed = computed(() => this.inspection()?.status === 'Failed');
+
+  protected readonly ncrEnabled = computed(() => this.capabilities.isEnabled(NCR_CAPABILITY));
 
   protected readonly needsNcrPart = computed(() => {
     const inspection = this.inspection();
@@ -168,7 +174,7 @@ export class QcInspectionDetailDialogComponent {
 
   protected openNcrForm(): void {
     const inspection = this.inspection();
-    if (!inspection) return;
+    if (!inspection || !this.ncrEnabled()) return;
     const failedChecks = inspection.results.filter(r => !r.passed).map(r => r.description);
     const description = [
       this.translate.instant('qcInspections.ncrDescriptionDefault', { id: inspection.id }),
@@ -191,7 +197,7 @@ export class QcInspectionDetailDialogComponent {
 
   protected raiseNcr(): void {
     const inspection = this.inspection();
-    if (!inspection || this.ncrForm.invalid || this.saving()) return;
+    if (!inspection || !this.ncrEnabled() || this.ncrForm.invalid || this.saving()) return;
     this.saving.set(true);
     const value = this.ncrForm.getRawValue();
     this.ncrCapaService.createNcr({
@@ -250,7 +256,7 @@ export class QcInspectionDetailDialogComponent {
       this.form.enable({ emitEvent: false });
     }
     this.form.updateValueAndValidity();
-    if (inspection.status === 'Failed') {
+    if (inspection.status === 'Failed' && this.ncrEnabled()) {
       this.findLinkedNcr(inspection);
     }
   }
@@ -258,7 +264,8 @@ export class QcInspectionDetailDialogComponent {
   private findLinkedNcr(inspection: QcInspectionDetail): void {
     const filters = inspection.jobId != null
       ? { jobId: inspection.jobId }
-      : inspection.partId != null ? { partId: inspection.partId } : undefined;
+      : inspection.partId != null ? { partId: inspection.partId } : null;
+    if (!filters) return;
     this.ncrCapaService.getNcrs(filters).subscribe({
       next: ncrs => this.linkedNcr.set(ncrs.find(n => n.qcInspectionId === inspection.id) ?? null),
     });

@@ -14,6 +14,7 @@ import { KanbanService } from '../kanban/services/kanban.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ScannerService } from '../../shared/services/scanner.service';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
+import { AuthService } from '../../shared/services/auth.service';
 import { SelectOption } from '../../shared/components/select/select.component';
 import { QcTemplate } from './models/qc-template.model';
 
@@ -27,12 +28,22 @@ interface QualityView {
   }>;
   inspectionSearchControl: FormControl<string>;
   templateOptions: Signal<SelectOption[]>;
+  templateColumns: Signal<{ field: string }[]>;
+  openCreateInspection(): void;
+  editTemplate(row: unknown): void;
   lotSuggestions: Signal<string[]>;
   onWorkOrderSelected(job: Record<string, unknown> | null): void;
   saveInspection(): void;
+  openInspection(row: unknown): void;
 }
 
-function setup(tab: string, queryParams: Record<string, string> = {}) {
+interface SetupOptions {
+  roles?: string[];
+  lastScan?: { value: string; context: string } | null;
+}
+
+function setup(tab: string, queryParams: Record<string, string> = {}, options: SetupOptions = {}) {
+  const roles = options.roles ?? ['Admin'];
   TestBed.resetTestingModule();
   const getInspections = vi.fn(() => of([]));
   const getTemplates = vi.fn(() => of([{ id: 3, name: 'Dimensional', items: [] } as unknown as QcTemplate]));
@@ -44,13 +55,17 @@ function setup(tab: string, queryParams: Record<string, string> = {}) {
   const navigate = vi.fn(() => Promise.resolve(true));
   const afterClosed = new Subject<unknown>();
   const open = vi.fn(() => ({ afterClosed: () => afterClosed }));
+  const detailClosed = new Subject<unknown>();
+  const openDetail = vi.fn(() => ({ afterClosed: () => detailClosed }));
+  const clearLastScan = vi.fn();
   TestBed.configureTestingModule({
     providers: [
       { provide: QualityService, useValue: { getInspections, getTemplates, getLotRecords, createInspection } },
       { provide: KanbanService, useValue: { getJobDetail } },
       { provide: SnackbarService, useValue: { success: vi.fn() } },
-      { provide: ScannerService, useValue: { setContext: vi.fn(), lastScan: signal(null), clearLastScan: vi.fn() } },
-      { provide: DetailDialogService, useValue: { getDetailFromUrl: () => null, open: vi.fn() } },
+      { provide: ScannerService, useValue: { setContext: vi.fn(), lastScan: signal(options.lastScan ?? null), clearLastScan } },
+      { provide: DetailDialogService, useValue: { getDetailFromUrl: () => null, open: openDetail } },
+      { provide: AuthService, useValue: { hasAnyRole: (allowed: string[]) => allowed.some(r => roles.includes(r)) } },
       { provide: TranslateService, useValue: { instant: (key: string) => key } },
       { provide: MatDialog, useValue: { open } },
       { provide: Router, useValue: { navigate } },
@@ -65,7 +80,7 @@ function setup(tab: string, queryParams: Record<string, string> = {}) {
   });
   const view = TestBed.runInInjectionContext(() => new QualityComponent()) as unknown as QualityView;
   TestBed.tick();
-  return { view, getInspections, getLotRecords, createInspection, getJobDetail, navigate, open, afterClosed };
+  return { view, getInspections, getTemplates, getLotRecords, createInspection, getJobDetail, navigate, open, afterClosed, detailClosed, clearLastScan };
 }
 
 describe('QualityComponent', () => {
@@ -132,5 +147,42 @@ describe('QualityComponent', () => {
     afterClosed.next(undefined);
 
     expect(view.inspectionForm.controls.templateId.value).toBeNull();
+  });
+
+  it('hides template authoring from roles the API does not allow to author', () => {
+    const { view, open } = setup('templates', {}, { roles: ['Engineer'] });
+
+    expect(view.templateOptions().some(o => o.value === -1)).toBe(false);
+    expect(view.templateColumns().some(c => c.field === 'actions')).toBe(false);
+
+    view.editTemplate({ id: 3 });
+    expect(open).not.toHaveBeenCalled();
+  });
+
+  it('loads templates once on the Templates tab and again when a new inspection opens', () => {
+    const { view, getTemplates } = setup('templates');
+    expect(getTemplates).toHaveBeenCalledTimes(1);
+
+    view.openCreateInspection();
+    expect(getTemplates).toHaveBeenCalledTimes(2);
+  });
+
+  it('puts a scan into the inspection search only on the Inspections tab', () => {
+    const onInspections = setup('inspections', {}, { lastScan: { value: 'LOT-9', context: 'quality' } });
+    expect(onInspections.view.inspectionSearchControl.value).toBe('LOT-9');
+
+    const onNcrs = setup('ncrs', {}, { lastScan: { value: 'LOT-9', context: 'quality' } });
+    expect(onNcrs.clearLastScan).toHaveBeenCalled();
+    expect(onNcrs.view.inspectionSearchControl.value).toBe('');
+  });
+
+  it('reloads inspections when the detail dialog closes without a result', () => {
+    const { view, getInspections, detailClosed } = setup('inspections');
+    const before = getInspections.mock.calls.length;
+
+    view.openInspection({ id: 12 });
+    detailClosed.next(undefined);
+
+    expect(getInspections.mock.calls.length).toBe(before + 1);
   });
 });

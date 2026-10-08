@@ -135,7 +135,7 @@
           (click)="markPassed()" data-testid="qc-detail-pass">{{ 'qcInspections.markPassed' | translate }}</button>
       </app-validation-button>
     }
-    @if (isFailed() && !linkedNcr() && !showNcrForm()) {
+    @if (ncrEnabled() && isFailed() && !linkedNcr() && !showNcrForm()) {
       <button class="action-btn action-btn--primary" type="button" (click)="openNcrForm()"
         data-testid="qc-detail-raise-ncr">{{ 'qcInspections.raiseNcr' | translate }}</button>
     }

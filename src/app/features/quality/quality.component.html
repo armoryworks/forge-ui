@@ -5,7 +5,7 @@
       {{ 'quality.newInspection' | translate }}
     </button>
   }
-  @if (activeTab() === 'templates') {
+  @if (activeTab() === 'templates' && canAuthorTemplates()) {
     <button class="action-btn action-btn--create" data-testid="new-qc-template-btn" (click)="openTemplateEditor(null)">
       <span class="material-icons-outlined">add</span>
       {{ 'qcInspections.newTemplate' | translate }}
@@ -125,8 +125,8 @@
   }
 
   @if (activeTab() === 'templates') {
-    <app-data-table tableId="qc-templates" [columns]="templateColumns" [data]="templateRows()"
-      [clickableRows]="true" (rowClick)="editTemplate($event)"
+    <app-data-table tableId="qc-templates" [columns]="templateColumns()" [data]="templateRows()"
+      [clickableRows]="canAuthorTemplates()" (rowClick)="editTemplate($event)"
       emptyIcon="checklist" [emptyMessage]="'qcInspections.noTemplatesFound' | translate">
       <ng-template appColumnCell="partNumber" let-row>
         {{ row.partNumber ?? '—' }}

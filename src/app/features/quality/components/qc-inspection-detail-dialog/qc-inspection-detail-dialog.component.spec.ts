@@ -11,6 +11,7 @@ import { QcInspectionDetailDialogComponent } from './qc-inspection-detail-dialog
 import { QualityService } from '../../services/quality.service';
 import { NcrCapaService } from '../../services/ncr-capa.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { CapabilityService } from '../../../../shared/services/capability.service';
 import { QcInspectionDetail } from '../../models/qc-inspection-detail.model';
 import { NonConformance } from '../../models/non-conformance.model';
 
@@ -65,7 +66,7 @@ describe('QcInspectionDetailDialogComponent', () => {
   let getNcrs: ReturnType<typeof vi.fn>;
   let close: ReturnType<typeof vi.fn>;
 
-  function setup(inspection: QcInspectionDetail): DialogView {
+  function setup(inspection: QcInspectionDetail, ncrEnabled = true): DialogView {
     TestBed.resetTestingModule();
     getInspection = vi.fn(() => of(inspection));
     updateInspection = vi.fn(() => of({ id: inspection.id }));
@@ -78,6 +79,7 @@ describe('QcInspectionDetailDialogComponent', () => {
         { provide: NcrCapaService, useValue: { createNcr, getNcrs } },
         { provide: SnackbarService, useValue: { success: vi.fn() } },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
+        { provide: CapabilityService, useValue: { isEnabled: (code: string) => code === 'CAP-QC-NCR' && ncrEnabled } },
         { provide: MatDialogRef, useValue: { close } },
         { provide: MAT_DIALOG_DATA, useValue: { inspectionId: inspection.id } },
       ],
@@ -189,6 +191,22 @@ describe('QcInspectionDetailDialogComponent', () => {
 
       expect(createNcr).not.toHaveBeenCalled();
     });
+
+    it('skips the linked-NCR lookup when it has neither a work order nor a part', () => {
+      view = setup(makeInspection({ status: 'Failed', jobId: null, partId: null, partNumber: null }));
+
+      expect(getNcrs).not.toHaveBeenCalled();
+    });
+
+    it('offers no NCR when NCRs are turned off', () => {
+      view = setup(makeInspection({ status: 'Failed' }), false);
+
+      expect(getNcrs).not.toHaveBeenCalled();
+      view.openNcrForm();
+      expect(view.showNcrForm()).toBe(false);
+      view.raiseNcr();
+      expect(createNcr).not.toHaveBeenCalled();
+    });
   });
 
   it('shows the NCR already raised from a failed inspection', () => {
@@ -204,6 +222,7 @@ describe('QcInspectionDetailDialogComponent', () => {
         { provide: NcrCapaService, useValue: { getNcrs: vi.fn(() => of(ncrs)) } },
         { provide: SnackbarService, useValue: { success: vi.fn() } },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
+        { provide: CapabilityService, useValue: { isEnabled: () => true } },
         { provide: MatDialogRef, useValue: { close: vi.fn() } },
         { provide: MAT_DIALOG_DATA, useValue: { inspectionId: 12 } },
       ],
