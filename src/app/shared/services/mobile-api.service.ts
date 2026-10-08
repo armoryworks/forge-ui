@@ -151,8 +151,14 @@ export class MobileApiService {
     return this.http.delete(`/api/v1/files/${fileId}`, { headers: this.idempotent() });
   }
 
-  clockState(): Observable<ClockState> {
-    return this.http.get<ClockState>('/api/v1/mobile/clock/state');
+  /**
+   * The caller's clock state. A caller that treats a failure as "nothing to
+   * show" passes `silent` to keep the refusal off the global error surface.
+   */
+  clockState(silent = false): Observable<ClockState> {
+    return this.http.get<ClockState>('/api/v1/mobile/clock/state', {
+      context: new HttpContext().set(SILENT_HTTP_ERRORS, silent),
+    });
   }
 
   clockPunch(eventType: 'ClockIn' | 'ClockOut' | 'BreakStart' | 'BreakEnd'): Observable<ClockPunchResult | QueuedOffline> {

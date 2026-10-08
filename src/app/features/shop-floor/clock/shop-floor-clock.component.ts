@@ -20,6 +20,7 @@ import { AuthService } from '../../../shared/services/auth.service';
 import { ClockEventTypeDef, ClockEventTypeService } from '../../../shared/services/clock-event-type.service';
 import { WebHidRfidService } from '../../../shared/services/web-hid-rfid.service';
 import { MobileApiService } from '../../../shared/services/mobile-api.service';
+import { CapabilityService } from '../../../shared/services/capability.service';
 import { ClockWorker } from '../models/clock-worker.model';
 import { ShopFloorOverview } from '../models/shop-floor-overview.model';
 import { KioskTerminal } from '../models/kiosk-terminal.model';
@@ -32,6 +33,7 @@ const PUNCH_FEEDBACK_MS = 2_000;
 const PUNCH_UNDO_MS = 10_000;
 const PUNCH_UNDO_RESULT_MS = 4_000;
 const SUPERVISE_ROLES = ['Admin', 'Manager'];
+const PUNCH_UNDO_CAPABILITIES = ['CAP-MOBILE-CORE', 'CAP-MOBILE-CLOCK'];
 
 type KioskPhase = 'setup' | 'dashboard' | 'identifying' | 'pin' | 'job-scanned' | 'manual-login' | 'clock';
 type PunchUndoState = 'offered' | 'undoing' | 'undone' | 'failed';
@@ -53,6 +55,7 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly mobileApi = inject(MobileApiService);
+  private readonly capabilities = inject(CapabilityService);
   protected readonly clockTypes = inject(ClockEventTypeService);
 
   // Terminal config
@@ -195,6 +198,7 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
   // ─── Dual-Scan Flow (employee badge OR job barcode — any order) ───
 
   protected onScanDetected(scanValue: string): void {
+    this.dismissPunchUndo();
     // If we're in the job-scanned phase, this second scan is the employee badge
     if (this.kioskPhase() === 'job-scanned') {
       this.scannedBarcode.set(scanValue);
@@ -282,6 +286,7 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
 
   // ─── Manual Login Flow ───
   protected showManualLogin(): void {
+    this.dismissPunchUndo();
     this.emailControl.reset();
     this.passwordControl.reset();
     this.manualLoginError.set(null);
@@ -334,7 +339,7 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
         this.clearAutoLogoutTimer();
         const time = this.formatTime(new Date().toISOString());
         this.punchRecorded.set(this.translate.instant('shopFloor.punchRecorded', { event: action.label, time }));
-        if (worker.userId === this.signedInUserId()) {
+        if (worker.userId === this.signedInUserId() && this.punchUndoAvailable()) {
           this.offerPunchUndo(this.translate.instant('kioskSetup.punchUndo.offer', {
             name: worker.name, event: action.label, time,
           }));
@@ -382,7 +387,7 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
       if (this.punchUndoState() !== 'undoing') this.clearPunchUndo();
     }, PUNCH_UNDO_MS);
     this.punchUndoTimer = timer;
-    this.mobileApi.clockState().subscribe({
+    this.mobileApi.clockState(true).subscribe({
       next: (state) => {
         if (this.punchUndoTimer !== timer || state.lastEventId === null) return;
         this.punchUndoEventId = state.lastEventId;
@@ -394,6 +399,14 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
         if (this.punchUndoTimer === timer) this.clearPunchUndo();
       },
     });
+  }
+
+  private punchUndoAvailable(): boolean {
+    return PUNCH_UNDO_CAPABILITIES.every(code => this.capabilities.isEnabled(code, true));
+  }
+
+  private dismissPunchUndo(): void {
+    if (this.punchUndoState() !== 'undoing') this.clearPunchUndo();
   }
 
   private clearPunchUndo(): void {

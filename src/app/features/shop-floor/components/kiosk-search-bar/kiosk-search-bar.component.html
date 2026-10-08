@@ -29,7 +29,7 @@
   }
 
   @if (selected(); as result) {
-    <div class="kiosk-search__card" role="dialog" [attr.aria-label]="result.title" data-testid="kiosk-search-card">
+    <div class="kiosk-search__card" role="region" [attr.aria-label]="result.title" data-testid="kiosk-search-card">
       <div class="kiosk-search__card-head">
         <span class="material-icons-outlined kiosk-search__result-icon">{{ result.icon }}</span>
         <div class="kiosk-search__result-text">

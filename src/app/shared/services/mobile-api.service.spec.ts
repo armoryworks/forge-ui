@@ -125,6 +125,17 @@ describe('MobileApiService', () => {
     req.flush({ state: 'out', lastEventType: null, lastEventAt: null, lastEventId: null });
   });
 
+  it('keeps a clock state refusal off the global error surface when asked', () => {
+    service.clockState(true).subscribe({ error: () => undefined });
+    service.clockState().subscribe({ error: () => undefined });
+
+    const [silent, loud] = http.match('/api/v1/mobile/clock/state');
+    expect(silent.request.context.get(SILENT_HTTP_ERRORS)).toBe(true);
+    expect(loud.request.context.get(SILENT_HTTP_ERRORS)).toBe(false);
+    silent.flush({ state: 'out', lastEventType: null, lastEventAt: null, lastEventId: null });
+    loud.flush({ state: 'out', lastEventType: null, lastEventAt: null, lastEventId: null });
+  });
+
   it('never queues a lookup — reads stay online-only', async () => {
     vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
     service.lookup('brack').subscribe();

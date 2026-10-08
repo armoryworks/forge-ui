@@ -12,6 +12,7 @@ import { AuthService, AuthUser } from '../../../shared/services/auth.service';
 import { ClockEventTypeDef, ClockEventTypeService } from '../../../shared/services/clock-event-type.service';
 import { WebHidRfidService } from '../../../shared/services/web-hid-rfid.service';
 import { MobileApiService } from '../../../shared/services/mobile-api.service';
+import { CapabilityService } from '../../../shared/services/capability.service';
 import { ClockWorker } from '../models/clock-worker.model';
 
 interface ClockInternals {
@@ -26,6 +27,8 @@ interface ClockInternals {
   punchUndoState: () => string | null;
   clockAction(worker: ClockWorker, action: ClockEventTypeDef): void;
   undoPunch(): void;
+  onScanDetected(scanValue: string): void;
+  showManualLogin(): void;
   enterClockPhase(): void;
 }
 
@@ -50,7 +53,9 @@ describe('ShopFloorClockComponent — clock phase', () => {
     clockState: vi.fn(() => of({ state: 'in', lastEventType: 'ClockIn', lastEventAt: null, lastEventId: 501 })),
     undoClockPunch: vi.fn(() => of({ state: 'out', lastEventType: null, lastEventAt: null, lastEventId: null })),
   };
+  const capabilities = { isEnabled: vi.fn((_code: string, _defaultWhenUnknown?: boolean) => true) };
   const shopFloor = {
+    identifyScan: vi.fn(() => of({ scanType: 'employee' })),
     getClockStatus: vi.fn(() => of([])),
     getOverview: vi.fn(() => of(null)),
     getTerminal: vi.fn(),
@@ -79,6 +84,7 @@ describe('ShopFloorClockComponent — clock phase', () => {
     user.set(null);
     token.set(null);
     shopFloor.getClockStatus.mockReturnValue(of([]));
+    capabilities.isEnabled.mockImplementation(() => true);
 
     TestBed.configureTestingModule({
       imports: [ShopFloorClockComponent],
@@ -87,6 +93,7 @@ describe('ShopFloorClockComponent — clock phase', () => {
         { provide: ShopFloorService, useValue: shopFloor },
         { provide: WebHidRfidService, useValue: rfid },
         { provide: MobileApiService, useValue: mobileApi },
+        { provide: CapabilityService, useValue: capabilities },
         { provide: ClockEventTypeService, useValue: clockTypes },
         { provide: Router, useValue: { navigate: vi.fn() } },
         { provide: MatDialog, useValue: { open: vi.fn() } },
@@ -174,6 +181,7 @@ describe('ShopFloorClockComponent — clock phase', () => {
 
     c.undoPunch();
 
+    expect(mobileApi.clockState).toHaveBeenCalledWith(true);
     expect(mobileApi.undoClockPunch).toHaveBeenCalledWith(501, 'token-1', true);
     expect(c.punchUndoState()).toBe('undone');
     expect(c.punchUndoMessage()).toBe('kioskSetup.punchUndo.undone');
@@ -266,6 +274,73 @@ describe('ShopFloorClockComponent — clock phase', () => {
     c.clockAction(worker(1, 'Ana'), clockIn);
 
     expect(c.punchUndoMessage()).toBeNull();
+  });
+
+  it('offers no undo when the mobile clock capability is off, without asking the server', () => {
+    signIn(1, ['ProductionWorker']);
+    shopFloor.clockInOut.mockReturnValue(of(undefined));
+    capabilities.isEnabled.mockImplementation((code: string) => code !== 'CAP-MOBILE-CLOCK');
+    const c = create();
+    c.enterClockPhase();
+
+    c.clockAction(worker(1, 'Ana'), clockIn);
+
+    expect(capabilities.isEnabled).toHaveBeenCalledWith('CAP-MOBILE-CLOCK', true);
+    expect(mobileApi.clockState).not.toHaveBeenCalled();
+    expect(c.punchUndoMessage()).toBeNull();
+    expect(c.punchRecorded()).toContain('shopFloor.punchRecorded');
+  });
+
+  it('withdraws the undo as soon as the next worker scans a badge', () => {
+    signIn(1, ['ProductionWorker']);
+    shopFloor.clockInOut.mockReturnValue(of(undefined));
+    const c = create();
+    c.enterClockPhase();
+
+    c.clockAction(worker(1, 'Ana'), clockIn);
+    vi.advanceTimersByTime(2000);
+    expect(c.punchUndoState()).toBe('offered');
+
+    c.onScanDetected('BADGE-2');
+
+    expect(c.punchUndoMessage()).toBeNull();
+    c.undoPunch();
+    expect(mobileApi.undoClockPunch).not.toHaveBeenCalled();
+  });
+
+  it('withdraws the undo when the next worker opens the manual sign-in', () => {
+    signIn(1, ['ProductionWorker']);
+    shopFloor.clockInOut.mockReturnValue(of(undefined));
+    const c = create();
+    c.enterClockPhase();
+
+    c.clockAction(worker(1, 'Ana'), clockIn);
+    vi.advanceTimersByTime(2000);
+
+    c.showManualLogin();
+
+    expect(c.punchUndoMessage()).toBeNull();
+    expect(c.punchUndoState()).toBeNull();
+  });
+
+  it('lets an undo already in flight settle when the next worker scans', () => {
+    signIn(1, ['ProductionWorker']);
+    shopFloor.clockInOut.mockReturnValue(of(undefined));
+    const pending = new Subject<{ state: string; lastEventType: null; lastEventAt: null; lastEventId: null }>();
+    mobileApi.undoClockPunch.mockReturnValueOnce(pending);
+    const c = create();
+    c.enterClockPhase();
+
+    c.clockAction(worker(1, 'Ana'), clockIn);
+    vi.advanceTimersByTime(2000);
+    c.undoPunch();
+    c.onScanDetected('BADGE-2');
+    expect(c.punchUndoState()).toBe('undoing');
+
+    pending.next({ state: 'out', lastEventType: null, lastEventAt: null, lastEventId: null });
+    pending.complete();
+
+    expect(c.punchUndoState()).toBe('undone');
   });
 
   it('offers no undo for a supervisor punch on another worker', () => {
