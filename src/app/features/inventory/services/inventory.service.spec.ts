@@ -322,4 +322,16 @@ describe('InventoryService', () => {
       expect(received).toEqual([{ id: 1 }]);
     });
   });
+
+  describe('getPartBins', () => {
+    it('unwraps the bin rows from the part inventory summary', () => {
+      let received: unknown[] | undefined;
+      service.getPartBins(10).subscribe(items => { received = items; });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/parts/10/inventory-summary`);
+      expect(req.request.method).toBe('GET');
+      req.flush({ totalQuantity: 3, reservedQuantity: 0, availableQuantity: 3, binLocations: [{ binContentId: 31 }] });
+      expect(received).toEqual([{ binContentId: 31 }]);
+    });
+  });
 });

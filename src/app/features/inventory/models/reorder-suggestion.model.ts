@@ -1,5 +1,7 @@
 export type ReorderSuggestionStatus = 'Pending' | 'Approved' | 'Dismissed' | 'Expired';
 
+export type ReorderSupplyType = 'Make' | 'Buy';
+
 export interface ReorderSuggestion {
   id: number;
   partId: number;
@@ -16,10 +18,14 @@ export interface ReorderSuggestion {
   incomingPoQuantity: number;
   earliestPoArrival: string | null;
   suggestedQuantity: number;
+  supplyType: ReorderSupplyType;
+  leadTimeDays: number | null;
   status: ReorderSuggestionStatus;
   approvedByName: string | null;
   approvedAt: string | null;
   resultingPurchaseOrderId: number | null;
+  resultingJobId: number | null;
+  resultingJobNumber: string | null;
   dismissReason: string | null;
   dismissedByName: string | null;
   dismissedAt: string | null;
@@ -31,4 +37,5 @@ export interface BulkApproveResult {
   approvedCount: number;
   skippedCount: number;
   createdPoIds: number[];
+  createdJobIds: number[];
 }

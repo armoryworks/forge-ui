@@ -393,6 +393,40 @@
   }
 }
 
+.replenishment-settings {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  max-width: 420px;
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+}
+
+.replenishment-created {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $sp-md;
+  padding: $sp-sm $sp-md;
+  border: $border-width-thin solid var(--border);
+  font-size: $font-size-sm;
+
+  &__title {
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+}
+
+.dialog-hint {
+  margin: 0 0 $sp-sm;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}
+
 .replenishment-actions {
   display: flex;
   align-items: center;

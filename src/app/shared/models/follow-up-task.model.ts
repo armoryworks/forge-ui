@@ -7,6 +7,7 @@ export interface FollowUpTask {
   dueDate: string | null;
   sourceEntityType: string | null;
   sourceEntityId: number | null;
+  sourceEntityLabel: string | null;
   triggerType: string;
   status: 'Open' | 'Completed' | 'Dismissed';
   completedAt: string | null;

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { EntityLinkComponent, LinkableEntityType } from '../../../shared/components/entity-link/entity-link.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
@@ -24,12 +25,25 @@ const TRIGGER_ICON_MAP: Record<string, string> = {
   ShipReady: 'local_shipping',
   MaterialsReady: 'shopping_cart',
   ShipmentDelivered: 'local_shipping',
+  ReorderSuggested: 'inventory',
+};
+
+const SOURCE_ENTITY_LINK_TYPES: Record<string, LinkableEntityType> = {
+  Job: 'job',
+  PurchaseOrder: 'purchase-order',
+  SalesOrder: 'sales-order',
+  Invoice: 'invoice',
+  Shipment: 'shipment',
+  Quote: 'quote',
+  Part: 'part',
+  Lot: 'lot',
+  CustomerReturn: 'customer-return',
 };
 
 @Component({
   selector: 'app-action-items-widget',
   standalone: true,
-  imports: [EntityLinkComponent, EmptyStateComponent, TranslatePipe],
+  imports: [EntityLinkComponent, EmptyStateComponent, TranslatePipe, RouterLink],
   templateUrl: './action-items-widget.component.html',
   styleUrl: './action-items-widget.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,6 +51,7 @@ const TRIGGER_ICON_MAP: Record<string, string> = {
 export class ActionItemsWidgetComponent implements OnInit {
   private readonly taskService = inject(FollowUpTaskService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly tasks = signal<FollowUpTask[]>([]);
   protected readonly loading = signal(false);
@@ -84,15 +99,23 @@ export class ActionItemsWidgetComponent implements OnInit {
     return new Date(dueDate) < new Date();
   }
 
-  protected getEntityType(sourceEntityType: string | null): LinkableEntityType {
-    return (sourceEntityType ?? 'job') as LinkableEntityType;
+  protected getEntityType(sourceEntityType: string | null): LinkableEntityType | null {
+    return sourceEntityType ? SOURCE_ENTITY_LINK_TYPES[sourceEntityType] ?? null : null;
+  }
+
+  protected getSourceLabel(task: FollowUpTask): string {
+    return task.sourceEntityLabel ?? `#${task.sourceEntityId}`;
+  }
+
+  protected isReorderSuggestion(task: FollowUpTask): boolean {
+    return task.triggerType === 'ReorderSuggested';
   }
 
   protected completeTask(task: FollowUpTask, event: Event): void {
     event.stopPropagation();
     this.taskService.completeTask(task.id).subscribe(() => {
       this.tasks.update(list => list.filter(t => t.id !== task.id));
-      this.snackbar.success('Task completed');
+      this.snackbar.success(this.translate.instant('replenishmentUi.taskCompleted'));
     });
   }
 
@@ -100,7 +123,7 @@ export class ActionItemsWidgetComponent implements OnInit {
     event.stopPropagation();
     this.taskService.dismissTask(task.id).subscribe(() => {
       this.tasks.update(list => list.filter(t => t.id !== task.id));
-      this.snackbar.success('Task dismissed');
+      this.snackbar.success(this.translate.instant('replenishmentUi.taskDismissed'));
     });
   }
 

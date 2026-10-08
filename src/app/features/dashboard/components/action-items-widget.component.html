@@ -13,10 +13,16 @@
                 {{ formatDate(task.dueDate) }}
               </span>
             }
-            @if (task.sourceEntityType && task.sourceEntityId) {
-              <app-entity-link [type]="getEntityType(task.sourceEntityType)" [entityId]="task.sourceEntityId">
-                {{ task.sourceEntityType }}#{{ task.sourceEntityId }}
-              </app-entity-link>
+            @if (isReorderSuggestion(task)) {
+              <a routerLink="/inventory/replenishment" data-testid="action-item-review">{{ 'replenishmentUi.review' | translate }}</a>
+            } @else if (task.sourceEntityType && task.sourceEntityId) {
+              @if (getEntityType(task.sourceEntityType); as linkType) {
+                <app-entity-link [type]="linkType" [entityId]="task.sourceEntityId" data-testid="action-item-entity-link">
+                  {{ getSourceLabel(task) }}
+                </app-entity-link>
+              } @else {
+                <span data-testid="action-item-entity-label">{{ getSourceLabel(task) }}</span>
+              }
             }
           </div>
         </div>

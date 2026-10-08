@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, u
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { map, startWith } from 'rxjs';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { catchError, map, of, startWith, switchMap, tap } from 'rxjs';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -22,7 +22,8 @@ import { Reservation } from './models/reservation.model';
 import { LocationType } from './models/location-type.type';
 import { StorageLocationFlat } from './models/storage-location-flat.model';
 import { BurnRate } from './models/burn-rate.model';
-import { ReorderSuggestion } from './models/reorder-suggestion.model';
+import { BulkApproveResult, ReorderSuggestion } from './models/reorder-suggestion.model';
+import { PartBinLocation } from './models/part-bin-location.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../shared/components/input/input.component';
@@ -45,13 +46,15 @@ import { ViewMode, DEFAULT_VIEW_MODE } from '../../shared/models/view-mode.model
 import { InventoryReorderVisualComponent } from './components/inventory-reorder-visual/inventory-reorder-visual.component';
 import { ReceivingInspectionQueueComponent } from './components/receiving-inspection-queue/receiving-inspection-queue.component';
 import { CapabilityService } from '../../shared/services/capability.service';
+import { EntityPickerComponent } from '../../shared/components/entity-picker/entity-picker.component';
+import { EntityLinkComponent, LinkableEntityType } from '../../shared/components/entity-link/entity-link.component';
 
 type InventoryTab = 'stock' | 'locations' | 'movements' | 'receiving' | 'inspection' | 'stockOps' | 'cycleCounts' | 'reservations' | 'replenishment' | 'uom';
 
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [ReactiveFormsModule, CurrencyPipe, DatePipe, DecimalPipe, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, DataTableComponent, ColumnCellDirective, RowExpandDirective, ValidationButtonComponent, EmptyStateComponent, LoadingBlockDirective, BarcodeInfoComponent, MatTooltipModule, UomManagementComponent, ViewModeToggleComponent, InventoryReorderVisualComponent, ReceivingInspectionQueueComponent],
+  imports: [ReactiveFormsModule, CurrencyPipe, DatePipe, DecimalPipe, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, DataTableComponent, ColumnCellDirective, RowExpandDirective, ValidationButtonComponent, EmptyStateComponent, LoadingBlockDirective, BarcodeInfoComponent, MatTooltipModule, UomManagementComponent, ViewModeToggleComponent, InventoryReorderVisualComponent, ReceivingInspectionQueueComponent, EntityPickerComponent, EntityLinkComponent],
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -214,9 +217,16 @@ export class InventoryComponent {
     quantityReceived: 'Quantity',
   });
 
+  protected readonly partBins = signal<PartBinLocation[]>([]);
+  protected readonly partBinsLoading = signal(false);
+  protected readonly partBinOptions = computed<SelectOption[]>(() =>
+    this.partBins().map(b => ({ value: b.binContentId, label: this.binOptionLabel(b) })),
+  );
+
   // Transfer dialog
   protected readonly showTransferDialog = signal(false);
   protected readonly transferForm = new FormGroup({
+    partId: new FormControl<number | null>(null),
     sourceBinContentId: new FormControl<number | null>(null, [Validators.required]),
     destinationLocationId: new FormControl<number | null>(null, [Validators.required]),
     quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(1)]),
@@ -224,7 +234,7 @@ export class InventoryComponent {
   });
 
   protected readonly transferViolations = FormValidationService.getViolations(this.transferForm, {
-    sourceBinContentId: 'Source Bin Content',
+    sourceBinContentId: this.translate.instant('replenishmentUi.sourceBin'),
     destinationLocationId: 'Destination',
     quantity: 'Quantity',
   });
@@ -232,6 +242,7 @@ export class InventoryComponent {
   // Adjust dialog
   protected readonly showAdjustDialog = signal(false);
   protected readonly adjustForm = new FormGroup({
+    partId: new FormControl<number | null>(null),
     binContentId: new FormControl<number | null>(null, [Validators.required]),
     newQuantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
     reason: new FormControl('', [Validators.required]),
@@ -239,7 +250,7 @@ export class InventoryComponent {
   });
 
   protected readonly adjustViolations = FormValidationService.getViolations(this.adjustForm, {
-    binContentId: 'Bin Content',
+    binContentId: this.translate.instant('replenishmentUi.bin'),
     newQuantity: 'New Quantity',
     reason: 'Reason',
   });
@@ -272,8 +283,8 @@ export class InventoryComponent {
   });
 
   protected readonly reservationViolations = FormValidationService.getViolations(this.reservationForm, {
-    partId: 'Part ID',
-    binContentId: 'Bin Content ID',
+    partId: this.translate.instant('replenishmentUi.part'),
+    binContentId: this.translate.instant('replenishmentUi.bin'),
     quantity: 'Quantity',
   });
 
@@ -306,6 +317,40 @@ export class InventoryComponent {
       this.router.navigate(['..', 'stock'], { relativeTo: this.route });
       this.loadStock();
     });
+
+    this.watchPartBins(this.reservationForm.controls.partId, this.reservationForm.controls.binContentId);
+    this.watchPartBins(this.transferForm.controls.partId, this.transferForm.controls.sourceBinContentId);
+    this.watchPartBins(this.adjustForm.controls.partId, this.adjustForm.controls.binContentId);
+
+    this.assigneeControl.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.saveAssignee());
+  }
+
+  private watchPartBins(partControl: FormControl<number | null>, binControl: FormControl<number | null>): void {
+    partControl.valueChanges.pipe(
+      tap(() => {
+        binControl.setValue(null);
+        this.partBins.set([]);
+      }),
+      switchMap(partId => {
+        if (partId == null) return of<PartBinLocation[]>([]);
+        this.partBinsLoading.set(true);
+        return this.inventoryService.getPartBins(partId).pipe(catchError(() => of<PartBinLocation[]>([])));
+      }),
+      takeUntilDestroyed(),
+    ).subscribe(bins => {
+      this.partBins.set(bins);
+      this.partBinsLoading.set(false);
+    });
+  }
+
+  private binOptionLabel(bin: PartBinLocation): string {
+    return bin.lotNumber
+      ? this.translate.instant('replenishmentUi.binOptionWithLot', { path: bin.locationPath, lot: bin.lotNumber, qty: bin.availableQuantity })
+      : this.translate.instant('replenishmentUi.binOption', { path: bin.locationPath, qty: bin.availableQuantity });
+  }
+
+  protected showNoBinsHint(partId: number | null): boolean {
+    return partId != null && !this.partBinsLoading() && this.partBins().length === 0;
   }
 
   protected switchTab(tab: InventoryTab): void {
@@ -321,7 +366,7 @@ export class InventoryComponent {
       if (tab === 'receiving' && this.receivingHistory().length === 0) this.loadReceivingHistory();
       if (tab === 'cycleCounts' && this.cycleCounts().length === 0) this.loadCycleCounts();
       if (tab === 'reservations' && this.reservations().length === 0) this.loadReservations();
-      if (tab === 'replenishment') { this.loadBurnRates(); this.loadSuggestions(); }
+      if (tab === 'replenishment') { this.loadBurnRates(); this.loadSuggestions(); this.loadReplenishmentSettings(); }
     });
   });
 
@@ -546,6 +591,7 @@ export class InventoryComponent {
   protected openTransferDialog(binContent?: BinContentItem): void {
     this.transferForm.reset();
     if (binContent) {
+      if (binContent.entityType === 'part') this.transferForm.controls.partId.setValue(binContent.entityId);
       this.transferForm.patchValue({
         sourceBinContentId: binContent.id,
         quantity: binContent.quantity as number,
@@ -581,6 +627,7 @@ export class InventoryComponent {
   protected openAdjustDialog(binContent?: BinContentItem): void {
     this.adjustForm.reset();
     if (binContent) {
+      if (binContent.entityType === 'part') this.adjustForm.controls.partId.setValue(binContent.entityId);
       this.adjustForm.patchValue({
         binContentId: binContent.id,
         newQuantity: binContent.quantity as number,
@@ -807,6 +854,11 @@ export class InventoryComponent {
   protected readonly showDismissDialog = signal(false);
   protected readonly dismissTarget = signal<ReorderSuggestion | null>(null);
   protected readonly dismissReasonControl = new FormControl('', [Validators.required, Validators.maxLength(500)]);
+  protected readonly createdRecords = signal<{ type: LinkableEntityType; id: number; label: string }[]>([]);
+  protected readonly assigneeControl = new FormControl<number | null>(null);
+  protected readonly assigneeOptions = signal<SelectOption[]>([
+    { value: null, label: this.translate.instant('replenishmentUi.nobody') },
+  ]);
 
   protected readonly pendingSuggestions = computed(() =>
     this.suggestions().filter(s => s.status === 'Pending'),
@@ -817,7 +869,7 @@ export class InventoryComponent {
     { field: 'partDescription', header: 'Description', sortable: true },
     { field: 'preferredVendorName', header: 'Vendor', sortable: true, width: '140px' },
     { field: 'availableStock', header: 'Available', sortable: true, align: 'right', width: '90px' },
-    { field: 'incomingPoQuantity', header: 'On Order', sortable: true, align: 'right', width: '80px' },
+    { field: 'incomingPoQuantity', header: this.translate.instant('replenishmentUi.incoming'), sortable: true, align: 'right', width: '130px' },
     { field: 'burnRate30Day', header: '30d / day', sortable: true, align: 'right', width: '80px' },
     { field: 'burnRate60Day', header: '60d / day', sortable: true, align: 'right', width: '80px' },
     { field: 'burnRate90Day', header: '90d / day', sortable: true, align: 'right', width: '80px' },
@@ -829,13 +881,15 @@ export class InventoryComponent {
   protected readonly suggestionColumns: ColumnDef[] = [
     { field: 'partNumber', header: 'Part #', sortable: true, width: '120px' },
     { field: 'partDescription', header: 'Description', sortable: true },
+    { field: 'supplyType', header: this.translate.instant('replenishmentUi.supply'), sortable: true, width: '90px' },
     { field: 'vendorName', header: 'Vendor', sortable: true, width: '140px' },
+    { field: 'leadTimeDays', header: this.translate.instant('replenishmentUi.leadTime'), sortable: true, align: 'right', width: '90px' },
     { field: 'availableStock', header: 'Available', sortable: true, align: 'right', width: '80px' },
     { field: 'burnRateDailyAvg', header: 'Burn/Day', sortable: true, align: 'right', width: '80px' },
     { field: 'daysOfStockRemaining', header: 'Days Left', sortable: true, align: 'right', width: '80px' },
     { field: 'projectedStockoutDate', header: 'Stockout', sortable: true, type: 'date', width: '100px' },
     { field: 'suggestedQuantity', header: 'Suggest Qty', sortable: true, align: 'right', width: '90px' },
-    { field: 'actions', header: '', width: '120px', align: 'right' },
+    { field: 'actions', header: '', width: '200px', align: 'right' },
   ];
 
   protected readonly burnRateRowClass = (row: unknown) => {
@@ -850,6 +904,28 @@ export class InventoryComponent {
       next: (data) => { this.burnRates.set(data); this.replenishmentLoading.set(false); },
       error: () => this.replenishmentLoading.set(false),
     });
+  }
+
+  private loadReplenishmentSettings(): void {
+    this.replenishmentService.getAssigneeCandidates().subscribe({
+      next: (users) => this.assigneeOptions.set([
+        { value: null, label: this.translate.instant('replenishmentUi.nobody') },
+        ...users.map(u => ({ value: u.id, label: u.name })),
+      ]),
+    });
+    this.replenishmentService.getSettings().subscribe({
+      next: (settings) => this.assigneeControl.setValue(settings.assigneeUserId ?? null, { emitEvent: false }),
+    });
+  }
+
+  private saveAssignee(): void {
+    this.replenishmentService.updateSettings({ assigneeUserId: this.assigneeControl.value ?? null }).subscribe({
+      next: () => this.snackbar.success(this.translate.instant('replenishmentUi.assigneeSaved')),
+    });
+  }
+
+  protected approveLabelKey(suggestion: ReorderSuggestion): string {
+    return suggestion.supplyType === 'Make' ? 'replenishmentUi.createWorkOrder' : 'replenishmentUi.createPo';
   }
 
   protected loadSuggestions(): void {
@@ -871,10 +947,22 @@ export class InventoryComponent {
   protected approveSuggestion(suggestion: ReorderSuggestion): void {
     this.replenishmentSaving.set(true);
     this.replenishmentService.approveSuggestion(suggestion.id).subscribe({
-      next: () => {
+      next: (approved) => {
         this.replenishmentSaving.set(false);
         this.loadSuggestions();
-        this.snackbar.success(`Reorder approved — draft PO created for ${suggestion.partNumber}`);
+        if (approved.resultingJobId != null) {
+          this.addCreatedRecords([{
+            type: 'job',
+            id: approved.resultingJobId,
+            label: this.translate.instant('replenishmentUi.workOrderLink', { number: approved.resultingJobNumber ?? approved.resultingJobId }),
+          }]);
+          this.snackbar.success(this.translate.instant('replenishmentUi.workOrderCreated', { part: suggestion.partNumber }));
+        } else {
+          if (approved.resultingPurchaseOrderId != null) {
+            this.addCreatedRecords([this.poRecord(approved.resultingPurchaseOrderId)]);
+          }
+          this.snackbar.success(this.translate.instant('replenishmentUi.poCreated', { part: suggestion.partNumber }));
+        }
       },
       error: () => this.replenishmentSaving.set(false),
     });
@@ -889,10 +977,37 @@ export class InventoryComponent {
         this.replenishmentSaving.set(false);
         this.selectedSuggestionIds.set(new Set());
         this.loadSuggestions();
-        this.snackbar.success(`Approved ${result.approvedCount} suggestions — ${result.createdPoIds.length} PO(s) created`);
+        this.reportBulkApproval(result);
       },
       error: () => this.replenishmentSaving.set(false),
     });
+  }
+
+  private reportBulkApproval(result: BulkApproveResult): void {
+    const jobIds = result.createdJobIds ?? [];
+    const poIds = result.createdPoIds ?? [];
+    this.addCreatedRecords([
+      ...jobIds.map(id => ({ type: 'job' as const, id, label: this.translate.instant('replenishmentUi.workOrderLink', { number: id }) })),
+      ...poIds.map(id => this.poRecord(id)),
+    ]);
+    this.snackbar.success(this.translate.instant('replenishmentUi.bulkApproved', {
+      approved: result.approvedCount,
+      workOrders: jobIds.length,
+      pos: poIds.length,
+    }));
+  }
+
+  private poRecord(id: number): { type: LinkableEntityType; id: number; label: string } {
+    return { type: 'purchase-order', id, label: this.translate.instant('replenishmentUi.poLink', { number: id }) };
+  }
+
+  private addCreatedRecords(records: { type: LinkableEntityType; id: number; label: string }[]): void {
+    if (records.length === 0) return;
+    this.createdRecords.update(list => [...records, ...list]);
+  }
+
+  protected clearCreatedRecords(): void {
+    this.createdRecords.set([]);
   }
 
   protected openDismissDialog(suggestion: ReorderSuggestion): void {

@@ -530,11 +530,14 @@
 @if (showReservationDialog()) {
   <app-dialog [title]="'inventory.dialogs.reserveStockTitle' | translate" width="520px" (closed)="closeReservationDialog()">
     <div [formGroup]="reservationForm">
-      <app-input [label]="'inventory.dialogs.partId' | translate" formControlName="partId" type="number" />
-      <app-input [label]="'inventory.dialogs.binContentId' | translate" formControlName="binContentId" type="number" />
-      <app-input [label]="'inventory.dialogs.jobIdOptional' | translate" formControlName="jobId" type="number" />
-      <app-input [label]="'common.quantity' | translate" formControlName="quantity" type="number" />
-      <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
+      <app-entity-picker data-testid="reserve-part" [label]="'replenishmentUi.part' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name" formControlName="partId" />
+      <app-select data-testid="reserve-bin" [label]="'replenishmentUi.bin' | translate" formControlName="binContentId" [options]="partBinOptions()" [placeholder]="(reservationForm.controls.partId.value ? 'replenishmentUi.selectBin' : 'replenishmentUi.pickPartFirst') | translate" />
+      @if (showNoBinsHint(reservationForm.controls.partId.value)) {
+        <p class="dialog-hint" data-testid="reserve-no-bins">{{ 'replenishmentUi.noBins' | translate }}</p>
+      }
+      <app-entity-picker data-testid="reserve-job" [label]="'replenishmentUi.jobOptional' | translate" entityType="jobs" displayField="jobNumber" secondaryDisplayField="title" formControlName="jobId" />
+      <app-input data-testid="reserve-quantity" [label]="'common.quantity' | translate" formControlName="quantity" type="number" />
+      <app-textarea data-testid="reserve-notes" [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
     </div>
 
     <div dialog-footer>
@@ -600,7 +603,11 @@
 @if (showTransferDialog()) {
   <app-dialog [title]="'inventory.dialogs.transferStockTitle' | translate" width="520px" (closed)="closeTransferDialog()">
     <div [formGroup]="transferForm">
-      <app-input [label]="'inventory.dialogs.sourceBinContentId' | translate" formControlName="sourceBinContentId" type="number" />
+      <app-entity-picker data-testid="transfer-part" [label]="'replenishmentUi.part' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name" formControlName="partId" />
+      <app-select data-testid="transfer-source-bin" [label]="'replenishmentUi.sourceBin' | translate" formControlName="sourceBinContentId" [options]="partBinOptions()" [placeholder]="(transferForm.controls.partId.value ? 'replenishmentUi.selectBin' : 'replenishmentUi.pickPartFirst') | translate" />
+      @if (showNoBinsHint(transferForm.controls.partId.value)) {
+        <p class="dialog-hint" data-testid="transfer-no-bins">{{ 'replenishmentUi.noBins' | translate }}</p>
+      }
       <app-select [label]="'inventory.dialogs.destinationLocation' | translate" formControlName="destinationLocationId" [options]="binLocationOptions()" />
       <app-input [label]="'common.quantity' | translate" formControlName="quantity" type="number" />
       <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
@@ -621,7 +628,11 @@
 @if (showAdjustDialog()) {
   <app-dialog [title]="'inventory.dialogs.adjustStockTitle' | translate" width="520px" (closed)="closeAdjustDialog()">
     <div [formGroup]="adjustForm">
-      <app-input data-testid="adjust-bin-content-id" [label]="'inventory.dialogs.binContentId' | translate" formControlName="binContentId" type="number" />
+      <app-entity-picker data-testid="adjust-part" [label]="'replenishmentUi.part' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name" formControlName="partId" />
+      <app-select data-testid="adjust-bin" [label]="'replenishmentUi.bin' | translate" formControlName="binContentId" [options]="partBinOptions()" [placeholder]="(adjustForm.controls.partId.value ? 'replenishmentUi.selectBin' : 'replenishmentUi.pickPartFirst') | translate" />
+      @if (showNoBinsHint(adjustForm.controls.partId.value)) {
+        <p class="dialog-hint" data-testid="adjust-no-bins">{{ 'replenishmentUi.noBins' | translate }}</p>
+      }
       <app-input data-testid="adjust-new-quantity" [label]="'inventory.dialogs.newQuantity' | translate" formControlName="newQuantity" type="number" />
       <app-input data-testid="adjust-reason" [label]="'inventory.dialogs.reason' | translate" formControlName="reason" />
       <app-textarea data-testid="adjust-notes" [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
@@ -726,6 +737,22 @@
 <!-- ── Replenishment Tab ── -->
 @if (activeTab() === 'replenishment') {
   <div class="tab-panel tab-panel--replenishment" [appLoadingBlock]="replenishmentLoading()">
+    <div class="replenishment-settings">
+      <app-select data-testid="replenishment-assignee" [label]="'replenishmentUi.sendSuggestionsTo' | translate" [formControl]="assigneeControl" [options]="assigneeOptions()" />
+      <p class="replenishment-settings__hint">{{ 'replenishmentUi.sendSuggestionsToHint' | translate }}</p>
+    </div>
+
+    @if (createdRecords().length > 0) {
+      <div class="replenishment-created" data-testid="replenishment-created">
+        <span class="replenishment-created__title">{{ 'replenishmentUi.justCreated' | translate }}</span>
+        @for (record of createdRecords(); track record.type + record.id) {
+          <app-entity-link [type]="record.type" [entityId]="record.id">{{ record.label }}</app-entity-link>
+        }
+        <button class="icon-btn" (click)="clearCreatedRecords()" [attr.aria-label]="'replenishmentUi.clearCreated' | translate" [matTooltip]="'replenishmentUi.clearCreated' | translate">
+          <span class="material-icons-outlined">close</span>
+        </button>
+      </div>
+    }
 
     <!-- Pending Suggestions Queue -->
     @if (pendingSuggestions().length > 0) {
@@ -742,7 +769,7 @@
                 [disabled]="replenishmentSaving()"
                 (click)="approveBulk()">
                 <span class="material-icons-outlined">shopping_cart</span>
-                Approve Selected ({{ selectedSuggestionIds().size }})
+                {{ 'replenishmentUi.approveSelected' | translate: { count: selectedSuggestionIds().size } }}
               </button>
             }
           </div>
@@ -760,8 +787,22 @@
             <span class="mono">{{ $any(row).partNumber }}</span>
           </ng-template>
 
+          <ng-template appColumnCell="supplyType" let-row>
+            <span class="chip" [class.chip--primary]="$any(row).supplyType === 'Make'" [class.chip--muted]="$any(row).supplyType !== 'Make'">
+              {{ ($any(row).supplyType === 'Make' ? 'replenishmentUi.supplyMake' : 'replenishmentUi.supplyBuy') | translate }}
+            </span>
+          </ng-template>
+
           <ng-template appColumnCell="vendorName" let-row>
             <span class="text-muted">{{ $any(row).vendorName ?? '—' }}</span>
+          </ng-template>
+
+          <ng-template appColumnCell="leadTimeDays" let-row>
+            @if (($any(row).leadTimeDays ?? null) !== null) {
+              <span class="mono">{{ 'replenishmentUi.leadTimeDays' | translate: { days: $any(row).leadTimeDays } }}</span>
+            } @else {
+              <span class="text-muted">—</span>
+            }
           </ng-template>
 
           <ng-template appColumnCell="availableStock" let-row>
@@ -799,11 +840,12 @@
           <ng-template appColumnCell="actions" let-row>
             <div class="replenishment-actions">
               <button class="action-btn action-btn--sm action-btn--primary"
+                data-testid="replenishment-approve"
                 [disabled]="replenishmentSaving()"
                 (click)="approveSuggestion($any(row)); $event.stopPropagation()"
-                aria-label="Approve suggestion for {{ $any(row).partNumber }}">
-                <span class="material-icons-outlined">shopping_cart</span>
-                Approve
+                [attr.aria-label]="(approveLabelKey($any(row)) | translate) + ': ' + $any(row).partNumber">
+                <span class="material-icons-outlined">{{ $any(row).supplyType === 'Make' ? 'precision_manufacturing' : 'shopping_cart' }}</span>
+                {{ approveLabelKey($any(row)) | translate }}
               </button>
               <button class="icon-btn"
                 (click)="openDismissDialog($any(row)); $event.stopPropagation()"

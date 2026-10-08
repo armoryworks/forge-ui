@@ -8,6 +8,7 @@ import { StorageLocationFlat } from '../models/storage-location-flat.model';
 import { BinContentItem } from '../models/bin-content-item.model';
 import { BinMovementItem } from '../models/bin-movement-item.model';
 import { InventoryPartSummary } from '../models/inventory-part-summary.model';
+import { PartBinLocation } from '../models/part-bin-location.model';
 import { CreateStorageLocationRequest } from '../models/create-storage-location-request.model';
 import { PlaceBinContentRequest } from '../models/place-bin-content-request.model';
 import { ReceivingRecord } from '../models/receiving-record.model';
@@ -61,6 +62,12 @@ export class InventoryService {
     let params = new HttpParams();
     if (search) params = params.set('search', search);
     return this.http.get<InventoryPartSummary[]>(`${this.base}/parts`, { params });
+  }
+
+  getPartBins(partId: number): Observable<PartBinLocation[]> {
+    return this.http
+      .get<{ binLocations: PartBinLocation[] }>(`${environment.apiUrl}/parts/${partId}/inventory-summary`)
+      .pipe(map(res => res.binLocations ?? []));
   }
 
   getMovements(locationId?: number, entityType?: string, entityId?: number, take = 100): Observable<BinMovementItem[]> {

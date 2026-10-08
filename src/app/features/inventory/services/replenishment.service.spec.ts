@@ -84,4 +84,38 @@ describe('ReplenishmentService', () => {
     expect(req.request.body).toMatchObject({ reason: 'Not needed at this time' });
     req.flush({});
   });
+
+  it('getSettings() and updateSettings() use replenishment/settings', () => {
+    service.getSettings().subscribe();
+    httpMock.expectOne(r => r.url === `${base}/settings` && r.method === 'GET').flush({ assigneeUserId: 4 });
+
+    service.updateSettings({ assigneeUserId: null }).subscribe();
+    const put = httpMock.expectOne(r => r.url === `${base}/settings` && r.method === 'PUT');
+    expect(put.request.body).toEqual({ assigneeUserId: null });
+    put.flush({ assigneeUserId: null });
+  });
+
+  it('getAssigneeCandidates() keeps active Admin and Manager users', () => {
+    let received: { id: number; name: string }[] | undefined;
+    service.getAssigneeCandidates().subscribe(users => { received = users; });
+
+    httpMock.expectOne(`${environment.apiUrl}/admin/users`).flush([
+      { id: 1, firstName: 'Avery', lastName: 'Admin', isActive: true, roles: ['Admin'] },
+      { id: 2, firstName: 'Morgan', lastName: 'Manager', isActive: true, roles: ['Manager', 'Engineer'] },
+      { id: 3, firstName: 'Ellis', lastName: 'Engineer', isActive: true, roles: ['Engineer'] },
+      { id: 4, firstName: 'Former', lastName: 'Manager', isActive: false, roles: ['Manager'] },
+    ]);
+
+    expect(received).toEqual([{ id: 1, name: 'Avery Admin' }, { id: 2, name: 'Morgan Manager' }]);
+  });
+
+  it('getAssigneeCandidates() falls back to the active user list when admin users is forbidden', () => {
+    let received: { id: number; name: string }[] | undefined;
+    service.getAssigneeCandidates().subscribe(users => { received = users; });
+
+    httpMock.expectOne(`${environment.apiUrl}/admin/users`).flush(null, { status: 403, statusText: 'Forbidden' });
+    httpMock.expectOne(`${environment.apiUrl}/users`).flush([{ id: 2, initials: 'MM', name: 'Morgan Manager', color: '', canBeAssignedJobs: true }]);
+
+    expect(received).toEqual([{ id: 2, name: 'Morgan Manager' }]);
+  });
 });
