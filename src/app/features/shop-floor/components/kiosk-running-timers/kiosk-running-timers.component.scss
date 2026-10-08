@@ -49,3 +49,8 @@
   font-family: $font-family-mono;
   color: var(--success);
 }
+
+.running-timers__stop {
+  min-width: 88px;
+  min-height: 88px;
+}

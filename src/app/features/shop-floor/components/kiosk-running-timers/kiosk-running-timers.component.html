@@ -7,7 +7,7 @@
           <span class="running-timers__job">{{ line.timer.jobNumber }}</span>
           <span class="running-timers__step">{{ line.stepLabel ?? ('shopFloor.operations.wholeJob' | translate) }}</span>
           <span class="running-timers__elapsed">{{ line.elapsedMs | durationMs }}</span>
-          <button type="button" class="action-btn action-btn--danger action-btn--sm"
+          <button type="button" class="action-btn action-btn--danger running-timers__stop"
                   [disabled]="busy()"
                   (click)="stop.emit(line.timer)"
                   [attr.aria-label]="'shopFloor.operations.stopTimerAria' | translate: { jobNumber: line.timer.jobNumber }"

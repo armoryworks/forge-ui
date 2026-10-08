@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { catchError, Observable, of } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
@@ -17,6 +17,7 @@ import { OperationTimerEntryType } from '../models/operation-timer-entry-type.ty
 import { RunningTimer } from '../models/running-timer.model';
 import { StopTimerTarget } from '../models/stop-timer-target.model';
 import { JobAdvanceResult, JobStatus } from '../../../shared/models/mobile-api.model';
+import { SILENT_HTTP_ERRORS } from '../../../shared/interceptors/silent-http-errors.token';
 
 @Injectable({ providedIn: 'root' })
 export class ShopFloorService {
@@ -54,38 +55,40 @@ export class ShopFloorService {
   }
 
   stopTimer(target?: StopTimerTarget): Observable<unknown> {
-    return this.http.post(`${environment.apiUrl}/time-tracking/timer/stop`, { notes: null, ...target });
+    const url = `${environment.apiUrl}/time-tracking/timer/stop`;
+    const body = { notes: null, ...target };
+    return target ? this.http.post(url, body, this.silent()) : this.http.post(url, body);
   }
 
   getActiveTimers(): Observable<RunningTimer[]> {
-    return this.http.get<RunningTimer[]>(`${environment.apiUrl}/time-tracking/timers/active`);
+    return this.http.get<RunningTimer[]>(`${environment.apiUrl}/time-tracking/timers/active`, this.silent());
   }
 
   getConfig(): Observable<JobOperationsConfig> {
-    return this.http.get<JobOperationsConfig>(`${environment.apiUrl}/job-operations/config`).pipe(
+    return this.http.get<JobOperationsConfig>(`${environment.apiUrl}/job-operations/config`, this.silent()).pipe(
       catchError(() => of({ operationTracking: false })),
     );
   }
 
   getOperations(jobId: number): Observable<JobOperations> {
-    return this.http.get<JobOperations>(`${environment.apiUrl}/jobs/${jobId}/operations`);
+    return this.http.get<JobOperations>(`${environment.apiUrl}/jobs/${jobId}/operations`, this.silent());
   }
 
   startOperationTimer(jobId: number, operationId: number, entryType: OperationTimerEntryType = 'Run'): Observable<JobOperationTimerResult> {
     return this.http.post<JobOperationTimerResult>(
-      `${environment.apiUrl}/jobs/${jobId}/operations/${operationId}/timer/start`, { entryType });
+      `${environment.apiUrl}/jobs/${jobId}/operations/${operationId}/timer/start`, { entryType }, this.silent());
   }
 
   stopOperationTimer(jobId: number, operationId: number): Observable<JobOperationTimerStopResult> {
     return this.http.post<JobOperationTimerStopResult>(
-      `${environment.apiUrl}/jobs/${jobId}/operations/${operationId}/timer/stop`, { notes: null });
+      `${environment.apiUrl}/jobs/${jobId}/operations/${operationId}/timer/stop`, { notes: null }, this.silent());
   }
 
   updateOperationProgress(
     jobId: number, operationId: number, request: UpdateJobOperationProgressRequest,
   ): Observable<JobOperationProgressResult> {
     return this.http.patch<JobOperationProgressResult>(
-      `${environment.apiUrl}/jobs/${jobId}/operations/${operationId}`, request);
+      `${environment.apiUrl}/jobs/${jobId}/operations/${operationId}`, request, this.silent());
   }
 
   completeJob(jobId: number): Observable<{ stageName: string }> {
@@ -118,5 +121,9 @@ export class ShopFloorService {
 
   setupTerminal(name: string, deviceToken: string, teamId: number): Observable<KioskTerminal> {
     return this.http.post<KioskTerminal>(`${this.base}/terminal`, { name, deviceToken, teamId });
+  }
+
+  private silent(): { context: HttpContext } {
+    return { context: new HttpContext().set(SILENT_HTTP_ERRORS, true) };
   }
 }

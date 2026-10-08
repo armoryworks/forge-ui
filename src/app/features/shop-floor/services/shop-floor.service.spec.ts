@@ -4,6 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 
 import { ShopFloorService } from './shop-floor.service';
 import { environment } from '../../../../environments/environment';
+import { SILENT_HTTP_ERRORS } from '../../../shared/interceptors/silent-http-errors.token';
 
 describe('ShopFloorService', () => {
   let service: ShopFloorService;
@@ -100,6 +101,7 @@ describe('ShopFloorService', () => {
       service.stopTimer().subscribe();
       const req = httpMock.expectOne(`${apiUrl}/time-tracking/timer/stop`);
       expect(req.request.body).toEqual({ notes: null });
+      expect(req.request.context.get(SILENT_HTTP_ERRORS)).toBe(false);
       req.flush(null);
     });
 
@@ -109,6 +111,7 @@ describe('ShopFloorService', () => {
       service.stopTimer({ timeEntryId: 9 }).subscribe();
       const req = httpMock.expectOne(`${apiUrl}/time-tracking/timer/stop`);
       expect(req.request.body).toEqual({ notes: null, timeEntryId: 9 });
+      expect(req.request.context.get(SILENT_HTTP_ERRORS)).toBe(true);
       req.flush(null);
     });
   });
@@ -151,6 +154,24 @@ describe('ShopFloorService', () => {
       const req = httpMock.expectOne(`${apiUrl}/jobs/41/operations/7/timer/stop`);
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual({ notes: null });
+    });
+
+    it('leaves operation failures to the terminal instead of the global error toast', () => {
+      service.getConfig().subscribe();
+      service.getOperations(41).subscribe();
+      service.getActiveTimers().subscribe();
+      service.startOperationTimer(41, 7).subscribe();
+      service.stopOperationTimer(41, 7).subscribe();
+      service.updateOperationProgress(41, 7, { completedQuantity: 1, scrapQuantity: 0, expectedVersion: 1 }).subscribe();
+      const requests = [
+        httpMock.expectOne(`${apiUrl}/job-operations/config`),
+        httpMock.expectOne(`${apiUrl}/jobs/41/operations`),
+        httpMock.expectOne(`${apiUrl}/time-tracking/timers/active`),
+        httpMock.expectOne(`${apiUrl}/jobs/41/operations/7/timer/start`),
+        httpMock.expectOne(`${apiUrl}/jobs/41/operations/7/timer/stop`),
+        httpMock.expectOne(r => r.method === 'PATCH' && r.url === `${apiUrl}/jobs/41/operations/7`),
+      ];
+      expect(requests.map(r => r.request.context.get(SILENT_HTTP_ERRORS))).toEqual([true, true, true, true, true, true]);
     });
 
     it('PATCHes absolute progress with the expected version', () => {

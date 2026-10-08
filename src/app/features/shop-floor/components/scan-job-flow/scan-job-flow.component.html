@@ -29,7 +29,7 @@
     }
 
     <div class="scan-job__action-grid">
-      @if (hasActiveTimer()) {
+      @if (jobTimerRunning()) {
         <button class="scan-job__action-btn scan-job__action-btn--stop"
                 (click)="stopTimer()"
                 aria-label="Stop timer"

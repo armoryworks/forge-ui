@@ -9,7 +9,9 @@ interface QuantityInternals {
   scrap: () => number;
   overLimit: () => boolean;
   canSubmit: () => boolean;
-  activeField: { set: (f: 'completed' | 'scrap') => void };
+  completedControl: { setValue: (v: number | null) => void };
+  selectField(f: 'completed' | 'scrap'): void;
+  onTyped(): void;
   ngOnInit(): void;
   onDigit(d: string): void;
   onBackspace(): void;
@@ -59,7 +61,6 @@ describe('KioskOperationQuantityComponent', () => {
   it('+Qty starts from the current count and records an absolute value without completing', () => {
     const { c, emitted } = create(false);
     expect(c.completed()).toBe(12);
-    c.onClear();
     c.onDigit('2');
     c.onDigit('0');
     c.record();
@@ -68,7 +69,7 @@ describe('KioskOperationQuantityComponent', () => {
 
   it('the keypad edits the scrap count when that field is active', () => {
     const { c } = create(false, row({ scrapQuantity: 0 }));
-    c.activeField.set('scrap');
+    c.selectField('scrap');
     c.onDigit('3');
     expect(c.scrap()).toBe(3);
     c.onBackspace();
@@ -76,9 +77,49 @@ describe('KioskOperationQuantityComponent', () => {
     expect(c.completed()).toBe(12);
   });
 
+  it('the first keypad digit replaces the prefilled count, later digits append', () => {
+    const { c } = create(true);
+    c.onDigit('5');
+    expect(c.completed()).toBe(5);
+    c.onDigit('3');
+    expect(c.completed()).toBe(53);
+  });
+
+  it('backspace edits the prefilled count instead of replacing it', () => {
+    const { c } = create(false);
+    c.onBackspace();
+    expect(c.completed()).toBe(1);
+    c.onDigit('8');
+    expect(c.completed()).toBe(18);
+  });
+
+  it('accepts a number typed into the field when the keypad is hidden', () => {
+    const { c, emitted } = create(false);
+    c.completedControl.setValue(25);
+    c.onTyped();
+    expect(c.completed()).toBe(25);
+    expect(c.canSubmit()).toBe(true);
+    c.onDigit('1');
+    expect(c.completed()).toBe(251);
+    expect(c.overLimit()).toBe(true);
+    c.onBackspace();
+    expect(c.completed()).toBe(25);
+    c.record();
+    expect(emitted).toEqual([{ completedQuantity: 25, scrapQuantity: 1, expectedVersion: 4 }]);
+  });
+
+  it('a cleared typed field reads as zero without throwing', () => {
+    const { c } = create(false);
+    c.completedControl.setValue(0);
+    c.onTyped();
+    expect(c.completed()).toBe(0);
+    expect(c.canSubmit()).toBe(true);
+    expect(() => c.onBackspace()).not.toThrow();
+    expect(c.completed()).toBeNull();
+  });
+
   it('warns and refuses when completed plus scrap exceeds the job quantity', () => {
     const { c, emitted } = create(false);
-    c.onClear();
     c.onDigit('4');
     c.onDigit('0');
     expect(c.overLimit()).toBe(true);

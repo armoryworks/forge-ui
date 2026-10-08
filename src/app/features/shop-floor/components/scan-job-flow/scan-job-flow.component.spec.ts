@@ -131,6 +131,7 @@ interface TrackingInternals {
   runningTimers: () => unknown[];
   operationNotice: () => string | null;
   now: () => number;
+  jobTimerRunning: () => boolean;
   startTimer(): void;
   stopTimer(): void;
   confirmAdvanceStage(): void;
@@ -249,6 +250,30 @@ describe('ScanJobFlowComponent — operation tracking', () => {
     const c = create();
     c.stopTimer();
     expect(shopFloor.stopTimer).toHaveBeenCalledWith({ jobId: 5 });
+  });
+
+  it('the whole-job button follows the running timers, not the stale input, when tracking is on', () => {
+    shopFloor.getConfig.mockReturnValueOnce(of({ operationTracking: true }));
+    shopFloor.getActiveTimers
+      .mockReturnValueOnce(of([{ id: 9, jobId: 5, jobNumber: 'JOB-0005', timerStart: new Date().toISOString() }]))
+      .mockReturnValueOnce(of([]));
+    const c = create();
+    expect(c.jobTimerRunning()).toBe(true);
+
+    c.stopRunningTimer({ id: 9, jobNumber: 'JOB-0005' });
+    expect(c.jobTimerRunning()).toBe(false);
+  });
+
+  it('a refused whole-job stop shows the server reason and reloads the timers', () => {
+    shopFloor.getConfig.mockReturnValueOnce(of({ operationTracking: true }));
+    shopFloor.stopTimer.mockReturnValueOnce(throwError(() =>
+      new HttpErrorResponse({ status: 409, error: { detail: 'Several timers are running.' } })));
+    const c = create();
+
+    c.stopTimer();
+    expect(c.step()).toBe('actions');
+    expect(c.error()).toBe('shopFloor.operations.actionFailed:{"reason":"Several timers are running."}');
+    expect(shopFloor.getActiveTimers).toHaveBeenCalledTimes(2);
   });
 
   it('starts a run or setup timer on one operation and keeps the flow open', () => {

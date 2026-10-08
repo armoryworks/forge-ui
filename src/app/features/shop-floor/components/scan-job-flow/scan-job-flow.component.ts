@@ -77,6 +77,9 @@ export class ScanJobFlowComponent implements OnInit {
   protected readonly quantityTarget = signal<{ row: JobOperationRow; prefillAll: boolean } | null>(null);
   protected readonly now = signal(Date.now());
   protected readonly currentUserId = computed(() => this.auth.user()?.id ?? null);
+  protected readonly jobTimerRunning = computed(() => this.tracking()
+    ? this.runningTimers().some(timer => timer.jobId === this.jobId())
+    : this.hasActiveTimer());
   private serverOffsetMs = 0;
   private ticking = false;
 
@@ -275,7 +278,8 @@ export class ScanJobFlowComponent implements OnInit {
     this.error.set(null);
     this.step.set('processing');
 
-    const stop$ = this.tracking() ? this.shopFloorService.stopTimer({ jobId: this.jobId() }) : this.shopFloorService.stopTimer();
+    const tracking = this.tracking();
+    const stop$ = tracking ? this.shopFloorService.stopTimer({ jobId: this.jobId() }) : this.shopFloorService.stopTimer();
     stop$.subscribe({
       next: () => {
         this.processing.set(false);
@@ -283,10 +287,15 @@ export class ScanJobFlowComponent implements OnInit {
         this.step.set('done');
         setTimeout(() => this.completed.emit(), 1500);
       },
-      error: () => {
+      error: (err: HttpErrorResponse) => {
         this.processing.set(false);
-        this.error.set('Failed to stop timer');
         this.step.set('actions');
+        if (!tracking) {
+          this.error.set('Failed to stop timer');
+          return;
+        }
+        this.error.set(this.translate.instant('shopFloor.operations.actionFailed', { reason: this.serverReason(err) }));
+        this.loadRunningTimers();
       },
     });
   }

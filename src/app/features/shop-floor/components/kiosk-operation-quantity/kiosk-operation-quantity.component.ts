@@ -27,46 +27,62 @@ export class KioskOperationQuantityComponent implements OnInit {
   readonly submitted = output<UpdateJobOperationProgressRequest>();
   readonly cancelled = output<void>();
 
-  protected readonly completedControl = new FormControl('', { nonNullable: true });
-  protected readonly scrapControl = new FormControl('', { nonNullable: true });
+  protected readonly completedControl = new FormControl<number | null>(null);
+  protected readonly scrapControl = new FormControl<number | null>(null);
   protected readonly activeField = signal<QuantityField>('completed');
   protected readonly scrapOpen = signal(false);
 
-  private readonly completedText = toSignal(this.completedControl.valueChanges, { initialValue: '' });
-  private readonly scrapText = toSignal(this.scrapControl.valueChanges, { initialValue: '' });
+  private readonly completedValue = toSignal(this.completedControl.valueChanges, { initialValue: null });
+  private readonly scrapValue = toSignal(this.scrapControl.valueChanges, { initialValue: null });
+  private replaceOnNextDigit = true;
 
-  protected readonly completed = computed(() => this.parse(this.completedText()));
-  protected readonly scrap = computed(() => this.parse(this.scrapText()) ?? 0);
+  protected readonly completed = computed(() => this.parse(this.completedValue()));
+  protected readonly scrap = computed(() => this.parse(this.scrapValue()) ?? 0);
   protected readonly overLimit = computed(() => (this.completed() ?? 0) + this.scrap() > this.jobQuantity());
   protected readonly canSubmit = computed(() => this.completed() !== null && !this.overLimit() && !this.busy());
 
   ngOnInit(): void {
     const row = this.operation();
     const all = Math.max(row.completedQuantity, this.jobQuantity() - row.scrapQuantity);
-    this.completedControl.setValue(String(this.prefillAll() ? all : row.completedQuantity));
-    this.scrapControl.setValue(String(row.scrapQuantity));
+    this.completedControl.setValue(this.prefillAll() ? all : row.completedQuantity);
+    this.scrapControl.setValue(row.scrapQuantity);
     this.scrapOpen.set(row.scrapQuantity > 0);
+  }
+
+  protected selectField(field: QuantityField): void {
+    if (this.activeField() === field) return;
+    this.activeField.set(field);
+    this.replaceOnNextDigit = true;
+  }
+
+  protected onTyped(): void {
+    this.replaceOnNextDigit = false;
   }
 
   protected toggleScrap(): void {
     this.scrapOpen.update(open => !open);
-    if (!this.scrapOpen()) this.activeField.set('completed');
+    if (!this.scrapOpen()) this.selectField('completed');
   }
 
   protected onDigit(digit: string): void {
     const control = this.activeControl();
-    const current = control.value === '0' ? '' : control.value;
+    const text = this.replaceOnNextDigit ? '' : this.digitsOf(control.value);
+    this.replaceOnNextDigit = false;
+    const current = text === '0' ? '' : text;
     if (current.length >= 7) return;
-    control.setValue(current + digit);
+    control.setValue(Number(current + digit));
   }
 
   protected onBackspace(): void {
+    this.replaceOnNextDigit = false;
     const control = this.activeControl();
-    control.setValue(control.value.slice(0, -1));
+    const text = this.digitsOf(control.value).slice(0, -1);
+    control.setValue(text ? Number(text) : null);
   }
 
   protected onClear(): void {
-    this.activeControl().setValue('');
+    this.replaceOnNextDigit = false;
+    this.activeControl().setValue(null);
   }
 
   protected finish(): void {
@@ -87,14 +103,18 @@ export class KioskOperationQuantityComponent implements OnInit {
     };
   }
 
-  private activeControl(): FormControl<string> {
+  private activeControl(): FormControl<number | null> {
     return this.activeField() === 'scrap' ? this.scrapControl : this.completedControl;
   }
 
-  private parse(text: string): number | null {
-    const trimmed = text.trim();
-    if (!trimmed) return null;
-    const value = Number(trimmed);
-    return Number.isFinite(value) && value >= 0 ? value : null;
+  private digitsOf(value: number | string | null): string {
+    return String(value ?? '').trim();
+  }
+
+  private parse(value: number | string | null): number | null {
+    const text = this.digitsOf(value);
+    if (!text) return null;
+    const parsed = Number(text);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
   }
 }

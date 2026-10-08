@@ -91,6 +91,7 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   { prefix: 'identity-documents', capability: 'CAP-QC-COMPLIANCE-FORMS' },
   { prefix: 'inventory', capability: 'CAP-INV-CORE' },
   { prefix: 'invoices', capability: 'CAP-O2C-INVOICE' },
+  { prefix: 'job-operations', capability: 'CAP-MFG-MULTIOP' },
   { prefix: 'jobs', capability: 'CAP-MFG-WO-RELEASE' },
   { prefix: 'kanban-cards', capability: 'CAP-EXT-KANBAN-REPLENISHMENT' },
   { prefix: 'leads', capability: 'CAP-O2C-LEAD' },

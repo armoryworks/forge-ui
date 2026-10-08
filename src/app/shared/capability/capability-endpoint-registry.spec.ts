@@ -61,6 +61,11 @@ describe('resolveCapabilityForUrl', () => {
       expect(resolveCapabilityForUrl('/api/v1/reports/sankey/jobs')).toBe('CAP-RPT-OPERATIONAL');
     });
 
+    it('resolves the job-operations config to CAP-MFG-MULTIOP without capturing jobs', () => {
+      expect(resolveCapabilityForUrl('/api/v1/job-operations/config')).toBe('CAP-MFG-MULTIOP');
+      expect(resolveCapabilityForUrl('/api/v1/jobs/5')).toBe('CAP-MFG-WO-RELEASE');
+    });
+
     it('resolves shop-floor/andon to CAP-EXT-ANDON, distinct from shop-floor/machine', () => {
       expect(resolveCapabilityForUrl('/api/v1/shop-floor/andon')).toBe('CAP-EXT-ANDON');
       expect(resolveCapabilityForUrl('/api/v1/shop-floor/machine/state')).toBe('CAP-MFG-MACHINE-CONNECT');

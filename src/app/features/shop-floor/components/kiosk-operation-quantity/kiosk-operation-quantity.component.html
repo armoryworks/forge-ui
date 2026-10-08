@@ -4,7 +4,8 @@
   <div class="op-qty__fields">
     <div class="op-qty__field"
          [class.op-qty__field--active]="scrapOpen() && activeField() === 'completed'"
-         (focusin)="activeField.set('completed')">
+         (focusin)="selectField('completed')"
+         (input)="onTyped()">
       <app-input
         [label]="'shopFloor.operations.completedLabel' | translate: { total: jobQuantity() }"
         type="number"
@@ -16,7 +17,8 @@
     @if (scrapOpen()) {
       <div class="op-qty__field"
            [class.op-qty__field--active]="activeField() === 'scrap'"
-           (focusin)="activeField.set('scrap')">
+           (focusin)="selectField('scrap')"
+           (input)="onTyped()">
         <app-input
           [label]="'shopFloor.operations.scrapLabel' | translate"
           type="number"
