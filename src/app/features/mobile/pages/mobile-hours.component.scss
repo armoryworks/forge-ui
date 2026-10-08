@@ -60,6 +60,34 @@
   }
 }
 
+.today-card {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding: $sp-md $sp-lg;
+  background: color-mix(in srgb, var(--success) 8%, var(--surface));
+  border: $border-width-thin solid var(--success);
+
+  &__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  &__value {
+    font-family: $font-family-mono;
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: var(--success);
+  }
+}
+
 .week-total {
   display: flex;
   align-items: center;

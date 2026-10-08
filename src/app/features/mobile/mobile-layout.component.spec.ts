@@ -64,6 +64,17 @@ describe('MobileLayoutComponent', () => {
     expect(paths).toContain('/m/clock');
   });
 
+  it('puts My Hours in the bottom nav, open whether or not the caller is clocked in', () => {
+    isEnabled.mockReturnValue(true);
+
+    const tabs = create().tabs() as { path: string; labelKey: string; requiresClockedIn?: boolean }[];
+    const hours = tabs.find(t => t.path === '/m/time');
+
+    expect(hours).toEqual(expect.objectContaining({ labelKey: 'mobileLegacy.nav.hours' }));
+    expect(hours?.requiresClockedIn).toBeFalsy();
+    expect(tabs.map(t => t.path)).toEqual(['/m/chat', '/m/jobs', '/m/scan', '/m/clock', '/m/time', '/m/account']);
+  });
+
   it('drops the desktop preference when /m is opened', () => {
     isEnabled.mockReturnValue(true);
 

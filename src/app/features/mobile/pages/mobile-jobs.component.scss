@@ -39,6 +39,7 @@
 
   &__header {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: $sp-md;
   }
@@ -53,6 +54,22 @@
     font-size: $font-size-xxs;
     color: var(--error);
     font-weight: 600;
+  }
+
+  &__running {
+    display: inline-flex;
+    align-items: center;
+    gap: $sp-xs;
+    padding: 0 $sp-sm;
+    font-size: $font-size-xxs;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--success);
+    border: $border-width-thin solid var(--success);
+  }
+
+  &__running-icon {
+    font-size: $icon-size-sm;
   }
 
   &__title {

@@ -1,40 +1,63 @@
 <div class="mobile-hours" [appLoadingBlock]="loading()">
-  <h2 class="mobile-hours__title">My Hours</h2>
+  <h2 class="mobile-hours__title">{{ 'mobileLegacy.hours.title' | translate }}</h2>
 
-  <!-- Week Navigator -->
   <div class="week-nav">
-    <button class="week-nav__btn" (click)="previousWeek()" aria-label="Previous week">
+    <button class="week-nav__btn" (click)="previousWeek()" [attr.aria-label]="'mobileLegacy.hours.previousWeek' | translate"
+            data-testid="mhours-prev-week">
       <span class="material-icons-outlined">chevron_left</span>
     </button>
     <span class="week-nav__label">{{ weekLabel() }}</span>
     <button class="week-nav__btn"
             [disabled]="isCurrentWeek()"
             (click)="nextWeek()"
-            aria-label="Next week">
+            [attr.aria-label]="'mobileLegacy.hours.nextWeek' | translate"
+            data-testid="mhours-next-week">
       <span class="material-icons-outlined">chevron_right</span>
     </button>
   </div>
 
-  <!-- Week Total -->
-  @if (weekData(); as week) {
+  @let inProgress = todayInProgress();
+  @if (isCurrentWeek() && (clockedInAt() || inProgress !== null)) {
+    <div class="today-card" data-testid="mhours-today">
+      @if (clockedInAt(); as since) {
+        <div class="today-card__row" data-testid="mhours-clocked-in-since">
+          <span class="today-card__label">{{ 'mobileLegacy.hours.clockedInSince' | translate }}</span>
+          <span class="today-card__value">{{ since | date: 'shortTime' }}</span>
+        </div>
+      }
+      @if (inProgress !== null) {
+        <div class="today-card__row" data-testid="mhours-in-progress">
+          <span class="today-card__label">{{ 'mobileLegacy.hours.inProgressToday' | translate }}</span>
+          <span class="today-card__value">{{ durationKey(inProgress) | translate: durationParts(inProgress) }}</span>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!failed()) {
     <div class="week-total">
-      <span class="week-total__label">Week Total</span>
-      <span class="week-total__value">{{ formatHours(week.totalHours) }}</span>
+      <span class="week-total__label">{{ 'mobileLegacy.hours.weekTotal' | translate }}</span>
+      <span class="week-total__value" data-testid="mhours-week-total">{{ durationKey(totalMinutes()) | translate: durationParts(totalMinutes()) }}</span>
     </div>
 
-    <!-- Day Rows -->
     <div class="day-list">
-      @for (day of week.days; track day.date) {
-        <div class="day-row" [class.day-row--has-hours]="day.totalHours > 0">
+      @for (day of days(); track day.date) {
+        <div class="day-row" [class.day-row--has-hours]="day.minutes > 0">
           <button class="day-row__header"
                   [class.day-row__header--expanded]="expandedDay() === day.date"
                   [disabled]="day.entries.length === 0"
                   (click)="toggleDay(day.date)"
-                  [attr.aria-label]="day.dayLabel + ' ' + getDayDate(day.date)">
-            <span class="day-row__day">{{ day.dayLabel }}</span>
+                  [attr.aria-label]="(weekdayKey(day.weekday) | translate) + ' ' + getDayDate(day.date)"
+                  [attr.data-testid]="'mhours-day-' + day.date">
+            <span class="day-row__day">{{ weekdayKey(day.weekday) | translate }}</span>
             <span class="day-row__date">{{ getDayDate(day.date) }}</span>
-            <span class="day-row__hours" [class.day-row__hours--zero]="day.totalHours === 0">
-              {{ day.totalHours > 0 ? formatHours(day.totalHours) : '-' }}
+            <span class="day-row__hours" [class.day-row__hours--zero]="day.minutes === 0 && !day.running"
+                  [attr.data-testid]="'mhours-day-total-' + day.date">
+              @if (day.minutes > 0 || day.running) {
+                {{ durationKey(day.minutes) | translate: durationParts(day.minutes) }}
+              } @else {
+                -
+              }
             </span>
             @if (day.entries.length > 0) {
               <span class="material-icons-outlined day-row__chevron">
@@ -46,20 +69,25 @@
           @if (expandedDay() === day.date && day.entries.length > 0) {
             <div class="day-detail">
               @for (entry of day.entries; track entry.id) {
+                @let entryMinutes = minutesOf(entry, now());
                 <div class="entry-row">
                   <div class="entry-row__time">
-                    {{ formatTime(entry.startTime) }}
-                    @if (entry.endTime) {
-                      - {{ formatTime(entry.endTime) }}
+                    @if (entry.timerStart) {
+                      {{ formatTime(entry.timerStart) }}
+                      @if (entry.timerStop) {
+                        - {{ formatTime(entry.timerStop) }}
+                      } @else {
+                        - {{ 'mobileLegacy.hours.now' | translate }}
+                      }
                     }
                   </div>
                   <div class="entry-row__desc">
                     @if (entry.jobNumber) {
                       <span class="entry-row__job">{{ entry.jobNumber }}</span>
                     }
-                    {{ entry.description }}
+                    {{ entry.notes || entry.category }}
                   </div>
-                  <div class="entry-row__hours">{{ formatHours(entry.hours) }}</div>
+                  <div class="entry-row__hours">{{ durationKey(entryMinutes) | translate: durationParts(entryMinutes) }}</div>
                 </div>
               }
             </div>
@@ -68,11 +96,11 @@
       }
     </div>
   } @else if (!loading()) {
-    <app-empty-state icon="schedule" message="No time data available" />
+    <app-empty-state icon="schedule" [message]="'mobileLegacy.hours.empty' | translate" />
   }
 
   <p class="mobile-hours__note">
     <span class="material-icons-outlined">info</span>
-    Time entries are read-only on mobile. Use the desktop app for corrections.
+    {{ 'mobileLegacy.hours.readOnlyNote' | translate }}
   </p>
 </div>

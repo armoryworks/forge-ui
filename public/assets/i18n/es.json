@@ -10686,6 +10686,87 @@
       "approveAction": "Aprobar y continuar"
     }
   },
+  "mobileLegacy": {
+    "nav": {
+      "label": "Navegación móvil",
+      "chat": "Chat",
+      "jobs": "Mis trabajos",
+      "scan": "Escanear",
+      "clock": "Reloj",
+      "hours": "Mis horas",
+      "account": "Cuenta",
+      "notifications": "Notificaciones"
+    },
+    "clockGate": "Marque su entrada para usar todas las funciones",
+    "timer": {
+      "runningTimers": "Temporizadores en marcha",
+      "onJob": "Temporizador en {{jobNumber}}",
+      "onOperation": "{{jobNumber}} · Op. {{step}} {{title}}",
+      "noJob": "Temporizador en marcha"
+    },
+    "clock": {
+      "since": "Desde {{time}}",
+      "recorded": "{{action}} registrado",
+      "recordedTimerStopped": "{{action}} registrado. Se detuvo su temporizador en {{jobNumber}}.",
+      "recordedTimersStopped": "{{action}} registrado. Se detuvieron sus temporizadores en marcha.",
+      "recordFailed": "No se pudo registrar el marcaje",
+      "timerWillStop": "También se detendrá su temporizador en {{jobNumber}}",
+      "timerWillStopUnknown": "También se detendrá su temporizador en marcha",
+      "timersWillStop": "También se detendrán sus {{count}} temporizadores en marcha"
+    },
+    "jobs": {
+      "title": "Mis trabajos",
+      "overdue": "Atrasado",
+      "empty": "No tiene trabajos asignados",
+      "running": "En marcha {{elapsed}}",
+      "runningOperation": "Op. {{step}} en marcha {{elapsed}}"
+    },
+    "hours": {
+      "title": "Mis horas",
+      "previousWeek": "Semana anterior",
+      "nextWeek": "Semana siguiente",
+      "weekTotal": "Total de la semana",
+      "clockedInSince": "Entrada marcada desde",
+      "inProgressToday": "En curso hoy",
+      "duration": "{{hours}} h {{minutes}} min",
+      "durationHours": "{{hours}} h",
+      "now": "ahora",
+      "empty": "No hay datos de tiempo disponibles",
+      "readOnlyNote": "Los registros de tiempo son de solo lectura en el móvil. Use la aplicación de escritorio para corregirlos.",
+      "weekdays": {
+        "sun": "Dom",
+        "mon": "Lun",
+        "tue": "Mar",
+        "wed": "Mié",
+        "thu": "Jue",
+        "fri": "Vie",
+        "sat": "Sáb"
+      }
+    },
+    "jobDetail": {
+      "back": "Volver a los trabajos",
+      "stage": "Etapa",
+      "priority": "Prioridad",
+      "customer": "Cliente",
+      "part": "Pieza",
+      "dueDate": "Fecha de entrega",
+      "overdue": "Atrasado",
+      "stopTimer": "Detener temporizador",
+      "startTimer": "Iniciar temporizador",
+      "since": "Desde {{time}}",
+      "description": "Descripción",
+      "addNote": "Agregar nota",
+      "notePlaceholder": "Agregue una nota o actualización...",
+      "noteLabel": "Nota del trabajo",
+      "loadFailed": "No se pudo cargar el trabajo",
+      "timerStopped": "Temporizador detenido",
+      "stopFailed": "No se pudo detener el temporizador",
+      "timerStarted": "Temporizador iniciado",
+      "startFailed": "No se pudo iniciar el temporizador",
+      "noteAdded": "Nota agregada",
+      "noteFailed": "No se pudo agregar la nota"
+    }
+  },
   "mobileWeb": {
     "scan": {
       "resolving": "Buscando el código...",

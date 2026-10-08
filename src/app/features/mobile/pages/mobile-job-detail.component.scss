@@ -87,6 +87,12 @@
   &__overdue-icon {
     font-size: $icon-size-sm;
   }
+
+  &__overdue-text {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: $font-size-xs;
+  }
 }
 
 .timer-section {

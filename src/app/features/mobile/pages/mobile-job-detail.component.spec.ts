@@ -28,6 +28,12 @@ class TimerStringsLoader implements TranslateLoader {
           stoppedButNotStarted: 'The timer on {{jobNumber}} was stopped, but this one could not start: {{reason}}',
         },
       },
+      mobileLegacy: {
+        jobDetail: {
+          stopTimer: 'Stop Timer', startTimer: 'Start Timer', since: 'Since {{time}}', overdue: 'Overdue',
+          timerStopped: 'Timer stopped', timerStarted: 'Timer started',
+        },
+      },
     });
   }
 }
@@ -40,8 +46,8 @@ describe('MobileJobDetailComponent', () => {
 
   const job = {
     id: 5, jobNumber: 'J-1042', title: 'Bracket', description: null, stageName: 'Machining',
-    stageColor: '#000', priorityName: 'Normal', partNumber: null, partDescription: null,
-    customerName: null, dueDate: null, isOverdue: false, notes: null,
+    stageColor: '#000', priority: 'Normal', partNumber: null, customerName: null, dueDate: null as string | null,
+    completedDate: null as string | null,
   };
 
   const timerOn = (jobId: number | null, jobNumber: string | null) => ({
@@ -73,10 +79,10 @@ describe('MobileJobDetailComponent', () => {
 
   afterEach(() => http.verify());
 
-  const render = (timer: ReturnType<typeof timerOn> | null): void => {
+  const render = (timer: ReturnType<typeof timerOn> | null, jobOverrides: Partial<typeof job> = {}): void => {
     fixture = TestBed.createComponent(MobileJobDetailComponent);
     fixture.detectChanges();
-    http.expectOne('/api/v1/jobs/5').flush(job);
+    http.expectOne('/api/v1/jobs/5').flush({ ...job, ...jobOverrides });
     const active = http.expectOne('/api/v1/time-tracking/timer/active');
     if (timer) {
       active.flush(timer);
@@ -174,5 +180,31 @@ describe('MobileJobDetailComponent', () => {
     http.expectOne('/api/v1/time-tracking/timer/active').flush(null, { status: 204, statusText: 'No Content' });
 
     expect(snackbar.error).toHaveBeenCalledWith('A timer is already running. Stop it before starting a new one.');
+  });
+
+  it('shows the priority the job detail returns', () => {
+    render(null);
+
+    expect(el().querySelector('[data-testid="mjob-priority"]')!.textContent!.trim()).toBe('Normal');
+  });
+
+  it('says Overdue next to a due date that has passed on an open job', () => {
+    render(null, { dueDate: '2021-10-13T00:00:00Z' });
+
+    expect(el().querySelector('[data-testid="mjob-due-date"]')!.classList).toContain('status-card__value--overdue');
+    expect(el().querySelector('[data-testid="mjob-overdue"]')!.textContent!.trim()).toBe('Overdue');
+  });
+
+  it('does not call a completed job overdue', () => {
+    render(null, { dueDate: '2021-10-13T00:00:00Z', completedDate: '2021-10-20T00:00:00Z' });
+
+    expect(el().querySelector('[data-testid="mjob-overdue"]')).toBeNull();
+  });
+
+  it('does not call a future due date overdue', () => {
+    render(null, { dueDate: new Date(Date.now() + 86_400_000).toISOString() });
+
+    expect(el().querySelector('[data-testid="mjob-due-date"]')).not.toBeNull();
+    expect(el().querySelector('[data-testid="mjob-overdue"]')).toBeNull();
   });
 });

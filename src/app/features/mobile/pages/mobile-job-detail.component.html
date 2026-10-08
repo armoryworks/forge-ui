@@ -1,7 +1,6 @@
 <div class="mobile-job-detail" [appLoadingBlock]="loading()">
-  <!-- Header -->
   <div class="detail-header">
-    <button class="detail-header__back" (click)="goBack()" aria-label="Back to jobs" data-testid="mjob-back-btn">
+    <button class="detail-header__back" (click)="goBack()" [attr.aria-label]="'mobileLegacy.jobDetail.back' | translate" data-testid="mjob-back-btn">
       <span class="material-icons-outlined">arrow_back</span>
     </button>
     @if (job(); as j) {
@@ -13,53 +12,52 @@
   </div>
 
   @if (job(); as j) {
-    <!-- Status Card -->
     <div class="status-card">
       <div class="status-card__row">
-        <span class="status-card__label">Stage</span>
+        <span class="status-card__label">{{ 'mobileLegacy.jobDetail.stage' | translate }}</span>
         <span class="chip" [style.--chip-color]="j.stageColor">{{ j.stageName }}</span>
       </div>
       <div class="status-card__row">
-        <span class="status-card__label">Priority</span>
-        <span class="status-card__value">{{ j.priorityName }}</span>
+        <span class="status-card__label">{{ 'mobileLegacy.jobDetail.priority' | translate }}</span>
+        <span class="status-card__value" data-testid="mjob-priority">{{ j.priority }}</span>
       </div>
       @if (j.customerName) {
         <div class="status-card__row">
-          <span class="status-card__label">Customer</span>
+          <span class="status-card__label">{{ 'mobileLegacy.jobDetail.customer' | translate }}</span>
           <span class="status-card__value">{{ j.customerName }}</span>
         </div>
       }
       @if (j.partNumber) {
         <div class="status-card__row">
-          <span class="status-card__label">Part</span>
+          <span class="status-card__label">{{ 'mobileLegacy.jobDetail.part' | translate }}</span>
           <span class="status-card__value">{{ j.partNumber }}</span>
         </div>
       }
       @if (j.dueDate) {
         <div class="status-card__row">
-          <span class="status-card__label">Due Date</span>
-          <span class="status-card__value" [class.status-card__value--overdue]="j.isOverdue">
+          <span class="status-card__label">{{ 'mobileLegacy.jobDetail.dueDate' | translate }}</span>
+          <span class="status-card__value" [class.status-card__value--overdue]="overdue()" data-testid="mjob-due-date">
             {{ j.dueDate | date:'MM/dd/yyyy' }}
-            @if (j.isOverdue) {
-              <span class="material-icons-outlined status-card__overdue-icon">warning</span>
+            @if (overdue()) {
+              <span class="material-icons-outlined status-card__overdue-icon" aria-hidden="true">warning</span>
+              <span class="status-card__overdue-text" data-testid="mjob-overdue">{{ 'mobileLegacy.jobDetail.overdue' | translate }}</span>
             }
           </span>
         </div>
       }
     </div>
 
-    <!-- Timer Control -->
     <div class="timer-section">
       @if (timerOnThisJob()) {
         <button class="timer-btn timer-btn--active"
                 [disabled]="submitting()"
                 (click)="stopTimer()"
-                aria-label="Stop timer"
+                [attr.aria-label]="'mobileLegacy.jobDetail.stopTimer' | translate"
                 data-testid="mjob-timer-btn">
           <span class="material-icons-outlined timer-btn__icon">stop</span>
-          <span class="timer-btn__label">Stop Timer</span>
+          <span class="timer-btn__label">{{ 'mobileLegacy.jobDetail.stopTimer' | translate }}</span>
           @if (activeTimer(); as t) {
-            <span class="timer-btn__since">Since {{ t.timerStart | date:'shortTime' }}</span>
+            <span class="timer-btn__since">{{ 'mobileLegacy.jobDetail.since' | translate: { time: (t.timerStart | date:'shortTime') } }}</span>
           }
         </button>
       } @else {
@@ -96,39 +94,37 @@
         <button class="timer-btn"
                 [disabled]="submitting()"
                 (click)="startTimer()"
-                [attr.aria-label]="timerElsewhere() ? ('mobileWeb.timer.switchHere' | translate) : 'Start timer'"
+                [attr.aria-label]="(timerElsewhere() ? 'mobileWeb.timer.switchHere' : 'mobileLegacy.jobDetail.startTimer') | translate"
                 data-testid="mjob-timer-btn">
           <span class="material-icons-outlined timer-btn__icon">{{ timerElsewhere() ? 'swap_horiz' : 'play_arrow' }}</span>
-          <span class="timer-btn__label">{{ timerElsewhere() ? ('mobileWeb.timer.switchHere' | translate) : 'Start Timer' }}</span>
+          <span class="timer-btn__label">{{ (timerElsewhere() ? 'mobileWeb.timer.switchHere' : 'mobileLegacy.jobDetail.startTimer') | translate }}</span>
         </button>
       }
     </div>
 
-    <!-- Description -->
     @if (j.description) {
       <section class="detail-section">
-        <h3 class="detail-section__title">Description</h3>
+        <h3 class="detail-section__title">{{ 'mobileLegacy.jobDetail.description' | translate }}</h3>
         <p class="detail-section__text">{{ j.description }}</p>
       </section>
     }
 
-    <!-- Add Note -->
     <section class="detail-section">
-      <h3 class="detail-section__title">Add Note</h3>
+      <h3 class="detail-section__title">{{ 'mobileLegacy.jobDetail.addNote' | translate }}</h3>
       <div class="note-input">
         <textarea class="note-input__textarea"
-                  placeholder="Add a note or update..."
+                  [placeholder]="'mobileLegacy.jobDetail.notePlaceholder' | translate"
                   rows="3"
                   [value]="noteText()"
                   (input)="onNoteInput($event)"
-                  aria-label="Job note"
+                  [attr.aria-label]="'mobileLegacy.jobDetail.noteLabel' | translate"
                   data-testid="mjob-note-input"></textarea>
         <button class="action-btn action-btn--primary note-input__submit"
                 [disabled]="!noteText().trim() || submitting()"
                 (click)="addNote()"
                 data-testid="mjob-note-send-btn">
           <span class="material-icons-outlined">send</span>
-          Add Note
+          {{ 'mobileLegacy.jobDetail.addNote' | translate }}
         </button>
       </div>
     </section>

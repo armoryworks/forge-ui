@@ -11,7 +11,7 @@ import { MobileClockStateService } from './services/mobile-clock-state.service';
 
 interface MobileTab {
   path: string;
-  label: string;
+  labelKey: string;
   icon: string;
   roles?: string[];
   capability?: string;
@@ -44,11 +44,15 @@ export class MobileLayoutComponent implements OnInit {
   protected readonly desktopReturnUrl = signal<string | null>(null);
 
   private readonly allTabs: MobileTab[] = [
-    { path: '/m/chat', label: 'Chat', icon: 'chat' },
-    { path: '/m/jobs', label: 'My Jobs', icon: 'work', requiresClockedIn: true },
-    { path: '/m/scan', label: 'Scan', icon: 'qr_code_scanner', isScan: true, requiresClockedIn: true, capability: 'CAP-MFG-SHOPFLOOR' },
-    { path: '/m/clock', label: 'Clock', icon: 'schedule' },
-    { path: '/m/account', label: 'Account', icon: 'person' },
+    { path: '/m/chat', labelKey: 'mobileLegacy.nav.chat', icon: 'chat' },
+    { path: '/m/jobs', labelKey: 'mobileLegacy.nav.jobs', icon: 'work', requiresClockedIn: true },
+    {
+      path: '/m/scan', labelKey: 'mobileLegacy.nav.scan', icon: 'qr_code_scanner', isScan: true, requiresClockedIn: true,
+      capability: 'CAP-MFG-SHOPFLOOR',
+    },
+    { path: '/m/clock', labelKey: 'mobileLegacy.nav.clock', icon: 'schedule' },
+    { path: '/m/time', labelKey: 'mobileLegacy.nav.hours', icon: 'history' },
+    { path: '/m/account', labelKey: 'mobileLegacy.nav.account', icon: 'person' },
   ];
 
   protected readonly tabs = computed(() => {

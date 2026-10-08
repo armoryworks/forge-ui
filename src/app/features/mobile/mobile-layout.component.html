@@ -1,8 +1,8 @@
 <div class="mobile-layout">
   <header class="mobile-header">
     <span class="mobile-header__logo">Forge</span>
-    <button class="mobile-header__action" aria-label="Notifications"
-            routerLink="/m/notifications">
+    <button class="mobile-header__action" [attr.aria-label]="'mobileLegacy.nav.notifications' | translate"
+            routerLink="/m/notifications" data-testid="mobile-notifications-btn">
       <span class="material-icons-outlined">notifications</span>
     </button>
   </header>
@@ -26,37 +26,39 @@
     @if (!isClockedIn() && clockCheckDone()) {
       <div class="clock-gate-banner">
         <span class="material-icons-outlined clock-gate-banner__icon">schedule</span>
-        <span class="clock-gate-banner__text">Clock in to access all features</span>
+        <span class="clock-gate-banner__text">{{ 'mobileLegacy.clockGate' | translate }}</span>
       </div>
     }
     <router-outlet />
   </main>
 
-  <nav class="mobile-nav" aria-label="Mobile navigation">
+  <nav class="mobile-nav" [attr.aria-label]="'mobileLegacy.nav.label' | translate">
     @for (tab of tabs(); track tab.path) {
       @if (tab.isScan) {
         <a class="mobile-nav__tab mobile-nav__tab--scan"
            [routerLink]="tab.path"
            routerLinkActive="mobile-nav__tab--active"
            [class.mobile-nav__tab--disabled]="isTabDisabled(tab)"
-           [attr.aria-label]="tab.label"
+           [attr.aria-label]="tab.labelKey | translate"
            [attr.aria-disabled]="isTabDisabled(tab)"
-           (click)="onTabClick($event, tab)">
+           (click)="onTabClick($event, tab)"
+           [attr.data-testid]="'mobile-nav-' + tab.path.slice(3)">
           <span class="mobile-nav__scan-ring">
             <span class="material-icons-outlined mobile-nav__icon mobile-nav__icon--scan">{{ tab.icon }}</span>
           </span>
-          <span class="mobile-nav__label">{{ tab.label }}</span>
+          <span class="mobile-nav__label">{{ tab.labelKey | translate }}</span>
         </a>
       } @else {
         <a class="mobile-nav__tab"
            [routerLink]="tab.path"
            routerLinkActive="mobile-nav__tab--active"
            [class.mobile-nav__tab--disabled]="isTabDisabled(tab)"
-           [attr.aria-label]="tab.label"
+           [attr.aria-label]="tab.labelKey | translate"
            [attr.aria-disabled]="isTabDisabled(tab)"
-           (click)="onTabClick($event, tab)">
+           (click)="onTabClick($event, tab)"
+           [attr.data-testid]="'mobile-nav-' + tab.path.slice(3)">
           <span class="material-icons-outlined mobile-nav__icon">{{ tab.icon }}</span>
-          <span class="mobile-nav__label">{{ tab.label }}</span>
+          <span class="mobile-nav__label">{{ tab.labelKey | translate }}</span>
         </a>
       }
     }

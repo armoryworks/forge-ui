@@ -17,13 +17,11 @@ interface JobDetail {
   description: string | null;
   stageName: string;
   stageColor: string;
-  priorityName: string;
+  priority: string;
   partNumber: string | null;
-  partDescription: string | null;
   customerName: string | null;
-  dueDate: string | null;
-  isOverdue: boolean;
-  notes: string | null;
+  dueDate: string | Date | null;
+  completedDate: string | Date | null;
 }
 
 interface ActiveTimer {
@@ -64,6 +62,11 @@ export class MobileJobDetailComponent implements OnInit {
 
   protected readonly timerElsewhere = computed(() => !!this.activeTimer() && !this.timerOnThisJob());
 
+  protected readonly overdue = computed(() => {
+    const j = this.job();
+    return !!j?.dueDate && !j.completedDate && new Date(j.dueDate).getTime() < Date.now();
+  });
+
   ngOnInit(): void {
     const jobId = this.route.snapshot.paramMap.get('jobId');
     if (jobId) {
@@ -88,7 +91,7 @@ export class MobileJobDetailComponent implements OnInit {
       },
       error: () => {
         this.loading.set(false);
-        this.snackbar.error('Failed to load job');
+        this.snackbar.error(this.translate.instant('mobileLegacy.jobDetail.loadFailed'));
       },
     });
   }
@@ -105,12 +108,12 @@ export class MobileJobDetailComponent implements OnInit {
     this.http.post('/api/v1/time-tracking/timer/stop', { timeEntryId: timer.timeEntryId }).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.snackbar.success('Timer stopped');
+        this.snackbar.success(this.translate.instant('mobileLegacy.jobDetail.timerStopped'));
         this.loadTimer();
       },
       error: (err: unknown) => {
         this.submitting.set(false);
-        this.snackbar.error(this.serverMessage(err, 'Failed to stop timer'));
+        this.snackbar.error(this.serverMessage(err, this.translate.instant('mobileLegacy.jobDetail.stopFailed')));
         this.loadTimer();
       },
     });
@@ -132,12 +135,12 @@ export class MobileJobDetailComponent implements OnInit {
     ).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.snackbar.success('Timer started');
+        this.snackbar.success(this.translate.instant('mobileLegacy.jobDetail.timerStarted'));
         this.loadTimer();
       },
       error: (err: unknown) => {
         this.submitting.set(false);
-        const reason = this.serverMessage(err, 'Failed to start timer');
+        const reason = this.serverMessage(err, this.translate.instant('mobileLegacy.jobDetail.startFailed'));
         this.snackbar.error(stoppedPrevious && previous ? this.stoppedButNotStarted(previous, reason) : reason);
         this.loadTimer();
       },
@@ -165,11 +168,11 @@ export class MobileJobDetailComponent implements OnInit {
       next: () => {
         this.submitting.set(false);
         this.noteText.set('');
-        this.snackbar.success('Note added');
+        this.snackbar.success(this.translate.instant('mobileLegacy.jobDetail.noteAdded'));
       },
       error: () => {
         this.submitting.set(false);
-        this.snackbar.error('Failed to add note');
+        this.snackbar.error(this.translate.instant('mobileLegacy.jobDetail.noteFailed'));
       },
     });
   }

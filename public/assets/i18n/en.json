@@ -10686,6 +10686,87 @@
       "approveAction": "Approve and continue"
     }
   },
+  "mobileLegacy": {
+    "nav": {
+      "label": "Mobile navigation",
+      "chat": "Chat",
+      "jobs": "My Jobs",
+      "scan": "Scan",
+      "clock": "Clock",
+      "hours": "My Hours",
+      "account": "Account",
+      "notifications": "Notifications"
+    },
+    "clockGate": "Clock in to access all features",
+    "timer": {
+      "runningTimers": "Running timers",
+      "onJob": "Timer on {{jobNumber}}",
+      "onOperation": "{{jobNumber}} · Op {{step}} {{title}}",
+      "noJob": "Timer running"
+    },
+    "clock": {
+      "since": "Since {{time}}",
+      "recorded": "{{action}} recorded",
+      "recordedTimerStopped": "{{action}} recorded. Your timer on {{jobNumber}} was stopped.",
+      "recordedTimersStopped": "{{action}} recorded. Your running timers were stopped.",
+      "recordFailed": "Failed to record clock event",
+      "timerWillStop": "Your timer on {{jobNumber}} will stop too",
+      "timerWillStopUnknown": "Your running timer will stop too",
+      "timersWillStop": "Your {{count}} running timers will stop too"
+    },
+    "jobs": {
+      "title": "My Jobs",
+      "overdue": "Overdue",
+      "empty": "No jobs assigned to you",
+      "running": "Running {{elapsed}}",
+      "runningOperation": "Op {{step}} running {{elapsed}}"
+    },
+    "hours": {
+      "title": "My Hours",
+      "previousWeek": "Previous week",
+      "nextWeek": "Next week",
+      "weekTotal": "Week Total",
+      "clockedInSince": "Clocked in since",
+      "inProgressToday": "In progress today",
+      "duration": "{{hours}}h {{minutes}}m",
+      "durationHours": "{{hours}}h",
+      "now": "now",
+      "empty": "No time data available",
+      "readOnlyNote": "Time entries are read-only on mobile. Use the desktop app for corrections.",
+      "weekdays": {
+        "sun": "Sun",
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat"
+      }
+    },
+    "jobDetail": {
+      "back": "Back to jobs",
+      "stage": "Stage",
+      "priority": "Priority",
+      "customer": "Customer",
+      "part": "Part",
+      "dueDate": "Due Date",
+      "overdue": "Overdue",
+      "stopTimer": "Stop Timer",
+      "startTimer": "Start Timer",
+      "since": "Since {{time}}",
+      "description": "Description",
+      "addNote": "Add Note",
+      "notePlaceholder": "Add a note or update...",
+      "noteLabel": "Job note",
+      "loadFailed": "Failed to load job",
+      "timerStopped": "Timer stopped",
+      "stopFailed": "Failed to stop timer",
+      "timerStarted": "Timer started",
+      "startFailed": "Failed to start timer",
+      "noteAdded": "Note added",
+      "noteFailed": "Failed to add note"
+    }
+  },
   "mobileWeb": {
     "scan": {
       "resolving": "Looking up code...",

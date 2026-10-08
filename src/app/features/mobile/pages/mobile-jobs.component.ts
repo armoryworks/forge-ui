@@ -1,10 +1,13 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { AuthService } from '../../../shared/services/auth.service';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
+import { secondTicker } from '../../../shared/utils/second-ticker';
+import { MobileRunningTimersService } from '../services/mobile-running-timers.service';
 
 interface MobileJob {
   id: number;
@@ -14,13 +17,12 @@ interface MobileJob {
   stageColor: string;
   priorityName: string;
   isOverdue: boolean;
-  hasActiveTimer: boolean;
 }
 
 @Component({
   selector: 'app-mobile-jobs',
   standalone: true,
-  imports: [RouterLink, EmptyStateComponent, LoadingBlockDirective],
+  imports: [RouterLink, TranslatePipe, EmptyStateComponent, LoadingBlockDirective],
   templateUrl: './mobile-jobs.component.html',
   styleUrl: './mobile-jobs.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,14 +30,17 @@ interface MobileJob {
 export class MobileJobsComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly http = inject(HttpClient);
+  protected readonly runningTimers = inject(MobileRunningTimersService);
 
   protected readonly loading = signal(true);
   protected readonly jobs = signal<MobileJob[]>([]);
+  protected readonly now = secondTicker();
 
   ngOnInit(): void {
     const userId = this.authService.user()?.id;
     if (!userId) return;
 
+    this.runningTimers.load();
     // Phase 3 F7-broad / WU-22 — server returns the standard paged envelope
     // ({ items, totalCount, page, pageSize }) on /jobs.
     this.http.get<{ items: MobileJob[] }>('/api/v1/jobs', {

@@ -7,10 +7,30 @@
     <h2 class="clock-status__label">{{ statusLabel }}</h2>
     @if (status()?.clockedInAt) {
       <p class="clock-status__since">
-        Since {{ status()?.clockedInAt | date: 'shortTime' }}
+        {{ 'mobileLegacy.clock.since' | translate: { time: (status()?.clockedInAt | date: 'shortTime') } }}
       </p>
     }
   </div>
+
+  @if (timers().length > 0) {
+    <ul class="clock-timers" [attr.aria-label]="'mobileLegacy.timer.runningTimers' | translate">
+      @for (timer of timers(); track timer.id) {
+        <li class="clock-timer" data-testid="clock-running-timer">
+          <span class="material-icons-outlined clock-timer__icon" aria-hidden="true">timer</span>
+          <span class="clock-timer__label">
+            @if (timer.operationStepNumber !== null) {
+              {{ 'mobileLegacy.timer.onOperation' | translate: { jobNumber: timer.jobNumber, step: timer.operationStepNumber, title: timer.operationTitle ?? '' } }}
+            } @else if (timer.jobNumber) {
+              {{ 'mobileLegacy.timer.onJob' | translate: { jobNumber: timer.jobNumber } }}
+            } @else {
+              {{ 'mobileLegacy.timer.noJob' | translate }}
+            }
+          </span>
+          <span class="clock-timer__elapsed" data-testid="clock-running-timer-elapsed">{{ runningTimers.elapsed(timer, now()) }}</span>
+        </li>
+      }
+    </ul>
+  }
 
   <div class="clock-actions">
     @for (action of actions(); track action.code) {
@@ -20,10 +40,22 @@
         [disabled]="submitting()"
         (click)="submitClock(action)"
         [attr.aria-label]="action.label"
+        [attr.aria-describedby]="stopsTimers(action) ? 'clock-timer-warning-' + action.code : null"
         [attr.data-testid]="'clock-action-' + action.code"
       >
         <span class="material-icons-outlined clock-btn__icon">{{ action.icon }}</span>
         <span class="clock-btn__label">{{ action.label }}</span>
+        @if (stopsTimers(action)) {
+          <span class="clock-btn__warning" [id]="'clock-timer-warning-' + action.code" data-testid="clock-timer-stop-warning">
+            @if (timers().length > 1) {
+              {{ 'mobileLegacy.clock.timersWillStop' | translate: { count: timers().length } }}
+            } @else if (timers()[0].jobNumber) {
+              {{ 'mobileLegacy.clock.timerWillStop' | translate: { jobNumber: timers()[0].jobNumber } }}
+            } @else {
+              {{ 'mobileLegacy.clock.timerWillStopUnknown' | translate }}
+            }
+          </span>
+        }
       </button>
     }
   </div>

@@ -1,16 +1,27 @@
 <div class="mobile-page" [appLoadingBlock]="loading()">
-  <h2 class="mobile-page__title">My Jobs</h2>
+  <h2 class="mobile-page__title">{{ 'mobileLegacy.jobs.title' | translate }}</h2>
 
   @if (jobs().length > 0) {
     <div class="job-list">
       @for (job of jobs(); track job.id) {
-        <a class="job-item" [routerLink]="['/m/jobs', job.id]" [attr.aria-label]="job.jobNumber + ': ' + job.title">
+        <a class="job-item" [routerLink]="['/m/jobs', job.id]" [attr.aria-label]="job.jobNumber + ': ' + job.title"
+           [attr.data-testid]="'mjobs-item-' + job.id">
           <div class="job-item__stripe" [style.background-color]="job.stageColor"></div>
           <div class="job-item__content">
             <div class="job-item__header">
               <span class="job-item__number">{{ job.jobNumber }}</span>
               @if (job.isOverdue) {
-                <span class="job-item__overdue">Overdue</span>
+                <span class="job-item__overdue">{{ 'mobileLegacy.jobs.overdue' | translate }}</span>
+              }
+              @for (timer of runningTimers.onJob(job.id); track timer.id) {
+                <span class="job-item__running" [attr.data-testid]="'mjobs-running-' + job.id">
+                  <span class="material-icons-outlined job-item__running-icon" aria-hidden="true">timer</span>
+                  @if (timer.operationStepNumber !== null) {
+                    {{ 'mobileLegacy.jobs.runningOperation' | translate: { step: timer.operationStepNumber, elapsed: runningTimers.elapsed(timer, now()) } }}
+                  } @else {
+                    {{ 'mobileLegacy.jobs.running' | translate: { elapsed: runningTimers.elapsed(timer, now()) } }}
+                  }
+                </span>
               }
             </div>
             <div class="job-item__title">{{ job.title }}</div>
@@ -24,6 +35,6 @@
       }
     </div>
   } @else {
-    <app-empty-state icon="work" message="No jobs assigned to you" />
+    <app-empty-state icon="work" [message]="'mobileLegacy.jobs.empty' | translate" />
   }
 </div>
