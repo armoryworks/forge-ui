@@ -121,19 +121,19 @@ export class AutocompleteComponent implements ControlValueAccessor {
   }
 
   protected onBlur(): void {
-    if (!this.trigger().panelOpen) this.resolveTypedText();
+    this.resolveTypedText(!this.trigger().panelOpen);
     this.onTouched();
   }
 
   protected onPanelClosed(): void {
-    if (document.activeElement !== this.searchInput().nativeElement) this.resolveTypedText();
+    if (document.activeElement !== this.searchInput().nativeElement) this.resolveTypedText(true);
   }
 
   protected onEnter(): void {
-    if (!this.trigger().activeOption) this.resolveTypedText();
+    if (!this.trigger().activeOption) this.resolveTypedText(true);
   }
 
-  private resolveTypedText(): void {
+  private resolveTypedText(clearUnmatched: boolean): void {
     const fields = this.autoSelectFields();
     if (fields.length === 0 || this.selectedValue !== null) return;
     const raw = this.searchControl.value;
@@ -145,7 +145,7 @@ export class AutocompleteComponent implements ControlValueAccessor {
     const match = exact ?? (filtered.length === 1 ? filtered[0] : undefined);
     if (match) {
       this.select(match);
-    } else {
+    } else if (clearUnmatched) {
       this.searchControl.setValue('');
     }
   }

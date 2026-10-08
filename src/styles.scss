@@ -114,7 +114,7 @@ html {
   }
 
   // ─── Collapse subscript (hint/error) space globally ───
-  // Validation errors use popover directive, so subscript area is unused dead space.
+  // Field errors render below the form field, outside the subscript wrapper, so it is unused dead space.
   .mat-mdc-form-field-subscript-wrapper {
     display: none;
   }

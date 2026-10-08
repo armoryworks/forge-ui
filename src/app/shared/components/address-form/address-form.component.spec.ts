@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
@@ -62,10 +63,15 @@ function configure(): void {
   });
 }
 
+interface StatePicker {
+  searchControl: { setValue(value: string): void };
+  filteredOptions(): AutocompleteOption[];
+  onOptionSelected(event: { option: { value: AutocompleteOption | undefined } }): void;
+}
+
 describe('AddressFormComponent · state picker', () => {
   let fixture: ComponentFixture<HostComponent>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let picker: any;
+  let picker: StatePicker;
   let stateInput: HTMLInputElement;
 
   async function render(requireState: boolean): Promise<void> {
@@ -74,7 +80,7 @@ describe('AddressFormComponent · state picker', () => {
     await fixture.whenStable();
     fixture.detectChanges();
     const pickerDe = fixture.debugElement.query(By.directive(AutocompleteComponent));
-    picker = pickerDe.componentInstance;
+    picker = pickerDe.componentInstance as unknown as StatePicker;
     stateInput = pickerDe.nativeElement.querySelector('input');
   }
 
@@ -115,7 +121,7 @@ describe('AddressFormComponent · state picker', () => {
   });
 
   it('stores the two-letter code when a state is picked', () => {
-    const option = picker.filteredOptions().find((o: AutocompleteOption) => o['value'] === 'NV');
+    const option = picker.filteredOptions().find(o => o['value'] === 'NV');
     picker.onOptionSelected({ option: { value: option } });
     expect(fixture.componentInstance.address.value?.state).toBe('NV');
   });
@@ -129,6 +135,17 @@ describe('AddressFormComponent · state picker', () => {
   it('keeps a typed full name that was not picked from the list', async () => {
     await typeAndBlur('Utah');
     expect(fixture.componentInstance.address.value?.state).toBe('UT');
+  });
+
+  it('stores a typed code on blur while its option list is still open', async () => {
+    const trigger = fixture.debugElement.query(By.directive(MatAutocompleteTrigger)).injector.get(MatAutocompleteTrigger);
+    stateInput.value = 'PA';
+    stateInput.dispatchEvent(new Event('input'));
+    trigger.openPanel();
+    fixture.detectChanges();
+    expect(trigger.panelOpen).toBe(true);
+    stateInput.dispatchEvent(new Event('blur'));
+    expect(fixture.componentInstance.address.value?.state).toBe('PA');
   });
 
   it('prefers an exact name over a partial match', async () => {

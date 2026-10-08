@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TestBed, ComponentFixture, ComponentFixtureAutoDetect } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { By } from '@angular/platform-browser';
+import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { AutocompleteComponent, AutocompleteOption } from './autocomplete.component';
@@ -117,5 +119,31 @@ describe('AutocompleteComponent · typed text on blur', () => {
     await typeAndBlur('zz');
     expect(fixture.componentInstance.part.value).toBeNull();
     expect(field.value).toBe('');
+  });
+
+  function typeWithPanelOpen(text: string): MatAutocompleteTrigger {
+    const trigger = fixture.debugElement.query(By.directive(MatAutocompleteTrigger)).injector.get(MatAutocompleteTrigger);
+    field.value = text;
+    field.dispatchEvent(new Event('input'));
+    trigger.openPanel();
+    fixture.detectChanges();
+    return trigger;
+  }
+
+  it('selects an exact match on blur while the panel is still open', async () => {
+    await render(['label']);
+    const trigger = typeWithPanelOpen('prt-00001');
+    expect(trigger.panelOpen).toBe(true);
+    field.dispatchEvent(new Event('blur'));
+    expect(fixture.componentInstance.part.value).toBe(2);
+  });
+
+  it('keeps ambiguous text on blur while the panel is still open', async () => {
+    await render(['label']);
+    const trigger = typeWithPanelOpen('0000');
+    expect(trigger.panelOpen).toBe(true);
+    field.dispatchEvent(new Event('blur'));
+    expect(fixture.componentInstance.part.value).toBeNull();
+    expect(field.value).toBe('0000');
   });
 });
