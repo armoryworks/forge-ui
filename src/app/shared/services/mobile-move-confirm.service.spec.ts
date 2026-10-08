@@ -6,6 +6,7 @@ import { of } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 import { JobStatus } from '../models/mobile-api.model';
+import { markHttpErrorShown } from '../utils/shown-http-errors';
 import { MobileMoveConfirmService } from './mobile-move-confirm.service';
 
 const base: JobStatus = {
@@ -59,5 +60,26 @@ describe('MobileMoveConfirmService', () => {
     expect(service.isConfirmRequired(new HttpErrorResponse({ status: 400, error: { code: 'confirm-required' } }))).toBe(true);
     expect(service.isConfirmRequired(new HttpErrorResponse({ status: 400, error: { title: 'Bad' } }))).toBe(false);
     expect(service.isConfirmRequired(new Error('x'))).toBe(false);
+  });
+
+  it('names a refusal the error handling did not show by the server\'s reason', () => {
+    const gate = new HttpErrorResponse({ status: 409, error: { detail: 'Quality checks are not complete.' } });
+    expect(service.failureMessage(gate)).toBe('Quality checks are not complete.');
+
+    const shown = new HttpErrorResponse({ status: 409, error: { detail: 'Shown already.' } });
+    markHttpErrorShown(shown);
+    expect(service.failureMessage(shown)).toBe('mobileApp.jobs.actionFailed');
+  });
+
+  it('falls back to translated messages when the server gives no reason', () => {
+    expect(service.failureMessage(new HttpErrorResponse({ status: 400, error: { code: 'confirm-required' } })))
+      .toBe('mobileAppWork.confirmMove.changed');
+    expect(service.failureMessage(new HttpErrorResponse({ status: 0 }))).toBe('errors.unableToReachServer');
+    expect(service.failureMessage(new HttpErrorResponse({ status: 403 }))).toBe('errors.accessDenied');
+    expect(service.failureMessage(new HttpErrorResponse({
+      status: 403, error: { errors: [{ code: 'capability-disabled', capability: 'CAP-MOBILE-JOBS' }] },
+    }))).toBe('mobileApp.jobs.actionFailed');
+    expect(service.failureMessage(new HttpErrorResponse({ status: 500 }))).toBe('mobileApp.jobs.actionFailed');
+    expect(service.failureMessage(new Error('x'))).toBe('mobileApp.jobs.actionFailed');
   });
 });

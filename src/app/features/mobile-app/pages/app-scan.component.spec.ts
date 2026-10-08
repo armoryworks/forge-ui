@@ -1,6 +1,6 @@
 import { Signal, WritableSignal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, TestRequest, provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
@@ -65,6 +65,7 @@ describe('AppScanComponent', () => {
     needed: vi.fn(),
     ask: vi.fn(),
     isConfirmRequired: vi.fn((_err: unknown) => false),
+    failureMessage: vi.fn((_err: unknown) => 'mobileApp.jobs.actionFailed'),
   };
   const router = { navigate: vi.fn() };
 
@@ -106,6 +107,7 @@ describe('AppScanComponent', () => {
     confirmMove.needed.mockReset().mockReturnValue(false);
     confirmMove.ask.mockReset().mockResolvedValue(true);
     confirmMove.isConfirmRequired.mockReset().mockReturnValue(false);
+    confirmMove.failureMessage.mockReset().mockReturnValue('mobileApp.jobs.actionFailed');
     router.navigate.mockReset().mockResolvedValue(true);
     TestBed.configureTestingModule({
       providers: [
@@ -116,6 +118,7 @@ describe('AppScanComponent', () => {
         { provide: OfflineQueueService, useValue: { remove: vi.fn() } },
         { provide: Router, useValue: router },
         { provide: MobileMoveConfirmService, useValue: confirmMove },
+        { provide: MatDialog, useValue: {} },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
         { provide: SharedIdentityService, useValue: identity },
         { provide: AuthService, useValue: { token: () => 'person-token' } },
@@ -312,6 +315,37 @@ describe('AppScanComponent', () => {
     expect(api.stopTimer).toHaveBeenCalledOnce();
     expect(confirmMove.ask).not.toHaveBeenCalled();
     expect(scan.notice()).toBe('mobileApp.jobs.actionFailed');
+  });
+
+  it('shows the server\'s reason when a complete is refused by a quality gate', async () => {
+    const real = TestBed.runInInjectionContext(() => new MobileMoveConfirmService());
+    confirmMove.failureMessage.mockImplementation((err: unknown) => real.failureMessage(err));
+    api.advanceJob.mockReturnValue(throwError(() => new HttpErrorResponse({
+      status: 409, error: { code: 'business-rule', detail: 'Quality checks are not complete.' },
+    })));
+    const scan = create();
+
+    await scan.onAction('complete');
+
+    expect(api.advanceJob).toHaveBeenCalledOnce();
+    expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', false, true);
+    expect(confirmMove.ask).not.toHaveBeenCalled();
+    expect(scan.notice()).toBe('Quality checks are not complete.');
+  });
+
+  it('offers no Undo when a confirmed move is saved offline', async () => {
+    refuseUnconfirmed();
+    api.advanceJob.mockImplementation((_id: number, _code: string, confirmed: boolean) => confirmed
+      ? of({ queued: true, entryId: 'q-1' })
+      : throwError(() => ({ code: 'confirm-required' })));
+    confirmMove.isConfirmRequired.mockImplementation((err: unknown) => (err as { code?: string }).code === 'confirm-required');
+    const scan = create();
+
+    await scan.onAction('move');
+
+    expect(offer).not.toHaveBeenCalled();
+    expect(scan.notice()).toBe('mobileApp.offline.queued');
+    expect(identity.clear).toHaveBeenCalledOnce();
   });
 
   it('opens receiving for a scanned purchase order', async () => {

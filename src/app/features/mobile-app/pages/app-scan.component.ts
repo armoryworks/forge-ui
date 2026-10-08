@@ -34,8 +34,9 @@ import { ScanAction, ScanActionSheetComponent } from '../components/scan-action-
  * one is newest. A move or complete is sent as it always was; when the
  * server answers that the column can't be undone or creates an accounting
  * document, the person is asked, the move is resent confirmed, offers no
- * undo, and ends the identity at once. Complete stops the timer unless the
- * person declines.
+ * undo, even when it was saved offline, and ends the identity at once. Any
+ * other refusal of the first send shows the server's reason here. Complete
+ * stops the timer unless the person declines.
  */
 @Component({
   selector: 'app-app-scan',
@@ -171,9 +172,7 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
           break;
       }
     } catch (err) {
-      this.notice.set(this.translate.instant(this.confirmMove.isConfirmRequired(err)
-        ? 'mobileAppWork.confirmMove.changed'
-        : 'mobileApp.jobs.actionFailed'));
+      this.notice.set(this.confirmMove.failureMessage(err));
     } finally {
       this.busy.set(false);
       if (action !== 'identify' && !ended) this.identity.touch();
@@ -211,9 +210,13 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
   private async afterAdvance(jobId: number, sent: { outcome: JobAdvanceResult | QueuedOffline; confirmed: boolean }, token: string | undefined): Promise<boolean> {
     const { outcome, confirmed } = sent;
     if (isQueued(outcome)) {
-      this.offerQueuedUndo([outcome.entryId], token);
+      if (!confirmed) this.offerQueuedUndo([outcome.entryId], token);
       this.result.set(null);
       await this.startScanner();
+      if (confirmed) {
+        this.notice.set(this.translate.instant('mobileApp.offline.queued'));
+        if (token) this.identity.clear();
+      }
       return !!token;
     }
     if (outcome.collapsed) {

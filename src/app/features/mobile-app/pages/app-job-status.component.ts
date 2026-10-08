@@ -27,7 +27,8 @@ type PendingAction = 'advance' | 'note' | 'photo' | 'timer';
  * customer, current column, due date, next step, last three timeline
  * entries. Advancing asks nothing and shows an undo toast, except into a
  * column that can't be undone or that creates an accounting document: that
- * asks first and offers no undo. Notes come from voice or a preset picker;
+ * asks first and offers no undo, even when saved offline. A refusal of an
+ * unconfirmed move shows the server's reason once. Notes come from voice or a preset picker;
  * photos from the camera; the timer button reads Stop while the person's
  * timer runs on this job. With operation tracking on, the job's routing
  * operations are listed with their own timers and counts. Never a keyboard.
@@ -175,12 +176,8 @@ export class AppJobStatusComponent {
         case 'timer': await this.doTimer(job); break;
       }
     } catch (err) {
-      if (this.confirmMove.isConfirmRequired(err)) {
-        this.snackbar.error(this.translate.instant('mobileAppWork.confirmMove.changed'));
-        this.load();
-      } else {
-        this.snackbar.error(this.translate.instant('mobileApp.jobs.actionFailed'));
-      }
+      this.snackbar.error(this.confirmMove.failureMessage(err));
+      if (this.confirmMove.isConfirmRequired(err)) this.load();
     } finally {
       this.busy.set(false);
       this.identity.touch();
@@ -191,9 +188,10 @@ export class AppJobStatusComponent {
     if (job.nextStageId === null) return;
     const confirmed = this.confirmMove.needed(job);
     if (confirmed && !(await this.confirmMove.ask(job))) return;
-    const outcome = await firstValueFrom(this.api.advanceJob(job.id, null, confirmed));
+    const outcome = await firstValueFrom(this.api.advanceJob(job.id, null, confirmed, !confirmed));
     if (isQueued(outcome)) {
-      this.offerQueuedUndo(outcome.entryId);
+      if (confirmed) this.snackbar.info(this.translate.instant('mobileApp.offline.queued'));
+      else this.offerQueuedUndo(outcome.entryId);
       return;
     }
     this.job.set(outcome.status);

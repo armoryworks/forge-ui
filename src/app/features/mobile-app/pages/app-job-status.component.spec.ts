@@ -38,7 +38,7 @@ describe('AppJobStatusComponent advancing', () => {
     advanceJob: vi.fn(),
     moveJobToStage: vi.fn(),
   };
-  const confirmMove = { needed: vi.fn(), ask: vi.fn(), isConfirmRequired: vi.fn() };
+  const confirmMove = { needed: vi.fn(), ask: vi.fn(), isConfirmRequired: vi.fn(), failureMessage: vi.fn() };
   const offer = vi.fn();
   const snackbar = { success: vi.fn(), error: vi.fn(), info: vi.fn() };
 
@@ -55,9 +55,13 @@ describe('AppJobStatusComponent advancing', () => {
     confirmMove.needed.mockReset().mockReturnValue(true);
     confirmMove.ask.mockReset().mockResolvedValue(true);
     confirmMove.isConfirmRequired.mockReset().mockReturnValue(false);
+    confirmMove.failureMessage.mockReset().mockImplementation((err: unknown) => (confirmMove.isConfirmRequired(err)
+      ? 'mobileAppWork.confirmMove.changed'
+      : 'mobileApp.jobs.actionFailed'));
     offer.mockReset();
     snackbar.success.mockReset();
     snackbar.error.mockReset();
+    snackbar.info.mockReset();
     TestBed.configureTestingModule({
       providers: [
         { provide: MobileApiService, useValue: api },
@@ -83,7 +87,7 @@ describe('AppJobStatusComponent advancing', () => {
     await vi.waitFor(() => expect(snackbar.success).toHaveBeenCalledWith('mobileApp.jobs.movedTo'));
 
     expect(confirmMove.ask).toHaveBeenCalledWith(status);
-    expect(api.advanceJob).toHaveBeenCalledWith(42, null, true);
+    expect(api.advanceJob).toHaveBeenCalledWith(42, null, true, false);
     expect(offer).not.toHaveBeenCalled();
     expect(page.job()?.stageName).toBe('Invoiced');
   });
@@ -107,7 +111,7 @@ describe('AppJobStatusComponent advancing', () => {
     await vi.waitFor(() => expect(offer).toHaveBeenCalledOnce());
 
     expect(confirmMove.ask).not.toHaveBeenCalled();
-    expect(api.advanceJob).toHaveBeenCalledWith(42, null, false);
+    expect(api.advanceJob).toHaveBeenCalledWith(42, null, false, true);
   });
 
   it('reloads and says so when the server wants a confirmation the page did not know about', async () => {
@@ -120,5 +124,29 @@ describe('AppJobStatusComponent advancing', () => {
     await vi.waitFor(() => expect(snackbar.error).toHaveBeenCalledWith('mobileAppWork.confirmMove.changed'));
 
     expect(api.jobStatus).toHaveBeenCalledTimes(2);
+  });
+
+  it('shows the server\'s reason once when an ordinary move is refused', async () => {
+    confirmMove.needed.mockReturnValue(false);
+    confirmMove.failureMessage.mockReturnValue('Quality checks are not complete.');
+    api.advanceJob.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 409 })));
+    const page = create();
+
+    page.advance();
+    await vi.waitFor(() => expect(page.busy()).toBe(false));
+
+    expect(api.advanceJob).toHaveBeenCalledWith(42, null, false, true);
+    expect(snackbar.error).toHaveBeenCalledOnce();
+    expect(snackbar.error).toHaveBeenCalledWith('Quality checks are not complete.');
+  });
+
+  it('offers no Undo when a confirmed move is saved offline', async () => {
+    api.advanceJob.mockReturnValue(of({ queued: true, entryId: 'q-1' }));
+    const page = create();
+
+    page.advance();
+    await vi.waitFor(() => expect(snackbar.info).toHaveBeenCalledWith('mobileApp.offline.queued'));
+
+    expect(offer).not.toHaveBeenCalled();
   });
 });
