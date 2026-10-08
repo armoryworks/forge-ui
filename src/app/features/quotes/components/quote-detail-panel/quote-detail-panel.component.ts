@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, linkedSignal, output, signal, ViewChild } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -70,6 +71,7 @@ export class QuoteDetailPanelComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly manualNumberSettings = inject(ManualNumberSettingsService);
+  private readonly router = inject(Router);
 
   readonly quoteId = input.required<number>();
   readonly closed = output<void>();
@@ -80,7 +82,9 @@ export class QuoteDetailPanelComponent {
   protected readonly documents = signal<FileAttachment[]>([]);
   protected readonly paymentSchedule = signal<PaymentSchedule | null>(null);
 
-  protected readonly quoteIdValue = computed(() => this.quoteId());
+  protected readonly activeQuoteId = linkedSignal(() => this.quoteId());
+  protected readonly duplicating = signal(false);
+  private readonly duplicated = signal(false);
 
   // --- Quote-number edit (manual-numbers on AND Draft only; server enforces Draft-only rename) ---
   protected readonly editingNumber = signal(false);
@@ -107,7 +111,7 @@ export class QuoteDetailPanelComponent {
 
   constructor() {
     effect(() => {
-      const id = this.quoteId();
+      const id = this.activeQuoteId();
       if (id) {
         this.loadQuote(id);
         this.loadDocuments(id);
@@ -125,7 +129,8 @@ export class QuoteDetailPanelComponent {
   }
 
   protected close(): void {
-    this.closed.emit();
+    if (this.duplicated()) this.changed.emit();
+    else this.closed.emit();
   }
 
   // --- Status Actions ---
@@ -181,6 +186,34 @@ export class QuoteDetailPanelComponent {
         URL.revokeObjectURL(url);
       },
     });
+  }
+
+  protected duplicateQuote(): void {
+    const q = this.quote();
+    if (!q || this.duplicating()) return;
+    this.duplicating.set(true);
+    this.quoteService.duplicateQuote(q.id).subscribe({
+      next: (copy) => {
+        this.duplicating.set(false);
+        this.duplicated.set(true);
+        this.editingNumber.set(false);
+        this.editingLineId.set(null);
+        this.documents.set([]);
+        this.paymentSchedule.set(null);
+        this.quote.set(copy);
+        this.activeQuoteId.set(copy.id);
+        this.syncDetailParam(copy.id);
+        this.snackbar.success(this.translate.instant('quoteCopy.duplicated', { number: copy.quoteNumber, source: q.quoteNumber }));
+      },
+      error: () => this.duplicating.set(false),
+    });
+  }
+
+  private syncDetailParam(id: number): void {
+    const urlTree = this.router.parseUrl(this.router.url);
+    if (!String(urlTree.queryParams['detail'] ?? '').startsWith('quote:')) return;
+    urlTree.queryParams['detail'] = `quote:${id}`;
+    this.router.navigateByUrl(urlTree, { replaceUrl: true });
   }
 
   protected acceptQuote(): void {
@@ -463,7 +496,7 @@ export class QuoteDetailPanelComponent {
     }).afterClosed().subscribe((result: MarkMilestonePaidDialogResult | undefined) => {
       if (!result) return;
       this.snackbar.success(this.translate.instant('quotes.paymentSchedule.paymentRecorded'));
-      this.loadPaymentSchedule(this.quoteId());
+      this.loadPaymentSchedule(this.activeQuoteId());
     });
   }
 
@@ -481,7 +514,7 @@ export class QuoteDetailPanelComponent {
       this.paymentScheduleService.waive(milestone.id).subscribe({
         next: () => {
           this.snackbar.success(this.translate.instant('quotes.paymentSchedule.milestoneWaived'));
-          this.loadPaymentSchedule(this.quoteId());
+          this.loadPaymentSchedule(this.activeQuoteId());
         },
       });
     });
@@ -492,7 +525,7 @@ export class QuoteDetailPanelComponent {
       next: (invoice) => {
         this.snackbar.success(
           this.translate.instant('quotes.paymentSchedule.invoiceGenerated', { number: invoice.invoiceNumber }));
-        this.loadPaymentSchedule(this.quoteId());
+        this.loadPaymentSchedule(this.activeQuoteId());
       },
     });
   }
@@ -530,7 +563,7 @@ export class QuoteDetailPanelComponent {
   }
 
   protected onFileUploaded(_file: UploadedFile): void {
-    this.loadDocuments(this.quoteId());
+    this.loadDocuments(this.activeQuoteId());
     this.snackbar.success(this.translate.instant('quotes.fileUploaded'));
   }
 

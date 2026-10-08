@@ -67,6 +67,9 @@
 
       <!-- Action Buttons -->
       <div class="rfq-detail__actions">
+        <button class="action-btn action-btn--sm" data-testid="rfq-download-pdf-btn" (click)="downloadPdf()" [disabled]="downloadingPdf()">
+          <span class="material-icons-outlined">picture_as_pdf</span> {{ 'rfqPdf.download' | translate }}
+        </button>
         @if (canSend()) {
           <button class="action-btn action-btn--sm" (click)="toggleSendForm()" [attr.aria-label]="'purchasing.sendToVendors' | translate">
             <span class="material-icons-outlined">person_add</span> {{ 'purchasing.sendToVendors' | translate }}
@@ -157,6 +160,11 @@
           <ng-template appColumnCell="vendorName" let-row>
             <div class="vendor-cell">
               <span>{{ row.vendorName }}</span>
+              <button class="icon-btn" data-testid="rfq-vendor-pdf-btn" (click)="downloadPdf(row)" [disabled]="downloadingPdf()"
+                [matTooltip]="'rfqPdf.downloadForVendor' | translate: { vendor: row.vendorName }" matTooltipPosition="above"
+                [attr.aria-label]="'rfqPdf.downloadForVendor' | translate: { vendor: row.vendorName }">
+                <span class="material-icons-outlined">picture_as_pdf</span>
+              </button>
               @if (canAward() && isReceived(row)) {
                 <button class="action-btn action-btn--sm action-btn--primary" (click)="awardVendor(row)" aria-label="Award to vendor">
                   {{ 'purchasing.award' | translate }}

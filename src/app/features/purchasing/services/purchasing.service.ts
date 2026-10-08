@@ -48,6 +48,12 @@ export class PurchasingService {
     return this.http.get<RfqVendorResponse[]>(`${this.base}/rfqs/${id}/compare`);
   }
 
+  getRfqPdf(id: number, vendorId?: number): Observable<Blob> {
+    let params = new HttpParams();
+    if (vendorId) params = params.set('vendorId', String(vendorId));
+    return this.http.get(`${this.base}/rfqs/${id}/pdf`, { params, responseType: 'blob' });
+  }
+
   awardRfq(id: number, responseId: number): Observable<{ purchaseOrderId: number }> {
     return this.http.post<{ purchaseOrderId: number }>(`${this.base}/rfqs/${id}/award/${responseId}`, {});
   }

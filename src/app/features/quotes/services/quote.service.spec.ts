@@ -83,6 +83,17 @@ describe('QuoteService', () => {
     });
   });
 
+  describe('duplicateQuote', () => {
+    it('should POST to the duplicate endpoint and return the copy', () => {
+      let result: { id: number; status: string } | undefined;
+      service.duplicateQuote(4).subscribe(q => (result = q));
+      const req = httpMock.expectOne(`${apiUrl}/quotes/4/duplicate`);
+      expect(req.request.method).toBe('POST');
+      req.flush({ id: 9, status: 'Draft' });
+      expect(result).toEqual({ id: 9, status: 'Draft' });
+    });
+  });
+
   describe('getQuotePdf', () => {
     it('should GET the quote PDF as a blob', () => {
       let result: Blob | undefined;

@@ -5912,6 +5912,10 @@
     "accept": "Aceptar pedido",
     "submitError": "No pudimos registrar su aceptación. Verifique la clave de verificación e inténtelo de nuevo."
   },
+  "quoteCopy": {
+    "duplicate": "Duplicar",
+    "duplicated": "Se creó {{number}} como copia de {{source}}"
+  },
   "quotes": {
     "quoteNumberLabel": "Número de cotización",
     "quoteNumberPlaceholder": "Se genera automáticamente si se deja en blanco",
@@ -7746,6 +7750,10 @@
       "monthly": "Monthly",
       "weekly": "Weekly"
     }
+  },
+  "rfqPdf": {
+    "download": "Descargar PDF",
+    "downloadForVendor": "Descargar PDF para {{vendor}}"
   },
   "purchasing": {
     "title": "Solicitudes",

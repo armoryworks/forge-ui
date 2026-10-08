@@ -4,6 +4,7 @@ import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PurchasingService } from '../../services/purchasing.service';
@@ -40,7 +41,7 @@ export interface RfqDetailDialogData {
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     DatepickerComponent, DataTableComponent, ColumnCellDirective,
     LoadingBlockDirective, ValidationButtonComponent, EntityLinkComponent,
-    CurrencyDisplayComponent,
+    CurrencyDisplayComponent, MatTooltipModule,
   ],
   templateUrl: './rfq-detail-dialog.component.html',
   styleUrl: './rfq-detail-dialog.component.scss',
@@ -220,6 +221,26 @@ export class RfqDetailDialogComponent {
         },
         error: () => this.saving.set(false),
       });
+    });
+  }
+
+  protected readonly downloadingPdf = signal(false);
+
+  protected downloadPdf(response?: RfqVendorResponse): void {
+    const rfq = this.rfq();
+    if (!rfq || this.downloadingPdf()) return;
+    this.downloadingPdf.set(true);
+    this.purchasingService.getRfqPdf(rfq.id, response?.vendorId).subscribe({
+      next: (blob) => {
+        this.downloadingPdf.set(false);
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = response ? `${rfq.rfqNumber}-${response.vendorName}.pdf` : `${rfq.rfqNumber}.pdf`;
+        link.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => this.downloadingPdf.set(false),
     });
   }
 

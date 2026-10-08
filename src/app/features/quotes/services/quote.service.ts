@@ -67,6 +67,11 @@ export class QuoteService {
     return this.http.put<void>(`${this.base}/${id}`, request);
   }
 
+  /** Copy a quote into a new Draft with the next quote number. Returns the copy's detail. */
+  duplicateQuote(id: number): Observable<QuoteDetail> {
+    return this.http.post<QuoteDetail>(`${this.base}/${id}/duplicate`, {});
+  }
+
   /** Append a line to a draft quote. Returns the refreshed quote detail. */
   addQuoteLine(id: number, line: QuoteLineInput): Observable<QuoteDetail> {
     return this.http.post<QuoteDetail>(`${this.base}/${id}/lines`, line);

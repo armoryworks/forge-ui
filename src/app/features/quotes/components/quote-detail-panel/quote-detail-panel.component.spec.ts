@@ -14,7 +14,11 @@ import { ConfirmDialogComponent } from '../../../../shared/components/confirm-di
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 
 interface PanelInternals {
-  quote: { set(value: QuoteDetail | null): void };
+  quote: { set(value: QuoteDetail | null): void; (): QuoteDetail | null };
+  changed: { subscribe(fn: () => void): unknown };
+  closed: { subscribe(fn: () => void): unknown };
+  duplicateQuote(): void;
+  close(): void;
   sendQuote(): void;
   markSent(): void;
   downloadPdf(): void;
@@ -29,11 +33,13 @@ describe('QuoteDetailPanelComponent', () => {
     getRecipientEmail: ReturnType<typeof vi.fn>;
     sendQuote: ReturnType<typeof vi.fn>;
     getQuotePdf: ReturnType<typeof vi.fn>;
+    duplicateQuote: ReturnType<typeof vi.fn>;
   };
   let dialog: { open: ReturnType<typeof vi.fn> };
   let dialogResult: unknown;
 
   const quote = { id: 12, quoteNumber: 'Q-0012', customerId: 4, customerName: 'Acme Corp', status: 'Draft' } as QuoteDetail;
+  const copy = { ...quote, id: 30, quoteNumber: 'Q-0030' } as QuoteDetail;
 
   beforeEach(() => {
     dialogResult = undefined;
@@ -42,6 +48,7 @@ describe('QuoteDetailPanelComponent', () => {
       getRecipientEmail: vi.fn(() => of('buyer@acme.test')),
       sendQuote: vi.fn(() => of(undefined)),
       getQuotePdf: vi.fn(() => of(new Blob(['%PDF'], { type: 'application/pdf' }))),
+      duplicateQuote: vi.fn(() => of(copy)),
     };
     dialog = { open: vi.fn(() => ({ afterClosed: () => of(dialogResult) })) };
 
@@ -113,5 +120,23 @@ describe('QuoteDetailPanelComponent', () => {
     expect(panel.canSend('Accepted')).toBe(false);
     expect(panel.canMarkSent('Draft')).toBe(true);
     expect(panel.canMarkSent('Sent')).toBe(false);
+  });
+
+  it('opens the duplicate in place and refreshes the list when closed', () => {
+    const changed = vi.fn();
+    const closed = vi.fn();
+    panel.changed.subscribe(changed);
+    panel.closed.subscribe(closed);
+
+    panel.duplicateQuote();
+
+    expect(quoteService.duplicateQuote).toHaveBeenCalledWith(12);
+    expect(panel.quote()).toEqual(copy);
+    expect(changed).not.toHaveBeenCalled();
+
+    panel.close();
+
+    expect(changed).toHaveBeenCalledTimes(1);
+    expect(closed).not.toHaveBeenCalled();
   });
 });

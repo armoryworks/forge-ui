@@ -5919,6 +5919,10 @@
     "accept": "Accept order",
     "submitError": "We couldn't record your acceptance. Please check the verification key and try again."
   },
+  "quoteCopy": {
+    "duplicate": "Duplicate",
+    "duplicated": "Created {{number}} as a copy of {{source}}"
+  },
   "quotes": {
     "quoteNumberLabel": "Quote Number",
     "quoteNumberPlaceholder": "Auto-generated if blank",
@@ -7753,6 +7757,10 @@
     "noWorkCenters": "No work centers",
     "trendChartLabel": "OEE Trend",
     "worldClassBadge": "World-Class"
+  },
+  "rfqPdf": {
+    "download": "Download PDF",
+    "downloadForVendor": "Download PDF for {{vendor}}"
   },
   "purchasing": {
     "title": "RFQs",

@@ -103,4 +103,24 @@ describe('PurchasingService', () => {
       req.flush(mockResult);
     });
   });
+
+  describe('getRfqPdf', () => {
+    it('should GET the RFQ PDF as a blob', () => {
+      let result: Blob | undefined;
+      service.getRfqPdf(7).subscribe(b => (result = b));
+      const req = httpMock.expectOne(`${base}/rfqs/7/pdf`);
+      expect(req.request.method).toBe('GET');
+      expect(req.request.responseType).toBe('blob');
+      expect(req.request.params.has('vendorId')).toBe(false);
+      req.flush(new Blob(['%PDF'], { type: 'application/pdf' }));
+      expect(result).toBeInstanceOf(Blob);
+    });
+
+    it('should address the PDF to a vendor when one is given', () => {
+      service.getRfqPdf(7, 12).subscribe();
+      const req = httpMock.expectOne(r => r.url === `${base}/rfqs/7/pdf`);
+      expect(req.request.params.get('vendorId')).toBe('12');
+      req.flush(new Blob(['%PDF'], { type: 'application/pdf' }));
+    });
+  });
 });

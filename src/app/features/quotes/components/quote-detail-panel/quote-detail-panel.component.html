@@ -295,6 +295,10 @@
           <span class="material-icons-outlined">picture_as_pdf</span>
           {{ 'quotes.downloadPdf' | translate }}
         </button>
+        <button data-testid="quote-duplicate-btn" class="action-btn" (click)="duplicateQuote()" [disabled]="duplicating()">
+          <span class="material-icons-outlined">content_copy</span>
+          {{ 'quoteCopy.duplicate' | translate }}
+        </button>
         @if (canMarkSent(quote.status)) {
           <button data-testid="quote-mark-sent-btn" class="action-btn" (click)="markSent()">
             <span class="material-icons-outlined">task_alt</span>
@@ -349,7 +353,7 @@
       </div>
 
       <!-- Activity -->
-      <app-entity-activity-section entityType="Quote" [entityId]="quoteIdValue()" />
+      <app-entity-activity-section entityType="Quote" [entityId]="activeQuoteId()" />
     </div>
   </div>
 } @else {
