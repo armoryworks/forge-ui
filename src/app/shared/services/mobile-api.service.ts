@@ -62,16 +62,22 @@ export class MobileApiService {
 
   /**
    * Moves the job to its next column. A column that can't be undone or that
-   * creates an accounting document needs `confirmed`; without it the server
-   * answers 400 with code `confirm-required`. A `silent` caller shows its
-   * own message for a refusal.
+   * creates an accounting document needs confirming; without it the server
+   * answers 400 with code `confirm-required`. `confirmedStageId` is the
+   * column the person agreed to: the confirmation counts only while that is
+   * still the job's next column, so a job moved by someone else in the
+   * meantime, or a queued move replayed later, is refused rather than
+   * carried into a column nobody confirmed. A `silent` caller shows its own
+   * message for a refusal.
    */
   advanceJob(
-    jobId: number, scanCode: string | null, confirmed = false, silent = false,
+    jobId: number, scanCode: string | null, confirmedStageId: number | null = null, silent = false,
   ): Observable<JobAdvanceResult | QueuedOffline> {
+    const body = confirmedStageId === null
+      ? { scanCode }
+      : { scanCode, confirmed: true, confirmedStageId };
     return this.mutate<JobAdvanceResult>(
-      'POST', `/api/v1/mobile/jobs/${jobId}/advance`, confirmed ? { scanCode, confirmed: true } : { scanCode },
-      this.jobLabel('advance', jobId), undefined, silent);
+      'POST', `/api/v1/mobile/jobs/${jobId}/advance`, body, this.jobLabel('advance', jobId), undefined, silent);
   }
 
   /** Compensating action for advance: move back to the column it came from. */

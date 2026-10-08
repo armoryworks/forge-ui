@@ -213,7 +213,7 @@ describe('MobileApiService', () => {
       expect.objectContaining({ label: { key: 'mobileAppWork.sync.action.updateOperationAny' } }));
   });
 
-  it('with operation tracking off, sends the same advance and timer requests as before', () => {
+  it('sends the advance, start and stop bodies it always sent when no operation or confirmation is named', () => {
     service.advanceJob(42, 'JOB-42').subscribe();
     const advance = http.expectOne('/api/v1/mobile/jobs/42/advance');
     expect(advance.request.method).toBe('POST');
@@ -231,21 +231,32 @@ describe('MobileApiService', () => {
     stop.flush({});
   });
 
-  it('sends confirmed only on a confirmed advance', () => {
-    service.advanceJob(42, null, true).subscribe();
+  it('sends confirmed with the status the person confirmed, and only on a confirmed advance', () => {
+    service.advanceJob(42, null, 6).subscribe();
     const req = http.expectOne('/api/v1/mobile/jobs/42/advance');
-    expect(req.request.body).toEqual({ scanCode: null, confirmed: true });
+    expect(req.request.body).toEqual({ scanCode: null, confirmed: true, confirmedStageId: 6 });
     req.flush({});
   });
 
+  it('queues a confirmed advance with the confirmed status, so a later replay cannot carry it elsewhere', async () => {
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+
+    const result = await firstValueFrom(service.advanceJob(42, 'JOB-42', 6, true));
+
+    expect(isQueued(result)).toBe(true);
+    expect(enqueue).toHaveBeenCalledWith(
+      'POST', '/api/v1/mobile/jobs/42/advance', { scanCode: 'JOB-42', confirmed: true, confirmedStageId: 6 }, undefined,
+      expect.any(Object));
+  });
+
   it('keeps a silent advance off the global error surface and leaves others visible', () => {
-    service.advanceJob(42, 'JOB-42', false, true).subscribe({ error: () => undefined });
+    service.advanceJob(42, 'JOB-42', null, true).subscribe({ error: () => undefined });
     const silent = http.expectOne('/api/v1/mobile/jobs/42/advance');
     expect(silent.request.context.get(SILENT_HTTP_ERRORS)).toBe(true);
     expect(silent.request.body).toEqual({ scanCode: 'JOB-42' });
     silent.flush({});
 
-    service.advanceJob(42, 'JOB-42', true).subscribe();
+    service.advanceJob(42, 'JOB-42', 6).subscribe();
     const visible = http.expectOne('/api/v1/mobile/jobs/42/advance');
     expect(visible.request.context.get(SILENT_HTTP_ERRORS)).toBe(false);
     visible.flush({});

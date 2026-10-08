@@ -11063,6 +11063,7 @@
         "forbidden": "You don't have permission for this change.",
         "notFound": "The record no longer exists.",
         "conflict": "Someone changed this record first. Check it and do it again.",
+        "businessRule": "A shop rule stopped this change. Check the work order on the desktop.",
         "refused": "The server didn't accept this change. Check the record and do it again."
       }
     }

@@ -11063,6 +11063,7 @@
         "forbidden": "No tiene permiso para este cambio.",
         "notFound": "El registro ya no existe.",
         "conflict": "Alguien cambió este registro primero. Revíselo y hágalo de nuevo.",
+        "businessRule": "Una regla del taller detuvo este cambio. Revise la orden de trabajo en la computadora.",
         "refused": "El servidor no aceptó este cambio. Revise el registro y hágalo de nuevo."
       }
     }

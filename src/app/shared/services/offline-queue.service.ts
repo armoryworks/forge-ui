@@ -306,6 +306,7 @@ export class OfflineQueueService {
 
   private rejectionReason(err: HttpErrorResponse): string {
     if (err.error?.code === 'confirm-required') return 'mobileAppWork.sync.reason.confirmRequired';
+    if (err.error?.code === 'business-rule') return 'mobileAppWork.sync.reason.businessRule';
     switch (err.status) {
       case 401: return 'mobileAppWork.sync.reason.signedOut';
       case 403: return 'mobileAppWork.sync.reason.forbidden';

@@ -71,7 +71,7 @@ describe('AppScanComponent', () => {
 
   function refuseUnconfirmed(): void {
     const refusal = { code: 'confirm-required' };
-    api.advanceJob.mockImplementation((_id: number, _code: string, confirmed: boolean) => confirmed
+    api.advanceJob.mockImplementation((_id: number, _code: string, confirmedStageId: number | null) => confirmedStageId !== null
       ? of({ status: { stageName: 'Invoiced' }, previousStageId: 3, previousStageName: 'Shipped', collapsed: false })
       : throwError(() => refusal));
     confirmMove.isConfirmRequired.mockImplementation((err: unknown) => err === refusal);
@@ -103,7 +103,7 @@ describe('AppScanComponent', () => {
     }));
     api.moveJobToStage.mockReset().mockReturnValue(of({}));
     api.stopTimer.mockReset().mockReturnValue(of({}));
-    api.jobStatus.mockReset().mockReturnValue(of({ id: 42, nextStageName: 'Machining' }));
+    api.jobStatus.mockReset().mockReturnValue(of({ id: 42, nextStageId: 6, nextStageName: 'Machining' }));
     confirmMove.needed.mockReset().mockReturnValue(false);
     confirmMove.ask.mockReset().mockResolvedValue(true);
     confirmMove.isConfirmRequired.mockReset().mockReturnValue(false);
@@ -232,7 +232,7 @@ describe('AppScanComponent', () => {
     await create().onAction('complete');
 
     expect(api.stopTimer).toHaveBeenCalledWith();
-    expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', false, true);
+    expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', null, true);
     expect(api.advanceJob.mock.invocationCallOrder[0]).toBeLessThan(api.stopTimer.mock.invocationCallOrder[0]);
   });
 
@@ -242,7 +242,7 @@ describe('AppScanComponent', () => {
     await create().onAction('complete');
 
     expect(api.stopTimer).toHaveBeenCalledWith(undefined, { jobId: 42 });
-    expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', false, true);
+    expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', null, true);
   });
 
   it('names the identified person and clears them on Not you', () => {
@@ -259,7 +259,7 @@ describe('AppScanComponent', () => {
     expect(api.jobStatus).not.toHaveBeenCalled();
     expect(confirmMove.ask).not.toHaveBeenCalled();
     expect(api.advanceJob).toHaveBeenCalledOnce();
-    expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', false, true);
+    expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', null, true);
     expect(offer).toHaveBeenCalledOnce();
   });
 
@@ -272,14 +272,14 @@ describe('AppScanComponent', () => {
     expect(offer).toHaveBeenCalledOnce();
   });
 
-  it('asks when the server needs a move confirmed, resends it confirmed, then offers no Undo', async () => {
+  it('asks when the server needs a move confirmed, resends it confirmed for that status only, then offers no Undo', async () => {
     refuseUnconfirmed();
     const scan = create();
 
     await scan.onAction('move');
 
-    expect(confirmMove.ask).toHaveBeenCalledWith({ id: 42, nextStageName: 'Machining' });
-    expect(api.advanceJob).toHaveBeenLastCalledWith(42, 'JOB-42', true);
+    expect(confirmMove.ask).toHaveBeenCalledWith({ id: 42, nextStageId: 6, nextStageName: 'Machining' });
+    expect(api.advanceJob).toHaveBeenLastCalledWith(42, 'JOB-42', 6, true);
     expect(offer).not.toHaveBeenCalled();
     expect(scan.notice()).toBe('mobileApp.jobs.movedTo');
     expect(identity.clear).toHaveBeenCalledOnce();
@@ -303,7 +303,7 @@ describe('AppScanComponent', () => {
 
     expect(confirmMove.ask).toHaveBeenCalledOnce();
     expect(api.stopTimer).toHaveBeenCalledOnce();
-    expect(api.advanceJob).toHaveBeenLastCalledWith(42, 'JOB-42', true);
+    expect(api.advanceJob).toHaveBeenLastCalledWith(42, 'JOB-42', 6, true);
   });
 
   it('still stops the timer when a complete fails for another reason', async () => {
@@ -328,14 +328,14 @@ describe('AppScanComponent', () => {
     await scan.onAction('complete');
 
     expect(api.advanceJob).toHaveBeenCalledOnce();
-    expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', false, true);
+    expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', null, true);
     expect(confirmMove.ask).not.toHaveBeenCalled();
     expect(scan.notice()).toBe('Quality checks are not complete.');
   });
 
   it('offers no Undo when a confirmed move is saved offline', async () => {
     refuseUnconfirmed();
-    api.advanceJob.mockImplementation((_id: number, _code: string, confirmed: boolean) => confirmed
+    api.advanceJob.mockImplementation((_id: number, _code: string, confirmedStageId: number | null) => confirmedStageId !== null
       ? of({ queued: true, entryId: 'q-1' })
       : throwError(() => ({ code: 'confirm-required' })));
     confirmMove.isConfirmRequired.mockImplementation((err: unknown) => (err as { code?: string }).code === 'confirm-required');
@@ -343,9 +343,29 @@ describe('AppScanComponent', () => {
 
     await scan.onAction('move');
 
+    expect(api.advanceJob).toHaveBeenLastCalledWith(42, 'JOB-42', 6, true);
     expect(offer).not.toHaveBeenCalled();
     expect(scan.notice()).toBe('mobileApp.offline.queued');
     expect(identity.clear).toHaveBeenCalledOnce();
+  });
+
+  it('shows the server\'s reason once when the confirmed resend is refused', async () => {
+    const real = TestBed.runInInjectionContext(() => new MobileMoveConfirmService());
+    confirmMove.failureMessage.mockImplementation((err: unknown) => real.failureMessage(err));
+    refuseUnconfirmed();
+    const refusal = new HttpErrorResponse({
+      status: 409, error: { code: 'business-rule', detail: 'Quality checks are not complete.' },
+    });
+    api.advanceJob.mockImplementation((_id: number, _code: string, confirmedStageId: number | null) => confirmedStageId !== null
+      ? throwError(() => refusal)
+      : throwError(() => ({ code: 'confirm-required' })));
+    confirmMove.isConfirmRequired.mockImplementation((err: unknown) => (err as { code?: string }).code === 'confirm-required');
+    const scan = create();
+
+    await scan.onAction('move');
+
+    expect(api.advanceJob).toHaveBeenLastCalledWith(42, 'JOB-42', 6, true);
+    expect(scan.notice()).toBe('Quality checks are not complete.');
   });
 
   it('opens receiving for a scanned purchase order', async () => {
@@ -432,13 +452,13 @@ describe('AppScanComponent requests', () => {
 
     scan.result.set(job);
     const completed = scan.onAction('complete');
+    const advance = await next('POST', '/api/v1/mobile/jobs/42/advance');
+    expect(advance.request.body).toEqual({ scanCode: 'JOB-42' });
+    advance.flush({ status: { stageName: 'Machining' }, previousStageId: 3, previousStageName: 'Queued', collapsed: false });
     const completeStop = await next('POST', '/api/v1/time-tracking/timer/stop');
     expect(completeStop.request.body).toEqual({});
     completeStop.flush({});
     (await next('GET', '/api/v1/time-tracking/timer/active')).flush(null, { status: 204, statusText: 'No Content' });
-    const advance = await next('POST', '/api/v1/mobile/jobs/42/advance');
-    expect(advance.request.body).toEqual({ scanCode: 'JOB-42' });
-    advance.flush({ status: { stageName: 'Machining' }, previousStageId: 3, previousStageName: 'Queued', collapsed: false });
     await completed;
 
     http.expectNone((r) => r.url.includes('/operations') || r.url.includes('/timers/active'));
@@ -449,12 +469,12 @@ describe('AppScanComponent requests', () => {
     const scan = create();
 
     const completed = scan.onAction('complete');
+    (await next('POST', '/api/v1/mobile/jobs/42/advance'))
+      .flush({ status: { stageName: 'Machining' }, previousStageId: 3, previousStageName: 'Queued', collapsed: false });
     const stop = await next('POST', '/api/v1/time-tracking/timer/stop');
     expect(stop.request.body).toEqual({ jobId: 42 });
     stop.flush({});
     (await next('GET', '/api/v1/time-tracking/timers/active')).flush([]);
-    (await next('POST', '/api/v1/mobile/jobs/42/advance'))
-      .flush({ status: { stageName: 'Machining' }, previousStageId: 3, previousStageName: 'Queued', collapsed: false });
     await completed;
   });
 });

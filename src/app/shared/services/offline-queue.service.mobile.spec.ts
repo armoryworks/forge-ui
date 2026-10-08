@@ -110,4 +110,20 @@ describe('OfflineQueueService in the mobile shell', () => {
     ]);
     expect(Object.keys(service.rejected()[1]).sort()).toEqual(['id', 'label', 'reasonKey', 'timestamp']);
   });
+
+  it('names a shop-rule refusal as one, not as someone else changing the record', async () => {
+    await service.enqueue('POST', '/api/v1/mobile/jobs/42/advance', { scanCode: null }, undefined, { instanceId: 'shop' });
+    await service.enqueue('PATCH', '/api/v1/jobs/7/stage', { stageId: 3 }, undefined, { instanceId: 'shop' });
+
+    const drain = service.drain();
+    (await pending('/api/v1/mobile/jobs/42/advance'))
+      .flush({ code: 'business-rule', detail: 'Quality checks are not complete.' }, { status: 409, statusText: 'Conflict' });
+    (await pending('/api/v1/jobs/7/stage')).flush({ title: 'Stale' }, { status: 409, statusText: 'Conflict' });
+    await drain;
+
+    expect(service.rejected().map((r) => r.reasonKey)).toEqual([
+      'mobileAppWork.sync.reason.businessRule',
+      'mobileAppWork.sync.reason.conflict',
+    ]);
+  });
 });

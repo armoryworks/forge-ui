@@ -80,14 +80,14 @@ describe('AppJobStatusComponent advancing', () => {
     });
   });
 
-  it('asks before moving into Invoiced, sends confirmed, and offers no Undo', async () => {
+  it('asks before moving into Invoiced, confirms that status only, and offers no Undo', async () => {
     const page = create();
 
     page.advance();
     await vi.waitFor(() => expect(snackbar.success).toHaveBeenCalledWith('mobileApp.jobs.movedTo'));
 
     expect(confirmMove.ask).toHaveBeenCalledWith(status);
-    expect(api.advanceJob).toHaveBeenCalledWith(42, null, true, false);
+    expect(api.advanceJob).toHaveBeenCalledWith(42, null, 6, true);
     expect(offer).not.toHaveBeenCalled();
     expect(page.job()?.stageName).toBe('Invoiced');
   });
@@ -111,7 +111,7 @@ describe('AppJobStatusComponent advancing', () => {
     await vi.waitFor(() => expect(offer).toHaveBeenCalledOnce());
 
     expect(confirmMove.ask).not.toHaveBeenCalled();
-    expect(api.advanceJob).toHaveBeenCalledWith(42, null, false, true);
+    expect(api.advanceJob).toHaveBeenCalledWith(42, null, null, true);
   });
 
   it('reloads and says so when the server wants a confirmation the page did not know about', async () => {
@@ -135,18 +135,33 @@ describe('AppJobStatusComponent advancing', () => {
     page.advance();
     await vi.waitFor(() => expect(page.busy()).toBe(false));
 
-    expect(api.advanceJob).toHaveBeenCalledWith(42, null, false, true);
+    expect(api.advanceJob).toHaveBeenCalledWith(42, null, null, true);
     expect(snackbar.error).toHaveBeenCalledOnce();
     expect(snackbar.error).toHaveBeenCalledWith('Quality checks are not complete.');
   });
 
-  it('offers no Undo when a confirmed move is saved offline', async () => {
+  it('shows the server\'s reason once when a confirmed move is refused', async () => {
+    confirmMove.failureMessage.mockReturnValue('Quality checks are not complete.');
+    api.advanceJob.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 409 })));
+    const page = create();
+
+    page.advance();
+    await vi.waitFor(() => expect(page.busy()).toBe(false));
+
+    expect(confirmMove.ask).toHaveBeenCalledOnce();
+    expect(api.advanceJob).toHaveBeenCalledWith(42, null, 6, true);
+    expect(snackbar.error).toHaveBeenCalledOnce();
+    expect(snackbar.error).toHaveBeenCalledWith('Quality checks are not complete.');
+  });
+
+  it('offers no Undo when a confirmed move is saved offline, and still names the confirmed status', async () => {
     api.advanceJob.mockReturnValue(of({ queued: true, entryId: 'q-1' }));
     const page = create();
 
     page.advance();
     await vi.waitFor(() => expect(snackbar.info).toHaveBeenCalledWith('mobileApp.offline.queued'));
 
+    expect(api.advanceJob).toHaveBeenCalledWith(42, null, 6, true);
     expect(offer).not.toHaveBeenCalled();
   });
 });

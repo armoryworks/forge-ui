@@ -188,7 +188,7 @@ export class AppJobStatusComponent {
     if (job.nextStageId === null) return;
     const confirmed = this.confirmMove.needed(job);
     if (confirmed && !(await this.confirmMove.ask(job))) return;
-    const outcome = await firstValueFrom(this.api.advanceJob(job.id, null, confirmed, !confirmed));
+    const outcome = await firstValueFrom(this.api.advanceJob(job.id, null, confirmed ? job.nextStageId : null, true));
     if (isQueued(outcome)) {
       if (confirmed) this.snackbar.info(this.translate.instant('mobileApp.offline.queued'));
       else this.offerQueuedUndo(outcome.entryId);
