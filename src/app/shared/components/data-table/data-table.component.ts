@@ -37,6 +37,8 @@ import { ColumnManagerPanelComponent, ColumnManagerState } from './column-manage
 import { UserPreferencesService } from '../../services/user-preferences.service';
 import { formatDateTime } from '../../utils/date.utils';
 
+const DATE_ONLY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
+
 @Component({
   selector: 'app-data-table',
   standalone: true,
@@ -322,6 +324,10 @@ export class DataTableComponent implements OnInit {
   formatCellValue(row: unknown, col: ColumnDef): unknown {
     const val = (row as Record<string, unknown>)[col.field];
     if (col.type === 'date' && val) {
+      const dateOnly = typeof val === 'string' ? DATE_ONLY_PATTERN.exec(val) : null;
+      if (dateOnly) {
+        return `${dateOnly[2]}/${dateOnly[3]}/${dateOnly[1]}`;
+      }
       return formatDateTime(val as string | Date);
     }
     return val;

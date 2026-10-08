@@ -8,16 +8,65 @@ import {
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { AutocompleteComponent, AutocompleteOption } from '../autocomplete/autocomplete.component';
 import { InputComponent } from '../input/input.component';
 import { SelectComponent, SelectOption } from '../select/select.component';
 import { AddressService } from '../../services/address.service';
 import { Address } from '../../models/address.model';
 
-const US_STATES: SelectOption[] = [
-  'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY',
-  'LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND',
-  'OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','DC',
-].map(s => ({ value: s, label: s }));
+const US_STATES: AutocompleteOption[] = ([
+  ['AL', 'Alabama'],
+  ['AK', 'Alaska'],
+  ['AZ', 'Arizona'],
+  ['AR', 'Arkansas'],
+  ['CA', 'California'],
+  ['CO', 'Colorado'],
+  ['CT', 'Connecticut'],
+  ['DE', 'Delaware'],
+  ['FL', 'Florida'],
+  ['GA', 'Georgia'],
+  ['HI', 'Hawaii'],
+  ['ID', 'Idaho'],
+  ['IL', 'Illinois'],
+  ['IN', 'Indiana'],
+  ['IA', 'Iowa'],
+  ['KS', 'Kansas'],
+  ['KY', 'Kentucky'],
+  ['LA', 'Louisiana'],
+  ['ME', 'Maine'],
+  ['MD', 'Maryland'],
+  ['MA', 'Massachusetts'],
+  ['MI', 'Michigan'],
+  ['MN', 'Minnesota'],
+  ['MS', 'Mississippi'],
+  ['MO', 'Missouri'],
+  ['MT', 'Montana'],
+  ['NE', 'Nebraska'],
+  ['NV', 'Nevada'],
+  ['NH', 'New Hampshire'],
+  ['NJ', 'New Jersey'],
+  ['NM', 'New Mexico'],
+  ['NY', 'New York'],
+  ['NC', 'North Carolina'],
+  ['ND', 'North Dakota'],
+  ['OH', 'Ohio'],
+  ['OK', 'Oklahoma'],
+  ['OR', 'Oregon'],
+  ['PA', 'Pennsylvania'],
+  ['RI', 'Rhode Island'],
+  ['SC', 'South Carolina'],
+  ['SD', 'South Dakota'],
+  ['TN', 'Tennessee'],
+  ['TX', 'Texas'],
+  ['UT', 'Utah'],
+  ['VT', 'Vermont'],
+  ['VA', 'Virginia'],
+  ['WA', 'Washington'],
+  ['WV', 'West Virginia'],
+  ['WI', 'Wisconsin'],
+  ['WY', 'Wyoming'],
+  ['DC', 'District of Columbia'],
+] as const).map(([code, name]) => ({ value: code, label: `${code} - ${name}` }));
 
 const COUNTRY_OPTIONS: SelectOption[] = [
   { value: 'US', label: 'United States' },
@@ -34,7 +83,7 @@ const COUNTRY_OPTIONS: SelectOption[] = [
 @Component({
   selector: 'app-address-form',
   standalone: true,
-  imports: [ReactiveFormsModule, InputComponent, SelectComponent, TranslatePipe],
+  imports: [ReactiveFormsModule, AutocompleteComponent, InputComponent, SelectComponent, TranslatePipe],
   templateUrl: './address-form.component.html',
   styleUrl: './address-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -64,13 +113,13 @@ export class AddressFormComponent implements ControlValueAccessor, OnInit {
   /** Lock country to a fixed value (null = editable) */
   readonly fixedCountry = input<string | null>(null);
 
-  /** Use state dropdown (US states) vs free-text input */
+  /** Use a searchable US state picker vs free-text input */
   readonly stateDropdown = input(true);
 
   /** Compact mode — fewer labels, tighter spacing */
   readonly compact = input(false);
 
-  protected readonly stateOptions: SelectOption[] = [{ value: null, label: '-- Select --' }, ...US_STATES];
+  protected readonly stateOptions: AutocompleteOption[] = US_STATES;
   protected readonly countryOptions: SelectOption[] = COUNTRY_OPTIONS;
 
   protected readonly verifying = signal(false);

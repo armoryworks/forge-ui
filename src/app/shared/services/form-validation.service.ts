@@ -84,23 +84,32 @@ export class FormValidationService {
       const label = labels[key] ?? key;
 
       for (const [errorKey, errorValue] of Object.entries(errors)) {
-        if (errorValue && typeof errorValue === 'object' && 'message' in errorValue) {
-          const message = (errorValue as { message: unknown }).message;
-          if (typeof message === 'string') {
-            items.push({
-              controlName: key,
-              message: errorKey === 'serverError' ? `${label}: ${message}` : message,
-            });
-          }
-        } else if (ERROR_MESSAGES[errorKey]) {
-          items.push({ controlName: key, message: ERROR_MESSAGES[errorKey](label, errorValue) });
-        } else {
-          items.push({ controlName: key, message: `${label} is invalid` });
+        const message = FormValidationService.messageFor(errorKey, errorValue, label);
+        if (message !== null) {
+          items.push({ controlName: key, message });
         }
       }
     }
 
     return items;
+  }
+
+  /**
+   * Message text for a single validation error on a field labelled `label`.
+   * Shared by the violation summary and the per-field error line on
+   * app-input so both read the same. Returns null for an error object whose
+   * `message` is not a string.
+   */
+  static messageFor(errorKey: string, errorValue: unknown, label: string): string | null {
+    if (errorValue && typeof errorValue === 'object' && 'message' in errorValue) {
+      const message = (errorValue as { message: unknown }).message;
+      if (typeof message !== 'string') return null;
+      return errorKey === 'serverError' ? `${label}: ${message}` : message;
+    }
+    if (ERROR_MESSAGES[errorKey]) {
+      return ERROR_MESSAGES[errorKey](label, errorValue);
+    }
+    return `${label} is invalid`;
   }
 
   /**

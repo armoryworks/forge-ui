@@ -1,14 +1,33 @@
 import {
+  AfterContentInit,
   ChangeDetectionStrategy,
   Component,
+  computed,
+  DestroyRef,
+  effect,
   forwardRef,
+  inject,
+  Injector,
   input,
   signal,
+  viewChild,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  AbstractControl,
+  ControlValueAccessor,
+  FormGroupDirective,
+  NG_VALUE_ACCESSOR,
+  NgControl,
+  NgForm,
+} from '@angular/forms';
+import { ErrorStateMatcher } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { MatInput, MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { EMPTY, merge } from 'rxjs';
+
+import { FormValidationService } from '../../services/form-validation.service';
 
 @Component({
   selector: 'app-input',
@@ -25,7 +44,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     },
   ],
 })
-export class InputComponent implements ControlValueAccessor {
+export class InputComponent implements ControlValueAccessor, AfterContentInit {
+  private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly parentForm = inject(FormGroupDirective, { optional: true }) ?? inject(NgForm, { optional: true });
+
   readonly label = input.required<string>();
   readonly type = input<'text' | 'number' | 'email' | 'password' | 'time' | 'datetime-local'>('text');
   readonly info = input<string>('');
@@ -48,10 +71,47 @@ export class InputComponent implements ControlValueAccessor {
   protected readonly disabled = signal(false);
   protected readonly showPassword = signal(false);
 
+  private readonly control = signal<AbstractControl | null>(null);
+  private readonly controlState = signal(0);
+
+  protected readonly errorMessage = computed(() => {
+    this.controlState();
+    const control = this.control();
+    if (!control?.invalid || !control.errors) return null;
+    if (!control.touched && !this.parentForm?.submitted) return null;
+    for (const [key, value] of Object.entries(control.errors)) {
+      const message = FormValidationService.messageFor(key, value, this.label());
+      if (message !== null) return message;
+    }
+    return null;
+  });
+
+  protected readonly errorStateMatcher: ErrorStateMatcher = {
+    isErrorState: () => this.errorMessage() !== null,
+  };
+
+  private readonly matInput = viewChild(MatInput);
+
+  constructor() {
+    effect(() => {
+      this.errorMessage();
+      this.matInput()?.updateErrorState();
+    });
+  }
+
   protected get effectiveType(): string {
     if (this.mask() === 'currency') return 'text';
     if (this.type() === 'password') return this.showPassword() ? 'text' : 'password';
     return this.type();
+  }
+
+  ngAfterContentInit(): void {
+    const control = this.injector.get(NgControl, null, { self: true, optional: true })?.control ?? null;
+    if (!control) return;
+    this.control.set(control);
+    merge<unknown[]>(control.events, this.parentForm?.ngSubmit ?? EMPTY)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.controlState.update(v => v + 1));
   }
 
   protected toggleShowPassword(): void {
