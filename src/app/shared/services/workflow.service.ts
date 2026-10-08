@@ -2,7 +2,7 @@ import { HttpClient, HttpContext, HttpErrorResponse, HttpParams } from '@angular
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { Observable, Subscription, catchError, defer, finalize, map, of, shareReplay, tap, throwError } from 'rxjs';
+import { EMPTY, Observable, Subscription, catchError, concat, defer, finalize, ignoreElements, map, of, shareReplay, tap, throwError } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
@@ -75,6 +75,8 @@ export class WorkflowService {
   private currentStepFormSub: Subscription | null = null;
 
   private readonly pendingStepSaves = signal(0);
+
+  private draftSave: Observable<void> | null = null;
 
   /** True while a step PATCH is in flight, so closing an empty run does not race the save that creates its entity. */
   readonly stepSavePending = computed(() => this.pendingStepSaves() > 0);
@@ -224,13 +226,39 @@ export class WorkflowService {
   patchStep(runId: number, stepId: string, fields: unknown): Observable<WorkflowRun> {
     return defer(() => {
       this.pendingStepSaves.update(n => n + 1);
-      return this.http
-        .patch<WorkflowRun>(`${environment.apiUrl}/workflows/${runId}/step`, { stepId, fields })
-        .pipe(
-          tap(run => this.currentRun.set(run)),
-          finalize(() => this.pendingStepSaves.update(n => n - 1)),
-        );
+      const draftSettled = (this.draftSave ?? EMPTY).pipe(ignoreElements(), catchError(() => EMPTY));
+      return concat(
+        draftSettled,
+        this.http.patch<WorkflowRun>(`${environment.apiUrl}/workflows/${runId}/step`, { stepId, fields }),
+      ).pipe(
+        tap(run => this.currentRun.set(run)),
+        finalize(() => this.pendingStepSaves.update(n => n - 1)),
+      );
     });
+  }
+
+  /**
+   * Keeps what the user has typed on a run whose entity does not exist yet,
+   * so draft lists can label it and the first step can refill it on resume.
+   * Sent silently: the run may already be saved or abandoned by the time it
+   * lands, and a lost label is not worth an error message. A step save
+   * started while this is in flight waits for it, so the two never race on
+   * the run row. Does not touch {@link currentRun}.
+   */
+  saveDraft(runId: number, fields: Record<string, unknown>): Observable<void> {
+    const request: Observable<void> = this.http
+      .put<WorkflowRun>(`${environment.apiUrl}/workflows/${runId}/draft`, { fields }, {
+        context: new HttpContext().set(SILENT_HTTP_ERRORS, true),
+      })
+      .pipe(
+        map(() => undefined),
+        finalize(() => {
+          if (this.draftSave === request) this.draftSave = null;
+        }),
+        shareReplay({ bufferSize: 1, refCount: false }),
+      );
+    this.draftSave = request;
+    return request;
   }
 
   /**

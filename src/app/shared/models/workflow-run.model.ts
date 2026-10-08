@@ -27,7 +27,9 @@ export interface WorkflowRun {
    * In-flight initial payload (camelCase keys, e.g. `procurementSource` /
    * `inventoryClass`) held until the entity materializes. Lets list pages
    * render entity-less draft "ghost" rows reflecting the user's actual picker
-   * selections. Null once the entity row is created.
+   * selections. Its `typed` object holds what the user has typed on the first
+   * step so far (see `WorkflowService.saveDraft`). Null once the entity row is
+   * created.
    */
   draftPayload: Record<string, unknown> | null;
 }

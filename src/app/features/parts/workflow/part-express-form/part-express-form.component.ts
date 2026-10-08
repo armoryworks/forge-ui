@@ -18,6 +18,7 @@ import { hasServerValidationDetail } from '../../../../shared/utils/server-valid
 import { AbcClass } from '../../models/abc-class.type';
 import { PartDetail } from '../../models/part-detail.model';
 import { PartsService } from '../../services/parts.service';
+import { keepTypedPartDraft } from '../typed-part-draft.util';
 import { TraceabilityType } from '../../models/traceability-type.type';
 
 /**
@@ -179,6 +180,13 @@ export class PartExpressFormComponent {
       () => this.persistOnly(),
     );
     this.destroyRef.onDestroy(() => this.workflowService.unregisterStepForm());
+    keepTypedPartDraft({
+      form: this.form,
+      runId: () => this.runId(),
+      entityId: () => this.entityId(),
+      workflowService: this.workflowService,
+      destroyRef: this.destroyRef,
+    });
   }
 
   /**

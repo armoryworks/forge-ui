@@ -6,6 +6,7 @@ import { environment } from '../../../environments/environment';
 import { EntityValidator } from '../models/entity-validator.model';
 import { WorkflowDefinition } from '../models/workflow-definition.model';
 import { WorkflowRun } from '../models/workflow-run.model';
+import { SILENT_HTTP_ERRORS } from '../interceptors/silent-http-errors.token';
 import { WorkflowService } from './workflow.service';
 
 /**
@@ -117,6 +118,39 @@ describe('WorkflowService — Phase 4', () => {
     expect(req.request.method).toBe('PATCH');
     expect(req.request.body).toEqual({ stepId: 'basics', fields: { name: 'X', type: 'Assembly' } });
     req.flush(updatedRun);
+    expect(service.currentRun()?.currentStepId).toBe('bom');
+  });
+
+  it('saveDraft PUTs the typed fields silently and leaves currentRun alone', () => {
+    const current = buildRun({ id: 4 });
+    service.currentRun.set(current);
+    service.saveDraft(4, { partNumber: 'BRK-100', name: 'Bracket', description: '' }).subscribe();
+    const req = httpMock.expectOne(`${environment.apiUrl}/workflows/4/draft`);
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual({ fields: { partNumber: 'BRK-100', name: 'Bracket', description: '' } });
+    expect(req.request.context.get(SILENT_HTTP_ERRORS)).toBe(true);
+    req.flush(buildRun({ id: 4, draftPayload: { typed: { name: 'Bracket' } } }));
+    expect(service.currentRun()).toBe(current);
+  });
+
+  it('patchStep waits for an in-flight draft save before sending', () => {
+    service.saveDraft(1, { name: 'Bracket' }).subscribe();
+    service.patchStep(1, 'basics', { name: 'Bracket' }).subscribe();
+    const draft = httpMock.expectOne(`${environment.apiUrl}/workflows/1/draft`);
+    httpMock.expectNone(`${environment.apiUrl}/workflows/1/step`);
+    expect(service.stepSavePending()).toBe(true);
+    draft.flush(buildRun());
+    httpMock.expectOne(`${environment.apiUrl}/workflows/1/step`).flush(buildRun({ currentStepId: 'bom' }));
+    expect(service.currentRun()?.currentStepId).toBe('bom');
+    expect(service.stepSavePending()).toBe(false);
+  });
+
+  it('patchStep still sends when the draft save it waited for fails', () => {
+    service.saveDraft(1, { name: 'Bracket' }).subscribe({ error: () => undefined });
+    service.patchStep(1, 'basics', { name: 'Bracket' }).subscribe();
+    httpMock.expectOne(`${environment.apiUrl}/workflows/1/draft`)
+      .flush({ title: 'Conflict' }, { status: 409, statusText: 'Conflict' });
+    httpMock.expectOne(`${environment.apiUrl}/workflows/1/step`).flush(buildRun({ currentStepId: 'bom' }));
     expect(service.currentRun()?.currentStepId).toBe('bom');
   });
 

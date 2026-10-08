@@ -12,6 +12,7 @@ import { ManualNumberSettingsService } from '../../../../shared/services/manual-
 import { hasServerValidationDetail } from '../../../../shared/utils/server-validation.utils';
 import { PartDetail } from '../../models/part-detail.model';
 import { PartsService } from '../../services/parts.service';
+import { keepTypedPartDraft } from '../typed-part-draft.util';
 
 /**
  * Workflow Pattern Phase 5 — Part Assembly basics step.
@@ -27,7 +28,9 @@ import { PartsService } from '../../services/parts.service';
  * Pre-refactor this used a 600ms debounced valueChanges subscription which
  * round-tripped on every keystroke and flapped on server-normalized values
  * (trailing whitespace deleted, etc.). The current model only fires on
- * shell navigation.
+ * shell navigation. Until the part exists, the typed part number, name and
+ * description are also kept on the run as the draft's label (see
+ * keepTypedPartDraft); that never writes the part itself.
  */
 @Component({
   selector: 'app-part-basics-step',
@@ -88,6 +91,13 @@ export class PartBasicsStepComponent {
       () => this.save(),
     );
     this.destroyRef.onDestroy(() => this.workflowService.unregisterStepForm());
+    keepTypedPartDraft({
+      form: this.form,
+      runId: () => this.runId(),
+      entityId: () => this.entityId(),
+      workflowService: this.workflowService,
+      destroyRef: this.destroyRef,
+    });
   }
 
   /**

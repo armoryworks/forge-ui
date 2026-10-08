@@ -97,9 +97,9 @@ export class PartsComponent {
   /**
    * Parts list with entity-less workflow drafts prepended as synthetic
    * "ghost" rows (see {@link buildDraftPartRows}). Each ghost has `_draftRun`
-   * set so cell templates can branch on it, takes its label from the run's
-   * `draftPayload` when it carries a part number or name (otherwise "Unnamed
-   * draft"), and is filtered by the applied search like parts are.
+   * set so cell templates can branch on it, takes its label from the part
+   * number and name typed into the New Part form (otherwise "Unnamed draft"),
+   * and is filtered by the applied search like parts are.
    */
   protected readonly combinedRows = computed<PartListRow[]>(() => [
     ...buildDraftPartRows(
@@ -490,7 +490,9 @@ export class PartsComponent {
 
   /**
    * Row action: opens the clone dialog for a listed part and, once the copy
-   * is created, refreshes the list and opens the new part.
+   * is created, refreshes the list and opens the new part's detail. A clone
+   * starts no workflow, so there is no run to resume. Ignored while a
+   * duplicate is already open.
    */
   protected duplicatePart(part: PartListItem): void {
     if (this.duplicating()) return;
@@ -500,15 +502,11 @@ export class PartsComponent {
         this.dialog.open<ClonePartDialogComponent, ClonePartDialogData, PartDetail | null>(
           ClonePartDialogComponent,
           { width: '520px', data: { part: detail } },
-        ).afterClosed().subscribe(created => {
+        ).afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(created => {
           this.duplicating.set(false);
           if (!created) return;
           this.loadParts();
-          if (created.status === 'Draft') {
-            this.tryResumeOrOpenDetail(created.id);
-          } else {
-            this.openDetailDialog(created.id);
-          }
+          this.openDetailDialog(created.id);
         });
       },
       error: () => this.duplicating.set(false),

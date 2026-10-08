@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { WorkflowRun } from '../../shared/models/workflow-run.model';
 import { buildDraftPartRows } from './draft-part-rows.util';
 
-function run(id: number, draftPayload: Record<string, unknown> | null): WorkflowRun {
+function run(id: number, typed: Record<string, unknown> | null, picks: Record<string, unknown> = {}): WorkflowRun {
   return {
     id,
     entityType: 'Part',
@@ -18,7 +18,7 @@ function run(id: number, draftPayload: Record<string, unknown> | null): Workflow
     abandonedReason: null,
     lastActivityAt: '2026-10-01T12:05:00Z',
     version: 1,
-    draftPayload,
+    draftPayload: typed ? { ...picks, typed } : (Object.keys(picks).length ? picks : null),
   };
 }
 
@@ -70,12 +70,18 @@ describe('buildDraftPartRows', () => {
     expect(rows.map(r => r.partNumber)).toEqual(['SCR-8']);
   });
 
+  it('ignores top-level fork payload keys when labelling', () => {
+    const [row] = buildDraftPartRows([run(1, null, { name: 'Fork value', partNumber: 'FORK-1' })], '', 'Unnamed draft');
+
+    expect([row.partNumber, row.name]).toEqual(['', 'Unnamed draft']);
+  });
+
   it('drops a draft with nothing typed from any active search', () => {
     expect(buildDraftPartRows([run(1, null)], 'unnamed', 'Unnamed draft')).toEqual([]);
   });
 
   it('reads a fork-dialog-only payload as an unnamed draft that drops out of searches', () => {
-    const forkOnly = run(1, { procurementSource: 'Make', inventoryClass: 'Subassembly', itemKindId: 3 });
+    const forkOnly = run(1, null, { procurementSource: 'Make', inventoryClass: 'Subassembly', itemKindId: 3 });
 
     expect(buildDraftPartRows([forkOnly], '', 'Unnamed draft').map(r => r.name)).toEqual(['Unnamed draft']);
     expect(buildDraftPartRows([forkOnly], 'make', 'Unnamed draft')).toEqual([]);
@@ -83,7 +89,7 @@ describe('buildDraftPartRows', () => {
 
   it('reflects the picked procurement source and inventory class, with defaults', () => {
     const [picked, missing] = buildDraftPartRows([
-      run(1, { procurementSource: 'Make', inventoryClass: 'Subassembly' }),
+      run(1, null, { procurementSource: 'Make', inventoryClass: 'Subassembly' }),
       run(2, null),
     ], '', 'Unnamed draft');
 
