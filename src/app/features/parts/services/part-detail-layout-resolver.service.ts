@@ -30,6 +30,7 @@ export type PartDetailTabId =
   | 'quality'
   | 'alternates'
   | 'material'
+  | 'whereUsed'
   | 'files';
 
 /** A single tab descriptor returned by the resolver. */
@@ -56,6 +57,7 @@ const PRICING: TabLayoutEntry = { id: 'pricing', labelKey: 'parts.detail.tabs.pr
 const QUALITY: TabLayoutEntry = { id: 'quality', labelKey: 'parts.detail.tabs.quality', iconName: 'fact_check' };
 const ALTERNATES: TabLayoutEntry = { id: 'alternates', labelKey: 'parts.detail.tabs.alternates', iconName: 'swap_horiz' };
 const MATERIAL: TabLayoutEntry = { id: 'material', labelKey: 'parts.detail.tabs.material', iconName: 'category' };
+const WHERE_USED: TabLayoutEntry = { id: 'whereUsed', labelKey: 'partBom.whereUsed.tab', iconName: 'device_hub' };
 const FILES: TabLayoutEntry = { id: 'files', labelKey: 'parts.detail.tabs.files', iconName: 'attach_file' };
 
 /**
@@ -78,7 +80,8 @@ export class PartDetailLayoutResolverService {
     // direction (2026-05-05): always show it. The empty state covers the
     // "no POs reference this part" case cleanly.
     const middleWithPo = this.injectPurchaseHistory(middle);
-    return [IDENTITY, ...middleWithPo, FILES];
+    const whereUsed = procurementSource === 'Phantom' ? [] : [WHERE_USED];
+    return [IDENTITY, ...middleWithPo, ...whereUsed, FILES];
   }
 
   /**
@@ -123,12 +126,8 @@ export class PartDetailLayoutResolverService {
       return [SOURCING, INVENTORY, QUALITY, COST, PRICING, ALTERNATES];
     }
 
-    // Make + Component (M1)
-    if (ps === 'Make' && ic === 'Component') {
-      return [MATERIAL, INVENTORY, MRP, ROUTING, COST, PRICING, QUALITY, ALTERNATES];
-    }
-    // Make + Subassembly / FinishedGood (M2 / M3)
-    if (ps === 'Make' && (ic === 'Subassembly' || ic === 'FinishedGood')) {
+    // Make + Component / Subassembly / FinishedGood (M1 / M2 / M3)
+    if (ps === 'Make' && (ic === 'Component' || ic === 'Subassembly' || ic === 'FinishedGood')) {
       return [MATERIAL, BOM, ROUTING, INVENTORY, MRP, COST, PRICING, QUALITY, ALTERNATES];
     }
     // Make + Tool (M4) — lives mostly as an Asset; minimal middle, no sales pricing

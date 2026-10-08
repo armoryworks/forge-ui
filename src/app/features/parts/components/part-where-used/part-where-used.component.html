@@ -1,0 +1,19 @@
+<app-data-table
+  tableId="part-where-used"
+  [columns]="columns"
+  [data]="rows()"
+  [loading]="loading()"
+  [clickableRows]="true"
+  trackByField="bomLineId"
+  emptyIcon="account_tree"
+  [emptyMessage]="'partBom.whereUsed.empty' | translate"
+  (rowClick)="openPart($event)">
+  <ng-template appColumnCell="parentPartNumber" let-row>
+    <button type="button" class="action-btn action-btn--link"
+      [attr.data-testid]="'where-used-open-' + row.parentPartId"
+      (click)="$event.stopPropagation(); openPart(row)">
+      {{ row.parentPartNumber }}
+    </button>
+  </ng-template>
+  <ng-template appColumnCell="sourceType" let-row>{{ sourceLabel(row.sourceType) }}</ng-template>
+</app-data-table>

@@ -240,7 +240,7 @@
         @case ('bom') {
           <div class="detail-body--padded">
           <div class="bom-header">
-            <span class="bom-count-label">{{ part.bomLines.length }} {{ 'parts.bomComponents' | translate }}</span>
+            <span class="bom-count-label">{{ (part.bomLines.length === 1 ? 'partBom.componentCountOne' : 'partBom.componentCountOther') | translate: { count: part.bomLines.length } }}</span>
             <div class="bom-header__actions">
               <div class="view-toggle" role="group" [attr.aria-label]="'parts.viewModeLabel' | translate">
                 <button class="icon-btn" [class.icon-btn--active]="bomViewMode() === 'table'"
@@ -281,21 +281,70 @@
                   <span class="bom-part-desc">{{ $any(row).childName }}</span>
                 </div>
               </ng-template>
+              <ng-template appColumnCell="quantity" let-row>
+                @if (editingBomLineId() === $any(row).id) {
+                  <app-input [formControl]="bomLineEditForm.controls.quantity"
+                    [label]="'parts.bomQty' | translate"
+                    type="number"
+                    data-testid="bom-line-edit-quantity"
+                    (keydown.enter)="commitBomLineEdit(true)"
+                    (keydown.escape)="cancelBomLineEdit()"
+                    (focusout)="commitBomLineEdit(false)" />
+                } @else {
+                  {{ $any(row).quantity }}
+                }
+              </ng-template>
               <ng-template appColumnCell="sourceType" let-row>
-                <span class="source-chip" [class.source-chip--make]="$any(row).sourceType === 'Make'" [class.source-chip--stock]="$any(row).sourceType === 'Stock'">
-                  {{ $any(row).sourceType }}
-                </span>
+                @if (editingBomLineId() === $any(row).id) {
+                  <app-select [formControl]="bomLineEditForm.controls.sourceType"
+                    [label]="'parts.bomSource' | translate"
+                    [options]="sourceTypeOptions"
+                    data-testid="bom-line-edit-source"
+                    (keydown.escape)="cancelBomLineEdit()" />
+                } @else {
+                  <span class="source-chip" [class.source-chip--make]="$any(row).sourceType === 'Make'" [class.source-chip--stock]="$any(row).sourceType === 'Stock'">
+                    {{ $any(row).sourceType }}
+                  </span>
+                }
               </ng-template>
               <ng-template appColumnCell="leadTimeDays" let-row>
                 <span class="text-muted">{{ $any(row).leadTimeDays !== null ? $any(row).leadTimeDays + 'd' : '---' }}</span>
               </ng-template>
               <ng-template appColumnCell="referenceDesignator" let-row>
-                <span class="text-muted">{{ $any(row).referenceDesignator ?? '---' }}</span>
+                @if (editingBomLineId() === $any(row).id) {
+                  <app-input [formControl]="bomLineEditForm.controls.referenceDesignator"
+                    [label]="'parts.bomRefDes' | translate"
+                    data-testid="bom-line-edit-ref-designator"
+                    (keydown.enter)="commitBomLineEdit(true)"
+                    (keydown.escape)="cancelBomLineEdit()"
+                    (focusout)="commitBomLineEdit(false)" />
+                } @else {
+                  <span class="text-muted">{{ $any(row).referenceDesignator || '---' }}</span>
+                }
               </ng-template>
               <ng-template appColumnCell="actions" let-row>
-                <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" (click)="deleteBomLine($any(row))" [attr.aria-label]="'common.remove' | translate">
-                  <span class="material-icons-outlined">delete</span>
-                </button>
+                <div class="bom-row-actions">
+                  @if (editingBomLineId() === $any(row).id) {
+                    <button class="icon-btn" type="button"
+                      [attr.data-testid]="'bom-line-done-' + $any(row).id"
+                      [matTooltip]="'partBom.doneEditing' | translate" matTooltipPosition="above"
+                      [attr.aria-label]="'partBom.doneEditing' | translate"
+                      (click)="commitBomLineEdit(true)">
+                      <span class="material-icons-outlined">check</span>
+                    </button>
+                  } @else {
+                    <button class="icon-btn" type="button"
+                      [attr.data-testid]="'bom-line-edit-' + $any(row).id"
+                      [matTooltip]="'partBom.editLine' | translate" matTooltipPosition="above"
+                      [attr.aria-label]="'partBom.editLine' | translate"
+                      (click)="startBomLineEdit($any(row))">
+                      <span class="material-icons-outlined">edit</span>
+                    </button>
+                  }
+                  <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" (click)="deleteBomLine($any(row))" [attr.aria-label]="'common.remove' | translate">
+                    <span class="material-icons-outlined">delete</span>
+                  </button>
+                </div>
               </ng-template>
             </app-data-table>
             <app-bom-revision-history [partId]="part.id" [refreshToken]="bomRefreshToken()" />
@@ -345,6 +394,12 @@
             (cancelled)="cancelEdit()" />
         }
 
+        @case ('whereUsed') {
+          <div class="detail-body--padded">
+            <app-part-where-used [partId]="part.id" (partOpened)="navigateToPart({ parentPartId: $event })" />
+          </div>
+        }
+
         @case ('files') {
           <app-part-files-cluster [partId]="part.id" />
           <!-- S3 — part-scope terms & conditions. -->
@@ -390,6 +445,7 @@
         secondaryDisplayField="name"
         [createNewLabel]="('parts.part' | translate).toLowerCase()"
         (createNew)="onCreateChildPart($event)"
+        (selected)="onBomChildSelected($event)"
         formControlName="childPartId" />
 
       <div class="dialog-row">

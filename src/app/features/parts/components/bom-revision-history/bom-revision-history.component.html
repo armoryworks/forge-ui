@@ -24,7 +24,7 @@
             }
             <span class="bom-rev-row__date">{{ formatDate(rev.effectiveDate) }}</span>
             <span class="bom-rev-row__count">
-              {{ rev.entryCount }} {{ 'parts.bomRevisionLines' | translate }}
+              {{ (rev.entryCount === 1 ? 'partBom.lineCountOne' : 'partBom.lineCountOther') | translate: { count: rev.entryCount } }}
             </span>
             @if (rev.notes) {
               <span class="bom-rev-row__notes" [title]="rev.notes">{{ rev.notes }}</span>

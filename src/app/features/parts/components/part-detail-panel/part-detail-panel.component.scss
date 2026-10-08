@@ -438,6 +438,13 @@
   }
 }
 
+.bom-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: $sp-xs;
+}
+
 .view-toggle {
   display: flex;
   gap: $sp-xs;

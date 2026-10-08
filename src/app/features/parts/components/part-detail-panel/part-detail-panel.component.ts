@@ -18,6 +18,7 @@ import { PartsService } from '../../services/parts.service';
 import { PartDetail } from '../../models/part-detail.model';
 import { BOMLine } from '../../models/bom-line.model';
 import { BOMSourceType } from '../../models/bom-source-type.type';
+import { UpdateBOMLineRequest } from '../../models/update-bom-line-request.model';
 import { PartInventorySummary } from '../../models/part-inventory-summary.model';
 import { PartPurchaseHistoryItem } from '../../models/part-purchase-history-item.model';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -71,6 +72,8 @@ import {
   TabLayoutEntry,
 } from '../../services/part-detail-layout-resolver.service';
 import { EntityCompletenessChipComponent } from '../../../../shared/components/entity-completeness-chip/entity-completeness-chip.component';
+import { PartWhereUsedComponent } from '../part-where-used/part-where-used.component';
+import { defaultBomSourceFor } from './bom-source-default.util';
 
 type BomViewMode = 'table' | 'tree';
 
@@ -110,7 +113,7 @@ type BomViewMode = 'table' | 'tree';
     PartMaterialClusterComponent, PartUomClusterComponent, PartMrpClusterComponent,
     PartRoutingClusterComponent, PartAlternatesClusterComponent,
     PartQualityClusterComponent, PartPricingClusterComponent,
-    EntityCompletenessChipComponent,
+    EntityCompletenessChipComponent, PartWhereUsedComponent,
   ],
   templateUrl: './part-detail-panel.component.html',
   styleUrl: './part-detail-panel.component.scss',
@@ -213,6 +216,18 @@ export class PartDetailPanelComponent {
     childPartId: 'Child Part', quantity: 'Quantity',
   });
 
+  private bomSourceChosenByUser = false;
+
+  protected readonly editingBomLineId = signal<number | null>(null);
+  protected readonly bomLineSaving = signal(false);
+  private bomLineCommitQueued: { close: boolean } | null = null;
+
+  protected readonly bomLineEditForm = new FormGroup({
+    quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
+    sourceType: new FormControl<BOMSourceType>('Buy', { nonNullable: true }),
+    referenceDesignator: new FormControl<string>('', { nonNullable: true }),
+  });
+
   protected readonly sourceTypeOptions: SelectOption[] = [
     { value: 'Make', label: this.translate.instant('parts.sourceMake') },
     { value: 'Buy', label: this.translate.instant('parts.sourceBuy') },
@@ -223,12 +238,12 @@ export class PartDetailPanelComponent {
   protected readonly bomColumns: ColumnDef[] = [
     { field: 'sortOrder', header: '#', width: '40px', align: 'center' },
     { field: 'childPartNumber', header: this.translate.instant('parts.bomPart'), sortable: true },
-    { field: 'quantity', header: this.translate.instant('parts.bomQty'), width: '60px', align: 'center', sortable: true },
-    { field: 'sourceType', header: this.translate.instant('parts.bomSource'), width: '80px', sortable: true, filterable: true, type: 'enum',
+    { field: 'quantity', header: this.translate.instant('parts.bomQty'), width: '90px', align: 'center', sortable: true },
+    { field: 'sourceType', header: this.translate.instant('parts.bomSource'), width: '120px', sortable: true, filterable: true, type: 'enum',
       filterOptions: this.sourceTypeOptions },
     { field: 'leadTimeDays', header: this.translate.instant('parts.bomLeadTime'), width: '90px' },
     { field: 'referenceDesignator', header: this.translate.instant('parts.bomRefDes') },
-    { field: 'actions', header: '', width: '40px' },
+    { field: 'actions', header: '', width: '80px' },
   ];
 
   // ── Used In Table Columns ──
@@ -327,6 +342,16 @@ export class PartDetailPanelComponent {
       .subscribe(() => {
         if (this.activeTabId() === 'purchaseHistory') this.loadPurchaseHistory();
       });
+
+    this.bomForm.controls.sourceType.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.bomSourceChosenByUser = true);
+
+    this.bomLineEditForm.controls.sourceType.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        if (this.editingBomLineId() !== null) this.commitBomLineEdit(false);
+      });
   }
 
   // ── Data Loading ──
@@ -336,6 +361,7 @@ export class PartDetailPanelComponent {
     this.partFiles.set([]);
     this.inventorySummary.set(null);
     this.editing.set(false);
+    this.editingBomLineId.set(null);
     this.partsService.getPartById(id).subscribe({
       next: (detail) => {
         this.part.set(detail);
@@ -434,6 +460,8 @@ export class PartDetailPanelComponent {
     if ('hazmatClass' in patch) request['hazmatClass'] = patch.hazmatClass;
     if ('shelfLifeDays' in patch) request['shelfLifeDays'] = patch.shelfLifeDays;
     if ('backflushPolicy' in patch) request['backflushPolicy'] = patch.backflushPolicy;
+    if ('procurementSource' in patch) request['procurementSource'] = patch.procurementSource;
+    if ('inventoryClass' in patch) request['inventoryClass'] = patch.inventoryClass;
 
     this.saving.set(true);
     this.partsService.updatePart(p.id, request).subscribe({
@@ -527,7 +555,18 @@ export class PartDetailPanelComponent {
       childPartId: null, quantity: 1, uomId: null, referenceDesignator: '',
       sourceType: 'Buy', leadTimeDays: null, notes: '',
     });
+    this.bomSourceChosenByUser = false;
     this.showBomDialog.set(true);
+  }
+
+  protected onBomChildSelected(entity: Record<string, unknown> | null): void {
+    if (entity) this.applyBomSourceDefault(entity['procurementSource']);
+  }
+
+  private applyBomSourceDefault(procurementSource: unknown): void {
+    if (this.bomSourceChosenByUser) return;
+    const source = defaultBomSourceFor(procurementSource);
+    if (source) this.bomForm.controls.sourceType.setValue(source, { emitEvent: false });
   }
 
   protected closeBomDialog(): void {
@@ -557,6 +596,7 @@ export class PartDetailPanelComponent {
       if (!created) return;
       this.bomForm.controls.childPartId.setValue(created.id);
       this.bomChildPartPicker?.setSelected(created.id, created.partNumber);
+      this.applyBomSourceDefault(created.procurementSource);
     });
   }
 
@@ -606,8 +646,77 @@ export class PartDetailPanelComponent {
     });
   }
 
+  protected startBomLineEdit(line: BOMLine): void {
+    this.bomLineEditForm.setValue({
+      quantity: line.quantity,
+      sourceType: line.sourceType,
+      referenceDesignator: line.referenceDesignator ?? '',
+    }, { emitEvent: false });
+    this.bomLineCommitQueued = null;
+    this.editingBomLineId.set(line.id);
+  }
+
+  protected cancelBomLineEdit(): void {
+    this.bomLineCommitQueued = null;
+    this.editingBomLineId.set(null);
+  }
+
+  protected commitBomLineEdit(close: boolean): void {
+    const p = this.part();
+    const lineId = this.editingBomLineId();
+    if (!p || lineId === null) return;
+    if (this.bomLineSaving()) {
+      this.bomLineCommitQueued = { close: close || (this.bomLineCommitQueued?.close ?? false) };
+      return;
+    }
+    const line = p.bomLines.find(l => l.id === lineId);
+    if (!line) {
+      this.editingBomLineId.set(null);
+      return;
+    }
+    if (this.bomLineEditForm.invalid) return;
+
+    const value = this.bomLineEditForm.getRawValue();
+    const request: UpdateBOMLineRequest = {};
+    if (value.quantity !== null && Number(value.quantity) !== line.quantity) request.quantity = Number(value.quantity);
+    if (value.sourceType !== line.sourceType) request.sourceType = value.sourceType;
+    if (value.referenceDesignator.trim() !== (line.referenceDesignator ?? '')) request.referenceDesignator = value.referenceDesignator.trim();
+
+    if (Object.keys(request).length === 0) {
+      if (close) this.editingBomLineId.set(null);
+      return;
+    }
+
+    this.bomLineSaving.set(true);
+    this.partsService.updateBOMLine(p.id, lineId, request).subscribe({
+      next: (detail) => {
+        this.part.set(detail);
+        this.bomLineSaving.set(false);
+        this.bomRefreshToken.update(v => v + 1);
+        const queued = this.bomLineCommitQueued;
+        this.bomLineCommitQueued = null;
+        if (queued && this.editingBomLineId() === lineId) {
+          this.commitBomLineEdit(close || queued.close);
+        } else if (close && this.editingBomLineId() === lineId) {
+          this.editingBomLineId.set(null);
+        }
+        this.snackbar.success(this.translate.instant('partBom.lineUpdated'));
+      },
+      error: () => {
+        this.bomLineSaving.set(false);
+        this.bomLineCommitQueued = null;
+      },
+    });
+  }
+
   protected navigateToPart(usage: { parentPartId: number }): void {
     this.loadDetail(usage.parentPartId);
+    this.router?.navigate([], {
+      relativeTo: this.route,
+      queryParams: { detail: `part:${usage.parentPartId}` },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   // ── Helpers ──

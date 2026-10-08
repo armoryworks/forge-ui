@@ -646,6 +646,25 @@
     "bulkMove": "Bulk Move",
     "bulkAssign": "Bulk Assign"
   },
+  "partBom": {
+    "componentCountOne": "1 component",
+    "componentCountOther": "{{count}} components",
+    "lineCountOne": "1 line",
+    "lineCountOther": "{{count}} lines",
+    "editLine": "Edit line",
+    "doneEditing": "Save line",
+    "lineUpdated": "BOM line updated.",
+    "whereUsed": {
+      "tab": "Where Used",
+      "parentPart": "Parent Part",
+      "parentName": "Name",
+      "revision": "Rev",
+      "quantityPer": "Qty per",
+      "source": "Source",
+      "openWorkOrders": "Open work orders",
+      "empty": "This part is not on any other part's BOM."
+    }
+  },
   "sequences": {
     "actionFailed": "The action could not be completed.",
     "blocked": "Blocked",
@@ -4706,7 +4725,7 @@
   },
   "entityCompleteness": {
     "loading": "Checking completeness…",
-    "ready": "Ready",
+    "ready": "Required info complete",
     "incompleteFor": "Incomplete for {{count}}",
     "badgeTooltip": "Incomplete for {{count}}: {{names}}",
     "columnHeader": "Completeness",

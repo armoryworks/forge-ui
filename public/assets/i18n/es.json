@@ -646,6 +646,25 @@
     "bulkMove": "Mover en Lote",
     "bulkAssign": "Asignar en Lote"
   },
+  "partBom": {
+    "componentCountOne": "1 componente",
+    "componentCountOther": "{{count}} componentes",
+    "lineCountOne": "1 línea",
+    "lineCountOther": "{{count}} líneas",
+    "editLine": "Editar línea",
+    "doneEditing": "Guardar línea",
+    "lineUpdated": "Línea de BOM actualizada.",
+    "whereUsed": {
+      "tab": "Dónde se usa",
+      "parentPart": "Pieza padre",
+      "parentName": "Nombre",
+      "revision": "Rev.",
+      "quantityPer": "Cant. por unidad",
+      "source": "Fuente",
+      "openWorkOrders": "Órdenes de trabajo abiertas",
+      "empty": "Esta pieza no figura en el BOM de ninguna otra pieza."
+    }
+  },
   "sequences": {
     "actionFailed": "No se pudo completar la acción.",
     "blocked": "Bloqueado",
@@ -4706,7 +4725,7 @@
   },
   "entityCompleteness": {
     "loading": "Comprobando integridad…",
-    "ready": "Listo",
+    "ready": "Información requerida completa",
     "incompleteFor": "Incompleto para {{count}}",
     "badgeTooltip": "Incompleto para {{count}}: {{names}}",
     "columnHeader": "Integridad",

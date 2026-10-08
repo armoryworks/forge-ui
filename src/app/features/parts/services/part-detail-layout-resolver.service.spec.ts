@@ -11,18 +11,40 @@ describe('PartDetailLayoutResolverService', () => {
     service = TestBed.inject(PartDetailLayoutResolverService);
   });
 
-  it('Buy + Raw → identity, sourcing, purchaseHistory, inventory, quality, cost, pricing, files', () => {
+  it('Buy + Raw → identity, sourcing, purchaseHistory, inventory, quality, cost, pricing, whereUsed, files', () => {
     const ids = service.resolve('Buy', 'Raw').map(t => t.id);
-    expect(ids).toEqual(['identity', 'sourcing', 'purchaseHistory', 'inventory', 'quality', 'cost', 'pricing', 'files']);
+    expect(ids).toEqual(['identity', 'sourcing', 'purchaseHistory', 'inventory', 'quality', 'cost', 'pricing', 'whereUsed', 'files']);
   });
 
-  it('Make + Subassembly → identity, material, purchaseHistory, bom, routing, inventory, mrp, cost, pricing, quality, alternates, files', () => {
+  it('Make + Subassembly → identity, material, purchaseHistory, bom, routing, inventory, mrp, cost, pricing, quality, alternates, whereUsed, files', () => {
     // PURCHASE_HISTORY is anchored after the FIRST inventory/bom/material
     // tab present (here: material), per the universal-inclusion rule.
     const ids = service.resolve('Make', 'Subassembly').map(t => t.id);
     expect(ids).toEqual([
-      'identity', 'material', 'purchaseHistory', 'bom', 'routing', 'inventory', 'mrp', 'cost', 'pricing', 'quality', 'alternates', 'files',
+      'identity', 'material', 'purchaseHistory', 'bom', 'routing', 'inventory', 'mrp', 'cost', 'pricing', 'quality', 'alternates', 'whereUsed', 'files',
     ]);
+  });
+
+  it('Make + Component gets a BOM tab between material and routing so raw stock can be attached', () => {
+    const ids = service.resolve('Make', 'Component').map(t => t.id);
+    expect(ids).toEqual([
+      'identity', 'material', 'purchaseHistory', 'bom', 'routing', 'inventory', 'mrp', 'cost', 'pricing', 'quality', 'alternates', 'whereUsed', 'files',
+    ]);
+  });
+
+  it('whereUsed sits just before files on every non-Phantom layout and is absent on Phantom layouts', () => {
+    const procs = ['Buy', 'Make', 'Subcontract', 'Phantom'] as const;
+    const classes = ['Raw', 'Component', 'Subassembly', 'FinishedGood', 'Consumable', 'Tool'] as const;
+    for (const p of procs) {
+      for (const c of classes) {
+        const ids = service.resolve(p, c).map(t => t.id);
+        if (p === 'Phantom') {
+          expect(ids, `${p}+${c}`).not.toContain('whereUsed');
+        } else {
+          expect(ids.indexOf('whereUsed'), `${p}+${c}`).toBe(ids.length - 2);
+        }
+      }
+    }
   });
 
   it('Phantom + Subassembly → identity, bom, purchaseHistory, files', () => {
@@ -99,11 +121,11 @@ describe('PartDetailLayoutResolverService', () => {
     expect(ids).toContain('pricing');
   });
 
-  it('Make + Tool (M4) limits to material/bom/routing + purchaseHistory — no Pricing (sold as asset, not part)', () => {
+  it('Make + Tool (M4) limits to material/bom/routing + purchaseHistory + whereUsed — no Pricing (sold as asset, not part)', () => {
     // PURCHASE_HISTORY anchored after the first material/bom tab (here:
     // material) per the universal-inclusion rule.
     const ids = service.resolve('Make', 'Tool').map(t => t.id);
-    expect(ids).toEqual(['identity', 'material', 'purchaseHistory', 'bom', 'routing', 'files']);
+    expect(ids).toEqual(['identity', 'material', 'purchaseHistory', 'bom', 'routing', 'whereUsed', 'files']);
     expect(ids).not.toContain('pricing');
   });
 
