@@ -580,7 +580,14 @@
     "dispositionNotesRequired": "Agregue un motivo para esta disposición.",
     "goodQuantity": "Cantidad buena",
     "destinationBin": "Guardar en ubicación",
-    "dispositionNoPart": "Esta orden de trabajo no tiene pieza, así que no se puede agregar nada al inventario."
+    "dispositionNoPart": "Esta orden de trabajo no tiene pieza, así que no se puede agregar nada al inventario.",
+    "card": {
+      "operationsRunning": "Hay un temporizador en marcha en este trabajo",
+      "operationsQty": "Cant. {{quantity}}",
+      "operationsCount": "Ops. {{complete}}/{{total}}",
+      "operationsInProgress": "▶ {{steps}}",
+      "operationsRemaining": "faltan ~{{time}}"
+    }
   },
   "backlog": {
     "title": "Pendientes",
@@ -2987,7 +2994,13 @@
     "entryAdded": "Entrada de tiempo agregada.",
     "entryDeleted": "Entrada de tiempo eliminada.",
     "timerStarted": "Cronómetro iniciado.",
-    "timerStopped": "Cronómetro detenido."
+    "timerStopped": "Cronómetro detenido.",
+    "runningTimers": "Temporizadores en marcha",
+    "runningNoJob": "Sin trabajo",
+    "runningStep": "Paso {{step}}",
+    "runningJustStarted": "recién iniciado",
+    "runningStop": "Detener",
+    "runningStopAria": "Detener el temporizador de {{job}}"
   },
   "assets": {
     "title": "Activos",
@@ -9940,6 +9953,84 @@
       "message": "Esa página está en el sitio de escritorio.",
       "open": "Abrir el sitio de escritorio",
       "storageBlocked": "Este navegador bloquea el almacenamiento del sitio, así que no se puede recordar la vista de escritorio."
+    }
+  },
+  "jobOperations": {
+    "sectionTitle": "Tiempo por operación",
+    "empty": "No hay datos de tiempo por operación. Puede que este trabajo no tenga una pieza con operaciones definidas.",
+    "noneRemaining": "No queda nada",
+    "qtyOf": "{{done}} / {{total}}",
+    "scrapCount": "{{count}} de desecho",
+    "otherRunning": "{{initials}} tiene un temporizador en marcha en este paso",
+    "perPieceEst": "Est. {{value}}",
+    "perPieceAct": "Real {{value}}",
+    "perPieceHist": "Hist. {{value}} ({{count}})",
+    "recordQuantityAria": "Registrar avance en {{operation}}",
+    "moreActionsAria": "Más acciones para {{operation}}",
+    "resetTitle": "¿Restablecer esta operación?",
+    "resetMessage": "Se borrarán las cantidades y las horas de inicio y fin registradas para {{operation}}. El tiempo ya registrado se conserva.",
+    "moveTitle": "Todas las operaciones están terminadas",
+    "moveMessage": "¿Mover el trabajo a {{stage}}?",
+    "moveConfirm": "Mover trabajo",
+    "moveLater": "Ahora no",
+    "status": {
+      "notStarted": "Sin iniciar",
+      "inProgress": "En curso",
+      "complete": "Terminada",
+      "skipped": "Omitida"
+    },
+    "actions": {
+      "start": "Iniciar",
+      "startRun": "Iniciar producción",
+      "startSetup": "Iniciar preparación",
+      "stop": "Detener",
+      "done": "Terminar",
+      "addQuantity": "+Cant.",
+      "skip": "Omitir",
+      "reopen": "Reabrir",
+      "reset": "Restablecer",
+      "undo": "Deshacer"
+    },
+    "columns": {
+      "operation": "Operación",
+      "status": "Estado",
+      "quantity": "Cant.",
+      "timers": "Temporizadores",
+      "estSetup": "Prep. est.",
+      "actSetup": "Prep. real",
+      "estRun": "Prod. est.",
+      "actRun": "Prod. real",
+      "total": "Total",
+      "efficiency": "Efic.",
+      "progress": "Avance",
+      "perPiece": "Por pieza",
+      "remaining": "Restante"
+    },
+    "summary": {
+      "estimated": "Estimado",
+      "actual": "Real",
+      "efficiency": "Eficiencia",
+      "remaining": "Restante",
+      "quantity": "Cant."
+    },
+    "dialog": {
+      "title": "Registrar avance: {{operation}}",
+      "summary": "{{done}} de {{total}} terminadas, faltan {{remaining}}",
+      "quantity": "Piezas terminadas ahora",
+      "scrap": "Piezas desechadas ahora",
+      "addScrap": "Registrar desecho",
+      "record": "Registrar {{count}} y seguir",
+      "doneAll": "Terminar — las {{count}}",
+      "done": "Terminar — {{count}}",
+      "negative": "Las cantidades no pueden ser negativas",
+      "overQuantity": "Terminadas más desechadas ({{total}}) supera la cantidad del trabajo ({{quantity}})"
+    },
+    "messages": {
+      "completed": "{{operation}} marcada como terminada",
+      "skipped": "{{operation}} omitida",
+      "reopened": "{{operation}} reabierta",
+      "reset": "{{operation}} restablecida",
+      "recorded": "Avance registrado en {{operation}}"
     }
   }
 }

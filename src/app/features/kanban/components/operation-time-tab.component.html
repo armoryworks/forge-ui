@@ -1,66 +1,171 @@
 <div class="op-time" [appLoadingBlock]="loading()">
-  @if (operations().length === 0 && !loading()) {
-    <app-empty-state icon="schedule" message="No operation time data. This job may not have a part with operations defined." />
+  @if (!loaded()) {
+    <div class="op-time__placeholder"></div>
+  } @else if (operations().length === 0) {
+    <app-empty-state icon="schedule" [message]="'jobOperations.empty' | translate" />
   } @else {
-    <!-- Summary Bar -->
     <div class="op-time__summary">
       <div class="op-time__summary-item">
-        <span class="op-time__summary-label">Estimated</span>
+        <span class="op-time__summary-label">{{ 'jobOperations.summary.estimated' | translate }}</span>
         <span class="op-time__summary-value">{{ formatMinutes(totalEstimated()) }}</span>
       </div>
       <div class="op-time__summary-item">
-        <span class="op-time__summary-label">Actual</span>
+        <span class="op-time__summary-label">{{ 'jobOperations.summary.actual' | translate }}</span>
         <span class="op-time__summary-value">{{ formatMinutes(totalActual()) }}</span>
       </div>
       <div class="op-time__summary-item">
-        <span class="op-time__summary-label">Efficiency</span>
+        <span class="op-time__summary-label">{{ 'jobOperations.summary.efficiency' | translate }}</span>
         <span class="op-time__summary-value" [class]="getEfficiencyClass(overallEfficiency())">
           {{ overallEfficiency() | number:'1.0-0' }}%
         </span>
       </div>
+      @if (trackingEnabled()) {
+        <div class="op-time__summary-item" data-testid="operation-time-remaining">
+          <span class="op-time__summary-label">{{ 'jobOperations.summary.remaining' | translate }}</span>
+          <span class="op-time__summary-value">
+            @if (remainingMs() === null) {
+              —
+            } @else if (remainingMs() === 0) {
+              {{ 'jobOperations.noneRemaining' | translate }}
+            } @else {
+              ~{{ remainingMs() | durationMs }}
+            }
+          </span>
+        </div>
+        <div class="op-time__summary-item" data-testid="operation-time-quantity">
+          <span class="op-time__summary-label">{{ 'jobOperations.summary.quantity' | translate }}</span>
+          <span class="op-time__summary-value">{{ jobQuantity() | number:'1.0-4' }}</span>
+        </div>
+      }
     </div>
 
-    <!-- Operations Table -->
-    <app-data-table
-      tableId="operation-time-analysis"
-      [columns]="opColumns"
-      [data]="operations()"
-      emptyIcon="schedule"
-      emptyMessage="No operation time data">
-      <ng-template appColumnCell="estimatedSetupMinutes" let-row>
-        <span class="op-time__num">{{ formatMinutes(row.estimatedSetupMinutes) }}</span>
-      </ng-template>
-      <ng-template appColumnCell="actualSetupMinutes" let-row>
-        <span class="op-time__num" [class]="getVarianceClass(row.setupVarianceMinutes)">
-          {{ formatMinutes(row.actualSetupMinutes) }}
-        </span>
-      </ng-template>
-      <ng-template appColumnCell="estimatedRunMinutes" let-row>
-        <span class="op-time__num">{{ formatMinutes(row.estimatedRunMinutes) }}</span>
-      </ng-template>
-      <ng-template appColumnCell="actualRunMinutes" let-row>
-        <span class="op-time__num" [class]="getVarianceClass(row.runVarianceMinutes)">
-          {{ formatMinutes(row.actualRunMinutes) }}
-        </span>
-      </ng-template>
-      <ng-template appColumnCell="actualTotalMinutes" let-row>
-        <span class="op-time__num"><strong>{{ formatMinutes(row.actualTotalMinutes) }}</strong></span>
-      </ng-template>
-      <ng-template appColumnCell="efficiencyPercent" let-row>
-        <span class="op-time__num" [class]="getEfficiencyClass(row.efficiencyPercent)">
-          {{ row.efficiencyPercent | number:'1.0-0' }}%
-        </span>
-      </ng-template>
-      <ng-template appColumnCell="progress" let-row>
-        <div class="op-time__bar-track">
-          <div
-            class="op-time__bar-fill"
-            [class]="getEfficiencyBarClass(row.efficiencyPercent)"
-            [style.width.%]="getBarWidth(row.actualTotalMinutes, row.estimatedSetupMinutes + row.estimatedRunMinutes)">
+    @for (key of tableKeys(); track key) {
+      <app-data-table
+        [tableId]="key"
+        [columns]="opColumns()"
+        [data]="operations()"
+        emptyIcon="schedule"
+        [emptyMessage]="'jobOperations.empty' | translate">
+        <ng-template appColumnCell="status" let-row>
+          <span class="chip" [class]="row.statusChipClass" [attr.data-testid]="'operation-status-' + row.operationSequence">
+            {{ row.statusLabelKey | translate }}
+          </span>
+        </ng-template>
+        <ng-template appColumnCell="completedQuantity" let-row>
+          @if (row.canAct) {
+            <button type="button" class="op-time__qty-btn" [attr.data-testid]="'operation-qty-' + row.operationSequence"
+                    [disabled]="busyRowId() === row.id"
+                    [attr.aria-label]="'jobOperations.recordQuantityAria' | translate: { operation: row.operationName }"
+                    (click)="openQuantity(row)">
+              {{ 'jobOperations.qtyOf' | translate: { done: (row.completedQuantity | number:'1.0-4'), total: (jobQuantity() | number:'1.0-4') } }}
+            </button>
+          } @else {
+            <span class="op-time__num">{{ 'jobOperations.qtyOf' | translate: { done: (row.completedQuantity | number:'1.0-4'), total: (jobQuantity() | number:'1.0-4') } }}</span>
+          }
+          @if (row.scrapQuantity > 0) {
+            <span class="op-time__scrap">{{ 'jobOperations.scrapCount' | translate: { count: (row.scrapQuantity | number:'1.0-4') } }}</span>
+          }
+        </ng-template>
+        <ng-template appColumnCell="timers" let-row>
+          <div class="op-time__timers">
+            @for (initials of row.otherInitials; track $index) {
+              <span class="op-time__other" [matTooltip]="'jobOperations.otherRunning' | translate: { initials: initials }">{{ initials }}</span>
+            }
+            @if (row.canAct && !row.closed) {
+              @if (row.myTimer) {
+                <span class="op-time__elapsed" [attr.data-testid]="'operation-elapsed-' + row.operationSequence">{{ (row.myElapsedMs | durationMs) || ('timeTracking.runningJustStarted' | translate) }}</span>
+                <button type="button" class="action-btn action-btn--warn action-btn--sm" [attr.data-testid]="'operation-stop-' + row.operationSequence"
+                        [disabled]="busyRowId() === row.id" (click)="stopTimer(row)">
+                  <span class="material-icons-outlined" aria-hidden="true">stop</span>
+                  {{ 'jobOperations.actions.stop' | translate }}
+                </button>
+              } @else {
+                <button type="button" class="action-btn action-btn--sm" [attr.data-testid]="'operation-start-' + row.operationSequence"
+                        [disabled]="busyRowId() === row.id" [matMenuTriggerFor]="startMenu">
+                  <span class="material-icons-outlined" aria-hidden="true">play_arrow</span>
+                  {{ 'jobOperations.actions.start' | translate }}
+                </button>
+                <mat-menu #startMenu="matMenu">
+                  <button mat-menu-item data-testid="operation-start-run" (click)="startTimer(row, 'Run')">{{ 'jobOperations.actions.startRun' | translate }}</button>
+                  <button mat-menu-item data-testid="operation-start-setup" (click)="startTimer(row, 'Setup')">{{ 'jobOperations.actions.startSetup' | translate }}</button>
+                </mat-menu>
+              }
+            }
           </div>
-          <div class="op-time__bar-target"></div>
-        </div>
-      </ng-template>
-    </app-data-table>
+        </ng-template>
+        <ng-template appColumnCell="estimatedSetupMinutes" let-row>
+          <span class="op-time__num">{{ formatMinutes(row.estimatedSetupMinutes) }}</span>
+        </ng-template>
+        <ng-template appColumnCell="actualSetupMinutes" let-row>
+          <span class="op-time__num" [class]="getVarianceClass(row.setupVarianceMinutes)">
+            {{ formatMinutes(row.actualSetupMinutes) }}
+          </span>
+        </ng-template>
+        <ng-template appColumnCell="estimatedRunMinutes" let-row>
+          <span class="op-time__num">{{ formatMinutes(row.estimatedRunMinutes) }}</span>
+        </ng-template>
+        <ng-template appColumnCell="actualRunMinutes" let-row>
+          <span class="op-time__num" [class]="getVarianceClass(row.runVarianceMinutes)">
+            {{ formatMinutes(row.actualRunMinutes) }}
+          </span>
+        </ng-template>
+        <ng-template appColumnCell="actualTotalMinutes" let-row>
+          <span class="op-time__num"><strong>{{ formatMinutes(row.actualTotalMinutes) }}</strong></span>
+        </ng-template>
+        <ng-template appColumnCell="efficiencyPercent" let-row>
+          <span class="op-time__num" [class]="getEfficiencyClass(row.efficiencyPercent)">
+            {{ row.efficiencyPercent | number:'1.0-0' }}%
+          </span>
+        </ng-template>
+        <ng-template appColumnCell="progress" let-row>
+          <div class="op-time__bar-track">
+            <div
+              class="op-time__bar-fill"
+              [class]="getEfficiencyBarClass(row.efficiencyPercent)"
+              [style.width.%]="getBarWidth(row.actualTotalMinutes, row.estimatedSetupMinutes + row.estimatedRunMinutes)">
+            </div>
+            <div class="op-time__bar-target"></div>
+          </div>
+        </ng-template>
+        <ng-template appColumnCell="perPiece" let-row>
+          <span class="op-time__per-piece">
+            <span>{{ 'jobOperations.perPieceEst' | translate: { value: (row.estimatedEachMs | durationMs) || '—' } }}</span>
+            <span>{{ 'jobOperations.perPieceAct' | translate: { value: (row.actualEachMs | durationMs) || '—' } }}</span>
+            <span>{{ 'jobOperations.perPieceHist' | translate: { value: (row.historyEachMs | durationMs) || '—', count: row.historyJobCount } }}</span>
+          </span>
+        </ng-template>
+        <ng-template appColumnCell="remainingMs" let-row>
+          <span class="op-time__num">{{ (row.remainingMs | durationMs) || '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="actions" let-row>
+          @if (row.canAct) {
+            <div class="op-time__row-actions">
+              @if (!row.closed) {
+                <button type="button" class="action-btn action-btn--sm" [attr.data-testid]="'operation-done-' + row.operationSequence"
+                        [disabled]="busyRowId() === row.id" (click)="markDone(row)">
+                  <span class="material-icons-outlined" aria-hidden="true">check</span>
+                  {{ 'jobOperations.actions.done' | translate }}
+                </button>
+              }
+              <button type="button" class="op-time__more" [attr.data-testid]="'operation-more-' + row.operationSequence"
+                      [disabled]="busyRowId() === row.id" [matMenuTriggerFor]="moreMenu"
+                      [attr.aria-label]="'jobOperations.moreActionsAria' | translate: { operation: row.operationName }">
+                <span class="material-icons-outlined" aria-hidden="true">more_vert</span>
+              </button>
+              <mat-menu #moreMenu="matMenu">
+                @if (row.closed) {
+                  <button mat-menu-item data-testid="operation-reopen" (click)="reopen(row)">{{ 'jobOperations.actions.reopen' | translate }}</button>
+                } @else {
+                  <button mat-menu-item data-testid="operation-skip" (click)="skip(row)">{{ 'jobOperations.actions.skip' | translate }}</button>
+                }
+                @if (row.status !== 'NotStarted') {
+                  <button mat-menu-item data-testid="operation-reset" (click)="reset(row)">{{ 'jobOperations.actions.reset' | translate }}</button>
+                }
+              </mat-menu>
+            </div>
+          }
+        </ng-template>
+      </app-data-table>
+    }
   }
 </div>

@@ -231,4 +231,34 @@ describe('JobCardComponent', () => {
 
     expect(el().querySelector('.card__due')!.textContent!.trim()).toBe('10/07/2026');
   });
+
+  it('shows the operation progress line only when the job has tracked operations', () => {
+    render(job({ partNumber: 'BRK-100', quantity: 40 }));
+    expect(el().querySelector('[data-testid="job-card-operations"]')).toBeNull();
+
+    fixture.destroy();
+    render(job({
+      partNumber: 'BRK-100', quantity: 40,
+      operationsTotal: 9, operationsComplete: 3, inProgressSteps: [4, 5], runningTimerCount: 2, estimatedRemainingMinutes: 390,
+    }));
+    const line = el().querySelector('[data-testid="job-card-operations"]');
+    expect(line).not.toBeNull();
+    expect(line!.textContent).toContain('kanban.card.operationsCount');
+    expect(line!.textContent).toContain('kanban.card.operationsInProgress');
+    expect(line!.textContent).toContain('kanban.card.operationsRemaining');
+    expect(line!.textContent).not.toContain('kanban.card.operationsQty');
+    expect(el().querySelector('[data-testid="job-card-operations-running"]')).not.toBeNull();
+  });
+
+  it('drops the empty pieces of the operation line', () => {
+    TestBed.inject(TranslateService).setTranslation('en', { kanban: { card: {
+      operationsQty: 'Qty {{quantity}}', operationsCount: 'Ops {{complete}}/{{total}}',
+    } } });
+    TestBed.inject(TranslateService).use('en');
+    render(job({ quantity: 40, operationsTotal: 9, operationsComplete: 0, inProgressSteps: [], runningTimerCount: 0, estimatedRemainingMinutes: 0 }));
+
+    const line = el().querySelector('[data-testid="job-card-operations"]')!;
+    expect(Array.from(line.children).map(c => c.textContent!.trim())).toEqual(['Qty 40', '·', 'Ops 0/9']);
+    expect(el().querySelector('[data-testid="job-card-operations-running"]')).toBeNull();
+  });
 });

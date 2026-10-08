@@ -39,6 +39,26 @@
       }
     </div>
   }
+  @if (operationProgress(); as progress) {
+    <div class="card__ops" data-testid="job-card-operations">
+      @if (progress.running) {
+        <span class="card__ops-dot" data-testid="job-card-operations-running" [title]="'kanban.card.operationsRunning' | translate"></span>
+      }
+      @if (progress.quantity !== null) {
+        <span>{{ 'kanban.card.operationsQty' | translate: { quantity: (progress.quantity | number:'1.0-4') } }}</span>
+        <span class="card__ops-sep" aria-hidden="true">·</span>
+      }
+      <span>{{ 'kanban.card.operationsCount' | translate: { complete: progress.complete, total: progress.total } }}</span>
+      @if (progress.steps) {
+        <span class="card__ops-sep" aria-hidden="true">·</span>
+        <span>{{ 'kanban.card.operationsInProgress' | translate: { steps: progress.steps } }}</span>
+      }
+      @if (progress.remainingMs !== null) {
+        <span class="card__ops-sep" aria-hidden="true">·</span>
+        <span>{{ 'kanban.card.operationsRemaining' | translate: { time: (progress.remainingMs | durationMs) } }}</span>
+      }
+    </div>
+  }
   <div class="card__footer">
     <app-priority-indicator [priority]="job().priorityName" size="sm" />
     @if (job().assigneeInitials) {

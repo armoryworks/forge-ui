@@ -825,6 +825,11 @@ All list views must show `<app-empty-state>` when data is empty — icon + messa
 | `DraftBroadcastService` | `shared/services/` | Cross-tab BroadcastChannel for draft sync |
 | `DraftRecoveryService` | `shared/services/` | Post-login recovery, TTL cleanup, logout warning |
 | `unsavedChangesGuard` | `shared/guards/` | `CanDeactivateFn` — warns on navigation away from dirty forms |
+| `RunningTimersComponent` | `shared/components/running-timers/` | Dumb list of the caller's open timers (job · step · title · live elapsed, ticking once a second, `[clockOffsetMs]` for server-clock correction); emits `stopRequested` with the time entry id |
+| `OperationTouchListComponent` | `shared/components/operation-touch-list/` | Touch-sized job-operation rows for phone and terminal (`size` compact/large): status chip, `N / M`, my live elapsed, others' initials; emits start (Run/Setup), stop, done and +Qty — the surface makes the calls |
+| `OperationQuantityDialogComponent` | `shared/components/operation-quantity-dialog/` | MatDialog for recording operation progress: pieces finished now (prefilled with what is left) plus optional scrap; returns absolute totals and whether to complete the step; warns when finished + scrap exceeds the job quantity |
+| `JobOperationsService` | `shared/services/` | Per-job operation progress API (`jobs/{id}/operations`, operation timer start/stop, progress PATCH) plus the cached `trackingEnabled` signal from `job-operations/config` (false on any error) |
+| `RunningTimersService` | `shared/services/` | The caller's open timers (`time-tracking/timers/active`) and stop-by-id |
 
 ### AppDataTableComponent — Usage Guide
 

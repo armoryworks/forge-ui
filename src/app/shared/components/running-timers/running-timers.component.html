@@ -1,0 +1,25 @@
+@if (items().length > 0) {
+  <ul class="running-timers" data-testid="running-timers" [attr.aria-label]="'timeTracking.runningTimers' | translate">
+    @for (item of items(); track item.entry.id) {
+      <li class="running-timers__item" [attr.data-testid]="'running-timer-' + item.entry.id">
+        <span class="running-timers__dot" aria-hidden="true"></span>
+        <span class="running-timers__job">{{ item.entry.jobNumber ?? ('timeTracking.runningNoJob' | translate) }}</span>
+        @if (item.entry.operationStepNumber !== null && item.entry.operationStepNumber !== undefined) {
+          <span class="running-timers__step">{{ 'timeTracking.runningStep' | translate: { step: item.entry.operationStepNumber } }}</span>
+        }
+        @if (item.label) {
+          <span class="running-timers__label">{{ item.label }}</span>
+        }
+        <span class="running-timers__elapsed" data-testid="running-timer-elapsed">{{ (item.elapsedMs | durationMs) || ('timeTracking.runningJustStarted' | translate) }}</span>
+        <button type="button" class="action-btn action-btn--warn action-btn--sm running-timers__stop"
+                data-testid="running-timer-stop"
+                [disabled]="stoppingId() === item.entry.id"
+                [attr.aria-label]="'timeTracking.runningStopAria' | translate: { job: item.entry.jobNumber ?? '' }"
+                (click)="stopRequested.emit(item.entry.id)">
+          <span class="material-icons-outlined" aria-hidden="true">stop</span>
+          {{ 'timeTracking.runningStop' | translate }}
+        </button>
+      </li>
+    }
+  </ul>
+}

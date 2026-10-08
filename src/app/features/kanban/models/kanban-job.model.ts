@@ -27,4 +27,9 @@ export interface KanbanJob {
   partNumber: string | null;
   quantity: number | null;
   completedDate?: string | null;
+  operationsTotal?: number | null;
+  operationsComplete?: number | null;
+  inProgressSteps?: number[] | null;
+  runningTimerCount?: number | null;
+  estimatedRemainingMinutes?: number | null;
 }

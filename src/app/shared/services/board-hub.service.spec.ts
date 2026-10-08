@@ -69,6 +69,20 @@ describe('BoardHubService', () => {
     });
   });
 
+  it('streams jobUpdated events alongside the registered callback', async () => {
+    const callback = vi.fn();
+    const streamed: unknown[] = [];
+    service.onJobUpdatedEvent(callback);
+    service.jobUpdated$.subscribe(event => streamed.push(event));
+    await service.connect();
+
+    const handler = mockConnection.on.mock.calls.find(call => call[0] === 'jobUpdated')![1] as (event: unknown) => void;
+    handler({ jobId: 9 });
+
+    expect(callback).toHaveBeenCalledWith({ jobId: 9 });
+    expect(streamed).toEqual([{ jobId: 9 }]);
+  });
+
   describe('joinBoard', () => {
     it('should invoke JoinBoard on connection', async () => {
       await service.connect();

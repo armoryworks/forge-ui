@@ -14,6 +14,7 @@ import { SelectComponent } from '../../../shared/components/select/select.compon
 import { EntityActivitySectionComponent } from '../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { FileAttachment } from '../../../shared/models/file.model';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { AuthService } from '../../../shared/services/auth.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -59,6 +60,7 @@ export class JobDetailPanelComponent implements OnInit {
   private readonly snackbar = inject(SnackbarService);
   private readonly matDialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
+  private readonly auth = inject(AuthService);
 
   readonly jobId = input.required<number>();
   readonly users = input<UserRef[]>([]);
@@ -108,9 +110,14 @@ export class JobDetailPanelComponent implements OnInit {
 
   protected readonly isTimerLoading = signal(false);
 
-  protected readonly hasActiveTimer = computed(() =>
-    this.timeEntries().some(e => e.timerStart !== null && e.timerStop === null),
-  );
+  protected readonly myActiveTimer = computed(() => {
+    const userId = this.auth.user()?.id;
+    if (userId === undefined) return null;
+    return this.timeEntries().find(e =>
+      e.userId === userId && !!e.timerStart && !e.timerStop && !e.jobOperationId) ?? null;
+  });
+
+  protected readonly hasActiveTimer = computed(() => this.myActiveTimer() !== null);
 
   protected readonly totalTimeMinutes = computed(() =>
     this.timeEntries().reduce((sum, e) => sum + e.durationMinutes, 0),
@@ -452,6 +459,27 @@ export class JobDetailPanelComponent implements OnInit {
     });
   }
 
+  protected onAllOperationsComplete(): void {
+    const j = this.job();
+    if (!j) return;
+    const stages = this.availableStages();
+    const index = stages.findIndex(st => st.id === j.currentStageId);
+    const next = index >= 0 ? stages[index + 1] : undefined;
+    if (!next) return;
+    this.matDialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('jobOperations.moveTitle'),
+        message: this.translate.instant('jobOperations.moveMessage', { stage: next.name }),
+        confirmLabel: this.translate.instant('jobOperations.moveConfirm'),
+        cancelLabel: this.translate.instant('jobOperations.moveLater'),
+        severity: 'info',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (confirmed) this.moveToStage(next);
+    });
+  }
+
   protected startTimerForJob(): void {
     const jobId = this.job()?.id;
     if (!jobId) return;
@@ -467,10 +495,10 @@ export class JobDetailPanelComponent implements OnInit {
   }
 
   protected stopTimerForJob(): void {
-    const active = this.timeEntries().find(e => e.timerStart !== null && e.timerStop === null);
+    const active = this.myActiveTimer();
     if (!active) return;
     this.isTimerLoading.set(true);
-    this.timeTrackingService.stopTimer({ notes: undefined }).subscribe({
+    this.timeTrackingService.stopTimer({ timeEntryId: active.id }).subscribe({
       next: () => {
         this.snackbar.success(this.translate.instant('kanban.timerStopped'));
         const jobId = this.job()?.id;

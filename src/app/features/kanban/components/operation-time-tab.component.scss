@@ -1,4 +1,5 @@
 @use 'styles/variables' as *;
+@use 'styles/mixins' as *;
 
 .op-time {
   display: flex;
@@ -7,6 +8,7 @@
 
   &__summary {
     display: flex;
+    flex-wrap: wrap;
     gap: $sp-lg;
     padding: $sp-md;
     background: var(--surface);
@@ -34,6 +36,75 @@
 
   &__num {
     font-family: $font-family-mono;
+  }
+
+  &__placeholder {
+    min-height: $sp-4xl;
+  }
+
+  &__qty-btn {
+    white-space: nowrap;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--primary);
+    font-family: $font-family-mono;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      text-decoration: underline;
+    }
+  }
+
+  &__scrap {
+    display: block;
+    font-size: $font-size-xxs;
+    color: var(--warning);
+  }
+
+  &__timers,
+  &__row-actions {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
+    flex-wrap: wrap;
+  }
+
+  &__row-actions {
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+  }
+
+  &__other {
+    @include flex-center;
+    width: $avatar-size-sm;
+    height: $avatar-size-sm;
+    border-radius: 50%;
+    background: var(--border);
+    font-size: $font-size-xxs;
+    font-weight: 700;
+  }
+
+  &__elapsed {
+    font-family: $font-family-mono;
+    color: var(--success);
+  }
+
+  &__per-piece {
+    display: flex;
+    flex-direction: column;
+    white-space: nowrap;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+
+  &__more {
+    @include flex-center;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
   }
 
   &__bar-track {

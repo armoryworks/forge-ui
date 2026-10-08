@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { startWith } from 'rxjs';
+import { catchError, of, startWith } from 'rxjs';
 import { TimeTrackingService } from './services/time-tracking.service';
 import { TimeEntry } from './models/time-entry.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
@@ -25,6 +25,9 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
+import { RunningTimersService } from '../../shared/services/running-timers.service';
+import { AuthService } from '../../shared/services/auth.service';
+import { RunningTimersComponent } from '../../shared/components/running-timers/running-timers.component';
 
 @Component({
   selector: 'app-time-tracking',
@@ -43,6 +46,7 @@ import { DraftResumeService } from '../../shared/services/draft-resume.service';
     EntityLinkComponent,
     TranslatePipe,
     MatTooltipModule,
+    RunningTimersComponent,
   ],
   templateUrl: './time-tracking.component.html',
   styleUrl: './time-tracking.component.scss',
@@ -58,10 +62,18 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly draftResume = inject(DraftResumeService);
+  private readonly runningTimers = inject(RunningTimersService);
+  private readonly auth = inject(AuthService);
 
   protected readonly loading = signal(false);
   protected readonly entries = signal<TimeEntry[]>([]);
-  protected readonly activeTimer = signal<TimeEntry | null>(null);
+  protected readonly activeTimers = signal<TimeEntry[]>([]);
+  protected readonly activeTimer = computed(() => this.activeTimers().find(t => !t.jobOperationId) ?? null);
+  protected readonly otherRunningTimers = computed(() => {
+    const header = this.activeTimer();
+    return this.activeTimers().filter(t => t !== header);
+  });
+  protected readonly stopTarget = signal<TimeEntry | null>(null);
   protected readonly saving = signal(false);
   protected draftConfig: DraftConfig = { entityType: 'time-entry', entityId: 'new', route: '/time-tracking' };
 
@@ -166,11 +178,23 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
     this.service.getTimeEntries(undefined, undefined, from, to).subscribe({
       next: (entries) => {
         this.entries.set(entries);
-        const timer = entries.find(e => e.timerStart && !e.timerStop);
-        this.activeTimer.set(timer ?? null);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
+    });
+    this.loadActiveTimers();
+  }
+
+  private loadActiveTimers(): void {
+    this.runningTimers.getMine().pipe(
+      catchError(() => of(null)),
+    ).subscribe(timers => {
+      if (timers) {
+        this.activeTimers.set(timers.filter(t => t.timerStart && !t.timerStop));
+        return;
+      }
+      const userId = this.auth.user()?.id;
+      this.activeTimers.set(this.entries().filter(e => e.userId === userId && e.timerStart && !e.timerStop));
     });
   }
 
@@ -231,15 +255,27 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
     });
   }
 
-  protected openStopTimer(): void {
+  protected openStopTimer(entry: TimeEntry | null = this.activeTimer()): void {
+    if (!entry) return;
+    this.stopTarget.set(entry);
     this.stopNotesControl.reset('');
     this.showStopDialog.set(true);
   }
 
-  protected closeStopDialog(): void { this.showStopDialog.set(false); }
+  protected openStopTimerById(timeEntryId: number): void {
+    this.openStopTimer(this.activeTimers().find(t => t.id === timeEntryId) ?? null);
+  }
+
+  protected closeStopDialog(): void {
+    this.showStopDialog.set(false);
+    this.stopTarget.set(null);
+  }
 
   protected stopTimer(): void {
+    const target = this.stopTarget();
+    if (!target) return;
     this.service.stopTimer({
+      timeEntryId: target.id,
       notes: this.stopNotesControl.value || undefined,
     }).subscribe({
       next: () => { this.closeStopDialog(); this.loadEntries(); this.snackbar.success(this.translate.instant('timeTracking.timerStopped')); },
@@ -252,8 +288,7 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
     return h > 0 ? `${h}h ${m}m` : `${m}m`;
   }
 
-  protected getTimerElapsed(): string {
-    const timer = this.activeTimer();
+  protected getTimerElapsed(timer: TimeEntry | null = this.activeTimer()): string {
     if (!timer?.timerStart) return '0m';
     const elapsed = Math.floor((Date.now() - new Date(timer.timerStart).getTime()) / 60000);
     return this.formatDuration(elapsed);

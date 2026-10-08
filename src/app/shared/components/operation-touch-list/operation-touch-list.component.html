@@ -1,0 +1,55 @@
+<ul class="op-touch" [class.op-touch--large]="size() === 'large'" data-testid="operation-touch-list">
+  @for (row of rows(); track row.key) {
+    <li class="op-touch__row" [class.op-touch__row--running]="row.mine !== null" [attr.data-testid]="'operation-touch-row-' + row.operation.stepNumber">
+      <div class="op-touch__info">
+        <span class="op-touch__step">{{ row.operation.stepNumber }}</span>
+        <span class="op-touch__title">{{ row.operation.title }}</span>
+        <span class="chip chip--sm" [class]="row.display.chipClass">{{ row.display.labelKey | translate }}</span>
+      </div>
+      <div class="op-touch__meta">
+        <span class="op-touch__qty">{{ 'jobOperations.qtyOf' | translate: { done: (row.operation.completedQuantity | number:'1.0-4'), total: (jobQuantity() | number:'1.0-4') } }}</span>
+        @if (row.mine) {
+          <span class="op-touch__elapsed" data-testid="operation-touch-elapsed">{{ (row.mineElapsedMs | durationMs) || ('timeTracking.runningJustStarted' | translate) }}</span>
+        }
+        @for (initials of row.otherInitials; track $index) {
+          <span class="op-touch__other" [attr.aria-label]="'jobOperations.otherRunning' | translate: { initials: initials }">{{ initials }}</span>
+        }
+      </div>
+      @if (row.actionable && !row.closed) {
+        <div class="op-touch__actions">
+          @if (row.mine) {
+            <button type="button" class="action-btn action-btn--warn" data-testid="operation-touch-stop"
+                    [disabled]="busyOperationId() === row.operation.operationId"
+                    (click)="stopRequested.emit(row.operation)">
+              <span class="material-icons-outlined" aria-hidden="true">stop</span>
+              {{ 'jobOperations.actions.stop' | translate }}
+            </button>
+          } @else {
+            <button type="button" class="action-btn action-btn--primary" data-testid="operation-touch-start"
+                    [disabled]="busyOperationId() === row.operation.operationId"
+                    (click)="startRequested.emit({ operation: row.operation, entryType: 'Run' })">
+              <span class="material-icons-outlined" aria-hidden="true">play_arrow</span>
+              {{ 'jobOperations.actions.start' | translate }}
+            </button>
+            <button type="button" class="action-btn" data-testid="operation-touch-start-setup"
+                    [disabled]="busyOperationId() === row.operation.operationId"
+                    (click)="startRequested.emit({ operation: row.operation, entryType: 'Setup' })">
+              {{ 'jobOperations.actions.startSetup' | translate }}
+            </button>
+          }
+          <button type="button" class="action-btn" data-testid="operation-touch-qty"
+                  [disabled]="busyOperationId() === row.operation.operationId"
+                  (click)="quantityRequested.emit(row.operation)">
+            {{ 'jobOperations.actions.addQuantity' | translate }}
+          </button>
+          <button type="button" class="action-btn" data-testid="operation-touch-done"
+                  [disabled]="busyOperationId() === row.operation.operationId"
+                  (click)="doneRequested.emit(row.operation)">
+            <span class="material-icons-outlined" aria-hidden="true">check</span>
+            {{ 'jobOperations.actions.done' | translate }}
+          </button>
+        </div>
+      }
+    </li>
+  }
+</ul>

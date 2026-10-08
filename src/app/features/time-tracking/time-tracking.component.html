@@ -17,6 +17,9 @@
 </app-page-header>
 
 <div class="time-tracking-layout">
+  @if (otherRunningTimers().length > 0) {
+    <app-running-timers class="running-strip" [timers]="otherRunningTimers()" (stopRequested)="openStopTimerById($event)" />
+  }
   <!-- Filters -->
   <div class="filters-bar">
     <div class="filter-group">
@@ -140,9 +143,9 @@
 @if (showStopDialog()) {
   <app-dialog [title]="'timeTracking.stopTimer' | translate" (closed)="closeStopDialog()">
     <p class="timer-info">
-      {{ 'timeTracking.timerRunningFor' | translate }} <strong>{{ getTimerElapsed() }}</strong>
-      @if (activeTimer()?.category) {
-        — {{ activeTimer()?.category }}
+      {{ 'timeTracking.timerRunningFor' | translate }} <strong>{{ getTimerElapsed(stopTarget()) }}</strong>
+      @if (stopTarget()?.operationTitle ?? stopTarget()?.category) {
+        — {{ stopTarget()?.operationTitle ?? stopTarget()?.category }}
       }
     </p>
 

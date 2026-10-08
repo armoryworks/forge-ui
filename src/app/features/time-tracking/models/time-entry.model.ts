@@ -13,4 +13,9 @@ export interface TimeEntry {
   isManual: boolean;
   isLocked: boolean;
   createdAt: Date;
+  operationId?: number | null;
+  jobOperationId?: number | null;
+  operationStepNumber?: number | null;
+  operationTitle?: string | null;
+  entryType?: string | null;
 }

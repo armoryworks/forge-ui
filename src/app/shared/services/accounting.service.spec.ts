@@ -164,7 +164,7 @@ describe('AccountingService', () => {
 
   it('loadEmployees() GETs employees and sets the employees signal', () => {
     const mockEmployees: AccountingEmployee[] = [
-      { externalId: 'EMP-1', displayName: 'Hartman, Daniel J', email: 'dan@example.com', phone: null, active: true },
+      { externalId: 'EMP-1', displayName: 'Rivera, Samiel J', email: 'dan@example.com', phone: null, active: true },
     ];
 
     service.loadEmployees();

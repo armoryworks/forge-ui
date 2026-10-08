@@ -7,13 +7,14 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { EntityLinkComponent } from '../../../shared/components/entity-link/entity-link.component';
 import { PriorityIndicatorComponent } from '../../../shared/components/priority-indicator/priority-indicator.component';
+import { DurationMsPipe } from '../../../shared/pipes/duration-ms.pipe';
 import { KanbanJob } from '../models/kanban-job.model';
 import { PRIORITY_COLORS } from '../models/priority-colors.const';
 
 @Component({
   selector: 'app-job-card',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, AvatarComponent, EntityLinkComponent, PriorityIndicatorComponent, MatTooltipModule, TranslatePipe],
+  imports: [DatePipe, DecimalPipe, AvatarComponent, EntityLinkComponent, PriorityIndicatorComponent, MatTooltipModule, TranslatePipe, DurationMsPipe],
   templateUrl: './job-card.component.html',
   styleUrl: './job-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,4 +32,19 @@ export class JobCardComponent {
   );
 
   protected readonly holdTooltip = computed(() => this.job().activeHolds.join('\n'));
+
+  protected readonly operationProgress = computed(() => {
+    const j = this.job();
+    const total = j.operationsTotal ?? 0;
+    if (total <= 0) return null;
+    const remaining = j.estimatedRemainingMinutes;
+    return {
+      quantity: j.partNumber ? null : (j.quantity ?? null),
+      complete: j.operationsComplete ?? 0,
+      total,
+      steps: (j.inProgressSteps ?? []).join(', '),
+      running: (j.runningTimerCount ?? 0) > 0,
+      remainingMs: remaining && remaining > 0 ? Math.round(remaining * 60) * 1000 : null,
+    };
+  });
 }

@@ -1,0 +1,85 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.op-touch {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.op-touch__row {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  padding: $sp-sm $sp-md;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  border-left: $border-width-accent solid var(--border);
+
+  &--running {
+    border-left-color: var(--success);
+  }
+}
+
+.op-touch__info,
+.op-touch__meta,
+.op-touch__actions {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  flex-wrap: wrap;
+}
+
+.op-touch__step {
+  font-family: $font-family-mono;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.op-touch__title {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  @include truncate;
+}
+
+.op-touch__qty,
+.op-touch__elapsed {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+}
+
+.op-touch__elapsed {
+  color: var(--success);
+}
+
+.op-touch__other {
+  @include flex-center;
+  width: $avatar-size-xs;
+  height: $avatar-size-xs;
+  border-radius: 50%;
+  background: var(--border);
+  font-size: $font-size-xxs;
+  font-weight: 700;
+}
+
+.op-touch--large {
+  gap: $sp-md;
+
+  .op-touch__row {
+    padding: $sp-md $sp-lg;
+  }
+
+  .op-touch__title {
+    font-size: $font-size-lg;
+  }
+
+  .op-touch__actions .action-btn {
+    min-height: $sp-4xl;
+    min-width: $sp-4xl;
+    font-size: $font-size-md;
+  }
+}

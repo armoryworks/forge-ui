@@ -240,3 +240,32 @@
     font-weight: 700;
   }
 }
+
+.card__ops {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $sp-xs;
+  margin-bottom: $sp-xs;
+  font-size: var(--font-size-xxs);
+  color: var(--text-muted);
+}
+
+.card__ops-dot {
+  width: $dot-size-sm;
+  height: $dot-size-sm;
+  border-radius: 50%;
+  background: var(--success);
+  animation: card-ops-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes card-ops-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card__ops-dot {
+    animation: none;
+  }
+}

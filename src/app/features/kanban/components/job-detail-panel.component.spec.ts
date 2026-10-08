@@ -3,13 +3,17 @@ import { TestBed } from '@angular/core/testing';
 import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, Subject, of, throwError } from 'rxjs';
 
 import { JobDetailPanelComponent } from './job-detail-panel.component';
 import { KanbanService } from '../services/kanban.service';
 import { LotService } from '../../lots/services/lot.service';
 import { TimeTrackingService } from '../../time-tracking/services/time-tracking.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { AuthService } from '../../../shared/services/auth.service';
+import { TimeEntry } from '../../time-tracking/models/time-entry.model';
+import { Stage } from '../../../shared/models/stage.model';
+import { JobDetail } from '../models/job-detail.model';
 import { JobPart } from '../models/job-part.model';
 import { PartSearchResult } from '../models/part-search-result.model';
 
@@ -30,6 +34,12 @@ interface PanelInternals {
   savePartQty(jp: JobPart): void;
   canDispose(disposition: string | null): boolean;
   formatDisposition(disposition: string): string;
+  timeEntries: { set(v: TimeEntry[]): void };
+  hasActiveTimer: () => boolean;
+  stopTimerForJob(): void;
+  job: { set(v: JobDetail | null): void };
+  availableStages: { set(v: Stage[]): void };
+  onAllOperationsComplete(): void;
 }
 
 const JOB_ID = 42;
@@ -68,22 +78,28 @@ function setup() {
   const kanban = {
     addJobPart: vi.fn(),
     updateJobPart: vi.fn(),
+    getJobTimeEntries: vi.fn().mockReturnValue(of([])),
+    moveJobStage: vi.fn().mockReturnValue(of(undefined)),
   };
   const snackbar = { success: vi.fn(), error: vi.fn() };
+  const timeTracking = { stopTimer: vi.fn().mockReturnValue(of({})), startTimer: vi.fn() };
+  const afterClosed = new Subject<unknown>();
+  const dialog = { open: vi.fn().mockReturnValue({ afterClosed: () => afterClosed }) };
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     providers: [
       provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
       { provide: KanbanService, useValue: kanban },
       { provide: LotService, useValue: {} },
-      { provide: TimeTrackingService, useValue: {} },
+      { provide: TimeTrackingService, useValue: timeTracking },
       { provide: SnackbarService, useValue: snackbar },
-      { provide: MatDialog, useValue: { open: vi.fn() } },
+      { provide: MatDialog, useValue: dialog },
+      { provide: AuthService, useValue: { user: () => ({ id: 1 }) } },
     ],
   });
   const component = TestBed.runInInjectionContext(() => new JobDetailPanelComponent()) as unknown as PanelInternals;
   Object.defineProperty(component, 'jobId', { value: () => JOB_ID });
-  return { component, kanban, snackbar };
+  return { component, kanban, snackbar, timeTracking, dialog, afterClosed };
 }
 
 describe('JobDetailPanelComponent', () => {
@@ -169,4 +185,68 @@ describe('JobDetailPanelComponent', () => {
     expect(component.formatDisposition('EnteredInError')).toBe('kanban.dispositionEnteredInError');
     expect(component.formatDisposition('Other')).toBe('kanban.dispositionOther');
   });
+
+  it('shows Stop only for the current user\'s own job-level timer and stops it by id', () => {
+    const { component, timeTracking } = setup();
+    component.timeEntries.set([
+      timeEntry({ id: 11, userId: 2 }),
+      timeEntry({ id: 12, userId: 1, jobOperationId: 4 }),
+    ]);
+    expect(component.hasActiveTimer()).toBe(false);
+
+    component.timeEntries.set([
+      timeEntry({ id: 11, userId: 2 }),
+      timeEntry({ id: 13, userId: 1 }),
+    ]);
+    expect(component.hasActiveTimer()).toBe(true);
+
+    component.stopTimerForJob();
+    expect(timeTracking.stopTimer).toHaveBeenCalledWith({ timeEntryId: 13 });
+  });
+
+  it('offers to move the job to the next stage once every operation is done', () => {
+    const { component, kanban, dialog, afterClosed } = setup();
+    component.job.set({ id: JOB_ID, currentStageId: 2, stageName: 'Machining', stageColor: '#000' } as unknown as JobDetail);
+    component.availableStages.set([
+      { id: 1, name: 'Queued', color: '#111', sortOrder: 1 },
+      { id: 2, name: 'Machining', color: '#222', sortOrder: 2 },
+      { id: 3, name: 'Inspection', color: '#333', sortOrder: 3 },
+    ] as unknown as Stage[]);
+
+    component.onAllOperationsComplete();
+    expect(dialog.open).toHaveBeenCalledOnce();
+    afterClosed.next(true);
+
+    expect(kanban.moveJobStage).toHaveBeenCalledWith(JOB_ID, 3);
+  });
+
+  it('does not prompt when the job is already in its last stage', () => {
+    const { component, dialog } = setup();
+    component.job.set({ id: JOB_ID, currentStageId: 3 } as unknown as JobDetail);
+    component.availableStages.set([{ id: 3, name: 'Inspection', color: '#333', sortOrder: 3 }] as unknown as Stage[]);
+
+    component.onAllOperationsComplete();
+    expect(dialog.open).not.toHaveBeenCalled();
+  });
 });
+
+function timeEntry(overrides: Partial<TimeEntry> = {}): TimeEntry {
+  return {
+    id: 1,
+    jobId: JOB_ID,
+    jobNumber: 'JOB-0042',
+    userId: 1,
+    userName: 'Rivera, Sam',
+    date: new Date('2026-10-08T00:00:00Z'),
+    durationMinutes: 0,
+    category: 'Production',
+    notes: null,
+    timerStart: new Date('2026-10-08T08:00:00Z'),
+    timerStop: null,
+    isManual: false,
+    isLocked: false,
+    createdAt: new Date('2026-10-08T08:00:00Z'),
+    jobOperationId: null,
+    ...overrides,
+  };
+}

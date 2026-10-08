@@ -1,0 +1,37 @@
+<app-dialog [title]="'jobOperations.dialog.title' | translate: { operation: data.title }" width="420px" (closed)="close()">
+  <p class="op-qty__summary" data-testid="operation-qty-summary">
+    {{ 'jobOperations.dialog.summary' | translate: {
+      done: (data.completedQuantity | number:'1.0-4'),
+      total: (data.jobQuantity | number:'1.0-4'),
+      remaining: (remaining | number:'1.0-4') } }}
+  </p>
+  <div [formGroup]="form">
+    <app-input data-testid="operation-qty-quantity" type="number" min="0"
+               [label]="'jobOperations.dialog.quantity' | translate" formControlName="quantity" />
+    @if (showScrap() || data.scrapQuantity > 0) {
+      <app-input data-testid="operation-qty-scrap" type="number" min="0"
+                 [label]="'jobOperations.dialog.scrap' | translate" formControlName="scrap" />
+    } @else {
+      <button type="button" class="action-btn action-btn--link" data-testid="operation-qty-show-scrap" (click)="toggleScrap()">
+        {{ 'jobOperations.dialog.addScrap' | translate }}
+      </button>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button type="button" class="action-btn" data-testid="operation-qty-record"
+            [disabled]="!canRecord()" (click)="record()">
+      {{ 'jobOperations.dialog.record' | translate: { count: (added() | number:'1.0-4') } }}
+    </button>
+    <app-validation-button [violations]="violations">
+      <button type="button" class="action-btn action-btn--primary" data-testid="operation-qty-done"
+              [disabled]="!canComplete()" (click)="complete()">
+        @if (isAll()) {
+          {{ 'jobOperations.dialog.doneAll' | translate: { count: (newCompleted() | number:'1.0-4') } }}
+        } @else {
+          {{ 'jobOperations.dialog.done' | translate: { count: (newCompleted() | number:'1.0-4') } }}
+        }
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

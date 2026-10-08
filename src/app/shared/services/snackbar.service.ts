@@ -5,7 +5,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { NavigationStart, Router } from '@angular/router';
 
 import { TranslateService } from '@ngx-translate/core';
-import { filter } from 'rxjs';
+import { Observable, filter } from 'rxjs';
 
 import { wasHttpErrorShown } from '../utils/shown-http-errors';
 
@@ -73,6 +73,13 @@ export class SnackbarService {
     ref.onAction().subscribe(() => {
       this.router.navigate([route]);
     });
+  }
+
+  successWithAction(message: string, actionLabel: string): Observable<void> {
+    return this.snackBar.open(message, actionLabel, {
+      duration: 8000,
+      panelClass: ['snackbar--success'],
+    }).onAction();
   }
 
   private dismissLabel(): string {

@@ -1,0 +1,62 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.running-timers {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.running-timers__item {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-xs $sp-sm;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  font-size: $font-size-sm;
+}
+
+.running-timers__dot {
+  flex-shrink: 0;
+  width: $dot-size-sm;
+  height: $dot-size-sm;
+  border-radius: 50%;
+  background: var(--success);
+  animation: running-timers-pulse 1.6s ease-in-out infinite;
+}
+
+.running-timers__job {
+  font-family: $font-family-mono;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.running-timers__step {
+  color: var(--text-muted);
+}
+
+.running-timers__label {
+  flex: 1;
+  min-width: 0;
+  @include truncate;
+}
+
+.running-timers__elapsed {
+  margin-left: auto;
+  font-family: $font-family-mono;
+}
+
+@keyframes running-timers-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .running-timers__dot {
+    animation: none;
+  }
+}

@@ -580,7 +580,14 @@
     "dispositionNotesRequired": "Add a reason for this disposition.",
     "goodQuantity": "Good quantity",
     "destinationBin": "Put away to bin",
-    "dispositionNoPart": "This work order has no part, so nothing can be added to inventory."
+    "dispositionNoPart": "This work order has no part, so nothing can be added to inventory.",
+    "card": {
+      "operationsRunning": "A timer is running on this job",
+      "operationsQty": "Qty {{quantity}}",
+      "operationsCount": "Ops {{complete}}/{{total}}",
+      "operationsInProgress": "▶ {{steps}}",
+      "operationsRemaining": "~{{time}} left"
+    }
   },
   "backlog": {
     "title": "Backlog",
@@ -2987,7 +2994,13 @@
     "entryAdded": "Time entry added.",
     "entryDeleted": "Time entry deleted.",
     "timerStarted": "Timer started.",
-    "timerStopped": "Timer stopped."
+    "timerStopped": "Timer stopped.",
+    "runningTimers": "Running timers",
+    "runningNoJob": "No job",
+    "runningStep": "Step {{step}}",
+    "runningJustStarted": "just started",
+    "runningStop": "Stop",
+    "runningStopAria": "Stop the timer on {{job}}"
   },
   "assets": {
     "title": "Assets",
@@ -9940,6 +9953,84 @@
       "message": "That page is on the desktop site.",
       "open": "Open desktop site",
       "storageBlocked": "This browser is blocking site storage, so the desktop view cannot be remembered."
+    }
+  },
+  "jobOperations": {
+    "sectionTitle": "Operation Time",
+    "empty": "No operation time data. This job may not have a part with operations defined.",
+    "noneRemaining": "Nothing left",
+    "qtyOf": "{{done}} / {{total}}",
+    "scrapCount": "{{count}} scrap",
+    "otherRunning": "{{initials}} has a timer running on this step",
+    "perPieceEst": "Est {{value}}",
+    "perPieceAct": "Act {{value}}",
+    "perPieceHist": "Hist {{value}} ({{count}})",
+    "recordQuantityAria": "Record progress on {{operation}}",
+    "moreActionsAria": "More actions for {{operation}}",
+    "resetTitle": "Reset this operation?",
+    "resetMessage": "This clears the counts and the start and finish times recorded for {{operation}}. Time already logged is kept.",
+    "moveTitle": "All operations are done",
+    "moveMessage": "Move the job to {{stage}}?",
+    "moveConfirm": "Move job",
+    "moveLater": "Not now",
+    "status": {
+      "notStarted": "Not started",
+      "inProgress": "In progress",
+      "complete": "Done",
+      "skipped": "Skipped"
+    },
+    "actions": {
+      "start": "Start",
+      "startRun": "Start run",
+      "startSetup": "Start setup",
+      "stop": "Stop",
+      "done": "Done",
+      "addQuantity": "+Qty",
+      "skip": "Skip",
+      "reopen": "Reopen",
+      "reset": "Reset",
+      "undo": "Undo"
+    },
+    "columns": {
+      "operation": "Operation",
+      "status": "Status",
+      "quantity": "Qty",
+      "timers": "Timers",
+      "estSetup": "Est. Setup",
+      "actSetup": "Act. Setup",
+      "estRun": "Est. Run",
+      "actRun": "Act. Run",
+      "total": "Total",
+      "efficiency": "Eff.",
+      "progress": "Progress",
+      "perPiece": "Per piece",
+      "remaining": "Remaining"
+    },
+    "summary": {
+      "estimated": "Estimated",
+      "actual": "Actual",
+      "efficiency": "Efficiency",
+      "remaining": "Remaining",
+      "quantity": "Qty"
+    },
+    "dialog": {
+      "title": "Record progress: {{operation}}",
+      "summary": "{{done}} of {{total}} done, {{remaining}} to go",
+      "quantity": "Pieces finished now",
+      "scrap": "Pieces scrapped now",
+      "addScrap": "Record scrap",
+      "record": "Record {{count}}, keep going",
+      "doneAll": "Done — all {{count}}",
+      "done": "Done — {{count}}",
+      "negative": "Quantities cannot be negative",
+      "overQuantity": "Finished plus scrapped ({{total}}) is more than the job quantity ({{quantity}})"
+    },
+    "messages": {
+      "completed": "{{operation}} marked done",
+      "skipped": "{{operation}} skipped",
+      "reopened": "{{operation}} reopened",
+      "reset": "{{operation}} reset",
+      "recorded": "Progress recorded on {{operation}}"
     }
   }
 }

@@ -9,6 +9,11 @@
   display: flex; align-items: center; gap: $sp-lg;
   padding: $sp-md $sp-lg; border-bottom: $border-width-thin solid var(--border); flex-shrink: 0;
 }
+.running-strip {
+  display: block;
+  padding: $sp-md $sp-lg 0;
+  flex-shrink: 0;
+}
 .filter-group { display: flex; align-items: center; gap: $sp-sm; min-width: 160px; max-width: 200px; }
 .filter-summary { margin-left: auto; font-size: var(--font-size-sm); color: var(--text-muted); }
 

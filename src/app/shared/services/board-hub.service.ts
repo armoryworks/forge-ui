@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HubConnection, HubConnectionState } from '@microsoft/signalr';
+import { Observable, Subject } from 'rxjs';
 
 import { SignalrService } from './signalr.service';
 
@@ -17,6 +18,9 @@ export class BoardHubService {
   private onJobPositionChanged: ((event: unknown) => void) | null = null;
   private onSubtaskChanged: ((event: unknown) => void) | null = null;
   private onBoardUpdated: ((event: unknown) => void) | null = null;
+  private readonly jobUpdatedSubject = new Subject<unknown>();
+
+  readonly jobUpdated$: Observable<unknown> = this.jobUpdatedSubject.asObservable();
 
   async connect(): Promise<void> {
     this.connection = this.signalr.getOrCreateConnection('board');
@@ -112,7 +116,10 @@ export class BoardHubService {
 
     this.connection.on('jobCreated', (event) => this.onJobCreated?.(event));
     this.connection.on('jobMoved', (event) => this.onJobMoved?.(event));
-    this.connection.on('jobUpdated', (event) => this.onJobUpdated?.(event));
+    this.connection.on('jobUpdated', (event) => {
+      this.onJobUpdated?.(event);
+      this.jobUpdatedSubject.next(event);
+    });
     this.connection.on('jobPositionChanged', (event) => this.onJobPositionChanged?.(event));
     this.connection.on('subtaskChanged', (event) => this.onSubtaskChanged?.(event));
     this.connection.on('boardUpdated', (event) => this.onBoardUpdated?.(event));
