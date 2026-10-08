@@ -1,9 +1,6 @@
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
 
-// ─── Layout ───
-$grid-columns: 5;
-
 :host {
   display: flex;
   flex-direction: column;
@@ -170,11 +167,23 @@ $grid-columns: 5;
   }
 }
 
-// ─── Worker Grid (5-column) ───
+// ─── Worker Grid ───
 .sf-grid {
   display: grid;
-  grid-template-columns: repeat($grid-columns, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(var(--sf-tile-min, 300px), 1fr));
+  align-items: start;
   gap: $sp-md;
+}
+
+.sf-grid--dense {
+  gap: $sp-sm;
+
+  .sf-card__identity {
+    gap: $sp-sm;
+    padding: $sp-sm $sp-md;
+  }
+
+  .sf-card__name { font-size: $font-size-md; }
 }
 
 // ─── Worker Card ───
@@ -192,9 +201,6 @@ $grid-columns: 5;
   color: var(--text);
   text-align: left;
   border-left: 4px solid var(--border);
-  aspect-ratio: 1;
-  overflow-y: auto;
-  @include custom-scrollbar(4px);
 
   &:hover {
     border-color: var(--primary);
@@ -233,6 +239,20 @@ $grid-columns: 5;
     .sf-card__name { color: var(--text-muted); }
 
     &:hover { opacity: 1; border-color: var(--primary); border-left-color: var(--primary); }
+  }
+
+  &--compact .sf-card__identity {
+    padding-top: $sp-sm;
+    padding-bottom: $sp-sm;
+  }
+
+  &--assign-target {
+    outline: 2px dashed var(--primary);
+    outline-offset: -2px;
+  }
+
+  &:disabled {
+    cursor: wait;
   }
 
   &--feedback-success {
@@ -297,6 +317,17 @@ $grid-columns: 5;
   color: var(--text-muted);
 }
 
+.sf-card__times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-xxs $sp-md;
+}
+
+.sf-card__time--job {
+  color: var(--primary);
+  font-weight: 600;
+}
+
 .sf-card__prior-shift {
   font-size: $font-size-md;
   font-weight: 600;
@@ -357,6 +388,15 @@ $grid-columns: 5;
   color: var(--primary);
 }
 
+.sf-card__job-elapsed {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-xxs;
+  font-family: $font-family-mono;
+  font-weight: 600;
+  color: var(--primary);
+}
+
 .sf-card__job-overflow {
   font-size: $font-size-md;
   color: var(--text-muted);
@@ -412,16 +452,65 @@ $grid-columns: 5;
   padding: $sp-md;
   background: var(--surface);
   border: $border-width-thin solid var(--border);
+  width: 100%;
+  font-family: $font-family-primary;
+  color: var(--text);
+  text-align: left;
+
+  &:disabled {
+    cursor: default;
+  }
 
   &--overdue {
     border-left: $border-width-accent solid var(--error);
   }
+
+  &--selectable {
+    cursor: pointer;
+
+    &:hover:not(:disabled) { border-color: var(--primary); }
+  }
+
+  &--selected {
+    border-color: var(--primary);
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+    background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+  }
 }
 
-.sf-unassigned-card__dot {
-  width: $dot-size-md;
-  height: $dot-size-md;
+.sf-assign-bar {
+  display: flex;
+  align-items: center;
+  gap: $sp-lg;
+  padding: $sp-md $sp-lg;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  border: $border-width solid var(--primary);
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.sf-assign-bar__icon {
+  font-size: $icon-size-xl;
+  color: var(--primary);
+}
+
+.sf-assign-bar__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+  font-size: $font-size-md;
+  font-weight: 600;
+}
+
+.sf-assign-bar__feedback {
+  color: var(--success);
+
+  &--fail { color: var(--error); }
 }
 
 .sf-unassigned-card__main {
@@ -774,6 +863,13 @@ $grid-columns: 5;
   @include truncate;
 }
 
+.sf-actions-card__job-elapsed {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: var(--primary);
+}
+
 .sf-actions-card__job-stage {
   font-size: $font-size-xxs;
   color: var(--text-muted);
@@ -809,6 +905,13 @@ $grid-columns: 5;
     font-size: $icon-size-lg;
     color: var(--text-muted);
   }
+}
+
+.sf-action-btn--pick,
+.sf-action-btn--assign {
+  border-left: $border-width-accent solid var(--primary);
+
+  .material-icons-outlined { color: var(--primary); }
 }
 
 .sf-actions-card__cancel {
@@ -895,8 +998,10 @@ $grid-columns: 5;
   background: var(--surface);
   border: $border-width solid var(--border);
   width: 100%;
-  max-width: 600px;
-  max-height: 80vh;
+  max-width: 960px;
+  max-height: 90vh;
+  overflow-y: auto;
+  @include custom-scrollbar(4px);
 }
 
 .sf-job-select-card__header {
@@ -933,7 +1038,7 @@ $grid-columns: 5;
   flex-direction: column;
   gap: $sp-xs;
   overflow-y: auto;
-  max-height: 50vh;
+  max-height: 60vh;
   @include custom-scrollbar(4px);
 }
 
@@ -960,12 +1065,6 @@ $grid-columns: 5;
   &--overdue { border-left: $border-width-accent solid var(--error); }
 }
 
-.sf-job-select-card__job-dot {
-  width: $dot-size-md;
-  height: $dot-size-md;
-  flex-shrink: 0;
-}
-
 .sf-job-select-card__job-main {
   flex: 1;
   display: flex;
@@ -984,6 +1083,58 @@ $grid-columns: 5;
 .sf-job-select-card__job-title {
   font-size: $font-size-base;
   @include truncate;
+}
+
+.sf-job-select-card__body {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) 1fr;
+  gap: $sp-lg;
+  min-height: 0;
+
+  @include tablet {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sf-job-select-card__search {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-sm;
+
+  app-input { width: 100%; }
+}
+
+.sf-job-select-card__job-detail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-xxs $sp-md;
+  font-size: $font-size-xs;
+  color: var(--text-secondary);
+}
+
+.sf-job-select-card__job-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: $sp-xxs;
+  flex-shrink: 0;
+}
+
+.sf-job-select-card__job-due {
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+  color: var(--text-secondary);
+
+  &--overdue {
+    color: var(--error);
+    font-weight: 600;
+  }
+}
+
+.sf-job-select-card__more {
+  align-self: center;
+  flex-shrink: 0;
 }
 
 .sf-job-select-card__job-stage {
@@ -1447,6 +1598,50 @@ $grid-columns: 5;
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+.sf-entry {
+  @include flex-center;
+  height: 100%;
+  padding: $sp-xl;
+}
+
+.sf-entry__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-lg;
+  padding: $sp-3xl;
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  width: 100%;
+  max-width: 520px;
+  text-align: center;
+}
+
+.sf-entry__icon {
+  font-size: $icon-size-hero;
+  color: var(--primary);
+}
+
+.sf-entry__title {
+  font-size: $font-size-xl;
+  font-weight: 700;
+  margin: 0;
+}
+
+.sf-entry__message {
+  font-size: $font-size-md;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.sf-entry__actions {
+  display: flex;
+  gap: $sp-md;
+  width: 100%;
+
+  .action-btn { flex: 1; }
 }
 
 // ─── Empty State ───

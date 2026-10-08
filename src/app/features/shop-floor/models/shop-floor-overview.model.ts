@@ -3,6 +3,7 @@ export interface ShopFloorOverview {
   workers: ShopFloorWorker[];
   completedToday: number;
   maintenanceAlerts: number;
+  readyToStartCount?: number;
 }
 
 export interface ShopFloorJob {

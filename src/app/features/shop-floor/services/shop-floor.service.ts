@@ -5,6 +5,7 @@ import { catchError, Observable, of } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ShopFloorOverview } from '../models/shop-floor-overview.model';
 import { ClockWorker } from '../models/clock-worker.model';
+import { KioskAvailableJob } from '../models/kiosk-available-job.model';
 import { KioskTerminal, Team } from '../models/kiosk-terminal.model';
 import { ScanIdentification } from '../models/scan-identification.model';
 import { JobOperations } from '../models/job-operations.model';
@@ -46,6 +47,18 @@ export class ShopFloorService {
 
   assignJob(jobId: number, userId: number): Observable<void> {
     return this.http.post<void>(`${this.base}/assign-job`, { jobId, userId });
+  }
+
+  getAvailableJobs(teamId: number | undefined, search: string, take: number): Observable<KioskAvailableJob[]> {
+    let params = new HttpParams().set('take', take);
+    if (teamId) params = params.set('teamId', teamId);
+    const term = search.trim();
+    if (term) params = params.set('search', term);
+    return this.http.get<KioskAvailableJob[]>(`${this.base}/jobs/available`, { params });
+  }
+
+  claimJob(jobId: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/jobs/${jobId}/claim`, {});
   }
 
   startTimer(jobId: number): Observable<unknown> {

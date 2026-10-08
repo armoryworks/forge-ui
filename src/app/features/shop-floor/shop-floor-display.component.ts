@@ -1,13 +1,15 @@
 import {
-  ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, HostBinding, inject, OnDestroy, OnInit, Renderer2, signal,
+  afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, HostBinding, inject, Injector, OnDestroy, OnInit,
+  Renderer2, signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
+import { A11yModule } from '@angular/cdk/a11y';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { catchError, forkJoin, interval, of } from 'rxjs';
+import { catchError, debounceTime, forkJoin, interval, of, Subject, switchMap } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { environment } from '../../../environments/environment';
@@ -25,7 +27,8 @@ import { AppEvent } from '../events/models/event.model';
 import { AuthService } from '../../shared/services/auth.service';
 import { ScannerService } from '../../shared/services/scanner.service';
 import { LoadingService } from '../../shared/services/loading.service';
-import { ShopFloorOverview, ShopFloorJob } from './models/shop-floor-overview.model';
+import { ShopFloorOverview } from './models/shop-floor-overview.model';
+import { KioskAvailableJob } from './models/kiosk-available-job.model';
 import { ClockWorker, WorkerAssignment } from './models/clock-worker.model';
 import { KioskTerminal } from './models/kiosk-terminal.model';
 import { PurchaseOrderService } from '../purchase-orders/services/purchase-order.service';
@@ -50,18 +53,19 @@ const REFRESH_INTERVAL_MS = 15_000;
 const AUTO_LOGOUT_MS = 30_000;
 const PIN_TIMEOUT_MS = 20_000;
 const JOB_SELECT_TIMEOUT_MS = 15_000;
+const JOB_PAGE_SIZE = 50;
 const FEEDBACK_VISIBLE_MS = 2_000;
 const FEEDBACK_CLEAR_MS = 4_000;
 const MAX_SERVER_REASON_LENGTH = 200;
 const DEVICE_TOKEN_KEY = 'forge-kiosk-device-token';
 const TERMINAL_KEY = 'forge-kiosk-terminal';
 
-type DisplayPhase = 'main' | 'pin' | 'actions' | 'job-select' | 'receiving' | 'shipping';
+type DisplayPhase = 'main' | 'pin' | 'actions' | 'job-select' | 'assign' | 'receiving' | 'shipping';
 
 @Component({
   selector: 'app-shop-floor-display',
   standalone: true,
-  imports: [DatePipe, TranslatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, KioskSessionBarComponent, KioskSetupComponent, TrainingModeBannerComponent, ScanUndoListComponent, ScanActionOverlayComponent, ScanDailyLogComponent, ScanDevicesPanelComponent, ScanLocationViewComponent, NumericKeypadComponent],
+  imports: [DatePipe, A11yModule, TranslatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, KioskSessionBarComponent, KioskSetupComponent, TrainingModeBannerComponent, ScanUndoListComponent, ScanActionOverlayComponent, ScanDailyLogComponent, ScanDevicesPanelComponent, ScanLocationViewComponent, NumericKeypadComponent],
   templateUrl: './shop-floor-display.component.html',
   styleUrl: './shop-floor-display.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -107,9 +111,9 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   // Training PREVIEW mode. Sourced ONLY from static route data (the training
   // walkthrough navigates to the `preview` child route, which sets
   // `data.preview = true`); it is NOT a runtime flag, URL param, or in-memory
-  // state. The real kiosk route (`''`) never carries this data, so the kiosk's
-  // clear-on-entry stays UNCONDITIONAL — there is no runtime input that can
-  // make the real terminal skip it.
+  // state. The real kiosk route (`''`) never carries this data, so the kiosk
+  // always clears the session before it shows the terminal — there is no
+  // runtime input that can make the real terminal skip it.
   //
   // In preview the component is deliberately inert: it renders representative
   // MOCK data, never calls clearAuth / scanLogin / login / any mutation, and
@@ -138,6 +142,10 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     && !this.previewMode,
   );
 
+  protected readonly entryConfirmPending = signal(
+    !this.previewMode && this.isUnpaired() && this.authService.isAuthenticated(),
+  );
+
   protected readonly terminal = signal<KioskTerminal | null>(this.previewMode ? null : this.readCachedTerminal());
   protected readonly fullscreenSupported = typeof document.documentElement.requestFullscreen === 'function';
   private wakeLock: WakeLockSentinel | null = null;
@@ -159,6 +167,31 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     }
     return map;
   });
+  protected readonly shiftTimes = computed(() => {
+    this.tick();
+    const now = Date.now();
+    const map: Record<number, string> = {};
+    for (const w of this.workers()) {
+      if (w.clockedInAt && this.clockTypes.isWorking(w.status)) {
+        map[w.userId] = this.formatDuration(now - new Date(w.clockedInAt).getTime());
+      }
+    }
+    return map;
+  });
+  protected readonly timerElapsed = computed(() => {
+    this.tick();
+    const now = Date.now();
+    const map: Record<string, string> = {};
+    const signedIn = this.selectedWorker();
+    for (const w of signedIn ? [...this.workers(), signedIn] : this.workers()) {
+      for (const a of w.assignments) {
+        if (a.hasActiveTimer && a.timerStartedAt) {
+          map[this.jobKey(w.userId, a.jobId)] = this.formatDuration(now - new Date(a.timerStartedAt).getTime());
+        }
+      }
+    }
+    return map;
+  });
 
   // Computed worker groups (using ClockEventTypeService for status checks)
   protected readonly workersIn = computed(() => this.workers().filter(w => this.clockTypes.isWorking(w.status)));
@@ -166,12 +199,19 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   protected readonly workersOut = computed(() => this.workers().filter(w => this.clockTypes.isClockedOut(w.status)));
   protected readonly activeWorkers = computed(() => this.workers().filter(w => this.clockTypes.isActive(w.status)));
   protected readonly inactiveWorkers = computed(() => this.workers().filter(w => this.clockTypes.isClockedOut(w.status)));
-  protected readonly activeJobs = computed(() => this.overview()?.activeJobs ?? []);
-  protected readonly unassignedJobs = computed(() =>
-    this.activeJobs().filter(j => !j.assigneeId),
+  protected readonly sortedWorkers = computed(() =>
+    [...this.workers()].sort((a, b) => a.name.localeCompare(b.name) || a.userId - b.userId),
   );
+  protected readonly denseBoard = computed(() => this.workers().length > 20);
+  protected readonly tileMinWidth = computed(() => {
+    const count = this.workers().length;
+    if (count > 20) return 200;
+    return count > 12 ? 240 : 300;
+  });
+  protected readonly boardJobs = signal<KioskAvailableJob[]>([]);
+  protected readonly readyToStart = computed(() => this.overview()?.readyToStartCount ?? 0);
   protected readonly completedToday = computed(() => this.overview()?.completedToday ?? 0);
-  protected readonly maxVisibleJobs = 4;
+  protected readonly maxVisibleJobs = computed(() => this.denseBoard() ? 2 : 4);
   protected readonly maintenanceAlerts = computed(() => this.overview()?.maintenanceAlerts ?? 0);
 
   // Phase state
@@ -190,8 +230,18 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private readonly operationTracking = signal(false);
   protected readonly actionFeedback = signal<{ workerId: number; success: boolean; message: string; detail: string | null } | null>(null);
 
-  // Job selection state (shown after clock-in if worker has no assignments)
+  // Job selection state
   protected readonly jobSelectWorker = signal<ClockWorker | null>(null);
+  protected readonly pickerSearch = new FormControl('', { nonNullable: true });
+  protected readonly pickerJobs = signal<KioskAvailableJob[]>([]);
+  protected readonly pickerTake = signal(JOB_PAGE_SIZE);
+  protected readonly pickerLoading = signal(false);
+  protected readonly pickerFailed = signal(false);
+  protected readonly pickerTerm = signal('');
+  protected readonly pickerHasMore = computed(() => this.pickerJobs().length >= this.pickerTake());
+  private readonly pickerQuery = new Subject<{ search: string; take: number }>();
+
+  protected readonly assignSelection = signal<KioskAvailableJob | null>(null);
 
   // Receiving state
   protected readonly receivablePOs = signal<PurchaseOrderDetail[]>([]);
@@ -240,6 +290,8 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   protected readonly scanFeedback = signal<string | null>(null);
 
   private readonly elRef = inject(ElementRef);
+  private readonly injector = inject(Injector);
+  private kioskStarted = false;
 
   private autoLogoutTimer: ReturnType<typeof setTimeout> | null = null;
   private phaseTimeoutTimer: ReturnType<typeof setTimeout> | null = null;
@@ -253,6 +305,20 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   constructor() {
     this.applyFontSize();
+    this.pickerQuery.pipe(
+      switchMap(query => this.shopFloorService.getAvailableJobs(this.terminal()?.teamId, query.search, query.take).pipe(
+        catchError(() => of(null)),
+      )),
+      takeUntilDestroyed(),
+    ).subscribe(jobs => {
+      this.pickerLoading.set(false);
+      this.pickerFailed.set(jobs === null);
+      if (jobs) this.pickerJobs.set(jobs);
+    });
+    this.pickerSearch.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.keepPickerOpen());
+    this.pickerSearch.valueChanges.pipe(debounceTime(250), takeUntilDestroyed()).subscribe(() => {
+      if (this.phase() === 'job-select') this.queryPicker(JOB_PAGE_SIZE);
+    });
   }
 
   // Auto-focus PIN field when entering PIN phase
@@ -281,6 +347,16 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     this.handleScanValue(scan.value);
   });
 
+  private readonly scannerPauseEffect = effect(() => {
+    const phase = this.phase();
+    if (this.previewMode || !this.kioskStarted) return;
+    if (phase === 'pin' || phase === 'job-select') {
+      this.scanner.disable();
+    } else {
+      this.scanner.enable();
+    }
+  });
+
   // Mirror the shop-floor theme onto <html> so CDK overlays (dialogs, toasts,
   // dropdowns) inherit the kiosk theme rather than the main site's theme.
   private readonly htmlThemeEffect = effect(() => {
@@ -303,6 +379,21 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.entryConfirmPending()) return;
+    this.startKiosk();
+  }
+
+  protected continueToKiosk(): void {
+    this.entryConfirmPending.set(false);
+    this.startKiosk();
+  }
+
+  protected backToForge(): void {
+    this.router.navigate(['/dashboard']);
+  }
+
+  private startKiosk(): void {
+    this.kioskStarted = true;
     // Real shared-terminal kiosk: unconditionally wipe any inherited session on
     // entry — this is what stops worker A's token lingering for worker B.
     this.authService.clearAuth();
@@ -362,7 +453,10 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.destroyed = true;
-    this.scanner.stop();
+    if (this.kioskStarted) {
+      this.scanner.enable();
+      this.scanner.stop();
+    }
     document.removeEventListener('visibilitychange', this.onVisibilityChange);
     this.releaseWakeLock();
     this.clearFeedbackTimer();
@@ -516,6 +610,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   protected cancelPin(): void {
     this.resetToMain();
+    this.focusKioskSearch();
   }
 
   // ─── Keypad input (touchscreen PIN entry) ───
@@ -567,17 +662,9 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
         const eventDef = this.clockTypes.definitions().find(d => d.code === eventType);
         const clockedInWithoutWork = eventDef?.statusMapping === 'In' && eventDef.category === 'work' && worker.assignments.length === 0;
-        if (clockedInWithoutWork && this.canSupervise()) {
+        if (clockedInWithoutWork) {
           this.showActionFeedback(worker.userId, true, this.translate.instant('shopFloor.actionDone'));
-          this.scheduleTransition(() => {
-            this.actionFeedback.set(null);
-            this.jobSelectWorker.set(worker);
-            this.phase.set('job-select');
-            this.startPhaseTimeout(JOB_SELECT_TIMEOUT_MS);
-          }, 800);
-        } else if (clockedInWithoutWork) {
-          this.showActionFeedback(worker.userId, true, this.translate.instant('shopFloor.noAssignmentAskLead'));
-          this.scheduleTransition(() => this.ephemeralLogout(), FEEDBACK_VISIBLE_MS);
+          this.scheduleTransition(() => this.openJobPicker(worker), 800);
         } else {
           this.showActionFeedback(worker.userId, true, this.translate.instant('shopFloor.actionDone'));
           this.scheduleTransition(() => this.ephemeralLogout(), 1500);
@@ -592,30 +679,136 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   // ─── Job Selection ───
 
-  protected selectJob(job: ShopFloorJob): void {
+  protected openPickerFromActions(): void {
+    const worker = this.selectedWorker();
+    if (!worker || this.processing()) return;
+    this.openJobPicker(worker);
+  }
+
+  private openJobPicker(worker: ClockWorker): void {
+    this.clearAutoLogoutTimer();
+    this.actionFeedback.set(null);
+    this.jobSelectWorker.set(worker);
+    this.pickerJobs.set([]);
+    this.pickerFailed.set(false);
+    this.pickerSearch.setValue('', { emitEvent: false });
+    this.phase.set('job-select');
+    this.startPhaseTimeout(JOB_SELECT_TIMEOUT_MS);
+    this.queryPicker(JOB_PAGE_SIZE);
+  }
+
+  private queryPicker(take: number): void {
+    const search = this.pickerSearch.value.trim();
+    this.pickerTake.set(take);
+    this.pickerTerm.set(search);
+    this.pickerLoading.set(true);
+    this.pickerQuery.next({ search, take });
+  }
+
+  protected showMoreJobs(): void {
+    this.keepPickerOpen();
+    this.queryPicker(this.pickerTake() + JOB_PAGE_SIZE);
+  }
+
+  protected onPickerDigit(digit: string): void {
+    this.pickerSearch.setValue(this.pickerSearch.value + digit);
+  }
+
+  protected onPickerBackspace(): void {
+    this.pickerSearch.setValue(this.pickerSearch.value.slice(0, -1));
+  }
+
+  protected onPickerClear(): void {
+    this.pickerSearch.setValue('');
+  }
+
+  private keepPickerOpen(): void {
+    if (this.phase() === 'job-select' && !this.processing()) this.startPhaseTimeout(JOB_SELECT_TIMEOUT_MS);
+  }
+
+  protected claimJob(job: KioskAvailableJob): void {
     const worker = this.jobSelectWorker();
     if (!worker || this.processing()) return;
-    this.processing.set(`assign-${job.id}`);
-    this.resetAutoLogoutTimer();
+    this.processing.set(`claim-${job.jobId}`);
+    this.clearPhaseTimeout();
 
-    this.loading.track(this.translate.instant('shopFloor.display.assigning'), this.shopFloorService.assignJob(job.id, worker.userId)).subscribe({
+    this.loading.track(this.translate.instant('kioskDisplay.claiming'), this.shopFloorService.claimJob(job.jobId)).subscribe({
       next: () => {
         this.processing.set(null);
+        this.jobSelectWorker.set(null);
         this.loadData();
-        this.scheduleTransition(() => this.ephemeralLogout(), 800);
+        this.phase.set('actions');
+        this.startAutoLogoutTimer();
+        this.showActionFeedback(worker.userId, true, this.translate.instant('kioskDisplay.claimed', { jobNumber: job.jobNumber }));
       },
       error: (err: HttpErrorResponse) => {
         this.processing.set(null);
-        this.clearPhaseTimeout();
         this.showActionFeedback(worker.userId, false,
-          this.translate.instant('shopFloor.display.assignFailed', { jobNumber: job.jobNumber }), this.serverReason(err));
-        this.scheduleTransition(() => this.ephemeralLogout(), FEEDBACK_VISIBLE_MS);
+          this.translate.instant('kioskDisplay.claimFailed', { jobNumber: job.jobNumber }), this.serverReason(err));
+        this.startPhaseTimeout(JOB_SELECT_TIMEOUT_MS);
+        this.queryPicker(this.pickerTake());
       },
     });
   }
 
   protected skipJobSelect(): void {
     this.ephemeralLogout();
+    this.focusKioskSearch();
+  }
+
+  protected enterAssignMode(): void {
+    if (!this.canSupervise() || this.processing()) return;
+    this.assignSelection.set(null);
+    this.actionFeedback.set(null);
+    this.phase.set('assign');
+    this.startAutoLogoutTimer();
+    this.loadData();
+  }
+
+  protected toggleAssignSelection(job: KioskAvailableJob): void {
+    if (this.phase() !== 'assign' || this.processing()) return;
+    this.assignSelection.update(current => current?.jobId === job.jobId ? null : job);
+    this.startAutoLogoutTimer();
+  }
+
+  protected onWorkerTile(worker: ClockWorker): void {
+    if (this.phase() === 'assign') {
+      this.assignSelectedJobTo(worker);
+      return;
+    }
+    this.selectWorker(worker);
+  }
+
+  private assignSelectedJobTo(worker: ClockWorker): void {
+    const supervisor = this.selectedWorker();
+    const job = this.assignSelection();
+    if (!supervisor || this.processing()) return;
+    this.startAutoLogoutTimer();
+    if (!job) {
+      this.showActionFeedback(supervisor.userId, false, this.translate.instant('kioskDisplay.assignPickJobFirst'));
+      return;
+    }
+    this.processing.set(`assign-${job.jobId}`);
+
+    this.loading.track(this.translate.instant('shopFloor.display.assigning'), this.shopFloorService.assignJob(job.jobId, worker.userId)).subscribe({
+      next: () => {
+        this.processing.set(null);
+        this.assignSelection.set(null);
+        this.loadData();
+        this.showActionFeedback(supervisor.userId, true,
+          this.translate.instant('kioskDisplay.assignedTo', { jobNumber: job.jobNumber, name: worker.name }));
+      },
+      error: (err: HttpErrorResponse) => {
+        this.processing.set(null);
+        this.showActionFeedback(supervisor.userId, false,
+          this.translate.instant('shopFloor.display.assignFailed', { jobNumber: job.jobNumber }), this.serverReason(err));
+      },
+    });
+  }
+
+  protected finishAssign(): void {
+    this.ephemeralLogout();
+    this.focusKioskSearch();
   }
 
   // ─── Job Timer Actions ───
@@ -707,6 +900,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   protected cancelActions(): void {
     this.ephemeralLogout();
+    this.focusKioskSearch();
   }
 
   // ─── Receiving ───
@@ -887,6 +1081,39 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   protected closeLocationView(): void {
     this.scannedLocationId.set(null);
     this.scannedLocationName.set(null);
+    this.focusKioskSearch();
+  }
+
+  protected closeDailyLog(): void {
+    this.showDailyLog.set(false);
+    this.focusKioskSearch();
+  }
+
+  protected closeDevicesPanel(): void {
+    this.showDevicesPanel.set(false);
+    this.focusKioskSearch();
+  }
+
+  protected runningAssignment(worker: ClockWorker): WorkerAssignment | null {
+    return worker.assignments.find(a => a.hasActiveTimer) ?? null;
+  }
+
+  protected isPastDue(job: KioskAvailableJob): boolean {
+    if (!job.dueDate) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return new Date(job.dueDate).getTime() < today.getTime();
+  }
+
+  protected jobKey(userId: number, jobId: number): string {
+    return `${userId}:${jobId}`;
+  }
+
+  private focusKioskSearch(): void {
+    afterNextRender(() => {
+      const search = (this.elRef.nativeElement as HTMLElement).querySelector<HTMLInputElement>('.kiosk-search__input');
+      search?.focus();
+    }, { injector: this.injector });
   }
 
   protected toggleTheme(): void {
@@ -995,6 +1222,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     this.clearTransitionTimer();
     this.closeNextStatusDialog();
     this.jobSelectWorker.set(null);
+    this.assignSelection.set(null);
     if (!this.previewMode) this.authService.clearAuth();
     this.selectedWorker.set(null);
     this.scannedValue.set(null);
@@ -1099,9 +1327,11 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
       workers: this.shopFloorService.getClockStatus(teamId),
       everyone: signedInOffTeam ? this.shopFloorService.getClockStatus().pipe(catchError(() => of(null))) : of(null),
       events: this.eventsService.getUpcomingEvents().pipe(catchError(() => of([]))),
+      jobs: this.shopFloorService.getAvailableJobs(teamId, '', JOB_PAGE_SIZE).pipe(catchError(() => of([]))),
     }).subscribe({
-      next: ({ overview, workers, everyone, events }) => {
+      next: ({ overview, workers, everyone, events, jobs }) => {
         this.overview.set(overview);
+        this.boardJobs.set(jobs);
         this.workers.set(workers);
         this.upcomingEvents.set(events);
         this.error.set(null);

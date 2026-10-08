@@ -1,4 +1,22 @@
-@if (isUnpaired()) {
+@if (entryConfirmPending()) {
+  <section class="sf-entry" aria-labelledby="sf-entry-title" data-testid="sf-entry-confirm">
+    <div class="sf-entry__card">
+      <span class="material-icons-outlined sf-entry__icon">precision_manufacturing</span>
+      <h1 id="sf-entry-title" class="sf-entry__title">{{ 'kioskDisplay.entryTitle' | translate }}</h1>
+      <p class="sf-entry__message">{{ 'kioskDisplay.entryMessage' | translate }}</p>
+      <div class="sf-entry__actions">
+        <button type="button" class="action-btn" (click)="backToForge()" data-testid="sf-entry-back">
+          <span class="material-icons-outlined">arrow_back</span>
+          {{ 'kioskDisplay.backToForge' | translate }}
+        </button>
+        <button type="button" class="action-btn action-btn--primary" (click)="continueToKiosk()" data-testid="sf-entry-continue">
+          <span class="material-icons-outlined">arrow_forward</span>
+          {{ 'kioskDisplay.continue' | translate }}
+        </button>
+      </div>
+    </div>
+  </section>
+} @else if (isUnpaired()) {
   <app-kiosk-setup (configured)="onTerminalConfigured($event)" />
 } @else if (error()) {
   <div class="sf-error">
@@ -25,9 +43,9 @@
         <span class="sf-stat__value">{{ workersOnBreak().length }}</span>
         <span class="sf-stat__label">{{ 'shopFloor.onBreak' | translate }}</span>
       </div>
-      <div class="sf-stat">
-        <span class="sf-stat__value">{{ unassignedJobs().length }}</span>
-        <span class="sf-stat__label">{{ 'shopFloor.unassigned' | translate }}</span>
+      <div class="sf-stat" data-testid="sf-ready-to-start">
+        <span class="sf-stat__value">{{ readyToStart() }}</span>
+        <span class="sf-stat__label">{{ 'kioskDisplay.readyToStart' | translate }}</span>
       </div>
       <div class="sf-stat sf-stat--accent">
         <span class="sf-stat__value">{{ completedToday() }}</span>
@@ -88,39 +106,87 @@
   </header>
 
   <div class="sf-body">
-    <!-- All Workers — Single Grid -->
+    @if (phase() === 'assign') {
+      <div class="sf-assign-bar" data-testid="sf-assign-bar">
+        <span class="material-icons-outlined sf-assign-bar__icon">assignment_ind</span>
+        <div class="sf-assign-bar__text">
+          @if (assignSelection(); as job) {
+            <span>{{ 'kioskDisplay.assignTapWorker' | translate: { jobNumber: job.jobNumber } }}</span>
+          } @else {
+            <span>{{ 'kioskDisplay.assignTapJob' | translate }}</span>
+          }
+          @if (selectedWorker(); as supervisor) {
+            @if (feedbackFor(supervisor.userId); as fb) {
+              <span class="sf-assign-bar__feedback"
+                    [class.sf-assign-bar__feedback--fail]="!fb.success"
+                    role="status" aria-live="assertive"
+                    data-testid="sf-assign-feedback">
+                {{ fb.message }}
+                @if (fb.detail) {
+                  — {{ fb.detail }}
+                }
+              </span>
+            }
+          }
+        </div>
+        <button type="button" class="action-btn action-btn--primary" (click)="finishAssign()" data-testid="sf-assign-done">
+          <span class="material-icons-outlined">check</span>
+          {{ 'kioskDisplay.assignDone' | translate }}
+        </button>
+      </div>
+    }
+
     @if (workers().length > 0) {
       <div class="sf-cta">
         <span class="material-icons-outlined">contactless</span>
         {{ 'shopFloor.display.signInPrompt' | translate }}
       </div>
 
-      <div class="sf-grid">
-        @for (worker of workers(); track worker.userId) {
-          <button class="sf-card"
-               [class.sf-card--in]="clockTypes.isWorking(worker.status)"
+      <div class="sf-grid" [class.sf-grid--dense]="denseBoard()" [style.--sf-tile-min]="tileMinWidth() + 'px'">
+        @for (worker of sortedWorkers(); track worker.userId) {
+          @let running = runningAssignment(worker);
+          @let working = clockTypes.isWorking(worker.status);
+          @let out = clockTypes.isClockedOut(worker.status);
+          @let statusText = working
+            ? (running ? ('kioskDisplay.statusRunning' | translate: { jobNumber: running.jobNumber }) : ('kioskDisplay.statusClockedIn' | translate))
+            : clockTypes.getShortLabel(worker.status);
+          <button type="button" class="sf-card"
+               [class.sf-card--in]="working"
                [class.sf-card--break]="clockTypes.isOnBreakOrLunch(worker.status)"
-               [class.sf-card--out]="clockTypes.isClockedOut(worker.status)"
+               [class.sf-card--out]="out"
+               [class.sf-card--compact]="out"
+               [class.sf-card--assign-target]="phase() === 'assign' && assignSelection() !== null"
                [class.sf-card--feedback-success]="feedbackSuccess(worker.userId)"
                [class.sf-card--feedback-fail]="hasFeedback(worker.userId) && !feedbackSuccess(worker.userId)"
-               (click)="selectWorker(worker)"
-               [attr.aria-label]="worker.name + ' - ' + clockTypes.getLabel(worker.status)"
+               [disabled]="phase() === 'assign' && processing() !== null"
+               (click)="onWorkerTile(worker)"
+               [attr.aria-label]="worker.name + ' - ' + (working ? statusText : clockTypes.getLabel(worker.status))"
                [attr.data-testid]="'sf-worker-' + worker.userId">
 
-            <!-- Status stripe (left) -->
             <div class="sf-card__stripe"></div>
 
-            <!-- Identity row — avatar left, name + status right -->
             <div class="sf-card__identity">
-              <app-avatar [initials]="worker.initials" [color]="worker.avatarColor" size="lg" />
+              <app-avatar [initials]="worker.initials" [color]="worker.avatarColor" [size]="out || denseBoard() ? 'md' : 'lg'" />
               <div class="sf-card__identity-text">
                 <span class="sf-card__name">{{ worker.name }}</span>
                 <div class="sf-card__meta">
-                  <span class="sf-card__status">{{ clockTypes.getShortLabel(worker.status) }}</span>
-                  @if (workerTimes()[worker.userId]) {
+                  <span class="sf-card__status" [attr.data-testid]="'sf-worker-status-' + worker.userId">{{ statusText }}</span>
+                  @if (!working && !out && workerTimes()[worker.userId]) {
                     <span class="sf-card__time">{{ workerTimes()[worker.userId] }}</span>
                   }
                 </div>
+                @if (working) {
+                  <div class="sf-card__times">
+                    @if (shiftTimes()[worker.userId]; as shift) {
+                      <span class="sf-card__time">{{ 'kioskDisplay.onShift' | translate: { time: shift } }}</span>
+                    }
+                    @if (running && timerElapsed()[jobKey(worker.userId, running.jobId)]; as jobTime) {
+                      <span class="sf-card__time sf-card__time--job" [attr.data-testid]="'sf-job-elapsed-' + worker.userId">
+                        {{ 'kioskDisplay.onJob' | translate: { time: jobTime } }}
+                      </span>
+                    }
+                  </div>
+                }
                 @if (worker.openFromPriorShift && worker.openSince) {
                   <span class="sf-card__prior-shift" [attr.data-testid]="'sf-prior-shift-' + worker.userId">
                     {{ 'shopFloor.stillClockedInSince' | translate: { date: (worker.openSince | date: 'short') } }}
@@ -129,11 +195,10 @@
               </div>
             </div>
 
-            <!-- Assigned jobs table -->
-            @if (worker.assignments.length > 0) {
+            @if (!out && worker.assignments.length > 0) {
               <div class="sf-card__jobs">
                 @for (assignment of worker.assignments; track assignment.jobId; let i = $index) {
-                  @if (i < maxVisibleJobs) {
+                  @if (i < maxVisibleJobs()) {
                     <div class="sf-card__job"
                          [class.sf-card__job--active]="assignment.hasActiveTimer"
                          [class.sf-card__job--overdue]="assignment.isOverdue">
@@ -141,13 +206,16 @@
                       <span class="sf-card__job-number">{{ assignment.jobNumber }}</span>
                       <span class="sf-card__job-title">{{ assignment.title }}</span>
                       @if (assignment.hasActiveTimer) {
-                        <span class="material-icons-outlined sf-card__job-timer">timer</span>
+                        <span class="sf-card__job-elapsed">
+                          <span class="material-icons-outlined sf-card__job-timer">timer</span>
+                          {{ timerElapsed()[jobKey(worker.userId, assignment.jobId)] }}
+                        </span>
                       }
                     </div>
                   }
                 }
-                @if (worker.assignments.length > maxVisibleJobs) {
-                  <span class="sf-card__job-overflow">{{ 'dashboard.moreEntries' | translate: { count: worker.assignments.length - maxVisibleJobs } }}</span>
+                @if (worker.assignments.length > maxVisibleJobs()) {
+                  <span class="sf-card__job-overflow">{{ 'dashboard.moreEntries' | translate: { count: worker.assignments.length - maxVisibleJobs() } }}</span>
                 }
               </div>
             }
@@ -165,20 +233,24 @@
       </div>
     }
 
-    <!-- Unassigned Jobs -->
-    @if (unassignedJobs().length > 0) {
+    @if (boardJobs().length > 0) {
       <section class="sf-section">
         <div class="sf-section__header">
           <span class="material-icons-outlined">assignment_late</span>
           <h2>{{ 'shopFloor.unassignedWorkOrders' | translate }}</h2>
-          <span class="sf-section__count">{{ unassignedJobs().length }}</span>
+          <span class="sf-section__count">{{ boardJobs().length }}</span>
         </div>
 
         <div class="sf-unassigned-grid">
-          @for (job of unassignedJobs(); track job.id) {
-            <div class="sf-unassigned-card"
-                 [class.sf-unassigned-card--overdue]="job.isOverdue">
-              <div class="sf-unassigned-card__dot" [style.background]="job.stageColor"></div>
+          @for (job of boardJobs(); track job.jobId) {
+            <button type="button" class="sf-unassigned-card"
+                    [class.sf-unassigned-card--overdue]="isPastDue(job)"
+                    [class.sf-unassigned-card--selectable]="phase() === 'assign'"
+                    [class.sf-unassigned-card--selected]="assignSelection()?.jobId === job.jobId"
+                    [disabled]="phase() !== 'assign' || processing() !== null"
+                    [attr.aria-pressed]="phase() === 'assign' ? assignSelection()?.jobId === job.jobId : null"
+                    (click)="toggleAssignSelection(job)"
+                    [attr.data-testid]="'sf-board-job-' + job.jobId">
               <div class="sf-unassigned-card__main">
                 <span class="sf-unassigned-card__number">{{ job.jobNumber }}</span>
                 <span class="sf-unassigned-card__title">{{ job.title }}</span>
@@ -187,7 +259,7 @@
               <span class="sf-unassigned-card__priority" [class]="priorityClass(job.priorityName)">
                 {{ job.priorityName }}
               </span>
-            </div>
+            </button>
           }
         </div>
       </section>
@@ -244,9 +316,11 @@
   <!-- ─── PIN Overlay ─── -->
   @if (phase() === 'pin') {
     <div class="sf-overlay" role="button" tabindex="0" [attr.aria-label]="'common.cancel' | translate" (click)="cancelPin()" (keydown.escape)="cancelPin()">
-      <div class="sf-auth-card" role="dialog" aria-modal="true" tabindex="-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+      <div class="sf-auth-card" role="dialog" aria-modal="true" aria-labelledby="sf-pin-title" tabindex="-1"
+           cdkTrapFocus cdkTrapFocusAutoCapture
+           (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" (keydown.escape)="cancelPin()">
         <span class="material-icons-outlined sf-auth-card__icon">lock</span>
-        <h2 class="sf-auth-card__title">{{ (isPasswordAuth() ? 'shopFloor.enterPassword' : 'shopFloor.enterPin') | translate }}</h2>
+        <h2 id="sf-pin-title" class="sf-auth-card__title">{{ (isPasswordAuth() ? 'shopFloor.enterPassword' : 'shopFloor.enterPin') | translate }}</h2>
 
         @if (selectedWorker(); as worker) {
           <div class="sf-auth-card__worker">
@@ -282,13 +356,13 @@
         }
 
         <div class="sf-auth-card__actions">
-          <button class="action-btn" (click)="cancelPin()" [disabled]="authenticating()"
+          <button type="button" class="action-btn" (click)="cancelPin()" [disabled]="authenticating()"
                   data-testid="sf-pin-cancel">
             <span class="material-icons-outlined">arrow_back</span>
             {{ 'common.cancel' | translate }}
           </button>
-          <button class="action-btn action-btn--primary"
-            [disabled]="authenticating() || !pinControl.value"
+          <button type="button" class="action-btn action-btn--primary"
+            [disabled]="authenticating()"
             (click)="onPinSubmit()"
             data-testid="sf-pin-submit">
             @if (authenticating()) {
@@ -307,17 +381,26 @@
   <!-- ─── Actions Overlay ─── -->
   @if (phase() === 'actions') {
     <div class="sf-overlay">
-      <div class="sf-actions-card">
+      <div class="sf-actions-card" role="dialog" aria-modal="true" aria-labelledby="sf-actions-title" tabindex="-1"
+           cdkTrapFocus cdkTrapFocusAutoCapture (keydown.escape)="cancelActions()">
         @if (selectedWorker(); as worker) {
+          @let running = runningAssignment(worker);
           <div class="sf-actions-card__header">
             <app-avatar [initials]="worker.initials" [color]="worker.avatarColor" size="lg" />
             <div class="sf-actions-card__worker-info">
-              <h2 class="sf-actions-card__name">{{ worker.name }}</h2>
+              <h2 id="sf-actions-title" class="sf-actions-card__name" tabindex="-1" cdkFocusInitial>{{ worker.name }}</h2>
               <span class="sf-actions-card__status"
                     [class.sf-actions-card__status--in]="clockTypes.isWorking(worker.status)"
                     [class.sf-actions-card__status--break]="clockTypes.isOnBreakOrLunch(worker.status)"
-                    [class.sf-actions-card__status--out]="clockTypes.isClockedOut(worker.status)">
-                {{ clockTypes.getLabel(worker.status) }}
+                    [class.sf-actions-card__status--out]="clockTypes.isClockedOut(worker.status)"
+                    data-testid="sf-actions-status">
+                @if (!clockTypes.isWorking(worker.status)) {
+                  {{ clockTypes.getLabel(worker.status) }}
+                } @else if (running) {
+                  {{ 'kioskDisplay.statusRunning' | translate: { jobNumber: running.jobNumber } }}
+                } @else {
+                  {{ 'kioskDisplay.statusClockedIn' | translate }}
+                }
               </span>
             </div>
           </div>
@@ -350,6 +433,11 @@
                     <span class="sf-actions-card__job-number">{{ assignment.jobNumber }}</span>
                     <span class="sf-actions-card__job-title">{{ assignment.title }}</span>
                     <span class="sf-actions-card__job-stage">{{ assignment.stageName }}</span>
+                    @if (assignment.hasActiveTimer && timerElapsed()[jobKey(worker.userId, assignment.jobId)]; as elapsed) {
+                      <span class="sf-actions-card__job-elapsed" [attr.data-testid]="'sf-actions-elapsed-' + assignment.jobId">
+                        {{ 'kioskDisplay.onJob' | translate: { time: elapsed } }}
+                      </span>
+                    }
                   </div>
                   <div class="sf-actions-card__job-actions">
                     @if (assignment.hasActiveTimer) {
@@ -423,6 +511,29 @@
             }
           </div>
 
+          @if (clockTypes.isActive(worker.status) || canSupervise()) {
+            <div class="sf-actions-card__grid sf-actions-card__grid--work">
+              @if (clockTypes.isActive(worker.status)) {
+                <button type="button" class="sf-action-btn sf-action-btn--pick"
+                        [disabled]="processing() !== null"
+                        (click)="openPickerFromActions()"
+                        data-testid="sf-pick-job">
+                  <span class="material-icons-outlined">playlist_add</span>
+                  <span class="sf-action-btn__label">{{ 'kioskDisplay.pickJob' | translate }}</span>
+                </button>
+              }
+              @if (canSupervise()) {
+                <button type="button" class="sf-action-btn sf-action-btn--assign"
+                        [disabled]="processing() !== null"
+                        (click)="enterAssignMode()"
+                        data-testid="sf-assign-mode">
+                  <span class="material-icons-outlined">assignment_ind</span>
+                  <span class="sf-action-btn__label">{{ 'kioskDisplay.assignWork' | translate }}</span>
+                </button>
+              }
+            </div>
+          }
+
           <!-- Dock Actions (Receive / Ship) — role-gated -->
           @if (canReceive() || canShip()) {
             <div class="sf-actions-card__grid" style="margin-top: 8px;">
@@ -460,16 +571,17 @@
   <!-- ─── Job Selection Overlay ─── -->
   @if (phase() === 'job-select') {
     <div class="sf-overlay">
-      <div class="sf-job-select-card">
+      <div class="sf-job-select-card" role="dialog" aria-modal="true" aria-labelledby="sf-job-select-title" tabindex="-1"
+           cdkTrapFocus cdkTrapFocusAutoCapture (keydown.escape)="skipJobSelect()">
         <div class="sf-job-select-card__header">
           <span class="material-icons-outlined">assignment</span>
-          <h2>{{ 'shopFloor.pickWorkOrder' | translate }}</h2>
+          <h2 id="sf-job-select-title">{{ 'kioskDisplay.pickerTitle' | translate }}</h2>
           @if (jobSelectWorker(); as w) {
             <span class="sf-job-select-card__worker">{{ w.name }}</span>
           }
         </div>
 
-        <p class="sf-job-select-card__hint">{{ 'shopFloor.pickWorkOrderHint' | translate }}</p>
+        <p class="sf-job-select-card__hint">{{ 'kioskDisplay.pickerHint' | translate }}</p>
 
         @if (jobSelectWorker(); as w) {
           @if (feedbackFor(w.userId); as fb) {
@@ -477,7 +589,7 @@
                  [class.sf-actions-card__feedback--success]="fb.success"
                  [class.sf-actions-card__feedback--fail]="!fb.success"
                  role="status" aria-live="assertive"
-                 data-testid="sf-assign-feedback">
+                 data-testid="sf-claim-feedback">
               <span class="material-icons-outlined">{{ fb.success ? 'check_circle' : 'error' }}</span>
               <div class="sf-actions-card__feedback-text">
                 <span>{{ fb.message }}</span>
@@ -489,35 +601,84 @@
           }
         }
 
-        <div class="sf-job-select-card__list">
-          @for (job of unassignedJobs(); track job.id) {
-            <button class="sf-job-select-card__job"
-                    [class.sf-job-select-card__job--overdue]="job.isOverdue"
-                    [disabled]="processing() !== null"
-                    (click)="selectJob(job)"
-                    [attr.aria-label]="job.jobNumber + ' - ' + job.title">
-              <div class="sf-job-select-card__job-dot" [style.background]="job.stageColor"></div>
-              <div class="sf-job-select-card__job-main">
-                <span class="sf-job-select-card__job-number">{{ job.jobNumber }}</span>
-                <span class="sf-job-select-card__job-title">{{ job.title }}</span>
+        <div class="sf-job-select-card__body">
+          <div class="sf-job-select-card__search">
+            <app-input [label]="'kioskDisplay.pickerSearch' | translate" [formControl]="pickerSearch"
+              [placeholder]="'kioskDisplay.pickerSearchPlaceholder' | translate" [maxlength]="60" data-testid="sf-picker-search" />
+            <app-numeric-keypad
+              [disabled]="processing() !== null"
+              (digit)="onPickerDigit($event)"
+              (backspace)="onPickerBackspace()"
+              (clear)="onPickerClear()" />
+          </div>
+
+          <div class="sf-job-select-card__list" [attr.aria-busy]="pickerLoading()" data-testid="sf-picker-list">
+            @for (job of pickerJobs(); track job.jobId) {
+              @let pastDue = isPastDue(job);
+              <button type="button" class="sf-job-select-card__job"
+                      [class.sf-job-select-card__job--overdue]="pastDue"
+                      [disabled]="processing() !== null"
+                      (click)="claimJob(job)"
+                      [attr.aria-label]="'kioskDisplay.claimJobAria' | translate: { jobNumber: job.jobNumber, title: job.title }"
+                      [attr.data-testid]="'sf-picker-job-' + job.jobId">
+                <div class="sf-job-select-card__job-main">
+                  <span class="sf-job-select-card__job-number">{{ job.jobNumber }}</span>
+                  <span class="sf-job-select-card__job-title">{{ job.title }}</span>
+                  <span class="sf-job-select-card__job-detail">
+                    @if (job.partNumber) {
+                      <span>{{ 'kioskDisplay.partNumber' | translate: { partNumber: job.partNumber } }}</span>
+                    }
+                    @if (job.nextOperation; as op) {
+                      <span>
+                        {{ 'kioskDisplay.nextOperation' | translate: { step: op.stepNumber, title: op.title } }}
+                        @if (op.workCenterName) {
+                          · {{ op.workCenterName }}
+                        }
+                      </span>
+                    }
+                  </span>
+                </div>
+                <div class="sf-job-select-card__job-side">
+                  @if (job.dueDate) {
+                    <span class="sf-job-select-card__job-due" [class.sf-job-select-card__job-due--overdue]="pastDue">
+                      {{ 'kioskDisplay.due' | translate: { date: (job.dueDate | date: 'MMM d') } }}
+                    </span>
+                  }
+                  <span class="sf-job-select-card__job-priority" [class]="priorityClass(job.priorityName)">
+                    {{ job.priorityName }}
+                  </span>
+                </div>
+                @if (processing() === 'claim-' + job.jobId) {
+                  <span class="material-icons-outlined sf-job-select-card__spinner">sync</span>
+                }
+              </button>
+            } @empty {
+              <div class="sf-empty" data-testid="sf-picker-empty">
+                <span class="material-icons-outlined sf-empty__icon">work_off</span>
+                @if (pickerLoading()) {
+                  <p>{{ 'kioskDisplay.pickerLoading' | translate }}</p>
+                } @else if (pickerFailed()) {
+                  <p>{{ 'kioskDisplay.pickerFailed' | translate }}</p>
+                } @else if (pickerTerm()) {
+                  <p>{{ 'kioskDisplay.pickerNoMatch' | translate: { search: pickerTerm() } }}</p>
+                } @else {
+                  <p>{{ 'shopFloor.noUnassignedWorkOrders' | translate }}</p>
+                }
               </div>
-              <span class="sf-job-select-card__job-stage">{{ job.stageName }}</span>
-              <span class="sf-job-select-card__job-priority" [class]="priorityClass(job.priorityName)">
-                {{ job.priorityName }}
-              </span>
-              @if (processing() === 'assign-' + job.id) {
-                <span class="material-icons-outlined sf-job-select-card__spinner">sync</span>
-              }
-            </button>
-          } @empty {
-            <div class="sf-empty">
-              <span class="material-icons-outlined sf-empty__icon">work_off</span>
-              <p>{{ 'shopFloor.noUnassignedWorkOrders' | translate }}</p>
-            </div>
-          }
+            }
+            @if (pickerHasMore()) {
+              <button type="button" class="action-btn sf-job-select-card__more"
+                      [disabled]="pickerLoading()"
+                      (click)="showMoreJobs()"
+                      data-testid="sf-picker-more">
+                <span class="material-icons-outlined">expand_more</span>
+                {{ 'kioskDisplay.showMore' | translate }}
+              </button>
+            }
+          </div>
         </div>
 
-        <button class="action-btn sf-job-select-card__skip" (click)="skipJobSelect()">
+        <button type="button" class="action-btn sf-job-select-card__skip" (click)="skipJobSelect()" data-testid="sf-picker-skip">
           <span class="material-icons-outlined">skip_next</span>
           {{ 'shopFloor.display.skip' | translate }}
         </button>
@@ -628,18 +789,18 @@
 
   <!-- ─── Daily Log Panel ─── -->
   @if (showDailyLog()) {
-    <div class="sf-overlay" role="button" tabindex="0" [attr.aria-label]="'common.close' | translate" (click)="showDailyLog.set(false)" (keydown.escape)="showDailyLog.set(false)">
+    <div class="sf-overlay" role="button" tabindex="0" [attr.aria-label]="'common.close' | translate" (click)="closeDailyLog()" (keydown.escape)="closeDailyLog()">
       <div class="sf-panel-container" role="dialog" aria-modal="true" tabindex="-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
-        <app-scan-daily-log (closed)="showDailyLog.set(false)" />
+        <app-scan-daily-log (closed)="closeDailyLog()" />
       </div>
     </div>
   }
 
   <!-- ─── Devices Panel ─── -->
   @if (showDevicesPanel()) {
-    <div class="sf-overlay" role="button" tabindex="0" [attr.aria-label]="'common.close' | translate" (click)="showDevicesPanel.set(false)" (keydown.escape)="showDevicesPanel.set(false)">
+    <div class="sf-overlay" role="button" tabindex="0" [attr.aria-label]="'common.close' | translate" (click)="closeDevicesPanel()" (keydown.escape)="closeDevicesPanel()">
       <div class="sf-panel-container sf-panel-container--narrow" role="dialog" aria-modal="true" tabindex="-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
-        <app-scan-devices-panel (closed)="showDevicesPanel.set(false)" />
+        <app-scan-devices-panel (closed)="closeDevicesPanel()" />
       </div>
     </div>
   }

@@ -79,6 +79,36 @@ describe('ShopFloorService', () => {
     });
   });
 
+  describe('getAvailableJobs', () => {
+    it('should GET a page of open jobs for the team, filtered by the search term', () => {
+      service.getAvailableJobs(7, ' J-2403 ', 50).subscribe();
+      const req = httpMock.expectOne(r => r.url === `${base}/jobs/available`);
+      expect(req.request.method).toBe('GET');
+      expect(req.request.params.get('teamId')).toBe('7');
+      expect(req.request.params.get('search')).toBe('J-2403');
+      expect(req.request.params.get('take')).toBe('50');
+      req.flush([]);
+    });
+
+    it('should leave out an empty search and a missing team', () => {
+      service.getAvailableJobs(undefined, '  ', 100).subscribe();
+      const req = httpMock.expectOne(r => r.url === `${base}/jobs/available`);
+      expect(req.request.params.has('teamId')).toBe(false);
+      expect(req.request.params.has('search')).toBe(false);
+      expect(req.request.params.get('take')).toBe('100');
+      req.flush([]);
+    });
+  });
+
+  describe('claimJob', () => {
+    it('should POST a claim for the signed-in worker', () => {
+      service.claimJob(2403).subscribe();
+      const req = httpMock.expectOne(`${base}/jobs/2403/claim`);
+      expect(req.request.method).toBe('POST');
+      req.flush(null);
+    });
+  });
+
   describe('startTimer', () => {
     it('should POST start timer', () => {
       service.startTimer(5).subscribe();

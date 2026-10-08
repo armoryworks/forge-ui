@@ -7,6 +7,7 @@ export interface WorkerAssignment {
   stageColor: string;
   isOverdue: boolean;
   hasActiveTimer: boolean;
+  timerStartedAt?: string | null;
 }
 
 export interface ClockWorker {
