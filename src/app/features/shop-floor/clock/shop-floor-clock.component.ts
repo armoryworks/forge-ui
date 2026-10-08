@@ -354,7 +354,7 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
     if (eventId === null || token === null || this.punchUndoState() !== 'offered') return;
     this.punchUndoState.set('undoing');
     const seq = this.punchUndoSeq;
-    this.mobileApi.undoClockPunch(eventId, token).subscribe({
+    this.mobileApi.undoClockPunch(eventId, token, true).subscribe({
       next: () => {
         if (seq !== this.punchUndoSeq) return;
         this.showPunchUndoResult('undone', 'kioskSetup.punchUndo.undone');

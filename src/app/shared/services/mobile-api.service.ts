@@ -162,10 +162,12 @@ export class MobileApiService {
   /**
    * Compensating action for clockPunch (own latest event, inside the window).
    * A shared device passes the token of the person who punched, since their
-   * session has already left the device.
+   * session has already left the device. A caller that shows its own failure
+   * message passes `silent` to keep the refusal off the global error surface.
    */
-  undoClockPunch(eventId: number, token?: string): Observable<ClockState | QueuedOffline> {
-    return this.mutate<ClockState>('DELETE', `/api/v1/mobile/clock/events/${eventId}`, null, 'Undo clock punch', token);
+  undoClockPunch(eventId: number, token?: string, silent = false): Observable<ClockState | QueuedOffline> {
+    return this.mutate<ClockState>(
+      'DELETE', `/api/v1/mobile/clock/events/${eventId}`, null, 'Undo clock punch', token, silent);
   }
 
   onHand(partId: number, locationId: number): Observable<OnHand> {

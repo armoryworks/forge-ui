@@ -174,7 +174,7 @@ describe('ShopFloorClockComponent — clock phase', () => {
 
     c.undoPunch();
 
-    expect(mobileApi.undoClockPunch).toHaveBeenCalledWith(501, 'token-1');
+    expect(mobileApi.undoClockPunch).toHaveBeenCalledWith(501, 'token-1', true);
     expect(c.punchUndoState()).toBe('undone');
     expect(c.punchUndoMessage()).toBe('kioskSetup.punchUndo.undone');
   });

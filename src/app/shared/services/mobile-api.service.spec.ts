@@ -112,7 +112,16 @@ describe('MobileApiService', () => {
     expect(req.request.method).toBe('DELETE');
     expect(req.request.headers.get('Authorization')).toBe('Bearer person-token');
     expect(req.request.headers.get('Idempotency-Key')).toBeTruthy();
+    expect(req.request.context.get(SILENT_HTTP_ERRORS)).toBe(false);
     expect(enqueue).not.toHaveBeenCalled();
+    req.flush({ state: 'out', lastEventType: null, lastEventAt: null, lastEventId: null });
+  });
+
+  it('keeps a punch undo refusal off the global error surface when asked', () => {
+    service.undoClockPunch(77, 'person-token', true).subscribe({ error: () => undefined });
+
+    const req = http.expectOne('/api/v1/mobile/clock/events/77');
+    expect(req.request.context.get(SILENT_HTTP_ERRORS)).toBe(true);
     req.flush({ state: 'out', lastEventType: null, lastEventAt: null, lastEventId: null });
   });
 
