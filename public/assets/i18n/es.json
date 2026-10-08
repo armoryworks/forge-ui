@@ -4683,6 +4683,18 @@
     "create": "Crear proveedor",
     "created": "Proveedor «{{name}}» creado."
   },
+  "materialSpecs": {
+    "newButton": "Nuevo material",
+    "dialogTitle": "Nuevo material",
+    "category": "Categoría",
+    "noCategory": "Sin categoría (material de nivel superior)",
+    "newCategory": "Nueva categoría…",
+    "newCategoryName": "Nombre de la categoría",
+    "name": "Nombre del material",
+    "namePlaceholder": "p. ej. 7075-T6",
+    "create": "Agregar material",
+    "created": "Material «{{name}}» agregado."
+  },
   "partQuickCreate": {
     "title": "Crear pieza rápida",
     "hint": "Nombre, procuración y clase de inventario — lo mínimo para referenciar esta pieza. Completa el resto después.",

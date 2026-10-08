@@ -7,6 +7,14 @@
       formControlName="materialSpecId"
       [options]="materialSpecOptions()"
       [isReadonly]="!editing()" />
+    @if (editing()) {
+      <button class="action-btn cluster__inline-action" type="button"
+        data-testid="part-material-spec-new"
+        (click)="openNewMaterial()">
+        <span class="material-icons-outlined">add</span>
+        {{ 'materialSpecs.newButton' | translate }}
+      </button>
+    }
   </div>
 
   <div class="cluster__form-row">

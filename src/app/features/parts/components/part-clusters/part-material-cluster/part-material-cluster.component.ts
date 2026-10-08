@@ -1,14 +1,20 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, input, output, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { InputComponent } from '../../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../../shared/components/select/select.component';
 import { ValidationButtonComponent } from '../../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../../shared/services/form-validation.service';
-import { ReferenceDataService } from '../../../../../shared/services/reference-data.service';
+import { ReferenceDataItem, ReferenceDataService } from '../../../../../shared/services/reference-data.service';
 import { PartDetail } from '../../../models/part-detail.model';
+import {
+  MaterialSpecDialogComponent, MaterialSpecDialogData,
+} from '../../material-spec-dialog/material-spec-dialog.component';
 import { buildMaterialSpecOptions } from './material-spec-options.util';
+
+const MATERIAL_SPEC_GROUP = 'part.material_spec';
 
 /**
  * Pillar 4 Phase 2 — Material & physical cluster.
@@ -33,6 +39,7 @@ import { buildMaterialSpecOptions } from './material-spec-options.util';
 })
 export class PartMaterialClusterComponent implements OnInit {
   private readonly refData = inject(ReferenceDataService);
+  private readonly dialog = inject(MatDialog);
 
   readonly part = input.required<PartDetail>();
   readonly editing = input(false);
@@ -43,6 +50,7 @@ export class PartMaterialClusterComponent implements OnInit {
   readonly cancelled = output<void>();
 
   protected readonly materialSpecOptions = signal<SelectOption[]>([{ value: null, label: '-- None --' }]);
+  private readonly materialSpecItems = signal<ReferenceDataItem[]>([]);
 
   // ── Conversion factors ──
   // Canonical: weight in grams, dimensions in mm, volume in mL.
@@ -111,10 +119,31 @@ export class PartMaterialClusterComponent implements OnInit {
     // Rolled") via `parent_id`. Parents are not selectable; only leaves are.
     // Each leaf option's label is prefixed with its parent's label so the
     // dropdown reads as "Aluminum / 6061-T6" instead of bare "6061-T6".
-    this.refData.getByGroup('part.material_spec').subscribe({
+    this.loadMaterialSpecs();
+  }
+
+  private loadMaterialSpecs(selectId?: number): void {
+    this.refData.getByGroup(MATERIAL_SPEC_GROUP).subscribe({
       next: (items) => {
+        this.materialSpecItems.set(items);
         this.materialSpecOptions.set(buildMaterialSpecOptions(items));
+        if (selectId !== undefined) {
+          const control = this.form.controls.materialSpecId;
+          control.setValue(selectId);
+          control.markAsDirty();
+        }
       },
+    });
+  }
+
+  protected openNewMaterial(): void {
+    this.dialog.open<MaterialSpecDialogComponent, MaterialSpecDialogData, ReferenceDataItem | null>(
+      MaterialSpecDialogComponent,
+      { width: '480px', data: { items: this.materialSpecItems() } },
+    ).afterClosed().subscribe((created) => {
+      if (!created) return;
+      this.refData.clearGroupCache(MATERIAL_SPEC_GROUP);
+      this.loadMaterialSpecs(created.id);
     });
   }
 

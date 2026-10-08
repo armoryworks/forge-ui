@@ -4683,6 +4683,18 @@
     "create": "Create vendor",
     "created": "Vendor “{{name}}” created."
   },
+  "materialSpecs": {
+    "newButton": "New material",
+    "dialogTitle": "New material",
+    "category": "Category",
+    "noCategory": "No category (top-level material)",
+    "newCategory": "New category…",
+    "newCategoryName": "Category name",
+    "name": "Material name",
+    "namePlaceholder": "e.g. 7075-T6",
+    "create": "Add material",
+    "created": "Material “{{name}}” added."
+  },
   "partQuickCreate": {
     "title": "Quick-create part",
     "hint": "Name, procurement, and inventory class — the minimum needed to reference this part. Finish the rest later from the part's detail page.",

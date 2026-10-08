@@ -1,0 +1,7 @@
+@use 'styles/variables' as *;
+
+.material-spec {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}

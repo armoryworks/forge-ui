@@ -1,0 +1,39 @@
+<app-dialog [title]="'materialSpecs.dialogTitle' | translate" width="480px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form" class="material-spec">
+    <app-select
+      data-testid="material-spec-category"
+      [label]="'materialSpecs.category' | translate"
+      formControlName="category"
+      [options]="categoryOptions" />
+    @if (creatingCategory()) {
+      <app-input
+        data-testid="material-spec-new-category"
+        [label]="'materialSpecs.newCategoryName' | translate"
+        formControlName="newCategoryLabel"
+        [maxlength]="200"
+        [required]="true" />
+    }
+    <app-input
+      data-testid="material-spec-name"
+      [label]="'materialSpecs.name' | translate"
+      [placeholder]="'materialSpecs.namePlaceholder' | translate"
+      formControlName="label"
+      [maxlength]="200"
+      [required]="true" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" type="button" data-testid="material-spec-cancel-btn" (click)="close()">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--create" type="button"
+        data-testid="material-spec-save-btn"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        <span class="material-icons-outlined">add</span>
+        {{ 'materialSpecs.create' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>
