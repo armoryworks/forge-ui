@@ -79,9 +79,9 @@ export class MfaPolicyPanelComponent implements OnInit {
         this.snackbar.success(this.translate.instant('adminPanels.mfa.snackbar.policySaved'));
         this.loadData();
       },
-      error: () => {
+      error: (err: unknown) => {
         this.saving.set(false);
-        this.snackbar.error(this.translate.instant('adminPanels.mfa.snackbar.policyReset'));
+        this.snackbar.errorFrom(err, 'adminPanels.mfa.snackbar.policyReset');
       },
     });
   }

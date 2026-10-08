@@ -94,7 +94,7 @@ export class TeamsPanelComponent implements OnInit {
     this.loading.set(true);
     this.adminService.getTeams().subscribe({
       next: (teams) => { this.teams.set(teams); this.loading.set(false); },
-      error: () => { this.loading.set(false); this.snackbar.error(this.translate.instant('teamsPanel.loadFailed')); },
+      error: (err: unknown) => { this.loading.set(false); this.snackbar.errorFrom(err, 'teamsPanel.loadFailed'); },
     });
     this.adminService.getKioskTerminals().subscribe({
       next: (terminals) => this.terminals.set(terminals),
@@ -144,7 +144,7 @@ export class TeamsPanelComponent implements OnInit {
           this.load();
           this.snackbar.success(this.translate.instant('teamsPanel.teamUpdated'));
         },
-        error: () => { this.saving.set(false); this.snackbar.error(this.translate.instant('teamsPanel.updateFailed')); },
+        error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'teamsPanel.updateFailed'); },
       });
     } else {
       this.adminService.createTeam({
@@ -158,7 +158,7 @@ export class TeamsPanelComponent implements OnInit {
           this.load();
           this.snackbar.success(this.translate.instant('teamsPanel.teamCreated'));
         },
-        error: () => { this.saving.set(false); this.snackbar.error(this.translate.instant('teamsPanel.createFailed')); },
+        error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'teamsPanel.createFailed'); },
       });
     }
   }
@@ -176,7 +176,7 @@ export class TeamsPanelComponent implements OnInit {
       if (!confirmed) return;
       this.adminService.deleteTeam(team.id).subscribe({
         next: () => { this.load(); this.snackbar.success(this.translate.instant('teamsPanel.teamDeleted')); },
-        error: () => this.snackbar.error(this.translate.instant('teamsPanel.deleteFailed')),
+        error: (err: unknown) => this.snackbar.errorFrom(err, 'teamsPanel.deleteFailed'),
       });
     });
   }
@@ -194,7 +194,7 @@ export class TeamsPanelComponent implements OnInit {
         this.teamMembers.set(members);
         this.selectedUserIds.set(new Set(members.map(m => m.id)));
       },
-      error: () => this.snackbar.error(this.translate.instant('teamsPanel.loadMembersFailed')),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'teamsPanel.loadMembersFailed'),
     });
 
     this.adminService.getUsers().subscribe({
@@ -238,7 +238,7 @@ export class TeamsPanelComponent implements OnInit {
         this.load();
         this.snackbar.success(this.translate.instant('teamsPanel.membersUpdated', { name: team.name }));
       },
-      error: () => { this.saving.set(false); this.snackbar.error(this.translate.instant('teamsPanel.assignFailed')); },
+      error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'teamsPanel.assignFailed'); },
     });
   }
 
@@ -266,7 +266,7 @@ export class TeamsPanelComponent implements OnInit {
           this.load();
           this.snackbar.success(this.translate.instant('teamsPanel.terminalRemoved'));
         },
-        error: () => this.snackbar.error(this.translate.instant('teamsPanel.terminalRemoveFailed')),
+        error: (err: unknown) => this.snackbar.errorFrom(err, 'teamsPanel.terminalRemoveFailed'),
       });
     });
   }

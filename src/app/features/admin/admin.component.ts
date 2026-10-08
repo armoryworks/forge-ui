@@ -507,7 +507,7 @@ export class AdminComponent implements OnInit {
           if (newLocId !== editing.workLocationId) {
             this.adminService.updateUserWorkLocation(editing.id, newLocId).subscribe({
               next: finalize,
-              error: () => { this.saving.set(false); this.snackbar.error(this.translate.instant('admin.userSavedLocationFailed')); this.closeUserDialog(); this.loadUsers(); },
+              error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'admin.userSavedLocationFailed'); this.closeUserDialog(); this.loadUsers(); },
             });
           } else {
             finalize();
@@ -607,7 +607,7 @@ export class AdminComponent implements OnInit {
         this.setupTokenExpiresAt.set(result.expiresAt);
         this.snackbar.success(this.translate.instant('admin.setupTokenGenerated', { name: user.firstName }));
       },
-      error: () => this.snackbar.error(this.translate.instant('admin.setupTokenFailed')),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'admin.setupTokenFailed'),
     });
   }
 
@@ -668,9 +668,9 @@ export class AdminComponent implements OnInit {
         this.loadUsers();
         this.snackbar.success(this.translate.instant('admin.scanIdAdded'));
       },
-      error: () => {
+      error: (err: unknown) => {
         this.scanIdLoading.set(false);
-        this.snackbar.error(this.translate.instant('admin.scanIdAddFailed'));
+        this.snackbar.errorFrom(err, 'admin.scanIdAddFailed');
       },
     });
   }
@@ -685,7 +685,7 @@ export class AdminComponent implements OnInit {
         this.loadUsers();
         this.snackbar.success(this.translate.instant('admin.scanIdRemoved'));
       },
-      error: () => this.snackbar.error(this.translate.instant('admin.scanIdRemoveFailed')),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'admin.scanIdRemoveFailed'),
     });
   }
 
@@ -733,7 +733,7 @@ export class AdminComponent implements OnInit {
           this.loadTrackTypes();
           this.snackbar.success(this.translate.instant('admin.trackTypeUpdated'));
         },
-        error: () => { this.saving.set(false); this.snackbar.error(this.translate.instant('admin.trackTypeUpdateFailed')); },
+        error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'admin.trackTypeUpdateFailed'); },
       });
     } else {
       this.adminService.createTrackType(data).subscribe({
@@ -743,7 +743,7 @@ export class AdminComponent implements OnInit {
           this.loadTrackTypes();
           this.snackbar.success(this.translate.instant('admin.trackTypeCreated'));
         },
-        error: () => { this.saving.set(false); this.snackbar.error(this.translate.instant('admin.trackTypeCreateFailed')); },
+        error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'admin.trackTypeCreateFailed'); },
       });
     }
   }
@@ -764,7 +764,7 @@ export class AdminComponent implements OnInit {
           this.loadTrackTypes();
           this.snackbar.success(this.translate.instant('admin.trackTypeDeleted'));
         },
-        error: () => this.snackbar.error(this.translate.instant('admin.trackTypeDeleteFailed')),
+        error: (err: unknown) => this.snackbar.errorFrom(err, 'admin.trackTypeDeleteFailed'),
       });
     });
   }
@@ -825,7 +825,7 @@ export class AdminComponent implements OnInit {
         this.saving.set(false);
         this.snackbar.success(this.translate.instant('admin.terminologySaved'));
       },
-      error: () => { this.saving.set(false); this.snackbar.error(this.translate.instant('admin.terminologySaveFailed')); },
+      error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'admin.terminologySaveFailed'); },
     });
   }
 
@@ -866,9 +866,9 @@ export class AdminComponent implements OnInit {
         this.numberingRows.set(rows);
         this.scrollToHighlightedSetting();
       },
-      error: () => {
+      error: (err: unknown) => {
         this.numberingLoaded.set(false);
-        this.snackbar.error(this.translate.instant('admin.loadSettingsFailed'));
+        this.snackbar.errorFrom(err, 'admin.loadSettingsFailed');
       },
     });
   }
@@ -880,10 +880,10 @@ export class AdminComponent implements OnInit {
         control.enable({ emitEvent: false });
         this.snackbar.success(this.translate.instant('admin.settingsSaved'));
       },
-      error: () => {
+      error: (err: unknown) => {
         control.setValue(!enabled, { emitEvent: false });
         control.enable({ emitEvent: false });
-        this.snackbar.error(this.translate.instant('admin.settingsSaveFailed'));
+        this.snackbar.errorFrom(err, 'admin.settingsSaveFailed');
       },
     });
   }
@@ -973,7 +973,7 @@ export class AdminComponent implements OnInit {
           lookup.get('theme.accent_color') || undefined,
         );
       },
-      error: () => { this.saving.set(false); this.snackbar.error(this.translate.instant('admin.settingsSaveFailed')); },
+      error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'admin.settingsSaveFailed'); },
     });
   }
 
@@ -986,7 +986,7 @@ export class AdminComponent implements OnInit {
         this.companyProfile.set(profile);
         this.profileForm.patchValue(profile, { emitEvent: false });
       },
-      error: () => this.snackbar.error(this.translate.instant('admin.companyProfileLoadFailed')),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'admin.companyProfileLoadFailed'),
     });
   }
 
@@ -1039,7 +1039,7 @@ export class AdminComponent implements OnInit {
           this.telemetryAgreement.set(agreement);
           this.telemetryConsentOpen.set(true);
         },
-        error: () => this.snackbar.error(this.translate.instant('admin.telemetry.agreementLoadFailed')),
+        error: (err: unknown) => this.snackbar.errorFrom(err, 'admin.telemetry.agreementLoadFailed'),
       });
   }
 
@@ -1056,9 +1056,9 @@ export class AdminComponent implements OnInit {
             accepted ? 'admin.telemetry.accepted' : 'admin.telemetry.declined'));
           this.loadTelemetry();
         },
-        error: () => {
+        error: (err: unknown) => {
           this.telemetrySaving.set(false);
-          this.snackbar.error(this.translate.instant('admin.telemetry.saveFailed'));
+          this.snackbar.errorFrom(err, 'admin.telemetry.saveFailed');
         },
       });
   }
@@ -1084,7 +1084,7 @@ export class AdminComponent implements OnInit {
         this.profileSaving.set(false);
         this.snackbar.success(this.translate.instant('admin.companyProfileSaved'));
       },
-      error: () => { this.profileSaving.set(false); this.snackbar.error(this.translate.instant('admin.companyProfileSaveFailed')); },
+      error: (err: unknown) => { this.profileSaving.set(false); this.snackbar.errorFrom(err, 'admin.companyProfileSaveFailed'); },
     });
   }
 
@@ -1094,7 +1094,7 @@ export class AdminComponent implements OnInit {
     this.locationsLoaded.set(true);
     this.adminService.getCompanyLocations().subscribe({
       next: (locations) => this.companyLocations.set(locations),
-      error: () => this.snackbar.error(this.translate.instant('admin.locationsLoadFailed')),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'admin.locationsLoadFailed'),
     });
   }
 
@@ -1124,7 +1124,7 @@ export class AdminComponent implements OnInit {
           this.loadCompanyLocations();
           this.snackbar.success(this.translate.instant('admin.locationUpdated'));
         },
-        error: () => { this.saving.set(false); this.snackbar.error(this.translate.instant('admin.locationUpdateFailed')); },
+        error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'admin.locationUpdateFailed'); },
       });
     } else {
       this.adminService.createCompanyLocation(data).subscribe({
@@ -1134,7 +1134,7 @@ export class AdminComponent implements OnInit {
           this.loadCompanyLocations();
           this.snackbar.success(this.translate.instant('admin.locationCreated'));
         },
-        error: () => { this.saving.set(false); this.snackbar.error(this.translate.instant('admin.locationCreateFailed')); },
+        error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'admin.locationCreateFailed'); },
       });
     }
   }
@@ -1152,7 +1152,7 @@ export class AdminComponent implements OnInit {
       if (!confirmed) return;
       this.adminService.deleteCompanyLocation(location.id).subscribe({
         next: () => { this.loadCompanyLocations(); this.snackbar.success(this.translate.instant('admin.locationDeleted')); },
-        error: () => this.snackbar.error(this.translate.instant('admin.locationDeleteFailed')),
+        error: (err: unknown) => this.snackbar.errorFrom(err, 'admin.locationDeleteFailed'),
       });
     });
   }
@@ -1160,7 +1160,7 @@ export class AdminComponent implements OnInit {
   protected setDefaultLocation(location: CompanyLocation): void {
     this.adminService.setDefaultCompanyLocation(location.id).subscribe({
       next: () => { this.loadCompanyLocations(); this.snackbar.success(this.translate.instant('admin.locationSetDefault', { name: location.name })); },
-      error: () => this.snackbar.error(this.translate.instant('admin.locationSetDefaultFailed')),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'admin.locationSetDefaultFailed'),
     });
   }
 
@@ -1189,9 +1189,9 @@ export class AdminComponent implements OnInit {
           this.lockThroughControl.reset();
           this.snackbar.success(`${result.lockedCount} time ${result.lockedCount === 1 ? 'entry' : 'entries'} locked successfully.`);
         },
-        error: () => {
+        error: (err: unknown) => {
           this.lockingPeriod.set(false);
-          this.snackbar.error(this.translate.instant('admin.lockPeriodFailed'));
+          this.snackbar.errorFrom(err, 'admin.lockPeriodFailed');
         },
       });
     });
@@ -1212,9 +1212,9 @@ export class AdminComponent implements OnInit {
         this.snackbar.success(this.translate.instant('admin.logoUploaded'));
         this.themeService.loadBrandSettings();
       },
-      error: () => {
+      error: (err: unknown) => {
         this.saving.set(false);
-        this.snackbar.error(this.translate.instant('admin.logoUploadFailed'));
+        this.snackbar.errorFrom(err, 'admin.logoUploadFailed');
       },
     });
   }
@@ -1227,9 +1227,9 @@ export class AdminComponent implements OnInit {
         this.snackbar.success(this.translate.instant('admin.logoRemoved'));
         this.themeService.loadBrandSettings();
       },
-      error: () => {
+      error: (err: unknown) => {
         this.saving.set(false);
-        this.snackbar.error(this.translate.instant('admin.logoRemoveFailed'));
+        this.snackbar.errorFrom(err, 'admin.logoRemoveFailed');
       },
     });
   }
@@ -1249,9 +1249,9 @@ export class AdminComponent implements OnInit {
         this.branding.refresh();
         this.snackbar.success(this.translate.instant('admin.lockupUploaded'));
       },
-      error: () => {
+      error: (err: unknown) => {
         this.saving.set(false);
-        this.snackbar.error(this.translate.instant('admin.lockupUploadFailed'));
+        this.snackbar.errorFrom(err, 'admin.lockupUploadFailed');
       },
     });
   }
@@ -1264,9 +1264,9 @@ export class AdminComponent implements OnInit {
         this.branding.refresh();
         this.snackbar.success(this.translate.instant('admin.lockupReset'));
       },
-      error: () => {
+      error: (err: unknown) => {
         this.saving.set(false);
-        this.snackbar.error(this.translate.instant('admin.lockupResetFailed'));
+        this.snackbar.errorFrom(err, 'admin.lockupResetFailed');
       },
     });
   }

@@ -303,8 +303,8 @@ export class DiscoveryComponent implements OnInit {
             this.commitApply(chosen, chosenName);
           });
       },
-      error: () => {
-        this.snackbar.error(this.translate.instant('discoveryWizard.previewFailed'));
+      error: (err: unknown) => {
+        this.snackbar.errorFrom(err, 'discoveryWizard.previewFailed');
       },
     });
   }
@@ -333,8 +333,8 @@ export class DiscoveryComponent implements OnInit {
           }
         });
       },
-      error: () => {
-        this.snackbar.error(this.translate.instant('discoveryWizard.applyFailed'));
+      error: (err: unknown) => {
+        this.snackbar.errorFrom(err, 'discoveryWizard.applyFailed');
       },
     });
   }

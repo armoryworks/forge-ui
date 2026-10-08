@@ -93,8 +93,8 @@ export class PresetCompareComponent implements OnInit {
     }
     this.presetService.compare(ids).subscribe({
       next: (res) => this.response.set(res),
-      error: () => {
-        this.snackbar.error('Failed to load comparison');
+      error: (err: unknown) => {
+        this.snackbar.errorFrom(err, 'errorFallbacksA.presetCompareLoadFailed');
         this.router.navigate(['/admin/presets']);
       },
     });
@@ -135,9 +135,9 @@ export class PresetCompareComponent implements OnInit {
             this.commitApply(presetId, preset.name, result.reason);
           });
       },
-      error: () => {
+      error: (err: unknown) => {
         this.applying.set(false);
-        this.snackbar.error('Failed to preview apply');
+        this.snackbar.errorFrom(err, 'errorFallbacksA.presetPreviewApplyFailed');
       },
     });
   }
@@ -158,8 +158,7 @@ export class PresetCompareComponent implements OnInit {
       },
       error: (err) => {
         this.applying.set(false);
-        const msg = err?.error?.message ?? 'Apply failed';
-        this.snackbar.error(msg);
+        this.snackbar.errorFrom(err, 'errorFallbacksA.presetApplyFailed');
       },
     });
   }

@@ -149,9 +149,9 @@ export class ComplianceTemplatesPanelComponent implements OnInit {
         this.snackbar.success(this.translate.instant('complianceTemplates.extractionComplete'));
         this.loadTemplates();
       },
-      error: () => {
+      error: (err: unknown) => {
         this.extracting.set(false);
-        this.snackbar.error(this.translate.instant('complianceTemplates.extractionFailed'));
+        this.snackbar.errorFrom(err, 'complianceTemplates.extractionFailed');
       },
     });
   }

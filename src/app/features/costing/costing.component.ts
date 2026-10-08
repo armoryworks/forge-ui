@@ -207,7 +207,7 @@ export class CostingComponent {
   protected loadTemplates(): void {
     this.service.getTemplates().subscribe({
       next: (templates) => this.costingTemplates.set(templates),
-      error: () => this.snackbar.error(this.translate.instant('costing.templates.loadFailed')),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'costing.templates.loadFailed'),
     });
   }
 
@@ -235,7 +235,7 @@ export class CostingComponent {
       if (!confirmed) return;
       this.service.deleteTemplate(template.id).subscribe({
         next: () => this.loadTemplates(),
-        error: () => this.snackbar.error(this.translate.instant('costing.templates.deleteFailed')),
+        error: (err: unknown) => this.snackbar.errorFrom(err, 'costing.templates.deleteFailed'),
       });
     });
   }
@@ -265,19 +265,19 @@ export class CostingComponent {
   private loadPeriods(): void {
     this.service.listPeriods().subscribe({
       next: r => this.periods.set(r),
-      error: () => this.snackbar.error('Failed to load costing periods'),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.costingPeriodsLoadFailed'),
     });
   }
   private loadCostCenters(): void {
     this.service.listCostCenters().subscribe({
       next: r => this.costCenters.set(r),
-      error: () => this.snackbar.error('Failed to load cost centers'),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.costCentersLoadFailed'),
     });
   }
   private loadPools(): void {
     this.service.listPools().subscribe({
       next: r => this.pools.set(r),
-      error: () => this.snackbar.error('Failed to load overhead pools'),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.overheadPoolsLoadFailed'),
     });
   }
 
@@ -289,14 +289,14 @@ export class CostingComponent {
     if (!start || !end) return;
     this.service.createPeriod(start, end).subscribe({
       next: () => { this.snackbar.success('Period created'); this.periodForm.reset(); this.loadPeriods(); },
-      error: () => this.snackbar.error('Failed to create period'),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.costingPeriodCreateFailed'),
     });
   }
 
   protected freeze(period: CostingPeriod): void {
     this.service.freezePeriod(period.id).subscribe({
       next: r => { this.snackbar.success(`Frozen: ${r.budgetsRated} budget(s), ${r.workCentersRated} rate(s)`); this.loadPeriods(); this.viewRates(period.id); },
-      error: () => this.snackbar.error('Freeze failed'),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.costingPeriodFreezeFailed'),
     });
   }
 
@@ -304,7 +304,7 @@ export class CostingComponent {
     this.ratesPeriodId.set(periodId);
     this.service.listRates(periodId).subscribe({
       next: r => this.rates.set(r),
-      error: () => this.snackbar.error('Failed to load rates'),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.costingRatesLoadFailed'),
     });
   }
 
@@ -316,7 +316,7 @@ export class CostingComponent {
       parentId: null, sqft: v.sqft, headcount: v.headcount, isInventoriable: v.isInventoriable!,
     }).subscribe({
       next: () => { this.snackbar.success('Cost center created'); this.costCenterForm.reset({ type: 'Production', isInventoriable: true }); this.loadCostCenters(); },
-      error: () => this.snackbar.error('Failed to create cost center'),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.costCenterCreateFailed'),
     });
   }
 
@@ -329,7 +329,7 @@ export class CostingComponent {
       fixedPortion: v.fixedPortion, driver: v.driver as OverheadPool['driver'],
     }).subscribe({
       next: () => { this.snackbar.success('Pool created'); this.poolForm.reset({ behavior: 'Fixed', driver: 'MachineHour' }); this.loadPools(); },
-      error: () => this.snackbar.error('Failed to create pool'),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.overheadPoolCreateFailed'),
     });
   }
 
@@ -338,7 +338,7 @@ export class CostingComponent {
     const v = this.budgetForm.getRawValue();
     this.service.upsertBudget(v.overheadCostPoolId!, v.costingPeriodId!, v.budgetAmount!, v.budgetDriverQty!).subscribe({
       next: r => { this.snackbar.success(`Budget set — rate ${r.derivedRate.toFixed(4)}`); this.budgetForm.reset(); },
-      error: () => this.snackbar.error('Failed to set budget'),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.overheadBudgetSetFailed'),
     });
   }
 }

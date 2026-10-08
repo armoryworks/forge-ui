@@ -87,9 +87,9 @@ export class RoleTemplatesPanelComponent implements OnInit {
     this.loading.set(true);
     this.adminService.getRoleTemplates().subscribe({
       next: (templates) => { this.templates.set(templates); this.loading.set(false); },
-      error: () => {
+      error: (err: unknown) => {
         this.loading.set(false);
-        this.snackbar.error('Failed to load role templates.');
+        this.snackbar.errorFrom(err, 'errorFallbacksA.roleTemplatesLoadFailed');
       },
     });
   }
@@ -143,8 +143,7 @@ export class RoleTemplatesPanelComponent implements OnInit {
       },
       error: (err) => {
         this.saving.set(false);
-        const detail = err?.error?.detail ?? err?.error?.title ?? 'Save failed.';
-        this.snackbar.error(detail);
+        this.snackbar.errorFrom(err, 'errorFallbacksA.roleTemplateSaveFailed');
       },
     });
   }
@@ -167,7 +166,7 @@ export class RoleTemplatesPanelComponent implements OnInit {
       if (!confirmed) return;
       this.adminService.deleteRoleTemplate(template.id).subscribe({
         next: () => { this.load(); this.snackbar.success('Template deleted.'); },
-        error: () => this.snackbar.error('Delete failed.'),
+        error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.roleTemplateDeleteFailed'),
       });
     });
   }

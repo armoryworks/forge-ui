@@ -31,8 +31,8 @@ export class MfaRecoveryCodesDialogComponent {
         this.warning.set(result.warning);
         this.loading.set(false);
       },
-      error: () => {
-        this.snackbar.error('Failed to generate recovery codes');
+      error: (err: unknown) => {
+        this.snackbar.errorFrom(err, 'errorFallbacksA.recoveryCodesFailed');
         this.dialogRef.close();
       },
     });

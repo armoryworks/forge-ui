@@ -82,9 +82,9 @@ export class AccountIntegrationsComponent implements OnInit {
           this.snackbar.error('Connection test failed');
         }
       },
-      error: () => {
+      error: (err: unknown) => {
         this.testing.set(null);
-        this.snackbar.error('Connection test failed');
+        this.snackbar.errorFrom(err, 'integrations.connectionTestFailed');
       },
     });
   }

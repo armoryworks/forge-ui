@@ -98,7 +98,7 @@ export class ChartOfAccountsComponent implements OnInit {
     this.loading.set(true);
     this.gl.listGlAccountsForManagement(this.bookId).subscribe({
       next: r => { this.accounts.set(r); this.loading.set(false); },
-      error: () => { this.snackbar.error('Failed to load chart of accounts'); this.loading.set(false); },
+      error: (err: unknown) => { this.snackbar.errorFrom(err, 'errorFallbacksA.chartOfAccountsLoadFailed'); this.loading.set(false); },
     });
   }
 
@@ -134,7 +134,7 @@ export class ChartOfAccountsComponent implements OnInit {
     this.saving.set(true);
     const done = {
       next: () => { this.snackbar.success('Account saved'); this.saving.set(false); this.dialogOpen.set(false); this.load(); },
-      error: (e: { error?: { detail?: string } }) => { this.snackbar.error(e?.error?.detail ?? 'Save failed'); this.saving.set(false); },
+      error: (e: unknown) => { this.snackbar.errorFrom(e, 'errorFallbacksA.glAccountSaveFailed'); this.saving.set(false); },
     };
     const current = this.editing();
     if (current) {

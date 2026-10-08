@@ -282,8 +282,8 @@ export class LedgerViewComponent implements OnInit {
           this.anomalyFlags.set(flags);
           this.scanning.set(false);
         },
-        error: () => {
-          this.snackbar.error(this.translate.instant('accounting.errors.anomalyScanFailed'));
+        error: (err: unknown) => {
+          this.snackbar.errorFrom(err, 'accounting.errors.anomalyScanFailed');
           this.scanning.set(false);
         },
       });

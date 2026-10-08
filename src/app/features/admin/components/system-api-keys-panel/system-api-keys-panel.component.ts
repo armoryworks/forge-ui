@@ -209,9 +209,7 @@ export class SystemApiKeysPanelComponent implements OnInit {
         if (isCapabilityDisabledError(err)) {
           this.capabilityDisabled.set(err.message);
           this.closeCreate();
-          this.snackbar.error(
-            this.translate.instant('adminPanels.systemApiKeys.capabilityDisabled'),
-          );
+          this.snackbar.errorFrom(err, 'adminPanels.systemApiKeys.capabilityDisabled');
           return;
         }
         const applied = FormValidationService.applyServerError(this.form, err);

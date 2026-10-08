@@ -45,6 +45,7 @@ interface LedgerApi {
   explanations(): Record<number, ExplainState>;
   explain(entry: LedgerRegisterEntry): void;
   scanAnomalies(): void;
+  scanning(): boolean;
   anomalyFlags(): Record<number, string[]>;
   anomalyCount(): number;
   reverseEntry(entry: LedgerRegisterEntry): void;
@@ -59,7 +60,7 @@ describe('LedgerViewComponent', () => {
     reverseJournalEntry: vi.fn(),
     getTrialBalance: vi.fn(),
   };
-  const snackbar = { error: vi.fn(), success: vi.fn() };
+  const snackbar = { error: vi.fn(), errorFrom: vi.fn(), success: vi.fn() };
   const dialog = { open: vi.fn() };
   let routeParams: Record<string, string>;
 
@@ -183,5 +184,15 @@ describe('LedgerViewComponent', () => {
     api.explain(ENTRY);
     expect(api.explanations()[1].failed).toBe(true);
     expect(api.explanations()[1].result).toBeNull();
+  });
+
+  it('hands a failed anomaly scan to errorFrom and stops scanning', () => {
+    const api = create();
+    const err = new Error('offline');
+    gl.getGlAnomalies.mockReturnValue(throwError(() => err));
+    api.scanAnomalies();
+    expect(snackbar.errorFrom).toHaveBeenCalledWith(err, 'accounting.errors.anomalyScanFailed');
+    expect(snackbar.error).not.toHaveBeenCalled();
+    expect(api.scanning()).toBe(false);
   });
 });

@@ -10,7 +10,6 @@ import { CustomerIdentityClusterComponent } from '../customer-clusters/customer-
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
-import { TranslateService } from '@ngx-translate/core';
 
 export interface CustomerDetailDialogData {
   customerId: number;
@@ -52,7 +51,6 @@ export class CustomerDetailDialogComponent {
   private readonly router = inject(Router);
   private readonly customerService = inject(CustomerService);
   private readonly snackbar = inject(SnackbarService);
-  private readonly translate = inject(TranslateService);
   protected readonly data = inject<CustomerDetailDialogData>(MAT_DIALOG_DATA);
 
   protected readonly customer = signal<CustomerSummary | null>(null);
@@ -69,9 +67,9 @@ export class CustomerDetailDialogComponent {
     this.loading.set(true);
     this.customerService.getCustomerSummary(id).subscribe({
       next: c => { this.customer.set(c); this.loading.set(false); },
-      error: () => {
+      error: (err: unknown) => {
         this.loading.set(false);
-        this.snackbar.error(this.translate.instant('customers.previewDialog.loadFailed'));
+        this.snackbar.errorFrom(err, 'customers.previewDialog.loadFailed');
         this.dialogRef.close(undefined);
       },
     });

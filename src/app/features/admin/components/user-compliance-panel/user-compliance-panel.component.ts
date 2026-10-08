@@ -170,9 +170,9 @@ export class UserCompliancePanelComponent {
         const id = this.userId();
         if (id) this.loadPayroll(id);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.syncing.set(false);
-        this.snackbar.error(this.translate.instant('userCompliance.payrollSyncFailed'));
+        this.snackbar.errorFrom(err, 'userCompliance.payrollSyncFailed');
       },
     });
   }

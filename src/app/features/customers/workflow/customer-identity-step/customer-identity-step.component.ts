@@ -103,9 +103,9 @@ export class CustomerIdentityStepComponent {
       }),
       tap({
         next: () => { this.saving.set(false); this.form.markAsPristine(); },
-        error: () => {
+        error: (err: unknown) => {
           this.saving.set(false);
-          this.snackbar.error(this.translate.instant('customers.workflow.identity.saveFailed'));
+          this.snackbar.errorFrom(err, 'customers.workflow.identity.saveFailed');
         },
       }),
     );

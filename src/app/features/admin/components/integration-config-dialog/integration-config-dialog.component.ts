@@ -182,11 +182,9 @@ export class IntegrationConfigDialogComponent {
         // for the consent screen. We'll come back via /admin?tab=integrations.
         window.location.href = result.authorizationUrl;
       },
-      error: () => {
+      error: (err: unknown) => {
         this.connecting.set(false);
-        this.snackbar.error(
-          `Couldn't start the ${this.data.integration.name} connect flow. ` +
-          `Check that Client ID and Client Secret are saved.`);
+        this.snackbar.errorFrom(err, 'errorFallbacksA.integrationConnectStartFailed');
       },
     });
   }

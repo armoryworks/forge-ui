@@ -85,8 +85,8 @@ export class PresetDetailComponent implements OnInit {
       return;
     }
     this.presetService.getPreset(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      error: () => {
-        this.snackbar.error('Preset not found');
+      error: (err: unknown) => {
+        this.snackbar.errorFrom(err, 'errorFallbacksA.presetNotFound');
         this.router.navigate(['/admin/presets']);
       },
     });
@@ -124,9 +124,9 @@ export class PresetDetailComponent implements OnInit {
             this.commitApply(detail.id, detail.name, result.reason);
           });
       },
-      error: () => {
+      error: (err: unknown) => {
         this.applying.set(false);
-        this.snackbar.error('Failed to preview apply');
+        this.snackbar.errorFrom(err, 'errorFallbacksA.presetPreviewApplyFailed');
       },
     });
   }
@@ -150,8 +150,7 @@ export class PresetDetailComponent implements OnInit {
       },
       error: (err) => {
         this.applying.set(false);
-        const msg = err?.error?.message ?? 'Apply failed';
-        this.snackbar.error(msg);
+        this.snackbar.errorFrom(err, 'errorFallbacksA.presetApplyFailed');
       },
     });
   }

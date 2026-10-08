@@ -194,7 +194,7 @@ export class LoginComponent implements OnInit {
         details: err.error?.stackTrace ?? `Status ${err.status}: ${err.statusText}`,
       });
     } else {
-      this.snackbar.error(err.error?.detail ?? 'Unable to connect to server.');
+      this.snackbar.errorFrom(err, 'errorFallbacksA.loginUnreachable');
     }
   }
 }

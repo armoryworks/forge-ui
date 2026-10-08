@@ -32,8 +32,8 @@ export class SsoCallbackComponent implements OnInit {
       // Trade the single-use code for the real session (JWT never rides the URL).
       this.authService.exchangeSsoCode(code).subscribe({
         next: () => this.router.navigate([this.layout.getDefaultRoute()], { replaceUrl: true }),
-        error: () => {
-          this.snackbar.error(this.translate.instant('auth.ssoFailed'));
+        error: (err: unknown) => {
+          this.snackbar.errorFrom(err, 'auth.ssoFailed');
           this.router.navigate(['/login'], { replaceUrl: true });
         },
       });

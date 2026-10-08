@@ -320,9 +320,9 @@ export class CustomersComponent {
           this.loadCustomers();
         }
       },
-      error: () => {
+      error: (err: unknown) => {
         this.saving.set(false);
-        this.snackbar.error(this.translate.instant('leads.convertFailed'));
+        this.snackbar.errorFrom(err, 'leads.convertFailed');
       },
     });
   }

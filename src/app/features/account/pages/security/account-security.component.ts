@@ -161,7 +161,7 @@ export class AccountSecurityComponent implements OnInit {
             this.snackbar.success('Device removed');
             this.loadMfaStatus();
           },
-          error: () => this.snackbar.error('Failed to remove device'),
+          error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.removeDeviceFailed'),
         });
       }
     });
@@ -183,7 +183,7 @@ export class AccountSecurityComponent implements OnInit {
             this.snackbar.success('Two-factor authentication disabled');
             this.loadMfaStatus();
           },
-          error: () => this.snackbar.error('Failed to disable MFA'),
+          error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.disableMfaFailed'),
         });
       }
     });

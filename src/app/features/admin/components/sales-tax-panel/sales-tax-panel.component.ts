@@ -105,7 +105,7 @@ export class SalesTaxPanelComponent implements OnInit {
           this.load();
           this.snackbar.success(this.translate.instant('salesTax.deleted'));
         },
-        error: () => this.snackbar.error(this.translate.instant('salesTax.deleteFailed')),
+        error: (err: unknown) => this.snackbar.errorFrom(err, 'salesTax.deleteFailed'),
       });
     });
   }

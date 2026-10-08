@@ -84,9 +84,9 @@ export class WalkthroughPreviewDialogComponent {
         this.snackbar.success('Walkthrough steps saved');
         this.dialogRef.close(true);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.saving.set(false);
-        this.snackbar.error('Failed to save steps');
+        this.snackbar.errorFrom(err, 'errorFallbacksA.walkthroughStepsSaveFailed');
       },
     });
   }

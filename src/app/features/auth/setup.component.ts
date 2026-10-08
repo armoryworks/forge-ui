@@ -324,7 +324,7 @@ export class SetupComponent {
         details: err.error?.stackTrace ?? `Status ${status}: ${err.statusText}`,
       });
     } else {
-      this.snackbar.error(detail ?? 'Setup failed. Please try again.');
+      this.snackbar.errorFrom(err, 'errorFallbacksA.setupFailed');
     }
   }
 }

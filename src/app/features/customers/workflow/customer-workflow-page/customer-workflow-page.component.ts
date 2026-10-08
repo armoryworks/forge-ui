@@ -151,15 +151,15 @@ export class CustomerWorkflowPageComponent {
               replaceUrl: true,
             });
           },
-          error: () => {
-            this.snackbar.error(this.translate.instant('customers.workflow.page.startFailed'));
+          error: (err: unknown) => {
+            this.snackbar.errorFrom(err, 'customers.workflow.page.startFailed');
             this.router.navigate(['/customers']);
           },
         });
       },
-      error: () => {
+      error: (err: unknown) => {
         this.loading.stop('customer-workflow');
-        this.snackbar.error(this.translate.instant('customers.workflow.page.loadFailed'));
+        this.snackbar.errorFrom(err, 'customers.workflow.page.loadFailed');
         this.router.navigate(['/customers']);
       },
     });
@@ -198,9 +198,9 @@ export class CustomerWorkflowPageComponent {
         this.validators.set(validators);
         this.workflowService.setContext({ run, definition, entity: null, validators });
       },
-      error: () => {
+      error: (err: unknown) => {
         this.loading.stop('customer-workflow');
-        this.snackbar.error(this.translate.instant('customers.workflow.page.loadFailed'));
+        this.snackbar.errorFrom(err, 'customers.workflow.page.loadFailed');
         this.router.navigate(['/customers']);
       },
     });

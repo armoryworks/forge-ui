@@ -84,9 +84,9 @@ export class AddDeviceDialogComponent implements OnInit {
         this.issuing.set(false);
         this.tick();
       },
-      error: () => {
+      error: (err: unknown) => {
         this.issuing.set(false);
-        this.snackbar.error(this.translate.instant('admin.devices.issueFailed'));
+        this.snackbar.errorFrom(err, 'admin.devices.issueFailed');
       },
     });
   }
@@ -107,7 +107,7 @@ export class AddDeviceDialogComponent implements OnInit {
           this.snackbar.success(this.translate.instant('admin.devices.revoked'));
           this.loadDevices();
         },
-        error: () => this.snackbar.error(this.translate.instant('admin.devices.revokeFailed')),
+        error: (err: unknown) => this.snackbar.errorFrom(err, 'admin.devices.revokeFailed'),
       });
     });
   }

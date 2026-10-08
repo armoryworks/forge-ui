@@ -59,7 +59,7 @@ export class AiAssistantsPanelComponent implements OnInit {
     this.loading.set(true);
     this.adminService.getAiAssistants().subscribe({
       next: (data) => { this.assistants.set(data); this.loading.set(false); },
-      error: () => { this.loading.set(false); this.snackbar.error(this.translate.instant('aiAssistants.loadFailed')); },
+      error: (err: unknown) => { this.loading.set(false); this.snackbar.errorFrom(err, 'aiAssistants.loadFailed'); },
     });
   }
 
@@ -94,7 +94,7 @@ export class AiAssistantsPanelComponent implements OnInit {
       if (!confirmed) return;
       this.adminService.deleteAiAssistant(assistant.id).subscribe({
         next: () => { this.load(); this.snackbar.success(this.translate.instant('aiAssistants.deleted')); },
-        error: () => this.snackbar.error(this.translate.instant('aiAssistants.deleteFailed')),
+        error: (err: unknown) => this.snackbar.errorFrom(err, 'aiAssistants.deleteFailed'),
       });
     });
   }

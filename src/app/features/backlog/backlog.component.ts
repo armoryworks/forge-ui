@@ -325,7 +325,7 @@ export class BacklogComponent implements OnInit {
           this.clearSelection();
           this.loadJobs();
         },
-        error: () => this.snackbar.error(this.translate.instant('backlog.unarchiveFailed')),
+        error: (err: unknown) => this.snackbar.errorFrom(err, 'backlog.unarchiveFailed'),
       });
     });
   }
@@ -354,7 +354,7 @@ export class BacklogComponent implements OnInit {
           this.snackbar.success(this.translate.instant('backlog.jobUnarchived', { jobNumber: job.jobNumber }));
           this.loadJobs();
         },
-        error: () => this.snackbar.error(this.translate.instant('backlog.unarchiveFailed')),
+        error: (err: unknown) => this.snackbar.errorFrom(err, 'backlog.unarchiveFailed'),
       });
     });
   }

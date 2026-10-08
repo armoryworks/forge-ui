@@ -61,11 +61,11 @@ export class TrainingComponent implements OnInit {
   ngOnInit(): void {
     this.training.getState().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (s) => this.state.set(s),
-      error: () => this.snackbar.error(this.translate.instant('accounting.training.errors.stateFailed')),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'accounting.training.errors.stateFailed'),
     });
     this.training.getScenarios().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.scenarios.set(list),
-      error: () => this.snackbar.error(this.translate.instant('accounting.training.errors.scenariosFailed')),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'accounting.training.errors.scenariosFailed'),
     });
   }
 
@@ -99,9 +99,9 @@ export class TrainingComponent implements OnInit {
           this.snackbar.success(this.translate.instant(scenario.successKey));
         }
       },
-      error: () => {
+      error: (err: unknown) => {
         this.checking.set(null);
-        this.snackbar.error(this.translate.instant('accounting.training.errors.checkFailed'));
+        this.snackbar.errorFrom(err, 'accounting.training.errors.checkFailed');
       },
     });
   }
@@ -131,7 +131,7 @@ export class TrainingComponent implements OnInit {
           localStorage.removeItem(PASSED_KEY);
           this.snackbar.success(this.translate.instant('accounting.training.resetDone'));
         },
-        error: () => this.snackbar.error(this.translate.instant('accounting.training.errors.resetFailed')),
+        error: (err: unknown) => this.snackbar.errorFrom(err, 'accounting.training.errors.resetFailed'),
       });
   }
 }

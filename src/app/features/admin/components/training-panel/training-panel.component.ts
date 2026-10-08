@@ -240,9 +240,9 @@ export class TrainingPanelComponent implements OnInit {
           });
         });
       },
-      error: () => {
+      error: (err: unknown) => {
         this.generatingModuleId.set(null);
-        this.snackbar.error(this.translate.instant('adminPanels.training.snackbar.walkthroughFailed'));
+        this.snackbar.errorFrom(err, 'adminPanels.training.snackbar.walkthroughFailed');
       },
     });
   }

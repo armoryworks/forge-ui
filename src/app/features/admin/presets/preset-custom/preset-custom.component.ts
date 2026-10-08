@@ -158,8 +158,7 @@ export class PresetCustomComponent implements OnInit {
       },
       error: (err) => {
         this.applying.set(false);
-        const msg = err?.error?.message ?? 'Apply failed';
-        this.snackbar.error(msg);
+        this.snackbar.errorFrom(err, 'errorFallbacksA.presetApplyFailed');
       },
     });
   }
@@ -167,7 +166,7 @@ export class PresetCustomComponent implements OnInit {
   private refreshPreview(): void {
     this.presetService.previewCustom(this.toOverrideList()).subscribe({
       next: (preview) => this.preview.set(preview),
-      error: () => this.snackbar.error('Failed to preview custom configuration'),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.presetCustomPreviewFailed'),
     });
   }
 

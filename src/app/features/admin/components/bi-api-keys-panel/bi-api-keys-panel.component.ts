@@ -173,9 +173,7 @@ export class BiApiKeysPanelComponent implements OnInit {
           // reads as "the button is broken." Snackbar + banner cover it.
           this.capabilityDisabled.set(err.message);
           this.closeCreate();
-          this.snackbar.error(
-            this.translate.instant('adminPanels.biApiKeys.capabilityDisabled'),
-          );
+          this.snackbar.errorFrom(err, 'adminPanels.biApiKeys.capabilityDisabled');
           return;
         }
         // Phase 3 / WU-02 envelope — surface per-field errors back on the form.

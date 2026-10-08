@@ -49,8 +49,8 @@ export class MfaChallengeComponent implements OnInit {
         this.challenge.set(challenge);
         this.loading.set(false);
       },
-      error: () => {
-        this.snackbar.error('Failed to create MFA challenge');
+      error: (err: unknown) => {
+        this.snackbar.errorFrom(err, 'errorFallbacksA.mfaChallengeFailed');
         this.cancelled.emit();
       },
     });

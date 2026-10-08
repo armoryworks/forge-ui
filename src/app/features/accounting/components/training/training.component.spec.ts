@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { of } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { of, throwError } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 import { TrainingComponent } from './training.component';
@@ -27,7 +28,7 @@ interface Api {
 
 describe('TrainingComponent', () => {
   const svc = { getState: vi.fn(), getScenarios: vi.fn(), check: vi.fn(), reset: vi.fn() };
-  const snackbar = { success: vi.fn(), error: vi.fn() };
+  const snackbar = { success: vi.fn(), error: vi.fn(), errorFrom: vi.fn() };
   const dialog = { open: vi.fn() };
 
   function create(): Api {
@@ -88,5 +89,15 @@ describe('TrainingComponent', () => {
     expect(svc.reset).toHaveBeenCalled();
     expect(api.passedIds().size).toBe(0);
     expect(localStorage.getItem('forge-training-passed')).toBeNull();
+  });
+
+  it('a failed check hands the server error to errorFrom with the check fallback', () => {
+    const err = new HttpErrorResponse({ status: 400, error: { detail: 'Scenario is not seeded.' } });
+    svc.check.mockReturnValue(throwError(() => err));
+    const api = create();
+    api.chooseTrack('A');
+    api.check(SCENARIOS[0]);
+    expect(snackbar.errorFrom).toHaveBeenCalledWith(err, 'accounting.training.errors.checkFailed');
+    expect(snackbar.error).not.toHaveBeenCalled();
   });
 });

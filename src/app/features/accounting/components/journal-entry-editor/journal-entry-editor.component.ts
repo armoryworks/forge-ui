@@ -128,14 +128,14 @@ export class JournalEntryEditorComponent implements OnInit {
             this.accountOptions.set(accounts.map((a) => this.toOption(a)));
             this.prefillFrom(page, correctionOf);
           },
-          error: () => this.snackbar.error(this.translate.instant('accounting.errors.accountsLoadFailed')),
+          error: (err: unknown) => this.snackbar.errorFrom(err, 'accounting.errors.accountsLoadFailed'),
         });
       return;
     }
 
     accounts$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (accounts) => this.accountOptions.set(accounts.map((a) => this.toOption(a))),
-      error: () => this.snackbar.error(this.translate.instant('accounting.errors.accountsLoadFailed')),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'accounting.errors.accountsLoadFailed'),
     });
   }
 

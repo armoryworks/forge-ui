@@ -27,7 +27,7 @@ const LOGO_MAP: Record<string, string> = {
 
 import { MatDialog } from '@angular/material/dialog';
 
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { AccountingService } from '../../../../shared/services/accounting.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -56,7 +56,6 @@ export class IntegrationsPanelComponent implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
-  private readonly translate = inject(TranslateService);
 
   readonly providers = this.accountingService.providers;
   readonly activeProviderId = this.accountingService.providerId;
@@ -195,9 +194,9 @@ export class IntegrationsPanelComponent implements OnInit {
           this.snackbar.error(result.message);
         }
       },
-      error: () => {
+      error: (err: unknown) => {
         this.testingProvider.set(null);
-        this.snackbar.error(this.translate.instant('integrations.connectionTestFailed'));
+        this.snackbar.errorFrom(err, 'integrations.connectionTestFailed');
       },
     });
   }

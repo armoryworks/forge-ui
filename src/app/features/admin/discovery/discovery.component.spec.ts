@@ -159,7 +159,7 @@ describe('DiscoveryComponent', () => {
         { provide: AdminSettingsService, useValue: { updateSetting } },
         { provide: CapabilityInstallStateService, useValue: { dismiss: () => undefined } },
         { provide: PresetService, useValue: { previewApply: () => of({ isCustom: false, deltas: [], violations: [], deltaCount: 1 }) } },
-        { provide: SnackbarService, useValue: { successWithNav, error: () => undefined } },
+        { provide: SnackbarService, useValue: { successWithNav, error: () => undefined, errorFrom: () => undefined } },
         { provide: MatDialog, useValue: { open: () => ({ afterClosed }) } },
         { provide: Router, useValue: { navigate } },
         { provide: ActivatedRoute, useValue: { queryParamMap: step$ } },

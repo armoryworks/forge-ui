@@ -29,7 +29,7 @@ const ACCOUNTS = [
 describe('JournalEntryEditorComponent', () => {
   const gl = { getChartOfAccounts: vi.fn(), createManualJournalEntry: vi.fn(), getLedgerRegister: vi.fn() };
   const router = { navigate: vi.fn() };
-  const snackbar = { success: vi.fn(), error: vi.fn() };
+  const snackbar = { success: vi.fn(), error: vi.fn(), errorFrom: vi.fn() };
   let queryParams: Record<string, string>;
 
   function create(): EditorApi {

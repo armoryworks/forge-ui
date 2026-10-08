@@ -43,8 +43,8 @@ export class MfaSetupDialogComponent {
         this.setupData.set(data);
         this.step.set('scan');
       },
-      error: () => {
-        this.snackbar.error('Failed to start MFA setup');
+      error: (err: unknown) => {
+        this.snackbar.errorFrom(err, 'errorFallbacksA.mfaSetupStartFailed');
         this.dialogRef.close(false);
       },
     });
