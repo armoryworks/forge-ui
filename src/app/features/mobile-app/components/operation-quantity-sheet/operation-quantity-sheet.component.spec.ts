@@ -90,8 +90,8 @@ describe('OperationQuantitySheetComponent', () => {
     click(el, 'operation-qty-done');
 
     expect(recorded.mock.calls).toEqual([
-      [{ completed: 13, scrap: 0, complete: false }],
-      [{ completed: 13, scrap: 0, complete: true }],
+      [{ completed: 13, scrap: 0, rework: 0, reason: null, complete: false }],
+      [{ completed: 13, scrap: 0, rework: 0, reason: null, complete: true }],
     ]);
   });
 
