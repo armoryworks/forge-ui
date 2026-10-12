@@ -28,6 +28,8 @@ import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { RunningTimersService } from '../../shared/services/running-timers.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { RunningTimersComponent } from '../../shared/components/running-timers/running-timers.component';
+import { elapsedMs } from '../../shared/utils/elapsed-ms';
+import { secondTicker } from '../../shared/utils/second-ticker';
 
 @Component({
   selector: 'app-time-tracking',
@@ -69,6 +71,9 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
   protected readonly entries = signal<TimeEntry[]>([]);
   protected readonly activeTimers = signal<TimeEntry[]>([]);
   protected readonly activeTimer = computed(() => this.activeTimers().find(t => !t.jobOperationId) ?? null);
+  private readonly now = secondTicker();
+  protected readonly activeTimerElapsed = computed(() => this.timerElapsed(this.activeTimer()));
+  protected readonly stopTargetElapsed = computed(() => this.timerElapsed(this.stopTarget()));
   protected readonly otherRunningTimers = computed(() => {
     const header = this.activeTimer();
     return this.activeTimers().filter(t => t !== header);
@@ -288,10 +293,9 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
     return h > 0 ? `${h}h ${m}m` : `${m}m`;
   }
 
-  protected getTimerElapsed(timer: TimeEntry | null = this.activeTimer()): string {
+  private timerElapsed(timer: TimeEntry | null): string {
     if (!timer?.timerStart) return '0m';
-    const elapsed = Math.floor((Date.now() - new Date(timer.timerStart).getTime()) / 60000);
-    return this.formatDuration(elapsed);
+    return this.formatDuration(Math.floor(elapsedMs(timer.timerStart, this.now()) / 60000));
   }
 
   protected getTotalHours(): string {

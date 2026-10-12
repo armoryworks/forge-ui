@@ -17,11 +17,41 @@
       <span class="qty-sheet__value qty-sheet__value--scrap" data-testid="operation-qty-scrap">{{ scrapCount() }}</span>
       <button type="button" class="qty-sheet__step" [attr.aria-label]="'mobileApp.move.more' | translate" data-testid="operation-scrap-plus" (click)="bumpScrap(1)">+</button>
     </div>
-  } @else {
-    <button type="button" class="qty-sheet__link" data-testid="operation-scrap-open" (click)="openScrap()">
-      {{ 'mobileApp.operations.addScrap' | translate }}
-    </button>
   }
+
+  @if (reworkOpen()) {
+    <span class="qty-sheet__label">{{ 'mobileApp.operations.rework' | translate }}</span>
+    <div class="qty-sheet__stepper">
+      <button type="button" class="qty-sheet__step" [attr.aria-label]="'mobileApp.move.less' | translate" data-testid="operation-rework-minus" (click)="bumpRework(-1)">−</button>
+      <span class="qty-sheet__value qty-sheet__value--rework" data-testid="operation-qty-rework">{{ reworkCount() }}</span>
+      <button type="button" class="qty-sheet__step" [attr.aria-label]="'mobileApp.move.more' | translate" data-testid="operation-rework-plus" (click)="bumpRework(1)">+</button>
+    </div>
+  }
+
+  @if (askReason()) {
+    <span class="qty-sheet__label">{{ 'mobileApp.operations.reason' | translate }}</span>
+    <div class="qty-sheet__chips" role="group" [attr.aria-label]="'mobileApp.operations.reason' | translate">
+      @for (r of reasons(); track r.code) {
+        <button type="button" class="qty-sheet__chip" [class.qty-sheet__chip--on]="reason() === r.code"
+                [attr.aria-pressed]="reason() === r.code" [attr.data-testid]="'operation-reason-' + r.code" (click)="pickReason(r.code)">
+          {{ r.label }}
+        </button>
+      }
+    </div>
+  }
+
+  <div class="qty-sheet__links">
+    @if (!scrapOpen()) {
+      <button type="button" class="qty-sheet__link" data-testid="operation-scrap-open" (click)="openScrap()">
+        {{ 'mobileApp.operations.addScrap' | translate }}
+      </button>
+    }
+    @if (!reworkOpen()) {
+      <button type="button" class="qty-sheet__link" data-testid="operation-rework-open" (click)="openRework()">
+        {{ 'mobileApp.operations.addRework' | translate }}
+      </button>
+    }
+  </div>
 
   @if (over()) {
     <p class="qty-sheet__warning" role="alert" data-testid="operation-qty-over">

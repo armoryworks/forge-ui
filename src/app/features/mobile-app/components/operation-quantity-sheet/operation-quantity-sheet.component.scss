@@ -60,6 +60,36 @@
     color: var(--text);
 
     &--scrap { color: var(--warning); }
+    &--rework { color: var(--info); }
+  }
+
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-md;
+  }
+
+  &__chip {
+    min-height: 44px;
+    padding: 0 $sp-lg;
+    background: var(--bg);
+    border: $border-width-thin solid var(--border);
+    color: var(--text);
+    font-family: $font-family-primary;
+    font-size: $font-size-md;
+    cursor: pointer;
+
+    &--on {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--bg);
+    }
+  }
+
+  &__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-lg;
   }
 
   &__link {

@@ -9,6 +9,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { JobOperationRow } from '../../../../shared/models/job-operation-row.model';
 import { JobOperations } from '../../../../shared/models/job-operations.model';
 import { isQueued } from '../../../../shared/models/mobile-api.model';
+import { OperationReason } from '../../../../shared/models/operation-reason.model';
 import { UpdateJobOperationProgressRequest } from '../../../../shared/models/update-job-operation-progress-request.model';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { InstanceService } from '../../../../shared/services/instance.service';
@@ -61,6 +62,7 @@ export class JobOperationsComponent {
   protected readonly busy = signal(false);
   protected readonly notice = signal<string | null>(null);
   protected readonly editing = signal<OperationEdit | null>(null);
+  protected readonly reasons = signal<OperationReason[]>([]);
   protected readonly identifying = signal(false);
   protected readonly moveOffered = signal(false);
 
@@ -230,6 +232,8 @@ export class JobOperationsComponent {
       completedQuantity: entry.completed,
       scrapQuantity: entry.scrap,
     };
+    if (entry.rework > 0) request.reworkQuantity = entry.rework;
+    if (entry.reason) request.reasonCode = entry.reason;
     if (entry.complete) request.status = 'Complete';
     if (row.version !== null) request.expectedVersion = row.version;
 
@@ -267,6 +271,12 @@ export class JobOperationsComponent {
   private load(jobId: number): void {
     const load = ++this.loads;
     if (!this.data()) this.loading.set(true);
+    if (load === 1) {
+      this.api.operationsConfig().subscribe({
+        next: (config) => this.reasons.set(config?.reasons ?? []),
+        error: () => this.reasons.set([]),
+      });
+    }
     this.api.jobOperations(jobId).subscribe({
       next: (data) => {
         if (load !== this.loads) return;

@@ -95,6 +95,7 @@ function setup(response: Observable<unknown>) {
     startTimer: vi.fn().mockReturnValue(of({})),
     stopTimer: vi.fn().mockReturnValue(of({ stopped: true, entry: null })),
     updateProgress: vi.fn(),
+    reasons: () => [{ code: 'tooling', label: 'Tool wear' }],
   };
   const cost = { getOperationTimeSummary: vi.fn().mockReturnValue(of([])) };
   const undo = new Subject<void>();
@@ -215,8 +216,9 @@ describe('OperationTimeTabComponent', () => {
     component.openQuantity(firstRow(component));
     expect(dialog.open.mock.calls[0][1].data).toEqual({
       title: 'Mill', jobQuantity: 40, completedQuantity: 20, scrapQuantity: 0,
+      reasons: [{ code: 'tooling', label: 'Tool wear' }],
     });
-    afterClosed.next({ completedQuantity: 30, scrapQuantity: 1, complete: false });
+    afterClosed.next({ completedQuantity: 30, scrapQuantity: 1, reworkQuantity: 0, reasonCode: null, complete: false });
 
     expect(operations.updateProgress).toHaveBeenCalledWith(JOB_ID, 7, {
       completedQuantity: 30,
@@ -225,6 +227,27 @@ describe('OperationTimeTabComponent', () => {
       expectedVersion: 5,
     });
     expect(finished).not.toHaveBeenCalled();
+  });
+
+  it('sends rework and the reason only when the dialog recorded them', () => {
+    const { component, operations, afterClosed } = setup(of(payload(true)));
+    operations.updateProgress.mockReturnValue(of({
+      operation: op({ completedQuantity: 20, scrapQuantity: 2, version: 6 }),
+      allOperationsComplete: false,
+      estimatedRemainingMinutes: 30,
+    }));
+
+    component.openQuantity(firstRow(component));
+    afterClosed.next({ completedQuantity: 20, scrapQuantity: 2, reworkQuantity: 3, reasonCode: 'tooling', complete: false });
+
+    expect(operations.updateProgress).toHaveBeenCalledWith(JOB_ID, 7, {
+      completedQuantity: 20,
+      scrapQuantity: 2,
+      status: null,
+      expectedVersion: 5,
+      reworkQuantity: 3,
+      reasonCode: 'tooling',
+    });
   });
 
   it('reloads when the board reports a change to this job only', async () => {

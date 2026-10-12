@@ -9,6 +9,7 @@ import { DatePipe } from '@angular/common';
 
 import { JobStatus, isQueued } from '../../../shared/models/mobile-api.model';
 import { InstanceService } from '../../../shared/services/instance.service';
+import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
 import { MobileApiService } from '../../../shared/services/mobile-api.service';
 import { MobileMoveConfirmService } from '../../../shared/services/mobile-move-confirm.service';
 import { MobileTimerService } from '../../../shared/services/mobile-timer.service';
@@ -36,7 +37,7 @@ type PendingAction = 'advance' | 'note' | 'photo' | 'timer';
 @Component({
   selector: 'app-app-job-status',
   standalone: true,
-  imports: [DatePipe, TranslatePipe, IdentityPromptComponent, JobOperationsComponent],
+  imports: [DateOnlyPipe, DatePipe, TranslatePipe, IdentityPromptComponent, JobOperationsComponent],
   templateUrl: './app-job-status.component.html',
   styleUrl: './app-job-status.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

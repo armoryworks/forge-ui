@@ -10,6 +10,7 @@ import { JobOperationTimerResult } from '../models/job-operation-timer-result.mo
 import { JobOperationTimerStopResult } from '../models/job-operation-timer-stop-result.model';
 import { JobOperations } from '../models/job-operations.model';
 import { JobOperationsConfig } from '../models/job-operations-config.model';
+import { OperationReason } from '../models/operation-reason.model';
 import { StartJobOperationTimerRequest } from '../models/start-job-operation-timer-request.model';
 import { UpdateJobOperationProgressRequest } from '../models/update-job-operation-progress-request.model';
 
@@ -18,19 +19,23 @@ export class JobOperationsService {
   private readonly http = inject(HttpClient);
   private readonly base = environment.apiUrl;
   private readonly _trackingEnabled = signal(false);
+  private readonly _reasons = signal<OperationReason[]>([]);
   private configLoaded = false;
 
   readonly trackingEnabled = this._trackingEnabled.asReadonly();
+  readonly reasons = this._reasons.asReadonly();
 
   loadConfig(force = false): Observable<boolean> {
     if (this.configLoaded && !force) return of(this._trackingEnabled());
     return this.http.get<JobOperationsConfig>(`${this.base}/job-operations/config`).pipe(
-      map(config => config?.operationTracking === true),
-      catchError(() => of(false)),
-      tap(enabled => {
+      map(config => ({ enabled: config?.operationTracking === true, reasons: config?.reasons ?? [] })),
+      catchError(() => of({ enabled: false, reasons: [] as OperationReason[] })),
+      tap(({ enabled, reasons }) => {
         this.configLoaded = true;
         this._trackingEnabled.set(enabled);
+        this._reasons.set(reasons);
       }),
+      map(({ enabled }) => enabled),
     );
   }
 

@@ -11048,7 +11048,10 @@
       "moreTen": "Diez más",
       "overQuantity": "{{good}} buenas más {{scrap}} de desecho supera la cantidad del trabajo, {{total}}.",
       "doneCount": "Terminar — {{count}} de {{total}}",
-      "recordCount": "Registrar {{count}} y seguir"
+      "recordCount": "Registrar {{count}} y seguir",
+      "rework": "Retrabajo",
+      "addRework": "Agregar retrabajo",
+      "reason": "Motivo"
     }
   },
   "mobileAppWork": {
@@ -11519,7 +11522,11 @@
       "doneAll": "Terminar — las {{count}}",
       "done": "Terminar — {{count}}",
       "negative": "Las cantidades no pueden ser negativas",
-      "overQuantity": "Terminadas más desechadas ({{total}}) supera la cantidad del trabajo ({{quantity}})"
+      "overQuantity": "Terminadas más desechadas ({{total}}) supera la cantidad del trabajo ({{quantity}})",
+      "rework": "Piezas devueltas a retrabajo ahora",
+      "addRework": "Registrar retrabajo",
+      "reason": "Motivo",
+      "noReason": "-- Ninguno --"
     },
     "messages": {
       "completed": "{{operation}} marcada como terminada",

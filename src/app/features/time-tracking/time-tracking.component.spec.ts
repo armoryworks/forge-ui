@@ -22,6 +22,7 @@ interface PageInternals {
   activeTimer: () => TimeEntry | null;
   otherRunningTimers: () => TimeEntry[];
   stopTarget: () => TimeEntry | null;
+  activeTimerElapsed: () => string;
   openStopTimer(entry?: TimeEntry | null): void;
   openStopTimerById(id: number): void;
   stopTimer(): void;
@@ -106,5 +107,20 @@ describe('TimeTrackingComponent', () => {
 
     expect(component.activeTimer()).toBeNull();
     expect(component.otherRunningTimers()).toEqual([]);
+  });
+
+  it('keeps the header elapsed time ticking after the first render', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-10-08T08:01:30Z'));
+    try {
+      const general = entry({ id: 5, timerStart: new Date('2026-10-08T08:00:00Z') });
+      const { component } = setup([general], of([general]));
+
+      expect(component.activeTimerElapsed()).toBe('1m');
+      vi.advanceTimersByTime(3 * 60_000);
+      expect(component.activeTimerElapsed()).toBe('4m');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

@@ -11048,7 +11048,10 @@
       "moreTen": "Ten more",
       "overQuantity": "{{good}} good plus {{scrap}} scrap is more than the job quantity of {{total}}.",
       "doneCount": "Done — {{count}} of {{total}}",
-      "recordCount": "Record {{count}}, keep going"
+      "recordCount": "Record {{count}}, keep going",
+      "rework": "Rework",
+      "addRework": "Add rework",
+      "reason": "Reason"
     }
   },
   "mobileAppWork": {
@@ -11519,7 +11522,11 @@
       "doneAll": "Done — all {{count}}",
       "done": "Done — {{count}}",
       "negative": "Quantities cannot be negative",
-      "overQuantity": "Finished plus scrapped ({{total}}) is more than the job quantity ({{quantity}})"
+      "overQuantity": "Finished plus scrapped ({{total}}) is more than the job quantity ({{quantity}})",
+      "rework": "Pieces sent back for rework now",
+      "addRework": "Record rework",
+      "reason": "Reason",
+      "noReason": "-- None --"
     },
     "messages": {
       "completed": "{{operation}} marked done",

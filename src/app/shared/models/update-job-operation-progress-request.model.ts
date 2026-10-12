@@ -5,4 +5,6 @@ export interface UpdateJobOperationProgressRequest {
   scrapQuantity?: number | null;
   status?: JobOperationStatus | null;
   expectedVersion?: number | null;
+  reworkQuantity?: number | null;
+  reasonCode?: string | null;
 }

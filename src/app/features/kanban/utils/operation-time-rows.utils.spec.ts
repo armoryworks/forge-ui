@@ -2,13 +2,7 @@ import { describe, it, expect } from 'vitest';
 
 import { JobOperationRow } from '../../../shared/models/job-operation-row.model';
 import { JobOperations } from '../../../shared/models/job-operations.model';
-import {
-  isJobOperations,
-  legacyToOperationTimeRows,
-  minutesToPreciseMs,
-  minutesToSecondsMs,
-  toOperationTimeRows,
-} from './operation-time-rows.utils';
+import { efficiencyPercent, isJobOperations, legacyToOperationTimeRows, minutesToPreciseMs, minutesToSecondsMs, toOperationTimeRows } from './operation-time-rows.utils';
 
 const LOADED_AT = Date.parse('2026-10-08T12:00:00Z');
 
@@ -104,6 +98,17 @@ describe('operation time rows', () => {
     expect(mapped.estimatedRunMinutes).toBe(8);
     expect(mapped.efficiencyPercent).toBe(121);
     expect(mapped.canAct).toBe(false);
+  });
+
+  it('has no efficiency until time is recorded', () => {
+    expect(efficiencyPercent(30, 0)).toBeNull();
+    expect(efficiencyPercent(30, 15)).toBe(200);
+    const [fresh] = legacyToOperationTimeRows([{
+      operationId: 7, operationName: 'Mill', operationSequence: 2,
+      estimatedSetupMinutes: 15, estimatedRunMinutes: 8, actualSetupMinutes: 0, actualRunMinutes: 0,
+      actualTotalMinutes: 0, setupVarianceMinutes: -15, runVarianceMinutes: -8, efficiencyPercent: 0, entryCount: 0,
+    }]);
+    expect(fresh.efficiencyPercent).toBeNull();
   });
 
   it('recognises only payloads that carry an operations array', () => {

@@ -12,6 +12,7 @@
       [jobQuantity]="data()?.jobQuantity ?? 0"
       [completed]="edit.row.completedQuantity"
       [scrap]="edit.row.scrapQuantity"
+      [reasons]="reasons()"
       [finishing]="edit.finishing"
       [busy]="busy()"
       (recorded)="record($event)"

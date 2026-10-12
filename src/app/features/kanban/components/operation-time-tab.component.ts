@@ -235,6 +235,7 @@ export class OperationTimeTabComponent {
           jobQuantity: this.jobQuantity(),
           completedQuantity: row.completedQuantity,
           scrapQuantity: row.scrapQuantity,
+          reasons: this.operationsService.reasons(),
         },
       }).afterClosed().subscribe(result => {
       if (!result) return;
@@ -242,6 +243,8 @@ export class OperationTimeTabComponent {
         completedQuantity: result.completedQuantity,
         scrapQuantity: result.scrapQuantity,
         status: result.complete ? 'Complete' : null,
+        ...(result.reworkQuantity > 0 ? { reworkQuantity: result.reworkQuantity } : {}),
+        ...(result.reasonCode ? { reasonCode: result.reasonCode } : {}),
       }, result.complete ? 'jobOperations.messages.completed' : 'jobOperations.messages.recorded');
     });
   }
@@ -316,13 +319,15 @@ export class OperationTimeTabComponent {
     return '';
   }
 
-  getEfficiencyClass(efficiency: number): string {
+  getEfficiencyClass(efficiency: number | null): string {
+    if (efficiency === null) return '';
     if (efficiency >= 100) return 'op-time__efficiency--good';
     if (efficiency >= 80) return 'op-time__efficiency--fair';
     return 'op-time__efficiency--poor';
   }
 
-  getEfficiencyBarClass(efficiency: number): string {
+  getEfficiencyBarClass(efficiency: number | null): string {
+    if (efficiency === null) return '';
     if (efficiency >= 100) return 'op-time__bar-fill--good';
     if (efficiency >= 80) return 'op-time__bar-fill--fair';
     return 'op-time__bar-fill--poor';

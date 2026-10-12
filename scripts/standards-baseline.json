@@ -165,7 +165,6 @@
     "src/app/features/expenses/upcoming/upcoming-expenses.component.html": 1,
     "src/app/features/invoices/components/invoice-detail-panel/invoice-detail-panel.component.html": 1,
     "src/app/features/invoices/invoices.component.html": 1,
-    "src/app/features/mobile-app/pages/app-job-status.component.html": 1,
     "src/app/features/payables/components/vendor-bill-detail-panel/vendor-bill-detail-panel.component.html": 1,
     "src/app/features/payables/components/vendor-payment-dialog/vendor-payment-dialog.component.html": 1,
     "src/app/features/payables/payables.component.html": 1,

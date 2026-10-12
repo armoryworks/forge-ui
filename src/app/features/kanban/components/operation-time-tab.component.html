@@ -16,7 +16,11 @@
       <div class="op-time__summary-item">
         <span class="op-time__summary-label">{{ 'jobOperations.summary.efficiency' | translate }}</span>
         <span class="op-time__summary-value" [class]="getEfficiencyClass(overallEfficiency())">
-          {{ overallEfficiency() | number:'1.0-0' }}%
+          @if (overallEfficiency() !== null) {
+            {{ overallEfficiency() | number:'1.0-0' }}%
+          } @else {
+            &mdash;
+          }
         </span>
       </div>
       @if (trackingEnabled()) {
@@ -114,7 +118,11 @@
         </ng-template>
         <ng-template appColumnCell="efficiencyPercent" let-row>
           <span class="op-time__num" [class]="getEfficiencyClass(row.efficiencyPercent)">
-            {{ row.efficiencyPercent | number:'1.0-0' }}%
+            @if (row.efficiencyPercent !== null) {
+              {{ row.efficiencyPercent | number:'1.0-0' }}%
+            } @else {
+              &mdash;
+            }
           </span>
         </ng-template>
         <ng-template appColumnCell="progress" let-row>

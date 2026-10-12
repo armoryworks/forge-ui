@@ -57,6 +57,7 @@ describe('JobOperationsComponent', () => {
   const timer = { refresh: vi.fn(), elapsedOf: vi.fn(() => '0:01:00') };
   const api = {
     jobOperations: vi.fn(),
+    operationsConfig: vi.fn(() => of({ operationTracking: true, reasons: [] })),
     startOperationTimer: vi.fn(),
     stopOperationTimer: vi.fn(),
     updateOperationProgress: vi.fn(),

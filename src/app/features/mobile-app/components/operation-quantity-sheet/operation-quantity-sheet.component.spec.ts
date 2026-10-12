@@ -19,6 +19,7 @@ describe('OperationQuantitySheetComponent', () => {
     fixture.componentRef.setInput('completed', completed);
     fixture.componentRef.setInput('scrap', scrap);
     fixture.componentRef.setInput('finishing', finishing);
+    fixture.componentRef.setInput('reasons', [{ code: 'tooling', label: 'Tool wear' }, { code: 'other', label: 'Other' }]);
     fixture.detectChanges();
     return fixture.nativeElement as HTMLElement;
   }
@@ -92,5 +93,33 @@ describe('OperationQuantitySheetComponent', () => {
       [{ completed: 13, scrap: 0, complete: false }],
       [{ completed: 13, scrap: 0, complete: true }],
     ]);
+  });
+
+  it('offers rework and a reason only once something is scrapped or reworked', () => {
+    const el = render(12, 0, false);
+    const recorded: unknown[] = [];
+    fixture.componentInstance.recorded.subscribe((e) => recorded.push(e));
+
+    expect(el.querySelector('[data-testid="operation-reason-tooling"]')).toBeNull();
+    click(el, 'operation-rework-open');
+    click(el, 'operation-rework-plus');
+    click(el, 'operation-rework-plus');
+    expect(text(el, 'operation-qty-rework')).toBe('2');
+    click(el, 'operation-reason-tooling');
+    click(el, 'operation-qty-record');
+
+    expect(recorded).toEqual([{ completed: 12, scrap: 0, rework: 2, reason: 'tooling', complete: false }]);
+  });
+
+  it('sends no reason when scrap and rework are untouched', () => {
+    const el = render(12, 1, false);
+    const recorded: unknown[] = [];
+    fixture.componentInstance.recorded.subscribe((e) => recorded.push(e));
+
+    expect(el.querySelector('[data-testid="operation-reason-tooling"]')).toBeNull();
+    click(el, 'operation-qty-plus');
+    click(el, 'operation-qty-record');
+
+    expect(recorded).toEqual([{ completed: 13, scrap: 1, rework: 0, reason: null, complete: false }]);
   });
 });

@@ -25,7 +25,7 @@
       <div class="job-status__fact">
         <dt>{{ 'mobileApp.jobs.due' | translate }}</dt>
         <dd [class.job-status__overdue]="job.isOverdue">
-          {{ job.dueDate ? (job.dueDate | date: 'MM/dd/yyyy') : ('mobileApp.jobs.noDue' | translate) }}
+          {{ job.dueDate ? (job.dueDate | dateOnly) : ('mobileApp.jobs.noDue' | translate) }}
         </dd>
       </div>
       <div class="job-status__fact">

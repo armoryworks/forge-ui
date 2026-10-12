@@ -18,7 +18,7 @@ export interface OperationTimeRow {
   actualTotalMinutes: number;
   setupVarianceMinutes: number;
   runVarianceMinutes: number;
-  efficiencyPercent: number;
+  efficiencyPercent: number | null;
   estimatedEachMs: number | null;
   actualEachMs: number | null;
   historyEachMs: number | null;

@@ -1,15 +1,17 @@
-import { ChangeDetectionStrategy, Component, computed, input, linkedSignal, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, linkedSignal, output, signal } from '@angular/core';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { OperationReason } from '../../../../shared/models/operation-reason.model';
 import { OperationQuantityEntry } from '../../models/operation-quantity-entry.model';
 
 /**
  * Quantities for one operation on a stepper, never a keyboard. Good pieces
  * start at everything not yet scrapped when the sheet opens from Done, and at
- * the recorded count otherwise; scrap stays folded away until asked for.
- * Counts are absolute. Going over the job quantity is flagged here because
- * the server refuses it.
+ * the recorded count otherwise; scrap and rework stay folded away until asked
+ * for, and a reason is offered as chips once either is non-zero. Counts are
+ * absolute except rework, which is this entry's pieces sent back. Going over
+ * the job quantity is flagged here because the server refuses it.
  */
 @Component({
   selector: 'app-operation-quantity-sheet',
@@ -24,6 +26,7 @@ export class OperationQuantitySheetComponent {
   readonly jobQuantity = input.required<number>();
   readonly completed = input<number>(0);
   readonly scrap = input<number>(0);
+  readonly reasons = input<OperationReason[]>([]);
   readonly finishing = input<boolean>(false);
   readonly busy = input<boolean>(false);
   readonly recorded = output<OperationQuantityEntry>();
@@ -34,8 +37,13 @@ export class OperationQuantitySheetComponent {
     this.finishing()
       ? Math.max(this.completed(), this.jobQuantity() - this.scrap())
       : this.completed());
+  protected readonly reworkCount = signal(0);
+  protected readonly reason = signal<string | null>(null);
   protected readonly scrapOpen = linkedSignal(() => this.scrap() > 0);
+  protected readonly reworkOpen = signal(false);
   protected readonly over = computed(() => this.goodCount() + this.scrapCount() > this.jobQuantity());
+  protected readonly askReason = computed(() =>
+    this.reasons().length > 0 && (this.scrapCount() > this.scrap() || this.reworkCount() > 0));
 
   protected bumpGood(delta: number): void {
     this.goodCount.update((n) => Math.max(0, n + delta));
@@ -45,12 +53,30 @@ export class OperationQuantitySheetComponent {
     this.scrapCount.update((n) => Math.max(0, n + delta));
   }
 
+  protected bumpRework(delta: number): void {
+    this.reworkCount.update((n) => Math.max(0, n + delta));
+  }
+
   protected openScrap(): void {
     this.scrapOpen.set(true);
   }
 
+  protected openRework(): void {
+    this.reworkOpen.set(true);
+  }
+
+  protected pickReason(code: string): void {
+    this.reason.update((current) => (current === code ? null : code));
+  }
+
   protected submit(complete: boolean): void {
     if (this.over() || this.busy()) return;
-    this.recorded.emit({ completed: this.goodCount(), scrap: this.scrapCount(), complete });
+    this.recorded.emit({
+      completed: this.goodCount(),
+      scrap: this.scrapCount(),
+      rework: this.reworkCount(),
+      reason: this.askReason() ? this.reason() : null,
+      complete,
+    });
   }
 }

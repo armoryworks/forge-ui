@@ -9,6 +9,7 @@ import { startWith } from 'rxjs';
 
 import { DialogComponent } from '../dialog/dialog.component';
 import { InputComponent } from '../input/input.component';
+import { SelectComponent, SelectOption } from '../select/select.component';
 import { ValidationButtonComponent } from '../validation-button/validation-button.component';
 import { OperationQuantityDialogData } from '../../models/operation-quantity-dialog-data.model';
 import { OperationQuantityDialogResult } from '../../models/operation-quantity-dialog-result.model';
@@ -16,7 +17,7 @@ import { OperationQuantityDialogResult } from '../../models/operation-quantity-d
 @Component({
   selector: 'app-operation-quantity-dialog',
   standalone: true,
-  imports: [DecimalPipe, ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, ValidationButtonComponent],
+  imports: [DecimalPipe, ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, SelectComponent, ValidationButtonComponent],
   templateUrl: './operation-quantity-dialog.component.html',
   styleUrl: './operation-quantity-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,24 +29,33 @@ export class OperationQuantityDialogComponent {
 
   protected readonly remaining = Math.max(this.data.jobQuantity - this.data.completedQuantity - this.data.scrapQuantity, 0);
   protected readonly showScrap = signal(false);
+  protected readonly showRework = signal(false);
+  protected readonly reasonOptions: SelectOption[] = [
+    { value: null, label: this.translate.instant('jobOperations.dialog.noReason') },
+    ...(this.data.reasons ?? []).map(r => ({ value: r.code, label: r.label })),
+  ];
 
   protected readonly form = new FormGroup({
     quantity: new FormControl<number | null>(this.remaining),
     scrap: new FormControl<number | null>(0),
+    rework: new FormControl<number | null>(0),
+    reason: new FormControl<string | null>(null),
   });
 
   private readonly value = toSignal(this.form.valueChanges.pipe(startWith(this.form.value)), { initialValue: this.form.value });
 
   protected readonly added = computed(() => toCount(this.value().quantity));
   protected readonly addedScrap = computed(() => toCount(this.value().scrap));
+  protected readonly addedRework = computed(() => toCount(this.value().rework));
   protected readonly newCompleted = computed(() => this.data.completedQuantity + this.added());
   protected readonly newScrap = computed(() => this.data.scrapQuantity + this.addedScrap());
   protected readonly isAll = computed(() => this.newCompleted() + this.newScrap() >= this.data.jobQuantity);
+  protected readonly askReason = computed(() => this.reasonOptions.length > 1 && (this.addedScrap() > 0 || this.addedRework() > 0));
 
   protected readonly violations = computed(() => {
     const issues: string[] = [];
     const raw = this.value();
-    if (isNegative(raw.quantity) || isNegative(raw.scrap)) {
+    if (isNegative(raw.quantity) || isNegative(raw.scrap) || isNegative(raw.rework)) {
       issues.push(this.translate.instant('jobOperations.dialog.negative'));
     }
     if (this.newCompleted() + this.newScrap() > this.data.jobQuantity) {
@@ -57,11 +67,16 @@ export class OperationQuantityDialogComponent {
     return issues;
   });
 
-  protected readonly canRecord = computed(() => this.violations().length === 0 && (this.added() > 0 || this.addedScrap() > 0));
+  protected readonly canRecord = computed(() =>
+    this.violations().length === 0 && (this.added() > 0 || this.addedScrap() > 0 || this.addedRework() > 0));
   protected readonly canComplete = computed(() => this.violations().length === 0);
 
   protected toggleScrap(): void {
     this.showScrap.update(v => !v);
+  }
+
+  protected toggleRework(): void {
+    this.showRework.update(v => !v);
   }
 
   protected close(): void {
@@ -79,7 +94,13 @@ export class OperationQuantityDialogComponent {
   }
 
   private result(complete: boolean): OperationQuantityDialogResult {
-    return { completedQuantity: this.newCompleted(), scrapQuantity: this.newScrap(), complete };
+    return {
+      completedQuantity: this.newCompleted(),
+      scrapQuantity: this.newScrap(),
+      reworkQuantity: this.addedRework(),
+      reasonCode: this.askReason() ? (this.value().reason ?? null) : null,
+      complete,
+    };
   }
 }
 

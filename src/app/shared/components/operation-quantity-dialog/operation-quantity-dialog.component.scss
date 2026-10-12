@@ -5,3 +5,9 @@
   color: var(--text-muted);
   font-size: $font-size-sm;
 }
+
+.op-qty__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-lg;
+}

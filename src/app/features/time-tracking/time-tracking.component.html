@@ -2,7 +2,7 @@
   @if (activeTimer()) {
     <button data-testid="stop-timer-btn" class="action-btn action-btn--warn" (click)="openStopTimer()">
       <span class="material-icons-outlined">stop_circle</span>
-      {{ 'timeTracking.stopTimer' | translate }} ({{ getTimerElapsed() }})
+      {{ 'timeTracking.stopTimer' | translate }} ({{ activeTimerElapsed() }})
     </button>
   } @else {
     <button data-testid="start-timer-btn" class="action-btn action-btn--primary" (click)="openStartTimer()">
@@ -143,7 +143,7 @@
 @if (showStopDialog()) {
   <app-dialog [title]="'timeTracking.stopTimer' | translate" (closed)="closeStopDialog()">
     <p class="timer-info">
-      {{ 'timeTracking.timerRunningFor' | translate }} <strong>{{ getTimerElapsed(stopTarget()) }}</strong>
+      {{ 'timeTracking.timerRunningFor' | translate }} <strong>{{ stopTargetElapsed() }}</strong>
       @if (stopTarget()?.operationTitle ?? stopTarget()?.category) {
         — {{ stopTarget()?.operationTitle ?? stopTarget()?.category }}
       }

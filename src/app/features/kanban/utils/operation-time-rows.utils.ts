@@ -14,8 +14,8 @@ export function minutesToPreciseMs(minutes: number | null | undefined): number |
   return Math.round(minutes * 60000);
 }
 
-export function efficiencyPercent(estimatedMinutes: number, actualMinutes: number): number {
-  return actualMinutes > 0 ? (estimatedMinutes / actualMinutes) * 100 : 0;
+export function efficiencyPercent(estimatedMinutes: number, actualMinutes: number): number | null {
+  return actualMinutes > 0 ? (estimatedMinutes / actualMinutes) * 100 : null;
 }
 
 export function isJobOperations(value: unknown): value is JobOperations {
@@ -104,7 +104,7 @@ export function legacyToOperationTimeRows(ops: OperationTimeAnalysis[]): Operati
     actualTotalMinutes: op.actualTotalMinutes,
     setupVarianceMinutes: op.setupVarianceMinutes,
     runVarianceMinutes: op.runVarianceMinutes,
-    efficiencyPercent: op.efficiencyPercent,
+    efficiencyPercent: op.actualTotalMinutes > 0 ? op.efficiencyPercent : null,
     estimatedEachMs: null,
     actualEachMs: null,
     historyEachMs: null,
