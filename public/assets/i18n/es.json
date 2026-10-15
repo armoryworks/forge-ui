@@ -3836,6 +3836,9 @@
     "shopFloor": {
       "title": "Planta de producción"
     },
+    "settingsSearch": "Buscar ajustes",
+    "settingsSearchPlaceholder": "Nombre o descripción",
+    "noSettingsMatch": "Ningún ajuste coincide.",
     "capability": {
       "relatedSettings": "Configuración relacionada"
     }

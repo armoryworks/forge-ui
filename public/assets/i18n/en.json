@@ -3836,6 +3836,9 @@
     "shopFloor": {
       "title": "Shop Floor"
     },
+    "settingsSearch": "Search settings",
+    "settingsSearchPlaceholder": "Name or description",
+    "noSettingsMatch": "No settings match.",
     "capability": {
       "relatedSettings": "Related settings"
     }

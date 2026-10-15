@@ -14,6 +14,7 @@ import { StageRequest } from './models/stage-request.model';
 import { ReferenceDataGroup } from './models/reference-data-group.model';
 import { TerminologyEntryItem } from './models/terminology-entry-item.model';
 import { CatalogToggleRow } from './models/catalog-toggle-row.model';
+import { SETTINGS_SEARCH_INDEX } from './models/settings-search-index.const';
 import { NUMBERING_SETTING_LABELS } from './models/numbering-setting-labels.const';
 import { SystemSettingDefinition } from './models/system-setting-definition.model';
 import { SYSTEM_SETTING_DEFAULTS } from './models/system-setting-defaults.const';
@@ -238,6 +239,36 @@ export class AdminComponent implements OnInit {
     this.route.queryParamMap.pipe(map(params => params.get('highlight'))),
     { initialValue: null },
   );
+  protected readonly settingsSearch = new FormControl('', { nonNullable: true });
+  private readonly settingsQuery = toSignal(
+    this.settingsSearch.valueChanges.pipe(map(value => value.trim().toLowerCase())),
+    { initialValue: '' },
+  );
+  protected readonly visibleSettings = computed(() => {
+    const query = this.settingsQuery();
+    const hit = (...texts: (string | null | undefined)[]) =>
+      query === '' || texts.some(text => (text ?? '').toLowerCase().includes(query));
+    const text = (key: string) => this.translate.instant(key) as string;
+    const visible = new Set<string>();
+    for (const section of SETTINGS_SEARCH_INDEX) {
+      if (hit(...section.textKeys.map(text))) visible.add(section.key);
+    }
+    const toggleRows = (sectionKey: string, rows: CatalogToggleRow[]) => {
+      for (const row of rows) {
+        if (visible.has(sectionKey) || hit(row.labelKey ? text(row.labelKey) : row.displayName, row.description)) visible.add(row.key);
+      }
+      if (rows.some(row => visible.has(row.key))) visible.add(sectionKey);
+    };
+    toggleRows('numbering', this.numberingRows());
+    toggleRows('shop-floor', this.shopFloorRows());
+    const systemHit = hit(text('admin.systemSettings'));
+    for (const def of this.settingDefinitions) {
+      if (systemHit || hit(text(def.labelKey), text(def.descKey))) visible.add(def.key);
+    }
+    if (['branding', 'lockups', ...this.settingDefinitions.map(def => def.key)].some(key => visible.has(key))) visible.add('system-settings');
+    return visible;
+  });
+  protected readonly settingsSearchEmpty = computed(() => this.settingsQuery() !== '' && this.visibleSettings().size === 0);
 
   // Company Profile
   private readonly profileLoaded = signal(false);

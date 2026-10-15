@@ -325,6 +325,19 @@
   overflow: hidden;
 }
 
+.settings-search {
+  max-width: 420px;
+  margin-bottom: $sp-sm;
+
+  &__empty {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
+    padding: $sp-lg 0;
+    color: var(--text-muted);
+  }
+}
+
 .settings-scroll {
   flex: 1;
   min-height: 0;

@@ -232,348 +232,382 @@
     <!-- System Settings Tab -->
     @if (activeTab() === 'settings') {
       <div class="tab-panel tab-panel--settings">
+        <div class="settings-search">
+          <app-input [label]="'admin.settingsSearch' | translate" [formControl]="settingsSearch"
+            [placeholder]="'admin.settingsSearchPlaceholder' | translate" data-testid="settings-search" />
+        </div>
         <div class="settings-scroll">
+        @if (settingsSearchEmpty()) {
+          <div class="settings-search__empty" data-testid="settings-search-empty">
+            <span class="material-icons-outlined">search_off</span>
+            <span>{{ 'admin.noSettingsMatch' | translate }}</span>
+          </div>
+        }
 
         <!-- Company Profile -->
-        <div class="settings-section"
-          [attr.data-setting-key]="'company-profile'"
-          [class.settings-section--highlight]="highlightedSetting() === 'company-profile'">
-          <div class="settings-section__header">
-            <h3 class="settings-section__title">
-              <span class="material-icons-outlined">business</span>
-              {{ 'admin.companyProfile' | translate }}
-            </h3>
-            <button class="action-btn action-btn--primary action-btn--sm"
-              [disabled]="profileSaving() || profileForm.invalid"
-              (click)="saveCompanyProfile()">
-              <span class="material-icons-outlined">save</span>
-              {{ 'admin.saveProfile' | translate }}
-            </button>
-          </div>
+        @if (visibleSettings().has('company-profile')) {
+          <div class="settings-section"
+            [attr.data-setting-key]="'company-profile'"
+            [class.settings-section--highlight]="highlightedSetting() === 'company-profile'">
+            <div class="settings-section__header">
+              <h3 class="settings-section__title">
+                <span class="material-icons-outlined">business</span>
+                {{ 'admin.companyProfile' | translate }}
+              </h3>
+              <button class="action-btn action-btn--primary action-btn--sm"
+                [disabled]="profileSaving() || profileForm.invalid"
+                (click)="saveCompanyProfile()">
+                <span class="material-icons-outlined">save</span>
+                {{ 'admin.saveProfile' | translate }}
+              </button>
+            </div>
 
-          <div class="profile-form" [formGroup]="profileForm">
-            <app-input [label]="'admin.companyName' | translate" formControlName="name" />
-            <div class="dialog-row">
-              <app-input [label]="'common.phone' | translate" formControlName="phone" mask="phone" />
-              <app-input [label]="'common.email' | translate" formControlName="email" type="email" />
-            </div>
-            <div class="dialog-row">
-              <app-input [label]="'admin.ein' | translate" formControlName="ein" placeholder="XX-XXXXXXX" />
-              <app-input [label]="'admin.website' | translate" formControlName="website" placeholder="https://" />
+            <div class="profile-form" [formGroup]="profileForm">
+              <app-input [label]="'admin.companyName' | translate" formControlName="name" />
+              <div class="dialog-row">
+                <app-input [label]="'common.phone' | translate" formControlName="phone" mask="phone" />
+                <app-input [label]="'common.email' | translate" formControlName="email" type="email" />
+              </div>
+              <div class="dialog-row">
+                <app-input [label]="'admin.ein' | translate" formControlName="ein" placeholder="XX-XXXXXXX" />
+                <app-input [label]="'admin.website' | translate" formControlName="website" placeholder="https://" />
+              </div>
             </div>
           </div>
-        </div>
+        }
 
         <!-- Company Locations -->
-        <div class="settings-section"
-          [attr.data-setting-key]="'company-locations'"
-          [class.settings-section--highlight]="highlightedSetting() === 'company-locations'">
-          <div class="settings-section__header">
-            <h3 class="settings-section__title">
-              <span class="material-icons-outlined">location_on</span>
-              {{ 'admin.locations' | translate }}
-            </h3>
-            <button class="action-btn action-btn--create action-btn--sm" (click)="openCreateLocation()">
-              <span class="material-icons-outlined">add</span>
-              {{ 'admin.newLocation' | translate }}
-            </button>
-          </div>
-
-          <app-data-table tableId="admin-locations" [columns]="locationColumns" [data]="companyLocations()"
-            emptyIcon="location_on" [emptyMessage]="'admin.noLocations' | translate">
-            <ng-template appColumnCell="address" let-loc>
-              {{ loc.line1 }}{{ loc.line2 ? ', ' + loc.line2 : '' }}, {{ loc.city }}
-            </ng-template>
-            <ng-template appColumnCell="default" let-loc>
-              @if (loc.isDefault) {
-                <span class="chip chip--primary">{{ 'common.default' | translate }}</span>
-              }
-            </ng-template>
-            <ng-template appColumnCell="actions" let-loc>
-              <div class="action-cell">
-                @if (!loc.isDefault) {
-                  <button class="icon-btn" [matTooltip]="'admin.setAsDefault' | translate" matTooltipPosition="above" [attr.aria-label]="'admin.setAsDefault' | translate" (click)="setDefaultLocation(loc); $event.stopPropagation()">
-                    <span class="material-icons-outlined">star_outline</span>
-                  </button>
-                }
-                <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" [attr.aria-label]="'admin.editLocation' | translate" (click)="openEditLocation(loc); $event.stopPropagation()">
-                  <span class="material-icons-outlined">edit</span>
-                </button>
-                @if (!loc.isDefault) {
-                  <button class="icon-btn icon-btn--danger" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" [attr.aria-label]="'admin.deleteLocationLabel' | translate" (click)="deleteLocation(loc); $event.stopPropagation()">
-                    <span class="material-icons-outlined">delete</span>
-                  </button>
-                }
-              </div>
-            </ng-template>
-          </app-data-table>
-        </div>
-
-        <!-- Pay Period Locking -->
-        <div class="settings-section"
-          [attr.data-setting-key]="'pay-period'"
-          [class.settings-section--highlight]="highlightedSetting() === 'pay-period'">
-          <div class="settings-section__header">
-            <h3 class="settings-section__title">
-              <span class="material-icons-outlined">lock_clock</span>
-              {{ 'admin.payPeriod' | translate }}
-            </h3>
-          </div>
-          <div class="pay-period-lock-row">
-            <app-datepicker label="Lock entries through" [formControl]="lockThroughControl" />
-            <button class="action-btn action-btn--sm"
-              [disabled]="!lockThroughControl.value || lockingPeriod()"
-              (click)="confirmLockPayPeriod()"
-              aria-label="Lock pay period through selected date">
-              <span class="material-icons-outlined">lock</span>
-              {{ 'admin.lockPeriod' | translate }}
-            </button>
-          </div>
-          <p class="settings-hint">{{ 'admin.lockPeriodHint' | translate }}</p>
-        </div>
-
-        <!-- Remote health monitoring — an opt-in consent decision, not a capability -->
-        <div class="settings-section">
-          <div class="settings-section__header">
-            <h3 class="settings-section__title">
-              <span class="material-icons-outlined">monitor_heart</span>
-              {{ 'admin.telemetry.title' | translate }}
-            </h3>
-            @if (telemetryStatus(); as t) {
-              @if (t.enabled && !t.agreementOutOfDate) {
-                <button class="action-btn action-btn--sm" [disabled]="telemetrySaving()" (click)="disableTelemetry()">
-                  <span class="material-icons-outlined">link_off</span>
-                  {{ 'admin.telemetry.turnOff' | translate }}
-                </button>
-              } @else {
-                <button class="action-btn action-btn--primary action-btn--sm" (click)="openTelemetryConsent()">
-                  <span class="material-icons-outlined">shield</span>
-                  {{ (t.agreementOutOfDate ? 'admin.telemetry.reviewTerms' : 'admin.telemetry.turnOn') | translate }}
-                </button>
-              }
-            }
-          </div>
-
-          <p class="settings-hint">{{ 'admin.telemetry.description' | translate }}</p>
-
-          @if (telemetryStatus(); as t) {
-            <div class="telemetry-state">
-              <span class="telemetry-state__dot"
-                [class.telemetry-state__dot--on]="t.enabled && t.enrollmentStatus === 'Accepted' && !t.agreementOutOfDate"
-                [class.telemetry-state__dot--pending]="t.enabled && t.enrollmentStatus !== 'Accepted'"></span>
-              <span class="telemetry-state__label">{{ telemetryStateKey() | translate }}</span>
+        @if (visibleSettings().has('company-locations')) {
+          <div class="settings-section"
+            [attr.data-setting-key]="'company-locations'"
+            [class.settings-section--highlight]="highlightedSetting() === 'company-locations'">
+            <div class="settings-section__header">
+              <h3 class="settings-section__title">
+                <span class="material-icons-outlined">location_on</span>
+                {{ 'admin.locations' | translate }}
+              </h3>
+              <button class="action-btn action-btn--create action-btn--sm" (click)="openCreateLocation()">
+                <span class="material-icons-outlined">add</span>
+                {{ 'admin.newLocation' | translate }}
+              </button>
             </div>
 
-            @if (t.agreementOutOfDate) {
-              <p class="settings-hint settings-hint--warn">{{ 'admin.telemetry.termsChangedHint' | translate }}</p>
-            }
-            @if (t.enabled && t.enrollmentStatus === 'Pending') {
-              <p class="settings-hint">{{ 'admin.telemetry.pendingHint' | translate }}</p>
-            }
-            @if (t.consentDecision) {
-              <p class="settings-hint">
-                {{ 'admin.telemetry.lastDecision' | translate: {
-                     decision: t.consentDecision, by: t.consentBy || '—' } }}
-                {{ t.consentAt | date: 'MM/dd/yyyy hh:mm' }}
-              </p>
-            }
-            @if (t.lastHeartbeatAt) {
-              <p class="settings-hint">
-                {{ 'admin.telemetry.lastReport' | translate }} {{ t.lastHeartbeatAt | date: 'MM/dd/yyyy hh:mm' }}
-              </p>
-            }
-            @if (t.lastError) {
-              <p class="settings-hint settings-hint--warn">{{ t.lastError }}</p>
-            }
-          }
+            <app-data-table tableId="admin-locations" [columns]="locationColumns" [data]="companyLocations()"
+              emptyIcon="location_on" [emptyMessage]="'admin.noLocations' | translate">
+              <ng-template appColumnCell="address" let-loc>
+                {{ loc.line1 }}{{ loc.line2 ? ', ' + loc.line2 : '' }}, {{ loc.city }}
+              </ng-template>
+              <ng-template appColumnCell="default" let-loc>
+                @if (loc.isDefault) {
+                  <span class="chip chip--primary">{{ 'common.default' | translate }}</span>
+                }
+              </ng-template>
+              <ng-template appColumnCell="actions" let-loc>
+                <div class="action-cell">
+                  @if (!loc.isDefault) {
+                    <button class="icon-btn" [matTooltip]="'admin.setAsDefault' | translate" matTooltipPosition="above" [attr.aria-label]="'admin.setAsDefault' | translate" (click)="setDefaultLocation(loc); $event.stopPropagation()">
+                      <span class="material-icons-outlined">star_outline</span>
+                    </button>
+                  }
+                  <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" [attr.aria-label]="'admin.editLocation' | translate" (click)="openEditLocation(loc); $event.stopPropagation()">
+                    <span class="material-icons-outlined">edit</span>
+                  </button>
+                  @if (!loc.isDefault) {
+                    <button class="icon-btn icon-btn--danger" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" [attr.aria-label]="'admin.deleteLocationLabel' | translate" (click)="deleteLocation(loc); $event.stopPropagation()">
+                      <span class="material-icons-outlined">delete</span>
+                    </button>
+                  }
+                </div>
+              </ng-template>
+            </app-data-table>
+          </div>
+        }
 
-          @if (telemetryHistory().length > 0) {
-            <h4 class="settings-item__label">{{ 'admin.telemetry.history' | translate }}</h4>
-            <ul class="telemetry-history">
-              @for (row of telemetryHistory(); track row.at) {
-                <li class="telemetry-history__row">
-                  <span class="telemetry-history__decision"
-                    [class.telemetry-history__decision--accepted]="row.decision === 'accepted'">
-                    {{ ('admin.telemetry.decision.' + row.decision) | translate }}
-                  </span>
-                  <span class="telemetry-history__meta">
-                    {{ row.at | date: 'MM/dd/yyyy hh:mm' }} · {{ row.by || '—' }}
-                    · {{ 'admin.telemetry.agreementVersion' | translate: { version: row.version } }}
-                  </span>
-                </li>
+        <!-- Pay Period Locking -->
+        @if (visibleSettings().has('pay-period')) {
+          <div class="settings-section"
+            [attr.data-setting-key]="'pay-period'"
+            [class.settings-section--highlight]="highlightedSetting() === 'pay-period'">
+            <div class="settings-section__header">
+              <h3 class="settings-section__title">
+                <span class="material-icons-outlined">lock_clock</span>
+                {{ 'admin.payPeriod' | translate }}
+              </h3>
+            </div>
+            <div class="pay-period-lock-row">
+              <app-datepicker label="Lock entries through" [formControl]="lockThroughControl" />
+              <button class="action-btn action-btn--sm"
+                [disabled]="!lockThroughControl.value || lockingPeriod()"
+                (click)="confirmLockPayPeriod()"
+                aria-label="Lock pay period through selected date">
+                <span class="material-icons-outlined">lock</span>
+                {{ 'admin.lockPeriod' | translate }}
+              </button>
+            </div>
+            <p class="settings-hint">{{ 'admin.lockPeriodHint' | translate }}</p>
+          </div>
+        }
+
+        <!-- Remote health monitoring — an opt-in consent decision, not a capability -->
+        @if (visibleSettings().has('telemetry')) {
+          <div class="settings-section">
+            <div class="settings-section__header">
+              <h3 class="settings-section__title">
+                <span class="material-icons-outlined">monitor_heart</span>
+                {{ 'admin.telemetry.title' | translate }}
+              </h3>
+              @if (telemetryStatus(); as t) {
+                @if (t.enabled && !t.agreementOutOfDate) {
+                  <button class="action-btn action-btn--sm" [disabled]="telemetrySaving()" (click)="disableTelemetry()">
+                    <span class="material-icons-outlined">link_off</span>
+                    {{ 'admin.telemetry.turnOff' | translate }}
+                  </button>
+                } @else {
+                  <button class="action-btn action-btn--primary action-btn--sm" (click)="openTelemetryConsent()">
+                    <span class="material-icons-outlined">shield</span>
+                    {{ (t.agreementOutOfDate ? 'admin.telemetry.reviewTerms' : 'admin.telemetry.turnOn') | translate }}
+                  </button>
+                }
               }
-            </ul>
-          }
-        </div>
+            </div>
 
-        <div class="settings-section" data-testid="numbering-settings"
-          [attr.data-setting-key]="'numbering'"
-          [class.settings-section--highlight]="highlightedSetting() === 'numbering'">
-          <div class="settings-section__header">
-            <h3 class="settings-section__title">
-              <span class="material-icons-outlined">pin</span>
-              {{ 'admin.numbering.title' | translate }}
-            </h3>
-          </div>
-          <div class="catalog-toggles">
-            @for (row of numberingRows(); track row.key) {
-              <div class="catalog-toggles__item"
-                [attr.data-setting-key]="row.key"
-                [class.catalog-toggles__item--highlight]="highlightedSetting() === row.key">
-                <app-toggle
-                  [label]="row.labelKey ? (row.labelKey | translate) : row.displayName"
-                  [formControl]="row.control"
-                  [attr.data-testid]="'numbering-toggle-' + row.key" />
-                @if (row.description) {
-                  <span class="catalog-toggles__hint material-icons-outlined" tabindex="0" role="img"
-                    [matTooltip]="row.description" matTooltipPosition="above" [attr.aria-label]="row.description">info</span>
-                }
+            <p class="settings-hint">{{ 'admin.telemetry.description' | translate }}</p>
+
+            @if (telemetryStatus(); as t) {
+              <div class="telemetry-state">
+                <span class="telemetry-state__dot"
+                  [class.telemetry-state__dot--on]="t.enabled && t.enrollmentStatus === 'Accepted' && !t.agreementOutOfDate"
+                  [class.telemetry-state__dot--pending]="t.enabled && t.enrollmentStatus !== 'Accepted'"></span>
+                <span class="telemetry-state__label">{{ telemetryStateKey() | translate }}</span>
               </div>
+
+              @if (t.agreementOutOfDate) {
+                <p class="settings-hint settings-hint--warn">{{ 'admin.telemetry.termsChangedHint' | translate }}</p>
+              }
+              @if (t.enabled && t.enrollmentStatus === 'Pending') {
+                <p class="settings-hint">{{ 'admin.telemetry.pendingHint' | translate }}</p>
+              }
+              @if (t.consentDecision) {
+                <p class="settings-hint">
+                  {{ 'admin.telemetry.lastDecision' | translate: {
+                       decision: t.consentDecision, by: t.consentBy || '—' } }}
+                  {{ t.consentAt | date: 'MM/dd/yyyy hh:mm' }}
+                </p>
+              }
+              @if (t.lastHeartbeatAt) {
+                <p class="settings-hint">
+                  {{ 'admin.telemetry.lastReport' | translate }} {{ t.lastHeartbeatAt | date: 'MM/dd/yyyy hh:mm' }}
+                </p>
+              }
+              @if (t.lastError) {
+                <p class="settings-hint settings-hint--warn">{{ t.lastError }}</p>
+              }
+            }
+
+            @if (telemetryHistory().length > 0) {
+              <h4 class="settings-item__label">{{ 'admin.telemetry.history' | translate }}</h4>
+              <ul class="telemetry-history">
+                @for (row of telemetryHistory(); track row.at) {
+                  <li class="telemetry-history__row">
+                    <span class="telemetry-history__decision"
+                      [class.telemetry-history__decision--accepted]="row.decision === 'accepted'">
+                      {{ ('admin.telemetry.decision.' + row.decision) | translate }}
+                    </span>
+                    <span class="telemetry-history__meta">
+                      {{ row.at | date: 'MM/dd/yyyy hh:mm' }} · {{ row.by || '—' }}
+                      · {{ 'admin.telemetry.agreementVersion' | translate: { version: row.version } }}
+                    </span>
+                  </li>
+                }
+              </ul>
             }
           </div>
-        </div>
+        }
 
-        <div class="settings-section" data-testid="shop-floor-settings"
-          [attr.data-setting-key]="'shop-floor'"
-          [class.settings-section--highlight]="highlightedSetting() === 'shop-floor'">
-          <div class="settings-section__header">
-            <h3 class="settings-section__title">
-              <span class="material-icons-outlined">precision_manufacturing</span>
-              {{ 'admin.shopFloor.title' | translate }}
-            </h3>
+        @if (visibleSettings().has('numbering')) {
+          <div class="settings-section" data-testid="numbering-settings"
+            [attr.data-setting-key]="'numbering'"
+            [class.settings-section--highlight]="highlightedSetting() === 'numbering'">
+            <div class="settings-section__header">
+              <h3 class="settings-section__title">
+                <span class="material-icons-outlined">pin</span>
+                {{ 'admin.numbering.title' | translate }}
+              </h3>
+            </div>
+            <div class="catalog-toggles">
+              @for (row of numberingRows(); track row.key) {
+              @if (visibleSettings().has(row.key)) {
+                  <div class="catalog-toggles__item"
+                    [attr.data-setting-key]="row.key"
+                    [class.catalog-toggles__item--highlight]="highlightedSetting() === row.key">
+                    <app-toggle
+                      [label]="row.labelKey ? (row.labelKey | translate) : row.displayName"
+                      [formControl]="row.control"
+                      [attr.data-testid]="'numbering-toggle-' + row.key" />
+                    @if (row.description) {
+                      <span class="catalog-toggles__hint material-icons-outlined" tabindex="0" role="img"
+                        [matTooltip]="row.description" matTooltipPosition="above" [attr.aria-label]="row.description">info</span>
+                    }
+                  </div>
+              }
+              }
+            </div>
           </div>
-          <div class="catalog-toggles">
-            @for (row of shopFloorRows(); track row.key) {
-              <div class="catalog-toggles__item"
-                [attr.data-setting-key]="row.key"
-                [class.catalog-toggles__item--highlight]="highlightedSetting() === row.key">
-                <app-toggle
-                  [label]="row.labelKey ? (row.labelKey | translate) : row.displayName"
-                  [formControl]="row.control"
-                  [attr.data-testid]="'shop-floor-toggle-' + row.key" />
-                @if (row.description) {
-                  <span class="catalog-toggles__hint material-icons-outlined" tabindex="0" role="img"
-                    [matTooltip]="row.description" matTooltipPosition="above" [attr.aria-label]="row.description">info</span>
-                }
-              </div>
-            }
+        }
+
+        @if (visibleSettings().has('shop-floor')) {
+          <div class="settings-section" data-testid="shop-floor-settings"
+            [attr.data-setting-key]="'shop-floor'"
+            [class.settings-section--highlight]="highlightedSetting() === 'shop-floor'">
+            <div class="settings-section__header">
+              <h3 class="settings-section__title">
+                <span class="material-icons-outlined">precision_manufacturing</span>
+                {{ 'admin.shopFloor.title' | translate }}
+              </h3>
+            </div>
+            <div class="catalog-toggles">
+              @for (row of shopFloorRows(); track row.key) {
+              @if (visibleSettings().has(row.key)) {
+                  <div class="catalog-toggles__item"
+                    [attr.data-setting-key]="row.key"
+                    [class.catalog-toggles__item--highlight]="highlightedSetting() === row.key">
+                    <app-toggle
+                      [label]="row.labelKey ? (row.labelKey | translate) : row.displayName"
+                      [formControl]="row.control"
+                      [attr.data-testid]="'shop-floor-toggle-' + row.key" />
+                    @if (row.description) {
+                      <span class="catalog-toggles__hint material-icons-outlined" tabindex="0" role="img"
+                        [matTooltip]="row.description" matTooltipPosition="above" [attr.aria-label]="row.description">info</span>
+                    }
+                  </div>
+              }
+              }
+            </div>
           </div>
-        </div>
+        }
 
         <!-- System Settings -->
-        <div class="settings-section">
-          <div class="settings-section__header">
-            <h3 class="settings-section__title">
-              <span class="material-icons-outlined">settings</span>
-              {{ 'admin.systemSettings' | translate }}
-            </h3>
+        @if (visibleSettings().has('system-settings')) {
+          <div class="settings-section">
+            <div class="settings-section__header">
+              <h3 class="settings-section__title">
+                <span class="material-icons-outlined">settings</span>
+                {{ 'admin.systemSettings' | translate }}
+              </h3>
+            </div>
           </div>
-        </div>
+        }
 
         <!-- Logo Upload -->
-        <div class="settings-item settings-item--logo"
-          [attr.data-setting-key]="'branding'"
-          [class.settings-item--highlight]="highlightedSetting() === 'branding'">
-          <div class="settings-item__header">
-            <label class="settings-item__label" for="logo-upload-input">{{ 'admin.companyLogo' | translate }}</label>
-            <span class="settings-item__description">{{ 'admin.logoDescription' | translate }}</span>
+        @if (visibleSettings().has('branding')) {
+          <div class="settings-item settings-item--logo"
+            [attr.data-setting-key]="'branding'"
+            [class.settings-item--highlight]="highlightedSetting() === 'branding'">
+            <div class="settings-item__header">
+              <label class="settings-item__label" for="logo-upload-input">{{ 'admin.companyLogo' | translate }}</label>
+              <span class="settings-item__description">{{ 'admin.logoDescription' | translate }}</span>
+            </div>
+            <div class="logo-upload">
+              @if (logoPreviewUrl()) {
+                <img class="logo-preview" [src]="logoPreviewUrl()" alt="Current logo" />
+                <button class="action-btn action-btn--sm" (click)="removeLogo()">
+                  <span class="material-icons-outlined">delete</span> {{ 'common.remove' | translate }}
+                </button>
+              } @else {
+                <div class="logo-placeholder">
+                  <span class="material-icons-outlined">image</span>
+                  <span>{{ 'admin.noLogo' | translate }}</span>
+                </div>
+              }
+              <label class="action-btn action-btn--sm action-btn--primary logo-upload-btn">
+                <span class="material-icons-outlined">upload</span> {{ 'admin.uploadLogo' | translate }}
+                <input id="logo-upload-input" type="file" accept="image/*" hidden (change)="onLogoFileSelected($event)" />
+              </label>
+            </div>
           </div>
-          <div class="logo-upload">
-            @if (logoPreviewUrl()) {
-              <img class="logo-preview" [src]="logoPreviewUrl()" alt="Current logo" />
-              <button class="action-btn action-btn--sm" (click)="removeLogo()">
-                <span class="material-icons-outlined">delete</span> {{ 'common.remove' | translate }}
-              </button>
-            } @else {
-              <div class="logo-placeholder">
-                <span class="material-icons-outlined">image</span>
-                <span>{{ 'admin.noLogo' | translate }}</span>
-              </div>
-            }
-            <label class="action-btn action-btn--sm action-btn--primary logo-upload-btn">
-              <span class="material-icons-outlined">upload</span> {{ 'admin.uploadLogo' | translate }}
-              <input id="logo-upload-input" type="file" accept="image/*" hidden (change)="onLogoFileSelected($event)" />
-            </label>
-          </div>
-        </div>
+        }
 
         <!-- Brand Lockups -->
-        <div class="settings-item settings-item--lockups">
-          <div class="settings-item__header">
-            <span class="settings-item__label">{{ 'admin.brandLockups' | translate }}</span>
-            <span class="settings-item__description">{{ 'admin.brandLockupsDescription' | translate }}</span>
+        @if (visibleSettings().has('lockups')) {
+          <div class="settings-item settings-item--lockups">
+            <div class="settings-item__header">
+              <span class="settings-item__label">{{ 'admin.brandLockups' | translate }}</span>
+              <span class="settings-item__description">{{ 'admin.brandLockupsDescription' | translate }}</span>
+            </div>
+            <div class="lockup-list">
+              @for (row of lockupRows(); track row.kind) {
+                <div class="lockup-row">
+                  <div class="lockup-row__info">
+                    <span class="lockup-row__name">{{ row.label | translate }}</span>
+                    <span class="lockup-row__hint">{{ row.hint | translate }}</span>
+                  </div>
+                  <div class="lockup-row__preview" [class.lockup-row__preview--dark]="row.darkPreview">
+                    <img [src]="row.previewUrl" [alt]="(row.label | translate) + ' preview'" />
+                  </div>
+                  <div class="lockup-row__actions">
+                    <label class="action-btn action-btn--sm action-btn--primary lockup-upload-btn">
+                      <span class="material-icons-outlined">upload</span> {{ 'admin.upload' | translate }}
+                      <input type="file" accept="image/*,.ico" hidden (change)="onLockupFileSelected($event, row.kind)" />
+                    </label>
+                    <button class="action-btn action-btn--sm" (click)="resetLockup(row.kind)">
+                      <span class="material-icons-outlined">restart_alt</span> {{ 'admin.resetToDefault' | translate }}
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
           </div>
-          <div class="lockup-list">
-            @for (row of lockupRows(); track row.kind) {
-              <div class="lockup-row">
-                <div class="lockup-row__info">
-                  <span class="lockup-row__name">{{ row.label | translate }}</span>
-                  <span class="lockup-row__hint">{{ row.hint | translate }}</span>
-                </div>
-                <div class="lockup-row__preview" [class.lockup-row__preview--dark]="row.darkPreview">
-                  <img [src]="row.previewUrl" [alt]="(row.label | translate) + ' preview'" />
-                </div>
-                <div class="lockup-row__actions">
-                  <label class="action-btn action-btn--sm action-btn--primary lockup-upload-btn">
-                    <span class="material-icons-outlined">upload</span> {{ 'admin.upload' | translate }}
-                    <input type="file" accept="image/*,.ico" hidden (change)="onLockupFileSelected($event, row.kind)" />
-                  </label>
-                  <button class="action-btn action-btn--sm" (click)="resetLockup(row.kind)">
-                    <span class="material-icons-outlined">restart_alt</span> {{ 'admin.resetToDefault' | translate }}
-                  </button>
-                </div>
-              </div>
-            }
-          </div>
-        </div>
+        }
 
         <div class="settings-grid">
           @for (def of settingDefinitions; track def.key) {
-            <div class="settings-item"
-              [attr.data-setting-key]="def.key"
-              [class.settings-item--highlight]="highlightedSetting() === def.key">
-              <div class="settings-item__header">
-                <span class="settings-item__label">{{ def.labelKey | translate }}</span>
-                <span class="settings-item__description">{{ def.descKey | translate }}</span>
-                @if (settingDefaultLabel(def); as defaultLabel) {
-                  <span class="settings-item__description" [attr.data-testid]="'setting-default-' + def.key">
-                    {{ 'capabilityAreas.systemSettings.defaultValue' | translate: { value: defaultLabel } }}
-                  </span>
-                }
-                @if (invalidSettings().has(def.key)) {
-                  <span class="settings-item__error" [attr.data-testid]="'setting-error-' + def.key">
-                    {{ (def.type === 'color' ? 'capabilityAreas.systemSettings.invalidColor' : 'capabilityAreas.systemSettings.invalidNumber') | translate }}
-                  </span>
-                }
+            @if (visibleSettings().has(def.key)) {
+              <div class="settings-item"
+                [attr.data-setting-key]="def.key"
+                [class.settings-item--highlight]="highlightedSetting() === def.key">
+                <div class="settings-item__header">
+                  <span class="settings-item__label">{{ def.labelKey | translate }}</span>
+                  <span class="settings-item__description">{{ def.descKey | translate }}</span>
+                  @if (settingDefaultLabel(def); as defaultLabel) {
+                    <span class="settings-item__description" [attr.data-testid]="'setting-default-' + def.key">
+                      {{ 'capabilityAreas.systemSettings.defaultValue' | translate: { value: defaultLabel } }}
+                    </span>
+                  }
+                  @if (invalidSettings().has(def.key)) {
+                    <span class="settings-item__error" [attr.data-testid]="'setting-error-' + def.key">
+                      {{ (def.type === 'color' ? 'capabilityAreas.systemSettings.invalidColor' : 'capabilityAreas.systemSettings.invalidNumber') | translate }}
+                    </span>
+                  }
+                </div>
+                <div class="settings-item__control">
+                  @switch (def.type) {
+                    @case ('boolean') {
+                      <app-select
+                        [label]="def.labelKey | translate"
+                        [options]="booleanOptions"
+                        [placeholder]="settingDefaultLabel(def)"
+                        [formControl]="settingControls[def.key]"
+                        [attr.data-testid]="'setting-' + def.key" />
+                    }
+                    @case ('priority') {
+                      <app-select
+                        [label]="def.labelKey | translate"
+                        [options]="priorityOptions"
+                        [placeholder]="settingDefaultLabel(def)"
+                        [formControl]="settingControls[def.key]"
+                        [attr.data-testid]="'setting-' + def.key" />
+                    }
+                    @default {
+                      <app-input
+                        [label]="def.labelKey | translate"
+                        [placeholder]="settingDefaults[def.key] ?? ''"
+                        [formControl]="settingControls[def.key]"
+                        [attr.data-testid]="'setting-' + def.key" />
+                    }
+                  }
+                </div>
               </div>
-              <div class="settings-item__control">
-                @switch (def.type) {
-                  @case ('boolean') {
-                    <app-select
-                      [label]="def.labelKey | translate"
-                      [options]="booleanOptions"
-                      [placeholder]="settingDefaultLabel(def)"
-                      [formControl]="settingControls[def.key]"
-                      [attr.data-testid]="'setting-' + def.key" />
-                  }
-                  @case ('priority') {
-                    <app-select
-                      [label]="def.labelKey | translate"
-                      [options]="priorityOptions"
-                      [placeholder]="settingDefaultLabel(def)"
-                      [formControl]="settingControls[def.key]"
-                      [attr.data-testid]="'setting-' + def.key" />
-                  }
-                  @default {
-                    <app-input
-                      [label]="def.labelKey | translate"
-                      [placeholder]="settingDefaults[def.key] ?? ''"
-                      [formControl]="settingControls[def.key]"
-                      [attr.data-testid]="'setting-' + def.key" />
-                  }
-                }
-              </div>
-            </div>
+            }
           }
         </div>
         </div>
