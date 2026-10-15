@@ -7,6 +7,9 @@ import { InstanceService } from './instance.service';
 import { ConnectionState } from '../models/signalr.model';
 import { SignalrConsoleLogger } from './signalr-console-logger';
 
+const SERVER_TIMEOUT_MS = 120_000;
+const KEEP_ALIVE_MS = 15_000;
+
 @Injectable({ providedIn: 'root' })
 export class SignalrService {
   private readonly authService = inject(AuthService);
@@ -101,7 +104,7 @@ export class SignalrService {
    * `signalr.service.spec.ts` for the test pattern.
    */
   protected buildHubConnection(hubPath: string): HubConnection {
-    return new HubConnectionBuilder()
+    const connection = new HubConnectionBuilder()
       .withUrl(this.hubUrl(hubPath), {
         accessTokenFactory: () => this.authService.token() ?? '',
       })
@@ -117,6 +120,9 @@ export class SignalrService {
       })
       .configureLogging(new SignalrConsoleLogger(environment.production ? LogLevel.Warning : LogLevel.Information))
       .build();
+    connection.serverTimeoutInMilliseconds = SERVER_TIMEOUT_MS;
+    connection.keepAliveIntervalInMilliseconds = KEEP_ALIVE_MS;
+    return connection;
   }
 
   /**

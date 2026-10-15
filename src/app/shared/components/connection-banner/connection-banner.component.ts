@@ -10,7 +10,7 @@ import { SignalrService } from '../../services/signalr.service';
 const STARTUP_GRACE_MS = 10_000;
 
 /** Only show the banner after the connection has been down for this long. */
-const DEBOUNCE_MS = 5_000;
+const DEBOUNCE_MS = 15_000;
 
 @Component({
   selector: 'app-connection-banner',
