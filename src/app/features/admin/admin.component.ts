@@ -1,6 +1,6 @@
 import { DatePipe, LowerCasePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, inject, Injector, OnInit, signal } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, inject, Injector, OnInit, signal, WritableSignal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -13,7 +13,7 @@ import { SystemSetting } from './models/system-setting.model';
 import { StageRequest } from './models/stage-request.model';
 import { ReferenceDataGroup } from './models/reference-data-group.model';
 import { TerminologyEntryItem } from './models/terminology-entry-item.model';
-import { NumberingSettingRow } from './models/numbering-setting-row.model';
+import { CatalogToggleRow } from './models/catalog-toggle-row.model';
 import { NUMBERING_SETTING_LABELS } from './models/numbering-setting-labels.const';
 import { SystemSettingDefinition } from './models/system-setting-definition.model';
 import { SYSTEM_SETTING_DEFAULTS } from './models/system-setting-defaults.const';
@@ -231,7 +231,9 @@ export class AdminComponent implements OnInit {
   protected readonly systemSettings = signal<SystemSetting[]>([]);
   protected readonly settingsEdits = signal<Map<string, string>>(new Map());
   private readonly numberingLoaded = signal(false);
-  protected readonly numberingRows = signal<NumberingSettingRow[]>([]);
+  protected readonly numberingRows = signal<CatalogToggleRow[]>([]);
+  private readonly shopFloorLoaded = signal(false);
+  protected readonly shopFloorRows = signal<CatalogToggleRow[]>([]);
   protected readonly highlightedSetting = toSignal(
     this.route.queryParamMap.pipe(map(params => params.get('highlight'))),
     { initialValue: null },
@@ -366,7 +368,8 @@ export class AdminComponent implements OnInit {
       if (tab === 'reference-data' && this.referenceDataGroups().length === 0) this.loadReferenceData();
       if (tab === 'terminology' && this.terminologyEntries().length === 0) this.loadTerminology();
       if (tab === 'settings' && !this.settingsLoaded()) this.loadSystemSettings();
-      if (tab === 'settings' && !this.numberingLoaded()) this.loadNumberingSettings();
+      if (tab === 'settings' && !this.numberingLoaded()) this.loadToggleGroup('Numbering', this.numberingLoaded, this.numberingRows, NUMBERING_SETTING_LABELS);
+      if (tab === 'settings' && !this.shopFloorLoaded()) this.loadToggleGroup('Shop Floor', this.shopFloorLoaded, this.shopFloorRows);
       if (tab === 'settings' && !this.profileLoaded()) this.loadCompanyProfile();
       if (tab === 'settings' && !this.locationsLoaded()) this.loadCompanyLocations();
       if (tab === 'settings' && this.telemetryStatus() === null) this.loadTelemetry();
@@ -849,30 +852,41 @@ export class AdminComponent implements OnInit {
     });
   }
 
-  private loadNumberingSettings(): void {
-    this.numberingLoaded.set(true);
-    const labels = new Map(NUMBERING_SETTING_LABELS.map(l => [l.key, l.labelKey]));
-    this.adminSettings.getGroup('Numbering').subscribe({
+  private loadToggleGroup(
+    group: string,
+    loaded: WritableSignal<boolean>,
+    rows: WritableSignal<CatalogToggleRow[]>,
+    labelKeys: { key: string; labelKey: string }[] = [],
+  ): void {
+    loaded.set(true);
+    const labels = new Map(labelKeys.map(l => [l.key, l.labelKey]));
+    this.adminSettings.getGroup(group).subscribe({
       next: (entries) => {
-        const rows = [...entries]
+        rows.set([...entries]
+          .filter(entry => entry.dataType === 'Boolean')
           .sort((a, b) => a.sortOrder - b.sortOrder)
           .map(entry => {
             const control = new FormControl(entry.value?.toLowerCase() === 'true', { nonNullable: true });
             control.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
-              .subscribe(enabled => this.saveNumberingSetting(entry.key, enabled, control));
-            return { key: entry.key, labelKey: labels.get(entry.key) ?? null, displayName: entry.displayName, control };
-          });
-        this.numberingRows.set(rows);
+              .subscribe(enabled => this.saveToggleSetting(entry.key, enabled, control));
+            return {
+              key: entry.key,
+              labelKey: labels.get(entry.key) ?? null,
+              displayName: entry.displayName,
+              description: entry.description,
+              control,
+            };
+          }));
         this.scrollToHighlightedSetting();
       },
       error: (err: unknown) => {
-        this.numberingLoaded.set(false);
+        loaded.set(false);
         this.snackbar.errorFrom(err, 'admin.loadSettingsFailed');
       },
     });
   }
 
-  private saveNumberingSetting(key: string, enabled: boolean, control: FormControl<boolean>): void {
+  private saveToggleSetting(key: string, enabled: boolean, control: FormControl<boolean>): void {
     control.disable({ emitEvent: false });
     this.adminSettings.updateSetting(key, String(enabled)).subscribe({
       next: () => {

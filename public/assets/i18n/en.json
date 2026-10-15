@@ -3833,6 +3833,9 @@
       "invoices": "Let me type my own invoice numbers",
       "payments": "Let me type my own payment numbers"
     },
+    "shopFloor": {
+      "title": "Shop Floor"
+    },
     "capability": {
       "relatedSettings": "Related settings"
     }

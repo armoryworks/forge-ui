@@ -415,15 +415,46 @@
               {{ 'admin.numbering.title' | translate }}
             </h3>
           </div>
-          <div class="numbering-toggles">
+          <div class="catalog-toggles">
             @for (row of numberingRows(); track row.key) {
-              <div class="numbering-toggles__item"
+              <div class="catalog-toggles__item"
                 [attr.data-setting-key]="row.key"
-                [class.numbering-toggles__item--highlight]="highlightedSetting() === row.key">
+                [class.catalog-toggles__item--highlight]="highlightedSetting() === row.key">
                 <app-toggle
                   [label]="row.labelKey ? (row.labelKey | translate) : row.displayName"
                   [formControl]="row.control"
                   [attr.data-testid]="'numbering-toggle-' + row.key" />
+                @if (row.description) {
+                  <span class="catalog-toggles__hint material-icons-outlined" tabindex="0" role="img"
+                    [matTooltip]="row.description" matTooltipPosition="above" [attr.aria-label]="row.description">info</span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="settings-section" data-testid="shop-floor-settings"
+          [attr.data-setting-key]="'shop-floor'"
+          [class.settings-section--highlight]="highlightedSetting() === 'shop-floor'">
+          <div class="settings-section__header">
+            <h3 class="settings-section__title">
+              <span class="material-icons-outlined">precision_manufacturing</span>
+              {{ 'admin.shopFloor.title' | translate }}
+            </h3>
+          </div>
+          <div class="catalog-toggles">
+            @for (row of shopFloorRows(); track row.key) {
+              <div class="catalog-toggles__item"
+                [attr.data-setting-key]="row.key"
+                [class.catalog-toggles__item--highlight]="highlightedSetting() === row.key">
+                <app-toggle
+                  [label]="row.labelKey ? (row.labelKey | translate) : row.displayName"
+                  [formControl]="row.control"
+                  [attr.data-testid]="'shop-floor-toggle-' + row.key" />
+                @if (row.description) {
+                  <span class="catalog-toggles__hint material-icons-outlined" tabindex="0" role="img"
+                    [matTooltip]="row.description" matTooltipPosition="above" [attr.aria-label]="row.description">info</span>
+                }
               </div>
             }
           </div>

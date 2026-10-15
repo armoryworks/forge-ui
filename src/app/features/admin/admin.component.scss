@@ -436,12 +436,15 @@
   background: var(--primary-light);
 }
 
-.numbering-toggles {
+.catalog-toggles {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: $sp-xs $sp-lg;
 
   &__item {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
     padding: $sp-xs $sp-sm;
     border: $border-width-thin solid transparent;
     border-radius: $border-radius;
@@ -450,6 +453,12 @@
       border-color: var(--primary);
       background: var(--primary-light);
     }
+  }
+
+  &__hint {
+    font-size: 18px;
+    color: var(--text-muted);
+    cursor: help;
   }
 }
 

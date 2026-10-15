@@ -3833,6 +3833,9 @@
       "invoices": "Permitirme escribir mis propios números de factura",
       "payments": "Permitirme escribir mis propios números de pago"
     },
+    "shopFloor": {
+      "title": "Planta de producción"
+    },
     "capability": {
       "relatedSettings": "Configuración relacionada"
     }
