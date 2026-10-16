@@ -246,19 +246,19 @@ export const routes: Routes = [
       },
       {
         path: 'vendors',
-        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
+        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager', 'Procurement')],
         loadChildren: () =>
           import('./features/vendors/vendors.routes').then((m) => m.VENDORS_ROUTES),
       },
       {
         path: 'purchasing',
-        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
+        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager', 'Procurement')],
         loadChildren: () =>
           import('./features/purchasing/purchasing.routes').then((m) => m.PURCHASING_ROUTES),
       },
       {
         path: 'purchase-orders',
-        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
+        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager', 'Procurement')],
         loadChildren: () =>
           import('./features/purchase-orders/purchase-orders.routes').then((m) => m.PURCHASE_ORDERS_ROUTES),
       },
@@ -298,7 +298,7 @@ export const routes: Routes = [
         // (split from CAP-P2P-PO; vendor payments ride CAP-P2P-PAY, which
         // depends on CAP-P2P-BILL).
         path: 'payables',
-        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager'), capabilityGuard('CAP-P2P-BILL')],
+        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager', 'Procurement', 'Controller'), capabilityGuard('CAP-P2P-BILL')],
         loadChildren: () =>
           import('./features/payables/payables.routes').then((m) => m.PAYABLES_ROUTES),
       },

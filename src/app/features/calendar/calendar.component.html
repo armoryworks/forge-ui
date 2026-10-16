@@ -17,13 +17,15 @@
   <div class="calendar-toolbar__right">
     <app-select class="calendar-toolbar__filter" [label]="'calendar.trackType' | translate" [formControl]="trackTypeControl" [options]="trackTypeOptions()" />
 
-    <button class="icon-btn" [class.icon-btn--active]="showPoDeliveries()"
-            (click)="togglePoDeliveries()"
-            [attr.aria-label]="(showPoDeliveries() ? 'calendar.hidePoDeliveries' : 'calendar.showPoDeliveries') | translate"
-            [matTooltip]="(showPoDeliveries() ? 'calendar.hidePoDeliveries' : 'calendar.showPoDeliveries') | translate"
-            matTooltipPosition="above">
-      <span class="material-icons-outlined">local_shipping</span>
-    </button>
+    @if (canReadPoDeliveries) {
+      <button class="icon-btn" [class.icon-btn--active]="showPoDeliveries()"
+              (click)="togglePoDeliveries()"
+              [attr.aria-label]="(showPoDeliveries() ? 'calendar.hidePoDeliveries' : 'calendar.showPoDeliveries') | translate"
+              [matTooltip]="(showPoDeliveries() ? 'calendar.hidePoDeliveries' : 'calendar.showPoDeliveries') | translate"
+              matTooltipPosition="above">
+        <span class="material-icons-outlined">local_shipping</span>
+      </button>
+    }
     <button class="icon-btn" [class.icon-btn--active]="layersOpen()"
             (click)="toggleLayersPanel()"
             [attr.aria-label]="'calendar.layers.title' | translate"

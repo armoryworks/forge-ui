@@ -6,6 +6,7 @@ import { TranslateService, TranslationObject } from '@ngx-translate/core';
 import { catchError, of } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+import { CapabilityService } from './capability.service';
 
 /** language code → (dotted i18n key → override text). */
 export type I18nOverrideMap = Record<string, Record<string, string>>;
@@ -22,12 +23,13 @@ export type I18nOverrideMap = Record<string, Record<string, string>>;
  * edits go live on the next `refresh()` / reload.
  *
  * Loaded after auth + capability descriptor resolve (app.component.ts); when
- * CAP-ADMIN-I18N is disabled or the call fails the app silently keeps the
- * shipped labels.
+ * CAP-ADMIN-I18N is disabled nothing is fetched, and when the call fails the
+ * app silently keeps the shipped labels.
  */
 @Injectable({ providedIn: 'root' })
 export class I18nOverridesService {
   private readonly http = inject(HttpClient);
+  private readonly capabilities = inject(CapabilityService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -43,6 +45,7 @@ export class I18nOverridesService {
 
   /** Fetches active overrides and applies them to the current language. */
   load(): void {
+    if (!this.capabilities.isEnabled('CAP-ADMIN-I18N')) return;
     this.http
       .get<I18nOverrideMap>(`${environment.apiUrl}/i18n/overrides/active`)
       .pipe(catchError(() => of({} as I18nOverrideMap)))

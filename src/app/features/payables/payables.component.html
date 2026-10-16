@@ -1,11 +1,11 @@
 <app-page-header [title]="'payables.title' | translate" [subtitle]="'payables.subtitle' | translate">
-  @if (activeTab() === 'bills') {
+  @if (activeTab() === 'bills' && canManage) {
     <button class="action-btn action-btn--create" data-testid="new-vendor-bill-btn" (click)="openBillDialog()">
       <span class="material-icons-outlined">add</span>
       {{ 'payables.newBill' | translate }}
     </button>
   }
-  @if (activeTab() === 'payments') {
+  @if (activeTab() === 'payments' && canManage) {
     <button class="action-btn action-btn--create" data-testid="new-vendor-payment-btn" (click)="openPaymentDialog()">
       <span class="material-icons-outlined">add</span>
       {{ 'payables.newPayment' | translate }}
@@ -56,10 +56,12 @@
       <span class="material-icons-outlined">receipt_long</span>
       {{ 'payables.tabBills' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'payments'" (click)="switchTab('payments')">
-      <span class="material-icons-outlined">payments</span>
-      {{ 'payables.tabPayments' | translate }}
-    </button>
+    @if (canReadPayments) {
+      <button class="tab" [class.tab--active]="activeTab() === 'payments'" (click)="switchTab('payments')">
+        <span class="material-icons-outlined">payments</span>
+        {{ 'payables.tabPayments' | translate }}
+      </button>
+    }
     @if (nachaEnabled()) {
       <button class="tab" [class.tab--active]="activeTab() === 'batches'" (click)="switchTab('batches')">
         <span class="material-icons-outlined">account_balance</span>

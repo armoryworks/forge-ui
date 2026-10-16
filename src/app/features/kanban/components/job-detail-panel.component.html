@@ -225,7 +225,7 @@
       }
 
       <!-- Explode BOM -->
-      @if (j.partId && j.childJobCount === 0) {
+      @if (canExplodeBom() && j.partId && j.childJobCount === 0) {
         <div class="jd-section">
           <button class="action-btn" (click)="explodeBom()">
             <span class="material-icons-outlined">account_tree</span> {{ 'kanban.explodeBom' | translate }}

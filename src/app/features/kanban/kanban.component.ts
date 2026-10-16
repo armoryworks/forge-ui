@@ -42,6 +42,7 @@ import { UserPreferencesService } from '../../shared/services/user-preferences.s
 import { AuthService } from '../../shared/services/auth.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { JOB_CREATE_ROLES } from './job-roles';
 
 export type ViewMode = 'board' | 'team';
 
@@ -91,6 +92,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
   private swimlaneDragging = false;
   protected readonly selectedJobIds = signal<Set<number>>(new Set());
   protected readonly selectionCount = computed(() => this.selectedJobIds().size);
+  protected readonly canCreateJobs = computed(() => this.authService.hasAnyRole(JOB_CREATE_ROLES));
   protected readonly users = signal<UserRef[]>([]);
   protected readonly priorityOptions = PRIORITIES;
 
@@ -484,6 +486,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
   }
 
   protected openCreateDialog(): void {
+    if (!this.canCreateJobs()) return;
     this.dialogMode.set('create');
     this.dialogJob.set(null);
     this.showJobDialog.set(true);

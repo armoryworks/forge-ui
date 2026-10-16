@@ -115,6 +115,7 @@ export class JobDetailPanelComponent implements OnInit {
 
   protected readonly isAdmin = computed(() => this.auth.hasRole('Admin'));
   protected readonly canViewCost = computed(() => this.auth.hasAnyRole(['Admin', 'Manager', 'Engineer', 'PM', 'OfficeManager']));
+  protected readonly canExplodeBom = computed(() => this.auth.hasAnyRole(['Admin', 'Manager']));
 
   protected readonly myActiveTimer = computed(() => {
     const userId = this.auth.user()?.id;

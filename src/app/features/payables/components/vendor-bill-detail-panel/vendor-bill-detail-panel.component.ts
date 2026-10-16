@@ -7,11 +7,13 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { VendorBillService } from '../../services/vendor-bill.service';
 import { VendorBillDetail } from '../../models/vendor-bill-detail.model';
+import { PAYABLES_MANAGE_ROLES } from '../../payables-roles';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 
@@ -34,6 +36,7 @@ export class VendorBillDetailPanelComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly canManage = inject(AuthService).hasAnyRole(PAYABLES_MANAGE_ROLES);
 
   readonly billId = input.required<number>();
   readonly closed = output<void>();
@@ -57,13 +60,14 @@ export class VendorBillDetailPanelComponent {
   }
 
   protected canApprove(bill: VendorBillDetail): boolean {
-    return bill.status === 'Draft';
+    return this.canManage && bill.status === 'Draft';
   }
 
   protected canVoid(bill: VendorBillDetail): boolean {
     // A bill promoted from an expense is voided by rejecting / revising the EXPENSE (the server
     // rejects a direct void) — hide the button so the lifecycle has one driver.
-    return (bill.status === 'Draft' || bill.status === 'Approved')
+    return this.canManage
+      && (bill.status === 'Draft' || bill.status === 'Approved')
       && bill.amountPaid === 0
       && bill.sourceExpenseId === null;
   }

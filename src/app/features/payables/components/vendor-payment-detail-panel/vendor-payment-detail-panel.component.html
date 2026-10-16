@@ -97,7 +97,7 @@
               <div class="transmission-error">{{ payment.transmissionLastError }}</div>
             </div>
           }
-          @if (transmissionStatus === 'Failed') {
+          @if (canManage && transmissionStatus === 'Failed') {
             <div class="transmission-actions">
               <button class="action-btn action-btn--primary" data-testid="retry-transmission-btn" (click)="retryTransmission()">
                 <span class="material-icons-outlined">refresh</span>
@@ -105,7 +105,7 @@
               </button>
             </div>
           }
-          @if (transmissionStatus === 'Queued' && payment.method === 'Wire') {
+          @if (canManage && transmissionStatus === 'Queued' && payment.method === 'Wire') {
             <div class="transmission-actions">
               <button class="action-btn action-btn--primary" data-testid="attest-wire-btn" (click)="attestWire()">
                 <span class="material-icons-outlined">verified</span>

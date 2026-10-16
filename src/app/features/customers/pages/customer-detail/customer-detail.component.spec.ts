@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader, TranslatePipe } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
 import { AuthService } from '../../../../shared/services/auth.service';
@@ -127,5 +128,43 @@ describe('CustomerDetailComponent · role-gated tabs', () => {
 
     expect(tabIds).toEqual(['overview', 'invoices', 'pricing', 'documents']);
     expect(documents).toBe(true);
+  });
+});
+
+describe('CustomerDetailComponent · money stats', () => {
+  function render(roles: string[]): HTMLElement {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: '5', tab: 'overview' })) } },
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: CustomerService, useValue: { getCustomerSummary: () => of(CUSTOMER) } },
+        { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
+        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: CustomerDetailLayoutResolverService, useValue: { deriveLifecycle: () => 'active', resolve: () => [] } },
+        { provide: CapabilityService, useValue: { isEnabled: () => true } },
+        { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
+      ],
+    });
+    TestBed.overrideComponent(CustomerDetailComponent, { set: { imports: [TranslatePipe], schemas: [NO_ERRORS_SCHEMA] } });
+    const fixture = TestBed.createComponent(CustomerDetailComponent);
+    fixture.detectChanges();
+    return fixture.nativeElement as HTMLElement;
+  }
+
+  it('hides outstanding and YTD revenue from a PM, who cannot read invoices', () => {
+    const el = render(['PM']);
+
+    expect(el.querySelector('.cd-stats')).not.toBeNull();
+    expect(el.querySelector('[data-testid="customer-stat-outstanding"]')).toBeNull();
+    expect(el.querySelector('[data-testid="customer-stat-ytd-revenue"]')).toBeNull();
+  });
+
+  it('shows them to an office manager', () => {
+    const el = render(['OfficeManager']);
+
+    expect(el.querySelector('[data-testid="customer-stat-outstanding"]')).not.toBeNull();
+    expect(el.querySelector('[data-testid="customer-stat-ytd-revenue"]')).not.toBeNull();
   });
 });

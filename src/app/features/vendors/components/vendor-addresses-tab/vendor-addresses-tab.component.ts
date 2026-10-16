@@ -41,7 +41,7 @@ export class VendorAddressesTabComponent {
   protected readonly showDialog = signal(false);
   protected readonly editingAddress = signal<VendorAddress | null>(null);
 
-  protected readonly canManage = computed(() => this.auth.hasAnyRole(['Admin', 'Manager', 'OfficeManager']));
+  protected readonly canManage = computed(() => this.auth.hasAnyRole(['Admin', 'Manager', 'OfficeManager', 'Procurement']));
 
   constructor() {
     effect(() => {

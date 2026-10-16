@@ -29,6 +29,7 @@ import { DetailDialogService } from '../../shared/services/detail-dialog.service
 import { autoRefreshOnGlChange } from '../../shared/utils/accounting-auto-refresh.util';
 import { CapabilityService } from '../../shared/services/capability.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { AuthService } from '../../shared/services/auth.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
 import { VendorBillDialogComponent } from './components/vendor-bill-dialog/vendor-bill-dialog.component';
@@ -37,6 +38,7 @@ import { VendorBillDetailDialogComponent, VendorBillDetailDialogData } from './c
 import { PaymentBatchCreateDialogComponent } from './components/payment-batch-create-dialog/payment-batch-create-dialog.component';
 import { VendorBankAccountDialogComponent } from './components/vendor-bank-account-dialog/vendor-bank-account-dialog.component';
 import { VendorPaymentDetailDialogComponent, VendorPaymentDetailDialogData } from './components/vendor-payment-detail-dialog/vendor-payment-detail-dialog.component';
+import { PAYABLES_MANAGE_ROLES, VENDOR_PAYMENT_READ_ROLES } from './payables-roles';
 
 type PayablesTab = 'bills' | 'payments' | 'batches' | 'accounts';
 
@@ -72,17 +74,21 @@ export class PayablesComponent {
   private readonly capabilities = inject(CapabilityService);
   private readonly snackbar = inject(SnackbarService);
   private readonly matDialog = inject(MatDialog);
+  private readonly auth = inject(AuthService);
 
-  /** BANK-002 Phase A tabs (batches + bank accounts) show only when NACHA is enabled. */
+  protected readonly canManage = this.auth.hasAnyRole(PAYABLES_MANAGE_ROLES);
+  protected readonly canReadPayments = this.auth.hasAnyRole(VENDOR_PAYMENT_READ_ROLES);
+
+  /** BANK-002 Phase A tabs (batches + bank accounts) show only when NACHA is enabled, and only to the roles that manage payables. */
   protected readonly nachaEnabled = computed(() => {
     this.capabilities.capabilities(); // reactive dependency on the loaded snapshot
-    return this.capabilities.isEnabled('CAP-BANK-NACHA');
+    return this.canManage && this.capabilities.isEnabled('CAP-BANK-NACHA');
   });
 
   protected readonly activeTab = toSignal(
     this.route.paramMap.pipe(map(p => {
       const tab = p.get('tab') as PayablesTab;
-      return VALID_TABS.includes(tab) ? tab : 'bills';
+      return VALID_TABS.includes(tab) && this.tabAllowed(tab) ? tab : 'bills';
     })),
     { initialValue: 'bills' as PayablesTab },
   );
@@ -224,7 +230,7 @@ export class PayablesComponent {
       .pipe(distinctUntilChanged(), takeUntilDestroyed())
       .subscribe(() => this.loadPayments());
 
-    this.loadFailedTransmissions();
+    if (this.canReadPayments) this.loadFailedTransmissions();
 
     // Approving / paying posts GL when FULLGL is on — keep both lists live.
     // (No-op while FULLGL is off: the hub never fires.) Transmission status
@@ -232,13 +238,21 @@ export class PayablesComponent {
     // stays live too. Open dialogs are intentionally NOT auto-refreshed.
     autoRefreshOnGlChange(() => {
       this.loadBills();
-      this.loadPayments();
-      this.loadFailedTransmissions();
+      if (this.canReadPayments) {
+        this.loadPayments();
+        this.loadFailedTransmissions();
+      }
       if (this.nachaEnabled()) {
         if (this.activeTab() === 'batches') this.loadBatches();
         if (this.activeTab() === 'accounts') this.loadAccounts();
       }
     });
+  }
+
+  private tabAllowed(tab: PayablesTab): boolean {
+    if (tab === 'payments') return this.canReadPayments;
+    if (tab === 'batches' || tab === 'accounts') return this.canManage;
+    return true;
   }
 
   protected switchTab(tab: PayablesTab): void {

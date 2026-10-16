@@ -121,9 +121,9 @@ export class NavTreeService {
     {
       icon: 'shopping_bag', label: 'Purchasing', i18nKey: 'navGroups.purchasing',
       children: [
-        { icon: 'storefront', label: 'Vendors', i18nKey: 'nav.vendors', route: '/vendors', capability: 'CAP-MD-VENDORS', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'description', label: 'Purchase Orders', i18nKey: 'nav.purchaseOrders', route: '/purchase-orders', capability: 'CAP-P2P-PO', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'request_page', label: 'RFQs', i18nKey: 'nav.purchasing', route: '/purchasing', capability: 'CAP-P2P-RFQ', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'storefront', label: 'Vendors', i18nKey: 'nav.vendors', route: '/vendors', capability: 'CAP-MD-VENDORS', allowedRoles: ['Admin', 'Manager', 'OfficeManager', 'Procurement'] },
+        { icon: 'description', label: 'Purchase Orders', i18nKey: 'nav.purchaseOrders', route: '/purchase-orders', capability: 'CAP-P2P-PO', allowedRoles: ['Admin', 'Manager', 'OfficeManager', 'Procurement'] },
+        { icon: 'request_page', label: 'RFQs', i18nKey: 'nav.purchasing', route: '/purchasing', capability: 'CAP-P2P-RFQ', allowedRoles: ['Admin', 'Manager', 'OfficeManager', 'Procurement'] },
         { icon: 'rule', label: 'Approvals', i18nKey: 'nav.approvals', route: '/approvals', capability: 'CAP-P2P-APPROVALS', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
       ],
     },
@@ -166,7 +166,7 @@ export class NavTreeService {
       children: [
         { icon: 'receipt', label: 'Invoices', i18nKey: 'nav.invoices', route: '/invoices', capability: 'CAP-O2C-INVOICE', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'payments', label: 'Payments', i18nKey: 'nav.payments', route: '/payments', capability: 'CAP-O2C-CASH', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'request_quote', label: 'Payables', i18nKey: 'nav.payables', route: '/payables', capability: 'CAP-P2P-BILL', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'request_quote', label: 'Payables', i18nKey: 'nav.payables', route: '/payables', capability: 'CAP-P2P-BILL', allowedRoles: ['Admin', 'Manager', 'OfficeManager', 'Procurement', 'Controller'] },
         { icon: 'receipt_long', label: 'Expenses', i18nKey: 'nav.expenses', route: '/expenses', capability: 'CAP-ACCT-EXPENSES', allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
         // Tier-3 standard costing (overhead pools, budgets, freeze, rates).
         // Capability-gated (default OFF) — the feature only appears when the

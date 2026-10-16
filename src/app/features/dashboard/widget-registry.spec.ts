@@ -19,4 +19,23 @@ describe('WIDGET_REGISTRY', () => {
     expect(widget?.roles).not.toContain('ProductionWorker');
     expect(widget?.roles).not.toContain('Engineer');
   });
+
+  it('keeps the planning-cycle widget from the roles the planning-cycles endpoint refuses', () => {
+    const widget = WIDGET_REGISTRY.find(w => w.id === 'cycle-progress');
+    expect(widget?.roles).toEqual(['Admin', 'Manager', 'PM', 'Engineer', 'ProductionWorker']);
+  });
+
+  it('keeps the inventory widget from the roles the inventory endpoints refuse', () => {
+    const widget = WIDGET_REGISTRY.find(w => w.id === 'low-stock');
+    expect(widget?.roles).toEqual(['Admin', 'Manager', 'OfficeManager', 'Engineer', 'ProductionWorker']);
+  });
+
+  it('gives Procurement and the Controller no widget whose endpoint refuses them', () => {
+    const rolesOf = (id: string) => WIDGET_REGISTRY.find(w => w.id === id)?.roles;
+    for (const id of ['cycle-progress', 'low-stock']) {
+      expect(rolesOf(id)).not.toContain('Procurement');
+      expect(rolesOf(id)).not.toContain('Controller');
+    }
+    expect(rolesOf('margin-summary')).not.toContain('Procurement');
+  });
 });

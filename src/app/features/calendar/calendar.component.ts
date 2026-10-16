@@ -21,6 +21,10 @@ import { InputComponent } from '../../shared/components/input/input.component';
 import { PriorityIndicatorComponent } from '../../shared/components/priority-indicator/priority-indicator.component';
 import { KanbanService } from '../kanban/services/kanban.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
+import { AuthService } from '../../shared/services/auth.service';
+
+const CALENDAR_JOB_ROLES = ['Admin', 'Manager', 'PM', 'Engineer', 'ProductionWorker', 'OfficeManager'];
+const PO_READ_ROLES = ['Admin', 'Manager', 'OfficeManager', 'Procurement'];
 
 export type CalendarView = 'month' | 'week' | 'day';
 
@@ -53,6 +57,10 @@ export class CalendarComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly userPreferences = inject(UserPreferencesService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly auth = inject(AuthService);
+
+  private readonly showJobs = this.auth.hasAnyRole(CALENDAR_JOB_ROLES);
+  protected readonly canReadPoDeliveries = this.auth.hasAnyRole(PO_READ_ROLES);
 
   protected readonly loading = signal(false);
   protected readonly allJobs = signal<CalendarJob[]>([]);
@@ -62,7 +70,7 @@ export class CalendarComponent implements OnInit {
   protected readonly view = signal<CalendarView>('month');
 
   protected readonly showPoDeliveries = signal(
-    this.userPreferences.get<boolean>('calendar:showPo') ?? false
+    this.canReadPoDeliveries && (this.userPreferences.get<boolean>('calendar:showPo') ?? false)
   );
   protected readonly poEvents = signal<PoCalendarEvent[]>([]);
   protected readonly isLoadingPo = signal(false);
@@ -219,6 +227,7 @@ export class CalendarComponent implements OnInit {
   }
 
   protected loadJobs(): void {
+    if (!this.showJobs) return;
     this.loading.set(true);
     this.service.getJobs().subscribe({
       next: (jobs) => { this.allJobs.set(jobs); this.loading.set(false); },

@@ -9,6 +9,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { VendorPaymentService } from '../../services/vendor-payment.service';
 import { PaymentTransmissionService } from '../../services/payment-transmission.service';
 import { VendorPaymentDetail } from '../../models/vendor-payment-detail.model';
+import { PAYABLES_MANAGE_ROLES } from '../../payables-roles';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { EntityActivitySectionComponent, ActivityFilterTab } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
@@ -18,6 +19,7 @@ import { EntityLinkComponent } from '../../../../shared/components/entity-link/e
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 
@@ -43,6 +45,8 @@ export class VendorPaymentDetailPanelComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
 
+  protected readonly canManage = inject(AuthService).hasAnyRole(PAYABLES_MANAGE_ROLES);
+
   readonly paymentId = input.required<number>();
   readonly closed = output<void>();
   readonly paymentChanged = output<void>();
@@ -62,7 +66,7 @@ export class VendorPaymentDetailPanelComponent {
   // Hidden once the bank transmission Succeeded — money already moved, the server 409s.
   protected readonly canVoid = computed(() => {
     const payment = this.payment();
-    return !!payment && payment.transmissionStatus !== 'Succeeded';
+    return this.canManage && !!payment && payment.transmissionStatus !== 'Succeeded';
   });
 
   protected readonly showVoidDialog = signal(false);
