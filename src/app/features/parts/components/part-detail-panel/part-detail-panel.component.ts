@@ -72,6 +72,7 @@ import {
   TabLayoutEntry,
 } from '../../services/part-detail-layout-resolver.service';
 import { EntityCompletenessChipComponent } from '../../../../shared/components/entity-completeness-chip/entity-completeness-chip.component';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 import { PartWhereUsedComponent } from '../part-where-used/part-where-used.component';
 import { defaultBomSourceFor } from './bom-source-default.util';
 
@@ -114,6 +115,7 @@ type BomViewMode = 'table' | 'tree';
     PartRoutingClusterComponent, PartAlternatesClusterComponent,
     PartQualityClusterComponent, PartPricingClusterComponent,
     EntityCompletenessChipComponent, PartWhereUsedComponent,
+    DetailLoadErrorComponent,
   ],
   templateUrl: './part-detail-panel.component.html',
   styleUrl: './part-detail-panel.component.scss',
@@ -143,6 +145,7 @@ export class PartDetailPanelComponent {
 
   protected readonly part = signal<PartDetail | null>(null);
   protected readonly detailLoading = signal(false);
+  protected readonly loadError = signal<unknown>(null);
   protected readonly saving = signal(false);
   /** Whether the global edit toggle is on; clusters render edit forms. */
   protected readonly editing = signal(false);
@@ -358,6 +361,7 @@ export class PartDetailPanelComponent {
 
   private loadDetail(id: number): void {
     this.detailLoading.set(true);
+    this.loadError.set(null);
     this.partFiles.set([]);
     this.inventorySummary.set(null);
     this.editing.set(false);
@@ -373,7 +377,7 @@ export class PartDetailPanelComponent {
           next: (summary) => this.inventorySummary.set(summary),
         });
       },
-      error: () => this.detailLoading.set(false),
+      error: (err: unknown) => { this.detailLoading.set(false); this.loadError.set(err); },
     });
   }
 

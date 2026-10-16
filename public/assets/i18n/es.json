@@ -11541,5 +11541,13 @@
       "reset": "{{operation}} restablecida",
       "recorded": "Avance registrado en {{operation}}"
     }
+  },
+  "detailLoadError": {
+    "notFound": "Registro no encontrado",
+    "notFoundHelp": "Puede que se haya eliminado o que el enlace apunte a un registro equivocado.",
+    "forbidden": "No tiene acceso a este registro",
+    "forbiddenHelp": "Pida a un administrador si necesita verlo.",
+    "failed": "No se pudo cargar este registro",
+    "failedHelp": "Revise su conexión e inténtelo de nuevo."
   }
 }

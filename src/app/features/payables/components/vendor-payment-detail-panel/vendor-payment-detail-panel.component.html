@@ -191,5 +191,7 @@
         </div>
       </app-dialog>
     }
+  } @else if (loadError()) {
+    <app-detail-load-error [error]="loadError()" (closed)="closed.emit()" />
   }
 </div>

@@ -28,6 +28,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/co
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 
 export interface RfqDetailDialogData {
   rfqId: number;
@@ -42,6 +43,7 @@ export interface RfqDetailDialogData {
     DatepickerComponent, DataTableComponent, ColumnCellDirective,
     LoadingBlockDirective, ValidationButtonComponent, EntityLinkComponent,
     CurrencyDisplayComponent, MatTooltipModule,
+    DetailLoadErrorComponent,
   ],
   templateUrl: './rfq-detail-dialog.component.html',
   styleUrl: './rfq-detail-dialog.component.scss',
@@ -60,6 +62,7 @@ export class RfqDetailDialogComponent {
   protected readonly data = inject<RfqDetailDialogData>(MAT_DIALOG_DATA);
 
   protected readonly loading = signal(true);
+  protected readonly loadError = signal<unknown>(null);
   protected readonly rfq = signal<RfqDetail | null>(null);
   protected readonly vendors = signal<VendorResponse[]>([]);
   protected readonly saving = signal(false);
@@ -123,12 +126,13 @@ export class RfqDetailDialogComponent {
 
   protected loadRfq(): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.purchasingService.getRfqById(this.data.rfqId).subscribe({
       next: (rfq) => {
         this.rfq.set(rfq);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); },
     });
   }
 

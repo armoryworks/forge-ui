@@ -22,6 +22,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { FileAttachment } from '../../../../shared/models/file.model';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { RecentCommunicationsComponent } from '../../../../shared/components/recent-communications/recent-communications.component';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 
 @Component({
   selector: 'app-lead-detail-panel',
@@ -30,6 +31,7 @@ import { RecentCommunicationsComponent } from '../../../../shared/components/rec
     DatePipe, ReactiveFormsModule, TranslatePipe, MatTooltipModule, MatMenuModule,
     DialogComponent, TextareaComponent, ValidationButtonComponent, EntityActivitySectionComponent,
     RecentCommunicationsComponent, FileUploadZoneComponent,
+    DetailLoadErrorComponent,
   ],
   templateUrl: './lead-detail-panel.component.html',
   styleUrl: './lead-detail-panel.component.scss',
@@ -49,6 +51,7 @@ export class LeadDetailPanelComponent {
 
   protected readonly lead = signal<LeadItem | null>(null);
   protected readonly loading = signal(false);
+  protected readonly loadError = signal<unknown>(null);
   protected readonly saving = signal(false);
   protected readonly documents = signal<FileAttachment[]>([]);
   /** Phase 1r — campaign name lookup. Loaded lazily; falls back to "Campaign #N". */
@@ -88,9 +91,10 @@ export class LeadDetailPanelComponent {
 
   private loadLead(id: number): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.leadsService.getLeadById(id).subscribe({
       next: (lead) => { this.lead.set(lead); this.loading.set(false); },
-      error: () => this.loading.set(false),
+      error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); },
     });
   }
 

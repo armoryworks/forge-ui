@@ -1,0 +1,8 @@
+<div class="detail-load-error" role="alert" data-testid="detail-load-error">
+  <app-empty-state
+    [icon]="view().icon"
+    [message]="view().message | translate"
+    [helpText]="view().help | translate"
+    [actionLabel]="'common.close' | translate"
+    (action)="closed.emit()" />
+</div>

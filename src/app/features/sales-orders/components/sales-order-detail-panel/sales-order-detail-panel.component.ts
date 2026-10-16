@@ -57,6 +57,7 @@ import { CreateMissingJobsResponse } from '../../models/create-missing-jobs-resp
 import { ConfirmSalesOrderResponse } from '../../models/confirm-sales-order-response.model';
 import { CancelSalesOrderRequest } from '../../models/cancel-sales-order-request.model';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 
 /** Capability gating the whole customer-acceptance feature. */
 const CAP_SO_ACCEPTANCE = 'CAP-O2C-SO-ACCEPTANCE';
@@ -87,6 +88,7 @@ type TabId = 'overview' | 'lines' | 'schedule' | 'stages' | 'shipments' | 'retur
     ScheduleTimelineComponent, InvoiceDialogComponent, ShipmentDialogComponent,
     CapDirective, DialogComponent, TextareaComponent,
     AuthorizedByComponent,
+    DetailLoadErrorComponent,
   ],
   templateUrl: './sales-order-detail-panel.component.html',
   styleUrl: './sales-order-detail-panel.component.scss',
@@ -121,6 +123,7 @@ export class SalesOrderDetailPanelComponent {
 
   protected readonly so = signal<SalesOrderDetail | null>(null);
   protected readonly loading = signal(false);
+  protected readonly loadError = signal<unknown>(null);
   protected readonly activeTab = signal<TabId>('overview');
 
   // --- Line editing (Draft only). editingLineId: null = closed, 0 = adding, >0 = editing. ---
@@ -404,6 +407,7 @@ export class SalesOrderDetailPanelComponent {
 
   private loadDetail(id: number): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.soService.getSalesOrderById(id).subscribe({
       next: (detail) => {
         this.so.set(detail);
@@ -416,7 +420,7 @@ export class SalesOrderDetailPanelComponent {
         // Confirm button can pre-empt release before the user opens the tab.
         if (this.acceptanceCapEnabled()) this.loadAcceptances(id);
       },
-      error: () => this.loading.set(false),
+      error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); },
     });
   }
 

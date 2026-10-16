@@ -18,6 +18,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { CapabilityService } from '../../../../shared/services/capability.service';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 import { NcrDetectionStage } from '../../models/ncr-detection-stage.model';
 import { NonConformance } from '../../models/non-conformance.model';
 import { QcInspectionDetail } from '../../models/qc-inspection-detail.model';
@@ -56,6 +57,7 @@ const DETECTION_STAGES: NcrDetectionStage[] = ['Receiving', 'InProcess', 'FinalI
     DatePipe, ReactiveFormsModule, TranslatePipe,
     DialogComponent, EntityActivitySectionComponent, EntityPickerComponent,
     InputComponent, SelectComponent, TextareaComponent, ValidationButtonComponent, LoadingBlockDirective,
+    DetailLoadErrorComponent,
   ],
   templateUrl: './qc-inspection-detail-dialog.component.html',
   styleUrl: './qc-inspection-detail-dialog.component.scss',
@@ -72,6 +74,7 @@ export class QcInspectionDetailDialogComponent {
 
   protected readonly inspection = signal<QcInspectionDetail | null>(null);
   protected readonly loading = signal(true);
+  protected readonly loadError = signal<unknown>(null);
   protected readonly saving = signal(false);
   protected readonly linkedNcr = signal<NonConformance | null>(null);
   protected readonly showNcrForm = signal(false);
@@ -242,12 +245,13 @@ export class QcInspectionDetailDialogComponent {
 
   private load(): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.qualityService.getInspection(this.data.inspectionId).subscribe({
       next: inspection => {
         this.apply(inspection);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); },
     });
   }
 

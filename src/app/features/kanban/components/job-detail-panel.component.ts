@@ -39,6 +39,7 @@ import { Stage } from '../../../shared/models/stage.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { StatusTimelineComponent } from '../../../shared/components/status-timeline/status-timeline.component';
 import { BarcodeInfoComponent } from '../../../shared/components/barcode-info/barcode-info.component';
+import { DetailLoadErrorComponent } from '../../../shared/components/detail-load-error/detail-load-error.component';
 import { CoverPhotoUploadDialogComponent, CoverPhotoDialogData } from './cover-photo-upload-dialog.component';
 import { JobCostTabComponent } from './job-cost-tab.component';
 import { OperationTimeTabComponent } from './operation-time-tab.component';
@@ -46,7 +47,7 @@ import { OperationTimeTabComponent } from './operation-time-tab.component';
 @Component({
   selector: 'app-job-detail-panel',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, ReactiveFormsModule, TranslatePipe, AvatarComponent, PriorityIndicatorComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, JobCostTabComponent, OperationTimeTabComponent, MatMenuModule, MatTooltipModule, EntityLinkComponent, EntityPickerComponent, CapDirective, JobGatesSectionComponent],
+  imports: [DatePipe, DecimalPipe, ReactiveFormsModule, TranslatePipe, AvatarComponent, PriorityIndicatorComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, JobCostTabComponent, OperationTimeTabComponent, MatMenuModule, MatTooltipModule, EntityLinkComponent, EntityPickerComponent, CapDirective, JobGatesSectionComponent, DetailLoadErrorComponent],
   templateUrl: './job-detail-panel.component.html',
   styleUrl: './job-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -71,6 +72,7 @@ export class JobDetailPanelComponent implements OnInit {
   protected readonly files = signal<FileAttachment[]>([]);
   protected readonly timeEntries = signal<TimeEntry[]>([]);
   protected readonly loading = signal(true);
+  protected readonly loadError = signal<unknown>(null);
   // Phase 3 H4 / WU-20 — BOM revision the job was released against, plus
   // the staleness flag (true if the part's BOM has advanced since).
   protected readonly bomAtRelease = signal<JobBomAtRelease | null>(null);
@@ -137,7 +139,7 @@ export class JobDetailPanelComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.jobId();
-    this.kanbanService.getJobDetail(id).subscribe(detail => {
+    this.kanbanService.getJobDetail(id).subscribe({ next: detail => {
       this.job.set(detail);
       this.loading.set(false);
       if (detail.childJobCount > 0) {
@@ -164,7 +166,7 @@ export class JobDetailPanelComponent implements OnInit {
           this.availableStages.set([...tt.stages].sort((a, b) => a.sortOrder - b.sortOrder));
         }
       });
-    });
+    }, error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); } });
     this.kanbanService.getSubtasks(id).subscribe(s => this.subtasks.set(s));
     this.kanbanService.getJobLinks(id).subscribe(l => this.links.set(l));
     this.kanbanService.getJobFiles(id).subscribe(f => this.files.set(f));

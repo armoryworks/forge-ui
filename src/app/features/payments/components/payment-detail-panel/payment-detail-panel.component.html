@@ -132,5 +132,7 @@
         }
       </div>
     </div>
+  } @else if (loadError()) {
+    <app-detail-load-error [error]="loadError()" (closed)="closed.emit()" />
   }
 </div>

@@ -14,6 +14,7 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 
 @Component({
   selector: 'app-customer-return-detail-panel',
@@ -27,6 +28,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
     DialogComponent,
     TextareaComponent,
     LoadingBlockDirective,
+    DetailLoadErrorComponent,
   ],
   templateUrl: './customer-return-detail-panel.component.html',
   styleUrl: './customer-return-detail-panel.component.scss',
@@ -44,6 +46,7 @@ export class CustomerReturnDetailPanelComponent {
 
   protected readonly detail = signal<CustomerReturnDetail | null>(null);
   protected readonly loading = signal(false);
+  protected readonly loadError = signal<unknown>(null);
   protected readonly showResolveDialog = signal(false);
   protected readonly resolveSaving = signal(false);
 
@@ -62,12 +65,13 @@ export class CustomerReturnDetailPanelComponent {
 
   private loadDetail(id: number): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.service.getById(id).subscribe({
       next: (d) => {
         this.detail.set(d);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); },
     });
   }
 

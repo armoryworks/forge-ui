@@ -39,6 +39,7 @@ import { FileAttachment } from '../../../../shared/models/file.model';
 import { PaymentMilestone } from '../../../../shared/models/payment-milestone.model';
 import { PaymentSchedule } from '../../../../shared/models/payment-schedule.model';
 import { NumberLockInfoComponent } from '../../../../shared/components/number-lock-info/number-lock-info.component';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 
 /** Per-milestone action availability for the panel's schedule section. */
 interface MilestoneActionRow {
@@ -58,6 +59,7 @@ interface MilestoneActionRow {
     EntityLinkComponent, CurrencyDisplayComponent,
     EntityPickerComponent, InputComponent, CurrencyInputComponent,
     PaymentProgressComponent,
+    DetailLoadErrorComponent,
   ],
   templateUrl: './quote-detail-panel.component.html',
   styleUrl: './quote-detail-panel.component.scss',
@@ -78,6 +80,7 @@ export class QuoteDetailPanelComponent {
   readonly changed = output<void>();
 
   protected readonly loading = signal(false);
+  protected readonly loadError = signal<unknown>(null);
   protected readonly quote = signal<QuoteDetail | null>(null);
   protected readonly documents = signal<FileAttachment[]>([]);
   protected readonly paymentSchedule = signal<PaymentSchedule | null>(null);
@@ -122,9 +125,10 @@ export class QuoteDetailPanelComponent {
 
   private loadQuote(id: number): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.quoteService.getQuoteById(id).subscribe({
       next: (detail) => { this.quote.set(detail); this.loading.set(false); },
-      error: () => this.loading.set(false),
+      error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); },
     });
   }
 

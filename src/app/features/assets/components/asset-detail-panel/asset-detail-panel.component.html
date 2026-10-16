@@ -170,4 +170,6 @@
       <app-entity-activity-section entityType="Asset" [entityId]="assetId()" />
     </div>
   </div>
+} @else if (loadError()) {
+  <app-detail-load-error [error]="loadError()" (closed)="closed.emit()" />
 }

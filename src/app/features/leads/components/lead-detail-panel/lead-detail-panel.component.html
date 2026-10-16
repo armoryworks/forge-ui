@@ -277,6 +277,8 @@
       <app-entity-activity-section entityType="Lead" [entityId]="leadId()" />
     </div>
   </div>
+} @else if (loadError()) {
+  <app-detail-load-error [error]="loadError()" (closed)="closed.emit()" />
 }
 
 <!-- Lost Reason Dialog — required so the activity log captures why the lead went cold. -->

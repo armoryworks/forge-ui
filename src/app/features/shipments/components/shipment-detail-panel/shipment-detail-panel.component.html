@@ -192,6 +192,8 @@
       <!-- Activity -->
       <app-entity-activity-section entityType="Shipment" [entityId]="shipment.id" />
     </div>
+  } @else if (loadError()) {
+    <app-detail-load-error [error]="loadError()" (closed)="closed.emit()" />
   }
 </div>
 

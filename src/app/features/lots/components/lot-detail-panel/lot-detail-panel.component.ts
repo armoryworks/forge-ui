@@ -1,6 +1,7 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -23,6 +24,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 
 const STATUS_KEYS: Record<string, Record<string, string>> = {
   QcInspection: {
@@ -59,7 +61,7 @@ const NCR_STATUS_KEYS: Record<string, string> = {
 @Component({
   selector: 'app-lot-detail-panel',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, MatTooltipModule, TranslatePipe, BarcodeInfoComponent, EntityActivitySectionComponent, LoadingBlockDirective, DataTableComponent, ColumnCellDirective, EntityLinkComponent],
+  imports: [DatePipe, DecimalPipe, MatTooltipModule, TranslatePipe, BarcodeInfoComponent, EntityActivitySectionComponent, LoadingBlockDirective, DataTableComponent, ColumnCellDirective, EntityLinkComponent, DetailLoadErrorComponent],
   templateUrl: './lot-detail-panel.component.html',
   styleUrl: './lot-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -80,6 +82,7 @@ export class LotDetailPanelComponent {
 
   protected readonly trace = signal<LotTrace | null>(null);
   protected readonly loading = signal(true);
+  protected readonly loadError = signal<unknown>(null);
   protected readonly initiatedRecall = signal<RecallDetail | null>(null);
 
   protected readonly shippedTo = computed(() => this.trace()?.shippedTo ?? []);
@@ -124,11 +127,16 @@ export class LotDetailPanelComponent {
   constructor() {
     effect(() => {
       const num = this.lotNumber();
-      if (!num) return;
+      this.loadError.set(null);
+      if (!num) {
+        this.loading.set(false);
+        this.loadError.set(new HttpErrorResponse({ status: 404 }));
+        return;
+      }
       this.loading.set(true);
       this.service.trace(num).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (t) => { this.trace.set(t); this.loading.set(false); },
-        error: () => this.loading.set(false),
+        error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); },
       });
     });
   }

@@ -13,6 +13,7 @@ import { EntityLinkComponent } from '../../../../shared/components/entity-link/e
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 
 // ⚡ ACCOUNTING BOUNDARY — AP counterpart of InvoiceDetailPanel.
 @Component({
@@ -22,6 +23,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
     DatePipe, DecimalPipe, TranslatePipe,
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent,
+    DetailLoadErrorComponent,
   ],
   templateUrl: './vendor-bill-detail-panel.component.html',
   styleUrl: './vendor-bill-detail-panel.component.scss',
@@ -38,6 +40,7 @@ export class VendorBillDetailPanelComponent {
   readonly billChanged = output<void>();
 
   protected readonly loading = signal(false);
+  protected readonly loadError = signal<unknown>(null);
   protected readonly bill = signal<VendorBillDetail | null>(null);
 
   constructor() {
@@ -136,12 +139,13 @@ export class VendorBillDetailPanelComponent {
 
   private loadBill(id: number): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.billService.getVendorBillById(id).subscribe({
       next: (detail) => {
         this.bill.set(detail);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); },
     });
   }
 }
