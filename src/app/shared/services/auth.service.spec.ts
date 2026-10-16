@@ -112,6 +112,31 @@ describe('AuthService', () => {
     });
   });
 
+  describe('logout', () => {
+    beforeEach(() => {
+      service.login({ email: 'admin@test.com', password: 'pass123' }).subscribe();
+      httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush(mockLoginResponse);
+    });
+
+    it('keeps the session and reports false when the before-logout check declines', async () => {
+      service.registerBeforeLogoutCallback(() => Promise.resolve(false));
+
+      await expect(service.logout()).resolves.toBe(false);
+
+      expect(service.isAuthenticated()).toBe(true);
+      httpMock.expectNone(`${environment.apiUrl}/auth/logout`);
+    });
+
+    it('clears the session, revokes it server-side and reports true when allowed', async () => {
+      service.registerBeforeLogoutCallback(() => Promise.resolve(true));
+
+      await expect(service.logout()).resolves.toBe(true);
+
+      expect(service.isAuthenticated()).toBe(false);
+      httpMock.expectOne(`${environment.apiUrl}/auth/logout`).flush(null);
+    });
+  });
+
   describe('hasRole', () => {
     beforeEach(() => {
       service.login({ email: 'admin@test.com', password: 'pass123' }).subscribe();

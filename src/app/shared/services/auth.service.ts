@@ -315,11 +315,11 @@ export class AuthService {
     );
   }
 
-  async logout(): Promise<void> {
+  async logout(): Promise<boolean> {
     // Run before-logout checks (e.g., draft warning dialog)
     if (this._beforeLogout) {
       const proceed = await this._beforeLogout();
-      if (!proceed) return;
+      if (!proceed) return false;
     }
 
     // Notify server to revoke the session (fire-and-forget)
@@ -327,6 +327,7 @@ export class AuthService {
 
     this.clearAuth();
     this._broadcastLogout?.();
+    return true;
   }
 
   clearAuth(): void {

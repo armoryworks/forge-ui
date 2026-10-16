@@ -209,7 +209,7 @@ export class AdminComponent implements OnInit {
   protected readonly complianceUserOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('admin.selectUserPlaceholder') },
     ...(this.isAdmin()
-      ? this.users().map(u => ({ value: u.id, label: `${u.lastName}, ${u.firstName}` }))
+      ? this.users().filter(u => !u.isServiceAccount).map(u => ({ value: u.id, label: `${u.lastName}, ${u.firstName}` }))
       : this.complianceDirectory()),
   ]);
 
@@ -588,6 +588,7 @@ export class AdminComponent implements OnInit {
             workLocationName: null,
             i9Status: null,
             isNonEmployee: false,
+            isServiceAccount: false,
           };
           this.editingUser.set(newUser);
           this.setupToken.set(result.setupToken);

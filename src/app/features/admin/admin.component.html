@@ -46,7 +46,9 @@
             }
           </ng-template>
           <ng-template appColumnCell="compliance" let-user>
-            @if (user.canBeAssignedJobs) {
+            @if (user.isServiceAccount) {
+              <span class="text-muted">—</span>
+            } @else if (user.canBeAssignedJobs) {
               <span class="chip chip--success" title="All required items complete">
                 <span class="material-icons-outlined chip__icon">check_circle</span>
                 {{ user.complianceCompletedItems }}/{{ user.complianceTotalItems }}
@@ -59,7 +61,9 @@
             }
           </ng-template>
           <ng-template appColumnCell="status" let-user>
-            @if (!user.hasPassword) {
+            @if (user.isServiceAccount) {
+              <span class="chip" data-testid="admin-user-service-account" [matTooltip]="'admin.serviceAccountHint' | translate">{{ 'admin.serviceAccount' | translate }}</span>
+            } @else if (!user.hasPassword) {
               <span class="chip chip--warning">{{ 'admin.pendingSetup' | translate }}</span>
             } @else {
               <span class="status-dot" [class.status-dot--active]="user.isActive" [class.status-dot--inactive]="!user.isActive"></span>
@@ -78,7 +82,7 @@
                   <span class="material-icons-outlined">qr_code_scanner</span>
                 </span>
               }
-              @if (!user.hasPassword) {
+              @if (!user.hasPassword && !user.isServiceAccount) {
                 <button class="icon-btn" [attr.aria-label]="'admin.getSetupCode' | translate" [matTooltip]="'admin.getSetupCode' | translate" matTooltipPosition="above" (click)="regenerateSetupToken(user); openEditUser(user); $event.stopPropagation()">
                   <span class="material-icons-outlined">vpn_key</span>
                 </button>
@@ -86,12 +90,14 @@
               <button class="icon-btn" [attr.aria-label]="'common.edit' | translate" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" (click)="openEditUser(user); $event.stopPropagation()">
                 <span class="material-icons-outlined">edit</span>
               </button>
-              <button *appCap="'CAP-MOBILE-CORE'" class="icon-btn" data-testid="admin-user-add-device" [attr.aria-label]="'admin.devices.addAction' | translate" [matTooltip]="'admin.devices.addAction' | translate" matTooltipPosition="above" (click)="deviceUser.set(user); $event.stopPropagation()">
-                <span class="material-icons-outlined">smartphone</span>
-              </button>
-              <button class="icon-btn" [class.icon-btn--active]="user.isNonEmployee" data-testid="admin-user-non-employee" [attr.aria-label]="(user.isNonEmployee ? 'admin.nonEmployee.clearAction' : 'admin.nonEmployee.setAction') | translate" [attr.aria-pressed]="user.isNonEmployee" [matTooltip]="user.isNonEmployee ? ('admin.nonEmployee.clearAction' | translate) : ('admin.nonEmployee.setAction' | translate)" matTooltipPosition="above" (click)="toggleNonEmployee(user); $event.stopPropagation()">
-                <span class="material-icons-outlined">{{ user.isNonEmployee ? 'badge' : 'work_outline' }}</span>
-              </button>
+              @if (!user.isServiceAccount) {
+                <button *appCap="'CAP-MOBILE-CORE'" class="icon-btn" data-testid="admin-user-add-device" [attr.aria-label]="'admin.devices.addAction' | translate" [matTooltip]="'admin.devices.addAction' | translate" matTooltipPosition="above" (click)="deviceUser.set(user); $event.stopPropagation()">
+                  <span class="material-icons-outlined">smartphone</span>
+                </button>
+                <button class="icon-btn" [class.icon-btn--active]="user.isNonEmployee" data-testid="admin-user-non-employee" [attr.aria-label]="(user.isNonEmployee ? 'admin.nonEmployee.clearAction' : 'admin.nonEmployee.setAction') | translate" [attr.aria-pressed]="user.isNonEmployee" [matTooltip]="user.isNonEmployee ? ('admin.nonEmployee.clearAction' | translate) : ('admin.nonEmployee.setAction' | translate)" matTooltipPosition="above" (click)="toggleNonEmployee(user); $event.stopPropagation()">
+                  <span class="material-icons-outlined">{{ user.isNonEmployee ? 'badge' : 'work_outline' }}</span>
+                </button>
+              }
               <button class="icon-btn" [attr.aria-label]="(user.isActive ? 'admin.deactivate' : 'admin.activate') | translate" [matTooltip]="user.isActive ? ('admin.deactivate' | translate) : ('admin.activate' | translate)" matTooltipPosition="above" (click)="toggleUserActive(user); $event.stopPropagation()">
                 <span class="material-icons-outlined">{{ user.isActive ? 'person_off' : 'person' }}</span>
               </button>

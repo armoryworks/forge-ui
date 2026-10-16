@@ -46,6 +46,21 @@ describe('AdminService', () => {
     });
   });
 
+  describe('getPeople', () => {
+    it('should drop service accounts from the admin user list', () => {
+      let result: { id: number }[] = [];
+
+      service.getPeople().subscribe((users) => { result = users; });
+
+      httpMock.expectOne(`${apiUrl}/admin/users`).flush([
+        { id: 1, firstName: 'Pat', isServiceAccount: false },
+        { id: 2, firstName: 'Lead Intake', isServiceAccount: true },
+      ]);
+
+      expect(result.map(u => u.id)).toEqual([1]);
+    });
+  });
+
   // ── createUser ────────────────────────────────────────────────────────────
 
   describe('createUser', () => {

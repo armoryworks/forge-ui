@@ -20,6 +20,7 @@ export interface AdminUser {
   workLocationName: string | null;
   i9Status: I9ComplianceStatus | null;
   isNonEmployee: boolean;
+  isServiceAccount: boolean;
 }
 
 export type I9ComplianceStatus =

@@ -3318,6 +3318,8 @@
     "createUser": "Create User",
     "noUsersFound": "No users found",
     "pendingSetup": "Pending Setup",
+    "serviceAccount": "Service account",
+    "serviceAccountHint": "Integration identity, not a person. Manage its keys under System API Keys.",
     "firstName": "First Name",
     "lastName": "Last Name",
     "initials": "Initials",

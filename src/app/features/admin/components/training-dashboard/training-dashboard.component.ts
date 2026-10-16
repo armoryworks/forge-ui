@@ -40,7 +40,7 @@ export class TrainingDashboardComponent {
 
   private loadTrainingData(): void {
     this.loading.set(true);
-    this.adminService.getUsers().subscribe({
+    this.adminService.getPeople().subscribe({
       next: (adminUsers) => {
         const rows: TrainingUserRow[] = adminUsers.map(u => {
           // Tour completion is client-side only (stored in UserPreferencesService)

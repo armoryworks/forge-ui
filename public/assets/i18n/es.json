@@ -3318,6 +3318,8 @@
     "createUser": "Crear Usuario",
     "noUsersFound": "No se encontraron usuarios",
     "pendingSetup": "Configuración Pendiente",
+    "serviceAccount": "Cuenta de servicio",
+    "serviceAccountHint": "Identidad de integración, no una persona. Administre sus claves en Claves API del Sistema.",
     "firstName": "Nombre",
     "lastName": "Apellido",
     "initials": "Iniciales",
