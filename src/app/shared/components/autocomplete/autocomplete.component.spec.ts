@@ -58,6 +58,27 @@ describe('AutocompleteComponent · filteredOptions', () => {
   });
 });
 
+describe('AutocompleteComponent · value written before options load', () => {
+  it('shows the label once the options for the written value arrive', () => {
+    TestBed.configureTestingModule({
+      providers: [provideNoopAnimations(), { provide: ComponentFixtureAutoDetect, useValue: false }],
+    });
+    const fixture = TestBed.createComponent(AutocompleteComponent);
+    const comp = fixture.componentInstance as unknown as { searchControl: FormControl<string | null>; writeValue(value: unknown): void };
+    fixture.componentRef.setInput('label', 'Sales Order');
+    fixture.componentRef.setInput('options', []);
+    TestBed.tick();
+
+    comp.writeValue(7);
+    expect(comp.searchControl.value).toBe('');
+
+    fixture.componentRef.setInput('options', [{ value: 7, label: 'SO-00007 — Acme' }]);
+    TestBed.tick();
+
+    expect(comp.searchControl.value).toBe('SO-00007 — Acme');
+  });
+});
+
 @Component({
   selector: 'app-autocomplete-host',
   standalone: true,

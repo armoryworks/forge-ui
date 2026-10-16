@@ -130,6 +130,12 @@ export class AutocompleteComponent implements ControlValueAccessor, AfterContent
       this.errorMessage();
       this.matInput()?.updateErrorState();
     });
+    effect(() => {
+      const options = this.options();
+      if (this.selectedValue == null) return;
+      const match = options.find(o => o[this.valueField()] === this.selectedValue);
+      if (match) this.searchControl.setValue(String(match[this.displayField()] ?? ''), { emitEvent: false });
+    });
   }
 
   ngAfterContentInit(): void {
