@@ -5255,7 +5255,8 @@
     "noLinesYet": "Sin líneas aún",
     "confirmSendTitle": "¿Enviar factura?",
     "confirmSendMessage": "¿Enviar la factura {{number}} al cliente?",
-    "numberLockedReason": "El número de factura solo se puede cambiar mientras la factura es un borrador. Esta ya se envió o se contabilizó, por lo que el número ya consta ante el cliente y en el libro mayor."
+    "numberLockedReason": "El número de factura solo se puede cambiar mientras la factura es un borrador. Esta ya se envió o se contabilizó, por lo que el número ya consta ante el cliente y en el libro mayor.",
+    "downloadPdf": "Descargar PDF"
   },
   "payments": {
     "paymentNumberLabel": "Número de pago",

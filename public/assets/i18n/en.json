@@ -5262,7 +5262,8 @@
     "noLinesYet": "No lines yet",
     "confirmSendTitle": "Send Invoice?",
     "confirmSendMessage": "Send invoice {{number}} to the customer?",
-    "numberLockedReason": "An invoice number can only be changed while the invoice is a draft. This one has been sent or posted, so the number is now on record with the customer and in the ledger."
+    "numberLockedReason": "An invoice number can only be changed while the invoice is a draft. This one has been sent or posted, so the number is now on record with the customer and in the ledger.",
+    "downloadPdf": "Download PDF"
   },
   "payments": {
     "paymentNumberLabel": "Payment Number",

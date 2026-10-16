@@ -149,4 +149,16 @@ describe('InvoiceService', () => {
       req.flush(null);
     });
   });
+
+  describe('getInvoicePdf', () => {
+    it('GETs the invoice PDF as a blob', () => {
+      let received: Blob | undefined;
+      service.getInvoicePdf(12).subscribe((b) => (received = b));
+      const req = httpMock.expectOne(`${base}/12/pdf`);
+      expect(req.request.method).toBe('GET');
+      expect(req.request.responseType).toBe('blob');
+      req.flush(new Blob(['%PDF'], { type: 'application/pdf' }));
+      expect(received).toBeInstanceOf(Blob);
+    });
+  });
 });

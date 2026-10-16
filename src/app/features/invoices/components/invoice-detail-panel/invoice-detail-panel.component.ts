@@ -20,6 +20,7 @@ import { ManualNumberSettingsService } from '../../../../shared/services/manual-
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { NumberLockInfoComponent } from '../../../../shared/components/number-lock-info/number-lock-info.component';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { downloadBlob } from '../../../../shared/utils/download-blob';
 
 @Component({
   selector: 'app-invoice-detail-panel',
@@ -51,6 +52,7 @@ export class InvoiceDetailPanelComponent {
   protected readonly invoice = signal<InvoiceDetail | null>(null);
 
   protected readonly invoiceIdValue = computed(() => this.invoice()?.id ?? 0);
+  protected readonly downloadingPdf = signal(false);
 
   // Inline rename of the invoice number — only offered while Draft and when the
   // tenant allows manual numbers. Backed by the dedicated rename endpoint.
@@ -118,6 +120,19 @@ export class InvoiceDetailPanelComponent {
           this.snackbar.success(this.translate.instant('invoices.invoiceSent'));
         },
       });
+    });
+  }
+
+  protected downloadPdf(): void {
+    const inv = this.invoice();
+    if (!inv || this.downloadingPdf()) return;
+    this.downloadingPdf.set(true);
+    this.invoiceService.getInvoicePdf(inv.id).subscribe({
+      next: (blob) => {
+        this.downloadingPdf.set(false);
+        downloadBlob(blob, `${inv.invoiceNumber || `invoice-${inv.id}`}.pdf`);
+      },
+      error: () => this.downloadingPdf.set(false),
     });
   }
 
