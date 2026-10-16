@@ -11,7 +11,7 @@ import {
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSlideToggle, MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -29,6 +29,7 @@ import { SpacerDirective } from '../../../shared/directives/spacer.directive';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { CAPABILITY_AREA_LABELS } from '../models/capability-area-labels.const';
 import { matchSettingsTopics } from '../models/settings-search-topics.const';
+import { GlOpeningCalloutComponent } from '../components/gl-opening-callout/gl-opening-callout.component';
 
 interface CapabilityViolation {
   code: string;
@@ -80,6 +81,7 @@ interface AreaGroup {
     SpacerDirective,
     LoadingBlockDirective,
     TranslatePipe,
+    GlOpeningCalloutComponent,
   ],
   templateUrl: './capabilities.component.html',
   styleUrl: './capabilities.component.scss',
@@ -100,6 +102,9 @@ export class CapabilitiesComponent implements OnInit {
 
   /** Toggled rows held by code. Phase 4E pessimistic UX (decisions-log #5). */
   protected readonly pending = signal<Set<string>>(new Set());
+
+  /** Server refusal text while full GL waits on an opening journal; null hides the cutover callout. */
+  protected readonly glOpeningReason = signal<string | null>(null);
 
   /** Collapsed area headings (per session — not persisted). */
   protected readonly collapsedAreas = signal<Set<string>>(new Set());
@@ -236,22 +241,31 @@ export class CapabilitiesComponent implements OnInit {
   }
 
   /** Pessimistic toggle UX (4E-decisions-log #5). */
-  protected onToggle(entry: CapabilityDescriptorEntry, target: boolean, event?: Event): void {
-    event?.stopPropagation();
-    if (this.pending().has(entry.code)) return;
+  protected onToggle(entry: CapabilityDescriptorEntry, target: boolean, toggle?: MatSlideToggle): void {
+    if (this.pending().has(entry.code)) {
+      if (toggle) toggle.checked = entry.enabled;
+      return;
+    }
     this.markPending(entry.code, true);
 
     this.capabilityService.setEnabled(entry.code, target).subscribe({
       next: () => {
         this.snackbar.success(`Capability ${target ? 'enabled' : 'disabled'}: ${entry.name}`);
         this.markPending(entry.code, false);
+        if (entry.code === 'CAP-ACCT-FULLGL' && target) this.glOpeningReason.set(null);
+        this.capabilityService.load().subscribe();
       },
       error: (err: HttpErrorResponse) => {
         this.markPending(entry.code, false);
+        if (toggle) toggle.checked = entry.enabled;
         this.surfaceError(entry, err);
         this.capabilityService.load().subscribe();
       },
     });
+  }
+
+  protected dismissGlOpening(): void {
+    this.glOpeningReason.set(null);
   }
 
   private markPending(code: string, on: boolean): void {
@@ -282,6 +296,9 @@ export class CapabilitiesComponent implements OnInit {
         this.snackbar.error(
           `${entry.name} conflicts with: ${(violation.conflicts ?? []).join(', ')}. Disable the peer first.`,
         );
+        break;
+      case 'capability-gl-opening-balances':
+        this.glOpeningReason.set(violation.message ?? '');
         break;
       case 'version-mismatch':
         this.snackbar.error(

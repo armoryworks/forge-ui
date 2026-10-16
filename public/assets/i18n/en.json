@@ -3855,6 +3855,16 @@
     "capability": {
       "relatedSettings": "Related settings",
       "toggleAria": "Toggle {{name}}"
+    },
+    "glOpening": {
+      "title": "Full general ledger needs an opening journal first",
+      "stepMigration": "Turn on the accounting migration wizard.",
+      "enableMigration": "Turn it on",
+      "stepJournal": "A Controller posts the opening journal under Accounting > Opening journal.",
+      "openJournal": "Open the opening journal",
+      "stepFullGl": "Turn on Built-in full general ledger again.",
+      "migrationEnabled": "Accounting migration wizard turned on",
+      "migrationFailed": "Could not turn on the accounting migration wizard"
     }
   },
   "teamsPanel": {

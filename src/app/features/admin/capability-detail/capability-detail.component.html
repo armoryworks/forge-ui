@@ -28,6 +28,9 @@
           <span>Loading capability…</span>
         </div>
       } @else {
+        @if (glOpeningReason() !== null) {
+          <app-gl-opening-callout [reason]="glOpeningReason()" (dismissed)="glOpeningReason.set(null)" />
+        }
         <section class="cap-detail__header">
           <div class="cap-detail__header-main">
             <div class="cap-detail__title">{{ entry()!.name }}</div>
@@ -53,7 +56,7 @@
             <mat-slide-toggle
               [checked]="entry()!.enabled"
               [disabled]="togglePending()"
-              (change)="onToggle($event.checked)"
+              (change)="onToggle($event.checked, $event.source)"
               data-testid="capability-detail-toggle"
               [aria-label]="'admin.capability.toggleAria' | translate: { name: entry()!.name }">
             </mat-slide-toggle>

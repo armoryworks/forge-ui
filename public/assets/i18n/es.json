@@ -3855,6 +3855,16 @@
     "capability": {
       "relatedSettings": "Configuración relacionada",
       "toggleAria": "Activar o desactivar {{name}}"
+    },
+    "glOpening": {
+      "title": "El libro mayor completo necesita primero un asiento de apertura",
+      "stepMigration": "Active el asistente de migración contable.",
+      "enableMigration": "Activarlo",
+      "stepJournal": "Un contralor registra el asiento de apertura en Contabilidad > Asiento de apertura.",
+      "openJournal": "Abrir el asiento de apertura",
+      "stepFullGl": "Vuelva a activar el libro mayor completo integrado.",
+      "migrationEnabled": "Asistente de migración contable activado",
+      "migrationFailed": "No se pudo activar el asistente de migración contable"
     }
   },
   "teamsPanel": {

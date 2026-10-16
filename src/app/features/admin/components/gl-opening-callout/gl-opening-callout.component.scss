@@ -1,0 +1,60 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.gl-opening {
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-md;
+  padding: $sp-sm $sp-md;
+  background: color-mix(in srgb, var(--warning) 8%, transparent);
+  border: $border-width-thin solid var(--warning);
+  border-left: $border-width-accent solid var(--warning);
+
+  &__icon {
+    color: var(--warning);
+    font-size: $icon-size-lg;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    flex: 1;
+    min-width: 0;
+    font-size: $font-size-sm;
+  }
+
+  &__title {
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &__reason {
+    color: var(--text-secondary);
+    overflow-wrap: anywhere;
+  }
+
+  &__steps {
+    margin: 0;
+    padding-left: $sp-lg;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+    color: var(--text);
+
+    li {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: $sp-md;
+    }
+  }
+
+  &__step--done {
+    color: var(--text-muted);
+    text-decoration: line-through;
+  }
+}
