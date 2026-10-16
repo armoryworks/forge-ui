@@ -92,7 +92,6 @@
     "src/app/features/customers/components/price-list-entries-cluster/price-list-entries-table.component.html": 2,
     "src/app/features/inventory/inventory.component.html": 1,
     "src/app/features/leads/pages/queue/leads-queue.component.html": 1,
-    "src/app/features/mobile/pages/mobile-chat.component.html": 1,
     "src/app/features/mobile/pages/mobile-job-detail.component.html": 1,
     "src/app/features/mobile/pages/mobile-scan.component.html": 1,
     "src/app/features/purchase-orders/components/receive-dialog/receive-dialog.component.html": 1,
