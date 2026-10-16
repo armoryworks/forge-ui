@@ -38,10 +38,10 @@ describe('CustomerDetailLayoutResolverService', () => {
     ]);
   });
 
-  it('Prospect → overview, contacts, addresses, estimates, quotes, interactions, documents, activity (no orders/jobs/invoices)', () => {
+  it('Prospect → overview, contacts, addresses, estimates, quotes, pricing, interactions, documents, activity (no orders/jobs/invoices)', () => {
     const ids = service.resolve('Prospect').map(t => t.id);
     expect(ids).toEqual([
-      'overview', 'contacts', 'addresses', 'estimates', 'quotes', 'interactions', 'documents', 'activity',
+      'overview', 'contacts', 'addresses', 'estimates', 'quotes', 'pricing', 'interactions', 'documents', 'activity',
     ]);
     expect(ids).not.toContain('orders');
     expect(ids).not.toContain('jobs');

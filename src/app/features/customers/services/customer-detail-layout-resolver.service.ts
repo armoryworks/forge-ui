@@ -70,9 +70,8 @@ export class CustomerDetailLayoutResolverService {
   private middleTabs(lifecycle: CustomerLifecycle): TabLayoutEntry[] {
     if (lifecycle === 'Prospect') {
       // No active business yet — surface intake + sales-pipeline tabs only.
-      // Pricing is omitted: prospects rarely have negotiated price lists.
       // Documents stays: NDAs / drawings arrive before the first order.
-      return [CONTACTS, ADDRESSES, ESTIMATES, QUOTES, INTERACTIONS, DOCUMENTS];
+      return [CONTACTS, ADDRESSES, ESTIMATES, QUOTES, PRICING, INTERACTIONS, DOCUMENTS];
     }
     if (lifecycle === 'Archived') {
       // Read-only history posture. Keep Invoices for unpaid balances and
