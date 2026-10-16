@@ -17,7 +17,7 @@
   overflow: hidden;
 
   // Loading block wrapper must participate in flex layout
-  > [apploadingblock] {
+  &__body {
     flex: 1;
     display: flex;
     flex-direction: column;

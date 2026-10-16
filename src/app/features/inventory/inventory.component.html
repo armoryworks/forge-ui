@@ -85,7 +85,7 @@
     </button>
   </div>
 
-  <div [appLoadingBlock]="loading()">
+  <div class="inventory-content__body" [appLoadingBlock]="loading()">
     <!-- Stock Levels Tab -->
     @if (activeTab() === 'stock') {
       <div class="tab-panel">
