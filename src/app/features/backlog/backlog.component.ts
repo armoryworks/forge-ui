@@ -13,6 +13,7 @@ import { DetailDialogService } from '../../shared/services/detail-dialog.service
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 import { AuthService } from '../../shared/services/auth.service';
+import { JOB_CREATE_ROLES } from '../kanban/job-roles';
 import { BacklogService } from './services/backlog.service';
 import { KanbanService } from '../kanban/services/kanban.service';
 import { LoadingService } from '../../shared/services/loading.service';
@@ -73,6 +74,7 @@ export class BacklogComponent implements OnInit {
    * also enforces Admin via [Authorize(Roles = "Admin")].
    */
   protected readonly isAdmin = computed(() => this.auth.hasRole('Admin'));
+  protected readonly canCreateJobs = computed(() => this.auth.hasAnyRole(JOB_CREATE_ROLES));
   protected readonly showArchived = signal(false);
   /** Selected job ids in the archived-view bulk-action context. WU-07 / F2. */
   protected readonly selectedJobs = signal<KanbanJob[]>([]);
@@ -256,6 +258,7 @@ export class BacklogComponent implements OnInit {
   }
 
   protected openCreateDialog(): void {
+    if (!this.canCreateJobs()) return;
     this.dialogMode.set('create');
     this.dialogJob.set(null);
     this.showJobDialog.set(true);

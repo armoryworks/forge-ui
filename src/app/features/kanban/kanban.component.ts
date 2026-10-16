@@ -42,10 +42,9 @@ import { UserPreferencesService } from '../../shared/services/user-preferences.s
 import { AuthService } from '../../shared/services/auth.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { JOB_CREATE_ROLES } from './job-roles';
 
 export type ViewMode = 'board' | 'team';
-
-const JOB_CREATE_ROLES = ['Admin', 'Manager', 'PM', 'Engineer', 'OfficeManager'];
 
 @Component({
   selector: 'app-kanban',

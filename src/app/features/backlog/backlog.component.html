@@ -25,10 +25,12 @@
         <span class="material-icons-outlined">view_module</span>
       </button>
     </div>
-    <button class="new-job-btn" (click)="openCreateDialog()">
-      <span class="material-icons-outlined">add</span>
-      {{ 'jobs.createJob' | translate }}
-    </button>
+    @if (canCreateJobs()) {
+      <button class="new-job-btn" data-testid="backlog-new-job-btn" (click)="openCreateDialog()">
+        <span class="material-icons-outlined">add</span>
+        {{ 'jobs.createJob' | translate }}
+      </button>
+    }
     @if (isAdmin()) {
       <button class="icon-btn"
         [class.icon-btn--active]="showArchived()"
