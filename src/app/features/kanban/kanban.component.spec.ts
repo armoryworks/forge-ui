@@ -138,6 +138,7 @@ describe('KanbanComponent', () => {
   let getTeams: ReturnType<typeof vi.fn>;
   let navigate: ReturnType<typeof vi.fn>;
   let queryParams: BehaviorSubject<ParamMap>;
+  let userRoles: string[];
 
   function createComponent(): void {
     component = TestBed.createComponent(KanbanComponent)
@@ -145,6 +146,7 @@ describe('KanbanComponent', () => {
   }
 
   beforeEach(() => {
+    userRoles = ['Admin'];
     getBoard = vi.fn(() => of({ columns: [], totalCount: 0, loadedCount: 0 }));
     getTeams = vi.fn(() => of([]));
     updateJobPosition = vi.fn(() => of(undefined));
@@ -205,7 +207,7 @@ describe('KanbanComponent', () => {
         { provide: ScannerService, useValue: { setContext: vi.fn(), clearLastScan: vi.fn(), lastScan: () => null } },
         { provide: DetailDialogService, useValue: { open: detailDialogOpen, getDetailFromUrl: () => null } },
         { provide: MatDialog, useValue: { open: vi.fn() } },
-        { provide: AuthService, useValue: { user: () => null } },
+        { provide: AuthService, useValue: { user: () => null, hasAnyRole: (roles: string[]) => roles.some(r => userRoles.includes(r)) } },
         { provide: UserPreferencesService, useValue: { get: (key: string) => storedPrefs[key] ?? null, set: prefsSet } },
         { provide: DraftResumeService, useValue: { consume: () => false } },
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
@@ -291,6 +293,50 @@ describe('KanbanComponent', () => {
     component.selectedJobIds.set(new Set([100, 102]));
 
     expect(component.disabledBulkStageIds().has(8)).toBe(false);
+  });
+
+  describe('billing columns', () => {
+    function billingBoard(): BoardColumn[] {
+      return [
+        { stage: stage({ id: 7, name: 'QC/Review', sortOrder: 7 }), jobs: [boardJob(100, 'QC/Review')] },
+        { stage: stage({ id: 8, name: 'Shipped', sortOrder: 8, accountingDocumentType: 'Invoice' }), jobs: [] },
+      ];
+    }
+
+    it('disables a billing column as a bulk target for a role that cannot bill', () => {
+      userRoles = ['PM'];
+      component.columns.set(billingBoard());
+      component.selectedJobIds.set(new Set([100]));
+
+      expect(component.disabledBulkStageIds().has(8)).toBe(true);
+    });
+
+    it('keeps a billing column as a bulk target for the office', () => {
+      userRoles = ['OfficeManager'];
+      component.columns.set(billingBoard());
+      component.selectedJobIds.set(new Set([100]));
+
+      expect(component.disabledBulkStageIds().has(8)).toBe(false);
+    });
+
+    it('leaves a card where it was when a role that cannot bill drops it on a billing column', () => {
+      userRoles = ['ProductionWorker'];
+      component.columns.set(billingBoard());
+      const cols = component.filteredColumns();
+      const source = { id: 'column-0', data: cols[0].jobs } as unknown as CdkDropList<KanbanJob[]>;
+      const target = { id: 'column-1', data: cols[1].jobs } as unknown as CdkDropList<KanbanJob[]>;
+
+      component.onCardDropped({
+        previousContainer: source,
+        container: target,
+        previousIndex: 0,
+        currentIndex: 0,
+      } as unknown as CdkDragDrop<KanbanJob[]>);
+
+      expect(moveJobStage).not.toHaveBeenCalled();
+      expect(component.columns()[0].jobs.map(j => j.id)).toEqual([100]);
+      expect(component.columns()[1].jobs).toEqual([]);
+    });
   });
 
   // ── Task 1: per-job bulk failures are surfaced with the server's messages ──

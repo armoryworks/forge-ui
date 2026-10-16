@@ -40,6 +40,8 @@ import { ScannerService } from '../../shared/services/scanner.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 import { AuthService } from '../../shared/services/auth.service';
+import { BILLING_STAGE_ROLES } from '../../shared/models/billing-stage-roles.const';
+import { isBillingStage } from '../../shared/utils/billing-stage';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -78,6 +80,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
   private readonly draftResume = inject(DraftResumeService);
 
   protected readonly trackTypes = signal<TrackType[]>([]);
+  protected readonly mayBill = computed(() => this.authService.hasAnyRole([...BILLING_STAGE_ROLES]));
   protected readonly selectedTrackTypeId = signal<number | null>(null);
   protected readonly columns = signal<BoardColumn[]>([]);
   protected readonly boardTotalCount = signal(0);
@@ -522,6 +525,10 @@ export class KanbanComponent implements OnInit, OnDestroy {
     const selectedJobs = cols.flatMap(c => c.jobs).filter(j => selected.has(j.id));
 
     for (const target of stages) {
+      if (this.billingLocked(target)) {
+        disabled.add(target.id);
+        continue;
+      }
       const anyAllowed = selectedJobs.some(j => {
         const current = stageByName.get(j.stageName);
         if (!current || current.id === target.id) return false;
@@ -698,7 +705,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
     const sourceColumnIndex = this.dropListIds().indexOf(event.previousContainer.id);
     const targetStage = this.columns()[targetColumnIndex]?.stage;
 
-    if (!job || !targetStage || targetStage.isIrreversible || sourceColumnIndex < 0) return;
+    if (!job || !targetStage || targetStage.isIrreversible || this.billingLocked(targetStage) || sourceColumnIndex < 0) return;
 
     const movedJob: KanbanJob = { ...job, stageName: targetStage.name, stageColor: targetStage.color };
     const targetVisible = [...event.container.data];
@@ -739,7 +746,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (targetStage.isIrreversible && stageChanged) return;
+    if ((targetStage.isIrreversible || this.billingLocked(targetStage)) && stageChanged) return;
 
     // Optimistic move
     transferArrayItem(
@@ -765,4 +772,8 @@ export class KanbanComponent implements OnInit, OnDestroy {
   }
 
   protected swimlaneCanEnter = (): boolean => true;
+
+  private billingLocked(stage: Stage): boolean {
+    return !this.mayBill() && isBillingStage(stage.accountingDocumentType);
+  }
 }

@@ -54,6 +54,7 @@ interface PanelInternals {
   stopTimerForJob(): void;
   availableStages: { set(v: Stage[]): void };
   onAllOperationsComplete(): void;
+  moveToStage(stage: Stage): void;
 }
 
 const JOB_ID = 42;
@@ -82,7 +83,7 @@ function jobPart(overrides: Partial<JobPart> = {}): JobPart {
   };
 }
 
-function setup(options: { admin?: boolean; confirm?: boolean } = {}) {
+function setup(options: { admin?: boolean; confirm?: boolean; roles?: string[] } = {}) {
   const kanban = {
     addJobPart: vi.fn(),
     updateJobPart: vi.fn(),
@@ -101,6 +102,7 @@ function setup(options: { admin?: boolean; confirm?: boolean } = {}) {
   const auth = {
     user: () => ({ id: 1 }),
     hasRole: vi.fn((role: string) => role === 'Admin' && !!options.admin),
+    hasAnyRole: vi.fn((roles: string[]) => roles.some(r => (options.roles ?? []).includes(r))),
   };
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
@@ -293,6 +295,31 @@ describe('JobDetailPanelComponent', () => {
     afterClosed.next(true);
 
     expect(kanban.moveJobStage).toHaveBeenCalledWith(JOB_ID, 3);
+  });
+
+  it('does not offer the next stage when it bills the customer and the role cannot bill', () => {
+    const { component, dialog } = setup({ roles: ['ProductionWorker'] });
+    component.job.set({ id: JOB_ID, currentStageId: 7, stageName: 'QC/Review', stageColor: '#000' } as unknown as JobDetail);
+    component.availableStages.set([
+      { id: 7, name: 'QC/Review', color: '#111', sortOrder: 7, accountingDocumentType: null },
+      { id: 8, name: 'Shipped', color: '#222', sortOrder: 8, accountingDocumentType: 'Invoice' },
+    ] as unknown as Stage[]);
+
+    component.onAllOperationsComplete();
+    expect(dialog.open).not.toHaveBeenCalled();
+  });
+
+  it('moves into a billing stage only for a role that can bill', () => {
+    const shipped = { id: 8, name: 'Shipped', color: '#222', sortOrder: 8, accountingDocumentType: 'Invoice' } as unknown as Stage;
+    const worker = setup({ roles: ['PM'] });
+    worker.component.job.set({ id: JOB_ID, currentStageId: 7 } as unknown as JobDetail);
+    worker.component.moveToStage(shipped);
+    expect(worker.kanban.moveJobStage).not.toHaveBeenCalled();
+
+    const office = setup({ roles: ['OfficeManager'] });
+    office.component.job.set({ id: JOB_ID, currentStageId: 7 } as unknown as JobDetail);
+    office.component.moveToStage(shipped);
+    expect(office.kanban.moveJobStage).toHaveBeenCalledWith(JOB_ID, 8);
   });
 
   it('does not prompt when the job is already in its last stage', () => {

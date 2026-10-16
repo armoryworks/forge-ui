@@ -14,6 +14,8 @@ import { EntityActivitySectionComponent } from '../../../shared/components/entit
 import { FileAttachment } from '../../../shared/models/file.model';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { AuthService } from '../../../shared/services/auth.service';
+import { BILLING_STAGE_ROLES } from '../../../shared/models/billing-stage-roles.const';
+import { isBillingStage } from '../../../shared/utils/billing-stage';
 import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -114,6 +116,7 @@ export class JobDetailPanelComponent implements OnInit {
   protected readonly isArchiveSaving = signal(false);
 
   protected readonly isAdmin = computed(() => this.auth.hasRole('Admin'));
+  private readonly mayBill = computed(() => this.auth.hasAnyRole([...BILLING_STAGE_ROLES]));
   protected readonly canViewCost = computed(() => this.auth.hasAnyRole(['Admin', 'Manager', 'Engineer', 'PM', 'OfficeManager']));
 
   protected readonly myActiveTimer = computed(() => {
@@ -463,11 +466,15 @@ export class JobDetailPanelComponent implements OnInit {
 
   protected moveToStage(stage: Stage): void {
     const j = this.job();
-    if (!j || stage.id === j.currentStageId) return;
+    if (!j || stage.id === j.currentStageId || this.billingLocked(stage)) return;
     this.kanbanService.moveJobStage(j.id, stage.id).subscribe(() => {
       this.job.set({ ...j, currentStageId: stage.id, stageName: stage.name, stageColor: stage.color });
       this.snackbar.success(this.translate.instant('kanban.movedToStage', { stage: stage.name }));
     });
+  }
+
+  protected billingLocked(stage: Stage): boolean {
+    return !this.mayBill() && isBillingStage(stage.accountingDocumentType);
   }
 
   protected onAllOperationsComplete(): void {
@@ -476,7 +483,7 @@ export class JobDetailPanelComponent implements OnInit {
     const stages = this.availableStages();
     const index = stages.findIndex(st => st.id === j.currentStageId);
     const next = index >= 0 ? stages[index + 1] : undefined;
-    if (!next) return;
+    if (!next || this.billingLocked(next)) return;
     this.matDialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
