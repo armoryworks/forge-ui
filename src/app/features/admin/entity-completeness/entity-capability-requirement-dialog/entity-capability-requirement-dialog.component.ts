@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -43,7 +43,7 @@ import {
   styleUrl: './entity-capability-requirement-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EntityCapabilityRequirementDialogComponent {
+export class EntityCapabilityRequirementDialogComponent implements OnInit {
   private readonly service = inject(EntityCapabilityRequirementService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -74,17 +74,15 @@ export class EntityCapabilityRequirementDialogComponent {
     sortOrder: new FormControl<number>(0, [Validators.required]),
   });
 
-  protected readonly violations = computed(() =>
-    FormValidationService.getViolations(this.form, {
-      entityType: 'Entity Type',
-      capabilityCode: 'Capability Code',
-      requirementId: 'Requirement Id',
-      predicate: 'Predicate',
-      displayNameKey: 'Display Name Key',
-      missingMessageKey: 'Missing Message Key',
-      sortOrder: 'Sort Order',
-    }),
-  );
+  protected readonly violations = FormValidationService.getViolations(this.form, {
+    entityType: 'Entity Type',
+    capabilityCode: 'Capability Code',
+    requirementId: 'Requirement Id',
+    predicate: 'Predicate',
+    displayNameKey: 'Display Name Key',
+    missingMessageKey: 'Missing Message Key',
+    sortOrder: 'Sort Order',
+  });
 
   protected readonly title = computed(() =>
     this.requirement()
@@ -92,7 +90,7 @@ export class EntityCapabilityRequirementDialogComponent {
       : this.translate.instant('admin.entityCompleteness.dialog.titleNew'),
   );
 
-  constructor() {
+  ngOnInit(): void {
     const r = this.requirement();
     if (r) {
       this.form.patchValue({

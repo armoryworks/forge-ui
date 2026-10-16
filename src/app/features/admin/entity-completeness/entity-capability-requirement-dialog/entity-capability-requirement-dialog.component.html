@@ -55,7 +55,7 @@
 
   <div dialog-footer>
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
-    <app-validation-button [violations]="violations()" [loading]="saving()">
+    <app-validation-button [violations]="violations" [loading]="saving()">
     <button class="action-btn action-btn--primary"
       data-testid="ecr-save-btn"
       [disabled]="form.invalid || saving()"
