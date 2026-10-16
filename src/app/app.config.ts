@@ -12,16 +12,11 @@ import { environment } from '../environments/environment';
 import { provideRouter } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideServiceWorker } from '@angular/service-worker';
-import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
-import { Chart } from 'chart.js';
-import { SankeyController, Flow } from 'chartjs-chart-sankey';
 import { provideMarkdown } from 'ngx-markdown';
 import { TranslateService, provideTranslateLoader, provideTranslateService } from '@ngx-translate/core';
 import { TRANSLATE_HTTP_LOADER_CONFIG } from '@ngx-translate/http-loader';
 import { MAT_DIALOG_DEFAULT_OPTIONS, MatDialogConfig } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
-
-Chart.register(SankeyController, Flow);
 
 import { routes } from './app.routes';
 import { authInterceptor } from './shared/interceptors/auth.interceptor';
@@ -68,7 +63,6 @@ export const appConfig: ApplicationConfig = {
         apiBaseInterceptor,
       ]),
     ),
-    provideCharts(withDefaultRegisterables()),
     provideMarkdown(),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),

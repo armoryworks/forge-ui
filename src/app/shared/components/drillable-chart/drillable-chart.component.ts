@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 
-import { BaseChartDirective } from 'ng2-charts';
+import { BaseChartDirective } from '../../charts/base-chart.directive';
 import { ChartData, ChartOptions, ChartType, ActiveElement, ChartEvent } from 'chart.js';
 
 export interface DrillLevel {

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, compute
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { BaseChartDirective } from 'ng2-charts';
+import { BaseChartDirective } from '../../../../shared/charts/base-chart.directive';
 import { ChartData, ChartEvent, ChartOptions } from 'chart.js';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { BaseChartDirective } from 'ng2-charts';
+import { BaseChartDirective } from '../../../shared/charts/base-chart.directive';
 import { ChartConfiguration, ChartData } from 'chart.js';
 
 import { SpcService } from '../services/spc.service';

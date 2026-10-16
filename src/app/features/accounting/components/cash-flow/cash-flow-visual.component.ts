@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { BaseChartDirective } from 'ng2-charts';
+import { BaseChartDirective } from '../../../../shared/charts/base-chart.directive';
 import { ChartConfiguration } from 'chart.js';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
