@@ -10,6 +10,7 @@ import { createTourSvg, clearTourConnector, updateTourConnector, attachScrollRef
 
 import { AuthService } from '../../../shared/services/auth.service';
 import { TrainingService } from '../services/training.service';
+import { TerminologyService } from '../../../shared/services/terminology.service';
 import { TrainingModuleDetail } from '../models/training-module.model';
 import { ArticleContent } from '../models/article-content.model';
 import { WalkthroughContent } from '../models/walkthrough-content.model';
@@ -33,6 +34,7 @@ export class TrainingModuleComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly ngZone = inject(NgZone);
+  private readonly terminology = inject(TerminologyService);
 
   protected readonly isLoading = signal(true);
   protected readonly module = signal<TrainingModuleDetail | null>(null);
@@ -356,7 +358,7 @@ export class TrainingModuleComponent implements OnInit {
           },
         });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        d.setSteps(content.steps as any);
+        d.setSteps(this.terminology.substituteSteps(content.steps) as any);
         d.drive();
 
         // Destroy tour if the user navigates away (back button, sidebar, etc.)

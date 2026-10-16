@@ -69,17 +69,7 @@ export class HelpTourService {
    */
   async startSteps(steps: DriverStep[], tourId: string): Promise<void> {
     if (this.isRunning || steps.length === 0) return;
-    await this.launchDriver(
-      steps.map(step => ({
-        ...step,
-        popover: {
-          ...step.popover,
-          title: this.terminology.substitute(step.popover.title),
-          description: this.terminology.substitute(step.popover.description),
-        },
-      })),
-      tourId,
-    );
+    await this.launchDriver(this.terminology.substituteSteps(steps), tourId);
   }
 
   isRegistered(tourId: string): boolean {

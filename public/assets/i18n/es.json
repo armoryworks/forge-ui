@@ -11581,5 +11581,10 @@
     "forbiddenHelp": "Pida a un administrador si necesita verlo.",
     "failed": "No se pudo cargar este registro",
     "failedHelp": "Revise su conexión e inténtelo de nuevo."
+  },
+  "jobCostTab": {
+    "noCostData": "No hay datos de costo para este trabajo.",
+    "summaryAria": "Resumen de costos del trabajo",
+    "noMaterials": "No se han emitido materiales a este trabajo."
   }
 }

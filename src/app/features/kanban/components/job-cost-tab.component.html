@@ -1,10 +1,10 @@
 <div class="cost-tab" [appLoadingBlock]="loading()">
   @if (!hasCostData() && !loading()) {
-    <app-empty-state icon="attach_money" message="No cost data available for this job." />
+    <app-empty-state icon="attach_money" [message]="'jobCostTab.noCostData' | translate" />
   } @else if (costSummary(); as summary) {
     <!-- Cost Summary Grid -->
     <div class="cost-tab__summary">
-      <table class="cost-tab__table" aria-label="Job cost summary">
+      <table class="cost-tab__table" [attr.aria-label]="'jobCostTab.summaryAria' | translate">
         <thead>
           <tr>
             <th scope="col">Category</th>
@@ -83,7 +83,7 @@
       </div>
 
       @if (materialIssues().length === 0) {
-        <app-empty-state icon="inventory_2" message="No materials issued to this job." />
+        <app-empty-state icon="inventory_2" [message]="'jobCostTab.noMaterials' | translate" />
       } @else {
         <app-data-table
           tableId="job-material-issues"

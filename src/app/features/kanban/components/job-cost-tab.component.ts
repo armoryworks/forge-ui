@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { CurrencyPipe, DecimalPipe, PercentPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
@@ -15,6 +16,7 @@ import { JobCostSummary, MaterialIssue } from '../models/job-cost.model';
   selector: 'app-job-cost-tab',
   standalone: true,
   imports: [
+    TranslatePipe,
     CurrencyPipe,
     DecimalPipe,
     PercentPipe,

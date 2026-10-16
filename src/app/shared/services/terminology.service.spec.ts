@@ -183,6 +183,23 @@ describe('TerminologyService', () => {
     });
   });
 
+  describe('substituteSteps', () => {
+    it('should rename walkthrough step text and keep the other fields', async () => {
+      service.applyEntries([{ key: 'entity_customer', label: 'Client' }]);
+      await TestBed.inject(TermSetStore).loadEngine();
+
+      const steps = service.substituteSteps([
+        { element: '#c', advanceOn: 'click', popover: { title: 'Customers', description: 'Pick a customer' } },
+        { element: '#d' },
+      ], 'en');
+
+      expect(steps).toEqual([
+        { element: '#c', advanceOn: 'click', popover: { title: 'Clients', description: 'Pick a client' } },
+        { element: '#d' },
+      ]);
+    });
+  });
+
   describe('resolve per language', () => {
     it('should use the Spanish override for Spanish users and never the English one', () => {
       translate.setTranslation('es', {});

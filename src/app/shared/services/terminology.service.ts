@@ -68,6 +68,20 @@ export class TerminologyService {
     return this.store.substituter(lang ?? this.currentLang())?.substitute(text) ?? text;
   }
 
+  /** {@link substitute} over driver.js walkthrough steps (title + description), leaving every other step field as is. */
+  substituteSteps<T extends { popover?: { title?: string; description?: string } }>(steps: readonly T[], lang?: string): T[] {
+    return steps.map(step => step.popover
+      ? {
+        ...step,
+        popover: {
+          ...step.popover,
+          ...(step.popover.title !== undefined ? { title: this.substitute(step.popover.title, lang) } : {}),
+          ...(step.popover.description !== undefined ? { description: this.substitute(step.popover.description, lang) } : {}),
+        },
+      }
+      : step);
+  }
+
   /**
    * Resolve a terminology key to its display label. Walks the three-tier
    * resolution order (override → ngx-translate → humanize).

@@ -11581,5 +11581,10 @@
     "forbiddenHelp": "Ask an administrator if you need to see it.",
     "failed": "This record couldn't be loaded",
     "failedHelp": "Check your connection and try again."
+  },
+  "jobCostTab": {
+    "noCostData": "No cost data available for this job.",
+    "summaryAria": "Job cost summary",
+    "noMaterials": "No materials issued to this job."
   }
 }

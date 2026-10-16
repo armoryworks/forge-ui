@@ -377,7 +377,7 @@ export class AppComponent implements OnInit, OnDestroy {
         },
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      d.setSteps(steps as any);
+      d.setSteps(this.terminology.substituteSteps(steps) as any);
       d.drive();
     }).catch(() => { /* driver.js not available */ });
   }
