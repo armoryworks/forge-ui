@@ -2,14 +2,19 @@
 
 :host {
   position: fixed;
-  top: 16px;
-  right: 16px;
   z-index: $z-cdk-overlay + 1;
   display: flex;
   flex-direction: column;
   gap: $sp-md;
   max-width: 400px;
   pointer-events: none;
+  inset: 16px 16px auto auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+  color: inherit;
 }
 
 .toast {

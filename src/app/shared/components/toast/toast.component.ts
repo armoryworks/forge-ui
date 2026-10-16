@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, effect, inject } from '@angular/core';
 import { ToastService, Toast } from '../../services/toast.service';
 
 @Component({
@@ -7,9 +7,16 @@ import { ToastService, Toast } from '../../services/toast.service';
   templateUrl: './toast.component.html',
   styleUrl: './toast.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { popover: 'manual' },
 })
 export class ToastContainerComponent {
   protected readonly toastService = inject(ToastService);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private shownCount = 0;
+
+  constructor() {
+    effect(() => this.raise(this.toastService.toasts().length));
+  }
 
   protected iconFor(severity: Toast['severity']): string {
     switch (severity) {
@@ -18,6 +25,19 @@ export class ToastContainerComponent {
       case 'warning': return 'warning';
       case 'error': return 'error';
     }
+  }
+
+  private raise(count: number): void {
+    const el = this.host.nativeElement;
+    if (typeof el.showPopover !== 'function') return;
+    const open = el.matches(':popover-open');
+    if (count === 0) {
+      if (open) el.hidePopover();
+    } else if (!open || count > this.shownCount) {
+      if (open) el.hidePopover();
+      el.showPopover();
+    }
+    this.shownCount = count;
   }
 
   protected copy(toast: Toast): void {
