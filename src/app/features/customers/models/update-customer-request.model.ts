@@ -15,4 +15,8 @@ export interface UpdateCustomerRequest {
   isItarControlled?: boolean;
   isReferenceOk?: boolean;
   referenceNotes?: string;
+  isTaxExempt?: boolean;
+  taxExemptionId?: string;
+  creditLimit?: number;
+  clearCreditLimit?: boolean;
 }

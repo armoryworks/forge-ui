@@ -9,6 +9,7 @@ import { AuthService } from '../../../../shared/services/auth.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { CustomerSummary } from '../../models/customer-summary.model';
+import { UpdateCustomerRequest } from '../../models/update-customer-request.model';
 import { CustomerDetailLayoutResolverService } from '../../services/customer-detail-layout-resolver.service';
 import { CustomerService } from '../../services/customer.service';
 import { CustomerDetailComponent } from './customer-detail.component';
@@ -127,5 +128,60 @@ describe('CustomerDetailComponent · role-gated tabs', () => {
 
     expect(tabIds).toEqual(['overview', 'invoices', 'pricing', 'documents']);
     expect(documents).toBe(true);
+  });
+});
+
+describe('CustomerDetailComponent · credit and tax terms', () => {
+  function setup(roles: string[], customer: CustomerSummary = CUSTOMER) {
+    const updateCustomer = vi.fn((_id: number, _request: UpdateCustomerRequest) => of(undefined));
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: '5', tab: 'overview' })) } },
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: CustomerService, useValue: { getCustomerSummary: () => of(customer), updateCustomer } },
+        { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
+        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: CustomerDetailLayoutResolverService, useValue: { deriveLifecycle: () => 'active', resolve: () => [] } },
+        { provide: CapabilityService, useValue: { isEnabled: () => true } },
+        { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
+      ],
+    });
+    const component = TestBed.runInInjectionContext(() => new CustomerDetailComponent()) as unknown as {
+      saveClusterPatch(p: Partial<CustomerSummary>): void;
+    };
+    TestBed.flushEffects();
+    return { component, updateCustomer };
+  }
+
+  it('sends credit limit and tax exemption for an office manager', () => {
+    const { component, updateCustomer } = setup(['OfficeManager']);
+
+    component.saveClusterPatch({ name: 'Acme Co', creditLimit: 25000, isTaxExempt: true, taxExemptionId: 'UT-1' });
+
+    expect(updateCustomer).toHaveBeenCalledWith(5, expect.objectContaining({
+      creditLimit: 25000, isTaxExempt: true, taxExemptionId: 'UT-1',
+    }));
+  });
+
+  it('asks the server to clear a credit limit that was emptied', () => {
+    const { component, updateCustomer } = setup(['OfficeManager'], { ...CUSTOMER, creditLimit: 10000 });
+
+    component.saveClusterPatch({ name: 'Acme Co', creditLimit: null, isTaxExempt: false, taxExemptionId: '' });
+
+    expect(updateCustomer).toHaveBeenCalledWith(5, expect.objectContaining({ clearCreditLimit: true }));
+    expect(updateCustomer.mock.calls[0][1]).not.toHaveProperty('creditLimit');
+  });
+
+  it('never sends credit or tax fields for a PM', () => {
+    const { component, updateCustomer } = setup(['PM']);
+
+    component.saveClusterPatch({ name: 'Acme Co', creditLimit: 25000, isTaxExempt: true, taxExemptionId: 'UT-1' });
+
+    const request = updateCustomer.mock.calls[0][1];
+    expect(request).not.toHaveProperty('creditLimit');
+    expect(request).not.toHaveProperty('isTaxExempt');
+    expect(request).not.toHaveProperty('taxExemptionId');
   });
 });

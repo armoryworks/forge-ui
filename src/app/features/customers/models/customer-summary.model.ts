@@ -26,4 +26,7 @@ export interface CustomerSummary {
   isItarControlled?: boolean;
   isReferenceOk?: boolean;
   referenceNotes?: string | null;
+  creditLimit?: number | null;
+  isTaxExempt?: boolean;
+  taxExemptionId?: string | null;
 }

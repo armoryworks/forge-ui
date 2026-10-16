@@ -112,4 +112,70 @@ describe('CustomerIdentityClusterComponent', () => {
     expect(cb.mock.calls[0][0]).toEqual(expect.objectContaining({ email: '', phone: '' }));
     expect(cb.mock.calls[0][0].companyName).toBeUndefined();
   });
+
+  describe('credit and tax terms', () => {
+    type Internals = {
+      form: {
+        patchValue(v: Record<string, unknown>): void;
+        invalid: boolean;
+        controls: { taxExemptionId: { hasError(code: string): boolean } };
+      };
+      onSave(): void;
+    };
+
+    function build(canEditCommercialTerms: boolean, creditLimitsEnabled = true, overrides: Partial<CustomerSummary> = {}) {
+      const component = TestBed.runInInjectionContext(() => new CustomerIdentityClusterComponent());
+      mockSignalInputs(component, {
+        customer: makeSummary(overrides),
+        editing: true,
+        saving: false,
+        canEditCommercialTerms,
+        creditLimitsEnabled,
+      });
+      TestBed.flushEffects();
+      const cb = vi.fn();
+      component.save.subscribe(cb);
+      return { c: component as unknown as Internals, cb };
+    }
+
+    it('loads the customer\'s credit limit and exemption into the form and saves edits', () => {
+      const { c, cb } = build(true, true, { creditLimit: 10000, isTaxExempt: false });
+      c.form.patchValue({ creditLimit: 25000, isTaxExempt: true, taxExemptionId: ' UT-12345 ' });
+
+      c.onSave();
+
+      expect(cb.mock.calls[0][0]).toEqual(expect.objectContaining({
+        creditLimit: 25000, isTaxExempt: true, taxExemptionId: 'UT-12345',
+      }));
+    });
+
+    it('requires an exemption ID once the customer is marked tax exempt', () => {
+      const { c, cb } = build(true);
+      c.form.patchValue({ isTaxExempt: true, taxExemptionId: '' });
+
+      expect(c.form.controls.taxExemptionId.hasError('required')).toBe(true);
+      c.onSave();
+      expect(cb).not.toHaveBeenCalled();
+    });
+
+    it('leaves the credit limit out when credit limits are switched off', () => {
+      const { c, cb } = build(true, false);
+
+      c.onSave();
+
+      expect(cb.mock.calls[0][0]).not.toHaveProperty('creditLimit');
+      expect(cb.mock.calls[0][0]).toHaveProperty('isTaxExempt', false);
+    });
+
+    it('sends no credit or tax fields for roles that cannot change them', () => {
+      const { c, cb } = build(false);
+
+      c.onSave();
+
+      const patch = cb.mock.calls[0][0];
+      expect(patch).not.toHaveProperty('creditLimit');
+      expect(patch).not.toHaveProperty('isTaxExempt');
+      expect(patch).not.toHaveProperty('taxExemptionId');
+    });
+  });
 });

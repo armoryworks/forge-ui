@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
@@ -24,7 +26,7 @@ import { CustomerSummary } from '../../models/customer-summary.model';
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe,
-    InputComponent, ToggleComponent, ValidationButtonComponent,
+    InputComponent, ToggleComponent, ValidationButtonComponent, CurrencyInputComponent,
   ],
   templateUrl: './customer-identity-cluster.component.html',
   styleUrl: './customer-clusters.shared.scss',
@@ -37,6 +39,8 @@ export class CustomerIdentityClusterComponent {
   readonly customer = input.required<CustomerSummary>();
   readonly editing = input(false);
   readonly saving = input(false);
+  readonly canEditCommercialTerms = input(false);
+  readonly creditLimitsEnabled = input(false);
 
   readonly save = output<Partial<CustomerSummary>>();
   readonly cancelled = output<void>();
@@ -51,14 +55,26 @@ export class CustomerIdentityClusterComponent {
     email: new FormControl<string>('', { nonNullable: true, validators: [Validators.email, Validators.maxLength(200)] }),
     phone: new FormControl<string>('', { nonNullable: true }),
     isActive: new FormControl<boolean>(true, { nonNullable: true }),
+    creditLimit: new FormControl<number | null>(null, [Validators.min(0), Validators.max(1_000_000_000)]),
+    isTaxExempt: new FormControl<boolean>(false, { nonNullable: true }),
+    taxExemptionId: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(50)] }),
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
     name: this.translate.instant('customers.identityCluster.violations.name'),
     email: this.translate.instant('customers.identityCluster.violations.email'),
+    creditLimit: this.translate.instant('customers.workflow.creditAndTax.creditLimitLabel'),
+    taxExemptionId: this.translate.instant('customers.workflow.creditAndTax.taxExemptionIdLabel'),
   });
 
   constructor() {
+    this.form.controls.isTaxExempt.valueChanges.pipe(takeUntilDestroyed()).subscribe(isExempt => {
+      const ctrl = this.form.controls.taxExemptionId;
+      if (isExempt) ctrl.addValidators(Validators.required);
+      else ctrl.removeValidators(Validators.required);
+      ctrl.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+    });
+
     effect(() => {
       const c = this.customer();
       this.form.reset({
@@ -68,6 +84,9 @@ export class CustomerIdentityClusterComponent {
         email: c.email ?? '',
         phone: c.phone ?? '',
         isActive: c.isActive,
+        creditLimit: c.creditLimit ?? null,
+        isTaxExempt: c.isTaxExempt ?? false,
+        taxExemptionId: c.taxExemptionId ?? '',
       });
       if (this.editing()) {
         this.form.enable();
@@ -80,14 +99,20 @@ export class CustomerIdentityClusterComponent {
   protected onSave(): void {
     if (this.form.invalid) return;
     const v = this.form.getRawValue();
-    this.save.emit({
+    const patch: Partial<CustomerSummary> = {
       name: v.name,
       customerNumber: this.allowManualCustomerNumbers() ? (v.customerNumber.trim() || undefined) : undefined,
       companyName: v.companyName || undefined,
       email: v.email.trim(),
       phone: v.phone.trim(),
       isActive: v.isActive,
-    });
+    };
+    if (this.canEditCommercialTerms()) {
+      patch.isTaxExempt = v.isTaxExempt;
+      patch.taxExemptionId = v.isTaxExempt ? v.taxExemptionId.trim() : '';
+      if (this.creditLimitsEnabled()) patch.creditLimit = v.creditLimit;
+    }
+    this.save.emit(patch);
   }
 
   protected onCancel(): void {

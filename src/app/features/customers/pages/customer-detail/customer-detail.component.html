@@ -117,6 +117,8 @@
             [customer]="c"
             [editing]="editing()"
             [saving]="saving()"
+            [canEditCommercialTerms]="canViewCommercialDocuments()"
+            [creditLimitsEnabled]="creditLimitsEnabled()"
             (save)="saveClusterPatch($event)"
             (cancelled)="cancelEdit()" />
           @if (!editing()) {
