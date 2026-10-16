@@ -328,6 +328,34 @@ export class LeadDetailPanelComponent {
     this.snackbar.success(this.translate.instant('leads.fileUploaded'));
   }
 
+  protected deleteLead(): void {
+    const lead = this.lead();
+    if (!lead) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('leads.deleteTitle'),
+        message: this.translate.instant('leads.deleteMessage', { name: lead.companyName || lead.contactName || lead.leadNumber || '' }),
+        confirmLabel: this.translate.instant('common.delete'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.saving.set(true);
+      this.leadsService.deleteLead(lead.id).subscribe({
+        next: () => {
+          this.saving.set(false);
+          this.snackbar.success(this.translate.instant('leads.deleted'));
+          this.closed.emit();
+        },
+        error: (err: unknown) => {
+          this.saving.set(false);
+          this.snackbar.errorFrom(err, 'leads.deleteFailed');
+        },
+      });
+    });
+  }
+
   protected getFileIcon(contentType: string): string {
     if (contentType.startsWith('image/')) return 'image';
     if (contentType === 'application/pdf') return 'picture_as_pdf';
@@ -351,7 +379,7 @@ export class LeadDetailPanelComponent {
    * so the mat-stepper that wrapped it was UX scaffolding, not a
    * technical necessity. The credit/tax/address fields that used to live
    * in the dialog now move to the customer detail page after conversion.
-   * Click → POST with empty body → navigate to the new customer.
+   * Click → POST with empty body → close and offer a link to the new customer.
    */
   protected convertLead(): void {
     const lead = this.lead();
@@ -368,10 +396,15 @@ export class LeadDetailPanelComponent {
     this.leadsService.convertLead(lead.id, { createJob: false }).subscribe({
       next: (result) => {
         this.saving.set(false);
-        this.snackbar.success(this.translate.instant('leads.convertedOnly'));
         if (result.customerId) {
-          this.router.navigate(['/customers', result.customerId, 'overview']);
+          this.closed.emit();
+          this.snackbar.successWithNav(
+            this.translate.instant('leads.convertedOnly'),
+            `/customers/${result.customerId}/overview`,
+            this.translate.instant('leads.viewCustomer'),
+          );
         } else {
+          this.snackbar.success(this.translate.instant('leads.convertedOnly'));
           this.loadLead(lead.id);
         }
       },
