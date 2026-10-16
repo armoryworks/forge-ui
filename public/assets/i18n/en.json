@@ -6987,7 +6987,8 @@
       "noStockToIssue": "No stock available to issue",
       "noActiveWorkOrders": "No active work orders require this part",
       "noQcTemplate": "No QC template configured for this part",
-      "noStockToReturn": "No stock available to return"
+      "noStockToReturn": "No stock available to return",
+      "roleCannotShip": "Your role cannot ship"
     },
     "logActions": {
       "move": "Move",
@@ -11224,7 +11225,8 @@
         "PurchaseOrder": "a purchase order",
         "Invoice": "an invoice",
         "Payment": "a payment"
-      }
+      },
+      "officeOnly": "The office moves {{job}} to {{status}}."
     },
     "myJobs": {
       "title": "My work orders",

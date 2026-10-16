@@ -66,6 +66,9 @@ describe('AppScanComponent', () => {
     ask: vi.fn(),
     isConfirmRequired: vi.fn((_err: unknown) => false),
     failureMessage: vi.fn((_err: unknown) => 'mobileApp.jobs.actionFailed'),
+    mayBill: vi.fn(),
+    officeOnly: vi.fn(),
+    officeOnlyMessage: vi.fn(),
   };
   const router = { navigate: vi.fn() };
 
@@ -108,6 +111,9 @@ describe('AppScanComponent', () => {
     confirmMove.ask.mockReset().mockResolvedValue(true);
     confirmMove.isConfirmRequired.mockReset().mockReturnValue(false);
     confirmMove.failureMessage.mockReset().mockReturnValue('mobileApp.jobs.actionFailed');
+    confirmMove.mayBill.mockReset().mockReturnValue(true);
+    confirmMove.officeOnly.mockReset().mockReturnValue(false);
+    confirmMove.officeOnlyMessage.mockReset().mockReturnValue('mobileAppWork.confirmMove.officeOnly');
     router.navigate.mockReset().mockResolvedValue(true);
     TestBed.configureTestingModule({
       providers: [
@@ -261,6 +267,18 @@ describe('AppScanComponent', () => {
     expect(api.advanceJob).toHaveBeenCalledOnce();
     expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', null, true);
     expect(offer).toHaveBeenCalledOnce();
+  });
+
+  it('leaves a billing column to the office instead of moving it', async () => {
+    confirmMove.mayBill.mockReturnValue(false);
+    confirmMove.officeOnly.mockReturnValue(true);
+    const scan = create();
+
+    await scan.onAction('move');
+
+    expect(api.jobStatus).toHaveBeenCalledWith(42);
+    expect(api.advanceJob).not.toHaveBeenCalled();
+    expect(scan.notice()).toBe('mobileAppWork.confirmMove.officeOnly');
   });
 
   it('completes an ordinary column without reading the job status', async () => {
@@ -421,7 +439,7 @@ describe('AppScanComponent requests', () => {
         { provide: Router, useValue: { navigate: vi.fn().mockResolvedValue(true) } },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
         { provide: SharedIdentityService, useValue: { identified: signal(false), person: signal(null), clear: vi.fn(), touch: vi.fn() } },
-        { provide: AuthService, useValue: { token: () => 'session-token', isAuthenticated: () => true, user: signal({ id: 1 }) } },
+        { provide: AuthService, useValue: { token: () => 'session-token', isAuthenticated: () => true, user: signal({ id: 1 }), hasAnyRole: () => true } },
         { provide: InstanceService, useValue: { instance: () => ({ id: 'shop', shared: false }) } },
       ],
     });

@@ -12,6 +12,7 @@ import { AuthService } from '../../../../shared/services/auth.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
 import { ShopFloorService } from '../../services/shop-floor.service';
 import { KanbanService } from '../../../kanban/services/kanban.service';
+import { BILLING_STAGE_ROLES } from '../../../../shared/models/billing-stage-roles.const';
 import { JobStatus } from '../../../../shared/models/mobile-api.model';
 import { KioskOperationTilesComponent } from '../kiosk-operation-tiles/kiosk-operation-tiles.component';
 import { KioskRunningTimersComponent } from '../kiosk-running-timers/kiosk-running-timers.component';
@@ -74,7 +75,8 @@ export class ScanJobFlowComponent implements OnInit {
   protected readonly advancedTo = signal<string | null>(null);
   protected readonly hasShopFloorNextStage = computed(() => {
     const status = this.jobStatus();
-    return status?.nextStageId != null && status.nextStageIsShopFloor === true;
+    return status?.nextStageId != null && status.nextStageIsShopFloor === true
+      && (status.nextStageIsBilling !== true || this.auth.hasAnyRole([...BILLING_STAGE_ROLES]));
   });
   protected readonly canAdvance = computed(() => !this.statusLoading() && this.hasShopFloorNextStage());
   protected readonly andonEnabled = computed(() => this.capabilities.isEnabled('CAP-EXT-ANDON'));

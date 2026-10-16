@@ -8,7 +8,7 @@ export interface ScanLogEntry {
   toLocation: string | null;
   relatedEntity: string | null;
   isReversed: boolean;
-  createdAt: string;
+  createdAt: Date;
 }
 
 export interface ScanDevice {

@@ -183,8 +183,8 @@
 }
 
 <!-- Identifying Scan Overlay (brief flash while detecting scan type) -->
-@if (kioskPhase() === 'identifying') {
-  <div class="sf-auth-overlay">
+@if (kioskPhase() === 'dashboard' && scanIdentifying()) {
+  <div class="sf-auth-overlay" data-testid="sf-identifying-scan">
     <div class="sf-auth-card">
       <span class="material-icons-outlined sf-auth-card__icon sf-auth-card__spinner">sync</span>
       <h2 class="sf-auth-card__title">{{ 'shopFloor.identifyingScan' | translate }}</h2>

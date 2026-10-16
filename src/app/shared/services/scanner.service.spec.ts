@@ -183,4 +183,22 @@ describe('ScannerService', () => {
       expect(service.listening()).toBe(false);
     });
   });
+  describe('typed entry', () => {
+    it('publishes a typed code as a scan in the current context', () => {
+      service.setContext('inventory');
+
+      service.submit('  RM-100 ');
+
+      expect(service.lastScan()).toMatchObject({ value: 'RM-100', context: 'inventory' });
+    });
+
+    it('ignores blank entries and entries while scanning is disabled', () => {
+      service.submit('   ');
+      expect(service.lastScan()).toBeNull();
+
+      service.disable();
+      service.submit('RM-100');
+      expect(service.lastScan()).toBeNull();
+    });
+  });
 });

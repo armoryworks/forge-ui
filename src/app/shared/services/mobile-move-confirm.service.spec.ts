@@ -7,6 +7,7 @@ import { TranslateService } from '@ngx-translate/core';
 
 import { JobStatus } from '../models/mobile-api.model';
 import { markHttpErrorShown } from '../utils/shown-http-errors';
+import { AuthService } from './auth.service';
 import { MobileMoveConfirmService } from './mobile-move-confirm.service';
 
 const base: JobStatus = {
@@ -18,14 +19,17 @@ const base: JobStatus = {
 describe('MobileMoveConfirmService', () => {
   let service: MobileMoveConfirmService;
   const open = vi.fn();
+  let roles: string[] = [];
   const instant = vi.fn((key: string, params?: Record<string, unknown>) => (params ? `${key} ${JSON.stringify(params)}` : key));
 
   beforeEach(() => {
     open.mockReset().mockReturnValue({ afterClosed: () => of(true) });
     instant.mockClear();
+    roles = ['ProductionWorker'];
     TestBed.configureTestingModule({
       providers: [
         { provide: MatDialog, useValue: { open } },
+        { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
         { provide: TranslateService, useValue: { instant } },
       ],
     });
@@ -37,6 +41,23 @@ describe('MobileMoveConfirmService', () => {
     expect(service.needed({ ...base, nextStageIsIrreversible: true })).toBe(true);
     expect(service.needed({ ...base, nextStageAccountingDocument: 'Invoice' })).toBe(true);
     expect(service.needed({ ...base, nextStageId: null, nextStageIsIrreversible: true })).toBe(false);
+  });
+
+  it('leaves a billing column to the office for a role that cannot bill', () => {
+    const billing = { ...base, nextStageIsBilling: true };
+
+    expect(service.officeOnly(billing)).toBe(true);
+    expect(service.officeOnly(base)).toBe(false);
+    expect(service.officeOnly({ ...billing, nextStageId: null })).toBe(false);
+    expect(service.officeOnlyMessage(billing)).toBe('mobileAppWork.confirmMove.officeOnly {"job":"JOB-42","status":"Invoiced"}');
+  });
+
+  it('lets the office roles move into a billing column', () => {
+    for (const role of ['Admin', 'Manager', 'OfficeManager']) {
+      roles = [role];
+      expect(service.mayBill()).toBe(true);
+      expect(service.officeOnly({ ...base, nextStageIsBilling: true })).toBe(false);
+    }
   });
 
   it('names the column and the document it creates', async () => {

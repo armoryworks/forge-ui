@@ -50,16 +50,20 @@
     </section>
 
     <div class="job-status__actions">
-      <button
-        type="button"
-        class="job-status__advance"
-        [disabled]="busy() || job.nextStageId === null"
-        data-testid="job-status-advance"
-        (click)="advance()"
-      >
-        <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
-        {{ job.nextStageName ? ('mobileApp.jobs.advanceTo' | translate: { column: job.nextStageName }) : ('mobileApp.jobs.lastColumn' | translate) }}
-      </button>
+      @if (officeOnly(); as message) {
+        <p class="job-status__hint" role="status" data-testid="job-status-office-only">{{ message }}</p>
+      } @else {
+        <button
+          type="button"
+          class="job-status__advance"
+          [disabled]="busy() || job.nextStageId === null"
+          data-testid="job-status-advance"
+          (click)="advance()"
+        >
+          <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+          {{ job.nextStageName ? ('mobileApp.jobs.advanceTo' | translate: { column: job.nextStageName }) : ('mobileApp.jobs.lastColumn' | translate) }}
+        </button>
+      }
       <div class="job-status__secondary">
         <button type="button" class="job-status__btn" [disabled]="busy()" data-testid="job-status-timer" (click)="toggleTimer()">
           <span class="material-icons-outlined" aria-hidden="true">{{ timerRunningHere() ? 'stop' : 'play_arrow' }}</span>

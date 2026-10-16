@@ -34,22 +34,16 @@ export class ChatChannelListComponent {
   readonly conversations = input<ChatConversation[]>([]);
   readonly rooms = input<ChatRoom[]>([]);
   readonly channels = input<ChatRoom[]>([]); // alias for rooms
-  readonly selectedId = input<number | null>(null);
-  readonly selectedType = input<'dm' | 'channel' | null>(null);
   readonly selectedChannelId = input<number | null>(null);
   readonly selectedUserId = input<number | null>(null);
   readonly searchTerm = input<string>('');
   readonly mutedChannelIds = input<Set<number>>(new Set());
 
   // Outputs
-  readonly conversationSelected = output<ChatConversation>();
-  readonly roomSelected = output<ChatRoom>();
   readonly channelSelected = output<ChannelSelection>();
   readonly newMessageClicked = output<void>();
-  readonly newGroupClicked = output<void>();
-  readonly newGroup = output<void>(); // alias
-  readonly browseChannelsClicked = output<void>();
-  readonly browseChannels = output<void>(); // alias
+  readonly newGroup = output<void>();
+  readonly browseChannels = output<void>();
   readonly muteToggled = output<{ channel: ChatRoom; mute: boolean }>();
   readonly searchChanged = output<string>();
 
@@ -115,7 +109,15 @@ export class ChatChannelListComponent {
   }
 
   protected isActive(type: 'dm' | 'channel', id: number): boolean {
-    return this.selectedType() === type && this.selectedId() === id;
+    return type === 'dm' ? this.selectedUserId() === id : this.selectedChannelId() === id;
+  }
+
+  protected selectConversation(conversation: ChatConversation): void {
+    this.channelSelected.emit({ type: 'dm', conversationUserId: conversation.userId });
+  }
+
+  protected selectChannel(channel: ChatRoom): void {
+    this.channelSelected.emit({ type: 'channel', channelId: channel.id });
   }
 
   protected isChannelMuted(channel: ChatRoom): boolean {

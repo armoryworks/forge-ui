@@ -111,6 +111,11 @@ export class ScannerService implements OnDestroy {
     this._lastScan.set(null);
   }
 
+  submit(value: string): void {
+    if (!this._enabled() || !value.trim()) return;
+    this.emitScan(value);
+  }
+
   ngOnDestroy(): void {
     this.stop();
   }

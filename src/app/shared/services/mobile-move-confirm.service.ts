@@ -6,18 +6,35 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 import { ConfirmDialogComponent, ConfirmDialogData } from '../components/confirm-dialog/confirm-dialog.component';
+import { BILLING_STAGE_ROLES } from '../models/billing-stage-roles.const';
 import { JobStatus } from '../models/mobile-api.model';
 import { wasHttpErrorShown } from '../utils/shown-http-errors';
+import { AuthService } from './auth.service';
 
 /**
  * The phone asks before moving a job into a column that can't be undone or
  * that creates an accounting document, naming the column and what it
- * creates. Such a move is sent with `confirmed` and offers no undo.
+ * creates. Such a move is sent with `confirmed` and offers no undo. A column
+ * that bills the customer (shipped, invoiced, paid) is moved by the office:
+ * other roles are not offered that move.
  */
 @Injectable({ providedIn: 'root' })
 export class MobileMoveConfirmService {
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
+  private readonly auth = inject(AuthService);
+
+  mayBill(): boolean {
+    return this.auth.hasAnyRole([...BILLING_STAGE_ROLES]);
+  }
+
+  officeOnly(job: JobStatus): boolean {
+    return job.nextStageId !== null && !!job.nextStageIsBilling && !this.mayBill();
+  }
+
+  officeOnlyMessage(job: JobStatus): string {
+    return this.translate.instant('mobileAppWork.confirmMove.officeOnly', { job: job.jobNumber, status: job.nextStageName ?? '' });
+  }
 
   needed(job: JobStatus): boolean {
     return job.nextStageId !== null && (!!job.nextStageIsIrreversible || !!job.nextStageAccountingDocument);

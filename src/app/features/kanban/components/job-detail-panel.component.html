@@ -16,7 +16,7 @@
       </button>
       <mat-menu #stageMenu="matMenu">
         @for (stage of availableStages(); track stage.id) {
-          <button mat-menu-item [disabled]="stage.id === j.currentStageId" data-testid="stage-option"
+          <button mat-menu-item [disabled]="stage.id === j.currentStageId || billingLocked(stage)" data-testid="stage-option"
                   (click)="moveToStage(stage)">
             <span class="bulk-bar__stage-dot" [style.background]="stage.color"></span>
             {{ stage.name }}

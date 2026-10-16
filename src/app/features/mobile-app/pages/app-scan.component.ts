@@ -195,6 +195,13 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
 
   private async sendAdvance(jobId: number, code: string): Promise<{ outcome: JobAdvanceResult | QueuedOffline; confirmed: boolean } | null> {
     try {
+      if (!this.confirmMove.mayBill()) {
+        const status = await firstValueFrom(this.api.jobStatus(jobId)).catch(() => null);
+        if (status && this.confirmMove.officeOnly(status)) {
+          this.notice.set(this.confirmMove.officeOnlyMessage(status));
+          return null;
+        }
+      }
       const outcome = await firstValueFrom(this.api.advanceJob(jobId, code, null, true));
       return outcome ? { outcome, confirmed: false } : null;
     } catch (err) {

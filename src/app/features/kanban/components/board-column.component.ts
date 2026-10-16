@@ -5,6 +5,7 @@ import { JobCardComponent } from './job-card.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { BoardColumn } from '../models/board-column.model';
 import { KanbanJob } from '../models/kanban-job.model';
+import { isBillingStage } from '../../../shared/utils/billing-stage';
 
 @Component({
   selector: 'app-board-column',
@@ -20,6 +21,7 @@ export class BoardColumnComponent {
   readonly dropListId = input.required<string>();
 
   readonly selectedJobIds = input<Set<number>>(new Set());
+  readonly billingLocked = input(false);
 
   readonly dropped = output<CdkDragDrop<KanbanJob[]>>();
   readonly cardClicked = output<{ job: KanbanJob; event: Event }>();
@@ -61,7 +63,8 @@ export class BoardColumnComponent {
   }
 
   protected canEnter = (drag: CdkDrag, drop: CdkDropList): boolean => {
-    if (!this.column().stage.isIrreversible) return true;
+    const stage = this.column().stage;
+    if (!stage.isIrreversible && !(this.billingLocked() && isBillingStage(stage.accountingDocumentType))) return true;
     return drag.dropContainer === drop;
   };
 }

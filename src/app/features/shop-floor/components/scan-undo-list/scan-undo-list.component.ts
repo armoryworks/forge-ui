@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
+import { forkJoin } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ScanActionService } from '../../../../shared/services/scan-action.service';
@@ -34,14 +35,13 @@ export class ScanUndoListComponent implements OnInit {
   readonly reversing = signal<number | null>(null);
 
   readonly recentEntries = computed(() => {
-    const cutoff = new Date();
-    cutoff.setHours(cutoff.getHours() - DEFAULT_LOOKBACK_HOURS);
-    return this.entries().filter(e => new Date(e.createdAt) >= cutoff);
+    const cutoff = Date.now() - DEFAULT_LOOKBACK_HOURS * 3_600_000;
+    return this.entries().filter(e => new Date(e.createdAt).getTime() >= cutoff);
   });
 
   readonly todayCount = computed(() => {
-    const today = new Date().toISOString().slice(0, 10);
-    return this.entries().filter(e => e.createdAt.startsWith(today)).length;
+    const today = new Date().toDateString();
+    return this.entries().filter(e => new Date(e.createdAt).toDateString() === today).length;
   });
 
   ngOnInit(): void {
@@ -50,10 +50,15 @@ export class ScanUndoListComponent implements OnInit {
 
   loadEntries(): void {
     this.loading.set(true);
-    const today = new Date().toISOString().slice(0, 10);
-    this.scanActionService.getScanLog(undefined, today).subscribe({
-      next: (entries) => {
-        this.entries.set(entries);
+    const now = new Date();
+    const lookbackStart = new Date(now.getTime() - DEFAULT_LOOKBACK_HOURS * 3_600_000);
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const earliest = lookbackStart < startOfToday ? lookbackStart : startOfToday;
+    const days = [...new Set([earliest, now].map(d => d.toISOString().slice(0, 10)))];
+    forkJoin(days.map(day => this.scanActionService.getScanLog(undefined, day))).subscribe({
+      next: (pages) => {
+        const byId = new Map(pages.flat().map(e => [e.id, e]));
+        this.entries.set([...byId.values()].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
         this.loading.set(false);
       },
       error: () => {

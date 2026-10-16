@@ -50,5 +50,5 @@
   </div>
 
   <!-- Overlay handles scan actions -->
-  <app-scan-action-overlay (dismissed)="onOverlayDismissed()" />
+  <app-scan-action-overlay (dismissed)="onOverlayDismissed()" (contextLoaded)="onContextLoaded($event)" />
 </div>

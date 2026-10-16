@@ -51,7 +51,7 @@
               role="option"
               [attr.aria-selected]="isActive('dm', conv.userId)"
               [attr.aria-label]="conv.userName"
-              (click)="conversationSelected.emit(conv)">
+              (click)="selectConversation(conv)">
               <app-avatar [initials]="conv.userInitials" [color]="conv.userColor" size="sm" />
               <div class="channel-list__item-content">
                 <div class="channel-list__item-top">
@@ -83,7 +83,7 @@
         <span class="channel-list__spacer"></span>
         <button
           class="action-btn action-btn--create action-btn--sm"
-          (click)="newGroupClicked.emit()"
+          (click)="newGroup.emit()"
           [attr.aria-label]="'chat.channelList.newGroup' | translate"
           [matTooltip]="'chat.channelList.newGroup' | translate"
           matTooltipPosition="above">
@@ -103,7 +103,7 @@
               role="option"
               [attr.aria-selected]="isActive('channel', channel.id)"
               [attr.aria-label]="channel.name"
-              (click)="roomSelected.emit(channel)">
+              (click)="selectChannel(channel)">
               <span class="material-icons-outlined channel-list__channel-icon">{{ getChannelIcon(channel) }}</span>
               <div class="channel-list__item-content">
                 <div class="channel-list__item-top">
@@ -134,7 +134,7 @@
           }
           <button
             class="channel-list__item channel-list__item--browse"
-            (click)="browseChannelsClicked.emit()">
+            (click)="browseChannels.emit()">
             <span class="material-icons-outlined channel-list__channel-icon">explore</span>
             <span class="channel-list__item-name">{{ 'chat.channelList.browseChannels' | translate }}</span>
           </button>
@@ -160,7 +160,7 @@
                 role="option"
                 [attr.aria-selected]="isActive('channel', channel.id)"
                 [attr.aria-label]="channel.name"
-                (click)="roomSelected.emit(channel)">
+                (click)="selectChannel(channel)">
                 <span class="material-icons-outlined channel-list__channel-icon">{{ getChannelIcon(channel) }}</span>
                 <div class="channel-list__item-content">
                   <div class="channel-list__item-top">

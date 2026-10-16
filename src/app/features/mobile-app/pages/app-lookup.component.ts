@@ -175,6 +175,13 @@ export class AppLookupComponent {
 
   private async sendAdvance(jobId: number): Promise<{ outcome: JobAdvanceResult | QueuedOffline; confirmed: boolean } | null> {
     try {
+      if (!this.confirmMove.mayBill()) {
+        const status = await firstValueFrom(this.api.jobStatus(jobId)).catch(() => null);
+        if (status && this.confirmMove.officeOnly(status)) {
+          this.snackbar.info(this.confirmMove.officeOnlyMessage(status));
+          return null;
+        }
+      }
       const outcome = await firstValueFrom(this.api.advanceJob(jobId, null, null, true));
       return { outcome, confirmed: false };
     } catch (err) {

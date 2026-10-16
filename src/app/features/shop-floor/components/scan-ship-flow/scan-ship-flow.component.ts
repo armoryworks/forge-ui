@@ -5,14 +5,8 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InputComponent } from '../../../../shared/components/input/input.component';
+import { ScanShipContextLine } from '../../../../shared/models/scan-ship-context-line.model';
 import { ShipmentService } from '../../../shipments/services/shipment.service';
-
-export interface ShipmentLineItem {
-  shipmentLineId: number;
-  shipmentNumber: string;
-  salesOrderNumber: string;
-  requiredQuantity: number;
-}
 
 type ShipStep = 'select-line' | 'quantity' | 'confirming' | 'done';
 
@@ -31,7 +25,7 @@ export class ScanShipFlowComponent {
   // Inputs
   readonly partId = input.required<number>();
   readonly partNumber = input.required<string>();
-  readonly openShipmentLines = input.required<ShipmentLineItem[]>();
+  readonly openShipmentLines = input.required<ScanShipContextLine[]>();
 
   // Outputs
   readonly completed = output<void>();
@@ -39,7 +33,7 @@ export class ScanShipFlowComponent {
 
   // State
   protected readonly step = signal<ShipStep>('select-line');
-  protected readonly selectedLine = signal<ShipmentLineItem | null>(null);
+  protected readonly selectedLine = signal<ScanShipContextLine | null>(null);
   protected readonly isPartial = signal(false);
   protected readonly partialQtyControl = new FormControl<number | null>(null);
   protected readonly submitting = signal(false);
@@ -52,7 +46,7 @@ export class ScanShipFlowComponent {
     return this.selectedLine()?.requiredQuantity ?? 0;
   });
 
-  protected selectLine(line: ShipmentLineItem): void {
+  protected selectLine(line: ScanShipContextLine): void {
     this.selectedLine.set(line);
     this.isPartial.set(false);
     this.partialQtyControl.setValue(line.requiredQuantity);
@@ -84,11 +78,7 @@ export class ScanShipFlowComponent {
     this.submitting.set(true);
     this.error.set(null);
 
-    // Use the shipment service to mark the shipment as shipped
-    // Extract shipment ID from the line (shipmentLineId is the line, we need the shipment)
-    // The shipShipment endpoint marks the whole shipment — for partial line fulfillment,
-    // we call the update endpoint with quantity info
-    this.shipmentService.shipShipment(line.shipmentLineId).subscribe({
+    this.shipmentService.shipShipment(line.shipmentId).subscribe({
       next: () => {
         this.submitting.set(false);
         this.step.set('done');

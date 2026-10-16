@@ -28,6 +28,7 @@ interface ClockInternals {
   clockAction(worker: ClockWorker, action: ClockEventTypeDef): void;
   undoPunch(): void;
   onScanDetected(scanValue: string): void;
+  scanIdentifying: () => boolean;
   showManualLogin(): void;
   enterClockPhase(): void;
 }
@@ -353,5 +354,20 @@ describe('ShopFloorClockComponent — clock phase', () => {
 
     expect(mobileApi.clockState).not.toHaveBeenCalled();
     expect(c.punchUndoMessage()).toBeNull();
+  });
+
+  it('shows the identifying card while a dashboard scan is being identified, then moves on to the PIN', () => {
+    const pending = new Subject<{ scanType: string }>();
+    shopFloor.identifyScan.mockReturnValueOnce(pending);
+    const c = create();
+
+    c.onScanDetected('BADGE-1');
+    expect(c.scanIdentifying()).toBe(true);
+
+    pending.next({ scanType: 'employee' });
+    pending.complete();
+
+    expect(c.scanIdentifying()).toBe(false);
+    expect(c.kioskPhase()).toBe('pin');
   });
 });

@@ -97,6 +97,7 @@
           [dropListId]="'column-' + i"
           [allDropListIds]="dropListIds()"
           [selectedJobIds]="selectedJobIds()"
+          [billingLocked]="!mayBill()"
           (dropped)="onCardDropped($event)"
           (cardClicked)="onCardClicked($event)"
           (jobNumberClicked)="onJobNumberClicked($event)"

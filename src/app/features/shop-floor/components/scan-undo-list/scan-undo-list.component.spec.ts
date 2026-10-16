@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
@@ -19,17 +19,20 @@ const MOVE: ScanLogEntry = {
   toLocation: 'B-2',
   relatedEntity: null,
   isReversed: false,
-  createdAt: '2026-10-08T10:00:00Z',
+  createdAt: new Date('2026-10-08T10:00:00Z'),
 };
 
-function setup(reverse: ScanActionService['reverseScanAction']) {
+function setup(
+  reverse: ScanActionService['reverseScanAction'],
+  getScanLog: ScanActionService['getScanLog'] = vi.fn(() => of([])),
+) {
   const open = vi.fn((_component: unknown, _config: unknown) => ({ afterClosed: () => of('1234') }));
   const success = vi.fn();
   const error = vi.fn();
   const errorFrom = vi.fn();
   TestBed.configureTestingModule({
     providers: [
-      { provide: ScanActionService, useValue: { getScanLog: vi.fn(() => of([])), reverseScanAction: reverse } },
+      { provide: ScanActionService, useValue: { getScanLog, reverseScanAction: reverse } },
       { provide: SnackbarService, useValue: { success, error, errorFrom } },
       { provide: MatDialog, useValue: { open } },
       {
@@ -73,5 +76,38 @@ describe('ScanUndoListComponent', () => {
 
     expect(list.actionTypeLabel('CycleCount')).toBe('es:kioskFlows.logActions.cycleCount');
     expect(list.actionTypeLabel('Teleport')).toBe('Teleport');
+  });
+
+  describe('loading the recent actions', () => {
+    afterEach(() => vi.useRealTimers());
+
+    it('lists entries whose time arrives as a Date and offers Reverse for them', () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2026, 9, 16, 12, 0));
+      const oneHourAgo = { ...MOVE, createdAt: new Date(2026, 9, 16, 11, 0) };
+      const yesterday = { ...MOVE, id: 10, createdAt: new Date(2026, 9, 15, 11, 0) };
+      const { list } = setup(vi.fn(), vi.fn(() => of([oneHourAgo, yesterday])));
+
+      list.ngOnInit();
+
+      expect(list.loading()).toBe(false);
+      expect(list.recentEntries().map(e => e.id)).toEqual([9]);
+      expect(list.todayCount()).toBe(1);
+    });
+
+    it('also asks for the earlier day when the look-back window starts before it', () => {
+      vi.useFakeTimers();
+      const now = new Date(2026, 9, 16, 2, 0);
+      vi.setSystemTime(now);
+      const getScanLog = vi.fn(() => of([]));
+      const { list } = setup(vi.fn(), getScanLog);
+
+      list.ngOnInit();
+
+      const requested = getScanLog.mock.calls.map(call => (call as unknown[])[1]);
+      const lookbackDay = new Date(now.getTime() - 6 * 3_600_000).toISOString().slice(0, 10);
+      expect(requested).toContain(lookbackDay);
+      expect(requested).toContain(now.toISOString().slice(0, 10));
+    });
   });
 });

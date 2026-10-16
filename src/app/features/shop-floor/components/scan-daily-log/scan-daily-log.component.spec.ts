@@ -18,7 +18,7 @@ function entry(id: number, actionType: string): ScanLogEntry {
     toLocation: null,
     relatedEntity: null,
     isReversed: false,
-    createdAt: '2026-10-08T10:00:00Z',
+    createdAt: new Date('2026-10-08T10:00:00Z'),
   };
 }
 

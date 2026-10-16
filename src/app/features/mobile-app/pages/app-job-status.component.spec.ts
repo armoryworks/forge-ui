@@ -38,7 +38,10 @@ describe('AppJobStatusComponent advancing', () => {
     advanceJob: vi.fn(),
     moveJobToStage: vi.fn(),
   };
-  const confirmMove = { needed: vi.fn(), ask: vi.fn(), isConfirmRequired: vi.fn(), failureMessage: vi.fn() };
+  const confirmMove = {
+    needed: vi.fn(), ask: vi.fn(), isConfirmRequired: vi.fn(), failureMessage: vi.fn(),
+    mayBill: vi.fn(), officeOnly: vi.fn(), officeOnlyMessage: vi.fn(),
+  };
   const offer = vi.fn();
   const snackbar = { success: vi.fn(), error: vi.fn(), info: vi.fn() };
 
@@ -58,6 +61,9 @@ describe('AppJobStatusComponent advancing', () => {
     confirmMove.failureMessage.mockReset().mockImplementation((err: unknown) => (confirmMove.isConfirmRequired(err)
       ? 'mobileAppWork.confirmMove.changed'
       : 'mobileApp.jobs.actionFailed'));
+    confirmMove.mayBill.mockReset().mockReturnValue(true);
+    confirmMove.officeOnly.mockReset().mockReturnValue(false);
+    confirmMove.officeOnlyMessage.mockReset().mockReturnValue('mobileAppWork.confirmMove.officeOnly');
     offer.mockReset();
     snackbar.success.mockReset();
     snackbar.error.mockReset();
@@ -90,6 +96,17 @@ describe('AppJobStatusComponent advancing', () => {
     expect(api.advanceJob).toHaveBeenCalledWith(42, null, 6, true);
     expect(offer).not.toHaveBeenCalled();
     expect(page.job()?.stageName).toBe('Invoiced');
+  });
+
+  it('leaves a billing column to the office: nothing is sent and the reason is shown', async () => {
+    confirmMove.officeOnly.mockReturnValue(true);
+    const page = create();
+
+    page.advance();
+    await vi.waitFor(() => expect(snackbar.info).toHaveBeenCalledWith('mobileAppWork.confirmMove.officeOnly'));
+
+    expect(confirmMove.ask).not.toHaveBeenCalled();
+    expect(api.advanceJob).not.toHaveBeenCalled();
   });
 
   it('moves nothing when the person declines', async () => {

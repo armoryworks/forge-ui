@@ -38,6 +38,9 @@ describe('AppLookupComponent moving a job', () => {
     ask: vi.fn(),
     isConfirmRequired: vi.fn((err: unknown) => err === refusal),
     failureMessage: vi.fn((_err: unknown) => 'mobileApp.jobs.actionFailed'),
+    mayBill: vi.fn(),
+    officeOnly: vi.fn(),
+    officeOnlyMessage: vi.fn(),
   };
   const timer = { active: signal(null), refresh: vi.fn() };
   const offer = vi.fn();
@@ -63,6 +66,9 @@ describe('AppLookupComponent moving a job', () => {
     confirmMove.needed.mockReset().mockReturnValue(true);
     confirmMove.ask.mockReset().mockResolvedValue(true);
     confirmMove.failureMessage.mockReset().mockReturnValue('mobileApp.jobs.actionFailed');
+    confirmMove.mayBill.mockReset().mockReturnValue(true);
+    confirmMove.officeOnly.mockReset().mockReturnValue(false);
+    confirmMove.officeOnlyMessage.mockReset().mockReturnValue('mobileAppWork.confirmMove.officeOnly');
     timer.refresh.mockReset();
     offer.mockReset();
     snackbar.success.mockReset();
@@ -80,6 +86,16 @@ describe('AppLookupComponent moving a job', () => {
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
       ],
     });
+  });
+
+  it('leaves a billing column to the office instead of moving it', async () => {
+    confirmMove.mayBill.mockReturnValue(false);
+    confirmMove.officeOnly.mockReturnValue(true);
+
+    await create().onAction('move');
+
+    expect(api.advanceJob).not.toHaveBeenCalled();
+    expect(snackbar.info).toHaveBeenCalledWith('mobileAppWork.confirmMove.officeOnly');
   });
 
   it('moves an ordinary column with one quiet request and offers Undo', async () => {

@@ -8,6 +8,7 @@ import { ScanActionService } from '../../../../shared/services/scan-action.servi
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { InventoryService } from '../../../inventory/services/inventory.service';
 import { ScanContext, ScanReceiveContextLine } from '../../../../shared/models/scan-action.model';
+import { ScanReceiveContext } from '../../../../shared/models/scan-receive-context.model';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { BarcodeScanInputComponent } from '../../../../shared/components/barcode-scan-input/barcode-scan-input.component';
@@ -43,11 +44,8 @@ export class ScanReceiveFlowComponent implements OnInit {
   protected readonly partialQty = new FormControl<number>(0);
 
   ngOnInit(): void {
-    // Extract PO lines from the context's available actions
     const receiveAction = this.context().availableActions.find(a => a.action === 'Receive');
-    if (receiveAction?.context) {
-      this.poLines.set((receiveAction.context as { poLines: ScanReceiveContextLine[] }).poLines ?? []);
-    }
+    this.poLines.set((receiveAction?.context as ScanReceiveContext | null | undefined)?.poLines ?? []);
 
     if (this.poLines().length === 1) {
       this.selectPoLine(this.poLines()[0]);

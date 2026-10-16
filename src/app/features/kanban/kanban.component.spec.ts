@@ -298,6 +298,50 @@ describe('KanbanComponent', () => {
     expect(component.disabledBulkStageIds().has(8)).toBe(false);
   });
 
+  describe('billing columns', () => {
+    function billingBoard(): BoardColumn[] {
+      return [
+        { stage: stage({ id: 7, name: 'QC/Review', sortOrder: 7 }), jobs: [boardJob(100, 'QC/Review')] },
+        { stage: stage({ id: 8, name: 'Shipped', sortOrder: 8, accountingDocumentType: 'Invoice' }), jobs: [] },
+      ];
+    }
+
+    it('disables a billing column as a bulk target for a role that cannot bill', () => {
+      roles = ['PM'];
+      component.columns.set(billingBoard());
+      component.selectedJobIds.set(new Set([100]));
+
+      expect(component.disabledBulkStageIds().has(8)).toBe(true);
+    });
+
+    it('keeps a billing column as a bulk target for the office', () => {
+      roles = ['OfficeManager'];
+      component.columns.set(billingBoard());
+      component.selectedJobIds.set(new Set([100]));
+
+      expect(component.disabledBulkStageIds().has(8)).toBe(false);
+    });
+
+    it('leaves a card where it was when a role that cannot bill drops it on a billing column', () => {
+      roles = ['ProductionWorker'];
+      component.columns.set(billingBoard());
+      const cols = component.filteredColumns();
+      const source = { id: 'column-0', data: cols[0].jobs } as unknown as CdkDropList<KanbanJob[]>;
+      const target = { id: 'column-1', data: cols[1].jobs } as unknown as CdkDropList<KanbanJob[]>;
+
+      component.onCardDropped({
+        previousContainer: source,
+        container: target,
+        previousIndex: 0,
+        currentIndex: 0,
+      } as unknown as CdkDragDrop<KanbanJob[]>);
+
+      expect(moveJobStage).not.toHaveBeenCalled();
+      expect(component.columns()[0].jobs.map(j => j.id)).toEqual([100]);
+      expect(component.columns()[1].jobs).toEqual([]);
+    });
+  });
+
   // ── Task 1: per-job bulk failures are surfaced with the server's messages ──
 
   it('surfaces per-job bulk-move failures via a warning toast with the server messages', () => {
