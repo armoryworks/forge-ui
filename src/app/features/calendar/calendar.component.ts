@@ -345,7 +345,7 @@ export class CalendarComponent implements OnInit {
   }
 
   protected onJobClick(job: CalendarJob): void {
-    this.router.navigate(['/kanban'], { queryParams: { jobId: job.id } });
+    this.router.navigate(['/kanban'], { queryParams: { detail: `job:${job.id}` } });
   }
 
   /**

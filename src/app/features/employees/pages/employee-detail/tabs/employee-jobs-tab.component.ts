@@ -43,6 +43,6 @@ export class EmployeeJobsTabComponent implements OnInit {
   }
 
   protected openJob(job: EmployeeJob): void {
-    this.router.navigate(['/kanban'], { queryParams: { job: job.id } });
+    this.router.navigate(['/kanban'], { queryParams: { detail: `job:${job.id}` } });
   }
 }
