@@ -40,7 +40,7 @@
       </p>
     }
 
-    @if (isRetail()) {
+    @if (isRetail() && canPickConnection) {
       <app-select
         [label]="'salesChannels.fieldConnection' | translate"
         formControlName="eCommerceIntegrationId"

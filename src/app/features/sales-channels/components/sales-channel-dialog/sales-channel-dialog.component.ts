@@ -11,6 +11,7 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { CustomerService } from '../../../customers/services/customer.service';
 import { ECommerceConnectionService } from '../../services/ecommerce-connection.service';
 import { SalesChannelService } from '../../services/sales-channel.service';
@@ -56,6 +57,7 @@ export class SalesChannelDialogComponent {
   private readonly service = inject(SalesChannelService);
   private readonly customerService = inject(CustomerService);
   private readonly connectionService = inject(ECommerceConnectionService);
+  private readonly auth = inject(AuthService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -64,6 +66,7 @@ export class SalesChannelDialogComponent {
   protected readonly saving = signal(false);
   protected readonly customerOptions = signal<SelectOption[]>([]);
   protected readonly connectionOptions = signal<SelectOption[]>([]);
+  protected readonly canPickConnection = this.auth.hasAnyRole(['Admin', 'Manager']);
 
   protected readonly form = this.fb.group({
     name: [this.data.channel?.name ?? '', [Validators.required, Validators.maxLength(200)]],
@@ -128,16 +131,18 @@ export class SalesChannelDialogComponent {
     // Only offer connections whose platform actually has a connector. Attaching
     // one that cannot be polled turns the channel's Import action into a button
     // that reports success and does nothing.
-    this.connectionService.getConnections().subscribe({
-      next: (connections) => {
-        this.connectionOptions.set([
-          { value: null, label: this.translate.instant('salesChannels.noConnectionOption') },
-          ...connections
-            .filter((c) => c.isActive)
-            .map((c) => ({ value: c.id, label: `${c.name} (${c.platform})` })),
-        ]);
-      },
-    });
+    if (this.canPickConnection) {
+      this.connectionService.getConnections().subscribe({
+        next: (connections) => {
+          this.connectionOptions.set([
+            { value: null, label: this.translate.instant('salesChannels.noConnectionOption') },
+            ...connections
+              .filter((c) => c.isActive)
+              .map((c) => ({ value: c.id, label: `${c.name} (${c.platform})` })),
+          ]);
+        },
+      });
+    }
 
     // Keep the house-account requirement in step with the selected type. Applied
     // on every change rather than once at init because the user can flip the

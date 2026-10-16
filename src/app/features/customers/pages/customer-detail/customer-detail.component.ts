@@ -15,6 +15,7 @@ import {
 } from '../../services/customer-detail-layout-resolver.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { CustomerOverviewTabComponent } from './tabs/customer-overview-tab.component';
 import { CustomerEstimatesTabComponent } from './tabs/customer-estimates-tab.component';
@@ -90,6 +91,7 @@ export class CustomerDetailComponent {
   private readonly translate = inject(TranslateService);
   private readonly layoutResolver = inject(CustomerDetailLayoutResolverService);
   private readonly capabilityService = inject(CapabilityService);
+  private readonly auth = inject(AuthService);
 
   /**
    * Wave 5 — Tabs whose entire surface is capability-gated. The resolver
@@ -109,6 +111,16 @@ export class CustomerDetailComponent {
     addresses: { code: 'CAP-MD-CUSTOMER-ADDRESSES', defaultOn: true },
     interactions: { code: 'CAP-MD-CUSTOMER-INTERACTIONS', defaultOn: false },
   };
+
+  private static readonly COMMERCIAL_RECORD_ROLES = ['Admin', 'Manager', 'OfficeManager'];
+
+  private readonly tabRoleMap: Partial<Record<CustomerDetailTabId, string[]>> = {
+    invoices: CustomerDetailComponent.COMMERCIAL_RECORD_ROLES,
+    pricing: CustomerDetailComponent.COMMERCIAL_RECORD_ROLES,
+  };
+
+  protected readonly canViewCommercialDocuments = computed(() =>
+    this.auth.hasAnyRole(CustomerDetailComponent.COMMERCIAL_RECORD_ROLES));
 
   protected readonly customerId = toSignal(
     this.route.paramMap.pipe(map(p => +p.get('id')!)),
@@ -140,6 +152,8 @@ export class CustomerDetailComponent {
     const visible: TabLayoutEntry[] = [];
     const hidden: { tab: TabLayoutEntry; code: string }[] = [];
     for (const tab of layout) {
+      const roles = this.tabRoleMap[tab.id];
+      if (roles && !this.auth.hasAnyRole(roles)) continue;
       const gate = this.tabCapabilityMap[tab.id];
       if (!gate || this.capabilityService.isEnabled(gate.code, gate.defaultOn)) {
         visible.push(tab);

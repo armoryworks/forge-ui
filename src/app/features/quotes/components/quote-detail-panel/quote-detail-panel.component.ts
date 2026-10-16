@@ -35,6 +35,7 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { PaymentProgressComponent } from '../../../../shared/components/payment-progress/payment-progress.component';
 import { AccountingService } from '../../../../shared/services/accounting.service';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { FileAttachment } from '../../../../shared/models/file.model';
 import { PaymentMilestone } from '../../../../shared/models/payment-milestone.model';
 import { PaymentSchedule } from '../../../../shared/models/payment-schedule.model';
@@ -67,6 +68,7 @@ export class QuoteDetailPanelComponent {
   private readonly quoteService = inject(QuoteService);
   private readonly paymentScheduleService = inject(PaymentScheduleService);
   private readonly accounting = inject(AccountingService);
+  private readonly auth = inject(AuthService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -434,6 +436,12 @@ export class QuoteDetailPanelComponent {
   // --- Payment schedule (S2) ---
 
   /**
+   * Payment schedules are served only to the roles that run billing; a PM can
+   * open the quote but would get a 403 from the schedule endpoint.
+   */
+  protected readonly canManagePaymentSchedule = this.auth.hasAnyRole(['Admin', 'Manager', 'OfficeManager']);
+
+  /**
    * Definition edits are only accepted server-side while no milestone is
    * locked (Invoiced / PartiallyPaid / Paid) — hide the edit affordance in
    * lock-step so users don't walk into the 409.
@@ -468,6 +476,7 @@ export class QuoteDetailPanelComponent {
   });
 
   private loadPaymentSchedule(id: number): void {
+    if (!this.canManagePaymentSchedule) return;
     this.paymentScheduleService.getByQuote(id).subscribe({
       next: (schedule) => this.paymentSchedule.set(schedule),
       error: () => { /* non-404 failures already toasted by the global interceptor */ },

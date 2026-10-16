@@ -69,13 +69,15 @@
           <span class="material-icons-outlined tab__warning" [matTooltip]="'salesOrders.tabWarning.atRisk' | translate" matTooltipPosition="above" [attr.aria-label]="'salesOrders.tabWarning.atRisk' | translate">warning</span>
         }
       </button>
-      <button class="tab" role="tab"
-        [class.tab--active]="activeTab() === 'stages'"
-        [attr.aria-selected]="activeTab() === 'stages'"
-        (click)="switchTab('stages')"
-        aria-label="Staged schedule tab">
-        {{ 'salesOrders.stages.tab' | translate }}
-      </button>
+      @if (canViewFulfilmentRecords()) {
+        <button class="tab" role="tab"
+          [class.tab--active]="activeTab() === 'stages'"
+          [attr.aria-selected]="activeTab() === 'stages'"
+          (click)="switchTab('stages')"
+          aria-label="Staged schedule tab">
+          {{ 'salesOrders.stages.tab' | translate }}
+        </button>
+      }
       <button class="tab" role="tab"
         [class.tab--active]="activeTab() === 'shipments'"
         [attr.aria-selected]="activeTab() === 'shipments'"
@@ -122,13 +124,15 @@
           <span class="material-icons-outlined tab__warning" [matTooltip]="'salesOrders.tabWarning.uninvoiced' | translate" matTooltipPosition="above" [attr.aria-label]="'salesOrders.tabWarning.uninvoiced' | translate">warning</span>
         }
       </button>
-      <button class="tab" role="tab"
-        [class.tab--active]="activeTab() === 'customer-po'"
-        [attr.aria-selected]="activeTab() === 'customer-po'"
-        (click)="switchTab('customer-po')"
-        aria-label="Customer P.O. tab">
-        {{ 'salesOrders.customerPoDoc.tab' | translate }}
-      </button>
+      @if (canViewFulfilmentRecords()) {
+        <button class="tab" role="tab"
+          [class.tab--active]="activeTab() === 'customer-po'"
+          [attr.aria-selected]="activeTab() === 'customer-po'"
+          (click)="switchTab('customer-po')"
+          aria-label="Customer P.O. tab">
+          {{ 'salesOrders.customerPoDoc.tab' | translate }}
+        </button>
+      }
       <button *appCap="'CAP-O2C-SO-ACCEPTANCE'" class="tab" role="tab"
         [class.tab--active]="activeTab() === 'acceptance'"
         [attr.aria-selected]="activeTab() === 'acceptance'"
