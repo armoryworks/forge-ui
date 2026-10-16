@@ -1,6 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { debounceTime } from 'rxjs';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -50,6 +52,16 @@ export class QuotesComponent implements OnInit {
   protected readonly searchControl = new FormControl('');
   protected readonly statusFilterControl = new FormControl<string | null>(null);
 
+  private readonly searchTerm = toSignal(this.searchControl.valueChanges.pipe(debounceTime(200)), { initialValue: '' });
+
+  protected readonly filteredQuotes = computed(() => {
+    const term = (this.searchTerm() ?? '').trim().toLowerCase();
+    const list = this.quotes();
+    if (!term) return list;
+    return list.filter(q =>
+      q.quoteNumber?.toLowerCase().includes(term) || q.customerName?.toLowerCase().includes(term));
+  });
+
   protected readonly statusOptions: SelectOption[] = [
     { value: null, label: this.translate.instant('common.allStatuses') },
     { value: 'Draft', label: this.translate.instant('status.draft') },
@@ -72,6 +84,7 @@ export class QuotesComponent implements OnInit {
   ];
 
   constructor() {
+    this.statusFilterControl.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.loadQuotes());
     this.loadQuotes();
   }
 

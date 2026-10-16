@@ -14,7 +14,7 @@
     </div>
 
     <div [appLoadingBlock]="loading()" class="qt-list-content">
-      <app-data-table tableId="quotes" [columns]="quoteColumns" [data]="quotes()"
+      <app-data-table tableId="quotes" [columns]="quoteColumns" [data]="filteredQuotes()"
         emptyIcon="request_quote" [emptyMessage]="'quotes.noQuotesFound' | translate"
         [clickableRows]="true"
         (rowClick)="openQuoteDetail($any($event))">
