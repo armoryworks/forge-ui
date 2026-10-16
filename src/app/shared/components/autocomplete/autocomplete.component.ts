@@ -153,7 +153,7 @@ export class AutocompleteComponent implements ControlValueAccessor, AfterContent
     return text.includes(query) ? 4 : -1;
   }
 
-    private onChange: (value: unknown) => void = () => {};
+  private onChange: (value: unknown) => void = () => {};
   private onTouched: () => void = () => {};
 
   writeValue(value: unknown): void {
