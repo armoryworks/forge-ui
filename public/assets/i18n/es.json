@@ -7581,7 +7581,8 @@
     "reworkJob": "Trabajo de Retrabajo",
     "subtitle": "Rastrear y gestionar devoluciones de clientes",
     "title": "Devoluciones de Clientes",
-    "updated": "Devolución actualizada"
+    "updated": "Devolución actualizada",
+    "fieldQuantity": "Cantidad devuelta"
   },
   "recalls": {
     "title": "Retiradas",

@@ -7588,7 +7588,8 @@
     "reworkJob": "Rework Job",
     "subtitle": "Track and manage customer returns",
     "title": "Customer Returns",
-    "updated": "Return updated"
+    "updated": "Return updated",
+    "fieldQuantity": "Quantity returned"
   },
   "recalls": {
     "title": "Recalls",

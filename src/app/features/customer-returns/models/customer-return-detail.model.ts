@@ -10,6 +10,7 @@ export interface CustomerReturnDetail {
   status: string;
   reason: string;
   notes: string | null;
+  quantity?: number | null;
   returnDate: Date;
   inspectedById: number | null;
   inspectedByName: string | null;
