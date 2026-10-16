@@ -319,7 +319,8 @@ export class VendorWorkflowPageComponent {
     const run = this.run();
     if (!run || run.mode === mode) return;
     this.workflowService.saveCurrentStep().subscribe({
-      next: () => {
+      next: (saveResult) => {
+        if (!saveResult.ok) return;
         this.workflowService.setMode(run.id, mode).subscribe({
           next: (updated) => {
             this.run.set(updated);

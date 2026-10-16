@@ -116,4 +116,17 @@ describe('VendorWorkflowPageComponent routing', () => {
       queryParamsHandling: 'merge',
     }));
   });
+
+  it('stays in the current mode when saving the step fails', () => {
+    setUp({}, { workflow: 'vendor-guided-v1', runId: '4', mode: 'guided' });
+    vi.spyOn(workflowService, 'getRun').mockReturnValue(of(buildRun()));
+    vi.spyOn(workflowService, 'saveCurrentStep').mockReturnValue(of({ ok: false as const, error: new Error('400') }));
+    const setMode = vi.spyOn(workflowService, 'setMode');
+    const component = TestBed.runInInjectionContext(() => new VendorWorkflowPageComponent());
+    (component as unknown as { run: { set(r: WorkflowRun): void } }).run.set(buildRun());
+
+    (component as unknown as { onModeChanged(mode: 'express' | 'guided'): void }).onModeChanged('express');
+
+    expect(setMode).not.toHaveBeenCalled();
+  });
 });

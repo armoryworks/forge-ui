@@ -88,7 +88,10 @@ export class CustomerWorkflowPageComponent {
     effect(() => {
       const runId = this.runIdFromUrl();
       const definitionId = this.definitionIdFromUrl();
-      if (!definitionId) return;
+      if (!definitionId) {
+        this.router.navigate(['/customers'], { replaceUrl: true });
+        return;
+      }
       if (runId) {
         this.loadByRun(runId, definitionId);
         return;
@@ -210,7 +213,8 @@ export class CustomerWorkflowPageComponent {
     const run = this.run();
     if (!run || run.mode === mode) return;
     this.workflowService.saveCurrentStep().subscribe({
-      next: () => {
+      next: (saveResult) => {
+        if (!saveResult.ok) return;
         this.workflowService.setMode(run.id, mode).subscribe({
           next: (updated) => {
             this.run.set(updated);
