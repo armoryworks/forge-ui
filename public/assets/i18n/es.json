@@ -10124,6 +10124,18 @@
       "rejectTitle": "Rechazar asiento {{number}}",
       "rejectNote": "El asiento vuelve a borrador; nada llega al libro mayor. El motivo se agrega a su nota.",
       "rejectReason": "Motivo (opcional)"
+    },
+    "jobCostClose": {
+      "title": "Costo de producción por orden",
+      "hint": "Cierre cada orden después de su última recepción de producción: la mano de obra y los gastos generales se absorben en el WIP y el resto va a la variación de producción.",
+      "job": "Orden",
+      "jobTitle": "Título",
+      "completed": "Completada",
+      "wip": "Saldo de WIP",
+      "close": "Cerrar costo",
+      "closed": "{{job}} cerrada; variación de producción {{variance}}",
+      "empty": "Ninguna orden tiene saldo de WIP abierto",
+      "loadFailed": "No se pudieron cargar las órdenes con WIP abierto"
     }
   },
   "subcontractUi": {

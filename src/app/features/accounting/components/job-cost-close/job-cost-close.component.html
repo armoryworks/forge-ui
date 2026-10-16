@@ -1,0 +1,31 @@
+<section class="job-cost-close" data-testid="job-cost-close">
+  <header class="job-cost-close__head">
+    <h2 class="job-cost-close__title">{{ 'accounting.jobCostClose.title' | translate }}</h2>
+    <span class="job-cost-close__hint">{{ 'accounting.jobCostClose.hint' | translate }}</span>
+  </header>
+  <div class="acct-table-block">
+    <app-data-table
+      tableId="acct-job-cost-close"
+      [columns]="columns"
+      [data]="candidates()"
+      [loading]="loading()"
+      emptyIcon="task_alt"
+      [emptyMessage]="'accounting.jobCostClose.empty' | translate">
+      <ng-template appColumnCell="jobNumber" let-row>
+        <app-entity-link type="job" [entityId]="row.jobId">{{ row.jobNumber }}</app-entity-link>
+      </ng-template>
+      <ng-template appColumnCell="wipBalance" let-row>
+        <app-currency-display [value]="row.wipBalance" />
+      </ng-template>
+      <ng-template appColumnCell="actions" let-row>
+        <button type="button" class="action-btn action-btn--sm"
+          [disabled]="closingId() !== null"
+          (click)="close(row)"
+          data-testid="job-cost-close-btn">
+          <span class="material-icons-outlined" aria-hidden="true">lock_clock</span>
+          {{ 'accounting.jobCostClose.close' | translate }}
+        </button>
+      </ng-template>
+    </app-data-table>
+  </div>
+</section>

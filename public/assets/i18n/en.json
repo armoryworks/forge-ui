@@ -10124,6 +10124,18 @@
       "rejectTitle": "Reject entry {{number}}",
       "rejectNote": "The entry goes back to draft; nothing reaches the ledger. The reason is added to its memo.",
       "rejectReason": "Reason (optional)"
+    },
+    "jobCostClose": {
+      "title": "Job production cost",
+      "hint": "Close each job after its last production receipt: labor and overhead are absorbed into WIP and the remainder goes to production variance.",
+      "job": "Job",
+      "jobTitle": "Title",
+      "completed": "Completed",
+      "wip": "WIP balance",
+      "close": "Close cost",
+      "closed": "{{job}} closed; production variance {{variance}}",
+      "empty": "No job has an open WIP balance",
+      "loadFailed": "Could not load the jobs with open WIP"
     }
   },
   "subcontractUi": {

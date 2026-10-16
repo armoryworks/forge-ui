@@ -36,6 +36,7 @@ import {
   TrialBalance,
   YearEndCloseResult,
 } from '../models/accounting.models';
+import { JobCostCloseCandidate, JobProductionCostCloseResult } from '../models/job-cost-close.model';
 
 /**
  * Read/operate seam for the dark GL accounting suite (`/api/v1/accounting/*`). Every call is gated server-side
@@ -252,6 +253,16 @@ export class GeneralLedgerService {
     if (filter?.toDate) params = params.set('toDate', filter.toDate);
     if (filter?.largeManualThreshold) params = params.set('largeManualThreshold', filter.largeManualThreshold);
     return this.http.get<GlAnomaly[]>(`${this.base}/anomalies`, { params });
+  }
+
+  /** Jobs whose GL WIP still carries a balance and whose production cost has not been closed. */
+  getJobCostCloseCandidates(): Observable<JobCostCloseCandidate[]> {
+    return this.http.get<JobCostCloseCandidate[]>(`${this.base}/jobs/production-cost-close-candidates`);
+  }
+
+  /** Absorb a job's labor + overhead into WIP and sweep the rest to production variance (idempotent). */
+  closeJobProductionCost(jobId: number): Observable<JobProductionCostCloseResult> {
+    return this.http.post<JobProductionCostCloseResult>(`${this.base}/jobs/${jobId}/close-production-cost`, {});
   }
 
   /** Maker-checker work-list (§5.7): manual entries of the book waiting for a second approver. */
