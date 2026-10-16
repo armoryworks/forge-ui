@@ -83,11 +83,16 @@
   display: flex;
   border-bottom: $border-width-thin solid var(--border);
   flex-shrink: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  @include custom-scrollbar(4px);
 }
 
 .detail-tab {
   @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
   display: flex;
+  flex: 0 0 auto;
+  white-space: nowrap;
   align-items: center;
   gap: $sp-sm;
   padding: $sp-md $sp-lg;
