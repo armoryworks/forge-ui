@@ -43,11 +43,12 @@ import { DetailLoadErrorComponent } from '../../../shared/components/detail-load
 import { CoverPhotoUploadDialogComponent, CoverPhotoDialogData } from './cover-photo-upload-dialog.component';
 import { JobCostTabComponent } from './job-cost-tab.component';
 import { OperationTimeTabComponent } from './operation-time-tab.component';
+import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
 
 @Component({
   selector: 'app-job-detail-panel',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, ReactiveFormsModule, TranslatePipe, AvatarComponent, PriorityIndicatorComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, JobCostTabComponent, OperationTimeTabComponent, MatMenuModule, MatTooltipModule, EntityLinkComponent, EntityPickerComponent, CapDirective, JobGatesSectionComponent, DetailLoadErrorComponent],
+  imports: [DateOnlyPipe, DatePipe, DecimalPipe, ReactiveFormsModule, TranslatePipe, AvatarComponent, PriorityIndicatorComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, JobCostTabComponent, OperationTimeTabComponent, MatMenuModule, MatTooltipModule, EntityLinkComponent, EntityPickerComponent, CapDirective, JobGatesSectionComponent, DetailLoadErrorComponent],
   templateUrl: './job-detail-panel.component.html',
   styleUrl: './job-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -41,6 +41,7 @@ import { PaymentMilestone } from '../../../../shared/models/payment-milestone.mo
 import { PaymentSchedule } from '../../../../shared/models/payment-schedule.model';
 import { NumberLockInfoComponent } from '../../../../shared/components/number-lock-info/number-lock-info.component';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 
 /** Per-milestone action availability for the panel's schedule section. */
 interface MilestoneActionRow {
@@ -53,7 +54,7 @@ interface MilestoneActionRow {
 @Component({
   selector: 'app-quote-detail-panel',
   standalone: true,
-  imports: [NumberLockInfoComponent, 
+  imports: [DateOnlyPipe, NumberLockInfoComponent, 
     DatePipe, DecimalPipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent, FileUploadZoneComponent,

@@ -21,11 +21,13 @@ import { QuoteDetailDialogComponent, QuoteDetailDialogData, QuoteDetailDialogRes
 import { SendQuoteEmailDialogComponent, SendQuoteEmailDialogData, SendQuoteEmailDialogResult } from './components/send-quote-email-dialog/send-quote-email-dialog.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
+import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
 
 @Component({
   selector: 'app-quotes',
   standalone: true,
   imports: [
+    DateOnlyPipe,
     ReactiveFormsModule, DatePipe, TranslatePipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective, MatTooltipModule,

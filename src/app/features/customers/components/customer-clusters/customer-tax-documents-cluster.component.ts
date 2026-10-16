@@ -15,6 +15,7 @@ import { CustomerTaxDocument } from '../../models/customer-tax-document.model';
 import { CustomerTaxDocumentService } from '../../services/customer-tax-document.service';
 import { CustomerTaxDocumentDialogComponent } from './customer-tax-document-dialog.component';
 import { CustomerTaxDocumentRejectDialogComponent } from './customer-tax-document-reject-dialog.component';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 
 /** Row view-model: pre-computed chip class / i18n keys (no template fn calls). */
 interface TaxDocumentRow {
@@ -43,6 +44,7 @@ interface TaxDocumentRow {
   selector: 'app-customer-tax-documents-cluster',
   standalone: true,
   imports: [
+    DateOnlyPipe,
     DatePipe,
     MatTooltipModule,
     TranslatePipe,

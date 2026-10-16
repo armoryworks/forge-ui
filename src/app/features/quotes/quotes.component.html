@@ -28,7 +28,7 @@
           <app-currency-display [value]="row.total" [currency]="null" />
         </ng-template>
         <ng-template appColumnCell="expirationDate" let-row>
-          <span class="text-muted">{{ row.expirationDate ? (row.expirationDate | date:'MM/dd/yyyy') : '---' }}</span>
+          <span class="text-muted">{{ row.expirationDate ? (row.expirationDate | dateOnly) : '---' }}</span>
         </ng-template>
         <ng-template appColumnCell="createdAt" let-row>
           <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>

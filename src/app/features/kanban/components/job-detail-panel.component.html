@@ -216,7 +216,7 @@
                 </span>
                 <span class="sub-job-item__title">{{ lot.partNumber }} · {{ lot.quantity | number:'1.0-4' }}</span>
                 @if (lot.expirationDate) {
-                  <span class="chip chip--muted">{{ 'lots.expires' | translate }} {{ lot.expirationDate | date:'MM/dd/yyyy' }}</span>
+                  <span class="chip chip--muted">{{ 'lots.expires' | translate }} {{ lot.expirationDate | dateOnly }}</span>
                 }
               </div>
             }

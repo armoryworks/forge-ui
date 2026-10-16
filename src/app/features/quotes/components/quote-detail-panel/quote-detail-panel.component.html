@@ -56,7 +56,7 @@
         @if (quote.expirationDate) {
           <div class="info-item">
             <span class="info-label">{{ 'quotes.expiration' | translate }}</span>
-            <span class="info-value">{{ quote.expirationDate | date:'MM/dd/yyyy' }}</span>
+            <span class="info-value">{{ quote.expirationDate | dateOnly }}</span>
           </div>
         }
         @if (quote.sentDate) {
