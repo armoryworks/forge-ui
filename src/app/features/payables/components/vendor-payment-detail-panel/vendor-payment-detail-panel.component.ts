@@ -22,13 +22,14 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 
 // ⚡ ACCOUNTING BOUNDARY — AP counterpart of PaymentDetailPanel.
 @Component({
   selector: 'app-vendor-payment-detail-panel',
   standalone: true,
   imports: [
-    DatePipe, TranslatePipe, ReactiveFormsModule,
+    DateOnlyPipe, DatePipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
     DialogComponent, TextareaComponent, ValidationButtonComponent,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent,

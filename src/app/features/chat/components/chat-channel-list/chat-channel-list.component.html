@@ -92,73 +92,16 @@
         </button>
       </div>
       @if (sectionsExpanded()['channels']) {
-        <div class="channel-list__items" role="listbox" [attr.aria-label]="'chat.channelList.groupChats' | translate">
+        <div class="channel-list__items" role="list" [attr.aria-label]="'chat.channelList.groupChats' | translate">
           @if (filteredGroupChannels().length === 0) {
             <div class="channel-list__section-empty">{{ 'chat.channelList.noConversations' | translate }}</div>
           }
           @for (channel of filteredGroupChannels(); track channel.id) {
-            <button
-              class="channel-list__item"
-              [class.channel-list__item--active]="isActive('channel', channel.id)"
-              role="option"
-              [attr.aria-selected]="isActive('channel', channel.id)"
-              [attr.aria-label]="channel.name"
-              (click)="selectChannel(channel)">
-              <span class="material-icons-outlined channel-list__channel-icon">{{ getChannelIcon(channel) }}</span>
-              <div class="channel-list__item-content">
-                <div class="channel-list__item-top">
-                  <span class="channel-list__item-name">{{ channel.name }}</span>
-                  @if (channel.lastMessageAt) {
-                    <span class="channel-list__item-time">{{ formatTimestamp(channel.lastMessageAt) }}</span>
-                  }
-                </div>
-                @if (channel.lastMessage) {
-                  <span class="channel-list__item-preview">{{ channel.lastMessage }}</span>
-                }
-              </div>
-              @if (isChannelMuted(channel)) {
-                <span class="material-icons-outlined channel-list__muted-icon" [matTooltip]="'Muted'" matTooltipPosition="above">notifications_off</span>
-              }
-              @if (channel.unreadCount > 0) {
-                <span class="channel-list__badge">{{ channel.unreadCount }}</span>
-              }
-              <button
-                class="icon-btn channel-list__mute-btn"
-                (click)="onMuteToggle(channel, $event)"
-                [attr.aria-label]="(isChannelMuted(channel) ? 'chat.channelList.unmuteChannel' : 'chat.channelList.muteChannel') | translate"
-                [matTooltip]="(isChannelMuted(channel) ? 'chat.channelList.unmute' : 'chat.channelList.mute') | translate"
-                matTooltipPosition="above">
-                <span class="material-icons-outlined">{{ isChannelMuted(channel) ? 'notifications_active' : 'notifications_off' }}</span>
-              </button>
-            </button>
-          }
-          <button
-            class="channel-list__item channel-list__item--browse"
-            (click)="browseChannels.emit()">
-            <span class="material-icons-outlined channel-list__channel-icon">explore</span>
-            <span class="channel-list__item-name">{{ 'chat.channelList.browseChannels' | translate }}</span>
-          </button>
-        </div>
-      }
-    </div>
-
-    <!-- Teams section -->
-    @if (filteredTeamChannels().length > 0) {
-      <div class="channel-list__section">
-        <div class="channel-list__section-header">
-          <button class="channel-list__section-toggle" (click)="toggleSection('teams')" [attr.aria-label]="'chat.channelList.teams' | translate">
-            <span class="material-icons-outlined channel-list__chevron" [class.channel-list__chevron--collapsed]="!sectionsExpanded()['teams']">expand_more</span>
-            <span class="channel-list__section-title">{{ 'chat.channelList.teams' | translate }}</span>
-          </button>
-        </div>
-        @if (sectionsExpanded()['teams']) {
-          <div class="channel-list__items" role="listbox" [attr.aria-label]="'chat.channelList.teams' | translate">
-            @for (channel of filteredTeamChannels(); track channel.id) {
+            <div class="channel-list__row" role="listitem">
               <button
                 class="channel-list__item"
                 [class.channel-list__item--active]="isActive('channel', channel.id)"
-                role="option"
-                [attr.aria-selected]="isActive('channel', channel.id)"
+                [attr.aria-current]="isActive('channel', channel.id) ? 'true' : null"
                 [attr.aria-label]="channel.name"
                 (click)="selectChannel(channel)">
                 <span class="material-icons-outlined channel-list__channel-icon">{{ getChannelIcon(channel) }}</span>
@@ -179,6 +122,67 @@
                 @if (channel.unreadCount > 0) {
                   <span class="channel-list__badge">{{ channel.unreadCount }}</span>
                 }
+              </button>
+              <button
+                class="icon-btn channel-list__mute-btn"
+                (click)="onMuteToggle(channel, $event)"
+                [attr.aria-label]="(isChannelMuted(channel) ? 'chat.channelList.unmuteChannel' : 'chat.channelList.muteChannel') | translate"
+                [matTooltip]="(isChannelMuted(channel) ? 'chat.channelList.unmute' : 'chat.channelList.mute') | translate"
+                matTooltipPosition="above">
+                <span class="material-icons-outlined">{{ isChannelMuted(channel) ? 'notifications_active' : 'notifications_off' }}</span>
+              </button>
+            </div>
+          }
+          <div class="channel-list__row" role="listitem">
+            <button
+              class="channel-list__item channel-list__item--browse"
+              (click)="browseChannels.emit()">
+              <span class="material-icons-outlined channel-list__channel-icon">explore</span>
+              <span class="channel-list__item-name">{{ 'chat.channelList.browseChannels' | translate }}</span>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Teams section -->
+    @if (filteredTeamChannels().length > 0) {
+      <div class="channel-list__section">
+        <div class="channel-list__section-header">
+          <button class="channel-list__section-toggle" (click)="toggleSection('teams')" [attr.aria-label]="'chat.channelList.teams' | translate">
+            <span class="material-icons-outlined channel-list__chevron" [class.channel-list__chevron--collapsed]="!sectionsExpanded()['teams']">expand_more</span>
+            <span class="channel-list__section-title">{{ 'chat.channelList.teams' | translate }}</span>
+          </button>
+        </div>
+        @if (sectionsExpanded()['teams']) {
+          <div class="channel-list__items" role="list" [attr.aria-label]="'chat.channelList.teams' | translate">
+            @for (channel of filteredTeamChannels(); track channel.id) {
+              <div class="channel-list__row" role="listitem">
+                <button
+                  class="channel-list__item"
+                  [class.channel-list__item--active]="isActive('channel', channel.id)"
+                  [attr.aria-current]="isActive('channel', channel.id) ? 'true' : null"
+                  [attr.aria-label]="channel.name"
+                  (click)="selectChannel(channel)">
+                  <span class="material-icons-outlined channel-list__channel-icon">{{ getChannelIcon(channel) }}</span>
+                  <div class="channel-list__item-content">
+                    <div class="channel-list__item-top">
+                      <span class="channel-list__item-name">{{ channel.name }}</span>
+                      @if (channel.lastMessageAt) {
+                        <span class="channel-list__item-time">{{ formatTimestamp(channel.lastMessageAt) }}</span>
+                      }
+                    </div>
+                    @if (channel.lastMessage) {
+                      <span class="channel-list__item-preview">{{ channel.lastMessage }}</span>
+                    }
+                  </div>
+                  @if (isChannelMuted(channel)) {
+                    <span class="material-icons-outlined channel-list__muted-icon" [matTooltip]="'Muted'" matTooltipPosition="above">notifications_off</span>
+                  }
+                  @if (channel.unreadCount > 0) {
+                    <span class="channel-list__badge">{{ channel.unreadCount }}</span>
+                  }
+                </button>
                 <button
                   class="icon-btn channel-list__mute-btn"
                   (click)="onMuteToggle(channel, $event)"
@@ -187,7 +191,7 @@
                   matTooltipPosition="above">
                   <span class="material-icons-outlined">{{ isChannelMuted(channel) ? 'notifications_active' : 'notifications_off' }}</span>
                 </button>
-              </button>
+              </div>
             }
           </div>
         }

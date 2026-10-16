@@ -102,7 +102,7 @@
           </ng-template>
           <ng-template appColumnCell="followUpDate" let-lead>
             @if (lead.followUpDate) {
-              <span [class.overdue]="isFollowUpOverdue(lead)">{{ lead.followUpDate | date:'MM/dd/yyyy' }}</span>
+              <span [class.overdue]="isFollowUpOverdue(lead)">{{ lead.followUpDate | dateOnly }}</span>
             } @else {
               <span class="text-muted">—</span>
             }
@@ -184,7 +184,7 @@
                 @if (lead.followUpDate) {
                   <div class="pipeline-card__meta" [class.pipeline-card__meta--overdue]="isFollowUpOverdue(lead)">
                     <span class="material-icons-outlined pipeline-card__meta-icon">event</span>
-                    <span>{{ lead.followUpDate | date:'MM/dd/yyyy' }}</span>
+                    <span>{{ lead.followUpDate | dateOnly }}</span>
                   </div>
                 }
               </div>

@@ -6,7 +6,7 @@
 // slot must never set `overflow: hidden` or fixed heights that would prevent
 // inner content from scrolling. The default chain is:
 //
-//   :host (app-root)        height: 100vh; overflow: hidden;
+//   :host (app-root)        height: 100dvh; overflow: hidden;
 //     .app-body             flex: 1; overflow: hidden; (display: flex)
 //       .app-main           flex: 1; overflow: hidden; (display: flex column)
 //         > * (routed)      flex: 1; min-height: 0;        ← applied by app.component.scss

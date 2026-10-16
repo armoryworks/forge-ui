@@ -39,6 +39,7 @@ import { PaymentBatchCreateDialogComponent } from './components/payment-batch-cr
 import { VendorBankAccountDialogComponent } from './components/vendor-bank-account-dialog/vendor-bank-account-dialog.component';
 import { VendorPaymentDetailDialogComponent, VendorPaymentDetailDialogData } from './components/vendor-payment-detail-dialog/vendor-payment-detail-dialog.component';
 import { PAYABLES_MANAGE_ROLES, VENDOR_PAYMENT_READ_ROLES } from './payables-roles';
+import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
 
 type PayablesTab = 'bills' | 'payments' | 'batches' | 'accounts';
 
@@ -49,7 +50,7 @@ const VALID_TABS: PayablesTab[] = ['bills', 'payments', 'batches', 'accounts'];
   selector: 'app-payables',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe, TranslatePipe,
+    DateOnlyPipe, ReactiveFormsModule, DatePipe, TranslatePipe,
     PageHeaderComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
     CurrencyDisplayComponent,

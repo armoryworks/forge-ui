@@ -35,9 +35,8 @@ import { EmptyStateComponent } from '../empty-state/empty-state.component';
 import { ColumnFilterPopoverComponent, ColumnFilterState } from './column-filter-popover/column-filter-popover.component';
 import { ColumnManagerPanelComponent, ColumnManagerState } from './column-manager-panel/column-manager-panel.component';
 import { UserPreferencesService } from '../../services/user-preferences.service';
-import { formatDateTime } from '../../utils/date.utils';
+import { formatDate, formatDateTime, parseDateOnly } from '../../utils/date.utils';
 
-const DATE_ONLY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 @Component({
   selector: 'app-data-table',
@@ -190,7 +189,7 @@ export class DataTableComponent implements OnInit {
           }
           case 'date': {
             const range = filterVal as { from?: Date; to?: Date };
-            const date = cellVal ? new Date(cellVal as string) : null;
+            const date = cellVal ? parseDateOnly(String(cellVal)) ?? new Date(cellVal as string) : null;
             if (!date) return false;
             if (range.from && date < range.from) return false;
             if (range.to && date > range.to) return false;
@@ -324,9 +323,9 @@ export class DataTableComponent implements OnInit {
   formatCellValue(row: unknown, col: ColumnDef): unknown {
     const val = (row as Record<string, unknown>)[col.field];
     if (col.type === 'date' && val) {
-      const dateOnly = typeof val === 'string' ? DATE_ONLY_PATTERN.exec(val) : null;
+      const dateOnly = typeof val === 'string' ? parseDateOnly(val) : null;
       if (dateOnly) {
-        return `${dateOnly[2]}/${dateOnly[3]}/${dateOnly[1]}`;
+        return formatDate(dateOnly);
       }
       return formatDateTime(val as string | Date);
     }
@@ -507,7 +506,7 @@ export class DataTableComponent implements OnInit {
       return Number.isNaN(n) ? { type: String, value: String(raw) } : { type: Number, value: n };
     }
     if (col.type === 'date') {
-      const d = raw instanceof Date ? raw : new Date(raw as string);
+      const d = raw instanceof Date ? raw : parseDateOnly(String(raw)) ?? new Date(raw as string);
       return Number.isNaN(d.getTime())
         ? { type: String, value: String(raw) }
         : { type: Date, value: d, format: 'mm/dd/yyyy' };

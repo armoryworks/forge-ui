@@ -3355,6 +3355,18 @@
     "role": "Role",
     "workLocation": "Work Location",
     "avatarColor": "Avatar Color",
+    "avatarColors": {
+      "teal": "Teal",
+      "violet": "Violet",
+      "orange": "Orange",
+      "green": "Green",
+      "blue": "Blue",
+      "rose": "Rose",
+      "brown": "Brown",
+      "purple": "Purple",
+      "forest": "Forest green",
+      "navy": "Navy"
+    },
     "deactivate": "Deactivate",
     "activate": "Activate",
     "getSetupCode": "Get Setup Code",
@@ -4881,6 +4893,8 @@
     "fri": "Fri",
     "sat": "Sat",
     "poDeliveries": "PO Deliveries",
+    "showPoDeliveries": "Show PO deliveries",
+    "hidePoDeliveries": "Hide PO deliveries",
     "poDeliveriesCount": "{{count}} deliveries",
     "poLines": "PO Lines",
     "viewSwitchLabel": "Calendar view",
@@ -7750,7 +7764,8 @@
     "clientSetupTitle": "RFID Client Setup",
     "downloadSetupScript": "Download Setup Script",
     "setupScriptError": "Failed to generate setup script",
-    "setupScriptHint": "Run the downloaded script as Administrator to install the RFID relay client service."
+    "setupScriptHint": "Run the downloaded script as Administrator to install the RFID relay client service.",
+    "relayNotInstalled": "The RFID relay is not installed on this workstation. Download and run the setup script to enable badge scanning."
   },
   "salesTax": {
     "addRate": "Add Rate",

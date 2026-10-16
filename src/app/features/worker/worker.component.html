@@ -39,7 +39,7 @@
           @if (task.dueDate) {
             <div class="task-card__due" [class.task-card__due--overdue]="isOverdue(task)">
               <span class="material-icons-outlined task-card__due-icon">{{ isOverdue(task) ? 'warning' : 'schedule' }}</span>
-              {{ isOverdue(task) ? ('worker.overdue' | translate) : ('worker.due' | translate) }} {{ task.dueDate | date:'MM/dd/yyyy' }}
+              {{ isOverdue(task) ? ('worker.overdue' | translate) : ('worker.due' | translate) }} {{ task.dueDate | dateOnly }}
             </div>
           }
 

@@ -1,10 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy, signal, viewChild, DestroyRef } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy, signal, viewChild } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { MatDialog } from '@angular/material/dialog';
-import { debounceTime } from 'rxjs';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -29,7 +26,7 @@ type MobileChatView = 'list' | 'dm' | 'channel';
 @Component({
   selector: 'app-mobile-chat',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe, ChatChannelListComponent, ChatMessageAreaComponent, ChatChannelHeaderComponent, ChatThreadPanelComponent],
+  imports: [TranslatePipe, ChatChannelListComponent, ChatMessageAreaComponent, ChatChannelHeaderComponent, ChatThreadPanelComponent],
   templateUrl: './mobile-chat.component.html',
   styleUrl: './mobile-chat.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,7 +39,6 @@ export class MobileChatComponent implements OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
 
   private readonly messageArea = viewChild<ChatMessageAreaComponent>('messageArea');
@@ -53,23 +49,7 @@ export class MobileChatComponent implements OnDestroy {
   protected readonly selectedConversation = signal<ChatConversation | null>(null);
   protected readonly selectedChannel = signal<ChatRoom | null>(null);
   protected readonly messages = signal<ChatMessage[]>([]);
-
-  // Search
-  protected readonly searchControl = new FormControl('');
   protected readonly searchTerm = signal('');
-
-  // Filtered data for channel list (mobile-specific search)
-  protected readonly filteredConversations = computed(() => {
-    const term = this.searchTerm().toLowerCase();
-    if (!term) return this.conversations();
-    return this.conversations().filter(c => c.userName.toLowerCase().includes(term));
-  });
-
-  protected readonly filteredChannels = computed(() => {
-    const term = this.searchTerm().toLowerCase();
-    if (!term) return this.channels();
-    return this.channels().filter(c => c.name.toLowerCase().includes(term));
-  });
 
   // File attachment state
   protected readonly pendingFile = signal<File | null>(null);
@@ -99,11 +79,6 @@ export class MobileChatComponent implements OnDestroy {
     this.loadConversations();
     this.loadChannels();
     this.connectHub();
-
-    this.searchControl.valueChanges.pipe(
-      debounceTime(200),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe(v => this.searchTerm.set(v ?? ''));
   }
 
   // ── Channel list events ──

@@ -21,12 +21,13 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { NumberLockInfoComponent } from '../../../../shared/components/number-lock-info/number-lock-info.component';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 import { downloadBlob } from '../../../../shared/utils/download-blob';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 
 @Component({
   selector: 'app-invoice-detail-panel',
   standalone: true,
-  imports: [NumberLockInfoComponent, 
-    DatePipe, DecimalPipe, TranslatePipe, RouterLink, ReactiveFormsModule,
+  imports: [
+    DateOnlyPipe, NumberLockInfoComponent, DatePipe, DecimalPipe, TranslatePipe, RouterLink, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent, InputComponent,
     DetailLoadErrorComponent,

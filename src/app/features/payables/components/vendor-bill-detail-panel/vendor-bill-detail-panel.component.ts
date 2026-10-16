@@ -16,13 +16,14 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 
 // ⚡ ACCOUNTING BOUNDARY — AP counterpart of InvoiceDetailPanel.
 @Component({
   selector: 'app-vendor-bill-detail-panel',
   standalone: true,
   imports: [
-    DatePipe, DecimalPipe, TranslatePipe,
+    DateOnlyPipe, DatePipe, DecimalPipe, TranslatePipe,
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent,
     DetailLoadErrorComponent,

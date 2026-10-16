@@ -34,7 +34,7 @@
               <span class="material-icons-outlined" role="img" [attr.aria-label]="'customers.taxDocuments.expired' | translate">warning</span>
             }
             {{ (row.isExpired ? 'customers.taxDocuments.expired' : 'customers.taxDocuments.expires') | translate }}
-            {{ row.doc.expirationDate | date:'MM/dd/yyyy' }}
+            {{ row.doc.expirationDate | dateOnly }}
           </span>
         }
 

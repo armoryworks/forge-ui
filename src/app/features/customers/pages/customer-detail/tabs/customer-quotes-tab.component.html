@@ -18,7 +18,7 @@
     </ng-template>
 
     <ng-template appColumnCell="expirationDate" let-row>
-      {{ $any(row).expirationDate | date:'MM/dd/yyyy' }}
+      {{ $any(row).expirationDate | dateOnly }}
     </ng-template>
 
     <ng-template appColumnCell="createdAt" let-row>

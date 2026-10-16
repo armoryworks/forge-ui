@@ -19,12 +19,13 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { NumberLockInfoComponent } from '../../../../shared/components/number-lock-info/number-lock-info.component';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 
 @Component({
   selector: 'app-payment-detail-panel',
   standalone: true,
-  imports: [NumberLockInfoComponent, 
-    DatePipe, TranslatePipe, ReactiveFormsModule,
+  imports: [
+    DateOnlyPipe, NumberLockInfoComponent, DatePipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent, InputComponent,
     DetailLoadErrorComponent,

@@ -30,6 +30,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { toIsoDate } from '../../../shared/utils/date.utils';
+import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
 
 type LedgerTab = 'upcoming' | 'recurring';
 
@@ -37,7 +38,7 @@ type LedgerTab = 'upcoming' | 'recurring';
   selector: 'app-upcoming-expenses',
   standalone: true,
   imports: [
-    ReactiveFormsModule, CurrencyPipe, DatePipe, TranslatePipe,
+    DateOnlyPipe, ReactiveFormsModule, CurrencyPipe, DatePipe, TranslatePipe,
     PageHeaderComponent, DialogComponent,
     InputComponent, CurrencyInputComponent, SelectComponent, DatepickerComponent, ToggleComponent,
     DataTableComponent, ColumnCellDirective, ValidationButtonComponent, LoadingBlockDirective, MatTooltipModule,

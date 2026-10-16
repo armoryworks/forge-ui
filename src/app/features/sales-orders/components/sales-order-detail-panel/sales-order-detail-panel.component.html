@@ -912,7 +912,7 @@
                   </div>
                   <div class="so-detail__invoice-row">
                     <span class="so-detail__invoice-label">{{ 'salesOrders.dueDate' | translate }}</span>
-                    <span class="so-detail__invoice-value">{{ invoice.dueDate | date:'MM/dd/yyyy' }}</span>
+                    <span class="so-detail__invoice-value">{{ invoice.dueDate | dateOnly }}</span>
                   </div>
                   <div class="so-detail__invoice-row">
                     <span class="so-detail__invoice-label">{{ 'salesOrders.paymentStatus' | translate }}</span>

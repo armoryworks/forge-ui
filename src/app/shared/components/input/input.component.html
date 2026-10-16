@@ -3,7 +3,7 @@
   @if (prefix() && prefix().length <= 2) {
     <span matPrefix class="input__text-prefix">{{ prefix() }}</span>
   } @else if (prefix()) {
-    <span matPrefix class="material-icons-outlined">{{ prefix() }}</span>
+    <span matPrefix class="material-icons-outlined input__icon-prefix" aria-hidden="true">{{ prefix() }}</span>
   }
   <input matInput
     [type]="effectiveType"
@@ -22,8 +22,9 @@
     (blur)="markTouched()" />
   @if (type() === 'password') {
     <button matSuffix type="button" class="input__password-toggle"
-      (mousedown)="toggleShowPassword()" (mouseup)="toggleShowPassword()"
-      (mouseleave)="showPassword.set(false)"
+      data-testid="password-toggle"
+      (click)="toggleShowPassword()"
+      [attr.aria-pressed]="showPassword()"
       [attr.aria-label]="(showPassword() ? 'shared.hidePassword' : 'shared.showPassword') | translate">
       <span class="material-icons-outlined">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
     </button>

@@ -43,7 +43,7 @@
                   <td class="eligible-table__mono">{{ payment.paymentNumber }}</td>
                   <td>{{ payment.vendorName }}</td>
                   <td class="eligible-table__right">{{ payment.amount | currency }}</td>
-                  <td>{{ payment.paymentDate | date:'MM/dd/yyyy' }}</td>
+                  <td>{{ payment.paymentDate | dateOnly }}</td>
                   <td>
                     @if (payment.accountNumberMasked) {
                       <span class="eligible-table__mono">{{ payment.accountNumberMasked }}</span>

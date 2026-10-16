@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { TranslateModule } from '@ngx-translate/core';
 
 import { InputComponent } from './input.component';
 
@@ -91,5 +92,40 @@ describe('InputComponent · field error', () => {
     control.markAsTouched();
     fixture.detectChanges();
     expect(errorText()).toBe('Minutes must be at least 0');
+  });
+});
+
+@Component({
+  selector: 'app-password-host',
+  standalone: true,
+  imports: [ReactiveFormsModule, InputComponent],
+  template: `<app-input label="Password" type="password" [formControl]="password" />`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+class PasswordHostComponent {
+  readonly password = new FormControl('secret');
+}
+
+describe('InputComponent · password reveal', () => {
+  it('toggles on a click, tap or key press and reports its pressed state', async () => {
+    TestBed.configureTestingModule({ imports: [TranslateModule.forRoot()], providers: [provideNoopAnimations()] });
+    const fixture = TestBed.createComponent(PasswordHostComponent);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const toggle = el.querySelector('[data-testid="password-toggle"]') as HTMLButtonElement;
+    const input = () => el.querySelector('input') as HTMLInputElement;
+
+    expect(input().type).toBe('password');
+    expect(toggle.getAttribute('aria-pressed')).toBe('false');
+
+    toggle.click();
+    fixture.detectChanges();
+    expect(input().type).toBe('text');
+    expect(toggle.getAttribute('aria-pressed')).toBe('true');
+
+    toggle.click();
+    fixture.detectChanges();
+    expect(input().type).toBe('password');
   });
 });

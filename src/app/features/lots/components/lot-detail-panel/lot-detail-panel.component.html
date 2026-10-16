@@ -44,7 +44,7 @@
         @if (t.expirationDate) {
           <div class="trace-meta">
             <span class="trace-label">{{ 'lots.expires' | translate }}</span>
-            <span class="trace-value">{{ t.expirationDate | date:'MM/dd/yyyy' }}</span>
+            <span class="trace-value">{{ t.expirationDate | dateOnly }}</span>
           </div>
         }
         @if (t.producingJob; as job) {

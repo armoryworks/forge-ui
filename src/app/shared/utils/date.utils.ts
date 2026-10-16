@@ -1,7 +1,25 @@
+const DATE_ONLY_VALUE = /^(\d{4})-(\d{2})-(\d{2})(?:T00:00:00(?:\.0+)?(?:Z|[+-]00:?00))?$/;
+
+/**
+ * Parse a date-only string — `YYYY-MM-DD`, or the UTC midnight the API sends for date fields
+ * (`2026-10-30T00:00:00Z` / `+00:00`) — to a local Date on that same calendar day.
+ * Returns null for any other string, so callers fall back to normal parsing for real timestamps.
+ */
+export function parseDateOnly(value: string): Date | null {
+  const m = DATE_ONLY_VALUE.exec(value.trim());
+  if (!m) return null;
+  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function toLocalDate(value: Date | string): Date {
+  return typeof value === 'string' ? parseDateOnly(value) ?? new Date(value) : value;
+}
+
 export function toIsoDate(date: Date | string | null | undefined): string | null {
   if (!date) return null;
   // Accept string (e.g. from localStorage draft restore) or Date
-  const d = typeof date === 'string' ? new Date(date) : date;
+  const d = toLocalDate(date);
   if (isNaN(d.getTime())) return null;
   // Send full ISO 8601 UTC string — Postgres timestamptz requires UTC kind
   const y = d.getFullYear();
@@ -16,7 +34,7 @@ export function toIsoDate(date: Date | string | null | undefined): string | null
  */
 export function toDateOnly(date: Date | string | null | undefined): string | null {
   if (!date) return null;
-  const d = typeof date === 'string' ? new Date(date) : date;
+  const d = toLocalDate(date);
   if (isNaN(d.getTime())) return null;
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -47,7 +65,7 @@ export const DATETIME_FORMAT = 'MM/dd/yyyy hh:mm a';
 /** Format a Date for display: MM/dd/yyyy */
 export function formatDate(date: Date | string | null | undefined): string {
   if (!date) return '';
-  const d = typeof date === 'string' ? new Date(date) : date;
+  const d = toLocalDate(date);
   if (isNaN(d.getTime())) return '';
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   const dd = String(d.getDate()).padStart(2, '0');

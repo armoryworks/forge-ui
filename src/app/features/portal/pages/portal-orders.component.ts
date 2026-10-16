@@ -6,11 +6,12 @@ import { LoadingBlockDirective } from '../../../shared/directives/loading-block.
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { PortalSalesOrder } from '../models/portal.model';
 import { PortalService } from '../services/portal.service';
+import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
 
 @Component({
   selector: 'app-portal-orders',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, TranslatePipe, LoadingBlockDirective, EmptyStateComponent],
+  imports: [DateOnlyPipe, DatePipe, DecimalPipe, TranslatePipe, LoadingBlockDirective, EmptyStateComponent],
   templateUrl: './portal-orders.component.html',
   styleUrl: './portal-list.shared.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

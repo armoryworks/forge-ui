@@ -41,7 +41,7 @@
           <span [class.text-warning]="row.unappliedAmount > 0"><app-currency-display [value]="row.unappliedAmount" [currency]="null" /></span>
         </ng-template>
         <ng-template appColumnCell="paymentDate" let-row>
-          <span class="text-muted">{{ row.paymentDate | date:'MM/dd/yyyy' }}</span>
+          <span class="text-muted">{{ row.paymentDate | dateOnly }}</span>
         </ng-template>
         <ng-template appColumnCell="referenceNumber" let-row>
           <span class="text-muted">{{ row.referenceNumber ?? '---' }}</span>

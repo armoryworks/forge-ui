@@ -65,11 +65,11 @@
         }
         <div class="info-item">
           <span class="info-label">{{ 'invoices.invoiceDate' | translate }}</span>
-          <span class="info-value">{{ inv.invoiceDate | date:'MM/dd/yyyy' }}</span>
+          <span class="info-value">{{ inv.invoiceDate | dateOnly }}</span>
         </div>
         <div class="info-item">
           <span class="info-label">{{ 'invoices.dueDate' | translate }}</span>
-          <span class="info-value">{{ inv.dueDate | date:'MM/dd/yyyy' }}</span>
+          <span class="info-value">{{ inv.dueDate | dateOnly }}</span>
         </div>
         @if (inv.creditTerms) {
           <div class="info-item">

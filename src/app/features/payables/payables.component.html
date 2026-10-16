@@ -103,10 +103,10 @@
           </span>
         </ng-template>
         <ng-template appColumnCell="billDate" let-row>
-          <span class="text-muted">{{ row.billDate | date:'MM/dd/yyyy' }}</span>
+          <span class="text-muted">{{ row.billDate | dateOnly }}</span>
         </ng-template>
         <ng-template appColumnCell="dueDate" let-row>
-          <span class="text-muted">{{ row.dueDate | date:'MM/dd/yyyy' }}</span>
+          <span class="text-muted">{{ row.dueDate | dateOnly }}</span>
         </ng-template>
         <ng-template appColumnCell="total" let-row>
           <app-currency-display [value]="row.total" [currency]="null" />
@@ -151,7 +151,7 @@
           </span>
         </ng-template>
         <ng-template appColumnCell="paymentDate" let-row>
-          <span class="text-muted">{{ row.paymentDate | date:'MM/dd/yyyy' }}</span>
+          <span class="text-muted">{{ row.paymentDate | dateOnly }}</span>
         </ng-template>
         <ng-template appColumnCell="transmissionStatus" let-row>
           @if (row.transmissionStatus) {

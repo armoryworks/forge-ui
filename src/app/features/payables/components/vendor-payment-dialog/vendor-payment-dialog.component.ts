@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ViewChild, computed, inject, output, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -24,6 +23,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ActiveCurrencyService } from '../../../../shared/services/active-currency.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { toIsoDate, todayEnd } from '../../../../shared/utils/date.utils';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 
 type ApplicationGroup = FormGroup<{
   amount: FormControl<number>;
@@ -45,7 +45,7 @@ interface DraftApplicationRow {
   selector: 'app-vendor-payment-dialog',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe, TranslatePipe,
+    DateOnlyPipe, ReactiveFormsModule, TranslatePipe,
     DialogComponent, InputComponent, SelectComponent, DatepickerComponent, TextareaComponent,
     CurrencyInputComponent, CurrencyDisplayComponent, ValidationButtonComponent, LoadingBlockDirective,
   ],

@@ -55,7 +55,7 @@
       [emptyMessage]="'expenses.noUpcomingExpenses' | translate">
 
       <ng-template appColumnCell="dueDate" let-row>
-        {{ row.dueDate | date:'MM/dd/yyyy' }}
+        {{ row.dueDate | dateOnly }}
       </ng-template>
 
       <ng-template appColumnCell="classification" let-row>

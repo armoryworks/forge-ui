@@ -3,6 +3,9 @@ import { DOCUMENT, Injectable, inject } from '@angular/core';
 import { ComponentType } from '@angular/cdk/overlay';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { filter } from 'rxjs';
+
+const FIELD_OVERLAY_PANELS = '.mat-mdc-select-panel, .mat-mdc-autocomplete-panel.mat-mdc-autocomplete-visible, .mat-datepicker-content';
 
 /**
  * Centralized detail dialog opener with URL sync.
@@ -11,6 +14,8 @@ import { Router } from '@angular/router';
  * Only one detail dialog is open at a time: opening another replaces the current one.
  * Feature components call `getDetailFromUrl()` in init to auto-open
  * when the page loads with a detail param (shared links, bookmarks, refresh).
+ * Escape closes the topmost detail dialog through its component's own `close()`,
+ * unless an open field overlay or an inline `<app-dialog>` inside it owns the key.
  */
 @Injectable({ providedIn: 'root' })
 export class DetailDialogService {
@@ -21,6 +26,15 @@ export class DetailDialogService {
   private current: MatDialogRef<unknown, unknown> | null = null;
   private focusOrigin: HTMLElement | null = null;
   private pageTab: string | null = null;
+  private escapeOwnedByFieldOverlay = false;
+
+  constructor() {
+    this.document.addEventListener('keydown', (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        this.escapeOwnedByFieldOverlay = this.document.querySelector(FIELD_OVERLAY_PANELS) !== null;
+      }
+    }, true);
+  }
 
   /**
    * Open a detail dialog and sync the URL. Closes any detail dialog that is
@@ -63,6 +77,9 @@ export class DetailDialogService {
     });
 
     this.current = ref as MatDialogRef<unknown, unknown>;
+    ref.keydownEvents()
+      .pipe(filter(event => event.key === 'Escape' && !event.defaultPrevented))
+      .subscribe(() => this.closeOnEscape(ref as MatDialogRef<unknown, unknown>));
     ref.afterClosed().subscribe(() => {
       if (this.current !== (ref as MatDialogRef<unknown, unknown>)) return;
       this.current = null;
@@ -72,6 +89,11 @@ export class DetailDialogService {
     });
 
     return ref;
+  }
+
+  /** True when `ref` is the detail dialog this service currently has open. */
+  isCurrent(ref: MatDialogRef<unknown, unknown> | null): boolean {
+    return ref !== null && ref === this.current;
   }
 
   /**
@@ -88,6 +110,17 @@ export class DetailDialogService {
     const id = parseInt(detail.substring(colonIdx + 1), 10);
     if (!type || isNaN(id)) return null;
     return { entityType: type, entityId: id };
+  }
+
+  private closeOnEscape(ref: MatDialogRef<unknown, unknown>): void {
+    if (this.escapeOwnedByFieldOverlay) return;
+    if (this.document.getElementById(ref.id)?.querySelector('app-dialog')) return;
+    const instance = ref.componentInstance as { close?: unknown } | null;
+    if (typeof instance?.close === 'function') {
+      (instance.close as () => void).call(instance);
+    } else {
+      ref.close();
+    }
   }
 
   private activeElement(): HTMLElement | null {

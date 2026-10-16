@@ -91,7 +91,6 @@
     "src/app/features/customers/components/price-list-entries-cluster/price-list-entries-table.component.html": 2,
     "src/app/features/inventory/inventory.component.html": 1,
     "src/app/features/leads/pages/queue/leads-queue.component.html": 1,
-    "src/app/features/mobile/pages/mobile-chat.component.html": 1,
     "src/app/features/mobile/pages/mobile-job-detail.component.html": 1,
     "src/app/features/mobile/pages/mobile-scan.component.html": 1,
     "src/app/features/purchase-orders/components/receive-dialog/receive-dialog.component.html": 1,
@@ -158,20 +157,7 @@
     "src/app/features/shipments/components/shipment-dialog/shipment-dialog.component.html": 1,
     "src/app/features/shipments/components/shipping-rates-dialog/shipping-rates-dialog.component.html": 1
   },
-  "date-only-in-local-time": {
-    "src/app/features/customers/pages/customer-detail/tabs/customer-invoices-tab.component.html": 1,
-    "src/app/features/expenses/upcoming/upcoming-expenses.component.html": 1,
-    "src/app/features/invoices/components/invoice-detail-panel/invoice-detail-panel.component.html": 1,
-    "src/app/features/invoices/invoices.component.html": 1,
-    "src/app/features/payables/components/vendor-bill-detail-panel/vendor-bill-detail-panel.component.html": 1,
-    "src/app/features/payables/components/vendor-payment-dialog/vendor-payment-dialog.component.html": 1,
-    "src/app/features/payables/payables.component.html": 1,
-    "src/app/features/portal/pages/portal-invoices.component.html": 1,
-    "src/app/features/portal/pages/portal-orders.component.html": 1,
-    "src/app/features/quality/components/capa-list.component.html": 1,
-    "src/app/features/sales-orders/components/sales-order-detail-panel/sales-order-detail-panel.component.html": 1,
-    "src/app/features/worker/worker.component.html": 1
-  },
+  "date-only-in-local-time": {},
   "hardcoded-text-in-templates": {
     "src/app/core/layout/app-header.component.html": 13,
     "src/app/features/account/account.component.html": 2,
@@ -349,7 +335,6 @@
     "src/app/shared/components/camera-capture/camera-capture.component.html": 1,
     "src/app/shared/components/chat-preview-popup/chat-preview-popup.component.html": 1,
     "src/app/shared/components/concurrency-conflict-dialog/concurrency-conflict-dialog.component.html": 1,
-    "src/app/shared/components/confirm-dialog/confirm-dialog.component.html": 1,
     "src/app/shared/components/connection-banner/connection-banner.component.html": 1,
     "src/app/shared/components/date-range-picker/date-range-picker.component.html": 2,
     "src/app/shared/components/demo-module-switcher/demo-module-switcher.component.html": 8,

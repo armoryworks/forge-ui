@@ -46,4 +46,19 @@ describe('ConfirmDialogComponent', () => {
     fixture.componentInstance.confirm();
     expect(dialogRef.close).toHaveBeenCalledWith(true);
   });
+
+  it('names the header X after the cancel action it performs, not the confirm label', () => {
+    const { fixture, dialogRef } = setupDialog({
+      title: 'Unsaved Changes',
+      message: 'Discard?',
+      confirmLabel: 'Close',
+      cancelLabel: 'Stay',
+    });
+    const x = fixture.nativeElement.querySelector('.confirm-dialog__header button') as HTMLButtonElement;
+
+    expect(x.getAttribute('aria-label')).toBe('Stay');
+
+    x.click();
+    expect(dialogRef.close).toHaveBeenCalledWith(false);
+  });
 });

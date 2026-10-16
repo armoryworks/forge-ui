@@ -18,6 +18,7 @@ describe('DetailDialogService', () => {
   beforeEach(() => {
     const mockDialogRef = {
       afterClosed: () => of(undefined),
+      keydownEvents: () => new Subject<KeyboardEvent>(),
     } as unknown as MatDialogRef<TestDialogComponent>;
 
     dialogOpenSpy = vi.fn().mockReturnValue(mockDialogRef);
@@ -103,6 +104,7 @@ describe('DetailDialogService', () => {
         const ref = {
           close: vi.fn(() => after.next()),
           afterClosed: () => after,
+          keydownEvents: () => new Subject<KeyboardEvent>(),
         };
         closed$.push(after);
         refs.push(ref);
@@ -173,6 +175,100 @@ describe('DetailDialogService', () => {
       closed$[0].next();
 
       expect(navigateSpy.mock.calls[0][0].toString()).toBe('/admin?tab=training');
+    });
+  });
+
+  describe('Escape', () => {
+    let keydown$: Subject<KeyboardEvent>;
+    let ref: { id: string; close: ReturnType<typeof vi.fn>; afterClosed: () => Subject<void>; keydownEvents: () => Subject<KeyboardEvent>; componentInstance: unknown };
+    let container: HTMLElement;
+    let panels: HTMLElement[];
+
+    beforeEach(() => {
+      vi.spyOn(router, 'navigateByUrl').mockImplementation(() => Promise.resolve(true));
+      keydown$ = new Subject<KeyboardEvent>();
+      ref = {
+        id: 'detail-dialog-1',
+        close: vi.fn(),
+        afterClosed: () => new Subject<void>(),
+        keydownEvents: () => keydown$,
+        componentInstance: null,
+      };
+      dialogOpenSpy.mockReturnValue(ref);
+      container = document.createElement('div');
+      container.id = ref.id;
+      document.body.appendChild(container);
+      panels = [];
+    });
+
+    afterEach(() => {
+      container.remove();
+      panels.forEach(panel => panel.remove());
+    });
+
+    function pressEscape(init: KeyboardEventInit = {}): KeyboardEvent {
+      const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true, ...init });
+      document.dispatchEvent(event);
+      keydown$.next(event);
+      return event;
+    }
+
+    it('closes through the dialog component\'s own close()', () => {
+      const close = vi.fn();
+      ref.componentInstance = { close };
+      service.open('vendor', 1, TestDialogComponent, {});
+
+      pressEscape();
+
+      expect(close).toHaveBeenCalledTimes(1);
+      expect(ref.close).not.toHaveBeenCalled();
+    });
+
+    it('closes the ref when the component has no close()', () => {
+      service.open('vendor', 1, TestDialogComponent, {});
+
+      pressEscape();
+
+      expect(ref.close).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores other keys and handled Escape presses', () => {
+      service.open('vendor', 1, TestDialogComponent, {});
+
+      keydown$.next(new KeyboardEvent('keydown', { key: 'Enter' }));
+      const handled = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
+      handled.preventDefault();
+      keydown$.next(handled);
+
+      expect(ref.close).not.toHaveBeenCalled();
+    });
+
+    it('leaves the dialog open while an inline app-dialog inside it owns Escape', () => {
+      container.appendChild(document.createElement('app-dialog'));
+      service.open('po', 1, TestDialogComponent, {});
+
+      pressEscape();
+
+      expect(ref.close).not.toHaveBeenCalled();
+    });
+
+    it('leaves the dialog open when Escape closes an open select panel', () => {
+      const panel = document.createElement('div');
+      panel.className = 'mat-mdc-select-panel';
+      document.body.appendChild(panel);
+      panels.push(panel);
+      service.open('vendor', 1, TestDialogComponent, {});
+
+      pressEscape();
+
+      expect(ref.close).not.toHaveBeenCalled();
+    });
+
+    it('reports the open detail dialog as current', () => {
+      const opened = service.open('vendor', 1, TestDialogComponent, {});
+
+      expect(service.isCurrent(opened as unknown as MatDialogRef<unknown, unknown>)).toBe(true);
+      expect(service.isCurrent(null)).toBe(false);
     });
   });
 

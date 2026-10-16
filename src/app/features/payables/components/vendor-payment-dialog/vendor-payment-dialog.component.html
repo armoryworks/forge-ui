@@ -30,7 +30,7 @@
           @for (group of applications.controls; track group; let i = $index) {
             <div class="app-line" [class.app-line--fx]="showSettlementFxRate()" [formGroupName]="i">
               <span class="app-line__mono">{{ payableBills()[i].billNumber }}</span>
-              <span class="app-line__muted">{{ payableBills()[i].dueDate | date:'MM/dd/yyyy' }}</span>
+              <span class="app-line__muted">{{ payableBills()[i].dueDate | dateOnly }}</span>
               <span class="app-line__right"><app-currency-display [value]="payableBills()[i].balanceDue" [currency]="null" /></span>
               <app-input [label]="'payables.amountToApply' | translate" type="number" formControlName="amount" min="0" [max]="payableBills()[i].balanceDue" step="0.01" data-testid="vendor-payment-app-amount" />
               @if (showSettlementFxRate()) {

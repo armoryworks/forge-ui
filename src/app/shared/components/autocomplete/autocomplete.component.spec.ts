@@ -22,6 +22,7 @@ describe('AutocompleteComponent · filteredOptions', () => {
   ];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let comp: any;
+  let fixture: ComponentFixture<AutocompleteComponent>;
 
   beforeEach(() => {
     // Disable auto change-detection so the template never renders — we read the
@@ -30,7 +31,7 @@ describe('AutocompleteComponent · filteredOptions', () => {
     TestBed.configureTestingModule({
       providers: [provideNoopAnimations(), { provide: ComponentFixtureAutoDetect, useValue: false }],
     });
-    const fixture = TestBed.createComponent(AutocompleteComponent);
+    fixture = TestBed.createComponent(AutocompleteComponent);
     comp = fixture.componentInstance;
     fixture.componentRef.setInput('label', 'Part');
     fixture.componentRef.setInput('options', OPTIONS);
@@ -52,7 +53,34 @@ describe('AutocompleteComponent · filteredOptions', () => {
     expect(comp.filteredOptions().map((o: AutocompleteOption) => o['value'])).toEqual([2]);
   });
 
-  it('is resilient to a numeric control value', () => {
+  it('ranks an exact match on a listed field ahead of substring matches', () => {
+    fixture.componentRef.setInput('options', [
+      { value: 'CT', name: 'Connecticut', label: 'CT - Connecticut' },
+      { value: 'SC', name: 'South Carolina', label: 'SC - South Carolina' },
+      { value: 'SD', name: 'South Dakota', label: 'SD - South Dakota' },
+      { value: 'UT', name: 'Utah', label: 'UT - Utah' },
+    ]);
+    fixture.componentRef.setInput('autoSelectFields', ['value', 'name']);
+
+    comp.searchControl.setValue('UT');
+
+    expect(comp.filteredOptions().map((o: AutocompleteOption) => o['value'])).toEqual(['UT', 'CT', 'SC', 'SD']);
+  });
+
+  it('ranks prefix and word-start matches ahead of other substring matches, keeping list order within a rank', () => {
+    fixture.componentRef.setInput('options', [
+      { value: 1, label: 'Bracket mount' },
+      { value: 2, label: 'Mount plate' },
+      { value: 3, label: 'Paramount' },
+      { value: 4, label: 'Mount ring' },
+    ]);
+
+    comp.searchControl.setValue('mount');
+
+    expect(comp.filteredOptions().map((o: AutocompleteOption) => o['value'])).toEqual([2, 4, 1, 3]);
+  });
+
+    it('is resilient to a numeric control value', () => {
     comp.searchControl.setValue(42 as unknown as string);
     expect(() => comp.filteredOptions()).not.toThrow();
   });

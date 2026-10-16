@@ -4,6 +4,7 @@
 :host {
   display: block;
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg);
   color: var(--text);
   font-family: $font-family-primary;
@@ -11,6 +12,7 @@
 
 .welcome {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;

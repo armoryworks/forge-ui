@@ -18,7 +18,7 @@ export interface TrainingDetailDialogData {
       [userId]="data.userId!"
       (closed)="close()" />
   `,
-  styles: [`:host { display: block; width: 100%; height: 100%; }`],
+  styles: [`:host { display: block; width: 100%; height: 100%; } app-training-detail-panel { height: 100%; }`],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TrainingDetailDialogComponent {

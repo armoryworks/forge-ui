@@ -99,33 +99,37 @@
 
         <!-- Channels section -->
         <div class="channel-section">
-          <button class="channel-section__header" (click)="toggleSection('channels')" aria-label="Toggle channels">
-            <span class="material-icons-outlined channel-section__chevron" [class.channel-section__chevron--collapsed]="!channelSectionsExpanded()['channels']">expand_more</span>
-            <span class="channel-section__title">Channels</span>
+          <div class="channel-section__header">
+            <button class="channel-section__toggle" (click)="toggleSection('channels')" aria-label="Toggle channels">
+              <span class="material-icons-outlined channel-section__chevron" [class.channel-section__chevron--collapsed]="!channelSectionsExpanded()['channels']">expand_more</span>
+              <span class="channel-section__title">Channels</span>
+            </button>
             <span class="channel-section__spacer"></span>
-            <button class="icon-btn channel-section__action" (click)="openCreateChannel(); $event.stopPropagation()" aria-label="New channel" matTooltip="New Channel" matTooltipPosition="above">
+            <button class="icon-btn channel-section__action" (click)="openCreateChannel()" aria-label="New channel" matTooltip="New Channel" matTooltipPosition="above">
               <span class="material-icons-outlined">add</span>
             </button>
-          </button>
+          </div>
           @if (channelSectionsExpanded()['channels']) {
             <div class="channel-section__items">
               @if (groupChannels().length === 0) {
                 <div class="channel-section__empty">No channels</div>
               }
               @for (channel of groupChannels(); track channel.id) {
-                <button class="channel-item" (click)="selectChannel(channel)">
-                  <span class="material-icons-outlined channel-item__icon">{{ getChannelIcon(channel) }}</span>
-                  <span class="channel-item__name">{{ channel.name }}</span>
-                  @if (isChannelMuted(channel)) {
-                    <span class="material-icons-outlined channel-item__muted" matTooltip="Muted" matTooltipPosition="above">notifications_off</span>
-                  }
-                  @if (channel.unreadCount > 0) {
-                    <span class="conversation__badge">{{ channel.unreadCount }}</span>
-                  }
+                <div class="channel-row">
+                  <button class="channel-item" (click)="selectChannel(channel)">
+                    <span class="material-icons-outlined channel-item__icon">{{ getChannelIcon(channel) }}</span>
+                    <span class="channel-item__name">{{ channel.name }}</span>
+                    @if (isChannelMuted(channel)) {
+                      <span class="material-icons-outlined channel-item__muted" matTooltip="Muted" matTooltipPosition="above">notifications_off</span>
+                    }
+                    @if (channel.unreadCount > 0) {
+                      <span class="conversation__badge">{{ channel.unreadCount }}</span>
+                    }
+                  </button>
                   <button class="icon-btn channel-item__mute-btn" (click)="toggleMuteChannel(channel, $event)" [attr.aria-label]="isChannelMuted(channel) ? 'Unmute channel' : 'Mute channel'" [matTooltip]="isChannelMuted(channel) ? 'Unmute' : 'Mute'" matTooltipPosition="above">
                     <span class="material-icons-outlined">{{ isChannelMuted(channel) ? 'notifications_active' : 'notifications_off' }}</span>
                   </button>
-                </button>
+                </div>
               }
               <button class="channel-item channel-item--browse" (click)="openBrowseChannels()" aria-label="Browse channels">
                 <span class="material-icons-outlined channel-item__icon">explore</span>
@@ -145,19 +149,21 @@
             @if (channelSectionsExpanded()['teams']) {
               <div class="channel-section__items">
                 @for (channel of teamChannels(); track channel.id) {
-                  <button class="channel-item" (click)="selectChannel(channel)">
-                    <span class="material-icons-outlined channel-item__icon">{{ getChannelIcon(channel) }}</span>
-                    <span class="channel-item__name">{{ channel.name }}</span>
-                    @if (isChannelMuted(channel)) {
-                      <span class="material-icons-outlined channel-item__muted" matTooltip="Muted" matTooltipPosition="above">notifications_off</span>
-                    }
-                    @if (channel.unreadCount > 0) {
-                      <span class="conversation__badge">{{ channel.unreadCount }}</span>
-                    }
+                  <div class="channel-row">
+                    <button class="channel-item" (click)="selectChannel(channel)">
+                      <span class="material-icons-outlined channel-item__icon">{{ getChannelIcon(channel) }}</span>
+                      <span class="channel-item__name">{{ channel.name }}</span>
+                      @if (isChannelMuted(channel)) {
+                        <span class="material-icons-outlined channel-item__muted" matTooltip="Muted" matTooltipPosition="above">notifications_off</span>
+                      }
+                      @if (channel.unreadCount > 0) {
+                        <span class="conversation__badge">{{ channel.unreadCount }}</span>
+                      }
+                    </button>
                     <button class="icon-btn channel-item__mute-btn" (click)="toggleMuteChannel(channel, $event)" [attr.aria-label]="isChannelMuted(channel) ? 'Unmute channel' : 'Mute channel'" [matTooltip]="isChannelMuted(channel) ? 'Unmute' : 'Mute'" matTooltipPosition="above">
                       <span class="material-icons-outlined">{{ isChannelMuted(channel) ? 'notifications_active' : 'notifications_off' }}</span>
                     </button>
-                  </button>
+                  </div>
                 }
               </div>
             }

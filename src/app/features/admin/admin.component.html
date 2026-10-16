@@ -826,11 +826,40 @@
           <button type="button" class="icon-btn roles-field__info"
                   [attr.aria-label]="'admin.roleSuggestions.ariaLabel' | translate"
                   [matTooltip]="'admin.roleSuggestions.ariaLabel' | translate" matTooltipPosition="above"
+                  [attr.aria-expanded]="showRoleSuggestions()"
+                  aria-controls="role-suggestions"
                   (click)="toggleRoleSuggestions()">
             <span class="material-icons-outlined">info_outline</span>
           </button>
         </div>
       </div>
+
+      @if (showRoleSuggestions()) {
+        <section id="role-suggestions" class="role-suggestions" [attr.aria-label]="'admin.roleSuggestions.title' | translate" data-testid="role-suggestions">
+          <header class="role-suggestions__header">
+            <span class="role-suggestions__title">{{ 'admin.roleSuggestions.title' | translate }}</span>
+            <button type="button" class="icon-btn"
+                    [attr.aria-label]="'shared.slideout.close' | translate"
+                    [matTooltip]="'shared.slideout.close' | translate" matTooltipPosition="above"
+                    (click)="showRoleSuggestions.set(false)">
+              <span class="material-icons-outlined">close</span>
+            </button>
+          </header>
+          <p class="role-suggestions__hint">{{ 'admin.roleSuggestions.hint' | translate }}</p>
+          <div class="role-suggestions__list">
+            @for (s of roleSuggestions; track s.labelKey) {
+              <button type="button" class="role-suggestions__item" (click)="applyRoleSuggestion(s.roles)">
+                <span class="role-suggestions__label">{{ s.labelKey | translate }}</span>
+                <span class="role-chips">
+                  @for (r of s.roles; track r) {
+                    <span class="chip chip--primary">{{ r }}</span>
+                  }
+                </span>
+              </button>
+            }
+          </div>
+        </section>
+      }
 
       @if (editingUser() && locationOptions().length > 1) {
         <app-select [label]="'admin.workLocation' | translate" formControlName="workLocationId" [options]="locationOptions()" />
@@ -840,13 +869,14 @@
         <div class="color-picker-row">
           <span class="color-picker-label" id="avatar-color-label">{{ 'admin.avatarColor' | translate }}</span>
           <div class="color-picker" role="group" aria-labelledby="avatar-color-label">
-            @for (color of avatarColors; track color) {
+            @for (color of avatarColors; track color.value) {
               <button class="color-option"
-                [style.background]="color"
-                [class.color-option--selected]="avatarColor() === color"
-                [attr.aria-label]="color"
-                [attr.aria-pressed]="avatarColor() === color"
-                (click)="avatarColor.set(color)">
+                [style.background]="color.value"
+                [class.color-option--selected]="avatarColor() === color.value"
+                [attr.aria-label]="color.labelKey | translate"
+                [matTooltip]="color.labelKey | translate"
+                [attr.aria-pressed]="avatarColor() === color.value"
+                (click)="avatarColor.set(color.value)">
               </button>
             }
           </div>
@@ -942,29 +972,6 @@
         }
       }
 
-      <!-- Roles info icon → suggested role combinations (guidance only) -->
-      <app-slideout
-        [open]="showRoleSuggestions()"
-        position="right"
-        size="300px"
-        icon="info_outline"
-        [title]="'admin.roleSuggestions.title' | translate"
-        [closeOnOutsideClick]="true"
-        (closed)="showRoleSuggestions.set(false)">
-        <p class="role-suggestions__hint">{{ 'admin.roleSuggestions.hint' | translate }}</p>
-        <div class="role-suggestions__list">
-          @for (s of roleSuggestions; track s.labelKey) {
-            <button type="button" class="role-suggestions__item" (click)="applyRoleSuggestion(s.roles)">
-              <span class="role-suggestions__label">{{ s.labelKey | translate }}</span>
-              <span class="role-chips">
-                @for (r of s.roles; track r) {
-                  <span class="chip chip--primary">{{ r }}</span>
-                }
-              </span>
-            </button>
-          }
-        </div>
-      </app-slideout>
     </div>
 
     @if (setupToken()) {

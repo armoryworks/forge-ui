@@ -215,17 +215,23 @@ const PATTERNS = [
   { name: 'config-double', re: /\b(?:i18nKey|labelKey|tooltipKey|placeholderKey|messageKey|titleKey|descKey|hintKey|emptyMessageKey|emptyHelpKey|addLabelKey|missingMessageKey|displayNameKey|sourceLabelKey)\s*:\s*"([a-zA-Z][\w]*(?:\.[\w]+)+)"/g },
 ];
 
+const PAREN_PIPE = /\(((?:[^()]|\((?:[^()]|\([^()]*\))*\))*)\)\s*\|\s*translate(?!\w)/g;
+const TERNARY_BRANCH = /[?:]\s*(['"])([a-zA-Z][\w]*(?:\.[\w]+)+)\1/g;
+
 const usages = new Map(); // key -> [{ file, pattern }]
+function addUsage(key, file, pattern) {
+  if (!usages.has(key)) usages.set(key, []);
+  usages.get(key).push({ file: relative(REPO_ROOT, file), pattern });
+}
 for (const file of sourceFiles) {
   const content = readFileSync(file, 'utf-8');
   for (const { name, re } of PATTERNS) {
     re.lastIndex = 0;
     let m;
-    while ((m = re.exec(content)) !== null) {
-      const key = m[1];
-      if (!usages.has(key)) usages.set(key, []);
-      usages.get(key).push({ file: relative(REPO_ROOT, file), pattern: name });
-    }
+    while ((m = re.exec(content)) !== null) addUsage(m[1], file, name);
+  }
+  for (const group of content.matchAll(PAREN_PIPE)) {
+    for (const branch of group[1].matchAll(TERNARY_BRANCH)) addUsage(branch[2], file, 'pipe-ternary');
   }
 }
 

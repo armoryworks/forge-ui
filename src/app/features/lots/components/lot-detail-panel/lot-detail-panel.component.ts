@@ -25,6 +25,7 @@ import { DataTableComponent } from '../../../../shared/components/data-table/dat
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 
 const STATUS_KEYS: Record<string, Record<string, string>> = {
   QcInspection: {
@@ -61,7 +62,7 @@ const NCR_STATUS_KEYS: Record<string, string> = {
 @Component({
   selector: 'app-lot-detail-panel',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, MatTooltipModule, TranslatePipe, BarcodeInfoComponent, EntityActivitySectionComponent, LoadingBlockDirective, DataTableComponent, ColumnCellDirective, EntityLinkComponent, DetailLoadErrorComponent],
+  imports: [DateOnlyPipe, DatePipe, DecimalPipe, MatTooltipModule, TranslatePipe, BarcodeInfoComponent, EntityActivitySectionComponent, LoadingBlockDirective, DataTableComponent, ColumnCellDirective, EntityLinkComponent, DetailLoadErrorComponent],
   templateUrl: './lot-detail-panel.component.html',
   styleUrl: './lot-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -49,6 +49,7 @@ import { environment } from '../environments/environment';
 import { CurrencyService } from './shared/services/currency.service';
 import { I18nOverridesService } from './shared/services/i18n-overrides.service';
 import { TerminologyService } from './shared/services/terminology.service';
+import { ActiveTabRevealService } from './shared/services/active-tab-reveal.service';
 import { EmployeeProfileService } from './features/account/services/employee-profile.service';
 import { TrainingService } from './features/training/services/training.service';
 import { WalkthroughContent } from './features/training/models/walkthrough-content.model';
@@ -106,6 +107,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
   private readonly dialog = inject(MatDialog);
   private readonly appUpdate = inject(AppUpdateService);
+  private readonly activeTabReveal = inject(ActiveTabRevealService);
 
   /** Prevents double-launching an inline tour on direct ?walkthrough= navigation. */
   private walkthroughRunning = false;
@@ -220,6 +222,8 @@ export class AppComponent implements OnInit, OnDestroy {
     this.registerTours();
     this.keyboardShortcuts.initialize();
     this.watchWalkthroughUrl();
+    const tabReveal = this.activeTabReveal.watch();
+    this.destroyRef.onDestroy(() => tabReveal.unsubscribe());
     // Surface freshly-deployed versions so shipped fixes aren't masked by the
     // service worker serving a stale cached build.
     this.appUpdate.init();

@@ -20,12 +20,13 @@ import { PaymentDialogComponent } from './components/payment-dialog/payment-dial
 import { PaymentDetailDialogComponent, PaymentDetailDialogData } from './components/payment-detail-dialog/payment-detail-dialog.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
+import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
 
 @Component({
   selector: 'app-payments',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe, TranslatePipe,
+    DateOnlyPipe, ReactiveFormsModule, DatePipe, TranslatePipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
     CurrencyDisplayComponent, PaymentDialogComponent,
