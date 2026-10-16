@@ -27,42 +27,6 @@
   flex: 1;
 }
 
-// ── Mobile search bar ──
-.mobile-chat__search {
-  display: flex;
-  align-items: center;
-  gap: $sp-sm;
-  padding: $sp-md $sp-lg;
-  border-bottom: $border-width-thin solid var(--border);
-  flex-shrink: 0;
-
-  .material-icons-outlined {
-    font-size: $icon-size-md;
-    color: var(--text-muted);
-  }
-}
-
-.mobile-chat__search-input {
-  flex: 1;
-  height: 36px;
-  padding: 0 $sp-md;
-  border: $border-width-thin solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  font-size: $font-size-base;
-  font-family: $font-family-primary;
-  outline: none;
-  border-radius: $border-radius;
-
-  &:focus {
-    border-color: var(--primary);
-  }
-
-  &::placeholder {
-    color: var(--text-muted);
-  }
-}
-
 // ── Channel list wrapper (adapts sub-component to mobile full-screen) ──
 .mobile-chat__channel-list-wrapper {
   flex: 1;

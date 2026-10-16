@@ -22,8 +22,9 @@
     (blur)="markTouched()" />
   @if (type() === 'password') {
     <button matSuffix type="button" class="input__password-toggle"
-      (mousedown)="toggleShowPassword()" (mouseup)="toggleShowPassword()"
-      (mouseleave)="showPassword.set(false)"
+      data-testid="password-toggle"
+      (click)="toggleShowPassword()"
+      [attr.aria-pressed]="showPassword()"
       [attr.aria-label]="(showPassword() ? 'shared.hidePassword' : 'shared.showPassword') | translate">
       <span class="material-icons-outlined">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
     </button>

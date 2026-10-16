@@ -3324,6 +3324,18 @@
     "role": "Role",
     "workLocation": "Work Location",
     "avatarColor": "Avatar Color",
+    "avatarColors": {
+      "teal": "Teal",
+      "violet": "Violet",
+      "orange": "Orange",
+      "green": "Green",
+      "blue": "Blue",
+      "rose": "Rose",
+      "brown": "Brown",
+      "purple": "Purple",
+      "forest": "Forest green",
+      "navy": "Navy"
+    },
     "deactivate": "Deactivate",
     "activate": "Activate",
     "getSetupCode": "Get Setup Code",

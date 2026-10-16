@@ -379,9 +379,17 @@ export class AdminComponent implements OnInit {
       } },
     { field: 'actions', header: this.translate.instant('admin.colActions'), width: '140px', align: 'right' },
   ]);
-  protected readonly avatarColors = [
-    '#0d9488', '#7c3aed', '#c2410c', '#15803d', '#1d4ed8',
-    '#be123c', '#92400e', '#6d28d9', '#065f46', '#1e40af',
+  protected readonly avatarColors: { value: string; labelKey: string }[] = [
+    { value: '#0d9488', labelKey: 'admin.avatarColors.teal' },
+    { value: '#7c3aed', labelKey: 'admin.avatarColors.violet' },
+    { value: '#c2410c', labelKey: 'admin.avatarColors.orange' },
+    { value: '#15803d', labelKey: 'admin.avatarColors.green' },
+    { value: '#1d4ed8', labelKey: 'admin.avatarColors.blue' },
+    { value: '#be123c', labelKey: 'admin.avatarColors.rose' },
+    { value: '#92400e', labelKey: 'admin.avatarColors.brown' },
+    { value: '#6d28d9', labelKey: 'admin.avatarColors.purple' },
+    { value: '#065f46', labelKey: 'admin.avatarColors.forest' },
+    { value: '#1e40af', labelKey: 'admin.avatarColors.navy' },
   ];
 
   constructor() {

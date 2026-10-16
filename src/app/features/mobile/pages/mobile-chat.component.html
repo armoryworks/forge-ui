@@ -4,23 +4,14 @@
       <h2 class="mobile-chat__title">{{ 'chat.title' | translate }}</h2>
     </div>
 
-    <!-- Mobile search bar -->
-    <div class="mobile-chat__search">
-      <span class="material-icons-outlined">search</span>
-      <input
-        class="mobile-chat__search-input"
-        type="text"
-        [placeholder]="'chat.searchConversations' | translate"
-        [formControl]="searchControl"
-        [attr.aria-label]="'mobileLegacyPages.chat.searchLabel' | translate" />
-    </div>
-
     <div class="mobile-chat__channel-list-wrapper">
       <app-chat-channel-list
-        [conversations]="filteredConversations()"
-        [channels]="filteredChannels()"
+        [conversations]="conversations()"
+        [channels]="channels()"
         [selectedChannelId]="selectedChannelId()"
         [selectedUserId]="selectedUserId()"
+        [searchTerm]="searchTerm()"
+        (searchChanged)="searchTerm.set($event)"
         (channelSelected)="onChannelSelected($event)"
         (newGroup)="openCreateChannel()"
         (browseChannels)="openBrowseChannels()"

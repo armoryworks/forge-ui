@@ -896,13 +896,14 @@
         <div class="color-picker-row">
           <span class="color-picker-label" id="avatar-color-label">{{ 'admin.avatarColor' | translate }}</span>
           <div class="color-picker" role="group" aria-labelledby="avatar-color-label">
-            @for (color of avatarColors; track color) {
+            @for (color of avatarColors; track color.value) {
               <button class="color-option"
-                [style.background]="color"
-                [class.color-option--selected]="avatarColor() === color"
-                [attr.aria-label]="color"
-                [attr.aria-pressed]="avatarColor() === color"
-                (click)="avatarColor.set(color)">
+                [style.background]="color.value"
+                [class.color-option--selected]="avatarColor() === color.value"
+                [attr.aria-label]="color.labelKey | translate"
+                [matTooltip]="color.labelKey | translate"
+                [attr.aria-pressed]="avatarColor() === color.value"
+                (click)="avatarColor.set(color.value)">
               </button>
             }
           </div>
