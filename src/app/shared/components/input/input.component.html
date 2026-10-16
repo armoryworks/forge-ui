@@ -24,7 +24,7 @@
     <button matSuffix type="button" class="input__password-toggle"
       (mousedown)="toggleShowPassword()" (mouseup)="toggleShowPassword()"
       (mouseleave)="showPassword.set(false)"
-      [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'">
+      [attr.aria-label]="(showPassword() ? 'shared.hidePassword' : 'shared.showPassword') | translate">
       <span class="material-icons-outlined">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
     </button>
   }

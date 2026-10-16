@@ -30,11 +30,11 @@
         </ng-template>
         <ng-template appColumnCell="actions" let-row>
           <div class="approval-queue__actions">
-            <button class="icon-btn icon-btn--success" [matTooltip]="'expenses.approve' | translate" matTooltipPosition="above"
+            <button class="icon-btn icon-btn--success" [attr.aria-label]="'expenses.approve' | translate" [matTooltip]="'expenses.approve' | translate" matTooltipPosition="above"
               (click)="openReview(row); $event.stopPropagation()">
               <span class="material-icons-outlined">check</span>
             </button>
-            <button class="icon-btn icon-btn--danger" [matTooltip]="'expenses.reject' | translate" matTooltipPosition="above"
+            <button class="icon-btn icon-btn--danger" [attr.aria-label]="'expenses.reject' | translate" [matTooltip]="'expenses.reject' | translate" matTooltipPosition="above"
               (click)="openReview(row); $event.stopPropagation()">
               <span class="material-icons-outlined">close</span>
             </button>

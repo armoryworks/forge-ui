@@ -6,7 +6,8 @@
   align-items: center;
   gap: $sp-sm;
   border: $border-width solid var(--border);
-  padding: $sp-sm $sp-md;
+  min-height: 44px;
+  padding: 0 $sp-md;
   background: var(--surface);
   transition: border-color $transition-fast;
 
@@ -27,6 +28,7 @@
 
   &__field {
     flex: 1;
+    align-self: stretch;
     border: none;
     outline: none;
     background: transparent;
@@ -49,6 +51,8 @@
     cursor: pointer;
     color: var(--text-muted);
     padding: 0;
+    align-self: stretch;
+    min-width: 44px;
 
     .material-icons-outlined {
       font-size: $icon-size-sm;

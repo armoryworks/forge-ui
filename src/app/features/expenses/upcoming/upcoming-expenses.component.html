@@ -101,10 +101,10 @@
 
       <ng-template appColumnCell="actions" let-row>
         <div class="row-actions">
-          <button class="icon-btn" [matTooltip]="'expenses.toggleActive' | translate" matTooltipPosition="above" (click)="toggleActive(row); $event.stopPropagation()">
+          <button class="icon-btn" [attr.aria-label]="'expenses.toggleActive' | translate" [matTooltip]="'expenses.toggleActive' | translate" matTooltipPosition="above" (click)="toggleActive(row); $event.stopPropagation()">
             <span class="material-icons-outlined">{{ row.isActive ? 'pause' : 'play_arrow' }}</span>
           </button>
-          <button class="icon-btn icon-btn--danger" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" (click)="deleteRecurring(row); $event.stopPropagation()">
+          <button class="icon-btn icon-btn--danger" [attr.aria-label]="'common.delete' | translate" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" (click)="deleteRecurring(row); $event.stopPropagation()">
             <span class="material-icons-outlined">delete</span>
           </button>
         </div>

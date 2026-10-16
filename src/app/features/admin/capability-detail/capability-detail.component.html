@@ -55,10 +55,10 @@
               [disabled]="togglePending()"
               (change)="onToggle($event.checked)"
               data-testid="capability-detail-toggle"
-              [attr.aria-label]="'Toggle ' + entry()!.name">
+              [aria-label]="'admin.capability.toggleAria' | translate: { name: entry()!.name }">
             </mat-slide-toggle>
             <span class="cap-detail__toggle-label">
-              {{ entry()!.enabled ? 'Enabled' : 'Disabled' }}
+              {{ (entry()!.enabled ? 'common.enabled' : 'common.disabled') | translate }}
             </span>
           </div>
         </section>

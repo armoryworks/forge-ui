@@ -13,8 +13,9 @@
     display: flex;
     align-items: center;
     gap: $sp-md;
-    height: 40px;
+    height: 44px;
     padding: 0 $sp-lg;
+    cursor: text;
     background: rgba(255, 255, 255, 0.15);
     border: $border-width solid rgba(255, 255, 255, 0.25);
   }
@@ -26,6 +27,8 @@
 
   &__input {
     flex: 1;
+    align-self: stretch;
+    min-width: 0;
     border: none;
     outline: none;
     background: transparent;

@@ -1,8 +1,11 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, input, output, signal, ViewChild } from '@angular/core';
 
+import { TranslatePipe } from '@ngx-translate/core';
+
 @Component({
   selector: 'app-barcode-scan-input',
   standalone: true,
+  imports: [TranslatePipe],
   templateUrl: './barcode-scan-input.component.html',
   styleUrl: './barcode-scan-input.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

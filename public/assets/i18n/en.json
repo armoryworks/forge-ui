@@ -353,6 +353,7 @@
     "print": "Print",
     "download": "Download",
     "upload": "Upload",
+    "uploading": "Uploading…",
     "view": "View",
     "details": "Details",
     "type": "Type",
@@ -3038,6 +3039,7 @@
     "date": "Date",
     "category": "Category",
     "receipt": "Receipt",
+    "uploadReceipt": "Upload receipt",
     "approved": "Approved",
     "rejected": "Rejected",
     "reimbursed": "Reimbursed",
@@ -3840,7 +3842,8 @@
     "settingsSearchPlaceholder": "Name or description",
     "noSettingsMatch": "No settings match.",
     "capability": {
-      "relatedSettings": "Related settings"
+      "relatedSettings": "Related settings",
+      "toggleAria": "Toggle {{name}}"
     }
   },
   "teamsPanel": {
@@ -4946,6 +4949,8 @@
     "min": "Min",
     "max": "Max",
     "clear": "Clear",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "apply": "Apply",
     "columnFilter": "Column filter",
     "columnManager": "Column manager",
@@ -6824,11 +6829,17 @@
     "channelList": {
       "directMessages": "Direct Messages",
       "groupChats": "Group Chats",
+      "teams": "Teams",
       "newMessage": "New Message",
       "newGroup": "New Group",
       "searchConversations": "Search conversations",
       "noConversations": "No conversations yet",
-      "noResults": "No results found"
+      "noResults": "No results found",
+      "muteChannel": "Mute channel",
+      "mute": "Mute",
+      "unmute": "Unmute",
+      "unmuteChannel": "Unmute channel",
+      "browseChannels": "Browse channels"
     },
     "thread": {
       "replies": "Thread",
@@ -8462,6 +8473,10 @@
       "entityType": "Entity Type",
       "escalateAfter": "Escalate After (hours)",
       "newWorkflow": "New Workflow",
+      "newWorkflowTitle": "New Workflow",
+      "editWorkflow": "Edit Workflow",
+      "create": "Create",
+      "update": "Update",
       "noWorkflows": "No workflows defined",
       "role": "Role",
       "stepName": "Step Name",

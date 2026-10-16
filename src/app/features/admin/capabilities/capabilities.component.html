@@ -140,7 +140,7 @@
                         [disabled]="isPending(cap.code) || loading()"
                         (change)="onToggle(cap, $event.checked)"
                         (click)="$event.stopPropagation()"
-                        [attr.aria-label]="'Toggle ' + cap.name"
+                        [aria-label]="'admin.capability.toggleAria' | translate: { name: cap.name }"
                         data-testid="capability-toggle">
                       </mat-slide-toggle>
 

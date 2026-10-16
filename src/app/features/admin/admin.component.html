@@ -79,20 +79,20 @@
                 </span>
               }
               @if (!user.hasPassword) {
-                <button class="icon-btn" [matTooltip]="'admin.getSetupCode' | translate" matTooltipPosition="above" (click)="regenerateSetupToken(user); openEditUser(user); $event.stopPropagation()">
+                <button class="icon-btn" [attr.aria-label]="'admin.getSetupCode' | translate" [matTooltip]="'admin.getSetupCode' | translate" matTooltipPosition="above" (click)="regenerateSetupToken(user); openEditUser(user); $event.stopPropagation()">
                   <span class="material-icons-outlined">vpn_key</span>
                 </button>
               }
-              <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" (click)="openEditUser(user); $event.stopPropagation()">
+              <button class="icon-btn" [attr.aria-label]="'common.edit' | translate" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" (click)="openEditUser(user); $event.stopPropagation()">
                 <span class="material-icons-outlined">edit</span>
               </button>
-              <button *appCap="'CAP-MOBILE-CORE'" class="icon-btn" data-testid="admin-user-add-device" [matTooltip]="'admin.devices.addAction' | translate" matTooltipPosition="above" (click)="deviceUser.set(user); $event.stopPropagation()">
+              <button *appCap="'CAP-MOBILE-CORE'" class="icon-btn" data-testid="admin-user-add-device" [attr.aria-label]="'admin.devices.addAction' | translate" [matTooltip]="'admin.devices.addAction' | translate" matTooltipPosition="above" (click)="deviceUser.set(user); $event.stopPropagation()">
                 <span class="material-icons-outlined">smartphone</span>
               </button>
-              <button class="icon-btn" [class.icon-btn--active]="user.isNonEmployee" data-testid="admin-user-non-employee" [matTooltip]="user.isNonEmployee ? ('admin.nonEmployee.clearAction' | translate) : ('admin.nonEmployee.setAction' | translate)" matTooltipPosition="above" (click)="toggleNonEmployee(user); $event.stopPropagation()">
+              <button class="icon-btn" [class.icon-btn--active]="user.isNonEmployee" data-testid="admin-user-non-employee" [attr.aria-label]="(user.isNonEmployee ? 'admin.nonEmployee.clearAction' : 'admin.nonEmployee.setAction') | translate" [attr.aria-pressed]="user.isNonEmployee" [matTooltip]="user.isNonEmployee ? ('admin.nonEmployee.clearAction' | translate) : ('admin.nonEmployee.setAction' | translate)" matTooltipPosition="above" (click)="toggleNonEmployee(user); $event.stopPropagation()">
                 <span class="material-icons-outlined">{{ user.isNonEmployee ? 'badge' : 'work_outline' }}</span>
               </button>
-              <button class="icon-btn" [matTooltip]="user.isActive ? ('admin.deactivate' | translate) : ('admin.activate' | translate)" matTooltipPosition="above" (click)="toggleUserActive(user); $event.stopPropagation()">
+              <button class="icon-btn" [attr.aria-label]="(user.isActive ? 'admin.deactivate' : 'admin.activate') | translate" [matTooltip]="user.isActive ? ('admin.deactivate' | translate) : ('admin.activate' | translate)" matTooltipPosition="above" (click)="toggleUserActive(user); $event.stopPropagation()">
                 <span class="material-icons-outlined">{{ user.isActive ? 'person_off' : 'person' }}</span>
               </button>
             </div>
@@ -126,11 +126,11 @@
                 }
                 <span class="stage-count">{{ track.stages.length }} {{ 'admin.stages' | translate }}</span>
                 <span class="accordion-actions">
-                  <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" (click)="openEditTrackType(track); $event.stopPropagation()">
+                  <button class="icon-btn" [attr.aria-label]="'common.edit' | translate" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" (click)="openEditTrackType(track); $event.stopPropagation()">
                     <span class="material-icons-outlined">edit</span>
                   </button>
                   @if (!track.isDefault) {
-                    <button class="icon-btn icon-btn--danger" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" (click)="deleteTrackType(track); $event.stopPropagation()">
+                    <button class="icon-btn icon-btn--danger" [attr.aria-label]="'common.delete' | translate" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" (click)="deleteTrackType(track); $event.stopPropagation()">
                       <span class="material-icons-outlined">delete</span>
                     </button>
                   }
@@ -831,6 +831,8 @@
               <button class="color-option"
                 [style.background]="color"
                 [class.color-option--selected]="avatarColor() === color"
+                [attr.aria-label]="color"
+                [attr.aria-pressed]="avatarColor() === color"
                 (click)="avatarColor.set(color)">
               </button>
             }
@@ -874,7 +876,7 @@
                 <span class="material-icons-outlined">contactless</span>
                 <span class="rfid-reader__name">{{ rfid.deviceName() }}</span>
                 <span class="rfid-reader__hint">{{ 'admin.rfidHint' | translate }}</span>
-                <button class="icon-btn" [matTooltip]="'admin.disconnectReader' | translate" matTooltipPosition="above" (click)="unpairRfidReader()">
+                <button class="icon-btn" [attr.aria-label]="'admin.disconnectReader' | translate" [matTooltip]="'admin.disconnectReader' | translate" matTooltipPosition="above" (click)="unpairRfidReader()">
                   <span class="material-icons-outlined">link_off</span>
                 </button>
               </div>
@@ -965,7 +967,7 @@
             }
           </span>
         </div>
-        <button class="icon-btn" [matTooltip]="'admin.copyCode' | translate" matTooltipPosition="above" (click)="copySetupCode()">
+        <button class="icon-btn" [attr.aria-label]="'admin.copyCode' | translate" [matTooltip]="'admin.copyCode' | translate" matTooltipPosition="above" (click)="copySetupCode()">
           <span class="material-icons-outlined">content_copy</span>
         </button>
       </div>

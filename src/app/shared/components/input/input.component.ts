@@ -25,6 +25,7 @@ import { ErrorStateMatcher } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInput, MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
 import { EMPTY, merge } from 'rxjs';
 
 import { FormValidationService } from '../../services/form-validation.service';
@@ -32,7 +33,7 @@ import { FormValidationService } from '../../services/form-validation.service';
 @Component({
   selector: 'app-input',
   standalone: true,
-  imports: [MatFormFieldModule, MatInputModule, MatTooltipModule],
+  imports: [MatFormFieldModule, MatInputModule, MatTooltipModule, TranslatePipe],
   templateUrl: './input.component.html',
   styleUrl: './input.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

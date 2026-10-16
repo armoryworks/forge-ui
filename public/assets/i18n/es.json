@@ -353,6 +353,7 @@
     "print": "Imprimir",
     "download": "Descargar",
     "upload": "Subir",
+    "uploading": "Subiendo…",
     "view": "Ver",
     "details": "Detalles",
     "type": "Tipo",
@@ -3038,6 +3039,7 @@
     "date": "Fecha",
     "category": "Categoría",
     "receipt": "Recibo",
+    "uploadReceipt": "Subir recibo",
     "approved": "Aprobado",
     "rejected": "Rechazado",
     "reimbursed": "Reembolsado",
@@ -3840,7 +3842,8 @@
     "settingsSearchPlaceholder": "Nombre o descripción",
     "noSettingsMatch": "Ningún ajuste coincide.",
     "capability": {
-      "relatedSettings": "Configuración relacionada"
+      "relatedSettings": "Configuración relacionada",
+      "toggleAria": "Activar o desactivar {{name}}"
     }
   },
   "teamsPanel": {
@@ -4946,6 +4949,8 @@
     "min": "Mín",
     "max": "Máx",
     "clear": "Limpiar",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
     "apply": "Aplicar",
     "columnFilter": "Filtro de columna",
     "columnManager": "Gestor de columnas",
@@ -6817,11 +6822,17 @@
     "channelList": {
       "directMessages": "Mensajes Directos",
       "groupChats": "Chats de Grupo",
+      "teams": "Equipos",
       "newMessage": "Nuevo Mensaje",
       "newGroup": "Nuevo Grupo",
       "searchConversations": "Buscar conversaciones",
       "noConversations": "Sin conversaciones aún",
-      "noResults": "No se encontraron resultados"
+      "noResults": "No se encontraron resultados",
+      "muteChannel": "Silenciar canal",
+      "mute": "Silenciar",
+      "unmute": "Activar sonido",
+      "unmuteChannel": "Activar sonido del canal",
+      "browseChannels": "Explorar canales"
     },
     "thread": {
       "replies": "Hilo",
@@ -8426,6 +8437,10 @@
     },
     "workflows": {
       "newWorkflow": "Nuevo Flujo",
+      "newWorkflowTitle": "Nuevo Flujo",
+      "editWorkflow": "Editar Flujo",
+      "create": "Crear",
+      "update": "Actualizar",
       "noWorkflows": "Sin flujos de aprobación configurados",
       "workflowName": "Nombre del Flujo",
       "entityType": "Tipo de Entidad",

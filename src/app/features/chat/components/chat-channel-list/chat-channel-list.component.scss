@@ -59,6 +59,7 @@
     cursor: pointer;
     font-family: $font-family-primary;
     padding: 0;
+    min-height: 24px;
 
     &:hover {
       color: var(--text);
@@ -198,8 +199,8 @@
 
 .channel-list__mute-btn {
   display: none;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border: none;
   background: transparent;
   color: var(--text-muted);
