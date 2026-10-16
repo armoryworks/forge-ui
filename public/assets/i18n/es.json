@@ -4843,6 +4843,8 @@
     "fri": "Vie",
     "sat": "Sáb",
     "poDeliveries": "Entregas de OC",
+    "showPoDeliveries": "Mostrar entregas de OC",
+    "hidePoDeliveries": "Ocultar entregas de OC",
     "poDeliveriesCount": "{{count}} entregas",
     "poLines": "Líneas de OC",
     "viewSwitchLabel": "Vista del calendario",
@@ -7692,7 +7694,8 @@
     "clientSetupTitle": "Configuración del Cliente RFID",
     "downloadSetupScript": "Descargar Script de Configuración",
     "setupScriptError": "Error al generar el script de configuración",
-    "setupScriptHint": "Ejecute el script descargado como Administrador para instalar el servicio de cliente RFID."
+    "setupScriptHint": "Ejecute el script descargado como Administrador para instalar el servicio de cliente RFID.",
+    "relayNotInstalled": "El relé RFID no está instalado en esta estación de trabajo. Descargue y ejecute el script de configuración para habilitar el escaneo de credenciales."
   },
   "salesTax": {
     "addRate": "Agregar Tasa",
