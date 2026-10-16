@@ -3028,7 +3028,9 @@
     "sourceSocialMedia": "Redes Sociales",
     "sourceOther": "Otro",
     "tableView": "Vista de tabla",
-    "pipelineView": "Vista de pipeline"
+    "pipelineView": "Vista de pipeline",
+    "viewCustomer": "Ver cliente",
+    "deleteFailed": "No se pudo eliminar el prospecto."
   },
   "expenses": {
     "title": "Gastos",
@@ -5290,7 +5292,9 @@
     "amountPlaceholder": "0.00",
     "noApplicationsYet": "Sin aplicaciones de pago aún",
     "paymentDetails": "Detalles de Pago",
-    "numberLockedReason": "El número de pago solo se puede cambiar antes de aplicar el pago. Este ya se aplicó a una factura, por lo que el número forma parte del registro liquidado."
+    "numberLockedReason": "El número de pago solo se puede cambiar antes de aplicar el pago. Este ya se aplicó a una factura, por lo que el número forma parte del registro liquidado.",
+    "invoice": "Factura",
+    "invoicePlaceholder": "Elija una factura abierta"
   },
   "vendorContacts": {
     "contactsTab": "Contactos",
@@ -5779,7 +5783,7 @@
     "workOrderSkipPhantomNoRouting": "Pieza fantasma sin ruta de fabricación",
     "workOrderSkipHasJob": "Ya tiene una orden de trabajo",
     "workOrderSkipAlreadyShipped": "Ya se envió",
-    "confirmSoReleaseMessage": "¿Confirmar {{number}}? Se liberarán a producción {{count}} línea(s) con pieza y el número de orden quedará bloqueado. Las piezas compradas o fantasma sin ruta de fabricación no generan orden de trabajo.",
+    "confirmSoReleaseMessage": "¿Confirmar {{number}}? Se liberarán a producción {{count}} línea(s) como órdenes de trabajo y el número de orden quedará bloqueado. Las piezas compradas o fantasma sin ruta de fabricación no generan orden de trabajo.",
     "cancelSoMessageHold": "¿Cancelar {{number}}? Sus órdenes de trabajo abiertas en líneas aún no enviadas quedarán en espera. Esto no se puede deshacer.",
     "cancelSoMessageNoJobs": "¿Cancelar {{number}}? Esto no se puede deshacer.",
     "creditHoldWarningNoReason": "Este cliente tiene una retención de crédito. Puede guardar un borrador, pero no se puede confirmar ni enviar hasta que se libere la retención.",
@@ -6119,7 +6123,10 @@
     "confirmMarkSentTitle": "¿Marcar Cotización como Enviada?",
     "confirmMarkSentMessage": "¿Marcar la cotización {{number}} como enviada? Use esto cuando la entregó usted mismo (fax, correo postal, en persona). No se enviará ningún correo electrónico.",
     "quoteMarkedSent": "Cotización marcada como enviada.",
-    "downloadPdf": "Descargar PDF"
+    "downloadPdf": "Descargar PDF",
+    "acceptQuoteTitle": "¿Aceptar Cotización?",
+    "acceptQuoteMessage": "¿Marcar \"{{number}}\" como aceptada por el cliente?",
+    "viewOrder": "Ver orden"
   },
   "shipments": {
     "shipmentNumberLabel": "Número de envío",

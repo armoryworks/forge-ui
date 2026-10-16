@@ -3028,7 +3028,9 @@
     "sourceSocialMedia": "Social Media",
     "sourceOther": "Other",
     "tableView": "Table view",
-    "pipelineView": "Pipeline view"
+    "pipelineView": "Pipeline view",
+    "viewCustomer": "View customer",
+    "deleteFailed": "Could not delete the lead."
   },
   "expenses": {
     "title": "Expenses",
@@ -5297,7 +5299,9 @@
     "amountPlaceholder": "0.00",
     "noApplicationsYet": "No payment applications yet",
     "paymentDetails": "Payment Details",
-    "numberLockedReason": "A payment number can only be changed before the payment is applied. This one is already applied to an invoice, so the number is part of the settled record."
+    "numberLockedReason": "A payment number can only be changed before the payment is applied. This one is already applied to an invoice, so the number is part of the settled record.",
+    "invoice": "Invoice",
+    "invoicePlaceholder": "Pick an open invoice"
   },
   "vendorContacts": {
     "contactsTab": "Contacts",
@@ -5807,7 +5811,7 @@
     "workOrderSkipPhantomNoRouting": "Phantom part with no routing",
     "workOrderSkipHasJob": "Already has a work order",
     "workOrderSkipAlreadyShipped": "Already shipped",
-    "confirmSoReleaseMessage": "Confirm {{number}}? {{count}} line(s) with a part will be released to production, and the order number locks. Bought or phantom parts with no routing don't get a work order.",
+    "confirmSoReleaseMessage": "Confirm {{number}}? {{count}} line(s) will be released to production as work orders, and the order number locks. Bought or phantom parts with no routing don't get a work order.",
     "cancelSoMessageHold": "Cancel {{number}}? Its open work orders on lines not yet shipped will be put on hold. This can't be undone.",
     "cancelSoMessageNoJobs": "Cancel {{number}}? This can't be undone.",
     "creditHoldWarningNoReason": "This customer is on credit hold. You can save a draft, but it can't be confirmed or shipped until the hold is released.",
@@ -6126,7 +6130,10 @@
     "confirmMarkSentTitle": "Mark Quote as Sent?",
     "confirmMarkSentMessage": "Mark quote {{number}} as sent? Use this when you delivered it yourself (fax, mail, in person). Nothing will be emailed.",
     "quoteMarkedSent": "Quote marked as sent.",
-    "downloadPdf": "Download PDF"
+    "downloadPdf": "Download PDF",
+    "acceptQuoteTitle": "Accept Quote?",
+    "acceptQuoteMessage": "Mark \"{{number}}\" as accepted by the customer?",
+    "viewOrder": "View order"
   },
   "shipments": {
     "shipmentNumberLabel": "Shipment Number",
