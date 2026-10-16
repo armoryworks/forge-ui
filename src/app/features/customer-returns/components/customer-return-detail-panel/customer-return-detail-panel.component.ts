@@ -90,8 +90,8 @@ export class CustomerReturnDetailPanelComponent {
     this.resolveSaving.set(true);
     const notes = this.resolveForm.value.inspectionNotes || undefined;
     this.service.resolve(r.id, notes).subscribe({
-      next: (updated) => {
-        this.detail.set(updated);
+      next: () => {
+        this.loadDetail(r.id);
         this.resolveSaving.set(false);
         this.closeResolveDialog();
         this.snackbar.success(this.translate.instant('customerReturns.resolved'));
@@ -113,8 +113,8 @@ export class CustomerReturnDetailPanelComponent {
     }).afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
       this.service.close(r.id).subscribe({
-        next: (updated) => {
-          this.detail.set(updated);
+        next: () => {
+          this.loadDetail(r.id);
           this.snackbar.success(this.translate.instant('customerReturns.closed'));
           this.updated.emit();
         },

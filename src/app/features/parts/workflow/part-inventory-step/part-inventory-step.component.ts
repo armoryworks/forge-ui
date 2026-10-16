@@ -110,6 +110,7 @@ export class PartInventoryStepComponent {
         stockUomId: part.stockUomId ?? null,
         defaultBinId: part.defaultBinId ?? null,
       }, { emitEvent: false });
+      this.workflowService.refreshStepForm();
     });
 
     this.workflowService.registerStepForm(

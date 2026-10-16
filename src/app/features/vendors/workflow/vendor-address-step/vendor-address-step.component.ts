@@ -62,6 +62,7 @@ export class VendorAddressStepComponent {
           }
         : null;
       this.form.patchValue({ address: seed }, { emitEvent: false });
+      this.workflowService.refreshStepForm();
     });
 
     this.workflowService.registerStepForm(

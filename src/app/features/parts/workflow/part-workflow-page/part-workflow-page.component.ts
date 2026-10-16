@@ -106,7 +106,13 @@ export class PartWorkflowPageComponent {
       const partId = this.partIdFromUrl();
       const runId = this.runIdFromUrl();
       const definitionId = this.definitionIdFromUrl();
-      if (!definitionId) return;
+      if (!definitionId) {
+        this.router.navigate(['/parts'], {
+          queryParams: partId ? { detail: `part:${partId}` } : {},
+          replaceUrl: true,
+        });
+        return;
+      }
       // Two entry paths converge on the same loader:
       //  • /parts/{id}?workflow=...      → load by partId (existing entity)
       //  • /parts/new?runId=N&workflow=… → load by runId (entity not yet materialized)
@@ -129,7 +135,7 @@ export class PartWorkflowPageComponent {
       if (!run || run.entityId == null) return;
       if (this.partIdFromUrl() !== 0) return; // already on /parts/{id}
       this.router.navigate(['/parts', run.entityId], {
-        queryParams: { runId: run.id },
+        queryParams: { runId: run.id, mode: run.mode },
         queryParamsHandling: 'merge',
         replaceUrl: true,
       });
@@ -309,9 +315,10 @@ export class PartWorkflowPageComponent {
           next: (updated) => {
             this.run.set(updated);
             this.workflowService.currentRun.set(updated);
-            this.router.navigate([], {
+            const materialized = updated.entityId != null && this.partIdFromUrl() === 0;
+            this.router.navigate(materialized ? ['/parts', updated.entityId] : [], {
               relativeTo: this.route,
-              queryParams: { mode },
+              queryParams: materialized ? { mode, runId: updated.id } : { mode },
               queryParamsHandling: 'merge',
             });
           },

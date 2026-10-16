@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy, Component, DestroyRef, DOCUMENT, HostListener, inject, input, OnInit, output, signal,
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
 
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -28,6 +29,7 @@ export class DialogComponent implements OnInit {
   private readonly draftService = inject(DraftService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly document = inject(DOCUMENT);
+  private readonly router = inject(Router);
   // Non-null only when this <app-dialog> is itself rendered inside a MatDialog
   // overlay — in that case the CDK already handles Escape, so we must not
   // double-handle it. Null for the inline usage (rendered directly in a page
@@ -40,7 +42,7 @@ export class DialogComponent implements OnInit {
   readonly dirty = input<boolean>(false);
   readonly closed = output<void>();
 
-  /** Optional draft config — when provided with draftFormGroup, enables auto-save/recovery. */
+  /** Optional draft config — when provided with draftFormGroup, enables auto-save/recovery. The draft is discarded when the dialog closes outside a route navigation. */
   readonly draftConfig = input<DraftConfig | null>(null);
   /** The FormGroup to auto-save. Required when draftConfig is set. */
   readonly draftFormGroup = input<FormGroup | null>(null);
@@ -87,6 +89,9 @@ export class DialogComponent implements OnInit {
     // Unregister on destroy (dialog close / component teardown)
     this.destroyRef.onDestroy(() => {
       this.draftService.unregister(config.entityType, config.entityId);
+      if (!this.router.currentNavigation()) {
+        this.draftService.clearDraft(config.entityType, config.entityId);
+      }
     });
   }
 

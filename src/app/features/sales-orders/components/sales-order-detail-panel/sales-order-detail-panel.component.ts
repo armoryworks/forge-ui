@@ -280,7 +280,7 @@ export class SalesOrderDetailPanelComponent {
     if (!so) return [];
     const status = so.status;
     if (status === 'Draft' || status === 'Cancelled') return [];
-    return so.lines.filter(l => l.partId != null && l.jobs.length === 0);
+    return so.lines.filter(l => l.needsJob && l.jobs.length === 0);
   });
 
   protected readonly linesNeedingWorkOrders = computed(() => {
@@ -805,7 +805,7 @@ export class SalesOrderDetailPanelComponent {
         title: this.translate.instant('salesOrders.confirmSoTitle'),
         message: this.translate.instant('salesOrders.confirmSoReleaseMessage', {
           number: so.orderNumber,
-          count: so.lines.filter(l => l.partId != null).length,
+          count: so.lines.filter(l => l.needsJob && l.jobs.length === 0 && !l.isFullyShipped).length,
         }),
         details: this.confirmWarnings(so),
         confirmLabel: this.translate.instant('salesOrders.confirm'),

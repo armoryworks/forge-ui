@@ -24,6 +24,8 @@ interface PanelInternals {
   downloadPdf(): void;
   canSend(status: string): boolean;
   canMarkSent(status: string): boolean;
+  acceptQuote(): void;
+  convertToOrder(): void;
 }
 
 describe('QuoteDetailPanelComponent', () => {
@@ -34,7 +36,10 @@ describe('QuoteDetailPanelComponent', () => {
     sendQuote: ReturnType<typeof vi.fn>;
     getQuotePdf: ReturnType<typeof vi.fn>;
     duplicateQuote: ReturnType<typeof vi.fn>;
+    acceptQuote: ReturnType<typeof vi.fn>;
+    convertToOrder: ReturnType<typeof vi.fn>;
   };
+  let snackbar: { success: ReturnType<typeof vi.fn>; successWithNav: ReturnType<typeof vi.fn> };
   let dialog: { open: ReturnType<typeof vi.fn> };
   let dialogResult: unknown;
 
@@ -49,7 +54,10 @@ describe('QuoteDetailPanelComponent', () => {
       sendQuote: vi.fn(() => of(undefined)),
       getQuotePdf: vi.fn(() => of(new Blob(['%PDF'], { type: 'application/pdf' }))),
       duplicateQuote: vi.fn(() => of(copy)),
+      acceptQuote: vi.fn(() => of(undefined)),
+      convertToOrder: vi.fn(() => of({ id: 55, orderNumber: 'SO-0055' })),
     };
+    snackbar = { success: vi.fn(), successWithNav: vi.fn() };
     dialog = { open: vi.fn(() => ({ afterClosed: () => of(dialogResult) })) };
 
     TestBed.configureTestingModule({
@@ -59,7 +67,7 @@ describe('QuoteDetailPanelComponent', () => {
         provideTranslateService(),
         { provide: QuoteService, useValue: quoteService },
         { provide: MatDialog, useValue: dialog },
-        { provide: SnackbarService, useValue: { success: vi.fn() } },
+        { provide: SnackbarService, useValue: snackbar },
       ],
     });
     panel = TestBed.runInInjectionContext(() => new QuoteDetailPanelComponent()) as unknown as PanelInternals;
@@ -137,6 +145,41 @@ describe('QuoteDetailPanelComponent', () => {
     panel.close();
 
     expect(changed).toHaveBeenCalledTimes(1);
+    expect(closed).toHaveBeenCalledTimes(1);
+  });
+
+  it('asks for confirmation before accepting and stays open on the refreshed quote', () => {
+    const closed = vi.fn();
+    panel.closed.subscribe(closed);
+    dialogResult = true;
+
+    panel.acceptQuote();
+
+    expect(dialog.open).toHaveBeenCalledWith(ConfirmDialogComponent, expect.anything());
+    expect(quoteService.acceptQuote).toHaveBeenCalledWith(12);
+    expect(quoteService.getQuoteById).toHaveBeenCalledWith(12);
     expect(closed).not.toHaveBeenCalled();
+  });
+
+  it('does not accept when the confirmation is cancelled', () => {
+    dialogResult = false;
+
+    panel.acceptQuote();
+
+    expect(quoteService.acceptQuote).not.toHaveBeenCalled();
+  });
+
+  it('closes after Convert and offers a link to the new sales order', () => {
+    const changed = vi.fn();
+    const closed = vi.fn();
+    panel.changed.subscribe(changed);
+    panel.closed.subscribe(closed);
+
+    panel.convertToOrder();
+
+    expect(quoteService.convertToOrder).toHaveBeenCalledWith(12);
+    expect(changed).toHaveBeenCalledTimes(1);
+    expect(closed).toHaveBeenCalledTimes(1);
+    expect(snackbar.successWithNav).toHaveBeenCalledWith(expect.any(String), '/sales-orders/55', expect.any(String));
   });
 });

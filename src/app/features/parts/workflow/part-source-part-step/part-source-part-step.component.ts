@@ -54,6 +54,7 @@ export class PartSourcePartStepComponent {
       this.form.patchValue({
         sourcePartId: part.sourcePartId ?? null,
       }, { emitEvent: false });
+      this.workflowService.refreshStepForm();
     });
 
     this.workflowService.registerStepForm(

@@ -14,4 +14,5 @@ export interface SalesOrderLine {
   isFullyShipped: boolean;
   notes: string | null;
   jobs: SalesOrderLineJob[];
+  needsJob: boolean;
 }

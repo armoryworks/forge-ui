@@ -136,7 +136,7 @@ export class QuoteDetailPanelComponent {
 
   protected close(): void {
     if (this.duplicated()) this.changed.emit();
-    else this.closed.emit();
+    this.closed.emit();
   }
 
   // --- Status Actions ---
@@ -225,12 +225,22 @@ export class QuoteDetailPanelComponent {
   protected acceptQuote(): void {
     const q = this.quote();
     if (!q) return;
-    this.quoteService.acceptQuote(q.id).subscribe({
-      next: () => {
-        this.loadQuote(q.id);
-        this.changed.emit();
-        this.snackbar.success(this.translate.instant('quotes.quoteAccepted'));
-      },
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('quotes.acceptQuoteTitle'),
+        message: this.translate.instant('quotes.acceptQuoteMessage', { number: q.quoteNumber }),
+        confirmLabel: this.translate.instant('quotes.accept'),
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.quoteService.acceptQuote(q.id).subscribe({
+        next: () => {
+          this.loadQuote(q.id);
+          this.changed.emit();
+          this.snackbar.success(this.translate.instant('quotes.quoteAccepted'));
+        },
+      });
     });
   }
 
@@ -262,9 +272,13 @@ export class QuoteDetailPanelComponent {
     if (!q) return;
     this.quoteService.convertToOrder(q.id).subscribe({
       next: (order) => {
-        this.loadQuote(q.id);
         this.changed.emit();
-        this.snackbar.success(this.translate.instant('quotes.quoteConverted', { number: order.orderNumber ?? '' }));
+        this.closed.emit();
+        this.snackbar.successWithNav(
+          this.translate.instant('quotes.quoteConverted', { number: order.orderNumber ?? '' }),
+          `/sales-orders/${order.id}`,
+          this.translate.instant('quotes.viewOrder'),
+        );
       },
     });
   }

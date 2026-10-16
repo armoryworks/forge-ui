@@ -76,6 +76,7 @@ export class VendorExpressFormComponent {
         paymentTerms: vendor.paymentTerms ?? '',
         notes: vendor.notes ?? '',
       }, { emitEvent: false });
+      this.workflowService.refreshStepForm();
     });
 
     this.workflowService.registerStepForm(

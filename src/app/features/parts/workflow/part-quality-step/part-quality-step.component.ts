@@ -97,6 +97,7 @@ export class PartQualityStepComponent {
         hazmatClass: part.hazmatClass ?? '',
         shelfLifeDays: part.shelfLifeDays ?? null,
       }, { emitEvent: false });
+      this.workflowService.refreshStepForm();
       this.inspectionEnabled.set(part.requiresReceivingInspection ?? false);
     });
 

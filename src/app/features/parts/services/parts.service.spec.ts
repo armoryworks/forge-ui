@@ -53,6 +53,27 @@ describe('PartsService', () => {
     });
   });
 
+  describe('getTransactableParts', () => {
+    it('should return Draft, Prototype and Active parts but not Obsolete ones', () => {
+      let result: { id: number }[] = [];
+      service.getTransactableParts().subscribe((items) => { result = items; });
+
+      const req = httpMock.expectOne((r) => r.url === baseUrl);
+      expect(req.request.params.get('status')).toBeNull();
+      req.flush({
+        items: [
+          { id: 1, status: 'Active' },
+          { id: 2, status: 'Draft' },
+          { id: 3, status: 'Obsolete' },
+          { id: 4, status: 'Prototype' },
+        ],
+        totalCount: 4, page: 1, pageSize: 200,
+      });
+
+      expect(result.map(p => p.id)).toEqual([1, 2, 4]);
+    });
+  });
+
   // ── getPartById ───────────────────────────────────────────────────────────
 
   describe('getPartById', () => {

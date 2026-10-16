@@ -103,7 +103,13 @@ export class VendorWorkflowPageComponent {
       const vendorId = this.vendorIdFromUrl();
       const runId = this.runIdFromUrl();
       const definitionId = this.definitionIdFromUrl();
-      if (!definitionId) return;
+      if (!definitionId) {
+        this.router.navigate(['/vendors'], {
+          queryParams: vendorId ? { detail: `vendor:${vendorId}` } : {},
+          replaceUrl: true,
+        });
+        return;
+      }
       if (vendorId) {
         this.loadWorkflowContext(vendorId, definitionId);
         return;
@@ -124,7 +130,7 @@ export class VendorWorkflowPageComponent {
       if (!run || run.entityId == null) return;
       if (this.vendorIdFromUrl() !== 0) return;
       this.router.navigate(['/vendors', run.entityId], {
-        queryParams: { runId: run.id },
+        queryParams: { runId: run.id, mode: run.mode },
         queryParamsHandling: 'merge',
         replaceUrl: true,
       });
@@ -313,14 +319,16 @@ export class VendorWorkflowPageComponent {
     const run = this.run();
     if (!run || run.mode === mode) return;
     this.workflowService.saveCurrentStep().subscribe({
-      next: () => {
+      next: (saveResult) => {
+        if (!saveResult.ok) return;
         this.workflowService.setMode(run.id, mode).subscribe({
           next: (updated) => {
             this.run.set(updated);
             this.workflowService.currentRun.set(updated);
-            this.router.navigate([], {
+            const materialized = updated.entityId != null && this.vendorIdFromUrl() === 0;
+            this.router.navigate(materialized ? ['/vendors', updated.entityId] : [], {
               relativeTo: this.route,
-              queryParams: { mode },
+              queryParams: materialized ? { mode, runId: updated.id } : { mode },
               queryParamsHandling: 'merge',
             });
           },

@@ -26,12 +26,14 @@ export class QuoteDetailDialogComponent {
 
   protected readonly data = inject<QuoteDetailDialogData>(MAT_DIALOG_DATA);
 
+  private changed = false;
+
   protected close(): void {
-    this.dialogRef.close();
+    this.dialogRef.close(this.changed ? { changed: true } : undefined);
   }
 
   protected onChanged(): void {
-    this.dialogRef.close({ changed: true });
+    this.changed = true;
   }
 }
 

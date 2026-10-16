@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BaseChartDirective } from '../../../../shared/charts/base-chart.directive';
@@ -81,6 +81,11 @@ export class ReportBuilderComponent {
   protected readonly chartLabelControl = new FormControl<string>('', { nonNullable: true });
   protected readonly chartValueControl = new FormControl<string>('', { nonNullable: true });
 
+  private readonly entitySource = toSignal(this.entityControl.valueChanges, { initialValue: this.entityControl.value });
+  protected readonly chartType = toSignal(this.chartTypeControl.valueChanges, { initialValue: this.chartTypeControl.value });
+  private readonly chartLabel = toSignal(this.chartLabelControl.valueChanges, { initialValue: this.chartLabelControl.value });
+  private readonly chartValue = toSignal(this.chartValueControl.valueChanges, { initialValue: this.chartValueControl.value });
+
   // State
   protected readonly selectedColumns = signal<string[]>([]);
   protected readonly filters = signal<FilterRow[]>([]);
@@ -113,7 +118,7 @@ export class ReportBuilderComponent {
 
   // Computed: selected entity definition
   protected readonly selectedEntity = computed<ReportEntityDefinition | null>(() => {
-    const src = this.entityControl.value;
+    const src = this.entitySource();
     if (!src) return null;
     return this.entities().find(e => e.entitySource === src) ?? null;
   });
@@ -164,7 +169,7 @@ export class ReportBuilderComponent {
 
   // Computed: can run the report
   protected readonly canRun = computed<boolean>(() => {
-    return !!this.entityControl.value && this.selectedColumns().length > 0;
+    return !!this.entitySource() && this.selectedColumns().length > 0;
   });
 
   // Computed: result columns for DataTable
@@ -191,7 +196,7 @@ export class ReportBuilderComponent {
    * The field used to group the chart (chartLabelControl) is also the field
    * used to filter rows when the user drills into a bar/slice.
    */
-  private readonly chartGroupByField = computed<string>(() => this.chartLabelControl.value);
+  private readonly chartGroupByField = computed<string>(() => this.chartLabel());
 
   /**
    * Rows filtered by the active drill selection.
@@ -209,9 +214,9 @@ export class ReportBuilderComponent {
   // Computed: chart data from results — highlights the active drill bar
   protected readonly chartData = computed<ChartData | null>(() => {
     const results = this.reportResults();
-    const chartType = this.chartTypeControl.value;
-    const labelField = this.chartLabelControl.value;
-    const valueField = this.chartValueControl.value;
+    const chartType = this.chartType();
+    const labelField = this.chartLabel();
+    const valueField = this.chartValue();
 
     if (!results || !chartType || chartType === 'table' || !labelField || !valueField) {
       return null;

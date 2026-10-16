@@ -77,6 +77,7 @@ export class PartBasicsStepComponent {
         name: part.name ?? '',
         description: part.description ?? '',
       }, { emitEvent: false });
+      this.workflowService.refreshStepForm();
     });
 
     // Register form with the shell so Continue gates on validity, the

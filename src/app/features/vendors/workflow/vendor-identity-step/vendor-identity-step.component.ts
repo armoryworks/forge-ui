@@ -65,6 +65,7 @@ export class VendorIdentityStepComponent {
         email: vendor.email ?? '',
         phone: vendor.phone ?? '',
       }, { emitEvent: false });
+      this.workflowService.refreshStepForm();
     });
 
     this.workflowService.registerStepForm(

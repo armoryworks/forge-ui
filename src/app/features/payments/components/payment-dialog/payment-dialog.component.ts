@@ -1,10 +1,14 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, output, computed, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { catchError, map, of, switchMap } from 'rxjs';
 
 import { PaymentService } from '../../services/payment.service';
 import { CustomerService } from '../../../customers/services/customer.service';
 import { CustomerListItem } from '../../../customers/models/customer-list-item.model';
+import { InvoiceService } from '../../../invoices/services/invoice.service';
+import { InvoiceListItem } from '../../../invoices/models/invoice-list-item.model';
+import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
 import { CreatePaymentApplicationRequest } from '../../models/create-payment-application-request.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -36,7 +40,7 @@ interface ApplicationEntry {
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    DialogComponent, InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
+    DialogComponent, InputComponent, SelectComponent, TextareaComponent, DatepickerComponent, AutocompleteComponent,
     CurrencyDisplayComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './payment-dialog.component.html',
@@ -47,6 +51,7 @@ export class PaymentDialogComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   private readonly paymentService = inject(PaymentService);
   private readonly customerService = inject(CustomerService);
+  private readonly invoiceService = inject(InvoiceService);
   private readonly currencyService = inject(ActiveCurrencyService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -72,6 +77,11 @@ export class PaymentDialogComponent {
   // settlement rate; it defaults to 1 (correct for base-currency invoices).
   protected readonly activeCurrencyCount = signal(0);
   protected readonly showSettlementFxRate = computed(() => this.activeCurrencyCount() > 1);
+
+  protected readonly openInvoices = signal<InvoiceListItem[]>([]);
+
+  protected readonly invoiceOptions = computed<AutocompleteOption[]>(() =>
+    this.openInvoices().map(inv => ({ value: inv.id, label: `${inv.invoiceNumber} — ${inv.balanceDue.toFixed(2)}` })));
 
   protected readonly customerOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('payments.selectCustomer') },
@@ -144,6 +154,30 @@ export class PaymentDialogComponent {
   constructor() {
     this.customerService.getCustomers(undefined, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.customers.set(list),
+    });
+
+    this.paymentForm.controls.customerId.valueChanges.pipe(
+      switchMap(customerId => {
+        this.openInvoices.set([]);
+        this.appForm.reset({ invoiceId: null, invoiceNumber: '', amount: null, settlementFxRate: 1 });
+        return customerId == null
+          ? of<InvoiceListItem[]>([])
+          : this.invoiceService.getInvoices(customerId).pipe(
+            map(list => list.filter(inv => inv.balanceDue > 0 && inv.status !== 'Draft' && inv.status !== 'Voided')),
+            catchError(() => of<InvoiceListItem[]>([])),
+          );
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(list => this.openInvoices.set(list));
+
+    this.appForm.controls.invoiceId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(invoiceId => {
+      const invoice = this.openInvoices().find(inv => inv.id === invoiceId);
+      this.appForm.controls.invoiceNumber.setValue(invoice?.invoiceNumber ?? '');
+      if (invoice && this.appForm.controls.amount.value == null) {
+        const applied = this.applications().filter(a => a.invoiceId === invoice.id).reduce((sum, a) => sum + a.amount, 0);
+        const remaining = Math.round((invoice.balanceDue - applied) * 100) / 100;
+        if (remaining > 0) this.appForm.controls.amount.setValue(remaining);
+      }
     });
 
     // Load active currencies only to decide whether the per-application

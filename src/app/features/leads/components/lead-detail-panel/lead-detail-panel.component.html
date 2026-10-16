@@ -216,8 +216,8 @@
           <div class="convert-btn-group">
             <!-- One-click convert (the stepper was retired 2026-05-31 —
                  see convertLead() in the .ts). A single click POSTs the
-                 atomic convert, optimistically flips the lead to Converted,
-                 then navigates to the new customer. Credit/tax/address
+                 atomic convert, optimistically flips the lead to Converted.
+                 Credit/tax/address
                  details are edited on the customer page after conversion. -->
             <button data-testid="lead-convert-btn" class="action-btn action-btn--primary" [disabled]="saving()" (click)="convertLead()">
               <span class="material-icons-outlined">person_add</span>
@@ -246,6 +246,10 @@
           <button class="action-btn" (click)="updateStatus('New')">
             <span class="material-icons-outlined">replay</span>
             {{ 'leads.reopenLead' | translate }}
+          </button>
+          <button data-testid="lead-delete-btn" class="action-btn action-btn--danger" [disabled]="saving()" (click)="deleteLead()">
+            <span class="material-icons-outlined">delete</span>
+            {{ 'common.delete' | translate }}
           </button>
         </div>
       }

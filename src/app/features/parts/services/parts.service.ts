@@ -66,6 +66,14 @@ export class PartsService {
   }
 
   /**
+   * Parts a quote or sales-order line may reference: every status except
+   * Obsolete, matching the server's active check on line create.
+   */
+  getTransactableParts(): Observable<PartListItem[]> {
+    return this.getParts().pipe(map(parts => parts.filter(p => p.status !== 'Obsolete')));
+  }
+
+  /**
    * Phase 3 F7-partial / WU-17 — paged part list. Returns the standard
    * envelope ({ items, totalCount, page, pageSize }) so callers can wire
    * up real server-side pagination, sort, and filtering.

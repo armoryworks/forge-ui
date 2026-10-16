@@ -80,6 +80,7 @@ export class PartSourcingStepComponent {
       this.form.patchValue({
         preferredVendorId: part.preferredVendorId ?? null,
       }, { emitEvent: false });
+      this.workflowService.refreshStepForm();
     });
 
     this.workflowService.registerStepForm(

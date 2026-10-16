@@ -4,12 +4,14 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
+import { vi } from 'vitest';
 
 import { EntityValidator } from '../../models/entity-validator.model';
 import { WorkflowDefinition } from '../../models/workflow-definition.model';
 import { WorkflowRun } from '../../models/workflow-run.model';
 import { WorkflowStepDefinition } from '../../models/workflow-step-definition.model';
 import { WorkflowStepRegistryService } from '../../services/workflow-step-registry.service';
+import { WorkflowService } from '../../services/workflow.service';
 import { WorkflowComponent } from './workflow.component';
 import { WorkflowStepStubComponent } from './workflow-step-stub.component';
 
@@ -234,6 +236,18 @@ describe('WorkflowComponent — shell logic (Phase 4)', () => {
     component.modeChanged.subscribe(e => events.push(e));
     pick<(m: 'express' | 'guided') => void>(component, 'setMode').call(component, 'guided');
     expect(events).toEqual([]);
+  });
+
+  it('D4: setMode hands a dirty step to the parent instead of saving it in the shell', () => {
+    const { component } = buildShell({ run: buildRun({ mode: 'guided' }) });
+    const service = TestBed.inject(WorkflowService);
+    service.currentStepDirty.set(true);
+    const save = vi.spyOn(service, 'saveCurrentStep');
+    const events: ('express' | 'guided')[] = [];
+    component.modeChanged.subscribe(e => events.push(e));
+    pick<(m: 'express' | 'guided') => void>(component, 'setMode').call(component, 'express');
+    expect(events).toEqual(['express']);
+    expect(save).not.toHaveBeenCalled();
   });
 
   it('D4: mode toggle is available mid-flow (currentStepId preserved)', () => {

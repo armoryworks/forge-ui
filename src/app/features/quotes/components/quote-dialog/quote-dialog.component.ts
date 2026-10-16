@@ -155,8 +155,7 @@ export class QuoteDialogComponent {
     this.customerService.getCustomers(undefined, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.customers.set(list),
     });
-    // Load all non-deleted parts regardless of status
-    this.partsService.getParts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.partsService.getTransactableParts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.parts.set(list),
     });
 

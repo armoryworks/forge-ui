@@ -70,3 +70,63 @@ describe('VendorWorkflowPageComponent completion', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/vendors']);
   });
 });
+
+describe('VendorWorkflowPageComponent routing', () => {
+  let router: Router;
+  let workflowService: WorkflowService;
+
+  function setUp(params: Record<string, string>, query: Record<string, string>): void {
+    TestBed.configureTestingModule({
+      imports: [VendorWorkflowPageComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        {
+          provide: ActivatedRoute,
+          useValue: { paramMap: of(convertToParamMap(params)), queryParamMap: of(convertToParamMap(query)) },
+        },
+      ],
+    });
+    router = TestBed.inject(Router);
+    workflowService = TestBed.inject(WorkflowService);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+  }
+
+  it('opens the vendor detail when /vendors/:id is reached without a workflow', () => {
+    setUp({ id: '7' }, {});
+    TestBed.runInInjectionContext(() => new VendorWorkflowPageComponent());
+    TestBed.tick();
+
+    expect(router.navigate).toHaveBeenCalledWith(['/vendors'], { queryParams: { detail: 'vendor:7' }, replaceUrl: true });
+  });
+
+  it('moves to the new vendor URL in the chosen mode when Quick add materializes the vendor', () => {
+    setUp({}, { workflow: 'vendor-guided-v1', runId: '4', mode: 'guided' });
+    vi.spyOn(workflowService, 'getRun').mockReturnValue(of(buildRun()));
+    vi.spyOn(workflowService, 'saveCurrentStep').mockReturnValue(of({ ok: true as const }));
+    vi.spyOn(workflowService, 'setMode').mockReturnValue(of(buildRun({ entityId: 9, mode: 'express' })));
+    const component = TestBed.runInInjectionContext(() => new VendorWorkflowPageComponent());
+    (component as unknown as { run: { set(r: WorkflowRun): void } }).run.set(buildRun());
+
+    (component as unknown as { onModeChanged(mode: 'express' | 'guided'): void }).onModeChanged('express');
+
+    expect(router.navigate).toHaveBeenCalledWith(['/vendors', 9], expect.objectContaining({
+      queryParams: { mode: 'express', runId: 4 },
+      queryParamsHandling: 'merge',
+    }));
+  });
+
+  it('stays in the current mode when saving the step fails', () => {
+    setUp({}, { workflow: 'vendor-guided-v1', runId: '4', mode: 'guided' });
+    vi.spyOn(workflowService, 'getRun').mockReturnValue(of(buildRun()));
+    vi.spyOn(workflowService, 'saveCurrentStep').mockReturnValue(of({ ok: false as const, error: new Error('400') }));
+    const setMode = vi.spyOn(workflowService, 'setMode');
+    const component = TestBed.runInInjectionContext(() => new VendorWorkflowPageComponent());
+    (component as unknown as { run: { set(r: WorkflowRun): void } }).run.set(buildRun());
+
+    (component as unknown as { onModeChanged(mode: 'express' | 'guided'): void }).onModeChanged('express');
+
+    expect(setMode).not.toHaveBeenCalled();
+  });
+});

@@ -92,6 +92,7 @@ export class PartSalesHooksStepComponent {
       this.form.patchValue({
         salesUomCode: part.salesUomCode ?? null,
       }, { emitEvent: false });
+      this.workflowService.refreshStepForm();
     });
 
     this.workflowService.registerStepForm(
