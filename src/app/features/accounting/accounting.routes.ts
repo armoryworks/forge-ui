@@ -33,6 +33,12 @@ export const ACCOUNTING_ROUTES: Routes = [
       import('./components/journal-entry-editor/journal-entry-editor.component').then((m) => m.JournalEntryEditorComponent),
   },
   {
+    path: 'journal-approvals',
+    canActivate: [capabilityGuard('CAP-ACCT-FULLGL')],
+    loadComponent: () =>
+      import('./components/journal-approvals/journal-approvals.component').then((m) => m.JournalApprovalsComponent),
+  },
+  {
     path: 'trial-balance',
     loadComponent: () =>
       import('./components/trial-balance/trial-balance.component').then((m) => m.TrialBalanceComponent),

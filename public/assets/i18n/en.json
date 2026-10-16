@@ -83,7 +83,8 @@
     "exports": "QBO Export",
     "chartOfAccounts": "Chart of Accounts",
     "pieceRates": "Piece Rates",
-    "openingJournal": "Opening Journal"
+    "openingJournal": "Opening Journal",
+    "journalApprovals": "Journal Approvals"
   },
   "navGroups": {
     "operations": "Operations",
@@ -9611,7 +9612,8 @@
       "post": "Post entry",
       "posted": "Entry #{{number}} posted",
       "correctionMemo": "Correction of entry #{{number}}: ",
-      "correcting": "Correcting entry #{{number}}"
+      "correcting": "Correcting entry #{{number}}",
+      "pendingApproval": "Entry {{number}} is waiting for a second approver"
     },
     "training": {
       "title": "GL Training",
@@ -9794,7 +9796,9 @@
       "bankStatements": "Bank Statements",
       "bankStatementsDesc": "Import OFX/CSV statements and match them to the ledger",
       "openingJournal": "Opening journal",
-      "openingJournalDesc": "Post the opening balances that switch on the full general ledger"
+      "openingJournalDesc": "Post the opening balances that switch on the full general ledger",
+      "journalApprovals": "Journal approvals",
+      "journalApprovalsDesc": "Approve or reject manual entries waiting for a second approver"
     },
     "exports": {
       "title": "CPA Exports",
@@ -10106,6 +10110,20 @@
       "tieOutHint": "Compare these balances with the closing trial balance of your previous system before going live.",
       "loadFailed": "Could not load the opening journal",
       "tieOutFailed": "Could not load the opening trial balance"
+    },
+    "approvals": {
+      "title": "Journal approvals",
+      "subtitle": "Manual entries over the approval threshold wait here for a second Controller",
+      "entry": "Entry {{number}}",
+      "approve": "Approve and post",
+      "reject": "Reject",
+      "approved": "Entry {{number}} approved and posted",
+      "rejected": "Entry {{number}} returned to draft",
+      "empty": "No entries are waiting for approval",
+      "loadFailed": "Could not load the entries waiting for approval",
+      "rejectTitle": "Reject entry {{number}}",
+      "rejectNote": "The entry goes back to draft; nothing reaches the ledger. The reason is added to its memo.",
+      "rejectReason": "Reason (optional)"
     }
   },
   "subcontractUi": {

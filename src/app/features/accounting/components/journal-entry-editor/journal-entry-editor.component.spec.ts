@@ -29,7 +29,7 @@ const ACCOUNTS = [
 describe('JournalEntryEditorComponent', () => {
   const gl = { getChartOfAccounts: vi.fn(), createManualJournalEntry: vi.fn(), getLedgerRegister: vi.fn() };
   const router = { navigate: vi.fn() };
-  const snackbar = { success: vi.fn(), error: vi.fn(), errorFrom: vi.fn() };
+  const snackbar = { success: vi.fn(), error: vi.fn(), errorFrom: vi.fn(), info: vi.fn() };
   let queryParams: Record<string, string>;
 
   function create(): EditorApi {
@@ -125,6 +125,18 @@ describe('JournalEntryEditorComponent', () => {
     expect(gl.createManualJournalEntry).toHaveBeenCalledTimes(1);
     expect(snackbar.success).toHaveBeenCalled();
     expect(router.navigate).toHaveBeenCalledWith(['/accounting/ledger']);
+  });
+
+  it('sends an entry held for a second approver to the approvals list', () => {
+    gl.createManualJournalEntry.mockReturnValue(
+      of({ id: 6, bookId: 1, entryNumber: 8, entryDate: '2026-01-10', status: 'PendingApproval', memo: 'cash sale' }),
+    );
+    const api = create();
+    fillBalanced(api);
+    api.save();
+    expect(snackbar.success).not.toHaveBeenCalled();
+    expect(snackbar.info).toHaveBeenCalledWith('accounting.journalEditor.pendingApproval');
+    expect(router.navigate).toHaveBeenCalledWith(['/accounting/journal-approvals']);
   });
 
   it('adds and removes lines but keeps a minimum pair', () => {

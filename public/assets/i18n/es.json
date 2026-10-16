@@ -83,7 +83,8 @@
     "exports": "Exportar a QBO",
     "chartOfAccounts": "Plan de Cuentas",
     "pieceRates": "Tarifas por pieza",
-    "openingJournal": "Asiento de apertura"
+    "openingJournal": "Asiento de apertura",
+    "journalApprovals": "Aprobación de asientos"
   },
   "navGroups": {
     "operations": "Operaciones",
@@ -9611,7 +9612,8 @@
       "post": "Registrar asiento",
       "posted": "Asiento n.º {{number}} registrado",
       "correctionMemo": "Corrección del asiento n.º {{number}}: ",
-      "correcting": "Corrigiendo el asiento n.º {{number}}"
+      "correcting": "Corrigiendo el asiento n.º {{number}}",
+      "pendingApproval": "El asiento {{number}} espera un segundo aprobador"
     },
     "training": {
       "title": "Formación del libro mayor",
@@ -9794,7 +9796,9 @@
       "bankStatements": "Estados de cuenta bancarios",
       "bankStatementsDesc": "Importe estados OFX/CSV y concílielos con el libro mayor",
       "openingJournal": "Asiento de apertura",
-      "openingJournalDesc": "Registre los saldos de apertura que activan el libro mayor completo"
+      "openingJournalDesc": "Registre los saldos de apertura que activan el libro mayor completo",
+      "journalApprovals": "Aprobación de asientos",
+      "journalApprovalsDesc": "Apruebe o rechace asientos manuales que esperan un segundo aprobador"
     },
     "exports": {
       "title": "Exportaciones para el contador",
@@ -10106,6 +10110,20 @@
       "tieOutHint": "Compare estos saldos con el balance de comprobación de cierre de su sistema anterior antes de comenzar.",
       "loadFailed": "No se pudo cargar el asiento de apertura",
       "tieOutFailed": "No se pudo cargar el balance de comprobación de apertura"
+    },
+    "approvals": {
+      "title": "Aprobación de asientos",
+      "subtitle": "Los asientos manuales que superan el umbral esperan aquí a un segundo contralor",
+      "entry": "Asiento {{number}}",
+      "approve": "Aprobar y registrar",
+      "reject": "Rechazar",
+      "approved": "Asiento {{number}} aprobado y registrado",
+      "rejected": "Asiento {{number}} devuelto a borrador",
+      "empty": "No hay asientos pendientes de aprobación",
+      "loadFailed": "No se pudieron cargar los asientos pendientes de aprobación",
+      "rejectTitle": "Rechazar asiento {{number}}",
+      "rejectNote": "El asiento vuelve a borrador; nada llega al libro mayor. El motivo se agrega a su nota.",
+      "rejectReason": "Motivo (opcional)"
     }
   },
   "subcontractUi": {

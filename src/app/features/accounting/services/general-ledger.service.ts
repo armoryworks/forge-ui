@@ -254,6 +254,24 @@ export class GeneralLedgerService {
     return this.http.get<GlAnomaly[]>(`${this.base}/anomalies`, { params });
   }
 
+  /** Maker-checker work-list (§5.7): manual entries of the book waiting for a second approver. */
+  getPendingJournalEntries(bookId: number): Observable<ManualJournalEntryResult[]> {
+    return this.http.get<ManualJournalEntryResult[]>(`${this.base}/journal-entries/pending`, {
+      params: new HttpParams().set('bookId', bookId),
+    });
+  }
+
+  /** Approve a pending manual entry; the approver must not be its submitter (server-enforced). */
+  approveJournalEntry(entryId: number): Observable<ManualJournalEntryResult> {
+    return this.http.post<ManualJournalEntryResult>(`${this.base}/journal-entries/${entryId}/approve`, {});
+  }
+
+  /** Return a pending manual entry to Draft, appending the optional reason to its memo. */
+  rejectJournalEntry(entryId: number, reason?: string | null): Observable<ManualJournalEntryResult> {
+    const params = reason ? new HttpParams().set('reason', reason) : undefined;
+    return this.http.post<ManualJournalEntryResult>(`${this.base}/journal-entries/${entryId}/reject`, {}, params ? { params } : {});
+  }
+
   /** Reverse a posted journal entry — posts an equal-and-opposite entry; the original is never edited. */
   reverseJournalEntry(entryId: number, request: ReverseJournalEntryInput): Observable<ManualJournalEntryResult> {
     return this.http.post<ManualJournalEntryResult>(`${this.base}/journal-entries/${entryId}/reverse`, request);

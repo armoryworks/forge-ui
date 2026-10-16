@@ -1,0 +1,79 @@
+@use 'styles/variables' as *;
+
+.jea {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  max-width: 960px;
+  min-height: 120px;
+
+  &__entry {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+    padding: $sp-md;
+    border: $border-width-thin solid var(--border);
+    border-left: $border-width-accent solid var(--warning);
+    background: var(--surface);
+  }
+
+  &__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: $sp-md;
+    font-size: $font-size-sm;
+  }
+
+  &__number {
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  &__date {
+    color: var(--text-secondary);
+    font-family: $font-family-mono;
+  }
+
+  &__memo {
+    flex: 1;
+    min-width: 0;
+    color: var(--text);
+    overflow-wrap: anywhere;
+  }
+
+  &__total {
+    font-family: $font-family-mono;
+    font-weight: 700;
+  }
+
+  &__table-wrap {
+    overflow-x: auto;
+  }
+
+  &__lines {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: $font-size-sm;
+
+    th,
+    td {
+      padding: $sp-xs $sp-sm;
+      border-bottom: $border-width-thin solid var(--border);
+      text-align: left;
+    }
+
+    th.jea__num,
+    td.jea__num {
+      text-align: right;
+      font-family: $font-family-mono;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $sp-sm;
+  }
+}

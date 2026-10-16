@@ -36,6 +36,7 @@ export class AccountingComponent {
     { route: 'ledger', label: this.translate.instant('accounting.dashboard.ledger'), icon: 'receipt_long', description: this.translate.instant('accounting.dashboard.ledgerDesc') },
     { route: '/accounting/opening-journal', label: this.translate.instant('accounting.dashboard.openingJournal'), icon: 'input', description: this.translate.instant('accounting.dashboard.openingJournalDesc'), capability: 'CAP-ACCT-MIGRATION' },
     { route: 'journal-entries/new', label: this.translate.instant('accounting.dashboard.newEntry'), icon: 'note_add', description: this.translate.instant('accounting.dashboard.newEntryDesc') },
+    { route: 'journal-approvals', label: this.translate.instant('accounting.dashboard.journalApprovals'), icon: 'fact_check', description: this.translate.instant('accounting.dashboard.journalApprovalsDesc'), capability: 'CAP-ACCT-FULLGL' },
     { route: 'training', label: this.translate.instant('accounting.dashboard.training'), icon: 'school', description: this.translate.instant('accounting.dashboard.trainingDesc') },
     { route: 'trial-balance', label: this.translate.instant('accounting.dashboard.trialBalance'), icon: 'balance', description: this.translate.instant('accounting.dashboard.trialBalanceDesc') },
     { route: 'profit-loss', label: this.translate.instant('accounting.dashboard.profitLoss'), icon: 'trending_up', description: this.translate.instant('accounting.dashboard.profitLossDesc') },

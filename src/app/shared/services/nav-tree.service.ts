@@ -183,6 +183,7 @@ export class NavTreeService {
             // absent from the nav, so the GL looked read-only.
             { icon: 'account_tree', label: 'Chart of Accounts', i18nKey: 'nav.chartOfAccounts', route: '/accounting/chart-of-accounts' },
             { icon: 'post_add', label: 'Journal Entries', i18nKey: 'nav.journalEntries', route: '/accounting/journal-entries/new' },
+            { icon: 'fact_check', label: 'Journal Approvals', i18nKey: 'nav.journalApprovals', route: '/accounting/journal-approvals' },
             { icon: 'menu_book', label: 'Ledger', i18nKey: 'nav.ledger', route: '/accounting/ledger' },
             // Financial statements.
             { icon: 'balance', label: 'Trial Balance', i18nKey: 'nav.trialBalance', route: '/accounting/trial-balance' },

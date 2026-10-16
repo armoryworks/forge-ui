@@ -183,6 +183,11 @@ export class JournalEntryEditorComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) => {
+          if (result.status === 'PendingApproval') {
+            this.snackbar.info(this.translate.instant('accounting.journalEditor.pendingApproval', { number: result.entryNumber }));
+            this.router.navigate(['/accounting/journal-approvals']);
+            return;
+          }
           this.snackbar.success(this.translate.instant('accounting.journalEditor.posted', { number: result.entryNumber }));
           this.router.navigate(['/accounting/ledger']);
         },
