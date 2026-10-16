@@ -391,10 +391,11 @@ export class AppHeaderComponent implements OnInit {
     this.languageService.setLanguage(lang);
   }
 
-  protected logout(): void {
+  protected async logout(): Promise<void> {
     this.userMenuOpen.set(false);
-    this.authService.logout();
-    this.router.navigate(['/login']);
+    if (await this.authService.logout()) {
+      this.router.navigate(['/login']);
+    }
   }
 
   protected goToAccount(): void {
