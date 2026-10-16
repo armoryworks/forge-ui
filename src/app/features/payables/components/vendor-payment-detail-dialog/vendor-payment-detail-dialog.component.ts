@@ -19,7 +19,7 @@ export interface VendorPaymentDetailDialogData {
       (closed)="close()"
       (paymentChanged)="changed = true" />
   `,
-  styles: [`:host { display: block; width: 100%; height: 100%; }`],
+  styles: [`:host { display: block; width: 100%; height: 100%; } app-vendor-payment-detail-panel { height: 100%; }`],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VendorPaymentDetailDialogComponent {
