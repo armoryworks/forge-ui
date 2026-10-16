@@ -3,7 +3,7 @@
   @if (prefix() && prefix().length <= 2) {
     <span matPrefix class="input__text-prefix">{{ prefix() }}</span>
   } @else if (prefix()) {
-    <span matPrefix class="material-icons-outlined">{{ prefix() }}</span>
+    <span matPrefix class="material-icons-outlined input__icon-prefix" aria-hidden="true">{{ prefix() }}</span>
   }
   <input matInput
     [type]="effectiveType"
