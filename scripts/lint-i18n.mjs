@@ -26,7 +26,6 @@
  *   • translate.instant("<key>")                       (programmatic, double quotes)
  *   • translate.get('<key>')                           (observable form)
  *   • i18nKey: '<key>' / labelKey: '<key>' / etc.      (config patterns flowing to UI)
- *   • (cond ? '<key>' : '<key>') | translate           (ternary branches inside parens)
  *
  * Patterns NOT matched (dynamic — would need an allowlist instead):
  *   • Template-literal keys: translate.instant(`foo.${x}`)
