@@ -9,6 +9,7 @@ import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
+import { CapabilityService } from '../../../shared/services/capability.service';
 import { I18nLabelsComponent } from './i18n-labels.component';
 import { I18nLabelOverride } from '../models/i18n-label-override.model';
 
@@ -59,6 +60,7 @@ function setup() {
       provideAnimations(),
       provideRouter([]),
       provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+      { provide: CapabilityService, useValue: { isEnabled: (code: string) => code === 'CAP-ADMIN-I18N' } },
     ],
   });
   const component = TestBed.runInInjectionContext(() => new I18nLabelsComponent());
