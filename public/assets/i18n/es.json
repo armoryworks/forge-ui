@@ -5037,7 +5037,9 @@
     "keepMine": "Mantener míos"
   },
   "activityHistory": {
-    "system": "Sistema"
+    "system": "Sistema",
+    "updatedFields": "{{count}} campos actualizados",
+    "fieldChanges": "{{count}} cambios de campos"
   },
   "statusTimeline": {
     "currentStatus": "Estado actual",

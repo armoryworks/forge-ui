@@ -1,24 +1,15 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AvatarComponent } from '../avatar/avatar.component';
 import { RichTextPipe } from '../../pipes/rich-text.pipe';
 import { DATETIME_FORMAT, formatDate } from '../../utils/date.utils';
 import { ActivityItem } from '../../models/activity.model';
-
-export interface DisplayActivity {
-  id: number;
-  description: string;
-  createdAt: Date;
-  userInitials?: string;
-  userName?: string;
-  userColor?: string;
-  action?: string;
-  batchedItems?: ActivityItem[];
-}
+import { DisplayActivity } from '../../models/display-activity.model';
+import { collapseFieldChanges } from '../../utils/activity-batching';
 
 @Component({
   selector: 'app-activity-timeline',
@@ -29,6 +20,8 @@ export interface DisplayActivity {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ActivityTimelineComponent {
+  private readonly translate = inject(TranslateService);
+
   readonly activities = input.required<ActivityItem[]>();
   readonly compact = input(false);
   readonly filterable = input(false);
@@ -66,51 +59,11 @@ export class ActivityTimelineComponent {
     return items;
   });
 
-  protected readonly displayActivities = computed<DisplayActivity[]>(() => {
-    const items = this.filteredActivities();
-    const result: DisplayActivity[] = [];
-
-    for (let i = 0; i < items.length; i++) {
-      const current = items[i];
-
-      if (current.action !== 'FieldChanged') {
-        result.push(current);
-        continue;
-      }
-
-      const batch: ActivityItem[] = [current];
-      while (i + 1 < items.length) {
-        const next = items[i + 1];
-        if (
-          next.action === 'FieldChanged' &&
-          next.userInitials === current.userInitials &&
-          Math.abs(next.createdAt.getTime() - current.createdAt.getTime()) < 5000
-        ) {
-          batch.push(next);
-          i++;
-        } else {
-          break;
-        }
-      }
-
-      if (batch.length === 1) {
-        result.push(current);
-      } else {
-        result.push({
-          id: current.id,
-          description: `Updated ${batch.length} fields`,
-          createdAt: current.createdAt,
-          userInitials: current.userInitials,
-          userName: current.userName,
-          userColor: current.userColor,
-          action: 'FieldChanged',
-          batchedItems: batch,
-        });
-      }
-    }
-
-    return result;
-  });
+  protected readonly displayActivities = computed<DisplayActivity[]>(() =>
+    collapseFieldChanges(
+      this.filteredActivities(),
+      count => this.translate.instant('activityHistory.updatedFields', { count }),
+    ));
 
   protected toggleBatch(id: number): void {
     this.expandedBatch.set(this.expandedBatch() === id ? null : id);

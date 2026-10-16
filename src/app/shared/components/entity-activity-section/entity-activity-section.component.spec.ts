@@ -3,13 +3,16 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
 import { mockSignalInputs } from '../../../../testing/signal-input-harness';
+import { TranslateService } from '@ngx-translate/core';
+
 import { ActivityItem } from '../../models/activity.model';
+import { DisplayActivity } from '../../models/display-activity.model';
 import { EntityNote } from '../../models/entity-note.model';
 import { EntityActivityService } from '../../services/entity-activity.service';
 import { ActivityFilterTab, EntityActivitySectionComponent } from './entity-activity-section.component';
 
 interface SectionInternals {
-  allActivityItems(): ActivityItem[];
+  allActivityItems(): DisplayActivity[];
   allItemKey(item: ActivityItem): string;
   loadData(entityType: string, entityId: number): void;
 }
@@ -26,17 +29,20 @@ const note: EntityNote = {
   authorColor: '#0d9488', createdAt: new Date('2026-10-01T11:00:00Z'), updatedAt: null,
 };
 
-function setup(tabs: ActivityFilterTab[]) {
+function setup(tabs: ActivityFilterTab[], history: ActivityItem[] = [fieldChange]) {
   const service = {
     getActivity: vi.fn(() => of([comment, fieldChange])),
     getNotes: vi.fn(() => of([note])),
-    getHistory: vi.fn(() => of([fieldChange])),
+    getHistory: vi.fn(() => of(history)),
     getMentionUsers: vi.fn(() => of([])),
   };
 
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
-    providers: [{ provide: EntityActivityService, useValue: service }],
+    providers: [
+      { provide: EntityActivityService, useValue: service },
+      { provide: TranslateService, useValue: { instant: (key: string, params?: { count: number }) => `${key}:${params?.count}` } },
+    ],
   });
 
   const component = TestBed.runInInjectionContext(() => new EntityActivitySectionComponent());
@@ -76,5 +82,19 @@ describe('EntityActivitySectionComponent', () => {
     const keys = internals.allActivityItems().map(i => internals.allItemKey(i));
 
     expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it('folds the field rows of one save under its summary entry in All', () => {
+    const savedAt = new Date('2026-10-16T09:02:21Z');
+    const history: ActivityItem[] = [
+      { id: 20, action: 'credit-hold-released', description: 'Credit hold released', createdAt: savedAt, userInitials: 'CT' },
+      { id: 21, action: 'FieldChanged', description: 'Is On Credit Hold: true → false', createdAt: savedAt, userInitials: 'CT' },
+      { id: 22, action: 'FieldChanged', description: 'Credit Hold By: Casey Thompson → (none)', createdAt: savedAt, userInitials: 'CT' },
+    ];
+    const { internals } = setup(['all'], history);
+
+    const summary = internals.allActivityItems().find(i => i.id === 20);
+    expect(internals.allActivityItems().some(i => i.id === 21 || i.id === 22)).toBe(false);
+    expect(summary?.batchedItems?.map(i => i.id)).toEqual([21, 22]);
   });
 });

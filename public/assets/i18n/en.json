@@ -5044,7 +5044,9 @@
     "keepMine": "Keep Mine"
   },
   "activityHistory": {
-    "system": "System"
+    "system": "System",
+    "updatedFields": "Updated {{count}} fields",
+    "fieldChanges": "{{count}} field changes"
   },
   "statusTimeline": {
     "currentStatus": "Current Status",
