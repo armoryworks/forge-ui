@@ -9,12 +9,14 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { phoneValidator } from '../../../../shared/validators/phone.validator';
 
 import { CustomerDetail } from '../../models/customer-detail.model';
 import { CustomerService } from '../../services/customer.service';
+import { CUSTOMER_COMMERCIAL_TERMS_ROLES } from '../../customer-roles';
 
 /**
  * Express-mode form for the customer workflow. Single consolidated screen
@@ -41,6 +43,7 @@ export class CustomerExpressFormComponent {
   private readonly translate = inject(TranslateService);
   private readonly manualNumberSettings = inject(ManualNumberSettingsService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly auth = inject(AuthService);
 
   readonly stepId = input<string>('express');
   readonly componentName = input<string>('CustomerExpressFormComponent');
@@ -49,6 +52,7 @@ export class CustomerExpressFormComponent {
   readonly entity = input<unknown>(null);
 
   protected readonly saving = signal(false);
+  protected readonly canSetCommercialTerms = this.auth.hasAnyRole(CUSTOMER_COMMERCIAL_TERMS_ROLES);
 
   /** Gated by the `customers.allow_manual_numbers` system setting. Optional here —
    *  a blank value lets the server auto-generate the number. */

@@ -8,11 +8,13 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 
 import { CustomerDetail } from '../../models/customer-detail.model';
 import { CustomerService } from '../../services/customer.service';
+import { CUSTOMER_COMMERCIAL_TERMS_ROLES } from '../../customer-roles';
 
 /**
  * Customer workflow credit + tax step. Optional — no completion gate.
@@ -36,6 +38,7 @@ export class CustomerCreditAndTaxStepComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly auth = inject(AuthService);
 
   readonly stepId = input<string>('creditAndTax');
   readonly componentName = input<string>('CustomerCreditAndTaxStepComponent');
@@ -44,6 +47,7 @@ export class CustomerCreditAndTaxStepComponent {
   readonly entity = input<unknown>(null);
 
   protected readonly saving = signal(false);
+  protected readonly canSetCommercialTerms = this.auth.hasAnyRole(CUSTOMER_COMMERCIAL_TERMS_ROLES);
 
   // Same shape the legacy guided dialog offered. Currency options live in
   // the leads.convertStepper i18n bucket (legacy) — re-used here rather

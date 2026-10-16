@@ -35,26 +35,30 @@
       formControlName="phone"
       mask="phone"
       data-testid="customer-express-phone" />
-    <app-currency-input
-      [label]="'customers.workflow.creditAndTax.creditLimitLabel' | translate"
-      formControlName="creditLimit"
-      data-testid="customer-express-credit-limit" />
+    @if (canSetCommercialTerms) {
+      <app-currency-input
+        [label]="'customers.workflow.creditAndTax.creditLimitLabel' | translate"
+        formControlName="creditLimit"
+        data-testid="customer-express-credit-limit" />
+    }
     <app-select
       [label]="'customers.workflow.creditAndTax.defaultCurrencyLabel' | translate"
       formControlName="defaultCurrency"
       [options]="currencyOptions"
       data-testid="customer-express-default-currency" />
-    <app-toggle
-      [label]="'customers.workflow.creditAndTax.isTaxExemptLabel' | translate"
-      formControlName="isTaxExempt"
-      data-testid="customer-express-is-tax-exempt" />
-    @if (form.controls.isTaxExempt.value) {
-      <app-input
-        [label]="'customers.workflow.creditAndTax.taxExemptionIdLabel' | translate"
-        formControlName="taxExemptionId"
-        [required]="true"
-        [maxlength]="100"
-        data-testid="customer-express-tax-exemption-id" />
+    @if (canSetCommercialTerms) {
+      <app-toggle
+        [label]="'customers.workflow.creditAndTax.isTaxExemptLabel' | translate"
+        formControlName="isTaxExempt"
+        data-testid="customer-express-is-tax-exempt" />
+      @if (form.controls.isTaxExempt.value) {
+        <app-input
+          [label]="'customers.workflow.creditAndTax.taxExemptionIdLabel' | translate"
+          formControlName="taxExemptionId"
+          [required]="true"
+          [maxlength]="100"
+          data-testid="customer-express-tax-exemption-id" />
+      }
     }
   </form>
 </section>
