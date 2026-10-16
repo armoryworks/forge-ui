@@ -76,4 +76,23 @@ describe('PartInventoryClusterComponent', () => {
     expect(c.form.value['reorderPoint']).toBe(50);
     expect(c.form.value['traceabilityType']).toBe('Lot');
   });
+  it('keeps unsaved edits when another cluster on the tab saves', () => {
+    const component = TestBed.runInInjectionContext(() => new PartInventoryClusterComponent());
+    const inputs = mockSignalInputs(component, {
+      part: makePart({ minStockThreshold: 25 }),
+      editing: true,
+      saving: false,
+    });
+    TestBed.flushEffects();
+    const c = component as unknown as { form: { value: Record<string, unknown>; controls: Record<string, { setValue(v: unknown): void }> } };
+    c.form.controls['minStockThreshold'].setValue(40);
+
+    inputs.part.set(makePart({ minStockThreshold: 25, stockUomId: 1 }));
+    TestBed.flushEffects();
+    expect(c.form.value['minStockThreshold']).toBe(40);
+
+    inputs.part.set(makePart({ minStockThreshold: 40, stockUomId: 1 }));
+    TestBed.flushEffects();
+    expect(c.form.value['minStockThreshold']).toBe(40);
+  });
 });

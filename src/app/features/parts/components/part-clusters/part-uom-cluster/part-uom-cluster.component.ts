@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnInit, effect, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, input, output, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InventoryService } from '../../../../inventory/services/inventory.service';
+import { shallowEqual } from '../../../../../shared/utils/shallow-equal';
 import { SelectComponent, SelectOption } from '../../../../../shared/components/select/select.component';
 import { ValidationButtonComponent } from '../../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../../shared/services/form-validation.service';
@@ -77,14 +78,20 @@ export class PartUomClusterComponent implements OnInit {
     });
   }
 
+  private readonly savedValues = computed(() => {
+    const p = this.part();
+    return {
+      id: p.id,
+      stockUomId: p.stockUomId ?? null,
+      purchaseUomId: p.purchaseUomId ?? null,
+      salesUomId: p.salesUomId ?? null,
+    };
+  }, { equal: shallowEqual });
+
   constructor() {
     effect(() => {
-      const p = this.part();
-      this.form.reset({
-        stockUomId: p.stockUomId ?? null,
-        purchaseUomId: p.purchaseUomId ?? null,
-        salesUomId: p.salesUomId ?? null,
-      });
+      const { stockUomId, purchaseUomId, salesUomId } = this.savedValues();
+      this.form.reset({ stockUomId, purchaseUomId, salesUomId });
       if (this.editing()) {
         this.form.enable();
       } else {
