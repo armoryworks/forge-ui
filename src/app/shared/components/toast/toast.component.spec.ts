@@ -1,8 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { ToastService } from '../../services/toast.service';
 import { ToastContainerComponent } from './toast.component';
+
+@Component({ selector: 'app-toast-spec-dialog', standalone: true, template: '', changeDetection: ChangeDetectionStrategy.OnPush })
+class SpecDialogComponent {}
 
 describe('ToastContainerComponent top layer', () => {
   let host: HTMLElement;
@@ -12,7 +18,7 @@ describe('ToastContainerComponent top layer', () => {
   let hide: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ imports: [ToastContainerComponent] });
+    TestBed.configureTestingModule({ imports: [ToastContainerComponent], providers: [provideNoopAnimations()] });
     const fixture = TestBed.createComponent(ToastContainerComponent);
     host = fixture.nativeElement as HTMLElement;
     toasts = TestBed.inject(ToastService);
@@ -48,5 +54,23 @@ describe('ToastContainerComponent top layer', () => {
     TestBed.tick();
 
     expect(open).toBe(false);
+  });
+
+  it('re-raises a visible toast above a dialog opened after it', () => {
+    toasts.show({ severity: 'warning', title: 'Before the dialog' });
+    TestBed.tick();
+    expect(show).toHaveBeenCalledTimes(1);
+
+    TestBed.inject(MatDialog).open(SpecDialogComponent);
+
+    expect(hide).toHaveBeenCalledTimes(1);
+    expect(show).toHaveBeenCalledTimes(2);
+    expect(open).toBe(true);
+  });
+
+  it('stays hidden when a dialog opens with no toast showing', () => {
+    TestBed.inject(MatDialog).open(SpecDialogComponent);
+
+    expect(show).not.toHaveBeenCalled();
   });
 });
