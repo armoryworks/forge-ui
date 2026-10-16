@@ -37,6 +37,7 @@ function line(overrides: Partial<SalesOrderLine> = {}): SalesOrderLine {
     isFullyShipped: false,
     notes: null,
     jobs: [],
+    needsJob: true,
     ...overrides,
   };
 }
@@ -189,7 +190,7 @@ describe('SalesOrderDetailPanelComponent', () => {
     const panel = build(order({
       shippingAddressId: null,
       requestedDeliveryDate: null,
-      lines: [line(), line({ id: 12, lineNumber: 2, unitPrice: 0 }), line({ id: 13, lineNumber: 3, partId: null, unitPrice: 0 })],
+      lines: [line(), line({ id: 12, lineNumber: 2, unitPrice: 0 }), line({ id: 13, lineNumber: 3, partId: null, needsJob: false, unitPrice: 0 })],
     }));
 
     panel['confirmSo']();
@@ -327,6 +328,19 @@ describe('SalesOrderDetailPanelComponent', () => {
     expect(panel['acceptedBannerKey']({ ...acceptance, recordedByName: 'Pat' })).toBe('salesOrders.acceptance.acceptedBanner');
   });
 
+  it('leaves lines the server will not make a work order for out of the confirm count and the missing-job flags', () => {
+    const buyLine = line({ id: 12, lineNumber: 2, partId: 9, needsJob: false });
+    const panel = build(order({ lines: [line(), buyLine] }));
+
+    panel['confirmSo']();
+
+    const data = dialogOpen.mock.calls[0][1].data as ConfirmDialogData;
+    expect(data.message).toBe('salesOrders.confirmSoReleaseMessage {"number":"SO-00007","count":1}');
+
+    const confirmed = build(order({ status: 'Confirmed', lines: [line({ jobs: [{ id: 1 } as never] }), buyLine] }));
+    expect(confirmed['linesWithNoJobs']()).toEqual([]);
+  });
+
   it('creates the work order for one flagged line and reloads the order', () => {
     soService['createMissingJobs'].mockReturnValue(of({ created: 0, skipped: [{ lineNumber: 2, reason: 'No part on this line' }] }));
     const flagged = line({ id: 12, lineNumber: 2 });
@@ -386,7 +400,7 @@ describe('SalesOrderDetailPanelComponent', () => {
 
   it('offers work orders only on lines with a part', () => {
     const make = line();
-    const freight = line({ id: 12, lineNumber: 2, partId: null, partNumber: null, description: 'Freight' });
+    const freight = line({ id: 12, lineNumber: 2, partId: null, partNumber: null, description: 'Freight', needsJob: false });
     const panel = build(order({ status: 'Confirmed', lines: [make, freight] }));
 
     expect(panel['linesWithNoJobs']()).toEqual([make]);

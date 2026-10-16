@@ -180,7 +180,7 @@ export class SoDialogComponent {
   };
 
   constructor() {
-    this.partsService.getParts('Active').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.partsService.getTransactableParts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.parts.set(list),
     });
 
