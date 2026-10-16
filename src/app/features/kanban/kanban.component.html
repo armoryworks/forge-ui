@@ -17,10 +17,10 @@
     </div>
 
     <div class="view-toggle">
-      <button class="view-toggle__btn" [class.view-toggle__btn--active]="viewMode() === 'board'" (click)="setViewMode('board')" [matTooltip]="'kanban.boardView' | translate" matTooltipPosition="above">
+      <button class="view-toggle__btn" [class.view-toggle__btn--active]="viewMode() === 'board'" (click)="setViewMode('board')" [attr.aria-label]="'kanban.boardView' | translate" [attr.aria-pressed]="viewMode() === 'board'" [matTooltip]="'kanban.boardView' | translate" matTooltipPosition="above">
         <span class="material-icons-outlined">view_column</span>
       </button>
-      <button class="view-toggle__btn" [class.view-toggle__btn--active]="viewMode() === 'team'" (click)="setViewMode('team')" [matTooltip]="'kanban.teamView' | translate" matTooltipPosition="above">
+      <button class="view-toggle__btn" [class.view-toggle__btn--active]="viewMode() === 'team'" (click)="setViewMode('team')" [attr.aria-label]="'kanban.teamView' | translate" [attr.aria-pressed]="viewMode() === 'team'" [matTooltip]="'kanban.teamView' | translate" matTooltipPosition="above">
         <span class="material-icons-outlined">people</span>
       </button>
     </div>
