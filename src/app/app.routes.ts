@@ -187,6 +187,7 @@ export const routes: Routes = [
       },
       {
         path: 'expenses',
+        canActivate: [roleGuard('Admin', 'Manager', 'Engineer', 'OfficeManager')],
         loadChildren: () =>
           import('./features/expenses/expenses.routes').then((m) => m.EXPENSES_ROUTES),
       },

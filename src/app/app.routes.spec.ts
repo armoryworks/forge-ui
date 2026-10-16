@@ -52,3 +52,11 @@ describe('top-level setup routes', () => {
     expect(token).toBeGreaterThan(integrations);
   });
 });
+
+describe('expenses route', () => {
+  it('is role-guarded so production workers cannot reach it by URL', () => {
+    const expenses = routes.flatMap(r => r.children ?? []).find(r => r.path === 'expenses');
+
+    expect(expenses?.canActivate?.length).toBe(1);
+  });
+});
