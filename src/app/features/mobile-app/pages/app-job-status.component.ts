@@ -28,7 +28,8 @@ type PendingAction = 'advance' | 'note' | 'photo' | 'timer';
  * customer, current column, due date, next step, last three timeline
  * entries. Advancing asks nothing and shows an undo toast, except into a
  * column that can't be undone or that creates an accounting document: that
- * asks first and offers no undo, even when saved offline. A refusal of an
+ * asks first and offers no undo, even when saved offline. A column that
+ * bills the customer is left to the office for roles that cannot bill. A refusal of an
  * unconfirmed move shows the server's reason once. Notes come from voice or a preset picker;
  * photos from the camera; the timer button reads Stop while the person's
  * timer runs on this job. With operation tracking on, the job's routing
@@ -69,6 +70,10 @@ export class AppJobStatusComponent {
   protected readonly identifying = signal(false);
   protected readonly timerRunningHere = computed(() => this.timer.runningOn(this.job()?.id));
   protected readonly operationTracking = computed(() => this.timer.operationTracking());
+  protected readonly officeOnly = computed(() => {
+    const job = this.job();
+    return job && this.confirmMove.officeOnly(job) ? this.confirmMove.officeOnlyMessage(job) : null;
+  });
 
   protected readonly voiceSupported = computed(() =>
     typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window));
@@ -187,6 +192,10 @@ export class AppJobStatusComponent {
 
   private async doAdvance(job: JobStatus): Promise<void> {
     if (job.nextStageId === null) return;
+    if (this.confirmMove.officeOnly(job)) {
+      this.snackbar.info(this.confirmMove.officeOnlyMessage(job));
+      return;
+    }
     const confirmed = this.confirmMove.needed(job);
     if (confirmed && !(await this.confirmMove.ask(job))) return;
     const outcome = await firstValueFrom(this.api.advanceJob(job.id, null, confirmed ? job.nextStageId : null, true));

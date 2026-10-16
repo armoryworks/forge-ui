@@ -6931,7 +6931,8 @@
       "noStockToIssue": "No hay existencias para emitir",
       "noActiveWorkOrders": "Ninguna orden de trabajo activa requiere esta pieza",
       "noQcTemplate": "No hay una plantilla de control de calidad configurada para esta pieza",
-      "noStockToReturn": "No hay existencias para devolver"
+      "noStockToReturn": "No hay existencias para devolver",
+      "roleCannotShip": "Su rol no puede enviar"
     },
     "logActions": {
       "move": "Movimiento",
@@ -11097,7 +11098,8 @@
         "PurchaseOrder": "una orden de compra",
         "Invoice": "una factura",
         "Payment": "un pago"
-      }
+      },
+      "officeOnly": "La oficina mueve {{job}} a {{status}}."
     },
     "myJobs": {
       "title": "Mis órdenes de trabajo",

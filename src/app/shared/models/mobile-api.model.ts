@@ -31,6 +31,7 @@ export interface JobStatus {
   nextStageName: string | null;
   nextStageIsShopFloor?: boolean;
   nextStageIsIrreversible?: boolean;
+  nextStageIsBilling?: boolean;
   nextStageAccountingDocument?: 'Estimate' | 'SalesOrder' | 'PurchaseOrder' | 'Invoice' | 'Payment' | null;
   previousStageId: number | null;
   previousStageName: string | null;
