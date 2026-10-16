@@ -110,7 +110,7 @@
 
     <!-- ── Tab content ── -->
     <div class="cd-content">
-      @switch (activeTab()) {
+      @switch (renderedTab()) {
         @case ('overview') {
           <!-- Pillar 5 — Identity cluster (read + edit) plus existing context sections. -->
           <app-customer-identity-cluster

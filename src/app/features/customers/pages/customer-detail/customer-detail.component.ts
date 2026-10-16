@@ -132,6 +132,12 @@ export class CustomerDetailComponent {
     { initialValue: 'overview' as CustomerDetailTabId },
   );
 
+  protected readonly renderedTab = computed<CustomerDetailTabId | null>(() => {
+    const tab = this.activeTab();
+    const roles = this.tabRoleMap[tab];
+    return roles && !this.auth.hasAnyRole(roles) ? null : tab;
+  });
+
   protected readonly customer = signal<CustomerSummary | null>(null);
   protected readonly loading = signal(true);
   protected readonly editing = signal(false);
