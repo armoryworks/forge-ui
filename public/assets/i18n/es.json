@@ -2451,7 +2451,7 @@
       "deleteTitle": "¿Eliminar estimación?",
       "deleteMessage": "¿Eliminar \"{{title}}\"? Esta acción no se puede deshacer.",
       "convertTitle": "¿Convertir a cotización?",
-      "convertMessage": "¿Convertir \"{{title}}\" en una cotización formal? La estimación se marcará como Aceptada.",
+      "convertMessage": "¿Convertir \"{{title}}\" en una cotización formal? La estimación se marcará como Convertida a cotización.",
       "convertConfirmLabel": "Convertir",
       "createdQuote": "Cotización {{number}} creada",
       "lines": "Partidas",
