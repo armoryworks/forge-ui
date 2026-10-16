@@ -74,6 +74,8 @@ export class WorkflowService {
 
   private currentStepFormSub: Subscription | null = null;
 
+  private currentStepFormRefresh: (() => void) | null = null;
+
   private readonly pendingStepSaves = signal(0);
 
   private draftSave: Observable<void> | null = null;
@@ -427,14 +429,26 @@ export class WorkflowService {
       this.currentStepViolations.set(FormValidationService.collectViolations(form, labels));
     };
     this.currentStepFormSub = form.statusChanges.pipe(startWith(form.status)).subscribe(refresh);
+    this.currentStepFormRefresh = refresh;
     this.currentStepSaveCallback = save ?? null;
     refresh();
+  }
+
+  /**
+   * Re-run validation on the registered step form and republish its
+   * validity, dirty state and violations. Steps call this after seeding the
+   * form with `{ emitEvent: false }`, which updates values without firing
+   * the statusChanges the registration listens to.
+   */
+  refreshStepForm(): void {
+    this.currentStepFormRefresh?.();
   }
 
   /** Step components call this from `destroyRef.onDestroy()` to clean up. */
   unregisterStepForm(): void {
     this.currentStepFormSub?.unsubscribe();
     this.currentStepFormSub = null;
+    this.currentStepFormRefresh = null;
     this.currentStepSaveCallback = null;
     this.currentStepValid.set(true);
     this.currentStepDirty.set(false);

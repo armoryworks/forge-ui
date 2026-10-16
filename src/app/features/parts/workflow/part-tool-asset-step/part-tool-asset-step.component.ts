@@ -57,6 +57,7 @@ export class PartToolAssetStepComponent {
       this.form.patchValue({
         toolingAssetId: part.toolingAssetId ?? null,
       }, { emitEvent: false });
+      this.workflowService.refreshStepForm();
     });
 
     this.workflowService.registerStepForm(

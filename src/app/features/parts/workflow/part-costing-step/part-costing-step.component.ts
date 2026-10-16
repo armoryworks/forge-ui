@@ -89,6 +89,7 @@ export class PartCostingStepComponent {
       this.form.patchValue({
         manualCostOverride: part.manualCostOverride ?? null,
       }, { emitEvent: false });
+      this.workflowService.refreshStepForm();
     });
 
     this.workflowService.registerStepForm(

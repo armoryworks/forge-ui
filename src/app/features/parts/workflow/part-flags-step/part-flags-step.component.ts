@@ -67,6 +67,7 @@ export class PartFlagsStepComponent {
         isConfigurable: part.isConfigurable ?? false,
         backflushPolicy: part.backflushPolicy ?? null,
       }, { emitEvent: false });
+      this.workflowService.refreshStepForm();
     });
 
     this.workflowService.registerStepForm(

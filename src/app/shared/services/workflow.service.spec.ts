@@ -1,6 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { environment } from '../../../environments/environment';
 import { EntityValidator } from '../models/entity-validator.model';
@@ -386,5 +387,20 @@ describe('WorkflowService — Phase 4', () => {
       success: false,
       missing: [{ validatorId: 'hasCost', displayNameKey: 'k', missingMessageKey: 'm' }],
     });
+  });
+
+  it('republishes step validity after a silent patch when the step asks for a refresh', () => {
+    const form = new FormGroup({ companyName: new FormControl('', [Validators.required]) });
+    service.registerStepForm(form, { companyName: 'Company Name' });
+    expect(service.currentStepValid()).toBe(false);
+    expect(service.currentStepViolations()).toEqual(['Company Name is required']);
+
+    form.patchValue({ companyName: 'Wasatch Steel' }, { emitEvent: false });
+    expect(service.currentStepValid()).toBe(false);
+
+    service.refreshStepForm();
+
+    expect(service.currentStepValid()).toBe(true);
+    expect(service.currentStepViolations()).toEqual([]);
   });
 });

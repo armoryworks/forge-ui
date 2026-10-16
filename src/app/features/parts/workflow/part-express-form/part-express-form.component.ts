@@ -165,6 +165,7 @@ export class PartExpressFormComponent {
         abcClass: part.abcClass ?? null,
         manualCostOverride: part.manualCostOverride ?? null,
       }, { emitEvent: false });
+      this.workflowService.refreshStepForm();
     });
 
     // Register a PATCH-ONLY save so the shell flushes the express form's

@@ -102,6 +102,7 @@ export class PartShippingStepComponent {
         volume: vol.value,
         volumeDisplayUnit: vol.unit,
       }, { emitEvent: false });
+      this.workflowService.refreshStepForm();
     });
 
     this.workflowService.registerStepForm(

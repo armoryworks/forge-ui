@@ -64,6 +64,7 @@ export class VendorTermsStepComponent {
         offTierVariancePct: vendor.offTierVariancePct,
         notes: vendor.notes ?? '',
       }, { emitEvent: false });
+      this.workflowService.refreshStepForm();
     });
 
     this.workflowService.registerStepForm(
