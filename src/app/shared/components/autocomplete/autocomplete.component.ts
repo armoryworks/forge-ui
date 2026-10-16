@@ -118,11 +118,14 @@ export class AutocompleteComponent implements ControlValueAccessor, AfterContent
 
     if (search.length < min) return [];
 
-    const lower = search.toLowerCase();
-    return all.filter(opt => {
-      const text = String(opt[display] ?? '');
-      return text.toLowerCase().includes(lower);
-    });
+    const lower = search.trim().toLowerCase();
+    if (!lower) return all;
+    const fields = this.autoSelectFields();
+    return all
+      .map((opt, index) => ({ opt, index, rank: this.matchRank(opt, display, fields, lower) }))
+      .filter(entry => entry.rank >= 0)
+      .sort((a, b) => a.rank - b.rank || a.index - b.index)
+      .map(entry => entry.opt);
   });
 
   constructor() {
@@ -141,7 +144,16 @@ export class AutocompleteComponent implements ControlValueAccessor, AfterContent
       .subscribe(() => this.controlState.update(v => v + 1));
   }
 
-  private onChange: (value: unknown) => void = () => {};
+  private matchRank(opt: AutocompleteOption, display: string, fields: readonly string[], query: string): number {
+    const text = String(opt[display] ?? '').toLowerCase();
+    if (text === query || fields.some(f => String(opt[f] ?? '').toLowerCase() === query)) return 0;
+    if (text.startsWith(query)) return 1;
+    if (fields.some(f => String(opt[f] ?? '').toLowerCase().startsWith(query))) return 2;
+    if (text.split(/[^\p{L}\p{N}]+/u).some(word => word.startsWith(query))) return 3;
+    return text.includes(query) ? 4 : -1;
+  }
+
+    private onChange: (value: unknown) => void = () => {};
   private onTouched: () => void = () => {};
 
   writeValue(value: unknown): void {
