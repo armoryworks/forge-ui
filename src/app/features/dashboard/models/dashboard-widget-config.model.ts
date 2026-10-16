@@ -10,6 +10,11 @@ export interface DashboardWidgetConfig {
    * the job/order/accounting widgets.
    */
   capability?: string;
+  /**
+   * Roles allowed to see this widget. Omitted = every role. Set when the widget's
+   * endpoint is role-restricted, so a user never gets a widget that can only 403.
+   */
+  roles?: string[];
   defaultX: number;
   defaultY: number;
   defaultW: number;

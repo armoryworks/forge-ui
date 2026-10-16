@@ -135,11 +135,11 @@ export class TimeCorrectionsPanelComponent implements OnInit {
   }
 
   private loadUsers(): void {
-    this.adminService.getUsers().subscribe({
+    this.adminService.getActiveUsers().subscribe({
       next: (users) => {
         this.userOptions.set([
           { value: null, label: this.translate.instant('adminPanels.timeCorrections.allEmployees') },
-          ...users.map(u => ({ value: u.id, label: `${u.lastName}, ${u.firstName}` })),
+          ...users.map(u => ({ value: u.id, label: u.name })),
         ]);
       },
     });

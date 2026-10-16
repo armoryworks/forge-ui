@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { capabilityGuard } from '../../shared/guards/capability.guard';
+import { roleGuard } from '../../shared/guards/role.guard';
 import { SalesChannelsComponent } from './sales-channels.component';
 
 /**
@@ -24,7 +25,7 @@ export const SALES_CHANNELS_ROUTES: Routes = [
     // settings keys, while a store connection is a row and a shop can hold
     // several — two Shopify stores, or Shopify plus Etsy.
     path: 'connections',
-    canActivate: [capabilityGuard('CAP-EXT-ECOMMERCE')],
+    canActivate: [roleGuard('Admin', 'Manager'), capabilityGuard('CAP-EXT-ECOMMERCE')],
     loadComponent: () =>
       import('./pages/connections/channel-connections.component').then(
         (m) => m.ChannelConnectionsPageComponent,
@@ -32,7 +33,7 @@ export const SALES_CHANNELS_ROUTES: Routes = [
   },
   {
     path: 'listings',
-    canActivate: [capabilityGuard('CAP-EXT-ECOMMERCE')],
+    canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager'), capabilityGuard('CAP-EXT-ECOMMERCE')],
     loadComponent: () =>
       import('./pages/listings/channel-listings.component').then(
         (m) => m.ChannelListingsPageComponent,
@@ -46,7 +47,7 @@ export const SALES_CHANNELS_ROUTES: Routes = [
   },
   {
     path: 'settlements',
-    canActivate: [capabilityGuard('CAP-O2C-SETTLEMENT')],
+    canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager'), capabilityGuard('CAP-O2C-SETTLEMENT')],
     loadComponent: () =>
       import('./pages/settlements/channel-settlements.component').then(
         (m) => m.ChannelSettlementsPageComponent,

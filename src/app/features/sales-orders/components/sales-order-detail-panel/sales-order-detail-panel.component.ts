@@ -161,6 +161,7 @@ export class SalesOrderDetailPanelComponent {
   /** Reactive to the capability descriptor snapshot (admin toggles, SignalR push). */
   protected readonly acceptanceCapEnabled = computed(() => this.capabilityService.isEnabled(CAP_SO_ACCEPTANCE));
   protected readonly isAdmin = computed(() => this.auth.hasRole('Admin'));
+  protected readonly canViewFulfilmentRecords = computed(() => this.auth.hasAnyRole(['Admin', 'Manager', 'OfficeManager']));
   protected readonly acceptedAcceptance = computed(() => this.acceptances().find(a => a.status === 'Accepted') ?? null);
   protected readonly hasAcceptedAcceptance = computed(() => this.acceptedAcceptance() !== null);
   /**
@@ -474,6 +475,7 @@ export class SalesOrderDetailPanelComponent {
   }
 
   protected switchTab(tab: TabId): void {
+    if ((tab === 'stages' || tab === 'customer-po') && !this.canViewFulfilmentRecords()) return;
     this.activeTab.set(tab);
     if (tab === 'schedule' && this.scheduleMilestones().length === 0) {
       this.loadSchedule(this.salesOrderId());

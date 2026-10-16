@@ -11,6 +11,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { DraftResumeService } from '../../../../shared/services/draft-resume.service';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { AdminService } from '../../services/admin.service';
 import { ComplianceFormTemplate, ComplianceFormType } from '../../../account/models/compliance-form.model';
 import { ComplianceTemplateDialogComponent } from '../compliance-template-dialog/compliance-template-dialog.component';
@@ -31,6 +32,7 @@ const SYSTEM_FORM_TYPES: Set<ComplianceFormType> = new Set([
 export class ComplianceTemplatesPanelComponent implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly draftResume = inject(DraftResumeService);
+  private readonly auth = inject(AuthService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -40,7 +42,9 @@ export class ComplianceTemplatesPanelComponent implements OnInit {
   protected readonly syncing = signal(false);
   protected readonly extracting = signal(false);
 
-  protected readonly columns: ColumnDef[] = [
+  protected readonly canManageTemplates = this.auth.hasRole('Admin');
+
+  private readonly allColumns: ColumnDef[] = [
     { field: 'icon', header: '', width: '40px' },
     { field: 'name', header: this.translate.instant('complianceTemplates.colName'), sortable: true },
     { field: 'formType', header: this.translate.instant('complianceTemplates.colType'), sortable: true, filterable: true, type: 'enum',
@@ -60,9 +64,13 @@ export class ComplianceTemplatesPanelComponent implements OnInit {
     { field: 'actions', header: '', width: '160px' },
   ];
 
+  protected readonly columns: ColumnDef[] = this.canManageTemplates
+    ? this.allColumns
+    : this.allColumns.filter(c => c.field !== 'actions');
+
   ngOnInit(): void {
     this.loadTemplates();
-    if (this.draftResume.consume('compliance-template')) {
+    if (this.canManageTemplates && this.draftResume.consume('compliance-template')) {
       this.openCreateDialog();
     }
   }
@@ -88,6 +96,7 @@ export class ComplianceTemplatesPanelComponent implements OnInit {
   }
 
   protected onRowClick(template: ComplianceFormTemplate): void {
+    if (!this.canManageTemplates) return;
     if (template.formType === 'StateWithholding') {
       this.openStateWithholdingDialog();
     } else {

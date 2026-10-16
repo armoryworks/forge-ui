@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AdminComponent } from './admin.component';
 import { capabilityGuard } from '../../shared/guards/capability.guard';
+import { roleGuard } from '../../shared/guards/role.guard';
 
 export const ADMIN_ROUTES: Routes = [
   // Admin Overview is the landing surface for /admin. Previously redirected
@@ -15,6 +16,7 @@ export const ADMIN_ROUTES: Routes = [
   // diagnostic and will be replaced/folded into Phase E's full admin UI.
   {
     path: 'capabilities-debug',
+    canActivate: [roleGuard('Admin')],
     loadComponent: () =>
       import('./capabilities-debug/capabilities-debug.component').then((m) => m.CapabilitiesDebugComponent),
   },
@@ -28,15 +30,18 @@ export const ADMIN_ROUTES: Routes = [
   // itself degrades to "no agent on this box" where upgrades are not local.
   {
     path: 'updates',
+    canActivate: [roleGuard('Admin')],
     loadComponent: () => import('./updates/updates.component').then((m) => m.UpdatesComponent),
   },
   {
     path: 'capabilities',
+    canActivate: [roleGuard('Admin')],
     loadComponent: () =>
       import('./capabilities/capabilities.component').then((m) => m.CapabilitiesComponent),
   },
   {
     path: 'capabilities/:id',
+    canActivate: [roleGuard('Admin')],
     loadComponent: () =>
       import('./capability-detail/capability-detail.component').then(
         (m) => m.CapabilityDetailComponent,
@@ -47,6 +52,7 @@ export const ADMIN_ROUTES: Routes = [
   // the `:tab` catch-all so AdminComponent doesn't intercept it.
   {
     path: 'discovery',
+    canActivate: [roleGuard('Admin')],
     loadComponent: () =>
       import('./discovery/discovery.component').then((m) => m.DiscoveryComponent),
   },
@@ -55,21 +61,25 @@ export const ADMIN_ROUTES: Routes = [
   // their literal segments win over the dynamic route.
   {
     path: 'presets',
+    canActivate: [roleGuard('Admin')],
     loadComponent: () =>
       import('./presets/preset-browser/preset-browser.component').then((m) => m.PresetBrowserComponent),
   },
   {
     path: 'presets/compare',
+    canActivate: [roleGuard('Admin')],
     loadComponent: () =>
       import('./presets/preset-compare/preset-compare.component').then((m) => m.PresetCompareComponent),
   },
   {
     path: 'presets/custom',
+    canActivate: [roleGuard('Admin')],
     loadComponent: () =>
       import('./presets/preset-custom/preset-custom.component').then((m) => m.PresetCustomComponent),
   },
   {
     path: 'presets/:id',
+    canActivate: [roleGuard('Admin')],
     loadComponent: () =>
       import('./presets/preset-detail/preset-detail.component').then((m) => m.PresetDetailComponent),
   },
@@ -78,6 +88,7 @@ export const ADMIN_ROUTES: Routes = [
   // `:tab` catch-all so AdminComponent doesn't intercept the literal segment.
   {
     path: 'entity-completeness',
+    canActivate: [roleGuard('Admin')],
     loadComponent: () =>
       import('./entity-completeness/entity-completeness-admin.component').then(
         (m) => m.EntityCompletenessAdminComponent,
@@ -88,6 +99,7 @@ export const ADMIN_ROUTES: Routes = [
   // override; resolution at runtime via IWorkingCalendarService server-side.
   {
     path: 'working-calendars',
+    canActivate: [roleGuard('Admin')],
     loadComponent: () =>
       import('./working-calendars/working-calendars.component').then(
         (m) => m.WorkingCalendarsComponent,
@@ -97,6 +109,7 @@ export const ADMIN_ROUTES: Routes = [
   // tariffs that feed the landed-cost duty component on the part Cost tab.
   {
     path: 'tariffs',
+    canActivate: [roleGuard('Admin')],
     loadComponent: () =>
       import('./tariffs/tariffs.component').then((m) => m.TariffsComponent),
   },
@@ -106,6 +119,7 @@ export const ADMIN_ROUTES: Routes = [
   // description + active flag.
   {
     path: 'lead-sources',
+    canActivate: [roleGuard('Admin', 'Manager')],
     loadComponent: () =>
       import('./lead-sources/lead-sources.component').then((m) => m.LeadSourcesComponent),
   },
@@ -113,6 +127,7 @@ export const ADMIN_ROUTES: Routes = [
   // scheme + dimensions used by the nightly LeadScore recompute job.
   {
     path: 'icp-rubrics',
+    canActivate: [roleGuard('Admin', 'Manager')],
     loadComponent: () =>
       import('./icp-rubrics/icp-rubrics.component').then((m) => m.IcpRubricsComponent),
   },
@@ -121,12 +136,14 @@ export const ADMIN_ROUTES: Routes = [
   // / industry / account-based).
   {
     path: 'assignment-rules',
+    canActivate: [roleGuard('Admin', 'Manager')],
     loadComponent: () =>
       import('./assignment-rules/assignment-rules.component').then((m) => m.AssignmentRulesComponent),
   },
   // Multi-currency admin — currencies catalog + per-day FX rates.
   {
     path: 'currencies',
+    canActivate: [roleGuard('Admin')],
     loadComponent: () =>
       import('./currencies/currencies.component').then((m) => m.CurrenciesComponent),
   },
@@ -150,7 +167,7 @@ export const ADMIN_ROUTES: Routes = [
   // CAP-COSTING-TIER2-DEPTRATES (route guard) + Admin/Manager on the server.
   {
     path: 'costing',
-    canActivate: [capabilityGuard('CAP-COSTING-TIER2-DEPTRATES')],
+    canActivate: [roleGuard('Admin', 'Manager'), capabilityGuard('CAP-COSTING-TIER2-DEPTRATES')],
     loadComponent: () =>
       import('./costing/costing.component').then((m) => m.CostingComponent),
   },
@@ -160,7 +177,7 @@ export const ADMIN_ROUTES: Routes = [
   // server. Routed before the `:tab` catch-all so the literal segment wins.
   {
     path: 'gs1',
-    canActivate: [capabilityGuard('CAP-MD-GS1')],
+    canActivate: [roleGuard('Admin', 'Manager'), capabilityGuard('CAP-MD-GS1')],
     loadComponent: () =>
       import('./gs1/gs1.component').then((m) => m.Gs1Component),
   },
@@ -171,7 +188,7 @@ export const ADMIN_ROUTES: Routes = [
   // Gated by CAP-ADMIN-I18N (route guard) + Admin on the server.
   {
     path: 'i18n-labels',
-    canActivate: [capabilityGuard('CAP-ADMIN-I18N')],
+    canActivate: [roleGuard('Admin'), capabilityGuard('CAP-ADMIN-I18N')],
     loadComponent: () =>
       import('./i18n-labels/i18n-labels.component').then((m) => m.I18nLabelsComponent),
   },
@@ -181,6 +198,7 @@ export const ADMIN_ROUTES: Routes = [
   // before the `:tab` catch-all so the literal segment wins.
   {
     path: 'database',
+    canActivate: [roleGuard('Admin')],
     loadComponent: () =>
       import('./database/database-transfer.component').then((m) => m.DatabaseTransferComponent),
   },

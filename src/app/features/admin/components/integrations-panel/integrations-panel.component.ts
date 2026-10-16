@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal, untracked } from '@angular/core';
 
 // Provider ID → Simple Icons CDN URL (open-source brand icon set, MIT licensed)
 // Format: https://cdn.simpleicons.org/{slug}/{hex-color}
@@ -30,6 +30,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { AccountingService } from '../../../../shared/services/accounting.service';
+import { CapabilityService } from '../../../../shared/services/capability.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { QuickBooksService } from '../../services/quickbooks.service';
 import { AdminService } from '../../services/admin.service';
@@ -54,6 +55,7 @@ export class IntegrationsPanelComponent implements OnInit {
   protected readonly accountingService = inject(AccountingService);
   private readonly qbService = inject(QuickBooksService);
   private readonly adminService = inject(AdminService);
+  private readonly capabilities = inject(CapabilityService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
 
@@ -62,6 +64,8 @@ export class IntegrationsPanelComponent implements OnInit {
   readonly isConfigured = this.accountingService.isConfigured;
   readonly loading = this.accountingService.loading;
   readonly syncStatus = this.accountingService.syncStatus;
+
+  readonly externalAccountingEnabled = computed(() => this.capabilities.isEnabled('CAP-ACCT-EXTERNAL'));
 
   readonly qbStatus = this.qbService.status;
   readonly qbLoading = this.qbService.loading;
@@ -105,10 +109,18 @@ export class IntegrationsPanelComponent implements OnInit {
     this.logoErrors.update(errs => [...errs, id]);
   }
 
+  constructor() {
+    effect(() => {
+      if (!this.externalAccountingEnabled()) return;
+      untracked(() => {
+        this.accountingService.loadProviders();
+        this.accountingService.loadSyncStatus();
+        this.qbService.loadStatus();
+      });
+    });
+  }
+
   ngOnInit(): void {
-    this.accountingService.loadProviders();
-    this.accountingService.loadSyncStatus();
-    this.qbService.loadStatus();
     this.loadIntegrations();
   }
 

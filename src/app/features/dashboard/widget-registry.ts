@@ -81,6 +81,7 @@ export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
     icon: 'trending_up',
     component: 'margin-summary',
     capability: 'CAP-ACCT-BUILTIN',
+    roles: ['Admin', 'Manager', 'Controller', 'OfficeManager', 'PM'],
     defaultX: 8,
     defaultY: 4,
     defaultW: 4,

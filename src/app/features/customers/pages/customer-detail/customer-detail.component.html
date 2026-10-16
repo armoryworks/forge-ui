@@ -75,10 +75,17 @@
           <span class="cd-stat__value">{{ c.activeJobCount }}</span>
           <span class="cd-stat__label">{{ 'customers.detail.stats.activeJobs' | translate }}</span>
         </div>
-        <div class="cd-stat" role="button" tabindex="0" (click)="switchTab('invoices')" (keydown.enter)="switchTab('invoices')" (keydown.space)="$event.preventDefault(); switchTab('invoices')" [class.cd-stat--active]="activeTab() === 'invoices'">
-          <span class="cd-stat__value"><app-currency-display [value]="c.openInvoiceTotal" [currency]="null" /></span>
-          <span class="cd-stat__label">{{ 'customers.detail.stats.outstanding' | translate }}</span>
-        </div>
+        @if (canViewCommercialDocuments()) {
+          <div class="cd-stat" role="button" tabindex="0" (click)="switchTab('invoices')" (keydown.enter)="switchTab('invoices')" (keydown.space)="$event.preventDefault(); switchTab('invoices')" [class.cd-stat--active]="activeTab() === 'invoices'">
+            <span class="cd-stat__value"><app-currency-display [value]="c.openInvoiceTotal" [currency]="null" /></span>
+            <span class="cd-stat__label">{{ 'customers.detail.stats.outstanding' | translate }}</span>
+          </div>
+        } @else {
+          <div class="cd-stat">
+            <span class="cd-stat__value"><app-currency-display [value]="c.openInvoiceTotal" [currency]="null" /></span>
+            <span class="cd-stat__label">{{ 'customers.detail.stats.outstanding' | translate }}</span>
+          </div>
+        }
         <div class="cd-stat">
           <span class="cd-stat__value"><app-currency-display [value]="c.ytdRevenue" [currency]="null" /></span>
           <span class="cd-stat__label">{{ 'customers.detail.stats.ytdRevenue' | translate }}</span>
@@ -103,7 +110,7 @@
 
     <!-- ── Tab content ── -->
     <div class="cd-content">
-      @switch (activeTab()) {
+      @switch (renderedTab()) {
         @case ('overview') {
           <!-- Pillar 5 — Identity cluster (read + edit) plus existing context sections. -->
           <app-customer-identity-cluster
@@ -145,10 +152,12 @@
         }
         @case ('documents') {
           <app-customer-documents-cluster [customerId]="c.id" />
-          <!-- S1 — tax certificates live below the general documents list. -->
-          <app-customer-tax-documents-cluster [customerId]="c.id" />
-          <!-- S3 — customer-scope terms & conditions. -->
-          <app-terms-section scope="Customer" [customerId]="c.id" [targetName]="c.name" />
+          @if (canViewCommercialDocuments()) {
+            <!-- S1 — tax certificates live below the general documents list. -->
+            <app-customer-tax-documents-cluster [customerId]="c.id" />
+            <!-- S3 — customer-scope terms & conditions. -->
+            <app-terms-section scope="Customer" [customerId]="c.id" [targetName]="c.name" />
+          }
         }
         @case ('activity') {
           <!-- Pillar 5 — Activity cluster wraps shared entity-activity-section. -->

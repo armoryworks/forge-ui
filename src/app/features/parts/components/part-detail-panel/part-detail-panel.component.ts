@@ -57,6 +57,7 @@ import { PartCostClusterComponent } from '../part-clusters/part-cost-cluster.com
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { PartPricingClusterComponent } from '../part-clusters/part-pricing-cluster/part-pricing-cluster.component';
 import { PartFilesClusterComponent } from '../part-clusters/part-files-cluster.component';
+import { AuthService } from '../../../../shared/services/auth.service';
 // S3 — Part-scope terms & conditions, stacked in the Files tab (the panel's
 // documents area). Reuses the shared terms section from the terms feature.
 import { TermsSectionComponent } from '../../../terms/components/terms-section/terms-section.component';
@@ -126,6 +127,8 @@ export class PartDetailPanelComponent {
   protected readonly manualNumbers = inject(ManualNumberSettingsService);
   protected readonly allowManualPartNumbers = computed(() => this.manualNumbers.isEnabled('parts'));
   private readonly destroyRef = inject(DestroyRef);
+  private readonly auth = inject(AuthService);
+  protected readonly canViewTerms = this.auth.hasAnyRole(['Admin', 'Manager', 'OfficeManager']);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);

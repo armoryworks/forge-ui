@@ -63,6 +63,7 @@ export class PurchaseOrdersComponent implements OnInit {
   protected readonly activeTab = toSignal(
     this.route.paramMap.pipe(map(p => {
       const tab = p.get('tab') as PoTab;
+      if (tab === 'settings' && !this.isAdmin) return 'orders';
       return PurchaseOrdersComponent.VALID_TABS.includes(tab) ? tab : 'orders';
     })),
     { initialValue: 'orders' },

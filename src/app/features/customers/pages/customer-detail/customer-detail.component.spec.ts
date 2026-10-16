@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
+import { AuthService } from '../../../../shared/services/auth.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { CustomerSummary } from '../../models/customer-summary.model';
@@ -74,5 +75,57 @@ describe('CustomerDetailComponent · saveClusterPatch', () => {
       email: '',
       phone: '',
     }));
+  });
+});
+
+describe('CustomerDetailComponent · role-gated tabs', () => {
+  const layout = ['overview', 'invoices', 'pricing', 'documents'].map(id => ({ id, labelKey: id }));
+
+  function setup(roles: string[], tab = 'overview'): { tabIds: string[]; documents: boolean; rendered: string | null } {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: '5', tab })) } },
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: CustomerService, useValue: { getCustomerSummary: () => of(CUSTOMER) } },
+        { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
+        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: CustomerDetailLayoutResolverService, useValue: { deriveLifecycle: () => 'active', resolve: () => layout } },
+        { provide: CapabilityService, useValue: { isEnabled: () => true } },
+        { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
+      ],
+    });
+    const component = TestBed.runInInjectionContext(() => new CustomerDetailComponent()) as unknown as {
+      tabLayout(): { id: string }[];
+      canViewCommercialDocuments(): boolean;
+      renderedTab(): string | null;
+    };
+    TestBed.flushEffects();
+    return {
+      tabIds: component.tabLayout().map(t => t.id),
+      documents: component.canViewCommercialDocuments(),
+      rendered: component.renderedTab(),
+    };
+  }
+
+  it('keeps invoices, pricing and the commercial documents from a PM', () => {
+    const { tabIds, documents } = setup(['PM']);
+
+    expect(tabIds).toEqual(['overview', 'documents']);
+    expect(documents).toBe(false);
+  });
+
+  it('renders nothing for a deep link to a tab the role cannot read, so its data is never requested', () => {
+    expect(setup(['PM'], 'invoices').rendered).toBeNull();
+    expect(setup(['PM'], 'pricing').rendered).toBeNull();
+    expect(setup(['OfficeManager'], 'invoices').rendered).toBe('invoices');
+  });
+
+  it('shows them to an office manager', () => {
+    const { tabIds, documents } = setup(['OfficeManager']);
+
+    expect(tabIds).toEqual(['overview', 'invoices', 'pricing', 'documents']);
+    expect(documents).toBe(true);
   });
 });

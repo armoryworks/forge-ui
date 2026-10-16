@@ -196,7 +196,7 @@ export const routes: Routes = [
         // GL-VIEW on). Write screens (journal-entries/new) add a CAP-ACCT-FULLGL guard below.
         // until the capability is switched on (mirrors the server-side gate).
         path: 'accounting',
-        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager'), capabilityGuard('CAP-ACCT-GL-VIEW')],
+        canActivate: [roleGuard('Controller'), capabilityGuard('CAP-ACCT-GL-VIEW')],
         loadChildren: () =>
           import('./features/accounting/accounting.routes').then((m) => m.ACCOUNTING_ROUTES),
       },
@@ -323,7 +323,7 @@ export const routes: Routes = [
       },
       {
         path: 'customer-returns',
-        canActivate: [roleGuard('Admin', 'Manager', 'PM', 'OfficeManager')],
+        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
         loadChildren: () =>
           import('./features/customer-returns/customer-returns.routes').then((m) => m.CUSTOMER_RETURNS_ROUTES),
       },

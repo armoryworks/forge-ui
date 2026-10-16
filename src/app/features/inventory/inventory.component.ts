@@ -45,6 +45,7 @@ import { ViewModeToggleComponent } from '../../shared/components/view-mode-toggl
 import { ViewMode, DEFAULT_VIEW_MODE } from '../../shared/models/view-mode.model';
 import { InventoryReorderVisualComponent } from './components/inventory-reorder-visual/inventory-reorder-visual.component';
 import { ReceivingInspectionQueueComponent } from './components/receiving-inspection-queue/receiving-inspection-queue.component';
+import { AuthService } from '../../shared/services/auth.service';
 import { CapabilityService } from '../../shared/services/capability.service';
 import { EntityPickerComponent } from '../../shared/components/entity-picker/entity-picker.component';
 import { EntityLinkComponent, LinkableEntityType } from '../../shared/components/entity-link/entity-link.component';
@@ -69,6 +70,7 @@ export class InventoryComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
   private readonly capabilities = inject(CapabilityService);
+  private readonly auth = inject(AuthService);
 
   private static readonly VALID_TABS: InventoryTab[] = ['stock', 'locations', 'movements', 'receiving', 'inspection', 'stockOps', 'cycleCounts', 'reservations', 'replenishment', 'uom'];
 
@@ -84,9 +86,17 @@ export class InventoryComponent {
 
   protected readonly inspectionEnabled = computed(() => this.capabilities.isEnabled('CAP-QC-INSPECTION'));
 
+  protected readonly canReplenish = this.auth.hasAnyRole(['Admin', 'Manager']);
+
   protected readonly activeTab = computed<InventoryTab>(() => {
     const tab = this.routeTab();
+    if (tab === 'replenishment' && !this.canReplenish) return 'stock';
     return tab === 'inspection' && !this.inspectionEnabled() ? 'stock' : tab;
+  });
+
+  private readonly forbiddenReplenishmentRedirect = effect(() => {
+    if (this.routeTab() !== 'replenishment' || this.canReplenish) return;
+    untracked(() => this.router.navigate(['..', 'stock'], { relativeTo: this.route, replaceUrl: true }));
   });
 
   private readonly disabledInspectionRedirect = effect(() => {

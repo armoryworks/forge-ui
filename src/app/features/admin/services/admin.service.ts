@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { AdminUser } from '../models/admin-user.model';
+import { ActiveUser } from '../models/active-user.model';
 import { CreateUserRequest, CreateUserResponse } from '../models/create-user-request.model';
 import { UpdateUserRequest } from '../models/update-user-request.model';
 import { CreateTrackTypeRequest } from '../models/create-track-type-request.model';
@@ -43,6 +44,10 @@ export class AdminService {
   // Users
   getUsers(): Observable<AdminUser[]> {
     return this.http.get<AdminUser[]>(`${environment.apiUrl}/admin/users`);
+  }
+
+  getActiveUsers(): Observable<ActiveUser[]> {
+    return this.http.get<ActiveUser[]>(`${environment.apiUrl}/users`);
   }
 
   createUser(request: CreateUserRequest): Observable<CreateUserResponse> {

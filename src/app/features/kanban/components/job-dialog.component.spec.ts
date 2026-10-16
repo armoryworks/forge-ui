@@ -10,6 +10,7 @@ import { KanbanService } from '../services/kanban.service';
 import { SalesOrderService } from '../../sales-orders/services/sales-order.service';
 import { PartsService } from '../../parts/services/parts.service';
 import { ManualNumberSettingsService } from '../../../shared/services/manual-number-settings.service';
+import { AuthService } from '../../../shared/services/auth.service';
 import { AssignableSalesOrderLine } from '../models/assignable-sales-order-line.model';
 import { JobDetail } from '../models/job-detail.model';
 import { TrackType } from '../../../shared/models/track-type.model';
@@ -109,6 +110,8 @@ describe('JobDialogComponent', () => {
     99: { id: 99, partNumber: 'SPC-99', name: 'Spacer' },
   };
   let lines: AssignableSalesOrderLine[];
+  let roles: string[];
+  let getAssignableSalesOrderLines: ReturnType<typeof vi.fn>;
 
   function render(mode: 'create' | 'edit', job: JobDetail | null = null, types: TrackType[] = trackTypes): void {
     fixture = TestBed.createComponent(JobDialogComponent);
@@ -121,6 +124,8 @@ describe('JobDialogComponent', () => {
 
   beforeEach(() => {
     lines = [soLine()];
+    roles = ['Manager'];
+    getAssignableSalesOrderLines = vi.fn(() => of(lines));
     createJob = vi.fn(() => new Subject());
     updateJob = vi.fn(() => new Subject());
     getSalesOrderById = vi.fn((id: number) => of(id === 9
@@ -136,7 +141,7 @@ describe('JobDialogComponent', () => {
           useValue: {
             getCustomers: () => of([]),
             getUsers: () => of([]),
-            getAssignableSalesOrderLines: () => of(lines),
+            getAssignableSalesOrderLines,
             createJob,
             updateJob,
           },
@@ -144,10 +149,24 @@ describe('JobDialogComponent', () => {
         { provide: SalesOrderService, useValue: { getSalesOrderById } },
         { provide: PartsService, useValue: { getPartById } },
         { provide: ManualNumberSettingsService, useValue: { isEnabled: () => false } },
+        { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
       ],
     });
     TestBed.overrideComponent(JobDialogComponent, { set: { template: '' } });
+  });
+
+  it('does not ask a production worker\'s create dialog for sales-order lines', () => {
+    roles = ['ProductionWorker'];
+    render('create');
+
+    expect(getAssignableSalesOrderLines).not.toHaveBeenCalled();
+  });
+
+  it('offers sales-order lines to roles that can read orders', () => {
+    render('create');
+
+    expect(getAssignableSalesOrderLines).toHaveBeenCalledWith(false);
   });
 
   it('enables quantity only once a part is chosen, defaulting to 1', () => {

@@ -6,6 +6,7 @@ import { provideTranslateService, TranslateLoader, TranslateService } from '@ngx
 import { FormControl, FormGroup } from '@angular/forms';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 
+import { AuthService } from '../../shared/services/auth.service';
 import { CapabilityService } from '../../shared/services/capability.service';
 import { ScannerService } from '../../shared/services/scanner.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
@@ -60,6 +61,7 @@ function setup(
   tab: string,
   capability: { loaded: boolean; enabled: boolean },
   services: { inventory?: Overrides; replenishment?: Overrides } = {},
+  roles: string[] = ['Manager'],
 ) {
   const descriptor = signal<object | null>(capability.loaded ? {} : null);
   const enabled = signal(capability.enabled);
@@ -80,6 +82,7 @@ function setup(
       { provide: ScannerService, useValue: { setContext: vi.fn(), lastScan: signal(null), clearLastScan: vi.fn() } },
       { provide: Router, useValue: router },
       { provide: ActivatedRoute, useValue: route },
+      { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
       {
         provide: CapabilityService,
         useValue: {
@@ -136,6 +139,27 @@ describe('InventoryComponent inspection tab', () => {
 
 describe('InventoryComponent replenishment', () => {
   beforeEach(() => vi.restoreAllMocks());
+
+  it('sends a role the replenishment API refuses back to stock without calling it', () => {
+    const getBurnRates = vi.fn(() => of([]));
+    const getSuggestions = vi.fn(() => of([]));
+    const getSettings = vi.fn(() => of({ assigneeUserId: null }));
+    const { internals, router } = setup('replenishment', { loaded: true, enabled: false },
+      { replenishment: { getBurnRates, getSuggestions, getSettings } }, ['Engineer']);
+
+    expect(internals.activeTab()).toBe('stock');
+    expect(redirectsToStock(router)).toBe(true);
+    expect(getBurnRates).not.toHaveBeenCalled();
+    expect(getSuggestions).not.toHaveBeenCalled();
+    expect(getSettings).not.toHaveBeenCalled();
+  });
+
+  it('keeps a manager on the replenishment tab', () => {
+    const { internals, router } = setup('replenishment', { loaded: true, enabled: false });
+
+    expect(internals.activeTab()).toBe('replenishment');
+    expect(redirectsToStock(router)).toBe(false);
+  });
 
   it('labels the approve button by supply type', () => {
     const { internals } = setup('replenishment', { loaded: true, enabled: false });

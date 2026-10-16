@@ -52,7 +52,7 @@
         <app-datepicker data-testid="job-due-date" [label]="'kanban.dueDate' | translate" formControlName="dueDate" />
       </div>
 
-      @if (mode() === 'create') {
+      @if (mode() === 'create' && canLinkSalesOrderLine) {
         <div class="so-line-assoc">
           <app-select data-testid="job-so-line" [label]="'kanban.salesOrderLine' | translate" formControlName="salesOrderLineId" [options]="salesOrderLineOptions()" />
           <p class="field-hint" data-testid="job-so-line-confirmed-hint">{{ 'trackStages.soLineConfirmedHint' | translate }}</p>

@@ -135,13 +135,9 @@ export class EventsPanelComponent implements OnInit {
   }
 
   private loadUsers(): void {
-    this.adminService.getUsers().subscribe({
+    this.adminService.getActiveUsers().subscribe({
       next: (users) => {
-        this.userOptions.set(
-          users
-            .filter(u => u.isActive)
-            .map(u => ({ value: u.id, label: `${u.lastName}, ${u.firstName}` })),
-        );
+        this.userOptions.set(users.map(u => ({ value: u.id, label: u.name })));
       },
     });
   }

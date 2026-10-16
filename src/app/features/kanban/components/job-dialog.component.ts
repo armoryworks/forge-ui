@@ -30,6 +30,7 @@ import { PriorityIndicatorComponent } from '../../../shared/components/priority-
 import { PRIORITIES, PRIORITY_OPTIONS } from '../../../shared/models/priority.const';
 import { SalesOrderService } from '../../sales-orders/services/sales-order.service';
 import { PartsService } from '../../parts/services/parts.service';
+import { AuthService } from '../../../shared/services/auth.service';
 
 export type DialogMode = 'create' | 'edit';
 
@@ -68,6 +69,7 @@ export class JobDialogComponent implements OnInit {
   private readonly manualNumbers = inject(ManualNumberSettingsService);
   private readonly salesOrderService = inject(SalesOrderService);
   private readonly partsService = inject(PartsService);
+  private readonly auth = inject(AuthService);
 
   /** Whether the tenant allows manually assigning/overriding job numbers. */
   protected readonly allowManualJobNumbers = computed(() => this.manualNumbers.isEnabled('jobs'));
@@ -83,6 +85,7 @@ export class JobDialogComponent implements OnInit {
   protected readonly users = signal<UserRef[]>([]);
   protected readonly saving = signal(false);
   protected readonly loadingRefs = signal(true);
+  protected readonly canLinkSalesOrderLine = this.auth.hasAnyRole(['Admin', 'Manager', 'OfficeManager', 'PM']);
   protected readonly priorities = PRIORITIES;
 
   // #27 — inline association of the new job with an open sales-order line.
@@ -219,10 +222,12 @@ export class JobDialogComponent implements OnInit {
       this.jobForm.controls.trackTypeId.valueChanges
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => this.applyDefaultStartStage());
-      this.loadAssignableSoLines(false);
-      this.showAssignedControl.valueChanges
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe(show => this.loadAssignableSoLines(show));
+      if (this.canLinkSalesOrderLine) {
+        this.loadAssignableSoLines(false);
+        this.showAssignedControl.valueChanges
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe(show => this.loadAssignableSoLines(show));
+      }
       this.jobForm.controls.partId.valueChanges
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(partId => this.syncQuantityEnabled(partId));
