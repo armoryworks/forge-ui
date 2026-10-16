@@ -31,32 +31,25 @@
             <section class="oj__tie-out" data-testid="oj-tie-out">
               <h2 class="oj__section-title">{{ 'accounting.openingJournal.tieOutTitle' | translate }}</h2>
               <p class="oj__hint">{{ 'accounting.openingJournal.tieOutHint' | translate }}</p>
-              <div class="oj__table-wrap">
-                <table class="oj__table" [attr.aria-label]="'accounting.openingJournal.tieOutTitle' | translate">
-                  <thead>
-                    <tr>
-                      <th scope="col">{{ 'accounting.journalEditor.account' | translate }}</th>
-                      <th scope="col" class="oj__num">{{ 'accounting.common.debit' | translate }}</th>
-                      <th scope="col" class="oj__num">{{ 'accounting.common.credit' | translate }}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (row of tb.rows; track row.glAccountId) {
-                      <tr>
-                        <td>{{ row.accountNumber }} — {{ row.accountName }}</td>
-                        <td class="oj__num"><app-currency-display [value]="row.debitTotal" /></td>
-                        <td class="oj__num"><app-currency-display [value]="row.creditTotal" /></td>
-                      </tr>
-                    }
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <th scope="row">{{ 'common.total' | translate }}</th>
-                      <td class="oj__num"><app-currency-display [value]="tb.totalDebit" /></td>
-                      <td class="oj__num"><app-currency-display [value]="tb.totalCredit" /></td>
-                    </tr>
-                  </tfoot>
-                </table>
+              <div class="acct-table-block">
+                <app-data-table
+                  tableId="acct-opening-tie-out"
+                  [columns]="tieOutColumns"
+                  [data]="tb.rows"
+                  emptyIcon="balance"
+                  [emptyMessage]="'accounting.trialBalance.empty' | translate">
+                  <ng-template appColumnCell="debitTotal" let-row>
+                    <app-currency-display [value]="row.debitTotal" />
+                  </ng-template>
+                  <ng-template appColumnCell="creditTotal" let-row>
+                    <app-currency-display [value]="row.creditTotal" />
+                  </ng-template>
+                </app-data-table>
+              </div>
+              <div class="totals-strip">
+                <span class="totals-strip__label">{{ 'accounting.common.total' | translate }}</span>
+                <span class="totals-strip__metric">{{ 'accounting.common.debit' | translate }} <app-currency-display [value]="tb.totalDebit" /></span>
+                <span class="totals-strip__metric">{{ 'accounting.common.credit' | translate }} <app-currency-display [value]="tb.totalCredit" /></span>
               </div>
             </section>
           }

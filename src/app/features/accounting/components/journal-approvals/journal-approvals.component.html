@@ -11,27 +11,20 @@
             <span class="jea__memo">{{ item.entry.memo }}</span>
             <span class="jea__total"><app-currency-display [value]="item.total" /></span>
           </div>
-          <div class="jea__table-wrap">
-            <table class="jea__lines" [attr.aria-label]="'accounting.approvals.entry' | translate: { number: item.entry.entryNumber }">
-              <thead>
-                <tr>
-                  <th scope="col">{{ 'accounting.journalEditor.account' | translate }}</th>
-                  <th scope="col" class="jea__num">{{ 'accounting.common.debit' | translate }}</th>
-                  <th scope="col" class="jea__num">{{ 'accounting.common.credit' | translate }}</th>
-                  <th scope="col">{{ 'accounting.common.description' | translate }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (line of item.lines; track line.key) {
-                  <tr>
-                    <td>{{ line.account }}</td>
-                    <td class="jea__num">@if (line.debit) { <app-currency-display [value]="line.debit" /> }</td>
-                    <td class="jea__num">@if (line.credit) { <app-currency-display [value]="line.credit" /> }</td>
-                    <td>{{ line.description }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
+          <div class="acct-table-block">
+            <app-data-table
+              tableId="acct-je-approval-lines"
+              [columns]="lineColumns"
+              [data]="item.lines"
+              emptyIcon="receipt_long"
+              [emptyMessage]="'accounting.approvals.noLines' | translate">
+              <ng-template appColumnCell="debit" let-row>
+                @if (row.debit) { <app-currency-display [value]="row.debit" /> }
+              </ng-template>
+              <ng-template appColumnCell="credit" let-row>
+                @if (row.credit) { <app-currency-display [value]="row.credit" /> }
+              </ng-template>
+            </app-data-table>
           </div>
           <div class="jea__actions">
             <button type="button" class="action-btn action-btn--sm action-btn--warn"

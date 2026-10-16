@@ -10136,7 +10136,8 @@
       "loadFailed": "Could not load the entries waiting for approval",
       "rejectTitle": "Reject entry {{number}}",
       "rejectNote": "The entry goes back to draft; nothing reaches the ledger. The reason is added to its memo.",
-      "rejectReason": "Reason (optional)"
+      "rejectReason": "Reason (optional)",
+      "noLines": "This entry has no lines"
     },
     "jobCostClose": {
       "title": "Job production cost",

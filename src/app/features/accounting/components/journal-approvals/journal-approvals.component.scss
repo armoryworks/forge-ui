@@ -1,4 +1,5 @@
 @use 'styles/variables' as *;
+@use 'app/features/accounting/accounting-shared' as *;
 
 .jea {
   position: relative;
@@ -46,29 +47,6 @@
   &__total {
     font-family: $font-family-mono;
     font-weight: 700;
-  }
-
-  &__table-wrap {
-    overflow-x: auto;
-  }
-
-  &__lines {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: $font-size-sm;
-
-    th,
-    td {
-      padding: $sp-xs $sp-sm;
-      border-bottom: $border-width-thin solid var(--border);
-      text-align: left;
-    }
-
-    th.jea__num,
-    td.jea__num {
-      text-align: right;
-      font-family: $font-family-mono;
-    }
   }
 
   &__actions {

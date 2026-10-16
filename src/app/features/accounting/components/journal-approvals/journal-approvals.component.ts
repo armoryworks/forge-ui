@@ -10,7 +10,10 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PageLayoutComponent } from '../../../../shared/components/page-layout/page-layout.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
+import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { ManualJournalEntryResult } from '../../models/accounting.models';
@@ -22,7 +25,7 @@ interface PendingEntryView {
   entry: ManualJournalEntryResult;
   dateLabel: string;
   total: number;
-  lines: { key: number; account: string; debit: number; credit: number; description: string | null }[];
+  lines: { id: number; account: string; debit: number; credit: number; description: string | null }[];
 }
 
 /**
@@ -33,7 +36,10 @@ interface PendingEntryView {
 @Component({
   selector: 'app-journal-approvals',
   standalone: true,
-  imports: [TranslatePipe, PageLayoutComponent, CurrencyDisplayComponent, EmptyStateComponent, LoadingBlockDirective],
+  imports: [
+    TranslatePipe, PageLayoutComponent, CurrencyDisplayComponent, EmptyStateComponent, LoadingBlockDirective,
+    DataTableComponent, ColumnCellDirective,
+  ],
   templateUrl: './journal-approvals.component.html',
   styleUrl: './journal-approvals.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,13 +56,19 @@ export class JournalApprovalsComponent implements OnInit {
   private readonly accountLabels = signal<Map<number, string>>(new Map());
   private readonly pending = signal<ManualJournalEntryResult[]>([]);
   protected readonly loading = signal(true);
+  protected readonly lineColumns: ColumnDef[] = [
+    { field: 'account', header: this.translate.instant('accounting.journalEditor.account') },
+    { field: 'debit', header: this.translate.instant('accounting.common.debit'), type: 'number', align: 'right', width: '150px' },
+    { field: 'credit', header: this.translate.instant('accounting.common.credit'), type: 'number', align: 'right', width: '150px' },
+    { field: 'description', header: this.translate.instant('accounting.common.description') },
+  ];
   protected readonly busyId = signal<number | null>(null);
 
   protected readonly entries = computed<PendingEntryView[]>(() => {
     const labels = this.accountLabels();
     return this.pending().map((entry) => {
       const lines = (entry.lines ?? []).map((line) => ({
-        key: line.id,
+        id: line.id,
         account: labels.get(line.glAccountId) ?? `#${line.glAccountId}`,
         debit: line.debit,
         credit: line.credit,

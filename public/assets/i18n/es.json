@@ -10136,7 +10136,8 @@
       "loadFailed": "No se pudieron cargar los asientos pendientes de aprobación",
       "rejectTitle": "Rechazar asiento {{number}}",
       "rejectNote": "El asiento vuelve a borrador; nada llega al libro mayor. El motivo se agrega a su nota.",
-      "rejectReason": "Motivo (opcional)"
+      "rejectReason": "Motivo (opcional)",
+      "noLines": "Este asiento no tiene líneas"
     },
     "jobCostClose": {
       "title": "Costo de producción por orden",

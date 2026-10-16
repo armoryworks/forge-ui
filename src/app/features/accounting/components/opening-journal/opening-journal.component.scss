@@ -1,4 +1,5 @@
 @use 'styles/variables' as *;
+@use 'app/features/accounting/accounting-shared' as *;
 
 .oj {
   position: relative;
@@ -57,38 +58,6 @@
     display: flex;
     flex-direction: column;
     gap: $sp-sm;
-  }
-
-  &__table-wrap {
-    overflow-x: auto;
-  }
-
-  &__table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: $font-size-sm;
-
-    th,
-    td {
-      padding: $sp-xs $sp-sm;
-      border-bottom: $border-width-thin solid var(--border);
-      text-align: left;
-    }
-
-    tfoot th,
-    tfoot td {
-      font-weight: 700;
-    }
-  }
-
-  &__num {
-    text-align: right;
-    font-family: $font-family-mono;
-  }
-
-  &__table th.oj__num,
-  &__table td.oj__num {
-    text-align: right;
   }
 
   &__csv-actions {

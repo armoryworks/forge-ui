@@ -15,7 +15,10 @@ import { DatepickerComponent } from '../../../../shared/components/datepicker/da
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
+import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -50,6 +53,8 @@ import { parseOpeningJournalCsv } from '../../utils/opening-journal-csv';
     CurrencyDisplayComponent,
     ValidationButtonComponent,
     LoadingBlockDirective,
+    DataTableComponent,
+    ColumnCellDirective,
   ],
   templateUrl: './opening-journal.component.html',
   styleUrl: './opening-journal.component.scss',
@@ -77,6 +82,13 @@ export class OpeningJournalComponent implements OnInit {
   protected readonly accountOptions = computed<SelectOption[]>(() =>
     this.accounts().map((a) => ({ value: a.id, label: `${a.accountNumber} — ${a.name}` })),
   );
+
+  protected readonly tieOutColumns: ColumnDef[] = [
+    { field: 'accountNumber', header: this.translate.instant('accounting.trialBalance.accountNumber'), sortable: true, width: '130px' },
+    { field: 'accountName', header: this.translate.instant('accounting.trialBalance.account'), sortable: true },
+    { field: 'debitTotal', header: this.translate.instant('accounting.common.debit'), sortable: true, type: 'number', align: 'right', width: '150px' },
+    { field: 'creditTotal', header: this.translate.instant('accounting.common.credit'), sortable: true, type: 'number', align: 'right', width: '150px' },
+  ];
 
   protected readonly csvControl = new FormControl<string>('', { nonNullable: true });
   protected readonly form = new FormGroup(
