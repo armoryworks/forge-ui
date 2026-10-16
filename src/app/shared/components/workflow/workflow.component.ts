@@ -382,18 +382,6 @@ export class WorkflowComponent {
 
   protected setMode(mode: 'express' | 'guided'): void {
     if (mode === this.mode()) return;
-    // Lossless switch (F21): express and guided edit the *same* underlying
-    // entity fields, just laid out differently — so unsaved edits on the
-    // current step shouldn't be discarded. Persist them first via the step's
-    // registered save callback, then switch; the destination mode reloads the
-    // same data. On save failure the step component surfaces the error and we
-    // stay put. (Previously this prompted "switch and discard", losing input.)
-    if (this.workflowService.currentStepDirty()) {
-      this.workflowService.saveCurrentStep().subscribe(result => {
-        if (result.ok) this.modeChanged.emit(mode);
-      });
-      return;
-    }
     this.modeChanged.emit(mode);
   }
 
