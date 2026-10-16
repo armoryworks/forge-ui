@@ -12,6 +12,7 @@ describe('downloadBlob', () => {
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
       expect(this.href).toBe('blob:pdf-1');
       expect(this.download).toBe('INV-00012.pdf');
+      expect(this.isConnected).toBe(true);
     });
     const blob = new Blob(['%PDF'], { type: 'application/pdf' });
 
@@ -22,6 +23,7 @@ describe('downloadBlob', () => {
     expect(revoke).not.toHaveBeenCalled();
     vi.runAllTimers();
     expect(revoke).toHaveBeenCalledWith('blob:pdf-1');
+    expect(document.querySelector('a[download]')).toBeNull();
     vi.useRealTimers();
   });
 });

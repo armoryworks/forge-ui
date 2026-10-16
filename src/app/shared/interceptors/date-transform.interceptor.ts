@@ -19,6 +19,8 @@ function transformDates(obj: unknown): unknown {
 }
 
 export const dateTransformInterceptor: HttpInterceptorFn = (req, next) =>
-  next(req).pipe(
-    map(event => event instanceof HttpResponse ? event.clone({ body: transformDates(event.body) }) : event)
-  );
+  req.responseType !== 'json'
+    ? next(req)
+    : next(req).pipe(
+      map(event => event instanceof HttpResponse ? event.clone({ body: transformDates(event.body) }) : event)
+    );
