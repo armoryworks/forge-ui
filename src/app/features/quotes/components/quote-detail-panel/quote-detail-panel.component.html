@@ -120,7 +120,7 @@
                   <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
                   <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" /></td>
                   <td class="lines-table__right lines-table__margin">
-                    @if (line.effectiveMargin !== null) {
+                    @if (typeof line.effectiveMargin === 'number') {
                       {{ line.effectiveMargin * 100 | number:'1.1-1' }}%
                     } @else {
                       <span class="lines-table__muted">—</span>
