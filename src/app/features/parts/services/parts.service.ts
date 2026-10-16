@@ -21,6 +21,7 @@ import { CreatePartRevisionRequest } from '../models/create-part-revision-reques
 import { PartInventorySummary } from '../models/part-inventory-summary.model';
 import { PartPurchaseHistoryItem } from '../models/part-purchase-history-item.model';
 import { PartLandedCost } from '../models/part-landed-cost.model';
+import { RecalculatedStandardCost } from '../models/recalculated-standard-cost.model';
 import { FileAttachment } from '../../../shared/models/file.model';
 import { ActivityItem } from '../../../shared/models/activity.model';
 import { Operation, OperationMaterial } from '../models/operation.model';
@@ -172,6 +173,11 @@ export class PartsService {
   getLandedCost(partId: number, maxReceipts = 3): Observable<PartLandedCost> {
     const params = new HttpParams().set('maxReceipts', String(maxReceipts));
     return this.http.get<PartLandedCost>(`${this.base}/${partId}/landed-cost`, { params });
+  }
+
+  /** Roll the part's BOM + routing cost up and freeze it as the current standard-cost snapshot. */
+  recalculateStandardCost(partId: number): Observable<RecalculatedStandardCost> {
+    return this.http.post<RecalculatedStandardCost>(`${this.base}/${partId}/recalculate-standard-cost`, {});
   }
 
   linkAccountingItem(partId: number, externalId: string, externalRef: string): Observable<void> {

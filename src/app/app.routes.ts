@@ -194,6 +194,12 @@ export const routes: Routes = [
           import('./features/expenses/expenses.routes').then((m) => m.EXPENSES_ROUTES),
       },
       {
+        path: 'accounting/opening-journal',
+        canActivate: [roleGuard('Controller'), capabilityGuard('CAP-ACCT-MIGRATION')],
+        loadComponent: () =>
+          import('./features/accounting/components/opening-journal/opening-journal.component').then((m) => m.OpeningJournalComponent),
+      },
+      {
         // GL accounting suite — gated by CAP-ACCT-GL-VIEW (the read-only view surface) so the
         // ledger/statements stay reachable read-only when a book is deactivated (FULLGL off,
         // GL-VIEW on). Write screens (journal-entries/new) add a CAP-ACCT-FULLGL guard below.

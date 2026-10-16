@@ -255,6 +255,7 @@ export class PartWorkflowPageComponent {
             entityType: 'Part',
             definitionId,
             mode: this.modeFromUrl(),
+            entityId: partId,
           }).subscribe({
             next: (created) => {
               this.run.set(created);

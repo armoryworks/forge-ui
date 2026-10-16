@@ -164,6 +164,11 @@
             {{ 'invoices.void' | translate }}
           </button>
         }
+        <button class="action-btn" type="button" data-testid="invoice-download-pdf-btn"
+          [disabled]="downloadingPdf()" (click)="downloadPdf()">
+          <span class="material-icons-outlined" aria-hidden="true">picture_as_pdf</span>
+          {{ 'invoices.downloadPdf' | translate }}
+        </button>
         <a class="action-btn" routerLink="/shipping">
           <span class="material-icons-outlined">local_shipping</span>
           {{ 'shipping.ship' | translate }}

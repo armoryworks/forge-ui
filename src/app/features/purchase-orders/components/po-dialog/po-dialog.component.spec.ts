@@ -242,6 +242,34 @@ describe('PoDialogComponent — vendor contact, order-from address and ship-to',
   });
 });
 
+describe('PoDialogComponent — blanket order', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  it('creates a blanket PO with its expiration when the toggle is on', () => {
+    const { internals, createPurchaseOrder } = setup();
+    internals.form.patchValue({ vendorId: 5, isBlanket: true, blanketExpirationDate: new Date(2027, 5, 30) });
+    internals.lines.set([{ ...partLine(1, 'P-1'), partId: null, partNumber: null }]);
+
+    internals.save();
+
+    const req = createPurchaseOrder.mock.calls[0][0];
+    expect(req.isBlanket).toBe(true);
+    expect(req.blanketExpirationDate).toBe('2027-06-30T00:00:00Z');
+  });
+
+  it('sends no blanket fields for a standard PO, even with a stale expiration', () => {
+    const { internals, createPurchaseOrder } = setup();
+    internals.form.patchValue({ vendorId: 5, isBlanket: false, blanketExpirationDate: new Date(2027, 5, 30) });
+    internals.lines.set([{ ...partLine(1, 'P-1'), partId: null, partNumber: null }]);
+
+    internals.save();
+
+    const req = createPurchaseOrder.mock.calls[0][0];
+    expect(req.isBlanket).toBeUndefined();
+    expect(req.blanketExpirationDate).toBeUndefined();
+  });
+});
+
 describe('PoDialogComponent — part picker', () => {
   beforeEach(() => TestBed.resetTestingModule());
 

@@ -70,6 +70,10 @@
         </div>
       }
 
+      @if (glOpeningReason() !== null) {
+        <app-gl-opening-callout [reason]="glOpeningReason()" (dismissed)="dismissGlOpening()" />
+      }
+
       <div class="capabilities-page__summary">
         <span><strong>{{ enabledCount() }}</strong> of <strong>{{ capabilities().length }}</strong> enabled</span>
         @if (filtered().length !== capabilities().length) {
@@ -138,7 +142,7 @@
                       <mat-slide-toggle
                         [checked]="cap.enabled"
                         [disabled]="isPending(cap.code) || loading()"
-                        (change)="onToggle(cap, $event.checked)"
+                        (change)="onToggle(cap, $event.checked, $event.source)"
                         (click)="$event.stopPropagation()"
                         [aria-label]="'admin.capability.toggleAria' | translate: { name: cap.name }"
                         data-testid="capability-toggle">

@@ -16,6 +16,11 @@
         </div>
       </div>
       <div class="detail-header__actions">
+        <button class="icon-btn" data-testid="lead-outreach-prefs-btn"
+          [matTooltip]="'leads.outreachPrefs.open' | translate" matTooltipPosition="above"
+          [attr.aria-label]="'leads.outreachPrefs.open' | translate" (click)="openOutreachPreferences()">
+          <span class="material-icons-outlined">do_not_disturb_on</span>
+        </button>
         <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" [attr.aria-label]="'common.edit' | translate" (click)="openEditLead()">
           <span class="material-icons-outlined">edit</span>
         </button>

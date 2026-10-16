@@ -277,6 +277,7 @@ export class VendorWorkflowPageComponent {
             entityType: 'Vendor',
             definitionId,
             mode: this.modeFromUrl(),
+            entityId: vendorId,
           }).subscribe({
             next: (created) => {
               this.run.set(created);

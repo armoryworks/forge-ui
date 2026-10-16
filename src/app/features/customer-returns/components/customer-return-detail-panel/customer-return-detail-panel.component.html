@@ -27,6 +27,12 @@
             <span class="detail-value">{{ r.reworkJobNumber }}</span>
           </div>
         }
+        @if (r.quantity !== null && r.quantity !== undefined) {
+          <div class="detail-item">
+            <span class="detail-label">{{ 'customerReturns.fieldQuantity' | translate }}</span>
+            <span class="detail-value" data-testid="return-detail-quantity">{{ r.quantity | number:'1.0-4' }}</span>
+          </div>
+        }
         <div class="detail-item">
           <span class="detail-label">{{ 'customerReturns.returnDate' | translate }}</span>
           <span class="detail-value">{{ r.returnDate | date:'MM/dd/yyyy' }}</span>

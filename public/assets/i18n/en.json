@@ -82,7 +82,9 @@
     "bankStatements": "Bank Statements",
     "exports": "QBO Export",
     "chartOfAccounts": "Chart of Accounts",
-    "pieceRates": "Piece Rates"
+    "pieceRates": "Piece Rates",
+    "openingJournal": "Opening Journal",
+    "journalApprovals": "Journal Approvals"
   },
   "navGroups": {
     "operations": "Operations",
@@ -1594,6 +1596,17 @@
       "materialsNeedBom": "Operation materials are only copied together with the bill of materials.",
       "submit": "Duplicate",
       "created": "Created {{partNumber}}."
+    },
+    "standardCost": {
+      "title": "Standard cost",
+      "recalculate": "Recalculate standard cost",
+      "hint": "Rolls the BOM and routing cost up and freezes it as the part's current standard cost.",
+      "material": "Material",
+      "labor": "Labor",
+      "overhead": "Overhead",
+      "total": "Standard cost",
+      "rolled": "Standard cost recalculated",
+      "rollFailed": "Could not recalculate the standard cost"
     }
   },
   "partsCatalog": {
@@ -3031,7 +3044,20 @@
     "tableView": "Table view",
     "pipelineView": "Pipeline view",
     "viewCustomer": "View customer",
-    "deleteFailed": "Could not delete the lead."
+    "deleteFailed": "Could not delete the lead.",
+    "outreachPrefs": {
+      "open": "Outreach preferences",
+      "title": "Outreach preferences: {{name}}",
+      "intro": "Opted-out channels and a do-not-contact date keep this lead out of outreach queues and put it on the suppression list.",
+      "emailOptOut": "Do not email",
+      "callOptOut": "Do not call",
+      "smsOptOut": "Do not text",
+      "source": "How the opt-out was received",
+      "cooldownUntil": "Do not contact until",
+      "cooldownNotes": "Notes",
+      "queueSource": "Suppressed from the outreach queue",
+      "saved": "Outreach preferences saved"
+    }
   },
   "expenses": {
     "title": "Expenses",
@@ -3846,6 +3872,16 @@
     "capability": {
       "relatedSettings": "Related settings",
       "toggleAria": "Toggle {{name}}"
+    },
+    "glOpening": {
+      "title": "Full general ledger needs an opening journal first",
+      "stepMigration": "Turn on the accounting migration wizard.",
+      "enableMigration": "Turn it on",
+      "stepJournal": "A Controller posts the opening journal under Accounting > Opening journal.",
+      "openJournal": "Open the opening journal",
+      "stepFullGl": "Turn on Built-in full general ledger again.",
+      "migrationEnabled": "Accounting migration wizard turned on",
+      "migrationFailed": "Could not turn on the accounting migration wizard"
     }
   },
   "teamsPanel": {
@@ -5256,7 +5292,8 @@
     "noLinesYet": "No lines yet",
     "confirmSendTitle": "Send Invoice?",
     "confirmSendMessage": "Send invoice {{number}} to the customer?",
-    "numberLockedReason": "An invoice number can only be changed while the invoice is a draft. This one has been sent or posted, so the number is now on record with the customer and in the ledger."
+    "numberLockedReason": "An invoice number can only be changed while the invoice is a draft. This one has been sent or posted, so the number is now on record with the customer and in the ledger.",
+    "downloadPdf": "Download PDF"
   },
   "payments": {
     "paymentNumberLabel": "Payment Number",
@@ -5663,7 +5700,9 @@
       "released": "Released",
       "remaining": "Remaining",
       "agreedPrice": "Agreed Price",
-      "expires": "Expires"
+      "expires": "Expires",
+      "createAsBlanket": "Blanket order",
+      "createHint": "The ordered quantities become the agreed total; the vendor ships against releases you create on the PO."
     }
   },
   "poManage": {
@@ -7586,7 +7625,8 @@
     "reworkJob": "Rework Job",
     "subtitle": "Track and manage customer returns",
     "title": "Customer Returns",
-    "updated": "Return updated"
+    "updated": "Return updated",
+    "fieldQuantity": "Quantity returned"
   },
   "recalls": {
     "title": "Recalls",
@@ -9615,7 +9655,8 @@
       "post": "Post entry",
       "posted": "Entry #{{number}} posted",
       "correctionMemo": "Correction of entry #{{number}}: ",
-      "correcting": "Correcting entry #{{number}}"
+      "correcting": "Correcting entry #{{number}}",
+      "pendingApproval": "Entry {{number}} is waiting for a second approver"
     },
     "training": {
       "title": "GL Training",
@@ -9796,7 +9837,11 @@
       "exports": "CPA Exports",
       "exportsDesc": "CSV downloads for the CPA — and the one-way QuickBooks push when enabled.",
       "bankStatements": "Bank Statements",
-      "bankStatementsDesc": "Import OFX/CSV statements and match them to the ledger"
+      "bankStatementsDesc": "Import OFX/CSV statements and match them to the ledger",
+      "openingJournal": "Opening journal",
+      "openingJournalDesc": "Post the opening balances that switch on the full general ledger",
+      "journalApprovals": "Journal approvals",
+      "journalApprovalsDesc": "Approve or reject manual entries waiting for a second approver"
     },
     "exports": {
       "title": "CPA Exports",
@@ -10083,6 +10128,58 @@
       "active": "Active",
       "description": "Description",
       "lockedNote": "This account has postings — its number, type, and normal balance are locked. Create a new account for structural changes."
+    },
+    "openingJournal": {
+      "title": "Opening journal",
+      "subtitle": "Carry the opening balances from your previous system into the ledger",
+      "book": "Book: {{name}}",
+      "intro": "Enter the closing trial balance of your previous system as of the cutover date, one line per account. Debits must equal credits. Receivable and payable balances load separately with their open items. The journal is posted once; full general ledger can be turned on after it.",
+      "asOfDate": "Opening balances as of",
+      "csvLabel": "Paste rows from the cutover CSV",
+      "csvHint": "Columns: account number, debit, credit, description (optional). A header row is fine.",
+      "loadCsv": "Load lines",
+      "csvLoaded": "{{count}} lines loaded",
+      "csvBadRows": "These rows need one account and exactly one non-zero amount: {{rows}}",
+      "csvUnknownAccounts": "The opening journal cannot post to these accounts (not in this book, or receivable/payable control accounts whose open items load separately): {{accounts}}",
+      "csvTooFew": "An opening journal needs at least two lines",
+      "post": "Post opening journal",
+      "posted": "Opening journal posted as entry {{number}}",
+      "postedTitle": "Opening journal posted: entry {{number}} as of {{date}}",
+      "fullGlOn": "Full general ledger is on.",
+      "nextStepAdmin": "Next, turn on Built-in full general ledger.",
+      "nextStepController": "Next, an administrator turns on Built-in full general ledger.",
+      "turnOnFullGl": "Open full general ledger",
+      "tieOutTitle": "Opening trial balance",
+      "tieOutHint": "Compare these balances with the closing trial balance of your previous system before going live.",
+      "loadFailed": "Could not load the opening journal",
+      "tieOutFailed": "Could not load the opening trial balance"
+    },
+    "approvals": {
+      "title": "Journal approvals",
+      "subtitle": "Manual entries over the approval threshold wait here for a second Controller",
+      "entry": "Entry {{number}}",
+      "approve": "Approve and post",
+      "reject": "Reject",
+      "approved": "Entry {{number}} approved and posted",
+      "rejected": "Entry {{number}} returned to draft",
+      "empty": "No entries are waiting for approval",
+      "loadFailed": "Could not load the entries waiting for approval",
+      "rejectTitle": "Reject entry {{number}}",
+      "rejectNote": "The entry goes back to draft; nothing reaches the ledger. The reason is added to its memo.",
+      "rejectReason": "Reason (optional)",
+      "noLines": "This entry has no lines"
+    },
+    "jobCostClose": {
+      "title": "Job production cost",
+      "hint": "Close each job after its last production receipt: labor and overhead are absorbed into WIP and the remainder goes to production variance.",
+      "job": "Job",
+      "jobTitle": "Title",
+      "completed": "Completed",
+      "wip": "WIP balance",
+      "close": "Close cost",
+      "closed": "{{job}} closed; production variance {{variance}}",
+      "empty": "No job has an open WIP balance",
+      "loadFailed": "Could not load the jobs with open WIP"
     }
   },
   "subcontractUi": {

@@ -1,0 +1,38 @@
+<section class="gl-opening" role="alert" aria-live="polite" data-testid="gl-opening-callout">
+  <span class="material-icons-outlined gl-opening__icon" aria-hidden="true">account_balance</span>
+  <div class="gl-opening__body">
+    <strong class="gl-opening__title">{{ 'admin.glOpening.title' | translate }}</strong>
+    @if (reason()) {
+      <span class="gl-opening__reason">{{ reason() }}</span>
+    }
+    <ol class="gl-opening__steps">
+      <li [class.gl-opening__step--done]="migrationEnabled()" data-testid="gl-opening-step-migration">
+        {{ 'admin.glOpening.stepMigration' | translate }}
+        @if (!migrationEnabled()) {
+          <button class="action-btn action-btn--sm" type="button"
+            [disabled]="enabling()"
+            data-testid="gl-opening-enable-migration"
+            (click)="enableMigration()">
+            {{ 'admin.glOpening.enableMigration' | translate }}
+          </button>
+        }
+      </li>
+      <li data-testid="gl-opening-step-journal">
+        {{ 'admin.glOpening.stepJournal' | translate }}
+        @if (isController && migrationEnabled()) {
+          <a class="action-btn action-btn--sm action-btn--primary" routerLink="/accounting/opening-journal"
+            data-testid="gl-opening-open-journal">
+            {{ 'admin.glOpening.openJournal' | translate }}
+          </a>
+        }
+      </li>
+      <li>{{ 'admin.glOpening.stepFullGl' | translate }}</li>
+    </ol>
+  </div>
+  <button class="icon-btn" type="button"
+    [attr.aria-label]="'common.close' | translate"
+    data-testid="gl-opening-dismiss"
+    (click)="dismissed.emit()">
+    <span class="material-icons-outlined" aria-hidden="true">close</span>
+  </button>
+</section>

@@ -1,0 +1,141 @@
+<app-page-layout
+  [pageTitle]="'accounting.openingJournal.title' | translate"
+  [pageSubtitle]="'accounting.openingJournal.subtitle' | translate">
+  <ng-container content>
+    <div class="oj" [appLoadingBlock]="loading()">
+      @if (status(); as s) {
+        <p class="oj__book" data-testid="oj-book">
+          {{ 'accounting.openingJournal.book' | translate: { name: s.bookName } }}
+        </p>
+
+        @if (s.openingJournalPosted) {
+          <section class="oj__posted" data-testid="oj-posted">
+            <span class="material-icons-outlined oj__posted-icon" aria-hidden="true">task_alt</span>
+            <div class="oj__posted-text">
+              <strong>{{ 'accounting.openingJournal.postedTitle' | translate: { number: s.openingEntryNumber, date: openingDateLabel() } }}</strong>
+              @if (s.fullGlEnabled) {
+                <span>{{ 'accounting.openingJournal.fullGlOn' | translate }}</span>
+              } @else if (isAdmin) {
+                <span>{{ 'accounting.openingJournal.nextStepAdmin' | translate }}</span>
+                <a class="action-btn action-btn--sm action-btn--primary" routerLink="/admin/capabilities/CAP-ACCT-FULLGL"
+                  data-testid="oj-turn-on-full-gl">
+                  {{ 'accounting.openingJournal.turnOnFullGl' | translate }}
+                </a>
+              } @else {
+                <span>{{ 'accounting.openingJournal.nextStepController' | translate }}</span>
+              }
+            </div>
+          </section>
+
+          @if (tieOut(); as tb) {
+            <section class="oj__tie-out" data-testid="oj-tie-out">
+              <h2 class="oj__section-title">{{ 'accounting.openingJournal.tieOutTitle' | translate }}</h2>
+              <p class="oj__hint">{{ 'accounting.openingJournal.tieOutHint' | translate }}</p>
+              <div class="acct-table-block">
+                <app-data-table
+                  tableId="acct-opening-tie-out"
+                  [columns]="tieOutColumns"
+                  [data]="tb.rows"
+                  emptyIcon="balance"
+                  [emptyMessage]="'accounting.trialBalance.empty' | translate">
+                  <ng-template appColumnCell="debitTotal" let-row>
+                    <app-currency-display [value]="row.debitTotal" />
+                  </ng-template>
+                  <ng-template appColumnCell="creditTotal" let-row>
+                    <app-currency-display [value]="row.creditTotal" />
+                  </ng-template>
+                </app-data-table>
+              </div>
+              <div class="totals-strip">
+                <span class="totals-strip__label">{{ 'accounting.common.total' | translate }}</span>
+                <span class="totals-strip__metric">{{ 'accounting.common.debit' | translate }} <app-currency-display [value]="tb.totalDebit" /></span>
+                <span class="totals-strip__metric">{{ 'accounting.common.credit' | translate }} <app-currency-display [value]="tb.totalCredit" /></span>
+              </div>
+            </section>
+          }
+        } @else {
+          <p class="oj__hint">{{ 'accounting.openingJournal.intro' | translate }}</p>
+
+          <section class="oj__csv">
+            <app-textarea
+              [label]="'accounting.openingJournal.csvLabel' | translate"
+              [formControl]="csvControl"
+              [rows]="4"
+              data-testid="oj-csv" />
+            <div class="oj__csv-actions">
+              <span class="oj__hint">{{ 'accounting.openingJournal.csvHint' | translate }}</span>
+              <button type="button" class="action-btn action-btn--sm" (click)="loadCsv()"
+                [disabled]="!csvControl.value.trim()" data-testid="oj-load-csv">
+                <span class="material-icons-outlined" aria-hidden="true">upload</span>
+                {{ 'accounting.openingJournal.loadCsv' | translate }}
+              </button>
+            </div>
+          </section>
+
+          <form [formGroup]="form" class="oj__form">
+            <div class="oj__date">
+              <app-datepicker [label]="'accounting.openingJournal.asOfDate' | translate" formControlName="asOfDate"
+                [required]="true" data-testid="oj-as-of" />
+            </div>
+
+            <div class="oj__lines" formArrayName="lines">
+              <div class="oj__lines-head">
+                <span class="oj__section-title">{{ 'accounting.journalEditor.lines' | translate }}</span>
+                <button type="button" class="action-btn action-btn--sm" (click)="addLine()" data-testid="oj-add-line">
+                  <span class="material-icons-outlined" aria-hidden="true">add</span>
+                  {{ 'accounting.journalEditor.addLine' | translate }}
+                </button>
+              </div>
+
+              @for (line of lines.controls; track $index; let i = $index) {
+                <div class="oj__line" [formGroupName]="i" data-testid="oj-line">
+                  <app-select
+                    class="oj__line-account"
+                    [label]="'accounting.journalEditor.account' | translate"
+                    [options]="accountOptions()"
+                    formControlName="glAccountId"
+                    [required]="true" />
+                  <app-currency-input class="oj__line-amt" [label]="'accounting.common.debit' | translate" formControlName="debit" />
+                  <app-currency-input class="oj__line-amt" [label]="'accounting.common.credit' | translate" formControlName="credit" />
+                  <app-input class="oj__line-desc" [label]="'accounting.common.description' | translate" formControlName="description" />
+                  <button
+                    type="button"
+                    class="icon-btn icon-btn--danger oj__line-del"
+                    [attr.aria-label]="'accounting.journalEditor.removeLine' | translate"
+                    [disabled]="lines.length <= 2"
+                    (click)="removeLine(i)">
+                    <span class="material-icons-outlined" aria-hidden="true">delete</span>
+                  </button>
+                </div>
+              }
+            </div>
+
+            <div class="oj__balance" [class.oj__balance--ok]="balanced()" data-testid="oj-balance">
+              <span>{{ 'accounting.common.debit' | translate }} <app-currency-display [value]="totalDebit()" /></span>
+              <span>{{ 'accounting.common.credit' | translate }} <app-currency-display [value]="totalCredit()" /></span>
+              <span class="oj__balance-state">
+                {{ (balanced() ? 'accounting.journalEditor.balanced' : 'accounting.common.outOfBalance') | translate }}
+              </span>
+            </div>
+          </form>
+        }
+      }
+    </div>
+  </ng-container>
+
+  <ng-container actions>
+    @if (status() && !status()!.openingJournalPosted) {
+      <app-validation-button class="validation-button--inline" [violations]="violations" [loading]="posting()">
+        <button
+          type="button"
+          class="action-btn action-btn--primary"
+          [disabled]="form.invalid || posting()"
+          (click)="post()"
+          data-testid="oj-post">
+          <span class="material-icons-outlined" aria-hidden="true">save</span>
+          {{ 'accounting.openingJournal.post' | translate }}
+        </button>
+      </app-validation-button>
+    }
+  </ng-container>
+</app-page-layout>

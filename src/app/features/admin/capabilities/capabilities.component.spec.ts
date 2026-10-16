@@ -3,7 +3,9 @@ import { Component, Directive, input, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { of, throwError } from 'rxjs';
+import { vi } from 'vitest';
 
 import { CapabilityService } from '../../../shared/services/capability.service';
 import { CapabilityInstallStateService } from '../../../shared/services/capability-install-state.service';
@@ -120,5 +122,74 @@ describe('CapabilitiesComponent', () => {
     search('ledger');
 
     expect(el.querySelector('[data-testid="capability-settings-results"]')).toBeNull();
+  });
+});
+
+describe('CapabilitiesComponent toggles', () => {
+  type ToggleInternals = {
+    onToggle(entry: CapabilityDescriptorEntry, target: boolean, toggle?: { checked: boolean }): void;
+    glOpeningReason(): string | null;
+  };
+  let setEnabled: ReturnType<typeof vi.fn>;
+  let load: ReturnType<typeof vi.fn>;
+  const fullGl = { ...entry('CAP-ACCT-FULLGL', 'ACCT', 'Built-in full general ledger'), enabled: false };
+
+  function component(): ToggleInternals {
+    TestBed.configureTestingModule({
+      imports: [CapabilitiesComponent, TranslateModule.forRoot()],
+      providers: [
+        provideRouter([]),
+        {
+          provide: CapabilityService,
+          useValue: { loading: signal(false), capabilities: signal([fullGl]), load, setEnabled, isEnabled: () => false },
+        },
+        { provide: ConsultantModeService, useValue: { enabled: signal(false), toggle: () => undefined } },
+        { provide: CapabilityInstallStateService, useValue: { dismissed: signal(true), dismiss: () => undefined } },
+        { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
+      ],
+    });
+    return TestBed.runInInjectionContext(() => new CapabilitiesComponent()) as unknown as ToggleInternals;
+  }
+
+  beforeEach(() => {
+    TestBed.resetTestingModule();
+    load = vi.fn(() => of(undefined));
+  });
+
+  it('puts a refused toggle back to the saved state so the next click retries the enable', () => {
+    setEnabled = vi.fn(() => throwError(() => new HttpErrorResponse({
+      status: 409,
+      error: { errors: [{ code: 'capability-missing-dependencies', message: 'x', missing: ['CAP-ACCT-BUILTIN'] }] },
+    })));
+    const c = component();
+    const toggle = { checked: true };
+
+    c.onToggle(fullGl, true, toggle);
+
+    expect(toggle.checked).toBe(false);
+    expect(load).toHaveBeenCalled();
+  });
+
+  it('opens the opening-journal callout when full GL waits on an opening journal', () => {
+    setEnabled = vi.fn(() => throwError(() => new HttpErrorResponse({
+      status: 409,
+      error: { errors: [{ code: 'capability-gl-opening-balances', message: 'Load the opening journal first.' }] },
+    })));
+    const c = component();
+
+    c.onToggle(fullGl, true, { checked: true });
+
+    expect(c.glOpeningReason()).toBe('Load the opening journal first.');
+  });
+
+  it('reloads the descriptor after a successful toggle so cascaded capabilities show', () => {
+    setEnabled = vi.fn(() => of({ ...fullGl, enabled: true }));
+    const c = component();
+
+    c.onToggle(fullGl, true, { checked: true });
+
+    expect(setEnabled).toHaveBeenCalledWith('CAP-ACCT-FULLGL', true);
+    expect(load).toHaveBeenCalled();
+    expect(c.glOpeningReason()).toBeNull();
   });
 });

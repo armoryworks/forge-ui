@@ -172,6 +172,7 @@ export class NavTreeService {
         // Capability-gated (default OFF) — the feature only appears when the
         // install opts into activity-based costing.
         { icon: 'calculate', label: 'Costing', i18nKey: 'nav.costing', route: '/costing', capability: 'CAP-COSTING-TIER3-ABC', allowedRoles: ['Admin', 'Manager'] },
+        { icon: 'input', label: 'Opening Journal', i18nKey: 'nav.openingJournal', route: '/accounting/opening-journal', capability: 'CAP-ACCT-MIGRATION', allowedRoles: ['Controller'] },
         {
           // Dark GL accounting suite — hidden unless CAP-ACCT-FULLGL is enabled.
           icon: 'account_balance', label: 'Accounting', i18nKey: 'navGroups.accounting',
@@ -182,6 +183,7 @@ export class NavTreeService {
             // absent from the nav, so the GL looked read-only.
             { icon: 'account_tree', label: 'Chart of Accounts', i18nKey: 'nav.chartOfAccounts', route: '/accounting/chart-of-accounts' },
             { icon: 'post_add', label: 'Journal Entries', i18nKey: 'nav.journalEntries', route: '/accounting/journal-entries/new' },
+            { icon: 'fact_check', label: 'Journal Approvals', i18nKey: 'nav.journalApprovals', route: '/accounting/journal-approvals' },
             { icon: 'menu_book', label: 'Ledger', i18nKey: 'nav.ledger', route: '/accounting/ledger' },
             // Financial statements.
             { icon: 'balance', label: 'Trial Balance', i18nKey: 'nav.trialBalance', route: '/accounting/trial-balance' },

@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, effect, inject, input, output, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 
@@ -21,6 +21,7 @@ import { DetailLoadErrorComponent } from '../../../../shared/components/detail-l
   standalone: true,
   imports: [
     DatePipe,
+    DecimalPipe,
     ReactiveFormsModule,
     TranslatePipe,
     MatTooltipModule,

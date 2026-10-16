@@ -1,0 +1,30 @@
+@use 'styles/variables' as *;
+@use 'app/features/accounting/accounting-shared' as *;
+
+:host {
+  display: block;
+}
+
+.job-cost-close {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: $sp-md;
+  }
+
+  &__title {
+    margin: 0;
+    font-weight: 600;
+    font-size: $font-size-title;
+  }
+
+  &__hint {
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+  }
+}

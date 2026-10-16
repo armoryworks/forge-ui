@@ -522,6 +522,12 @@ export class PartDetailPanelComponent {
     });
   }
 
+  /** Standard cost rolled on the Cost tab — reload so the cost-calculation snapshot id shows the new roll. */
+  protected onStandardCostRolled(): void {
+    const p = this.part();
+    if (p) this.loadDetail(p.id);
+  }
+
   /** GTIN assigned / removed on the Identity tab — reload so the bound part shows the change. */
   protected onGtinChanged(): void {
     const p = this.part();

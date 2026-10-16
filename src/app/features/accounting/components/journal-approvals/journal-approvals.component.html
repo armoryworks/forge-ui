@@ -1,0 +1,53 @@
+<app-page-layout
+  [pageTitle]="'accounting.approvals.title' | translate"
+  [pageSubtitle]="'accounting.approvals.subtitle' | translate">
+  <ng-container content>
+    <div class="jea" [appLoadingBlock]="loading()">
+      @for (item of entries(); track item.entry.id) {
+        <section class="jea__entry" data-testid="je-approval-entry">
+          <div class="jea__head">
+            <span class="jea__number">{{ 'accounting.approvals.entry' | translate: { number: item.entry.entryNumber } }}</span>
+            <span class="jea__date">{{ item.dateLabel }}</span>
+            <span class="jea__memo">{{ item.entry.memo }}</span>
+            <span class="jea__total"><app-currency-display [value]="item.total" /></span>
+          </div>
+          <div class="acct-table-block">
+            <app-data-table
+              tableId="acct-je-approval-lines"
+              [columns]="lineColumns"
+              [data]="item.lines"
+              emptyIcon="receipt_long"
+              [emptyMessage]="'accounting.approvals.noLines' | translate">
+              <ng-template appColumnCell="debit" let-row>
+                @if (row.debit) { <app-currency-display [value]="row.debit" /> }
+              </ng-template>
+              <ng-template appColumnCell="credit" let-row>
+                @if (row.credit) { <app-currency-display [value]="row.credit" /> }
+              </ng-template>
+            </app-data-table>
+          </div>
+          <div class="jea__actions">
+            <button type="button" class="action-btn action-btn--sm action-btn--warn"
+              [disabled]="busyId() !== null"
+              (click)="reject(item.entry)"
+              data-testid="je-reject">
+              <span class="material-icons-outlined" aria-hidden="true">undo</span>
+              {{ 'accounting.approvals.reject' | translate }}
+            </button>
+            <button type="button" class="action-btn action-btn--sm action-btn--primary"
+              [disabled]="busyId() !== null"
+              (click)="approve(item.entry)"
+              data-testid="je-approve">
+              <span class="material-icons-outlined" aria-hidden="true">check</span>
+              {{ 'accounting.approvals.approve' | translate }}
+            </button>
+          </div>
+        </section>
+      } @empty {
+        @if (!loading()) {
+          <app-empty-state icon="fact_check" [message]="'accounting.approvals.empty' | translate" />
+        }
+      }
+    </div>
+  </ng-container>
+</app-page-layout>

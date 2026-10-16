@@ -7,6 +7,7 @@ import { vi } from 'vitest';
 import { CapabilityService } from './capability.service';
 import { CapabilityDescriptor, CapabilityDescriptorEntry } from '../models/capability-descriptor.model';
 import { environment } from '../../../environments/environment';
+import { SILENT_HTTP_ERRORS } from '../interceptors/silent-http-errors.token';
 
 function entry(overrides: Partial<CapabilityDescriptorEntry> = {}): CapabilityDescriptorEntry {
   return {
@@ -77,6 +78,13 @@ describe('CapabilityService — Phase 4 Phase-C ETag handling', () => {
     // Local snapshot mirrors the new ETag for the next round-trip.
     expect(service.getETag('CAP-EXT-CHAT')).toBe('W/"2"');
     expect(service.isEnabled('CAP-EXT-CHAT')).toBe(true);
+  });
+
+  it('leaves toggle failures to the caller instead of the global error toast', () => {
+    service.setEnabled('CAP-EXT-CHAT', true).subscribe({ error: () => undefined });
+    const req = httpMock.expectOne(`${environment.apiUrl}/capabilities/CAP-EXT-CHAT/enabled`);
+    expect(req.request.context.get(SILENT_HTTP_ERRORS)).toBe(true);
+    req.flush({ errors: [{ code: 'capability-missing-dependencies' }] }, { status: 409, statusText: 'Conflict' });
   });
 
   it('omits If-Match when no ETag is known yet', () => {

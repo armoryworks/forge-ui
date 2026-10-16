@@ -45,6 +45,7 @@ export class CustomerReturnDialogComponent {
   protected readonly returnForm = new FormGroup({
     customerId: new FormControl<number | null>(null, [Validators.required]),
     originalJobId: new FormControl<number | null>(null, [Validators.required]),
+    quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0.0001)]),
     reason: new FormControl('', [Validators.required, Validators.maxLength(500)]),
     notes: new FormControl(''),
     returnDate: new FormControl<Date | null>(new Date(), [Validators.required]),
@@ -53,6 +54,7 @@ export class CustomerReturnDialogComponent {
   protected readonly violations = FormValidationService.getViolations(this.returnForm, {
     customerId: 'Customer',
     originalJobId: 'Original Job',
+    quantity: this.translate.instant('customerReturns.fieldQuantity'),
     reason: 'Reason',
     returnDate: 'Return Date',
   });
@@ -68,12 +70,14 @@ export class CustomerReturnDialogComponent {
   constructor() {
     const r = this.returnDetail();
     if (r) {
+      this.returnForm.controls.quantity.disable();
       this.returnForm.patchValue({
         customerId: r.customerId,
         originalJobId: r.originalJobId,
         reason: r.reason,
         notes: r.notes ?? '',
         returnDate: r.returnDate ?? null,
+        quantity: r.quantity ?? null,
       });
     }
   }
@@ -113,6 +117,7 @@ export class CustomerReturnDialogComponent {
         reason: f.reason!,
         notes: f.notes || undefined,
         returnDate: toIsoDate(f.returnDate ?? new Date()) ?? '',
+        quantity: f.quantity ?? undefined,
       }).subscribe({
         next: () => {
           this.saving.set(false);

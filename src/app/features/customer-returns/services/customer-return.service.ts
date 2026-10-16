@@ -28,6 +28,7 @@ export class CustomerReturnService {
     reason: string;
     notes?: string;
     returnDate: string;
+    quantity?: number;
   }): Observable<CustomerReturnDetail> {
     return this.http.post<CustomerReturnDetail>(this.base, request);
   }

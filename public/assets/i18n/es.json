@@ -82,7 +82,9 @@
     "bankStatements": "Extractos Bancarios",
     "exports": "Exportar a QBO",
     "chartOfAccounts": "Plan de Cuentas",
-    "pieceRates": "Tarifas por pieza"
+    "pieceRates": "Tarifas por pieza",
+    "openingJournal": "Asiento de apertura",
+    "journalApprovals": "Aprobación de asientos"
   },
   "navGroups": {
     "operations": "Operaciones",
@@ -1594,6 +1596,17 @@
       "materialsNeedBom": "Los materiales de las operaciones solo se copian junto con la lista de materiales.",
       "submit": "Duplicar",
       "created": "Se creó {{partNumber}}."
+    },
+    "standardCost": {
+      "title": "Costo estándar",
+      "recalculate": "Recalcular costo estándar",
+      "hint": "Acumula el costo de la lista de materiales y la ruta y lo fija como el costo estándar actual de la pieza.",
+      "material": "Material",
+      "labor": "Mano de obra",
+      "overhead": "Gastos generales",
+      "total": "Costo estándar",
+      "rolled": "Costo estándar recalculado",
+      "rollFailed": "No se pudo recalcular el costo estándar"
     }
   },
   "partsCatalog": {
@@ -3031,7 +3044,20 @@
     "tableView": "Vista de tabla",
     "pipelineView": "Vista de pipeline",
     "viewCustomer": "Ver cliente",
-    "deleteFailed": "No se pudo eliminar el prospecto."
+    "deleteFailed": "No se pudo eliminar el prospecto.",
+    "outreachPrefs": {
+      "open": "Preferencias de contacto",
+      "title": "Preferencias de contacto: {{name}}",
+      "intro": "Los canales excluidos y una fecha de no contactar mantienen este prospecto fuera de las colas de contacto y lo agregan a la lista de supresión.",
+      "emailOptOut": "No enviar correos",
+      "callOptOut": "No llamar",
+      "smsOptOut": "No enviar mensajes de texto",
+      "source": "Cómo se recibió la exclusión",
+      "cooldownUntil": "No contactar hasta",
+      "cooldownNotes": "Notas",
+      "queueSource": "Suprimido desde la cola de contacto",
+      "saved": "Preferencias de contacto guardadas"
+    }
   },
   "expenses": {
     "title": "Gastos",
@@ -3846,6 +3872,16 @@
     "capability": {
       "relatedSettings": "Configuración relacionada",
       "toggleAria": "Activar o desactivar {{name}}"
+    },
+    "glOpening": {
+      "title": "El libro mayor completo necesita primero un asiento de apertura",
+      "stepMigration": "Active el asistente de migración contable.",
+      "enableMigration": "Activarlo",
+      "stepJournal": "Un contralor registra el asiento de apertura en Contabilidad > Asiento de apertura.",
+      "openJournal": "Abrir el asiento de apertura",
+      "stepFullGl": "Vuelva a activar el libro mayor completo integrado.",
+      "migrationEnabled": "Asistente de migración contable activado",
+      "migrationFailed": "No se pudo activar el asistente de migración contable"
     }
   },
   "teamsPanel": {
@@ -5249,7 +5285,8 @@
     "noLinesYet": "Sin líneas aún",
     "confirmSendTitle": "¿Enviar factura?",
     "confirmSendMessage": "¿Enviar la factura {{number}} al cliente?",
-    "numberLockedReason": "El número de factura solo se puede cambiar mientras la factura es un borrador. Esta ya se envió o se contabilizó, por lo que el número ya consta ante el cliente y en el libro mayor."
+    "numberLockedReason": "El número de factura solo se puede cambiar mientras la factura es un borrador. Esta ya se envió o se contabilizó, por lo que el número ya consta ante el cliente y en el libro mayor.",
+    "downloadPdf": "Descargar PDF"
   },
   "payments": {
     "paymentNumberLabel": "Número de pago",
@@ -5656,7 +5693,9 @@
       "released": "Liberada",
       "remaining": "Restante",
       "agreedPrice": "Precio Acordado",
-      "expires": "Vence"
+      "expires": "Vence",
+      "createAsBlanket": "Orden abierta",
+      "createHint": "Las cantidades pedidas pasan a ser el total acordado; el proveedor envía contra las liberaciones que cree en la orden."
     }
   },
   "poManage": {
@@ -7579,7 +7618,8 @@
     "reworkJob": "Trabajo de Retrabajo",
     "subtitle": "Rastrear y gestionar devoluciones de clientes",
     "title": "Devoluciones de Clientes",
-    "updated": "Devolución actualizada"
+    "updated": "Devolución actualizada",
+    "fieldQuantity": "Cantidad devuelta"
   },
   "recalls": {
     "title": "Retiradas",
@@ -9615,7 +9655,8 @@
       "post": "Registrar asiento",
       "posted": "Asiento n.º {{number}} registrado",
       "correctionMemo": "Corrección del asiento n.º {{number}}: ",
-      "correcting": "Corrigiendo el asiento n.º {{number}}"
+      "correcting": "Corrigiendo el asiento n.º {{number}}",
+      "pendingApproval": "El asiento {{number}} espera un segundo aprobador"
     },
     "training": {
       "title": "Formación del libro mayor",
@@ -9796,7 +9837,11 @@
       "exports": "Exportaciones para el contador",
       "exportsDesc": "Descargas CSV para el contador — y el envío unidireccional a QuickBooks cuando está habilitado.",
       "bankStatements": "Estados de cuenta bancarios",
-      "bankStatementsDesc": "Importe estados OFX/CSV y concílielos con el libro mayor"
+      "bankStatementsDesc": "Importe estados OFX/CSV y concílielos con el libro mayor",
+      "openingJournal": "Asiento de apertura",
+      "openingJournalDesc": "Registre los saldos de apertura que activan el libro mayor completo",
+      "journalApprovals": "Aprobación de asientos",
+      "journalApprovalsDesc": "Apruebe o rechace asientos manuales que esperan un segundo aprobador"
     },
     "exports": {
       "title": "Exportaciones para el contador",
@@ -10083,6 +10128,58 @@
       "active": "Activa",
       "description": "Descripción",
       "lockedNote": "Esta cuenta tiene asientos — su número, tipo y saldo normal están bloqueados. Cree una cuenta nueva para cambios estructurales."
+    },
+    "openingJournal": {
+      "title": "Asiento de apertura",
+      "subtitle": "Traslade al libro mayor los saldos de apertura de su sistema anterior",
+      "book": "Libro: {{name}}",
+      "intro": "Ingrese el balance de comprobación de cierre de su sistema anterior a la fecha de corte, una línea por cuenta. Los débitos deben igualar a los créditos. Los saldos por cobrar y por pagar se cargan aparte con sus partidas abiertas. El asiento se registra una sola vez; después se puede activar el libro mayor completo.",
+      "asOfDate": "Saldos de apertura al",
+      "csvLabel": "Pegue filas del CSV de corte",
+      "csvHint": "Columnas: número de cuenta, débito, crédito, descripción (opcional). Puede incluir una fila de encabezado.",
+      "loadCsv": "Cargar líneas",
+      "csvLoaded": "{{count}} líneas cargadas",
+      "csvBadRows": "Estas filas necesitan una cuenta y exactamente un importe distinto de cero: {{rows}}",
+      "csvUnknownAccounts": "El asiento de apertura no puede registrar en estas cuentas (no están en este libro, o son cuentas de control de cobrar/pagar cuyas partidas abiertas se cargan aparte): {{accounts}}",
+      "csvTooFew": "Un asiento de apertura necesita al menos dos líneas",
+      "post": "Registrar asiento de apertura",
+      "posted": "Asiento de apertura registrado como asiento {{number}}",
+      "postedTitle": "Asiento de apertura registrado: asiento {{number}} al {{date}}",
+      "fullGlOn": "El libro mayor completo está activado.",
+      "nextStepAdmin": "A continuación, active el libro mayor completo integrado.",
+      "nextStepController": "A continuación, un administrador activa el libro mayor completo integrado.",
+      "turnOnFullGl": "Abrir libro mayor completo",
+      "tieOutTitle": "Balance de comprobación de apertura",
+      "tieOutHint": "Compare estos saldos con el balance de comprobación de cierre de su sistema anterior antes de comenzar.",
+      "loadFailed": "No se pudo cargar el asiento de apertura",
+      "tieOutFailed": "No se pudo cargar el balance de comprobación de apertura"
+    },
+    "approvals": {
+      "title": "Aprobación de asientos",
+      "subtitle": "Los asientos manuales que superan el umbral esperan aquí a un segundo contralor",
+      "entry": "Asiento {{number}}",
+      "approve": "Aprobar y registrar",
+      "reject": "Rechazar",
+      "approved": "Asiento {{number}} aprobado y registrado",
+      "rejected": "Asiento {{number}} devuelto a borrador",
+      "empty": "No hay asientos pendientes de aprobación",
+      "loadFailed": "No se pudieron cargar los asientos pendientes de aprobación",
+      "rejectTitle": "Rechazar asiento {{number}}",
+      "rejectNote": "El asiento vuelve a borrador; nada llega al libro mayor. El motivo se agrega a su nota.",
+      "rejectReason": "Motivo (opcional)",
+      "noLines": "Este asiento no tiene líneas"
+    },
+    "jobCostClose": {
+      "title": "Costo de producción por orden",
+      "hint": "Cierre cada orden después de su última recepción de producción: la mano de obra y los gastos generales se absorben en el WIP y el resto va a la variación de producción.",
+      "job": "Orden",
+      "jobTitle": "Título",
+      "completed": "Completada",
+      "wip": "Saldo de WIP",
+      "close": "Cerrar costo",
+      "closed": "{{job}} cerrada; variación de producción {{variance}}",
+      "empty": "Ninguna orden tiene saldo de WIP abierto",
+      "loadFailed": "No se pudieron cargar las órdenes con WIP abierto"
     }
   },
   "subcontractUi": {

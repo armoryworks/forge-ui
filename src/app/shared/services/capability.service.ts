@@ -1,9 +1,10 @@
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { Observable, catchError, finalize, map, of, share, tap, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+import { SILENT_HTTP_ERRORS } from '../interceptors/silent-http-errors.token';
 import { CapabilityAuditEntry } from '../models/capability-audit-entry.model';
 import { CapabilityDescriptor, CapabilityDescriptorEntry } from '../models/capability-descriptor.model';
 import { CapabilityRelations } from '../models/capability-relations.model';
@@ -189,7 +190,8 @@ export class CapabilityService {
   /**
    * Phase 4 Phase-C — Toggle a single capability with optimistic concurrency.
    * The current ETag (if known) is automatically attached as `If-Match`.
-   * Errors (412 / 409) bubble up so the caller can render the envelope.
+   * Errors (412 / 409) bubble up so the caller can render the envelope; the global error toast is
+   * suppressed, since its generic text would contradict the caller's specific message.
    */
   setEnabled(code: string, enabled: boolean, reason?: string): Observable<CapabilityDescriptorEntry> {
     const ifMatch = this.getETag(code);
@@ -198,7 +200,7 @@ export class CapabilityService {
       .put<CapabilityDescriptorEntry>(
         `${environment.apiUrl}/capabilities/${encodeURIComponent(code)}/enabled`,
         { enabled, reason: reason ?? null },
-        { headers },
+        { headers, context: new HttpContext().set(SILENT_HTTP_ERRORS, true) },
       )
       .pipe(
         tap((updated) => this._patchEntry(updated)),

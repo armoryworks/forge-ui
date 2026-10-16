@@ -70,6 +70,11 @@ export class InvoiceService {
     return this.http.post<void>(`${this.base}/${id}/send`, {});
   }
 
+  /** The customer-facing invoice PDF (same document the send action produces). */
+  getInvoicePdf(id: number): Observable<Blob> {
+    return this.http.get(`${this.base}/${id}/pdf`, { responseType: 'blob' });
+  }
+
   voidInvoice(id: number): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/void`, {});
   }

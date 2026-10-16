@@ -1,0 +1,36 @@
+@if (canRoll) {
+  <div class="cost-roll" [appLoadingBlock]="rolling()">
+    <div class="cost-roll__head">
+      <div class="cost-roll__title">{{ 'parts.standardCost.title' | translate }}</div>
+      <button class="action-btn action-btn--sm" type="button"
+        [disabled]="rolling()"
+        data-testid="part-recalc-standard-cost"
+        (click)="recalculate()">
+        <span class="material-icons-outlined" aria-hidden="true">calculate</span>
+        {{ 'parts.standardCost.recalculate' | translate }}
+      </button>
+    </div>
+    <p class="cost-roll__hint">{{ 'parts.standardCost.hint' | translate }}</p>
+
+    @if (result(); as r) {
+      <div class="cost-roll__breakdown" data-testid="part-standard-cost-result">
+        <div class="cost-roll__row">
+          <span class="cost-roll__label">{{ 'parts.standardCost.material' | translate }}</span>
+          <span class="cost-roll__value"><app-currency-display [value]="r.material" /></span>
+        </div>
+        <div class="cost-roll__row">
+          <span class="cost-roll__label">{{ 'parts.standardCost.labor' | translate }}</span>
+          <span class="cost-roll__value"><app-currency-display [value]="r.labor" /></span>
+        </div>
+        <div class="cost-roll__row">
+          <span class="cost-roll__label">{{ 'parts.standardCost.overhead' | translate }}</span>
+          <span class="cost-roll__value"><app-currency-display [value]="r.overhead" /></span>
+        </div>
+        <div class="cost-roll__row cost-roll__row--total">
+          <span class="cost-roll__label">{{ 'parts.standardCost.total' | translate }}</span>
+          <span class="cost-roll__value"><app-currency-display [value]="r.total" /></span>
+        </div>
+      </div>
+    }
+  </div>
+}

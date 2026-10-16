@@ -91,6 +91,12 @@
       "isDefaultOn": true
     },
     {
+      "code": "CAP-MD-GS1",
+      "area": "MD",
+      "name": "GS1 GTIN barcodes",
+      "isDefaultOn": false
+    },
+    {
       "code": "CAP-MD-BOM",
       "area": "MD",
       "name": "Bill of materials",
@@ -265,6 +271,12 @@
       "isDefaultOn": true
     },
     {
+      "code": "CAP-O2C-SO-ACCEPTANCE",
+      "area": "O2C",
+      "name": "SO acceptance gate",
+      "isDefaultOn": false
+    },
+    {
       "code": "CAP-O2C-RECURRING",
       "area": "O2C",
       "name": "Recurring / subscription orders",
@@ -316,6 +328,24 @@
       "code": "CAP-O2C-DELIVERABLE",
       "area": "O2C",
       "name": "Deliverable / artifact tracking",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-O2C-CHANNELS",
+      "area": "O2C",
+      "name": "Sales channels",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-O2C-RETAIL",
+      "area": "O2C",
+      "name": "Retail / consumer orders",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-O2C-SETTLEMENT",
+      "area": "O2C",
+      "name": "Channel settlement reconciliation",
       "isDefaultOn": false
     },
     {
@@ -595,6 +625,12 @@
       "isDefaultOn": false
     },
     {
+      "code": "CAP-ACCT-GL-VIEW",
+      "area": "ACCT",
+      "name": "General-ledger read-only view",
+      "isDefaultOn": false
+    },
+    {
       "code": "CAP-ACCT-EXPENSES",
       "area": "ACCT",
       "name": "Expense entry",
@@ -679,15 +715,15 @@
       "isDefaultOn": false
     },
     {
-      "code": "CAP-HR-TRAINING",
-      "area": "HR",
-      "name": "Training \u002B certification tracking",
-      "isDefaultOn": false
-    },
-    {
       "code": "CAP-HR-REVIEW",
       "area": "HR",
       "name": "Performance reviews",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-HR-PIECE-RATES",
+      "area": "HR",
+      "name": "Piece rates \u002B minimum-wage compliance",
       "isDefaultOn": false
     },
     {
@@ -799,6 +835,18 @@
       "isDefaultOn": true
     },
     {
+      "code": "CAP-CROSS-SEQUENCES",
+      "area": "CROSS",
+      "name": "Gated sequence engine",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-ADMIN-I18N",
+      "area": "CROSS",
+      "name": "UI label customization (i18n overrides)",
+      "isDefaultOn": true
+    },
+    {
       "code": "CAP-EXT-KANBAN",
       "area": "EXT",
       "name": "Kanban-style job board",
@@ -877,6 +925,12 @@
       "isDefaultOn": false
     },
     {
+      "code": "CAP-EXT-WATCHTOWER",
+      "area": "EXT",
+      "name": "Regulatory Watchtower \u2014 horizon scanning",
+      "isDefaultOn": false
+    },
+    {
       "code": "CAP-EXT-CLOUD-STORAGE",
       "area": "EXT",
       "name": "Cloud storage integration (umbrella)",
@@ -898,6 +952,12 @@
       "code": "CAP-EXT-CLOUD-STORAGE-DROPBOX",
       "area": "EXT",
       "name": "Dropbox provider",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-EXT-ECOMMERCE",
+      "area": "EXT",
+      "name": "Storefront \u002B marketplace connectors",
       "isDefaultOn": false
     },
     {
@@ -941,6 +1001,42 @@
       "area": "PS",
       "name": "Utilization dashboard widgets",
       "isDefaultOn": false
+    },
+    {
+      "code": "CAP-MOBILE-CORE",
+      "area": "MOBILE",
+      "name": "Mobile app device enrollment",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-MOBILE-SCAN",
+      "area": "MOBILE",
+      "name": "Mobile app: Scan",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-MOBILE-CLOCK",
+      "area": "MOBILE",
+      "name": "Mobile app: Clock",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-MOBILE-JOBS",
+      "area": "MOBILE",
+      "name": "Mobile app: Job Status",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-MOBILE-STOCK",
+      "area": "MOBILE",
+      "name": "Mobile app: Move Stock",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-MOBILE-LOOKUP",
+      "area": "MOBILE",
+      "name": "Mobile app: Lookup",
+      "isDefaultOn": false
     }
   ],
   "foundations": [
@@ -959,7 +1055,6 @@
     "CAP-CROSS-NOTIFICATIONS",
     "CAP-CROSS-INTEG-FILE",
     "CAP-CROSS-CONCURRENCY",
-    "CAP-MD-PARTS",
     "CAP-MD-UOM",
     "CAP-MD-LOCATIONS",
     "CAP-MD-CURRENCIES",
@@ -969,6 +1064,7 @@
   ],
   "modules": {
     "inventory": [
+      "CAP-ADMIN-I18N",
       "CAP-CROSS-ACTIVITY-LOG",
       "CAP-CROSS-ATTACHMENTS",
       "CAP-CROSS-BULK-OPS",
@@ -988,6 +1084,8 @@
       "CAP-INV-ADJUST",
       "CAP-INV-CORE",
       "CAP-INV-CYCLECOUNT",
+      "CAP-MAINT-ASSETLIFECYCLE",
+      "CAP-MD-ASSETS",
       "CAP-MD-CURRENCIES",
       "CAP-MD-LOCATIONS",
       "CAP-MD-PARTS",
@@ -997,6 +1095,7 @@
       "CAP-RPT-INVVAL"
     ],
     "purchasing": [
+      "CAP-ADMIN-I18N",
       "CAP-CROSS-ACTIVITY-LOG",
       "CAP-CROSS-ATTACHMENTS",
       "CAP-CROSS-BULK-OPS",
@@ -1013,9 +1112,10 @@
       "CAP-IDEN-ROLES",
       "CAP-IDEN-TENANT-CONFIG",
       "CAP-IDEN-USERS",
+      "CAP-MAINT-ASSETLIFECYCLE",
+      "CAP-MD-ASSETS",
       "CAP-MD-CURRENCIES",
       "CAP-MD-LOCATIONS",
-      "CAP-MD-PARTS",
       "CAP-MD-TAXCODES",
       "CAP-MD-UOM",
       "CAP-MD-VENDORS",
@@ -1026,6 +1126,7 @@
       "CAP-RPT-DASHBOARDS"
     ],
     "sales": [
+      "CAP-ADMIN-I18N",
       "CAP-CROSS-ACTIVITY-LOG",
       "CAP-CROSS-ATTACHMENTS",
       "CAP-CROSS-BULK-OPS",
@@ -1042,19 +1143,24 @@
       "CAP-IDEN-ROLES",
       "CAP-IDEN-TENANT-CONFIG",
       "CAP-IDEN-USERS",
+      "CAP-MAINT-ASSETLIFECYCLE",
+      "CAP-MD-ASSETS",
       "CAP-MD-CURRENCIES",
       "CAP-MD-CUSTOMER-ADDRESSES",
       "CAP-MD-CUSTOMER-CONTACTS",
       "CAP-MD-CUSTOMERS",
       "CAP-MD-LOCATIONS",
-      "CAP-MD-PARTS",
       "CAP-MD-TAXCODES",
       "CAP-MD-UOM",
+      "CAP-O2C-CHANNELS",
+      "CAP-O2C-CREDIT-LIMITS",
+      "CAP-O2C-LEAD",
       "CAP-O2C-QUOTE",
       "CAP-O2C-SO",
       "CAP-RPT-DASHBOARDS"
     ],
     "production": [
+      "CAP-ADMIN-I18N",
       "CAP-CROSS-ACTIVITY-LOG",
       "CAP-CROSS-ATTACHMENTS",
       "CAP-CROSS-BULK-OPS",
@@ -1073,6 +1179,8 @@
       "CAP-IDEN-TENANT-CONFIG",
       "CAP-IDEN-USERS",
       "CAP-INV-CORE",
+      "CAP-MAINT-ASSETLIFECYCLE",
+      "CAP-MD-ASSETS",
       "CAP-MD-BOM",
       "CAP-MD-CALENDARS",
       "CAP-MD-CURRENCIES",
@@ -1092,6 +1200,7 @@
       "CAP-RPT-DASHBOARDS"
     ],
     "shipping": [
+      "CAP-ADMIN-I18N",
       "CAP-CROSS-ACTIVITY-LOG",
       "CAP-CROSS-ATTACHMENTS",
       "CAP-CROSS-BULK-OPS",
@@ -1109,12 +1218,15 @@
       "CAP-IDEN-TENANT-CONFIG",
       "CAP-IDEN-USERS",
       "CAP-INV-CORE",
+      "CAP-MAINT-ASSETLIFECYCLE",
+      "CAP-MD-ASSETS",
       "CAP-MD-CURRENCIES",
       "CAP-MD-CUSTOMERS",
       "CAP-MD-LOCATIONS",
       "CAP-MD-PARTS",
       "CAP-MD-TAXCODES",
       "CAP-MD-UOM",
+      "CAP-O2C-CHANNELS",
       "CAP-O2C-PICKPACK",
       "CAP-O2C-SHIP",
       "CAP-O2C-SO",
@@ -1123,6 +1235,7 @@
     "invoicing": [
       "CAP-ACCT-BUILTIN",
       "CAP-ACCT-EXPENSES",
+      "CAP-ADMIN-I18N",
       "CAP-CROSS-ACTIVITY-LOG",
       "CAP-CROSS-ATTACHMENTS",
       "CAP-CROSS-BULK-OPS",
@@ -1139,10 +1252,11 @@
       "CAP-IDEN-ROLES",
       "CAP-IDEN-TENANT-CONFIG",
       "CAP-IDEN-USERS",
+      "CAP-MAINT-ASSETLIFECYCLE",
+      "CAP-MD-ASSETS",
       "CAP-MD-CURRENCIES",
       "CAP-MD-EMPLOYEES",
       "CAP-MD-LOCATIONS",
-      "CAP-MD-PARTS",
       "CAP-MD-TAXCODES",
       "CAP-MD-UOM",
       "CAP-O2C-CASH",
@@ -1150,6 +1264,7 @@
       "CAP-RPT-DASHBOARDS"
     ],
     "quality": [
+      "CAP-ADMIN-I18N",
       "CAP-CROSS-ACTIVITY-LOG",
       "CAP-CROSS-ATTACHMENTS",
       "CAP-CROSS-BULK-OPS",
@@ -1166,6 +1281,8 @@
       "CAP-IDEN-ROLES",
       "CAP-IDEN-TENANT-CONFIG",
       "CAP-IDEN-USERS",
+      "CAP-MAINT-ASSETLIFECYCLE",
+      "CAP-MD-ASSETS",
       "CAP-MD-CURRENCIES",
       "CAP-MD-LOCATIONS",
       "CAP-MD-PARTS",
@@ -1176,6 +1293,7 @@
       "CAP-RPT-DASHBOARDS"
     ],
     "planning": [
+      "CAP-ADMIN-I18N",
       "CAP-CROSS-ACTIVITY-LOG",
       "CAP-CROSS-ATTACHMENTS",
       "CAP-CROSS-BULK-OPS",
@@ -1193,6 +1311,8 @@
       "CAP-IDEN-TENANT-CONFIG",
       "CAP-IDEN-USERS",
       "CAP-INV-CORE",
+      "CAP-MAINT-ASSETLIFECYCLE",
+      "CAP-MD-ASSETS",
       "CAP-MD-BOM",
       "CAP-MD-CALENDARS",
       "CAP-MD-CURRENCIES",
@@ -1212,6 +1332,7 @@
       "CAP-RPT-MRPEX"
     ],
     "people": [
+      "CAP-ADMIN-I18N",
       "CAP-CROSS-ACTIVITY-LOG",
       "CAP-CROSS-ATTACHMENTS",
       "CAP-CROSS-BULK-OPS",
@@ -1225,17 +1346,17 @@
       "CAP-HR-HIRE",
       "CAP-HR-TERMINATION",
       "CAP-HR-TIMETRACK",
-      "CAP-HR-TRAINING",
       "CAP-IDEN-AUDIT-SYSTEM-LOG",
       "CAP-IDEN-AUTH-PASSWORD",
       "CAP-IDEN-CAPABILITY-ADMIN",
       "CAP-IDEN-ROLES",
       "CAP-IDEN-TENANT-CONFIG",
       "CAP-IDEN-USERS",
+      "CAP-MAINT-ASSETLIFECYCLE",
+      "CAP-MD-ASSETS",
       "CAP-MD-CURRENCIES",
       "CAP-MD-EMPLOYEES",
       "CAP-MD-LOCATIONS",
-      "CAP-MD-PARTS",
       "CAP-MD-TAXCODES",
       "CAP-MD-UOM",
       "CAP-RPT-DASHBOARDS"

@@ -1,0 +1,57 @@
+@use 'styles/variables' as *;
+@use 'app/features/accounting/accounting-shared' as *;
+
+.jea {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  max-width: 960px;
+  min-height: 120px;
+
+  &__entry {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+    padding: $sp-md;
+    border: $border-width-thin solid var(--border);
+    border-left: $border-width-accent solid var(--warning);
+    background: var(--surface);
+  }
+
+  &__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: $sp-md;
+    font-size: $font-size-sm;
+  }
+
+  &__number {
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  &__date {
+    color: var(--text-secondary);
+    font-family: $font-family-mono;
+  }
+
+  &__memo {
+    flex: 1;
+    min-width: 0;
+    color: var(--text);
+    overflow-wrap: anywhere;
+  }
+
+  &__total {
+    font-family: $font-family-mono;
+    font-weight: 700;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $sp-sm;
+  }
+}

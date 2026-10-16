@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { CapDirective } from '../../shared/directives/cap.directive';
+import { CapabilityService } from '../../shared/services/capability.service';
 import { FinancialRatiosStripComponent } from './components/financial-ratios-strip/financial-ratios-strip.component';
 
 interface AccountingTile {
@@ -12,6 +13,7 @@ interface AccountingTile {
   label: string;
   icon: string;
   description: string;
+  capability?: string;
 }
 
 /**
@@ -28,10 +30,13 @@ interface AccountingTile {
 })
 export class AccountingComponent {
   private readonly translate = inject(TranslateService);
+  private readonly capabilities = inject(CapabilityService);
 
   protected readonly tiles: AccountingTile[] = [
     { route: 'ledger', label: this.translate.instant('accounting.dashboard.ledger'), icon: 'receipt_long', description: this.translate.instant('accounting.dashboard.ledgerDesc') },
+    { route: '/accounting/opening-journal', label: this.translate.instant('accounting.dashboard.openingJournal'), icon: 'input', description: this.translate.instant('accounting.dashboard.openingJournalDesc'), capability: 'CAP-ACCT-MIGRATION' },
     { route: 'journal-entries/new', label: this.translate.instant('accounting.dashboard.newEntry'), icon: 'note_add', description: this.translate.instant('accounting.dashboard.newEntryDesc') },
+    { route: 'journal-approvals', label: this.translate.instant('accounting.dashboard.journalApprovals'), icon: 'fact_check', description: this.translate.instant('accounting.dashboard.journalApprovalsDesc'), capability: 'CAP-ACCT-FULLGL' },
     { route: 'training', label: this.translate.instant('accounting.dashboard.training'), icon: 'school', description: this.translate.instant('accounting.dashboard.trainingDesc') },
     { route: 'trial-balance', label: this.translate.instant('accounting.dashboard.trialBalance'), icon: 'balance', description: this.translate.instant('accounting.dashboard.trialBalanceDesc') },
     { route: 'profit-loss', label: this.translate.instant('accounting.dashboard.profitLoss'), icon: 'trending_up', description: this.translate.instant('accounting.dashboard.profitLossDesc') },
@@ -48,4 +53,9 @@ export class AccountingComponent {
     { route: 'bank-statements', label: this.translate.instant('accounting.dashboard.bankStatements'), icon: 'upload_file', description: this.translate.instant('accounting.dashboard.bankStatementsDesc') },
     { route: 'exports', label: this.translate.instant('accounting.dashboard.exports'), icon: 'download', description: this.translate.instant('accounting.dashboard.exportsDesc') },
   ];
+
+  protected readonly visibleTiles = computed(() => {
+    this.capabilities.capabilities();
+    return this.tiles.filter((t) => !t.capability || this.capabilities.isEnabled(t.capability));
+  });
 }

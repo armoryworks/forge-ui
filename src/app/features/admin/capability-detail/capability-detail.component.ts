@@ -12,7 +12,7 @@ import {
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSlideToggle, MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -30,6 +30,7 @@ import { PageLayoutComponent } from '../../../shared/components/page-layout/page
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { CAPABILITY_RELATED_SETTINGS } from '../models/capability-related-settings.const';
 import { NUMBERING_SETTING_LABELS } from '../models/numbering-setting-labels.const';
+import { GlOpeningCalloutComponent } from '../components/gl-opening-callout/gl-opening-callout.component';
 
 interface CapabilityViolation {
   code: string;
@@ -65,6 +66,7 @@ interface CapabilityViolation {
     PageLayoutComponent,
     LoadingBlockDirective,
     TranslatePipe,
+    GlOpeningCalloutComponent,
   ],
   templateUrl: './capability-detail.component.html',
   styleUrl: './capability-detail.component.scss',
@@ -105,6 +107,8 @@ export class CapabilityDetailComponent implements OnInit {
   protected readonly relationsLoading = signal(false);
   protected readonly auditLoading = signal(false);
   protected readonly togglePending = signal(false);
+  /** Server refusal text while full GL waits on an opening journal; null hides the cutover callout. */
+  protected readonly glOpeningReason = signal<string | null>(null);
 
   constructor() {
     // React to code changes (deep-link navigation, internal cross-links).
@@ -139,20 +143,26 @@ export class CapabilityDetailComponent implements OnInit {
     this.loadAuditLog(code);
   }
 
-  protected onToggle(target: boolean): void {
+  protected onToggle(target: boolean, toggle?: MatSlideToggle): void {
     const entry = this.entry();
-    if (!entry || this.togglePending()) return;
+    if (!entry || this.togglePending()) {
+      if (entry && toggle) toggle.checked = entry.enabled;
+      return;
+    }
     this.togglePending.set(true);
     this.capabilityService.setEnabled(entry.code, target).subscribe({
       next: () => {
         this.snackbar.success(`Capability ${target ? 'enabled' : 'disabled'}: ${entry.name}`);
         this.togglePending.set(false);
+        this.glOpeningReason.set(null);
+        this.capabilityService.load().subscribe();
         // Refresh relations + audit so the UI reflects new state.
         this.loadRelations(entry.code);
         this.loadAuditLog(entry.code);
       },
       error: (err: HttpErrorResponse) => {
         this.togglePending.set(false);
+        if (toggle) toggle.checked = entry.enabled;
         this.surfaceError(entry, err);
         this.capabilityService.load().subscribe();
       },
@@ -237,6 +247,9 @@ export class CapabilityDetailComponent implements OnInit {
         this.snackbar.error(
           `${entry.name} conflicts with: ${(violation.conflicts ?? []).join(', ')}. Disable the peer first.`,
         );
+        break;
+      case 'capability-gl-opening-balances':
+        this.glOpeningReason.set(violation.message ?? '');
         break;
       default:
         this.snackbar.error(violation.message ?? `Failed to update ${entry.name}.`);

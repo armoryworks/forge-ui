@@ -1,0 +1,26 @@
+<app-dialog
+  [title]="'accounting.approvals.rejectTitle' | translate: { number: data.entryNumber }"
+  width="480px"
+  (closed)="close()">
+  <div>
+    <p>{{ 'accounting.approvals.rejectNote' | translate }}</p>
+    <app-input
+      [label]="'accounting.approvals.rejectReason' | translate"
+      [formControl]="reason"
+      [maxlength]="500"
+      data-testid="je-reject-reason" />
+  </div>
+
+  <div dialog-footer>
+    <button type="button" class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <button
+      type="button"
+      class="action-btn action-btn--destructive"
+      [disabled]="reason.invalid"
+      (click)="confirm()"
+      data-testid="je-reject-confirm">
+      <span class="material-icons-outlined" aria-hidden="true">undo</span>
+      {{ 'accounting.approvals.reject' | translate }}
+    </button>
+  </div>
+</app-dialog>

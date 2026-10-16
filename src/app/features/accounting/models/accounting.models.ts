@@ -465,6 +465,18 @@ export interface ManualJournalEntryResult {
   entryDate: string;
   status: string;
   memo: string | null;
+  postedBy?: number | null;
+  lines?: ManualJournalLineResult[];
+}
+
+export interface ManualJournalLineResult {
+  id: number;
+  lineNumber: number;
+  glAccountId: number;
+  debit: number;
+  credit: number;
+  functionalAmount: number;
+  description: string | null;
 }
 
 // ── Anomaly scan (§5A advisory) ──

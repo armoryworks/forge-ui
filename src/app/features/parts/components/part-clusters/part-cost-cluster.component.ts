@@ -7,6 +7,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { PartDetail } from '../../models/part-detail.model';
 import { PartLandedCostComponent } from './part-landed-cost.component';
+import { PartStandardCostRollComponent } from './part-standard-cost-roll.component';
 
 /**
  * Pillar 4 — Cost cluster.
@@ -22,7 +23,7 @@ import { PartLandedCostComponent } from './part-landed-cost.component';
   imports: [
     ReactiveFormsModule, TranslatePipe,
     CurrencyInputComponent, ValidationButtonComponent,
-    PartLandedCostComponent,
+    PartLandedCostComponent, PartStandardCostRollComponent,
   ],
   templateUrl: './part-cost-cluster.component.html',
   styleUrl: './part-clusters.shared.scss',
@@ -36,6 +37,7 @@ export class PartCostClusterComponent {
   readonly save = output<Partial<PartDetail>>();
   readonly saveAndClose = output<Partial<PartDetail>>();
   readonly cancelled = output<void>();
+  readonly standardCostRolled = output<void>();
 
   protected readonly form = new FormGroup({
     manualCostOverride: new FormControl<number | null>(null),

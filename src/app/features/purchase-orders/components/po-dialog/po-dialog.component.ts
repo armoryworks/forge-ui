@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, output, signal, Signal, ViewChild } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -217,7 +217,11 @@ export class PoDialogComponent {
     incoterm: new FormControl<string>('FOB_Origin', { nonNullable: true }),
     estimatedFreight: new FormControl<number | null>(null, [Validators.min(0)]),
     quoteCurrency: new FormControl<string>('USD', { nonNullable: true }),
+    isBlanket: new FormControl<boolean>(false, { nonNullable: true }),
+    blanketExpirationDate: new FormControl<Date | null>(null),
   });
+
+  protected readonly isBlanket = toSignal(this.form.controls.isBlanket.valueChanges, { initialValue: false });
 
   private readonly formViolations = FormValidationService.getViolations(this.form, {
     vendorId: 'Vendor',
@@ -721,6 +725,8 @@ export class PoDialogComponent {
       estimatedFreight: f.estimatedFreight ?? undefined,
       quoteCurrency: controls.quoteCurrency.dirty ? f.quoteCurrency : undefined,
       expectedDeliveryDate: toIsoDate(f.expectedDeliveryDate) ?? undefined,
+      isBlanket: f.isBlanket || undefined,
+      blanketExpirationDate: f.isBlanket ? (toIsoDate(f.blanketExpirationDate) ?? undefined) : undefined,
     }).subscribe({
       next: () => {
         this.saving.set(false);
