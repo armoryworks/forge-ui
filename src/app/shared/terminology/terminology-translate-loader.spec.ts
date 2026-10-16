@@ -5,6 +5,7 @@ import { provideTranslateLoader, provideTranslateService, TranslateService } fro
 import { TRANSLATE_HTTP_LOADER_CONFIG } from '@ngx-translate/http-loader';
 
 import { environment } from '../../../environments/environment';
+import { CapabilityService } from '../services/capability.service';
 import { I18nOverridesService } from '../services/i18n-overrides.service';
 import { TerminologyService } from '../services/terminology.service';
 import { TerminologyTranslateLoader } from './terminology-translate-loader';
@@ -39,6 +40,7 @@ describe('TerminologyTranslateLoader + TerminologyService', () => {
         provideHttpClientTesting(),
         provideTranslateService({ loader: provideTranslateLoader(TerminologyTranslateLoader) }),
         { provide: TRANSLATE_HTTP_LOADER_CONFIG, useValue: { prefix: '/assets/i18n/', suffix: '.json' } },
+        { provide: CapabilityService, useValue: { isEnabled: (code: string) => code === 'CAP-ADMIN-I18N' } },
       ],
     });
     translate = TestBed.inject(TranslateService);
@@ -98,6 +100,7 @@ describe('TerminologyTranslateLoader + TerminologyService', () => {
         provideHttpClientTesting(),
         provideTranslateService({ loader: provideTranslateLoader(TerminologyTranslateLoader) }),
         { provide: TRANSLATE_HTTP_LOADER_CONFIG, useValue: { prefix: '/assets/i18n/', suffix: '.json' } },
+        { provide: CapabilityService, useValue: { isEnabled: (code: string) => code === 'CAP-ADMIN-I18N' } },
       ],
     });
     translate = TestBed.inject(TranslateService);
