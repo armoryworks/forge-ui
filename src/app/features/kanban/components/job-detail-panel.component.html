@@ -359,12 +359,14 @@
       </div>
 
       <!-- Cost Summary -->
-      <div class="jd-section">
-        <div class="jd-section__header">
-          <h3 class="jd-section__title">Cost Analysis</h3>
+      @if (canViewCost()) {
+        <div class="jd-section">
+          <div class="jd-section__header">
+            <h3 class="jd-section__title">Cost Analysis</h3>
+          </div>
+          <app-job-cost-tab [jobId]="j.id" />
         </div>
-        <app-job-cost-tab [jobId]="j.id" />
-      </div>
+      }
 
       <!-- Operation Time Analysis -->
       <div class="jd-section">

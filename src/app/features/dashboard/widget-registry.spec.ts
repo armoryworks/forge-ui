@@ -12,4 +12,11 @@ describe('WIDGET_REGISTRY', () => {
     expect(widget?.titleKey).toBe('dashboard.jobsByStage');
     expect(widget?.title).toBeUndefined();
   });
+
+  it('keeps the margin widget from the roles the margin endpoint refuses', () => {
+    const widget = WIDGET_REGISTRY.find(w => w.id === 'margin-summary');
+    expect(widget?.roles).toEqual(['Admin', 'Manager', 'Controller', 'OfficeManager', 'PM']);
+    expect(widget?.roles).not.toContain('ProductionWorker');
+    expect(widget?.roles).not.toContain('Engineer');
+  });
 });

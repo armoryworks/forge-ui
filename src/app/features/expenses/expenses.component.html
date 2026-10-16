@@ -89,9 +89,11 @@
 
       <!-- Vendor-settled: naming a vendor routes the expense to Accounts Payable — on approval it is
            promoted into a vendor bill and paid through Payables. Empty = out-of-pocket (cash). -->
-      <app-select data-testid="expense-vendor" [label]="'expenses.vendor' | translate" formControlName="vendorId" [options]="vendorOptions()" />
-      @if (expenseForm.controls.vendorId.value) {
-        <div class="vendor-hint">{{ 'expenses.vendorHint' | translate }}</div>
+      @if (canSettleWithVendor) {
+        <app-select data-testid="expense-vendor" [label]="'expenses.vendor' | translate" formControlName="vendorId" [options]="vendorOptions()" />
+        @if (expenseForm.controls.vendorId.value) {
+          <div class="vendor-hint">{{ 'expenses.vendorHint' | translate }}</div>
+        }
       }
 
       <app-textarea data-testid="expense-description" [label]="'common.description' | translate" formControlName="description" />

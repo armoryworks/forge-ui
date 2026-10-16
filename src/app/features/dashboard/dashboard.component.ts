@@ -46,6 +46,7 @@ import { IdleService } from '../../shared/services/idle.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 import { CapabilityService } from '../../shared/services/capability.service';
+import { AuthService } from '../../shared/services/auth.service';
 import { AMBIENT_IDLE_PREF_KEY, DEFAULT_AMBIENT_IDLE_MS } from '../../shared/models/ambient-idle.model';
 
 import type { GridStack, GridStackNode } from 'gridstack';
@@ -88,6 +89,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly ngZone = inject(NgZone);
   private readonly translate = inject(TranslateService);
   private readonly capabilities = inject(CapabilityService);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -117,7 +119,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // snapshot signal keeps these computeds reactive to module changes (the demo
   // module switcher, or a real capability toggle).
   private widgetAllowed(w: DashboardWidgetConfig): boolean {
-    return !w.capability || this.capabilities.isEnabled(w.capability);
+    return (!w.capability || this.capabilities.isEnabled(w.capability))
+      && (!w.roles || this.auth.hasAnyRole(w.roles));
   }
 
   // Job KPIs (active/overdue jobs, hours) only make sense with the jobs module.

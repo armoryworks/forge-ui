@@ -34,6 +34,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { EntityLinkComponent } from '../../shared/components/entity-link/entity-link.component';
 import { VendorService } from '../vendors/services/vendor.service';
+import { AuthService } from '../../shared/services/auth.service';
 
 @Component({
   selector: 'app-expenses',
@@ -56,6 +57,7 @@ export class ExpensesComponent implements OnInit {
   private readonly approvalsService = inject(ApprovalsService);
   private readonly refDataService = inject(ReferenceDataService);
   private readonly vendorService = inject(VendorService);
+  private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
@@ -135,18 +137,22 @@ export class ExpensesComponent implements OnInit {
 
   protected readonly categoryOptions = signal<SelectOption[]>([]);
 
+  protected readonly canSettleWithVendor = this.auth.hasAnyRole(['Admin', 'Manager', 'OfficeManager']);
+
   protected readonly vendorOptions = signal<SelectOption[]>([
     { value: null, label: this.translate.instant('expenses.noVendor') },
   ]);
 
   constructor() {
     this.refDataService.getAsOptions('expense_category', { valueField: 'label' }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(opts => this.categoryOptions.set(opts));
-    this.vendorService.getVendorDropdown().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (vendors) => this.vendorOptions.set([
-        { value: null, label: this.translate.instant('expenses.noVendor') },
-        ...vendors.map(v => ({ value: v.id, label: v.companyName })),
-      ]),
-    });
+    if (this.canSettleWithVendor) {
+      this.vendorService.getVendorDropdown().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: (vendors) => this.vendorOptions.set([
+          { value: null, label: this.translate.instant('expenses.noVendor') },
+          ...vendors.map(v => ({ value: v.id, label: v.companyName })),
+        ]),
+      });
+    }
     this.expensesService.getSettings().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (s) => this.settings.set(s),
       error: () => this.settings.set(null),

@@ -12,7 +12,7 @@ import { StatusTrackingService } from '../../services/status-tracking.service';
 import { StatusEntry } from '../../models/status-entry.model';
 import { ActiveStatus } from '../../models/active-status.model';
 import { SelectOption } from '../select/select.component';
-import { AdminService } from '../../../features/admin/services/admin.service';
+import { ReferenceDataItem, ReferenceDataService } from '../../services/reference-data.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../confirm-dialog/confirm-dialog.component';
 import { SetStatusDialogComponent, SetStatusDialogData } from '../set-status-dialog/set-status-dialog.component';
 import { AddHoldDialogComponent, AddHoldDialogData } from '../add-hold-dialog/add-hold-dialog.component';
@@ -27,7 +27,7 @@ import { AddHoldDialogComponent, AddHoldDialogData } from '../add-hold-dialog/ad
 })
 export class StatusTimelineComponent {
   private readonly statusTrackingService = inject(StatusTrackingService);
-  private readonly adminService = inject(AdminService);
+  private readonly referenceData = inject(ReferenceDataService);
   private readonly matDialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -73,25 +73,19 @@ export class StatusTimelineComponent {
     const workflowGroup = `${entityType.toLowerCase()}_workflow_status`;
     const holdGroup = `${entityType.toLowerCase()}_hold_type`;
 
-    this.adminService.getReferenceData().subscribe(groups => {
-      const workflowEntries = groups.find(g => g.groupCode === workflowGroup);
-      if (workflowEntries) {
-        this.workflowOptions.set(
-          workflowEntries.values
-            .filter(v => v.isActive)
-            .map(v => ({ value: v.code, label: v.label })),
-        );
-      }
-
-      const holdEntries = groups.find(g => g.groupCode === holdGroup);
-      if (holdEntries) {
-        this.holdOptions.set(
-          holdEntries.values
-            .filter(v => v.isActive)
-            .map(v => ({ value: v.code, label: v.label })),
-        );
-      }
+    forkJoin({
+      workflow: this.referenceData.getByGroup(workflowGroup),
+      hold: this.referenceData.getByGroup(holdGroup),
+    }).subscribe(({ workflow, hold }) => {
+      this.workflowOptions.set(this.toOptions(workflow));
+      this.holdOptions.set(this.toOptions(hold));
     });
+  }
+
+  private toOptions(items: ReferenceDataItem[]): SelectOption[] {
+    return items
+      .filter(v => v.isActive)
+      .map(v => ({ value: v.code, label: v.label }));
   }
 
   protected openSetStatus(): void {
