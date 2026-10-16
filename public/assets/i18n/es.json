@@ -82,7 +82,8 @@
     "bankStatements": "Extractos Bancarios",
     "exports": "Exportar a QBO",
     "chartOfAccounts": "Plan de Cuentas",
-    "pieceRates": "Tarifas por pieza"
+    "pieceRates": "Tarifas por pieza",
+    "openingJournal": "Asiento de apertura"
   },
   "navGroups": {
     "operations": "Operaciones",
@@ -9791,7 +9792,9 @@
       "exports": "Exportaciones para el contador",
       "exportsDesc": "Descargas CSV para el contador — y el envío unidireccional a QuickBooks cuando está habilitado.",
       "bankStatements": "Estados de cuenta bancarios",
-      "bankStatementsDesc": "Importe estados OFX/CSV y concílielos con el libro mayor"
+      "bankStatementsDesc": "Importe estados OFX/CSV y concílielos con el libro mayor",
+      "openingJournal": "Asiento de apertura",
+      "openingJournalDesc": "Registre los saldos de apertura que activan el libro mayor completo"
     },
     "exports": {
       "title": "Exportaciones para el contador",
@@ -10078,6 +10081,31 @@
       "active": "Activa",
       "description": "Descripción",
       "lockedNote": "Esta cuenta tiene asientos — su número, tipo y saldo normal están bloqueados. Cree una cuenta nueva para cambios estructurales."
+    },
+    "openingJournal": {
+      "title": "Asiento de apertura",
+      "subtitle": "Traslade al libro mayor los saldos de apertura de su sistema anterior",
+      "book": "Libro: {{name}}",
+      "intro": "Ingrese el balance de comprobación de cierre de su sistema anterior a la fecha de corte, una línea por cuenta. Los débitos deben igualar a los créditos. El asiento se registra una sola vez; después se puede activar el libro mayor completo.",
+      "asOfDate": "Saldos de apertura al",
+      "csvLabel": "Pegue filas del CSV de corte",
+      "csvHint": "Columnas: número de cuenta, débito, crédito, descripción (opcional). Puede incluir una fila de encabezado.",
+      "loadCsv": "Cargar líneas",
+      "csvLoaded": "{{count}} líneas cargadas",
+      "csvBadRows": "Estas filas necesitan una cuenta y exactamente un importe distinto de cero: {{rows}}",
+      "csvUnknownAccounts": "Este libro no tiene cuentas con el número: {{accounts}}",
+      "csvTooFew": "Un asiento de apertura necesita al menos dos líneas",
+      "post": "Registrar asiento de apertura",
+      "posted": "Asiento de apertura registrado como asiento {{number}}",
+      "postedTitle": "Asiento de apertura registrado: asiento {{number}} al {{date}}",
+      "fullGlOn": "El libro mayor completo está activado.",
+      "nextStepAdmin": "A continuación, active el libro mayor completo integrado.",
+      "nextStepController": "A continuación, un administrador activa el libro mayor completo integrado.",
+      "turnOnFullGl": "Abrir libro mayor completo",
+      "tieOutTitle": "Balance de comprobación de apertura",
+      "tieOutHint": "Compare estos saldos con el balance de comprobación de cierre de su sistema anterior antes de comenzar.",
+      "loadFailed": "No se pudo cargar el asiento de apertura",
+      "tieOutFailed": "No se pudo cargar el balance de comprobación de apertura"
     }
   },
   "subcontractUi": {

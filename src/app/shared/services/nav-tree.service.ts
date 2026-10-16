@@ -172,6 +172,7 @@ export class NavTreeService {
         // Capability-gated (default OFF) — the feature only appears when the
         // install opts into activity-based costing.
         { icon: 'calculate', label: 'Costing', i18nKey: 'nav.costing', route: '/costing', capability: 'CAP-COSTING-TIER3-ABC', allowedRoles: ['Admin', 'Manager'] },
+        { icon: 'input', label: 'Opening Journal', i18nKey: 'nav.openingJournal', route: '/accounting/opening-journal', capability: 'CAP-ACCT-MIGRATION', allowedRoles: ['Controller'] },
         {
           // Dark GL accounting suite — hidden unless CAP-ACCT-FULLGL is enabled.
           icon: 'account_balance', label: 'Accounting', i18nKey: 'navGroups.accounting',

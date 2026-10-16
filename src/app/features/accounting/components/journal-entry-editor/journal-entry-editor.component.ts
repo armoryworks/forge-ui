@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { AbstractControl, FormArray, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { forkJoin } from 'rxjs';
@@ -19,31 +19,10 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { GlAccount, LedgerRegisterEntry, LedgerRegisterPage, ManualJournalEntryInput } from '../../models/accounting.models';
+import { balancedValidator, lineValidator } from '../../utils/journal-line.validators';
 
 const DEFAULT_BOOK_ID = 1; // overridable via ?bookId= (training sandbox, §5A.4)
 const DEFAULT_CURRENCY_ID = 1;
-
-/** A line must carry exactly one non-zero side (debit XOR credit). */
-function lineValidator(control: AbstractControl): ValidationErrors | null {
-  const debit = Number(control.get('debit')?.value) || 0;
-  const credit = Number(control.get('credit')?.value) || 0;
-  if (debit > 0 && credit > 0) return { bothSides: true };
-  if (debit === 0 && credit === 0) return { emptyLine: true };
-  return null;
-}
-
-/** The whole entry must balance: total debits === total credits, and > 0. */
-function balancedValidator(group: AbstractControl): ValidationErrors | null {
-  const lines = (group.get('lines') as FormArray | null)?.controls ?? [];
-  let debit = 0;
-  let credit = 0;
-  for (const line of lines) {
-    debit += Number(line.get('debit')?.value) || 0;
-    credit += Number(line.get('credit')?.value) || 0;
-  }
-  if (debit === 0 && credit === 0) return null; // empty — the line validators speak first
-  return Math.abs(debit - credit) < 0.005 ? null : { unbalanced: true };
-}
 
 /**
  * §5A manual journal-entry editor: compose and post a balanced double-entry journal. Balanced-by-

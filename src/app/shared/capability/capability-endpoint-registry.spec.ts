@@ -32,6 +32,11 @@ describe('resolveCapabilityForUrl', () => {
       expect(resolveCapabilityForUrl('/api/v1/vendors/5')).toBe('CAP-MD-VENDORS');
     });
 
+    it('resolves the conversion endpoints to CAP-ACCT-MIGRATION, not the GL view', () => {
+      expect(resolveCapabilityForUrl('/api/v1/accounting/conversion/opening-journal')).toBe('CAP-ACCT-MIGRATION');
+      expect(resolveCapabilityForUrl('/api/v1/accounting/trial-balance')).toBe('CAP-ACCT-GL-VIEW');
+    });
+
     it('resolves the accounting mode to CAP-ACCT-EXTERNAL, not the GL view', () => {
       expect(resolveCapabilityForUrl('/api/v1/admin/accounting-mode')).toBe('CAP-ACCT-EXTERNAL');
     });

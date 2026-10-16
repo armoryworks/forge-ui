@@ -1,0 +1,159 @@
+@use 'styles/variables' as *;
+
+.oj {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  max-width: 960px;
+  padding-top: $sp-md;
+
+  &__book,
+  &__hint {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+
+  &__section-title {
+    margin: 0;
+    font-size: $font-size-xxs;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+  }
+
+  &__posted {
+    display: flex;
+    align-items: flex-start;
+    gap: $sp-md;
+    padding: $sp-sm $sp-md;
+    border-left: $border-width-accent solid var(--success);
+    background: color-mix(in srgb, var(--success) 8%, transparent);
+  }
+
+  &__posted-icon {
+    color: var(--success);
+    font-size: $icon-size-lg;
+  }
+
+  &__posted-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $sp-sm;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+
+    strong {
+      color: var(--text);
+    }
+  }
+
+  &__tie-out,
+  &__csv,
+  &__lines {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__table-wrap {
+    overflow-x: auto;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: $font-size-sm;
+
+    th,
+    td {
+      padding: $sp-xs $sp-sm;
+      border-bottom: $border-width-thin solid var(--border);
+      text-align: left;
+    }
+
+    tfoot th,
+    tfoot td {
+      font-weight: 700;
+    }
+  }
+
+  &__num {
+    text-align: right;
+    font-family: $font-family-mono;
+  }
+
+  &__table th.oj__num,
+  &__table td.oj__num {
+    text-align: right;
+  }
+
+  &__csv-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $sp-md;
+    flex-wrap: wrap;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-lg;
+  }
+
+  &__date {
+    max-width: 220px;
+  }
+
+  &__lines-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__line {
+    display: grid;
+    grid-template-columns: minmax(220px, 2fr) 150px 150px minmax(160px, 1.5fr) auto;
+    gap: $sp-sm;
+    align-items: start;
+  }
+
+  &__line-del {
+    margin-top: $sp-sm;
+  }
+
+  &__balance {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-lg;
+    align-items: center;
+    padding: $sp-sm $sp-md;
+    border-top: $border-width-thin solid var(--border);
+    font-family: $font-family-mono;
+  }
+
+  &__balance-state {
+    margin-left: auto;
+    font-family: $font-family-primary;
+    color: var(--warning);
+  }
+
+  &__balance--ok &__balance-state {
+    color: var(--success);
+  }
+}
+
+@media (max-width: $breakpoint-mobile) {
+  .oj__line {
+    grid-template-columns: 1fr 1fr auto;
+  }
+
+  .oj__line-account,
+  .oj__line-desc {
+    grid-column: 1 / -1;
+  }
+}

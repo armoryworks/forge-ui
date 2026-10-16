@@ -82,7 +82,8 @@
     "bankStatements": "Bank Statements",
     "exports": "QBO Export",
     "chartOfAccounts": "Chart of Accounts",
-    "pieceRates": "Piece Rates"
+    "pieceRates": "Piece Rates",
+    "openingJournal": "Opening Journal"
   },
   "navGroups": {
     "operations": "Operations",
@@ -9791,7 +9792,9 @@
       "exports": "CPA Exports",
       "exportsDesc": "CSV downloads for the CPA — and the one-way QuickBooks push when enabled.",
       "bankStatements": "Bank Statements",
-      "bankStatementsDesc": "Import OFX/CSV statements and match them to the ledger"
+      "bankStatementsDesc": "Import OFX/CSV statements and match them to the ledger",
+      "openingJournal": "Opening journal",
+      "openingJournalDesc": "Post the opening balances that switch on the full general ledger"
     },
     "exports": {
       "title": "CPA Exports",
@@ -10078,6 +10081,31 @@
       "active": "Active",
       "description": "Description",
       "lockedNote": "This account has postings — its number, type, and normal balance are locked. Create a new account for structural changes."
+    },
+    "openingJournal": {
+      "title": "Opening journal",
+      "subtitle": "Carry the opening balances from your previous system into the ledger",
+      "book": "Book: {{name}}",
+      "intro": "Enter the closing trial balance of your previous system as of the cutover date, one line per account. Debits must equal credits. The journal is posted once; full general ledger can be turned on after it.",
+      "asOfDate": "Opening balances as of",
+      "csvLabel": "Paste rows from the cutover CSV",
+      "csvHint": "Columns: account number, debit, credit, description (optional). A header row is fine.",
+      "loadCsv": "Load lines",
+      "csvLoaded": "{{count}} lines loaded",
+      "csvBadRows": "These rows need one account and exactly one non-zero amount: {{rows}}",
+      "csvUnknownAccounts": "This book has no accounts numbered: {{accounts}}",
+      "csvTooFew": "An opening journal needs at least two lines",
+      "post": "Post opening journal",
+      "posted": "Opening journal posted as entry {{number}}",
+      "postedTitle": "Opening journal posted: entry {{number}} as of {{date}}",
+      "fullGlOn": "Full general ledger is on.",
+      "nextStepAdmin": "Next, turn on Built-in full general ledger.",
+      "nextStepController": "Next, an administrator turns on Built-in full general ledger.",
+      "turnOnFullGl": "Open full general ledger",
+      "tieOutTitle": "Opening trial balance",
+      "tieOutHint": "Compare these balances with the closing trial balance of your previous system before going live.",
+      "loadFailed": "Could not load the opening journal",
+      "tieOutFailed": "Could not load the opening trial balance"
     }
   },
   "subcontractUi": {

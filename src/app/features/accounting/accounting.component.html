@@ -7,7 +7,7 @@
   <app-financial-ratios-strip *appCap="'CAP-ACCT-GL-VIEW'" />
 
   <div class="tile-grid">
-    @for (tile of tiles; track tile.route) {
+    @for (tile of visibleTiles(); track tile.route) {
       <a class="tile" [routerLink]="tile.route">
         <span class="material-icons-outlined tile-icon" aria-hidden="true">{{ tile.icon }}</span>
         <span class="tile-label">{{ tile.label }}</span>
