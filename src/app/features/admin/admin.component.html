@@ -189,46 +189,6 @@
       </div>
     }
 
-    <!-- Terminology Tab -->
-    @if (activeTab() === 'terminology') {
-      <div class="tab-panel">
-        <div class="panel-header">
-          <span class="panel-header__count">{{ terminologyEntries().length }} {{ 'admin.entries' | translate }}</span>
-          <button class="action-btn action-btn--primary" [disabled]="saving() || !hasTerminologyChanges()" (click)="saveTerminology()">
-            <span class="material-icons-outlined">save</span>
-            {{ 'common.saveChanges' | translate }}
-          </button>
-        </div>
-
-        @if (terminologyEntries().length === 0) {
-          <app-empty-state icon="translate" [message]="'admin.noTerminology' | translate" />
-        } @else {
-          <table class="admin-table" aria-label="Admin table 2">
-            <thead>
-              <tr>
-                <th>{{ 'admin.key' | translate }}</th>
-                <th>{{ 'admin.defaultLabel' | translate }}</th>
-                <th>{{ 'admin.customLabel' | translate }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (entry of terminologyEntries(); track entry.key) {
-                <tr class="admin-row">
-                  <td class="text-muted terminology-key">{{ entry.key }}</td>
-                  <td class="text-muted">{{ getTerminologyDefault(entry.key) }}</td>
-                  <td>
-                    <input class="terminology-input"
-                      [value]="terminologyEdits().get(entry.key) ?? entry.label"
-                      (input)="onTerminologyChange(entry.key, $any($event.target).value)" />
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        }
-      </div>
-    }
-
     <!-- System Settings Tab -->
     @if (activeTab() === 'settings') {
       <div class="tab-panel tab-panel--settings">
