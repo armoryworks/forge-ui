@@ -190,7 +190,9 @@ export class LeadsComponent implements OnInit {
     return this.leads().filter(lead => {
       const matchesSearch = !term ||
         lead.companyName.toLowerCase().includes(term) ||
-        (lead.contactName ?? '').toLowerCase().includes(term);
+        (lead.leadNumber ?? '').toLowerCase().includes(term) ||
+        (lead.contactName ?? '').toLowerCase().includes(term) ||
+        (lead.email ?? '').toLowerCase().includes(term);
       const matchesStatus = !statusF || lead.status === statusF;
       return matchesSearch && matchesStatus;
     });
