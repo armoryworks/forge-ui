@@ -22,7 +22,7 @@ export class AccountingConversionService {
     return this.http.get<ConversionStatus>(`${this.base}/status`, params ? { params } : {});
   }
 
-  /** Postable accounts of the book, control accounts included, for the opening-journal lines. */
+  /** Postable accounts the opening journal can post (inventory control included, AR/AP control left out), for its lines. */
   getAccounts(bookId: number): Observable<GlAccount[]> {
     return this.http.get<GlAccount[]>(`${this.base}/accounts`, { params: new HttpParams().set('bookId', bookId) });
   }
