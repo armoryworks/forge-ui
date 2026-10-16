@@ -96,6 +96,7 @@ function makeUser(overrides: Partial<AdminUser> = {}): AdminUser {
     workLocationId: null, workLocationName: null,
     i9Status: null,
     isNonEmployee: false,
+    isServiceAccount: false,
     ...overrides,
   };
 }
@@ -131,6 +132,25 @@ describe('AdminOverviewComponent', () => {
     expect(roles).toContain('Admin');
     expect(roles).toContain('Engineer');
     expect(component.isLoading()).toBe(false);
+    httpMock.verify();
+  });
+
+  it('leaves service accounts out of the people counts', () => {
+    const { component, httpMock } = setup();
+    component.ngOnInit();
+    flushAll(httpMock, {
+      users: [
+        makeUser({ id: 1, roles: ['PM'], isActive: true }),
+        makeUser({
+          id: 2, roles: ['LeadIntake'], isActive: true, isServiceAccount: true,
+          hasPassword: false, missingComplianceItems: ['W-4 Federal Tax Withholding'],
+        }),
+      ],
+    });
+
+    expect(component.activeUserCount()).toBe(1);
+    expect(component.roleBreakdown().map(r => r.role)).toEqual(['PM']);
+    expect(component.complianceOpenCount()).toBe(0);
     httpMock.verify();
   });
 

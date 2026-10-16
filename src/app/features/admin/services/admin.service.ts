@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { AdminUser } from '../models/admin-user.model';
 import { ActiveUser } from '../models/active-user.model';
@@ -44,6 +44,10 @@ export class AdminService {
   // Users
   getUsers(): Observable<AdminUser[]> {
     return this.http.get<AdminUser[]>(`${environment.apiUrl}/admin/users`);
+  }
+
+  getPeople(): Observable<AdminUser[]> {
+    return this.getUsers().pipe(map(users => users.filter(u => !u.isServiceAccount)));
   }
 
   getActiveUsers(): Observable<ActiveUser[]> {

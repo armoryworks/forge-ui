@@ -197,7 +197,7 @@ export class TeamsPanelComponent implements OnInit {
       error: (err: unknown) => this.snackbar.errorFrom(err, 'teamsPanel.loadMembersFailed'),
     });
 
-    this.adminService.getUsers().subscribe({
+    this.adminService.getPeople().subscribe({
       next: (users) => {
         this.allUsers.set(users.filter(u => u.isActive));
         this.memberLoading.set(false);

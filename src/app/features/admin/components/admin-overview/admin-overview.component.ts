@@ -181,7 +181,7 @@ export class AdminOverviewComponent implements OnInit {
       if (--pending === 0) this.isLoading.set(false);
     };
 
-    this.adminService.getUsers().subscribe({
+    this.adminService.getPeople().subscribe({
       next: (users) => { this.users.set(users); done(); },
       error: () => done(),
     });
