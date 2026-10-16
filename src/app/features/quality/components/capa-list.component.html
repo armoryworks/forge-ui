@@ -16,7 +16,7 @@
       <span [class]="getStatusClass(row.status)">{{ row.status }}</span>
     </ng-template>
     <ng-template appColumnCell="dueDate" let-row>
-      {{ row.dueDate | date:'MM/dd/yyyy' }}
+      {{ row.dueDate | dateOnly }}
     </ng-template>
     <ng-template appColumnCell="tasks" let-row>
       {{ row.completedTaskCount }}/{{ row.taskCount }}

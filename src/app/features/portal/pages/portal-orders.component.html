@@ -23,7 +23,7 @@
             <tr>
               <td>{{ o.orderNumber }}</td>
               <td>{{ o.orderDate | date:'MM/dd/yyyy' }}</td>
-              <td>{{ o.requestedDate ? (o.requestedDate | date:'MM/dd/yyyy') : '—' }}</td>
+              <td>{{ o.requestedDate ? (o.requestedDate | dateOnly) : '—' }}</td>
               <td><span [class]="statusClass(o.status)">{{ o.status }}</span></td>
               <td class="portal-list__num">{{ o.total | number:'1.2-2' }}</td>
             </tr>

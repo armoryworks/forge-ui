@@ -92,7 +92,7 @@
           <div class="info-item">
             <span class="info-label">{{ 'leads.followUp' | translate }}</span>
             <span class="info-value" [class.overdue]="isFollowUpOverdue(lead)">
-              {{ lead.followUpDate | date:'MM/dd/yyyy' }}
+              {{ lead.followUpDate | dateOnly }}
             </span>
           </div>
         }

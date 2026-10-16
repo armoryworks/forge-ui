@@ -57,11 +57,11 @@
         }
         <div class="info-item">
           <span class="info-label">{{ 'payables.billDate' | translate }}</span>
-          <span class="info-value">{{ bill.billDate | date:'MM/dd/yyyy' }}</span>
+          <span class="info-value">{{ bill.billDate | dateOnly }}</span>
         </div>
         <div class="info-item">
           <span class="info-label">{{ 'common.dueDate' | translate }}</span>
-          <span class="info-value">{{ bill.dueDate | date:'MM/dd/yyyy' }}</span>
+          <span class="info-value">{{ bill.dueDate | dateOnly }}</span>
         </div>
       </div>
 

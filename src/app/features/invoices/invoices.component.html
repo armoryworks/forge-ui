@@ -57,10 +57,10 @@
           <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
         </ng-template>
         <ng-template appColumnCell="invoiceDate" let-row>
-          <span class="text-muted">{{ row.invoiceDate | date:'MM/dd/yyyy' }}</span>
+          <span class="text-muted">{{ row.invoiceDate | dateOnly }}</span>
         </ng-template>
         <ng-template appColumnCell="dueDate" let-row>
-          <span class="text-muted">{{ row.dueDate | date:'MM/dd/yyyy' }}</span>
+          <span class="text-muted">{{ row.dueDate | dateOnly }}</span>
         </ng-template>
         <ng-template appColumnCell="total" let-row>
           <app-currency-display [value]="row.total" [currency]="null" />

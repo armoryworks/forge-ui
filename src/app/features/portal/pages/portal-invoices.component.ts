@@ -1,16 +1,17 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { PortalInvoice } from '../models/portal.model';
 import { PortalService } from '../services/portal.service';
+import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
 
 @Component({
   selector: 'app-portal-invoices',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, TranslatePipe, LoadingBlockDirective, EmptyStateComponent],
+  imports: [DateOnlyPipe, DecimalPipe, TranslatePipe, LoadingBlockDirective, EmptyStateComponent],
   templateUrl: './portal-invoices.component.html',
   styleUrl: './portal-list.shared.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

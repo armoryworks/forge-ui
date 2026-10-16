@@ -23,12 +23,13 @@ import { FileAttachment } from '../../../../shared/models/file.model';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { RecentCommunicationsComponent } from '../../../../shared/components/recent-communications/recent-communications.component';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 
 @Component({
   selector: 'app-lead-detail-panel',
   standalone: true,
   imports: [
-    DatePipe, ReactiveFormsModule, TranslatePipe, MatTooltipModule, MatMenuModule,
+    DateOnlyPipe, DatePipe, ReactiveFormsModule, TranslatePipe, MatTooltipModule, MatMenuModule,
     DialogComponent, TextareaComponent, ValidationButtonComponent, EntityActivitySectionComponent,
     RecentCommunicationsComponent, FileUploadZoneComponent,
     DetailLoadErrorComponent,

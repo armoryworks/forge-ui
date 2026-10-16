@@ -26,13 +26,14 @@ import { UninvoicedJobsPanelComponent } from './components/uninvoiced-jobs-panel
 import { InvoiceDetailDialogComponent, InvoiceDetailDialogData } from './components/invoice-detail-dialog/invoice-detail-dialog.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
+import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
 
 // ⚡ ACCOUNTING BOUNDARY
 @Component({
   selector: 'app-invoices',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe, TranslatePipe,
+    DateOnlyPipe, ReactiveFormsModule, DatePipe, TranslatePipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
     CurrencyDisplayComponent, EntityLinkComponent,

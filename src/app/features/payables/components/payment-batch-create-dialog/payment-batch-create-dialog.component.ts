@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -12,6 +12,7 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 
 // ⚡ BANKING BOUNDARY — assemble a NACHA batch. Payment mode: pick eligible ACH payments
 // (vendors without a payable bank account are visibly blocked). Prenote mode: every Approved
@@ -21,7 +22,7 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
   selector: 'app-payment-batch-create-dialog',
   standalone: true,
   imports: [
-    ReactiveFormsModule, TranslatePipe, CurrencyPipe, DatePipe,
+    DateOnlyPipe, ReactiveFormsModule, TranslatePipe, CurrencyPipe,
     DialogComponent, DatepickerComponent, ValidationButtonComponent, LoadingBlockDirective,
   ],
   templateUrl: './payment-batch-create-dialog.component.html',

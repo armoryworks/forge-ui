@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, beforeEach, describe, it, expect } from 'vitest';
 
-import { fromIsoDate, toIsoDate } from './date.utils';
+import { formatDate, fromIsoDate, parseDateOnly, toDateOnly, toIsoDate } from './date.utils';
 
 describe('fromIsoDate', () => {
   it('keeps the calendar day of a UTC-midnight value', () => {
@@ -29,5 +29,50 @@ describe('fromIsoDate', () => {
     expect(fromIsoDate(undefined)).toBeNull();
     expect(fromIsoDate('')).toBeNull();
     expect(fromIsoDate('not a date')).toBeNull();
+  });
+});
+
+describe('date-only values west of UTC', () => {
+  let originalTz: string | undefined;
+
+  beforeEach(() => {
+    originalTz = process.env['TZ'];
+    process.env['TZ'] = 'America/Denver';
+  });
+
+  afterEach(() => {
+    if (originalTz === undefined) delete process.env['TZ'];
+    else process.env['TZ'] = originalTz;
+  });
+
+  it.each(['2026-10-26', '2026-10-26T00:00:00Z', '2026-10-26T00:00:00+00:00', '2026-10-26T00:00:00.000Z'])(
+    'parseDateOnly keeps the calendar day of %s',
+    value => {
+      const d = parseDateOnly(value);
+
+      expect([d!.getFullYear(), d!.getMonth(), d!.getDate(), d!.getHours()]).toEqual([2026, 9, 26, 0]);
+    },
+  );
+
+  it('parseDateOnly leaves real timestamps to normal parsing', () => {
+    expect(parseDateOnly('2026-10-26T06:00:00.000Z')).toBeNull();
+    expect(parseDateOnly('2026-10-26T00:00:00-06:00')).toBeNull();
+    expect(parseDateOnly('not a date')).toBeNull();
+  });
+
+  it('toIsoDate does not slip a day for a value the API sent back', () => {
+    expect(toIsoDate('2026-10-26T00:00:00+00:00')).toBe('2026-10-26T00:00:00Z');
+    expect(toIsoDate('2026-10-26')).toBe('2026-10-26T00:00:00Z');
+  });
+
+  it('toIsoDate keeps a restored draft that holds a local-midnight timestamp', () => {
+    const draft = JSON.parse(JSON.stringify(new Date(2026, 9, 26))) as string;
+
+    expect(toIsoDate(draft)).toBe('2026-10-26T00:00:00Z');
+  });
+
+  it('toDateOnly and formatDate keep the calendar day of a UTC-midnight value', () => {
+    expect(toDateOnly('2026-10-16T00:00:00+00:00')).toBe('2026-10-16');
+    expect(formatDate('2026-10-16T00:00:00+00:00')).toBe('10/16/2026');
   });
 });

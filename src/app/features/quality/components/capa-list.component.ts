@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { NcrCapaService } from '../services/ncr-capa.service';
@@ -18,12 +17,13 @@ import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { FormValidationService } from '../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
+import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
 
 @Component({
   selector: 'app-capa-list',
   standalone: true,
   imports: [
-    DatePipe, ReactiveFormsModule,
+    DateOnlyPipe, ReactiveFormsModule,
     DataTableComponent, ColumnCellDirective,
     SelectComponent, InputComponent, TextareaComponent, DatepickerComponent,
     DialogComponent, LoadingBlockDirective,

@@ -30,7 +30,7 @@
         </div>
         <div class="info-item">
           <span class="info-label">{{ 'payables.paymentDate' | translate }}</span>
-          <span class="info-value">{{ payment.paymentDate | date:'MM/dd/yyyy' }}</span>
+          <span class="info-value">{{ payment.paymentDate | dateOnly }}</span>
         </div>
         @if (payment.referenceNumber) {
           <div class="info-item">

@@ -24,8 +24,8 @@
           @for (i of invoices(); track i.id) {
             <tr>
               <td>{{ i.invoiceNumber }}</td>
-              <td>{{ i.invoiceDate | date:'MM/dd/yyyy' }}</td>
-              <td>{{ i.dueDate ? (i.dueDate | date:'MM/dd/yyyy') : '—' }}</td>
+              <td>{{ i.invoiceDate | dateOnly }}</td>
+              <td>{{ i.dueDate ? (i.dueDate | dateOnly) : '—' }}</td>
               <td><span [class]="statusClass(i.status)">{{ i.status }}</span></td>
               <td class="portal-list__num">{{ i.total | number:'1.2-2' }}</td>
               <td class="portal-list__num">{{ i.amountPaid | number:'1.2-2' }}</td>

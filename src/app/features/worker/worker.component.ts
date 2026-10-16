@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -9,11 +8,12 @@ import { AuthService } from '../../shared/services/auth.service';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { TranslatePipe } from '@ngx-translate/core';
+import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
 
 @Component({
   selector: 'app-worker',
   standalone: true,
-  imports: [DatePipe, MatTooltipModule, EmptyStateComponent, LoadingBlockDirective, TranslatePipe],
+  imports: [DateOnlyPipe, MatTooltipModule, EmptyStateComponent, LoadingBlockDirective, TranslatePipe],
   templateUrl: './worker.component.html',
   styleUrl: './worker.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

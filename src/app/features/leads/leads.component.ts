@@ -31,7 +31,7 @@ import { FormValidationService } from '../../shared/services/form-validation.ser
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { DraftConfig } from '../../shared/models/draft-config.model';
-import { toIsoDate, todayStart } from '../../shared/utils/date.utils';
+import { fromIsoDate, toIsoDate, todayStart } from '../../shared/utils/date.utils';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { ScannerService } from '../../shared/services/scanner.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -41,6 +41,7 @@ import { AvatarComponent } from '../../shared/components/avatar/avatar.component
 import { AccountDialogComponent, AccountDialogData } from './components/account-dialog/account-dialog.component';
 import { CreateAccountRequest } from './models/account.model';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
+import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
 
 type ViewMode = 'table' | 'pipeline';
 
@@ -50,7 +51,7 @@ const VIEW_MODE_KEY = 'leads-view-mode';
   selector: 'app-leads',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe, TranslatePipe,
+    DateOnlyPipe, ReactiveFormsModule, DatePipe, TranslatePipe,
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
     DataTableComponent, ColumnCellDirective, ValidationButtonComponent, MatTooltipModule, MatMenuModule,
@@ -346,7 +347,7 @@ export class LeadsComponent implements OnInit {
       source: lead.source ?? '',
       accountId: lead.accountId ?? null,
       notes: lead.notes ?? '',
-      followUpDate: lead.followUpDate ?? null,
+      followUpDate: fromIsoDate(lead.followUpDate),
     });
     // Lazy-load the account list the first time an edit dialog opens.
     if (this.accounts().length === 0) {
