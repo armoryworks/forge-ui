@@ -9084,6 +9084,23 @@
         "failedAt": "Falló en",
         "lastRetry": "Último reintento"
       }
+    },
+    "terminology": {
+      "intro": "Cambie el nombre de los términos principales para que coincidan con el vocabulario de su taller. El cambio se aplica a todos los menús, títulos, columnas, botones y mensajes para todos los usuarios. Deje un campo en blanco para conservar el término estándar; el plural se completa automáticamente si no escribe uno. Los cambios de etiquetas específicas hechos en Etiquetas de UI siguen teniendo prioridad.",
+      "resetAll": "Borrar todos los cambios",
+      "resetTerm": "Borrar el cambio de {{term}}",
+      "enSingular": "Inglés (singular)",
+      "enPlural": "Inglés (plural)",
+      "esSingular": "Español (singular)",
+      "esPlural": "Español (plural)",
+      "esGender": "Género en español",
+      "genderDefaultMasculine": "Estándar (masculino)",
+      "genderDefaultFeminine": "Estándar (femenino)",
+      "genderMasculine": "Masculino (el / los)",
+      "genderFeminine": "Femenino (la / las)",
+      "otherTitle": "Otras sustituciones guardadas",
+      "otherHint": "Estas claves provienen de un preajuste o de una versión anterior. Se conservan, pero solo las pantallas que las buscan por clave las muestran.",
+      "forms": "{{one}} / {{many}}"
     }
   },
   "announcements": {

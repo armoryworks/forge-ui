@@ -4622,6 +4622,7 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
     const adminRoutes = [
       '/admin/track-types',
       '/admin/reference-data',
+      '/admin/terminology',
       '/admin/teams',
       '/admin/sales-tax',
       '/admin/audit-log',

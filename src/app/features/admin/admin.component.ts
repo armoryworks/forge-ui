@@ -12,7 +12,6 @@ import { ScanIdentifier } from './models/scan-identifier.model';
 import { SystemSetting } from './models/system-setting.model';
 import { StageRequest } from './models/stage-request.model';
 import { ReferenceDataGroup } from './models/reference-data-group.model';
-import { TerminologyEntryItem } from './models/terminology-entry-item.model';
 import { CatalogToggleRow } from './models/catalog-toggle-row.model';
 import { SETTINGS_SEARCH_INDEX } from './models/settings-search-index.const';
 import { NUMBERING_SETTING_LABELS } from './models/numbering-setting-labels.const';
@@ -21,6 +20,7 @@ import { SYSTEM_SETTING_DEFAULTS } from './models/system-setting-defaults.const'
 import { AdminSettingsService } from './settings/services/admin-settings.service';
 import { TrackType } from '../../shared/models/track-type.model';
 import { TrackTypeDialogComponent } from './components/track-type-dialog.component';
+import { TerminologyPanelComponent } from './components/terminology-panel/terminology-panel.component';
 import { AddDeviceDialogComponent } from './components/add-device-dialog/add-device-dialog.component';
 import { TelemetryConsentDialogComponent } from './components/telemetry-consent-dialog/telemetry-consent-dialog.component';
 import { TelemetryService } from './services/telemetry.service';
@@ -30,7 +30,6 @@ import { CapDirective } from '../../shared/directives/cap.directive';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SnackbarService } from '../../shared/services/snackbar.service';
-import { TerminologyService } from '../../shared/services/terminology.service';
 import { ThemeService } from '../../shared/services/theme.service';
 import { BrandingService } from '../../shared/services/branding.service';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
@@ -85,7 +84,7 @@ import { SlideoutComponent } from '../../shared/components/slideout/slideout.com
   imports: [
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent, DatepickerComponent, DataTableComponent,
-    ColumnCellDirective, ValidationButtonComponent, TrackTypeDialogComponent,
+    ColumnCellDirective, ValidationButtonComponent, TrackTypeDialogComponent, TerminologyPanelComponent,
     EmptyStateComponent, LoadingBlockDirective, AdminOverviewComponent, TrainingPanelComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, RoleTemplatesPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, AuditLogPanelComponent, TimeCorrectionsPanelComponent, EventsPanelComponent, AnnouncementsPanelComponent, EdiPanelComponent, MfaPolicyPanelComponent, DomainEventFailuresPanelComponent, IntegrationOutboxPanelComponent, AutoPoSettingsComponent, ExpenseSettingsPanelComponent, BiApiKeysPanelComponent, SystemApiKeysPanelComponent, ConnectionsPanelComponent, BarcodeInfoComponent, SlideoutComponent, DatePipe, LowerCasePipe, TranslatePipe, MatTooltipModule, AddDeviceDialogComponent, CapDirective, TelemetryConsentDialogComponent,
   ],
   templateUrl: './admin.component.html',
@@ -97,7 +96,6 @@ export class AdminComponent implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
-  private readonly terminologyService = inject(TerminologyService);
   private readonly themeService = inject(ThemeService);
   private readonly branding = inject(BrandingService);
   private readonly scanner = inject(ScannerService);
@@ -113,8 +111,8 @@ export class AdminComponent implements OnInit {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
 
-  private static readonly VALID_TABS = new Set(['overview', 'users', 'track-types', 'reference-data', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'role-templates', 'compliance', 'sales-tax', 'audit-log', 'time-corrections', 'events', 'announcements', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'bi-api-keys', 'system-api-keys', 'connections']);
-  private static readonly ADMIN_ONLY_TABS = new Set(['overview', 'users', 'track-types', 'reference-data', 'settings', 'integrations', 'ai-assistants', 'teams', 'role-templates', 'sales-tax', 'audit-log', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'bi-api-keys', 'system-api-keys', 'connections']);
+  private static readonly VALID_TABS = new Set(['overview', 'users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'role-templates', 'compliance', 'sales-tax', 'audit-log', 'time-corrections', 'events', 'announcements', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'bi-api-keys', 'system-api-keys', 'connections']);
+  private static readonly ADMIN_ONLY_TABS = new Set(['overview', 'users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'ai-assistants', 'teams', 'role-templates', 'sales-tax', 'audit-log', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'bi-api-keys', 'system-api-keys', 'connections']);
   private static readonly MANAGER_AND_ADMIN_TABS = new Set(['training', 'time-corrections', 'events', 'announcements']);
 
   protected readonly isAdmin = computed(() => this.authService.hasRole('Admin'));
@@ -226,9 +224,6 @@ export class AdminComponent implements OnInit {
   protected readonly referenceDataGroups = signal<ReferenceDataGroup[]>([]);
   protected readonly expandedGroup = signal<string | null>(null);
 
-  // Terminology
-  protected readonly terminologyEntries = signal<TerminologyEntryItem[]>([]);
-  protected readonly terminologyEdits = signal<Map<string, string>>(new Map());
 
   // System Settings
   private readonly settingsLoaded = signal(false);
@@ -402,7 +397,6 @@ export class AdminComponent implements OnInit {
       if (tab === 'users' && !this.locationsLoaded()) this.loadCompanyLocations();
       if (tab === 'track-types' && this.trackTypes().length === 0) this.loadTrackTypes();
       if (tab === 'reference-data' && this.referenceDataGroups().length === 0) this.loadReferenceData();
-      if (tab === 'terminology' && this.terminologyEntries().length === 0) this.loadTerminology();
       if (tab === 'settings' && !this.settingsLoaded()) this.loadSystemSettings();
       if (tab === 'settings' && !this.numberingLoaded()) this.loadToggleGroup('Numbering', this.numberingLoaded, this.numberingRows, NUMBERING_SETTING_LABELS);
       if (tab === 'settings' && !this.shopFloorLoaded()) this.loadToggleGroup('Shop Floor', this.shopFloorLoaded, this.shopFloorRows);
@@ -830,55 +824,6 @@ export class AdminComponent implements OnInit {
 
   protected formatGroupCode(code: string): string {
     return code.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-  }
-
-  // ── Terminology ──
-
-  private loadTerminology(): void {
-    this.loading.set(true);
-    this.adminService.getTerminology().subscribe({
-      next: (entries) => {
-        this.terminologyEntries.set(entries);
-        this.terminologyEdits.set(new Map(entries.map(e => [e.key, e.label])));
-        this.loading.set(false);
-      },
-      error: () => { this.error.set(this.translate.instant('admin.loadTerminologyFailed')); this.loading.set(false); },
-    });
-  }
-
-  protected onTerminologyChange(key: string, label: string): void {
-    this.terminologyEdits.update(map => {
-      const updated = new Map(map);
-      updated.set(key, label);
-      return updated;
-    });
-    this.terminologyService.set(key, label);
-  }
-
-  protected hasTerminologyChanges(): boolean {
-    const edits = this.terminologyEdits();
-    return this.terminologyEntries().some(e => edits.get(e.key) !== e.label);
-  }
-
-  protected saveTerminology(): void {
-    const entries = Array.from(this.terminologyEdits()).map(([key, label]) => ({ key, label }));
-    this.saving.set(true);
-    this.adminService.updateTerminology(entries).subscribe({
-      next: (updated) => {
-        this.terminologyEntries.set(updated);
-        this.terminologyEdits.set(new Map(updated.map(e => [e.key, e.label])));
-        this.saving.set(false);
-        this.snackbar.success(this.translate.instant('admin.terminologySaved'));
-      },
-      error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'admin.terminologySaveFailed'); },
-    });
-  }
-
-  protected getTerminologyDefault(key: string): string {
-    return key
-      .replace(/^(entity_|status_|action_|label_|field_)/, '')
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, c => c.toUpperCase());
   }
 
   // ── System Settings ──

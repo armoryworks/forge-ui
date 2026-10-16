@@ -1,0 +1,99 @@
+@use 'styles/variables' as *;
+
+.terminology {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+}
+
+.terminology__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $sp-md;
+}
+
+.terminology__intro {
+  flex: 1 1 320px;
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.terminology__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-sm;
+}
+
+.terminology__error {
+  margin: 0;
+  color: var(--error);
+}
+
+.terminology__list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.term-card {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+
+  &--active {
+    border-left: $border-width-accent solid var(--primary);
+  }
+}
+
+.term-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $sp-md;
+}
+
+.term-card__names {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: $sp-sm $sp-md;
+}
+
+.term-card__title {
+  margin: 0;
+  font-size: var(--font-size-md);
+}
+
+.term-card__subtitle {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.term-card__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: $sp-sm $sp-md;
+}
+
+.terminology__other {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.terminology__other-title {
+  margin: 0;
+  font-size: var(--font-size-md);
+}
+
+.terminology__other-hint {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}

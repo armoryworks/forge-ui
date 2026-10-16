@@ -1,0 +1,63 @@
+<div class="terminology" [appLoadingBlock]="loading()" data-testid="terminology-panel">
+  <div class="terminology__header">
+    <p class="terminology__intro">{{ 'adminPanels.terminology.intro' | translate }}</p>
+    <div class="terminology__actions">
+      <button type="button" class="action-btn" [disabled]="saving() || !hasValues()" (click)="resetAll()" data-testid="terminology-reset-all">
+        <span class="material-icons-outlined">restart_alt</span>
+        {{ 'adminPanels.terminology.resetAll' | translate }}
+      </button>
+      <button type="button" class="action-btn action-btn--primary" [disabled]="saving() || !dirty()" (click)="save()" data-testid="terminology-save">
+        <span class="material-icons-outlined">save</span>
+        {{ 'common.saveChanges' | translate }}
+      </button>
+    </div>
+  </div>
+
+  @if (loadFailed()) {
+    <p class="terminology__error" role="alert">{{ 'admin.loadTerminologyFailed' | translate }}</p>
+  }
+
+  <div class="terminology__list">
+    @for (row of rows; track row.id) {
+      <section class="term-card" [class.term-card--active]="isOverridden(row)" [attr.data-testid]="'term-' + row.id">
+        <header class="term-card__header">
+          <div class="term-card__names">
+            <h3 class="term-card__title">{{ 'adminPanels.terminology.forms' | translate: { one: row.enOne, many: row.enOther } }}</h3>
+            <span class="term-card__subtitle" lang="es">{{ 'adminPanels.terminology.forms' | translate: { one: row.esOne, many: row.esOther } }}</span>
+          </div>
+          @if (isOverridden(row)) {
+            <button type="button" class="icon-btn" (click)="resetRow(row)"
+              [attr.aria-label]="'adminPanels.terminology.resetTerm' | translate: { term: row.enOne }"
+              [attr.data-testid]="'term-reset-' + row.id">
+              <span class="material-icons-outlined">undo</span>
+            </button>
+          }
+        </header>
+        <div class="term-card__fields">
+          <app-input [label]="'adminPanels.terminology.enSingular' | translate" [placeholder]="row.enOne"
+            [formControl]="control(row.keys.enOne)" [maxlength]="200" [attr.data-testid]="'term-' + row.id + '-en-one'" />
+          <app-input [label]="'adminPanels.terminology.enPlural' | translate" [placeholder]="enPluralHint(row)"
+            [formControl]="control(row.keys.enOther)" [maxlength]="200" [attr.data-testid]="'term-' + row.id + '-en-other'" />
+          <app-input [label]="'adminPanels.terminology.esSingular' | translate" [placeholder]="row.esOne"
+            [formControl]="control(row.keys.esOne)" [maxlength]="200" [attr.data-testid]="'term-' + row.id + '-es-one'" />
+          <app-input [label]="'adminPanels.terminology.esPlural' | translate" [placeholder]="esPluralHint(row)"
+            [formControl]="control(row.keys.esOther)" [maxlength]="200" [attr.data-testid]="'term-' + row.id + '-es-other'" />
+          <app-select [label]="'adminPanels.terminology.esGender' | translate" [options]="genderOptions(row)"
+            [formControl]="control(row.keys.esGender)" [attr.data-testid]="'term-' + row.id + '-es-gender'" />
+        </div>
+      </section>
+    }
+  </div>
+
+  @if (otherKeys().length > 0) {
+    <section class="terminology__other" data-testid="terminology-other">
+      <h3 class="terminology__other-title">{{ 'adminPanels.terminology.otherTitle' | translate }}</h3>
+      <p class="terminology__other-hint">{{ 'adminPanels.terminology.otherHint' | translate }}</p>
+      <div class="term-card__fields">
+        @for (key of otherKeys(); track key) {
+          <app-input [label]="key" [formControl]="control(key)" [maxlength]="200" />
+        }
+      </div>
+    </section>
+  }
+</div>

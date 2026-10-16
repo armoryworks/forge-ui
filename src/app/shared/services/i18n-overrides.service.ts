@@ -38,7 +38,7 @@ export class I18nOverridesService {
     // every language switch completes.
     this.translate.onLangChange
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((event) => this.apply(event.lang));
+      .subscribe((event) => this.reapply(event.lang));
   }
 
   /** Fetches active overrides and applies them to the current language. */
@@ -48,7 +48,7 @@ export class I18nOverridesService {
       .pipe(catchError(() => of({} as I18nOverrideMap)))
       .subscribe((map) => {
         this.overrides.set(map ?? {});
-        this.apply(this.translate.currentLang || this.translate.getDefaultLang() || 'en');
+        this.reapply(this.translate.currentLang || this.translate.getDefaultLang() || 'en');
       });
   }
 
@@ -57,7 +57,8 @@ export class I18nOverridesService {
     this.load();
   }
 
-  private apply(lang: string): void {
+  /** Re-layers the cached overrides for `lang` — called after the terminology layer rebuilds a catalog so specific label overrides keep winning. */
+  reapply(lang: string): void {
     const flat = this.overrides()[lang];
     if (!flat || Object.keys(flat).length === 0) {
       return;

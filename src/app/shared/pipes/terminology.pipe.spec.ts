@@ -10,6 +10,7 @@ describe('TerminologyPipe', () => {
   let terminologyService: TerminologyService;
 
   beforeEach(() => {
+    localStorage.clear();
     TestBed.configureTestingModule({
       providers: [
         TerminologyPipe,
@@ -29,9 +30,11 @@ describe('TerminologyPipe', () => {
 
   describe('transform with configured labels', () => {
     beforeEach(() => {
-      terminologyService.set('entity_job', 'Work Order');
-      terminologyService.set('status_in_production', 'Manufacturing');
-      terminologyService.set('action_archive', 'Retire');
+      terminologyService.applyEntries([
+        { key: 'entity_job', label: 'Work Order' },
+        { key: 'status_in_production', label: 'Manufacturing' },
+        { key: 'action_archive', label: 'Retire' },
+      ]);
     });
 
     it('should resolve a known key to its configured label', () => {
@@ -70,22 +73,19 @@ describe('TerminologyPipe', () => {
   });
 
   describe('transform with overridden labels', () => {
-    it('should use set() override instead of fallback', () => {
-      // Default fallback
+    it('should use an applied override instead of fallback', () => {
       expect(pipe.transform('entity_part')).toBe('Part');
 
-      // Override
-      terminologyService.set('entity_part', 'Component');
+      terminologyService.applyEntries([{ key: 'entity_part', label: 'Component' }]);
       expect(pipe.transform('entity_part')).toBe('Component');
     });
 
-    it('should allow clearing an override by setting empty string', () => {
-      terminologyService.set('entity_job', 'Work Order');
+    it('should restore the fallback when an override is cleared', () => {
+      terminologyService.applyEntries([{ key: 'entity_job', label: 'Work Order' }]);
       expect(pipe.transform('entity_job')).toBe('Work Order');
 
-      // Setting empty string should still return that empty string (it exists in the map)
-      terminologyService.set('entity_job', '');
-      expect(pipe.transform('entity_job')).toBe('');
+      terminologyService.applyEntries([{ key: 'entity_job', label: '' }]);
+      expect(pipe.transform('entity_job')).toBe('Job');
     });
   });
 });

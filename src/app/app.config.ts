@@ -16,8 +16,8 @@ import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { Chart } from 'chart.js';
 import { SankeyController, Flow } from 'chartjs-chart-sankey';
 import { provideMarkdown } from 'ngx-markdown';
-import { TranslateService, provideTranslateService } from '@ngx-translate/core';
-import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
+import { TranslateService, provideTranslateLoader, provideTranslateService } from '@ngx-translate/core';
+import { TRANSLATE_HTTP_LOADER_CONFIG } from '@ngx-translate/http-loader';
 import { MAT_DIALOG_DEFAULT_OPTIONS, MatDialogConfig } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 
@@ -37,6 +37,7 @@ import { kioskTokenInterceptor } from './shared/interceptors/kiosk-token.interce
 import { demoApiInterceptor } from './shared/interceptors/demo-api.interceptor';
 import { portalAuthInterceptor } from './features/portal/services/portal-auth.interceptor';
 import { trainingLangInterceptor } from './shared/interceptors/training-lang.interceptor';
+import { TerminologyTranslateLoader } from './shared/terminology/terminology-translate-loader';
 
 function initTranslations(): () => Promise<void> {
   const translate = inject(TranslateService);
@@ -75,11 +76,12 @@ export const appConfig: ApplicationConfig = {
     }),
     provideTranslateService({
       defaultLanguage: 'en',
+      loader: provideTranslateLoader(TerminologyTranslateLoader),
     }),
-    provideTranslateHttpLoader({
-      prefix: '/assets/i18n/',
-      suffix: '.json',
-    }),
+    {
+      provide: TRANSLATE_HTTP_LOADER_CONFIG,
+      useValue: { prefix: '/assets/i18n/', suffix: '.json' },
+    },
     {
       provide: APP_INITIALIZER,
       useFactory: initTranslations,

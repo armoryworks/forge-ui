@@ -9091,6 +9091,23 @@
       "snackbar": {
         "i9Completed": "I-9 Section 2 completed"
       }
+    },
+    "terminology": {
+      "intro": "Rename core terms to match how your shop talks. A rename applies to every menu, page title, column, button and message for all users. Leave a field blank to keep the standard wording; plurals fill in automatically unless you type one. Specific label changes made under UI Labels still win over these renames.",
+      "resetAll": "Clear all renames",
+      "resetTerm": "Clear the rename for {{term}}",
+      "enSingular": "English (one)",
+      "enPlural": "English (many)",
+      "esSingular": "Spanish (one)",
+      "esPlural": "Spanish (many)",
+      "esGender": "Spanish gender",
+      "genderDefaultMasculine": "Standard (masculine)",
+      "genderDefaultFeminine": "Standard (feminine)",
+      "genderMasculine": "Masculine (el / los)",
+      "genderFeminine": "Feminine (la / las)",
+      "otherTitle": "Other saved overrides",
+      "otherHint": "These keys came from a preset or an older version. They are kept, but only screens that look them up by key show them.",
+      "forms": "{{one}} / {{many}}"
     }
   },
   "announcements": {
