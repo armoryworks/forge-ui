@@ -74,6 +74,20 @@ describe('TerminologyService', () => {
     });
   });
 
+  describe('loadPortal', () => {
+    it('reads the anonymous portal term set once and applies it', () => {
+      service.loadPortal();
+      service.loadPortal();
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/portal/terminology`);
+      expect(req.request.method).toBe('GET');
+      req.flush([{ key: 'entity_customer', label: 'Client' }]);
+
+      httpMock.expectNone(`${environment.apiUrl}/terminology`);
+      expect(service.labels().get('entity_customer')).toBe('Client');
+    });
+  });
+
   describe('resolve', () => {
     it('should return the configured label when present', () => {
       service.load();

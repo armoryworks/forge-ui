@@ -37,6 +37,7 @@ export class TerminologyService {
   private readonly injector = inject(Injector);
   private readonly loader = inject(TranslateLoader, { optional: true });
   private loaded = false;
+  private portalLoaded = false;
 
   readonly labels = computed(() => this.store.entries());
 
@@ -48,6 +49,13 @@ export class TerminologyService {
     if (this.loaded) return;
     this.loaded = true;
     this.fetch();
+  }
+
+  /** Load the term set for the customer portal, which has no employee session, from its anonymous read. */
+  loadPortal(): void {
+    if (this.portalLoaded) return;
+    this.portalLoaded = true;
+    this.fetch(`${environment.apiUrl}/portal/terminology`);
   }
 
   /** Re-fetch and re-apply — used after an admin save and on the `terminologyChanged` hub event. */
@@ -106,8 +114,8 @@ export class TerminologyService {
     return this.humanize(key);
   }
 
-  private fetch(): void {
-    this.http.get<TerminologyEntry[]>(`${environment.apiUrl}/terminology`).pipe(
+  private fetch(url = `${environment.apiUrl}/terminology`): void {
+    this.http.get<TerminologyEntry[]>(url).pipe(
       catchError(() => of(null)),
     ).subscribe(entries => {
       if (entries) this.applyEntries(entries);
