@@ -123,6 +123,10 @@ export class LeadDetailPanelComponent {
     this.router.navigate(['/leads/campaigns']);
   }
 
+  protected openConvertedCustomer(customerId: number): void {
+    this.router.navigate(['/customers', customerId, 'overview']).then(() => this.closed.emit());
+  }
+
   protected getCapabilityFitClass(value: CapabilityFitStatus | undefined): string {
     const map: Record<CapabilityFitStatus, string> = {
       NotAssessed: 'chip--muted', Fits: 'chip--success',

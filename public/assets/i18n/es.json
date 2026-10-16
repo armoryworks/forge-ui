@@ -2912,6 +2912,7 @@
     "convertToCustomer": "Convertir a Cliente",
     "convertAndCreateJob": "Convertir y Crear Trabajo",
     "convertedInfo": "Este prospecto ha sido convertido a cliente.",
+    "openCustomer": "Abrir cliente",
     "reopenLead": "Reabrir Prospecto",
     "playbook": {
       "QuickQuote": "Devuelva la cotización rápido — el comprador está comparando precios. Apunte a una respuesta el mismo día.",

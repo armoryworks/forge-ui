@@ -2912,6 +2912,7 @@
     "convertToCustomer": "Convert to Customer",
     "convertAndCreateJob": "Convert & Create Job",
     "convertedInfo": "This lead has been converted to a customer.",
+    "openCustomer": "Open customer",
     "reopenLead": "Reopen Lead",
     "playbook": {
       "QuickQuote": "Turn the quote around fast — the buyer is in price-comparison mode. Aim for a same-day response.",
