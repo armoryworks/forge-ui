@@ -1,15 +1,16 @@
 <div class="kiosk-search">
-  <div class="kiosk-search__field">
+  <label class="kiosk-search__field">
     <span class="material-icons-outlined kiosk-search__icon">search</span>
     <input
       class="kiosk-search__input"
       type="text"
       data-testid="kiosk-search-input"
+      [attr.aria-label]="'shopFloor.searchPlaceholder' | translate"
       [placeholder]="'shopFloor.searchPlaceholder' | translate"
       [formControl]="searchControl"
       (focus)="onFocus()"
       (blur)="onBlur()" />
-  </div>
+  </label>
 
   @if (showResults()) {
     <div class="kiosk-search__dropdown">
