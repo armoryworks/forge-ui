@@ -7,6 +7,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ScanActionService } from '../../../../shared/services/scan-action.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ScanContext, ScanIssueContextJob } from '../../../../shared/models/scan-action.model';
+import { ScanIssueContext } from '../../../../shared/models/scan-issue-context.model';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 
 type IssueStep = 'select-job' | 'quantity' | 'confirm';
@@ -38,9 +39,7 @@ export class ScanIssueFlowComponent implements OnInit {
 
   ngOnInit(): void {
     const issueAction = this.context().availableActions.find(a => a.action === 'Issue');
-    if (issueAction?.context) {
-      this.jobs.set((issueAction.context as { jobs: ScanIssueContextJob[] }).jobs ?? []);
-    }
+    this.jobs.set((issueAction?.context as ScanIssueContext | null | undefined)?.jobs ?? []);
 
     if (this.jobs().length === 1) {
       this.selectJob(this.jobs()[0]);

@@ -35,7 +35,7 @@ const PUNCH_UNDO_RESULT_MS = 4_000;
 const SUPERVISE_ROLES = ['Admin', 'Manager'];
 const PUNCH_UNDO_CAPABILITIES = ['CAP-MOBILE-CORE', 'CAP-MOBILE-CLOCK'];
 
-type KioskPhase = 'setup' | 'dashboard' | 'identifying' | 'pin' | 'job-scanned' | 'manual-login' | 'clock';
+type KioskPhase = 'setup' | 'dashboard' | 'pin' | 'job-scanned' | 'manual-login' | 'clock';
 type PunchUndoState = 'offered' | 'undoing' | 'undone' | 'failed';
 
 @Component({

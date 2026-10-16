@@ -7,17 +7,21 @@ import { ScannerService } from '../../../../shared/services/scanner.service';
 import { ScanActionService } from '../../../../shared/services/scan-action.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ScanContext } from '../../../../shared/models/scan-action.model';
+import { ScanInspectContext } from '../../../../shared/models/scan-inspect-context.model';
+import { ScanShipContext } from '../../../../shared/models/scan-ship-context.model';
+import { ScanShipContextLine } from '../../../../shared/models/scan-ship-context-line.model';
 import { QuickActionPanelComponent, QuickAction } from '../../../../shared/components/quick-action-panel/quick-action-panel.component';
 import { ScanMoveFlowComponent } from '../scan-move-flow/scan-move-flow.component';
 import { ScanCountFlowComponent } from '../scan-count-flow/scan-count-flow.component';
 import { ScanReceiveFlowComponent } from '../scan-receive-flow/scan-receive-flow.component';
 import { ScanIssueFlowComponent } from '../scan-issue-flow/scan-issue-flow.component';
-import { ScanShipFlowComponent, ShipmentLineItem } from '../scan-ship-flow/scan-ship-flow.component';
+import { ScanShipFlowComponent } from '../scan-ship-flow/scan-ship-flow.component';
 import { ScanInspectFlowComponent } from '../scan-inspect-flow/scan-inspect-flow.component';
 import { ScanJobFlowComponent } from '../scan-job-flow/scan-job-flow.component';
-import { ScanReturnFlowComponent, RecentShipmentItem } from '../scan-return-flow/scan-return-flow.component';
+import { ShopFloorService } from '../../services/shop-floor.service';
+import { ScanIdentification } from '../../models/scan-identification.model';
 
-type OverlayPhase = 'idle' | 'loading' | 'actions' | 'move' | 'count' | 'receive' | 'issue' | 'ship' | 'inspect' | 'job' | 'return';
+type OverlayPhase = 'idle' | 'loading' | 'actions' | 'move' | 'count' | 'receive' | 'issue' | 'ship' | 'inspect' | 'job';
 
 interface JobActionContext {
   jobId: number;
@@ -35,7 +39,6 @@ const ACTION_ICONS: Record<string, string> = {
   Ship: 'local_shipping',
   Issue: 'output',
   Inspect: 'fact_check',
-  Return: 'assignment_return',
   Job: 'engineering',
 };
 
@@ -46,7 +49,6 @@ const ACTION_LABEL_KEYS: Record<string, string> = {
   Ship: 'kioskFlows.actions.ship',
   Issue: 'kioskFlows.actions.issue',
   Inspect: 'kioskFlows.actions.inspect',
-  Return: 'kioskFlows.actions.return',
   Job: 'kioskFlows.actions.job',
 };
 
@@ -54,11 +56,11 @@ const DISABLED_REASON_KEYS: Record<string, string> = {
   'No stock available to move': 'kioskFlows.disabledReasons.noStockToMove',
   'No open purchase order lines': 'kioskFlows.disabledReasons.noOpenPoLines',
   'No stock available to ship': 'kioskFlows.disabledReasons.noStockToShip',
+  'Your role cannot ship': 'kioskFlows.disabledReasons.roleCannotShip',
   'No open shipment lines': 'kioskFlows.disabledReasons.noOpenShipmentLines',
   'No stock available to issue': 'kioskFlows.disabledReasons.noStockToIssue',
   'No active jobs require this part': 'kioskFlows.disabledReasons.noActiveWorkOrders',
   'No QC template configured for this part': 'kioskFlows.disabledReasons.noQcTemplate',
-  'No stock available to return': 'kioskFlows.disabledReasons.noStockToReturn',
 };
 
 const ACTION_COLORS: Record<string, string> = {
@@ -68,7 +70,6 @@ const ACTION_COLORS: Record<string, string> = {
   Ship: 'var(--accent)',
   Issue: 'var(--warning)',
   Inspect: 'var(--primary)',
-  Return: 'var(--error)',
   Job: 'var(--info)',
 };
 
@@ -85,7 +86,6 @@ const ACTION_COLORS: Record<string, string> = {
     ScanShipFlowComponent,
     ScanInspectFlowComponent,
     ScanJobFlowComponent,
-    ScanReturnFlowComponent,
   ],
   templateUrl: './scan-action-overlay.component.html',
   styleUrl: './scan-action-overlay.component.scss',
@@ -94,13 +94,16 @@ const ACTION_COLORS: Record<string, string> = {
 export class ScanActionOverlayComponent {
   private readonly scanner = inject(ScannerService);
   private readonly scanAction = inject(ScanActionService);
+  private readonly shopFloor = inject(ShopFloorService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
 
   readonly dismissed = output<void>();
+  readonly contextLoaded = output<ScanContext>();
 
   protected readonly phase = signal<OverlayPhase>('idle');
   protected readonly context = signal<ScanContext | null>(null);
+  protected readonly jobContext = signal<JobActionContext | null>(null);
   protected readonly error = signal<string | null>(null);
   protected readonly multiScanMode = signal(false);
 
@@ -131,12 +134,11 @@ export class ScanActionOverlayComponent {
   });
 
   /** Extract open shipment lines from the Ship action context. */
-  protected readonly openShipmentLines = computed<ShipmentLineItem[]>(() => {
+  protected readonly openShipmentLines = computed<ScanShipContextLine[]>(() => {
     const ctx = this.context();
     if (!ctx) return [];
     const shipAction = ctx.availableActions.find(a => a.action === 'Ship');
-    const actionCtx = shipAction?.context as { openShipmentLines?: ShipmentLineItem[] } | undefined;
-    return actionCtx?.openShipmentLines ?? [];
+    return (shipAction?.context as ScanShipContext | null | undefined)?.openShipmentLines ?? [];
   });
 
   /** Extract QC template ID from the Inspect action context. */
@@ -144,27 +146,7 @@ export class ScanActionOverlayComponent {
     const ctx = this.context();
     if (!ctx) return null;
     const inspectAction = ctx.availableActions.find(a => a.action === 'Inspect');
-    const actionCtx = inspectAction?.context as { qcTemplateId?: number } | undefined;
-    return actionCtx?.qcTemplateId ?? null;
-  });
-
-  /** Extract recent shipments from the Return action context. */
-  protected readonly recentShipments = computed<RecentShipmentItem[]>(() => {
-    const ctx = this.context();
-    if (!ctx) return [];
-    const returnAction = ctx.availableActions.find(a => a.action === 'Return');
-    const actionCtx = returnAction?.context as { recentShipments?: RecentShipmentItem[] } | undefined;
-    return actionCtx?.recentShipments ?? [];
-  });
-
-  /** Extract job details from the Job action context (when scanning a job barcode). */
-  protected readonly jobContext = computed<JobActionContext | null>(() => {
-    const ctx = this.context();
-    if (!ctx) return null;
-    const jobAction = ctx.availableActions.find(a => a.action === 'Job');
-    if (!jobAction?.context) return null;
-    const actionCtx = jobAction.context as JobActionContext;
-    return actionCtx;
+    return (inspectAction?.context as ScanInspectContext | null | undefined)?.qcTemplateId ?? null;
   });
 
   // Listen for scans in inventory context
@@ -189,18 +171,48 @@ export class ScanActionOverlayComponent {
   private lookupPart(identifier: string): void {
     this.phase.set('loading');
     this.error.set(null);
+    this.jobContext.set(null);
 
     this.scanAction.getContext(identifier).subscribe({
       next: (ctx) => {
         this.context.set(ctx);
         this.phase.set('actions');
+        this.contextLoaded.emit(ctx);
       },
-      error: () => {
-        this.error.set(this.translate.instant('kioskFlows.overlay.partNotFound', { identifier }));
-        this.phase.set('actions');
-        setTimeout(() => this.close(), 3000);
-      },
+      error: () => this.lookupJob(identifier),
     });
+  }
+
+  private lookupJob(identifier: string): void {
+    this.shopFloor.identifyScan(identifier).subscribe({
+      next: (result) => {
+        if (result.scanType === 'job' && result.entityId != null) {
+          this.openJob(result);
+        } else {
+          this.showNotFound(identifier);
+        }
+      },
+      error: () => this.showNotFound(identifier),
+    });
+  }
+
+  private openJob(result: ScanIdentification): void {
+    this.context.set(null);
+    this.jobContext.set({
+      jobId: result.entityId!,
+      jobNumber: result.entityNumber ?? '',
+      jobTitle: result.entityTitle ?? '',
+      currentStage: result.stageName ?? '',
+      assigneeName: null,
+      hasActiveTimer: false,
+    });
+    this.phase.set('job');
+  }
+
+  private showNotFound(identifier: string): void {
+    this.error.set(this.translate.instant('kioskFlows.overlay.partNotFound', { identifier }));
+    this.phase.set('actions');
+    setTimeout(() => this.close(), 3000);
   }
 
   protected onActionClick(actionId: string): void {
@@ -225,9 +237,6 @@ export class ScanActionOverlayComponent {
         break;
       case 'Job':
         this.startJob();
-        break;
-      case 'Return':
-        this.startReturn();
         break;
       default:
         this.snackbar.info(this.translate.instant('kioskFlows.overlay.notImplemented', { action: this.actionLabel(actionId) }));
@@ -256,17 +265,8 @@ export class ScanActionOverlayComponent {
     this.phase.set('job');
   }
 
-  protected startReturn(): void {
-    const shipments = this.recentShipments();
-    if (shipments.length === 0) {
-      this.snackbar.info(this.translate.instant('kioskFlows.overlay.noRecentShipments'));
-      return;
-    }
-    this.phase.set('return');
-  }
-
   protected onFlowCompleted(): void {
-    if (this.multiScanMode()) {
+    if (this.multiScanMode() && this.context()) {
       // Stay open, ready for next scan
       this.phase.set('actions');
       this.snackbar.success(this.translate.instant('kioskFlows.overlay.readyForNext'));
@@ -276,6 +276,10 @@ export class ScanActionOverlayComponent {
   }
 
   protected onFlowCancelled(): void {
+    if (this.phase() === 'job') {
+      this.close();
+      return;
+    }
     this.phase.set('actions');
   }
 
@@ -297,6 +301,7 @@ export class ScanActionOverlayComponent {
   protected close(): void {
     this.phase.set('idle');
     this.context.set(null);
+    this.jobContext.set(null);
     this.error.set(null);
     this.multiScanMode.set(false);
     this.dismissed.emit();
