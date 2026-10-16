@@ -213,6 +213,7 @@ export class WorkflowService {
     definitionId: string;
     mode?: 'express' | 'guided';
     initialEntityData?: unknown;
+    entityId?: number;
   }): Observable<WorkflowRun> {
     return this.http.post<WorkflowRun>(`${environment.apiUrl}/workflows`, body)
       .pipe(tap(run => this.currentRun.set(run)));

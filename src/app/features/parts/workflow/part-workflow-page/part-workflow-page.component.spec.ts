@@ -6,8 +6,11 @@ import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
+import { WorkflowDefinition } from '../../../../shared/models/workflow-definition.model';
 import { WorkflowRun } from '../../../../shared/models/workflow-run.model';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
+import { PartDetail } from '../../models/part-detail.model';
+import { PartsService } from '../../services/parts.service';
 import { PartWorkflowPageComponent } from './part-workflow-page.component';
 
 class FakeLoader implements TranslateLoader {
@@ -87,5 +90,38 @@ describe('PartWorkflowPageComponent close', () => {
     expect(navSpy).toHaveBeenCalledWith(['/parts']);
     patch.flush(buildRun({ entityId: 42 }));
     expect(workflowService.stepSavePending()).toBe(false);
+  });
+});
+
+describe('PartWorkflowPageComponent on an existing part', () => {
+  const definition: WorkflowDefinition = {
+    id: 2, definitionId: 'part-make-finishedgood-v1', entityType: 'Part', defaultMode: 'guided',
+    steps: [], stepsJson: '[]', expressTemplateComponent: null, isSeedData: true,
+  };
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([{ path: 'parts', children: [] }]),
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+      ],
+    }).compileComponents();
+  });
+
+  it('binds the new run to the part instead of starting an entity-less run', () => {
+    const workflowService = TestBed.inject(WorkflowService);
+    vi.spyOn(TestBed.inject(PartsService), 'getPartById').mockReturnValue(of({ id: 1 } as unknown as PartDetail));
+    vi.spyOn(workflowService, 'listActive').mockReturnValue(of([]));
+    vi.spyOn(workflowService, 'loadDefinitionsForEntity').mockReturnValue(of([definition]));
+    vi.spyOn(workflowService, 'loadValidatorsForEntity').mockReturnValue(of([]));
+    const start = vi.spyOn(workflowService, 'startRun').mockReturnValue(of(buildRun({ entityId: 1 })));
+    const component = TestBed.runInInjectionContext(() => new PartWorkflowPageComponent());
+
+    (component as unknown as { loadWorkflowContext(id: number, def: string): void })
+      .loadWorkflowContext(1, 'part-make-finishedgood-v1');
+
+    expect(start).toHaveBeenCalledWith(expect.objectContaining({ entityType: 'Part', entityId: 1 }));
   });
 });

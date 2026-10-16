@@ -6,9 +6,12 @@ import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 import { vi } from 'vitest';
 
+import { WorkflowDefinition } from '../../../../shared/models/workflow-definition.model';
 import { WorkflowRun } from '../../../../shared/models/workflow-run.model';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
+import { VendorDetail } from '../../models/vendor-detail.model';
+import { VendorService } from '../../services/vendor.service';
 import { VendorWorkflowPageComponent } from './vendor-workflow-page.component';
 
 class FakeLoader implements TranslateLoader {
@@ -68,5 +71,42 @@ describe('VendorWorkflowPageComponent completion', () => {
   it('falls back to the list when the run has no vendor id', () => {
     complete(buildRun(), buildRun());
     expect(router.navigate).toHaveBeenCalledWith(['/vendors']);
+  });
+});
+
+describe('VendorWorkflowPageComponent on an existing vendor', () => {
+  const definition: WorkflowDefinition = {
+    id: 1, definitionId: 'vendor-guided-v1', entityType: 'Vendor', defaultMode: 'guided',
+    steps: [], stepsJson: '[]', expressTemplateComponent: null, isSeedData: true,
+  };
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [VendorWorkflowPageComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        {
+          provide: ActivatedRoute,
+          useValue: { paramMap: of(convertToParamMap({})), queryParamMap: of(convertToParamMap({})) },
+        },
+      ],
+    }).compileComponents();
+  });
+
+  it('binds the new run to the vendor so its steps edit the saved record', () => {
+    const workflowService = TestBed.inject(WorkflowService);
+    vi.spyOn(TestBed.inject(VendorService), 'getVendorById').mockReturnValue(of({ id: 55 } as unknown as VendorDetail));
+    vi.spyOn(workflowService, 'listActive').mockReturnValue(of([]));
+    vi.spyOn(workflowService, 'loadDefinitionsForEntity').mockReturnValue(of([definition]));
+    vi.spyOn(workflowService, 'loadValidatorsForEntity').mockReturnValue(of([]));
+    const start = vi.spyOn(workflowService, 'startRun').mockReturnValue(of(buildRun({ entityId: 55 })));
+    const component = TestBed.runInInjectionContext(() => new VendorWorkflowPageComponent());
+
+    (component as unknown as { loadWorkflowContext(id: number, def: string): void })
+      .loadWorkflowContext(55, 'vendor-guided-v1');
+
+    expect(start).toHaveBeenCalledWith(expect.objectContaining({ entityType: 'Vendor', entityId: 55 }));
   });
 });
