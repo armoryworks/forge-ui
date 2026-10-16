@@ -6836,6 +6836,8 @@
       "noConversations": "No conversations yet",
       "noResults": "No results found",
       "muteChannel": "Mute channel",
+      "mute": "Mute",
+      "unmute": "Unmute",
       "unmuteChannel": "Unmute channel",
       "browseChannels": "Browse channels"
     },

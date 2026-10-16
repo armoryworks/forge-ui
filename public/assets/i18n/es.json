@@ -6829,6 +6829,8 @@
       "noConversations": "Sin conversaciones aún",
       "noResults": "No se encontraron resultados",
       "muteChannel": "Silenciar canal",
+      "mute": "Silenciar",
+      "unmute": "Activar sonido",
       "unmuteChannel": "Activar sonido del canal",
       "browseChannels": "Explorar canales"
     },

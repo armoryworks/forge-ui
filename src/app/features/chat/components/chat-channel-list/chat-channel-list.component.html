@@ -126,7 +126,7 @@
                 class="icon-btn channel-list__mute-btn"
                 (click)="onMuteToggle(channel, $event)"
                 [attr.aria-label]="(isChannelMuted(channel) ? 'chat.channelList.unmuteChannel' : 'chat.channelList.muteChannel') | translate"
-                [matTooltip]="(isChannelMuted(channel) ? 'chat.channelInfo.unmute' : 'chat.channelInfo.mute') | translate"
+                [matTooltip]="(isChannelMuted(channel) ? 'chat.channelList.unmute' : 'chat.channelList.mute') | translate"
                 matTooltipPosition="above">
                 <span class="material-icons-outlined">{{ isChannelMuted(channel) ? 'notifications_active' : 'notifications_off' }}</span>
               </button>
@@ -183,7 +183,7 @@
                   class="icon-btn channel-list__mute-btn"
                   (click)="onMuteToggle(channel, $event)"
                   [attr.aria-label]="(isChannelMuted(channel) ? 'chat.channelList.unmuteChannel' : 'chat.channelList.muteChannel') | translate"
-                  [matTooltip]="(isChannelMuted(channel) ? 'chat.channelInfo.unmute' : 'chat.channelInfo.mute') | translate"
+                  [matTooltip]="(isChannelMuted(channel) ? 'chat.channelList.unmute' : 'chat.channelList.mute') | translate"
                   matTooltipPosition="above">
                   <span class="material-icons-outlined">{{ isChannelMuted(channel) ? 'notifications_active' : 'notifications_off' }}</span>
                 </button>
