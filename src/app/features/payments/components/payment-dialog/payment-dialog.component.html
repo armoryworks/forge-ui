@@ -50,9 +50,8 @@
         }
 
         <!-- Add Application Form -->
-        <div class="add-line" [class.add-line--4col]="!showSettlementFxRate()" [class.add-line--5col]="showSettlementFxRate()" [formGroup]="appForm">
-          <app-input [label]="'payments.invoiceId' | translate" type="number" formControlName="invoiceId" />
-          <app-input [label]="'payments.invoiceNumber' | translate" formControlName="invoiceNumber" />
+        <div class="add-line" [class.add-line--3col]="!showSettlementFxRate()" [class.add-line--4col]="showSettlementFxRate()" [formGroup]="appForm">
+          <app-autocomplete [label]="'payments.invoice' | translate" [options]="invoiceOptions()" formControlName="invoiceId" [minChars]="0" [placeholder]="'payments.invoicePlaceholder' | translate" data-testid="payment-app-invoice" />
           <app-input [label]="'payments.amount' | translate" type="number" formControlName="amount" [placeholder]="'payments.amountPlaceholder' | translate" />
           @if (showSettlementFxRate()) {
             <app-input [label]="'accounting.currency.settlementFxRate' | translate" type="number" formControlName="settlementFxRate" step="0.0000001" min="0.0000001" [placeholder]="'accounting.currency.fxRatePlaceholder' | translate" data-testid="payment-settlement-fx-rate" />
