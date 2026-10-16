@@ -198,6 +198,24 @@
 
 // ─── Role Suggestions Slideout ───
 .role-suggestions {
+  margin-bottom: $sp-lg;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--border);
+  background: var(--bg);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $sp-sm;
+    margin-bottom: $sp-sm;
+  }
+
+  &__title {
+    @include uppercase-label($font-size-xxs);
+    color: var(--text);
+  }
+
   &__hint {
     margin: 0 0 $sp-md;
     font-size: $font-size-sm;
@@ -205,8 +223,8 @@
   }
 
   &__list {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: $sp-sm;
   }
 
