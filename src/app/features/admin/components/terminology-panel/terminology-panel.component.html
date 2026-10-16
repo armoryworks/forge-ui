@@ -45,6 +45,17 @@
           <app-select [label]="'adminPanels.terminology.esGender' | translate" [options]="genderOptions(row)"
             [formControl]="control(row.keys.esGender)" [attr.data-testid]="'term-' + row.id + '-es-gender'" />
         </div>
+        @if (isUntranslated(row)) {
+          <p class="term-card__note term-card__note--warn" role="status" [attr.data-testid]="'term-' + row.id + '-untranslated'">
+            <span class="material-icons-outlined" aria-hidden="true">translate</span>
+            {{ 'adminPanels.terminology.untranslatedNote' | translate }}
+          </p>
+        } @else if (isMachineTranslated(row)) {
+          <p class="term-card__note" [attr.data-testid]="'term-' + row.id + '-machine'">
+            <span class="material-icons-outlined" aria-hidden="true">translate</span>
+            {{ 'adminPanels.terminology.machineNote' | translate }}
+          </p>
+        }
       </section>
     }
   </div>

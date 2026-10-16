@@ -11,6 +11,7 @@ import { UpdateTrackTypeRequest } from '../models/update-track-type-request.mode
 import { ReferenceDataGroup } from '../models/reference-data-group.model';
 import { ReferenceDataEntry } from '../models/reference-data-entry.model';
 import { TerminologyEntryItem } from '../models/terminology-entry-item.model';
+import { TerminologySaveResult } from '../models/terminology-save-result.model';
 import { SystemSetting } from '../models/system-setting.model';
 import { TrackType } from '../../../shared/models/track-type.model';
 import { CustomFieldDefinition } from '../models/custom-field-definition.model';
@@ -133,8 +134,8 @@ export class AdminService {
     return this.http.get<TerminologyEntryItem[]>(`${environment.apiUrl}/terminology`);
   }
 
-  updateTerminology(entries: TerminologyEntryItem[]): Observable<TerminologyEntryItem[]> {
-    return this.http.put<TerminologyEntryItem[]>(`${environment.apiUrl}/terminology`, { entries });
+  updateTerminology(entries: TerminologyEntryItem[]): Observable<TerminologySaveResult> {
+    return this.http.put<TerminologySaveResult>(`${environment.apiUrl}/terminology`, { entries });
   }
 
   // System Settings

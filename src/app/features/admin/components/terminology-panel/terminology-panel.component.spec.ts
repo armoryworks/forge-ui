@@ -21,6 +21,8 @@ interface PanelInternals {
   save(): void;
   resetAll(): void;
   enPluralHint(row: unknown): string;
+  isMachineTranslated(row: unknown): boolean;
+  isUntranslated(row: unknown): boolean;
   rows: { id: string }[];
 }
 
@@ -31,7 +33,7 @@ describe('TerminologyPanelComponent', () => {
     updateTerminology: vi.fn(),
   };
   const terminology = { applyEntries: vi.fn() };
-  const snackbar = { success: vi.fn(), errorFrom: vi.fn() };
+  const snackbar = { success: vi.fn(), warn: vi.fn(), errorFrom: vi.fn() };
 
   const create = (entries: TerminologyEntryItem[]) => {
     adminService.getTerminology.mockReturnValue(of(entries));
@@ -80,7 +82,7 @@ describe('TerminologyPanelComponent', () => {
   it('saves only changed keys, sends cleared keys blank, and applies the result app-wide', () => {
     create([{ key: 'entity_customer', label: 'Patron' }]);
     const saved = [{ key: 'entity_job', label: 'Work Order' }];
-    adminService.updateTerminology.mockReturnValue(of(saved));
+    adminService.updateTerminology.mockReturnValue(of({ entries: saved, untranslatedTerms: [] }));
 
     panel.control('entity_job').setValue(' Work Order ');
     panel.control('entity_customer').setValue('');
@@ -97,6 +99,39 @@ describe('TerminologyPanelComponent', () => {
     expect(terminology.applyEntries).toHaveBeenCalledWith(saved);
     expect(snackbar.success).toHaveBeenCalled();
     expect(panel.dirty()).toBe(false);
+  });
+
+  it('flags Spanish that was machine-translated until the admin edits it', () => {
+    create([
+      { key: 'entity_job', label: 'Work Order' },
+      { key: 'entity_job:es', label: 'Orden de trabajo', isMachineTranslated: true },
+      { key: 'gender_job:es', label: 'f', isMachineTranslated: true },
+    ]);
+    const job = panel.rows.find(r => r.id === 'job')!;
+    const customer = panel.rows.find(r => r.id === 'customer')!;
+
+    expect(panel.isMachineTranslated(job)).toBe(true);
+    expect(panel.isMachineTranslated(customer)).toBe(false);
+
+    panel.control('entity_job:es').setValue('Orden de producción');
+    panel.control('gender_job:es').setValue('m');
+    expect(panel.isMachineTranslated(job)).toBe(false);
+  });
+
+  it('warns and marks the term when Spanish could not be translated', () => {
+    create([]);
+    adminService.updateTerminology.mockReturnValue(of({
+      entries: [{ key: 'entity_job', label: 'Work Order' }],
+      untranslatedTerms: ['job'],
+    }));
+
+    panel.control('entity_job').setValue('Work Order');
+    panel.save();
+
+    expect(snackbar.warn).toHaveBeenCalled();
+    expect(snackbar.success).not.toHaveBeenCalled();
+    expect(panel.isUntranslated(panel.rows.find(r => r.id === 'job')!)).toBe(true);
+    expect(panel.isUntranslated(panel.rows.find(r => r.id === 'customer')!)).toBe(false);
   });
 
   it('clears every rename with reset all', () => {

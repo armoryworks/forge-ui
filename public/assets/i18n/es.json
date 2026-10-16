@@ -9083,7 +9083,7 @@
       }
     },
     "terminology": {
-      "intro": "Cambie el nombre de los términos principales para que coincidan con el vocabulario de su taller. El cambio se aplica a todos los menús, títulos, columnas, botones y mensajes para todos los usuarios. Deje un campo en blanco para conservar el término estándar; el plural se completa automáticamente si no escribe uno. Los cambios de etiquetas específicas hechos en Etiquetas de UI siguen teniendo prioridad.",
+      "intro": "Cambie el nombre de los términos principales para que coincidan con el vocabulario de su taller. El cambio se aplica a todos los menús, títulos, columnas, botones y mensajes para todos los usuarios, incluido el portal de clientes. Deje un campo en blanco para conservar el término estándar; el plural se completa automáticamente si no escribe uno. Un cambio en inglés se traduce automáticamente al español si deja en blanco los campos en español, y puede editar esa traducción. Los cambios de etiquetas específicas hechos en Etiquetas de UI siguen teniendo prioridad.",
       "resetAll": "Borrar todos los cambios",
       "resetTerm": "Borrar el cambio de {{term}}",
       "enSingular": "Inglés (singular)",
@@ -9097,7 +9097,10 @@
       "genderFeminine": "Femenino (la / las)",
       "otherTitle": "Otras sustituciones guardadas",
       "otherHint": "Estas claves provienen de un preajuste o de una versión anterior. Se conservan, pero solo las pantallas que las buscan por clave las muestran.",
-      "forms": "{{one}} / {{many}}"
+      "forms": "{{one}} / {{many}}",
+      "machineNote": "El español se tradujo automáticamente del cambio en inglés. Edítelo para usar sus propias palabras.",
+      "untranslatedNote": "La traducción automática al español no está disponible en este momento, por lo que los usuarios en español siguen viendo el término estándar. Escriba el término en español o vuelva a guardar el cambio en inglés más tarde.",
+      "savedUntranslated": "Terminología guardada, pero no se pudo traducir automáticamente al español: {{terms}}"
     }
   },
   "announcements": {

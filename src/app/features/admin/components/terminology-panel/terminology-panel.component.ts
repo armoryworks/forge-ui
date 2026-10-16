@@ -47,6 +47,8 @@ export class TerminologyPanelComponent implements OnInit {
   protected readonly loadFailed = signal(false);
   protected readonly original = signal<ReadonlyMap<string, string>>(new Map());
   protected readonly otherKeys = signal<string[]>([]);
+  protected readonly machineKeys = signal<ReadonlySet<string>>(new Set());
+  protected readonly untranslated = signal<ReadonlySet<string>>(new Set());
 
   protected readonly rows: TermRow[] = TERM_CATALOG.map(term => toRow(term));
   protected readonly form = new FormRecord<FormControl<string>>({});
@@ -99,6 +101,17 @@ export class TerminologyPanelComponent implements OnInit {
     return Object.values(row.keys).some(key => (values[key] ?? '').trim().length > 0);
   }
 
+  protected isMachineTranslated(row: TermRow): boolean {
+    const values = this.values();
+    const original = this.original();
+    return [row.keys.esOne, row.keys.esOther, row.keys.esGender].some(key =>
+      this.machineKeys().has(key) && (values[key] ?? '') === (original.get(key) ?? ''));
+  }
+
+  protected isUntranslated(row: TermRow): boolean {
+    return this.untranslated().has(row.id);
+  }
+
   protected resetRow(row: TermRow): void {
     for (const key of Object.values(row.keys)) this.control(key).setValue('');
   }
@@ -112,11 +125,17 @@ export class TerminologyPanelComponent implements OnInit {
     if (entries.length === 0) return;
     this.saving.set(true);
     this.adminService.updateTerminology(entries).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: updated => {
-        this.applyLoaded(updated);
-        this.terminology.applyEntries(updated);
+      next: result => {
+        this.applyLoaded(result.entries);
+        this.terminology.applyEntries(result.entries);
+        this.untranslated.set(new Set(result.untranslatedTerms));
         this.saving.set(false);
-        this.snackbar.success(this.translate.instant('admin.terminologySaved'));
+        if (result.untranslatedTerms.length > 0) {
+          const terms = this.rows.filter(row => this.untranslated().has(row.id)).map(row => row.enOne).join(', ');
+          this.snackbar.warn(this.translate.instant('adminPanels.terminology.savedUntranslated', { terms }));
+        } else {
+          this.snackbar.success(this.translate.instant('admin.terminologySaved'));
+        }
       },
       error: (err: unknown) => {
         this.saving.set(false);
@@ -151,6 +170,7 @@ export class TerminologyPanelComponent implements OnInit {
     }
     this.original.set(original);
     this.otherKeys.set(others);
+    this.machineKeys.set(new Set(entries.filter(e => e.isMachineTranslated).map(e => e.key)));
     this.form.reset(Object.fromEntries(Object.keys(this.form.controls).map(key => [key, original.get(key) ?? ''])));
   }
 

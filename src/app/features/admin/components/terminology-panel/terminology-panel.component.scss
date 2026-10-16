@@ -81,6 +81,23 @@
   gap: $sp-sm $sp-md;
 }
 
+.term-card__note {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+
+  .material-icons-outlined {
+    font-size: var(--font-size-md);
+  }
+
+  &--warn {
+    color: var(--warning);
+  }
+}
+
 .terminology__other {
   display: flex;
   flex-direction: column;

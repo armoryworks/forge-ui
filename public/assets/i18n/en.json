@@ -9090,7 +9090,7 @@
       }
     },
     "terminology": {
-      "intro": "Rename core terms to match how your shop talks. A rename applies to every menu, page title, column, button and message for all users. Leave a field blank to keep the standard wording; plurals fill in automatically unless you type one. Specific label changes made under UI Labels still win over these renames.",
+      "intro": "Rename core terms to match how your shop talks. A rename applies to every menu, page title, column, button and message for all users, including the customer portal. Leave a field blank to keep the standard wording; plurals fill in automatically unless you type one. An English rename is translated to Spanish automatically when you leave the Spanish fields blank, and you can edit that translation. Specific label changes made under UI Labels still win over these renames.",
       "resetAll": "Clear all renames",
       "resetTerm": "Clear the rename for {{term}}",
       "enSingular": "English (one)",
@@ -9104,7 +9104,10 @@
       "genderFeminine": "Feminine (la / las)",
       "otherTitle": "Other saved overrides",
       "otherHint": "These keys came from a preset or an older version. They are kept, but only screens that look them up by key show them.",
-      "forms": "{{one}} / {{many}}"
+      "forms": "{{one}} / {{many}}",
+      "machineNote": "Spanish was translated automatically from the English rename. Edit it to use your own wording.",
+      "untranslatedNote": "Automatic Spanish translation isn't available right now, so Spanish users still see the standard term. Type the Spanish wording, or save the English rename again later.",
+      "savedUntranslated": "Terminology saved, but Spanish couldn't be translated automatically for: {{terms}}"
     }
   },
   "announcements": {
