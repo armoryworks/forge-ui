@@ -2456,7 +2456,7 @@
       "deleteTitle": "Delete Estimate?",
       "deleteMessage": "Delete \"{{title}}\"? This cannot be undone.",
       "convertTitle": "Convert to Quote?",
-      "convertMessage": "Convert \"{{title}}\" to a formal quote? The estimate will be marked as Accepted.",
+      "convertMessage": "Convert \"{{title}}\" to a formal quote? The estimate will be marked as Converted to Quote.",
       "convertConfirmLabel": "Convert",
       "createdQuote": "Created quote {{number}}",
       "lines": "Line items",
@@ -2912,6 +2912,7 @@
     "convertToCustomer": "Convert to Customer",
     "convertAndCreateJob": "Convert & Create Job",
     "convertedInfo": "This lead has been converted to a customer.",
+    "openCustomer": "Open customer",
     "reopenLead": "Reopen Lead",
     "playbook": {
       "QuickQuote": "Turn the quote around fast — the buyer is in price-comparison mode. Aim for a same-day response.",
@@ -5043,7 +5044,10 @@
     "keepMine": "Keep Mine"
   },
   "activityHistory": {
-    "system": "System"
+    "system": "System",
+    "updatedFields": "Updated {{count}} fields",
+    "fieldChange": "1 field change",
+    "fieldChanges": "{{count}} field changes"
   },
   "statusTimeline": {
     "currentStatus": "Current Status",

@@ -39,6 +39,21 @@
 
   <app-toggle data-testid="customer-identity-active" [label]="'customers.colActive' | translate" formControlName="isActive" [isReadonly]="!editing()" />
 
+  @if (canEditCommercialTerms()) {
+    <h4 class="cluster__title">{{ 'customers.workflow.creditAndTax.title' | translate }}</h4>
+    <div class="cluster__form-row">
+      @if (creditLimitsEnabled()) {
+        <app-currency-input data-testid="customer-identity-credit-limit" [label]="'customers.workflow.creditAndTax.creditLimitLabel' | translate" formControlName="creditLimit" [max]="1000000000" [isReadonly]="!editing()" />
+      }
+      <app-toggle data-testid="customer-identity-tax-exempt" [label]="'customers.workflow.creditAndTax.isTaxExemptLabel' | translate" formControlName="isTaxExempt" [isReadonly]="!editing()" />
+    </div>
+    @if (form.controls.isTaxExempt.value) {
+      <div class="cluster__form-row">
+        <app-input data-testid="customer-identity-tax-exemption-id" [label]="'customers.workflow.creditAndTax.taxExemptionIdLabel' | translate" formControlName="taxExemptionId" [required]="true" [maxlength]="50" [isReadonly]="!editing()" />
+      </div>
+    }
+  }
+
   <!-- ─── Always-derived external-system fields ─────────────────
        Provider and ExternalId aren't editable here (managed by the
        accounting integration). Shown via cluster label/value pattern

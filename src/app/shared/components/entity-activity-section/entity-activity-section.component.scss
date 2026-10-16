@@ -138,6 +138,41 @@
   }
 }
 
+.ea-batch-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-xs;
+  margin-top: $sp-xs;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: $font-family-primary;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+  }
+
+  &:hover {
+    color: var(--text);
+  }
+}
+
+.ea-batch-list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+  margin: $sp-xs 0 0;
+  padding-left: $sp-xl;
+  border-left: $border-width solid var(--border);
+  list-style: none;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
 // ─── Notes ───
 .ea-note-add {
   display: flex;

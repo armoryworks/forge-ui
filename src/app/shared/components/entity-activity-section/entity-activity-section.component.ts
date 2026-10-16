@@ -6,9 +6,12 @@ import {
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { EntityActivityService } from '../../services/entity-activity.service';
 import { ActivityItem } from '../../models/activity.model';
+import { DisplayActivity } from '../../models/display-activity.model';
+import { collapseFieldChanges } from '../../utils/activity-batching';
 import { EntityNote } from '../../models/entity-note.model';
 import { MentionUser } from '../../models/mention-user.model';
 import { AvatarComponent } from '../avatar/avatar.component';
@@ -25,6 +28,7 @@ export type ActivityFilterTab = 'all' | 'comments' | 'notes' | 'history';
     DatePipe,
     ReactiveFormsModule,
     MatTooltipModule,
+    TranslatePipe,
     AvatarComponent,
     ActivityTimelineComponent,
     RichTextEditorComponent,
@@ -36,6 +40,7 @@ export type ActivityFilterTab = 'all' | 'comments' | 'notes' | 'history';
 })
 export class EntityActivitySectionComponent implements OnInit {
   private readonly activityService = inject(EntityActivityService);
+  private readonly translate = inject(TranslateService);
 
   readonly entityType = input.required<string>();
   readonly entityId = input.required<number>();
@@ -47,6 +52,7 @@ export class EntityActivitySectionComponent implements OnInit {
   protected readonly historyItems = signal<ActivityItem[]>([]);
   protected readonly mentionUsers = signal<MentionUser[]>([]);
   protected readonly isSavingNote = signal(false);
+  protected readonly expandedItem = signal<string | null>(null);
 
   protected readonly commentControl = new FormControl('');
   protected readonly noteControl = new FormControl('');
@@ -57,7 +63,7 @@ export class EntityActivitySectionComponent implements OnInit {
     this.activity().filter(a => a.action === 'Comment'),
   );
 
-  protected readonly allActivityItems = computed<ActivityItem[]>(() => {
+  protected readonly allActivityItems = computed<DisplayActivity[]>(() => {
     const comments = this.mappedComments();
     const noteItems: ActivityItem[] = this.notes().map(n => ({
       id: n.id,
@@ -66,8 +72,12 @@ export class EntityActivitySectionComponent implements OnInit {
       userInitials: n.authorInitials ?? undefined,
       action: 'note',
     }));
-    return [...comments, ...noteItems, ...this.historyItems()].sort(
+    const merged = [...comments, ...noteItems, ...this.historyItems()].sort(
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+    );
+    return collapseFieldChanges(
+      merged,
+      count => this.translate.instant('activityHistory.updatedFields', { count }),
     );
   });
 
@@ -88,6 +98,14 @@ export class EntityActivitySectionComponent implements OnInit {
 
   protected allItemKey(item: ActivityItem): string {
     return `${item.action === 'note' ? 'note' : 'log'}-${item.id}`;
+  }
+
+  protected batchLabelKey(count: number): string {
+    return count === 1 ? 'activityHistory.fieldChange' : 'activityHistory.fieldChanges';
+  }
+
+  protected toggleExpanded(key: string): void {
+    this.expandedItem.update(current => (current === key ? null : key));
   }
 
   protected setFilter(tab: ActivityFilterTab): void {

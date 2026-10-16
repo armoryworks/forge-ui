@@ -291,7 +291,6 @@
     "src/app/features/parts/components/part-clusters/part-mrp-cluster/part-mrp-cluster.component.html": 2,
     "src/app/features/parts/components/part-clusters/part-purchase-units-cluster/part-purchase-units-cluster.component.html": 2,
     "src/app/features/parts/components/part-clusters/part-quality-cluster/part-quality-cluster.component.html": 2,
-    "src/app/features/parts/components/part-clusters/part-uom-cluster/part-uom-cluster.component.html": 2,
     "src/app/features/parts/components/part-detail-panel/part-detail-panel.component.html": 2,
     "src/app/features/parts/components/routing-flow-view/routing-flow-view.component.html": 1,
     "src/app/features/parts/components/routing/routing.component.html": 1,

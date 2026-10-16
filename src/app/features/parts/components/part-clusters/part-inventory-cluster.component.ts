@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -6,6 +6,7 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
+import { shallowEqual } from '../../../../shared/utils/shallow-equal';
 import { PartDetail } from '../../models/part-detail.model';
 import { TraceabilityType } from '../../models/traceability-type.type';
 import { AbcClass } from '../../models/abc-class.type';
@@ -61,16 +62,29 @@ export class PartInventoryClusterComponent {
     { value: 'C', label: 'C' },
   ];
 
+  private readonly savedValues = computed(() => {
+    const p = this.part();
+    return {
+      id: p.id,
+      minStockThreshold: p.minStockThreshold,
+      reorderPoint: p.reorderPoint,
+      reorderQuantity: p.reorderQuantity,
+      safetyStockDays: p.safetyStockDays,
+      traceabilityType: p.traceabilityType,
+      abcClass: p.abcClass,
+    };
+  }, { equal: shallowEqual });
+
   constructor() {
     effect(() => {
-      const p = this.part();
+      const v = this.savedValues();
       this.form.reset({
-        minStockThreshold: p.minStockThreshold,
-        reorderPoint: p.reorderPoint,
-        reorderQuantity: p.reorderQuantity,
-        safetyStockDays: p.safetyStockDays,
-        traceabilityType: p.traceabilityType,
-        abcClass: p.abcClass,
+        minStockThreshold: v.minStockThreshold,
+        reorderPoint: v.reorderPoint,
+        reorderQuantity: v.reorderQuantity,
+        safetyStockDays: v.safetyStockDays,
+        traceabilityType: v.traceabilityType,
+        abcClass: v.abcClass,
       });
       if (this.editing()) {
         this.form.enable();

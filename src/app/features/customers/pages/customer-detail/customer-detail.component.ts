@@ -8,6 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { CustomerService } from '../../services/customer.service';
 import { CustomerSummary } from '../../models/customer-summary.model';
+import { UpdateCustomerRequest } from '../../models/update-customer-request.model';
 import {
   CustomerDetailLayoutResolverService,
   CustomerDetailTabId,
@@ -266,6 +267,7 @@ export class CustomerDetailComponent {
       email: patch.email ?? c.email,
       phone: patch.phone ?? c.phone,
       isActive: patch.isActive ?? c.isActive,
+      ...this.commercialTermsChanges(patch),
     }).subscribe({
       next: () => {
         this.saving.set(false);
@@ -275,6 +277,21 @@ export class CustomerDetailComponent {
       },
       error: () => this.saving.set(false),
     });
+  }
+
+  private commercialTermsChanges(patch: Partial<CustomerSummary>): UpdateCustomerRequest {
+    if (!this.canViewCommercialDocuments()) return {};
+    const changes: UpdateCustomerRequest = {};
+    if (patch.isTaxExempt !== undefined) changes.isTaxExempt = patch.isTaxExempt;
+    if (patch.taxExemptionId !== undefined && patch.taxExemptionId !== null) changes.taxExemptionId = patch.taxExemptionId;
+    if (patch.creditLimit !== undefined) {
+      if (patch.creditLimit === null) {
+        if (this.customer()?.creditLimit != null) changes.clearCreditLimit = true;
+      } else {
+        changes.creditLimit = patch.creditLimit;
+      }
+    }
+    return changes;
   }
 
   protected archiveCustomer(): void {

@@ -115,6 +115,22 @@
               <span class="ea-comment-item__time">{{ item.createdAt | date:'MM/dd/yyyy hh:mm a' }}</span>
             </div>
             <app-rich-text-display [content]="item.description" />
+            @if (item.batchedItems; as batch) {
+              @let key = allItemKey(item);
+              <button type="button" class="ea-batch-toggle" data-testid="activity-batch-toggle"
+                [attr.aria-expanded]="expandedItem() === key"
+                (click)="toggleExpanded(key)">
+                <span class="material-icons-outlined" aria-hidden="true">{{ expandedItem() === key ? 'expand_more' : 'chevron_right' }}</span>
+                {{ batchLabelKey(batch.length) | translate: { count: batch.length } }}
+              </button>
+              @if (expandedItem() === key) {
+                <ul class="ea-batch-list">
+                  @for (change of batch; track change.id) {
+                    <li>{{ change.description }}</li>
+                  }
+                </ul>
+              }
+            }
           </div>
         }
       </div>

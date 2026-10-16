@@ -2451,7 +2451,7 @@
       "deleteTitle": "¿Eliminar estimación?",
       "deleteMessage": "¿Eliminar \"{{title}}\"? Esta acción no se puede deshacer.",
       "convertTitle": "¿Convertir a cotización?",
-      "convertMessage": "¿Convertir \"{{title}}\" en una cotización formal? La estimación se marcará como Aceptada.",
+      "convertMessage": "¿Convertir \"{{title}}\" en una cotización formal? La estimación se marcará como Convertida a cotización.",
       "convertConfirmLabel": "Convertir",
       "createdQuote": "Cotización {{number}} creada",
       "lines": "Partidas",
@@ -2912,6 +2912,7 @@
     "convertToCustomer": "Convertir a Cliente",
     "convertAndCreateJob": "Convertir y Crear Trabajo",
     "convertedInfo": "Este prospecto ha sido convertido a cliente.",
+    "openCustomer": "Abrir cliente",
     "reopenLead": "Reabrir Prospecto",
     "playbook": {
       "QuickQuote": "Devuelva la cotización rápido — el comprador está comparando precios. Apunte a una respuesta el mismo día.",
@@ -5036,7 +5037,10 @@
     "keepMine": "Mantener míos"
   },
   "activityHistory": {
-    "system": "Sistema"
+    "system": "Sistema",
+    "updatedFields": "{{count}} campos actualizados",
+    "fieldChange": "1 cambio de campo",
+    "fieldChanges": "{{count}} cambios de campos"
   },
   "statusTimeline": {
     "currentStatus": "Estado actual",

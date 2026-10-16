@@ -231,6 +231,13 @@
         <div class="converted-info">
           <span class="material-icons-outlined converted-icon">check_circle</span>
           <span>{{ 'leads.convertedInfo' | translate }}</span>
+          @if (lead.convertedCustomerId; as customerId) {
+            <button type="button" class="action-btn action-btn--sm converted-info__open" data-testid="lead-open-customer-btn"
+              (click)="openConvertedCustomer(customerId)">
+              <span class="material-icons-outlined">open_in_new</span>
+              {{ 'leads.openCustomer' | translate }}
+            </button>
+          }
         </div>
       }
 

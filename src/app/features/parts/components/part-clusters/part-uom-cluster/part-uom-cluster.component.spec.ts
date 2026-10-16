@@ -109,4 +109,23 @@ describe('PartUomClusterComponent', () => {
     c.onSave();
     expect(cb).toHaveBeenCalledWith({ stockUomId: 11, purchaseUomId: 22, salesUomId: 33 });
   });
+  it('keeps unsaved edits when another cluster on the tab saves', () => {
+    const component = TestBed.runInInjectionContext(() => new PartUomClusterComponent());
+    const inputs = mockSignalInputs(component, {
+      part: makePart({ stockUomId: null }),
+      editing: true,
+      saving: false,
+    });
+    TestBed.flushEffects();
+    const c = component as unknown as { form: { value: Record<string, unknown>; controls: Record<string, { setValue(v: unknown): void }> } };
+    c.form.controls['stockUomId'].setValue(1);
+
+    inputs.part.set(makePart({ stockUomId: null, minStockThreshold: 10 }));
+    TestBed.flushEffects();
+    expect(c.form.value['stockUomId']).toBe(1);
+
+    inputs.part.set(makePart({ stockUomId: 2, minStockThreshold: 10 }));
+    TestBed.flushEffects();
+    expect(c.form.value['stockUomId']).toBe(2);
+  });
 });

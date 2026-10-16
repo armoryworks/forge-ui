@@ -34,6 +34,7 @@ interface DialogInternals {
   salesOrderOptions(): SelectOption[];
   shipmentOptions(): SelectOption[];
   onPartPicked(entity: Record<string, unknown> | null): void;
+  lines: { (): { partId: number | null; partNumber: string; description: string; quantity: number; unitPrice: number }[]; set(v: unknown[]): void };
 }
 
 const emptyPage = { items: [], totalCount: 0, page: 1, pageSize: 200 };
@@ -44,8 +45,14 @@ const acmeSources: InvoiceSources = {
     { id: 43, orderNumber: 'SO-00043', customerName: 'Acme' },
   ],
   shipments: [
-    { id: 7, shipmentNumber: 'SHP-00007', salesOrderId: 42, salesOrderNumber: 'SO-00042', shippedDate: '2026-10-01T12:00:00Z' },
-    { id: 8, shipmentNumber: 'SHP-00008', salesOrderId: 43, salesOrderNumber: 'SO-00043', shippedDate: null },
+    {
+      id: 7, shipmentNumber: 'SHP-00007', salesOrderId: 42, salesOrderNumber: 'SO-00042', shippedDate: '2026-10-01T12:00:00Z',
+      lines: [{ partId: 4711, partNumber: 'PN-1001', description: 'Bracket', quantity: 4, unitPrice: 12.5 }],
+    },
+    {
+      id: 8, shipmentNumber: 'SHP-00008', salesOrderId: 43, salesOrderNumber: 'SO-00043', shippedDate: null,
+      lines: [{ partId: null, partNumber: null, description: 'Freight', quantity: 1, unitPrice: 40 }],
+    },
   ],
 };
 
@@ -192,5 +199,44 @@ describe('InvoiceDialogComponent — order, shipment and part pickers', () => {
 
     control.setValue('A'.repeat(20));
     expect(control.valid).toBe(true);
+  });
+
+  it('prefills the lines from a picked shipment at the order price', () => {
+    const { internals, httpMock } = setup();
+    selectCustomer(internals, httpMock, 5, acmeSources);
+
+    internals.invoiceForm.controls.shipmentId.setValue(7);
+
+    expect(internals.lines()).toEqual([
+      { partId: 4711, partNumber: 'PN-1001', description: 'Bracket', quantity: 4, unitPrice: 12.5 },
+    ]);
+  });
+
+  it('swaps prefilled lines when another shipment is picked, and clears them when none is', () => {
+    const { internals, httpMock } = setup();
+    selectCustomer(internals, httpMock, 5, acmeSources);
+    const shipment = internals.invoiceForm.controls.shipmentId;
+
+    shipment.setValue(7);
+    shipment.setValue(8);
+    expect(internals.lines().map(l => l.description)).toEqual(['Freight']);
+
+    shipment.setValue(null);
+    expect(internals.lines()).toEqual([]);
+  });
+
+  it('never overwrites lines the user typed or changed', () => {
+    const { internals, httpMock } = setup();
+    selectCustomer(internals, httpMock, 5, acmeSources);
+    internals.lines.set([{ partId: null, partNumber: '', description: 'Setup charge', quantity: 1, unitPrice: 75 }]);
+
+    internals.invoiceForm.controls.shipmentId.setValue(7);
+    expect(internals.lines().map(l => l.description)).toEqual(['Setup charge']);
+
+    internals.lines.set([]);
+    internals.invoiceForm.controls.shipmentId.setValue(8);
+    internals.lines.set([...internals.lines(), { partId: null, partNumber: '', description: 'Crating', quantity: 1, unitPrice: 20 }]);
+    internals.invoiceForm.controls.shipmentId.setValue(7);
+    expect(internals.lines().map(l => l.description)).toEqual(['Freight', 'Crating']);
   });
 });

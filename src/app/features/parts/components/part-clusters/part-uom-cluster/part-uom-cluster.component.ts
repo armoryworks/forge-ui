@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnInit, effect, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, input, output, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InventoryService } from '../../../../inventory/services/inventory.service';
+import { shallowEqual } from '../../../../../shared/utils/shallow-equal';
 import { SelectComponent, SelectOption } from '../../../../../shared/components/select/select.component';
 import { ValidationButtonComponent } from '../../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../../shared/services/form-validation.service';
@@ -29,6 +30,7 @@ import { PartDetail } from '../../../models/part-detail.model';
 })
 export class PartUomClusterComponent implements OnInit {
   private readonly inventoryService = inject(InventoryService);
+  private readonly translate = inject(TranslateService);
 
   readonly part = input.required<PartDetail>();
   readonly editing = input(false);
@@ -37,7 +39,7 @@ export class PartUomClusterComponent implements OnInit {
   readonly save = output<Partial<PartDetail>>();
   readonly cancelled = output<void>();
 
-  protected readonly uomOptions = signal<SelectOption[]>([{ value: null, label: '-- None --' }]);
+  protected readonly uomOptions = signal<SelectOption[]>([this.noneOption()]);
   protected readonly uomLabelById = signal<Map<number, string>>(new Map());
 
   protected readonly form = new FormGroup({
@@ -54,7 +56,7 @@ export class PartUomClusterComponent implements OnInit {
         const list = (uoms ?? []).filter(u => u.isActive);
         if (list.length === 0) {
           // Fallback to a small fixed list when the admin tool hasn't populated UoMs yet.
-          const fallback: SelectOption[] = [{ value: null, label: '-- None --' }];
+          const fallback: SelectOption[] = [this.noneOption()];
           ['ea', 'kg', 'g', 'lb', 'oz', 'm', 'mm', 'L', 'mL'].forEach((code, idx) => {
             // Negative ids signal "fallback"; the server won't accept them on save
             // but they let the dropdown render before admin populates real UoMs.
@@ -63,7 +65,7 @@ export class PartUomClusterComponent implements OnInit {
           this.uomOptions.set(fallback);
           return;
         }
-        const options: SelectOption[] = [{ value: null, label: '-- None --' }];
+        const options: SelectOption[] = [this.noneOption()];
         const labelMap = new Map<number, string>();
         for (const u of list) {
           const label = u.symbol ? `${u.name} (${u.symbol})` : u.name;
@@ -76,20 +78,30 @@ export class PartUomClusterComponent implements OnInit {
     });
   }
 
+  private readonly savedValues = computed(() => {
+    const p = this.part();
+    return {
+      id: p.id,
+      stockUomId: p.stockUomId ?? null,
+      purchaseUomId: p.purchaseUomId ?? null,
+      salesUomId: p.salesUomId ?? null,
+    };
+  }, { equal: shallowEqual });
+
   constructor() {
     effect(() => {
-      const p = this.part();
-      this.form.reset({
-        stockUomId: p.stockUomId ?? null,
-        purchaseUomId: p.purchaseUomId ?? null,
-        salesUomId: p.salesUomId ?? null,
-      });
+      const { stockUomId, purchaseUomId, salesUomId } = this.savedValues();
+      this.form.reset({ stockUomId, purchaseUomId, salesUomId });
       if (this.editing()) {
         this.form.enable();
       } else {
         this.form.disable();
       }
     });
+  }
+
+  private noneOption(): SelectOption {
+    return { value: null, label: this.translate.instant('common.none') };
   }
 
   protected resolveLabel(id: number | null | undefined): string {

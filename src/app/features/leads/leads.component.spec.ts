@@ -79,4 +79,19 @@ describe('LeadsComponent — inline account creation (forge#2/#3)', () => {
     const ctrl = (component as unknown as { bulkAccountControl: { value: unknown } }).bulkAccountControl;
     expect(ctrl.value).toBe(newAccount.id);
   });
+
+  it('pipeline search matches the lead number', () => {
+    const internals = component as unknown as {
+      leads: { set: (rows: unknown[]) => void };
+      searchControl: { setValue: (v: string) => void };
+      filteredLeads: () => { id: number }[];
+    };
+    internals.leads.set([
+      { id: 1, companyName: 'Acme', contactName: null, email: null, leadNumber: 'LEAD-00001', status: 'New' },
+      { id: 2, companyName: 'Globex', contactName: null, email: null, leadNumber: 'LEAD-00002', status: 'New' },
+    ]);
+    internals.searchControl.setValue('lead-00002');
+
+    expect(internals.filteredLeads().map(l => l.id)).toEqual([2]);
+  });
 });
