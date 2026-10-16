@@ -19,7 +19,7 @@ describe('AppComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([]),
-        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: MatDialog, useValue: { open: vi.fn(), afterOpened: EMPTY } },
         // AppUpdateService (used by AppComponent) injects SwUpdate; the SW is
         // disabled in tests, so a no-op stub satisfies the DI graph.
         { provide: SwUpdate, useValue: { isEnabled: false, versionUpdates: EMPTY } },
