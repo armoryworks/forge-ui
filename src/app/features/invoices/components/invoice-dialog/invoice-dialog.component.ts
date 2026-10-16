@@ -11,6 +11,7 @@ import { CustomerService } from '../../../customers/services/customer.service';
 import { CustomerListItem } from '../../../customers/models/customer-list-item.model';
 import { PartListItem } from '../../../parts/models/part-list-item.model';
 import { InvoiceSources } from '../../models/invoice-sources.model';
+import { InvoiceSourceShipment } from '../../models/invoice-source-shipment.model';
 import { CreateInvoiceLineRequest } from '../../models/create-invoice-line-request.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -80,6 +81,7 @@ export class InvoiceDialogComponent {
   /** Phase 1l — invoice issue date is when it was issued; not future. */
   protected readonly today = todayEnd();
   protected readonly lines = signal<LineEntry[]>([]);
+  private prefilledLines: LineEntry[] | null = null;
   protected readonly sources = signal<InvoiceSources>({ salesOrders: [], shipments: [] });
 
   protected readonly customerOptions = computed<SelectOption[]>(() => [
@@ -236,6 +238,7 @@ export class InvoiceDialogComponent {
       if (shipment && controls.salesOrderId.value == null) {
         controls.salesOrderId.setValue(shipment.salesOrderId);
       }
+      this.prefillLinesFrom(shipment);
     });
 
     // Apply the SO-context pre-link once inputs resolve. save() reads
@@ -277,6 +280,25 @@ export class InvoiceDialogComponent {
 
   protected close(): void {
     this.closed.emit();
+  }
+
+  private prefillLinesFrom(shipment: InvoiceSourceShipment | undefined): void {
+    const untouched = this.lines().length === 0 || this.lines() === this.prefilledLines;
+    if (!untouched) return;
+    if (!shipment || shipment.lines.length === 0) {
+      if (this.prefilledLines && this.lines() === this.prefilledLines) this.lines.set([]);
+      this.prefilledLines = null;
+      return;
+    }
+    const entries: LineEntry[] = shipment.lines.map(l => ({
+      partId: l.partId,
+      partNumber: l.partNumber ?? '',
+      description: l.description,
+      quantity: l.quantity,
+      unitPrice: l.unitPrice,
+    }));
+    this.prefilledLines = entries;
+    this.lines.set(entries);
   }
 
   protected onPartPicked(entity: Record<string, unknown> | null): void {
