@@ -20,4 +20,6 @@ export interface CreatePurchaseOrderRequest {
   estimatedFreight?: number;
   quoteCurrency?: string;
   expectedDeliveryDate?: string;
+  isBlanket?: boolean;
+  blanketExpirationDate?: string;
 }

@@ -5661,7 +5661,9 @@
       "released": "Liberada",
       "remaining": "Restante",
       "agreedPrice": "Precio Acordado",
-      "expires": "Vence"
+      "expires": "Vence",
+      "createAsBlanket": "Orden abierta",
+      "createHint": "Las cantidades pedidas pasan a ser el total acordado; el proveedor envía contra las liberaciones que cree en la orden."
     }
   },
   "poManage": {

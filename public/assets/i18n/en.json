@@ -5668,7 +5668,9 @@
       "released": "Released",
       "remaining": "Remaining",
       "agreedPrice": "Agreed Price",
-      "expires": "Expires"
+      "expires": "Expires",
+      "createAsBlanket": "Blanket order",
+      "createHint": "The ordered quantities become the agreed total; the vendor ships against releases you create on the PO."
     }
   },
   "poManage": {
