@@ -4,6 +4,7 @@ import { Observable, of } from 'rxjs';
 import { TranslateLoader, provideTranslateService } from '@ngx-translate/core';
 
 import { ScanResolveResult } from '../../../../shared/models/mobile-api.model';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
 import { ScanActionSheetComponent } from './scan-action-sheet.component';
 
@@ -17,6 +18,7 @@ const purchaseOrder: ScanResolveResult = { kind: 'purchaseOrder', id: 8, code: '
 describe('ScanActionSheetComponent', () => {
   let fixture: ComponentFixture<ScanActionSheetComponent>;
   let purchasing: boolean;
+  let roles: string[];
 
   function render(runningJobId: number | null, actingAs: string | null = null, result = job): HTMLElement {
     fixture = TestBed.createComponent(ScanActionSheetComponent);
@@ -29,11 +31,13 @@ describe('ScanActionSheetComponent', () => {
 
   beforeEach(() => {
     purchasing = true;
+    roles = ['Procurement'];
     TestBed.configureTestingModule({
       imports: [ScanActionSheetComponent],
       providers: [
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
         { provide: CapabilityService, useValue: { isEnabled: (code: string) => code !== 'CAP-P2P-PO' || purchasing } },
+        { provide: AuthService, useValue: { hasAnyRole: (allowed: string[]) => roles.some(r => allowed.includes(r)) } },
       ],
     });
   });
@@ -85,6 +89,14 @@ describe('ScanActionSheetComponent', () => {
 
   it('offers only Open on desktop for a purchase order while purchasing is off', () => {
     purchasing = false;
+    const el = render(null, null, purchaseOrder);
+
+    expect(el.querySelector('[data-testid="scan-action-receive"]')).toBeNull();
+    expect(el.querySelector('[data-testid="scan-action-details"]')).not.toBeNull();
+  });
+
+  it('offers only Open on desktop for a purchase order to a production worker, who cannot receive it', () => {
+    roles = ['ProductionWorker'];
     const el = render(null, null, purchaseOrder);
 
     expect(el.querySelector('[data-testid="scan-action-receive"]')).toBeNull();

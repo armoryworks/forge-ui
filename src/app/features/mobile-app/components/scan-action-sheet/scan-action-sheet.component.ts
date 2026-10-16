@@ -3,7 +3,10 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, output } f
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { ScanResolveResult } from '../../../../shared/models/mobile-api.model';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
+
+const PO_RECEIVE_ROLES = ['Admin', 'Manager', 'OfficeManager', 'Procurement'];
 
 export type ScanAction = 'start' | 'stop' | 'complete' | 'move' | 'details' | 'moveStock' | 'identify' | 'receive';
 
@@ -17,7 +20,8 @@ interface ActionButton {
 /**
  * The one contextual action sheet after a decode: "Job 4471 — Start /
  * Complete / Move / Details". Start becomes Stop while the person's timer
- * runs on this job; a purchase order offers Receive while purchasing is on.
+ * runs on this job; a purchase order offers Receive while purchasing is on
+ * and the person holds a role that may receive it.
  * Dumb: the parent resolves the scan and performs the chosen action. Never
  * navigates on its own.
  */
@@ -31,6 +35,7 @@ interface ActionButton {
 })
 export class ScanActionSheetComponent {
   private readonly capabilities = inject(CapabilityService);
+  private readonly auth = inject(AuthService);
 
   readonly result = input.required<ScanResolveResult>();
   readonly busy = input<boolean>(false);
@@ -64,7 +69,7 @@ export class ScanActionSheetComponent {
       case 'badge':
         return [{ action: 'identify', labelKey: 'mobileApp.scan.actions.identify', icon: 'badge', primary: true }];
       case 'purchaseOrder':
-        return this.capabilities.isEnabled('CAP-P2P-PO', true)
+        return this.capabilities.isEnabled('CAP-P2P-PO', true) && this.auth.hasAnyRole(PO_RECEIVE_ROLES)
           ? [
             { action: 'receive', labelKey: 'mobileAppWork.scan.receive', icon: 'move_to_inbox', primary: true },
             { action: 'details', labelKey: 'mobileApp.scan.actions.openOnDesktop', icon: 'open_in_new' },
