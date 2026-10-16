@@ -100,6 +100,10 @@ export class EntityActivitySectionComponent implements OnInit {
     return `${item.action === 'note' ? 'note' : 'log'}-${item.id}`;
   }
 
+  protected batchLabelKey(count: number): string {
+    return count === 1 ? 'activityHistory.fieldChange' : 'activityHistory.fieldChanges';
+  }
+
   protected toggleExpanded(key: string): void {
     this.expandedItem.update(current => (current === key ? null : key));
   }

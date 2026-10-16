@@ -121,7 +121,7 @@
                 [attr.aria-expanded]="expandedItem() === key"
                 (click)="toggleExpanded(key)">
                 <span class="material-icons-outlined" aria-hidden="true">{{ expandedItem() === key ? 'expand_more' : 'chevron_right' }}</span>
-                {{ 'activityHistory.fieldChanges' | translate: { count: batch.length } }}
+                {{ batchLabelKey(batch.length) | translate: { count: batch.length } }}
               </button>
               @if (expandedItem() === key) {
                 <ul class="ea-batch-list">

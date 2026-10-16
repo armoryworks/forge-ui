@@ -5040,6 +5040,7 @@
   "activityHistory": {
     "system": "Sistema",
     "updatedFields": "{{count}} campos actualizados",
+    "fieldChange": "1 cambio de campo",
     "fieldChanges": "{{count}} cambios de campos"
   },
   "statusTimeline": {

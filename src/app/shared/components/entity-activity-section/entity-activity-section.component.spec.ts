@@ -14,6 +14,7 @@ import { ActivityFilterTab, EntityActivitySectionComponent } from './entity-acti
 interface SectionInternals {
   allActivityItems(): DisplayActivity[];
   allItemKey(item: ActivityItem): string;
+  batchLabelKey(count: number): string;
   loadData(entityType: string, entityId: number): void;
 }
 
@@ -96,5 +97,12 @@ describe('EntityActivitySectionComponent', () => {
     const summary = internals.allActivityItems().find(i => i.id === 20);
     expect(internals.allActivityItems().some(i => i.id === 21 || i.id === 22)).toBe(false);
     expect(summary?.batchedItems?.map(i => i.id)).toEqual([21, 22]);
+  });
+
+  it('labels a folded single field change in the singular', () => {
+    const { internals } = setup(['all']);
+
+    expect(internals.batchLabelKey(1)).toBe('activityHistory.fieldChange');
+    expect(internals.batchLabelKey(3)).toBe('activityHistory.fieldChanges');
   });
 });

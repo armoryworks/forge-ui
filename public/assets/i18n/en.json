@@ -5047,6 +5047,7 @@
   "activityHistory": {
     "system": "System",
     "updatedFields": "Updated {{count}} fields",
+    "fieldChange": "1 field change",
     "fieldChanges": "{{count}} field changes"
   },
   "statusTimeline": {
