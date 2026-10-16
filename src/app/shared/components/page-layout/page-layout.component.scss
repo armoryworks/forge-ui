@@ -22,7 +22,8 @@
   background: var(--surface);
   border-bottom: $border-width-accent solid var(--header);
   flex-shrink: 0;
-  height: 48px;
+  flex-wrap: wrap;
+  min-height: 48px;
   gap: $sp-md;
 
   [data-theme='dark'] & {
