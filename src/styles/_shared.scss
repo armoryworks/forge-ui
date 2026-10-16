@@ -54,6 +54,13 @@
   }
 }
 
+.page-header--wrap {
+  flex-wrap: wrap;
+  height: auto;
+  min-height: 48px;
+  row-gap: $sp-sm;
+}
+
 .page-header__title {
   font-size: var(--font-size-title);
   font-weight: 700;
