@@ -27,6 +27,17 @@ export const routes: Routes = [
     canActivate: [setupRequiredGuard],
     loadComponent: () => import('./features/auth/setup.component').then((m) => m.SetupComponent),
   },
+  // Phase 1m.7 — post-first-admin integration setup wizard. Shown
+  // after the first admin completes initial account setup; walks
+  // through optional integrations with "Set up" / "Skip" choices per
+  // card. Auth-gated; admin-only is enforced inside the component.
+  {
+    path: 'setup/integrations',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/setup-integrations/setup-integrations.component')
+        .then(m => m.SetupIntegrationsComponent),
+  },
   {
     path: 'setup/:token',
     loadComponent: () => import('./features/auth/token-setup.component').then((m) => m.TokenSetupComponent),
@@ -48,17 +59,6 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/sales-orders/pages/public-acceptance/public-acceptance.component')
         .then(m => m.PublicAcceptanceComponent),
-  },
-  // Phase 1m.7 — post-first-admin integration setup wizard. Shown
-  // after the first admin completes initial account setup; walks
-  // through optional integrations with "Set up" / "Skip" choices per
-  // card. Auth-gated; admin-only is enforced inside the component.
-  {
-    path: 'setup/integrations',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/setup-integrations/setup-integrations.component')
-        .then(m => m.SetupIntegrationsComponent),
   },
   {
     path: 'chat/popout',
