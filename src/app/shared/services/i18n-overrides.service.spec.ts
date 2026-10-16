@@ -8,6 +8,7 @@ import { Observable, of } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { I18nOverridesService } from './i18n-overrides.service';
+import { CapabilityService } from './capability.service';
 
 /** Stands in for the HTTP catalog loader — the shipped JSON the overrides merge over. */
 class CatalogStubLoader implements TranslateLoader {
@@ -18,13 +19,14 @@ class CatalogStubLoader implements TranslateLoader {
 
 const activeUrl = `${environment.apiUrl}/i18n/overrides/active`;
 
-function setup() {
+function setup(i18nEnabled = true) {
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     providers: [
       provideHttpClient(),
       provideHttpClientTesting(),
       provideTranslateService({ loader: { provide: TranslateLoader, useClass: CatalogStubLoader } }),
+      { provide: CapabilityService, useValue: { isEnabled: (code: string) => code === 'CAP-ADMIN-I18N' && i18nEnabled } },
     ],
   });
   const translate = TestBed.inject(TranslateService);
@@ -45,6 +47,16 @@ describe('I18nOverridesService (merge point)', () => {
 
     expect(translate.instant('common.save')).toBe('Commit'); // overridden
     expect(translate.instant('common.cancel')).toBe('Cancel'); // untouched shipped value
+    httpMock.verify();
+  });
+
+  it('does not ask for overrides while CAP-ADMIN-I18N is off', () => {
+    const { service, translate, httpMock } = setup(false);
+
+    service.load();
+
+    httpMock.expectNone(activeUrl);
+    expect(translate.instant('common.save')).toBe('Save');
     httpMock.verify();
   });
 
