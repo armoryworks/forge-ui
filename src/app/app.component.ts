@@ -48,6 +48,7 @@ import { CapabilityService } from './shared/services/capability.service';
 import { environment } from '../environments/environment';
 import { CurrencyService } from './shared/services/currency.service';
 import { I18nOverridesService } from './shared/services/i18n-overrides.service';
+import { TerminologyService } from './shared/services/terminology.service';
 import { EmployeeProfileService } from './features/account/services/employee-profile.service';
 import { TrainingService } from './features/training/services/training.service';
 import { WalkthroughContent } from './features/training/models/walkthrough-content.model';
@@ -98,6 +99,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly capabilityService = inject(CapabilityService);
   private readonly currencyService = inject(CurrencyService);
   private readonly i18nOverrides = inject(I18nOverridesService);
+  private readonly terminology = inject(TerminologyService);
   private readonly employeeProfile = inject(EmployeeProfileService);
   private readonly trainingService = inject(TrainingService);
   private readonly ngZone = inject(NgZone);
@@ -142,6 +144,7 @@ export class AppComponent implements OnInit, OnDestroy {
           this.draftRecovery.onLogin();
         }
         this.userPreferences.load();
+        this.terminology.load();
 
         // Capability descriptor MUST resolve before any capability-gated
         // service makes HTTP calls. Otherwise the layer-3 interceptor can't
@@ -374,7 +377,7 @@ export class AppComponent implements OnInit, OnDestroy {
         },
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      d.setSteps(steps as any);
+      d.setSteps(this.terminology.substituteSteps(steps) as any);
       d.drive();
     }).catch(() => { /* driver.js not available */ });
   }

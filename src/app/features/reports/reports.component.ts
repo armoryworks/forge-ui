@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { BaseChartDirective } from 'ng2-charts';
+import { BaseChartDirective } from '../../shared/charts/base-chart.directive';
 import { ChartData, ChartOptions } from 'chart.js';
 import { DrillableChartComponent, DrillEvent, DrillLevel } from '../../shared/components/drillable-chart/drillable-chart.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';

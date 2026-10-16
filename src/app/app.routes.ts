@@ -9,6 +9,7 @@ import { mobileRedirectGuard } from './shared/guards/mobile-redirect.guard';
 import { roleGuard } from './shared/guards/role.guard';
 import { rootRedirectGuard } from './shared/guards/root-redirect.guard';
 import { setupRequiredGuard, setupCompleteGuard } from './shared/guards/setup.guard';
+import { portalTerminologyGuard } from './features/portal/services/portal-terminology.guard';
 
 export const routes: Routes = [
   { path: 'login', canActivate: [setupCompleteGuard], component: LoginComponent },
@@ -48,6 +49,7 @@ export const routes: Routes = [
   // session and have no role guard.
   {
     path: 'portal',
+    canActivate: [portalTerminologyGuard],
     loadChildren: () => import('./features/portal/portal.routes').then(m => m.PORTAL_ROUTES),
   },
   // Anonymous customer acceptance page (CAP-O2C-SO-ACCEPTANCE). Reached from

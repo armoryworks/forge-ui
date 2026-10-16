@@ -4,6 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { TerminologyService } from './terminology.service';
+import { TermSetStore } from '../terminology/term-set.store';
 import { environment } from '../../../environments/environment';
 
 describe('TerminologyService', () => {
@@ -12,6 +13,7 @@ describe('TerminologyService', () => {
   let translate: TranslateService;
 
   beforeEach(() => {
+    localStorage.clear();
     TestBed.configureTestingModule({
       imports: [TranslateModule.forRoot()],
       providers: [
@@ -72,6 +74,20 @@ describe('TerminologyService', () => {
     });
   });
 
+  describe('loadPortal', () => {
+    it('reads the anonymous portal term set once and applies it', () => {
+      service.loadPortal();
+      service.loadPortal();
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/portal/terminology`);
+      expect(req.request.method).toBe('GET');
+      req.flush([{ key: 'entity_customer', label: 'Client' }]);
+
+      httpMock.expectNone(`${environment.apiUrl}/terminology`);
+      expect(service.labels().get('entity_customer')).toBe('Client');
+    });
+  });
+
   describe('resolve', () => {
     it('should return the configured label when present', () => {
       service.load();
@@ -121,7 +137,7 @@ describe('TerminologyService', () => {
         translate.use('en');
 
         // Preset override seeded — should win even though translate has a value.
-        service.set('entity_job', 'Task');
+        service.applyEntries([{ key: 'entity_job', label: 'Task' }]);
         expect(service.resolve('entity_job')).toBe('Task');
       });
 
@@ -133,29 +149,80 @@ describe('TerminologyService', () => {
     });
   });
 
-  describe('set', () => {
-    it('should update a single label for live preview', () => {
-      service.set('entity_job', 'Project');
+  describe('applyEntries', () => {
+    it('should replace the active set', () => {
+      service.applyEntries([{ key: 'entity_job', label: 'Project' }]);
 
       expect(service.resolve('entity_job')).toBe('Project');
     });
 
-    it('should override existing labels', () => {
+    it('should override loaded labels', () => {
       service.load();
       httpMock.expectOne(`${environment.apiUrl}/terminology`).flush([
         { key: 'entity_job', label: 'Work Order' },
       ]);
 
-      service.set('entity_job', 'Project');
+      service.applyEntries([{ key: 'entity_job', label: 'Project' }]);
       expect(service.resolve('entity_job')).toBe('Project');
     });
 
-    it('should not affect other labels when setting one', () => {
-      service.set('entity_job', 'Work Order');
-      service.set('entity_part', 'Component');
+    it('should keep several labels', () => {
+      service.applyEntries([
+        { key: 'entity_job', label: 'Work Order' },
+        { key: 'entity_part', label: 'Component' },
+      ]);
 
       expect(service.resolve('entity_job')).toBe('Work Order');
       expect(service.resolve('entity_part')).toBe('Component');
+    });
+
+    it('should cache the set so the next boot renders it before the API answers', () => {
+      service.applyEntries([{ key: 'entity_job', label: 'Ticket' }]);
+
+      expect(JSON.parse(localStorage.getItem('forge.terminology') ?? '{}')).toEqual({ entity_job: 'Ticket' });
+    });
+  });
+
+  describe('substitute', () => {
+    it('should leave text alone while no terms are set', () => {
+      expect(service.substitute('Move jobs', 'en')).toBe('Move jobs');
+    });
+
+    it('should rename terms in free text', async () => {
+      service.applyEntries([{ key: 'entity_job', label: 'Ticket' }]);
+      await TestBed.inject(TermSetStore).loadEngine();
+
+      expect(service.substitute('Drag cards to move jobs through the pipeline.', 'en'))
+        .toBe('Drag cards to move tickets through the pipeline.');
+    });
+  });
+
+  describe('substituteSteps', () => {
+    it('should rename walkthrough step text and keep the other fields', async () => {
+      service.applyEntries([{ key: 'entity_customer', label: 'Client' }]);
+      await TestBed.inject(TermSetStore).loadEngine();
+
+      const steps = service.substituteSteps([
+        { element: '#c', advanceOn: 'click', popover: { title: 'Customers', description: 'Pick a customer' } },
+        { element: '#d' },
+      ], 'en');
+
+      expect(steps).toEqual([
+        { element: '#c', advanceOn: 'click', popover: { title: 'Clients', description: 'Pick a client' } },
+        { element: '#d' },
+      ]);
+    });
+  });
+
+  describe('resolve per language', () => {
+    it('should use the Spanish override for Spanish users and never the English one', () => {
+      translate.setTranslation('es', {});
+      translate.use('es');
+      service.applyEntries([{ key: 'entity_job', label: 'Work Order' }]);
+      expect(service.resolve('entity_job')).toBe('Job');
+
+      service.applyEntries([{ key: 'entity_job', label: 'Work Order' }, { key: 'entity_job:es', label: 'Orden' }]);
+      expect(service.resolve('entity_job')).toBe('Orden');
     });
   });
 });

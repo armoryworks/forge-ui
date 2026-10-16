@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { SignalrService } from './signalr.service';
 import { NotificationService } from './notification.service';
 import { CapabilityService } from './capability.service';
+import { TerminologyService } from './terminology.service';
 import { AppNotification } from '../models/app-notification.model';
 
 /**
@@ -20,6 +21,7 @@ export class NotificationHubService {
   private readonly signalr = inject(SignalrService);
   private readonly notificationService = inject(NotificationService);
   private readonly capabilityService = inject(CapabilityService);
+  private readonly terminology = inject(TerminologyService);
   private connected = false;
 
   async connect(): Promise<void> {
@@ -49,6 +51,9 @@ export class NotificationHubService {
       this.capabilityService.load().subscribe();
     });
 
+    connection.off('terminologyChanged');
+    connection.on('terminologyChanged', () => this.terminology.refresh());
+
     await this.signalr.startConnection('notifications');
   }
 
@@ -57,6 +62,7 @@ export class NotificationHubService {
     const connection = this.signalr.getOrCreateConnection('notifications');
     connection.off('notificationReceived');
     connection.off('capabilityChanged');
+    connection.off('terminologyChanged');
     await this.signalr.stopConnection('notifications');
   }
 }

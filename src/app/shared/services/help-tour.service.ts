@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { TerminologyService } from './terminology.service';
 import { createTourSvg, clearTourConnector, updateTourConnector, attachScrollRefresh, setupPopoverDraggable } from '../utils/tour-connector.utils';
 
 export interface TourStep {
@@ -28,6 +29,7 @@ export interface DriverStep {
 @Injectable({ providedIn: 'root' })
 export class HelpTourService {
   private readonly router = inject(Router);
+  private readonly terminology = inject(TerminologyService);
   private readonly tours = new Map<string, TourDefinition>();
   private driverInstance: unknown = null;
   private tourSvg: SVGSVGElement | null = null;
@@ -51,7 +53,11 @@ export class HelpTourService {
     await this.launchDriver(
       tour.steps.map(step => ({
         element: step.element,
-        popover: { title: step.title, description: step.description, side: step.side ?? 'bottom' },
+        popover: {
+          title: this.terminology.substitute(step.title, 'en'),
+          description: this.terminology.substitute(step.description, 'en'),
+          side: step.side ?? 'bottom',
+        },
       })),
       tourId,
     );
@@ -63,7 +69,7 @@ export class HelpTourService {
    */
   async startSteps(steps: DriverStep[], tourId: string): Promise<void> {
     if (this.isRunning || steps.length === 0) return;
-    await this.launchDriver(steps, tourId);
+    await this.launchDriver(this.terminology.substituteSteps(steps), tourId);
   }
 
   isRegistered(tourId: string): boolean {

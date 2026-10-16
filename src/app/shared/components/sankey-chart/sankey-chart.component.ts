@@ -1,8 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
-import { BaseChartDirective } from 'ng2-charts';
+import { BaseChartDirective } from '../../charts/base-chart.directive';
 import { ChartData, ChartOptions } from 'chart.js';
-import 'chartjs-chart-sankey';
 
 import { SankeyFlowItem } from '../../../features/reports/models/sankey-flow-item.model';
 

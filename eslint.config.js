@@ -32,7 +32,23 @@ module.exports = tseslint.config(
         },
       ],
       "@typescript-eslint/no-explicit-any": "warn",
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "ng2-charts",
+              importNames: ["BaseChartDirective", "provideCharts", "withDefaultRegisterables"],
+              message: "Import BaseChartDirective from shared/charts/base-chart.directive so Chart.js registers inside the lazy chunk that draws the chart.",
+            },
+          ],
+        },
+      ],
     },
+  },
+  {
+    files: ["src/app/shared/charts/base-chart.directive.ts"],
+    rules: { "no-restricted-imports": "off" },
   },
   {
     // dynamic-qb-* components are rendered programmatically via ViewContainerRef
