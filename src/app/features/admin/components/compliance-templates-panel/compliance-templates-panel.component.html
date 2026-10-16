@@ -1,15 +1,17 @@
 <div class="panel-header">
   <span class="panel-header__count">{{ templates().length }} {{ 'complianceTemplates.templates' | translate }}</span>
-  <div class="panel-header__actions">
-    <button class="action-btn" [disabled]="syncing()" (click)="syncAll()" [attr.aria-label]="'complianceTemplates.syncAll' | translate">
-      <span class="material-icons-outlined">sync</span>
-      {{ 'complianceTemplates.syncAll' | translate }}
-    </button>
-    <button class="action-btn action-btn--create" (click)="openCreateDialog()" [attr.aria-label]="'complianceTemplates.newTemplate' | translate">
-      <span class="material-icons-outlined">add</span>
-      {{ 'complianceTemplates.newTemplate' | translate }}
-    </button>
-  </div>
+  @if (canManageTemplates) {
+    <div class="panel-header__actions">
+      <button class="action-btn" [disabled]="syncing()" (click)="syncAll()" [attr.aria-label]="'complianceTemplates.syncAll' | translate">
+        <span class="material-icons-outlined">sync</span>
+        {{ 'complianceTemplates.syncAll' | translate }}
+      </button>
+      <button class="action-btn action-btn--create" (click)="openCreateDialog()" [attr.aria-label]="'complianceTemplates.newTemplate' | translate">
+        <span class="material-icons-outlined">add</span>
+        {{ 'complianceTemplates.newTemplate' | translate }}
+      </button>
+    </div>
+  }
 </div>
 
 <div [appLoadingBlock]="loading()">
@@ -19,7 +21,7 @@
     [data]="templates()"
     emptyIcon="description"
     [emptyMessage]="'complianceTemplates.noTemplates' | translate"
-    [clickableRows]="true"
+    [clickableRows]="canManageTemplates"
     (rowClick)="onRowClick($any($event))">
 
     <ng-template appColumnCell="icon" let-row>

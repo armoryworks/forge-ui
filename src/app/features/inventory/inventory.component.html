@@ -72,13 +72,15 @@
       <span class="material-icons-outlined">lock</span>
       {{ 'inventory.tabs.reservations' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'replenishment'" (click)="switchTab('replenishment')">
-      <span class="material-icons-outlined">shopping_cart</span>
-      Replenishment
-      @if (pendingSuggestions().length > 0) {
-        <span class="tab__badge">{{ pendingSuggestions().length }}</span>
-      }
-    </button>
+    @if (canReplenish) {
+      <button class="tab" [class.tab--active]="activeTab() === 'replenishment'" (click)="switchTab('replenishment')">
+        <span class="material-icons-outlined">shopping_cart</span>
+        Replenishment
+        @if (pendingSuggestions().length > 0) {
+          <span class="tab__badge">{{ pendingSuggestions().length }}</span>
+        }
+      </button>
+    }
     <button class="tab" [class.tab--active]="activeTab() === 'uom'" (click)="switchTab('uom')">
       <span class="material-icons-outlined">straighten</span>
       Units of Measure

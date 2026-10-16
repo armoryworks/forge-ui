@@ -208,9 +208,12 @@ export class AdminComponent implements OnInit {
   // Compliance — selected user for per-user detail panel
   protected readonly complianceUserControl = new FormControl<number | null>(null);
   protected readonly complianceUserId = toSignal(this.complianceUserControl.valueChanges, { initialValue: null });
+  private readonly complianceDirectory = signal<SelectOption[]>([]);
   protected readonly complianceUserOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('admin.selectUserPlaceholder') },
-    ...this.users().map(u => ({ value: u.id, label: `${u.lastName}, ${u.firstName}` })),
+    ...(this.isAdmin()
+      ? this.users().map(u => ({ value: u.id, label: `${u.lastName}, ${u.firstName}` }))
+      : this.complianceDirectory()),
   ]);
 
   // Track Types
@@ -384,7 +387,9 @@ export class AdminComponent implements OnInit {
 
   constructor() {
     // Load roles from API (used by user form select + column filter)
-    this.refDataService.getRolesAsOptions().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(opts => this.roleOptions.set(opts));
+    if (this.isAdmin()) {
+      this.refDataService.getRolesAsOptions().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(opts => this.roleOptions.set(opts));
+    }
 
     for (const def of this.settingDefinitions) {
       this.settingControls[def.key].valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
@@ -404,7 +409,8 @@ export class AdminComponent implements OnInit {
       if (tab === 'settings' && !this.profileLoaded()) this.loadCompanyProfile();
       if (tab === 'settings' && !this.locationsLoaded()) this.loadCompanyLocations();
       if (tab === 'settings' && this.telemetryStatus() === null) this.loadTelemetry();
-      if (tab === 'compliance' && this.users().length === 0) this.loadUsers();
+      if (tab === 'compliance' && this.isAdmin() && this.users().length === 0) this.loadUsers();
+      if (tab === 'compliance' && !this.isAdmin() && this.complianceDirectory().length === 0) this.loadComplianceDirectory();
     });
 
     // When editing a user, ensure scanner is active and set context.
@@ -465,6 +471,12 @@ export class AdminComponent implements OnInit {
     this.adminService.getUsers().subscribe({
       next: (users) => { this.users.set(users); this.loading.set(false); },
       error: () => { this.error.set(this.translate.instant('admin.loadUsersFailed')); this.loading.set(false); },
+    });
+  }
+
+  private loadComplianceDirectory(): void {
+    this.adminService.getActiveUsers().subscribe({
+      next: (users) => this.complianceDirectory.set(users.map(u => ({ value: u.id, label: u.name }))),
     });
   }
 
