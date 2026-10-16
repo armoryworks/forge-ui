@@ -1,4 +1,4 @@
-<div [appLoadingBlock]="loading()">
+<div [appLoadingBlock]="loading()" class="planning-page">
   <app-page-header [title]="'planning.title' | translate" [subtitle]="'planning.subtitle' | translate" helpTourId="planning">
     <app-select [label]="'planning.cycle' | translate" [formControl]="cycleControl" [options]="cycleOptions()" />
     <button class="action-btn action-btn--create" data-testid="planning-new-cycle-btn" (click)="openCreateCycleDialog()">

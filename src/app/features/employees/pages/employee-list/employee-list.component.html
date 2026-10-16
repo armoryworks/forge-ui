@@ -18,7 +18,7 @@
       (selectionChange)="applyFilters()" />
   </div>
 
-  <div [appLoadingBlock]="loading()">
+  <div [appLoadingBlock]="loading()" class="employees-list-content">
     <app-data-table
       tableId="employees-list"
       [columns]="columns()"
