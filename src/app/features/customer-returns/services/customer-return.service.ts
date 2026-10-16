@@ -42,11 +42,11 @@ export class CustomerReturnService {
     return this.http.put<CustomerReturnDetail>(`${this.base}/${id}`, request);
   }
 
-  resolve(id: number, inspectionNotes?: string): Observable<CustomerReturnDetail> {
-    return this.http.post<CustomerReturnDetail>(`${this.base}/${id}/resolve`, { inspectionNotes });
+  resolve(id: number, inspectionNotes?: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/resolve`, { inspectionNotes });
   }
 
-  close(id: number): Observable<CustomerReturnDetail> {
-    return this.http.post<CustomerReturnDetail>(`${this.base}/${id}/close`, {});
+  close(id: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/close`, {});
   }
 }
