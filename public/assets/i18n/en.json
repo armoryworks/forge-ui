@@ -3041,7 +3041,20 @@
     "sourceSocialMedia": "Social Media",
     "sourceOther": "Other",
     "tableView": "Table view",
-    "pipelineView": "Pipeline view"
+    "pipelineView": "Pipeline view",
+    "outreachPrefs": {
+      "open": "Outreach preferences",
+      "title": "Outreach preferences: {{name}}",
+      "intro": "Opted-out channels and a do-not-contact date keep this lead out of outreach queues and put it on the suppression list.",
+      "emailOptOut": "Do not email",
+      "callOptOut": "Do not call",
+      "smsOptOut": "Do not text",
+      "source": "How the opt-out was received",
+      "cooldownUntil": "Do not contact until",
+      "cooldownNotes": "Notes",
+      "queueSource": "Suppressed from the outreach queue",
+      "saved": "Outreach preferences saved"
+    }
   },
   "expenses": {
     "title": "Expenses",

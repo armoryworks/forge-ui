@@ -3041,7 +3041,20 @@
     "sourceSocialMedia": "Redes Sociales",
     "sourceOther": "Otro",
     "tableView": "Vista de tabla",
-    "pipelineView": "Vista de pipeline"
+    "pipelineView": "Vista de pipeline",
+    "outreachPrefs": {
+      "open": "Preferencias de contacto",
+      "title": "Preferencias de contacto: {{name}}",
+      "intro": "Los canales excluidos y una fecha de no contactar mantienen este prospecto fuera de las colas de contacto y lo agregan a la lista de supresión.",
+      "emailOptOut": "No enviar correos",
+      "callOptOut": "No llamar",
+      "smsOptOut": "No enviar mensajes de texto",
+      "source": "Cómo se recibió la exclusión",
+      "cooldownUntil": "No contactar hasta",
+      "cooldownNotes": "Notas",
+      "queueSource": "Suprimido desde la cola de contacto",
+      "saved": "Preferencias de contacto guardadas"
+    }
   },
   "expenses": {
     "title": "Gastos",

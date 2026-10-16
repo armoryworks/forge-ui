@@ -12,6 +12,7 @@ import { LeadsService } from '../../services/leads.service';
 import { OutreachCampaignsService } from '../../services/outreach-campaigns.service';
 import { LeadItem, CapabilityFitStatus, NdaState, ExportControlClearance } from '../../models/lead-item.model';
 import { LeadStatus } from '../../models/lead-status.type';
+import { OutreachPreferencesDialogComponent, OutreachPreferencesDialogData } from '../outreach-preferences-dialog/outreach-preferences-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
@@ -289,6 +290,15 @@ export class LeadDetailPanelComponent {
     const lead = this.lead();
     if (!lead) return;
     this.editRequested.emit(lead);
+  }
+
+  protected openOutreachPreferences(): void {
+    const lead = this.lead();
+    if (!lead) return;
+    this.dialog.open<OutreachPreferencesDialogComponent, OutreachPreferencesDialogData>(OutreachPreferencesDialogComponent, {
+      width: '480px',
+      data: { leadId: lead.id, leadName: lead.companyName || lead.contactName || '' },
+    });
   }
 
   // --- Documents (mirrors the sales-order detail panel's Documents tab) ---

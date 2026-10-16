@@ -1,0 +1,38 @@
+<app-dialog
+  [title]="'leads.outreachPrefs.title' | translate: { name: data.leadName }"
+  width="480px"
+  (closed)="cancel()">
+  <div [formGroup]="form" [appLoadingBlock]="loading()">
+    <p>{{ 'leads.outreachPrefs.intro' | translate }}</p>
+    <app-toggle [label]="'leads.outreachPrefs.emailOptOut' | translate" formControlName="emailOptOut" data-testid="prefs-email-opt-out" />
+    <app-toggle [label]="'leads.outreachPrefs.callOptOut' | translate" formControlName="callOptOut" data-testid="prefs-call-opt-out" />
+    <app-toggle [label]="'leads.outreachPrefs.smsOptOut' | translate" formControlName="smsOptOut" data-testid="prefs-sms-opt-out" />
+    <app-input
+      [label]="'leads.outreachPrefs.source' | translate"
+      formControlName="source"
+      [maxlength]="200"
+      data-testid="prefs-source" />
+    <app-datepicker
+      [label]="'leads.outreachPrefs.cooldownUntil' | translate"
+      formControlName="cooldownUntil"
+      data-testid="prefs-cooldown-until" />
+    <app-input
+      [label]="'leads.outreachPrefs.cooldownNotes' | translate"
+      formControlName="cooldownNotes"
+      [maxlength]="500"
+      data-testid="prefs-cooldown-notes" />
+  </div>
+
+  <div dialog-footer>
+    <button type="button" class="action-btn" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button type="button" class="action-btn action-btn--primary"
+        [disabled]="form.invalid || saving() || loading()"
+        (click)="save()"
+        data-testid="prefs-save">
+        <span class="material-icons-outlined" aria-hidden="true">save</span>
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

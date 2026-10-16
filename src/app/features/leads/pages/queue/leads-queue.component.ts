@@ -13,6 +13,8 @@ import { TelLinkOutboundService } from '../../../../shared/services/outbound-cal
 import { LeadsService } from '../../services/leads.service';
 import { DispositionRequest, OutreachState, QueueLead } from '../../models/queue.model';
 import { CallbackSchedulerDialogComponent, CallbackSchedulerResult } from '../../components/callback-scheduler-dialog/callback-scheduler-dialog.component';
+import { OutreachPreferencesDialogComponent, OutreachPreferencesDialogData } from '../../components/outreach-preferences-dialog/outreach-preferences-dialog.component';
+import { OutreachPreferences } from '../../models/suppression.model';
 
 interface DispositionAction {
   state: OutreachState;
@@ -118,6 +120,20 @@ export class LeadsQueueComponent {
           nextState: action.state,
           notes: this.notesControl.value.trim() || undefined,
           callbackAt: result.callbackAt,
+        }, action.labelKey);
+      });
+      return;
+    }
+
+    if (action.state === 'Suppressed') {
+      this.dialog.open<OutreachPreferencesDialogComponent, OutreachPreferencesDialogData, OutreachPreferences | undefined>(
+        OutreachPreferencesDialogComponent,
+        { width: '480px', data: { leadId: lead.id, leadName: lead.companyName || lead.contactName || '', suppress: true } },
+      ).afterClosed().subscribe(saved => {
+        if (!saved) return;
+        this.submitDisposition(lead.id, {
+          nextState: action.state,
+          notes: this.notesControl.value.trim() || undefined,
         }, action.labelKey);
       });
       return;
