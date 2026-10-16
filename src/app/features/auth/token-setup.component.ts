@@ -15,7 +15,6 @@ import { passwordStrengthValidator } from '../../shared/validators/password-stre
 import { LoadingService } from '../../shared/services/loading.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ToastService } from '../../shared/services/toast.service';
-import { needsProfileCompletion } from './post-login.utils';
 
 @Component({
   selector: 'app-token-setup',
@@ -96,10 +95,9 @@ export class TokenSetupComponent implements OnInit {
       token: this.token,
       password: password!,
     })).subscribe({
-      next: (response) => {
+      next: () => {
         this.snackbar.success(this.translate.instant('auth.setupComplete'));
-        const dest = needsProfileCompletion(response.user, window.innerWidth) ? '/account/profile' : this.layout.getDefaultRoute();
-        this.router.navigate([dest]);
+        this.router.navigate([this.layout.getDefaultRoute()]);
       },
       error: (err: HttpErrorResponse) => {
         const detail = err.error?.detail ?? err.error?.title ?? 'Setup failed.';
