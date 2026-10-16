@@ -259,11 +259,34 @@ function pluralizeEn(word: string): string {
   return `${word}s`;
 }
 
+const ES_ACCENTED: Record<string, string> = { a: 'á', e: 'é', i: 'í', o: 'ó', u: 'ú' };
+const ES_PLAIN: Record<string, string> = { á: 'a', é: 'e', í: 'i', ó: 'o', ú: 'u' };
+
 function pluralizeEs(word: string): string {
-  if (/ión$/i.test(word)) return `${word.slice(0, -3)}iones`;
-  if (/[aeiouáéó]$/i.test(word)) return `${word}s`;
-  if (/z$/i.test(word)) return `${word.slice(0, -1)}ces`;
-  return `${word}es`;
+  const upper = word.length > 1 && word === word.toLocaleUpperCase('es');
+  const suffix = (text: string) => (upper ? text.toLocaleUpperCase('es') : text);
+  if (/[áéíóú][ns]$/i.test(word)) return `${word.slice(0, -2)}${swapVowel(word.charAt(word.length - 2), ES_PLAIN)}${word.slice(-1)}${suffix('es')}`;
+  if (/[aeiouáéó]$/i.test(word)) return `${word}${suffix('s')}`;
+  if (/z$/i.test(word)) return `${word.slice(0, -1)}${suffix('ces')}`;
+  const multisyllable = (word.match(/[aeiouáéíóúü]+/gi)?.length ?? 0) > 1;
+  if (multisyllable && /[sx]$/i.test(word)) return word;
+  if (multisyllable && /n$/i.test(word) && !/[áéíóú]/i.test(word)) return `${accentPenultimate(word)}${suffix('es')}`;
+  return `${word}${suffix('es')}`;
+}
+
+function accentPenultimate(word: string): string {
+  const stem = word.replace(/[aeiouü]+n$/i, '');
+  const group = /[aeiouü]+(?=[^aeiouü]*$)/i.exec(stem);
+  if (!group) return word;
+  const strong = Math.max(...['a', 'e', 'o'].map(v => group[0].toLowerCase().lastIndexOf(v)));
+  const index = group.index + (strong >= 0 ? strong : group[0].length - 1);
+  return word.slice(0, index) + swapVowel(word.charAt(index), ES_ACCENTED) + word.slice(index + 1);
+}
+
+function swapVowel(vowel: string, table: Record<string, string>): string {
+  const swapped = table[vowel.toLowerCase()];
+  if (!swapped) return vowel;
+  return vowel === vowel.toLowerCase() ? swapped : swapped.toUpperCase();
 }
 
 function clean(value: string | undefined): string | undefined {

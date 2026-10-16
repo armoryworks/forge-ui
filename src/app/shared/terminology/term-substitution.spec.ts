@@ -12,10 +12,22 @@ describe('term substitution', () => {
     });
 
     it('pluralizes the first Spanish word', () => {
-      expect(pluralize('Orden de trabajo', 'es')).toBe('Ordenes de trabajo');
+      expect(pluralize('Orden de trabajo', 'es')).toBe('Órdenes de trabajo');
       expect(pluralize('Socio', 'es')).toBe('Socios');
       expect(pluralize('Cotización', 'es')).toBe('Cotizaciones');
       expect(pluralize('Lápiz', 'es')).toBe('Lápices');
+    });
+
+    it('keeps Spanish stress marks right in the plural', () => {
+      expect(pluralize('Imagen', 'es')).toBe('Imágenes');
+      expect(pluralize('Volumen', 'es')).toBe('Volúmenes');
+      expect(pluralize('ORDEN', 'es')).toBe('ÓRDENES');
+      expect(pluralize('Almacén', 'es')).toBe('Almacenes');
+      expect(pluralize('Compás', 'es')).toBe('Compases');
+      expect(pluralize('Tren', 'es')).toBe('Trenes');
+      expect(pluralize('Mes', 'es')).toBe('Meses');
+      expect(pluralize('Análisis', 'es')).toBe('Análisis');
+      expect(pluralize('Tórax', 'es')).toBe('Tórax');
     });
   });
 
@@ -32,7 +44,7 @@ describe('term substitution', () => {
 
     it('reads Spanish keys and gender separately from English', () => {
       const overrides = map({ entity_job: 'Work Order', 'entity_job:es': 'Orden de trabajo', 'gender_job:es': 'f' });
-      expect(resolveTerms(overrides, 'es').get('job')).toEqual({ one: 'Orden de trabajo', other: 'Ordenes de trabajo', gender: 'f' });
+      expect(resolveTerms(overrides, 'es').get('job')).toEqual({ one: 'Orden de trabajo', other: 'Órdenes de trabajo', gender: 'f' });
       expect(resolveTerms(map({ entity_job: 'Work Order' }), 'es').size).toBe(0);
     });
 
@@ -75,6 +87,7 @@ describe('term substitution', () => {
     it('leaves protected phrases alone', () => {
       expect(sub.substitute('This is part of the Job')).toBe('This is part of the Work Order');
       expect(sub.substitute('Job Shop preset')).toBe('Job Shop preset');
+      expect(sub.substitute('The nightly Hangfire job runs')).toBe('The nightly Hangfire job runs');
     });
 
     it('never touches interpolation placeholders or markup', () => {

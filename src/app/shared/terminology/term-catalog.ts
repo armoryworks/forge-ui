@@ -39,7 +39,7 @@ const ES_TRABAJO_COMPOUNDS = [
 ];
 
 export const TERM_CATALOG: readonly TermDefinition[] = [
-  { id: 'job', pluralId: 'jobs', locales: { en: en('Job', 'Jobs', ['job shop', 'job shops']), es: es('Trabajo', 'Trabajos', 'm', ES_TRABAJO_COMPOUNDS) } },
+  { id: 'job', pluralId: 'jobs', locales: { en: en('Job', 'Jobs', ['job shop', 'job shops', 'hangfire job', 'hangfire jobs', 'background job', 'background jobs']), es: es('Trabajo', 'Trabajos', 'm', ES_TRABAJO_COMPOUNDS) } },
   { id: 'customer', pluralId: 'customers', locales: { en: en('Customer', 'Customers'), es: es('Cliente', 'Clientes', 'm') } },
   { id: 'vendor', pluralId: 'vendors', locales: { en: en('Vendor', 'Vendors'), es: es('Proveedor', 'Proveedores', 'm') } },
   { id: 'part', pluralId: 'parts', locales: { en: en('Part', 'Parts', ['part of', 'parts of', 'in part']), es: es('Pieza', 'Piezas', 'f') } },
