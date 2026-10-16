@@ -94,6 +94,9 @@ function productionBoard(): BoardColumn[] {
 }
 
 interface ComponentInternals {
+  canCreateJobs: () => boolean;
+  showJobDialog: () => boolean;
+  openCreateDialog(): void;
   columns: { set(cols: BoardColumn[]): void; (): BoardColumn[] };
   filteredColumns: () => BoardColumn[];
   swimlaneRows: () => { cells: { jobs: KanbanJob[] }[] }[];
@@ -138,6 +141,7 @@ describe('KanbanComponent', () => {
   let getTeams: ReturnType<typeof vi.fn>;
   let navigate: ReturnType<typeof vi.fn>;
   let queryParams: BehaviorSubject<ParamMap>;
+  let roles: string[];
 
   function createComponent(): void {
     component = TestBed.createComponent(KanbanComponent)
@@ -145,6 +149,7 @@ describe('KanbanComponent', () => {
   }
 
   beforeEach(() => {
+    roles = ['Manager'];
     getBoard = vi.fn(() => of({ columns: [], totalCount: 0, loadedCount: 0 }));
     getTeams = vi.fn(() => of([]));
     updateJobPosition = vi.fn(() => of(undefined));
@@ -205,7 +210,7 @@ describe('KanbanComponent', () => {
         { provide: ScannerService, useValue: { setContext: vi.fn(), clearLastScan: vi.fn(), lastScan: () => null } },
         { provide: DetailDialogService, useValue: { open: detailDialogOpen, getDetailFromUrl: () => null } },
         { provide: MatDialog, useValue: { open: vi.fn() } },
-        { provide: AuthService, useValue: { user: () => null } },
+        { provide: AuthService, useValue: { user: () => null, hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
         { provide: UserPreferencesService, useValue: { get: (key: string) => storedPrefs[key] ?? null, set: prefsSet } },
         { provide: DraftResumeService, useValue: { consume: () => false } },
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
@@ -795,6 +800,25 @@ describe('KanbanComponent', () => {
       queryParams.next(convertToParamMap({ myWork: 'true' }));
 
       expect(getBoard).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('new job', () => {
+    it('is offered to the roles that plan work and opens the create dialog', () => {
+      expect(component.canCreateJobs()).toBe(true);
+
+      component.openCreateDialog();
+
+      expect(component.showJobDialog()).toBe(true);
+    });
+
+    it('is withheld from production workers, even through ?new=job or a draft resume', () => {
+      roles = ['ProductionWorker'];
+      createComponent();
+
+      expect(component.canCreateJobs()).toBe(false);
+      component.openCreateDialog();
+      expect(component.showJobDialog()).toBe(false);
     });
   });
 });

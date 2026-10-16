@@ -45,6 +45,8 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 export type ViewMode = 'board' | 'team';
 
+const JOB_CREATE_ROLES = ['Admin', 'Manager', 'PM', 'Engineer', 'OfficeManager'];
+
 @Component({
   selector: 'app-kanban',
   standalone: true,
@@ -91,6 +93,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
   private swimlaneDragging = false;
   protected readonly selectedJobIds = signal<Set<number>>(new Set());
   protected readonly selectionCount = computed(() => this.selectedJobIds().size);
+  protected readonly canCreateJobs = computed(() => this.authService.hasAnyRole(JOB_CREATE_ROLES));
   protected readonly users = signal<UserRef[]>([]);
   protected readonly priorityOptions = PRIORITIES;
 
@@ -484,6 +487,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
   }
 
   protected openCreateDialog(): void {
+    if (!this.canCreateJobs()) return;
     this.dialogMode.set('create');
     this.dialogJob.set(null);
     this.showJobDialog.set(true);

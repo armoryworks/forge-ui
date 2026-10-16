@@ -66,10 +66,12 @@
       {{ 'boardFilters.onHold' | translate }}
     </button>
 
-    <button *appCap="'CAP-MFG-WO-RELEASE'" data-testid="new-job-btn" class="new-job-btn" (click)="openCreateDialog()">
-      <span class="material-icons-outlined">add</span>
-      {{ 'jobs.createJob' | translate }}
-    </button>
+    @if (canCreateJobs()) {
+      <button *appCap="'CAP-MFG-WO-RELEASE'" data-testid="new-job-btn" class="new-job-btn" (click)="openCreateDialog()">
+        <span class="material-icons-outlined">add</span>
+        {{ 'jobs.createJob' | translate }}
+      </button>
+    }
   </app-page-header>
 
   @if (selectionCount() === 0) {

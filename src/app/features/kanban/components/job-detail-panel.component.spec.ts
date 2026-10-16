@@ -35,6 +35,7 @@ interface PanelInternals {
   showLinkAdd: () => boolean;
   showPartAdd: () => boolean;
   isAdmin: () => boolean;
+  canExplodeBom: () => boolean;
   toggleSubtaskAdd(): void;
   toggleLinkAdd(): void;
   togglePartAdd(): void;
@@ -82,7 +83,7 @@ function jobPart(overrides: Partial<JobPart> = {}): JobPart {
   };
 }
 
-function setup(options: { admin?: boolean; confirm?: boolean } = {}) {
+function setup(options: { admin?: boolean; confirm?: boolean; roles?: string[] } = {}) {
   const kanban = {
     addJobPart: vi.fn(),
     updateJobPart: vi.fn(),
@@ -101,6 +102,7 @@ function setup(options: { admin?: boolean; confirm?: boolean } = {}) {
   const auth = {
     user: () => ({ id: 1 }),
     hasRole: vi.fn((role: string) => role === 'Admin' && !!options.admin),
+    hasAnyRole: (wanted: string[]) => wanted.some(r => (options.roles ?? (options.admin ? ['Admin'] : [])).includes(r)),
   };
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
@@ -121,6 +123,13 @@ function setup(options: { admin?: boolean; confirm?: boolean } = {}) {
 
 describe('JobDetailPanelComponent', () => {
   beforeEach(() => TestBed.resetTestingModule());
+
+  it('offers Explode BOM only to the roles the explode endpoint admits', () => {
+    expect(setup({ roles: ['Admin'] }).component.canExplodeBom()).toBe(true);
+    expect(setup({ roles: ['Manager'] }).component.canExplodeBom()).toBe(true);
+    expect(setup({ roles: ['ProductionWorker'] }).component.canExplodeBom()).toBe(false);
+    expect(setup({ roles: ['Engineer'] }).component.canExplodeBom()).toBe(false);
+  });
 
   it('keeps the subtask, link and part add forms hidden until [+] is pressed', () => {
     const { component } = setup();
