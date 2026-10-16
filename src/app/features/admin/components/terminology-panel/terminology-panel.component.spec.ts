@@ -134,6 +134,30 @@ describe('TerminologyPanelComponent', () => {
     expect(panel.isUntranslated(panel.rows.find(r => r.id === 'customer')!)).toBe(false);
   });
 
+  it('lets the admin save an untranslated English rename again to retry the translation', () => {
+    create([]);
+    adminService.updateTerminology.mockReturnValue(of({
+      entries: [{ key: 'entity_job', label: 'Work Order' }],
+      untranslatedTerms: ['job'],
+    }));
+    panel.control('entity_job').setValue('Work Order');
+    panel.save();
+
+    expect(panel.dirty()).toBe(true);
+    adminService.updateTerminology.mockReturnValue(of({
+      entries: [
+        { key: 'entity_job', label: 'Work Order' },
+        { key: 'entity_job:es', label: 'Orden de trabajo', isMachineTranslated: true },
+      ],
+      untranslatedTerms: [],
+    }));
+    panel.save();
+
+    expect(adminService.updateTerminology.mock.calls[1][0]).toEqual([{ key: 'entity_job', label: 'Work Order' }]);
+    expect(panel.isUntranslated(panel.rows.find(r => r.id === 'job')!)).toBe(false);
+    expect(panel.dirty()).toBe(false);
+  });
+
   it('clears every rename with reset all', () => {
     create([{ key: 'entity_job', label: 'Work Order' }, { key: 'entity_job:es', label: 'Orden' }]);
 

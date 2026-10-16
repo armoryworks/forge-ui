@@ -58,7 +58,8 @@ export class TerminologyPanelComponent implements OnInit {
     { initialValue: {} as Record<string, string> },
   );
 
-  protected readonly dirty = computed(() => this.changes(this.values(), this.original()).length > 0);
+  protected readonly dirty = computed(() =>
+    this.changes(this.values(), this.original()).length > 0 || this.retries(this.values()).length > 0);
   protected readonly hasValues = computed(() => Object.values(this.values()).some(v => v.trim().length > 0));
 
   constructor() {
@@ -121,7 +122,8 @@ export class TerminologyPanelComponent implements OnInit {
   }
 
   protected save(): void {
-    const entries = this.changes(this.form.getRawValue() as Record<string, string>, this.original());
+    const values = this.form.getRawValue() as Record<string, string>;
+    const entries = [...this.changes(values, this.original()), ...this.retries(values)];
     if (entries.length === 0) return;
     this.saving.set(true);
     this.adminService.updateTerminology(entries).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
@@ -172,6 +174,15 @@ export class TerminologyPanelComponent implements OnInit {
     this.otherKeys.set(others);
     this.machineKeys.set(new Set(entries.filter(e => e.isMachineTranslated).map(e => e.key)));
     this.form.reset(Object.fromEntries(Object.keys(this.form.controls).map(key => [key, original.get(key) ?? ''])));
+  }
+
+  private retries(values: Record<string, string>): TerminologyEntryItem[] {
+    const original = this.original();
+    return this.rows
+      .filter(row => this.untranslated().has(row.id))
+      .flatMap(row => [row.keys.enOne, row.keys.enOther])
+      .map(key => ({ key, label: (values[key] ?? '').trim() }))
+      .filter(entry => entry.label.length > 0 && entry.label === (original.get(entry.key) ?? ''));
   }
 
   private changes(values: Record<string, string>, original: ReadonlyMap<string, string>): TerminologyEntryItem[] {
