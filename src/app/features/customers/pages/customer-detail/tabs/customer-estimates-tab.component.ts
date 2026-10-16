@@ -130,12 +130,10 @@ export class CustomerEstimatesTabComponent implements OnInit {
     return d && !d.generatedQuoteId ? d : null;
   });
 
-  protected readonly violations = computed(() =>
-    FormValidationService.getViolations(this.estimateForm, {
-      title: this.translate.instant('customers.estimates.title'),
-      estimatedAmount: this.translate.instant('customers.estimates.estimatedAmount'),
-    })
-  );
+  protected readonly violations = FormValidationService.getViolations(this.estimateForm, {
+    title: this.translate.instant('customers.estimates.title'),
+    estimatedAmount: this.translate.instant('customers.estimates.estimatedAmount'),
+  });
 
   protected readonly dialogTitle = computed(() =>
     this.translate.instant(this.editingId() ? 'customers.estimates.editEstimate' : 'customers.estimates.newEstimate')

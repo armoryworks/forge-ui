@@ -2,7 +2,7 @@
   <div class="detail-panel__header">
     <h2 class="detail-panel__title">{{ lotNumber() }}</h2>
     <div class="detail-panel__actions">
-      @if (canInitiateRecall()) {
+      @if (canInitiateRecall() && !loadError()) {
         <button class="action-btn action-btn--warn" (click)="openInitiateRecall()" data-testid="lot-initiate-recall-btn">
           <span class="material-icons-outlined">report</span>
           {{ 'recalls.initiate' | translate }}
@@ -187,13 +187,17 @@
           </app-data-table>
         </div>
       }
+    } @else if (loadError()) {
+      <app-detail-load-error [error]="loadError()" (closed)="closed.emit()" />
     }
 
-    <div class="detail-panel__activity">
-      <app-entity-activity-section
-        entityType="Lot"
-        [entityId]="lotId()"
-        [tabs]="['history']" />
-    </div>
+    @if (!loadError()) {
+      <div class="detail-panel__activity">
+        <app-entity-activity-section
+          entityType="Lot"
+          [entityId]="lotId()"
+          [tabs]="['history']" />
+      </div>
+    }
   </div>
 </div>

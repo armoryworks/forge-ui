@@ -508,6 +508,8 @@
       <!-- Activity Section -->
       <app-entity-activity-section entityType="PurchaseOrder" [entityId]="purchaseOrderId()" />
     </div>
+  } @else if (loadError()) {
+    <app-detail-load-error [error]="loadError()" (closed)="closed.emit()" />
   }
 </div>
 

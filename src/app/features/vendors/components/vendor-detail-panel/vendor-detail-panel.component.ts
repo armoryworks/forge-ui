@@ -33,6 +33,7 @@ import { VendorPartsService } from '../../../parts/services/vendor-parts.service
 import { VendorPart } from '../../../parts/models/vendor-part.model';
 import { EntityCompletenessChipComponent } from '../../../../shared/components/entity-completeness-chip/entity-completeness-chip.component';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 
 @Component({
   selector: 'app-vendor-detail-panel',
@@ -47,6 +48,7 @@ import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
     VendorContactsTabComponent, VendorAddressesTabComponent,
     VendorPartListPanelComponent,
     EntityCompletenessChipComponent,
+    DetailLoadErrorComponent,
   ],
   templateUrl: './vendor-detail-panel.component.html',
   styleUrl: './vendor-detail-panel.component.scss',
@@ -64,6 +66,7 @@ export class VendorDetailPanelComponent {
   readonly vendorChanged = output<void>();
 
   protected readonly loading = signal(false);
+  protected readonly loadError = signal<unknown>(null);
   protected readonly vendor = signal<VendorDetail | null>(null);
   protected readonly activeTab = signal<'info' | 'contacts' | 'addresses' | 'purchase-orders' | 'scorecard' | 'catalog'>('info');
 
@@ -96,12 +99,13 @@ export class VendorDetailPanelComponent {
 
   private loadVendor(id: number): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.vendorService.getVendorById(id).subscribe({
       next: (detail) => {
         this.vendor.set(detail);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); },
     });
   }
 

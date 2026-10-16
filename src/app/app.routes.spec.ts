@@ -42,3 +42,13 @@ describe('app routes', () => {
     expect(router.url).toBe('/kanban');
   });
 });
+
+describe('top-level setup routes', () => {
+  it('declares setup/integrations before setup/:token so the token route does not swallow it', () => {
+    const integrations = routes.findIndex(r => r.path === 'setup/integrations');
+    const token = routes.findIndex(r => r.path === 'setup/:token');
+
+    expect(integrations).toBeGreaterThanOrEqual(0);
+    expect(token).toBeGreaterThan(integrations);
+  });
+});

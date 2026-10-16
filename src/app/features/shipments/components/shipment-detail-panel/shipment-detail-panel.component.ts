@@ -18,6 +18,7 @@ import { EntityLinkComponent } from '../../../../shared/components/entity-link/e
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 
 @Component({
   selector: 'app-shipment-detail-panel',
@@ -27,6 +28,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
     MatTooltipModule,
     TrackingTimelineComponent, ShippingRatesDialogComponent, EditShipmentDialogComponent, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent,
+    DetailLoadErrorComponent,
   ],
   templateUrl: './shipment-detail-panel.component.html',
   styleUrl: './shipment-detail-panel.component.scss',
@@ -46,6 +48,7 @@ export class ShipmentDetailPanelComponent implements OnInit {
 
   protected readonly shipment = signal<ShipmentDetail | null>(null);
   protected readonly loading = signal(false);
+  protected readonly loadError = signal<unknown>(null);
   protected readonly trackingData = signal<ShipmentTracking | null>(null);
   protected readonly trackingLoading = signal(false);
   protected readonly showRatesDialog = signal(false);
@@ -66,12 +69,13 @@ export class ShipmentDetailPanelComponent implements OnInit {
 
   private loadDetail(id: number): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.shipmentService.getShipmentById(id).subscribe({
       next: (detail) => {
         this.shipment.set(detail);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); },
     });
   }
 

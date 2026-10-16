@@ -18,6 +18,7 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { NumberLockInfoComponent } from '../../../../shared/components/number-lock-info/number-lock-info.component';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 
 @Component({
   selector: 'app-payment-detail-panel',
@@ -26,6 +27,7 @@ import { NumberLockInfoComponent } from '../../../../shared/components/number-lo
     DatePipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent, InputComponent,
+    DetailLoadErrorComponent,
   ],
   templateUrl: './payment-detail-panel.component.html',
   styleUrl: './payment-detail-panel.component.scss',
@@ -43,6 +45,7 @@ export class PaymentDetailPanelComponent {
   readonly paymentChanged = output<void>();
 
   protected readonly loading = signal(false);
+  protected readonly loadError = signal<unknown>(null);
   protected readonly payment = signal<PaymentDetail | null>(null);
 
   protected readonly paymentIdValue = computed(() => this.payment()?.id ?? 0);
@@ -142,12 +145,13 @@ export class PaymentDetailPanelComponent {
 
   private loadPayment(id: number): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.paymentService.getPaymentById(id).subscribe({
       next: (detail) => {
         this.payment.set(detail);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); },
     });
   }
 }

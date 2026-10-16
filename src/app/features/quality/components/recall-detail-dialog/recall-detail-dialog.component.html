@@ -117,6 +117,8 @@
             data-testid="recall-resolution-notes" />
         </div>
       }
+    } @else if (loadError()) {
+      <app-detail-load-error [error]="loadError()" (closed)="close()" />
     }
   </div>
 

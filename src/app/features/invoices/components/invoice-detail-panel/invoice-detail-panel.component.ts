@@ -19,6 +19,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { NumberLockInfoComponent } from '../../../../shared/components/number-lock-info/number-lock-info.component';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 
 @Component({
   selector: 'app-invoice-detail-panel',
@@ -27,6 +28,7 @@ import { NumberLockInfoComponent } from '../../../../shared/components/number-lo
     DatePipe, DecimalPipe, TranslatePipe, RouterLink, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent, InputComponent,
+    DetailLoadErrorComponent,
   ],
   templateUrl: './invoice-detail-panel.component.html',
   styleUrl: './invoice-detail-panel.component.scss',
@@ -45,6 +47,7 @@ export class InvoiceDetailPanelComponent {
   readonly invoiceChanged = output<void>();
 
   protected readonly loading = signal(false);
+  protected readonly loadError = signal<unknown>(null);
   protected readonly invoice = signal<InvoiceDetail | null>(null);
 
   protected readonly invoiceIdValue = computed(() => this.invoice()?.id ?? 0);
@@ -187,12 +190,13 @@ export class InvoiceDetailPanelComponent {
 
   private loadInvoice(id: number): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.invoiceService.getInvoiceById(id).subscribe({
       next: (detail) => {
         this.invoice.set(detail);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); },
     });
   }
 }

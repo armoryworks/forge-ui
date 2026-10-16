@@ -59,7 +59,7 @@ export class WorkerComponent {
   }
 
   protected openJob(task: WorkerTask): void {
-    this.router.navigate(['/kanban'], { queryParams: { jobId: task.id } });
+    this.router.navigate(['/kanban'], { queryParams: { detail: `job:${task.id}` } });
   }
 
   protected getPriorityClass(priority: string): string {

@@ -428,6 +428,8 @@
       </div>
     </div>
   </div>
+} @else if (loadError()) {
+  <app-detail-load-error [error]="loadError()" (closed)="closed.emit()" />
 } @else {
   <div class="detail-panel detail-panel--loading" [appLoadingBlock]="detailLoading()">
     <div class="detail-panel__empty"></div>

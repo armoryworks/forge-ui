@@ -45,6 +45,7 @@ import { ReferenceDataService } from '../../../../shared/services/reference-data
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { NumberLockInfoComponent } from '../../../../shared/components/number-lock-info/number-lock-info.component';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 
 @Component({
   selector: 'app-po-detail-panel',
@@ -59,6 +60,7 @@ import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
     EntityLinkComponent, CurrencyDisplayComponent, CurrencyInputComponent,
     DataTableComponent, ColumnCellDirective,
     EntityPickerComponent, FileUploadZoneComponent,
+    DetailLoadErrorComponent,
   ],
   templateUrl: './po-detail-panel.component.html',
   styleUrl: './po-detail-panel.component.scss',
@@ -101,6 +103,7 @@ export class PoDetailPanelComponent implements OnInit {
 
   protected readonly po = signal<PurchaseOrderDetail | null>(null);
   protected readonly loading = signal(false);
+  protected readonly loadError = signal<unknown>(null);
   protected readonly showReceiveDialog = signal(false);
   protected readonly releases = signal<PurchaseOrderRelease[]>([]);
   protected readonly showCreateReleaseDialog = signal(false);
@@ -155,6 +158,7 @@ export class PoDetailPanelComponent implements OnInit {
 
   protected loadDetail(): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.poService.getPurchaseOrderById(this.purchaseOrderId()).subscribe({
       next: (detail) => {
         this.po.set(detail);
@@ -162,7 +166,7 @@ export class PoDetailPanelComponent implements OnInit {
         if (detail.isBlanket) this.loadReleases();
         this.loadDocuments(detail.id);
       },
-      error: () => this.loading.set(false),
+      error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); },
     });
   }
 

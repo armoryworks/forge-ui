@@ -1,0 +1,13 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.detail-load-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  padding: $sp-lg;
+}

@@ -11541,5 +11541,13 @@
       "reset": "{{operation}} reset",
       "recorded": "Progress recorded on {{operation}}"
     }
+  },
+  "detailLoadError": {
+    "notFound": "Record not found",
+    "notFoundHelp": "It may have been deleted, or the link points to the wrong record.",
+    "forbidden": "You don't have access to this record",
+    "forbiddenHelp": "Ask an administrator if you need to see it.",
+    "failed": "This record couldn't be loaded",
+    "failedHelp": "Check your connection and try again."
   }
 }

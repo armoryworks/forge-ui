@@ -120,6 +120,8 @@
         <span class="dlg-section__title">{{ 'qcInspections.activity' | translate }}</span>
         <app-entity-activity-section entityType="QcInspection" [entityId]="insp.id" />
       </div>
+    } @else if (loadError()) {
+      <app-detail-load-error [error]="loadError()" (closed)="close()" />
     }
   </div>
 

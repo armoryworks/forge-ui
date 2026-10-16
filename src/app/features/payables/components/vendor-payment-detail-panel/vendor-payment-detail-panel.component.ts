@@ -19,6 +19,7 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 
 // ⚡ ACCOUNTING BOUNDARY — AP counterpart of PaymentDetailPanel.
 @Component({
@@ -29,6 +30,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
     MatTooltipModule, LoadingBlockDirective,
     DialogComponent, TextareaComponent, ValidationButtonComponent,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent,
+    DetailLoadErrorComponent,
   ],
   templateUrl: './vendor-payment-detail-panel.component.html',
   styleUrl: './vendor-payment-detail-panel.component.scss',
@@ -46,6 +48,7 @@ export class VendorPaymentDetailPanelComponent {
   readonly paymentChanged = output<void>();
 
   protected readonly loading = signal(false);
+  protected readonly loadError = signal<unknown>(null);
   protected readonly payment = signal<VendorPaymentDetail | null>(null);
   /** History-only, mirroring the AR sibling (PaymentDetailPanel). */
   protected readonly activityTabs: ActivityFilterTab[] = ['history'];
@@ -186,12 +189,13 @@ export class VendorPaymentDetailPanelComponent {
 
   private loadPayment(id: number): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.paymentService.getVendorPaymentById(id).subscribe({
       next: (detail) => {
         this.payment.set(detail);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); },
     });
   }
 }

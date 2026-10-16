@@ -2,7 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
 
 import { RecallDetailDialogComponent } from './recall-detail-dialog.component';
 import { RecallService } from '../../services/recall.service';
@@ -51,8 +52,8 @@ describe('RecallDetailDialogComponent', () => {
   let resolveRecall: ReturnType<typeof vi.fn>;
   let roles: string[];
 
-  function create(detail: RecallDetail = recall()) {
-    getRecall = vi.fn(() => of(detail));
+  function create(detail: RecallDetail = recall(), load: Observable<RecallDetail> = of(detail)) {
+    getRecall = vi.fn(() => load);
     resolveRecall = vi.fn(() => of({ ...detail, status: 'Resolved', resolvedAt: new Date('2026-10-05') }));
     TestBed.configureTestingModule({
       imports: [RecallDetailDialogComponent, TranslateModule.forRoot()],
@@ -120,5 +121,16 @@ describe('RecallDetailDialogComponent', () => {
 
     expect(api.canResolve()).toBe(false);
     expect((fixture.nativeElement as HTMLElement).querySelector('[data-testid="recall-resolve-btn"]')).toBeNull();
+  });
+
+  it('shows a not-found state instead of an empty body when the recall does not exist', () => {
+    const { fixture } = create(recall(), throwError(() => new HttpErrorResponse({ status: 404 })));
+    const el = fixture.nativeElement as HTMLElement;
+
+    expect(el.querySelector('[data-testid="detail-load-error"]')).not.toBeNull();
+    expect(el.querySelector('[data-testid="recall-status"]')).toBeNull();
+
+    (el.querySelector('[data-testid="detail-load-error"] button') as HTMLButtonElement).click();
+    expect(dialogRef.close).toHaveBeenCalled();
   });
 });

@@ -15,6 +15,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 
 export interface RecallDetailDialogData {
   recallId: number;
@@ -26,6 +27,7 @@ export interface RecallDetailDialogData {
   imports: [
     DatePipe, DecimalPipe, ReactiveFormsModule, MatTooltipModule, TranslatePipe,
     TextareaComponent, DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
+    DetailLoadErrorComponent,
   ],
   templateUrl: './recall-detail-dialog.component.html',
   styleUrl: './recall-detail-dialog.component.scss',
@@ -41,6 +43,7 @@ export class RecallDetailDialogComponent {
 
   protected readonly recall = signal<RecallDetail | null>(null);
   protected readonly loading = signal(true);
+  protected readonly loadError = signal<unknown>(null);
   protected readonly resolving = signal(false);
   private changed = false;
 
@@ -73,7 +76,7 @@ export class RecallDetailDialogComponent {
   constructor() {
     this.recallService.getRecall(this.data.recallId).subscribe({
       next: (recall) => { this.recall.set(recall); this.loading.set(false); },
-      error: () => this.loading.set(false),
+      error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); },
     });
   }
 

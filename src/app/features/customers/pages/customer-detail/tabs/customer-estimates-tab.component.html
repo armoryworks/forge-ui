@@ -166,7 +166,7 @@
         </button>
       }
       <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
-      <app-validation-button [violations]="violations()" [loading]="saving()">
+      <app-validation-button [violations]="violations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
         [disabled]="estimateForm.invalid || saving()"
         (click)="saveEstimate()">{{ 'common.save' | translate }}</button>
