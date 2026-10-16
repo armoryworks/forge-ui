@@ -217,6 +217,12 @@
             (save)="saveClusterPatch($event)"
             (saveAndClose)="saveClusterPatch($event, true)"
             (cancelled)="cancelEdit()" />
+          <app-part-uom-cluster
+            [part]="part"
+            [editing]="editing()"
+            [saving]="saving()"
+            (save)="saveClusterPatch($event)"
+            (cancelled)="cancelEdit()" />
         }
 
         @case ('cost') {
