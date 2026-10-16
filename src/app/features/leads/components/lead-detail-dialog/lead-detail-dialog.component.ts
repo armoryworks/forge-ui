@@ -19,7 +19,7 @@ export interface LeadDetailDialogResult {
   standalone: true,
   imports: [LeadDetailPanelComponent],
   template: `<app-lead-detail-panel [leadId]="data.leadId" (closed)="close()" (editRequested)="onEditRequested($event)" />`,
-  styles: [`:host { display: block; width: 100%; height: 100%; }`],
+  styles: [`:host { display: block; width: 100%; height: 100%; } app-lead-detail-panel { height: 100%; }`],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LeadDetailDialogComponent {
