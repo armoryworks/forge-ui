@@ -41,22 +41,22 @@
       <ng-template appColumnCell="actions" let-expense>
         @if (expense.status === 'Pending') {
           <div class="action-cell">
-            <button class="icon-btn icon-btn--success" [matTooltip]="'expenses.approve' | translate" matTooltipPosition="above" (click)="approveExpense(expense); $event.stopPropagation()">
+            <button class="icon-btn icon-btn--success" [attr.aria-label]="'expenses.approve' | translate" [matTooltip]="'expenses.approve' | translate" matTooltipPosition="above" (click)="approveExpense(expense); $event.stopPropagation()">
               <span class="material-icons-outlined">check</span>
             </button>
-            <button class="icon-btn icon-btn--danger" [matTooltip]="'expenses.reject' | translate" matTooltipPosition="above" (click)="rejectExpense(expense); $event.stopPropagation()">
+            <button class="icon-btn icon-btn--danger" [attr.aria-label]="'expenses.reject' | translate" [matTooltip]="'expenses.reject' | translate" matTooltipPosition="above" (click)="rejectExpense(expense); $event.stopPropagation()">
               <span class="material-icons-outlined">close</span>
             </button>
           </div>
         } @else if (expense.status === 'NeedsRevision') {
           <div class="action-cell">
-            <button data-testid="resubmit-expense-btn" class="icon-btn" [matTooltip]="'expenses.resubmit' | translate" matTooltipPosition="above" (click)="openEditExpense(expense); $event.stopPropagation()">
+            <button data-testid="resubmit-expense-btn" class="icon-btn" [attr.aria-label]="'expenses.resubmit' | translate" [matTooltip]="'expenses.resubmit' | translate" matTooltipPosition="above" (click)="openEditExpense(expense); $event.stopPropagation()">
               <span class="material-icons-outlined">edit</span>
             </button>
           </div>
         } @else if (expense.status === 'Approved' || expense.status === 'SelfApproved') {
           <div class="action-cell">
-            <button data-testid="reimburse-expense-btn" class="icon-btn icon-btn--success" [matTooltip]="'expenses.markReimbursed' | translate" matTooltipPosition="above" (click)="reimburseExpense(expense); $event.stopPropagation()">
+            <button data-testid="reimburse-expense-btn" class="icon-btn icon-btn--success" [attr.aria-label]="'expenses.markReimbursed' | translate" [matTooltip]="'expenses.markReimbursed' | translate" matTooltipPosition="above" (click)="reimburseExpense(expense); $event.stopPropagation()">
               <span class="material-icons-outlined">paid</span>
             </button>
           </div>
