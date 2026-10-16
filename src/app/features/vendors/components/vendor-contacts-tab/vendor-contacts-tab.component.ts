@@ -41,7 +41,7 @@ export class VendorContactsTabComponent {
   protected readonly showDialog = signal(false);
   protected readonly editingContact = signal<VendorContact | null>(null);
 
-  protected readonly canManage = computed(() => this.auth.hasAnyRole(['Admin', 'Manager', 'OfficeManager']));
+  protected readonly canManage = computed(() => this.auth.hasAnyRole(['Admin', 'Manager', 'OfficeManager', 'Procurement']));
 
   constructor() {
     effect(() => {

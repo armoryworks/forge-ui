@@ -75,8 +75,9 @@ describe('VendorAddressesTabComponent', () => {
     expect(internals.typeLabelKey('Legacy')).toBe('vendorContacts.addressTypes.other');
   });
 
-  it('hides management actions from roles outside Admin, Manager and OfficeManager', () => {
+  it('hides management actions from roles outside Admin, Manager, OfficeManager and Procurement', () => {
     expect(setup(['Admin']).internals.canManage()).toBe(true);
+    expect(setup(['Procurement']).internals.canManage()).toBe(true);
     expect(setup(['Engineer']).internals.canManage()).toBe(false);
   });
 });

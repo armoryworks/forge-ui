@@ -75,9 +75,10 @@ describe('VendorContactsTabComponent', () => {
     httpMock.verify();
   });
 
-  it('lets Admin, Manager and OfficeManager manage contacts', () => {
+  it('lets Admin, Manager, OfficeManager and Procurement manage contacts', () => {
     expect(setup(['Manager']).internals.canManage()).toBe(true);
     expect(setup(['OfficeManager']).internals.canManage()).toBe(true);
+    expect(setup(['Procurement']).internals.canManage()).toBe(true);
     expect(setup(['Engineer']).internals.canManage()).toBe(false);
   });
 });
