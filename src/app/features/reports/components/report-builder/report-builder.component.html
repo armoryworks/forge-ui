@@ -67,7 +67,7 @@
           <div class="builder__section">
             <h3 class="builder__section-title">{{ 'reports.visualization' | translate }}</h3>
             <app-select [label]="'reports.chartType' | translate" [options]="chartTypeOptions" [formControl]="chartTypeControl" />
-            @if (chartTypeControl.value && chartTypeControl.value !== 'table') {
+            @if (chartType() && chartType() !== 'table') {
               <div class="builder__sort-row">
                 <app-select [label]="'reports.labelField' | translate" [options]="fieldOptions()" [formControl]="chartLabelControl" />
                 <app-select [label]="'reports.valueField' | translate" [options]="numericFieldOptions()" [formControl]="chartValueControl" />
@@ -99,10 +99,10 @@
       <div class="builder__results" [appLoadingBlock]="isRunning()">
         @if (reportResults()) {
           <!-- Chart (if configured) -->
-          @if (chartTypeControl.value && chartTypeControl.value !== 'table' && chartData()) {
+          @if (chartType() && chartType() !== 'table' && chartData()) {
             <div class="builder__chart">
               <canvas baseChart
-                [type]="$any(chartTypeControl.value)"
+                [type]="$any(chartType())"
                 [data]="chartData()!"
                 [options]="chartOptions"
                 (chartClick)="onChartClick($event)">
