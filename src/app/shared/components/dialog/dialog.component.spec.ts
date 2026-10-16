@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
+import { DetailDialogService } from '../../services/detail-dialog.service';
 import { DraftService } from '../../services/draft.service';
 import { DialogComponent } from './dialog.component';
 
@@ -15,6 +16,7 @@ describe('DialogComponent Escape handling', () => {
       providers: [
         { provide: MatDialog, useValue: { openDialogs: [], open: vi.fn() } },
         { provide: DraftService, useValue: { register: vi.fn(), unregister: vi.fn(), loadDraft: vi.fn() } },
+        { provide: DetailDialogService, useValue: { isCurrent: () => false } },
       ],
     });
     component = TestBed.runInInjectionContext(() => new DialogComponent());
@@ -76,5 +78,52 @@ describe('DialogComponent Escape handling', () => {
     pressEscape(false);
 
     expect(closedCount).toBe(1);
+  });
+});
+
+describe('DialogComponent Escape handling inside a MatDialog', () => {
+  const hostRef = { id: 'host' } as MatDialogRef<unknown>;
+  const otherRef = { id: 'other' } as MatDialogRef<unknown>;
+
+  function create(openDialogs: MatDialogRef<unknown>[], currentDetail: MatDialogRef<unknown> | null): { closedCount: () => number; escape: () => void } {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: MatDialog, useValue: { openDialogs, open: vi.fn() } },
+        { provide: MatDialogRef, useValue: hostRef },
+        { provide: DraftService, useValue: { register: vi.fn(), unregister: vi.fn(), loadDraft: vi.fn() } },
+        { provide: DetailDialogService, useValue: { isCurrent: (ref: MatDialogRef<unknown>) => ref === currentDetail } },
+      ],
+    });
+    const component = TestBed.runInInjectionContext(() => new DialogComponent());
+    let count = 0;
+    component.closed.subscribe(() => count++);
+    return {
+      closedCount: () => count,
+      escape: () => (component as unknown as { onEscapeKey(): void }).onEscapeKey(),
+    };
+  }
+
+  it('closes an inline dialog nested in the topmost detail dialog', () => {
+    const dialog = create([hostRef], hostRef);
+
+    dialog.escape();
+
+    expect(dialog.closedCount()).toBe(1);
+  });
+
+  it('ignores Escape when its host is not a detail dialog', () => {
+    const dialog = create([hostRef], null);
+
+    dialog.escape();
+
+    expect(dialog.closedCount()).toBe(0);
+  });
+
+  it('ignores Escape when another dialog is stacked above its detail host', () => {
+    const dialog = create([hostRef, otherRef], hostRef);
+
+    dialog.escape();
+
+    expect(dialog.closedCount()).toBe(0);
   });
 });

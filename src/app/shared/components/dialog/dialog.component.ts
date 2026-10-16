@@ -12,6 +12,7 @@ import { DirtyFormIndicatorComponent } from '../dirty-form-indicator/dirty-form-
 import { DraftRecoveryBannerComponent } from '../draft-recovery-banner/draft-recovery-banner.component';
 import { DraftService } from '../../services/draft.service';
 import { DraftConfig } from '../../models/draft-config.model';
+import { DetailDialogService } from '../../services/detail-dialog.service';
 
 const FIELD_OVERLAY_PANELS = '.mat-mdc-select-panel, .mat-mdc-autocomplete-panel.mat-mdc-autocomplete-visible, .mat-datepicker-content';
 
@@ -28,6 +29,7 @@ export class DialogComponent implements OnInit {
   private readonly draftService = inject(DraftService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly document = inject(DOCUMENT);
+  private readonly detailDialog = inject(DetailDialogService);
   // Non-null only when this <app-dialog> is itself rendered inside a MatDialog
   // overlay — in that case the CDK already handles Escape, so we must not
   // double-handle it. Null for the inline usage (rendered directly in a page
@@ -118,13 +120,19 @@ export class DialogComponent implements OnInit {
    * Escape closes the dialog through the same path as the X button (incl. the
    * unsaved-changes confirm). Only active for the inline usage — a MatDialog
    * host decides what Escape does for its own content, and a nested confirm
-   * owns Escape while it's open. An open select, autocomplete or datepicker
-   * panel also owns Escape: that press closes the panel, not the form.
+   * owns Escape while it's open. An inline dialog inside the topmost detail
+   * dialog also handles Escape, so the press closes it and not the detail.
+   * An open select, autocomplete or datepicker panel also owns Escape: that
+   * press closes the panel, not the form.
    */
   @HostListener('document:keydown.escape')
   protected onEscapeKey(): void {
-    if (this.hostMatDialogRef) return;
-    if (this.dialog.openDialogs.length > 0) return;
+    if (this.hostMatDialogRef) {
+      if (!this.detailDialog.isCurrent(this.hostMatDialogRef)) return;
+      if (this.dialog.openDialogs.at(-1) !== this.hostMatDialogRef) return;
+    } else if (this.dialog.openDialogs.length > 0) {
+      return;
+    }
     if (this.escapeOwnedByFieldOverlay) return;
     this.tryClose();
   }
