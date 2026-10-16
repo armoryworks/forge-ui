@@ -216,7 +216,8 @@
             [saving]="saving()"
             (save)="saveClusterPatch($event)"
             (saveAndClose)="saveClusterPatch($event, true)"
-            (cancelled)="cancelEdit()" />
+            (cancelled)="cancelEdit()"
+            (standardCostRolled)="onStandardCostRolled()" />
         }
 
         @case ('cost') {

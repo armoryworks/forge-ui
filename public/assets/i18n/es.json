@@ -1594,6 +1594,17 @@
       "materialsNeedBom": "Los materiales de las operaciones solo se copian junto con la lista de materiales.",
       "submit": "Duplicar",
       "created": "Se creó {{partNumber}}."
+    },
+    "standardCost": {
+      "title": "Costo estándar",
+      "recalculate": "Recalcular costo estándar",
+      "hint": "Acumula el costo de la lista de materiales y la ruta y lo fija como el costo estándar actual de la pieza.",
+      "material": "Material",
+      "labor": "Mano de obra",
+      "overhead": "Gastos generales",
+      "total": "Costo estándar",
+      "rolled": "Costo estándar recalculado",
+      "rollFailed": "No se pudo recalcular el costo estándar"
     }
   },
   "partsCatalog": {

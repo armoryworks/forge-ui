@@ -1,0 +1,61 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: block;
+  margin-top: $sp-lg;
+}
+
+.cost-roll {
+  position: relative;
+  border-top: $border-width-thin solid var(--border);
+  padding-top: $sp-md;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $sp-md;
+  }
+
+  &__title {
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
+    color: var(--text-muted);
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+  }
+
+  &__breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__row {
+    display: flex;
+    justify-content: space-between;
+    gap: $sp-md;
+    font-size: var(--font-size-sm);
+
+    &--total {
+      border-top: $border-width-thin solid var(--border);
+      padding-top: $sp-xs;
+      font-weight: 700;
+    }
+  }
+
+  &__label {
+    color: var(--text-muted);
+  }
+
+  &__value {
+    font-family: $font-family-mono;
+  }
+}

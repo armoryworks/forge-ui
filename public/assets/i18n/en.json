@@ -1594,6 +1594,17 @@
       "materialsNeedBom": "Operation materials are only copied together with the bill of materials.",
       "submit": "Duplicate",
       "created": "Created {{partNumber}}."
+    },
+    "standardCost": {
+      "title": "Standard cost",
+      "recalculate": "Recalculate standard cost",
+      "hint": "Rolls the BOM and routing cost up and freezes it as the part's current standard cost.",
+      "material": "Material",
+      "labor": "Labor",
+      "overhead": "Overhead",
+      "total": "Standard cost",
+      "rolled": "Standard cost recalculated",
+      "rollFailed": "Could not recalculate the standard cost"
     }
   },
   "partsCatalog": {
