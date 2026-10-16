@@ -317,6 +317,7 @@
 // Used by entity dialogs: Quote, SO, PO, Invoice, Shipment, Payment, Vendor
 .dialog--split {
   max-height: 88vh;
+  min-height: min(600px, 88vh);
 
   .dialog__body {
     padding: 0;
@@ -337,7 +338,7 @@
   display: flex;
   flex: 1;
   overflow: hidden;
-  min-height: 500px;
+  min-height: 0;
 }
 
 .dlg-main {
