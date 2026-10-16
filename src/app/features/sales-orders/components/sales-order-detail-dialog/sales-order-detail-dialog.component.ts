@@ -25,7 +25,7 @@ export interface SalesOrderDetailDialogResult {
       (editRequested)="onEditRequested($event)"
       (changed)="hasChanges = true" />
   `,
-  styles: [`:host { display: block; width: 100%; height: 100%; }`],
+  styles: [`:host { display: block; width: 100%; height: 100%; } app-sales-order-detail-panel { height: 100%; }`],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SalesOrderDetailDialogComponent {

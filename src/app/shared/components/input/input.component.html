@@ -1,11 +1,9 @@
 <mat-form-field appearance="outline" [class.app-readonly-field]="isReadonly()">
   <mat-label>{{ label() }}</mat-label>
-  @if (prefix()) {
-    @if (prefix().length <= 2) {
-      <span matPrefix class="input__text-prefix">{{ prefix() }}</span>
-    } @else {
-      <span matPrefix class="material-icons-outlined">{{ prefix() }}</span>
-    }
+  @if (prefix() && prefix().length <= 2) {
+    <span matPrefix class="input__text-prefix">{{ prefix() }}</span>
+  } @else if (prefix()) {
+    <span matPrefix class="material-icons-outlined">{{ prefix() }}</span>
   }
   <input matInput
     [type]="effectiveType"

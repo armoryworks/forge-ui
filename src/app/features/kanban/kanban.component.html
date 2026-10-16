@@ -4,7 +4,7 @@
     <p>{{ error() }}</p>
   </div>
 } @else {
-  <app-page-header [title]="'kanban.title' | translate" [subtitle]="'kanban.subtitle' | translate" helpTourId="kanban-board">
+  <app-page-header [title]="'kanban.title' | translate" [subtitle]="'kanban.subtitle' | translate" helpTourId="kanban-board" [wrap]="true">
     <div class="page-header__track-types" data-tour="track-type-switcher">
       @for (tt of trackTypes(); track tt.id) {
         <button

@@ -54,6 +54,13 @@
   }
 }
 
+.page-header--wrap {
+  flex-wrap: wrap;
+  height: auto;
+  min-height: 48px;
+  row-gap: $sp-sm;
+}
+
 .page-header__title {
   font-size: var(--font-size-title);
   font-weight: 700;
@@ -494,6 +501,14 @@
   background: var(--surface);
   border-bottom: $border-width-thin solid var(--border);
   flex-shrink: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  @include custom-scrollbar(4px);
+
+  .tab {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
 }
 
 .tab {
