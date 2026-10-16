@@ -493,6 +493,14 @@
   background: var(--surface);
   border-bottom: $border-width-thin solid var(--border);
   flex-shrink: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  @include custom-scrollbar(4px);
+
+  .tab {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
 }
 
 .tab {
