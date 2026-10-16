@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { SalesOrdersComponent } from './sales-orders.component';
+import { roleGuard } from '../../shared/guards/role.guard';
 
 export const SALES_ORDERS_ROUTES: Routes = [
   { path: '', component: SalesOrdersComponent },
@@ -8,6 +9,7 @@ export const SALES_ORDERS_ROUTES: Routes = [
   // intrinsically tied to sales orders.
   {
     path: 'recurring',
+    canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
     loadComponent: () => import('./pages/recurring/recurring-orders.component').then(m => m.RecurringOrdersComponent),
   },
 ];

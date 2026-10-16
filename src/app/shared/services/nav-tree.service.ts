@@ -81,10 +81,10 @@ export class NavTreeService {
           allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'],
           children: [
             { icon: 'list', label: 'All Channels', i18nKey: 'nav.salesChannelsAll', route: '/sales-channels' },
-            { icon: 'power', label: 'Connections', i18nKey: 'nav.salesChannelsConnections', route: '/sales-channels/connections', capability: 'CAP-EXT-ECOMMERCE' },
-            { icon: 'sell', label: 'Listings', i18nKey: 'nav.salesChannelsListings', route: '/sales-channels/listings', capability: 'CAP-EXT-ECOMMERCE' },
+            { icon: 'power', label: 'Connections', i18nKey: 'nav.salesChannelsConnections', route: '/sales-channels/connections', capability: 'CAP-EXT-ECOMMERCE', allowedRoles: ['Admin', 'Manager'] },
+            { icon: 'sell', label: 'Listings', i18nKey: 'nav.salesChannelsListings', route: '/sales-channels/listings', capability: 'CAP-EXT-ECOMMERCE', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
             { icon: 'person_outline', label: 'Retail Buyers', i18nKey: 'nav.salesChannelsBuyers', route: '/sales-channels/buyers', capability: 'CAP-O2C-RETAIL' },
-            { icon: 'account_balance', label: 'Settlements', i18nKey: 'nav.salesChannelsSettlements', route: '/sales-channels/settlements', capability: 'CAP-O2C-SETTLEMENT' },
+            { icon: 'account_balance', label: 'Settlements', i18nKey: 'nav.salesChannelsSettlements', route: '/sales-channels/settlements', capability: 'CAP-O2C-SETTLEMENT', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
           ],
         },
         { icon: 'request_quote', label: 'Quotes', i18nKey: 'nav.quotes', route: '/quotes', capability: 'CAP-O2C-QUOTE', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
@@ -153,7 +153,7 @@ export class NavTreeService {
       children: [
         { icon: 'local_shipping', label: 'Shipping', i18nKey: 'nav.shipping', route: '/shipping', capability: 'CAP-O2C-SHIP', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'outbox', label: 'Shipments', i18nKey: 'nav.shipments', route: '/shipments', capability: 'CAP-O2C-SHIP', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'assignment_return', label: 'Customer Returns', i18nKey: 'nav.customerReturns', route: '/customer-returns', capability: 'CAP-O2C-RMA', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
+        { icon: 'assignment_return', label: 'Customer Returns', i18nKey: 'nav.customerReturns', route: '/customer-returns', capability: 'CAP-O2C-RMA', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
       ],
     },
 
@@ -176,19 +176,18 @@ export class NavTreeService {
           // Dark GL accounting suite — hidden unless CAP-ACCT-FULLGL is enabled.
           icon: 'account_balance', label: 'Accounting', i18nKey: 'navGroups.accounting',
           capability: 'CAP-ACCT-FULLGL',
-          allowedRoles: ['Admin', 'Manager', 'OfficeManager'],
+          allowedRoles: ['Controller'],
           children: [
             // Data-entry surfaces first — these exist on main but were previously
-            // absent from the nav, so the GL looked read-only. Posting journals is
-            // a controller/manager function, so it's role-gated tighter than reports.
-            { icon: 'account_tree', label: 'Chart of Accounts', i18nKey: 'nav.chartOfAccounts', route: '/accounting/chart-of-accounts', allowedRoles: ['Admin', 'Manager'] },
-            { icon: 'post_add', label: 'Journal Entries', i18nKey: 'nav.journalEntries', route: '/accounting/journal-entries/new', allowedRoles: ['Admin', 'Manager'] },
+            // absent from the nav, so the GL looked read-only.
+            { icon: 'account_tree', label: 'Chart of Accounts', i18nKey: 'nav.chartOfAccounts', route: '/accounting/chart-of-accounts' },
+            { icon: 'post_add', label: 'Journal Entries', i18nKey: 'nav.journalEntries', route: '/accounting/journal-entries/new' },
             { icon: 'menu_book', label: 'Ledger', i18nKey: 'nav.ledger', route: '/accounting/ledger' },
             // Financial statements.
             { icon: 'balance', label: 'Trial Balance', i18nKey: 'nav.trialBalance', route: '/accounting/trial-balance' },
             { icon: 'trending_up', label: 'Profit & Loss', i18nKey: 'nav.profitLoss', route: '/accounting/profit-loss' },
             { icon: 'account_balance', label: 'Balance Sheet', i18nKey: 'nav.balanceSheet', route: '/accounting/balance-sheet' },
-            { icon: 'savings', label: 'Budgets', i18nKey: 'nav.budgets', route: '/accounting/budgets', allowedRoles: ['Admin', 'Manager'] },
+            { icon: 'savings', label: 'Budgets', i18nKey: 'nav.budgets', route: '/accounting/budgets' },
             { icon: 'waterfall_chart', label: 'Cash Flow', i18nKey: 'nav.cashFlow', route: '/accounting/cash-flow' },
             // Sub-ledgers / aging.
             { icon: 'trending_flat', label: 'AR Aging', i18nKey: 'nav.arAging', route: '/accounting/ar-aging' },
@@ -197,10 +196,10 @@ export class NavTreeService {
             { icon: 'percent', label: 'Sales Tax Liability', i18nKey: 'nav.salesTaxLiability', route: '/accounting/sales-tax-liability' },
             { icon: 'badge', label: '1099 Report', i18nKey: 'nav.form1099', route: '/accounting/1099-report' },
             // Bank + period + export.
-            { icon: 'account_balance_wallet', label: 'Bank Reconciliation', i18nKey: 'nav.bankRec', route: '/accounting/bank-rec', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-            { icon: 'receipt_long', label: 'Bank Statements', i18nKey: 'nav.bankStatements', route: '/accounting/bank-statements', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-            { icon: 'event_available', label: 'Period Close', i18nKey: 'nav.periodClose', route: '/accounting/period-close', allowedRoles: ['Admin', 'Manager'] },
-            { icon: 'sync_alt', label: 'QBO Export', i18nKey: 'nav.exports', route: '/accounting/exports', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+            { icon: 'account_balance_wallet', label: 'Bank Reconciliation', i18nKey: 'nav.bankRec', route: '/accounting/bank-rec' },
+            { icon: 'receipt_long', label: 'Bank Statements', i18nKey: 'nav.bankStatements', route: '/accounting/bank-statements' },
+            { icon: 'event_available', label: 'Period Close', i18nKey: 'nav.periodClose', route: '/accounting/period-close' },
+            { icon: 'sync_alt', label: 'QBO Export', i18nKey: 'nav.exports', route: '/accounting/exports' },
           ],
         },
       ],
@@ -212,7 +211,7 @@ export class NavTreeService {
       icon: 'verified', label: 'Quality', i18nKey: 'navGroups.quality',
       children: [
         { icon: 'checklist', label: 'Quality', i18nKey: 'nav.quality', route: '/quality', capability: 'CAP-QC-INSPECTION', allowedRoles: ['Admin', 'Manager', 'Engineer'] },
-        { icon: 'report', label: 'Recalls', i18nKey: 'recalls.title', route: '/quality/recalls', capability: 'CAP-QC-RECALL', allowedRoles: ['Admin', 'Manager', 'Engineer'] },
+        { icon: 'report', label: 'Recalls', i18nKey: 'recalls.title', route: '/quality/recalls', capability: 'CAP-QC-RECALL', allowedRoles: ['Admin', 'Manager'] },
         { icon: 'fact_check', label: 'Compliance', i18nKey: 'nav.compliance', route: '/compliance', capability: 'CAP-EXT-WATCHTOWER', allowedRoles: ['Admin', 'Manager', 'ComplianceOfficer', 'OfficeManager'] },
         { icon: 'radar', label: 'Watchtower', i18nKey: 'nav.watchtower', route: '/watchtower', capability: 'CAP-EXT-WATCHTOWER', allowedRoles: ['Admin', 'Manager'] },
       ],
