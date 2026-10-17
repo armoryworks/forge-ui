@@ -249,6 +249,15 @@ describe('ScanInspectFlowComponent', () => {
       expect(flow.step()).toBe('inspect');
     });
 
+    it('asks which checklist to use even when the scan suggested one', () => {
+      const { flow, openInspection } = setup({ templateId: 4, templates: [template(4, 'Final'), template(3, 'First article')] });
+
+      flow.skipReference();
+
+      expect(flow.step()).toBe('template');
+      expect(openInspection).not.toHaveBeenCalled();
+    });
+
     it('uses the only checklist of the part without asking', () => {
       const { flow, openInspection } = setup({ templateId: null, templates: [template(4, 'Final')] });
 

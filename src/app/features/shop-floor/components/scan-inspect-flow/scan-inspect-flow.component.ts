@@ -155,22 +155,18 @@ export class ScanInspectFlowComponent implements OnInit {
   private begin(target: KioskInspectionTarget): void {
     this.target.set(target);
     this.step.set('starting');
-    const templateId = this.qcTemplateId();
-    if (templateId !== null) {
-      this.open(templateId);
-      return;
-    }
-    this.starting = this.kioskInspection.findTemplates(this.partId()).subscribe({
+    const lookup = this.kioskInspection.findTemplates(this.partId()).subscribe({
       next: (templates) => {
         if (templates.length > 1) {
           this.templates.set(templates);
           this.step.set('template');
         } else {
-          this.open(templates[0]?.id ?? null);
+          this.open(templates[0]?.id ?? this.qcTemplateId());
         }
       },
       error: (err: { error?: { detail?: string } }) => this.startFailed(err),
     });
+    if (!lookup.closed) this.starting = lookup;
   }
 
   protected chooseTemplate(templateId: number): void {
