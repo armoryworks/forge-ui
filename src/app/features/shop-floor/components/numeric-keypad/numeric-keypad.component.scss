@@ -70,6 +70,7 @@
 .keypad__mode-toggle {
   display: inline-flex;
   align-items: center;
+  min-height: 44px;
   gap: $sp-xs;
   padding: $sp-xs $sp-md;
   font-size: $font-size-xs;
