@@ -20,6 +20,9 @@ interface DialogInternals {
   taxCertBacked(): boolean;
   taxOverridden(): boolean;
   taxEditability(): CustomerTaxEditability | null;
+  lines: { set(lines: { partId: number; partNumber: string; description: string; quantity: number; unitPrice: number }[]): void };
+  taxAmount(): number;
+  grandTotal(): number;
 }
 
 const emptyPage = { items: [], totalCount: 0, page: 1, pageSize: 200 };
@@ -120,6 +123,35 @@ describe('QuoteDialogComponent — S1 tax-rate gate', () => {
     expect(internals.taxLocked()).toBe(false);
     expect(internals.taxEditability()).toBeNull();
     expect(component.form.controls.taxRate.enabled).toBe(true);
+    httpMock.verify();
+  });
+});
+
+describe('QuoteDialogComponent — summary tax', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  it('includes the auto-filled customer tax rate in the summary', () => {
+    const { component, internals, httpMock } = setup();
+    internals.lines.set([{ partId: 1, partNumber: 'P-1', description: 'Bracket', quantity: 10, unitPrice: 125 }]);
+
+    component.form.controls.customerId.setValue(5);
+    httpMock.expectOne(`${environment.apiUrl}/sales-tax-rates/for-customer/5`)
+      .flush({ id: 1, stateCode: 'NC', rate: 0.0475 });
+    httpMock.expectOne(`${environment.apiUrl}/customers/5/tax-editability`).flush(makeEditability());
+
+    expect(internals.taxAmount()).toBeCloseTo(59.375, 3);
+    expect(internals.grandTotal()).toBeCloseTo(1309.375, 3);
+    httpMock.verify();
+  });
+
+  it('follows a manual tax-rate edit', () => {
+    const { component, internals, httpMock } = setup();
+    internals.lines.set([{ partId: 1, partNumber: 'P-1', description: 'Bracket', quantity: 1, unitPrice: 200 }]);
+
+    component.form.controls.taxRate.setValue(10);
+
+    expect(internals.taxAmount()).toBeCloseTo(20, 3);
+    expect(internals.grandTotal()).toBeCloseTo(220, 3);
     httpMock.verify();
   });
 });

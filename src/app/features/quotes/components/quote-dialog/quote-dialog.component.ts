@@ -1,10 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, output, signal, Signal, ViewChild } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { startWith } from 'rxjs';
 
 import { QuoteService } from '../../services/quote.service';
 import { CustomerService } from '../../../customers/services/customer.service';
@@ -131,10 +130,7 @@ export class QuoteDialogComponent {
     this.lines().reduce((sum, l) => sum + l.quantity * l.unitPrice, 0)
   );
 
-  protected readonly taxRateValue = toSignal(
-    this.form.controls.taxRate.valueChanges.pipe(startWith(this.form.controls.taxRate.value ?? 0)),
-    { initialValue: this.form.controls.taxRate.value ?? 0 }
-  );
+  protected readonly taxRateValue = signal<number>(this.form.controls.taxRate.value ?? 0);
 
   protected readonly taxAmount = computed(() => (this.taxRateValue() ?? 0) / 100 * this.lineTotal());
   protected readonly grandTotal = computed(() => this.lineTotal() + this.taxAmount());
@@ -173,6 +169,7 @@ export class QuoteDialogComponent {
           if (rate == null) return;
           const pct = +(rate.rate * 100).toFixed(4);
           this.form.controls.taxRate.setValue(pct, { emitEvent: false });
+          this.taxRateValue.set(pct);
           this.taxAutoFilled.set(true);
           this.taxAutoLabel.set(
             rate.stateCode ? `${rate.stateCode} ${pct}%` : `Default ${pct}%`
@@ -193,7 +190,8 @@ export class QuoteDialogComponent {
     });
 
     // When tax rate is manually changed, clear the auto-fill indicator
-    this.form.controls.taxRate.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+    this.form.controls.taxRate.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
+      this.taxRateValue.set(value ?? 0);
       this.taxAutoFilled.set(false);
       this.taxAutoLabel.set('');
       // S1 — a manual edit is an override (cert-backed badge when allowed).
