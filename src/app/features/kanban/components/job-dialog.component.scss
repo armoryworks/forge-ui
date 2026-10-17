@@ -3,6 +3,7 @@
 
 .dialog-loading {
   @include flex-center;
+  flex-direction: row;
   gap: $sp-md;
   padding: $sp-xl;
   color: var(--text-muted);

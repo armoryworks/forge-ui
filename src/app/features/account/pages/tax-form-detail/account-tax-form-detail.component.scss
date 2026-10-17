@@ -325,6 +325,7 @@
 .form-detail__doc-or,
 .form-detail__doc-and {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: $sp-md;
   font-size: var(--font-size-xs);

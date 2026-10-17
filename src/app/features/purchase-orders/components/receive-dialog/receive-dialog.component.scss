@@ -7,6 +7,7 @@
 
 .receive-actions-top {
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
   gap: $sp-md;
@@ -18,6 +19,7 @@
 }
 
 .receive-table {
+  display: table;
   width: 100%;
   border-collapse: collapse;
   font-size: var(--font-size-sm);

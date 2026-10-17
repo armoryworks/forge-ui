@@ -46,6 +46,7 @@
 
 .current-file {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: $sp-sm;
   padding: $sp-md;

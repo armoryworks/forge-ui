@@ -91,6 +91,7 @@
 
 // ─── Bin Detail (expand content) ───
 .bin-detail-table {
+  display: table;
   width: 100%;
   border-collapse: collapse;
   font-size: var(--font-size-xs);

@@ -1,6 +1,10 @@
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
 
+.tab-bar {
+  flex-direction: row;
+}
+
 .operation-form {
   display: flex;
   flex-direction: column;
