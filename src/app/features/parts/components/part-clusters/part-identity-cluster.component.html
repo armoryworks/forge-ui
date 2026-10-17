@@ -1,4 +1,4 @@
-<div class="cluster" [formGroup]="form">
+<div class="cluster" [class.cluster--reading]="!editing()" [formGroup]="form">
   <h3 class="cluster__title">{{ 'parts.detail.tabs.identity' | translate }}</h3>
 
   <div class="cluster__grid">

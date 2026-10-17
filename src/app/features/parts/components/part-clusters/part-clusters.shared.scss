@@ -12,6 +12,14 @@
   padding: $sp-md $sp-lg;
 }
 
+.cluster--reading {
+  app-input,
+  app-textarea,
+  app-select {
+    margin-left: -$sp-lg;
+  }
+}
+
 .cluster__title {
   @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
   color: var(--text-muted);
@@ -53,7 +61,7 @@
 .cluster__form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: $sp-md;
+  gap: $sp-md $sp-lg;
 
   @include mobile {
     grid-template-columns: 1fr;
