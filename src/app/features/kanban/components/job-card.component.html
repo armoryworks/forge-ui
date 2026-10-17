@@ -30,12 +30,12 @@
     </span>
   </div>
   <div class="card__title">{{ job().title }}</div>
-  @if (job().partNumber) {
+  @if (buildQuantity(); as quantity) {
     <div class="card__part" data-testid="job-card-part-qty">
-      @if (job().quantity !== null) {
-        {{ 'kanban.partQty' | translate: { partNumber: job().partNumber, quantity: (job().quantity | number:'1.0-4') } }}
+      @if (job().partNumber) {
+        {{ 'kanban.partQty' | translate: { partNumber: job().partNumber, quantity: (quantity | number:'1.0-4') } }}
       } @else {
-        {{ job().partNumber }}
+        {{ 'kanban.card.quantity' | translate: { quantity: (quantity | number:'1.0-4') } }}
       }
     </div>
   }
@@ -43,10 +43,6 @@
     <div class="card__ops" data-testid="job-card-operations">
       @if (progress.running) {
         <span class="card__ops-dot" data-testid="job-card-operations-running" [title]="'kanban.card.operationsRunning' | translate"></span>
-      }
-      @if (progress.quantity !== null) {
-        <span>{{ 'kanban.card.operationsQty' | translate: { quantity: (progress.quantity | number:'1.0-4') } }}</span>
-        <span class="card__ops-sep" aria-hidden="true">·</span>
       }
       <span>{{ 'kanban.card.operationsCount' | translate: { complete: progress.complete, total: progress.total } }}</span>
       @if (progress.steps) {

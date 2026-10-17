@@ -657,6 +657,8 @@
     "partQty": "{{partNumber}} · Cant. {{quantity}}",
     "boardTruncated": "Mostrando {{shown}} de {{total}} órdenes de trabajo. Archive el trabajo enviado para ver el resto.",
     "activeOnly": "Solo activas",
+    "quantityUpdated": "Cantidad actualizada",
+    "quantityUpdateFailed": "No se pudo actualizar la cantidad.",
     "quantityToMake": "Cantidad a fabricar",
     "customerOptionalHint": "Opcional. Déjelo en blanco para órdenes de inventario o internas.",
     "fromSoLine": "Tomado de la línea de la orden de venta",
@@ -672,7 +674,7 @@
     "dispositionNoPart": "Esta orden de trabajo no tiene pieza, así que no se puede agregar nada al inventario.",
     "card": {
       "operationsRunning": "Hay un temporizador en marcha en este trabajo",
-      "operationsQty": "Cant. {{quantity}}",
+      "quantity": "Cant. {{quantity}}",
       "operationsCount": "Ops. {{complete}}/{{total}}",
       "operationsInProgress": "▶ {{steps}}",
       "operationsRemaining": "faltan ~{{time}}"

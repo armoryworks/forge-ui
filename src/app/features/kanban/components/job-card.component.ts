@@ -31,6 +31,11 @@ export class JobCardComponent {
     () => PRIORITY_COLORS[this.job().priorityName] ?? PRIORITY_COLORS['Normal'],
   );
 
+  protected readonly buildQuantity = computed(() => {
+    const j = this.job();
+    return j.quantity ?? (j.partNumber ? 1 : null);
+  });
+
   protected readonly holdTooltip = computed(() => this.job().activeHolds.join('\n'));
 
   protected readonly operationProgress = computed(() => {
@@ -39,7 +44,6 @@ export class JobCardComponent {
     if (total <= 0) return null;
     const remaining = j.estimatedRemainingMinutes;
     return {
-      quantity: j.partNumber ? null : (j.quantity ?? null),
       complete: j.operationsComplete ?? 0,
       total,
       steps: (j.inProgressSteps ?? []).join(', '),

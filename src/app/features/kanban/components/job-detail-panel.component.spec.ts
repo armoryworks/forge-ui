@@ -56,6 +56,10 @@ interface PanelInternals {
   availableStages: { set(v: Stage[]): void };
   onAllOperationsComplete(): void;
   moveToStage(stage: Stage): void;
+  quantityControl: FormControl<number | null>;
+  canEditQuantity: () => boolean;
+  saveQuantity(): void;
+  quantityChanged: { subscribe(fn: () => void): unknown };
 }
 
 const JOB_ID = 42;
@@ -88,13 +92,16 @@ function setup(options: { admin?: boolean; confirm?: boolean; roles?: string[] }
   const kanban = {
     addJobPart: vi.fn(),
     updateJobPart: vi.fn(),
+    updateJob: vi.fn(),
+    getJobDetail: vi.fn(),
+    getJobParts: vi.fn().mockReturnValue(of([])),
     createJobLink: vi.fn(),
     bulkArchive: vi.fn(),
     unarchiveJob: vi.fn(),
     getJobTimeEntries: vi.fn().mockReturnValue(of([])),
     moveJobStage: vi.fn().mockReturnValue(of(undefined)),
   };
-  const snackbar = { success: vi.fn(), error: vi.fn() };
+  const snackbar = { success: vi.fn(), error: vi.fn(), errorFrom: vi.fn() };
   const timeTracking = { stopTimer: vi.fn().mockReturnValue(of({})), startTimer: vi.fn() };
   const afterClosed = new Subject<unknown>();
   const dialog = {
@@ -255,6 +262,99 @@ describe('JobDetailPanelComponent', () => {
     control.setValue(40);
     component.savePartQty(jp);
     expect(control.value).toBe(25);
+  });
+
+  it('lets only the roles that can edit a job change an open work order\'s quantity', () => {
+    const open = jobDetail({ partId: 9, quantity: 1, completedDate: null, disposition: null });
+    const manager = setup({ roles: ['Manager'] }).component;
+    manager.job.set(open);
+    expect(manager.canEditQuantity()).toBe(true);
+
+    const worker = setup({ roles: ['ProductionWorker'] }).component;
+    worker.job.set(open);
+    expect(worker.canEditQuantity()).toBe(false);
+
+    const admin = setup({ roles: ['Admin'] }).component;
+    admin.job.set(jobDetail({ partId: null, quantity: null }));
+    expect(admin.canEditQuantity()).toBe(false);
+    admin.job.set({ ...open, disposition: 'ShipToCustomer' });
+    expect(admin.canEditQuantity()).toBe(false);
+    admin.job.set({ ...open, completedDate: new Date() });
+    expect(admin.canEditQuantity()).toBe(false);
+    admin.job.set({ ...open, isArchived: true });
+    expect(admin.canEditQuantity()).toBe(false);
+  });
+
+  it('saves the job quantity through the job update and reloads the job, its parts and the board', () => {
+    const { component, kanban, snackbar } = setup({ roles: ['Manager'] });
+    component.job.set(jobDetail({ partId: 9, quantity: 1 }));
+    kanban.updateJob.mockReturnValue(of({}));
+    kanban.getJobDetail.mockReturnValue(of(jobDetail({ partId: 9, quantity: 300 })));
+    kanban.getJobParts.mockReturnValue(of([jobPart({ quantity: 300 })]));
+    const changed = vi.fn();
+    component.quantityChanged.subscribe(changed);
+
+    component.quantityControl.setValue(300);
+    component.saveQuantity();
+
+    expect(kanban.updateJob).toHaveBeenCalledWith(JOB_ID, { quantity: 300 });
+    expect(snackbar.success).toHaveBeenCalledWith('kanban.quantityUpdated');
+    expect(component.job()!.quantity).toBe(300);
+    expect(component.quantityControl.value).toBe(300);
+    expect(component.jobParts().map(p => p.quantity)).toEqual([300]);
+    expect(changed).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not save an unchanged job quantity and restores an invalid or failed one', () => {
+    const { component, kanban, snackbar } = setup({ roles: ['Admin'] });
+    component.job.set(jobDetail({ partId: 9, quantity: 12 }));
+
+    component.quantityControl.setValue(12);
+    component.saveQuantity();
+    expect(kanban.updateJob).not.toHaveBeenCalled();
+
+    component.quantityControl.setValue(0);
+    component.saveQuantity();
+    expect(kanban.updateJob).not.toHaveBeenCalled();
+    expect(component.quantityControl.value).toBe(12);
+
+    const err = new Error('boom');
+    kanban.updateJob.mockReturnValue(throwError(() => err));
+    component.quantityControl.setValue(40);
+    component.saveQuantity();
+    expect(component.quantityControl.value).toBe(12);
+    expect(snackbar.errorFrom).toHaveBeenCalledWith(err, 'kanban.quantityUpdateFailed');
+  });
+
+  it('starts the first part on a work order at the work order\'s quantity', () => {
+    const { component, kanban } = setup();
+    component.job.set(jobDetail({ partId: null, quantity: 300 }));
+    kanban.addJobPart.mockReturnValue(of(jobPart({ quantity: 300 })));
+    kanban.getJobDetail.mockReturnValue(of(jobDetail({ partId: 9, quantity: 300 })));
+
+    component.togglePartAdd();
+    expect(component.partQtyControl.value).toBe(300);
+
+    component.onPartPicked(PART_ROW);
+    component.addPart();
+
+    expect(kanban.addJobPart).toHaveBeenCalledWith(JOB_ID, 9, 300);
+    expect(kanban.getJobDetail).toHaveBeenCalledWith(JOB_ID);
+  });
+
+  it('reloads the job after the build part\'s quantity is edited in the parts list', () => {
+    const { component, kanban } = setup();
+    const jp = jobPart();
+    component.job.set(jobDetail({ partId: 9, quantity: 25 }));
+    component.jobParts.set([jp]);
+    kanban.updateJobPart.mockReturnValue(of({ ...jp, quantity: 30 }));
+    kanban.getJobDetail.mockReturnValue(of(jobDetail({ partId: 9, quantity: 30 })));
+
+    component.partQtyEditControl(jp).setValue(30);
+    component.savePartQty(jp);
+
+    expect(kanban.getJobDetail).toHaveBeenCalledWith(JOB_ID);
+    expect(component.quantityControl.value).toBe(30);
   });
 
   it('offers Dispose on undisposed and held work orders only', () => {

@@ -9,6 +9,7 @@ import { UserRef } from '../models/user-ref.model';
 export interface JobDetailDialogData {
   jobId: number;
   users?: UserRef[];
+  onQuantityChanged?: () => void;
 }
 
 export interface JobDetailDialogResult {
@@ -25,7 +26,8 @@ export interface JobDetailDialogResult {
       [jobId]="data.jobId"
       [users]="data.users ?? []"
       (closed)="close()"
-      (editRequested)="onEditRequested($event)" />
+      (editRequested)="onEditRequested($event)"
+      (quantityChanged)="data.onQuantityChanged?.()" />
   `,
   styles: [`:host { display: block; width: 100%; height: 100%; } app-job-detail-panel { height: 100%; }`],
   changeDetection: ChangeDetectionStrategy.OnPush,

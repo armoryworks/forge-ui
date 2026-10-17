@@ -198,6 +198,10 @@ export class JobDialogComponent implements OnInit {
         priority: j.priority,
         dueDate: this.utcCalendarDate(j.dueDate),
       });
+      if (this.mode() === 'edit' && this.quantityEditable(j)) {
+        this.jobForm.controls.quantity.setValue(j.quantity ?? 1);
+        this.jobForm.controls.quantity.enable({ emitEvent: false });
+      }
     } else {
       const types = this.trackTypes();
       const defaultType = types.find(t => t.isDefault) ?? types[0];
@@ -264,6 +268,15 @@ export class JobDialogComponent implements OnInit {
       : undefined;
     control.setValue((orderConfirmed ?? stages[0])?.id ?? null);
     control.markAsPristine();
+  }
+
+  protected quantityEditable(j: JobDetail | null): boolean {
+    return !!j && j.partId != null && !j.completedDate && !j.disposition && !j.isArchived;
+  }
+
+  private editedQuantity(current: JobDetail, quantity: number | null): number | undefined {
+    if (!this.quantityEditable(current) || quantity == null) return undefined;
+    return quantity === current.quantity ? undefined : quantity;
   }
 
   private syncQuantityEnabled(partId: number | null): void {
@@ -490,7 +503,9 @@ export class JobDialogComponent implements OnInit {
       // JobNumber is editable only while the job is not disposed/closed.
       const canRenumber = this.allowManualJobNumbers() && !current.disposition;
       const nextJobNumber = canRenumber ? (f.jobNumber?.trim() || current.jobNumber) : current.jobNumber;
+      const quantity = this.editedQuantity(current, f.quantity);
       this.kanbanService.updateJob(jobId, {
+        quantity,
         jobNumber: canRenumber ? (f.jobNumber?.trim() || undefined) : undefined,
         title: f.title!.trim(),
         description: f.description || null,
@@ -511,6 +526,7 @@ export class JobDialogComponent implements OnInit {
             customerId: f.customerId,
             priority: f.priority ?? 'Normal',
             dueDate: dueDateIso ? new Date(dueDateIso) : null,
+            quantity: quantity ?? current.quantity,
           };
           this.saved.emit(updated);
         },

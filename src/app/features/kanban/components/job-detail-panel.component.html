@@ -480,6 +480,24 @@
                 <app-entity-link type="part" [entityId]="j.partId">{{ j.partNumber }}</app-entity-link>
               </span>
             </div>
+          }
+          @if (canEditQuantity()) {
+            <div class="jd-detail-row">
+              <span class="jd-detail-label">{{ 'kanban.quantityToMake' | translate }}</span>
+              <span class="jd-detail-value">
+                <app-input class="jd-detail-qty" type="number" [min]="0.0001" step="any"
+                  [label]="'kanban.quantityToMake' | translate" [formControl]="quantityControl"
+                  (focusout)="saveQuantity()" (keydown.enter)="commitQuantityOnEnter($event)"
+                  data-testid="job-detail-quantity" />
+              </span>
+            </div>
+          } @else if (j.quantity !== null) {
+            <div class="jd-detail-row">
+              <span class="jd-detail-label">{{ 'kanban.quantityToMake' | translate }}</span>
+              <span class="jd-detail-value" data-testid="job-detail-quantity-value">{{ j.quantity | number:'1.0-4' }}</span>
+            </div>
+          }
+          @if (j.partId) {
             <!-- Phase 3 H4 / WU-20 — BOM revision pinned at release time. -->
             @if (bomAtRelease(); as snap) {
               <div class="jd-detail-row">

@@ -493,4 +493,57 @@ describe('JobDialogComponent', () => {
     component.onSubmit();
     expect(createJob.mock.calls[0][0].initialStageId).toBe(14);
   });
+
+  function editableJob(overrides: Partial<JobDetail> = {}): JobDetail {
+    return {
+      id: 3, jobNumber: 'JOB-0003', title: 'Bracket run', description: null, trackTypeId: 1,
+      customerId: null, assigneeId: null, priority: 'Normal', dueDate: null, disposition: null,
+      completedDate: null, isArchived: false, partId: 12, partNumber: 'BRK-100', quantity: 1,
+      ...overrides,
+    } as unknown as JobDetail;
+  }
+
+  function submitEdit(): { saved: JobDetail[]; update: Subject<void> } {
+    const saved: JobDetail[] = [];
+    fixture.componentInstance.saved.subscribe(j => saved.push(j));
+    const update = new Subject<void>();
+    updateJob.mockReturnValue(update);
+    (fixture.componentInstance as unknown as { dialogRef: { clearDraft(): void } }).dialogRef = { clearDraft: vi.fn() };
+    component.onSubmit();
+    return { saved, update };
+  }
+
+  it('loads the job quantity for editing and sends it when changed', () => {
+    render('edit', editableJob());
+
+    const quantity = component.jobForm.controls.quantity;
+    expect(quantity.enabled).toBe(true);
+    expect(quantity.value).toBe(1);
+
+    quantity.setValue(300);
+    const { saved, update } = submitEdit();
+    expect(updateJob.mock.calls[0][1].quantity).toBe(300);
+
+    update.next();
+    expect(saved[0].quantity).toBe(300);
+  });
+
+  it('leaves the quantity out of the update when it is unchanged', () => {
+    render('edit', editableJob({ quantity: 40 }));
+
+    submitEdit();
+
+    expect(updateJob.mock.calls[0][1].quantity).toBeUndefined();
+  });
+
+  it('does not offer the quantity on a job without a part or one that is finished', () => {
+    render('edit', editableJob({ partId: null, quantity: null }));
+    expect(component.jobForm.controls.quantity.enabled).toBe(false);
+    submitEdit();
+    expect(updateJob.mock.calls[0][1].quantity).toBeUndefined();
+
+    fixture.destroy();
+    render('edit', editableJob({ disposition: 'ShipToCustomer' }));
+    expect(component.jobForm.controls.quantity.enabled).toBe(false);
+  });
 });

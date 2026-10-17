@@ -480,7 +480,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
   protected openJobDetail(jobId: number): void {
     this.detailDialog.open<JobDetailDialogComponent, JobDetailDialogData, JobDetailDialogResult | undefined>(
       'job', jobId, JobDetailDialogComponent,
-      { jobId, users: this.users() },
+      { jobId, users: this.users(), onQuantityChanged: () => this.reloadBoard() },
     ).afterClosed().subscribe(result => {
       if (result?.action === 'edit') {
         this.openEditDialog(result.job);

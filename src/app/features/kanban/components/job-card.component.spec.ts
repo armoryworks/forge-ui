@@ -215,13 +215,34 @@ describe('JobCardComponent', () => {
     expect(el().querySelector('[data-testid="job-card-part-qty"]')!.textContent!.trim()).toBe('BRK-100 · Qty 500');
   });
 
-  it('shows the part number alone when the work order has no quantity', () => {
+  it('counts a part with no recorded quantity as one, the quantity the remaining time uses', () => {
+    TestBed.inject(TranslateService).setTranslation('en', { kanban: { partQty: '{{partNumber}} · Qty {{quantity}}' } });
+    TestBed.inject(TranslateService).use('en');
     render(job({ partNumber: 'BRK-100', quantity: null }));
 
-    expect(el().querySelector('[data-testid="job-card-part-qty"]')!.textContent!.trim()).toBe('BRK-100');
+    expect(el().querySelector('[data-testid="job-card-part-qty"]')!.textContent!.trim()).toBe('BRK-100 · Qty 1');
   });
 
-  it('omits the part line when the work order has no part', () => {
+  it('shows the quantity even when the part has tracked operations', () => {
+    TestBed.inject(TranslateService).setTranslation('en', { kanban: { partQty: '{{partNumber}} · Qty {{quantity}}' } });
+    TestBed.inject(TranslateService).use('en');
+    render(job({
+      partNumber: 'BRK-100', quantity: 300,
+      operationsTotal: 4, operationsComplete: 1, inProgressSteps: [], runningTimerCount: 0, estimatedRemainingMinutes: 600,
+    }));
+
+    expect(el().querySelector('[data-testid="job-card-part-qty"]')!.textContent!.trim()).toBe('BRK-100 · Qty 300');
+  });
+
+  it('shows the quantity alone for a work order without a part', () => {
+    TestBed.inject(TranslateService).setTranslation('en', { kanban: { card: { quantity: 'Qty {{quantity}}' } } });
+    TestBed.inject(TranslateService).use('en');
+    render(job({ quantity: 300 }));
+
+    expect(el().querySelector('[data-testid="job-card-part-qty"]')!.textContent!.trim()).toBe('Qty 300');
+  });
+
+  it('omits the quantity line when the work order has neither part nor quantity', () => {
     render(job());
     expect(el().querySelector('[data-testid="job-card-part-qty"]')).toBeNull();
   });
@@ -246,19 +267,20 @@ describe('JobCardComponent', () => {
     expect(line!.textContent).toContain('kanban.card.operationsCount');
     expect(line!.textContent).toContain('kanban.card.operationsInProgress');
     expect(line!.textContent).toContain('kanban.card.operationsRemaining');
-    expect(line!.textContent).not.toContain('kanban.card.operationsQty');
+    expect(line!.textContent).not.toContain('kanban.card.quantity');
     expect(el().querySelector('[data-testid="job-card-operations-running"]')).not.toBeNull();
   });
 
   it('drops the empty pieces of the operation line', () => {
     TestBed.inject(TranslateService).setTranslation('en', { kanban: { card: {
-      operationsQty: 'Qty {{quantity}}', operationsCount: 'Ops {{complete}}/{{total}}',
+      quantity: 'Qty {{quantity}}', operationsCount: 'Ops {{complete}}/{{total}}',
     } } });
     TestBed.inject(TranslateService).use('en');
     render(job({ quantity: 40, operationsTotal: 9, operationsComplete: 0, inProgressSteps: [], runningTimerCount: 0, estimatedRemainingMinutes: 0 }));
 
     const line = el().querySelector('[data-testid="job-card-operations"]')!;
-    expect(Array.from(line.children).map(c => c.textContent!.trim())).toEqual(['Qty 40', '·', 'Ops 0/9']);
+    expect(Array.from(line.children).map(c => c.textContent!.trim())).toEqual(['Ops 0/9']);
+    expect(el().querySelector('[data-testid="job-card-part-qty"]')!.textContent!.trim()).toBe('Qty 40');
     expect(el().querySelector('[data-testid="job-card-operations-running"]')).toBeNull();
   });
 });

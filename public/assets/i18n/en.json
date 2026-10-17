@@ -657,6 +657,8 @@
     "partQty": "{{partNumber}} · Qty {{quantity}}",
     "boardTruncated": "Showing {{shown}} of {{total}} work orders. Archive shipped work to see the rest.",
     "activeOnly": "Active only",
+    "quantityUpdated": "Quantity updated",
+    "quantityUpdateFailed": "Couldn't update the quantity.",
     "quantityToMake": "Quantity to make",
     "customerOptionalHint": "Optional. Leave blank for stock or internal orders.",
     "fromSoLine": "Filled from the sales order line",
@@ -672,7 +674,7 @@
     "dispositionNoPart": "This work order has no part, so nothing can be added to inventory.",
     "card": {
       "operationsRunning": "A timer is running on this job",
-      "operationsQty": "Qty {{quantity}}",
+      "quantity": "Qty {{quantity}}",
       "operationsCount": "Ops {{complete}}/{{total}}",
       "operationsInProgress": "▶ {{steps}}",
       "operationsRemaining": "~{{time}} left"

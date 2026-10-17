@@ -46,6 +46,7 @@ import { CoverPhotoUploadDialogComponent, CoverPhotoDialogData } from './cover-p
 import { JobCostTabComponent } from './job-cost-tab.component';
 import { OperationTimeTabComponent } from './operation-time-tab.component';
 import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
+import { JOB_EDIT_ROLES } from '../job-roles';
 
 @Component({
   selector: 'app-job-detail-panel',
@@ -68,6 +69,7 @@ export class JobDetailPanelComponent implements OnInit {
   readonly users = input<UserRef[]>([]);
   readonly closed = output<void>();
   readonly editRequested = output<JobDetail>();
+  readonly quantityChanged = output<void>();
 
   protected readonly job = signal<JobDetail | null>(null);
   protected readonly subtasks = signal<Subtask[]>([]);
@@ -107,6 +109,14 @@ export class JobDetailPanelComponent implements OnInit {
   private readonly partQtyEditControls = new Map<number, FormControl<number | null>>();
   protected readonly selectedPartId = signal<number | null>(null);
   private readonly partPicker = viewChild<EntityPickerComponent>('partPicker');
+  private readonly operationTimeTab = viewChild(OperationTimeTabComponent);
+
+  protected readonly quantityControl = new FormControl<number | null>(null);
+  protected readonly canEditQuantity = computed(() => {
+    const j = this.job();
+    return !!j && j.partId != null && !j.completedDate && !j.disposition && !j.isArchived
+      && this.auth.hasAnyRole([...JOB_EDIT_ROLES]);
+  });
 
   // Activity (delegated to shared EntityActivitySectionComponent)
 
@@ -146,7 +156,7 @@ export class JobDetailPanelComponent implements OnInit {
   ngOnInit(): void {
     const id = this.jobId();
     this.kanbanService.getJobDetail(id).subscribe({ next: detail => {
-      this.job.set(detail);
+      this.applyDetail(detail);
       this.loading.set(false);
       if (detail.childJobCount > 0) {
         this.kanbanService.getChildJobs(id).subscribe(children => this.childJobs.set(children));
@@ -179,6 +189,48 @@ export class JobDetailPanelComponent implements OnInit {
     this.kanbanService.getJobTimeEntries(id).subscribe(t => this.timeEntries.set(t));
     this.kanbanService.getJobParts(id).subscribe(p => this.jobParts.set(p));
 
+  }
+
+  private applyDetail(detail: JobDetail): void {
+    this.job.set(detail);
+    this.quantityControl.setValue(detail.quantity);
+  }
+
+  private refreshBuildQuantity(): void {
+    const id = this.jobId();
+    this.kanbanService.getJobDetail(id).subscribe(detail => this.applyDetail(detail));
+    this.kanbanService.getJobParts(id).subscribe(parts => {
+      this.jobParts.set(parts);
+      for (const jp of parts) this.partQtyEditControls.get(jp.id)?.setValue(jp.quantity);
+    });
+    this.operationTimeTab()?.reload();
+    this.quantityChanged.emit();
+  }
+
+  protected commitQuantityOnEnter(event: Event): void {
+    (event.target as HTMLElement).blur();
+  }
+
+  protected saveQuantity(): void {
+    const j = this.job();
+    if (!j || !this.canEditQuantity()) return;
+    const qty = this.quantityControl.value;
+    if (!this.isValidQty(qty)) {
+      this.quantityControl.setValue(j.quantity);
+      return;
+    }
+    if (qty === j.quantity) return;
+
+    this.kanbanService.updateJob(j.id, { quantity: qty }).subscribe({
+      next: () => {
+        this.snackbar.success(this.translate.instant('kanban.quantityUpdated'));
+        this.refreshBuildQuantity();
+      },
+      error: (err: unknown) => {
+        this.quantityControl.setValue(j.quantity);
+        this.snackbar.errorFrom(err, 'kanban.quantityUpdateFailed');
+      },
+    });
   }
 
   protected completedCount(): number {
@@ -214,7 +266,7 @@ export class JobDetailPanelComponent implements OnInit {
   }
 
   protected togglePartAdd(): void {
-    if (this.showPartAdd()) this.resetPartForm();
+    this.resetPartForm();
     this.showPartAdd.update(open => !open);
   }
 
@@ -309,7 +361,12 @@ export class JobDetailPanelComponent implements OnInit {
   private resetPartForm(): void {
     this.selectedPartId.set(null);
     this.partPickerControl.reset();
-    this.partQtyControl.setValue(1);
+    this.partQtyControl.setValue(this.newPartDefaultQty());
+  }
+
+  private newPartDefaultQty(): number {
+    const j = this.job();
+    return j && j.partId == null ? (j.quantity ?? 1) : 1;
   }
 
   private pickedLabel(primary: unknown, secondary: unknown): string {
@@ -326,10 +383,13 @@ export class JobDetailPanelComponent implements OnInit {
       return;
     }
 
+    const current = this.job();
+    const setsBuildPart = !!current && current.partId == null;
     this.kanbanService.addJobPart(this.jobId(), partId, qty).subscribe(jp => {
       this.jobParts.update(list => [...list, jp]);
       this.resetPartForm();
       this.snackbar.success(this.translate.instant('kanban.partAdded'));
+      if (setsBuildPart) this.refreshBuildQuantity();
     });
   }
 
@@ -364,6 +424,7 @@ export class JobDetailPanelComponent implements OnInit {
         this.jobParts.update(list => list.map(p => (p.id === jp.id ? updated : p)));
         control.setValue(updated.quantity);
         this.snackbar.success(this.translate.instant('parts.partUpdated'));
+        if (updated.partId === this.job()?.partId) this.refreshBuildQuantity();
       },
       error: () => control.setValue(jp.quantity),
     });

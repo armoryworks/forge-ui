@@ -32,6 +32,9 @@
           <app-input data-testid="job-quantity" [label]="'kanban.quantityToMake' | translate" type="number"
             formControlName="quantity" [min]="0.0001" step="any" />
         </div>
+      } @else if (quantityEditable(job())) {
+        <app-input data-testid="job-quantity-edit" [label]="'kanban.quantityToMake' | translate" type="number"
+          formControlName="quantity" [min]="0.0001" step="any" />
       }
 
       <div class="dialog-row">
