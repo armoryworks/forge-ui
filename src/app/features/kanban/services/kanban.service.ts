@@ -177,7 +177,7 @@ export class KanbanService {
     return this.http.get<JobPart[]>(`${environment.apiUrl}/jobs/${jobId}/parts`);
   }
 
-  addJobPart(jobId: number, partId: number, quantity: number = 1, notes?: string): Observable<JobPart> {
+  addJobPart(jobId: number, partId: number, quantity?: number, notes?: string): Observable<JobPart> {
     return this.http.post<JobPart>(`${environment.apiUrl}/jobs/${jobId}/parts`, { partId, quantity, notes });
   }
 

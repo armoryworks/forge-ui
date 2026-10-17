@@ -31,6 +31,7 @@ import { PRIORITIES, PRIORITY_OPTIONS } from '../../../shared/models/priority.co
 import { SalesOrderService } from '../../sales-orders/services/sales-order.service';
 import { PartsService } from '../../parts/services/parts.service';
 import { AuthService } from '../../../shared/services/auth.service';
+import { JOB_EDIT_ROLES } from '../job-roles';
 
 export type DialogMode = 'create' | 'edit';
 
@@ -86,6 +87,7 @@ export class JobDialogComponent implements OnInit {
   protected readonly saving = signal(false);
   protected readonly loadingRefs = signal(true);
   protected readonly canLinkSalesOrderLine = this.auth.hasAnyRole(['Admin', 'Manager', 'OfficeManager', 'PM']);
+  private readonly canEditJob = this.auth.hasAnyRole([...JOB_EDIT_ROLES]);
   protected readonly priorities = PRIORITIES;
 
   // #27 — inline association of the new job with an open sales-order line.
@@ -234,7 +236,10 @@ export class JobDialogComponent implements OnInit {
       }
       this.jobForm.controls.partId.valueChanges
         .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe(partId => this.syncQuantityEnabled(partId));
+        .subscribe(partId => {
+          this.syncQuantityEnabled(partId);
+          this.applyLineQuantityForPart();
+        });
       this.jobForm.controls.salesOrderLineId.valueChanges
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(lineId => {
@@ -271,7 +276,7 @@ export class JobDialogComponent implements OnInit {
   }
 
   protected quantityEditable(j: JobDetail | null): boolean {
-    return !!j && j.partId != null && !j.completedDate && !j.disposition && !j.isArchived;
+    return this.canEditJob && !!j && j.partId != null && !j.completedDate && !j.disposition && !j.isArchived;
   }
 
   private editedQuantity(current: JobDetail, quantity: number | null): number | undefined {
@@ -322,6 +327,33 @@ export class JobDialogComponent implements OnInit {
     return quantity.value == null || !quantity.dirty;
   }
 
+  private lineQuantityFor(line: AssignableSalesOrderLine, partId: number | null): number | null {
+    const remaining = line.remainingQuantity;
+    if (partId == null || remaining == null || remaining <= 0) return null;
+    return line.partId == null || line.partId === partId ? remaining : null;
+  }
+
+  private applyLineQuantity(line: AssignableSalesOrderLine, previousAuto: number | null): boolean {
+    const controls = this.jobForm.controls;
+    if (controls.partId.value == null || !this.quantityReplaceable()) return false;
+    const lineQuantity = this.lineQuantityFor(line, controls.partId.value);
+    if (lineQuantity != null) {
+      controls.quantity.setValue(lineQuantity);
+      this.autoFilled.quantity = lineQuantity;
+      return true;
+    }
+    if (this.holdsAuto(controls.quantity.value, previousAuto)) controls.quantity.setValue(1);
+    this.autoFilled.quantity = null;
+    return false;
+  }
+
+  private applyLineQuantityForPart(): void {
+    if (this.restoringDraft) return;
+    const lineId = this.jobForm.controls.salesOrderLineId.value;
+    const line = lineId == null ? undefined : this.salesOrderLines().find(l => l.id === lineId);
+    if (line) this.applyLineQuantity(line, this.autoFilled.quantity);
+  }
+
   private lineTitle(line: AssignableSalesOrderLine, partName: string | null = null): string {
     const name = partName || line.description;
     return line.partNumber ? `${line.partNumber} — ${name}` : name;
@@ -360,16 +392,7 @@ export class JobDialogComponent implements OnInit {
       }
     }
 
-    if (controls.partId.value != null && this.quantityReplaceable()) {
-      const remaining = line.remainingQuantity;
-      if (controls.partId.value === line.partId && remaining != null && remaining > 0) {
-        controls.quantity.setValue(remaining);
-        this.autoFilled.quantity = remaining;
-        filled = true;
-      } else if (this.holdsAuto(controls.quantity.value, previous.quantity)) {
-        controls.quantity.setValue(1);
-      }
-    }
+    if (this.applyLineQuantity(line, previous.quantity)) filled = true;
 
     const currentTitle = controls.title.value?.trim() ?? '';
     if (currentTitle === '' || this.holdsAuto(currentTitle, previous.title)) {

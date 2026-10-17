@@ -248,7 +248,7 @@ export class BacklogComponent implements OnInit {
     this.selectedJobId.set(job.id);
     this.detailDialog.open<JobDetailDialogComponent, JobDetailDialogData, JobDetailDialogResult | undefined>(
       'job', job.id, JobDetailDialogComponent,
-      { jobId: job.id, users: this.users() },
+      { jobId: job.id, users: this.users(), onQuantityChanged: () => this.loadJobs() },
     ).afterClosed().subscribe(result => {
       this.selectedJobId.set(null);
       if (result?.action === 'edit') {

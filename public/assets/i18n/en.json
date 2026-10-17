@@ -663,6 +663,7 @@
     "customerOptionalHint": "Optional. Leave blank for stock or internal orders.",
     "fromSoLine": "Filled from the sales order line",
     "addPartQty": "Qty",
+    "addPartQtyFromLine": "From order",
     "childQty": "Qty {{quantity}}",
     "childDue": "Due {{date}}",
     "workflowStatusHint": "Workflow status tracks holds and paperwork. The board status shows where the work order is.",

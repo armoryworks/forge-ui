@@ -48,6 +48,7 @@ interface PanelInternals {
   canAddPart(): boolean;
   partQtyEditControl(jp: JobPart): FormControl<number | null>;
   savePartQty(jp: JobPart): void;
+  partQtyReadonly(jp: JobPart): boolean;
   canDispose(disposition: string | null): boolean;
   formatDisposition(disposition: string): string;
   timeEntries: { set(v: TimeEntry[]): void };
@@ -326,24 +327,69 @@ describe('JobDetailPanelComponent', () => {
     expect(snackbar.errorFrom).toHaveBeenCalledWith(err, 'kanban.quantityUpdateFailed');
   });
 
-  it('starts the first part on a work order at the work order\'s quantity', () => {
+  it('leaves the first part\'s quantity on a sales-order work order to the server', () => {
     const { component, kanban } = setup();
-    component.job.set(jobDetail({ partId: null, quantity: 300 }));
-    kanban.addJobPart.mockReturnValue(of(jobPart({ quantity: 300 })));
-    kanban.getJobDetail.mockReturnValue(of(jobDetail({ partId: 9, quantity: 300 })));
+    component.job.set(jobDetail({ partId: null, salesOrderId: 7, quantity: 300 }));
+    kanban.addJobPart.mockReturnValue(of(jobPart({ quantity: 100 })));
+    kanban.getJobDetail.mockReturnValue(of(jobDetail({ partId: 9, quantity: 100 })));
 
     component.togglePartAdd();
-    expect(component.partQtyControl.value).toBe(300);
+    expect(component.partQtyControl.value).toBeNull();
 
     component.onPartPicked(PART_ROW);
+    expect(component.canAddPart()).toBe(true);
     component.addPart();
 
-    expect(kanban.addJobPart).toHaveBeenCalledWith(JOB_ID, 9, 300);
+    expect(kanban.addJobPart).toHaveBeenCalledWith(JOB_ID, 9, undefined);
     expect(kanban.getJobDetail).toHaveBeenCalledWith(JOB_ID);
   });
 
-  it('reloads the job after the build part\'s quantity is edited in the parts list', () => {
+  it('sends a typed first-part quantity on a sales-order work order', () => {
     const { component, kanban } = setup();
+    component.job.set(jobDetail({ partId: null, salesOrderId: 7, quantity: 300 }));
+    kanban.addJobPart.mockReturnValue(of(jobPart({ quantity: 40 })));
+    kanban.getJobDetail.mockReturnValue(of(jobDetail({ partId: 9, quantity: 40 })));
+
+    component.togglePartAdd();
+    component.onPartPicked(PART_ROW);
+    component.partQtyControl.setValue(40);
+    component.addPart();
+
+    expect(kanban.addJobPart).toHaveBeenCalledWith(JOB_ID, 9, 40);
+  });
+
+  it('starts the first part at one on a work order without a sales-order line', () => {
+    const { component } = setup();
+    component.job.set(jobDetail({ partId: null, salesOrderId: null, quantity: null }));
+
+    component.togglePartAdd();
+
+    expect(component.partQtyControl.value).toBe(1);
+  });
+
+  it('keeps the build part\'s quantity read-only in the parts list for roles that cannot edit the job', () => {
+    const { component, kanban } = setup({ roles: ['ProductionWorker'] });
+    const build = jobPart();
+    const other = jobPart({ id: 6, partId: 10, quantity: 2 });
+    component.job.set(jobDetail({ partId: 9, quantity: 25 }));
+    component.jobParts.set([build, other]);
+
+    expect(component.partQtyReadonly(build)).toBe(true);
+    expect(component.partQtyReadonly(other)).toBe(false);
+    component.partQtyEditControl(build).setValue(30);
+    component.savePartQty(build);
+    expect(kanban.updateJobPart).not.toHaveBeenCalled();
+  });
+
+  it('keeps the build part\'s quantity read-only in the parts list on a finished work order', () => {
+    const { component } = setup({ roles: ['Admin'] });
+    component.job.set(jobDetail({ partId: 9, quantity: 25, completedDate: new Date() }));
+
+    expect(component.partQtyReadonly(jobPart())).toBe(true);
+  });
+
+  it('reloads the job after the build part\'s quantity is edited in the parts list', () => {
+    const { component, kanban } = setup({ roles: ['Manager'] });
     const jp = jobPart();
     component.job.set(jobDetail({ partId: 9, quantity: 25 }));
     component.jobParts.set([jp]);

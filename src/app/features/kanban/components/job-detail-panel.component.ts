@@ -364,9 +364,21 @@ export class JobDetailPanelComponent implements OnInit {
     this.partQtyControl.setValue(this.newPartDefaultQty());
   }
 
-  private newPartDefaultQty(): number {
+  private newPartDefaultQty(): number | null {
+    return this.newPartTakesLineQuantity() ? null : 1;
+  }
+
+  protected newPartTakesLineQuantity(): boolean {
     const j = this.job();
-    return j && j.partId == null ? (j.quantity ?? 1) : 1;
+    return !!j && j.partId == null && j.salesOrderId != null;
+  }
+
+  private newPartQtyAcceptable(qty: number | null): boolean {
+    return this.isValidQty(qty) || (qty == null && this.newPartTakesLineQuantity());
+  }
+
+  protected partQtyReadonly(jp: JobPart): boolean {
+    return jp.partId === this.job()?.partId && !this.canEditQuantity();
   }
 
   private pickedLabel(primary: unknown, secondary: unknown): string {
@@ -377,7 +389,7 @@ export class JobDetailPanelComponent implements OnInit {
   protected addPart(): void {
     const partId = this.selectedPartId();
     const qty = this.partQtyControl.value;
-    if (partId === null || !this.isValidQty(qty)) return;
+    if (partId === null || !this.newPartQtyAcceptable(qty)) return;
     if (this.jobParts().some(jp => jp.partId === partId)) {
       this.snackbar.error(this.translate.instant('jobDetailExtras.partDuplicate'));
       return;
@@ -385,7 +397,7 @@ export class JobDetailPanelComponent implements OnInit {
 
     const current = this.job();
     const setsBuildPart = !!current && current.partId == null;
-    this.kanbanService.addJobPart(this.jobId(), partId, qty).subscribe(jp => {
+    this.kanbanService.addJobPart(this.jobId(), partId, qty ?? undefined).subscribe(jp => {
       this.jobParts.update(list => [...list, jp]);
       this.resetPartForm();
       this.snackbar.success(this.translate.instant('kanban.partAdded'));
@@ -394,7 +406,7 @@ export class JobDetailPanelComponent implements OnInit {
   }
 
   protected canAddPart(): boolean {
-    return this.selectedPartId() !== null && this.isValidQty(this.partQtyControl.value);
+    return this.selectedPartId() !== null && this.newPartQtyAcceptable(this.partQtyControl.value);
   }
 
   protected partQtyEditControl(jp: JobPart): FormControl<number | null> {
@@ -411,6 +423,7 @@ export class JobDetailPanelComponent implements OnInit {
   }
 
   protected savePartQty(jp: JobPart): void {
+    if (this.partQtyReadonly(jp)) return;
     const control = this.partQtyEditControl(jp);
     const qty = control.value;
     if (!this.isValidQty(qty)) {

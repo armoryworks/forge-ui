@@ -663,6 +663,7 @@
     "customerOptionalHint": "Opcional. Déjelo en blanco para órdenes de inventario o internas.",
     "fromSoLine": "Tomado de la línea de la orden de venta",
     "addPartQty": "Cant.",
+    "addPartQtyFromLine": "Del pedido",
     "childQty": "Cant. {{quantity}}",
     "childDue": "Vence {{date}}",
     "workflowStatusHint": "El estado del flujo de trabajo controla retenciones y documentación. El estado del tablero muestra dónde está la orden de trabajo.",

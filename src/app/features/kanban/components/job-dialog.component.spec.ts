@@ -322,6 +322,42 @@ describe('JobDialogComponent', () => {
     expect(f.quantity.value).toBe(1);
   });
 
+  it('takes a free-text line\'s remaining quantity for the part the user picks', () => {
+    lines = [soLine({ partId: null, partNumber: null, remainingQuantity: 300 })];
+    render('create');
+    const f = component.jobForm.controls;
+
+    f.salesOrderLineId.setValue(40);
+    f.partId.setValue(99);
+
+    expect(f.quantity.value).toBe(300);
+    component.onSubmit();
+    expect(createJob.mock.calls[0][0]).toMatchObject({ salesOrderLineId: 40, partId: 99, quantity: null });
+  });
+
+  it('takes a free-text line\'s remaining quantity for a part picked before the line', () => {
+    lines = [soLine({ partId: null, partNumber: null, remainingQuantity: 300 })];
+    render('create');
+    const f = component.jobForm.controls;
+
+    f.partId.setValue(99);
+    f.salesOrderLineId.setValue(40);
+
+    expect(f.partId.value).toBe(99);
+    expect(f.quantity.value).toBe(300);
+  });
+
+  it('drops the line quantity when the user swaps to a part that is not the line\'s', () => {
+    render('create');
+    const f = component.jobForm.controls;
+    f.salesOrderLineId.setValue(40);
+    expect(f.quantity.value).toBe(500);
+
+    f.partId.setValue(99);
+
+    expect(f.quantity.value).toBe(1);
+  });
+
   it('accepts a fractional remaining quantity from the line', () => {
     lines = [soLine({ remainingQuantity: 0.5 })];
     render('create');
@@ -533,6 +569,15 @@ describe('JobDialogComponent', () => {
 
     submitEdit();
 
+    expect(updateJob.mock.calls[0][1].quantity).toBeUndefined();
+  });
+
+  it('does not offer the quantity to roles that cannot save a job edit', () => {
+    roles = ['PM'];
+    render('edit', editableJob());
+
+    expect(component.jobForm.controls.quantity.enabled).toBe(false);
+    submitEdit();
     expect(updateJob.mock.calls[0][1].quantity).toBeUndefined();
   });
 
