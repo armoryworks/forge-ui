@@ -91,7 +91,9 @@ export class AutocompleteComponent implements ControlValueAccessor, AfterContent
 
   protected readonly errorStateMatcher: ErrorStateMatcher = {
     isErrorState: (searchControl, form) =>
-      this.errorMessage() !== null || this.defaultErrorState.isErrorState(searchControl, form),
+      this.control() !== null
+        ? this.errorMessage() !== null
+        : this.defaultErrorState.isErrorState(searchControl, form),
   };
 
   private readonly matInput = viewChild(MatInput);

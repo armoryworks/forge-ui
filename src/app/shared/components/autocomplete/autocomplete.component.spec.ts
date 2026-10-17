@@ -265,4 +265,14 @@ describe('AutocompleteComponent · field error', () => {
     expect(errorText()).toBeNull();
     expect(isOutlinedInvalid()).toBe(false);
   });
+
+  it('drops the invalid outline when the bound control is reset after the field was touched', () => {
+    el.querySelector('input')!.dispatchEvent(new Event('blur'));
+    fixture.detectChanges();
+    expect(isOutlinedInvalid()).toBe(true);
+    fixture.componentInstance.form.reset();
+    fixture.detectChanges();
+    expect(errorText()).toBeNull();
+    expect(isOutlinedInvalid()).toBe(false);
+  });
 });
