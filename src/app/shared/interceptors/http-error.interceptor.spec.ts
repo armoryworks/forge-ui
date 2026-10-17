@@ -247,6 +247,58 @@ describe('httpErrorInterceptor', () => {
     });
   });
 
+  describe('network failures', () => {
+    const networkError = new ProgressEvent('error');
+
+    afterEach(() => vi.useRealTimers());
+
+    it('retries a read that never reached the server before reporting it', () => {
+      vi.useFakeTimers();
+      let result: unknown;
+      http.get('/api/v1/jobs').subscribe({ next: (body) => { result = body; } });
+
+      httpMock.expectOne('/api/v1/jobs').error(networkError);
+      vi.advanceTimersByTime(500);
+      httpMock.expectOne('/api/v1/jobs').flush([{ id: 1 }]);
+
+      expect(result).toEqual([{ id: 1 }]);
+      expect(toast.show).not.toHaveBeenCalled();
+    });
+
+    it('shows the connection-lost toast once the retries are used up', () => {
+      vi.useFakeTimers();
+      http.get('/api/v1/jobs').subscribe({ error: () => {} });
+
+      httpMock.expectOne('/api/v1/jobs').error(networkError);
+      vi.advanceTimersByTime(500);
+      httpMock.expectOne('/api/v1/jobs').error(networkError);
+      vi.advanceTimersByTime(1500);
+      httpMock.expectOne('/api/v1/jobs').error(networkError);
+
+      expect(toast.show).toHaveBeenCalledOnce();
+      expect(toast.show).toHaveBeenCalledWith(expect.objectContaining({ title: 'errors.connectionLost' }));
+    });
+
+    it('does not resend a write that never reached the server', () => {
+      http.post('/api/v1/jobs', {}).subscribe({ error: () => {} });
+
+      httpMock.expectOne('/api/v1/jobs').error(networkError);
+
+      httpMock.expectNone('/api/v1/jobs');
+      expect(toast.show).toHaveBeenCalledOnce();
+    });
+
+    it('stays quiet while the tab is hidden', () => {
+      const visibility = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+      http.post('/api/v1/jobs', {}).subscribe({ error: () => {} });
+
+      httpMock.expectOne('/api/v1/jobs').error(networkError);
+
+      expect(toast.show).not.toHaveBeenCalled();
+      visibility.mockRestore();
+    });
+  });
+
   it('shows nothing for a request marked silent, and still passes the error on', () => {
     let captured: unknown;
     http.delete('/api/v1/time-tracking/entries/9', { context: new HttpContext().set(SILENT_HTTP_ERRORS, true) })

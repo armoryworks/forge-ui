@@ -1,6 +1,6 @@
 import { HttpContext, HttpContextToken, HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { catchError, throwError } from 'rxjs';
+import { catchError, retry, throwError, timer } from 'rxjs';
 
 import { TranslateService } from '@ngx-translate/core';
 
@@ -13,6 +13,8 @@ import { SILENT_HTTP_ERRORS } from './silent-http-errors.token';
 
 export const SUPPRESS_VALIDATION_SNACKBAR = new HttpContextToken<boolean>(() => false);
 
+const NETWORK_RETRY_DELAYS_MS = [500, 1500];
+
 export function formValidationContext(): HttpContext {
   return new HttpContext().set(SUPPRESS_VALIDATION_SNACKBAR, true);
 }
@@ -24,7 +26,16 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
 
   const isExternal = /^https?:\/\//i.test(req.url) && !req.url.startsWith(window.location.origin);
 
+  const idempotent = req.method === 'GET' || req.method === 'HEAD';
+
   return next(req).pipe(
+    retry({
+      count: NETWORK_RETRY_DELAYS_MS.length,
+      delay: (error: unknown, attempt: number) =>
+        idempotent && error instanceof HttpErrorResponse && error.status === 0
+          ? timer(NETWORK_RETRY_DELAYS_MS[attempt - 1])
+          : throwError(() => error),
+    }),
     catchError((error: HttpErrorResponse) => {
       if (isExternal || req.context.get(SILENT_HTTP_ERRORS)) {
         return throwError(() => error);
@@ -95,7 +106,7 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
           break;
 
         case 0:
-          // Network error / connection lost.
+          if (document.visibilityState === 'hidden') break;
           toast.show({
             severity: 'error',
             title: translate.instant('errors.connectionLost'),
