@@ -32,6 +32,7 @@ export class CurrencyDisplayComponent {
   readonly value = input.required<number>();
   readonly currency = input<string | null>(null);
   readonly showCodeWhenBase = input<boolean>(false);
+  readonly maximumFractionDigits = input<number | null>(null);
 
   protected readonly formatted = computed(() => {
     const v = this.value();
@@ -49,12 +50,14 @@ export class CurrencyDisplayComponent {
         style: 'currency',
         currency: effective,
         currencyDisplay: 'symbol',
+        ...this.fractionOptions(),
       }).format(v);
     } catch {
       numStr = new Intl.NumberFormat(undefined, {
         style: 'currency',
         currency: base,
         currencyDisplay: 'symbol',
+        ...this.fractionOptions(),
       }).format(v);
       return `${numStr} ${base}`;
     }
@@ -67,4 +70,9 @@ export class CurrencyDisplayComponent {
     }
     return numStr;
   });
+
+  private fractionOptions(): Intl.NumberFormatOptions {
+    const max = this.maximumFractionDigits();
+    return max == null ? {} : { minimumFractionDigits: Math.min(2, max), maximumFractionDigits: max };
+  }
 }

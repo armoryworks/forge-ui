@@ -358,7 +358,7 @@
                     </td>
                   }
                   <td class="lines-table__right">
-                    {{ line.unitPrice | number:'1.2-4' }}
+                    <app-currency-display [value]="line.unitPrice" [currency]="null" [maximumFractionDigits]="4" />
                     @if (line.manualOverrideReason) {
                       <span class="material-icons-outlined price-override-icon"
                             [matTooltip]="line.manualOverrideReason"

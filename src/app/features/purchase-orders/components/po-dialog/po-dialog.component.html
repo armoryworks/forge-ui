@@ -42,7 +42,7 @@
                   <!-- Phase 3 / WU-10 — quantity may be fractional. Display up to 4 decimals;
                        trailing zeros collapse via Angular's number pipe. -->
                   <td class="lines-table__right">{{ line.orderedQuantity | number:'1.0-4' }}</td>
-                  <td class="lines-table__right">{{ line.unitPrice | number:'1.2-4' }}</td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" [maximumFractionDigits]="4" /></td>
                   <td class="lines-table__right"><app-currency-display [value]="line.orderedQuantity * line.unitPrice" [currency]="null" /></td>
                   <td>
                     <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" [attr.aria-label]="'common.remove' | translate" (click)="removeLine($index)">
