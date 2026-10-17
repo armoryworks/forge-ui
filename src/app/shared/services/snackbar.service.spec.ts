@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar, MatSnackBarRef, TextOnlySnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
+import { NavigationStart, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 
@@ -18,6 +18,7 @@ describe('SnackbarService', () => {
   let routerSpy: {
     navigate: ReturnType<typeof vi.fn>;
     events: Subject<unknown>;
+    url: string;
   };
   let actionSubject: Subject<void>;
 
@@ -34,6 +35,7 @@ describe('SnackbarService', () => {
     routerSpy = {
       navigate: vi.fn(),
       events: new Subject<unknown>(),
+      url: '/leads?detail=lead:7',
     };
 
     TestBed.configureTestingModule({
@@ -135,6 +137,20 @@ describe('SnackbarService', () => {
       service.successWithNav('Job created', '/jobs/42', 'View Job');
 
       expect(routerSpy.navigate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('navigation', () => {
+    it('dismisses the snackbar when the route path changes', () => {
+      routerSpy.events.next(new NavigationStart(1, '/customers/3/overview'));
+
+      expect(snackBarSpy.dismiss).toHaveBeenCalled();
+    });
+
+    it('keeps the snackbar when only the query string changes', () => {
+      routerSpy.events.next(new NavigationStart(1, '/leads'));
+
+      expect(snackBarSpy.dismiss).not.toHaveBeenCalled();
     });
   });
 

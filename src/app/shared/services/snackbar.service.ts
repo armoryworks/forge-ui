@@ -21,7 +21,8 @@ export class SnackbarService {
   constructor() {
     // Dismiss any open snackbar on route navigation
     this.router.events.pipe(
-      filter(e => e instanceof NavigationStart),
+      filter((e): e is NavigationStart => e instanceof NavigationStart),
+      filter(e => pathOf(e.url) !== pathOf(this.router.url)),
       takeUntilDestroyed(this.destroyRef),
     ).subscribe(() => {
       this.snackBar.dismiss();
@@ -116,4 +117,8 @@ function problemText(body: unknown, key: 'detail' | 'title'): string | null {
   if (!body || typeof body !== 'object') return null;
   const value = (body as Record<string, unknown>)[key];
   return typeof value === 'string' && value.trim() ? value : null;
+}
+
+function pathOf(url: string): string {
+  return url.split(/[?#]/)[0];
 }
