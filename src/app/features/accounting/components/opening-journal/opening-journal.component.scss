@@ -7,7 +7,7 @@
   flex-direction: column;
   gap: $sp-lg;
   max-width: 960px;
-  padding-top: $sp-md;
+  padding: $sp-md $sp-lg;
 
   &__book,
   &__hint {

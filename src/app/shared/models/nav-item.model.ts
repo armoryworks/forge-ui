@@ -9,5 +9,7 @@ export interface NavItem {
   allowedRoles?: string[];
   /** Hide this item (and its group) unless the given capability is enabled in the current snapshot. */
   capability?: string;
+  /** Hide this item when the given capability is enabled in the current snapshot. */
+  hiddenWithCapability?: string;
   children?: NavItem[];
 }

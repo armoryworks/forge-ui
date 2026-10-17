@@ -172,7 +172,7 @@ export class NavTreeService {
         // Capability-gated (default OFF) — the feature only appears when the
         // install opts into activity-based costing.
         { icon: 'calculate', label: 'Costing', i18nKey: 'nav.costing', route: '/costing', capability: 'CAP-COSTING-TIER3-ABC', allowedRoles: ['Admin', 'Manager'] },
-        { icon: 'input', label: 'Opening Journal', i18nKey: 'nav.openingJournal', route: '/accounting/opening-journal', capability: 'CAP-ACCT-MIGRATION', allowedRoles: ['Controller'] },
+        { icon: 'input', label: 'Opening Journal', i18nKey: 'nav.openingJournal', route: '/accounting/opening-journal', capability: 'CAP-ACCT-MIGRATION', hiddenWithCapability: 'CAP-ACCT-FULLGL', allowedRoles: ['Controller'] },
         {
           // Dark GL accounting suite — hidden unless CAP-ACCT-FULLGL is enabled.
           icon: 'account_balance', label: 'Accounting', i18nKey: 'navGroups.accounting',
@@ -182,6 +182,7 @@ export class NavTreeService {
             // Data-entry surfaces first — these exist on main but were previously
             // absent from the nav, so the GL looked read-only.
             { icon: 'account_tree', label: 'Chart of Accounts', i18nKey: 'nav.chartOfAccounts', route: '/accounting/chart-of-accounts' },
+            { icon: 'input', label: 'Opening Journal', i18nKey: 'nav.openingJournal', route: '/accounting/opening-journal', capability: 'CAP-ACCT-MIGRATION' },
             { icon: 'post_add', label: 'Journal Entries', i18nKey: 'nav.journalEntries', route: '/accounting/journal-entries/new' },
             { icon: 'fact_check', label: 'Journal Approvals', i18nKey: 'nav.journalApprovals', route: '/accounting/journal-approvals' },
             { icon: 'menu_book', label: 'Ledger', i18nKey: 'nav.ledger', route: '/accounting/ledger' },
@@ -201,7 +202,7 @@ export class NavTreeService {
             { icon: 'account_balance_wallet', label: 'Bank Reconciliation', i18nKey: 'nav.bankRec', route: '/accounting/bank-rec' },
             { icon: 'receipt_long', label: 'Bank Statements', i18nKey: 'nav.bankStatements', route: '/accounting/bank-statements' },
             { icon: 'event_available', label: 'Period Close', i18nKey: 'nav.periodClose', route: '/accounting/period-close' },
-            { icon: 'sync_alt', label: 'QBO Export', i18nKey: 'nav.exports', route: '/accounting/exports' },
+            { icon: 'sync_alt', label: 'CPA Exports', i18nKey: 'nav.exports', route: '/accounting/exports' },
           ],
         },
       ],
@@ -400,6 +401,7 @@ export class NavTreeService {
 
   private isAllowed(item: NavItem): boolean {
     if (item.capability && !this.capabilities.isEnabled(item.capability)) return false;
+    if (item.hiddenWithCapability && this.capabilities.isEnabled(item.hiddenWithCapability)) return false;
     if (!item.allowedRoles) return true;
     return this.auth.hasAnyRole(item.allowedRoles);
   }
