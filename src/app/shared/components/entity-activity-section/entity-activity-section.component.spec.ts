@@ -105,4 +105,32 @@ describe('EntityActivitySectionComponent', () => {
     expect(internals.batchLabelKey(1)).toBe('activityHistory.fieldChange');
     expect(internals.batchLabelKey(3)).toBe('activityHistory.fieldChanges');
   });
+
+  it('reloads when the host passes a new refresh key', () => {
+    const service = {
+      getActivity: vi.fn(() => of([])),
+      getNotes: vi.fn(() => of([])),
+      getHistory: vi.fn(() => of([])),
+      getMentionUsers: vi.fn(() => of([])),
+    };
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: EntityActivityService, useValue: service },
+        { provide: TranslateService, useValue: { instant: (key: string) => key } },
+      ],
+    });
+    const component = TestBed.runInInjectionContext(() => new EntityActivitySectionComponent());
+    const inputs = mockSignalInputs(component, {
+      entityType: 'PurchaseOrder', entityId: 7, tabs: ['all'] as ActivityFilterTab[], refreshKey: { status: 'Draft' } as unknown,
+    });
+    TestBed.tick();
+    expect(service.getHistory).toHaveBeenCalledTimes(1);
+
+    inputs.refreshKey.set({ status: 'Submitted' });
+    TestBed.tick();
+
+    expect(service.getHistory).toHaveBeenCalledTimes(2);
+    expect(service.getActivity).toHaveBeenLastCalledWith('PurchaseOrder', 7);
+  });
 });

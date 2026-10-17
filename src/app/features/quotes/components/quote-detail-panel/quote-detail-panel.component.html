@@ -355,7 +355,7 @@
       </div>
 
       <!-- Activity -->
-      <app-entity-activity-section entityType="Quote" [entityId]="activeQuoteId()" />
+      <app-entity-activity-section entityType="Quote" [entityId]="activeQuoteId()" [refreshKey]="quote" />
     </div>
   </div>
 } @else if (loadError()) {

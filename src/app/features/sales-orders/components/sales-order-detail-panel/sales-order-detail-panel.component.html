@@ -1100,7 +1100,7 @@
       <!-- Activity Tab -->
       @if (activeTab() === 'activity') {
         <div class="tab-panel" role="tabpanel">
-          <app-entity-activity-section entityType="SalesOrder" [entityId]="so.id" />
+          <app-entity-activity-section entityType="SalesOrder" [entityId]="so.id" [refreshKey]="so" />
         </div>
       }
     </div>

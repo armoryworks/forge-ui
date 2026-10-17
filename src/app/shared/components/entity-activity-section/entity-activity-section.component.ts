@@ -45,6 +45,7 @@ export class EntityActivitySectionComponent implements OnInit {
   readonly entityType = input.required<string>();
   readonly entityId = input.required<number>();
   readonly tabs = input<ActivityFilterTab[]>(['all', 'comments', 'notes', 'history']);
+  readonly refreshKey = input<unknown>(null);
 
   protected readonly activeFilter = signal<ActivityFilterTab>('all');
   protected readonly activity = signal<ActivityItem[]>([]);
@@ -86,6 +87,7 @@ export class EntityActivitySectionComponent implements OnInit {
     effect(() => {
       const id = this.entityId();
       const type = this.entityType();
+      this.refreshKey();
       if (id && type) {
         this.loadData(type, id);
       }

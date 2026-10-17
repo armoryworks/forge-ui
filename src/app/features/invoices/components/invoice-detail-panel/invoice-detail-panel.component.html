@@ -182,7 +182,7 @@
       </div>
 
       <!-- Activity -->
-      <app-entity-activity-section entityType="Invoice" [entityId]="invoiceIdValue()" />
+      <app-entity-activity-section entityType="Invoice" [entityId]="invoiceIdValue()" [refreshKey]="inv" />
     </div>
   </div>
 } @else if (loadError()) {
