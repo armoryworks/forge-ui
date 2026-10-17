@@ -14,6 +14,8 @@ import { CapDirective } from '../../../../../shared/directives/cap.directive';
 import { RecentCommunicationsComponent } from '../../../../../shared/components/recent-communications/recent-communications.component';
 import { TextareaComponent } from '../../../../../shared/components/textarea/textarea.component';
 import { SnackbarService } from '../../../../../shared/services/snackbar.service';
+import { AuthService } from '../../../../../shared/services/auth.service';
+import { CUSTOMER_COMMERCIAL_TERMS_ROLES } from '../../../customer-roles';
 
 interface ComplianceFlagDef {
   key: 'isFdaRegulated' | 'isAerospace' | 'isAutomotive' | 'isItarControlled';
@@ -37,10 +39,12 @@ export class CustomerOverviewTabComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly dialog = inject(MatDialog);
+  private readonly auth = inject(AuthService);
 
   readonly customer = input.required<CustomerSummary>();
   readonly customerUpdated = output<void>();
 
+  protected readonly canSeeCredit = this.auth.hasAnyRole(CUSTOMER_COMMERCIAL_TERMS_ROLES);
   protected readonly pendingFlags = signal<Set<string>>(new Set());
   protected readonly editingNotes = signal(false);
   protected readonly notesControl = new FormControl<string>('', { nonNullable: true });

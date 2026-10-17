@@ -33,6 +33,8 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { fromIsoDate, toIsoDate } from '../../../../shared/utils/date.utils';
 import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
+import { AuthService } from '../../../../shared/services/auth.service';
+import { CUSTOMER_COMMERCIAL_TERMS_ROLES } from '../../../customers/customer-roles';
 
 interface LineEntry {
   partId: number;
@@ -63,6 +65,7 @@ export class SoDialogComponent {
   private readonly addressService = inject(CustomerAddressService);
   private readonly dialog = inject(MatDialog);
   private readonly partsService = inject(PartsService);
+  private readonly auth = inject(AuthService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly manualNumberSettings = inject(ManualNumberSettingsService);
@@ -200,7 +203,7 @@ export class SoDialogComponent {
     customerChanges.pipe(
       switchMap(customerId => {
         this.creditStatus.set(null);
-        return customerId == null
+        return customerId == null || !this.auth.hasAnyRole(CUSTOMER_COMMERCIAL_TERMS_ROLES)
           ? of(null)
           : this.customerService.getCreditStatus(customerId).pipe(catchError(() => of(null)));
       }),

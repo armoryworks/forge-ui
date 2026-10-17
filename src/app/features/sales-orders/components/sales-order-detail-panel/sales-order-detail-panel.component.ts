@@ -45,6 +45,7 @@ import { InvoiceDialogComponent } from '../../../invoices/components/invoice-dia
 import { CapDirective } from '../../../../shared/directives/cap.directive';
 import { CapabilityService } from '../../../../shared/services/capability.service';
 import { AuthService } from '../../../../shared/services/auth.service';
+import { CUSTOMER_COMMERCIAL_TERMS_ROLES } from '../../../customers/customer-roles';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { SalesOrderAcceptanceService, RecordAcceptanceMethod } from '../../services/sales-order-acceptance.service';
@@ -426,7 +427,7 @@ export class SalesOrderDetailPanelComponent {
   }
 
   private loadCreditStatus(customerId: number): void {
-    if (!this.capabilityService.isEnabled(CAP_CREDIT_LIMITS)) {
+    if (!this.capabilityService.isEnabled(CAP_CREDIT_LIMITS) || !this.auth.hasAnyRole(CUSTOMER_COMMERCIAL_TERMS_ROLES)) {
       this.creditStatus.set(null);
       return;
     }

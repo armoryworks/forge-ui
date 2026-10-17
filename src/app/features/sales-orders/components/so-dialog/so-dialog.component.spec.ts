@@ -11,6 +11,7 @@ import { Observable, of } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { CustomerAddress } from '../../../../shared/models/customer-address.model';
 import { CreditStatus } from '../../../customers/models/credit-status.model';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { CustomerTaxEditability } from '../../../customers/models/customer-tax-editability.model';
 import { PartListItem } from '../../../parts/models/part-list-item.model';
 import { SoDialogComponent } from './so-dialog.component';
@@ -76,7 +77,7 @@ function creditStatus(overrides: Partial<CreditStatus> = {}): CreditStatus {
   };
 }
 
-function setup(parts: PartListItem[] = [part()], confirmed = true) {
+function setup(parts: PartListItem[] = [part()], confirmed = true, commercialRole = true) {
   TestBed.resetTestingModule();
   const dialogOpen = vi.fn(() => ({ afterClosed: () => of(confirmed) }));
   TestBed.configureTestingModule({
@@ -86,6 +87,7 @@ function setup(parts: PartListItem[] = [part()], confirmed = true) {
       provideAnimations(),
       provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
       { provide: MatDialog, useValue: { open: dialogOpen } },
+      { provide: AuthService, useValue: { hasAnyRole: () => commercialRole } },
     ],
   });
 
@@ -471,6 +473,19 @@ describe('SoDialogComponent', () => {
 
       const restored = component.form.controls.requestedDeliveryDate.value;
       expect([restored?.getFullYear(), restored?.getMonth(), restored?.getDate()]).toEqual([2026, 9, 30]);
+      httpMock.verify();
+    });
+  });
+
+  describe('credit status', () => {
+    it('does not read credit status for a role without commercial terms', () => {
+      const { component, httpMock } = setup([part()], true, false);
+
+      component.form.controls.customerId.setValue(5);
+      httpMock.expectOne(r => r.url === `${api}/customers/5/addresses`).flush([]);
+      flushTax(httpMock, 5);
+
+      httpMock.expectNone(`${api}/customers/5/credit-status`);
       httpMock.verify();
     });
   });

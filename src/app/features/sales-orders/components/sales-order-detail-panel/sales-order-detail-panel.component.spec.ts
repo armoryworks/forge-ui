@@ -160,7 +160,7 @@ describe('SalesOrderDetailPanelComponent', () => {
         },
         { provide: AccountingService, useValue: { isStandalone: standalone } },
         { provide: CapabilityService, useValue: { isEnabled: (code: string) => enabledCaps.has(code) } },
-        { provide: AuthService, useValue: { hasRole: () => false } },
+        { provide: AuthService, useValue: { hasRole: () => false, hasAnyRole: () => true } },
         { provide: ManualNumberSettingsService, useValue: { isEnabled: () => true } },
       ],
     });
