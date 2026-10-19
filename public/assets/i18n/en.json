@@ -10042,7 +10042,7 @@
       "jurisdiction": "Jurisdiction",
       "taxableBase": "Taxable base",
       "liability": "Liability",
-      "orders": "Orders",
+      "invoices": "Invoices",
       "unassigned": "Unassigned",
       "range": "Date range",
       "empty": "No sales-tax liability in this period"

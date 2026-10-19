@@ -10042,7 +10042,7 @@
       "jurisdiction": "Jurisdicción",
       "taxableBase": "Base imponible",
       "liability": "Por pagar",
-      "orders": "Pedidos",
+      "invoices": "Facturas",
       "unassigned": "Sin asignar",
       "range": "Rango de fechas",
       "empty": "No hay impuesto sobre ventas por pagar en este período"
