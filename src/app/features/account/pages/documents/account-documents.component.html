@@ -11,6 +11,29 @@
       entityType="employee-docs"
       [entityId]="userId()"
       accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-      [maxSizeMb]="25" />
+      [maxSizeMb]="25"
+      (uploaded)="loadDocuments()" />
+  </div>
+
+  <div class="account-page__card">
+    <span class="account-page__section-label">{{ 'account.uploadedDocuments' | translate }}</span>
+    @if (documents().length === 0) {
+      <p class="documents__intro">{{ 'account.noUploadedDocuments' | translate }}</p>
+    } @else {
+      <ul class="documents__list" data-testid="account-documents-list">
+        @for (doc of documents(); track doc.id) {
+          <li class="documents__item">
+            <span class="material-icons-outlined documents__icon">description</span>
+            <span class="documents__name">{{ doc.fileName }}</span>
+            <span class="documents__date">{{ doc.createdAt | date:'MM/dd/yyyy' }}</span>
+            <button type="button" class="icon-btn" (click)="download(doc)"
+              [attr.aria-label]="'common.download' | translate"
+              [matTooltip]="'common.download' | translate" matTooltipPosition="above">
+              <span class="material-icons-outlined">download</span>
+            </button>
+          </li>
+        }
+      </ul>
+    }
   </div>
 </div>

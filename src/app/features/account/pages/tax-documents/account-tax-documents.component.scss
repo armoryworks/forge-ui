@@ -1,14 +1,15 @@
 @use 'styles/variables' as *;
 
-.tax-documents {
-  padding: $sp-xl;
-}
+@use '../../shared/account-page';
 
-.tax-documents__title {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  color: var(--text);
-  margin: 0 0 $sp-sm;
+.tax-documents {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: $sp-xl;
+
+  .account-page__title {
+    margin-bottom: $sp-sm;
+  }
 }
 
 .tax-documents__subtitle {

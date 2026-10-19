@@ -5,6 +5,8 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
+import { downloadBlob } from '../../../../shared/utils/download-blob';
+import { TaxDocument } from '../../models/payroll.model';
 import { PayrollService } from '../../services/payroll.service';
 
 @Component({
@@ -44,7 +46,9 @@ export class AccountTaxDocumentsComponent implements OnInit {
     return labels[type] ?? type;
   }
 
-  protected downloadPdf(id: number): void {
-    this.payrollService.downloadTaxDocumentPdf(id);
+  protected downloadPdf(doc: TaxDocument): void {
+    this.payrollService.downloadTaxDocumentPdf(doc.id).subscribe(
+      blob => downloadBlob(blob, `${doc.documentType}-${doc.taxYear}.pdf`),
+    );
   }
 }

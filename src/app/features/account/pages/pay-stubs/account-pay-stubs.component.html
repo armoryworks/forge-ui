@@ -1,5 +1,8 @@
 <div class="pay-stubs">
-  <h2 class="pay-stubs__title">{{ 'account.payStubs' | translate }}</h2>
+  <h1 class="account-page__title">
+    <span class="material-icons-outlined">payments</span>
+    {{ 'account.payStubs' | translate }}
+  </h1>
   <p class="pay-stubs__subtitle">{{ 'account.payStubsSubtitle' | translate }}</p>
 
   <app-data-table
@@ -39,7 +42,7 @@
 
     <ng-template appColumnCell="actions" let-row>
       @if (row.fileAttachmentId) {
-        <button class="icon-btn" (click)="downloadPdf(row.id); $event.stopPropagation()" [attr.aria-label]="'account.downloadPayStubPdf' | translate" [matTooltip]="'account.downloadPayStubPdf' | translate" matTooltipPosition="above">
+        <button class="icon-btn" (click)="downloadPdf(row); $event.stopPropagation()" [attr.aria-label]="'account.downloadPayStubPdf' | translate" [matTooltip]="'account.downloadPayStubPdf' | translate" matTooltipPosition="above">
           <span class="material-icons-outlined">download</span>
         </button>
       }

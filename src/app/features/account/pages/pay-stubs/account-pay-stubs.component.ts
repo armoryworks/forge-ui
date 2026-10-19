@@ -6,6 +6,8 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
+import { downloadBlob } from '../../../../shared/utils/download-blob';
+import { PayStub } from '../../models/payroll.model';
 import { PayrollService } from '../../services/payroll.service';
 
 @Component({
@@ -36,7 +38,9 @@ export class AccountPayStubsComponent implements OnInit {
     this.payrollService.loadMyPayStubs();
   }
 
-  protected downloadPdf(id: number): void {
-    this.payrollService.downloadPayStubPdf(id);
+  protected downloadPdf(stub: PayStub): void {
+    this.payrollService.downloadPayStubPdf(stub.id).subscribe(
+      blob => downloadBlob(blob, `pay-stub-${stub.id}.pdf`),
+    );
   }
 }

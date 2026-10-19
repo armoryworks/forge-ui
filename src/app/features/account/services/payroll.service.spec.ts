@@ -43,20 +43,25 @@ describe('PayrollService', () => {
   });
 
   describe('downloadPayStubPdf', () => {
-    it('should open PDF URL in new window', () => {
-      const spy = vi.spyOn(window, 'open').mockImplementation(() => null);
-      service.downloadPayStubPdf(5);
-      expect(spy).toHaveBeenCalledWith(`${base}/pay-stubs/5/pdf`, '_blank');
-      spy.mockRestore();
+    it('should GET the PDF as a blob through HttpClient so the bearer token is sent', () => {
+      const blob = new Blob(['%PDF'], { type: 'application/pdf' });
+      let received: Blob | undefined;
+      service.downloadPayStubPdf(5).subscribe(b => (received = b));
+      const req = httpMock.expectOne(`${base}/pay-stubs/5/pdf`);
+      expect(req.request.method).toBe('GET');
+      expect(req.request.responseType).toBe('blob');
+      req.flush(blob);
+      expect(received).toBe(blob);
     });
   });
 
   describe('downloadTaxDocumentPdf', () => {
-    it('should open PDF URL in new window', () => {
-      const spy = vi.spyOn(window, 'open').mockImplementation(() => null);
-      service.downloadTaxDocumentPdf(8);
-      expect(spy).toHaveBeenCalledWith(`${base}/tax-documents/8/pdf`, '_blank');
-      spy.mockRestore();
+    it('should GET the PDF as a blob through HttpClient so the bearer token is sent', () => {
+      service.downloadTaxDocumentPdf(8).subscribe();
+      const req = httpMock.expectOne(`${base}/tax-documents/8/pdf`);
+      expect(req.request.method).toBe('GET');
+      expect(req.request.responseType).toBe('blob');
+      req.flush(new Blob(['%PDF']));
     });
   });
 
