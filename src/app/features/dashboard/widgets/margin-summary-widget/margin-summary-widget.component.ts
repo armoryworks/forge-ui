@@ -44,6 +44,12 @@ export class MarginSummaryWidgetComponent implements OnInit {
     return s.jobCount > 0 && (s.costedJobCount ?? 0) === 0;
   });
 
+  protected readonly partialCoverage = computed(() => {
+    const s = this.summary();
+    const costed = s.costedJobCount ?? 0;
+    return costed > 0 && costed < s.jobCount;
+  });
+
   ngOnInit(): void {
     this.http.get<MarginSummary>(`${environment.apiUrl}/dashboard/margin-summary`)
       .subscribe(data => this.summary.set(data));

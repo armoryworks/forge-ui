@@ -10,6 +10,7 @@ interface WidgetInternals {
   ngOnInit(): void;
   costMissing: { (): boolean };
   uncostedJobCount: { (): number };
+  partialCoverage: { (): boolean };
 }
 
 const url = `${environment.apiUrl}/dashboard/margin-summary`;
@@ -48,6 +49,17 @@ describe('MarginSummaryWidgetComponent', () => {
 
     expect(component.costMissing()).toBe(false);
     expect(component.uncostedJobCount()).toBe(1);
+    expect(component.partialCoverage()).toBe(true);
+  });
+
+  it('does not add a coverage note when every job has a cost', () => {
+    const { component, httpMock } = setup();
+
+    httpMock.expectOne(url).flush({
+      totalRevenue: 1500, totalCost: 750, totalMargin: 750, averageMarginPercentage: 50, jobCount: 2, costedJobCount: 2,
+    });
+
+    expect(component.partialCoverage()).toBe(false);
   });
 
   it('does not flag missing cost when there are no jobs at all', () => {
