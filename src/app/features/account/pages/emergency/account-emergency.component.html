@@ -16,7 +16,7 @@
     <div class="account-page__actions">
       <app-validation-button [violations]="violations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [disabled]="form.invalid || saving()"
+        [disabled]="form.invalid || saving() || !profileLoaded()"
         (click)="save()">
         @if (saving()) {
           <span class="material-icons-outlined account-page__spinner">sync</span>

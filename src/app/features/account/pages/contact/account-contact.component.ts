@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -12,6 +12,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { EmployeeProfileService } from '../../services/employee-profile.service';
+import { patchPristineControls } from '../../shared/patch-pristine-controls';
 
 @Component({
   selector: 'app-account-contact',
@@ -21,12 +22,13 @@ import { EmployeeProfileService } from '../../services/employee-profile.service'
   styleUrl: './account-contact.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AccountContactComponent implements OnInit {
+export class AccountContactComponent {
   private readonly profileService = inject(EmployeeProfileService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
 
   protected readonly saving = signal(false);
+  protected readonly profileLoaded = computed(() => this.profileService.profile() !== null);
 
   protected readonly form = new FormGroup({
     phoneNumber: new FormControl<string | null>(null, [phoneValidator]),
@@ -39,19 +41,20 @@ export class AccountContactComponent implements OnInit {
     personalEmail: 'Personal Email',
   });
 
-  ngOnInit(): void {
-    const p = this.profileService.profile();
-    if (p) {
-      this.form.patchValue({
+  constructor() {
+    effect(() => {
+      const p = this.profileService.profile();
+      if (!p) return;
+      untracked(() => patchPristineControls(this.form, {
         phoneNumber: p.phoneNumber,
         personalEmail: p.personalEmail,
         address: toAddress({ street1: p.street1, street2: p.street2, city: p.city, state: p.state, zipCode: p.zipCode, country: p.country }),
-      });
-    }
+      }));
+    });
   }
 
   protected save(): void {
-    if (this.form.invalid || this.saving()) return;
+    if (this.form.invalid || this.saving() || !this.profileLoaded()) return;
     const val = this.form.getRawValue();
     const addr = val.address;
     const current = this.profileService.profile();

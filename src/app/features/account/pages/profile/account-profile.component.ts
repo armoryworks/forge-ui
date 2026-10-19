@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -14,6 +14,7 @@ import { AuthService } from '../../../../shared/services/auth.service';
 import { AccountService } from '../../services/account.service';
 import { EmployeeProfileService } from '../../services/employee-profile.service';
 import { dateOfBirthMin, dateOfBirthMax } from '../../../../shared/utils/date.utils';
+import { patchPristineControls } from '../../shared/patch-pristine-controls';
 
 const AVATAR_COLORS = [
   '#6366f1', '#8b5cf6', '#ec4899', '#ef4444', '#f97316',
@@ -46,6 +47,7 @@ export class AccountProfileComponent {
 
   protected readonly user = this.authService.user;
   protected readonly profile = this.profileService.profile;
+  protected readonly profileLoaded = computed(() => this.profile() !== null);
   protected readonly avatarColors = AVATAR_COLORS;
   protected readonly genderOptions = GENDER_OPTIONS;
   protected readonly saving = signal(false);
@@ -80,13 +82,11 @@ export class AccountProfileComponent {
       this.selectedColor.set(u.avatarColor ?? '');
     }
 
-    const p = this.profile();
-    if (p) {
-      this.form.patchValue({
-        dateOfBirth: p.dateOfBirth,
-        gender: p.gender,
-      });
-    }
+    effect(() => {
+      const p = this.profile();
+      if (!p) return;
+      untracked(() => patchPristineControls(this.form, { dateOfBirth: p.dateOfBirth, gender: p.gender }));
+    });
   }
 
   protected selectColor(color: string): void {
@@ -95,7 +95,7 @@ export class AccountProfileComponent {
   }
 
   protected save(): void {
-    if (this.form.invalid || this.saving()) return;
+    if (this.form.invalid || this.saving() || !this.profileLoaded()) return;
     const val = this.form.getRawValue();
     this.saving.set(true);
 
