@@ -173,24 +173,24 @@ export class ScanActionOverlayComponent {
     this.error.set(null);
     this.jobContext.set(null);
 
-    this.scanAction.getContext(identifier).subscribe({
-      next: (ctx) => {
-        this.context.set(ctx);
-        this.phase.set('actions');
-        this.contextLoaded.emit(ctx);
-      },
-      error: () => this.lookupJob(identifier),
-    });
-  }
-
-  private lookupJob(identifier: string): void {
     this.shopFloor.identifyScan(identifier).subscribe({
       next: (result) => {
         if (result.scanType === 'job' && result.entityId != null) {
           this.openJob(result);
         } else {
-          this.showNotFound(identifier);
+          this.loadPartContext(identifier);
         }
+      },
+      error: () => this.loadPartContext(identifier),
+    });
+  }
+
+  private loadPartContext(identifier: string): void {
+    this.scanAction.getContext(identifier).subscribe({
+      next: (ctx) => {
+        this.context.set(ctx);
+        this.phase.set('actions');
+        this.contextLoaded.emit(ctx);
       },
       error: () => this.showNotFound(identifier),
     });

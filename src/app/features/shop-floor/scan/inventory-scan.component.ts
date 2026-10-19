@@ -11,6 +11,7 @@ import { BarcodeScanInputComponent } from '../../../shared/components/barcode-sc
 import { ScanActionOverlayComponent } from '../components/scan-action-overlay/scan-action-overlay.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { AuthService } from '../../../shared/services/auth.service';
+import { focusCancelOnOpen } from '../../../shared/utils/focus-dialog-cancel';
 
 @Component({
   selector: 'app-inventory-scan',
@@ -57,7 +58,7 @@ export class InventoryScanComponent implements OnInit, OnDestroy {
   // The kiosk runs without a live session, so exiting must re-authenticate.
   // Confirm first so a mis-tap doesn't drop the worker to login.
   protected exitKiosk(): void {
-    this.dialog.open(ConfirmDialogComponent, {
+    const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
         title: this.translate.instant('shopFloor.exitKioskConfirmTitle'),
@@ -65,7 +66,9 @@ export class InventoryScanComponent implements OnInit, OnDestroy {
         confirmLabel: this.translate.instant('shopFloor.exitKiosk'),
         severity: 'warn',
       } satisfies ConfirmDialogData,
-    }).afterClosed().subscribe(confirmed => {
+    });
+    focusCancelOnOpen(ref);
+    ref.afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
       // Tear down kiosk state, then re-authenticate via /login.
       this.scanner.stop();

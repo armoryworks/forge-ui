@@ -7345,6 +7345,8 @@
     "overdue": "OVERDUE",
     "due": "Due",
     "openJobAria": "Open job {{jobNumber}}: {{title}}",
+    "loadFailed": "Couldn't load your tasks.",
+    "noTasksAssignedHint": "Work orders assigned to you appear here.",
     "operations": "operations"
   },
   "kioskFlows": {
@@ -7365,7 +7367,10 @@
       "selectLocation": "Select Location",
       "scanDestinationPrompt": "Scan destination location or select from list",
       "selectShipmentAria": "Select shipment {{number}}",
-      "reversed": "Reversed"
+      "reversed": "Reversed",
+      "quantityPositive": "Enter a quantity greater than 0.",
+      "quantityAtMost": "Enter no more than {{max}}.",
+      "loadFailed": "Couldn't load this list. Check the connection and try again."
     },
     "actions": {
       "move": "Move",
@@ -7579,14 +7584,14 @@
     },
     "undo": {
       "title": "Recent Scan Actions",
-      "actionsToday": "{{count}} actions today",
       "closeAria": "Close undo panel",
       "empty": "No scan actions in the last {{hours}} hours",
       "reverseAria": "Reverse scan action",
       "reverse": "Reverse",
       "reversedToast": "Reversed: {{description}}",
       "movedBackTo": "moved back to {{location}}",
-      "reverseFailed": "Failed to reverse action. Check your PIN."
+      "reverseFailed": "Failed to reverse action. Check your PIN.",
+      "actionsRecent": "{{count}} actions in the last {{hours}} hours"
     },
     "pin": {
       "title": "Enter PIN to reverse",
@@ -7663,7 +7668,8 @@
       "undo": "Undo",
       "undone": "Punch undone.",
       "failed": "Could not undo the punch. Ask your supervisor to correct it."
-    }
+    },
+    "needsAdminOrManager": "Only an Admin or Manager can set up this terminal."
   },
   "shopFloor": {
     "title": "Shop Floor",
@@ -7769,7 +7775,13 @@
       "shipmentShipped": "{{number}} marked as shipped",
       "shipFailed": "Could not mark the shipment as shipped",
       "noTeamMembers": "No one is on the {{team}} team yet. Add members under Admin > Teams & Kiosks.",
-      "assignFailed": "Could not assign {{jobNumber}}"
+      "assignFailed": "Could not assign {{jobNumber}}",
+      "purchaseOrderScanned": "Purchase Order {{number}}",
+      "partScanned": "Part {{number}}",
+      "lotScanned": "Lot {{number}}",
+      "assetScanned": "Asset: {{name}}",
+      "assetScannedUnnamed": "Asset label scanned",
+      "clockInToStartTimer": "Clock in to start a timer"
     },
     "trainingModeActive": "TRAINING MODE — Actions will not be saved",
     "trainingModeEnabled": "Training mode enabled",
@@ -7873,7 +7885,8 @@
       "alreadyRunning": "Your timer on step {{step}} · {{title}} is already running",
       "stopped": "Stopped step {{step}} · {{title}}",
       "timerStopped": "Stopped your timer on {{jobNumber}}",
-      "recorded": "Step {{step}}: {{count}} of {{total}} recorded"
+      "recorded": "Step {{step}}: {{count}} of {{total}} recorded",
+      "wholeNumbersOnly": "Enter whole pieces only (0 or more)."
     },
     "returnFlow": {
       "title": "Return Items",
@@ -7953,7 +7966,8 @@
     "assignFailed": "You can't take this work order. Ask a supervisor.",
     "fullscreen": "Full screen",
     "setupFullscreenHint": "Tap Full screen on the display after setup so the board fills the screen.",
-    "terminalNotForWorker": "This terminal is not set up for your team. Use your team's terminal or ask your supervisor."
+    "terminalNotForWorker": "This terminal is not set up for your team. Use your team's terminal or ask your supervisor.",
+    "scanBadgeNotRecognized": "That wasn't a badge. Scan your badge or RFID to continue."
   },
   "kioskDisplay": {
     "entryTitle": "Use this browser as a shop-floor terminal?",
@@ -11688,13 +11702,15 @@
         "ClockIn": "Clock in",
         "ClockOut": "Clock out",
         "BreakStart": "Start break",
-        "BreakEnd": "End break"
+        "BreakEnd": "End break",
+        "LunchEnd": "End lunch"
       },
       "done": {
         "ClockIn": "Clocked in",
         "ClockOut": "Clocked out",
         "BreakStart": "Break started",
-        "BreakEnd": "Break ended"
+        "BreakEnd": "Break ended",
+        "LunchEnd": "Lunch ended"
       }
     },
     "move": {

@@ -63,9 +63,9 @@ export class ShopFloorService {
     return this.http.post<void>(`${this.base}/jobs/${jobId}/claim`, {});
   }
 
-  startTimer(jobId: number): Observable<unknown> {
+  startTimer(jobId: number, requireClockedIn = false): Observable<unknown> {
     return this.http.post(`${environment.apiUrl}/time-tracking/timer/start`, {
-      jobId, category: null, notes: null,
+      jobId, category: null, notes: null, requireClockedIn,
     });
   }
 

@@ -14,10 +14,10 @@
       </div>
       <div class="scan-flow__info-row">
         <span class="scan-flow__info-label">{{ 'kioskFlows.common.available' | translate }}</span>
-        <span class="scan-flow__info-value scan-flow__info-value--mono">{{ context().currentStock }}</span>
+        <span class="scan-flow__info-value scan-flow__info-value--mono">{{ (context().currentStock + (context().stockUomCode ? ' ' + context().stockUomCode : '')) }}</span>
       </div>
 
-      <p class="scan-flow__prompt">{{ 'kioskFlows.move.moveAllPrompt' | translate: { count: context().currentStock } }}</p>
+      <p class="scan-flow__prompt">{{ 'kioskFlows.move.moveAllPrompt' | translate: { count: (context().currentStock + (context().stockUomCode ? ' ' + context().stockUomCode : '')) } }}</p>
 
       <div class="scan-flow__choice-row">
         <button class="scan-flow__choice-btn scan-flow__choice-btn--primary"
@@ -25,7 +25,7 @@
                 [attr.aria-label]="'kioskFlows.move.moveAllAria' | translate"
                 data-testid="move-all-btn">
           <span class="material-icons-outlined">select_all</span>
-          {{ 'kioskFlows.move.yesAllCount' | translate: { count: context().currentStock } }}
+          {{ 'kioskFlows.move.yesAllCount' | translate: { count: (context().currentStock + (context().stockUomCode ? ' ' + context().stockUomCode : '')) } }}
         </button>
         <button class="scan-flow__choice-btn"
                 (click)="selectPartial()"
@@ -39,7 +39,6 @@
         <div class="scan-flow__partial-input">
           <app-input [label]="'common.quantity' | translate" type="number" [formControl]="partialQty" data-testid="move-partial-qty" />
           <button class="action-btn action-btn--primary"
-                  [disabled]="(partialQty.value ?? 0) <= 0 || (partialQty.value ?? 0) > context().currentStock"
                   (click)="confirmPartial()"
                   [attr.aria-label]="'kioskFlows.common.confirmPartialAria' | translate">
             <span class="material-icons-outlined">check</span>

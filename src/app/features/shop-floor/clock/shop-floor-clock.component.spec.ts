@@ -31,6 +31,11 @@ interface ClockInternals {
   scanIdentifying: () => boolean;
   showManualLogin(): void;
   enterClockPhase(): void;
+  maskedBadge: () => string;
+  kioskAuthError: () => string | null;
+  scannedJob: () => { entityNumber?: string } | null;
+  entryConfirmPending: () => boolean;
+  continueToKiosk(): void;
 }
 
 function worker(userId: number, name: string): ClockWorker {
@@ -49,7 +54,7 @@ const clockIn: ClockEventTypeDef = {
 describe('ShopFloorClockComponent — clock phase', () => {
   const user = signal<AuthUser | null>(null);
   const token = signal<string | null>(null);
-  const auth = { user, token, clearAuth: vi.fn(), scanLogin: vi.fn(), login: vi.fn() };
+  const auth = { user, token, clearAuth: vi.fn(), scanLogin: vi.fn(), login: vi.fn(), isAuthenticated: vi.fn(() => false) };
   const mobileApi = {
     clockState: vi.fn(() => of({ state: 'in', lastEventType: 'ClockIn', lastEventAt: null, lastEventId: 501 })),
     undoClockPunch: vi.fn(() => of({ state: 'out', lastEventType: null, lastEventAt: null, lastEventId: null })),
@@ -146,6 +151,7 @@ describe('ShopFloorClockComponent — clock phase', () => {
     expect(c.kioskPhase()).toBe('clock');
     expect(c.punchError()).toEqual({ detail: 'Already clocked in.' });
     expect(auth.clearAuth).not.toHaveBeenCalled();
+    expect(shopFloor.getClockStatus).toHaveBeenCalledTimes(2);
   });
 
   it('a recorded punch is shown for two seconds before signing out', () => {
@@ -369,5 +375,70 @@ describe('ShopFloorClockComponent — clock phase', () => {
 
     expect(c.scanIdentifying()).toBe(false);
     expect(c.kioskPhase()).toBe('pin');
+  });
+
+  it('identifies the second scan after a work order and only takes a badge as the badge', () => {
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'job', entityId: 4, entityNumber: 'J-4' }));
+    const c = create();
+    c.onScanDetected('JOB-4');
+    expect(c.kioskPhase()).toBe('job-scanned');
+
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'part', entityId: 7, entityNumber: 'P-7' }));
+    c.onScanDetected('PART-7');
+    expect(c.kioskPhase()).toBe('job-scanned');
+    expect(c.kioskAuthError()).toBe('shopFloor.scanBadgeNotRecognized');
+
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'employee', entityId: 1 }));
+    c.onScanDetected('BADGE-00123456');
+    expect(c.kioskPhase()).toBe('pin');
+    expect(c.scannedJob()?.entityNumber).toBe('J-4');
+  });
+
+  it('shows only the end of the scanned badge on the PIN card', () => {
+    const c = create();
+    c.onScanDetected('BADGE-00123456');
+
+    expect(c.kioskPhase()).toBe('pin');
+    expect(c.maskedBadge()).toBe('•••• 3456');
+    expect(c.maskedBadge()).not.toContain('BADGE');
+  });
+
+  it('returns an untouched PIN prompt to the board', () => {
+    const c = create();
+    c.onScanDetected('BADGE-1');
+    expect(c.kioskPhase()).toBe('pin');
+
+    vi.advanceTimersByTime(20_000);
+
+    expect(c.kioskPhase()).toBe('dashboard');
+  });
+
+  it('returns an abandoned manual sign-in and a work order scan with no badge to the board', () => {
+    const c = create();
+    c.showManualLogin();
+    vi.advanceTimersByTime(60_000);
+    expect(c.kioskPhase()).toBe('dashboard');
+
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'job', entityId: 4, entityNumber: 'J-4' }));
+    c.onScanDetected('JOB-4');
+    vi.advanceTimersByTime(20_000);
+    expect(c.kioskPhase()).toBe('dashboard');
+  });
+
+  it('asks before signing out someone who opens the clock kiosk on an unpaired browser', () => {
+    localStorage.removeItem('forge-kiosk-device-token');
+    auth.isAuthenticated.mockReturnValue(true);
+    const fixture = TestBed.createComponent(ShopFloorClockComponent);
+    fixture.detectChanges();
+    const c = fixture.componentInstance as unknown as ClockInternals;
+
+    expect(c.entryConfirmPending()).toBe(true);
+    expect(auth.clearAuth).not.toHaveBeenCalled();
+
+    c.continueToKiosk();
+
+    expect(c.entryConfirmPending()).toBe(false);
+    expect(auth.clearAuth).toHaveBeenCalled();
+    auth.isAuthenticated.mockReturnValue(false);
   });
 });

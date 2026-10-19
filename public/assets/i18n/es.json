@@ -7338,6 +7338,8 @@
     "overdue": "VENCIDO",
     "due": "Vence",
     "openJobAria": "Abrir trabajo {{jobNumber}}: {{title}}",
+    "loadFailed": "No se pudieron cargar sus tareas.",
+    "noTasksAssignedHint": "Aquí aparecen las órdenes de trabajo asignadas a usted.",
     "operations": "operaciones"
   },
   "kioskFlows": {
@@ -7358,7 +7360,10 @@
       "selectLocation": "Seleccionar ubicación",
       "scanDestinationPrompt": "Escanee la ubicación de destino o selecciónela de la lista",
       "selectShipmentAria": "Seleccionar envío {{number}}",
-      "reversed": "Revertido"
+      "reversed": "Revertido",
+      "quantityPositive": "Ingrese una cantidad mayor que 0.",
+      "quantityAtMost": "Ingrese como máximo {{max}}.",
+      "loadFailed": "No se pudo cargar esta lista. Revise la conexión e intente de nuevo."
     },
     "actions": {
       "move": "Mover",
@@ -7572,14 +7577,14 @@
     },
     "undo": {
       "title": "Acciones de escaneo recientes",
-      "actionsToday": "{{count}} acciones hoy",
       "closeAria": "Cerrar el panel de deshacer",
       "empty": "No hay acciones de escaneo en las últimas {{hours}} horas",
       "reverseAria": "Revertir la acción de escaneo",
       "reverse": "Revertir",
       "reversedToast": "Revertido: {{description}}",
       "movedBackTo": "devuelto a {{location}}",
-      "reverseFailed": "No se pudo revertir la acción. Verifique su PIN."
+      "reverseFailed": "No se pudo revertir la acción. Verifique su PIN.",
+      "actionsRecent": "{{count}} acciones en las últimas {{hours}} horas"
     },
     "pin": {
       "title": "Ingrese el PIN para revertir",
@@ -7656,7 +7661,8 @@
       "undo": "Deshacer",
       "undone": "Registro deshecho.",
       "failed": "No se pudo deshacer el registro. Pida a su supervisor que lo corrija."
-    }
+    },
+    "needsAdminOrManager": "Solo un administrador o gerente puede configurar esta terminal."
   },
   "shopFloor": {
     "title": "Planta de Producción",
@@ -7762,7 +7768,13 @@
       "shipmentShipped": "{{number}} marcado como enviado",
       "shipFailed": "No se pudo marcar el envío como enviado",
       "noTeamMembers": "Todavía no hay nadie en el equipo {{team}}. Agregue miembros en Administración > Equipos y Kioscos.",
-      "assignFailed": "No se pudo asignar {{jobNumber}}"
+      "assignFailed": "No se pudo asignar {{jobNumber}}",
+      "purchaseOrderScanned": "Orden de compra {{number}}",
+      "partScanned": "Pieza {{number}}",
+      "lotScanned": "Lote {{number}}",
+      "assetScanned": "Activo: {{name}}",
+      "assetScannedUnnamed": "Etiqueta de activo escaneada",
+      "clockInToStartTimer": "Registre su entrada para iniciar un temporizador"
     },
     "trainingModeActive": "MODO DE ENTRENAMIENTO — Las acciones no se guardarán",
     "trainingModeEnabled": "Modo de entrenamiento activado",
@@ -7855,7 +7867,8 @@
       "alreadyRunning": "Tu temporizador en el paso {{step}} · {{title}} ya está en curso",
       "stopped": "Paso {{step}} · {{title}} detenido",
       "timerStopped": "Se detuvo tu temporizador en {{jobNumber}}",
-      "recorded": "Paso {{step}}: {{count}} de {{total}} registradas"
+      "recorded": "Paso {{step}}: {{count}} de {{total}} registradas",
+      "wholeNumbersOnly": "Ingrese solo piezas enteras (0 o más)."
     },
     "returnFlow": {
       "title": "Devolver Artículos",
@@ -7946,7 +7959,8 @@
     "assignFailed": "No puede tomar esta orden de trabajo. Pregunte a un supervisor.",
     "fullscreen": "Pantalla completa",
     "setupFullscreenHint": "Toque Pantalla completa en la pantalla después de la configuración para que el tablero ocupe toda la pantalla.",
-    "terminalNotForWorker": "Esta terminal no está configurada para su equipo. Use la terminal de su equipo o pregunte a su supervisor."
+    "terminalNotForWorker": "Esta terminal no está configurada para su equipo. Use la terminal de su equipo o pregunte a su supervisor.",
+    "scanBadgeNotRecognized": "Eso no es una credencial. Escanee su credencial o RFID para continuar."
   },
   "kioskDisplay": {
     "entryTitle": "¿Usar este navegador como terminal de planta?",
@@ -11688,13 +11702,15 @@
         "ClockIn": "Marcar entrada",
         "ClockOut": "Marcar salida",
         "BreakStart": "Iniciar descanso",
-        "BreakEnd": "Terminar descanso"
+        "BreakEnd": "Terminar descanso",
+        "LunchEnd": "Terminar almuerzo"
       },
       "done": {
         "ClockIn": "Entrada registrada",
         "ClockOut": "Salida registrada",
         "BreakStart": "Descanso iniciado",
-        "BreakEnd": "Descanso terminado"
+        "BreakEnd": "Descanso terminado",
+        "LunchEnd": "Almuerzo terminado"
       }
     },
     "move": {

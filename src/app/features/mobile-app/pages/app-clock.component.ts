@@ -15,7 +15,7 @@ import { UndoService } from '../../../shared/services/undo.service';
 import { IdentityPromptComponent } from '../identity/identity-prompt.component';
 import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
 
-type Punch = 'ClockIn' | 'ClockOut' | 'BreakStart' | 'BreakEnd';
+type Punch = 'ClockIn' | 'ClockOut' | 'BreakStart' | 'BreakEnd' | 'LunchEnd';
 
 /**
  * Clock: current status in huge type, one button whose label follows the
@@ -51,7 +51,7 @@ export class AppClockComponent {
   protected readonly primaryPunch = computed<Punch>(() => {
     switch (this.state()?.state) {
       case 'in': return 'ClockOut';
-      case 'break': return 'BreakEnd';
+      case 'break': return this.state()?.lastEventType === 'LunchStart' ? 'LunchEnd' : 'BreakEnd';
       default: return 'ClockIn';
     }
   });
@@ -151,8 +151,9 @@ export class AppClockComponent {
         );
       }
       if (this.shared()) this.identity.clear();
-    } catch {
-      this.snackbar.error(this.translate.instant('mobileApp.clock.failed'));
+    } catch (err: unknown) {
+      this.snackbar.errorFrom(err, 'mobileApp.clock.failed');
+      this.load();
     } finally {
       this.busy.set(false);
     }

@@ -77,21 +77,26 @@
               [disabled]="fontSizeIndex() === maxFontSizeIndex" [attr.aria-label]="'shopFloor.display.increaseFontSize' | translate">
         <span class="material-icons-outlined">text_increase</span>
       </button>
-      <button class="sf-header__control-btn" (click)="showDailyLog.set(!showDailyLog())"
-              [class.sf-header__control-btn--active]="showDailyLog()"
-              [attr.aria-label]="'shopFloor.dailyLog.title' | translate">
-        <span class="material-icons-outlined">receipt_long</span>
-      </button>
-      <button class="sf-header__control-btn" (click)="showDevicesPanel.set(!showDevicesPanel())"
-              [class.sf-header__control-btn--active]="showDevicesPanel()"
-              [attr.aria-label]="'shopFloor.devices' | translate">
-        <span class="material-icons-outlined">devices</span>
-      </button>
-      <button class="sf-header__control-btn" (click)="toggleUndoPanel()"
-              [class.sf-header__control-btn--active]="undoPanelOpen()"
-              [attr.aria-label]="'shopFloor.undoList.title' | translate">
-        <span class="material-icons-outlined">undo</span>
-      </button>
+      @if (supervisorSignedIn()) {
+        <button class="sf-header__control-btn" (click)="toggleDailyLog()"
+                [class.sf-header__control-btn--active]="showDailyLog()"
+                [attr.aria-label]="'shopFloor.dailyLog.title' | translate"
+                data-testid="sf-daily-log-toggle">
+          <span class="material-icons-outlined">receipt_long</span>
+        </button>
+        <button class="sf-header__control-btn" (click)="toggleDevicesPanel()"
+                [class.sf-header__control-btn--active]="showDevicesPanel()"
+                [attr.aria-label]="'shopFloor.devices' | translate"
+                data-testid="sf-devices-toggle">
+          <span class="material-icons-outlined">devices</span>
+        </button>
+        <button class="sf-header__control-btn" (click)="toggleUndoPanel()"
+                [class.sf-header__control-btn--active]="undoPanelOpen()"
+                [attr.aria-label]="'shopFloor.undoList.title' | translate"
+                data-testid="sf-undo-toggle">
+          <span class="material-icons-outlined">undo</span>
+        </button>
+      }
       <button class="sf-header__control-btn" (click)="toggleTheme()"
               [attr.aria-label]="'header.toggleTheme' | translate">
         <span class="material-icons-outlined">{{ theme() === 'light' ? 'dark_mode' : 'light_mode' }}</span>
@@ -106,6 +111,7 @@
     <span class="sf-header__clock">{{ clockDisplay() }}</span>
   </header>
 
+  <div class="sf-main">
   <div class="sf-body">
     @if (phase() === 'assign') {
       <div class="sf-assign-bar" data-testid="sf-assign-bar">
@@ -273,7 +279,7 @@
     <ng-template #boardJobBody let-job>
       <div class="sf-unassigned-card__main">
         <span class="sf-unassigned-card__number">{{ job.jobNumber }}</span>
-        <span class="sf-unassigned-card__title">{{ job.title }}</span>
+        <span class="sf-unassigned-card__title" [attr.title]="job.title">{{ job.title }}</span>
       </div>
       <span class="sf-unassigned-card__stage">{{ job.stageName }}</span>
       <span class="sf-unassigned-card__priority" [class]="priorityClass(job.priorityName)">
@@ -316,6 +322,13 @@
         </div>
       </section>
     }
+  </div>
+
+  @if (undoPanelOpen()) {
+    <div class="sf-undo-panel-container" data-testid="sf-undo-panel">
+      <app-scan-undo-list (closed)="toggleUndoPanel()" />
+    </div>
+  }
   </div>
 
   <!-- Bottom Status Bar (passive scan — no input needed) -->
@@ -471,7 +484,8 @@
                       </button>
                     } @else {
                       <button class="sf-action-btn sf-action-btn--start-timer"
-                              [disabled]="processing() !== null"
+                              [disabled]="processing() !== null || !clockTypes.isWorking(worker.status)"
+                              [attr.title]="clockTypes.isWorking(worker.status) ? null : ('shopFloor.display.clockInToStartTimer' | translate)"
                               (click)="startJobTimer(assignment)"
                               [attr.aria-label]="'shopFloor.display.startTimerOn' | translate: { jobNumber: assignment.jobNumber }"
                               data-testid="sf-start-timer">
@@ -705,10 +719,11 @@
   <!-- ─── Receiving Overlay ─── -->
   @if (phase() === 'receiving') {
     <div class="sf-overlay">
-      <div class="sf-receiving-card">
+      <div class="sf-receiving-card" role="dialog" aria-modal="true" aria-labelledby="sf-receiving-title" tabindex="-1"
+           cdkTrapFocus cdkTrapFocusAutoCapture data-testid="sf-receiving-card">
         <div class="sf-receiving-card__header">
-          <span class="material-icons-outlined">local_shipping</span>
-          <h2>{{ 'inventory.receiveGoods' | translate }}</h2>
+          <span class="material-icons-outlined">move_to_inbox</span>
+          <h2 id="sf-receiving-title" tabindex="-1" cdkFocusInitial>{{ 'inventory.receiveGoods' | translate }}</h2>
         </div>
 
         @if (!selectedPO()) {
@@ -794,7 +809,9 @@
   <!-- ─── Location View (triggered by scanning a storage location) ─── -->
   @if (scannedLocationId(); as locId) {
     <div class="sf-overlay" role="button" tabindex="0" [attr.aria-label]="'common.close' | translate" (click)="closeLocationView()" (keydown.escape)="closeLocationView()">
-      <div class="sf-location-view-container" role="dialog" aria-modal="true" tabindex="-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+      <div class="sf-location-view-container" role="dialog" aria-modal="true" tabindex="-1"
+           cdkTrapFocus cdkTrapFocusAutoCapture
+           (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" (keydown.escape)="closeLocationView()">
         <app-scan-location-view
           [locationId]="locId"
           [locationName]="scannedLocationName() ?? ''"
@@ -806,7 +823,9 @@
   <!-- ─── Daily Log Panel ─── -->
   @if (showDailyLog()) {
     <div class="sf-overlay" role="button" tabindex="0" [attr.aria-label]="'common.close' | translate" (click)="closeDailyLog()" (keydown.escape)="closeDailyLog()">
-      <div class="sf-panel-container" role="dialog" aria-modal="true" tabindex="-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+      <div class="sf-panel-container" role="dialog" aria-modal="true" tabindex="-1"
+           cdkTrapFocus cdkTrapFocusAutoCapture
+           (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" (keydown.escape)="closeDailyLog()">
         <app-scan-daily-log (closed)="closeDailyLog()" />
       </div>
     </div>
@@ -815,26 +834,22 @@
   <!-- ─── Devices Panel ─── -->
   @if (showDevicesPanel()) {
     <div class="sf-overlay" role="button" tabindex="0" [attr.aria-label]="'common.close' | translate" (click)="closeDevicesPanel()" (keydown.escape)="closeDevicesPanel()">
-      <div class="sf-panel-container sf-panel-container--narrow" role="dialog" aria-modal="true" tabindex="-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+      <div class="sf-panel-container sf-panel-container--narrow" role="dialog" aria-modal="true" tabindex="-1"
+           cdkTrapFocus cdkTrapFocusAutoCapture
+           (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" (keydown.escape)="closeDevicesPanel()">
         <app-scan-devices-panel (closed)="closeDevicesPanel()" />
       </div>
-    </div>
-  }
-
-  <!-- ─── Undo Panel ─── -->
-  @if (undoPanelOpen()) {
-    <div class="sf-undo-panel-container">
-      <app-scan-undo-list (closed)="toggleUndoPanel()" />
     </div>
   }
 
   <!-- ─── Shipping Overlay ─── -->
   @if (phase() === 'shipping') {
     <div class="sf-overlay">
-      <div class="sf-shipping-card">
+      <div class="sf-shipping-card" role="dialog" aria-modal="true" aria-labelledby="sf-shipping-title" tabindex="-1"
+           cdkTrapFocus cdkTrapFocusAutoCapture data-testid="sf-shipping-card">
         <div class="sf-shipping-card__header">
           <span class="material-icons-outlined">local_shipping</span>
-          <h2>{{ 'shopFloor.display.shipGoods' | translate }}</h2>
+          <h2 id="sf-shipping-title" tabindex="-1" cdkFocusInitial>{{ 'shopFloor.display.shipGoods' | translate }}</h2>
         </div>
 
         @if (!selectedShipment()) {

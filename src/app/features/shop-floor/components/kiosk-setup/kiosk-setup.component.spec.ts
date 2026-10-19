@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormControl } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 
 import { KioskSetupComponent } from './kiosk-setup.component';
@@ -56,6 +57,7 @@ function setup() {
     login: vi.fn<(c: unknown) => Observable<unknown>>(() => of({})),
     completeMfaLogin: vi.fn<(token: string, trusted?: string | null) => Observable<unknown>>(() => of({ id: 1 })),
     clearAuth: vi.fn(),
+    hasAnyRole: vi.fn((_roles: string[]) => true),
   };
   TestBed.configureTestingModule({
     imports: [KioskSetupComponent, TranslateModule.forRoot()],
@@ -292,5 +294,66 @@ describe('KioskSetupComponent', () => {
     const ctx = setup();
 
     expect(ctx.fixture.nativeElement.querySelector('[data-testid="kiosk-setup-language-toggle"]')).not.toBeNull();
+  });
+
+  it('turns away a sign-in that cannot set up terminals and signs it straight back out', () => {
+    const ctx = setup();
+    ctx.auth.hasAnyRole.mockReturnValue(false);
+
+    signIn(ctx);
+
+    expect(ctx.auth.hasAnyRole).toHaveBeenCalledWith(['Admin', 'Manager']);
+    expect(ctx.auth.clearAuth).toHaveBeenCalled();
+    expect(ctx.component.phase()).toBe('admin-login');
+    expect(ctx.shopFloor.getTeams).not.toHaveBeenCalled();
+  });
+
+  it('turns away an MFA sign-in that cannot set up terminals', () => {
+    const ctx = setup();
+    ctx.auth.login.mockReturnValue(of({ mfaRequired: true, mfaPendingToken: 'pending-1' }));
+    signIn(ctx);
+    ctx.auth.hasAnyRole.mockReturnValue(false);
+
+    mfaChallenge(ctx)!.validated.emit({ accessToken: 'access', refreshToken: 'r', expiresAt: '2026-10-19T00:00:00Z' });
+    ctx.fixture.detectChanges();
+
+    expect(ctx.auth.clearAuth).toHaveBeenCalled();
+    expect(ctx.component.phase()).toBe('admin-login');
+    expect(ctx.shopFloor.getTeams).not.toHaveBeenCalled();
+  });
+
+  it('signs the setup user out when setup is left without activating', () => {
+    const ctx = setup();
+    signIn(ctx);
+    expect(ctx.auth.clearAuth).not.toHaveBeenCalled();
+
+    ctx.fixture.destroy();
+
+    expect(ctx.auth.clearAuth).toHaveBeenCalledTimes(1);
+  });
+
+  it('signs the setup user out when the tab is closed during setup', () => {
+    const ctx = setup();
+    signIn(ctx);
+
+    window.dispatchEvent(new Event('pagehide'));
+
+    expect(ctx.auth.clearAuth).toHaveBeenCalledTimes(1);
+  });
+
+  it('caps the terminal name and shows the server reason when the save is refused', () => {
+    const ctx = setup();
+    ctx.shopFloor.getTeams.mockReturnValue(of([team]));
+    ctx.shopFloor.setupTerminal.mockReturnValue(throwError(() =>
+      new HttpErrorResponse({ status: 400, error: { detail: 'Name must be 100 characters or fewer.' } })));
+    signIn(ctx);
+    const input = ctx.fixture.nativeElement.querySelector('[data-testid="kiosk-setup-terminal-name"] input') as HTMLInputElement;
+    expect(input.getAttribute('maxlength')).toBe('100');
+
+    ctx.component.terminalNameControl.setValue('Press 1');
+    ctx.component.teamControl.setValue(3);
+    ctx.component.onSave();
+
+    expect(ctx.component.configError()).toBe('Name must be 100 characters or fewer.');
   });
 });

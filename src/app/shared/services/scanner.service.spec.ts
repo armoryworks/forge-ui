@@ -174,6 +174,83 @@ describe('ScannerService', () => {
     });
   });
 
+  describe('scan timing', () => {
+    let clock = 0;
+
+    function key(key: string, at: number): void {
+      const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+      Object.defineProperty(event, 'timeStamp', { value: at });
+      document.body.dispatchEvent(event);
+    }
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      clock = 1_000;
+      service.start();
+    });
+
+    afterEach(() => vi.useRealTimers());
+
+    it('keeps a scan whole when the page stalls partway through it', () => {
+      key('J', clock);
+      key('-', clock + 8);
+      key('2', clock + 16);
+      vi.setSystemTime(Date.now() + 400);
+      key('4', clock + 24);
+      key('0', clock + 32);
+      key('3', clock + 40);
+      key('Enter', clock + 48);
+
+      expect(service.lastScan()?.value).toBe('J-2403');
+    });
+
+    it('waits out a stalled fallback timer instead of sending half a scan', () => {
+      const realNow = performance.now.bind(performance);
+      let skew = 0;
+      const now = vi.spyOn(performance, 'now').mockImplementation(() => realNow() + skew);
+
+      key('J', clock);
+      key('-', clock + 8);
+      key('2', clock + 16);
+      key('4', clock + 24);
+      skew = 500;
+      vi.advanceTimersByTime(80);
+      expect(service.lastScan()).toBeNull();
+
+      key('0', clock + 32);
+      key('3', clock + 40);
+      vi.advanceTimersByTime(80);
+
+      expect(service.lastScan()?.value).toBe('J-2403');
+      now.mockRestore();
+    });
+
+    it('does not treat slow typing on the board as a scan', () => {
+      [...'J-2403'].forEach((k, i) => key(k, clock + i * 120));
+      key('Enter', clock + 6 * 120);
+      vi.advanceTimersByTime(200);
+
+      expect(service.lastScan()).toBeNull();
+    });
+
+    it('does not let the fallback timer send slow typing as a scan', () => {
+      [...'J-2403'].forEach((k, i) => {
+        key(k, clock + i * 60);
+        vi.advanceTimersByTime(60);
+      });
+      vi.advanceTimersByTime(200);
+
+      expect(service.lastScan()).toBeNull();
+    });
+
+    it('sends a fast burst with no Enter through the fallback timer', () => {
+      [...'J-2403'].forEach((k, i) => key(k, clock + i * 8));
+      vi.advanceTimersByTime(80);
+
+      expect(service.lastScan()?.value).toBe('J-2403');
+    });
+  });
+
   describe('ngOnDestroy', () => {
     it('should stop listening on destroy', () => {
       service.start();

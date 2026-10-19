@@ -45,6 +45,7 @@ export class ScanDailyLogComponent implements OnInit {
 
   readonly entries = signal<ScanLogEntry[]>([]);
   readonly loading = signal(false);
+  readonly loadFailed = signal(false);
 
   protected readonly today = todayEnd();
   readonly dateControl = new FormControl(new Date());
@@ -98,6 +99,7 @@ export class ScanDailyLogComponent implements OnInit {
 
   loadData(): void {
     this.loading.set(true);
+    this.loadFailed.set(false);
     const date = this.dateControl.value;
     const dateStr = (date ? toDateOnly(date) : null) ?? toDateOnly(new Date())!;
     const actionType = this.actionTypeControl.value || undefined;
@@ -108,7 +110,9 @@ export class ScanDailyLogComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => {
+        this.entries.set([]);
         this.loading.set(false);
+        this.loadFailed.set(true);
       },
     });
   }

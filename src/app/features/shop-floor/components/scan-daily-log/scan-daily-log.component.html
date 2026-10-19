@@ -24,8 +24,8 @@
       [columns]="columns"
       [data]="entries()"
       [loading]="loading()"
-      emptyIcon="history"
-      [emptyMessage]="'kioskFlows.dailyLog.empty' | translate">
+      [emptyIcon]="loadFailed() ? 'error_outline' : 'history'"
+      [emptyMessage]="(loadFailed() ? 'kioskFlows.common.loadFailed' : 'kioskFlows.dailyLog.empty') | translate">
 
       <ng-template appColumnCell="createdAt" let-row>
         {{ row.createdAt | dateTime:'timeSeconds' }}
