@@ -289,8 +289,8 @@ export class PlanningComponent implements OnInit {
           this.showCycleDialog.set(false);
           this.planningService.getCycles().subscribe(cycles => {
             this.cycles.set(cycles);
-            this.selectedCycle.set(created);
             this.cycleControl.setValue(created.id, { emitEvent: false });
+            this.loadCycle(created.id);
           });
           this.snackbar.success(this.translate.instant('planning.cycleCreated'));
         },
@@ -307,11 +307,22 @@ export class PlanningComponent implements OnInit {
     const cycle = this.selectedCycle();
     if (!cycle) return;
 
-    this.planningService.activateCycle(cycle.id).subscribe({
-      next: () => {
-        this.reloadAll();
-        this.snackbar.success(this.translate.instant('planning.cycleActivated'));
-      },
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('planning.activateCycleTitle'),
+        message: this.translate.instant('planning.activateCycleMessage', { name: cycle.name }),
+        confirmLabel: this.translate.instant('planning.activateBtn'),
+        severity: 'info',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.planningService.activateCycle(cycle.id).subscribe({
+        next: () => {
+          this.reloadAll();
+          this.snackbar.success(this.translate.instant('planning.cycleActivated'));
+        },
+      });
     });
   }
 

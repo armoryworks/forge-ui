@@ -6396,7 +6396,10 @@
     "rolledOver": "Rolled over from previous cycle",
     "markComplete": "Mark complete",
     "removeFromCycle": "Remove from cycle",
-    "noJobsCommitted": "No jobs committed to this cycle"
+    "noJobsCommitted": "No jobs committed to this cycle",
+    "selectCycleHint": "Select a planning cycle to see its board",
+    "activateCycleTitle": "Activate cycle?",
+    "activateCycleMessage": "Activate \"{{name}}\"? It moves from Planning to Active and work on its jobs begins."
   },
   "reports": {
     "title": "Reports",

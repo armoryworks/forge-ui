@@ -6389,7 +6389,10 @@
     "rolledOver": "Transferido del ciclo anterior",
     "markComplete": "Marcar completo",
     "removeFromCycle": "Remover del ciclo",
-    "noJobsCommitted": "No hay trabajos comprometidos en este ciclo"
+    "noJobsCommitted": "No hay trabajos comprometidos en este ciclo",
+    "selectCycleHint": "Seleccione un ciclo de planificación para ver su tablero",
+    "activateCycleTitle": "¿Activar ciclo?",
+    "activateCycleMessage": "¿Activar \"{{name}}\"? Pasa de Planificación a Activo y comienza el trabajo en sus trabajos."
   },
   "reports": {
     "title": "Reportes",
