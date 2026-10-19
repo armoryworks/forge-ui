@@ -1,0 +1,44 @@
+<app-dialog [title]="'employees.create.title' | translate" width="520px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form" class="employee-create">
+    <p class="employee-create__hint">{{ 'employees.create.hint' | translate }}</p>
+    <div class="employee-create__row">
+      <app-input data-testid="employee-create-first-name" [label]="'employees.create.firstName' | translate"
+        formControlName="firstName" [maxlength]="100" [required]="true" />
+      <app-input data-testid="employee-create-last-name" [label]="'employees.create.lastName' | translate"
+        formControlName="lastName" [maxlength]="100" [required]="true" />
+    </div>
+    <div class="employee-create__row">
+      <app-datepicker data-testid="employee-create-hire-date" [label]="'employees.create.hireDate' | translate"
+        formControlName="hireDate" />
+      <app-input data-testid="employee-create-employee-number" [label]="'employees.create.employeeNumber' | translate"
+        formControlName="employeeNumber" [maxlength]="50" />
+    </div>
+    <div class="employee-create__row">
+      <app-input data-testid="employee-create-department" [label]="'employees.create.department' | translate"
+        formControlName="department" [maxlength]="200" />
+      <app-input data-testid="employee-create-job-title" [label]="'employees.create.jobTitle' | translate"
+        formControlName="jobTitle" [maxlength]="200" />
+    </div>
+    <div class="employee-create__row">
+      <app-input data-testid="employee-create-work-email" [label]="'employees.create.workEmail' | translate"
+        formControlName="workEmail" type="email" [maxlength]="256" />
+      <app-input data-testid="employee-create-phone" [label]="'employees.create.phone' | translate"
+        formControlName="phoneNumber" [maxlength]="50" />
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" data-testid="employee-create-cancel-btn" (click)="close()">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--create"
+        data-testid="employee-create-save-btn"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        <span class="material-icons-outlined">add</span>
+        {{ 'employees.create.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

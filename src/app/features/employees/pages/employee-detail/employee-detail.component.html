@@ -19,7 +19,11 @@
         <div class="ed-header__name-row">
           <app-avatar [initials]="e.initials ?? ''" [color]="e.avatarColor ?? ''" size="md" />
           <h1 class="ed-header__name">{{ displayName() }}</h1>
-          <span class="chip chip--info">{{ e.role }}</span>
+          @if (hasLogin()) {
+            <span class="chip chip--info">{{ e.role }}</span>
+          } @else {
+            <span class="chip chip--muted" data-testid="employee-detail-no-login-chip">{{ 'employees.noLogin' | translate }}</span>
+          }
           <span class="chip" [class.chip--success]="e.isActive" [class.chip--muted]="!e.isActive">
             {{ (e.isActive ? 'employees.detail.active' : 'employees.detail.inactive') | translate }}
           </span>
@@ -80,7 +84,7 @@
 
       <!-- Tab bar -->
       <nav class="ed-tabs" role="tablist">
-        @for (tab of tabs; track tab) {
+        @for (tab of tabs(); track tab) {
           <button
             class="ed-tab"
             [class.ed-tab--active]="activeTab() === tab"
@@ -97,33 +101,36 @@
     <!-- ── Tab content ── -->
     <div class="ed-content">
       @if (activeTab() === 'overview') {
+        @if (!hasLogin()) {
+          <p class="ed-no-login-hint" data-testid="employee-detail-no-login-hint">{{ 'employees.detail.noLoginHint' | translate }}</p>
+        }
         <app-employee-overview-tab [employee]="e" />
       }
-      @if (activeTab() === 'time') {
+      @if (hasLogin() && activeTab() === 'time') {
         <app-employee-time-tab [employeeId]="e.id" />
       }
-      @if (activeTab() === 'pay') {
+      @if (hasLogin() && activeTab() === 'pay') {
         <app-employee-pay-tab [employeeId]="e.id" />
       }
-      @if (activeTab() === 'training') {
+      @if (hasLogin() && activeTab() === 'training') {
         <app-employee-training-tab [employeeId]="e.id" />
       }
-      @if (activeTab() === 'compliance') {
+      @if (hasLogin() && activeTab() === 'compliance') {
         <app-employee-compliance-tab [employeeId]="e.id" />
       }
-      @if (activeTab() === 'jobs') {
+      @if (hasLogin() && activeTab() === 'jobs') {
         <app-employee-jobs-tab [employeeId]="e.id" />
       }
-      @if (activeTab() === 'events') {
+      @if (hasLogin() && activeTab() === 'events') {
         <app-employee-events-tab [employeeId]="e.id" />
       }
-      @if (activeTab() === 'expenses') {
+      @if (hasLogin() && activeTab() === 'expenses') {
         <app-employee-expenses-tab [employeeId]="e.id" />
       }
-      @if (activeTab() === 'documents') {
+      @if (hasLogin() && activeTab() === 'documents') {
         <app-employee-documents-tab [employeeId]="e.id" />
       }
-      @if (activeTab() === 'activity') {
+      @if (hasLogin() && activeTab() === 'activity') {
         <app-employee-activity-tab [employeeId]="e.id" />
       }
     </div>

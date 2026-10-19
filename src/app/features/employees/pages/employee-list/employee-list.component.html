@@ -1,4 +1,10 @@
 <app-page-header [title]="'employees.title' | translate" [subtitle]="'employees.subtitle' | translate">
+  @if (canCreate()) {
+    <button class="action-btn" data-testid="employees-create-btn" (click)="createEmployee()">
+      <span class="material-icons-outlined">badge</span>
+      {{ 'employees.newEmployee' | translate }}
+    </button>
+  }
   @if (canInvite()) {
     <button class="action-btn action-btn--create" data-testid="employees-invite-btn" (click)="inviteEmployee()">
       <span class="material-icons-outlined">person_add</span>
@@ -32,6 +38,9 @@
         <div class="employee-name-cell">
           <app-avatar [initials]="row.initials ?? ''" [color]="row.avatarColor ?? ''" size="sm" />
           <span>{{ formatName(row) }}</span>
+          @if (row.hasLogin === false) {
+            <span class="chip chip--muted" data-testid="employee-no-login-chip">{{ 'employees.noLogin' | translate }}</span>
+          }
         </div>
       </ng-template>
       <ng-template appColumnCell="isActive" let-row>

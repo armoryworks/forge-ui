@@ -14,6 +14,7 @@ export interface EmployeeListItem {
   department?: string;
   startDate?: string;
   createdAt: string;
+  hasLogin?: boolean;
 }
 
 export interface EmployeeDetail {
@@ -48,6 +49,7 @@ export interface EmployeeDetail {
   emergencyContactRelationship?: string;
   complianceCompletedItems: number;
   complianceTotalItems: number;
+  hasLogin?: boolean;
 }
 
 export interface EmployeeStats {

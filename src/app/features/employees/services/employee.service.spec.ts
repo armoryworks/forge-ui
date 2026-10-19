@@ -70,6 +70,23 @@ describe('EmployeeService', () => {
       expect(req.request.method).toBe('GET');
       req.flush({ id: 10 });
     });
+
+    it('should pass the employee kind when given', () => {
+      service.getEmployee(10, 'profile').subscribe();
+      const req = httpMock.expectOne(r => r.url === `${base}/10`);
+      expect(req.request.params.get('kind')).toBe('profile');
+      req.flush({ id: 10 });
+    });
+  });
+
+  describe('createEmployee', () => {
+    it('should POST the employee to the employees endpoint', () => {
+      service.createEmployee({ firstName: 'Bea', lastName: 'Carter', department: 'Shipping' }).subscribe();
+      const req = httpMock.expectOne(base);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ firstName: 'Bea', lastName: 'Carter', department: 'Shipping' });
+      req.flush({ id: 3 });
+    });
   });
 
   describe('getEmployeeStats', () => {

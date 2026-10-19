@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 
+import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { EmployeeService } from '../../services/employee.service';
@@ -19,6 +20,8 @@ import { ColumnCellDirective } from '../../../../shared/directives/column-cell.d
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
+import { EmployeeCreateDialogComponent } from '../../components/employee-create-dialog/employee-create-dialog.component';
+import { CreatedEmployee } from '../../models/created-employee.model';
 
 @Component({
   selector: 'app-employee-list',
@@ -39,10 +42,13 @@ export class EmployeeListComponent {
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
   private readonly auth = inject(AuthService);
+  private readonly dialog = inject(MatDialog);
 
   // Employees are created/invited through Admin > Users (Admin-only). Surface
   // the entry point here so an admin landing on an empty list has a next step.
   protected readonly canInvite = computed(() => (this.auth.user()?.roles ?? []).includes('Admin'));
+  protected readonly canCreate = computed(() =>
+    (this.auth.user()?.roles ?? []).some(r => r === 'Admin' || r === 'Manager'));
 
   protected readonly loading = signal(false);
   protected readonly employees = signal<EmployeeListItem[]>([]);
@@ -131,8 +137,20 @@ export class EmployeeListComponent {
     this.router.navigate(['/admin/users']);
   }
 
+  protected createEmployee(): void {
+    this.dialog.open<EmployeeCreateDialogComponent, void, CreatedEmployee | null>(EmployeeCreateDialogComponent, {
+      width: '520px',
+    }).afterClosed().subscribe(created => {
+      if (!created) return;
+      this.loadEmployees();
+      this.router.navigate(['/employees', created.id, 'overview'], { queryParams: { kind: 'profile' } });
+    });
+  }
+
   protected selectEmployee(item: EmployeeListItem): void {
-    this.router.navigate(['/employees', item.id]);
+    this.router.navigate(['/employees', item.id, 'overview'], {
+      queryParams: { kind: item.hasLogin === false ? 'profile' : 'user' },
+    });
   }
 
   protected formatName(item: EmployeeListItem): string {
