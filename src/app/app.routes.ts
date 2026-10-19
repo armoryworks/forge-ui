@@ -58,7 +58,6 @@ export const routes: Routes = [
   // employee token and are not gated by the capability interceptor.
   {
     path: 'accept/:token',
-    data: { breadcrumb: 'nav.orderAcceptance' },
     loadComponent: () =>
       import('./features/sales-orders/pages/public-acceptance/public-acceptance.component')
         .then(m => m.PublicAcceptanceComponent),
@@ -310,13 +309,11 @@ export const routes: Routes = [
       },
       {
         path: 'notifications',
-        data: { breadcrumb: 'header.notifications' },
         loadChildren: () =>
           import('./features/notifications/notifications.routes').then((m) => m.NOTIFICATION_ROUTES),
       },
       {
         path: 'worker',
-        data: { breadcrumb: 'nav.worker' },
         loadChildren: () =>
           import('./features/worker/worker.routes').then((m) => m.WORKER_ROUTES),
       },
@@ -346,13 +343,11 @@ export const routes: Routes = [
       },
       {
         path: 'account',
-        data: { breadcrumb: 'header.accountSettings' },
         loadChildren: () =>
           import('./features/account/account.routes').then((m) => m.ACCOUNT_ROUTES),
       },
       {
         path: 'onboarding',
-        data: { breadcrumb: 'nav.onboarding' },
         loadChildren: () =>
           import('./features/onboarding/onboarding.routes').then((m) => m.ONBOARDING_ROUTES),
       },
@@ -386,7 +381,6 @@ export const routes: Routes = [
       },
       {
         path: 'chat',
-        data: { breadcrumb: 'header.chat' },
         loadChildren: () =>
           import('./features/chat/chat.routes').then((m) => m.CHAT_ROUTES),
       },
@@ -401,7 +395,6 @@ export const routes: Routes = [
         // authenticated user can poke at the shell). Phase 5+ wires
         // per-entity workflow surfaces into their own routes.
         path: 'workflow-shell-demo',
-        data: { breadcrumb: 'nav.workflowShellDemo' },
         loadComponent: () =>
           import('./features/workflow-demo/workflow-shell-demo.component')
             .then(m => m.WorkflowShellDemoComponent),
@@ -432,7 +425,6 @@ export const routes: Routes = [
   },
   {
     path: 'dev-tools',
-    data: { breadcrumb: 'nav.devTools' },
     loadChildren: () =>
       import('./features/dev-tools/dev-tools.routes').then((m) => m.DEV_TOOLS_ROUTES),
   },

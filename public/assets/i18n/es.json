@@ -85,11 +85,7 @@
     "pieceRates": "Tarifas por pieza",
     "openingJournal": "Asiento de apertura",
     "journalApprovals": "Aprobación de asientos",
-    "maintenancePredictions": "Predicciones",
-    "onboarding": "Incorporación",
-    "workflowShellDemo": "Demostración de flujo de trabajo",
-    "devTools": "Herramientas de desarrollo",
-    "orderAcceptance": "Aceptación del pedido"
+    "maintenancePredictions": "Predicciones"
   },
   "navGroups": {
     "operations": "Operaciones",

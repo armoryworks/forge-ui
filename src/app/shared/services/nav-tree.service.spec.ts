@@ -68,7 +68,7 @@ async function serviceAt(url: string): Promise<NavTreeService> {
   TestBed.configureTestingModule({
     providers: [
       provideRouter([
-        { path: 'notifications', data: { breadcrumb: 'header.notifications' }, children: [{ path: '', component: SpecPageComponent }] },
+        { path: 'notifications', data: { titleKey: 'header.notifications' }, children: [{ path: '', component: SpecPageComponent }] },
         { path: 'training/path/:id', component: SpecPageComponent },
         { path: 'customers/:id/:tab', component: SpecPageComponent },
         { path: 'customers', component: SpecPageComponent },

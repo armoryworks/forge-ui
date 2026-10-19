@@ -477,7 +477,7 @@ export class NavTreeService {
     let route: ActivatedRouteSnapshot | null = this.router.routerState.snapshot.root;
     let key: string | null = null;
     while (route) {
-      const crumb = route.data['breadcrumb'];
+      const crumb = route.data['titleKey'];
       if (typeof crumb === 'string') key = crumb;
       route = route.firstChild;
     }
