@@ -36,6 +36,7 @@ interface PanelInternals {
   showPartAdd: () => boolean;
   isAdmin: () => boolean;
   canExplodeBom: () => boolean;
+  canArchive: () => boolean;
   toggleSubtaskAdd(): void;
   toggleLinkAdd(): void;
   togglePartAdd(): void;
@@ -513,7 +514,7 @@ describe('JobDetailPanelComponent', () => {
   });
 
   it('archives the work order through the bulk endpoint after confirming', () => {
-    const { component, kanban, snackbar, dialog } = setup({ confirm: true });
+    const { component, kanban, snackbar, dialog } = setup({ roles: ['Manager'], confirm: true });
     component.job.set(jobDetail());
     kanban.bulkArchive.mockReturnValue(of({ successCount: 1, failureCount: 0, errors: [] }));
 
@@ -526,7 +527,7 @@ describe('JobDetailPanelComponent', () => {
   });
 
   it('does not archive when the confirm dialog is cancelled', () => {
-    const { component, kanban } = setup({ confirm: false });
+    const { component, kanban } = setup({ roles: ['Manager'], confirm: false });
     component.job.set(jobDetail());
 
     component.archiveJob();
@@ -536,7 +537,7 @@ describe('JobDetailPanelComponent', () => {
   });
 
   it('keeps the work order active and reports an error when the server archives nothing', () => {
-    const { component, kanban, snackbar } = setup({ confirm: true });
+    const { component, kanban, snackbar } = setup({ roles: ['Manager'], confirm: true });
     component.job.set(jobDetail());
     kanban.bulkArchive.mockReturnValue(of({ successCount: 0, failureCount: 1, errors: [{ jobId: JOB_ID, message: 'x' }] }));
 
@@ -544,6 +545,23 @@ describe('JobDetailPanelComponent', () => {
 
     expect(component.job()?.isArchived).toBe(false);
     expect(snackbar.error).toHaveBeenCalledWith('jobDetailExtras.archiveFailed');
+  });
+
+  it('offers Archive only to the roles the archive endpoint admits', () => {
+    expect(setup({ roles: ['Admin'] }).component.canArchive()).toBe(true);
+    expect(setup({ roles: ['Manager'] }).component.canArchive()).toBe(true);
+    expect(setup({ roles: ['ProductionWorker'] }).component.canArchive()).toBe(false);
+    expect(setup({ roles: ['PM'] }).component.canArchive()).toBe(false);
+  });
+
+  it('does not archive for a production worker', () => {
+    const { component, kanban, dialog } = setup({ roles: ['ProductionWorker'], confirm: true });
+    component.job.set(jobDetail());
+
+    component.archiveJob();
+
+    expect(dialog.open).not.toHaveBeenCalled();
+    expect(kanban.bulkArchive).not.toHaveBeenCalled();
   });
 
   it('lets an Admin unarchive an archived work order', () => {

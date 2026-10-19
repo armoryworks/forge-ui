@@ -182,37 +182,39 @@
         }
       </mat-menu>
 
-      <button class="bulk-bar__btn" [matMenuTriggerFor]="assignMenu">
-        <span class="material-icons-outlined">person</span>
-        {{ 'kanban.assign' | translate }}
-      </button>
-      <mat-menu #assignMenu="matMenu">
-        <button mat-menu-item (click)="bulkAssign(null)">
-          <span class="material-icons-outlined bulk-bar__menu-icon">person_off</span>
-          {{ 'kanban.unassign' | translate }}
+      @if (canEditJobs()) {
+        <button class="bulk-bar__btn" data-testid="bulk-assign-btn" [matMenuTriggerFor]="assignMenu">
+          <span class="material-icons-outlined">person</span>
+          {{ 'kanban.assign' | translate }}
         </button>
-        @for (user of users(); track user.id) {
-          <button mat-menu-item (click)="bulkAssign(user)">
-            <span class="material-icons-outlined bulk-bar__menu-icon">person</span>
-            {{ user.name }}
+        <mat-menu #assignMenu="matMenu">
+          <button mat-menu-item (click)="bulkAssign(null)">
+            <span class="material-icons-outlined bulk-bar__menu-icon">person_off</span>
+            {{ 'kanban.unassign' | translate }}
           </button>
-        }
-      </mat-menu>
+          @for (user of users(); track user.id) {
+            <button mat-menu-item (click)="bulkAssign(user)">
+              <span class="material-icons-outlined bulk-bar__menu-icon">person</span>
+              {{ user.name }}
+            </button>
+          }
+        </mat-menu>
 
-      <button class="bulk-bar__btn" [matMenuTriggerFor]="priorityMenu">
-        <span class="material-icons-outlined">flag</span>
-        {{ 'common.priority' | translate }}
-      </button>
-      <mat-menu #priorityMenu="matMenu">
-        @for (p of priorityOptions; track p) {
-          <button mat-menu-item (click)="bulkSetPriority(p)">{{ p }}</button>
-        }
-      </mat-menu>
+        <button class="bulk-bar__btn" data-testid="bulk-priority-btn" [matMenuTriggerFor]="priorityMenu">
+          <span class="material-icons-outlined">flag</span>
+          {{ 'common.priority' | translate }}
+        </button>
+        <mat-menu #priorityMenu="matMenu">
+          @for (p of priorityOptions; track p) {
+            <button mat-menu-item (click)="bulkSetPriority(p)">{{ p }}</button>
+          }
+        </mat-menu>
 
-      <button class="bulk-bar__btn bulk-bar__btn--danger" (click)="bulkArchive()">
-        <span class="material-icons-outlined">archive</span>
-        {{ 'common.archive' | translate }}
-      </button>
+        <button class="bulk-bar__btn bulk-bar__btn--danger" data-testid="bulk-archive-btn" (click)="bulkArchive()">
+          <span class="material-icons-outlined">archive</span>
+          {{ 'common.archive' | translate }}
+        </button>
+      }
 
       <button class="bulk-bar__close" (click)="clearSelection()" [matTooltip]="'kanban.clearSelection' | translate" matTooltipPosition="above" [attr.aria-label]="'kanban.clearSelection' | translate">
         <span class="material-icons-outlined">close</span>

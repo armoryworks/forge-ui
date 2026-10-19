@@ -44,7 +44,7 @@ import { BILLING_STAGE_ROLES } from '../../shared/models/billing-stage-roles.con
 import { isBillingStage } from '../../shared/utils/billing-stage';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { JOB_CREATE_ROLES } from './job-roles';
+import { JOB_CREATE_ROLES, JOB_EDIT_ROLES } from './job-roles';
 
 export type ViewMode = 'board' | 'team';
 
@@ -96,6 +96,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
   protected readonly selectedJobIds = signal<Set<number>>(new Set());
   protected readonly selectionCount = computed(() => this.selectedJobIds().size);
   protected readonly canCreateJobs = computed(() => this.authService.hasAnyRole(JOB_CREATE_ROLES));
+  protected readonly canEditJobs = computed(() => this.authService.hasAnyRole([...JOB_EDIT_ROLES]));
   protected readonly users = signal<UserRef[]>([]);
   protected readonly priorityOptions = PRIORITIES;
 
