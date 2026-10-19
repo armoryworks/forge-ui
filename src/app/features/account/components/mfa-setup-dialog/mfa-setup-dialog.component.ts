@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -12,7 +13,7 @@ import { MfaSetupResponse } from '../../models/mfa.model';
 @Component({
   selector: 'app-mfa-setup-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, DialogComponent, InputComponent, QrCodeComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, QrCodeComponent],
   templateUrl: './mfa-setup-dialog.component.html',
   styleUrl: './mfa-setup-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,6 +21,7 @@ import { MfaSetupResponse } from '../../models/mfa.model';
 export class MfaSetupDialogComponent {
   private readonly mfaService = inject(MfaService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
   private readonly dialogRef = inject(MatDialogRef<MfaSetupDialogComponent>);
 
   protected readonly step = signal<'loading' | 'scan' | 'verify' | 'complete'>('loading');
@@ -64,13 +66,13 @@ export class MfaSetupDialogComponent {
         if (result.verified) {
           this.step.set('complete');
         } else {
-          this.verifyError.set('Invalid code. Please try again.');
+          this.verifyError.set(this.translate.instant('account.mfa.invalidCode'));
           this.codeControl.reset();
         }
       },
       error: () => {
         this.verifying.set(false);
-        this.verifyError.set('Invalid code. Please try again.');
+        this.verifyError.set(this.translate.instant('account.mfa.invalidCode'));
         this.codeControl.reset();
       },
     });
@@ -80,7 +82,7 @@ export class MfaSetupDialogComponent {
     const key = this.setupData()?.manualEntryKey;
     if (key) {
       navigator.clipboard.writeText(key);
-      this.snackbar.success('Key copied to clipboard');
+      this.snackbar.success(this.translate.instant('account.mfa.keyCopied'));
     }
   }
 
