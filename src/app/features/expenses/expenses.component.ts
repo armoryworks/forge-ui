@@ -341,8 +341,13 @@ export class ExpensesComponent implements OnInit {
     return this.translate.instant(key);
   }
 
+  protected readonly totalExcludesRejected = computed(() => !this.statusFilter());
+
   protected getTotalAmount(): number {
-    return this.expenses().reduce((sum, e) => sum + e.amount, 0);
+    const excludeRejected = this.totalExcludesRejected();
+    return this.expenses()
+      .filter(e => !excludeRejected || e.status !== 'Rejected')
+      .reduce((sum, e) => sum + e.amount, 0);
   }
 
   protected deleteExpense(expense: ExpenseItem): void {

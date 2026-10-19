@@ -10,13 +10,13 @@ export const EXPENSES_TOUR: TourDefinition = {
     {
       element: 'app-data-table',
       title: 'Expense List',
-      description: 'All expenses with status tracking. Filter by date, category, or status. Export to CSV.',
+      description: 'All expenses with status tracking. Search by description, filter by status, and sort or filter by any column header. Export to CSV.',
       side: 'top',
     },
     {
-      element: '.action-btn--primary',
+      element: '[data-testid="new-expense-btn"]',
       title: 'Create Expense',
-      description: 'Click to log a new expense. Attach receipt photos and link to jobs.',
+      description: 'Click to log a new expense with its amount, date, category and vendor, and attach a receipt photo.',
       side: 'bottom',
     },
   ],
