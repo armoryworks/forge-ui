@@ -80,10 +80,18 @@ export class MobileApiService {
       'POST', `/api/v1/mobile/jobs/${jobId}/advance`, body, this.jobLabel('advance', jobId), undefined, silent);
   }
 
-  /** Compensating action for advance: move back to the column it came from. */
-  moveJobToStage(jobId: number, stageId: number, token?: string): Observable<JobStatus | QueuedOffline> {
+  /**
+   * Compensating action for advance: move back to the column it came from.
+   * `rowVersion` is the job version the advance returned; it is sent as
+   * If-Match when the move goes out now, and dropped when it is queued.
+   */
+  moveJobToStage(
+    jobId: number, stageId: number, token?: string, rowVersion?: number,
+  ): Observable<JobStatus | QueuedOffline> {
+    const onlineHeaders = rowVersion === undefined ? undefined : { 'If-Match': `"${rowVersion}"` };
     return this.mutate<JobStatus>(
-      'PATCH', `/api/v1/jobs/${jobId}/stage`, { stageId }, this.jobLabel('moveBack', jobId), token);
+      'PATCH', `/api/v1/jobs/${jobId}/stage`, { stageId }, this.jobLabel('moveBack', jobId), token, false,
+      onlineHeaders);
   }
 
   /**
@@ -259,6 +267,7 @@ export class MobileApiService {
 
   private mutate<T>(
     method: Method, url: string, body: unknown, label: QueuedActionLabel, token?: string, silent = false,
+    onlineHeaders?: Record<string, string>,
   ): Observable<T | QueuedOffline> {
     const headers = this.idempotentHeaders();
     if (token) {
@@ -269,7 +278,7 @@ export class MobileApiService {
       })).pipe(map((entryId) => ({ queued: true as const, entryId })));
     }
     const options = {
-      headers: new HttpHeaders(headers),
+      headers: new HttpHeaders({ ...headers, ...onlineHeaders }),
       context: new HttpContext().set(SILENT_HTTP_ERRORS, silent),
     };
     switch (method) {

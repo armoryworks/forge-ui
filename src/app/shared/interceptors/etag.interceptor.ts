@@ -11,8 +11,14 @@ import { ETagCacheService } from '../services/etag-cache.service';
  * Caches per-resource ETags from PATCH/PUT/POST/GET responses, and injects
  * If-Match on subsequent PATCH/PUT/DELETE requests for the same resource.
  *
- * Resource key = HTTP path (e.g. "/api/v1/jobs/179"). The cache is in-memory
- * only; on full reload, the next GET will refresh the ETag automatically.
+ * Resource key = HTTP path up to its last numeric id, so an action on a
+ * record shares the record's key: "/api/v1/jobs/179/stage" and
+ * "/api/v1/jobs/179" are both "/api/v1/jobs/179", while
+ * "/api/v1/jobs/179/operations/5" keeps its own key. A path with no numeric
+ * id (e.g. /jobs/bulk/*) is used as is. A response body's rowVersion is filed
+ * under the record key only when the body's id is that record's id. The cache
+ * is in-memory only; on full reload, the next GET will refresh the ETag
+ * automatically. A request that already carries If-Match keeps its own value.
  *
  * Master-data resources (customers, parts, vendors, etc.) are NOT subject to
  * ETag plumbing — the server simply ignores If-Match on them. Per the
@@ -27,6 +33,8 @@ import { ETagCacheService } from '../services/etag-cache.service';
  *  - /jobs/{id}/position — presentational board ordering only. Enforcing If-Match
  *    would require N GETs for an N-card column reorder (30 round-trips on a
  *    15-card board). No business/financial invariant depends on position.
+ *    No If-Match is sent, but the job version in the response is still cached,
+ *    since a reorder bumps it.
  *
  * On 412 Precondition Failed responses, the ConcurrencyConflictService is
  * notified so the UI can prompt the user to reload.
@@ -37,12 +45,12 @@ export const etagInterceptor: HttpInterceptorFn = (req, next) => {
   const cache = inject(ETagCacheService);
   const conflict = inject(ConcurrencyConflictService);
 
-  // Build a stable cache key from the URL path (strip query string).
-  const key = resourceKey(req.url);
+  const path = requestPath(req.url);
+  const key = path === null ? null : recordKey(path);
 
-  // Inject If-Match for mutating requests if we have a cached value.
   let outbound: HttpRequest<unknown> = req;
-  if (key && (req.method === 'PATCH' || req.method === 'PUT' || req.method === 'DELETE')) {
+  if (key && path && !UNLOCKED_PATH.test(path)
+    && (req.method === 'PATCH' || req.method === 'PUT' || req.method === 'DELETE')) {
     const etag = cache.get(key);
     if (etag && !req.headers.has('If-Match')) {
       outbound = req.clone({ setHeaders: { 'If-Match': etag } });
@@ -62,7 +70,7 @@ export const etagInterceptor: HttpInterceptorFn = (req, next) => {
           // Some endpoints embed rowVersion in the body — capture that too.
           const body = resp.body as { id?: number; rowVersion?: number | string } | null | undefined;
           if (body && typeof body === 'object' && body.rowVersion !== undefined && body.rowVersion !== null) {
-            const rvKey = bodyResourceKey(req.url, resp, body);
+            const rvKey = bodyResourceKey(req.url, body);
             if (rvKey) {
               cache.set(rvKey, `"${body.rowVersion}"`);
             }
@@ -82,11 +90,11 @@ export const etagInterceptor: HttpInterceptorFn = (req, next) => {
   );
 };
 
-function resourceKey(url: string): string | null {
+const UNLOCKED_PATH = /\/jobs\/\d+\/position\/?$/;
+
+function requestPath(url: string): string | null {
   if (!url) return null;
-  // Strip query string + protocol.
   const noQuery = url.split('?')[0];
-  // For absolute URLs, strip host portion.
   try {
     const u = new URL(noQuery, 'http://placeholder.local');
     return u.pathname;
@@ -95,20 +103,35 @@ function resourceKey(url: string): string | null {
   }
 }
 
+function lastIdIndex(segments: string[]): number {
+  for (let i = segments.length - 1; i >= 0; i--) {
+    if (/^\d+$/.test(segments[i])) return i;
+  }
+  return -1;
+}
+
+function recordKey(path: string): string {
+  const segments = path.split('/');
+  const idIndex = lastIdIndex(segments);
+  return idIndex < 0 ? path : segments.slice(0, idIndex + 1).join('/');
+}
+
 /**
- * On a POST that creates a resource, the response body's id can be appended
- * to the request URL to form the canonical resource key for future
- * PATCH/PUT/DELETE.
+ * The key a response body's rowVersion is filed under. A path ending in an
+ * id is the record itself. A path that carries an id followed by an action
+ * (e.g. /jobs/20/stage) maps to the record when the body is that record,
+ * and stays as is otherwise. On a POST that creates a resource, the
+ * response body's id is appended to the request URL.
  */
-function bodyResourceKey(
-  reqUrl: string,
-  resp: HttpResponse<unknown>,
-  body: { id?: number },
-): string | null {
-  const base = resourceKey(reqUrl);
+function bodyResourceKey(reqUrl: string, body: { id?: number }): string | null {
+  const base = requestPath(reqUrl);
   if (!base) return null;
-  // If the URL already ends with /<id> or /<id>/something, just use it.
-  if (/\/\d+(\/.*)?$/.test(base)) return base;
+  const segments = base.split('/');
+  const idIndex = lastIdIndex(segments);
+  if (idIndex === segments.length - 1) return base;
+  if (idIndex >= 0) {
+    return body.id === Number(segments[idIndex]) ? recordKey(base) : base;
+  }
   if (typeof body.id === 'number' && body.id > 0) {
     const sep = base.endsWith('/') ? '' : '/';
     return `${base}${sep}${body.id}`;

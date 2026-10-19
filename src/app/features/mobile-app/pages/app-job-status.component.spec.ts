@@ -131,6 +131,21 @@ describe('AppJobStatusComponent advancing', () => {
     expect(api.advanceJob).toHaveBeenCalledWith(42, null, null, true);
   });
 
+  it('undoes the move with the job version the advance returned, not one read before it', async () => {
+    confirmMove.needed.mockReturnValue(false);
+    api.advanceJob.mockReturnValue(of({
+      status: { ...status, stageName: 'Invoiced', rowVersion: 7 }, previousStageId: 5, previousStageName: 'Shipped', collapsed: false,
+    }));
+    api.moveJobToStage.mockReturnValue(of(status));
+    const page = create();
+
+    page.advance();
+    await vi.waitFor(() => expect(offer).toHaveBeenCalledOnce());
+    await offer.mock.calls[0][1]();
+
+    expect(api.moveJobToStage).toHaveBeenCalledWith(42, 5, undefined, 7);
+  });
+
   it('reloads and says so when the server wants a confirmation the page did not know about', async () => {
     confirmMove.needed.mockReturnValue(false);
     confirmMove.isConfirmRequired.mockReturnValue(true);
