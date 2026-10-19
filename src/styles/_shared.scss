@@ -433,6 +433,7 @@
   }
 
   &__right { text-align: right; }
+  th.lines-table__right, td.lines-table__right { text-align: right; font-variant-numeric: tabular-nums; }
   &__mono { font-family: $font-family-mono; font-size: var(--font-size-xs); }
   &__bold { font-weight: 700; }
 }

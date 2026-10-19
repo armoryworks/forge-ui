@@ -21,14 +21,16 @@ const DETAIL = {
 interface PanelInternals {
   shipment: WritableSignal<ShipmentDetail | null>;
   markShipped(): void;
+  cancelShipment(): void;
 }
 
 function setup(dialogResult: unknown) {
   const shipShipment = vi.fn(() => of(undefined));
+  const cancelShipment = vi.fn(() => of(undefined));
   const open = vi.fn((_component: unknown) => ({ afterClosed: () => of(dialogResult) }));
   TestBed.configureTestingModule({
     providers: [
-      { provide: ShipmentService, useValue: { shipShipment, getShipmentById: vi.fn(() => of(DETAIL)) } },
+      { provide: ShipmentService, useValue: { shipShipment, cancelShipment, getShipmentById: vi.fn(() => of(DETAIL)) } },
       { provide: MatDialog, useValue: { open } },
       { provide: SnackbarService, useValue: { success: vi.fn(), errorFrom: vi.fn() } },
       { provide: TranslateService, useValue: { instant: (key: string) => key } },
@@ -36,7 +38,7 @@ function setup(dialogResult: unknown) {
   });
   const component = TestBed.runInInjectionContext(() => new ShipmentDetailPanelComponent());
   mockSignalInputs(component, { shipmentId: 7 });
-  return { panel: component as unknown as PanelInternals, shipShipment, open };
+  return { panel: component as unknown as PanelInternals, shipShipment, cancelShipment, open };
 }
 
 describe('ShipmentDetailPanelComponent markShipped', () => {
@@ -69,5 +71,28 @@ describe('ShipmentDetailPanelComponent markShipped', () => {
 
     expect(open.mock.calls[0][0]).toBe(ConfirmDialogComponent);
     expect(shipShipment).toHaveBeenCalledWith(7, undefined);
+  });
+});
+
+describe('ShipmentDetailPanelComponent cancelShipment', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  it('cancels the shipment once the user confirms', () => {
+    const { panel, cancelShipment, open } = setup(true);
+    panel.shipment.set(DETAIL);
+
+    panel.cancelShipment();
+
+    expect(open.mock.calls[0][0]).toBe(ConfirmDialogComponent);
+    expect(cancelShipment).toHaveBeenCalledWith(7);
+  });
+
+  it('leaves the shipment alone when the user backs out', () => {
+    const { panel, cancelShipment } = setup(false);
+    panel.shipment.set(DETAIL);
+
+    panel.cancelShipment();
+
+    expect(cancelShipment).not.toHaveBeenCalled();
   });
 });

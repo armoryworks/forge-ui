@@ -4,4 +4,5 @@ export interface ShipmentLine {
   description: string;
   quantity: number;
   notes: string | null;
+  partNumber?: string | null;
 }

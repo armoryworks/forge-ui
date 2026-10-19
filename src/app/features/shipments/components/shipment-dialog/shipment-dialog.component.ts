@@ -100,7 +100,7 @@ export class ShipmentDialogComponent implements OnInit {
       .filter(l => this.remainingFor(l.id) > 0)
       .map(l => ({
         value: l.id,
-        label: `${l.partNumber ? l.partNumber + ' — ' : ''}${l.description} · ${this.remainingFor(l.id)} ${this.translate.instant('shipments.remainingShort')}`,
+        label: `${l.partNumber ? l.partNumber + ' — ' : ''}${l.description} · ${ShipmentDialogComponent.QTY_FORMAT.format(this.remainingFor(l.id))} ${this.translate.instant('shipments.remainingShort')}`,
       }));
   });
 
@@ -120,6 +120,7 @@ export class ShipmentDialogComponent implements OnInit {
   protected readonly weightUnit = signal<WeightUnit>('lbs');
   protected readonly weightUnits: WeightUnit[] = ['lbs', 'oz', 'kg'];
   private static readonly LBS_PER: Record<WeightUnit, number> = { lbs: 1, oz: 1 / 16, kg: 2.2046226218 };
+  private static readonly QTY_FORMAT = new Intl.NumberFormat(undefined, { maximumFractionDigits: 4 });
 
   protected setWeightUnit(unit: WeightUnit): void {
     const current = this.weightUnit();
@@ -143,6 +144,7 @@ export class ShipmentDialogComponent implements OnInit {
   ]);
   private readonly carrierIdSig = toSignal(this.shipmentForm.controls.carrierId.valueChanges, { initialValue: null });
   protected readonly selectedCarrier = computed(() => this.carriers().find(c => c.id === this.carrierIdSig()) ?? null);
+  protected readonly usesListedCarrier = computed(() => this.carrierIdSig() != null);
 
   private readonly formViolations = FormValidationService.getViolations(this.shipmentForm, {
     salesOrderId: 'Sales Order',
@@ -192,9 +194,14 @@ export class ShipmentDialogComponent implements OnInit {
       .subscribe((id) => {
         this.lines.set([]);
         this.lineForm.reset({ salesOrderLineId: null, quantity: 1 });
+        const prefill = this.prefillOrderId === id;
+        this.prefillOrderId = null;
         if (!id) { this.orderLines.set([]); return; }
         this.salesOrderService.getSalesOrderById(id).subscribe({
-          next: (order) => this.orderLines.set(order.lines ?? []),
+          next: (order) => {
+            this.orderLines.set(order.lines ?? []);
+            if (prefill) this.prefillRemainingLines();
+          },
           error: () => this.orderLines.set([]),
         });
       });
@@ -203,18 +210,43 @@ export class ShipmentDialogComponent implements OnInit {
     this.lineForm.controls.salesOrderLineId.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((lineId) => {
-        if (lineId == null) return;
-        const remaining = this.remainingFor(lineId);
-        if (remaining > 0) this.lineForm.controls.quantity.setValue(remaining);
+        const quantity = this.lineForm.controls.quantity;
+        const remaining = lineId == null ? null : this.remainingFor(lineId);
+        quantity.setValidators(remaining == null
+          ? [Validators.required, Validators.min(0.0001)]
+          : [Validators.required, Validators.min(0.0001), Validators.max(remaining)]);
+        if (remaining != null && remaining > 0) quantity.setValue(remaining);
+        else quantity.updateValueAndValidity();
+      });
+
+    this.shipmentForm.controls.carrierId.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((carrierId) => {
+        if (carrierId != null) this.shipmentForm.controls.carrier.setValue('');
       });
   }
+
+  private prefillOrderId: number | null = null;
 
   ngOnInit(): void {
     // Scoped-open: pre-select the passed sales order (valueChanges then loads its lines).
     const soId = this.initialSalesOrderId();
     if (soId != null) {
+      this.prefillOrderId = soId;
       this.shipmentForm.controls.salesOrderId.setValue(soId);
     }
+  }
+
+  private prefillRemainingLines(): void {
+    this.lines.set(this.orderLines()
+      .filter(l => l.remainingQuantity > 0)
+      .map(l => ({
+        salesOrderLineId: l.id,
+        partId: l.partId,
+        partNumber: l.partNumber ?? '',
+        description: l.description,
+        quantity: l.remainingQuantity,
+      })));
   }
 
   protected close(): void {

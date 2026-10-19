@@ -104,6 +104,7 @@
           <table class="lines-table" aria-label="Shipment line items">
             <thead>
               <tr>
+                <th scope="col">{{ 'salesOrders.partNumber' | translate }}</th>
                 <th scope="col">{{ 'common.description' | translate }}</th>
                 <th scope="col" class="lines-table__right">{{ 'common.quantity' | translate }}</th>
               </tr>
@@ -111,6 +112,7 @@
             <tbody>
               @for (line of shipment.lines; track line.id) {
                 <tr>
+                  <td class="lines-table__mono" data-testid="shipment-line-part-number">{{ line.partNumber ?? '—' }}</td>
                   <td>{{ line.description }}</td>
                   <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
                 </tr>
@@ -164,6 +166,10 @@
               {{ 'shipments.labelRequired' | translate }}
             </span>
           }
+          <button class="action-btn action-btn--danger" data-testid="shipment-cancel-btn" (click)="cancelShipment()">
+            <span class="material-icons-outlined">cancel</span>
+            {{ 'shipments.cancelShipment' | translate }}
+          </button>
         }
         @if (shipment.trackingNumber && !trackingData()) {
           <button class="action-btn" data-testid="shipment-load-tracking-btn" (click)="loadTracking()">

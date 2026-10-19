@@ -158,6 +158,30 @@ export class ShipmentDetailPanelComponent implements OnInit {
     });
   }
 
+  protected cancelShipment(): void {
+    const shipment = this.shipment();
+    if (!shipment) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('shipments.cancelShipmentTitle'),
+        message: this.translate.instant('shipments.cancelShipmentMessage', { number: shipment.shipmentNumber }),
+        confirmLabel: this.translate.instant('shipments.cancelShipment'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.shipmentService.cancelShipment(shipment.id).subscribe({
+        next: () => {
+          this.refreshDetail();
+          this.shipmentChanged.emit();
+          this.snackbar.success(this.translate.instant('shipments.shipmentCancelled'));
+        },
+        error: (err: unknown) => this.snackbar.errorFrom(err, 'shipments.cancelFailed'),
+      });
+    });
+  }
+
   protected markDelivered(): void {
     const shipment = this.shipment();
     if (!shipment) return;
