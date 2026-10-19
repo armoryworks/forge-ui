@@ -383,8 +383,8 @@
                     <td class="breaks-table__right"><app-currency-display [value]="brk.cost.ospCost" [currency]="null" /></td>
                     <td class="breaks-table__right"><app-currency-display [value]="brk.cost.nreCost" [currency]="null" /></td>
                     <td class="breaks-table__right breaks-table__total"><app-currency-display [value]="brk.cost.totalCost" [currency]="null" /></td>
-                    <td class="breaks-table__right"><app-currency-display [value]="brk.unitCost" [currency]="null" /></td>
-                    <td class="breaks-table__right breaks-table__price"><app-currency-display [value]="brk.unitPrice" [currency]="null" /></td>
+                    <td class="breaks-table__right"><app-currency-display [value]="brk.unitCost" [currency]="null" [maximumFractionDigits]="4" /></td>
+                    <td class="breaks-table__right breaks-table__price"><app-currency-display [value]="brk.unitPrice" [currency]="null" [maximumFractionDigits]="4" /></td>
                     <td class="breaks-table__right"><app-currency-display [value]="brk.extendedPrice" [currency]="null" /></td>
                     <td class="breaks-table__right breaks-table__margin">{{ marginPct(brk.effectiveMargin) }}</td>
                   </tr>
