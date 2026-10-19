@@ -5,6 +5,9 @@
     <ng-template appColumnCell="rfqNumber" let-row>
       <span class="rfq-number">{{ row.rfqNumber }}</span>
     </ng-template>
+    <ng-template appColumnCell="partDescription" let-row>
+      <span class="rfq-description" [matTooltip]="row.partDescription" matTooltipShowDelay="400">{{ row.partDescription }}</span>
+    </ng-template>
     <ng-template appColumnCell="status" let-row>
       <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
     </ng-template>

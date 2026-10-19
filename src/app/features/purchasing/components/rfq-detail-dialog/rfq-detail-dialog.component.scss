@@ -24,6 +24,7 @@
   display: flex;
   flex-direction: column;
   gap: $sp-xs;
+  min-width: 0;
 }
 
 .info-label {
@@ -34,6 +35,7 @@
 .info-value {
   font-size: $font-size-base;
   color: var(--text);
+  overflow-wrap: anywhere;
 }
 
 .info-value--link {
@@ -53,6 +55,7 @@
   font-size: $font-size-sm;
   color: var(--text-secondary);
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .rfq-detail__actions {

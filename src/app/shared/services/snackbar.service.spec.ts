@@ -133,6 +133,20 @@ describe('SnackbarService', () => {
       expect(toasts.toasts()).toEqual([]);
     });
 
+    it('passes query params and runs the before-navigate hook when the action is clicked', () => {
+      const calls: string[] = [];
+      routerSpy.navigate.mockImplementation(() => { calls.push('navigate'); return Promise.resolve(true); });
+      service.successWithNav('RFQ awarded', '/purchase-orders/orders', 'View PO', {
+        queryParams: { detail: 'purchase-order:8' },
+        beforeNavigate: () => calls.push('before'),
+      });
+
+      actionSubject.next();
+
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/purchase-orders/orders'], { queryParams: { detail: 'purchase-order:8' } });
+      expect(calls).toEqual(['before', 'navigate']);
+    });
+
     it('should not navigate if action is not clicked', () => {
       service.successWithNav('Job created', '/jobs/42', 'View Job');
 

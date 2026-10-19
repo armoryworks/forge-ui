@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { DatePipe } from '@angular/common';
 
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
@@ -13,7 +14,7 @@ import { RfqListItem } from '../../models/rfq.model';
 @Component({
   selector: 'app-rfq-list',
   standalone: true,
-  imports: [DatePipe, DateOnlyPipe, TranslatePipe, DataTableComponent, ColumnCellDirective, LoadingBlockDirective],
+  imports: [DatePipe, DateOnlyPipe, TranslatePipe, DataTableComponent, ColumnCellDirective, LoadingBlockDirective, MatTooltipModule],
   templateUrl: './rfq-list.component.html',
   styleUrl: './rfq-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
