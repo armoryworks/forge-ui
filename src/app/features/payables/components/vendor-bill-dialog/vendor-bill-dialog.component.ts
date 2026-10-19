@@ -26,7 +26,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ActiveCurrencyService } from '../../../../shared/services/active-currency.service';
 import { ActiveCurrency } from '../../../../shared/models/active-currency.model';
 import { toIsoDate, todayEnd } from '../../../../shared/utils/date.utils';
-import { MONEY_DECIMALS, UNIT_DECIMALS } from '../../../../shared/utils/money';
+import { MONEY_DECIMALS, roundMoney, UNIT_DECIMALS } from '../../../../shared/utils/money';
 import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 
 /** Static (non-form) metadata for one billable PO line row. */
@@ -193,7 +193,7 @@ export class VendorBillDialogComponent {
     { initialValue: this.billForm.controls.taxAmount.value ?? 0 },
   );
 
-  protected readonly grandTotal = computed(() => this.linesTotal() + (this.taxAmountValue() ?? 0));
+  protected readonly grandTotal = computed(() => roundMoney(this.linesTotal() + (this.taxAmountValue() ?? 0)));
 
   /** Lines that would actually be submitted (PO rows with qty 0 are omitted). */
   protected readonly activeLineCount = computed(() => {
