@@ -479,7 +479,7 @@ export class LeadsComponent implements OnInit {
     this.saving.set(false);
     this.showBulkAssignDialog.set(false);
     if (errors === 0) {
-      this.snackbar.success(this.translate.instant('leads.bulkAssignSuccess', { count: total }));
+      this.snackbar.success(this.translate.instant(total === 1 ? 'leads.bulkAssignSuccessOne' : 'leads.bulkAssignSuccessOther', { count: total }));
     } else if (errors < total) {
       this.snackbar.error(this.translate.instant('leads.bulkAssignPartial', {
         ok: total - errors, total,

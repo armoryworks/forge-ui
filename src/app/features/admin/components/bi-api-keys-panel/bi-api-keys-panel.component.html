@@ -1,7 +1,7 @@
 <div class="bi-api-keys-panel">
   <div class="panel-header">
     <span class="panel-header__count">
-      {{ keys().length }} {{ 'adminPanels.biApiKeys.headerCount' | translate }}
+      {{ (keys().length === 1 ? 'adminPanels.biApiKeys.headerCountOne' : 'adminPanels.biApiKeys.headerCountOther') | translate: { count: keys().length } }}
     </span>
     <span class="bi-api-keys-panel__spacer"></span>
     <button class="action-btn action-btn--create"

@@ -2874,12 +2874,14 @@
     "bulkSelected": "{{ count }} selected",
     "bulkAssign": "Assign…",
     "bulkAssignTitle": "Assign leads",
-    "bulkAssignHint": "{{ count }} lead(s) selected. Pick an owner, an account, or both; \"Keep current\" leaves that field as it is. Pick \"— None —\" as the account to unaffiliate.",
+    "bulkAssignHintOne": "1 lead selected. Pick an owner, an account, or both; \"Keep current\" leaves that field as it is. Pick \"— None —\" as the account to unaffiliate.",
+    "bulkAssignHintOther": "{{count}} leads selected. Pick an owner, an account, or both; \"Keep current\" leaves that field as it is. Pick \"— None —\" as the account to unaffiliate.",
     "bulkKeepCurrent": "Keep current",
     "owner": "Owner",
     "ownerUnassigned": "— Unassigned —",
     "bulkAssignConfirm": "Assign",
-    "bulkAssignSuccess": "{{ count }} lead(s) assigned.",
+    "bulkAssignSuccessOne": "1 lead assigned.",
+    "bulkAssignSuccessOther": "{{count}} leads assigned.",
     "bulkAssignPartial": "Assigned {{ ok }} of {{ total }} — some failed. Check the activity log for details.",
     "bulkAssignFailed": "Bulk assign failed.",
     "companyName": "Company Name",
@@ -4652,11 +4654,13 @@
     "users": "Users"
   },
   "aiAssistants": {
-    "assistants": "assistants",
+    "assistantCountOne": "{{count}} assistant",
+    "assistantCountOther": "{{count}} assistants",
     "newAssistant": "New Assistant",
     "noAssistants": "No AI assistants configured",
     "builtIn": "Built-in",
-    "types": "types",
+    "typeCountOne": "{{count}} type",
+    "typeCountOther": "{{count}} types",
     "colName": "Name",
     "colCategory": "Category",
     "colEntityFilters": "Entity Filters",
@@ -6363,7 +6367,8 @@
     "editCycle": "Edit Cycle",
     "newPlanningCycle": "New Planning Cycle",
     "backlog": "Backlog",
-    "jobs": "jobs",
+    "jobCountOne": "{{count}} job",
+    "jobCountOther": "{{count}} jobs",
     "searchPlaceholder": "Search jobs...",
     "commitToCycle": "Commit to cycle",
     "noAvailableJobs": "No available jobs",
@@ -8773,7 +8778,8 @@
   },
   "adminPanels": {
     "biApiKeys": {
-      "headerCount": "keys",
+      "headerCountOne": "{{count}} key",
+      "headerCountOther": "{{count}} keys",
       "newKey": "New API Key",
       "noKeys": "No BI API keys issued yet",
       "issueButton": "Issue Key",
@@ -8811,7 +8817,8 @@
       }
     },
     "connections": {
-      "headerCount": "connections",
+      "headerCountOne": "{{count}} connection",
+      "headerCountOther": "{{count}} connections",
       "lede": "Federated read-only view of every credential and connection issued or accepted by this install. Click Manage on any row to go to its native admin surface.",
       "noRows": "No integrations connected yet",
       "capabilityDisabledTitle": "Capability disabled",
@@ -8837,7 +8844,8 @@
       }
     },
     "systemApiKeys": {
-      "headerCount": "keys",
+      "headerCountOne": "{{count}} key",
+      "headerCountOther": "{{count}} keys",
       "newKey": "New System API Key",
       "noKeys": "No system API keys issued yet",
       "issueButton": "Issue Key",

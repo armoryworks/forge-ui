@@ -12,7 +12,7 @@
     <div class="backlog-panel">
       <div class="backlog-panel__header">
         <h3 class="backlog-panel__title">{{ 'planning.backlog' | translate }}</h3>
-        <span class="backlog-panel__count">{{ filteredBacklog().length }} {{ 'planning.jobs' | translate }}</span>
+        <span class="backlog-panel__count">{{ (filteredBacklog().length === 1 ? 'planning.jobCountOne' : 'planning.jobCountOther') | translate: { count: filteredBacklog().length } }}</span>
       </div>
 
       <div class="backlog-panel__filters">

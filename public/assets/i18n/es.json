@@ -2874,12 +2874,14 @@
     "bulkSelected": "{{ count }} seleccionados",
     "bulkAssign": "Asignar…",
     "bulkAssignTitle": "Asignar leads",
-    "bulkAssignHint": "{{ count }} lead(s) seleccionados. Elige un responsable, una cuenta o ambos; \"Mantener actual\" deja ese campo como está. Elige \"— Ninguno —\" como cuenta para desafiliar.",
+    "bulkAssignHintOne": "1 lead seleccionado. Elige un responsable, una cuenta o ambos; \"Mantener actual\" deja ese campo como está. Elige \"— Ninguno —\" como cuenta para desafiliar.",
+    "bulkAssignHintOther": "{{count}} leads seleccionados. Elige un responsable, una cuenta o ambos; \"Mantener actual\" deja ese campo como está. Elige \"— Ninguno —\" como cuenta para desafiliar.",
     "bulkKeepCurrent": "Mantener actual",
     "owner": "Responsable",
     "ownerUnassigned": "— Sin asignar —",
     "bulkAssignConfirm": "Asignar",
-    "bulkAssignSuccess": "{{ count }} lead(s) asignados.",
+    "bulkAssignSuccessOne": "1 lead asignado.",
+    "bulkAssignSuccessOther": "{{count}} leads asignados.",
     "bulkAssignPartial": "Asignados {{ ok }} de {{ total }} — algunos fallaron. Revisa el registro de actividad.",
     "bulkAssignFailed": "Asignación masiva fallida.",
     "companyName": "Nombre de Empresa",
@@ -4652,11 +4654,13 @@
     "users": "Usuarios"
   },
   "aiAssistants": {
-    "assistants": "asistentes",
+    "assistantCountOne": "{{count}} asistente",
+    "assistantCountOther": "{{count}} asistentes",
     "newAssistant": "Nuevo Asistente",
     "noAssistants": "Sin asistentes de IA configurados",
     "builtIn": "Integrado",
-    "types": "tipos",
+    "typeCountOne": "{{count}} tipo",
+    "typeCountOther": "{{count}} tipos",
     "colName": "Nombre",
     "colCategory": "Categoría",
     "colEntityFilters": "Filtros de Entidad",
@@ -6356,7 +6360,8 @@
     "editCycle": "Editar Ciclo",
     "newPlanningCycle": "Nuevo Ciclo de Planificación",
     "backlog": "Pendientes",
-    "jobs": "trabajos",
+    "jobCountOne": "{{count}} trabajo",
+    "jobCountOther": "{{count}} trabajos",
     "searchPlaceholder": "Buscar trabajos...",
     "commitToCycle": "Comprometer al ciclo",
     "noAvailableJobs": "No hay trabajos disponibles",
@@ -8766,7 +8771,8 @@
   },
   "adminPanels": {
     "biApiKeys": {
-      "headerCount": "claves",
+      "headerCountOne": "{{count}} clave",
+      "headerCountOther": "{{count}} claves",
       "newKey": "Nueva Clave API",
       "noKeys": "Aún no se han emitido claves API de BI",
       "issueButton": "Emitir Clave",
@@ -8804,7 +8810,8 @@
       }
     },
     "connections": {
-      "headerCount": "conexiones",
+      "headerCountOne": "{{count}} conexión",
+      "headerCountOther": "{{count}} conexiones",
       "lede": "Vista federada de sólo lectura de cada credencial y conexión emitida o aceptada por esta instalación. Haga clic en Administrar en cualquier fila para ir a su superficie administrativa nativa.",
       "noRows": "No hay integraciones conectadas todavía",
       "capabilityDisabledTitle": "Capacidad desactivada",
@@ -8830,7 +8837,8 @@
       }
     },
     "systemApiKeys": {
-      "headerCount": "claves",
+      "headerCountOne": "{{count}} clave",
+      "headerCountOther": "{{count}} claves",
       "newKey": "Nueva Clave API del Sistema",
       "noKeys": "Aún no se han emitido claves API del sistema",
       "issueButton": "Emitir Clave",
