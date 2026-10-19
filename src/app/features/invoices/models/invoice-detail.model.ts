@@ -23,4 +23,5 @@ export interface InvoiceDetail {
   lines: InvoiceLine[];
   createdAt: Date;
   updatedAt: Date;
+  rowVersion?: number;
 }

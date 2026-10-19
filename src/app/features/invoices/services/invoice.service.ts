@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -11,6 +11,8 @@ import { CreateInvoiceRequest } from '../models/create-invoice-request.model';
 import { UninvoicedJob } from '../models/uninvoiced-job.model';
 import { InvoiceSources } from '../models/invoice-sources.model';
 import { InvoiceQueueSettings } from '../models/invoice-queue-settings.model';
+import { InvoiceEmailRecipient } from '../models/invoice-email-recipient.model';
+import { SendInvoiceEmailRequest } from '../models/send-invoice-email-request.model';
 
 /** Phase 3 F7-broad / WU-22 — paged invoice list query parameters. */
 export interface InvoiceListPagedQuery extends PagedQuery {
@@ -60,10 +62,11 @@ export class InvoiceService {
 
   /**
    * Renames an invoice's business number via the dedicated endpoint. The server
-   * only permits this while the invoice is in Draft status.
+   * only permits this while the invoice is in Draft status. With a `rowVersion`
+   * the server refuses the rename (412) when someone else changed the invoice first.
    */
-  renameInvoiceNumber(id: number, invoiceNumber: string): Observable<void> {
-    return this.http.patch<void>(`${this.base}/${id}/number`, { invoiceNumber });
+  renameInvoiceNumber(id: number, invoiceNumber: string, rowVersion?: number): Observable<void> {
+    return this.http.patch<void>(`${this.base}/${id}/number`, { invoiceNumber }, { headers: ifMatch(rowVersion) });
   }
 
   sendInvoice(id: number): Observable<void> {
@@ -75,12 +78,22 @@ export class InvoiceService {
     return this.http.get(`${this.base}/${id}/pdf`, { responseType: 'blob' });
   }
 
+  /** The default recipient for the invoice email: Billing contact, then customer email, then primary contact. */
+  getEmailRecipient(id: number): Observable<InvoiceEmailRecipient> {
+    return this.http.get<InvoiceEmailRecipient>(`${this.base}/${id}/email-recipient`);
+  }
+
+  /** Emails the invoice PDF to the recipient. Only a finalized invoice can be emailed. */
+  emailInvoice(id: number, request: SendInvoiceEmailRequest): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/email`, request);
+  }
+
   voidInvoice(id: number): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/void`, {});
   }
 
-  deleteInvoice(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.base}/${id}`);
+  deleteInvoice(id: number, rowVersion?: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`, { headers: ifMatch(rowVersion) });
   }
 
   getInvoiceSources(customerId: number): Observable<InvoiceSources> {
@@ -103,4 +116,10 @@ export class InvoiceService {
   updateQueueSettings(mode: string, assignedUserId: number | null): Observable<void> {
     return this.http.put<void>(`${this.base}/queue-settings`, { mode, assignedUserId });
   }
+}
+
+function ifMatch(rowVersion: number | undefined): HttpHeaders | undefined {
+  return typeof rowVersion !== 'number'
+    ? undefined
+    : new HttpHeaders({ 'If-Match': `"${rowVersion}"` });
 }
