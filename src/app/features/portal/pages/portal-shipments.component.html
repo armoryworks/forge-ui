@@ -42,5 +42,10 @@
         </tbody>
       </table>
     </div>
+    @if (totalCount() > shipments().length) {
+      <p class="portal-list__notice" data-testid="portal-shipments-truncated">
+        {{ 'portal.list.truncated' | translate: { shown: shipments().length, total: totalCount() } }}
+      </p>
+    }
   }
 </div>

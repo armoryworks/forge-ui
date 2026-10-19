@@ -28,16 +28,17 @@
 
   &__brand {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: $sp-sm;
     flex-shrink: 0;
   }
 
   &__logo {
-    font-family: $font-family-mono;
-    font-size: $font-size-md;
-    font-weight: 700;
-    letter-spacing: 1px;
+    display: block;
+    height: 28px;
+    width: auto;
+    object-fit: contain;
+    flex-shrink: 0;
   }
 
   &__title {

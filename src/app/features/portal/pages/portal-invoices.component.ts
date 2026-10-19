@@ -21,6 +21,7 @@ export class PortalInvoicesComponent implements OnInit {
   private readonly portal = inject(PortalService);
 
   protected readonly invoices = signal<PortalInvoice[]>([]);
+  protected readonly totalCount = signal(0);
   protected readonly loading = signal(true);
   protected readonly loadError = signal(false);
 
@@ -32,7 +33,7 @@ export class PortalInvoicesComponent implements OnInit {
     this.loading.set(true);
     this.loadError.set(false);
     this.portal.getInvoices().subscribe({
-      next: (data) => { this.invoices.set(data); this.loading.set(false); },
+      next: (data) => { this.invoices.set(data.items); this.totalCount.set(data.totalCount); this.loading.set(false); },
       error: () => { this.loading.set(false); this.loadError.set(true); },
     });
   }

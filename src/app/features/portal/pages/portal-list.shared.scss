@@ -80,4 +80,10 @@
   &__error-text {
     flex: 1 1 auto;
   }
+
+  &__notice {
+    margin: $sp-sm 0 0;
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+  }
 }

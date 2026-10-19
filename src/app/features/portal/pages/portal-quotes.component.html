@@ -63,5 +63,10 @@
         </tbody>
       </table>
     </div>
+    @if (totalCount() > quotes().length) {
+      <p class="portal-list__notice" data-testid="portal-quotes-truncated">
+        {{ 'portal.list.truncated' | translate: { shown: quotes().length, total: totalCount() } }}
+      </p>
+    }
   }
 </div>

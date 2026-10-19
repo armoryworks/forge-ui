@@ -44,5 +44,10 @@
         </tbody>
       </table>
     </div>
+    @if (totalCount() > invoices().length) {
+      <p class="portal-list__notice" data-testid="portal-invoices-truncated">
+        {{ 'portal.list.truncated' | translate: { shown: invoices().length, total: totalCount() } }}
+      </p>
+    }
   }
 </div>

@@ -68,3 +68,8 @@ export interface RequestMagicLinkResult {
    *  developer click the link directly without going through email. */
   devLink: string | null;
 }
+
+export interface PortalList<T> {
+  items: T[];
+  totalCount: number;
+}

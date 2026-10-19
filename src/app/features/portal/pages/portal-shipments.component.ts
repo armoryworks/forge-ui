@@ -20,6 +20,7 @@ export class PortalShipmentsComponent implements OnInit {
   private readonly portal = inject(PortalService);
 
   protected readonly shipments = signal<PortalShipment[]>([]);
+  protected readonly totalCount = signal(0);
   protected readonly loading = signal(true);
   protected readonly loadError = signal(false);
 
@@ -31,7 +32,7 @@ export class PortalShipmentsComponent implements OnInit {
     this.loading.set(true);
     this.loadError.set(false);
     this.portal.getShipments().subscribe({
-      next: (data) => { this.shipments.set(data); this.loading.set(false); },
+      next: (data) => { this.shipments.set(data.items); this.totalCount.set(data.totalCount); this.loading.set(false); },
       error: () => { this.loading.set(false); this.loadError.set(true); },
     });
   }

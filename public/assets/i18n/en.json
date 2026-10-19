@@ -8220,7 +8220,8 @@
     },
     "list": {
       "loadError": "We couldn't load this list. Check your connection and try again.",
-      "retry": "Retry"
+      "retry": "Retry",
+      "truncated": "Showing the latest {{ shown }} of {{ total }}. Contact us for older records."
     }
   },
   "scheduling": {

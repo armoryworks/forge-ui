@@ -8213,7 +8213,8 @@
     },
     "list": {
       "loadError": "No pudimos cargar esta lista. Revisa tu conexión e inténtalo de nuevo.",
-      "retry": "Reintentar"
+      "retry": "Reintentar",
+      "truncated": "Se muestran los {{ shown }} más recientes de {{ total }}. Contáctanos para ver registros anteriores."
     }
   },
   "scheduling": {

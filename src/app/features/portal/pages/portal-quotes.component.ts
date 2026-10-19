@@ -29,6 +29,7 @@ export class PortalQuotesComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
 
   protected readonly quotes = signal<PortalQuote[]>([]);
+  protected readonly totalCount = signal(0);
   protected readonly loading = signal(true);
   protected readonly loadError = signal(false);
   protected readonly responding = signal<Set<number>>(new Set());
@@ -41,7 +42,7 @@ export class PortalQuotesComponent implements OnInit {
     this.loading.set(true);
     this.loadError.set(false);
     this.portal.getQuotes().subscribe({
-      next: (data) => { this.quotes.set(data); this.loading.set(false); },
+      next: (data) => { this.quotes.set(data.items); this.totalCount.set(data.totalCount); this.loading.set(false); },
       error: () => { this.loading.set(false); this.loadError.set(true); },
     });
   }

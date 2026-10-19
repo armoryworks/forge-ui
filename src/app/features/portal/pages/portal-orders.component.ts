@@ -22,6 +22,7 @@ export class PortalOrdersComponent implements OnInit {
   private readonly portal = inject(PortalService);
 
   protected readonly orders = signal<PortalSalesOrder[]>([]);
+  protected readonly totalCount = signal(0);
   protected readonly loading = signal(true);
   protected readonly loadError = signal(false);
 
@@ -33,7 +34,7 @@ export class PortalOrdersComponent implements OnInit {
     this.loading.set(true);
     this.loadError.set(false);
     this.portal.getSalesOrders().subscribe({
-      next: (data) => { this.orders.set(data); this.loading.set(false); },
+      next: (data) => { this.orders.set(data.items); this.totalCount.set(data.totalCount); this.loading.set(false); },
       error: () => { this.loading.set(false); this.loadError.set(true); },
     });
   }

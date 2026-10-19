@@ -75,4 +75,24 @@ describe('PortalService', () => {
     expect(req.request.context.get(SILENT_HTTP_ERRORS)).toBe(true);
     req.flush({ devLink: null });
   });
+
+  it('reads the full count of a capped list from the total-count header', () => {
+    let result: { items: unknown[]; totalCount: number } | undefined;
+    TestBed.inject(PortalService).getSalesOrders().subscribe(list => (result = list));
+
+    TestBed.inject(HttpTestingController).expectOne(r => r.url.endsWith('/portal/me/sales-orders'))
+      .flush([{ id: 1 }, { id: 2 }], { headers: { 'X-Total-Count': '250' } });
+
+    expect(result?.items.length).toBe(2);
+    expect(result?.totalCount).toBe(250);
+  });
+
+  it('falls back to the row count when the total-count header is missing', () => {
+    let result: { items: unknown[]; totalCount: number } | undefined;
+    TestBed.inject(PortalService).getQuotes().subscribe(list => (result = list));
+
+    TestBed.inject(HttpTestingController).expectOne(r => r.url.endsWith('/portal/me/quotes')).flush([{ id: 1 }]);
+
+    expect(result?.totalCount).toBe(1);
+  });
 });
