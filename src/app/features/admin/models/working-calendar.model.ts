@@ -71,4 +71,12 @@ export interface HolidayRequest {
  */
 export const WORKING_DAYS_MASK_DEFAULT = 0b0111110; // 62
 
-export const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+export const DAY_KEYS = [
+  'workingCalendars.daySun',
+  'workingCalendars.dayMon',
+  'workingCalendars.dayTue',
+  'workingCalendars.dayWed',
+  'workingCalendars.dayThu',
+  'workingCalendars.dayFri',
+  'workingCalendars.daySat',
+];

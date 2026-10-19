@@ -4766,7 +4766,9 @@
     "editLocation": "Edit Location",
     "newLocation": "New Location",
     "locationName": "Location Name",
-    "createLocation": "Create Location"
+    "createLocation": "Create Location",
+    "workingCalendar": "Working calendar",
+    "defaultCalendar": "Company default calendar"
   },
   "integrationConfigDialog": {
     "configure": "Configure",
@@ -8006,7 +8008,9 @@
       "forecastApproved": "Forecast approved",
       "scheduleCreated": "Master schedule created",
       "scheduleUpdated": "Master schedule updated",
-      "forecastGenerated": "Forecast generated"
+      "forecastGenerated": "Forecast generated",
+      "scheduleCompleted": "Schedule completed",
+      "scheduleCancelled": "Schedule cancelled"
     },
     "newMasterSchedule": "New Master Schedule",
     "newForecast": "Generate Forecast",
@@ -8094,7 +8098,13 @@
     },
     "supplySource": {
       "job": "Open work order"
-    }
+    },
+    "completeSchedule": "Complete",
+    "completeScheduleTitle": "Complete master schedule?",
+    "completeScheduleMessage": "Mark \"{{name}}\" complete? MRP stops planning its lines.",
+    "cancelSchedule": "Cancel schedule",
+    "cancelScheduleTitle": "Cancel master schedule?",
+    "cancelScheduleMessage": "Cancel \"{{name}}\"? MRP stops planning its lines."
   },
   "portal": {
     "title": "Customer Portal",
@@ -8338,7 +8348,9 @@
     "assetPlaceholder": "Search assets…",
     "team": "Owning team",
     "noTeam": "No team",
-    "create": "Create Work Center"
+    "create": "Create Work Center",
+    "idealCycleTimeSeconds": "Ideal cycle time (seconds per unit)",
+    "idealCycleTimeHint": "Fastest time to make one good unit; OEE performance compares actual run time to it."
   },
   "oee": {
     "title": "OEE Dashboard",
@@ -11840,6 +11852,61 @@
     "binOptionNoLot": "{{location}} - {{available}} available",
     "noIssuableMaterials": "This job's part has no BOM components or approved alternates to issue.",
     "noIssuableStock": "No stock of this part can be issued: it is out of stock or on quality hold."
+  },
+  "workingCalendars": {
+    "title": "Working Calendars",
+    "backToAdmin": "Back to Admin",
+    "newCalendar": "New Calendar",
+    "editCalendar": "Edit Calendar",
+    "emptyMessage": "No calendars yet",
+    "emptyHelp": "Create your first calendar to get started.",
+    "holidayCountOne": "{{count}} holiday",
+    "holidayCountOther": "{{count}} holidays",
+    "setDefault": "Set as Default",
+    "timeZone": "Time Zone",
+    "workingDays": "Working days",
+    "holidays": "Holidays",
+    "noHolidays": "No holidays configured.",
+    "observed": "Observed",
+    "recurring": "Recurring",
+    "observedDateOptional": "Observed Date (optional)",
+    "addHoliday": "Add Holiday",
+    "shifts": "Shifts",
+    "hoursPerWeek": "{{hours}} h / week",
+    "noShifts": "No shifts configured. Add one below.",
+    "days": "Days",
+    "start": "Start",
+    "end": "End",
+    "capacity": "Capacity",
+    "capacityHours": "Capacity (h)",
+    "premium": "Premium",
+    "addShift": "Add Shift",
+    "saveShift": "Save Shift",
+    "created": "Calendar created",
+    "saved": "Calendar saved",
+    "defaultUpdated": "Default calendar updated",
+    "deleteTitle": "Delete Calendar?",
+    "deleteMessage": "Delete \"{{name}}\"? This cannot be undone.",
+    "deleted": "Calendar deleted",
+    "holidayAdded": "Holiday added",
+    "removeHolidayTitle": "Remove Holiday?",
+    "removeHolidayMessage": "Remove \"{{name}}\" ({{date}})?",
+    "holidayRemoved": "Holiday removed",
+    "pickShiftDay": "Pick at least one day for the shift",
+    "shiftAdded": "Shift added",
+    "shiftUpdated": "Shift updated",
+    "removeShiftTitle": "Remove Shift?",
+    "removeShiftMessage": "Remove \"{{name}}\"?",
+    "shiftRemoved": "Shift removed",
+    "daySun": "Sun",
+    "dayMon": "Mon",
+    "dayTue": "Tue",
+    "dayWed": "Wed",
+    "dayThu": "Thu",
+    "dayFri": "Fri",
+    "daySat": "Sat",
+    "hoursShort": "{{hours}}h",
+    "multiplier": "{{value}}x"
   },
   "serials": {
     "fieldJob": "Job (optional)",

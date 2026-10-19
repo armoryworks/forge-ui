@@ -116,6 +116,14 @@ export class MrpService {
     return this.http.post<MasterSchedule>(`${this.base}/master-schedules/${id}/activate`, {});
   }
 
+  completeMasterSchedule(id: number): Observable<MasterSchedule> {
+    return this.http.post<MasterSchedule>(`${this.base}/master-schedules/${id}/complete`, {});
+  }
+
+  cancelMasterSchedule(id: number): Observable<MasterSchedule> {
+    return this.http.post<MasterSchedule>(`${this.base}/master-schedules/${id}/cancel`, {});
+  }
+
   getMpsVsActual(id: number): Observable<MpsVsActual[]> {
     return this.http.get<MpsVsActual[]>(`${this.base}/master-schedules/${id}/vs-actual`);
   }

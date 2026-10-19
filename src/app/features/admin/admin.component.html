@@ -259,13 +259,13 @@
                 <span class="material-icons-outlined">location_on</span>
                 {{ 'admin.locations' | translate }}
               </h3>
-              <button class="action-btn action-btn--create action-btn--sm" (click)="openCreateLocation()">
+              <button class="action-btn action-btn--create action-btn--sm" data-testid="locations-new-btn" (click)="openCreateLocation()">
                 <span class="material-icons-outlined">add</span>
                 {{ 'admin.newLocation' | translate }}
               </button>
             </div>
 
-            <app-data-table tableId="admin-locations" [columns]="locationColumns" [data]="companyLocations()"
+            <app-data-table tableId="admin-locations" data-testid="locations-table" [columns]="locationColumns" [data]="companyLocations()"
               emptyIcon="location_on" [emptyMessage]="'admin.noLocations' | translate">
               <ng-template appColumnCell="address" let-loc>
                 {{ loc.line1 }}{{ loc.line2 ? ', ' + loc.line2 : '' }}, {{ loc.city }}
@@ -278,15 +278,15 @@
               <ng-template appColumnCell="actions" let-loc>
                 <div class="action-cell">
                   @if (!loc.isDefault) {
-                    <button class="icon-btn" [matTooltip]="'admin.setAsDefault' | translate" matTooltipPosition="above" [attr.aria-label]="'admin.setAsDefault' | translate" (click)="setDefaultLocation(loc); $event.stopPropagation()">
+                    <button class="icon-btn" data-testid="location-set-default-btn" [matTooltip]="'admin.setAsDefault' | translate" matTooltipPosition="above" [attr.aria-label]="'admin.setAsDefault' | translate" (click)="setDefaultLocation(loc); $event.stopPropagation()">
                       <span class="material-icons-outlined">star_outline</span>
                     </button>
                   }
-                  <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" [attr.aria-label]="'admin.editLocation' | translate" (click)="openEditLocation(loc); $event.stopPropagation()">
+                  <button class="icon-btn" data-testid="location-edit-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" [attr.aria-label]="'admin.editLocation' | translate" (click)="openEditLocation(loc); $event.stopPropagation()">
                     <span class="material-icons-outlined">edit</span>
                   </button>
                   @if (!loc.isDefault) {
-                    <button class="icon-btn icon-btn--danger" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" [attr.aria-label]="'admin.deleteLocationLabel' | translate" (click)="deleteLocation(loc); $event.stopPropagation()">
+                    <button class="icon-btn icon-btn--danger" data-testid="location-delete-btn" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" [attr.aria-label]="'admin.deleteLocationLabel' | translate" (click)="deleteLocation(loc); $event.stopPropagation()">
                       <span class="material-icons-outlined">delete</span>
                     </button>
                   }

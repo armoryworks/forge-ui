@@ -105,6 +105,25 @@ describe('WorkCenterDialogComponent', () => {
     expect(emitted[0].companyLocationId).toBe(2);
   });
 
+  it('saves the ideal cycle time in seconds per unit', () => {
+    const { api, emitted } = create({ ...workCenter, idealCycleTimeSeconds: 12 });
+
+    expect(api.form.value.idealCycleTimeSeconds).toBe(12);
+    api.form.patchValue({ idealCycleTimeSeconds: 7.5 });
+    api.save();
+
+    expect(emitted[0].idealCycleTimeSeconds).toBe(7.5);
+  });
+
+  it('saves an empty ideal cycle time as not set', () => {
+    const { api, emitted } = create(null);
+    api.form.patchValue({ code: 'WC-MILL', name: 'Mill', idealCycleTimeSeconds: null });
+
+    api.save();
+
+    expect(emitted[0].idealCycleTimeSeconds).toBeNull();
+  });
+
   it('saves a deactivated work center as inactive', () => {
     const { api, emitted } = create(workCenter);
     api.form.patchValue({ isActive: false, teamId: null });

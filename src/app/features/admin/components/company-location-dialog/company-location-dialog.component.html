@@ -1,24 +1,30 @@
 <app-dialog [title]="isEdit() ? ('companyLocationDialog.editLocation' | translate) : ('companyLocationDialog.newLocation' | translate)" width="520px" [draftConfig]="draftConfig" [draftFormGroup]="form" (closed)="closed.emit()">
 
   <div [formGroup]="form">
-    <app-input [label]="'companyLocationDialog.locationName' | translate" formControlName="name" [required]="true" [maxlength]="100" />
-    <app-input [label]="'common.phone' | translate" formControlName="phone" mask="phone" />
+    <app-input [label]="'companyLocationDialog.locationName' | translate" formControlName="name" [required]="true" [maxlength]="100"
+      data-testid="location-name" />
+    <app-input [label]="'common.phone' | translate" formControlName="phone" mask="phone" data-testid="location-phone" />
 
     <app-address-form
       formControlName="address"
+      data-testid="location-address"
       [showVerify]="false"
       [fixedCountry]="'US'"
       [compact]="true" />
 
+    <app-select [label]="'companyLocationDialog.workingCalendar' | translate" formControlName="workingCalendarId"
+      [options]="calendarOptions()" data-testid="location-calendar" />
+
     @if (isEdit()) {
-      <app-toggle [label]="'common.active' | translate" formControlName="isActive" />
+      <app-toggle [label]="'common.active' | translate" formControlName="isActive" data-testid="location-active" />
     }
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="closed.emit()">{{ 'common.cancel' | translate }}</button>
+    <button class="action-btn" data-testid="location-cancel-btn" (click)="closed.emit()">{{ 'common.cancel' | translate }}</button>
     <app-validation-button [violations]="violations" [loading]="saving()">
     <button class="action-btn action-btn--primary"
+      data-testid="location-save-btn"
       [disabled]="form.invalid || saving()"
       (click)="save()">
       <span class="material-icons-outlined">save</span>

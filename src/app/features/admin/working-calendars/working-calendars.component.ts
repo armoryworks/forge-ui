@@ -3,7 +3,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
 import { InputComponent } from '../../../shared/components/input/input.component';
@@ -21,7 +21,7 @@ import { toDateOnly } from '../../../shared/utils/date.utils';
 import { WorkingCalendarsService } from '../services/working-calendars.service';
 import {
   CalendarShift,
-  DAY_NAMES,
+  DAY_KEYS,
   Holiday,
   WORKING_DAYS_MASK_DEFAULT,
   WorkingCalendar,
@@ -51,6 +51,7 @@ export class WorkingCalendarsComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
 
   protected readonly calendars = signal<WorkingCalendar[]>([]);
   protected readonly loading = signal(false);
@@ -69,13 +70,15 @@ export class WorkingCalendarsComponent {
   });
 
   protected readonly calendarViolations = FormValidationService.getViolations(this.calendarForm, {
-    name: 'Name', timeZone: 'Time Zone', workingDaysMask: 'Working Days',
+    name: this.translate.instant('common.name'),
+    timeZone: this.translate.instant('workingCalendars.timeZone'),
+    workingDaysMask: this.translate.instant('workingCalendars.workingDays'),
   });
 
   // Day-of-week toggles — stored as 7 bits, edited as 7 booleans.
   protected readonly dayBits = signal<boolean[]>([false, true, true, true, true, true, false]); // Mon-Fri
 
-  protected readonly dayNames = DAY_NAMES;
+  protected readonly dayKeys = DAY_KEYS;
 
   // Holiday form
   protected readonly holidayForm = new FormGroup({
@@ -86,7 +89,8 @@ export class WorkingCalendarsComponent {
   });
 
   protected readonly holidayViolations = FormValidationService.getViolations(this.holidayForm, {
-    date: 'Date', name: 'Name',
+    date: this.translate.instant('common.date'),
+    name: this.translate.instant('common.name'),
   });
 
   // Shifts effort — calendar-bound shifts. Inline edit/add panel below the
@@ -105,8 +109,11 @@ export class WorkingCalendarsComponent {
   });
 
   protected readonly shiftViolations = FormValidationService.getViolations(this.shiftForm, {
-    name: 'Name', startTime: 'Start Time', endTime: 'End Time',
-    premiumMultiplier: 'Premium Multiplier', capacityHours: 'Capacity Hours',
+    name: this.translate.instant('common.name'),
+    startTime: this.translate.instant('workingCalendars.start'),
+    endTime: this.translate.instant('workingCalendars.end'),
+    premiumMultiplier: this.translate.instant('workingCalendars.premium'),
+    capacityHours: this.translate.instant('workingCalendars.capacityHours'),
   });
 
   // Common timezones; admins typing a custom IANA tz are still accepted by
@@ -207,7 +214,7 @@ export class WorkingCalendarsComponent {
       : this.service.update(id, v);
     op.subscribe({
       next: (saved) => {
-        this.snackbar.success(id == null ? 'Calendar created' : 'Calendar saved');
+        this.snackbar.success(this.translate.instant(id == null ? 'workingCalendars.created' : 'workingCalendars.saved'));
         this.saving.set(false);
         this.load();
         this.selectedId.set(saved.id);
@@ -221,7 +228,7 @@ export class WorkingCalendarsComponent {
     if (id == null) return;
     this.service.setDefault(id).subscribe({
       next: () => {
-        this.snackbar.success('Default calendar updated');
+        this.snackbar.success(this.translate.instant('workingCalendars.defaultUpdated'));
         this.load();
       },
     });
@@ -233,16 +240,16 @@ export class WorkingCalendarsComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
-        title: 'Delete Calendar?',
-        message: `Delete "${sel.name}"? This cannot be undone.`,
-        confirmLabel: 'Delete',
+        title: this.translate.instant('workingCalendars.deleteTitle'),
+        message: this.translate.instant('workingCalendars.deleteMessage', { name: sel.name }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe((confirmed) => {
       if (!confirmed) return;
       this.service.delete(sel.id).subscribe({
         next: () => {
-          this.snackbar.success('Calendar deleted');
+          this.snackbar.success(this.translate.instant('workingCalendars.deleted'));
           this.selectedId.set(null);
           this.load();
         },
@@ -263,7 +270,7 @@ export class WorkingCalendarsComponent {
       isRecurring: v.isRecurring,
     }).subscribe({
       next: () => {
-        this.snackbar.success('Holiday added');
+        this.snackbar.success(this.translate.instant('workingCalendars.holidayAdded'));
         this.holidayForm.reset({ date: null, name: '', observedDate: null, isRecurring: false });
         this.load();
       },
@@ -276,15 +283,15 @@ export class WorkingCalendarsComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Remove Holiday?',
-        message: `Remove "${holiday.name}" (${holiday.date})?`,
-        confirmLabel: 'Remove',
+        title: this.translate.instant('workingCalendars.removeHolidayTitle'),
+        message: this.translate.instant('workingCalendars.removeHolidayMessage', { name: holiday.name, date: holiday.date }),
+        confirmLabel: this.translate.instant('common.remove'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe((confirmed) => {
       if (!confirmed) return;
       this.service.deleteHoliday(sel.id, holiday.id).subscribe({
-        next: () => { this.snackbar.success('Holiday removed'); this.load(); },
+        next: () => { this.snackbar.success(this.translate.instant('workingCalendars.holidayRemoved')); this.load(); },
       });
     });
   }
@@ -333,7 +340,7 @@ export class WorkingCalendarsComponent {
     let mask = 0;
     this.shiftDayBits().forEach((on, i) => { if (on) mask |= (1 << i); });
     if (mask === 0) {
-      this.snackbar.error('Pick at least one day for the shift');
+      this.snackbar.error(this.translate.instant('workingCalendars.pickShiftDay'));
       return;
     }
     const body = {
@@ -352,7 +359,7 @@ export class WorkingCalendarsComponent {
       : this.service.updateShift(sel.id, id, body);
     op.subscribe({
       next: () => {
-        this.snackbar.success(id == null ? 'Shift added' : 'Shift updated');
+        this.snackbar.success(this.translate.instant(id == null ? 'workingCalendars.shiftAdded' : 'workingCalendars.shiftUpdated'));
         this.resetShiftForm();
         this.select(sel.id);
       },
@@ -365,16 +372,16 @@ export class WorkingCalendarsComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Remove Shift?',
-        message: `Remove "${shift.name}"?`,
-        confirmLabel: 'Remove',
+        title: this.translate.instant('workingCalendars.removeShiftTitle'),
+        message: this.translate.instant('workingCalendars.removeShiftMessage', { name: shift.name }),
+        confirmLabel: this.translate.instant('common.remove'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe((confirmed) => {
       if (!confirmed) return;
       this.service.deleteShift(sel.id, shift.id).subscribe({
         next: () => {
-          this.snackbar.success('Shift removed');
+          this.snackbar.success(this.translate.instant('workingCalendars.shiftRemoved'));
           if (this.editingShiftId() === shift.id) this.resetShiftForm();
           this.select(sel.id);
         },
@@ -389,6 +396,6 @@ export class WorkingCalendarsComponent {
 
   /** Pretty render for the shift's day mask in the list (e.g. "M T W T F"). */
   protected renderMask(mask: number): string {
-    return DAY_NAMES.map((n, i) => (mask & (1 << i)) !== 0 ? n[0] : '·').join(' ');
+    return DAY_KEYS.map((key, i) => (mask & (1 << i)) !== 0 ? String(this.translate.instant(key)).charAt(0) : '·').join(' ');
   }
 }

@@ -247,6 +247,20 @@
             <span class="material-icons-outlined">play_arrow</span>
           </button>
         }
+        @if (row.status === 'Active') {
+          <button class="icon-btn" data-testid="mps-complete-btn"
+            [attr.aria-label]="'mrp.completeSchedule' | translate" [title]="'mrp.completeSchedule' | translate"
+            (click)="completeSchedule(row)">
+            <span class="material-icons-outlined">task_alt</span>
+          </button>
+        }
+        @if (row.status === 'Draft' || row.status === 'Active') {
+          <button class="icon-btn icon-btn--danger" data-testid="mps-cancel-btn"
+            [attr.aria-label]="'mrp.cancelSchedule' | translate" [title]="'mrp.cancelSchedule' | translate"
+            (click)="cancelSchedule(row)">
+            <span class="material-icons-outlined">block</span>
+          </button>
+        }
         @if (row.status === 'Active' || row.status === 'Completed') {
           <button class="icon-btn"
             [attr.aria-label]="'mrp.mpsActual.title' | translate" [title]="'mrp.mpsActual.title' | translate"

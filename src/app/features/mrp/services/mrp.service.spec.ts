@@ -137,6 +137,22 @@ describe('MrpService', () => {
     });
   });
 
+  describe('closing a master schedule', () => {
+    it('should POST to /mrp/master-schedules/{id}/complete', () => {
+      service.completeMasterSchedule(4).subscribe();
+      const req = httpMock.expectOne(`${base}/master-schedules/4/complete`);
+      expect(req.request.method).toBe('POST');
+      req.flush({});
+    });
+
+    it('should POST to /mrp/master-schedules/{id}/cancel', () => {
+      service.cancelMasterSchedule(4).subscribe();
+      const req = httpMock.expectOne(`${base}/master-schedules/4/cancel`);
+      expect(req.request.method).toBe('POST');
+      req.flush({});
+    });
+  });
+
   describe('getForecasts', () => {
     it('should GET /mrp/forecasts without partId', () => {
       service.getForecasts().subscribe();

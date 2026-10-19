@@ -1,29 +1,34 @@
-import { ChangeDetectionStrategy, Component, input, output, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal, ViewChild } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
+import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { AddressFormComponent } from '../../../../shared/components/address-form/address-form.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { CompanyLocation } from '../../models/company-location.model';
 import { Address } from '../../../../shared/models/address.model';
+import { WorkingCalendarsService } from '../../services/working-calendars.service';
 
 @Component({
   selector: 'app-company-location-dialog',
   standalone: true,
   imports: [
-    ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, ToggleComponent,
+    ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, ToggleComponent, SelectComponent,
     AddressFormComponent, ValidationButtonComponent,
   ],
   templateUrl: './company-location-dialog.component.html',
   styleUrl: './company-location-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CompanyLocationDialogComponent {
+export class CompanyLocationDialogComponent implements OnInit {
+  private readonly calendars = inject(WorkingCalendarsService);
+  private readonly translate = inject(TranslateService);
+
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
 
   readonly location = input<CompanyLocation | null>(null);
@@ -31,7 +36,7 @@ export class CompanyLocationDialogComponent {
   readonly closed = output<void>();
   readonly saved = output<Partial<CompanyLocation>>();
 
-  protected readonly draftConfig: DraftConfig = {
+  protected draftConfig: DraftConfig = {
     entityType: 'company-location',
     entityId: 'new',
     route: '/admin?tab=settings',
@@ -42,15 +47,18 @@ export class CompanyLocationDialogComponent {
     phone: new FormControl(''),
     isActive: new FormControl(true),
     address: new FormControl<Address | null>(null),
+    workingCalendarId: new FormControl<number | null>(null),
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
-    name: 'Location Name',
+    name: this.translate.instant('companyLocationDialog.locationName'),
   });
+
+  protected readonly calendarOptions = signal<SelectOption[]>([this.defaultCalendarOption()]);
 
   protected readonly isEdit = signal(false);
 
-  constructor() {
+  ngOnInit(): void {
     const loc = this.location();
     if (loc) {
       this.isEdit.set(true);
@@ -59,6 +67,7 @@ export class CompanyLocationDialogComponent {
         name: loc.name,
         phone: loc.phone ?? '',
         isActive: loc.isActive,
+        workingCalendarId: loc.workingCalendarId ?? null,
         address: {
           line1: loc.line1,
           line2: loc.line2 ?? undefined,
@@ -69,6 +78,15 @@ export class CompanyLocationDialogComponent {
         },
       });
     }
+
+    this.calendars.list().subscribe({
+      next: (list) => this.calendarOptions.set([
+        this.defaultCalendarOption(),
+        ...list
+          .filter(c => c.isActive || c.id === this.form.controls.workingCalendarId.value)
+          .map(c => ({ value: c.id, label: `${c.name} (${c.timeZone})` })),
+      ]),
+    });
   }
 
   protected save(): void {
@@ -88,6 +106,11 @@ export class CompanyLocationDialogComponent {
       state: addr?.state ?? '',
       postalCode: addr?.postalCode ?? '',
       country: addr?.country ?? 'US',
+      workingCalendarId: v.workingCalendarId ?? null,
     });
+  }
+
+  private defaultCalendarOption(): SelectOption {
+    return { value: null, label: this.translate.instant('companyLocationDialog.defaultCalendar') };
   }
 }

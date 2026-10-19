@@ -62,6 +62,7 @@ export class WorkCenterDialogComponent implements OnInit {
     sortOrder: new FormControl<number | null>(0),
     assetId: new FormControl<number | null>(null),
     teamId: new FormControl<number | null>(null),
+    idealCycleTimeSeconds: new FormControl<number | null>(null, [Validators.min(0.001)]),
     isActive: new FormControl(true),
   });
 
@@ -71,6 +72,7 @@ export class WorkCenterDialogComponent implements OnInit {
     dailyCapacityHours: 'Daily Capacity (hours)',
     efficiencyPercent: 'Efficiency %',
     numberOfMachines: 'Number of Machines',
+    idealCycleTimeSeconds: this.translate.instant('workCenterDialog.idealCycleTimeSeconds'),
   });
 
   protected readonly isEdit = signal(false);
@@ -104,6 +106,7 @@ export class WorkCenterDialogComponent implements OnInit {
         sortOrder: wc.sortOrder,
         assetId: wc.assetId ?? null,
         teamId: wc.teamId ?? null,
+        idealCycleTimeSeconds: wc.idealCycleTimeSeconds ?? null,
         isActive: wc.isActive,
       });
     }
@@ -130,6 +133,7 @@ export class WorkCenterDialogComponent implements OnInit {
       sortOrder: v.sortOrder ?? 0,
       assetId: v.assetId ?? null,
       teamId: v.teamId ?? null,
+      idealCycleTimeSeconds: v.idealCycleTimeSeconds || null,
       isActive: v.isActive ?? true,
       companyLocationId: existing?.companyLocationId ?? null,
     });

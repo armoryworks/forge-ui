@@ -23,6 +23,10 @@
       <app-input [label]="'workCenterDialog.sortOrder' | translate" type="number" formControlName="sortOrder" />
     </div>
 
+    <app-input data-testid="work-center-ideal-cycle" [label]="'workCenterDialog.idealCycleTimeSeconds' | translate"
+      type="number" formControlName="idealCycleTimeSeconds" step="0.1" min="0"
+      [info]="'workCenterDialog.idealCycleTimeHint' | translate" />
+
     <div class="dialog-row">
       <app-currency-input [label]="'workCenterDialog.laborCostPerHour' | translate" formControlName="laborCostPerHour" />
       <app-currency-input [label]="'workCenterDialog.burdenRatePerHour' | translate" formControlName="burdenRatePerHour" />
