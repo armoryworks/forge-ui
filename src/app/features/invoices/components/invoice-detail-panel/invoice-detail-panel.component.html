@@ -169,12 +169,18 @@
           <span class="material-icons-outlined" aria-hidden="true">picture_as_pdf</span>
           {{ 'invoices.downloadPdf' | translate }}
         </button>
+        @if (canEmail()) {
+          <button class="action-btn" type="button" data-testid="invoice-email-btn" (click)="emailInvoice()">
+            <span class="material-icons-outlined" aria-hidden="true">mail</span>
+            {{ 'invoices.emailInvoice' | translate }}
+          </button>
+        }
         <a class="action-btn" routerLink="/shipping">
           <span class="material-icons-outlined">local_shipping</span>
           {{ 'shipping.ship' | translate }}
         </a>
         @if (canSend(inv.status)) {
-          <button class="action-btn action-btn--primary" (click)="sendInvoice()">
+          <button class="action-btn action-btn--primary" data-testid="invoice-finalize-btn" (click)="sendInvoice()">
             <span class="material-icons-outlined">send</span>
             {{ 'invoices.send' | translate }}
           </button>

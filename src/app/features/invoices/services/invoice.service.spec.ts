@@ -161,4 +161,37 @@ describe('InvoiceService', () => {
       expect(received).toBeInstanceOf(Blob);
     });
   });
+  describe('concurrency and email', () => {
+    it('sends If-Match with the version on rename and delete', () => {
+      service.renameInvoiceNumber(7, 'INV-0100', 4).subscribe();
+      const rename = httpMock.expectOne(`${base}/7/number`);
+      expect(rename.request.method).toBe('PATCH');
+      expect(rename.request.headers.get('If-Match')).toBe('"4"');
+      rename.flush(null);
+
+      service.deleteInvoice(7, 4).subscribe();
+      const del = httpMock.expectOne(`${base}/7`);
+      expect(del.request.method).toBe('DELETE');
+      expect(del.request.headers.get('If-Match')).toBe('"4"');
+      del.flush(null);
+    });
+
+    it('sends no If-Match when no version is known', () => {
+      service.deleteInvoice(7).subscribe();
+      const del = httpMock.expectOne(`${base}/7`);
+      expect(del.request.headers.has('If-Match')).toBe(false);
+      del.flush(null);
+    });
+
+    it('reads the default recipient and posts the email', () => {
+      service.getEmailRecipient(7).subscribe();
+      httpMock.expectOne(`${base}/7/email-recipient`).flush({ email: 'ap@buyer.test', source: 'customer', contactName: null });
+
+      service.emailInvoice(7, { recipientEmail: 'ap@buyer.test' }).subscribe();
+      const post = httpMock.expectOne(`${base}/7/email`);
+      expect(post.request.method).toBe('POST');
+      expect(post.request.body).toEqual({ recipientEmail: 'ap@buyer.test' });
+      post.flush(null);
+    });
+  });
 });

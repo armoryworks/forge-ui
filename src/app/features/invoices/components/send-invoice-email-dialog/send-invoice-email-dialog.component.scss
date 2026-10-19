@@ -1,0 +1,18 @@
+@use 'styles/variables' as *;
+
+.send-invoice-email {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.send-invoice-email__context,
+.send-invoice-email__source {
+  margin: 0;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}
+
+.send-invoice-email__source--missing {
+  color: var(--warning);
+}

@@ -22,6 +22,11 @@ import { NumberLockInfoComponent } from '../../../../shared/components/number-lo
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 import { downloadBlob } from '../../../../shared/utils/download-blob';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
+import { SendInvoiceEmailDialogComponent } from '../send-invoice-email-dialog/send-invoice-email-dialog.component';
+import { SendInvoiceEmailDialogData } from '../../models/send-invoice-email-dialog-data.model';
+
+const EMAILABLE_STATUSES = new Set(['Sent', 'PartiallyPaid', 'Overdue', 'Paid']);
+const VOIDABLE_STATUSES = new Set(['Sent', 'Overdue']);
 
 @Component({
   selector: 'app-invoice-detail-panel',
@@ -65,6 +70,7 @@ export class InvoiceDetailPanelComponent {
   protected readonly canEditNumber = computed(() =>
     this.manualNumbers.isEnabled('invoices') && this.invoice()?.status === 'Draft',
   );
+  protected readonly canEmail = computed(() => EMAILABLE_STATUSES.has(this.invoice()?.status ?? ''));
 
   constructor() {
     effect(() => {
@@ -93,7 +99,7 @@ export class InvoiceDetailPanelComponent {
     const next = this.numberControl.value?.trim();
     if (!inv || !next) return;
     this.savingNumber.set(true);
-    this.invoiceService.renameInvoiceNumber(inv.id, next).subscribe({
+    this.invoiceService.renameInvoiceNumber(inv.id, next, inv.rowVersion).subscribe({
       next: () => {
         this.savingNumber.set(false);
         this.editingNumber.set(false);
@@ -101,7 +107,10 @@ export class InvoiceDetailPanelComponent {
         this.invoiceChanged.emit();
         this.snackbar.success(this.translate.instant('invoices.invoiceNumberUpdated'));
       },
-      error: () => this.savingNumber.set(false),
+      error: () => {
+        this.savingNumber.set(false);
+        this.loadInvoice(inv.id);
+      },
     });
   }
 
@@ -112,6 +121,7 @@ export class InvoiceDetailPanelComponent {
       titleKey: 'invoices.confirmSendTitle',
       messageKey: 'invoices.confirmSendMessage',
       messageParams: { number: inv.invoiceNumber },
+      confirmLabelKey: 'invoices.send',
     }).subscribe(confirmed => {
       if (!confirmed) return;
       this.invoiceService.sendInvoice(inv.id).subscribe({
@@ -121,6 +131,20 @@ export class InvoiceDetailPanelComponent {
           this.snackbar.success(this.translate.instant('invoices.invoiceSent'));
         },
       });
+    });
+  }
+
+  protected emailInvoice(): void {
+    const inv = this.invoice();
+    if (!inv) return;
+    this.dialog.open<SendInvoiceEmailDialogComponent, SendInvoiceEmailDialogData, boolean | undefined>(
+      SendInvoiceEmailDialogComponent,
+      {
+        width: '520px',
+        data: { invoiceId: inv.id, invoiceNumber: inv.invoiceNumber, customerName: inv.customerName },
+      },
+    ).afterClosed().subscribe(sent => {
+      if (sent) this.invoiceChanged.emit();
     });
   }
 
@@ -173,7 +197,7 @@ export class InvoiceDetailPanelComponent {
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
-      this.invoiceService.deleteInvoice(inv.id).subscribe({
+      this.invoiceService.deleteInvoice(inv.id, inv.rowVersion).subscribe({
         next: () => {
           this.invoiceChanged.emit();
           this.closed.emit();
@@ -201,7 +225,7 @@ export class InvoiceDetailPanelComponent {
   }
 
   protected canSend(status: string): boolean { return status === 'Draft'; }
-  protected canVoid(status: string): boolean { return status === 'Draft' || status === 'Sent'; }
+  protected canVoid(status: string): boolean { return VOIDABLE_STATUSES.has(status); }
   protected canDelete(status: string): boolean { return status === 'Draft'; }
 
   private loadInvoice(id: number): void {

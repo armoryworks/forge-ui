@@ -1,0 +1,57 @@
+<app-dialog
+  [title]="'invoices.sendEmail.title' | translate"
+  width="520px"
+  [dirty]="form.dirty"
+  (closed)="close()">
+
+  <div class="send-invoice-email" [formGroup]="form" [appLoadingBlock]="resolving()">
+    <p class="send-invoice-email__context">
+      {{ 'invoices.sendEmail.context' | translate: { number: data.invoiceNumber, customer: data.customerName } }}
+    </p>
+
+    <app-input
+      type="email"
+      data-testid="invoice-email-recipient"
+      [label]="'invoices.sendEmail.recipient' | translate"
+      formControlName="recipientEmail"
+      [required]="true"
+      [placeholder]="'invoices.sendEmail.recipientPlaceholder' | translate" />
+
+    @if (recipient(); as r) {
+      @switch (r.source) {
+        @case ('billing-contact') {
+          <p class="send-invoice-email__source" data-testid="invoice-email-source">
+            {{ 'invoices.sendEmail.sourceBilling' | translate: { name: r.contactName ?? '' } }}
+          </p>
+        }
+        @case ('customer') {
+          <p class="send-invoice-email__source" data-testid="invoice-email-source">{{ 'invoices.sendEmail.sourceCustomer' | translate }}</p>
+        }
+        @case ('primary-contact') {
+          <p class="send-invoice-email__source" data-testid="invoice-email-source">
+            {{ 'invoices.sendEmail.sourcePrimary' | translate: { name: r.contactName ?? '' } }}
+          </p>
+        }
+        @default {
+          <p class="send-invoice-email__source send-invoice-email__source--missing" data-testid="invoice-email-source">
+            {{ 'invoices.sendEmail.sourceNone' | translate }}
+          </p>
+        }
+      }
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button
+        data-testid="send-invoice-email-btn"
+        class="action-btn action-btn--primary"
+        [disabled]="form.invalid || saving()"
+        (click)="send()">
+        <span class="material-icons-outlined">send</span>
+        {{ 'invoices.sendEmail.send' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>
