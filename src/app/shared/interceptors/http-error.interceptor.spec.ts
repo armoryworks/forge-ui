@@ -176,6 +176,18 @@ describe('httpErrorInterceptor', () => {
       expect(shown.details).toBe('traceId: 00-def-01');
     });
 
+    it('keeps the full body for the copy button when it carries validation errors', () => {
+      const body = { title: 'Boom', status: 500, traceId: '00-ghi-01', errors: { Name: ['Required'] } };
+      const shown = flush500(body);
+      expect(shown.details).toBe(JSON.stringify(body, null, 2));
+    });
+
+    it('keeps the full body for the copy button when it carries a stack trace', () => {
+      const body = { title: 'Boom', detail: 'Server exploded', stackTrace: 'at Forge.Api.Foo()' };
+      const shown = flush500(body);
+      expect(shown.details).toBe(JSON.stringify(body, null, 2));
+    });
+
     it('adds no details for a plain string body', () => {
       const shown = flush500('upstream timeout');
       expect(shown.message).toBe('upstream timeout');
