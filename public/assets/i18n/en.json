@@ -10370,6 +10370,7 @@
     "goodQuantity": "Good quantity",
     "scrapQuantity": "Scrap quantity",
     "nothingBack": "Enter a good or scrap quantity.",
+    "overSent": "Good plus scrap can't be more than the {{quantity}} sent.",
     "sent": "Sent out to {{vendor}}.",
     "sentWithPo": "Sent out to {{vendor}} on draft {{po}}.",
     "received": "Received back from {{vendor}}.",

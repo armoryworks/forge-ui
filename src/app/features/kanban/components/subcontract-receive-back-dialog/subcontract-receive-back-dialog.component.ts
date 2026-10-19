@@ -71,9 +71,12 @@ export class SubcontractReceiveBackDialogComponent {
     return (control: AbstractControl): ValidationErrors | null => {
       const good = Number(control.value ?? 0);
       const scrap = Number(control.parent?.get('scrapQuantity')?.value ?? 0);
-      return good + scrap > 0
-        ? null
-        : { nothingBack: { message: this.translate.instant('subcontractUi.nothingBack') } };
+      if (good + scrap <= 0) {
+        return { nothingBack: { message: this.translate.instant('subcontractUi.nothingBack') } };
+      }
+      return good + scrap > this.data.order.quantity
+        ? { overSent: { message: this.translate.instant('subcontractUi.overSent', { quantity: this.data.order.quantity }) } }
+        : null;
     };
   }
 }

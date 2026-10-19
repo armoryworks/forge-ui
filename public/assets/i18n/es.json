@@ -10370,6 +10370,7 @@
     "goodQuantity": "Cantidad buena",
     "scrapQuantity": "Cantidad de desecho",
     "nothingBack": "Ingrese una cantidad buena o de desecho.",
+    "overSent": "Lo bueno más el desecho no puede superar los {{quantity}} enviados.",
     "sent": "Enviado a {{vendor}}.",
     "sentWithPo": "Enviado a {{vendor}} con la OC en borrador {{po}}.",
     "received": "Recibido de vuelta de {{vendor}}.",

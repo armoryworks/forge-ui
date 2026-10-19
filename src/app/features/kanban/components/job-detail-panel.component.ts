@@ -331,7 +331,7 @@ export class JobDetailPanelComponent implements OnInit {
   }
 
   protected deleteFile(file: FileAttachment): void {
-    this.confirm('kanban.deleteFileConfirmTitle', 'kanban.deleteFileConfirmMessage', { fileName: file.fileName }, 'kanban.deleteFile')
+    this.confirm('kanban.deleteFileConfirmTitle', 'kanban.deleteFileConfirmMessage', { fileName: file.fileName }, 'kanban.deleteFile', 'danger')
       .subscribe(confirmed => {
         if (!confirmed) return;
         this.kanbanService.deleteJobFile(file.id).subscribe({
@@ -351,14 +351,17 @@ export class JobDetailPanelComponent implements OnInit {
     });
   }
 
-  private confirm(titleKey: string, messageKey: string, params: Record<string, string>, confirmKey: string): Observable<boolean | undefined> {
+  private confirm(
+    titleKey: string, messageKey: string, params: Record<string, string>, confirmKey: string,
+    severity: ConfirmDialogData['severity'] = 'warn',
+  ): Observable<boolean | undefined> {
     return this.matDialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
         title: this.translate.instant(titleKey),
         message: this.translate.instant(messageKey, params),
         confirmLabel: this.translate.instant(confirmKey),
-        severity: 'warn',
+        severity,
       } satisfies ConfirmDialogData,
     }).afterClosed();
   }

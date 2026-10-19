@@ -124,6 +124,8 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
       : fields;
   });
 
+  protected readonly today = new Date();
+
   // Timer dialog
   protected readonly showTimerDialog = signal(false);
   protected readonly timerForm = new FormGroup({
