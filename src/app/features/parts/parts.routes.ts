@@ -26,6 +26,7 @@ export const PARTS_ROUTES: Routes = [
       // page treats as a part id).
       {
         path: 'import',
+        data: { titleKey: 'parts.importPage.title' },
         loadComponent: () =>
           import('./pages/import/part-import.component').then(m => m.PartImportPageComponent),
       },

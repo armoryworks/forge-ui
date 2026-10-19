@@ -9,7 +9,7 @@ import {
 import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
 
 import { environment } from '../environments/environment';
-import { provideRouter } from '@angular/router';
+import { TitleStrategy, provideRouter } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideServiceWorker } from '@angular/service-worker';
 import { provideMarkdown } from 'ngx-markdown';
@@ -33,6 +33,7 @@ import { demoApiInterceptor } from './shared/interceptors/demo-api.interceptor';
 import { portalAuthInterceptor } from './features/portal/services/portal-auth.interceptor';
 import { trainingLangInterceptor } from './shared/interceptors/training-lang.interceptor';
 import { TerminologyTranslateLoader } from './shared/terminology/terminology-translate-loader';
+import { ForgeTitleStrategy } from './shared/services/forge-title-strategy';
 
 function initTranslations(): () => Promise<void> {
   const translate = inject(TranslateService);
@@ -48,6 +49,7 @@ export const appConfig: ApplicationConfig = {
     { provide: ErrorHandler, useClass: MobileErrorHandler },
     provideAnimationsAsync(),
     provideRouter(routes),
+    { provide: TitleStrategy, useClass: ForgeTitleStrategy },
     provideHttpClient(
       withXhr(),
       withInterceptors([

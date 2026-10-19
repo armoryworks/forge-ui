@@ -25,6 +25,7 @@ export const CUSTOMERS_ROUTES: Routes = [
     // WorkflowComponent shell. Lives BEFORE the :id route so the literal
     // "new" segment doesn't resolve as a customer id.
     path: 'new',
+    data: { titleKey: 'customers.workflow.express.title' },
     providers: [provideCustomerWorkflowSteps()],
     loadComponent: () =>
       import('./workflow/customer-workflow-page/customer-workflow-page.component')
@@ -32,24 +33,28 @@ export const CUSTOMERS_ROUTES: Routes = [
   },
   {
     path: 'contacts',
+    data: { titleKey: 'nav.customersContacts' },
     loadComponent: () =>
       import('./pages/contacts/customer-contacts.component')
         .then(m => m.CustomerContactsPageComponent),
   },
   {
     path: 'portal-access',
+    data: { titleKey: 'nav.customersPortalAccess' },
     loadComponent: () =>
       import('./pages/portal-access/customer-portal-access.component')
         .then(m => m.CustomerPortalAccessPageComponent),
   },
   {
     path: 'segments',
+    data: { titleKey: 'nav.customersSegments' },
     loadComponent: () =>
       import('./pages/segments/customer-segments.component')
         .then(m => m.CustomerSegmentsPageComponent),
   },
   {
     path: 'import',
+    data: { titleKey: 'nav.customersImport' },
     loadComponent: () =>
       import('./pages/import/customer-import.component')
         .then(m => m.CustomerImportPageComponent),

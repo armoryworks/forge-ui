@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { ThemeService } from '../../shared/services/theme.service';
 import { PortalService } from './services/portal.service';
 
 /**
@@ -21,7 +22,9 @@ import { PortalService } from './services/portal.service';
 export class PortalLayoutComponent {
   private readonly portal = inject(PortalService);
   private readonly router = inject(Router);
+  protected readonly theme = inject(ThemeService);
 
+  protected readonly supplierName = computed(() => this.theme.companyName() || this.theme.appName());
   protected readonly identity = this.portal.identity;
   protected readonly initials = computed(() => {
     const i = this.identity();

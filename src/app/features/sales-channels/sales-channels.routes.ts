@@ -25,6 +25,7 @@ export const SALES_CHANNELS_ROUTES: Routes = [
     // settings keys, while a store connection is a row and a shop can hold
     // several — two Shopify stores, or Shopify plus Etsy.
     path: 'connections',
+    data: { titleKey: 'nav.salesChannelsConnections' },
     canActivate: [roleGuard('Admin', 'Manager'), capabilityGuard('CAP-EXT-ECOMMERCE')],
     loadComponent: () =>
       import('./pages/connections/channel-connections.component').then(
@@ -33,6 +34,7 @@ export const SALES_CHANNELS_ROUTES: Routes = [
   },
   {
     path: 'listings',
+    data: { titleKey: 'nav.salesChannelsListings' },
     canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager'), capabilityGuard('CAP-EXT-ECOMMERCE')],
     loadComponent: () =>
       import('./pages/listings/channel-listings.component').then(
@@ -41,12 +43,14 @@ export const SALES_CHANNELS_ROUTES: Routes = [
   },
   {
     path: 'buyers',
+    data: { titleKey: 'nav.salesChannelsBuyers' },
     canActivate: [capabilityGuard('CAP-O2C-RETAIL')],
     loadComponent: () =>
       import('./pages/buyers/retail-buyers.component').then((m) => m.RetailBuyersPageComponent),
   },
   {
     path: 'settlements',
+    data: { titleKey: 'nav.salesChannelsSettlements' },
     canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager'), capabilityGuard('CAP-O2C-SETTLEMENT')],
     loadComponent: () =>
       import('./pages/settlements/channel-settlements.component').then(

@@ -8201,7 +8201,8 @@
       "colDelivered": "Delivered",
       "colCarrier": "Carrier",
       "colTracking": "Tracking #"
-    }
+    },
+    "companyPortal": "{{company}} customer portal"
   },
   "scheduling": {
     "title": "Scheduling",
@@ -12022,5 +12023,21 @@
       "sftpReturnsDir": "SFTP returns directory",
       "sftpReturnsDirHint": "Where the bank leaves return files for Forge to read."
     }
+  },
+  "routeTitles": {
+    "login": "Sign in",
+    "ssoCallback": "Signing in",
+    "welcome": "Welcome",
+    "setup": "Setup",
+    "tokenSetup": "Account setup",
+    "acceptOrder": "Review order",
+    "workflowDemo": "Workflow demo",
+    "devTools": "Developer tools",
+    "renderForm": "Form",
+    "lockScreen": "Unlock",
+    "setupLock": "Set up app lock",
+    "enroll": "Connect this device",
+    "timeClock": "Time clock",
+    "inventoryScan": "Inventory scan"
   }
 }

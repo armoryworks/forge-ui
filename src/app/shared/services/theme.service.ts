@@ -10,6 +10,7 @@ interface BrandSettings {
   accentColor: string | null;
   appName: string | null;
   hasLogo: boolean;
+  companyName?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -20,6 +21,7 @@ export class ThemeService {
   private readonly _fontScale = signal<FontScale>('default');
   readonly fontScale = this._fontScale.asReadonly();
   readonly appName = signal('Forge');
+  readonly companyName = signal<string | null>(null);
   readonly logoUrl = signal<string | null>(null);
 
   private brandColors: { primary?: string; accent?: string } = {};
@@ -100,8 +102,8 @@ export class ThemeService {
         this.setBrandColors(brand.primaryColor ?? undefined, brand.accentColor ?? undefined);
         if (brand.appName) {
           this.appName.set(brand.appName);
-          document.title = brand.appName;
         }
+        this.companyName.set(brand.companyName?.trim() || null);
         this.logoUrl.set(brand.hasLogo ? `${environment.apiUrl}/admin/logo?t=${Date.now()}` : null);
       },
     });

@@ -286,7 +286,6 @@
     "src/app/features/payables/components/vendor-payment-detail-panel/vendor-payment-detail-panel.component.html": 1,
     "src/app/features/payments/components/payment-detail-panel/payment-detail-panel.component.html": 1,
     "src/app/features/payments/components/payment-dialog/payment-dialog.component.html": 2,
-    "src/app/features/portal/portal-layout.component.html": 1,
     "src/app/features/purchase-orders/components/auto-po-panel/auto-po-panel.component.html": 3,
     "src/app/features/purchase-orders/components/auto-po-settings-panel/auto-po-settings-panel.component.html": 1,
     "src/app/features/purchase-orders/components/po-detail-panel/po-detail-panel.component.html": 6,

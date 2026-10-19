@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InputComponent } from '../../../shared/components/input/input.component';
+import { ThemeService } from '../../../shared/services/theme.service';
 import { PortalService } from '../services/portal.service';
 
 /**
@@ -24,6 +25,9 @@ export class PortalLoginComponent {
   private readonly portal = inject(PortalService);
   private readonly router = inject(Router);
   protected readonly translate = inject(TranslateService);
+  private readonly theme = inject(ThemeService);
+
+  protected readonly supplierName = computed(() => this.theme.companyName() || this.theme.appName());
 
   protected readonly emailControl = new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.email] });
   protected readonly submitting = signal(false);

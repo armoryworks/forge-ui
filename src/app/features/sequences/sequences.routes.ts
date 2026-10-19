@@ -8,6 +8,6 @@ import { SequenceInstancesPageComponent } from './pages/instances/sequence-insta
 export const SEQUENCES_ROUTES: Routes = [
   { path: '', component: SequenceDefinitionsPageComponent },
   { path: 'new', component: SequenceDefinitionEditorComponent },
-  { path: 'instances', component: SequenceInstancesPageComponent },
+  { path: 'instances', component: SequenceInstancesPageComponent, data: { titleKey: 'nav.sequencesInstances' } },
   { path: ':id/edit', component: SequenceDefinitionEditorComponent },
 ];

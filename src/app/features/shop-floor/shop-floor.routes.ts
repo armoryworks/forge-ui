@@ -13,16 +13,19 @@ export const SHOP_FLOOR_ROUTES: Routes = [
   { path: 'preview', component: ShopFloorDisplayComponent, canActivate: [authGuard], data: { preview: true } },
   {
     path: 'clock',
+    data: { titleKey: 'routeTitles.timeClock' },
     loadComponent: () =>
       import('./clock/shop-floor-clock.component').then((m) => m.ShopFloorClockComponent),
   },
   {
     path: 'scan',
+    data: { titleKey: 'routeTitles.inventoryScan' },
     loadComponent: () =>
       import('./scan/inventory-scan.component').then((m) => m.InventoryScanComponent),
   },
   {
     path: 'scan-log',
+    data: { titleKey: 'kioskFlows.dailyLog.title' },
     loadComponent: () =>
       import('./components/scan-daily-log/scan-daily-log.component').then((m) => m.ScanDailyLogComponent),
   },

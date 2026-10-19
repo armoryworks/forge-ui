@@ -138,6 +138,22 @@ describe('ThemeService', () => {
       });
 
       expect(service.appName()).toBe('Forge');
+      expect(service.companyName()).toBeNull();
+    });
+
+    it('should expose the company name for the customer portal', () => {
+      service.loadBrandSettings();
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/admin/brand`);
+      req.flush({
+        primaryColor: null,
+        accentColor: null,
+        appName: 'My Shop',
+        hasLogo: false,
+        companyName: ' Harbor Gear Works ',
+      });
+
+      expect(service.companyName()).toBe('Harbor Gear Works');
     });
   });
 });
