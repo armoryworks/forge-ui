@@ -7,10 +7,12 @@ import { UpdateJobOperationProgressRequest } from '../../models/update-job-opera
 interface QuantityInternals {
   completed: () => number | null;
   scrap: () => number;
+  rework: () => number;
   overLimit: () => boolean;
   canSubmit: () => boolean;
   completedControl: { setValue: (v: number | null) => void };
-  selectField(f: 'completed' | 'scrap'): void;
+  selectField(f: 'completed' | 'scrap' | 'rework'): void;
+  toggleRework(): void;
   onTyped(): void;
   ngOnInit(): void;
   onDigit(d: string): void;
@@ -134,5 +136,41 @@ describe('KioskOperationQuantityComponent', () => {
     c.onClear();
     expect(c.completed()).toBeNull();
     expect(c.canSubmit()).toBe(false);
+  });
+
+  it('rework typed on the keypad is sent as this entry\'s rework count', () => {
+    const { c, emitted } = create(false);
+    expect(c.rework()).toBe(0);
+    c.toggleRework();
+    c.selectField('rework');
+    c.onDigit('4');
+    c.record();
+    expect(emitted).toEqual([{ completedQuantity: 12, scrapQuantity: 1, reworkQuantity: 4, expectedVersion: 4 }]);
+  });
+
+  it('rework does not count toward the job quantity limit', () => {
+    const { c } = create(true);
+    c.toggleRework();
+    c.selectField('rework');
+    c.onDigit('9');
+    expect(c.rework()).toBe(9);
+    expect(c.overLimit()).toBe(false);
+    expect(c.canSubmit()).toBe(true);
+  });
+
+  it('zero rework, or rework folded away, sends no rework count', () => {
+    const { c, emitted } = create(false);
+    c.toggleRework();
+    c.record();
+    c.selectField('rework');
+    c.onDigit('3');
+    c.toggleRework();
+    expect(c.rework()).toBe(0);
+    c.onDigit('5');
+    c.record();
+    expect(emitted).toEqual([
+      { completedQuantity: 12, scrapQuantity: 1, expectedVersion: 4 },
+      { completedQuantity: 5, scrapQuantity: 1, expectedVersion: 4 },
+    ]);
   });
 });

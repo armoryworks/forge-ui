@@ -21,6 +21,7 @@ export class MfaChallengeComponent implements OnInit {
   private readonly snackbar = inject(SnackbarService);
 
   readonly pendingToken = input.required<string>();
+  readonly allowRememberDevice = input(true);
   readonly validated = output<MfaValidateResponse>();
   readonly cancelled = output<void>();
 
@@ -67,7 +68,7 @@ export class MfaChallengeComponent implements OnInit {
     this.mfaService.validateChallenge({
       challengeToken: ch.challengeToken,
       code: this.codeForm.getRawValue().code,
-      rememberDevice: this.codeForm.getRawValue().rememberDevice,
+      rememberDevice: this.allowRememberDevice() && this.codeForm.getRawValue().rememberDevice,
     }).subscribe({
       next: (result) => {
         this.verifying.set(false);

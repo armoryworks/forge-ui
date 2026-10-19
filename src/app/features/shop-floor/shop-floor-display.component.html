@@ -59,6 +59,7 @@
       }
     </div>
     <div class="sf-header__controls">
+      <app-language-toggle class="sf-header__lang" data-testid="sf-language-toggle" />
       @if (fullscreenSupported) {
         <button class="sf-header__control-btn" (click)="enterFullscreen()"
                 [attr.aria-label]="'shopFloor.fullscreen' | translate"

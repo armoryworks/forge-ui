@@ -48,6 +48,7 @@ import { ScanDailyLogComponent } from './components/scan-daily-log/scan-daily-lo
 import { ScanDevicesPanelComponent } from './components/scan-devices-panel/scan-devices-panel.component';
 import { ScanLocationViewComponent } from './components/scan-location-view/scan-location-view.component';
 import { NumericKeypadComponent } from './components/numeric-keypad/numeric-keypad.component';
+import { LanguageToggleComponent } from '../../shared/components/language-toggle/language-toggle.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
 const FONT_SIZES = [12, 14, 16, 18, 20, 24, 28] as const;
@@ -70,7 +71,7 @@ type DisplayPhase = 'main' | 'pin' | 'actions' | 'job-select' | 'assign' | 'rece
 @Component({
   selector: 'app-shop-floor-display',
   standalone: true,
-  imports: [DatePipe, NgTemplateOutlet, A11yModule, TranslatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, KioskSessionBarComponent, KioskSetupComponent, TrainingModeBannerComponent, ScanUndoListComponent, ScanActionOverlayComponent, ScanDailyLogComponent, ScanDevicesPanelComponent, ScanLocationViewComponent, NumericKeypadComponent],
+  imports: [DatePipe, NgTemplateOutlet, A11yModule, TranslatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, KioskSessionBarComponent, KioskSetupComponent, TrainingModeBannerComponent, ScanUndoListComponent, ScanActionOverlayComponent, ScanDailyLogComponent, ScanDevicesPanelComponent, ScanLocationViewComponent, NumericKeypadComponent, LanguageToggleComponent],
   templateUrl: './shop-floor-display.component.html',
   styleUrl: './shop-floor-display.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

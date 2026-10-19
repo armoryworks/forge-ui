@@ -1,14 +1,25 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { WritableSignal } from '@angular/core';
+import { Component, input, output, WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { FormControl } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
-import { of, throwError } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 
 import { KioskSetupComponent } from './kiosk-setup.component';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { ShopFloorService } from '../../services/shop-floor.service';
 import { KioskTerminal, Team } from '../../models/kiosk-terminal.model';
+import { MfaChallengeComponent } from '../../../auth/mfa-challenge.component';
+import { MfaValidateResponse } from '../../../account/models/mfa.model';
+
+@Component({ selector: 'app-mfa-challenge', standalone: true, template: '' })
+class StubMfaChallengeComponent {
+  readonly pendingToken = input.required<string>();
+  readonly allowRememberDevice = input(true);
+  readonly validated = output<MfaValidateResponse>();
+  readonly cancelled = output<void>();
+}
 
 interface KioskSetupHarness {
   phase: WritableSignal<string>;
@@ -41,13 +52,20 @@ function setup() {
     createTeam: vi.fn<ShopFloorService['createTeam']>(() => of(team)),
     setupTerminal: vi.fn<ShopFloorService['setupTerminal']>(() => of(terminal)),
   };
-  const auth = { login: vi.fn(() => of({})), clearAuth: vi.fn() };
+  const auth = {
+    login: vi.fn<(c: unknown) => Observable<unknown>>(() => of({})),
+    completeMfaLogin: vi.fn<(token: string, trusted?: string | null) => Observable<unknown>>(() => of({ id: 1 })),
+    clearAuth: vi.fn(),
+  };
   TestBed.configureTestingModule({
     imports: [KioskSetupComponent, TranslateModule.forRoot()],
     providers: [
       { provide: ShopFloorService, useValue: shopFloor },
       { provide: AuthService, useValue: auth },
     ],
+  }).overrideComponent(KioskSetupComponent, {
+    remove: { imports: [MfaChallengeComponent] },
+    add: { imports: [StubMfaChallengeComponent] },
   });
   const fixture = TestBed.createComponent(KioskSetupComponent);
   fixture.detectChanges();
@@ -210,5 +228,69 @@ describe('KioskSetupComponent', () => {
     expect(ctx.component.teamsLoadFailed()).toBe(true);
     expect(ctx.component.noTeams()).toBe(false);
     expect(ctx.fixture.nativeElement.querySelector('[data-testid="kiosk-setup-teams-error"]')).not.toBeNull();
+  });
+
+  const mfaChallenge = (ctx: ReturnType<typeof setup>): StubMfaChallengeComponent | null =>
+    ctx.fixture.debugElement.query(By.directive(StubMfaChallengeComponent))?.componentInstance ?? null;
+
+  it('asks an MFA admin for the code before loading teams', () => {
+    const ctx = setup();
+    ctx.auth.login.mockReturnValue(of({ mfaRequired: true, mfaPendingToken: 'pending-1' }));
+
+    signIn(ctx);
+
+    expect(ctx.component.phase()).toBe('mfa');
+    expect(ctx.shopFloor.getTeams).not.toHaveBeenCalled();
+    const challenge = mfaChallenge(ctx)!;
+    expect(challenge.pendingToken()).toBe('pending-1');
+    expect(challenge.allowRememberDevice()).toBe(false);
+  });
+
+  it('loads teams once the MFA code is verified, without trusting the kiosk as a device', () => {
+    const ctx = setup();
+    ctx.auth.login.mockReturnValue(of({ mfaRequired: true, mfaPendingToken: 'pending-1' }));
+    signIn(ctx);
+
+    mfaChallenge(ctx)!.validated.emit({
+      accessToken: 'access', refreshToken: 'refresh', expiresAt: '2026-10-19T00:00:00Z', trustedDeviceToken: 'trusted',
+    });
+    ctx.fixture.detectChanges();
+
+    expect(ctx.auth.completeMfaLogin).toHaveBeenCalledWith('access', null);
+    expect(ctx.shopFloor.getTeams).toHaveBeenCalledTimes(1);
+    expect(ctx.component.phase()).toBe('configure');
+  });
+
+  it('returns to the admin sign-in when the MFA challenge is cancelled', () => {
+    const ctx = setup();
+    ctx.auth.login.mockReturnValue(of({ mfaRequired: true, mfaPendingToken: 'pending-1' }));
+    signIn(ctx);
+
+    mfaChallenge(ctx)!.cancelled.emit();
+    ctx.fixture.detectChanges();
+
+    expect(ctx.component.phase()).toBe('admin-login');
+    expect(ctx.shopFloor.getTeams).not.toHaveBeenCalled();
+    expect(ctx.auth.completeMfaLogin).not.toHaveBeenCalled();
+  });
+
+  it('clears the half-finished sign-in when the profile cannot be loaded after MFA', () => {
+    const ctx = setup();
+    ctx.auth.login.mockReturnValue(of({ mfaRequired: true, mfaPendingToken: 'pending-1' }));
+    ctx.auth.completeMfaLogin.mockReturnValue(throwError(() => new Error('boom')));
+    signIn(ctx);
+
+    mfaChallenge(ctx)!.validated.emit({ accessToken: 'access', refreshToken: 'r', expiresAt: '2026-10-19T00:00:00Z' });
+    ctx.fixture.detectChanges();
+
+    expect(ctx.auth.clearAuth).toHaveBeenCalled();
+    expect(ctx.component.phase()).toBe('admin-login');
+    expect(ctx.shopFloor.getTeams).not.toHaveBeenCalled();
+  });
+
+  it('offers the language switch on the sign-in card', () => {
+    const ctx = setup();
+
+    expect(ctx.fixture.nativeElement.querySelector('[data-testid="kiosk-setup-language-toggle"]')).not.toBeNull();
   });
 });

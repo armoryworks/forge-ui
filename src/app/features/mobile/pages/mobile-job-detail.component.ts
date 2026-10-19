@@ -6,7 +6,6 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { Observable, of, switchMap, tap } from 'rxjs';
 
-import { AuthService } from '../../../shared/services/auth.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 
@@ -46,7 +45,6 @@ export class MobileJobDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
-  private readonly authService = inject(AuthService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
 
@@ -169,15 +167,8 @@ export class MobileJobDetailComponent implements OnInit {
     const text = this.noteText().trim();
     if (!j || !text || this.submitting()) return;
 
-    const userId = this.authService.user()?.id;
-    if (!userId) return;
-
     this.submitting.set(true);
-    this.http.post(`/api/v1/jobs/${j.id}/activity`, {
-      description: text,
-      action: 'Comment',
-      userId,
-    }).subscribe({
+    this.http.post(`/api/v1/jobs/${j.id}/notes`, { text }).subscribe({
       next: () => {
         this.submitting.set(false);
         this.noteText.set('');

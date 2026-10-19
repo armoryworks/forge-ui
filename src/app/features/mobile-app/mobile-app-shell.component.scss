@@ -147,5 +147,7 @@ $tab-min-target: 56px;
     // One step larger than the desktop label scale, per the floor design rule.
     font-size: $font-size-base;
     font-weight: 500;
+    @include truncate;
+    max-width: 100%;
   }
 }

@@ -34,6 +34,17 @@
           }
         </button>
       </form>
+
+      <app-language-toggle data-testid="kiosk-setup-language-toggle" />
+    </div>
+  </div>
+}
+
+@if (phase() === 'mfa' && mfaPendingToken(); as pendingToken) {
+  <div class="setup" data-testid="kiosk-setup-mfa">
+    <div class="setup__card">
+      <app-mfa-challenge [pendingToken]="pendingToken" [allowRememberDevice]="false"
+        (validated)="onMfaValidated($event)" (cancelled)="onMfaCancelled()" />
     </div>
   </div>
 }

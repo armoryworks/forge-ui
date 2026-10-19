@@ -12,13 +12,16 @@ import { AuthService } from '../../../../shared/services/auth.service';
 import { ShopFloorService } from '../../services/shop-floor.service';
 import { KioskTerminal, Team } from '../../models/kiosk-terminal.model';
 import { randomId } from '../../../../shared/utils/random-id';
+import { MfaChallengeComponent } from '../../../auth/mfa-challenge.component';
+import { MfaValidateResponse } from '../../../account/models/mfa.model';
+import { LanguageToggleComponent } from '../../../../shared/components/language-toggle/language-toggle.component';
 
-type SetupPhase = 'admin-login' | 'configure';
+type SetupPhase = 'admin-login' | 'mfa' | 'configure';
 
 @Component({
   selector: 'app-kiosk-setup',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent, MfaChallengeComponent, LanguageToggleComponent],
   templateUrl: './kiosk-setup.component.html',
   styleUrl: './kiosk-setup.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,6 +37,7 @@ export class KioskSetupComponent {
   protected readonly teams = signal<Team[]>([]);
   protected readonly loginError = signal<string | null>(null);
   protected readonly loggingIn = signal(false);
+  protected readonly mfaPendingToken = signal<string | null>(null);
   protected readonly configError = signal<string | null>(null);
   protected readonly saving = signal(false);
 
@@ -76,8 +80,17 @@ export class KioskSetupComponent {
     this.loginError.set(null);
 
     this.authService.login({ email, password }).subscribe({
-      next: () => {
+      next: (response) => {
         this.loggingIn.set(false);
+        if (response.mfaRequired) {
+          if (!response.mfaPendingToken) {
+            this.loginError.set(this.translate.instant('shopFloor.invalidAdminCredentials'));
+            return;
+          }
+          this.mfaPendingToken.set(response.mfaPendingToken);
+          this.phase.set('mfa');
+          return;
+        }
         this.loadTeams();
         this.phase.set('configure');
       },
@@ -86,6 +99,29 @@ export class KioskSetupComponent {
         this.loginError.set(this.translate.instant('shopFloor.invalidAdminCredentials'));
       },
     });
+  }
+
+  protected onMfaValidated(result: MfaValidateResponse): void {
+    this.mfaPendingToken.set(null);
+    this.loggingIn.set(true);
+    this.authService.completeMfaLogin(result.accessToken, null).subscribe({
+      next: () => {
+        this.loggingIn.set(false);
+        this.loadTeams();
+        this.phase.set('configure');
+      },
+      error: () => {
+        this.loggingIn.set(false);
+        this.authService.clearAuth();
+        this.loginError.set(this.translate.instant('shopFloor.invalidAdminCredentials'));
+        this.phase.set('admin-login');
+      },
+    });
+  }
+
+  protected onMfaCancelled(): void {
+    this.mfaPendingToken.set(null);
+    this.phase.set('admin-login');
   }
 
   protected toggleNewTeam(): void {

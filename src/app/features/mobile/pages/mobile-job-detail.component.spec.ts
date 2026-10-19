@@ -234,4 +234,38 @@ describe('MobileJobDetailComponent', () => {
     expect(el().querySelector('[data-testid="mjob-due-date"]')).not.toBeNull();
     expect(el().querySelector('[data-testid="mjob-overdue"]')).toBeNull();
   });
+
+  const typeNote = (text: string): void => {
+    const box = el().querySelector<HTMLTextAreaElement>('[data-testid="mjob-note-input"]')!;
+    box.value = text;
+    box.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    el().querySelector<HTMLButtonElement>('[data-testid="mjob-note-send-btn"]')!.click();
+  };
+
+  it('adds a note through the job notes endpoint and clears the box', () => {
+    render(null);
+
+    typeNote('  Chip on the left flange  ');
+    const post = http.expectOne('/api/v1/jobs/5/notes');
+    expect(post.request.method).toBe('POST');
+    expect(post.request.body).toEqual({ text: 'Chip on the left flange' });
+    post.flush({ id: 1, text: 'Chip on the left flange' }, { status: 201, statusText: 'Created' });
+    fixture.detectChanges();
+
+    expect(snackbar.success).toHaveBeenCalled();
+    expect(el().querySelector<HTMLTextAreaElement>('[data-testid="mjob-note-input"]')!.value).toBe('');
+  });
+
+  it('keeps the note text when the note cannot be saved', () => {
+    render(null);
+
+    typeNote('Needs a second look');
+    http.expectOne('/api/v1/jobs/5/notes')
+      .flush({ title: 'Nope' }, { status: 500, statusText: 'Server Error' });
+    fixture.detectChanges();
+
+    expect(snackbar.errorFrom).toHaveBeenCalledWith(expect.any(HttpErrorResponse), 'mobileLegacy.jobDetail.noteFailed');
+    expect(el().querySelector<HTMLTextAreaElement>('[data-testid="mjob-note-input"]')!.value).toBe('Needs a second look');
+  });
 });
