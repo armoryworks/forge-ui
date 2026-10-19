@@ -213,12 +213,33 @@ describe('CustomerDetailComponent · credit and tax terms', () => {
     expect(updateCustomer.mock.calls[0][1]).not.toHaveProperty('creditLimit');
   });
 
+  it('sends changed default credit terms and asks the server to clear emptied ones', () => {
+    const changed = setup(['OfficeManager'], { ...CUSTOMER, defaultCreditTerms: 'Net30' });
+    changed.component.saveClusterPatch({ name: 'Acme Co', defaultCreditTerms: 'Net45' });
+    expect(changed.updateCustomer).toHaveBeenCalledWith(5, expect.objectContaining({ defaultCreditTerms: 'Net45' }));
+
+    const cleared = setup(['OfficeManager'], { ...CUSTOMER, defaultCreditTerms: 'Net30' });
+    cleared.component.saveClusterPatch({ name: 'Acme Co', defaultCreditTerms: null });
+    expect(cleared.updateCustomer).toHaveBeenCalledWith(5, expect.objectContaining({ clearDefaultCreditTerms: true }));
+    expect(cleared.updateCustomer.mock.calls[0][1]).not.toHaveProperty('defaultCreditTerms');
+  });
+
+  it('leaves unchanged default credit terms out of the request', () => {
+    const { component, updateCustomer } = setup(['OfficeManager'], { ...CUSTOMER, defaultCreditTerms: 'Net30' });
+
+    component.saveClusterPatch({ name: 'Acme Co', defaultCreditTerms: 'Net30' });
+
+    expect(updateCustomer.mock.calls[0][1]).not.toHaveProperty('defaultCreditTerms');
+    expect(updateCustomer.mock.calls[0][1]).not.toHaveProperty('clearDefaultCreditTerms');
+  });
+
   it('never sends credit or tax fields for a PM', () => {
     const { component, updateCustomer } = setup(['PM']);
 
-    component.saveClusterPatch({ name: 'Acme Co', creditLimit: 25000, isTaxExempt: true, taxExemptionId: 'UT-1' });
+    component.saveClusterPatch({ name: 'Acme Co', creditLimit: 25000, isTaxExempt: true, taxExemptionId: 'UT-1', defaultCreditTerms: 'Net45' });
 
     const request = updateCustomer.mock.calls[0][1];
+    expect(request).not.toHaveProperty('defaultCreditTerms');
     expect(request).not.toHaveProperty('creditLimit');
     expect(request).not.toHaveProperty('isTaxExempt');
     expect(request).not.toHaveProperty('taxExemptionId');
