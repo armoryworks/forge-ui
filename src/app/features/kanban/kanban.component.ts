@@ -381,13 +381,29 @@ export class KanbanComponent implements OnInit, OnDestroy {
     this.initBoardHub();
     this.kanbanService.getUsers().subscribe(u => this.users.set(u));
     this.kanbanService.getTeams().subscribe({
-      next: t => this.teams.set(t),
+      next: t => {
+        this.teams.set(t);
+        this.dropUnknownFilter('team', this.teamFilterId(), t.map(team => team.id), 'boardFilters.unknownTeam');
+      },
       error: () => this.teams.set([]),
     });
     this.kanbanService.getCustomers().subscribe({
-      next: c => this.customers.set(c),
+      next: c => {
+        this.customers.set(c);
+        this.dropUnknownFilter('customer', this.urlFilters().customerId, c.map(customer => customer.id), 'boardFilters.unknownCustomer');
+      },
       error: () => this.customers.set([]),
     });
+  }
+
+  private dropUnknownFilter(param: 'team' | 'customer', id: number | null, knownIds: number[], messageKey: string): void {
+    if (id === null || knownIds.includes(id)) return;
+    this.router.navigate([], {
+      queryParams: { [param]: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+    this.snackbar.info(this.translate.instant(messageKey, { id }));
   }
 
   ngOnDestroy(): void {
