@@ -19,10 +19,12 @@
           placeholder="000000" [maxlength]="6" [required]="true"
           data-testid="mfa-code" />
 
-        <label class="mfa-challenge__remember">
-          <input type="checkbox" formControlName="rememberDevice" />
-          Remember this device for 30 days
-        </label>
+        @if (allowRememberDevice()) {
+          <label class="mfa-challenge__remember">
+            <input type="checkbox" formControlName="rememberDevice" data-testid="mfa-remember-device" />
+            Remember this device for 30 days
+          </label>
+        }
 
         @if (error(); as err) {
           <div class="mfa-challenge__error">
