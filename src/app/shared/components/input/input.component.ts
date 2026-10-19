@@ -121,9 +121,6 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
     effect(() => {
       this.type();
       this.mask();
-      this.min();
-      this.max();
-      this.step();
       if (validatorInputsRead) untracked(() => this.onValidatorChange());
       validatorInputsRead = true;
     });
@@ -131,6 +128,12 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
 
   protected get isNumeric(): boolean {
     return this.type() === 'number' || this.mask() === 'currency';
+  }
+
+  protected get inputMode(): string | null {
+    if (!this.isNumeric) return null;
+    const min = this.toNumber(this.min());
+    return this.mask() === 'currency' || (min !== null && min >= 0) ? 'decimal' : 'text';
   }
 
   protected get effectiveMaxlength(): number | null {
@@ -202,19 +205,14 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
       return { numberFormat: { message: this.message('shared.numberFormat', `${this.label()} must be a number`) } };
     }
     const value = control.value;
-    if (typeof value !== 'number') return null;
-    const errors: ValidationErrors = {};
-    const min = this.toNumber(this.min());
-    const max = this.toNumber(this.max());
-    if (min !== null && value < min) errors['min'] = { min, actual: value };
-    if (max !== null && value > max) errors['max'] = { max, actual: value };
-    const places = this.allowedDecimalPlaces();
-    if (places !== null && decimalPlaces(value) > places) {
-      errors['decimalPlaces'] = {
-        message: this.message('shared.numberDecimals', `${this.label()} allows at most ${places} decimal places`, { places }),
+    if (this.mask() === 'currency' && typeof value === 'number' && decimalPlaces(value) > 2) {
+      return {
+        decimalPlaces: {
+          message: this.message('shared.numberDecimals', `${this.label()} allows at most 2 decimal places`, { places: 2 }),
+        },
       };
     }
-    return Object.keys(errors).length ? errors : null;
+    return null;
   }
 
   protected onInput(event: Event): void {
@@ -275,12 +273,6 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
     if (value === null || value === '') return null;
     const num = Number(value);
     return Number.isFinite(num) ? num : null;
-  }
-
-  private allowedDecimalPlaces(): number | null {
-    const step = this.toNumber(this.step());
-    if (step !== null && step > 0) return decimalPlaces(step);
-    return this.mask() === 'currency' ? 2 : null;
   }
 
   private typingMask(): ((raw: string) => string) | null {

@@ -40,7 +40,8 @@ import { formatLocaleNumber, parseLocaleNumber } from '../../utils/locale-number
  *
  * `ControlValueAccessor` so it drops in as `formControlName="..."` like
  * `<app-input>`. Internally the input is `type="text"` with
- * `inputmode="decimal"` so mobile keyboards offer a numeric keypad; typed text
+ * `inputmode="decimal"` so mobile keyboards offer a numeric keypad (`text` when
+ * `min` allows negatives, since the iOS decimal pad has no minus key); typed text
  * is parsed with the app language's decimal and group separators, and the
  * field text is only rewritten by `writeValue` and on blur, never while typing.
  * Blank, partial or malformed text emits null and raises a `numberFormat` error.
@@ -87,6 +88,11 @@ export class CurrencyInputComponent implements ControlValueAccessor, Validator, 
 
   private onChange: (value: number | null) => void = () => {};
   private onTouched: () => void = () => {};
+
+  protected get inputMode(): string {
+    const min = this.min();
+    return min !== null && min !== '' && Number(min) >= 0 ? 'decimal' : 'text';
+  }
 
   ngAfterViewInit(): void {
     this.setText(this.text);

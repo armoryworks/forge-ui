@@ -19,6 +19,7 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
+import { DecimalInputDirective } from '../../../../shared/directives/decimal-input.directive';
 
 @Component({
   selector: 'app-receive-dialog',
@@ -26,7 +27,7 @@ import { EntityPickerComponent } from '../../../../shared/components/entity-pick
   imports: [
     ReactiveFormsModule, DecimalPipe,
     DialogComponent, EmptyStateComponent, CurrencyInputComponent, SelectComponent,
-    InputComponent, TextareaComponent, EntityPickerComponent,
+    InputComponent, TextareaComponent, EntityPickerComponent, DecimalInputDirective,
     TranslatePipe,
   ],
   templateUrl: './receive-dialog.component.html',
@@ -193,6 +194,7 @@ export class ReceiveDialogComponent implements OnInit, AfterViewInit {
 
   protected get hasInvalidLineField(): boolean {
     return this.packingSlipCtrl.invalid
+      || this.lineControls().some(c => c.hasError('numberFormat'))
       || this.lotControls().some(c => c.invalid)
       || this.noteControls().some(c => c.invalid);
   }

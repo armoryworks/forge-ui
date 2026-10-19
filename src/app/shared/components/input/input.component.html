@@ -7,7 +7,7 @@
   }
   <input matInput #field
     [type]="effectiveType"
-    [attr.inputmode]="isNumeric ? 'decimal' : null"
+    [attr.inputmode]="inputMode"
     [placeholder]="placeholder()"
     [readonly]="isReadonly()"
     [required]="required()"

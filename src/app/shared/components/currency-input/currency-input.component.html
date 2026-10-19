@@ -3,7 +3,7 @@
   <span matTextPrefix class="currency-input__symbol" aria-hidden="true">{{ currencySymbol() }}&nbsp;</span>
   <input matInput #field
     type="text"
-    inputmode="decimal"
+    [attr.inputmode]="inputMode"
     [placeholder]="placeholder()"
     [required]="required()"
     [readonly]="isReadonly()"

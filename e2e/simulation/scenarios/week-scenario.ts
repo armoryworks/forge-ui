@@ -4555,7 +4555,7 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
       await adminPage.waitForTimeout(300);
 
       // Hover over any threshold control
-      const input = adminPage.locator('input[type="number"]').first();
+      const input = adminPage.locator('input[inputmode], input[type="number"]').first();
       if (await input.isVisible({ timeout: 1500 }).catch(() => false)) {
         await input.hover();
         await adminPage.waitForTimeout(200);

@@ -143,12 +143,14 @@ class FakeLoader implements TranslateLoader {
   template: `
     <app-input label="Quantity" type="number" step="0.0001" min="0" [formControl]="quantity" />
     <app-input label="Price" mask="currency" [formControl]="price" />
+    <app-input label="Adjustment" type="number" [formControl]="adjustment" />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class NumberHostComponent {
   readonly quantity = new FormControl<number | null>(null, Validators.required);
   readonly price = new FormControl<number | null>(null);
+  readonly adjustment = new FormControl<number | null>(null);
 }
 
 describe('InputComponent · numbers', () => {
@@ -189,6 +191,13 @@ describe('InputComponent · numbers', () => {
     expect(field().getAttribute('inputmode')).toBe('decimal');
   });
 
+  it('uses a text keyboard where negative numbers are allowed so the minus key is available', async () => {
+    await render('en');
+    expect(field(2).type).toBe('text');
+    expect(field(2).getAttribute('inputmode')).toBe('text');
+    expect(field(1).getAttribute('inputmode')).toBe('decimal');
+  });
+
   it('flags en "1,5" as invalid instead of reading it as 15', async () => {
     await render('en');
     type('1,5');
@@ -227,15 +236,15 @@ describe('InputComponent · numbers', () => {
 
   it('keeps a typed minus sign and emits -1 rather than 1', async () => {
     await render('en');
-    type('-');
+    type('-', 2);
     fixture.detectChanges();
-    expect(field().value).toBe('-');
-    expect(host.quantity.value).toBeNull();
-    type('-1');
+    expect(field(2).value).toBe('-');
+    expect(host.adjustment.value).toBeNull();
+    type('-1', 2);
     fixture.detectChanges();
-    expect(field().value).toBe('-1');
-    expect(host.quantity.value).toBe(-1);
-    expect(host.quantity.hasError('min')).toBe(true);
+    expect(field(2).value).toBe('-1');
+    expect(host.adjustment.value).toBe(-1);
+    expect(host.adjustment.valid).toBe(true);
   });
 
   it('emits null for a cleared field so a required control is invalid', async () => {
@@ -260,12 +269,10 @@ describe('InputComponent · numbers', () => {
     expect(host.quantity.value).toBe(412000.05);
   });
 
-  it('enforces the decimal places implied by step', async () => {
+  it('leaves min, max and step unenforced as they were with the native number input', async () => {
     await render('en');
-    type('1.12345');
-    expect(host.quantity.value).toBe(1.12345);
-    expect(host.quantity.hasError('decimalPlaces')).toBe(true);
-    type('1.1234');
+    type('-1.12345');
+    expect(host.quantity.value).toBe(-1.12345);
     expect(host.quantity.valid).toBe(true);
   });
 
