@@ -162,7 +162,7 @@
 }
 
 .job-chip__number { font-weight: 700; flex-shrink: 0; }
-.job-chip__title { overflow: hidden; text-overflow: ellipsis; color: var(--text-muted); }
+.job-chip__title { overflow: hidden; text-overflow: ellipsis; color: var(--text); }
 .job-chip__overdue { font-size: var(--font-size-base); color: var(--error); flex-shrink: 0; }
 
 .job-chip__priority {
@@ -224,7 +224,7 @@
   border-left: $border-width-accent solid var(--border);
   border-left-color: var(--job-tint, var(--border));
 }
-.job-chip__customer { font-size: var(--font-size-xs); color: var(--text-muted); }
+.job-chip__customer { font-size: var(--font-size-xs); color: var(--text); }
 
 // Day View
 .day-view {
