@@ -40,6 +40,12 @@ import { EmployeeProfileService } from './services/employee-profile.service';
     @include mobile {
       .account-layout {
         flex-direction: column;
+        overflow-y: auto;
+      }
+
+      .account-layout__content {
+        flex: none;
+        overflow: visible;
       }
     }
   `,
