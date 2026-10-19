@@ -35,7 +35,8 @@ const PROBLEM_MAX_LENGTH = 2000;
  * native shell has them; signing out there ends the web session, and on the
  * phone it signs this device out and removes the server from it. When no
  * phone screen is turned on for the shop it says so, since this is where
- * the screen guard sends the person.
+ * the screen guard sends the person. The biometric switch shows only when
+ * the device can unlock that way.
  */
 @Component({
   selector: 'app-app-account',
@@ -79,8 +80,10 @@ export class AppAccountComponent {
   protected readonly problemCount = computed(() =>
     this.translate.instant('mobileApp.account.problemCount', { count: this.problemText().length, max: PROBLEM_MAX_LENGTH }));
   protected readonly confirmingSignOut = signal(false);
+  protected readonly biometricAvailable = signal(false);
 
   constructor() {
+    void this.lock.biometricAvailable().then((available) => this.biometricAvailable.set(available), () => undefined);
     if (!this.shared()) {
       this.devices.mine().subscribe({
         next: (list) => this.myDevices.set(list.filter((d) => d.revokedAt === null)),

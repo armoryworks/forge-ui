@@ -1,4 +1,13 @@
-<div class="manual" data-testid="manual-code-entry">
+<div
+  class="manual"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-label]="'mobileApp.scan.manual.label' | translate"
+  cdkTrapFocus
+  cdkTrapFocusAutoCapture
+  data-testid="manual-code-entry"
+  (keydown.escape)="dismissed.emit()"
+>
   <app-input [label]="'mobileApp.scan.manual.label' | translate" [formControl]="control" [maxlength]="maxLength" autocomplete="off" data-testid="manual-code-input" (keydown.enter)="submit()" />
   <div class="manual__actions">
     <button type="button" class="manual__cancel" (click)="dismissed.emit()">{{ 'common.cancel' | translate }}</button>

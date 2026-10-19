@@ -1,4 +1,4 @@
-import { WritableSignal, signal } from '@angular/core';
+import { Signal, WritableSignal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -18,6 +18,8 @@ import { AppLookupComponent } from './app-lookup.component';
 
 interface LookupInternals {
   selected: WritableSignal<ScanResolveResult | null>;
+  offline: Signal<boolean>;
+  searchControl: { disabled: boolean };
   onAction(action: ScanAction): Promise<void>;
 }
 
@@ -189,5 +191,30 @@ describe('AppLookupComponent moving a job', () => {
     await lookup.onAction('details');
 
     expect(snackbar.info).toHaveBeenCalledWith('mobileApp.scan.openOnDesktopHint');
+  });
+
+  it('opens Receive for a purchase order', async () => {
+    const lookup = create();
+    lookup.selected.set({ kind: 'purchaseOrder', id: 9, code: 'PO-9', label: 'PO-9', subtitle: null });
+
+    await lookup.onAction('receive');
+
+    expect(TestBed.inject(Router).navigate).toHaveBeenCalledWith(['/app/receive', 9]);
+  });
+
+  it('disables the search while offline and enables it again on reconnect', () => {
+    const online = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    try {
+      const lookup = create();
+      expect(lookup.offline()).toBe(true);
+      expect(lookup.searchControl.disabled).toBe(true);
+
+      online.mockReturnValue(true);
+      window.dispatchEvent(new Event('online'));
+      expect(lookup.offline()).toBe(false);
+      expect(lookup.searchControl.disabled).toBe(false);
+    } finally {
+      online.mockRestore();
+    }
   });
 });

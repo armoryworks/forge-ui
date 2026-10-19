@@ -8,27 +8,30 @@
     <span class="app-scan__corner app-scan__corner--br"></span>
   </div>
 
+  @if (cameraError()) {
+    <p class="app-scan__hint" role="alert" data-testid="scan-camera-error">{{ 'mobileApp.scan.cameraError' | translate }}</p>
+  }
   @if (notice(); as message) {
     <p class="app-scan__hint" role="status" data-testid="scan-notice">{{ message }}</p>
-  } @else if (cameraError()) {
-    <p class="app-scan__hint" role="alert">{{ 'mobileApp.scan.cameraError' | translate }}</p>
   } @else if (resolving()) {
     <p class="app-scan__hint" role="status">{{ 'mobileApp.scan.resolving' | translate }}</p>
-  } @else if (!result()) {
+  } @else if (!result() && !cameraError()) {
     <p class="app-scan__hint">{{ 'mobileApp.scan.prompt' | translate }}</p>
   }
 
-  <button
-    type="button"
-    class="app-scan__torch"
-    [class.app-scan__torch--on]="torchOn()"
-    [attr.aria-label]="'mobileApp.scan.torch' | translate"
-    [attr.aria-pressed]="torchOn()"
-    data-testid="scan-torch"
-    (click)="toggleTorch()"
-  >
-    <span class="material-icons-outlined" aria-hidden="true">{{ torchOn() ? 'flashlight_on' : 'flashlight_off' }}</span>
-  </button>
+  @if (torchSupported()) {
+    <button
+      type="button"
+      class="app-scan__torch"
+      [class.app-scan__torch--on]="torchOn()"
+      [attr.aria-label]="'mobileApp.scan.torch' | translate"
+      [attr.aria-pressed]="torchOn()"
+      data-testid="scan-torch"
+      (click)="toggleTorch()"
+    >
+      <span class="material-icons-outlined" aria-hidden="true">{{ torchOn() ? 'flashlight_on' : 'flashlight_off' }}</span>
+    </button>
+  }
 
   @if (!result() && !typing()) {
     <button type="button" class="app-scan__manual" data-testid="scan-type-it" (click)="openManual()">

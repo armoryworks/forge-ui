@@ -3,7 +3,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { debounceTime, distinctUntilChanged, firstValueFrom, switchMap, of, catchError } from 'rxjs';
+import { debounceTime, distinctUntilChanged, firstValueFrom, fromEvent, merge, switchMap, of, catchError } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InputComponent } from '../../../shared/components/input/input.component';
@@ -23,7 +23,8 @@ import { ScanAction, ScanActionSheetComponent } from '../components/scan-action-
  * no undo, when the server answers that the column can't be undone or
  * creates an accounting document; Complete then stops the person's timer on
  * that job only, unless the person declines. A record the phone does not
- * open says to use the desktop app.
+ * open says to use the desktop app; a purchase order opens Receive. Offline,
+ * the search field is disabled and says lookups need a connection.
  */
 @Component({
   selector: 'app-app-lookup',
@@ -50,11 +51,19 @@ export class AppLookupComponent {
   protected readonly busy = signal(false);
   protected readonly listening = signal(false);
   protected readonly runningJobId = computed(() => this.timer.active()?.jobId ?? null);
+  protected readonly offline = signal(typeof navigator !== 'undefined' && !navigator.onLine);
 
   protected readonly voiceSupported = computed(() =>
     typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window));
 
   constructor() {
+    if (this.offline()) this.searchControl.disable({ emitEvent: false });
+    merge(fromEvent(window, 'online'), fromEvent(window, 'offline')).pipe(takeUntilDestroyed()).subscribe(() => {
+      this.offline.set(!navigator.onLine);
+      if (this.offline()) this.searchControl.disable({ emitEvent: false });
+      else this.searchControl.enable({ emitEvent: false });
+    });
+
     this.searchControl.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged(),
@@ -164,6 +173,9 @@ export class AppLookupComponent {
         }
         case 'moveStock':
           await this.router.navigate(['/app/move'], { queryParams: { code: result.code } });
+          break;
+        case 'receive':
+          if (result.kind === 'purchaseOrder') await this.router.navigate(['/app/receive', result.id]);
           break;
         default:
           this.selected.set(null);

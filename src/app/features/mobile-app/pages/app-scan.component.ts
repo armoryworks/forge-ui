@@ -26,13 +26,14 @@ import { ScanAction, ScanActionSheetComponent } from '../components/scan-action-
 /**
  * Scan is home: the viewfinder opens immediately. A decode ticks, resolves
  * on the server, and offers one contextual action sheet — never a detail
- * page by itself. Unknown codes double-buzz. Torch bottom-left. On a shared
+ * page by itself. Unknown codes double-buzz. Torch bottom-left, shown only
+ * when the camera has one. On a shared
  * device a start, stop, move or complete ends the person's identity once its
  * undo toast closes; the undo itself runs with the token captured beforehand.
  * With operation tracking on, a job's open operations sit under the sheet.
- * Complete ("Stop & advance") moves the job on one step and stops the
- * person's timer on that job only, never one running on another job, and
- * says both in one toast. A move or complete is sent as it always was; when the
+ * Complete moves the job on one step and stops the person's timer on that
+ * job only, never one running on another job, and says both in one toast.
+ * A notice stays readable when the camera is unavailable. A move or complete is sent as it always was; when the
  * server answers that the column can't be undone or creates an accounting
  * document, the person is asked, the move is resent confirmed, offers no
  * undo, even when it was saved offline, and ends the identity at once. Any
@@ -66,6 +67,7 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
   protected readonly busy = signal(false);
   protected readonly notice = signal<string | null>(null);
   protected readonly torchOn = signal(false);
+  protected readonly torchSupported = signal(false);
   protected readonly cameraError = signal(false);
   protected readonly identifying = signal(false);
   protected readonly typing = signal(false);
@@ -322,7 +324,9 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
     this.cameraError.set(false);
     try {
       await this.scanner.start('app-scan-viewfinder', (value) => void this.onDecode(value));
+      this.torchSupported.set(await this.scanner.torchAvailable());
     } catch {
+      this.torchSupported.set(false);
       this.cameraError.set(true);
     }
   }

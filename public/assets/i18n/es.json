@@ -11118,7 +11118,7 @@
       },
       "actions": {
         "start": "Iniciar",
-        "complete": "Detener y avanzar",
+        "complete": "Completar",
         "move": "Mover",
         "details": "Detalles",
         "moveStock": "Mover inventario",
@@ -11128,7 +11128,7 @@
       },
       "manual": {
         "open": "Escribirlo",
-        "label": "Código de la etiqueta (p. ej. JOB-01042)",
+        "label": "Código de la etiqueta (p. ej. J-1042)",
         "go": "Buscar"
       },
       "actingAs": "Actuando como {{name}}",
@@ -11270,7 +11270,8 @@
       "placeholder": "Trabajo, pieza, cliente o ubicación",
       "voice": "Buscar por voz",
       "hint": "Escriba o diga un número de trabajo, pieza, cliente o ubicación.",
-      "none": "Nada coincidió."
+      "none": "Nada coincidió.",
+      "needsConnection": "La búsqueda necesita conexión. El escaneo sigue funcionando sin conexión."
     },
     "offline": {
       "queued": "Guardado en este teléfono. Se sincronizará cuando vuelva la conexión."

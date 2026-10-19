@@ -70,3 +70,14 @@
     transform: translateX(-50%) translateY(0);
   }
 }
+
+:host-context(body.app-mobile-shell) {
+  .offline-banner {
+    bottom: calc(var(--app-mobile-shell-chrome, 0px) + #{$sp-md});
+    max-width: calc(100vw - #{2 * $sp-lg});
+  }
+
+  .offline-banner__message {
+    white-space: normal;
+  }
+}

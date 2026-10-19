@@ -18,6 +18,7 @@ import { ScanFeedbackService } from '../../../shared/services/scan-feedback.serv
 import { SharedIdentityService } from '../../../shared/services/shared-identity.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { UndoService } from '../../../shared/services/undo.service';
+import { wasHttpErrorShown } from '../../../shared/utils/shown-http-errors';
 import { ManualCodeEntryComponent } from '../components/manual-code-entry/manual-code-entry.component';
 import { IdentityPromptComponent } from '../identity/identity-prompt.component';
 
@@ -29,7 +30,10 @@ type Step = 'part' | 'from' | 'to' | 'quantity';
  * one tap. A from-bin that does not hold the part is refused at once. Lot
  * picker appears only for lot-tracked parts, with a "no lot" choice for stock
  * put away without one. Moves are in whole units; a fraction on hand stays
- * behind and the screen says so. Undo moves it back.
+ * behind and the screen says so. A typed quantity is held to 1..what can
+ * move. Scanning a lot first picks its part and that lot; scanning a bin
+ * first makes it the from-bin, checked once the part is scanned. A refusal
+ * the server already explained is not repeated. Undo moves it back.
  */
 @Component({
   selector: 'app-app-move-stock',
@@ -70,6 +74,8 @@ export class AppMoveStockComponent implements AfterViewInit, OnDestroy {
   protected readonly identifying = signal(false);
   protected readonly typing = signal(false);
 
+  private prefillLot: string | null = null;
+
   protected readonly scanning = computed(() => this.step() !== 'quantity');
   protected readonly canFinish = computed(() =>
     this.quantity() > 0
@@ -96,7 +102,10 @@ export class AppMoveStockComponent implements AfterViewInit, OnDestroy {
 
   constructor() {
     this.typedQuantity.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
-      if (value !== null && Number.isFinite(value)) this.quantity.set(value);
+      if (value === null || !Number.isFinite(value)) return;
+      const held = Math.max(1, Math.min(this.movable(), value));
+      if (held !== value) this.setQuantity(held);
+      else this.quantity.set(value);
     });
   }
 
@@ -147,6 +156,7 @@ export class AppMoveStockComponent implements AfterViewInit, OnDestroy {
   protected restart(): void {
     this.part.set(null); this.from.set(null); this.to.set(null);
     this.onHand.set(null); this.lot.set(null); this.noLot.set(false); this.notice.set(null);
+    this.prefillLot = null;
     this.typingQuantity.set(false);
     this.setQuantity(1);
     this.step.set('part');
@@ -190,8 +200,8 @@ export class AppMoveStockComponent implements AfterViewInit, OnDestroy {
         );
       }
       this.restart();
-    } catch {
-      this.snackbar.error(this.translate.instant('mobileApp.move.failed'));
+    } catch (err) {
+      if (!wasHttpErrorShown(err)) this.snackbar.error(this.translate.instant('mobileApp.move.failed'));
     } finally {
       this.busy.set(false);
       this.identity.touch();
@@ -217,28 +227,20 @@ export class AppMoveStockComponent implements AfterViewInit, OnDestroy {
     this.busy.set(true);
     try {
       const resolved = await firstValueFrom(this.api.resolveScan(code));
-      const expected = this.step() === 'part' ? 'part' : 'bin';
-      if (resolved.kind !== expected) {
+      if (this.step() === 'part') {
+        await this.acceptFirst(resolved);
+        return;
+      }
+      if (resolved.kind !== 'bin') {
         await this.feedback.doubleBuzz();
-        this.notice.set(this.translate.instant(`mobileApp.move.expect.${expected}`));
+        this.notice.set(this.translate.instant('mobileApp.move.expect.bin'));
         return;
       }
       await this.feedback.tick();
       this.notice.set(null);
 
-      if (this.step() === 'part') {
-        this.part.set(resolved);
-        this.step.set('from');
-      } else if (this.step() === 'from') {
-        const stock = await firstValueFrom(this.api.onHand(this.part()!.id!, resolved.id!));
-        if (stock.quantity <= 0) {
-          await this.feedback.doubleBuzz();
-          this.notice.set(this.translate.instant('mobileApp.move.notInBin', { part: this.part()!.label, bin: resolved.label }));
-          return;
-        }
-        this.from.set(resolved);
-        this.onHand.set(stock);
-        this.step.set('to');
+      if (this.step() === 'from') {
+        await this.takeFrom(resolved);
       } else {
         if (resolved.id === this.from()?.id) {
           await this.feedback.doubleBuzz();
@@ -248,7 +250,9 @@ export class AppMoveStockComponent implements AfterViewInit, OnDestroy {
         this.to.set(resolved);
         await this.scanner.stop();
         const stock = this.onHand()!;
-        if (stock.lotTracked && stock.lots.length === 1 && stock.unlottedQuantity <= 0) this.pickLot(stock.lots[0].lotNumber);
+        const prefill = this.prefillLot;
+        if (prefill && stock.lots.some((l) => l.lotNumber === prefill)) this.pickLot(prefill);
+        else if (stock.lotTracked && stock.lots.length === 1 && stock.unlottedQuantity <= 0) this.pickLot(stock.lots[0].lotNumber);
         else if (stock.lotTracked && stock.lots.length === 0 && stock.unlottedQuantity > 0) this.pickNoLot();
         else this.setQuantity(this.movable());
         this.step.set('quantity');
@@ -259,5 +263,49 @@ export class AppMoveStockComponent implements AfterViewInit, OnDestroy {
     } finally {
       this.busy.set(false);
     }
+  }
+
+  private async acceptFirst(resolved: ScanResolveResult): Promise<void> {
+    if (resolved.kind === 'bin' && resolved.id) {
+      await this.feedback.tick();
+      this.notice.set(null);
+      this.from.set(resolved);
+      return;
+    }
+    const part = this.partOf(resolved);
+    if (!part) {
+      await this.feedback.doubleBuzz();
+      this.notice.set(this.translate.instant('mobileApp.move.expect.part'));
+      return;
+    }
+    await this.feedback.tick();
+    this.notice.set(null);
+    this.part.set(part);
+    this.prefillLot = resolved.kind === 'lot' ? resolved.label : null;
+    const from = this.from();
+    if (from) await this.takeFrom(from);
+    else this.step.set('from');
+  }
+
+  private partOf(resolved: ScanResolveResult): ScanResolveResult | null {
+    if (resolved.kind === 'part' && resolved.id) return resolved;
+    if (resolved.kind === 'lot' && resolved.partId && resolved.partNumber) {
+      return { kind: 'part', id: resolved.partId, code: resolved.partNumber, label: resolved.partNumber, subtitle: null };
+    }
+    return null;
+  }
+
+  private async takeFrom(bin: ScanResolveResult): Promise<void> {
+    const stock = await firstValueFrom(this.api.onHand(this.part()!.id!, bin.id!));
+    if (stock.quantity <= 0) {
+      await this.feedback.doubleBuzz();
+      this.notice.set(this.translate.instant('mobileApp.move.notInBin', { part: this.part()!.label, bin: bin.label }));
+      this.from.set(null);
+      this.step.set('from');
+      return;
+    }
+    this.from.set(bin);
+    this.onHand.set(stock);
+    this.step.set('to');
   }
 }

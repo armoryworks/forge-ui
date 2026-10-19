@@ -6,6 +6,8 @@ export interface ScanResolveResult {
   code: string;
   label: string;
   subtitle: string | null;
+  partId?: number | null;
+  partNumber?: string | null;
 }
 
 export interface JobActivityEntry {

@@ -1,7 +1,16 @@
-<div class="identity" data-testid="mobile-app-identity-prompt">
+<div
+  class="identity"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="identity-prompt-title"
+  cdkTrapFocus
+  cdkTrapFocusAutoCapture
+  data-testid="mobile-app-identity-prompt"
+  (keydown.escape)="cancel()"
+>
   @switch (stage()) {
     @case ('badge') {
-      <h2 class="identity__title">{{ 'mobileApp.identity.scanBadge' | translate }}</h2>
+      <h2 id="identity-prompt-title" class="identity__title">{{ 'mobileApp.identity.scanBadge' | translate }}</h2>
       <div class="identity__stage">
         <div #badgeViewfinder id="identity-badge-viewfinder" class="identity__viewfinder"></div>
         @if (cameraError(); as message) {
@@ -13,7 +22,7 @@
       </div>
     }
     @case ('pin') {
-      <h2 class="identity__title">{{ 'mobileApp.identity.enterPin' | translate }}</h2>
+      <h2 id="identity-prompt-title" class="identity__title">{{ 'mobileApp.identity.enterPin' | translate }}</h2>
       <app-pin-pad [minLength]="4" [maxLength]="8" (completed)="onPin($event)" />
       @if (error(); as message) {
         <p class="identity__error" role="alert">{{ message }}</p>

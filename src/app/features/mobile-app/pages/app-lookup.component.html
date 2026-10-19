@@ -20,7 +20,9 @@
     }
   </div>
 
-  @if (results().length) {
+  @if (offline()) {
+    <p class="lookup__hint" role="status" data-testid="lookup-offline">{{ 'mobileApp.lookup.needsConnection' | translate }}</p>
+  } @else if (results().length) {
     <ul class="lookup__results">
       @for (item of results(); track item.kind + item.id) {
         <li class="lookup__item">

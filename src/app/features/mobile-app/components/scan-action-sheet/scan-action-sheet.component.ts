@@ -20,9 +20,9 @@ interface ActionButton {
 
 /**
  * The one contextual action sheet after a decode: "Job 4471 — Start /
- * Stop & advance / Move / Details". Start becomes Stop while the person's
- * timer runs on this job; Stop & advance moves the job on one step and
- * stops the person's timer on it. A purchase order offers Receive while
+ * Complete / Move / Details". Start becomes Stop while the person's
+ * timer runs on this job; Complete moves the job on one step and stops the
+ * person's timer on it. A purchase order offers Receive while
  * purchasing is on and the person holds a role that may receive it. A
  * record the phone has no page for says Open on desktop. A modal dialog:
  * it takes focus when it opens and Escape cancels.

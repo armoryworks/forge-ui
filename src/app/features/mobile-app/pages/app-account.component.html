@@ -80,10 +80,12 @@
         <span class="material-icons-outlined" aria-hidden="true">pin</span>
         {{ 'mobileApp.account.changePin' | translate }}
       </button>
-      <button type="button" class="account__switch" role="switch" [attr.aria-checked]="lock.biometricEnabled()" data-testid="account-biometric" (click)="toggleBiometric()">
-        <span>{{ 'mobileApp.account.biometric' | translate }}</span>
-        <span class="material-icons-outlined" aria-hidden="true">{{ lock.biometricEnabled() ? 'toggle_on' : 'toggle_off' }}</span>
-      </button>
+      @if (biometricAvailable()) {
+        <button type="button" class="account__switch" role="switch" [attr.aria-checked]="lock.biometricEnabled()" data-testid="account-biometric" (click)="toggleBiometric()">
+          <span>{{ 'mobileApp.account.biometric' | translate }}</span>
+          <span class="material-icons-outlined" aria-hidden="true">{{ lock.biometricEnabled() ? 'toggle_on' : 'toggle_off' }}</span>
+        </button>
+      }
     </section>
     }
 

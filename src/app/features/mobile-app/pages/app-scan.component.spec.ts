@@ -28,6 +28,9 @@ interface ScanInternals {
   actingAs: Signal<string | null>;
   identifying: Signal<boolean>;
   notice: Signal<string | null>;
+  torchSupported: Signal<boolean>;
+  cameraError: Signal<boolean>;
+  ngAfterViewInit(): Promise<void>;
   onAction(action: ScanAction): Promise<void>;
   onIdentified(): void;
   notYou(): void;
@@ -117,7 +120,7 @@ describe('AppScanComponent', () => {
     router.navigate.mockReset().mockResolvedValue(true);
     TestBed.configureTestingModule({
       providers: [
-        { provide: CameraScannerService, useValue: { start: vi.fn().mockResolvedValue(undefined), stop: vi.fn() } },
+        { provide: CameraScannerService, useValue: { start: vi.fn().mockResolvedValue(undefined), stop: vi.fn(), torchAvailable: vi.fn().mockResolvedValue(false) } },
         { provide: MobileApiService, useValue: api },
         { provide: ScanFeedbackService, useValue: { tick: vi.fn(), doubleBuzz: vi.fn() } },
         { provide: UndoService, useValue: { offer } },
@@ -265,6 +268,31 @@ describe('AppScanComponent', () => {
 
     expect(offer).toHaveBeenCalledOnce();
     expect(offer.mock.calls[0][0]).toBe('mobileApp.jobs.movedTo');
+  });
+
+  it('offers the torch only when the running camera has one', async () => {
+    const scanner = TestBed.inject(CameraScannerService) as unknown as { torchAvailable: ReturnType<typeof vi.fn> };
+    const scan = create();
+    await scan.ngAfterViewInit();
+    expect(scan.torchSupported()).toBe(false);
+
+    scanner.torchAvailable.mockResolvedValue(true);
+    await scan.ngAfterViewInit();
+    expect(scan.torchSupported()).toBe(true);
+  });
+
+  it('keeps a notice when the camera cannot start', async () => {
+    const scanner = TestBed.inject(CameraScannerService) as unknown as { start: ReturnType<typeof vi.fn> };
+    scanner.start.mockRejectedValue(new Error('denied'));
+    const scan = create();
+    await scan.ngAfterViewInit();
+    scan.result.set({ kind: 'part', id: 7, code: 'PRT-SA-210', label: 'SA-210', subtitle: null });
+
+    await scan.onAction('details');
+
+    expect(scan.cameraError()).toBe(true);
+    expect(scan.torchSupported()).toBe(false);
+    expect(scan.notice()).toBe('mobileApp.scan.openOnDesktopHint');
   });
 
   it('names the identified person and clears them on Not you', () => {
@@ -446,7 +474,7 @@ describe('AppScanComponent requests', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: CameraScannerService, useValue: { start: vi.fn().mockResolvedValue(undefined), stop: vi.fn() } },
+        { provide: CameraScannerService, useValue: { start: vi.fn().mockResolvedValue(undefined), stop: vi.fn(), torchAvailable: vi.fn().mockResolvedValue(false) } },
         { provide: ScanFeedbackService, useValue: { tick: vi.fn(), doubleBuzz: vi.fn() } },
         { provide: UndoService, useValue: { offer } },
         { provide: OfflineQueueService, useValue: { remove: vi.fn(), enqueue: vi.fn() } },
