@@ -77,6 +77,14 @@
           <td>{{ 'accounting.cashFlow.netChangeInCash' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.netChangeInCash" /></td>
         </tr>
+        <tr>
+          <td>{{ 'accounting.cashFlow.beginningCash' | translate }}</td>
+          <td class="num"><app-currency-display [value]="r.beginningCash" /></td>
+        </tr>
+        <tr class="statement__subtotal">
+          <td>{{ 'accounting.cashFlow.endingCash' | translate }}</td>
+          <td class="num"><app-currency-display [value]="r.endingCash" /></td>
+        </tr>
         <tr class="statement__reconcile">
           <td>{{ 'accounting.cashFlow.actualCashMovement' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.actualCashChange" /></td>

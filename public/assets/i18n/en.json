@@ -10131,6 +10131,8 @@
       "netCashFromFinancing": "Net cash from financing",
       "netChangeInCash": "Net change in cash",
       "actualCashMovement": "Actual cash movement",
+      "beginningCash": "Cash at beginning of period",
+      "endingCash": "Cash at end of period",
       "operatingAdjustments": "Operating adjustments",
       "chartLabel": "Cash flow waterfall chart"
     },
@@ -10225,6 +10227,7 @@
         "grniReconciled": "GRNI ties (GL vs received-not-billed)",
         "arTies": "AR aging ties to control",
         "apTies": "AP aging ties to control",
+        "noPendingEntries": "No journal entries awaiting approval",
         "blockedHint": "Hard-closing this period, or closing the year when it is the final period, is refused until every item passes.",
         "loadFailed": "Could not load the close checklist."
       },

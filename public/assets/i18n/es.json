@@ -10131,6 +10131,8 @@
       "netCashFromFinancing": "Efectivo neto de financiamiento",
       "netChangeInCash": "Variación neta de efectivo",
       "actualCashMovement": "Movimiento real de efectivo",
+      "beginningCash": "Efectivo al inicio del periodo",
+      "endingCash": "Efectivo al final del periodo",
       "operatingAdjustments": "Ajustes de operación",
       "chartLabel": "Gráfico de cascada de flujo de efectivo"
     },
@@ -10225,6 +10227,7 @@
         "grniReconciled": "GRNI cuadra (libro mayor vs. recibido no facturado)",
         "arTies": "La antigüedad de cuentas por cobrar cuadra con la cuenta de control",
         "apTies": "La antigüedad de cuentas por pagar cuadra con la cuenta de control",
+        "noPendingEntries": "Ningún asiento contable pendiente de aprobación",
         "blockedHint": "El cierre definitivo de este período, o el cierre del año cuando es el último período, se rechaza hasta que todos los puntos estén correctos.",
         "loadFailed": "No se pudo cargar la lista de verificación de cierre."
       },

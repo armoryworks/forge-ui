@@ -114,6 +114,8 @@ export interface CashFlowStatement {
   netCashFromFinancing: number;
   netChangeInCash: number;
   actualCashChange: number;
+  beginningCash: number;
+  endingCash: number;
   roundingTolerance: number;
   isReconciled: boolean;
 }
