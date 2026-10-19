@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 
 import { AuthService } from './auth.service';
 import { CapabilityService } from './capability.service';
@@ -56,5 +57,53 @@ describe('NavTreeService · maintenance', () => {
 
     expect(routes).toContain('/maintenance/predictions');
     expect(routes).not.toContain('/maintenance/schedules');
+  });
+});
+
+@Component({ selector: 'app-nav-tree-spec-page', template: '' })
+class SpecPageComponent {}
+
+async function serviceAt(url: string): Promise<NavTreeService> {
+  TestBed.resetTestingModule();
+  TestBed.configureTestingModule({
+    providers: [
+      provideRouter([
+        { path: 'notifications', data: { breadcrumb: 'header.notifications' }, children: [{ path: '', component: SpecPageComponent }] },
+        { path: 'training/path/:id', component: SpecPageComponent },
+        { path: 'customers/:id/:tab', component: SpecPageComponent },
+        { path: 'customers', component: SpecPageComponent },
+      ]),
+      { provide: CapabilityService, useValue: { isEnabled: () => true } },
+      { provide: AuthService, useValue: { hasAnyRole: () => true, user: () => null } },
+    ],
+  });
+  const service = TestBed.inject(NavTreeService);
+  await TestBed.inject(Router).navigateByUrl(url);
+  return service;
+}
+
+describe('NavTreeService · breadcrumb', () => {
+  it('names a page outside the navigation tree from its route data', async () => {
+    const service = await serviceAt('/notifications');
+
+    expect(service.breadcrumbTrail().map(c => c.i18nKey)).toEqual(['header.notifications']);
+  });
+
+  it('keeps Training as the current crumb on its module and path pages', async () => {
+    const service = await serviceAt('/training/path/5');
+
+    expect(service.breadcrumbTrail().at(-1)?.i18nKey).toBe('nav.training');
+  });
+
+  it('reports the record name only while the URL stays under that record', async () => {
+    const service = await serviceAt('/customers/12/overview');
+    service.setRecordCrumb('Acme Tooling', '/customers/12');
+    expect(service.recordCrumb()).toBe('Acme Tooling');
+
+    await TestBed.inject(Router).navigateByUrl('/customers/12/orders');
+    expect(service.recordCrumb()).toBe('Acme Tooling');
+
+    await TestBed.inject(Router).navigateByUrl('/customers');
+    expect(service.recordCrumb()).toBeNull();
   });
 });

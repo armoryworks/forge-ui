@@ -8,6 +8,7 @@ import { Observable, of } from 'rxjs';
 
 import { AuthService } from '../../../../shared/services/auth.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
+import { NavTreeService } from '../../../../shared/services/nav-tree.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { CustomerSummary } from '../../models/customer-summary.model';
 import { UpdateCustomerRequest } from '../../models/update-customer-request.model';
@@ -18,6 +19,8 @@ import { CustomerDetailComponent } from './customer-detail.component';
 class FakeLoader implements TranslateLoader {
   getTranslation(): Observable<Record<string, string>> { return of({}); }
 }
+
+const navTreeStub = { setRecordCrumb: vi.fn() };
 
 const CUSTOMER: CustomerSummary = {
   id: 5,
@@ -49,6 +52,7 @@ describe('CustomerDetailComponent · saveClusterPatch', () => {
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
         { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: '5', tab: 'overview' })) } },
         { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: NavTreeService, useValue: navTreeStub },
         { provide: CustomerService, useValue: customerService },
         { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
         { provide: MatDialog, useValue: { open: vi.fn() } },
@@ -78,6 +82,12 @@ describe('CustomerDetailComponent · saveClusterPatch', () => {
       phone: '',
     }));
   });
+
+  it('names the customer in the header breadcrumb once it loads', () => {
+    setup();
+
+    expect(navTreeStub.setRecordCrumb).toHaveBeenCalledWith('Acme Co', '/customers/5');
+  });
 });
 
 describe('CustomerDetailComponent · role-gated tabs', () => {
@@ -90,6 +100,7 @@ describe('CustomerDetailComponent · role-gated tabs', () => {
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
         { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: '5', tab })) } },
         { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: NavTreeService, useValue: navTreeStub },
         { provide: CustomerService, useValue: { getCustomerSummary: () => of(CUSTOMER) } },
         { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
         { provide: MatDialog, useValue: { open: vi.fn() } },
@@ -140,6 +151,7 @@ describe('CustomerDetailComponent · money stats', () => {
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
         { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: '5', tab: 'overview' })) } },
         { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: NavTreeService, useValue: navTreeStub },
         { provide: CustomerService, useValue: { getCustomerSummary: () => of(CUSTOMER) } },
         { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
         { provide: MatDialog, useValue: { open: vi.fn() } },
@@ -179,6 +191,7 @@ describe('CustomerDetailComponent · credit and tax terms', () => {
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
         { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: '5', tab: 'overview' })) } },
         { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: NavTreeService, useValue: navTreeStub },
         { provide: CustomerService, useValue: { getCustomerSummary: () => of(customer), updateCustomer } },
         { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
         { provide: MatDialog, useValue: { open: vi.fn() } },

@@ -85,7 +85,11 @@
     "pieceRates": "Piece Rates",
     "openingJournal": "Opening Journal",
     "journalApprovals": "Journal Approvals",
-    "maintenancePredictions": "Predictions"
+    "maintenancePredictions": "Predictions",
+    "onboarding": "Onboarding",
+    "workflowShellDemo": "Workflow demo",
+    "devTools": "Developer tools",
+    "orderAcceptance": "Order acceptance"
   },
   "navGroups": {
     "operations": "Operations",

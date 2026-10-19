@@ -17,6 +17,7 @@ import {
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
 import { AuthService } from '../../../../shared/services/auth.service';
+import { NavTreeService } from '../../../../shared/services/nav-tree.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { CustomerOverviewTabComponent } from './tabs/customer-overview-tab.component';
 import { CustomerEstimatesTabComponent } from './tabs/customer-estimates-tab.component';
@@ -93,6 +94,7 @@ export class CustomerDetailComponent {
   private readonly layoutResolver = inject(CustomerDetailLayoutResolverService);
   private readonly capabilityService = inject(CapabilityService);
   private readonly auth = inject(AuthService);
+  private readonly navTree = inject(NavTreeService);
 
   /**
    * Wave 5 — Tabs whose entire surface is capability-gated. The resolver
@@ -188,6 +190,11 @@ export class CustomerDetailComponent {
     effect(() => {
       const id = this.customerId();
       if (id > 0) this.loadCustomer(id);
+    });
+
+    effect(() => {
+      const c = this.customer();
+      if (c) this.navTree.setRecordCrumb(c.name, `/customers/${c.id}`);
     });
 
     // Diagnostics — whenever tabs are dropped by capability gating, say so
