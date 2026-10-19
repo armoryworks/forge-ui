@@ -11853,7 +11853,7 @@
     "noMaterials": "No se han emitido materiales a este trabajo.",
     "issueMaterial": "Emitir material",
     "issueMaterialTitle": "Emitir material a este trabajo",
-    "part": "Parte",
+    "part": "Pieza",
     "bin": "Ubicación y lote",
     "quantity": "Cantidad",
     "issue": "Emitir",
@@ -11862,8 +11862,8 @@
     "alternateOption": "{{part}} - alternativa de {{primary}} (requerido {{required}}, emitido {{issued}})",
     "binOption": "{{location}} - lote {{lot}} - {{available}} disponibles",
     "binOptionNoLot": "{{location}} - {{available}} disponibles",
-    "noIssuableMaterials": "La parte de este trabajo no tiene componentes de BOM ni alternativas aprobadas para emitir.",
-    "noIssuableStock": "No se puede emitir existencia de esta parte: está agotada o en retención de calidad."
+    "noIssuableMaterials": "La pieza de este trabajo no tiene componentes de BOM ni alternativas aprobadas para emitir.",
+    "noIssuableStock": "No se puede emitir existencia de esta pieza: está agotada o en retención de calidad."
   },
   "maintenanceSchedules": {
     "pageTitle": "Mantenimiento preventivo",

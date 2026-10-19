@@ -84,6 +84,15 @@ describe('BankingSettingsPanelComponent', () => {
     ]);
   });
 
+  it('saves a number field, which the input emits as a number, as text', () => {
+    const panel = create();
+    edit(panel, 'banking.sftp.port', 2222);
+
+    panel.save();
+
+    expect(updateSetting).toHaveBeenCalledWith('banking.sftp.port', '2222');
+  });
+
   it('clears a plain setting when it is emptied', () => {
     const panel = create();
     edit(panel, 'banking.sftp.host', '');
