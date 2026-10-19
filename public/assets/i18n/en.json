@@ -5398,7 +5398,21 @@
     "ssoEmailUnverified": "Your identity provider has not verified this email address, so it can't be used to sign in. Verify the email with your provider or contact your administrator.",
     "invalidSetupLink": "Invalid setup link. Please contact your administrator.",
     "expiredSetupCode": "Invalid or expired setup code. Please contact your administrator.",
-    "bundleJobShop": "Job shop: quote, make, ship, invoice"
+    "bundleJobShop": "Job shop: quote, make, ship, invoice",
+    "mfa": {
+      "preparing": "Preparing verification...",
+      "codeSentTo": "Code sent to {{target}}",
+      "sixDigitCode": "6-digit code",
+      "rememberDevice": "Remember this device for 30 days",
+      "verify": "Verify",
+      "useRecoveryCode": "Use a recovery code instead",
+      "recoveryCode": "Recovery Code",
+      "verifyRecoveryCode": "Verify Recovery Code",
+      "useAuthenticator": "Use authenticator code instead",
+      "backToLogin": "Back to login",
+      "invalidCode": "Invalid verification code",
+      "invalidRecoveryCode": "Invalid recovery code"
+    }
   },
   "validation": {
     "required": "{field} is required",
@@ -5406,7 +5420,18 @@
     "maxLength": "{field} cannot exceed {max} characters",
     "invalidEmail": "Invalid email address",
     "invalidPhone": "Invalid phone number",
-    "invalidZip": "Invalid ZIP code"
+    "invalidZip": "Invalid ZIP code",
+    "messages": {
+      "required": "{{label}} is required",
+      "email": "{{label}} must be a valid email",
+      "minLength": "{{label}} must be at least {{count}} characters",
+      "maxLength": "{{label}} must be at most {{count}} characters",
+      "min": "{{label}} must be at least {{min}}",
+      "max": "{{label}} must be at most {{max}}",
+      "pattern": "{{label}} format is invalid",
+      "wholeNumber": "{{label}} must be a whole number",
+      "invalid": "{{label}} is invalid"
+    }
   },
   "invoices": {
     "invoiceNumberLabel": "Invoice Number",
@@ -6809,12 +6834,33 @@
       "qualityRejection": "Quality / Rejection Flow",
       "inventoryLocation": "Inventory Location Flow",
       "customerRevenue": "Customer Revenue Breakdown",
-      "trainingCompletion": "Training Completion"
+      "trainingCompletion": "Training Completion",
+      "noFlowData": "No flow data available"
     },
     "colFailures": "Failures",
     "colDowntimeHours": "Downtime (h)",
     "colUnplannedDowntimeHours": "Unplanned downtime (h)",
-    "colMtbfHours": "MTBF (h)"
+    "colMtbfHours": "MTBF (h)",
+    "chart": {
+      "jobs": "Jobs",
+      "hours": "Hours",
+      "leads": "Leads",
+      "created": "Created",
+      "completed": "Completed",
+      "avgDays": "Avg Days",
+      "active": "Active",
+      "overdue": "Overdue",
+      "quotes": "Quotes",
+      "revenue": "Revenue",
+      "stock": "Stock",
+      "scrapRatePct": "Scrap Rate %",
+      "completionPct": "Completion %",
+      "margin": "Margin",
+      "onTime": "On Time",
+      "late": "Late",
+      "allStages": "All Stages",
+      "allCategories": "All Categories"
+    }
   },
   "qcInspections": {
     "tabTemplates": "Templates",
@@ -7667,7 +7713,11 @@
         "submit": "Raise alert",
         "raised": "Alert raised at {{workCenter}}",
         "failed": "Could not raise the alert: {{reason}}"
-      }
+      },
+      "cancelActions": "Cancel job actions",
+      "cancelAdvance": "Cancel advance",
+      "confirmAdvance": "Confirm advance stage",
+      "cancelNote": "Cancel note"
     },
     "operations": {
       "title": "Operations",
@@ -7785,7 +7835,18 @@
     "assignFailed": "You can't take this work order. Ask a supervisor.",
     "fullscreen": "Full screen",
     "setupFullscreenHint": "Tap Full screen on the display after setup so the board fills the screen.",
-    "terminalNotForWorker": "This terminal is not set up for your team. Use your team's terminal or ask your supervisor."
+    "terminalNotForWorker": "This terminal is not set up for your team. Use your team's terminal or ask your supervisor.",
+    "teamOptionOne": "{{name}} ({{count}} member)",
+    "teamOptionOther": "{{name}} ({{count}} members)",
+    "invScan": {
+      "title": "Inventory Scan Mode",
+      "scanned": "Scanned",
+      "prompt": "Scan a part barcode to begin",
+      "inputLabel": "Scan Part Barcode",
+      "inputPlaceholder": "Scan or type part number...",
+      "recent": "Recent Scans",
+      "inStock": "{{count}} in stock"
+    }
   },
   "kioskDisplay": {
     "entryTitle": "Use this browser as a shop-floor terminal?",
@@ -8564,7 +8625,8 @@
     "min": "min",
     "noWorkCenters": "No work centers",
     "trendChartLabel": "OEE Trend",
-    "worldClassBadge": "World-Class"
+    "worldClassBadge": "World-Class",
+    "gridLabel": "Work center OEE overview"
   },
   "rfqPdf": {
     "download": "Download PDF",
@@ -11405,7 +11467,8 @@
       "expect": {
         "part": "That is not a part label.",
         "bin": "That is not a bin label."
-      }
+      },
+      "stepsLabel": "Move stock steps"
     },
     "lookup": {
       "placeholder": "Job, part, customer, or bin",
@@ -12015,7 +12078,31 @@
     "binOption": "{{location}} - lot {{lot}} - {{available}} available",
     "binOptionNoLot": "{{location}} - {{available}} available",
     "noIssuableMaterials": "This job's part has no BOM components or approved alternates to issue.",
-    "noIssuableStock": "No stock of this part can be issued: it is out of stock or on quality hold."
+    "noIssuableStock": "No stock of this part can be issued: it is out of stock or on quality hold.",
+    "category": "Category",
+    "estimated": "Estimated",
+    "actual": "Actual",
+    "variance": "Variance",
+    "material": "Material",
+    "labor": "Labor",
+    "burden": "Burden",
+    "subcontract": "Subcontract",
+    "quotedPrice": "Quoted Price",
+    "actualMargin": "Actual Margin",
+    "materialIssues": "MATERIAL ISSUES",
+    "recalculate": "Recalculate",
+    "recalculateAria": "Recalculate costs",
+    "returnMaterial": "Return material",
+    "returned": "Material returned to stock",
+    "recalculated": "Costs recalculated",
+    "colPartNumber": "Part #",
+    "colQty": "Qty",
+    "colUnitCost": "Unit Cost",
+    "issueTypes": {
+      "issue": "Issue",
+      "return": "Return",
+      "scrap": "Scrap"
+    }
   },
   "maintenanceSchedules": {
     "pageTitle": "Preventive Maintenance",
@@ -12207,5 +12294,39 @@
     "lastPage": "Last page",
     "range": "{{start}} – {{end}} of {{length}}",
     "rangeEmpty": "0 of {{length}}"
+  },
+  "validationButton": {
+    "triggerAriaOne": "{{count}} validation issue. Click to view.",
+    "triggerAriaOther": "{{count}} validation issues. Click to view.",
+    "show": "Show validation errors",
+    "popoverLabel": "Validation errors",
+    "allResolved": "All issues resolved"
+  },
+  "clockStatus": {
+    "in": "Currently Working",
+    "inShort": "IN",
+    "out": "Clocked Out",
+    "outShort": "OUT",
+    "onBreak": "On Break",
+    "onBreakShort": "BREAK",
+    "onLunch": "On Lunch",
+    "onLunchShort": "LUNCH",
+    "unknown": "Unknown"
+  },
+  "clockActions": {
+    "ClockIn": "Clock In",
+    "ClockOut": "Clock Out",
+    "BreakStart": "Start Break",
+    "BreakEnd": "End Break",
+    "LunchStart": "Start Lunch",
+    "LunchEnd": "End Lunch"
+  },
+  "dateRange": {
+    "presets": {
+      "today": "Today",
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
+      "last30Days": "Last 30 Days"
+    }
   }
 }

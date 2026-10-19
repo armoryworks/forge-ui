@@ -45,7 +45,30 @@ const ERROR_MESSAGES: Record<string, (label: string, error: unknown) => string> 
   pattern: (label) => `${label} format is invalid`,
 };
 
+type MessageTranslator = (key: string, params: Record<string, unknown>) => string;
+
+const ERROR_MESSAGE_KEYS: Record<string, (label: string, error: unknown) => [string, Record<string, unknown>]> = {
+  required: (label) => ['validation.messages.required', { label }],
+  email: (label) => ['validation.messages.email', { label }],
+  minlength: (label, err) => ['validation.messages.minLength', { label, count: (err as { requiredLength: number }).requiredLength }],
+  maxlength: (label, err) => ['validation.messages.maxLength', { label, count: (err as { requiredLength: number }).requiredLength }],
+  min: (label, err) => ['validation.messages.min', { label, min: (err as { min: number }).min }],
+  max: (label, err) => ['validation.messages.max', { label, max: (err as { max: number }).max }],
+  pattern: (label) => ['validation.messages.pattern', { label }],
+  wholeNumber: (label) => ['validation.messages.wholeNumber', { label }],
+};
+
+let translator: MessageTranslator | null = null;
+
 export class FormValidationService {
+  /**
+   * Routes the built-in validation messages through the UI translations.
+   * Set once at startup; until then (and in unit tests) messages are English.
+   */
+  static setTranslator(fn: MessageTranslator | null): void {
+    translator = fn;
+  }
+
   /**
    * Returns a signal of violation messages for the given form.
    * Safe to call from any context (constructor, effect, computed, etc.)
@@ -105,6 +128,10 @@ export class FormValidationService {
       const message = (errorValue as { message: unknown }).message;
       if (typeof message !== 'string') return null;
       return errorKey === 'serverError' ? `${label}: ${message}` : message;
+    }
+    if (translator) {
+      const [key, params] = ERROR_MESSAGE_KEYS[errorKey]?.(label, errorValue) ?? ['validation.messages.invalid', { label }];
+      return translator(key, params);
     }
     if (ERROR_MESSAGES[errorKey]) {
       return ERROR_MESSAGES[errorKey](label, errorValue);

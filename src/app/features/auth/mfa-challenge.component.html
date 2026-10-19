@@ -2,27 +2,27 @@
   @if (loading()) {
     <div class="mfa-challenge__loading">
       <span class="material-icons-outlined mfa-challenge__spinner">sync</span>
-      <p>Preparing verification...</p>
+      <p>{{ 'auth.mfa.preparing' | translate }}</p>
     </div>
   } @else {
     <div class="mfa-challenge__header">
       <span class="material-icons-outlined mfa-challenge__icon">verified_user</span>
-      <h2>Two-Factor Authentication</h2>
+      <h2>{{ 'account.mfa.title' | translate }}</h2>
       @if (challenge()?.maskedTarget; as target) {
-        <p class="mfa-challenge__hint">Code sent to {{ target }}</p>
+        <p class="mfa-challenge__hint">{{ 'auth.mfa.codeSentTo' | translate: { target } }}</p>
       }
     </div>
 
     @if (!showRecovery()) {
       <form [formGroup]="codeForm" (ngSubmit)="submitCode()" class="mfa-challenge__form">
-        <app-input label="6-digit code" formControlName="code"
+        <app-input [label]="'auth.mfa.sixDigitCode' | translate" formControlName="code"
           placeholder="000000" [maxlength]="6" [required]="true"
           data-testid="mfa-code" />
 
         @if (allowRememberDevice()) {
           <label class="mfa-challenge__remember">
             <input type="checkbox" formControlName="rememberDevice" data-testid="mfa-remember-device" />
-            Remember this device for 30 days
+            {{ 'auth.mfa.rememberDevice' | translate }}
           </label>
         }
 
@@ -39,20 +39,20 @@
           data-testid="mfa-submit">
           @if (verifying()) {
             <span class="material-icons-outlined mfa-challenge__spinner">sync</span>
-            Verifying...
+            {{ 'account.mfa.verifying' | translate }}
           } @else {
-            Verify
+            {{ 'auth.mfa.verify' | translate }}
           }
         </button>
         </app-validation-button>
       </form>
 
       <button class="mfa-challenge__alt-link" (click)="showRecovery.set(true)" type="button">
-        Use a recovery code instead
+        {{ 'auth.mfa.useRecoveryCode' | translate }}
       </button>
     } @else {
       <form [formGroup]="recoveryForm" (ngSubmit)="submitRecovery()" class="mfa-challenge__form">
-        <app-input label="Recovery Code" formControlName="recoveryCode"
+        <app-input [label]="'auth.mfa.recoveryCode' | translate" formControlName="recoveryCode"
           placeholder="XXXXX-XXXXX" [required]="true"
           data-testid="mfa-recovery-code" />
 
@@ -68,21 +68,21 @@
           data-testid="mfa-recovery-submit">
           @if (verifying()) {
             <span class="material-icons-outlined mfa-challenge__spinner">sync</span>
-            Verifying...
+            {{ 'account.mfa.verifying' | translate }}
           } @else {
-            Verify Recovery Code
+            {{ 'auth.mfa.verifyRecoveryCode' | translate }}
           }
         </button>
       </form>
 
       <button class="mfa-challenge__alt-link" (click)="showRecovery.set(false)" type="button">
-        Use authenticator code instead
+        {{ 'auth.mfa.useAuthenticator' | translate }}
       </button>
     }
 
     <button class="mfa-challenge__cancel" (click)="cancel()" type="button">
       <span class="material-icons-outlined">arrow_back</span>
-      Back to login
+      {{ 'auth.mfa.backToLogin' | translate }}
     </button>
   }
 </div>

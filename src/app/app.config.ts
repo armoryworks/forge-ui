@@ -35,9 +35,11 @@ import { portalAuthInterceptor } from './features/portal/services/portal-auth.in
 import { trainingLangInterceptor } from './shared/interceptors/training-lang.interceptor';
 import { TerminologyTranslateLoader } from './shared/terminology/terminology-translate-loader';
 import { TranslatedPaginatorIntl } from './shared/services/translated-paginator-intl';
+import { FormValidationService } from './shared/services/form-validation.service';
 
 function initTranslations(): () => Promise<void> {
   const translate = inject(TranslateService);
+  FormValidationService.setTranslator((key, params) => translate.instant(key, params));
   return async () => {
     const saved = localStorage.getItem('language') || 'en';
     await firstValueFrom(translate.use(saved));

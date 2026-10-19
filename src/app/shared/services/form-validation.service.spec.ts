@@ -201,4 +201,30 @@ describe('FormValidationService', () => {
       });
     });
   });
+
+  describe('with a translator', () => {
+    afterEach(() => FormValidationService.setTranslator(null));
+
+    it('builds each message from its validation.messages key and parameters', () => {
+      const calls: [string, Record<string, unknown>][] = [];
+      FormValidationService.setTranslator((key, params) => {
+        calls.push([key, params]);
+        return `${key}:${JSON.stringify(params)}`;
+      });
+
+      expect(FormValidationService.messageFor('required', true, 'Nombre')).toBe('validation.messages.required:{"label":"Nombre"}');
+      expect(FormValidationService.messageFor('minlength', { requiredLength: 3, actualLength: 1 }, 'Código'))
+        .toBe('validation.messages.minLength:{"label":"Código","count":3}');
+      expect(FormValidationService.messageFor('somethingCustom', true, 'Campo')).toBe('validation.messages.invalid:{"label":"Campo"}');
+      expect(calls.length).toBe(3);
+    });
+
+    it('leaves validator-supplied and server messages untouched', () => {
+      FormValidationService.setTranslator(() => 'translated');
+
+      expect(FormValidationService.messageFor('custom', { message: 'Pick a later date' }, 'Date')).toBe('Pick a later date');
+      expect(FormValidationService.messageFor('serverError', { message: 'already used' }, 'Code')).toBe('Code: already used');
+    });
+  });
 });
+

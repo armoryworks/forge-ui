@@ -5391,7 +5391,21 @@
     "ssoEmailUnverified": "Su proveedor de identidad no ha verificado esta dirección de correo, así que no se puede usar para iniciar sesión. Verifique el correo con su proveedor o contacte a su administrador.",
     "invalidSetupLink": "Enlace de configuración inválido. Contacte a su administrador.",
     "expiredSetupCode": "Código de configuración inválido o expirado. Contacte a su administrador.",
-    "bundleJobShop": "Taller por pedido: cotizar, fabricar, enviar, facturar"
+    "bundleJobShop": "Taller por pedido: cotizar, fabricar, enviar, facturar",
+    "mfa": {
+      "preparing": "Preparando la verificación...",
+      "codeSentTo": "Código enviado a {{target}}",
+      "sixDigitCode": "Código de 6 dígitos",
+      "rememberDevice": "Recordar este dispositivo durante 30 días",
+      "verify": "Verificar",
+      "useRecoveryCode": "Usar un código de recuperación",
+      "recoveryCode": "Código de recuperación",
+      "verifyRecoveryCode": "Verificar código de recuperación",
+      "useAuthenticator": "Usar el código del autenticador",
+      "backToLogin": "Volver al inicio de sesión",
+      "invalidCode": "Código de verificación no válido",
+      "invalidRecoveryCode": "Código de recuperación no válido"
+    }
   },
   "validation": {
     "required": "{field} es requerido",
@@ -5399,7 +5413,18 @@
     "maxLength": "{field} no puede exceder {max} caracteres",
     "invalidEmail": "Dirección de correo inválida",
     "invalidPhone": "Número de teléfono inválido",
-    "invalidZip": "Código postal inválido"
+    "invalidZip": "Código postal inválido",
+    "messages": {
+      "required": "{{label}} es obligatorio",
+      "email": "{{label}} debe ser un correo electrónico válido",
+      "minLength": "{{label}} debe tener al menos {{count}} caracteres",
+      "maxLength": "{{label}} debe tener como máximo {{count}} caracteres",
+      "min": "{{label}} debe ser al menos {{min}}",
+      "max": "{{label}} debe ser como máximo {{max}}",
+      "pattern": "El formato de {{label}} no es válido",
+      "wholeNumber": "{{label}} debe ser un número entero",
+      "invalid": "{{label}} no es válido"
+    }
   },
   "invoices": {
     "invoiceNumberLabel": "Número de factura",
@@ -6802,12 +6827,33 @@
       "qualityRejection": "Flujo de Calidad / Rechazo",
       "inventoryLocation": "Flujo de Ubicación de Inventario",
       "customerRevenue": "Desglose de Ingresos por Cliente",
-      "trainingCompletion": "Finalización de Capacitación"
+      "trainingCompletion": "Finalización de Capacitación",
+      "noFlowData": "No hay datos de flujo disponibles"
     },
     "colFailures": "Fallas",
     "colDowntimeHours": "Tiempo muerto (h)",
     "colUnplannedDowntimeHours": "Tiempo muerto no planificado (h)",
-    "colMtbfHours": "MTBF (h)"
+    "colMtbfHours": "MTBF (h)",
+    "chart": {
+      "jobs": "Trabajos",
+      "hours": "Horas",
+      "leads": "Prospectos",
+      "created": "Creados",
+      "completed": "Completados",
+      "avgDays": "Días prom.",
+      "active": "Activos",
+      "overdue": "Vencidos",
+      "quotes": "Cotizaciones",
+      "revenue": "Ingresos",
+      "stock": "Existencias",
+      "scrapRatePct": "% de desecho",
+      "completionPct": "% de cumplimiento",
+      "margin": "Margen",
+      "onTime": "A tiempo",
+      "late": "Con retraso",
+      "allStages": "Todas las etapas",
+      "allCategories": "Todas las categorías"
+    }
   },
   "qcInspections": {
     "tabTemplates": "Plantillas",
@@ -7649,7 +7695,11 @@
         "submit": "Enviar alerta",
         "raised": "Alerta enviada a {{workCenter}}",
         "failed": "No se pudo enviar la alerta: {{reason}}"
-      }
+      },
+      "cancelActions": "Cancelar acciones del trabajo",
+      "cancelAdvance": "Cancelar avance",
+      "confirmAdvance": "Confirmar avance de estado",
+      "cancelNote": "Cancelar nota"
     },
     "operations": {
       "title": "Operaciones",
@@ -7778,7 +7828,18 @@
     "assignFailed": "No puede tomar esta orden de trabajo. Pregunte a un supervisor.",
     "fullscreen": "Pantalla completa",
     "setupFullscreenHint": "Toque Pantalla completa en la pantalla después de la configuración para que el tablero ocupe toda la pantalla.",
-    "terminalNotForWorker": "Esta terminal no está configurada para su equipo. Use la terminal de su equipo o pregunte a su supervisor."
+    "terminalNotForWorker": "Esta terminal no está configurada para su equipo. Use la terminal de su equipo o pregunte a su supervisor.",
+    "teamOptionOne": "{{name}} ({{count}} miembro)",
+    "teamOptionOther": "{{name}} ({{count}} miembros)",
+    "invScan": {
+      "title": "Modo de escaneo de inventario",
+      "scanned": "Escaneados",
+      "prompt": "Escanee el código de barras de una pieza para comenzar",
+      "inputLabel": "Escanear código de barras de la pieza",
+      "inputPlaceholder": "Escanee o escriba el número de pieza...",
+      "recent": "Escaneos recientes",
+      "inStock": "{{count}} en existencia"
+    }
   },
   "kioskDisplay": {
     "entryTitle": "¿Usar este navegador como terminal de planta?",
@@ -8557,7 +8618,8 @@
       "daily": "Diario",
       "monthly": "Mensual",
       "weekly": "Semanal"
-    }
+    },
+    "gridLabel": "Resumen de OEE por centro de trabajo"
   },
   "rfqPdf": {
     "download": "Descargar PDF",
@@ -11405,7 +11467,8 @@
       "expect": {
         "part": "Esa no es una etiqueta de pieza.",
         "bin": "Esa no es una etiqueta de ubicación."
-      }
+      },
+      "stepsLabel": "Pasos para mover inventario"
     },
     "lookup": {
       "placeholder": "Trabajo, pieza, cliente o ubicación",
@@ -12015,7 +12078,31 @@
     "binOption": "{{location}} - lote {{lot}} - {{available}} disponibles",
     "binOptionNoLot": "{{location}} - {{available}} disponibles",
     "noIssuableMaterials": "La pieza de este trabajo no tiene componentes de BOM ni alternativas aprobadas para emitir.",
-    "noIssuableStock": "No se puede emitir existencia de esta pieza: está agotada o en retención de calidad."
+    "noIssuableStock": "No se puede emitir existencia de esta pieza: está agotada o en retención de calidad.",
+    "category": "Categoría",
+    "estimated": "Estimado",
+    "actual": "Real",
+    "variance": "Variación",
+    "material": "Material",
+    "labor": "Mano de obra",
+    "burden": "Gastos indirectos",
+    "subcontract": "Subcontratación",
+    "quotedPrice": "Precio cotizado",
+    "actualMargin": "Margen real",
+    "materialIssues": "SALIDAS DE MATERIAL",
+    "recalculate": "Recalcular",
+    "recalculateAria": "Recalcular costos",
+    "returnMaterial": "Devolver material",
+    "returned": "Material devuelto al inventario",
+    "recalculated": "Costos recalculados",
+    "colPartNumber": "Pieza #",
+    "colQty": "Cant.",
+    "colUnitCost": "Costo unitario",
+    "issueTypes": {
+      "issue": "Salida",
+      "return": "Devolución",
+      "scrap": "Desecho"
+    }
   },
   "maintenanceSchedules": {
     "pageTitle": "Mantenimiento preventivo",
@@ -12207,5 +12294,39 @@
     "lastPage": "Última página",
     "range": "{{start}} – {{end}} de {{length}}",
     "rangeEmpty": "0 de {{length}}"
+  },
+  "validationButton": {
+    "triggerAriaOne": "{{count}} problema de validación. Haga clic para verlo.",
+    "triggerAriaOther": "{{count}} problemas de validación. Haga clic para verlos.",
+    "show": "Mostrar errores de validación",
+    "popoverLabel": "Errores de validación",
+    "allResolved": "Todos los problemas resueltos"
+  },
+  "clockStatus": {
+    "in": "Trabajando",
+    "inShort": "DENTRO",
+    "out": "Salida registrada",
+    "outShort": "FUERA",
+    "onBreak": "En descanso",
+    "onBreakShort": "DESCANSO",
+    "onLunch": "En almuerzo",
+    "onLunchShort": "ALMUERZO",
+    "unknown": "Desconocido"
+  },
+  "clockActions": {
+    "ClockIn": "Marcar entrada",
+    "ClockOut": "Marcar salida",
+    "BreakStart": "Iniciar descanso",
+    "BreakEnd": "Terminar descanso",
+    "LunchStart": "Iniciar almuerzo",
+    "LunchEnd": "Terminar almuerzo"
+  },
+  "dateRange": {
+    "presets": {
+      "today": "Hoy",
+      "thisWeek": "Esta semana",
+      "thisMonth": "Este mes",
+      "last30Days": "Últimos 30 días"
+    }
   }
 }

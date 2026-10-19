@@ -46,8 +46,8 @@ export class LoginComponent implements OnInit {
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
-    email: 'Email',
-    password: 'Password',
+    email: this.translate.instant('auth.email'),
+    password: this.translate.instant('auth.password'),
   });
 
   protected readonly loading = this.loadingService.isLoading;
