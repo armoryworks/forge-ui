@@ -22,7 +22,7 @@
   }
 
   <div class="cluster__form-row">
-    <app-input data-testid="customer-identity-name" [label]="'guidedSetup.customerIdentity.nameLabel' | translate" formControlName="name" [required]="true" [isReadonly]="!editing()" />
+    <app-input data-testid="customer-identity-name" [label]="'guidedSetup.customerIdentity.nameLabel' | translate" formControlName="name" [required]="editing()" [isReadonly]="!editing()" />
     <app-input data-testid="customer-identity-company" [label]="'guidedSetup.customerIdentity.displayNameLabel' | translate" [info]="'guidedSetup.customerIdentity.displayNameHelp' | translate" formControlName="companyName" [isReadonly]="!editing()" />
   </div>
   @if (editing()) {
@@ -37,19 +37,43 @@
     <app-input data-testid="customer-identity-phone" [label]="'customers.colPhone' | translate" formControlName="phone" mask="phone" [isReadonly]="!editing()" />
   </div>
 
-  <app-toggle data-testid="customer-identity-active" [label]="'customers.colActive' | translate" formControlName="isActive" [isReadonly]="!editing()" />
+  @if (editing()) {
+    <app-toggle data-testid="customer-identity-active" [label]="'customers.colActive' | translate" formControlName="isActive" />
+  } @else {
+    <div class="cluster__item">
+      <span class="cluster__label">{{ 'customers.colActive' | translate }}</span>
+      <span class="cluster__value">
+        <span class="chip" data-testid="customer-identity-active-chip" [class.chip--success]="customer().isActive" [class.chip--muted]="!customer().isActive">
+          {{ (customer().isActive ? 'customers.detail.active' : 'customers.detail.inactive') | translate }}
+        </span>
+      </span>
+    </div>
+  }
 
   @if (canEditCommercialTerms()) {
     <h4 class="cluster__title">{{ 'customers.workflow.creditAndTax.title' | translate }}</h4>
     <div class="cluster__form-row">
       @if (creditLimitsEnabled()) {
-        <app-currency-input data-testid="customer-identity-credit-limit" [label]="'customers.workflow.creditAndTax.creditLimitLabel' | translate" formControlName="creditLimit" [max]="1000000000" [isReadonly]="!editing()" />
+        @if (editing()) {
+          <app-currency-input data-testid="customer-identity-credit-limit" [label]="'customers.workflow.creditAndTax.creditLimitLabel' | translate" formControlName="creditLimit" [max]="1000000000" />
+        } @else {
+          <div class="cluster__item">
+            <span class="cluster__label">{{ 'customers.workflow.creditAndTax.creditLimitLabel' | translate }}</span>
+            <span class="cluster__value" data-testid="customer-identity-credit-limit-read">
+              @if (customer().creditLimit !== null && customer().creditLimit !== undefined) {
+                <app-currency-display [value]="customer().creditLimit ?? 0" />
+              } @else {
+                —
+              }
+            </span>
+          </div>
+        }
       }
       <app-toggle data-testid="customer-identity-tax-exempt" [label]="'customers.workflow.creditAndTax.isTaxExemptLabel' | translate" formControlName="isTaxExempt" [isReadonly]="!editing()" />
     </div>
     @if (form.controls.isTaxExempt.value) {
       <div class="cluster__form-row">
-        <app-input data-testid="customer-identity-tax-exemption-id" [label]="'customers.workflow.creditAndTax.taxExemptionIdLabel' | translate" formControlName="taxExemptionId" [required]="true" [maxlength]="50" [isReadonly]="!editing()" />
+        <app-input data-testid="customer-identity-tax-exemption-id" [label]="'customers.workflow.creditAndTax.taxExemptionIdLabel' | translate" formControlName="taxExemptionId" [required]="editing()" [maxlength]="50" [isReadonly]="!editing()" />
       </div>
     }
   }

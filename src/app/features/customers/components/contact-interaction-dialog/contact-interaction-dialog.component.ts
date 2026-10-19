@@ -88,7 +88,7 @@ export class ContactInteractionDialogComponent {
       this.data.interaction ? new Date(this.data.interaction.interactionDate) : new Date(),
       [Validators.required],
     ),
-    durationMinutes: new FormControl<number | null>(this.data.interaction?.durationMinutes ?? null),
+    durationMinutes: new FormControl<number | null>(this.data.interaction?.durationMinutes ?? null, [Validators.min(0), Validators.max(1440)]),
     followUpDate: new FormControl<Date | null>(null),
   });
 
@@ -96,6 +96,7 @@ export class ContactInteractionDialogComponent {
     type: this.translate.instant('customers.interactions.violations.type'),
     subject: this.translate.instant('customers.interactions.violations.subject'),
     interactionDate: this.translate.instant('customers.interactions.violations.date'),
+    durationMinutes: this.translate.instant('customers.interactions.durationMinutes'),
   });
 
   constructor() {

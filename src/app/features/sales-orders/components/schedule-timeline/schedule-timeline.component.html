@@ -11,7 +11,12 @@
             <span class="schedule-line__part-desc">{{ line.partDescription }}</span>
           }
         </div>
-        @if (line.isAtRisk) {
+        @if (line.isShipped) {
+          <span class="chip chip--success" data-testid="schedule-line-shipped">
+            <span class="material-icons-outlined chip__icon">local_shipping</span>
+            {{ 'salesOrders.schedule.shipped' | translate }}
+          </span>
+        } @else if (line.isAtRisk) {
           <span class="chip chip--error">
             <span class="material-icons-outlined chip__icon">warning</span>
             {{ 'salesOrders.schedule.atRisk' | translate }}

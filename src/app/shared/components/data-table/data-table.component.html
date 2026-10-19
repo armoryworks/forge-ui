@@ -12,6 +12,7 @@
                 <mat-checkbox
                   [checked]="allSelected()"
                   [indeterminate]="someSelected()"
+                  [aria-label]="'shared.selectAllRows' | translate"
                   (change)="toggleSelectAll()" />
               </th>
             }
@@ -148,7 +149,7 @@
               }
               @if (selectable()) {
                 <td class="data-table__td data-table__td--checkbox" (click)="toggleRowSelection(row, $event)">
-                  <mat-checkbox [checked]="isRowSelected(row)" />
+                  <mat-checkbox [checked]="isRowSelected(row)" [aria-label]="'shared.selectRow' | translate" />
                 </td>
               }
               @for (col of visibleColumns(); track col.field; let first = $first) {

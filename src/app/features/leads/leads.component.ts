@@ -168,6 +168,7 @@ export class LeadsComponent implements OnInit {
   // validation-button stereotype on the dialog's submit makes the gap visible.
   protected readonly showLostDialog = signal(false);
   protected readonly lostLeadId = signal<number | null>(null);
+  private lostPreviousStatus: LeadStatus | null = null;
   protected readonly lostReasonControl = new FormControl('', [Validators.required, Validators.maxLength(500)]);
   protected readonly lostFormGroup = new FormGroup({ reason: this.lostReasonControl });
   protected readonly lostViolations = FormValidationService.getViolations(this.lostFormGroup, {
@@ -547,10 +548,23 @@ export class LeadsComponent implements OnInit {
       next: () => {
         this.showLostDialog.set(false);
         this.lostLeadId.set(null);
+        this.lostPreviousStatus = null;
         this.lostReasonControl.setValue('');
         this.loadLeads();
       },
+      error: () => this.cancelLost(),
     });
+  }
+
+  protected cancelLost(): void {
+    const leadId = this.lostLeadId();
+    const previous = this.lostPreviousStatus;
+    if (leadId !== null && previous !== null) {
+      this.leads.update(all => all.map(l => l.id === leadId ? { ...l, status: previous } : l));
+    }
+    this.lostPreviousStatus = null;
+    this.lostLeadId.set(null);
+    this.showLostDialog.set(false);
   }
 
   protected getStatusClass(status: string): string {
@@ -608,6 +622,7 @@ export class LeadsComponent implements OnInit {
 
     // If dropping into Lost, show the lost reason dialog (same UX as button)
     if (targetStatus === 'Lost') {
+      this.lostPreviousStatus = lead.status;
       this.lostLeadId.set(lead.id);
       this.showLostDialog.set(true);
       return;

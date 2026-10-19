@@ -136,7 +136,7 @@
             [disabled]="capFitPending()"
             [attr.aria-label]="'leads.classification.capFitAriaLabel' | translate">
             <span class="material-icons-outlined">precision_manufacturing</span>
-            <span>{{ ('leads.classification.capFit.' + (lead.capabilityFit ?? 'NotAssessed')) | translate }}</span>
+            <span>{{ 'leads.classification.capFitChip' | translate: { value: (('leads.classification.capFit.' + (lead.capabilityFit ?? 'NotAssessed')) | translate) } }}</span>
             <span class="material-icons-outlined chip-edit-btn__chevron">{{ capFitPending() ? 'sync' : 'arrow_drop_down' }}</span>
           </button>
           <mat-menu #capFitMenu="matMenu">
@@ -154,7 +154,7 @@
             [disabled]="ndaPending()"
             [attr.aria-label]="'leads.classification.ndaAriaLabel' | translate">
             <span class="material-icons-outlined">lock</span>
-            <span>NDA: {{ ('leads.classification.nda.' + (lead.ndaState ?? 'None')) | translate }}</span>
+            <span>{{ 'leads.classification.ndaChip' | translate: { value: (('leads.classification.nda.' + (lead.ndaState ?? 'None')) | translate) } }}</span>
             <span class="material-icons-outlined chip-edit-btn__chevron">{{ ndaPending() ? 'sync' : 'arrow_drop_down' }}</span>
           </button>
           <mat-menu #ndaMenu="matMenu">
@@ -172,7 +172,7 @@
             [disabled]="exportPending()"
             [attr.aria-label]="'leads.classification.exportAriaLabel' | translate">
             <span class="material-icons-outlined">public</span>
-            <span>ITAR: {{ ('leads.classification.export.' + (lead.exportControl ?? 'NotApplicable')) | translate }}</span>
+            <span>{{ 'leads.classification.exportChip' | translate: { value: (('leads.classification.export.' + (lead.exportControl ?? 'NotApplicable')) | translate) } }}</span>
             <span class="material-icons-outlined chip-edit-btn__chevron">{{ exportPending() ? 'sync' : 'arrow_drop_down' }}</span>
           </button>
           <mat-menu #exportMenu="matMenu">

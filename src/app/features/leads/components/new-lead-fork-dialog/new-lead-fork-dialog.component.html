@@ -1,4 +1,4 @@
-<app-dialog [title]="'leads.fork.title' | translate" width="640px"
+<app-dialog [title]="(currentStep() === 0 ? 'leads.fork.title' : 'leads.fork.detailsTitle') | translate" width="640px"
   [draftConfig]="draftConfig" [draftFormGroup]="form"
   (closed)="close()">
   <div class="lead-fork">
@@ -86,7 +86,7 @@
                           formControlName="rfqParts" [rows]="3"
                           [placeholder]="'leads.fork.rfqPartsHint' | translate" />
             <div class="form-row">
-              <app-input data-testid="lead-rfq-target-price"
+              <app-currency-input data-testid="lead-rfq-target-price"
                          [label]="'leads.fork.rfqTargetPriceLabel' | translate"
                          formControlName="rfqTargetPrice" />
               <app-datepicker data-testid="lead-rfq-due-date"

@@ -247,7 +247,7 @@ export class SalesOrderDetailPanelComponent {
   });
 
   protected readonly scheduleAtRiskCount = computed(() =>
-    this.scheduleMilestones().filter(m => m.isAtRisk).length
+    this.scheduleMilestones().filter(m => m.isAtRisk && !m.isShipped).length
   );
 
   protected readonly shipmentCount = computed(() => this.so()?.shipments?.length ?? 0);
@@ -327,6 +327,7 @@ export class SalesOrderDetailPanelComponent {
     creditTerms: new FormControl<string | null>(null),
     requestedDeliveryDate: new FormControl<Date | null>(null),
     billingAddressId: new FormControl<number | null>(null),
+    shippingAddressId: new FormControl<number | null>(null),
     taxRate: new FormControl<number>(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
   });
   protected readonly headerTaxEditability = signal<CustomerTaxEditability | null>(null);
@@ -391,6 +392,16 @@ export class SalesOrderDetailPanelComponent {
   protected readonly billingAddressOptions = computed<SelectOption[]>(() => {
     const opts: SelectOption[] = this.customerAddresses()
       .filter(a => a.addressType === 'Billing' || a.addressType === 'Both')
+      .map(a => ({
+        value: a.id,
+        label: `${a.label} — ${a.line1}, ${a.city} ${a.state} ${a.postalCode}`.trim(),
+      }));
+    return [{ value: null, label: this.translate.instant('common.none') }, ...opts];
+  });
+
+  protected readonly shippingAddressOptions = computed<SelectOption[]>(() => {
+    const opts: SelectOption[] = this.customerAddresses()
+      .filter(a => (a.addressType === 'Shipping' || a.addressType === 'Both') && a.isActive !== false)
       .map(a => ({
         value: a.id,
         label: `${a.label} — ${a.line1}, ${a.city} ${a.state} ${a.postalCode}`.trim(),
@@ -1108,6 +1119,7 @@ export class SalesOrderDetailPanelComponent {
       creditTerms: so.creditTerms ?? null,
       requestedDeliveryDate: fromIsoDate(so.requestedDeliveryDate),
       billingAddressId: so.billingAddressId ?? null,
+      shippingAddressId: so.shippingAddressId ?? null,
       taxRate: this.taxPercent(),
     });
     this.headerError.set(null);
@@ -1159,6 +1171,7 @@ export class SalesOrderDetailPanelComponent {
       creditTerms: v.creditTerms || undefined,
       requestedDeliveryDate: toIsoDate(v.requestedDeliveryDate) || undefined,
       billingAddressId: v.billingAddressId ?? undefined,
+      shippingAddressId: v.shippingAddressId ?? undefined,
       taxRate: taxChanged ? Number(v.taxRate) / 100 : undefined,
     }).subscribe({
       next: () => {

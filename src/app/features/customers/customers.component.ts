@@ -131,6 +131,7 @@ export class CustomersComponent {
 
   // Table
   protected readonly customerColumns: ColumnDef[] = [
+    { field: 'customerNumber', header: this.translate.instant('customers.colNumber'), sortable: true, width: '120px' },
     { field: 'name', header: this.translate.instant('customers.colName'), sortable: true },
     { field: 'companyName', header: this.translate.instant('customers.colCompany'), sortable: true },
     { field: 'email', header: this.translate.instant('customers.colEmail'), sortable: true },

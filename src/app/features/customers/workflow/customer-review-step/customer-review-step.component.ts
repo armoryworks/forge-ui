@@ -3,6 +3,7 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 
 import { CustomerDetail } from '../../models/customer-detail.model';
@@ -16,7 +17,7 @@ import { CustomerDetail } from '../../models/customer-detail.model';
 @Component({
   selector: 'app-customer-review-step',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe],
+  imports: [ReactiveFormsModule, TranslatePipe, CurrencyDisplayComponent],
   templateUrl: './customer-review-step.component.html',
   styleUrl: './customer-review-step.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

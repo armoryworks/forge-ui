@@ -130,13 +130,13 @@
           <app-customer-addresses-cluster [customerId]="c.id" />
         }
         @case ('estimates') {
-          <app-customer-estimates-tab [customerId]="c.id" />
+          <app-customer-estimates-tab [customerId]="c.id" (changed)="refreshSummary()" />
         }
         @case ('quotes') {
-          <app-customer-quotes-tab [customerId]="c.id" />
+          <app-customer-quotes-tab [customerId]="c.id" (changed)="refreshSummary()" />
         }
         @case ('orders') {
-          <app-customer-orders-tab [customerId]="c.id" />
+          <app-customer-orders-tab [customerId]="c.id" (changed)="refreshSummary()" />
         }
         @case ('jobs') {
           <app-customer-jobs-tab [customerId]="c.id" />

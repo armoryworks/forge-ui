@@ -30,7 +30,8 @@ export class ScheduleTimelineComponent {
       salesOrderLineId: m.salesOrderLineId,
       partNumber: m.partNumber,
       partDescription: m.partDescription,
-      isAtRisk: m.isAtRisk,
+      isAtRisk: m.isAtRisk && !m.isShipped,
+      isShipped: !!m.isShipped,
       items: this.buildMilestoneItems(m, now),
       timelineSegments: this.buildTimelineSegments(m, now),
     }));
@@ -50,7 +51,9 @@ export class ScheduleTimelineComponent {
     return milestones.map(ms => {
       const date = ms.dateStr ? new Date(ms.dateStr) : null;
       let status: 'completed' | 'overdue' | 'upcoming' = 'upcoming';
-      if (date && date < now) {
+      if (m.isShipped) {
+        status = 'completed';
+      } else if (date && date < now) {
         // A past delivery date is always overdue. Other past milestones are
         // normally completed, but when the whole line is at risk they render as
         // overdue rather than merely done so the schedule slip is visible.

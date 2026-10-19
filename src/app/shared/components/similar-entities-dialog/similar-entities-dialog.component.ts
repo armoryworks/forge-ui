@@ -56,7 +56,7 @@ export type SimilarEntitiesDialogResult =
       </ul>
       <div dialog-footer>
         <button type="button" class="action-btn" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
-        <button type="button" class="action-btn action-btn--create" (click)="createNew()">
+        <button type="button" class="action-btn action-btn--create similar-entities__create" (click)="createNew()">
           {{ 'similarEntities.createAnyway' | translate:{ term: data.typedTerm } }}
         </button>
       </div>
@@ -72,6 +72,7 @@ export type SimilarEntitiesDialogResult =
     .similar-entities__text { display: flex; flex-direction: column; min-width: 0; }
     .similar-entities__primary { font-weight: 600; }
     .similar-entities__secondary { font-size: var(--font-size-sm); color: var(--text-secondary); }
+    .similar-entities__create { text-transform: none; }
   `],
 })
 export class SimilarEntitiesDialogComponent {

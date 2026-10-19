@@ -6,8 +6,11 @@ import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { catchError, of } from 'rxjs';
 
 import { QuoteService } from '../../services/quote.service';
+import { CustomerService } from '../../../customers/services/customer.service';
+import { CUSTOMER_COMMERCIAL_TERMS_ROLES } from '../../../customers/customer-roles';
 import { PaymentScheduleService } from '../../services/payment-schedule.service';
 import { QuoteDetail } from '../../models/quote-detail.model';
 import { QuoteLine } from '../../models/quote-line.model';
@@ -72,6 +75,7 @@ export class QuoteDetailPanelComponent {
   private readonly paymentScheduleService = inject(PaymentScheduleService);
   private readonly accounting = inject(AccountingService);
   private readonly auth = inject(AuthService);
+  private readonly customerService = inject(CustomerService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -281,7 +285,33 @@ export class QuoteDetailPanelComponent {
   protected convertToOrder(): void {
     const q = this.quote();
     if (!q) return;
-    this.quoteService.convertToOrder(q.id).subscribe({
+    if (!this.auth.hasAnyRole(CUSTOMER_COMMERCIAL_TERMS_ROLES)) {
+      this.performConvert(q.id);
+      return;
+    }
+    this.customerService.getCreditStatus(q.customerId).pipe(catchError(() => of(null))).subscribe(status => {
+      if (!status?.isOnHold) {
+        this.performConvert(q.id);
+        return;
+      }
+      this.dialog.open(ConfirmDialogComponent, {
+        width: '420px',
+        data: {
+          title: this.translate.instant('quotes.convertOnHoldTitle'),
+          message: this.translate.instant('quotes.convertOnHoldMessage', {
+            reason: status.holdReason?.trim() || this.translate.instant('onboarding.notSpecified'),
+          }),
+          confirmLabel: this.translate.instant('quotes.convertToOrder'),
+          severity: 'warn',
+        } satisfies ConfirmDialogData,
+      }).afterClosed().subscribe(confirmed => {
+        if (confirmed) this.performConvert(q.id);
+      });
+    });
+  }
+
+  private performConvert(quoteId: number): void {
+    this.quoteService.convertToOrder(quoteId).subscribe({
       next: (order) => {
         this.changed.emit();
         this.closed.emit();

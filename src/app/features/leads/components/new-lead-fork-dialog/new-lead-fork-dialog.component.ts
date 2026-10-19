@@ -6,6 +6,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
+import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
@@ -55,7 +56,7 @@ interface ShapeChoice {
   imports: [
     ReactiveFormsModule, TranslatePipe,
     DialogComponent,
-    InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
+    InputComponent, CurrencyInputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
     ValidationButtonComponent,
   ],
   templateUrl: './new-lead-fork-dialog.component.html',
@@ -112,7 +113,7 @@ export class NewLeadForkDialogComponent {
     extras: new FormGroup({
       // QuickQuote / Prototype
       rfqParts: new FormControl<string>('', { nonNullable: true }),
-      rfqTargetPrice: new FormControl<string>('', { nonNullable: true }),
+      rfqTargetPrice: new FormControl<number | null>(null, [Validators.min(0)]),
       rfqDueDate: new FormControl<Date | null>(null),
       // Strategic
       decisionMaker: new FormControl<string>('', { nonNullable: true }),
@@ -225,10 +226,10 @@ export class NewLeadForkDialogComponent {
     // Build CustomFieldValues JSON only with fields that the picked
     // shape surfaces AND the user actually filled. Empty-string treated
     // as not-filled to keep the JSONB tidy.
-    const custom: Record<string, string> = {};
+    const custom: Record<string, string | number> = {};
     if (this.showsRfqFields()) {
       if (e.rfqParts.trim()) custom['rfqParts'] = e.rfqParts.trim();
-      if (e.rfqTargetPrice.trim()) custom['rfqTargetPrice'] = e.rfqTargetPrice.trim();
+      if (e.rfqTargetPrice != null) custom['rfqTargetPrice'] = e.rfqTargetPrice;
       if (e.rfqDueDate) {
         const iso = toIsoDate(e.rfqDueDate);
         if (iso) custom['rfqDueDate'] = iso;

@@ -23,7 +23,7 @@
       }
       @if (c.creditLimit !== null && c.creditLimit !== undefined) {
         <dt>{{ 'customers.workflow.creditAndTax.creditLimitLabel' | translate }}</dt>
-        <dd>{{ c.creditLimit }}</dd>
+        <dd><app-currency-display [value]="c.creditLimit" [currency]="c.defaultCurrency ?? null" /></dd>
       }
       @if (c.defaultCurrency) {
         <dt>{{ 'customers.workflow.creditAndTax.defaultCurrencyLabel' | translate }}</dt>

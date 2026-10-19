@@ -47,8 +47,6 @@
           <span class="workflow-shell__step-sep" aria-hidden="true">·</span>
           <span class="workflow-shell__step-name">{{ step.labelKey | translate }}</span>
         </span>
-      } @else if (currentStep(); as step) {
-        <span class="workflow-shell__step-label">{{ step.labelKey | translate }}</span>
       }
     </div>
 

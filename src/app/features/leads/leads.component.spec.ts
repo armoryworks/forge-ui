@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { MatDialog } from '@angular/material/dialog';
@@ -105,6 +105,47 @@ describe('LeadsComponent — inline account creation (forge#2/#3)', () => {
     internals.searchControl.setValue('lead-00002');
 
     expect(internals.filteredLeads().map(l => l.id)).toEqual([2]);
+  });
+
+  it('puts a card back in its column when the drag-to-Lost dialog is cancelled', () => {
+    const internals = component as unknown as {
+      leads: { set: (rows: unknown[]) => void; (): { id: number; status: string }[] };
+      onCardDrop: (event: unknown, status: string) => void;
+      cancelLost: () => void;
+      showLostDialog: () => boolean;
+    };
+    const lead = { id: 5, companyName: 'Acme', contactName: null, email: null, leadNumber: 'LEAD-00005', status: 'Quoting' };
+    internals.leads.set([lead]);
+
+    internals.onCardDrop({ previousContainer: {}, container: {}, item: { data: lead } }, 'Lost');
+    expect(internals.leads()[0].status).toBe('Lost');
+    expect(internals.showLostDialog()).toBe(true);
+
+    internals.cancelLost();
+
+    expect(internals.leads()[0].status).toBe('Quoting');
+    expect(internals.showLostDialog()).toBe(false);
+    expect(leadsService.updateLead).not.toHaveBeenCalled();
+  });
+
+  it('puts a card back when saving the drag-to-Lost reason fails', () => {
+    const internals = component as unknown as {
+      leads: { set: (rows: unknown[]) => void; (): { id: number; status: string }[] };
+      onCardDrop: (event: unknown, status: string) => void;
+      lostReasonControl: { setValue: (v: string) => void };
+      confirmLost: () => void;
+      showLostDialog: () => boolean;
+    };
+    const lead = { id: 6, companyName: 'Acme', contactName: null, email: null, leadNumber: 'LEAD-00006', status: 'Contacted' };
+    internals.leads.set([lead]);
+    leadsService.updateLead.mockReturnValueOnce(throwError(() => new Error('boom')));
+
+    internals.onCardDrop({ previousContainer: {}, container: {}, item: { data: lead } }, 'Lost');
+    internals.lostReasonControl.setValue('Went elsewhere');
+    internals.confirmLost();
+
+    expect(internals.leads()[0].status).toBe('Contacted');
+    expect(internals.showLostDialog()).toBe(false);
   });
 
   describe('bulk assign', () => {

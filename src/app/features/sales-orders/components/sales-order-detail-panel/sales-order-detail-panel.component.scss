@@ -153,7 +153,9 @@
     color: var(--text-muted);
   }
 
-  &__right { text-align: right; }
+  &__right,
+  th.lines-table__right,
+  td.lines-table__right { text-align: right; }
   &__mono { font-family: $font-family-mono; font-size: $font-size-xs; }
   &__narrow { width: $btn-icon-size; padding: $sp-sm $sp-xs; }
 }
@@ -278,7 +280,9 @@
     color: var(--text-muted);
   }
 
-  &__right { text-align: right; }
+  &__right,
+  th.nested-table__right,
+  td.nested-table__right { text-align: right; }
 }
 
 // --- Empty State ---

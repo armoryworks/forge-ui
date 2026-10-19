@@ -93,14 +93,18 @@ export class CustomerImportPageComponent {
       for (const err of result.errors.slice(0, 5)) errors.push(`Row ${err.row}: ${err.message}`);
     }
 
-    const rows: BulkCustomerIntakeRow[] = (result.data ?? []).map((raw, idx) => ({
+    const allRows: BulkCustomerIntakeRow[] = (result.data ?? []).map((raw, idx) => ({
       externalRowKey: `r${idx + 1}`,
       name: pick(raw, 'name', 'customer', 'customername', 'customer name', 'customer_name') ?? '',
       companyName: pick(raw, 'companyname', 'company', 'company name', 'company_name'),
       email: pick(raw, 'email', 'email address', 'email_address', 'e-mail'),
       phone: pick(raw, 'phone', 'phone number', 'phone_number', 'tel', 'telephone'),
       notes: pick(raw, 'notes', 'note', 'comment', 'comments'),
-    })).filter(r => r.name);
+    }));
+    allRows.forEach((r, idx) => {
+      if (!r.name) errors.push(this.translate.instant('customers.importPage.missingName', { row: idx + 1 }));
+    });
+    const rows = allRows.filter(r => r.name);
 
     this.parsedRows.set(rows);
     this.parseErrors.set(errors);

@@ -125,9 +125,9 @@ export class ComplianceTemplatesPanelComponent implements OnInit {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Template?',
-        message: `This will deactivate "${template.name}". Existing submissions will be preserved.`,
-        confirmLabel: 'Delete',
+        title: this.translate.instant('complianceTemplates.deleteTitle'),
+        message: this.translate.instant('complianceTemplates.deleteMessage', { name: template.name }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe((confirmed) => {

@@ -118,14 +118,15 @@ export class QuoteService {
   }
 
   /**
-   * The customer's primary contact email, else the first contact with an email,
-   * used to pre-fill the send-email dialog's recipient.
+   * The customer's primary contact email, else the customer's own email, else the
+   * first contact with an email, used to pre-fill the send-email dialog's recipient.
    */
   getRecipientEmail(customerId: number): Observable<string | undefined> {
     return this.customerService.getCustomerById(customerId).pipe(
       map(customer => {
         const withEmail = (customer.contacts ?? []).filter(c => !!c.email?.trim());
-        return (withEmail.find(c => c.isPrimary) ?? withEmail[0])?.email?.trim();
+        const primary = withEmail.find(c => c.isPrimary)?.email?.trim();
+        return primary || customer.email?.trim() || withEmail[0]?.email?.trim();
       }),
       catchError(() => of(undefined)),
     );

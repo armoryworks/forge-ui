@@ -15,17 +15,21 @@
       [rows]="2" />
 
     <div class="dialog-row">
-      <app-datepicker
-        data-testid="price-list-effective-from"
-        [label]="'priceList.effectiveFromLabel' | translate"
-        formControlName="effectiveFrom" />
-      <app-datepicker
-        data-testid="price-list-effective-to"
-        [label]="'priceList.effectiveToLabel' | translate"
-        formControlName="effectiveTo" />
+      <div class="pl-form__field">
+        <app-datepicker
+          data-testid="price-list-effective-from"
+          [label]="'priceList.effectiveFromLabel' | translate"
+          formControlName="effectiveFrom" />
+        <p class="pl-form__hint">{{ 'priceList.effectiveFromHelper' | translate }}</p>
+      </div>
+      <div class="pl-form__field">
+        <app-datepicker
+          data-testid="price-list-effective-to"
+          [label]="'priceList.effectiveToLabel' | translate"
+          formControlName="effectiveTo" />
+        <p class="pl-form__hint">{{ 'priceList.effectiveToHelper' | translate }}</p>
+      </div>
     </div>
-    <p class="pl-form__hint">{{ 'priceList.effectiveFromHelper' | translate }}</p>
-    <p class="pl-form__hint">{{ 'priceList.effectiveToHelper' | translate }}</p>
 
     <div class="pl-form__toggle-row">
       <app-toggle

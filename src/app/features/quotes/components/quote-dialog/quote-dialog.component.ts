@@ -11,6 +11,9 @@ import { PartsService } from '../../../parts/services/parts.service';
 import { AdminService } from '../../../admin/services/admin.service';
 import { CustomerListItem } from '../../../customers/models/customer-list-item.model';
 import { CustomerTaxEditability } from '../../../customers/models/customer-tax-editability.model';
+import { CreditStatus } from '../../../customers/models/credit-status.model';
+import { CUSTOMER_COMMERCIAL_TERMS_ROLES } from '../../../customers/customer-roles';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { PartListItem } from '../../../parts/models/part-list-item.model';
 import { CreateQuoteLineRequest } from '../../models/create-quote-line-request.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
@@ -61,6 +64,7 @@ export class QuoteDialogComponent {
   private readonly translate = inject(TranslateService);
   private readonly manualNumberSettings = inject(ManualNumberSettingsService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly auth = inject(AuthService);
 
   /** Whether the shop allows a manual quote-number override on create/rename. */
   protected readonly allowManualQuoteNumbers = computed(() => this.manualNumberSettings.isEnabled('quotes'));
@@ -82,6 +86,15 @@ export class QuoteDialogComponent {
   protected readonly taxEditability = signal<CustomerTaxEditability | null>(null);
   /** S1 — tax field locked: editability is known and no verified certificate is on file. */
   protected readonly taxLocked = computed(() => this.taxEditability()?.canEditTax === false);
+  protected readonly creditStatus = signal<CreditStatus | null>(null);
+  protected readonly creditHoldMessage = computed(() => {
+    const status = this.creditStatus();
+    return status?.isOnHold
+      ? this.translate.instant('salesOrders.creditHoldWarning', {
+        reason: status.holdReason?.trim() || this.translate.instant('onboarding.notSpecified'),
+      })
+      : null;
+  });
   /** True once the user manually edits the tax rate away from the auto-filled default. */
   protected readonly taxOverridden = signal(false);
   /** S1 — the manual override is backed by a verified certificate (badge cue). */
@@ -162,8 +175,16 @@ export class QuoteDialogComponent {
       // S1 — reset the tax-override gate until the new customer's verdict arrives.
       this.taxOverridden.set(false);
       this.taxEditability.set(null);
+      this.creditStatus.set(null);
       this.form.controls.taxRate.enable({ emitEvent: false });
       if (customerId == null) return;
+      if (this.auth.hasAnyRole(CUSTOMER_COMMERCIAL_TERMS_ROLES)) {
+        this.customerService.getCreditStatus(customerId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+          next: (status) => {
+            if (this.form.controls.customerId.value === customerId) this.creditStatus.set(status);
+          },
+        });
+      }
       this.adminService.getTaxRateForCustomer(customerId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (rate) => {
           if (rate == null) return;
@@ -172,7 +193,7 @@ export class QuoteDialogComponent {
           this.taxRateValue.set(pct);
           this.taxAutoFilled.set(true);
           this.taxAutoLabel.set(
-            rate.stateCode ? `${rate.stateCode} ${pct}%` : `Default ${pct}%`
+            rate.stateCode ? `${rate.stateCode} ${pct}%` : this.translate.instant('quotes.taxAutoDefault', { rate: pct })
           );
         },
       });

@@ -15,7 +15,7 @@ import { EntityPickerComponent } from '../../../../shared/components/entity-pick
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
-import { fromIsoDate, toIsoDate } from '../../../../shared/utils/date.utils';
+import { fromIsoDate, todayStart, toIsoDate } from '../../../../shared/utils/date.utils';
 import { TermsService } from '../../services/terms.service';
 import { TermsScope } from '../../models/terms-scope.model';
 import { TermsDocument } from '../../models/terms-document.model';
@@ -101,7 +101,7 @@ export class TermsDialogComponent {
       nonNullable: true, validators: [Validators.required],
     }),
     effectiveFrom: new FormControl<Date | null>(
-      fromIsoDate(this.data.terms?.effectiveFrom), [Validators.required],
+      this.data.terms ? fromIsoDate(this.data.terms.effectiveFrom) : todayStart(), [Validators.required],
     ),
     effectiveTo: new FormControl<Date | null>(
       fromIsoDate(this.data.terms?.effectiveTo),

@@ -13,6 +13,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 
 import { CustomerTaxDocument } from '../../models/customer-tax-document.model';
 import { CustomerTaxDocumentService } from '../../services/customer-tax-document.service';
+import { CustomerService } from '../../services/customer.service';
 import { CustomerTaxDocumentDialogComponent } from './customer-tax-document-dialog.component';
 import { CustomerTaxDocumentRejectDialogComponent } from './customer-tax-document-reject-dialog.component';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
@@ -66,6 +67,7 @@ export class CustomerTaxDocumentsClusterComponent {
   };
 
   private readonly taxDocumentService = inject(CustomerTaxDocumentService);
+  private readonly customerService = inject(CustomerService);
   private readonly auth = inject(AuthService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -141,7 +143,9 @@ export class CustomerTaxDocumentsClusterComponent {
   }
 
   protected closeDialog(): void {
+    const abandoned = this.pendingUpload();
     this.pendingUpload.set(null);
+    if (abandoned) this.customerService.deleteFile(abandoned.id).subscribe();
   }
 
   protected verify(doc: CustomerTaxDocument): void {

@@ -251,6 +251,7 @@
                 <div class="line-edit-form__title">{{ 'salesOrders.editDetails' | translate }}</div>
                 <app-input [label]="'salesOrders.customerPOLabel' | translate" formControlName="customerPO" data-testid="so-header-po" />
                 <app-select [label]="'salesOrders.creditTerms' | translate" formControlName="creditTerms" [options]="creditTermsOptions" data-testid="so-header-terms" />
+                <app-select [label]="'salesOrders.shippingAddress' | translate" formControlName="shippingAddressId" [options]="shippingAddressOptions()" data-testid="so-header-shipping" />
                 <app-select [label]="'salesOrders.billingAddress' | translate" formControlName="billingAddressId" [options]="billingAddressOptions()" data-testid="so-header-billing" />
                 <app-datepicker [label]="'salesOrders.requestedDeliveryDate' | translate" formControlName="requestedDeliveryDate" data-testid="so-header-delivery" />
                 <div class="tax-field">
@@ -447,7 +448,7 @@
                       </span>
                       / {{ line.remainingQuantity | number:'1.0-4' }}
                     </td>
-                    <td class="lines-table__right">{{ line.unitPrice | number:'1.2-4' }}</td>
+                    <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" [maximumFractionDigits]="4" /></td>
                     <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="null" /></td>
                     @if (canEditLines(so.status)) {
                       <td class="lines-table__right lines-table__actions">

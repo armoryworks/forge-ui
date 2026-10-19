@@ -10,6 +10,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { US_STATES } from '../../../../shared/components/address-form/address-form.component';
 
 import { CustomerTaxDocumentService } from '../../services/customer-tax-document.service';
 
@@ -56,6 +57,8 @@ export class CustomerTaxDocumentDialogComponent {
     { value: 'DirectPay', label: this.translate.instant('customers.taxDocuments.typeDirectPay') },
     { value: 'Other', label: this.translate.instant('customers.taxDocuments.typeOther') },
   ];
+
+  protected readonly stateOptions: SelectOption[] = US_STATES.map(s => ({ value: String(s['value']), label: String(s['label']) }));
 
   protected readonly form = new FormGroup({
     stateCode: new FormControl<string>('', {

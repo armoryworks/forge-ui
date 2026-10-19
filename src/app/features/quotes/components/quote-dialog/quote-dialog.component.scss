@@ -23,3 +23,24 @@
 .tax-badge--cert {
   background: var(--info);
 }
+
+.tax-hint {
+  margin: 0;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}
+
+.credit-hold-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-sm;
+  padding: $sp-sm $sp-md;
+  background: var(--warning-light);
+  border-left: 3px solid var(--warning);
+  font-size: $font-size-sm;
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+    color: var(--warning);
+  }
+}

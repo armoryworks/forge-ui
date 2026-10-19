@@ -1,6 +1,7 @@
 export interface CustomerListItem {
   id: number;
   name: string;
+  customerNumber?: string | null;
   companyName: string | null;
   email: string | null;
   phone: string | null;

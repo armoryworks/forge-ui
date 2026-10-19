@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { ChangeDetectionStrategy, Component, inject, input, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output, OnInit, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Router } from '@angular/router';
 
@@ -35,6 +35,7 @@ export class CustomerOrdersTabComponent implements OnInit {
   private readonly translate = inject(TranslateService);
 
   readonly customerId = input.required<number>();
+  readonly changed = output<void>();
 
   protected readonly orders = signal<SalesOrderListItem[]>([]);
   protected readonly loading = signal(false);
@@ -60,7 +61,7 @@ export class CustomerOrdersTabComponent implements OnInit {
     this.loading.set(true);
     const params = new HttpParams().set('customerId', String(this.customerId()));
     this.http.get<SalesOrderListItem[]>(`${environment.apiUrl}/orders`, { params }).subscribe({
-      next: data => { this.orders.set(data); this.loading.set(false); },
+      next: data => { this.orders.set(data); this.loading.set(false); this.changed.emit(); },
       error: () => this.loading.set(false),
     });
   }
