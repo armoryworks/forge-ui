@@ -1,7 +1,7 @@
 <app-dialog [title]="'reports.saveReportTitle' | translate" width="420px" (closed)="close()">
   <div [formGroup]="form">
-    <app-input [label]="'reports.reportName' | translate" formControlName="name" />
-    <app-textarea [label]="'common.description' | translate" formControlName="description" [rows]="3" />
+    <app-input [label]="'reports.reportName' | translate" formControlName="name" [maxlength]="nameMaxLength" [required]="true" />
+    <app-textarea [label]="'common.description' | translate" formControlName="description" [rows]="3" [maxlength]="descriptionMaxLength" />
     <app-toggle [label]="'reports.shareWithTeam' | translate" formControlName="isShared" />
   </div>
 
@@ -9,7 +9,7 @@
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <app-validation-button [violations]="violations">
     <button class="action-btn action-btn--primary"
-      [disabled]="form.invalid"
+      [disabled]="form.invalid || saving()"
       (click)="save()">
       {{ 'reports.saveReport' | translate }}
     </button>

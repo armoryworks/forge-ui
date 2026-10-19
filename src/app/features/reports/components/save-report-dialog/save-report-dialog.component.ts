@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Observable } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
@@ -9,11 +10,13 @@ import { ToggleComponent } from '../../../../shared/components/toggle/toggle.com
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { TranslatePipe } from '@ngx-translate/core';
+import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
 
 export interface SaveReportDialogData {
   name: string;
   description: string;
   isShared: boolean;
+  submit: (result: SaveReportDialogResult) => Observable<unknown>;
 }
 
 export interface SaveReportDialogResult {
@@ -21,6 +24,9 @@ export interface SaveReportDialogResult {
   description: string;
   isShared: boolean;
 }
+
+const NAME_MAX_LENGTH = 100;
+const DESCRIPTION_MAX_LENGTH = 500;
 
 @Component({
   selector: 'app-save-report-dialog',
@@ -43,8 +49,8 @@ export class SaveReportDialogComponent {
   private readonly data = inject<SaveReportDialogData>(MAT_DIALOG_DATA);
 
   protected readonly form = new FormGroup({
-    name: new FormControl(this.data.name, [Validators.required, Validators.maxLength(100)]),
-    description: new FormControl(this.data.description),
+    name: new FormControl(this.data.name, [requiredTrimmed, Validators.maxLength(NAME_MAX_LENGTH)]),
+    description: new FormControl(this.data.description, [Validators.maxLength(DESCRIPTION_MAX_LENGTH)]),
     isShared: new FormControl(this.data.isShared),
   });
 
@@ -54,17 +60,26 @@ export class SaveReportDialogComponent {
     isShared: 'Shared',
   });
 
+  protected readonly nameMaxLength = NAME_MAX_LENGTH;
+  protected readonly descriptionMaxLength = DESCRIPTION_MAX_LENGTH;
+  protected readonly saving = signal(false);
+
   protected close(): void {
     this.dialogRef.close();
   }
 
   protected save(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.saving()) return;
     const f = this.form.getRawValue();
-    this.dialogRef.close({
-      name: f.name!,
+    const result: SaveReportDialogResult = {
+      name: f.name!.trim(),
       description: f.description ?? '',
       isShared: f.isShared ?? false,
-    } satisfies SaveReportDialogResult);
+    };
+    this.saving.set(true);
+    this.data.submit(result).subscribe({
+      next: () => this.dialogRef.close(result),
+      error: () => this.saving.set(false),
+    });
   }
 }

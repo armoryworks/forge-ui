@@ -78,16 +78,20 @@
 
         <!-- Actions -->
         <div class="builder__actions">
-          <button class="action-btn action-btn--primary" data-testid="report-run-btn"
-                  [disabled]="!canRun()"
-                  (click)="runReport()">
-            <span class="material-icons-outlined">play_arrow</span> {{ 'reports.runReport' | translate }}
-          </button>
-          <button class="action-btn"
-                  [disabled]="!canRun()"
-                  (click)="openSaveDialog()">
-            <span class="material-icons-outlined">save</span> {{ 'common.save' | translate }}
-          </button>
+          <app-validation-button [violations]="runBlockers">
+            <button class="action-btn action-btn--primary" data-testid="report-run-btn"
+                    [disabled]="!canRun()"
+                    (click)="runReport()">
+              <span class="material-icons-outlined">play_arrow</span> {{ 'reports.runReport' | translate }}
+            </button>
+          </app-validation-button>
+          <app-validation-button [violations]="runBlockers">
+            <button class="action-btn"
+                    [disabled]="!canRun()"
+                    (click)="openSaveDialog()">
+              <span class="material-icons-outlined">save</span> {{ 'common.save' | translate }}
+            </button>
+          </app-validation-button>
           @if (reportResults()) {
             <button class="action-btn" (click)="exportCsv()">
               <span class="material-icons-outlined">download</span> {{ 'reports.csv' | translate }}
