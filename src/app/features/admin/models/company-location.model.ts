@@ -10,6 +10,7 @@ export interface CompanyLocation {
   phone: string | null;
   isDefault: boolean;
   isActive: boolean;
+  workingCalendarId?: number | null;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -4751,7 +4751,9 @@
     "editLocation": "Editar Ubicación",
     "newLocation": "Nueva Ubicación",
     "locationName": "Nombre de Ubicación",
-    "createLocation": "Crear Ubicación"
+    "createLocation": "Crear Ubicación",
+    "workingCalendar": "Calendario laboral",
+    "defaultCalendar": "Calendario predeterminado de la empresa"
   },
   "integrationConfigDialog": {
     "configure": "Configurar",
@@ -7942,7 +7944,9 @@
       "forecastApproved": "Pronóstico aprobado",
       "scheduleCreated": "Programación maestra creada",
       "scheduleUpdated": "Programación maestra actualizada",
-      "forecastGenerated": "Pronóstico generado"
+      "forecastGenerated": "Pronóstico generado",
+      "scheduleCompleted": "Programa completado",
+      "scheduleCancelled": "Programa cancelado"
     },
     "newMasterSchedule": "Nueva Programación Maestra",
     "newForecast": "Generar Pronóstico",
@@ -8030,7 +8034,13 @@
     },
     "supplySource": {
       "job": "Orden de trabajo abierta"
-    }
+    },
+    "completeSchedule": "Completar",
+    "completeScheduleTitle": "¿Completar programa maestro?",
+    "completeScheduleMessage": "¿Marcar \"{{name}}\" como completado? MRP deja de planificar sus líneas.",
+    "cancelSchedule": "Cancelar programa",
+    "cancelScheduleTitle": "¿Cancelar programa maestro?",
+    "cancelScheduleMessage": "¿Cancelar \"{{name}}\"? MRP deja de planificar sus líneas."
   },
   "portal": {
     "title": "Portal de Cliente",
@@ -8254,7 +8264,9 @@
     "assetPlaceholder": "Buscar activos…",
     "team": "Equipo responsable",
     "noTeam": "Sin equipo",
-    "create": "Crear Centro de Trabajo"
+    "create": "Crear Centro de Trabajo",
+    "idealCycleTimeSeconds": "Tiempo de ciclo ideal (segundos por unidad)",
+    "idealCycleTimeHint": "Tiempo más rápido para fabricar una unidad buena; el rendimiento OEE compara el tiempo real de producción con él."
   },
   "oee": {
     "title": "Panel OEE",
@@ -11716,5 +11728,60 @@
     "noCostData": "No hay datos de costo para este trabajo.",
     "summaryAria": "Resumen de costos del trabajo",
     "noMaterials": "No se han emitido materiales a este trabajo."
+  },
+  "workingCalendars": {
+    "title": "Calendarios laborales",
+    "backToAdmin": "Volver a Administración",
+    "newCalendar": "Nuevo calendario",
+    "editCalendar": "Editar calendario",
+    "emptyMessage": "Aún no hay calendarios",
+    "emptyHelp": "Cree su primer calendario para comenzar.",
+    "holidayCountOne": "{{count}} feriado",
+    "holidayCountOther": "{{count}} feriados",
+    "setDefault": "Establecer como predeterminado",
+    "timeZone": "Zona horaria",
+    "workingDays": "Días laborables",
+    "holidays": "Feriados",
+    "noHolidays": "No hay feriados configurados.",
+    "observed": "Observado",
+    "recurring": "Recurrente",
+    "observedDateOptional": "Fecha observada (opcional)",
+    "addHoliday": "Agregar feriado",
+    "shifts": "Turnos",
+    "hoursPerWeek": "{{hours}} h / semana",
+    "noShifts": "No hay turnos configurados. Agregue uno abajo.",
+    "days": "Días",
+    "start": "Inicio",
+    "end": "Fin",
+    "capacity": "Capacidad",
+    "capacityHours": "Capacidad (h)",
+    "premium": "Prima",
+    "addShift": "Agregar turno",
+    "saveShift": "Guardar turno",
+    "created": "Calendario creado",
+    "saved": "Calendario guardado",
+    "defaultUpdated": "Calendario predeterminado actualizado",
+    "deleteTitle": "¿Eliminar calendario?",
+    "deleteMessage": "¿Eliminar \"{{name}}\"? Esta acción no se puede deshacer.",
+    "deleted": "Calendario eliminado",
+    "holidayAdded": "Feriado agregado",
+    "removeHolidayTitle": "¿Quitar feriado?",
+    "removeHolidayMessage": "¿Quitar \"{{name}}\" ({{date}})?",
+    "holidayRemoved": "Feriado quitado",
+    "pickShiftDay": "Elija al menos un día para el turno",
+    "shiftAdded": "Turno agregado",
+    "shiftUpdated": "Turno actualizado",
+    "removeShiftTitle": "¿Quitar turno?",
+    "removeShiftMessage": "¿Quitar \"{{name}}\"?",
+    "shiftRemoved": "Turno quitado",
+    "daySun": "Dom",
+    "dayMon": "Lun",
+    "dayTue": "Mar",
+    "dayWed": "Mié",
+    "dayThu": "Jue",
+    "dayFri": "Vie",
+    "daySat": "Sáb",
+    "hoursShort": "{{hours}} h",
+    "multiplier": "{{value}}x"
   }
 }

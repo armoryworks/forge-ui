@@ -212,7 +212,6 @@
     "src/app/features/admin/presets/preset-custom/preset-custom.component.html": 14,
     "src/app/features/admin/presets/preset-detail/preset-detail.component.html": 9,
     "src/app/features/admin/updates/updates.component.html": 2,
-    "src/app/features/admin/working-calendars/working-calendars.component.html": 33,
     "src/app/features/approvals/components/approval-inbox/approval-inbox.component.html": 3,
     "src/app/features/approvals/components/approval-workflow-editor/approval-workflow-editor.component.html": 5,
     "src/app/features/assets/components/asset-detail-panel/asset-detail-panel.component.html": 3,

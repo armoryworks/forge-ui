@@ -17,6 +17,7 @@ import { SpacerDirective } from '../../shared/directives/spacer.directive';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { SelectOption } from '../../shared/components/select/select.component';
 import { ViewModeToggleComponent } from '../../shared/components/view-mode-toggle/view-mode-toggle.component';
@@ -343,6 +344,43 @@ export class MrpComponent {
         this.snackbar.success(this.translate.instant('mrp.snackbar.scheduleActivated'));
         this.loadMasterSchedules();
       },
+    });
+  }
+
+  protected completeSchedule(schedule: MasterSchedule): void {
+    this.confirmThen('mrp.completeScheduleTitle', 'mrp.completeScheduleMessage', 'mrp.completeSchedule', schedule, 'warn', () =>
+      this.mrpService.completeMasterSchedule(schedule.id).subscribe({
+        next: () => {
+          this.snackbar.success(this.translate.instant('mrp.snackbar.scheduleCompleted'));
+          this.loadMasterSchedules();
+        },
+      }));
+  }
+
+  protected cancelSchedule(schedule: MasterSchedule): void {
+    this.confirmThen('mrp.cancelScheduleTitle', 'mrp.cancelScheduleMessage', 'mrp.cancelSchedule', schedule, 'danger', () =>
+      this.mrpService.cancelMasterSchedule(schedule.id).subscribe({
+        next: () => {
+          this.snackbar.success(this.translate.instant('mrp.snackbar.scheduleCancelled'));
+          this.loadMasterSchedules();
+        },
+      }));
+  }
+
+  private confirmThen(
+    titleKey: string, messageKey: string, confirmKey: string, schedule: MasterSchedule,
+    severity: ConfirmDialogData['severity'], action: () => void,
+  ): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: this.translate.instant(titleKey),
+        message: this.translate.instant(messageKey, { name: schedule.name }),
+        confirmLabel: this.translate.instant(confirmKey),
+        severity,
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe((confirmed) => {
+      if (confirmed) action();
     });
   }
 

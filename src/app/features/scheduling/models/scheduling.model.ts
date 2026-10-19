@@ -16,6 +16,7 @@ export interface WorkCenter {
   sortOrder: number;
   teamId: number | null;
   teamName: string | null;
+  idealCycleTimeSeconds?: number | null;
 }
 
 export interface Shift {
@@ -110,6 +111,7 @@ export interface CreateWorkCenterRequest {
   companyLocationId: number | null;
   sortOrder: number;
   teamId?: number | null;
+  idealCycleTimeSeconds?: number | null;
 }
 
 export interface CreateShiftRequest {
