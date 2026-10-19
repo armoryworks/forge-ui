@@ -46,9 +46,11 @@
         <button class="action-btn" (click)="openVerb('use')">
           <span class="material-icons-outlined">remove_circle_outline</span>{{ 'inventory.home.verbs.use' | translate }}
         </button>
-        <button class="action-btn" (click)="openVerb('count')">
-          <span class="material-icons-outlined">fact_check</span>{{ 'inventory.home.verbs.count' | translate }}
-        </button>
+        @if (canCount()) {
+          <button class="action-btn" (click)="openVerb('count')">
+            <span class="material-icons-outlined">fact_check</span>{{ 'inventory.home.verbs.count' | translate }}
+          </button>
+        }
       </div>
 
       @if (lowStock().length > 0) {
