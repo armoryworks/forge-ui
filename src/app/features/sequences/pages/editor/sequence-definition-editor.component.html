@@ -14,8 +14,8 @@
   <section class="seq-editor__section seq-editor__grid">
     <app-input [label]="'sequences.editor.code' | translate" formControlName="code" data-testid="sequence-editor-code" />
     <app-input [label]="'sequences.editor.name' | translate" formControlName="name" data-testid="sequence-editor-name" />
-    <app-input [label]="'sequences.editor.subjectType' | translate" formControlName="subjectEntityType"
-      [placeholder]="'sequences.start.subjectTypePlaceholder' | translate" />
+    <app-select [label]="'sequences.editor.subjectType' | translate" formControlName="subjectEntityType"
+      [options]="subjectTypeOptions()" data-testid="sequence-editor-subject-type" />
     <app-select [label]="'sequences.editor.autoStart' | translate" formControlName="autoStartOnSubjectCreate" [options]="autoStartOptions" />
     <app-input class="seq-editor__wide" [label]="'sequences.editor.description' | translate" formControlName="description" />
   </section>

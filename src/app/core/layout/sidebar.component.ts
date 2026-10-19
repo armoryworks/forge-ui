@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, HostListener, inject, signal, untracked } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -11,7 +11,7 @@ import { NavItem } from '../../shared/models/nav-item.model';
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, MatTooltipModule, TranslatePipe],
+  imports: [RouterLink, MatTooltipModule, TranslatePipe],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -165,6 +165,10 @@ export class SidebarComponent {
     if (this.layout.isMobile()) {
       this.layout.closeMobileMenu();
     }
+  }
+
+  protected isActiveLeaf(item: NavItem): boolean {
+    return !!item.route && item.route === this.navTree.activeLeafRoute();
   }
 
   protected isInActiveTrail(item: NavItem): boolean {

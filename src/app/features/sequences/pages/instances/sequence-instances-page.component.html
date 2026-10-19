@@ -1,22 +1,32 @@
 <div class="seq-page" data-testid="sequence-instances">
-  <div class="seq-page__toolbar">
-    <h2 class="seq-page__title">{{ 'sequences.instances.title' | translate }}</h2>
+  <app-page-header [title]="'sequences.instances.title' | translate" [wrap]="true">
     <div class="seq-page__filter">
       <app-select [label]="'common.status' | translate" [formControl]="statusFilter" [options]="statusOptions" />
     </div>
     <button class="action-btn action-btn--primary" type="button" data-testid="sequence-start-btn" (click)="showStart.set(!showStart())">
       <span class="material-icons-outlined">play_arrow</span>{{ 'sequences.start.action' | translate }}
     </button>
-  </div>
+  </app-page-header>
 
   @if (showStart()) {
     <div class="seq-start" data-testid="sequence-start-form">
-      <app-select [label]="'sequences.start.definition' | translate" [formControl]="startDefId" [options]="defOptions()" />
-      <app-input [label]="'sequences.start.subjectType' | translate" [formControl]="startSubjectType"
-        [placeholder]="'sequences.start.subjectTypePlaceholder' | translate" />
-      <app-input type="number" [label]="'sequences.start.subjectId' | translate" [formControl]="startSubjectId" />
+      <app-select [label]="'sequences.start.definition' | translate" [formControl]="startDefId" [options]="defOptions()"
+        [placeholder]="'sequences.start.pickDefinition' | translate" data-testid="sequence-start-definition" />
+      @if (subjectType(); as type) {
+        <div class="seq-start__subject-type" data-testid="sequence-start-subject-type">
+          <span class="seq-start__label">{{ 'sequences.start.subjectType' | translate }}</span>
+          <span>{{ type }}</span>
+        </div>
+        @if (isJobSubject()) {
+          <app-entity-picker [label]="'sequences.start.job' | translate" entityType="jobs" displayField="jobNumber"
+            secondaryDisplayField="title" [formControl]="startSubjectId" data-testid="sequence-start-subject" />
+        } @else {
+          <app-input type="number" [label]="'sequences.start.subjectId' | translate" [formControl]="startSubjectId"
+            data-testid="sequence-start-subject" />
+        }
+      }
       <button class="action-btn action-btn--primary" type="button" data-testid="sequence-start-confirm"
-        [disabled]="!startDefId.value || starting()" (click)="start()">{{ 'sequences.start.confirm' | translate }}</button>
+        [disabled]="!canStart()" (click)="start()">{{ 'sequences.start.confirm' | translate }}</button>
     </div>
   }
 

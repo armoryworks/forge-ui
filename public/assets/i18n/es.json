@@ -834,7 +834,8 @@
       "subjectId": "ID del sujeto",
       "confirm": "Iniciar",
       "started": "Secuencia iniciada.",
-      "failed": "No se pudo iniciar la secuencia."
+      "failed": "No se pudo iniciar la secuencia.",
+      "job": "Trabajo"
     },
     "instances": {
       "title": "Instancias de secuencia",
@@ -894,7 +895,8 @@
       "noGates": "Aún no hay compuertas: un paso sin compuerta inicia en cuanto terminan sus predecesores.",
       "saved": "Definición guardada.",
       "saveFailed": "No se pudo guardar la definición.",
-      "badConfig": "La compuerta \"{{gate}}\" tiene una configuración JSON inválida."
+      "badConfig": "La compuerta \"{{gate}}\" tiene una configuración JSON inválida.",
+      "noSubject": "Ninguno"
     }
   },
   "newPartFlow": {

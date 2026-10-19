@@ -834,7 +834,8 @@
       "subjectId": "Subject ID",
       "confirm": "Start",
       "started": "Sequence started.",
-      "failed": "Could not start the sequence."
+      "failed": "Could not start the sequence.",
+      "job": "Job"
     },
     "instances": {
       "title": "Sequence Instances",
@@ -894,7 +895,8 @@
       "noGates": "No gates yet — a step with no gate starts as soon as its predecessors are done.",
       "saved": "Definition saved.",
       "saveFailed": "Could not save the definition.",
-      "badConfig": "Gate \"{{gate}}\" has invalid JSON config."
+      "badConfig": "Gate \"{{gate}}\" has invalid JSON config.",
+      "noSubject": "None"
     }
   },
   "newPartFlow": {

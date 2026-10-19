@@ -7,6 +7,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SequencesService } from '../../services/sequences.service';
@@ -16,7 +17,7 @@ import { SequenceDefinition, SequenceDefinitionStatus, SequenceGateDefinition } 
 @Component({
   selector: 'app-sequence-definitions-page',
   standalone: true,
-  imports: [DatePipe, ReactiveFormsModule, RouterLink, TranslatePipe, SelectComponent],
+  imports: [DatePipe, ReactiveFormsModule, RouterLink, TranslatePipe, PageHeaderComponent, SelectComponent],
   templateUrl: './sequence-definitions-page.component.html',
   styleUrl: './sequence-definitions-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

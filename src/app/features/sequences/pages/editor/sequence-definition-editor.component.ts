@@ -67,6 +67,10 @@ export class SequenceDefinitionEditorComponent {
     gates: new FormArray<FormGroup>([]),
   });
 
+  private readonly knownSubjectTypes = ['Job'];
+
+  protected readonly subjectTypeOptions = signal<SelectOption[]>(this.subjectTypeOptionsFor(''));
+
   protected readonly autoStartOptions: SelectOption[] = [
     { value: false, label: this.translate.instant('common.no') },
     { value: true, label: this.translate.instant('common.yes') },
@@ -109,7 +113,7 @@ export class SequenceDefinitionEditorComponent {
       description: new FormControl(s?.description ?? '', { nonNullable: true }),
       sortOrder: new FormControl(s?.sortOrder ?? this.steps.length + 1, { nonNullable: true }),
       joinPolicy: new FormControl<SequenceJoinPolicy>(s?.joinPolicy ?? 'All', { nonNullable: true }),
-      maxDwellMinutes: new FormControl<number | null>(s?.maxDwellMinutes ?? null),
+      maxDwellMinutes: new FormControl<number | null>(s?.maxDwellMinutes ?? null, [Validators.min(1)]),
       dwellExpiryAction: new FormControl<SequenceExpiryAction>(s?.dwellExpiryAction ?? 'Flag', { nonNullable: true }),
       escalateRole: new FormControl(s?.escalateRole ?? '', { nonNullable: true }),
     });
@@ -146,10 +150,24 @@ export class SequenceDefinitionEditorComponent {
     return this.configHints[gate.controls['sourceType'].value as SequenceGateSourceType] ?? '{}';
   }
 
+  private subjectTypeOptionsFor(current: string): SelectOption[] {
+    const options: SelectOption[] = [
+      { value: '', label: this.translate.instant('sequences.editor.noSubject') },
+      ...this.knownSubjectTypes.map(t => ({ value: t, label: t })),
+    ];
+    const trimmed = current.trim();
+    if (trimmed && !this.knownSubjectTypes.some(t => t.toLowerCase() === trimmed.toLowerCase())) {
+      options.push({ value: trimmed, label: trimmed });
+    }
+    return options;
+  }
+
   private hydrate(def: SequenceDefinitionRequest & { id?: number }): void {
+    const known = this.knownSubjectTypes.find(t => t.toLowerCase() === (def.subjectEntityType ?? '').trim().toLowerCase());
+    this.subjectTypeOptions.set(this.subjectTypeOptionsFor(def.subjectEntityType ?? ''));
     this.form.patchValue({
       code: def.code, name: def.name, description: def.description ?? '',
-      subjectEntityType: def.subjectEntityType ?? '', autoStartOnSubjectCreate: def.autoStartOnSubjectCreate,
+      subjectEntityType: known ?? def.subjectEntityType?.trim() ?? '', autoStartOnSubjectCreate: def.autoStartOnSubjectCreate,
     });
     this.steps.clear(); this.edges.clear(); this.gates.clear();
     (def.steps ?? []).forEach(s => this.steps.push(this.stepGroup(s)));
