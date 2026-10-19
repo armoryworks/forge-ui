@@ -276,6 +276,8 @@
             <app-datepicker
               [label]="'onboarding.personal.dateOfBirth' | translate"
               formControlName="dateOfBirth"
+              [min]="dobMin"
+              [max]="dobMax"
               [required]="true"
               data-testid="onboarding-dob"
             />

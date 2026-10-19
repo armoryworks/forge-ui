@@ -24,7 +24,10 @@ interface DialogInternals {
     salesOrderId: FormControl<number | null>;
     shipmentId: FormControl<number | null>;
     taxRate: FormControl<number | null>;
+    invoiceDate: FormControl<Date | null>;
+    dueDate: FormControl<Date | null>;
   }>;
+  violations(): string[];
   lineForm: FormGroup<{
     partId: FormControl<number | null>;
     partNumber: FormControl<string | null>;
@@ -195,6 +198,19 @@ describe('InvoiceDialogComponent — order, shipment and part pickers', () => {
 
     expect(internals.lineForm.valid).toBe(true);
     expect(internals.lineForm.controls.partId.value).toBeNull();
+  });
+
+  it('rejects a due date before the invoice date and names both fields', () => {
+    const { internals } = setup();
+    const form = internals.invoiceForm;
+
+    form.controls.invoiceDate.setValue(new Date(2026, 9, 19));
+    form.controls.dueDate.setValue(new Date(2026, 9, 18));
+    expect(form.hasError('dateRangeOrder')).toBe(true);
+    expect(internals.violations()).toContain(form.errors!['dateRangeOrder'].message);
+
+    form.controls.dueDate.setValue(new Date(2026, 9, 19));
+    expect(form.hasError('dateRangeOrder')).toBe(false);
   });
 
   it('rejects an invoice number longer than 20 characters', () => {

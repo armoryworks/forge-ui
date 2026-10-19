@@ -201,4 +201,30 @@ describe('FormValidationService', () => {
       });
     });
   });
+
+  describe('collectViolationItems with group-level errors', () => {
+    it('lists a cross-field error that carries a message, jumping to its field', () => {
+      const form = new FormGroup(
+        { from: new FormControl('a'), to: new FormControl('b') },
+        { validators: [() => ({ range: { message: 'To must be after From', field: 'to' } })] },
+      );
+
+      expect(FormValidationService.collectViolationItems(form, {})).toEqual([
+        { controlName: 'to', message: 'To must be after From' },
+      ]);
+      expect(FormValidationService.collectViolations(form, {})).toEqual(['To must be after From']);
+    });
+
+    it('uses an empty controlName when the group error names no field', () => {
+      const form = new FormGroup({ a: new FormControl('') }, { validators: [() => ({ g: { message: 'Whole form' } })] });
+
+      expect(FormValidationService.collectViolationItems(form, {})).toEqual([{ controlName: '', message: 'Whole form' }]);
+    });
+
+    it('skips group errors without a message', () => {
+      const form = new FormGroup({ a: new FormControl('') }, { validators: [() => ({ g: true })] });
+
+      expect(FormValidationService.collectViolationItems(form, {})).toEqual([]);
+    });
+  });
 });

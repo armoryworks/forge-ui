@@ -21,15 +21,15 @@
     </div>
 
     <div class="exports-buttons">
-      <button type="button" class="action-btn" (click)="download('trial-balance')" [disabled]="downloading() !== null">
+      <button type="button" class="action-btn" (click)="download('trial-balance')" [disabled]="downloading() !== null || rangeControl.invalid">
         <span class="material-icons-outlined" aria-hidden="true">download</span>
         {{ 'accounting.exports.trialBalanceCsv' | translate }}
       </button>
-      <button type="button" class="action-btn" (click)="download('gl-detail')" [disabled]="downloading() !== null">
+      <button type="button" class="action-btn" (click)="download('gl-detail')" [disabled]="downloading() !== null || rangeControl.invalid">
         <span class="material-icons-outlined" aria-hidden="true">download</span>
         {{ 'accounting.exports.glDetailCsv' | translate }}
       </button>
-      <button type="button" class="action-btn" (click)="download('journal-summary')" [disabled]="downloading() !== null">
+      <button type="button" class="action-btn" (click)="download('journal-summary')" [disabled]="downloading() !== null || rangeControl.invalid">
         <span class="material-icons-outlined" aria-hidden="true">download</span>
         {{ 'accounting.exports.journalSummaryCsv' | translate }}
       </button>
@@ -98,7 +98,7 @@
         <button
           type="button"
           class="action-btn action-btn--primary"
-          [disabled]="pushBusy()"
+          [disabled]="pushBusy() || rangeControl.invalid"
           (click)="confirmPush()">
           <span class="material-icons-outlined" aria-hidden="true">send</span>
           {{ 'accounting.exports.pushButton' | translate }}

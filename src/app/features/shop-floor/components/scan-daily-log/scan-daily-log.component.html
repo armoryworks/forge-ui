@@ -2,11 +2,9 @@
   <ng-container toolbar>
     <app-toolbar>
       <app-datepicker [label]="'kioskFlows.dailyLog.date' | translate" [formControl]="dateControl"
-                      (dateChange)="onDateChange()"
                       data-testid="scan-log-date" />
       <app-select [label]="'kioskFlows.dailyLog.actionType' | translate" [formControl]="actionTypeControl"
                   [options]="actionTypeOptions"
-                  (selectionChange)="onActionTypeChange()"
                   data-testid="scan-log-action-type" />
     </app-toolbar>
   </ng-container>

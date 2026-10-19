@@ -26,8 +26,11 @@
         <div class="report-header__filters">
           <app-datepicker [label]="'reports.from' | translate" [formControl]="startControl" />
           <app-datepicker [label]="'reports.to' | translate" [formControl]="endControl" />
-          <button class="action-btn action-btn--primary action-btn--sm" (click)="loadReport()">{{ 'reports.apply' | translate }}</button>
+          <button class="action-btn action-btn--primary action-btn--sm" [disabled]="dateRange.invalid" (click)="loadReport()">{{ 'reports.apply' | translate }}</button>
         </div>
+        @if (dateRange.errors?.['dateRangeOrder']?.message; as message) {
+          <span class="report-header__error" role="alert" data-testid="report-date-range-error">{{ message }}</span>
+        }
       }
     </div>
 

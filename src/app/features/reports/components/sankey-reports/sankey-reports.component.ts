@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -11,6 +11,7 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { SankeyChartComponent } from '../../../../shared/components/sankey-chart/sankey-chart.component';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { dateOrderValidator } from '../../../../shared/validators/date-order.validator';
 
 interface SankeyReportDef {
   id: SankeyReportType;
@@ -52,6 +53,12 @@ export class SankeyReportsComponent {
 
   protected readonly startControl = new FormControl<Date | null>(this.defaultStart());
   protected readonly endControl = new FormControl<Date | null>(this.defaultEnd());
+  protected readonly dateRange = new FormGroup({ start: this.startControl, end: this.endControl }, {
+    validators: [dateOrderValidator('start', 'end', () => this.translate.instant('validation.dateRangeOrder', {
+      start: this.translate.instant('reports.from'),
+      end: this.translate.instant('reports.to'),
+    }))],
+  });
 
   constructor() {
     this.loadReport();
@@ -63,6 +70,7 @@ export class SankeyReportsComponent {
   }
 
   protected loadReport(): void {
+    if (this.dateRange.invalid && this.activeReportDef().needsDateRange) return;
     this.loading.set(true);
     const report = this.activeReport();
     const start = this.startControl.value ? toIsoDate(this.startControl.value) || undefined : undefined;

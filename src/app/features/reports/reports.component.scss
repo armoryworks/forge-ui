@@ -78,3 +78,8 @@
   &--error .kpi-card__value { color: var(--error); }
 }
 
+
+.report-header__error {
+  color: var(--error);
+  font-size: var(--font-size-xs);
+}

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { FormControl } from '@angular/forms';
 
@@ -57,5 +57,75 @@ describe('DatepickerComponent.writeValue west of UTC', () => {
     picker.writeValue(null);
 
     expect(picker.internalControl.value).toBeNull();
+  });
+});
+
+describe('DatepickerComponent as a validator', () => {
+  interface ValidatingPicker extends PickerApi {
+    validate(control: unknown): Record<string, { message: string }> | null;
+    registerOnValidatorChange(fn: () => void): void;
+    errorMessage(): string | null;
+    markTouched(): void;
+  }
+
+  function create(): ValidatingPicker {
+    TestBed.resetTestingModule();
+    TestBed.overrideComponent(DatepickerComponent, { set: { template: '', imports: [] } });
+    const fixture = TestBed.createComponent(DatepickerComponent);
+    fixture.componentRef.setInput('label', 'Date of Birth');
+    return fixture.componentInstance as unknown as ValidatingPicker;
+  }
+
+  it('reports a typed date that is not a real day even before the field is dirty', () => {
+    const picker = create();
+
+    picker.internalControl.setErrors({ matDatepickerParse: { text: '02/30/2026' } });
+
+    expect(picker.validate(null)).toEqual({
+      matDatepickerParse: { message: 'validation.invalidDate' },
+    });
+  });
+
+  it('does not fail a stored date that falls outside [min] until the user changes it', () => {
+    const picker = create();
+    picker.writeValue('2020-01-15');
+    picker.internalControl.setErrors({ matDatepickerMin: { min: new Date(2026, 0, 1), actual: new Date(2020, 0, 15) } });
+
+    expect(picker.validate(null)).toBeNull();
+
+    picker.internalControl.markAsDirty();
+    picker.internalControl.setErrors({ matDatepickerMin: { min: new Date(2026, 0, 1), actual: new Date(2020, 0, 15) } });
+
+    expect(Object.keys(picker.validate(null)!)).toEqual(['matDatepickerMin']);
+  });
+
+  it('reports a typed date past [max] once dirty', () => {
+    const picker = create();
+    picker.internalControl.markAsDirty();
+    picker.internalControl.setErrors({ matDatepickerMax: { max: new Date(2026, 9, 19), actual: new Date(2099, 11, 31) } });
+
+    expect(Object.keys(picker.validate(null)!)).toEqual(['matDatepickerMax']);
+  });
+
+  it('asks the parent to re-validate whenever the inner status changes', () => {
+    const picker = create();
+    const revalidate = vi.fn();
+    picker.registerOnValidatorChange(revalidate);
+
+    picker.internalControl.setErrors({ matDatepickerParse: { text: 'x' } });
+
+    expect(revalidate).toHaveBeenCalled();
+  });
+
+  it('shows the parse message under the field once touched, and clears it when the parent writes a value', () => {
+    const picker = create();
+    picker.internalControl.setErrors({ matDatepickerParse: { text: 'x' } });
+    expect(picker.errorMessage()).toBeNull();
+
+    picker.markTouched();
+    expect(picker.errorMessage()).toBe('validation.invalidDate');
+
+    picker.writeValue(new Date(2026, 9, 19));
+    expect(picker.errorMessage()).toBeNull();
   });
 });

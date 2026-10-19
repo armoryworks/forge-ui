@@ -1,27 +1,27 @@
 <div class="date-range">
   <mat-form-field appearance="outline">
-    <mat-label>From</mat-label>
+    <mat-label>{{ 'common.from' | translate }}</mat-label>
     <input matInput
       [matDatepicker]="startPicker"
       [min]="min()"
       [max]="endDate() ?? max()"
       [disabled]="disabled()"
       [value]="startDate()"
-      (dateChange)="onStartChange($event.value)"
+      (dateChange)="onStartChange($event)"
       (blur)="markTouched()" />
     <mat-datepicker-toggle matSuffix [for]="startPicker" />
     <mat-datepicker #startPicker />
   </mat-form-field>
 
   <mat-form-field appearance="outline">
-    <mat-label>To</mat-label>
+    <mat-label>{{ 'common.to' | translate }}</mat-label>
     <input matInput
       [matDatepicker]="endPicker"
       [min]="startDate() ?? min()"
       [max]="max()"
       [disabled]="disabled()"
       [value]="endDate()"
-      (dateChange)="onEndChange($event.value)"
+      (dateChange)="onEndChange($event)"
       (blur)="markTouched()" />
     <mat-datepicker-toggle matSuffix [for]="endPicker" />
     <mat-datepicker #endPicker />
@@ -40,3 +40,6 @@
     </div>
   }
 </div>
+@if (errorMessage(); as message) {
+  <span class="date-range__error" role="alert" data-testid="date-range-error">{{ message }}</span>
+}

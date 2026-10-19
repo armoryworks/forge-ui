@@ -29,6 +29,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ActiveCurrencyService } from '../../../../shared/services/active-currency.service';
 import { ActiveCurrency } from '../../../../shared/models/active-currency.model';
 import { formatDate, toIsoDate, todayEnd } from '../../../../shared/utils/date.utils';
+import { dateOrderValidator } from '../../../../shared/validators/date-order.validator';
 import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
 
 interface LineEntry {
@@ -124,6 +125,11 @@ export class InvoiceDialogComponent {
     currencyId: new FormControl<number | null>(null),
     fxRate: new FormControl<number>(1, [Validators.required, Validators.min(0.0000001)]),
     notes: new FormControl(''),
+  }, {
+    validators: [dateOrderValidator('invoiceDate', 'dueDate', () => this.translate.instant('validation.dateRangeOrder', {
+      start: this.translate.instant('invoices.invoiceDate'),
+      end: this.translate.instant('invoices.dueDate'),
+    }))],
   });
 
   private readonly selectedCurrencyId = toSignal(

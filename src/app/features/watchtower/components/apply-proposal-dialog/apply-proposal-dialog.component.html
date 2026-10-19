@@ -10,7 +10,7 @@
 
   <div dialog-footer>
     <button class="action-btn" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
-    <button class="action-btn action-btn--primary" (click)="apply()">
+    <button class="action-btn action-btn--primary" [disabled]="form.invalid" (click)="apply()">
       <span class="material-icons-outlined">check</span>
       {{ 'watchtower.apply' | translate }}
     </button>

@@ -41,3 +41,11 @@
     cursor: not-allowed;
   }
 }
+
+.date-range__error {
+  display: block;
+  color: var(--error);
+  font-size: var(--font-size-xs);
+  line-height: 1.3;
+  padding: $sp-xs $sp-md 0;
+}

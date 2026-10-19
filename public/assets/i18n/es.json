@@ -2647,6 +2647,7 @@
     "effectiveFromHelper": "Cuándo comienza a aplicar para pedidos. Dejar en blanco para 'siempre activa'.",
     "effectiveToLabel": "Vigente Hasta",
     "effectiveToHelper": "Cuándo expira. Dejar en blanco para 'sin expiración'.",
+    "effectiveRangeInvalid": "Vigente Hasta debe ser posterior a Vigente Desde",
     "isDefaultLabel": "Lista predeterminada",
     "isDefaultHelper": "Aplica cuando ninguna otra regla coincide. Solo una predeterminada por cliente.",
     "isActiveLabel": "Activa",
@@ -5256,7 +5257,11 @@
     "maxLength": "{field} no puede exceder {max} caracteres",
     "invalidEmail": "Dirección de correo inválida",
     "invalidPhone": "Número de teléfono inválido",
-    "invalidZip": "Código postal inválido"
+    "invalidZip": "Código postal inválido",
+    "invalidDate": "{{field}} debe ser una fecha válida (MM/DD/AAAA)",
+    "dateMin": "{{field}} debe ser igual o posterior a {{min}}",
+    "dateMax": "{{field}} debe ser igual o anterior a {{max}}",
+    "dateRangeOrder": "{{start}} debe ser igual o anterior a {{end}}"
   },
   "invoices": {
     "invoiceNumberLabel": "Número de factura",

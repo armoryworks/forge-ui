@@ -22,10 +22,10 @@ function entry(id: number, actionType: string): ScanLogEntry {
   };
 }
 
-function setup() {
+function setup(getScanLog = vi.fn(() => of([] as ScanLogEntry[]))) {
   TestBed.configureTestingModule({
     providers: [
-      { provide: ScanActionService, useValue: { getScanLog: vi.fn(() => of([])) } },
+      { provide: ScanActionService, useValue: { getScanLog } },
       {
         provide: TranslateService,
         useValue: {
@@ -78,5 +78,27 @@ describe('ScanDailyLogComponent', () => {
 
     expect(log.actionTypeLabel('JobAdvance')).toBe('es:kioskFlows.logActions.jobAdvance');
     expect(log.actionTypeLabel('Teleport')).toBe('Teleport');
+  });
+
+  it('reloads for a typed date and a changed action filter', () => {
+    const getScanLog = vi.fn(() => of([] as ScanLogEntry[]));
+    const log = setup(getScanLog);
+
+    log.dateControl.setValue(new Date(2026, 9, 8));
+    log.actionTypeControl.setValue('Move');
+
+    expect(getScanLog).toHaveBeenNthCalledWith(1, undefined, '2026-10-08', undefined);
+    expect(getScanLog).toHaveBeenNthCalledWith(2, undefined, '2026-10-08', 'Move');
+  });
+
+  it('does not reload while the date field holds an invalid date', () => {
+    const getScanLog = vi.fn(() => of([] as ScanLogEntry[]));
+    const log = setup(getScanLog);
+    log.dateControl.addValidators(() => ({ matDatepickerParse: { message: 'bad' } }));
+
+    log.dateControl.setValue(null);
+    log.actionTypeControl.setValue('Ship');
+
+    expect(getScanLog).not.toHaveBeenCalled();
   });
 });

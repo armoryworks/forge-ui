@@ -72,7 +72,9 @@ export class FormValidationService {
    * Same scan as collectViolations but returns each violation alongside
    * the control name that produced it. Powers the validation popover's
    * click-to-jump so a click on a violation can scroll/focus the source
-   * field instead of leaving the user hunting.
+   * field instead of leaving the user hunting. Group-level (cross-field)
+   * errors carrying a `message` are included too, jumping to their
+   * optional `field` (empty controlName when none is given).
    */
   static collectViolationItems(form: FormGroup, labels: Record<string, string>): ViolationItem[] {
     const items: ViolationItem[] = [];
@@ -89,6 +91,12 @@ export class FormValidationService {
           items.push({ controlName: key, message });
         }
       }
+    }
+
+    for (const errorValue of Object.values(form.errors ?? {})) {
+      const { message, field } = (errorValue ?? {}) as { message?: unknown; field?: unknown };
+      if (typeof message !== 'string') continue;
+      items.push({ controlName: typeof field === 'string' ? field : '', message });
     }
 
     return items;

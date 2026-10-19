@@ -47,6 +47,7 @@ export class ApplyProposalDialogComponent {
   });
 
   protected apply(): void {
+    if (this.form.invalid) return;
     const { dueDate, targetEventTypeId } = this.form.getRawValue();
     this.dialogRef.close({
       dueDate: dueDate ? toIsoDate(dueDate) : null,

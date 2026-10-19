@@ -105,7 +105,7 @@ export class OeeComponent implements OnInit {
 
   protected loadWorkCenters(): void {
     const range = this.dateRangeControl.value;
-    if (!range?.start || !range?.end) return;
+    if (this.dateRangeControl.invalid || !range?.start || !range?.end) return;
 
     const dateFrom = this.formatDateOnly(range.start);
     const dateTo = this.formatDateOnly(range.end);
@@ -131,7 +131,7 @@ export class OeeComponent implements OnInit {
 
   private loadDetail(workCenterId: number): void {
     const range = this.dateRangeControl.value;
-    if (!range?.start || !range?.end) return;
+    if (this.dateRangeControl.invalid || !range?.start || !range?.end) return;
 
     const dateFrom = this.formatDateOnly(range.start);
     const dateTo = this.formatDateOnly(range.end);

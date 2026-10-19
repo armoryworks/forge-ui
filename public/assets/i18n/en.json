@@ -2647,6 +2647,7 @@
     "effectiveFromHelper": "When this list starts being valid for orders. Leave blank for 'always-on'.",
     "effectiveToLabel": "Effective To",
     "effectiveToHelper": "When this list expires. Leave blank for 'no expiry'.",
+    "effectiveRangeInvalid": "Effective To must be after Effective From",
     "isDefaultLabel": "Default list",
     "isDefaultHelper": "Apply this list when no other rule matches. Only one default per customer.",
     "isActiveLabel": "Active",
@@ -5263,7 +5264,11 @@
     "maxLength": "{field} cannot exceed {max} characters",
     "invalidEmail": "Invalid email address",
     "invalidPhone": "Invalid phone number",
-    "invalidZip": "Invalid ZIP code"
+    "invalidZip": "Invalid ZIP code",
+    "invalidDate": "{{field}} must be a real date (MM/DD/YYYY)",
+    "dateMin": "{{field}} must be on or after {{min}}",
+    "dateMax": "{{field}} must be on or before {{max}}",
+    "dateRangeOrder": "{{start}} must be on or before {{end}}"
   },
   "invoices": {
     "invoiceNumberLabel": "Invoice Number",
