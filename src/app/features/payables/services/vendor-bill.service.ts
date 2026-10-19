@@ -6,6 +6,7 @@ import { environment } from '../../../../environments/environment';
 import { VendorBillListItem } from '../models/vendor-bill-list-item.model';
 import { VendorBillDetail } from '../models/vendor-bill-detail.model';
 import { CreateVendorBillRequest } from '../models/create-vendor-bill-request.model';
+import { BillableGlAccount } from '../models/billable-gl-account.model';
 
 // ⚡ ACCOUNTING BOUNDARY — AP counterpart of InvoiceService.
 @Injectable({ providedIn: 'root' })
@@ -23,6 +24,11 @@ export class VendorBillService {
 
   getVendorBillById(id: number): Observable<VendorBillDetail> {
     return this.http.get<VendorBillDetail>(`${this.base}/${id}`);
+  }
+
+  /** GL accounts a standalone bill line can debit directly (active book, postable, non-control). */
+  getBillableAccounts(): Observable<BillableGlAccount[]> {
+    return this.http.get<BillableGlAccount[]>(`${this.base}/billable-accounts`);
   }
 
   createVendorBill(request: CreateVendorBillRequest): Observable<VendorBillListItem> {

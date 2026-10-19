@@ -64,11 +64,14 @@
         }
         <div formArrayName="lines">
           @for (group of standaloneLines.controls; track group; let i = $index) {
-            <div class="line-row" [formGroupName]="i">
+            <div class="line-row" [class.line-row--with-account]="accountOptions().length > 0" [formGroupName]="i">
               <app-entity-picker [label]="'common.part' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name" formControlName="partId" />
               <app-input [label]="'common.description' | translate" formControlName="description" [required]="true" data-testid="bill-line-desc" />
               <app-input [label]="'payables.qty' | translate" type="number" formControlName="quantity" step="0.0001" min="0.0001" data-testid="bill-line-qty" />
               <app-input [label]="'payables.unitPrice' | translate" type="number" formControlName="unitPrice" step="0.0001" min="0" data-testid="bill-line-price" />
+              @if (accountOptions().length > 0) {
+                <app-select [label]="'payables.glAccount' | translate" formControlName="glAccountId" [options]="accountOptions()" data-testid="bill-line-gl-account" />
+              }
               <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" [attr.aria-label]="'common.remove' | translate" (click)="removeLine(i)">
                 <span class="material-icons-outlined">delete</span>
               </button>

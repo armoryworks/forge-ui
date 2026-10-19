@@ -71,6 +71,33 @@ describe('VendorBillService', () => {
     });
   });
 
+  describe('getBillableAccounts', () => {
+    it('should GET the accounts a standalone bill line can debit', () => {
+      let result: unknown[] = [];
+      service.getBillableAccounts().subscribe((accounts) => { result = accounts; });
+      const req = httpMock.expectOne(`${base}/billable-accounts`);
+      expect(req.request.method).toBe('GET');
+      req.flush([{ id: 7, accountNumber: '61000', name: 'Office Supplies', accountType: 'Expense' }]);
+      expect(result).toHaveLength(1);
+    });
+  });
+
+  describe('createVendorBill with a GL account', () => {
+    it('should send the chosen account on the line', () => {
+      const body = {
+        vendorId: 1,
+        billDate: '2026-06-01T00:00:00Z',
+        dueDate: '2026-07-01T00:00:00Z',
+        taxAmount: 0,
+        lines: [{ description: 'Printer paper', quantity: 1, unitPrice: 25, glAccountId: 7 }],
+      };
+      service.createVendorBill(body).subscribe();
+      const req = httpMock.expectOne(base);
+      expect(req.request.body.lines[0].glAccountId).toBe(7);
+      req.flush({ id: 2 });
+    });
+  });
+
   describe('approveVendorBill', () => {
     it('should POST approve', () => {
       service.approveVendorBill(5).subscribe();
