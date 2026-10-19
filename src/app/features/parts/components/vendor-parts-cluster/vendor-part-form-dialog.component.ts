@@ -14,7 +14,7 @@ import { EntityPickerComponent } from '../../../../shared/components/entity-pick
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
-import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { fromIsoDate, toIsoDate } from '../../../../shared/utils/date.utils';
 
 import { VendorPartsService } from '../../services/vendor-parts.service';
 import { VendorPart } from '../../models/vendor-part.model';
@@ -111,7 +111,7 @@ export class VendorPartFormDialogComponent {
       { nonNullable: true },
     ),
     lastQuotedDate: new FormControl<Date | null>(
-      this.data.vendorPart?.lastQuotedDate ? new Date(this.data.vendorPart.lastQuotedDate) : null,
+      fromIsoDate(this.data.vendorPart?.lastQuotedDate),
     ),
     notes: new FormControl<string | null>(this.data.vendorPart?.notes ?? '', [Validators.maxLength(2000)]),
   });

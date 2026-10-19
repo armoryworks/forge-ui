@@ -15,7 +15,7 @@ import { EntityPickerComponent } from '../../../../shared/components/entity-pick
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
-import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { fromIsoDate, toIsoDate } from '../../../../shared/utils/date.utils';
 import { TermsService } from '../../services/terms.service';
 import { TermsScope } from '../../models/terms-scope.model';
 import { TermsDocument } from '../../models/terms-document.model';
@@ -101,10 +101,10 @@ export class TermsDialogComponent {
       nonNullable: true, validators: [Validators.required],
     }),
     effectiveFrom: new FormControl<Date | null>(
-      this.data.terms?.effectiveFrom ? new Date(this.data.terms.effectiveFrom) : null, [Validators.required],
+      fromIsoDate(this.data.terms?.effectiveFrom), [Validators.required],
     ),
     effectiveTo: new FormControl<Date | null>(
-      this.data.terms?.effectiveTo ? new Date(this.data.terms.effectiveTo) : null,
+      fromIsoDate(this.data.terms?.effectiveTo),
     ),
     sortOrder: new FormControl<number>(this.data.terms?.sortOrder ?? 0, {
       nonNullable: true, validators: [Validators.required, Validators.min(0)],

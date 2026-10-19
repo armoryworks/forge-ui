@@ -22,7 +22,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
-import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { fromIsoDate, toIsoDate } from '../../../../shared/utils/date.utils';
 
 @Component({
   selector: 'app-time-corrections-panel',
@@ -170,7 +170,7 @@ export class TimeCorrectionsPanelComponent implements OnInit {
     this.correctionForm.reset();
     this.correctionForm.patchValue({
       jobId: entry.jobId,
-      date: entry.date ? new Date(entry.date) : null,
+      date: fromIsoDate(entry.date),
       startTime: entry.timerStart ? this.toTimeString(new Date(entry.timerStart)) : null,
       endTime: entry.timerStop ? this.toTimeString(new Date(entry.timerStop)) : null,
       category: entry.category,
@@ -197,14 +197,14 @@ export class TimeCorrectionsPanelComponent implements OnInit {
 
     // Only include fields that changed
     if (val.jobId !== entry.jobId) request.jobId = val.jobId;
-    if (val.date && toIsoDate(val.date) !== toIsoDate(new Date(entry.date))) request.date = toIsoDate(val.date);
+    if (val.date && toIsoDate(val.date) !== toIsoDate(fromIsoDate(entry.date))) request.date = toIsoDate(val.date);
 
     const origStartStr = entry.timerStart ? this.toTimeString(new Date(entry.timerStart)) : null;
     const origEndStr = entry.timerStop ? this.toTimeString(new Date(entry.timerStop)) : null;
 
     if (val.startTime !== origStartStr || val.endTime !== origEndStr) {
       // Build full DateTimeOffset from date + time
-      const dateVal = val.date ?? new Date(entry.date);
+      const dateVal = val.date ?? fromIsoDate(entry.date)!;
       if (val.startTime) request.startTime = this.combineDateTime(dateVal, val.startTime);
       if (val.endTime) request.endTime = this.combineDateTime(dateVal, val.endTime);
     }

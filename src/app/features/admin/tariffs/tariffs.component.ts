@@ -21,7 +21,7 @@ import { FormValidationService } from '../../../shared/services/form-validation.
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { toIsoDate } from '../../../shared/utils/date.utils';
+import { fromIsoDate, toIsoDate } from '../../../shared/utils/date.utils';
 
 /**
  * Bought-parts effort PR4 — TariffRate admin page.
@@ -125,8 +125,8 @@ export class TariffsComponent {
       htsCode: row.htsCode,
       countryOfOrigin: row.countryOfOrigin,
       ratePct: row.ratePct,
-      effectiveFrom: row.effectiveFrom ? new Date(row.effectiveFrom) : null,
-      effectiveTo: row.effectiveTo ? new Date(row.effectiveTo) : null,
+      effectiveFrom: fromIsoDate(row.effectiveFrom),
+      effectiveTo: fromIsoDate(row.effectiveTo),
       source: row.source ?? '',
     });
     // HTS code + country are immutable on edit (they're the natural key).

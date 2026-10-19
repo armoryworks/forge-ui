@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, input, OnInit, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { map } from 'rxjs';
@@ -16,7 +16,7 @@ import { DatepickerComponent } from '../../../../shared/components/datepicker/da
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
-import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { fromIsoDate, toIsoDate } from '../../../../shared/utils/date.utils';
 import { CreateRfqRequest, RfqListItem } from '../../models/rfq.model';
 
 @Component({
@@ -31,7 +31,7 @@ import { CreateRfqRequest, RfqListItem } from '../../models/rfq.model';
   styleUrl: './rfq-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class RfqDialogComponent {
+export class RfqDialogComponent implements OnInit {
   private readonly purchasingService = inject(PurchasingService);
   private readonly partsService = inject(PartsService);
   private readonly snackbar = inject(SnackbarService);
@@ -75,16 +75,18 @@ export class RfqDialogComponent {
         ]);
       },
     });
+  }
 
+  ngOnInit(): void {
     const existing = this.rfq();
     if (existing) {
       this.form.patchValue({
         partId: existing.partId,
         quantity: existing.quantity,
-        requiredDate: existing.requiredDate ? new Date(existing.requiredDate) : null,
+        requiredDate: fromIsoDate(existing.requiredDate),
         description: existing.description ?? '',
         specialInstructions: existing.specialInstructions ?? '',
-        responseDeadline: existing.responseDeadline ? new Date(existing.responseDeadline) : null,
+        responseDeadline: fromIsoDate(existing.responseDeadline),
       });
     }
   }

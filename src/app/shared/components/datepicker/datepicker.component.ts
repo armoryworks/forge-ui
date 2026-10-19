@@ -13,6 +13,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MAT_DATE_FORMATS, provideNativeDateAdapter } from '@angular/material/core';
 
+import { toCalendarDate } from '../../utils/date.utils';
+
 /** Custom date formats enforcing MM/dd/yyyy display (project standard) */
 const QBE_DATE_FORMATS = {
   parse: { dateInput: 'MM/dd/yyyy' },
@@ -80,7 +82,7 @@ export class DatepickerComponent implements ControlValueAccessor {
   }
 
   writeValue(value: Date | string | null): void {
-    this.internalControl.setValue(value ? new Date(value) : null, { emitEvent: false });
+    this.internalControl.setValue(value ? new Date(toCalendarDate(value).getTime()) : null, { emitEvent: false });
   }
 
   registerOnChange(fn: (value: Date | null) => void): void {

@@ -16,10 +16,25 @@ function toLocalDate(value: Date | string): Date {
   return typeof value === 'string' ? parseDateOnly(value) ?? new Date(value) : value;
 }
 
+/**
+ * Resolve a value to a Date on the calendar day it stands for. A date-only string, or a Date at
+ * exactly UTC midnight (how the API sends date fields), becomes local midnight of that UTC day;
+ * any other value keeps its own local day. Used by toIsoDate()/toDateOnly() and the datepicker,
+ * so a date-only value loaded with new Date(value) neither shows nor saves as the previous day.
+ */
+export function toCalendarDate(value: Date | string): Date {
+  const d = toLocalDate(value);
+  const isUtcMidnight = d.getUTCHours() === 0 && d.getUTCMinutes() === 0
+    && d.getUTCSeconds() === 0 && d.getUTCMilliseconds() === 0;
+  return isUtcMidnight && d.getHours() !== 0
+    ? new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
+    : d;
+}
+
 export function toIsoDate(date: Date | string | null | undefined): string | null {
   if (!date) return null;
   // Accept string (e.g. from localStorage draft restore) or Date
-  const d = toLocalDate(date);
+  const d = toCalendarDate(date);
   if (isNaN(d.getTime())) return null;
   // Send full ISO 8601 UTC string — Postgres timestamptz requires UTC kind
   const y = d.getFullYear();
@@ -34,7 +49,7 @@ export function toIsoDate(date: Date | string | null | undefined): string | null
  */
 export function toDateOnly(date: Date | string | null | undefined): string | null {
   if (!date) return null;
-  const d = toLocalDate(date);
+  const d = toCalendarDate(date);
   if (isNaN(d.getTime())) return null;
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');

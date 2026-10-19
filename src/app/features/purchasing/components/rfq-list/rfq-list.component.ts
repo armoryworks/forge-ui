@@ -7,12 +7,13 @@ import { DataTableComponent } from '../../../../shared/components/data-table/dat
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { RfqListItem } from '../../models/rfq.model';
 
 @Component({
   selector: 'app-rfq-list',
   standalone: true,
-  imports: [DatePipe, TranslatePipe, DataTableComponent, ColumnCellDirective, LoadingBlockDirective],
+  imports: [DatePipe, DateOnlyPipe, TranslatePipe, DataTableComponent, ColumnCellDirective, LoadingBlockDirective],
   templateUrl: './rfq-list.component.html',
   styleUrl: './rfq-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

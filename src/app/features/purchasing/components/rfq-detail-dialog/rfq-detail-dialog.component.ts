@@ -28,6 +28,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/co
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 
 export interface RfqDetailDialogData {
@@ -38,7 +39,7 @@ export interface RfqDetailDialogData {
   selector: 'app-rfq-detail-dialog',
   standalone: true,
   imports: [
-    DatePipe, ReactiveFormsModule, TranslatePipe,
+    DatePipe, DateOnlyPipe, ReactiveFormsModule, TranslatePipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     DatepickerComponent, DataTableComponent, ColumnCellDirective,
     LoadingBlockDirective, ValidationButtonComponent, EntityLinkComponent,

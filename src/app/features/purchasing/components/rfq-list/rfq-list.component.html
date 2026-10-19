@@ -9,10 +9,10 @@
       <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
     </ng-template>
     <ng-template appColumnCell="requiredDate" let-row>
-      <span class="text-muted">{{ row.requiredDate | date:'MM/dd/yyyy' }}</span>
+      <span class="text-muted">{{ row.requiredDate | dateOnly }}</span>
     </ng-template>
     <ng-template appColumnCell="responseDeadline" let-row>
-      <span class="text-muted">{{ row.responseDeadline ? (row.responseDeadline | date:'MM/dd/yyyy') : '—' }}</span>
+      <span class="text-muted">{{ row.responseDeadline ? (row.responseDeadline | dateOnly) : '—' }}</span>
     </ng-template>
     <ng-template appColumnCell="createdAt" let-row>
       <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>

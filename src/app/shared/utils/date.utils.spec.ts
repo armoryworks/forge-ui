@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, it, expect } from 'vitest';
 
-import { formatDate, fromIsoDate, parseDateOnly, toDateOnly, toIsoDate } from './date.utils';
+import { formatDate, fromIsoDate, parseDateOnly, toCalendarDate, toDateOnly, toIsoDate } from './date.utils';
 
 describe('fromIsoDate', () => {
   it('keeps the calendar day of a UTC-midnight value', () => {
@@ -74,5 +74,54 @@ describe('date-only values west of UTC', () => {
   it('toDateOnly and formatDate keep the calendar day of a UTC-midnight value', () => {
     expect(toDateOnly('2026-10-16T00:00:00+00:00')).toBe('2026-10-16');
     expect(formatDate('2026-10-16T00:00:00+00:00')).toBe('10/16/2026');
+  });
+});
+
+describe.each([
+  ['America/Denver', 'west'],
+  ['Europe/Berlin', 'east'],
+])('a Date loaded with new Date(value) in %s (%s of UTC)', tz => {
+  let originalTz: string | undefined;
+
+  beforeEach(() => {
+    originalTz = process.env['TZ'];
+    process.env['TZ'] = tz;
+  });
+
+  afterEach(() => {
+    if (originalTz === undefined) delete process.env['TZ'];
+    else process.env['TZ'] = originalTz;
+  });
+
+  it('serialises a UTC-midnight Date from its UTC calendar day', () => {
+    const loaded = new Date('2026-11-20T00:00:00Z');
+
+    expect(toIsoDate(loaded)).toBe('2026-11-20T00:00:00Z');
+    expect(toDateOnly(loaded)).toBe('2026-11-20');
+  });
+
+  it('still serialises a picked local-midnight Date from its local day', () => {
+    const picked = new Date(2026, 10, 20);
+
+    expect(toIsoDate(picked)).toBe('2026-11-20T00:00:00Z');
+    expect(toDateOnly(picked)).toBe('2026-11-20');
+  });
+
+  it('keeps the local day of a real timestamp', () => {
+    const evening = new Date(2026, 10, 20, 22, 30);
+
+    expect(toIsoDate(evening)).toBe('2026-11-20T00:00:00Z');
+  });
+
+  it('toCalendarDate maps a UTC-midnight Date to local midnight of that day', () => {
+    const d = toCalendarDate(new Date('2026-11-20T00:00:00Z'));
+
+    expect([d.getFullYear(), d.getMonth(), d.getDate(), d.getHours()]).toEqual([2026, 10, 20, 0]);
+  });
+
+  it('toCalendarDate leaves a local-midnight Date alone', () => {
+    const picked = new Date(2026, 10, 20);
+
+    expect(toCalendarDate(picked).getTime()).toBe(picked.getTime());
   });
 });
