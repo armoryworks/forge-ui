@@ -16,6 +16,7 @@ import { provideMarkdown } from 'ngx-markdown';
 import { TranslateService, provideTranslateLoader, provideTranslateService } from '@ngx-translate/core';
 import { TRANSLATE_HTTP_LOADER_CONFIG } from '@ngx-translate/http-loader';
 import { MAT_DIALOG_DEFAULT_OPTIONS, MatDialogConfig } from '@angular/material/dialog';
+import { MatPaginatorIntl } from '@angular/material/paginator';
 import { firstValueFrom } from 'rxjs';
 
 import { routes } from './app.routes';
@@ -33,6 +34,7 @@ import { demoApiInterceptor } from './shared/interceptors/demo-api.interceptor';
 import { portalAuthInterceptor } from './features/portal/services/portal-auth.interceptor';
 import { trainingLangInterceptor } from './shared/interceptors/training-lang.interceptor';
 import { TerminologyTranslateLoader } from './shared/terminology/terminology-translate-loader';
+import { TranslatedPaginatorIntl } from './shared/services/translated-paginator-intl';
 
 function initTranslations(): () => Promise<void> {
   const translate = inject(TranslateService);
@@ -72,6 +74,7 @@ export const appConfig: ApplicationConfig = {
       defaultLanguage: 'en',
       loader: provideTranslateLoader(TerminologyTranslateLoader),
     }),
+    { provide: MatPaginatorIntl, useClass: TranslatedPaginatorIntl },
     {
       provide: TRANSLATE_HTTP_LOADER_CONFIG,
       useValue: { prefix: '/assets/i18n/', suffix: '.json' },

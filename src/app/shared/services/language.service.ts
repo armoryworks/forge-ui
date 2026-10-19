@@ -1,14 +1,17 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { TranslateService } from '@ngx-translate/core';
 
 export type SupportedLanguage = 'en' | 'es';
+
+const INTL_LOCALES: Record<SupportedLanguage, string> = { en: 'en-US', es: 'es-US' };
 
 @Injectable({ providedIn: 'root' })
 export class LanguageService {
   private readonly translate = inject(TranslateService);
 
   readonly currentLanguage = signal<SupportedLanguage>('en');
+  readonly intlLocale = computed(() => INTL_LOCALES[this.currentLanguage()]);
 
   readonly availableLanguages: { code: SupportedLanguage; label: string }[] = [
     { code: 'en', label: 'English' },

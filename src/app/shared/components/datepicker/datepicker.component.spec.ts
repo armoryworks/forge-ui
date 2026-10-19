@@ -1,8 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { FormControl } from '@angular/forms';
+import { DateAdapter, MAT_DATE_FORMATS, MatDateFormats } from '@angular/material/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { DatepickerComponent } from './datepicker.component';
+import { LanguageService } from '../../services/language.service';
 
 interface PickerApi {
   internalControl: FormControl<Date | null>;
@@ -14,6 +17,7 @@ describe('DatepickerComponent.writeValue west of UTC', () => {
 
   function create(): PickerApi {
     TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: [provideTranslateService()] });
     TestBed.overrideComponent(DatepickerComponent, { set: { template: '', imports: [] } });
     return TestBed.createComponent(DatepickerComponent).componentInstance as unknown as PickerApi;
   }
@@ -57,5 +61,37 @@ describe('DatepickerComponent.writeValue west of UTC', () => {
     picker.writeValue(null);
 
     expect(picker.internalControl.value).toBeNull();
+  });
+});
+
+describe('DatepickerComponent date adapter in Spanish', () => {
+  function setup() {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: [provideTranslateService()] });
+    TestBed.overrideComponent(DatepickerComponent, { set: { template: '', imports: [] } });
+    const fixture = TestBed.createComponent(DatepickerComponent);
+    const adapter = fixture.debugElement.injector.get(DateAdapter<Date>);
+    const formats = fixture.debugElement.injector.get(MAT_DATE_FORMATS) as MatDateFormats;
+    TestBed.inject(LanguageService).setLanguage('es');
+    fixture.detectChanges();
+    return { adapter, formats };
+  }
+
+  afterEach(() => localStorage.removeItem('language'));
+
+  it('names months in Spanish but keeps the typed date MM/dd/yyyy', () => {
+    const { adapter, formats } = setup();
+    const date = new Date(2026, 9, 19);
+
+    expect(adapter.format(date, formats.display.monthYearA11yLabel)).toBe('octubre de 2026');
+    expect(adapter.format(date, formats.display.dateInput)).toBe('10/19/2026');
+  });
+
+  it('still reads 10/19/2026 as October 19', () => {
+    const { adapter, formats } = setup();
+
+    const parsed = adapter.parse('10/19/2026', formats.parse.dateInput)!;
+
+    expect([parsed.getFullYear(), parsed.getMonth(), parsed.getDate()]).toEqual([2026, 9, 19]);
   });
 });

@@ -36,6 +36,13 @@ describe('LanguageService', () => {
     expect(service.currentLanguage()).toBe('es');
   });
 
+  it('intlLocale follows the language so dates, times and money format for it', () => {
+    expect(service.intlLocale()).toBe('en-US');
+    service.setLanguage('es');
+    expect(service.intlLocale()).toBe('es-US');
+    expect(new Date(2026, 9, 19).toLocaleDateString(service.intlLocale(), { month: 'long', year: 'numeric' })).toBe('octubre de 2026');
+  });
+
   it('setLanguage() calls translate.use() with the given language code', () => {
     service.setLanguage('es');
     expect(translateUseSpy).toHaveBeenCalledWith('es');

@@ -76,6 +76,7 @@ import { AuthService } from '../../shared/services/auth.service';
 import { ReferenceDataService } from '../../shared/services/reference-data.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { CompanyLocation, CompanyProfile } from './models/company-location.model';
+import { formatDate } from '../../shared/utils/date.utils';
 
 @Component({
   selector: 'app-admin',
@@ -1178,7 +1179,7 @@ export class AdminComponent implements OnInit {
     const date = this.lockThroughControl.value;
     if (!date) return;
 
-    const formatted = date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+    const formatted = formatDate(date);
 
     this.dialog.open(ConfirmDialogComponent, {
       width: '420px',

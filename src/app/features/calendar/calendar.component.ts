@@ -22,6 +22,7 @@ import { PriorityIndicatorComponent } from '../../shared/components/priority-ind
 import { KanbanService } from '../kanban/services/kanban.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 import { AuthService } from '../../shared/services/auth.service';
+import { LanguageService } from '../../shared/services/language.service';
 
 const CALENDAR_JOB_ROLES = ['Admin', 'Manager', 'PM', 'Engineer', 'ProductionWorker', 'OfficeManager'];
 const PO_READ_ROLES = ['Admin', 'Manager', 'OfficeManager', 'Procurement'];
@@ -55,6 +56,7 @@ export class CalendarComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
+  private readonly language = inject(LanguageService);
   private readonly userPreferences = inject(UserPreferencesService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly auth = inject(AuthService);
@@ -104,17 +106,16 @@ export class CalendarComponent implements OnInit {
   });
 
   protected readonly headerLabel = computed(() => {
+    const locale = this.language.intlLocale();
     const d = this.currentDate();
     const v = this.view();
-    if (v === 'month') return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    if (v === 'day') return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    if (v === 'month') return d.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
+    if (v === 'day') return d.toLocaleDateString(locale, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
     const week = this.getWeekDays(d);
     const start = week[0];
     const end = week[6];
-    if (start.getMonth() === end.getMonth()) {
-      return `${start.toLocaleDateString('en-US', { month: 'long' })} ${start.getDate()}–${end.getDate()}, ${start.getFullYear()}`;
-    }
-    return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+    const month = start.getMonth() === end.getMonth() ? 'long' : 'short';
+    return new Intl.DateTimeFormat(locale, { month, day: 'numeric', year: 'numeric' }).formatRange(start, end);
   });
 
   protected readonly calendarDays = computed(() => {

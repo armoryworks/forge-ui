@@ -50,6 +50,7 @@ import { ScanLocationViewComponent } from './components/scan-location-view/scan-
 import { NumericKeypadComponent } from './components/numeric-keypad/numeric-keypad.component';
 import { LanguageToggleComponent } from '../../shared/components/language-toggle/language-toggle.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { LanguageService } from '../../shared/services/language.service';
 
 const FONT_SIZES = [12, 14, 16, 18, 20, 24, 28] as const;
 
@@ -109,6 +110,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private readonly eventsService = inject(EventsService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
+  private readonly language = inject(LanguageService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
@@ -1507,7 +1509,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   private updateClock(): void {
     this.clockDisplay.set(
-      new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      new Date().toLocaleTimeString(this.language.intlLocale(), { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
     );
     this.tick.update(t => t + 1);
   }

@@ -2,8 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  effect,
   forwardRef,
   inject,
+  Injectable,
   input,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -11,20 +13,38 @@ import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR, ReactiveFormsModu
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MAT_DATE_FORMATS, provideNativeDateAdapter } from '@angular/material/core';
+import { DateAdapter, MAT_DATE_FORMATS, NativeDateAdapter } from '@angular/material/core';
 
-import { toCalendarDate } from '../../utils/date.utils';
+import { formatDate, toCalendarDate } from '../../utils/date.utils';
+import { LanguageService } from '../../services/language.service';
+
+const NUMERIC_DATE_INPUT: Intl.DateTimeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit' };
 
 /** Custom date formats enforcing MM/dd/yyyy display (project standard) */
 const QBE_DATE_FORMATS = {
   parse: { dateInput: 'MM/dd/yyyy' },
   display: {
-    dateInput: { year: 'numeric', month: '2-digit', day: '2-digit' } as Intl.DateTimeFormatOptions,
+    dateInput: NUMERIC_DATE_INPUT,
     monthYearLabel: { year: 'numeric', month: 'short' } as Intl.DateTimeFormatOptions,
     dateA11yLabel: { year: 'numeric', month: 'long', day: 'numeric' } as Intl.DateTimeFormatOptions,
     monthYearA11yLabel: { year: 'numeric', month: 'long' } as Intl.DateTimeFormatOptions,
   },
 };
+
+/**
+ * Native adapter whose month and weekday names follow the UI language while the typed
+ * date stays MM/dd/yyyy in every language, so parsing does not change with the language.
+ */
+@Injectable()
+export class LocalizedNativeDateAdapter extends NativeDateAdapter {
+  override format(date: Date, displayFormat: object): string {
+    if (displayFormat === NUMERIC_DATE_INPUT) {
+      if (!this.isValid(date)) throw Error('NativeDateAdapter: Cannot format invalid date.');
+      return formatDate(date);
+    }
+    return super.format(date, displayFormat);
+  }
+}
 
 @Component({
   selector: 'app-datepicker',
@@ -40,16 +60,13 @@ const QBE_DATE_FORMATS = {
       multi: true,
     },
     { provide: MAT_DATE_FORMATS, useValue: QBE_DATE_FORMATS },
-    // Standalone components don't inherit NgModule providers, so
-    // MatNativeDateModule's DateAdapter binding never reached
-    // matDatepicker — clicks threw NG0201 NullInjectorError. The
-    // `provideNativeDateAdapter()` helper is the standalone-friendly
-    // form and registers DateAdapter + MAT_DATE_LOCALE locally.
-    provideNativeDateAdapter(),
+    { provide: DateAdapter, useClass: LocalizedNativeDateAdapter },
   ],
 })
 export class DatepickerComponent implements ControlValueAccessor {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly dateAdapter = inject(DateAdapter);
+  private readonly language = inject(LanguageService);
 
   readonly label = input.required<string>();
   readonly min = input<Date | null>(null);
@@ -74,6 +91,7 @@ export class DatepickerComponent implements ControlValueAccessor {
   private onTouched: () => void = () => {};
 
   constructor() {
+    effect(() => this.dateAdapter.setLocale(this.language.intlLocale()));
     // Forward internal-control changes out to the parent CVA. Skipping
     // emitEvent in writeValue prevents a feedback loop.
     this.internalControl.valueChanges
