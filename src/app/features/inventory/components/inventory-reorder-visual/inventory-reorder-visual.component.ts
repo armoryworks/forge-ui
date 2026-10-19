@@ -105,7 +105,7 @@ export class InventoryReorderVisualComponent {
           },
         },
         scales: {
-          x: { beginAtZero: true, ticks: { font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+          x: { beginAtZero: true, ticks: { font: { size: 10 } } },
           y: { ticks: { font: { size: 10 } }, grid: { display: false } },
         },
       },

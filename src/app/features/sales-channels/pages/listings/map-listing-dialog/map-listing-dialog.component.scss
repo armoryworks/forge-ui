@@ -12,7 +12,7 @@
     align-items: baseline;
     gap: $sp-md;
     padding: $sp-md;
-    background: var(--surface-alt);
+    background: var(--row-alt);
     border: $border-width-thin solid var(--border);
     border-radius: $border-radius;
   }
@@ -80,7 +80,7 @@
 
   &:last-child { border-bottom: 0; }
 
-  &:hover { background: var(--surface-hover); }
+  &:hover { background: var(--bg); }
 
   &--selected {
     background: color-mix(in srgb, var(--primary) 12%, transparent);

@@ -5008,6 +5008,8 @@
     "clearAllFilters": "Clear All Filters",
     "hideColumn": "Hide Column",
     "resetWidth": "Reset Width",
+    "selectAllRows": "Select all rows",
+    "selectRow": "Select row",
     "columns": "Columns",
     "resetColumns": "Reset",
     "contains": "Contains",

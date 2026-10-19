@@ -106,7 +106,6 @@ export class CostingRatesVisualComponent {
           y: {
             stacked: true,
             ticks: { callback: (v) => `${v}`, font: { size: 10 } },
-            grid: { color: 'rgba(0,0,0,0.05)' },
           },
         },
       },

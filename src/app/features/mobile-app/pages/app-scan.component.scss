@@ -54,7 +54,7 @@ $torch-size: 72px;
     margin: 0;
     padding: $sp-md $sp-lg;
     background: rgba(0, 0, 0, 0.55);
-    color: var(--text);
+    color: var(--header-text);
     font-size: $font-size-md;
     text-align: center;
   }
@@ -68,7 +68,7 @@ $torch-size: 72px;
     height: $torch-size;
     background: rgba(0, 0, 0, 0.55);
     border: $border-width-thin solid var(--border);
-    color: var(--text);
+    color: var(--header-text);
     cursor: pointer;
 
     .material-icons-outlined { font-size: $icon-size-xxl; }
@@ -89,7 +89,7 @@ $torch-size: 72px;
     padding: 0 $sp-md;
     background: transparent;
     border: none;
-    color: var(--text-muted);
+    color: color-mix(in srgb, var(--header-text) 85%, transparent);
     font-family: $font-family-primary;
     font-size: $font-size-sm;
     cursor: pointer;

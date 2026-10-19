@@ -9,7 +9,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     min-width: 1.25rem; height: 1.25rem; padding: 0 0.375rem;
     border-radius: 999px; font-size: 0.75rem;
-    background: var(--surface-hover); color: var(--muted);
+    background: var(--bg); color: var(--text-muted);
   }
   &__instance {
     border: 1px solid var(--border);

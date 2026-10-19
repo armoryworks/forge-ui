@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { BaseChartDirective } from '../../../shared/charts/base-chart.directive';
+import { cssVar } from '../../../shared/charts/chart-theme';
+import { ThemeService } from '../../../shared/services/theme.service';
 import { ChartConfiguration, ChartData } from 'chart.js';
 
 import { SpcService } from '../services/spc.service';
@@ -20,6 +22,7 @@ import { SnackbarService } from '../../../shared/services/snackbar.service';
 export class SpcChartComponent {
   private readonly spcService = inject(SpcService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly themeService = inject(ThemeService);
 
   readonly characteristic = input.required<SpcCharacteristic>();
 
@@ -27,19 +30,21 @@ export class SpcChartComponent {
   protected readonly chartData = signal<SpcChartData | null>(null);
 
   protected readonly xBarChartData = computed<ChartData<'line'>>(() => {
+    this.themeService.theme();
     const data = this.chartData();
     if (!data || data.points.length === 0) return { labels: [], datasets: [] };
 
     const labels = data.points.map(p => `#${p.subgroupNumber}`);
     const means = data.points.map(p => p.mean);
     const oocIndices = data.points.map(p => p.isOoc);
+    const primary = cssVar('--primary', '#0f766e');
 
     const datasets: ChartData<'line'>['datasets'] = [
       {
         label: 'X-bar',
         data: means,
-        borderColor: 'var(--primary)',
-        backgroundColor: means.map((_, i) => oocIndices[i] ? '#ef4444' : 'var(--primary)'),
+        borderColor: primary,
+        backgroundColor: means.map((_, i) => oocIndices[i] ? '#ef4444' : primary),
         pointBackgroundColor: means.map((_, i) => oocIndices[i] ? '#ef4444' : '#3b82f6'),
         pointRadius: means.map((_, i) => oocIndices[i] ? 6 : 3),
         tension: 0,

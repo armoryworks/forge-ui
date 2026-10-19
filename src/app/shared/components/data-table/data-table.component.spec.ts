@@ -1,10 +1,18 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed, ComponentFixtureAutoDetect } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { TranslateLoader, TranslateService, TranslationObject, provideTranslateService } from '@ngx-translate/core';
+import { Observable, of } from 'rxjs';
 
 import { DataTableComponent } from './data-table.component';
 import { ColumnDef } from '../../models/column-def.model';
 import { UserPreferencesService } from '../../services/user-preferences.service';
+
+class CatalogLoader implements TranslateLoader {
+  getTranslation(): Observable<TranslationObject> {
+    return of({ shared: { selectAllRows: 'Select all rows', selectRow: 'Select row' } });
+  }
+}
 
 describe('DataTableComponent · formatCellValue', () => {
   const dateCol: ColumnDef = { field: 'date', header: 'Date', type: 'date' };
@@ -47,5 +55,27 @@ describe('DataTableComponent · formatCellValue', () => {
 
   it('leaves empty date cells empty', () => {
     expect(table.formatCellValue({ date: null }, dateCol)).toBeNull();
+  });
+});
+
+describe('DataTableComponent · selection checkboxes', () => {
+  it('gives the select-all and row checkboxes an accessible name', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideNoopAnimations(),
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: CatalogLoader } }),
+        { provide: UserPreferencesService, useValue: { get: () => null, set: () => undefined } },
+      ],
+    });
+    TestBed.inject(TranslateService).use('en');
+    const fixture = TestBed.createComponent(DataTableComponent);
+    fixture.componentRef.setInput('tableId', 'spec-table');
+    fixture.componentRef.setInput('columns', [{ field: 'name', header: 'Name' }]);
+    fixture.componentRef.setInput('data', [{ id: 1, name: 'A' }]);
+    fixture.componentRef.setInput('selectable', true);
+    fixture.detectChanges();
+
+    const inputs = Array.from(fixture.nativeElement.querySelectorAll('mat-checkbox input')) as HTMLInputElement[];
+    expect(inputs.map(i => i.getAttribute('aria-label'))).toEqual(['Select all rows', 'Select row']);
   });
 });

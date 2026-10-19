@@ -60,7 +60,6 @@ export class SixBigLossesChartComponent {
         scales: {
           x: {
             ticks: { callback: v => `${v} min`, font: { size: 10 } },
-            grid: { color: 'rgba(0,0,0,0.05)' },
           },
           y: {
             ticks: { font: { size: 11 } },

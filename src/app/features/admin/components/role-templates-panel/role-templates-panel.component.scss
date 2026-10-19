@@ -1,9 +1,9 @@
 .panel-hint {
   margin: 0 0 16px 0;
   padding: 12px 16px;
-  background: var(--surface-2, #f8fafc);
+  background: var(--bg);
   border-radius: 8px;
-  color: var(--text-muted, #64748b);
+  color: var(--text-muted);
   font-size: 13px;
   line-height: 1.5;
 }
@@ -28,18 +28,18 @@
   white-space: nowrap;
 
   &--primary {
-    background: var(--primary-100, #ccfbf1);
-    color: var(--primary-800, #115e59);
+    background: var(--primary-light);
+    color: var(--text);
   }
 
   &--system {
-    background: var(--info-100, #e0f2fe);
-    color: var(--info-800, #075985);
+    background: var(--info-light);
+    color: var(--text);
   }
 
   &--custom {
-    background: var(--warning-100, #fef3c7);
-    color: var(--warning-800, #92400e);
+    background: var(--warning-light);
+    color: var(--text);
   }
 }
 
@@ -65,7 +65,7 @@
 
 .form-hint {
   margin: 8px 0 0 0;
-  color: var(--text-muted, #64748b);
+  color: var(--text-muted);
   font-size: 12px;
   line-height: 1.5;
 }

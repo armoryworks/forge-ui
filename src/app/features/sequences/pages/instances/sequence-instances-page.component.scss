@@ -32,7 +32,7 @@
     display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
     padding: 0.5rem 0.625rem; border: 1px solid var(--border);
     border-radius: 6px; cursor: pointer;
-    &:hover { background: var(--surface-hover); }
+    &:hover { background: var(--bg); }
     &--active { border-color: var(--primary); }
   }
   &__name { font-weight: 600; }

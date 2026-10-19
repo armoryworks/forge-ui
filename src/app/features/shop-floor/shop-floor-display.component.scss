@@ -134,6 +134,13 @@
 .sf-stat--error .sf-stat__value { color: var(--error-light); }
 .sf-stat--accent .sf-stat__value { color: var(--accent-light); }
 
+:host-context([data-theme='dark']) {
+  .sf-stat--success .sf-stat__value { color: var(--success); }
+  .sf-stat--warning .sf-stat__value { color: var(--warning); }
+  .sf-stat--error .sf-stat__value { color: color-mix(in srgb, var(--error) 60%, var(--header-text)); }
+  .sf-stat--accent .sf-stat__value { color: var(--accent); }
+}
+
 // ─── Body ───
 //
 // Layout contract: :host is flex column with height:100dvh + overflow:hidden.

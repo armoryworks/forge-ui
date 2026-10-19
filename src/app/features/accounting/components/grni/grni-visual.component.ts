@@ -72,7 +72,6 @@ export class GrniVisualComponent {
         scales: {
           y: {
             ticks: { callback: (v) => `${v}`, font: { size: 10 } },
-            grid: { color: 'rgba(0,0,0,0.05)' },
           },
           x: {
             ticks: { font: { size: 11 } },

@@ -24,7 +24,7 @@
   background: color-mix(in srgb, var(--primary) 4%, transparent);
 }
 
-[data-theme='dark'] .entity-picker__field ::ng-deep .mat-mdc-text-field-wrapper {
+:host-context([data-theme='dark']) .entity-picker__field ::ng-deep .mat-mdc-text-field-wrapper {
   background: color-mix(in srgb, var(--primary) 8%, transparent);
 }
 

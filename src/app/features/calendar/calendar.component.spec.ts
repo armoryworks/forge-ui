@@ -75,3 +75,41 @@ describe('CalendarComponent · role access', () => {
     expect(calendar['getPoEvents']).toHaveBeenCalled();
   });
 });
+
+describe('CalendarComponent · month cells', () => {
+  it('puts the day action on a button instead of making the whole cell a button around other controls', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        {
+          provide: CalendarService,
+          useValue: {
+            getJobs: () => of([]),
+            getPoEvents: () => of([]),
+            getSuperGroups: () => of([]),
+            getEvents: () => of([]),
+            getSavedViews: () => of([]),
+          },
+        },
+        { provide: KanbanService, useValue: { getTrackTypes: () => of([]) } },
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: UserPreferencesService, useValue: { get: () => null, set: vi.fn() } },
+        { provide: AuthService, useValue: { hasAnyRole: () => true } },
+      ],
+    });
+    const fixture = TestBed.createComponent(CalendarComponent);
+    fixture.detectChanges();
+
+    const cells = Array.from(fixture.nativeElement.querySelectorAll('.calendar-cell')) as HTMLElement[];
+    expect(cells.length).toBeGreaterThan(27);
+    for (const cell of cells) {
+      expect(cell.getAttribute('role')).toBeNull();
+      expect(cell.getAttribute('tabindex')).toBeNull();
+      const date = cell.querySelector('.cell-date') as HTMLElement;
+      expect(date.tagName).toBe('BUTTON');
+      expect(date.getAttribute('aria-label')).toBeTruthy();
+    }
+  });
+});
