@@ -84,7 +84,8 @@
     "chartOfAccounts": "Chart of Accounts",
     "pieceRates": "Piece Rates",
     "openingJournal": "Opening Journal",
-    "journalApprovals": "Journal Approvals"
+    "journalApprovals": "Journal Approvals",
+    "maintenancePredictions": "Predictions"
   },
   "navGroups": {
     "operations": "Operations",
@@ -11718,5 +11719,39 @@
     "noCostData": "No cost data available for this job.",
     "summaryAria": "Job cost summary",
     "noMaterials": "No materials issued to this job."
+  },
+  "maintenanceSchedules": {
+    "pageTitle": "Preventive Maintenance",
+    "subtitle": "Recurring maintenance by calendar, run hours or shot count",
+    "newSchedule": "New PM Schedule",
+    "empty": "No preventive maintenance schedules yet",
+    "colAsset": "Asset",
+    "colTitle": "Task",
+    "colInterval": "Interval",
+    "colLastPerformed": "Last done",
+    "colNextDue": "Next due",
+    "statusDue": "Due",
+    "statusOk": "OK",
+    "logService": "Log service",
+    "createJob": "Create maintenance job",
+    "asset": "Asset",
+    "title": "Task",
+    "description": "Description",
+    "intervalDays": "Every (days)",
+    "intervalHours": "Every (run hours)",
+    "intervalShots": "Every (shots)",
+    "nextDueAt": "Next due",
+    "usageHint": "Run-hour and shot intervals count from the meter reading recorded at the last service.",
+    "created": "PM schedule created",
+    "logged": "Service logged",
+    "jobCreated": "Maintenance job created",
+    "logTitle": "Log service: {{title}}",
+    "logHint": "Leave the meter readings blank to record the asset's current hours and shot count.",
+    "hoursAtService": "Run hours at service",
+    "shotCountAtService": "Shot count at service",
+    "cost": "Cost",
+    "everyDays": "{{count}} days",
+    "everyHours": "{{count}} h",
+    "everyShots": "{{count}} shots"
   }
 }

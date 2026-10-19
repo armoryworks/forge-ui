@@ -1,0 +1,85 @@
+<app-page-header [title]="'maintenanceSchedules.pageTitle' | translate" [subtitle]="'maintenanceSchedules.subtitle' | translate">
+  <button class="action-btn action-btn--create" data-testid="new-pm-schedule-btn" (click)="openCreate()">
+    <span class="material-icons-outlined">add</span>
+    {{ 'maintenanceSchedules.newSchedule' | translate }}
+  </button>
+</app-page-header>
+
+<div class="schedules-body" [appLoadingBlock]="loading()">
+  <app-data-table tableId="maintenance-schedules" [columns]="columns" [data]="schedules()"
+    emptyIcon="handyman" [emptyMessage]="'maintenanceSchedules.empty' | translate">
+    <ng-template appColumnCell="interval" let-row>
+      {{ intervalParts(row).join(' · ') }}
+    </ng-template>
+    <ng-template appColumnCell="lastPerformedAt" let-row>
+      {{ row.lastPerformedAt ? (row.lastPerformedAt | date:'MM/dd/yyyy') : '—' }}
+    </ng-template>
+    <ng-template appColumnCell="nextDueAt" let-row>
+      {{ row.nextDueAt | date:'MM/dd/yyyy':'UTC' }}
+    </ng-template>
+    <ng-template appColumnCell="isOverdue" let-row>
+      <span [class]="row.isOverdue ? 'chip chip--error' : 'chip chip--success'">
+        {{ (row.isOverdue ? 'maintenanceSchedules.statusDue' : 'maintenanceSchedules.statusOk') | translate }}
+      </span>
+    </ng-template>
+    <ng-template appColumnCell="actions" let-row>
+      <button class="icon-btn" [attr.aria-label]="'maintenanceSchedules.logService' | translate"
+        [matTooltip]="'maintenanceSchedules.logService' | translate"
+        data-testid="pm-log-btn" (click)="openLog($any(row))">
+        <span class="material-icons-outlined">task_alt</span>
+      </button>
+      <button class="icon-btn" [attr.aria-label]="'maintenanceSchedules.createJob' | translate"
+        [matTooltip]="'maintenanceSchedules.createJob' | translate"
+        data-testid="pm-create-job-btn" (click)="createJob($any(row))">
+        <span class="material-icons-outlined">post_add</span>
+      </button>
+    </ng-template>
+  </app-data-table>
+</div>
+
+@if (showCreateDialog()) {
+  <app-dialog [title]="'maintenanceSchedules.newSchedule' | translate" width="520px" (closed)="showCreateDialog.set(false)">
+    <div [formGroup]="createForm">
+      <app-select [label]="'maintenanceSchedules.asset' | translate" formControlName="assetId" [options]="assetOptions()" [required]="true" data-testid="pm-asset" />
+      <app-input [label]="'maintenanceSchedules.title' | translate" formControlName="title" [required]="true" data-testid="pm-title" />
+      <app-textarea [label]="'maintenanceSchedules.description' | translate" formControlName="description" data-testid="pm-description" />
+      <div class="dialog-row">
+        <app-input [label]="'maintenanceSchedules.intervalDays' | translate" type="number" formControlName="intervalDays" [required]="true" data-testid="pm-interval-days" />
+        <app-datepicker [label]="'maintenanceSchedules.nextDueAt' | translate" formControlName="nextDueAt" [required]="true" data-testid="pm-next-due" />
+      </div>
+      <div class="dialog-row">
+        <app-input [label]="'maintenanceSchedules.intervalHours' | translate" type="number" formControlName="intervalHours" data-testid="pm-interval-hours" />
+        <app-input [label]="'maintenanceSchedules.intervalShots' | translate" type="number" formControlName="intervalShots" data-testid="pm-interval-shots" />
+      </div>
+      <p class="dialog-hint">{{ 'maintenanceSchedules.usageHint' | translate }}</p>
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="showCreateDialog.set(false)">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="createViolations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" [disabled]="createForm.invalid || saving()"
+          (click)="saveSchedule()" data-testid="pm-save-btn">{{ 'common.create' | translate }}</button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}
+
+@if (loggingSchedule(); as schedule) {
+  <app-dialog [title]="'maintenanceSchedules.logTitle' | translate: { title: schedule.title }" width="480px" (closed)="loggingSchedule.set(null)">
+    <div [formGroup]="logForm">
+      <p class="dialog-hint">{{ 'maintenanceSchedules.logHint' | translate }}</p>
+      <div class="dialog-row">
+        <app-input [label]="'maintenanceSchedules.hoursAtService' | translate" type="number" formControlName="hoursAtService" data-testid="pm-log-hours" />
+        <app-input [label]="'maintenanceSchedules.shotCountAtService' | translate" type="number" formControlName="shotCountAtService" data-testid="pm-log-shots" />
+      </div>
+      <app-input [label]="'maintenanceSchedules.cost' | translate" type="number" formControlName="cost" data-testid="pm-log-cost" />
+      <app-textarea [label]="'common.notes' | translate" formControlName="notes" data-testid="pm-log-notes" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="loggingSchedule.set(null)">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="logViolations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" [disabled]="logForm.invalid || saving()"
+          (click)="saveLog()" data-testid="pm-log-save-btn">{{ 'maintenanceSchedules.logService' | translate }}</button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}

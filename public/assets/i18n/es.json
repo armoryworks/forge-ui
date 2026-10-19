@@ -84,7 +84,8 @@
     "chartOfAccounts": "Plan de Cuentas",
     "pieceRates": "Tarifas por pieza",
     "openingJournal": "Asiento de apertura",
-    "journalApprovals": "Aprobación de asientos"
+    "journalApprovals": "Aprobación de asientos",
+    "maintenancePredictions": "Predicciones"
   },
   "navGroups": {
     "operations": "Operaciones",
@@ -11718,5 +11719,39 @@
     "noCostData": "No hay datos de costo para este trabajo.",
     "summaryAria": "Resumen de costos del trabajo",
     "noMaterials": "No se han emitido materiales a este trabajo."
+  },
+  "maintenanceSchedules": {
+    "pageTitle": "Mantenimiento preventivo",
+    "subtitle": "Mantenimiento recurrente por calendario, horas de operación o conteo de disparos",
+    "newSchedule": "Nuevo programa de MP",
+    "empty": "Aún no hay programas de mantenimiento preventivo",
+    "colAsset": "Activo",
+    "colTitle": "Tarea",
+    "colInterval": "Intervalo",
+    "colLastPerformed": "Última vez",
+    "colNextDue": "Próximo vencimiento",
+    "statusDue": "Vencido",
+    "statusOk": "Al día",
+    "logService": "Registrar servicio",
+    "createJob": "Crear trabajo de mantenimiento",
+    "asset": "Activo",
+    "title": "Tarea",
+    "description": "Descripción",
+    "intervalDays": "Cada (días)",
+    "intervalHours": "Cada (horas de operación)",
+    "intervalShots": "Cada (disparos)",
+    "nextDueAt": "Próximo vencimiento",
+    "usageHint": "Los intervalos de horas y disparos se cuentan desde la lectura del medidor registrada en el último servicio.",
+    "created": "Programa de MP creado",
+    "logged": "Servicio registrado",
+    "jobCreated": "Trabajo de mantenimiento creado",
+    "logTitle": "Registrar servicio: {{title}}",
+    "logHint": "Deje las lecturas en blanco para registrar las horas y el conteo de disparos actuales del activo.",
+    "hoursAtService": "Horas de operación en el servicio",
+    "shotCountAtService": "Conteo de disparos en el servicio",
+    "cost": "Costo",
+    "everyDays": "{{count}} días",
+    "everyHours": "{{count}} h",
+    "everyShots": "{{count}} disparos"
   }
 }

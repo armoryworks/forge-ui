@@ -1,0 +1,21 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.schedules-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.dialog-hint {
+  margin: 0 0 $sp-sm;
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+}
