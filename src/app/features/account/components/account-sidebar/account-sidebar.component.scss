@@ -133,10 +133,63 @@
 }
 
 @include mobile {
+  :host {
+    flex-shrink: 0;
+  }
+
   .account-sidebar {
     width: 100%;
     min-width: 0;
+    flex-direction: row;
+    align-items: stretch;
+    padding: 0;
+    overflow: visible;
     border-right: none;
     border-bottom: $border-width-thin solid var(--border);
+  }
+
+  .account-sidebar__back {
+    flex-shrink: 0;
+    margin: 0;
+    justify-content: center;
+    @include touch-target;
+  }
+
+  .account-sidebar__back-label,
+  .account-sidebar__title {
+    display: none;
+  }
+
+  .account-sidebar__nav,
+  .account-sidebar__nav > li,
+  .account-sidebar__children {
+    display: flex;
+  }
+
+  .account-sidebar__nav {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .account-sidebar__link {
+    height: auto;
+    padding: $sp-md $sp-lg;
+    white-space: nowrap;
+    @include touch-target(height);
+
+    &--active {
+      border-left: none;
+      border-bottom: $border-width solid var(--primary);
+    }
+  }
+
+  .account-sidebar__link--parent {
+    width: auto;
+  }
+
+  .account-sidebar__link--child {
+    padding-left: $sp-lg;
   }
 }

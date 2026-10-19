@@ -41,6 +41,10 @@ import { EmployeeProfileService } from './services/employee-profile.service';
       .account-layout {
         flex-direction: column;
       }
+
+      .account-layout__content {
+        min-height: 0;
+      }
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,12 +1,12 @@
 <nav class="account-sidebar" [attr.aria-label]="'account.settingsNav' | translate">
   <button class="account-sidebar__back" (click)="goBack()" [attr.aria-label]="'account.backToDashboard' | translate">
     <span class="material-icons-outlined">arrow_back</span>
-    <span>{{ 'common.back' | translate }}</span>
+    <span class="account-sidebar__back-label">{{ 'common.back' | translate }}</span>
   </button>
 
   <div class="account-sidebar__title">{{ 'account.accountSettings' | translate }}</div>
 
-  <ul class="account-sidebar__nav" role="list">
+  <ul class="account-sidebar__nav" role="list" appScrollCue>
     <!-- Profile, Contact, Emergency -->
     @for (item of navItems.slice(0, 3); track item.path) {
       <li>

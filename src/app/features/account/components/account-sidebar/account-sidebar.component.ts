@@ -6,6 +6,7 @@ import { EmployeeProfileService } from '../../services/employee-profile.service'
 import { ComplianceFormService } from '../../services/compliance-form.service';
 import { OnboardingService } from '../../../onboarding/onboarding.service';
 import { LayoutService } from '../../../../shared/services/layout.service';
+import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
 
 const WIZARD_PROFILE_KEYS = new Set([
   'w4', 'i9', 'state_withholding', 'direct_deposit', 'workers_comp', 'handbook',
@@ -29,7 +30,7 @@ interface AccountNavChild {
 @Component({
   selector: 'app-account-sidebar',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, TranslatePipe],
+  imports: [ScrollCueDirective, RouterLink, RouterLinkActive, TranslatePipe],
   templateUrl: './account-sidebar.component.html',
   styleUrl: './account-sidebar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
