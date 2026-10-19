@@ -104,6 +104,7 @@ export type MasterScheduleStatus = 'Draft' | 'Active' | 'Completed' | 'Cancelled
 
 export interface MasterScheduleDetail extends Omit<MasterSchedule, 'lineCount'> {
   lines: MasterScheduleLine[];
+  rowVersion?: number;
 }
 
 export interface MasterScheduleLine {

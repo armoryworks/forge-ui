@@ -334,4 +334,27 @@ describe('InventoryService', () => {
       expect(received).toEqual([{ binContentId: 31 }]);
     });
   });
+  describe('updateUnitOfMeasure', () => {
+    const data = {
+      code: 'ea', name: 'Each', symbol: null, category: 'Count' as const,
+      decimalPlaces: 0, isBaseUnit: true, sortOrder: 1,
+    };
+
+    it('sends the row version as If-Match, since the list read is not cached', () => {
+      service.updateUnitOfMeasure(3, data, 7).subscribe();
+
+      const req = httpMock.expectOne(`${baseUrl}/uom/3`);
+      expect(req.request.method).toBe('PUT');
+      expect(req.request.headers.get('If-Match')).toBe('"7"');
+      req.flush({ id: 3, ...data, isActive: true, rowVersion: 8 });
+    });
+
+    it('sends no If-Match when no row version is known', () => {
+      service.updateUnitOfMeasure(3, data).subscribe();
+
+      const req = httpMock.expectOne(`${baseUrl}/uom/3`);
+      expect(req.request.headers.has('If-Match')).toBe(false);
+      req.flush({ id: 3, ...data, isActive: true });
+    });
+  });
 });

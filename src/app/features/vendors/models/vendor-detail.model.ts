@@ -29,4 +29,5 @@ export interface VendorDetail {
   // vendor edit dialog so admins can widen tolerance for vendors with
   // genuinely noisy pricing.
   offTierVariancePct: number | null;
+  rowVersion?: number;
 }

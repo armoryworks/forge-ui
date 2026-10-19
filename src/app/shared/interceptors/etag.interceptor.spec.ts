@@ -144,4 +144,40 @@ describe('etagInterceptor', () => {
     expect(put.request.headers.has('If-Match')).toBe(false);
     put.flush(null);
   });
+  it('files the version a customer summary read returns under the customer, so the detail save sends it', () => {
+    http.get('/api/v1/customers/5/summary').subscribe();
+    backend.expectOne('/api/v1/customers/5/summary').flush({ id: 5, name: 'Acme', rowVersion: 2 });
+
+    http.put('/api/v1/customers/5', { name: 'Acme Co' }).subscribe();
+    const put = backend.expectOne(r => r.method === 'PUT' && r.url === '/api/v1/customers/5');
+
+    expect(put.request.headers.get('If-Match')).toBe('"2"');
+    put.flush(null);
+  });
+
+  it('sends the refreshed customer version after a credit hold reloads the summary', () => {
+    http.get('/api/v1/customers/5/summary').subscribe();
+    backend.expectOne('/api/v1/customers/5/summary').flush({ id: 5, rowVersion: 2 });
+    http.post('/api/v1/customers/5/credit-hold', { reason: 'Past due' }).subscribe();
+    backend.expectOne('/api/v1/customers/5/credit-hold').flush(null);
+    http.get('/api/v1/customers/5/summary').subscribe();
+    backend.expectOne('/api/v1/customers/5/summary').flush({ id: 5, rowVersion: 3 });
+
+    http.put('/api/v1/customers/5', { name: 'Acme Co' }).subscribe();
+    const put = backend.expectOne(r => r.method === 'PUT' && r.url === '/api/v1/customers/5');
+
+    expect(put.request.headers.get('If-Match')).toBe('"3"');
+    put.flush(null);
+  });
+
+  it('keeps an explicit If-Match over a cached one', () => {
+    http.get('/api/v1/master-schedules/4').subscribe();
+    backend.expectOne('/api/v1/master-schedules/4').flush({ id: 4, rowVersion: 2 });
+
+    http.put('/api/v1/master-schedules/4', {}, { headers: { 'If-Match': '"9"' } }).subscribe();
+    const put = backend.expectOne('/api/v1/master-schedules/4');
+
+    expect(put.request.headers.get('If-Match')).toBe('"9"');
+    put.flush(null);
+  });
 });

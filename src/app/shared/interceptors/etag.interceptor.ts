@@ -20,11 +20,15 @@ import { ETagCacheService } from '../services/etag-cache.service';
  * is in-memory only; on full reload, the next GET will refresh the ETag
  * automatically. A request that already carries If-Match keeps its own value.
  *
- * Master-data resources (customers, parts, vendors, etc.) are NOT subject to
- * ETag plumbing — the server simply ignores If-Match on them. Per the
- * Phase 1F decision: master data is last-write-wins. The interceptor still
- * harmlessly attaches If-Match if it has one, but the server treats it as
- * a no-op for those endpoints.
+ * Most master-data resources (parts, etc.) are NOT subject to ETag plumbing —
+ * the server simply ignores If-Match on them. Per the Phase 1F decision: master
+ * data is last-write-wins. The interceptor still harmlessly attaches If-Match
+ * if it has one, but the server treats it as a no-op for those endpoints. The
+ * full-form editors for customers, vendors, units of measure, master schedules
+ * and employee profiles are versioned: the customer and vendor reads cache the
+ * version for the record's PUT/DELETE, while the unit-of-measure and profile
+ * saves send If-Match explicitly (a list read is not cached, and the profile's
+ * self route has no id in its path).
  *
  * Documented permissive exceptions (explicitly last-write-wins by eng-lead ruling):
  *  - /jobs/bulk/* — bulk stage/assign/priority/archive operations. No per-resource
