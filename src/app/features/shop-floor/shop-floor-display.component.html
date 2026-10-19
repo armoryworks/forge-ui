@@ -277,7 +277,7 @@
       </div>
       <span class="sf-unassigned-card__stage">{{ job.stageName }}</span>
       <span class="sf-unassigned-card__priority" [class]="priorityClass(job.priorityName)">
-        {{ job.priorityName }}
+        {{ priorityLabel(job.priorityName) }}
       </span>
     </ng-template>
 
@@ -661,7 +661,7 @@
                     </span>
                   }
                   <span class="sf-job-select-card__job-priority" [class]="priorityClass(job.priorityName)">
-                    {{ job.priorityName }}
+                    {{ priorityLabel(job.priorityName) }}
                   </span>
                 </div>
                 @if (processing() === 'claim-' + job.jobId) {

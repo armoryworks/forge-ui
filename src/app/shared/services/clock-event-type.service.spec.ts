@@ -1,12 +1,26 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 
 import { ClockEventTypeService, ClockEventTypeDef } from './clock-event-type.service';
+
+const EN = {
+  clockStatus: {
+    in: 'Currently Working', inShort: 'IN', out: 'Clocked Out', outShort: 'OUT',
+    onBreak: 'On Break', onBreakShort: 'BREAK', onLunch: 'On Lunch', onLunchShort: 'LUNCH', unknown: 'Unknown',
+  },
+  clockActions: { ClockOut: 'Clock Out', BreakStart: 'Start Break' },
+};
+const ES = {
+  clockStatus: { in: 'Trabajando', inShort: 'DENTRO', out: 'Salida registrada', outShort: 'FUERA' },
+  clockActions: { ClockOut: 'Marcar salida', BreakStart: 'Iniciar descanso' },
+};
 
 describe('ClockEventTypeService', () => {
   let service: ClockEventTypeService;
   let httpMock: HttpTestingController;
+  let translate: TranslateService;
 
   const mockReferenceData = [
     {
@@ -107,9 +121,14 @@ describe('ClockEventTypeService', () => {
         ClockEventTypeService,
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideTranslateService(),
       ],
     });
 
+    translate = TestBed.inject(TranslateService);
+    translate.setTranslation('en', EN);
+    translate.setTranslation('es', ES);
+    translate.use('en');
     service = TestBed.inject(ClockEventTypeService);
     httpMock = TestBed.inject(HttpTestingController);
   });
@@ -119,6 +138,19 @@ describe('ClockEventTypeService', () => {
   });
 
   // ── load ──
+
+  it('shows statuses and actions in Spanish after the language switches', () => {
+    loadDefinitions();
+
+    translate.use('es');
+
+    expect(service.getLabel('In')).toBe('Trabajando');
+    expect(service.getShortLabel('Out')).toBe('FUERA');
+    const labels = service.getAvailableActions('In').map((a) => a.label);
+    expect(labels).toContain('Marcar salida');
+    expect(labels).toContain('Iniciar descanso');
+    expect(labels).toContain('Start Lunch');
+  });
 
   it('should load definitions from API on init', () => {
     loadDefinitions();

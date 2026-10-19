@@ -1,5 +1,5 @@
 <div class="move" data-testid="mobile-app-move-stock">
-  <ol class="move__steps" aria-label="Move stock steps">
+  <ol class="move__steps" [attr.aria-label]="'mobileApp.move.stepsLabel' | translate">
     <li class="move__step" [class.move__step--done]="part()" [class.move__step--active]="step() === 'part'">
       <span class="move__step-label">{{ 'mobileApp.move.part' | translate }}</span>
       <span class="move__step-value">{{ part()?.label ?? '—' }}</span>

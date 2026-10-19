@@ -218,7 +218,8 @@ export class KioskSetupComponent {
   }
 
   private toTeamOption(team: Team): { value: unknown; label: string } {
-    return { value: team.id, label: `${team.name} (${team.memberCount} members)` };
+    const key = team.memberCount === 1 ? 'shopFloor.teamOptionOne' : 'shopFloor.teamOptionOther';
+    return { value: team.id, label: this.translate.instant(key, { name: team.name, count: team.memberCount }) };
   }
 
   private loadTeams(): void {

@@ -32,7 +32,7 @@
       @if (jobTimerRunning()) {
         <button class="scan-job__action-btn scan-job__action-btn--stop"
                 (click)="stopTimer()"
-                aria-label="Stop timer"
+                [attr.aria-label]="'shopFloor.jobFlow.stopTimer' | translate"
                 data-testid="job-stop-timer-btn">
           <span class="material-icons-outlined">stop_circle</span>
           <span class="scan-job__action-label">{{ 'shopFloor.jobFlow.stopTimer' | translate }}</span>
@@ -40,7 +40,7 @@
       } @else {
         <button class="scan-job__action-btn scan-job__action-btn--start"
                 (click)="startTimer()"
-                aria-label="Start timer"
+                [attr.aria-label]="'shopFloor.jobFlow.startTimer' | translate"
                 data-testid="job-start-timer-btn">
           <span class="material-icons-outlined">play_circle</span>
           <span class="scan-job__action-label">{{ 'shopFloor.jobFlow.startTimer' | translate }}</span>
@@ -61,7 +61,7 @@
 
       <button class="scan-job__action-btn scan-job__action-btn--note"
               (click)="showLogNote()"
-              aria-label="Log note"
+              [attr.aria-label]="'shopFloor.jobFlow.logNote' | translate"
               data-testid="job-log-note-btn">
         <span class="material-icons-outlined">note_add</span>
         <span class="scan-job__action-label">{{ 'shopFloor.jobFlow.logNote' | translate }}</span>
@@ -106,7 +106,7 @@
       </div>
     }
 
-    <button class="action-btn scan-job__cancel" (click)="cancel()" aria-label="Cancel job actions">
+    <button class="action-btn scan-job__cancel" (click)="cancel()" [attr.aria-label]="'shopFloor.jobFlow.cancelActions' | translate">
       <span class="material-icons-outlined">close</span>
       {{ 'common.cancel' | translate }}
     </button>
@@ -123,11 +123,11 @@
       } }}</p>
 
       <div class="scan-job__confirm-actions">
-        <button class="action-btn" (click)="backToActions()" aria-label="Cancel advance">
+        <button class="action-btn" (click)="backToActions()" [attr.aria-label]="'shopFloor.jobFlow.cancelAdvance' | translate">
           <span class="material-icons-outlined">arrow_back</span>
           {{ 'common.back' | translate }}
         </button>
-        <button class="action-btn action-btn--primary" (click)="confirmAdvanceStage()" aria-label="Confirm advance stage"
+        <button class="action-btn action-btn--primary" (click)="confirmAdvanceStage()" [attr.aria-label]="'shopFloor.jobFlow.confirmAdvance' | translate"
                 data-testid="job-confirm-advance-btn">
           <span class="material-icons-outlined">check</span>
           {{ 'common.confirm' | translate }}
@@ -153,14 +153,14 @@
         data-testid="job-note-text" />
 
       <div class="scan-job__note-actions">
-        <button class="action-btn" (click)="backToActions()" aria-label="Cancel note">
+        <button class="action-btn" (click)="backToActions()" [attr.aria-label]="'shopFloor.jobFlow.cancelNote' | translate">
           <span class="material-icons-outlined">arrow_back</span>
           {{ 'common.back' | translate }}
         </button>
         <button class="action-btn action-btn--primary"
                 [disabled]="!noteControl.value?.trim()"
                 (click)="submitNote()"
-                aria-label="Submit note"
+                [attr.aria-label]="'shopFloor.jobFlow.submitNote' | translate"
                 data-testid="job-submit-note-btn">
           <span class="material-icons-outlined">save</span>
           {{ 'shopFloor.jobFlow.submitNote' | translate }}

@@ -1265,6 +1265,13 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     localStorage.setItem('sf-font-index', String(this.fontSizeIndex()));
   }
 
+  protected priorityLabel(priority: string | null | undefined): string {
+    if (!priority) return '';
+    const key = `priority.${priority.toLowerCase()}`;
+    const text = this.translate.instant(key);
+    return text === key ? priority : text;
+  }
+
   protected priorityClass(priority: string): string {
     switch (priority) {
       case 'Urgent': return 'priority--urgent';

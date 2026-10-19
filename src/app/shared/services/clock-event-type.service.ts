@@ -1,5 +1,8 @@
 import { inject, Injectable, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
+import { TranslateService } from '@ngx-translate/core';
+import { map } from 'rxjs';
 
 export interface ClockEventTypeDef {
   code: string;
@@ -21,17 +24,21 @@ export interface ClockStatusInfo {
 
 /** Known status mapping values — derived from reference data metadata.statusMapping */
 const STATUS_DISPLAY: Record<string, ClockStatusInfo> = {
-  In: { label: 'Currently Working', shortLabel: 'IN', cssClass: 'in' },
-  Out: { label: 'Clocked Out', shortLabel: 'OUT', cssClass: 'out' },
-  OnBreak: { label: 'On Break', shortLabel: 'BREAK', cssClass: 'break' },
-  OnLunch: { label: 'On Lunch', shortLabel: 'LUNCH', cssClass: 'break' },
+  In: { label: 'clockStatus.in', shortLabel: 'clockStatus.inShort', cssClass: 'in' },
+  Out: { label: 'clockStatus.out', shortLabel: 'clockStatus.outShort', cssClass: 'out' },
+  OnBreak: { label: 'clockStatus.onBreak', shortLabel: 'clockStatus.onBreakShort', cssClass: 'break' },
+  OnLunch: { label: 'clockStatus.onLunch', shortLabel: 'clockStatus.onLunchShort', cssClass: 'break' },
 };
 
-const FALLBACK_STATUS: ClockStatusInfo = { label: 'Unknown', shortLabel: '?', cssClass: 'out' };
+const FALLBACK_STATUS: ClockStatusInfo = { label: 'clockStatus.unknown', shortLabel: '?', cssClass: 'out' };
 
 @Injectable({ providedIn: 'root' })
 export class ClockEventTypeService {
   private readonly http = inject(HttpClient);
+  private readonly translate = inject(TranslateService);
+  private readonly lang = toSignal(this.translate.onLangChange.pipe(map((e) => e.lang)), {
+    initialValue: this.translate.getCurrentLang(),
+  });
   private readonly _definitions = signal<ClockEventTypeDef[]>([]);
   private loaded = false;
 
@@ -56,11 +63,11 @@ export class ClockEventTypeService {
 
   /** Get display info for a worker's current status string. */
   getStatusInfo(status: string | null | undefined): ClockStatusInfo {
-    if (!status) return STATUS_DISPLAY['Out'] ?? FALLBACK_STATUS;
+    if (!status) return this.translated(STATUS_DISPLAY['Out']);
 
     // First try known statuses
     const known = STATUS_DISPLAY[status];
-    if (known) return known;
+    if (known) return this.translated(known);
 
     // Try to derive from loaded definitions — find event whose statusMapping matches
     const def = this._definitions().find((d) => d.statusMapping === status);
@@ -72,7 +79,7 @@ export class ClockEventTypeService {
       };
     }
 
-    return FALLBACK_STATUS;
+    return this.translated(FALLBACK_STATUS);
   }
 
   /** Get the CSS class suffix for a status (e.g., 'in', 'break', 'out'). */
@@ -117,7 +124,8 @@ export class ClockEventTypeService {
    * Returns event type definitions that are valid next actions.
    */
   getAvailableActions(currentStatus: string | null | undefined): ClockEventTypeDef[] {
-    const defs = this._definitions();
+    this.lang();
+    const defs = this._definitions().map((d) => ({ ...d, label: this.translateOr(`clockActions.${d.code}`, d.label) }));
     if (defs.length === 0) return [];
 
     const status = currentStatus ?? 'Out';
@@ -133,6 +141,16 @@ export class ClockEventTypeService {
       const opposite = defMap.get(def.oppositeCode);
       return opposite ? opposite.statusMapping === status : false;
     });
+  }
+
+  private translated(info: ClockStatusInfo): ClockStatusInfo {
+    this.lang();
+    return { ...info, label: this.translateOr(info.label, info.label), shortLabel: this.translateOr(info.shortLabel, info.shortLabel) };
+  }
+
+  private translateOr(key: string, fallback: string): string {
+    const text = this.translate.instant(key);
+    return typeof text === 'string' && text !== key ? text : fallback;
   }
 
   private parseDefinition(item: ReferenceDataItem): ClockEventTypeDef {
