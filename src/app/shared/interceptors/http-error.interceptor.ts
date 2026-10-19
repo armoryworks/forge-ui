@@ -1,5 +1,6 @@
 import { HttpContext, HttpContextToken, HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { catchError, retry, throwError, timer } from 'rxjs';
 
 import { TranslateService } from '@ngx-translate/core';
@@ -13,6 +14,8 @@ import { SILENT_HTTP_ERRORS } from './silent-http-errors.token';
 
 export const SUPPRESS_VALIDATION_SNACKBAR = new HttpContextToken<boolean>(() => false);
 
+export const MFA_ENROLLMENT_REQUIRED = 'mfa-enrollment-required';
+
 const NETWORK_RETRY_DELAYS_MS = [500, 1500];
 
 export function formValidationContext(): HttpContext {
@@ -23,6 +26,7 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
   const snackbar = inject(SnackbarService);
   const toast = inject(ToastService);
   const translate = inject(TranslateService);
+  const router = inject(Router);
 
   const isExternal = /^https?:\/\//i.test(req.url) && !req.url.startsWith(window.location.origin);
 
@@ -74,6 +78,11 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
           // etc.). Callers that don't catch see no visible UI side-effect —
           // the Observable simply errors with the tagged error, which the
           // toast/snackbar layers explicitly ignore.
+          if (isMfaEnrollmentRequired(error)) {
+            void router.navigate(['/account/security']);
+            markHttpErrorShown(error);
+            break;
+          }
           const cap = parseCapabilityDisabled(error);
           if (cap) {
             // Diagnostic visibility without flagging as an error in devtools.
@@ -140,6 +149,11 @@ function problemDetail(error: HttpErrorResponse): string | null {
   return body && typeof body === 'object' && typeof body.detail === 'string' && body.detail
     ? body.detail
     : null;
+}
+
+function isMfaEnrollmentRequired(error: HttpErrorResponse): boolean {
+  const body = error.error;
+  return !!body && typeof body === 'object' && body.code === MFA_ENROLLMENT_REQUIRED;
 }
 
 function isBusinessRule(error: HttpErrorResponse): boolean {

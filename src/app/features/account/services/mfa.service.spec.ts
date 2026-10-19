@@ -1,19 +1,24 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
+import { of } from 'rxjs';
+
 import { MfaService } from './mfa.service';
 import { environment } from '../../../../environments/environment';
+import { AuthService } from '../../../shared/services/auth.service';
 
 describe('MfaService', () => {
   let service: MfaService;
   let httpMock: HttpTestingController;
+  let auth: { refreshAccessToken: ReturnType<typeof vi.fn> };
   const base = `${environment.apiUrl}`;
 
   beforeEach(() => {
+    auth = { refreshAccessToken: vi.fn(() => of('fresh-token')) };
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting(), { provide: AuthService, useValue: auth }],
     });
     service = TestBed.inject(MfaService);
     httpMock = TestBed.inject(HttpTestingController);
@@ -51,6 +56,22 @@ describe('MfaService', () => {
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual({ deviceId: 1, code: '123456' });
       req.flush({ verified: true });
+    });
+
+    it('swaps in a fresh token once the device is verified, so an MFA-required role is no longer held to enrolment', () => {
+      let result: { verified: boolean } | undefined;
+      service.verifySetup(1, '123456').subscribe(res => { result = res; });
+      httpMock.expectOne(`${base}/auth/mfa/verify-setup`).flush({ verified: true });
+
+      expect(auth.refreshAccessToken).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({ verified: true });
+    });
+
+    it('keeps the current token when the code is wrong', () => {
+      service.verifySetup(1, '000000').subscribe();
+      httpMock.expectOne(`${base}/auth/mfa/verify-setup`).flush({ verified: false });
+
+      expect(auth.refreshAccessToken).not.toHaveBeenCalled();
     });
   });
 
