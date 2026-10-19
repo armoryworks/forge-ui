@@ -98,6 +98,26 @@ describe('BoardHubService', () => {
       expect(mockConnection.invoke).toHaveBeenCalledWith('JoinBoard', 2);
     });
 
+    it('swallows a refused JoinBoard and does not remember the group', async () => {
+      await service.connect();
+      mockConnection.invoke.mockRejectedValueOnce(new Error('Failed to invoke \'JoinBoard\' because user is unauthorized'));
+
+      await expect(service.joinBoard(42)).resolves.toBeUndefined();
+      mockConnection.invoke.mockClear();
+      await service.leaveBoard();
+      expect(mockConnection.invoke).not.toHaveBeenCalled();
+    });
+
+    it('swallows a refused JoinJob and does not remember the group', async () => {
+      await service.connect();
+      mockConnection.invoke.mockRejectedValueOnce(new Error('Failed to invoke \'JoinJob\' because user is unauthorized'));
+
+      await expect(service.joinJob(7)).resolves.toBeUndefined();
+      mockConnection.invoke.mockClear();
+      await service.leaveJob();
+      expect(mockConnection.invoke).not.toHaveBeenCalled();
+    });
+
     it('should not invoke if connection is not connected', async () => {
       await service.connect();
       mockConnection.state = HubConnectionState.Disconnected;

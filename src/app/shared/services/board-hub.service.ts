@@ -51,7 +51,11 @@ export class BoardHubService {
     if (this.currentBoardGroup !== null) {
       await this.leaveBoard();
     }
-    await this.connection.invoke('JoinBoard', trackTypeId);
+    try {
+      await this.connection.invoke('JoinBoard', trackTypeId);
+    } catch {
+      return;
+    }
     this.currentBoardGroup = trackTypeId;
   }
 
@@ -71,7 +75,11 @@ export class BoardHubService {
     if (this.currentJobGroup !== null) {
       await this.leaveJob();
     }
-    await this.connection.invoke('JoinJob', jobId);
+    try {
+      await this.connection.invoke('JoinJob', jobId);
+    } catch {
+      return;
+    }
     this.currentJobGroup = jobId;
   }
 
