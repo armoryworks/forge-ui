@@ -127,6 +127,7 @@ export class JobDetailPanelComponent implements OnInit {
   protected readonly isArchiveSaving = signal(false);
 
   protected readonly isAdmin = computed(() => this.auth.hasRole('Admin'));
+  protected readonly canArchive = computed(() => this.auth.hasAnyRole([...JOB_EDIT_ROLES]));
   private readonly mayBill = computed(() => this.auth.hasAnyRole([...BILLING_STAGE_ROLES]));
   protected readonly canViewCost = computed(() => this.auth.hasAnyRole(['Admin', 'Manager', 'Engineer', 'PM', 'OfficeManager']));
   protected readonly canExplodeBom = computed(() => this.auth.hasAnyRole(['Admin', 'Manager']));
@@ -605,7 +606,7 @@ export class JobDetailPanelComponent implements OnInit {
 
   protected archiveJob(): void {
     const j = this.job();
-    if (!j || j.isArchived) return;
+    if (!j || j.isArchived || !this.canArchive()) return;
     this.matDialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {

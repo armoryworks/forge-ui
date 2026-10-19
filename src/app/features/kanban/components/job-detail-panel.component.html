@@ -49,12 +49,14 @@
         <span class="material-icons-outlined">add_photo_alternate</span>
       </button>
       @if (!j.isArchived) {
-        <button class="panel__archive-btn" [disabled]="isArchiveSaving()" (click)="archiveJob()"
-                data-testid="job-archive-btn"
-                [matTooltip]="'jobDetailExtras.archive' | translate" matTooltipPosition="above"
-                [attr.aria-label]="'jobDetailExtras.archive' | translate">
-          <span class="material-icons-outlined">archive</span>
-        </button>
+        @if (canArchive()) {
+          <button class="panel__archive-btn" [disabled]="isArchiveSaving()" (click)="archiveJob()"
+                  data-testid="job-archive-btn"
+                  [matTooltip]="'jobDetailExtras.archive' | translate" matTooltipPosition="above"
+                  [attr.aria-label]="'jobDetailExtras.archive' | translate">
+            <span class="material-icons-outlined">archive</span>
+          </button>
+        }
       } @else if (isAdmin()) {
         <button class="panel__archive-btn" [disabled]="isArchiveSaving()" (click)="unarchiveJob()"
                 data-testid="job-unarchive-btn"

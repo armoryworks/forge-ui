@@ -95,6 +95,7 @@ function productionBoard(): BoardColumn[] {
 
 interface ComponentInternals {
   canCreateJobs: () => boolean;
+  canEditJobs: () => boolean;
   showJobDialog: () => boolean;
   openCreateDialog(): void;
   columns: { set(cols: BoardColumn[]): void; (): BoardColumn[] };
@@ -844,6 +845,20 @@ describe('KanbanComponent', () => {
       queryParams.next(convertToParamMap({ myWork: 'true' }));
 
       expect(getBoard).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('supervisory bulk actions', () => {
+    it('are offered to managers', () => {
+      expect(component.canEditJobs()).toBe(true);
+    });
+
+    it('are withheld from production workers and planners', () => {
+      for (const role of ['ProductionWorker', 'PM', 'Engineer', 'OfficeManager']) {
+        roles = [role];
+        createComponent();
+        expect(component.canEditJobs()).toBe(false);
+      }
     });
   });
 
