@@ -295,7 +295,37 @@
     "userMenu": "Menú de usuario",
     "closeUserMenu": "Cerrar menú de usuario",
     "closeNotifications": "Cerrar notificaciones",
-    "pageResult": "Página"
+    "pageResult": "Página",
+    "entityTypes": {
+      "Job": "Trabajo",
+      "Part": "Pieza",
+      "Customer": "Cliente",
+      "Lead": "Prospecto",
+      "Asset": "Activo",
+      "Expense": "Gasto",
+      "FileAttachment": "Archivo",
+      "Documentation": "Documentación",
+      "Vendor": "Proveedor",
+      "SalesOrder": "Orden de venta",
+      "PurchaseOrder": "Orden de compra",
+      "Quote": "Cotización",
+      "Shipment": "Envío",
+      "Invoice": "Factura",
+      "Payment": "Pago",
+      "Lot": "Lote"
+    },
+    "sourceFields": {
+      "Title": "Título",
+      "Description": "Descripción",
+      "IterationNotes": "Notas de iteración",
+      "PartNumber": "Número de pieza",
+      "Operations": "Operaciones",
+      "FileName": "Nombre de archivo",
+      "Content": "Contenido",
+      "Name": "Nombre",
+      "CompanyName": "Nombre de la empresa",
+      "Notes": "Notas"
+    }
   },
   "app": {
     "updateAvailable": "Hay una nueva versión disponible.",
@@ -500,7 +530,24 @@
     "addWorkCenters": "Agregue sus centros de trabajo",
     "addFirstPart": "Agregue una pieza con enrutamiento",
     "sendFirstQuote": "Envíe su primera cotización",
-    "shipFirstOrder": "Envíe su primera orden"
+    "shipFirstOrder": "Envíe su primera orden",
+    "export": {
+      "section": "Sección",
+      "field": "Campo",
+      "value": "Valor",
+      "kpis": "Indicadores",
+      "activeJobs": "Trabajos activos",
+      "overdueJobs": "Trabajos vencidos",
+      "totalHours": "Total de horas",
+      "status": "Estado",
+      "count": "Cantidad",
+      "teamMember": "Miembro del equipo",
+      "taskCount": "Cantidad de tareas",
+      "dueDate": "Fecha de vencimiento",
+      "jobNumber": "Trabajo #",
+      "title": "Título",
+      "overdue": "Vencido"
+    }
   },
   "boardFilters": {
     "search": "Buscar",
@@ -7013,8 +7060,8 @@
     "noTasksAssigned": "No hay tareas asignadas a usted",
     "overdue": "VENCIDO",
     "due": "Vence",
-    "subtasks": "subtareas",
-    "openJobAria": "Abrir trabajo {{jobNumber}}: {{title}}"
+    "openJobAria": "Abrir trabajo {{jobNumber}}: {{title}}",
+    "operations": "operaciones"
   },
   "kioskFlows": {
     "common": {
@@ -8690,7 +8737,16 @@
         "documents": "Documentos",
         "activity": "Actividad"
       },
-      "noLoginHint": "Este empleado no tiene acceso al sistema, así que solo se muestra el resumen. Otorgue acceso al sistema para registrar tiempo, trabajos y capacitación."
+      "noLoginHint": "Este empleado no tiene acceso al sistema, así que solo se muestra el resumen. Otorgue acceso al sistema para registrar tiempo, trabajos y capacitación.",
+      "jobsTab": {
+        "empty": "No hay trabajos activos asignados",
+        "colJobNumber": "Trabajo #",
+        "colTitle": "Título",
+        "colTrack": "Tipo",
+        "colStage": "Etapa",
+        "colPriority": "Prioridad",
+        "colDue": "Vence"
+      }
     },
     "newEmployee": "Nuevo Empleado",
     "noLogin": "Sin acceso",
@@ -9291,6 +9347,30 @@
       "machineNote": "El español se tradujo automáticamente del cambio en inglés. Edítelo para usar sus propias palabras.",
       "untranslatedNote": "La traducción automática al español no está disponible en este momento, por lo que los usuarios en español siguen viendo el término estándar. Escriba el término en español o vuelva a guardar el cambio en inglés más tarde.",
       "savedUntranslated": "Terminología guardada, pero no se pudo traducir automáticamente al español: {{terms}}"
+    },
+    "referenceData": {
+      "groups": {
+        "asset_hold_type": "Tipos de retención de activos",
+        "clock_event_type": "Tipos de marcación",
+        "contact_role": "Roles de contacto",
+        "currency": "Monedas",
+        "deliverable_type": "Tipos de entregable",
+        "expense_category": "Categorías de gasto",
+        "job_hold_type": "Tipos de retención del trabajo",
+        "job_priority": "Prioridades del trabajo",
+        "job_workflow_status": "Estados de flujo del trabajo",
+        "lead_source": "Orígenes del prospecto",
+        "mobile_note_presets": "Notas predefinidas móviles",
+        "operation_reason": "Motivos de operación",
+        "part_item_kind": "Tipos de artículo de la pieza",
+        "part_material_spec": "Especificaciones de material de la pieza",
+        "part_valuation_class": "Clases de valoración de la pieza",
+        "po_workflow_status": "Estados de flujo de la orden de compra",
+        "quote_workflow_status": "Estados de flujo de la cotización",
+        "return_reason": "Motivos de devolución",
+        "so_workflow_status": "Estados de flujo de la orden de venta",
+        "state_withholding": "Retención estatal"
+      }
     }
   },
   "announcements": {

@@ -114,7 +114,7 @@
               }
               <span class="ea-comment-item__time">{{ item.createdAt | date:'MM/dd/yyyy hh:mm a' }}</span>
             </div>
-            <app-rich-text-display [content]="item.description" />
+            <app-rich-text-display [content]="isPersonText(item) ? item.description : (item.description | termText)" />
             @if (item.batchedItems; as batch) {
               @let key = allItemKey(item);
               <button type="button" class="ea-batch-toggle" data-testid="activity-batch-toggle"
@@ -126,7 +126,7 @@
               @if (expandedItem() === key) {
                 <ul class="ea-batch-list">
                   @for (change of batch; track change.id) {
-                    <li>{{ change.description }}</li>
+                    <li>{{ change.description | termText }}</li>
                   }
                 </ul>
               }

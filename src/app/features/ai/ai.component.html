@@ -61,9 +61,10 @@
             @if (assistant.starterQuestions.length > 0) {
               <div class="ai-chat__starters">
                 @for (q of assistant.starterQuestions; track $index) {
-                  <button class="starter-btn" (click)="askStarter(q)">
+                  @let starter = q | termText;
+                  <button class="starter-btn" (click)="askStarter(starter)">
                     <span class="material-icons-outlined">chat_bubble_outline</span>
-                    {{ q }}
+                    {{ starter }}
                   </button>
                 }
               </div>

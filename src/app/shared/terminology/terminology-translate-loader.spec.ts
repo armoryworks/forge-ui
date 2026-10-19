@@ -139,7 +139,7 @@ describe('TerminologyTranslateLoader + TerminologyService', () => {
 
     expect(translate.instant('jobs.title')).toBe('Órdenes de servicio');
     expect(translate.instant('jobs.new')).toBe('Crear una orden de servicio');
-    expect(translate.instant('workOrders.title')).toBe('Órdenes de trabajo');
+    expect(translate.instant('workOrders.title')).toBe('Órdenes de servicio');
     expect(translate.instant('customers.title')).toBe('Clientes');
   });
 

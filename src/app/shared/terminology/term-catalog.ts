@@ -32,14 +32,31 @@ const es = (one: string, other: string, gender: TermGender, protect?: string[]):
 });
 
 const ES_TRABAJO_COMPOUNDS = [
-  'orden de trabajo', 'órdenes de trabajo', 'orden(es) de trabajo', 'suborden de trabajo', 'subórdenes de trabajo',
+  'orden(es) de trabajo', 'suborden de trabajo', 'subórdenes de trabajo',
   'centro de trabajo', 'centros de trabajo', 'flujo de trabajo', 'flujos de trabajo', 'cola de trabajo',
   'autorización de trabajo', 'ubicación de trabajo', 'carga de trabajo', 'espacio de trabajo', 'área de trabajo',
   'instrucciones de trabajo', 'instrucción de trabajo', 'lugar de trabajo', 'jornada de trabajo', 'hoja de trabajo',
 ];
 
 export const TERM_CATALOG: readonly TermDefinition[] = [
-  { id: 'job', pluralId: 'jobs', locales: { en: en('Job', 'Jobs', ['job shop', 'job shops', 'hangfire job', 'hangfire jobs', 'background job', 'background jobs']), es: es('Trabajo', 'Trabajos', 'm', ES_TRABAJO_COMPOUNDS) } },
+  {
+    id: 'job', pluralId: 'jobs', locales: {
+      en: {
+        forms: [
+          { text: 'Job', plural: false }, { text: 'Jobs', plural: true },
+          { text: 'Work Order', plural: false }, { text: 'Work Orders', plural: true },
+        ],
+        protect: ['job shop', 'job shops', 'hangfire job', 'hangfire jobs', 'background job', 'background jobs'],
+      },
+      es: {
+        forms: [
+          { text: 'Trabajo', plural: false, gender: 'm' }, { text: 'Trabajos', plural: true, gender: 'm' },
+          { text: 'Orden de trabajo', plural: false, gender: 'f' }, { text: 'Órdenes de trabajo', plural: true, gender: 'f' },
+        ],
+        protect: ES_TRABAJO_COMPOUNDS,
+      },
+    },
+  },
   { id: 'customer', pluralId: 'customers', locales: { en: en('Customer', 'Customers'), es: es('Cliente', 'Clientes', 'm') } },
   { id: 'vendor', pluralId: 'vendors', locales: { en: en('Vendor', 'Vendors'), es: es('Proveedor', 'Proveedores', 'm') } },
   { id: 'part', pluralId: 'parts', locales: { en: en('Part', 'Parts', ['part of', 'parts of', 'in part']), es: es('Pieza', 'Piezas', 'f') } },

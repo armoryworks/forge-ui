@@ -60,12 +60,12 @@ describe('WorkerService', () => {
       {
         id: 1, jobNumber: 'J-1', title: 'Mill part', stageName: 'In Production', stageColor: '#f59e0b',
         priority: 'High', customerName: 'Apex', dueDate: new Date('2026-10-17T00:00:00+00:00'),
-        subtaskCount: 4, subtasksCompleted: 1,
+        operationCount: 4, operationsCompleted: 1,
       },
       {
         id: 2, jobNumber: 'J-2', title: 'Inspect bore', stageName: 'QC', stageColor: '#0d9488',
         priority: 'Normal', customerName: null, dueDate: null,
-        subtaskCount: 0, subtasksCompleted: 0,
+        operationCount: 0, operationsCompleted: 0,
       },
     ]);
   });

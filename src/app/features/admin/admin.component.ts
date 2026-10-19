@@ -76,6 +76,7 @@ import { AuthService } from '../../shared/services/auth.service';
 import { ReferenceDataService } from '../../shared/services/reference-data.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { CompanyLocation, CompanyProfile } from './models/company-location.model';
+import { humanizeIdentifier } from '../../shared/utils/humanize-identifier';
 
 @Component({
   selector: 'app-admin',
@@ -830,7 +831,9 @@ export class AdminComponent implements OnInit {
   }
 
   protected formatGroupCode(code: string): string {
-    return code.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    const key = `adminPanels.referenceData.groups.${code.replace(/\./g, '_')}`;
+    const label = this.translate.instant(key);
+    return typeof label === 'string' && label !== key ? label : humanizeIdentifier(code);
   }
 
   // ── System Settings ──

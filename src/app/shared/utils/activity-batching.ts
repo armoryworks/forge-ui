@@ -4,6 +4,7 @@ import { DisplayActivity } from '../models/display-activity.model';
 const FIELD_CHANGED = 'FieldChanged';
 const BATCH_WINDOW_MS = 5000;
 const NON_SUMMARY_ACTIONS = new Set([FIELD_CHANGED, 'Comment', 'note']);
+const PERSON_AUTHORED_ACTIONS = new Set(['Comment', 'CommentAdded', 'note']);
 
 function sameSave(a: ActivityItem, b: ActivityItem): boolean {
   return a.userInitials === b.userInitials
@@ -15,6 +16,10 @@ function canAbsorb(summary: DisplayActivity | undefined, run: ActivityItem[]): s
     && !summary.batchedItems
     && !NON_SUMMARY_ACTIONS.has(summary.action ?? '')
     && sameSave(summary, run[0]);
+}
+
+export function isPersonAuthored(action: string | undefined): boolean {
+  return PERSON_AUTHORED_ACTIONS.has(action ?? '');
 }
 
 export function collapseFieldChanges(

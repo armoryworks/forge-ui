@@ -22,6 +22,7 @@ import { PriorityIndicatorComponent } from '../../shared/components/priority-ind
 import { KanbanService } from '../kanban/services/kanban.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 import { AuthService } from '../../shared/services/auth.service';
+import { TerminologyService } from '../../shared/services/terminology.service';
 
 const CALENDAR_JOB_ROLES = ['Admin', 'Manager', 'PM', 'Engineer', 'ProductionWorker', 'OfficeManager'];
 const PO_READ_ROLES = ['Admin', 'Manager', 'OfficeManager', 'Procurement'];
@@ -58,6 +59,7 @@ export class CalendarComponent implements OnInit {
   private readonly userPreferences = inject(UserPreferencesService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly auth = inject(AuthService);
+  private readonly terminology = inject(TerminologyService);
 
   private readonly showJobs = this.auth.hasAnyRole(CALENDAR_JOB_ROLES);
   protected readonly canReadPoDeliveries = this.auth.hasAnyRole(PO_READ_ROLES);
@@ -163,7 +165,7 @@ export class CalendarComponent implements OnInit {
       const list = map.get(key) ?? [];
       list.push({
         id: e.id,
-        title: e.title,
+        title: this.eventText(e, e.title),
         color: e.superGroupId != null ? (colorByGroup.get(e.superGroupId) ?? 'var(--primary)') : 'var(--text-muted)',
       });
       map.set(key, list);
@@ -394,8 +396,8 @@ export class CalendarComponent implements OnInit {
         && (e.superGroupId == null || selected.has(e.superGroupId)))
       .map(e => ({
         id: e.id,
-        title: e.title,
-        description: e.description,
+        title: this.eventText(e, e.title),
+        description: e.description ? this.eventText(e, e.description) : e.description,
         location: e.location,
         startTime: e.startTime,
         endTime: e.endTime,
@@ -403,6 +405,11 @@ export class CalendarComponent implements OnInit {
         isRequired: e.isRequired,
         color: e.superGroupId != null ? (colorByGroup.get(e.superGroupId) ?? 'var(--primary)') : 'var(--text-muted)',
       }));
+  }
+
+  private eventText(event: CalendarEvent, text: string): string {
+    this.terminology.labels();
+    return event.isSystemGenerated ? this.terminology.substitute(text, 'en') : text;
   }
 
   protected overflowCount(day: CalendarDay): number {

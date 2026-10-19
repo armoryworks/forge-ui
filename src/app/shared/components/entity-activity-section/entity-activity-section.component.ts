@@ -11,13 +11,14 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { EntityActivityService } from '../../services/entity-activity.service';
 import { ActivityItem } from '../../models/activity.model';
 import { DisplayActivity } from '../../models/display-activity.model';
-import { collapseFieldChanges } from '../../utils/activity-batching';
+import { collapseFieldChanges, isPersonAuthored } from '../../utils/activity-batching';
 import { EntityNote } from '../../models/entity-note.model';
 import { MentionUser } from '../../models/mention-user.model';
 import { AvatarComponent } from '../avatar/avatar.component';
 import { ActivityTimelineComponent } from '../activity-timeline/activity-timeline.component';
 import { RichTextEditorComponent } from '../rich-text-editor/rich-text-editor.component';
 import { RichTextDisplayComponent } from '../rich-text-display/rich-text-display.component';
+import { TermTextPipe } from '../../pipes/term-text.pipe';
 
 export type ActivityFilterTab = 'all' | 'comments' | 'notes' | 'history';
 
@@ -33,6 +34,7 @@ export type ActivityFilterTab = 'all' | 'comments' | 'notes' | 'history';
     ActivityTimelineComponent,
     RichTextEditorComponent,
     RichTextDisplayComponent,
+    TermTextPipe,
   ],
   templateUrl: './entity-activity-section.component.html',
   styleUrl: './entity-activity-section.component.scss',
@@ -96,6 +98,10 @@ export class EntityActivitySectionComponent implements OnInit {
 
   ngOnInit(): void {
     this.activityService.getMentionUsers().subscribe(u => this.mentionUsers.set(u));
+  }
+
+  protected isPersonText(item: ActivityItem): boolean {
+    return isPersonAuthored(item.action);
   }
 
   protected allItemKey(item: ActivityItem): string {

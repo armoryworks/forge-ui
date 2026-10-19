@@ -100,6 +100,14 @@ describe('term substitution', () => {
       expect(wc.substitute('Work Centers and jobs')).toBe('Cells and tickets');
     });
 
+    it('renames the literal work-order wording with the job term', () => {
+      const ticket = createSubstituter(map({ entity_job: 'Ticket' }), 'en');
+      expect(ticket.substitute('Work Orders by Status')).toBe('Tickets by Status');
+      expect(ticket.substitute('Linked work orders')).toBe('Linked tickets');
+      expect(ticket.substitute('Open a work order')).toBe('Open a ticket');
+      expect(sub.substitute('Work Orders by Status')).toBe('Work Orders by Status');
+    });
+
     it('returns the same string when nothing matches', () => {
       const text = 'Nothing to see';
       expect(sub.substitute(text)).toBe(text);
@@ -128,6 +136,14 @@ describe('term substitution', () => {
       expect(sub.substitute('Los trabajos activos')).toBe('Las órdenes de trabajo activos');
       expect(sub.substitute('¿Cómo creo un nuevo trabajo?')).toBe('¿Cómo creo una nueva orden de trabajo?');
       expect(sub.substitute('Todos los trabajos')).toBe('Todas las órdenes de trabajo');
+    });
+
+    it('renames the literal orden de trabajo wording with the job term', () => {
+      const encargo = createSubstituter(map({ 'entity_job:es': 'Encargo', 'gender_job:es': 'm' }), 'es');
+      expect(encargo.substitute('Crear una orden de trabajo')).toBe('Crear un encargo');
+      expect(encargo.substitute('Las órdenes de trabajo abiertas')).toBe('Los encargos abiertas');
+      expect(encargo.substitute('Centro de trabajo')).toBe('Centro de trabajo');
+      expect(sub.substitute('Una orden de trabajo')).toBe('Una orden de trabajo');
     });
 
     it('leaves articles when the gender is unchanged', () => {
@@ -165,7 +181,7 @@ describe('term substitution', () => {
     });
 
     it('only rewrites a Spanish string when its English twin uses the term', () => {
-      const en: TranslationTree = { a: 'Job number', b: 'Work order' };
+      const en: TranslationTree = { a: 'Job number', b: 'Workshop' };
       const es: TranslationTree = { a: 'Número de trabajo', b: 'Trabajo de taller' };
       const sub = createSubstituter(map({ 'entity_job:es': 'Encargo' }), 'es');
       expect(transformCatalog(es, sub, { catalog: en, lang: 'en' })).toEqual({ a: 'Número de encargo', b: 'Trabajo de taller' });

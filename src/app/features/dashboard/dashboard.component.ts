@@ -41,12 +41,15 @@ import { DashboardData } from './models/dashboard-data.model';
 import { DashboardWidgetConfig } from './models/dashboard-widget-config.model';
 import { DashboardSavedLayout, DashboardWidgetLayout } from './models/dashboard-widget-layout.model';
 import { WIDGET_REGISTRY } from './widget-registry';
+import { buildDashboardCsv } from './dashboard-export';
 import { DashboardService } from './services/dashboard.service';
 import { IdleService } from '../../shared/services/idle.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 import { CapabilityService } from '../../shared/services/capability.service';
 import { AuthService } from '../../shared/services/auth.service';
+import { downloadBlob } from '../../shared/utils/download-blob';
+import { toDateOnly } from '../../shared/utils/date.utils';
 import { AMBIENT_IDLE_PREF_KEY, DEFAULT_AMBIENT_IDLE_MS } from '../../shared/models/ambient-idle.model';
 
 import type { GridStack, GridStackNode } from 'gridstack';
@@ -358,35 +361,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   protected exportDashboard(): void {
     const d = this.data();
     if (!d) return;
-
-    const lines: string[] = [];
-    lines.push('Section,Field,Value');
-    lines.push(`KPIs,Active Jobs,${d.kpis.activeCount}`);
-    lines.push(`KPIs,Overdue Jobs,${d.kpis.overdueCount}`);
-    lines.push(`KPIs,Total Hours,${d.kpis.totalHours}`);
-    lines.push('');
-    lines.push('Stage,Count');
-    for (const s of d.stages) {
-      lines.push(`${s.label},${s.count}`);
-    }
-    lines.push('');
-    lines.push('Team Member,Task Count');
-    for (const t of d.team) {
-      lines.push(`${t.name},${t.taskCount}`);
-    }
-    lines.push('');
-    lines.push('Deadline,Job #,Title,Overdue');
-    for (const dl of d.deadlines) {
-      lines.push(`${dl.date},${dl.jobNumber},"${dl.description}",${dl.isOverdue}`);
-    }
-
-    const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `dashboard-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const csv = buildDashboardCsv(d, key => this.translate.instant(key));
+    downloadBlob(new Blob([csv], { type: 'text/csv' }), `dashboard-${toDateOnly(new Date())}.csv`);
   }
 
   private loadSavedLayout(): void {

@@ -7,7 +7,7 @@
       @if (entry.actorName) {
         <span class="activity-item__actor">{{ entry.actorName }}</span>
       }
-      <span [innerHTML]="entry.text | richText"></span>
+      <span [innerHTML]="(entry.icon === 'comment' ? entry.text : (entry.text | termText)) | richText"></span>
     </span>
     @if (entry.recordNumber) {
       <span class="activity-item__record">{{ entry.recordNumber }}</span>

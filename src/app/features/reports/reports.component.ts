@@ -141,7 +141,7 @@ export class ReportsComponent {
       datasets: [{
         data: data.map(d => d.count),
         backgroundColor: data.map(d => d.stageColor),
-        label: 'Jobs',
+        label: this.translate.instant('reports.colJobs'),
       }],
     };
   });
