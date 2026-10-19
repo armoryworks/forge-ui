@@ -92,4 +92,14 @@ describe('purchasing and payables routes', () => {
       expect(admits(path, ['ProductionWorker'])).toBe(false);
     }
   });
+
+  it('admits engineers to /assets, matching the assets API', () => {
+    expect(admits('assets', ['Engineer'])).toBe(true);
+    expect(admits('assets', ['OfficeManager'])).toBe(false);
+  });
+
+  it('admits the roles that may run planning cycles to /planning', () => {
+    expect(admits('planning', ['PM'])).toBe(true);
+    expect(admits('planning', ['Engineer'])).toBe(false);
+  });
 });

@@ -140,7 +140,7 @@ export class NavTreeService {
     {
       icon: 'construction', label: 'Equipment', i18nKey: 'navGroups.equipment',
       children: [
-        { icon: 'build', label: 'Assets', i18nKey: 'nav.assets', route: '/assets', capability: 'CAP-MD-ASSETS', allowedRoles: ['Admin', 'Manager'] },
+        { icon: 'build', label: 'Assets', i18nKey: 'nav.assets', route: '/assets', capability: 'CAP-MD-ASSETS', allowedRoles: ['Admin', 'Manager', 'Engineer'] },
         { icon: 'handyman', label: 'Maintenance', i18nKey: 'nav.maintenance', route: '/maintenance/predictions', capability: 'CAP-MAINT-PM', allowedRoles: ['Admin', 'Manager'] },
         { icon: 'speed', label: 'OEE', i18nKey: 'nav.oee', route: '/oee', capability: 'CAP-RPT-OEE', allowedRoles: ['Admin', 'Manager'] },
       ],

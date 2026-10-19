@@ -211,7 +211,7 @@ export const routes: Routes = [
       },
       {
         path: 'assets',
-        canActivate: [roleGuard('Admin', 'Manager')],
+        canActivate: [roleGuard('Admin', 'Manager', 'Engineer')],
         loadChildren: () =>
           import('./features/assets/assets.routes').then((m) => m.ASSETS_ROUTES),
       },
