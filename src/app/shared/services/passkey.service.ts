@@ -62,6 +62,7 @@ export class PasskeyService {
             attestationObject: PasskeyService.toB64Url(response.attestationObject),
             clientDataJSON: PasskeyService.toB64Url(response.clientDataJSON),
           },
+          clientExtensionResults: credential.getClientExtensionResults(),
         },
       }));
     return result.deviceName;
@@ -103,6 +104,7 @@ export class PasskeyService {
               signature: PasskeyService.toB64Url(response.signature),
               userHandle: response.userHandle ? PasskeyService.toB64Url(response.userHandle) : null,
             },
+            clientExtensionResults: credential.getClientExtensionResults(),
           },
         }));
     } catch {

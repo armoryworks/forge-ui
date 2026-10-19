@@ -57,3 +57,7 @@ export interface MfaComplianceUser {
   mfaDeviceType: MfaDeviceType | null;
   isEnforcedByPolicy: boolean;
 }
+
+export interface MfaPolicy {
+  requiredRoles: string[];
+}

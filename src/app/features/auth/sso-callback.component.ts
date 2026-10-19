@@ -43,6 +43,9 @@ export class SsoCallbackComponent implements OnInit {
     } else if (error === 'domain_not_permitted') {
       this.snackbar.error(this.translate.instant('auth.ssoDomainNotPermitted'));
       this.router.navigate(['/login'], { replaceUrl: true });
+    } else if (error === 'email_unverified') {
+      this.snackbar.error(this.translate.instant('auth.ssoEmailUnverified'));
+      this.router.navigate(['/login'], { replaceUrl: true });
     } else if (error === 'no_account') {
       this.snackbar.error(this.translate.instant('auth.noAccountFound'));
       this.router.navigate(['/login'], { replaceUrl: true });

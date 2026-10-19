@@ -54,14 +54,13 @@ export class MfaPolicyPanelComponent implements OnInit {
       next: (roles) => this.roles.set(roles),
     });
 
+    this.mfaService.getPolicy().subscribe({
+      next: (policy) => this.enforcedRolesControl.setValue([...policy.requiredRoles], { emitEvent: false }),
+    });
+
     this.mfaService.getCompliance().subscribe({
       next: (users) => {
         this.users.set(users);
-        // Derive currently enforced roles from user data
-        const enforced = new Set(
-          users.filter(u => u.isEnforcedByPolicy).map(u => u.role),
-        );
-        this.enforcedRolesControl.setValue([...enforced], { emitEvent: false });
         this.loading.set(false);
       },
       error: () => {

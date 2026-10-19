@@ -116,6 +116,17 @@ describe('MfaService', () => {
     });
   });
 
+  describe('getPolicy', () => {
+    it('should GET /admin/mfa/policy and return the stored roles', () => {
+      service.getPolicy().subscribe(res => {
+        expect(res).toEqual({ requiredRoles: ['Controller'] });
+      });
+      const req = httpMock.expectOne(`${base}/admin/mfa/policy`);
+      expect(req.request.method).toBe('GET');
+      req.flush({ requiredRoles: ['Controller'] });
+    });
+  });
+
   describe('setPolicy', () => {
     it('should PUT /admin/mfa/policy with requiredRoles', () => {
       service.setPolicy(['Admin', 'Manager']).subscribe();

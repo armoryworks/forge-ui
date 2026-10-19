@@ -132,7 +132,7 @@ export class LoginComponent implements OnInit {
           }
           // Defensive: a non-MFA success always carries a user, but never crash the
           // login flow (and silently stall) if the server omits it.
-          this.navigatePostLogin(response.user);
+          this.navigatePostLogin(response.user, response.mfaEnrollmentRequired === true);
         },
         error: (err: HttpErrorResponse) => this.handleError(err),
       });
@@ -171,7 +171,11 @@ export class LoginComponent implements OnInit {
     }
   }
 
-  private navigatePostLogin(user: AuthUser | null | undefined): void {
+  private navigatePostLogin(user: AuthUser | null | undefined, mfaEnrollmentRequired = false): void {
+    if (mfaEnrollmentRequired) {
+      this.router.navigate(['/account/security']);
+      return;
+    }
     if (needsProfileCompletion(user, window.innerWidth)) {
       this.router.navigate(['/account/profile']);
       return;

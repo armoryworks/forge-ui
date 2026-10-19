@@ -11,6 +11,7 @@ import {
   MfaStatus,
   MfaRecoveryCodesResponse,
   MfaComplianceUser,
+  MfaPolicy,
 } from '../models/mfa.model';
 
 @Injectable({ providedIn: 'root' })
@@ -68,6 +69,10 @@ export class MfaService {
 
   getCompliance(): Observable<MfaComplianceUser[]> {
     return this.http.get<MfaComplianceUser[]>(`${environment.apiUrl}/admin/mfa/compliance`);
+  }
+
+  getPolicy(): Observable<MfaPolicy> {
+    return this.http.get<MfaPolicy>(`${environment.apiUrl}/admin/mfa/policy`);
   }
 
   setPolicy(requiredRoles: string[]): Observable<void> {
