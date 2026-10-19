@@ -31,3 +31,14 @@ describe('NavTreeService · purchasing and payables', () => {
     expect(routes).not.toContain('/purchase-orders');
   });
 });
+
+describe('NavTreeService · assets', () => {
+  it('lists assets for engineers, who maintain them', () => {
+    expect(routesFor(['Engineer'])).toContain('/assets');
+  });
+
+  it('keeps assets off the office and shop-floor menus', () => {
+    expect(routesFor(['OfficeManager'])).not.toContain('/assets');
+    expect(routesFor(['ProductionWorker'])).not.toContain('/assets');
+  });
+});
