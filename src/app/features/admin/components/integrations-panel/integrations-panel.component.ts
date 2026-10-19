@@ -99,7 +99,7 @@ export class IntegrationsPanelComponent implements OnInit {
 
   readonly serviceIntegrations = computed(() =>
     this.integrations()
-      .filter(i => i.category === 'service')
+      .filter(i => i.category !== 'shipping' && i.category !== 'accounting')
       .map(i => ({ ...i, logoUrl: LOGO_MAP[i.provider] ?? i.logoUrl ?? null })),
   );
 

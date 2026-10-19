@@ -93,7 +93,7 @@ export class IntegrationConfigDialogComponent {
         // toggle as OFF on reload (silent state corruption).
         ? field.value?.toLowerCase() === 'true'
         : field.value;
-      controls[field.key] = new FormControl(value);
+      controls[this.controlName(field)] = new FormControl(value);
       this.originalValues.set(field.key, field.value ?? '');
     }
     this.form = new FormGroup(controls);
@@ -111,6 +111,10 @@ export class IntegrationConfigDialogComponent {
    * inline is cheap and avoids a stale-cache gotcha if the descriptor
    * changes between dialog opens.
    */
+  controlName(field: IntegrationSettingField): string {
+    return field.key.replace(/\./g, '__');
+  }
+
   enumOptions(field: IntegrationSettingField): SelectOption[] {
     return (field.choices ?? []).map(c => ({ value: c.value, label: c.label }));
   }
@@ -127,7 +131,7 @@ export class IntegrationConfigDialogComponent {
     this.saving.set(true);
     const settings: Record<string, string> = {};
     for (const field of this.fields) {
-      const val = this.form.get(field.key)?.value;
+      const val = this.form.controls[this.controlName(field)]?.value;
       settings[field.key] = val?.toString() ?? '';
     }
 
