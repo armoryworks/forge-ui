@@ -7,7 +7,7 @@
 
   <div [formGroup]="lotForm">
     <app-entity-picker #partPicker
-      label="Part"
+      [label]="'lots.fieldPart' | translate"
       entityType="parts"
       displayField="partNumber"
       secondaryDisplayField="name"
@@ -27,7 +27,7 @@
 
     <div class="dialog-row">
       <app-input
-        label="Quantity"
+        [label]="'lots.fieldQuantity' | translate"
         type="number"
         formControlName="quantity"
         [required]="true"
@@ -37,16 +37,16 @@
         [attr.aria-label]="'lots.fieldQuantity' | translate" />
 
       <app-input
-        label="Supplier Lot #"
+        [label]="'lots.fieldSupplierLot' | translate"
         formControlName="supplierLotNumber"
-        placeholder="Optional"
+        [placeholder]="'common.optional' | translate"
         data-testid="lot-supplier-number"
         [attr.aria-label]="'lots.fieldSupplierLot' | translate" />
     </div>
 
     <div class="dialog-row">
       <app-entity-picker
-        label="Linked Job (optional)"
+        [label]="'lots.fieldLinkedJobOptional' | translate"
         entityType="jobs"
         displayField="jobNumber"
         secondaryDisplayField="title"
@@ -55,14 +55,14 @@
         [attr.aria-label]="'lots.fieldJob' | translate" />
 
       <app-datepicker
-        label="Expiration Date (optional)"
+        [label]="'lots.fieldExpirationOptional' | translate"
         formControlName="expirationDate"
         data-testid="lot-expiration"
         [attr.aria-label]="'lots.fieldExpiration' | translate" />
     </div>
 
     <app-textarea
-      label="Notes (optional)"
+      [label]="'lots.fieldNotesOptional' | translate"
       formControlName="notes"
       [rows]="2"
       data-testid="lot-notes"
