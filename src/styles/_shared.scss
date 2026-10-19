@@ -227,6 +227,7 @@
     background: transparent;
     color: var(--primary);
     min-width: auto;
+    @include touch-target(width);
     padding: 0 $sp-sm;
 
     &:hover {
@@ -238,6 +239,7 @@
 
   &--sm {
     min-width: auto;
+    @include touch-target(width);
     padding: $sp-xs $sp-md;
     .material-icons-outlined { font-size: var(--font-size-base); }
   }
