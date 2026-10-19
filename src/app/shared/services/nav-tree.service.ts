@@ -235,7 +235,7 @@ export class NavTreeService {
     {
       icon: 'insights', label: 'Insights', i18nKey: 'navGroups.insights',
       children: [
-        { icon: 'bar_chart', label: 'Reports', i18nKey: 'nav.reports', route: '/reports', shortcut: ['Q', 'R'], allowedRoles: ['Admin', 'Manager', 'PM'] },
+        { icon: 'bar_chart', label: 'Reports', i18nKey: 'nav.reports', route: '/reports', shortcut: ['Q', 'R'] },
         { icon: 'smart_toy', label: 'AI', i18nKey: 'nav.ai', route: '/ai', capability: 'CAP-EXT-AI-ASSISTANT' },
       ],
     },
