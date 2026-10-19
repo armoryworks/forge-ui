@@ -105,7 +105,7 @@ export class PartUomClusterComponent implements OnInit {
   }
 
   protected resolveLabel(id: number | null | undefined): string {
-    if (id === null || id === undefined) return '---';
+    if (id === null || id === undefined) return '—';
     return this.uomLabelById().get(id) ?? `#${id}`;
   }
 

@@ -115,7 +115,7 @@
             <tbody>
               @for (line of quote.lines; track line.id) {
                 <tr>
-                  <td class="lines-table__mono">{{ line.partNumber ?? '---' }}</td>
+                  <td class="lines-table__mono">{{ line.partNumber ?? '—' }}</td>
                   <td>{{ line.description }}</td>
                   <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
                   <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" /></td>

@@ -43,7 +43,7 @@
           }
         </ng-template>
         <ng-template appColumnCell="notes" let-row>
-          <span [class.tier-history__closed]="row.effectiveTo !== null">{{ row.notes || '---' }}</span>
+          <span [class.tier-history__closed]="row.effectiveTo !== null">{{ row.notes || '—' }}</span>
         </ng-template>
       </app-data-table>
     }

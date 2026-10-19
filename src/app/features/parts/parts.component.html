@@ -129,14 +129,14 @@
                 [value]="part.effectivePrice"
                 [currency]="part.effectivePriceCurrency" />
             } @else {
-              <span class="text-muted">---</span>
+              <span class="text-muted">—</span>
             }
           </ng-template>
           <ng-template appColumnCell="bomLineCount" let-part>
             @if (part.bomLineCount > 0) {
               <span class="bom-count">{{ part.bomLineCount }}</span>
             } @else {
-              <span class="text-muted">---</span>
+              <span class="text-muted">—</span>
             }
           </ng-template>
           <ng-template appColumnCell="completeness" let-part>

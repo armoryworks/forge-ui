@@ -11,7 +11,7 @@
     <div class="cluster__item">
       <span class="cluster__label">{{ 'parts.detail.clusters.cost.costCalculationId' | translate }}</span>
       <span class="cluster__value" [class.cluster__value--muted]="part().currentCostCalculationId === null">
-        {{ part().currentCostCalculationId ?? '---' }}
+        {{ part().currentCostCalculationId ?? '—' }}
       </span>
     </div>
     @if (part().valuationClassLabel) {

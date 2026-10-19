@@ -26,10 +26,14 @@
           <span class="text-muted">{{ row.effectiveFrom | date:'MM/dd/yyyy' }}</span>
         </ng-template>
         <ng-template appColumnCell="effectiveTo" let-row>
-          <span class="text-muted">{{ row.effectiveTo ? (row.effectiveTo | date:'MM/dd/yyyy') : '---' }}</span>
+          @if (row.effectiveTo) {
+            <span class="text-muted">{{ row.effectiveTo | date:'MM/dd/yyyy' }}</span>
+          } @else {
+            <span class="price-tiers-dialog__open">{{ 'parts.pricing.openBadge' | translate }}</span>
+          }
         </ng-template>
         <ng-template appColumnCell="notes" let-row>
-          <span class="text-muted">{{ row.notes || '---' }}</span>
+          <span class="text-muted">{{ row.notes || '—' }}</span>
         </ng-template>
         <ng-template appColumnCell="actions" let-row>
           <button class="icon-btn icon-btn--danger"

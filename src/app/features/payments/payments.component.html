@@ -44,7 +44,7 @@
           <span class="text-muted">{{ row.paymentDate | dateOnly }}</span>
         </ng-template>
         <ng-template appColumnCell="referenceNumber" let-row>
-          <span class="text-muted">{{ row.referenceNumber ?? '---' }}</span>
+          <span class="text-muted">{{ row.referenceNumber ?? '—' }}</span>
         </ng-template>
         <ng-template appColumnCell="createdAt" let-row>
           <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>

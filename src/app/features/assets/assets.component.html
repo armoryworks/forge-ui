@@ -38,7 +38,7 @@
           <span [class]="getStatusClass(asset.status)">{{ getStatusLabel(asset.status) }}</span>
         </ng-template>
         <ng-template appColumnCell="currentHours" let-asset>
-          <span class="text-muted hours-cell">{{ asset.currentHours > 0 ? asset.currentHours : '—' }}</span>
+          <span class="text-muted hours-cell">{{ asset.currentHours }}</span>
         </ng-template>
       </app-data-table>
     }

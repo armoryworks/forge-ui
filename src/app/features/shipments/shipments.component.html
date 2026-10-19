@@ -29,13 +29,13 @@
           <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
         </ng-template>
         <ng-template appColumnCell="carrier" let-row>
-          <span>{{ row.carrier ?? '---' }}</span>
+          <span>{{ row.carrier ?? '—' }}</span>
         </ng-template>
         <ng-template appColumnCell="trackingNumber" let-row>
-          <span class="sh-number">{{ row.trackingNumber ?? '---' }}</span>
+          <span class="sh-number">{{ row.trackingNumber ?? '—' }}</span>
         </ng-template>
         <ng-template appColumnCell="shippedDate" let-row>
-          <span class="text-muted">{{ row.shippedDate ? (row.shippedDate | date:'MM/dd/yyyy') : '---' }}</span>
+          <span class="text-muted">{{ row.shippedDate ? (row.shippedDate | date:'MM/dd/yyyy') : '—' }}</span>
         </ng-template>
         <ng-template appColumnCell="createdAt" let-row>
           <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
