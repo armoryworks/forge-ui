@@ -591,6 +591,7 @@
   .app-header__logo-link {
     flex-shrink: 1;
     min-width: 0;
+    min-height: $tap-target-min;
   }
 
   .app-header__lockup {

@@ -102,7 +102,7 @@
   cursor: pointer;
   border-radius: $border-radius;
   font-family: $font-family-primary;
-  @include touch-target(height);
+  @include touch-target;
 
   .material-icons-outlined { font-size: $icon-size-xs; }
 
