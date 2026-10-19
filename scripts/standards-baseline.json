@@ -290,7 +290,6 @@
     "src/app/features/purchase-orders/components/auto-po-panel/auto-po-panel.component.html": 3,
     "src/app/features/purchase-orders/components/auto-po-settings-panel/auto-po-settings-panel.component.html": 1,
     "src/app/features/purchase-orders/components/po-detail-panel/po-detail-panel.component.html": 6,
-    "src/app/features/purchase-orders/components/receive-dialog/receive-dialog.component.html": 1,
     "src/app/features/purchasing/components/rfq-detail-dialog/rfq-detail-dialog.component.html": 4,
     "src/app/features/quality/components/capa-list.component.html": 4,
     "src/app/features/quality/components/eco-list.component.html": 24,

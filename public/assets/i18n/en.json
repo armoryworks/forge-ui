@@ -5766,7 +5766,8 @@
     },
     "linesReceived": "Lines Received",
     "linesReceivedOf": "{{received}} of {{total}}",
-    "receiveQtyFor": "Receive quantity for {{line}}"
+    "receiveQtyFor": "Receive quantity for {{line}}",
+    "receiveTable": "Quantities to receive"
   },
   "poManage": {
     "packingSlipNumber": "Packing slip #",

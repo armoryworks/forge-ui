@@ -23,4 +23,5 @@ export interface PurchaseOrderListItem {
   originSource: string;
   originUserName: string | null;
   originReference: string | null;
+  linesFullyReceived: number;
 }

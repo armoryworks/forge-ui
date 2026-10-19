@@ -15,7 +15,7 @@
       </button>
     </div>
 
-    <table class="receive-table" aria-label="Receive table">
+    <table class="receive-table" [attr.aria-label]="'purchaseOrders.receiveTable' | translate">
       <thead>
         <tr>
           <th>{{ 'purchaseOrders.partNumber' | translate }}</th>
@@ -41,6 +41,7 @@
             <td class="receive-table__right">{{ line.remainingQuantity }}</td>
             <td class="receive-table__input">
               <input type="number" [formControl]="lineControls()[i]"
+                [attr.aria-label]="'purchaseOrders.receiveQtyFor' | translate: { line: line.partNumber ?? line.description }"
                 [min]="0" [max]="line.remainingQuantity"
                 class="receive-qty-input" />
             </td>

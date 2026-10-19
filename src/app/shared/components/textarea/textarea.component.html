@@ -6,6 +6,7 @@
     [rows]="rows()"
     [attr.maxlength]="maxlength()"
     [attr.placeholder]="placeholder() || null"
+    [attr.aria-label]="label() ? null : ariaLabel()"
     [readonly]="isReadonly()"
     [disabled]="disabled()"
     [value]="value()"

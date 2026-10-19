@@ -589,7 +589,7 @@ export class PoDetailPanelComponent implements OnInit {
   }
   protected canEditLines(status: string): boolean { return status === 'Draft'; }
   protected canDeleteLine(po: PurchaseOrderDetail): boolean { return this.canEditLines(po.status) && po.lines.length > 1; }
-  protected canEmail(status: string): boolean { return status !== 'Cancelled'; }
+  protected canEmail(status: string): boolean { return status !== 'Cancelled' && status !== 'Draft'; }
 
   protected readonly showAddLineDialog = signal(false);
   protected readonly addLineSaving = signal(false);

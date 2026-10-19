@@ -5759,7 +5759,8 @@
     },
     "linesReceived": "Líneas recibidas",
     "linesReceivedOf": "{{received}} de {{total}}",
-    "receiveQtyFor": "Cantidad a recibir de {{line}}"
+    "receiveQtyFor": "Cantidad a recibir de {{line}}",
+    "receiveTable": "Cantidades a recibir"
   },
   "poManage": {
     "packingSlipNumber": "N.º de lista de empaque",

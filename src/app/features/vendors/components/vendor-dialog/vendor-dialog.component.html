@@ -23,7 +23,7 @@
 
       <div class="dlg-section">
         <span class="dlg-section__title">{{ 'common.notes' | translate }}</span>
-        <app-textarea formControlName="notes" [rows]="3" data-testid="vendor-notes" />
+        <app-textarea formControlName="notes" [rows]="3" [ariaLabel]="'common.notes' | translate" data-testid="vendor-notes" />
       </div>
     </div>
 
