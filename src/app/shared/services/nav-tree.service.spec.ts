@@ -58,3 +58,37 @@ describe('NavTreeService · maintenance', () => {
     expect(routes).not.toContain('/maintenance/schedules');
   });
 });
+
+describe('NavTreeService · canReach', () => {
+  function serviceFor(roles: string[], enabled: (code: string) => boolean = () => true): NavTreeService {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        { provide: CapabilityService, useValue: { isEnabled: enabled } },
+        { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)), user: () => null } },
+      ],
+    });
+    return TestBed.inject(NavTreeService);
+  }
+
+  it('keeps a production worker off sales, purchasing and accounting screens', () => {
+    const nav = serviceFor(['ProductionWorker']);
+
+    expect(nav.canReach('/kanban')).toBe(true);
+    expect(nav.canReach('/sales-orders')).toBe(false);
+    expect(nav.canReach('/purchasing')).toBe(false);
+    expect(nav.canReach('/accounting')).toBe(false);
+  });
+
+  it('lets the controller reach the accounting screens', () => {
+    expect(serviceFor(['Controller']).canReach('/accounting')).toBe(true);
+  });
+
+  it('ignores capability gates when asked to, for the sign-in redirect', () => {
+    const nav = serviceFor(['Manager'], () => false);
+
+    expect(nav.canReach('/sales-orders')).toBe(false);
+    expect(nav.canReach('/sales-orders', false)).toBe(true);
+  });
+});

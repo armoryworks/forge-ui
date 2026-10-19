@@ -16,6 +16,7 @@ import {
 import { CONFIRM_BEFORE_SEND_PREF_KEY } from '../../../../shared/services/confirm-send.service';
 import { FontScale, ThemeService } from '../../../../shared/services/theme.service';
 import { UserPreferencesService } from '../../../../shared/services/user-preferences.service';
+import { NavTreeService } from '../../../../shared/services/nav-tree.service';
 import { IdleService } from '../../../../shared/services/idle.service';
 import { ChatNotificationService, ChatSoundType } from '../../../../shared/services/chat-notification.service';
 import { DRAFT_TTL_OPTIONS, DEFAULT_DRAFT_TTL, DraftTtlOption } from '../../../../shared/models/draft-ttl.model';
@@ -42,17 +43,24 @@ export class AccountCustomizationComponent {
   private readonly idleService = inject(IdleService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
+  private readonly navTree = inject(NavTreeService);
   protected readonly chatNotification = inject(ChatNotificationService);
 
   /** Default landing screen. 'auto' clears the preference → role-based landing. */
-  protected readonly landingOptions: SelectOption[] = LANDING_OPTIONS.map((o) => ({
-    value: o.value,
-    label: this.translate.instant(o.labelKey),
-  }));
+  protected readonly landingOptions: SelectOption[] = LANDING_OPTIONS
+    .filter((o) => o.value === 'auto' || o.value === '/dashboard' || this.navTree.canReach(o.value))
+    .map((o) => ({
+      value: o.value,
+      label: this.translate.instant(o.labelKey),
+    }));
+  private readonly storedLanding = this.preferences.get<string>(LANDING_ROUTE_PREF_KEY);
   protected readonly landingControl = new FormControl<string>(
-    this.preferences.get<string>(LANDING_ROUTE_PREF_KEY) ?? 'auto',
+    this.storedLanding && this.landingOptions.some((o) => o.value === this.storedLanding) ? this.storedLanding : 'auto',
     { nonNullable: true },
   );
+
+  /** The accounting-view preference only matters to users who can open Accounting. */
+  protected readonly showAccountingView = this.navTree.canReach('/accounting');
 
   /** Default accounting presentation (Classic tables vs Visual charts). */
   protected readonly accountingViewOptions: SelectOption[] = ACCOUNTING_VIEW_OPTIONS.map((o) => ({

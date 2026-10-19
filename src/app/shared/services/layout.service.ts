@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, NgZone, inject, DestroyRef } from '@angular/core';
+import { Injectable, signal, computed, NgZone, inject, DestroyRef, Injector } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
@@ -6,6 +6,7 @@ import { filter } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
 import { DesktopPreferenceService } from './desktop-preference.service';
+import { NavTreeService } from './nav-tree.service';
 import { UserPreferencesService } from './user-preferences.service';
 import { LANDING_ROUTE_PREF_KEY, resolveRoleLanding } from '../models/role-landing.model';
 
@@ -24,6 +25,7 @@ export class LayoutService {
   private readonly auth = inject(AuthService);
   private readonly userPreferences = inject(UserPreferencesService);
   private readonly desktopPreference = inject(DesktopPreferenceService);
+  private readonly injector = inject(Injector);
 
   private readonly _sidebarCollapsed = signal(this.loadCollapsedState());
   private readonly _mobileMenuOpen = signal(false);
@@ -161,15 +163,16 @@ export class LayoutService {
   /**
    * The post-login / root landing route. Mobile devices go to `/m` unless the
    * user chose "View Desktop Site". Otherwise an explicit per-user preference
-   * wins; failing that, a user with a single mapped role lands on that role's
-   * most relevant screen; everyone else lands on the dashboard. A mapped screen
-   * gated off by capability falls back via its guard.
+   * wins when the user's roles can open it; failing that, a user with a single
+   * mapped role lands on that role's most relevant screen; everyone else lands
+   * on the dashboard. A mapped screen gated off by capability falls back via
+   * its guard.
    */
   getDefaultRoute(): string {
     if (environment.mobileShell) return '/app';
     if (this.isMobileDevice() && !this.desktopPreference.isPreferred()) return '/m';
     const explicit = this.userPreferences.get<string>(LANDING_ROUTE_PREF_KEY);
-    if (explicit) return explicit;
+    if (explicit && (explicit === '/dashboard' || this.injector.get(NavTreeService).canReach(explicit, false))) return explicit;
     return resolveRoleLanding(this.auth.user()?.roles ?? []) ?? '/dashboard';
   }
 

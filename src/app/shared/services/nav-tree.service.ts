@@ -383,6 +383,22 @@ export class NavTreeService {
     return this.findTrail([...this.mainTree(), ...this.bottomTree()], url, /*requirePrefix*/ false);
   });
 
+  /**
+   * Whether the current user can open `route` (or a screen under it) from the
+   * navigation. Capability gates apply only when `includeCapabilities` is true,
+   * because the capability snapshot may not be loaded yet right after sign-in;
+   * a gated screen then falls back through its route guard.
+   */
+  canReach(route: string, includeCapabilities = true): boolean {
+    const matches = (candidate?: string) => !!candidate && (candidate === route || candidate.startsWith(`${route}/`));
+    const walk = (items: NavItem[]): boolean => items.some(item => {
+      if (includeCapabilities && !this.isCapabilityAllowed(item)) return false;
+      if (item.allowedRoles && !this.auth.hasAnyRole(item.allowedRoles)) return false;
+      return item.children?.length ? walk(item.children) : matches(item.route);
+    });
+    return walk([...this.allPinnedTopTree, ...this.allMainTree, ...this.allBottomTree]);
+  }
+
   private filterTree(tree: NavItem[]): NavItem[] {
     return tree
       .filter(item => this.isAllowed(item))
@@ -402,10 +418,14 @@ export class NavTreeService {
   }
 
   private isAllowed(item: NavItem): boolean {
-    if (item.capability && !this.capabilities.isEnabled(item.capability)) return false;
-    if (item.hiddenWithCapability && this.capabilities.isEnabled(item.hiddenWithCapability)) return false;
+    if (!this.isCapabilityAllowed(item)) return false;
     if (!item.allowedRoles) return true;
     return this.auth.hasAnyRole(item.allowedRoles);
+  }
+
+  private isCapabilityAllowed(item: NavItem): boolean {
+    if (item.capability && !this.capabilities.isEnabled(item.capability)) return false;
+    return !(item.hiddenWithCapability && this.capabilities.isEnabled(item.hiddenWithCapability));
   }
 
   private findTrail(tree: NavItem[], url: string, requirePrefix: boolean, insideDrillable = false): NavItem[] {

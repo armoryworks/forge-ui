@@ -45,14 +45,16 @@
   </div>
 
   <!-- Default accounting view -->
-  <div class="account-page__card">
-    <span class="account-page__section-label">{{ 'account.accountingView' | translate }}</span>
-    <p class="customization__hint">{{ 'account.accountingViewHint' | translate }}</p>
-    <app-select
-      [label]="'account.accountingView' | translate"
-      [options]="accountingViewOptions"
-      [formControl]="accountingViewControl" />
-  </div>
+  @if (showAccountingView) {
+    <div class="account-page__card">
+      <span class="account-page__section-label">{{ 'account.accountingView' | translate }}</span>
+      <p class="customization__hint">{{ 'account.accountingViewHint' | translate }}</p>
+      <app-select
+        [label]="'account.accountingView' | translate"
+        [options]="accountingViewOptions"
+        [formControl]="accountingViewControl" />
+    </div>
+  }
 
   <!-- Text Size -->
   <div class="account-page__card">
