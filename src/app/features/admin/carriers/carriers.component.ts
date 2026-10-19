@@ -59,7 +59,7 @@ export class CarriersComponent {
   protected readonly columns: ColumnDef[] = [
     { field: 'name', header: this.translate.instant('admin.carriers.cols.name'), sortable: true },
     { field: 'code', header: this.translate.instant('admin.carriers.cols.code'), sortable: true, width: '110px' },
-    { field: 'integrationKind', header: this.translate.instant('admin.carriers.cols.integration'), sortable: true, width: '120px' },
+    { field: 'integrationKind', header: this.translate.instant('admin.carriers.cols.integration'), sortable: true, width: '150px' },
     { field: 'requiresScanToShip', header: this.translate.instant('admin.carriers.cols.scan'), width: '80px', align: 'center' },
     { field: 'credentialsConfigured', header: this.translate.instant('admin.carriers.cols.credentials'), width: '130px', align: 'center' },
     { field: 'isActive', header: this.translate.instant('admin.carriers.cols.active'), width: '80px', align: 'center' },

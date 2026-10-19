@@ -118,13 +118,20 @@ export class AdminComponent implements OnInit {
 
   protected readonly isAdmin = computed(() => this.authService.hasRole('Admin'));
   protected readonly isManagerOrAdmin = computed(() => this.authService.hasRole('Admin') || this.authService.hasRole('Manager'));
-  protected readonly pageTitle = computed(() => {
+  private readonly activeTabTitleKey = computed(() => {
     const tab = this.activeTab();
-    const crumb = tab === 'overview' ? undefined : this.navTree.breadcrumbTrail().find(c => c.route === `/admin/${tab}`);
-    if (crumb?.i18nKey) return this.translate.instant(crumb.i18nKey);
+    if (tab === 'overview') return undefined;
+    return this.navTree.breadcrumbTrail().find(c => c.route === `/admin/${tab}` && !c.children)?.i18nKey;
+  });
+  protected readonly pageTitle = computed(() => {
+    const key = this.activeTabTitleKey();
+    if (key) return this.translate.instant(key);
     return this.isAdmin() ? this.translate.instant('admin.title') : this.translate.instant('admin.titleEmployee');
   });
-  protected readonly pageSubtitle = computed(() => this.isAdmin() ? this.translate.instant('admin.subtitle') : this.translate.instant('admin.subtitleEmployee'));
+  protected readonly pageSubtitle = computed(() => {
+    if (this.activeTabTitleKey()) return '';
+    return this.isAdmin() ? this.translate.instant('admin.subtitle') : this.translate.instant('admin.subtitleEmployee');
+  });
 
   protected readonly activeTab = toSignal(
     this.route.paramMap.pipe(
