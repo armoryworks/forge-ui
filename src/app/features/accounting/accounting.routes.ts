@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AccountingComponent } from './accounting.component';
 import { capabilityGuard } from '../../shared/guards/capability.guard';
+import { unsavedChangesGuard } from '../../shared/guards/unsaved-changes.guard';
 
 export const ACCOUNTING_ROUTES: Routes = [
   { path: '', component: AccountingComponent },
@@ -29,6 +30,7 @@ export const ACCOUNTING_ROUTES: Routes = [
   {
     path: 'journal-entries/new',
     canActivate: [capabilityGuard('CAP-ACCT-FULLGL')],
+    canDeactivate: [unsavedChangesGuard],
     loadComponent: () =>
       import('./components/journal-entry-editor/journal-entry-editor.component').then((m) => m.JournalEntryEditorComponent),
   },

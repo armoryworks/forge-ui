@@ -12,6 +12,7 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-refresh.util';
 import { CapDirective } from '../../../../shared/directives/cap.directive';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { JobCostCloseComponent } from '../job-cost-close/job-cost-close.component';
 import {
@@ -39,7 +40,7 @@ interface ShownChecklist {
 @Component({
   selector: 'app-period-close',
   standalone: true,
-  imports: [TranslatePipe, PageHeaderComponent, DataTableComponent, ColumnCellDirective, CapDirective, JobCostCloseComponent],
+  imports: [TranslatePipe, DateOnlyPipe, PageHeaderComponent, DataTableComponent, ColumnCellDirective, CapDirective, JobCostCloseComponent],
   templateUrl: './period-close.component.html',
   styleUrl: './period-close.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

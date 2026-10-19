@@ -19,6 +19,7 @@ import {
 } from '../../../../shared/models/accounting-view.model';
 import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-refresh.util';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
+import { agingBucketLabel } from '../../utils/aging-bucket-label';
 import { GrniReconciliation } from '../../models/accounting.models';
 import { GrniVisualComponent } from './grni-visual.component';
 
@@ -79,12 +80,16 @@ export class GrniComponent implements OnInit {
     this.preferences.set(ACCOUNTING_VIEW_PREF_KEY, mode);
   }
 
+  protected bucketLabel(label: string): string {
+    return agingBucketLabel(label, this.translate);
+  }
+
   /** Open-GRNI-by-PO columns: PO + Vendor + one per aging bucket + Open. */
   protected readonly poColumns = computed<ColumnDef[]>(() => {
     const r = this.report();
     if (!r) return [];
     const buckets: ColumnDef[] = r.totalsByBucket.map((b, i) => ({
-      field: `b${i}`, header: b.label, sortable: true, type: 'number', align: 'right', width: '120px',
+      field: `b${i}`, header: agingBucketLabel(b.label, this.translate), sortable: true, type: 'number', align: 'right', width: '120px',
     }));
     return [
       { field: 'poNumber', header: this.translate.instant('accounting.common.po'), sortable: true, width: '120px' },

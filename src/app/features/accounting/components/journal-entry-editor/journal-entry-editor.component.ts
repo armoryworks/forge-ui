@@ -16,8 +16,9 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
-import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { parseDateOnly, toIsoDate } from '../../../../shared/utils/date.utils';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
+import { HasDirtyForm } from '../../../../shared/guards/unsaved-changes.guard';
 import { GlAccount, LedgerRegisterEntry, LedgerRegisterPage, ManualJournalEntryInput } from '../../models/accounting.models';
 import { balancedValidator, lineValidator } from '../../utils/journal-line.validators';
 
@@ -48,7 +49,7 @@ const DEFAULT_CURRENCY_ID = 1;
   styleUrl: './journal-entry-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class JournalEntryEditorComponent implements OnInit {
+export class JournalEntryEditorComponent implements OnInit, HasDirtyForm {
   private readonly gl = inject(GeneralLedgerService);
   private readonly translate = inject(TranslateService);
   private readonly snackbar = inject(SnackbarService);
@@ -61,6 +62,8 @@ export class JournalEntryEditorComponent implements OnInit {
   protected readonly accountOptions = signal<SelectOption[]>([]);
   /** §5A.2 split-pane: the entry being corrected stays pinned above the compose form. */
   protected readonly original = signal<LedgerRegisterEntry | null>(null);
+  /** A rejected draft being resubmitted: it is discarded once the new entry is saved. */
+  protected readonly resubmitting = signal(false);
 
   protected readonly form = new FormGroup(
     {
@@ -99,13 +102,17 @@ export class JournalEntryEditorComponent implements OnInit {
     // Options MUST be set before the lines are patched or the account selects render blank
     // (value-vs-options race, caught by visual verification 2026-07-07) — hence the forkJoin.
     const correctionOf = Number(this.route.snapshot.queryParamMap.get('correctionOf'));
-    if (correctionOf > 0) {
-      forkJoin([accounts$, this.gl.getLedgerRegister(this.bookId, { pageSize: 100 })])
+    const resubmitOf = Number(this.route.snapshot.queryParamMap.get('resubmitOf'));
+    const sourceId = resubmitOf > 0 ? resubmitOf : correctionOf;
+    if (sourceId > 0) {
+      const filter = resubmitOf > 0 ? { pageSize: 100, status: 'Draft' as const } : { pageSize: 100 };
+      forkJoin([accounts$, this.gl.getLedgerRegister(this.bookId, filter)])
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: ([accounts, page]) => {
             this.accountOptions.set(accounts.map((a) => this.toOption(a)));
-            this.prefillFrom(page, correctionOf);
+            if (resubmitOf > 0) this.prefillResubmit(page, resubmitOf);
+            else this.prefillFrom(page, correctionOf);
           },
           error: (err: unknown) => this.snackbar.errorFrom(err, 'accounting.errors.accountsLoadFailed'),
         });
@@ -118,6 +125,20 @@ export class JournalEntryEditorComponent implements OnInit {
     });
   }
 
+  isDirty(): boolean {
+    return this.form.dirty && !this.saving();
+  }
+
+  private prefillResubmit(page: LedgerRegisterPage, entryId: number): void {
+    const draft = page.data.find((e) => e.id === entryId);
+    if (!draft) return;
+    this.resubmitting.set(true);
+    this.original.set(draft);
+    this.form.controls.memo.setValue((draft.memo ?? '').replace(/\s*(?:—\s*)?\[Rejected\].*$/, ''));
+    this.form.controls.entryDate.setValue(parseDateOnly(draft.entryDate));
+    this.patchLines(draft);
+  }
+
   private prefillFrom(page: LedgerRegisterPage, entryId: number): void {
     const original = page.data.find((e) => e.id === entryId);
     if (!original) return; // fell off the first page — user composes manually
@@ -125,6 +146,10 @@ export class JournalEntryEditorComponent implements OnInit {
     this.form.controls.memo.setValue(
       this.translate.instant('accounting.journalEditor.correctionMemo', { number: original.entryNumber }),
     );
+    this.patchLines(original);
+  }
+
+  private patchLines(original: LedgerRegisterEntry): void {
     // Resize then patch IN PLACE — never clear()+push(). The @for tracks $index, so replacing the
     // controls under reused rows leaves formGroupName bound to the dead controls and the inputs
     // render blank while the form state is correct (caught by visual verification 2026-07-07).
@@ -183,6 +208,9 @@ export class JournalEntryEditorComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) => {
+          this.form.markAsPristine();
+          const draft = this.resubmitting() ? this.original() : null;
+          if (draft) this.gl.discardJournalEntry(draft.id).subscribe({ error: () => undefined });
           if (result.status === 'PendingApproval') {
             this.snackbar.info(this.translate.instant('accounting.journalEditor.pendingApproval', { number: result.entryNumber }));
             this.router.navigate(['/accounting/journal-approvals']);

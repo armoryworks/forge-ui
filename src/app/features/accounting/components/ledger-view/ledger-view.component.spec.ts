@@ -50,6 +50,10 @@ interface LedgerApi {
   anomalyCount(): number;
   reverseEntry(entry: LedgerRegisterEntry): void;
   lensAccount(): unknown;
+  accountNotFound(): boolean;
+  toggleDrafts(): void;
+  toggleFlaggedOnly(): void;
+  discardDraft(entry: LedgerRegisterEntry): void;
 }
 
 describe('LedgerViewComponent', () => {
@@ -59,6 +63,7 @@ describe('LedgerViewComponent', () => {
     getGlAnomalies: vi.fn(),
     reverseJournalEntry: vi.fn(),
     getTrialBalance: vi.fn(),
+    discardJournalEntry: vi.fn(),
   };
   const snackbar = { error: vi.fn(), errorFrom: vi.fn(), success: vi.fn() };
   const dialog = { open: vi.fn() };
@@ -100,10 +105,41 @@ describe('LedgerViewComponent', () => {
 
   it('loads the register for the default book on init', () => {
     const api = create();
-    expect(gl.getLedgerRegister).toHaveBeenCalledWith(1, { pageSize: 100, glAccountId: null });
+    expect(gl.getLedgerRegister).toHaveBeenCalledWith(1, { pageSize: 100, glAccountId: null, status: null });
     expect(api.entries()).toHaveLength(1);
     expect(api.loading()).toBe(false);
     expect(api.error()).toBeNull();
+  });
+
+  it('shows a not-found state for an invalid account id instead of the whole register', () => {
+    routeParams = { accountId: 'abc' };
+    const api = create();
+    expect(api.accountNotFound()).toBe(true);
+    expect(gl.getLedgerRegister).not.toHaveBeenCalled();
+    expect(api.entries()).toHaveLength(0);
+  });
+
+  it('lists rejected drafts on request and discards one after confirmation', () => {
+    const api = create();
+    api.toggleDrafts();
+    expect(gl.getLedgerRegister).toHaveBeenLastCalledWith(1, { pageSize: 100, glAccountId: null, status: 'Draft' });
+
+    gl.discardJournalEntry.mockReturnValue(of(undefined));
+    dialog.open.mockReturnValue({ afterClosed: () => of(true) });
+    api.discardDraft({ ...ENTRY, status: 'Draft' });
+    expect(gl.discardJournalEntry).toHaveBeenCalledWith(1);
+    expect(snackbar.success).toHaveBeenCalled();
+  });
+
+  it('narrows the register to flagged entries', () => {
+    gl.getLedgerRegister.mockReturnValue(of({ ...PAGE, data: [ENTRY, { ...ENTRY, id: 2, entryNumber: 2 }], totalCount: 2 }));
+    gl.getGlAnomalies.mockReturnValue(
+      of([{ entryId: 2, entryNumber: 2, entryDate: '2026-01-10', source: 'Manual', totalDebit: 100, flags: ['big'] }]),
+    );
+    const api = create();
+    api.scanAnomalies();
+    api.toggleFlaggedOnly();
+    expect(api.entries().map((e) => e.id)).toEqual([2]);
   });
 
   it('formats the DateOnly entry date as a plain string (no timezone shift)', () => {
@@ -148,7 +184,7 @@ describe('LedgerViewComponent', () => {
     }));
 
     const api = create();
-    expect(gl.getLedgerRegister).toHaveBeenCalledWith(1, { pageSize: 100, glAccountId: 1 });
+    expect(gl.getLedgerRegister).toHaveBeenCalledWith(1, { pageSize: 100, glAccountId: 1, status: null });
     expect(api.lensAccount()).toMatchObject({ glAccountId: 1, netBalance: 120 });
     // balance AFTER each entry, walking newest -> oldest: 120, 20, 50
     expect(api.entries().map((e) => e.balanceAfter)).toEqual([120, 20, 50]);

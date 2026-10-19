@@ -19,6 +19,7 @@ import {
 } from '../../../../shared/models/accounting-view.model';
 import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-refresh.util';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
+import { agingBucketLabel } from '../../utils/aging-bucket-label';
 import { ApAging } from '../../models/accounting.models';
 import { ApAgingVisualComponent } from './ap-aging-visual.component';
 
@@ -78,12 +79,16 @@ export class ApAgingComponent implements OnInit {
     this.preferences.set(ACCOUNTING_VIEW_PREF_KEY, mode);
   }
 
+  protected bucketLabel(label: string): string {
+    return agingBucketLabel(label, this.translate);
+  }
+
   /** Dynamic columns: Vendor + one per aging bucket + Open, derived from the report's bucket set. */
   protected readonly columns = computed<ColumnDef[]>(() => {
     const r = this.report();
     if (!r) return [];
     const buckets: ColumnDef[] = r.totalsByBucket.map((b, i) => ({
-      field: `b${i}`, header: b.label, sortable: true, type: 'number', align: 'right', width: '120px',
+      field: `b${i}`, header: agingBucketLabel(b.label, this.translate), sortable: true, type: 'number', align: 'right', width: '120px',
     }));
     return [
       { field: 'partyName', header: this.translate.instant('accounting.common.vendor'), sortable: true },

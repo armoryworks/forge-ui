@@ -15,6 +15,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { ManualJournalEntryResult } from '../../models/accounting.models';
 import { RejectEntryDialogComponent, RejectEntryDialogData } from '../reject-entry-dialog/reject-entry-dialog.component';
@@ -25,6 +26,7 @@ interface PendingEntryView {
   entry: ManualJournalEntryResult;
   dateLabel: string;
   total: number;
+  ownEntry: boolean;
   lines: { id: number; account: string; debit: number; credit: number; description: string | null }[];
 }
 
@@ -50,6 +52,7 @@ export class JournalApprovalsComponent implements OnInit {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly route = inject(ActivatedRoute);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
   private bookId = DEFAULT_BOOK_ID;
@@ -66,6 +69,7 @@ export class JournalApprovalsComponent implements OnInit {
 
   protected readonly entries = computed<PendingEntryView[]>(() => {
     const labels = this.accountLabels();
+    const me = this.auth.user()?.id ?? null;
     return this.pending().map((entry) => {
       const lines = (entry.lines ?? []).map((line) => ({
         id: line.id,
@@ -79,6 +83,7 @@ export class JournalApprovalsComponent implements OnInit {
         entry,
         dateLabel: `${month}/${day}/${year}`,
         total: lines.reduce((sum, l) => sum + l.debit, 0),
+        ownEntry: me !== null && entry.postedBy === me,
         lines,
       };
     });

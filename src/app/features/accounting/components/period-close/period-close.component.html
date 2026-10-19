@@ -14,7 +14,7 @@
         <header class="acct-year__head">
           <span class="acct-year__name">{{ year.name }}</span>
           <span class="chip" [class.chip--success]="year.status === 'Open'" [class.chip--muted]="year.status === 'Closed'">
-            {{ year.status }}
+            {{ ('accounting.periodClose.statuses.' + year.status) | translate }}
           </span>
           @if (year.status === 'Open') {
             <button type="button" class="action-btn action-btn--warn action-btn--sm" (click)="closeYear(year.id)" [disabled]="busy()">
@@ -58,14 +58,14 @@
             emptyIcon="event_busy"
             [emptyMessage]="'accounting.periodClose.empty' | translate">
             <ng-template appColumnCell="dates" let-row>
-              {{ row.startDate }} – {{ row.endDate }}
+              {{ row.startDate | dateOnly }} – {{ row.endDate | dateOnly }}
             </ng-template>
             <ng-template appColumnCell="status" let-row>
               <span class="chip"
                 [class.chip--success]="row.status === 'Open'"
                 [class.chip--warning]="row.status === 'SoftClosed'"
                 [class.chip--muted]="row.status === 'HardClosed'">
-                {{ row.status }}
+                {{ ('accounting.periodClose.statuses.' + row.status) | translate }}
               </span>
             </ng-template>
             <ng-template appColumnCell="actions" let-row>

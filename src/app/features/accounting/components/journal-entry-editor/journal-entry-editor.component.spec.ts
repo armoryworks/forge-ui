@@ -19,6 +19,7 @@ interface EditorApi {
   addLine(): void;
   removeLine(index: number): void;
   save(): void;
+  isDirty(): boolean;
 }
 
 const ACCOUNTS = [
@@ -27,7 +28,7 @@ const ACCOUNTS = [
 ];
 
 describe('JournalEntryEditorComponent', () => {
-  const gl = { getChartOfAccounts: vi.fn(), createManualJournalEntry: vi.fn(), getLedgerRegister: vi.fn() };
+  const gl = { getChartOfAccounts: vi.fn(), createManualJournalEntry: vi.fn(), getLedgerRegister: vi.fn(), discardJournalEntry: vi.fn() };
   const router = { navigate: vi.fn() };
   const snackbar = { success: vi.fn(), error: vi.fn(), errorFrom: vi.fn(), info: vi.fn() };
   let queryParams: Record<string, string>;
@@ -67,6 +68,55 @@ describe('JournalEntryEditorComponent', () => {
       of({ id: 5, bookId: 1, entryNumber: 7, entryDate: '2026-01-10', status: 'Posted', memo: 'cash sale' }),
     );
     gl.getLedgerRegister.mockReturnValue(of({ data: [], page: 1, pageSize: 100, totalCount: 0, totalPages: 0 }));
+    gl.discardJournalEntry.mockReturnValue(of(undefined));
+  });
+
+  it('prefills a rejected draft from ?resubmitOf and discards it once the new entry is saved', () => {
+    queryParams = { resubmitOf: '9' };
+    gl.getLedgerRegister.mockReturnValue(
+      of({
+        data: [
+          {
+            id: 9, entryNumber: 12, entryDate: '2026-07-06', source: 'Manual', sourceType: null, sourceId: null,
+            status: 'Draft', memo: 'Accrue rent — [Rejected] wrong period', reversalOfEntryId: null, reversedByEntryId: null, postedAt: null,
+            lines: [
+              { id: 1, lineNumber: 1, glAccountId: 100, accountNumber: '1000', accountName: 'Cash', debit: 50, credit: 0, description: null, jobId: null, costCenterId: null },
+              { id: 2, lineNumber: 2, glAccountId: 101, accountNumber: '4000', accountName: 'Revenue', debit: 0, credit: 50, description: null, jobId: null, costCenterId: null },
+            ],
+          },
+        ],
+        page: 1, pageSize: 100, totalCount: 1, totalPages: 1,
+      }),
+    );
+    const api = create();
+
+    expect(gl.getLedgerRegister).toHaveBeenCalledWith(1, { pageSize: 100, status: 'Draft' });
+    expect(api.form.get('memo')!.value).toBe('Accrue rent');
+    expect((api.form.get('lines') as FormArray).at(0).value.debit).toBe(50);
+    expect(api.isDirty()).toBe(true);
+
+    api.save();
+
+    expect(gl.discardJournalEntry).toHaveBeenCalledWith(9);
+    expect(api.isDirty()).toBe(false);
+  });
+
+  it('rejects a negative amount on a line', () => {
+    const api = create();
+    fillBalanced(api);
+    (api.form.get('lines') as FormArray).at(0).patchValue({ debit: -100, credit: 0 });
+    (api.form.get('lines') as FormArray).at(1).patchValue({ debit: 0, credit: -100 });
+
+    expect((api.form.get('lines') as FormArray).at(0).hasError('negativeAmount')).toBe(true);
+    api.save();
+    expect(gl.createManualJournalEntry).not.toHaveBeenCalled();
+  });
+
+  it('reports unsaved changes only after an edit', () => {
+    const api = create();
+    expect(api.isDirty()).toBe(false);
+    api.addLine();
+    expect(api.isDirty()).toBe(true);
   });
 
   it('prefills lines and memo from ?correctionOf', () => {

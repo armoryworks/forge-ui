@@ -9,7 +9,15 @@
       [label]="'accounting.form1099.year' | translate"
       [options]="yearOptions"
       [formControl]="yearControl" />
+    <app-toggle [label]="'accounting.form1099.includeZero' | translate" [formControl]="includeZeroControl"
+      data-testid="f1099-include-zero" />
   </div>
+
+  @if (report(); as r) {
+    @if (r.zeroPaymentVendorCount > 0 && !includeZeroControl.value) {
+      <p class="acct-muted f1099-note">{{ 'accounting.form1099.zeroHidden' | translate: { count: r.zeroPaymentVendorCount } }}</p>
+    }
+  }
 
   @if (error()) {
     <p class="acct-error" role="alert">{{ error() }}</p>
@@ -38,6 +46,9 @@
   @if (report(); as r) {
     <div class="totals-strip">
       <span class="totals-strip__label">{{ 'accounting.common.total' | translate }}</span>
+      <span class="totals-strip__metric">
+        {{ 'accounting.form1099.threshold' | translate }} <app-currency-display [value]="r.threshold" />
+      </span>
       <span class="totals-strip__metric">
         {{ 'accounting.form1099.reportableVendors' | translate }} {{ r.reportableVendorCount }}
       </span>

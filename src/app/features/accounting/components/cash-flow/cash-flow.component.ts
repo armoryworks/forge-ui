@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
@@ -7,6 +7,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { ViewModeToggleComponent } from '../../../../shared/components/view-mode-toggle/view-mode-toggle.component';
 import { UserPreferencesService } from '../../../../shared/services/user-preferences.service';
 import {
@@ -18,24 +19,26 @@ import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { CashFlowStatement } from '../../models/accounting.models';
 import { CashFlowVisualComponent } from './cash-flow-visual.component';
-
-const DEFAULT_BOOK_ID = 1;
+import { StatementPeriodComponent } from '../statement-period/statement-period.component';
+import { StatementPeriod, bookIdFromParams, periodFromParams, samePeriod } from '../../utils/statement-period';
 
 @Component({
   selector: 'app-cash-flow',
   standalone: true,
   imports: [
     TranslatePipe,
+    DateOnlyPipe,
     PageHeaderComponent,
     CurrencyDisplayComponent,
     ViewModeToggleComponent,
     CashFlowVisualComponent,
+    StatementPeriodComponent,
   ],
   templateUrl: './cash-flow.component.html',
   styleUrl: './cash-flow.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CashFlowComponent implements OnInit {
+export class CashFlowComponent {
   private readonly gl = inject(GeneralLedgerService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -57,6 +60,19 @@ export class CashFlowComponent implements OnInit {
     { initialValue: this.preferredView() },
   );
 
+  private readonly params = toSignal(this.route.queryParamMap, { initialValue: this.route.snapshot.queryParamMap });
+  /** Statement window, mirrored to `?from=&to=`; empty is from inception to today. */
+  protected readonly period = computed(() => periodFromParams(this.params()), { equal: samePeriod });
+  private readonly bookId = computed(() => bookIdFromParams(this.params()));
+
+  protected setPeriod(period: StatementPeriod): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { from: period.from, to: period.to },
+      queryParamsHandling: 'merge',
+    });
+  }
+
   protected setViewMode(mode: AccountingViewMode): void {
     this.router.navigate([], {
       relativeTo: this.route,
@@ -68,17 +84,19 @@ export class CashFlowComponent implements OnInit {
 
   constructor() {
     autoRefreshOnGlChange(() => this.load());
-  }
 
-  ngOnInit(): void {
-    this.load();
+    effect(() => {
+      this.period();
+      this.bookId();
+      this.load();
+    });
   }
 
   protected load(): void {
     this.loading.set(true);
     this.error.set(null);
     this.gl
-      .getCashFlow(DEFAULT_BOOK_ID)
+      .getCashFlow(this.bookId(), this.period().from, this.period().to)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (r) => {

@@ -3,6 +3,8 @@ import { CanDeactivateFn } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { map } from 'rxjs';
 
+import { TranslateService } from '@ngx-translate/core';
+
 import {
   ConfirmDialogComponent,
   ConfirmDialogData,
@@ -18,15 +20,16 @@ export const unsavedChangesGuard: CanDeactivateFn<HasDirtyForm> = (component) =>
   }
 
   const dialog = inject(MatDialog);
+  const translate = inject(TranslateService);
 
   return dialog
     .open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Unsaved Changes',
-        message: 'You have unsaved changes that will be lost. Are you sure you want to leave?',
-        confirmLabel: 'Leave',
-        cancelLabel: 'Stay',
+        title: translate.instant('common.unsavedChanges.title'),
+        message: translate.instant('common.unsavedChanges.message'),
+        confirmLabel: translate.instant('common.unsavedChanges.leave'),
+        cancelLabel: translate.instant('common.unsavedChanges.stay'),
         severity: 'warn',
       } satisfies ConfirmDialogData,
     })

@@ -9,6 +9,7 @@
     <p class="acct-muted">{{ 'accounting.common.loading' | translate }}</p>
   } @else if (report(); as r) {
     <div class="acct-view-bar">
+      <app-statement-period mode="range" [from]="r.fromDate ?? null" [to]="r.toDate ?? null" (periodChange)="setPeriod($event)" />
       @if (viewMode() !== 'visual') {
         <app-toggle class="acct-compare-toggle" [label]="'accounting.comparison.compareToPrior' | translate" [formControl]="compareControl" />
       }
@@ -22,11 +23,13 @@
       <p class="acct-caveat">{{ r.marginCaveat }}</p>
     }
 
-    @if (compare() && r.hasComparison && r.compareFromDate && r.compareToDate) {
-      <p class="acct-muted stmt-compare-note">
-        {{ 'accounting.comparison.priorPeriod' | translate }}: {{ r.compareFromDate }} – {{ r.compareToDate }}
-      </p>
-    }
+    <p class="acct-muted stmt-compare-note">
+      {{ 'accounting.comparison.currentPeriod' | translate }}:
+      @if (r.fromDate) { {{ r.fromDate | dateOnly }} } @else { {{ 'accounting.period.inception' | translate }} } – {{ r.toDate | dateOnly }}
+      @if (compare() && r.hasComparison && r.compareFromDate && r.compareToDate) {
+        · {{ 'accounting.comparison.priorPeriod' | translate }}: {{ r.compareFromDate | dateOnly }} – {{ r.compareToDate | dateOnly }}
+      }
+    </p>
 
     <table class="statement" aria-label="Profit and loss statement">
       @if (compare()) {

@@ -85,7 +85,8 @@
     "pieceRates": "Piece Rates",
     "openingJournal": "Opening Journal",
     "journalApprovals": "Journal Approvals",
-    "maintenancePredictions": "Predictions"
+    "maintenancePredictions": "Predictions",
+    "accountingTraining": "Accounting Training"
   },
   "navGroups": {
     "operations": "Operations",
@@ -418,7 +419,13 @@
     "continue": "Continue",
     "dismiss": "Dismiss",
     "fax": "Fax",
-    "deactivatedSuffix": "(deactivated)"
+    "deactivatedSuffix": "(deactivated)",
+    "unsavedChanges": {
+      "title": "Unsaved changes",
+      "message": "You have unsaved changes that will be lost. Are you sure you want to leave?",
+      "leave": "Leave",
+      "stay": "Stay"
+    }
   },
   "dashboardWidgets": {
     "margin": {
@@ -9752,7 +9759,8 @@
       "ledgerLoadFailed": "Could not load the ledger.",
       "explainFailed": "Could not generate an explanation.",
       "accountsLoadFailed": "Could not load accounts.",
-      "anomalyScanFailed": "Anomaly scan failed."
+      "anomalyScanFailed": "Anomaly scan failed.",
+      "discardFailed": "Could not discard the draft entry."
     },
     "ledger": {
       "title": "Ledger",
@@ -9778,7 +9786,16 @@
       "previousMatch": "Previous match",
       "nextMatch": "Next match",
       "entryNotLoaded": "Entry id {{number}} is older than the loaded page",
-      "empty": "No journal entries"
+      "empty": "No journal entries",
+      "rejectedDrafts": "Rejected drafts",
+      "draftsNote": "Rejected entries return here as drafts. Resubmit one to open it in the editor, or discard it.",
+      "accountNotFound": "That account could not be found. Open the ledger from the chart of accounts or the trial balance.",
+      "flaggedOffPage": "{{count}} flagged entries are older than the entries loaded here.",
+      "resubmit": "Resubmit",
+      "discard": "Discard",
+      "discardTitle": "Discard draft?",
+      "discardMessage": "Draft entry #{{number}} will be deleted. It never posted, so the books are not affected.",
+      "discarded": "Draft entry #{{number}} discarded"
     },
     "journalEditor": {
       "title": "New Journal Entry",
@@ -9793,7 +9810,8 @@
       "posted": "Entry #{{number}} posted",
       "correctionMemo": "Correction of entry #{{number}}: ",
       "correcting": "Correcting entry #{{number}}",
-      "pendingApproval": "Entry {{number}} is waiting for a second approver"
+      "pendingApproval": "Entry {{number}} is waiting for a second approver",
+      "resubmitting": "Resubmitting rejected entry #{{number}}"
     },
     "training": {
       "title": "GL Training",
@@ -10015,7 +10033,9 @@
       "account": "Account",
       "net": "Net",
       "balanced": "Balanced",
-      "empty": "No ledger activity"
+      "empty": "No ledger activity",
+      "debitTurnover": "Debit activity",
+      "creditTurnover": "Credit activity"
     },
     "profitLoss": {
       "title": "Profit & Loss",
@@ -10045,14 +10065,15 @@
       "current": "Current",
       "prior": "Prior",
       "variance": "Variance",
-      "variancePercent": "Variance %"
+      "variancePercent": "Variance %",
+      "currentPeriod": "Period"
     },
     "budget": {
       "title": "Budgets",
       "subtitle": "Set budgets per account and compare budget vs actual",
-      "entryTab": "Budget Entry",
-      "vsActualTab": "Budget vs Actual",
-      "amount": "Budget Amount",
+      "entryTab": "Budget entry",
+      "vsActualTab": "Budget vs actual",
+      "amount": "Budget amount",
       "budget": "Budget",
       "actual": "Actual",
       "total": "Total",
@@ -10079,7 +10100,11 @@
         "10": "October",
         "11": "November",
         "12": "December"
-      }
+      },
+      "window": "Period",
+      "totalIncome": "Total income",
+      "totalExpense": "Total expense",
+      "netIncome": "Net income"
     },
     "balanceSheet": {
       "title": "Balance Sheet",
@@ -10169,12 +10194,15 @@
       "totalPayments": "Total payments",
       "status": "Status",
       "reportable": "Reportable",
-      "underThreshold": "Under $600",
+      "underThreshold": "Under threshold",
       "reportableVendors": "Reportable vendors",
       "empty": "No 1099 vendors flagged",
       "vendorToggle": "1099 vendor",
       "taxIdLabel": "Tax ID (TIN/EIN)",
-      "taxIdPlaceholder": "e.g. 12-3456789"
+      "taxIdPlaceholder": "e.g. 12-3456789",
+      "includeZero": "Show vendors with no payments",
+      "zeroHidden": "{{count}} 1099 vendors with no payments this year are hidden.",
+      "threshold": "Reporting threshold"
     },
     "periodClose": {
       "title": "Period Close",
@@ -10184,13 +10212,13 @@
       "dates": "Dates",
       "empty": "No periods",
       "noFiscalYears": "No fiscal years configured.",
-      "closeYear": "Close year (RE roll)",
+      "closeYear": "Close fiscal year",
       "softClose": "Soft-close",
       "hardClose": "Hard-close",
       "reopen": "Reopen",
       "locked": "Locked",
       "confirmTitle": "Close fiscal year?",
-      "confirmMessage": "This posts the retained-earnings roll and hard-closes every period in the year. It cannot be undone.",
+      "confirmMessage": "This moves the year's net income into retained earnings and hard-closes every period in the year. It cannot be undone.",
       "confirmLabel": "Close year",
       "checklist": {
         "title": "Close checklist",
@@ -10204,6 +10232,12 @@
         "apTies": "AP aging ties to control",
         "blockedHint": "Hard-closing this period, or closing the year when it is the final period, is refused until every item passes.",
         "loadFailed": "Could not load the close checklist."
+      },
+      "statuses": {
+        "Open": "Open",
+        "SoftClosed": "Soft-closed",
+        "HardClosed": "Hard-closed",
+        "Closed": "Closed"
       }
     },
     "bankRec": {
@@ -10277,7 +10311,9 @@
       "requiresCostCenter": "Requires Cost Center",
       "active": "Active",
       "description": "Description",
-      "lockedNote": "This account has postings — its number, type, and normal balance are locked. Create a new account for structural changes."
+      "lockedNote": "This account has postings, so its number and type are locked. Create a new account for structural changes.",
+      "contraNote": "This normal balance is opposite the usual side for the account type, as for a contra account.",
+      "normalBalanceConversionNote": "Changing it does not alter posted entries or statements; only future conversion imports read it."
     },
     "openingJournal": {
       "title": "Opening journal",
@@ -10317,7 +10353,8 @@
       "rejectTitle": "Reject entry {{number}}",
       "rejectNote": "The entry goes back to draft; nothing reaches the ledger. The reason is added to its memo.",
       "rejectReason": "Reason (optional)",
-      "noLines": "This entry has no lines"
+      "noLines": "This entry has no lines",
+      "ownEntry": "You submitted this entry, so another approver must approve it."
     },
     "jobCostClose": {
       "title": "Job production cost",
@@ -10330,6 +10367,29 @@
       "closed": "{{job}} closed; production variance {{variance}}",
       "empty": "No job has an open WIP balance",
       "loadFailed": "Could not load the jobs with open WIP"
+    },
+    "period": {
+      "period": "Period",
+      "from": "From",
+      "to": "To",
+      "asOf": "As of",
+      "inception": "Inception",
+      "presets": {
+        "thisMonth": "This month",
+        "lastMonth": "Last month",
+        "thisQuarter": "This quarter",
+        "lastQuarter": "Last quarter",
+        "yearToDate": "Fiscal year to date",
+        "lastYear": "Last calendar year",
+        "custom": "Custom",
+        "today": "Today",
+        "endOfLastMonth": "End of last month",
+        "endOfLastQuarter": "End of last quarter",
+        "endOfLastYear": "End of last year"
+      }
+    },
+    "aging": {
+      "current": "Current"
     }
   },
   "subcontractUi": {
