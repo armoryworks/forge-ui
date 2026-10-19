@@ -96,6 +96,18 @@ describe('VendorWorkflowPageComponent routing', () => {
     vi.spyOn(router, 'navigate').mockResolvedValue(true);
   }
 
+  it('fills in the vendor workflow when /vendors/new is reached without one', () => {
+    setUp({}, {});
+    TestBed.runInInjectionContext(() => new VendorWorkflowPageComponent());
+    TestBed.tick();
+
+    expect(router.navigate).toHaveBeenCalledWith([], expect.objectContaining({
+      queryParams: { workflow: 'vendor-guided-v1' },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    }));
+  });
+
   it('opens the vendor detail when /vendors/:id is reached without a workflow', () => {
     setUp({ id: '7' }, {});
     TestBed.runInInjectionContext(() => new VendorWorkflowPageComponent());
@@ -155,19 +167,79 @@ describe('VendorWorkflowPageComponent on an existing vendor', () => {
     }).compileComponents();
   });
 
-  it('binds the new run to the vendor so its steps edit the saved record', () => {
+  function stub(): WorkflowService {
     const workflowService = TestBed.inject(WorkflowService);
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     vi.spyOn(TestBed.inject(VendorService), 'getVendorById').mockReturnValue(of({ id: 55 } as unknown as VendorDetail));
-    vi.spyOn(workflowService, 'listActive').mockReturnValue(of([]));
     vi.spyOn(workflowService, 'loadDefinitionsForEntity').mockReturnValue(of([definition]));
     vi.spyOn(workflowService, 'loadValidatorsForEntity').mockReturnValue(of([]));
-    const start = vi.spyOn(workflowService, 'startRun').mockReturnValue(of(buildRun({ entityId: 55 })));
+    return workflowService;
+  }
+
+  function load(runId: number): VendorWorkflowPageComponent {
     const component = TestBed.runInInjectionContext(() => new VendorWorkflowPageComponent());
+    (component as unknown as { loadWorkflowContext(id: number, runId: number, def: string): void })
+      .loadWorkflowContext(55, runId, 'vendor-guided-v1');
+    return component;
+  }
 
-    (component as unknown as { loadWorkflowContext(id: number, def: string): void })
-      .loadWorkflowContext(55, 'vendor-guided-v1');
+  it('opens the vendor instead of reopening its finished workflow when no run is open', () => {
+    const workflowService = stub();
+    vi.spyOn(workflowService, 'listActive').mockReturnValue(of([]));
+    const start = vi.spyOn(workflowService, 'startRun');
 
-    expect(start).toHaveBeenCalledWith(expect.objectContaining({ entityType: 'Vendor', entityId: 55 }));
+    load(0);
+
+    expect(start).not.toHaveBeenCalled();
+    expect(TestBed.inject(Router).navigate).toHaveBeenCalledWith(['/vendors'], { queryParams: { detail: 'vendor:55' }, replaceUrl: true });
+  });
+
+  it('resumes the current user\'s open run on the vendor', () => {
+    const workflowService = stub();
+    vi.spyOn(workflowService, 'listActive').mockReturnValue(of([buildRun({ id: 6, entityId: 55 })]));
+
+    const component = load(0);
+
+    expect((component as unknown as { run(): WorkflowRun | null }).run()?.id).toBe(6);
+  });
+
+  it('mounts the run named by ?runId even when someone else started it', () => {
+    const workflowService = stub();
+    const listActive = vi.spyOn(workflowService, 'listActive');
+    vi.spyOn(workflowService, 'getRun').mockReturnValue(of(buildRun({ id: 8, entityId: 55, startedByUserId: 2 })));
+
+    const component = load(8);
+
+    expect(listActive).not.toHaveBeenCalled();
+    expect((component as unknown as { run(): WorkflowRun | null }).run()?.id).toBe(8);
+  });
+
+  it('opens the vendor instead of editing a finished run', async () => {
+    const workflowService = stub();
+    vi.spyOn(workflowService, 'getRun').mockReturnValue(of(buildRun({ id: 8, entityId: 55, completedAt: '2026-10-02T00:00:00Z' })));
+    const info = vi.spyOn(TestBed.inject(SnackbarService), 'info').mockImplementation(() => undefined);
+
+    const component = load(8);
+    await Promise.resolve();
+
+    expect(TestBed.inject(Router).navigate).toHaveBeenCalledWith(['/vendors'], { queryParams: { detail: 'vendor:55' }, replaceUrl: true });
+    expect(info).toHaveBeenCalledWith('workflow.shell.closedRun.completed');
+    expect((component as unknown as { run(): WorkflowRun | null }).run()).toBeNull();
+  });
+
+  it('abandons an unsaved run on close but keeps one bound to a vendor', () => {
+    const workflowService = stub();
+    const abandon = vi.spyOn(workflowService, 'abandonRun').mockReturnValue(of(buildRun()));
+    const component = TestBed.runInInjectionContext(() => new VendorWorkflowPageComponent()) as unknown as { onClosed(): void };
+
+    workflowService.currentRun.set(buildRun({ entityId: null }));
+    component.onClosed();
+    expect(abandon).toHaveBeenCalledWith(4, 'user');
+
+    abandon.mockClear();
+    workflowService.currentRun.set(buildRun({ entityId: 55 }));
+    component.onClosed();
+    expect(abandon).not.toHaveBeenCalled();
   });
 });
 

@@ -47,6 +47,8 @@ export class CustomerWorkflowPageComponent {
   private readonly translate = inject(TranslateService);
   private readonly loading = inject(LoadingService);
 
+  private static readonly DEFAULT_DEFINITION_ID = 'customer-guided-v1';
+
   protected readonly customer = signal<CustomerDetail | null>(null);
   protected readonly run = signal<WorkflowRun | null>(null);
   protected readonly definition = signal<WorkflowDefinition | null>(null);
@@ -89,7 +91,12 @@ export class CustomerWorkflowPageComponent {
       const runId = this.runIdFromUrl();
       const definitionId = this.definitionIdFromUrl();
       if (!definitionId) {
-        this.router.navigate(['/customers'], { replaceUrl: true });
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: { workflow: CustomerWorkflowPageComponent.DEFAULT_DEFINITION_ID },
+          queryParamsHandling: 'merge',
+          replaceUrl: true,
+        });
         return;
       }
       if (runId) {
@@ -104,6 +111,7 @@ export class CustomerWorkflowPageComponent {
       const run = this.run();
       if (!target || !run) return;
       if (run.currentStepId === target) return;
+      if (!this.definition()?.steps.some((s) => s.id === target)) return;
       this.run.set({ ...run, currentStepId: target });
     });
 
@@ -183,6 +191,7 @@ export class CustomerWorkflowPageComponent {
           this.router.navigate(['/customers']);
           return;
         }
+        if (this.leaveClosedRun(run)) return;
         if (run.entityId != null) {
           this.customerService.getCustomerById(run.entityId).subscribe({
             next: (customer) => {
@@ -207,6 +216,20 @@ export class CustomerWorkflowPageComponent {
         this.router.navigate(['/customers']);
       },
     });
+  }
+
+  /**
+   * A finished or abandoned run cannot take edits. Sends the user to the
+   * customer (finished) or the list (abandoned) and reports whether it did.
+   */
+  private leaveClosedRun(run: WorkflowRun): boolean {
+    if (run.abandonedAt == null && run.completedAt == null) return false;
+    const completed = run.completedAt != null;
+    const target = completed && run.entityId != null ? ['/customers', run.entityId, 'overview'] : ['/customers'];
+    this.workflowService.clearContext();
+    this.router.navigate(target, { replaceUrl: true }).then(() => this.snackbar.info(
+      this.translate.instant(completed ? 'workflow.shell.closedRun.completed' : 'workflow.shell.closedRun.abandoned')));
+    return true;
   }
 
   protected onModeChanged(mode: 'express' | 'guided'): void {
@@ -328,7 +351,16 @@ export class CustomerWorkflowPageComponent {
   }
 
   protected onClosed(): void {
-    this.workflowService.clearContext();
-    this.router.navigate(['/customers']);
+    const leave = (): void => {
+      this.workflowService.clearContext();
+      this.router.navigate(['/customers']);
+    };
+    const run = this.workflowService.currentRun() ?? this.run();
+    if (!run || run.entityId != null || run.completedAt != null || run.abandonedAt != null
+      || this.workflowService.stepSavePending()) {
+      leave();
+      return;
+    }
+    this.workflowService.abandonRun(run.id, 'user').subscribe({ next: leave, error: leave });
   }
 }

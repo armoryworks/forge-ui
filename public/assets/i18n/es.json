@@ -1351,7 +1351,8 @@
         "startFailed": "No se pudo iniciar.",
         "completeSuccess": "Pieza promovida a Activa.",
         "missingValidators": "No se puede completar: falta {{missing}}",
-        "blockedByStep": "Termina '{{step}}' antes de continuar — falta {{missing}}"
+        "blockedByStep": "Termina '{{step}}' antes de continuar — falta {{missing}}",
+        "noRun": "Ese enlace no indica una pieza ni un borrador. Inicie una pieza nueva desde la lista de piezas."
       },
       "promote": {
         "cta": "Promover a Activa",
@@ -2630,13 +2631,14 @@
       },
       "review": {
         "title": "Revisión",
-        "hint": "Confirme los detalles a continuación y luego marque como Completado para guardar.",
+        "hint": "El cliente ya está guardado. Confirme los detalles a continuación y luego marque como Completado para terminar la configuración.",
         "loading": "Cargando cliente…"
       },
       "express": {
         "title": "Nuevo Cliente",
         "hint": "Capture lo esencial en un solo formulario. Las direcciones pueden agregarse más tarde desde la página de detalle del cliente.",
-        "saveFailed": "No se pudo guardar el cliente."
+        "saveFailed": "No se pudo guardar el cliente.",
+        "save": "Guardar cliente"
       }
     },
     "taxDocuments": {
@@ -5806,13 +5808,14 @@
       },
       "review": {
         "title": "Revisión",
-        "hint": "Confirme los detalles a continuación y luego marque como Completado para guardar.",
+        "hint": "El proveedor ya está guardado. Confirme los detalles a continuación y luego marque como Completado para terminar la configuración.",
         "loading": "Cargando proveedor…"
       },
       "express": {
         "title": "Nuevo Proveedor",
         "hint": "Capture lo esencial en un solo formulario. Puede agregar dirección, términos y artículos de suministro más tarde desde la página de detalle del proveedor.",
-        "saveFailed": "No se pudo guardar el proveedor."
+        "saveFailed": "No se pudo guardar el proveedor.",
+        "save": "Guardar proveedor"
       }
     }
   },
@@ -9987,12 +9990,18 @@
         "heading": "Steps"
       },
       "resume": {
-        "heading": "Workflow drafts in progress",
-        "message": "Pick up where you left off.",
-        "resumeButton": "Resume",
-        "dismissButton": "Dismiss",
-        "empty": "No drafts in progress.",
-        "loadFailed": "Couldn't load active drafts."
+        "heading": "Configuraciones en curso",
+        "message": "Continúe donde lo dejó.",
+        "resumeButton": "Reanudar",
+        "dismissButton": "Descartar",
+        "empty": "No hay configuraciones en curso.",
+        "loadFailed": "No se pudieron cargar las configuraciones en curso.",
+        "promptOne": "Tiene 1 configuración en curso.",
+        "promptOther": "Tiene {{count}} configuraciones en curso."
+      },
+      "closedRun": {
+        "completed": "Esta configuración ya está terminada.",
+        "abandoned": "Esta configuración se descartó."
       }
     },
     "demo": {

@@ -6,8 +6,12 @@ import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 import { vi } from 'vitest';
 
+import { WorkflowDefinition } from '../../../../shared/models/workflow-definition.model';
 import { WorkflowRun } from '../../../../shared/models/workflow-run.model';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
+import { CustomerDetail } from '../../models/customer-detail.model';
+import { CustomerService } from '../../services/customer.service';
 import { CustomerWorkflowPageComponent } from './customer-workflow-page.component';
 
 class FakeLoader implements TranslateLoader {
@@ -51,12 +55,82 @@ describe('CustomerWorkflowPageComponent', () => {
     return TestBed.runInInjectionContext(() => new CustomerWorkflowPageComponent());
   }
 
-  it('returns to the customer list when /customers/new is reached without a workflow', () => {
+  const definition: WorkflowDefinition = {
+    id: 3, definitionId: 'customer-guided-v1', entityType: 'Customer', defaultMode: 'guided',
+    steps: [
+      { id: 'identity', labelKey: 'a', componentName: 'A', required: true, completionGates: [] },
+      { id: 'review', labelKey: 'b', componentName: 'B', required: true, completionGates: [] },
+    ],
+    stepsJson: '[]', expressTemplateComponent: null, isSeedData: true,
+  } as unknown as WorkflowDefinition;
+
+  function stubLoad(run: WorkflowRun): void {
+    vi.spyOn(workflowService, 'getRun').mockReturnValue(of(run));
+    vi.spyOn(workflowService, 'loadDefinitionsForEntity').mockReturnValue(of([definition]));
+    vi.spyOn(workflowService, 'loadValidatorsForEntity').mockReturnValue(of([]));
+  }
+
+  it('fills in the customer workflow when /customers/new is reached without one', () => {
     setUp({});
     create();
     TestBed.tick();
 
+    expect(router.navigate).toHaveBeenCalledWith([], expect.objectContaining({
+      queryParams: { workflow: 'customer-guided-v1' },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    }));
+  });
+
+  it('opens the customer instead of editing a finished run', async () => {
+    setUp({ workflow: 'customer-guided-v1', runId: '4' });
+    stubLoad(buildRun({ completedAt: '2026-10-02T00:00:00Z' }));
+    const info = vi.spyOn(TestBed.inject(SnackbarService), 'info').mockImplementation(() => undefined);
+    const component = create();
+    TestBed.tick();
+    await Promise.resolve();
+
+    expect(router.navigate).toHaveBeenCalledWith(['/customers', 12, 'overview'], { replaceUrl: true });
+    expect(info).toHaveBeenCalledWith('workflow.shell.closedRun.completed');
+    expect((component as unknown as { run(): WorkflowRun | null }).run()).toBeNull();
+  });
+
+  it('returns to the list instead of editing an abandoned run', async () => {
+    setUp({ workflow: 'customer-guided-v1', runId: '4' });
+    stubLoad(buildRun({ abandonedAt: '2026-10-02T00:00:00Z' }));
+    const info = vi.spyOn(TestBed.inject(SnackbarService), 'info').mockImplementation(() => undefined);
+    create();
+    TestBed.tick();
+    await Promise.resolve();
+
     expect(router.navigate).toHaveBeenCalledWith(['/customers'], { replaceUrl: true });
+    expect(info).toHaveBeenCalledWith('workflow.shell.closedRun.abandoned');
+  });
+
+  it('ignores a ?step= that is not part of the workflow', () => {
+    setUp({ workflow: 'customer-guided-v1', runId: '4', step: 'nonsense' });
+    vi.spyOn(TestBed.inject(CustomerService), 'getCustomerById').mockReturnValue(of({ id: 12 } as unknown as CustomerDetail));
+    stubLoad(buildRun({ currentStepId: 'identity' }));
+    const component = create();
+    TestBed.tick();
+
+    expect((component as unknown as { run(): WorkflowRun | null }).run()?.currentStepId).toBe('identity');
+  });
+
+  it('abandons an unsaved run on close but keeps one bound to a customer', () => {
+    setUp({});
+    const abandon = vi.spyOn(workflowService, 'abandonRun').mockReturnValue(of(buildRun()));
+    const component = create() as unknown as { onClosed(): void };
+
+    workflowService.currentRun.set(buildRun({ entityId: null }));
+    component.onClosed();
+    expect(abandon).toHaveBeenCalledWith(4, 'user');
+
+    abandon.mockClear();
+    workflowService.currentRun.set(buildRun({ entityId: 12 }));
+    component.onClosed();
+    expect(abandon).not.toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenLastCalledWith(['/customers']);
   });
 
   it('switches mode after the step saves', () => {

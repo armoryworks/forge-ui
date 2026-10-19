@@ -61,4 +61,21 @@
       }
     }
   </form>
+
+  <div class="customer-workflow-step__actions">
+    <app-validation-button
+      class="validation-button--inline"
+      [violations]="violations"
+      [loading]="saving()">
+      <button
+        class="action-btn action-btn--primary"
+        type="button"
+        data-testid="customer-express-save-btn"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        <span class="material-icons-outlined">save</span>
+        {{ 'customers.workflow.express.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
 </section>
