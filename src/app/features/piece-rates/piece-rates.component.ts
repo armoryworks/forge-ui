@@ -1,11 +1,13 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DEFAULT_CURRENCY_CODE, DestroyRef, LOCALE_ID, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe, DecimalPipe, CurrencyPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 
 import { addDays, format, startOfWeek } from 'date-fns';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { RowExpandDirective } from '../../shared/directives/row-expand.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
@@ -52,6 +54,8 @@ export class PieceRatesComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly dialog = inject(MatDialog);
+  private readonly money = new CurrencyPipe(inject(LOCALE_ID), inject(DEFAULT_CURRENCY_CODE));
 
   protected readonly rates = signal<PieceRateTimeline[]>([]);
   protected readonly work = signal<PieceWorkEntry[]>([]);
@@ -173,8 +177,10 @@ export class PieceRatesComponent {
       .subscribe({
         next: (entry) => {
           this.savingWork.set(false);
-          this.workForm.patchValue({ quantity: null });
-          this.snackbar.success(this.translate.instant('pieceRates.workLogged', { earnings: entry.earnings }));
+          this.workForm.controls.quantity.reset(null);
+          this.snackbar.success(this.translate.instant('pieceRates.workLogged', {
+            earnings: this.money.transform(entry.earnings) ?? entry.earnings,
+          }));
           this.loadWeek();
         },
         error: (err: unknown) => {
@@ -185,9 +191,26 @@ export class PieceRatesComponent {
   }
 
   protected deleteWork(entry: PieceWorkEntry): void {
-    this.service.deleteWork(entry.id).subscribe({
-      next: () => this.loadWeek(),
-      error: (err: unknown) => this.snackbar.errorFrom(err, 'pieceRates.deleteFailed'),
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('pieceRates.deleteConfirmTitle'),
+        message: this.translate.instant('pieceRates.deleteConfirmMessage', {
+          quantity: entry.quantity,
+          part: entry.partNumber,
+          worker: entry.userName,
+          date: format(new Date(`${entry.workDate.slice(0, 10)}T00:00:00`), 'MM/dd/yyyy'),
+          earnings: this.money.transform(entry.earnings) ?? entry.earnings,
+        }),
+        confirmLabel: this.translate.instant('pieceRates.deleteEntry'),
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.service.deleteWork(entry.id).subscribe({
+        next: () => this.loadWeek(),
+        error: (err: unknown) => this.snackbar.errorFrom(err, 'pieceRates.deleteFailed'),
+      });
     });
   }
 }

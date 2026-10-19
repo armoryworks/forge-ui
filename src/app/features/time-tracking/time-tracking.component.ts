@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { catchError, of, startWith } from 'rxjs';
 import { TimeTrackingService } from './services/time-tracking.service';
@@ -32,6 +32,11 @@ import { CapabilityService } from '../../shared/services/capability.service';
 import { RunningTimersComponent } from '../../shared/components/running-timers/running-timers.component';
 import { elapsedMs } from '../../shared/utils/elapsed-ms';
 import { secondTicker } from '../../shared/utils/second-ticker';
+
+function durationInRange(group: AbstractControl): ValidationErrors | null {
+  const total = (Number(group.get('hours')?.value) || 0) * 60 + (Number(group.get('minutes')?.value) || 0);
+  return total >= 1 && total <= 1440 ? null : { durationRange: true };
+}
 
 @Component({
   selector: 'app-time-tracking',
@@ -104,11 +109,19 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
     category: new FormControl(''),
     notes: new FormControl(''),
     isBillable: new FormControl(true, { nonNullable: true }),
-  });
-  protected readonly entryViolations = FormValidationService.getViolations(this.entryForm, {
+  }, { validators: durationInRange });
+  private readonly entryFieldViolations = FormValidationService.getViolations(this.entryForm, {
     date: 'Date',
     hours: 'Hours',
     minutes: 'Minutes',
+  });
+  private readonly entryStatus = toSignal(this.entryForm.statusChanges.pipe(startWith(this.entryForm.status)));
+  protected readonly entryViolations = computed(() => {
+    this.entryStatus();
+    const fields = this.entryFieldViolations();
+    return this.entryForm.hasError('durationRange')
+      ? [...fields, this.translate.instant('timeTracking.durationRange')]
+      : fields;
   });
 
   // Timer dialog

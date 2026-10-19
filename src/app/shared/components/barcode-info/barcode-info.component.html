@@ -27,7 +27,7 @@
         <span class="material-icons-outlined">print</span>
         {{ 'common.print' | translate }}
       </button>
-      @if (naturalIdentifier()) {
+      @if (naturalIdentifier() && canRegenerate()) {
         <button class="action-btn action-btn--sm" (click)="regenerate()">
           <span class="material-icons-outlined">refresh</span>
           {{ 'shared.regenerate' | translate }}
@@ -39,7 +39,7 @@
   <div class="barcode-info barcode-info--empty">
     <span class="material-icons-outlined">qr_code_2</span>
     <span class="barcode-info__no-barcode">{{ 'shared.noBarcodeAssigned' | translate }}</span>
-    @if (naturalIdentifier()) {
+    @if (naturalIdentifier() && canRegenerate()) {
       <button class="action-btn action-btn--sm" (click)="regenerate()">
         <span class="material-icons-outlined">add</span>
         {{ 'shared.generateBarcode' | translate }}

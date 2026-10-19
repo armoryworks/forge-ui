@@ -128,6 +128,7 @@ export class JobDetailPanelComponent implements OnInit {
 
   protected readonly isAdmin = computed(() => this.auth.hasRole('Admin'));
   protected readonly canArchive = computed(() => this.auth.hasAnyRole([...JOB_EDIT_ROLES]));
+  protected readonly canEditJob = computed(() => this.auth.hasAnyRole([...JOB_EDIT_ROLES]));
   private readonly mayBill = computed(() => this.auth.hasAnyRole([...BILLING_STAGE_ROLES]));
   protected readonly canViewCost = computed(() => this.auth.hasAnyRole(['Admin', 'Manager', 'Engineer', 'PM', 'OfficeManager']));
   protected readonly canExplodeBom = computed(() => this.auth.hasAnyRole(['Admin', 'Manager']));
@@ -448,11 +449,30 @@ export class JobDetailPanelComponent implements OnInit {
     return typeof qty === 'number' && Number.isFinite(qty) && qty > 0;
   }
 
+  protected canRemovePart(jp: JobPart): boolean {
+    return jp.partId !== this.job()?.partId || this.canEditJob();
+  }
+
   protected removePart(jp: JobPart): void {
-    this.kanbanService.removeJobPart(this.jobId(), jp.id).subscribe(() => {
-      this.jobParts.update(list => list.filter(p => p.id !== jp.id));
-      this.partQtyEditControls.delete(jp.id);
-      this.snackbar.success(this.translate.instant('kanban.partRemoved'));
+    const isBuildPart = jp.partId === this.job()?.partId;
+    this.matDialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('kanban.removePartConfirmTitle'),
+        message: this.translate.instant(
+          isBuildPart ? 'kanban.removeBuildPartConfirmMessage' : 'kanban.removePartConfirmMessage',
+          { partNumber: jp.partNumber }),
+        confirmLabel: this.translate.instant('kanban.removePart'),
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.kanbanService.removeJobPart(this.jobId(), jp.id).subscribe(() => {
+        this.jobParts.update(list => list.filter(p => p.id !== jp.id));
+        this.partQtyEditControls.delete(jp.id);
+        this.snackbar.success(this.translate.instant('kanban.partRemoved'));
+        if (isBuildPart) this.refreshBuildQuantity();
+      });
     });
   }
 

@@ -680,7 +680,12 @@
       "operationsCount": "Ops. {{complete}}/{{total}}",
       "operationsInProgress": "▶ {{steps}}",
       "operationsRemaining": "faltan ~{{time}}"
-    }
+    },
+    "removePartConfirmTitle": "¿Quitar pieza?",
+    "removePartConfirmMessage": "¿Quitar {{partNumber}} de esta orden de trabajo?",
+    "removeBuildPartConfirmMessage": "{{partNumber}} es la pieza que fabrica esta orden de trabajo. Si la quita, la orden queda sin cantidad a fabricar. ¿Quitarla?",
+    "bulkMoveBillingReason": "Las etapas de facturación las fijan la facturación y los pagos; su rol no puede mover órdenes de trabajo allí.",
+    "bulkMoveBlockedReason": "Ninguna de las órdenes de trabajo seleccionadas puede moverse aquí: ya están allí, no pueden retroceder o saltarían una etapa obligatoria."
   },
   "jobDetailExtras": {
     "archive": "Archivar orden de trabajo",
@@ -3245,7 +3250,8 @@
     "runningStop": "Detener",
     "runningStopAria": "Detener el temporizador de {{job}}",
     "billable": "Facturable",
-    "nonBillable": "No facturable"
+    "nonBillable": "No facturable",
+    "durationRange": "Ingrese una duración entre 1 minuto y 24 horas."
   },
   "assets": {
     "title": "Activos",
@@ -8405,7 +8411,8 @@
       "daily": "Daily",
       "monthly": "Monthly",
       "weekly": "Weekly"
-    }
+    },
+    "noRunsInPeriod": "Sin corridas en el período"
   },
   "rfqPdf": {
     "download": "Descargar PDF",
@@ -11463,7 +11470,10 @@
     "rateSetFailed": "No se pudo fijar la tarifa.",
     "workLogged": "Registrado: ganó {{earnings}}.",
     "workLogFailed": "No se pudieron registrar las piezas (¿hay una tarifa vigente para esa fecha?).",
-    "deleteFailed": "No se pudo eliminar el registro."
+    "deleteFailed": "No se pudo eliminar el registro.",
+    "subtitle": "Pago por pieza: fije tarifas, registre piezas y revise el salario mínimo semanal.",
+    "deleteConfirmTitle": "¿Eliminar registro de pago?",
+    "deleteConfirmMessage": "¿Eliminar {{quantity}} piezas de {{part}} registradas para {{worker}} el {{date}} (ganó {{earnings}})? La revisión semanal de compensación cambiará."
   },
   "mobileReceive": {
     "backToScan": "Volver a escanear",
@@ -11791,7 +11801,8 @@
       "skip": "Omitir",
       "reopen": "Reabrir",
       "reset": "Restablecer",
-      "undo": "Deshacer"
+      "undo": "Deshacer",
+      "retry": "Reintentar"
     },
     "columns": {
       "operation": "Operación",
@@ -11829,14 +11840,18 @@
       "rework": "Piezas devueltas a retrabajo ahora",
       "addRework": "Registrar retrabajo",
       "reason": "Motivo",
-      "noReason": "-- Ninguno --"
+      "noReason": "-- Ninguno --",
+      "shortCloseTitle": "¿Marcar como terminada incompleta?",
+      "shortCloseMessage": "Solo se cuentan {{done}} buenas y {{scrap}} desechadas de {{quantity}}. ¿Marcar este paso como terminado de todos modos?",
+      "shortCloseConfirm": "Marcar terminada"
     },
     "messages": {
       "completed": "{{operation}} marcada como terminada",
       "skipped": "{{operation}} omitida",
       "reopened": "{{operation}} reabierta",
       "reset": "{{operation}} restablecida",
-      "recorded": "Avance registrado en {{operation}}"
+      "recorded": "Avance registrado en {{operation}}",
+      "saveFailed": "El avance de {{operation}} no se guardó. Revise la conexión e inténtelo de nuevo."
     }
   },
   "detailLoadError": {

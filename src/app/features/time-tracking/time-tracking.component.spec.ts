@@ -27,7 +27,8 @@ interface PageInternals {
   openStopTimer(entry?: TimeEntry | null): void;
   openStopTimerById(id: number): void;
   stopTimer(): void;
-  entryForm: { patchValue(value: Record<string, unknown>): void };
+  entryForm: { patchValue(value: Record<string, unknown>): void; invalid: boolean };
+  entryViolations: () => string[];
   dialogRef: { clearDraft(): void };
   openManualEntry(): void;
   saveEntry(): void;
@@ -151,5 +152,23 @@ describe('TimeTrackingComponent', () => {
     component.saveEntry();
 
     expect(service.createTimeEntry.mock.calls[0][0].isBillable).toBeUndefined();
+  });
+
+  it('refuses a manual entry whose total is zero or over a day', () => {
+    const { component, service } = setup([], of([]));
+    component.dialogRef = { clearDraft: vi.fn() };
+    component.openManualEntry();
+
+    component.entryForm.patchValue({ hours: 0, minutes: 0 });
+    expect(component.entryForm.invalid).toBe(true);
+    expect(component.entryViolations()).toContain('timeTracking.durationRange');
+
+    component.entryForm.patchValue({ hours: 24, minutes: 59 });
+    expect(component.entryForm.invalid).toBe(true);
+    component.saveEntry();
+    expect(service.createTimeEntry).not.toHaveBeenCalled();
+
+    component.entryForm.patchValue({ hours: 24, minutes: 0 });
+    expect(component.entryViolations()).not.toContain('timeTracking.durationRange');
   });
 });

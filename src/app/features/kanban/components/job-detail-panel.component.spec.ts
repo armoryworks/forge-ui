@@ -37,6 +37,9 @@ interface PanelInternals {
   isAdmin: () => boolean;
   canExplodeBom: () => boolean;
   canArchive: () => boolean;
+  canEditJob: () => boolean;
+  canRemovePart(jp: JobPart): boolean;
+  removePart(jp: JobPart): void;
   toggleSubtaskAdd(): void;
   toggleLinkAdd(): void;
   togglePartAdd(): void;
@@ -102,6 +105,7 @@ function setup(options: { admin?: boolean; confirm?: boolean; roles?: string[] }
     unarchiveJob: vi.fn(),
     getJobTimeEntries: vi.fn().mockReturnValue(of([])),
     moveJobStage: vi.fn().mockReturnValue(of(undefined)),
+    removeJobPart: vi.fn().mockReturnValue(of(undefined)),
   };
   const snackbar = { success: vi.fn(), error: vi.fn(), errorFrom: vi.fn() };
   const timeTracking = { stopTimer: vi.fn().mockReturnValue(of({})), startTimer: vi.fn() };
@@ -133,6 +137,36 @@ function setup(options: { admin?: boolean; confirm?: boolean; roles?: string[] }
 
 describe('JobDetailPanelComponent', () => {
   beforeEach(() => TestBed.resetTestingModule());
+
+  it('offers edit only to the roles that can save a work order', () => {
+    expect(setup({ roles: ['Manager'] }).component.canEditJob()).toBe(true);
+    expect(setup({ roles: ['ProductionWorker'] }).component.canEditJob()).toBe(false);
+  });
+
+  it('lets any role remove a supporting part but only an editor remove the build part', () => {
+    const worker = setup({ roles: ['ProductionWorker'] }).component;
+    worker.job.set(jobDetail({ partId: 9 }));
+    expect(worker.canRemovePart(jobPart({ partId: 9 }))).toBe(false);
+    expect(worker.canRemovePart(jobPart({ id: 6, partId: 11 }))).toBe(true);
+
+    const manager = setup({ roles: ['Manager'] }).component;
+    manager.job.set(jobDetail({ partId: 9 }));
+    expect(manager.canRemovePart(jobPart({ partId: 9 }))).toBe(true);
+  });
+
+  it('removes a part only after the confirm', () => {
+    const declined = setup({ confirm: false });
+    declined.component.jobParts.set([jobPart({ id: 6, partId: 11 })]);
+    declined.component.removePart(jobPart({ id: 6, partId: 11 }));
+    expect(declined.dialog.open).toHaveBeenCalled();
+    expect(declined.kanban.removeJobPart).not.toHaveBeenCalled();
+
+    const confirmed = setup({ confirm: true });
+    confirmed.component.jobParts.set([jobPart({ id: 6, partId: 11 })]);
+    confirmed.component.removePart(jobPart({ id: 6, partId: 11 }));
+    expect(confirmed.kanban.removeJobPart).toHaveBeenCalledWith(JOB_ID, 6);
+    expect(confirmed.component.jobParts()).toEqual([]);
+  });
 
   it('offers Explode BOM only to the roles the explode endpoint admits', () => {
     expect(setup({ roles: ['Admin'] }).component.canExplodeBom()).toBe(true);

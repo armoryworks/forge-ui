@@ -1,5 +1,10 @@
 @use 'styles/variables' as *;
 
+.piece-rates {
+  padding: $sp-md $sp-lg;
+  max-width: 1200px;
+}
+
 .piece-rates__section {
   margin: $sp-xl 0 $sp-md;
   font-size: $font-size-lg;

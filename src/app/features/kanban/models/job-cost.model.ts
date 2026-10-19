@@ -5,11 +5,11 @@ export interface JobCostSummary {
   materialEstimated: number;
   materialActual: number;
   materialVariance: number;
-  materialVariancePercent: number;
+  materialVariancePercent: number | null;
   laborEstimated: number;
   laborActual: number;
   laborVariance: number;
-  laborVariancePercent: number;
+  laborVariancePercent: number | null;
   burdenEstimated: number;
   burdenActual: number;
   burdenVariance: number;
@@ -19,9 +19,9 @@ export interface JobCostSummary {
   totalEstimated: number;
   totalActual: number;
   totalVariance: number;
-  totalVariancePercent: number;
+  totalVariancePercent: number | null;
   actualMargin: number;
-  actualMarginPercent: number;
+  actualMarginPercent: number | null;
 }
 
 export interface MaterialIssue {

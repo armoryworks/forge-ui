@@ -52,7 +52,7 @@
             <td class="cost-tab__num"><strong>{{ summary.totalActual | currency }}</strong></td>
             <td class="cost-tab__num" [class]="getVarianceClass(summary.totalVariance)">
               <strong>{{ summary.totalVariance | currency }}</strong>
-              <span class="cost-tab__pct">({{ summary.totalVariancePercent | number:'1.1-1' }}%)</span>
+              <span class="cost-tab__pct">({{ summary.totalVariancePercent === null ? '—' : (summary.totalVariancePercent | number:'1.1-1') + '%' }})</span>
             </td>
           </tr>
         </tbody>
@@ -67,7 +67,7 @@
         <div class="cost-tab__margin-item">
           <span class="cost-tab__margin-label">Actual Margin</span>
           <span class="cost-tab__margin-value" [class]="summary.actualMargin >= 0 ? 'cost-tab__margin-value--positive' : 'cost-tab__margin-value--negative'">
-            {{ summary.actualMargin | currency }} ({{ summary.actualMarginPercent | number:'1.1-1' }}%)
+            {{ summary.actualMargin | currency }} ({{ summary.actualMarginPercent === null ? '—' : (summary.actualMarginPercent | number:'1.1-1') + '%' }})
           </span>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
+import { AuthSrcDirective } from '../../../shared/directives/auth-src.directive';
 import { EntityLinkComponent } from '../../../shared/components/entity-link/entity-link.component';
 import { PriorityIndicatorComponent } from '../../../shared/components/priority-indicator/priority-indicator.component';
 import { DurationMsPipe } from '../../../shared/pipes/duration-ms.pipe';
@@ -14,7 +15,7 @@ import { PRIORITY_COLORS } from '../models/priority-colors.const';
 @Component({
   selector: 'app-job-card',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, AvatarComponent, EntityLinkComponent, PriorityIndicatorComponent, MatTooltipModule, TranslatePipe, DurationMsPipe],
+  imports: [DatePipe, DecimalPipe, AuthSrcDirective, AvatarComponent, EntityLinkComponent, PriorityIndicatorComponent, MatTooltipModule, TranslatePipe, DurationMsPipe],
   templateUrl: './job-card.component.html',
   styleUrl: './job-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -20,6 +20,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
+import { AuthSrcDirective } from '../../../../shared/directives/auth-src.directive';
 import { FileAttachment } from '../../../../shared/models/file.model';
 import { ActivityItem } from '../../../../shared/models/activity.model';
 import { environment } from '../../../../../environments/environment';
@@ -43,6 +44,7 @@ export interface OperationDialogData {
   selector: 'app-operation-dialog',
   standalone: true,
   imports: [
+    AuthSrcDirective,
     ReactiveFormsModule,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     ToggleComponent, EntityPickerComponent, FileUploadZoneComponent,

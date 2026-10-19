@@ -680,7 +680,12 @@
       "operationsCount": "Ops {{complete}}/{{total}}",
       "operationsInProgress": "▶ {{steps}}",
       "operationsRemaining": "~{{time}} left"
-    }
+    },
+    "removePartConfirmTitle": "Remove part?",
+    "removePartConfirmMessage": "Remove {{partNumber}} from this work order?",
+    "removeBuildPartConfirmMessage": "{{partNumber}} is the part this work order builds. Removing it leaves the work order with no quantity to make. Remove it?",
+    "bulkMoveBillingReason": "Billing stages are set by invoicing and payments; your role cannot move work orders there.",
+    "bulkMoveBlockedReason": "None of the selected work orders can move here: they are already there, cannot move back, or would skip a required stage."
   },
   "jobDetailExtras": {
     "archive": "Archive work order",
@@ -3245,7 +3250,8 @@
     "runningStop": "Stop",
     "runningStopAria": "Stop the timer on {{job}}",
     "billable": "Billable",
-    "nonBillable": "Non-billable"
+    "nonBillable": "Non-billable",
+    "durationRange": "Enter a duration between 1 minute and 24 hours."
   },
   "assets": {
     "title": "Assets",
@@ -8412,7 +8418,8 @@
     "min": "min",
     "noWorkCenters": "No work centers",
     "trendChartLabel": "OEE Trend",
-    "worldClassBadge": "World-Class"
+    "worldClassBadge": "World-Class",
+    "noRunsInPeriod": "No runs in period"
   },
   "rfqPdf": {
     "download": "Download PDF",
@@ -11463,7 +11470,10 @@
     "rateSetFailed": "Could not set the rate.",
     "workLogged": "Logged — earned {{earnings}}.",
     "workLogFailed": "Could not log pieces (is a rate in force for that date?).",
-    "deleteFailed": "Could not delete the entry."
+    "deleteFailed": "Could not delete the entry.",
+    "subtitle": "Pay per piece: set rates, log pieces and check the weekly minimum wage.",
+    "deleteConfirmTitle": "Delete pay record?",
+    "deleteConfirmMessage": "Delete {{quantity}} pieces of {{part}} logged for {{worker}} on {{date}} (earned {{earnings}})? The weekly make-up check will change."
   },
   "mobileReceive": {
     "backToScan": "Back to scan",
@@ -11791,7 +11801,8 @@
       "skip": "Skip",
       "reopen": "Reopen",
       "reset": "Reset",
-      "undo": "Undo"
+      "undo": "Undo",
+      "retry": "Retry"
     },
     "columns": {
       "operation": "Operation",
@@ -11829,14 +11840,18 @@
       "rework": "Pieces sent back for rework now",
       "addRework": "Record rework",
       "reason": "Reason",
-      "noReason": "-- None --"
+      "noReason": "-- None --",
+      "shortCloseTitle": "Mark done short?",
+      "shortCloseMessage": "Only {{done}} good and {{scrap}} scrapped of {{quantity}} are counted. Mark this step done anyway?",
+      "shortCloseConfirm": "Mark done"
     },
     "messages": {
       "completed": "{{operation}} marked done",
       "skipped": "{{operation}} skipped",
       "reopened": "{{operation}} reopened",
       "reset": "{{operation}} reset",
-      "recorded": "Progress recorded on {{operation}}"
+      "recorded": "Progress recorded on {{operation}}",
+      "saveFailed": "Progress on {{operation}} was not saved. Check the connection and try again."
     }
   },
   "detailLoadError": {

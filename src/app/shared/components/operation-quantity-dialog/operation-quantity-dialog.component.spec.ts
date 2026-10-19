@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
@@ -23,18 +23,20 @@ interface DialogInternals {
   complete(): void;
 }
 
-function setup(data: OperationQuantityDialogData) {
+function setup(data: OperationQuantityDialogData, confirm = true) {
   const close = vi.fn();
+  const confirmDialog = { open: vi.fn(() => ({ afterClosed: () => of(confirm) })) };
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     providers: [
       provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
       { provide: MAT_DIALOG_DATA, useValue: data },
       { provide: MatDialogRef, useValue: { close } },
+      { provide: MatDialog, useValue: confirmDialog },
     ],
   });
   const component = TestBed.runInInjectionContext(() => new OperationQuantityDialogComponent()) as unknown as DialogInternals;
-  return { component, close };
+  return { component, close, confirmDialog };
 }
 
 describe('OperationQuantityDialogComponent', () => {
@@ -99,5 +101,24 @@ describe('OperationQuantityDialogComponent', () => {
     expect(close).toHaveBeenCalledWith({
       completedQuantity: 17, scrapQuantity: 0, reworkQuantity: 0, reasonCode: null, complete: false,
     });
+  });
+
+  it('asks before closing a step short and closes it only on yes', () => {
+    const declined = setup({ title: 'Mill', jobQuantity: 1, completedQuantity: 0, scrapQuantity: 0, reasons: [] }, false);
+    declined.component.form.patchValue({ quantity: 0 });
+    declined.component.complete();
+    expect(declined.confirmDialog.open).toHaveBeenCalled();
+    expect(declined.close).not.toHaveBeenCalled();
+
+    const confirmed = setup({ title: 'Mill', jobQuantity: 1, completedQuantity: 0, scrapQuantity: 0, reasons: [] }, true);
+    confirmed.component.form.patchValue({ quantity: 0 });
+    confirmed.component.complete();
+    expect(confirmed.close).toHaveBeenCalledWith({ completedQuantity: 0, scrapQuantity: 0, reworkQuantity: 0, reasonCode: null, complete: true });
+  });
+
+  it('closes a fully counted step without asking', () => {
+    const { component, confirmDialog } = setup({ title: 'Mill', jobQuantity: 4, completedQuantity: 0, scrapQuantity: 0, reasons: [] });
+    component.complete();
+    expect(confirmDialog.open).not.toHaveBeenCalled();
   });
 });
