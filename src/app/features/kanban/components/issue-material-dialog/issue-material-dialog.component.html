@@ -1,0 +1,22 @@
+<app-dialog [title]="'jobCostTab.issueMaterialTitle' | translate" width="520px" (closed)="matDialogRef.close()">
+  <div [formGroup]="formGroup">
+    @if (loaded() && materials().length === 0) {
+      <p class="text-muted" data-testid="issue-material-none">{{ 'jobCostTab.noIssuableMaterials' | translate }}</p>
+    }
+    <app-select [label]="'jobCostTab.part' | translate" formControlName="partId" [options]="partOptions()" [required]="true" data-testid="issue-material-part" />
+    <app-select [label]="'jobCostTab.bin' | translate" formControlName="binContentId" [options]="binOptions()" [required]="true" data-testid="issue-material-bin" />
+    @if (formGroup.controls.partId.value !== null && bins().length > 0 && issuableBins().length === 0) {
+      <p class="text-muted" data-testid="issue-material-no-stock">{{ 'jobCostTab.noIssuableStock' | translate }}</p>
+    }
+    <app-input [label]="'jobCostTab.quantity' | translate" formControlName="quantity" type="number" [min]="0" [required]="true" data-testid="issue-material-quantity" />
+  </div>
+
+  <div dialog-footer>
+    <button type="button" class="action-btn" (click)="matDialogRef.close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button type="button" class="action-btn action-btn--primary" data-testid="issue-material-save"
+        [disabled]="formGroup.invalid || saving()"
+        (click)="save()">{{ 'jobCostTab.issue' | translate }}</button>
+    </app-validation-button>
+  </div>
+</app-dialog>

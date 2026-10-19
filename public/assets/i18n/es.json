@@ -11826,7 +11826,20 @@
   "jobCostTab": {
     "noCostData": "No hay datos de costo para este trabajo.",
     "summaryAria": "Resumen de costos del trabajo",
-    "noMaterials": "No se han emitido materiales a este trabajo."
+    "noMaterials": "No se han emitido materiales a este trabajo.",
+    "issueMaterial": "Emitir material",
+    "issueMaterialTitle": "Emitir material a este trabajo",
+    "part": "Parte",
+    "bin": "Ubicación y lote",
+    "quantity": "Cantidad",
+    "issue": "Emitir",
+    "issued": "Se emitieron {{quantity}} de {{part}}",
+    "partOption": "{{part}} (requerido {{required}}, emitido {{issued}})",
+    "alternateOption": "{{part}} - alternativa de {{primary}} (requerido {{required}}, emitido {{issued}})",
+    "binOption": "{{location}} - lote {{lot}} - {{available}} disponibles",
+    "binOptionNoLot": "{{location}} - {{available}} disponibles",
+    "noIssuableMaterials": "La parte de este trabajo no tiene componentes de BOM ni alternativas aprobadas para emitir.",
+    "noIssuableStock": "No se puede emitir existencia de esta parte: está agotada o en retención de calidad."
   },
   "serials": {
     "fieldJob": "Trabajo (opcional)",

@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal } from '@angular/core';
 import { CurrencyPipe, DecimalPipe, PercentPipe } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
@@ -8,9 +10,14 @@ import { DataTableComponent } from '../../../shared/components/data-table/data-t
 import { ColumnCellDirective } from '../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../shared/models/column-def.model';
 import { ToolbarComponent } from '../../../shared/components/toolbar/toolbar.component';
+import { CapabilityService } from '../../../shared/services/capability.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { JobCostService } from '../services/job-cost.service';
+import { IssueMaterialDialogData } from '../models/issue-material-dialog-data.model';
 import { JobCostSummary, MaterialIssue } from '../models/job-cost.model';
+import { IssueMaterialDialogComponent } from './issue-material-dialog/issue-material-dialog.component';
+
+const MATERIAL_ISSUE_CAPABILITY = 'CAP-MFG-MATL-ISSUE';
 
 @Component({
   selector: 'app-job-cost-tab',
@@ -35,8 +42,13 @@ export class JobCostTabComponent {
 
   private readonly costService = inject(JobCostService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly capabilities = inject(CapabilityService);
+  private readonly dialog = inject(MatDialog);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly loading = signal(false);
+  readonly returningId = signal<number | null>(null);
+  readonly canIssue = computed(() => this.capabilities.isEnabled(MATERIAL_ISSUE_CAPABILITY));
   readonly costSummary = signal<JobCostSummary | null>(null);
   readonly materialIssues = signal<MaterialIssue[]>([]);
 
@@ -78,13 +90,31 @@ export class JobCostTabComponent {
     });
   }
 
+  canReturn(issue: MaterialIssue): boolean {
+    return issue.issueType === 'Issue' && !issue.isReturned;
+  }
+
   returnMaterial(issue: MaterialIssue): void {
+    if (!this.canReturn(issue) || this.returningId() !== null) return;
+    this.returningId.set(issue.id);
     this.costService.returnMaterial(issue.jobId, issue.id).subscribe({
       next: () => {
+        this.returningId.set(null);
         this.snackbar.success('Material returned to stock');
         this.loadData(this.jobId());
       },
+      error: () => this.returningId.set(null),
     });
+  }
+
+  openIssueDialog(): void {
+    const data: IssueMaterialDialogData = { jobId: this.jobId() };
+    this.dialog.open(IssueMaterialDialogComponent, { data, width: '520px' })
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(issue => {
+        if (issue) this.loadData(this.jobId());
+      });
   }
 
   recalculateCosts(): void {

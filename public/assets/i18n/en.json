@@ -11826,7 +11826,20 @@
   "jobCostTab": {
     "noCostData": "No cost data available for this job.",
     "summaryAria": "Job cost summary",
-    "noMaterials": "No materials issued to this job."
+    "noMaterials": "No materials issued to this job.",
+    "issueMaterial": "Issue material",
+    "issueMaterialTitle": "Issue material to this job",
+    "part": "Part",
+    "bin": "Bin and lot",
+    "quantity": "Quantity",
+    "issue": "Issue",
+    "issued": "Issued {{quantity}} of {{part}}",
+    "partOption": "{{part}} (need {{required}}, issued {{issued}})",
+    "alternateOption": "{{part}} - alternate for {{primary}} (need {{required}}, issued {{issued}})",
+    "binOption": "{{location}} - lot {{lot}} - {{available}} available",
+    "binOptionNoLot": "{{location}} - {{available}} available",
+    "noIssuableMaterials": "This job's part has no BOM components or approved alternates to issue.",
+    "noIssuableStock": "No stock of this part can be issued: it is out of stock or on quality hold."
   },
   "serials": {
     "fieldJob": "Job (optional)",

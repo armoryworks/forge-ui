@@ -104,6 +104,11 @@
     justify-content: space-between;
   }
 
+  &__section-actions {
+    display: flex;
+    gap: $sp-sm;
+  }
+
   &__section-title {
     font-size: $font-size-xxs;
     text-transform: uppercase;
