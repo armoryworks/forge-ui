@@ -27,6 +27,7 @@ export interface PortalSalesOrder {
   orderDate: string;
   requestedDate: string | null;
   total: number;
+  currencyCode: string | null;
 }
 
 export interface PortalQuote {
@@ -37,6 +38,7 @@ export interface PortalQuote {
   quoteDate: string;
   expiresAt: string | null;
   total: number;
+  currencyCode: string | null;
 }
 
 export interface PortalInvoice {
@@ -48,6 +50,7 @@ export interface PortalInvoice {
   total: number;
   amountPaid: number;
   balance: number;
+  currencyCode: string | null;
 }
 
 export interface PortalShipment {

@@ -1,8 +1,10 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { HttpClient, HttpContext } from '@angular/common/http';
+import { Injectable, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
+import { SILENT_HTTP_ERRORS } from '../../../shared/interceptors/silent-http-errors.token';
 import {
   PortalIdentity,
   PortalInvoice,
@@ -27,25 +29,39 @@ const IDENTITY_KEY = 'portal-identity';
 @Injectable({ providedIn: 'root' })
 export class PortalService {
   private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
   private readonly base = `${environment.apiUrl}/portal`;
 
   private readonly _identity = signal<PortalIdentity | null>(this.loadStoredIdentity());
   readonly identity = this._identity.asReadonly();
-  readonly isAuthenticated = computed(() => this._identity() !== null && this.getToken() !== null);
+  isAuthenticated(): boolean {
+    return this._identity() !== null && this.getToken() !== null;
+  }
 
   getToken(): string | null {
     const token = localStorage.getItem(TOKEN_KEY);
     if (!token) return null;
     const expiresRaw = localStorage.getItem(EXPIRES_KEY);
     if (expiresRaw && new Date(expiresRaw).getTime() < Date.now()) {
-      this.clearSession();
       return null;
     }
     return token;
   }
 
+  hasLapsedSession(): boolean {
+    const stored = this._identity() !== null || localStorage.getItem(TOKEN_KEY) !== null;
+    return stored && this.getToken() === null;
+  }
+
+  endSession(): void {
+    this.clearSession();
+    this.router.navigate(['/portal/login'], { queryParams: { reason: 'session_expired' } });
+  }
+
   requestMagicLink(email: string): Observable<RequestMagicLinkResult> {
-    return this.http.post<RequestMagicLinkResult>(`${this.base}/auth/request-link`, { email });
+    return this.http.post<RequestMagicLinkResult>(`${this.base}/auth/request-link`, { email }, {
+      context: new HttpContext().set(SILENT_HTTP_ERRORS, true),
+    });
   }
 
   exchangeMagicLink(token: string): Observable<PortalSession> {

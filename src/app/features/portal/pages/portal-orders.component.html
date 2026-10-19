@@ -4,7 +4,16 @@
     <p class="portal-list__subtitle">{{ 'portal.orders.subtitle' | translate }}</p>
   </header>
 
-  @if (!loading() && orders().length === 0) {
+  @if (loadError()) {
+    <div class="portal-list__error" role="alert">
+      <span class="material-icons-outlined" aria-hidden="true">error_outline</span>
+      <span class="portal-list__error-text">{{ 'portal.list.loadError' | translate }}</span>
+      <button type="button" class="action-btn action-btn--sm" (click)="load()" data-testid="portal-orders-retry">
+        <span class="material-icons-outlined" aria-hidden="true">refresh</span>
+        {{ 'portal.list.retry' | translate }}
+      </button>
+    </div>
+  } @else if (!loading() && orders().length === 0) {
     <app-empty-state icon="receipt_long" [message]="'portal.orders.empty' | translate" />
   } @else {
     <div class="portal-list__table-wrap">
@@ -24,8 +33,8 @@
               <td>{{ o.orderNumber }}</td>
               <td>{{ o.orderDate | date:'MM/dd/yyyy' }}</td>
               <td>{{ o.requestedDate ? (o.requestedDate | dateOnly) : '—' }}</td>
-              <td><span [class]="statusClass(o.status)">{{ o.status }}</span></td>
-              <td class="portal-list__num">{{ o.total | number:'1.2-2' }}</td>
+              <td><span [class]="statusChip(o.status)">{{ statusLabelKey(o.status) | translate }}</span></td>
+              <td class="portal-list__num"><app-currency-display [value]="o.total" [currency]="o.currencyCode" /></td>
             </tr>
           }
         </tbody>

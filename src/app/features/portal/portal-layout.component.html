@@ -31,13 +31,13 @@
           <span class="portal-shell__user-customer">{{ me.customerName }}</span>
         </div>
         <button type="button" class="portal-shell__logout" (click)="logout()" [attr.aria-label]="'portal.logout' | translate">
-          <span class="material-icons-outlined">logout</span>
+          <span class="material-icons-outlined" aria-hidden="true">logout</span>
         </button>
       </div>
     }
   </header>
 
-  <main class="portal-shell__main">
+  <div class="portal-shell__main">
     <router-outlet />
-  </main>
+  </div>
 </div>

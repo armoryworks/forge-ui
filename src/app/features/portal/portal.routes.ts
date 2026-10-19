@@ -37,6 +37,7 @@ export const PORTAL_ROUTES: Routes = [
         path: 'shipments',
         loadComponent: () => import('./pages/portal-shipments.component').then(m => m.PortalShipmentsComponent),
       },
+      { path: '**', redirectTo: 'dashboard' },
     ],
   },
 ];

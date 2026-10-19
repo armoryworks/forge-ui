@@ -8140,7 +8140,11 @@
       "sentTitle": "Check your inbox",
       "sentBody": "If we have your email on file, a sign-in link is on its way. The link expires in 15 minutes — feel free to close this tab.",
       "devLink": "Dev mode — SMTP isn't configured. Use the link directly:",
-      "openLink": "Open sign-in link"
+      "openLink": "Open sign-in link",
+      "sessionExpired": "Your session has ended. Please sign in again.",
+      "sendAgain": "Send again",
+      "sendAgainIn": "Send again in {{seconds}}s",
+      "useDifferentEmail": "Use a different email"
     },
     "callback": {
       "signingIn": "Signing you in",
@@ -8181,7 +8185,15 @@
       "colExpires": "Expires",
       "colStatus": "Status",
       "colTotal": "Total",
-      "colActions": "Actions"
+      "colActions": "Actions",
+      "typeEstimate": "Estimate",
+      "typeQuote": "Quote",
+      "statusConvertedToQuote": "Converted to Quote",
+      "acceptTitle": "Accept this quote?",
+      "acceptMessage": "Accept quote {{number}}? Your supplier will be told you accepted it.",
+      "declineTitle": "Decline this quote?",
+      "declineMessage": "Decline quote {{number}}? You can't undo this from the portal.",
+      "respondFailed": "We couldn't record your response to quote {{number}}. Please try again."
     },
     "invoices": {
       "title": "Your Invoices",
@@ -8205,6 +8217,10 @@
       "colDelivered": "Delivered",
       "colCarrier": "Carrier",
       "colTracking": "Tracking #"
+    },
+    "list": {
+      "loadError": "We couldn't load this list. Check your connection and try again.",
+      "retry": "Retry"
     }
   },
   "scheduling": {

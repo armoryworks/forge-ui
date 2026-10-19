@@ -4,6 +4,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
+import { portalStatusChip, portalStatusLabelKey } from '../portal-status';
 import { PortalShipment } from '../models/portal.model';
 import { PortalService } from '../services/portal.service';
 
@@ -20,21 +21,26 @@ export class PortalShipmentsComponent implements OnInit {
 
   protected readonly shipments = signal<PortalShipment[]>([]);
   protected readonly loading = signal(true);
+  protected readonly loadError = signal(false);
 
   ngOnInit(): void {
+    this.load();
+  }
+
+  protected load(): void {
+    this.loading.set(true);
+    this.loadError.set(false);
     this.portal.getShipments().subscribe({
       next: (data) => { this.shipments.set(data); this.loading.set(false); },
-      error: () => this.loading.set(false),
+      error: () => { this.loading.set(false); this.loadError.set(true); },
     });
   }
 
-  protected statusClass(status: string): string {
-    switch (status) {
-      case 'Pending': return 'chip chip--muted';
-      case 'Shipped': case 'InTransit': return 'chip chip--info';
-      case 'Delivered': return 'chip chip--success';
-      case 'Lost': case 'Damaged': return 'chip chip--error';
-      default: return 'chip';
-    }
+  protected statusChip(status: string): string {
+    return portalStatusChip('shipment', status);
+  }
+
+  protected statusLabelKey(status: string): string {
+    return portalStatusLabelKey('shipment', status);
   }
 }

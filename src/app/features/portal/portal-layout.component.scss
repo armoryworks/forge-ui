@@ -10,13 +10,20 @@
 
   &__header {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: $sp-xl;
-    padding: 0 $sp-xl;
-    height: 56px;
+    gap: $sp-sm $sp-xl;
+    padding: $sp-sm $sp-xl;
+    min-height: 56px;
     background: var(--header);
     color: white;
     flex-shrink: 0;
+    box-sizing: border-box;
+
+    @include mobile {
+      padding: $sp-sm $sp-md;
+      gap: $sp-sm $sp-md;
+    }
   }
 
   &__brand {
@@ -44,8 +51,16 @@
     display: flex;
     align-items: center;
     gap: $sp-md;
-    flex: 1;
-    margin-left: $sp-xl;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    @include custom-scrollbar(4px);
+
+    @include mobile {
+      order: 3;
+      flex-basis: 100%;
+      gap: $sp-xs;
+    }
   }
 
   &__tab {
@@ -54,6 +69,7 @@
     text-decoration: none;
     font-size: $font-size-sm;
     border-bottom: $border-width-accent solid transparent;
+    white-space: nowrap;
     transition: color $transition-fast, border-color $transition-fast;
 
     &:hover {
@@ -71,6 +87,11 @@
     align-items: center;
     gap: $sp-sm;
     flex-shrink: 0;
+    min-width: 0;
+
+    @include mobile {
+      margin-left: auto;
+    }
   }
 
   &__avatar {
@@ -87,6 +108,11 @@
     display: flex;
     flex-direction: column;
     line-height: 1.2;
+    min-width: 0;
+
+    @include mobile {
+      display: none;
+    }
   }
 
   &__user-name {
@@ -123,5 +149,9 @@
     width: 100%;
     margin: 0 auto;
     box-sizing: border-box;
+
+    @include mobile {
+      padding: $sp-md;
+    }
   }
 }

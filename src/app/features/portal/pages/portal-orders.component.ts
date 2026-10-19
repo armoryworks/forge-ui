@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
+import { CurrencyDisplayComponent } from '../../../shared/components/currency-display/currency-display.component';
+import { portalStatusChip, portalStatusLabelKey } from '../portal-status';
 import { PortalSalesOrder } from '../models/portal.model';
 import { PortalService } from '../services/portal.service';
 import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
@@ -11,7 +13,7 @@ import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
 @Component({
   selector: 'app-portal-orders',
   standalone: true,
-  imports: [DateOnlyPipe, DatePipe, DecimalPipe, TranslatePipe, LoadingBlockDirective, EmptyStateComponent],
+  imports: [DateOnlyPipe, DatePipe, TranslatePipe, LoadingBlockDirective, EmptyStateComponent, CurrencyDisplayComponent],
   templateUrl: './portal-orders.component.html',
   styleUrl: './portal-list.shared.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -21,22 +23,26 @@ export class PortalOrdersComponent implements OnInit {
 
   protected readonly orders = signal<PortalSalesOrder[]>([]);
   protected readonly loading = signal(true);
+  protected readonly loadError = signal(false);
 
   ngOnInit(): void {
+    this.load();
+  }
+
+  protected load(): void {
+    this.loading.set(true);
+    this.loadError.set(false);
     this.portal.getSalesOrders().subscribe({
       next: (data) => { this.orders.set(data); this.loading.set(false); },
-      error: () => this.loading.set(false),
+      error: () => { this.loading.set(false); this.loadError.set(true); },
     });
   }
 
-  protected statusClass(status: string): string {
-    switch (status) {
-      case 'Draft': return 'chip chip--muted';
-      case 'Confirmed': case 'InProduction': return 'chip chip--info';
-      case 'Shipped': case 'PartiallyShipped': return 'chip chip--warning';
-      case 'Completed': return 'chip chip--success';
-      case 'Cancelled': return 'chip chip--error';
-      default: return 'chip';
-    }
+  protected statusChip(status: string): string {
+    return portalStatusChip('order', status);
+  }
+
+  protected statusLabelKey(status: string): string {
+    return portalStatusLabelKey('order', status);
   }
 }

@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
+import { CurrencyDisplayComponent } from '../../../shared/components/currency-display/currency-display.component';
+import { portalStatusChip, portalStatusLabelKey } from '../portal-status';
 import { PortalInvoice } from '../models/portal.model';
 import { PortalService } from '../services/portal.service';
 import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
@@ -11,7 +12,7 @@ import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
 @Component({
   selector: 'app-portal-invoices',
   standalone: true,
-  imports: [DateOnlyPipe, DecimalPipe, TranslatePipe, LoadingBlockDirective, EmptyStateComponent],
+  imports: [DateOnlyPipe, TranslatePipe, LoadingBlockDirective, EmptyStateComponent, CurrencyDisplayComponent],
   templateUrl: './portal-invoices.component.html',
   styleUrl: './portal-list.shared.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -21,37 +22,26 @@ export class PortalInvoicesComponent implements OnInit {
 
   protected readonly invoices = signal<PortalInvoice[]>([]);
   protected readonly loading = signal(true);
-  /** True when the install has an external accounting provider connected,
-   *  in which case the API returns an empty list (we suppress the
-   *  "no invoices yet" empty state and show a clearer message). */
-  protected readonly accountingIntegrated = signal(false);
+  protected readonly loadError = signal(false);
 
   ngOnInit(): void {
-    this.portal.getDashboard().subscribe(summary => {
-      // Heuristic: in integrated mode the dashboard's open-invoice count
-      // is hard-zero (the list endpoint short-circuits the same way).
-      // We surface a different empty-state message in that case.
-      if (summary.openInvoiceCount === 0) {
-        // Not conclusive yet — could just be no open invoices in standalone
-        // mode. Defer to the list response.
-      }
-    });
+    this.load();
+  }
 
+  protected load(): void {
+    this.loading.set(true);
+    this.loadError.set(false);
     this.portal.getInvoices().subscribe({
       next: (data) => { this.invoices.set(data); this.loading.set(false); },
-      error: () => this.loading.set(false),
+      error: () => { this.loading.set(false); this.loadError.set(true); },
     });
   }
 
-  protected statusClass(status: string): string {
-    switch (status) {
-      case 'Draft': return 'chip chip--muted';
-      case 'Sent': return 'chip chip--info';
-      case 'PartiallyPaid': return 'chip chip--warning';
-      case 'Paid': return 'chip chip--success';
-      case 'Overdue': return 'chip chip--error';
-      case 'Void': return 'chip chip--muted';
-      default: return 'chip';
-    }
+  protected statusChip(status: string): string {
+    return portalStatusChip('invoice', status);
+  }
+
+  protected statusLabelKey(status: string): string {
+    return portalStatusLabelKey('invoice', status);
   }
 }

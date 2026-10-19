@@ -8133,7 +8133,11 @@
       "sentTitle": "Revisa tu bandeja de entrada",
       "sentBody": "Si tenemos tu correo registrado, el enlace de inicio está en camino. El enlace expira en 15 minutos — puedes cerrar esta pestaña.",
       "devLink": "Modo dev — SMTP no está configurado. Usa el enlace directamente:",
-      "openLink": "Abrir enlace de inicio"
+      "openLink": "Abrir enlace de inicio",
+      "sessionExpired": "Tu sesión ha terminado. Vuelve a iniciar sesión.",
+      "sendAgain": "Enviar de nuevo",
+      "sendAgainIn": "Enviar de nuevo en {{seconds}} s",
+      "useDifferentEmail": "Usar otro correo electrónico"
     },
     "callback": {
       "signingIn": "Iniciando sesión",
@@ -8174,7 +8178,15 @@
       "colExpires": "Expira",
       "colStatus": "Estado",
       "colTotal": "Total",
-      "colActions": "Acciones"
+      "colActions": "Acciones",
+      "typeEstimate": "Estimación",
+      "typeQuote": "Cotización",
+      "statusConvertedToQuote": "Convertida en cotización",
+      "acceptTitle": "¿Aceptar esta cotización?",
+      "acceptMessage": "¿Aceptar la cotización {{number}}? Se le avisará a tu proveedor que la aceptaste.",
+      "declineTitle": "¿Rechazar esta cotización?",
+      "declineMessage": "¿Rechazar la cotización {{number}}? No podrás deshacerlo desde el portal.",
+      "respondFailed": "No pudimos registrar tu respuesta a la cotización {{number}}. Inténtalo de nuevo."
     },
     "invoices": {
       "title": "Tus Facturas",
@@ -8198,6 +8210,10 @@
       "colDelivered": "Entregado",
       "colCarrier": "Transportista",
       "colTracking": "Rastreo #"
+    },
+    "list": {
+      "loadError": "No pudimos cargar esta lista. Revisa tu conexión e inténtalo de nuevo.",
+      "retry": "Reintentar"
     }
   },
   "scheduling": {
