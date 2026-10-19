@@ -26,6 +26,7 @@ import { CapDirective } from '../../../shared/directives/cap.directive';
 import { FormValidationService } from '../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { CapabilityService } from '../../../shared/services/capability.service';
+import { AuthService } from '../../../shared/services/auth.service';
 import { ColumnDef } from '../../../shared/models/column-def.model';
 
 type StockVerb = 'receive' | 'use' | 'count';
@@ -62,6 +63,7 @@ export class InventoryHomeComponent {
   private readonly router = inject(Router);
   private readonly inventory = inject(InventoryService);
   private readonly capabilities = inject(CapabilityService);
+  private readonly auth = inject(AuthService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
 
@@ -72,6 +74,8 @@ export class InventoryHomeComponent {
   );
 
   protected readonly locationsEnabled = computed(() => this.capabilities.isEnabled('CAP-INV-MULTILOC'));
+  protected readonly canCount = computed(() =>
+    this.auth.hasAnyRole(['Admin', 'Manager']) && this.capabilities.isEnabled('CAP-INV-ADJUST'));
 
   // ── Data ──
   protected readonly parts = signal<InventoryPartSummary[]>([]);
@@ -106,9 +110,11 @@ export class InventoryHomeComponent {
     const actions: QuickAction[] = [
       { id: 'receive', label: this.translate.instant('inventory.home.verbs.receive'), icon: 'add_box', color: 'var(--success)' },
       { id: 'use', label: this.translate.instant('inventory.home.verbs.use'), icon: 'remove_circle_outline', color: 'var(--warning)' },
-      { id: 'count', label: this.translate.instant('inventory.home.verbs.count'), icon: 'fact_check', color: 'var(--primary)' },
-      { id: 'find', label: this.translate.instant('inventory.home.verbs.find'), icon: 'search', color: 'var(--info)' },
     ];
+    if (this.canCount()) {
+      actions.push({ id: 'count', label: this.translate.instant('inventory.home.verbs.count'), icon: 'fact_check', color: 'var(--primary)' });
+    }
+    actions.push({ id: 'find', label: this.translate.instant('inventory.home.verbs.find'), icon: 'search', color: 'var(--info)' });
     return actions;
   });
 
@@ -166,6 +172,7 @@ export class InventoryHomeComponent {
   }
 
   protected openVerb(mode: StockVerb, part?: InventoryPartSummary): void {
+    if (mode === 'count' && !this.canCount()) return;
     this.verbForm.reset({ partId: part?.partId ?? null, quantity: null, locationId: null, reason: '', notes: '', lotNumber: '' });
     this.verbDialog.set({ mode, partLabel: part?.partNumber });
     if (this.locationsEnabled() && this.locationOptions().length === 0) {
