@@ -166,6 +166,13 @@
       "primaryColorDesc": "Main theme color, as a hex code such as #0d9488",
       "accentColor": "Accent brand color",
       "accentColorDesc": "Accent theme color, as a hex code such as #f59e0b"
+    },
+    "onboarding": {
+      "title": "Welcome — let's set up Forge for your business.",
+      "body": "Run discovery to get a tailored preset, browse curated presets, or skip and configure capabilities manually.",
+      "runDiscovery": "Run Discovery",
+      "browsePresets": "Browse Presets",
+      "dismiss": "Dismiss onboarding banner"
     }
   },
   "adminGroups": {
@@ -4600,7 +4607,8 @@
       "mockInProd": "MockIntegrations is ON in Production — every external integration is returning canned data. Set MockIntegrations=false and configure real providers before serving real users.",
       "gapSummary": "These capabilities are on but their integration is not configured. Configure each one, or turn the capability off.",
       "setupRequired": "Setup required"
-    }
+    },
+    "lead": "Services <strong>Forge connects to</strong> — accounting, shipping carriers, and other external APIs."
   },
   "complianceTemplates": {
     "templates": "compliance templates",
@@ -10976,7 +10984,7 @@
     }
   },
   "costing": {
-    "title": "Costing (Tier 3)",
+    "title": "Costing",
     "tabs": {
       "periods": "Periods",
       "costCenters": "Cost Centers",

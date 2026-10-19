@@ -1,7 +1,5 @@
 <div class="integrations-tabs__body">
-  <p class="integrations-tabs__lead">
-    Services <strong>forge connects to</strong> — accounting, shipping carriers, and other external APIs.
-  </p>
+  <p class="integrations-tabs__lead" [innerHTML]="'integrations.lead' | translate"></p>
 
   @if (showReadinessBanner()) {
     <div class="readiness-banner" role="status">

@@ -75,6 +75,7 @@ import { CompanyLocationDialogComponent } from './components/company-location-di
 import { AuthService } from '../../shared/services/auth.service';
 import { ReferenceDataService } from '../../shared/services/reference-data.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
+import { NavTreeService } from '../../shared/services/nav-tree.service';
 import { CompanyLocation, CompanyProfile } from './models/company-location.model';
 
 @Component({
@@ -109,6 +110,7 @@ export class AdminComponent implements OnInit {
   private readonly adminSettings = inject(AdminSettingsService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
+  private readonly navTree = inject(NavTreeService);
 
   private static readonly VALID_TABS = new Set(['overview', 'users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'role-templates', 'compliance', 'sales-tax', 'audit-log', 'time-corrections', 'events', 'announcements', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'banking', 'bi-api-keys', 'system-api-keys', 'connections']);
   private static readonly ADMIN_ONLY_TABS = new Set(['overview', 'users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'ai-assistants', 'teams', 'role-templates', 'sales-tax', 'audit-log', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'banking', 'bi-api-keys', 'system-api-keys', 'connections']);
@@ -116,7 +118,12 @@ export class AdminComponent implements OnInit {
 
   protected readonly isAdmin = computed(() => this.authService.hasRole('Admin'));
   protected readonly isManagerOrAdmin = computed(() => this.authService.hasRole('Admin') || this.authService.hasRole('Manager'));
-  protected readonly pageTitle = computed(() => this.isAdmin() ? this.translate.instant('admin.title') : this.translate.instant('admin.titleEmployee'));
+  protected readonly pageTitle = computed(() => {
+    const tab = this.activeTab();
+    const crumb = tab === 'overview' ? undefined : this.navTree.breadcrumbTrail().find(c => c.route === `/admin/${tab}`);
+    if (crumb?.i18nKey) return this.translate.instant(crumb.i18nKey);
+    return this.isAdmin() ? this.translate.instant('admin.title') : this.translate.instant('admin.titleEmployee');
+  });
   protected readonly pageSubtitle = computed(() => this.isAdmin() ? this.translate.instant('admin.subtitle') : this.translate.instant('admin.subtitleEmployee'));
 
   protected readonly activeTab = toSignal(

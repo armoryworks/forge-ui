@@ -166,6 +166,13 @@
       "primaryColorDesc": "Color principal del tema, como código hexadecimal, p. ej. #0d9488",
       "accentColor": "Color de acento de la marca",
       "accentColorDesc": "Color de acento del tema, como código hexadecimal, p. ej. #f59e0b"
+    },
+    "onboarding": {
+      "title": "Bienvenido: configuremos Forge para su negocio.",
+      "body": "Ejecute el descubrimiento para obtener un ajuste preestablecido a medida, explore los ajustes preestablecidos seleccionados u omita este paso y configure las capacidades manualmente.",
+      "runDiscovery": "Ejecutar descubrimiento",
+      "browsePresets": "Explorar ajustes preestablecidos",
+      "dismiss": "Descartar el aviso de bienvenida"
     }
   },
   "adminGroups": {
@@ -4600,7 +4607,8 @@
       "mockInProd": "MockIntegrations está ACTIVADO en Producción — todas las integraciones externas devuelven datos simulados. Establezca MockIntegrations=false y configure proveedores reales antes de atender a usuarios reales.",
       "gapSummary": "Estas capacidades están activadas pero su integración no está configurada. Configure cada una o desactive la capacidad.",
       "setupRequired": "Configuración requerida"
-    }
+    },
+    "lead": "Servicios <strong>a los que Forge se conecta</strong>: contabilidad, transportistas y otras API externas."
   },
   "complianceTemplates": {
     "templates": "plantillas de cumplimiento",
@@ -10976,7 +10984,7 @@
     }
   },
   "costing": {
-    "title": "Costeo (Nivel 3)",
+    "title": "Costeo",
     "tabs": {
       "periods": "Periodos",
       "costCenters": "Centros de Costo",
