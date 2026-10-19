@@ -243,6 +243,30 @@ describe('ScannerService', () => {
       expect(service.lastScan()).toBeNull();
     });
 
+    it('keeps a scan whole across one 60 ms gap inside the burst', () => {
+      key('J', clock);
+      key('-', clock + 8);
+      key('2', clock + 16);
+      vi.advanceTimersByTime(60);
+      key('4', clock + 76);
+      key('0', clock + 84);
+      key('3', clock + 92);
+      key('Enter', clock + 100);
+
+      expect(service.lastScan()?.value).toBe('J-2403');
+    });
+
+    it('starts over after a 120 ms gap', () => {
+      key('X', clock);
+      key('Y', clock + 8);
+      key('Z', clock + 16);
+      vi.advanceTimersByTime(120);
+      [...'J-2403'].forEach((k, i) => key(k, clock + 136 + i * 8));
+      key('Enter', clock + 136 + 6 * 8);
+
+      expect(service.lastScan()?.value).toBe('J-2403');
+    });
+
     it('sends a fast burst with no Enter through the fallback timer', () => {
       [...'J-2403'].forEach((k, i) => key(k, clock + i * 8));
       vi.advanceTimersByTime(80);

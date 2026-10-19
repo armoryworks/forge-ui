@@ -23,7 +23,22 @@
   <app-kiosk-setup (configured)="onTerminalConfigured($event)" />
 }
 
-@if (kioskPhase() !== 'setup') {
+@if (kioskPhase() === 'offline') {
+  <section class="sf-entry" aria-labelledby="sf-clock-offline-title" data-testid="sf-clock-offline">
+    <div class="sf-entry__card">
+      <span class="material-icons-outlined sf-entry__icon">cloud_off</span>
+      <h1 id="sf-clock-offline-title" class="sf-entry__title">{{ 'shopFloor.terminalCheckFailed' | translate }}</h1>
+      <div class="sf-entry__actions">
+        <button type="button" class="action-btn action-btn--primary" (click)="checkTerminalConfig()" data-testid="sf-clock-offline-retry">
+          <span class="material-icons-outlined">refresh</span>
+          {{ 'kioskSetup.retry' | translate }}
+        </button>
+      </div>
+    </div>
+  </section>
+}
+
+@if (kioskPhase() !== 'setup' && kioskPhase() !== 'offline') {
 
 @if (error()) {
   <div class="clock-error">
@@ -205,7 +220,7 @@
 <!-- Identifying Scan Overlay (brief flash while detecting scan type) -->
 @if (kioskPhase() === 'dashboard' && scanIdentifying()) {
   <div class="sf-auth-overlay" data-testid="sf-identifying-scan">
-    <div class="sf-auth-card">
+    <div class="sf-auth-card" role="status">
       <span class="material-icons-outlined sf-auth-card__icon sf-auth-card__spinner">sync</span>
       <h2 class="sf-auth-card__title">{{ 'shopFloor.identifyingScan' | translate }}</h2>
     </div>
@@ -215,9 +230,10 @@
 <!-- Job Scanned Phase (job barcode scanned first — now prompt for employee badge) -->
 @if (kioskPhase() === 'job-scanned') {
   <div class="sf-auth-overlay">
-    <div class="sf-auth-card">
+    <div class="sf-auth-card" role="dialog" aria-modal="true" aria-labelledby="sf-clock-job-scanned-title" tabindex="-1"
+         cdkTrapFocus cdkTrapFocusAutoCapture (keydown.escape)="cancelJobScanned()" data-testid="sf-job-scanned-card">
       <span class="material-icons-outlined sf-auth-card__icon sf-auth-card__icon--job">work</span>
-      <h2 class="sf-auth-card__title">{{ 'shopFloor.jobScanned' | translate }}</h2>
+      <h2 id="sf-clock-job-scanned-title" class="sf-auth-card__title">{{ 'shopFloor.jobScanned' | translate }}</h2>
 
       @if (scannedJob(); as job) {
         <div class="sf-job-card">
@@ -264,10 +280,13 @@
 <!-- PIN Phase -->
 @if (kioskPhase() === 'pin') {
   <div class="sf-auth-overlay">
-    <div class="sf-auth-card">
+    <div class="sf-auth-card" role="dialog" aria-modal="true" aria-labelledby="sf-clock-pin-title" tabindex="-1"
+         cdkTrapFocus cdkTrapFocusAutoCapture (keydown.escape)="cancelPin()" data-testid="sf-pin-card">
       <span class="material-icons-outlined sf-auth-card__icon">lock</span>
-      <h2 class="sf-auth-card__title">{{ 'shopFloor.enterPin' | translate }}</h2>
-      <p class="sf-auth-card__subtitle" data-testid="sf-pin-badge">{{ 'shopFloor.scanId' | translate }}: {{ maskedBadge() }}</p>
+      <h2 id="sf-clock-pin-title" class="sf-auth-card__title">{{ 'shopFloor.enterPin' | translate }}</h2>
+      @if (scannedEmployeeName(); as name) {
+        <p class="sf-auth-card__subtitle" data-testid="sf-pin-badge">{{ name }}</p>
+      }
 
       @if (scannedJob(); as job) {
         <div class="sf-job-card sf-job-card--compact">
@@ -323,9 +342,10 @@
 <!-- Manual Login Phase -->
 @if (kioskPhase() === 'manual-login') {
   <div class="sf-auth-overlay">
-    <div class="sf-auth-card">
+    <div class="sf-auth-card" role="dialog" aria-modal="true" aria-labelledby="sf-clock-manual-title" tabindex="-1"
+         cdkTrapFocus cdkTrapFocusAutoCapture (keydown.escape)="cancelManualLogin()" data-testid="sf-manual-login-card">
       <span class="material-icons-outlined sf-auth-card__icon">person</span>
-      <h2 class="sf-auth-card__title">{{ 'shopFloor.clockInManually' | translate }}</h2>
+      <h2 id="sf-clock-manual-title" class="sf-auth-card__title">{{ 'shopFloor.clockInManually' | translate }}</h2>
       <p class="sf-auth-card__subtitle">{{ 'shopFloor.enterCredentials' | translate }}</p>
 
       @if (manualLoginError()) {
@@ -370,8 +390,9 @@
 <!-- Clock Action Phase (after auth) -->
 @if (kioskPhase() === 'clock') {
   <div class="sf-auth-overlay">
-    <div class="sf-clock-actions">
-      <h2 class="sf-clock-actions__title">{{ 'shopFloor.selectAction' | translate }}</h2>
+    <div class="sf-clock-actions" role="dialog" aria-modal="true" aria-labelledby="sf-clock-actions-title" tabindex="-1"
+         cdkTrapFocus cdkTrapFocusAutoCapture (keydown.escape)="resetToDashboard()" data-testid="sf-clock-actions-card">
+      <h2 id="sf-clock-actions-title" class="sf-clock-actions__title">{{ 'shopFloor.selectAction' | translate }}</h2>
 
       @if (scannedJob(); as job) {
         <div class="sf-job-card sf-job-card--banner">

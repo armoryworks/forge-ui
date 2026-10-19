@@ -7416,7 +7416,8 @@
       "noShipmentLines": "No open shipment lines for this part",
       "noWorkOrderContext": "No work order details available",
       "noRecentShipments": "No recent shipments found for this part",
-      "readyForNext": "Ready for next scan"
+      "readyForNext": "Ready for next scan",
+      "signInNeeded": "Your session has ended. Sign in again to use the scanner."
     },
     "count": {
       "title": "Cycle Count",
@@ -7669,7 +7670,8 @@
       "undone": "Punch undone.",
       "failed": "Could not undo the punch. Ask your supervisor to correct it."
     },
-    "needsAdminOrManager": "Only an Admin or Manager can set up this terminal."
+    "needsAdminOrManager": "Only an Admin or Manager can set up this terminal.",
+    "signedOutIdle": "Setup was idle, so you were signed out. Sign in again to finish."
   },
   "shopFloor": {
     "title": "Shop Floor",
@@ -7697,7 +7699,6 @@
     "jobScanned": "Job Scanned",
     "scanBadgeToContinue": "Now scan your badge or RFID to continue",
     "enterPin": "Enter Your PIN",
-    "scanId": "Scan ID",
     "pin": "PIN",
     "enterPinPlaceholder": "Enter PIN...",
     "authenticating": "Authenticating...",
@@ -7781,7 +7782,10 @@
       "lotScanned": "Lot {{number}}",
       "assetScanned": "Asset: {{name}}",
       "assetScannedUnnamed": "Asset label scanned",
-      "clockInToStartTimer": "Clock in to start a timer"
+      "clockInToStartTimer": "Clock in to start a timer",
+      "locationScanned": "Location {{name}}",
+      "receivingLoadFailed": "Couldn't load the purchase orders to receive. Go back and try again.",
+      "shippingLoadFailed": "Couldn't load the shipments. Go back and try again."
     },
     "trainingModeActive": "TRAINING MODE — Actions will not be saved",
     "trainingModeEnabled": "Training mode enabled",
@@ -7886,7 +7890,9 @@
       "stopped": "Stopped step {{step}} · {{title}}",
       "timerStopped": "Stopped your timer on {{jobNumber}}",
       "recorded": "Step {{step}}: {{count}} of {{total}} recorded",
-      "wholeNumbersOnly": "Enter whole pieces only (0 or more)."
+      "wholeNumbersOnly": "Enter whole pieces only (0 or more).",
+      "quantityNotNegative": "Enter 0 or more.",
+      "quantityDecimals": "Enter 0 or more, with at most {{places}} decimal places."
     },
     "returnFlow": {
       "title": "Return Items",
@@ -7967,7 +7973,12 @@
     "fullscreen": "Full screen",
     "setupFullscreenHint": "Tap Full screen on the display after setup so the board fills the screen.",
     "terminalNotForWorker": "This terminal is not set up for your team. Use your team's terminal or ask your supervisor.",
-    "scanBadgeNotRecognized": "That wasn't a badge. Scan your badge or RFID to continue."
+    "scanBadgeNotRecognized": "That wasn't a badge. Scan your badge or RFID to continue.",
+    "scanCheckFailed": "Couldn't check that scan. Scan it again.",
+    "closedJobScanned": "Work order {{number}} is closed and can't take time.",
+    "scanNotForClock": "{{label}} isn't used for clocking. Scan your badge or a work order.",
+    "kioskMfaUseBadge": "This account needs a second sign-in step. Use your badge and PIN on this kiosk.",
+    "terminalCheckFailed": "Can't reach the server to check this terminal."
   },
   "kioskDisplay": {
     "entryTitle": "Use this browser as a shop-floor terminal?",

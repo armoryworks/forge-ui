@@ -7409,7 +7409,8 @@
       "noShipmentLines": "No hay líneas de envío abiertas para esta pieza",
       "noWorkOrderContext": "No hay detalles de la orden de trabajo disponibles",
       "noRecentShipments": "No se encontraron envíos recientes para esta pieza",
-      "readyForNext": "Listo para el siguiente escaneo"
+      "readyForNext": "Listo para el siguiente escaneo",
+      "signInNeeded": "Su sesión ha terminado. Inicie sesión de nuevo para usar el escáner."
     },
     "count": {
       "title": "Conteo cíclico",
@@ -7662,7 +7663,8 @@
       "undone": "Registro deshecho.",
       "failed": "No se pudo deshacer el registro. Pida a su supervisor que lo corrija."
     },
-    "needsAdminOrManager": "Solo un administrador o gerente puede configurar esta terminal."
+    "needsAdminOrManager": "Solo un administrador o gerente puede configurar esta terminal.",
+    "signedOutIdle": "La configuración estuvo inactiva y se cerró su sesión. Inicie sesión de nuevo para terminar."
   },
   "shopFloor": {
     "title": "Planta de Producción",
@@ -7690,7 +7692,6 @@
     "jobScanned": "Trabajo Escaneado",
     "scanBadgeToContinue": "Ahora escanee su credencial o RFID para continuar",
     "enterPin": "Ingrese Su PIN",
-    "scanId": "ID de Escaneo",
     "pin": "PIN",
     "enterPinPlaceholder": "Ingrese PIN...",
     "authenticating": "Autenticando...",
@@ -7774,7 +7775,10 @@
       "lotScanned": "Lote {{number}}",
       "assetScanned": "Activo: {{name}}",
       "assetScannedUnnamed": "Etiqueta de activo escaneada",
-      "clockInToStartTimer": "Registre su entrada para iniciar un temporizador"
+      "clockInToStartTimer": "Registre su entrada para iniciar un temporizador",
+      "locationScanned": "Ubicación {{name}}",
+      "receivingLoadFailed": "No se pudieron cargar las órdenes de compra por recibir. Vuelva e inténtelo de nuevo.",
+      "shippingLoadFailed": "No se pudieron cargar los envíos. Vuelva e inténtelo de nuevo."
     },
     "trainingModeActive": "MODO DE ENTRENAMIENTO — Las acciones no se guardarán",
     "trainingModeEnabled": "Modo de entrenamiento activado",
@@ -7868,7 +7872,9 @@
       "stopped": "Paso {{step}} · {{title}} detenido",
       "timerStopped": "Se detuvo tu temporizador en {{jobNumber}}",
       "recorded": "Paso {{step}}: {{count}} de {{total}} registradas",
-      "wholeNumbersOnly": "Ingrese solo piezas enteras (0 o más)."
+      "wholeNumbersOnly": "Ingrese solo piezas enteras (0 o más).",
+      "quantityNotNegative": "Introduzca 0 o más.",
+      "quantityDecimals": "Introduzca 0 o más, con un máximo de {{places}} decimales."
     },
     "returnFlow": {
       "title": "Devolver Artículos",
@@ -7960,7 +7966,12 @@
     "fullscreen": "Pantalla completa",
     "setupFullscreenHint": "Toque Pantalla completa en la pantalla después de la configuración para que el tablero ocupe toda la pantalla.",
     "terminalNotForWorker": "Esta terminal no está configurada para su equipo. Use la terminal de su equipo o pregunte a su supervisor.",
-    "scanBadgeNotRecognized": "Eso no es una credencial. Escanee su credencial o RFID para continuar."
+    "scanBadgeNotRecognized": "Eso no es una credencial. Escanee su credencial o RFID para continuar.",
+    "scanCheckFailed": "No se pudo comprobar ese escaneo. Escanéelo de nuevo.",
+    "closedJobScanned": "La orden de trabajo {{number}} está cerrada y no admite tiempo.",
+    "scanNotForClock": "{{label}} no sirve para fichar. Escanee su credencial o una orden de trabajo.",
+    "kioskMfaUseBadge": "Esta cuenta requiere un segundo paso de inicio de sesión. Use su credencial y PIN en este quiosco.",
+    "terminalCheckFailed": "No se puede contactar con el servidor para comprobar esta terminal."
   },
   "kioskDisplay": {
     "entryTitle": "¿Usar este navegador como terminal de planta?",

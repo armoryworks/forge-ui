@@ -42,6 +42,7 @@ import { ScanLabelDialogComponent } from '../shipments/components/scan-label-dia
 import { ScanLabelDialogData } from '../shipments/models/scan-label-dialog-data.model';
 import { httpProblemDetail } from '../../shared/utils/http-problem-detail';
 import { focusCancelOnOpen } from '../../shared/utils/focus-dialog-cancel';
+import { describeNonClockScan } from './utils/describe-scan';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { ScanUndoListComponent } from './components/scan-undo-list/scan-undo-list.component';
 import { ScanActionOverlayComponent } from './components/scan-action-overlay/scan-action-overlay.component';
@@ -506,6 +507,8 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
       next: (result) => {
         if (result.scanType === 'employee') {
           this.signInScannedEmployee(result.entityId, scanValue);
+        } else if (result.scanType === 'job' && result.isClosed) {
+          this.showScanFeedback(this.translate.instant('shopFloor.closedJobScanned', { number: result.entityNumber ?? '' }));
         } else if (result.scanType === 'job') {
           this.showScanFeedback(this.translate.instant('shopFloor.display.workOrderScanned', { number: result.entityNumber, title: result.entityTitle }));
         } else if (result.scanType === 'storage-location') {
@@ -513,28 +516,17 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
           this.scannedLocationName.set(result.entityTitle ?? result.entityNumber ?? this.translate.instant('shopFloor.display.unknownLocation'));
         } else if (result.scanType === 'sales-order') {
           this.showScanFeedback(this.translate.instant('shopFloor.display.salesOrderScanned', { number: result.entityNumber }));
-        } else if (result.scanType === 'purchase-order') {
-          this.showScanFeedback(this.translate.instant('shopFloor.display.purchaseOrderScanned', { number: result.entityNumber }));
-        } else if (result.scanType === 'part') {
-          this.showScanFeedback(this.translate.instant('shopFloor.display.partScanned', { number: result.entityNumber }));
-        } else if (result.scanType === 'lot') {
-          this.showScanFeedback(this.translate.instant('shopFloor.display.lotScanned', { number: result.entityNumber }));
-        } else if (result.scanType === 'asset') {
-          this.showScanFeedback(result.entityNumber
-            ? this.translate.instant('shopFloor.display.assetScanned', { name: result.entityNumber })
-            : this.translate.instant('shopFloor.display.assetScannedUnnamed'));
         } else {
-          this.showScanFeedback(this.translate.instant('shopFloor.scanNotRecognized', { value: scanValue }));
+          this.showScanFeedback(describeNonClockScan(result, this.translate)
+            ?? this.translate.instant('shopFloor.scanNotRecognized', { value: scanValue }));
         }
       },
-      error: () => {
-        // Identification failed — treat as badge scan anyway (fallback)
-        this.scannedValue.set(scanValue);
-        this.pinControl.reset();
-        this.pinError.set(null);
-        this.phase.set('pin');
-        this.selectedWorker.set(null);
-        this.startPhaseTimeout(PIN_TIMEOUT_MS);
+      error: (err: HttpErrorResponse) => {
+        if (err?.status === 401 && localStorage.getItem(DEVICE_TOKEN_KEY)) {
+          this.unpair();
+          return;
+        }
+        this.showScanFeedback(this.translate.instant('shopFloor.scanCheckFailed'));
       },
     });
   }
@@ -635,8 +627,13 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
       this.authenticating.set(true);
       this.pinError.set(null);
       this.authService.login({ email: worker.email, password: credential }).subscribe({
-        next: () => {
+        next: (response) => {
           this.authenticating.set(false);
+          if (response.mfaRequired) {
+            this.pinControl.reset();
+            this.pinError.set(this.translate.instant('shopFloor.kioskMfaUseBadge'));
+            return;
+          }
           this.enterActionsPhase();
         },
         error: () => {
@@ -894,7 +891,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     this.processing.set(`timer-start-${assignment.jobId}`);
     this.resetAutoLogoutTimer();
 
-    this.loading.track(this.translate.instant('shopFloor.display.startingTimer'), this.shopFloorService.startTimer(assignment.jobId, true)).subscribe({
+    this.loading.track(this.translate.instant('shopFloor.display.startingTimer'), this.shopFloorService.startTimer(assignment.jobId)).subscribe({
       next: () => {
         this.processing.set(null);
         this.loadData();
@@ -992,21 +989,32 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   private loadReceivablePOs(): void {
     const receivableStatuses = ['Submitted', 'Acknowledged', 'PartiallyReceived'];
-    this.poService.getPurchaseOrders().subscribe(pos => {
-      const openPos = pos.filter(po => receivableStatuses.includes(po.status));
-      const details: PurchaseOrderDetail[] = [];
-      if (openPos.length === 0) {
-        this.receivablePOs.set([]);
-        return;
-      }
-      openPos.forEach(po => {
-        this.poService.getPurchaseOrderById(po.id).subscribe(detail => {
-          if (detail.lines.some(l => l.remainingQuantity > 0)) {
-            details.push(detail);
-            this.receivablePOs.set([...details]);
-          }
+    this.poService.getPurchaseOrders().subscribe({
+      next: pos => {
+        const openPos = pos.filter(po => receivableStatuses.includes(po.status));
+        const details: PurchaseOrderDetail[] = [];
+        if (openPos.length === 0) {
+          this.receivablePOs.set([]);
+          return;
+        }
+        let reported = false;
+        openPos.forEach(po => {
+          this.poService.getPurchaseOrderById(po.id).subscribe({
+            next: detail => {
+              if (detail.lines.some(l => l.remainingQuantity > 0)) {
+                details.push(detail);
+                this.receivablePOs.set([...details]);
+              }
+            },
+            error: () => {
+              if (reported) return;
+              reported = true;
+              this.onKioskListLoadFailed('shopFloor.display.receivingLoadFailed');
+            },
+          });
         });
-      });
+      },
+      error: () => this.onKioskListLoadFailed('shopFloor.display.receivingLoadFailed'),
     });
   }
 
@@ -1055,7 +1063,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
           if (completed === lines.length) {
             this.receivingSubmitting.set(false);
             this.showScanFeedback(this.translate.instant('shopFloor.display.receivedLines', { count: lines.length }));
-            setTimeout(() => this.ephemeralLogout(), 1500);
+            this.scheduleTransition(() => this.ephemeralLogout(), 1500);
           }
         },
         error: () => {
@@ -1084,18 +1092,29 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   }
 
   private loadShippableShipments(): void {
-    this.shipmentService.getShipments(undefined, 'Pending').subscribe(pending => {
-      this.shipmentService.getShipments(undefined, 'Packed').subscribe(packed => {
-        this.shippableShipments.set([...pending, ...packed]);
-      });
+    forkJoin({
+      pending: this.shipmentService.getShipments(undefined, 'Pending'),
+      packed: this.shipmentService.getShipments(undefined, 'Packed'),
+    }).subscribe({
+      next: ({ pending, packed }) => this.shippableShipments.set([...pending, ...packed]),
+      error: () => this.onKioskListLoadFailed('shopFloor.display.shippingLoadFailed'),
     });
   }
 
   protected selectShipmentForShipping(shipment: ShipmentListItem): void {
-    this.shipmentService.getShipmentById(shipment.id).subscribe(detail => {
-      this.selectedShipment.set(detail);
-      this.resetAutoLogoutTimer();
+    this.resetAutoLogoutTimer();
+    this.shipmentService.getShipmentById(shipment.id).subscribe({
+      next: detail => {
+        this.selectedShipment.set(detail);
+        this.resetAutoLogoutTimer();
+      },
+      error: () => this.onKioskListLoadFailed('shopFloor.display.shippingLoadFailed'),
     });
+  }
+
+  private onKioskListLoadFailed(messageKey: string): void {
+    this.showScanFeedback(this.translate.instant(messageKey));
+    this.resetAutoLogoutTimer();
   }
 
   protected confirmShip(): void {
@@ -1122,7 +1141,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
       next: () => {
         this.shippingSubmitting.set(false);
         this.showScanFeedback(this.translate.instant('shopFloor.display.shipmentShipped', { number: shipment.shipmentNumber }));
-        setTimeout(() => this.ephemeralLogout(), 1500);
+        this.scheduleTransition(() => this.ephemeralLogout(), 1500);
       },
       error: (err: unknown) => {
         this.shippingSubmitting.set(false);

@@ -23,6 +23,7 @@ import { OperationEdit } from '../../models/operation-edit.model';
 import { OperationQuantityEntry } from '../../models/operation-quantity-entry.model';
 import { OperationRowView } from '../../models/operation-row-view.model';
 import { OperationQuantitySheetComponent } from '../operation-quantity-sheet/operation-quantity-sheet.component';
+import { httpProblemDetail } from '../../../../shared/utils/http-problem-detail';
 
 /**
  * A job's routing operations on the phone, shown only while operation
@@ -172,7 +173,7 @@ export class JobOperationsComponent {
       ended = await run();
     } catch (err) {
       this.editing.set(null);
-      this.notice.set(this.translate.instant(err instanceof HttpErrorResponse && err.status === 409
+      this.notice.set(httpProblemDetail(err) ?? this.translate.instant(err instanceof HttpErrorResponse && err.status === 409
         ? 'mobileApp.operations.conflict'
         : 'mobileApp.jobs.actionFailed'));
       this.load(this.jobId());

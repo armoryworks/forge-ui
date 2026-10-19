@@ -21,6 +21,7 @@ type SetupPhase = 'admin-login' | 'mfa' | 'configure';
 
 const SETUP_ROLES = ['Admin', 'Manager'];
 const TERMINAL_NAME_MAX = 100;
+const SETUP_IDLE_MS = 120_000;
 
 @Component({
   selector: 'app-kiosk-setup',
@@ -39,6 +40,7 @@ export class KioskSetupComponent implements OnDestroy {
 
   protected readonly terminalNameMax = TERMINAL_NAME_MAX;
   private setupSessionOpen = false;
+  private idleTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly endSetupSession = (): void => this.closeSetupSession();
 
   protected readonly phase = signal<SetupPhase>('admin-login');
@@ -140,9 +142,48 @@ export class KioskSetupComponent implements OnDestroy {
     window.addEventListener('pagehide', this.endSetupSession);
     this.loadTeams();
     this.phase.set('configure');
+    this.startIdleTimer();
+  }
+
+  protected cancelSetup(): void {
+    if (this.saving()) return;
+    this.leaveConfigure();
+    this.loginError.set(null);
+  }
+
+  protected onConfigureActivity(): void {
+    if (this.phase() === 'configure') this.startIdleTimer();
+  }
+
+  private leaveConfigure(): void {
+    this.closeSetupSession();
+    this.configError.set(null);
+    this.passwordControl.reset();
+    this.phase.set('admin-login');
+  }
+
+  private startIdleTimer(): void {
+    this.clearIdleTimer();
+    this.idleTimer = setTimeout(() => {
+      this.idleTimer = null;
+      if (this.saving()) {
+        this.startIdleTimer();
+        return;
+      }
+      this.leaveConfigure();
+      this.loginError.set(this.translate.instant('kioskSetup.signedOutIdle'));
+    }, SETUP_IDLE_MS);
+  }
+
+  private clearIdleTimer(): void {
+    if (this.idleTimer) {
+      clearTimeout(this.idleTimer);
+      this.idleTimer = null;
+    }
   }
 
   private closeSetupSession(always = false): void {
+    this.clearIdleTimer();
     window.removeEventListener('pagehide', this.endSetupSession);
     if (!this.setupSessionOpen && !always) return;
     this.setupSessionOpen = false;

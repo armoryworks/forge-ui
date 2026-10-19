@@ -720,7 +720,7 @@
   @if (phase() === 'receiving') {
     <div class="sf-overlay">
       <div class="sf-receiving-card" role="dialog" aria-modal="true" aria-labelledby="sf-receiving-title" tabindex="-1"
-           cdkTrapFocus cdkTrapFocusAutoCapture data-testid="sf-receiving-card">
+           cdkTrapFocus cdkTrapFocusAutoCapture (keydown.escape)="cancelReceiving()" data-testid="sf-receiving-card">
         <div class="sf-receiving-card__header">
           <span class="material-icons-outlined">move_to_inbox</span>
           <h2 id="sf-receiving-title" tabindex="-1" cdkFocusInitial>{{ 'inventory.receiveGoods' | translate }}</h2>
@@ -846,7 +846,7 @@
   @if (phase() === 'shipping') {
     <div class="sf-overlay">
       <div class="sf-shipping-card" role="dialog" aria-modal="true" aria-labelledby="sf-shipping-title" tabindex="-1"
-           cdkTrapFocus cdkTrapFocusAutoCapture data-testid="sf-shipping-card">
+           cdkTrapFocus cdkTrapFocusAutoCapture (keydown.escape)="cancelShipping()" data-testid="sf-shipping-card">
         <div class="sf-shipping-card__header">
           <span class="material-icons-outlined">local_shipping</span>
           <h2 id="sf-shipping-title" tabindex="-1" cdkFocusInitial>{{ 'shopFloor.display.shipGoods' | translate }}</h2>

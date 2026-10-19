@@ -146,7 +146,7 @@ export class ScannerService implements OnDestroy {
     // Only accumulate printable characters
     if (event.key.length !== 1) return;
 
-    if (this.buffer && now - this.lastKeyTime < this.SCAN_THRESHOLD_MS) {
+    if (this.buffer && (now - this.lastKeyTime < this.SCAN_THRESHOLD_MS || this.completeTimer)) {
       this.buffer += event.key;
     } else {
       this.buffer = event.key;

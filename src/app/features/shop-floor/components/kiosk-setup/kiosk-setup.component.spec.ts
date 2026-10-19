@@ -341,6 +341,37 @@ describe('KioskSetupComponent', () => {
     expect(ctx.auth.clearAuth).toHaveBeenCalledTimes(1);
   });
 
+  it('Cancel on the configure step signs the setup user out and returns to sign-in', () => {
+    const ctx = setup();
+    signIn(ctx);
+    expect(ctx.component.phase()).toBe('configure');
+
+    (ctx.fixture.nativeElement.querySelector('[data-testid="kiosk-setup-cancel"]') as HTMLButtonElement).click();
+
+    expect(ctx.auth.clearAuth).toHaveBeenCalledTimes(1);
+    expect(ctx.component.phase()).toBe('admin-login');
+  });
+
+  it('signs the setup user out after two idle minutes on the configure step', () => {
+    vi.useFakeTimers();
+    try {
+      const ctx = setup();
+      signIn(ctx);
+      vi.advanceTimersByTime(100_000);
+      ctx.component.terminalNameControl.setValue('Press 1');
+      (ctx.component as unknown as { onConfigureActivity: () => void }).onConfigureActivity();
+      vi.advanceTimersByTime(100_000);
+      expect(ctx.component.phase()).toBe('configure');
+
+      vi.advanceTimersByTime(20_000);
+
+      expect(ctx.auth.clearAuth).toHaveBeenCalledTimes(1);
+      expect(ctx.component.phase()).toBe('admin-login');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('caps the terminal name and shows the server reason when the save is refused', () => {
     const ctx = setup();
     ctx.shopFloor.getTeams.mockReturnValue(of([team]));

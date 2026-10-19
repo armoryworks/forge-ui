@@ -52,7 +52,7 @@
 <!-- Configure Phase -->
 @if (phase() === 'configure') {
   <div class="setup">
-    <div class="setup__card setup__card--wide">
+    <div class="setup__card setup__card--wide" (focusin)="onConfigureActivity()" (input)="onConfigureActivity()" (change)="onConfigureActivity()">
       <span class="material-icons-outlined setup__icon">dns</span>
       <h1 class="setup__title">{{ 'shopFloor.configureTerminal' | translate }}</h1>
       <p class="setup__subtitle">{{ 'shopFloor.nameAndAssignTeam' | translate }}</p>
@@ -116,6 +116,11 @@
           <span class="material-icons-outlined">check</span>
           {{ 'shopFloor.activateTerminal' | translate }}
         }
+      </button>
+      <button type="button" class="action-btn setup__toggle" data-testid="kiosk-setup-cancel"
+        [disabled]="saving()" (click)="cancelSetup()">
+        <span class="material-icons-outlined">close</span>
+        {{ 'common.cancel' | translate }}
       </button>
       <p class="setup__subtitle">{{ 'shopFloor.setupFullscreenHint' | translate }}</p>
     </div>

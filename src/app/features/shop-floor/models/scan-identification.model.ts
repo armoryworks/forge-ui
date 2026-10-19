@@ -5,4 +5,5 @@ export interface ScanIdentification {
   entityTitle?: string;
   stageName?: string;
   stageColor?: string;
+  isClosed?: boolean;
 }
