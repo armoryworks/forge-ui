@@ -32,7 +32,7 @@
           <div class="form-detail__completed-summary">
             <span class="material-icons-outlined form-detail__completed-icon">verified</span>
             <div class="form-detail__completed-body">
-              <h2 class="form-detail__card-title">{{ template()?.name }} — Completed</h2>
+              <h2 class="form-detail__card-title">{{ 'account.formCompletedTitle' | translate: { name: template()?.name } }}</h2>
 
               @if (wizardFormSummary(); as summary) {
                 <!-- W-4 summary -->
@@ -62,7 +62,7 @@
                 }
 
                 <!-- State withholding summary -->
-                @if (formType() === 'state_withholding') {
+                @if (formType() === 'stateWithholding') {
                   <dl class="form-detail__summary-grid">
                     <dt>Filing Status</dt><dd>{{ summary['filingStatus'] }}</dd>
                     <dt>Allowances</dt><dd>{{ summary['allowances'] }}</dd>
@@ -76,7 +76,7 @@
                 }
 
                 <!-- Direct deposit summary -->
-                @if (formType() === 'direct_deposit') {
+                @if (formType() === 'directDeposit') {
                   <dl class="form-detail__summary-grid">
                     <dt>Bank</dt><dd>{{ summary['bankName'] }}</dd>
                     <dt>Account Type</dt><dd>{{ summary['accountType'] }}</dd>
@@ -90,13 +90,13 @@
                 }
 
                 <!-- Workers' comp / handbook summary -->
-                @if (formType() === 'workers_comp' || formType() === 'handbook') {
+                @if (formType() === 'workersComp' || formType() === 'handbook') {
                   <p class="form-detail__card-text">
                     Acknowledged on {{ completedDate() | date:'MM/dd/yyyy' }}.
                   </p>
                 }
               } @else {
-                <p class="form-detail__card-text">{{ 'account.formCompletedNote' | translate }}</p>
+                <p class="form-detail__card-text">{{ (canResubmit() ? 'account.formCompletedNote' : 'account.formCompletedNoteFinal') | translate }}</p>
               }
             </div>
           </div>
@@ -117,8 +117,8 @@
             }
             @if (canResubmit()) {
               <button class="action-btn action-btn--primary" (click)="startResubmit()">
-                <span class="material-icons-outlined">edit</span>
-                Update
+                <span class="material-icons-outlined">refresh</span>
+                {{ 'account.resubmitForm' | translate }}
               </button>
             }
           </div>
@@ -131,10 +131,14 @@
             <div>
               <h2 class="form-detail__card-title">{{ 'account.formAlreadySubmitted' | translate }}</h2>
               <p class="form-detail__card-text">
-                @if (isSensitive()) {
+                @if (isSensitive() && canResubmit()) {
                   {{ 'account.formSensitiveNote' | translate }}
-                } @else {
+                } @else if (isSensitive()) {
+                  {{ 'account.formSensitiveNoteLocked' | translate }}
+                } @else if (canResubmit()) {
                   {{ 'account.formCompletedNote' | translate }}
+                } @else {
+                  {{ 'account.formCompletedNoteFinal' | translate }}
                 }
               </p>
             </div>
@@ -220,7 +224,7 @@
       }
     } @else {
       <!-- Pending Setup Banner — shown when form should have electronic definition but admin hasn't extracted it yet -->
-      @if (needsFormDefinition()) {
+      @if (needsFormDefinition() && !isComplete()) {
         <div class="form-detail__pending-setup">
           <span class="material-icons-outlined form-detail__pending-setup-icon">hourglass_empty</span>
           <div>
@@ -235,14 +239,13 @@
         <div class="form-detail__card">
           <div class="form-detail__card-header">
             <h2 class="form-detail__card-title">{{ 'account.formDocument' | translate }}</h2>
-            @if (pdfDownloadUrl(); as downloadUrl) {
-              <a class="action-btn action-btn--sm"
-                [href]="downloadUrl"
-                target="_blank"
+            @if (tmpl.manualOverrideFileId; as fileId) {
+              <button type="button" class="action-btn action-btn--sm"
+                (click)="downloadFile(fileId)"
                 [attr.aria-label]="'account.downloadFormPdf' | translate">
                 <span class="material-icons-outlined">download</span>
                 {{ 'common.download' | translate }}
-              </a>
+              </button>
             }
           </div>
           <iframe
@@ -298,20 +301,19 @@
               </iframe>
             } @else if (sub.status === 'Completed' && sub.signedPdfFileId) {
               <p class="form-detail__card-text">{{ 'account.signedDocAvailable' | translate }}</p>
-              <a class="action-btn action-btn--primary action-btn--sm"
-                [href]="'/api/v1/files/' + sub.signedPdfFileId"
-                target="_blank"
+              <button type="button" class="action-btn action-btn--primary action-btn--sm"
+                (click)="downloadFile(sub.signedPdfFileId)"
                 [attr.aria-label]="'account.downloadSignedPdfLabel' | translate">
                 <span class="material-icons-outlined">download</span>
                 {{ 'account.downloadSignedPdf' | translate }}
-              </a>
+              </button>
             }
           }
         </div>
       }
 
       <!-- Acknowledge (for forms without DocuSeal, form definition, and NOT pending setup) -->
-      @if (!isComplete() && !tmpl.docuSealTemplateId && !needsFormDefinition()) {
+      @if (!isComplete() && isSelfAcknowledgeable() && !tmpl.docuSealTemplateId && !needsFormDefinition()) {
         <div class="form-detail__card">
           <h2 class="form-detail__card-title">{{ 'account.acknowledgment' | translate }}</h2>
           <p class="form-detail__card-text">

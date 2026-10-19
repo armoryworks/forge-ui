@@ -274,8 +274,8 @@ export async function runSimulation(): Promise<SimulationReport> {
     // One-time per-user compliance: drive each seeded user through the full 7-step
     // onboarding wizard UI (Personal → Address → W-4 → State → I-9 w/ file upload →
     // Direct Deposit w/ file upload → Acknowledgments → Submit), then surrogate the
-    // DocuSeal signing completion via POST /employee-profile/acknowledge/{formType}
-    // for W-4/I-9/State (mirrors what HandleDocuSealWebhook does in production).
+    // DocuSeal signing completion: an admin records the W-4/I-9/State completion dates
+    // via PUT /admin/users/{id}/employee-profile (the data HandleDocuSealWebhook writes in production).
     // Emergency contact is set via PUT /employee-profile afterward. Idempotent.
     console.log('Driving each user through the full onboarding wizard...');
     for (const role of ROLES) {
@@ -284,7 +284,7 @@ export async function runSimulation(): Promise<SimulationReport> {
       const token = tokens[email];
       if (!page || !token) continue;
       try {
-        const ok = await ensureUserOnboarded(page, token);
+        const ok = await ensureUserOnboarded(page, token, tokens[ROLE_EMAILS.admin]);
         console.log(`  ${ok ? '✓' : '✗'} onboarded: ${role}`);
       } catch (err) {
         console.error(`  ✗ onboarding ${role}: ${err}`);

@@ -71,6 +71,24 @@ export interface ProfileCompleteness {
   items: ProfileCompletenessItem[];
 }
 
+/** Completion keys of the forms the onboarding wizard collects, as the API emits them. */
+export const WIZARD_FORM_KEYS: readonly string[] = [
+  'w4', 'i9', 'stateWithholding', 'directDeposit', 'workersComp', 'handbook',
+];
+
+/**
+ * Completion state of one item. The API returns no items at all for an employee
+ * whose onboarding was bypassed (or when HR tracking is off) and marks the whole
+ * profile complete, so an item that is absent from a complete profile is not
+ * required. Null while completeness has not loaded or the item is unknown.
+ */
+export function completenessItemStatus(completeness: ProfileCompleteness | null, key: string): boolean | null {
+  if (!completeness) return null;
+  const item = completeness.items.find(i => i.key === key);
+  if (item) return item.isComplete;
+  return completeness.isComplete ? true : null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class EmployeeProfileService {
   private readonly http = inject(HttpClient);
@@ -97,7 +115,7 @@ export class EmployeeProfileService {
   private static readonly COMPLETION_SECTIONS: readonly string[][] = [
     ['address'],
     ['emergency_contact'],
-    ['w4', 'i9', 'state_withholding', 'direct_deposit', 'workers_comp', 'handbook'],
+    [...WIZARD_FORM_KEYS],
   ];
 
   readonly incompleteSectionCount = computed(() => {

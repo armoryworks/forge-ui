@@ -151,19 +151,21 @@ function seedFromEmail(email: string): number {
 
 /**
  * Drives the full 7-step onboarding wizard UI for a user, then surrogates the
- * DocuSeal-webhook completion step by posting to /employee-profile/acknowledge/{formType}
- * for the three sign-required forms (W-4, I-9, State Withholding), and sets the
- * emergency contact (which the wizard doesn't collect) via PUT /employee-profile.
+ * DocuSeal-webhook completion step for the three sign-required forms (W-4, I-9,
+ * State Withholding) by having an admin record their completion dates through
+ * PUT /admin/users/{id}/employee-profile, and sets the emergency contact (which
+ * the wizard doesn't collect) via PUT /employee-profile.
  *
  * Why a surrogate instead of driving DocuSeal: compliance-form templates in the dev
  * seed don't have AcroFieldMapJson / FilledPdfTemplate configured, and MockIntegrations
  * is false. POST /onboarding/sign-form therefore throws 400 in this environment.
- * /acknowledge/{formType} is the same endpoint the DocuSeal webhook calls when a form
- * is signed in production, so this mirrors production semantics at the data layer.
+ * Employees cannot mark those forms complete themselves (the self-service
+ * /employee-profile/acknowledge route only accepts acknowledgement-only forms), so the
+ * admin endpoint is the sanctioned stand-in.
  *
  * Idempotent — reads /completeness first and returns immediately if already 8/8.
  */
-export async function ensureUserOnboarded(page: Page, token: string): Promise<boolean> {
+export async function ensureUserOnboarded(page: Page, token: string, adminToken: string): Promise<boolean> {
   const { apiCall } = await import('./api.helper');
   const completeness = await apiCall<{ isComplete: boolean; canBeAssignedJobs: boolean }>(
     'GET', 'employee-profile/completeness', token,
@@ -173,7 +175,7 @@ export async function ensureUserOnboarded(page: Page, token: string): Promise<bo
   // The /employee-profile payload has no firstName/lastName/email; those come from auth.
   // Read the seeded authUser out of localStorage to pick a deterministic seed + email
   // so our generated data matches the logged-in account.
-  const authUser = await page.evaluate<{ email: string; firstName: string; lastName: string } | null>(
+  const authUser = await page.evaluate<{ id: number; email: string; firstName: string; lastName: string } | null>(
     () => {
       const raw = localStorage.getItem('forge-user');
       return raw ? JSON.parse(raw) : null;
@@ -369,11 +371,22 @@ export async function ensureUserOnboarded(page: Page, token: string): Promise<bo
   }
 
   // ── DocuSeal webhook surrogate: ack the 3 sign-required forms ─────────────
-  // In production, HandleDocuSealWebhookHandler calls AcknowledgeFormCommand after the
-  // form.completed webhook fires. We call the same MediatR command via the self-service
-  // endpoint here because the dev seed has no AcroFieldMap templates configured.
-  for (const formType of ['w4', 'i9', 'state_withholding']) {
-    await apiCall<void>('POST', `employee-profile/acknowledge/${formType}`, token);
+  // In production, HandleDocuSealWebhookHandler records completion after the
+  // form.completed webhook fires. The dev seed has no AcroFieldMap templates configured,
+  // so an admin records the same completion dates here.
+  if (authUser?.id) {
+    const adminProfile = await apiCall<Record<string, unknown>>(
+      'GET', `admin/users/${authUser.id}/employee-profile`, adminToken,
+    );
+    if (adminProfile) {
+      const signedAt = new Date().toISOString();
+      await apiCall<unknown>('PUT', `admin/users/${authUser.id}/employee-profile`, adminToken, {
+        ...adminProfile,
+        w4CompletedAt: adminProfile['w4CompletedAt'] ?? signedAt,
+        i9CompletedAt: adminProfile['i9CompletedAt'] ?? signedAt,
+        stateWithholdingCompletedAt: adminProfile['stateWithholdingCompletedAt'] ?? signedAt,
+      });
+    }
   }
 
   // ── Emergency contact (not collected by the wizard) ───────────────────────

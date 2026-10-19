@@ -90,6 +90,10 @@ export class ComplianceFormService {
     );
   }
 
+  downloadFile(fileId: number): Observable<Blob> {
+    return this.http.get(`${environment.apiUrl}/files/${fileId}/download`, { responseType: 'blob' });
+  }
+
   downloadSubmissionPdf(submissionId: number): Observable<Blob> {
     return this.http.get(`${this.base}/submissions/${submissionId}/pdf`, { responseType: 'blob' });
   }

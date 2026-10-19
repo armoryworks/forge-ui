@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
-import { EmployeeProfileService, EmployeeProfile, ProfileCompleteness, UpdateEmployeeProfileRequest } from './employee-profile.service';
+import { completenessItemStatus, EmployeeProfileService, EmployeeProfile, ProfileCompleteness, UpdateEmployeeProfileRequest } from './employee-profile.service';
 import { environment } from '../../../../environments/environment';
 
 describe('EmployeeProfileService', () => {
@@ -177,5 +177,43 @@ describe('EmployeeProfileService', () => {
 
       expect(service.firstIncompleteRoute()).toBe('/account/tax-forms/directDeposit');
     });
+  });
+
+  describe('incompleteSectionCount', () => {
+    it('counts the tax forms section from the camelCase keys the API emits', () => {
+      service.load();
+      httpMock.expectOne(base).flush(mockProfile);
+      httpMock.expectOne(`${base}/completeness`).flush({
+        isComplete: false, canBeAssignedJobs: true, totalItems: 3, completedItems: 2,
+        items: [
+          { key: 'address', label: 'Home Address', isComplete: true, blocksJobAssignment: false },
+          { key: 'emergency_contact', label: 'Emergency Contact', isComplete: true, blocksJobAssignment: true },
+          { key: 'stateWithholding', label: 'State', isComplete: false, blocksJobAssignment: true },
+        ],
+      } satisfies ProfileCompleteness);
+
+      expect(service.incompleteSectionCount()).toBe(1);
+    });
+  });
+});
+
+describe('completenessItemStatus', () => {
+  const bypassed: ProfileCompleteness = { isComplete: true, canBeAssignedJobs: true, totalItems: 8, completedItems: 8, items: [] };
+
+  it('treats an item missing from a complete profile (onboarding bypassed) as complete', () => {
+    expect(completenessItemStatus(bypassed, 'w4')).toBe(true);
+  });
+
+  it('reports the item itself when the API lists it', () => {
+    const partial: ProfileCompleteness = {
+      isComplete: false, canBeAssignedJobs: false, totalItems: 1, completedItems: 0,
+      items: [{ key: 'w4', label: 'W-4', isComplete: false, blocksJobAssignment: true }],
+    };
+    expect(completenessItemStatus(partial, 'w4')).toBe(false);
+    expect(completenessItemStatus(partial, 'i9')).toBeNull();
+  });
+
+  it('is unknown until completeness loads', () => {
+    expect(completenessItemStatus(null, 'w4')).toBeNull();
   });
 });

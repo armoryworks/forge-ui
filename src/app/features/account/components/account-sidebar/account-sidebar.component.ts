@@ -1,15 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { EmployeeProfileService } from '../../services/employee-profile.service';
+import { completenessItemStatus, EmployeeProfileService, WIZARD_FORM_KEYS } from '../../services/employee-profile.service';
 import { ComplianceFormService } from '../../services/compliance-form.service';
 import { OnboardingService } from '../../../onboarding/onboarding.service';
 import { LayoutService } from '../../../../shared/services/layout.service';
-
-const WIZARD_PROFILE_KEYS = new Set([
-  'w4', 'i9', 'state_withholding', 'direct_deposit', 'workers_comp', 'handbook',
-]);
 
 interface AccountNavItem {
   path: string;
@@ -57,7 +55,7 @@ export class AccountSidebarComponent {
     const templates = this.templates();
     return templates.map(t => ({
       // Wizard-managed forms route to /onboarding; others keep their own route
-      path: WIZARD_PROFILE_KEYS.has(t.profileCompletionKey)
+      path: WIZARD_FORM_KEYS.includes(t.profileCompletionKey)
         ? '/onboarding'
         : `tax-forms/${t.profileCompletionKey}`,
       label: t.name,
@@ -82,9 +80,8 @@ export class AccountSidebarComponent {
   protected readonly taxFormsComplete = computed(() => {
     const c = this.completeness();
     if (!c) return null;
-    const keys = ['w4', 'i9', 'state_withholding', 'direct_deposit', 'workers_comp', 'handbook'];
-    const relevant = c.items.filter(i => keys.includes(i.key));
-    if (relevant.length === 0) return null;
+    const relevant = c.items.filter(i => WIZARD_FORM_KEYS.includes(i.key));
+    if (relevant.length === 0) return c.isComplete ? true : null;
     return relevant.every(i => i.isComplete);
   });
 
@@ -98,16 +95,21 @@ export class AccountSidebarComponent {
     const c = this.completeness();
     if (!c) return null;
     const relevant = c.items.filter(i => item.completionKeys!.includes(i.key));
-    if (relevant.length === 0) return null;
+    if (relevant.length === 0) return c.isComplete ? true : null;
     return relevant.every(i => i.isComplete);
   }
 
   protected isChildComplete(child: AccountNavChild): boolean | null {
-    const c = this.completeness();
-    if (!c) return null;
-    const item = c.items.find(i => i.key === child.completionKey);
-    return item?.isComplete ?? null;
+    return completenessItemStatus(this.completeness(), child.completionKey);
   }
+
+  protected readonly onTaxFormsPage = toSignal(
+    this.router.events.pipe(
+      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+      map(e => e.urlAfterRedirects.startsWith('/account/tax-forms')),
+    ),
+    { initialValue: this.router.url.startsWith('/account/tax-forms') },
+  );
 
   protected toggleTaxForms(): void {
     this.taxFormsExpanded.update(v => !v);

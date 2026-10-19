@@ -3,7 +3,7 @@ import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { EmployeeProfileService } from '../../services/employee-profile.service';
+import { completenessItemStatus, EmployeeProfileService } from '../../services/employee-profile.service';
 import { ComplianceFormService } from '../../services/compliance-form.service';
 import { OnboardingService } from '../../../onboarding/onboarding.service';
 
@@ -38,18 +38,16 @@ export class AccountTaxFormsComponent {
     return WIZARD_FORM_TYPES.has(formType);
   }
 
-  /** Resolves the router link for a given template. */
+  /** Resolves the router link for a given template: incomplete wizard forms are filled in the wizard. */
   protected getLinkForTemplate(formType: string, profileKey: string): string[] {
-    if (WIZARD_FORM_TYPES.has(formType)) {
+    if (WIZARD_FORM_TYPES.has(formType) && !this.isComplete(profileKey)) {
       return ['/onboarding'];
     }
     return [profileKey];
   }
 
   protected isComplete(profileKey: string): boolean {
-    const items = this.completeness()?.items;
-    if (!items) return false;
-    return items.find(i => i.key === profileKey)?.isComplete ?? false;
+    return completenessItemStatus(this.completeness(), profileKey) ?? false;
   }
 
   protected getCompletedDate(profileKey: string): string | null {

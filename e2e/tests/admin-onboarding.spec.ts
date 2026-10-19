@@ -395,6 +395,11 @@ async function completeStateWithholding(page: Page) {
 async function acknowledgeForm(page: Page, formType: string, screenshotName: string) {
   console.log(`Step: Acknowledge ${formType}`);
   await page.goto(`${BASE_URL}/account/tax-forms/${formType}`, { waitUntil: 'networkidle' });
+  if (page.url().includes('/onboarding')) {
+    console.log(`  ${formType} is collected by the onboarding wizard — skipping`);
+    await page.screenshot({ path: `e2e/screenshots/${screenshotName}.png` });
+    return;
+  }
 
   // Wait for the template to load (form detail renders either the status-complete div,
   // the acknowledge button, or the pending-setup banner — any of these confirms load).
