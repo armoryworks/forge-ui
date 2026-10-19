@@ -37,6 +37,7 @@ import { VendorPartsService } from '../../services/vendor-parts.service';
 import { PartPurchaseUnit } from '../../models/part-purchase-unit.model';
 import { PurchaseUnitsService } from '../../services/purchase-units.service';
 import { fromIsoDate, toDateOnly, toIsoDate } from '../../../../shared/utils/date.utils';
+import { countryCodeValidator, positiveValidator } from '../../../../shared/validators/vendor-part.validators';
 
 /**
  * A new price tier that the user has typed but not yet committed to the
@@ -489,8 +490,8 @@ export class VendorSourcesPanelComponent {
         vendorMpn: [row?.vendorMpn ?? '', [Validators.maxLength(100)]],
         leadTimeDays: [row?.leadTimeDays ?? null, [Validators.min(0)]],
         minOrderQty: [row?.minOrderQty ?? null, [Validators.min(0)]],
-        packSize: [row?.packSize ?? null, [Validators.min(0)]],
-        countryOfOrigin: [row?.countryOfOrigin ?? '', [Validators.maxLength(2)]],
+        packSize: [row?.packSize ?? null, [positiveValidator]],
+        countryOfOrigin: [row?.countryOfOrigin ?? '', [Validators.maxLength(2), countryCodeValidator]],
         htsCode: [row?.htsCode ?? '', [Validators.maxLength(20)]],
         certifications: [row?.certifications ?? '', [Validators.maxLength(500)]],
         lastQuotedDate: [fromIsoDate(row?.lastQuotedDate)],

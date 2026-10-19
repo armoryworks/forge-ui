@@ -23,6 +23,7 @@ import { VendorQuickCreateDialogComponent, VendorQuickCreateDialogData } from '.
 import { VendorListItem } from '../../../vendors/models/vendor-list-item.model';
 import { PartQuickCreateDialogComponent, PartQuickCreateDialogData } from '../part-quick-create-dialog/part-quick-create-dialog.component';
 import { PartDetail } from '../../models/part-detail.model';
+import { countryCodeValidator, positiveValidator } from '../../../../shared/validators/vendor-part.validators';
 
 export interface VendorPartFormDialogData {
   vendorPart: VendorPart | null;
@@ -98,8 +99,8 @@ export class VendorPartFormDialogComponent {
     vendorMpn: new FormControl<string | null>(this.data.vendorPart?.vendorMpn ?? '', [Validators.maxLength(100)]),
     leadTimeDays: new FormControl<number | null>(this.data.vendorPart?.leadTimeDays ?? null, [Validators.min(0)]),
     minOrderQty: new FormControl<number | null>(this.data.vendorPart?.minOrderQty ?? null, [Validators.min(0)]),
-    packSize: new FormControl<number | null>(this.data.vendorPart?.packSize ?? null, [Validators.min(0)]),
-    countryOfOrigin: new FormControl<string | null>(this.data.vendorPart?.countryOfOrigin ?? '', [Validators.maxLength(2)]),
+    packSize: new FormControl<number | null>(this.data.vendorPart?.packSize ?? null, [positiveValidator]),
+    countryOfOrigin: new FormControl<string | null>(this.data.vendorPart?.countryOfOrigin ?? '', [Validators.maxLength(2), countryCodeValidator]),
     htsCode: new FormControl<string | null>(this.data.vendorPart?.htsCode ?? '', [Validators.maxLength(20)]),
     isApproved: new FormControl<boolean>(this.data.vendorPart?.isApproved ?? true, { nonNullable: true }),
     isPreferred: new FormControl<boolean>(
