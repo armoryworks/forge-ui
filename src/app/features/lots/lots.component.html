@@ -6,7 +6,8 @@
   <app-input
     label="Search lot number or part"
     [formControl]="searchControl"
-    [attr.aria-label]="'common.search' | translate" />
+    [attr.aria-label]="'common.search' | translate"
+    (keydown.enter)="applySearch()" />
   <button class="action-btn" (click)="applySearch()"
     [attr.aria-label]="'common.search' | translate">
     <span class="material-icons-outlined">search</span>
@@ -38,6 +39,19 @@
         <app-entity-link type="job" [entityId]="row.jobId">
           <span>{{ row.jobNumber }}</span>
         </app-entity-link>
+      } @else {
+        <span class="text-muted">—</span>
+      }
+    </ng-template>
+
+    <ng-template appColumnCell="expirationDate" let-row>
+      @if (row.expirationDate) {
+        <span class="lot-expiry">
+          {{ row.expirationDate | dateOnly }}
+          @if (isExpired(row)) {
+            <span class="chip chip--error" data-testid="lot-expired">{{ 'lots.expired' | translate }}</span>
+          }
+        </span>
       } @else {
         <span class="text-muted">—</span>
       }
