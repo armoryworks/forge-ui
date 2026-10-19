@@ -55,7 +55,7 @@
             }
             <mat-slide-toggle
               [checked]="entry()!.enabled"
-              [disabled]="togglePending()"
+              [disabled]="togglePending() || (entry()!.isAvailable === false && !entry()!.enabled)"
               (change)="onToggle($event.checked, $event.source)"
               data-testid="capability-detail-toggle"
               [aria-label]="'admin.capability.toggleAria' | translate: { name: entry()!.name }">

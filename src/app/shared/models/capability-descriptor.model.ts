@@ -25,6 +25,8 @@ export interface CapabilityDescriptorEntry {
   configId: number | null;
   dependencies: string[];
   mutexes: string[];
+  /** False when the capability is listed but not built yet; it cannot be turned on. */
+  isAvailable?: boolean;
 }
 
 export interface CapabilityDescriptor {

@@ -141,7 +141,7 @@
                       (keydown.enter)="openDetail(cap)">
                       <mat-slide-toggle
                         [checked]="cap.enabled"
-                        [disabled]="isPending(cap.code) || loading()"
+                        [disabled]="isPending(cap.code) || loading() || (cap.isAvailable === false && !cap.enabled)"
                         (change)="onToggle(cap, $event.checked, $event.source)"
                         (click)="$event.stopPropagation()"
                         [aria-label]="'admin.capability.toggleAria' | translate: { name: cap.name }"
