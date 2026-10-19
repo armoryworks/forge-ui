@@ -14,7 +14,7 @@ import { CapabilityDisabledError } from '../errors/capability-disabled.error';
 import { SnackbarService } from '../services/snackbar.service';
 import { ToastService } from '../services/toast.service';
 import { wasHttpErrorShown } from '../utils/shown-http-errors';
-import { httpErrorInterceptor, SUPPRESS_VALIDATION_SNACKBAR } from './http-error.interceptor';
+import { httpErrorInterceptor, MFA_ENROLLMENT_REQUIRED, SUPPRESS_VALIDATION_SNACKBAR } from './http-error.interceptor';
 import { SILENT_HTTP_ERRORS } from './silent-http-errors.token';
 
 describe('httpErrorInterceptor', () => {
@@ -22,6 +22,7 @@ describe('httpErrorInterceptor', () => {
   let httpMock: HttpTestingController;
   let snackbar: { error: ReturnType<typeof vi.fn>; warn: ReturnType<typeof vi.fn>; success: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
   let toast: { show: ReturnType<typeof vi.fn> };
+  let router: { navigate: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     snackbar = {
@@ -31,6 +32,7 @@ describe('httpErrorInterceptor', () => {
       info: vi.fn(),
     };
     toast = { show: vi.fn() };
+    router = { navigate: vi.fn().mockResolvedValue(true) };
 
     TestBed.configureTestingModule({
       providers: [
@@ -39,7 +41,7 @@ describe('httpErrorInterceptor', () => {
         { provide: SnackbarService, useValue: snackbar },
         { provide: ToastService, useValue: toast },
         { provide: TranslateService, useValue: { instant: (k: string) => k } },
-        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: Router, useValue: router },
       ],
     });
 
@@ -91,6 +93,22 @@ describe('httpErrorInterceptor', () => {
     expect(captured).toBeInstanceOf(CapabilityDisabledError);
     expect((captured as CapabilityDisabledError).capabilityCode).toBe('CAP-EXT-ANNOUNCEMENTS');
     expect(snackbar.error).not.toHaveBeenCalled();
+  });
+
+  it('sends a user who must enrol in MFA to the security page instead of showing access denied', () => {
+    let captured: unknown;
+    http.get('/api/v1/jobs').subscribe({
+      next: () => {},
+      error: (err) => { captured = err; },
+    });
+
+    const req = httpMock.expectOne('/api/v1/jobs');
+    req.flush({ status: 403, code: MFA_ENROLLMENT_REQUIRED }, { status: 403, statusText: 'Forbidden' });
+
+    expect(router.navigate).toHaveBeenCalledWith(['/account/security']);
+    expect(snackbar.error).not.toHaveBeenCalled();
+    expect(captured).toBeInstanceOf(HttpErrorResponse);
+    expect(wasHttpErrorShown(captured)).toBe(true);
   });
 
   it('falls back to access-denied snackbar on plain 403 (no capability envelope, no header)', () => {

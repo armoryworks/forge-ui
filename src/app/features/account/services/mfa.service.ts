@@ -1,8 +1,9 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, map, of, switchMap, tap } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
+import { AuthService } from '../../../shared/services/auth.service';
 import {
   MfaSetupResponse,
   MfaChallengeResponse,
@@ -17,6 +18,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class MfaService {
   private readonly http = inject(HttpClient);
+  private readonly auth = inject(AuthService);
   private readonly _status = signal<MfaStatus | null>(null);
 
   readonly status = this._status.asReadonly();
@@ -28,7 +30,11 @@ export class MfaService {
   }
 
   verifySetup(deviceId: number, code: string): Observable<{ verified: boolean }> {
-    return this.http.post<{ verified: boolean }>(`${environment.apiUrl}/auth/mfa/verify-setup`, { deviceId, code });
+    return this.http.post<{ verified: boolean }>(`${environment.apiUrl}/auth/mfa/verify-setup`, { deviceId, code }).pipe(
+      switchMap((result) => result.verified
+        ? this.auth.refreshAccessToken().pipe(map(() => result))
+        : of(result)),
+    );
   }
 
   disable(): Observable<void> {
