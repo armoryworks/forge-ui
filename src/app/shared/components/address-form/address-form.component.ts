@@ -1,6 +1,6 @@
 import {
   AfterContentInit, ChangeDetectionStrategy, Component, DestroyRef, forwardRef, inject, Injector,
-  input, OnInit, signal,
+  computed, input, OnInit, signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -71,6 +71,24 @@ const US_STATES: AutocompleteOption[] = ([
   ['DC', 'District of Columbia'],
 ] as const).map(([code, name]) => ({ value: code, name, label: `${code} - ${name}` }));
 
+const CA_PROVINCES: AutocompleteOption[] = ([
+  ['AB', 'Alberta'],
+  ['BC', 'British Columbia'],
+  ['MB', 'Manitoba'],
+  ['NB', 'New Brunswick'],
+  ['NL', 'Newfoundland and Labrador'],
+  ['NS', 'Nova Scotia'],
+  ['NT', 'Northwest Territories'],
+  ['NU', 'Nunavut'],
+  ['ON', 'Ontario'],
+  ['PE', 'Prince Edward Island'],
+  ['QC', 'Quebec'],
+  ['SK', 'Saskatchewan'],
+  ['YT', 'Yukon'],
+] as const).map(([code, name]) => ({ value: code, name, label: `${code} - ${name}` }));
+
+const REGION_OPTIONS: Record<string, AutocompleteOption[]> = { US: US_STATES, CA: CA_PROVINCES };
+
 const COUNTRY_OPTIONS: SelectOption[] = [
   { value: 'US', label: 'United States' },
   { value: 'CA', label: 'Canada' },
@@ -119,13 +137,14 @@ export class AddressFormComponent implements ControlValueAccessor, OnInit, After
   /** Lock country to a fixed value (null = editable) */
   readonly fixedCountry = input<string | null>(null);
 
-  /** Use a searchable US state picker vs free-text input */
+  /** Use a searchable state/province picker for US and CA addresses vs free-text input */
   readonly stateDropdown = input(true);
 
   /** Compact mode — fewer labels, tighter spacing */
   readonly compact = input(false);
 
-  protected readonly stateOptions: AutocompleteOption[] = US_STATES;
+  protected readonly country = signal<string | null>('US');
+  protected readonly stateOptions = computed(() => REGION_OPTIONS[this.country() ?? ''] ?? null);
   protected readonly stateMatchFields: readonly string[] = ['value', 'name', 'label'];
   protected readonly countryOptions: SelectOption[] = COUNTRY_OPTIONS;
 
@@ -154,6 +173,16 @@ export class AddressFormComponent implements ControlValueAccessor, OnInit, After
       this.form.controls.country.setValue(fixed);
       this.form.controls.country.disable();
     }
+    this.country.set(this.form.controls.country.value);
+
+    this.form.controls.country.valueChanges.subscribe(country => {
+      this.country.set(country);
+      const options = REGION_OPTIONS[country ?? ''];
+      const state = this.form.controls.state.value;
+      if (options && state && !options.some(o => o['value'] === state)) {
+        this.form.controls.state.setValue(null);
+      }
+    });
 
     this.form.valueChanges.subscribe(() => {
       this.verified.set(false);
@@ -185,6 +214,7 @@ export class AddressFormComponent implements ControlValueAccessor, OnInit, After
     } else {
       this.form.reset({ country: this.fixedCountry() ?? 'US' }, { emitEvent: false });
     }
+    this.country.set(this.form.controls.country.value);
   }
 
   registerOnChange(fn: (value: Address | null) => void): void {

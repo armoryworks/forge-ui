@@ -212,3 +212,74 @@ describe('AddressFormComponent · errors from the outer form', () => {
     expect(errorCount()).toBe(0);
   });
 });
+
+@Component({
+  selector: 'app-address-form-country-host',
+  standalone: true,
+  imports: [ReactiveFormsModule, AddressFormComponent],
+  template: '<app-address-form [formControl]="address" [showVerify]="false" />',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+class CountryHostComponent {
+  readonly address = new FormControl<Address | null>({
+    line1: '1000 Rue Sherbrooke',
+    city: 'Montreal',
+    state: 'QC',
+    postalCode: 'H3B 1A7',
+    country: 'CA',
+  });
+}
+
+describe('AddressFormComponent · non-US addresses', () => {
+  let fixture: ComponentFixture<CountryHostComponent>;
+  let el: HTMLElement;
+
+  beforeEach(async () => {
+    configure();
+    fixture = TestBed.createComponent(CountryHostComponent);
+    el = fixture.nativeElement;
+    await fixture.whenStable();
+    fixture.detectChanges();
+  });
+
+  function form(): AddressFormComponent {
+    return fixture.debugElement.query(By.directive(AddressFormComponent)).componentInstance as AddressFormComponent;
+  }
+
+  function stateOptions(): AutocompleteOption[] {
+    const picker = fixture.debugElement.query(By.directive(AutocompleteComponent));
+    return picker ? (picker.componentInstance as AutocompleteComponent).options() : [];
+  }
+
+  function setCountry(country: string): void {
+    (form() as unknown as { form: FormGroup }).form.controls['country'].setValue(country);
+    fixture.detectChanges();
+  }
+
+  it('keeps a Canadian postal code exactly as stored', () => {
+    const inputs = Array.from(el.querySelectorAll('app-input input')) as HTMLInputElement[];
+    expect(inputs.map(i => i.value)).toContain('H3B 1A7');
+    expect(fixture.componentInstance.address.value?.postalCode).toBe('H3B 1A7');
+  });
+
+  it('offers Canadian provinces for a Canadian address', () => {
+    expect(stateOptions().map(o => o['value'])).toContain('QC');
+    expect(stateOptions().map(o => o['value'])).not.toContain('UT');
+  });
+
+  it('switches to a free-text region for other countries', () => {
+    setCountry('GB');
+    expect(el.querySelector('[data-testid="address-form-state"]')).toBeNull();
+    const region = el.querySelector('[data-testid="address-form-state-text"] input') as HTMLInputElement;
+    expect(region.value).toBe('QC');
+    region.value = 'Greater London';
+    region.dispatchEvent(new Event('input'));
+    expect(fixture.componentInstance.address.value?.state).toBe('Greater London');
+  });
+
+  it('clears a region that does not belong to the newly chosen country list', () => {
+    setCountry('US');
+    expect(fixture.componentInstance.address.value?.state).toBe('');
+    expect(stateOptions().map(o => o['value'])).toContain('UT');
+  });
+});

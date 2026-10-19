@@ -5,21 +5,18 @@
   } @else if (prefix()) {
     <span matPrefix class="material-icons-outlined input__icon-prefix" aria-hidden="true">{{ prefix() }}</span>
   }
-  <input matInput
+  <input matInput #field
     [type]="effectiveType"
+    [attr.inputmode]="isNumeric ? 'decimal' : null"
     [placeholder]="placeholder()"
     [readonly]="isReadonly()"
     [required]="required()"
-    [attr.maxlength]="maxlength()"
-    [attr.step]="step()"
-    [attr.min]="min()"
-    [attr.max]="max()"
+    [attr.maxlength]="effectiveMaxlength"
     [autocomplete]="autocomplete()"
     [disabled]="disabled()"
-    [value]="value()"
     [errorStateMatcher]="errorStateMatcher"
     (input)="onInput($event)"
-    (blur)="markTouched()" />
+    (blur)="onBlur()" />
   @if (type() === 'password') {
     <button matSuffix type="button" class="input__password-toggle"
       data-testid="password-toggle"
