@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
@@ -17,7 +18,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
-import { debounceTime, distinctUntilChanged, filter, switchMap, catchError, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, switchMap, catchError, map, of } from 'rxjs';
 
 import {
   SimilarEntitiesDialogComponent,
@@ -61,6 +62,8 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
   readonly filters = input<Record<string, string>>({});
   readonly placeholder = input<string>('');
   readonly isReadonly = input<boolean>(false);
+  /** Marks the inner input required so the form field shows its required asterisk. */
+  readonly required = input(false, { transform: booleanAttribute });
   /**
    * Singular noun for the inline-create affordance — when set, the dropdown
    * surfaces a "Create new {createNewLabel} '{typed query}'" option below
@@ -79,12 +82,16 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
    * consumers that only bind the form value ignore it.
    */
   readonly selected = output<Record<string, unknown> | null>();
+  /** Emits the term and result count each time a server search returns. */
+  readonly searchCompleted = output<{ term: string; count: number }>();
 
   protected readonly searchControl = new FormControl('');
   protected readonly results = signal<Record<string, unknown>[]>([]);
   protected readonly disabled = signal(false);
   /** True when {@link createNewLabel} is set AND the user has typed >= 2 chars — controls the dropdown's "Create new" row visibility. */
   protected readonly canShowCreateNew = signal(false);
+  /** True while exactly one character is typed — the dropdown shows a "type at least 2 characters" hint instead of results. */
+  protected readonly showMinCharsHint = signal(false);
   private selectedValue: unknown = null;
 
   private onChange: (value: unknown) => void = () => {};
@@ -100,15 +107,22 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
       this.canShowCreateNew.set(
         !!this.createNewLabel() && typeof term === 'string' && term.length >= 2,
       );
+      const length = typeof term === 'string' ? term.trim().length : 0;
+      this.showMinCharsHint.set(length === 1);
+      if (length < 2) this.results.set([]);
     });
 
     this.searchControl.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged(),
       filter(term => typeof term === 'string' && term.length >= 2),
-      switchMap(term => this.search(term as string)),
+      switchMap(term => this.search(term as string).pipe(map(results => ({ term: term as string, results })))),
       takeUntilDestroyed(this.destroyRef),
-    ).subscribe(results => this.results.set(results));
+    ).subscribe(({ term, results }) => {
+      if ((this.searchControl.value ?? '').toString().trim().length < 2) return;
+      this.results.set(results);
+      this.searchCompleted.emit({ term, count: results.length });
+    });
   }
 
   writeValue(value: unknown): void {

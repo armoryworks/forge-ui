@@ -35,6 +35,9 @@ import { formValidationContext } from '../../shared/interceptors/http-error.inte
 import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { ServerPageRequest, ServerPageState } from '../../shared/models/server-page-state.model';
+import { TablePreferences } from '../../shared/models/table-preferences.model';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { PartsCardGridComponent } from './components/parts-card-grid/parts-card-grid.component';
@@ -60,7 +63,7 @@ type ViewMode = 'table' | 'cards';
     InputComponent, SelectComponent, TextareaComponent,
     CurrencyDisplayComponent,
     DataTableComponent, EntityPickerComponent, ColumnCellDirective, ValidationButtonComponent,
-    LoadingBlockDirective, MatTooltipModule,
+    LoadingBlockDirective, MatTooltipModule, MatPaginatorModule,
     PartsCardGridComponent,
     EntityCompletenessChipComponent, EntityCompletenessBadgeComponent,
   ],
@@ -102,16 +105,31 @@ export class PartsComponent {
    * and is filtered by the applied search like parts are.
    */
   protected readonly combinedRows = computed<PartListRow[]>(() => [
-    ...buildDraftPartRows(
-      this.entitylessDrafts(),
-      this.appliedSearch(),
-      this.translate.instant('parts.drafts.unnamed'),
-    ),
+    ...(this.pageRequest().pageIndex === 0
+      ? buildDraftPartRows(
+        this.entitylessDrafts(),
+        this.appliedSearch(),
+        this.translate.instant('parts.drafts.unnamed'),
+      )
+      : []),
     ...this.parts(),
   ]);
 
   // Phase 3 F7-partial / WU-17 — surfaces server-side totalCount.
   protected readonly totalCount = signal<number>(0);
+
+  private static readonly defaultSort = { sort: 'partNumber', order: 'asc' as const };
+
+  protected readonly pageRequest = signal<ServerPageRequest>({
+    pageIndex: 0,
+    pageSize: this.userPreferences.get<TablePreferences>('table:parts')?.pageSize ?? 25,
+    ...PartsComponent.defaultSort,
+  });
+
+  protected readonly serverPaging = computed<ServerPageState>(() => ({
+    ...this.pageRequest(),
+    totalCount: this.totalCount(),
+  }));
 
   // ── View Mode (table / cards) — URL param + persisted preference ──
   protected readonly viewMode = toSignal(
@@ -173,7 +191,7 @@ export class PartsComponent {
     { field: 'status', header: this.translate.instant('common.status'), sortable: true, filterable: true, type: 'enum', filterOptions: [
       { value: 'Active', label: this.translate.instant('parts.statusActive') }, { value: 'Draft', label: this.translate.instant('parts.statusDraft') }, { value: 'Prototype', label: this.translate.instant('parts.statusPrototype') }, { value: 'Obsolete', label: this.translate.instant('parts.statusObsolete') },
     ]},
-    { field: 'effectivePrice', header: this.translate.instant('parts.effectivePrice'), sortable: true, width: '110px', align: 'right' },
+    { field: 'effectivePrice', header: this.translate.instant('parts.effectivePrice'), width: '110px', align: 'right' },
     { field: 'bomLineCount', header: this.translate.instant('parts.bom'), width: '60px', align: 'center' },
     // Hidden by default — power users opt in via column-manager. Renders the
     // full completeness chip (click → popover with per-capability gaps).
@@ -267,20 +285,20 @@ export class PartsComponent {
       .pipe(takeUntilDestroyed())
       .subscribe(term => {
         this.appliedSearch.set(term);
-        this.loadParts();
+        this.loadFirstPage();
       });
 
     this.statusFilterControl.valueChanges
       .pipe(distinctUntilChanged(), takeUntilDestroyed())
-      .subscribe(() => this.loadParts());
+      .subscribe(() => this.loadFirstPage());
 
     this.procurementFilterControl.valueChanges
       .pipe(distinctUntilChanged(), takeUntilDestroyed())
-      .subscribe(() => this.loadParts());
+      .subscribe(() => this.loadFirstPage());
 
     this.inventoryClassFilterControl.valueChanges
       .pipe(distinctUntilChanged(), takeUntilDestroyed())
-      .subscribe(() => this.loadParts());
+      .subscribe(() => this.loadFirstPage());
   }
 
   // ── List ──
@@ -291,18 +309,16 @@ export class PartsComponent {
     const procurementSource = (this.procurementFilter() ?? '') || undefined;
     const inventoryClass = (this.inventoryClassFilter() ?? '') || undefined;
     const search = this.appliedSearch() || undefined;
-    // Phase 3 F7-partial / WU-17 — paged endpoint with the standardised
-    // contract; pageSize=200 matches the server cap. The data-table slices
-    // client-side for now; switch to true server-paging if a tenant grows
-    // beyond the 200-row window.
+    const page = this.pageRequest();
     this.partsService.getPartsPaged({
       status,
       procurementSource,
       inventoryClass,
       q: search,
-      pageSize: 200,
-      sort: 'partNumber',
-      order: 'asc',
+      page: page.pageIndex + 1,
+      pageSize: page.pageSize,
+      sort: page.sort ?? PartsComponent.defaultSort.sort,
+      order: page.sort ? page.order : PartsComponent.defaultSort.order,
     }).subscribe({
       next: (paged) => {
         this.completeness.prime('Part', paged.items.map(p => p.id));
@@ -312,6 +328,25 @@ export class PartsComponent {
         this.autoOpenFromUrl();
       },
       error: () => this.loading.set(false),
+    });
+  }
+
+  private loadFirstPage(): void {
+    this.pageRequest.update(page => ({ ...page, pageIndex: 0 }));
+    this.loadParts();
+  }
+
+  protected onServerPageChange(request: ServerPageRequest): void {
+    this.pageRequest.set(request.sort ? request : { ...request, ...PartsComponent.defaultSort });
+    this.loadParts();
+  }
+
+  protected onCardPageChange(event: PageEvent): void {
+    const page = this.pageRequest();
+    this.onServerPageChange({
+      ...page,
+      pageIndex: event.pageSize === page.pageSize ? event.pageIndex : 0,
+      pageSize: event.pageSize,
     });
   }
 

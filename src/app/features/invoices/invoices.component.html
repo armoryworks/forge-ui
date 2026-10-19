@@ -44,6 +44,7 @@
       <app-data-table tableId="invoices" [columns]="invoiceColumns" [data]="invoices()"
         emptyIcon="receipt_long" [emptyMessage]="'invoices.noInvoicesFound' | translate"
         [clickableRows]="true"
+        [serverPaging]="serverPaging()" (serverPageChange)="onServerPageChange($event)"
         (rowClick)="openInvoiceDetail($any($event))">
         <ng-template appColumnCell="invoiceNumber" let-row>
           <span class="inv-number">{{ row.invoiceNumber }}</span>

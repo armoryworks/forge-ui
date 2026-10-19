@@ -32,6 +32,7 @@ interface DialogInternals {
   taxLocked(): boolean;
   draftConfig: { snapshotFn(): Record<string, unknown>; restoreFn(data: Record<string, unknown>): void };
   onCustomerSelected(customer: Record<string, unknown> | null): void;
+  onPartPicked(part: Record<string, unknown> | null): void;
   shipToOptions(): { value: unknown }[];
   billToOptions(): { value: unknown }[];
   addLine(): void;
@@ -77,8 +78,16 @@ function creditStatus(overrides: Partial<CreditStatus> = {}): CreditStatus {
   };
 }
 
+let pickableParts: PartListItem[] = [];
+
+function pickPart(internals: DialogInternals, partId: number): void {
+  internals.lineForm.controls.partId.setValue(partId);
+  internals.onPartPicked((pickableParts.find(p => p.id === partId) ?? null) as Record<string, unknown> | null);
+}
+
 function setup(parts: PartListItem[] = [part()], confirmed = true, commercialRole = true) {
   TestBed.resetTestingModule();
+  pickableParts = parts;
   const dialogOpen = vi.fn(() => ({ afterClosed: () => of(confirmed) }));
   TestBed.configureTestingModule({
     providers: [
@@ -93,8 +102,6 @@ function setup(parts: PartListItem[] = [part()], confirmed = true, commercialRol
 
   const component = TestBed.runInInjectionContext(() => new SoDialogComponent());
   const httpMock = TestBed.inject(HttpTestingController);
-
-  httpMock.expectOne(r => r.url === `${api}/parts`).flush({ items: parts, totalCount: parts.length, page: 1, pageSize: 200 });
 
   return { component, internals: component as unknown as DialogInternals, httpMock, dialogOpen };
 }
@@ -181,7 +188,7 @@ describe('SoDialogComponent', () => {
       const { component, internals, httpMock } = setup([part({ id: 20 })]);
       internals.dialogRef = { clearDraft: vi.fn() };
       selectCustomer(component, httpMock, [address(2, 'Shipping', true), address(3, 'Billing', true)]);
-      internals.lineForm.controls.partId.setValue(20);
+      pickPart(internals, 20);
       expectPriceLookup(httpMock, 5, 20, 12.5);
       internals.addLine();
 
@@ -201,7 +208,7 @@ describe('SoDialogComponent', () => {
       const { component, internals, httpMock } = setup();
       selectCustomer(component, httpMock);
 
-      internals.lineForm.controls.partId.setValue(20);
+      pickPart(internals, 20);
       expectPriceLookup(httpMock, 5, 20, 42);
 
       expect(internals.lineForm.controls.unitPrice.value).toBe(42);
@@ -220,7 +227,7 @@ describe('SoDialogComponent', () => {
 
         internals.lineForm.controls.quantity.setValue(250);
         vi.advanceTimersByTime(300);
-        internals.lineForm.controls.partId.setValue(20);
+        pickPart(internals, 20);
         httpMock.expectOne(r =>
           r.url === `${api}/quotes/resolve-price` && r.params.get('quantity') === '250').flush(96);
         expect(internals.lineForm.controls.unitPrice.value).toBe(96);
@@ -240,7 +247,7 @@ describe('SoDialogComponent', () => {
       const { component, internals, httpMock } = setup([part({ effectivePrice: 9.5, effectivePriceSource: 'PartPrice' })]);
       selectCustomer(component, httpMock);
 
-      internals.lineForm.controls.partId.setValue(20);
+      pickPart(internals, 20);
       expectPriceLookup(httpMock, 5, 20, null);
 
       expect(internals.lineForm.controls.unitPrice.value).toBe(9.5);
@@ -252,7 +259,7 @@ describe('SoDialogComponent', () => {
       const { component, internals, httpMock } = setup([part({ effectivePrice: 3, effectivePriceSource: 'Default' })]);
       selectCustomer(component, httpMock);
 
-      internals.lineForm.controls.partId.setValue(20);
+      pickPart(internals, 20);
       expectPriceLookup(httpMock, 5, 20, null);
 
       expect(internals.lineForm.controls.unitPrice.value).toBe(0);
@@ -263,7 +270,7 @@ describe('SoDialogComponent', () => {
     it('uses the part effective price without a lookup when no customer is chosen', () => {
       const { internals, httpMock } = setup([part({ effectivePrice: 7, effectivePriceSource: 'PriceListEntry' })]);
 
-      internals.lineForm.controls.partId.setValue(20);
+      pickPart(internals, 20);
 
       expect(internals.lineForm.controls.unitPrice.value).toBe(7);
       httpMock.verify();
@@ -272,10 +279,10 @@ describe('SoDialogComponent', () => {
     it('re-resolves only the pending line when the customer changes', () => {
       const { component, internals, httpMock } = setup([part({ id: 20 }), part({ id: 21, partNumber: 'P-21' })]);
       selectCustomer(component, httpMock);
-      internals.lineForm.controls.partId.setValue(20);
+      pickPart(internals, 20);
       expectPriceLookup(httpMock, 5, 20, 10);
       internals.addLine();
-      internals.lineForm.controls.partId.setValue(21);
+      pickPart(internals, 21);
       expectPriceLookup(httpMock, 5, 21, 11);
 
       component.form.controls.customerId.setValue(6);
@@ -292,10 +299,10 @@ describe('SoDialogComponent', () => {
     it('resets the price to 0 when the next part has no price', () => {
       const { component, internals, httpMock } = setup([part({ id: 20 }), part({ id: 21, partNumber: 'P-21' })]);
       selectCustomer(component, httpMock);
-      internals.lineForm.controls.partId.setValue(20);
+      pickPart(internals, 20);
       expectPriceLookup(httpMock, 5, 20, 25);
 
-      internals.lineForm.controls.partId.setValue(21);
+      pickPart(internals, 21);
       expectPriceLookup(httpMock, 5, 21, null);
 
       expect(internals.lineForm.controls.unitPrice.value).toBe(0);
@@ -306,7 +313,7 @@ describe('SoDialogComponent', () => {
     it('resets the price to 0 when the new customer has no price', () => {
       const { component, internals, httpMock } = setup();
       selectCustomer(component, httpMock);
-      internals.lineForm.controls.partId.setValue(20);
+      pickPart(internals, 20);
       expectPriceLookup(httpMock, 5, 20, 25);
 
       component.form.controls.customerId.setValue(6);
@@ -323,7 +330,7 @@ describe('SoDialogComponent', () => {
     it('does not overwrite a price typed while the lookup was in flight', () => {
       const { component, internals, httpMock } = setup();
       selectCustomer(component, httpMock);
-      internals.lineForm.controls.partId.setValue(20);
+      pickPart(internals, 20);
       internals.lineForm.controls.unitPrice.setValue(8);
       internals.lineForm.controls.unitPrice.markAsDirty();
 
@@ -337,7 +344,7 @@ describe('SoDialogComponent', () => {
     it('keeps a price the user typed when the customer changes', () => {
       const { component, internals, httpMock } = setup();
       selectCustomer(component, httpMock);
-      internals.lineForm.controls.partId.setValue(20);
+      pickPart(internals, 20);
       expectPriceLookup(httpMock, 5, 20, 10);
       internals.lineForm.controls.unitPrice.setValue(8);
       internals.lineForm.controls.unitPrice.markAsDirty();
@@ -352,7 +359,7 @@ describe('SoDialogComponent', () => {
   describe('zero-price confirmation', () => {
     it('asks before adding a $0 line and skips it when declined', () => {
       const { internals, httpMock, dialogOpen } = setup([part()], false);
-      internals.lineForm.controls.partId.setValue(20);
+      pickPart(internals, 20);
 
       internals.addLine();
 
@@ -363,7 +370,7 @@ describe('SoDialogComponent', () => {
 
     it('adds the $0 line when confirmed', () => {
       const { internals, httpMock, dialogOpen } = setup([part()], true);
-      internals.lineForm.controls.partId.setValue(20);
+      pickPart(internals, 20);
 
       internals.addLine();
 
@@ -374,7 +381,7 @@ describe('SoDialogComponent', () => {
 
     it('does not ask for a priced line', () => {
       const { internals, httpMock, dialogOpen } = setup();
-      internals.lineForm.controls.partId.setValue(20);
+      pickPart(internals, 20);
       internals.lineForm.controls.unitPrice.setValue(5);
 
       internals.addLine();
@@ -469,7 +476,7 @@ describe('SoDialogComponent', () => {
       const { component, internals, httpMock } = setup([part({ id: 20 })]);
       internals.dialogRef = { clearDraft: vi.fn() };
       pickCustomer(component, httpMock, 0.0725, false);
-      internals.lineForm.controls.partId.setValue(20);
+      pickPart(internals, 20);
       expectPriceLookup(httpMock, 5, 20, 10);
       internals.addLine();
 

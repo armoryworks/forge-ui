@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -13,6 +13,9 @@ import { SelectComponent, SelectOption } from '../../shared/components/select/se
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
+import { ServerPageRequest, ServerPageState } from '../../shared/models/server-page-state.model';
+import { TablePreferences } from '../../shared/models/table-preferences.model';
+import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { AccountingService } from '../../shared/services/accounting.service';
@@ -50,6 +53,7 @@ export class InvoicesComponent implements OnInit {
   private readonly snackbar = inject(SnackbarService);
   private readonly accountingService = inject(AccountingService);
   private readonly translate = inject(TranslateService);
+  private readonly userPreferences = inject(UserPreferencesService);
 
   protected readonly isStandalone = this.accountingService.isStandalone;
   protected readonly providerName = this.accountingService.providerName;
@@ -60,6 +64,19 @@ export class InvoicesComponent implements OnInit {
   protected readonly invoices = signal<InvoiceListItem[]>([]);
   // Phase 3 F7-broad / WU-22 — server-side total for the header counter.
   protected readonly totalCount = signal<number>(0);
+
+  private static readonly defaultSort = { sort: 'invoiceDate', order: 'desc' as const };
+
+  protected readonly pageRequest = signal<ServerPageRequest>({
+    pageIndex: 0,
+    pageSize: this.userPreferences.get<TablePreferences>('table:invoices')?.pageSize ?? 25,
+    ...InvoicesComponent.defaultSort,
+  });
+
+  protected readonly serverPaging = computed<ServerPageState>(() => ({
+    ...this.pageRequest(),
+    totalCount: this.totalCount(),
+  }));
   protected readonly uninvoicedJobs = signal<UninvoicedJob[]>([]);
   protected readonly uninvoicedCount = signal(0);
 
@@ -90,9 +107,9 @@ export class InvoicesComponent implements OnInit {
     ]},
     { field: 'invoiceDate', header: this.translate.instant('invoices.invoiceDate'), sortable: true, type: 'date', width: '110px' },
     { field: 'dueDate', header: this.translate.instant('invoices.dueDate'), sortable: true, type: 'date', width: '110px' },
-    { field: 'total', header: this.translate.instant('common.total'), sortable: true, width: '100px', align: 'right' },
-    { field: 'amountPaid', header: this.translate.instant('invoices.paid'), sortable: true, width: '100px', align: 'right' },
-    { field: 'balanceDue', header: this.translate.instant('invoices.balance'), sortable: true, width: '100px', align: 'right' },
+    { field: 'total', header: this.translate.instant('common.total'), width: '100px', align: 'right' },
+    { field: 'amountPaid', header: this.translate.instant('invoices.paid'), width: '100px', align: 'right' },
+    { field: 'balanceDue', header: this.translate.instant('invoices.balance'), width: '100px', align: 'right' },
     { field: 'createdAt', header: this.translate.instant('common.created'), sortable: true, type: 'date', width: '110px' },
   ];
 
@@ -104,11 +121,11 @@ export class InvoicesComponent implements OnInit {
     // the standardised paged endpoint.
     this.searchControl.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
-      .subscribe(() => this.loadInvoices());
+      .subscribe(() => this.loadFirstPage());
 
     this.statusFilterControl.valueChanges
       .pipe(distinctUntilChanged(), takeUntilDestroyed())
-      .subscribe(() => this.loadInvoices());
+      .subscribe(() => this.loadFirstPage());
   }
 
   ngOnInit(): void {
@@ -121,14 +138,14 @@ export class InvoicesComponent implements OnInit {
     this.loading.set(true);
     const search = (this.searchControl.value ?? '').trim() || undefined;
     const status = this.statusFilterControl.value ?? undefined;
-    // Phase 3 F7-broad / WU-22 — call the paged endpoint directly so we can
-    // read totalCount for the header counter.
+    const page = this.pageRequest();
     this.invoiceService.getInvoicesPaged({
       q: search,
       status,
-      pageSize: 200,
-      sort: 'invoiceDate',
-      order: 'desc',
+      page: page.pageIndex + 1,
+      pageSize: page.pageSize,
+      sort: page.sort ?? InvoicesComponent.defaultSort.sort,
+      order: page.sort ? page.order : InvoicesComponent.defaultSort.order,
     }).subscribe({
       next: (paged) => {
         this.invoices.set(paged.items);
@@ -143,7 +160,17 @@ export class InvoicesComponent implements OnInit {
     });
   }
 
-  protected applyFilters(): void { this.loadInvoices(); }
+  protected applyFilters(): void { this.loadFirstPage(); }
+
+  private loadFirstPage(): void {
+    this.pageRequest.update(page => ({ ...page, pageIndex: 0 }));
+    this.loadInvoices();
+  }
+
+  protected onServerPageChange(request: ServerPageRequest): void {
+    this.pageRequest.set(request.sort ? request : { ...request, ...InvoicesComponent.defaultSort });
+    this.loadInvoices();
+  }
 
   protected openInvoiceDetail(item: InvoiceListItem): void {
     const ref = this.detailDialog.open<InvoiceDetailDialogComponent, InvoiceDetailDialogData, void>(

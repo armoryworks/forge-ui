@@ -27,6 +27,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { ColumnDef } from '../../models/column-def.model';
 import { SortState } from '../../models/sort-state.model';
+import { ServerPageRequest, ServerPageState } from '../../models/server-page-state.model';
 import { TablePreferences } from '../../models/table-preferences.model';
 import { ColumnCellDirective } from '../../directives/column-cell.directive';
 import { RowExpandDirective } from '../../directives/row-expand.directive';
@@ -85,9 +86,19 @@ export class DataTableComponent implements OnInit {
    * regardless of the active sort column. Returns true → row pins to top.
    */
   readonly pinPredicate = input<((row: unknown) => boolean) | null>(null);
+  /**
+   * Server-paged mode. When set, `data` is one server page: the paginator
+   * runs off `totalCount`, sorting is a single column sent back through
+   * {@link serverPageChange}, column filters are hidden, and export covers
+   * the rows on this page. The consumer owns the state and fetches the
+   * page it asks for. Leave null for client-side paging over `data`.
+   */
+  readonly serverPaging = input<ServerPageState | null>(null);
 
   readonly rowClick = output<unknown>();
   readonly selectionChange = output<unknown[]>();
+  /** The page or sort the user asked for in server-paged mode. */
+  readonly serverPageChange = output<ServerPageRequest>();
 
   readonly cellTemplates = contentChildren(ColumnCellDirective);
   readonly expandTemplate = contentChild(RowExpandDirective);
@@ -137,8 +148,23 @@ export class DataTableComponent implements OnInit {
     });
   });
 
+  protected readonly isServerPaged = computed(() => this.serverPaging() !== null);
+
+  protected readonly paginatorLength = computed(() =>
+    this.serverPaging()?.totalCount ?? this.sortedData().length,
+  );
+
+  protected readonly paginatorPageIndex = computed(() =>
+    this.serverPaging()?.pageIndex ?? this.pageIndex(),
+  );
+
+  protected readonly paginatorPageSize = computed(() =>
+    this.serverPaging()?.pageSize ?? this.pageSize(),
+  );
+
   protected readonly filteredData = computed(() => {
     const data = this.data();
+    if (this.isServerPaged()) return data;
     const activeFilters = this.filters();
     const filterKeys = Object.keys(activeFilters);
     if (!filterKeys.length) return data;
@@ -208,7 +234,7 @@ export class DataTableComponent implements OnInit {
 
   protected readonly sortedData = computed(() => {
     const allData = [...this.filteredData()];
-    const sorts = this.sortStates();
+    const sorts = this.isServerPaged() ? [] : this.sortStates();
     const pin = this.pinPredicate();
 
     // Partition pinned rows out so they always render at the top regardless
@@ -263,6 +289,7 @@ export class DataTableComponent implements OnInit {
 
   protected readonly pagedData = computed(() => {
     const all = this.sortedData();
+    if (this.isServerPaged()) return all;
     const start = this.pageIndex() * this.pageSize();
     return all.slice(start, start + this.pageSize());
   });
@@ -337,15 +364,28 @@ export class DataTableComponent implements OnInit {
   }
 
   getSortState(field: string): SortState | undefined {
+    const server = this.serverPaging();
+    if (server) {
+      const col = this.columns().find(c => c.field === field);
+      const key = col?.sortField ?? field;
+      return server.sort === key ? { field, direction: server.order } : undefined;
+    }
     return this.sortStates().find(s => s.field === field);
   }
 
   hasFilter(field: string): boolean {
-    return field in this.filters();
+    return !this.isServerPaged() && field in this.filters();
   }
 
   onHeaderClick(col: ColumnDef, event: MouseEvent): void {
     if (!col.sortable) return;
+    if (this.isServerPaged()) {
+      const existing = this.getSortState(col.field);
+      if (!existing) this.requestServerSort(col, 'asc');
+      else if (existing.direction === 'asc') this.requestServerSort(col, 'desc');
+      else this.requestServerSort(null, 'asc');
+      return;
+    }
 
     const current = this.sortStates();
     const existing = current.find(s => s.field === col.field);
@@ -377,6 +417,18 @@ export class DataTableComponent implements OnInit {
   }
 
   onPageChange(event: PageEvent): void {
+    const server = this.serverPaging();
+    if (server) {
+      this.pageSize.set(event.pageSize);
+      this.serverPageChange.emit({
+        pageIndex: event.pageSize === server.pageSize ? event.pageIndex : 0,
+        pageSize: event.pageSize,
+        sort: server.sort,
+        order: server.order,
+      });
+      this.debouncedSave();
+      return;
+    }
     this.pageIndex.set(event.pageIndex);
     this.pageSize.set(event.pageSize);
     this.debouncedSave();
@@ -433,7 +485,7 @@ export class DataTableComponent implements OnInit {
     const key = this.getTrackValue(row);
     const index = this.sortedData().findIndex(r => this.getTrackValue(r) === key);
     if (index < 0) return;
-    this.pageIndex.set(Math.floor(index / this.pageSize()));
+    if (!this.isServerPaged()) this.pageIndex.set(Math.floor(index / this.pageSize()));
     setTimeout(() => {
       const el = this.host.nativeElement.querySelector(`tr[data-row-key="${String(key)}"]`);
       if (!el) return;
@@ -579,6 +631,10 @@ export class DataTableComponent implements OnInit {
   contextSortAsc(): void {
     const col = this.contextMenuCol();
     if (!col) return;
+    if (this.isServerPaged()) {
+      this.requestServerSort(col, 'asc');
+      return;
+    }
     this.sortStates.set([{ field: col.field, direction: 'asc' }]);
     this.debouncedSave();
   }
@@ -586,6 +642,10 @@ export class DataTableComponent implements OnInit {
   contextSortDesc(): void {
     const col = this.contextMenuCol();
     if (!col) return;
+    if (this.isServerPaged()) {
+      this.requestServerSort(col, 'desc');
+      return;
+    }
     this.sortStates.set([{ field: col.field, direction: 'desc' }]);
     this.debouncedSave();
   }
@@ -593,6 +653,10 @@ export class DataTableComponent implements OnInit {
   contextClearSort(): void {
     const col = this.contextMenuCol();
     if (!col) return;
+    if (this.isServerPaged()) {
+      this.requestServerSort(null, 'asc');
+      return;
+    }
     this.sortStates.update(sorts => sorts.filter(s => s.field !== col.field));
     this.debouncedSave();
   }
@@ -704,6 +768,17 @@ export class DataTableComponent implements OnInit {
   private debouncedSave(): void {
     if (this.saveTimer) clearTimeout(this.saveTimer);
     this.saveTimer = setTimeout(() => this.savePreferences(), 500);
+  }
+
+  private requestServerSort(col: ColumnDef | null, order: 'asc' | 'desc'): void {
+    const server = this.serverPaging();
+    if (!server) return;
+    this.serverPageChange.emit({
+      pageIndex: 0,
+      pageSize: server.pageSize,
+      sort: col ? col.sortField ?? col.field : null,
+      order,
+    });
   }
 
   protected getTrackValue(row: unknown): unknown {

@@ -27,50 +27,30 @@ describe('PartsService', () => {
     httpMock.verify();
   });
 
-  // ── getParts ──────────────────────────────────────────────────────────────
-
-  describe('getParts', () => {
-    it('should GET parts without filters', () => {
-      let result: unknown[] = [];
-      service.getParts().subscribe((items) => { result = items; });
+  describe('getPartsPaged', () => {
+    it('should send status, search, paging and sort params when provided', () => {
+      service.getPartsPaged({ status: 'Active', q: 'widget', page: 3, pageSize: 25, sort: 'partNumber', order: 'asc' }).subscribe();
 
       const req = httpMock.expectOne((r) => r.url === baseUrl);
       expect(req.request.method).toBe('GET');
-      // Default page size of 200 is always sent
-      expect(req.request.params.get('pageSize')).toBe('200');
-      req.flush({ items: [{ id: 1, partNumber: 'P-001' }], totalCount: 1, page: 1, pageSize: 200 });
-
-      expect(result.length).toBe(1);
-    });
-
-    it('should include status and search query params when provided', () => {
-      service.getParts('Active', 'widget').subscribe();
-
-      const req = httpMock.expectOne((r) => r.url === baseUrl);
       expect(req.request.params.get('status')).toBe('Active');
       expect(req.request.params.get('q')).toBe('widget');
-      req.flush({ items: [], totalCount: 0, page: 1, pageSize: 200 });
+      expect(req.request.params.get('page')).toBe('3');
+      expect(req.request.params.get('pageSize')).toBe('25');
+      expect(req.request.params.get('sort')).toBe('partNumber');
+      expect(req.request.params.get('order')).toBe('asc');
+      expect(req.request.params.has('purchasable')).toBe(false);
+      req.flush({ items: [], totalCount: 0, page: 3, pageSize: 25 });
     });
-  });
 
-  describe('getTransactableParts', () => {
-    it('should return Draft, Prototype and Active parts but not Obsolete ones', () => {
-      let result: { id: number }[] = [];
-      service.getTransactableParts().subscribe((items) => { result = items; });
+    it('should send the purchasable filter, including false', () => {
+      service.getPartsPaged({ purchasable: true }).subscribe();
+      httpMock.expectOne((r) => r.url === baseUrl && r.params.get('purchasable') === 'true')
+        .flush({ items: [], totalCount: 0, page: 1, pageSize: 25 });
 
-      const req = httpMock.expectOne((r) => r.url === baseUrl);
-      expect(req.request.params.get('status')).toBeNull();
-      req.flush({
-        items: [
-          { id: 1, status: 'Active' },
-          { id: 2, status: 'Draft' },
-          { id: 3, status: 'Obsolete' },
-          { id: 4, status: 'Prototype' },
-        ],
-        totalCount: 4, page: 1, pageSize: 200,
-      });
-
-      expect(result.map(p => p.id)).toEqual([1, 2, 4]);
+      service.getPartsPaged({ purchasable: false }).subscribe();
+      httpMock.expectOne((r) => r.url === baseUrl && r.params.get('purchasable') === 'false')
+        .flush({ items: [], totalCount: 0, page: 1, pageSize: 25 });
     });
   });
 

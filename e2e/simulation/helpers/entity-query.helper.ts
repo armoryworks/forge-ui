@@ -161,6 +161,7 @@ export interface PartListItem {
   partNumber: string;
   description: string;
   status: string;
+  procurementSource?: string;
 }
 
 export interface VendorListItem {
@@ -190,8 +191,8 @@ export interface EventListItem {
 
 /** Get parts */
 export async function getParts(token: string): Promise<PartListItem[]> {
-  const result = await apiCall<{ data: PartListItem[] }>('GET', 'parts?pageSize=100', token);
-  return result?.data ?? [];
+  const result = await apiCall<{ items?: PartListItem[]; data?: PartListItem[] }>('GET', 'parts?pageSize=100', token);
+  return result?.items ?? result?.data ?? [];
 }
 
 /** Get vendors */

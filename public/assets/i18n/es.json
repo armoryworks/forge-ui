@@ -4942,7 +4942,8 @@
     }
   },
   "entityPicker": {
-    "createNew": "Crear nuevo {{label}} «{{term}}»"
+    "createNew": "Crear nuevo {{label}} «{{term}}»",
+    "minChars": "Escriba al menos 2 caracteres para buscar"
   },
   "similarEntities": {
     "title": "¿Quisiste decir uno de estos?",
@@ -5077,7 +5078,9 @@
     },
     "preview": {
       "open": "Abrir"
-    }
+    },
+    "exportCsvPage": "Exportar esta página a CSV",
+    "exportExcelPage": "Exportar esta página a Excel"
   },
   "addressForm": {
     "streetAddress": "Dirección",

@@ -60,11 +60,21 @@
             [parts]="parts()"
             [selectedPartId]="null"
             (partClick)="openPartDetail($event.id)" />
+          @if (totalCount() > 25) {
+            <mat-paginator data-testid="parts-cards-paginator"
+              [length]="totalCount()"
+              [pageIndex]="pageRequest().pageIndex"
+              [pageSize]="pageRequest().pageSize"
+              [pageSizeOptions]="[25, 50, 100]"
+              (page)="onCardPageChange($event)"
+              showFirstLastButtons />
+          }
         </div>
       } @else {
         <app-data-table tableId="parts" [columns]="partColumns" [data]="combinedRows()"
           emptyIcon="inventory_2" [emptyMessage]="'parts.noPartsFound' | translate" [emptyHelpText]="'parts.noPartsHelp' | translate"
           [clickableRows]="true" [rowClass]="partRowClass" [pinPredicate]="draftPinPredicate()"
+          [serverPaging]="serverPaging()" (serverPageChange)="onServerPageChange($event)"
           (rowClick)="onRowClick($any($event))">
           <div table-actions>
             <ng-container *ngTemplateOutlet="viewToggle" />

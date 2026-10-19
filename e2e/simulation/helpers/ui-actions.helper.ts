@@ -434,8 +434,9 @@ export async function fillAutocomplete(
   if (searchText) {
     await input.fill(searchText);
   }
-  await page.locator('mat-option').first().waitFor({ state: 'visible', timeout: 5000 });
-  await page.locator('mat-option').first().click({ force: true });
+  const option = page.locator('mat-option:not(.mat-mdc-option-disabled)').first();
+  await option.waitFor({ state: 'visible', timeout: 5000 });
+  await option.click({ force: true });
 }
 
 // ── Buttons ───────────────────────────────────────────────────────────────────

@@ -459,6 +459,9 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
 
   // ── 8. Create manufactured parts via UI (Engineer) ─────────────────────────
   const existingParts = await getParts(engineer);
+  const sellablePartNumber = existingParts.find(p => p.status !== 'Obsolete')?.partNumber ?? '';
+  const buyablePartNumber = existingParts.find(p => p.status !== 'Obsolete'
+    && (p.procurementSource === 'Buy' || p.procurementSource === 'Subcontract'))?.partNumber ?? '';
   if (pct(w, 1000, 40) || existingParts.length < 10) {
     const partCount = seededInt(1, 2, w, 20);
     for (let i = 0; i < partCount; i++) {
@@ -569,9 +572,9 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
       await navigateTo(pmPage, '/quotes');
       await clickButton(pmPage, 'new-quote-btn');
       await waitForDialog(pmPage);
-      await fillMatSelect(pmPage, 'quote-customer', customer.name);
+      await fillAutocomplete(pmPage, 'quote-customer', customer.name);
       await fillDatepicker(pmPage, 'quote-expiry', expiry);
-      await fillAutocomplete(pmPage, 'quote-line-part', '');
+      await fillAutocomplete(pmPage, 'quote-line-part', sellablePartNumber);
       await fillInput(pmPage, 'quote-line-qty', String(qty));
       await fillInput(pmPage, 'quote-line-price', String(unitPrice));
       await clickButton(pmPage, 'quote-add-line-btn');
@@ -651,7 +654,7 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
       await waitForDialog(officePage);
       await fillMatSelect(officePage, 'so-customer', customer.name);
       await fillDatepicker(officePage, 'so-delivery-date', deliveryDate);
-      await fillAutocomplete(officePage, 'so-line-part', '');
+      await fillAutocomplete(officePage, 'so-line-part', sellablePartNumber);
       await fillInput(officePage, 'so-line-qty', String(qty));
       await fillInput(officePage, 'so-line-price', String(price));
       await clickButton(officePage, 'so-add-line-btn');
@@ -1005,7 +1008,7 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
       await clickButton(officePage, 'new-po-btn');
       await waitForDialog(officePage);
       await fillMatSelect(officePage, 'po-vendor', vendor.name);
-      await fillAutocomplete(officePage, 'po-line-part', '');
+      await fillAutocomplete(officePage, 'po-line-part', buyablePartNumber);
       await fillInput(officePage, 'po-line-qty', String(seededInt(5, 50, w, 70)));
       await fillInput(officePage, 'po-line-price', String(seededInt(10, 100, w, 75)));
       await clickButton(officePage, 'po-add-line-btn');
@@ -2033,7 +2036,7 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
       await navigateTo(pmPage, '/quotes');
       await clickButton(pmPage, 'new-quote-btn');
       await waitForDialog(pmPage);
-      await fillMatSelect(pmPage, 'quote-customer', customer.name);
+      await fillAutocomplete(pmPage, 'quote-customer', customer.name);
       await fillDatepicker(pmPage, 'quote-expiry', weekDayDisplay(ctx, 60));
       // Add a single line for the estimate
       await fillInput(pmPage, 'quote-line-qty', '1');
