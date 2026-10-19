@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed, WritableSignal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BaseChartDirective } from '../../shared/charts/base-chart.directive';
@@ -9,6 +11,10 @@ import { DataTableComponent } from '../../shared/components/data-table/data-tabl
 import { DatepickerComponent } from '../../shared/components/datepicker/datepicker.component';
 import { toIsoDate } from '../../shared/utils/date.utils';
 import { dateOrderValidator } from '../../shared/validators/date-order.validator';
+import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
+import { formatMinutesAsHours } from './utils/format-minutes.utils';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { AuthService } from '../../shared/services/auth.service';
 import { ReportService } from './services/report.service';
@@ -46,10 +52,13 @@ import { RdReportItem } from './models/rd-report-item.model';
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 
+const SANKEY_PICKER_VALUE = 'sankey';
+const BUILDER_PICKER_VALUE = 'builder';
+
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [ReactiveFormsModule, CurrencyPipe, DecimalPipe, BaseChartDirective, DrillableChartComponent, PageHeaderComponent, DataTableComponent, DatepickerComponent, TranslatePipe],
+  imports: [ReactiveFormsModule, CurrencyPipe, DecimalPipe, BaseChartDirective, DrillableChartComponent, PageHeaderComponent, DataTableComponent, DatepickerComponent, SelectComponent, EmptyStateComponent, ColumnCellDirective, TranslatePipe],
   templateUrl: './reports.component.html',
   styleUrl: './reports.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -98,6 +107,8 @@ export class ReportsComponent {
 
   protected readonly activeReport = signal<ReportType>(this.reports[0].id);
   protected readonly loading = signal(false);
+  protected readonly loadError = signal(false);
+  private loadSeq = 0;
   protected readonly activeReportDef = computed(() => this.reports.find(r => r.id === this.activeReport())!);
 
   // Date range controls (DatepickerComponent works with Date objects)
@@ -158,7 +169,7 @@ export class ReportsComponent {
     return {
       labels: data.map(d => d.userName),
       datasets: [{
-        data: data.map(d => d.totalHours),
+        data: data.map(d => d.totalMinutes / 60),
         backgroundColor: 'rgba(59, 130, 246, 0.7)',
         label: this.translate.instant('reports.legend.hours'),
       }],
@@ -372,10 +383,13 @@ export class ReportsComponent {
     const totalRevenue = data.reduce((sum, d) => sum + d.revenue, 0);
     const totalCost = data.reduce((sum, d) => sum + d.totalCost, 0);
     const totalMargin = totalRevenue - totalCost;
-    const avgMarginPct = data.length > 0
-      ? data.reduce((sum, d) => sum + d.marginPercentage, 0) / data.length
-      : 0;
-    return { totalRevenue, totalCost, totalMargin, avgMarginPct: Math.round(avgMarginPct * 10) / 10 };
+    const measured = data.filter(d => d.revenue > 0 && d.totalCost > 0);
+    const measuredRevenue = measured.reduce((sum, d) => sum + d.revenue, 0);
+    const measuredMargin = measured.reduce((sum, d) => sum + d.margin, 0);
+    const avgMarginPct = measuredRevenue > 0
+      ? Math.round(measuredMargin / measuredRevenue * 1000) / 10
+      : null;
+    return { totalRevenue, totalCost, totalMargin, avgMarginPct, measuredCount: measured.length, jobCount: data.length };
   });
 
   protected readonly barOptions: ChartOptions<'bar'> = {
@@ -555,6 +569,8 @@ export class ReportsComponent {
     { field: 'totalItems', header: this.translate.instant('reports.colTotalItems'), sortable: true, type: 'number', width: '110px', align: 'right' },
     { field: 'onTimeCount', header: this.translate.instant('reports.colOnTime'), sortable: true, type: 'number', width: '100px', align: 'right' },
     { field: 'lateCount', header: this.translate.instant('reports.colLate'), sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'noDueDateCount', header: this.translate.instant('reports.colNoDueDate'), sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'notShippedCount', header: this.translate.instant('reports.colNotShipped'), sortable: true, type: 'number', width: '110px', align: 'right' },
   ];
 
   protected readonly timeInStageColumns: ColumnDef[] = [
@@ -645,12 +661,31 @@ export class ReportsComponent {
     { field: 'completedDate', header: this.translate.instant('reports.colCompleted'), sortable: true, type: 'date', width: '100px' },
   ];
 
+  protected readonly reportPickerOptions: SelectOption[] = [
+    ...this.reports.map(r => ({ value: r.id, label: r.label })),
+    ...(this.canViewShopReports
+      ? [
+        { value: SANKEY_PICKER_VALUE, label: this.translate.instant('reports.sankeyDiagrams') },
+        { value: BUILDER_PICKER_VALUE, label: this.translate.instant('reports.reportBuilder') },
+      ]
+      : []),
+  ];
+  protected readonly reportPicker = new FormControl<string>(this.activeReport(), { nonNullable: true });
+
+  protected readonly formatMinutes = formatMinutesAsHours;
+
   constructor() {
+    this.reportPicker.valueChanges.pipe(takeUntilDestroyed()).subscribe(value => {
+      if (value === SANKEY_PICKER_VALUE) this.openSankeyReports();
+      else if (value === BUILDER_PICKER_VALUE) this.openReportBuilder();
+      else if (value !== this.activeReport()) this.selectReport(value as ReportType);
+    });
     this.loadReport(this.activeReport());
   }
 
   protected selectReport(reportId: ReportType): void {
     this.activeReport.set(reportId);
+    this.reportPicker.setValue(reportId, { emitEvent: false });
     this.loadReport(reportId);
   }
 
@@ -658,94 +693,111 @@ export class ReportsComponent {
     const id = reportId ?? this.activeReport();
     if (this.dateRange.invalid && this.reports.find(r => r.id === id)?.needsDateRange) return;
     this.loading.set(true);
-    const done = () => this.loading.set(false);
+    this.loadError.set(false);
 
     switch (id) {
       case 'jobs-by-stage':
-        this.reportService.getJobsByStage().subscribe({ next: d => { this.jobsByStageData.set(d); done(); }, error: done });
+        this.load(this.reportService.getJobsByStage(), this.jobsByStageData, []);
         break;
       case 'overdue-jobs':
-        this.reportService.getOverdueJobs().subscribe({ next: d => { this.overdueJobsData.set(d); done(); }, error: done });
+        this.load(this.reportService.getOverdueJobs(), this.overdueJobsData, []);
         break;
       case 'time-by-user':
-        this.reportService.getTimeByUser(this.startValue(), this.endValue()).subscribe({ next: d => { this.timeByUserData.set(d); done(); }, error: done });
+        this.load(this.reportService.getTimeByUser(this.startValue(), this.endValue()), this.timeByUserData, []);
         break;
       case 'expense-summary':
-        this.reportService.getExpenseSummary(this.startValue(), this.endValue()).subscribe({ next: d => { this.expenseSummaryData.set(d); done(); }, error: done });
+        this.load(this.reportService.getExpenseSummary(this.startValue(), this.endValue()), this.expenseSummaryData, []);
         break;
       case 'lead-pipeline':
-        this.reportService.getLeadPipeline().subscribe({ next: d => { this.leadPipelineData.set(d); done(); }, error: done });
+        this.load(this.reportService.getLeadPipeline(), this.leadPipelineData, []);
         break;
       case 'job-completion-trend':
-        this.reportService.getJobCompletionTrend().subscribe({ next: d => { this.completionTrendData.set(d); done(); }, error: done });
+        this.load(this.reportService.getJobCompletionTrend(), this.completionTrendData, []);
         break;
       case 'on-time-delivery':
-        this.reportService.getOnTimeDelivery(this.startValue(), this.endValue()).subscribe({ next: d => { this.onTimeDeliveryData.set(d); done(); }, error: done });
+        this.load(this.reportService.getOnTimeDelivery(this.startValue(), this.endValue()), this.onTimeDeliveryData, null);
         break;
       case 'average-lead-time':
-        this.reportService.getAverageLeadTime().subscribe({ next: d => { this.averageLeadTimeData.set(d); done(); }, error: done });
+        this.load(this.reportService.getAverageLeadTime(), this.averageLeadTimeData, []);
         break;
       case 'team-workload':
-        this.reportService.getTeamWorkload().subscribe({ next: d => { this.teamWorkloadData.set(d); done(); }, error: done });
+        this.load(this.reportService.getTeamWorkload(), this.teamWorkloadData, []);
         break;
       case 'customer-activity':
-        this.reportService.getCustomerActivity().subscribe({ next: d => { this.customerActivityData.set(d); done(); }, error: done });
+        this.load(this.reportService.getCustomerActivity(), this.customerActivityData, []);
         break;
       case 'my-work-history':
-        this.reportService.getMyWorkHistory().subscribe({ next: d => { this.myWorkHistoryData.set(d); done(); }, error: done });
+        this.load(this.reportService.getMyWorkHistory(), this.myWorkHistoryData, []);
         break;
       case 'my-time-log':
-        this.reportService.getMyTimeLog(this.startValue(), this.endValue()).subscribe({ next: d => { this.myTimeLogData.set(d); done(); }, error: done });
+        this.load(this.reportService.getMyTimeLog(this.startValue(), this.endValue()), this.myTimeLogData, []);
         break;
       case 'ar-aging':
-        this.reportService.getArAging().subscribe({ next: d => { this.arAgingData.set(d); done(); }, error: done });
+        this.load(this.reportService.getArAging(), this.arAgingData, []);
         break;
       case 'revenue':
-        this.reportService.getRevenue(this.startValue(), this.endValue()).subscribe({ next: d => { this.revenueData.set(d); done(); }, error: done });
+        this.load(this.reportService.getRevenue(this.startValue(), this.endValue()), this.revenueData, []);
         break;
       case 'simple-pnl':
-        this.reportService.getSimplePnl(this.startValue(), this.endValue()).subscribe({ next: d => { this.simplePnlData.set(d); done(); }, error: done });
+        this.load(this.reportService.getSimplePnl(this.startValue(), this.endValue()), this.simplePnlData, []);
         break;
       case 'my-expense-history':
-        this.reportService.getMyExpenseHistory(this.startValue(), this.endValue()).subscribe({ next: d => { this.myExpenseHistoryData.set(d); done(); }, error: done });
+        this.load(this.reportService.getMyExpenseHistory(this.startValue(), this.endValue()), this.myExpenseHistoryData, []);
         break;
       case 'quote-to-close':
-        this.reportService.getQuoteToClose(this.startValue(), this.endValue()).subscribe({ next: d => { this.quoteToCloseData.set(d); done(); }, error: done });
+        this.load(this.reportService.getQuoteToClose(this.startValue(), this.endValue()), this.quoteToCloseData, []);
         break;
       case 'shipping-summary':
-        this.reportService.getShippingSummary(this.startValue(), this.endValue()).subscribe({ next: d => { this.shippingSummaryData.set(d); done(); }, error: done });
+        this.load(this.reportService.getShippingSummary(this.startValue(), this.endValue()), this.shippingSummaryData, []);
         break;
       case 'time-in-stage':
-        this.reportService.getTimeInStage().subscribe({ next: d => { this.timeInStageData.set(d); done(); }, error: done });
+        this.load(this.reportService.getTimeInStage(), this.timeInStageData, []);
         break;
       case 'employee-productivity':
-        this.reportService.getEmployeeProductivity(this.startValue(), this.endValue()).subscribe({ next: d => { this.employeeProductivityData.set(d); done(); }, error: done });
+        this.load(this.reportService.getEmployeeProductivity(this.startValue(), this.endValue()), this.employeeProductivityData, []);
         break;
       case 'inventory-levels':
-        this.reportService.getInventoryLevels().subscribe({ next: d => { this.inventoryLevelsData.set(d); done(); }, error: done });
+        this.load(this.reportService.getInventoryLevels(), this.inventoryLevelsData, []);
         break;
       case 'maintenance':
-        this.reportService.getMaintenance(this.startValue(), this.endValue()).subscribe({ next: d => { this.maintenanceData.set(d); done(); }, error: done });
+        this.load(this.reportService.getMaintenance(this.startValue(), this.endValue()), this.maintenanceData, []);
         break;
       case 'quality-scrap':
-        this.reportService.getQualityScrap(this.startValue(), this.endValue()).subscribe({ next: d => { this.qualityScrapData.set(d); done(); }, error: done });
+        this.load(this.reportService.getQualityScrap(this.startValue(), this.endValue()), this.qualityScrapData, []);
         break;
       case 'cycle-review':
-        this.reportService.getCycleReview().subscribe({ next: d => { this.cycleReviewData.set(d); done(); }, error: done });
+        this.load(this.reportService.getCycleReview(), this.cycleReviewData, []);
         break;
       case 'job-margin':
-        this.reportService.getJobMargin(this.startValue(), this.endValue()).subscribe({ next: d => { this.jobMarginData.set(d); done(); }, error: done });
+        this.load(this.reportService.getJobMargin(this.startValue(), this.endValue()), this.jobMarginData, []);
         break;
       case 'my-cycle-summary':
-        this.reportService.getMyCycleSummary().subscribe({ next: d => { this.myCycleSummaryData.set(d); done(); }, error: done });
+        this.load(this.reportService.getMyCycleSummary(), this.myCycleSummaryData, []);
         break;
       case 'lead-sales':
-        this.reportService.getLeadSales(this.startValue(), this.endValue()).subscribe({ next: d => { this.leadSalesData.set(d); done(); }, error: done });
+        this.load(this.reportService.getLeadSales(this.startValue(), this.endValue()), this.leadSalesData, null);
         break;
       case 'rd':
-        this.reportService.getRdReport(this.startValue(), this.endValue()).subscribe({ next: d => { this.rdReportData.set(d); done(); }, error: done });
+        this.load(this.reportService.getRdReport(this.startValue(), this.endValue()), this.rdReportData, []);
         break;
     }
+  }
+
+  private load<T>(source: Observable<T>, target: WritableSignal<T>, empty: T): void {
+    const seq = ++this.loadSeq;
+    source.subscribe({
+      next: data => {
+        if (seq !== this.loadSeq) return;
+        target.set(data);
+        this.loading.set(false);
+      },
+      error: () => {
+        if (seq !== this.loadSeq) return;
+        target.set(empty);
+        this.loadError.set(true);
+        this.loading.set(false);
+      },
+    });
   }
 
   private startValue(): string {

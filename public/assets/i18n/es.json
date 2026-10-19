@@ -454,7 +454,8 @@
   "dashboardWidgets": {
     "margin": {
       "costNotRecorded": "Costo no registrado",
-      "jobsWithoutCost": "Trabajos sin costo registrado"
+      "jobsWithoutCost": "Trabajos sin costo registrado",
+      "coverage": "de {{costed}} de {{total}} con costo"
     },
     "lowStock": {
       "noMinimumsSet": "No hay niveles mínimos de existencias definidos"
@@ -6910,7 +6911,19 @@
       "scrapRate": "Tasa de desecho %",
       "completionRate": "Finalización %",
       "margin": "Margen"
-    }
+    },
+    "loadFailed": "No se pudo cargar este informe.",
+    "retry": "Reintentar",
+    "chooseReport": "Informe",
+    "marginCoverage": "de {{measured}} de {{total}} con costo e ingresos",
+    "costNotRecorded": "Sin costo registrado",
+    "notInvoiced": "Aún no facturado",
+    "colNoDueDate": "Sin fecha de entrega",
+    "colNotShipped": "No enviado",
+    "deleteReportTitle": "¿Eliminar el informe guardado?",
+    "deleteReportConfirm": "¿Eliminar el informe guardado \"{{name}}\"? Esta acción no se puede deshacer.",
+    "chooseDataSourceFirst": "Elija una fuente de datos",
+    "pickColumnFirst": "Elija al menos una columna"
   },
   "qcInspections": {
     "tabTemplates": "Plantillas",
@@ -11122,6 +11135,24 @@
       "hint": "Opcionalmente, establezca una fecha límite y un tipo de evento para agregar esto al calendario de cumplimiento como fecha límite.",
       "dueDate": "Fecha límite",
       "eventType": "Tipo de evento del calendario"
+    },
+    "noActiveSources": "No hay fuentes activas, así que no se consultó nada.",
+    "domain": {
+      "crossCutting": "General",
+      "environmental": "Ambiental",
+      "firearms": "Armas de fuego",
+      "food": "Alimentos",
+      "labor": "Laboral",
+      "productSafety": "Seguridad de productos",
+      "safety": "Seguridad",
+      "tax": "Impuestos"
+    },
+    "feedType": {
+      "api": "API",
+      "rss": "RSS",
+      "email": "Correo",
+      "bulk": "Descarga masiva",
+      "scrape": "Página web"
     }
   },
   "shipping": {

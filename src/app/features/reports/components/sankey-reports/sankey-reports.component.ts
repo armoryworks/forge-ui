@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -10,6 +11,8 @@ import { SankeyReportType } from '../../models/sankey-report-type.type';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { SankeyChartComponent } from '../../../../shared/components/sankey-chart/sankey-chart.component';
+import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { dateOrderValidator } from '../../../../shared/validators/date-order.validator';
 
@@ -23,7 +26,7 @@ interface SankeyReportDef {
 @Component({
   selector: 'app-sankey-reports',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe, PageHeaderComponent, DatepickerComponent, SankeyChartComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, PageHeaderComponent, DatepickerComponent, SankeyChartComponent, SelectComponent, EmptyStateComponent],
   templateUrl: './sankey-reports.component.html',
   styleUrl: './sankey-reports.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,6 +51,8 @@ export class SankeyReportsComponent {
 
   protected readonly activeReport = signal<SankeyReportType>('quote-to-cash');
   protected readonly loading = signal(false);
+  protected readonly loadError = signal(false);
+  private loadSeq = 0;
   protected readonly flowData = signal<SankeyFlowItem[]>([]);
   protected readonly activeReportDef = computed(() => this.reports.find(r => r.id === this.activeReport())!);
 
@@ -60,18 +65,27 @@ export class SankeyReportsComponent {
     }))],
   });
 
+  protected readonly reportPickerOptions: SelectOption[] = this.reports.map(r => ({ value: r.id, label: r.label }));
+  protected readonly reportPicker = new FormControl<SankeyReportType>(this.activeReport(), { nonNullable: true });
+
   constructor() {
+    this.reportPicker.valueChanges.pipe(takeUntilDestroyed()).subscribe(id => {
+      if (id !== this.activeReport()) this.selectReport(id);
+    });
     this.loadReport();
   }
 
   protected selectReport(id: SankeyReportType): void {
     this.activeReport.set(id);
+    this.reportPicker.setValue(id, { emitEvent: false });
     this.loadReport();
   }
 
   protected loadReport(): void {
     if (this.dateRange.invalid && this.activeReportDef().needsDateRange) return;
     this.loading.set(true);
+    this.loadError.set(false);
+    const seq = ++this.loadSeq;
     const report = this.activeReport();
     const start = this.startControl.value ? toIsoDate(this.startControl.value) || undefined : undefined;
     const end = this.endControl.value ? toIsoDate(this.endControl.value) || undefined : undefined;
@@ -79,10 +93,16 @@ export class SankeyReportsComponent {
     const obs = this.getReportObservable(report, start, end);
     obs.subscribe({
       next: (data) => {
+        if (seq !== this.loadSeq) return;
         this.flowData.set(data);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        if (seq !== this.loadSeq) return;
+        this.flowData.set([]);
+        this.loadError.set(true);
+        this.loading.set(false);
+      },
     });
   }
 

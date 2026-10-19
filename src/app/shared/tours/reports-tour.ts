@@ -5,19 +5,19 @@ export const REPORTS_TOUR: TourDefinition = {
   steps: [
     {
       title: 'Reports & Analytics',
-      description: 'Explore operational data with 15+ built-in reports. Filter by date range, export to CSV.',
+      description: 'Explore operational and financial data with the built-in reports.',
     },
     {
-      element: '.report-selector',
-      title: 'Report Selector',
-      description: 'Choose from categories: My Reports, Jobs, Team, Financial, Inventory, and more.',
-      side: 'bottom',
+      element: '.reports-sidebar',
+      title: 'Report List',
+      description: 'Pick a report from the list. Sankey Diagrams and the Report Builder are at the bottom.',
+      side: 'right',
     },
     {
-      element: '.report-content',
+      element: '.reports-main',
       title: 'Report View',
-      description: 'Charts and data tables update based on your filters. Use the Export button for CSV download.',
-      side: 'top',
+      description: 'Set the date range and click Apply where a report has one. Use the export button in the table header to download the rows.',
+      side: 'left',
     },
   ],
 };

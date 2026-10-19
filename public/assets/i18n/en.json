@@ -454,7 +454,8 @@
   "dashboardWidgets": {
     "margin": {
       "costNotRecorded": "Cost not recorded",
-      "jobsWithoutCost": "Jobs without recorded cost"
+      "jobsWithoutCost": "Jobs without recorded cost",
+      "coverage": "from {{costed}} of {{total}} costed"
     },
     "lowStock": {
       "noMinimumsSet": "No minimum stock levels set"
@@ -6917,7 +6918,19 @@
       "scrapRate": "Scrap rate %",
       "completionRate": "Completion %",
       "margin": "Margin"
-    }
+    },
+    "loadFailed": "This report could not be loaded.",
+    "retry": "Retry",
+    "chooseReport": "Report",
+    "marginCoverage": "from {{measured}} of {{total}} with cost and revenue",
+    "costNotRecorded": "No cost recorded",
+    "notInvoiced": "Not invoiced yet",
+    "colNoDueDate": "No due date",
+    "colNotShipped": "Not shipped",
+    "deleteReportTitle": "Delete saved report?",
+    "deleteReportConfirm": "Delete the saved report \"{{name}}\"? This cannot be undone.",
+    "chooseDataSourceFirst": "Choose a data source",
+    "pickColumnFirst": "Pick at least one column"
   },
   "qcInspections": {
     "tabTemplates": "Templates",
@@ -11122,6 +11135,24 @@
       "hint": "Optionally set a due date and target event type to add this to the compliance calendar as a deadline.",
       "dueDate": "Due date",
       "eventType": "Calendar event type"
+    },
+    "noActiveSources": "No sources are active, so nothing was polled.",
+    "domain": {
+      "crossCutting": "Cross-cutting",
+      "environmental": "Environmental",
+      "firearms": "Firearms",
+      "food": "Food",
+      "labor": "Labor",
+      "productSafety": "Product safety",
+      "safety": "Safety",
+      "tax": "Tax"
+    },
+    "feedType": {
+      "api": "API",
+      "rss": "RSS",
+      "email": "Email",
+      "bulk": "Bulk download",
+      "scrape": "Web page"
     }
   },
   "shipping": {
