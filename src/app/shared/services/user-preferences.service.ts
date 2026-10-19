@@ -48,6 +48,9 @@ export class UserPreferencesService {
             // Skip malformed entries
           }
         }
+        for (const [key, value] of this.pendingUpdates) {
+          map.set(key, value);
+        }
         this.cache.set(map);
         this.loaded = true;
       },
