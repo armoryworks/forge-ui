@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, effect, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, input, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
@@ -8,6 +8,8 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { PartDetail } from '../../models/part-detail.model';
 import { PartLandedCostComponent } from './part-landed-cost.component';
 import { PartStandardCostRollComponent } from './part-standard-cost-roll.component';
+import { UNIT_DECIMALS } from '../../../../shared/utils/money';
+import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 
 /**
  * Pillar 4 — Cost cluster.
@@ -39,8 +41,12 @@ export class PartCostClusterComponent {
   readonly cancelled = output<void>();
   readonly standardCostRolled = output<void>();
 
+  private readonly translate = inject(TranslateService);
+
   protected readonly form = new FormGroup({
-    manualCostOverride: new FormControl<number | null>(null),
+    manualCostOverride: new FormControl<number | null>(null, [
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('parts.detail.clusters.cost.manualCostOverride')),
+    ]),
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {});

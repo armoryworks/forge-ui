@@ -22,6 +22,7 @@ import { TranslateService } from '@ngx-translate/core';
 
 import { LanguageService } from '../../services/language.service';
 import { formatLocaleNumber, parseLocaleNumber } from '../../utils/locale-number';
+import { MONEY_DECIMALS } from '../../utils/money';
 
 /**
  * Shared currency input wrapper.
@@ -105,7 +106,7 @@ export class CurrencyInputComponent implements ControlValueAccessor, Validator, 
       return;
     }
     const num = typeof value === 'number' ? value : Number(value);
-    this.setText(Number.isFinite(num) ? formatLocaleNumber(num, this.lang()) : '');
+    this.setText(Number.isFinite(num) ? formatLocaleNumber(num, this.lang(), false, MONEY_DECIMALS) : '');
   }
 
   registerOnChange(fn: (value: number | null) => void): void {
@@ -136,7 +137,7 @@ export class CurrencyInputComponent implements ControlValueAccessor, Validator, 
 
   protected onBlur(): void {
     const parsed = parseLocaleNumber(this.text, this.lang());
-    if (parsed !== null && !Number.isNaN(parsed)) this.setText(formatLocaleNumber(parsed, this.lang()));
+    if (parsed !== null && !Number.isNaN(parsed)) this.setText(formatLocaleNumber(parsed, this.lang(), false, MONEY_DECIMALS));
     this.onTouched();
   }
 

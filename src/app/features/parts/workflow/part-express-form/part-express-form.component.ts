@@ -20,6 +20,8 @@ import { PartDetail } from '../../models/part-detail.model';
 import { PartsService } from '../../services/parts.service';
 import { keepTypedPartDraft } from '../typed-part-draft.util';
 import { TraceabilityType } from '../../models/traceability-type.type';
+import { UNIT_DECIMALS } from '../../../../shared/utils/money';
+import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 
 /**
  * Workflow Pattern Phase 5 — Express form for parts.
@@ -88,7 +90,10 @@ export class PartExpressFormComponent {
     // the user has neither, the express Save call gets a 409 from the
     // promote step with a "missing cost" message — friendlier than
     // blocking the form on a field the user may not be ready to fill.
-    manualCostOverride: new FormControl<number | null>(null, [Validators.min(0)]),
+    manualCostOverride: new FormControl<number | null>(null, [
+      Validators.min(0),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('parts.workflow.costing.manualOverrideLabel')),
+    ]),
   });
 
   protected readonly traceabilityOptions: SelectOption[] = [

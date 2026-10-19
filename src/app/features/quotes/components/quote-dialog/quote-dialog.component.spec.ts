@@ -28,10 +28,13 @@ interface DialogInternals {
   };
   taxAmount(): number;
   grandTotal(): number;
+  lineTotal(): number;
+  lineAmount(line: { quantity: number; unitPrice: number }): number;
   lineForm: {
     controls: {
       partId: { setValue(v: number | null): void };
-      unitPrice: { value: number | null };
+      quantity: { setValue(v: number): void; errors: Record<string, unknown> | null };
+      unitPrice: { value: number | null; setValue(v: number): void; errors: Record<string, unknown> | null };
     };
   };
   priceIsDefault(): boolean;
@@ -169,8 +172,8 @@ describe('QuoteDialogComponent — summary tax', () => {
       .flush({ id: 1, stateCode: 'NC', rate: 0.0475 });
     httpMock.expectOne(`${environment.apiUrl}/customers/5/tax-editability`).flush(makeEditability());
 
-    expect(internals.taxAmount()).toBeCloseTo(59.375, 3);
-    expect(internals.grandTotal()).toBeCloseTo(1309.375, 3);
+    expect(internals.taxAmount()).toBe(59.38);
+    expect(internals.grandTotal()).toBe(1309.38);
     httpMock.verify();
   });
 
@@ -180,8 +183,45 @@ describe('QuoteDialogComponent — summary tax', () => {
 
     component.form.controls.taxRate.setValue(10);
 
-    expect(internals.taxAmount()).toBeCloseTo(20, 3);
-    expect(internals.grandTotal()).toBeCloseTo(220, 3);
+    expect(internals.taxAmount()).toBe(20);
+    expect(internals.grandTotal()).toBe(220);
+    httpMock.verify();
+  });
+
+  it('rounds the subtotal and total to the cent and takes tax as the difference', () => {
+    const { component, internals, httpMock } = setup();
+    internals.lines.set([
+      { partId: 1, partNumber: 'P-1', description: 'Eighths', quantity: 3, unitPrice: 0.125 },
+      { partId: 2, partNumber: 'P-2', description: 'Half', quantity: 0.5, unitPrice: 19.999 },
+      { partId: 3, partNumber: 'P-3', description: 'Whole', quantity: 1, unitPrice: 10 },
+    ]);
+
+    component.form.controls.taxRate.setValue(7.25);
+
+    expect(internals.lineAmount({ quantity: 3, unitPrice: 0.125 })).toBe(0.38);
+    expect(internals.lineAmount({ quantity: 0.5, unitPrice: 19.999 })).toBe(10);
+    expect(internals.lineTotal()).toBe(20.37);
+    expect(internals.grandTotal()).toBe(21.85);
+    expect(internals.taxAmount()).toBe(1.48);
+    httpMock.verify();
+  });
+});
+
+describe('QuoteDialogComponent — line precision', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  it('rejects a quantity or unit price with more than four decimals', () => {
+    const { internals, httpMock } = setup();
+    const { quantity, unitPrice } = internals.lineForm.controls;
+
+    quantity.setValue(3.14159);
+    unitPrice.setValue(0.3334);
+
+    expect(quantity.errors?.['maxDecimals']).toBeTruthy();
+    expect(unitPrice.errors).toBeNull();
+
+    unitPrice.setValue(0.33335);
+    expect(unitPrice.errors?.['maxDecimals']).toBeTruthy();
     httpMock.verify();
   });
 

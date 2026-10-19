@@ -47,6 +47,12 @@ describe('formatLocaleNumber', () => {
     expect(formatLocaleNumber(1234567.5, 'es', true)).toBe('1.234.567,5');
   });
 
+  it('pads to the minimum fraction digits without rounding longer values', () => {
+    expect(formatLocaleNumber(74, 'en', false, 2)).toBe('74.00');
+    expect(formatLocaleNumber(42.5, 'es', false, 2)).toBe('42,50');
+    expect(formatLocaleNumber(0.3334, 'en', false, 2)).toBe('0.3334');
+  });
+
   it('round-trips through parseLocaleNumber', () => {
     for (const lang of ['en', 'es']) {
       for (const value of [0, -3.5, 0.0001, 98765.4321, 1234567.89]) {

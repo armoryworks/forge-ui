@@ -50,7 +50,19 @@ describe('CurrencyInputComponent', () => {
     host.control.setValue(42.5);
     fixture.detectChanges();
     const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
-    expect(input.value).toBe('42.5');
+    expect(input.value).toBe('42.50');
+  });
+
+  it.each([
+    [74, '74.00'],
+    [12.345, '12.345'],
+    [0.3334, '0.3334'],
+  ])('shows %s with at least two decimals and without rounding', (value, shown) => {
+    const { fixture, host } = setup();
+    host.control.setValue(value);
+    fixture.detectChanges();
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
+    expect(input.value).toBe(shown);
   });
 
   it('clears the input when control is set to null', () => {
@@ -157,7 +169,7 @@ describe('CurrencyInputComponent', () => {
     input.dispatchEvent(new Event('blur'));
     fixture.detectChanges();
     expect(host.control.value).toBe(1250.5);
-    expect(input.value).toBe('1250.5');
+    expect(input.value).toBe('1250.50');
   });
 
   it('reads the comma as the decimal separator in Spanish', () => {

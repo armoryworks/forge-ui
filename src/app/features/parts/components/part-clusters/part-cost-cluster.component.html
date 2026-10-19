@@ -3,7 +3,7 @@
 
   <!-- ─── Editable cost field ───────────────────────────────────── -->
   <div class="cluster__form-row">
-    <app-currency-input [label]="'parts.detail.clusters.cost.manualCostOverride' | translate" formControlName="manualCostOverride" [isReadonly]="!editing()" />
+    <app-currency-input [label]="'parts.detail.clusters.cost.manualCostOverride' | translate" formControlName="manualCostOverride" [isReadonly]="!editing()" step="0.0001" />
   </div>
 
   <!-- ─── Always-derived cost identifiers ──────────────────────── -->

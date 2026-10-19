@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ViewChild, computed, inject, output, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -26,6 +26,8 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ActiveCurrencyService } from '../../../../shared/services/active-currency.service';
 import { ActiveCurrency } from '../../../../shared/models/active-currency.model';
 import { toIsoDate, todayEnd } from '../../../../shared/utils/date.utils';
+import { MONEY_DECIMALS, UNIT_DECIMALS } from '../../../../shared/utils/money';
+import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 
 /** Static (non-form) metadata for one billable PO line row. */
 interface PoLineMeta {
@@ -125,13 +127,19 @@ export class VendorBillDialogComponent {
     this.currencies().map(c => ({ value: c.id, label: `${c.code} — ${c.name}` })),
   );
 
+  private readonly quantityDecimals = maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('payables.qty'));
+  private readonly unitPriceDecimals = maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('payables.unitPrice'));
+
   protected readonly billForm = new FormGroup({
     vendorId: new FormControl<number | null>(null, [Validators.required]),
     vendorInvoiceNumber: new FormControl(''),
     purchaseOrderId: new FormControl<number | null>(null),
     billDate: new FormControl<Date | null>(null, [Validators.required]),
     dueDate: new FormControl<Date | null>(null, [Validators.required]),
-    taxAmount: new FormControl<number | null>(0, [Validators.min(0)]),
+    taxAmount: new FormControl<number | null>(0, [
+      Validators.min(0),
+      maxDecimalsValidator(MONEY_DECIMALS, this.translate.instant('payables.tax')),
+    ]),
     currencyId: new FormControl<number | null>(null),
     fxRate: new FormControl<number>(1, [Validators.required, Validators.min(0.0000001)]),
     notes: new FormControl(''),
@@ -318,8 +326,8 @@ export class VendorBillDialogComponent {
     this.standaloneLines.push(new FormGroup({
       partId: new FormControl<number | null>(null),
       description: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-      quantity: new FormControl(1, { nonNullable: true, validators: [Validators.required, Validators.min(0.0001)] }),
-      unitPrice: new FormControl(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
+      quantity: new FormControl(1, { nonNullable: true, validators: [Validators.required, Validators.min(0.0001), this.quantityDecimals] }),
+      unitPrice: new FormControl(0, { nonNullable: true, validators: [Validators.required, Validators.min(0), this.unitPriceDecimals] }),
       glAccountId: new FormControl<number | null>(null),
     }));
   }
@@ -362,12 +370,12 @@ export class VendorBillDialogComponent {
             // Default to billing everything still unbilled; rows zeroed out are omitted.
             quantityToBill: new FormControl(line.unbilledReceivedQuantity, {
               nonNullable: true,
-              validators: [Validators.required, Validators.min(0), Validators.max(line.unbilledReceivedQuantity)],
+              validators: [Validators.required, Validators.min(0), Validators.max(line.unbilledReceivedQuantity), this.quantityDecimals],
             }),
             // Prefill the PO price; edits become purchase-price variance on posting.
             unitPrice: new FormControl(line.unitPrice, {
               nonNullable: true,
-              validators: [Validators.required, Validators.min(0)],
+              validators: [Validators.required, Validators.min(0), this.unitPriceDecimals],
             }),
           }));
         }
@@ -400,8 +408,18 @@ export class VendorBillDialogComponent {
       if (group.controls.unitPrice.hasError('required') || group.controls.unitPrice.hasError('min')) {
         messages.push(this.translate.instant('payables.lineViolations.unitPriceInvalid', { line }));
       }
+      messages.push(...this.decimalViolations(group.controls.quantity, group.controls.unitPrice, line));
     });
     return messages;
+  }
+
+  private decimalViolations(quantity: AbstractControl, unitPrice: AbstractControl, line: number): string[] {
+    return [
+      ...(quantity.hasError('maxDecimals')
+        ? [this.translate.instant('payables.lineViolations.quantityDecimals', { line })] : []),
+      ...(unitPrice.hasError('maxDecimals')
+        ? [this.translate.instant('payables.lineViolations.unitPriceDecimals', { line })] : []),
+    ];
   }
 
   private collectPoLineViolations(): string[] {
@@ -421,6 +439,7 @@ export class VendorBillDialogComponent {
       if (group.controls.unitPrice.hasError('required') || group.controls.unitPrice.hasError('min')) {
         messages.push(this.translate.instant('payables.lineViolations.unitPriceInvalid', { line }));
       }
+      messages.push(...this.decimalViolations(qty, group.controls.unitPrice, line));
     });
     return messages;
   }

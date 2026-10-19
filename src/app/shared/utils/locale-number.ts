@@ -46,10 +46,12 @@ export function parseLocaleNumber(text: string | null | undefined, lang: string)
 /**
  * Format a number for display in the given app language without rounding it. Group separators
  * are added only when `grouping` is true, so quantity fields read `1500.25` / `1500,25`.
+ * `minimumFractionDigits` pads with zeros (`42.50` for money) and never rounds.
  */
-export function formatLocaleNumber(value: number, lang: string, grouping = false): string {
+export function formatLocaleNumber(value: number, lang: string, grouping = false, minimumFractionDigits = 0): string {
   return new Intl.NumberFormat(LOCALES[lang] ?? lang, {
     useGrouping: grouping,
+    minimumFractionDigits,
     maximumFractionDigits: 20,
   }).format(value);
 }

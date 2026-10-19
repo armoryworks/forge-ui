@@ -9,7 +9,7 @@
             <span class="resolve-line__description">{{ line.description }}</span>
             <span class="resolve-line__amounts">
               {{ line.quantity }} ×
-              <app-currency-display [value]="line.unitPrice" [currency]="null" />
+              <app-currency-display [value]="line.unitPrice" [currency]="null" [maximumFractionDigits]="4" />
             </span>
           </div>
 
@@ -30,7 +30,8 @@
                 (selected)="onPartSelected(i, $event)" />
               <app-currency-input
                 [label]="'customers.estimates.resolveLumpSum.unitPriceLabel' | translate"
-                formControlName="unitPrice" />
+                formControlName="unitPrice"
+                step="0.0001" />
             </div>
           }
         </div>

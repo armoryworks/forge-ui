@@ -24,6 +24,8 @@ import { ActiveCurrencyService } from '../../../../shared/services/active-curren
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { toIsoDate, todayEnd } from '../../../../shared/utils/date.utils';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
+import { MONEY_DECIMALS } from '../../../../shared/utils/money';
+import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 
 type ApplicationGroup = FormGroup<{
   amount: FormControl<number>;
@@ -95,7 +97,10 @@ export class VendorPaymentDialogComponent {
   protected readonly paymentForm = new FormGroup({
     vendorId: new FormControl<number | null>(null, [Validators.required]),
     method: new FormControl<string | null>(null, [Validators.required]),
-    amount: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
+    amount: new FormControl<number | null>(null, [
+      Validators.required, Validators.min(0.01),
+      maxDecimalsValidator(MONEY_DECIMALS, this.translate.instant('payables.amount')),
+    ]),
     paymentDate: new FormControl<Date | null>(null, [Validators.required]),
     referenceNumber: new FormControl(''),
     notes: new FormControl(''),
@@ -202,7 +207,10 @@ export class VendorPaymentDialogComponent {
           this.applications.push(new FormGroup({
             amount: new FormControl(0, {
               nonNullable: true,
-              validators: [Validators.required, Validators.min(0), Validators.max(bill.balanceDue)],
+              validators: [
+                Validators.required, Validators.min(0), Validators.max(bill.balanceDue),
+                maxDecimalsValidator(MONEY_DECIMALS, this.translate.instant('payables.amount')),
+              ],
             }),
             settlementFxRate: new FormControl(1, {
               nonNullable: true,
@@ -231,6 +239,9 @@ export class VendorPaymentDialogComponent {
       }
       if (amount.hasError('required') || amount.hasError('min')) {
         messages.push(this.translate.instant('payables.applicationViolations.amountInvalid', { row }));
+      }
+      if (amount.hasError('maxDecimals')) {
+        messages.push(this.translate.instant('payables.applicationViolations.amountDecimals', { row }));
       }
       const fx = group.controls.settlementFxRate;
       if (fx.hasError('required') || fx.hasError('min')) {

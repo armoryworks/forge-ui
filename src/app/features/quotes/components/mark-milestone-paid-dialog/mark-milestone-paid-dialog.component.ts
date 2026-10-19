@@ -11,6 +11,8 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { PaymentMilestone } from '../../../../shared/models/payment-milestone.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
+import { MONEY_DECIMALS } from '../../../../shared/utils/money';
+import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 import { PaymentScheduleService } from '../../services/payment-schedule.service';
 
 export interface MarkMilestonePaidDialogData {
@@ -52,7 +54,8 @@ export class MarkMilestonePaidDialogComponent {
 
   protected readonly form = new FormGroup({
     paidAmount: new FormControl<number | null>(this.remaining > 0 ? this.remaining : null, [
-      Validators.required, Validators.min(0.01),
+      Validators.required, Validators.min(0.01), Validators.max(this.remaining),
+      maxDecimalsValidator(MONEY_DECIMALS, this.translate.instant('quotes.paymentSchedule.paidAmount')),
     ]),
     paidReference: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(100)] }),
   });

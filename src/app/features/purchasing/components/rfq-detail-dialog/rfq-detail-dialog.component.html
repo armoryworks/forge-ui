@@ -136,7 +136,7 @@
           </ng-template>
           <ng-template appColumnCell="unitPrice" let-row>
             @if (row.unitPrice !== null) {
-              <app-currency-display [value]="row.unitPrice" [currency]="null" />
+              <app-currency-display [value]="row.unitPrice" [currency]="null" [maximumFractionDigits]="4" />
             } @else {
               <span>—</span>
             }

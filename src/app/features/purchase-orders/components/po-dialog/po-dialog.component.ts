@@ -49,6 +49,8 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
+import { UNIT_DECIMALS } from '../../../../shared/utils/money';
+import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 
 @Component({
   selector: 'app-po-dialog',
@@ -237,8 +239,14 @@ export class PoDialogComponent {
     // Phase 3 / WU-10 / F8-partial — fractional qty allowed (decimal(18,4) on
     // server). Min is 0.0001 — no zero / negative. Default still 1 for the
     // common whole-unit case (caller can override).
-    orderedQuantity: new FormControl<number>(1, [Validators.required, Validators.min(0.0001)]),
-    unitPrice: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
+    orderedQuantity: new FormControl<number>(1, [
+      Validators.required, Validators.min(0.0001),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('purchaseOrders.qty')),
+    ]),
+    unitPrice: new FormControl<number>(0, [
+      Validators.required, Validators.min(0),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('common.price')),
+    ]),
   });
 
   // UoM purchase-units effort — the selected part's purchase units, loaded when a part is

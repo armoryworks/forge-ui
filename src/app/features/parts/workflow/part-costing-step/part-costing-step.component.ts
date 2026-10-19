@@ -12,6 +12,8 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { PartDetail } from '../../models/part-detail.model';
 import { PartsService } from '../../services/parts.service';
+import { UNIT_DECIMALS } from '../../../../shared/utils/money';
+import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 
 /** Costing modes per the design doc D3 — Tier 1 always available, Tiers 2/3
  * gated by `CAP-COSTING-TIER2-DEPTRATES` and `CAP-COSTING-TIER3-ABC`
@@ -79,7 +81,10 @@ export class PartCostingStepComponent {
   });
 
   protected readonly form = new FormGroup({
-    manualCostOverride: new FormControl<number | null>(null, [Validators.min(0)]),
+    manualCostOverride: new FormControl<number | null>(null, [
+      Validators.min(0),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('parts.workflow.costing.manualOverrideLabel')),
+    ]),
   });
 
   constructor() {
