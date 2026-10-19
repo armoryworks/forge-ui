@@ -254,6 +254,7 @@ export class ChatPopoutComponent implements OnInit, OnDestroy {
   }
 
   private selectConversation(conv: ChatConversation): void {
+    this.clearPendingFile();
     this.selectedConversation.set(conv);
     this.selectedChannel.set(null);
     this.threadParentMessage.set(null);
@@ -263,6 +264,7 @@ export class ChatPopoutComponent implements OnInit, OnDestroy {
   }
 
   private selectChannel(channel: ChatRoom): void {
+    if (this.selectedChannel()?.id !== channel.id) this.clearPendingFile();
     this.selectedChannel.set(channel);
     this.selectedConversation.set(null);
     this.threadParentMessage.set(null);

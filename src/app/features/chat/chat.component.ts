@@ -180,6 +180,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.chatBroadcast.openConversationInPopout({ userId: conv.userId });
       return;
     }
+    this.clearPendingFile();
     this.selectedConversation.set(conv);
     this.selectedChannel.set(null);
     this.view.set('dm');
@@ -192,6 +193,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.chatBroadcast.openConversationInPopout({ channelId: channel.id });
       return;
     }
+    if (this.selectedChannel()?.id !== channel.id) this.clearPendingFile();
     this.selectedChannel.set(channel);
     this.selectedConversation.set(null);
     this.view.set('channel');
