@@ -3,13 +3,13 @@
      Users close via the header X button or an explicit footer button.
      The backdrop stays as a visual scrim only. -->
 <div class="dialog-backdrop">
-  <div class="dialog" role="dialog" aria-modal="true" [attr.aria-label]="title()" [style.width]="width()" [class.dialog--split]="splitLayout()">
+  <div #panel class="dialog" role="dialog" aria-modal="true" [attr.aria-label]="title()" [style.width]="width()" [class.dialog--split]="splitLayout()">
     <div class="dialog__header">
       <span class="dialog__title">{{ title() }}</span>
       @if (isDraftEnabled()) {
         <app-dirty-form-indicator [dirty]="isDirty()" />
       }
-      <button class="icon-btn" [attr.aria-label]="'shared.closeDialog' | translate" [matTooltip]="'shared.closeDialog' | translate" matTooltipPosition="above" (click)="tryClose()">
+      <button #closeButton class="icon-btn" [attr.aria-label]="'shared.closeDialog' | translate" [matTooltip]="'shared.closeDialog' | translate" matTooltipPosition="above" (click)="tryClose()">
         <span class="material-icons-outlined">close</span>
       </button>
     </div>

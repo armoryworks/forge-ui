@@ -4,6 +4,7 @@ import {
   isDevMode,
   inject,
   provideBrowserGlobalErrorListeners,
+  provideEnvironmentInitializer,
   ErrorHandler,
 } from '@angular/core';
 import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
@@ -33,6 +34,7 @@ import { demoApiInterceptor } from './shared/interceptors/demo-api.interceptor';
 import { portalAuthInterceptor } from './features/portal/services/portal-auth.interceptor';
 import { trainingLangInterceptor } from './shared/interceptors/training-lang.interceptor';
 import { TerminologyTranslateLoader } from './shared/terminology/terminology-translate-loader';
+import { DialogEscapeService } from './shared/services/dialog-escape.service';
 
 function initTranslations(): () => Promise<void> {
   const translate = inject(TranslateService);
@@ -94,14 +96,15 @@ export const appConfig: ApplicationConfig = {
       multi: true,
     },
     {
-      // App-wide dialog defaults: backdrop click + ESC do NOT auto-close.
+      // App-wide dialog defaults: backdrop click does NOT auto-close.
       // Per Dan: clicking the CDK overlay area shouldn't close a dialog
       // out from under work in progress. Each dialog still owns its
       // explicit cancel/close button. Individual dialogs that genuinely
       // want backdrop-close (image lightbox, transient hint, etc.) opt
       // out by passing `disableClose: false` to MatDialog.open().
       provide: MAT_DIALOG_DEFAULT_OPTIONS,
-      useValue: { disableClose: true } satisfies MatDialogConfig,
+      useValue: { ...new MatDialogConfig(), disableClose: true } satisfies MatDialogConfig,
     },
+    provideEnvironmentInitializer(() => inject(DialogEscapeService).start()),
   ],
 };
