@@ -16,6 +16,7 @@ $zoomed-phone-width: 359px;
 
   &__header {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     min-width: 0;
     padding: $sp-md $sp-lg;

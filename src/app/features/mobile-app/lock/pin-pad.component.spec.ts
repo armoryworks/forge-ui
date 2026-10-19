@@ -95,6 +95,23 @@ describe('PinPadComponent', () => {
     expect(emitted).toEqual(['1234']);
   });
 
+  it('leaves Enter on a focused key to that key', () => {
+    fixture.componentRef.setInput('minLength', 4);
+    fixture.componentRef.setInput('maxLength', 8);
+    fixture.detectChanges();
+    type('1234');
+
+    const five = key('5')!;
+    five.dispatchEvent(new KeyboardEvent('keydown', { key: '5', bubbles: true, cancelable: true }));
+    const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+    five.dispatchEvent(enter);
+    fixture.detectChanges();
+
+    expect(el().querySelectorAll('.pin-pad__dot--filled').length).toBe(5);
+    expect(enter.defaultPrevented).toBe(false);
+    expect(emitted).toEqual([]);
+  });
+
   it('names the delete key in the current language', () => {
     fixture.detectChanges();
     expect(key('backspace')!.getAttribute('aria-label')).toBe('mobileApp.lock.backspace');

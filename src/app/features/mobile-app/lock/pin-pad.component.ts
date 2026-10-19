@@ -9,7 +9,8 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
  * takes a fixed `length` and submits on the last digit; give it `maxLength`
  * for a variable-length PIN that submits on the OK key once `minLength` digits
  * are in. Digits, Backspace and Enter on a hardware keyboard work too, and
- * each change is announced as a count, never the digits.
+ * each change is announced as a count, never the digits. Enter on a focused
+ * button or link activates that control rather than submitting.
  */
 @Component({
   selector: 'app-pin-pad',
@@ -64,6 +65,7 @@ export class PinPadComponent {
   protected onKey(event: KeyboardEvent): void {
     const target = event.target;
     if (target instanceof Element && target.closest('input, textarea, select, [contenteditable="true"]')) return;
+    if (event.key === 'Enter' && target instanceof Element && target.closest('button, a[href]')) return;
     if (/^\d$/.test(event.key)) this.press(event.key);
     else if (event.key === 'Backspace') this.backspace();
     else if (event.key === 'Enter') this.submit();
