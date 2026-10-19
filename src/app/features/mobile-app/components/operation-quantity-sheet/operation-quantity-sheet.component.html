@@ -1,4 +1,13 @@
-<div class="qty-sheet" role="dialog" [attr.aria-label]="label()" data-testid="operation-quantity-sheet">
+<div
+  class="qty-sheet"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-label]="label()"
+  cdkTrapFocus
+  cdkTrapFocusAutoCapture
+  data-testid="operation-quantity-sheet"
+  (keydown.escape)="cancelled.emit()"
+>
   <span class="qty-sheet__title">{{ label() }}</span>
 
   <span class="qty-sheet__label">{{ 'mobileApp.operations.goodPieces' | translate: { total: jobQuantity() } }}</span>
@@ -9,6 +18,20 @@
     <button type="button" class="qty-sheet__step" [attr.aria-label]="'mobileApp.move.more' | translate" data-testid="operation-qty-plus" (click)="bumpGood(1)">+</button>
     <button type="button" class="qty-sheet__step qty-sheet__step--small" [attr.aria-label]="'mobileApp.operations.moreTen' | translate" data-testid="operation-qty-plus-10" (click)="bumpGood(10)">+10</button>
   </div>
+  @if (typing()) {
+    <app-input
+      type="number"
+      step="1"
+      [min]="0"
+      [formControl]="typedGood"
+      [label]="'mobileApp.operations.typedCount' | translate"
+      data-testid="operation-qty-typed"
+    />
+  } @else {
+    <button type="button" class="qty-sheet__link" data-testid="operation-qty-type" (click)="typeGood()">
+      {{ 'mobileApp.operations.typeCount' | translate }}
+    </button>
+  }
 
   @if (scrapOpen()) {
     <span class="qty-sheet__label">{{ 'mobileApp.operations.scrap' | translate }}</span>

@@ -77,6 +77,15 @@ describe('MobileMoveConfirmService', () => {
     expect(open.mock.calls[0][1].data.message).toBe('mobileAppWork.confirmMove.irreversible {"document":null}');
   });
 
+  it('takes focus, gives it back, and treats Escape or a tap outside as no move', async () => {
+    open.mockReturnValue({ afterClosed: () => of(undefined) });
+
+    expect(await service.ask({ ...base, nextStageIsIrreversible: true })).toBe(false);
+    expect(open.mock.calls[0][1]).toEqual(expect.objectContaining({
+      disableClose: false, autoFocus: 'first-tabbable', restoreFocus: true,
+    }));
+  });
+
   it('recognises the server asking for a confirmation', () => {
     expect(service.isConfirmRequired(new HttpErrorResponse({ status: 400, error: { code: 'confirm-required' } }))).toBe(true);
     expect(service.isConfirmRequired(new HttpErrorResponse({ status: 400, error: { title: 'Bad' } }))).toBe(false);

@@ -13,6 +13,7 @@
     }
   </section>
 
+  @if (platform.mobileShell) {
   <section class="account__section">
     <h2 class="account__heading">{{ 'mobileApp.account.instances' | translate }}</h2>
     <ul class="account__list">
@@ -40,6 +41,7 @@
       {{ 'mobileApp.account.addInstance' | translate }}
     </button>
   </section>
+  }
 
   @if (!shared()) {
     <section class="account__section">
@@ -71,6 +73,7 @@
       </ul>
     </section>
 
+    @if (platform.mobileShell) {
     <section class="account__section">
       <h2 class="account__heading">{{ 'mobileApp.account.security' | translate }}</h2>
       <button type="button" class="account__button" data-testid="account-change-pin" (click)="changePin()">
@@ -80,6 +83,21 @@
       <button type="button" class="account__switch" role="switch" [attr.aria-checked]="lock.biometricEnabled()" data-testid="account-biometric" (click)="toggleBiometric()">
         <span>{{ 'mobileApp.account.biometric' | translate }}</span>
         <span class="material-icons-outlined" aria-hidden="true">{{ lock.biometricEnabled() ? 'toggle_on' : 'toggle_off' }}</span>
+      </button>
+    </section>
+    }
+
+    <section class="account__section">
+      <button
+        type="button"
+        class="account__button"
+        [class.account__button--danger]="confirmingSignOut()"
+        [disabled]="busy()"
+        data-testid="account-sign-out"
+        (click)="signOut()"
+      >
+        <span class="material-icons-outlined" aria-hidden="true">logout</span>
+        {{ (confirmingSignOut() ? 'mobileApp.account.confirmSignOutHere' : 'mobileApp.account.signOut') | translate }}
       </button>
     </section>
   }
@@ -102,7 +120,13 @@
 
   <section class="account__section">
     <h2 class="account__heading">{{ 'mobileApp.account.reportProblem' | translate }}</h2>
-    <app-textarea [label]="'mobileApp.account.problemLabel' | translate" [rows]="3" [formControl]="problemControl" />
+    <app-textarea
+      [label]="'mobileApp.account.problemLabel' | translate"
+      [rows]="3"
+      [maxlength]="problemMaxLength"
+      [hint]="problemCount()"
+      [formControl]="problemControl"
+    />
     <button type="button" class="account__button account__button--primary" [disabled]="problemControl.invalid || busy()" data-testid="account-send-problem" (click)="sendProblem()">
       <span class="material-icons-outlined" aria-hidden="true">send</span>
       {{ 'mobileApp.account.send' | translate }}

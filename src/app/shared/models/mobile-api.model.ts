@@ -77,6 +77,7 @@ export interface OnHand {
   quantity: number;
   lotTracked: boolean;
   lots: { lotNumber: string; quantity: number }[];
+  unlottedQuantity: number;
 }
 
 export interface StockMoveRequest {

@@ -1,4 +1,13 @@
-<div class="sheet" role="dialog" [attr.aria-label]="titleKey() | translate" data-testid="scan-action-sheet">
+<div
+  class="sheet"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-label]="titleKey() | translate"
+  cdkTrapFocus
+  cdkTrapFocusAutoCapture
+  data-testid="scan-action-sheet"
+  (keydown.escape)="dismissed.emit()"
+>
   <div class="sheet__head">
     <span class="sheet__kind">{{ titleKey() | translate }}</span>
     <span class="sheet__label">{{ result().label }}</span>

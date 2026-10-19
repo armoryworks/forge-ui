@@ -164,4 +164,30 @@ describe('AppLookupComponent moving a job', () => {
     expect(snackbar.error).toHaveBeenCalledWith('Quality checks are not complete.');
     expect(api.stopTimer).toHaveBeenCalledOnce();
   });
+
+  it('stops only the person\'s timer on the completed job, and says both in one toast', async () => {
+    await create().onAction('complete');
+
+    expect(api.stopTimer).toHaveBeenCalledWith(undefined, { jobId: 42 }, true);
+    expect(offer).toHaveBeenCalledOnce();
+    expect(offer.mock.calls[0][0]).toBe('mobileApp.jobs.timerStoppedMovedTo');
+  });
+
+  it('says only that the job moved on when the person had no timer on it', async () => {
+    api.stopTimer.mockReturnValue(throwError(() => new Error('No active timer found.')));
+
+    await create().onAction('complete');
+
+    expect(offer.mock.calls[0][0]).toBe('mobileApp.jobs.movedTo');
+    expect(snackbar.error).not.toHaveBeenCalled();
+  });
+
+  it('says to use the desktop app for a record the phone does not open', async () => {
+    const lookup = create();
+    lookup.selected.set({ kind: 'part', id: 7, code: 'PRT-SA-210', label: 'SA-210', subtitle: null });
+
+    await lookup.onAction('details');
+
+    expect(snackbar.info).toHaveBeenCalledWith('mobileApp.scan.openOnDesktopHint');
+  });
 });

@@ -20,22 +20,26 @@
     }
   </div>
 
-  <div class="lookup__results" role="list">
-    @for (item of results(); track item.kind + item.id) {
-      <button type="button" class="lookup__row" role="listitem" [attr.data-testid]="'lookup-row-' + item.id" (click)="select(item)">
-        <span class="material-icons-outlined lookup__row-icon" aria-hidden="true">{{ iconFor(item.kind) }}</span>
-        <span class="lookup__row-body">
-          <span class="lookup__row-label">{{ item.label }}</span>
-          @if (item.subtitle) { <span class="lookup__row-sub">{{ item.subtitle }}</span> }
-        </span>
-        <span class="lookup__row-kind">{{ ('mobileApp.scan.kind.' + item.kind) | translate }}</span>
-      </button>
-    } @empty {
-      <p class="lookup__hint">
-        {{ (searching() ? 'mobileApp.scan.resolving' : (searchControl.value.length < 2 ? 'mobileApp.lookup.hint' : 'mobileApp.lookup.none')) | translate }}
-      </p>
-    }
-  </div>
+  @if (results().length) {
+    <ul class="lookup__results">
+      @for (item of results(); track item.kind + item.id) {
+        <li class="lookup__item">
+          <button type="button" class="lookup__row" [attr.data-testid]="'lookup-row-' + item.id" (click)="select(item)">
+            <span class="material-icons-outlined lookup__row-icon" aria-hidden="true">{{ iconFor(item.kind) }}</span>
+            <span class="lookup__row-body">
+              <span class="lookup__row-label">{{ item.label }}</span>
+              @if (item.subtitle) { <span class="lookup__row-sub">{{ item.subtitle }}</span> }
+            </span>
+            <span class="lookup__row-kind">{{ ('mobileApp.scan.kind.' + item.kind) | translate }}</span>
+          </button>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="lookup__hint" role="status">
+      {{ (searching() ? 'mobileApp.scan.resolving' : (searchControl.value.length < 2 ? 'mobileApp.lookup.hint' : 'mobileApp.lookup.none')) | translate }}
+    </p>
+  }
 
   @if (selected(); as chosen) {
     <div class="lookup__sheet">

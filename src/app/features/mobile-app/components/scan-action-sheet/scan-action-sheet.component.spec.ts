@@ -102,4 +102,22 @@ describe('ScanActionSheetComponent', () => {
     expect(el.querySelector('[data-testid="scan-action-receive"]')).toBeNull();
     expect(el.querySelector('[data-testid="scan-action-details"]')).not.toBeNull();
   });
+
+  it('says Open on desktop for a part, since the phone has no part page', () => {
+    const el = render(null, null, { kind: 'part', id: 3, code: 'PRT-SA-210', label: 'SA-210', subtitle: null });
+
+    expect(el.querySelector('[data-testid="scan-action-details"]')!.textContent).toContain('mobileApp.scan.actions.openOnDesktop');
+  });
+
+  it('is a modal dialog that Escape cancels', () => {
+    const el = render(null);
+    let dismissed = 0;
+    fixture.componentInstance.dismissed.subscribe(() => dismissed++);
+    const sheet = el.querySelector<HTMLElement>('[data-testid="scan-action-sheet"]')!;
+
+    expect(sheet.getAttribute('aria-modal')).toBe('true');
+    sheet.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+
+    expect(dismissed).toBe(1);
+  });
 });

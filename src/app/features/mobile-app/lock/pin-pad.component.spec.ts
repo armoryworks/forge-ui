@@ -77,4 +77,26 @@ describe('PinPadComponent', () => {
       expect(dotCount()).toBe(6);
     });
   });
+
+  it('takes digits, Backspace and Enter from a hardware keyboard', () => {
+    fixture.componentRef.setInput('minLength', 4);
+    fixture.componentRef.setInput('maxLength', 8);
+    fixture.detectChanges();
+    const keydown = (k: string): void => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: k }));
+      fixture.detectChanges();
+    };
+
+    for (const d of '12345') keydown(d);
+    keydown('Backspace');
+    keydown('x');
+    keydown('Enter');
+
+    expect(emitted).toEqual(['1234']);
+  });
+
+  it('names the delete key in the current language', () => {
+    fixture.detectChanges();
+    expect(key('backspace')!.getAttribute('aria-label')).toBe('mobileApp.lock.backspace');
+  });
 });

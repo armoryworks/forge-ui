@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { DatePipe } from '@angular/common';
 
@@ -24,10 +25,15 @@ import { PlatformService } from '../../../shared/services/platform.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { MOBILE_APP_SCREENS } from '../../../shared/utils/mobile-app-screens';
 
+const PROBLEM_MAX_LENGTH = 2000;
+
 /**
  * Account: who is signed in, the instances on this phone (switch / add /
  * remove), this person's devices, the lock and diagnostics toggles,
- * language, report-a-problem, and the app build. Never a tab. When no
+ * language, report-a-problem, sign-out, and the app build. Never a tab.
+ * In a browser the instances and the lock are not offered, since only the
+ * native shell has them; signing out there ends the web session, and on the
+ * phone it signs this device out and removes the server from it. When no
  * phone screen is turned on for the shop it says so, since this is where
  * the screen guard sends the person.
  */
@@ -65,7 +71,14 @@ export class AppAccountComponent {
   protected readonly pendingRevoke = signal<number | null>(null);
   protected readonly sent = signal(false);
 
-  protected readonly problemControl = new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(2000)] });
+  protected readonly problemMaxLength = PROBLEM_MAX_LENGTH;
+  protected readonly problemControl = new FormControl('', {
+    nonNullable: true, validators: [Validators.required, Validators.maxLength(PROBLEM_MAX_LENGTH)],
+  });
+  private readonly problemText = toSignal(this.problemControl.valueChanges, { initialValue: '' });
+  protected readonly problemCount = computed(() =>
+    this.translate.instant('mobileApp.account.problemCount', { count: this.problemText().length, max: PROBLEM_MAX_LENGTH }));
+  protected readonly confirmingSignOut = signal(false);
 
   constructor() {
     if (!this.shared()) {
@@ -96,6 +109,22 @@ export class AppAccountComponent {
     } finally {
       this.busy.set(false);
     }
+  }
+
+  protected async signOut(): Promise<void> {
+    if (!this.confirmingSignOut()) {
+      this.confirmingSignOut.set(true);
+      return;
+    }
+    this.confirmingSignOut.set(false);
+    if (!this.platform.mobileShell) {
+      if (await this.auth.logout()) await this.router.navigate(['/login']);
+      return;
+    }
+    const current = this.myDevices().find((device) => this.isCurrentDevice(device));
+    if (current) await firstValueFrom(this.devices.revoke(current.id)).catch(() => undefined);
+    const active = this.active();
+    if (active) await this.remove(active.id);
   }
 
   protected addInstance(): void {

@@ -184,7 +184,8 @@ export class MobileAuthService {
 
   static normalizeOrigin(input: string): string {
     let value = input.trim();
-    if (!/^https?:\/\//i.test(value)) value = `https://${value}`;
+    if (!value) throw new Error('A server address is required.');
+    if (!/^[a-z][a-z\d+.-]*:\/\//i.test(value)) value = `https://${value}`;
     const url = new URL(value);
     if (url.protocol !== 'https:') {
       throw new Error('TLS is required — plain HTTP is refused.');

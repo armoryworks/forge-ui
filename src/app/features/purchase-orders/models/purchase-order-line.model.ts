@@ -20,4 +20,6 @@ export interface PurchaseOrderLine {
   manualOverrideReason: string | null;
   partDefaultBinId: number | null;
   partDefaultBinPath: string | null;
+  unitSymbol?: string | null;
+  quantityDecimalPlaces?: number | null;
 }

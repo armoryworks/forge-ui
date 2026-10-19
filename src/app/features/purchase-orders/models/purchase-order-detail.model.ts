@@ -57,4 +57,6 @@ export interface PurchaseOrderDetail {
   shipToLocationName?: string | null;
   shipToAddressText?: string | null;
   rowVersion?: number;
+  receivingFallbackBinId?: number | null;
+  receivingFallbackBinPath?: string | null;
 }

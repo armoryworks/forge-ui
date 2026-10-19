@@ -306,6 +306,16 @@ describe('httpErrorInterceptor', () => {
       expect(toast.show).toHaveBeenCalledOnce();
     });
 
+    it('leaves an offline device to the offline banner', () => {
+      const online = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+      http.post('/api/v1/jobs', {}).subscribe({ error: () => {} });
+
+      httpMock.expectOne('/api/v1/jobs').error(networkError);
+
+      expect(toast.show).not.toHaveBeenCalled();
+      online.mockRestore();
+    });
+
     it('stays quiet while the tab is hidden', () => {
       const visibility = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
       http.post('/api/v1/jobs', {}).subscribe({ error: () => {} });

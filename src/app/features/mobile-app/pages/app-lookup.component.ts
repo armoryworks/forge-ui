@@ -21,8 +21,9 @@ import { ScanAction, ScanActionSheetComponent } from '../components/scan-action-
  * jobs, parts, customers, bins; voice input; big result rows that open the
  * same action sheet a scan would. A move or complete asks first, and offers
  * no undo, when the server answers that the column can't be undone or
- * creates an accounting document; Complete then stops the timer unless the
- * person declines.
+ * creates an accounting document; Complete then stops the person's timer on
+ * that job only, unless the person declines. A record the phone does not
+ * open says to use the desktop app.
  */
 @Component({
   selector: 'app-app-lookup',
@@ -116,6 +117,7 @@ export class AppLookupComponent {
       switch (action) {
         case 'details':
           if (result.kind === 'job') await this.router.navigate(['/app/jobs', result.id]);
+          else this.snackbar.info(this.translate.instant('mobileApp.scan.openOnDesktopHint'));
           break;
         case 'move': {
           const sent = await this.sendAdvance(result.id);
@@ -152,12 +154,12 @@ export class AppLookupComponent {
           try {
             sent = await this.sendAdvance(result.id);
           } catch (err) {
-            await this.stopForComplete();
+            await this.stopForComplete(result.id);
             throw err;
           }
           if (!sent) break;
-          await this.stopForComplete();
-          this.afterAdvance(result.id, sent);
+          const stopped = await this.stopForComplete(result.id);
+          this.afterAdvance(result.id, sent, stopped);
           break;
         }
         case 'moveStock':
@@ -194,7 +196,9 @@ export class AppLookupComponent {
     }
   }
 
-  private afterAdvance(jobId: number, sent: { outcome: JobAdvanceResult | QueuedOffline; confirmed: boolean }): void {
+  private afterAdvance(
+    jobId: number, sent: { outcome: JobAdvanceResult | QueuedOffline; confirmed: boolean }, timerStopped = false,
+  ): void {
     const { outcome, confirmed } = sent;
     this.selected.set(null);
     if (isQueued(outcome)) {
@@ -203,7 +207,8 @@ export class AppLookupComponent {
       return;
     }
     if (outcome.collapsed) return;
-    const message = this.translate.instant('mobileApp.jobs.movedTo', { column: outcome.status.stageName });
+    const message = this.translate.instant(
+      timerStopped ? 'mobileApp.jobs.timerStoppedMovedTo' : 'mobileApp.jobs.movedTo', { column: outcome.status.stageName });
     if (confirmed) {
       this.snackbar.success(message);
       return;
@@ -211,9 +216,10 @@ export class AppLookupComponent {
     this.undo.offer(message, () => firstValueFrom(this.api.moveJobToStage(jobId, outcome.previousStageId)));
   }
 
-  private async stopForComplete(): Promise<void> {
-    await firstValueFrom(this.api.stopTimer()).catch(() => undefined);
+  private async stopForComplete(jobId: number): Promise<boolean> {
+    const stopped = await firstValueFrom(this.api.stopTimer(undefined, { jobId }, true)).then(() => true, () => false);
     void this.timer.refresh();
+    return stopped;
   }
 
   private offerQueuedUndo(...entryIds: string[]): void {

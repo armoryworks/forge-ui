@@ -602,6 +602,10 @@
   }
 }
 
+body.app-mobile-shell .mat-mdc-snack-bar-container {
+  margin-bottom: calc(var(--app-mobile-shell-chrome, 0px) + 72px) !important;
+}
+
 // ─── Chip ───
 .chip {
   @include uppercase-label(var(--font-size-xs), 0.5px, 600);

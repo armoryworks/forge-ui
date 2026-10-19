@@ -1,7 +1,7 @@
 <div class="job-status" data-testid="mobile-app-job-status">
   <button type="button" class="job-status__back" data-testid="job-status-back" (click)="back()">
     <span class="material-icons-outlined" aria-hidden="true">arrow_back</span>
-    {{ 'mobileApp.jobs.backToScan' | translate }}
+    {{ 'common.back' | translate }}
   </button>
 
   @if (loading()) {
@@ -88,7 +88,16 @@
   }
 
   @if (notePicker()) {
-    <div class="job-status__sheet" role="dialog" [attr.aria-label]="'mobileApp.jobs.noteFromList' | translate">
+    <div
+      class="job-status__sheet"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="'mobileApp.jobs.noteFromList' | translate"
+      cdkTrapFocus
+      cdkTrapFocusAutoCapture
+      data-testid="note-picker"
+      (keydown.escape)="notePicker.set(false)"
+    >
       @for (preset of notePresets(); track preset) {
         <button type="button" class="job-status__preset" (click)="pickNote(preset)">{{ preset }}</button>
       } @empty {

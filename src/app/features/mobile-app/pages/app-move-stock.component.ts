@@ -1,12 +1,14 @@
 import {
   AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, computed, inject, signal,
 } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 import { firstValueFrom, map } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { InputComponent } from '../../../shared/components/input/input.component';
 import { OnHand, ScanResolveResult, isQueued } from '../../../shared/models/mobile-api.model';
 import { CameraScannerService } from '../../../shared/services/camera-scanner.service';
 import { InstanceService } from '../../../shared/services/instance.service';
@@ -23,13 +25,16 @@ type Step = 'part' | 'from' | 'to' | 'quantity';
 
 /**
  * Move Stock: scan part → scan from-bin → scan to-bin → quantity on a
- * stepper (default = on hand at the from-bin) → Done. Four scans, one tap.
- * Lot picker appears only for lot-tracked parts. Undo moves it back.
+ * stepper (default = on hand at the from-bin), or typed → Done. Four scans,
+ * one tap. A from-bin that does not hold the part is refused at once. Lot
+ * picker appears only for lot-tracked parts, with a "no lot" choice for stock
+ * put away without one. Moves are in whole units; a fraction on hand stays
+ * behind and the screen says so. Undo moves it back.
  */
 @Component({
   selector: 'app-app-move-stock',
   standalone: true,
-  imports: [TranslatePipe, IdentityPromptComponent, ManualCodeEntryComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, IdentityPromptComponent, ManualCodeEntryComponent],
   templateUrl: './app-move-stock.component.html',
   styleUrl: './app-move-stock.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,6 +61,9 @@ export class AppMoveStockComponent implements AfterViewInit, OnDestroy {
   protected readonly onHand = signal<OnHand | null>(null);
   protected readonly quantity = signal(1);
   protected readonly lot = signal<string | null>(null);
+  protected readonly noLot = signal(false);
+  protected readonly typingQuantity = signal(false);
+  protected readonly typedQuantity = new FormControl<number | null>(null);
   protected readonly busy = signal(false);
   protected readonly notice = signal<string | null>(null);
   protected readonly cameraError = signal(false);
@@ -65,15 +73,32 @@ export class AppMoveStockComponent implements AfterViewInit, OnDestroy {
   protected readonly scanning = computed(() => this.step() !== 'quantity');
   protected readonly canFinish = computed(() =>
     this.quantity() > 0
-    && (!this.onHand()?.lotTracked || !!this.lot())
-    && (this.onHand() === null || this.quantity() <= this.lotQuantity()));
+    && this.wholeQuantity()
+    && (!this.onHand()?.lotTracked || !!this.lot() || this.noLot())
+    && (this.onHand() === null || this.quantity() <= this.movable()));
 
-  private readonly lotQuantity = computed(() => {
+  private readonly available = computed(() => {
     const stock = this.onHand();
     if (!stock) return Number.MAX_SAFE_INTEGER;
     const lot = this.lot();
-    return lot ? (stock.lots.find((l) => l.lotNumber === lot)?.quantity ?? 0) : stock.quantity;
+    if (lot) return stock.lots.find((l) => l.lotNumber === lot)?.quantity ?? 0;
+    return stock.lotTracked ? stock.unlottedQuantity : stock.quantity;
   });
+
+  protected readonly movable = computed(() => Math.floor(this.available()));
+  protected readonly wholeQuantity = computed(() => Number.isInteger(this.quantity()));
+
+  protected readonly leftBehind = computed(() => {
+    if (!this.onHand() || (this.onHand()!.lotTracked && !this.lot() && !this.noLot())) return null;
+    const rest = Math.round((this.available() - this.movable()) * 1e6) / 1e6;
+    return rest > 0 ? rest : null;
+  });
+
+  constructor() {
+    this.typedQuantity.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
+      if (value !== null && Number.isFinite(value)) this.quantity.set(value);
+    });
+  }
 
   async ngAfterViewInit(): Promise<void> {
     const code = this.prefillCode();
@@ -99,19 +124,31 @@ export class AppMoveStockComponent implements AfterViewInit, OnDestroy {
   }
 
   protected bump(delta: number): void {
-    this.quantity.set(Math.max(1, Math.min(this.lotQuantity(), this.quantity() + delta)));
+    this.setQuantity(Math.max(1, Math.min(this.movable(), Math.floor(this.quantity()) + delta)));
+  }
+
+  protected typeQuantity(): void {
+    this.typedQuantity.setValue(this.quantity(), { emitEvent: false });
+    this.typingQuantity.set(true);
   }
 
   protected pickLot(lotNumber: string): void {
     this.lot.set(lotNumber);
-    const stock = this.onHand();
-    const qty = stock?.lots.find((l) => l.lotNumber === lotNumber)?.quantity ?? 1;
-    this.quantity.set(Math.max(1, Math.floor(qty)));
+    this.noLot.set(false);
+    this.setQuantity(this.movable());
+  }
+
+  protected pickNoLot(): void {
+    this.lot.set(null);
+    this.noLot.set(true);
+    this.setQuantity(this.movable());
   }
 
   protected restart(): void {
     this.part.set(null); this.from.set(null); this.to.set(null);
-    this.onHand.set(null); this.lot.set(null); this.quantity.set(1); this.notice.set(null);
+    this.onHand.set(null); this.lot.set(null); this.noLot.set(false); this.notice.set(null);
+    this.typingQuantity.set(false);
+    this.setQuantity(1);
     this.step.set('part');
     void this.startScanner();
   }
@@ -161,6 +198,11 @@ export class AppMoveStockComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  private setQuantity(value: number): void {
+    this.quantity.set(value);
+    this.typedQuantity.setValue(value, { emitEvent: false });
+  }
+
   private async startScanner(): Promise<void> {
     this.cameraError.set(false);
     try {
@@ -188,7 +230,14 @@ export class AppMoveStockComponent implements AfterViewInit, OnDestroy {
         this.part.set(resolved);
         this.step.set('from');
       } else if (this.step() === 'from') {
+        const stock = await firstValueFrom(this.api.onHand(this.part()!.id!, resolved.id!));
+        if (stock.quantity <= 0) {
+          await this.feedback.doubleBuzz();
+          this.notice.set(this.translate.instant('mobileApp.move.notInBin', { part: this.part()!.label, bin: resolved.label }));
+          return;
+        }
         this.from.set(resolved);
+        this.onHand.set(stock);
         this.step.set('to');
       } else {
         if (resolved.id === this.from()?.id) {
@@ -198,10 +247,10 @@ export class AppMoveStockComponent implements AfterViewInit, OnDestroy {
         }
         this.to.set(resolved);
         await this.scanner.stop();
-        const stock = await firstValueFrom(this.api.onHand(this.part()!.id!, this.from()!.id!));
-        this.onHand.set(stock);
-        this.quantity.set(Math.max(1, Math.floor(stock.quantity)));
-        if (stock.lotTracked && stock.lots.length === 1) this.pickLot(stock.lots[0].lotNumber);
+        const stock = this.onHand()!;
+        if (stock.lotTracked && stock.lots.length === 1 && stock.unlottedQuantity <= 0) this.pickLot(stock.lots[0].lotNumber);
+        else if (stock.lotTracked && stock.lots.length === 0 && stock.unlottedQuantity > 0) this.pickNoLot();
+        else this.setQuantity(this.movable());
         this.step.set('quantity');
       }
     } catch {

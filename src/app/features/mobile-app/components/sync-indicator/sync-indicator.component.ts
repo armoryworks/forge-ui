@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { A11yModule } from '@angular/cdk/a11y';
 
 import { DatePipe } from '@angular/common';
 
@@ -20,7 +21,7 @@ type SyncState = 'online' | 'offline' | 'syncing' | 'rejected';
 @Component({
   selector: 'app-sync-indicator',
   standalone: true,
-  imports: [DatePipe, TranslatePipe],
+  imports: [A11yModule, DatePipe, TranslatePipe],
   templateUrl: './sync-indicator.component.html',
   styleUrl: './sync-indicator.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

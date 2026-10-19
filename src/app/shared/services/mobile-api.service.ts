@@ -103,9 +103,9 @@ export class MobileApiService {
   }
 
   /** Without a target the server stops the caller's newest job-level timer, as it always has. */
-  stopTimer(token?: string, target?: TimerStopTarget): Observable<unknown> {
+  stopTimer(token?: string, target?: TimerStopTarget, silent = false): Observable<unknown> {
     return this.mutate<unknown>('POST', '/api/v1/time-tracking/timer/stop', target ?? {},
-      { key: 'mobileAppWork.sync.action.stopTimer' }, token);
+      { key: 'mobileAppWork.sync.action.stopTimer' }, token, silent);
   }
 
   /** All of the caller's open timers, job-level and per operation. A failure is not shown. */

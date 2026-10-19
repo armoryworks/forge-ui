@@ -157,6 +157,18 @@
     color: var(--text);
   }
 
+  &__type {
+    min-height: 44px;
+    padding: 0 $sp-md;
+    background: transparent;
+    border: none;
+    color: var(--primary);
+    font-family: $font-family-primary;
+    font-size: $font-size-base;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
   &__notice {
     margin: 0;
     font-size: $font-size-md;

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, Injector, afterNextRender, computed, effect, inject, signal, untracked, viewChildren } from '@angular/core';
-import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -31,9 +31,11 @@ const RECEIVABLE_STATUSES = ['Submitted', 'Acknowledged', 'PartiallyReceived'];
 
 /**
  * Receive: reached by scanning a PO at the dock. The PO header, its open
- * lines with what is still due, and per line a quantity, a bin and a lot /
- * heat number; one packing slip number for the whole receipt. Online only,
- * and a refusal shows the server's own message.
+ * lines with what is still due in the line's unit, and per line a quantity
+ * (held to the unit's precision), a bin and a lot / heat number; one packing
+ * slip number for the whole receipt. A line with no bin of its own shows the
+ * bin the receipt falls back to. Online only, and a refusal shows the
+ * server's own message.
  */
 @Component({
   selector: 'app-app-receive',
@@ -130,6 +132,23 @@ export class AppReceiveComponent {
     return this.form.controls.lines.at(index);
   }
 
+  protected unitOf(line: PurchaseOrderLine): string {
+    return line.purchaseUnitLabel ?? line.unitSymbol ?? '';
+  }
+
+  protected withUnit(quantity: number, line: PurchaseOrderLine): string {
+    return `${quantity} ${this.unitOf(line)}`.trim();
+  }
+
+  protected stepFor(line: PurchaseOrderLine): string {
+    const places = line.quantityDecimalPlaces;
+    return places == null ? 'any' : (1 / 10 ** places).toFixed(places);
+  }
+
+  protected binWillBeCreated(line: PurchaseOrderLine): boolean {
+    return !!line.partId && line.partDefaultBinId === null && !this.po()?.receivingFallbackBinId;
+  }
+
   protected fillRemaining(index: number): void {
     const line = this.lines()[index];
     if (line) this.lineGroup(index).controls.quantity.setValue(line.remainingQuantity);
@@ -181,16 +200,37 @@ export class AppReceiveComponent {
   }
 
   private buildForm(): void {
+    const fallbackId = this.po()?.receivingFallbackBinId ?? null;
+    const fallbackPath = this.po()?.receivingFallbackBinPath ?? null;
     const groups: LineForm[] = this.lines().map((line) => new FormGroup({
-      quantity: new FormControl<number | null>(null, [Validators.min(0), Validators.max(line.remainingQuantity)]),
-      binId: new FormControl<number | null>(line.partId ? line.partDefaultBinId : null),
+      quantity: new FormControl<number | null>(null, [
+        Validators.min(0), Validators.max(line.remainingQuantity), this.precisionValidator(line),
+      ]),
+      binId: new FormControl<number | null>(line.partId ? (line.partDefaultBinId ?? fallbackId) : null),
       lot: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(100)] }),
     }));
     this.form.setControl('lines', new FormArray(groups), { emitEvent: false });
     this.pendingReceipt = null;
-    this.binLabels.set(this.lines().map((line) => (line.partId ? line.partDefaultBinPath : null)));
+    this.binLabels.set(this.lines().map((line) => {
+      if (!line.partId) return null;
+      return line.partDefaultBinId !== null ? line.partDefaultBinPath : fallbackPath;
+    }));
     this.form.controls.packingSlip.setValue('', { emitEvent: false });
     this.form.updateValueAndValidity();
+  }
+
+  private precisionValidator(line: PurchaseOrderLine): ValidatorFn {
+    return (control) => {
+      const places = line.quantityDecimalPlaces;
+      const value = control.value as number | null;
+      if (places == null || value == null || !Number.isFinite(value)) return null;
+      const scaled = value * 10 ** places;
+      if (Math.abs(scaled - Math.round(scaled)) < 1e-6) return null;
+      const message = places === 0
+        ? this.translate.instant('mobileReceive.wholeUnitsOnly', { unit: this.unitOf(line) })
+        : this.translate.instant('mobileReceive.tooManyDecimals', { places, unit: this.unitOf(line) });
+      return { precision: { message } };
+    };
   }
 
   private syncBinPickers(pickers: readonly EntityPickerComponent[]): void {

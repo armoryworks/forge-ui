@@ -115,7 +115,7 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
           break;
 
         case 0:
-          if (document.visibilityState === 'hidden') break;
+          if (document.visibilityState === 'hidden' || !navigator.onLine) break;
           toast.show({
             severity: 'error',
             title: translate.instant('errors.connectionLost'),

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -27,6 +27,9 @@ interface MfaChallengeResponse {
 interface MfaValidateResponse {
   accessToken: string;
 }
+
+const notBlank: ValidatorFn = (control: AbstractControl<string>) =>
+  control.value.trim() ? null : { required: true };
 
 /**
  * Manual enrollment: type the server address, trust its certificate
@@ -63,7 +66,7 @@ export class EnrollManualComponent {
   private readonly challengeToken = signal<string | null>(null);
 
   protected readonly addressForm = new FormGroup({
-    server: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    server: new FormControl('', { nonNullable: true, validators: [Validators.required, notBlank] }),
   });
 
   protected readonly loginForm = new FormGroup({

@@ -44,15 +44,15 @@
               <dl class="receive__facts">
                 <div class="receive__fact">
                   <dt>{{ 'mobileReceive.ordered' | translate }}</dt>
-                  <dd>{{ line.orderedQuantity }}</dd>
+                  <dd>{{ withUnit(line.orderedQuantity, line) }}</dd>
                 </div>
                 <div class="receive__fact">
                   <dt>{{ 'mobileReceive.receivedSoFar' | translate }}</dt>
-                  <dd>{{ line.receivedQuantity }}</dd>
+                  <dd>{{ withUnit(line.receivedQuantity, line) }}</dd>
                 </div>
                 <div class="receive__fact receive__fact--due">
                   <dt>{{ 'mobileReceive.remaining' | translate }}</dt>
-                  <dd>{{ line.remainingQuantity }}</dd>
+                  <dd>{{ withUnit(line.remainingQuantity, line) }}</dd>
                 </div>
               </dl>
 
@@ -60,9 +60,10 @@
                 <app-input
                   formControlName="quantity"
                   type="number"
-                  step="any"
+                  [step]="stepFor(line)"
                   [min]="0"
                   [max]="line.remainingQuantity"
+                  [suffix]="unitOf(line)"
                   [label]="'mobileReceive.quantity' | translate"
                   [attr.data-testid]="'receive-qty-' + line.id"
                 />
@@ -71,7 +72,7 @@
                   class="receive__fill"
                   [attr.data-testid]="'receive-fill-' + line.id"
                   (click)="fillRemaining(i)"
-                >{{ 'mobileReceive.fillRemaining' | translate: { qty: line.remainingQuantity } }}</button>
+                >{{ 'mobileReceive.fillRemaining' | translate: { qty: withUnit(line.remainingQuantity, line) } }}</button>
               </div>
 
               @if (line.partId) {
@@ -87,6 +88,9 @@
                     (selected)="onBinSelected(i, $event)"
                     [attr.data-testid]="'receive-bin-' + line.id"
                   />
+                  @if (binWillBeCreated(line)) {
+                    <p class="receive__hint" [attr.data-testid]="'receive-bin-hint-' + line.id">{{ 'mobileReceive.binCreatedHint' | translate }}</p>
+                  }
                 }
                 <app-input
                   formControlName="lot"

@@ -234,10 +234,10 @@ describe('AppScanComponent', () => {
     expect(identity.clear).toHaveBeenCalledOnce();
   });
 
-  it('completes by stopping the newest timer, as before, while operation tracking is off', async () => {
+  it('completes by stopping only the person\'s timer on that job while operation tracking is off', async () => {
     await create().onAction('complete');
 
-    expect(api.stopTimer).toHaveBeenCalledWith();
+    expect(api.stopTimer).toHaveBeenCalledWith(undefined, { jobId: 42 }, true);
     expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', null, true);
     expect(api.advanceJob.mock.invocationCallOrder[0]).toBeLessThan(api.stopTimer.mock.invocationCallOrder[0]);
   });
@@ -247,8 +247,24 @@ describe('AppScanComponent', () => {
 
     await create().onAction('complete');
 
-    expect(api.stopTimer).toHaveBeenCalledWith(undefined, { jobId: 42 });
+    expect(api.stopTimer).toHaveBeenCalledWith(undefined, { jobId: 42 }, true);
     expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', null, true);
+  });
+
+  it('says in one toast that the timer stopped and the job moved on', async () => {
+    await create().onAction('complete');
+
+    expect(offer).toHaveBeenCalledOnce();
+    expect(offer.mock.calls[0][0]).toBe('mobileApp.jobs.timerStoppedMovedTo');
+  });
+
+  it('says only that the job moved on when the person had no timer on it', async () => {
+    api.stopTimer.mockReturnValue(throwError(() => new Error('No active timer found.')));
+
+    await create().onAction('complete');
+
+    expect(offer).toHaveBeenCalledOnce();
+    expect(offer.mock.calls[0][0]).toBe('mobileApp.jobs.movedTo');
   });
 
   it('names the identified person and clears them on Not you', () => {
@@ -449,7 +465,7 @@ describe('AppScanComponent requests', () => {
 
   afterEach(() => http.verify());
 
-  it('with operation tracking off, start, complete and stop send exactly the requests they always sent', async () => {
+  it('with operation tracking off, start and stop send the requests they always sent and complete names its job', async () => {
     await signIn(false);
     const scan = create();
 
@@ -474,7 +490,7 @@ describe('AppScanComponent requests', () => {
     expect(advance.request.body).toEqual({ scanCode: 'JOB-42' });
     advance.flush({ status: { stageName: 'Machining' }, previousStageId: 3, previousStageName: 'Queued', collapsed: false });
     const completeStop = await next('POST', '/api/v1/time-tracking/timer/stop');
-    expect(completeStop.request.body).toEqual({});
+    expect(completeStop.request.body).toEqual({ jobId: 42 });
     completeStop.flush({});
     (await next('GET', '/api/v1/time-tracking/timer/active')).flush(null, { status: 204, statusText: 'No Content' });
     await completed;

@@ -294,6 +294,35 @@ describe('AppReceiveComponent', () => {
     expect(receive.canSubmit()).toBe(false);
   });
 
+  it('puts a line with no bin of its own in the bin the receipt falls back to, and shows it', async () => {
+    const receive = await create(purchaseOrder({
+      receivingFallbackBinId: 9, receivingFallbackBinPath: 'Dock / Receiving',
+      lines: [line({ partDefaultBinId: null, partDefaultBinPath: null })],
+    }));
+    TestBed.tick();
+
+    expect(receive.form.controls.lines.at(0).controls.binId.value).toBe(9);
+    expect(receive.binLabels()).toEqual(['Dock / Receiving']);
+    expect(picker.setSelected).toHaveBeenCalledWith(9, 'Dock / Receiving');
+  });
+
+  it('holds a quantity to the precision of the line\'s unit', async () => {
+    const receive = await create(purchaseOrder({
+      lines: [line({ unitSymbol: 'ea', quantityDecimalPlaces: 0 }), line({ id: 4, unitSymbol: 'kg', quantityDecimalPlaces: 3 })],
+    }));
+    const each = receive.form.controls.lines.at(0).controls.quantity;
+    const kilos = receive.form.controls.lines.at(1).controls.quantity;
+
+    each.setValue(3.0001);
+    expect(each.errors?.['precision']?.message).toBe('mobileReceive.wholeUnitsOnly');
+    expect(receive.canSubmit()).toBe(false);
+    each.setValue(3);
+    kilos.setValue(10.125);
+    expect(kilos.valid).toBe(true);
+    kilos.setValue(10.1255);
+    expect(kilos.errors?.['precision']?.message).toBe('mobileReceive.tooManyDecimals');
+  });
+
   it('does not submit while offline', async () => {
     vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
     const receive = await create();

@@ -16,7 +16,8 @@ import { AuthService } from './auth.service';
  * that creates an accounting document, naming the column and what it
  * creates. Such a move is sent with `confirmed` and offers no undo. A column
  * that bills the customer (shipped, invoiced, paid) is moved by the office:
- * other roles are not offered that move.
+ * other roles are not offered that move. Escape or a tap outside the
+ * question closes it without moving.
  */
 @Injectable({ providedIn: 'root' })
 export class MobileMoveConfirmService {
@@ -50,6 +51,9 @@ export class MobileMoveConfirmService {
       : 'mobileAppWork.confirmMove.irreversible';
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
+      disableClose: false,
+      autoFocus: 'first-tabbable',
+      restoreFocus: true,
       data: {
         title: this.translate.instant('mobileAppWork.confirmMove.title', { job: job.jobNumber, status }),
         message: this.translate.instant(messageKey, { document }),

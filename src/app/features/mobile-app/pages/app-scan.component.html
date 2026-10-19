@@ -8,10 +8,10 @@
     <span class="app-scan__corner app-scan__corner--br"></span>
   </div>
 
-  @if (cameraError()) {
+  @if (notice(); as message) {
+    <p class="app-scan__hint" role="status" data-testid="scan-notice">{{ message }}</p>
+  } @else if (cameraError()) {
     <p class="app-scan__hint" role="alert">{{ 'mobileApp.scan.cameraError' | translate }}</p>
-  } @else if (notice(); as message) {
-    <p class="app-scan__hint" role="status">{{ message }}</p>
   } @else if (resolving()) {
     <p class="app-scan__hint" role="status">{{ 'mobileApp.scan.resolving' | translate }}</p>
   } @else if (!result()) {

@@ -20,7 +20,16 @@
 }
 
 @if (open()) {
-  <div class="sync-sheet" role="dialog" [attr.aria-label]="'mobileApp.sync.title' | translate" data-testid="sync-sheet">
+  <div
+    class="sync-sheet"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="'mobileApp.sync.title' | translate"
+    cdkTrapFocus
+    cdkTrapFocusAutoCapture
+    data-testid="sync-sheet"
+    (keydown.escape)="toggle()"
+  >
     <div class="sync-sheet__head">
       <span class="sync-sheet__title">{{ ('mobileApp.sync.state.' + state()) | translate }}</span>
       <button type="button" class="sync-sheet__close" [attr.aria-label]="'common.close' | translate" (click)="toggle()">

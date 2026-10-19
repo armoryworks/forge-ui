@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
+import { A11yModule } from '@angular/cdk/a11y';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -19,16 +20,19 @@ interface ActionButton {
 
 /**
  * The one contextual action sheet after a decode: "Job 4471 — Start /
- * Complete / Move / Details". Start becomes Stop while the person's timer
- * runs on this job; a purchase order offers Receive while purchasing is on
- * and the person holds a role that may receive it.
+ * Stop & advance / Move / Details". Start becomes Stop while the person's
+ * timer runs on this job; Stop & advance moves the job on one step and
+ * stops the person's timer on it. A purchase order offers Receive while
+ * purchasing is on and the person holds a role that may receive it. A
+ * record the phone has no page for says Open on desktop. A modal dialog:
+ * it takes focus when it opens and Escape cancels.
  * Dumb: the parent resolves the scan and performs the chosen action. Never
  * navigates on its own.
  */
 @Component({
   selector: 'app-scan-action-sheet',
   standalone: true,
-  imports: [TranslatePipe],
+  imports: [A11yModule, TranslatePipe],
   templateUrl: './scan-action-sheet.component.html',
   styleUrl: './scan-action-sheet.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -54,14 +58,14 @@ export class ScanActionSheetComponent {
           this.result().id !== null && this.runningJobId() === this.result().id
             ? { action: 'stop', labelKey: 'mobileApp.scan.actions.stop', icon: 'stop', primary: true }
             : { action: 'start', labelKey: 'mobileApp.scan.actions.start', icon: 'play_arrow', primary: true },
-          { action: 'complete', labelKey: 'mobileApp.scan.actions.complete', icon: 'check' },
+          { action: 'complete', labelKey: 'mobileApp.scan.actions.complete', icon: 'done_all' },
           { action: 'move', labelKey: 'mobileApp.scan.actions.move', icon: 'arrow_forward' },
           { action: 'details', labelKey: 'mobileApp.scan.actions.details', icon: 'info' },
         ];
       case 'part':
         return [
           { action: 'moveStock', labelKey: 'mobileApp.scan.actions.moveStock', icon: 'swap_horiz', primary: true },
-          { action: 'details', labelKey: 'mobileApp.scan.actions.details', icon: 'info' },
+          { action: 'details', labelKey: 'mobileApp.scan.actions.openOnDesktop', icon: 'open_in_new' },
         ];
       case 'bin':
       case 'lot':

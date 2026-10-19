@@ -250,9 +250,7 @@ export class JobOperationsComponent {
     if (result.operation.status !== row.status) previous.status = row.status;
     if (result.operation.version !== null) previous.expectedVersion = result.operation.version;
     this.undo.offer(
-      entry.complete
-        ? this.translate.instant('mobileApp.operations.completed', { name: this.labelOf(row) })
-        : this.translate.instant('mobileApp.operations.recorded', { count: entry.completed, name: this.labelOf(row) }),
+      this.recordedMessage(entry, row),
       async () => {
         await firstValueFrom(this.api.updateOperationProgress(jobId, operationId, previous, token));
         this.moveOffered.set(false);
@@ -261,6 +259,18 @@ export class JobOperationsComponent {
       this.endIdentity(token),
     );
     return !!token;
+  }
+
+  private recordedMessage(entry: OperationQuantityEntry, row: JobOperationRow): string {
+    const name = this.labelOf(row);
+    if (entry.complete) {
+      return entry.scrap > 0
+        ? this.translate.instant('mobileApp.operations.completedWithScrap', { name, scrap: entry.scrap })
+        : this.translate.instant('mobileApp.operations.completed', { name });
+    }
+    return entry.scrap > 0
+      ? this.translate.instant('mobileApp.operations.recordedWithScrap', { count: entry.completed, scrap: entry.scrap, name })
+      : this.translate.instant('mobileApp.operations.recorded', { count: entry.completed, name });
   }
 
   private changed(): void {

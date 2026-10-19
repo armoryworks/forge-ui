@@ -5077,7 +5077,8 @@
     },
     "preview": {
       "open": "Abrir"
-    }
+    },
+    "offlineNotSaved": "Estás sin conexión. Los cambios no se pueden guardar hasta que te reconectes."
   },
   "addressForm": {
     "streetAddress": "Dirección",
@@ -11117,7 +11118,7 @@
       },
       "actions": {
         "start": "Iniciar",
-        "complete": "Completar",
+        "complete": "Detener y avanzar",
         "move": "Mover",
         "details": "Detalles",
         "moveStock": "Mover inventario",
@@ -11172,7 +11173,9 @@
       "biometricTitle": "¿Desbloquear con su huella o rostro?",
       "biometricHint": "Más rápido que el PIN. El PIN queda como respaldo.",
       "enableBiometric": "Activar",
-      "notNow": "Ahora no"
+      "notNow": "Ahora no",
+      "backspace": "Borrar el último dígito",
+      "digitsEntered": "{{count}} de {{total}} dígitos ingresados"
     },
     "identity": {
       "scanBadge": "Escanee su credencial",
@@ -11201,7 +11204,8 @@
       "noteFromList": "Nota de la lista",
       "noPresets": "No hay notas predefinidas configuradas.",
       "attachPhoto": "Adjuntar foto",
-      "homeHint": "Escanee un viajero de trabajo o búsquelo para ver su estado."
+      "homeHint": "Escanee un viajero de trabajo o búsquelo para ver su estado.",
+      "timerStoppedMovedTo": "Temporizador detenido · movido a {{column}}"
     },
     "undo": {
       "action": "Deshacer",
@@ -11253,7 +11257,14 @@
       "expect": {
         "part": "Esa no es una etiqueta de pieza.",
         "bin": "Esa no es una etiqueta de ubicación."
-      }
+      },
+      "stepsLabel": "Pasos para mover inventario",
+      "notInBin": "{{part}} no está en {{bin}}. Escanee la ubicación donde está.",
+      "noLotChoice": "Sin lote",
+      "typeQuantity": "Escribir un número",
+      "typedQuantity": "Cantidad a mover",
+      "wholeOnly": "Ingrese un número entero.",
+      "fractionLeft": "Aquí solo se mueven unidades enteras; {{qty}} se queda en la ubicación."
     },
     "lookup": {
       "placeholder": "Trabajo, pieza, cliente o ubicación",
@@ -11305,7 +11316,10 @@
       "problemLabel": "¿Qué salió mal?",
       "send": "Enviar",
       "problemSent": "Enviado. Sus administradores lo tienen.",
-      "problemFailed": "No se pudo enviar. Inténtelo cuando tenga conexión."
+      "problemFailed": "No se pudo enviar. Inténtelo cuando tenga conexión.",
+      "signOut": "Cerrar sesión",
+      "confirmSignOutHere": "Toque de nuevo para cerrar sesión",
+      "problemCount": "{{count}} / {{max}}"
     },
     "timer": {
       "running": "En curso: {{jobNumber}} · {{elapsed}}",
@@ -11329,7 +11343,7 @@
       "start": "Iniciar",
       "startSetup": "Preparación",
       "stop": "Detener",
-      "addQuantity": "+Cant.",
+      "addQuantity": "Contar",
       "done": "Terminar",
       "othersRunning": "También en curso: {{names}}",
       "status": {
@@ -11352,7 +11366,11 @@
       "recordCount": "Registrar {{count}} y seguir",
       "rework": "Retrabajo",
       "addRework": "Agregar retrabajo",
-      "reason": "Motivo"
+      "reason": "Motivo",
+      "typeCount": "Escribir un número",
+      "typedCount": "Piezas buenas",
+      "recordedWithScrap": "Registradas {{count}} buenas y {{scrap}} de desecho en {{name}}",
+      "completedWithScrap": "{{name}} terminada · {{scrap}} de desecho"
     }
   },
   "mobileAppWork": {
@@ -11485,7 +11503,10 @@
     "receive": "Recibir",
     "receiving": "Recibiendo…",
     "received": "Recepción registrada en {{number}}.",
-    "failed": "La recepción no se completó. Inténtelo de nuevo."
+    "failed": "La recepción no se completó. Inténtelo de nuevo.",
+    "wholeUnitsOnly": "Ingrese un número entero de {{unit}}.",
+    "tooManyDecimals": "Use como máximo {{places}} decimales para {{unit}}.",
+    "binCreatedHint": "Si la deja vacía, el inventario va a una nueva ubicación de Recepción."
   },
   "upgradeLock": {
     "title": "Forge se está actualizando",
