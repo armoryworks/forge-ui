@@ -240,7 +240,6 @@ export const routes: Routes = [
       },
       {
         path: 'reports',
-        canActivate: [roleGuard('Admin', 'Manager', 'PM')],
         loadChildren: () =>
           import('./features/reports/reports.routes').then((m) => m.REPORTS_ROUTES),
       },

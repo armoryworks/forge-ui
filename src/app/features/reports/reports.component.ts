@@ -9,7 +9,9 @@ import { DataTableComponent } from '../../shared/components/data-table/data-tabl
 import { DatepickerComponent } from '../../shared/components/datepicker/datepicker.component';
 import { toIsoDate } from '../../shared/utils/date.utils';
 import { ColumnDef } from '../../shared/models/column-def.model';
+import { AuthService } from '../../shared/services/auth.service';
 import { ReportService } from './services/report.service';
+import { isReportVisible, SHOP_REPORT_ROLES } from './utils/report-visibility.utils';
 import { ReportType } from './models/report-type.type';
 import { ReportDef } from './models/report-def.model';
 import { JobsByStageItem } from './models/jobs-by-stage-item.model';
@@ -55,8 +57,11 @@ export class ReportsComponent {
   private readonly reportService = inject(ReportService);
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
+  private readonly auth = inject(AuthService);
 
-  protected readonly reports: ReportDef[] = [
+  protected readonly canViewShopReports = this.auth.hasAnyRole(SHOP_REPORT_ROLES);
+
+  private readonly allReports: ReportDef[] = [
     { id: 'jobs-by-stage', label: this.translate.instant('reports.navJobsByStage'), icon: 'view_kanban', needsDateRange: false },
     { id: 'overdue-jobs', label: this.translate.instant('reports.navOverdueJobs'), icon: 'warning', needsDateRange: false },
     { id: 'time-by-user', label: this.translate.instant('reports.navTimeByUser'), icon: 'schedule', needsDateRange: true },
@@ -87,7 +92,10 @@ export class ReportsComponent {
     { id: 'rd', label: this.translate.instant('reports.navRdReport'), icon: 'science', needsDateRange: true },
   ];
 
-  protected readonly activeReport = signal<ReportType>('jobs-by-stage');
+  protected readonly reports: ReportDef[] = this.allReports.filter(
+    r => isReportVisible(r.id, this.canViewShopReports));
+
+  protected readonly activeReport = signal<ReportType>(this.reports[0].id);
   protected readonly loading = signal(false);
   protected readonly activeReportDef = computed(() => this.reports.find(r => r.id === this.activeReport())!);
 
@@ -631,7 +639,7 @@ export class ReportsComponent {
   ];
 
   constructor() {
-    this.loadReport('jobs-by-stage');
+    this.loadReport(this.activeReport());
   }
 
   protected selectReport(reportId: ReportType): void {

@@ -1,4 +1,4 @@
-export type OutboxProvider = 'Email' | 'DocuSeal' | 'QuickBooks' | 'Shipping' | 'Webhook' | 'Sms';
+export type OutboxProvider = 'Email' | 'DocuSeal' | 'QuickBooks' | 'Shipping' | 'Webhook' | 'Sms' | 'Messaging';
 
 export type OutboxStatus = 'Pending' | 'InFlight' | 'Sent' | 'Failed' | 'DeadLetter';
 
