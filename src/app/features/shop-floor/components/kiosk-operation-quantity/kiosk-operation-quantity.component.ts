@@ -8,7 +8,7 @@ import { NumericKeypadComponent } from '../numeric-keypad/numeric-keypad.compone
 import { JobOperationRow } from '../../models/job-operation-row.model';
 import { UpdateJobOperationProgressRequest } from '../../models/update-job-operation-progress-request.model';
 
-type QuantityField = 'completed' | 'scrap';
+type QuantityField = 'completed' | 'scrap' | 'rework';
 
 @Component({
   selector: 'app-kiosk-operation-quantity',
@@ -29,15 +29,19 @@ export class KioskOperationQuantityComponent implements OnInit {
 
   protected readonly completedControl = new FormControl<number | null>(null);
   protected readonly scrapControl = new FormControl<number | null>(null);
+  protected readonly reworkControl = new FormControl<number | null>(0);
   protected readonly activeField = signal<QuantityField>('completed');
   protected readonly scrapOpen = signal(false);
+  protected readonly reworkOpen = signal(false);
 
   private readonly completedValue = toSignal(this.completedControl.valueChanges, { initialValue: null });
   private readonly scrapValue = toSignal(this.scrapControl.valueChanges, { initialValue: null });
+  private readonly reworkValue = toSignal(this.reworkControl.valueChanges, { initialValue: 0 });
   private replaceOnNextDigit = true;
 
   protected readonly completed = computed(() => this.parse(this.completedValue()));
   protected readonly scrap = computed(() => this.parse(this.scrapValue()) ?? 0);
+  protected readonly rework = computed(() => this.parse(this.reworkValue()) ?? 0);
   protected readonly overLimit = computed(() => (this.completed() ?? 0) + this.scrap() > this.jobQuantity());
   protected readonly canSubmit = computed(() => this.completed() !== null && !this.overLimit() && !this.busy());
 
@@ -61,7 +65,15 @@ export class KioskOperationQuantityComponent implements OnInit {
 
   protected toggleScrap(): void {
     this.scrapOpen.update(open => !open);
-    if (!this.scrapOpen()) this.selectField('completed');
+    if (!this.scrapOpen() && this.activeField() === 'scrap') this.selectField('completed');
+  }
+
+  protected toggleRework(): void {
+    this.reworkOpen.update(open => !open);
+    if (!this.reworkOpen()) {
+      this.reworkControl.setValue(0);
+      if (this.activeField() === 'rework') this.selectField('completed');
+    }
   }
 
   protected onDigit(digit: string): void {
@@ -96,15 +108,21 @@ export class KioskOperationQuantityComponent implements OnInit {
   }
 
   private quantities(): UpdateJobOperationProgressRequest {
-    return {
+    const request: UpdateJobOperationProgressRequest = {
       completedQuantity: this.completed(),
       scrapQuantity: this.scrap(),
       expectedVersion: this.operation().version,
     };
+    if (this.reworkOpen() && this.rework() > 0) request.reworkQuantity = this.rework();
+    return request;
   }
 
   private activeControl(): FormControl<number | null> {
-    return this.activeField() === 'scrap' ? this.scrapControl : this.completedControl;
+    switch (this.activeField()) {
+      case 'scrap': return this.scrapControl;
+      case 'rework': return this.reworkControl;
+      default: return this.completedControl;
+    }
   }
 
   private digitsOf(value: number | string | null): string {

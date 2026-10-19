@@ -3,7 +3,7 @@
 
   <div class="op-qty__fields">
     <div class="op-qty__field"
-         [class.op-qty__field--active]="scrapOpen() && activeField() === 'completed'"
+         [class.op-qty__field--active]="(scrapOpen() || reworkOpen()) && activeField() === 'completed'"
          (focusin)="selectField('completed')"
          (input)="onTyped()">
       <app-input
@@ -27,6 +27,20 @@
           data-testid="kiosk-op-qty-scrap" />
       </div>
     }
+
+    @if (reworkOpen()) {
+      <div class="op-qty__field"
+           [class.op-qty__field--active]="activeField() === 'rework'"
+           (focusin)="selectField('rework')"
+           (input)="onTyped()">
+        <app-input
+          [label]="'shopFloor.operations.reworkLabel' | translate"
+          type="number"
+          [min]="0"
+          [formControl]="reworkControl"
+          data-testid="kiosk-op-qty-rework" />
+      </div>
+    }
   </div>
 
   <button type="button" class="action-btn action-btn--link op-qty__scrap-toggle"
@@ -34,6 +48,13 @@
           [attr.aria-expanded]="scrapOpen()"
           data-testid="kiosk-op-qty-scrap-toggle">
     {{ (scrapOpen() ? 'shopFloor.operations.hideScrap' : 'shopFloor.operations.addScrap') | translate }}
+  </button>
+
+  <button type="button" class="action-btn action-btn--link op-qty__rework-toggle"
+          (click)="toggleRework()"
+          [attr.aria-expanded]="reworkOpen()"
+          data-testid="kiosk-op-qty-rework-toggle">
+    {{ (reworkOpen() ? 'shopFloor.operations.hideRework' : 'shopFloor.operations.addRework') | translate }}
   </button>
 
   @if (overLimit()) {
