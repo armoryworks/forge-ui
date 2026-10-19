@@ -1,6 +1,7 @@
 import { ElementRef, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 
 import { LayoutService } from '../../shared/services/layout.service';
 import { NavTreeService } from '../../shared/services/nav-tree.service';
@@ -86,5 +87,53 @@ describe('SidebarComponent mobile flyout', () => {
     click(outside);
 
     expect(menuOpen()).toBe(true);
+  });
+});
+
+describe('SidebarComponent collapse toggle', () => {
+  let isMobile: ReturnType<typeof signal<boolean>>;
+
+  beforeEach(() => {
+    isMobile = signal(true);
+    TestBed.configureTestingModule({
+      imports: [SidebarComponent, TranslateModule.forRoot()],
+      providers: [
+        provideRouter([]),
+        {
+          provide: LayoutService,
+          useValue: {
+            isMobile,
+            mobileMenuOpen: signal(true),
+            sidebarExpanded: signal(true),
+            closeMobileMenu: vi.fn(),
+          },
+        },
+        {
+          provide: NavTreeService,
+          useValue: {
+            pinnedTopTree: signal([]),
+            mainTree: signal([]),
+            bottomTree: signal([]),
+            drillTrail: signal([]),
+            breadcrumbTrail: signal([]),
+          },
+        },
+      ],
+    });
+  });
+
+  function render(): HTMLElement {
+    const fixture = TestBed.createComponent(SidebarComponent);
+    fixture.detectChanges();
+    return fixture.nativeElement as HTMLElement;
+  }
+
+  it('is not rendered in the mobile drawer', () => {
+    expect(render().querySelector('.nav-item--toggle')).toBeNull();
+  });
+
+  it('is rendered on desktop', () => {
+    isMobile.set(false);
+    expect(render().querySelector('.nav-item--toggle')).not.toBeNull();
   });
 });

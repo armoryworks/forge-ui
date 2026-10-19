@@ -1,12 +1,14 @@
 <aside class="sidebar" [class.sidebar--expanded]="!collapsed()" [class.sidebar--drilled]="!!railTop()">
   @if (!railTop()) {
     <!-- ROOT: collapse toggle + the vertical top-level list. Groups drill; leaves (Dashboard) navigate. -->
-    <button class="nav-item nav-item--toggle" (click)="toggleCollapse()"
-            [matTooltip]="(collapsed() ? 'nav.expand' : 'nav.collapse') | translate" matTooltipPosition="right"
-            [attr.aria-label]="(collapsed() ? 'nav.expand' : 'nav.collapse') | translate">
-      <span class="material-icons-outlined">{{ collapsed() ? 'chevron_right' : 'chevron_left' }}</span>
-      @if (!collapsed()) { <span class="nav-item__label">{{ 'nav.collapse' | translate }}</span> }
-    </button>
+    @if (!layout.isMobile()) {
+      <button class="nav-item nav-item--toggle" (click)="toggleCollapse()"
+              [matTooltip]="(collapsed() ? 'nav.expand' : 'nav.collapse') | translate" matTooltipPosition="right"
+              [attr.aria-label]="(collapsed() ? 'nav.expand' : 'nav.collapse') | translate">
+        <span class="material-icons-outlined">{{ collapsed() ? 'chevron_right' : 'chevron_left' }}</span>
+        @if (!collapsed()) { <span class="nav-item__label">{{ 'nav.collapse' | translate }}</span> }
+      </button>
+    }
 
     @for (item of pinnedTopTree(); track item.label) {
       <a class="nav-item" [routerLink]="item.route" routerLinkActive="nav-item--active"
