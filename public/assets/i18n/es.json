@@ -4652,7 +4652,9 @@
     "colUser": "Usuario",
     "noUsers": "No se encontraron usuarios",
     "trackingNote": "El progreso de tours se rastrea por dispositivo mediante almacenamiento del navegador.",
-    "users": "Usuarios"
+    "users": "Usuarios",
+    "completionQueued": "Finalización guardada. Se sincronizará la próxima vez que inicie sesión.",
+    "walkthroughHint": "Haga clic en \"{{label}}\" arriba para comenzar. Al completar el recorrido, este módulo se marca como terminado automáticamente."
   },
   "aiAssistants": {
     "assistants": "asistentes",
@@ -8694,7 +8696,20 @@
         "documents": "Documentos",
         "activity": "Actividad"
       },
-      "noLoginHint": "Este empleado no tiene acceso al sistema, así que solo se muestra el resumen. Otorgue acceso al sistema para registrar tiempo, trabajos y capacitación."
+      "noLoginHint": "Este empleado no tiene acceso al sistema, así que solo se muestra el resumen. Otorgue acceso al sistema para registrar tiempo, trabajos y capacitación.",
+      "checklist": {
+        "title": "Lista de incorporación",
+        "w4": "W-4 federal",
+        "i9": "I-9",
+        "stateWithholding": "Retención estatal",
+        "emergencyContact": "Contacto de emergencia (nombre y teléfono)",
+        "address": "Domicilio",
+        "directDeposit": "Depósito directo",
+        "workersComp": "Acuse de compensación laboral",
+        "handbook": "Acuse del manual",
+        "done": "Completo",
+        "missing": "Pendiente"
+      }
     },
     "newEmployee": "Nuevo Empleado",
     "noLogin": "Sin acceso",
@@ -8745,7 +8760,8 @@
       "visual": "Visual",
       "reading": "Lectura / Escritura",
       "handson": "Práctico / Kinestésico"
-    }
+    },
+    "clearFilters": "Borrar filtros"
   },
   "auditLogUi": {
     "loadFailed": "No se pudo cargar el registro de auditoría.",

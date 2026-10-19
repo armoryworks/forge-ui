@@ -94,7 +94,7 @@ export class EmployeeDetailComponent {
         this.employee.set(e);
         this.loading.set(false);
         if (e.hasLogin !== false) {
-          this.loadStats(id);
+          this.loadStats(e.id);
         } else if (this.activeTab() !== 'overview') {
           this.switchTab('overview');
         }

@@ -1,9 +1,13 @@
 import { Injectable, effect, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpContext, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { EMPTY, Observable, catchError, expand, map, of, reduce, throwError } from 'rxjs';
+
+import { TranslateService } from '@ngx-translate/core';
 
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../shared/services/auth.service';
+import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { SILENT_HTTP_ERRORS } from '../../../shared/interceptors/silent-http-errors.token';
 import { TrainingModuleListItem, TrainingModuleDetail } from '../models/training-module.model';
 import { TrainingPath } from '../models/training-path.model';
 import { TrainingProgress, TrainingEnrollment } from '../models/training-progress.model';
@@ -17,6 +21,13 @@ export interface PaginatedResult<T> {
   pageSize: number;
   totalCount: number;
   totalPages: number;
+}
+
+export type CompletionOutcome = 'completed' | 'queued';
+
+interface PendingCompletion {
+  userId: number;
+  moduleId: number;
 }
 
 export interface TrainingModuleParams {
@@ -33,52 +44,93 @@ export class TrainingService {
   private readonly auth = inject(AuthService);
   private readonly base = `${environment.apiUrl}/training`;
 
+  private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
+
   /**
    * Completions that couldn't be recorded when they happened — e.g. a
    * walkthrough that ends on the shop floor, where the kiosk flow has
    * already cleared the session (ephemeralLogout) so the complete POST
-   * would 401 and the progress silently vanish. They're stashed here and
-   * replayed on the next authenticated session.
+   * would 401 and the progress silently vanish. Each entry carries the user
+   * who earned it and is replayed only in that user's next session.
    */
   private static readonly PENDING_COMPLETIONS_KEY = 'training:pending-completions';
 
+  private static readonly PAGE_SIZE_MAX = 100;
+
   constructor() {
     effect(() => {
-      if (this.auth.user()) this.flushPendingCompletions();
+      const user = this.auth.user();
+      if (user) this.flushPendingCompletions(user.id);
     });
   }
 
-  /** Stash a completion to be replayed once a session exists again. */
-  queueCompletion(moduleId: number): void {
-    const pending = this.readPending();
-    if (!pending.includes(moduleId)) pending.push(moduleId);
-    localStorage.setItem(TrainingService.PENDING_COMPLETIONS_KEY, JSON.stringify(pending));
+  /**
+   * Record a completion for the signed-in user. When the request cannot reach the
+   * server or the session has lapsed, the completion is queued for that same user
+   * and replayed on their next session; any other failure is passed on.
+   */
+  completeOrQueue(moduleId: number): Observable<CompletionOutcome> {
+    const userId = this.auth.user()?.id;
+    return this.completeModule(moduleId).pipe(
+      map((): CompletionOutcome => 'completed'),
+      catchError((error: unknown) => {
+        if (userId == null || !TrainingService.isRetryable(error)) return throwError(() => error);
+        this.queueCompletion(userId, moduleId);
+        this.snackbar.info(this.translate.instant('training.completionQueued'));
+        return of<CompletionOutcome>('queued');
+      }),
+    );
   }
 
-  private flushPendingCompletions(): void {
-    for (const moduleId of this.readPending()) {
-      this.completeModule(moduleId).subscribe({
-        next: () => this.removePending(moduleId),
-        // Keep it queued on failure — retried on the next login.
-        error: () => {},
+  private queueCompletion(userId: number, moduleId: number): void {
+    const pending = this.readPending();
+    if (!pending.some(p => p.userId === userId && p.moduleId === moduleId)) pending.push({ userId, moduleId });
+    this.writePending(pending);
+  }
+
+  private flushPendingCompletions(userId: number): void {
+    for (const { moduleId } of this.readPending().filter(p => p.userId === userId)) {
+      this.completeModule(moduleId, new HttpContext().set(SILENT_HTTP_ERRORS, true)).subscribe({
+        next: () => this.removePending(userId, moduleId),
+        error: (error: unknown) => {
+          if (!TrainingService.isRetryable(error)) this.removePending(userId, moduleId);
+        },
       });
     }
   }
 
-  private readPending(): number[] {
+  private static isRetryable(error: unknown): boolean {
+    return error instanceof HttpErrorResponse && (error.status === 0 || error.status === 401);
+  }
+
+  private readPending(): PendingCompletion[] {
     try {
       const raw = localStorage.getItem(TrainingService.PENDING_COMPLETIONS_KEY);
       const parsed: unknown = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed.filter((v): v is number => typeof v === 'number') : [];
+      return Array.isArray(parsed) ? parsed.filter(TrainingService.isPendingCompletion) : [];
     } catch {
       return [];
     }
   }
 
-  private removePending(moduleId: number): void {
-    const rest = this.readPending().filter(id => id !== moduleId);
-    if (rest.length === 0) localStorage.removeItem(TrainingService.PENDING_COMPLETIONS_KEY);
-    else localStorage.setItem(TrainingService.PENDING_COMPLETIONS_KEY, JSON.stringify(rest));
+  private static isPendingCompletion(value: unknown): value is PendingCompletion {
+    if (typeof value !== 'object' || value === null) return false;
+    const entry = value as Partial<PendingCompletion>;
+    return typeof entry.userId === 'number' && typeof entry.moduleId === 'number';
+  }
+
+  private writePending(pending: PendingCompletion[]): void {
+    try {
+      if (pending.length === 0) localStorage.removeItem(TrainingService.PENDING_COMPLETIONS_KEY);
+      else localStorage.setItem(TrainingService.PENDING_COMPLETIONS_KEY, JSON.stringify(pending));
+    } catch {
+      return;
+    }
+  }
+
+  private removePending(userId: number, moduleId: number): void {
+    this.writePending(this.readPending().filter(p => !(p.userId === userId && p.moduleId === moduleId)));
   }
 
   getModules(params: TrainingModuleParams = {}): Observable<PaginatedResult<TrainingModuleListItem>> {
@@ -89,6 +141,17 @@ export class TrainingService {
     if (params.page) httpParams = httpParams.set('page', params.page.toString());
     if (params.pageSize) httpParams = httpParams.set('pageSize', params.pageSize.toString());
     return this.http.get<PaginatedResult<TrainingModuleListItem>>(`${this.base}/modules`, { params: httpParams });
+  }
+
+  /** Every module matching the filters, fetched page by page at the server's page-size cap. */
+  getAllModules(params: Omit<TrainingModuleParams, 'page' | 'pageSize'> = {}): Observable<TrainingModuleListItem[]> {
+    const pageSize = TrainingService.PAGE_SIZE_MAX;
+    return this.getModules({ ...params, page: 1, pageSize }).pipe(
+      expand(result => result.page < result.totalPages
+        ? this.getModules({ ...params, page: result.page + 1, pageSize })
+        : EMPTY),
+      reduce((all, result) => all.concat(result.data), [] as TrainingModuleListItem[]),
+    );
   }
 
   getModule(id: number): Observable<TrainingModuleDetail> {
@@ -125,8 +188,8 @@ export class TrainingService {
     return this.http.post<void>(`${this.base}/progress/${moduleId}/heartbeat`, { seconds });
   }
 
-  completeModule(moduleId: number): Observable<void> {
-    return this.http.post<void>(`${this.base}/progress/${moduleId}/complete`, {});
+  completeModule(moduleId: number, context?: HttpContext): Observable<void> {
+    return this.http.post<void>(`${this.base}/progress/${moduleId}/complete`, {}, { context });
   }
 
   submitQuiz(moduleId: number, answers: QuizAnswer[]): Observable<QuizSubmissionResult> {

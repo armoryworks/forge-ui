@@ -1,25 +1,106 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { TrainingService } from './training.service';
+import { AuthService, AuthUser } from '../../../shared/services/auth.service';
+import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { environment } from '../../../../environments/environment';
+
+const PENDING_KEY = 'training:pending-completions';
 
 describe('TrainingService', () => {
   let service: TrainingService;
   let httpMock: HttpTestingController;
   const apiUrl = environment.apiUrl;
   const base = `${apiUrl}/training`;
+  const user = signal<AuthUser | null>(null);
+  const snackbar = { info: vi.fn() };
+
+  const asUser = (id: number) => ({ id, roles: [] } as unknown as AuthUser);
 
   beforeEach(() => {
+    localStorage.removeItem(PENDING_KEY);
+    user.set(null);
+    snackbar.info.mockReset();
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideTranslateService(),
+        { provide: AuthService, useValue: { user } },
+        { provide: SnackbarService, useValue: snackbar },
+      ],
     });
     service = TestBed.inject(TrainingService);
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  afterEach(() => httpMock.verify());
+  afterEach(() => {
+    httpMock.verify();
+    localStorage.removeItem(PENDING_KEY);
+  });
+
+  describe('completeOrQueue', () => {
+    it('queues an offline completion for the user who earned it', () => {
+      user.set(asUser(7));
+      let outcome: string | undefined;
+      service.completeOrQueue(3).subscribe(o => outcome = o);
+      httpMock.expectOne(`${base}/progress/3/complete`).flush(null, { status: 0, statusText: 'Unknown Error' });
+
+      expect(outcome).toBe('queued');
+      expect(JSON.parse(localStorage.getItem(PENDING_KEY)!)).toEqual([{ userId: 7, moduleId: 3 }]);
+      expect(snackbar.info).toHaveBeenCalled();
+    });
+
+    it('does not queue a refused completion', () => {
+      user.set(asUser(7));
+      let failed = false;
+      service.completeOrQueue(3).subscribe({ error: () => failed = true });
+      httpMock.expectOne(`${base}/progress/3/complete`).flush({}, { status: 409, statusText: 'Conflict' });
+
+      expect(failed).toBe(true);
+      expect(localStorage.getItem(PENDING_KEY)).toBeNull();
+    });
+
+    it('replays only the signed-in user\'s queued completions', () => {
+      localStorage.setItem(PENDING_KEY, JSON.stringify([{ userId: 7, moduleId: 3 }, { userId: 8, moduleId: 4 }, 5]));
+      user.set(asUser(8));
+      TestBed.tick();
+
+      httpMock.expectOne(`${base}/progress/4/complete`).flush(null);
+      httpMock.expectNone(`${base}/progress/3/complete`);
+      httpMock.expectNone(`${base}/progress/5/complete`);
+      expect(JSON.parse(localStorage.getItem(PENDING_KEY)!)).toEqual([{ userId: 7, moduleId: 3 }]);
+    });
+
+    it('drops a replayed completion the server refuses, keeps one that is still offline', () => {
+      localStorage.setItem(PENDING_KEY, JSON.stringify([{ userId: 8, moduleId: 4 }, { userId: 8, moduleId: 5 }]));
+      user.set(asUser(8));
+      TestBed.tick();
+
+      httpMock.expectOne(`${base}/progress/4/complete`).flush({}, { status: 404, statusText: 'Not Found' });
+      httpMock.expectOne(`${base}/progress/5/complete`).flush(null, { status: 0, statusText: 'Unknown Error' });
+      expect(JSON.parse(localStorage.getItem(PENDING_KEY)!)).toEqual([{ userId: 8, moduleId: 5 }]);
+    });
+  });
+
+  describe('getAllModules', () => {
+    it('follows every page at the server cap', () => {
+      let titles: string[] = [];
+      service.getAllModules().subscribe(all => titles = all.map(m => m.title));
+
+      const first = httpMock.expectOne(r => r.url === `${base}/modules` && r.params.get('page') === '1');
+      expect(first.request.params.get('pageSize')).toBe('100');
+      first.flush({ data: [{ title: 'a' }], page: 1, pageSize: 100, totalCount: 101, totalPages: 2 });
+      httpMock.expectOne(r => r.url === `${base}/modules` && r.params.get('page') === '2')
+        .flush({ data: [{ title: 'b' }], page: 2, pageSize: 100, totalCount: 101, totalPages: 2 });
+
+      expect(titles).toEqual(['a', 'b']);
+    });
+  });
 
   describe('getModules', () => {
     it('should GET modules list', () => {

@@ -1,4 +1,19 @@
 <div class="tab-content tab-content--table">
+  @if (checklist().length > 0) {
+    <section class="compliance-checklist" data-testid="employee-compliance-checklist"
+             [attr.aria-label]="'employees.detail.checklist.title' | translate">
+      <h3 class="compliance-checklist__title">{{ 'employees.detail.checklist.title' | translate }}</h3>
+      <ul class="compliance-checklist__items">
+        @for (item of checklist(); track item.key) {
+          <li class="compliance-checklist__item" [class.compliance-checklist__item--done]="item.completed">
+            <span class="material-icons-outlined" role="img"
+                  [attr.aria-label]="(item.completed ? 'employees.detail.checklist.done' : 'employees.detail.checklist.missing') | translate">{{ item.completed ? 'check_circle' : 'radio_button_unchecked' }}</span>
+            <span>{{ checkLabel(item.key) | translate }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+  }
   <app-data-table
     tableId="employee-compliance"
     [columns]="columns"

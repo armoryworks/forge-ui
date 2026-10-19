@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, input, linkedSignal, output, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { TrainingService } from '../services/training.service';
 import { QuizAnswer, QuizContent, QuizSubmissionResult } from '../models/quiz-content.model';
@@ -19,8 +20,12 @@ export class TrainingModuleQuizComponent {
   readonly moduleId = input.required<number>();
 
   readonly completed = output<boolean>();
+  readonly retryRequested = output<void>();
 
-  protected readonly answers = signal<Map<string, string>>(new Map());
+  protected readonly answers = linkedSignal<QuizContent, Map<string, string>>({
+    source: this.content,
+    computation: () => new Map(),
+  });
   protected readonly submitted = signal(false);
   protected readonly result = signal<QuizSubmissionResult | null>(null);
   protected readonly isSubmitting = signal(false);
@@ -70,7 +75,10 @@ export class TrainingModuleQuizComponent {
           this.el.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
       },
-      error: () => this.isSubmitting.set(false),
+      error: (error: unknown) => {
+        this.isSubmitting.set(false);
+        if (error instanceof HttpErrorResponse && error.status === 409) this.retryRequested.emit();
+      },
     });
   }
 
@@ -78,6 +86,7 @@ export class TrainingModuleQuizComponent {
     this.answers.set(new Map());
     this.submitted.set(false);
     this.result.set(null);
+    this.retryRequested.emit();
   }
 
   protected getQuestionResult(questionId: string) {
@@ -87,7 +96,7 @@ export class TrainingModuleQuizComponent {
   protected scoreLabel(): string {
     const r = this.result();
     if (!r) return '';
-    const passing = this.content().passingScore;
+    const passing = r.passingScore;
     if (r.passed) {
       return `Score: ${r.score}% — Passed!`;
     }

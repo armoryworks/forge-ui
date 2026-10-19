@@ -40,17 +40,6 @@
     font-style: italic;
   }
 
-  &__time-limit {
-    display: flex;
-    align-items: center;
-    gap: $sp-xs;
-    font-size: var(--font-size-xs);
-    color: var(--text-muted);
-    font-family: $font-family-mono;
-
-    .material-icons-outlined { font-size: $icon-size-xs; }
-  }
-
   // ── Progress header (before submit) ──────────────────────────────────────
 
   &__progress-bar-wrap {

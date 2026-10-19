@@ -35,7 +35,7 @@ const ENTITY_ROUTES: Record<LinkableEntityType, string> = {
   'lot': '/lots',
   'rfq': '/purchasing',
   'customer-return': '/customer-returns',
-  'training': '/training',
+  'training': '/admin/training',
   'customer': '/customers',
   'vendor-bill': '/payables/bills',
   'vendor-payment': '/payables/payments',

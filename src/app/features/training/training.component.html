@@ -27,11 +27,13 @@
       <div class="training__filters">
         <app-input [label]="'trainingPage.searchModules' | translate" [formControl]="searchControl" prefix="search" />
         <app-select [label]="'trainingPage.type' | translate" [formControl]="contentTypeControl" [options]="contentTypeOptions" />
-        <app-select [label]="'trainingPage.learningStyle' | translate" [formControl]="learningStyleControl" [options]="learningStyleOptions" />
+        <app-select [label]="'trainingPage.learningStyle' | translate" [formControl]="learningStyleControl" [options]="learningStyleOptions()" />
       </div>
       <div [appLoadingBlock]="isLoading()">
         @if (modules().length === 0 && !isLoading()) {
-          <app-empty-state icon="school" [message]="'trainingPage.noModules' | translate" />
+          <app-empty-state icon="school" [message]="'trainingPage.noModules' | translate"
+                           [actionLabel]="hasActiveFilters() ? ('trainingPage.clearFilters' | translate) : null"
+                           (action)="clearFilters()" />
         } @else {
           <div class="training-grid">
             @for (module of modules(); track module.id) {
@@ -87,9 +89,8 @@
       } @else {
         <div class="training-enrollments">
           @for (enrollment of enrollments(); track enrollment.id) {
-            <div class="enrollment-card" [routerLink]="['/training/path', enrollment.pathId]"
-                 role="link" tabindex="0"
-                 [attr.aria-label]="enrollment.pathTitle">
+            <a class="enrollment-card" [routerLink]="['/training/path', enrollment.pathId]"
+               [attr.aria-label]="enrollment.pathTitle">
               <div class="enrollment-card__header">
                 <span class="material-icons-outlined enrollment-card__icon" aria-hidden="true">{{ enrollment.pathIcon }}</span>
                 <div class="enrollment-card__info">
@@ -119,7 +120,7 @@
                 <div class="enrollment-card__progress-fill"
                      [style.width.%]="enrollmentProgress(enrollment)"></div>
               </div>
-            </div>
+            </a>
           }
         </div>
       }
@@ -132,9 +133,8 @@
         <div class="training-paths-list">
           @for (path of paths(); track path.id) {
             @let enrollment = enrollmentForPath(path.id);
-            <div class="path-card" [routerLink]="['/training/path', path.id]"
-                 role="link" tabindex="0"
-                 [attr.aria-label]="path.title">
+            <a class="path-card" [routerLink]="['/training/path', path.id]"
+               [attr.aria-label]="path.title">
               <span class="material-icons-outlined path-card__icon" aria-hidden="true">{{ path.icon }}</span>
               <div class="path-card__info">
                 <h3 class="path-card__title">{{ path.title }}</h3>
@@ -155,7 +155,7 @@
                   <span class="chip chip--primary path-card__badge">{{ 'trainingPage.autoAssigned' | translate }}</span>
                 }
               </div>
-            </div>
+            </a>
             @if (enrollment) {
               <div class="path-card__progress-bar" role="progressbar"
                    [attr.aria-valuenow]="enrollmentProgress(enrollment)"

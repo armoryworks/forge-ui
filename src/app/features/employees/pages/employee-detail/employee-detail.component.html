@@ -116,7 +116,7 @@
         <app-employee-training-tab [employeeId]="e.id" />
       }
       @if (hasLogin() && activeTab() === 'compliance') {
-        <app-employee-compliance-tab [employeeId]="e.id" />
+        <app-employee-compliance-tab [employeeId]="e.id" [checklist]="e.complianceChecklist ?? []" />
       }
       @if (hasLogin() && activeTab() === 'jobs') {
         <app-employee-jobs-tab [employeeId]="e.id" />

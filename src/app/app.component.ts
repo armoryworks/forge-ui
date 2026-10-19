@@ -369,9 +369,7 @@ export class AppComponent implements OnInit, OnDestroy {
           } else {
             cleanup();
             ngZone.run(() => {
-              trainingService.completeModule(moduleId).subscribe({
-                error: () => { /* swallow — navigation proceeds regardless */ },
-              });
+              trainingService.completeOrQueue(moduleId).subscribe({ error: () => undefined });
               router.navigateByUrl(`/training/module/${moduleId}`);
             });
             setTimeout(() => d.destroy(), 0);
