@@ -11,6 +11,15 @@
     }
   </div>
 
+  @if (loadError(); as err) {
+    <app-detail-load-error
+      [error]="err"
+      closeLabel="detailLoadError.backToList"
+      [retryable]="true"
+      (closed)="goBack()"
+      (retry)="reloadJob()" />
+  }
+
   @if (job(); as j) {
     <div class="status-card">
       <div class="status-card__row">

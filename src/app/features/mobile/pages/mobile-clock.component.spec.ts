@@ -1,6 +1,7 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { signal } from '@angular/core';
 import { provideTranslateService, TranslateLoader, TranslationObject } from '@ngx-translate/core';
 
@@ -80,8 +81,12 @@ describe('MobileClockComponent', () => {
     update: vi.fn(),
   };
 
+  const mockRouter = { navigateByUrl: vi.fn() };
+  let queryParams: Record<string, string> = {};
+
   beforeEach(async () => {
     vi.clearAllMocks();
+    queryParams = {};
     mockDefinitions.set([]);
     mockClockTypes.getAvailableActions.mockReturnValue([clockInAction]);
 
@@ -95,6 +100,8 @@ describe('MobileClockComponent', () => {
         { provide: SnackbarService, useValue: mockSnackbar },
         { provide: ClockEventTypeService, useValue: mockClockTypes },
         { provide: MobileClockStateService, useValue: mockClockState },
+        { provide: Router, useValue: mockRouter },
+        { provide: ActivatedRoute, useValue: { snapshot: { get queryParamMap() { return convertToParamMap(queryParams); } } } },
       ],
     })
       .overrideComponent(MobileClockComponent, {
@@ -205,6 +212,43 @@ describe('MobileClockComponent', () => {
       isClockedIn: true,
       status: 'In',
       clockedInAt: '2026-04-10T08:00:00Z',
+    });
+  });
+
+  describe('returning to the page that sent the user to clock in', () => {
+    const clockIn = (): void => {
+      component['submitClock'](clockInAction);
+      httpTesting.expectOne('/api/v1/display/shop-floor/clock').flush({});
+      flushTimers();
+      httpTesting.expectOne('/api/v1/time-tracking/clock-status').flush({
+        isClockedIn: true, status: 'In', clockedInAt: '2026-04-10T08:00:00Z',
+      });
+    };
+
+    it('opens the work order after clocking in', () => {
+      queryParams = { returnUrl: '/m/jobs/12' };
+      createComponent();
+      flushInitRequests();
+      clockIn();
+      expect(mockRouter.navigateByUrl).toHaveBeenCalledWith('/m/jobs/12');
+    });
+
+    it.each(['//evil.example/m/jobs', '/kanban', 'https://evil.example'])('ignores a return url outside /m (%s)', (returnUrl) => {
+      queryParams = { returnUrl };
+      createComponent();
+      flushInitRequests();
+      clockIn();
+      expect(mockRouter.navigateByUrl).not.toHaveBeenCalled();
+    });
+
+    it('does not leave the page on first load', () => {
+      queryParams = { returnUrl: '/m/jobs/12' };
+      createComponent();
+      flushTimers();
+      httpTesting.expectOne('/api/v1/time-tracking/clock-status').flush({
+        isClockedIn: true, status: 'In', clockedInAt: '2026-04-10T08:00:00Z',
+      });
+      expect(mockRouter.navigateByUrl).not.toHaveBeenCalled();
     });
   });
 

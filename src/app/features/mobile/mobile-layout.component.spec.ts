@@ -137,3 +137,26 @@ describe('MobileLayoutComponent', () => {
     expect(layout.desktopReturnUrl()).toBeNull();
   });
 });
+
+describe('MobileLayoutComponent clock redirect', () => {
+  it('sends a clocked-out user from a work order to the clock page, keeping where they were going', () => {
+    const navigate = vi.fn();
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: AuthService, useValue: { user: signal({ id: 1, roles: [] }), logout: vi.fn() } },
+        { provide: HttpClient, useValue: { get: vi.fn(() => of({ isClockedIn: false })) } },
+        { provide: Router, useValue: { url: '/m/jobs/12', navigate, navigateByUrl: vi.fn() } },
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({}) } } },
+        { provide: SnackbarService, useValue: { error: vi.fn() } },
+        provideTranslateService(),
+        { provide: CapabilityService, useValue: { isEnabled: vi.fn(() => true) } },
+        { provide: DesktopPreferenceService, useValue: { clear: vi.fn(), prefer: vi.fn() } },
+      ],
+    });
+    const layout = TestBed.runInInjectionContext(() => new MobileLayoutComponent()) as unknown as LayoutInternals;
+    layout.ngOnInit();
+    TestBed.flushEffects();
+    expect(navigate).toHaveBeenCalledWith(['/m/clock'], { queryParams: { returnUrl: '/m/jobs/12' } });
+  });
+});
+

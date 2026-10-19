@@ -11,6 +11,7 @@ import { AuthService } from '../../../shared/services/auth.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { MobileJobDetailComponent } from './mobile-job-detail.component';
+import { MobileClockStateService } from '../services/mobile-clock-state.service';
 
 @Directive({ selector: '[appLoadingBlock]', standalone: true })
 class StubLoadingBlockDirective {
@@ -76,6 +77,7 @@ describe('MobileJobDetailComponent', () => {
       .compileComponents();
 
     http = TestBed.inject(HttpTestingController);
+    TestBed.inject(MobileClockStateService).update(true);
   });
 
   afterEach(() => {
@@ -267,5 +269,69 @@ describe('MobileJobDetailComponent', () => {
 
     expect(snackbar.errorFrom).toHaveBeenCalledWith(expect.any(HttpErrorResponse), 'mobileLegacy.jobDetail.noteFailed');
     expect(el().querySelector<HTMLTextAreaElement>('[data-testid="mjob-note-input"]')!.value).toBe('Needs a second look');
+  });
+});
+
+describe('MobileJobDetailComponent · bad links and clock gating', () => {
+  let http: HttpTestingController;
+
+  let clockState: MobileClockStateService;
+
+  function setup(jobId: string, clockedIn: boolean | null): ComponentFixture<MobileJobDetailComponent> {
+    clockState = new MobileClockStateService();
+    if (clockedIn !== null) clockState.update(clockedIn);
+    TestBed.configureTestingModule({
+      imports: [MobileJobDetailComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideTranslateService(),
+        { provide: AuthService, useValue: { user: signal({ id: 1 }) } },
+        { provide: SnackbarService, useValue: { success: vi.fn(), errorFrom: vi.fn() } },
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: convertToParamMap({ jobId }) } } },
+        { provide: MobileClockStateService, useValue: clockState },
+      ],
+    }).overrideComponent(MobileJobDetailComponent, {
+      remove: { imports: [LoadingBlockDirective] },
+      add: { imports: [StubLoadingBlockDirective] },
+    });
+    http = TestBed.inject(HttpTestingController);
+    const fixture = TestBed.createComponent(MobileJobDetailComponent);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  const errorState = (fixture: ComponentFixture<MobileJobDetailComponent>): Element | null =>
+    (fixture.nativeElement as HTMLElement).querySelector('[data-testid="detail-load-error"]');
+
+  afterEach(() => http?.verify());
+
+  it('shows not-found for a non-numeric id without calling the API', () => {
+    const fixture = setup('abc', true);
+    http.expectNone(() => true);
+    expect(errorState(fixture)).not.toBeNull();
+  });
+
+  it('waits for the clock check before loading the work order', () => {
+    const fixture = setup('5', null);
+    http.expectNone('/api/v1/jobs/5');
+    clockState.update(true);
+    fixture.detectChanges();
+    http.expectOne('/api/v1/jobs/5').flush({ id: 5, jobNumber: 'J-5', title: 'Bracket', description: null, stageName: 'Cut', stageColor: '#000', priority: 'Normal', partNumber: null, customerName: null, dueDate: null, completedDate: null });
+    http.expectOne('/api/v1/time-tracking/timer/active').flush(null, { status: 204, statusText: 'No Content' });
+  });
+
+  it('loads nothing for a clocked-out user', () => {
+    setup('5', false);
+    http.expectNone('/api/v1/jobs/5');
+  });
+
+  it('shows the not-found state in place when the work order does not exist', () => {
+    const fixture = setup('999999', true);
+    http.expectOne('/api/v1/jobs/999999').flush({ title: 'Not found' }, { status: 404, statusText: 'Not Found' });
+    http.expectOne('/api/v1/time-tracking/timer/active').flush(null, { status: 204, statusText: 'No Content' });
+    fixture.detectChanges();
+    expect(errorState(fixture)).not.toBeNull();
   });
 });

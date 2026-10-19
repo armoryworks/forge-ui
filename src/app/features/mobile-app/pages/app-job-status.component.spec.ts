@@ -86,6 +86,14 @@ describe('AppJobStatusComponent advancing', () => {
     });
   });
 
+  it('shows the failed state for a non-numeric id without calling the API', () => {
+    TestBed.overrideProvider(ActivatedRoute, { useValue: { paramMap: of(convertToParamMap({ id: 'abc' })) } });
+    const component = create() as unknown as { loading(): boolean; failed(): boolean };
+    expect(component.loading()).toBe(false);
+    expect(component.failed()).toBe(true);
+    expect(api.jobStatus).not.toHaveBeenCalled();
+  });
+
   it('asks before moving into Invoiced, confirms that status only, and offers no Undo', async () => {
     const page = create();
 

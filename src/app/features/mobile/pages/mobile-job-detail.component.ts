@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -8,6 +8,10 @@ import { Observable, of, switchMap, tap } from 'rxjs';
 
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
+import { DetailLoadErrorComponent } from '../../../shared/components/detail-load-error/detail-load-error.component';
+import { notFoundError } from '../../../shared/utils/not-found-error';
+import { parsePositiveId } from '../../../shared/utils/parse-positive-id';
+import { MobileClockStateService } from '../services/mobile-clock-state.service';
 
 interface JobDetail {
   id: number;
@@ -36,20 +40,22 @@ const PRIORITY_KEYS = new Set(['low', 'normal', 'high', 'urgent']);
 @Component({
   selector: 'app-mobile-job-detail',
   standalone: true,
-  imports: [DatePipe, TranslatePipe, LoadingBlockDirective],
+  imports: [DatePipe, TranslatePipe, LoadingBlockDirective, DetailLoadErrorComponent],
   templateUrl: './mobile-job-detail.component.html',
   styleUrl: './mobile-job-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MobileJobDetailComponent implements OnInit {
+export class MobileJobDetailComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly clockState = inject(MobileClockStateService);
 
   protected readonly loading = signal(true);
   protected readonly job = signal<JobDetail | null>(null);
+  protected readonly loadError = signal<unknown>(null);
   protected readonly submitting = signal(false);
   protected readonly noteText = signal('');
   protected readonly activeTimer = signal<ActiveTimer | null>(null);
@@ -74,12 +80,27 @@ export class MobileJobDetailComponent implements OnInit {
     return priority && PRIORITY_KEYS.has(priority.toLowerCase()) ? `priority.${priority.toLowerCase()}` : null;
   });
 
-  ngOnInit(): void {
-    const jobId = this.route.snapshot.paramMap.get('jobId');
-    if (jobId) {
-      this.loadJob(+jobId);
-      this.loadTimer();
+  private readonly jobId = parsePositiveId(this.route.snapshot.paramMap.get('jobId'));
+  private started = false;
+
+  constructor() {
+    if (!this.jobId) {
+      this.loadError.set(notFoundError());
+      this.loading.set(false);
+      return;
     }
+    effect(() => {
+      if (this.started || !this.clockState.checkDone() || !this.clockState.isClockedIn()) return;
+      this.started = true;
+      untracked(() => {
+        this.reloadJob();
+        this.loadTimer();
+      });
+    });
+  }
+
+  protected reloadJob(): void {
+    if (this.jobId) this.loadJob(this.jobId);
   }
 
   private loadTimer(): void {
@@ -91,14 +112,15 @@ export class MobileJobDetailComponent implements OnInit {
 
   private loadJob(jobId: number): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.http.get<JobDetail>(`/api/v1/jobs/${jobId}`).subscribe({
       next: (job) => {
         this.job.set(job);
         this.loading.set(false);
       },
       error: (err: unknown) => {
+        this.loadError.set(err);
         this.loading.set(false);
-        this.snackbar.errorFrom(err, 'mobileLegacy.jobDetail.loadFailed');
       },
     });
   }
