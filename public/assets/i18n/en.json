@@ -11731,6 +11731,6 @@
     "fieldLot": "Lot (optional)",
     "genealogyJob": "Built on job {{job}}",
     "lotSourceLot": "serial lot",
-    "lotSourceIssue": "issued to the job"
+    "lotSourceIssue": "issued to the job or a sub-assembly job"
   }
 }

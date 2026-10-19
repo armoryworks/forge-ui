@@ -11731,6 +11731,6 @@
     "fieldLot": "Lote (opcional)",
     "genealogyJob": "Fabricado en el trabajo {{job}}",
     "lotSourceLot": "lote del número de serie",
-    "lotSourceIssue": "entregado al trabajo"
+    "lotSourceIssue": "entregado al trabajo o a un trabajo de subensamble"
   }
 }
