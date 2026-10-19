@@ -35,6 +35,7 @@ import {
   SalesTaxLiabilityReport,
   TrialBalance,
   YearEndCloseResult,
+  CloseChecklistResult,
 } from '../models/accounting.models';
 import { JobCostCloseCandidate, JobProductionCostCloseResult } from '../models/job-cost-close.model';
 
@@ -156,6 +157,10 @@ export class GeneralLedgerService {
   setPeriodStatus(periodId: number, target: FiscalPeriodStatus): Observable<FiscalPeriodModel> {
     const verb = target === 'SoftClosed' ? 'soft-close' : target === 'HardClosed' ? 'hard-close' : 'reopen';
     return this.http.post<FiscalPeriodModel>(`${this.base}/periods/${periodId}/${verb}`, {});
+  }
+
+  getCloseChecklist(periodId: number): Observable<CloseChecklistResult> {
+    return this.http.get<CloseChecklistResult>(`${this.base}/periods/${periodId}/close-checklist`);
   }
 
   closeFiscalYear(fiscalYearId: number): Observable<YearEndCloseResult> {

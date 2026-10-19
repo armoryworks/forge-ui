@@ -10122,7 +10122,20 @@
       "locked": "Locked",
       "confirmTitle": "Close fiscal year?",
       "confirmMessage": "This posts the retained-earnings roll and hard-closes every period in the year. It cannot be undone.",
-      "confirmLabel": "Close year"
+      "confirmLabel": "Close year",
+      "checklist": {
+        "title": "Close checklist",
+        "check": "Checklist",
+        "ready": "Ready to hard-close",
+        "blocked": "Hard close blocked",
+        "passed": "Passed",
+        "failed": "Failed",
+        "grniReconciled": "GRNI ties (GL vs received-not-billed)",
+        "arTies": "AR aging ties to control",
+        "apTies": "AP aging ties to control",
+        "blockedHint": "Hard-closing this period, or closing the year when it is the final period, is refused until every item passes.",
+        "loadFailed": "Could not load the close checklist."
+      }
     },
     "bankRec": {
       "title": "Bank Reconciliation",

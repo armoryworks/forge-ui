@@ -269,6 +269,20 @@ export interface FiscalYearModel {
   periods: FiscalPeriodModel[];
 }
 
+export interface CloseChecklistItem {
+  key: string;
+  label: string;
+  passed: boolean;
+  detail: string;
+}
+
+export interface CloseChecklistResult {
+  bookId: number;
+  asOf: string;
+  items: CloseChecklistItem[];
+  allPassed: boolean;
+}
+
 export interface YearEndCloseResult {
   fiscalYearId: number;
   journalEntryId: number | null;
@@ -455,7 +469,6 @@ export interface ManualJournalEntryInput {
   memo?: string | null;
   allowSoftClosedOverride?: boolean;
   lines: ManualJournalLineInput[];
-  approvedByUserId?: number | null;
 }
 
 export interface ManualJournalEntryResult {
