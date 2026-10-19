@@ -1,6 +1,7 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, signal, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -114,6 +115,13 @@ export class CustomerEstimatesTabComponent implements OnInit {
     this.lineForm.controls.unitPrice.valueChanges
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.priceIsDefault.set(false));
+    this.lineForm.controls.quantity.valueChanges
+      .pipe(debounceTime(300), takeUntilDestroyed())
+      .subscribe(() => {
+        const partId = this.lineForm.controls.partId.value;
+        const autoPriced = this.priceIsDefault() || Number(this.lineForm.controls.unitPrice.value) === 0;
+        if (partId && this.editingLineId() === 0 && autoPriced) this.resolveLinePrice(partId);
+      });
   }
 
   // Lines are editable only on a saved, Draft, not-yet-converted estimate.
@@ -328,7 +336,11 @@ export class CustomerEstimatesTabComponent implements OnInit {
     }
     const partId = part['id'] as number | undefined;
     if (!partId) return;
-    this.quoteService.resolvePrice(this.customerId(), partId).subscribe({
+    this.resolveLinePrice(partId);
+  }
+
+  private resolveLinePrice(partId: number): void {
+    this.quoteService.resolvePrice(this.customerId(), partId, this.lineForm.controls.quantity.value).subscribe({
       next: price => {
         if (price != null && price > 0) {
           this.lineForm.controls.unitPrice.setValue(price, { emitEvent: false });

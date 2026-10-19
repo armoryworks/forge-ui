@@ -5,7 +5,7 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { catchError, EMPTY, map, Observable, of, startWith, Subject, switchMap } from 'rxjs';
+import { catchError, debounceTime, EMPTY, map, Observable, of, startWith, Subject, switchMap } from 'rxjs';
 
 import { SalesOrderService } from '../../services/sales-order.service';
 import { CustomerService } from '../../../customers/services/customer.service';
@@ -242,6 +242,12 @@ export class SoDialogComponent {
       this.priceLookups.next();
     });
 
+    this.lineForm.controls.quantity.valueChanges.pipe(debounceTime(300), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      if (this.lineForm.controls.partId.value != null && !this.lineForm.controls.unitPrice.dirty) {
+        this.priceLookups.next();
+      }
+    });
+
     this.priceLookups.pipe(
       switchMap(() => this.lookupPendingPrice()),
       takeUntilDestroyed(this.destroyRef),
@@ -291,7 +297,7 @@ export class SoDialogComponent {
       : null;
     const customerId = this.form.controls.customerId.value;
     if (customerId == null) return of(fallback);
-    return this.soService.resolvePrice(customerId, partId).pipe(
+    return this.soService.resolvePrice(customerId, partId, this.lineForm.controls.quantity.value).pipe(
       map(price => price ?? fallback),
       catchError(() => of(fallback)),
     );

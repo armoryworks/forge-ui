@@ -413,7 +413,7 @@ export class QuoteDetailPanelComponent {
     const q = this.quote();
     const partId = part['id'] as number | undefined;
     if (q && partId) {
-      this.quoteService.resolvePrice(q.customerId, partId).subscribe({
+      this.quoteService.resolvePrice(q.customerId, partId, this.lineForm.controls.quantity.value).subscribe({
         next: price => {
           if (price != null) this.lineForm.controls.unitPrice.setValue(price);
         },

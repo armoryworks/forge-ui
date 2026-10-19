@@ -50,12 +50,14 @@ export class QuoteService {
   /**
    * AUDIT-19-S1 / #26 — the customer-specific price-list unit price for a part,
    * or null when there's no applicable entry. Called on part-select to pre-fill
-   * the line's unit price. Returns a bare decimal (or null) per the server contract.
+   * the line's unit price. The quantity picks the price-list break; without it
+   * the lowest break applies. Returns a bare decimal (or null) per the server contract.
    */
-  resolvePrice(customerId: number, partId: number): Observable<number | null> {
-    const params = new HttpParams()
+  resolvePrice(customerId: number, partId: number, quantity?: number | null): Observable<number | null> {
+    let params = new HttpParams()
       .set('customerId', String(customerId))
       .set('partId', String(partId));
+    if (quantity != null && quantity > 0) params = params.set('quantity', String(quantity));
     return this.http.get<number | null>(`${this.base}/resolve-price`, { params });
   }
 

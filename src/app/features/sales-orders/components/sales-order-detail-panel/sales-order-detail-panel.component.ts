@@ -1061,7 +1061,7 @@ export class SalesOrderDetailPanelComponent {
     const so = this.so();
     const partId = part['id'] as number | undefined;
     if (so && partId) {
-      this.soService.resolvePrice(so.customerId, partId).subscribe({
+      this.soService.resolvePrice(so.customerId, partId, this.lineForm.controls.quantity.value).subscribe({
         next: price => {
           if (price != null) this.lineForm.controls.unitPrice.setValue(price);
         },

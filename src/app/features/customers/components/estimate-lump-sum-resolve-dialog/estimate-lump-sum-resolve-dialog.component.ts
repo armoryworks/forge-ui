@@ -147,7 +147,7 @@ export class EstimateLumpSumResolveDialogComponent {
     if (!part) return;
     const partId = part['id'] as number | undefined;
     if (!partId) return;
-    this.quoteService.resolvePrice(this.data.customerId, partId).subscribe({
+    this.quoteService.resolvePrice(this.data.customerId, partId, this.data.lumpSumLines[index]?.quantity).subscribe({
       next: price => {
         if (price != null && price > 0) {
           this.resolutions.at(index).controls.unitPrice.setValue(price);
