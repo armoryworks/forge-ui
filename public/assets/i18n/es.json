@@ -8354,7 +8354,8 @@
     "noTeam": "Sin equipo",
     "create": "Crear Centro de Trabajo",
     "idealCycleTimeSeconds": "Tiempo de ciclo ideal (segundos por unidad)",
-    "idealCycleTimeHint": "Tiempo más rápido para fabricar una unidad buena; el rendimiento OEE compara el tiempo real de producción con él."
+    "idealCycleTimeHint": "Tiempo más rápido para fabricar una unidad buena; el rendimiento OEE compara el tiempo real de producción con él.",
+    "dailyCapacityHint": "Horas disponibles de cada máquina por día laborable (hasta 24)."
   },
   "oee": {
     "title": "Panel OEE",

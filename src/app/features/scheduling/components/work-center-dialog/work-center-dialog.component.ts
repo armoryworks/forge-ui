@@ -54,11 +54,11 @@ export class WorkCenterDialogComponent implements OnInit {
     code: new FormControl('', [Validators.required, Validators.maxLength(50)]),
     name: new FormControl('', [Validators.required, Validators.maxLength(200)]),
     description: new FormControl(''),
-    dailyCapacityHours: new FormControl<number | null>(8, [Validators.required, Validators.min(0.01)]),
+    dailyCapacityHours: new FormControl<number | null>(8, [Validators.required, Validators.min(0.01), Validators.max(24)]),
     efficiencyPercent: new FormControl<number | null>(100, [Validators.required, Validators.min(1), Validators.max(200)]),
     numberOfMachines: new FormControl<number | null>(1, [Validators.required, Validators.min(1)]),
-    laborCostPerHour: new FormControl<number | null>(0),
-    burdenRatePerHour: new FormControl<number | null>(0),
+    laborCostPerHour: new FormControl<number | null>(0, [Validators.min(0)]),
+    burdenRatePerHour: new FormControl<number | null>(0, [Validators.min(0)]),
     sortOrder: new FormControl<number | null>(0),
     assetId: new FormControl<number | null>(null),
     teamId: new FormControl<number | null>(null),
@@ -72,6 +72,8 @@ export class WorkCenterDialogComponent implements OnInit {
     dailyCapacityHours: 'Daily Capacity (hours)',
     efficiencyPercent: 'Efficiency %',
     numberOfMachines: 'Number of Machines',
+    laborCostPerHour: this.translate.instant('workCenterDialog.laborCostPerHour'),
+    burdenRatePerHour: this.translate.instant('workCenterDialog.burdenRatePerHour'),
     idealCycleTimeSeconds: this.translate.instant('workCenterDialog.idealCycleTimeSeconds'),
   });
 

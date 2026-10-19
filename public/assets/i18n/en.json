@@ -8361,7 +8361,8 @@
     "noTeam": "No team",
     "create": "Create Work Center",
     "idealCycleTimeSeconds": "Ideal cycle time (seconds per unit)",
-    "idealCycleTimeHint": "Fastest time to make one good unit; OEE performance compares actual run time to it."
+    "idealCycleTimeHint": "Fastest time to make one good unit; OEE performance compares actual run time to it.",
+    "dailyCapacityHint": "Hours each machine is available per working day (up to 24)."
   },
   "oee": {
     "title": "OEE Dashboard",
