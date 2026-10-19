@@ -38,6 +38,15 @@ describe('chart theme', () => {
     expect((Chart.defaults.datasets as unknown as Record<string, { color?: string }>)['sankey'].color).toBe('#f1f5f9');
   });
 
+  it('reports whether the tokens changed since the last pass', () => {
+    root.style.setProperty('--border', '#111111');
+    applyChartDefaults();
+
+    expect(applyChartDefaults()).toBe(false);
+    root.style.setProperty('--border', '#222222');
+    expect(applyChartDefaults()).toBe(true);
+  });
+
   it('re-reads the tokens when the theme attribute changes', async () => {
     root.style.setProperty('--text-secondary', '#64748b');
     applyChartDefaults();
