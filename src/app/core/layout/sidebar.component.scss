@@ -120,7 +120,13 @@
 
 .nav-item__label {
   @include uppercase-label(var(--font-size-sm), 0.5px, 600);
-  @include truncate;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  line-height: 1.2;
+  min-width: 0;
 
   &--header {
     text-transform: none;
