@@ -52,7 +52,7 @@
         <!-- Add Application Form -->
         <div class="add-line" [class.add-line--3col]="!showSettlementFxRate()" [class.add-line--4col]="showSettlementFxRate()" [formGroup]="appForm">
           <app-autocomplete [label]="'payments.invoice' | translate" [options]="invoiceOptions()" formControlName="invoiceId" [minChars]="0" [placeholder]="'payments.invoicePlaceholder' | translate" data-testid="payment-app-invoice" />
-          <app-input [label]="'payments.amount' | translate" type="number" formControlName="amount" [placeholder]="'payments.amountPlaceholder' | translate" />
+          <app-input [label]="'payments.amount' | translate" type="number" formControlName="amount" [placeholder]="'payments.amountPlaceholder' | translate" [max]="applicationRemaining()" data-testid="payment-app-amount" />
           @if (showSettlementFxRate()) {
             <app-input [label]="'accounting.currency.settlementFxRate' | translate" type="number" formControlName="settlementFxRate" step="0.0000001" min="0.0000001" [placeholder]="'accounting.currency.fxRatePlaceholder' | translate" data-testid="payment-settlement-fx-rate" />
           }
@@ -74,7 +74,7 @@
         <app-select [label]="'payments.customer' | translate" formControlName="customerId" [options]="customerOptions()" data-testid="payment-customer" />
         <app-select [label]="'payments.paymentMethod' | translate" formControlName="method" [options]="methodOptions" data-testid="payment-method" />
         <app-input [label]="'payments.amount' | translate" type="number" formControlName="amount" [placeholder]="'payments.amountPlaceholder' | translate" [required]="true" data-testid="payment-amount" />
-        <app-datepicker [label]="'payments.paymentDate' | translate" formControlName="paymentDate" [max]="today" data-testid="payment-date" />
+        <app-datepicker [label]="'payments.paymentDate' | translate" formControlName="paymentDate" [max]="today" [required]="true" data-testid="payment-date" />
         <app-input [label]="'payments.referenceNumber' | translate" formControlName="referenceNumber" [placeholder]="'payments.optional' | translate" data-testid="payment-ref" />
       </div>
 

@@ -106,3 +106,9 @@
   .action-btn--danger,
   .action-btn--destructive { margin-right: auto; }
 }
+
+.void-message {
+  margin: 0;
+  font-size: $font-size-base;
+  color: var(--text-secondary);
+}

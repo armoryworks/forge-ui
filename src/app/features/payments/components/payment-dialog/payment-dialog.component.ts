@@ -22,7 +22,8 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ActiveCurrencyService } from '../../../../shared/services/active-currency.service';
-import { toIsoDate, todayEnd } from '../../../../shared/utils/date.utils';
+import { CurrencyService } from '../../../../shared/services/currency.service';
+import { toIsoDate, todayEnd, todayStart } from '../../../../shared/utils/date.utils';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
@@ -80,8 +81,17 @@ export class PaymentDialogComponent {
 
   protected readonly openInvoices = signal<InvoiceListItem[]>([]);
 
-  protected readonly invoiceOptions = computed<AutocompleteOption[]>(() =>
-    this.openInvoices().map(inv => ({ value: inv.id, label: `${inv.invoiceNumber} — ${inv.balanceDue.toFixed(2)}` })));
+  private readonly baseCurrency = inject(CurrencyService).baseCurrency;
+
+  protected readonly invoiceOptions = computed<AutocompleteOption[]>(() => {
+    const money = new Intl.NumberFormat(undefined, { style: 'currency', currency: this.baseCurrency() });
+    return this.openInvoices().map(inv => ({
+      value: inv.id,
+      label: this.translate.instant('payments.invoiceOptionLabel', { number: inv.invoiceNumber, balance: money.format(inv.balanceDue) }),
+    }));
+  });
+
+  protected readonly applicationRemaining = signal<number | null>(null);
 
   protected readonly customerOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('payments.selectCustomer') },
@@ -103,7 +113,7 @@ export class PaymentDialogComponent {
     customerId: new FormControl<number | null>(null, [Validators.required]),
     method: new FormControl<string | null>(null, [Validators.required]),
     amount: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
-    paymentDate: new FormControl<Date | null>(null, [Validators.required]),
+    paymentDate: new FormControl<Date | null>(todayStart(), [Validators.required]),
     referenceNumber: new FormControl(''),
     notes: new FormControl(''),
   });
@@ -173,10 +183,10 @@ export class PaymentDialogComponent {
     this.appForm.controls.invoiceId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(invoiceId => {
       const invoice = this.openInvoices().find(inv => inv.id === invoiceId);
       this.appForm.controls.invoiceNumber.setValue(invoice?.invoiceNumber ?? '');
-      if (invoice && this.appForm.controls.amount.value == null) {
-        const applied = this.applications().filter(a => a.invoiceId === invoice.id).reduce((sum, a) => sum + a.amount, 0);
-        const remaining = Math.round((invoice.balanceDue - applied) * 100) / 100;
-        if (remaining > 0) this.appForm.controls.amount.setValue(remaining);
+      const remaining = invoice ? this.remainingBalance(invoice) : null;
+      this.capApplicationAmount(remaining);
+      if (remaining != null && remaining > 0 && this.appForm.controls.amount.value == null) {
+        this.appForm.controls.amount.setValue(remaining);
       }
     });
 
@@ -189,6 +199,20 @@ export class PaymentDialogComponent {
 
   protected close(): void {
     this.closed.emit();
+  }
+
+  private remainingBalance(invoice: InvoiceListItem): number {
+    const applied = this.applications().filter(a => a.invoiceId === invoice.id).reduce((sum, a) => sum + a.amount, 0);
+    return Math.round((invoice.balanceDue - applied) * 100) / 100;
+  }
+
+  private capApplicationAmount(remaining: number | null): void {
+    const amount = this.appForm.controls.amount;
+    amount.setValidators(remaining == null
+      ? [Validators.required, Validators.min(0.01)]
+      : [Validators.required, Validators.min(0.01), Validators.max(remaining)]);
+    amount.updateValueAndValidity();
+    this.applicationRemaining.set(remaining);
   }
 
   protected addApplication(): void {
