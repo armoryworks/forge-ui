@@ -1823,7 +1823,9 @@
     "clearCreated": "Clear this list",
     "review": "Review",
     "taskCompleted": "Task completed",
-    "taskDismissed": "Task dismissed"
+    "taskDismissed": "Task dismissed",
+    "why": "Why",
+    "belowReorderPoint": "Below reorder point {{point}}"
   },
   "inventory": {
     "home": {
@@ -1850,7 +1852,8 @@
       "stat": {
         "parts": "Parts tracked",
         "onHand": "Units on hand",
-        "lowStock": "Low on stock"
+        "lowStock": "Low on stock",
+        "partsInStock": "Parts in stock"
       },
       "dialog": {
         "part": "Part",
@@ -1893,7 +1896,10 @@
       "stockOps": "Stock Ops",
       "cycleCounts": "Cycle Counts",
       "reservations": "Reservations",
-      "inspection": "Inspection"
+      "inspection": "Inspection",
+      "label": "Inventory sections",
+      "replenishment": "Replenishment",
+      "uom": "Units of Measure"
     },
     "subtitle": "Track stock levels, locations, and movements",
     "addLocation": "Add Location",
@@ -1954,7 +1960,7 @@
       "barcode": "Barcode",
       "createLocation": "Create Location",
       "receiveGoodsTitle": "Receive Goods",
-      "poLineId": "PO Line ID",
+      "poLineId": "PO line",
       "quantityReceived": "Quantity Received",
       "binLocation": "Bin Location",
       "lotNumber": "Lot Number",
@@ -1970,7 +1976,9 @@
       "countedBy": "Counted By",
       "reject": "Reject",
       "approveAndAdjust": "Approve & Adjust Stock",
-      "noItemsAtLocation": "No items at this location"
+      "noItemsAtLocation": "No items at this location",
+      "countMustBeWholeNumber": "Each actual count must be a whole number, 0 or more.",
+      "managerApprovesCount": "An Admin or Manager enters the actual quantities and approves this count."
     },
     "columns": {
       "partNumber": "Part #",
@@ -1994,7 +2002,9 @@
       "job": "Job",
       "reservedDate": "Reserved",
       "expected": "Expected",
-      "actual": "Actual"
+      "actual": "Actual",
+      "uom": "UoM",
+      "actualFor": "Actual count for {{item}}"
     },
     "statuses": {
       "stored": "Stored",
@@ -2064,7 +2074,10 @@
       "recordResult": "Record result",
       "recorded": "Inspection recorded",
       "waived": "Inspection waived"
-    }
+    },
+    "partsCount": "{{total}} parts · {{inStock}} in stock",
+    "collapseLocation": "Collapse {{name}}",
+    "expandLocation": "Expand {{name}}"
   },
   "contactFields": {
     "mobile": "Mobile",
@@ -6351,7 +6364,13 @@
     "scanLabelMessage": "Scan the QR code on the label printed for shipment {{number}} to confirm it before it ships.",
     "scanLabelField": "Label code",
     "scanLabelPlaceholder": "Scan, or type the code and press Enter",
-    "shipFailed": "Could not mark the shipment as shipped."
+    "shipFailed": "Could not mark the shipment as shipped.",
+    "otherCarrier": "Other carrier (not in list)",
+    "cancelShipment": "Cancel shipment",
+    "cancelShipmentTitle": "Cancel shipment?",
+    "cancelShipmentMessage": "Cancel shipment {{number}}? Its quantities go back to the sales order so they can be shipped again.",
+    "shipmentCancelled": "Shipment cancelled",
+    "cancelFailed": "Could not cancel the shipment"
   },
   "planning": {
     "title": "Planning",
@@ -7802,7 +7821,8 @@
     "deleteFileTitle": "Delete File?",
     "deleteFileMessage": "This will permanently delete \"{{name}}\".",
     "fileDeleted": "File deleted",
-    "fileUploaded": "File uploaded"
+    "fileUploaded": "File uploaded",
+    "expired": "Expired"
   },
   "partQuality": {
     "recentInspections": "Recent Inspections",
