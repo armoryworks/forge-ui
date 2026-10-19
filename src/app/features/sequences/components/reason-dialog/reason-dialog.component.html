@@ -10,7 +10,7 @@
     [rows]="3"
     [required]="true" />
   <div class="reason-dialog__actions">
-    <button class="action-btn" type="button" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
+    <button class="action-btn" type="button" data-testid="sequence-reason-cancel" (click)="cancel()">{{ data.cancelLabel ?? ('common.cancel' | translate) }}</button>
     <button class="action-btn action-btn--primary" type="button"
       data-testid="sequence-reason-confirm"
       [disabled]="reason.invalid"

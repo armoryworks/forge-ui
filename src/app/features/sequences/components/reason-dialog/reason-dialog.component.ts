@@ -9,6 +9,7 @@ export interface ReasonDialogData {
   title: string;
   message?: string;
   confirmLabel?: string;
+  cancelLabel?: string;
   severity?: 'info' | 'warn' | 'danger';
 }
 

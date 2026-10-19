@@ -296,6 +296,7 @@ export class PoDetailPanelComponent implements OnInit {
         title: this.translate.instant('purchaseOrders.cancelPoTitle'),
         message: this.translate.instant('purchaseOrders.cancelPoMessage', { number: po.poNumber }),
         confirmLabel: this.translate.instant('purchaseOrders.cancelPo'),
+        cancelLabel: this.translate.instant('purchaseOrders.keepPo'),
         severity: 'warn',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {

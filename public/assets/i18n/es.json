@@ -796,7 +796,8 @@
       "action": "Cancelar ejecución",
       "title": "¿Cancelar esta secuencia?",
       "message": "Cancelar detiene la ejecución de forma permanente. Se requiere un motivo.",
-      "confirm": "Cancelar ejecución"
+      "confirm": "Cancelar ejecución",
+      "keep": "Seguir ejecutando"
     },
     "skip": {
       "title": "¿Omitir \"{{step}}\"?",
@@ -5661,6 +5662,7 @@
     "cancelPoTitle": "¿Cancelar Orden de Compra?",
     "cancelPoMessage": "¿Cancelar \"{{number}}\"? Esta acción no se puede deshacer.",
     "cancelPo": "Cancelar OC",
+    "keepPo": "Mantener OC",
     "poCancelled": "Orden de compra cancelada.",
     "poClosed": "Orden de compra cerrada.",
     "deletePoTitle": "¿Eliminar Orden de Compra?",
@@ -9059,6 +9061,12 @@
       "calendarType": "Categoría del calendario",
       "markDone": "Marcar como hecho",
       "acknowledge": "Confirmar",
+      "cancelDialog": {
+        "title": "¿Cancelar evento?",
+        "message": "¿Cancelar \"{{title}}\"? Se notificará a los asistentes.",
+        "confirm": "Cancelar evento",
+        "keep": "Mantener evento"
+      },
       "noCalendarType": "— Ninguno —",
       "types": {
         "meeting": "Reunión",
@@ -10509,6 +10517,7 @@
       "download": "Descargar archivo",
       "release": "Liberar",
       "cancel": "Cancelar lote",
+      "keep": "Mantener lote",
       "generated": "Archivo NACHA generado",
       "released": "Lote liberado — pagos marcados como transmitidos",
       "cancelled": "Lote cancelado — los pagos vuelven al grupo elegible",

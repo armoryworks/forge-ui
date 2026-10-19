@@ -796,7 +796,8 @@
       "action": "Cancel run",
       "title": "Cancel this sequence?",
       "message": "Cancelling stops the run permanently. A reason is required.",
-      "confirm": "Cancel run"
+      "confirm": "Cancel run",
+      "keep": "Keep running"
     },
     "skip": {
       "title": "Skip \"{{step}}\"?",
@@ -5668,6 +5669,7 @@
     "cancelPoTitle": "Cancel Purchase Order?",
     "cancelPoMessage": "Cancel \"{{number}}\"? This action cannot be undone.",
     "cancelPo": "Cancel PO",
+    "keepPo": "Keep PO",
     "poCancelled": "Purchase order cancelled.",
     "poClosed": "Purchase order closed.",
     "deletePoTitle": "Delete Purchase Order?",
@@ -9066,6 +9068,12 @@
       "calendarType": "Calendar Category",
       "markDone": "Mark done",
       "acknowledge": "Acknowledge",
+      "cancelDialog": {
+        "title": "Cancel event?",
+        "message": "Cancel \"{{title}}\"? Attendees will be notified.",
+        "confirm": "Cancel event",
+        "keep": "Keep event"
+      },
       "noCalendarType": "— None —",
       "types": {
         "meeting": "Meeting",
@@ -10509,6 +10517,7 @@
       "download": "Download file",
       "release": "Release",
       "cancel": "Cancel batch",
+      "keep": "Keep batch",
       "generated": "NACHA file generated",
       "released": "Batch released — payments marked transmitted",
       "cancelled": "Batch cancelled — payments returned to the eligible pool",

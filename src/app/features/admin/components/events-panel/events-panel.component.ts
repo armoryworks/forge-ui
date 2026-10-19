@@ -254,9 +254,10 @@ export class EventsPanelComponent implements OnInit {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Cancel Event?',
-        message: `Cancel "${event.title}"? Attendees will be notified.`,
-        confirmLabel: 'Cancel Event',
+        title: this.translate.instant('adminPanels.events.cancelDialog.title'),
+        message: this.translate.instant('adminPanels.events.cancelDialog.message', { title: event.title }),
+        confirmLabel: this.translate.instant('adminPanels.events.cancelDialog.confirm'),
+        cancelLabel: this.translate.instant('adminPanels.events.cancelDialog.keep'),
         severity: 'warn',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
