@@ -586,7 +586,8 @@
       <app-select [label]="'inventory.dialogs.poLineId' | translate" formControlName="purchaseOrderLineId" [options]="poLineOptions()" [required]="true" />
       <app-input [label]="'inventory.dialogs.quantityReceived' | translate" formControlName="quantityReceived" type="number" />
       <app-select [label]="'inventory.dialogs.binLocation' | translate" formControlName="locationId" [options]="binLocationOptions()" />
-      <app-input [label]="'inventory.dialogs.lotNumber' | translate" formControlName="lotNumber" />
+      <app-input [label]="'inventory.dialogs.lotNumber' | translate" formControlName="lotNumber" [maxlength]="100"
+        [info]="receiveLotTracked() ? ('inventory.dialogs.lotAutoAssigned' | translate) : ''" />
       <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
     </div>
 

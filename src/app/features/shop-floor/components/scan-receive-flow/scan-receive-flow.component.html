@@ -99,13 +99,19 @@
                   [options]="locationOptions()"
                   data-testid="receive-dest-location" />
 
+      <app-input [label]="'kioskFlows.receive.lot' | translate"
+                 [formControl]="lotNumber"
+                 [maxlength]="100"
+                 [info]="selectedLine()?.lotTracked ? ('purchaseOrders.receiveLotAutoAssigned' | translate) : ''"
+                 data-testid="receive-lot" />
+
       <div class="scan-flow__action-row">
         <button class="action-btn" (click)="back()" [attr.aria-label]="'kioskFlows.common.goBackAria' | translate">
           <span class="material-icons-outlined">arrow_back</span>
           {{ 'common.back' | translate }}
         </button>
         <button class="action-btn action-btn--primary"
-                [disabled]="!toLocationId.value"
+                [disabled]="!toLocationId.value || lotNumber.invalid"
                 (click)="confirmDestination()" [attr.aria-label]="'kioskFlows.common.confirmDestinationAria' | translate"
                 data-testid="receive-dest-next-btn">
           <span class="material-icons-outlined">check</span>
@@ -135,6 +141,12 @@
           <span class="scan-flow__summary-label">{{ 'kioskFlows.common.to' | translate }}</span>
           <span class="scan-flow__summary-value">{{ getToLocationLabel() }}</span>
         </div>
+        @if (lotNumber.value.trim()) {
+          <div class="scan-flow__summary-row">
+            <span class="scan-flow__summary-label">{{ 'kioskFlows.receive.lot' | translate }}</span>
+            <span class="scan-flow__summary-value scan-flow__summary-value--mono">{{ lotNumber.value.trim() }}</span>
+          </div>
+        }
       </div>
 
       <div class="scan-flow__action-row">

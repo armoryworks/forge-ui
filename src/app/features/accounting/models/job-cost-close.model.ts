@@ -5,6 +5,8 @@ export interface JobCostCloseCandidate {
   title: string;
   completedDate: string | null;
   wipBalance: number;
+  /** False while the job is still open; its production cost can't be closed until it completes. */
+  isComplete: boolean;
 }
 
 /** Outcome of `POST accounting/jobs/{jobId}/close-production-cost`. */

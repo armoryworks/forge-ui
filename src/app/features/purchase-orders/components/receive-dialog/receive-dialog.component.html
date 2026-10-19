@@ -64,6 +64,7 @@
                   [label]="'purchaseOrders.receiveLot' | translate"
                   [formControl]="lotControls()[i]"
                   [maxlength]="100"
+                  [info]="line.lotTracked ? ('purchaseOrders.receiveLotAutoAssigned' | translate) : ''"
                   [attr.data-testid]="'receive-lot-' + line.id" />
               }
             </td>

@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal,
 } from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ScanActionService } from '../../../../shared/services/scan-action.service';
@@ -42,6 +42,7 @@ export class ScanReceiveFlowComponent implements OnInit {
   protected readonly locationOptions = signal<SelectOption[]>([]);
   protected readonly toLocationId = new FormControl<number | null>(null);
   protected readonly partialQty = new FormControl<number>(0);
+  protected readonly lotNumber = new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(100)] });
 
   ngOnInit(): void {
     const receiveAction = this.context().availableActions.find(a => a.action === 'Receive');
@@ -89,7 +90,7 @@ export class ScanReceiveFlowComponent implements OnInit {
   }
 
   protected confirmDestination(): void {
-    if (!this.toLocationId.value) return;
+    if (!this.toLocationId.value || this.lotNumber.invalid) return;
     this.step.set('confirm');
   }
 
@@ -98,12 +99,14 @@ export class ScanReceiveFlowComponent implements OnInit {
     const toId = this.toLocationId.value;
     if (!line || !toId) return;
 
+    const lot = this.lotNumber.value.trim();
     this.submitting.set(true);
     this.scanAction.receive({
       partId: this.context().partId,
       purchaseOrderLineId: line.purchaseOrderLineId,
       quantity: this.quantity(),
       toLocationId: toId,
+      lotNumber: lot || undefined,
     }).subscribe({
       next: () => {
         this.submitting.set(false);

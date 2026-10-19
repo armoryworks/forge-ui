@@ -33,6 +33,7 @@ export interface ScanReceiveRequest {
   purchaseOrderLineId: number;
   quantity: number;
   toLocationId: number;
+  lotNumber?: string;
 }
 
 export interface ScanIssueRequest {
@@ -48,6 +49,7 @@ export interface ScanReceiveContextLine {
   expectedQuantity: number;
   receivedQuantity: number;
   remainingQuantity: number;
+  lotTracked?: boolean;
 }
 
 export interface ScanIssueContextJob {

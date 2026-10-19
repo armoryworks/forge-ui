@@ -23,8 +23,9 @@ type Internals = {
 
 const base = `${environment.apiUrl}/accounting/jobs`;
 const ROWS: JobCostCloseCandidate[] = [
-  { jobId: 11, jobNumber: 'J-0011', title: 'Brackets', completedDate: '2026-09-30T00:00:00Z', wipBalance: 50 },
-  { jobId: 12, jobNumber: 'J-0012', title: 'Housings', completedDate: null, wipBalance: 80 },
+  { jobId: 11, jobNumber: 'J-0011', title: 'Brackets', completedDate: '2026-09-30T00:00:00Z', wipBalance: 50, isComplete: true },
+  { jobId: 12, jobNumber: 'J-0012', title: 'Housings', completedDate: '2026-10-01T00:00:00Z', wipBalance: 80, isComplete: true },
+  { jobId: 13, jobNumber: 'J-0013', title: 'Covers', completedDate: null, wipBalance: 20, isComplete: false },
 ];
 
 describe('JobCostCloseComponent', () => {
@@ -50,18 +51,29 @@ describe('JobCostCloseComponent', () => {
     const c = TestBed.runInInjectionContext(() => new JobCostCloseComponent()) as unknown as Internals;
     c.ngOnInit();
     http.expectOne(`${base}/production-cost-close-candidates`).flush(ROWS);
-    expect(c.candidates()).toHaveLength(2);
+    expect(c.candidates()).toHaveLength(3);
 
     c.close(ROWS[0]);
     expect(c.closingId()).toBe(11);
     const req = http.expectOne(`${base}/11/close-production-cost`);
     expect(req.request.method).toBe('POST');
     req.flush({ jobId: 11, laborAbsorbed: 30, overheadAbsorbed: 10, productionVariance: 90, posted: true });
-    http.expectOne(`${base}/production-cost-close-candidates`).flush([ROWS[1]]);
+    http.expectOne(`${base}/production-cost-close-candidates`).flush([ROWS[1], ROWS[2]]);
 
     expect(snackbar.success).toHaveBeenCalled();
     expect(c.closingId()).toBeNull();
-    expect(c.candidates().map((r) => r.jobId)).toEqual([12]);
+    expect(c.candidates().map((r) => r.jobId)).toEqual([12, 13]);
+  });
+
+  it('does not close a job that is still open', () => {
+    const c = TestBed.runInInjectionContext(() => new JobCostCloseComponent()) as unknown as Internals;
+    c.ngOnInit();
+    http.expectOne(`${base}/production-cost-close-candidates`).flush(ROWS);
+
+    c.close(ROWS[2]);
+
+    expect(c.closingId()).toBeNull();
+    http.expectNone(`${base}/13/close-production-cost`);
   });
 
   it('closes one job at a time', () => {

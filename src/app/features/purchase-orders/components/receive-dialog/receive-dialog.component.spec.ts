@@ -230,6 +230,17 @@ describe('ReceiveDialogComponent — bin, lot and note per line', () => {
     expect(receiveItems).not.toHaveBeenCalled();
   });
 
+  it('submits a lot-tracked line without a lot so the server assigns one', () => {
+    const { internals, receiveItems } = setup([line({ id: 1, lotTracked: true })]);
+
+    internals.lineControls()[0].setValue(2);
+    internals.lotControls()[0].setValue('   ');
+    internals.save();
+
+    expect(receiveItems).toHaveBeenCalledTimes(1);
+    expect(receiveItems.mock.calls[0][1].lines[0].lotNumber ?? null).toBeNull();
+  });
+
   it('sends the trimmed packing slip number with the receipt', () => {
     const { internals, receiveItems } = setup([line({ id: 1 })]);
 

@@ -1970,7 +1970,8 @@
       "countedBy": "Counted By",
       "reject": "Reject",
       "approveAndAdjust": "Approve & Adjust Stock",
-      "noItemsAtLocation": "No items at this location"
+      "noItemsAtLocation": "No items at this location",
+      "lotAutoAssigned": "Lot-tracked part: leave the lot blank and a lot number is assigned."
     },
     "columns": {
       "partNumber": "Part #",
@@ -5762,7 +5763,8 @@
       "expires": "Expires",
       "createAsBlanket": "Blanket order",
       "createHint": "The ordered quantities become the agreed total; the vendor ships against releases you create on the PO."
-    }
+    },
+    "receiveLotAutoAssigned": "Lot-tracked part: leave the lot blank and a lot number is assigned."
   },
   "poManage": {
     "packingSlipNumber": "Packing slip #",
@@ -7163,7 +7165,8 @@
       "submitting": "Receiving...",
       "confirm": "Confirm Receive",
       "success": "Received {{quantity}} x {{part}} from {{po}}",
-      "failed": "Receive failed. Please try again."
+      "failed": "Receive failed. Please try again.",
+      "lot": "Lot / heat #"
     },
     "return": {
       "decreaseQtyAria": "Decrease quantity",
@@ -10329,7 +10332,8 @@
       "close": "Close cost",
       "closed": "{{job}} closed; production variance {{variance}}",
       "empty": "No job has an open WIP balance",
-      "loadFailed": "Could not load the jobs with open WIP"
+      "loadFailed": "Could not load the jobs with open WIP",
+      "notComplete": "Complete the job before closing its cost"
     }
   },
   "subcontractUi": {
