@@ -28,7 +28,7 @@ const ACCOUNTS = [
 ];
 
 describe('JournalEntryEditorComponent', () => {
-  const gl = { getChartOfAccounts: vi.fn(), createManualJournalEntry: vi.fn(), getLedgerRegister: vi.fn(), discardJournalEntry: vi.fn() };
+  const gl = { getChartOfAccounts: vi.fn(), createManualJournalEntry: vi.fn(), getLedgerRegister: vi.fn(), resubmitJournalEntry: vi.fn() };
   const router = { navigate: vi.fn() };
   const snackbar = { success: vi.fn(), error: vi.fn(), errorFrom: vi.fn(), info: vi.fn() };
   let queryParams: Record<string, string>;
@@ -68,10 +68,12 @@ describe('JournalEntryEditorComponent', () => {
       of({ id: 5, bookId: 1, entryNumber: 7, entryDate: '2026-01-10', status: 'Posted', memo: 'cash sale' }),
     );
     gl.getLedgerRegister.mockReturnValue(of({ data: [], page: 1, pageSize: 100, totalCount: 0, totalPages: 0 }));
-    gl.discardJournalEntry.mockReturnValue(of(undefined));
+    gl.resubmitJournalEntry.mockReturnValue(
+      of({ id: 9, bookId: 1, entryNumber: 12, entryDate: '2026-07-06', status: 'PendingApproval', memo: 'Accrue rent' }),
+    );
   });
 
-  it('prefills a rejected draft from ?resubmitOf and discards it once the new entry is saved', () => {
+  it('prefills a rejected draft from ?resubmitOf and resubmits it in place', () => {
     queryParams = { resubmitOf: '9' };
     gl.getLedgerRegister.mockReturnValue(
       of({
@@ -97,7 +99,8 @@ describe('JournalEntryEditorComponent', () => {
 
     api.save();
 
-    expect(gl.discardJournalEntry).toHaveBeenCalledWith(9);
+    expect(gl.resubmitJournalEntry).toHaveBeenCalledWith(9, expect.objectContaining({ memo: 'Accrue rent', entryDate: '2026-07-06' }));
+    expect(gl.createManualJournalEntry).not.toHaveBeenCalled();
     expect(api.isDirty()).toBe(false);
   });
 

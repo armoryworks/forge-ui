@@ -27,6 +27,7 @@ interface BudgetTotal {
   actual: number;
   variance: number;
   variancePercent: number | null;
+  favorable: boolean;
 }
 
 interface BudgetRow {
@@ -81,6 +82,7 @@ export class BudgetsComponent {
       actual,
       variance: actual - budget,
       variancePercent: budget === 0 ? null : ((actual - budget) / Math.abs(budget)) * 100,
+      favorable: key === 'expense' ? actual <= budget : actual >= budget,
     });
     return [
       total('income', 'accounting.budget.totalIncome', c.totalBudgetIncome, c.totalActualIncome),

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signa
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { filter } from 'rxjs';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -29,8 +30,8 @@ const conventionalBalance = (type: string | null): 'Debit' | 'Credit' =>
   type === 'Asset' || type === 'Expense' ? 'Debit' : 'Credit';
 
 /** Chart-of-accounts management: create postable accounts + edit safe fields. Structural fields
- * (number/type) lock once an account has postings — the editor disables them. The normal balance
- * stays editable so a contra account can carry the side opposite its type's convention. */
+ * (number/type/normal-balance) lock once an account has postings — the editor disables them. The
+ * normal balance defaults to the type's convention; the opposite side marks a contra account. */
 @Component({
   selector: 'app-chart-of-accounts',
   standalone: true,
@@ -107,7 +108,10 @@ export class ChartOfAccountsComponent implements OnInit {
 
   constructor() {
     this.form.controls.accountType.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        filter(() => this.form.controls.accountType.dirty),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe(() => this.onTypeChange());
   }
 
@@ -125,7 +129,7 @@ export class ChartOfAccountsComponent implements OnInit {
     });
   }
 
-  /** Default the normal balance to the type convention as the user picks a type; it can still be flipped for a contra account. */
+  /** Default the normal balance to the type convention when the user picks a type; it can still be flipped for a contra account. */
   protected onTypeChange(): void {
     this.form.controls.normalBalance.setValue(conventionalBalance(this.form.controls.accountType.value));
   }
@@ -164,7 +168,7 @@ export class ChartOfAccountsComponent implements OnInit {
         id: current.id, name: v.name!.trim(), parentAccountId: v.parentAccountId, requiresJob: v.requiresJob!,
         requiresCostCenter: v.requiresCostCenter!, cashFlowCategory: v.cashFlowCategory, description: v.description,
         isActive: v.isActive!,
-        accountNumber: locked ? null : v.accountNumber!.trim(), accountType: locked ? null : v.accountType!, normalBalance: v.normalBalance!,
+        accountNumber: locked ? null : v.accountNumber!.trim(), accountType: locked ? null : v.accountType!, normalBalance: locked ? null : v.normalBalance!,
       }).subscribe(done);
     } else {
       this.gl.createGlAccount({

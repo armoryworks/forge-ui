@@ -15,6 +15,7 @@
 
   @if (report(); as r) {
     <div class="acct-view-bar">
+      <app-statement-period mode="asOf" [to]="r.asOfDate" (periodChange)="setPeriod($event)" />
       <app-view-mode-toggle [mode]="viewMode()" (modeChange)="setViewMode($event)" />
     </div>
   }

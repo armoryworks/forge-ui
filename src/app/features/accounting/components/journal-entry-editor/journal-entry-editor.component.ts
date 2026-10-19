@@ -62,7 +62,7 @@ export class JournalEntryEditorComponent implements OnInit, HasDirtyForm {
   protected readonly accountOptions = signal<SelectOption[]>([]);
   /** §5A.2 split-pane: the entry being corrected stays pinned above the compose form. */
   protected readonly original = signal<LedgerRegisterEntry | null>(null);
-  /** A rejected draft being resubmitted: it is discarded once the new entry is saved. */
+  /** A rejected draft being edited: saving resubmits it in place (same entry number) for approval. */
   protected readonly resubmitting = signal(false);
 
   protected readonly form = new FormGroup(
@@ -203,14 +203,15 @@ export class JournalEntryEditorComponent implements OnInit, HasDirtyForm {
         };
       }),
     };
-    this.gl
-      .createManualJournalEntry(request)
+    const draft = this.resubmitting() ? this.original() : null;
+    const save$ = draft
+      ? this.gl.resubmitJournalEntry(draft.id, request)
+      : this.gl.createManualJournalEntry(request);
+    save$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) => {
           this.form.markAsPristine();
-          const draft = this.resubmitting() ? this.original() : null;
-          if (draft) this.gl.discardJournalEntry(draft.id).subscribe({ error: () => undefined });
           if (result.status === 'PendingApproval') {
             this.snackbar.info(this.translate.instant('accounting.journalEditor.pendingApproval', { number: result.entryNumber }));
             this.router.navigate(['/accounting/journal-approvals']);

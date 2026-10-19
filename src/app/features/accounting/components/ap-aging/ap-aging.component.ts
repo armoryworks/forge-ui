@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
@@ -22,8 +22,8 @@ import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { agingBucketLabel } from '../../utils/aging-bucket-label';
 import { ApAging } from '../../models/accounting.models';
 import { ApAgingVisualComponent } from './ap-aging-visual.component';
-
-const DEFAULT_BOOK_ID = 1;
+import { StatementPeriodComponent } from '../statement-period/statement-period.component';
+import { StatementPeriod, bookIdFromParams, periodFromParams, samePeriod } from '../../utils/statement-period';
 
 /** Flattened aging row — bucket amounts hoisted to top-level b{i} fields so the shared table can render/sort them. */
 interface AgingTableRow {
@@ -43,12 +43,13 @@ interface AgingTableRow {
     ColumnCellDirective,
     ViewModeToggleComponent,
     ApAgingVisualComponent,
+    StatementPeriodComponent,
   ],
   templateUrl: './ap-aging.component.html',
   styleUrl: './ap-aging.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ApAgingComponent implements OnInit {
+export class ApAgingComponent {
   private readonly gl = inject(GeneralLedgerService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -69,6 +70,19 @@ export class ApAgingComponent implements OnInit {
     ),
     { initialValue: this.preferredView() },
   );
+
+  private readonly params = toSignal(this.route.queryParamMap, { initialValue: this.route.snapshot.queryParamMap });
+  /** As-of date, mirrored to `?to=`; empty is today. */
+  protected readonly period = computed(() => periodFromParams(this.params()), { equal: samePeriod });
+  private readonly bookId = computed(() => bookIdFromParams(this.params()));
+
+  protected setPeriod(period: StatementPeriod): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { from: null, to: period.to },
+      queryParamsHandling: 'merge',
+    });
+  }
 
   protected setViewMode(mode: AccountingViewMode): void {
     this.router.navigate([], {
@@ -109,17 +123,18 @@ export class ApAgingComponent implements OnInit {
 
   constructor() {
     autoRefreshOnGlChange(() => this.load());
-  }
-
-  ngOnInit(): void {
-    this.load();
+    effect(() => {
+      this.period();
+      this.bookId();
+      this.load();
+    });
   }
 
   protected load(): void {
     this.loading.set(true);
     this.error.set(null);
     this.gl
-      .getApAging(DEFAULT_BOOK_ID)
+      .getApAging(this.bookId(), this.period().to)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (r) => {

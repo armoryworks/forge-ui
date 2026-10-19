@@ -4,7 +4,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 
-import { EMPTY, filter, forkJoin, switchMap } from 'rxjs';
+import { filter, forkJoin, switchMap } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
@@ -16,10 +16,7 @@ import { ColumnCellDirective } from '../../../../shared/directives/column-cell.d
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-refresh.util';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
-import {
-  ConfirmDialogComponent,
-  ConfirmDialogData,
-} from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { JournalEntryExplanation, LedgerRegisterEntry, LedgerRegisterPage, ReverseJournalEntryInput, TrialBalanceRow } from '../../models/accounting.models';
 import { ReverseEntryDialogComponent, ReverseEntryDialogData } from '../reverse-entry-dialog/reverse-entry-dialog.component';
@@ -59,6 +56,7 @@ export class LedgerViewComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(false);
@@ -198,30 +196,10 @@ export class LedgerViewComponent implements OnInit {
     });
   }
 
-  protected discardDraft(entry: LedgerRegisterEntry): void {
-    this.dialog
-      .open(ConfirmDialogComponent, {
-        width: '400px',
-        data: {
-          title: this.translate.instant('accounting.ledger.discardTitle'),
-          message: this.translate.instant('accounting.ledger.discardMessage', { number: entry.entryNumber }),
-          confirmLabel: this.translate.instant('accounting.ledger.discard'),
-          cancelLabel: this.translate.instant('common.cancel'),
-          severity: 'danger',
-        } satisfies ConfirmDialogData,
-      })
-      .afterClosed()
-      .pipe(
-        switchMap((confirmed) => (confirmed === true ? this.gl.discardJournalEntry(entry.id) : EMPTY)),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe({
-        next: () => {
-          this.snackbar.success(this.translate.instant('accounting.ledger.discarded', { number: entry.entryNumber }));
-          this.load();
-        },
-        error: (err: unknown) => this.snackbar.errorFrom(err, 'accounting.errors.discardFailed'),
-      });
+  /** A rejected draft can be edited and resubmitted only by the user who submitted it. */
+  protected canResubmit(entry: LedgerRegisterEntry): boolean {
+    const me = this.auth.user()?.id ?? null;
+    return entry.status === 'Draft' && me !== null && entry.postedBy === me;
   }
 
   /** Browser-find semantics: the first Enter after a term change locates match 1; repeats cycle. */

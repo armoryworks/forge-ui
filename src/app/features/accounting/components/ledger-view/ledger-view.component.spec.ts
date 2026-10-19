@@ -8,6 +8,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { LedgerViewComponent } from './ledger-view.component';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { AuthService } from '../../../../shared/services/auth.service';
 import {
   JournalEntryExplanation,
   LedgerRegisterEntry,
@@ -53,7 +54,7 @@ interface LedgerApi {
   accountNotFound(): boolean;
   toggleDrafts(): void;
   toggleFlaggedOnly(): void;
-  discardDraft(entry: LedgerRegisterEntry): void;
+  canResubmit(entry: LedgerRegisterEntry): boolean;
 }
 
 describe('LedgerViewComponent', () => {
@@ -63,7 +64,6 @@ describe('LedgerViewComponent', () => {
     getGlAnomalies: vi.fn(),
     reverseJournalEntry: vi.fn(),
     getTrialBalance: vi.fn(),
-    discardJournalEntry: vi.fn(),
   };
   const snackbar = { error: vi.fn(), errorFrom: vi.fn(), success: vi.fn() };
   const dialog = { open: vi.fn() };
@@ -77,6 +77,7 @@ describe('LedgerViewComponent', () => {
         { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap(routeParams)), snapshot: { queryParamMap: convertToParamMap({}) } } },
         { provide: SnackbarService, useValue: snackbar },
         { provide: MatDialog, useValue: dialog },
+        { provide: AuthService, useValue: { user: () => ({ id: 5 }) } },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
       ],
     });
@@ -119,16 +120,14 @@ describe('LedgerViewComponent', () => {
     expect(api.entries()).toHaveLength(0);
   });
 
-  it('lists rejected drafts on request and discards one after confirmation', () => {
+  it('lists rejected drafts on request and offers resubmit only on the signed-in user\'s own', () => {
     const api = create();
     api.toggleDrafts();
     expect(gl.getLedgerRegister).toHaveBeenLastCalledWith(1, { pageSize: 100, glAccountId: null, status: 'Draft' });
 
-    gl.discardJournalEntry.mockReturnValue(of(undefined));
-    dialog.open.mockReturnValue({ afterClosed: () => of(true) });
-    api.discardDraft({ ...ENTRY, status: 'Draft' });
-    expect(gl.discardJournalEntry).toHaveBeenCalledWith(1);
-    expect(snackbar.success).toHaveBeenCalled();
+    expect(api.canResubmit({ ...ENTRY, status: 'Draft', postedBy: 5 })).toBe(true);
+    expect(api.canResubmit({ ...ENTRY, status: 'Draft', postedBy: 6 })).toBe(false);
+    expect(api.canResubmit({ ...ENTRY, status: 'Posted', postedBy: 5 })).toBe(false);
   });
 
   it('narrows the register to flagged entries', () => {

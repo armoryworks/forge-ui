@@ -9759,8 +9759,7 @@
       "ledgerLoadFailed": "No se pudo cargar el libro mayor.",
       "explainFailed": "No se pudo generar una explicación.",
       "accountsLoadFailed": "No se pudieron cargar las cuentas.",
-      "anomalyScanFailed": "Falló la búsqueda de anomalías.",
-      "discardFailed": "No se pudo descartar el borrador."
+      "anomalyScanFailed": "Falló la búsqueda de anomalías."
     },
     "ledger": {
       "title": "Libro mayor",
@@ -9788,14 +9787,10 @@
       "entryNotLoaded": "El asiento id {{number}} es anterior a la página cargada",
       "empty": "Sin asientos contables",
       "rejectedDrafts": "Borradores rechazados",
-      "draftsNote": "Los asientos rechazados vuelven aquí como borradores. Reenvíe uno para abrirlo en el editor, o descártelo.",
+      "draftsNote": "Los asientos rechazados vuelven aquí como borradores. Reenvíe uno suyo para corregirlo en el editor y enviarlo de nuevo a aprobación; conserva su número de asiento.",
       "accountNotFound": "No se encontró esa cuenta. Abra el libro mayor desde el catálogo de cuentas o el balance de comprobación.",
       "flaggedOffPage": "{{count}} asientos marcados son anteriores a los asientos cargados aquí.",
-      "resubmit": "Reenviar",
-      "discard": "Descartar",
-      "discardTitle": "¿Descartar el borrador?",
-      "discardMessage": "El borrador #{{number}} se eliminará. Nunca se contabilizó, así que los libros no cambian.",
-      "discarded": "Borrador #{{number}} descartado"
+      "resubmit": "Reenviar"
     },
     "journalEditor": {
       "title": "Nuevo asiento contable",
@@ -10055,7 +10050,7 @@
       "roa": "Rendimiento sobre activos",
       "debtToEquity": "Deuda sobre capital",
       "expenseRatio": "Índice de gastos",
-      "currentPeriodNote": "Estado de resultados del período actual y balance general a la fecha de hoy."
+      "currentPeriodNote": "Estado de resultados del ejercicio fiscal hasta la fecha y balance general a la fecha de hoy."
     },
     "comparison": {
       "compareToPrior": "Comparar con el período anterior",
@@ -10311,9 +10306,8 @@
       "requiresCostCenter": "Requiere Centro de Costo",
       "active": "Activa",
       "description": "Descripción",
-      "lockedNote": "Esta cuenta tiene asientos, así que su número y tipo están bloqueados. Cree una cuenta nueva para cambios estructurales.",
-      "contraNote": "Este saldo normal es el lado opuesto al habitual para el tipo de cuenta, como en una cuenta de contrapartida.",
-      "normalBalanceConversionNote": "Cambiarlo no altera asientos contabilizados ni estados; solo lo leen las importaciones de conversión futuras."
+      "lockedNote": "Esta cuenta tiene asientos — su número, tipo y saldo normal están bloqueados. Cree una cuenta nueva para cambios estructurales.",
+      "contraNote": "Este saldo normal es el lado opuesto al habitual para el tipo de cuenta, como en una cuenta de contrapartida."
     },
     "openingJournal": {
       "title": "Asiento de apertura",

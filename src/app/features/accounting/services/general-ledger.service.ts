@@ -64,8 +64,8 @@ export class GeneralLedgerService {
   /**
    * Profit & Loss. When `compare` is true the response carries prior-period and variance
    * figures per line and per total; an explicit prior window (compareFromDate/compareToDate)
-   * overrides the server's default (the preceding whole months, or the same dates a year earlier
-   * for year-to-date). With no fromDate the server starts at the fiscal year containing toDate.
+   * overrides the server's default (the same dates a year earlier for fiscal year-to-date, else the
+   * preceding period of equal length). With no fromDate the server starts at the fiscal year containing toDate.
    */
   getProfitAndLoss(
     bookId: number,
@@ -290,9 +290,9 @@ export class GeneralLedgerService {
     return this.http.post<ManualJournalEntryResult>(`${this.base}/journal-entries/${entryId}/reject`, {}, params ? { params } : {});
   }
 
-  /** Discard a manual Draft journal entry (where a rejected entry lands); it never posted, so it is deleted. */
-  discardJournalEntry(entryId: number): Observable<void> {
-    return this.http.delete<void>(`${this.base}/journal-entries/${entryId}`);
+  /** Edit and resubmit a rejected manual journal entry (a Draft): it keeps its number and returns to PendingApproval. */
+  resubmitJournalEntry(entryId: number, request: ManualJournalEntryInput): Observable<ManualJournalEntryResult> {
+    return this.http.post<ManualJournalEntryResult>(`${this.base}/journal-entries/${entryId}/resubmit`, request);
   }
 
   /** Reverse a posted journal entry — posts an equal-and-opposite entry; the original is never edited. */

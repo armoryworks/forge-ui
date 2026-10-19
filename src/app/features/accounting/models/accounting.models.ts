@@ -421,6 +421,7 @@ export interface LedgerRegisterEntry {
   lines: LedgerRegisterLine[];
   reversalOfEntryNumber?: number | null;
   reversedByEntryNumber?: number | null;
+  postedBy?: number | null;
 }
 
 export interface LedgerRegisterPage {
@@ -631,6 +632,7 @@ export interface BudgetVsActualLine {
   accountNumber: string;
   accountName: string;
   isIncome: boolean;
+  isFavorable: boolean;
   budgetAmount: number;
   actualAmount: number;
   variance?: number | null;

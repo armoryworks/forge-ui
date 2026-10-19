@@ -9759,8 +9759,7 @@
       "ledgerLoadFailed": "Could not load the ledger.",
       "explainFailed": "Could not generate an explanation.",
       "accountsLoadFailed": "Could not load accounts.",
-      "anomalyScanFailed": "Anomaly scan failed.",
-      "discardFailed": "Could not discard the draft entry."
+      "anomalyScanFailed": "Anomaly scan failed."
     },
     "ledger": {
       "title": "Ledger",
@@ -9788,14 +9787,10 @@
       "entryNotLoaded": "Entry id {{number}} is older than the loaded page",
       "empty": "No journal entries",
       "rejectedDrafts": "Rejected drafts",
-      "draftsNote": "Rejected entries return here as drafts. Resubmit one to open it in the editor, or discard it.",
+      "draftsNote": "Rejected entries return here as drafts. Resubmit one of yours to correct it in the editor and send it back for approval; it keeps its entry number.",
       "accountNotFound": "That account could not be found. Open the ledger from the chart of accounts or the trial balance.",
       "flaggedOffPage": "{{count}} flagged entries are older than the entries loaded here.",
-      "resubmit": "Resubmit",
-      "discard": "Discard",
-      "discardTitle": "Discard draft?",
-      "discardMessage": "Draft entry #{{number}} will be deleted. It never posted, so the books are not affected.",
-      "discarded": "Draft entry #{{number}} discarded"
+      "resubmit": "Resubmit"
     },
     "journalEditor": {
       "title": "New Journal Entry",
@@ -10055,7 +10050,7 @@
       "roa": "Return on assets",
       "debtToEquity": "Debt-to-equity",
       "expenseRatio": "Expense ratio",
-      "currentPeriodNote": "Current period P&L and balance sheet as of today."
+      "currentPeriodNote": "Fiscal year-to-date P&L and balance sheet as of today."
     },
     "comparison": {
       "compareToPrior": "Compare to prior period",
@@ -10311,9 +10306,8 @@
       "requiresCostCenter": "Requires Cost Center",
       "active": "Active",
       "description": "Description",
-      "lockedNote": "This account has postings, so its number and type are locked. Create a new account for structural changes.",
-      "contraNote": "This normal balance is opposite the usual side for the account type, as for a contra account.",
-      "normalBalanceConversionNote": "Changing it does not alter posted entries or statements; only future conversion imports read it."
+      "lockedNote": "This account has postings — its number, type, and normal balance are locked. Create a new account for structural changes.",
+      "contraNote": "This normal balance is opposite the usual side for the account type, as for a contra account."
     },
     "openingJournal": {
       "title": "Opening journal",

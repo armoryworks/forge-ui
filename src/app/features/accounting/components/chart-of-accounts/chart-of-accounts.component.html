@@ -45,12 +45,12 @@
       <div class="dialog-row">
         <app-select [label]="'accounting.coa.type' | translate" formControlName="accountType" [options]="typeOptions"
           [isReadonly]="structuralLocked()" data-testid="coa-type" />
-        <app-select [label]="'accounting.coa.normalBalance' | translate" formControlName="normalBalance" [options]="balanceOptions" data-testid="coa-balance" />
+        <app-select [label]="'accounting.coa.normalBalance' | translate" formControlName="normalBalance" [options]="balanceOptions"
+          [isReadonly]="structuralLocked()" data-testid="coa-balance" />
       </div>
       @if (contraBalance()) {
         <p class="coa-contra-note" data-testid="coa-contra-note">
           {{ 'accounting.coa.contraNote' | translate }}
-          @if (structuralLocked()) { {{ 'accounting.coa.normalBalanceConversionNote' | translate }} }
         </p>
       }
       <div class="dialog-row">

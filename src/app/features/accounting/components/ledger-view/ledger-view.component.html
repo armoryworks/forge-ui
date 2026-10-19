@@ -156,14 +156,12 @@
 
         <div class="ledger-detail__actions">
           @if (row.status === 'Draft') {
-            <button type="button" class="action-btn action-btn--sm" (click)="resubmitDraft(row)" data-testid="ledger-resubmit">
-              <span class="material-icons-outlined" aria-hidden="true">send</span>
-              {{ 'accounting.ledger.resubmit' | translate }}
-            </button>
-            <button type="button" class="action-btn action-btn--sm action-btn--danger" (click)="discardDraft(row)" data-testid="ledger-discard">
-              <span class="material-icons-outlined" aria-hidden="true">delete</span>
-              {{ 'accounting.ledger.discard' | translate }}
-            </button>
+            @if (canResubmit(row)) {
+              <button type="button" class="action-btn action-btn--sm" (click)="resubmitDraft(row)" data-testid="ledger-resubmit">
+                <span class="material-icons-outlined" aria-hidden="true">send</span>
+                {{ 'accounting.ledger.resubmit' | translate }}
+              </button>
+            }
           } @else {
           @if (row.status === 'Posted' && !row.reversedByEntryId) {
             <button type="button" class="action-btn action-btn--sm action-btn--danger" (click)="reverseEntry(row)">
