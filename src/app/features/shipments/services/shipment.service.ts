@@ -61,8 +61,8 @@ export class ShipmentService {
     return this.http.post(`${this.base}/${shipmentId}/ship-document/regenerate`, {}, { responseType: 'blob' });
   }
 
-  shipShipment(id: number): Observable<void> {
-    return this.http.post<void>(`${this.base}/${id}/ship`, {});
+  shipShipment(id: number, scanCode?: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/ship`, scanCode ? { scanCode } : {});
   }
 
   deliverShipment(id: number): Observable<void> {

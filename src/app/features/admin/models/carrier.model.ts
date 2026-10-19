@@ -17,6 +17,7 @@ export interface Carrier {
   credentialsConfigured: boolean;
   credentialClientId: string | null;
   credentialEnvironment: string | null;
+  notes: string | null;
 }
 
 export interface CreateCarrierRequest {

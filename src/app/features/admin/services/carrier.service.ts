@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 import { Carrier, CarrierTestResult, CreateCarrierRequest, UpdateCarrierCredentialsRequest } from '../models/carrier.model';
+import { UpdateCarrierRequest } from '../models/update-carrier-request.model';
 
 @Injectable({ providedIn: 'root' })
 export class CarrierService {
@@ -18,6 +19,11 @@ export class CarrierService {
 
   create(request: CreateCarrierRequest): Observable<Carrier> {
     return this.http.post<Carrier>(this.base, request);
+  }
+
+  /** Edit a carrier's master data (name, delivery updates, scan-to-ship, active). Credentials are separate. */
+  update(id: number, request: UpdateCarrierRequest): Observable<Carrier> {
+    return this.http.put<Carrier>(`${this.base}/${id}`, request);
   }
 
   /** Store API credentials for a carrier. The secret is encrypted server-side and never returned. */

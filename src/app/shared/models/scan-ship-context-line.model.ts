@@ -4,4 +4,5 @@ export interface ScanShipContextLine {
   shipmentNumber: string;
   salesOrderNumber: string | null;
   requiredQuantity: number;
+  requiresScanToShip: boolean;
 }

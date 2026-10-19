@@ -38,6 +38,9 @@ import { InventoryService } from '../inventory/services/inventory.service';
 import { ShipmentService } from '../shipments/services/shipment.service';
 import { ShipmentListItem } from '../shipments/models/shipment-list-item.model';
 import { ShipmentDetail } from '../shipments/models/shipment-detail.model';
+import { ScanLabelDialogComponent } from '../shipments/components/scan-label-dialog/scan-label-dialog.component';
+import { ScanLabelDialogData } from '../shipments/models/scan-label-dialog-data.model';
+import { httpProblemDetail } from '../../shared/utils/http-problem-detail';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { ScanUndoListComponent } from './components/scan-undo-list/scan-undo-list.component';
 import { ScanActionOverlayComponent } from './components/scan-action-overlay/scan-action-overlay.component';
@@ -1071,18 +1074,32 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   protected confirmShip(): void {
     const shipment = this.selectedShipment();
     if (!shipment || this.shippingSubmitting()) return;
-    this.shippingSubmitting.set(true);
     this.resetAutoLogoutTimer();
 
-    this.shipmentService.shipShipment(shipment.id).subscribe({
+    if (shipment.carrierRequiresScanToShip) {
+      this.dialog.open<ScanLabelDialogComponent, ScanLabelDialogData, string | undefined>(ScanLabelDialogComponent, {
+        width: '420px',
+        data: { shipmentNumber: shipment.shipmentNumber },
+      }).afterClosed().subscribe(scanCode => {
+        this.resetAutoLogoutTimer();
+        if (scanCode) this.submitShip(shipment, scanCode);
+      });
+      return;
+    }
+    this.submitShip(shipment);
+  }
+
+  private submitShip(shipment: ShipmentDetail, scanCode?: string): void {
+    this.shippingSubmitting.set(true);
+    this.shipmentService.shipShipment(shipment.id, scanCode).subscribe({
       next: () => {
         this.shippingSubmitting.set(false);
         this.showScanFeedback(this.translate.instant('shopFloor.display.shipmentShipped', { number: shipment.shipmentNumber }));
         setTimeout(() => this.ephemeralLogout(), 1500);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.shippingSubmitting.set(false);
-        this.showScanFeedback(this.translate.instant('shopFloor.display.shipFailed'));
+        this.showScanFeedback(httpProblemDetail(err) ?? this.translate.instant('shopFloor.display.shipFailed'));
       },
     });
   }

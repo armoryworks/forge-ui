@@ -1,0 +1,17 @@
+<app-dialog [title]="'shipments.scanLabelTitle' | translate" width="420px" (closed)="close()">
+  <p class="scan-label__message" data-testid="shipment-scan-label-message">
+    {{ 'shipments.scanLabelMessage' | translate: { number: data.shipmentNumber } }}
+  </p>
+  <app-barcode-scan-input
+    data-testid="shipment-scan-label-input"
+    [label]="'shipments.scanLabelField' | translate"
+    [placeholder]="'shipments.scanLabelPlaceholder' | translate"
+    [autoFocus]="true"
+    (scanned)="onScanned($event)" />
+
+  <div dialog-footer>
+    <button type="button" class="action-btn" data-testid="shipment-scan-label-cancel" (click)="close()">
+      {{ 'common.cancel' | translate }}
+    </button>
+  </div>
+</app-dialog>

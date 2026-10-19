@@ -11,6 +11,7 @@ export interface ShipmentDetail {
   status: string;
   carrier: string | null;
   carrierIsApi: boolean;
+  carrierRequiresScanToShip: boolean;
   trackingNumber: string | null;
   shippedDate: Date | null;
   deliveredDate: Date | null;

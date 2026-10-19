@@ -2,6 +2,8 @@ import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, input, o
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+let nextScanInputId = 0;
+
 @Component({
   selector: 'app-barcode-scan-input',
   standalone: true,
@@ -17,6 +19,8 @@ export class BarcodeScanInputComponent implements AfterViewInit {
   readonly scanned = output<string>();
 
   @ViewChild('scanInput') scanInputRef!: ElementRef<HTMLInputElement>;
+
+  protected readonly inputId = `scan-input-field-${nextScanInputId++}`;
 
   ngAfterViewInit(): void {
     if (this.autoFocus()) {

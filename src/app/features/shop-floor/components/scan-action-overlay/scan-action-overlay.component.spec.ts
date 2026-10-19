@@ -36,7 +36,7 @@ const STOCKED: ScanContext = {
   availableActions: [
     {
       action: 'Ship', enabled: true, disabledReason: null,
-      context: { openShipmentLines: [{ shipmentLineId: 11, shipmentId: 4, shipmentNumber: 'SH-0001', salesOrderNumber: 'SO-0003', requiredQuantity: 6 }] },
+      context: { openShipmentLines: [{ shipmentLineId: 11, shipmentId: 4, shipmentNumber: 'SH-0001', salesOrderNumber: 'SO-0003', requiredQuantity: 6, requiresScanToShip: false }] },
     },
     { action: 'Inspect', enabled: true, disabledReason: null, context: { qcTemplateId: 12 } },
   ],

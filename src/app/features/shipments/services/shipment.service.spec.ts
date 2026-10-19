@@ -37,6 +37,7 @@ describe('ShipmentService', () => {
     status: 'Pending',
     carrier: 'FedEx',
     carrierIsApi: false,
+    carrierRequiresScanToShip: false,
     trackingNumber: null,
     shippedDate: null,
     deliveredDate: null,
@@ -206,6 +207,14 @@ describe('ShipmentService', () => {
       req.flush(null);
 
       expect(completed).toBe(true);
+    });
+
+    it('sends the scanned label code when one is given', () => {
+      service.shipShipment(1, 'v1.SH-0001.abc').subscribe();
+
+      const req = httpMock.expectOne(`${baseUrl}/1/ship`);
+      expect(req.request.body).toEqual({ scanCode: 'v1.SH-0001.abc' });
+      req.flush(null);
     });
   });
 
