@@ -109,6 +109,9 @@ export class PartDetailLayoutResolverService {
   }
 
   private middleTabs(ps: ProcurementSource, ic: InventoryClass): TabLayoutEntry[] {
+    if (ic === 'Service') {
+      return ps === 'Buy' ? [SOURCING, COST, PRICING] : [COST, PRICING];
+    }
     // Buy + Raw (B1)
     if (ps === 'Buy' && ic === 'Raw') {
       return [SOURCING, INVENTORY, QUALITY, COST, PRICING];

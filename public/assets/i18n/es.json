@@ -973,7 +973,8 @@
       "Subassembly": "Subensamblaje",
       "FinishedGood": "Producto Terminado",
       "Consumable": "Consumible",
-      "Tool": "Herramienta"
+      "Tool": "Herramienta",
+      "Service": "Servicio"
     },
     "subtitle": "Gestionar piezas, listas de materiales y especificaciones",
     "createPart": "Nueva Pieza",
@@ -1178,6 +1179,8 @@
         "step2ConsumableDesc": "Single-use shop supply.",
         "step2Tool": "Tool",
         "step2ToolDesc": "Durable, multi-use.",
+        "step2Service": "Servicio",
+        "step2ServiceDesc": "Cargo sin inventario facturado por línea (NRE, preparación, ingeniería).",
         "step3Title": "Item kind",
         "step3Helper": "Optional descriptive tag — Fastener, Electronic, Packaging, etc. Skip if unsure.",
         "step3None": "— None —",

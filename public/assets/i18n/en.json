@@ -973,7 +973,8 @@
       "Subassembly": "Subassembly",
       "FinishedGood": "Finished Good",
       "Consumable": "Consumable",
-      "Tool": "Tool"
+      "Tool": "Tool",
+      "Service": "Service"
     },
     "subtitle": "Manage parts, BOMs, and specifications",
     "createPart": "New Part",
@@ -1195,6 +1196,8 @@
         "step2ConsumableDesc": "Single-use shop supply.",
         "step2Tool": "Tool",
         "step2ToolDesc": "Durable, multi-use.",
+        "step2Service": "Service",
+        "step2ServiceDesc": "Non-stock charge billed by the line (NRE, setup, engineering).",
         "step3Title": "Item kind",
         "step3Helper": "Optional descriptive tag — Fastener, Electronic, Packaging, etc. Skip if unsure.",
         "step3None": "— None —",

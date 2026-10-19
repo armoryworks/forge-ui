@@ -129,6 +129,16 @@ describe('PartDetailLayoutResolverService', () => {
     expect(ids).not.toContain('pricing');
   });
 
+  it('Service parts are never stocked: no inventory, BOM, routing, MRP or quality tabs', () => {
+    for (const ps of ['Buy', 'Make'] as const) {
+      const ids = service.resolve(ps, 'Service').map(t => t.id);
+      expect(ids).toEqual(expect.arrayContaining(['identity', 'cost', 'pricing', 'files']));
+      for (const stocked of ['inventory', 'bom', 'routing', 'mrp', 'quality']) {
+        expect(ids, `${ps}+Service`).not.toContain(stocked);
+      }
+    }
+  });
+
   it('Pricing tab is positioned immediately after Cost on every non-Phantom combo', () => {
     const cases: { ps: 'Buy' | 'Make' | 'Subcontract'; ic: 'Raw' | 'Component' | 'Subassembly' | 'FinishedGood' | 'Consumable' | 'Tool' }[] = [
       { ps: 'Buy', ic: 'Raw' },

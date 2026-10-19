@@ -161,6 +161,7 @@ export class PartsComponent {
     { value: 'FinishedGood', label: 'Finished Good' },
     { value: 'Consumable', label: 'Consumable' },
     { value: 'Tool', label: 'Tool' },
+    { value: 'Service', label: 'Service' },
   ];
 
   protected readonly partColumns: ColumnDef[] = [
@@ -223,6 +224,7 @@ export class PartsComponent {
     { value: 'FinishedGood', label: 'Finished Good' },
     { value: 'Consumable', label: 'Consumable' },
     { value: 'Tool', label: 'Tool' },
+    { value: 'Service', label: 'Service' },
   ];
 
   protected readonly traceabilityOptions: SelectOption[] = [

@@ -158,6 +158,7 @@ export class NewPartForkDialogComponent implements OnInit {
     FinishedGood: { titleKey: 'parts.workflow.fork.step2FinishedGood', descKey: 'parts.workflow.fork.step2FinishedGoodDesc' },
     Consumable: { titleKey: 'parts.workflow.fork.step2Consumable', descKey: 'parts.workflow.fork.step2ConsumableDesc' },
     Tool: { titleKey: 'parts.workflow.fork.step2Tool', descKey: 'parts.workflow.fork.step2ToolDesc' },
+    Service: { titleKey: 'parts.workflow.fork.step2Service', descKey: 'parts.workflow.fork.step2ServiceDesc' },
   };
 
   /** Every inventory class card, enabled only when viable for the Step-1 pick. */
