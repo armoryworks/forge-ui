@@ -9,6 +9,6 @@ export interface OperationTimeAnalysis {
   actualTotalMinutes: number;
   setupVarianceMinutes: number;
   runVarianceMinutes: number;
-  efficiencyPercent: number;
+  efficiencyPercent: number | null;
   entryCount: number;
 }

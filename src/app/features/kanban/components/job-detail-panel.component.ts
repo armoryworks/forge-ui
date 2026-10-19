@@ -1,7 +1,8 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, signal, viewChild } from '@angular/core';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Observable } from 'rxjs';
 
 import { TimeTrackingService } from '../../time-tracking/services/time-tracking.service';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
@@ -16,6 +17,7 @@ import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { AuthService } from '../../../shared/services/auth.service';
 import { BILLING_STAGE_ROLES } from '../../../shared/models/billing-stage-roles.const';
 import { isBillingStage } from '../../../shared/utils/billing-stage';
+import { downloadBlob } from '../../../shared/utils/download-blob';
 import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -51,7 +53,7 @@ import { JOB_EDIT_ROLES } from '../job-roles';
 @Component({
   selector: 'app-job-detail-panel',
   standalone: true,
-  imports: [DateOnlyPipe, DatePipe, DecimalPipe, ReactiveFormsModule, TranslatePipe, AvatarComponent, PriorityIndicatorComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, JobCostTabComponent, OperationTimeTabComponent, MatMenuModule, MatTooltipModule, EntityLinkComponent, EntityPickerComponent, CapDirective, JobGatesSectionComponent, DetailLoadErrorComponent],
+  imports: [DateOnlyPipe, DatePipe, DecimalPipe, NgTemplateOutlet, ReactiveFormsModule, TranslatePipe, AvatarComponent, PriorityIndicatorComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, JobCostTabComponent, OperationTimeTabComponent, MatMenuModule, MatTooltipModule, EntityLinkComponent, EntityPickerComponent, CapDirective, JobGatesSectionComponent, DetailLoadErrorComponent],
   templateUrl: './job-detail-panel.component.html',
   styleUrl: './job-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -307,10 +309,17 @@ export class JobDetailPanelComponent implements OnInit {
   }
 
   protected deleteLink(link: JobLink): void {
-    this.kanbanService.deleteJobLink(this.jobId(), link.id).subscribe(() => {
-      this.links.update(list => list.filter(l => l.id !== link.id));
-      this.snackbar.success(this.translate.instant('kanban.linkRemoved'));
-    });
+    this.confirm('kanban.removeLinkConfirmTitle', 'kanban.removeLinkConfirmMessage', { jobNumber: link.linkedJobNumber }, 'kanban.removeLink')
+      .subscribe(confirmed => {
+        if (!confirmed) return;
+        this.kanbanService.deleteJobLink(this.jobId(), link.id).subscribe({
+          next: () => {
+            this.links.update(list => list.filter(l => l.id !== link.id));
+            this.snackbar.success(this.translate.instant('kanban.linkRemoved'));
+          },
+          error: (err: unknown) => this.snackbar.errorFrom(err, 'kanban.removeLinkFailed'),
+        });
+      });
   }
 
 
@@ -322,14 +331,36 @@ export class JobDetailPanelComponent implements OnInit {
   }
 
   protected deleteFile(file: FileAttachment): void {
-    this.kanbanService.deleteJobFile(file.id).subscribe(() => {
-      this.files.update(list => list.filter(f => f.id !== file.id));
-      this.snackbar.success(this.translate.instant('kanban.fileDeleted'));
-    });
+    this.confirm('kanban.deleteFileConfirmTitle', 'kanban.deleteFileConfirmMessage', { fileName: file.fileName }, 'kanban.deleteFile')
+      .subscribe(confirmed => {
+        if (!confirmed) return;
+        this.kanbanService.deleteJobFile(file.id).subscribe({
+          next: () => {
+            this.files.update(list => list.filter(f => f.id !== file.id));
+            this.snackbar.success(this.translate.instant('kanban.fileDeleted'));
+          },
+          error: (err: unknown) => this.snackbar.errorFrom(err, 'kanban.deleteFileFailed'),
+        });
+      });
   }
 
   protected downloadFile(file: FileAttachment): void {
-    window.open(this.kanbanService.downloadFileUrl(file.id), '_blank');
+    this.kanbanService.downloadJobFile(file.id).subscribe({
+      next: blob => downloadBlob(blob, file.fileName),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'kanban.downloadFileFailed'),
+    });
+  }
+
+  private confirm(titleKey: string, messageKey: string, params: Record<string, string>, confirmKey: string): Observable<boolean | undefined> {
+    return this.matDialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant(titleKey),
+        message: this.translate.instant(messageKey, params),
+        confirmLabel: this.translate.instant(confirmKey),
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed();
   }
 
   protected formatFileSize(bytes: number): string {
@@ -455,23 +486,21 @@ export class JobDetailPanelComponent implements OnInit {
 
   protected removePart(jp: JobPart): void {
     const isBuildPart = jp.partId === this.job()?.partId;
-    this.matDialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: {
-        title: this.translate.instant('kanban.removePartConfirmTitle'),
-        message: this.translate.instant(
-          isBuildPart ? 'kanban.removeBuildPartConfirmMessage' : 'kanban.removePartConfirmMessage',
-          { partNumber: jp.partNumber }),
-        confirmLabel: this.translate.instant('kanban.removePart'),
-        severity: 'warn',
-      } satisfies ConfirmDialogData,
-    }).afterClosed().subscribe(confirmed => {
+    this.confirm(
+      'kanban.removePartConfirmTitle',
+      isBuildPart ? 'kanban.removeBuildPartConfirmMessage' : 'kanban.removePartConfirmMessage',
+      { partNumber: jp.partNumber },
+      'kanban.removePart',
+    ).subscribe(confirmed => {
       if (!confirmed) return;
-      this.kanbanService.removeJobPart(this.jobId(), jp.id).subscribe(() => {
-        this.jobParts.update(list => list.filter(p => p.id !== jp.id));
-        this.partQtyEditControls.delete(jp.id);
-        this.snackbar.success(this.translate.instant('kanban.partRemoved'));
-        if (isBuildPart) this.refreshBuildQuantity();
+      this.kanbanService.removeJobPart(this.jobId(), jp.id).subscribe({
+        next: () => {
+          this.jobParts.update(list => list.filter(p => p.id !== jp.id));
+          this.partQtyEditControls.delete(jp.id);
+          this.snackbar.success(this.translate.instant('kanban.partRemoved'));
+          if (isBuildPart) this.refreshBuildQuantity();
+        },
+        error: (err: unknown) => this.snackbar.errorFrom(err, 'kanban.removePartFailed'),
       });
     });
   }

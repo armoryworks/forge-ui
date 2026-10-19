@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
+import { environment } from '../../../environments/environment';
 import { AuthSrcDirective } from './auth-src.directive';
 import { SILENT_HTTP_ERRORS } from '../interceptors/silent-http-errors.token';
 
@@ -37,7 +38,7 @@ describe('AuthSrcDirective', () => {
     const fixture = TestBed.createComponent(HostComponent);
     fixture.detectChanges();
 
-    const req = http.expectOne('/api/v1/files/14/download');
+    const req = http.expectOne(`${environment.apiUrl}/files/14/download`);
     expect(req.request.responseType).toBe('blob');
     expect(req.request.context.get(SILENT_HTTP_ERRORS)).toBe(true);
     req.flush(new Blob(['x'], { type: 'image/png' }));
@@ -54,7 +55,7 @@ describe('AuthSrcDirective', () => {
     const fixture = TestBed.createComponent(HostComponent);
     fixture.detectChanges();
 
-    http.expectOne('/api/v1/files/14/download').flush(new Blob(['no']), { status: 404, statusText: 'Not Found' });
+    http.expectOne(`${environment.apiUrl}/files/14/download`).flush(new Blob(['no']), { status: 404, statusText: 'Not Found' });
 
     const img = fixture.nativeElement.querySelector('img') as HTMLImageElement;
     expect(img.hasAttribute('src')).toBe(false);

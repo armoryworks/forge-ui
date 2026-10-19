@@ -16,6 +16,7 @@ import { Stage } from '../../../shared/models/stage.model';
 import { JobPart } from '../models/job-part.model';
 import { JobDetail } from '../models/job-detail.model';
 import { JobLink } from '../models/job-link.model';
+import { FileAttachment } from '../../../shared/models/file.model';
 
 class FakeLoader implements TranslateLoader {
   getTranslation(): Observable<Record<string, string>> { return of({}); }
@@ -40,6 +41,10 @@ interface PanelInternals {
   canEditJob: () => boolean;
   canRemovePart(jp: JobPart): boolean;
   removePart(jp: JobPart): void;
+  deleteLink(link: JobLink): void;
+  deleteFile(file: FileAttachment): void;
+  downloadFile(file: FileAttachment): void;
+  files: { (): FileAttachment[]; set(v: FileAttachment[]): void };
   toggleSubtaskAdd(): void;
   toggleLinkAdd(): void;
   togglePartAdd(): void;
@@ -106,6 +111,9 @@ function setup(options: { admin?: boolean; confirm?: boolean; roles?: string[] }
     getJobTimeEntries: vi.fn().mockReturnValue(of([])),
     moveJobStage: vi.fn().mockReturnValue(of(undefined)),
     removeJobPart: vi.fn().mockReturnValue(of(undefined)),
+    deleteJobLink: vi.fn().mockReturnValue(of(undefined)),
+    deleteJobFile: vi.fn().mockReturnValue(of(undefined)),
+    downloadJobFile: vi.fn(),
   };
   const snackbar = { success: vi.fn(), error: vi.fn(), errorFrom: vi.fn() };
   const timeTracking = { stopTimer: vi.fn().mockReturnValue(of({})), startTimer: vi.fn() };
@@ -620,6 +628,47 @@ describe('JobDetailPanelComponent', () => {
 
     expect(dialog.open).not.toHaveBeenCalled();
     expect(kanban.unarchiveJob).not.toHaveBeenCalled();
+  });
+
+  describe('link and file deletes', () => {
+    it('removes a link only after the user confirms', () => {
+      const declined = setup({ confirm: false });
+      declined.component.links.set([jobLink()]);
+      declined.component.deleteLink(jobLink());
+      expect(declined.kanban.deleteJobLink).not.toHaveBeenCalled();
+
+      const confirmed = setup({ confirm: true });
+      confirmed.component.links.set([jobLink()]);
+      confirmed.component.deleteLink(jobLink());
+      expect(confirmed.kanban.deleteJobLink).toHaveBeenCalledWith(JOB_ID, 3);
+      expect(confirmed.component.links()).toEqual([]);
+    });
+
+    it('says so when a confirmed file delete fails', () => {
+      const { component, kanban, snackbar } = setup({ confirm: true });
+      const file = { id: 8, fileName: 'drawing.pdf' } as FileAttachment;
+      component.files.set([file]);
+      kanban.deleteJobFile.mockReturnValue(throwError(() => new Error('boom')));
+
+      component.deleteFile(file);
+
+      expect(snackbar.errorFrom).toHaveBeenCalledWith(expect.anything(), 'kanban.deleteFileFailed');
+      expect(component.files()).toEqual([file]);
+    });
+
+    it('downloads a file through the authenticated API instead of opening a bare URL', () => {
+      const { component, kanban } = setup();
+      const open = vi.spyOn(window, 'open').mockReturnValue(null);
+      vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:file');
+      vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+      kanban.downloadJobFile.mockReturnValue(of(new Blob(['x'])));
+
+      component.downloadFile({ id: 8, fileName: 'drawing.pdf' } as FileAttachment);
+
+      expect(kanban.downloadJobFile).toHaveBeenCalledWith(8);
+      expect(open).not.toHaveBeenCalled();
+      vi.restoreAllMocks();
+    });
   });
 });
 

@@ -326,7 +326,7 @@
                 </div>
                 <span class="part-item__qty">
                   x
-                  <app-input class="part-item__qty-input" type="number" [min]="0.01" step="0.01"
+                  <app-input class="part-item__qty-input" type="number" [min]="0.0001" step="any"
                     [label]="'kanban.addPartQty' | translate" [formControl]="partQtyEditControl(jp)"
                     [isReadonly]="partQtyReadonly(jp)"
                     (focusout)="savePartQty(jp)" (keydown.enter)="commitPartQtyOnEnter($event)"
@@ -353,7 +353,7 @@
               secondaryDisplayField="name"
               [formControl]="partPickerControl"
               (selected)="onPartPicked($event)" />
-            <app-input class="part-add__qty" type="number" [min]="0.01" step="0.01"
+            <app-input class="part-add__qty" type="number" [min]="0.0001" step="any"
               [label]="'kanban.addPartQty' | translate" [formControl]="partQtyControl"
               [placeholder]="newPartTakesLineQuantity() ? ('kanban.addPartQtyFromLine' | translate) : ''"
               (keydown.enter)="addPart()" data-testid="job-part-add-qty" />
@@ -426,18 +426,30 @@
               <app-priority-indicator [priority]="j.priority" [showLabel]="true" />
             </span>
           </div>
-          <div class="jd-detail-row jd-detail-row--clickable" [matMenuTriggerFor]="assignMenu">
-            <span class="jd-detail-label">{{ 'kanban.assignee' | translate }}</span>
-            <span class="jd-detail-value">
-              @if (j.assigneeInitials) {
-                <app-avatar [initials]="j.assigneeInitials" [color]="j.assigneeColor ?? '#0d9488'" size="sm" />
-                {{ j.assigneeName ?? j.assigneeInitials }}
-              } @else {
-                <span class="meta-row__empty">{{ 'kanban.unassigned' | translate }}</span>
-              }
-              <span class="material-icons-outlined meta-row__edit-icon">expand_more</span>
-            </span>
-          </div>
+          <ng-template #assigneeValue>
+            @if (j.assigneeInitials) {
+              <app-avatar [initials]="j.assigneeInitials" [color]="j.assigneeColor ?? '#0d9488'" size="sm" />
+              {{ j.assigneeName ?? j.assigneeInitials }}
+            } @else {
+              <span class="meta-row__empty">{{ 'kanban.unassigned' | translate }}</span>
+            }
+          </ng-template>
+          @if (canEditJob()) {
+            <div class="jd-detail-row jd-detail-row--clickable" [matMenuTriggerFor]="assignMenu" data-testid="job-assignee-menu">
+              <span class="jd-detail-label">{{ 'kanban.assignee' | translate }}</span>
+              <span class="jd-detail-value">
+                <ng-container [ngTemplateOutlet]="assigneeValue" />
+                <span class="material-icons-outlined meta-row__edit-icon">expand_more</span>
+              </span>
+            </div>
+          } @else {
+            <div class="jd-detail-row" data-testid="job-assignee">
+              <span class="jd-detail-label">{{ 'kanban.assignee' | translate }}</span>
+              <span class="jd-detail-value">
+                <ng-container [ngTemplateOutlet]="assigneeValue" />
+              </span>
+            </div>
+          }
           <mat-menu #assignMenu="matMenu">
             <button mat-menu-item (click)="assignJob(null)">
               <span class="material-icons-outlined">person_off</span>
@@ -492,7 +504,7 @@
           }
           @if (canEditQuantity()) {
             <div class="jd-detail-row">
-              <app-input class="jd-detail-qty" type="number" [min]="0.01" step="0.01"
+              <app-input class="jd-detail-qty" type="number" [min]="0.0001" step="any"
                 [label]="'kanban.quantityToMake' | translate" [formControl]="quantityControl"
                 (focusout)="saveQuantity()" (keydown.enter)="commitQuantityOnEnter($event)"
                 data-testid="job-detail-quantity" />
