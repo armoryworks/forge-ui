@@ -18,6 +18,8 @@ interface PanelInternals {
   changed: { subscribe(fn: () => void): unknown };
   closed: { subscribe(fn: () => void): unknown };
   duplicateQuote(): void;
+  reviseQuote(): void;
+  canRevise(status: string): boolean;
   close(): void;
   sendQuote(): void;
   markSent(): void;
@@ -36,6 +38,7 @@ describe('QuoteDetailPanelComponent', () => {
     sendQuote: ReturnType<typeof vi.fn>;
     getQuotePdf: ReturnType<typeof vi.fn>;
     duplicateQuote: ReturnType<typeof vi.fn>;
+    reviseQuote: ReturnType<typeof vi.fn>;
     acceptQuote: ReturnType<typeof vi.fn>;
     convertToOrder: ReturnType<typeof vi.fn>;
   };
@@ -54,6 +57,7 @@ describe('QuoteDetailPanelComponent', () => {
       sendQuote: vi.fn(() => of(undefined)),
       getQuotePdf: vi.fn(() => of(new Blob(['%PDF'], { type: 'application/pdf' }))),
       duplicateQuote: vi.fn(() => of(copy)),
+      reviseQuote: vi.fn(() => of({ ...copy, quoteNumber: 'Q-0012-R1' })),
       acceptQuote: vi.fn(() => of(undefined)),
       convertToOrder: vi.fn(() => of({ id: 55, orderNumber: 'SO-0055' })),
     };
@@ -146,6 +150,24 @@ describe('QuoteDetailPanelComponent', () => {
 
     expect(changed).toHaveBeenCalledTimes(1);
     expect(closed).toHaveBeenCalledTimes(1);
+  });
+
+  it('offers Revise only while the quote is out with the customer', () => {
+    expect(panel.canRevise('Sent')).toBe(true);
+    expect(panel.canRevise('Declined')).toBe(true);
+    expect(panel.canRevise('Expired')).toBe(true);
+    expect(panel.canRevise('Draft')).toBe(false);
+    expect(panel.canRevise('Accepted')).toBe(false);
+    expect(panel.canRevise('Superseded')).toBe(false);
+  });
+
+  it('opens the revision in place through the revise call', () => {
+    panel.reviseQuote();
+
+    expect(quoteService.reviseQuote).toHaveBeenCalledWith(12);
+    expect(quoteService.duplicateQuote).not.toHaveBeenCalled();
+    expect(panel.quote()?.quoteNumber).toBe('Q-0012-R1');
+    expect(snackbar.success).toHaveBeenCalled();
   });
 
   it('asks for confirmation before accepting and stays open on the refreshed quote', () => {

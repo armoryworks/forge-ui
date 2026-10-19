@@ -6048,7 +6048,10 @@
   },
   "quoteCopy": {
     "duplicate": "Duplicar",
-    "duplicated": "Se creó {{number}} como copia de {{source}}"
+    "duplicated": "Se creó {{number}} como copia de {{source}}",
+    "revise": "Revisar",
+    "revised": "Se creó {{number}} como la siguiente revisión de {{source}}",
+    "reviseHint": "Inicia una nueva revisión; esta cotización queda reemplazada y ya no se puede aceptar"
   },
   "quotes": {
     "quoteNumberLabel": "Número de cotización",
@@ -6092,6 +6095,7 @@
     "statusDeclined": "Rechazada",
     "statusExpired": "Vencida",
     "statusConvertedToOrder": "Convertida a Orden",
+    "statusSuperseded": "Reemplazada",
     "quoteSent": "Cotización enviada.",
     "quoteAccepted": "Cotización aceptada.",
     "rejectQuoteTitle": "¿Rechazar Cotización?",

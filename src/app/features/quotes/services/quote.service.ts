@@ -74,6 +74,14 @@ export class QuoteService {
     return this.http.post<QuoteDetail>(`${this.base}/${id}/duplicate`, {});
   }
 
+  /**
+   * Start the next revision of a Sent, Declined or Expired quote. The server
+   * creates a Draft numbered after it and marks the source Superseded.
+   */
+  reviseQuote(id: number): Observable<QuoteDetail> {
+    return this.http.post<QuoteDetail>(`${this.base}/${id}/revise`, {});
+  }
+
   /** Append a line to a draft quote. Returns the refreshed quote detail. */
   addQuoteLine(id: number, line: QuoteLineInput): Observable<QuoteDetail> {
     return this.http.post<QuoteDetail>(`${this.base}/${id}/lines`, line);

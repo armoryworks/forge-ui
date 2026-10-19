@@ -6055,7 +6055,10 @@
   },
   "quoteCopy": {
     "duplicate": "Duplicate",
-    "duplicated": "Created {{number}} as a copy of {{source}}"
+    "duplicated": "Created {{number}} as a copy of {{source}}",
+    "revise": "Revise",
+    "revised": "Created {{number}} as the next revision of {{source}}",
+    "reviseHint": "Start a new revision; this quote becomes superseded and can no longer be accepted"
   },
   "quotes": {
     "quoteNumberLabel": "Quote Number",
@@ -6099,6 +6102,7 @@
     "statusDeclined": "Declined",
     "statusExpired": "Expired",
     "statusConvertedToOrder": "Converted to Order",
+    "statusSuperseded": "Superseded",
     "quoteSent": "Quote sent.",
     "quoteAccepted": "Quote accepted.",
     "rejectQuoteTitle": "Decline Quote?",
