@@ -63,6 +63,11 @@
   flex-shrink: 0;
 }
 
+.sf-header__lang {
+  display: inline-flex;
+  background: var(--surface);
+}
+
 .sf-header__control-btn {
   display: flex;
   align-items: center;

@@ -1,11 +1,13 @@
-import { signal } from '@angular/core';
+import { NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { NEVER, of, Subject, throwError } from 'rxjs';
-import { TranslateService } from '@ngx-translate/core';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
+import { provideTranslateService, TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ShopFloorDisplayComponent } from './shop-floor-display.component';
 import { KioskSessionService } from '../../shared/services/kiosk-session.service';
@@ -19,6 +21,7 @@ import { LoadingService } from '../../shared/services/loading.service';
 import { PurchaseOrderService } from '../purchase-orders/services/purchase-order.service';
 import { InventoryService } from '../inventory/services/inventory.service';
 import { ShipmentService } from '../shipments/services/shipment.service';
+import { LanguageToggleComponent } from '../../shared/components/language-toggle/language-toggle.component';
 
 /**
  * SECURITY-CRITICAL. The shop-floor kiosk is a shared terminal that wipes any
@@ -951,5 +954,60 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     expect(c.fontSize()).toBe(28);
     const host = fixture.nativeElement as HTMLElement;
     expect(host.style.getPropertyValue('--sf-zoom')).toBe(`${28 / 12}`);
+  });
+});
+
+describe('ShopFloorDisplayComponent — header', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [ShopFloorDisplayComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideTranslateService({ lang: 'en' }),
+        { provide: AuthService, useValue: { clearAuth: vi.fn(), isAuthenticated: () => true } },
+        { provide: ActivatedRoute, useValue: { snapshot: { data: { preview: true } } } },
+        { provide: KioskSessionService, useValue: { isTrainingMode: () => true } },
+        {
+          provide: ScannerService,
+          useValue: {
+            setContext: vi.fn(), restart: vi.fn(), stop: vi.fn(), clearLastScan: vi.fn(), enable: vi.fn(),
+            disable: vi.fn(), lastScan: () => null,
+          },
+        },
+        { provide: ShopFloorService, useValue: {} },
+        { provide: EventsService, useValue: {} },
+        {
+          provide: ClockEventTypeService,
+          useValue: {
+            load: vi.fn(), isWorking: () => false, isOnBreakOrLunch: () => false, isClockedOut: () => true,
+            isActive: () => false, definitions: () => [], getAvailableActions: () => [],
+            getLabel: (code: string) => code, getShortLabel: (code: string) => code,
+          },
+        },
+        { provide: LoadingService, useValue: {} },
+        { provide: PurchaseOrderService, useValue: {} },
+        { provide: InventoryService, useValue: {} },
+        { provide: ShipmentService, useValue: {} },
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: MatDialog, useValue: { open: vi.fn() } },
+      ],
+    });
+    TestBed.overrideComponent(ShopFloorDisplayComponent, {
+      set: {
+        imports: [DatePipe, NgTemplateOutlet, TranslatePipe, ReactiveFormsModule, LanguageToggleComponent],
+        schemas: [NO_ERRORS_SCHEMA],
+      },
+    });
+  });
+
+  it('offers the language switch in the kiosk header', () => {
+    const fixture = TestBed.createComponent(ShopFloorDisplayComponent);
+    fixture.detectChanges();
+
+    const toggle = (fixture.nativeElement as HTMLElement).querySelector('[data-testid="sf-language-toggle"]');
+    expect(toggle).not.toBeNull();
+    expect(toggle!.querySelector('[data-testid="language-toggle-es"]')).not.toBeNull();
+    fixture.destroy();
   });
 });
