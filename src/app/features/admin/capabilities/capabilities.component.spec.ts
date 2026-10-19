@@ -67,6 +67,7 @@ describe('CapabilitiesComponent', () => {
             capabilities: signal([
               entry('CAP-ACCT-FULLGL', 'ACCT', 'Built-in full general ledger'),
               entry('CAP-O2C-SO', 'O2C', 'Sales orders'),
+              { ...entry('CAP-QC-COA', 'O2C', 'Certificate of analysis (lot)'), enabled: false, isAvailable: false },
             ]),
             load: () => of(null),
           },
@@ -105,6 +106,15 @@ describe('CapabilitiesComponent', () => {
     const codes = Array.from(el.querySelectorAll('[data-testid="capability-area-code"]')).map((n) => n.textContent?.trim());
 
     expect(codes).toEqual(['ACCT', 'O2C']);
+  });
+
+  it('disables the toggle of a capability that is not built yet', () => {
+    const el = render();
+    const toggleButton = (code: string) =>
+      el.querySelector<HTMLButtonElement>(`[data-cap-code="${code}"] [data-testid="capability-toggle"] button`);
+
+    expect(toggleButton('CAP-QC-COA')!.disabled).toBe(true);
+    expect(toggleButton('CAP-O2C-SO')!.disabled).toBe(false);
   });
 
   it('links a number search to the Numbering settings, highlighted', () => {
