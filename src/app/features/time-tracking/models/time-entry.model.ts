@@ -12,6 +12,7 @@ export interface TimeEntry {
   timerStop: Date | null;
   isManual: boolean;
   isLocked: boolean;
+  isBillable?: boolean;
   createdAt: Date;
   operationId?: number | null;
   jobOperationId?: number | null;

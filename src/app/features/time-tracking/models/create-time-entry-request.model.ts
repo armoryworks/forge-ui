@@ -4,4 +4,5 @@ export interface CreateTimeEntryRequest {
   durationMinutes: number;
   category?: string;
   notes?: string;
+  isBillable?: boolean;
 }

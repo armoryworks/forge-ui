@@ -9,6 +9,7 @@ import { DialogComponent } from '../../shared/components/dialog/dialog.component
 import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { TextareaComponent } from '../../shared/components/textarea/textarea.component';
+import { ToggleComponent } from '../../shared/components/toggle/toggle.component';
 import { DatepickerComponent } from '../../shared/components/datepicker/datepicker.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
@@ -27,6 +28,7 @@ import { SnackbarService } from '../../shared/services/snackbar.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { RunningTimersService } from '../../shared/services/running-timers.service';
 import { AuthService } from '../../shared/services/auth.service';
+import { CapabilityService } from '../../shared/services/capability.service';
 import { RunningTimersComponent } from '../../shared/components/running-timers/running-timers.component';
 import { elapsedMs } from '../../shared/utils/elapsed-ms';
 import { secondTicker } from '../../shared/utils/second-ticker';
@@ -41,6 +43,7 @@ import { secondTicker } from '../../shared/utils/second-ticker';
     InputComponent,
     SelectComponent,
     TextareaComponent,
+    ToggleComponent,
     DatepickerComponent,
     DataTableComponent,
     ColumnCellDirective,
@@ -66,6 +69,9 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
   private readonly draftResume = inject(DraftResumeService);
   private readonly runningTimers = inject(RunningTimersService);
   private readonly auth = inject(AuthService);
+  private readonly capabilities = inject(CapabilityService);
+
+  protected readonly billableEnabled = computed(() => this.capabilities.isEnabled('CAP-PS-TIME-BILLABLE'));
 
   protected readonly loading = signal(false);
   protected readonly entries = signal<TimeEntry[]>([]);
@@ -97,6 +103,7 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
     minutes: new FormControl(0, [Validators.required, Validators.min(0), Validators.max(59)]),
     category: new FormControl(''),
     notes: new FormControl(''),
+    isBillable: new FormControl(true, { nonNullable: true }),
   });
   protected readonly entryViolations = FormValidationService.getViolations(this.entryForm, {
     date: 'Date',
@@ -211,6 +218,7 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
       minutes: 0,
       category: '',
       notes: '',
+      isBillable: true,
     });
     this.showDialog.set(true);
   }
@@ -230,6 +238,7 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
       durationMinutes: duration,
       category: form.category || undefined,
       notes: form.notes || undefined,
+      isBillable: this.billableEnabled() ? form.isBillable : undefined,
     }).subscribe({
       next: () => {
         this.saving.set(false);

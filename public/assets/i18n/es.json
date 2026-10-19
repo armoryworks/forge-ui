@@ -3234,7 +3234,9 @@
     "runningStep": "Paso {{step}}",
     "runningJustStarted": "recién iniciado",
     "runningStop": "Detener",
-    "runningStopAria": "Detener el temporizador de {{job}}"
+    "runningStopAria": "Detener el temporizador de {{job}}",
+    "billable": "Facturable",
+    "nonBillable": "No facturable"
   },
   "assets": {
     "title": "Activos",
@@ -8225,6 +8227,26 @@
       "chartLabel": "Cronograma de operaciones programadas por centro de trabajo a lo largo del tiempo",
       "empty": "No hay operaciones programadas para mostrar.",
       "noWorkCenter": "Sin asignar"
+    },
+    "assignments": {
+      "title": "Quién trabaja en cada turno",
+      "assign": "Asignar a turno",
+      "assignTitle": "Asignar a un turno",
+      "person": "Persona",
+      "shift": "Turno",
+      "from": "Desde",
+      "to": "Hasta",
+      "openEnded": "Sin fecha de fin",
+      "differential": "Diferencial de turno",
+      "differentialInput": "Diferencial de turno ($/hora)",
+      "perHour": "${{amount}}/h",
+      "notes": "Notas",
+      "empty": "Todavía no hay nadie asignado a un turno.",
+      "saved": "Asignación de turno guardada",
+      "remove": "Quitar asignación",
+      "removeTitle": "Quitar asignación de turno",
+      "removeMessage": "¿Quitar a {{name}} del turno {{shift}}?",
+      "removed": "Asignación de turno quitada"
     }
   },
   "routingTools": {

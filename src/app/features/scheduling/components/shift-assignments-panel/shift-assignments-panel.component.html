@@ -1,0 +1,80 @@
+<section class="shift-assignments" data-testid="shift-assignments" [appLoadingBlock]="loading()">
+  <app-toolbar>
+    <h3 class="shift-assignments__title">{{ 'scheduling.assignments.title' | translate }}</h3>
+    <span appSpacer></span>
+    @if (canEdit()) {
+      <button class="action-btn action-btn--create" data-testid="shift-assign-btn" (click)="openAssign()">
+        <span class="material-icons-outlined">person_add</span> {{ 'scheduling.assignments.assign' | translate }}
+      </button>
+    }
+  </app-toolbar>
+
+  @if (assignments().length === 0 && !loading()) {
+    <app-empty-state icon="badge" [message]="'scheduling.assignments.empty' | translate" />
+  } @else {
+    <app-data-table
+      tableId="scheduling-shift-assignments"
+      [columns]="columns()"
+      [data]="assignments()"
+      emptyIcon="badge"
+      [emptyMessage]="'scheduling.assignments.empty' | translate">
+      <ng-template appColumnCell="effectiveFrom" let-row>{{ formatDate(row.effectiveFrom) }}</ng-template>
+      <ng-template appColumnCell="effectiveTo" let-row>
+        @if (row.effectiveTo) {
+          {{ formatDate(row.effectiveTo) }}
+        } @else {
+          <span class="text-muted">{{ 'scheduling.assignments.openEnded' | translate }}</span>
+        }
+      </ng-template>
+      <ng-template appColumnCell="shiftDifferentialRate" let-row>
+        @if (row.shiftDifferentialRate !== null) {
+          {{ 'scheduling.assignments.perHour' | translate:{ amount: row.shiftDifferentialRate.toFixed(2) } }}
+        } @else {
+          <span class="text-muted">—</span>
+        }
+      </ng-template>
+      <ng-template appColumnCell="notes" let-row>
+        <span class="text-muted">{{ row.notes ?? '' }}</span>
+      </ng-template>
+      <ng-template appColumnCell="actions" let-row>
+        <button class="icon-btn icon-btn--danger" data-testid="shift-assignment-remove"
+          [attr.aria-label]="'scheduling.assignments.remove' | translate" (click)="remove(row)">
+          <span class="material-icons-outlined">delete</span>
+        </button>
+      </ng-template>
+    </app-data-table>
+  }
+</section>
+
+@if (showDialog()) {
+  <app-dialog [title]="'scheduling.assignments.assignTitle' | translate" width="520px" (closed)="closeDialog()">
+    <div [formGroup]="form">
+      <div class="dialog-row">
+        <app-select data-testid="shift-assignment-user" [label]="'scheduling.assignments.person' | translate"
+          formControlName="userId" [options]="userOptions()" [required]="true" />
+        <app-select data-testid="shift-assignment-shift" [label]="'scheduling.assignments.shift' | translate"
+          formControlName="shiftId" [options]="shiftOptions()" [required]="true" />
+      </div>
+      <div class="dialog-row">
+        <app-datepicker data-testid="shift-assignment-from" [label]="'scheduling.assignments.from' | translate"
+          formControlName="effectiveFrom" [required]="true" />
+        <app-datepicker data-testid="shift-assignment-to" [label]="'scheduling.assignments.to' | translate"
+          formControlName="effectiveTo" />
+      </div>
+      <app-input data-testid="shift-assignment-differential" [label]="'scheduling.assignments.differentialInput' | translate"
+        type="number" formControlName="shiftDifferentialRate" />
+      <app-textarea data-testid="shift-assignment-notes" [label]="'scheduling.assignments.notes' | translate"
+        formControlName="notes" [rows]="2" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button data-testid="shift-assignment-save" class="action-btn action-btn--primary"
+          [disabled]="form.invalid || saving()" (click)="save()">
+          <span class="material-icons-outlined">save</span> {{ 'scheduling.assignments.assign' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}

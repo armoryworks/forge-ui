@@ -25,6 +25,8 @@ import { ViewMode, DEFAULT_VIEW_MODE } from '../../shared/models/view-mode.model
 import { SchedulingService } from './services/scheduling.service';
 import { WorkCenterDialogComponent } from './components/work-center-dialog/work-center-dialog.component';
 import { SchedulingTimelineComponent } from './components/scheduling-timeline/scheduling-timeline.component';
+import { ShiftAssignmentsPanelComponent } from './components/shift-assignments-panel/shift-assignments-panel.component';
+import { CapabilityService } from '../../shared/services/capability.service';
 import { toDateOnly } from '../../shared/utils/date.utils';
 import {
   ScheduleRun,
@@ -58,6 +60,7 @@ const VALID_TABS = new Set<SchedulingTab>(['gantt', 'dispatch', 'work-centers', 
     TranslatePipe,
     ViewModeToggleComponent,
     SchedulingTimelineComponent,
+    ShiftAssignmentsPanelComponent,
   ],
   templateUrl: './scheduling.component.html',
   styleUrl: './scheduling.component.scss',
@@ -71,6 +74,9 @@ export class SchedulingComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly dialog = inject(MatDialog);
   private readonly draftResume = inject(DraftResumeService);
+  private readonly capabilities = inject(CapabilityService);
+
+  protected readonly shiftAssignmentsEnabled = computed(() => this.capabilities.isEnabled('CAP-HR-SHIFTS'));
 
   // Tab state from URL
   protected readonly activeTab = toSignal(

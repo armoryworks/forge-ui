@@ -95,4 +95,8 @@ export class SchedulingService {
   deleteShift(id: number) {
     return this.http.delete(`${this.baseUrl}/shifts/${id}`);
   }
+
+  getUsers() {
+    return this.http.get<{ id: number; name: string }[]>(`${this.baseUrl}/users`);
+  }
 }

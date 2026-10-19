@@ -134,6 +134,9 @@
           </ng-template>
         </app-data-table>
       }
+      @if (shiftAssignmentsEnabled()) {
+        <app-shift-assignments-panel [shifts]="shifts()" />
+      }
     </div>
   }
 
