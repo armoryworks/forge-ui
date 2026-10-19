@@ -11311,7 +11311,9 @@
       "running": "En curso: {{jobNumber}} · {{elapsed}}",
       "stop": "Detener",
       "stopped": "Temporizador detenido en {{jobNumber}}",
-      "switchConfirm": "Temporizador en curso en {{current}}. ¿Cambiar a {{next}}?"
+      "switchConfirm": "Temporizador en curso en {{current}}. ¿Cambiar a {{next}}?",
+      "showMore": "Mostrar {{count}} temporizadores más en curso",
+      "showFewer": "Mostrar menos temporizadores"
     },
     "operations": {
       "title": "Operaciones",

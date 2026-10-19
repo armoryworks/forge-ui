@@ -11311,7 +11311,9 @@
       "running": "Running: {{jobNumber}} · {{elapsed}}",
       "stop": "Stop",
       "stopped": "Timer stopped on {{jobNumber}}",
-      "switchConfirm": "Timer running on {{current}}. Switch to {{next}}?"
+      "switchConfirm": "Timer running on {{current}}. Switch to {{next}}?",
+      "showMore": "Show {{count}} more running timers",
+      "showFewer": "Show fewer timers"
     },
     "operations": {
       "title": "Operations",

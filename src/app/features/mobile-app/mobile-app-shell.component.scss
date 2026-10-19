@@ -57,11 +57,15 @@ $tab-min-target: 56px;
     flex-direction: column;
   }
 
+  &__bottom {
+    flex-shrink: 0;
+  }
+
   &__timer {
     display: flex;
     align-items: center;
     gap: $sp-md;
-    padding: $sp-sm $sp-lg;
+    padding: $sp-xs $sp-lg;
     background: var(--surface);
     border-top: $border-width-accent solid var(--primary);
   }
@@ -85,6 +89,21 @@ $tab-min-target: 56px;
     font-size: $font-size-md;
     font-weight: 600;
     color: var(--text);
+  }
+
+  &__timer-more {
+    @include flex-center;
+    flex-shrink: 0;
+    min-width: $tap-target-min;
+    min-height: $tap-target-min;
+    padding: 0 $sp-sm;
+    background: var(--bg);
+    border: $border-width-thin solid var(--border);
+    color: var(--text);
+    font-family: $font-family-mono;
+    font-size: $font-size-md;
+    font-weight: 700;
+    cursor: pointer;
   }
 
   &__timer-stop {

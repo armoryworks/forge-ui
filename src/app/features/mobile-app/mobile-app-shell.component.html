@@ -18,56 +18,81 @@
     <router-outlet />
   </main>
 
-  @if (timer.active()) {
-    <div class="app-shell__timer" data-testid="mobile-app-timer-strip">
-      <span class="material-icons-outlined app-shell__timer-icon" aria-hidden="true">timer</span>
-      <span class="app-shell__timer-text">
-        {{ 'mobileApp.timer.running' | translate: { jobNumber: runningLabel(), elapsed: elapsed() } }}
-      </span>
-      <button
-        type="button"
-        class="app-shell__timer-stop"
-        [disabled]="stopping()"
-        data-testid="mobile-app-timer-stop"
-        (click)="stopTimer()"
-      >
-        <span class="material-icons-outlined" aria-hidden="true">stop</span>
-        {{ 'mobileApp.timer.stop' | translate }}
-      </button>
-    </div>
-  }
-
-  @for (running of timer.operationTimers(); track running.id) {
-    <div class="app-shell__timer app-shell__timer--operation" data-testid="mobile-app-operation-timer">
-      <span class="material-icons-outlined app-shell__timer-icon" aria-hidden="true">precision_manufacturing</span>
-      <span class="app-shell__timer-text">{{ operationLabel(running) }} {{ operationElapsed(running) }}</span>
-      <button
-        type="button"
-        class="app-shell__timer-stop"
-        [disabled]="stoppingOperation() !== null"
-        [attr.aria-label]="'mobileApp.operations.stopNamed' | translate: { name: operationLabel(running) }"
-        [attr.data-testid]="'mobile-app-operation-timer-stop-' + running.id"
-        (click)="stopOperation(running)"
-      >
-        <span class="material-icons-outlined" aria-hidden="true">stop</span>
-        {{ 'mobileApp.timer.stop' | translate }}
-      </button>
-    </div>
-  }
-
-  @if (tabs().length > 0) {
-    <nav class="app-shell__nav" [attr.aria-label]="'mobileApp.navLabel' | translate" data-testid="mobile-app-nav">
-      @for (tab of tabs(); track tab.path) {
-        <a
-          class="app-shell__tab"
-          [routerLink]="tab.path"
-          routerLinkActive="app-shell__tab--active"
-          [attr.data-testid]="'mobile-app-tab-' + tab.icon"
+  <div class="app-shell__bottom" appBottomChromeOffset>
+    @if (timer.active()) {
+      <div class="app-shell__timer" data-testid="mobile-app-timer-strip">
+        <span class="material-icons-outlined app-shell__timer-icon" aria-hidden="true">timer</span>
+        <span class="app-shell__timer-text">
+          {{ 'mobileApp.timer.running' | translate: { jobNumber: runningLabel(), elapsed: elapsed() } }}
+        </span>
+        <ng-container [ngTemplateOutlet]="moreTimers" />
+        <button
+          type="button"
+          class="app-shell__timer-stop"
+          [disabled]="stopping()"
+          data-testid="mobile-app-timer-stop"
+          (click)="stopTimer()"
         >
-          <span class="material-icons-outlined app-shell__tab-icon" aria-hidden="true">{{ tab.icon }}</span>
-          <span class="app-shell__tab-label">{{ tab.labelKey | translate }}</span>
-        </a>
-      }
-    </nav>
-  }
+          <span class="material-icons-outlined" aria-hidden="true">stop</span>
+          {{ 'mobileApp.timer.stop' | translate }}
+        </button>
+      </div>
+    }
+
+    @for (running of visibleOperationTimers(); track running.id; let first = $first) {
+      <div class="app-shell__timer app-shell__timer--operation" data-testid="mobile-app-operation-timer">
+        <span class="material-icons-outlined app-shell__timer-icon" aria-hidden="true">precision_manufacturing</span>
+        <span class="app-shell__timer-text">{{ operationLabel(running) }} {{ operationElapsed(running) }}</span>
+        @if (first && !timer.active()) {
+          <ng-container [ngTemplateOutlet]="moreTimers" />
+        }
+        <button
+          type="button"
+          class="app-shell__timer-stop"
+          [disabled]="stoppingOperation() !== null"
+          [attr.aria-label]="'mobileApp.operations.stopNamed' | translate: { name: operationLabel(running) }"
+          [attr.data-testid]="'mobile-app-operation-timer-stop-' + running.id"
+          (click)="stopOperation(running)"
+        >
+          <span class="material-icons-outlined" aria-hidden="true">stop</span>
+          {{ 'mobileApp.timer.stop' | translate }}
+        </button>
+      </div>
+    }
+
+    @if (tabs().length > 0) {
+      <nav class="app-shell__nav" [attr.aria-label]="'mobileApp.navLabel' | translate" data-testid="mobile-app-nav">
+        @for (tab of tabs(); track tab.path) {
+          <a
+            class="app-shell__tab"
+            [routerLink]="tab.path"
+            routerLinkActive="app-shell__tab--active"
+            [attr.data-testid]="'mobile-app-tab-' + tab.icon"
+          >
+            <span class="material-icons-outlined app-shell__tab-icon" aria-hidden="true">{{ tab.icon }}</span>
+            <span class="app-shell__tab-label">{{ tab.labelKey | translate }}</span>
+          </a>
+        }
+      </nav>
+    }
+  </div>
 </div>
+
+<ng-template #moreTimers>
+  @if (timerCount() > 1) {
+    <button
+      type="button"
+      class="app-shell__timer-more"
+      [attr.aria-expanded]="timersExpanded()"
+      [attr.aria-label]="(timersExpanded() ? 'mobileApp.timer.showFewer' : 'mobileApp.timer.showMore') | translate: { count: timerCount() - 1 }"
+      data-testid="mobile-app-timer-more"
+      (click)="toggleTimers()"
+    >
+      @if (timersExpanded()) {
+        <span class="material-icons-outlined" aria-hidden="true">expand_more</span>
+      } @else {
+        +{{ timerCount() - 1 }}
+      }
+    </button>
+  }
+</ng-template>

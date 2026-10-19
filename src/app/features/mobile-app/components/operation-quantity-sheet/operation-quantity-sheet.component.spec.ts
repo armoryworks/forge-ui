@@ -122,4 +122,18 @@ describe('OperationQuantitySheetComponent', () => {
 
     expect(recorded).toEqual([{ completed: 13, scrap: 1, rework: 0, reason: null, complete: false }]);
   });
+
+  it('scrolls its action row into view when it opens', () => {
+    const scrolled = vi.fn();
+    const original = HTMLElement.prototype.scrollIntoView;
+    HTMLElement.prototype.scrollIntoView = scrolled;
+    try {
+      const el = render(0, 0, true);
+      TestBed.tick();
+      expect(scrolled).toHaveBeenCalledWith({ block: 'nearest' });
+      expect(scrolled.mock.contexts[0]).toBe(el.querySelector('[data-testid="operation-qty-cancel"]'));
+    } finally {
+      HTMLElement.prototype.scrollIntoView = original;
+    }
+  });
 });

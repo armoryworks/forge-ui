@@ -78,7 +78,7 @@
   >
     {{ 'mobileApp.operations.recordCount' | translate: { count: goodCount() } }}
   </button>
-  <button type="button" class="qty-sheet__dismiss" data-testid="operation-qty-cancel" (click)="cancelled.emit()">
+  <button #lastAction type="button" class="qty-sheet__dismiss" data-testid="operation-qty-cancel" (click)="cancelled.emit()">
     {{ 'common.cancel' | translate }}
   </button>
 </div>
