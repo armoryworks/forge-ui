@@ -47,8 +47,8 @@ export class UserIntegrationService {
     );
   }
 
-  testConnection(id: number): Observable<{ success: boolean }> {
-    return this.http.post<{ success: boolean }>(`${this.baseUrl}/${id}/test`, {});
+  testConnection(id: number): Observable<{ success: boolean; contacted: boolean }> {
+    return this.http.post<{ success: boolean; contacted: boolean }>(`${this.baseUrl}/${id}/test`, {});
   }
 
   updateCredentials(id: number, credentialsJson: string): Observable<void> {

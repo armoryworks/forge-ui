@@ -25,7 +25,7 @@ export interface IntegrationStatus {
   icon: string;
   isConfigured: boolean;
   fields: IntegrationSettingField[];
-  category: 'service' | 'shipping' | 'accounting';
+  category: 'service' | 'shipping' | 'accounting' | 'communications';
   sandboxSteps: string[] | null;
   sandboxUrl: string | null;
   logoUrl: string | null;

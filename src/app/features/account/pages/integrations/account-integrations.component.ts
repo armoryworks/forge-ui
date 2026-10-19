@@ -52,7 +52,7 @@ export class AccountIntegrationsComponent implements OnInit {
         .filter(p => p.category === cat.category && !connectedProviderIds.has(p.providerId));
 
       return { ...cat, connected, available };
-    });
+    }).filter(group => group.connected.length > 0 || group.available.length > 0);
   });
 
   ngOnInit(): void {
@@ -76,7 +76,9 @@ export class AccountIntegrationsComponent implements OnInit {
     this.integrationService.testConnection(integration.id).subscribe({
       next: (result) => {
         this.testing.set(null);
-        if (result.success) {
+        if (result.success && !result.contacted) {
+          this.snackbar.info('Credentials saved, but Forge cannot contact this provider to check them yet');
+        } else if (result.success) {
           this.snackbar.success('Connection test passed');
         } else {
           this.snackbar.error('Connection test failed');
