@@ -12,7 +12,8 @@ import {
   Signal,
   signal,
 } from '@angular/core';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatTooltipModule, TooltipPosition } from '@angular/material/tooltip';
+import { TranslateService } from '@ngx-translate/core';
 
 import { ViolationItem } from '../../services/form-validation.service';
 
@@ -41,6 +42,28 @@ export class ValidationButtonComponent {
    */
   readonly violationItems = input<Signal<ViolationItem[]> | null>(null);
   readonly loading = input<boolean, unknown>(false, { transform: (v: unknown) => !!v });
+  /**
+   * Where the warning trigger's tooltip opens. Defaults to above; a consumer whose inline field
+   * errors sit just above the button (so the tooltip would cover them) can move it.
+   */
+  readonly tooltipPosition = input<TooltipPosition>('above');
+
+  private readonly translate = inject(TranslateService, { optional: true });
+
+  protected triggerTooltip(): string {
+    return this.translateOr('common.showValidationErrors', {}, 'Show validation errors');
+  }
+
+  protected triggerAriaLabel(): string {
+    const count = this.count();
+    return this.translateOr('common.validationIssues', { count },
+      `${count} validation issue${count === 1 ? '' : 's'}. Click to view.`);
+  }
+
+  private translateOr(key: string, params: Record<string, unknown>, fallback: string): string {
+    const text = this.translate?.instant(key, params);
+    return typeof text === 'string' && text && text !== key ? text : fallback;
+  }
 
   /** Emitted when the user clicks a violation entry in the popover. */
   @Output() readonly violationClicked = new EventEmitter<string>();

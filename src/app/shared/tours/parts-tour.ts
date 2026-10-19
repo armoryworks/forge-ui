@@ -14,10 +14,10 @@ export const PARTS_TOUR: TourDefinition = {
       side: 'top',
     },
     {
-      element: 'app-detail-side-panel',
-      title: 'Part Detail Panel',
-      description: 'View specs, BOM lines, usage (where-used), and file attachments in the side panel.',
-      side: 'left',
+      element: '[data-testid="new-part-btn"]',
+      title: 'Part Details',
+      description: 'Clicking a row opens the part in a dialog with tabs for its identity, BOM, routing, cost, inventory, where-used and files. Use New Part to add one, or Import to bring in many from a CSV.',
+      side: 'bottom',
     },
   ],
 };

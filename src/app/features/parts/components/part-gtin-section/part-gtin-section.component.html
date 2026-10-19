@@ -53,7 +53,7 @@
           formControlName="manualGtin"
           [maxlength]="14"
           [placeholder]="'parts.gtin.manualPlaceholder' | translate" />
-        <app-validation-button [violations]="manualViolations" [loading]="assigning()">
+        <app-validation-button [violations]="manualViolations" [loading]="assigning()" tooltipPosition="below">
           <button class="action-btn" type="button"
             data-testid="part-gtin-manual-assign"
             [disabled]="manualForm.invalid || manualEmpty() || assigning()"

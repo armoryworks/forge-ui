@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 
 import { format } from 'date-fns';
@@ -25,6 +25,7 @@ import { SpacerDirective } from '../../shared/directives/spacer.directive';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { toIsoDate } from '../../shared/utils/date.utils';
+import { maxDecimalsValidator } from '../../shared/validators/max-decimals.validator';
 
 import { CostingService } from './services/costing.service';
 import { CostingRatesVisualComponent } from './components/costing-rates-visual/costing-rates-visual.component';
@@ -37,6 +38,7 @@ import {
   OverheadPool,
   WorkCenterCostRate,
   CostingTemplate,
+  workCenterRateLabel,
 } from './models/costing.model';
 
 type CostingTab = 'periods' | 'cost-centers' | 'pools' | 'templates';
@@ -46,7 +48,7 @@ type CostingTab = 'periods' | 'cost-centers' | 'pools' | 'templates';
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent, DatepickerComponent,
-    ToggleComponent, PageLayoutComponent, DataTableComponent, ColumnCellDirective, DatePipe,
+    ToggleComponent, PageLayoutComponent, DataTableComponent, ColumnCellDirective, DatePipe, CurrencyPipe,
     ViewModeToggleComponent, CostingRatesVisualComponent, SpacerDirective,
   ],
   templateUrl: './costing.component.html',
@@ -165,8 +167,8 @@ export class CostingComponent {
     code: ['', [Validators.required, Validators.maxLength(32)]],
     name: ['', [Validators.required, Validators.maxLength(128)]],
     type: ['Production', Validators.required],
-    sqft: this.fb.control<number | null>(null),
-    headcount: this.fb.control<number | null>(null),
+    sqft: this.fb.control<number | null>(null, Validators.min(0)),
+    headcount: this.fb.control<number | null>(null, Validators.min(0)),
     isInventoriable: [true],
   });
   protected readonly poolForm = this.fb.group({
@@ -175,7 +177,10 @@ export class CostingComponent {
     code: ['', [Validators.required, Validators.maxLength(32)]],
     name: ['', [Validators.required, Validators.maxLength(128)]],
     behavior: ['Fixed', Validators.required],
-    fixedPortion: this.fb.control<number | null>(null),
+    fixedPortion: this.fb.control<number | null>(null, [
+      Validators.min(0), Validators.max(1),
+      maxDecimalsValidator(6, this.translate.instant('costing.pools.fixedPortion')),
+    ]),
     driver: ['MachineHour', Validators.required],
   });
   protected readonly budgetForm = this.fb.group({
@@ -185,7 +190,13 @@ export class CostingComponent {
     budgetDriverQty: this.fb.control<number | null>(null, [Validators.required, Validators.min(0.0001)]),
   });
 
+  protected readonly workCenterRateLabel = workCenterRateLabel;
+
   constructor() {
+    this.poolForm.controls.behavior.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(behavior => this.syncFixedPortionRequired(behavior));
+
     effect(() => {
       const tab = this.activeTab();
       if (tab === 'periods') this.loadPeriods();
@@ -193,6 +204,13 @@ export class CostingComponent {
       else if (tab === 'pools') { this.loadPools(); this.loadCostCenters(); this.loadPeriods(); }
       else if (tab === 'templates') this.loadTemplates();
     });
+  }
+
+  private syncFixedPortionRequired(behavior: string | null): void {
+    const control = this.poolForm.controls.fixedPortion;
+    if (behavior === 'Semi') control.addValidators(Validators.required);
+    else control.removeValidators(Validators.required);
+    control.updateValueAndValidity();
   }
 
   protected switchTab(tab: CostingTab): void {

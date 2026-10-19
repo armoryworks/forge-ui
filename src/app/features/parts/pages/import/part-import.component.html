@@ -50,21 +50,25 @@
                   <th scope="col">{{ 'parts.importPage.inventoryClass' | translate }}</th>
                   <th scope="col">{{ 'parts.importPage.procurement' | translate }}</th>
                   <th scope="col">{{ 'parts.importPage.externalId' | translate }}</th>
+                  <th scope="col">{{ 'parts.importPage.newPartNumber' | translate }}</th>
                   <th scope="col">{{ 'parts.importPage.statusCol' | translate }}</th>
                 </tr>
               </thead>
               <tbody>
                 @for (row of parsedRows(); track row.externalRowKey) {
                   <tr>
-                    <td>{{ row.name }}</td>
+                    <td>{{ row.name || '—' }}</td>
                     <td>{{ row.inventoryClass || '—' }}</td>
                     <td>{{ row.procurementSource || '—' }}</td>
                     <td>{{ row.externalId || '—' }}</td>
                     <td>
+                      <span class="imp-partnum" data-testid="import-new-part-number">{{ resultFor(row.externalRowKey)?.createdPartNumber || '—' }}</span>
+                    </td>
+                    <td>
                       @if (resultFor(row.externalRowKey); as res) {
                         <span [class]="statusChipClass(res.status)">{{ statusLabel(res.status) }}</span>
-                        @if (res.createdPartNumber) {
-                          <span class="imp-partnum">{{ res.createdPartNumber }}</span>
+                        @if (res.message) {
+                          <span class="imp-message">{{ res.message }}</span>
                         }
                       } @else {
                         <span class="chip chip--muted">{{ 'parts.importPage.status.Pending' | translate }}</span>
@@ -83,6 +87,11 @@
             <button class="action-btn action-btn--sm action-btn--primary" [disabled]="!canCommit()" (click)="commit()">
               <span class="material-icons-outlined">check</span>{{ 'parts.importPage.commit' | translate }}
             </button>
+            @if (committed()) {
+              <button class="action-btn action-btn--sm" data-testid="import-view-parts" (click)="viewParts()">
+                <span class="material-icons-outlined">list</span>{{ 'parts.importPage.viewParts' | translate }}
+              </button>
+            }
           </div>
         </section>
       }

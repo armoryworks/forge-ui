@@ -22,6 +22,18 @@
       <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusFilterOptions" />
       <app-select [label]="'parts.detail.clusters.identity.procurementSource' | translate" [formControl]="procurementFilterControl" [options]="procurementFilterOptions" />
       <app-select [label]="'parts.detail.clusters.identity.inventoryClass' | translate" [formControl]="inventoryClassFilterControl" [options]="inventoryClassFilterOptions" />
+      @if (hiddenDraftCount() > 0) {
+        <button type="button" class="action-btn action-btn--sm" data-testid="parts-show-drafts" (click)="showDrafts()">
+          <span class="material-icons-outlined">edit_note</span>
+          {{ 'parts.drafts.inProgress' | translate: { count: hiddenDraftCount() } }}
+        </button>
+      }
+      @if (hasActiveFilters()) {
+        <button type="button" class="action-btn action-btn--sm" data-testid="parts-clear-filters" (click)="clearFilters()">
+          <span class="material-icons-outlined">filter_alt_off</span>
+          {{ 'parts.clearFilters' | translate }}
+        </button>
+      }
     </div>
 
     <!--
@@ -63,7 +75,9 @@
         </div>
       } @else {
         <app-data-table tableId="parts" [columns]="partColumns" [data]="combinedRows()"
-          emptyIcon="inventory_2" [emptyMessage]="'parts.noPartsFound' | translate" [emptyHelpText]="'parts.noPartsHelp' | translate"
+          emptyIcon="inventory_2"
+          [emptyMessage]="(hasActiveFilters() ? 'parts.noPartsMatch' : 'parts.noPartsFound') | translate"
+          [emptyHelpText]="(hasActiveFilters() ? 'parts.noPartsMatchHelp' : 'parts.noPartsHelp') | translate"
           [clickableRows]="true" [rowClass]="partRowClass" [pinPredicate]="draftPinPredicate()"
           (rowClick)="onRowClick($any($event))">
           <div table-actions>

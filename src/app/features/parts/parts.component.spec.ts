@@ -16,7 +16,8 @@ import { SnackbarService } from '../../shared/services/snackbar.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 import { WorkflowService } from '../../shared/services/workflow.service';
 import { PartDetail } from './models/part-detail.model';
-import { PartListItem } from './models/part-list-item.model';
+import { PartListItem, PartListRow } from './models/part-list-item.model';
+import { WorkflowRun } from '../../shared/models/workflow-run.model';
 import { PartsComponent } from './parts.component';
 import { PartsService } from './services/parts.service';
 
@@ -194,5 +195,66 @@ describe('PartsComponent search and Duplicate', () => {
 
     expect(dialog.open).toHaveBeenCalledTimes(2);
     expect(detailDialog.open).not.toHaveBeenCalled();
+  });
+
+  describe('drafts and filters', () => {
+    interface DraftHarness {
+      entitylessDrafts: { set(runs: WorkflowRun[]): void };
+      combinedRows: () => PartListRow[];
+      hiddenDraftCount: () => number;
+      hasActiveFilters: () => boolean;
+      statusFilterControl: FormControl<string | null>;
+      procurementFilterControl: FormControl<string | null>;
+      showDrafts(): void;
+      clearFilters(): void;
+    }
+
+    const draft = { id: 4, entityType: 'Part', entityId: null, currentStepId: 'basics', startedAt: '2026-10-01T00:00:00Z', lastActivityAt: '2026-10-01T00:00:00Z' } as WorkflowRun;
+
+    function createWithDraft(): DraftHarness {
+      const parts = create() as unknown as DraftHarness;
+      parts.entitylessDrafts.set([draft]);
+      return parts;
+    }
+
+    it('keeps entity-less drafts out of the Active list and offers them as a count', () => {
+      const parts = createWithDraft();
+
+      expect(parts.combinedRows()).toEqual([]);
+      expect(parts.hiddenDraftCount()).toBe(1);
+
+      parts.showDrafts();
+      TestBed.tick();
+
+      expect(parts.statusFilterControl.value).toBe('Draft');
+      expect(parts.combinedRows().map(r => r.id)).toEqual([-4]);
+      expect(parts.hiddenDraftCount()).toBe(0);
+    });
+
+    it('lists drafts under All', () => {
+      const parts = createWithDraft();
+
+      parts.statusFilterControl.setValue('');
+      TestBed.tick();
+
+      expect(parts.combinedRows().map(r => r.id)).toEqual([-4]);
+    });
+
+    it('tells a filtered empty list apart from an empty catalog and clears back to the default', () => {
+      const parts = create() as unknown as DraftHarness & PartsHarness;
+      expect(parts.hasActiveFilters()).toBe(false);
+
+      parts.procurementFilterControl.setValue('Buy');
+      parts.searchControl.setValue('zzz');
+      parts.applyFilters();
+      expect(parts.hasActiveFilters()).toBe(true);
+
+      parts.clearFilters();
+      vi.advanceTimersByTime(300);
+
+      expect(parts.procurementFilterControl.value).toBe('');
+      expect(parts.appliedSearch()).toBe('');
+      expect(parts.hasActiveFilters()).toBe(false);
+    });
   });
 });

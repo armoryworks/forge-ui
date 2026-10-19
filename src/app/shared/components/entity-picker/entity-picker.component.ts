@@ -294,6 +294,12 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
     return v == null ? '' : String(v);
   }
 
+  /**
+   * Ids left out of the search results, e.g. the record being edited when it cannot be its own
+   * source. Empty by default, so other consumers see every result.
+   */
+  readonly excludeIds = input<readonly unknown[]>([]);
+
   private search(term: string) {
     // Phase 3 / WU-17 standardised paged-list endpoints on `?q=` + `{ items, totalCount, page, pageSize }`.
     // Older endpoints still accept `?search=` and either return a flat array or a `{ data: [] }` envelope.
@@ -314,10 +320,15 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
       .pipe(
         catchError(() => of([] as Record<string, unknown>[])),
         switchMap(res => {
-          if (Array.isArray(res)) return of(res);
+          if (Array.isArray(res)) return of(this.withoutExcluded(res));
           const env = res as Envelope;
-          return of(env.items ?? env.data ?? []);
+          return of(this.withoutExcluded(env.items ?? env.data ?? []));
         }),
       );
+  }
+
+  private withoutExcluded(rows: Record<string, unknown>[]): Record<string, unknown>[] {
+    const excluded = this.excludeIds();
+    return excluded.length ? rows.filter(row => !excluded.includes(row['id'])) : rows;
   }
 }

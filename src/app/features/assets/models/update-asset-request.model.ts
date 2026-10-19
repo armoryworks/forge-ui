@@ -1,5 +1,6 @@
 import { AssetType } from './asset-type.type';
 import { AssetStatus } from './asset-status.type';
+import { DepreciationMethod } from './create-asset-request.model';
 
 export interface UpdateAssetRequest {
   name?: string;
@@ -15,4 +16,7 @@ export interface UpdateAssetRequest {
   cavityCount?: number;
   toolLifeExpectancy?: number;
   currentShotCount?: number;
+  acquisitionCost?: number;
+  depreciationMethod?: DepreciationMethod;
+  workCenterId?: number;
 }

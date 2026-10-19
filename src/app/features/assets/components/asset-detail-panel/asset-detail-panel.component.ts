@@ -1,4 +1,4 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -19,7 +19,7 @@ import { DetailLoadErrorComponent } from '../../../../shared/components/detail-l
 @Component({
   selector: 'app-asset-detail-panel',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, TranslatePipe, MatTooltipModule, BarcodeInfoComponent, EntityActivitySectionComponent, EntityLinkComponent, DetailLoadErrorComponent],
+  imports: [CurrencyPipe, DatePipe, DecimalPipe, TranslatePipe, MatTooltipModule, BarcodeInfoComponent, EntityActivitySectionComponent, EntityLinkComponent, DetailLoadErrorComponent],
   templateUrl: './asset-detail-panel.component.html',
   styleUrl: './asset-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -91,6 +91,11 @@ export class AssetDetailPanelComponent {
         this.snackbar.success(this.translate.instant('assets.assetUpdated'));
       },
     });
+  }
+
+  protected hasAcquisitionDetails(asset: AssetItem): boolean {
+    return (asset.acquisitionCost !== null && asset.acquisitionCost !== undefined)
+      || !!asset.depreciationMethod || !!asset.workCenterId || !!asset.glAccount;
   }
 
   protected getTypeIcon(type: string): string {
