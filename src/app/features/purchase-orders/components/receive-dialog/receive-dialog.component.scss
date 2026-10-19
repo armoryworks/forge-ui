@@ -89,6 +89,10 @@
   &:focus {
     outline: $border-width solid var(--primary);
   }
+
+  &.ng-invalid {
+    border-color: var(--error);
+  }
 }
 
 // Bought-parts effort PR3 — receipt-level freight capture footer.

@@ -230,6 +230,16 @@ describe('ReceiveDialogComponent — bin, lot and note per line', () => {
     expect(receiveItems).not.toHaveBeenCalled();
   });
 
+  it('does not submit while a received quantity is malformed', () => {
+    const { internals, receiveItems } = setup([line({ id: 1 }), line({ id: 2 })]);
+
+    internals.lineControls()[0].setValue(2);
+    internals.lineControls()[1].setErrors({ numberFormat: true });
+    internals.save();
+
+    expect(receiveItems).not.toHaveBeenCalled();
+  });
+
   it('sends the trimmed packing slip number with the receipt', () => {
     const { internals, receiveItems } = setup([line({ id: 1 })]);
 

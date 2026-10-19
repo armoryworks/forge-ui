@@ -43,6 +43,7 @@
               <input appDecimalInput [formControl]="lineControls()[i]"
                 [attr.aria-label]="'purchaseOrders.receiveQty' | translate"
                 [attr.data-testid]="'receive-qty-' + line.id"
+                [attr.aria-invalid]="lineControls()[i].hasError('numberFormat')"
                 class="receive-qty-input" />
             </td>
             @if (binsEnabled()) {
