@@ -9,7 +9,7 @@
     <p class="acct-muted">{{ 'accounting.common.loading' | translate }}</p>
   } @else if (report(); as r) {
     <div class="acct-view-bar">
-      <app-statement-period mode="range" [from]="r.fromDate ?? null" [to]="r.toDate ?? null" (periodChange)="setPeriod($event)" />
+      <app-statement-period mode="range" [from]="period().from" [to]="period().to ?? r.toDate ?? null" (periodChange)="setPeriod($event)" />
       @if (viewMode() !== 'visual') {
         <app-toggle class="acct-compare-toggle" [label]="'accounting.comparison.compareToPrior' | translate" [formControl]="compareControl" />
       }

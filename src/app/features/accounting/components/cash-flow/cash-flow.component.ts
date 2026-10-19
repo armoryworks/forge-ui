@@ -61,7 +61,7 @@ export class CashFlowComponent {
   );
 
   private readonly params = toSignal(this.route.queryParamMap, { initialValue: this.route.snapshot.queryParamMap });
-  /** Statement window, mirrored to `?from=&to=`; empty is from inception to today. */
+  /** Statement window, mirrored to `?from=&to=`; empty is fiscal year-to-date. */
   protected readonly period = computed(() => periodFromParams(this.params()), { equal: samePeriod });
   private readonly bookId = computed(() => bookIdFromParams(this.params()));
 

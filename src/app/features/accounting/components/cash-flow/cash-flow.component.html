@@ -14,7 +14,7 @@
     <p class="acct-muted">{{ 'accounting.common.loading' | translate }}</p>
   } @else if (report(); as r) {
     <div class="acct-view-bar">
-      <app-statement-period mode="range" [from]="r.fromDate ?? null" [to]="r.toDate" (periodChange)="setPeriod($event)" />
+      <app-statement-period mode="range" [from]="period().from" [to]="period().to ?? r.toDate" (periodChange)="setPeriod($event)" />
       <app-view-mode-toggle [mode]="viewMode()" (modeChange)="setViewMode($event)" />
     </div>
 
