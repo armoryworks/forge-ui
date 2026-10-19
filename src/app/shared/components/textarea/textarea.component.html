@@ -8,6 +8,8 @@
     [attr.placeholder]="placeholder() || null"
     [attr.aria-label]="label() ? null : ariaLabel()"
     [readonly]="isReadonly()"
+    [required]="isRequired()"
+    [errorStateMatcher]="errorStateMatcher"
     [disabled]="disabled()"
     [value]="value()"
     (input)="onInput($event)"
@@ -17,3 +19,6 @@
     <mat-hint>{{ hint() }}</mat-hint>
   }
 </mat-form-field>
+@if (errorMessage(); as message) {
+  <span class="textarea__error" role="alert" data-testid="textarea-error">{{ message }}</span>
+}

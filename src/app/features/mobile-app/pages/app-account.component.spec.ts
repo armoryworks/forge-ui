@@ -1,6 +1,7 @@
 import { Signal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
+import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { Observable, of, throwError } from 'rxjs';
@@ -22,6 +23,8 @@ import { AppAccountComponent } from './app-account.component';
 interface AccountInternals {
   signOut(): Promise<void>;
   confirmingSignOut: Signal<boolean>;
+  problemControl: FormControl<string>;
+  sendProblem(): Promise<void>;
   noScreens: Signal<boolean>;
   myDevices: Signal<MobileDevice[]>;
   devicesProblem: Signal<'forbidden' | 'failed' | null>;
@@ -37,6 +40,8 @@ describe('AppAccountComponent', () => {
   const revoke = vi.fn();
   const lock = { biometricEnabled: signal(false), biometricAvailable: vi.fn() };
   const instances = { instance: signal({ id: 'shop', shared: false, deviceId: 9 }), instances: signal([]), remove: vi.fn() };
+  let report: () => Observable<void>;
+  let snackbar: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
 
   function create(): AccountInternals {
     return TestBed.runInInjectionContext(() => new AppAccountComponent()) as unknown as AccountInternals;
@@ -51,14 +56,16 @@ describe('AppAccountComponent', () => {
     revoke.mockReset().mockReturnValue(of(undefined));
     instances.remove.mockReset().mockResolvedValue(undefined);
     lock.biometricAvailable.mockReset().mockResolvedValue(false);
+    report = () => of(undefined);
+    snackbar = { success: vi.fn(), error: vi.fn() };
     TestBed.configureTestingModule({
       providers: [
         { provide: Router, useValue: router },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
-        { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
+        { provide: SnackbarService, useValue: snackbar },
         { provide: AuthService, useValue: auth },
         { provide: MobileAuthService, useValue: { wipeAndRestart: vi.fn() } },
-        { provide: MobileDevicesService, useValue: { mine: () => devices(), revoke } },
+        { provide: MobileDevicesService, useValue: { mine: () => devices(), revoke, reportProblem: () => report() } },
         { provide: CapabilityService, useValue: { isEnabled: (code: string) => enabled(code) } },
         { provide: InstanceService, useValue: instances },
         { provide: LocalLockService, useValue: lock },
@@ -129,5 +136,27 @@ describe('AppAccountComponent', () => {
     expect(revoke).toHaveBeenCalledWith(9);
     expect(instances.remove).toHaveBeenCalledWith('shop');
     expect(auth.logout).not.toHaveBeenCalled();
+  });
+
+  it('blocks a problem report that is only spaces', () => {
+    const account = create();
+    account.problemControl.setValue('   ');
+    expect(account.problemControl.invalid).toBe(true);
+  });
+
+  it('says to retry when online only when the report could not reach the server', async () => {
+    report = () => throwError(() => new HttpErrorResponse({ status: 0 }));
+    const account = create();
+    account.problemControl.setValue('Scanner froze');
+    await account.sendProblem();
+    expect(snackbar.error).toHaveBeenCalledWith('mobileApp.account.problemFailed');
+  });
+
+  it('says the report was refused when the server rejects it', async () => {
+    report = () => throwError(() => new HttpErrorResponse({ status: 500 }));
+    const account = create();
+    account.problemControl.setValue('Scanner froze');
+    await account.sendProblem();
+    expect(snackbar.error).toHaveBeenCalledWith('mobileApp.account.problemRejected');
   });
 });

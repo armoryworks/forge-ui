@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { AbstractControl } from '@angular/forms';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
@@ -18,6 +19,7 @@ class FakeLoader implements TranslateLoader {
 interface DialogInternals {
   form: {
     invalid: boolean;
+    controls: Record<string, AbstractControl>;
     patchValue(v: Record<string, unknown>): void;
     getRawValue(): Record<string, unknown>;
   };
@@ -88,6 +90,15 @@ describe('CustomerAddressDialogComponent', () => {
       address: { line1: '100 Main St', city: 'Springfield', state: 'IL', postalCode: '62701', country: 'US' },
     });
     expect(internals.form.invalid).toBe(false);
+  });
+
+  it('names each missing address part, including on a fresh form', () => {
+    const { internals } = setup();
+    const errors = internals.form.controls['address'].errors as { addressIncomplete: { message: string } };
+    expect(errors.addressIncomplete.message).toBe('customers.addresses.missingParts');
+
+    internals.form.patchValue({ address: { line1: '1 Main', city: '  ', state: 'IL', postalCode: '62701', country: 'US' } });
+    expect(internals.form.controls['address'].hasError('addressIncomplete')).toBe(true);
   });
 
   it('hydrates the form from the bound address in edit mode', () => {

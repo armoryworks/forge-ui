@@ -8,8 +8,8 @@
     [matAutocomplete]="auto"
     [placeholder]="placeholder()"
     [disabled]="disabled() || isReadonly()"
-    [required]="required()"
     [readonly]="isReadonly()"
+    [required]="isRequired()"
     (input)="onInput()"
     (blur)="markTouched()" />
   <mat-autocomplete #auto="matAutocomplete"

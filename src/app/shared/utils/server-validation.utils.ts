@@ -75,7 +75,8 @@ export function hasServerValidationDetail(error: HttpErrorResponse | unknown): b
  * `lineItems[0].quantity`) to the matching `AbstractControl`, or `null` when no
  * matching control exists. Falls back to a case-insensitive lookup on the
  * top-level form so that `Field` from PascalCase server output hits the
- * camelCase reactive control.
+ * camelCase reactive control, then to the last path segment so a wrapped
+ * `data.title` still reaches a flat `title` control.
  */
 export function resolveFormControl(
   form: FormGroup,
@@ -99,6 +100,11 @@ export function resolveFormControl(
   const lower = field.toLowerCase();
   for (const [key, control] of Object.entries(form.controls)) {
     if (key.toLowerCase() === lower) return control;
+  }
+
+  const lastSegment = normalized.split('.').pop();
+  if (lastSegment && lastSegment !== normalized && !/^\d+$/.test(lastSegment)) {
+    return resolveFormControl(form, lastSegment);
   }
 
   return null;

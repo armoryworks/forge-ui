@@ -227,4 +227,19 @@ describe('FormValidationService', () => {
       expect(FormValidationService.collectViolationItems(form, {})).toEqual([]);
     });
   });
+
+  describe('messageFor', () => {
+    it('prefixes a server message with the field label', () => {
+      expect(FormValidationService.messageFor('serverError', { message: 'already in use' }, 'Code')).toBe('Code: already in use');
+    });
+
+    it('does not repeat the label when the server message already names the field', () => {
+      expect(FormValidationService.messageFor('serverError', { message: 'Name must contain visible characters.' }, 'Name'))
+        .toBe('Name must contain visible characters.');
+    });
+
+    it('describes a whole-number failure', () => {
+      expect(FormValidationService.messageFor('wholeNumber', true, 'Machines')).toBe('Machines must be a whole number');
+    });
+  });
 });

@@ -14,6 +14,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 
 import { Contact } from '../../models/contact.model';
 import { CustomerService } from '../../services/customer.service';
+import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
 
 /**
  * Create/edit dialog for a customer contact. Extracted from the inline
@@ -74,8 +75,8 @@ export class CustomerContactDialogComponent implements OnInit {
 
   protected readonly form = new FormGroup({
     customerId: new FormControl<number | null>(null, [Validators.required]),
-    firstName: new FormControl('', [Validators.required, Validators.maxLength(100)]),
-    lastName: new FormControl('', [Validators.required, Validators.maxLength(100)]),
+    firstName: new FormControl('', [requiredTrimmed, Validators.maxLength(100)]),
+    lastName: new FormControl('', [requiredTrimmed, Validators.maxLength(100)]),
     email: new FormControl('', [Validators.email, Validators.maxLength(200)]),
     phone: new FormControl(''),
     mobile: new FormControl('', [Validators.maxLength(50)]),
@@ -136,8 +137,8 @@ export class CustomerContactDialogComponent implements OnInit {
     const existing = this.contact();
     const cleared = existing ? '' : undefined;
     const payload = {
-      firstName: v.firstName!,
-      lastName: v.lastName!,
+      firstName: v.firstName!.trim(),
+      lastName: v.lastName!.trim(),
       email: v.email?.trim() || cleared,
       phone: v.phone?.trim() || cleared,
       mobile: v.mobile?.trim() || cleared,

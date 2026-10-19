@@ -31,6 +31,7 @@
         [label]="'priceListEntry.minQuantityLabel' | translate"
         type="number"
         formControlName="minQuantity"
+        [step]="1"
         [required]="true" />
     </div>
     <p class="ple-form__hint">{{ 'priceListEntry.minQuantityHelper' | translate }}</p>

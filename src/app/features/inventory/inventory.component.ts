@@ -54,6 +54,7 @@ import { INVENTORY_TABS, InventoryTab } from './models/inventory-tab.model';
 import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
 import { DateTimePipe } from '../../shared/pipes/date-time.pipe';
+import { requiredTrimmed } from '../../shared/validators/required-trimmed.validator';
 
 
 @Component({
@@ -193,7 +194,7 @@ export class InventoryComponent {
   // Location dialog
   protected readonly showLocationDialog = signal(false);
   protected readonly locationForm = new FormGroup({
-    name: new FormControl('', [Validators.required]),
+    name: new FormControl('', [requiredTrimmed]),
     locationType: new FormControl<LocationType>('Area', [Validators.required]),
     parentId: new FormControl<number | null>(null),
     barcode: new FormControl(''),

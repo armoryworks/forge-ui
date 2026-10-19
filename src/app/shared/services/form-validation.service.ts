@@ -44,6 +44,7 @@ const ERROR_MESSAGES: Record<string, (label: string, error: unknown) => string> 
   },
   pattern: (label) => `${label} format is invalid`,
   positive: (label) => `${label} must be greater than 0`,
+  wholeNumber: (label) => `${label} must be a whole number`,
 };
 
 export class FormValidationService {
@@ -113,7 +114,8 @@ export class FormValidationService {
     if (errorValue && typeof errorValue === 'object' && 'message' in errorValue) {
       const message = (errorValue as { message: unknown }).message;
       if (typeof message !== 'string') return null;
-      return errorKey === 'serverError' ? `${label}: ${message}` : message;
+      if (errorKey !== 'serverError' || message.toLowerCase().startsWith(label.toLowerCase())) return message;
+      return `${label}: ${message}`;
     }
     if (ERROR_MESSAGES[errorKey]) {
       return ERROR_MESSAGES[errorKey](label, errorValue);

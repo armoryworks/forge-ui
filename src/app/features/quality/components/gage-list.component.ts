@@ -24,6 +24,8 @@ import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../shared/utils/date.utils';
 import { AuthService } from '../../../shared/services/auth.service';
 import { QUALITY_MANAGER_ROLES } from '../quality-roles';
+import { requiredTrimmed } from '../../../shared/validators/required-trimmed.validator';
+import { wholeNumber } from '../../../shared/validators/whole-number.validator';
 
 const MAX_CALIBRATION_INTERVAL_DAYS = 3650;
 
@@ -108,12 +110,12 @@ export class GageListComponent {
   ];
 
   protected readonly createForm = new FormGroup({
-    description: new FormControl('', [Validators.required, Validators.maxLength(500)]),
+    description: new FormControl('', [requiredTrimmed, Validators.maxLength(500)]),
     gageType: new FormControl(''),
     manufacturer: new FormControl(''),
     model: new FormControl(''),
     serialNumber: new FormControl(''),
-    calibrationIntervalDays: new FormControl(365, [Validators.required, Validators.min(1), Validators.max(MAX_CALIBRATION_INTERVAL_DAYS)]),
+    calibrationIntervalDays: new FormControl(365, [Validators.required, Validators.min(1), Validators.max(MAX_CALIBRATION_INTERVAL_DAYS), wholeNumber]),
     lastCalibratedAt: new FormControl<Date | null>(null),
     status: new FormControl<GageStatus | null>(null),
     accuracySpec: new FormControl(''),

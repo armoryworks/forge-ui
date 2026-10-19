@@ -5,9 +5,13 @@
     type="text"
     [attr.inputmode]="inputMode"
     [placeholder]="placeholder()"
-    [required]="required()"
+    [required]="isRequired()"
+    [errorStateMatcher]="errorStateMatcher"
     [readonly]="isReadonly()"
     [disabled]="disabled()"
     (input)="onInput($event)"
     (blur)="onBlur()" />
 </mat-form-field>
+@if (errorMessage(); as message) {
+  <span class="currency-input__error" role="alert" data-testid="currency-input-error">{{ message }}</span>
+}

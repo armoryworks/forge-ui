@@ -42,6 +42,7 @@ import { CostingTab } from './models/costing-tab.model';
 import { EnumLabelPipe } from '../../shared/pipes/enum-label.pipe';
 import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
+import { requiredTrimmed } from '../../shared/validators/required-trimmed.validator';
 
 @Component({
   selector: 'app-costing',
@@ -168,8 +169,8 @@ export class CostingComponent {
     end: this.fb.control<Date | null>(null, Validators.required),
   });
   protected readonly costCenterForm = this.fb.group({
-    code: ['', [Validators.required, Validators.maxLength(32)]],
-    name: ['', [Validators.required, Validators.maxLength(128)]],
+    code: ['', [requiredTrimmed, Validators.maxLength(32)]],
+    name: ['', [requiredTrimmed, Validators.maxLength(128)]],
     type: ['Production', Validators.required],
     sqft: this.fb.control<number | null>(null),
     headcount: this.fb.control<number | null>(null),
@@ -178,8 +179,8 @@ export class CostingComponent {
   protected readonly poolForm = this.fb.group({
     costingCostCenterId: this.fb.control<number | null>(null, Validators.required),
     workCenterId: this.fb.control<number | null>(null),
-    code: ['', [Validators.required, Validators.maxLength(32)]],
-    name: ['', [Validators.required, Validators.maxLength(128)]],
+    code: ['', [requiredTrimmed, Validators.maxLength(32)]],
+    name: ['', [requiredTrimmed, Validators.maxLength(128)]],
     behavior: ['Fixed', Validators.required],
     fixedPortion: this.fb.control<number | null>(null),
     driver: ['MachineHour', Validators.required],

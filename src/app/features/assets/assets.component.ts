@@ -26,6 +26,7 @@ import { SnackbarService } from '../../shared/services/snackbar.service';
 import { AssetDetailDialogComponent, AssetDetailDialogData, AssetDetailDialogResult } from './components/asset-detail-dialog/asset-detail-dialog.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
+import { requiredTrimmed } from '../../shared/validators/required-trimmed.validator';
 
 @Component({
   selector: 'app-assets',
@@ -68,7 +69,7 @@ export class AssetsComponent implements OnInit {
   protected readonly editingAsset = signal<AssetItem | null>(null);
 
   protected readonly assetForm = new FormGroup({
-    name: new FormControl('', [Validators.required]),
+    name: new FormControl('', [requiredTrimmed, Validators.maxLength(200)]),
     assetType: new FormControl<AssetType>('Machine', [Validators.required]),
     status: new FormControl<AssetStatus>('Active', [Validators.required]),
     location: new FormControl(''),

@@ -35,6 +35,7 @@ import {
 } from '@angular/material/autocomplete';
 
 import { FormValidationService } from '../../services/form-validation.service';
+import { controlIsRequired } from '../../validators/control-is-required';
 
 export interface AutocompleteOption {
   [key: string]: unknown;
@@ -87,6 +88,11 @@ export class AutocompleteComponent implements ControlValueAccessor, AfterContent
       if (message !== null) return message;
     }
     return null;
+  });
+
+  protected readonly isRequired = computed(() => {
+    this.controlState();
+    return this.required() || controlIsRequired(this.control());
   });
 
   protected readonly errorStateMatcher: ErrorStateMatcher = {

@@ -1778,7 +1778,8 @@
       "reason": "Reason for change",
       "effectiveDate": "Effective date",
       "submit": "Revise part",
-      "created": "Revision {{revision}} created"
+      "created": "Revision {{revision}} created",
+      "revisionTaken": "Revision {{revision}} already exists for this part"
     },
     "classification": {
       "confirmTitle": "Change part classification?",
@@ -2298,7 +2299,8 @@
       "typeBoth": "Billing & Shipping",
       "addAddressAriaLabel": "Add address",
       "editAddressAriaLabel": "Edit address",
-      "deleteAddressAriaLabel": "Delete address"
+      "deleteAddressAriaLabel": "Delete address",
+      "missingParts": "Address is missing: {{parts}}"
     },
     "orders": "Orders",
     "contacts": "Contacts",
@@ -3337,7 +3339,7 @@
   "assets": {
     "title": "Assets",
     "subtitle": "Track equipment, tooling, and company property",
-    "createAsset": "New Asset",
+    "createAsset": "Create asset",
     "addAsset": "Add Asset",
     "editAsset": "Edit Asset",
     "assetTag": "Asset Tag",
@@ -4691,7 +4693,7 @@
     "connectionLost": "Connection Lost",
     "unableToReachServer": "Unable to reach the server. Check your network connection.",
     "timeout": "Request timed out. Please try again.",
-    "ruleViolation": "Action not allowed",
+    "ruleViolation": "Couldn't complete that",
     "numberTaken": "That number was just taken by another record. Save again to get the next number."
   },
   "confirmDialog": {
@@ -5466,7 +5468,9 @@
     "invalidDate": "{{field}} must be a real date (MM/DD/YYYY)",
     "dateMin": "{{field}} must be on or after {{min}}",
     "dateMax": "{{field}} must be on or before {{max}}",
-    "dateRangeOrder": "{{start}} must be on or before {{end}}"
+    "dateRangeOrder": "{{start}} must be on or before {{end}}",
+    "endOnOrAfterStartDate": "End date must be on or after the start date",
+    "dueOnOrAfterBillDate": "Due date must be on or after the bill date"
   },
   "invoices": {
     "invoiceNumberLabel": "Invoice Number",
@@ -11783,7 +11787,8 @@
       "problemFailed": "Could not send. Try again when online.",
       "signOut": "Sign out",
       "confirmSignOutHere": "Tap again to sign out",
-      "problemCount": "{{count}} / {{max}}"
+      "problemCount": "{{count}} / {{max}}",
+      "problemRejected": "Could not send that report. Check it and try again."
     },
     "timer": {
       "running": "Running: {{jobNumber}} · {{elapsed}}",

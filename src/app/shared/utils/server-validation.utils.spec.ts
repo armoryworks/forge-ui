@@ -1,6 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
 
-import { hasServerValidationDetail } from './server-validation.utils';
+import { FormControl, FormGroup } from '@angular/forms';
+
+import { hasServerValidationDetail, resolveFormControl } from './server-validation.utils';
 
 describe('hasServerValidationDetail', () => {
   it('is true for a 400 whose body carries a detail', () => {
@@ -18,5 +20,19 @@ describe('hasServerValidationDetail', () => {
     expect(hasServerValidationDetail(new HttpErrorResponse({ status: 500, error: { detail: 'boom' } }))).toBe(false);
     expect(hasServerValidationDetail(new Error('boom'))).toBe(false);
     expect(hasServerValidationDetail(null)).toBe(false);
+  });
+});
+
+describe('resolveFormControl', () => {
+  const form = new FormGroup({ title: new FormControl(''), description: new FormControl('') });
+
+  it('maps a wrapped server field to the flat control by its last segment', () => {
+    expect(resolveFormControl(form, 'data.title')).toBe(form.controls.title);
+    expect(resolveFormControl(form, 'request.Description')).toBe(form.controls.description);
+  });
+
+  it('returns null when no segment matches', () => {
+    expect(resolveFormControl(form, 'data.unknown')).toBeNull();
+    expect(resolveFormControl(form, 'lines[0]')).toBeNull();
   });
 });

@@ -22,6 +22,7 @@ import { FormValidationService } from '../../../shared/services/form-validation.
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { requiredTrimmed } from '../../../shared/validators/required-trimmed.validator';
 
 /**
  * Phase 1r / Batch 9 — admin CRUD for the LeadSource catalog.
@@ -72,8 +73,8 @@ export class LeadSourcesComponent {
   ];
 
   protected readonly form = new FormGroup({
-    name: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(100)] }),
-    code: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(50), Validators.pattern(/^[a-z0-9_-]+$/i)] }),
+    name: new FormControl<string>('', { nonNullable: true, validators: [requiredTrimmed, Validators.maxLength(100)] }),
+    code: new FormControl<string>('', { nonNullable: true, validators: [requiredTrimmed, Validators.maxLength(50), Validators.pattern(/^[a-z0-9_-]+$/i)] }),
     description: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
     isActive: new FormControl<boolean>(true, { nonNullable: true }),
   });
@@ -124,7 +125,7 @@ export class LeadSourcesComponent {
   }
 
   protected save(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.saving()) return;
     this.saving.set(true);
     const f = this.form.getRawValue();
     const id = this.editingId();

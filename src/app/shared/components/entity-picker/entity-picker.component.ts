@@ -1,10 +1,13 @@
 import {
+  AfterContentInit,
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   forwardRef,
   inject,
+  Injector,
   input,
   OnInit,
   output,
@@ -20,6 +23,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
 import { debounceTime, distinctUntilChanged, filter, switchMap, catchError, map, of } from 'rxjs';
 
+import { BoundControl } from '../../utils/bound-control';
 import {
   SimilarEntitiesDialogComponent,
   SimilarEntitiesDialogData,
@@ -41,10 +45,12 @@ import {
     },
   ],
 })
-export class EntityPickerComponent implements ControlValueAccessor, OnInit {
+export class EntityPickerComponent implements ControlValueAccessor, OnInit, AfterContentInit {
   private readonly http = inject(HttpClient);
   private readonly destroyRef = inject(DestroyRef);
   private readonly dialog = inject(MatDialog);
+  private readonly injector = inject(Injector);
+  private readonly bound = new BoundControl();
 
   readonly label = input.required<string>();
   readonly entityType = input.required<string>();
@@ -90,6 +96,7 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
   protected readonly searchControl = new FormControl('');
   protected readonly results = signal<Record<string, unknown>[]>([]);
   protected readonly disabled = signal(false);
+  protected readonly isRequired = computed(() => this.required() || this.bound.isRequired());
   /** True when {@link createNewLabel} is set AND the user has typed >= 2 chars — controls the dropdown's "Create new" row visibility. */
   protected readonly canShowCreateNew = signal(false);
   /** True while exactly one character is typed — the dropdown shows a "type at least 2 characters" hint instead of results. */
@@ -98,6 +105,10 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
 
   private onChange: (value: unknown) => void = () => {};
   private onTouched: () => void = () => {};
+
+  ngAfterContentInit(): void {
+    this.bound.attach(this.injector, this.destroyRef);
+  }
 
   ngOnInit(): void {
     this.searchControl.valueChanges.pipe(
