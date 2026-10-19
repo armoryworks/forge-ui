@@ -33,6 +33,29 @@
   border-radius: $border-radius;
 }
 
+.data-table__selection-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-sm;
+  padding: $sp-sm $sp-lg;
+  flex-shrink: 0;
+  font-size: var(--font-size-sm);
+  background: var(--info-light);
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.data-table__selection-link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--primary);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 // ─── Scroll Container ───
 .data-table__scroll {
   flex: 1;
@@ -229,6 +252,11 @@
 
   &--clickable {
     cursor: pointer;
+
+    &:focus-visible {
+      outline: $border-width-accent solid var(--primary);
+      outline-offset: -$border-width-accent;
+    }
   }
 
   // Find-in-context row states — set via the [rowClass] input by consumers (e.g. the GL ledger):
@@ -252,6 +280,7 @@
   padding: $sp-md $sp-lg;
   border-bottom: $border-width-thin solid var(--border);
   vertical-align: middle;
+  overflow-wrap: anywhere;
 
   &--right {
     text-align: right;

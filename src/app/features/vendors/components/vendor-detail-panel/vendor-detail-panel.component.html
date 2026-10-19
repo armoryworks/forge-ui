@@ -25,27 +25,27 @@
     </div>
 
     <!-- Tabs -->
-    <div class="tab-bar">
-      <button class="tab" [class.tab--active]="activeTab() === 'info'" (click)="activeTab.set('info')">{{ 'vendors.info' | translate }}</button>
-      <button class="tab" data-testid="vendor-tab-contacts" [class.tab--active]="activeTab() === 'contacts'" (click)="activeTab.set('contacts')">
+    <div class="tab-bar" role="tablist" [attr.aria-label]="'vendors.detail.tabsLabel' | translate">
+      <button type="button" class="tab" role="tab" id="vendor-tab-info" aria-controls="vendor-detail-tabpanel" [attr.aria-selected]="activeTab() === 'info'" [class.tab--active]="activeTab() === 'info'" (click)="activeTab.set('info')">{{ 'vendors.info' | translate }}</button>
+      <button type="button" class="tab" role="tab" id="vendor-tab-contacts" aria-controls="vendor-detail-tabpanel" data-testid="vendor-tab-contacts" [attr.aria-selected]="activeTab() === 'contacts'" [class.tab--active]="activeTab() === 'contacts'" (click)="activeTab.set('contacts')">
         {{ 'vendorContacts.contactsTab' | translate }}
       </button>
-      <button class="tab" data-testid="vendor-tab-addresses" [class.tab--active]="activeTab() === 'addresses'" (click)="activeTab.set('addresses')">
+      <button type="button" class="tab" role="tab" id="vendor-tab-addresses" aria-controls="vendor-detail-tabpanel" data-testid="vendor-tab-addresses" [attr.aria-selected]="activeTab() === 'addresses'" [class.tab--active]="activeTab() === 'addresses'" (click)="activeTab.set('addresses')">
         {{ 'vendorContacts.addressesTab' | translate }}
       </button>
-      <button class="tab" [class.tab--active]="activeTab() === 'purchase-orders'" (click)="activeTab.set('purchase-orders')">
+      <button type="button" class="tab" role="tab" id="vendor-tab-purchase-orders" aria-controls="vendor-detail-tabpanel" [attr.aria-selected]="activeTab() === 'purchase-orders'" [class.tab--active]="activeTab() === 'purchase-orders'" (click)="activeTab.set('purchase-orders')">
         {{ 'vendors.purchaseOrders' | translate }} ({{ vendor.purchaseOrders.length }})
       </button>
-      <button class="tab" data-testid="vendor-tab-catalog" [class.tab--active]="activeTab() === 'catalog'" (click)="onCatalogTabActivated()">
+      <button type="button" class="tab" role="tab" id="vendor-tab-catalog" aria-controls="vendor-detail-tabpanel" data-testid="vendor-tab-catalog" [attr.aria-selected]="activeTab() === 'catalog'" [class.tab--active]="activeTab() === 'catalog'" (click)="onCatalogTabActivated()">
         {{ 'vendors.detail.catalogTab' | translate }}
       </button>
-      <button class="tab" [class.tab--active]="activeTab() === 'scorecard'" (click)="activeTab.set('scorecard')">
+      <button type="button" class="tab" role="tab" id="vendor-tab-scorecard" aria-controls="vendor-detail-tabpanel" [attr.aria-selected]="activeTab() === 'scorecard'" [class.tab--active]="activeTab() === 'scorecard'" (click)="activeTab.set('scorecard')">
         {{ 'vendors.detail.scorecardTab' | translate }}
       </button>
     </div>
 
     <!-- Body -->
-    <div class="detail-body">
+    <div class="detail-body" role="tabpanel" id="vendor-detail-tabpanel" [attr.aria-labelledby]="'vendor-tab-' + activeTab()">
       <!-- Info Tab -->
       @if (activeTab() === 'info') {
         <div class="info-grid">

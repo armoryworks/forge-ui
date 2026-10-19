@@ -5003,6 +5003,10 @@
     "sortAscending": "Sort Ascending",
     "sortDescending": "Sort Descending",
     "clearSort": "Clear Sort",
+    "pageRowsSelected": "All {{count}} rows on this page are selected.",
+    "selectAllMatching": "Select all {{count}} rows",
+    "allMatchingSelected": "All {{count}} rows are selected.",
+    "clearSelection": "Clear selection",
     "filterEllipsis": "Filter...",
     "clearFilter": "Clear Filter",
     "clearAllFilters": "Clear All Filters",
@@ -5542,7 +5546,8 @@
       "catalogEmpty": "This vendor has no parts in the catalog yet.",
       "catalogEmptyHelp": "Add a part this vendor supplies.",
       "addPartToCatalog": "Add Part",
-      "scorecardTab": "Scorecard"
+      "scorecardTab": "Scorecard",
+      "tabsLabel": "Vendor detail tabs"
     },
     "offTierVariancePct": "Price tolerance vs. vendor price list (%)",
     "offTierVariancePctPlaceholder": "Default: 5%",

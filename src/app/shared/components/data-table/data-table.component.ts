@@ -36,6 +36,7 @@ import { ColumnFilterPopoverComponent, ColumnFilterState } from './column-filter
 import { ColumnManagerPanelComponent, ColumnManagerState } from './column-manager-panel/column-manager-panel.component';
 import { UserPreferencesService } from '../../services/user-preferences.service';
 import { formatDate, formatDateTime, parseDateOnly } from '../../utils/date.utils';
+import { foldText } from '../../utils/text-fold';
 
 
 @Component({
@@ -158,15 +159,15 @@ export class DataTableComponent implements OnInit {
             // filterVal can be a plain string (legacy "contains") or
             // { mode, value } from the new match-mode picker. Back-compat
             // treats a bare string as contains.
-            const cell = cellVal == null ? '' : String(cellVal).toLowerCase();
+            const cell = foldText(cellVal);
             let needle: string;
             let mode: string;
             if (typeof filterVal === 'string') {
-              needle = filterVal.toLowerCase();
+              needle = foldText(filterVal);
               mode = 'contains';
             } else {
               const tv = filterVal as { mode?: string; value?: string };
-              needle = (tv.value ?? '').toLowerCase();
+              needle = foldText(tv.value);
               mode = tv.mode ?? 'contains';
             }
             if (!needle) return true;
@@ -226,8 +227,10 @@ export class DataTableComponent implements OnInit {
 
     const columns = this.columns();
     const resolvers = new Map<string, (row: unknown) => unknown>();
+    const types = new Map<string, ColumnDef['type']>();
     for (const sort of sorts) {
       const col = columns.find(c => c.field === sort.field);
+      types.set(sort.field, col?.type);
       if (col?.sortValue) {
         resolvers.set(sort.field, col.sortValue);
       } else if (col?.sortField) {
@@ -244,13 +247,14 @@ export class DataTableComponent implements OnInit {
         const valA = resolve(a);
         const valB = resolve(b);
 
-        let comparison: number;
-        if (valA == null && valB == null) comparison = 0;
-        else if (valA == null) comparison = -1;
-        else if (valB == null) comparison = 1;
-        else if (typeof valA === 'string' && typeof valB === 'string') comparison = valA.localeCompare(valB);
-        else comparison = valA < valB ? -1 : valA > valB ? 1 : 0;
+        const blankA = isBlankSortValue(valA);
+        const blankB = isBlankSortValue(valB);
+        if (blankA || blankB) {
+          if (blankA && blankB) continue;
+          return blankA ? 1 : -1;
+        }
 
+        const comparison = compareSortValues(valA, valB, types.get(sort.field));
         if (comparison !== 0) {
           return sort.direction === 'desc' ? -comparison : comparison;
         }
@@ -261,11 +265,27 @@ export class DataTableComponent implements OnInit {
     return [...pinned, ...sorted];
   });
 
+  protected readonly effectivePageIndex = computed(() => {
+    const lastPage = Math.max(0, Math.ceil(this.sortedData().length / this.pageSize()) - 1);
+    return Math.min(this.pageIndex(), lastPage);
+  });
+
   protected readonly pagedData = computed(() => {
     const all = this.sortedData();
-    const start = this.pageIndex() * this.pageSize();
+    const start = this.effectivePageIndex() * this.pageSize();
     return all.slice(start, start + this.pageSize());
   });
+
+  protected readonly allMatchingSelected = computed(() => {
+    const data = this.sortedData();
+    if (!data.length) return false;
+    const selected = this.selectedRows();
+    return data.every(row => selected.has(this.getTrackValue(row)));
+  });
+
+  protected readonly showSelectAllMatching = computed(() =>
+    this.selectable() && this.allSelected() && this.sortedData().length > this.pagedData().length
+  );
 
   protected readonly allSelected = computed(() => {
     const data = this.pagedData();
@@ -386,6 +406,21 @@ export class DataTableComponent implements OnInit {
     this.rowClick.emit(row);
   }
 
+  onRowKeydown(row: unknown, event: KeyboardEvent): void {
+    if (!this.clickableRows() || event.target !== event.currentTarget) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.onRowClick(row);
+    }
+  }
+
+  getAriaSort(col: ColumnDef): 'ascending' | 'descending' | 'none' | null {
+    if (!col.sortable) return null;
+    const sort = this.getSortState(col.field);
+    if (!sort) return 'none';
+    return sort.direction === 'asc' ? 'ascending' : 'descending';
+  }
+
   toggleSelectAll(): void {
     const data = this.pagedData();
     const selected = new Set(this.selectedRows());
@@ -398,6 +433,18 @@ export class DataTableComponent implements OnInit {
 
     this.selectedRows.set(selected);
     this.selectionChange.emit(this.getSelectedData());
+  }
+
+  selectAllMatching(): void {
+    const selected = new Set(this.selectedRows());
+    this.sortedData().forEach(row => selected.add(this.getTrackValue(row)));
+    this.selectedRows.set(selected);
+    this.selectionChange.emit(this.getSelectedData());
+  }
+
+  clearSelection(): void {
+    this.selectedRows.set(new Set());
+    this.selectionChange.emit([]);
   }
 
   toggleRowSelection(row: unknown, event: Event): void {
@@ -525,6 +572,7 @@ export class DataTableComponent implements OnInit {
     current[state.field] = state.value;
     this.filters.set(current);
     this.pageIndex.set(0);
+    this.pruneSelectionToFiltered();
     this.debouncedSave();
   }
 
@@ -533,6 +581,7 @@ export class DataTableComponent implements OnInit {
     delete current[field];
     this.filters.set(current);
     this.pageIndex.set(0);
+    this.pruneSelectionToFiltered();
     this.debouncedSave();
   }
 
@@ -612,6 +661,7 @@ export class DataTableComponent implements OnInit {
   contextClearAllFilters(): void {
     this.filters.set({});
     this.pageIndex.set(0);
+    this.pruneSelectionToFiltered();
     this.debouncedSave();
   }
 
@@ -712,6 +762,34 @@ export class DataTableComponent implements OnInit {
 
   private getSelectedData(): unknown[] {
     const selected = this.selectedRows();
-    return this.data().filter(row => selected.has(this.getTrackValue(row)));
+    return this.filteredData().filter(row => selected.has(this.getTrackValue(row)));
   }
+
+  private pruneSelectionToFiltered(): void {
+    const selected = this.selectedRows();
+    if (!selected.size) return;
+    const visible = new Set(this.filteredData().map(row => this.getTrackValue(row)));
+    const kept = new Set([...selected].filter(key => visible.has(key)));
+    if (kept.size === selected.size) return;
+    this.selectedRows.set(kept);
+    this.selectionChange.emit(this.getSelectedData());
+  }
+}
+
+const sortCollator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+
+function isBlankSortValue(value: unknown): boolean {
+  return value == null || value === '';
+}
+
+function compareSortValues(a: unknown, b: unknown, type: ColumnDef['type']): number {
+  if (type === 'number') {
+    const na = Number(a);
+    const nb = Number(b);
+    if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
+  }
+  if (typeof a === 'string' && typeof b === 'string') return sortCollator.compare(a, b);
+  const x = a as number;
+  const y = b as number;
+  return x < y ? -1 : x > y ? 1 : 0;
 }

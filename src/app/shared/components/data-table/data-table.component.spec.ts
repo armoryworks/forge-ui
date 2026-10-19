@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { TestBed, ComponentFixtureAutoDetect } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { TestBed, ComponentFixture, ComponentFixtureAutoDetect } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { DataTableComponent } from './data-table.component';
@@ -47,5 +47,207 @@ describe('DataTableComponent · formatCellValue', () => {
 
   it('leaves empty date cells empty', () => {
     expect(table.formatCellValue({ date: null }, dateCol)).toBeNull();
+  });
+});
+
+interface TableInternals {
+  pageIndex: { set(value: number): void };
+  effectivePageIndex: () => number;
+  pagedData: () => unknown[];
+  sortedData: () => unknown[];
+  sortStates: { set(value: { field: string; direction: 'asc' | 'desc' }[]): void };
+  filters: { set(value: Record<string, unknown>): void };
+  showSelectAllMatching: () => boolean;
+  allMatchingSelected: () => boolean;
+}
+
+describe('DataTableComponent · behaviour', () => {
+  let fixture: ComponentFixture<DataTableComponent>;
+  let table: DataTableComponent;
+  let internals: TableInternals;
+
+  const rows = (count: number) => Array.from({ length: count }, (_, i) => ({ id: i + 1, name: `Row ${i + 1}` }));
+
+  function setup(columns: ColumnDef[], data: unknown[], extra: Record<string, unknown> = {}): void {
+    fixture.componentRef.setInput('tableId', 'spec');
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', data);
+    for (const [key, value] of Object.entries(extra)) fixture.componentRef.setInput(key, value);
+  }
+
+  function sortBy(field: string, direction: 'asc' | 'desc'): unknown[] {
+    internals.sortStates.set([{ field, direction }]);
+    return internals.sortedData().map(r => (r as { id: unknown }).id);
+  }
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideNoopAnimations(),
+        { provide: ComponentFixtureAutoDetect, useValue: false },
+        { provide: UserPreferencesService, useValue: { get: () => null, set: () => undefined, reset: () => undefined } },
+      ],
+    });
+    fixture = TestBed.createComponent(DataTableComponent);
+    table = fixture.componentInstance;
+    internals = table as unknown as TableInternals;
+  });
+
+  it('shows the rows when a parent search shrinks the data while on a later page', () => {
+    setup([{ field: 'name', header: 'Name' }], rows(60));
+    internals.pageIndex.set(1);
+    expect(internals.pagedData().length).toBe(25);
+
+    fixture.componentRef.setInput('data', rows(5));
+
+    expect(internals.effectivePageIndex()).toBe(0);
+    expect(internals.pagedData().length).toBe(5);
+  });
+
+  it('keeps the page when the data changes but the page still exists', () => {
+    setup([{ field: 'name', header: 'Name' }], rows(60));
+    internals.pageIndex.set(1);
+
+    fixture.componentRef.setInput('data', rows(59));
+
+    expect(internals.effectivePageIndex()).toBe(1);
+  });
+
+  it('sorts text with embedded numbers naturally', () => {
+    setup([{ field: 'job', header: 'Job', sortable: true }], [
+      { id: 'a', job: 'J-10' }, { id: 'b', job: 'J-2' }, { id: 'c', job: 'J-1' },
+    ]);
+
+    expect(sortBy('job', 'asc')).toEqual(['c', 'b', 'a']);
+  });
+
+  it('puts blank values last whichever way the column is sorted', () => {
+    setup([{ field: 'price', header: 'Price', sortable: true, type: 'number' }], [
+      { id: 'a', price: null }, { id: 'b', price: 5 }, { id: 'c', price: '' }, { id: 'd', price: 2 }, { id: 'e' },
+    ]);
+
+    expect(sortBy('price', 'asc').slice(0, 2)).toEqual(['d', 'b']);
+    expect(sortBy('price', 'desc').slice(0, 2)).toEqual(['b', 'd']);
+    expect(sortBy('price', 'desc').slice(2).sort()).toEqual(['a', 'c', 'e']);
+  });
+
+  it('sorts a number column holding decimal strings by value', () => {
+    setup([{ field: 'qty', header: 'Qty', sortable: true, type: 'number' }], [
+      { id: 'a', qty: '10' }, { id: 'b', qty: '1.5' }, { id: 'c', qty: '1.25' },
+    ]);
+
+    expect(sortBy('qty', 'asc')).toEqual(['c', 'b', 'a']);
+  });
+
+  it('matches text filters without regard to accents in either the data or the filter', () => {
+    setup([{ field: 'name', header: 'Name' }], [
+      { id: 1, name: 'García' }, { id: 2, name: 'Garden' }, { id: 3, name: 'Peña' },
+    ]);
+
+    internals.filters.set({ name: 'garcia' });
+    expect(internals.sortedData().map(r => (r as { id: number }).id)).toEqual([1]);
+
+    internals.filters.set({ name: { mode: 'equals', value: 'PENA' } });
+    expect(internals.sortedData().map(r => (r as { id: number }).id)).toEqual([3]);
+
+    internals.filters.set({ name: { mode: 'startsWith', value: 'garcí' } });
+    expect(internals.sortedData().map(r => (r as { id: number }).id)).toEqual([1]);
+  });
+
+  it('reports aria-sort only for sortable columns', () => {
+    const sortable: ColumnDef = { field: 'name', header: 'Name', sortable: true };
+    const plain: ColumnDef = { field: 'other', header: 'Other' };
+    setup([sortable, plain], rows(3));
+
+    expect(table.getAriaSort(plain)).toBeNull();
+    expect(table.getAriaSort(sortable)).toBe('none');
+    internals.sortStates.set([{ field: 'name', direction: 'asc' }]);
+    expect(table.getAriaSort(sortable)).toBe('ascending');
+    internals.sortStates.set([{ field: 'name', direction: 'desc' }]);
+    expect(table.getAriaSort(sortable)).toBe('descending');
+  });
+
+  it('opens a clickable row from the keyboard with Enter or Space', () => {
+    setup([{ field: 'name', header: 'Name' }], rows(1), { clickableRows: true });
+    const clicked: unknown[] = [];
+    table.rowClick.subscribe(row => clicked.push(row));
+    const tr = document.createElement('tr');
+    const key = (k: string, target: EventTarget = tr) => {
+      const preventDefault = vi.fn();
+      table.onRowKeydown(rows(1)[0], { key: k, target, currentTarget: tr, preventDefault } as unknown as KeyboardEvent);
+      return preventDefault;
+    };
+
+    key('Enter');
+    const spacePrevented = key(' ');
+    key('a');
+
+    expect(clicked.length).toBe(2);
+    expect(spacePrevented).toHaveBeenCalled();
+  });
+
+  it('leaves keys pressed on a control inside the row to that control', () => {
+    setup([{ field: 'name', header: 'Name' }], rows(1), { clickableRows: true });
+    const clicked: unknown[] = [];
+    table.rowClick.subscribe(row => clicked.push(row));
+    const tr = document.createElement('tr');
+    const button = document.createElement('button');
+
+    table.onRowKeydown(rows(1)[0], { key: 'Enter', target: button, currentTarget: tr, preventDefault: vi.fn() } as unknown as KeyboardEvent);
+
+    expect(clicked.length).toBe(0);
+  });
+
+  it('ignores row keys when rows are not clickable', () => {
+    setup([{ field: 'name', header: 'Name' }], rows(1));
+    const clicked: unknown[] = [];
+    table.rowClick.subscribe(row => clicked.push(row));
+    const tr = document.createElement('tr');
+
+    table.onRowKeydown(rows(1)[0], { key: 'Enter', target: tr, currentTarget: tr, preventDefault: vi.fn() } as unknown as KeyboardEvent);
+
+    expect(clicked.length).toBe(0);
+  });
+
+  it('offers to select every matching row once the whole page is selected', () => {
+    setup([{ field: 'name', header: 'Name' }], rows(60), { selectable: true });
+    const emitted: unknown[][] = [];
+    table.selectionChange.subscribe(sel => emitted.push(sel));
+
+    table.toggleSelectAll();
+    expect(emitted.at(-1)!.length).toBe(25);
+    expect(internals.showSelectAllMatching()).toBe(true);
+
+    table.selectAllMatching();
+    expect(emitted.at(-1)!.length).toBe(60);
+    expect(internals.allMatchingSelected()).toBe(true);
+
+    table.clearSelection();
+    expect(emitted.at(-1)).toEqual([]);
+    expect(internals.showSelectAllMatching()).toBe(false);
+  });
+
+  it('selects only the rows the column filters leave visible', () => {
+    setup([{ field: 'name', header: 'Name' }], rows(60), { selectable: true });
+    const emitted: unknown[][] = [];
+    table.selectionChange.subscribe(sel => emitted.push(sel));
+    internals.filters.set({ name: 'row 1' });
+
+    table.selectAllMatching();
+
+    expect(emitted.at(-1)!.length).toBe(internals.sortedData().length);
+    expect(emitted.at(-1)!.length).toBe(11);
+  });
+
+  it('drops rows a new column filter hides from the selection handed to bulk actions', () => {
+    setup([{ field: 'name', header: 'Name' }], rows(3), { selectable: true });
+    const emitted: unknown[][] = [];
+    table.selectionChange.subscribe(sel => emitted.push(sel));
+    table.toggleSelectAll();
+    expect(emitted.at(-1)!.length).toBe(3);
+
+    table.onFilterApplied({ field: 'name', value: 'row 2' });
+
+    expect(emitted.at(-1)).toEqual([{ id: 2, name: 'Row 2' }]);
   });
 });
