@@ -6,12 +6,12 @@ import { AuthService } from './auth.service';
 import { CapabilityService } from './capability.service';
 import { NavTreeService } from './nav-tree.service';
 
-function routesFor(roles: string[]): string[] {
+function routesFor(roles: string[], enabled: (code: string) => boolean = () => true): string[] {
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     providers: [
       provideRouter([]),
-      { provide: CapabilityService, useValue: { isEnabled: () => true } },
+      { provide: CapabilityService, useValue: { isEnabled: enabled } },
       { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)), user: () => null } },
     ],
   });
@@ -40,5 +40,21 @@ describe('NavTreeService · assets', () => {
   it('keeps assets off the office and shop-floor menus', () => {
     expect(routesFor(['OfficeManager'])).not.toContain('/assets');
     expect(routesFor(['ProductionWorker'])).not.toContain('/assets');
+  });
+});
+
+describe('NavTreeService · maintenance', () => {
+  it('opens preventive maintenance schedules from the Maintenance entry', () => {
+    const routes = routesFor(['Manager'], code => code !== 'CAP-MAINT-PREDICTIVE');
+
+    expect(routes).toContain('/maintenance/schedules');
+    expect(routes).not.toContain('/maintenance/predictions');
+  });
+
+  it('lists predictions only when predictive maintenance is on', () => {
+    const routes = routesFor(['Manager'], code => code !== 'CAP-MAINT-PM');
+
+    expect(routes).toContain('/maintenance/predictions');
+    expect(routes).not.toContain('/maintenance/schedules');
   });
 });

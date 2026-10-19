@@ -20,6 +20,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { toDateOnly } from '../../../shared/utils/date.utils';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-eco-list',
@@ -29,7 +30,7 @@ import { toDateOnly } from '../../../shared/utils/date.utils';
     DataTableComponent, ColumnCellDirective,
     SelectComponent, InputComponent, TextareaComponent, DatepickerComponent,
     DialogComponent, LoadingBlockDirective,
-    ValidationButtonComponent, MatTooltipModule,
+    ValidationButtonComponent, MatTooltipModule, TranslatePipe,
   ],
   templateUrl: './eco-list.component.html',
   styleUrl: './eco-list.component.scss',
@@ -39,6 +40,7 @@ export class EcoListComponent implements OnInit {
   private readonly ecoService = inject(EcoService);
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -194,11 +196,9 @@ export class EcoListComponent implements OnInit {
     const eco = this.selectedEco();
     if (!eco) return;
     this.saving.set(true);
-    this.ecoService.updateEco(eco.id, { title: eco.title }).subscribe({
+    this.ecoService.submitEco(eco.id).subscribe({
       next: () => {
-        // Update status to Review
-        this.ecoService.updateEco(eco.id, {} as never).subscribe();
-        this.snackbar.success('ECO submitted for review');
+        this.snackbar.success(this.translate.instant('quality.ecoSubmitted'));
         this.saving.set(false);
         this.refreshDetail(eco.id);
         this.loadEcos();
@@ -335,6 +335,10 @@ export class EcoListComponent implements OnInit {
       case 'Low': return 'chip chip--muted';
       default: return 'chip';
     }
+  }
+
+  canSubmit(eco: Eco): boolean {
+    return eco.status === 'Draft';
   }
 
   canApprove(eco: Eco): boolean {

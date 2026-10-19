@@ -151,6 +151,11 @@
     </div>
 
     <div dialog-footer>
+      @if (canSubmit(eco)) {
+        <button class="action-btn action-btn--primary" [disabled]="saving()" (click)="submitForReview()" data-testid="eco-submit-btn">
+          <span class="material-icons-outlined">send</span> {{ 'quality.ecoSubmitForReview' | translate }}
+        </button>
+      }
       @if (canApprove(eco)) {
         <button class="action-btn action-btn--primary" [disabled]="saving()" (click)="approveEco()">
           <span class="material-icons-outlined">check</span> Approve

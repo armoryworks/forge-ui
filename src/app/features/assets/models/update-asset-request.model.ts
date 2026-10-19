@@ -14,4 +14,5 @@ export interface UpdateAssetRequest {
   isCustomerOwned?: boolean;
   cavityCount?: number;
   toolLifeExpectancy?: number;
+  currentShotCount?: number;
 }

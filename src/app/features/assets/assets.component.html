@@ -102,6 +102,9 @@
           <app-input [label]="'assets.cavityCount' | translate" type="number" formControlName="cavityCount" />
           <app-input [label]="'assets.toolLifeExpectancy' | translate" type="number" formControlName="toolLifeExpectancy" />
         </div>
+        @if (editingAsset()) {
+          <app-input [label]="'assets.currentShotCount' | translate" type="number" formControlName="currentShotCount" data-testid="asset-shot-count" />
+        }
       }
     </div>
 

@@ -79,6 +79,7 @@ export class AssetsComponent implements OnInit {
     isCustomerOwned: new FormControl(false),
     cavityCount: new FormControl<number | null>(null),
     toolLifeExpectancy: new FormControl<number | null>(null),
+    currentShotCount: new FormControl<number | null>(null, [Validators.min(0)]),
     // Phase 3 F4 — full-record fields. All optional on create.
     acquisitionCost: new FormControl<number | null>(null, [Validators.min(0), Validators.max(1_000_000_000)]),
     depreciationMethod: new FormControl<'StraightLine' | 'DecliningBalance' | 'UnitsOfProduction' | null>(null),
@@ -213,7 +214,7 @@ export class AssetsComponent implements OnInit {
     this.assetForm.reset({
       name: '', assetType: 'Machine', status: 'Active', location: '',
       manufacturer: '', model: '', serialNumber: '', notes: '',
-      isCustomerOwned: false, cavityCount: null, toolLifeExpectancy: null,
+      isCustomerOwned: false, cavityCount: null, toolLifeExpectancy: null, currentShotCount: null,
       // Phase 3 F4 — reset full-record fields too.
       acquisitionCost: null, depreciationMethod: null,
       workCenterId: null, glAccount: null,
@@ -236,6 +237,7 @@ export class AssetsComponent implements OnInit {
       isCustomerOwned: asset.isCustomerOwned ?? false,
       cavityCount: asset.cavityCount,
       toolLifeExpectancy: asset.toolLifeExpectancy,
+      currentShotCount: asset.currentShotCount,
     });
     this.showDialog.set(true);
   }
@@ -264,6 +266,7 @@ export class AssetsComponent implements OnInit {
         isCustomerOwned: form.isCustomerOwned ?? false,
         cavityCount: form.cavityCount ?? undefined,
         toolLifeExpectancy: form.toolLifeExpectancy ?? undefined,
+        currentShotCount: form.currentShotCount ?? undefined,
       }).subscribe({
         next: () => {
           this.saving.set(false);

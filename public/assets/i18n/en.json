@@ -84,7 +84,8 @@
     "chartOfAccounts": "Chart of Accounts",
     "pieceRates": "Piece Rates",
     "openingJournal": "Opening Journal",
-    "journalApprovals": "Journal Approvals"
+    "journalApprovals": "Journal Approvals",
+    "maintenancePredictions": "Predictions"
   },
   "navGroups": {
     "operations": "Operations",
@@ -3305,7 +3306,8 @@
     "colStatus": "Status",
     "colHours": "Hours",
     "maintenanceHistory": "Maintenance History",
-    "noMaintenanceLogs": "No maintenance logs"
+    "noMaintenanceLogs": "No maintenance logs",
+    "currentShotCount": "Current shot count"
   },
   "admin": {
     "title": "Admin Settings",
@@ -6661,7 +6663,11 @@
       "inventoryLocation": "Inventory Location Flow",
       "customerRevenue": "Customer Revenue Breakdown",
       "trainingCompletion": "Training Completion"
-    }
+    },
+    "colFailures": "Failures",
+    "colDowntimeHours": "Downtime (h)",
+    "colUnplannedDowntimeHours": "Unplanned downtime (h)",
+    "colMtbfHours": "MTBF (h)"
   },
   "qcInspections": {
     "tabTemplates": "Templates",
@@ -6832,7 +6838,9 @@
     "inspector": "Inspector",
     "expires": "Expires",
     "traceQty": "Qty: {{qty}}",
-    "jobId": "Job ID"
+    "jobId": "Job ID",
+    "ecoSubmitForReview": "Submit for Review",
+    "ecoSubmitted": "ECO submitted for review"
   },
   "ncrDetail": {
     "createTitle": "Create Non-Conformance",
@@ -11852,6 +11860,40 @@
     "binOptionNoLot": "{{location}} - {{available}} available",
     "noIssuableMaterials": "This job's part has no BOM components or approved alternates to issue.",
     "noIssuableStock": "No stock of this part can be issued: it is out of stock or on quality hold."
+  },
+  "maintenanceSchedules": {
+    "pageTitle": "Preventive Maintenance",
+    "subtitle": "Recurring maintenance by calendar, run hours or shot count",
+    "newSchedule": "New PM Schedule",
+    "empty": "No preventive maintenance schedules yet",
+    "colAsset": "Asset",
+    "colTitle": "Task",
+    "colInterval": "Interval",
+    "colLastPerformed": "Last done",
+    "colNextDue": "Next due",
+    "statusDue": "Due",
+    "statusOk": "OK",
+    "logService": "Log service",
+    "createJob": "Create maintenance job",
+    "asset": "Asset",
+    "title": "Task",
+    "description": "Description",
+    "intervalDays": "Every (days)",
+    "intervalHours": "Every (run hours)",
+    "intervalShots": "Every (shots)",
+    "nextDueAt": "Next due",
+    "usageHint": "Run-hour and shot intervals count from the meter reading recorded at the last service.",
+    "created": "PM schedule created",
+    "logged": "Service logged",
+    "jobCreated": "Maintenance job created",
+    "logTitle": "Log service: {{title}}",
+    "logHint": "Leave the meter readings blank to record the asset's current hours and shot count.",
+    "hoursAtService": "Run hours at service",
+    "shotCountAtService": "Shot count at service",
+    "cost": "Cost",
+    "everyDays": "{{count}} days",
+    "everyHours": "{{count}} h",
+    "everyShots": "{{count}} shots"
   },
   "workingCalendars": {
     "title": "Working Calendars",
