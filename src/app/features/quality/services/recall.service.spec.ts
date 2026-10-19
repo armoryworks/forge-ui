@@ -57,7 +57,14 @@ describe('RecallService', () => {
     service.resolveRecall(3, 'Customers notified').subscribe();
     const req = httpMock.expectOne(`${base}/3/resolve`);
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({ resolutionNotes: 'Customers notified' });
+    expect(req.request.body).toEqual({ resolutionNotes: 'Customers notified', releaseHeldStock: false });
+    req.flush({ id: 3 });
+  });
+
+  it('resolveRecall() asks to release held stock only when told to', () => {
+    service.resolveRecall(3, null, true).subscribe();
+    const req = httpMock.expectOne(`${base}/3/resolve`);
+    expect(req.request.body).toEqual({ resolutionNotes: null, releaseHeldStock: true });
     req.flush({ id: 3 });
   });
 });

@@ -9,6 +9,7 @@ import { RecallService } from '../../services/recall.service';
 import { RecallDetail } from '../../models/recall-detail.model';
 import { RECALL_STATUS_CHIP_CLASSES, RECALL_STATUS_LABEL_KEYS, RecallStatus } from '../../models/recall-status.model';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
@@ -26,7 +27,7 @@ export interface RecallDetailDialogData {
   standalone: true,
   imports: [
     DatePipe, DecimalPipe, ReactiveFormsModule, MatTooltipModule, TranslatePipe,
-    TextareaComponent, DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
+    TextareaComponent, ToggleComponent, DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
     DetailLoadErrorComponent,
   ],
   templateUrl: './recall-detail-dialog.component.html',
@@ -56,6 +57,7 @@ export class RecallDetailDialogComponent {
 
   protected readonly resolveForm = new FormGroup({
     resolutionNotes: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(2000)] }),
+    releaseHeldStock: new FormControl<boolean>(false, { nonNullable: true }),
   });
 
   protected readonly lotColumns: ColumnDef[] = [
@@ -93,7 +95,8 @@ export class RecallDetailDialogComponent {
     if (!recall || !this.canResolve() || this.resolveForm.invalid || this.resolving()) return;
     this.resolving.set(true);
     const notes = this.resolveForm.controls.resolutionNotes.value.trim();
-    this.recallService.resolveRecall(recall.id, notes || null).subscribe({
+    const releaseHeldStock = this.resolveForm.controls.releaseHeldStock.value;
+    this.recallService.resolveRecall(recall.id, notes || null, releaseHeldStock).subscribe({
       next: (updated) => {
         this.resolving.set(false);
         this.recall.set(updated);

@@ -94,3 +94,8 @@
 .recall-approx {
   margin-left: $sp-sm;
 }
+
+.recall-release-hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}

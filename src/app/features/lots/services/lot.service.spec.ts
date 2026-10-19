@@ -76,4 +76,24 @@ describe('LotService', () => {
       req.flush({ id: 1 });
     });
   });
+
+  describe('files', () => {
+    it('should GET the files attached to the lot', () => {
+      service.getFiles(7).subscribe();
+      const req = httpMock.expectOne(`${apiUrl}/lots/7/files`);
+      expect(req.request.method).toBe('GET');
+      req.flush([]);
+    });
+
+    it('should DELETE a lot file through the files endpoint', () => {
+      service.deleteFile(12).subscribe();
+      const req = httpMock.expectOne(`${apiUrl}/files/12`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush(null);
+    });
+
+    it('should build the download URL for a lot file', () => {
+      expect(service.downloadFileUrl(12)).toBe(`${apiUrl}/files/12/download`);
+    });
+  });
 });

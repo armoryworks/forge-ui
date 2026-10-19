@@ -44,6 +44,7 @@ export class LotDialogComponent {
 
   protected readonly lotForm = new FormGroup({
     partId: new FormControl<number | null>(null, [Validators.required]),
+    lotNumber: new FormControl('', [Validators.maxLength(100)]),
     quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0.0001)]),
     jobId: new FormControl<number | null>(null),
     supplierLotNumber: new FormControl(''),
@@ -72,6 +73,7 @@ export class LotDialogComponent {
     const f = this.lotForm.getRawValue();
 
     this.service.create({
+      lotNumber: f.lotNumber?.trim() || null,
       partId: f.partId!,
       quantity: f.quantity!,
       jobId: f.jobId ?? null,

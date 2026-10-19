@@ -18,6 +18,13 @@
       data-testid="lot-part"
       [attr.aria-label]="'lots.fieldPart' | translate" />
 
+    <app-input
+      [label]="'lots.lotNumber' | translate"
+      formControlName="lotNumber"
+      [placeholder]="'lots.lotNumberPlaceholder' | translate"
+      data-testid="lot-number"
+      [attr.aria-label]="'lots.lotNumber' | translate" />
+
     <div class="dialog-row">
       <app-input
         label="Quantity"

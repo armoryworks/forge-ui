@@ -1,5 +1,5 @@
-import { DatePipe, NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, effect, inject, input, signal } from '@angular/core';
+import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { SerialService } from '../../services/serial.service';
@@ -17,13 +17,16 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { CapabilityService } from '../../../../shared/services/capability.service';
+import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-serial-numbers-tab',
   standalone: true,
   imports: [
-    DatePipe, NgTemplateOutlet, ReactiveFormsModule,
-    DataTableComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent,
+    DatePipe, DecimalPipe, NgTemplateOutlet, ReactiveFormsModule, TranslatePipe,
+    DataTableComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, EntityPickerComponent,
     EmptyStateComponent, LoadingBlockDirective, ValidationButtonComponent, ColumnCellDirective,
   ],
   templateUrl: './serial-numbers-tab.component.html',
@@ -33,8 +36,12 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 export class SerialNumbersTabComponent {
   private readonly serialService = inject(SerialService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly capabilities = inject(CapabilityService);
 
   readonly partId = input.required<number>();
+
+  protected readonly lotsEnabled = computed(() => this.capabilities.isEnabled('CAP-INV-LOTS'));
+  protected readonly lotFilters = computed<Record<string, string>>(() => ({ partId: String(this.partId()) }));
 
   protected readonly serials = signal<SerialNumber[]>([]);
   protected readonly loading = signal(false);
@@ -54,6 +61,8 @@ export class SerialNumbersTabComponent {
 
   protected readonly createForm = new FormGroup({
     serialValue: new FormControl('', [Validators.required, Validators.maxLength(100)]),
+    jobId: new FormControl<number | null>(null),
+    lotRecordId: new FormControl<number | null>(null),
     notes: new FormControl(''),
   });
 
@@ -114,7 +123,7 @@ export class SerialNumbersTabComponent {
   }
 
   protected openCreate(): void {
-    this.createForm.reset({ serialValue: '', notes: '' });
+    this.createForm.reset({ serialValue: '', jobId: null, lotRecordId: null, notes: '' });
     this.showCreateDialog.set(true);
   }
 
@@ -128,6 +137,8 @@ export class SerialNumbersTabComponent {
     const f = this.createForm.getRawValue();
     this.serialService.createSerialNumber(this.partId(), {
       serialValue: f.serialValue!,
+      jobId: f.jobId ?? undefined,
+      lotRecordId: f.lotRecordId ?? undefined,
       notes: f.notes || undefined,
     }).subscribe({
       next: () => {

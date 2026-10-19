@@ -26,6 +26,10 @@ import { ColumnCellDirective } from '../../../../shared/directives/column-cell.d
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
+import { FileUploadZoneComponent } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
+import { FileAttachment } from '../../../../shared/models/file.model';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
 
 const STATUS_KEYS: Record<string, Record<string, string>> = {
   QcInspection: {
@@ -62,7 +66,7 @@ const NCR_STATUS_KEYS: Record<string, string> = {
 @Component({
   selector: 'app-lot-detail-panel',
   standalone: true,
-  imports: [DateOnlyPipe, DatePipe, DecimalPipe, MatTooltipModule, TranslatePipe, BarcodeInfoComponent, EntityActivitySectionComponent, LoadingBlockDirective, DataTableComponent, ColumnCellDirective, EntityLinkComponent, DetailLoadErrorComponent],
+  imports: [DateOnlyPipe, DatePipe, DecimalPipe, MatTooltipModule, TranslatePipe, BarcodeInfoComponent, EntityActivitySectionComponent, LoadingBlockDirective, DataTableComponent, ColumnCellDirective, EntityLinkComponent, DetailLoadErrorComponent, FileUploadZoneComponent],
   templateUrl: './lot-detail-panel.component.html',
   styleUrl: './lot-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -76,6 +80,7 @@ export class LotDetailPanelComponent {
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
   private readonly hostDialogRef = inject(MatDialogRef, { optional: true });
+  private readonly snackbar = inject(SnackbarService);
 
   readonly lotId = input.required<number>();
   readonly lotNumber = input.required<string>();
@@ -85,11 +90,14 @@ export class LotDetailPanelComponent {
   protected readonly loading = signal(true);
   protected readonly loadError = signal<unknown>(null);
   protected readonly initiatedRecall = signal<RecallDetail | null>(null);
+  protected readonly files = signal<FileAttachment[]>([]);
 
   protected readonly shippedTo = computed(() => this.trace()?.shippedTo ?? []);
   protected readonly receivedFrom = computed(() => this.trace()?.receivedFrom ?? []);
   protected readonly inspections = computed(() => this.trace()?.inspections ?? []);
   protected readonly nonConformances = computed(() => this.trace()?.nonConformances ?? []);
+
+  protected readonly canAttachFiles = computed(() => this.capabilities.isEnabled('CAP-CROSS-ATTACHMENTS'));
 
   protected readonly canInitiateRecall = computed(() =>
     this.auth.hasAnyRole(['Admin', 'Manager']) && this.capabilities.isEnabled('CAP-QC-RECALL'));
@@ -140,6 +148,61 @@ export class LotDetailPanelComponent {
         error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); },
       });
     });
+
+    effect(() => {
+      const id = this.lotId();
+      this.files.set([]);
+      if (id && this.canAttachFiles()) this.loadFiles(id);
+    });
+  }
+
+  private loadFiles(lotId: number): void {
+    this.service.getFiles(lotId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (files) => this.files.set(files),
+    });
+  }
+
+  protected downloadFile(doc: FileAttachment): void {
+    window.open(this.service.downloadFileUrl(doc.id), '_blank');
+  }
+
+  protected deleteFile(doc: FileAttachment): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('lots.deleteFileTitle'),
+        message: this.translate.instant('lots.deleteFileMessage', { name: doc.fileName }),
+        confirmLabel: this.translate.instant('common.delete'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.service.deleteFile(doc.id).subscribe({
+        next: () => {
+          this.files.update(list => list.filter(f => f.id !== doc.id));
+          this.snackbar.success(this.translate.instant('lots.fileDeleted'));
+        },
+      });
+    });
+  }
+
+  protected onFileUploaded(): void {
+    this.loadFiles(this.lotId());
+    this.snackbar.success(this.translate.instant('lots.fileUploaded'));
+  }
+
+  protected getFileIcon(contentType: string): string {
+    if (contentType.startsWith('image/')) return 'image';
+    if (contentType === 'application/pdf') return 'picture_as_pdf';
+    if (contentType.includes('spreadsheet') || contentType.includes('excel')) return 'table_chart';
+    if (contentType.includes('document') || contentType.includes('word')) return 'description';
+    return 'attach_file';
+  }
+
+  protected formatFileSize(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
   protected getTraceEventIcon(type: string): string {
@@ -149,6 +212,7 @@ export class LotDetailPanelComponent {
       PurchaseOrder: 'description',
       BinLocation: 'inventory_2',
       QcInspection: 'fact_check',
+      IssuedToJob: 'move_to_inbox',
     };
     return map[type] ?? 'circle';
   }
