@@ -98,7 +98,7 @@ export class NavTreeService {
     {
       icon: 'precision_manufacturing', label: 'Production', i18nKey: 'navGroups.production',
       children: [
-        { icon: 'view_kanban', label: 'Board', i18nKey: 'nav.kanban', route: '/kanban', shortcut: ['Q', 'K'], capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'Engineer', 'ProductionWorker'] },
+        { icon: 'view_kanban', label: 'Board', i18nKey: 'nav.kanban', route: '/kanban', shortcut: ['Q', 'K'], capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'PM', 'Engineer', 'ProductionWorker', 'OfficeManager'] },
         { icon: 'inbox', label: 'Backlog', i18nKey: 'nav.backlog', route: '/backlog', shortcut: ['Q', 'B'], capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'PM', 'Engineer'] },
         { icon: 'event_note', label: 'Planning', i18nKey: 'nav.planning', route: '/planning', capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'PM'] },
         { icon: 'event_available', label: 'Scheduling', i18nKey: 'nav.scheduling', route: '/scheduling', capability: 'CAP-PLAN-CAPACITY', allowedRoles: ['Admin', 'Manager'] },
