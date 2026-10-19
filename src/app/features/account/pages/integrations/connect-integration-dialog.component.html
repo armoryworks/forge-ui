@@ -1,16 +1,19 @@
-<app-dialog [title]="'Connect ' + data.provider.displayName" width="480px" (closed)="close()">
+<app-dialog [title]="'account.integrationConnectTitle' | translate: { name: data.provider.displayName }" width="480px" (closed)="close()">
   <div [formGroup]="form">
-    <app-input label="Display Name (optional)"
-               placeholder="e.g., Work Calendar"
+    <app-input [label]="'account.integrationDisplayName' | translate"
+               [placeholder]="'account.integrationDisplayNamePlaceholder' | translate"
                formControlName="displayName"
+               (keydown.enter)="save()"
                data-testid="integration-display-name" />
 
     @if (!isNoAuth) {
-      @if (data.provider.authType === 'webhook' || data.provider.authType === 'oauth2' || data.provider.authType === 'app_password') {
+      @if (isSingleSecret) {
         <app-input [label]="credentialLabel"
+                   type="password"
                    [placeholder]="credentialPlaceholder"
                    formControlName="credentials"
                    [required]="true"
+                   (keydown.enter)="save()"
                    data-testid="integration-credentials" />
       } @else {
         <app-textarea [label]="credentialLabel"
@@ -30,14 +33,14 @@
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="close()">Cancel</button>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <app-validation-button [violations]="violations" [loading]="saving()">
     <button class="action-btn action-btn--primary"
             [disabled]="form.invalid || saving()"
             (click)="save()"
             data-testid="integration-save-btn">
       <span class="material-icons-outlined">{{ saving() ? 'sync' : 'link' }}</span>
-      {{ saving() ? 'Connecting...' : 'Connect' }}
+      {{ (saving() ? 'account.integrationConnecting' : 'account.integrationConnect') | translate }}
     </button>
     </app-validation-button>
   </div>

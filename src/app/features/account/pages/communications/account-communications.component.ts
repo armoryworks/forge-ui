@@ -25,6 +25,7 @@ interface KindGroup {
   capability: string;
   capabilityEnabled: boolean;
   connected: CommunicationSyncConfigSummary[];
+  healthyCount: number;
   available: CommunicationProviderInfo[];
 }
 
@@ -76,7 +77,11 @@ export class AccountCommunicationsComponent implements OnInit {
 
   protected readonly kindGroups = computed<KindGroup[]>(() => {
     const connections = this.service.connections();
-    const providers = this.service.providers;
+    const configuredOAuth = this.service.configuredOAuthProviders();
+    const providers = this.service.providers.filter(p => {
+      const oauthKey = CommunicationsService.oauthProviderKey(p.providerId);
+      return oauthKey === null || configuredOAuth.has(oauthKey);
+    });
 
     const groups: { kind: 'Email' | 'Voice'; labelKey: string; icon: string; capability: string }[] = [
       { kind: 'Email', labelKey: 'account.communications.kindEmail', icon: 'mail', capability: 'CAP-EXT-EMAIL-SYNC' },
@@ -97,6 +102,7 @@ export class AccountCommunicationsComponent implements OnInit {
         ...g,
         capabilityEnabled: this.capabilities.isEnabled(g.capability),
         connected,
+        healthyCount: connected.filter(c => c.isConnected && !c.lastError).length,
         available,
       };
     });
@@ -104,6 +110,7 @@ export class AccountCommunicationsComponent implements OnInit {
 
   ngOnInit(): void {
     this.service.loadConnections();
+    this.service.loadOAuthProviders();
   }
 
   protected connectProvider(provider: CommunicationProviderInfo): void {
@@ -120,8 +127,8 @@ export class AccountCommunicationsComponent implements OnInit {
     // authorize URL; we navigate same-tab to it. The provider redirects
     // to /account/communications/oauth-callback which exchanges code+state
     // and bounces back to /account/communications.
-    if (provider.providerId === 'gmail-oauth' || provider.providerId === 'microsoft-oauth') {
-      const providerKey = provider.providerId === 'gmail-oauth' ? 'google' : 'microsoft';
+    const providerKey = CommunicationsService.oauthProviderKey(provider.providerId);
+    if (providerKey) {
       this.service.beginOAuthImap(providerKey).subscribe({
         next: (result) => {
           // Persist provider-key for the callback page to know which

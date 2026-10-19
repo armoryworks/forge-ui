@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
-import { finalize, Observable, tap } from 'rxjs';
+import { catchError, finalize, map, Observable, of, tap } from 'rxjs';
 
 import {
   CommunicationProviderInfo,
@@ -27,6 +27,8 @@ export class CommunicationsService {
   readonly loading = signal(false);
   /** Connection ids currently syncing — keyed for per-card spinner state. */
   readonly syncing = signal<Set<number>>(new Set());
+  /** OAuth-IMAP provider keys ('google' / 'microsoft') an admin has configured on this install. */
+  readonly configuredOAuthProviders = signal<ReadonlySet<string>>(new Set());
 
   /**
    * Static provider catalog. Each entry implements `ICommunicationSyncProvider`
@@ -100,6 +102,20 @@ export class CommunicationsService {
       status: 'planned',
     },
   ];
+
+  /** Catalog provider id → OAuth provider key, for providers that sign in through OAuth-IMAP. */
+  static oauthProviderKey(providerId: string): 'google' | 'microsoft' | null {
+    if (providerId === 'gmail-oauth') return 'google';
+    if (providerId === 'microsoft-oauth') return 'microsoft';
+    return null;
+  }
+
+  loadOAuthProviders(): void {
+    this.http.get<{ provider: string; isConfigured: boolean }[]>(`${this.baseUrl}/oauth/imap/providers`).pipe(
+      map(list => new Set(list.filter(p => p.isConfigured).map(p => p.provider))),
+      catchError(() => of(new Set<string>())),
+    ).subscribe(configured => this.configuredOAuthProviders.set(configured));
+  }
 
   loadConnections(): void {
     this.loading.set(true);

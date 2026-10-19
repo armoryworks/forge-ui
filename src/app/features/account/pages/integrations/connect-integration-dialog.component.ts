@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -21,6 +22,7 @@ export interface ConnectIntegrationDialogData {
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    TranslatePipe,
     DialogComponent,
     InputComponent,
     TextareaComponent,
@@ -33,6 +35,7 @@ export class ConnectIntegrationDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<ConnectIntegrationDialogComponent>);
   private readonly integrationService = inject(UserIntegrationService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly data = inject<ConnectIntegrationDialogData>(MAT_DIALOG_DATA);
   protected readonly saving = signal(false);
@@ -46,6 +49,13 @@ export class ConnectIntegrationDialogComponent {
   protected readonly violations = FormValidationService.getViolations(this.form, {
     credentials: this.credentialLabel,
   });
+
+  constructor() {
+    if (this.isNoAuth) {
+      this.form.controls.credentials.clearValidators();
+      this.form.controls.credentials.updateValueAndValidity();
+    }
+  }
 
   protected get credentialLabel(): string {
     switch (this.data.provider.authType) {
@@ -81,6 +91,11 @@ export class ConnectIntegrationDialogComponent {
       default:
         return 'Enter credentials';
     }
+  }
+
+  protected get isSingleSecret(): boolean {
+    const authType = this.data.provider.authType;
+    return authType === 'webhook' || authType === 'oauth2' || authType === 'app_password';
   }
 
   protected get isNoAuth(): boolean {
@@ -120,7 +135,7 @@ export class ConnectIntegrationDialogComponent {
     }).subscribe({
       next: () => {
         this.saving.set(false);
-        this.snackbar.success(`${this.data.provider.displayName} connected`);
+        this.snackbar.success(this.translate.instant('account.integrationConnected', { name: this.data.provider.displayName }));
         this.dialogRef.close(true);
       },
       error: () => this.saving.set(false),

@@ -1,6 +1,9 @@
 <div class="comms" [appLoadingBlock]="loading()">
   <div class="comms__header">
-    <h2 class="comms__title">{{ 'account.communications.title' | translate }}</h2>
+    <h1 class="account-page__title">
+      <span class="material-icons-outlined">forum</span>
+      {{ 'account.communications.title' | translate }}
+    </h1>
     <p class="comms__subtitle">{{ 'account.communications.subtitle' | translate }}</p>
   </div>
 
@@ -35,7 +38,7 @@
       <div class="kind-group__header">
         <span class="material-icons-outlined kind-group__icon">{{ group.icon }}</span>
         <h3 class="kind-group__title">{{ group.labelKey | translate }}</h3>
-        <span class="kind-group__count">{{ group.connected.length }} {{ 'account.communications.connectedSuffix' | translate }}</span>
+        <span class="kind-group__count">{{ group.healthyCount }} {{ 'account.communications.connectedSuffix' | translate }}</span>
       </div>
 
       @if (!group.capabilityEnabled) {
