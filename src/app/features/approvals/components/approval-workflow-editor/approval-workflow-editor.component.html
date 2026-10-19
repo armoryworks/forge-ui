@@ -44,6 +44,12 @@
         <app-textarea [label]="'approvals.workflows.description' | translate" formControlName="description" [rows]="2" />
         <app-input [label]="'approvals.workflows.amountThreshold' | translate" formControlName="amountThreshold" type="number" [placeholder]="'approvals.workflows.amountPlaceholder' | translate" />
       </div>
+      @if (unsupportedConditions()) {
+        <p class="conditions-warning" role="alert" data-testid="workflow-unsupported-conditions">
+          <span class="material-icons-outlined" aria-hidden="true">warning_amber</span>
+          {{ 'approvals.workflows.unsupportedConditions' | translate }}
+        </p>
+      }
 
       <div class="steps-section">
         <div class="steps-section__header">

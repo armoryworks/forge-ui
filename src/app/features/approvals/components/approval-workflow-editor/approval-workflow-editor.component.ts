@@ -45,6 +45,7 @@ export class ApprovalWorkflowEditorComponent implements OnInit {
   protected readonly workflows = signal<ApprovalWorkflow[]>([]);
   protected readonly showDialog = signal(false);
   protected readonly editingWorkflow = signal<ApprovalWorkflow | null>(null);
+  protected readonly unsupportedConditions = signal(false);
 
   protected readonly entityTypeOptions: SelectOption[] = [
     { value: 'PurchaseOrder', label: this.translate.instant('approvals.entityTypes.purchaseOrder') },
@@ -110,6 +111,7 @@ export class ApprovalWorkflowEditorComponent implements OnInit {
 
   protected openCreate(): void {
     this.editingWorkflow.set(null);
+    this.unsupportedConditions.set(false);
     this.workflowForm.reset({ entityType: 'PurchaseOrder' });
     this.stepsArray.clear();
     this.addStep();
@@ -118,13 +120,13 @@ export class ApprovalWorkflowEditorComponent implements OnInit {
 
   protected openEdit(workflow: ApprovalWorkflow): void {
     this.editingWorkflow.set(workflow);
-    const conditions = workflow.activationConditionsJson
-      ? JSON.parse(workflow.activationConditionsJson) : {};
+    const conditions = parseActivationConditions(workflow.activationConditionsJson);
+    this.unsupportedConditions.set(conditions.unsupported);
     this.workflowForm.patchValue({
       name: workflow.name,
       entityType: workflow.entityType,
       description: workflow.description ?? '',
-      amountThreshold: conditions.amountGreaterThan ?? null,
+      amountThreshold: conditions.amountGreaterThan,
     });
     this.stepsArray.clear();
     for (const s of workflow.steps) {
@@ -240,4 +242,29 @@ export class ApprovalWorkflowEditorComponent implements OnInit {
         error: () => this.loading.set(false),
       });
   }
+}
+
+function parseActivationConditions(json: string | null | undefined): { amountGreaterThan: number | null; unsupported: boolean } {
+  if (!json) return { amountGreaterThan: null, unsupported: false };
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(json);
+  } catch {
+    return { amountGreaterThan: null, unsupported: true };
+  }
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    return { amountGreaterThan: null, unsupported: true };
+  }
+  let amountGreaterThan: number | null = null;
+  let unsupported = false;
+  for (const [key, value] of Object.entries(parsed as Record<string, unknown>)) {
+    if (key.toLowerCase() !== 'amountgreaterthan') {
+      unsupported = true;
+    } else if (typeof value === 'number' && value >= 0) {
+      amountGreaterThan = value;
+    } else if (value !== null) {
+      unsupported = true;
+    }
+  }
+  return { amountGreaterThan, unsupported };
 }

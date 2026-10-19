@@ -3188,7 +3188,8 @@
     "colNextDue": "Próximo Vencimiento",
     "colActive": "Activo",
     "noVendor": "-- Ninguno (de bolsillo / tarjeta) --",
-    "vendorHint": "Al aprobarse, este gasto se convierte en una factura de proveedor en Cuentas por Pagar y se paga desde allí."
+    "vendorHint": "Al aprobarse, este gasto se convierte en una factura de proveedor en Cuentas por Pagar y se paga desde allí.",
+    "totalExcludingRejectedLabel": "Total (sin rechazados):"
   },
   "timeTracking": {
     "title": "Control de Tiempo",
@@ -5755,7 +5756,10 @@
       "expires": "Vence",
       "createAsBlanket": "Orden abierta",
       "createHint": "Las cantidades pedidas pasan a ser el total acordado; el proveedor envía contra las liberaciones que cree en la orden."
-    }
+    },
+    "linesReceived": "Líneas recibidas",
+    "linesReceivedOf": "{{received}} de {{total}}",
+    "receiveQtyFor": "Cantidad a recibir de {{line}}"
   },
   "poManage": {
     "packingSlipNumber": "N.º de lista de empaque",
@@ -8532,14 +8536,15 @@
       "awardTitle": "¿Adjudicar solicitud?"
     },
     "allStatuses": "All Statuses",
-    "awardRfqMessage": "Award this RFQ to the selected vendor?",
+    "awardRfqMessage": "¿Adjudicar {{rfq}} a {{vendor}}? Se creará una orden de compra en borrador a partir de su cotización.",
     "awardRfqTitle": "Award RFQ",
     "leadTime": "Lead Time",
     "selectPart": "Select Part",
     "rfq": {
       "confirmSendTitle": "¿Agregar proveedores a la RFQ?",
-      "confirmSendMessage": "¿Agregar {{count}} proveedor(es) a esta RFQ? Usted mismo se la enviará."
-    }
+      "confirmSendMessage": "¿Agregar los proveedores seleccionados ({{count}}) a esta RFQ? Esto no les envía un correo: descargue el PDF de la RFQ y envíelo usted mismo a cada proveedor."
+    },
+    "viewPo": "Ver OC"
   },
   "approvals": {
     "title": "Aprobaciones",
@@ -8623,7 +8628,8 @@
       "role": "Rol",
       "autoApproveBelow": "Auto-Aprobar Debajo de ($)",
       "escalateAfter": "Escalar Después de (horas)",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "unsupportedConditions": "Las condiciones de activación guardadas de este flujo no son compatibles, por lo que ahora solo se aplica cuando ningún otro flujo coincide. Establezca un umbral de importe (o déjelo vacío) y guarde para reemplazarlas."
     },
     "entityTypes": {
       "purchaseOrder": "Orden de Compra",
@@ -10517,7 +10523,7 @@
       "cancelTitle": "¿Cancelar lote?",
       "cancelMessage": "¿Cancelar {{number}}? Sus pagos vuelven al grupo elegible.",
       "eligiblePayments": "Pagos ACH elegibles",
-      "noneEligible": "No hay pagos ACH elegibles — registre pagos por transferencia bancaria primero.",
+      "noneEligible": "No hay pagos ACH elegibles. Registre primero un pago con el método Transferencia Bancaria.",
       "destination": "Destino",
       "needsAccount": "Requiere cuenta bancaria verificada",
       "selectedTotal": "Total seleccionado",
@@ -10526,7 +10532,8 @@
       "created": "Lote {{number}} armado",
       "prenoteHint": "Cada cuenta bancaria de proveedor aprobada (aún sin prenotificar) recibirá una entrada de verificación de cero dólares. Cuando pase la ventana de devoluciones del banco sin devolución, marque las cuentas como verificadas.",
       "importReturns": "Importar archivo de devoluciones",
-      "returnsApplied": "Devoluciones aplicadas: {{returned}} pago(s) devuelto(s), {{prenotes}} prenotificación(es) rechazada(s), {{nocs}} aviso(s) de corrección"
+      "returnsApplied": "Devoluciones aplicadas: {{returned}} pago(s) devuelto(s), {{prenotes}} prenotificación(es) rechazada(s), {{nocs}} aviso(s) de corrección",
+      "effectiveDatePast": "La fecha efectiva no puede ser anterior a hoy."
     },
     "bankAccounts": {
       "nickname": "Alias",
@@ -10563,7 +10570,14 @@
       "attested": "Transferencia atestiguada — marcada como transmitida"
     },
     "glAccount": "Cuenta contable",
-    "defaultExpenseAccount": "Cuenta de gastos predeterminada"
+    "defaultExpenseAccount": "Cuenta de gastos predeterminada",
+    "statusVoided": "Anulado",
+    "voidedOn": "Anulado el {{date}}",
+    "accountKeys": {
+      "OPERATING_EXPENSE": "Gasto operativo",
+      "GRNI": "Mercancía recibida no facturada"
+    },
+    "taxNegative": "El impuesto no puede ser negativo."
   },
   "terms": {
     "scope": {
