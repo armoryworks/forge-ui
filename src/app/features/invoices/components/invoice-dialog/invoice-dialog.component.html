@@ -15,6 +15,7 @@
                 <th scope="col" class="lines-table__right">{{ 'invoices.qty' | translate }}</th>
                 <th scope="col" class="lines-table__right">{{ 'invoices.unitPrice' | translate }}</th>
                 <th scope="col" class="lines-table__right">{{ 'common.total' | translate }}</th>
+                <th scope="col">{{ 'invoices.taxable' | translate }}</th>
                 <th scope="col"><span class="sr-only">{{ 'common.actions' | translate }}</span></th>
               </tr>
             </thead>
@@ -27,6 +28,11 @@
                   <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" /></td>
                   <td class="lines-table__right"><app-currency-display [value]="line.quantity * line.unitPrice" [currency]="null" /></td>
                   <td>
+                    <button class="icon-btn" type="button" [attr.aria-pressed]="line.taxable" [matTooltip]="(line.taxable ? 'invoices.taxableLine' : 'invoices.nonTaxableLine') | translate" matTooltipPosition="above" [attr.aria-label]="'invoices.taxable' | translate" [attr.data-testid]="'invoice-line-taxable-' + $index" (click)="toggleTaxable($index)">
+                      <span class="material-icons-outlined">{{ line.taxable ? 'check_box' : 'check_box_outline_blank' }}</span>
+                    </button>
+                  </td>
+                  <td>
                     <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" [attr.aria-label]="'common.remove' | translate" (click)="removeLine($index)">
                       <span class="material-icons-outlined">close</span>
                     </button>
@@ -38,6 +44,7 @@
               <tr>
                 <td colspan="4" class="lines-table__right lines-table__bold">{{ 'common.total' | translate }}</td>
                 <td class="lines-table__right lines-table__bold"><app-currency-display [value]="lineTotal()" [currency]="null" /></td>
+                <td></td>
                 <td></td>
               </tr>
             </tfoot>

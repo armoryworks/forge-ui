@@ -4,4 +4,5 @@ export interface InvoiceSourceShipmentLine {
   description: string;
   quantity: number;
   unitPrice: number;
+  taxable: boolean;
 }

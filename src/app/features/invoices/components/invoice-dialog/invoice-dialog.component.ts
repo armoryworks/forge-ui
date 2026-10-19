@@ -7,6 +7,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { EMPTY, catchError, distinctUntilChanged, of, startWith, switchMap } from 'rxjs';
 
 import { InvoiceService } from '../../services/invoice.service';
+import { AdminService } from '../../../admin/services/admin.service';
 import { CustomerService } from '../../../customers/services/customer.service';
 import { CustomerListItem } from '../../../customers/models/customer-list-item.model';
 import { PartListItem } from '../../../parts/models/part-list-item.model';
@@ -36,6 +37,7 @@ interface LineEntry {
   description: string;
   quantity: number;
   unitPrice: number;
+  taxable: boolean;
 }
 
 // ---- ACCOUNTING BOUNDARY ----
@@ -56,6 +58,7 @@ export class InvoiceDialogComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   private readonly invoiceService = inject(InvoiceService);
   private readonly customerService = inject(CustomerService);
+  private readonly adminService = inject(AdminService);
   private readonly currencyService = inject(ActiveCurrencyService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -184,11 +187,15 @@ export class InvoiceDialogComponent {
     this.lines().reduce((sum, l) => sum + l.quantity * l.unitPrice, 0)
   );
 
+  protected readonly taxableTotal = computed(() =>
+    this.lines().reduce((sum, l) => (l.taxable ? sum + l.quantity * l.unitPrice : sum), 0)
+  );
+
   protected readonly taxRateValue = toSignal(
     this.invoiceForm.controls.taxRate.valueChanges.pipe(startWith(this.invoiceForm.controls.taxRate.value ?? 0)),
     { initialValue: this.invoiceForm.controls.taxRate.value ?? 0 }
   );
-  protected readonly taxAmount = computed(() => (this.taxRateValue() ?? 0) / 100 * this.lineTotal());
+  protected readonly taxAmount = computed(() => (this.taxRateValue() ?? 0) / 100 * this.taxableTotal());
   protected readonly grandTotal = computed(() => this.lineTotal() + this.taxAmount());
 
   protected readonly draftConfig: DraftConfig = {
@@ -198,7 +205,10 @@ export class InvoiceDialogComponent {
     snapshotFn: () => ({ ...this.invoiceForm.getRawValue(), lines: this.lines() }),
     restoreFn: (data) => {
       this.invoiceForm.patchValue(data);
-      if (Array.isArray(data['lines'])) this.lines.set(data['lines'] as LineEntry[]);
+      if (Array.isArray(data['lines'])) {
+        this.lines.set((data['lines'] as LineEntry[]).map(l => ({ ...l, taxable: l.taxable ?? true })));
+      }
+      this.invoiceForm.controls.taxRate.markAsDirty();
       this.invoiceForm.markAsDirty();
     },
   };
@@ -223,7 +233,21 @@ export class InvoiceDialogComponent {
       }),
       takeUntilDestroyed(this.destroyRef),
     ).subscribe((sources) => {
-      if (sources) this.sources.set(sources);
+      if (!sources) return;
+      this.sources.set(sources);
+      const order = sources.salesOrders.find(so => so.id === controls.salesOrderId.value);
+      if (order) this.applyDefaultTaxRate(order.taxRate);
+    });
+
+    controls.customerId.valueChanges.pipe(
+      startWith(controls.customerId.value),
+      distinctUntilChanged(),
+      switchMap(customerId => customerId == null
+        ? EMPTY
+        : this.adminService.getTaxRateForCustomer(customerId).pipe(catchError(() => EMPTY))),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(rate => {
+      if (controls.salesOrderId.value == null) this.applyDefaultTaxRate(rate?.rate ?? 0);
     });
 
     controls.salesOrderId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((salesOrderId) => {
@@ -231,6 +255,8 @@ export class InvoiceDialogComponent {
       if (salesOrderId != null && shipment && shipment.salesOrderId !== salesOrderId) {
         controls.shipmentId.setValue(null);
       }
+      const order = this.sources().salesOrders.find(so => so.id === salesOrderId);
+      if (order) this.applyDefaultTaxRate(order.taxRate);
     });
 
     controls.shipmentId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((shipmentId) => {
@@ -282,6 +308,16 @@ export class InvoiceDialogComponent {
     this.closed.emit();
   }
 
+  private applyDefaultTaxRate(rate: number): void {
+    const control = this.invoiceForm.controls.taxRate;
+    if (control.dirty) return;
+    control.setValue(+(rate * 100).toFixed(4));
+  }
+
+  protected toggleTaxable(index: number): void {
+    this.lines.update(prev => prev.map((l, i) => (i === index ? { ...l, taxable: !l.taxable } : l)));
+  }
+
   private prefillLinesFrom(shipment: InvoiceSourceShipment | undefined): void {
     const untouched = this.lines().length === 0 || this.lines() === this.prefilledLines;
     if (!untouched) return;
@@ -296,6 +332,7 @@ export class InvoiceDialogComponent {
       description: l.description,
       quantity: l.quantity,
       unitPrice: l.unitPrice,
+      taxable: l.taxable ?? true,
     }));
     this.prefilledLines = entries;
     this.lines.set(entries);
@@ -323,6 +360,7 @@ export class InvoiceDialogComponent {
       description: f.description ?? '',
       quantity: f.quantity!,
       unitPrice: f.unitPrice!,
+      taxable: true,
     }]);
     this.lineForm.reset({ partId: null, partNumber: '', description: '', quantity: 1, unitPrice: 0 });
   }
@@ -341,6 +379,7 @@ export class InvoiceDialogComponent {
       description: l.description,
       quantity: l.quantity,
       unitPrice: l.unitPrice,
+      taxable: l.taxable,
     }));
 
     // Only attach currency when the install is multi-currency; otherwise let
