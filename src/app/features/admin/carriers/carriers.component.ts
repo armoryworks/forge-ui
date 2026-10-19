@@ -22,8 +22,9 @@ import { LoadingBlockDirective } from '../../../shared/directives/loading-block.
 
 /**
  * Carrier admin — list shipping carriers, create custom ("shadow") shippers, edit any carrier's settings
- * (delivery updates, scan-to-ship, active), and enter per-carrier API credentials. The secret is write-only: it's encrypted server-side and never returned, so the dialog
- * shows a "configured" badge + the non-secret client id and only ever WRITES a new secret.
+ * (delivery updates, scan-to-ship, active), and enter per-carrier API credentials. The secret is
+ * write-only: it's encrypted server-side and never returned, so the dialog shows a "configured" badge +
+ * the non-secret client id and only ever WRITES a new secret.
  */
 @Component({
   selector: 'app-carriers',
