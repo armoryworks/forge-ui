@@ -3620,6 +3620,14 @@
     },
     "carriers": {
       "title": "Transportistas",
+      "cols": {
+        "name": "Transportista",
+        "code": "Código",
+        "integration": "Integración",
+        "scan": "Escaneo",
+        "credentials": "Credenciales",
+        "active": "Activo"
+      },
       "hint": "Transportistas de envío para cotizaciones, etiquetas, seguimiento y recogidas. Agregue transportistas personalizados e ingrese las credenciales de API de cada transportista integrado.",
       "newCarrier": "Nuevo transportista",
       "empty": "No hay transportistas configurados.",

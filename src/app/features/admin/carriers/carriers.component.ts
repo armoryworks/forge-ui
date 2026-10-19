@@ -57,12 +57,12 @@ export class CarriersComponent {
   protected readonly testingId = signal<number | null>(null);
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'name', header: 'Carrier', sortable: true },
-    { field: 'code', header: 'Code', sortable: true, width: '110px' },
-    { field: 'integrationKind', header: 'Integration', sortable: true, width: '120px' },
-    { field: 'requiresScanToShip', header: 'Scan', width: '80px', align: 'center' },
-    { field: 'credentialsConfigured', header: 'Credentials', width: '130px', align: 'center' },
-    { field: 'isActive', header: 'Active', width: '80px', align: 'center' },
+    { field: 'name', header: this.translate.instant('admin.carriers.cols.name'), sortable: true },
+    { field: 'code', header: this.translate.instant('admin.carriers.cols.code'), sortable: true, width: '110px' },
+    { field: 'integrationKind', header: this.translate.instant('admin.carriers.cols.integration'), sortable: true, width: '120px' },
+    { field: 'requiresScanToShip', header: this.translate.instant('admin.carriers.cols.scan'), width: '80px', align: 'center' },
+    { field: 'credentialsConfigured', header: this.translate.instant('admin.carriers.cols.credentials'), width: '130px', align: 'center' },
+    { field: 'isActive', header: this.translate.instant('admin.carriers.cols.active'), width: '80px', align: 'center' },
     { field: 'actions', header: '', width: '160px', align: 'right' },
   ];
 

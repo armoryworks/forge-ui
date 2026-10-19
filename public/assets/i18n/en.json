@@ -3620,6 +3620,14 @@
     },
     "carriers": {
       "title": "Carriers",
+      "cols": {
+        "name": "Carrier",
+        "code": "Code",
+        "integration": "Integration",
+        "scan": "Scan",
+        "credentials": "Credentials",
+        "active": "Active"
+      },
       "hint": "Shipping carriers for rate quotes, labels, tracking, and pickups. Add custom shippers and enter each integrated carrier's API credentials.",
       "newCarrier": "New Carrier",
       "empty": "No carriers configured.",
