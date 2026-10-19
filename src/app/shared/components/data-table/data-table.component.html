@@ -52,8 +52,8 @@
                     [class.data-table__col-menu-btn--has-filter]="hasFilter(col.field)"
                     [matMenuTriggerFor]="headerContextMenu"
                     (click)="contextMenuCol.set(col); $event.stopPropagation()"
-                    [attr.aria-label]="('shared.columnMenu' | translate:{ column: col.header })"
-                    [matTooltip]="('shared.columnMenu' | translate:{ column: col.header })" matTooltipPosition="above"
+                    [attr.aria-label]="(col.header ? ('shared.columnMenu' | translate:{ column: col.header }) : ('shared.columnMenuUnnamed' | translate))"
+                    [matTooltip]="(col.header ? ('shared.columnMenu' | translate:{ column: col.header }) : ('shared.columnMenuUnnamed' | translate))" matTooltipPosition="above"
                     cdkOverlayOrigin
                     #filterOrigin="cdkOverlayOrigin">
                     <span class="material-icons-outlined">more_vert</span>

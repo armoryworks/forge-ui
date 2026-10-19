@@ -26,10 +26,10 @@
         @for (stage of stages(); track $index; let i = $index; let first = $first; let last = $last) {
           <div class="stage-row" [class.stage-row--hidden]="!stage.isActive">
             <div class="stage-row__order">
-              <button class="icon-btn" [disabled]="first" (click)="moveStageUp(i)" [matTooltip]="'trackTypeDialog.moveUp' | translate" matTooltipPosition="above">
+              <button class="icon-btn" [disabled]="first" (click)="moveStageUp(i)" [attr.aria-label]="'trackTypeDialog.moveUp' | translate" [matTooltip]="'trackTypeDialog.moveUp' | translate" matTooltipPosition="above">
                 <span class="material-icons-outlined">arrow_upward</span>
               </button>
-              <button class="icon-btn" [disabled]="last" (click)="moveStageDown(i)" [matTooltip]="'trackTypeDialog.moveDown' | translate" matTooltipPosition="above">
+              <button class="icon-btn" [disabled]="last" (click)="moveStageDown(i)" [attr.aria-label]="'trackTypeDialog.moveDown' | translate" [matTooltip]="'trackTypeDialog.moveDown' | translate" matTooltipPosition="above">
                 <span class="material-icons-outlined">arrow_downward</span>
               </button>
             </div>
@@ -50,17 +50,17 @@
             </label>
             @if (isSaved(stage)) {
               @if (stage.isActive) {
-                <button class="icon-btn" data-testid="track-stage-hide" (click)="hideStage(i)" [matTooltip]="'trackStages.hide' | translate" matTooltipPosition="above">
+                <button class="icon-btn" data-testid="track-stage-hide" (click)="hideStage(i)" [attr.aria-label]="'trackStages.hide' | translate" [matTooltip]="'trackStages.hide' | translate" matTooltipPosition="above">
                   <span class="material-icons-outlined">visibility_off</span>
                 </button>
               } @else {
                 <span class="stage-row__hidden-tag">{{ 'trackStages.hidden' | translate }}</span>
-                <button class="icon-btn" data-testid="track-stage-show" (click)="showStage(i)" [matTooltip]="'trackStages.show' | translate" matTooltipPosition="above">
+                <button class="icon-btn" data-testid="track-stage-show" (click)="showStage(i)" [attr.aria-label]="'trackStages.show' | translate" [matTooltip]="'trackStages.show' | translate" matTooltipPosition="above">
                   <span class="material-icons-outlined">visibility</span>
                 </button>
               }
             } @else {
-              <button class="icon-btn icon-btn--danger" (click)="removeStage(i)" [matTooltip]="'trackTypeDialog.removeStage' | translate" matTooltipPosition="above">
+              <button class="icon-btn icon-btn--danger" (click)="removeStage(i)" [attr.aria-label]="'trackTypeDialog.removeStage' | translate" [matTooltip]="'trackTypeDialog.removeStage' | translate" matTooltipPosition="above">
                 <span class="material-icons-outlined">close</span>
               </button>
             }

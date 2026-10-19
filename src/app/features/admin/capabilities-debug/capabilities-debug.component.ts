@@ -1,5 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from '@angular/core';
 
+import { DatePipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
+
 import { CapabilityService } from '../../../shared/services/capability.service';
 
 /**
@@ -15,7 +18,7 @@ import { CapabilityService } from '../../../shared/services/capability.service';
 @Component({
   selector: 'app-capabilities-debug',
   standalone: true,
-  imports: [],
+  imports: [DatePipe, TranslatePipe],
   templateUrl: './capabilities-debug.component.html',
   styleUrl: './capabilities-debug.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -184,8 +184,11 @@ export class CapabilitiesComponent implements OnInit {
       .sort((a, b) => a.label.localeCompare(b.label));
   });
 
-  /** Show the onboarding banner when fresh-install state hasn't been confirmed. */
-  protected readonly showOnboardingBanner = computed(() => !this.bannerDismissed());
+  /** Show the onboarding banner until the server reports a preset applied or discovery run, or the user skips it. */
+  protected readonly showOnboardingBanner = computed(() => {
+    const descriptor = this.capabilityService.descriptor();
+    return descriptor !== null && descriptor.onboardingComplete !== true && !this.bannerDismissed();
+  });
 
   ngOnInit(): void {
     this.capabilityService.load().subscribe();

@@ -34,4 +34,6 @@ export interface CapabilityDescriptor {
   totalCount: number;
   enabledCount: number;
   capabilities: CapabilityDescriptorEntry[];
+  /** True once a preset has been applied or a discovery run recorded on this install. */
+  onboardingComplete?: boolean;
 }

@@ -7,6 +7,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AssignmentRuleService } from '../services/assignment-rule.service';
+import { AdminService } from '../services/admin.service';
 import { AssignmentRule, AssignmentRuleKind } from '../models/assignment-rule.model';
 import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
 import { ToolbarComponent } from '../../../shared/components/toolbar/toolbar.component';
@@ -50,6 +51,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
 })
 export class AssignmentRulesComponent {
   private readonly service = inject(AssignmentRuleService);
+  private readonly adminService = inject(AdminService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -86,7 +88,7 @@ export class AssignmentRulesComponent {
     // serialize the relevant fields to JSON into `spec`. Storing
     // structured + raw side-by-side lets the admin fall back to raw
     // when a Kind acquires fields the form doesn't surface yet.
-    specRepIds: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
+    specRepIds: new FormControl<number[]>([], { nonNullable: true }),
     specStates: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
     specZipPrefixes: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
     specIndustries: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
@@ -98,6 +100,23 @@ export class AssignmentRulesComponent {
     this.form.controls.kind.valueChanges.pipe(startWith(this.form.controls.kind.value)),
     { initialValue: this.form.controls.kind.value },
   );
+
+  private readonly activeUsers = signal<{ id: number; name: string }[]>([]);
+  private readonly selectedRepIds = toSignal(
+    this.form.controls.specRepIds.valueChanges.pipe(startWith(this.form.controls.specRepIds.value)),
+    { initialValue: this.form.controls.specRepIds.value },
+  );
+
+  /** Active users as rep choices, plus any already-saved rep that is no longer active so editing never drops it. */
+  protected readonly repOptions = computed<SelectOption[]>(() => {
+    const users = this.activeUsers();
+    const known = new Set(users.map(u => u.id));
+    const missing = this.selectedRepIds().filter(id => !known.has(id));
+    return [
+      ...users.map(u => ({ value: u.id, label: u.name })),
+      ...missing.map(id => ({ value: id, label: this.translate.instant('admin.assignmentRules.unknownRep', { id }) })),
+    ];
+  });
 
   protected readonly showRoundRobinFields = computed(() => this.currentKind() === 'RoundRobin');
   protected readonly showTerritoryFields = computed(() => this.currentKind() === 'Territory');
@@ -112,6 +131,9 @@ export class AssignmentRulesComponent {
 
   constructor() {
     this.load();
+    this.adminService.getActiveUsers().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (users) => this.activeUsers.set(users.map(u => ({ id: u.id, name: u.name }))),
+    });
   }
 
   protected load(): void {
@@ -126,7 +148,7 @@ export class AssignmentRulesComponent {
     this.editingId.set(null);
     this.form.reset({
       name: '', kind: 'RoundRobin', priority: 100, isActive: true,
-      specRepIds: '', specStates: '', specZipPrefixes: '', specIndustries: '', specRaw: '',
+      specRepIds: [], specStates: '', specZipPrefixes: '', specIndustries: '', specRaw: '',
     });
     this.showDialog.set(true);
   }
@@ -154,14 +176,14 @@ export class AssignmentRulesComponent {
    * Kind changed), we fall through to the raw textarea so nothing is lost.
    */
   private parseSpec(spec: string | null, kind: AssignmentRuleKind): {
-    repIds: string; states: string; zipPrefixes: string; industries: string; raw: string;
+    repIds: number[]; states: string; zipPrefixes: string; industries: string; raw: string;
   } {
-    const empty = { repIds: '', states: '', zipPrefixes: '', industries: '', raw: '' };
+    const empty = { repIds: [] as number[], states: '', zipPrefixes: '', industries: '', raw: '' };
     if (!spec) return empty;
     try {
       const obj = JSON.parse(spec) as Record<string, unknown>;
       if (kind === 'RoundRobin' && Array.isArray(obj['repIds'])) {
-        return { ...empty, repIds: (obj['repIds'] as number[]).join(', ') };
+        return { ...empty, repIds: (obj['repIds'] as unknown[]).map(Number).filter(n => Number.isInteger(n) && n > 0) };
       }
       if (kind === 'Territory') {
         const states = Array.isArray(obj['states']) ? (obj['states'] as string[]).join(', ') : '';
@@ -183,11 +205,11 @@ export class AssignmentRulesComponent {
    * paste a hand-crafted spec for kinds the form doesn't surface).
    */
   private buildSpec(kind: AssignmentRuleKind, form: {
-    specRepIds: string; specStates: string; specZipPrefixes: string;
+    specRepIds: number[]; specStates: string; specZipPrefixes: string;
     specIndustries: string; specRaw: string;
   }): string | null {
     if (kind === 'RoundRobin') {
-      const ids = this.parseIntList(form.specRepIds);
+      const ids = form.specRepIds.filter(n => Number.isInteger(n) && n > 0);
       if (ids.length > 0) return JSON.stringify({ repIds: ids });
     }
     if (kind === 'Territory') {
@@ -207,10 +229,6 @@ export class AssignmentRulesComponent {
     if (kind === 'AccountBased') return null;
     // Fallback to raw JSON when structured fields are empty.
     return form.specRaw.trim() || null;
-  }
-
-  private parseIntList(input: string): number[] {
-    return input.split(/[,\s]+/).map(s => s.trim()).filter(s => s).map(s => Number(s)).filter(n => Number.isFinite(n) && n > 0);
   }
 
   private parseStringList(input: string): string[] {

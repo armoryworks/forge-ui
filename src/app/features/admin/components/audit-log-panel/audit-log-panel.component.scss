@@ -15,4 +15,32 @@
     app-input  { flex: 1 1 160px; }
     app-datepicker { flex: 1 1 140px; }
   }
+
+  &__details {
+    display: block;
+    width: 100%;
+    max-width: 420px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  &__details-preview {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__details-full {
+    margin: 0;
+    font-family: $font-family-mono;
+    font-size: var(--font-size-sm);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
 }

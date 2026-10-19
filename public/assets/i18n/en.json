@@ -183,7 +183,8 @@
     "people": {
       "title": "People",
       "activeLabel": "active users",
-      "cta": "View Users"
+      "cta": "View Users",
+      "roleBreakdownAria": "Active users by role"
     },
     "capabilities": {
       "title": "Capabilities",
@@ -3355,7 +3356,10 @@
       "roleTemplates": "Role Templates",
       "entityCompleteness": "Entity Completeness",
       "terms": "Terms & Conditions",
-      "updates": "Updates"
+      "updates": "Updates",
+      "tariffs": "Tariff Rates",
+      "workingCalendars": "Working Calendars",
+      "database": "Database Transfer"
     },
     "users": "Users",
     "addUser": "Add User",
@@ -3553,7 +3557,7 @@
     "payPeriod": "Pay Period",
     "leadSources": {
       "title": "Lead Sources",
-      "hint": "Catalog of formal lead-attribution sources. Quality scores are computed nightly from disposition outcomes on linked leads — high score means the source converts; low score means the list provider delivers garbage.",
+      "hint": "Catalog of formal lead-attribution sources. Quality scores are recalculated nightly from how linked leads turn out: a high score means the source converts well, a low score means its leads rarely do.",
       "newSource": "New Source",
       "editSource": "Edit Source",
       "empty": "No lead sources yet. Add at least one before bulk intake to get clean attribution.",
@@ -3655,7 +3659,7 @@
     },
     "icpRubrics": {
       "title": "ICP Rubrics",
-      "hint": "Ideal-customer-profile scoring schemes. The default rubric drives the nightly LeadScore recompute; dimensions match lead/customer fields and contribute their weight to the total.",
+      "hint": "Ideal-customer-profile scoring schemes. The default rubric drives the nightly lead score recalculation; dimensions match lead/customer fields and contribute their weight to the total.",
       "newRubric": "New Rubric",
       "editRubric": "Edit Rubric",
       "empty": "No ICP rubrics yet. Add one and mark it default to start scoring leads.",
@@ -3693,9 +3697,8 @@
       "fieldKind": "Kind",
       "fieldPriority": "Priority",
       "specPlaceholder": "{ \"repIds\": [12, 14, 19] }",
-      "specRepIds": "Rep User IDs (rotation)",
-      "specRepIdsPlaceholder": "12, 14, 19",
-      "specRepIdsHint": "Comma-separated user IDs of reps to rotate among. Empty rule never matches.",
+      "specRepIds": "Reps (rotation)",
+      "specRepIdsHint": "Pick the reps to rotate leads among. A rule with no reps never matches.",
       "specStates": "States (ISO-2 codes)",
       "specStatesPlaceholder": "CA, NY, TX",
       "specZipPrefixes": "ZIP code prefixes",
@@ -3722,7 +3725,8 @@
       "updated": "Assignment rule updated.",
       "deleted": "Assignment rule deleted.",
       "deleteTitle": "Delete assignment rule?",
-      "deleteMessage": "Soft-delete \"{{name}}\"? Leads previously assigned via this rule keep their assignment — only future evaluations are affected."
+      "deleteMessage": "Soft-delete \"{{name}}\"? Leads previously assigned via this rule keep their assignment — only future evaluations are affected.",
+      "unknownRep": "Inactive user #{{id}}"
     },
     "currencies": {
       "title": "Currencies & Exchange Rates",
@@ -3766,7 +3770,7 @@
     },
     "tariffs": {
       "title": "Tariff Rates",
-      "hint": "HTS-code import duty rates feed the landed-cost duty component on the part Cost tab. SCD-2: to retire a rate, edit the row and set Effective To, then add a new row with a fresh Effective From.",
+      "hint": "HTS-code import duty rates feed the landed-cost duty component on the part Cost tab. Rates keep their history: to retire a rate, edit the row and set Effective To, then add a new row with a fresh Effective From.",
       "newTariff": "New Tariff",
       "editTariff": "Edit Tariff",
       "empty": "No tariff rates yet — landed cost will show duty as \"—\" until rates are imported.",
@@ -3808,7 +3812,8 @@
       "confirmDelete": {
         "title": "Delete requirement?",
         "message": "This will permanently remove requirement \"{{requirementId}}\". The completeness chip will refresh on next render."
-      }
+      },
+      "empty": "No completeness requirements yet. Add one to require fields on an entity when a capability is on."
     },
     "confirmReminderTitle": "Send Reminder?",
     "confirmReminderMessage": "Send a compliance reminder email to this employee?",
@@ -3903,7 +3908,14 @@
     "noSettingsMatch": "No settings match.",
     "capability": {
       "relatedSettings": "Related settings",
-      "toggleAria": "Toggle {{name}}"
+      "toggleAria": "Toggle {{name}}",
+      "banner": {
+        "title": "Welcome — let's set up Forge for your business.",
+        "body": "Run discovery to get a tailored preset, browse curated presets, or skip and configure capabilities manually.",
+        "runDiscovery": "Run Discovery",
+        "browsePresets": "Browse Presets",
+        "dismiss": "Skip onboarding for now"
+      }
     },
     "glOpening": {
       "title": "Full general ledger needs an opening journal first",
@@ -3914,6 +3926,46 @@
       "stepFullGl": "Turn on Built-in full general ledger again.",
       "migrationEnabled": "Accounting migration wizard turned on",
       "migrationFailed": "Could not turn on the accounting migration wizard"
+    },
+    "tabNotPermitted": "That admin page needs a role you don't have, so you've been taken to Compliance.",
+    "capabilitiesDebug": {
+      "title": "Capability diagnostics",
+      "hint": "Read-only view of every capability as the server reports it. To turn capabilities on or off, use the Capabilities page.",
+      "total": "Total:",
+      "enabled": "Enabled:",
+      "generated": "Generated:",
+      "notLoaded": "Capabilities not loaded yet.",
+      "refresh": "Refresh",
+      "refreshAria": "Refresh capability list",
+      "empty": "No capabilities loaded.",
+      "tableAria": "Capabilities",
+      "cols": {
+        "code": "Code",
+        "area": "Area",
+        "name": "Name",
+        "default": "Default",
+        "state": "State",
+        "roles": "Roles"
+      },
+      "on": "On",
+      "off": "Off",
+      "stateEnabled": "Enabled",
+      "stateDisabled": "Disabled"
+    },
+    "presetCompare": {
+      "title": "Compare Presets",
+      "back": "Presets",
+      "showAll": "Show all capabilities",
+      "showDifferences": "Show differences only",
+      "differHint": "{{count}} of {{total}} capabilities differ between the selected presets",
+      "tableAria": "Preset comparison",
+      "capability": "Capability",
+      "capabilityCount": "{{count}} capabilities",
+      "pick": "Pick this one",
+      "default": "Default",
+      "needIds": "Compare needs 2 to 4 presets",
+      "noChanges": "{{name}}: no changes — already matches.",
+      "applied": "Applied {{name}} ({{count}} capabilities changed)."
     }
   },
   "teamsPanel": {
@@ -5000,6 +5052,7 @@
     "manageColumns": "Manage columns",
     "filterColumn": "Filter {{column}}",
     "columnMenu": "{{column}} options",
+    "columnMenuUnnamed": "Column options",
     "sortAscending": "Sort Ascending",
     "sortDescending": "Sort Descending",
     "clearSort": "Clear Sort",
@@ -7854,7 +7907,8 @@
     "fieldName": "Name",
     "fieldRate": "Rate (%)",
     "noRates": "No sales tax rates configured",
-    "rates": "Tax Rates"
+    "rates": "Tax Rates",
+    "colRate": "Rate"
   },
   "maintenance": {
     "title": "Predictive Maintenance",
@@ -8929,7 +8983,9 @@
         "userDeactivated": "User Deactivated",
         "biApiKeyIssued": "BI API Key Issued",
         "biApiKeyRevoked": "BI API Key Revoked"
-      }
+      },
+      "expandDetails": "Show full details",
+      "collapseDetails": "Hide full details"
     },
     "edi": {
       "tabs": {
@@ -9008,7 +9064,8 @@
         "partnerDeleted": "Partner deleted",
         "connectionSuccess": "Connection successful",
         "connectionFailed": "Connection failed:",
-        "retryQueued": "Transaction queued for retry"
+        "retryQueued": "Transaction queued for retry",
+        "deleteFailed": "Couldn't delete the partner"
       },
       "sftp": {
         "title": "SFTP Transport",
@@ -9039,6 +9096,10 @@
         "unresolvedTooltip": "Our part number above matches no part in the catalog — the mapping saves, but an 850 line using it will still arrive unresolved until the part exists.",
         "saved": "Part-number map saved",
         "imported": "Imported {{imported}} new, updated {{updated}} ({{unresolved}} with no matching part)"
+      },
+      "deleteConfirm": {
+        "title": "Delete trading partner?",
+        "message": "Delete \"{{name}}\"? Inbound documents from this partner will no longer be matched to it."
       }
     },
     "events": {
@@ -9243,8 +9304,16 @@
         "moduleUpdated": "Training module updated",
         "moduleDeleted": "Module deleted",
         "pathCreated": "Training path created",
-        "walkthroughFailed": "Failed to generate walkthrough steps"
-      }
+        "walkthroughFailed": "Failed to generate walkthrough steps",
+        "moduleRestored": "Module restored",
+        "deleteFailed": "Couldn't delete the module",
+        "restoreFailed": "Couldn't restore the module"
+      },
+      "deleteConfirm": {
+        "title": "Delete training module?",
+        "message": "Delete \"{{title}}\"? It disappears from the library and from learners' paths. You can undo right after deleting."
+      },
+      "undo": "Undo"
     },
     "trainingDetail": {
       "title": "Training Detail",
@@ -11952,7 +12021,10 @@
     "dayFri": "Fri",
     "daySat": "Sat",
     "hoursShort": "{{hours}}h",
-    "multiplier": "{{value}}x"
+    "multiplier": "{{value}}x",
+    "removeHolidayAria": "Remove holiday {{name}}",
+    "editShiftAria": "Edit shift {{name}}",
+    "removeShiftAria": "Remove shift {{name}}"
   },
   "serials": {
     "fieldJob": "Job (optional)",

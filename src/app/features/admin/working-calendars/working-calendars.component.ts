@@ -12,6 +12,7 @@ import { ToggleComponent } from '../../../shared/components/toggle/toggle.compon
 import { DatepickerComponent } from '../../../shared/components/datepicker/datepicker.component';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
+import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
@@ -40,7 +41,7 @@ import {
     ReactiveFormsModule, TranslatePipe, MatTooltipModule,
     PageLayoutComponent, InputComponent, SelectComponent, ToggleComponent,
     DatepickerComponent, LoadingBlockDirective, EmptyStateComponent,
-    ValidationButtonComponent,
+    ValidationButtonComponent, DateOnlyPipe,
   ],
   templateUrl: './working-calendars.component.html',
   styleUrl: './working-calendars.component.scss',

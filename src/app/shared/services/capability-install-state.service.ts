@@ -7,15 +7,12 @@ import { Injectable, signal } from '@angular/core';
  * banner stays dismissed for everyone. Re-showing it on a per-user basis
  * would be inappropriate — the install IS configured once that's happened.
  *
- * Phase E's contract: the banner is shown when the install is in the
- * default-bootstrapped state and dismissable by the user clicking either
- * "Run discovery" (lands in Phase F) or "Apply preset" (lands in Phase G),
- * or by an explicit "Skip for now" dismissal that records the dismissal
- * locally. Phase E's dismissal lives in localStorage as a per-install flag
- * (the localStorage key includes the install's identity if available); when
- * Phase F/G land, the actual server-side state (preset_applied / discovery_
- * completed) becomes the authoritative source and the localStorage key is
- * cleared.
+ * The server is authoritative: the capability descriptor's
+ * `onboardingComplete` flag turns true once any preset has been applied or
+ * any discovery run recorded, and the banner then stays hidden for every
+ * user. This service only records an explicit "skip for now" dismissal,
+ * kept in localStorage, which hides the banner in this browser before the
+ * install has been configured.
  *
  * The banner does NOT block — users can use the app while it's visible.
  */

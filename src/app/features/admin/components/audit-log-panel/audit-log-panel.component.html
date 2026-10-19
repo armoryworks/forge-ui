@@ -40,7 +40,24 @@
         [columns]="columns"
         [data]="entries()"
         emptyIcon="manage_search"
-        [emptyMessage]="'adminPanels.auditLog.noEntries' | translate" />
+        [emptyMessage]="'adminPanels.auditLog.noEntries' | translate">
+        <ng-template appColumnCell="details" let-row>
+          @if (row.details) {
+            <button type="button" class="audit-log-panel__details"
+              [class.audit-log-panel__details--expanded]="expandedDetailsId() === row.id"
+              [attr.aria-expanded]="expandedDetailsId() === row.id"
+              [attr.aria-label]="(expandedDetailsId() === row.id ? 'adminPanels.auditLog.collapseDetails' : 'adminPanels.auditLog.expandDetails') | translate"
+              data-testid="audit-log-details-toggle"
+              (click)="toggleDetails(row.id); $event.stopPropagation()">
+              @if (expandedDetailsId() === row.id) {
+                <pre class="audit-log-panel__details-full">{{ formatDetails(row.details) }}</pre>
+              } @else {
+                <span class="audit-log-panel__details-preview">{{ row.details }}</span>
+              }
+            </button>
+          }
+        </ng-template>
+      </app-data-table>
     }
   </div>
 

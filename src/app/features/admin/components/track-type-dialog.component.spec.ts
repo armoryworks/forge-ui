@@ -28,6 +28,7 @@ interface DialogInternals {
   updateStage(index: number, field: keyof StageRequest, value: unknown): void;
   addStage(): void;
   onSubmit(): void;
+  form: { controls: { code: { valid: boolean; setValue(v: string): void } } };
 }
 
 function adminStage(overrides: Partial<TrackTypeStageAdmin>): TrackTypeStageAdmin {
@@ -193,5 +194,19 @@ describe('TrackTypeDialogComponent', () => {
 
     expect(component.hasVisibleStage()).toBe(false);
     expect(component.startStage()).toBeNull();
+  });
+
+  it('accepts the lowercase codes seeded track types carry, so they can be edited and saved', async () => {
+    await render({ ...production, code: 'production' } as TrackType);
+
+    expect(component.form.controls.code.valid).toBe(true);
+  });
+
+  it('still rejects codes with spaces or punctuation', async () => {
+    await render(null);
+
+    component.form.controls.code.setValue('my code!');
+
+    expect(component.form.controls.code.valid).toBe(false);
   });
 });

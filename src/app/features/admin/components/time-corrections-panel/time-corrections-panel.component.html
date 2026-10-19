@@ -13,14 +13,14 @@
   </div>
 
   <!-- Time Entries -->
-  <h3 class="time-corrections-panel__section-title">Time Entries</h3>
+  <h3 class="time-corrections-panel__section-title">{{ 'adminPanels.timeCorrections.timeEntries' | translate }}</h3>
   <div [appLoadingBlock]="isLoading()">
     <app-data-table
       tableId="admin-time-entries"
       [columns]="entryColumns"
       [data]="entries()"
       emptyIcon="schedule"
-      [emptyMessage]="'adminPanels.timeCorrections.noCorrections' | translate">
+      [emptyMessage]="'adminPanels.timeCorrections.noEntries' | translate">
       <ng-template appColumnCell="date" let-row>
         {{ row.date | date:'MM/dd/yyyy' }}
       </ng-template>
@@ -34,7 +34,7 @@
         {{ formatDuration(row.durationMinutes) }}
       </ng-template>
       <ng-template appColumnCell="actions" let-row>
-        <button class="icon-btn" aria-label="Correct time entry" (click)="openCorrection(row); $event.stopPropagation()">
+        <button class="icon-btn" [attr.aria-label]="'adminPanels.timeCorrections.correctTitle' | translate" (click)="openCorrection(row); $event.stopPropagation()">
           <span class="material-icons-outlined">edit</span>
         </button>
       </ng-template>
@@ -42,7 +42,7 @@
   </div>
 
   <!-- Correction History -->
-  <h3 class="time-corrections-panel__section-title">Correction History</h3>
+  <h3 class="time-corrections-panel__section-title">{{ 'adminPanels.timeCorrections.correctionHistory' | translate }}</h3>
   <app-data-table
     tableId="admin-time-corrections"
     [columns]="correctionColumns"

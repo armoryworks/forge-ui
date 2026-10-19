@@ -1,19 +1,18 @@
-<app-page-layout pageTitle="Compare Presets">
+<app-page-layout [pageTitle]="'admin.presetCompare.title' | translate">
   <ng-container toolbar>
     <button class="action-btn action-btn--sm" type="button"
       (click)="back()" data-testid="preset-compare-back-btn">
-      <span class="material-icons-outlined">chevron_left</span> Presets
+      <span class="material-icons-outlined">chevron_left</span> {{ 'admin.presetCompare.back' | translate }}
     </button>
     <button class="action-btn action-btn--sm" type="button"
-      [class.action-btn--primary]="disagreementOnly()"
       (click)="toggleDisagreementOnly()"
       data-testid="preset-compare-disagreement-toggle">
       <span class="material-icons-outlined">filter_alt</span>
-      {{ disagreementOnly() ? 'Showing differences only' : 'Show all rows' }}
+      {{ (disagreementOnly() ? 'admin.presetCompare.showAll' : 'admin.presetCompare.showDifferences') | translate }}
     </button>
     @if (response(); as r) {
       <span class="preset-compare__hint">
-        {{ disagreementCount() }} of {{ r.rows.length }} capabilities differ between selected presets
+        {{ 'admin.presetCompare.differHint' | translate: { count: disagreementCount(), total: r.rows.length } }}
       </span>
     }
   </ng-container>
@@ -22,10 +21,10 @@
     <div class="preset-compare" [appLoadingBlock]="loading()">
       @if (response(); as r) {
         <div class="preset-compare__matrix" data-testid="preset-compare-matrix">
-          <table class="preset-compare__table" aria-label="Table table">
+          <table class="preset-compare__table" [attr.aria-label]="'admin.presetCompare.tableAria' | translate">
             <thead>
               <tr>
-                <th class="preset-compare__th preset-compare__th--row">Capability</th>
+                <th class="preset-compare__th preset-compare__th--row">{{ 'admin.presetCompare.capability' | translate }}</th>
                 @for (preset of r.presets; track preset.id) {
                   <th class="preset-compare__th preset-compare__th--col"
                     [attr.data-testid]="'preset-compare-col-' + preset.id">
@@ -33,14 +32,14 @@
                       <span class="preset-compare__col-name">{{ preset.name }}</span>
                       <span class="preset-compare__col-id">{{ preset.id }}</span>
                       <span class="preset-compare__col-count">
-                        {{ preset.capabilityCount }} capabilities
+                        {{ 'admin.presetCompare.capabilityCount' | translate: { count: preset.capabilityCount } }}
                       </span>
                       <button class="action-btn action-btn--primary action-btn--sm"
                         type="button"
                         (click)="pickPreset(preset.id)"
                         [disabled]="applying()"
                         [attr.data-testid]="'preset-compare-pick-' + preset.id">
-                        Pick this one
+                        {{ 'admin.presetCompare.pick' | translate }}
                       </button>
                     </div>
                   </th>
@@ -61,7 +60,7 @@
                       <code>{{ row.code }}</code>
                       <span>{{ row.name }}</span>
                       @if (row.defaultOn) {
-                        <span class="chip preset-compare__default-chip">Default</span>
+                        <span class="chip preset-compare__default-chip">{{ 'admin.presetCompare.default' | translate }}</span>
                       }
                     </td>
                     @for (cell of row.cells; track cell.presetId) {

@@ -46,13 +46,13 @@
       </p>
 
       <div class="updates__actions">
-        <button type="button" (click)="check()" [disabled]="checking() || running()" data-testid="updates-check">
+        <button type="button" class="action-btn" (click)="check()" [disabled]="checking() || running()" data-testid="updates-check">
           {{ 'adminUpdates.checkAction' | translate }}
         </button>
-        <button type="button" class="primary" (click)="upgrade()" [disabled]="starting() || running()" data-testid="updates-upgrade">
+        <button type="button" class="action-btn action-btn--primary" (click)="upgrade()" [disabled]="starting() || running()" data-testid="updates-upgrade">
           {{ 'adminUpdates.upgradeAction' | translate }}
         </button>
-        <button type="button" (click)="rollback()" [disabled]="starting() || running()" data-testid="updates-rollback">
+        <button type="button" class="action-btn action-btn--warn" (click)="rollback()" [disabled]="starting() || running()" data-testid="updates-rollback">
           {{ 'adminUpdates.rollbackAction' | translate }}
         </button>
       </div>
@@ -118,7 +118,7 @@
               data-testid="updates-confirm-word" />
             <button
               type="button"
-              class="danger"
+              class="action-btn action-btn--danger"
               (click)="approveDestructive()"
               [disabled]="!confirmed()"
               data-testid="updates-approve">

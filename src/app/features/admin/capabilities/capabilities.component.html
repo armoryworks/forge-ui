@@ -46,24 +46,24 @@
         <div class="capabilities-page__banner" role="alert" aria-live="polite" data-testid="capability-onboarding-banner">
           <span class="material-icons-outlined capabilities-page__banner-icon">auto_awesome</span>
           <div class="capabilities-page__banner-text">
-            <strong>Welcome — let's set up forge for your business.</strong>
-            <span>Run discovery to get a tailored preset, browse curated presets, or skip and configure capabilities manually.</span>
+            <strong>{{ 'admin.capability.banner.title' | translate }}</strong>
+            <span>{{ 'admin.capability.banner.body' | translate }}</span>
           </div>
           <button class="action-btn action-btn--primary action-btn--sm" type="button"
             (click)="runDiscovery()"
             data-testid="capability-banner-discovery-btn">
-            Run Discovery
+            {{ 'admin.capability.banner.runDiscovery' | translate }}
           </button>
           <button class="action-btn action-btn--sm" type="button"
             (click)="browsePresets()"
             data-testid="capability-banner-presets-btn">
-            Browse Presets
+            {{ 'admin.capability.banner.browsePresets' | translate }}
           </button>
           <button
             class="icon-btn"
             type="button"
             (click)="dismissBanner()"
-            aria-label="Dismiss onboarding banner"
+            [attr.aria-label]="'admin.capability.banner.dismiss' | translate"
             data-testid="capability-banner-dismiss-btn">
             <span class="material-icons-outlined">close</span>
           </button>

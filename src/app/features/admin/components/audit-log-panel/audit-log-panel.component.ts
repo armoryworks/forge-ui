@@ -9,6 +9,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminService } from '../../services/admin.service';
 import { AuditLogEntry } from '../../models/audit-log-entry.model';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
@@ -26,6 +27,7 @@ type AuditLogQuery = Parameters<AdminService['getAuditLog']>[0];
     ReactiveFormsModule,
     TranslatePipe,
     DataTableComponent,
+    ColumnCellDirective,
     EmptyStateComponent,
     InputComponent,
     SelectComponent,
@@ -48,6 +50,7 @@ export class AuditLogPanelComponent implements OnInit {
   protected readonly totalCount = signal(0);
   protected readonly page = signal(1);
   protected readonly pageSize = signal(25);
+  protected readonly expandedDetailsId = signal<number | null>(null);
 
   protected readonly entityTypeControl = new FormControl<string>('');
   protected readonly actionControl = new FormControl<string>('');
@@ -119,6 +122,19 @@ export class AuditLogPanelComponent implements OnInit {
     { field: 'details', header: this.translate.instant('adminPanels.auditLog.cols.details') },
     { field: 'ipAddress', header: this.translate.instant('adminPanels.auditLog.cols.ip'), width: '130px' },
   ];
+
+  protected toggleDetails(id: number): void {
+    this.expandedDetailsId.update(current => (current === id ? null : id));
+  }
+
+  protected formatDetails(details: string | null): string {
+    if (!details) return '';
+    try {
+      return JSON.stringify(JSON.parse(details), null, 2);
+    } catch {
+      return details;
+    }
+  }
 
   constructor() {
     this.entityTypeControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => { this.page.set(1); this.load(); });

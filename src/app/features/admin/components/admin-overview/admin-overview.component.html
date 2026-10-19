@@ -16,11 +16,11 @@
         <span class="admin-overview-card__label">{{ 'adminOverview.people.activeLabel' | translate }}</span>
       </div>
       @if (roleBreakdown().length > 0) {
-        <ul class="admin-overview-card__chips" aria-label="Role breakdown">
+        <ul class="admin-overview-card__chips" [attr.aria-label]="'adminOverview.people.roleBreakdownAria' | translate">
           @for (entry of roleBreakdown(); track entry.role) {
             <li class="chip chip--muted">
               <span class="admin-overview-card__chip-count">{{ entry.count }}</span>
-              {{ entry.role }}
+              {{ entry.label }}
             </li>
           }
         </ul>
@@ -202,7 +202,7 @@
         <ul class="admin-overview-card__audit-list">
           @for (entry of auditEntries(); track entry.id) {
             <li class="admin-overview-card__audit-row">
-              <span class="admin-overview-card__audit-action">{{ entry.action }}</span>
+              <span class="admin-overview-card__audit-action">{{ actionLabel(entry.action) }}</span>
               <span class="admin-overview-card__audit-actor">{{ entry.userName }}</span>
               <span class="admin-overview-card__audit-when">{{ entry.createdAt | date:'MM/dd/yyyy hh:mm a' }}</span>
             </li>

@@ -1,0 +1,50 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { Observable, of } from 'rxjs';
+
+import { SalesTaxPanelComponent } from './sales-tax-panel.component';
+import { AdminService } from '../../services/admin.service';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { DraftResumeService } from '../../../../shared/services/draft-resume.service';
+import { ColumnDef } from '../../../../shared/models/column-def.model';
+import { SalesTaxRate } from '../../models/sales-tax-rate.model';
+
+class FakeLoader implements TranslateLoader {
+  getTranslation(): Observable<Record<string, string>> { return of({}); }
+}
+
+interface PanelInternals {
+  columns: ColumnDef[];
+  rates: { (): SalesTaxRate[] };
+}
+
+describe('SalesTaxPanelComponent', () => {
+  let component: PanelInternals;
+
+  beforeEach(() => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        {
+          provide: AdminService,
+          useValue: { getSalesTaxRates: () => of([{ id: 1, name: 'State', code: 'ST', rate: 0.0625 }, { id: 2, name: 'City', code: 'CT', rate: 0.1 }]) },
+        },
+        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: SnackbarService, useValue: {} },
+        { provide: DraftResumeService, useValue: { consume: () => false } },
+      ],
+    });
+    component = TestBed.runInInjectionContext(() => new SalesTaxPanelComponent()) as unknown as PanelInternals;
+  });
+
+  it('sorts the Rate column on the numeric rate, not on a formatted string where "10%" sorts before "6%"', () => {
+    const rateColumn = component.columns.find(c => c.field === 'rate');
+
+    expect(rateColumn).toEqual(expect.objectContaining({ sortable: true, type: 'number' }));
+    expect(component.columns.some(c => c.field === 'rateDisplay')).toBe(false);
+    expect(component.rates().map(r => r.rate)).toEqual([0.0625, 0.1]);
+  });
+});

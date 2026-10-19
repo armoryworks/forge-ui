@@ -1,36 +1,36 @@
 <div class="capabilities-debug">
   <header class="capabilities-debug__header">
-    <h2>Capabilities (Phase 4 Phase-A diagnostic)</h2>
+    <h2>{{ 'admin.capabilitiesDebug.title' | translate }}</h2>
     <p class="capabilities-debug__hint">
-      Read-only descriptor view. Mutation lands in Phase C; the full admin UI lands in Phase E.
+      {{ 'admin.capabilitiesDebug.hint' | translate }}
     </p>
     <div class="capabilities-debug__summary">
-      @if (descriptor()) {
-        <span><strong>Total:</strong> {{ descriptor()!.totalCount }}</span>
-        <span><strong>Enabled:</strong> {{ enabledCount() }}</span>
-        <span><strong>Generated:</strong> {{ descriptor()!.generatedAt }}</span>
+      @if (descriptor(); as d) {
+        <span><strong>{{ 'admin.capabilitiesDebug.total' | translate }}</strong> {{ d.totalCount }}</span>
+        <span><strong>{{ 'admin.capabilitiesDebug.enabled' | translate }}</strong> {{ enabledCount() }}</span>
+        <span><strong>{{ 'admin.capabilitiesDebug.generated' | translate }}</strong> {{ d.generatedAt | date: 'medium' }}</span>
       } @else {
-        <span>Descriptor not loaded.</span>
+        <span>{{ 'admin.capabilitiesDebug.notLoaded' | translate }}</span>
       }
-      <button class="action-btn" type="button" (click)="refresh()" [disabled]="loading()" aria-label="Refresh capability descriptor">
+      <button class="action-btn" type="button" (click)="refresh()" [disabled]="loading()" [attr.aria-label]="'admin.capabilitiesDebug.refreshAria' | translate">
         <span class="material-icons-outlined">refresh</span>
-        Refresh
+        {{ 'admin.capabilitiesDebug.refresh' | translate }}
       </button>
     </div>
   </header>
 
   @if (capabilities().length === 0) {
-    <p>No capabilities loaded.</p>
+    <p>{{ 'admin.capabilitiesDebug.empty' | translate }}</p>
   } @else {
-    <table class="capabilities-debug__table" aria-label="Capabilities">
+    <table class="capabilities-debug__table" [attr.aria-label]="'admin.capabilitiesDebug.tableAria' | translate">
       <thead>
         <tr>
-          <th scope="col">Code</th>
-          <th scope="col">Area</th>
-          <th scope="col">Name</th>
-          <th scope="col">Default</th>
-          <th scope="col">State</th>
-          <th scope="col">Roles</th>
+          <th scope="col">{{ 'admin.capabilitiesDebug.cols.code' | translate }}</th>
+          <th scope="col">{{ 'admin.capabilitiesDebug.cols.area' | translate }}</th>
+          <th scope="col">{{ 'admin.capabilitiesDebug.cols.name' | translate }}</th>
+          <th scope="col">{{ 'admin.capabilitiesDebug.cols.default' | translate }}</th>
+          <th scope="col">{{ 'admin.capabilitiesDebug.cols.state' | translate }}</th>
+          <th scope="col">{{ 'admin.capabilitiesDebug.cols.roles' | translate }}</th>
         </tr>
       </thead>
       <tbody>
@@ -39,10 +39,10 @@
             <td><code>{{ cap.code }}</code></td>
             <td>{{ cap.area }}</td>
             <td>{{ cap.name }}</td>
-            <td>{{ cap.isDefaultOn ? 'on' : 'off' }}</td>
+            <td>{{ (cap.isDefaultOn ? 'admin.capabilitiesDebug.on' : 'admin.capabilitiesDebug.off') | translate }}</td>
             <td>
               <span class="chip" [class.chip--success]="cap.enabled" [class.chip--muted]="!cap.enabled">
-                {{ cap.enabled ? 'enabled' : 'disabled' }}
+                {{ (cap.enabled ? 'admin.capabilitiesDebug.stateEnabled' : 'admin.capabilitiesDebug.stateDisabled') | translate }}
               </span>
             </td>
             <td>{{ cap.requiresRoles ?? '—' }}</td>
