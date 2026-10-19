@@ -1,7 +1,7 @@
 <app-dialog [title]="data.operation ? ('parts.editOperation' | translate) + ' — Op ' + data.operation.stepNumber : ('parts.addOperation' | translate)" width="800px" [draftConfig]="draftConfig" [draftFormGroup]="formGroup" (closed)="matDialogRef.close()">
 
   <!-- Tabs -->
-  <div class="tab-bar">
+  <div class="tab-bar" appScrollCue>
     <button class="tab" [class.tab--active]="activeTab() === 'details'" (click)="activeTab.set('details')">
       <span class="material-icons-outlined">settings</span>
       {{ 'parts.operationDetails' | translate }}

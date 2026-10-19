@@ -28,6 +28,7 @@ import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { CapabilityService } from '../../../shared/services/capability.service';
 import { AuthService } from '../../../shared/services/auth.service';
 import { ColumnDef } from '../../../shared/models/column-def.model';
+import { ScrollCueDirective } from '../../../shared/directives/scroll-cue.directive';
 
 type StockVerb = 'receive' | 'use' | 'count';
 type HomeTab = 'kiosk' | 'tasks' | 'dashboard';
@@ -48,6 +49,7 @@ interface VerbDialogState {
   selector: 'app-inventory-home',
   standalone: true,
   imports: [
+    ScrollCueDirective,
     ReactiveFormsModule, DecimalPipe, TranslatePipe, RouterLink,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     EntityPickerComponent, QuickActionPanelComponent, DataTableComponent,
@@ -100,7 +102,7 @@ export class InventoryHomeComponent {
 
   protected readonly stockColumns: ColumnDef[] = [
     { field: 'partNumber', header: 'Part #', sortable: true, width: '140px' },
-    { field: 'description', header: 'Description', sortable: true },
+    { field: 'description', phoneHidden: true, header: 'Description', sortable: true },
     { field: 'onHand', header: 'On hand', sortable: true, type: 'number', align: 'right', width: '110px' },
     { field: 'actions', header: '', sortable: false, align: 'right', width: '150px' },
   ];

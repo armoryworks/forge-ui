@@ -44,7 +44,7 @@
 </app-page-header>
 
 <div class="quality-content">
-  <div class="tab-bar">
+  <div class="tab-bar" appScrollCue>
     <button class="tab" [class.tab--active]="activeTab() === 'inspections'" (click)="switchTab('inspections')">
       <span class="material-icons-outlined">fact_check</span>
       {{ 'quality.qcInspections' | translate }}

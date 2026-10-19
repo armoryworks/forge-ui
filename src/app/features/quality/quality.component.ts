@@ -49,6 +49,7 @@ import {
   QcTemplateEditorDialogComponent,
   QcTemplateEditorDialogData,
 } from './components/qc-template-editor-dialog/qc-template-editor-dialog.component';
+import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
 
 type QualityTab = 'inspections' | 'templates' | 'spc-charts' | 'spc-data' | 'spc-ooc' | 'ncrs' | 'capas' | 'ecos' | 'gages';
 
@@ -64,6 +65,7 @@ const TEMPLATE_AUTHOR_ROLES = ['Admin', 'Manager'];
   selector: 'app-quality',
   standalone: true,
   imports: [
+    ScrollCueDirective,
     ReactiveFormsModule, DatePipe,
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent, EntityPickerComponent,

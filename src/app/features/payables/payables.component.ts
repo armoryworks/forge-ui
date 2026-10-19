@@ -40,6 +40,7 @@ import { VendorBankAccountDialogComponent } from './components/vendor-bank-accou
 import { VendorPaymentDetailDialogComponent, VendorPaymentDetailDialogData } from './components/vendor-payment-detail-dialog/vendor-payment-detail-dialog.component';
 import { PAYABLES_MANAGE_ROLES, VENDOR_PAYMENT_READ_ROLES } from './payables-roles';
 import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
+import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
 
 type PayablesTab = 'bills' | 'payments' | 'batches' | 'accounts';
 
@@ -50,6 +51,7 @@ const VALID_TABS: PayablesTab[] = ['bills', 'payments', 'batches', 'accounts'];
   selector: 'app-payables',
   standalone: true,
   imports: [
+    ScrollCueDirective,
     DateOnlyPipe, ReactiveFormsModule, DatePipe, TranslatePipe,
     PageHeaderComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,

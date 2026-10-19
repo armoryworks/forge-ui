@@ -45,6 +45,7 @@ import { CustomerTaxDocumentsClusterComponent } from '../../components/customer-
 import { TermsSectionComponent } from '../../../terms/components/terms-section/terms-section.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { EntityCompletenessChipComponent } from '../../../../shared/components/entity-completeness-chip/entity-completeness-chip.component';
+import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
 
 /**
  * Pillar 5 — Customer detail shell.
@@ -66,6 +67,7 @@ import { EntityCompletenessChipComponent } from '../../../../shared/components/e
   selector: 'app-customer-detail',
   standalone: true,
   imports: [
+    ScrollCueDirective,
     TranslatePipe, RouterLink, MatTooltipModule,
     CustomerOverviewTabComponent,
     CustomerEstimatesTabComponent, CustomerQuotesTabComponent, CustomerOrdersTabComponent,

@@ -51,7 +51,7 @@
     </div>
   }
 
-  <div class="tab-bar">
+  <div class="tab-bar" appScrollCue>
     <button class="tab" [class.tab--active]="activeTab() === 'bills'" (click)="switchTab('bills')">
       <span class="material-icons-outlined">receipt_long</span>
       {{ 'payables.tabBills' | translate }}

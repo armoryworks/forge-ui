@@ -353,14 +353,14 @@ export class AdminComponent implements OnInit {
   protected readonly roleOptions = signal<SelectOption[]>([]);
 
   protected readonly userColumns = computed<ColumnDef[]>(() => [
-    { field: 'avatar', header: '', width: '36px' },
+    { field: 'avatar', phoneHidden: true, header: '', width: '36px' },
     { field: 'name', header: this.translate.instant('admin.colName'), sortable: true, sortField: 'lastName' },
-    { field: 'email', header: this.translate.instant('admin.colEmail'), sortable: true },
+    { field: 'email', phoneHidden: true, header: this.translate.instant('admin.colEmail'), sortable: true },
     { field: 'role', header: this.translate.instant('admin.colRole'), sortable: true, filterable: true, type: 'enum' as const,
       filterOptions: this.roleOptions(),
       sortValue: (row) => (row as AdminUser).roles[0] ?? '' },
-    { field: 'workLocationName', header: this.translate.instant('admin.colLocation'), sortable: true, filterable: true, type: 'text' as const, width: '150px' },
-    { field: 'compliance', header: this.translate.instant('admin.colCompliance'), sortable: true, width: '130px',
+    { field: 'workLocationName', phoneHidden: true, header: this.translate.instant('admin.colLocation'), sortable: true, filterable: true, type: 'text' as const, width: '150px' },
+    { field: 'compliance', phoneHidden: true, header: this.translate.instant('admin.colCompliance'), sortable: true, width: '130px',
       sortValue: (row) => {
         const u = row as AdminUser;
         return u.complianceTotalItems > 0 ? u.complianceCompletedItems / u.complianceTotalItems : 1;

@@ -19,6 +19,7 @@ import { EmployeeExpensesTabComponent } from './tabs/employee-expenses-tab.compo
 import { EmployeeDocumentsTabComponent } from './tabs/employee-documents-tab.component';
 import { EmployeeActivityTabComponent } from './tabs/employee-activity-tab.component';
 import { EmployeeEventsTabComponent } from './tabs/employee-events-tab.component';
+import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
 
 const TABS = ['overview', 'time', 'pay', 'training', 'compliance', 'jobs', 'events', 'expenses', 'documents', 'activity'] as const;
 type EmployeeTab = typeof TABS[number];
@@ -31,6 +32,7 @@ function toKind(value: string | null): EmployeeKind | null {
   selector: 'app-employee-detail',
   standalone: true,
   imports: [
+    ScrollCueDirective,
     RouterLink, TranslatePipe, AvatarComponent,
     EmployeeOverviewTabComponent, EmployeeTimeTabComponent, EmployeePayTabComponent,
     EmployeeTrainingTabComponent, EmployeeComplianceTabComponent, EmployeeJobsTabComponent,

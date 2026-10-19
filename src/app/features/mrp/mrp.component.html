@@ -1,6 +1,6 @@
 <app-page-header [title]="'mrp.title' | translate" />
 
-<div class="tab-bar">
+<div class="tab-bar" appScrollCue>
   <button class="tab" [class.tab--active]="activeTab() === 'dashboard'" (click)="switchTab('dashboard')">{{ 'mrp.tabs.dashboard' | translate }}</button>
   <button class="tab" [class.tab--active]="activeTab() === 'planned-orders'" (click)="switchTab('planned-orders')">{{ 'mrp.tabs.plannedOrders' | translate }}</button>
   <button class="tab" [class.tab--active]="activeTab() === 'exceptions'" (click)="switchTab('exceptions')">{{ 'mrp.tabs.exceptions' | translate }}</button>

@@ -1,6 +1,6 @@
 <div class="data-table">
   @if (pagedData().length || sortedData().length) {
-    <div class="data-table__scroll" [appLoadingBlock]="loading()">
+    <div class="data-table__scroll" appScrollCue [appLoadingBlock]="loading()">
       <table class="data-table__table">
         <thead>
           <tr>
@@ -207,6 +207,7 @@
       <app-column-manager-panel
         [columns]="columns()"
         [visibility]="columnVisibility()"
+        [defaultVisibility]="defaultVisibility()"
         [order]="columnOrder()"
         (stateChanged)="onColumnManagerChange($event)"
         (resetRequested)="onColumnManagerReset()"

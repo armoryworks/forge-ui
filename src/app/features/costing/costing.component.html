@@ -8,7 +8,7 @@
   </ng-container>
 
   <ng-container content>
-    <div class="tab-bar" role="tablist">
+    <div class="tab-bar" appScrollCue role="tablist">
       <button class="tab" role="tab" [attr.aria-selected]="activeTab() === 'periods'"
         [class.tab--active]="activeTab() === 'periods'" (click)="switchTab('periods')" data-testid="costing-tab-periods">
         {{ 'costing.tabs.periods' | translate }}
@@ -57,7 +57,7 @@
     }
 
     @if (activeTab() === 'periods') {
-      <div class="create-row" [formGroup]="periodForm">
+      <div class="create-row create-row--wrap" [formGroup]="periodForm">
         <app-datepicker [label]="'costing.periods.start' | translate" formControlName="start" [required]="true" data-testid="costing-period-start" />
         <app-datepicker [label]="'costing.periods.end' | translate" formControlName="end" [required]="true" data-testid="costing-period-end" />
         <button class="action-btn action-btn--create" [disabled]="periodForm.invalid" (click)="createPeriod()" data-testid="costing-period-create">

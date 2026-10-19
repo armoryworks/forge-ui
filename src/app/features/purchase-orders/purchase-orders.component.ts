@@ -29,6 +29,7 @@ import { DetailDialogService } from '../../shared/services/detail-dialog.service
 import { AuthService } from '../../shared/services/auth.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
+import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
 
 type PoTab = 'orders' | 'suggestions' | 'settings';
 
@@ -36,6 +37,7 @@ type PoTab = 'orders' | 'suggestions' | 'settings';
   selector: 'app-purchase-orders',
   standalone: true,
   imports: [
+    ScrollCueDirective,
     ReactiveFormsModule, DatePipe, DateOnlyPipe, TranslatePipe, MatTooltipModule,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective,
@@ -119,14 +121,14 @@ export class PurchaseOrdersComponent implements OnInit {
   protected readonly poColumns: ColumnDef[] = [
     { field: 'poNumber', header: this.translate.instant('purchaseOrders.poNumber'), sortable: true, width: '120px' },
     { field: 'vendorName', header: this.translate.instant('purchaseOrders.vendor'), sortable: true },
-    { field: 'jobNumber', header: this.translate.instant('purchaseOrders.job'), sortable: true, width: '100px' },
+    { field: 'jobNumber', phoneHidden: true, header: this.translate.instant('purchaseOrders.job'), sortable: true, width: '100px' },
     { field: 'status', header: this.translate.instant('common.status'), sortable: true, filterable: true, type: 'enum', width: '140px', filterOptions: this.statusOptions.slice(1) },
-    { field: 'originSource', header: this.translate.instant('purchaseOrders.origin'), sortable: true, filterable: true, type: 'enum', width: '130px', filterOptions: this.originFilterOptions },
-    { field: 'lineCount', header: this.translate.instant('purchaseOrders.lines'), sortable: true, width: '70px', align: 'center' },
-    { field: 'totalOrdered', header: this.translate.instant('purchaseOrders.ordered'), sortable: true, width: '90px', align: 'center' },
-    { field: 'totalReceived', header: this.translate.instant('purchaseOrders.received'), sortable: true, width: '90px', align: 'center' },
-    { field: 'expectedDeliveryDate', header: this.translate.instant('purchaseOrders.expected'), sortable: true, type: 'date', width: '110px' },
-    { field: 'createdAt', header: this.translate.instant('common.created'), sortable: true, type: 'date', width: '110px' },
+    { field: 'originSource', phoneHidden: true, header: this.translate.instant('purchaseOrders.origin'), sortable: true, filterable: true, type: 'enum', width: '130px', filterOptions: this.originFilterOptions },
+    { field: 'lineCount', phoneHidden: true, header: this.translate.instant('purchaseOrders.lines'), sortable: true, width: '70px', align: 'center' },
+    { field: 'totalOrdered', phoneHidden: true, header: this.translate.instant('purchaseOrders.ordered'), sortable: true, width: '90px', align: 'center' },
+    { field: 'totalReceived', phoneHidden: true, header: this.translate.instant('purchaseOrders.received'), sortable: true, width: '90px', align: 'center' },
+    { field: 'expectedDeliveryDate', phoneHidden: true, header: this.translate.instant('purchaseOrders.expected'), sortable: true, type: 'date', width: '110px' },
+    { field: 'createdAt', phoneHidden: true, header: this.translate.instant('common.created'), sortable: true, type: 'date', width: '110px' },
   ];
 
   constructor() {

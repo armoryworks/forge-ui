@@ -26,11 +26,13 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
+import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
 
 @Component({
   selector: 'app-edi-panel',
   standalone: true,
   imports: [
+    ScrollCueDirective,
     EdiPartNumberMapDialogComponent,
     MatTooltipModule,
     DatePipe, ReactiveFormsModule, TranslatePipe,

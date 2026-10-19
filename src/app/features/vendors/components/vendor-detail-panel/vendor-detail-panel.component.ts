@@ -34,11 +34,13 @@ import { VendorPart } from '../../../parts/models/vendor-part.model';
 import { EntityCompletenessChipComponent } from '../../../../shared/components/entity-completeness-chip/entity-completeness-chip.component';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
 
 @Component({
   selector: 'app-vendor-detail-panel',
   standalone: true,
   imports: [
+    ScrollCueDirective,
     DatePipe, DateOnlyPipe,
     MatTooltipModule,
     TranslatePipe,

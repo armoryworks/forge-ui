@@ -132,15 +132,15 @@ export class CustomersComponent {
   // Table
   protected readonly customerColumns: ColumnDef[] = [
     { field: 'name', header: this.translate.instant('customers.colName'), sortable: true },
-    { field: 'companyName', header: this.translate.instant('customers.colCompany'), sortable: true },
-    { field: 'email', header: this.translate.instant('customers.colEmail'), sortable: true },
-    { field: 'phone', header: this.translate.instant('customers.colPhone'), sortable: true },
+    { field: 'companyName', phoneHidden: true, header: this.translate.instant('customers.colCompany'), sortable: true },
+    { field: 'email', phoneHidden: true, header: this.translate.instant('customers.colEmail'), sortable: true },
+    { field: 'phone', phoneHidden: true, header: this.translate.instant('customers.colPhone'), sortable: true },
     { field: 'isActive', header: this.translate.instant('customers.colActive'), sortable: true, type: 'enum', filterable: true, filterOptions: [
       { value: true, label: this.translate.instant('common.active') }, { value: false, label: this.translate.instant('common.inactive') },
     ], width: '80px' },
-    { field: 'contactCount', header: this.translate.instant('customers.colContacts'), sortable: true, width: '90px', align: 'center' },
-    { field: 'jobCount', header: this.translate.instant('customers.colJobs'), sortable: true, width: '70px', align: 'center' },
-    { field: 'createdAt', header: this.translate.instant('customers.colCreated'), sortable: true, type: 'date', width: '110px' },
+    { field: 'contactCount', phoneHidden: true, header: this.translate.instant('customers.colContacts'), sortable: true, width: '90px', align: 'center' },
+    { field: 'jobCount', phoneHidden: true, header: this.translate.instant('customers.colJobs'), sortable: true, width: '70px', align: 'center' },
+    { field: 'createdAt', phoneHidden: true, header: this.translate.instant('customers.colCreated'), sortable: true, type: 'date', width: '110px' },
     // Hidden by default — power users opt in via column-manager. Renders the
     // full completeness chip (click → popover with per-capability gaps).
     { field: 'completeness', header: this.translate.instant('entityCompleteness.columnHeader'), width: '160px', align: 'center', visible: false },

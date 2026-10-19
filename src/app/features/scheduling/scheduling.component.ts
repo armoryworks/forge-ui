@@ -37,6 +37,7 @@ import {
   WorkCenterLoad,
   Shift,
 } from './models/scheduling.model';
+import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
 
 type SchedulingTab = 'gantt' | 'dispatch' | 'work-centers' | 'shifts' | 'runs';
 
@@ -46,6 +47,7 @@ const VALID_TABS = new Set<SchedulingTab>(['gantt', 'dispatch', 'work-centers', 
   selector: 'app-scheduling',
   standalone: true,
   imports: [
+    ScrollCueDirective,
     ReactiveFormsModule,
     PageHeaderComponent,
     DataTableComponent,

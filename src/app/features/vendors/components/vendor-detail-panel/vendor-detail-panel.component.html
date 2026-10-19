@@ -25,7 +25,7 @@
     </div>
 
     <!-- Tabs -->
-    <div class="tab-bar">
+    <div class="tab-bar" appScrollCue>
       <button class="tab" [class.tab--active]="activeTab() === 'info'" (click)="activeTab.set('info')">{{ 'vendors.info' | translate }}</button>
       <button class="tab" data-testid="vendor-tab-contacts" [class.tab--active]="activeTab() === 'contacts'" (click)="activeTab.set('contacts')">
         {{ 'vendorContacts.contactsTab' | translate }}

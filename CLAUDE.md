@@ -538,7 +538,7 @@ Promotion rule: used by 2+ features → move to `shared/`.
 | Expand/collapse | `expand_more` / `expand_less` | Vertical toggle sections |
 | Navigation | `chevron_right` / `chevron_left` | Sidebar, directional nav |
 
-**Component Sizing:** `$btn-icon-size: 24px` | `$avatar-size-xs: 18px` | `$avatar-size-sm: 20px` | `$avatar-size-md: 28px` | `$avatar-size-lg: 36px` | `$dot-size-sm: 8px` | `$dot-size-md: 12px` | `$progress-bar-height: 4px` | `$sidebar-nav-height: 36px` | `$sidebar-icon-size: 20px` | `$badge-size-sm: 14px` | `$badge-size-md: 16px` | `$input-height: 2rem` | `$chart-height: 300px`
+**Component Sizing:** `$btn-icon-size: 24px` | `$tap-target-min: 44px` | `$avatar-size-xs: 18px` | `$avatar-size-sm: 20px` | `$avatar-size-md: 28px` | `$avatar-size-lg: 36px` | `$dot-size-sm: 8px` | `$dot-size-md: 12px` | `$progress-bar-height: 4px` | `$sidebar-nav-height: 36px` | `$sidebar-icon-size: 20px` | `$badge-size-sm: 14px` | `$badge-size-md: 16px` | `$input-height: 2rem` | `$chart-height: 300px`
 
 **Sizing:** `$sidebar-width-collapsed: 52px` | `$sidebar-width-expanded: 200px` | `$header-height: 44px` | `$detail-panel-width: 400px` | `$notification-panel-width: 380px`
 
@@ -567,10 +567,11 @@ Dark theme auto-swaps via `[data-theme='dark']` on `<html>`.
 - `@include flex-center` / `@include flex-between` — common flex patterns
 - `@include custom-scrollbar($width)` — themed scrollbar
 - `@include mobile` / `@include tablet` / `@include desktop` — responsive breakpoints
+- `@include touch` — coarse pointer or phone width; `@include touch-target($axis: both|height|width)` raises a control to `$tap-target-min` there (already on `.icon-btn`, `.action-btn`, `.tab`)
 - `@include truncate` — text ellipsis
 
 ### Shared Classes (from `_shared.scss`)
-- `.page-header` — 48px height, `$sp-sm $sp-lg` padding, form fields zero margin
+- `.page-header` — 48px height, `$sp-sm $sp-lg` padding, form fields zero margin; wraps at phone width
 - `.action-btn` — outlined neutral (2rem height). Modifiers below.
 - `.icon-btn` / `.icon-btn--danger` / `.icon-btn--active` — 24x24 icon buttons
 - `.dialog-backdrop`, `.dialog`, `.dialog__header`, `.dialog__body`, `.dialog__footer`
@@ -751,6 +752,7 @@ All list views must show `<app-empty-state>` when data is empty — icon + messa
 | `AutocompleteComponent` | `shared/components/autocomplete/` | mat-autocomplete form field wrapper (CVA) |
 | `ToolbarComponent` | `shared/components/toolbar/` | Horizontal flex filter/action bar |
 | `SpacerDirective` | `shared/directives/spacer.directive.ts` | Pushes toolbar items right (`flex: 1`) |
+| `ScrollCueDirective` | `shared/directives/scroll-cue.directive.ts` | `appScrollCue` on a horizontal scroller (tab bars, the data-table scroll area) fades the edge that has more content |
 | `DateRangePickerComponent` | `shared/components/date-range-picker/` | Two-date picker with presets (CVA) |
 | `ActivityTimelineComponent` | `shared/components/activity-timeline/` | Chronological activity feed (compact + full) |
 | `ListPanelComponent` | `shared/components/list-panel/` | Scrollable list with built-in empty state |
@@ -889,7 +891,7 @@ protected readonly partRowStyle = (row: unknown): Record<string, string> => {
 };
 ```
 
-**ColumnDef interface:** `field`, `header`, `sortable?`, `filterable?`, `type?` ('text'|'number'|'date'|'enum'), `filterOptions?` (SelectOption[]), `width?`, `visible?`, `align?` ('left'|'center'|'right')
+**ColumnDef interface:** `field`, `header`, `sortable?`, `filterable?`, `type?` ('text'|'number'|'date'|'enum'), `filterOptions?` (SelectOption[]), `width?`, `visible?`, `align?` ('left'|'center'|'right'), `phoneHidden?` (hidden by default under 768px; a saved column-manager choice wins)
 
 **Additional inputs:** `loading` (boolean, shows `LoadingBlockDirective` overlay on scroll area), `stickyFirstColumn` (boolean, keeps first data column visible during horizontal scroll), `expandable` (boolean, adds expand/collapse chevron column), `clickableRows` (boolean, adds pointer cursor + hover highlight on rows that have a `(rowClick)` handler)
 

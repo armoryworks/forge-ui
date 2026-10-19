@@ -9,7 +9,7 @@
 
 <div class="po-content">
   <!-- Tabs -->
-  <div class="tab-bar">
+  <div class="tab-bar" appScrollCue>
     <button class="tab" [class.tab--active]="activeTab() === 'orders'" (click)="switchTab('orders')">
       <span class="material-icons-outlined">description</span>
       {{ 'purchaseOrders.tabOrders' | translate }}

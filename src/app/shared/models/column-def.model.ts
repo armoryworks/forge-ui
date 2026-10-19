@@ -27,4 +27,6 @@ export interface ColumnDef {
   sortField?: string;
   /** Value resolver for sort when the sort key isn't a direct property (multi-field compositions, derived status, etc.). Takes precedence over `sortField`. */
   sortValue?: (row: unknown) => unknown;
+  /** Hide this column by default at phone width; a visibility the user saved in the column manager still wins. */
+  phoneHidden?: boolean;
 }

@@ -7,7 +7,7 @@
   </ng-container>
 
   <ng-container content>
-    <div class="tab-bar">
+    <div class="tab-bar" appScrollCue>
       <button class="tab" [class.tab--active]="activeTab() === 'proposals'" (click)="switchTab('proposals')">
         {{ 'watchtower.tabs.proposals' | translate }}
         @if (pendingCount() > 0) { <span class="chip chip--warning wt-tab-badge">{{ pendingCount() }}</span> }

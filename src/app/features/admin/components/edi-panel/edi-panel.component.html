@@ -1,5 +1,5 @@
 <div class="edi-panel">
-  <div class="tab-bar">
+  <div class="tab-bar" appScrollCue>
     <button class="tab" [class.tab--active]="subTab() === 'partners'" (click)="switchSubTab('partners')">
       <span class="material-icons-outlined">business</span>
       {{ 'adminPanels.edi.tabs.tradingPartners' | translate }}

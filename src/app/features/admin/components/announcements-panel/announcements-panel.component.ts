@@ -22,11 +22,13 @@ import { CreateAnnouncementDialogComponent } from '../../../chat/components/crea
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
 
 @Component({
   selector: 'app-announcements-panel',
   standalone: true,
   imports: [
+    ScrollCueDirective,
     DatePipe,
     ReactiveFormsModule,
     DataTableComponent,

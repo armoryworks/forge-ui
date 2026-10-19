@@ -9,7 +9,7 @@
   </div>
 
   <!-- Tabs -->
-  <div class="tab-bar">
+  <div class="tab-bar" appScrollCue>
     <button class="tab" [class.tab--active]="activeTab() === 'gantt'" (click)="switchTab('gantt')">{{ 'scheduling.tabs.schedule' | translate }}</button>
     <button class="tab" [class.tab--active]="activeTab() === 'dispatch'" (click)="switchTab('dispatch')">{{ 'scheduling.tabs.dispatch' | translate }}</button>
     <button class="tab" [class.tab--active]="activeTab() === 'work-centers'" (click)="switchTab('work-centers')">{{ 'scheduling.tabs.workCenters' | translate }}</button>
