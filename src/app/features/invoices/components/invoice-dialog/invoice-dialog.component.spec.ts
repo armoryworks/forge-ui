@@ -37,6 +37,9 @@ interface DialogInternals {
   onPartPicked(entity: Record<string, unknown> | null): void;
   lines: { (): { partId: number | null; partNumber: string; description: string; quantity: number; unitPrice: number; taxable: boolean }[]; set(v: unknown[]): void };
   taxAmount(): number;
+  lineAmounts(): number[];
+  lineTotal(): number;
+  grandTotal(): number;
   toggleTaxable(index: number): void;
 }
 
@@ -293,6 +296,20 @@ describe('InvoiceDialogComponent — tax rate and taxable lines', () => {
 
     expect(internals.taxAmount()).toBeCloseTo(40, 6);
     expect(internals.lines()[1].taxable).toBe(false);
+  });
+
+  it('rounds the line, subtotal and total the way the server does and derives tax from them', () => {
+    const { internals, httpMock } = setup();
+    selectCustomer(internals, httpMock, 5, acmeSources, 0.0725);
+    internals.lines.set([
+      { partId: null, partNumber: '', description: 'Bracket', quantity: 3, unitPrice: 33.335, taxable: true },
+      { partId: null, partNumber: '', description: 'Shim', quantity: 0.1, unitPrice: 0.2, taxable: true },
+    ]);
+
+    expect(internals.lineAmounts()).toEqual([100.01, 0.02]);
+    expect(internals.lineTotal()).toBe(100.03);
+    expect(internals.taxAmount()).toBe(7.25);
+    expect(internals.grandTotal()).toBe(107.28);
   });
 
   it('carries a non-taxable order line onto the prefilled invoice line', () => {

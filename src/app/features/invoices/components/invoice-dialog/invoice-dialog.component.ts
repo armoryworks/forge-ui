@@ -29,6 +29,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ActiveCurrencyService } from '../../../../shared/services/active-currency.service';
 import { ActiveCurrency } from '../../../../shared/models/active-currency.model';
 import { formatDate, toIsoDate, todayEnd } from '../../../../shared/utils/date.utils';
+import { roundMoney } from '../../../../shared/utils/money.utils';
 import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
 
 interface LineEntry {
@@ -183,9 +184,15 @@ export class InvoiceDialogComponent {
     unitPrice: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
   });
 
-  protected readonly lineTotal = computed(() =>
+  protected readonly lineAmounts = computed(() =>
+    this.lines().map(l => roundMoney(l.quantity * l.unitPrice))
+  );
+
+  private readonly rawLineTotal = computed(() =>
     this.lines().reduce((sum, l) => sum + l.quantity * l.unitPrice, 0)
   );
+
+  protected readonly lineTotal = computed(() => roundMoney(this.rawLineTotal()));
 
   protected readonly taxableTotal = computed(() =>
     this.lines().reduce((sum, l) => (l.taxable ? sum + l.quantity * l.unitPrice : sum), 0)
@@ -195,8 +202,10 @@ export class InvoiceDialogComponent {
     this.invoiceForm.controls.taxRate.valueChanges.pipe(startWith(this.invoiceForm.controls.taxRate.value ?? 0)),
     { initialValue: this.invoiceForm.controls.taxRate.value ?? 0 }
   );
-  protected readonly taxAmount = computed(() => (this.taxRateValue() ?? 0) / 100 * this.taxableTotal());
-  protected readonly grandTotal = computed(() => this.lineTotal() + this.taxAmount());
+  protected readonly grandTotal = computed(() =>
+    roundMoney(this.rawLineTotal() + (this.taxRateValue() ?? 0) / 100 * this.taxableTotal())
+  );
+  protected readonly taxAmount = computed(() => roundMoney(this.grandTotal() - this.lineTotal()));
 
   protected readonly draftConfig: DraftConfig = {
     entityType: 'invoice',

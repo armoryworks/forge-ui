@@ -25,8 +25,8 @@
                   <td class="lines-table__mono">{{ line.partNumber }}</td>
                   <td>{{ line.description }}</td>
                   <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
-                  <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" /></td>
-                  <td class="lines-table__right"><app-currency-display [value]="line.quantity * line.unitPrice" [currency]="null" /></td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" [maximumFractionDigits]="4" /></td>
+                  <td class="lines-table__right"><app-currency-display [value]="lineAmounts()[$index]" [currency]="null" /></td>
                   <td>
                     <button class="icon-btn" type="button" [attr.aria-pressed]="line.taxable" [matTooltip]="(line.taxable ? 'invoices.taxableLine' : 'invoices.nonTaxableLine') | translate" matTooltipPosition="above" [attr.aria-label]="'invoices.taxable' | translate" [attr.data-testid]="'invoice-line-taxable-' + $index" (click)="toggleTaxable($index)">
                       <span class="material-icons-outlined">{{ line.taxable ? 'check_box' : 'check_box_outline_blank' }}</span>
