@@ -30,7 +30,7 @@
 
     <ng-template appColumnCell="nextAttemptAt" let-row>
       @if (row.nextAttemptAt) {
-        {{ row.nextAttemptAt | date:'MM/dd/yyyy hh:mm' }}
+        {{ row.nextAttemptAt | dateTime }}
       } @else {
         <span class="text-muted">&mdash;</span>
       }
@@ -38,7 +38,7 @@
 
     <ng-template appColumnCell="sentAt" let-row>
       @if (row.sentAt) {
-        {{ row.sentAt | date:'MM/dd/yyyy hh:mm' }}
+        {{ row.sentAt | dateTime }}
       } @else {
         <span class="text-muted">&mdash;</span>
       }
@@ -107,15 +107,15 @@
           </div>
           <div class="outbox-detail__meta-item">
             <span class="outbox-detail__label">Created</span>
-            <span>{{ entry.createdAt | date:'MM/dd/yyyy hh:mm' }}</span>
+            <span>{{ entry.createdAt | dateTime }}</span>
           </div>
           <div class="outbox-detail__meta-item">
             <span class="outbox-detail__label">Last attempt</span>
-            <span>{{ entry.lastAttemptAt ? (entry.lastAttemptAt | date:'MM/dd/yyyy hh:mm') : '—' }}</span>
+            <span>{{ entry.lastAttemptAt ? (entry.lastAttemptAt | dateTime) : '—' }}</span>
           </div>
           <div class="outbox-detail__meta-item">
             <span class="outbox-detail__label">Sent at</span>
-            <span>{{ entry.sentAt ? (entry.sentAt | date:'MM/dd/yyyy hh:mm') : '—' }}</span>
+            <span>{{ entry.sentAt ? (entry.sentAt | dateTime) : '—' }}</span>
           </div>
         </div>
       </div>

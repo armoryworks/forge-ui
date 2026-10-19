@@ -129,6 +129,8 @@
           [data]="shifts()"
           emptyIcon="schedule"
           [emptyMessage]="'scheduling.noShiftsTable' | translate">
+          <ng-template appColumnCell="startTime" let-row>{{ row.startTime | dateTime:'time' }}</ng-template>
+          <ng-template appColumnCell="endTime" let-row>{{ row.endTime | dateTime:'time' }}</ng-template>
           <ng-template appColumnCell="isActive" let-row>
             <span [class]="row.isActive ? 'chip chip--success' : 'chip chip--muted'">{{ (row.isActive ? 'scheduling.active' : 'scheduling.inactive') | translate }}</span>
           </ng-template>

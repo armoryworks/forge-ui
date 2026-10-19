@@ -364,12 +364,12 @@
                 <p class="settings-hint">
                   {{ 'admin.telemetry.lastDecision' | translate: {
                        decision: t.consentDecision, by: t.consentBy || '—' } }}
-                  {{ t.consentAt | date: 'MM/dd/yyyy hh:mm' }}
+                  {{ t.consentAt | dateTime }}
                 </p>
               }
               @if (t.lastHeartbeatAt) {
                 <p class="settings-hint">
-                  {{ 'admin.telemetry.lastReport' | translate }} {{ t.lastHeartbeatAt | date: 'MM/dd/yyyy hh:mm' }}
+                  {{ 'admin.telemetry.lastReport' | translate }} {{ t.lastHeartbeatAt | dateTime }}
                 </p>
               }
               @if (t.lastError) {
@@ -387,7 +387,7 @@
                       {{ ('admin.telemetry.decision.' + row.decision) | translate }}
                     </span>
                     <span class="telemetry-history__meta">
-                      {{ row.at | date: 'MM/dd/yyyy hh:mm' }} · {{ row.by || '—' }}
+                      {{ row.at | dateTime }} · {{ row.by || '—' }}
                       · {{ 'admin.telemetry.agreementVersion' | translate: { version: row.version } }}
                     </span>
                   </li>

@@ -20,6 +20,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { CustomerService } from '../../../customers/services/customer.service';
 import { CommunicationService } from '../../services/communication.service';
 import { CommunicationDetail } from '../../models/communication-detail.model';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 /**
  * The review screen. A message on the left, an editable draft on the right, and
@@ -38,7 +39,7 @@ import { CommunicationDetail } from '../../models/communication-detail.model';
   selector: 'app-communication-review',
   standalone: true,
   imports: [
-    DatePipe,
+    DatePipe, DateTimePipe,
     DecimalPipe,
     ReactiveFormsModule,
     MatTooltipModule,

@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { Draft } from '../../models/draft.model';
+import { DateTimePipe } from '../../pipes/date-time.pipe';
 
 export interface DraftRecoveryPromptData {
   drafts: Draft[];
@@ -17,7 +17,7 @@ export interface DraftRecoveryPromptResult {
 @Component({
   selector: 'app-draft-recovery-prompt',
   standalone: true,
-  imports: [DatePipe],
+  imports: [DateTimePipe],
   templateUrl: './draft-recovery-prompt.component.html',
   styleUrl: './draft-recovery-prompt.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

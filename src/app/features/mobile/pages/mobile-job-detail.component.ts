@@ -8,6 +8,7 @@ import { Observable, of, switchMap, tap } from 'rxjs';
 
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
+import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
 
 interface JobDetail {
   id: number;
@@ -36,7 +37,7 @@ const PRIORITY_KEYS = new Set(['low', 'normal', 'high', 'urgent']);
 @Component({
   selector: 'app-mobile-job-detail',
   standalone: true,
-  imports: [DatePipe, TranslatePipe, LoadingBlockDirective],
+  imports: [DatePipe, DateTimePipe, TranslatePipe, LoadingBlockDirective],
   templateUrl: './mobile-job-detail.component.html',
   styleUrl: './mobile-job-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

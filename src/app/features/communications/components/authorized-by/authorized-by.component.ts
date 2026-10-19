@@ -8,6 +8,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { CommunicationService } from '../../services/communication.service';
 import { SalesOrderAuthorization } from '../../models/sales-order-authorization.model';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 /**
  * The Authorized-by line.
@@ -24,7 +25,7 @@ import { SalesOrderAuthorization } from '../../models/sales-order-authorization.
 @Component({
   selector: 'app-authorized-by',
   standalone: true,
-  imports: [DatePipe, MatTooltipModule, RouterLink, TranslatePipe],
+  imports: [DatePipe, DateTimePipe, MatTooltipModule, RouterLink, TranslatePipe],
   templateUrl: './authorized-by.component.html',
   styleUrl: './authorized-by.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

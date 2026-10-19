@@ -37,6 +37,7 @@ import {
   WorkCenterLoad,
   Shift,
 } from './models/scheduling.model';
+import { DateTimePipe } from '../../shared/pipes/date-time.pipe';
 
 type SchedulingTab = 'gantt' | 'dispatch' | 'work-centers' | 'shifts' | 'runs';
 
@@ -47,6 +48,7 @@ const VALID_TABS = new Set<SchedulingTab>(['gantt', 'dispatch', 'work-centers', 
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    DateTimePipe,
     PageHeaderComponent,
     DataTableComponent,
     ColumnCellDirective,

@@ -29,13 +29,13 @@
           @if (rfq.sentAt) {
             <div class="info-item">
               <span class="info-label">{{ 'purchasing.sentAt' | translate }}</span>
-              <span class="info-value">{{ rfq.sentAt | date:'MM/dd/yyyy hh:mm' }}</span>
+              <span class="info-value">{{ rfq.sentAt | dateTime }}</span>
             </div>
           }
           @if (rfq.awardedAt) {
             <div class="info-item">
               <span class="info-label">{{ 'purchasing.awardedAt' | translate }}</span>
-              <span class="info-value">{{ rfq.awardedAt | date:'MM/dd/yyyy hh:mm' }}</span>
+              <span class="info-value">{{ rfq.awardedAt | dateTime }}</span>
             </div>
           }
           @if (rfq.generatedPurchaseOrderId) {

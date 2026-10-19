@@ -88,7 +88,7 @@
               <span class="part-row__draft-meta">
                 {{ 'parts.drafts.stepLabel' | translate: { step: part._draftRun.currentStepId ?? '?' } }}
                 ·
-                {{ 'parts.drafts.lastEdited' | translate: { when: part._draftRun.lastActivityAt | date:'short' } }}
+                {{ 'parts.drafts.lastEdited' | translate: { when: part._draftRun.lastActivityAt | dateTime } }}
               </span>
               <button type="button" class="icon-btn icon-btn--danger part-row__draft-abandon"
                 [attr.data-testid]="'parts-drafts-abandon-' + part._draftRun.id"

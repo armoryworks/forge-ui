@@ -146,7 +146,7 @@
                     @if (entry.toLocationName) {
                       <span>{{ entry.toLocationName }}</span>
                     }
-                    <span class="serial-history__date">{{ entry.occurredAt | date:'MM/dd/yyyy HH:mm' }}</span>
+                    <span class="serial-history__date">{{ entry.occurredAt | dateTime }}</span>
                   </div>
                   @if (entry.details) {
                     <div class="serial-history__details">{{ entry.details }}</div>

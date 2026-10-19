@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, output, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
@@ -16,6 +15,7 @@ import { PageLayoutComponent } from '../../../../shared/components/page-layout/p
 import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { SCAN_LOG_ACTION_LABEL_KEYS } from '../../models/scan-log-action-label-keys.const';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 const ACTION_TYPE_FILTER_VALUES = ['Move', 'CycleCount', 'Receive', 'Ship', 'Issue'];
 
@@ -23,7 +23,7 @@ const ACTION_TYPE_FILTER_VALUES = ['Move', 'CycleCount', 'Receive', 'Ship', 'Iss
   selector: 'app-scan-daily-log',
   standalone: true,
   imports: [
-    DatePipe,
+    DateTimePipe,
     ReactiveFormsModule,
     TranslatePipe,
     DataTableComponent,

@@ -134,7 +134,7 @@
         <p class="admin-overview-card__sub">
           <span class="material-icons-outlined">arrow_forward</span>
           {{ 'adminOverview.scheduledTasks.nextRun' | translate }}
-          <span class="admin-overview-card__sub-value">{{ next | date:'MM/dd/yyyy hh:mm a' }}</span>
+          <span class="admin-overview-card__sub-value">{{ next | dateTime }}</span>
         </p>
       } @else {
         <p class="admin-overview-card__sub admin-overview-card__sub--muted">
@@ -204,7 +204,7 @@
             <li class="admin-overview-card__audit-row">
               <span class="admin-overview-card__audit-action">{{ entry.action }}</span>
               <span class="admin-overview-card__audit-actor">{{ entry.userName }}</span>
-              <span class="admin-overview-card__audit-when">{{ entry.createdAt | date:'MM/dd/yyyy hh:mm a' }}</span>
+              <span class="admin-overview-card__audit-when">{{ entry.createdAt | dateTime }}</span>
             </li>
           }
         </ul>

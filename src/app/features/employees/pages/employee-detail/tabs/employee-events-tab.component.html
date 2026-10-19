@@ -14,10 +14,10 @@
       </span>
     </ng-template>
     <ng-template appColumnCell="startTime" let-row>
-      {{ row.startTime | date:'MM/dd/yyyy hh:mm a' }}
+      {{ row.isAllDay ? (row.startTime | dateOnly) : (row.startTime | dateTime) }}
     </ng-template>
     <ng-template appColumnCell="endTime" let-row>
-      {{ row.endTime | date:'MM/dd/yyyy hh:mm a' }}
+      {{ row.isAllDay ? (row.endTime | dateOnly) : (row.endTime | dateTime) }}
     </ng-template>
     <ng-template appColumnCell="isRequired" let-row>
       @if (row.isRequired) {

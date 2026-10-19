@@ -12,4 +12,5 @@ export interface CalendarEvent {
   status: string | null;
   eventTypeId: number | null;
   superGroupId: number | null;
+  isAllDay: boolean;
 }

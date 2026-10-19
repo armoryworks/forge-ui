@@ -10,7 +10,7 @@
     <app-data-table tableId="spc-ooc-events" [columns]="columns" [data]="events()"
       emptyIcon="warning" emptyMessage="No out-of-control events">
       <ng-template appColumnCell="detectedAt" let-row>
-        <span class="text-muted">{{ row.detectedAt | date:'MM/dd/yyyy HH:mm' }}</span>
+        <span class="text-muted">{{ row.detectedAt | dateTime }}</span>
       </ng-template>
       <ng-template appColumnCell="severity" let-row>
         <span [class]="getSeverityClass(row.severity)">{{ row.severity }}</span>

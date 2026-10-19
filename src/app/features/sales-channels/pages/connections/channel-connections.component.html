@@ -47,7 +47,7 @@
                   <dt>{{ 'connections.lastSync' | translate }}</dt>
                   <dd>
                     @if (row.connection.lastSyncAt) {
-                      {{ row.connection.lastSyncAt | date:'MM/dd/yyyy hh:mm a' }}
+                      {{ row.connection.lastSyncAt | dateTime }}
                     } @else {
                       <span class="conn-card__muted">{{ 'connections.never' | translate }}</span>
                     }

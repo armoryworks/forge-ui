@@ -12,6 +12,7 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
 
 import { ConnectionsRegistryService } from '../../services/connections-registry.service';
 import { IntegrationKind, IntegrationRecord } from '../../models/integration-record.model';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 interface KindDescriptor {
   label: string;
@@ -31,7 +32,7 @@ interface KindDescriptor {
   selector: 'app-connections-panel',
   standalone: true,
   imports: [
-    DatePipe,
+    DatePipe, DateTimePipe,
     TranslatePipe,
     DataTableComponent,
     ColumnCellDirective,

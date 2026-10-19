@@ -30,7 +30,7 @@
       [emptyMessage]="'kioskFlows.dailyLog.empty' | translate">
 
       <ng-template appColumnCell="createdAt" let-row>
-        {{ row.createdAt | date:'HH:mm:ss' }}
+        {{ row.createdAt | dateTime:'timeSeconds' }}
       </ng-template>
 
       <ng-template appColumnCell="actionType" let-row>

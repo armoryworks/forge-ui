@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 
-import { DatePipe } from '@angular/common';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { OfflineQueueEntry } from '../../../../shared/models/offline-queue-entry.model';
 import { QueuedActionLabel } from '../../../../shared/models/queued-action-label.model';
 import { OfflineQueueService } from '../../../../shared/services/offline-queue.service';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 type SyncState = 'online' | 'offline' | 'syncing' | 'rejected';
 
@@ -20,7 +20,7 @@ type SyncState = 'online' | 'offline' | 'syncing' | 'rejected';
 @Component({
   selector: 'app-sync-indicator',
   standalone: true,
-  imports: [DatePipe, TranslatePipe],
+  imports: [DateTimePipe, TranslatePipe],
   templateUrl: './sync-indicator.component.html',
   styleUrl: './sync-indicator.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

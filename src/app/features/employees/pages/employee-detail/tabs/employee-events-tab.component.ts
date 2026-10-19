@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input, OnInit, signal } from '@angular/core';
 
 import { EventsService } from '../../../../events/services/events.service';
@@ -6,11 +5,13 @@ import { AppEvent } from '../../../../events/models/event.model';
 import { DataTableComponent } from '../../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../../shared/models/column-def.model';
+import { DateOnlyPipe } from '../../../../../shared/pipes/date-only.pipe';
+import { DateTimePipe } from '../../../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-employee-events-tab',
   standalone: true,
-  imports: [DatePipe, DataTableComponent, ColumnCellDirective],
+  imports: [DateTimePipe, DateOnlyPipe, DataTableComponent, ColumnCellDirective],
   templateUrl: './employee-events-tab.component.html',
   styleUrl: '../employee-detail-tabs.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

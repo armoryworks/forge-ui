@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -10,6 +10,8 @@ import { UserPreferencesService } from '../../shared/services/user-preferences.s
 import { KanbanService } from '../kanban/services/kanban.service';
 import { CalendarComponent } from './calendar.component';
 import { CalendarService } from './services/calendar.service';
+import { CalendarEvent } from './models/calendar-event.model';
+import { CalendarDayEvent } from './components/calendar-day-dialog/calendar-day-dialog.component';
 
 class FakeLoader implements TranslateLoader {
   getTranslation(): Observable<Record<string, string>> { return of({}); }
@@ -73,5 +75,74 @@ describe('CalendarComponent · role access', () => {
 
     expect(calendar['getJobs']).toHaveBeenCalled();
     expect(calendar['getPoEvents']).toHaveBeenCalled();
+  });
+});
+
+interface CalendarEventInternals {
+  events: { set(events: CalendarEvent[]): void };
+  eventsByDate(): Map<string, { id: number }[]>;
+  eventsForDay(dateKey: string): CalendarDayEvent[];
+}
+
+describe('CalendarComponent · event days', () => {
+  let originalTz: string | undefined;
+
+  beforeEach(() => {
+    originalTz = process.env['TZ'];
+    process.env['TZ'] = 'America/Denver';
+  });
+
+  afterEach(() => {
+    if (originalTz === undefined) delete process.env['TZ'];
+    else process.env['TZ'] = originalTz;
+  });
+
+  function event(id: number, startTime: string, isAllDay: boolean): CalendarEvent {
+    return {
+      id, title: `Event ${id}`, description: null, startTime, endTime: startTime, location: null,
+      eventType: 'Other', isRequired: false, isCancelled: false, status: null,
+      eventTypeId: null, superGroupId: null, isAllDay,
+    };
+  }
+
+  function setup(): CalendarEventInternals {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        {
+          provide: CalendarService,
+          useValue: {
+            getJobs: () => of([]), getPoEvents: () => of([]), getSuperGroups: () => of([]),
+            getEvents: () => of([]), getSavedViews: () => of([]),
+          },
+        },
+        { provide: KanbanService, useValue: { getTrackTypes: () => of([]) } },
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: UserPreferencesService, useValue: { get: () => null, set: vi.fn() } },
+        { provide: AuthService, useValue: { hasAnyRole: () => false } },
+      ],
+    });
+    const component = TestBed.runInInjectionContext(() => new CalendarComponent()) as unknown as CalendarEventInternals;
+    TestBed.flushEffects();
+    return component;
+  }
+
+  it('keeps an all-day event stored at UTC midnight on its own day west of UTC', () => {
+    const view = setup();
+    view.events.set([event(1, '2026-10-30T00:00:00Z', true), event(2, '2026-10-30T17:00:00Z', true)]);
+
+    expect(view.eventsByDate().get('2026-10-30')?.map(e => e.id)).toEqual([1, 2]);
+    expect(view.eventsByDate().has('2026-10-29')).toBe(false);
+    expect(view.eventsForDay('2026-10-30').map(e => [e.id, e.isAllDay])).toEqual([[1, true], [2, true]]);
+  });
+
+  it('places a timed event on its local day', () => {
+    const view = setup();
+    view.events.set([event(3, '2026-10-30T02:00:00Z', false)]);
+
+    expect(view.eventsByDate().get('2026-10-29')?.map(e => e.id)).toEqual([3]);
+    expect(view.eventsForDay('2026-10-30')).toEqual([]);
   });
 });

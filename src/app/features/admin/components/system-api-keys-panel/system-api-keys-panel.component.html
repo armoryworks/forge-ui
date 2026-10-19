@@ -55,7 +55,7 @@
       </ng-template>
       <ng-template appColumnCell="lastUsedAt" let-row>
         @if (row.lastUsedAt) {
-          {{ row.lastUsedAt | date:'MM/dd/yyyy hh:mm' }}
+          {{ row.lastUsedAt | dateTime }}
         } @else {
           <span class="text-muted">{{ 'adminPanels.systemApiKeys.never' | translate }}</span>
         }

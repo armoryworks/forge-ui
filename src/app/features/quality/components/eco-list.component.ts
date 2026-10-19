@@ -21,12 +21,13 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
 import { MatDialog } from '@angular/material/dialog';
 import { toDateOnly } from '../../../shared/utils/date.utils';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
 
 @Component({
   selector: 'app-eco-list',
   standalone: true,
   imports: [
-    DatePipe, ReactiveFormsModule,
+    DatePipe, DateOnlyPipe, ReactiveFormsModule,
     DataTableComponent, ColumnCellDirective,
     SelectComponent, InputComponent, TextareaComponent, DatepickerComponent,
     DialogComponent, LoadingBlockDirective,

@@ -50,7 +50,7 @@
     emptyIcon="history"
     [emptyMessage]="'adminPanels.timeCorrections.noCorrections' | translate">
     <ng-template appColumnCell="createdAt" let-row>
-      {{ row.createdAt | date:'MM/dd/yyyy hh:mm a' }}
+      {{ row.createdAt | dateTime }}
     </ng-template>
     <ng-template appColumnCell="originalDate" let-row>
       {{ row.originalDate | date:'MM/dd/yyyy' }}

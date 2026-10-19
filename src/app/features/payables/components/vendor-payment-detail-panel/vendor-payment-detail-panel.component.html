@@ -87,7 +87,7 @@
             @if (transmissionStatus === 'Retrying' && payment.transmissionNextAttemptAt) {
               <div class="info-item">
                 <span class="info-label">{{ 'payables.transmission.nextAttemptAt' | translate }}</span>
-                <span class="info-value">{{ payment.transmissionNextAttemptAt | date:'MM/dd/yyyy hh:mm' }}</span>
+                <span class="info-value">{{ payment.transmissionNextAttemptAt | dateTime }}</span>
               </div>
             }
           </div>

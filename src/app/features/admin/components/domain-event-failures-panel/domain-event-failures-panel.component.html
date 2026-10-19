@@ -28,12 +28,12 @@
     </ng-template>
 
     <ng-template appColumnCell="failedAt" let-row>
-      {{ row.failedAt | date:'MM/dd/yyyy hh:mm' }}
+      {{ row.failedAt | dateTime }}
     </ng-template>
 
     <ng-template appColumnCell="lastRetryAt" let-row>
       @if (row.lastRetryAt) {
-        {{ row.lastRetryAt | date:'MM/dd/yyyy hh:mm' }}
+        {{ row.lastRetryAt | dateTime }}
       } @else {
         <span class="text-muted">&mdash;</span>
       }
@@ -99,11 +99,11 @@
           </div>
           <div class="failure-detail__meta-item">
             <span class="failure-detail__label">{{ 'adminPanels.domainEventFailures.cols.failedAt' | translate }}</span>
-            <span>{{ failure.failedAt | date:'MM/dd/yyyy hh:mm' }}</span>
+            <span>{{ failure.failedAt | dateTime }}</span>
           </div>
           <div class="failure-detail__meta-item">
             <span class="failure-detail__label">{{ 'adminPanels.domainEventFailures.cols.lastRetry' | translate }}</span>
-            <span>{{ failure.lastRetryAt ? (failure.lastRetryAt | date:'MM/dd/yyyy hh:mm') : '&mdash;' }}</span>
+            <span>{{ failure.lastRetryAt ? (failure.lastRetryAt | dateTime) : '&mdash;' }}</span>
           </div>
         </div>
       </div>

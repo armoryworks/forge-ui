@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { FormControl } from '@angular/forms';
 
@@ -22,12 +21,13 @@ import { CreateAnnouncementDialogComponent } from '../../../chat/components/crea
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-announcements-panel',
   standalone: true,
   imports: [
-    DatePipe,
+    DateTimePipe,
     ReactiveFormsModule,
     DataTableComponent,
     ColumnCellDirective,

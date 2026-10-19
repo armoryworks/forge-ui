@@ -23,13 +23,14 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { fromIsoDate, toIsoDate } from '../../../../shared/utils/date.utils';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-time-corrections-panel',
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    DatePipe,
+    DatePipe, DateTimePipe,
     DataTableComponent,
     ColumnCellDirective,
     InputComponent,

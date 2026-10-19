@@ -118,9 +118,9 @@
                 <tbody>
                   @for (h of sel.holidays; track h.id) {
                     <tr data-testid="holiday-row">
-                      <td>{{ h.date }}</td>
+                      <td>{{ h.date | dateOnly }}</td>
                       <td>{{ h.name }}</td>
-                      <td>{{ h.observedDate ?? '—' }}</td>
+                      <td>{{ h.observedDate ? (h.observedDate | dateOnly) : '—' }}</td>
                       <td>{{ (h.isRecurring ? 'common.yes' : 'common.no') | translate }}</td>
                       <td class="working-calendars__holidays-action">
                         <button type="button" class="icon-btn icon-btn--danger"
@@ -188,8 +188,8 @@
                     <tr data-testid="shift-row" [class.working-calendars__shift--inactive]="!s.isActive">
                       <td>{{ s.name }}</td>
                       <td class="working-calendars__shift-days">{{ renderMask(s.daysOfWeekMask) }}</td>
-                      <td>{{ s.startTime.substring(0, 5) }}</td>
-                      <td>{{ s.endTime.substring(0, 5) }}</td>
+                      <td>{{ s.startTime | dateTime:'time' }}</td>
+                      <td>{{ s.endTime | dateTime:'time' }}</td>
                       <td>{{ 'workingCalendars.hoursShort' | translate: { hours: s.effectiveCapacityHours } }}</td>
                       <td>{{ 'workingCalendars.multiplier' | translate: { value: s.premiumMultiplier } }}</td>
                       <td class="working-calendars__holidays-action">

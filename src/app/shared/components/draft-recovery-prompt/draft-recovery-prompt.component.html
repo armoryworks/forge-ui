@@ -15,7 +15,7 @@
           <div class="draft-prompt__item">
             <div class="draft-prompt__item-info">
               <span class="draft-prompt__item-label">{{ draft.displayLabel }}</span>
-              <span class="draft-prompt__item-time">{{ draft.lastModified | date:'MM/dd/yyyy hh:mm a' }}</span>
+              <span class="draft-prompt__item-time">{{ draft.lastModified | dateTime }}</span>
             </div>
             <button class="action-btn action-btn--sm" aria-label="Go to {{ draft.displayLabel }}" (click)="navigateTo(draft)">
               <span class="material-icons-outlined">open_in_new</span>

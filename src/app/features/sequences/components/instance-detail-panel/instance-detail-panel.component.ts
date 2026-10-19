@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 
 import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -10,6 +9,7 @@ import {
   SequenceEvent, SequenceGateInstance, SequenceInstance, SequenceStepInstance,
 } from '../../models/sequence.model';
 import { ReasonDialogComponent, ReasonDialogData } from '../reason-dialog/reason-dialog.component';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 /**
  * Operational view of one sequence instance: the steps with their live status
@@ -20,7 +20,7 @@ import { ReasonDialogComponent, ReasonDialogData } from '../reason-dialog/reason
 @Component({
   selector: 'app-sequence-instance-panel',
   standalone: true,
-  imports: [DatePipe, TranslatePipe],
+  imports: [DateTimePipe, TranslatePipe],
   templateUrl: './instance-detail-panel.component.html',
   styleUrl: './instance-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

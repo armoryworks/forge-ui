@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, OnDestroy, OnInit, signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DatePipe, NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -26,6 +26,7 @@ import { ShopFloorOverview } from '../models/shop-floor-overview.model';
 import { KioskTerminal } from '../models/kiosk-terminal.model';
 import { ScanIdentification } from '../models/scan-identification.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
 
 const REFRESH_INTERVAL_MS = 15_000;
 const AUTO_LOGOUT_MS = 30_000;
@@ -41,7 +42,7 @@ type PunchUndoState = 'offered' | 'undoing' | 'undone' | 'failed';
 @Component({
   selector: 'app-shop-floor-clock',
   standalone: true,
-  imports: [ReactiveFormsModule, DatePipe, NgTemplateOutlet, TranslatePipe, AvatarComponent, InputComponent, BarcodeScanInputComponent, KioskSearchBarComponent, KioskSetupComponent],
+  imports: [ReactiveFormsModule, DateTimePipe, NgTemplateOutlet, TranslatePipe, AvatarComponent, InputComponent, BarcodeScanInputComponent, KioskSearchBarComponent, KioskSetupComponent],
   templateUrl: './shop-floor-clock.component.html',
   styleUrl: './shop-floor-clock.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

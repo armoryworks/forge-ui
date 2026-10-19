@@ -2,7 +2,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { EdiPartNumberMapDialogComponent } from '../edi-part-number-map-dialog/edi-part-number-map-dialog.component';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -26,6 +25,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-edi-panel',
@@ -33,7 +33,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
   imports: [
     EdiPartNumberMapDialogComponent,
     MatTooltipModule,
-    DatePipe, ReactiveFormsModule, TranslatePipe,
+    DateTimePipe, ReactiveFormsModule, TranslatePipe,
     DataTableComponent, ColumnCellDirective,
     SelectComponent, InputComponent, TextareaComponent, ToggleComponent,
     DialogComponent, LoadingBlockDirective, ValidationButtonComponent,

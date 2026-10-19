@@ -15,6 +15,7 @@ import { DispositionRequest, OutreachState, QueueLead } from '../../models/queue
 import { CallbackSchedulerDialogComponent, CallbackSchedulerResult } from '../../components/callback-scheduler-dialog/callback-scheduler-dialog.component';
 import { OutreachPreferencesDialogComponent, OutreachPreferencesDialogData } from '../../components/outreach-preferences-dialog/outreach-preferences-dialog.component';
 import { OutreachPreferences } from '../../models/suppression.model';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 interface DispositionAction {
   state: OutreachState;
@@ -46,7 +47,7 @@ interface DispositionAction {
   selector: 'app-leads-queue',
   standalone: true,
   imports: [
-    DatePipe, ReactiveFormsModule, TranslatePipe,
+    DatePipe, DateTimePipe, ReactiveFormsModule, TranslatePipe,
     PageHeaderComponent, TextareaComponent,
     LoadingBlockDirective, EmptyStateComponent,
   ],

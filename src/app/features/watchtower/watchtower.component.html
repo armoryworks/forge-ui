@@ -87,7 +87,7 @@
                   </a>
                   <span class="wt-card__spacer"></span>
                   <span class="wt-card__date">
-                    {{ 'watchtower.lastPolled' | translate }}: {{ s.lastPolledAt ? (s.lastPolledAt | date: 'MM/dd/yyyy hh:mm') : ('watchtower.never' | translate) }}
+                    {{ 'watchtower.lastPolled' | translate }}: {{ s.lastPolledAt ? (s.lastPolledAt | dateTime) : ('watchtower.never' | translate) }}
                   </span>
                 </div>
               </div>

@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 
 import { MatDialog } from '@angular/material/dialog';
@@ -14,13 +13,14 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-integration-outbox-panel',
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    DatePipe,
+    DateTimePipe,
     MatTooltipModule,
     DataTableComponent,
     ColumnCellDirective,

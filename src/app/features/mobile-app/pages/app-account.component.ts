@@ -3,7 +3,6 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 
-import { DatePipe } from '@angular/common';
 
 import { firstValueFrom } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -23,6 +22,7 @@ import { MobileDevicesService } from '../../../shared/services/mobile-devices.se
 import { PlatformService } from '../../../shared/services/platform.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { MOBILE_APP_SCREENS } from '../../../shared/utils/mobile-app-screens';
+import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
 
 /**
  * Account: who is signed in, the instances on this phone (switch / add /
@@ -34,7 +34,7 @@ import { MOBILE_APP_SCREENS } from '../../../shared/utils/mobile-app-screens';
 @Component({
   selector: 'app-app-account',
   standalone: true,
-  imports: [ReactiveFormsModule, DatePipe, TranslatePipe, LanguageToggleComponent, TextareaComponent],
+  imports: [ReactiveFormsModule, DateTimePipe, TranslatePipe, LanguageToggleComponent, TextareaComponent],
   templateUrl: './app-account.component.html',
   styleUrl: './app-account.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -26,6 +26,8 @@ import {
   WORKING_DAYS_MASK_DEFAULT,
   WorkingCalendar,
 } from '../models/working-calendar.model';
+import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
+import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
 
 /**
  * Admin screen for working calendars + holidays. Master-detail layout:
@@ -37,7 +39,7 @@ import {
   selector: 'app-working-calendars',
   standalone: true,
   imports: [
-    ReactiveFormsModule, TranslatePipe, MatTooltipModule,
+    ReactiveFormsModule, TranslatePipe, DateOnlyPipe, DateTimePipe, MatTooltipModule,
     PageLayoutComponent, InputComponent, SelectComponent, ToggleComponent,
     DatepickerComponent, LoadingBlockDirective, EmptyStateComponent,
     ValidationButtonComponent,

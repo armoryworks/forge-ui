@@ -5,7 +5,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { firstValueFrom, map } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { DatePipe } from '@angular/common';
 
 import { JobStatus, isQueued } from '../../../shared/models/mobile-api.model';
 import { InstanceService } from '../../../shared/services/instance.service';
@@ -20,6 +19,7 @@ import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { UndoService } from '../../../shared/services/undo.service';
 import { IdentityPromptComponent } from '../identity/identity-prompt.component';
 import { JobOperationsComponent } from '../components/job-operations/job-operations.component';
+import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
 
 type PendingAction = 'advance' | 'note' | 'photo' | 'timer';
 
@@ -38,7 +38,7 @@ type PendingAction = 'advance' | 'note' | 'photo' | 'timer';
 @Component({
   selector: 'app-app-job-status',
   standalone: true,
-  imports: [DateOnlyPipe, DatePipe, TranslatePipe, IdentityPromptComponent, JobOperationsComponent],
+  imports: [DateOnlyPipe, DateTimePipe, TranslatePipe, IdentityPromptComponent, JobOperationsComponent],
   templateUrl: './app-job-status.component.html',
   styleUrl: './app-job-status.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

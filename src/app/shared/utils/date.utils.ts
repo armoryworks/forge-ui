@@ -1,4 +1,5 @@
 const DATE_ONLY_VALUE = /^(\d{4})-(\d{2})-(\d{2})(?:T00:00:00(?:\.0+)?(?:Z|[+-]00:?00))?$/;
+const TIME_OF_DAY_VALUE = /^([01]\d|2[0-3]):([0-5]\d)(?::([0-5]\d)(?:\.\d+)?)?$/;
 
 /**
  * Parse a date-only string — `YYYY-MM-DD`, or the UTC midnight the API sends for date fields
@@ -89,18 +90,44 @@ export function formatDate(date: Date | string | null | undefined): string {
 }
 
 /** Format a Date for display with time: MM/dd/yyyy hh:mm AM/PM */
-export function formatDateTime(date: Date | string | null | undefined): string {
-  if (!date) return '';
-  const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return '';
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  const yyyy = d.getFullYear();
-  let h = d.getHours();
+export function formatDateTime(date: Date | string | number | null | undefined): string {
+  const d = toTimestamp(date);
+  return d ? `${monthDay(d)}/${d.getFullYear()} ${clockTime(d, false)}` : '';
+}
+
+/** Format a Date for display as month, day and time without the year: MM/dd hh:mm AM/PM */
+export function formatDateTimeCompact(date: Date | string | number | null | undefined): string {
+  const d = toTimestamp(date);
+  return d ? `${monthDay(d)} ${clockTime(d, false)}` : '';
+}
+
+/**
+ * Format the time of a Date for display: hh:mm AM/PM, or hh:mm:ss AM/PM with seconds.
+ * Also accepts a time-of-day string as the API sends TimeOnly fields (`HH:mm` / `HH:mm:ss`).
+ */
+export function formatTime(date: Date | string | number | null | undefined, withSeconds = false): string {
+  const timeOfDay = typeof date === 'string' ? TIME_OF_DAY_VALUE.exec(date.trim()) : null;
+  const d = timeOfDay
+    ? new Date(2000, 0, 1, Number(timeOfDay[1]), Number(timeOfDay[2]), Number(timeOfDay[3] ?? 0))
+    : toTimestamp(date);
+  return d ? clockTime(d, withSeconds) : '';
+}
+
+function toTimestamp(date: Date | string | number | null | undefined): Date | null {
+  if (!date) return null;
+  const d = date instanceof Date ? date : new Date(date);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function monthDay(d: Date): string {
+  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function clockTime(d: Date, withSeconds: boolean): string {
+  const h = d.getHours();
   const min = String(d.getMinutes()).padStart(2, '0');
-  const ampm = h >= 12 ? 'PM' : 'AM';
-  h = h % 12 || 12;
-  return `${mm}/${dd}/${yyyy} ${String(h).padStart(2, '0')}:${min} ${ampm}`;
+  const sec = withSeconds ? `:${String(d.getSeconds()).padStart(2, '0')}` : '';
+  return `${String(h % 12 || 12).padStart(2, '0')}:${min}${sec} ${h >= 12 ? 'PM' : 'AM'}`;
 }
 
 /** Format a person's full name: Last, First MI */

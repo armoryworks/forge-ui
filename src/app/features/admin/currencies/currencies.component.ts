@@ -16,6 +16,7 @@ import { ColumnCellDirective } from '../../../shared/directives/column-cell.dire
 import { ColumnDef } from '../../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
 
 /**
  * Multi-currency admin — Currency catalog on top, exchange rate history
@@ -33,7 +34,7 @@ import { SnackbarService } from '../../../shared/services/snackbar.service';
   selector: 'app-admin-currencies',
   standalone: true,
   imports: [
-    DatePipe, DecimalPipe, TranslatePipe,
+    DatePipe, DateTimePipe, DecimalPipe, TranslatePipe,
     PageLayoutComponent, ToolbarComponent, SpacerDirective,
     DataTableComponent, ColumnCellDirective,
     LoadingBlockDirective,

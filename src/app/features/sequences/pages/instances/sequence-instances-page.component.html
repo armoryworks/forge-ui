@@ -32,7 +32,7 @@
           @if (inst.subjectEntityType) {
             <span class="seq-list__subject">{{ inst.subjectEntityType }} #{{ inst.subjectEntityId }}</span>
           }
-          <span class="seq-list__date">{{ inst.startedAt | date:'short' }}</span>
+          <span class="seq-list__date">{{ inst.startedAt | dateTime }}</span>
         </li>
       } @empty {
         <li class="seq-list__empty" data-testid="sequence-instances-empty">{{ 'sequences.instances.empty' | translate }}</li>

@@ -44,7 +44,7 @@
           <div class="notification-item__content">
             <div class="notification-item__title">{{ n.title }}</div>
             <div class="notification-item__message" [innerHTML]="n.message | richText"></div>
-            <div class="notification-item__time">{{ n.createdAt | date:'MM/dd/yyyy hh:mm a' }}</div>
+            <div class="notification-item__time">{{ n.createdAt | dateTime }}</div>
           </div>
           <div class="notification-item__actions">
             <button class="icon-btn" [attr.aria-label]="n.isPinned ? ('notifications.unpin' | translate) : ('notifications.pin' | translate)" [matTooltip]="n.isPinned ? ('notifications.unpin' | translate) : ('notifications.pin' | translate)" matTooltipPosition="above" (click)="togglePin(n, $event)">

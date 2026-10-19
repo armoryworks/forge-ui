@@ -22,6 +22,7 @@ import { PriorityIndicatorComponent } from '../../shared/components/priority-ind
 import { KanbanService } from '../kanban/services/kanban.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 import { AuthService } from '../../shared/services/auth.service';
+import { fromIsoDate } from '../../shared/utils/date.utils';
 
 const CALENDAR_JOB_ROLES = ['Admin', 'Manager', 'PM', 'Engineer', 'ProductionWorker', 'OfficeManager'];
 const PO_READ_ROLES = ['Admin', 'Manager', 'OfficeManager', 'Procurement'];
@@ -159,7 +160,7 @@ export class CalendarComponent implements OnInit {
     const map = new Map<string, { id: number; title: string; color: string }[]>();
     for (const e of this.events()) {
       if (e.superGroupId != null && !selected.has(e.superGroupId)) continue;
-      const key = this.toDateStr(new Date(e.startTime));
+      const key = this.eventDateKey(e);
       const list = map.get(key) ?? [];
       list.push({
         id: e.id,
@@ -390,7 +391,7 @@ export class CalendarComponent implements OnInit {
     const selected = new Set(this.selectedLayerIds());
     const colorByGroup = new Map(this.superGroups().map(g => [g.id, g.color ?? 'var(--primary)']));
     return this.events()
-      .filter(e => this.toDateStr(new Date(e.startTime)) === dateKey
+      .filter(e => this.eventDateKey(e) === dateKey
         && (e.superGroupId == null || selected.has(e.superGroupId)))
       .map(e => ({
         id: e.id,
@@ -401,6 +402,7 @@ export class CalendarComponent implements OnInit {
         endTime: e.endTime,
         status: e.status,
         isRequired: e.isRequired,
+        isAllDay: e.isAllDay,
         color: e.superGroupId != null ? (colorByGroup.get(e.superGroupId) ?? 'var(--primary)') : 'var(--text-muted)',
       }));
   }
@@ -548,6 +550,11 @@ export class CalendarComponent implements OnInit {
   private isWeekendDate(d: Date): boolean {
     const day = d.getDay();
     return day === 0 || day === 6;
+  }
+
+  private eventDateKey(e: CalendarEvent): string {
+    const start = e.isAllDay ? fromIsoDate(e.startTime) : new Date(e.startTime);
+    return start ? this.toDateStr(start) : '';
   }
 
   private toDateStr(d: Date): string {

@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { DatePipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { DeployAvailability, DeployJob, DeployState } from './models/update.model';
 import { UpdatesService } from './services/updates.service';
+import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
 
 const POLL_MS = 2000;
 
@@ -20,7 +20,7 @@ const POLL_MS = 2000;
 @Component({
   selector: 'app-admin-updates',
   standalone: true,
-  imports: [ReactiveFormsModule, DatePipe, TranslatePipe, InputComponent],
+  imports: [ReactiveFormsModule, DateTimePipe, TranslatePipe, InputComponent],
   templateUrl: './updates.component.html',
   styleUrl: './updates.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

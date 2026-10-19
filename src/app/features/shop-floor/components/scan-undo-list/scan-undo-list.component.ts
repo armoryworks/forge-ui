@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, output, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -9,13 +8,14 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ScanLogEntry } from '../../../../shared/models/scan-log.model';
 import { PinPromptDialogComponent, PinPromptDialogData } from '../pin-prompt-dialog/pin-prompt-dialog.component';
 import { SCAN_LOG_ACTION_LABEL_KEYS } from '../../models/scan-log-action-label-keys.const';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 const DEFAULT_LOOKBACK_HOURS = 6;
 
 @Component({
   selector: 'app-scan-undo-list',
   standalone: true,
-  imports: [DatePipe, TranslatePipe],
+  imports: [DateTimePipe, TranslatePipe],
   templateUrl: './scan-undo-list.component.html',
   styleUrl: './scan-undo-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

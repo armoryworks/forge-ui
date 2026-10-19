@@ -1,4 +1,4 @@
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialogRef } from '@angular/material/dialog';
@@ -6,6 +6,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { WorkflowRun } from '../../models/workflow-run.model';
 import { WorkflowService } from '../../services/workflow.service';
+import { DateTimePipe } from '../../pipes/date-time.pipe';
 
 /**
  * Workflow Pattern Phase 4 — Active workflow runs list dialog.
@@ -22,7 +23,7 @@ import { WorkflowService } from '../../services/workflow.service';
 @Component({
   selector: 'app-workflow-active-list-dialog',
   standalone: true,
-  imports: [CommonModule, TranslatePipe, DatePipe],
+  imports: [CommonModule, TranslatePipe, DateTimePipe],
   templateUrl: './workflow-active-list-dialog.component.html',
   styleUrl: './workflow-active-list-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

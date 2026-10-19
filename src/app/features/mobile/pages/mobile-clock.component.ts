@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, effect, inject, OnInit, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -11,6 +10,7 @@ import { RunningTimer } from '../../../shared/models/running-timer.model';
 import { secondTicker } from '../../../shared/utils/second-ticker';
 import { MobileClockStateService } from '../services/mobile-clock-state.service';
 import { MobileRunningTimersService } from '../services/mobile-running-timers.service';
+import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
 
 interface ClockStatus {
   isClockedIn: boolean;
@@ -23,7 +23,7 @@ type ClockAction = ClockEventTypeDef;
 @Component({
   selector: 'app-mobile-clock',
   standalone: true,
-  imports: [DatePipe, TranslatePipe, LoadingBlockDirective],
+  imports: [DateTimePipe, TranslatePipe, LoadingBlockDirective],
   templateUrl: './mobile-clock.component.html',
   styleUrl: './mobile-clock.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

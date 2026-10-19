@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { SpcService } from '../services/spc.service';
@@ -12,12 +11,13 @@ import { DialogComponent } from '../../../shared/components/dialog/dialog.compon
 import { TextareaComponent } from '../../../shared/components/textarea/textarea.component';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
+import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-spc-ooc-list',
   standalone: true,
   imports: [
-    DatePipe, ReactiveFormsModule,
+    DateTimePipe, ReactiveFormsModule,
     DataTableComponent, ColumnCellDirective,
     SelectComponent, DialogComponent, TextareaComponent,
     LoadingBlockDirective,

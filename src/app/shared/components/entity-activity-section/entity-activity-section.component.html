@@ -46,7 +46,7 @@
             <div class="ea-note-item__header">
               <app-avatar [initials]="note.authorInitials" [color]="note.authorColor" size="sm" />
               <span class="ea-note-item__author">{{ note.authorName }}</span>
-              <span class="ea-note-item__date">{{ note.createdAt | date:'MM/dd/yyyy hh:mm a' }}</span>
+              <span class="ea-note-item__date">{{ note.createdAt | dateTime }}</span>
               <button class="ea-note-item__delete icon-btn icon-btn--danger"
                 (click)="deleteNote(note)" aria-label="Delete note"
                 matTooltip="Delete note" matTooltipPosition="above">
@@ -89,7 +89,7 @@
               } @else {
                 <span class="material-icons-outlined ea-comment-item__system-icon">account_circle</span>
               }
-              <span class="ea-comment-item__time">{{ item.createdAt | date:'MM/dd/yyyy hh:mm a' }}</span>
+              <span class="ea-comment-item__time">{{ item.createdAt | dateTime }}</span>
             </div>
             <app-rich-text-display [content]="item.description" />
           </div>
@@ -112,7 +112,7 @@
               @if (item.action === 'note') {
                 <span class="chip chip--muted ea-comment-item__tag">Note</span>
               }
-              <span class="ea-comment-item__time">{{ item.createdAt | date:'MM/dd/yyyy hh:mm a' }}</span>
+              <span class="ea-comment-item__time">{{ item.createdAt | dateTime }}</span>
             </div>
             <app-rich-text-display [content]="item.description" />
             @if (item.batchedItems; as batch) {

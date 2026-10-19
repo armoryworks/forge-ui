@@ -14,7 +14,7 @@
       @if (inst.subjectEntityType) {
         <span class="seq-panel__subject">{{ inst.subjectEntityType }} #{{ inst.subjectEntityId }}</span>
       }
-      <span class="seq-panel__started">{{ 'sequences.startedAt' | translate }} {{ inst.startedAt | date:'short' }}</span>
+      <span class="seq-panel__started">{{ 'sequences.startedAt' | translate }} {{ inst.startedAt | dateTime }}</span>
     </header>
 
     @if (isRunning()) {
@@ -43,7 +43,7 @@
             }
             @if (step.dwellExpiresAt && step.status === 'InProgress') {
               <span class="seq-step__dwell" [class.seq-step__dwell--fired]="step.dwellFiredAt">
-                <span class="material-icons-outlined">schedule</span>{{ step.dwellExpiresAt | date:'short' }}
+                <span class="material-icons-outlined">schedule</span>{{ step.dwellExpiresAt | dateTime }}
               </span>
             }
             @if (isRunning()) {
@@ -109,7 +109,7 @@
         <ul class="seq-events">
           @for (ev of events(); track ev.id) {
             <li class="seq-event">
-              <span class="seq-event__time">{{ ev.occurredAt | date:'short' }}</span>
+              <span class="seq-event__time">{{ ev.occurredAt | dateTime }}</span>
               <span class="seq-event__type">{{ ev.type }}</span>
               @if (ev.stepKey) { <span class="seq-event__ref">{{ ev.stepKey }}</span> }
               @if (ev.gateKey) { <span class="seq-event__ref">/ {{ ev.gateKey }}</span> }

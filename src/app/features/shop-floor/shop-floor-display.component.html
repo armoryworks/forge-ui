@@ -190,7 +190,7 @@
                 }
                 @if (worker.openFromPriorShift && worker.openSince) {
                   <span class="sf-card__prior-shift" [attr.data-testid]="'sf-prior-shift-' + worker.userId">
-                    {{ 'shopFloor.stillClockedInSince' | translate: { date: (worker.openSince | date: 'short') } }}
+                    {{ 'shopFloor.stillClockedInSince' | translate: { date: (worker.openSince | dateTime) } }}
                   </span>
                 }
               </div>
@@ -299,7 +299,7 @@
               <div class="sf-event-card__content">
                 <span class="sf-event-card__title">{{ event.title }}</span>
                 <span class="sf-event-card__time">
-                  {{ event.startTime | date:'MM/dd hh:mm a' }}
+                  {{ event.isAllDay ? (event.startTime | dateOnly) : (event.startTime | dateTime:'compact') }}
                 </span>
                 @if (event.location) {
                   <span class="sf-event-card__location">

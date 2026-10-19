@@ -59,6 +59,7 @@ import { ConfirmSalesOrderResponse } from '../../models/confirm-sales-order-resp
 import { CancelSalesOrderRequest } from '../../models/cancel-sales-order-request.model';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 /** Capability gating the whole customer-acceptance feature. */
 const CAP_SO_ACCEPTANCE = 'CAP-O2C-SO-ACCEPTANCE';
@@ -81,7 +82,7 @@ type TabId = 'overview' | 'lines' | 'schedule' | 'stages' | 'shipments' | 'retur
   selector: 'app-sales-order-detail-panel',
   standalone: true,
   imports: [NumberLockInfoComponent, 
-    DatePipe, DateOnlyPipe, DecimalPipe, TranslatePipe, ReactiveFormsModule,
+    DatePipe, DateTimePipe, DateOnlyPipe, DecimalPipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
     BarcodeInfoComponent, EntityActivitySectionComponent,
     EntityLinkComponent, CurrencyDisplayComponent, FileUploadZoneComponent, EmptyStateComponent,

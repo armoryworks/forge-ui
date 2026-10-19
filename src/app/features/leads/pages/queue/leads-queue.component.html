@@ -83,7 +83,7 @@
         }
         @if (lead.lastActivityAt) {
           <dt>{{ 'leads.queue.lastActivity' | translate }}</dt>
-          <dd>{{ lead.lastActivityAt | date:'MM/dd/yyyy hh:mm' }}</dd>
+          <dd>{{ lead.lastActivityAt | dateTime }}</dd>
         }
         @if (lead.notes) {
           <dt>{{ 'common.notes' | translate }}</dt>

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -27,6 +27,7 @@ import { ColumnCellDirective } from '../../../../shared/directives/column-cell.d
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 /**
  * Predictive maintenance alerts page. Top strip shows the dashboard KPIs
@@ -43,7 +44,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
   selector: 'app-predictions',
   standalone: true,
   imports: [
-    DatePipe, DecimalPipe, ReactiveFormsModule, TranslatePipe, MatTooltipModule,
+    DateTimePipe, DecimalPipe, ReactiveFormsModule, TranslatePipe, MatTooltipModule,
     PageLayoutComponent, ToolbarComponent, SpacerDirective,
     SelectComponent, DataTableComponent, ColumnCellDirective,
     LoadingBlockDirective,

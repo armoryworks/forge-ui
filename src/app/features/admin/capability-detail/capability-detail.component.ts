@@ -1,4 +1,4 @@
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
@@ -31,6 +31,7 @@ import { LoadingBlockDirective } from '../../../shared/directives/loading-block.
 import { CAPABILITY_RELATED_SETTINGS } from '../models/capability-related-settings.const';
 import { NUMBERING_SETTING_LABELS } from '../models/numbering-setting-labels.const';
 import { GlOpeningCalloutComponent } from '../components/gl-opening-callout/gl-opening-callout.component';
+import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
 
 interface CapabilityViolation {
   code: string;
@@ -59,7 +60,7 @@ interface CapabilityViolation {
   standalone: true,
   imports: [
     CommonModule,
-    DatePipe,
+    DateTimePipe,
     RouterModule,
     MatSlideToggleModule,
     MatTooltipModule,

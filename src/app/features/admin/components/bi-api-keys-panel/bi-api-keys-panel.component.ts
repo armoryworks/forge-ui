@@ -30,6 +30,7 @@ import {
   CreateBiApiKeyRequest,
   CreateBiApiKeyResponse,
 } from '../../models/bi-api-key.model';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 /**
  * Phase 3 / WU-04 retrofit — BI API keys admin panel. Issuance + listing +
@@ -41,7 +42,7 @@ import {
   selector: 'app-bi-api-keys-panel',
   standalone: true,
   imports: [
-    DatePipe,
+    DatePipe, DateTimePipe,
     ReactiveFormsModule,
     TranslatePipe,
     DataTableComponent,
