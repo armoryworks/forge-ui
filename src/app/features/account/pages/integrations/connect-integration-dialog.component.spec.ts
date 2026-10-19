@@ -43,4 +43,27 @@ describe('ConnectIntegrationDialogComponent', () => {
     expect(dialog.form.valid).toBe(false);
     expect(dialog.isSingleSecret).toBe(true);
   });
+
+  it('builds basic credentials from separate username and password fields', () => {
+    const dialog = open('basic');
+
+    expect(dialog.form.valid).toBe(false);
+    dialog.form.patchValue({ username: 'me', password: 's3cret' });
+    expect(dialog.form.valid).toBe(true);
+    dialog.save();
+    expect(integrations.create).toHaveBeenCalledWith(expect.objectContaining({
+      credentialsJson: JSON.stringify({ username: 'me', password: 's3cret' }),
+    }));
+  });
+
+  it('builds access-key credentials and leaves out a blank endpoint', () => {
+    const dialog = open('access_key');
+
+    dialog.form.patchValue({ accessKey: 'AK', secretKey: 'SK' });
+    expect(dialog.form.valid).toBe(true);
+    dialog.save();
+    expect(integrations.create).toHaveBeenCalledWith(expect.objectContaining({
+      credentialsJson: JSON.stringify({ accessKey: 'AK', secretKey: 'SK' }),
+    }));
+  });
 });

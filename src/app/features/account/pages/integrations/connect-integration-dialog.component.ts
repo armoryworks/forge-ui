@@ -6,7 +6,6 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
-import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -25,7 +24,6 @@ export interface ConnectIntegrationDialogData {
     TranslatePipe,
     DialogComponent,
     InputComponent,
-    TextareaComponent,
     ValidationButtonComponent,
   ],
   templateUrl: './connect-integration-dialog.component.html',
@@ -42,18 +40,34 @@ export class ConnectIntegrationDialogComponent {
 
   protected readonly form = new FormGroup({
     displayName: new FormControl('', { nonNullable: true }),
-    credentials: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    credentials: new FormControl('', { nonNullable: true }),
+    username: new FormControl('', { nonNullable: true }),
+    password: new FormControl('', { nonNullable: true }),
+    accessKey: new FormControl('', { nonNullable: true }),
+    secretKey: new FormControl('', { nonNullable: true }),
+    endpoint: new FormControl('', { nonNullable: true }),
     configJson: new FormControl('', { nonNullable: true }),
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
     credentials: this.credentialLabel,
+    username: this.translate.instant('account.integrationUsername'),
+    password: this.translate.instant('account.integrationPassword'),
+    accessKey: this.translate.instant('account.integrationAccessKey'),
+    secretKey: this.translate.instant('account.integrationSecretKey'),
   });
 
   constructor() {
-    if (this.isNoAuth) {
-      this.form.controls.credentials.clearValidators();
-      this.form.controls.credentials.updateValueAndValidity();
+    const required = this.isSingleSecret
+      ? [this.form.controls.credentials]
+      : this.isBasic
+        ? [this.form.controls.username, this.form.controls.password]
+        : this.isAccessKey
+          ? [this.form.controls.accessKey, this.form.controls.secretKey]
+          : [];
+    for (const control of required) {
+      control.setValidators(Validators.required);
+      control.updateValueAndValidity();
     }
   }
 
@@ -80,12 +94,8 @@ export class ConnectIntegrationDialogComponent {
         return 'https://hooks.example.com/services/...';
       case 'oauth2':
         return 'Paste your access token here';
-      case 'basic':
-        return '{"username": "...", "password": "..."}';
       case 'app_password':
         return 'App-specific password';
-      case 'access_key':
-        return '{"accessKey": "...", "secretKey": "...", "endpoint": "..."}';
       case 'none':
         return 'No credentials required';
       default:
@@ -96,6 +106,14 @@ export class ConnectIntegrationDialogComponent {
   protected get isSingleSecret(): boolean {
     const authType = this.data.provider.authType;
     return authType === 'webhook' || authType === 'oauth2' || authType === 'app_password';
+  }
+
+  protected get isBasic(): boolean {
+    return this.data.provider.authType === 'basic';
+  }
+
+  protected get isAccessKey(): boolean {
+    return this.data.provider.authType === 'access_key';
   }
 
   protected get isNoAuth(): boolean {
@@ -116,6 +134,14 @@ export class ConnectIntegrationDialogComponent {
       credentialsJson = '{}';
     } else if (this.data.provider.authType === 'oauth2') {
       credentialsJson = JSON.stringify({ access_token: val.credentials });
+    } else if (this.isBasic) {
+      credentialsJson = JSON.stringify({ username: val.username, password: val.password });
+    } else if (this.isAccessKey) {
+      credentialsJson = JSON.stringify({
+        accessKey: val.accessKey,
+        secretKey: val.secretKey,
+        ...(val.endpoint.trim() ? { endpoint: val.endpoint.trim() } : {}),
+      });
     } else {
       // Try to parse as JSON; if not valid JSON, wrap in a simple object
       try {
