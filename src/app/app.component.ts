@@ -328,6 +328,7 @@ export class AppComponent implements OnInit, OnDestroy {
    */
   private startInlineWalkthrough(steps: DriverStep[], moduleId: number): void {
     this.walkthroughRunning = true;
+    const earnedBy = this.authService.user()?.id;
     const svg = createTourSvg();
     document.body.appendChild(svg);
     const removeScrollRefresh = attachScrollRefresh(svg);
@@ -369,7 +370,7 @@ export class AppComponent implements OnInit, OnDestroy {
           } else {
             cleanup();
             ngZone.run(() => {
-              trainingService.completeOrQueue(moduleId).subscribe({ error: () => undefined });
+              trainingService.completeOrQueue(moduleId, earnedBy).subscribe({ error: () => undefined });
               router.navigateByUrl(`/training/module/${moduleId}`);
             });
             setTimeout(() => d.destroy(), 0);

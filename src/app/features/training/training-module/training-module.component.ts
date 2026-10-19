@@ -204,6 +204,7 @@ export class TrainingModuleComponent implements OnInit {
     const router = this.router;
     const trainingService = this.trainingService;
     const numericModuleId = this.module()?.id;
+    const earnedBy = this.authService.user()?.id;
     const ngZone = this.ngZone;
     const fromUrl = this.fromUrl();
 
@@ -247,7 +248,7 @@ export class TrainingModuleComponent implements OnInit {
             if (numericModuleId) {
               // Session is intact (the preview never cleared it), so this POST
               // succeeds; the queue fallback stays for the token-expired case.
-              trainingService.completeOrQueue(numericModuleId).subscribe({ error: () => undefined });
+              trainingService.completeOrQueue(numericModuleId, earnedBy).subscribe({ error: () => undefined });
               // Carry ?from= back to the splash so its Back button still
               // returns to wherever the user originally opened it.
               const back = fromUrl ? `?from=${encodeURIComponent(fromUrl)}` : '';

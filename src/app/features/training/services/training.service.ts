@@ -1,6 +1,6 @@
 import { Injectable, effect, inject } from '@angular/core';
 import { HttpClient, HttpContext, HttpErrorResponse, HttpParams } from '@angular/common/http';
-import { EMPTY, Observable, catchError, expand, map, of, reduce, throwError } from 'rxjs';
+import { EMPTY, Observable, catchError, defer, expand, map, of, reduce, throwError } from 'rxjs';
 
 import { TranslateService } from '@ngx-translate/core';
 
@@ -66,21 +66,28 @@ export class TrainingService {
   }
 
   /**
-   * Record a completion for the signed-in user. When the request cannot reach the
-   * server or the session has lapsed, the completion is queued for that same user
-   * and replayed on their next session; any other failure is passed on.
+   * Record a completion for the user who earned it: `earnedBy` when given (captured when a
+   * walkthrough starts, before a kiosk flow can clear the session), otherwise the signed-in
+   * user. When that user is no longer the one signed in, the request cannot reach the server,
+   * or the session has lapsed, the completion is queued for that user and replayed on their
+   * next session; any other failure is passed on.
    */
-  completeOrQueue(moduleId: number): Observable<CompletionOutcome> {
-    const userId = this.auth.user()?.id;
+  completeOrQueue(moduleId: number, earnedBy?: number): Observable<CompletionOutcome> {
+    const userId = earnedBy ?? this.auth.user()?.id;
+    if (userId == null) return throwError(() => new Error('No user to credit the completion to.'));
+    if (this.auth.user()?.id !== userId) return defer(() => of(this.queueAndNotify(userId, moduleId)));
     return this.completeModule(moduleId).pipe(
       map((): CompletionOutcome => 'completed'),
-      catchError((error: unknown) => {
-        if (userId == null || !TrainingService.isRetryable(error)) return throwError(() => error);
-        this.queueCompletion(userId, moduleId);
-        this.snackbar.info(this.translate.instant('training.completionQueued'));
-        return of<CompletionOutcome>('queued');
-      }),
+      catchError((error: unknown) => TrainingService.isRetryable(error)
+        ? of(this.queueAndNotify(userId, moduleId))
+        : throwError(() => error)),
     );
+  }
+
+  private queueAndNotify(userId: number, moduleId: number): CompletionOutcome {
+    this.queueCompletion(userId, moduleId);
+    this.snackbar.info(this.translate.instant('training.completionQueued'));
+    return 'queued';
   }
 
   private queueCompletion(userId: number, moduleId: number): void {

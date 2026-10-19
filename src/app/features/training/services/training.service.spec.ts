@@ -65,6 +65,42 @@ describe('TrainingService', () => {
       expect(localStorage.getItem(PENDING_KEY)).toBeNull();
     });
 
+    it('queues a walkthrough whose session ended mid-tour under the user who started it, and replays it only for them', () => {
+      let outcome: string | undefined;
+      service.completeOrQueue(3, 7).subscribe(o => outcome = o);
+
+      httpMock.expectNone(`${base}/progress/3/complete`);
+      expect(outcome).toBe('queued');
+      expect(JSON.parse(localStorage.getItem(PENDING_KEY)!)).toEqual([{ userId: 7, moduleId: 3 }]);
+
+      user.set(asUser(8));
+      TestBed.tick();
+      httpMock.expectNone(`${base}/progress/3/complete`);
+
+      user.set(asUser(7));
+      TestBed.tick();
+      httpMock.expectOne(`${base}/progress/3/complete`).flush(null);
+      expect(localStorage.getItem(PENDING_KEY)).toBeNull();
+    });
+
+    it('does not credit a walkthrough to a different user who signed in mid-tour', () => {
+      user.set(asUser(8));
+      TestBed.tick();
+      service.completeOrQueue(3, 7).subscribe();
+
+      httpMock.expectNone(`${base}/progress/3/complete`);
+      expect(JSON.parse(localStorage.getItem(PENDING_KEY)!)).toEqual([{ userId: 7, moduleId: 3 }]);
+    });
+
+    it('fails without queueing when nobody can be credited', () => {
+      let failed = false;
+      service.completeOrQueue(3).subscribe({ error: () => failed = true });
+
+      httpMock.expectNone(`${base}/progress/3/complete`);
+      expect(failed).toBe(true);
+      expect(localStorage.getItem(PENDING_KEY)).toBeNull();
+    });
+
     it('replays only the signed-in user\'s queued completions', () => {
       localStorage.setItem(PENDING_KEY, JSON.stringify([{ userId: 7, moduleId: 3 }, { userId: 8, moduleId: 4 }, 5]));
       user.set(asUser(8));
