@@ -354,6 +354,19 @@ describe('InputComponent · phone and postal code masks', () => {
     expect(load(host.phone, '8015550199', 0)).toBe('(801) 555-0199');
   });
 
+  it('leaves a stored phone or postal code unchanged when the field is only focused and left', () => {
+    load(host.phone, 'call reception', 0);
+    load(host.zip, 'h3b 1a7', 1);
+    field(0).dispatchEvent(new Event('blur'));
+    field(1).dispatchEvent(new Event('blur'));
+    fixture.detectChanges();
+    expect(host.phone.value).toBe('call reception');
+    expect(host.phone.dirty).toBe(false);
+    expect(field(0).value).toBe('call reception');
+    expect(host.zip.value).toBe('h3b 1a7');
+    expect(host.zip.dirty).toBe(false);
+  });
+
   it('keeps a Canadian postal code and uppercases it', () => {
     typeAndBlur(1, 'h3b 1a7');
     expect(host.zip.value).toBe('H3B 1A7');

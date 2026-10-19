@@ -109,6 +109,7 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
   private readonly field = viewChild<ElementRef<HTMLInputElement>>('field');
 
   private text = '';
+  private edited = false;
   private invalidNumber = false;
 
   constructor() {
@@ -165,6 +166,7 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
   private onValidatorChange: () => void = () => {};
 
   writeValue(value: string | number | null): void {
+    this.edited = false;
     if (this.isNumeric) {
       this.invalidNumber = false;
       if (value === null || value === undefined || value === '') {
@@ -218,6 +220,7 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
   protected onInput(event: Event): void {
     const el = event.target as HTMLInputElement;
     this.text = el.value;
+    this.edited = true;
 
     if (this.isNumeric) {
       const parsed = parseLocaleNumber(this.text, this.lang());
@@ -238,7 +241,7 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
     if (this.isNumeric) {
       const parsed = parseLocaleNumber(this.text, this.lang());
       if (parsed !== null && !Number.isNaN(parsed)) this.setText(this.formatNumber(parsed));
-    } else if (this.mask() === 'phone' || this.mask() === 'zip') {
+    } else if (this.edited && (this.mask() === 'phone' || this.mask() === 'zip')) {
       const formatted = this.mask() === 'phone' ? this.formatPhone(this.text, true) : this.formatZip(this.text, true);
       if (formatted !== this.text) {
         this.setText(formatted);
