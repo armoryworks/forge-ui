@@ -99,7 +99,7 @@
                   @if (bill.purchaseOrderId) {
                     <td class="lines-table__right lines-table__mono">{{ line.purchaseOrderLineId ?? '—' }}</td>
                   } @else {
-                    <td data-testid="bill-line-account">{{ line.glAccountName ?? line.accountDeterminationKey }}</td>
+                    <td data-testid="bill-line-account">{{ line.glAccountName ?? getAccountKeyLabel(line.accountDeterminationKey) }}</td>
                   }
                   <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
                   <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" /></td>

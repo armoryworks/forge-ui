@@ -153,4 +153,10 @@ export class VendorBillDetailPanelComponent {
       error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); },
     });
   }
+
+  protected getAccountKeyLabel(key: string): string {
+    const i18nKey = 'payables.accountKeys.' + key;
+    const translated = this.translate.instant(i18nKey);
+    return translated !== i18nKey ? translated : key;
+  }
 }

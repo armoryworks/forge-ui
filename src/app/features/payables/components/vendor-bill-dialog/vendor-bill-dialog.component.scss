@@ -92,3 +92,16 @@
   font-size: $font-size-sm;
   border: $border-width-thin dashed var(--border);
 }
+
+.tax-amount-field {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.field-error {
+  margin: 0;
+  color: var(--error);
+  font-size: $font-size-sm;
+}

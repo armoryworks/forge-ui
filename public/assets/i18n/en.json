@@ -10572,8 +10572,6 @@
     },
     "glAccount": "GL account",
     "defaultExpenseAccount": "Default expense account",
-    "statusVoided": "Voided",
-    "voidedOn": "Voided {{date}}",
     "accountKeys": {
       "OPERATING_EXPENSE": "Operating expense",
       "GRNI": "Goods received not invoiced"

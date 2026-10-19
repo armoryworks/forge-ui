@@ -10572,8 +10572,6 @@
     },
     "glAccount": "Cuenta contable",
     "defaultExpenseAccount": "Cuenta de gastos predeterminada",
-    "statusVoided": "Anulado",
-    "voidedOn": "Anulado el {{date}}",
     "accountKeys": {
       "OPERATING_EXPENSE": "Gasto operativo",
       "GRNI": "Mercancía recibida no facturada"

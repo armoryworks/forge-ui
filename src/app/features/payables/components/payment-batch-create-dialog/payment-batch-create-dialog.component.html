@@ -2,7 +2,7 @@
   width="800px" (closed)="close()">
   <div [formGroup]="form">
     <app-datepicker [label]="'payables.batches.effectiveDate' | translate"
-      formControlName="effectiveEntryDate" [required]="true" />
+      formControlName="effectiveEntryDate" [required]="true" [min]="today" />
 
     @if (prenote()) {
       <div class="batch-hint">
@@ -67,7 +67,7 @@
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <app-validation-button [violations]="violations" [loading]="saving()">
       <button class="action-btn action-btn--primary" data-testid="create-batch-btn"
-        [disabled]="form.invalid || saving()" (click)="save()">
+        [disabled]="form.invalid || !canAssemble() || saving()" (click)="save()">
         <span class="material-icons-outlined">save</span>
         {{ 'payables.batches.assemble' | translate }}
       </button>

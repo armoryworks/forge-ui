@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { BankingService } from '../../services/banking.service';
@@ -48,9 +48,16 @@ export class PaymentBatchCreateDialogComponent implements OnInit {
     .filter(e => this.selectedIds().has(e.vendorPaymentId))
     .reduce((sum, e) => sum + e.amount, 0));
 
+  protected readonly today = startOfToday();
+
   protected readonly form = new FormGroup({
-    effectiveEntryDate: new FormControl<Date | null>(this.defaultEffectiveDate(), [Validators.required]),
+    effectiveEntryDate: new FormControl<Date | null>(this.defaultEffectiveDate(), [
+      Validators.required,
+      notBefore(this.today, () => this.translate.instant('payables.batches.effectiveDatePast')),
+    ]),
   });
+
+  protected readonly canAssemble = computed(() => this.prenote() || this.selectedIds().size > 0);
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
     effectiveEntryDate: this.translate.instant('payables.batches.effectiveDate'),
@@ -125,4 +132,20 @@ export class PaymentBatchCreateDialogComponent implements OnInit {
     } while (date.getDay() === 0 || date.getDay() === 6);
     return date;
   }
+}
+
+function startOfToday(): Date {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function notBefore(earliest: Date, message: () => string): ValidatorFn {
+  return (control: AbstractControl<Date | null>): ValidationErrors | null => {
+    const value = control.value;
+    if (!value) return null;
+    const day = new Date(value);
+    day.setHours(0, 0, 0, 0);
+    return day < earliest ? { notBefore: { message: message() } } : null;
+  };
 }
