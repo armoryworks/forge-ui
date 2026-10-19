@@ -1,5 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { AuthService } from '../../../shared/services/auth.service';
+import { QUALITY_MANAGER_ROLES } from '../quality-roles';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { SpcService } from '../services/spc.service';
@@ -17,7 +20,7 @@ import { LoadingBlockDirective } from '../../../shared/directives/loading-block.
   selector: 'app-spc-ooc-list',
   standalone: true,
   imports: [
-    DatePipe, ReactiveFormsModule,
+    DatePipe, ReactiveFormsModule, TranslatePipe,
     DataTableComponent, ColumnCellDirective,
     SelectComponent, DialogComponent, TextareaComponent,
     LoadingBlockDirective,
@@ -29,6 +32,10 @@ import { LoadingBlockDirective } from '../../../shared/directives/loading-block.
 export class SpcOocListComponent {
   private readonly spcService = inject(SpcService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly auth = inject(AuthService);
+  private readonly translate = inject(TranslateService);
+
+  protected readonly canCreateCapa = this.auth.hasAnyRole(QUALITY_MANAGER_ROLES);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -74,6 +81,7 @@ export class SpcOocListComponent {
         { value: 'Resolved', label: 'Resolved' },
       ]},
     { field: 'acknowledgedByName', header: 'Acknowledged By', sortable: true, width: '140px' },
+    { field: 'capaNumber', header: 'CAPA', sortable: true, width: '130px' },
     { field: 'actions', header: '', width: '80px', align: 'center' },
   ];
 
@@ -123,9 +131,11 @@ export class SpcOocListComponent {
 
   protected createCapa(event: SpcOocEvent): void {
     this.spcService.createCapaFromOoc(event.id).subscribe({
-      next: () => {
+      next: (updated) => {
         this.loadEvents();
-        this.snackbar.success('CAPA created from OOC event');
+        this.snackbar.success(updated.capaNumber
+          ? this.translate.instant('spc.ooc.capaCreatedNumber', { number: updated.capaNumber })
+          : 'CAPA created from OOC event');
       },
     });
   }

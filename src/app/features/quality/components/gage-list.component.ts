@@ -1,6 +1,9 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { QualityService } from '../services/quality.service';
 import { Gage, GageStatus, CalibrationRecord } from '../models/gage.model';
@@ -19,6 +22,10 @@ import { ColumnCellDirective } from '../../../shared/directives/column-cell.dire
 import { FormValidationService } from '../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../shared/utils/date.utils';
+import { AuthService } from '../../../shared/services/auth.service';
+import { QUALITY_MANAGER_ROLES } from '../quality-roles';
+
+const MAX_CALIBRATION_INTERVAL_DAYS = 3650;
 
 @Component({
   selector: 'app-gage-list',
@@ -27,7 +34,7 @@ import { toIsoDate } from '../../../shared/utils/date.utils';
     DatePipe, ReactiveFormsModule,
     DataTableComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     DatepickerComponent, EmptyStateComponent, LoadingBlockDirective, ValidationButtonComponent,
-    ColumnCellDirective,
+    ColumnCellDirective, TranslatePipe,
   ],
   templateUrl: './gage-list.component.html',
   styleUrl: './gage-list.component.scss',
@@ -36,6 +43,13 @@ import { toIsoDate } from '../../../shared/utils/date.utils';
 export class GageListComponent {
   private readonly qualityService = inject(QualityService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly auth = inject(AuthService);
+  private readonly translate = inject(TranslateService);
+
+  protected readonly canManage = computed(() => this.auth.hasAnyRole(QUALITY_MANAGER_ROLES));
+  protected readonly today = new Date();
+  protected readonly maxIntervalDays = MAX_CALIBRATION_INTERVAL_DAYS;
+  protected readonly editingGageId = signal<number | null>(null);
 
   protected readonly gages = signal<Gage[]>([]);
   protected readonly loading = signal(false);
@@ -99,7 +113,9 @@ export class GageListComponent {
     manufacturer: new FormControl(''),
     model: new FormControl(''),
     serialNumber: new FormControl(''),
-    calibrationIntervalDays: new FormControl(365, [Validators.required, Validators.min(1)]),
+    calibrationIntervalDays: new FormControl(365, [Validators.required, Validators.min(1), Validators.max(MAX_CALIBRATION_INTERVAL_DAYS)]),
+    lastCalibratedAt: new FormControl<Date | null>(null),
+    status: new FormControl<GageStatus | null>(null),
     accuracySpec: new FormControl(''),
     rangeSpec: new FormControl(''),
     resolution: new FormControl(''),
@@ -135,6 +151,9 @@ export class GageListComponent {
 
   constructor() {
     this.loadGages();
+    this.searchControl.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.loadGages());
   }
 
   loadGages(): void {
@@ -152,7 +171,27 @@ export class GageListComponent {
   }
 
   openCreate(): void {
-    this.createForm.reset({ description: '', calibrationIntervalDays: 365 });
+    this.editingGageId.set(null);
+    this.createForm.reset({ description: '', calibrationIntervalDays: 365, lastCalibratedAt: null, status: null });
+    this.showCreateDialog.set(true);
+  }
+
+  protected openEdit(gage: Gage): void {
+    this.editingGageId.set(gage.id);
+    this.createForm.reset({
+      description: gage.description,
+      gageType: gage.gageType ?? '',
+      manufacturer: gage.manufacturer ?? '',
+      model: gage.model ?? '',
+      serialNumber: gage.serialNumber ?? '',
+      calibrationIntervalDays: gage.calibrationIntervalDays,
+      lastCalibratedAt: null,
+      status: gage.status,
+      accuracySpec: gage.accuracySpec ?? '',
+      rangeSpec: gage.rangeSpec ?? '',
+      resolution: gage.resolution ?? '',
+      notes: gage.notes ?? '',
+    });
     this.showCreateDialog.set(true);
   }
 
@@ -164,6 +203,32 @@ export class GageListComponent {
     if (this.createForm.invalid) return;
     this.saving.set(true);
     const f = this.createForm.getRawValue();
+    const editingId = this.editingGageId();
+    if (editingId != null) {
+      this.qualityService.updateGage(editingId, {
+        description: f.description!,
+        gageType: f.gageType ?? '',
+        manufacturer: f.manufacturer ?? '',
+        model: f.model ?? '',
+        serialNumber: f.serialNumber ?? '',
+        calibrationIntervalDays: f.calibrationIntervalDays!,
+        status: f.status ?? undefined,
+        accuracySpec: f.accuracySpec ?? '',
+        rangeSpec: f.rangeSpec ?? '',
+        resolution: f.resolution ?? '',
+        notes: f.notes ?? '',
+      }).subscribe({
+        next: (updated) => {
+          this.saving.set(false);
+          this.closeCreate();
+          if (this.selectedGage()?.id === updated.id) this.selectedGage.set(updated);
+          this.loadGages();
+          this.snackbar.success(this.translate.instant('gages.updated'));
+        },
+        error: () => this.saving.set(false),
+      });
+      return;
+    }
     this.qualityService.createGage({
       description: f.description!,
       gageType: f.gageType || undefined,
@@ -171,6 +236,7 @@ export class GageListComponent {
       model: f.model || undefined,
       serialNumber: f.serialNumber || undefined,
       calibrationIntervalDays: f.calibrationIntervalDays!,
+      lastCalibratedAt: f.lastCalibratedAt ? toIsoDate(f.lastCalibratedAt)! : undefined,
       accuracySpec: f.accuracySpec || undefined,
       rangeSpec: f.rangeSpec || undefined,
       resolution: f.resolution || undefined,
@@ -234,10 +300,19 @@ export class GageListComponent {
         this.calSaving.set(false);
         this.closeCalDialog();
         this.loadCalibrations(gage.id);
+        this.refreshSelectedGage(gage.id);
         this.loadGages();
         this.snackbar.success('Calibration recorded');
       },
       error: () => this.calSaving.set(false),
+    });
+  }
+
+  private refreshSelectedGage(gageId: number): void {
+    this.qualityService.getGageById(gageId).subscribe({
+      next: (fresh) => {
+        if (this.selectedGage()?.id === fresh.id) this.selectedGage.set(fresh);
+      },
     });
   }
 

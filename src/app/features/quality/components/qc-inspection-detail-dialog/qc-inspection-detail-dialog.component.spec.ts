@@ -4,7 +4,7 @@ import { Signal } from '@angular/core';
 import { FormArray, FormGroup } from '@angular/forms';
 import { of } from 'rxjs';
 
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 
 import { QcInspectionDetailDialogComponent } from './qc-inspection-detail-dialog.component';
@@ -66,6 +66,8 @@ describe('QcInspectionDetailDialogComponent', () => {
   let createNcr: ReturnType<typeof vi.fn>;
   let getNcrs: ReturnType<typeof vi.fn>;
   let close: ReturnType<typeof vi.fn>;
+  let confirmOpen: ReturnType<typeof vi.fn>;
+  let confirmAnswer: boolean;
 
   function setup(inspection: QcInspectionDetail, ncrEnabled = true): DialogView {
     TestBed.resetTestingModule();
@@ -74,6 +76,8 @@ describe('QcInspectionDetailDialogComponent', () => {
     createNcr = vi.fn(() => of({ id: 55, ncrNumber: 'NCR-0055', qcInspectionId: inspection.id } as NonConformance));
     getNcrs = vi.fn(() => of([] as NonConformance[]));
     close = vi.fn();
+    confirmAnswer = true;
+    confirmOpen = vi.fn(() => ({ afterClosed: () => of(confirmAnswer) }));
     TestBed.configureTestingModule({
       providers: [
         { provide: QualityService, useValue: { getInspection, updateInspection } },
@@ -82,6 +86,7 @@ describe('QcInspectionDetailDialogComponent', () => {
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
         { provide: CapabilityService, useValue: { isEnabled: (code: string) => code === 'CAP-QC-NCR' && ncrEnabled } },
         { provide: MatDialogRef, useValue: { close } },
+        { provide: MatDialog, useValue: { open: confirmOpen } },
         { provide: MAT_DIALOG_DATA, useValue: { inspectionId: inspection.id } },
       ],
     });
@@ -283,5 +288,37 @@ describe('QcInspectionDetailDialogComponent', () => {
     const view = TestBed.runInInjectionContext(() => new QcInspectionDetailDialogComponent()) as unknown as DialogView;
 
     expect(view.linkedNcr()?.ncrNumber).toBe('NCR-0009');
+  });
+
+  describe('completing an inspection', () => {
+    it('asks before passing and sends nothing when the inspector backs out', () => {
+      const view = setup(makeInspection());
+      view.form.controls.results.at(0).patchValue({ passed: true });
+      confirmAnswer = false;
+
+      view.markPassed();
+
+      expect(confirmOpen).toHaveBeenCalledTimes(1);
+      expect(updateInspection).not.toHaveBeenCalled();
+    });
+
+    it('asks before failing and records the failure once confirmed', () => {
+      const view = setup(makeInspection());
+
+      view.markFailed();
+
+      expect(confirmOpen).toHaveBeenCalledTimes(1);
+      expect(updateInspection).toHaveBeenCalledWith(12, expect.objectContaining({ status: 'Failed' }));
+    });
+
+    it('will not pass an inspection with no check recorded', () => {
+      const view = setup(makeInspection({ templateId: null, templateName: null, results: [] }));
+
+      expect(view.passViolations()).toEqual(['qcInspections.noCheckRecorded']);
+      view.markPassed();
+
+      expect(confirmOpen).not.toHaveBeenCalled();
+      expect(updateInspection).not.toHaveBeenCalled();
+    });
   });
 });

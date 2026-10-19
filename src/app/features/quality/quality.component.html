@@ -11,7 +11,7 @@
       {{ 'qcInspections.newTemplate' | translate }}
     </button>
   }
-  @if (activeTab() === 'spc-charts' || activeTab() === 'spc-data') {
+  @if ((activeTab() === 'spc-charts' || activeTab() === 'spc-data') && canManageQuality()) {
     <button class="action-btn action-btn--create" data-testid="new-spc-characteristic-btn" (click)="spcCharsComponent?.openCreate()">
       <span class="material-icons-outlined">add</span>
       {{ 'qcInspections.newCharacteristic' | translate }}
@@ -23,19 +23,19 @@
       {{ 'qcInspections.newNcr' | translate }}
     </button>
   }
-  @if (activeTab() === 'capas') {
+  @if (activeTab() === 'capas' && canManageQuality()) {
     <button class="action-btn action-btn--create" data-testid="new-capa-btn" (click)="capaListComponent?.openCreate()">
       <span class="material-icons-outlined">add</span>
       {{ 'qcInspections.newCapa' | translate }}
     </button>
   }
-  @if (activeTab() === 'ecos') {
+  @if (activeTab() === 'ecos' && canAuthorEcos()) {
     <button class="action-btn action-btn--create" data-testid="new-eco-btn" (click)="ecoListComponent?.openCreate()">
       <span class="material-icons-outlined">add</span>
       {{ 'qcInspections.newEco' | translate }}
     </button>
   }
-  @if (activeTab() === 'gages') {
+  @if (activeTab() === 'gages' && canManageQuality()) {
     <button class="action-btn action-btn--create" data-testid="new-gage-btn" (click)="gageListComponent?.openCreate()">
       <span class="material-icons-outlined">add</span>
       {{ 'qcInspections.newGage' | translate }}
@@ -44,45 +44,45 @@
 </app-page-header>
 
 <div class="quality-content">
-  <div class="tab-bar">
-    <button class="tab" [class.tab--active]="activeTab() === 'inspections'" (click)="switchTab('inspections')">
-      <span class="material-icons-outlined">fact_check</span>
+  <div class="tab-bar" role="tablist" [attr.aria-label]="'quality.title' | translate">
+    <button class="tab" role="tab" [attr.aria-selected]="activeTab() === 'inspections'" [class.tab--active]="activeTab() === 'inspections'" (click)="switchTab('inspections')">
+      <span class="material-icons-outlined" aria-hidden="true">fact_check</span>
       {{ 'quality.qcInspections' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'templates'" data-testid="qc-templates-tab" (click)="switchTab('templates')">
-      <span class="material-icons-outlined">checklist</span>
+    <button class="tab" role="tab" [attr.aria-selected]="activeTab() === 'templates'" [class.tab--active]="activeTab() === 'templates'" data-testid="qc-templates-tab" (click)="switchTab('templates')">
+      <span class="material-icons-outlined" aria-hidden="true">checklist</span>
       {{ 'qcInspections.tabTemplates' | translate }}
     </button>
-    <button class="tab" data-testid="quality-lots-tab" (click)="openLots()">
-      <span class="material-icons-outlined">qr_code_2</span>
+    <button class="tab" role="tab" [attr.aria-selected]="false" data-testid="quality-lots-tab" (click)="openLots()">
+      <span class="material-icons-outlined" aria-hidden="true">qr_code_2</span>
       {{ 'quality.lotTracking' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'spc-charts'" (click)="switchTab('spc-charts')">
-      <span class="material-icons-outlined">show_chart</span>
+    <button class="tab" role="tab" [attr.aria-selected]="activeTab() === 'spc-charts'" [class.tab--active]="activeTab() === 'spc-charts'" (click)="switchTab('spc-charts')">
+      <span class="material-icons-outlined" aria-hidden="true">show_chart</span>
       {{ 'qcInspections.tabSpcCharts' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'spc-data'" (click)="switchTab('spc-data')">
-      <span class="material-icons-outlined">edit_note</span>
+    <button class="tab" role="tab" [attr.aria-selected]="activeTab() === 'spc-data'" [class.tab--active]="activeTab() === 'spc-data'" (click)="switchTab('spc-data')">
+      <span class="material-icons-outlined" aria-hidden="true">edit_note</span>
       {{ 'qcInspections.tabSpcData' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'spc-ooc'" (click)="switchTab('spc-ooc')">
-      <span class="material-icons-outlined">warning</span>
+    <button class="tab" role="tab" [attr.aria-selected]="activeTab() === 'spc-ooc'" [class.tab--active]="activeTab() === 'spc-ooc'" (click)="switchTab('spc-ooc')">
+      <span class="material-icons-outlined" aria-hidden="true">warning</span>
       {{ 'qcInspections.tabOocEvents' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'ncrs'" (click)="switchTab('ncrs')">
-      <span class="material-icons-outlined">report_problem</span>
+    <button class="tab" role="tab" [attr.aria-selected]="activeTab() === 'ncrs'" [class.tab--active]="activeTab() === 'ncrs'" (click)="switchTab('ncrs')">
+      <span class="material-icons-outlined" aria-hidden="true">report_problem</span>
       {{ 'qcInspections.tabNcrs' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'capas'" (click)="switchTab('capas')">
-      <span class="material-icons-outlined">assignment_turned_in</span>
+    <button class="tab" role="tab" [attr.aria-selected]="activeTab() === 'capas'" [class.tab--active]="activeTab() === 'capas'" (click)="switchTab('capas')">
+      <span class="material-icons-outlined" aria-hidden="true">assignment_turned_in</span>
       {{ 'qcInspections.tabCapas' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'ecos'" (click)="switchTab('ecos')">
-      <span class="material-icons-outlined">engineering</span>
+    <button class="tab" role="tab" [attr.aria-selected]="activeTab() === 'ecos'" [class.tab--active]="activeTab() === 'ecos'" (click)="switchTab('ecos')">
+      <span class="material-icons-outlined" aria-hidden="true">engineering</span>
       {{ 'qcInspections.tabEcos' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'gages'" (click)="switchTab('gages')">
-      <span class="material-icons-outlined">straighten</span>
+    <button class="tab" role="tab" [attr.aria-selected]="activeTab() === 'gages'" [class.tab--active]="activeTab() === 'gages'" (click)="switchTab('gages')">
+      <span class="material-icons-outlined" aria-hidden="true">straighten</span>
       {{ 'qcInspections.tabGages' | translate }}
     </button>
   </div>
@@ -150,7 +150,7 @@
     <div class="spc-tab-content">
       @if (selectedCharacteristic(); as char) {
         <div class="spc-tab-content__sidebar">
-          <app-spc-characteristics (characteristicSelected)="onCharacteristicSelected($event)" />
+          <app-spc-characteristics [compact]="true" (characteristicSelected)="onCharacteristicSelected($event)" />
         </div>
         <div class="spc-tab-content__main">
           <app-spc-chart [characteristic]="char" />
@@ -165,7 +165,7 @@
     <div class="spc-tab-content">
       @if (selectedCharacteristic(); as char) {
         <div class="spc-tab-content__sidebar">
-          <app-spc-characteristics (characteristicSelected)="selectedCharacteristic.set($event)" />
+          <app-spc-characteristics [compact]="true" (characteristicSelected)="selectedCharacteristic.set($event)" />
         </div>
         <div class="spc-tab-content__main">
           <app-spc-data-entry [characteristic]="char" (measurementRecorded)="onMeasurementRecorded()" />

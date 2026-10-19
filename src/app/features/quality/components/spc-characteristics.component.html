@@ -1,12 +1,15 @@
 <div [appLoadingBlock]="loading()">
-  <app-data-table tableId="spc-characteristics" [columns]="columns" [data]="characteristics()"
+  <app-data-table [tableId]="compact() ? 'spc-characteristics-compact' : 'spc-characteristics'" [columns]="columns()" [data]="characteristics()"
     [clickableRows]="true" emptyIcon="straighten" [emptyMessage]="'spc.characteristics.empty' | translate"
     (rowClick)="selectCharacteristic($any($event))">
     <ng-template appColumnCell="operationName" let-row>
       <span class="text-muted">{{ row.operationName ?? '—' }}</span>
     </ng-template>
+    <ng-template appColumnCell="nominalValue" let-row>
+      {{ formatValue(row, row.nominalValue) }}
+    </ng-template>
     <ng-template appColumnCell="specLimits" let-row>
-      <span class="spc-char__spec">{{ row.lowerSpecLimit }} — {{ row.upperSpecLimit }}</span>
+      <span class="spc-char__spec">{{ formatValue(row, row.lowerSpecLimit) }} — {{ formatValue(row, row.upperSpecLimit) }}</span>
     </ng-template>
     <ng-template appColumnCell="measurementCount" let-row>
       {{ row.measurementCount }}

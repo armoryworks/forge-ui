@@ -18,6 +18,11 @@ import { LoadingBlockDirective } from '../../../shared/directives/loading-block.
 import { FormValidationService } from '../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
 import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
+import { AuthService } from '../../../shared/services/auth.service';
+import { QUALITY_MANAGER_ROLES } from '../quality-roles';
+import { CapaDetailDialogComponent } from './capa-detail-dialog/capa-detail-dialog.component';
 
 @Component({
   selector: 'app-capa-list',
@@ -27,7 +32,7 @@ import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
     DataTableComponent, ColumnCellDirective,
     SelectComponent, InputComponent, TextareaComponent, DatepickerComponent,
     DialogComponent, LoadingBlockDirective,
-    ValidationButtonComponent,
+    ValidationButtonComponent, MatTooltipModule, TranslatePipe, CapaDetailDialogComponent,
   ],
   templateUrl: './capa-list.component.html',
   styleUrl: './capa-list.component.scss',
@@ -36,6 +41,11 @@ import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
 export class CapaListComponent implements OnInit {
   private readonly ncrCapaService = inject(NcrCapaService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly auth = inject(AuthService);
+
+  protected readonly canManage = this.auth.hasAnyRole(QUALITY_MANAGER_ROLES);
+  protected readonly userOptions = signal<SelectOption[]>([]);
+  protected readonly openCapaId = signal<number | null>(null);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -81,7 +91,7 @@ export class CapaListComponent implements OnInit {
   ];
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'capaNumber', header: 'CAPA #', sortable: true, width: '140px' },
+    { field: 'capaNumber', header: 'CAPA #', sortable: true, width: '180px' },
     { field: 'type', header: 'Type', sortable: true, width: '100px' },
     { field: 'title', header: 'Title', sortable: true },
     { field: 'ownerName', header: 'Owner', sortable: true, width: '150px' },
@@ -106,12 +116,19 @@ export class CapaListComponent implements OnInit {
   protected readonly createViolations = FormValidationService.getViolations(this.createForm, {
     title: 'Title',
     problemDescription: 'Problem Description',
-    ownerId: 'Owner ID',
+    ownerId: 'Owner',
     dueDate: 'Due Date',
   });
 
   ngOnInit(): void {
     this.loadCapas();
+    this.ncrCapaService.getUsers().subscribe({
+      next: users => this.userOptions.set(users.map(u => ({ value: u.id, label: u.name }))),
+    });
+  }
+
+  protected openDetail(row: unknown): void {
+    this.openCapaId.set((row as CorrectiveAction).id);
   }
 
   loadCapas(): void {

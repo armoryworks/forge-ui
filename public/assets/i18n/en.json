@@ -6750,7 +6750,11 @@
     "createNcr": "Create NCR",
     "ncrCreated": "{{number}} raised.",
     "linkedNcr": "Non-conformance raised:",
-    "activity": "Activity"
+    "activity": "Activity",
+    "noCheckRecorded": "Record at least one check result before passing",
+    "confirmPassTitle": "Pass this inspection?",
+    "confirmFailTitle": "Fail this inspection?",
+    "confirmCompleteMessage": "A completed inspection is locked and cannot be changed afterwards."
   },
   "spc": {
     "characteristics": {
@@ -6799,6 +6803,9 @@
       "record": "Record subgroup",
       "recorded": "Subgroup #{{number}} recorded.",
       "recordedOoc": "Subgroup #{{number}} recorded. Out of control: {{rule}}"
+    },
+    "ooc": {
+      "capaCreatedNumber": "Created {{number}} from the out-of-control event"
     }
   },
   "quality": {
@@ -7768,7 +7775,14 @@
       "ncrStatusDispositioned": "Dispositioned"
     },
     "releaseHeldStock": "Release the held stock",
-    "releaseHeldStockHint": "Only when the held material has been cleared for use. Lots an NCR still holds, and receipts still awaiting inspection, stay on hold."
+    "releaseHeldStockHint": "Only when the held material has been cleared for use. Lots an NCR still holds, and receipts still awaiting inspection, stay on hold.",
+    "detailTitleWithLot": "Recall #{{id}} — Lot {{lotNumber}}",
+    "confirmResolveTitle": "Resolve this recall?",
+    "confirmResolveMessage": "The recall will be marked resolved.",
+    "confirmResolveRelease": "The recall will be marked resolved and its held stock released back to inventory.",
+    "startRecall": "Start Recall",
+    "pickLot": "Lot to recall",
+    "initiateTitleNoLot": "Start a recall"
   },
   "lots": {
     "created": "Lot created",
@@ -7859,7 +7873,7 @@
   "maintenance": {
     "title": "Predictive Maintenance",
     "hint": "Open predictions need a decision: acknowledge, schedule preventive work, resolve, or mark false-positive. Resolved + false-positive close the loop and feed the model accuracy stats.",
-    "empty": "No predictions match the current filter. Lower-severity alerts may be hidden — try Status: All.",
+    "empty": "No predictions yet. Alerts appear here when a work center's readings trend toward a failure.",
     "filterSeverity": "Severity",
     "filterStatus": "Status",
     "severityAll": "All severities",
@@ -7906,7 +7920,8 @@
       "fieldNotes": "Resolution notes",
       "confirmResolve": "Resolve",
       "confirmFalsePositive": "Mark false positive"
-    }
+    },
+    "emptyFiltered": "No predictions match these filters. Widen the severity or status filter to see more."
   },
   "mrp": {
     "title": "Material Requirements Planning",
@@ -12021,6 +12036,52 @@
       "sftpUploadDirHint": "Where payment files are uploaded on the bank's server.",
       "sftpReturnsDir": "SFTP returns directory",
       "sftpReturnsDirHint": "Where the bank leaves return files for Forge to read."
+    }
+  },
+  "gages": {
+    "updated": "Gage updated",
+    "editTitle": "Edit Gage",
+    "lastCalibratedAt": "Last Calibrated (certificate date)",
+    "lastCalibratedHint": "Leave the certificate date blank for a gage that has not been calibrated yet; it starts as due for calibration today."
+  },
+  "ecos": {
+    "oldValue": "Old Value (JSON)",
+    "newValue": "New Value (JSON)",
+    "jsonHint": "Values are optional. When given they must be valid JSON, for example {\"revision\": \"B\"}."
+  },
+  "capas": {
+    "detailTitle": "CAPA",
+    "owner": "Owner",
+    "blockers": "To advance to the next phase, fill in: {{fields}}.",
+    "rootCauseMethod": "Root Cause Method",
+    "rootCauseAnalysis": "Root Cause Analysis",
+    "containmentAction": "Containment Action",
+    "correctiveAction": "Corrective Action",
+    "preventiveAction": "Preventive Action",
+    "verificationMethod": "Verification Method",
+    "verificationResult": "Verification Result",
+    "effectivenessResult": "Effectiveness Result",
+    "isEffective": "Effective?",
+    "notDecided": "Not decided",
+    "tasks": "Tasks",
+    "addTask": "Add Task",
+    "noTasks": "No tasks yet.",
+    "advance": "Advance Phase",
+    "saved": "CAPA saved",
+    "advanced": "CAPA advanced to {{status}}",
+    "method": {
+      "FiveWhy": "5 Whys",
+      "Fishbone": "Fishbone",
+      "FaultTree": "Fault Tree",
+      "EightD": "8D",
+      "Pareto": "Pareto",
+      "IsIsNot": "Is / Is Not"
+    },
+    "taskStatus": {
+      "Open": "Open",
+      "InProgress": "In Progress",
+      "Completed": "Completed",
+      "Cancelled": "Cancelled"
     }
   }
 }

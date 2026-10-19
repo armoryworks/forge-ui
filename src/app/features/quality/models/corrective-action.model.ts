@@ -45,4 +45,5 @@ export interface CorrectiveAction {
   completedTaskCount: number;
   relatedNcrCount: number;
   createdAt: string;
+  advanceBlockers?: string[];
 }

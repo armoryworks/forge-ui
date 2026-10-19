@@ -47,6 +47,8 @@ export interface CreateGageRequest {
   model?: string;
   serialNumber?: string;
   calibrationIntervalDays: number;
+  lastCalibratedAt?: string;
+  status?: GageStatus;
   locationId?: number;
   assetId?: number;
   accuracySpec?: string;

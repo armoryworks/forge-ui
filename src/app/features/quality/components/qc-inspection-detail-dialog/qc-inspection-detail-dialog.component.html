@@ -1,5 +1,12 @@
-<app-dialog [title]="title()" width="960px" (closed)="close()">
-  <div class="qc-detail" [appLoadingBlock]="loading()">
+<div class="detail-panel">
+  <div class="detail-panel__header">
+    <h2 class="detail-panel__title">{{ title() }}</h2>
+    <button class="icon-btn" type="button" [attr.aria-label]="'common.close' | translate" (click)="close()" data-testid="qc-detail-x-btn">
+      <span class="material-icons-outlined" aria-hidden="true">close</span>
+    </button>
+  </div>
+
+  <div class="detail-panel__body qc-detail" [appLoadingBlock]="loading()">
     @if (inspection(); as insp) {
       <dl class="qc-detail__header" data-testid="qc-detail-header">
         <div class="qc-detail__field">
@@ -117,7 +124,6 @@
       }
 
       <div class="dlg-section qc-detail__activity">
-        <span class="dlg-section__title">{{ 'qcInspections.activity' | translate }}</span>
         <app-entity-activity-section entityType="QcInspection" [entityId]="insp.id" />
       </div>
     } @else if (loadError()) {
@@ -125,10 +131,12 @@
     }
   </div>
 
-  <div dialog-footer>
-    <button class="action-btn" type="button" (click)="close()" data-testid="qc-detail-close">
-      {{ 'common.close' | translate }}
-    </button>
+  <div class="detail-panel__footer">
+    @if (!loadError()) {
+      <button class="action-btn" type="button" (click)="close()" data-testid="qc-detail-close">
+        {{ 'common.close' | translate }}
+      </button>
+    }
     @if (inspection() && !isComplete()) {
       <button class="action-btn" type="button" [disabled]="saving() || form.invalid" (click)="save()"
         data-testid="qc-detail-save">{{ 'common.save' | translate }}</button>
@@ -158,4 +166,4 @@
       </app-validation-button>
     }
   </div>
-</app-dialog>
+</div>

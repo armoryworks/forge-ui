@@ -11,9 +11,11 @@
         }
         <app-kpi-chip label="Points" [value]="'' + data.points.length" />
       </div>
-      <button class="action-btn action-btn--sm" (click)="recalculateLimits()">
-        <span class="material-icons-outlined">refresh</span> Recalculate
-      </button>
+      @if (canRecalculate) {
+        <button class="action-btn action-btn--sm" (click)="recalculateLimits()">
+          <span class="material-icons-outlined">refresh</span> Recalculate
+        </button>
+      }
     </div>
 
     <div class="spc-chart__spec-info">

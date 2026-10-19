@@ -1,0 +1,89 @@
+@use 'styles/variables' as *;
+
+.capa-detail {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__summary {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-md;
+    color: var(--text);
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-md;
+    align-items: center;
+    font-size: $font-size-sm;
+  }
+
+  &__problem {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+  }
+
+  &__blockers {
+    display: flex;
+    gap: $sp-sm;
+    align-items: flex-start;
+    padding: $sp-sm $sp-md;
+    border-left: $border-width-accent solid var(--warning);
+    background: var(--surface);
+    font-size: $font-size-sm;
+  }
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__section-title {
+    margin: 0;
+    font-size: $font-size-xxs;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+  }
+
+  &__task {
+    display: flex;
+    gap: $sp-md;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  &__task-text {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+    min-width: 0;
+  }
+
+  &__task-title {
+    font-size: $font-size-sm;
+    color: var(--text);
+  }
+
+  &__task-actions {
+    display: flex;
+    gap: $sp-sm;
+    justify-content: flex-end;
+  }
+}

@@ -6743,7 +6743,11 @@
     "createNcr": "Crear NCR",
     "ncrCreated": "{{number}} levantada.",
     "linkedNcr": "No conformidad levantada:",
-    "activity": "Actividad"
+    "activity": "Actividad",
+    "noCheckRecorded": "Registra al menos un resultado de verificación antes de aprobar",
+    "confirmPassTitle": "¿Aprobar esta inspección?",
+    "confirmFailTitle": "¿Rechazar esta inspección?",
+    "confirmCompleteMessage": "Una inspección completada queda bloqueada y no se puede cambiar después."
   },
   "spc": {
     "characteristics": {
@@ -6792,6 +6796,9 @@
       "record": "Registrar subgrupo",
       "recorded": "Subgrupo n.º {{number}} registrado.",
       "recordedOoc": "Subgrupo n.º {{number}} registrado. Fuera de control: {{rule}}"
+    },
+    "ooc": {
+      "capaCreatedNumber": "Se creó {{number}} a partir del evento fuera de control"
     }
   },
   "quality": {
@@ -7761,7 +7768,14 @@
       "ncrStatusDispositioned": "Con disposición"
     },
     "releaseHeldStock": "Liberar el inventario retenido",
-    "releaseHeldStockHint": "Solo cuando el material retenido se haya autorizado para su uso. Los lotes que una NCR aún retiene y las recepciones pendientes de inspección siguen retenidos."
+    "releaseHeldStockHint": "Solo cuando el material retenido se haya autorizado para su uso. Los lotes que una NCR aún retiene y las recepciones pendientes de inspección siguen retenidos.",
+    "detailTitleWithLot": "Retiro #{{id}} — Lote {{lotNumber}}",
+    "confirmResolveTitle": "¿Resolver este retiro?",
+    "confirmResolveMessage": "El retiro se marcará como resuelto.",
+    "confirmResolveRelease": "El retiro se marcará como resuelto y su inventario retenido volverá al inventario.",
+    "startRecall": "Iniciar retiro",
+    "pickLot": "Lote a retirar",
+    "initiateTitleNoLot": "Iniciar un retiro"
   },
   "lots": {
     "created": "Lote creado",
@@ -7852,7 +7866,7 @@
   "maintenance": {
     "title": "Mantenimiento Predictivo",
     "hint": "Las predicciones abiertas necesitan decisión: reconocer, programar trabajo preventivo, resolver o marcar como falso positivo. Resuelto + falso positivo cierran el ciclo y alimentan las estadísticas de precisión del modelo.",
-    "empty": "Ninguna predicción coincide con el filtro actual. Las alertas de menor severidad pueden estar ocultas — prueba Estado: Todos.",
+    "empty": "Aún no hay predicciones. Las alertas aparecen aquí cuando las lecturas de un centro de trabajo tienden hacia una falla.",
     "filterSeverity": "Severidad",
     "filterStatus": "Estado",
     "severityAll": "Todas las severidades",
@@ -7899,7 +7913,8 @@
       "fieldNotes": "Notas de resolución",
       "confirmResolve": "Resolver",
       "confirmFalsePositive": "Marcar falso positivo"
-    }
+    },
+    "emptyFiltered": "Ninguna predicción coincide con estos filtros. Amplía el filtro de severidad o de estado para ver más."
   },
   "mrp": {
     "title": "Planificación de Requerimientos de Materiales",
@@ -12021,6 +12036,52 @@
       "sftpUploadDirHint": "Dónde se suben los archivos de pago en el servidor del banco.",
       "sftpReturnsDir": "Directorio de devoluciones SFTP",
       "sftpReturnsDirHint": "Dónde deja el banco los archivos de devoluciones para que Forge los lea."
+    }
+  },
+  "gages": {
+    "updated": "Calibre actualizado",
+    "editTitle": "Editar calibre",
+    "lastCalibratedAt": "Última calibración (fecha del certificado)",
+    "lastCalibratedHint": "Deja la fecha del certificado en blanco si el calibre aún no se ha calibrado; empezará como pendiente de calibración hoy."
+  },
+  "ecos": {
+    "oldValue": "Valor anterior (JSON)",
+    "newValue": "Valor nuevo (JSON)",
+    "jsonHint": "Los valores son opcionales. Si se indican deben ser JSON válido, por ejemplo {\"revision\": \"B\"}."
+  },
+  "capas": {
+    "detailTitle": "CAPA",
+    "owner": "Responsable",
+    "blockers": "Para avanzar a la siguiente fase, completa: {{fields}}.",
+    "rootCauseMethod": "Método de causa raíz",
+    "rootCauseAnalysis": "Análisis de causa raíz",
+    "containmentAction": "Acción de contención",
+    "correctiveAction": "Acción correctiva",
+    "preventiveAction": "Acción preventiva",
+    "verificationMethod": "Método de verificación",
+    "verificationResult": "Resultado de la verificación",
+    "effectivenessResult": "Resultado de eficacia",
+    "isEffective": "¿Eficaz?",
+    "notDecided": "Sin decidir",
+    "tasks": "Tareas",
+    "addTask": "Agregar tarea",
+    "noTasks": "Aún no hay tareas.",
+    "advance": "Avanzar fase",
+    "saved": "CAPA guardada",
+    "advanced": "CAPA avanzada a {{status}}",
+    "method": {
+      "FiveWhy": "5 porqués",
+      "Fishbone": "Espina de pescado",
+      "FaultTree": "Árbol de fallas",
+      "EightD": "8D",
+      "Pareto": "Pareto",
+      "IsIsNot": "Es / No es"
+    },
+    "taskStatus": {
+      "Open": "Abierta",
+      "InProgress": "En curso",
+      "Completed": "Completada",
+      "Cancelled": "Cancelada"
     }
   }
 }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -21,6 +21,10 @@ import { FormValidationService } from '../../../shared/services/form-validation.
 import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
+import { AuthService } from '../../../shared/services/auth.service';
+import { QUALITY_MANAGER_ROLES } from '../quality-roles';
+
+const COMPACT_FIELDS = ['partNumber', 'name', 'latestCpk', 'actions'];
 
 @Component({
   selector: 'app-spc-characteristics',
@@ -41,8 +45,12 @@ export class SpcCharacteristicsComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly partsService = inject(PartsService);
   private readonly translate = inject(TranslateService);
+  private readonly auth = inject(AuthService);
 
+  readonly compact = input(false);
   readonly characteristicSelected = output<SpcCharacteristic>();
+
+  protected readonly canManage = this.auth.hasAnyRole(QUALITY_MANAGER_ROLES);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -53,7 +61,7 @@ export class SpcCharacteristicsComponent {
   protected readonly editingPartNumber = signal('');
   private operationsSub: Subscription | null = null;
 
-  protected readonly columns: ColumnDef[] = [
+  private readonly allColumns: ColumnDef[] = [
     { field: 'partNumber', header: this.translate.instant('spc.characteristics.colPartNumber'), sortable: true, width: '120px' },
     { field: 'name', header: this.translate.instant('spc.characteristics.colCharacteristic'), sortable: true },
     { field: 'operationName', header: this.translate.instant('spc.characteristics.operation'), sortable: true, width: '140px' },
@@ -65,6 +73,12 @@ export class SpcCharacteristicsComponent {
     { field: 'isActive', header: this.translate.instant('common.active'), sortable: true, width: '70px', align: 'center' },
     { field: 'actions', header: '', width: '50px', align: 'center' },
   ];
+
+  protected readonly columns = computed<ColumnDef[]>(() => {
+    const keep = this.compact() ? COMPACT_FIELDS : null;
+    return this.allColumns.filter(c =>
+      (c.field !== 'actions' || this.canManage) && (keep === null || keep.includes(c.field)));
+  });
 
   protected readonly measurementTypeOptions: SelectOption[] = [
     { value: 'Variable', label: this.translate.instant('spc.characteristics.measurementTypes.Variable') },
@@ -105,6 +119,12 @@ export class SpcCharacteristicsComponent {
       this.form.controls.operationId.setValue(null);
       this.loadOperations(partId);
     });
+  }
+
+  protected formatValue(char: SpcCharacteristic, value: number): string {
+    const places = Math.min(Math.max(char.decimalPlaces ?? 4, 0), 6);
+    const text = value.toFixed(places);
+    return char.unitOfMeasure ? `${text} ${char.unitOfMeasure}` : text;
   }
 
   loadCharacteristics(): void {

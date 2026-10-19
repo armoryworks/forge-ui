@@ -112,6 +112,16 @@ describe('NcrListComponent disposition dialog', () => {
     }));
   });
 
+  it('drops rework instructions typed before switching away from Rework', () => {
+    view.dispositionForm.controls.code.setValue('Rework');
+    view.dispositionForm.controls.reworkInstructions.setValue('Re-machine the bore');
+    view.dispositionForm.controls.code.setValue('Scrap');
+
+    view.saveDisposition();
+
+    expect(dispositionNcr).toHaveBeenCalledWith(5, expect.objectContaining({ code: 'Scrap', reworkInstructions: undefined }));
+  });
+
   it('refreshes an open detail panel after recording a disposition', () => {
     view.dispositionForm.controls.code.setValue('Scrap');
 
@@ -158,6 +168,17 @@ describe('NcrListComponent create dialog and detail panel', () => {
     expect(createNcr).toHaveBeenCalledWith(expect.objectContaining({
       partId: 12, jobId: 34, lotNumber: 'LOT-7', detectedAtStage: 'Receiving',
     }));
+  });
+
+  it('rejects a negative defective quantity or one above the affected quantity', () => {
+    view.createForm.patchValue({ partId: 12, description: 'Burr on edge', affectedQuantity: 4, defectiveQuantity: -1 });
+    expect(view.createForm.controls['defectiveQuantity'].invalid).toBe(true);
+
+    view.createForm.patchValue({ defectiveQuantity: 5 });
+    expect(view.createForm.controls['defectiveQuantity'].invalid).toBe(true);
+
+    view.createForm.patchValue({ affectedQuantity: 6 });
+    expect(view.createForm.controls['defectiveQuantity'].valid).toBe(true);
   });
 
   it('sends no lot when the lot is left blank', () => {

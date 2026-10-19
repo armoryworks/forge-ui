@@ -28,6 +28,7 @@ import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ScannerService } from '../../shared/services/scanner.service';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { AuthService } from '../../shared/services/auth.service';
+import { ECO_AUTHOR_ROLES, QUALITY_MANAGER_ROLES } from './quality-roles';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -58,7 +59,6 @@ const NEW_TEMPLATE_OPTION = -1;
 
 const INSPECTION_DETAIL_TYPE = 'qc-inspection';
 
-const TEMPLATE_AUTHOR_ROLES = ['Admin', 'Manager'];
 
 @Component({
   selector: 'app-quality',
@@ -118,7 +118,9 @@ export class QualityComponent {
   protected readonly inspections = signal<QcInspection[]>([]);
   protected readonly templates = signal<QcTemplate[]>([]);
   protected readonly showInspectionDialog = signal(false);
-  protected readonly canAuthorTemplates = computed(() => this.auth.hasAnyRole(TEMPLATE_AUTHOR_ROLES));
+  protected readonly canAuthorTemplates = computed(() => this.auth.hasAnyRole(QUALITY_MANAGER_ROLES));
+  protected readonly canManageQuality = this.canAuthorTemplates;
+  protected readonly canAuthorEcos = computed(() => this.auth.hasAnyRole(ECO_AUTHOR_ROLES));
   private detailRestored = false;
 
   protected readonly statusFilterControl = new FormControl<string>(this.route.snapshot.queryParamMap.get('status') ?? '', { nonNullable: true });

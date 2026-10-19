@@ -11,6 +11,14 @@
     gap: $sp-md;
   }
 
+  &__title {
+    margin: 0;
+    font-size: $font-size-md;
+    font-weight: 600;
+    color: var(--text);
+    overflow-wrap: anywhere;
+  }
+
   &__meta {
     display: flex;
     gap: $sp-sm;

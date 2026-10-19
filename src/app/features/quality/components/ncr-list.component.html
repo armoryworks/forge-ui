@@ -23,16 +23,18 @@
     </ng-template>
     <ng-template appColumnCell="actions" let-row>
       <div class="ncr-list__actions">
-        @if (row.status !== 'Dispositioned' && row.status !== 'Closed') {
+        @if (canManage && row.status !== 'Dispositioned' && row.status !== 'Closed') {
           <button class="icon-btn" [attr.aria-label]="'ncrDetail.dispositionTitle' | translate"
+            [matTooltip]="'ncrDetail.dispositionTitle' | translate" matTooltipPosition="above"
             (click)="openDisposition(row); $event.stopPropagation()">
-            <span class="material-icons-outlined">gavel</span>
+            <span class="material-icons-outlined" aria-hidden="true">gavel</span>
           </button>
         }
-        @if (!row.capaId && row.status !== 'Closed') {
+        @if (canManage && !row.capaId && row.status !== 'Closed') {
           <button class="icon-btn" [attr.aria-label]="'ncrDetail.createCapa' | translate"
+            [matTooltip]="'ncrDetail.createCapa' | translate" matTooltipPosition="above"
             (click)="createCapa(row); $event.stopPropagation()">
-            <span class="material-icons-outlined">assignment_turned_in</span>
+            <span class="material-icons-outlined" aria-hidden="true">assignment_turned_in</span>
           </button>
         }
       </div>
@@ -80,7 +82,7 @@
         <app-input [label]="'ncrDetail.affectedQuantity' | translate" type="number" formControlName="affectedQuantity"
           [required]="true" data-testid="ncr-create-affected-qty" />
         <app-input [label]="'ncrDetail.defectiveQuantity' | translate" type="number" formControlName="defectiveQuantity"
-          data-testid="ncr-create-defective-qty" />
+          [min]="0" data-testid="ncr-create-defective-qty" />
       </div>
       <app-textarea [label]="'ncrDetail.containmentActions' | translate" formControlName="containmentActions"
         data-testid="ncr-create-containment" />

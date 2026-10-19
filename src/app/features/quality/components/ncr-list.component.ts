@@ -3,6 +3,7 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { NcrCapaService } from '../services/ncr-capa.service';
@@ -26,6 +27,8 @@ import { DetailDialogService } from '../../../shared/services/detail-dialog.serv
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { FormValidationService } from '../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
+import { AuthService } from '../../../shared/services/auth.service';
+import { QUALITY_MANAGER_ROLES } from '../quality-roles';
 
 const NCR_ENTITY_TYPE = 'ncr';
 
@@ -34,11 +37,18 @@ const NOTES_REQUIRED_CODES: readonly NcrDispositionCode[] = ['UseAsIs', 'Reject'
 const requiredText = (control: AbstractControl): ValidationErrors | null =>
   typeof control.value === 'string' && control.value.trim() ? null : { required: true };
 
+const defectiveWithinAffected = (control: AbstractControl): ValidationErrors | null => {
+  const defective = control.value as number | null;
+  const affected = control.parent?.get('affectedQuantity')?.value as number | null | undefined;
+  if (defective == null || affected == null) return null;
+  return defective > affected ? { max: { max: affected, actual: defective } } : null;
+};
+
 @Component({
   selector: 'app-ncr-list',
   standalone: true,
   imports: [
-    DatePipe, ReactiveFormsModule, TranslatePipe,
+    DatePipe, ReactiveFormsModule, TranslatePipe, MatTooltipModule,
     DataTableComponent, ColumnCellDirective,
     SelectComponent, InputComponent, TextareaComponent, EntityPickerComponent,
     DialogComponent, DetailSidePanelComponent, LoadingBlockDirective,
@@ -55,7 +65,9 @@ export class NcrListComponent implements OnInit {
   private readonly detailDialog = inject(DetailDialogService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
 
+  protected readonly canManage = this.auth.hasAnyRole(QUALITY_MANAGER_ROLES);
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   protected readonly ncrs = signal<NonConformance[]>([]);
@@ -130,7 +142,7 @@ export class NcrListComponent implements OnInit {
     detectedAtStage: new FormControl<NcrDetectionStage>('Receiving', { nonNullable: true }),
     description: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     affectedQuantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
-    defectiveQuantity: new FormControl<number | null>(null),
+    defectiveQuantity: new FormControl<number | null>(null, [Validators.min(0), defectiveWithinAffected]),
     containmentActions: new FormControl(''),
   });
 
@@ -155,6 +167,7 @@ export class NcrListComponent implements OnInit {
     lotNumber: this.translate.instant('ncrDetail.lotNumber'),
     description: this.translate.instant('ncrDetail.description'),
     affectedQuantity: this.translate.instant('ncrDetail.affectedQuantity'),
+    defectiveQuantity: this.translate.instant('ncrDetail.defectiveQuantity'),
   });
 
   constructor() {
@@ -162,6 +175,9 @@ export class NcrListComponent implements OnInit {
       .pipe(takeUntilDestroyed())
       .subscribe(code => this.applyDispositionValidators(code));
     this.applyDispositionValidators(this.dispositionForm.controls.code.value);
+    this.createForm.controls.affectedQuantity.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.createForm.controls.defectiveQuantity.updateValueAndValidity({ emitEvent: false }));
     this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe(() => this.openDetailFromUrl());
   }
 
@@ -240,7 +256,7 @@ export class NcrListComponent implements OnInit {
     this.ncrCapaService.dispositionNcr(ncr.id, {
       code: formVal.code,
       notes: formVal.notes ?? undefined,
-      reworkInstructions: formVal.reworkInstructions ?? undefined,
+      reworkInstructions: formVal.code === 'Rework' ? (formVal.reworkInstructions ?? undefined) : undefined,
     }).subscribe({
       next: () => {
         this.snackbar.success(this.translate.instant('ncrDetail.dispositionRecorded'));

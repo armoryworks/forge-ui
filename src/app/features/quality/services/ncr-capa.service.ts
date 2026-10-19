@@ -121,4 +121,8 @@ export class NcrCapaService {
   updateCapaTask(capaId: number, taskId: number, request: Partial<CapaTask>): Observable<void> {
     return this.http.patch<void>(`${this.baseUrl}/capas/${capaId}/tasks/${taskId}`, request);
   }
+
+  getUsers(): Observable<{ id: number; name: string }[]> {
+    return this.http.get<{ id: number; name: string }[]>('/api/v1/users');
+  }
 }

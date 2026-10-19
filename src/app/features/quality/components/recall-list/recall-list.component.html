@@ -1,6 +1,13 @@
 <app-page-header
   [title]="'recalls.title' | translate"
-  [subtitle]="'recalls.subtitle' | translate" />
+  [subtitle]="'recalls.subtitle' | translate">
+  @if (canStartRecall) {
+    <button class="action-btn action-btn--create" (click)="startRecall()" data-testid="recall-start-btn">
+      <span class="material-icons-outlined" aria-hidden="true">add</span>
+      {{ 'recalls.startRecall' | translate }}
+    </button>
+  }
+</app-page-header>
 
 <div class="page-content page-content--table" [appLoadingBlock]="loading()">
   <app-data-table
