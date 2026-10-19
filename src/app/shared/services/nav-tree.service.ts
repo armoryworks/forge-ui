@@ -294,6 +294,7 @@ export class NavTreeService {
             { icon: 'school', label: 'Training', i18nKey: 'admin.tabs.training', route: '/admin/training', allowedRoles: ['Admin', 'Manager'] },
             { icon: 'fact_check', label: 'Compliance', i18nKey: 'admin.tabs.compliance', route: '/admin/compliance', capability: 'CAP-QC-COMPLIANCE-FORMS', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
             { icon: 'receipt_long', label: 'Expense Policy', i18nKey: 'admin.tabs.expenses', route: '/admin/expenses', allowedRoles: ['Admin'] },
+            { icon: 'account_balance', label: 'Banking', i18nKey: 'admin.tabs.banking', route: '/admin/banking', allowedRoles: ['Admin'] },
           ],
         },
         {

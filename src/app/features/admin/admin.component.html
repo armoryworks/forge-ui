@@ -727,6 +727,12 @@
       </div>
     }
 
+    @if (activeTab() === 'banking') {
+      <div class="tab-panel">
+        <app-banking-settings-panel />
+      </div>
+    }
+
     <!-- Compliance Tab -->
     @if (activeTab() === 'compliance') {
       <div class="tab-panel">

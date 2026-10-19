@@ -3336,6 +3336,7 @@
       "automations": "Automatizaciones",
       "integrationOutbox": "Bandeja de Integración",
       "expenses": "Política de Gastos",
+      "banking": "Banca",
       "roleTemplates": "Plantillas de Rol",
       "capabilities": "Capacidades",
       "discovery": "Asistente de Descubrimiento",
@@ -10336,6 +10337,7 @@
     "transmission": {
       "column": "Transmisión",
       "statusQueued": "En cola",
+      "statusAwaitingAttestation": "En espera de atestación",
       "statusRetrying": "Reintentando",
       "statusRetryingCount": "Reintentando {{attempts}}/5",
       "statusSucceeded": "Exitosa",
@@ -10429,7 +10431,9 @@
       "attestTitle": "¿Atestiguar la transferencia?",
       "attestMessage": "Confirme que la transferencia {{number}} se ingresó en el portal del banco. La atestación debe hacerla un usuario distinto al creador del pago, marca la transferencia como transmitida y compensa el efectivo en tránsito.",
       "attested": "Transferencia atestiguada — marcada como transmitida"
-    }
+    },
+    "glAccount": "Cuenta contable",
+    "defaultExpenseAccount": "Cuenta de gastos predeterminada"
   },
   "terms": {
     "scope": {
@@ -11716,5 +11720,67 @@
     "noCostData": "No hay datos de costo para este trabajo.",
     "summaryAria": "Resumen de costos del trabajo",
     "noMaterials": "No se han emitido materiales a este trabajo."
+  },
+  "adminBanking": {
+    "title": "Banca",
+    "intro": "Originación de archivos bancarios, canal SFTP y atestación de transferencias. Los valores provienen de su acuerdo de originación ACH con el banco.",
+    "saved": "Configuración bancaria guardada",
+    "secretStored": "Guardado — déjelo en blanco para conservarlo",
+    "secretNotSet": "Sin definir",
+    "sections": {
+      "wires": "Pagos por transferencia",
+      "nacha": "Identidad del archivo NACHA",
+      "controls": "Controles",
+      "balanced": "Archivos balanceados",
+      "channel": "Canal de envío"
+    },
+    "fields": {
+      "wireManualAttestation": "Transferencias — atestación manual",
+      "wireManualAttestationHint": "Activado: una transferencia espera hasta que un segundo usuario atestigüe que se ingresó en el portal del banco. Actívelo en producción mientras no exista una conexión de transferencias con el banco. Las transferencias que ya esperan siguen esperando si lo desactiva.",
+      "immediateDestination": "Destino inmediato (ruta del banco)",
+      "immediateDestinationHint": "El número de ruta de 9 dígitos del banco receptor para el encabezado del archivo, según su acuerdo de originación ACH.",
+      "immediateDestinationName": "Nombre del destino inmediato",
+      "immediateDestinationNameHint": "El nombre del banco receptor tal como debe aparecer en el encabezado del archivo (hasta 23 caracteres).",
+      "immediateOrigin": "Origen inmediato",
+      "immediateOriginHint": "Su identificador de origen para el encabezado del archivo, normalmente 1 seguido de su EIN, o el valor que asigna su banco (10 caracteres).",
+      "immediateOriginName": "Nombre del origen inmediato",
+      "immediateOriginNameHint": "El nombre de su empresa tal como debe aparecer en el encabezado del archivo (hasta 23 caracteres).",
+      "companyName": "Nombre de la empresa",
+      "companyNameHint": "El nombre de la empresa en cada encabezado de lote, que el proveedor ve en su estado de cuenta (hasta 16 caracteres).",
+      "companyId": "ID de la empresa",
+      "companyIdHint": "La identificación de 10 caracteres de la empresa en los encabezados de lote, normalmente 1 seguido de su EIN.",
+      "originatingDfi": "DFI de origen",
+      "originatingDfiHint": "Los primeros 8 dígitos del número de ruta de su banco. Precede a cada número de rastreo.",
+      "entryClassCode": "Clase de entrada estándar",
+      "entryClassCodeHint": "CCD para cuentas corporativas (predeterminado) o PPD para cuentas personales, como empresarios individuales.",
+      "requirePrenote": "Exigir verificación por prenota",
+      "requirePrenoteHint": "Activado (predeterminado): una cuenta bancaria de proveedor debe superar una prenota de cero dólares antes de recibir pagos. Desactívelo solo si su acuerdo bancario exime las prenotas.",
+      "exposureLimit": "Límite de exposición ACH",
+      "exposureLimitHint": "El total máximo permitido en un lote de pagos. 0 significa sin límite.",
+      "matchWindowDays": "Ventana de conciliación automática (días)",
+      "matchWindowDaysHint": "Una línea del estado de cuenta se concilia automáticamente con un asiento de efectivo solo si los importes son iguales y las fechas están dentro de esta cantidad de días.",
+      "balancedFiles": "Archivos balanceados",
+      "balancedFilesHint": "Desactivado (predeterminado): archivos solo de créditos; el banco crea la contrapartida. Activado: cada lote lleva su propio débito de contrapartida contra la cuenta indicada abajo. Algunos bancos lo exigen.",
+      "offsetRouting": "Ruta de la cuenta de contrapartida",
+      "offsetRoutingHint": "El número de ruta de su cuenta de fondos, usado para el débito de contrapartida cuando los archivos balanceados están activados.",
+      "offsetAccount": "Número de la cuenta de contrapartida",
+      "offsetAccountHint": "El número de su cuenta de fondos para el débito de contrapartida. Se guarda cifrado; déjelo en blanco para conservar el valor guardado.",
+      "channel": "Canal de envío",
+      "channelHint": "manual (predeterminado): genere el archivo, descárguelo y súbalo usted mismo al portal del banco. sftp: al liberar un lote, el archivo se sube por SFTP con la configuración de abajo. La liberación sigue requiriendo un segundo usuario.",
+      "sftpHost": "Servidor SFTP",
+      "sftpHostHint": "El nombre o la dirección del servidor SFTP del banco.",
+      "sftpPort": "Puerto SFTP",
+      "sftpPortHint": "El puerto SFTP, normalmente 22.",
+      "sftpUsername": "Usuario SFTP",
+      "sftpUsernameHint": "El usuario que el banco emitió para su buzón SFTP.",
+      "sftpPassword": "Contraseña SFTP",
+      "sftpPasswordHint": "Se guarda cifrada; déjela en blanco para conservar el valor guardado.",
+      "sftpHostKeyFingerprint": "Huella de la clave del servidor SFTP",
+      "sftpHostKeyFingerprintHint": "Obligatoria para el canal sftp. La huella SHA256 del servidor tal como la imprime ssh-keygen (SHA256:…). Confírmela con el banco antes de pegarla aquí. Una conexión rechazada informa la huella que presentó el servidor.",
+      "sftpUploadDir": "Directorio de carga SFTP",
+      "sftpUploadDirHint": "Dónde se suben los archivos de pago en el servidor del banco.",
+      "sftpReturnsDir": "Directorio de devoluciones SFTP",
+      "sftpReturnsDirHint": "Dónde deja el banco los archivos de devoluciones para que Forge los lea."
+    }
   }
 }
