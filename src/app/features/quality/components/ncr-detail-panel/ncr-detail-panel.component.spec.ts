@@ -31,6 +31,7 @@ interface PanelView {
   requestDisposition(): void;
   openStatusAction(action: 'close' | 'reopen'): void;
   confirmStatusAction(): void;
+  activityRefresh: Signal<number>;
 }
 
 const makeNcr = (status: NcrStatus, extra: Partial<NonConformance> = {}): NonConformance => ({
@@ -124,6 +125,20 @@ describe('NcrDetailPanelComponent', () => {
     view.saveCosts();
 
     expect(service.updateNcr).toHaveBeenCalledWith(9, { materialCost: 125.5, laborCost: undefined });
+  });
+
+  it('re-reads the NCR after every action so the next edit sends the current version and the activity refreshes', () => {
+    const view = create(makeNcr('UnderReview', { rowVersion: 3 }));
+    const before = view.activityRefresh();
+    view.containmentControl.setValue('Quarantined');
+    view.markContained();
+
+    view.costForm.setValue({ materialCost: 5, laborCost: null });
+    view.saveCosts();
+
+    expect(service.getNcr).toHaveBeenCalledTimes(3);
+    expect(service.getNcr).toHaveBeenLastCalledWith(9);
+    expect(view.activityRefresh()).toBe(before + 2);
   });
 
   it('locks costs once the NCR is Closed', () => {
