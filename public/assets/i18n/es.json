@@ -4639,7 +4639,7 @@
     "quizPassed": "Passed — {{score}}%",
     "quizFailed": "{{score}}% — {{required}}% required. Try again.",
     "quizRetry": "Try Again",
-    "walkthroughStart": "Take the Tour",
+    "walkthroughStart": "Hacer el recorrido",
     "walkthroughDesc": "This is an interactive guided tour. Click the button to start, and the tour will walk you through the interface step by step.",
     "backToLibrary": "Training Library",
     "autoAssigned": "Auto-assigned",
