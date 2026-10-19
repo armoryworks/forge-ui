@@ -10,6 +10,9 @@ import {
   EmployeeTimeEntry, EmployeePayStub, EmployeeJob,
   EmployeeExpense, EmployeeTraining, EmployeeCompliance,
 } from '../models/employee.model';
+import { EmployeeKind } from '../models/employee-kind.model';
+import { CreateEmployeeRequest } from '../models/create-employee-request.model';
+import { CreatedEmployee } from '../models/created-employee.model';
 
 /** Phase 3 F7-broad / WU-22 — paged employee list query parameters. */
 export interface EmployeeListPagedQuery extends PagedQuery {
@@ -63,8 +66,13 @@ export class EmployeeService {
     return this.http.get<PagedResponse<EmployeeListItem>>(this.baseUrl, { params });
   }
 
-  getEmployee(id: number): Observable<EmployeeDetail> {
-    return this.http.get<EmployeeDetail>(`${this.baseUrl}/${id}`);
+  getEmployee(id: number, kind?: EmployeeKind | null): Observable<EmployeeDetail> {
+    const params = kind ? new HttpParams().set('kind', kind) : undefined;
+    return this.http.get<EmployeeDetail>(`${this.baseUrl}/${id}`, { params });
+  }
+
+  createEmployee(request: CreateEmployeeRequest): Observable<CreatedEmployee> {
+    return this.http.post<CreatedEmployee>(this.baseUrl, request);
   }
 
   getEmployeeStats(id: number): Observable<EmployeeStats> {

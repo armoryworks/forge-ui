@@ -7,6 +7,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { EmployeeService } from '../../services/employee.service';
 import { EmployeeDetail, EmployeeStats } from '../../models/employee.model';
+import { EmployeeKind } from '../../models/employee-kind.model';
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
 import { EmployeeOverviewTabComponent } from './tabs/employee-overview-tab.component';
 import { EmployeeTimeTabComponent } from './tabs/employee-time-tab.component';
@@ -21,6 +22,10 @@ import { EmployeeEventsTabComponent } from './tabs/employee-events-tab.component
 
 const TABS = ['overview', 'time', 'pay', 'training', 'compliance', 'jobs', 'events', 'expenses', 'documents', 'activity'] as const;
 type EmployeeTab = typeof TABS[number];
+
+function toKind(value: string | null): EmployeeKind | null {
+  return value === 'user' || value === 'profile' ? value : null;
+}
 
 @Component({
   selector: 'app-employee-detail',
@@ -47,6 +52,11 @@ export class EmployeeDetailComponent {
     { initialValue: 0 },
   );
 
+  protected readonly employeeKind = toSignal(
+    this.route.queryParamMap.pipe(map(q => toKind(q.get('kind')))),
+    { initialValue: toKind(this.route.snapshot.queryParamMap.get('kind')) },
+  );
+
   protected readonly activeTab = toSignal(
     this.route.paramMap.pipe(map(p => (p.get('tab') ?? 'overview') as EmployeeTab)),
     { initialValue: 'overview' as EmployeeTab },
@@ -62,24 +72,32 @@ export class EmployeeDetailComponent {
     return `${e.lastName}, ${e.firstName}`;
   });
 
-  protected readonly tabs = TABS;
+  protected readonly hasLogin = computed(() => this.employee()?.hasLogin !== false);
+
+  protected readonly tabs = computed<readonly EmployeeTab[]>(() => this.hasLogin() ? TABS : ['overview']);
 
   constructor() {
     effect(() => {
       const id = this.employeeId();
+      const kind = this.employeeKind();
       if (id > 0) {
-        this.loadEmployee(id);
-        this.loadStats(id);
+        this.loadEmployee(id, kind);
       }
     });
   }
 
-  private loadEmployee(id: number): void {
+  private loadEmployee(id: number, kind: EmployeeKind | null): void {
     this.loading.set(true);
-    this.employeeService.getEmployee(id).subscribe({
+    this.stats.set(null);
+    this.employeeService.getEmployee(id, kind).subscribe({
       next: e => {
         this.employee.set(e);
         this.loading.set(false);
+        if (e.hasLogin !== false) {
+          this.loadStats(id);
+        } else if (this.activeTab() !== 'overview') {
+          this.switchTab('overview');
+        }
       },
       error: () => {
         this.loading.set(false);
@@ -95,7 +113,7 @@ export class EmployeeDetailComponent {
   }
 
   protected switchTab(tab: EmployeeTab): void {
-    this.router.navigate(['..', tab], { relativeTo: this.route });
+    this.router.navigate(['..', tab], { relativeTo: this.route, queryParamsHandling: 'preserve' });
   }
 
   protected tabLabel(tab: EmployeeTab): string {

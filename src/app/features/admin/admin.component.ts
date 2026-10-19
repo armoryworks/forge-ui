@@ -557,7 +557,7 @@ export class AdminComponent implements OnInit {
             finalize();
           }
         },
-        error: () => { this.saving.set(false); this.error.set(this.translate.instant('admin.updateUserFailed')); },
+        error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'admin.updateUserFailed'); },
       });
     } else {
       this.adminService.createUser({
@@ -659,7 +659,7 @@ export class AdminComponent implements OnInit {
   protected toggleUserActive(user: AdminUser): void {
     this.adminService.updateUser(user.id, { isActive: !user.isActive }).subscribe({
       next: () => this.loadUsers(),
-      error: () => this.error.set(this.translate.instant('admin.updateUserStatusFailed')),
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'admin.updateUserStatusFailed'),
     });
   }
 

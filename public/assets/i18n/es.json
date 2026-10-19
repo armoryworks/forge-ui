@@ -8597,7 +8597,25 @@
         "expenses": "Gastos",
         "documents": "Documentos",
         "activity": "Actividad"
-      }
+      },
+      "noLoginHint": "Este empleado no tiene acceso al sistema, así que solo se muestra el resumen. Otorgue acceso al sistema para registrar tiempo, trabajos y capacitación."
+    },
+    "newEmployee": "Nuevo Empleado",
+    "noLogin": "Sin acceso",
+    "create": {
+      "title": "Nuevo Empleado",
+      "hint": "Cree un registro de empleado sin acceso al sistema. El acceso se puede otorgar más tarde.",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "hireDate": "Fecha de Contratación",
+      "department": "Departamento",
+      "jobTitle": "Puesto",
+      "employeeNumber": "Número de Empleado",
+      "workEmail": "Correo del Trabajo",
+      "phone": "Teléfono",
+      "save": "Crear Empleado",
+      "created": "Empleado {{name}} creado",
+      "failed": "No se pudo crear el empleado"
     }
   },
   "trainingPage": {

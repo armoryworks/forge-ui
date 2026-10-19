@@ -8604,7 +8604,25 @@
         "expenses": "Expenses",
         "documents": "Documents",
         "activity": "Activity"
-      }
+      },
+      "noLoginHint": "This employee has no system login, so only the overview is shown. Grant system access to track time, jobs and training."
+    },
+    "newEmployee": "New Employee",
+    "noLogin": "No login",
+    "create": {
+      "title": "New Employee",
+      "hint": "Create an employee record without a system login. System access can be granted later.",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "hireDate": "Hire Date",
+      "department": "Department",
+      "jobTitle": "Job Title",
+      "employeeNumber": "Employee Number",
+      "workEmail": "Work Email",
+      "phone": "Phone",
+      "save": "Create Employee",
+      "created": "Employee {{name}} created",
+      "failed": "Could not create the employee"
     }
   },
   "trainingPage": {
