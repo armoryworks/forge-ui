@@ -69,6 +69,8 @@ export class LoginComponent implements OnInit {
     const reason = params.get('reason');
     if (reason === 'session_expired') {
       this.snackbar.info(this.translate.instant('auth.sessionExpired'));
+    } else if (reason === 'password_changed') {
+      this.snackbar.success(this.translate.instant('auth.passwordChangedSignIn'));
     }
 
     // Capture return URL from auth guard

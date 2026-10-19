@@ -1,5 +1,10 @@
-<app-dialog [title]="'Recovery Codes'" width="480px" (closed)="close()">
-  @if (loading()) {
+<app-dialog [title]="'account.mfaRecoveryCodesTitle' | translate" width="480px" (closed)="close()">
+  @if (step() === 'confirm') {
+    <div class="recovery__warning">
+      <span class="material-icons-outlined">warning</span>
+      <p>{{ 'account.mfaRecoveryCodesReplaceWarning' | translate: { count: remainingCodes } }}</p>
+    </div>
+  } @else if (step() === 'loading') {
     <div class="recovery__loading">
       <span class="material-icons-outlined recovery__spinner">sync</span>
       <p>Generating recovery codes...</p>
@@ -31,9 +36,17 @@
   }
 
   <div dialog-footer>
-    <button class="action-btn action-btn--primary" (click)="close()" type="button">
-      <span class="material-icons-outlined">check</span>
-      I've Saved These Codes
-    </button>
+    @if (step() === 'confirm') {
+      <button class="action-btn" (click)="close()" type="button">{{ 'common.cancel' | translate }}</button>
+      <button class="action-btn action-btn--danger" (click)="generate()" type="button" data-testid="mfa-recovery-generate">
+        <span class="material-icons-outlined">vpn_key</span>
+        {{ 'account.mfaRecoveryCodesGenerate' | translate }}
+      </button>
+    } @else {
+      <button class="action-btn action-btn--primary" (click)="close()" type="button" [disabled]="step() === 'loading'">
+        <span class="material-icons-outlined">check</span>
+        I've Saved These Codes
+      </button>
+    }
   </div>
 </app-dialog>

@@ -34,7 +34,7 @@
         </div>
       }
 
-      <div class="mfa-setup__verify-form">
+      <form class="mfa-setup__verify-form" (submit)="$event.preventDefault(); verifyCode()">
         <p class="mfa-setup__verify-label">Enter the 6-digit code from your app:</p>
         <app-input label="Verification Code" [formControl]="codeControl"
           placeholder="000000" [maxlength]="6" [required]="true"
@@ -46,7 +46,7 @@
             {{ err }}
           </div>
         }
-      </div>
+      </form>
     </div>
   }
 
@@ -57,7 +57,7 @@
       <p>Your account is now protected with two-factor authentication. You'll need your authenticator app each time you sign in.</p>
       <p class="mfa-setup__recovery-hint">
         <span class="material-icons-outlined">info</span>
-        Generate recovery codes from the Security page in case you lose access to your authenticator.
+        {{ 'account.mfaRecoveryCodesNext' | translate }}
       </p>
     </div>
   }
