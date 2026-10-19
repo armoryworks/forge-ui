@@ -206,7 +206,7 @@
           @if (po.agreedUnitPrice !== null) {
             <div class="info-item">
               <span class="info-label">{{ 'purchaseOrders.blanket.agreedPrice' | translate }}</span>
-              <span class="info-value"><app-currency-display [value]="po.agreedUnitPrice" [currency]="null" /></span>
+              <span class="info-value"><app-currency-display [value]="po.agreedUnitPrice" [currency]="po.quoteCurrency" /></span>
             </div>
           }
           @if (po.blanketExpirationDate) {
@@ -363,14 +363,14 @@
                     </td>
                   }
                   <td class="lines-table__right">
-                    <app-currency-display [value]="line.unitPrice" [currency]="null" [maximumFractionDigits]="4" />
+                    <app-currency-display [value]="line.unitPrice" [currency]="po.quoteCurrency" [maximumFractionDigits]="4" />
                     @if (line.manualOverrideReason) {
                       <span class="material-icons-outlined price-override-icon"
                             [matTooltip]="line.manualOverrideReason"
                             [attr.aria-label]="'purchaseOrders.priceOverridden' | translate">edit_note</span>
                     }
                   </td>
-                  <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="null" /></td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="po.quoteCurrency" /></td>
                   @if (canEditLines(po.status)) {
                     <td class="lines-table__action">
                       @if (canDeleteLine(po)) {

@@ -24,4 +24,5 @@ export interface InvoiceDetail {
   createdAt: Date;
   updatedAt: Date;
   rowVersion?: number;
+  currencyCode?: string | null;
 }
