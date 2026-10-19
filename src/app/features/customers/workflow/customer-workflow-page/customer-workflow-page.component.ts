@@ -218,10 +218,6 @@ export class CustomerWorkflowPageComponent {
     });
   }
 
-  /**
-   * A finished or abandoned run cannot take edits. Sends the user to the
-   * customer (finished) or the list (abandoned) and reports whether it did.
-   */
   private leaveClosedRun(run: WorkflowRun): boolean {
     if (run.abandonedAt == null && run.completedAt == null) return false;
     const completed = run.completedAt != null;

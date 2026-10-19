@@ -274,13 +274,6 @@ export class VendorWorkflowPageComponent {
     });
   }
 
-  /**
-   * Bound variant: the route is /vendors/{id}. A `runId=` in the query string
-   * names the run to mount, whoever started it; without one the page looks
-   * for the current user's open run on this vendor. Vendors have no draft
-   * state, so with no open run the page opens the vendor instead of starting
-   * one — the server would reopen the vendor's finished run at step 1.
-   */
   private loadWorkflowContext(vendorId: number, runId: number, definitionId: string): void {
     this.loadError.set(null);
     this.loading.start('vendor-workflow', this.translate.instant('vendors.workflow.page.loading'));
@@ -341,10 +334,6 @@ export class VendorWorkflowPageComponent {
     this.router.navigate(['/vendors']);
   }
 
-  /**
-   * A finished or abandoned run cannot take edits. Sends the user to the
-   * vendor (finished) or the list (abandoned) and reports whether it did.
-   */
   private leaveClosedRun(run: WorkflowRun): boolean {
     if (run.abandonedAt == null && run.completedAt == null) return false;
     const completed = run.completedAt != null;

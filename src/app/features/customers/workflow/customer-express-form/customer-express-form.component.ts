@@ -127,12 +127,6 @@ export class CustomerExpressFormComponent {
     this.destroyRef.onDestroy(() => this.workflowService.unregisterStepForm());
   }
 
-  /**
-   * Manual Save in Quick add: persists the fields when they changed or the
-   * customer does not exist yet, then completes the run and opens the
-   * customer. When readiness blocks completion the run stays open and the
-   * message names what is still missing.
-   */
   protected save(): void {
     if (this.form.invalid || this.saving()) return;
     const runId = this.runId();
