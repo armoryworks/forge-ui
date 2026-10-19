@@ -14,7 +14,7 @@
           </div>
           <div class="info-item">
             <span class="info-label">{{ 'purchasing.requiredDate' | translate }}</span>
-            <span class="info-value">{{ rfq.requiredDate | date:'MM/dd/yyyy' }}</span>
+            <span class="info-value">{{ rfq.requiredDate | dateOnly }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">{{ 'purchasing.status' | translate }}</span>
@@ -23,7 +23,7 @@
           @if (rfq.responseDeadline) {
             <div class="info-item">
               <span class="info-label">{{ 'purchasing.responseDeadline' | translate }}</span>
-              <span class="info-value">{{ rfq.responseDeadline | date:'MM/dd/yyyy' }}</span>
+              <span class="info-value">{{ rfq.responseDeadline | dateOnly }}</span>
             </div>
           }
           @if (rfq.sentAt) {
@@ -155,7 +155,7 @@
             }
           </ng-template>
           <ng-template appColumnCell="quoteValidUntil" let-row>
-            <span class="text-muted">{{ row.quoteValidUntil ? (row.quoteValidUntil | date:'MM/dd/yyyy') : '—' }}</span>
+            <span class="text-muted">{{ row.quoteValidUntil ? (row.quoteValidUntil | dateOnly) : '—' }}</span>
           </ng-template>
           <ng-template appColumnCell="vendorName" let-row>
             <div class="vendor-cell">

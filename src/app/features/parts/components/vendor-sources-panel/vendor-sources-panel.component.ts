@@ -36,7 +36,7 @@ import { VendorPart, VendorPartPriceTier } from '../../models/vendor-part.model'
 import { VendorPartsService } from '../../services/vendor-parts.service';
 import { PartPurchaseUnit } from '../../models/part-purchase-unit.model';
 import { PurchaseUnitsService } from '../../services/purchase-units.service';
-import { toDateOnly, toIsoDate } from '../../../../shared/utils/date.utils';
+import { fromIsoDate, toDateOnly, toIsoDate } from '../../../../shared/utils/date.utils';
 
 /**
  * A new price tier that the user has typed but not yet committed to the
@@ -493,7 +493,7 @@ export class VendorSourcesPanelComponent {
         countryOfOrigin: [row?.countryOfOrigin ?? '', [Validators.maxLength(2)]],
         htsCode: [row?.htsCode ?? '', [Validators.maxLength(20)]],
         certifications: [row?.certifications ?? '', [Validators.maxLength(500)]],
-        lastQuotedDate: [row?.lastQuotedDate ? new Date(row.lastQuotedDate) : null],
+        lastQuotedDate: [fromIsoDate(row?.lastQuotedDate)],
         notes: [row?.notes ?? '', [Validators.maxLength(2000)]],
         currency: [row?.currency ?? 'USD', [Validators.required, Validators.maxLength(3)]],
       });

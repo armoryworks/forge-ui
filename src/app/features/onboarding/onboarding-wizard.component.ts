@@ -28,7 +28,7 @@ import { ValidationButtonComponent } from '../../shared/components/validation-bu
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { LayoutService } from '../../shared/services/layout.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
-import { toIsoDate } from '../../shared/utils/date.utils';
+import { fromIsoDate, toIsoDate } from '../../shared/utils/date.utils';
 
 import { AuthService } from '../../shared/services/auth.service';
 
@@ -1090,7 +1090,7 @@ export class OnboardingWizardComponent {
       firstName:    status.firstName ?? this.personalForm.controls.firstName.value ?? '',
       middleName:   status.middleName ?? '',
       lastName:     status.lastName ?? this.personalForm.controls.lastName.value ?? '',
-      dateOfBirth:  status.dateOfBirth ? new Date(status.dateOfBirth) : null,
+      dateOfBirth:  fromIsoDate(status.dateOfBirth),
       email:        status.email ?? this.personalForm.controls.email.value ?? '',
       phone:        status.phone ?? '',
     });
@@ -1133,18 +1133,18 @@ export class OnboardingWizardComponent {
     }
     this.i9Form.patchValue({
       foreignPassportCountry: status.i9ForeignPassportCountry ?? '',
-      workAuthExpiry: status.i9WorkAuthExpiry ? new Date(status.i9WorkAuthExpiry) : null,
+      workAuthExpiry: fromIsoDate(status.i9WorkAuthExpiry),
       listAType:      status.i9ListAType ?? '',
       listAAuthority: status.i9ListAAuthority ?? '',
-      listAExpiry:    status.i9ListAExpiry ? new Date(status.i9ListAExpiry) : null,
+      listAExpiry:    fromIsoDate(status.i9ListAExpiry),
       listAFileId:    status.i9ListAFileAttachmentId ?? null,
       listBType:      status.i9ListBType ?? '',
       listBAuthority: status.i9ListBAuthority ?? '',
-      listBExpiry:    status.i9ListBExpiry ? new Date(status.i9ListBExpiry) : null,
+      listBExpiry:    fromIsoDate(status.i9ListBExpiry),
       listBFileId:    status.i9ListBFileAttachmentId ?? null,
       listCType:      status.i9ListCType ?? '',
       listCAuthority: status.i9ListCAuthority ?? '',
-      listCExpiry:    status.i9ListCExpiry ? new Date(status.i9ListCExpiry) : null,
+      listCExpiry:    fromIsoDate(status.i9ListCExpiry),
       listCFileId:    status.i9ListCFileAttachmentId ?? null,
     });
 

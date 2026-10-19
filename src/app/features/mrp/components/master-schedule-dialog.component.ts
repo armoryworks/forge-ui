@@ -10,7 +10,7 @@ import { TextareaComponent } from '../../../shared/components/textarea/textarea.
 import { EntityPickerComponent } from '../../../shared/components/entity-picker/entity-picker.component';
 import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../shared/services/form-validation.service';
-import { toIsoDate } from '../../../shared/utils/date.utils';
+import { fromIsoDate, toIsoDate } from '../../../shared/utils/date.utils';
 import {
   CreateMasterScheduleRequest,
   MasterScheduleDetail,
@@ -66,11 +66,11 @@ export class MasterScheduleDialogComponent {
     }),
     description: new FormControl<string>(this.data.schedule?.description ?? '', { nonNullable: true }),
     periodStart: new FormControl<Date | null>(
-      this.data.schedule?.periodStart ? new Date(this.data.schedule.periodStart) : null,
+      fromIsoDate(this.data.schedule?.periodStart),
       [Validators.required],
     ),
     periodEnd: new FormControl<Date | null>(
-      this.data.schedule?.periodEnd ? new Date(this.data.schedule.periodEnd) : null,
+      fromIsoDate(this.data.schedule?.periodEnd),
       [Validators.required],
     ),
     lines: new FormArray<FormGroup<LineFormGroup>>(

@@ -18,7 +18,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { PaymentMilestone } from '../../../../shared/models/payment-milestone.model';
 import { PaymentSchedule } from '../../../../shared/models/payment-schedule.model';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
-import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { fromIsoDate, toIsoDate } from '../../../../shared/utils/date.utils';
 import { PaymentScheduleService } from '../../services/payment-schedule.service';
 import { PaymentDueTrigger } from '../../models/payment-due-trigger.model';
 import { UpsertPaymentScheduleRequest } from '../../models/upsert-payment-schedule-request.model';
@@ -219,7 +219,7 @@ export class PaymentScheduleDialogComponent {
         (m?.dueTrigger as PaymentDueTrigger) ?? 'OnAcceptance',
         { nonNullable: true, validators: [Validators.required] },
       ),
-      dueDate: new FormControl<Date | null>(m?.dueDate ? new Date(m.dueDate) : null),
+      dueDate: new FormControl<Date | null>(fromIsoDate(m?.dueDate)),
       netDays: new FormControl<number | null>(m?.netDays ?? null),
       notes: new FormControl(m?.notes ?? '', { nonNullable: true, validators: [Validators.maxLength(500)] }),
     }, { validators: [triggerFieldsValidator] });

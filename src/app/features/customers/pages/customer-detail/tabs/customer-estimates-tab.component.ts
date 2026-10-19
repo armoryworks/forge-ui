@@ -28,7 +28,7 @@ import { PartQuickCreateDialogComponent, PartQuickCreateDialogData } from '../..
 import { PartDetail } from '../../../../parts/models/part-detail.model';
 import { ColumnDef } from '../../../../../shared/models/column-def.model';
 import { SelectOption } from '../../../../../shared/components/select/select.component';
-import { toIsoDate } from '../../../../../shared/utils/date.utils';
+import { fromIsoDate, toIsoDate } from '../../../../../shared/utils/date.utils';
 
 const STATUS_OPTIONS: SelectOption[] = [
   { value: 'Draft', label: 'Draft' },
@@ -178,7 +178,7 @@ export class CustomerEstimatesTabComponent implements OnInit {
       title: estimate.title,
       estimatedAmount: estimate.estimatedAmount,
       status: estimate.status,
-      validUntil: estimate.validUntil ? new Date(estimate.validUntil) : null,
+      validUntil: fromIsoDate(estimate.validUntil),
     });
     this.resetLineState();
     this.showDialog.set(true);
