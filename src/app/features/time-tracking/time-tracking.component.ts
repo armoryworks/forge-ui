@@ -228,7 +228,7 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
   }
 
   protected saveEntry(): void {
-    if (this.entryForm.invalid) return;
+    if (this.entryForm.invalid || this.saving()) return;
     const form = this.entryForm.getRawValue();
     const duration = ((form.hours ?? 0) * 60) + (form.minutes ?? 0);
     if (duration <= 0) return;
@@ -260,12 +260,15 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
   protected closeTimerDialog(): void { this.showTimerDialog.set(false); }
 
   protected startTimer(): void {
+    if (this.saving()) return;
     const form = this.timerForm.getRawValue();
+    this.saving.set(true);
     this.service.startTimer({
       category: form.category || undefined,
       notes: form.notes || undefined,
     }).subscribe({
-      next: () => { this.closeTimerDialog(); this.loadEntries(); this.snackbar.success(this.translate.instant('timeTracking.timerStarted')); },
+      next: () => { this.saving.set(false); this.closeTimerDialog(); this.loadEntries(); this.snackbar.success(this.translate.instant('timeTracking.timerStarted')); },
+      error: () => this.saving.set(false),
     });
   }
 
@@ -287,12 +290,14 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
 
   protected stopTimer(): void {
     const target = this.stopTarget();
-    if (!target) return;
+    if (!target || this.saving()) return;
+    this.saving.set(true);
     this.service.stopTimer({
       timeEntryId: target.id,
       notes: this.stopNotesControl.value || undefined,
     }).subscribe({
-      next: () => { this.closeStopDialog(); this.loadEntries(); this.snackbar.success(this.translate.instant('timeTracking.timerStopped')); },
+      next: () => { this.saving.set(false); this.closeStopDialog(); this.loadEntries(); this.snackbar.success(this.translate.instant('timeTracking.timerStopped')); },
+      error: () => this.saving.set(false),
     });
   }
 

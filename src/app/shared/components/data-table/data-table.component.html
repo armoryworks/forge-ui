@@ -138,7 +138,7 @@
               [class.data-table__row--clickable]="clickableRows()"
               [class.data-table__row--expanded]="expandable() && isRowExpanded(row)"
               [style]="getRowStyles(row)"
-              (click)="onRowClick(row)">
+              (click)="onRowClick(row, $event)">
               @if (expandable()) {
                 <td class="data-table__td data-table__td--expand" (click)="toggleRowExpand(row, $event)">
                   <span class="material-icons-outlined data-table__expand-icon">

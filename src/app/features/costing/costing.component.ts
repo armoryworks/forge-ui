@@ -88,6 +88,7 @@ export class CostingComponent {
   protected readonly rates = signal<WorkCenterCostRate[]>([]);
   protected readonly ratesPeriodId = signal<number | null>(null);
   protected readonly costingTemplates = signal<CostingTemplate[]>([]);
+  protected readonly saving = signal(false);
 
   protected readonly typeOptions: SelectOption[] = [
     { value: 'Production', label: 'Production' },
@@ -286,17 +287,20 @@ export class CostingComponent {
     const v = this.periodForm.getRawValue();
     const start = toIsoDate(v.start);
     const end = toIsoDate(v.end);
-    if (!start || !end) return;
+    if (!start || !end || this.saving()) return;
+    this.saving.set(true);
     this.service.createPeriod(start, end).subscribe({
-      next: () => { this.snackbar.success('Period created'); this.periodForm.reset(); this.loadPeriods(); },
-      error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.costingPeriodCreateFailed'),
+      next: () => { this.saving.set(false); this.snackbar.success('Period created'); this.periodForm.reset(); this.loadPeriods(); },
+      error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'errorFallbacksA.costingPeriodCreateFailed'); },
     });
   }
 
   protected freeze(period: CostingPeriod): void {
+    if (this.saving()) return;
+    this.saving.set(true);
     this.service.freezePeriod(period.id).subscribe({
-      next: r => { this.snackbar.success(`Frozen: ${r.budgetsRated} budget(s), ${r.workCentersRated} rate(s)`); this.loadPeriods(); this.viewRates(period.id); },
-      error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.costingPeriodFreezeFailed'),
+      next: r => { this.saving.set(false); this.snackbar.success(`Frozen: ${r.budgetsRated} budget(s), ${r.workCentersRated} rate(s)`); this.loadPeriods(); this.viewRates(period.id); },
+      error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'errorFallbacksA.costingPeriodFreezeFailed'); },
     });
   }
 
@@ -309,36 +313,39 @@ export class CostingComponent {
   }
 
   protected createCostCenter(): void {
-    if (this.costCenterForm.invalid) return;
+    if (this.costCenterForm.invalid || this.saving()) return;
+    this.saving.set(true);
     const v = this.costCenterForm.getRawValue();
     this.service.createCostCenter({
       code: v.code!, name: v.name!, type: v.type as CostingCostCenter['type'],
       parentId: null, sqft: v.sqft, headcount: v.headcount, isInventoriable: v.isInventoriable!,
     }).subscribe({
-      next: () => { this.snackbar.success('Cost center created'); this.costCenterForm.reset({ type: 'Production', isInventoriable: true }); this.loadCostCenters(); },
-      error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.costCenterCreateFailed'),
+      next: () => { this.saving.set(false); this.snackbar.success('Cost center created'); this.costCenterForm.reset({ type: 'Production', isInventoriable: true }); this.loadCostCenters(); },
+      error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'errorFallbacksA.costCenterCreateFailed'); },
     });
   }
 
   protected createPool(): void {
-    if (this.poolForm.invalid) return;
+    if (this.poolForm.invalid || this.saving()) return;
+    this.saving.set(true);
     const v = this.poolForm.getRawValue();
     this.service.createPool({
       costingCostCenterId: v.costingCostCenterId!, workCenterId: v.workCenterId,
       code: v.code!, name: v.name!, behavior: v.behavior as OverheadPool['behavior'],
       fixedPortion: v.fixedPortion, driver: v.driver as OverheadPool['driver'],
     }).subscribe({
-      next: () => { this.snackbar.success('Pool created'); this.poolForm.reset({ behavior: 'Fixed', driver: 'MachineHour' }); this.loadPools(); },
-      error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.overheadPoolCreateFailed'),
+      next: () => { this.saving.set(false); this.snackbar.success('Pool created'); this.poolForm.reset({ behavior: 'Fixed', driver: 'MachineHour' }); this.loadPools(); },
+      error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'errorFallbacksA.overheadPoolCreateFailed'); },
     });
   }
 
   protected setBudget(): void {
-    if (this.budgetForm.invalid) return;
+    if (this.budgetForm.invalid || this.saving()) return;
+    this.saving.set(true);
     const v = this.budgetForm.getRawValue();
     this.service.upsertBudget(v.overheadCostPoolId!, v.costingPeriodId!, v.budgetAmount!, v.budgetDriverQty!).subscribe({
-      next: r => { this.snackbar.success(`Budget set — rate ${r.derivedRate.toFixed(4)}`); this.budgetForm.reset(); },
-      error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.overheadBudgetSetFailed'),
+      next: r => { this.saving.set(false); this.snackbar.success(`Budget set — rate ${r.derivedRate.toFixed(4)}`); this.budgetForm.reset(); },
+      error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'errorFallbacksA.overheadBudgetSetFailed'); },
     });
   }
 }

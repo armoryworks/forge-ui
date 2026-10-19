@@ -382,7 +382,8 @@ export class DataTableComponent implements OnInit {
     this.debouncedSave();
   }
 
-  onRowClick(row: unknown): void {
+  onRowClick(row: unknown, event?: MouseEvent): void {
+    if ((event?.detail ?? 0) > 1) return;
     this.rowClick.emit(row);
   }
 

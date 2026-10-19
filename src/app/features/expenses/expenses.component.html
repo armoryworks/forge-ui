@@ -125,7 +125,7 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
-      <app-validation-button [violations]="expenseViolations" [loading]="receiptMissing()">
+      <app-validation-button [violations]="expenseViolations" [loading]="receiptMissing() || saving()">
       <button data-testid="expense-save-btn" class="action-btn action-btn--primary"
         [disabled]="expenseForm.invalid || saving() || uploadingReceipt() || receiptMissing()"
         [matTooltip]="receiptMissing() ? ('expenses.receiptRequiredHint' | translate) : ''"

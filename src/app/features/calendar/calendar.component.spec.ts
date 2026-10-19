@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 
 import { AuthService } from '../../shared/services/auth.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
@@ -73,5 +73,36 @@ describe('CalendarComponent · role access', () => {
 
     expect(calendar['getJobs']).toHaveBeenCalled();
     expect(calendar['getPoEvents']).toHaveBeenCalled();
+  });
+});
+
+describe('CalendarComponent · saved views', () => {
+  it('saves one view when Save is pressed twice before the server answers', () => {
+    const createSavedView = vi.fn(() => new Subject());
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        { provide: CalendarService, useValue: {
+          getJobs: vi.fn(() => of([])), getPoEvents: vi.fn(() => of([])), getSuperGroups: vi.fn(() => of([])),
+          getEvents: vi.fn(() => of([])), getSavedViews: vi.fn(() => of([])), createSavedView,
+        } },
+        { provide: KanbanService, useValue: { getTrackTypes: () => of([]) } },
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: UserPreferencesService, useValue: { get: () => null, set: vi.fn() } },
+        { provide: AuthService, useValue: { hasAnyRole: () => true } },
+      ],
+    });
+    const view = TestBed.runInInjectionContext(() => new CalendarComponent()) as unknown as {
+      newViewNameControl: { setValue(v: string): void };
+      saveCurrentView(): void;
+    };
+
+    view.newViewNameControl.setValue('Shop week');
+    view.saveCurrentView();
+    view.saveCurrentView();
+
+    expect(createSavedView).toHaveBeenCalledTimes(1);
   });
 });

@@ -132,7 +132,7 @@ export class SerialNumbersTabComponent {
   }
 
   protected saveSerial(): void {
-    if (this.createForm.invalid) return;
+    if (this.createForm.invalid || this.saving()) return;
     this.saving.set(true);
     const f = this.createForm.getRawValue();
     this.serialService.createSerialNumber(this.partId(), {

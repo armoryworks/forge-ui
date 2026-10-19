@@ -269,6 +269,7 @@ export class PlanningComponent implements OnInit {
   }
 
   protected onCycleDialogSaved(request: CreatePlanningCycleRequest | UpdatePlanningCycleRequest): void {
+    if (this.saving()) return;
     this.saving.set(true);
     const existing = this.editingCycle();
 

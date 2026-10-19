@@ -4,7 +4,7 @@ import { Signal } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { provideTranslateService } from '@ngx-translate/core';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, Subject, throwError } from 'rxjs';
 
 import { NcrListComponent } from './ncr-list.component';
 import { NcrCapaService } from '../services/ncr-capa.service';
@@ -250,5 +250,47 @@ describe('NcrListComponent ?detail= deep link', () => {
     view.closeDetail();
 
     expect(navigate).not.toHaveBeenCalled();
+  });
+});
+
+describe('NcrListComponent create CAPA', () => {
+  let createCapaFromNcr: ReturnType<typeof vi.fn>;
+  let view: { createCapa(ncr: NonConformance): void };
+
+  beforeEach(() => {
+    TestBed.resetTestingModule();
+    createCapaFromNcr = vi.fn(() => new Subject());
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslateService(),
+        { provide: NcrCapaService, useValue: { createCapaFromNcr, getNcrs: vi.fn(() => of([])) } },
+        { provide: SnackbarService, useValue: { success: vi.fn() } },
+        ...routingProviders().providers,
+      ],
+    });
+    view = TestBed.runInInjectionContext(() => new NcrListComponent()) as unknown as typeof view;
+  });
+
+  it('creates one CAPA when the row button is pressed twice before the server answers', () => {
+    view.createCapa({ id: 5, detectedById: 1 } as NonConformance);
+    view.createCapa({ id: 5, detectedById: 1 } as NonConformance);
+
+    expect(createCapaFromNcr).toHaveBeenCalledTimes(1);
+  });
+
+  it('still lets another row create its CAPA meanwhile', () => {
+    view.createCapa({ id: 5, detectedById: 1 } as NonConformance);
+    view.createCapa({ id: 6, detectedById: 1 } as NonConformance);
+
+    expect(createCapaFromNcr).toHaveBeenCalledTimes(2);
+  });
+
+  it('allows a retry after the server rejects the first press', () => {
+    createCapaFromNcr.mockReturnValueOnce(throwError(() => new Error('500')));
+
+    view.createCapa({ id: 5, detectedById: 1 } as NonConformance);
+    view.createCapa({ id: 5, detectedById: 1 } as NonConformance);
+
+    expect(createCapaFromNcr).toHaveBeenCalledTimes(2);
   });
 });

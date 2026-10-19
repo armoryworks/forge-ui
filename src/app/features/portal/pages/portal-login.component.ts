@@ -32,7 +32,7 @@ export class PortalLoginComponent {
   protected readonly errorMessage = signal<string | null>(null);
 
   protected submit(): void {
-    if (this.emailControl.invalid) return;
+    if (this.emailControl.invalid || this.submitting()) return;
     this.submitting.set(true);
     this.errorMessage.set(null);
     this.devLink.set(null);

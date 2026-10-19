@@ -494,7 +494,7 @@ export class InventoryComponent {
   }
 
   protected saveLocation(): void {
-    if (this.locationForm.invalid) return;
+    if (this.locationForm.invalid || this.saving()) return;
 
     this.saving.set(true);
     const form = this.locationForm.getRawValue();

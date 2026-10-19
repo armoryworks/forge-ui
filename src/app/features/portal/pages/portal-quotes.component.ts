@@ -38,6 +38,7 @@ export class PortalQuotesComponent implements OnInit {
   }
 
   protected respond(quote: PortalQuote, accepted: boolean): void {
+    if (this.isResponding(quote.id)) return;
     const next = new Set(this.responding());
     next.add(quote.id);
     this.responding.set(next);

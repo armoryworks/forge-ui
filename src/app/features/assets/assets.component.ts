@@ -247,7 +247,7 @@ export class AssetsComponent implements OnInit {
   }
 
   protected saveAsset(): void {
-    if (this.assetForm.invalid) return;
+    if (this.assetForm.invalid || this.saving()) return;
 
     this.saving.set(true);
     const form = this.assetForm.getRawValue();

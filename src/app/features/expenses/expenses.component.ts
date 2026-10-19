@@ -257,7 +257,7 @@ export class ExpensesComponent implements OnInit {
   }
 
   protected saveExpense(): void {
-    if (this.expenseForm.invalid || this.receiptMissing()) return;
+    if (this.expenseForm.invalid || this.receiptMissing() || this.saving()) return;
 
     this.saving.set(true);
     const form = this.expenseForm.getRawValue();

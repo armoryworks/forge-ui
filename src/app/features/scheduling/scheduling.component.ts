@@ -116,6 +116,7 @@ export class SchedulingComponent implements OnInit {
   protected readonly showWorkCenterDialog = signal(false);
   protected readonly editingWorkCenter = signal<WorkCenter | null>(null);
   protected readonly savingWorkCenter = signal(false);
+  protected readonly runningSchedule = signal(false);
 
   // Work center select for dispatch/load
   protected readonly selectedWorkCenterControl = new FormControl<number | null>(null);
@@ -348,6 +349,8 @@ export class SchedulingComponent implements OnInit {
 
   // Actions
   protected executeSchedule(): void {
+    if (this.runningSchedule()) return;
+    this.runningSchedule.set(true);
     const now = new Date();
     const from = toDateOnly(now)!;
     const to = toDateOnly(new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000))!;
@@ -359,10 +362,12 @@ export class SchedulingComponent implements OnInit {
       priorityRule: 'DueDate',
     }).subscribe({
       next: run => {
+        this.runningSchedule.set(false);
         this.snackbar.success(`${this.translate.instant('scheduling.snackbar.scheduled')} ${run.operationsScheduled} ${this.translate.instant('scheduling.snackbar.operations')}`);
         this.loadGanttData();
         this.loadRuns();
       },
+      error: () => this.runningSchedule.set(false),
     });
   }
 
