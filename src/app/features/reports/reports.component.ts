@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BaseChartDirective } from '../../shared/charts/base-chart.directive';
@@ -57,6 +58,7 @@ export class ReportsComponent {
   private readonly reportService = inject(ReportService);
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
+  private readonly langChange = toSignal(this.translate.onLangChange);
   private readonly auth = inject(AuthService);
 
   protected readonly canViewShopReports = this.auth.hasAnyRole(SHOP_REPORT_ROLES);
@@ -135,30 +137,33 @@ export class ReportsComponent {
 
   // Chart configurations
   protected readonly jobsByStageChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.jobsByStageData();
     return {
       labels: data.map(d => d.stageName),
       datasets: [{
         data: data.map(d => d.count),
         backgroundColor: data.map(d => d.stageColor),
-        label: 'Jobs',
+        label: this.translate.instant('reports.chart.jobs'),
       }],
     };
   });
 
   protected readonly timeByUserChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.timeByUserData();
     return {
       labels: data.map(d => d.userName),
       datasets: [{
         data: data.map(d => d.totalHours),
         backgroundColor: 'rgba(59, 130, 246, 0.7)',
-        label: 'Hours',
+        label: this.translate.instant('reports.chart.hours'),
       }],
     };
   });
 
   protected readonly expenseSummaryChart = computed<ChartData<'pie'>>(() => {
+    this.langChange();
     const data = this.expenseSummaryData();
     const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#f97316', '#ec4899'];
     return {
@@ -171,6 +176,7 @@ export class ReportsComponent {
   });
 
   protected readonly leadPipelineChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.leadPipelineData();
     const statusColors: Record<string, string> = {
       New: '#3b82f6', Qualified: '#8b5cf6', Proposal: '#f59e0b', Won: '#22c55e', Lost: '#ef4444',
@@ -180,27 +186,29 @@ export class ReportsComponent {
       datasets: [{
         data: data.map(d => d.count),
         backgroundColor: data.map(d => statusColors[d.status] ?? '#94a3b8'),
-        label: 'Leads',
+        label: this.translate.instant('reports.chart.leads'),
       }],
     };
   });
 
   protected readonly completionTrendChart = computed<ChartData<'line'>>(() => {
+    this.langChange();
     const data = this.completionTrendData();
     return {
       labels: data.map(d => d.month),
       datasets: [
-        { data: data.map(d => d.created), label: 'Created', borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.3 },
-        { data: data.map(d => d.completed), label: 'Completed', borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.1)', fill: true, tension: 0.3 },
+        { data: data.map(d => d.created), label: this.translate.instant('reports.chart.created'), borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.3 },
+        { data: data.map(d => d.completed), label: this.translate.instant('reports.chart.completed'), borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.1)', fill: true, tension: 0.3 },
       ],
     };
   });
 
   protected readonly onTimeDeliveryChart = computed<ChartData<'pie'>>(() => {
+    this.langChange();
     const data = this.onTimeDeliveryData();
     if (!data) return { labels: [], datasets: [{ data: [] }] };
     return {
-      labels: ['On Time', 'Late'],
+      labels: [this.translate.instant('reports.chart.onTime'), this.translate.instant('reports.chart.late')],
       datasets: [{
         data: [data.onTime, data.late],
         backgroundColor: ['#22c55e', '#ef4444'],
@@ -209,40 +217,44 @@ export class ReportsComponent {
   });
 
   protected readonly averageLeadTimeChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.averageLeadTimeData();
     return {
       labels: data.map(d => d.stageName),
       datasets: [{
         data: data.map(d => d.averageDays),
         backgroundColor: data.map(d => d.stageColor),
-        label: 'Avg Days',
+        label: this.translate.instant('reports.chart.avgDays'),
       }],
     };
   });
 
   protected readonly teamWorkloadChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.teamWorkloadData();
     return {
       labels: data.map(d => d.userName),
       datasets: [
-        { data: data.map(d => d.activeJobs), label: 'Active', backgroundColor: 'rgba(59, 130, 246, 0.7)' },
-        { data: data.map(d => d.overdueJobs), label: 'Overdue', backgroundColor: 'rgba(239, 68, 68, 0.7)' },
+        { data: data.map(d => d.activeJobs), label: this.translate.instant('reports.chart.active'), backgroundColor: 'rgba(59, 130, 246, 0.7)' },
+        { data: data.map(d => d.overdueJobs), label: this.translate.instant('reports.chart.overdue'), backgroundColor: 'rgba(239, 68, 68, 0.7)' },
       ],
     };
   });
 
   protected readonly customerActivityChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.customerActivityData().slice(0, 10);
     return {
       labels: data.map(d => d.customerName),
       datasets: [
-        { data: data.map(d => d.activeJobs), label: 'Active', backgroundColor: 'rgba(59, 130, 246, 0.7)' },
-        { data: data.map(d => d.completedJobs), label: 'Completed', backgroundColor: 'rgba(34, 197, 94, 0.7)' },
+        { data: data.map(d => d.activeJobs), label: this.translate.instant('reports.chart.active'), backgroundColor: 'rgba(59, 130, 246, 0.7)' },
+        { data: data.map(d => d.completedJobs), label: this.translate.instant('reports.chart.completed'), backgroundColor: 'rgba(34, 197, 94, 0.7)' },
       ],
     };
   });
 
   protected readonly quoteToCloseChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.quoteToCloseData();
     const statusColors: Record<string, string> = {
       Draft: '#94a3b8', Sent: '#3b82f6', Accepted: '#22c55e', Rejected: '#ef4444', Expired: '#f59e0b',
@@ -252,31 +264,33 @@ export class ReportsComponent {
       datasets: [{
         data: data.map(d => d.count),
         backgroundColor: data.map(d => statusColors[d.status] ?? '#94a3b8'),
-        label: 'Quotes',
+        label: this.translate.instant('reports.chart.quotes'),
       }],
     };
   });
 
   protected readonly timeInStageChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.timeInStageData();
     return {
       labels: data.map(d => d.stageName),
       datasets: [{
         data: data.map(d => d.averageDays),
         backgroundColor: data.map(d => d.stageColor),
-        label: 'Avg Days',
+        label: this.translate.instant('reports.chart.avgDays'),
       }],
     };
   });
 
   protected readonly revenueChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.revenueData();
     return {
       labels: data.map(d => d.customerName ?? d.period),
       datasets: [{
         data: data.map(d => d.total),
         backgroundColor: 'rgba(34, 197, 94, 0.7)',
-        label: 'Revenue',
+        label: this.translate.instant('reports.chart.revenue'),
       }],
     };
   });
@@ -289,73 +303,79 @@ export class ReportsComponent {
   });
 
   protected readonly employeeProductivityChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.employeeProductivityData();
     return {
       labels: data.map(d => d.userName),
       datasets: [{
         data: data.map(d => d.totalHours),
         backgroundColor: 'rgba(59, 130, 246, 0.7)',
-        label: 'Hours',
+        label: this.translate.instant('reports.chart.hours'),
       }],
     };
   });
 
   protected readonly inventoryLevelsChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.inventoryLevelsData();
     return {
       labels: data.map(d => d.partNumber),
       datasets: [{
         data: data.map(d => d.currentStock),
         backgroundColor: data.map(d => d.isLowStock ? 'rgba(239, 68, 68, 0.7)' : 'rgba(34, 197, 94, 0.7)'),
-        label: 'Stock',
+        label: this.translate.instant('reports.chart.stock'),
       }],
     };
   });
 
   protected readonly maintenanceChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.maintenanceData();
     return {
       labels: data.map(d => d.assetName),
       datasets: [{
         data: data.map(d => d.completedCount),
         backgroundColor: 'rgba(59, 130, 246, 0.7)',
-        label: 'Completed',
+        label: this.translate.instant('reports.chart.completed'),
       }],
     };
   });
 
   protected readonly qualityScrapChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.qualityScrapData();
     return {
       labels: data.map(d => d.partNumber),
       datasets: [{
         data: data.map(d => d.scrapRate),
         backgroundColor: data.map(d => d.scrapRate > 10 ? 'rgba(239, 68, 68, 0.7)' : 'rgba(59, 130, 246, 0.7)'),
-        label: 'Scrap Rate %',
+        label: this.translate.instant('reports.chart.scrapRatePct'),
       }],
     };
   });
 
   protected readonly cycleReviewChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.cycleReviewData();
     return {
       labels: data.map(d => d.cycleName),
       datasets: [{
         data: data.map(d => d.completionRate),
         backgroundColor: data.map(d => d.completionRate >= 80 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(245, 158, 11, 0.7)'),
-        label: 'Completion %',
+        label: this.translate.instant('reports.chart.completionPct'),
       }],
     };
   });
 
   protected readonly jobMarginChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.jobMarginData();
     return {
       labels: data.map(d => d.jobNumber),
       datasets: [{
         data: data.map(d => d.margin),
         backgroundColor: data.map(d => d.margin >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
-        label: 'Margin',
+        label: this.translate.instant('reports.chart.margin'),
       }],
     };
   });
@@ -769,6 +789,7 @@ export class ReportsComponent {
   }
 
   protected readonly arAgingBuckets = computed(() => {
+    this.langChange();
     const data = this.arAgingData();
     const buckets: { key: string; label: string }[] = [
       { key: 'Current', label: this.translate.instant('reports.bucketCurrent') },

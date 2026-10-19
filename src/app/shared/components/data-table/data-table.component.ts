@@ -329,6 +329,10 @@ export class DataTableComponent implements OnInit {
       }
       return formatDateTime(val as string | Date);
     }
+    if (col.type === 'enum' && col.filterOptions) {
+      const option = col.filterOptions.find(o => o.value === val);
+      if (option) return option.label;
+    }
     return val;
   }
 

@@ -54,7 +54,7 @@
             initialChartType="bar"
             [initialData]="jobsByStageChart()"
             [initialOptions]="barOptions"
-            initialLabel="All Stages" />
+            [initialLabel]="'reports.chart.allStages' | translate" />
         </div>
         <app-data-table tableId="report-jobs-by-stage" [columns]="stageColumns" [data]="jobsByStageData()"
                         emptyIcon="view_kanban" [emptyMessage]="'reports.emptyNoJobsFound' | translate" />
@@ -85,7 +85,7 @@
             initialChartType="pie"
             [initialData]="expenseSummaryChart()"
             [initialOptions]="pieOptions"
-            initialLabel="All Categories"
+            [initialLabel]="'reports.chart.allCategories' | translate"
             [drillDataFn]="expenseDrillFn" />
         </div>
         <app-data-table tableId="report-expense-summary" [columns]="expenseColumns" [data]="expenseSummaryData()"

@@ -8,7 +8,7 @@ import { PageLayoutComponent } from '../../shared/components/page-layout/page-la
 import { ToolbarComponent } from '../../shared/components/toolbar/toolbar.component';
 import { SpacerDirective } from '../../shared/directives/spacer.directive';
 import { SelectComponent } from '../../shared/components/select/select.component';
-import { DateRangePickerComponent } from '../../shared/components/date-range-picker/date-range-picker.component';
+import { DateRangePickerComponent, resolveDateRangePreset } from '../../shared/components/date-range-picker/date-range-picker.component';
 import { KpiChipComponent } from '../../shared/components/kpi-chip/kpi-chip.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
@@ -59,10 +59,7 @@ export class OeeComponent implements OnInit {
   protected readonly lossesData = signal<SixBigLosses | null>(null);
 
   // Date range — default last 30 days
-  protected readonly dateRangeControl = new FormControl<{ start: Date | null; end: Date | null }>({
-    start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-    end: new Date(),
-  });
+  protected readonly dateRangeControl = new FormControl<{ start: Date | null; end: Date | null }>(resolveDateRangePreset('Last 30 Days'));
 
   // Granularity control
   protected readonly granularityControl = new FormControl<OeeTrendGranularity>('Daily');

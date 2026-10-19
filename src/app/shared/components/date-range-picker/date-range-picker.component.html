@@ -1,6 +1,6 @@
 <div class="date-range">
   <mat-form-field appearance="outline">
-    <mat-label>From</mat-label>
+    <mat-label>{{ 'common.from' | translate }}</mat-label>
     <input matInput
       [matDatepicker]="startPicker"
       [min]="min()"
@@ -14,7 +14,7 @@
   </mat-form-field>
 
   <mat-form-field appearance="outline">
-    <mat-label>To</mat-label>
+    <mat-label>{{ 'common.to' | translate }}</mat-label>
     <input matInput
       [matDatepicker]="endPicker"
       [min]="startDate() ?? min()"
@@ -34,7 +34,7 @@
           class="date-range__preset"
           [disabled]="disabled()"
           (click)="applyPreset(preset)">
-          {{ preset }}
+          {{ presetKey(preset) | translate }}
         </button>
       }
     </div>

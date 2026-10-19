@@ -10,11 +10,19 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 export interface DateRange {
   start: Date | null;
   end: Date | null;
 }
+
+const PRESET_KEYS: Record<string, string> = {
+  'Today': 'dateRange.presets.today',
+  'This Week': 'dateRange.presets.thisWeek',
+  'This Month': 'dateRange.presets.thisMonth',
+  'Last 30 Days': 'dateRange.presets.last30Days',
+};
 
 export interface DateRangePreset {
   label: string;
@@ -24,7 +32,7 @@ export interface DateRangePreset {
 @Component({
   selector: 'app-date-range-picker',
   standalone: true,
-  imports: [MatFormFieldModule, MatInputModule, MatDatepickerModule, MatNativeDateModule],
+  imports: [MatFormFieldModule, MatInputModule, MatDatepickerModule, MatNativeDateModule, TranslatePipe],
   templateUrl: './date-range-picker.component.html',
   styleUrl: './date-range-picker.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -81,43 +89,47 @@ export class DateRangePickerComponent implements ControlValueAccessor {
   }
 
   protected applyPreset(presetLabel: string): void {
-    const range = this.resolvePreset(presetLabel);
+    const range = resolveDateRangePreset(presetLabel);
     this.startDate.set(range.start);
     this.endDate.set(range.end);
     this.emitChange();
   }
 
+  protected presetKey(preset: string): string {
+    return PRESET_KEYS[preset] ?? preset;
+  }
+
   private emitChange(): void {
     this.onChange({ start: this.startDate(), end: this.endDate() });
   }
+}
 
-  private resolvePreset(label: string): DateRange {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+export function resolveDateRangePreset(label: string): DateRange {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    switch (label) {
-      case 'Today':
-        return { start: today, end: today };
-      case 'This Week': {
-        const day = today.getDay();
-        const monday = new Date(today);
-        monday.setDate(today.getDate() - (day === 0 ? 6 : day - 1));
-        const sunday = new Date(monday);
-        sunday.setDate(monday.getDate() + 6);
-        return { start: monday, end: sunday };
-      }
-      case 'This Month':
-        return {
-          start: new Date(today.getFullYear(), today.getMonth(), 1),
-          end: new Date(today.getFullYear(), today.getMonth() + 1, 0),
-        };
-      case 'Last 30 Days': {
-        const start = new Date(today);
-        start.setDate(today.getDate() - 29);
-        return { start, end: today };
-      }
-      default:
-        return { start: null, end: null };
+  switch (label) {
+    case 'Today':
+      return { start: today, end: today };
+    case 'This Week': {
+      const day = today.getDay();
+      const monday = new Date(today);
+      monday.setDate(today.getDate() - (day === 0 ? 6 : day - 1));
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      return { start: monday, end: sunday };
     }
+    case 'This Month':
+      return {
+        start: new Date(today.getFullYear(), today.getMonth(), 1),
+        end: new Date(today.getFullYear(), today.getMonth() + 1, 0),
+      };
+    case 'Last 30 Days': {
+      const start = new Date(today);
+      start.setDate(today.getDate() - 29);
+      return { start, end: today };
+    }
+    default:
+      return { start: null, end: null };
   }
 }

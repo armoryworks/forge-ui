@@ -32,7 +32,7 @@
                 <div class="wt-card__head">
                   <span class="chip chip--info wt-card__source">{{ p.sourceName }}</span>
                   <span class="wt-card__title">{{ p.title }}</span>
-                  <span [class]="statusChipClass(p.status)">{{ p.status }}</span>
+                  <span [class]="statusChipClass(p.status)">{{ statusLabel(p.status) }}</span>
                 </div>
                 @if (p.details) { <p class="wt-card__details">{{ p.details }}</p> }
                 <div class="wt-card__foot">

@@ -21,6 +21,15 @@ describe('DataTableComponent · formatCellValue', () => {
     table = TestBed.createComponent(DataTableComponent).componentInstance;
   });
 
+  it('shows an enum cell by its filter option label and leaves unknown values as they are', () => {
+    const bucketCol: ColumnDef = {
+      field: 'bucket', header: 'Bucket', type: 'enum',
+      filterOptions: [{ value: '1-30 Days', label: '1-30 días' }],
+    };
+    expect(table.formatCellValue({ bucket: '1-30 Days' }, bucketCol)).toBe('1-30 días');
+    expect(table.formatCellValue({ bucket: 'Later' }, bucketCol)).toBe('Later');
+  });
+
   it('renders a date-only value as that calendar date', () => {
     expect(table.formatCellValue({ date: '2026-10-07' }, dateCol)).toBe('10/07/2026');
   });
