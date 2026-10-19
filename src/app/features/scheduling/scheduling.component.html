@@ -4,7 +4,7 @@
   <!-- KPI Row -->
   <div class="scheduling__kpis">
     <app-kpi-chip [label]="'scheduling.kpi.scheduledOps' | translate" [value]="totalScheduled().toString()" />
-    <app-kpi-chip [label]="'scheduling.kpi.inProgress' | translate" [value]="totalInProgress().toString()" valueColor="warn" />
+    <app-kpi-chip [label]="'scheduling.kpi.inProgress' | translate" [value]="totalInProgress().toString()" />
     <app-kpi-chip [label]="'scheduling.kpi.workCenters' | translate" [value]="totalWorkCenters().toString()" valueColor="primary" />
   </div>
 
@@ -43,6 +43,7 @@
           <ng-template appColumnCell="status" let-row>
             <span [class]="getStatusClass(row.status)">{{ row.status }}</span>
           </ng-template>
+          <ng-template appColumnCell="totalHours" let-row>{{ row.totalHours | number:'1.0-2' }}</ng-template>
           <ng-template appColumnCell="isLocked" let-row>
             <button class="icon-btn" (click)="toggleLock(row)" [attr.aria-label]="row.isLocked ? 'Unlock' : 'Lock'">
               <span class="material-icons-outlined">{{ row.isLocked ? 'lock' : 'lock_open' }}</span>
@@ -75,6 +76,8 @@
           <ng-template appColumnCell="priority" let-row>
             <span class="chip chip--info">{{ row.priority }}</span>
           </ng-template>
+          <ng-template appColumnCell="setupHours" let-row>{{ row.setupHours | number:'1.0-2' }}</ng-template>
+          <ng-template appColumnCell="runHours" let-row>{{ row.runHours | number:'1.0-2' }}</ng-template>
         </app-data-table>
       }
     </div>

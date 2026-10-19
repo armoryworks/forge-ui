@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { DecimalPipe } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -46,6 +47,7 @@ const VALID_TABS = new Set<SchedulingTab>(['gantt', 'dispatch', 'work-centers', 
   selector: 'app-scheduling',
   standalone: true,
   imports: [
+    DecimalPipe,
     ReactiveFormsModule,
     PageHeaderComponent,
     DataTableComponent,
@@ -207,6 +209,7 @@ export class SchedulingComponent implements OnInit {
   constructor() {
     // Load work centers on init (needed for dispatch selector)
     this.loadWorkCenters();
+    if (untracked(this.activeTab) !== 'gantt') this.loadGanttData();
 
     // Lazy load tab data
     effect(() => {
