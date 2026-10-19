@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -28,7 +28,7 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
   selector: 'app-maintenance-schedules',
   standalone: true,
   imports: [
-    DatePipe, DecimalPipe, ReactiveFormsModule, TranslatePipe, MatTooltipModule,
+    DatePipe, ReactiveFormsModule, TranslatePipe, MatTooltipModule,
     PageHeaderComponent, DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
     ValidationButtonComponent,
