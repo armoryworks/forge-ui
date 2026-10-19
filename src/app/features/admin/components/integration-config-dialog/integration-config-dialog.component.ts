@@ -105,16 +105,16 @@ export class IntegrationConfigDialogComponent {
     };
   }
 
+  controlName(field: IntegrationSettingField): string {
+    return field.key.replace(/\./g, '__');
+  }
+
   /**
    * Build the SelectOption[] for an enum field. Cached per-key would be
    * nicer but enum fields are tiny (3 options for mode); recomputing
    * inline is cheap and avoids a stale-cache gotcha if the descriptor
    * changes between dialog opens.
    */
-  controlName(field: IntegrationSettingField): string {
-    return field.key.replace(/\./g, '__');
-  }
-
   enumOptions(field: IntegrationSettingField): SelectOption[] {
     return (field.choices ?? []).map(c => ({ value: c.value, label: c.label }));
   }
