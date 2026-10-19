@@ -4,7 +4,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { HttpClient } from '@angular/common/http';
 
 import { MatDialogRef } from '@angular/material/dialog';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -14,6 +14,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
 import { AuthService } from '../../../../shared/services/auth.service';
+import { matchesSearch } from '../../../../shared/utils/fold-for-search';
 import { ChatService } from '../../services/chat.service';
 import { ChannelType, ChatRoom } from '../../models/chat-room.model';
 
@@ -47,6 +48,7 @@ export class CreateChannelDialogComponent {
   private readonly authService = inject(AuthService);
   private readonly http = inject(HttpClient);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   protected readonly saving = signal(false);
   protected readonly allUsers = signal<UserListItem[]>([]);
@@ -61,13 +63,13 @@ export class CreateChannelDialogComponent {
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
-    name: 'Channel Name',
-    channelType: 'Channel Type',
+    name: this.translate.instant('chat.createChannel.name'),
+    channelType: this.translate.instant('chat.createChannel.type'),
   });
 
   protected readonly channelTypeOptions: SelectOption[] = [
-    { value: 'Group', label: 'Private Group' },
-    { value: 'Custom', label: 'Public Channel' },
+    { value: 'Group', label: this.translate.instant('chat.createChannel.typePrivateGroup') },
+    { value: 'Custom', label: this.translate.instant('chat.createChannel.typePublicChannel') },
   ];
 
   protected readonly filteredUsers = signal<UserListItem[]>([]);
@@ -126,7 +128,7 @@ export class CreateChannelDialogComponent {
   }
 
   private updateFilteredUsers(): void {
-    const term = this.memberSearchTerm().toLowerCase();
+    const term = this.memberSearchTerm();
     const currentUserId = this.authService.user()?.id;
     const selectedIds = new Set(this.selectedMembers().map(m => m.id));
 
@@ -134,7 +136,7 @@ export class CreateChannelDialogComponent {
       this.allUsers()
         .filter(u => u.id !== currentUserId)
         .filter(u => !selectedIds.has(u.id))
-        .filter(u => !term || u.name.toLowerCase().includes(term)),
+        .filter(u => matchesSearch(u.name, term)),
     );
   }
 }

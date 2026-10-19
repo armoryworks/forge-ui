@@ -7,6 +7,13 @@
   gap: $sp-lg;
 }
 
+.settings__channel-name {
+  font-size: $font-size-md;
+  font-weight: 600;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
 .settings__description {
   display: flex;
   flex-direction: column;

@@ -1,14 +1,18 @@
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
 
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 .mobile-chat {
   display: flex;
   flex-direction: column;
-  height: 100%;
-
-  &--conversation {
-    height: 100%;
-  }
+  flex: 1;
+  min-height: 0;
 }
 
 .mobile-chat__header {

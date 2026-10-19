@@ -57,6 +57,17 @@ $scan-ring-overhang: 12px;
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+
+  &--fill {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    > .desktop-link-banner,
+    > .clock-gate-banner {
+      flex-shrink: 0;
+    }
+  }
 }
 
 .clock-gate-banner {

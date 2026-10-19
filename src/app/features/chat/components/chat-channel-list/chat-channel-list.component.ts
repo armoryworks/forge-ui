@@ -9,6 +9,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { formatDate } from '../../../../shared/utils/date.utils';
+import { matchesSearch } from '../../../../shared/utils/fold-for-search';
 import { ChatConversation } from '../../models/chat-conversation.model';
 import { ChatRoom } from '../../models/chat-room.model';
 
@@ -38,6 +39,7 @@ export class ChatChannelListComponent {
   readonly selectedUserId = input<number | null>(null);
   readonly searchTerm = input<string>('');
   readonly mutedChannelIds = input<Set<number>>(new Set());
+  readonly canStartDirectMessage = input(true);
 
   // Outputs
   readonly channelSelected = output<ChannelSelection>();
@@ -75,21 +77,18 @@ export class ChatChannelListComponent {
 
   // Filtered lists based on search
   protected readonly filteredConversations = computed(() => {
-    const term = this.searchTerm().toLowerCase();
-    if (!term) return this.conversations();
-    return this.conversations().filter(c => c.userName.toLowerCase().includes(term));
+    const term = this.searchTerm();
+    return this.conversations().filter(c => matchesSearch(c.userName, term));
   });
 
   protected readonly filteredGroupChannels = computed(() => {
-    const term = this.searchTerm().toLowerCase();
-    if (!term) return this.groupChannels();
-    return this.groupChannels().filter(c => c.name.toLowerCase().includes(term));
+    const term = this.searchTerm();
+    return this.groupChannels().filter(c => matchesSearch(c.name, term));
   });
 
   protected readonly filteredTeamChannels = computed(() => {
-    const term = this.searchTerm().toLowerCase();
-    if (!term) return this.teamChannels();
-    return this.teamChannels().filter(c => c.name.toLowerCase().includes(term));
+    const term = this.searchTerm();
+    return this.teamChannels().filter(c => matchesSearch(c.name, term));
   });
 
   protected readonly hasResults = computed(() =>

@@ -1,6 +1,6 @@
 <div class="thread-panel__header">
-  <span class="thread-panel__title">Thread</span>
-  <button class="icon-btn" (click)="onClose()" aria-label="Close thread">
+  <span class="thread-panel__title">{{ 'chat.thread.replies' | translate }}</span>
+  <button class="icon-btn" (click)="onClose()" [attr.aria-label]="'chat.closeThread' | translate">
     <span class="material-icons-outlined">close</span>
   </button>
 </div>
@@ -16,7 +16,7 @@
   </div>
   @if (replies().length > 0) {
     <div class="thread-panel__divider">
-      <span class="thread-panel__divider-text">{{ replies().length }} {{ replies().length === 1 ? 'reply' : 'replies' }}</span>
+      <span class="thread-panel__divider-text">{{ (replies().length === 1 ? 'chat.thread.replyCount_one' : 'chat.thread.replyCount_other') | translate: { count: replies().length } }}</span>
     </div>
   }
   @for (reply of replies(); track reply.id) {
@@ -38,14 +38,14 @@
   <input
     class="thread-panel__input-field"
     type="text"
-    placeholder="Reply in thread..."
+    [placeholder]="'chat.thread.replyPlaceholder' | translate"
     [formControl]="replyControl"
     (keydown)="onKeydown($event)" />
   <button
     class="icon-btn thread-panel__send"
     [disabled]="!replyControl.value?.trim()"
     (click)="sendReply()"
-    aria-label="Send thread reply">
+    [attr.aria-label]="'chat.sendThreadReply' | translate">
     <span class="material-icons-outlined">send</span>
   </button>
 </div>

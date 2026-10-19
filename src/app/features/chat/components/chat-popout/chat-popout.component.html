@@ -8,7 +8,10 @@
       [channels]="channels()"
       [selectedChannelId]="selectedChannelId()"
       [selectedUserId]="selectedUserId()"
+      [mutedChannelIds]="mutedChannelIds()"
+      [canStartDirectMessage]="canStartDirectMessage()"
       (channelSelected)="onChannelSelected($event)"
+      (newMessageClicked)="openNewMessage()"
       (newGroup)="openCreateChannel()"
       (browseChannels)="openBrowseChannels()"
       (muteToggled)="onMuteToggled($event)" />

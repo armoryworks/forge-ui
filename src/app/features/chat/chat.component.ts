@@ -10,6 +10,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { formatDate } from '../../shared/utils/date.utils';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { AuthService } from '../../shared/services/auth.service';
+import { LanguageService } from '../../shared/services/language.service';
+import { matchesSearch } from '../../shared/utils/fold-for-search';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { ChatHubService } from '../../shared/services/chat-hub.service';
 import { ChatService } from './services/chat.service';
@@ -22,6 +24,7 @@ import { CreateChannelDialogComponent } from './components/create-channel-dialog
 import { ChannelBrowserDialogComponent } from './components/channel-browser-dialog/channel-browser-dialog.component';
 import { ChannelSettingsDialogComponent, ChannelSettingsDialogData, ChannelSettingsDialogResult } from './components/channel-settings-dialog/channel-settings-dialog.component';
 import { MentionRenderPipe } from './pipes/mention-render.pipe';
+import { chatDateSeparator, formatChatTime } from './utils/chat-time';
 
 interface UserListItem {
   id: number;
@@ -46,6 +49,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly http = inject(HttpClient);
   private readonly translate = inject(TranslateService);
+  private readonly language = inject(LanguageService);
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
   private readonly chatBroadcast = inject(ChatBroadcastService);
@@ -84,12 +88,12 @@ export class ChatComponent implements OnInit, OnDestroy {
   protected readonly userSearchControl = new FormControl('');
   protected readonly userSearchTerm = signal('');
   protected readonly filteredUsers = computed(() => {
-    const term = this.userSearchTerm().toLowerCase();
+    const term = this.userSearchTerm();
     const currentUserId = this.authService.user()?.id;
     const existingUserIds = new Set(this.conversations().map(c => c.userId));
     return this.allUsers()
       .filter(u => u.id !== currentUserId)
-      .filter(u => !term || u.name.toLowerCase().includes(term))
+      .filter(u => matchesSearch(u.name, term))
       .filter(u => !existingUserIds.has(u.id));
   });
 
@@ -105,6 +109,10 @@ export class ChatComponent implements OnInit, OnDestroy {
   private hubConnected = false;
 
   constructor() {
+    this.userSearchControl.valueChanges.pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(v => this.userSearchTerm.set(v ?? ''));
+
     effect(() => {
       const msg = this.chatBroadcast.lastMessage();
       if (!msg || !this.isRoutedPage()) return;
@@ -212,7 +220,6 @@ export class ChatComponent implements OnInit, OnDestroy {
         this.allUsers.set(users);
       });
     }
-    this.userSearchControl.valueChanges.subscribe(v => this.userSearchTerm.set(v ?? ''));
   }
 
   protected selectUser(user: UserListItem): void {
@@ -532,42 +539,11 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   protected formatTime(date: Date | string): string {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return formatChatTime(date, this.language.currentLanguage());
   }
 
   protected dateSeparator(index: number): string | null {
-    const msgs = this.messages();
-    const current = new Date(msgs[index].createdAt);
-    const currentDay = this.toDayKey(current);
-
-    if (index === 0) {
-      return this.isToday(current) ? null : this.formatDayLabel(current);
-    }
-
-    const prev = new Date(msgs[index - 1].createdAt);
-    const prevDay = this.toDayKey(prev);
-
-    if (currentDay !== prevDay) {
-      return this.isToday(current) ? 'Today' : this.formatDayLabel(current);
-    }
-    return null;
-  }
-
-  private toDayKey(d: Date): string {
-    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-  }
-
-  private isToday(d: Date): boolean {
-    const now = new Date();
-    return this.toDayKey(d) === this.toDayKey(now);
-  }
-
-  private formatDayLabel(d: Date): string {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    if (this.toDayKey(d) === this.toDayKey(yesterday)) return 'Yesterday';
-    return d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    return chatDateSeparator(this.topLevelMessages(), index, this.language.currentLanguage(), key => this.translate.instant(key));
   }
 
   protected formatDate(date: Date | string | null): string {

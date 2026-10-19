@@ -7,7 +7,7 @@
     </button>
   </header>
 
-  <main class="mobile-content">
+  <main class="mobile-content" [class.mobile-content--fill]="fillContent()">
     @if (desktopReturnUrl()) {
       <div class="desktop-link-banner" data-testid="mobile-desktop-link-banner">
         <span class="material-icons-outlined desktop-link-banner__icon">desktop_windows</span>
@@ -29,7 +29,7 @@
         <span class="clock-gate-banner__text">{{ 'mobileLegacy.clockGate' | translate }}</span>
       </div>
     }
-    <router-outlet />
+    <router-outlet (activate)="onOutletActivate()" />
   </main>
 
   <nav class="mobile-nav" [attr.aria-label]="'mobileLegacy.nav.label' | translate">

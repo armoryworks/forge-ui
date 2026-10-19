@@ -42,6 +42,7 @@ export class MobileLayoutComponent implements OnInit {
   protected readonly isClockedIn = this.clockState.isClockedIn;
   protected readonly clockCheckDone = this.clockState.checkDone;
   protected readonly desktopReturnUrl = signal<string | null>(null);
+  protected readonly fillContent = signal(false);
 
   private readonly allTabs: MobileTab[] = [
     { path: '/m/chat', labelKey: 'mobileLegacy.nav.chat', icon: 'chat' },
@@ -105,6 +106,10 @@ export class MobileLayoutComponent implements OnInit {
 
   protected isTabDisabled(tab: MobileTab): boolean {
     return !!tab.requiresClockedIn && !this.isClockedIn();
+  }
+
+  protected onOutletActivate(): void {
+    this.fillContent.set(this.route.firstChild?.snapshot.data['fillContent'] === true);
   }
 
   protected onTabClick(event: Event, tab: MobileTab): void {

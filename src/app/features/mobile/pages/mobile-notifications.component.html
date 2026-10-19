@@ -27,7 +27,7 @@
               <span class="notif-item__title">{{ n.title }}</span>
               <span class="notif-item__time">{{ formatTime(n.createdAt) }}</span>
             </div>
-            <span class="notif-item__message">{{ n.message }}</span>
+            <div class="notif-item__message" [innerHTML]="n.message | richText"></div>
           </div>
           <button class="icon-btn" (click)="dismiss(n.id, $event)" [attr.aria-label]="'mobileLegacyPages.notifications.dismissLabel' | translate">
             <span class="material-icons-outlined">close</span>

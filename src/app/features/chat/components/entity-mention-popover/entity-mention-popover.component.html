@@ -1,5 +1,5 @@
 @if (visible() && (flatResults().length > 0 || isLoading() || query().length >= 2)) {
-  <div class="mention-popover" role="listbox" aria-label="Entity mention suggestions">
+  <div class="mention-popover" role="listbox" [attr.aria-label]="'chat.mentionSuggestions' | translate">
     @if (isLoading()) {
       <div class="mention-popover__loading">
         <span class="material-icons-outlined spin">sync</span>

@@ -18,6 +18,8 @@ interface LayoutInternals {
   ngOnInit(): void;
   openOnDesktop(): void;
   dismissDesktopLink(): void;
+  fillContent: () => boolean;
+  onOutletActivate(): void;
 }
 
 describe('MobileLayoutComponent', () => {
@@ -135,5 +137,18 @@ describe('MobileLayoutComponent', () => {
     layout.dismissDesktopLink();
 
     expect(layout.desktopReturnUrl()).toBeNull();
+  });
+
+  it('lets only pages that ask for it fill the content area', () => {
+    isEnabled.mockReturnValue(true);
+    const layout = create();
+    const activate = (data: Record<string, unknown>) => {
+      Object.assign(TestBed.inject(ActivatedRoute), { firstChild: { snapshot: { data } } });
+      layout.onOutletActivate();
+      return layout.fillContent();
+    };
+
+    expect(activate({ fillContent: true })).toBe(true);
+    expect(activate({})).toBe(false);
   });
 });

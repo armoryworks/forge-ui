@@ -1,21 +1,26 @@
 import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
+import { TranslatePipe } from '@ngx-translate/core';
+
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
 import { AuthService } from '../../../../shared/services/auth.service';
+import { LanguageService } from '../../../../shared/services/language.service';
 import { ChatMessage } from '../../models/chat-message.model';
 import { MentionRenderPipe } from '../../pipes/mention-render.pipe';
+import { formatChatTime } from '../../utils/chat-time';
 
 @Component({
   selector: 'app-chat-thread-panel',
   standalone: true,
-  imports: [ReactiveFormsModule, AvatarComponent, MentionRenderPipe],
+  imports: [ReactiveFormsModule, AvatarComponent, MentionRenderPipe, TranslatePipe],
   templateUrl: './chat-thread-panel.component.html',
   styleUrl: './chat-thread-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChatThreadPanelComponent {
   private readonly authService = inject(AuthService);
+  private readonly language = inject(LanguageService);
 
   readonly parentMessage = input.required<ChatMessage>();
   readonly replies = input<ChatMessage[]>([]);
@@ -29,6 +34,9 @@ export class ChatThreadPanelComponent {
     const content = this.replyControl.value?.trim();
     if (!content) return;
     this.replySent.emit(content);
+  }
+
+  clearComposer(): void {
     this.replyControl.setValue('');
   }
 
@@ -44,8 +52,7 @@ export class ChatThreadPanelComponent {
   }
 
   protected formatTime(date: Date | string): string {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return formatChatTime(date, this.language.currentLanguage());
   }
 
   protected onClose(): void {

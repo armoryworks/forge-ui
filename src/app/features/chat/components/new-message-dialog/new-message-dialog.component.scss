@@ -1,0 +1,55 @@
+@use 'styles/variables' as *;
+
+.new-message {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__list {
+    max-height: 320px;
+    overflow-y: auto;
+    border: $border-width-thin solid var(--border);
+  }
+
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    width: 100%;
+    min-height: 44px;
+    padding: $sp-sm $sp-md;
+    border: none;
+    border-bottom: $border-width-thin solid var(--border);
+    background: none;
+    color: var(--text);
+    font-family: $font-family-primary;
+    font-size: $font-size-base;
+    text-align: left;
+    cursor: pointer;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover,
+    &:focus-visible {
+      background: var(--bg);
+    }
+  }
+
+  &__user-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__state {
+    display: flex;
+    justify-content: center;
+    padding: $sp-lg;
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+  }
+}

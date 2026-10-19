@@ -1,8 +1,8 @@
 @if (open() && parentMessage(); as parent) {
-  <div class="thread-panel" role="complementary" aria-label="Thread replies">
+  <div class="thread-panel" role="complementary" [attr.aria-label]="'chat.threadRepliesLabel' | translate">
     <div class="thread-panel__header">
       <span class="thread-panel__title">{{ 'chat.thread.replies' | translate }}</span>
-      <button class="icon-btn" (click)="close()" aria-label="Close thread">
+      <button class="icon-btn" (click)="close()" [attr.aria-label]="'chat.closeThread' | translate">
         <span class="material-icons-outlined">close</span>
       </button>
     </div>
@@ -23,7 +23,7 @@
       @if (replies().length > 0) {
         <div class="thread-panel__divider">
           <span class="thread-panel__divider-line"></span>
-          <span class="thread-panel__divider-text">{{ replies().length }} {{ replies().length === 1 ? ('chat.reply' | translate) : ('chat.replies' | translate) }}</span>
+          <span class="thread-panel__divider-text">{{ (replies().length === 1 ? 'chat.thread.replyCount_one' : 'chat.thread.replyCount_other') | translate: { count: replies().length } }}</span>
           <span class="thread-panel__divider-line"></span>
         </div>
       }
@@ -63,7 +63,7 @@
         data-testid="thread-send-btn"
         [disabled]="!replyControl.value?.trim()"
         (click)="sendReply()"
-        aria-label="Send thread reply">
+        [attr.aria-label]="'chat.sendThreadReply' | translate">
         <span class="material-icons-outlined">send</span>
       </button>
     </div>

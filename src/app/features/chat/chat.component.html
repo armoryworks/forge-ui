@@ -19,7 +19,7 @@
         </button>
         <span class="material-icons-outlined chat-panel__channel-icon">{{ getChannelIcon(selectedChannel()!) }}</span>
         <span class="chat-panel__header-name">{{ selectedChannel()!.name }}</span>
-        <button class="icon-btn" (click)="openChannelSettings()" aria-label="Channel settings" matTooltip="Channel settings" matTooltipPosition="above">
+        <button class="icon-btn" (click)="openChannelSettings()" [attr.aria-label]="'chat.channelSettings' | translate" [matTooltip]="'chat.channelSettings' | translate" matTooltipPosition="above">
           <span class="material-icons-outlined">settings</span>
         </button>
       } @else {
@@ -59,9 +59,9 @@
         <!-- Direct Messages section -->
         <div class="channel-section">
           <div class="channel-section__header">
-            <button class="channel-section__toggle" (click)="toggleSection('dms')" aria-label="Toggle direct messages">
+            <button class="channel-section__toggle" (click)="toggleSection('dms')" [attr.aria-label]="'chat.toggleSection' | translate: { section: ('chat.channelList.directMessages' | translate) }">
               <span class="material-icons-outlined channel-section__chevron" [class.channel-section__chevron--collapsed]="!channelSectionsExpanded()['dms']">expand_more</span>
-              <span class="channel-section__title">Direct Messages</span>
+              <span class="channel-section__title">{{ 'chat.channelList.directMessages' | translate }}</span>
             </button>
             <span class="channel-section__spacer"></span>
             <button class="action-btn action-btn--create action-btn--sm" (click)="openUserPicker()" [attr.aria-label]="'chat.newMessage' | translate" [matTooltip]="'chat.newMessage' | translate" matTooltipPosition="above">
@@ -72,7 +72,7 @@
           @if (channelSectionsExpanded()['dms']) {
             <div class="channel-section__items">
               @if (dmConversations().length === 0) {
-                <div class="channel-section__empty">No conversations yet</div>
+                <div class="channel-section__empty">{{ 'chat.noConversations' | translate }}</div>
               }
               @for (conv of dmConversations(); track conv.userId) {
                 <button class="conversation" (click)="selectConversation(conv)">
@@ -100,19 +100,19 @@
         <!-- Channels section -->
         <div class="channel-section">
           <div class="channel-section__header">
-            <button class="channel-section__toggle" (click)="toggleSection('channels')" aria-label="Toggle channels">
+            <button class="channel-section__toggle" (click)="toggleSection('channels')" [attr.aria-label]="'chat.toggleSection' | translate: { section: ('chat.channelList.channels' | translate) }">
               <span class="material-icons-outlined channel-section__chevron" [class.channel-section__chevron--collapsed]="!channelSectionsExpanded()['channels']">expand_more</span>
-              <span class="channel-section__title">Channels</span>
+              <span class="channel-section__title">{{ 'chat.channelList.channels' | translate }}</span>
             </button>
             <span class="channel-section__spacer"></span>
-            <button class="icon-btn channel-section__action" (click)="openCreateChannel()" aria-label="New channel" matTooltip="New Channel" matTooltipPosition="above">
+            <button class="icon-btn channel-section__action" (click)="openCreateChannel()" [attr.aria-label]="'chat.channelList.newChannel' | translate" [matTooltip]="'chat.channelList.newChannel' | translate" matTooltipPosition="above">
               <span class="material-icons-outlined">add</span>
             </button>
           </div>
           @if (channelSectionsExpanded()['channels']) {
             <div class="channel-section__items">
               @if (groupChannels().length === 0) {
-                <div class="channel-section__empty">No channels</div>
+                <div class="channel-section__empty">{{ 'chat.channelList.noChannels' | translate }}</div>
               }
               @for (channel of groupChannels(); track channel.id) {
                 <div class="channel-row">
@@ -120,20 +120,20 @@
                     <span class="material-icons-outlined channel-item__icon">{{ getChannelIcon(channel) }}</span>
                     <span class="channel-item__name">{{ channel.name }}</span>
                     @if (isChannelMuted(channel)) {
-                      <span class="material-icons-outlined channel-item__muted" matTooltip="Muted" matTooltipPosition="above">notifications_off</span>
+                      <span class="material-icons-outlined channel-item__muted" [matTooltip]="'chat.muted' | translate" matTooltipPosition="above">notifications_off</span>
                     }
                     @if (channel.unreadCount > 0) {
                       <span class="conversation__badge">{{ channel.unreadCount }}</span>
                     }
                   </button>
-                  <button class="icon-btn channel-item__mute-btn" (click)="toggleMuteChannel(channel, $event)" [attr.aria-label]="isChannelMuted(channel) ? 'Unmute channel' : 'Mute channel'" [matTooltip]="isChannelMuted(channel) ? 'Unmute' : 'Mute'" matTooltipPosition="above">
+                  <button class="icon-btn channel-item__mute-btn" (click)="toggleMuteChannel(channel, $event)" [attr.aria-label]="(isChannelMuted(channel) ? 'chat.channelList.unmuteChannel' : 'chat.channelList.muteChannel') | translate" [matTooltip]="(isChannelMuted(channel) ? 'chat.channelList.unmute' : 'chat.channelList.mute') | translate" matTooltipPosition="above">
                     <span class="material-icons-outlined">{{ isChannelMuted(channel) ? 'notifications_active' : 'notifications_off' }}</span>
                   </button>
                 </div>
               }
-              <button class="channel-item channel-item--browse" (click)="openBrowseChannels()" aria-label="Browse channels">
+              <button class="channel-item channel-item--browse" (click)="openBrowseChannels()" [attr.aria-label]="'chat.channelList.browseChannels' | translate">
                 <span class="material-icons-outlined channel-item__icon">explore</span>
-                <span class="channel-item__name">Browse Channels</span>
+                <span class="channel-item__name">{{ 'chat.channelList.browseChannels' | translate }}</span>
               </button>
             </div>
           }
@@ -142,9 +142,9 @@
         <!-- Teams section -->
         @if (teamChannels().length > 0) {
           <div class="channel-section">
-            <button class="channel-section__header" (click)="toggleSection('teams')" aria-label="Toggle teams">
+            <button class="channel-section__header" (click)="toggleSection('teams')" [attr.aria-label]="'chat.toggleSection' | translate: { section: ('chat.channelList.teams' | translate) }">
               <span class="material-icons-outlined channel-section__chevron" [class.channel-section__chevron--collapsed]="!channelSectionsExpanded()['teams']">expand_more</span>
-              <span class="channel-section__title">Teams</span>
+              <span class="channel-section__title">{{ 'chat.channelList.teams' | translate }}</span>
             </button>
             @if (channelSectionsExpanded()['teams']) {
               <div class="channel-section__items">
@@ -154,13 +154,13 @@
                       <span class="material-icons-outlined channel-item__icon">{{ getChannelIcon(channel) }}</span>
                       <span class="channel-item__name">{{ channel.name }}</span>
                       @if (isChannelMuted(channel)) {
-                        <span class="material-icons-outlined channel-item__muted" matTooltip="Muted" matTooltipPosition="above">notifications_off</span>
+                        <span class="material-icons-outlined channel-item__muted" [matTooltip]="'chat.muted' | translate" matTooltipPosition="above">notifications_off</span>
                       }
                       @if (channel.unreadCount > 0) {
                         <span class="conversation__badge">{{ channel.unreadCount }}</span>
                       }
                     </button>
-                    <button class="icon-btn channel-item__mute-btn" (click)="toggleMuteChannel(channel, $event)" [attr.aria-label]="isChannelMuted(channel) ? 'Unmute channel' : 'Mute channel'" [matTooltip]="isChannelMuted(channel) ? 'Unmute' : 'Mute'" matTooltipPosition="above">
+                    <button class="icon-btn channel-item__mute-btn" (click)="toggleMuteChannel(channel, $event)" [attr.aria-label]="(isChannelMuted(channel) ? 'chat.channelList.unmuteChannel' : 'chat.channelList.muteChannel') | translate" [matTooltip]="(isChannelMuted(channel) ? 'chat.channelList.unmute' : 'chat.channelList.mute') | translate" matTooltipPosition="above">
                       <span class="material-icons-outlined">{{ isChannelMuted(channel) ? 'notifications_active' : 'notifications_off' }}</span>
                     </button>
                   </div>
@@ -180,7 +180,7 @@
             [placeholder]="'chat.searchUsers' | translate"
             [formControl]="userSearchControl"
             />
-          <button class="icon-btn" (click)="cancelUserPicker()" aria-label="Cancel">
+          <button class="icon-btn" (click)="cancelUserPicker()" [attr.aria-label]="'chat.cancel' | translate">
             <span class="material-icons-outlined">close</span>
           </button>
         </div>
@@ -235,12 +235,12 @@
                 <span class="message__time">{{ formatTime(msg.createdAt) }}</span>
               </div>
               @if (msg.threadReplyCount > 0) {
-                <button class="message__thread-link" (click)="openThread(msg)" aria-label="View thread replies">
+                <button class="message__thread-link" (click)="openThread(msg)" [attr.aria-label]="'chat.viewThreadReplies' | translate">
                   <span class="material-icons-outlined">forum</span>
-                  {{ msg.threadReplyCount }} {{ msg.threadReplyCount === 1 ? 'reply' : 'replies' }}
+                  {{ (msg.threadReplyCount === 1 ? 'chat.thread.replyCount_one' : 'chat.thread.replyCount_other') | translate: { count: msg.threadReplyCount } }}
                 </button>
               }
-              <button class="message__reply-btn" (click)="openThread(msg)" aria-label="Reply in thread" matTooltip="Reply in thread" matTooltipPosition="above">
+              <button class="message__reply-btn" (click)="openThread(msg)" [attr.aria-label]="'chat.replyInThread' | translate" [matTooltip]="'chat.replyInThread' | translate" matTooltipPosition="above">
                 <span class="material-icons-outlined">reply</span>
               </button>
             </div>
@@ -251,8 +251,8 @@
         @if (threadParentMessage(); as parent) {
           <div class="thread-panel">
             <div class="thread-panel__header">
-              <span class="thread-panel__title">Thread</span>
-              <button class="icon-btn" (click)="closeThread()" aria-label="Close thread">
+              <span class="thread-panel__title">{{ 'chat.thread.replies' | translate }}</span>
+              <button class="icon-btn" (click)="closeThread()" [attr.aria-label]="'chat.closeThread' | translate">
                 <span class="material-icons-outlined">close</span>
               </button>
             </div>
@@ -268,7 +268,7 @@
               </div>
               @if (threadReplies().length > 0) {
                 <div class="thread-panel__divider">
-                  <span class="thread-panel__divider-text">{{ threadReplies().length }} {{ threadReplies().length === 1 ? 'reply' : 'replies' }}</span>
+                  <span class="thread-panel__divider-text">{{ (threadReplies().length === 1 ? 'chat.thread.replyCount_one' : 'chat.thread.replyCount_other') | translate: { count: threadReplies().length } }}</span>
                 </div>
               }
               @for (reply of threadReplies(); track reply.id) {
@@ -290,14 +290,14 @@
               <input
                 class="chat-panel__input-field"
                 type="text"
-                placeholder="Reply in thread..."
+                [placeholder]="'chat.thread.replyPlaceholder' | translate"
                 [formControl]="threadReplyControl"
                 (keydown)="onThreadKeydown($event)" />
               <button
                 class="icon-btn chat-panel__send"
                 [disabled]="!threadReplyControl.value?.trim()"
                 (click)="sendThreadReply()"
-                aria-label="Send thread reply">
+                [attr.aria-label]="'chat.sendThreadReply' | translate">
                 <span class="material-icons-outlined">send</span>
               </button>
             </div>
@@ -313,20 +313,22 @@
             @if (isUploading()) {
               <span class="material-icons-outlined spin">sync</span>
             }
-            <button class="icon-btn" (click)="clearPendingFile()" aria-label="Remove file">
+            <button class="icon-btn" (click)="clearPendingFile()" [attr.aria-label]="'chat.removeFile' | translate">
               <span class="material-icons-outlined">close</span>
             </button>
           </div>
         }
         <div class="chat-panel__input" >
           @if (isInputDisabled()) {
-            <span class="chat-panel__readonly">This channel is read-only</span>
+            <span class="chat-panel__readonly">{{ 'chat.readOnly' | translate }}</span>
           } @else {
-            <input type="file" #fileInput class="chat-panel__file-input" (change)="onFileSelected($event)"
-              accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx,.xls,.xlsx,.csv,.txt,.step,.stl,.dxf" />
-            <button class="icon-btn" (click)="fileInput.click()" aria-label="Attach file" matTooltip="Attach file" matTooltipPosition="above">
-              <span class="material-icons-outlined">attach_file</span>
-            </button>
+            @if (selectedChannel()) {
+              <input type="file" #fileInput class="chat-panel__file-input" (change)="onFileSelected($event)"
+                accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx,.xls,.xlsx,.csv,.txt" />
+              <button class="icon-btn" (click)="fileInput.click()" [attr.aria-label]="'chat.attachFile' | translate" [matTooltip]="'chat.attachFile' | translate" matTooltipPosition="above" data-testid="chat-attach-btn">
+                <span class="material-icons-outlined">attach_file</span>
+              </button>
+            }
             <input
               data-testid="chat-message-input"
               class="chat-panel__input-field"

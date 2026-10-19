@@ -6,9 +6,11 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
 import { AuthService } from '../../../../shared/services/auth.service';
+import { LanguageService } from '../../../../shared/services/language.service';
 import { ChatService } from '../../services/chat.service';
 import { ChatMessage } from '../../models/chat-message.model';
 import { MentionRenderPipe } from '../../pipes/mention-render.pipe';
+import { formatChatTime } from '../../utils/chat-time';
 
 @Component({
   selector: 'app-thread-panel',
@@ -21,6 +23,7 @@ import { MentionRenderPipe } from '../../pipes/mention-render.pipe';
 export class ThreadPanelComponent {
   private readonly chatService = inject(ChatService);
   private readonly authService = inject(AuthService);
+  private readonly language = inject(LanguageService);
   private readonly destroyRef = inject(DestroyRef);
 
   private readonly repliesContainer = viewChild<ElementRef<HTMLElement>>('repliesContainer');
@@ -51,8 +54,7 @@ export class ThreadPanelComponent {
   }
 
   protected formatTime(date: Date | string): string {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return formatChatTime(date, this.language.currentLanguage());
   }
 
   protected sendReply(): void {

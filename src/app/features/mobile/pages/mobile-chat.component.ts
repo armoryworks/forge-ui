@@ -1,11 +1,17 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy, signal, viewChild } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnDestroy, signal, viewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { HttpClient } from '@angular/common/http';
+import { Location } from '@angular/common';
+import { Router, ActivatedRoute, ParamMap } from '@angular/router';
+import { A11yModule } from '@angular/cdk/a11y';
 
 import { MatDialog } from '@angular/material/dialog';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { catchError, of } from 'rxjs';
 
 import { AuthService } from '../../../shared/services/auth.service';
+import { CapabilityService } from '../../../shared/services/capability.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { ChatHubService } from '../../../shared/services/chat-hub.service';
 import { ChatService } from '../../chat/services/chat.service';
@@ -20,13 +26,20 @@ import { ChatChannelListComponent, ChannelSelection } from '../../chat/component
 import { ChatMessageAreaComponent } from '../../chat/components/chat-message-area/chat-message-area.component';
 import { ChatChannelHeaderComponent } from '../../chat/components/chat-channel-header/chat-channel-header.component';
 import { ChatThreadPanelComponent } from '../../chat/components/chat-thread-panel/chat-thread-panel.component';
+import { NewMessageDialogComponent, NewMessageRecipient } from '../../chat/components/new-message-dialog/new-message-dialog.component';
+import { mutedChannelIds } from '../../chat/utils/chat-rooms';
 
 type MobileChatView = 'list' | 'dm' | 'channel';
+
+interface ChatRouteTarget {
+  dm: number | null;
+  channel: number | null;
+}
 
 @Component({
   selector: 'app-mobile-chat',
   standalone: true,
-  imports: [TranslatePipe, ChatChannelListComponent, ChatMessageAreaComponent, ChatChannelHeaderComponent, ChatThreadPanelComponent],
+  imports: [A11yModule, TranslatePipe, ChatChannelListComponent, ChatMessageAreaComponent, ChatChannelHeaderComponent, ChatThreadPanelComponent],
   templateUrl: './mobile-chat.component.html',
   styleUrl: './mobile-chat.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,8 +53,13 @@ export class MobileChatComponent implements OnDestroy {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
+  private readonly location = inject(Location);
+  private readonly http = inject(HttpClient);
+  private readonly capabilities = inject(CapabilityService);
+  private readonly destroyRef = inject(DestroyRef);
 
   private readonly messageArea = viewChild<ChatMessageAreaComponent>('messageArea');
+  private readonly threadPanel = viewChild(ChatThreadPanelComponent);
 
   protected readonly view = signal<MobileChatView>('list');
   protected readonly conversations = signal<ChatConversation[]>([]);
@@ -66,6 +84,8 @@ export class MobileChatComponent implements OnDestroy {
   protected readonly selectedUserId = computed(() => this.selectedConversation()?.userId ?? null);
   protected readonly isChannel = computed(() => this.view() === 'channel');
   protected readonly isReadOnly = computed(() => this.selectedChannel()?.isReadOnly ?? false);
+  protected readonly mutedChannelIds = computed(() => mutedChannelIds(this.channels(), this.currentUserId()));
+  protected readonly canStartDirectMessage = computed(() => this.capabilities.isEnabled('CAP-IDEN-USERS', true));
 
   // Swipe state (mobile-specific)
   protected readonly swipedChannelId = signal<number | null>(null);
@@ -74,8 +94,18 @@ export class MobileChatComponent implements OnDestroy {
   protected readonly refreshing = signal(false);
 
   private hubConnected = false;
+  private conversationsLoaded = false;
+  private channelsLoaded = false;
+  private openedFromList = false;
+  private target: ChatRouteTarget = { dm: null, channel: null };
+  private knownConversation: ChatConversation | null = null;
+  private knownChannel: ChatRoom | null = null;
 
   constructor() {
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      this.target = this.parseTarget(params);
+      this.applyTarget();
+    });
     this.loadConversations();
     this.loadChannels();
     this.connectHub();
@@ -85,30 +115,19 @@ export class MobileChatComponent implements OnDestroy {
 
   protected onChannelSelected(selection: ChannelSelection): void {
     if (selection.type === 'dm' && selection.conversationUserId != null) {
-      const existing = this.conversations().find(c => c.userId === selection.conversationUserId);
-      if (existing) {
-        this.selectConversation(existing);
-      } else {
-        // New user selected from picker
-        this.loadMessages(selection.conversationUserId);
-        this.selectedConversation.set({
-          userId: selection.conversationUserId,
-          userName: '',
-          userInitials: '',
-          userColor: '',
-          lastMessage: null,
-          lastMessageAt: null,
-          unreadCount: 0,
-        });
-        this.selectedChannel.set(null);
-        this.view.set('dm');
-      }
+      this.openConversation({ dm: selection.conversationUserId, channel: null });
     } else if (selection.type === 'channel' && selection.channelId != null) {
-      const channel = this.channels().find(c => c.id === selection.channelId);
-      if (channel) {
-        this.selectChannel(channel);
-      }
+      this.openConversation({ dm: null, channel: selection.channelId });
     }
+  }
+
+  protected openNewMessage(): void {
+    this.dialog.open<NewMessageDialogComponent, void, NewMessageRecipient>(NewMessageDialogComponent, { width: '420px' })
+      .afterClosed().subscribe(user => {
+        if (!user) return;
+        this.knownConversation = this.conversations().find(c => c.userId === user.id) ?? this.toConversation(user);
+        this.openConversation({ dm: user.id, channel: null });
+      });
   }
 
   protected onMuteToggled(event: { channel: ChatRoom; mute: boolean }): void {
@@ -136,17 +155,11 @@ export class MobileChatComponent implements OnDestroy {
   // ── Navigation ──
 
   protected backToList(): void {
-    const ch = this.selectedChannel();
-    if (ch) this.chatHub.leaveChannel(ch.id);
-    this.selectedConversation.set(null);
-    this.selectedChannel.set(null);
-    this.messages.set([]);
-    this.clearPendingFile();
-    this.threadParentMessage.set(null);
-    this.threadReplies.set([]);
-    this.view.set('list');
-    this.loadConversations();
-    this.loadChannels();
+    if (this.openedFromList) {
+      this.location.back();
+    } else {
+      this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
+    }
   }
 
   // ── Dialogs ──
@@ -155,8 +168,9 @@ export class MobileChatComponent implements OnDestroy {
     this.dialog.open(CreateChannelDialogComponent, { width: '520px' })
       .afterClosed().subscribe((result: ChatRoom | undefined) => {
         if (result) {
+          this.knownChannel = result;
           this.loadChannels();
-          this.selectChannel(result);
+          this.openConversation({ dm: null, channel: result.id });
         }
       });
   }
@@ -165,8 +179,9 @@ export class MobileChatComponent implements OnDestroy {
     this.dialog.open(ChannelBrowserDialogComponent, { width: '520px' })
       .afterClosed().subscribe((result: ChatRoom | undefined) => {
         if (result) {
+          this.knownChannel = result;
           this.loadChannels();
-          this.selectChannel(result);
+          this.openConversation({ dm: null, channel: result.id });
         }
       });
   }
@@ -197,13 +212,14 @@ export class MobileChatComponent implements OnDestroy {
 
     if (file && !fileId) {
       // Need to upload first
-      this.uploadAndSend(content, conv, channel);
+      this.uploadAndSend(content, channel);
       return;
     }
 
     const onSent = (msg: ChatMessage) => {
       this.messages.update((msgs) => [...msgs, msg]);
       this.clearPendingFile();
+      this.messageArea()?.clearComposer();
       this.messageArea()?.scrollToBottom();
     };
 
@@ -253,6 +269,7 @@ export class MobileChatComponent implements OnDestroy {
     if (!parent) return;
 
     this.chatService.replyInThread(parent.id, content).subscribe(reply => {
+      this.threadPanel()?.clearComposer();
       this.threadReplies.update(r => [...r, reply]);
       this.messages.update(msgs => msgs.map(m =>
         m.id === parent.id ? { ...m, threadReplyCount: m.threadReplyCount + 1, threadLastReplyAt: new Date() } : m,
@@ -304,7 +321,99 @@ export class MobileChatComponent implements OnDestroy {
 
   // ── Private ──
 
+  private parseTarget(params: ParamMap): ChatRouteTarget {
+    const id = (key: string) => {
+      const value = Number(params.get(key));
+      return Number.isInteger(value) && value > 0 ? value : null;
+    };
+    const channel = id('channel');
+    return { channel, dm: channel ? null : id('dm') };
+  }
+
+  private openConversation(target: ChatRouteTarget): void {
+    const fromList = this.view() === 'list';
+    if (fromList) this.openedFromList = true;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: target.channel ? { channel: target.channel } : { dm: target.dm },
+      replaceUrl: !fromList,
+    });
+  }
+
+  private applyTarget(): void {
+    const { dm, channel } = this.target;
+    if (channel) {
+      if (this.selectedChannel()?.id === channel) return;
+      const found = this.channels().find(c => c.id === channel)
+        ?? (this.knownChannel?.id === channel ? this.knownChannel : null);
+      if (found) {
+        this.selectChannel(found);
+      } else if (this.channelsLoaded) {
+        this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
+      }
+      return;
+    }
+    if (dm) {
+      if (this.selectedConversation()?.userId === dm) return;
+      const found = this.conversations().find(c => c.userId === dm)
+        ?? (this.knownConversation?.userId === dm ? this.knownConversation : null);
+      if (found) {
+        this.selectConversation(found);
+      } else if (this.conversationsLoaded) {
+        this.selectConversation(this.toConversation({ id: dm, name: '', initials: '', color: '' }));
+        this.resolveConversationUser(dm);
+      }
+      return;
+    }
+    if (this.view() !== 'list') this.showList();
+  }
+
+  private showList(): void {
+    const ch = this.selectedChannel();
+    if (ch) this.chatHub.leaveChannel(ch.id);
+    this.openedFromList = false;
+    this.selectedConversation.set(null);
+    this.selectedChannel.set(null);
+    this.messages.set([]);
+    this.clearPendingFile();
+    this.threadParentMessage.set(null);
+    this.threadReplies.set([]);
+    this.view.set('list');
+    this.loadConversations();
+    this.loadChannels();
+  }
+
+  private toConversation(user: NewMessageRecipient): ChatConversation {
+    return {
+      userId: user.id,
+      userName: user.name,
+      userInitials: user.initials,
+      userColor: user.color,
+      lastMessage: null,
+      lastMessageAt: null,
+      unreadCount: 0,
+    };
+  }
+
+  private resolveConversationUser(userId: number): void {
+    if (!this.canStartDirectMessage()) return;
+    this.http.get<NewMessageRecipient[]>('/api/v1/users').pipe(
+      catchError(() => of([] as NewMessageRecipient[])),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(users => {
+      const user = users.find(u => u.id === userId);
+      if (user && this.selectedConversation()?.userId === userId) {
+        this.selectedConversation.set(this.toConversation(user));
+      }
+    });
+  }
+
   private selectConversation(conv: ChatConversation): void {
+    const previous = this.selectedChannel();
+    if (previous) this.chatHub.leaveChannel(previous.id);
+    this.threadParentMessage.set(null);
+    this.threadReplies.set([]);
+    this.clearPendingFile();
     this.selectedConversation.set(conv);
     this.selectedChannel.set(null);
     this.view.set('dm');
@@ -313,6 +422,11 @@ export class MobileChatComponent implements OnDestroy {
   }
 
   private selectChannel(channel: ChatRoom): void {
+    const previous = this.selectedChannel();
+    if (previous && previous.id !== channel.id) this.chatHub.leaveChannel(previous.id);
+    this.threadParentMessage.set(null);
+    this.threadReplies.set([]);
+    this.clearPendingFile();
     this.selectedChannel.set(channel);
     this.selectedConversation.set(null);
     this.view.set('channel');
@@ -326,54 +440,42 @@ export class MobileChatComponent implements OnDestroy {
     this.pendingFileAttachmentId.set(null);
   }
 
-  private uploadAndSend(content: string, conv: ChatConversation | null, channel: ChatRoom | null): void {
+  private uploadAndSend(content: string, channel: ChatRoom | null): void {
     const file = this.pendingFile();
-    if (!file) return;
+    if (!file || !channel) return;
 
     this.isUploading.set(true);
-
-    if (channel) {
-      this.chatService.uploadChatFile(channel.id, file).subscribe({
-        next: (attachment) => {
-          this.isUploading.set(false);
+    this.chatService.uploadChatFile(channel.id, file).subscribe({
+      next: (attachment) => {
+        this.isUploading.set(false);
+        this.pendingFileAttachmentId.set(attachment.id);
+        this.chatService.sendChatRoomMessage(channel.id, content, attachment.id).subscribe((msg) => {
+          this.messages.update(msgs => [...msgs, msg]);
           this.clearPendingFile();
-          this.chatService.sendChatRoomMessage(channel.id, content, attachment.id).subscribe((msg) => {
-            this.messages.update(msgs => [...msgs, msg]);
-            this.messageArea()?.scrollToBottom();
-          });
-        },
-        error: (err: unknown) => {
-          this.isUploading.set(false);
-          this.snackbar.errorFrom(err, 'mobileLegacyPages.chat.uploadFailed');
-        },
-      });
-    } else if (conv) {
-      this.chatService.uploadChatFile(0, file).subscribe({
-        next: (attachment) => {
-          this.isUploading.set(false);
-          this.clearPendingFile();
-          this.chatService.sendMessage(conv.userId, content, attachment.id).subscribe((msg) => {
-            this.messages.update(msgs => [...msgs, msg]);
-            this.messageArea()?.scrollToBottom();
-          });
-        },
-        error: (err: unknown) => {
-          this.isUploading.set(false);
-          this.snackbar.errorFrom(err, 'mobileLegacyPages.chat.uploadFailed');
-        },
-      });
-    }
+          this.messageArea()?.clearComposer();
+          this.messageArea()?.scrollToBottom();
+        });
+      },
+      error: (err: unknown) => {
+        this.isUploading.set(false);
+        this.snackbar.errorFrom(err, 'mobileLegacyPages.chat.uploadFailed');
+      },
+    });
   }
 
   private loadConversations(): void {
     this.chatService.getConversations().subscribe((convs) => {
       this.conversations.set(convs);
+      this.conversationsLoaded = true;
+      this.applyTarget();
     });
   }
 
   private loadChannels(): void {
     this.chatService.getChannels().subscribe((chs) => {
       this.channels.set(chs);
+      this.channelsLoaded = true;
+      this.applyTarget();
     });
   }
 

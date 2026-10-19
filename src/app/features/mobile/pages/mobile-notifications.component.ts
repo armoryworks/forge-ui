@@ -3,13 +3,14 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
+import { RichTextPipe } from '../../../shared/pipes/rich-text.pipe';
 import { LanguageService } from '../../../shared/services/language.service';
 import { NotificationService } from '../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-mobile-notifications',
   standalone: true,
-  imports: [TranslatePipe, AvatarComponent, EmptyStateComponent],
+  imports: [TranslatePipe, AvatarComponent, EmptyStateComponent, RichTextPipe],
   templateUrl: './mobile-notifications.component.html',
   styleUrl: './mobile-notifications.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

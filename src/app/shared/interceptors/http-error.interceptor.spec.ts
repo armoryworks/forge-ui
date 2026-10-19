@@ -157,6 +157,38 @@ describe('httpErrorInterceptor', () => {
     );
   });
 
+  describe('500 toast details', () => {
+    const flush500 = (body: string | object | null) => {
+      http.get('/api/v1/jobs/1').subscribe({ next: () => {}, error: () => {} });
+      httpMock.expectOne('/api/v1/jobs/1').flush(body, { status: 500, statusText: 'Server Error' });
+      return toast.show.mock.calls[0][0] as { message: string; details?: string };
+    };
+
+    it('keeps the detail and adds the trace id when the problem carries both', () => {
+      const shown = flush500({ title: 'Boom', detail: 'Server exploded', traceId: '00-abc-01' });
+      expect(shown.message).toBe('Server exploded');
+      expect(shown.details).toBe('Server exploded\ntraceId: 00-abc-01');
+    });
+
+    it('shows only the trace id for a bare problem body instead of a JSON blob', () => {
+      const shown = flush500({ type: 'https://tools.ietf.org/html/rfc9110#section-15.6.1', title: 'An error occurred', status: 500, traceId: '00-def-01' });
+      expect(shown.message).toBe('An error occurred');
+      expect(shown.details).toBe('traceId: 00-def-01');
+    });
+
+    it('adds no details for a plain string body', () => {
+      const shown = flush500('upstream timeout');
+      expect(shown.message).toBe('upstream timeout');
+      expect(shown.details).toBeUndefined();
+    });
+
+    it('falls back to the generic message with no details for an empty body', () => {
+      const shown = flush500(null);
+      expect(shown.message).toBe('errors.unexpectedError');
+      expect(shown.details).toBeUndefined();
+    });
+  });
+
   it('shows the detail of a 400 validation problem instead of its generic title', () => {
     http.post('/api/v1/parts', {}).subscribe({
       next: () => {},
