@@ -15,7 +15,10 @@ import { EmptyStateComponent } from '../empty-state/empty-state.component';
 })
 export class DetailLoadErrorComponent {
   readonly error = input<unknown>(null);
+  readonly closeLabel = input('common.close');
+  readonly retryable = input(false);
   readonly closed = output<void>();
+  readonly retry = output<void>();
 
   protected readonly kind = computed<'notFound' | 'forbidden' | 'failed'>(() => {
     const err = this.error();
@@ -36,4 +39,11 @@ export class DetailLoadErrorComponent {
         return { icon: 'error_outline', message: 'detailLoadError.failed', help: 'detailLoadError.failedHelp' };
     }
   });
+
+  protected readonly offersRetry = computed(() => this.retryable() && this.kind() === 'failed');
+
+  protected act(): void {
+    if (this.offersRetry()) this.retry.emit();
+    else this.closed.emit();
+  }
 }

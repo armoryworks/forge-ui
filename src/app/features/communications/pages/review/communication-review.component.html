@@ -15,6 +15,9 @@
 
   <ng-container content>
     <div class="review" [appLoadingBlock]="loading()">
+      @if (loadError(); as err) {
+        <app-detail-load-error [error]="err" [retryable]="true" (closed)="leave()" (retry)="load()" />
+      }
       @if (detail(); as d) {
         <div class="review__grid">
 
@@ -169,14 +172,16 @@
   </ng-container>
 
   <ng-container actions>
-    <app-validation-button [violations]="violations" [loading]="saving()">
-      <button
-        class="action-btn action-btn--primary"
-        [disabled]="form.invalid || saving() || !canApprove()"
-        [matTooltip]="canApprove() ? '' : ('review.cannotApprove' | translate)"
-        (click)="approve()">
-        {{ 'review.approve' | translate }}
-      </button>
-    </app-validation-button>
+    @if (detail()) {
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button
+          class="action-btn action-btn--primary"
+          [disabled]="form.invalid || saving() || !canApprove()"
+          [matTooltip]="canApprove() ? '' : ('review.cannotApprove' | translate)"
+          (click)="approve()">
+          {{ 'review.approve' | translate }}
+        </button>
+      </app-validation-button>
+    }
   </ng-container>
 </app-page-layout>

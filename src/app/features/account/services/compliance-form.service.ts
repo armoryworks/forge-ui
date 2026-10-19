@@ -22,13 +22,18 @@ export class ComplianceFormService {
   private readonly _templates = signal<ComplianceFormTemplate[]>([]);
   private readonly _submissions = signal<ComplianceFormSubmission[]>([]);
   private readonly _identityDocuments = signal<IdentityDocument[]>([]);
+  private readonly _templatesLoaded = signal(false);
 
   readonly templates = this._templates.asReadonly();
   readonly submissions = this._submissions.asReadonly();
   readonly identityDocuments = this._identityDocuments.asReadonly();
+  readonly templatesLoaded = this._templatesLoaded.asReadonly();
 
   loadTemplates(): void {
-    this.http.get<ComplianceFormTemplate[]>(this.base).subscribe(t => this._templates.set(t));
+    this.http.get<ComplianceFormTemplate[]>(this.base).subscribe(t => {
+      this._templates.set(t);
+      this._templatesLoaded.set(true);
+    });
   }
 
   loadMySubmissions(): void {

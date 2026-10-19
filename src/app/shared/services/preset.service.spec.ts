@@ -88,6 +88,14 @@ describe('PresetService', () => {
     expect(service.selected()?.id).toBe('PRESET-04');
   });
 
+  it('getPreset stops loading and clears the selection when the preset is missing', () => {
+    service.getPreset('PRESET-99').subscribe({ error: () => undefined });
+    expect(service.detailLoading()).toBe(true);
+    httpMock.expectOne(`${BASE}/presets/PRESET-99`).flush({ title: 'Not found' }, { status: 404, statusText: 'Not Found' });
+    expect(service.detailLoading()).toBe(false);
+    expect(service.selected()).toBeNull();
+  });
+
   it('compare POSTs to /presets/compare with preset ids', () => {
     const response: PresetCompareResponse = { presets: [], rows: [] };
     service.compare(['PRESET-01', 'PRESET-04']).subscribe();

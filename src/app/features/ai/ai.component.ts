@@ -10,6 +10,7 @@ import { AiService, AiHelpMessage } from '../../shared/services/ai.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
+import { parsePositiveId } from '../../shared/utils/parse-positive-id';
 
 export interface AiAssistantListItem {
   id: number;
@@ -44,6 +45,7 @@ export class AiComponent {
 
   protected readonly assistants = signal<AiAssistantListItem[]>([]);
   protected readonly loadingAssistants = signal(false);
+  private readonly assistantsLoaded = signal(false);
   protected readonly sending = signal(false);
   protected readonly messageInput = new FormControl('');
 
@@ -60,9 +62,12 @@ export class AiComponent {
     if (param === 'general') {
       return list.find(a => a.category === 'General') ?? list[0] ?? null;
     }
-    const id = parseInt(param, 10);
+    const id = parsePositiveId(param);
     return list.find(a => a.id === id) ?? null;
   });
+
+  protected readonly assistantNotFound = computed(() =>
+    this.assistantsLoaded() && this.assistantIdParam() !== 'general' && !this.activeAssistant());
 
   protected readonly messages = computed(() => {
     const assistant = this.activeAssistant();
@@ -90,10 +95,15 @@ export class AiComponent {
     this.aiService.getAssistants().subscribe({
       next: (data) => {
         this.assistants.set(data);
+        this.assistantsLoaded.set(true);
         this.loadingAssistants.set(false);
       },
       error: () => this.loadingAssistants.set(false),
     });
+  }
+
+  protected openGeneral(): void {
+    this.router.navigate(['..', 'general'], { relativeTo: this.route, replaceUrl: true });
   }
 
   protected selectAssistant(assistant: AiAssistantListItem): void {

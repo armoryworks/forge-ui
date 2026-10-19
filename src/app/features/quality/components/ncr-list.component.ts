@@ -21,6 +21,7 @@ import { TextareaComponent } from '../../../shared/components/textarea/textarea.
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
 import { EntityPickerComponent } from '../../../shared/components/entity-picker/entity-picker.component';
 import { DetailSidePanelComponent } from '../../../shared/components/detail-side-panel/detail-side-panel.component';
+import { DetailLoadErrorComponent } from '../../../shared/components/detail-load-error/detail-load-error.component';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { DetailDialogService } from '../../../shared/services/detail-dialog.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
@@ -42,7 +43,7 @@ const requiredText = (control: AbstractControl): ValidationErrors | null =>
     DataTableComponent, ColumnCellDirective,
     SelectComponent, InputComponent, TextareaComponent, EntityPickerComponent,
     DialogComponent, DetailSidePanelComponent, LoadingBlockDirective,
-    ValidationButtonComponent, NcrDetailPanelComponent,
+    ValidationButtonComponent, NcrDetailPanelComponent, DetailLoadErrorComponent,
   ],
   templateUrl: './ncr-list.component.html',
   styleUrl: './ncr-list.component.scss',
@@ -63,6 +64,7 @@ export class NcrListComponent implements OnInit {
   protected readonly showDispositionDialog = signal(false);
   protected readonly dispositionNcr = signal<NonConformance | null>(null);
   protected readonly selectedNcr = signal<NonConformance | null>(null);
+  protected readonly detailError = signal<unknown>(null);
   protected readonly detailRefresh = signal(0);
 
   protected readonly typeFilter = new FormControl<NcrType | ''>('');
@@ -211,6 +213,7 @@ export class NcrListComponent implements OnInit {
 
   protected closeDetail(): void {
     this.selectedNcr.set(null);
+    this.detailError.set(null);
     if (this.detailDialog.getDetailFromUrl()?.entityType !== NCR_ENTITY_TYPE) return;
     this.router.navigate([], {
       relativeTo: this.route,
@@ -223,7 +226,11 @@ export class NcrListComponent implements OnInit {
   private openDetailFromUrl(): void {
     const detail = this.detailDialog.getDetailFromUrl();
     if (detail?.entityType !== NCR_ENTITY_TYPE || this.selectedNcr()?.id === detail.entityId) return;
-    this.ncrCapaService.getNcr(detail.entityId).subscribe(ncr => this.selectedNcr.set(ncr));
+    this.detailError.set(null);
+    this.ncrCapaService.getNcr(detail.entityId).subscribe({
+      next: ncr => this.selectedNcr.set(ncr),
+      error: (err: unknown) => this.detailError.set(err),
+    });
   }
 
   openDisposition(ncr: NonConformance): void {

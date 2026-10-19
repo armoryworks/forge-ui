@@ -17,11 +17,13 @@ import { ComplianceFormRendererComponent } from '../../components/compliance-for
 import { EmployeeProfileService } from '../../services/employee-profile.service';
 import { ComplianceFormService } from '../../services/compliance-form.service';
 import { IdentityDocument, IdentityDocumentType, IDENTITY_DOC_LIST_A, IDENTITY_DOC_LIST_B, IDENTITY_DOC_LIST_C } from '../../models/compliance-form.model';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { notFoundError } from '../../../../shared/utils/not-found-error';
 
 @Component({
   selector: 'app-account-tax-form-detail',
   standalone: true,
-  imports: [DatePipe, UpperCasePipe, MatTooltipModule, TranslatePipe, FileUploadZoneComponent, ComplianceFormRendererComponent, DialogComponent],
+  imports: [DatePipe, UpperCasePipe, MatTooltipModule, TranslatePipe, FileUploadZoneComponent, ComplianceFormRendererComponent, DialogComponent, DetailLoadErrorComponent],
   templateUrl: './account-tax-form-detail.component.html',
   styleUrl: './account-tax-form-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,7 +40,7 @@ export class AccountTaxFormDetailComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly formType = toSignal(
-    this.route.paramMap.pipe(map(p => p.get('formType') as string)),
+    this.route.paramMap.pipe(map(p => (p.get('formType') ?? '').toLowerCase())),
     { initialValue: '' },
   );
 
@@ -61,8 +63,11 @@ export class AccountTaxFormDetailComponent {
     const ft = this.formType();
     const templates = this.templates();
     if (!ft || !templates.length) return null;
-    return templates.find(t => t.profileCompletionKey === ft) ?? null;
+    return templates.find(t => t.profileCompletionKey.toLowerCase() === ft) ?? null;
   });
+
+  protected readonly notFound = computed(() => this.complianceService.templatesLoaded() && !this.template());
+  protected readonly notFoundError = notFoundError();
 
   protected readonly submission = computed(() => {
     const tmpl = this.template();

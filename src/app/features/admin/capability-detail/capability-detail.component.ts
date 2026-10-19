@@ -17,6 +17,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { CapabilityService } from '../../../shared/services/capability.service';
+import { DetailLoadErrorComponent } from '../../../shared/components/detail-load-error/detail-load-error.component';
+import { notFoundError } from '../../../shared/utils/not-found-error';
 import { ConsultantModeService } from '../../../shared/services/consultant-mode.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import {
@@ -67,6 +69,7 @@ interface CapabilityViolation {
     LoadingBlockDirective,
     TranslatePipe,
     GlOpeningCalloutComponent,
+    DetailLoadErrorComponent,
   ],
   templateUrl: './capability-detail.component.html',
   styleUrl: './capability-detail.component.scss',
@@ -93,6 +96,12 @@ export class CapabilityDetailComponent implements OnInit {
     if (!code) return undefined;
     return this.capabilityService.getEntry(code);
   });
+
+  /** True once the live descriptor has loaded and holds no capability with this code. */
+  protected readonly notFound = computed(() => this.capabilityService.descriptor() !== null && !this.entry());
+
+  /** The error the not-found state renders. */
+  protected readonly notFoundError = notFoundError();
 
   /** Admin settings that change how this capability behaves, linked to Admin > Settings. */
   protected readonly relatedSettings = computed(() => {

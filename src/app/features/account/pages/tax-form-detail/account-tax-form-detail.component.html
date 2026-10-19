@@ -417,6 +417,11 @@
         </app-dialog>
       }
     }
+  } @else if (notFound()) {
+    <app-detail-load-error
+      [error]="notFoundError"
+      closeLabel="account.backToForms"
+      (closed)="goBack()" />
   } @else {
     <div class="page-loading">
       <span class="material-icons-outlined account-page__spinner">sync</span>

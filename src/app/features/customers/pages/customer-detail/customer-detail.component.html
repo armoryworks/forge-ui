@@ -4,6 +4,13 @@
     <div class="cd-loading">
       <span class="material-icons-outlined">hourglass_empty</span>
     </div>
+  } @else if (loadError(); as err) {
+    <app-detail-load-error
+      [error]="err"
+      closeLabel="detailLoadError.backToList"
+      [retryable]="true"
+      (closed)="backToList()"
+      (retry)="reloadCustomer()" />
   } @else if (customer(); as c) {
 
     <!-- ── Header ── -->

@@ -5,6 +5,9 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { filter } from 'rxjs';
 
+import { DetailNotFoundDialogComponent } from '../components/detail-not-found-dialog/detail-not-found-dialog.component';
+import { parsePositiveId } from '../utils/parse-positive-id';
+
 const FIELD_OVERLAY_PANELS = '.mat-mdc-select-panel, .mat-mdc-autocomplete-panel.mat-mdc-autocomplete-visible, .mat-datepicker-content';
 
 /**
@@ -27,6 +30,7 @@ export class DetailDialogService {
   private focusOrigin: HTMLElement | null = null;
   private pageTab: string | null = null;
   private escapeOwnedByFieldOverlay = false;
+  private invalidDetailShown: string | null = null;
 
   constructor() {
     this.document.addEventListener('keydown', (event: KeyboardEvent) => {
@@ -98,18 +102,38 @@ export class DetailDialogService {
 
   /**
    * Parse `?detail=type:id` from the current URL.
-   * Returns null if no detail param or invalid format.
+   * Returns null if no detail param or invalid format. A param that is present but malformed
+   * (no type, or an id that is not a whole number above zero) opens the not-found detail dialog
+   * once, which clears the param when closed.
    */
   getDetailFromUrl(): { entityType: string; entityId: number } | null {
     const urlTree = this.router.parseUrl(this.router.url);
     const detail = urlTree.queryParams['detail'];
     if (!detail) return null;
     const colonIdx = detail.indexOf(':');
-    if (colonIdx < 0) return null;
-    const type = detail.substring(0, colonIdx);
-    const id = parseInt(detail.substring(colonIdx + 1), 10);
-    if (!type || isNaN(id)) return null;
+    const type = colonIdx < 0 ? '' : detail.substring(0, colonIdx);
+    const id = colonIdx < 0 ? null : parsePositiveId(detail.substring(colonIdx + 1));
+    if (!type || id === null) {
+      this.showInvalidDetail(detail);
+      return null;
+    }
     return { entityType: type, entityId: id };
+  }
+
+  private showInvalidDetail(detail: string): void {
+    if (this.invalidDetailShown === detail) return;
+    this.invalidDetailShown = detail;
+    const pageTab = this.router.parseUrl(this.router.url).queryParams['tab'] ?? null;
+    const ref = this.dialog.open(DetailNotFoundDialogComponent, {
+      width: '720px',
+      maxWidth: '95vw',
+      panelClass: 'detail-dialog-panel',
+      autoFocus: 'dialog',
+    });
+    ref.afterClosed().subscribe(() => {
+      this.invalidDetailShown = null;
+      this.clearDetailParam(pageTab);
+    });
   }
 
   private closeOnEscape(ref: MatDialogRef<unknown, unknown>): void {

@@ -9,6 +9,14 @@ import { capabilityGuard } from '../../shared/guards/capability.guard';
  */
 export const COMMUNICATIONS_ROUTES: Routes = [
   {
+    path: '',
+    pathMatch: 'full',
+    data: { status: 'notFound' },
+    loadComponent: () =>
+      import('../../shared/components/route-status-page/route-status-page.component')
+        .then((m) => m.RouteStatusPageComponent),
+  },
+  {
     path: ':id',
     canActivate: [capabilityGuard('CAP-EXT-EMAIL-SYNC')],
     loadComponent: () =>

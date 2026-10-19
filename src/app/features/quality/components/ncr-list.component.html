@@ -40,8 +40,10 @@
   </app-data-table>
 </div>
 
-<app-detail-side-panel [open]="selectedNcr() !== null" [title]="selectedNcr()?.ncrNumber ?? ''" (closed)="closeDetail()">
-  @if (selectedNcr(); as ncr) {
+<app-detail-side-panel [open]="selectedNcr() !== null || detailError() !== null" [title]="selectedNcr()?.ncrNumber ?? ''" (closed)="closeDetail()">
+  @if (detailError(); as err) {
+    <app-detail-load-error [error]="err" (closed)="closeDetail()" />
+  } @else if (selectedNcr(); as ncr) {
     <app-ncr-detail-panel [ncrId]="ncr.id" [refresh]="detailRefresh()"
       (dispositionRequested)="openDisposition($event)"
       (changed)="loadNcrs()" />

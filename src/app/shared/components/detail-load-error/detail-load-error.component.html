@@ -3,6 +3,6 @@
     [icon]="view().icon"
     [message]="view().message | translate"
     [helpText]="view().help | translate"
-    [actionLabel]="'common.close' | translate"
-    (action)="closed.emit()" />
+    [actionLabel]="(offersRetry() ? 'detailLoadError.retry' : closeLabel()) | translate"
+    (action)="act()" />
 </div>

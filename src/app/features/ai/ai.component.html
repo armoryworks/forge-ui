@@ -113,6 +113,15 @@
           <span class="material-icons-outlined">send</span>
         </button>
       </footer>
+    } @else if (assistantNotFound()) {
+      <div class="ai-chat__empty" data-testid="ai-assistant-not-found">
+        <app-empty-state
+          icon="search_off"
+          [message]="'ai.assistantNotFound' | translate"
+          [helpText]="'ai.assistantNotFoundHelp' | translate"
+          [actionLabel]="'ai.openGeneralAssistant' | translate"
+          (action)="openGeneral()" />
+      </div>
     } @else {
       <div class="ai-chat__empty">
         <app-empty-state icon="smart_toy" [message]="'ai.selectAssistant' | translate" />

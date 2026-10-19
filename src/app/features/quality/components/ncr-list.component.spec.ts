@@ -1,10 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Signal } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { provideTranslateService } from '@ngx-translate/core';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, throwError } from 'rxjs';
 
 import { NcrListComponent } from './ncr-list.component';
 import { NcrCapaService } from '../services/ncr-capa.service';
@@ -250,5 +251,28 @@ describe('NcrListComponent ?detail= deep link', () => {
     view.closeDetail();
 
     expect(navigate).not.toHaveBeenCalled();
+  });
+});
+
+describe('NcrListComponent deep link to a missing NCR', () => {
+  it('shows the not-found card in the side panel instead of failing silently', () => {
+    TestBed.resetTestingModule();
+    const missing = new HttpErrorResponse({ status: 404 });
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslateService(),
+        { provide: NcrCapaService, useValue: { getNcr: vi.fn(() => throwError(() => missing)), getNcrs: vi.fn(() => of([])) } },
+        { provide: SnackbarService, useValue: { success: vi.fn() } },
+        ...routingProviders(() => ({ entityType: 'ncr', entityId: 999999 })).providers,
+      ],
+    });
+    const view = TestBed.runInInjectionContext(() => new NcrListComponent()) as unknown as {
+      ngOnInit(): void; detailError: Signal<unknown>; closeDetail(): void;
+    };
+    view.ngOnInit();
+    TestBed.flushEffects();
+    expect(view.detailError()).toBe(missing);
+    view.closeDetail();
+    expect(view.detailError()).toBeNull();
   });
 });

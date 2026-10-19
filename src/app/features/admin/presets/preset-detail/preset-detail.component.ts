@@ -24,6 +24,7 @@ import { CapabilityService } from '../../../../shared/services/capability.servic
 import { PresetService } from '../../../../shared/services/preset.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { PresetCapabilityRow } from '../../../../shared/models/preset.model';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 
 interface CapabilityAreaGroup {
   area: string;
@@ -42,7 +43,7 @@ interface CapabilityAreaGroup {
 @Component({
   selector: 'app-preset-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, PageLayoutComponent, LoadingBlockDirective],
+  imports: [CommonModule, RouterModule, PageLayoutComponent, LoadingBlockDirective, DetailLoadErrorComponent],
   templateUrl: './preset-detail.component.html',
   styleUrl: './preset-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -60,6 +61,7 @@ export class PresetDetailComponent implements OnInit {
   protected readonly preset = this.presetService.selected;
   protected readonly loading = this.presetService.detailLoading;
   protected readonly applying = signal<boolean>(false);
+  protected readonly loadError = signal<unknown>(null);
 
   protected readonly capabilityGroups = computed<CapabilityAreaGroup[]>(() => {
     const detail = this.preset();
@@ -85,10 +87,7 @@ export class PresetDetailComponent implements OnInit {
       return;
     }
     this.presetService.getPreset(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      error: (err: unknown) => {
-        this.snackbar.errorFrom(err, 'errorFallbacksA.presetNotFound');
-        this.router.navigate(['/admin/presets']);
-      },
+      error: (err: unknown) => this.loadError.set(err),
     });
   }
 
