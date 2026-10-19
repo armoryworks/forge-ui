@@ -18,10 +18,8 @@
     <app-input [label]="'employees.search' | translate" [formControl]="searchControl"
       [placeholder]="'employees.searchPlaceholder' | translate"
       (keyup.enter)="applyFilters()" />
-    <app-select [label]="'employees.role' | translate" [formControl]="roleControl" [options]="roleOptions()"
-      (selectionChange)="applyFilters()" />
-    <app-select [label]="'employees.status' | translate" [formControl]="statusControl" [options]="statusOptions"
-      (selectionChange)="applyFilters()" />
+    <app-select [label]="'employees.role' | translate" [formControl]="roleControl" [options]="roleOptions()" />
+    <app-select [label]="'employees.status' | translate" [formControl]="statusControl" [options]="statusOptions" />
   </div>
 
   <div [appLoadingBlock]="loading()" class="employees-list-content">

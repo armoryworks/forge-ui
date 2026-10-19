@@ -44,6 +44,7 @@ export class CalendarComponent implements OnInit {
    * getSuperGroups) and namespaces saved views to that module.
    */
   readonly scope = input<string>('master');
+  protected readonly showOperationalLayers = computed(() => this.scope() !== 'module:compliance');
   // Host-overridable header text so an embedding module (e.g. /compliance) shows
   // its own title in the calendar's single page-header instead of stacking a
   // second header above it (space-efficiency rule — no redundant chrome).
@@ -172,7 +173,6 @@ export class CalendarComponent implements OnInit {
   });
 
   constructor() {
-    this.loadJobs();
     this.kanbanService.getTrackTypes().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(types => {
       this.trackTypeOptions.set([
         { value: null, label: this.translate.instant('calendar.allTrackTypes') },
@@ -224,6 +224,11 @@ export class CalendarComponent implements OnInit {
     // pass it to the scoped saved-views endpoint (input signals hold their
     // default during the constructor).
     this.loadSavedViews();
+    if (this.showOperationalLayers()) {
+      this.loadJobs();
+    } else {
+      this.showPoDeliveries.set(false);
+    }
   }
 
   protected loadJobs(): void {
@@ -260,6 +265,7 @@ export class CalendarComponent implements OnInit {
   }
 
   private loadPoEvents(): void {
+    if (!this.showOperationalLayers()) return;
     const d = this.currentDate();
     const year = d.getFullYear();
     const month = d.getMonth();

@@ -15,9 +15,11 @@
   </div>
 
   <div class="calendar-toolbar__right">
-    <app-select class="calendar-toolbar__filter" [label]="'calendar.trackType' | translate" [formControl]="trackTypeControl" [options]="trackTypeOptions()" />
+    @if (showOperationalLayers()) {
+      <app-select class="calendar-toolbar__filter" [label]="'calendar.trackType' | translate" [formControl]="trackTypeControl" [options]="trackTypeOptions()" />
+    }
 
-    @if (canReadPoDeliveries) {
+    @if (canReadPoDeliveries && showOperationalLayers()) {
       <button class="icon-btn" [class.icon-btn--active]="showPoDeliveries()"
               (click)="togglePoDeliveries()"
               [attr.aria-label]="(showPoDeliveries() ? 'calendar.hidePoDeliveries' : 'calendar.showPoDeliveries') | translate"

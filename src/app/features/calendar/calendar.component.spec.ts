@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -33,7 +34,7 @@ describe('CalendarComponent · role access', () => {
     };
   });
 
-  function setup(roles: string[]): CalendarInternals {
+  function setup(roles: string[], scope = 'master'): CalendarInternals {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -46,9 +47,14 @@ describe('CalendarComponent · role access', () => {
         { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
       ],
     });
-    const component = TestBed.runInInjectionContext(() => new CalendarComponent()) as unknown as CalendarInternals;
+    const component = TestBed.runInInjectionContext(() => {
+      const created = new CalendarComponent();
+      Object.defineProperty(created, 'scope', { value: signal(scope) });
+      return created;
+    });
+    component.ngOnInit();
     TestBed.flushEffects();
-    return component;
+    return component as unknown as CalendarInternals;
   }
 
   it('asks a Controller for neither jobs nor PO deliveries, which the API refuses that role', () => {
@@ -73,5 +79,14 @@ describe('CalendarComponent · role access', () => {
 
     expect(calendar['getJobs']).toHaveBeenCalled();
     expect(calendar['getPoEvents']).toHaveBeenCalled();
+  });
+
+  it('keeps the compliance calendar to its own events, without jobs or PO deliveries', () => {
+    const view = setup(['OfficeManager'], 'module:compliance');
+
+    expect(calendar['getJobs']).not.toHaveBeenCalled();
+    expect(calendar['getPoEvents']).not.toHaveBeenCalled();
+    expect(view.showPoDeliveries()).toBe(false);
+    expect(calendar['getEvents']).toHaveBeenCalled();
   });
 });
