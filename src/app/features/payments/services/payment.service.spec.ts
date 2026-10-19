@@ -50,6 +50,17 @@ describe('PaymentService', () => {
     });
   });
 
+  describe('applyPayment', () => {
+    it('should POST the applications for the payment', () => {
+      const body = { applications: [{ invoiceId: 9, amount: 250 }] };
+      service.applyPayment(4, body).subscribe();
+      const req = httpMock.expectOne(`${base}/4/applications`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(body);
+      req.flush({ id: 4 });
+    });
+  });
+
   describe('createPayment', () => {
     it('should POST new payment', () => {
       const body = { customerId: 1, amount: 500, method: 'Check' } as any;

@@ -9,6 +9,7 @@ import { PaymentListItem } from '../models/payment-list-item.model';
 import { PaymentDetail } from '../models/payment-detail.model';
 import { CreatePaymentRequest } from '../models/create-payment-request.model';
 import { UpdatePaymentRequest } from '../models/update-payment-request.model';
+import { ApplyPaymentRequest } from '../models/apply-payment-request.model';
 
 /** Phase 3 F7-broad / WU-22 — paged payment list query parameters. */
 export interface PaymentListPagedQuery extends PagedQuery {
@@ -62,6 +63,11 @@ export class PaymentService {
    */
   updatePayment(id: number, request: UpdatePaymentRequest): Observable<PaymentListItem> {
     return this.http.put<PaymentListItem>(`${this.base}/${id}`, request);
+  }
+
+  /** Applies the payment's unapplied (on-account) cash to open invoices of the same customer. */
+  applyPayment(id: number, request: ApplyPaymentRequest): Observable<PaymentListItem> {
+    return this.http.post<PaymentListItem>(`${this.base}/${id}/applications`, request);
   }
 
   deletePayment(id: number): Observable<void> {

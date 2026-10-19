@@ -124,6 +124,12 @@
 
       <!-- Actions -->
       <div class="detail-actions">
+        @if (canApplyCredit()) {
+          <button class="action-btn action-btn--primary" data-testid="payment-apply-credit-btn" (click)="openApplyCredit()">
+            <span class="material-icons-outlined">playlist_add_check</span>
+            {{ 'payments.applyCredit' | translate }}
+          </button>
+        }
         @if (canDelete()) {
           <button class="action-btn action-btn--danger" (click)="deletePayment()">
             <span class="material-icons-outlined">delete</span>
@@ -132,6 +138,9 @@
         }
       </div>
     </div>
+    @if (applyingCredit()) {
+      <app-apply-credit-dialog [payment]="payment" (closed)="closeApplyCredit()" (saved)="onCreditApplied()" />
+    }
   } @else if (loadError()) {
     <app-detail-load-error [error]="loadError()" (closed)="closed.emit()" />
   }

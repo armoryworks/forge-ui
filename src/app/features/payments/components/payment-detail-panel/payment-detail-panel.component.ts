@@ -20,6 +20,7 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { NumberLockInfoComponent } from '../../../../shared/components/number-lock-info/number-lock-info.component';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
+import { ApplyCreditDialogComponent } from '../apply-credit-dialog/apply-credit-dialog.component';
 
 @Component({
   selector: 'app-payment-detail-panel',
@@ -28,7 +29,7 @@ import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
     DateOnlyPipe, NumberLockInfoComponent, DatePipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent, InputComponent,
-    DetailLoadErrorComponent,
+    DetailLoadErrorComponent, ApplyCreditDialogComponent,
   ],
   templateUrl: './payment-detail-panel.component.html',
   styleUrl: './payment-detail-panel.component.scss',
@@ -51,6 +52,8 @@ export class PaymentDetailPanelComponent {
 
   protected readonly paymentIdValue = computed(() => this.payment()?.id ?? 0);
   protected readonly activityTabs: ActivityFilterTab[] = ['history'];
+  protected readonly applyingCredit = signal(false);
+  protected readonly canApplyCredit = computed(() => (this.payment()?.unappliedAmount ?? 0) > 0);
 
   // Inline rename of the payment number — only offered when manual numbers are
   // enabled and the payment has no applications (matches the server's rule).
@@ -114,6 +117,20 @@ export class PaymentDetailPanelComponent {
     const key = 'payments.method' + method;
     const translated = this.translate.instant(key);
     return translated !== key ? translated : method;
+  }
+
+  protected openApplyCredit(): void {
+    this.applyingCredit.set(true);
+  }
+
+  protected closeApplyCredit(): void {
+    this.applyingCredit.set(false);
+  }
+
+  protected onCreditApplied(): void {
+    this.applyingCredit.set(false);
+    this.loadPayment(this.paymentId());
+    this.paymentChanged.emit();
   }
 
   protected canDelete(): boolean {

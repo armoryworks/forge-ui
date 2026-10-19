@@ -10,6 +10,7 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
+import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
@@ -22,7 +23,7 @@ import { toIsoDate, todayEnd } from '../../../../shared/utils/date.utils';
   imports: [
     ReactiveFormsModule,
     DialogComponent, InputComponent, TextareaComponent, DatepickerComponent,
-    EntityPickerComponent, ValidationButtonComponent, TranslatePipe,
+    EntityPickerComponent, ToggleComponent, ValidationButtonComponent, TranslatePipe,
   ],
   templateUrl: './customer-return-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,6 +50,7 @@ export class CustomerReturnDialogComponent {
     reason: new FormControl('', [Validators.required, Validators.maxLength(500)]),
     notes: new FormControl(''),
     returnDate: new FormControl<Date | null>(new Date(), [Validators.required]),
+    createReworkJob: new FormControl<boolean>(false, { nonNullable: true }),
   });
 
   protected readonly violations = FormValidationService.getViolations(this.returnForm, {
@@ -118,6 +120,7 @@ export class CustomerReturnDialogComponent {
         notes: f.notes || undefined,
         returnDate: toIsoDate(f.returnDate ?? new Date()) ?? '',
         quantity: f.quantity ?? undefined,
+        createReworkJob: f.createReworkJob,
       }).subscribe({
         next: () => {
           this.saving.set(false);

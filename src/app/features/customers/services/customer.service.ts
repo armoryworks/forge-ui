@@ -119,6 +119,10 @@ export class CustomerService {
     return this.http.get<CreditStatus[]>(`${this.base}/credit-risk-report`);
   }
 
+  getStatementPdf(customerId: number): Observable<Blob> {
+    return this.http.get(`${this.base}/${customerId}/statement`, { responseType: 'blob' });
+  }
+
   // ─── Contact Interactions ───
 
   getInteractions(customerId: number, contactId?: number): Observable<ContactInteraction[]> {

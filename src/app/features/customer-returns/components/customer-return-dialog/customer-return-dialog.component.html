@@ -35,6 +35,11 @@
         formControlName="quantity"
         [required]="true"
         data-testid="return-quantity" />
+
+      <app-toggle
+        [label]="'customerReturns.fieldCreateReworkJob' | translate"
+        formControlName="createReworkJob"
+        data-testid="return-create-rework" />
     }
 
     <app-input

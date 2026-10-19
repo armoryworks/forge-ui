@@ -2372,7 +2372,8 @@
         "Email": "Email",
         "Meeting": "Meeting",
         "Note": "Note"
-      }
+      },
+      "followUpDate": "Follow-up date (adds a task for you)"
     },
     "contactsCluster": {
       "addFirst": "Add First Contact",
@@ -2449,7 +2450,8 @@
       "colDue": "Due",
       "colTitle": "Title",
       "colStage": "Stage",
-      "colPriority": "Priority"
+      "colPriority": "Priority",
+      "downloadStatement": "Download statement"
     },
     "estimates": {
       "newEstimate": "New Estimate",
@@ -5358,7 +5360,13 @@
     "paymentDetails": "Payment Details",
     "numberLockedReason": "A payment number can only be changed before the payment is applied. This one is already applied to an invoice, so the number is part of the settled record.",
     "invoice": "Invoice",
-    "invoicePlaceholder": "Pick an open invoice"
+    "invoicePlaceholder": "Pick an open invoice",
+    "applyCredit": "Apply credit",
+    "applyCreditTitle": "Apply credit — {{number}}",
+    "availableCredit": "Available credit",
+    "remainingCredit": "Remaining credit",
+    "creditApplied": "Credit applied.",
+    "addApplication": "Add invoice application"
   },
   "vendorContacts": {
     "contactsTab": "Contacts",
@@ -7644,7 +7652,8 @@
     "subtitle": "Track and manage customer returns",
     "title": "Customer Returns",
     "updated": "Return updated",
-    "fieldQuantity": "Quantity returned"
+    "fieldQuantity": "Quantity returned",
+    "fieldCreateReworkJob": "Create a rework work order"
   },
   "recalls": {
     "title": "Recalls",

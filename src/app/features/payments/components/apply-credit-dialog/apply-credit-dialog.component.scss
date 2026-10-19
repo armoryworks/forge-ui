@@ -1,0 +1,44 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.credit-summary {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  margin-bottom: $sp-md;
+}
+
+.credit-summary__row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.credit-lines {
+  list-style: none;
+  margin: 0 0 $sp-md;
+  padding: 0;
+}
+
+.credit-lines__row {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-xs 0;
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.credit-lines__invoice {
+  flex: 1;
+  font-family: monospace;
+}
+
+.add-line--3col {
+  grid-template-columns: 1fr 120px auto;
+}
+
+.add-line--4col {
+  grid-template-columns: 1fr 120px 110px auto;
+}

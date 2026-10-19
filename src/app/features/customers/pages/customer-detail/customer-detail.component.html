@@ -142,7 +142,7 @@
           <app-customer-jobs-tab [customerId]="c.id" />
         }
         @case ('invoices') {
-          <app-customer-invoices-tab [customerId]="c.id" />
+          <app-customer-invoices-tab [customerId]="c.id" [customerName]="c.name" />
         }
         @case ('pricing') {
           <app-customer-pricing-tab [customerId]="c.id" />
