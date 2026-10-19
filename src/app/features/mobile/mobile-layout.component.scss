@@ -192,6 +192,8 @@ $scan-ring-overhang: 12px;
 
   &__label {
     @include uppercase-label($font-size-xs, 0.3px, 500);
+    @include truncate;
+    max-width: 100%;
   }
 }
 
