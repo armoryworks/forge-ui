@@ -50,7 +50,7 @@ export class InventoryReorderVisualComponent {
 
     return this.alerts()
       .map((a) => {
-        const reorderPoint = a.reorderPoint ?? a.minStockThreshold;
+        const reorderPoint = a.reorderPoint ?? a.minStockThreshold ?? 0;
         const available = availByPart.get(a.partId) ?? a.currentStock;
         const ratio = reorderPoint > 0 ? available / reorderPoint : available;
         return { partNumber: a.partNumber, available, reorderPoint, color: this.statusColor(available, reorderPoint), ratio };

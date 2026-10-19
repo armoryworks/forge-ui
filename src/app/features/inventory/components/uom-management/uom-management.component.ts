@@ -14,6 +14,7 @@ import { ToggleComponent } from '../../../../shared/components/toggle/toggle.com
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
@@ -34,6 +35,9 @@ export class UomManagementComponent implements OnInit {
   private readonly inventoryService = inject(InventoryService);
   private readonly snackbar = inject(SnackbarService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly auth = inject(AuthService);
+
+  protected readonly canManage = this.auth.hasAnyRole(['Admin', 'Manager']);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -61,7 +65,7 @@ export class UomManagementComponent implements OnInit {
       filterOptions: this.categoryOptions, width: '120px' },
     { field: 'decimalPlaces', header: 'Decimals', sortable: true, align: 'center', width: '90px' },
     { field: 'isBaseUnit', header: 'Base', sortable: true, align: 'center', width: '70px' },
-    { field: 'actions', header: '', width: '60px' },
+    ...(this.canManage ? [{ field: 'actions', header: '', width: '60px' }] : []),
   ];
 
   protected readonly conversionColumns: ColumnDef[] = [
@@ -114,6 +118,7 @@ export class UomManagementComponent implements OnInit {
   }
 
   protected openEditUom(uom: UnitOfMeasure): void {
+    if (!this.canManage) return;
     this.editingUom.set(uom);
     this.uomForm.patchValue({
       code: uom.code,

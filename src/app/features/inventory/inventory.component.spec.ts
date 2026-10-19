@@ -330,3 +330,132 @@ describe('InventoryComponent stock dialogs', () => {
     expect(internals.showNoBinsHint(null, internals.adjustBinOptions())).toBe(false);
   });
 });
+
+interface InventoryFixInternals {
+  searchControl: FormControl<string | null>;
+  partSummaries: { set(rows: { onHand: number }[]): void };
+  inStockCount(): number;
+  canAdjustStock: boolean;
+  transferForm: FormGroup<{
+    partId: FormControl<number | null>;
+    sourceBinContentId: FormControl<number | null>;
+    quantity: FormControl<number | null>;
+  }>;
+  selectedCycleCount: { set(cc: unknown): void; (): { lines: { id: number; actualQuantity: number; variance: number }[] } | null };
+  invalidCycleCountLineIds(): ReadonlySet<number>;
+  updateCycleCountLine(lineId: number, raw: string): void;
+  approveCycleCount(): void;
+  suggestionBurnRate(s: ReorderSuggestion): number | null;
+}
+
+describe('InventoryComponent stock search, counts and permissions', () => {
+  beforeEach(() => vi.restoreAllMocks());
+
+  it('reloads stock with the typed term after the user stops typing', () => {
+    vi.useFakeTimers();
+    try {
+      const getPartInventory = vi.fn(() => of([]));
+      const { internals } = setup('stock', { loaded: true, enabled: false }, { inventory: { getPartInventory } });
+      const fix = internals as unknown as InventoryFixInternals;
+      getPartInventory.mockClear();
+
+      fix.searchControl.setValue('brk');
+      fix.searchControl.setValue('bracket');
+      expect(getPartInventory).not.toHaveBeenCalled();
+
+      vi.advanceTimersByTime(300);
+
+      expect(getPartInventory).toHaveBeenCalledTimes(1);
+      expect(getPartInventory).toHaveBeenCalledWith('bracket');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('counts the parts that actually have stock', () => {
+    const { internals } = setup('stock', { loaded: true, enabled: false });
+    const fix = internals as unknown as InventoryFixInternals;
+
+    fix.partSummaries.set([{ onHand: 5 }, { onHand: 0 }, { onHand: 0 }, { onHand: 2.5 }]);
+
+    expect(fix.inStockCount()).toBe(2);
+  });
+
+  it('offers stock adjustment to Admin and Manager only, matching the API', () => {
+    expect((setup('stockOps', { loaded: true, enabled: false }, {}, ['Manager']).internals as unknown as InventoryFixInternals).canAdjustStock).toBe(true);
+    expect((setup('stockOps', { loaded: true, enabled: false }, {}, ['Admin']).internals as unknown as InventoryFixInternals).canAdjustStock).toBe(true);
+    expect((setup('stockOps', { loaded: true, enabled: false }, {}, ['OfficeManager']).internals as unknown as InventoryFixInternals).canAdjustStock).toBe(false);
+    expect((setup('stockOps', { loaded: true, enabled: false }, {}, ['Engineer']).internals as unknown as InventoryFixInternals).canAdjustStock).toBe(false);
+  });
+
+  it('caps the transfer quantity at what the chosen bin has available', () => {
+    const bins: PartBinLocation[] = [
+      { binContentId: 31, locationPath: 'Main / A1', quantity: 10, reservedQuantity: 4, availableQuantity: 6, lotNumber: null, status: 'Stored' },
+    ];
+    const { internals } = setup('stockOps', { loaded: true, enabled: false }, { inventory: { getPartBins: () => of(bins) } });
+    const form = (internals as unknown as InventoryFixInternals).transferForm;
+
+    form.controls.partId.setValue(10);
+    form.controls.sourceBinContentId.setValue(31);
+    TestBed.flushEffects();
+    form.controls.quantity.setValue(7);
+
+    expect(form.controls.quantity.errors).toEqual({ max: { max: 6, actual: 7 } });
+    form.controls.quantity.setValue(6);
+    expect(form.controls.quantity.valid).toBe(true);
+  });
+});
+
+describe('InventoryComponent cycle count lines', () => {
+  beforeEach(() => vi.restoreAllMocks());
+
+  const count = {
+    id: 5, locationId: 1, locationName: 'A1', countedById: 1, countedByName: 'Avery Stone',
+    countedAt: '2026-10-01T00:00:00Z', status: 'Pending', notes: null,
+    lines: [{ id: 1, entityType: 'part', entityId: 10, entityName: 'P-10', expectedQuantity: 8, actualQuantity: 8, variance: 0, notes: null }],
+  };
+
+  it('refuses a negative or fractional actual and blocks approval until it is fixed', () => {
+    const updateCycleCount = vi.fn(() => of(undefined));
+    const { internals } = setup('cycleCounts', { loaded: true, enabled: false }, { inventory: { updateCycleCount } });
+    const fix = internals as unknown as InventoryFixInternals;
+    fix.selectedCycleCount.set(count);
+
+    fix.updateCycleCountLine(1, '-2');
+    expect(fix.invalidCycleCountLineIds().has(1)).toBe(true);
+    expect(fix.selectedCycleCount()!.lines[0].actualQuantity).toBe(8);
+    fix.approveCycleCount();
+    expect(updateCycleCount).not.toHaveBeenCalled();
+
+    fix.updateCycleCountLine(1, '3.5');
+    expect(fix.invalidCycleCountLineIds().has(1)).toBe(true);
+
+    fix.updateCycleCountLine(1, '6');
+    expect(fix.invalidCycleCountLineIds().size).toBe(0);
+    expect(fix.selectedCycleCount()!.lines[0]).toMatchObject({ actualQuantity: 6, variance: -2 });
+    fix.approveCycleCount();
+    expect(updateCycleCount).toHaveBeenCalledWith(5, expect.objectContaining({
+      status: 'Approved',
+      lines: [{ id: 1, actualQuantity: 6, notes: undefined }],
+    }));
+  });
+
+  it('accepts a count of zero', () => {
+    const { internals } = setup('cycleCounts', { loaded: true, enabled: false });
+    const fix = internals as unknown as InventoryFixInternals;
+    fix.selectedCycleCount.set(count);
+
+    fix.updateCycleCountLine(1, '0');
+
+    expect(fix.invalidCycleCountLineIds().size).toBe(0);
+    expect(fix.selectedCycleCount()!.lines[0].actualQuantity).toBe(0);
+  });
+
+  it('shows no burn rate for a suggestion without consumption history', () => {
+    const { internals } = setup('replenishment', { loaded: true, enabled: false });
+    const fix = internals as unknown as InventoryFixInternals;
+
+    expect(fix.suggestionBurnRate(suggestion({ burnRateDailyAvg: 0 }))).toBeNull();
+    expect(fix.suggestionBurnRate(suggestion({ burnRateDailyAvg: 2.5 }))).toBe(2.5);
+  });
+});

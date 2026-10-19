@@ -10,13 +10,13 @@ export const INVENTORY_TOUR: TourDefinition = {
     {
       element: '.tab-bar',
       title: 'Inventory Tabs',
-      description: 'Switch between Stock Levels, Receiving, Stock Operations, and Cycle Counts.',
+      description: 'Switch between Stock Levels, Locations, Movements, Receiving, Stock Ops, Cycle Counts and Reservations, plus Inspection, Replenishment and Units of Measure when they are available to you.',
       side: 'bottom',
     },
     {
       element: 'app-data-table',
       title: 'Inventory Table',
-      description: 'View stock by location. Expandable rows show bin-level detail. Use column filters for quick lookup.',
+      description: 'Search by part number or description. Expand a row to see stock in each bin.',
       side: 'top',
     },
   ],

@@ -1,11 +1,11 @@
 export interface BurnRate {
   partId: number;
   partNumber: string;
-  partDescription: string;
+  description: string;
   preferredVendorId: number | null;
   preferredVendorName: string | null;
-  onHandStock: number;
-  availableStock: number;
+  onHand: number;
+  available: number;
   incomingPoQuantity: number;
   earliestPoArrival: string | null;
   burnRate30Day: number | null;
