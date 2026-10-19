@@ -7685,6 +7685,7 @@
     "inspectedAt": "Inspeccionado el",
     "inspectedBy": "Inspeccionado por",
     "inspectionNotes": "Notas de Inspección",
+    "inspectionNotesOptional": "Notas de inspección (opcional)",
     "newReturn": "Nueva Devolución",
     "noReturns": "No se encontraron devoluciones",
     "originalJob": "Trabajo Original",

@@ -62,3 +62,8 @@
   font-size: $font-size-base;
   color: var(--text);
 }
+
+.resolve-dialog__message {
+  margin: 0 0 $sp-md;
+  color: var(--text);
+}

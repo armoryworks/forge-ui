@@ -7692,6 +7692,7 @@
     "inspectedAt": "Inspected At",
     "inspectedBy": "Inspected By",
     "inspectionNotes": "Inspection Notes",
+    "inspectionNotesOptional": "Inspection notes (optional)",
     "newReturn": "New Return",
     "noReturns": "No customer returns found",
     "originalJob": "Original Job",
