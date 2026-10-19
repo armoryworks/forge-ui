@@ -32,6 +32,8 @@ export interface LoginResponse {
   mfaRequired?: boolean;
   /** Short-lived pre-auth token issued when MFA is required; exchanged for a challenge. */
   mfaPendingToken?: string;
+  /** The user's role requires MFA by policy and they have not enrolled yet. */
+  mfaEnrollmentRequired?: boolean;
 }
 
 export interface SetupStatusResponse {

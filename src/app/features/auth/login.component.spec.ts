@@ -105,4 +105,14 @@ describe('LoginComponent', () => {
 
     expect(router.navigate).toHaveBeenCalledWith(['/account/profile']);
   });
+
+  it('sends a user whose role requires MFA, and who has not enrolled, to account security first', () => {
+    respond({ user: user(['Controller'], true), mfaEnrollmentRequired: true });
+    const login = create();
+    autofill('controller@forge.local', 'correct horse');
+
+    login.onSubmit();
+
+    expect(router.navigate).toHaveBeenCalledWith(['/account/security']);
+  });
 });
