@@ -296,6 +296,7 @@ export class EcoListComponent implements OnInit {
       data: {
         title: 'Remove Affected Item?',
         message: 'Remove this affected item from the ECO?',
+        details: [`${item.entityType} ${item.entityId}: ${item.changeDescription}`],
         confirmLabel: 'Remove',
         severity: 'danger',
       } satisfies ConfirmDialogData,
