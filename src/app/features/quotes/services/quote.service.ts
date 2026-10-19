@@ -50,12 +50,14 @@ export class QuoteService {
   /**
    * AUDIT-19-S1 / #26 — the customer-specific price-list unit price for a part,
    * or null when there's no applicable entry. Called on part-select to pre-fill
-   * the line's unit price. Returns a bare decimal (or null) per the server contract.
+   * the line's unit price. The quantity picks the price-list break; without it
+   * the lowest break applies. Returns a bare decimal (or null) per the server contract.
    */
-  resolvePrice(customerId: number, partId: number): Observable<number | null> {
-    const params = new HttpParams()
+  resolvePrice(customerId: number, partId: number, quantity?: number | null): Observable<number | null> {
+    let params = new HttpParams()
       .set('customerId', String(customerId))
       .set('partId', String(partId));
+    if (quantity != null && quantity > 0) params = params.set('quantity', String(quantity));
     return this.http.get<number | null>(`${this.base}/resolve-price`, { params });
   }
 
@@ -70,6 +72,14 @@ export class QuoteService {
   /** Copy a quote into a new Draft with the next quote number. Returns the copy's detail. */
   duplicateQuote(id: number): Observable<QuoteDetail> {
     return this.http.post<QuoteDetail>(`${this.base}/${id}/duplicate`, {});
+  }
+
+  /**
+   * Start the next revision of a Sent, Declined or Expired quote. The server
+   * creates a Draft numbered after it and marks the source Superseded.
+   */
+  reviseQuote(id: number): Observable<QuoteDetail> {
+    return this.http.post<QuoteDetail>(`${this.base}/${id}/revise`, {});
   }
 
   /** Append a line to a draft quote. Returns the refreshed quote detail. */

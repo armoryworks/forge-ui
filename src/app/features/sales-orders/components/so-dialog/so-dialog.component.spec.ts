@@ -212,6 +212,30 @@ describe('SoDialogComponent', () => {
       httpMock.verify();
     });
 
+    it('sends the line quantity and re-resolves the price break when the quantity changes', () => {
+      vi.useFakeTimers();
+      try {
+        const { component, internals, httpMock } = setup();
+        selectCustomer(component, httpMock);
+
+        internals.lineForm.controls.quantity.setValue(250);
+        vi.advanceTimersByTime(300);
+        internals.lineForm.controls.partId.setValue(20);
+        httpMock.expectOne(r =>
+          r.url === `${api}/quotes/resolve-price` && r.params.get('quantity') === '250').flush(96);
+        expect(internals.lineForm.controls.unitPrice.value).toBe(96);
+
+        internals.lineForm.controls.quantity.setValue(10);
+        vi.advanceTimersByTime(300);
+        httpMock.expectOne(r =>
+          r.url === `${api}/quotes/resolve-price` && r.params.get('quantity') === '10').flush(112);
+        expect(internals.lineForm.controls.unitPrice.value).toBe(112);
+        httpMock.verify();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it('falls back to the part effective price when the customer has no price', () => {
       const { component, internals, httpMock } = setup([part({ effectivePrice: 9.5, effectivePriceSource: 'PartPrice' })]);
       selectCustomer(component, httpMock);

@@ -196,10 +196,19 @@ export class QuoteDetailPanelComponent {
   }
 
   protected duplicateQuote(): void {
+    this.openCopy(false);
+  }
+
+  protected reviseQuote(): void {
+    this.openCopy(true);
+  }
+
+  private openCopy(asRevision: boolean): void {
     const q = this.quote();
     if (!q || this.duplicating()) return;
     this.duplicating.set(true);
-    this.quoteService.duplicateQuote(q.id).subscribe({
+    const request = asRevision ? this.quoteService.reviseQuote(q.id) : this.quoteService.duplicateQuote(q.id);
+    request.subscribe({
       next: (copy) => {
         this.duplicating.set(false);
         this.duplicated.set(true);
@@ -210,7 +219,8 @@ export class QuoteDetailPanelComponent {
         this.quote.set(copy);
         this.activeQuoteId.set(copy.id);
         this.syncDetailParam(copy.id);
-        this.snackbar.success(this.translate.instant('quoteCopy.duplicated', { number: copy.quoteNumber, source: q.quoteNumber }));
+        this.snackbar.success(this.translate.instant(
+          asRevision ? 'quoteCopy.revised' : 'quoteCopy.duplicated', { number: copy.quoteNumber, source: q.quoteNumber }));
       },
       error: () => this.duplicating.set(false),
     });
@@ -316,6 +326,7 @@ export class QuoteDetailPanelComponent {
       Declined: 'chip--error',
       Expired: 'chip--warning',
       ConvertedToOrder: 'chip--primary',
+      Superseded: 'chip--muted',
     };
     return `chip ${map[status] ?? ''}`.trim();
   }
@@ -331,6 +342,7 @@ export class QuoteDetailPanelComponent {
   protected canAccept(status: string): boolean { return status === 'Sent'; }
   protected canReject(status: string): boolean { return status === 'Sent'; }
   protected canConvert(status: string): boolean { return status === 'Accepted'; }
+  protected canRevise(status: string): boolean { return status === 'Sent' || status === 'Declined' || status === 'Expired'; }
   protected canDelete(status: string): boolean { return status === 'Draft'; }
 
   // --- Quote-number edit ---
@@ -413,7 +425,7 @@ export class QuoteDetailPanelComponent {
     const q = this.quote();
     const partId = part['id'] as number | undefined;
     if (q && partId) {
-      this.quoteService.resolvePrice(q.customerId, partId).subscribe({
+      this.quoteService.resolvePrice(q.customerId, partId, this.lineForm.controls.quantity.value).subscribe({
         next: price => {
           if (price != null) this.lineForm.controls.unitPrice.setValue(price);
         },

@@ -72,6 +72,7 @@ export class QuotesComponent implements OnInit {
     { value: 'Declined', label: this.translate.instant('quotes.statusDeclined') },
     { value: 'Expired', label: this.translate.instant('quotes.statusExpired') },
     { value: 'ConvertedToOrder', label: this.translate.instant('quotes.statusConvertedToOrder') },
+    { value: 'Superseded', label: this.translate.instant('quotes.statusSuperseded') },
   ];
 
   protected readonly quoteColumns: ColumnDef[] = [
@@ -156,6 +157,7 @@ export class QuotesComponent implements OnInit {
       Declined: 'chip--error',
       Expired: 'chip--warning',
       ConvertedToOrder: 'chip--primary',
+      Superseded: 'chip--muted',
     };
     return `chip ${map[status] ?? ''}`.trim();
   }

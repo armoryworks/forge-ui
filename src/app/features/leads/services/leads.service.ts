@@ -13,6 +13,11 @@ import { BulkLeadIntakeRequest, BulkLeadIntakeResponse } from '../models/bulk-in
 import { DispositionRequest, PullQueueRequest, QueueLead } from '../models/queue.model';
 import { OutreachPreferences, SuppressedLeadSummary, UpdateOutreachPreferencesRequest } from '../models/suppression.model';
 
+export interface LeadOwnerCandidate {
+  id: number;
+  name: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class LeadsService {
   private readonly http = inject(HttpClient);
@@ -31,6 +36,16 @@ export class LeadsService {
 
   createLead(request: CreateLeadRequest): Observable<LeadItem> {
     return this.http.post<LeadItem>(this.base, request);
+  }
+
+  /** Assign the leads to one rep, or back to the open queue with 0. Changes only the owner. */
+  bulkAssignOwner(leadIds: number[], assignedToUserId: number): Observable<{ updated: number }> {
+    return this.http.post<{ updated: number }>(`${this.base}/bulk-assign-owner`, { leadIds, assignedToUserId });
+  }
+
+  /** Active users a lead can be assigned to. */
+  getOwnerCandidates(): Observable<LeadOwnerCandidate[]> {
+    return this.http.get<LeadOwnerCandidate[]>(`${environment.apiUrl}/users`);
   }
 
   updateLead(id: number, request: UpdateLeadRequest): Observable<LeadItem> {

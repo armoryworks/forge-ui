@@ -3,11 +3,11 @@ import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { debounceTime, distinctUntilChanged, startWith } from 'rxjs';
+import { debounceTime, distinctUntilChanged, Observable, startWith } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkDragPreview } from '@angular/cdk/drag-drop';
 
-import { LeadsService } from './services/leads.service';
+import { LeadOwnerCandidate, LeadsService } from './services/leads.service';
 import { AccountsService } from './services/accounts.service';
 import { companyOrContactRequired } from './validators/company-or-contact.validator';
 import { LeadItem } from './models/lead-item.model';
@@ -46,6 +46,8 @@ import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
 type ViewMode = 'table' | 'pipeline';
 
 const VIEW_MODE_KEY = 'leads-view-mode';
+
+const BULK_KEEP = -1;
 
 @Component({
   selector: 'app-leads',
@@ -136,7 +138,19 @@ export class LeadsComponent implements OnInit {
   // DataTable's selectionChange. When > 0 rows are selected, an action
   // bar appears with the "Assign to account" button.
   protected readonly selectedLeads = signal<LeadItem[]>([]);
-  protected readonly bulkAccountControl = new FormControl<number | null>(null);
+  protected readonly bulkKeep = BULK_KEEP;
+  protected readonly bulkAccountControl = new FormControl<number | null>(BULK_KEEP);
+  protected readonly bulkOwnerControl = new FormControl<number | null>(BULK_KEEP);
+  private readonly ownerCandidates = signal<LeadOwnerCandidate[]>([]);
+  protected readonly bulkAccountOptions = computed<SelectOption[]>(() => [
+    { value: BULK_KEEP, label: this.translate.instant('leads.bulkKeepCurrent') },
+    ...this.accountOptions(),
+  ]);
+  protected readonly bulkOwnerOptions = computed<SelectOption[]>(() => [
+    { value: BULK_KEEP, label: this.translate.instant('leads.bulkKeepCurrent') },
+    { value: 0, label: this.translate.instant('leads.ownerUnassigned') },
+    ...this.ownerCandidates().map(u => ({ value: u.id, label: u.name })),
+  ]);
   protected readonly showBulkAssignDialog = signal(false);
 
   protected readonly leadViolations = FormValidationService.getViolations(this.leadForm, {
@@ -378,10 +392,16 @@ export class LeadsComponent implements OnInit {
 
   protected openBulkAssignDialog(): void {
     if (this.selectedLeads().length === 0) return;
-    this.bulkAccountControl.setValue(null);
+    this.bulkAccountControl.setValue(BULK_KEEP);
+    this.bulkOwnerControl.setValue(BULK_KEEP);
     if (this.accounts().length === 0) {
       this.accountsService.list().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (rows) => this.accounts.set(rows),
+      });
+    }
+    if (this.ownerCandidates().length === 0) {
+      this.leadsService.getOwnerCandidates().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: (rows) => this.ownerCandidates.set(rows),
       });
     }
     this.showBulkAssignDialog.set(true);
@@ -421,22 +441,35 @@ export class LeadsComponent implements OnInit {
 
   protected confirmBulkAssign(): void {
     const accountId = this.bulkAccountControl.value;
+    const ownerId = this.bulkOwnerControl.value;
     const selected = this.selectedLeads();
     if (selected.length === 0) return;
+    const requests: { leadIds: number[]; call: Observable<unknown> }[] = [];
+    if (ownerId !== BULK_KEEP) {
+      const leadIds = selected.map(l => l.id);
+      requests.push({ leadIds, call: this.leadsService.bulkAssignOwner(leadIds, ownerId ?? 0) });
+    }
+    if (accountId !== BULK_KEEP) {
+      // Fire all PATCHes in parallel — the server handles them as discrete
+      // transactions; if some succeed and one fails we still want partial
+      // success surfaced. Final reload pulls authoritative state.
+      selected.forEach(lead => requests.push({ leadIds: [lead.id], call: this.leadsService.updateLead(lead.id, { accountId }) }));
+    }
+    if (requests.length === 0) {
+      this.closeBulkAssignDialog();
+      return;
+    }
     this.saving.set(true);
-    // Fire all PATCHes in parallel — the server handles them as discrete
-    // transactions; if some succeed and one fails we still want partial
-    // success surfaced. Final reload pulls authoritative state.
-    let inflight = selected.length;
-    let errors = 0;
-    selected.forEach(lead => {
-      this.leadsService.updateLead(lead.id, { accountId }).subscribe({
+    let inflight = requests.length;
+    const failed = new Set<number>();
+    requests.forEach(({ leadIds, call }) => {
+      call.subscribe({
         next: () => {
-          if (--inflight === 0) this.finishBulkAssign(errors, selected.length);
+          if (--inflight === 0) this.finishBulkAssign(failed.size, selected.length);
         },
         error: () => {
-          errors++;
-          if (--inflight === 0) this.finishBulkAssign(errors, selected.length);
+          leadIds.forEach(id => failed.add(id));
+          if (--inflight === 0) this.finishBulkAssign(failed.size, selected.length);
         },
       });
     });

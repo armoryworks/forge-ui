@@ -77,8 +77,8 @@
             </span>
             <button class="action-btn action-btn--sm" type="button"
                     (click)="openBulkAssignDialog()" data-testid="leads-bulk-assign-btn">
-              <span class="material-icons-outlined">business</span>
-              {{ 'leads.bulkAssignAccount' | translate }}
+              <span class="material-icons-outlined">assignment_ind</span>
+              {{ 'leads.bulkAssign' | translate }}
             </button>
           </div>
         }
@@ -286,11 +286,18 @@
 @if (showBulkAssignDialog()) {
   <app-dialog [title]="'leads.bulkAssignTitle' | translate" width="480px" (closed)="closeBulkAssignDialog()">
     <p class="hint">{{ 'leads.bulkAssignHint' | translate:{ count: selectedLeads().length } }}</p>
+    <div class="dialog-row">
+      <app-select
+        [label]="'leads.owner' | translate"
+        [formControl]="bulkOwnerControl"
+        [options]="bulkOwnerOptions()"
+        data-testid="bulk-assign-owner-picker" />
+    </div>
     <div class="dialog-row dialog-row--spaced">
       <app-select
         [label]="'leads.accounts.fieldName' | translate"
         [formControl]="bulkAccountControl"
-        [options]="accountOptions()"
+        [options]="bulkAccountOptions()"
         data-testid="bulk-assign-account-picker" />
       <button class="action-btn action-btn--secondary" type="button"
         (click)="openNewAccountForBulk()">
@@ -301,7 +308,7 @@
     <div dialog-footer>
       <button class="action-btn" (click)="closeBulkAssignDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
-        [disabled]="saving()"
+        [disabled]="saving() || (bulkOwnerControl.value === bulkKeep && bulkAccountControl.value === bulkKeep)"
         (click)="confirmBulkAssign()" data-testid="bulk-assign-confirm-btn">
         <span class="material-icons-outlined">save</span>
         {{ 'leads.bulkAssignConfirm' | translate }}

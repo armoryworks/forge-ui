@@ -94,6 +94,33 @@ describe('QuoteService', () => {
     });
   });
 
+  describe('reviseQuote', () => {
+    it('should POST to the revise endpoint and return the revision', () => {
+      let result: { id: number; quoteNumber: string } | undefined;
+      service.reviseQuote(4).subscribe(q => (result = q));
+      const req = httpMock.expectOne(`${apiUrl}/quotes/4/revise`);
+      expect(req.request.method).toBe('POST');
+      req.flush({ id: 9, quoteNumber: 'Q-4-R1' });
+      expect(result).toEqual({ id: 9, quoteNumber: 'Q-4-R1' });
+    });
+  });
+
+  describe('resolvePrice', () => {
+    it('sends the quantity so the price-list break applies', () => {
+      service.resolvePrice(3, 8, 250).subscribe();
+      const req = httpMock.expectOne(r => r.url === `${apiUrl}/quotes/resolve-price`);
+      expect(req.request.params.get('quantity')).toBe('250');
+      req.flush(96);
+    });
+
+    it('omits the quantity when it is not known', () => {
+      service.resolvePrice(3, 8).subscribe();
+      const req = httpMock.expectOne(r => r.url === `${apiUrl}/quotes/resolve-price`);
+      expect(req.request.params.has('quantity')).toBe(false);
+      req.flush(null);
+    });
+  });
+
   describe('getQuotePdf', () => {
     it('should GET the quote PDF as a blob', () => {
       let result: Blob | undefined;

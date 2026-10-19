@@ -2865,9 +2865,12 @@
       "Lost": "Lost"
     },
     "bulkSelected": "{{ count }} selected",
-    "bulkAssignAccount": "Assign to account",
-    "bulkAssignTitle": "Assign leads to account",
-    "bulkAssignHint": "{{ count }} lead(s) will be linked to the picked account. Pick \"— None —\" to unaffiliate.",
+    "bulkAssign": "Assign…",
+    "bulkAssignTitle": "Assign leads",
+    "bulkAssignHint": "{{ count }} lead(s) selected. Pick an owner, an account, or both; \"Keep current\" leaves that field as it is. Pick \"— None —\" as the account to unaffiliate.",
+    "bulkKeepCurrent": "Keep current",
+    "owner": "Owner",
+    "ownerUnassigned": "— Unassigned —",
     "bulkAssignConfirm": "Assign",
     "bulkAssignSuccess": "{{ count }} lead(s) assigned.",
     "bulkAssignPartial": "Assigned {{ ok }} of {{ total }} — some failed. Check the activity log for details.",
@@ -6056,7 +6059,10 @@
   },
   "quoteCopy": {
     "duplicate": "Duplicate",
-    "duplicated": "Created {{number}} as a copy of {{source}}"
+    "duplicated": "Created {{number}} as a copy of {{source}}",
+    "revise": "Revise",
+    "revised": "Created {{number}} as the next revision of {{source}}",
+    "reviseHint": "Start a new revision; this quote becomes superseded and can no longer be accepted"
   },
   "quotes": {
     "quoteNumberLabel": "Quote Number",
@@ -6100,6 +6106,7 @@
     "statusDeclined": "Declined",
     "statusExpired": "Expired",
     "statusConvertedToOrder": "Converted to Order",
+    "statusSuperseded": "Superseded",
     "quoteSent": "Quote sent.",
     "quoteAccepted": "Quote accepted.",
     "rejectQuoteTitle": "Decline Quote?",

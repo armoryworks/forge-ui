@@ -30,17 +30,29 @@ describe('LeadsComponent — inline account creation (forge#2/#3)', () => {
   let component: LeadsComponent;
   let dialogOpen: ReturnType<typeof vi.fn>;
   let accountsCreate: ReturnType<typeof vi.fn>;
+  let leadsService: {
+    getLeads: () => Observable<unknown[]>;
+    bulkAssignOwner: ReturnType<typeof vi.fn>;
+    updateLead: ReturnType<typeof vi.fn>;
+    getOwnerCandidates: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     // The add-account dialog returns a CreateAccountRequest payload; the
     // service then POSTs it and returns the created Account.
     dialogOpen = vi.fn(() => ({ afterClosed: () => of({ name: newAccount.name }) }));
     accountsCreate = vi.fn(() => of(newAccount));
+    leadsService = {
+      getLeads: () => of([]),
+      bulkAssignOwner: vi.fn(() => of({ updated: 2 })),
+      updateLead: vi.fn(() => of({})),
+      getOwnerCandidates: vi.fn(() => of([{ id: 7, name: 'Owen Rep' }])),
+    };
 
     TestBed.configureTestingModule({
       imports: [LeadsComponent],
       providers: [
-        { provide: LeadsService, useValue: { getLeads: () => of([]) } },
+        { provide: LeadsService, useValue: leadsService },
         { provide: AccountsService, useValue: { create: accountsCreate, list: () => of([]) } },
         { provide: ReferenceDataService, useValue: { getAsOptions: () => of([]) } },
         { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn(), info: vi.fn() } },
@@ -93,5 +105,43 @@ describe('LeadsComponent — inline account creation (forge#2/#3)', () => {
     internals.searchControl.setValue('lead-00002');
 
     expect(internals.filteredLeads().map(l => l.id)).toEqual([2]);
+  });
+
+  describe('bulk assign', () => {
+    type BulkInternals = {
+      selectedLeads: { set: (rows: unknown[]) => void };
+      bulkOwnerControl: { setValue: (v: number | null) => void };
+      bulkAccountControl: { setValue: (v: number | null) => void };
+      openBulkAssignDialog: () => void;
+      confirmBulkAssign: () => void;
+      bulkOwnerOptions: () => { value: unknown; label: string }[];
+    };
+    const selected = [{ id: 1, companyName: 'A' }, { id: 2, companyName: 'B' }];
+
+    it('assigns the owner in one call and leaves the account alone', () => {
+      const internals = component as unknown as BulkInternals;
+      internals.selectedLeads.set(selected);
+      internals.openBulkAssignDialog();
+      expect(internals.bulkOwnerOptions().some(o => o.value === 7 && o.label === 'Owen Rep')).toBe(true);
+
+      internals.bulkOwnerControl.setValue(7);
+      internals.confirmBulkAssign();
+
+      expect(leadsService.bulkAssignOwner).toHaveBeenCalledWith([1, 2], 7);
+      expect(leadsService.updateLead).not.toHaveBeenCalled();
+    });
+
+    it('sets only the account when the owner is kept', () => {
+      const internals = component as unknown as BulkInternals;
+      internals.selectedLeads.set(selected);
+      internals.openBulkAssignDialog();
+
+      internals.bulkAccountControl.setValue(99);
+      internals.confirmBulkAssign();
+
+      expect(leadsService.bulkAssignOwner).not.toHaveBeenCalled();
+      expect(leadsService.updateLead).toHaveBeenCalledWith(1, { accountId: 99 });
+      expect(leadsService.updateLead).toHaveBeenCalledWith(2, { accountId: 99 });
+    });
   });
 });
