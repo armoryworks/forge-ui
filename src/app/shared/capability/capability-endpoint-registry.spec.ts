@@ -1,3 +1,4 @@
+import overrides from './__fixtures__/capability-action-overrides.json';
 import { resolveCapabilityForUrl } from './capability-endpoint-registry';
 
 describe('resolveCapabilityForUrl', () => {
@@ -78,6 +79,31 @@ describe('resolveCapabilityForUrl', () => {
     it('resolves shop-floor/andon to CAP-EXT-ANDON, distinct from shop-floor/machine', () => {
       expect(resolveCapabilityForUrl('/api/v1/shop-floor/andon')).toBe('CAP-EXT-ANDON');
       expect(resolveCapabilityForUrl('/api/v1/shop-floor/machine/state')).toBe('CAP-MFG-MACHINE-CONNECT');
+    });
+  });
+
+  describe('server action-level overrides that widen access', () => {
+    it.each(overrides.mirrored)('resolves $prefix to $capability', ({ prefix, capability }) => {
+      expect(resolveCapabilityForUrl(`/api/v1/${prefix}`)).toBe(capability);
+      expect(resolveCapabilityForUrl(`/api/v1/${prefix}/7`)).toBe(capability);
+    });
+
+    it('gates ECOs and gages on their own capabilities, not inspection', () => {
+      expect(resolveCapabilityForUrl('/api/v1/quality/ecos/5/approve')).toBe('CAP-MD-ECO');
+      expect(resolveCapabilityForUrl('/api/v1/quality/gages/due')).toBe('CAP-QC-GAGE');
+      expect(resolveCapabilityForUrl('/api/v1/quality/templates')).toBe('CAP-QC-INSPECTION');
+    });
+
+    it('gates units of measure on CAP-MD-UOM while other inventory paths keep CAP-INV-CORE', () => {
+      expect(resolveCapabilityForUrl('/api/v1/inventory/uom')).toBe('CAP-MD-UOM');
+      expect(resolveCapabilityForUrl('/api/v1/inventory/uom/conversions')).toBe('CAP-MD-UOM');
+      expect(resolveCapabilityForUrl('/api/v1/inventory')).toBe('CAP-INV-CORE');
+      expect(resolveCapabilityForUrl('/api/v1/inventory/uoms-legacy')).toBe('CAP-INV-CORE');
+    });
+
+    it('leaves the ledger read surface on CAP-ACCT-GL-VIEW', () => {
+      expect(resolveCapabilityForUrl('/api/v1/accounting/pnl')).toBe('CAP-ACCT-GL-VIEW');
+      expect(resolveCapabilityForUrl('/api/v1/accounting/journal-entries')).toBe('CAP-ACCT-GL-VIEW');
     });
   });
 

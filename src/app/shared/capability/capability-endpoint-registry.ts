@@ -36,15 +36,21 @@ export interface CapabilityEndpointEntry {
 /**
  * Order-sensitive list. Specific paths first (e.g. `inventory/abc` before
  * `inventory`). All controller-level `[RequiresCapability]` attributes are
- * mirrored here. Method-level overrides on the server side are intentionally
- * not mirrored — the interceptor only short-circuits on the controller-level
- * (most common) gate. Endpoints with method-level overrides still go through
- * (the server's middleware will 403 them and the layer-2 interceptor will
- * convert that into a `CapabilityDisabledError`).
+ * mirrored here. A method-level override is mirrored too when its capability
+ * does not depend on the controller's: the server gates that action on the
+ * override alone, so the controller-level entry would block it in the browser
+ * while the server allows it. Those overrides are listed in
+ * `__fixtures__/capability-action-overrides.json`, the twin of the forge-api
+ * architecture test's file, and the registry spec asserts every `mirrored`
+ * entry resolves here. Overrides that only narrow access (the override depends
+ * on the controller's capability) stay unmirrored: the server 403s them and the
+ * layer-2 interceptor converts that into a `CapabilityDisabledError`.
  */
 export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = [
   // ── Specific sub-paths first (must precede their parent prefix) ──
+  { prefix: 'accounting/cash-flow', capability: 'CAP-RPT-FINANCIALS' },
   { prefix: 'accounting/conversion', capability: 'CAP-ACCT-MIGRATION' },
+  { prefix: 'accounting/pay-runs', capability: 'CAP-PAYROLL-RUN' },
   { prefix: 'admin/accounting-mode', capability: 'CAP-ACCT-EXTERNAL' },
   { prefix: 'admin/bi-api-keys', capability: 'CAP-IDEN-AUTH-API-KEYS' },
   { prefix: 'admin/currencies', capability: 'CAP-MD-CURRENCIES' },
@@ -52,11 +58,21 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   { prefix: 'admin/machine-connections', capability: 'CAP-MFG-MACHINE-CONNECT' },
   { prefix: 'admin/plants', capability: 'CAP-MD-LOCATIONS' },
   { prefix: 'admin/webhooks', capability: 'CAP-CROSS-WEBHOOKS' },
+  { prefix: 'customer-returns/channel', capability: 'CAP-O2C-RETAIL' },
+  { prefix: 'customers/portal-access', capability: 'CAP-EXT-CUSTOMER-PORTAL' },
   { prefix: 'documents/controlled', capability: 'CAP-CROSS-DOCS' },
   { prefix: 'inventory/abc', capability: 'CAP-PLAN-ABC' },
+  { prefix: 'inventory/inspect', capability: 'CAP-QC-INSPECTION' },
+  { prefix: 'inventory/pending-inspection', capability: 'CAP-QC-INSPECTION' },
+  { prefix: 'inventory/set-on-hand', capability: 'CAP-INV-ADJUST' },
   { prefix: 'inventory/transfers', capability: 'CAP-INV-MULTILOC' },
+  { prefix: 'inventory/uom', capability: 'CAP-MD-UOM' },
+  { prefix: 'purchase-orders/price-variance-review', capability: 'CAP-EXT-AI-ASSISTANT' },
+  { prefix: 'quality/ecos', capability: 'CAP-MD-ECO' },
+  { prefix: 'quality/gages', capability: 'CAP-QC-GAGE' },
   { prefix: 'reports/copq', capability: 'CAP-RPT-OPERATIONAL' },
   { prefix: 'reports/sankey', capability: 'CAP-RPT-OPERATIONAL' },
+  { prefix: 'reports/win-loss-by-class', capability: 'CAP-O2C-LEAD' },
   { prefix: 'shop-floor/andon', capability: 'CAP-EXT-ANDON' },
   { prefix: 'shop-floor/machine', capability: 'CAP-MFG-MACHINE-CONNECT' },
 

@@ -107,6 +107,9 @@ describe('DiscoveryComponent', () => {
   let capabilityEnabled: Set<string>;
   let bulkToggle: ReturnType<typeof vi.fn>;
   let updateSetting: ReturnType<typeof vi.fn>;
+  let openDialog: ReturnType<typeof vi.fn>;
+  let previewApply: ReturnType<typeof vi.fn>;
+  let applyPreset: ReturnType<typeof vi.fn>;
 
   function render(step: number): void {
     step$.next(convertToParamMap({ step: String(step) }));
@@ -129,6 +132,9 @@ describe('DiscoveryComponent', () => {
     capabilityEnabled = new Set<string>();
     bulkToggle = vi.fn(() => of([]));
     updateSetting = vi.fn(() => of(undefined));
+    openDialog = vi.fn(() => ({ afterClosed }));
+    previewApply = vi.fn(() => of({ isCustom: false, deltas: [], violations: [], deltaCount: 1 }));
+    applyPreset = vi.fn(() => of(RECOMMENDATION));
 
     const discovery = {
       questions,
@@ -144,7 +150,7 @@ describe('DiscoveryComponent', () => {
       setConsultantMode: () => undefined,
       setAnswer: (id: string, value: string) => answers.update((m) => new Map(m).set(id, value)),
       preview: () => of(RECOMMENDATION),
-      apply: () => of(RECOMMENDATION),
+      apply: applyPreset,
     };
 
     TestBed.configureTestingModule({
@@ -154,13 +160,18 @@ describe('DiscoveryComponent', () => {
         { provide: ConsultantModeService, useValue: { enabled: consultantMode, toggle: () => consultantMode.update(v => !v) } },
         {
           provide: CapabilityService,
-          useValue: { load: () => of(undefined), isEnabled: (code: string) => capabilityEnabled.has(code), bulkToggle },
+          useValue: {
+            load: () => of(undefined),
+            isEnabled: (code: string) => capabilityEnabled.has(code),
+            getEntry: () => undefined,
+            bulkToggle,
+          },
         },
         { provide: AdminSettingsService, useValue: { updateSetting } },
         { provide: CapabilityInstallStateService, useValue: { dismiss: () => undefined } },
-        { provide: PresetService, useValue: { previewApply: () => of({ isCustom: false, deltas: [], violations: [], deltaCount: 1 }) } },
+        { provide: PresetService, useValue: { previewApply } },
         { provide: SnackbarService, useValue: { successWithNav, error: () => undefined, errorFrom: () => undefined } },
-        { provide: MatDialog, useValue: { open: () => ({ afterClosed }) } },
+        { provide: MatDialog, useValue: { open: openDialog } },
         { provide: Router, useValue: { navigate } },
         { provide: ActivatedRoute, useValue: { queryParamMap: step$ } },
       ],
@@ -277,6 +288,36 @@ describe('DiscoveryComponent', () => {
     expect(updateSetting).toHaveBeenCalledWith('parts.allow_manual_numbers', 'true');
     expect(updateSetting).toHaveBeenCalledWith('jobs.allow_manual_numbers', 'true');
     expect(successWithNav).toHaveBeenCalled();
+  });
+
+  it('applies the answer adjustments even when the preset itself already matches', async () => {
+    previewApply.mockReturnValue(of({ isCustom: true, deltas: [], violations: [], deltaCount: 0 }));
+    capabilityEnabled.add('CAP-IDEN-AUTH-KIOSK');
+    render(1);
+
+    (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>('[data-testid="discovery-apply-btn"]')!.click();
+    await fixture.whenStable();
+
+    const data = openDialog.mock.calls[0][1].data;
+    expect(data.noOp).toBe(false);
+    expect(data.deltas).toEqual([
+      expect.objectContaining({ code: 'CAP-IDEN-AUTH-KIOSK', currentlyEnabled: true, willBeEnabled: false }),
+    ]);
+    expect(applyPreset).toHaveBeenCalled();
+    expect(bulkToggle).toHaveBeenCalledWith([{ id: 'CAP-IDEN-AUTH-KIOSK', enabled: false }], 'Nobody shares a terminal.');
+  });
+
+  it('treats a matching preset with no answer changes as a re-apply', async () => {
+    previewApply.mockReturnValue(of({ isCustom: true, deltas: [], violations: [], deltaCount: 0 }));
+    render(1);
+
+    (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>('[data-testid="discovery-apply-btn"]')!.click();
+    await fixture.whenStable();
+
+    expect(openDialog.mock.calls[0][1].data.noOp).toBe(true);
+    expect(applyPreset).toHaveBeenCalled();
   });
 
   it('skips adjustments the install already matches', async () => {
