@@ -21,8 +21,8 @@ import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 
 /**
- * Carrier admin — list shipping carriers, create custom ("shadow") shippers, and enter per-carrier API
- * credentials. The secret is write-only: it's encrypted server-side and never returned, so the dialog
+ * Carrier admin — list shipping carriers, create custom ("shadow") shippers, edit any carrier's settings
+ * (delivery updates, scan-to-ship, active), and enter per-carrier API credentials. The secret is write-only: it's encrypted server-side and never returned, so the dialog
  * shows a "configured" badge + the non-secret client id and only ever WRITES a new secret.
  */
 @Component({
@@ -49,7 +49,8 @@ export class CarriersComponent {
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
 
-  protected readonly showCreateDialog = signal(false);
+  protected readonly showCarrierDialog = signal(false);
+  protected readonly editingCarrier = signal<Carrier | null>(null);
   protected readonly showCredentialsDialog = signal(false);
   protected readonly credentialsCarrier = signal<Carrier | null>(null);
   protected readonly testingId = signal<number | null>(null);
@@ -61,7 +62,7 @@ export class CarriersComponent {
     { field: 'requiresScanToShip', header: 'Scan', width: '80px', align: 'center' },
     { field: 'credentialsConfigured', header: 'Credentials', width: '130px', align: 'center' },
     { field: 'isActive', header: 'Active', width: '80px', align: 'center' },
-    { field: 'actions', header: '', width: '120px', align: 'right' },
+    { field: 'actions', header: '', width: '160px', align: 'right' },
   ];
 
   protected readonly integrationKindOptions: SelectOption[] = [
@@ -80,13 +81,14 @@ export class CarriersComponent {
     { value: 'production', label: this.translate.instant('admin.carriers.envProduction') },
   ];
 
-  protected readonly createForm = new FormGroup({
+  protected readonly carrierForm = new FormGroup({
     name: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(100)] }),
     code: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(50)] }),
     integrationKind: new FormControl<string>('Manual', { nonNullable: true, validators: [Validators.required] }),
     deliveryUpdateMode: new FormControl<string>('Manual', { nonNullable: true, validators: [Validators.required] }),
     integrationServiceId: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(50)] }),
     requiresScanToShip: new FormControl<boolean>(true, { nonNullable: true }),
+    isActive: new FormControl<boolean>(true, { nonNullable: true }),
   });
 
   protected readonly credentialsForm = new FormGroup({
@@ -96,7 +98,7 @@ export class CarriersComponent {
     environment: new FormControl<string>('sandbox', { nonNullable: true, validators: [Validators.required] }),
   });
 
-  protected readonly createViolations = FormValidationService.getViolations(this.createForm, {
+  protected readonly carrierViolations = FormValidationService.getViolations(this.carrierForm, {
     name: this.translate.instant('admin.carriers.fieldName'),
     integrationKind: this.translate.instant('admin.carriers.fieldKind'),
   });
@@ -122,21 +124,42 @@ export class CarriersComponent {
   }
 
   protected openCreate(): void {
-    this.createForm.reset({
+    this.editingCarrier.set(null);
+    this.carrierForm.reset({
       name: '', code: '', integrationKind: 'Manual', deliveryUpdateMode: 'Manual',
-      integrationServiceId: '', requiresScanToShip: true,
+      integrationServiceId: '', requiresScanToShip: true, isActive: true,
     });
-    this.showCreateDialog.set(true);
+    this.showCarrierDialog.set(true);
   }
 
-  protected closeCreate(): void {
-    this.showCreateDialog.set(false);
+  protected openEdit(row: Carrier): void {
+    this.editingCarrier.set(row);
+    this.carrierForm.reset({
+      name: row.name,
+      code: row.code ?? '',
+      integrationKind: row.integrationKind,
+      deliveryUpdateMode: row.deliveryUpdateMode,
+      integrationServiceId: row.integrationServiceId ?? '',
+      requiresScanToShip: row.requiresScanToShip,
+      isActive: row.isActive,
+    });
+    this.showCarrierDialog.set(true);
   }
 
-  protected saveCreate(): void {
-    if (this.createForm.invalid) return;
+  protected closeCarrierDialog(): void {
+    this.showCarrierDialog.set(false);
+    this.editingCarrier.set(null);
+  }
+
+  protected saveCarrier(): void {
+    if (this.carrierForm.invalid) return;
+    const editing = this.editingCarrier();
+    if (editing) {
+      this.saveEdit(editing);
+      return;
+    }
     this.saving.set(true);
-    const f = this.createForm.getRawValue();
+    const f = this.carrierForm.getRawValue();
     this.service.create({
       name: f.name.trim(),
       code: f.code.trim() || null,
@@ -148,10 +171,35 @@ export class CarriersComponent {
       next: () => {
         this.saving.set(false);
         this.snackbar.success(this.translate.instant('admin.carriers.created'));
-        this.closeCreate();
+        this.closeCarrierDialog();
         this.load();
       },
       error: () => this.saving.set(false),
+    });
+  }
+
+  private saveEdit(carrier: Carrier): void {
+    this.saving.set(true);
+    const f = this.carrierForm.getRawValue();
+    this.service.update(carrier.id, {
+      name: f.name.trim(),
+      code: f.code.trim(),
+      integrationKind: f.integrationKind,
+      deliveryUpdateMode: f.deliveryUpdateMode,
+      integrationServiceId: f.integrationServiceId.trim(),
+      requiresScanToShip: f.requiresScanToShip,
+      isActive: f.isActive,
+    }).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.snackbar.success(this.translate.instant('admin.carriers.updated'));
+        this.closeCarrierDialog();
+        this.load();
+      },
+      error: (err: unknown) => {
+        this.saving.set(false);
+        this.snackbar.errorFrom(err, 'admin.carriers.updateFailed');
+      },
     });
   }
 

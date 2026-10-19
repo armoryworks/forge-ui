@@ -3634,7 +3634,11 @@
       "secretPlaceholder": "Enter to set or replace",
       "fieldAccountNumber": "Account Number",
       "fieldEnvironment": "Environment",
-      "credentialsSaved": "Credentials saved."
+      "credentialsSaved": "Credentials saved.",
+      "editCarrier": "Edit carrier",
+      "updated": "Carrier updated.",
+      "updateFailed": "Could not update the carrier.",
+      "fieldActive": "Active"
     },
     "icpRubrics": {
       "title": "ICP Rubrics",
@@ -6300,7 +6304,12 @@
     "selectOrderFirst": "Select a sales order to add line items",
     "allLinesShipped": "All order lines are fully shipped",
     "remainingShort": "left",
-    "exceedsRemaining": "Cannot ship more than {{remaining}} remaining for {{part}}"
+    "exceedsRemaining": "Cannot ship more than {{remaining}} remaining for {{part}}",
+    "scanLabelTitle": "Scan the shipping label",
+    "scanLabelMessage": "Scan the QR code on the label printed for shipment {{number}} to confirm it before it ships.",
+    "scanLabelField": "Label code",
+    "scanLabelPlaceholder": "Scan, or type the code and press Enter",
+    "shipFailed": "Could not mark the shipment as shipped."
   },
   "planning": {
     "title": "Planning",

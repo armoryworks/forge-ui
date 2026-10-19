@@ -2,11 +2,15 @@ import {
   ChangeDetectionStrategy, Component, computed, inject, input, output, signal,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { ScanShipContextLine } from '../../../../shared/models/scan-ship-context-line.model';
+import { httpProblemDetail } from '../../../../shared/utils/http-problem-detail';
 import { ShipmentService } from '../../../shipments/services/shipment.service';
+import { ScanLabelDialogComponent } from '../../../shipments/components/scan-label-dialog/scan-label-dialog.component';
+import { ScanLabelDialogData } from '../../../shipments/models/scan-label-dialog-data.model';
 
 type ShipStep = 'select-line' | 'quantity' | 'confirming' | 'done';
 
@@ -21,6 +25,7 @@ type ShipStep = 'select-line' | 'quantity' | 'confirming' | 'done';
 export class ScanShipFlowComponent {
   private readonly shipmentService = inject(ShipmentService);
   private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(MatDialog);
 
   // Inputs
   readonly partId = input.required<number>();
@@ -75,18 +80,31 @@ export class ScanShipFlowComponent {
     const line = this.selectedLine();
     if (!line || this.submitting()) return;
 
+    if (line.requiresScanToShip) {
+      this.dialog.open<ScanLabelDialogComponent, ScanLabelDialogData, string | undefined>(ScanLabelDialogComponent, {
+        width: '420px',
+        data: { shipmentNumber: line.shipmentNumber },
+      }).afterClosed().subscribe(scanCode => {
+        if (scanCode) this.submitShip(line, scanCode);
+      });
+      return;
+    }
+    this.submitShip(line);
+  }
+
+  private submitShip(line: ScanShipContextLine, scanCode?: string): void {
     this.submitting.set(true);
     this.error.set(null);
 
-    this.shipmentService.shipShipment(line.shipmentId).subscribe({
+    this.shipmentService.shipShipment(line.shipmentId, scanCode).subscribe({
       next: () => {
         this.submitting.set(false);
         this.step.set('done');
         setTimeout(() => this.completed.emit(), 1500);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.submitting.set(false);
-        this.error.set(this.translate.instant('kioskFlows.ship.failed'));
+        this.error.set(httpProblemDetail(err) ?? this.translate.instant('kioskFlows.ship.failed'));
       },
     });
   }

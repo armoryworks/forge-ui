@@ -3634,7 +3634,11 @@
       "secretPlaceholder": "Ingrese para establecer o reemplazar",
       "fieldAccountNumber": "Número de cuenta",
       "fieldEnvironment": "Entorno",
-      "credentialsSaved": "Credenciales guardadas."
+      "credentialsSaved": "Credenciales guardadas.",
+      "editCarrier": "Editar transportista",
+      "updated": "Transportista actualizado.",
+      "updateFailed": "No se pudo actualizar el transportista.",
+      "fieldActive": "Activo"
     },
     "icpRubrics": {
       "title": "Rúbricas ICP",
@@ -6293,7 +6297,12 @@
     "selectOrderFirst": "Seleccione una orden de venta para agregar líneas",
     "allLinesShipped": "Todas las líneas del pedido están completamente enviadas",
     "remainingShort": "restante",
-    "exceedsRemaining": "No se puede enviar más de {{remaining}} restante de {{part}}"
+    "exceedsRemaining": "No se puede enviar más de {{remaining}} restante de {{part}}",
+    "scanLabelTitle": "Escanee la etiqueta de envío",
+    "scanLabelMessage": "Escanee el código QR de la etiqueta impresa para el envío {{number}} para confirmarlo antes de enviarlo.",
+    "scanLabelField": "Código de la etiqueta",
+    "scanLabelPlaceholder": "Escanee, o escriba el código y pulse Intro",
+    "shipFailed": "No se pudo marcar el envío como enviado."
   },
   "planning": {
     "title": "Planificación",

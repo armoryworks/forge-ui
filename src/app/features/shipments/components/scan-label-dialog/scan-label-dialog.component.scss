@@ -1,0 +1,7 @@
+@use 'styles/variables' as *;
+
+.scan-label__message {
+  margin: 0 0 $sp-md;
+  color: var(--text-muted);
+  font-size: $font-size-sm;
+}

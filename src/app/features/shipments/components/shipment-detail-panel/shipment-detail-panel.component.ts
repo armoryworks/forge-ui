@@ -12,6 +12,8 @@ import { ShippingLabel } from '../../models/shipping-label.model';
 import { TrackingTimelineComponent } from '../tracking-timeline/tracking-timeline.component';
 import { ShippingRatesDialogComponent } from '../shipping-rates-dialog/shipping-rates-dialog.component';
 import { EditShipmentDialogComponent } from '../edit-shipment-dialog/edit-shipment-dialog.component';
+import { ScanLabelDialogComponent } from '../scan-label-dialog/scan-label-dialog.component';
+import { ScanLabelDialogData } from '../../models/scan-label-dialog-data.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
@@ -123,6 +125,15 @@ export class ShipmentDetailPanelComponent implements OnInit {
   protected markShipped(): void {
     const shipment = this.shipment();
     if (!shipment) return;
+    if (shipment.carrierRequiresScanToShip) {
+      this.dialog.open<ScanLabelDialogComponent, ScanLabelDialogData, string | undefined>(ScanLabelDialogComponent, {
+        width: '420px',
+        data: { shipmentNumber: shipment.shipmentNumber },
+      }).afterClosed().subscribe(scanCode => {
+        if (scanCode) this.ship(shipment, scanCode);
+      });
+      return;
+    }
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
@@ -132,14 +143,18 @@ export class ShipmentDetailPanelComponent implements OnInit {
         severity: 'info',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
-      if (!confirmed) return;
-      this.shipmentService.shipShipment(shipment.id).subscribe({
-        next: () => {
-          this.refreshDetail();
-          this.shipmentChanged.emit();
-          this.snackbar.success(this.translate.instant('shipments.shipmentShipped'));
-        },
-      });
+      if (confirmed) this.ship(shipment);
+    });
+  }
+
+  private ship(shipment: ShipmentDetail, scanCode?: string): void {
+    this.shipmentService.shipShipment(shipment.id, scanCode).subscribe({
+      next: () => {
+        this.refreshDetail();
+        this.shipmentChanged.emit();
+        this.snackbar.success(this.translate.instant('shipments.shipmentShipped'));
+      },
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'shipments.shipFailed'),
     });
   }
 

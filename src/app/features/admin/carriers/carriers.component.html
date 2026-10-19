@@ -47,6 +47,11 @@
         </ng-template>
 
         <ng-template appColumnCell="actions" let-row>
+          <button class="icon-btn" [attr.aria-label]="'admin.carriers.editCarrier' | translate"
+            [attr.title]="'admin.carriers.editCarrier' | translate"
+            (click)="openEdit($any(row))" data-testid="carrier-edit-btn">
+            <span class="material-icons-outlined">edit</span>
+          </button>
           @if (row.integrationKind === 'Api') {
             <button class="icon-btn" [attr.aria-label]="'admin.carriers.editCredentials' | translate"
               [attr.title]="'admin.carriers.editCredentials' | translate"
@@ -68,28 +73,35 @@
   </ng-container>
 </app-page-layout>
 
-@if (showCreateDialog()) {
-  <app-dialog [title]="'admin.carriers.newCarrier' | translate" width="480px" (closed)="closeCreate()">
-    <div [formGroup]="createForm">
+@if (showCarrierDialog()) {
+  <app-dialog [title]="(editingCarrier() ? 'admin.carriers.editCarrier' : 'admin.carriers.newCarrier') | translate"
+    width="480px" (closed)="closeCarrierDialog()">
+    <div [formGroup]="carrierForm">
       <app-input [label]="'admin.carriers.fieldName' | translate"
         formControlName="name" [required]="true" data-testid="carrier-name" />
       <app-input [label]="'admin.carriers.fieldCode' | translate" formControlName="code" />
       <app-select [label]="'admin.carriers.fieldKind' | translate"
         formControlName="integrationKind" [options]="integrationKindOptions" [required]="true" />
       <app-select [label]="'admin.carriers.fieldDeliveryMode' | translate"
-        formControlName="deliveryUpdateMode" [options]="deliveryModeOptions" [required]="true" />
-      @if (createForm.controls.integrationKind.value === 'Api') {
+        formControlName="deliveryUpdateMode" [options]="deliveryModeOptions" [required]="true"
+        data-testid="carrier-delivery-mode" />
+      @if (carrierForm.controls.integrationKind.value === 'Api') {
         <app-input [label]="'admin.carriers.fieldServiceId' | translate"
           formControlName="integrationServiceId"
           [placeholder]="'admin.carriers.serviceIdPlaceholder' | translate" />
       }
-      <app-toggle [label]="'admin.carriers.fieldRequiresScan' | translate" formControlName="requiresScanToShip" />
+      <app-toggle [label]="'admin.carriers.fieldRequiresScan' | translate" formControlName="requiresScanToShip"
+        data-testid="carrier-requires-scan" />
+      @if (editingCarrier()) {
+        <app-toggle [label]="'admin.carriers.fieldActive' | translate" formControlName="isActive"
+          data-testid="carrier-active" />
+      }
     </div>
     <div dialog-footer>
-      <button class="action-btn" (click)="closeCreate()">{{ 'common.cancel' | translate }}</button>
-      <app-validation-button [violations]="createViolations" [loading]="saving()">
+      <button class="action-btn" (click)="closeCarrierDialog()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="carrierViolations" [loading]="saving()">
         <button class="action-btn action-btn--primary"
-          [disabled]="createForm.invalid || saving()" (click)="saveCreate()" data-testid="carrier-create-save-btn">
+          [disabled]="carrierForm.invalid || saving()" (click)="saveCarrier()" data-testid="carrier-create-save-btn">
           <span class="material-icons-outlined">save</span>
           {{ 'common.save' | translate }}
         </button>
