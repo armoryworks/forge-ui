@@ -7,5 +7,6 @@ export interface InvoiceLine {
   unitPrice: number;
   lineTotal: number;
   lineNumber: number;
+  taxable: boolean;
   notes: string | null;
 }

@@ -9,12 +9,16 @@ import { vi } from 'vitest';
 import { QuoteDetailPanelComponent } from './quote-detail-panel.component';
 import { QuoteService } from '../../services/quote.service';
 import { QuoteDetail } from '../../models/quote-detail.model';
+import { PaymentSchedule } from '../../../../shared/models/payment-schedule.model';
+import { PaymentMilestone } from '../../../../shared/models/payment-milestone.model';
 import { SendQuoteEmailDialogComponent } from '../send-quote-email-dialog/send-quote-email-dialog.component';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 
 interface PanelInternals {
   quote: { set(value: QuoteDetail | null): void; (): QuoteDetail | null };
+  paymentSchedule: { set(value: PaymentSchedule | null): void };
+  milestoneActionRows: () => { milestone: PaymentMilestone; canMarkPaid: boolean }[];
   changed: { subscribe(fn: () => void): unknown };
   closed: { subscribe(fn: () => void): unknown };
   duplicateQuote(): void;
@@ -203,5 +207,20 @@ describe('QuoteDetailPanelComponent', () => {
     expect(changed).toHaveBeenCalledTimes(1);
     expect(closed).toHaveBeenCalledTimes(1);
     expect(snackbar.successWithNav).toHaveBeenCalledWith(expect.any(String), '/sales-orders/55', expect.any(String));
+  });
+
+  it('offers mark-paid only on milestones that have no invoice', () => {
+    const milestone = (id: number, invoiceId: number | null, status: string): PaymentMilestone => ({
+      id, sequence: id, name: `M${id}`, percentage: 50, dueTrigger: 'OnAcceptance', dueDate: null,
+      netDays: null, status, amountDue: 100, paidAmount: 0, invoiceId, notes: null,
+    });
+    panel.paymentSchedule.set({
+      id: 1, quoteId: 12, salesOrderId: null, status: 'Active',
+      milestones: [milestone(1, 77, 'Invoiced'), milestone(2, null, 'Due')],
+    } as PaymentSchedule);
+
+    const markable = panel.milestoneActionRows().filter(r => r.canMarkPaid).map(r => r.milestone.id);
+
+    expect(markable).toEqual([2]);
   });
 });

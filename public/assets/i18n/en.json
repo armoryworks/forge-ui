@@ -973,7 +973,8 @@
       "Subassembly": "Subassembly",
       "FinishedGood": "Finished Good",
       "Consumable": "Consumable",
-      "Tool": "Tool"
+      "Tool": "Tool",
+      "Service": "Service"
     },
     "subtitle": "Manage parts, BOMs, and specifications",
     "createPart": "New Part",
@@ -1195,6 +1196,8 @@
         "step2ConsumableDesc": "Single-use shop supply.",
         "step2Tool": "Tool",
         "step2ToolDesc": "Durable, multi-use.",
+        "step2Service": "Service",
+        "step2ServiceDesc": "Non-stock charge billed by the line (NRE, setup, engineering).",
         "step3Title": "Item kind",
         "step3Helper": "Optional descriptive tag — Fastener, Electronic, Packaging, etc. Skip if unsure.",
         "step3None": "— None —",
@@ -5299,6 +5302,9 @@
     "salesOrderId": "Sales Order",
     "shipmentId": "Shipment",
     "taxRate": "Tax Rate (%)",
+    "taxable": "Taxable",
+    "taxableLine": "Taxed. Select to leave this line out of sales tax.",
+    "nonTaxableLine": "Not taxed. Select to include this line in sales tax.",
     "partId": "Part",
     "allStatuses": "All Statuses",
     "statusDraft": "Draft",
@@ -10103,7 +10109,7 @@
       "jurisdiction": "Jurisdiction",
       "taxableBase": "Taxable base",
       "liability": "Liability",
-      "orders": "Orders",
+      "invoices": "Invoices",
       "unassigned": "Unassigned",
       "range": "Date range",
       "empty": "No sales-tax liability in this period"

@@ -23,6 +23,7 @@ interface DialogInternals {
     customerId: FormControl<number | null>;
     salesOrderId: FormControl<number | null>;
     shipmentId: FormControl<number | null>;
+    taxRate: FormControl<number | null>;
   }>;
   lineForm: FormGroup<{
     partId: FormControl<number | null>;
@@ -34,24 +35,26 @@ interface DialogInternals {
   salesOrderOptions(): SelectOption[];
   shipmentOptions(): SelectOption[];
   onPartPicked(entity: Record<string, unknown> | null): void;
-  lines: { (): { partId: number | null; partNumber: string; description: string; quantity: number; unitPrice: number }[]; set(v: unknown[]): void };
+  lines: { (): { partId: number | null; partNumber: string; description: string; quantity: number; unitPrice: number; taxable: boolean }[]; set(v: unknown[]): void };
+  taxAmount(): number;
+  toggleTaxable(index: number): void;
 }
 
 const emptyPage = { items: [], totalCount: 0, page: 1, pageSize: 200 };
 
 const acmeSources: InvoiceSources = {
   salesOrders: [
-    { id: 42, orderNumber: 'SO-00042', customerName: 'Acme' },
-    { id: 43, orderNumber: 'SO-00043', customerName: 'Acme' },
+    { id: 42, orderNumber: 'SO-00042', customerName: 'Acme', taxRate: 0.0485 },
+    { id: 43, orderNumber: 'SO-00043', customerName: 'Acme', taxRate: 0.0725 },
   ],
   shipments: [
     {
       id: 7, shipmentNumber: 'SHP-00007', salesOrderId: 42, salesOrderNumber: 'SO-00042', shippedDate: '2026-10-01T12:00:00Z',
-      lines: [{ partId: 4711, partNumber: 'PN-1001', description: 'Bracket', quantity: 4, unitPrice: 12.5 }],
+      lines: [{ partId: 4711, partNumber: 'PN-1001', description: 'Bracket', quantity: 4, unitPrice: 12.5, taxable: true }],
     },
     {
       id: 8, shipmentNumber: 'SHP-00008', salesOrderId: 43, salesOrderNumber: 'SO-00043', shippedDate: null,
-      lines: [{ partId: null, partNumber: null, description: 'Freight', quantity: 1, unitPrice: 40 }],
+      lines: [{ partId: null, partNumber: null, description: 'Freight', quantity: 1, unitPrice: 40, taxable: false }],
     },
   ],
 };
@@ -86,11 +89,15 @@ function setup() {
   return { internals: component as unknown as DialogInternals, httpMock };
 }
 
-function selectCustomer(internals: DialogInternals, httpMock: HttpTestingController, customerId: number, sources: InvoiceSources) {
+function selectCustomer(
+  internals: DialogInternals, httpMock: HttpTestingController, customerId: number, sources: InvoiceSources, customerRate: number | null = null,
+) {
   internals.invoiceForm.controls.customerId.setValue(customerId);
   const req = httpMock.expectOne(r => r.url === `${environment.apiUrl}/invoices/sources`);
   expect(req.request.params.get('customerId')).toBe(String(customerId));
   req.flush(sources);
+  httpMock.expectOne(`${environment.apiUrl}/sales-tax-rates/for-customer/${customerId}`)
+    .flush(customerRate === null ? null : { id: 53, code: 'UT-UTCO', rate: customerRate });
 }
 
 describe('InvoiceDialogComponent — order, shipment and part pickers', () => {
@@ -208,7 +215,7 @@ describe('InvoiceDialogComponent — order, shipment and part pickers', () => {
     internals.invoiceForm.controls.shipmentId.setValue(7);
 
     expect(internals.lines()).toEqual([
-      { partId: 4711, partNumber: 'PN-1001', description: 'Bracket', quantity: 4, unitPrice: 12.5 },
+      { partId: 4711, partNumber: 'PN-1001', description: 'Bracket', quantity: 4, unitPrice: 12.5, taxable: true },
     ]);
   });
 
@@ -238,5 +245,62 @@ describe('InvoiceDialogComponent — order, shipment and part pickers', () => {
     internals.lines.set([...internals.lines(), { partId: null, partNumber: '', description: 'Crating', quantity: 1, unitPrice: 20 }]);
     internals.invoiceForm.controls.shipmentId.setValue(7);
     expect(internals.lines().map(l => l.description)).toEqual(['Freight', 'Crating']);
+  });
+});
+
+describe('InvoiceDialogComponent — tax rate and taxable lines', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  it('defaults the tax rate from the customer\'s tax code', () => {
+    const { internals, httpMock } = setup();
+
+    selectCustomer(internals, httpMock, 5, acmeSources, 0.0725);
+
+    expect(internals.invoiceForm.controls.taxRate.value).toBe(7.25);
+    httpMock.verify();
+  });
+
+  it('repeats the picked sales order\'s tax rate', () => {
+    const { internals, httpMock } = setup();
+    selectCustomer(internals, httpMock, 5, acmeSources, 0.0725);
+
+    internals.invoiceForm.controls.salesOrderId.setValue(42);
+
+    expect(internals.invoiceForm.controls.taxRate.value).toBe(4.85);
+  });
+
+  it('keeps a tax rate the user typed', () => {
+    const { internals, httpMock } = setup();
+    const taxRate = internals.invoiceForm.controls.taxRate;
+    taxRate.setValue(6);
+    taxRate.markAsDirty();
+
+    selectCustomer(internals, httpMock, 5, acmeSources, 0.0725);
+    internals.invoiceForm.controls.salesOrderId.setValue(42);
+
+    expect(taxRate.value).toBe(6);
+  });
+
+  it('leaves a non-taxable line out of the tax and sends it as non-taxable', () => {
+    const { internals, httpMock } = setup();
+    selectCustomer(internals, httpMock, 5, acmeSources, 0.1);
+    internals.lines.set([
+      { partId: null, partNumber: '', description: 'Bracket', quantity: 4, unitPrice: 100, taxable: true },
+      { partId: null, partNumber: '', description: 'Freight', quantity: 1, unitPrice: 40, taxable: true },
+    ]);
+
+    internals.toggleTaxable(1);
+
+    expect(internals.taxAmount()).toBeCloseTo(40, 6);
+    expect(internals.lines()[1].taxable).toBe(false);
+  });
+
+  it('carries a non-taxable order line onto the prefilled invoice line', () => {
+    const { internals, httpMock } = setup();
+    selectCustomer(internals, httpMock, 5, acmeSources);
+
+    internals.invoiceForm.controls.shipmentId.setValue(8);
+
+    expect(internals.lines()[0].taxable).toBe(false);
   });
 });

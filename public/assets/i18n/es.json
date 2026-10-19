@@ -973,7 +973,8 @@
       "Subassembly": "Subensamblaje",
       "FinishedGood": "Producto Terminado",
       "Consumable": "Consumible",
-      "Tool": "Herramienta"
+      "Tool": "Herramienta",
+      "Service": "Servicio"
     },
     "subtitle": "Gestionar piezas, listas de materiales y especificaciones",
     "createPart": "Nueva Pieza",
@@ -1178,6 +1179,8 @@
         "step2ConsumableDesc": "Single-use shop supply.",
         "step2Tool": "Tool",
         "step2ToolDesc": "Durable, multi-use.",
+        "step2Service": "Servicio",
+        "step2ServiceDesc": "Cargo sin inventario facturado por línea (NRE, preparación, ingeniería).",
         "step3Title": "Item kind",
         "step3Helper": "Optional descriptive tag — Fastener, Electronic, Packaging, etc. Skip if unsure.",
         "step3None": "— None —",
@@ -5292,6 +5295,9 @@
     "salesOrderId": "Orden de Venta",
     "shipmentId": "Envío",
     "taxRate": "Tasa de Impuesto (%)",
+    "taxable": "Gravable",
+    "taxableLine": "Con impuesto. Seleccione para excluir esta línea del impuesto sobre ventas.",
+    "nonTaxableLine": "Sin impuesto. Seleccione para incluir esta línea en el impuesto sobre ventas.",
     "partId": "Pieza",
     "allStatuses": "Todos los Estados",
     "statusDraft": "Borrador",
@@ -10103,7 +10109,7 @@
       "jurisdiction": "Jurisdicción",
       "taxableBase": "Base imponible",
       "liability": "Por pagar",
-      "orders": "Pedidos",
+      "invoices": "Facturas",
       "unassigned": "Sin asignar",
       "range": "Rango de fechas",
       "empty": "No hay impuesto sobre ventas por pagar en este período"

@@ -3,5 +3,6 @@ export interface CreateInvoiceLineRequest {
   description: string;
   quantity: number;
   unitPrice: number;
+  taxable: boolean;
   notes?: string;
 }

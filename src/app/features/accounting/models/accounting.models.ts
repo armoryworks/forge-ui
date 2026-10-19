@@ -166,13 +166,14 @@ export interface SalesTaxLiabilityJurisdictionRow {
   jurisdiction: string | null;
   taxableBase: number;
   liability: number;
-  orderCount: number;
+  invoiceCount: number;
 }
 
 /**
  * Sales-tax liability report — what the business owes a taxing authority,
- * grouped by jurisdiction over an optional date range. Amounts sum the seller's
- * own liability (marketplace-facilitator tax the platform remits is excluded).
+ * grouped by jurisdiction over an optional date range. Amounts sum the tax on
+ * finalized invoices by invoice date, so the total ties to Sales Tax Payable
+ * (marketplace-facilitator tax the platform remits is excluded).
  */
 export interface SalesTaxLiabilityReport {
   fromDate: string | null;
@@ -180,7 +181,7 @@ export interface SalesTaxLiabilityReport {
   jurisdictions: SalesTaxLiabilityJurisdictionRow[];
   totalTaxableBase: number;
   totalLiability: number;
-  totalOrderCount: number;
+  totalInvoiceCount: number;
 }
 
 // ── 1099 report ─────────────────────────────────────────────────────────────

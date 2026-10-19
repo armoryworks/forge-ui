@@ -25,7 +25,7 @@ interface SalesTaxTableRow {
   jurisdiction: string;
   taxableBase: number;
   liability: number;
-  orderCount: number;
+  invoiceCount: number;
 }
 
 /**
@@ -79,7 +79,7 @@ export class SalesTaxLiabilityComponent {
   protected readonly columns = computed<ColumnDef[]>(() => [
     { field: 'jurisdiction', header: this.translate.instant('accounting.salesTaxLiability.jurisdiction'), sortable: true },
     { field: 'taxableBase', header: this.translate.instant('accounting.salesTaxLiability.taxableBase'), sortable: true, type: 'number', align: 'right', width: '160px' },
-    { field: 'orderCount', header: this.translate.instant('accounting.salesTaxLiability.orders'), sortable: true, type: 'number', align: 'right', width: '110px' },
+    { field: 'invoiceCount', header: this.translate.instant('accounting.salesTaxLiability.invoices'), sortable: true, type: 'number', align: 'right', width: '110px' },
     { field: 'liability', header: this.translate.instant('accounting.salesTaxLiability.liability'), sortable: true, type: 'number', align: 'right', width: '160px' },
   ]);
 
@@ -91,7 +91,7 @@ export class SalesTaxLiabilityComponent {
       jurisdiction: j.jurisdiction ?? unassigned,
       taxableBase: j.taxableBase,
       liability: j.liability,
-      orderCount: j.orderCount,
+      invoiceCount: j.invoiceCount,
     }));
   });
 

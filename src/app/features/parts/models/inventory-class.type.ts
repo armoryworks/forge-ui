@@ -8,8 +8,9 @@ export type InventoryClass =
   | 'Subassembly'
   | 'FinishedGood'
   | 'Consumable'
-  | 'Tool';
+  | 'Tool'
+  | 'Service';
 
 export const INVENTORY_CLASSES: readonly InventoryClass[] = [
-  'Raw', 'Component', 'Subassembly', 'FinishedGood', 'Consumable', 'Tool',
+  'Raw', 'Component', 'Subassembly', 'FinishedGood', 'Consumable', 'Tool', 'Service',
 ] as const;

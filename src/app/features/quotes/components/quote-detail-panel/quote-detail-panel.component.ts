@@ -486,7 +486,8 @@ export class QuoteDetailPanelComponent {
 
   /**
    * Milestone action availability mirrors the server guards: mark-paid on
-   * anything not Paid/Waived, waive on anything without recorded payments,
+   * anything not Paid/Waived that has no invoice (an invoiced milestone is
+   * paid through its invoice), waive on anything without recorded payments,
    * generate-invoice only when the quote is linked to a sales order AND the
    * install runs standalone accounting (⚡ 409 otherwise — hidden here).
    */
@@ -498,7 +499,7 @@ export class QuoteDetailPanelComponent {
     return schedule.milestones
       .map(m => ({
         milestone: m,
-        canMarkPaid: m.status !== 'Paid' && m.status !== 'Waived',
+        canMarkPaid: m.invoiceId === null && m.status !== 'Paid' && m.status !== 'Waived',
         canWaive: m.status !== 'Paid' && m.status !== 'PartiallyPaid' && m.status !== 'Waived',
         canGenerateInvoice: canInvoice && m.invoiceId === null
           && m.status !== 'Invoiced' && m.status !== 'Paid' && m.status !== 'Waived',
