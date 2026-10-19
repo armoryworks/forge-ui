@@ -2553,7 +2553,8 @@
         "defaultCurrencyLabel": "Moneda Predeterminada",
         "isTaxExemptLabel": "Exento de Impuestos",
         "taxExemptionIdLabel": "ID de Exención Fiscal",
-        "saveFailed": "No se pudo guardar la configuración de crédito e impuestos del cliente."
+        "saveFailed": "No se pudo guardar la configuración de crédito e impuestos del cliente.",
+        "defaultCreditTermsLabel": "Condiciones de crédito predeterminadas"
       },
       "review": {
         "title": "Revisión",
@@ -5339,7 +5340,9 @@
       "sourceNone": "Este cliente no tiene correo registrado. Escriba un destinatario o agregue un contacto de facturación al cliente.",
       "send": "Enviar correo",
       "sent": "Factura enviada por correo a {{email}}."
-    }
+    },
+    "taxExemptNote": "Exento de impuestos (certificado {{id}}). No se factura impuesto sobre las ventas.",
+    "dueDateTermsMismatch": "La fecha de vencimiento debe ser {{date}} para las condiciones {{terms}}. Cambie la fecha de vencimiento o las condiciones de crédito."
   },
   "payments": {
     "paymentNumberLabel": "Número de pago",
@@ -5393,7 +5396,14 @@
     "availableCredit": "Crédito disponible",
     "remainingCredit": "Crédito restante",
     "creditApplied": "Crédito aplicado.",
-    "addApplication": "Agregar aplicación a factura"
+    "addApplication": "Agregar aplicación a factura",
+    "voidPayment": "Anular Pago",
+    "voidPaymentTitle": "¿Anular Pago?",
+    "voidPaymentMessage": "¿Anular el pago \"{{number}}\"? El cobro se revierte en el libro contable y las facturas que pagó se reabren para cobro. Esta acción no se puede deshacer.",
+    "voidReason": "Motivo de Anulación",
+    "paymentVoided": "Pago anulado.",
+    "void": "Anular",
+    "invoiceOptionLabel": "{{number}} — {{balance}} pendiente"
   },
   "vendorContacts": {
     "contactsTab": "Contactos",

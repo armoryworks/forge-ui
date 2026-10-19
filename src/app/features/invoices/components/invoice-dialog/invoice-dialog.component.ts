@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal, output, computed, ViewChild } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -28,8 +28,9 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ActiveCurrencyService } from '../../../../shared/services/active-currency.service';
 import { ActiveCurrency } from '../../../../shared/models/active-currency.model';
-import { formatDate, toIsoDate, todayEnd } from '../../../../shared/utils/date.utils';
-import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
+import { formatDate, toCalendarDate, toIsoDate, todayEnd, todayStart } from '../../../../shared/utils/date.utils';
+import { CREDIT_TERMS_OPTIONS, dueDateForCreditTerms } from '../../../../shared/models/credit-terms.const';
+import { CustomerDetail } from '../../../customers/models/customer-detail.model';
 
 interface LineEntry {
   partId: number | null;
@@ -86,6 +87,7 @@ export class InvoiceDialogComponent {
   protected readonly lines = signal<LineEntry[]>([]);
   private prefilledLines: LineEntry[] | null = null;
   protected readonly sources = signal<InvoiceSources>({ salesOrders: [], shipments: [] });
+  protected readonly customerDetail = signal<CustomerDetail | null>(null);
 
   protected readonly customerOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('invoices.selectCustomer') },
@@ -117,7 +119,7 @@ export class InvoiceDialogComponent {
     customerId: new FormControl<number | null>(null, [Validators.required]),
     salesOrderId: new FormControl<number | null>(null),
     shipmentId: new FormControl<number | null>(null),
-    invoiceDate: new FormControl<Date | null>(null, [Validators.required]),
+    invoiceDate: new FormControl<Date | null>(todayStart(), [Validators.required]),
     dueDate: new FormControl<Date | null>(null, [Validators.required]),
     creditTerms: new FormControl<string | null>(null),
     taxRate: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
@@ -195,7 +197,23 @@ export class InvoiceDialogComponent {
     this.invoiceForm.controls.taxRate.valueChanges.pipe(startWith(this.invoiceForm.controls.taxRate.value ?? 0)),
     { initialValue: this.invoiceForm.controls.taxRate.value ?? 0 }
   );
-  protected readonly taxAmount = computed(() => (this.taxRateValue() ?? 0) / 100 * this.taxableTotal());
+  private readonly invoiceDateValue = toSignal(
+    this.invoiceForm.controls.invoiceDate.valueChanges.pipe(startWith(this.invoiceForm.controls.invoiceDate.value)),
+    { initialValue: this.invoiceForm.controls.invoiceDate.value },
+  );
+
+  /** True when the picked customer's exemption certificate covers the invoice date; the server bills no tax then. */
+  protected readonly customerTaxExempt = computed(() => {
+    const customer = this.customerDetail();
+    if (!customer?.isTaxExempt) return false;
+    if (!customer.exemptionExpiryDate) return true;
+    const invoiceDate = this.invoiceDateValue() ?? todayStart();
+    const expiry = toCalendarDate(customer.exemptionExpiryDate);
+    return toIsoDate(expiry)! >= toIsoDate(invoiceDate)!;
+  });
+
+  protected readonly effectiveTaxRate = computed(() => (this.customerTaxExempt() ? 0 : (this.taxRateValue() ?? 0)));
+  protected readonly taxAmount = computed(() => this.effectiveTaxRate() / 100 * this.taxableTotal());
   protected readonly grandTotal = computed(() => this.lineTotal() + this.taxAmount());
 
   protected readonly draftConfig: DraftConfig = {
@@ -242,6 +260,27 @@ export class InvoiceDialogComponent {
     controls.customerId.valueChanges.pipe(
       startWith(controls.customerId.value),
       distinctUntilChanged(),
+      switchMap(customerId => {
+        this.customerDetail.set(null);
+        return customerId == null
+          ? EMPTY
+          : this.customerService.getCustomerById(customerId).pipe(catchError(() => EMPTY));
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(customer => {
+      this.customerDetail.set(customer);
+      if (controls.salesOrderId.value == null) this.applyDefaultCreditTerms(customer.defaultCreditTerms ?? null);
+    });
+
+    effect(() => {
+      const taxRate = this.invoiceForm.controls.taxRate;
+      if (this.customerTaxExempt()) taxRate.disable({ emitEvent: false });
+      else taxRate.enable({ emitEvent: false });
+    });
+
+    controls.customerId.valueChanges.pipe(
+      startWith(controls.customerId.value),
+      distinctUntilChanged(),
       switchMap(customerId => customerId == null
         ? EMPTY
         : this.adminService.getTaxRateForCustomer(customerId).pipe(catchError(() => EMPTY))),
@@ -256,8 +295,15 @@ export class InvoiceDialogComponent {
         controls.shipmentId.setValue(null);
       }
       const order = this.sources().salesOrders.find(so => so.id === salesOrderId);
-      if (order) this.applyDefaultTaxRate(order.taxRate);
+      if (order) {
+        this.applyDefaultTaxRate(order.taxRate);
+        this.applyDefaultCreditTerms(order.creditTerms ?? this.customerDetail()?.defaultCreditTerms ?? null);
+      }
     });
+
+    controls.dueDate.addValidators(control => this.dueDateTermsError(control.value as Date | null));
+    controls.creditTerms.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.applyTermsDueDate());
+    controls.invoiceDate.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.applyTermsDueDate());
 
     controls.shipmentId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((shipmentId) => {
       const shipment = this.sources().shipments.find(s => s.id === shipmentId);
@@ -306,6 +352,34 @@ export class InvoiceDialogComponent {
 
   protected close(): void {
     this.closed.emit();
+  }
+
+  private applyDefaultCreditTerms(creditTerms: string | null): void {
+    const control = this.invoiceForm.controls.creditTerms;
+    if (control.dirty || creditTerms == null) return;
+    control.setValue(creditTerms);
+  }
+
+  private termsDueDate(): Date | null {
+    const { invoiceDate, creditTerms } = this.invoiceForm.controls;
+    return invoiceDate.value ? dueDateForCreditTerms(toCalendarDate(invoiceDate.value), creditTerms.value) : null;
+  }
+
+  private applyTermsDueDate(): void {
+    const due = this.termsDueDate();
+    if (due) this.invoiceForm.controls.dueDate.setValue(due);
+    else this.invoiceForm.controls.dueDate.updateValueAndValidity();
+  }
+
+  private dueDateTermsError(dueDate: Date | null): ValidationErrors | null {
+    const expected = this.termsDueDate();
+    if (!dueDate || !expected || toIsoDate(dueDate) === toIsoDate(expected)) return null;
+    const terms = this.creditTermsOptions.find(o => o.value === this.invoiceForm.controls.creditTerms.value)?.label ?? '';
+    return {
+      termsMismatch: {
+        message: this.translate.instant('invoices.dueDateTermsMismatch', { terms, date: formatDate(expected) }),
+      },
+    };
   }
 
   private applyDefaultTaxRate(rate: number): void {
@@ -397,7 +471,7 @@ export class InvoiceDialogComponent {
       invoiceDate: toIsoDate(f.invoiceDate!)!,
       dueDate: toIsoDate(f.dueDate!)!,
       creditTerms: f.creditTerms ?? undefined,
-      taxRate: (f.taxRate ?? 0) / 100,
+      taxRate: this.effectiveTaxRate() / 100,
       currencyId,
       fxRate,
       notes: f.notes || undefined,

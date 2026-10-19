@@ -2553,7 +2553,8 @@
         "defaultCurrencyLabel": "Default Currency",
         "isTaxExemptLabel": "Tax Exempt",
         "taxExemptionIdLabel": "Tax Exemption ID",
-        "saveFailed": "Could not save the customer's credit and tax settings."
+        "saveFailed": "Could not save the customer's credit and tax settings.",
+        "defaultCreditTermsLabel": "Default Credit Terms"
       },
       "review": {
         "title": "Review",
@@ -5346,7 +5347,9 @@
       "sourceNone": "This customer has no email on file. Enter a recipient, or add a Billing contact to the customer.",
       "send": "Send email",
       "sent": "Invoice emailed to {{email}}."
-    }
+    },
+    "taxExemptNote": "Tax exempt (certificate {{id}}). No sales tax is billed.",
+    "dueDateTermsMismatch": "Due date must be {{date}} for {{terms}} terms. Change the due date or the credit terms."
   },
   "payments": {
     "paymentNumberLabel": "Payment Number",
@@ -5400,7 +5403,14 @@
     "availableCredit": "Available credit",
     "remainingCredit": "Remaining credit",
     "creditApplied": "Credit applied.",
-    "addApplication": "Add invoice application"
+    "addApplication": "Add invoice application",
+    "voidPayment": "Void Payment",
+    "voidPaymentTitle": "Void Payment?",
+    "voidPaymentMessage": "Void payment \"{{number}}\"? The cash receipt is reversed in the ledger and the invoices it paid reopen for payment. This action cannot be undone.",
+    "voidReason": "Void Reason",
+    "paymentVoided": "Payment voided.",
+    "void": "Void",
+    "invoiceOptionLabel": "{{number}} — {{balance}} open"
   },
   "vendorContacts": {
     "contactsTab": "Contacts",
