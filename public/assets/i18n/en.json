@@ -6614,7 +6614,11 @@
       "inventoryLocation": "Inventory Location Flow",
       "customerRevenue": "Customer Revenue Breakdown",
       "trainingCompletion": "Training Completion"
-    }
+    },
+    "colFailures": "Failures",
+    "colDowntimeHours": "Downtime (h)",
+    "colUnplannedDowntimeHours": "Unplanned downtime (h)",
+    "colMtbfHours": "MTBF (h)"
   },
   "qcInspections": {
     "tabTemplates": "Templates",

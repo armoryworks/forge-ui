@@ -572,6 +572,10 @@ export class ReportsComponent {
     { field: 'completedCount', header: this.translate.instant('reports.colCompleted'), sortable: true, type: 'number', width: '100px', align: 'right' },
     { field: 'overdueCount', header: this.translate.instant('reports.colOverdue'), sortable: true, type: 'number', width: '100px', align: 'right' },
     { field: 'totalCost', header: this.translate.instant('reports.colTotalCost'), sortable: true, type: 'number', width: '120px', align: 'right' },
+    { field: 'failureCount', header: this.translate.instant('reports.colFailures'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'downtimeHours', header: this.translate.instant('reports.colDowntimeHours'), sortable: true, type: 'number', width: '120px', align: 'right' },
+    { field: 'unplannedDowntimeHours', header: this.translate.instant('reports.colUnplannedDowntimeHours'), sortable: true, type: 'number', width: '140px', align: 'right' },
+    { field: 'mtbfHours', header: this.translate.instant('reports.colMtbfHours'), sortable: true, type: 'number', width: '110px', align: 'right' },
   ];
 
   protected readonly qualityScrapColumns: ColumnDef[] = [

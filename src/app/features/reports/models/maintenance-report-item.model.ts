@@ -5,4 +5,9 @@ export interface MaintenanceReportItem {
   completedCount: number;
   overdueCount: number;
   totalCost: number;
+  downtimeEvents: number;
+  failureCount: number;
+  downtimeHours: number;
+  unplannedDowntimeHours: number;
+  mtbfHours: number | null;
 }

@@ -6607,7 +6607,11 @@
       "inventoryLocation": "Flujo de Ubicación de Inventario",
       "customerRevenue": "Desglose de Ingresos por Cliente",
       "trainingCompletion": "Finalización de Capacitación"
-    }
+    },
+    "colFailures": "Fallas",
+    "colDowntimeHours": "Tiempo muerto (h)",
+    "colUnplannedDowntimeHours": "Tiempo muerto no planificado (h)",
+    "colMtbfHours": "MTBF (h)"
   },
   "qcInspections": {
     "tabTemplates": "Plantillas",
