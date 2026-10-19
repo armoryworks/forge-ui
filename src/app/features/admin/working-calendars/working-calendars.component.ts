@@ -349,8 +349,8 @@ export class WorkingCalendarsComponent {
       // Pad form's "HH:mm" back to TimeOnly's "HH:mm:ss".
       startTime: `${v.startTime}:00`,
       endTime: `${v.endTime}:00`,
-      premiumMultiplier: v.premiumMultiplier,
-      capacityHours: v.capacityHours,
+      premiumMultiplier: v.premiumMultiplier ?? 1,
+      capacityHours: v.capacityHours ?? 0,
       isActive: v.isActive,
     };
     const id = this.editingShiftId();

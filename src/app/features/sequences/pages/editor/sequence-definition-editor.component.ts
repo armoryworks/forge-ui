@@ -179,8 +179,8 @@ export class SequenceDefinitionEditorComponent {
       description: v.description.trim() || null,
       subjectEntityType: v.subjectEntityType.trim() || null,
       autoStartOnSubjectCreate: v.autoStartOnSubjectCreate,
-      steps: this.steps.getRawValue().map(s => ({
-        ...s, escalateRole: (s['escalateRole'] as string)?.trim() || null,
+      steps: this.steps.getRawValue().map((s, i) => ({
+        ...s, sortOrder: s['sortOrder'] ?? i + 1, escalateRole: (s['escalateRole'] as string)?.trim() || null,
       })) as SequenceStepDefinition[],
       edges: this.edges.getRawValue() as SequenceEdgeDefinition[],
       gates: this.gates.getRawValue().map(g => ({
