@@ -40,6 +40,7 @@ export interface MaterialIssue {
   lotNumber: string | null;
   issueType: 'Issue' | 'Return' | 'Scrap';
   notes: string | null;
+  isReturned: boolean;
 }
 
 export interface MaterialIssueRequest {

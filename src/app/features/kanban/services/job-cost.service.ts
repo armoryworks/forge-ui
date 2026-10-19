@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
+import { IssuableMaterial } from '../models/issuable-material.model';
 import { JobCostSummary, JobProfitabilityRow, LaborRate, MaterialIssue, MaterialIssueRequest } from '../models/job-cost.model';
 import { OperationTimeAnalysis } from '../models/operation-time.model';
 
@@ -17,6 +18,10 @@ export class JobCostService {
   getMaterialIssues(jobId: number, page = 1, pageSize = 25): Observable<MaterialIssue[]> {
     const params = new HttpParams().set('page', page).set('pageSize', pageSize);
     return this.http.get<MaterialIssue[]>(`${this.baseUrl}/jobs/${jobId}/material-issues`, { params });
+  }
+
+  getIssuableMaterials(jobId: number): Observable<IssuableMaterial[]> {
+    return this.http.get<IssuableMaterial[]>(`${this.baseUrl}/jobs/${jobId}/issuable-materials`);
   }
 
   issueMaterial(jobId: number, request: MaterialIssueRequest): Observable<MaterialIssue> {
