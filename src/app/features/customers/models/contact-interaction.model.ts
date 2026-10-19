@@ -19,4 +19,5 @@ export interface ContactInteractionRequest {
   body?: string | null;
   interactionDate: string;
   durationMinutes?: number | null;
+  followUpDate?: string;
 }

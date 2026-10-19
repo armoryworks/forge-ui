@@ -15,4 +15,5 @@ export interface PaymentDetail {
   applications: PaymentApplication[];
   createdAt: Date;
   updatedAt: Date;
+  rowVersion?: number | string | null;
 }

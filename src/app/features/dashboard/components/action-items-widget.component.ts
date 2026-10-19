@@ -29,6 +29,7 @@ const TRIGGER_ICON_MAP: Record<string, string> = {
   MaterialsReady: 'shopping_cart',
   ShipmentDelivered: 'local_shipping',
   ReorderSuggested: 'inventory',
+  InteractionFollowUp: 'phone_callback',
 };
 
 const SOURCE_ENTITY_LINK_TYPES: Record<string, LinkableEntityType> = {
@@ -41,6 +42,7 @@ const SOURCE_ENTITY_LINK_TYPES: Record<string, LinkableEntityType> = {
   Part: 'part',
   Lot: 'lot',
   CustomerReturn: 'customer-return',
+  Customer: 'customer',
 };
 
 @Component({

@@ -1,0 +1,56 @@
+<app-dialog [title]="'payments.applyCreditTitle' | translate: { number: payment().paymentNumber }" width="640px" (closed)="close()">
+  <div class="credit-summary">
+    <div class="credit-summary__row">
+      <span>{{ 'payments.availableCredit' | translate }}</span>
+      <app-currency-display [value]="payment().unappliedAmount" [currency]="null" />
+    </div>
+    <div class="credit-summary__row" [class.text-warning]="remainingCredit() < 0">
+      <span>{{ 'payments.remainingCredit' | translate }}</span>
+      <app-currency-display [value]="remainingCredit()" [currency]="null" data-testid="apply-credit-remaining" />
+    </div>
+  </div>
+
+  @if (applications().length > 0) {
+    <ul class="credit-lines" [attr.aria-label]="'payments.invoiceApplications' | translate">
+      @for (app of applications(); track app.invoiceId) {
+        <li class="credit-lines__row">
+          <span class="credit-lines__invoice">{{ app.invoiceNumber }}</span>
+          @if (showSettlementFxRate()) {
+            <span class="credit-lines__rate">{{ app.settlementFxRate }}</span>
+          }
+          <app-currency-display [value]="app.amount" [currency]="null" />
+          <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above"
+            [attr.aria-label]="'common.remove' | translate" (click)="removeApplication($index)">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </li>
+      }
+    </ul>
+  } @else {
+    <div class="lines-empty">{{ 'payments.noApplicationsYet' | translate }}</div>
+  }
+
+  <div class="add-line" [class.add-line--3col]="!showSettlementFxRate()" [class.add-line--4col]="showSettlementFxRate()" [formGroup]="appForm">
+    <app-autocomplete [label]="'payments.invoice' | translate" [options]="invoiceOptions()" formControlName="invoiceId" [minChars]="0"
+      [placeholder]="'payments.invoicePlaceholder' | translate" data-testid="apply-credit-invoice" />
+    <app-input [label]="'payments.amount' | translate" type="number" formControlName="amount"
+      [placeholder]="'payments.amountPlaceholder' | translate" data-testid="apply-credit-amount" />
+    @if (showSettlementFxRate()) {
+      <app-input [label]="'accounting.currency.settlementFxRate' | translate" type="number" formControlName="settlementFxRate"
+        step="0.0000001" min="0.0000001" [placeholder]="'accounting.currency.fxRatePlaceholder' | translate" />
+    }
+    <button class="action-btn action-btn--sm" (click)="addApplication()" [disabled]="!canAdd()"
+      [attr.aria-label]="'payments.addApplication' | translate" data-testid="apply-credit-add">
+      <span class="material-icons-outlined">add</span>
+      {{ 'common.add' | translate }}
+    </button>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <button class="action-btn action-btn--primary" data-testid="apply-credit-save"
+      [disabled]="applications().length === 0 || remainingCredit() < 0 || saving()" (click)="save()">
+      <span class="material-icons-outlined">done</span> {{ 'payments.applyCredit' | translate }}
+    </button>
+  </div>
+</app-dialog>

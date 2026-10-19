@@ -2367,7 +2367,8 @@
         "Email": "Correo",
         "Meeting": "Reunión",
         "Note": "Nota"
-      }
+      },
+      "followUpDate": "Fecha de seguimiento (crea una tarea para usted)"
     },
     "contactsCluster": {
       "addFirst": "Agregar primer contacto",
@@ -2444,7 +2445,8 @@
       "colDue": "Vence",
       "colTitle": "Título",
       "colStage": "Etapa",
-      "colPriority": "Prioridad"
+      "colPriority": "Prioridad",
+      "downloadStatement": "Descargar estado de cuenta"
     },
     "estimates": {
       "newEstimate": "Nueva estimación",
@@ -5358,7 +5360,13 @@
     "paymentDetails": "Detalles de Pago",
     "numberLockedReason": "El número de pago solo se puede cambiar antes de aplicar el pago. Este ya se aplicó a una factura, por lo que el número forma parte del registro liquidado.",
     "invoice": "Factura",
-    "invoicePlaceholder": "Elija una factura abierta"
+    "invoicePlaceholder": "Elija una factura abierta",
+    "applyCredit": "Aplicar crédito",
+    "applyCreditTitle": "Aplicar crédito — {{number}}",
+    "availableCredit": "Crédito disponible",
+    "remainingCredit": "Crédito restante",
+    "creditApplied": "Crédito aplicado.",
+    "addApplication": "Agregar aplicación a factura"
   },
   "vendorContacts": {
     "contactsTab": "Contactos",
@@ -7648,7 +7656,8 @@
     "subtitle": "Rastrear y gestionar devoluciones de clientes",
     "title": "Devoluciones de Clientes",
     "updated": "Devolución actualizada",
-    "fieldQuantity": "Cantidad devuelta"
+    "fieldQuantity": "Cantidad devuelta",
+    "fieldCreateReworkJob": "Crear una orden de retrabajo"
   },
   "recalls": {
     "title": "Retiradas",

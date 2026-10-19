@@ -1,3 +1,14 @@
+@if (canDownloadStatement) {
+  <div class="tab-toolbar">
+    <span class="tab-toolbar__spacer"></span>
+    <button class="action-btn action-btn--sm" data-testid="customer-statement-btn"
+            [disabled]="downloadingStatement()" (click)="downloadStatement()">
+      <span class="material-icons-outlined">picture_as_pdf</span>
+      {{ 'customers.tabs.downloadStatement' | translate }}
+    </button>
+  </div>
+}
+
 <div class="tab-content tab-content--table">
   <app-data-table
     tableId="customer-invoices"

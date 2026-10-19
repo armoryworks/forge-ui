@@ -12,7 +12,7 @@ import { DatepickerComponent } from '../../../../shared/components/datepicker/da
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
-import { toIsoDate, todayEnd } from '../../../../shared/utils/date.utils';
+import { toIsoDate, todayEnd, todayStart } from '../../../../shared/utils/date.utils';
 
 import { CustomerService } from '../../services/customer.service';
 import { ContactInteraction } from '../../models/contact-interaction.model';
@@ -69,6 +69,7 @@ export class ContactInteractionDialogComponent {
   /** Interactions log a thing that already happened — future dates make no
    *  sense; [max]=today is safe on edit (existing past dates still pass). */
   protected readonly today = todayEnd();
+  protected readonly followUpMin = todayStart();
 
   protected readonly title = computed(() =>
     this.isEdit
@@ -88,6 +89,7 @@ export class ContactInteractionDialogComponent {
       [Validators.required],
     ),
     durationMinutes: new FormControl<number | null>(this.data.interaction?.durationMinutes ?? null),
+    followUpDate: new FormControl<Date | null>(null),
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
@@ -124,6 +126,7 @@ export class ContactInteractionDialogComponent {
       body: val.body,
       interactionDate: toIsoDate(val.interactionDate) ?? new Date().toISOString(),
       durationMinutes: val.durationMinutes,
+      followUpDate: this.isEdit ? undefined : (toIsoDate(val.followUpDate) ?? undefined),
     };
 
     const existing = this.data.interaction;

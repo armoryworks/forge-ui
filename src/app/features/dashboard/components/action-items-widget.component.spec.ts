@@ -120,6 +120,7 @@ describe('ActionItemsWidgetComponent', () => {
     expect(internals.getEntityType('Part')).toBe('part');
     expect(internals.getEntityType('Lot')).toBe('lot');
     expect(internals.getEntityType('CustomerReturn')).toBe('customer-return');
+    expect(internals.getEntityType('Customer')).toBe('customer');
   });
 
   it('treats unknown or missing source types as plain text', () => {
@@ -144,6 +145,12 @@ describe('ActionItemsWidgetComponent', () => {
     expect(internals.getIcon('ReorderSuggested')).toBe('inventory');
     expect(internals.isReorderSuggestion(reorder)).toBe(true);
     expect(internals.isReorderSuggestion(task())).toBe(false);
+  });
+
+  it('gives interaction follow-ups a call-back icon', () => {
+    const { internals } = setup();
+
+    expect(internals.getIcon('InteractionFollowUp')).toBe('phone_callback');
   });
 
   it('translates the complete and dismiss snackbars', () => {

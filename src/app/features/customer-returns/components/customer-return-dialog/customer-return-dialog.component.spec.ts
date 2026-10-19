@@ -59,4 +59,15 @@ describe('CustomerReturnDialogComponent quantity', () => {
 
     expect(create).toHaveBeenCalledWith(expect.objectContaining({ customerId: 1, originalJobId: 2, quantity: 2.5 }));
   });
+
+  it('asks for a rework work order only when the toggle is on', () => {
+    const d = dialog();
+    d.returnForm.patchValue({ customerId: 1, originalJobId: 2, reason: 'Cracked', quantity: 3, returnDate: new Date(2026, 9, 1) });
+    d.save();
+    expect(create).toHaveBeenLastCalledWith(expect.objectContaining({ createReworkJob: false }));
+
+    d.returnForm.patchValue({ createReworkJob: true });
+    d.save();
+    expect(create).toHaveBeenLastCalledWith(expect.objectContaining({ createReworkJob: true, quantity: 3 }));
+  });
 });

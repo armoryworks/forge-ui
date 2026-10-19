@@ -14,6 +14,10 @@
       <app-input data-testid="interaction-duration" [label]="'customers.interactions.durationMinutes' | translate"
                  type="number" formControlName="durationMinutes" />
     </div>
+    @if (!isEdit) {
+      <app-datepicker data-testid="interaction-follow-up-date" [label]="'customers.interactions.followUpDate' | translate"
+                      formControlName="followUpDate" [min]="followUpMin" />
+    }
     <app-textarea data-testid="interaction-body" [label]="'customers.interactions.notes' | translate"
                   formControlName="body" [rows]="4" />
   </div>
