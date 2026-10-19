@@ -54,7 +54,7 @@
               @for (widget of availableWidgets(); track widget.id) {
                 <button class="widget-add-menu__item" (click)="addWidget(widget)">
                   <span class="material-icons-outlined widget-add-menu__icon">{{ widget.icon }}</span>
-                  <span class="widget-add-menu__label">{{ widget.titleKey ? (widget.titleKey | translate) : widget.title }}</span>
+                  <span class="widget-add-menu__label">{{ widget.titleKey | translate }}</span>
                 </button>
               }
             </div>
@@ -120,11 +120,11 @@
               }
 
               <app-dashboard-widget
-                [title]="widget.titleKey ? (widget.titleKey | translate) : (widget.title ?? '')"
+                [title]="widget.titleKey | translate"
                 [icon]="widget.icon"
                 [widgetKey]="widget.id"
                 [viewAllLink]="widget.viewAllLink ?? null"
-                [viewAllLabel]="widget.viewAllLabel ?? 'View all'">
+                [viewAllLabel]="(widget.viewAllLabelKey ?? 'dashboard.widgets.viewAll') | translate">
                 @switch (widget.component) {
                   @case ('todays-tasks') {
                     <app-todays-tasks-widget [tasks]="d.tasks" />

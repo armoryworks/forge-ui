@@ -29,7 +29,7 @@ export class KeyboardShortcutsHelpComponent {
     const map = new Map<string, KeyboardShortcut[]>();
 
     for (const s of all) {
-      const ctx = s.context ?? 'Other';
+      const ctx = s.contextKey ?? 'shortcuts.groups.other';
       const list = map.get(ctx) ?? [];
       list.push(s);
       map.set(ctx, list);
