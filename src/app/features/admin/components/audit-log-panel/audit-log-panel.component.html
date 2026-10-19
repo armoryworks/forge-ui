@@ -50,7 +50,7 @@
               data-testid="audit-log-details-toggle"
               (click)="toggleDetails(row.id); $event.stopPropagation()">
               @if (expandedDetailsId() === row.id) {
-                <pre class="audit-log-panel__details-full">{{ formatDetails(row.details) }}</pre>
+                <span class="audit-log-panel__details-full">{{ formatDetails(row.details) }}</span>
               } @else {
                 <span class="audit-log-panel__details-preview">{{ row.details }}</span>
               }

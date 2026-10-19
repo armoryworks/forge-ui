@@ -37,6 +37,7 @@
   }
 
   &__details-full {
+    display: block;
     margin: 0;
     font-family: $font-family-mono;
     font-size: var(--font-size-sm);
