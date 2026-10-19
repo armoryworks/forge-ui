@@ -12,6 +12,7 @@ import { InvoiceDetail } from '../../models/invoice-detail.model';
 import { InvoiceDetailPanelComponent } from './invoice-detail-panel.component';
 import { SendInvoiceEmailDialogComponent } from '../send-invoice-email-dialog/send-invoice-email-dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { ConfirmSendService } from '../../../../shared/services/confirm-send.service';
 
 type PanelInternals = {
   invoice: { set(v: InvoiceDetail): void };
@@ -21,6 +22,7 @@ type PanelInternals = {
   saveNumber(): void;
   deleteInvoice(): void;
   emailInvoice(): void;
+  sendInvoice(): void;
 };
 
 describe('InvoiceDetailPanelComponent actions', () => {
@@ -30,6 +32,7 @@ describe('InvoiceDetailPanelComponent actions', () => {
     renameInvoiceNumber: ReturnType<typeof vi.fn>;
     deleteInvoice: ReturnType<typeof vi.fn>;
   };
+  let confirmSend: { confirmSend: ReturnType<typeof vi.fn> };
   let dialog: { open: ReturnType<typeof vi.fn> };
   let dialogResult: unknown;
   const invoice = { id: 7, invoiceNumber: 'INV-0007', customerName: 'Acme', status: 'Draft', rowVersion: 3 } as InvoiceDetail;
@@ -41,6 +44,7 @@ describe('InvoiceDetailPanelComponent actions', () => {
       renameInvoiceNumber: vi.fn(() => of(undefined)),
       deleteInvoice: vi.fn(() => of(undefined)),
     };
+    confirmSend = { confirmSend: vi.fn(() => of(false)) };
     dialog = { open: vi.fn(() => ({ afterClosed: () => of(dialogResult) })) };
     TestBed.configureTestingModule({
       providers: [
@@ -50,6 +54,7 @@ describe('InvoiceDetailPanelComponent actions', () => {
         provideTranslateService(),
         { provide: InvoiceService, useValue: service },
         { provide: MatDialog, useValue: dialog },
+        { provide: ConfirmSendService, useValue: confirmSend },
         { provide: SnackbarService, useValue: { success: vi.fn() } },
       ],
     });
@@ -95,6 +100,15 @@ describe('InvoiceDetailPanelComponent actions', () => {
 
     expect(dialog.open).toHaveBeenCalledWith(SendInvoiceEmailDialogComponent, expect.objectContaining({
       data: { invoiceId: 7, invoiceNumber: 'INV-0007', customerName: 'Acme' },
+    }));
+  });
+
+  it('asks to finalize, not to send, before finalizing', () => {
+    panel.sendInvoice();
+
+    expect(confirmSend.confirmSend).toHaveBeenCalledWith(expect.objectContaining({
+      titleKey: 'invoices.confirmSendTitle',
+      confirmLabelKey: 'invoices.send',
     }));
   });
 });

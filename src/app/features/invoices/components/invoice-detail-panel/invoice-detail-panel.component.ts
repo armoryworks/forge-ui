@@ -121,6 +121,7 @@ export class InvoiceDetailPanelComponent {
       titleKey: 'invoices.confirmSendTitle',
       messageKey: 'invoices.confirmSendMessage',
       messageParams: { number: inv.invoiceNumber },
+      confirmLabelKey: 'invoices.send',
     }).subscribe(confirmed => {
       if (!confirmed) return;
       this.invoiceService.sendInvoice(inv.id).subscribe({
