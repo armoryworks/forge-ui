@@ -32,6 +32,25 @@ import { DateTimePipe } from '../../shared/pipes/date-time.pipe';
  * Proposals inbox (apply → optional compliance-calendar deadline / dismiss), monitored-sources
  * view, and a manual poll trigger. Tabs are URL-driven (`/watchtower/:tab`).
  */
+const DOMAIN_LABEL_KEYS: Readonly<Record<string, string>> = {
+  'cross-cutting': 'watchtower.domain.crossCutting',
+  environmental: 'watchtower.domain.environmental',
+  firearms: 'watchtower.domain.firearms',
+  food: 'watchtower.domain.food',
+  labor: 'watchtower.domain.labor',
+  'product-safety': 'watchtower.domain.productSafety',
+  safety: 'watchtower.domain.safety',
+  tax: 'watchtower.domain.tax',
+};
+
+const FEED_TYPE_LABEL_KEYS: Readonly<Record<string, string>> = {
+  Api: 'watchtower.feedType.api',
+  Rss: 'watchtower.feedType.rss',
+  Email: 'watchtower.feedType.email',
+  Bulk: 'watchtower.feedType.bulk',
+  Scrape: 'watchtower.feedType.scrape',
+};
+
 @Component({
   selector: 'app-watchtower',
   standalone: true,
@@ -92,6 +111,17 @@ export class WatchtowerComponent {
     });
   }
 
+  protected domainLabel(domain: string): string {
+    const key = DOMAIN_LABEL_KEYS[domain];
+    if (key) return this.translate.instant(key);
+    return domain.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  }
+
+  protected feedTypeLabel(feedType: string): string {
+    const key = FEED_TYPE_LABEL_KEYS[feedType];
+    return key ? this.translate.instant(key) : feedType;
+  }
+
   protected switchTab(tab: WatchtowerTab): void {
     this.router.navigate(['..', tab], { relativeTo: this.route });
   }
@@ -116,7 +146,11 @@ export class WatchtowerComponent {
     this.service.poll().subscribe({
       next: (r) => {
         this.polling.set(false);
-        this.snackbar.success(this.translate.instant('watchtower.polled', { count: r.created }));
+        if (r.activeSources === 0) {
+          this.snackbar.info(this.translate.instant('watchtower.noActiveSources'));
+        } else {
+          this.snackbar.success(this.translate.instant('watchtower.polled', { count: r.created }));
+        }
         this.loadProposals();
         this.loadSources();
       },
@@ -127,7 +161,7 @@ export class WatchtowerComponent {
   protected applyProposal(proposal: RegulatoryProposal): void {
     this.dialog.open<ApplyProposalDialogComponent, ApplyProposalDialogData, ApplyProposalDialogResult>(
       ApplyProposalDialogComponent,
-      { width: '480px', autoFocus: false, data: { proposalTitle: proposal.title, eventTypeOptions: this.eventTypeOptions() } },
+      { width: '480px', autoFocus: 'input', data: { proposalTitle: proposal.title, eventTypeOptions: this.eventTypeOptions() } },
     ).afterClosed().subscribe(result => {
       if (!result) return;
       this.service.applyProposal(proposal.id, result).subscribe({

@@ -7,12 +7,12 @@
   </ng-container>
 
   <ng-container content>
-    <div class="tab-bar" appTabList appScrollCue>
-      <button class="tab" [appTab]="activeTab() === 'proposals'" (click)="switchTab('proposals')">
+    <div class="tab-bar" appTabList appScrollCue [attr.aria-label]="'watchtower.title' | translate">
+      <button class="tab" [appTab]="activeTab() === 'proposals'" data-testid="watchtower-tab-proposals" (click)="switchTab('proposals')">
         {{ 'watchtower.tabs.proposals' | translate }}
         @if (pendingCount() > 0) { <span class="chip chip--warning wt-tab-badge">{{ pendingCount() }}</span> }
       </button>
-      <button class="tab" [appTab]="activeTab() === 'sources'" (click)="switchTab('sources')">
+      <button class="tab" [appTab]="activeTab() === 'sources'" data-testid="watchtower-tab-sources" (click)="switchTab('sources')">
         {{ 'watchtower.tabs.sources' | translate }}
       </button>
     </div>
@@ -77,8 +77,8 @@
                 </div>
                 <div class="wt-source__meta">
                   @if (s.issuingBody) { <span>{{ s.issuingBody }}</span> }
-                  @if (s.domain) { <span>{{ s.domain }}</span> }
-                  <span>{{ s.feedType }}</span>
+                  @if (s.domain) { <span>{{ domainLabel(s.domain) }}</span> }
+                  <span>{{ feedTypeLabel(s.feedType) }}</span>
                   @if (s.industryGate) { <span class="chip chip--muted">{{ s.industryGate }}</span> }
                 </div>
                 <div class="wt-card__foot">
