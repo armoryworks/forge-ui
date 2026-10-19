@@ -60,6 +60,7 @@ export class IntegrationOutboxPanelComponent {
     { value: 'Shipping', label: 'Shipping' },
     { value: 'Webhook', label: 'Webhook' },
     { value: 'Sms', label: 'SMS' },
+    { value: 'Messaging', label: 'Chat' },
   ];
 
   protected readonly filtered = computed(() => {
