@@ -4,6 +4,12 @@
     <p class="updates__intro">{{ 'adminUpdates.intro' | translate }}</p>
   </header>
 
+  @if (!state() && !apiReachable()) {
+    <div class="updates__notice updates__notice--warn" role="alert" data-testid="updates-unreachable">
+      {{ 'adminUpdates.unreachable' | translate }}
+    </div>
+  }
+
   @if (!agentAvailable()) {
     <div class="updates__notice updates__notice--warn" data-testid="updates-no-agent">
       <strong>{{ 'adminUpdates.noAgent.title' | translate }}</strong>
@@ -60,6 +66,12 @@
   @if (job(); as j) {
     <div class="updates__card" data-testid="updates-job">
       <h2>{{ 'adminUpdates.progress' | translate }}</h2>
+
+      <p class="updates__outcome updates__state--{{ j.state }}" role="status" data-testid="updates-outcome">
+        {{ 'adminUpdates.states.' + j.state | translate }}
+        @if (j.endedAt) { <span class="updates__dim">· {{ j.endedAt | date: 'short' }}</span> }
+        @if (j.state === 'failed' && j.reason) { <span class="updates__dim">· {{ j.reason }}</span> }
+      </p>
 
       @if (!apiReachable()) {
         <p class="updates__notice" data-testid="updates-reconnecting">

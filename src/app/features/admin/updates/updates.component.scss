@@ -50,6 +50,8 @@
 
   &__box { min-width: 6rem; font-weight: 500; }
 
+  &__outcome { margin: 0 0 0.75rem; font-weight: 500; }
+
   &__state--succeeded { color: var(--mat-sys-primary); }
   &__state--failed,
   &__state--halted-destructive { color: var(--mat-sys-error); }

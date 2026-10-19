@@ -11495,6 +11495,7 @@
     "rollbackAction": "Revertir",
     "progress": "Progreso de la actualización",
     "reconnecting": "Forge se está reiniciando como parte de la actualización. Reconectando…",
+    "unreachable": "Forge no respondió al leer el estado de la actualización. Vuelva a cargar la página para intentarlo de nuevo.",
     "partial": "Actualización parcial: {{completed}} terminó, {{incomplete}} no.",
     "states": {
       "pending": "en espera",
