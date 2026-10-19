@@ -9,13 +9,13 @@
     "parts": "Piezas",
     "inventory": "Inventario",
     "customers": "Clientes",
-    "customersAll": "Todos los Clientes",
+    "customersAll": "Todos los clientes",
     "customersContacts": "Contactos",
     "customersPortalAccess": "Acceso al Portal",
     "customersSegments": "Segmentos",
     "customersImport": "Importar",
     "leads": "Prospectos",
-    "leadsAll": "Todos los Prospectos",
+    "leadsAll": "Todos los prospectos",
     "leadsIntake": "Carga Masiva",
     "leadsQueue": "Cola de Trabajo",
     "leadsCampaigns": "Campañas",
@@ -295,7 +295,16 @@
     "userMenu": "Menú de usuario",
     "closeUserMenu": "Cerrar menú de usuario",
     "closeNotifications": "Cerrar notificaciones",
-    "pageResult": "Página"
+    "pageResult": "Página",
+    "about": {
+      "menu": "Acerca de",
+      "title": "Acerca de Armory Works Forge",
+      "logoAlt": "Forge — Plataforma de operaciones de manufactura",
+      "build": "Su versión",
+      "license": "Licencia",
+      "stack": "Tecnologías",
+      "description": "ERP de código abierto y gestión de producción para pequeños fabricantes. Se integra con QuickBooks Online para sincronizar la contabilidad."
+    }
   },
   "app": {
     "updateAvailable": "Hay una nueva versión disponible.",
@@ -403,7 +412,7 @@
     "info": "Información",
     "done": "Listo",
     "default": "Predeterminado",
-    "allStatuses": "Todos los Estados",
+    "allStatuses": "Todos los estados",
     "send": "Enviar",
     "addComment": "Agregar Comentario",
     "post": "Publicar",
@@ -411,7 +420,7 @@
     "part": "Parte",
     "settings": "Configuración",
     "summary": "Resumen",
-    "units": "units",
+    "units": "unidades",
     "overview": "Resumen",
     "activity": "Actividad",
     "archived": "Archivado",
@@ -492,15 +501,34 @@
     "enterFocusMode": "Entrar en Modo Enfoque",
     "exitFocusMode": "Salir del Modo Enfoque",
     "focusMode": "Modo Enfoque",
-    "completeTask": "Complete Task",
-    "dismissTask": "Dismiss Task",
-    "noActionItems": "No action items",
+    "completeTask": "Completar tarea",
+    "dismissTask": "Descartar tarea",
+    "noActionItems": "No hay acciones pendientes",
     "olderActionItems": "Anteriores ({{count}})",
-    "totalItems": "Total Items",
+    "totalItems": "Total de artículos",
     "addWorkCenters": "Agregue sus centros de trabajo",
     "addFirstPart": "Agregue una pieza con enrutamiento",
     "sendFirstQuote": "Envíe su primera cotización",
-    "shipFirstOrder": "Envíe su primera orden"
+    "shipFirstOrder": "Envíe su primera orden",
+    "widgets": {
+      "todaysTasks": "Tareas de hoy",
+      "teamLoad": "Carga del equipo",
+      "deadlines": "Fechas límite",
+      "activity": "Actividad",
+      "marginSummary": "Resumen de márgenes",
+      "cycleProgress": "Progreso del ciclo",
+      "openOrders": "Pedidos abiertos",
+      "endOfDay": "Fin del día",
+      "actionItems": "Acciones pendientes",
+      "inventorySnapshot": "Resumen de inventario",
+      "viewBoard": "Ver tablero",
+      "timeTracking": "Control de tiempo",
+      "viewCalendar": "Ver calendario",
+      "planningCycles": "Ciclos de planificación",
+      "allOrders": "Todos los pedidos",
+      "viewInventory": "Ver inventario",
+      "viewAll": "Ver todo"
+    }
   },
   "boardFilters": {
     "search": "Buscar",
@@ -947,7 +975,7 @@
     "searchByPartNumber": "Buscar por número de pieza…",
     "draftIndicator": {
       "label": "Borrador",
-      "tooltip": "Flujo en progreso — paso actual: {{step}}. Haz clic para retomar.",
+      "tooltip": "Flujo en progreso — paso actual: {{step}}. Haga clic para retomar.",
       "resume": "Retomar flujo"
     },
     "drafts": {
@@ -1015,7 +1043,7 @@
     "partNumber": "Pieza #",
     "extPartNumber": "Pieza Ext. #",
     "revision": "Revisión",
-    "rev": "Rev",
+    "rev": "Rev.",
     "material": "Material",
     "unitCost": "Costo Unitario",
     "stockLevel": "Nivel de Stock",
@@ -1028,10 +1056,10 @@
     "viewer3d": "Vista 3D",
     "tooling": "Herramental",
     "specifications": "Especificaciones",
-    "info": "Info",
+    "info": "Información",
     "searchPlaceholder": "Buscar piezas...",
-    "allStatuses": "Todos los Estados",
-    "allTypes": "Todos los Tipos",
+    "allStatuses": "Todos los estados",
+    "allTypes": "Todos los tipos",
     "noPartsFound": "No se encontraron piezas",
     "noPartsHelp": "Cree su primera pieza para comenzar a construir su catálogo. Las piezas pueden incluir listas de materiales, operaciones y archivos adjuntos.",
     "externalPartNumber": "Pieza Externa #",
@@ -1062,9 +1090,9 @@
     "bomQty": "Cant.",
     "bomSource": "Fuente",
     "bomLeadTime": "Tiempo de Entrega",
-    "bomRefDes": "Ref Des",
-    "bomNotes": "Notes",
-    "bomSourceAuto": "Source: {{source}} (auto, based on component type)",
+    "bomRefDes": "Ref. desig.",
+    "bomNotes": "Notas",
+    "bomSourceAuto": "Origen: {{source}} (automático, según el tipo de componente)",
     "noBomLines": "Sin entradas de lista de materiales",
     "addBomLine": "Agregar Línea de BOM",
     "childPart": "Pieza Hija",
@@ -1134,7 +1162,7 @@
     "typePackaging": "Empaque",
     "sourceMake": "Fabricar",
     "sourceBuy": "Comprar",
-    "sourceStock": "Stock",
+    "sourceStock": "Existencias",
     "sku": "SKU",
     "viewTable": "Tabla",
     "viewCards": "Tarjetas",
@@ -1153,48 +1181,48 @@
     "safetyStockDays": "Días de Stock de Seguridad",
     "workflow": {
       "startFailed": "No se pudo iniciar el flujo.",
-      "abandonFailed": "No se pudo abandonar el borrador. Inténtalo de nuevo.",
+      "abandonFailed": "No se pudo abandonar el borrador. Inténtelo de nuevo.",
       "fork": {
-        "title": "How would you like to add this part?",
+        "title": "¿Cómo desea agregar esta pieza?",
         "stepLabel": "Paso {{current}} de {{total}}",
         "setupStage": "Configuración",
-        "step1Title": "How is this part sourced?",
-        "step1Make": "Made",
-        "step1MakeDesc": "Produced in-house from raw stock or a BOM.",
-        "step1Buy": "Bought",
-        "step1BuyDesc": "Purchased from a vendor as-is.",
-        "step1Subcontract": "Subcontracted",
-        "step1SubcontractDesc": "Vendor builds the entire part on our behalf.",
-        "step1Phantom": "Phantom",
-        "step1PhantomDesc": "Logical grouping; never stocked.",
-        "step2Title": "What inventory bucket?",
-        "step2Raw": "Raw material",
-        "step2RawDesc": "Bulk input — bar stock, sheet, pellets, wire.",
-        "step2Component": "Component",
-        "step2ComponentDesc": "Single-piece part used in a parent BOM.",
-        "step2Subassembly": "Subassembly",
-        "step2SubassemblyDesc": "Multi-level build used in higher assemblies.",
-        "step2FinishedGood": "Finished good",
-        "step2FinishedGoodDesc": "Sold to customers.",
-        "step2Consumable": "Consumable",
-        "step2ConsumableDesc": "Single-use shop supply.",
-        "step2Tool": "Tool",
-        "step2ToolDesc": "Durable, multi-use.",
+        "step1Title": "¿Cómo se abastece esta pieza?",
+        "step1Make": "Fabricada",
+        "step1MakeDesc": "Se produce internamente a partir de material en bruto o de una lista de materiales.",
+        "step1Buy": "Comprada",
+        "step1BuyDesc": "Se compra a un proveedor tal como está.",
+        "step1Subcontract": "Subcontratada",
+        "step1SubcontractDesc": "El proveedor fabrica la pieza completa por nosotros.",
+        "step1Phantom": "Fantasma",
+        "step1PhantomDesc": "Agrupación lógica; nunca se almacena.",
+        "step2Title": "¿Qué categoría de inventario?",
+        "step2Raw": "Materia prima",
+        "step2RawDesc": "Insumo a granel: barra, lámina, pellets, alambre.",
+        "step2Component": "Componente",
+        "step2ComponentDesc": "Pieza individual que se usa en la lista de materiales de un ensamble.",
+        "step2Subassembly": "Subensamble",
+        "step2SubassemblyDesc": "Ensamble de varios niveles que se usa en ensambles superiores.",
+        "step2FinishedGood": "Producto terminado",
+        "step2FinishedGoodDesc": "Se vende a clientes.",
+        "step2Consumable": "Consumible",
+        "step2ConsumableDesc": "Suministro de taller de un solo uso.",
+        "step2Tool": "Herramienta",
+        "step2ToolDesc": "Duradera, de uso múltiple.",
         "step2Service": "Servicio",
         "step2ServiceDesc": "Cargo sin inventario facturado por línea (NRE, preparación, ingeniería).",
-        "step3Title": "Item kind",
-        "step3Helper": "Optional descriptive tag — Fastener, Electronic, Packaging, etc. Skip if unsure.",
-        "step3None": "— None —",
-        "step4Title": "How would you like to fill it in?",
-        "step4Express": "Quick add",
-        "step4ExpressDesc": "One form, all fields visible.",
-        "step4Guided": "Step by step",
-        "step4GuidedDesc": "Walk through each cluster of fields in order.",
-        "continue": "Continue",
-        "recommended": "Recommended",
+        "step3Title": "Tipo de artículo",
+        "step3Helper": "Etiqueta descriptiva opcional: sujetador, electrónico, empaque, etc. Omítala si no está seguro.",
+        "step3None": "— Ninguno —",
+        "step4Title": "¿Cómo desea completarla?",
+        "step4Express": "Alta rápida",
+        "step4ExpressDesc": "Un formulario con todos los campos visibles.",
+        "step4Guided": "Paso a paso",
+        "step4GuidedDesc": "Recorra cada grupo de campos en orden.",
+        "continue": "Continuar",
+        "recommended": "Recomendado",
         "violations": {
-          "procurementRequired": "Pick how this part is sourced",
-          "inventoryClassRequired": "Pick an inventory bucket"
+          "procurementRequired": "Elija cómo se abastece esta pieza",
+          "inventoryClassRequired": "Elija una categoría de inventario"
         }
       },
       "basics": {
@@ -1261,7 +1289,7 @@
         "currentLabel": "Costo mostrado actualmente",
         "notSet": "No definido",
         "saveFailed": "No se pudo guardar.",
-        "rationale": "<strong>El costo determina cada dólar aguas abajo.</strong> El precio de cotización, los reportes de margen, la valuación de WIP y el análisis de variación estándar-vs-real leen de este número. <br><br>El Nivel 1 (override manual) es el camino más simple: ingresa un número en el que confíes. El Nivel 2 / Nivel 3 agregan tarifas por centro de costo y bolsas basadas en actividad — están bloqueados por capacidad y aún no implementados, por lo que hoy el override manual es la respuesta operativa."
+        "rationale": "<strong>El costo determina cada dólar aguas abajo.</strong> El precio de cotización, los reportes de margen, la valuación de WIP y el análisis de variación estándar-vs-real leen de este número. <br><br>El Nivel 1 (override manual) es el camino más simple: ingrese un número en el que confíe. El Nivel 2 / Nivel 3 agregan tarifas por centro de costo y bolsas basadas en actividad — están bloqueados por capacidad y aún no implementados, por lo que hoy el override manual es la respuesta operativa."
       },
       "alternates": {
         "title": "Alternativos",
@@ -1272,8 +1300,8 @@
         "hint": "Llene todo de una vez.",
         "saveFailed": "No se pudo guardar.",
         "saveSuccess": "Pieza guardada.",
-        "save": "Save",
-        "typeLockedHint": "Set when the part was created. Edit on the part detail page if you need to change it."
+        "save": "Guardar",
+        "typeLockedHint": "Se definió al crear la pieza. Edítelo en la página de detalle de la pieza si necesita cambiarlo."
       },
       "page": {
         "loading": "Cargando flujo…",
@@ -1284,7 +1312,7 @@
         "startFailed": "No se pudo iniciar.",
         "completeSuccess": "Pieza promovida a Activa.",
         "missingValidators": "No se puede completar: falta {{missing}}",
-        "blockedByStep": "Termina '{{step}}' antes de continuar — falta {{missing}}"
+        "blockedByStep": "Termine '{{step}}' antes de continuar — falta {{missing}}"
       },
       "promote": {
         "cta": "Promover a Activa",
@@ -1321,7 +1349,7 @@
         "defaultBinLabel": "Bin Predeterminado (id)",
         "defaultBinHelper": "Dónde se guarda normalmente esta pieza.",
         "saveFailed": "No se pudo guardar el inventario.",
-        "rationale": "<strong>La UoM de inventario es la unidad que utilizan todas las demás transacciones de inventario.</strong> Recepciones, salidas, transferencias, conteos — todo se denomina aquí. Eligir mal y las conversiones se propagan por cada reporte aguas abajo. <br><br>Mín / reorden / stock de seguridad son política: determinan cuándo MRP dispara órdenes planificadas o cuándo los reportes manuales de reorden destacan una pieza. Los valores predeterminados están bien si aún no lo sabes — ajusta más tarde a medida que surjan los patrones de demanda."
+        "rationale": "<strong>La UoM de inventario es la unidad que utilizan todas las demás transacciones de inventario.</strong> Recepciones, salidas, transferencias, conteos — todo se denomina aquí. Si elige mal, las conversiones se propagan por cada reporte aguas abajo. <br><br>Mín / reorden / stock de seguridad son política: determinan cuándo MRP dispara órdenes planificadas o cuándo los reportes manuales de reorden destacan una pieza. Los valores predeterminados están bien si aún no lo sabe; ajústelos más tarde a medida que surjan los patrones de demanda."
       },
       "quality": {
         "title": "Calidad",
@@ -1345,7 +1373,7 @@
         "hazmatClassLabel": "Clase Peligrosa",
         "shelfLifeDaysLabel": "Vida Útil (días)",
         "saveFailed": "No se pudo guardar calidad.",
-        "rationale": "<strong>El modo de trazabilidad es casi-irreversible — puedes cambiarlo después pero cada transacción previa se registró bajo la configuración anterior.</strong> Lote o serie habilita retiro por lote, seguimiento de caducidad y flujos de garantía / RMA por unidad. Bulk se salta todo eso. <br><br>La clase ABC determina la cadencia de conteo cíclico (A semanal, C anual, etc.) y la priorización en los reportes de resolución de faltantes. Mat. peligroso + vida útil solo importan si las capacidades de industria regulada están activas en esta instalación."
+        "rationale": "<strong>El modo de trazabilidad es casi-irreversible — puede cambiarlo después pero cada transacción previa se registró bajo la configuración anterior.</strong> Lote o serie habilita retiro por lote, seguimiento de caducidad y flujos de garantía / RMA por unidad. Bulk se salta todo eso. <br><br>La clase ABC determina la cadencia de conteo cíclico (A semanal, C anual, etc.) y la priorización en los reportes de resolución de faltantes. Mat. peligroso + vida útil solo importan si las capacidades de industria regulada están activas en esta instalación."
       },
       "shipping": {
         "title": "Envío y Físico",
@@ -1412,14 +1440,14 @@
       "vendorParts": {
         "title": "Fuentes de proveedor",
         "hint": "Cada proveedor que suministra esta pieza es su propio grupo abajo — identificadores específicos del proveedor, tiempo de entrega, MOQ y niveles de precio. El proveedor preferido (definido en el paso anterior) se muestra primero; agrega alternos según sea necesario.",
-        "pendingMaterialization": "Guarda los pasos anteriores primero para habilitar fuentes de proveedor para esta pieza.",
-        "rationale": "<strong>Las Fuentes de proveedor son donde viven los precios y los términos por proveedor.</strong> La creación de Órdenes de Compra lee los niveles de precio desde aquí — sin al menos un nivel en el proveedor elegido, el sistema no puede cotizar un precio para la cantidad solicitada y la línea de PO se bloqueará. <br><br>El proveedor preferido (definido en el paso previo) es el predeterminado para nuevas POs; puedes anularlo por PO. Agregar proveedores alternos aquí da a los compradores opciones de respaldo cuando el preferido está sin stock o sobre el MOQ para la situación."
+        "pendingMaterialization": "Guarde primero los pasos anteriores para habilitar fuentes de proveedor para esta pieza.",
+        "rationale": "<strong>Las Fuentes de proveedor son donde viven los precios y los términos por proveedor.</strong> La creación de Órdenes de Compra lee los niveles de precio desde aquí — sin al menos un nivel en el proveedor elegido, el sistema no puede cotizar un precio para la cantidad solicitada y la línea de PO se bloqueará. <br><br>El proveedor preferido (definido en el paso previo) es el predeterminado para nuevas POs; puede anularlo por PO. Agregar proveedores alternos aquí da a los compradores opciones de respaldo cuando el preferido está sin stock o sobre el MOQ para la situación."
       }
     },
     "detail": {
       "sourcesTab": "Fuentes",
       "sourcesEmpty": "Aún no hay proveedores.",
-      "sourcesEmptyHelp": "Añade un proveedor que suministre esta pieza para registrar plazo, MOQ y precios.",
+      "sourcesEmptyHelp": "Agregue un proveedor que suministre esta pieza para registrar plazo, MOQ y precios.",
       "addVendorSource": "Añadir proveedor",
       "tabs": {
         "identity": "Identidad",
@@ -1427,7 +1455,7 @@
         "purchaseHistory": "Historial de Compras",
         "inventory": "Inventario",
         "mrp": "MRP",
-        "bom": "BOM",
+        "bom": "Lista de materiales",
         "routing": "Ruta",
         "cost": "Coste",
         "pricing": "Precios",
@@ -1623,11 +1651,11 @@
     "preferred": "Preferido",
     "setAsPreferred": "Marcar como preferido",
     "noTiersWarning": "Sin niveles — falta precio",
-    "stubHint": "Completa los detalles para añadir este proveedor",
+    "stubHint": "Complete los detalles para agregar este proveedor",
     "addAnother": "Añadir otro proveedor",
     "addTier": "Añadir nivel",
     "stubHintReadonly": "Fuente aún no configurada",
-    "pickVendor": "Selecciona un proveedor",
+    "pickVendor": "Seleccione un proveedor",
     "priceTiers": "Niveles de precio",
     "removed": "Proveedor eliminado",
     "duplicate": "Ese proveedor ya es una fuente de esta pieza.",
@@ -1667,7 +1695,7 @@
       },
       "empty": {
         "message": "Sin niveles de precio en ningún proveedor.",
-        "help": "Agrega un proveedor y un nivel de precio para ver precios consolidados aquí."
+        "help": "Agregue un proveedor y un nivel de precio para ver precios consolidados aquí."
       }
     },
     "details": {
@@ -1676,7 +1704,7 @@
     },
     "inspector": {
       "label": "Detalles del proveedor seleccionado",
-      "placeholder": "Selecciona un proveedor a la izquierda para ver y editar sus detalles aquí."
+      "placeholder": "Seleccione un proveedor a la izquierda para ver y editar sus detalles aquí."
     },
     "removeTier": {
       "confirmTitle": "¿Eliminar este nivel de precio?",
@@ -1689,8 +1717,8 @@
     },
     "empty": {
       "message": "Aún no hay proveedores.",
-      "help": "Añade un proveedor que suministre esta pieza para rastrear plazo, MOQ y precios.",
-      "helpReadonly": "Haz clic en Editar para añadir un proveedor a esta pieza."
+      "help": "Agregue un proveedor que suministre esta pieza para rastrear plazo, MOQ y precios.",
+      "helpReadonly": "Haga clic en Editar para agregar un proveedor a esta pieza."
     }
   },
   "partRevisions": {
@@ -1726,11 +1754,11 @@
     "partNumber": "N.º de pieza",
     "partNumberWhenMfrHelper": "Si compras directamente al fabricante, el número de catálogo del proveedor ES el MPN.",
     "isManufacturer": "El proveedor es el fabricante",
-    "isManufacturerHelper": "Marca esta opción cuando compres directamente al fabricante (no a un distribuidor). El nombre del fabricante se toma del proveedor; un único campo N.º de pieza reemplaza al SKU y al MPN.",
+    "isManufacturerHelper": "Marque esta opción cuando compre directamente al fabricante (no a un distribuidor). El nombre del fabricante se toma del proveedor; un único campo N.º de pieza reemplaza al SKU y al MPN.",
     "bulkImport": {
       "importButton": "Importar CSV",
       "dialogTitle": "Importar catálogo — {{vendor}}",
-      "helper": "Sube un CSV con las columnas: partNumber (obligatorio), vendorPartNumber, manufacturerName, vendorMpn, leadTimeDays, minOrderQty, packSize, countryOfOrigin, htsCode, notes (todas opcionales).",
+      "helper": "Suba un CSV con las columnas: partNumber (obligatorio), vendorPartNumber, manufacturerName, vendorMpn, leadTimeDays, minOrderQty, packSize, countryOfOrigin, htsCode, notes (todas opcionales).",
       "dropzone": "Suelta un archivo .csv aquí, o",
       "browse": "Examinar",
       "downloadTemplate": "Descargar plantilla CSV",
@@ -1742,7 +1770,7 @@
       "actionSkip": "Omitir",
       "actionError": "Error",
       "applyButton": "Aplicar",
-      "applyDisabledHelper": "Corrige las filas con errores en tu CSV y vuelve a subirlo.",
+      "applyDisabledHelper": "Corrija las filas con errores en su CSV y vuelva a subirlo.",
       "applySuccess": "Importados: {{added}} agregados, {{updated}} actualizados.",
       "back": "Atrás",
       "cancel": "Cancelar",
@@ -1883,7 +1911,7 @@
     "reorderPoint": "Punto de Reorden",
     "minStock": "Stock Mínimo",
     "receiving": "Recepción",
-    "stock": "Stock",
+    "stock": "Existencias",
     "movements": "Movimientos",
     "tabs": {
       "stockLevels": "Niveles de Stock",
@@ -1893,7 +1921,9 @@
       "stockOps": "Operaciones de Stock",
       "cycleCounts": "Conteos Cíclicos",
       "reservations": "Reservas",
-      "inspection": "Inspección"
+      "inspection": "Inspección",
+      "replenishment": "Reabastecimiento",
+      "uom": "Unidades de medida"
     },
     "subtitle": "Seguimiento de niveles de stock, ubicaciones y movimientos",
     "addLocation": "Agregar Ubicación",
@@ -2064,6 +2094,74 @@
       "recordResult": "Registrar resultado",
       "recorded": "Inspección registrada",
       "waived": "Inspección dispensada"
+    },
+    "clearSearch": "Borrar búsqueda",
+    "replenishment": {
+      "pendingTitle": "Sugerencias de reorden pendientes",
+      "noPending": "No hay sugerencias de reorden pendientes",
+      "allGood": "No hay sugerencias de reorden pendientes: los niveles de inventario están bien.",
+      "dismissFor": "Descartar la sugerencia para {{part}}",
+      "dismissTitle": "Descartar sugerencia de reorden",
+      "dismissingFor": "Se descartará la sugerencia para",
+      "dismissReasonHint": "Indique un motivo para que pueda revisarse más tarde."
+    },
+    "burnRates": {
+      "title": "Análisis de consumo",
+      "searchParts": "Buscar piezas",
+      "needsReorder": "Requiere reorden",
+      "needsReorderTooltip": "Mostrar solo las piezas que requieren reorden",
+      "refresh": "Actualizar el consumo",
+      "empty": "No hay datos de consumo: empiece a recibir y surtir piezas para generar historial",
+      "daysShort": "{{count}} d",
+      "ok": "OK",
+      "per30": "30 d / día",
+      "per60": "60 d / día",
+      "per90": "90 d / día",
+      "daysLeft": "Días restantes",
+      "stockout": "Agotamiento",
+      "reorder": "Reordenar",
+      "burnPerDay": "Consumo/día",
+      "suggestQty": "Cant. sugerida"
+    },
+    "uom": {
+      "conversions": "Conversiones",
+      "newUom": "Nueva UdM",
+      "emptyUoms": "No hay unidades de medida configuradas",
+      "baseUnit": "Unidad base",
+      "editUom": "Editar UdM",
+      "newConversion": "Nueva conversión",
+      "emptyConversions": "No hay conversiones configuradas",
+      "reversible": "Reversible",
+      "editTitle": "Editar unidad de medida",
+      "newTitle": "Nueva unidad de medida",
+      "code": "Código",
+      "codePlaceholder": "p. ej., EA, FT, LB",
+      "namePlaceholder": "p. ej., Pieza, Pie, Libra",
+      "symbol": "Símbolo",
+      "symbolPlaceholder": "p. ej., ft, lb, kg",
+      "decimalPlaces": "Decimales",
+      "decimals": "Decimales",
+      "sortOrder": "Orden",
+      "base": "Base",
+      "baseForCategory": "Unidad base de la categoría",
+      "update": "Actualizar",
+      "fromUom": "UdM de origen",
+      "toUom": "UdM de destino",
+      "conversionFactor": "Factor de conversión",
+      "factor": "Factor",
+      "factorPlaceholder": "p. ej., 12 (1 ft = 12 in)",
+      "reversibleToggle": "Reversible (crea la inversa automáticamente)",
+      "updated": "UdM actualizada",
+      "created": "UdM creada",
+      "conversionCreated": "Conversión creada",
+      "categories": {
+        "count": "Conteo",
+        "length": "Longitud",
+        "weight": "Peso",
+        "volume": "Volumen",
+        "area": "Área",
+        "time": "Tiempo"
+      }
     }
   },
   "contactFields": {
@@ -2082,19 +2180,19 @@
     "title": "Clientes",
     "subtitle": "Gestionar contactos y direcciones de clientes",
     "createCustomer": "Nuevo Cliente",
-    "quickAddHint": "Solo lo esencial. Agrega términos de crédito, impuestos y direcciones más tarde desde la página del cliente — o usa la configuración guiada para el registro completo.",
+    "quickAddHint": "Solo lo esencial. Agregue términos de crédito, impuestos y direcciones más tarde desde la página del cliente, o use la configuración guiada para el registro completo.",
     "contactDialog": {
       "customerField": "Cliente"
     },
     "contactsPage": {
-      "title": "Todos los Contactos",
+      "title": "Todos los contactos",
       "subtitle": "Vista plana entre clientes de cada contacto — \"¿a quién conozco en la empresa X?\".",
-      "empty": "Sin contactos. Agrega contactos a los clientes para poblar esta vista."
+      "empty": "Sin contactos. Agregue contactos a los clientes para poblar esta vista."
     },
     "portalAccessPage": {
       "title": "Acceso al Portal",
       "subtitle": "Supervisión administrativa de qué contactos pueden iniciar sesión en el portal del cliente.",
-      "empty": "Ningún contacto tiene acceso al portal aún. Haz clic en \"Aprovisionar acceso\" arriba para elegir un contacto.",
+      "empty": "Ningún contacto tiene acceso al portal aún. Haga clic en \"Aprovisionar acceso\" arriba para elegir un contacto.",
       "colLastLogin": "Último Acceso",
       "colCreated": "Aprovisionado",
       "colEnabled": "Habilitado",
@@ -2103,7 +2201,7 @@
       "toggleDisabled": "Acceso al portal deshabilitado para {{ name }}.",
       "toggleAriaLabel": "Alternar acceso al portal para {{ name }}",
       "provisionTitle": "Aprovisionar acceso",
-      "provisionHint": "Elige un contacto para otorgarle acceso al portal. Solo aparecen aquí los contactos con email (el identificador de inicio de sesión) y sin acceso ya existente.",
+      "provisionHint": "Elija un contacto para otorgarle acceso al portal. Solo aparecen aquí los contactos con email (el identificador de inicio de sesión) y sin acceso ya existente.",
       "provisionContactLabel": "Contacto",
       "provisionConfirm": "Otorgar acceso",
       "provisionNoneEligible": "Sin contactos elegibles. Todos los contactos carecen de email o ya tienen acceso.",
@@ -2129,7 +2227,7 @@
     },
     "importPage": {
       "title": "Importación Masiva",
-      "subtitle": "Sube un CSV de clientes, deduplica contra filas existentes y confirma.",
+      "subtitle": "Suba un CSV de clientes, deduplique contra filas existentes y confirme.",
       "step1": "1. Origen",
       "step2": "2. Previsualizar y confirmar",
       "columnsHint": "Columnas: name (requerido), company, email, phone, notes. Se requiere una fila de encabezado; los alias comunes se detectan automáticamente.",
@@ -2158,17 +2256,17 @@
     },
     "fork": {
       "title": "¿Cómo deseas agregar este cliente?",
-      "hint": "Elige la ruta que coincida con lo que ya sabes de esta cuenta.",
+      "hint": "Elija la ruta que coincida con lo que ya sabe de esta cuenta.",
       "quickTitle": "Agregar rápido",
       "quickDesc": "Captura un nombre y un par de datos de contacto y sigue adelante.",
       "quickBadge": "Más común",
       "fromLeadTitle": "Convertir desde prospecto",
-      "fromLeadDesc": "Elige un prospecto existente y pásalo por el asistente de conversión.",
+      "fromLeadDesc": "Elija un prospecto existente y páselo por el asistente de conversión.",
       "guidedTitle": "Configuración guiada",
       "guidedDesc": "Pasa por identidad, direcciones y facturación para una cuenta estratégica."
     },
     "leadPicker": {
-      "title": "Elige un prospecto para convertir",
+      "title": "Elija un prospecto para convertir",
       "hint": "Solo aparecen prospectos que aún no estén Perdidos o Convertidos.",
       "search": "Buscar por empresa, contacto o correo",
       "empty": "No hay prospectos coincidentes."
@@ -2178,13 +2276,13 @@
       "step1Title": "Identidad",
       "step1Hint": "¿Quién es este cliente? Captura primero lo básico.",
       "step2Title": "Compromiso",
-      "step2Hint": "¿Qué tipo de relación estamos configurando? Elige el que mejor encaje.",
+      "step2Hint": "¿Qué tipo de relación estamos configurando? Elija el que mejor encaje.",
       "step3Title": "Direcciones",
       "step3Hint": "Facturación primero; desactiva \"igual que facturación\" para capturar un envío distinto.",
       "step4Title": "Crédito e impuestos",
-      "step4Hint": "Opcional hoy — establece un límite de crédito y exención fiscal si los tienes.",
+      "step4Hint": "Opcional hoy: establezca un límite de crédito y exención fiscal si los tiene.",
       "step5Title": "Revisar",
-      "step5Hint": "Confirma y crea. Puedes editar todo desde la página de detalle del cliente después.",
+      "step5Hint": "Confirme y cree. Puede editar todo desde la página de detalle del cliente después.",
       "fields": {
         "name": "Nombre para mostrar",
         "companyName": "Nombre de la empresa",
@@ -2228,7 +2326,7 @@
     "contacts": "Contactos",
     "searchPlaceholder": "Buscar clientes...",
     "noCustomersFound": "No se encontraron clientes",
-    "info": "Info",
+    "info": "Información",
     "jobs": "Trabajos",
     "accounting": "Contabilidad",
     "externalId": "ID Externo",
@@ -2511,7 +2609,7 @@
       "createFirstList": "Crear primera lista",
       "entries": "Entradas",
       "empty": "Aún no hay entradas.",
-      "emptyHelp": "Agrega una pieza para comenzar a fijar precios en esta lista.",
+      "emptyHelp": "Agregue una pieza para comenzar a fijar precios en esta lista.",
       "addEntry": "Agregar Entrada",
       "confirmDelete": "¿Eliminar esta entrada de precio?"
     },
@@ -2609,14 +2707,14 @@
     "notesHelper": "Por qué este precio (p. ej., negociado, contrato).",
     "dialogTitleCreate": "Agregar Entrada de Precio",
     "dialogTitleEdit": "Editar Entrada de Precio",
-    "cellEditTooltip": "Haz clic para editar",
+    "cellEditTooltip": "Haga clic para editar",
     "cellEditError": "No se pudo guardar — pulsa Esc para cancelar",
     "cellEditInvalid": "Valor no válido",
     "cellSaved": "Guardado",
     "bulkImport": {
       "label": "Importar CSV",
       "dialogTitle": "Importar entradas de lista de precios",
-      "helper": "Sube un CSV con columnas: partNumber, unitPrice, minQuantity (opcional), currency (opcional), notes (opcional).",
+      "helper": "Suba un CSV con columnas: partNumber, unitPrice, minQuantity (opcional), currency (opcional), notes (opcional).",
       "dropzone": "Suelta un archivo .csv aquí, o",
       "browse": "Examinar",
       "downloadTemplate": "Descargar plantilla CSV",
@@ -2628,7 +2726,7 @@
       "actionSkip": "Omitir",
       "actionError": "Error",
       "applyButton": "Aplicar",
-      "applyDisabledHelper": "Corrige las filas con error en tu CSV y vuelve a cargarlo.",
+      "applyDisabledHelper": "Corrija las filas con error en su CSV y vuelva a cargarlo.",
       "applySuccess": "Importadas: {{added}} agregadas, {{updated}} actualizadas.",
       "back": "Atrás",
       "cancel": "Cancelar",
@@ -2676,10 +2774,10 @@
     "startCampaign": "Iniciar una campaña",
     "intake": {
       "title": "Carga Masiva",
-      "subtitle": "Sube una lista, deduplica contra prospectos existentes + supresión, valida calidad antes de confirmar.",
-      "placeholderMessage": "Sube una lista para comenzar",
-      "placeholderHelp": "Sube un CSV o pega filas abajo. El asistente de deduplicación previsualiza coincidencias contra prospectos existentes, contactos suprimidos y enfriamientos activos antes de confirmar.",
-      "step1Title": "Elige la estrategia",
+      "subtitle": "Suba una lista, deduplique contra prospectos existentes y supresión, y valide la calidad antes de confirmar.",
+      "placeholderMessage": "Suba una lista para comenzar",
+      "placeholderHelp": "Suba un CSV o pegue filas abajo. El asistente de deduplicación previsualiza coincidencias contra prospectos existentes, contactos suprimidos y enfriamientos activos antes de confirmar.",
+      "step1Title": "Elija la estrategia",
       "step2Title": "Proporciona los datos",
       "step3Title": "Previsualiza y confirma",
       "fieldStrategy": "Estrategia",
@@ -2694,7 +2792,7 @@
       "colAliases": "También aceptados",
       "chooseFile": "Elegir archivo CSV",
       "orPaste": "o pega abajo",
-      "pasteLabel": "Pega filas (CSV o separado por tabs, encabezado en la primera línea)",
+      "pasteLabel": "Pegue filas (CSV o separado por tabulaciones, encabezado en la primera línea)",
       "parsePaste": "Analizar filas pegadas",
       "reset": "Restablecer",
       "rowCount": "{{count}} analizadas",
@@ -2734,7 +2832,7 @@
       "readyHelp": "Toma un grupo de prospectos y la cola los sirve uno a la vez. Dos reps tomando al mismo tiempo obtienen segmentos disjuntos — sin superposición.",
       "batchSize": "Tamaño",
       "pullN": "Tomar siguientes {{count}}",
-      "empty": "No hay más prospectos para tomar ahora. Vuelve más tarde o elige otra campaña.",
+      "empty": "No hay más prospectos para tomar ahora. Vuelva más tarde o elija otra campaña.",
       "progress": "Prospecto {{current}} de {{total}}",
       "previous": "Prospecto anterior",
       "next": "Siguiente prospecto",
@@ -2749,19 +2847,19 @@
       "actionCallback": "Programar devolución",
       "actionBadData": "Datos incorrectos",
       "actionSuppress": "Suprimir (DNC)",
-      "dialFailed": "No se pudo realizar la llamada. Verifica el formato del número de teléfono.",
+      "dialFailed": "No se pudo realizar la llamada. Verifique el formato del número de teléfono.",
       "placeholderMessage": "Cola de trabajo lista",
       "placeholderHelp": "Toma prospectos de la cola para comenzar a trabajarlos. Las disposiciones con una tecla avanzan automáticamente al siguiente prospecto.",
       "callbackSchedulerTitle": "Programar devolución de llamada",
       "callbackDate": "Fecha de devolución",
       "callbackTime": "Hora de devolución",
       "scheduleCallback": "Programar",
-      "shortcutHint": "Pulsa una tecla resaltada para disparar la acción correspondiente. J/K navegan entre leads del lote."
+      "shortcutHint": "Pulse una tecla resaltada para disparar la acción correspondiente. J/K navegan entre los prospectos del lote."
     },
     "campaigns": {
       "title": "Campañas",
       "subtitle": "Envuelve cada lote masivo en una Campaña para reportes de cohorte y configuración por estrategia.",
-      "placeholderMessage": "Aún sin campañas. Crea una para rastrear cohortes de marketing masivo.",
+      "placeholderMessage": "Aún sin campañas. Cree una para rastrear cohortes de marketing masivo.",
       "placeholderHelp": "Una Campaña lleva el tipo de estrategia, canal, campos requeridos, propietario, fechas y override de enfriamiento por defecto. Cada Prospecto de una importación masiva recibe un FK CampaignId para que los reportes puedan responder \"lote LinkedIn de septiembre vs agosto\" limpiamente.",
       "create": "Nueva Campaña",
       "createTitle": "Crear Campaña",
@@ -2800,7 +2898,7 @@
       "hint": "Agrupaciones de cuenta B2B multi-contacto. Cada lead apunta opcionalmente a una de estas para que los contactos de ingeniería/compras/patrocinio ejecutivo de un mismo prospecto se agrupen.",
       "newAccount": "Nueva cuenta",
       "editAccount": "Editar cuenta",
-      "empty": "Aún no hay cuentas. Crea una para agrupar leads que comparten empresa.",
+      "empty": "Aún no hay cuentas. Cree una para agrupar prospectos que comparten empresa.",
       "noneOption": "— Ninguno —",
       "colName": "Nombre",
       "colIndustry": "Industria",
@@ -2808,7 +2906,7 @@
       "colCity": "Ciudad",
       "colState": "Estado",
       "colContacts": "Contactos",
-      "colLeads": "Leads",
+      "colLeads": "Prospectos",
       "colCreated": "Creado",
       "fieldName": "Nombre de la cuenta",
       "fieldIndustry": "Industria",
@@ -2836,7 +2934,7 @@
       "empty": "Aún no hay envíos de muestra. Los representantes solicitan muestras desde el panel de detalle de un lead.",
       "statusAll": "Todos",
       "statusOpen": "Abiertos (sin resultado aún)",
-      "colLead": "Lead",
+      "colLead": "Prospecto",
       "colPart": "Pieza",
       "colQty": "Cant.",
       "colRequested": "Solicitado",
@@ -2873,13 +2971,13 @@
     "bulkSelected": "{{ count }} seleccionados",
     "bulkAssign": "Asignar…",
     "bulkAssignTitle": "Asignar leads",
-    "bulkAssignHint": "{{ count }} lead(s) seleccionados. Elige un responsable, una cuenta o ambos; \"Mantener actual\" deja ese campo como está. Elige \"— Ninguno —\" como cuenta para desafiliar.",
+    "bulkAssignHint": "{{ count }} lead(s) seleccionados. Elija un responsable, una cuenta o ambos; \"Mantener actual\" deja ese campo como está. Elija \"— Ninguno —\" como cuenta para desafiliar.",
     "bulkKeepCurrent": "Mantener actual",
     "owner": "Responsable",
     "ownerUnassigned": "— Sin asignar —",
     "bulkAssignConfirm": "Asignar",
     "bulkAssignSuccess": "{{ count }} lead(s) asignados.",
-    "bulkAssignPartial": "Asignados {{ ok }} de {{ total }} — algunos fallaron. Revisa el registro de actividad.",
+    "bulkAssignPartial": "Asignados {{ ok }} de {{ total }}; algunos fallaron. Revise el registro de actividad.",
     "bulkAssignFailed": "Asignación masiva fallida.",
     "companyName": "Nombre de Empresa",
     "contactName": "Nombre de Contacto",
@@ -2888,16 +2986,16 @@
     "source": "Fuente",
     "followUpDate": "Fecha de Seguimiento",
     "notes": "Notas",
-    "pipeline": "Pipeline",
+    "pipeline": "Embudo",
     "won": "Ganado",
     "fork": {
-      "title": "¿Cómo quieres agregar este prospecto?",
+      "title": "¿Cómo desea agregar este prospecto?",
       "step1Title": "¿Qué tipo de oportunidad es?",
-      "step1Hint": "Elige la forma que mejor describa la dinámica de ventas. \"Carga rápida\" registra lo básico al instante — las otras opciones muestran campos adicionales adaptados (detalles de RFQ, contexto del tomador de decisiones, etc.).",
+      "step1Hint": "Elija la forma que mejor describa la dinámica de ventas. \"Carga rápida\" registra lo básico al instante — las otras opciones muestran campos adicionales adaptados (detalles de RFQ, contexto del tomador de decisiones, etc.).",
       "step2Title": "Detalles del prospecto",
       "step2Hint": "Los campos con *  son obligatorios. Los opcionales pueden completarse después desde el detalle del prospecto.",
       "shapeUnknown": "Carga rápida",
-      "shapeUnknownDesc": "Solo lo básico — empresa, contacto, fuente. Omite los extras y ajústalos luego.",
+      "shapeUnknownDesc": "Solo lo básico: empresa, contacto, fuente. Omita los extras y ajústelos luego.",
       "shapeQuickQuote": "Cotización rápida / RFQ",
       "shapeQuickQuoteDesc": "Solicitud entrante con una necesidad ya formada. Captura lista de piezas, fecha objetivo, precio objetivo.",
       "shapeRepeat": "Recurrente / relación establecida",
@@ -2909,7 +3007,7 @@
       "rfqPartsLabel": "Piezas / cantidades",
       "rfqPartsHint": "Lista los números de pieza y cantidades solicitadas. Una por línea.",
       "rfqTargetPriceLabel": "Precio objetivo",
-      "rfqTargetPriceHint": "Lo que insinuaron, o donde tú crees que la operación funciona.",
+      "rfqTargetPriceHint": "Lo que insinuaron, o donde usted cree que la operación funciona.",
       "rfqDueDateLabel": "Fecha requerida",
       "decisionMakerLabel": "Tomador de decisiones",
       "decisionMakerHint": "Quién firma — cargo o nombre si lo conoces.",
@@ -2975,7 +3073,7 @@
         "Expired": "expirado"
       },
       "export": {
-        "NotApplicable": "n/a",
+        "NotApplicable": "n/d",
         "Pending": "pendiente",
         "Cleared": "autorizado",
         "Denied": "denegado"
@@ -3045,7 +3143,7 @@
     "statusQuoting": "Cotizando",
     "statusConverted": "Convertido",
     "statusLost": "Perdido",
-    "allStatuses": "Todos los Estados",
+    "allStatuses": "Todos los estados",
     "sourceReferral": "Referencia",
     "sourceWebsite": "Sitio Web",
     "sourceTradeShow": "Feria Comercial",
@@ -3092,7 +3190,7 @@
     "resubmitTitle": "Revisar y Reenviar Gasto",
     "reviewerFeedback": "Comentarios del Revisor",
     "selfApproved": "Auto-aprobado",
-    "allStatuses": "Todos los Estados",
+    "allStatuses": "Todos los estados",
     "deleteTitle": "¿Eliminar Gasto?",
     "deleteMessage": "Esto eliminará permanentemente este registro de gasto.",
     "expenseSubmitted": "Gasto enviado.",
@@ -3167,7 +3265,7 @@
     "deleteRecurringMessage": "Esto eliminará \"{{name}}\" de los gastos recurrentes.",
     "existingReceipt": "Recibo existente",
     "receiptRequiredHint": "Se requiere un recibo para este gasto antes de poder enviarlo.",
-    "allClassifications": "Todas las Clasificaciones",
+    "allClassifications": "Todas las clasificaciones",
     "classSubscription": "Suscripción",
     "classLease": "Arrendamiento",
     "classInsurance": "Seguro",
@@ -3229,7 +3327,7 @@
     "categoryMaintenance": "Mantenimiento",
     "categoryTraining": "Capacitación",
     "categoryMeeting": "Reunión",
-    "categoryAdmin": "Admin",
+    "categoryAdmin": "Administración",
     "categoryCleanup": "Limpieza",
     "categoryOther": "Otro",
     "deleteTitle": "¿Eliminar Entrada de Tiempo?",
@@ -3262,8 +3360,8 @@
     "maintenance": "Mantenimiento",
     "searchPlaceholder": "Buscar activos...",
     "noAssetsFound": "No se encontraron activos",
-    "allTypes": "Todos los Tipos",
-    "allStatuses": "Todos los Estados",
+    "allTypes": "Todos los tipos",
+    "allStatuses": "Todos los estados",
     "name": "Nombre",
     "type": "Tipo",
     "manufacturer": "Fabricante",
@@ -3343,7 +3441,7 @@
       "announcements": "Anuncios",
       "edi": "EDI",
       "mfa": "Política MFA",
-      "autoPo": "Auto-PO",
+      "autoPo": "OC automáticas",
       "carriers": "Transportistas",
       "automations": "Automatizaciones",
       "integrationOutbox": "Bandeja de Integración",
@@ -3455,7 +3553,7 @@
     "roleSuggestions": {
       "title": "Combinaciones de roles sugeridas",
       "ariaLabel": "Ver combinaciones de roles sugeridas",
-      "hint": "Perfiles comunes de taller para ayudarte a elegir. Haz clic en una sugerencia para agregar sus roles a la selección.",
+      "hint": "Perfiles comunes de taller para ayudarle a elegir. Haga clic en una sugerencia para agregar sus roles a la selección.",
       "ownerOperator": "Propietario-operador",
       "frontOffice": "Oficina administrativa",
       "floorLead": "Líder de planta",
@@ -3556,7 +3654,7 @@
       "hint": "Catálogo de fuentes formales de atribución de leads. Las puntuaciones de calidad se calculan cada noche a partir de los resultados de disposición de los leads vinculados — alta puntuación significa que la fuente convierte; baja significa que el proveedor entrega basura.",
       "newSource": "Nueva fuente",
       "editSource": "Editar fuente",
-      "empty": "Aún no hay fuentes de leads. Añade al menos una antes de la captación masiva para tener atribución limpia.",
+      "empty": "Aún no hay fuentes de prospectos. Agregue al menos una antes de la captación masiva para tener atribución limpia.",
       "fieldName": "Nombre",
       "fieldCode": "Código",
       "fieldDescription": "Descripción",
@@ -3570,10 +3668,10 @@
     },
     "i18nLabels": {
       "title": "Etiquetas de UI",
-      "hint": "Renombra cualquier etiqueta de la interfaz para que coincida con tu vocabulario. Las ediciones se propagan como traducciones automáticas a los demás idiomas.",
+      "hint": "Renombre cualquier etiqueta de la interfaz para que coincida con su vocabulario. Las ediciones se propagan como traducciones automáticas a los demás idiomas.",
       "language": "Idioma",
       "searchPlaceholder": "Buscar clave o valor…",
-      "empty": "Ninguna etiqueta coincide con tu búsqueda.",
+      "empty": "Ninguna etiqueta coincide con su búsqueda.",
       "key": "Clave",
       "baseValue": "Valor base",
       "fieldValue": "Valor personalizado",
@@ -3658,7 +3756,7 @@
       "hint": "Esquemas de puntuación del perfil de cliente ideal. La rúbrica por defecto impulsa el recálculo nocturno de LeadScore; las dimensiones coinciden con campos de lead/cliente y aportan su peso al total.",
       "newRubric": "Nueva rúbrica",
       "editRubric": "Editar rúbrica",
-      "empty": "Aún no hay rúbricas ICP. Añade una y márquela como por defecto para empezar a puntuar leads.",
+      "empty": "Aún no hay rúbricas ICP. Agregue una y márquela como predeterminada para empezar a puntuar prospectos.",
       "fieldName": "Nombre",
       "fieldDescription": "Descripción",
       "fieldDefault": "Rúbrica por defecto",
@@ -3727,8 +3825,8 @@
     "currencies": {
       "title": "Monedas y Tipos de Cambio",
       "currenciesTitle": "Monedas",
-      "currenciesHint": "Catálogo de monedas que la instalación acepta. Marca exactamente una como moneda base.",
-      "currenciesEmpty": "Aún no hay monedas configuradas. Añade al menos la moneda base antes de registrar transacciones.",
+      "currenciesHint": "Catálogo de monedas que la instalación acepta. Marque exactamente una como moneda base.",
+      "currenciesEmpty": "Aún no hay monedas configuradas. Agregue al menos la moneda base antes de registrar transacciones.",
       "newCurrency": "Nueva moneda",
       "editCurrency": "Editar moneda",
       "fieldCode": "Código ISO",
@@ -3749,7 +3847,7 @@
       "updated": "Moneda actualizada.",
       "ratesTitle": "Tipos de cambio",
       "ratesHint": "Historial solo-añadir de tipos por par y por día. La tasa más reciente por par gana al convertir.",
-      "ratesEmpty": "Aún no hay tipos de cambio registrados. Define al menos un par para habilitar conversión.",
+      "ratesEmpty": "Aún no hay tipos de cambio registrados. Defina al menos un par para habilitar la conversión.",
       "newExchangeRate": "Definir tipo",
       "fieldFromCurrency": "Desde",
       "fieldToCurrency": "Hacia",
@@ -3757,7 +3855,7 @@
       "fieldEffectiveDate": "Fecha efectiva",
       "ratePlaceholder": "1 unidad de Desde = N unidades de Hacia",
       "rateCreated": "Tipo de cambio definido.",
-      "needTwoCurrencies": "Añade al menos dos monedas activas antes de definir un tipo de cambio.",
+      "needTwoCurrencies": "Agregue al menos dos monedas activas antes de definir un tipo de cambio.",
       "colEffective": "Efectiva",
       "colPair": "Par",
       "colRate": "Tipo",
@@ -4009,7 +4107,7 @@
     },
     "preparingSigningSession": "Preparando sesión de firma…",
     "backToPreview": "Volver a la vista previa",
-    "completeSignatureNote": "Completa tu firma arriba para continuar al siguiente formulario.",
+    "completeSignatureNote": "Complete su firma arriba para continuar al siguiente formulario.",
     "listADocProvided": "Documento de Lista A proporcionado",
     "listBCDocProvided": "Documentos de Lista B + Lista C proporcionados",
     "notSpecified": "No especificado",
@@ -4026,7 +4124,7 @@
     },
     "personal": {
       "title": "Información personal",
-      "desc": "Esta información se usa para pre-llenar tus formularios W-4, I-9 y de retención estatal. Ingrésala una vez aquí — no necesitarás volver a ingresarla en cada formulario.",
+      "desc": "Esta información se usa para prellenar sus formularios W-4, I-9 y de retención estatal. Ingrésela una vez aquí; no necesitará volver a ingresarla en cada formulario.",
       "firstName": "Nombre",
       "middleName": "Segundo nombre",
       "lastName": "Apellido",
@@ -4037,16 +4135,16 @@
       "ssnPlaceholder": "XXX-XX-XXXX",
       "email": "Dirección de correo electrónico",
       "phone": "Número de teléfono",
-      "securityNote": "Tu SSN y fecha de nacimiento están encriptados y se usan únicamente para la presentación oficial de formularios fiscales. Nunca se almacenan en texto plano."
+      "securityNote": "Su SSN y fecha de nacimiento están cifrados y se usan únicamente para la presentación oficial de formularios fiscales. Nunca se almacenan en texto plano."
     },
     "addressStep": {
       "title": "Dirección de domicilio",
-      "desc": "Tu dirección residencial es obligatoria para W-4, I-9 y retención estatal. El estado que selecciones también determina qué formulario de retención estatal aplica.",
+      "desc": "Su dirección residencial es obligatoria para W-4, I-9 y retención estatal. El estado que seleccione también determina qué formulario de retención estatal aplica.",
       "street1": "Dirección de calle",
       "street2": "Apartamento / Suite / Unidad",
       "city": "Ciudad",
       "state": "Estado",
-      "statePlaceholder": "Selecciona estado",
+      "statePlaceholder": "Seleccione el estado",
       "zipCode": "Código postal",
       "zipPlaceholder": "00000"
     },
@@ -4054,13 +4152,13 @@
       "title": "W-4: Retención de impuestos federales",
       "howToComplete": "Cómo completar este formulario",
       "filingStatusInstructions": "Estado civil para efectos fiscales (Paso 1c):",
-      "filingStatusDesc": "Elige el estado que mejor describa tu situación. Es el campo más importante y afecta cada cheque de pago.",
+      "filingStatusDesc": "Elija el estado que mejor describa su situación. Es el campo más importante y afecta cada cheque de pago.",
       "multipleJobsInstructions": "Múltiples empleos (Paso 2):",
-      "multipleJobsDesc": "Marca esto si tú (o tu cónyuge) tienen más de un empleo simultáneamente. Esto evita la sub-retención.",
+      "multipleJobsDesc": "Marque esto si usted (o su cónyuge) tiene más de un empleo simultáneamente. Esto evita la retención insuficiente.",
       "dependentsInstructions": "Dependientes (Paso 3):",
-      "dependentsDesc": "Ingresa el número de hijos calificados menores de 17 años (línea 3a, $2,000 cada uno) y otros dependientes (línea 3b, $500 cada uno). La mayoría de los empleados deja ambos en 0.",
+      "dependentsDesc": "Ingrese el número de hijos calificados menores de 17 años (línea 3a, $2,000 cada uno) y otros dependientes (línea 3b, $500 cada uno). La mayoría de los empleados deja ambos en 0.",
       "otherAdjustmentsInstructions": "Otros ajustes (Paso 4 — Opcional):",
-      "otherAdjustmentsDesc": "Usa estos campos para afinar la retención por ingresos de inversión, deducciones detalladas o retención adicional por cheque.",
+      "otherAdjustmentsDesc": "Use estos campos para afinar la retención por ingresos de inversión, deducciones detalladas o retención adicional por cheque.",
       "exemptInstructions": "Exento:",
       "exemptDesc": "Solo reclama exento si debiste $0 de impuesto federal el año pasado y esperas deber $0 este año. La mayoría de los empleados no califican.",
       "filingStatusLabel": "Estado civil para efectos fiscales (Paso 1c)",
@@ -4081,11 +4179,11 @@
     "stateTax": {
       "title": "Retención de impuestos estatales",
       "noIncomeTaxTitle": "{{state}} no tiene impuesto sobre la renta estatal.",
-      "noIncomeTaxDesc": "No se requiere certificado de retención estatal. Haz clic en Continuar para proceder.",
+      "noIncomeTaxDesc": "No se requiere certificado de retención estatal. Haga clic en Continuar para proceder.",
       "instructionsTitle": "Instrucciones",
-      "instructionsDesc": "La retención estatal varía según el estado. Ingresa tu estado civil para efectos fiscales y asignaciones como se muestra en el certificado de retención de tu estado.",
+      "instructionsDesc": "La retención estatal varía según el estado. Ingrese su estado civil para efectos fiscales y sus asignaciones como se muestra en el certificado de retención de su estado.",
       "allowancesDesc": "Asignaciones:",
-      "allowancesExplain": "Cada asignación reduce el monto retenido por cheque de pago. Reclamar más asignaciones = menos retenido; menos = más retenido. Ingresa 0 si no estás seguro — tu estado aplicará el predeterminado.",
+      "allowancesExplain": "Cada asignación reduce el monto retenido por cheque de pago. Reclamar más asignaciones = menos retenido; menos = más retenido. Ingrese 0 si no está seguro; su estado aplicará el predeterminado.",
       "exemptDesc": "Exento:",
       "exemptExplain": "Solo reclama exento si no debiste impuestos estatales el año pasado y no esperas deber este año.",
       "filingStatusLabel": "Estado civil estatal para efectos fiscales",
@@ -4096,14 +4194,14 @@
     "i9": {
       "title": "I-9: Verificación de elegibilidad de empleo",
       "section1Title": "Sección 1 — Empleado (Completar antes del primer día)",
-      "section1Desc": "La ley federal exige que verifiques tu identidad y autorización para trabajar en los EE.UU. Completas la Sección 1 ahora; tu empleador completa la Sección 2 dentro de",
+      "section1Desc": "La ley federal exige que verifique su identidad y autorización para trabajar en los EE.UU. Usted completa la Sección 1 ahora; su empleador completa la Sección 2 dentro de",
       "section1Days": "3 días hábiles",
-      "section1Suffix": "de tu primer día de empleo.",
+      "section1Suffix": "de su primer día de empleo.",
       "lprInstructions": "Residentes Permanentes Legales:",
-      "lprDesc": "Ingresa tu Número de Registro de Extranjero (Número-A, comienza con \"A\") en el campo proporcionado.",
+      "lprDesc": "Ingrese su Número de Registro de Extranjero (Número A, comienza con \"A\") en el campo proporcionado.",
       "alienInstructions": "Extranjeros autorizados para trabajar:",
-      "alienDesc": "Proporciona tu Número-A, Número de Admisión del Formulario I-94 o detalles del pasaporte extranjero según corresponda.",
-      "docsHeader": "Documentos que debes presentar a tu empleador en tu primer día",
+      "alienDesc": "Proporcione su Número A, Número de Admisión del Formulario I-94 o los datos del pasaporte extranjero según corresponda.",
+      "docsHeader": "Documentos que debe presentar a su empleador en su primer día",
       "listATitle": "Lista A (cualquiera)",
       "listAItems": [
         "Pasaporte o tarjeta de pasaporte de EE.UU.",
@@ -4126,7 +4224,7 @@
       "foreignPassport": "Número de pasaporte extranjero",
       "countryOfIssuance": "País de emisión",
       "workAuthExpiry": "Fecha de vencimiento de la autorización de trabajo",
-      "docUploadDesc": "Pre-carga copias de tus documentos de identidad. Los originales físicos deben presentarse a tu empleador en o antes de tu primer día de empleo.",
+      "docUploadDesc": "Cargue con anticipación copias de sus documentos de identidad. Los originales físicos deben presentarse a su empleador en su primer día de empleo o antes.",
       "listAChoice": "Lista A",
       "listAChoiceDesc": "Un documento — Pasaporte de EE.UU., Tarjeta de Residente Permanente o Autorización de Empleo",
       "listBCChoice": "Lista B + Lista C",
@@ -4139,11 +4237,11 @@
       "expirationDateShort": "Fecha de vencimiento",
       "documentUploaded": "Documento cargado",
       "uploading": "Cargando...",
-      "uploadListA": "Haz clic para cargar el documento de Lista A (PDF o imagen)",
+      "uploadListA": "Haga clic para cargar el documento de la Lista A (PDF o imagen)",
       "listBSubTitle": "Lista B — Documento de identidad",
-      "uploadListB": "Haz clic para cargar el documento de Lista B (PDF o imagen)",
+      "uploadListB": "Haga clic para cargar el documento de la Lista B (PDF o imagen)",
       "listCSubTitle": "Lista C — Autorización de empleo",
-      "uploadListC": "Haz clic para cargar el documento de Lista C (PDF o imagen)",
+      "uploadListC": "Haga clic para cargar el documento de la Lista C (PDF o imagen)",
       "preparerToggle": "Un preparador o traductor me ayudó a completar este formulario",
       "preparerFirstName": "Nombre del preparador",
       "preparerLastName": "Apellido del preparador",
@@ -4154,7 +4252,7 @@
     },
     "deposit": {
       "title": "Autorización de depósito directo",
-      "desc": "Autoriza el depósito directo de nómina a tu cuenta bancaria. Tus números de ruta y de cuenta se pueden encontrar en un cheque o en la aplicación móvil de tu banco.",
+      "desc": "Autorice el depósito directo de la nómina a su cuenta bancaria. Sus números de ruta y de cuenta se pueden encontrar en un cheque o en la aplicación móvil de su banco.",
       "routingLabel": "Nº de ruta",
       "routingValue": "⑆ 123456789 ⑆",
       "routingDesc": "Primeros 9 dígitos en la parte inferior izquierda",
@@ -4167,13 +4265,13 @@
       "accountNumber": "Número de cuenta",
       "accountType": "Tipo de cuenta",
       "voidedCheck": "CHEQUE ANULADO",
-      "uploadVoidedCheck": "Haz clic para cargar un cheque anulado (PDF o imagen)",
+      "uploadVoidedCheck": "Haga clic para cargar un cheque anulado (PDF o imagen)",
       "uploadingCheck": "Cargando…",
       "voidedCheckUploaded": "Cheque anulado cargado"
     },
     "ack": {
       "title": "Reconocimientos",
-      "desc": "Revisa y reconoce las siguientes políticas obligatorias para continuar al paso de firma de documentos.",
+      "desc": "Revise y reconozca las siguientes políticas obligatorias para continuar al paso de firma de documentos.",
       "workersCompTitle": "Compensación al trabajador",
       "workersCompBody": "Reconozco que se me ha informado de mis derechos bajo las leyes de compensación al trabajador de mi estado. Entiendo que el seguro de compensación al trabajador cubre lesiones y enfermedades relacionadas con el trabajo, y acepto reportar cualquier lesión o enfermedad de este tipo a mi supervisor inmediatamente.",
       "workersCompToggle": "Reconozco la política de compensación al trabajador",
@@ -4182,7 +4280,7 @@
       "handbookBody": "Reconozco que he recibido, leído y entendido el Manual del Empleado. Entiendo que no es un contrato de empleo, que puede actualizarse en cualquier momento, y acepto cumplir con todas las políticas y procedimientos contenidos en él.",
       "handbookToggle": "Reconozco la recepción del Manual del Empleado",
       "handbookLink": "Abrir el Manual del Empleado",
-      "submitNote": "Después de hacer clic en Enviar, serás guiado a firmar electrónicamente tu W-4, formulario de retención estatal e I-9 vía DocuSign."
+      "submitNote": "Después de hacer clic en Enviar, se le guiará para firmar electrónicamente su W-4, el formulario de retención estatal y el I-9 mediante DocuSign."
     },
     "actions": {
       "back": "Atrás",
@@ -4192,11 +4290,11 @@
     },
     "securelyStored": "Almacenado de forma segura — déjalo en blanco para mantenerlo, o ingresa un nuevo valor para sobrescribirlo.",
     "errors": {
-      "uploadFailed": "Falló la carga del documento. Inténtalo de nuevo.",
-      "voidedCheckFailed": "Falló la carga del cheque anulado. Inténtalo de nuevo.",
-      "submissionFailed": "Falló el envío. Inténtalo de nuevo.",
-      "previewFailed": "No se pudo cargar la vista previa del PDF. Inténtalo de nuevo.",
-      "signingFailed": "No se pudo crear la sesión de firma. Inténtalo de nuevo."
+      "uploadFailed": "Falló la carga del documento. Inténtelo de nuevo.",
+      "voidedCheckFailed": "Falló la carga del cheque anulado. Inténtelo de nuevo.",
+      "submissionFailed": "Falló el envío. Inténtelo de nuevo.",
+      "previewFailed": "No se pudo cargar la vista previa del PDF. Inténtelo de nuevo.",
+      "signingFailed": "No se pudo crear la sesión de firma. Inténtelo de nuevo."
     },
     "paperworkRemaining": "Su documentación de empleado no está terminada (faltan {{count}} secciones).",
     "skip": "Omitir",
@@ -4216,7 +4314,7 @@
     "taxForms": "Formularios Fiscales",
     "taxCompliance": "Impuestos y Cumplimiento",
     "taxComplianceForms": "Formularios de Impuestos y Cumplimiento",
-    "allForms": "Todos los Formularios",
+    "allForms": "Todos los formularios",
     "documents": "Documentos",
     "myDocuments": "Mis Documentos",
     "documentsIntro": "Suba documentos personales como copias de identificación, certificaciones u otros registros.",
@@ -4277,7 +4375,7 @@
       "displayLabel": "Etiqueta para mostrar",
       "displayLabelPlaceholder": "p. ej. Buzón de ventas, Línea principal",
       "externalAccountId": "Identificador de cuenta",
-      "externalAccountIdEmailPlaceholder": "tu@ejemplo.com",
+      "externalAccountIdEmailPlaceholder": "usted@ejemplo.com",
       "externalAccountIdVoicePlaceholder": "+15035551212",
       "statusConnected": "Conectado",
       "statusPending": "Esperando enlace",
@@ -4324,8 +4422,8 @@
     },
     "customization": "Personalización",
     "landingScreen": "Pantalla de inicio",
-    "landingScreenHint": "La pantalla que ves primero al iniciar sesión. Automático elige la pantalla más relevante para tu rol.",
-    "landingAuto": "Automático (según tu rol)",
+    "landingScreenHint": "La pantalla que ve primero al iniciar sesión. Automático elige la pantalla más relevante para su rol.",
+    "landingAuto": "Automático (según su rol)",
     "landingDashboard": "Panel",
     "landingKanban": "Tablero de trabajos",
     "landingBacklog": "Pendientes",
@@ -4338,15 +4436,15 @@
     "landingReports": "Informes",
     "landingAccounting": "Contabilidad",
     "accountingView": "Vista contable predeterminada",
-    "accountingViewHint": "Cómo se abren las pantallas financieras por defecto. Visual muestra gráficos para una lectura rápida; Clásico muestra tablas detalladas. Puedes cambiar en cualquier pantalla.",
+    "accountingViewHint": "Cómo se abren las pantallas financieras de forma predeterminada. Visual muestra gráficos para una lectura rápida; Clásico muestra tablas detalladas. Puede cambiarlo en cualquier pantalla.",
     "accountingViewClassic": "Clásico (tablas)",
     "accountingViewVisual": "Visual (gráficos)",
     "colorTheme": "Tema de color",
-    "colorThemeHint": "Elige entre modo claro y oscuro.",
+    "colorThemeHint": "Elija entre modo claro y oscuro.",
     "themeLight": "Claro",
     "themeDark": "Oscuro",
     "displayPreferences": "Tamaño de texto",
-    "fontScaleHint": "Ajusta el tamaño del texto en toda la aplicación. Los cambios surten efecto de inmediato.",
+    "fontScaleHint": "Ajuste el tamaño del texto en toda la aplicación. Los cambios surten efecto de inmediato.",
     "fontScaleDefault": "Predeterminado",
     "fontScaleComfortable": "Cómodo",
     "fontScaleLarge": "Grande",
@@ -4462,7 +4560,56 @@
     "soundPop": "Pop",
     "emailAndSending": "Correo y envío",
     "confirmBeforeSendLabel": "Confirmar antes de enviar",
-    "confirmBeforeSendHint": "Solicitar confirmación cada vez que se envíe algo a un cliente, proveedor o empleado. Desactívelo para enviar de inmediato."
+    "confirmBeforeSendHint": "Solicitar confirmación cada vez que se envíe algo a un cliente, proveedor o empleado. Desactívelo para enviar de inmediato.",
+    "integrations": "Integraciones",
+    "selectNotificationSound": "Seleccionar sonido de notificación: {{name}}",
+    "draftRetention": {
+      "title": "Conservar el trabajo sin guardar durante",
+      "hint": "Cuando un formulario tiene cambios sin guardar, se guardan automáticamente. Elija cuánto tiempo conservarlos antes de que caduquen.",
+      "oneDay": "1 día",
+      "threeDays": "3 días",
+      "oneWeek": "1 semana",
+      "twoWeeks": "2 semanas"
+    },
+    "mfa": {
+      "title": "Autenticación de dos factores",
+      "statusPrefix": "La autenticación de dos factores está",
+      "statusEnabled": "activada",
+      "statusNotEnabled": "desactivada",
+      "requiredByPolicy": "Obligatoria según la política de la organización",
+      "requiredMustEnable": "Obligatoria según la política de la organización: debe activar la MFA",
+      "registeredDevices": "Dispositivos registrados",
+      "lastUsed": "Último uso: {{date}}",
+      "removeDeviceAria": "Quitar {{name}}",
+      "recoveryCodesRemaining": "Quedan {{count}} códigos de recuperación",
+      "addDevice": "Agregar dispositivo",
+      "addPasskey": "Agregar llave de acceso",
+      "newRecoveryCodes": "Nuevos códigos de recuperación",
+      "disable": "Desactivar MFA",
+      "disableTitle": "¿Desactivar la MFA?",
+      "disableMessage": "Se quitarán todos los dispositivos de MFA y los códigos de recuperación. Su cuenta será menos segura.",
+      "disabled": "Autenticación de dos factores desactivada",
+      "deviceRemoved": "Dispositivo quitado",
+      "passkeyUnsupported": "Este navegador no admite llaves de acceso.",
+      "passkeyAdded": "Llave de acceso \"{{name}}\" agregada.",
+      "passkeyIncomplete": "No se completó el registro de la llave de acceso.",
+      "hint": "Agregue una capa adicional de seguridad: al iniciar sesión se pedirá un código de verificación de una aplicación de autenticación.",
+      "enable": "Activar la autenticación de dos factores",
+      "loadFailed": "No se pudo cargar el estado de la MFA.",
+      "setupTitle": "Configurar la autenticación de dos factores",
+      "preparing": "Preparando la configuración del autenticador...",
+      "scanInstructions": "Escanee este código QR con su aplicación de autenticación (Google Authenticator, Authy, etc.)",
+      "manualKeyToggle": "¿No puede escanear? Ingrese la clave manualmente",
+      "copyKey": "Copiar clave",
+      "keyCopied": "Clave copiada al portapapeles",
+      "enterCode": "Ingrese el código de 6 dígitos de su aplicación:",
+      "verificationCode": "Código de verificación",
+      "invalidCode": "Código no válido. Inténtelo de nuevo.",
+      "enabledTitle": "Autenticación de dos factores activada",
+      "enabledText": "Su cuenta ahora está protegida con autenticación de dos factores. Necesitará su aplicación de autenticación cada vez que inicie sesión.",
+      "verifying": "Verificando...",
+      "verifyAndEnable": "Verificar y activar"
+    }
   },
   "errorFallbacksA": {
     "chartOfAccountsLoadFailed": "No se pudo cargar el plan de cuentas",
@@ -4596,7 +4743,7 @@
     "syncAll": "Sincronizar Todo",
     "newTemplate": "Nueva Plantilla",
     "noTemplates": "Sin plantillas de cumplimiento configuradas",
-    "auto": "Auto",
+    "auto": "Automático",
     "manual": "Manual",
     "never": "Nunca",
     "deleteTitle": "¿Eliminar Plantilla?",
@@ -4605,7 +4752,7 @@
     "synced": "Todas las plantillas auto-sync sincronizadas",
     "colName": "Nombre",
     "colType": "Tipo",
-    "colAutoSync": "Auto-Sync",
+    "colAutoSync": "Sincronización automática",
     "colLastSynced": "Última Sinc.",
     "colActive": "Activo",
     "noFormDefinition": "Sin definición de formulario",
@@ -4615,31 +4762,31 @@
     "extractionFailed": "Falló la extracción de la definición del formulario"
   },
   "training": {
-    "title": "Training Library",
-    "myLearning": "My Learning",
-    "pathsTab": "Learning Paths",
-    "searchPlaceholder": "Search modules...",
-    "noModules": "No training modules found",
-    "noEnrollments": "No training paths assigned yet",
-    "noPaths": "No learning paths available",
+    "title": "Biblioteca de capacitación",
+    "myLearning": "Mi aprendizaje",
+    "pathsTab": "Rutas de aprendizaje",
+    "searchPlaceholder": "Buscar módulos...",
+    "noModules": "No se encontraron módulos de capacitación",
+    "noEnrollments": "Aún no tiene rutas de capacitación asignadas",
+    "noPaths": "No hay rutas de aprendizaje disponibles",
     "minutesShort": "min",
-    "startModule": "Start",
-    "continueModule": "Continue",
-    "reviewModule": "Review",
-    "markComplete": "Mark as Complete",
-    "completing": "Saving...",
-    "completedBadge": "Completed",
-    "inProgressBadge": "In Progress",
-    "quizPassingScore": "Passing score: {{score}}%",
-    "quizSubmit": "Submit Answers",
-    "quizPassed": "Passed — {{score}}%",
-    "quizFailed": "{{score}}% — {{required}}% required. Try again.",
-    "quizRetry": "Try Again",
-    "walkthroughStart": "Take the Tour",
-    "walkthroughDesc": "This is an interactive guided tour. Click the button to start, and the tour will walk you through the interface step by step.",
-    "backToLibrary": "Training Library",
-    "autoAssigned": "Auto-assigned",
-    "modulesCount": "{{count}} modules",
+    "startModule": "Comenzar",
+    "continueModule": "Continuar",
+    "reviewModule": "Repasar",
+    "markComplete": "Marcar como completado",
+    "completing": "Guardando...",
+    "completedBadge": "Completado",
+    "inProgressBadge": "En curso",
+    "quizPassingScore": "Calificación aprobatoria: {{score}}%",
+    "quizSubmit": "Enviar respuestas",
+    "quizPassed": "Aprobado — {{score}}%",
+    "quizFailed": "{{score}}% — se requiere {{required}}%. Inténtelo de nuevo.",
+    "quizRetry": "Intentar de nuevo",
+    "walkthroughStart": "Iniciar el recorrido",
+    "walkthroughDesc": "Este es un recorrido guiado interactivo. Haga clic en el botón para comenzar y el recorrido le mostrará la interfaz paso a paso.",
+    "backToLibrary": "Biblioteca de capacitación",
+    "autoAssigned": "Asignado automáticamente",
+    "modulesCount": "{{count}} módulos",
     "colCompleted": "Completados",
     "colCompletion": "Progreso",
     "colLastTour": "Último Tour",
@@ -4970,10 +5117,10 @@
   },
   "partQuickCreate": {
     "title": "Crear pieza rápida",
-    "hint": "Nombre, procuración y clase de inventario — lo mínimo para referenciar esta pieza. Completa el resto después.",
+    "hint": "Nombre, abastecimiento y clase de inventario: lo mínimo para referenciar esta pieza. Complete el resto después.",
     "partNumberLabel": "Número de Pieza",
     "partNumberHint": "Dejar en blanco para autogenerar",
-    "partNumberInfo": "Los números de pieza manuales están habilitados. Ingresa un número personalizado o déjalo en blanco para autogenerar.",
+    "partNumberInfo": "Los números de pieza manuales están habilitados. Ingrese un número personalizado o déjelo en blanco para generarlo automáticamente.",
     "create": "Crear pieza",
     "created": "Pieza «{{name}}» creada."
   },
@@ -5050,8 +5197,8 @@
     "generateBarcode": "Generar Código de Barras",
     "cancel": "Cancelar",
     "send": "Enviar",
-    "offlineWithPending": "Estás sin conexión. {{count}} cambio(s) pendiente(s) se sincronizarán al reconectarse.",
-    "offlineNoChanges": "Estás sin conexión. Los cambios se sincronizarán al reconectarse.",
+    "offlineWithPending": "Está sin conexión. {{count}} cambio(s) pendiente(s) se sincronizarán al reconectarse.",
+    "offlineNoChanges": "Está sin conexión. Los cambios se sincronizarán al reconectarse.",
     "syncing": "Sincronizando {{count}} cambio(s)...",
     "allChangesSynced": "Todos los cambios sincronizados.",
     "skipToContent": "Saltar al contenido principal",
@@ -5147,14 +5294,14 @@
     "dismiss": "Descartar",
     "dismissAll": "Descartar Todo",
     "all": "Todo",
-    "allNotifications": "Todas las Notificaciones",
+    "allNotifications": "Todas las notificaciones",
     "messages": "Mensajes",
     "alerts": "Alertas",
     "preferences": "Preferencias",
     "message": "Mensaje",
     "severity": "Severidad",
     "source": "Fuente",
-    "severityInfo": "Info",
+    "severityInfo": "Información",
     "severityWarning": "Advertencia",
     "severityCritical": "Crítico",
     "allFilter": "-- Todos --",
@@ -5307,7 +5454,7 @@
     "taxableLine": "Con impuesto. Seleccione para excluir esta línea del impuesto sobre ventas.",
     "nonTaxableLine": "Sin impuesto. Seleccione para incluir esta línea en el impuesto sobre ventas.",
     "partId": "Pieza",
-    "allStatuses": "Todos los Estados",
+    "allStatuses": "Todos los estados",
     "statusDraft": "Borrador",
     "statusSent": "Enviada",
     "statusPartiallyPaid": "Parcialmente Pagada",
@@ -5368,7 +5515,7 @@
     "selectCustomer": "Seleccionar cliente...",
     "selectMethod": "Seleccionar método...",
     "paymentMethod": "Método de Pago",
-    "allMethods": "Todos los Métodos",
+    "allMethods": "Todos los métodos",
     "methodCash": "Efectivo",
     "methodCheck": "Cheque",
     "methodCreditCard": "Tarjeta de Crédito",
@@ -5455,7 +5602,7 @@
     "contactName": "Nombre de Contacto",
     "paymentTerms": "Términos de Pago",
     "pos": "OC",
-    "info": "Info",
+    "info": "Información",
     "purchaseOrders": "Órdenes de Compra",
     "noPurchaseOrders": "Sin órdenes de compra para este proveedor",
     "accounting": "Contabilidad",
@@ -5479,9 +5626,9 @@
     "expected": "Esperado",
     "fork": {
       "title": "Nuevo Proveedor",
-      "hint": "Elige cómo configurar este proveedor.",
+      "hint": "Elija cómo configurar este proveedor.",
       "quickTitle": "Alta rápida",
-      "quickDesc": "Solo lo esencial — nombre de empresa y contacto básico. Completa el resto más tarde.",
+      "quickDesc": "Solo lo esencial: nombre de empresa y contacto básico. Complete el resto más tarde.",
       "quickBadge": "Rápido",
       "guidedTitle": "Configuración guiada",
       "guidedDesc": "Paso a paso para proveedores estratégicos o aprobados — clasificación, dirección, términos y las piezas que suministran."
@@ -5499,9 +5646,9 @@
       "step4Title": "Términos",
       "step4Hint": "Términos de pago y notas sobre el trabajo con este proveedor.",
       "step5Title": "Piezas Suministradas",
-      "step5Hint": "Agrega las piezas o consumibles que suministra este proveedor. Opcional — puedes agregarlas más tarde desde la pestaña Catálogo del proveedor.",
+      "step5Hint": "Agregue las piezas o consumibles que suministra este proveedor. Opcional: puede agregarlas más tarde desde la pestaña Catálogo del proveedor.",
       "step6Title": "Revisar",
-      "step6Hint": "Confirma los detalles y luego crea el proveedor.",
+      "step6Hint": "Confirme los detalles y luego cree el proveedor.",
       "type": {
         "Transactional": "Transaccional",
         "TransactionalDesc": "Proveedor habitual para compras rutinarias.",
@@ -5510,11 +5657,11 @@
         "StrategicDesc": "Proveedor clave en el que vale la pena invertir en la relación.",
         "StrategicPlaybook": "Captura el gerente de cuenta y las capacidades principales para que el equipo sepa a quién llamar.",
         "Subcontractor": "Subcontratista",
-        "SubcontractorDesc": "Realiza operaciones subcontratadas sobre tus piezas.",
-        "SubcontractorPlaybook": "Registra los procesos que ejecutan y las certificaciones en las que confías.",
+        "SubcontractorDesc": "Realiza operaciones subcontratadas sobre sus piezas.",
+        "SubcontractorPlaybook": "Registre los procesos que ejecutan y las certificaciones en las que confía.",
         "Distributor": "Distribuidor",
         "DistributorDesc": "Revende piezas fabricadas por otros fabricantes.",
-        "DistributorPlaybook": "Anota las líneas que manejan para saber qué abastecer a través de ellos."
+        "DistributorPlaybook": "Anote las líneas que manejan para saber qué abastecer a través de ellos."
       },
       "extras": {
         "accountManager": "Gerente de Cuenta",
@@ -5533,7 +5680,7 @@
     "detail": {
       "catalogTab": "Catálogo",
       "catalogEmpty": "Este proveedor aún no tiene piezas en el catálogo.",
-      "catalogEmptyHelp": "Añade una pieza que este proveedor suministre.",
+      "catalogEmptyHelp": "Agregue una pieza que este proveedor suministre.",
       "addPartToCatalog": "Añadir pieza",
       "scorecardTab": "Evaluación"
     },
@@ -5647,8 +5794,8 @@
     "submit": "Enviar",
     "acknowledge": "Confirmar",
     "receiveItems": "Recibir Artículos",
-    "allStatuses": "Todos los Estados",
-    "allVendors": "Todos los Proveedores",
+    "allStatuses": "Todos los estados",
+    "allVendors": "Todos los proveedores",
     "statusDraft": "Borrador",
     "statusSubmitted": "Enviada",
     "statusAcknowledged": "Confirmada",
@@ -5681,7 +5828,7 @@
     "newPoTitle": "Nueva Orden de Compra",
     "noLinesYet": "Sin líneas aún",
     "orderDetails": "Detalles de la Orden",
-    "tabOrders": "Orders",
+    "tabOrders": "Órdenes",
     "showInactiveVendors": "Mostrar proveedores inactivos",
     "showInactiveParts": "Mostrar piezas obsoletas",
     "purchaseUnit": "Unidad de Compra",
@@ -5710,7 +5857,7 @@
     "variance": "Variación",
     "offTier": {
       "title": "Precios fuera de tarifa",
-      "intro": "{{count}} línea(s) con precio más de {{threshold}}% por encima/debajo del nivel de tarifa actual del proveedor. Elige cómo manejar cada una — por defecto los precios ingresados quedan como excepciones únicas y no cambian el precio maestro del proveedor.",
+      "intro": "{{count}} línea(s) con precio más de {{threshold}}% por encima/debajo del nivel de tarifa actual del proveedor. Elija cómo manejar cada una — por defecto los precios ingresados quedan como excepciones únicas y no cambian el precio maestro del proveedor.",
       "tableLabel": "Líneas fuera de tarifa",
       "tierPrice": "Precio de tarifa",
       "enteredPrice": "Precio ingresado",
@@ -5724,7 +5871,7 @@
     },
     "origin": "Origen",
     "originManual": "Manual",
-    "originAutoMrp": "Auto (MRP)",
+    "originAutoMrp": "Automático (MRP)",
     "originAutoQuote": "Auto (cotización)",
     "originExternalIntegration": "Externo",
     "originEdi": "EDI",
@@ -5792,7 +5939,7 @@
       "title": "Plantillas de Órdenes Recurrentes",
       "hint": "Plantillas que el job nocturno de Hangfire convierte en órdenes de venta nuevas. Cada plantilla lleva un cliente, un intervalo y las líneas a replicar.",
       "newRecurring": "Nueva plantilla recurrente",
-      "empty": "Aún no hay plantillas de órdenes recurrentes. Crea una para programar órdenes de venta auto-generadas para un cliente.",
+      "empty": "Aún no hay plantillas de órdenes recurrentes. Cree una para programar órdenes de venta generadas automáticamente para un cliente.",
       "neverRun": "Nunca ejecutado",
       "colName": "Nombre de plantilla",
       "colCustomer": "Cliente",
@@ -5839,8 +5986,8 @@
     "unitPrice": "Precio Unit.",
     "lines": "Líneas",
     "confirm": "Confirmar",
-    "allStatuses": "Todos los Estados",
-    "allCustomers": "Todos los Clientes",
+    "allStatuses": "Todos los estados",
+    "allCustomers": "Todos los clientes",
     "statusDraft": "Borrador",
     "statusConfirmed": "Confirmada",
     "statusInProduction": "En Producción",
@@ -6130,7 +6277,7 @@
     "accept": "Aceptar",
     "reject": "Rechazar",
     "convertToOrder": "Convertir a Orden",
-    "allStatuses": "Todos los Estados",
+    "allStatuses": "Todos los estados",
     "statusDraft": "Borrador",
     "statusSent": "Enviada",
     "statusAccepted": "Aceptada",
@@ -6288,7 +6435,7 @@
     "labelRequiredHint": "Este transportista está integrado — el envío se realiza creando la etiqueta (que asigna el número de seguimiento). Obtenga tarifas y luego cree la etiqueta.",
     "track": "Rastrear",
     "markDelivered": "Marcar Entregado",
-    "allStatuses": "Todos los Estados",
+    "allStatuses": "Todos los estados",
     "statusPending": "Pendiente",
     "statusPacked": "Empacado",
     "statusShipped": "Enviado",
@@ -6326,7 +6473,7 @@
     "labelCreatedSuccess": "Etiqueta de envío creada.",
     "estDelivery": "Entrega Est.",
     "noTrackingEvents": "Sin eventos de seguimiento aún.",
-    "lbs": "lbs",
+    "lbs": "lb",
     "weightUnitLabel": "Unidad de peso",
     "unit_lbs": "lb",
     "unit_oz": "oz",
@@ -6582,7 +6729,7 @@
     "colAvgHrsJob": "Prom. Hrs/Trabajo",
     "colOnTimePercent": "% a Tiempo",
     "colPartNumber": "Pieza #",
-    "colStock": "Stock",
+    "colStock": "Existencias",
     "colMinThreshold": "Umbral Mínimo",
     "colReorderPt": "Pto. Reorden",
     "colLowStock": "Stock Bajo",
@@ -6644,7 +6791,7 @@
     "sankeyDiagrams": "Diagramas Sankey",
     "sankey": {
       "title": "Diagramas Sankey",
-      "subtitle": "Visualiza flujos y relaciones en tus datos",
+      "subtitle": "Visualice flujos y relaciones en sus datos",
       "backToReports": "Volver a Reportes",
       "quoteToCash": "Cotización a Cobro",
       "jobStageFlow": "Flujo de Etapas de Trabajo",
@@ -7311,8 +7458,9 @@
     "starterQuoteWorkflow": "Flujo de cotización a pedido",
     "starterInventory": "¿Cómo hago seguimiento del inventario?",
     "starterShortcuts": "Atajos de teclado",
-    "askPlaceholder": "Haz una pregunta...",
-    "errorMessage": "Lo siento, no pude procesar su pregunta. Por favor intente de nuevo."
+    "askPlaceholder": "Haga una pregunta...",
+    "errorMessage": "Lo siento, no pude procesar su pregunta. Por favor intente de nuevo.",
+    "relatedTraining": "Capacitación relacionada:"
   },
   "kioskSetup": {
     "noTeamsYet": "Todavía no hay equipos. Escriba un nombre aquí y el equipo se creará al activar esta terminal.",
@@ -7519,9 +7667,9 @@
       "addQuantity": "+Cant.",
       "done": "Terminar",
       "noRouting": "Esta pieza no tiene pasos de ruta.",
-      "runningTitle": "Tus temporizadores en curso",
+      "runningTitle": "Sus temporizadores en curso",
       "wholeJob": "Trabajo completo",
-      "stopTimerAria": "Detener tu temporizador en {{jobNumber}}",
+      "stopTimerAria": "Detener su temporizador en {{jobNumber}}",
       "quantityTitle": "Paso {{step}} · {{title}}",
       "completedLabel": "Completadas (de {{total}})",
       "scrapLabel": "Desecho",
@@ -7536,9 +7684,9 @@
       "loadFailed": "No se pudieron cargar las operaciones de esta orden de trabajo: {{reason}}",
       "actionFailed": "No se pudo completar: {{reason}}",
       "started": "Paso {{step}} · {{title}} iniciado",
-      "alreadyRunning": "Tu temporizador en el paso {{step}} · {{title}} ya está en curso",
+      "alreadyRunning": "Su temporizador en el paso {{step}} · {{title}} ya está en curso",
       "stopped": "Paso {{step}} · {{title}} detenido",
-      "timerStopped": "Se detuvo tu temporizador en {{jobNumber}}",
+      "timerStopped": "Se detuvo su temporizador en {{jobNumber}}",
       "recorded": "Paso {{step}}: {{count}} de {{total}} registradas"
     },
     "returnFlow": {
@@ -7587,7 +7735,7 @@
       "title": "Registro Diario de Escaneos",
       "filterByDate": "Fecha",
       "filterByAction": "Tipo de Acción",
-      "allActions": "Todas las Acciones",
+      "allActions": "Todas las acciones",
       "summaryStats": "Resumen",
       "scansToday": "escaneos hoy",
       "exportCsv": "Exportar CSV",
@@ -7601,9 +7749,9 @@
       "trainingMode": "MODO DE ENTRENAMIENTO",
       "trainingModeHint": "Las acciones no se guardarán"
     },
-    "locationEmpty": "Location Empty",
-    "lot": "Lot",
-    "scan": "Scan",
+    "locationEmpty": "Ubicación vacía",
+    "lot": "Lote",
+    "scan": "Escanear",
     "devices": "Dispositivos lectores",
     "punchNotRecorded": "Registro NO guardado. Intente de nuevo o avise a su supervisor.",
     "punchRecorded": "{{event}} a las {{time}}",
@@ -7667,7 +7815,7 @@
     "boardShowing": "Mostrando {{shown}} de {{total}}"
   },
   "customerReturns": {
-    "allStatuses": "Todos los Estados",
+    "allStatuses": "Todos los estados",
     "close": "Cerrar",
     "closeConfirm": "¿Cerrar esta devolución? Esta acción no se puede deshacer.",
     "closeMessage": "La devolución se marcará como cerrada.",
@@ -7795,7 +7943,11 @@
     "deleteFileTitle": "¿Eliminar archivo?",
     "deleteFileMessage": "Esto eliminará permanentemente \"{{name}}\".",
     "fileDeleted": "Archivo eliminado",
-    "fileUploaded": "Archivo cargado"
+    "fileUploaded": "Archivo cargado",
+    "fieldLinkedJobOptional": "Trabajo vinculado (opcional)",
+    "fieldExpirationOptional": "Fecha de vencimiento (opcional)",
+    "fieldNotesOptional": "Notas (opcional)",
+    "searchLabel": "Buscar número de lote o pieza"
   },
   "partQuality": {
     "recentInspections": "Inspecciones recientes",
@@ -8048,7 +8200,7 @@
     },
     "forecastDialog": {
       "title": "Generar Pronóstico de Demanda",
-      "hint": "Elige una parte con historial de ventas y un método de pronóstico. El motor lee `períodos históricos` de demanda pasada y proyecta `períodos de pronóstico` al futuro.",
+      "hint": "Elija una pieza con historial de ventas y un método de pronóstico. El motor lee `períodos históricos` de demanda pasada y proyecta `períodos de pronóstico` al futuro.",
       "fieldName": "Nombre del Pronóstico",
       "fieldPart": "Parte",
       "fieldMethod": "Método",
@@ -8068,7 +8220,7 @@
       "horizon": "Horizonte",
       "partsTouched": "Partes Tocadas",
       "noParts": "Sin partes en esta ejecución.",
-      "pickPart": "Selecciona una parte para ver su plan por período y trazabilidad de demanda.",
+      "pickPart": "Seleccione una pieza para ver su plan por período y la trazabilidad de la demanda.",
       "orders": "órdenes",
       "timeBuckets": "Plan por Período",
       "bucketStart": "Período",
@@ -8121,21 +8273,21 @@
       "shipments": "Envíos"
     },
     "login": {
-      "title": "Inicia sesión en tu portal",
-      "hint": "Ingresa tu correo y te enviaremos un enlace de inicio de sesión de un solo uso. El enlace expira en 15 minutos.",
+      "title": "Inicie sesión en su portal",
+      "hint": "Ingrese su correo y le enviaremos un enlace de inicio de sesión de un solo uso. El enlace caduca en 15 minutos.",
       "email": "Correo electrónico",
       "send": "Enviar enlace de inicio",
-      "error": "No pudimos enviar el enlace de inicio. Inténtalo de nuevo.",
-      "sentTitle": "Revisa tu bandeja de entrada",
-      "sentBody": "Si tenemos tu correo registrado, el enlace de inicio está en camino. El enlace expira en 15 minutos — puedes cerrar esta pestaña.",
-      "devLink": "Modo dev — SMTP no está configurado. Usa el enlace directamente:",
+      "error": "No pudimos enviar el enlace de inicio. Inténtelo de nuevo.",
+      "sentTitle": "Revise su bandeja de entrada",
+      "sentBody": "Si tenemos su correo registrado, el enlace de inicio está en camino. El enlace caduca en 15 minutos; puede cerrar esta pestaña.",
+      "devLink": "Modo dev: SMTP no está configurado. Use el enlace directamente:",
       "openLink": "Abrir enlace de inicio"
     },
     "callback": {
       "signingIn": "Iniciando sesión",
-      "signingInBody": "Un momento mientras verificamos tu enlace.",
-      "missing": "A este enlace le falta el token de inicio. Solicita uno nuevo.",
-      "failed": "Este enlace de inicio es inválido o expiró. Solicita uno nuevo.",
+      "signingInBody": "Un momento mientras verificamos su enlace.",
+      "missing": "A este enlace le falta el token de inicio. Solicite uno nuevo.",
+      "failed": "Este enlace de inicio no es válido o caducó. Solicite uno nuevo.",
       "failedTitle": "El enlace de inicio no funcionó",
       "backToLogin": "Solicitar un nuevo enlace"
     },
@@ -8147,9 +8299,9 @@
       "inTransit": "Envíos en Tránsito"
     },
     "orders": {
-      "title": "Tus Pedidos",
+      "title": "Sus pedidos",
       "subtitle": "Pedidos de venta abiertos y recientes. Se muestran los últimos 200.",
-      "empty": "Aún no tienes pedidos.",
+      "empty": "Aún no tiene pedidos.",
       "colNumber": "Pedido #",
       "colDate": "Fecha del Pedido",
       "colRequested": "Solicitado",
@@ -8157,9 +8309,9 @@
       "colTotal": "Total"
     },
     "quotes": {
-      "title": "Tus Cotizaciones",
+      "title": "Sus cotizaciones",
       "subtitle": "Cotizaciones y estimados abiertos. Las cotizaciones enviadas pueden aceptarse o rechazarse aquí.",
-      "empty": "Aún no tienes cotizaciones.",
+      "empty": "Aún no tiene cotizaciones.",
       "accept": "Aceptar",
       "decline": "Rechazar",
       "acceptedToast": "Cotización aceptada. ¡Gracias!",
@@ -8173,9 +8325,9 @@
       "colActions": "Acciones"
     },
     "invoices": {
-      "title": "Tus Facturas",
-      "subtitle": "Facturas abiertas y recientes. Si tu proveedor usa un sistema contable externo, consulta su portal para los datos más actuales.",
-      "empty": "No hay facturas para mostrar. Tu proveedor podría gestionar la facturación a través de un sistema contable externo.",
+      "title": "Sus facturas",
+      "subtitle": "Facturas abiertas y recientes. Si su proveedor usa un sistema contable externo, consulte su portal para los datos más actuales.",
+      "empty": "No hay facturas para mostrar. Su proveedor podría gestionar la facturación a través de un sistema contable externo.",
       "colNumber": "Factura #",
       "colDate": "Fecha de Factura",
       "colDueDate": "Fecha de Vencimiento",
@@ -8185,8 +8337,8 @@
       "colBalance": "Saldo"
     },
     "shipments": {
-      "title": "Tus Envíos",
-      "subtitle": "Envíos salientes vinculados a tus pedidos.",
+      "title": "Sus envíos",
+      "subtitle": "Envíos salientes vinculados a sus pedidos.",
       "empty": "Aún no hay envíos.",
       "colNumber": "Envío #",
       "colStatus": "Estado",
@@ -8262,8 +8414,8 @@
       "runHrs": "Ejec. (hrs)",
       "priority": "Prioridad",
       "dueDate": "Fecha Venc.",
-      "endTime": "End Time",
-      "startTime": "Start Time"
+      "endTime": "Hora de fin",
+      "startTime": "Hora de inicio"
     },
     "statuses": {
       "scheduled": "Programado",
@@ -8282,17 +8434,17 @@
       "scheduled": "Programado",
       "operationLocked": "Operación bloqueada",
       "operationUnlocked": "Operación desbloqueada",
-      "locked": "Schedule locked",
-      "operations": "Operations scheduled",
-      "unlocked": "Schedule unlocked",
+      "locked": "Programa bloqueado",
+      "operations": "Operaciones programadas",
+      "unlocked": "Programa desbloqueado",
       "workCenterCreated": "Centro de trabajo creado",
       "workCenterUpdated": "Centro de trabajo actualizado",
       "workCenterDeleted": "Centro de trabajo eliminado"
     },
     "priorityRules": {
-      "dueDate": "Due Date",
+      "dueDate": "Fecha de vencimiento",
       "fifo": "FIFO",
-      "priority": "Priority"
+      "priority": "Prioridad"
     },
     "newWorkCenter": "Nuevo Centro de Trabajo",
     "deleteWorkCenter": {
@@ -8382,13 +8534,13 @@
     "quality": "Calidad",
     "total": "total",
     "good": "buenas",
-    "scrap": "scrap",
+    "scrap": "desecho",
     "trendAriaLabel": "Gráfico de tendencia OEE mostrando disponibilidad, rendimiento, calidad y OEE general",
     "noTrendData": "Sin datos de tendencia para este periodo",
     "totalLoss": "Pérdida Total:",
     "noLosses": "Sin pérdidas registradas para este periodo",
     "min": "min",
-    "hrs": "hrs",
+    "hrs": "h",
     "lossesChartLabel": "Gráfico de las seis grandes pérdidas",
     "trendChartLabel": "Gráfico de tendencia OEE",
     "worldClassBadge": "OEE clase mundial",
@@ -8402,9 +8554,9 @@
       "reducedYield": "Rendimiento Reducido"
     },
     "granularities": {
-      "daily": "Daily",
-      "monthly": "Monthly",
-      "weekly": "Weekly"
+      "daily": "Diario",
+      "monthly": "Mensual",
+      "weekly": "Semanal"
     }
   },
   "rfqPdf": {
@@ -8459,11 +8611,11 @@
       "required": "Requerida",
       "deadline": "Límite",
       "created": "Creada",
-      "leadTime": "Lead Time",
-      "moq": "MOQ",
-      "tooling": "Tooling",
-      "unitPrice": "Unit Price",
-      "validUntil": "Valid Until"
+      "leadTime": "Tiempo de entrega",
+      "moq": "Cant. mín.",
+      "tooling": "Herramental",
+      "unitPrice": "Precio unitario",
+      "validUntil": "Válido hasta"
     },
     "statuses": {
       "draft": "Borrador",
@@ -8525,17 +8677,17 @@
       "sentToVendors": "Proveedores agregados a la solicitud de cotización. Envíe la solicitud a cada proveedor usted mismo.",
       "responseRecorded": "Respuesta de proveedor registrada",
       "awardedPo": "Solicitud adjudicada. OC creada.",
-      "rfqAwarded": "RFQ awarded",
+      "rfqAwarded": "Solicitud de cotización adjudicada",
       "rfqSent": "Proveedores agregados a la solicitud de cotización. Envíe la solicitud a cada proveedor usted mismo."
     },
     "confirm": {
       "awardTitle": "¿Adjudicar solicitud?"
     },
-    "allStatuses": "All Statuses",
-    "awardRfqMessage": "Award this RFQ to the selected vendor?",
-    "awardRfqTitle": "Award RFQ",
-    "leadTime": "Lead Time",
-    "selectPart": "Select Part",
+    "allStatuses": "Todos los estados",
+    "awardRfqMessage": "¿Adjudicar esta solicitud de cotización al proveedor seleccionado?",
+    "awardRfqTitle": "Adjudicar solicitud de cotización",
+    "leadTime": "Tiempo de entrega",
+    "selectPart": "Seleccionar pieza",
     "rfq": {
       "confirmSendTitle": "¿Agregar proveedores a la RFQ?",
       "confirmSendMessage": "¿Agregar {{count}} proveedor(es) a esta RFQ? Usted mismo se la enviará."
@@ -8636,7 +8788,7 @@
       "specificUser": "Usuario Específico",
       "role": "Rol",
       "directManager": "Gerente Directo",
-      "manager": "Manager"
+      "manager": "Gerente"
     },
     "roles": {
       "admin": "Administrador",
@@ -8714,7 +8866,7 @@
     "tabs": {
       "myLearning": "Mi Aprendizaje",
       "learningPaths": "Rutas de Aprendizaje",
-      "allModules": "Todos los Módulos"
+      "allModules": "Todos los módulos"
     },
     "searchModules": "Buscar módulos",
     "type": "Tipo",
@@ -8729,7 +8881,7 @@
     "complete": "completo",
     "autoAssigned": "Auto-asignado",
     "typeOptions": {
-      "all": "Todos los Tipos",
+      "all": "Todos los tipos",
       "article": "Artículo",
       "walkthrough": "Tutorial",
       "quickRef": "Referencia Rápida",
@@ -8737,7 +8889,7 @@
       "reference": "Referencia"
     },
     "styleOptions": {
-      "all": "Todos los Estilos",
+      "all": "Todos los estilos",
       "visual": "Visual",
       "reading": "Lectura / Escritura",
       "handson": "Práctico / Kinestésico"
@@ -8962,12 +9114,12 @@
         "manual": "Manual"
       },
       "directions": {
-        "all": "Todas las Direcciones",
+        "all": "Todas las direcciones",
         "inbound": "Entrante",
         "outbound": "Saliente"
       },
       "statuses": {
-        "all": "Todos los Estados",
+        "all": "Todos los estados",
         "received": "Recibido",
         "parsing": "Analizando",
         "parsed": "Analizado",
@@ -8983,13 +9135,13 @@
         "vendor": "Proveedor",
         "format": "Formato",
         "transport": "Transporte",
-        "txns": "Txns",
+        "txns": "Trans.",
         "errors": "Errores",
         "active": "Activo",
         "partner": "Socio",
         "dir": "Dir",
         "set": "Conj",
-        "controlNumber": "Control #",
+        "controlNumber": "N.º de control",
         "status": "Estado",
         "entity": "Entidad",
         "received": "Recibido",
@@ -9065,7 +9217,7 @@
         "training": "Capacitación",
         "safety": "Seguridad",
         "other": "Otro",
-        "all": "All Types"
+        "all": "Todos los tipos"
       },
       "cols": {
         "title": "Título",
@@ -9082,7 +9234,7 @@
         "acknowledged": "Confirmado",
         "eventCreated": "Evento creado",
         "eventCancelled": "Evento cancelado",
-        "eventDeleted": "Event deleted"
+        "eventDeleted": "Evento eliminado"
       }
     },
     "mfa": {
@@ -9106,12 +9258,12 @@
       },
       "snackbar": {
         "policyUpdated": "Política MFA actualizada",
-        "policyReset": "MFA policy reset",
-        "policySaved": "MFA policy saved"
+        "policyReset": "Política de MFA restablecida",
+        "policySaved": "Política de MFA guardada"
       },
-      "requiredForRoles": "Required for Roles",
-      "save": "Save",
-      "selectRoles": "Select roles"
+      "requiredForRoles": "Obligatoria para los roles",
+      "save": "Guardar",
+      "selectRoles": "Seleccionar roles"
     },
     "timeCorrections": {
       "employee": "Empleado",
@@ -9152,15 +9304,15 @@
         "origEnd": "Fin Orig.",
         "origDuration": "Duración Orig.",
         "reason": "Motivo",
-        "correctedAt": "Corrected At",
-        "newValue": "New Value",
-        "originalValue": "Original Value"
+        "correctedAt": "Corregido el",
+        "newValue": "Valor nuevo",
+        "originalValue": "Valor original"
       },
       "snackbar": {
         "corrected": "Entrada de tiempo corregida",
-        "correctionSaved": "Time correction saved"
+        "correctionSaved": "Corrección de tiempo guardada"
       },
-      "allEmployees": "All Employees"
+      "allEmployees": "Todos los empleados"
     },
     "training": {
       "tabs": {
@@ -9197,7 +9349,7 @@
       "noPaths": "Sin rutas de capacitación definidas",
       "noProgress": "Sin datos de progreso de usuario disponibles",
       "users": "usuarios",
-      "auto": "Auto",
+      "auto": "Automático",
       "manual": "Manual",
       "activeLabel": "Activo",
       "inactive": "Inactivo",
@@ -9220,7 +9372,7 @@
       "moduleBreakdown": "Desglose de Módulos",
       "completed": "Completado",
       "inProgress": "En Progreso",
-      "selectUser": "Selecciona un usuario para ver su progreso de capacitación",
+      "selectUser": "Seleccione un usuario para ver su progreso de capacitación",
       "completedStat": "completado",
       "notStarted": "Sin iniciar"
     },
@@ -9363,27 +9515,27 @@
     "bufferDays": "Días de Margen",
     "notifyChat": "Enviar Notificaciones por Chat",
     "settingsSaved": "Configuración de auto-OC guardada.",
-    "bulkConvertedSuccess": "Suggestions converted to POs",
-    "convertedSuccess": "Suggestion converted to PO",
-    "defaultMode": "Default Mode",
-    "description": "Description",
-    "dismissedPartial": "Some suggestions dismissed",
-    "dismissedSuccess": "Suggestion dismissed",
-    "partNumber": "Part Number",
-    "qty": "Qty",
-    "runAnalysis": "Run Analysis",
-    "runTriggered": "Analysis started",
-    "settingsTitle": "Auto-PO Settings",
-    "sourceSOs": "Source SOs",
-    "tabSettings": "Settings",
-    "tabSuggestions": "Suggestions",
-    "vendor": "Vendor",
+    "bulkConvertedSuccess": "Sugerencias convertidas en órdenes de compra",
+    "convertedSuccess": "Sugerencia convertida en orden de compra",
+    "defaultMode": "Modo predeterminado",
+    "description": "Descripción",
+    "dismissedPartial": "Se descartaron algunas sugerencias",
+    "dismissedSuccess": "Sugerencia descartada",
+    "partNumber": "Número de pieza",
+    "qty": "Cant.",
+    "runAnalysis": "Ejecutar análisis",
+    "runTriggered": "Análisis iniciado",
+    "settingsTitle": "Configuración de órdenes de compra automáticas",
+    "sourceSOs": "Pedidos de venta de origen",
+    "tabSettings": "Configuración",
+    "tabSuggestions": "Sugerencias",
+    "vendor": "Proveedor",
     "autoCustomerPo": "Generar O.C. del cliente automáticamente al crear el pedido",
     "autoCustomerPoHint": "Cuando una cotización se convierte en pedido de venta, genera automáticamente el documento interno de orden de compra del cliente (solo lectura)."
   },
   "expenseSettings": {
     "title": "Política de Gastos",
-    "intro": "Configura umbrales, requisitos de recibos y reglas de aprobación para los envíos de gastos.",
+    "intro": "Configure umbrales, requisitos de recibos y reglas de aprobación para los envíos de gastos.",
     "allowSelfApproval": "Permitir auto-aprobación",
     "allowSelfApprovalHint": "Cuando está activo, los empleados pueden aprobar automáticamente sus propios gastos hasta el umbral indicado abajo.",
     "autoApproveThreshold": "Umbral de auto-aprobación",
@@ -9395,7 +9547,7 @@
     "requireReceipt": "Exigir recibo adjunto",
     "requireReceiptHint": "Cuando está activo, los empleados deben adjuntar un archivo de recibo antes de enviar cualquier gasto.",
     "minDescriptionLength": "Longitud mínima de descripción",
-    "minDescriptionLengthHint": "Descripción de gasto mínima aceptable (en caracteres). Usa 0 para permitir descripciones vacías.",
+    "minDescriptionLengthHint": "Longitud mínima aceptable de la descripción del gasto (en caracteres). Use 0 para permitir descripciones vacías.",
     "saved": "Política de gastos guardada",
     "thresholdExceedsMax": "El umbral de auto-aprobación no puede superar el monto máximo del gasto."
   },
@@ -9403,14 +9555,14 @@
     "brandName": "Armory Works Forge",
     "demoChip": "Demo",
     "tagline": "Un ERP de código abierto para talleres de ingeniería.",
-    "lede": "Armory Works Forge es una plataforma autohospedable de gestión de planta y de negocio — kanban, trabajos, piezas, inventario, compras, ventas, nómina y más — diseñada para ejecutarse junto a tu archivo de QuickBooks o de forma totalmente independiente.",
+    "lede": "Armory Works Forge es una plataforma autohospedable de gestión de planta y de negocio — kanban, trabajos, piezas, inventario, compras, ventas, nómina y más — diseñada para ejecutarse junto a su archivo de QuickBooks o de forma totalmente independiente.",
     "caveat": "Esta es una demo pública. Los datos se reinician periódicamente y se comparten con todos los usuarios conectados.",
     "ctaSignIn": "Iniciar sesión en la demo",
     "footerLicense": "Software libre con licencia Apache 2.0",
     "footerGithub": "Ver en GitHub",
     "setup": {
-      "focusTitle": "¿En qué te quieres enfocar?",
-      "focusHint": "Elige lo más parecido — puedes activar más después.",
+      "focusTitle": "¿En qué desea enfocarse?",
+      "focusHint": "Elija lo más parecido; puede activar más después.",
       "focus": {
         "stock": {
           "label": "Controlar el inventario",
@@ -9429,8 +9581,8 @@
           "desc": "Convertir materiales en productos terminados y seguir el trabajo."
         }
       },
-      "addonsTitle": "¿Algo más que quieras probar?",
-      "addonsHint": "Opcional — actívalo si te resulta útil.",
+      "addonsTitle": "¿Algo más que quiera probar?",
+      "addonsHint": "Opcional: actívelo si le resulta útil.",
       "addon": {
         "invoicing": "Enviar facturas a clientes",
         "quality": "Controles e inspecciones de calidad",
@@ -9454,16 +9606,16 @@
   "workflow": {
     "parts": {
       "definitions": {
-        "assemblyGuidedV1": "Assembly setup",
-        "rawMaterialExpressV1": "Raw material quick-add"
+        "assemblyGuidedV1": "Configuración de ensamble",
+        "rawMaterialExpressV1": "Alta rápida de materia prima"
       },
       "steps": {
-        "basics": "Basics",
-        "bom": "Bill of Materials",
-        "routing": "Routing",
-        "costing": "Cost",
-        "alternates": "Alternates",
-        "expressForm": "Quick add",
+        "basics": "Básicos",
+        "bom": "Lista de materiales",
+        "routing": "Ruta",
+        "costing": "Costo",
+        "alternates": "Alternativas",
+        "expressForm": "Alta rápida",
         "sourcing": "Abastecimiento",
         "vendorParts": "Proveedores",
         "inventory": "Inventario",
@@ -9502,11 +9654,11 @@
     },
     "shell": {
       "actions": {
-        "back": "Back",
-        "continue": "Continue",
-        "complete": "Mark Complete",
-        "skip": "Skip",
-        "close": "Close"
+        "back": "Atrás",
+        "continue": "Continuar",
+        "complete": "Marcar como completo",
+        "skip": "Omitir",
+        "close": "Cerrar"
       },
       "mode": {
         "express": "Alta rápida",
@@ -9517,7 +9669,7 @@
       },
       "modeSwitch": {
         "confirmTitle": "¿Cambiar de modo?",
-        "confirmMessage": "Tienes cambios sin guardar en este paso. Cambiar de modo los descartará.",
+        "confirmMessage": "Tiene cambios sin guardar en este paso. Cambiar de modo los descartará.",
         "confirmAction": "Cambiar y descartar"
       },
       "optional": "Opcional",
@@ -9533,34 +9685,34 @@
         "heading": "Este paso necesita datos para completar el flujo"
       },
       "steps": {
-        "heading": "Steps"
+        "heading": "Pasos"
       },
       "resume": {
-        "heading": "Workflow drafts in progress",
-        "message": "Pick up where you left off.",
-        "resumeButton": "Resume",
-        "dismissButton": "Dismiss",
-        "empty": "No drafts in progress.",
-        "loadFailed": "Couldn't load active drafts."
+        "heading": "Borradores de flujo en curso",
+        "message": "Continúe donde se quedó.",
+        "resumeButton": "Reanudar",
+        "dismissButton": "Descartar",
+        "empty": "No hay borradores en curso.",
+        "loadFailed": "No se pudieron cargar los borradores activos."
       }
     },
     "demo": {
       "steps": {
-        "basics": "Basics",
-        "bom": "Bill of Materials",
-        "routing": "Routing",
-        "costing": "Cost",
-        "alternates": "Alternates"
+        "basics": "Básicos",
+        "bom": "Lista de materiales",
+        "routing": "Ruta",
+        "costing": "Costo",
+        "alternates": "Alternativas"
       },
       "readiness": {
-        "basics": "Basics",
-        "basicsMissing": "Name, type, and material are required.",
-        "bom": "BOM",
-        "bomMissing": "BOM not yet defined.",
-        "routing": "Routing",
-        "routingMissing": "Routing operations not yet defined.",
-        "cost": "Cost",
-        "costMissing": "Cost not yet set."
+        "basics": "Básicos",
+        "basicsMissing": "El nombre, el tipo y el material son obligatorios.",
+        "bom": "Lista de materiales",
+        "bomMissing": "Aún no se ha definido la lista de materiales.",
+        "routing": "Ruta",
+        "routingMissing": "Aún no se han definido las operaciones de la ruta.",
+        "cost": "Costo",
+        "costMissing": "Aún no se ha definido el costo."
       }
     }
   },
@@ -9592,14 +9744,14 @@
   },
   "validators": {
     "parts": {
-      "hasBasics": "Basics",
+      "hasBasics": "Básicos",
       "hasBasicsMissing": "Se requieren nombre, tipo y material.",
-      "hasBom": "BOM",
-      "hasBomMissing": "BOM not yet defined.",
-      "hasRouting": "Routing",
-      "hasRoutingMissing": "Routing operations not yet defined.",
-      "hasCost": "Cost",
-      "hasCostMissing": "Cost not yet set.",
+      "hasBom": "Lista de materiales",
+      "hasBomMissing": "Aún no se ha definido la lista de materiales.",
+      "hasRouting": "Ruta",
+      "hasRoutingMissing": "Aún no se han definido las operaciones de la ruta.",
+      "hasCost": "Costo",
+      "hasCostMissing": "Aún no se ha definido el costo.",
       "hasSourcing": "Abastecimiento",
       "hasSourcingMissing": "Aún no se ha seleccionado el proveedor preferido.",
       "hasInventory": "Inventario",
@@ -9804,7 +9956,7 @@
       "switchTrack": "Cambiar de vía",
       "reset": "Reiniciar práctica",
       "resetTitle": "¿Reiniciar el libro de práctica?",
-      "resetMessage": "Se borran tus asientos de práctica y se vuelve a sembrar el trimestre original (con sus errores plantados).",
+      "resetMessage": "Se borran sus asientos de práctica y se vuelve a sembrar el trimestre original (con sus errores plantados).",
       "resetConfirm": "Reiniciar",
       "resetDone": "Práctica resembrada",
       "progress": "{{passed}} de {{total}} superados",
@@ -9815,7 +9967,7 @@
       "checkWork": "Revisar mi trabajo",
       "showHint": "Pista",
       "intake": {
-        "q": "¿Has llevado contabilidad antes?",
+        "q": "¿Ha llevado contabilidad antes?",
         "optionA": "No: enséñame desde cero",
         "optionADesc": "Débitos, créditos y por qué el libro nunca miente, construido en orden, como un libro en papel.",
         "optionB": "Sí, en QuickBooks (o similar)",
@@ -9888,24 +10040,24 @@
       },
       "scenarios": {
         "firstEntry": {
-          "title": "Registra tu primer asiento",
-          "brief": "Registra cualquier asiento cuadrado en la práctica con la palabra 'practice' en la nota.",
-          "hint1": "Usa 'Registrar un asiento de práctica': dos líneas, débito y crédito iguales, y una nota que contenga 'practice'.",
-          "done": "Registrado: el libro aceptó tu primer asiento cuadrado."
+          "title": "Registre su primer asiento",
+          "brief": "Registre cualquier asiento cuadrado en la práctica con la palabra 'practice' en la nota.",
+          "hint1": "Use 'Registrar un asiento de práctica': dos líneas, débito y crédito iguales, y una nota que contenga 'practice'.",
+          "done": "Registrado: el libro aceptó su primer asiento cuadrado."
         },
         "miscoded": {
           "title": "Corrige el recibo de luz mal codificado",
           "brief": "El recibo de luz de abril ($842.17) se codificó a Renta. Reviértelo y regístralo en Servicios.",
-          "bait": "En QuickBooks abrirías la transacción y editarías la cuenta. Inténtalo aquí y observa qué te ofrece el libro en su lugar.",
+          "bait": "En QuickBooks abriría la transacción y editaría la cuenta. Inténtelo aquí y observe qué le ofrece el libro en su lugar.",
           "hint1": "Encuentra el recibo de abril en el libro de práctica (prueba la búsqueda).",
           "hint2": "Reviértelo con un motivo y usa 'Corregir (nuevo asiento)': cambia la cuenta de débito a 60300 Servicios.",
           "done": "Corregido como corresponde: el error, su reversa y la corrección quedan visibles."
         },
         "duplicate": {
-          "title": "Elimina el recibo duplicado",
+          "title": "Elimine el recibo duplicado",
           "brief": "El recibo de City Power de junio se registró dos veces. Reversa exactamente uno.",
           "bait": "En QuickBooks simplemente borrarías el duplicado. Aquí no existe borrar: la evidencia permanece.",
-          "hint1": "Busca el importe 842.17: la búsqueda mantiene ambas coincidencias a la vista para comparar fechas.",
+          "hint1": "Busque el importe 842.17: la búsqueda mantiene ambas coincidencias a la vista para comparar fechas.",
           "done": "Uno queda, el otro se reversa, y ambos permanecen en el registro."
         },
         "nsf": {
@@ -9918,14 +10070,14 @@
           "title": "Deshaz el registro directo a cuentas por cobrar",
           "brief": "Alguien registró $150 directamente en la cuenta de control de cobrar. Ejecuta el análisis de anomalías y reviértelo.",
           "bait": "En QuickBooks un asiento a cuentas por cobrar es normal. Aquí el escáner lo marca: las cuentas de control se mueven por sus submayores.",
-          "hint1": "En el libro de práctica pulsa 'Buscar anomalías': el asiento marcado es tu objetivo.",
+          "hint1": "En el libro de práctica pulse 'Buscar anomalías': el asiento marcado es su objetivo.",
           "done": "Cuenta de control restaurada: el submayor sigue siendo la única fuente de verdad de cobrar."
         },
         "narration": {
           "title": "Documenta el ajuste misterioso",
           "brief": "'adjust to match bank' no dice nada. Reviértelo y regístralo de nuevo con una nota útil para un revisor.",
-          "hint1": "Prueba antes 'Explicar con IA': fíjate en lo poco que puede decir incluso la IA sin narración.",
-          "done": "Disciplina de narración: tu yo futuro (y tu contador) ya pueden saber qué pasó."
+          "hint1": "Pruebe antes 'Explicar con IA': fíjese en lo poco que puede decir incluso la IA sin narración.",
+          "done": "Disciplina de narración: usted en el futuro (y su contador) ya pueden saber qué pasó."
         }
       }
     },
@@ -10334,7 +10486,7 @@
   },
   "subcontractUi": {
     "title": "Operaciones subcontratadas",
-    "operationLabel": "Op {{step}} · {{title}}",
+    "operationLabel": "Op. {{step}} · {{title}}",
     "outCount": "{{quantity}} fuera",
     "sendOut": "Enviar",
     "receiveBack": "Recibir de vuelta",
@@ -10378,8 +10530,8 @@
     "newBill": "Nueva Factura",
     "newPayment": "Nuevo Pago",
     "vendor": "Proveedor",
-    "allVendors": "Todos los Proveedores",
-    "allStatuses": "Todos los Estados",
+    "allVendors": "Todos los proveedores",
+    "allStatuses": "Todos los estados",
     "statusDraft": "Borrador",
     "statusApproved": "Aprobada",
     "statusPartiallyPaid": "Parcialmente Pagada",
@@ -10676,7 +10828,7 @@
     "newChannel": "Nuevo canal",
     "showInactive": "Mostrar retirados",
     "empty": "No hay canales de venta configurados",
-    "emptyHelp": "Cada instalación tiene un canal Directo para negocio con cuenta. Añade un canal para una tienda, un marketplace o venta presencial.",
+    "emptyHelp": "Cada instalación tiene un canal Directo para negocio con cuenta. Agregue un canal para una tienda, un marketplace o venta presencial.",
     "groupAccount": "Negocio con cuenta",
     "groupAccountHint": "Pedidos de un cliente con cuenta: aplican condiciones de crédito, presupuestos y órdenes de compra.",
     "groupRetail": "Minorista y marketplaces",
@@ -10685,7 +10837,7 @@
     "defaultTooltip": "Los pedidos creados sin canal explícito pertenecen a este.",
     "inactive": "Retirado",
     "makeDefault": "Hacer predeterminado",
-    "cannotDeleteDefault": "El canal predeterminado no se puede eliminar. Haz predeterminado otro canal primero.",
+    "cannotDeleteDefault": "El canal predeterminado no se puede eliminar. Haga predeterminado otro canal primero.",
     "billsTo": "Se factura a",
     "noHouseAccount": "Sin cuenta central",
     "orders": "Pedidos",
@@ -10719,13 +10871,13 @@
     "type": {
       "DirectB2B": "Negocio con cuenta",
       "DirectRetail": "Minorista directo",
-      "Marketplace": "Marketplace"
+      "Marketplace": "Mercado en línea"
     },
     "importOrders": "Importar pedidos",
     "importDone": "{{imported}} importados, {{skipped}} ya vistos",
     "importPartial": "{{imported}} importados, {{skipped}} ya vistos, {{failed}} fallidos: revisa el registro de sincronización",
     "fieldConnection": "Conexión de tienda",
-    "connectionExplainer": "Vincula una conexión de tienda para traer sus pedidos y publicaciones. Déjalo vacío para un canal manual: las ventas presenciales, por teléfono y en ferias se capturan directamente.",
+    "connectionExplainer": "Vincule una conexión de tienda para traer sus pedidos y publicaciones. Déjelo vacío para un canal manual: las ventas presenciales, por teléfono y en ferias se capturan directamente.",
     "noConnectionOption": "-- Ninguna (captura manual) --"
   },
   "channelListings": {
@@ -10735,7 +10887,7 @@
     "allChannels": "Todos los canales",
     "unmappedOnly": "Solo sin asignar",
     "syncListings": "Sincronizar desde el canal",
-    "pickChannelToSync": "Elige un canal del que sincronizar publicaciones.",
+    "pickChannelToSync": "Elija un canal del que sincronizar publicaciones.",
     "syncDone": "{{created}} nuevas, {{updated}} actualizadas, {{unmapped}} aún sin asignar",
     "empty": "Todavía no hay publicaciones",
     "emptyUnmapped": "Todas las publicaciones están asignadas",
@@ -10788,7 +10940,7 @@
     "channel": "Canal",
     "allChannels": "Todos los marketplaces",
     "import": "Importar pagos",
-    "pickChannelToImport": "Elige un marketplace del que importar pagos.",
+    "pickChannelToImport": "Elija un marketplace del que importar pagos.",
     "importDone": "{{imported}} nuevas, {{updated}} actualizadas, {{discrepancies}} requieren revisión",
     "needsReview": "{{count}} requieren revisión",
     "empty": "Todavía no hay lotes de pago",
@@ -10812,7 +10964,7 @@
     "lineDescription": "Descripción",
     "lineAmount": "Importe",
     "acceptVariance": "Aceptar diferencia",
-    "acceptHint": "Algunas diferencias nunca se resuelven: una reserva retenida o una comisión reformulada fuera del lote. Registra el motivo y este lote dejará de aparecer como excepción.",
+    "acceptHint": "Algunas diferencias nunca se resuelven: una reserva retenida o una comisión reformulada fuera del lote. Registre el motivo y este lote dejará de aparecer como excepción.",
     "acceptReason": "Motivo",
     "acceptConfirm": "Aceptar",
     "accepted": "Diferencia aceptada",
@@ -10840,14 +10992,14 @@
     "takeOrder": "Tomar pedido minorista",
     "createOrder": "Crear pedido",
     "created": "Pedido {{number}} creado",
-    "noChannels": "Todavía no existe ningún canal minorista activo. Añade uno primero: un pedido minorista se factura a la cuenta central del canal, así que sin él el cobro no tiene dónde ir.",
+    "noChannels": "Todavía no existe ningún canal minorista activo. Agregue uno primero: un pedido minorista se factura a la cuenta central del canal, así que sin él el cobro no tiene dónde ir.",
     "fieldChannel": "Canal",
     "buyerSection": "Comprador",
     "fieldBuyerName": "Nombre del comprador",
     "fieldBuyerEmail": "Correo electrónico",
     "fieldBuyerPhone": "Teléfono",
     "fieldMarketingConsent": "Aceptó recibir comunicaciones comerciales",
-    "consentHint": "Marca esto solo si el comprador dijo que sí. Una compra por sí sola no es consentimiento.",
+    "consentHint": "Marque esto solo si el comprador dijo que sí. Una compra por sí sola no es consentimiento.",
     "shipToSection": "Enviar a",
     "fieldShipToName": "Destinatario",
     "fieldAddress": "Dirección",
@@ -10864,7 +11016,7 @@
     "lineUnitPrice": "Precio unitario",
     "addLine": "Añadir artículo",
     "removeLine": "Quitar artículo",
-    "priceHint": "Introduce el precio realmente cobrado. Los precios minoristas no se calculan desde una lista de precios.",
+    "priceHint": "Introduzca el precio realmente cobrado. Los precios minoristas no se calculan desde una lista de precios.",
     "fieldShipping": "Envío cobrado",
     "fieldTaxRate": "Tasa de impuesto",
     "fieldNotes": "Notas",
@@ -10872,7 +11024,7 @@
   },
   "connections": {
     "title": "Conexiones de tienda",
-    "subtitle": "Credenciales de las tiendas y marketplaces que alimentan tus canales.",
+    "subtitle": "Credenciales de las tiendas y marketplaces que alimentan sus canales.",
     "newConnection": "Nueva conexión",
     "noConnectors": "Todavía no hay ningún conector construido para ninguna plataforma, así que no hay nada que conectar.",
     "empty": "Todavía no hay conexiones de tienda",
@@ -10898,12 +11050,12 @@
     "fieldAutoImport": "Importar pedidos automáticamente",
     "fieldSyncInventory": "Enviar niveles de inventario",
     "fieldActive": "Activada",
-    "platformImmutable": "La plataforma no puede cambiar: las credenciales guardadas tienen el formato de esta API. Crea una conexión nueva en su lugar.",
+    "platformImmutable": "La plataforma no puede cambiar: las credenciales guardadas tienen el formato de esta API. Cree una conexión nueva en su lugar.",
     "credentialsUnchanged": "Déjalo en blanco para conservar las credenciales ya guardadas. Nunca se muestran de vuelta.",
-    "hintShopify": "Pega el token de acceso de la Admin API (empieza por shpat_) de tu aplicación personalizada.",
-    "hintWooCommerce": "Pega la clave y el secreto de consumidor juntos como consumer_key:consumer_secret.",
-    "hintGeneric": "Pega las credenciales de API de esta plataforma.",
-    "hintShopifyUrl": "Tu host de myshopify, por ejemplo mi-tienda.myshopify.com",
+    "hintShopify": "Pegue el token de acceso de la Admin API (empieza por shpat_) de su aplicación personalizada.",
+    "hintWooCommerce": "Pegue la clave y el secreto de consumidor juntos como consumer_key:consumer_secret.",
+    "hintGeneric": "Pegue las credenciales de API de esta plataforma.",
+    "hintShopifyUrl": "Su host de myshopify, por ejemplo mi-tienda.myshopify.com",
     "hintStoreUrl": "La URL base de la tienda."
   },
   "authorizedBy": {
@@ -11010,7 +11162,7 @@
     "quickStart": {
       "button": "Inicio rápido",
       "title": "Inicio rápido de costeo",
-      "lead": "Responde unas preguntas y se rellenan el centro de costos de planta, el periodo de costeo del año, los grupos de gastos generales estándar con sus presupuestos y (con el libro mayor completo activo) las cuentas de gastos y líneas de presupuesto del GL correspondientes.",
+      "lead": "Responda unas preguntas y se rellenan el centro de costos de planta, el periodo de costeo del año, los grupos de gastos generales estándar con sus presupuestos y (con el libro mayor completo activo) las cuentas de gastos y líneas de presupuesto del GL correspondientes.",
       "fiscalYear": "Año fiscal",
       "headcount": "Personal directo",
       "wage": "Salario promedio por hora",
@@ -11033,7 +11185,7 @@
       }
     },
     "templates": {
-      "hint": "Las plantillas definen las categorías de gastos generales que pregunta el inicio rápido. La plantilla del sistema viene con el producto; crea las tuyas para tu taller.",
+      "hint": "Las plantillas definen las categorías de gastos generales que pregunta el inicio rápido. La plantilla del sistema viene con el producto; cree las suyas para su taller.",
       "new": "Nueva plantilla",
       "edit": "Editar",
       "delete": "Eliminar",
@@ -11047,7 +11199,7 @@
       "description": "Descripción",
       "addLine": "Agregar línea",
       "removeLine": "Quitar línea",
-      "noLines": "Agrega al menos una línea de categoría de gastos generales.",
+      "noLines": "Agregue al menos una línea de categoría de gastos generales.",
       "code": "Código",
       "lineName": "Categoría",
       "behaviorLabel": "Comportamiento",
@@ -11093,7 +11245,7 @@
       "lookup": "Buscar"
     },
     "scan": {
-      "prompt": "Apunte a un viajero de trabajo, pieza, ubicación o credencial.",
+      "prompt": "Apunte a una hoja de ruta de trabajo, pieza, ubicación o credencial.",
       "resolving": "Buscando…",
       "unknownCode": "No es un código de Forge.",
       "lookupFailed": "No se pudo buscar. Revise la conexión.",
@@ -11181,7 +11333,7 @@
       "failed": "La credencial y el PIN no coinciden."
     },
     "jobs": {
-      "backToScan": "Volver a escanear",
+      "backToScan": "Volver al escáner",
       "loadFailed": "No se pudo cargar este trabajo.",
       "column": "Estado",
       "due": "Vence",
@@ -11201,7 +11353,7 @@
       "noteFromList": "Nota de la lista",
       "noPresets": "No hay notas predefinidas configuradas.",
       "attachPhoto": "Adjuntar foto",
-      "homeHint": "Escanee un viajero de trabajo o búsquelo para ver su estado."
+      "homeHint": "Escanee una hoja de ruta de trabajo o búsquela para ver su estado."
     },
     "undo": {
       "action": "Deshacer",
@@ -11382,12 +11534,12 @@
     },
     "myJobs": {
       "title": "Mis órdenes de trabajo",
-      "scan": "Escanear un viajero",
+      "scan": "Escanear una hoja de ruta",
       "search": "Buscar trabajo, título o pieza",
       "identifyHint": "Identifíquese para ver las órdenes de trabajo asignadas a usted.",
       "loadFailed": "No se cargaron sus órdenes de trabajo.",
       "retry": "Intentar de nuevo",
-      "none": "No tiene nada asignado por ahora. Escanee un viajero o busque un trabajo.",
+      "none": "No tiene nada asignado por ahora. Escanee una hoja de ruta o busque un trabajo.",
       "noMatch": "Ninguna orden de trabajo coincide.",
       "overdue": "Atrasada",
       "timerRunning": "Temporizador en marcha",
@@ -11466,7 +11618,7 @@
     "deleteFailed": "No se pudo eliminar el registro."
   },
   "mobileReceive": {
-    "backToScan": "Volver a escanear",
+    "backToScan": "Volver al escáner",
     "loadFailed": "No se pudo cargar esta orden de compra.",
     "retry": "Reintentar",
     "notPermitted": "No tiene permiso para recibir órdenes de compra.",
@@ -12022,5 +12174,38 @@
       "sftpReturnsDir": "Directorio de devoluciones SFTP",
       "sftpReturnsDirHint": "Dónde deja el banco los archivos de devoluciones para que Forge los lea."
     }
+  },
+  "shortcuts": {
+    "goToDashboard": "Ir al Panel",
+    "goToBoard": "Ir al Tablero",
+    "goToBacklog": "Ir a Pendientes",
+    "goToParts": "Ir a Piezas",
+    "goToInventory": "Ir a Inventario",
+    "goToReports": "Ir a Reportes",
+    "goToTimeTracking": "Ir a Tiempo",
+    "showShortcuts": "Mostrar atajos de teclado",
+    "closePanel": "Cerrar panel o diálogo",
+    "then": "luego",
+    "groups": {
+      "navigation": "Navegación",
+      "general": "General",
+      "other": "Otros"
+    }
+  },
+  "dialog": {
+    "unsaved": {
+      "title": "Cambios sin guardar",
+      "message": "Tiene cambios sin guardar que se perderán. ¿Está seguro de que desea cerrar?",
+      "stay": "Quedarse"
+    }
+  },
+  "paginator": {
+    "itemsPerPage": "Elementos por página:",
+    "nextPage": "Página siguiente",
+    "previousPage": "Página anterior",
+    "firstPage": "Primera página",
+    "lastPage": "Última página",
+    "range": "{{start}} – {{end}} de {{length}}",
+    "rangeEmpty": "0 de {{length}}"
   }
 }

@@ -211,8 +211,8 @@ const PATTERNS = [
   { name: 'programmatic-double', re: /translate\.(?:instant|get|stream)\(\s*"([a-zA-Z][\w]*(?:\.[\w]+)+)"/g },
   // i18nKey: 'foo.bar' / labelKey: 'foo.bar' / tooltipKey / placeholderKey / messageKey
   // These are config properties that flow into translate calls elsewhere.
-  { name: 'config-single', re: /\b(?:i18nKey|labelKey|tooltipKey|placeholderKey|messageKey|titleKey|descKey|hintKey|emptyMessageKey|emptyHelpKey|addLabelKey|missingMessageKey|displayNameKey|sourceLabelKey)\s*:\s*'([a-zA-Z][\w]*(?:\.[\w]+)+)'/g },
-  { name: 'config-double', re: /\b(?:i18nKey|labelKey|tooltipKey|placeholderKey|messageKey|titleKey|descKey|hintKey|emptyMessageKey|emptyHelpKey|addLabelKey|missingMessageKey|displayNameKey|sourceLabelKey)\s*:\s*"([a-zA-Z][\w]*(?:\.[\w]+)+)"/g },
+  { name: 'config-single', re: /\b(?:i18nKey|labelKey|tooltipKey|placeholderKey|messageKey|titleKey|viewAllLabelKey|descKey|descriptionKey|contextKey|hintKey|emptyMessageKey|emptyHelpKey|addLabelKey|missingMessageKey|displayNameKey|sourceLabelKey)\s*:\s*'([a-zA-Z][\w]*(?:\.[\w]+)+)'/g },
+  { name: 'config-double', re: /\b(?:i18nKey|labelKey|tooltipKey|placeholderKey|messageKey|titleKey|viewAllLabelKey|descKey|descriptionKey|contextKey|hintKey|emptyMessageKey|emptyHelpKey|addLabelKey|missingMessageKey|displayNameKey|sourceLabelKey)\s*:\s*"([a-zA-Z][\w]*(?:\.[\w]+)+)"/g },
 ];
 
 const PAREN_PIPE = /\(((?:[^()]|\((?:[^()]|\([^()]*\))*\))*)\)\s*\|\s*translate(?!\w)/g;

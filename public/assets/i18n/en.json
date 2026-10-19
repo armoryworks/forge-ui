@@ -295,7 +295,16 @@
     "userMenu": "User menu",
     "closeUserMenu": "Close user menu",
     "closeNotifications": "Close notifications",
-    "pageResult": "Page"
+    "pageResult": "Page",
+    "about": {
+      "menu": "About",
+      "title": "About Armory Works Forge",
+      "logoAlt": "Forge — Manufacturing Operations Platform",
+      "build": "Your build",
+      "license": "License",
+      "stack": "Stack",
+      "description": "Open-source ERP and production management for small manufacturers. Integrates with QuickBooks Online for accounting sync."
+    }
   },
   "app": {
     "updateAvailable": "A new version is available.",
@@ -500,7 +509,26 @@
     "addWorkCenters": "Add your work centers",
     "addFirstPart": "Add a part with a routing",
     "sendFirstQuote": "Send your first quote",
-    "shipFirstOrder": "Ship your first order"
+    "shipFirstOrder": "Ship your first order",
+    "widgets": {
+      "todaysTasks": "Today's Tasks",
+      "teamLoad": "Team Load",
+      "deadlines": "Deadlines",
+      "activity": "Activity",
+      "marginSummary": "Margin Summary",
+      "cycleProgress": "Cycle Progress",
+      "openOrders": "Open Orders",
+      "endOfDay": "End of Day",
+      "actionItems": "Action Items",
+      "inventorySnapshot": "Inventory Snapshot",
+      "viewBoard": "View board",
+      "timeTracking": "Time tracking",
+      "viewCalendar": "View calendar",
+      "planningCycles": "Planning cycles",
+      "allOrders": "All orders",
+      "viewInventory": "View inventory",
+      "viewAll": "View all"
+    }
   },
   "boardFilters": {
     "search": "Search",
@@ -1893,7 +1921,9 @@
       "stockOps": "Stock Ops",
       "cycleCounts": "Cycle Counts",
       "reservations": "Reservations",
-      "inspection": "Inspection"
+      "inspection": "Inspection",
+      "replenishment": "Replenishment",
+      "uom": "Units of Measure"
     },
     "subtitle": "Track stock levels, locations, and movements",
     "addLocation": "Add Location",
@@ -2064,6 +2094,74 @@
       "recordResult": "Record result",
       "recorded": "Inspection recorded",
       "waived": "Inspection waived"
+    },
+    "clearSearch": "Clear search",
+    "replenishment": {
+      "pendingTitle": "Pending Reorder Suggestions",
+      "noPending": "No pending reorder suggestions",
+      "allGood": "No pending reorder suggestions — inventory levels look good.",
+      "dismissFor": "Dismiss suggestion for {{part}}",
+      "dismissTitle": "Dismiss Reorder Suggestion",
+      "dismissingFor": "Dismissing the suggestion for",
+      "dismissReasonHint": "Please provide a reason so it can be reviewed later."
+    },
+    "burnRates": {
+      "title": "Burn Rate Analysis",
+      "searchParts": "Search parts",
+      "needsReorder": "Needs Reorder",
+      "needsReorderTooltip": "Show only parts that need reordering",
+      "refresh": "Refresh burn rates",
+      "empty": "No burn rate data — start receiving and picking parts to build history",
+      "daysShort": "{{count}}d",
+      "ok": "OK",
+      "per30": "30d / day",
+      "per60": "60d / day",
+      "per90": "90d / day",
+      "daysLeft": "Days Left",
+      "stockout": "Stockout",
+      "reorder": "Reorder",
+      "burnPerDay": "Burn/Day",
+      "suggestQty": "Suggest Qty"
+    },
+    "uom": {
+      "conversions": "Conversions",
+      "newUom": "New UOM",
+      "emptyUoms": "No units of measure configured",
+      "baseUnit": "Base unit",
+      "editUom": "Edit UOM",
+      "newConversion": "New Conversion",
+      "emptyConversions": "No conversions configured",
+      "reversible": "Reversible",
+      "editTitle": "Edit Unit of Measure",
+      "newTitle": "New Unit of Measure",
+      "code": "Code",
+      "codePlaceholder": "e.g. EA, FT, LB",
+      "namePlaceholder": "e.g. Each, Foot, Pound",
+      "symbol": "Symbol",
+      "symbolPlaceholder": "e.g. ft, lb, kg",
+      "decimalPlaces": "Decimal Places",
+      "decimals": "Decimals",
+      "sortOrder": "Sort Order",
+      "base": "Base",
+      "baseForCategory": "Base Unit for Category",
+      "update": "Update",
+      "fromUom": "From UOM",
+      "toUom": "To UOM",
+      "conversionFactor": "Conversion Factor",
+      "factor": "Factor",
+      "factorPlaceholder": "e.g. 12 (1 ft = 12 in)",
+      "reversibleToggle": "Reversible (auto-creates inverse)",
+      "updated": "UOM updated",
+      "created": "UOM created",
+      "conversionCreated": "Conversion created",
+      "categories": {
+        "count": "Count",
+        "length": "Length",
+        "weight": "Weight",
+        "volume": "Volume",
+        "area": "Area",
+        "time": "Time"
+      }
     }
   },
   "contactFields": {
@@ -4462,7 +4560,56 @@
     "soundPop": "Pop",
     "emailAndSending": "Email & Sending",
     "confirmBeforeSendLabel": "Confirm before sending",
-    "confirmBeforeSendHint": "Ask for confirmation whenever anything is sent to a customer, vendor, or employee. Turn off to send immediately."
+    "confirmBeforeSendHint": "Ask for confirmation whenever anything is sent to a customer, vendor, or employee. Turn off to send immediately.",
+    "integrations": "Integrations",
+    "selectNotificationSound": "Select notification sound: {{name}}",
+    "draftRetention": {
+      "title": "Keep unsaved work for",
+      "hint": "When a form has unsaved changes, they are saved automatically. Choose how long to keep them before they expire.",
+      "oneDay": "1 day",
+      "threeDays": "3 days",
+      "oneWeek": "1 week",
+      "twoWeeks": "2 weeks"
+    },
+    "mfa": {
+      "title": "Two-Factor Authentication",
+      "statusPrefix": "Two-factor authentication is",
+      "statusEnabled": "enabled",
+      "statusNotEnabled": "not enabled",
+      "requiredByPolicy": "Required by organization policy",
+      "requiredMustEnable": "Required by organization policy — you must enable MFA",
+      "registeredDevices": "Registered Devices",
+      "lastUsed": "Last used: {{date}}",
+      "removeDeviceAria": "Remove {{name}}",
+      "recoveryCodesRemaining": "{{count}} recovery codes remaining",
+      "addDevice": "Add Device",
+      "addPasskey": "Add Passkey",
+      "newRecoveryCodes": "New Recovery Codes",
+      "disable": "Disable MFA",
+      "disableTitle": "Disable MFA?",
+      "disableMessage": "This will remove all MFA devices and recovery codes. Your account will be less secure.",
+      "disabled": "Two-factor authentication disabled",
+      "deviceRemoved": "Device removed",
+      "passkeyUnsupported": "This browser does not support passkeys.",
+      "passkeyAdded": "Passkey \"{{name}}\" added.",
+      "passkeyIncomplete": "Passkey registration was not completed.",
+      "hint": "Add an extra layer of security by requiring a verification code from an authenticator app when signing in.",
+      "enable": "Enable Two-Factor Authentication",
+      "loadFailed": "Unable to load MFA status.",
+      "setupTitle": "Set Up Two-Factor Authentication",
+      "preparing": "Preparing authenticator setup...",
+      "scanInstructions": "Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)",
+      "manualKeyToggle": "Can't scan? Enter key manually",
+      "copyKey": "Copy key",
+      "keyCopied": "Key copied to clipboard",
+      "enterCode": "Enter the 6-digit code from your app:",
+      "verificationCode": "Verification Code",
+      "invalidCode": "Invalid code. Please try again.",
+      "enabledTitle": "Two-Factor Authentication Enabled",
+      "enabledText": "Your account is now protected with two-factor authentication. You'll need your authenticator app each time you sign in.",
+      "verifying": "Verifying...",
+      "verifyAndEnable": "Verify & Enable"
+    }
   },
   "errorFallbacksA": {
     "chartOfAccountsLoadFailed": "Failed to load chart of accounts",
@@ -7319,7 +7466,8 @@
     "starterInventory": "How do I track inventory?",
     "starterShortcuts": "Keyboard shortcuts",
     "askPlaceholder": "Ask a question...",
-    "errorMessage": "Sorry, I was unable to process your question. Please try again."
+    "errorMessage": "Sorry, I was unable to process your question. Please try again.",
+    "relatedTraining": "Related training:"
   },
   "kioskSetup": {
     "noTeamsYet": "There are no teams yet. Name one here and it is created when you activate this terminal.",
@@ -7802,7 +7950,11 @@
     "deleteFileTitle": "Delete File?",
     "deleteFileMessage": "This will permanently delete \"{{name}}\".",
     "fileDeleted": "File deleted",
-    "fileUploaded": "File uploaded"
+    "fileUploaded": "File uploaded",
+    "fieldLinkedJobOptional": "Linked Job (optional)",
+    "fieldExpirationOptional": "Expiration Date (optional)",
+    "fieldNotesOptional": "Notes (optional)",
+    "searchLabel": "Search lot number or part"
   },
   "partQuality": {
     "recentInspections": "Recent Inspections",
@@ -12022,5 +12174,38 @@
       "sftpReturnsDir": "SFTP returns directory",
       "sftpReturnsDirHint": "Where the bank leaves return files for Forge to read."
     }
+  },
+  "shortcuts": {
+    "goToDashboard": "Go to Dashboard",
+    "goToBoard": "Go to Board",
+    "goToBacklog": "Go to Backlog",
+    "goToParts": "Go to Parts",
+    "goToInventory": "Go to Inventory",
+    "goToReports": "Go to Reports",
+    "goToTimeTracking": "Go to Time Tracking",
+    "showShortcuts": "Show keyboard shortcuts",
+    "closePanel": "Close panel/dialog",
+    "then": "then",
+    "groups": {
+      "navigation": "Navigation",
+      "general": "General",
+      "other": "Other"
+    }
+  },
+  "dialog": {
+    "unsaved": {
+      "title": "Unsaved Changes",
+      "message": "You have unsaved changes that will be lost. Are you sure you want to close?",
+      "stay": "Stay"
+    }
+  },
+  "paginator": {
+    "itemsPerPage": "Items per page:",
+    "nextPage": "Next page",
+    "previousPage": "Previous page",
+    "firstPage": "First page",
+    "lastPage": "Last page",
+    "range": "{{start}} – {{end}} of {{length}}",
+    "rangeEmpty": "0 of {{length}}"
   }
 }
