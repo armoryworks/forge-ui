@@ -1,4 +1,5 @@
 @use 'styles/variables' as *;
+@use 'styles/mixins' as *;
 @use 'app/features/accounting/accounting-shared' as *;
 
 // Expanded-row detail for one journal entry: drill-back refs, its balanced lines, and the AI advisory.
@@ -84,6 +85,17 @@
   align-items: center;
   gap: $sp-sm;
   margin-left: auto;
+
+  @include mobile {
+    flex: 1 1 100%;
+    min-width: 0;
+    margin-left: 0;
+
+    app-input {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+  }
 }
 
 .ledger-find__count {

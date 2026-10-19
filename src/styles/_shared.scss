@@ -52,6 +52,22 @@
       margin-bottom: 0;
     }
   }
+
+  @include mobile {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 48px;
+    row-gap: $sp-sm;
+
+    > * {
+      max-width: 100%;
+    }
+
+    app-input, app-select, app-datepicker, app-autocomplete {
+      flex: 1 1 10rem;
+      min-width: 10rem;
+    }
+  }
 }
 
 .page-header--wrap {
@@ -86,6 +102,7 @@
   cursor: pointer;
   border-radius: $border-radius;
   font-family: $font-family-primary;
+  @include touch-target(height);
 
   .material-icons-outlined { font-size: $icon-size-xs; }
 
@@ -235,6 +252,7 @@
   color: var(--text-muted);
   cursor: pointer;
   border-radius: $border-radius;
+  @include touch-target;
 
   .material-icons-outlined { font-size: $icon-size-sm; }
 
@@ -511,6 +529,25 @@
   }
 }
 
+.scroll-cue--start {
+  --scroll-cue-start: transparent;
+}
+
+.scroll-cue--end {
+  --scroll-cue-end: transparent;
+}
+
+.scroll-cue--start,
+.scroll-cue--end {
+  mask-image: linear-gradient(
+    to right,
+    var(--scroll-cue-start, black),
+    black $sp-xl,
+    black calc(100% - #{$sp-xl}),
+    var(--scroll-cue-end, black)
+  );
+}
+
 .tab {
   @include uppercase-label(var(--font-size-xs), 0.5px, 600);
   display: flex;
@@ -523,6 +560,7 @@
   cursor: pointer;
   border-bottom: $border-width solid transparent;
   font-family: $font-family-primary;
+  @include touch-target(height);
 
   .material-icons-outlined { font-size: $icon-size-sm; }
   &:hover { color: var(--text); background: var(--bg); }
@@ -598,7 +636,7 @@
 // Shift snackbar above mobile bottom nav (56px + safe area)
 @include mobile {
   .mat-mdc-snack-bar-container {
-    margin-bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important;
+    margin-bottom: var(--app-shell-bottom-offset, calc(56px + env(safe-area-inset-bottom, 0px))) !important;
   }
 }
 

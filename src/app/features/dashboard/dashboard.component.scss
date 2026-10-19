@@ -22,6 +22,11 @@
   display: flex;
   gap: $sp-sm;
   align-items: center;
+
+  @include mobile {
+    flex-wrap: wrap;
+    margin-left: 0;
+  }
 }
 
 // ─── Buttons ───

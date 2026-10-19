@@ -1,9 +1,15 @@
 @use 'styles/variables' as *;
+@use 'styles/mixins' as *;
 
 .page-header__title-group {
   display: flex;
   align-items: baseline;
   gap: $sp-md;
+
+  @include mobile {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
 }
 
 .page-header__subtitle {
@@ -12,6 +18,11 @@
   font-weight: 400;
   letter-spacing: 0;
   text-transform: none;
+
+  @include mobile {
+    @include truncate;
+    min-width: 0;
+  }
 }
 
 .page-header__help {

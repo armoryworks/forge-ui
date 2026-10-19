@@ -71,3 +71,20 @@
     @content;
   }
 }
+
+@mixin touch {
+  @media (pointer: coarse), (max-width: $breakpoint-mobile) {
+    @content;
+  }
+}
+
+@mixin touch-target($axis: both) {
+  @include touch {
+    @if $axis == both or $axis == height {
+      min-height: $tap-target-min;
+    }
+    @if $axis == both or $axis == width {
+      min-width: $tap-target-min;
+    }
+  }
+}
