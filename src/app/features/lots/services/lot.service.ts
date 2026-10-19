@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { LotListItem } from '../models/lot-list-item.model';
 import { LotTrace } from '../models/lot-trace.model';
+import { FileAttachment } from '../../../shared/models/file.model';
 
 @Injectable({ providedIn: 'root' })
 export class LotService {
@@ -24,6 +25,7 @@ export class LotService {
   }
 
   create(request: {
+    lotNumber?: string | null;
     partId: number;
     quantity: number;
     jobId?: number | null;
@@ -33,5 +35,17 @@ export class LotService {
     notes?: string | null;
   }): Observable<LotListItem> {
     return this.http.post<LotListItem>(this.base, request);
+  }
+
+  getFiles(lotId: number): Observable<FileAttachment[]> {
+    return this.http.get<FileAttachment[]>(`${this.base}/${lotId}/files`);
+  }
+
+  deleteFile(fileId: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/files/${fileId}`);
+  }
+
+  downloadFileUrl(fileId: number): string {
+    return `${environment.apiUrl}/files/${fileId}/download`;
   }
 }

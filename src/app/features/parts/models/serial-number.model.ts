@@ -36,12 +36,24 @@ export interface SerialHistory {
   occurredAt: string;
 }
 
+export interface SerialGenealogyLot {
+  lotId: number | null;
+  lotNumber: string;
+  partId: number;
+  partNumber: string;
+  source: 'Lot' | 'MaterialIssue';
+  quantity: number | null;
+}
+
 export interface SerialGenealogy {
   id: number;
   serialValue: string;
   partNumber: string;
   status: SerialNumberStatus;
   children: SerialGenealogy[];
+  jobId?: number | null;
+  jobNumber?: string | null;
+  lots?: SerialGenealogyLot[] | null;
 }
 
 export interface CreateSerialNumberRequest {

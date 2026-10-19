@@ -115,6 +115,10 @@
           <app-textarea [label]="'recalls.resolutionNotes' | translate"
             formControlName="resolutionNotes" [rows]="3" [maxlength]="2000"
             data-testid="recall-resolution-notes" />
+          <app-toggle [label]="'recalls.releaseHeldStock' | translate"
+            formControlName="releaseHeldStock"
+            data-testid="recall-release-held-stock" />
+          <span class="recall-release-hint">{{ 'recalls.releaseHeldStockHint' | translate }}</span>
         </div>
       }
     } @else if (loadError()) {

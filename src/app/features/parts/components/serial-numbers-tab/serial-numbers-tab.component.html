@@ -37,6 +37,23 @@
     <div [formGroup]="createForm">
       <app-input label="Serial Number" formControlName="serialValue" [required]="true"
         data-testid="serial-value" />
+      <app-entity-picker
+        [label]="'serials.fieldJob' | translate"
+        entityType="jobs"
+        displayField="jobNumber"
+        secondaryDisplayField="title"
+        formControlName="jobId"
+        data-testid="serial-job" />
+      @if (lotsEnabled()) {
+        <app-entity-picker
+          [label]="'serials.fieldLot' | translate"
+          entityType="lots"
+          displayField="lotNumber"
+          secondaryDisplayField="partNumber"
+          [filters]="lotFilters()"
+          formControlName="lotRecordId"
+          data-testid="serial-lot" />
+      }
       <app-textarea label="Notes" formControlName="notes" [rows]="3"
         data-testid="serial-notes" />
     </div>
@@ -174,6 +191,23 @@
     <span class="genealogy-node__part">{{ node.partNumber }}</span>
     <span [class]="getStatusClass(node.status)">{{ node.status }}</span>
   </div>
+  @if (node.jobNumber || node.lots?.length) {
+    <div class="genealogy-node__sources" [style.padding-left.px]="depth * 24 + 32" data-testid="serial-genealogy-sources">
+      @if (node.jobNumber) {
+        <span class="genealogy-node__source">{{ 'serials.genealogyJob' | translate: { job: node.jobNumber } }}</span>
+      }
+      @for (lot of node.lots ?? []; track lot.source + lot.partId + lot.lotNumber) {
+        <span class="genealogy-node__source" data-testid="serial-genealogy-lot">
+          <span class="material-icons-outlined genealogy-node__source-icon">{{ lot.source === 'Lot' ? 'inventory_2' : 'move_to_inbox' }}</span>
+          {{ lot.lotNumber }} · {{ lot.partNumber }}
+          @if (lot.quantity !== null) {
+            · {{ lot.quantity | number:'1.0-4' }}
+          }
+          · {{ (lot.source === 'Lot' ? 'serials.lotSourceLot' : 'serials.lotSourceIssue') | translate }}
+        </span>
+      }
+    </div>
+  }
   @if (node.children) {
     @for (child of node.children; track child.id) {
       <ng-container *ngTemplateOutlet="genealogyNode; context: { $implicit: child, depth: depth + 1 }" />

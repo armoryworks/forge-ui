@@ -27,7 +27,7 @@ export class RecallService {
     return this.http.post<RecallDetail>(this.base, request);
   }
 
-  resolveRecall(id: number, resolutionNotes: string | null): Observable<RecallDetail> {
-    return this.http.post<RecallDetail>(`${this.base}/${id}/resolve`, { resolutionNotes });
+  resolveRecall(id: number, resolutionNotes: string | null, releaseHeldStock = false): Observable<RecallDetail> {
+    return this.http.post<RecallDetail>(`${this.base}/${id}/resolve`, { resolutionNotes, releaseHeldStock });
   }
 }

@@ -140,4 +140,24 @@
     font-size: $font-size-xs;
     color: var(--text-secondary);
   }
+
+  &__sources {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+    padding-bottom: $sp-xs;
+  }
+
+  &__source {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
+    font-size: $font-size-xs;
+    color: var(--text-secondary);
+  }
+
+  &__source-icon {
+    font-size: $icon-size-sm;
+    color: var(--text-muted);
+  }
 }

@@ -7709,7 +7709,9 @@
       "ncrStatusUnderReview": "En revisión",
       "ncrStatusContained": "Contenida",
       "ncrStatusDispositioned": "Con disposición"
-    }
+    },
+    "releaseHeldStock": "Liberar el inventario retenido",
+    "releaseHeldStockHint": "Solo cuando el material retenido se haya autorizado para su uso. Los lotes que una NCR aún retiene y las recepciones pendientes de inspección siguen retenidos."
   },
   "lots": {
     "created": "Lote creado",
@@ -7736,7 +7738,14 @@
     "colCustomer": "Cliente",
     "colShipment": "Envío",
     "colShipDate": "Fecha de envío",
-    "colQty": "Cant."
+    "colQty": "Cant.",
+    "lotNumberPlaceholder": "Déjelo en blanco para numerarlo automáticamente",
+    "files": "Certificados y archivos",
+    "filesHint": "Certificados de fundición, certificados de análisis y otros documentos de este lote.",
+    "deleteFileTitle": "¿Eliminar archivo?",
+    "deleteFileMessage": "Esto eliminará permanentemente \"{{name}}\".",
+    "fileDeleted": "Archivo eliminado",
+    "fileUploaded": "Archivo cargado"
   },
   "partQuality": {
     "recentInspections": "Inspecciones recientes",
@@ -11781,6 +11790,13 @@
     "noCostData": "No hay datos de costo para este trabajo.",
     "summaryAria": "Resumen de costos del trabajo",
     "noMaterials": "No se han emitido materiales a este trabajo."
+  },
+  "serials": {
+    "fieldJob": "Trabajo (opcional)",
+    "fieldLot": "Lote (opcional)",
+    "genealogyJob": "Fabricado en el trabajo {{job}}",
+    "lotSourceLot": "lote del número de serie",
+    "lotSourceIssue": "entregado al trabajo o a un trabajo de subensamble"
   },
   "adminBanking": {
     "title": "Banca",

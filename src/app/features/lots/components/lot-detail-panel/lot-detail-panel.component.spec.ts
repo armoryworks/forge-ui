@@ -12,6 +12,8 @@ import { LotDetailPanelComponent } from './lot-detail-panel.component';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
 import { RecallDetail } from '../../../quality/models/recall-detail.model';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { FileAttachment } from '../../../../shared/models/file.model';
 
 function event(overrides: Partial<LotTraceEvent>): LotTraceEvent {
   return {
@@ -64,18 +66,28 @@ interface PanelInternals {
   openInitiateRecall: () => void;
   openRecall: (id: number) => void;
   closed: { emit: () => void };
+  canAttachFiles: () => boolean;
+  files: () => FileAttachment[];
+  deleteFile: (doc: FileAttachment) => void;
+  onFileUploaded: () => void;
 }
+
+const CERT = { id: 31, fileName: 'mill-cert.pdf', contentType: 'application/pdf', size: 2048 } as FileAttachment;
 
 interface SetupOptions {
   roles?: string[];
   recallEnabled?: boolean;
   traceResult?: LotTrace;
-  dialogResult?: RecallDetail;
+  dialogResult?: RecallDetail | boolean;
   inDialog?: boolean;
+  attachmentsEnabled?: boolean;
 }
 
 function setup(options: SetupOptions = {}) {
   const trace = vi.fn(() => of(options.traceResult ?? TRACE));
+  const getFiles = vi.fn(() => of([CERT]));
+  const deleteFile = vi.fn(() => of(undefined));
+  const success = vi.fn();
   const roles = options.roles ?? ['Manager'];
   const dialogOpen = vi.fn(() => ({ afterClosed: () => of(options.dialogResult) }));
   const navigate = vi.fn(() => Promise.resolve(true));
@@ -83,10 +95,13 @@ function setup(options: SetupOptions = {}) {
   const hostDialogRef = { afterClosed: () => hostClosed.asObservable() };
   TestBed.configureTestingModule({
     providers: [
-      { provide: LotService, useValue: { trace } },
+      { provide: LotService, useValue: { trace, getFiles, deleteFile, downloadFileUrl: (id: number) => `/files/${id}/download` } },
+      { provide: SnackbarService, useValue: { success } },
       { provide: TranslateService, useValue: { instant: (key: string) => key } },
       { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
-      { provide: CapabilityService, useValue: { isEnabled: (code: string) => code === 'CAP-QC-RECALL' && (options.recallEnabled ?? true) } },
+      { provide: CapabilityService, useValue: { isEnabled: (code: string) =>
+        (code === 'CAP-QC-RECALL' && (options.recallEnabled ?? true))
+        || (code === 'CAP-CROSS-ATTACHMENTS' && (options.attachmentsEnabled ?? false)) } },
       { provide: MatDialog, useValue: { open: dialogOpen } },
       { provide: Router, useValue: { navigate } },
       ...(options.inDialog ? [{ provide: MatDialogRef, useValue: hostDialogRef }] : []),
@@ -95,7 +110,7 @@ function setup(options: SetupOptions = {}) {
   const component = TestBed.runInInjectionContext(() => new LotDetailPanelComponent());
   mockSignalInputs(component, { lotId: 1, lotNumber: 'LOT-1' });
   TestBed.tick();
-  return { panel: component as unknown as PanelInternals, trace, dialogOpen, navigate, hostClosed };
+  return { panel: component as unknown as PanelInternals, trace, dialogOpen, navigate, hostClosed, getFiles, deleteFile, success };
 }
 
 describe('LotDetailPanelComponent', () => {
@@ -179,5 +194,39 @@ describe('LotDetailPanelComponent', () => {
     panel.openRecall(4);
 
     expect(navigate).toHaveBeenCalledWith(['/quality/recalls'], { queryParams: { detail: 'recall:4' } });
+  });
+
+  it('loads the lot files when attachments are on', () => {
+    const { panel, getFiles } = setup({ attachmentsEnabled: true });
+
+    expect(panel.canAttachFiles()).toBe(true);
+    expect(getFiles).toHaveBeenCalledWith(1);
+    expect(panel.files().map(f => f.fileName)).toEqual(['mill-cert.pdf']);
+  });
+
+  it('does not ask for files when attachments are off', () => {
+    const { panel, getFiles } = setup();
+
+    expect(panel.canAttachFiles()).toBe(false);
+    expect(getFiles).not.toHaveBeenCalled();
+  });
+
+  it('reloads the files after an upload', () => {
+    const { panel, getFiles, success } = setup({ attachmentsEnabled: true });
+
+    panel.onFileUploaded();
+
+    expect(getFiles).toHaveBeenCalledTimes(2);
+    expect(success).toHaveBeenCalledWith('lots.fileUploaded');
+  });
+
+  it('deletes a file once the delete is confirmed', () => {
+    const { panel, deleteFile, success } = setup({ attachmentsEnabled: true, dialogResult: true });
+
+    panel.deleteFile(CERT);
+
+    expect(deleteFile).toHaveBeenCalledWith(31);
+    expect(panel.files()).toEqual([]);
+    expect(success).toHaveBeenCalledWith('lots.fileDeleted');
   });
 });

@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import { FormControl, FormGroup } from '@angular/forms';
 import { Observable, of, throwError } from 'rxjs';
 
 import { RecallDetailDialogComponent } from './recall-detail-dialog.component';
@@ -39,6 +40,7 @@ function recall(overrides: Partial<RecallDetail> = {}): RecallDetail {
 }
 
 interface DialogApi {
+  resolveForm: FormGroup<{ resolutionNotes: FormControl<string>; releaseHeldStock: FormControl<boolean> }>;
   canResolve(): boolean;
   affectedCustomerCount(): number;
   approximateCount(): number;
@@ -108,11 +110,20 @@ describe('RecallDetailDialogComponent', () => {
 
     expect(api.canResolve()).toBe(true);
     api.resolve();
-    expect(resolveRecall).toHaveBeenCalledWith(4, null);
+    expect(resolveRecall).toHaveBeenCalledWith(4, null, false);
     expect(api.canResolve()).toBe(false);
 
     api.close();
     expect(dialogRef.close).toHaveBeenCalledWith(true);
+  });
+
+  it('releases held stock on resolve only when the user turns it on', () => {
+    const { api } = create();
+
+    api.resolveForm.controls.releaseHeldStock.setValue(true);
+    api.resolve();
+
+    expect(resolveRecall).toHaveBeenCalledWith(4, null, true);
   });
 
   it('does not offer Resolve to an Engineer', () => {

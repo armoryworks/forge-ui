@@ -7716,7 +7716,9 @@
       "ncrStatusUnderReview": "Under review",
       "ncrStatusContained": "Contained",
       "ncrStatusDispositioned": "Dispositioned"
-    }
+    },
+    "releaseHeldStock": "Release the held stock",
+    "releaseHeldStockHint": "Only when the held material has been cleared for use. Lots an NCR still holds, and receipts still awaiting inspection, stay on hold."
   },
   "lots": {
     "created": "Lot created",
@@ -7743,7 +7745,14 @@
     "colCustomer": "Customer",
     "colShipment": "Shipment",
     "colShipDate": "Ship date",
-    "colQty": "Qty"
+    "colQty": "Qty",
+    "lotNumberPlaceholder": "Leave blank to number it automatically",
+    "files": "Certificates and files",
+    "filesHint": "Mill certs, certificates of analysis and other documents for this lot.",
+    "deleteFileTitle": "Delete File?",
+    "deleteFileMessage": "This will permanently delete \"{{name}}\".",
+    "fileDeleted": "File deleted",
+    "fileUploaded": "File uploaded"
   },
   "partQuality": {
     "recentInspections": "Recent Inspections",
@@ -11781,6 +11790,13 @@
     "noCostData": "No cost data available for this job.",
     "summaryAria": "Job cost summary",
     "noMaterials": "No materials issued to this job."
+  },
+  "serials": {
+    "fieldJob": "Job (optional)",
+    "fieldLot": "Lot (optional)",
+    "genealogyJob": "Built on job {{job}}",
+    "lotSourceLot": "serial lot",
+    "lotSourceIssue": "issued to the job or a sub-assembly job"
   },
   "adminBanking": {
     "title": "Banking",

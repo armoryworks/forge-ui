@@ -187,6 +187,34 @@
           </app-data-table>
         </div>
       }
+
+      @if (canAttachFiles()) {
+        <div class="trace-shipments lot-files" data-testid="lot-files">
+          <h4 class="trace-timeline__title">{{ 'lots.files' | translate }}</h4>
+          <span class="lot-files__hint">{{ 'lots.filesHint' | translate }}</span>
+          @for (doc of files(); track doc.id) {
+            <div class="doc-item" data-testid="lot-file">
+              <span class="material-icons-outlined doc-item__icon">{{ getFileIcon(doc.contentType) }}</span>
+              <div class="doc-item__info">
+                <span class="doc-item__name">{{ doc.fileName }}</span>
+                <span class="doc-item__meta">{{ formatFileSize(doc.size) }} · {{ doc.createdAt | date:'MM/dd/yyyy' }}</span>
+              </div>
+              <button class="icon-btn" [attr.aria-label]="'common.download' | translate" (click)="downloadFile(doc)">
+                <span class="material-icons-outlined">download</span>
+              </button>
+              <button class="icon-btn icon-btn--danger" [attr.aria-label]="'common.delete' | translate" (click)="deleteFile(doc)">
+                <span class="material-icons-outlined">delete</span>
+              </button>
+            </div>
+          }
+          <app-file-upload-zone
+            entityType="lots"
+            [entityId]="lotId()"
+            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv,.txt"
+            [maxSizeMb]="50"
+            (uploaded)="onFileUploaded()" />
+        </div>
+      }
     } @else if (loadError()) {
       <app-detail-load-error [error]="loadError()" (closed)="closed.emit()" />
     }
