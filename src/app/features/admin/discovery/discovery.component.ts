@@ -33,6 +33,7 @@ import {
 } from '../../../shared/models/discovery-recommendation.model';
 import { DiscoveryCapabilityAdjustment } from '../../../shared/models/discovery-capability-adjustment.model';
 import { DiscoveryChoice, DiscoveryQuestion } from '../../../shared/models/discovery-question.model';
+import { PresetCapabilityDelta } from '../../../shared/models/preset.model';
 
 import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
 import {
@@ -282,13 +283,14 @@ export class DiscoveryComponent implements OnInit {
     // surfaces.
     this.presetService.previewApply(chosen).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (preview) => {
+        const deltas = this.withAnswerAdjustments(preview.deltas, rec.capabilityAdjustments);
         const data: PresetApplyDialogData = {
           presetId: chosen,
           presetName: chosenName,
           isCustom: preview.isCustom,
-          deltas: preview.deltas,
+          deltas,
           violations: preview.violations,
-          noOp: preview.deltaCount === 0,
+          noOp: deltas.length === 0 && this.manualNumberSettingKeys().length === 0,
           hideCodes: !this.consultantModeEnabled(),
         };
         this.dialog
@@ -307,6 +309,28 @@ export class DiscoveryComponent implements OnInit {
         this.snackbar.errorFrom(err, 'discoveryWizard.previewFailed');
       },
     });
+  }
+
+  private withAnswerAdjustments(
+    presetDeltas: PresetCapabilityDelta[],
+    adjustments: DiscoveryCapabilityAdjustment[],
+  ): PresetCapabilityDelta[] {
+    const adjusted = new Map(adjustments.map((a) => [a.code, a.enabled]));
+    const deltas = presetDeltas
+      .map((d) => ({ ...d, willBeEnabled: adjusted.get(d.code) ?? d.willBeEnabled }))
+      .filter((d) => d.willBeEnabled !== d.currentlyEnabled);
+    const covered = new Set(presetDeltas.map((d) => d.code));
+    for (const a of adjustments) {
+      if (covered.has(a.code) || this.capabilityService.isEnabled(a.code) === a.enabled) continue;
+      deltas.push({
+        code: a.code,
+        name: a.name,
+        area: this.capabilityService.getEntry(a.code)?.area ?? '',
+        currentlyEnabled: !a.enabled,
+        willBeEnabled: a.enabled,
+      });
+    }
+    return deltas;
   }
 
   private commitApply(chosenPresetId: string, chosenPresetName: string): void {

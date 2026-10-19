@@ -102,6 +102,24 @@ describe('PresetApplyDialogComponent', () => {
     expect(dialogRef.close).toHaveBeenCalledWith({ confirmed: false });
   });
 
+  it('lets the admin re-apply a preset the install already matches', () => {
+    const { fixture, dialogRef } = setupDialog({
+      presetId: 'PRESET-04',
+      presetName: 'Production Manufacturer',
+      isCustom: false,
+      deltas: [],
+      violations: [],
+      noOp: true,
+    });
+    const confirmBtn: HTMLButtonElement = fixture.nativeElement.querySelector(
+      '[data-testid="preset-apply-dialog-confirm"]',
+    );
+    expect(confirmBtn.textContent).toContain('Re-apply');
+    expect(confirmBtn.disabled).toBe(false);
+    confirmBtn.click();
+    expect(dialogRef.close).toHaveBeenCalledWith({ confirmed: true, reason: undefined });
+  });
+
   it('returns confirmed=true with reason when confirm button clicked', () => {
     const { fixture, dialogRef } = setupDialog({
       presetId: 'PRESET-04',

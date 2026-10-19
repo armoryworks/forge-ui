@@ -56,7 +56,7 @@ export class PresetApplyDialogComponent {
     this.data.deltas.filter((d) => !d.willBeEnabled),
   );
   protected readonly hasViolations = computed(() => this.data.violations.length > 0);
-  protected readonly canConfirm = computed(() => !this.hasViolations() && !this.data.noOp);
+  protected readonly canConfirm = computed(() => !this.hasViolations());
 
   protected readonly enableCount = signal(0);
   protected readonly disableCount = signal(0);
