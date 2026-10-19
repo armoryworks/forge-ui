@@ -3296,7 +3296,8 @@
     "colStatus": "Status",
     "colHours": "Hours",
     "maintenanceHistory": "Maintenance History",
-    "noMaintenanceLogs": "No maintenance logs"
+    "noMaintenanceLogs": "No maintenance logs",
+    "currentShotCount": "Current shot count"
   },
   "admin": {
     "title": "Admin Settings",

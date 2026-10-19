@@ -3296,7 +3296,8 @@
     "depreciationMethod": "Método de depreciación",
     "workCenterId": "ID de centro de trabajo",
     "workCenter": "Centro de trabajo",
-    "glAccount": "Cuenta contable (opcional)"
+    "glAccount": "Cuenta contable (opcional)",
+    "currentShotCount": "Conteo actual de disparos"
   },
   "admin": {
     "title": "Configuración Admin",
