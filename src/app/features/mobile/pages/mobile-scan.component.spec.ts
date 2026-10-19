@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
 
@@ -7,7 +7,10 @@ import { Subject } from 'rxjs';
 
 import { CapabilityDisabledError } from '../../../shared/errors/capability-disabled.error';
 import { ScanResolveResult } from '../../../shared/models/mobile-api.model';
+import { DesktopPreferenceService } from '../../../shared/services/desktop-preference.service';
 import { ScannerService } from '../../../shared/services/scanner.service';
+import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { markHttpErrorShown } from '../../../shared/utils/shown-http-errors';
 import { MobileScanComponent } from './mobile-scan.component';
 
 interface ScanInternals {
@@ -15,13 +18,16 @@ interface ScanInternals {
   lastResult: () => ScanResolveResult | null;
   lookupError: () => string | null;
   resolving: () => boolean;
+  lookupHandled: () => boolean;
   submitManual(): void;
+  openResult(): void;
   resumeScanning(): void;
 }
 
 describe('MobileScanComponent', () => {
   const navigate = vi.fn();
   const post = vi.fn();
+  const prefer = vi.fn();
   let response: Subject<ScanResolveResult>;
   let component: ScanInternals;
 
@@ -35,6 +41,8 @@ describe('MobileScanComponent', () => {
         { provide: HttpClient, useValue: { post } },
         provideTranslateService(),
         { provide: ScannerService, useValue: { setContext: vi.fn() } },
+        { provide: DesktopPreferenceService, useValue: { prefer } },
+        { provide: SnackbarService, useValue: { error: vi.fn() } },
       ],
     });
     component = TestBed.runInInjectionContext(() => new MobileScanComponent()) as unknown as ScanInternals;
@@ -112,6 +120,90 @@ describe('MobileScanComponent', () => {
 
     expect(rendered.lookupError()).toBeNull();
     expect(root.querySelector('[data-testid="scan-lookup-error"]')).toBeNull();
+  });
+
+  it('leaves the message to the interceptor when it already showed the error', () => {
+    const err = new HttpErrorResponse({ status: 400, statusText: 'Bad Request' });
+    markHttpErrorShown(err);
+    submit('JOB-1');
+    response.error(err);
+
+    expect(component.lookupError()).toBeNull();
+    expect(component.lookupHandled()).toBe(true);
+    expect(component.resolving()).toBe(false);
+  });
+
+  it('keeps Scan Again on screen after an error the interceptor showed', async () => {
+    const fixture = TestBed.createComponent(MobileScanComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const rendered = fixture.componentInstance as unknown as ScanInternals;
+    const err = new HttpErrorResponse({ status: 403, statusText: 'Forbidden' });
+    markHttpErrorShown(err);
+
+    rendered.manualValue.set('JOB-1');
+    rendered.submitManual();
+    response.error(err);
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('[data-testid="scan-lookup-error"]')).toBeNull();
+    expect(root.querySelector('[data-testid="scan-error-again-btn"]')).not.toBeNull();
+  });
+
+  it('refuses a code longer than the server accepts without calling it', () => {
+    submit('X'.repeat(201));
+
+    expect(post).not.toHaveBeenCalled();
+    expect(component.lookupError()).toBe('mobileWeb.scan.tooLong');
+    expect(component.resolving()).toBe(false);
+  });
+
+  it('caps the typed code at the server limit', async () => {
+    const fixture = TestBed.createComponent(MobileScanComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    (fixture.componentInstance as unknown as { showManual: { set(v: boolean): void } }).showManual.set(true);
+    fixture.detectChanges();
+
+    const input = (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>('[data-testid="scan-manual-input"]')!;
+    expect(input.getAttribute('maxlength')).toBe('200');
+  });
+
+  it('says a typed code matched nothing differently from a scanned one', async () => {
+    const fixture = TestBed.createComponent(MobileScanComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const rendered = fixture.componentInstance as unknown as ScanInternals;
+
+    rendered.manualValue.set('nope');
+    rendered.submitManual();
+    response.next({ kind: 'unknown', id: null, code: 'nope', label: 'nope', subtitle: null });
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('[data-testid="scan-no-match"]')!.textContent!.trim()).toBe('mobileWeb.scan.noMatchTyped');
+    expect(root.querySelector('[data-testid="scan-open-btn"]')).toBeNull();
+  });
+
+  it('offers to open a resolved part on the desktop site', async () => {
+    prefer.mockReturnValue(true);
+    const fixture = TestBed.createComponent(MobileScanComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const rendered = fixture.componentInstance as unknown as ScanInternals;
+
+    rendered.manualValue.set('PRT-9');
+    rendered.submitManual();
+    response.next({ kind: 'part', id: 3, code: 'PRT-9', label: 'PRT-9', subtitle: 'Bracket' });
+    fixture.detectChanges();
+
+    const open = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('[data-testid="scan-open-btn"]')!;
+    expect(open.textContent).toContain('mobileWeb.scan.openDesktop');
+    open.click();
+
+    expect(prefer).toHaveBeenCalled();
+    expect(navigate).toHaveBeenCalledWith(['/parts'], { queryParams: { id: 3 } });
   });
 
   it('shows the camera permission help from translations', async () => {

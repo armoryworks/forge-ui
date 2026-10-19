@@ -11738,7 +11738,12 @@
       "noMatch": "Nothing in Forge matches that code. Check the label or type it in.",
       "lookupFailed": "Could not look that code up. Check your connection and try again.",
       "disabled": "Scanning is turned off for this shop. Ask an admin to turn on shop-floor execution.",
-      "scanAgain": "Scan Again"
+      "scanAgain": "Scan Again",
+      "noMatchTyped": "Nothing in Forge matches that code. Check what you typed and try again.",
+      "tooLong": "That code is too long. Forge codes are at most {{max}} characters.",
+      "open": "Open",
+      "openDesktop": "Open on Desktop Site",
+      "openDesktopLabel": "Switch to the desktop site to open this record"
     },
     "timer": {
       "runningOn": "Running on {{jobNumber}}",
@@ -11749,12 +11754,22 @@
       "stop": "Stop",
       "stopRunning": "Stop the running timer",
       "stoppedButNotStarted": "The timer on {{jobNumber}} was stopped, but this one could not start: {{reason}}",
-      "stoppedButNotStartedUnknown": "The running timer was stopped, but this one could not start: {{reason}}"
+      "stoppedButNotStartedUnknown": "The running timer was stopped, but this one could not start: {{reason}}",
+      "stateUnknown": "Could not check for a running timer. Retry before starting or stopping one.",
+      "retry": "Retry",
+      "retryLabel": "Check the running timer again"
     },
     "desktopLink": {
       "message": "That page is on the desktop site.",
       "open": "Open desktop site",
       "storageBlocked": "This browser is blocking site storage, so the desktop view cannot be remembered."
+    },
+    "notifications": {
+      "opensDesktop": "Opens on the desktop site"
+    },
+    "account": {
+      "back": "Account",
+      "setupWizardLabel": "Open the setup wizard on the desktop site"
     }
   },
   "jobOperations": {

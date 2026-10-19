@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  computed,
   ElementRef,
   inject,
   OnDestroy,
@@ -16,6 +17,12 @@ import { Html5Qrcode, Html5QrcodeScannerState } from 'html5-qrcode'; // camera s
 import { isCapabilityDisabledError } from '../../../shared/errors/capability-disabled.error';
 import { ScanResolveResult } from '../../../shared/models/mobile-api.model';
 import { ScannerService } from '../../../shared/services/scanner.service';
+import { wasHttpErrorShown } from '../../../shared/utils/shown-http-errors';
+import { MobileEntityLinkService } from '../services/mobile-entity-link.service';
+
+const MAX_CODE_LENGTH = 200;
+
+type ScanSource = 'camera' | 'manual';
 
 @Component({
   selector: 'app-mobile-scan',
@@ -30,6 +37,9 @@ export class MobileScanComponent implements AfterViewInit, OnDestroy {
   private readonly http = inject(HttpClient);
   private readonly translate = inject(TranslateService);
   private readonly scanner = inject(ScannerService);
+  private readonly entityLinks = inject(MobileEntityLinkService);
+
+  protected readonly maxCodeLength = MAX_CODE_LENGTH;
 
   private html5Qrcode: Html5Qrcode | null = null;
   private readonly readerEl = viewChild<ElementRef<HTMLDivElement>>('reader');
@@ -38,6 +48,12 @@ export class MobileScanComponent implements AfterViewInit, OnDestroy {
   protected readonly lastResult = signal<ScanResolveResult | null>(null);
   protected readonly resolving = signal(false);
   protected readonly lookupError = signal<string | null>(null);
+  protected readonly lookupHandled = signal(false);
+  protected readonly lastSource = signal<ScanSource>('camera');
+  protected readonly resultTarget = computed(() => {
+    const result = this.lastResult();
+    return result ? this.entityLinks.targetFor(result.kind, result.id) : null;
+  });
   protected readonly error = signal<string | null>(null);
   protected readonly manualValue = signal('');
   protected readonly showManual = signal(false);
@@ -118,19 +134,26 @@ export class MobileScanComponent implements AfterViewInit, OnDestroy {
       this.html5Qrcode.pause(true);
     }
 
-    this.resolve(value);
+    this.resolve(value, 'camera');
 
     // Also emit to global scanner service for other consumers
     this.scanner.setContext('global');
   }
 
-  private resolve(value: string): void {
+  private resolve(value: string, source: ScanSource): void {
     const code = value.trim();
     if (!code) return;
 
-    this.resolving.set(true);
+    this.lastSource.set(source);
     this.lookupError.set(null);
+    this.lookupHandled.set(false);
     this.lastResult.set(null);
+    if (code.length > MAX_CODE_LENGTH) {
+      this.lookupError.set(this.translate.instant('mobileWeb.scan.tooLong', { max: MAX_CODE_LENGTH }));
+      return;
+    }
+
+    this.resolving.set(true);
     this.http.post<ScanResolveResult>('/api/v1/scanner/resolve', { code }).subscribe({
       next: (result) => {
         this.resolving.set(false);
@@ -142,16 +165,26 @@ export class MobileScanComponent implements AfterViewInit, OnDestroy {
       },
       error: (err: unknown) => {
         this.resolving.set(false);
-        this.lookupError.set(this.translate.instant(
-          isCapabilityDisabledError(err) ? 'mobileWeb.scan.disabled' : 'mobileWeb.scan.lookupFailed',
-        ));
+        if (isCapabilityDisabledError(err)) {
+          this.lookupError.set(this.translate.instant('mobileWeb.scan.disabled'));
+        } else if (wasHttpErrorShown(err)) {
+          this.lookupHandled.set(true);
+        } else {
+          this.lookupError.set(this.translate.instant('mobileWeb.scan.lookupFailed'));
+        }
       },
     });
+  }
+
+  protected openResult(): void {
+    const target = this.resultTarget();
+    if (target) this.entityLinks.open(target);
   }
 
   protected resumeScanning(): void {
     this.lastResult.set(null);
     this.lookupError.set(null);
+    this.lookupHandled.set(false);
     if (this.html5Qrcode?.getState() === Html5QrcodeScannerState.PAUSED) {
       this.html5Qrcode.resume();
     }
@@ -176,7 +209,7 @@ export class MobileScanComponent implements AfterViewInit, OnDestroy {
     const value = this.manualValue().trim();
     if (!value) return;
 
-    this.resolve(value);
+    this.resolve(value, 'manual');
     this.manualValue.set('');
   }
 

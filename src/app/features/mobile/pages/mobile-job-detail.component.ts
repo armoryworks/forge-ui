@@ -53,6 +53,8 @@ export class MobileJobDetailComponent implements OnInit {
   protected readonly submitting = signal(false);
   protected readonly noteText = signal('');
   protected readonly activeTimer = signal<ActiveTimer | null>(null);
+  protected readonly timerKnown = signal(false);
+  protected readonly timerLoadFailed = signal(false);
 
   protected readonly timerOnThisJob = computed(() => {
     const timer = this.activeTimer();
@@ -83,10 +85,19 @@ export class MobileJobDetailComponent implements OnInit {
   }
 
   private loadTimer(): void {
+    this.timerKnown.set(false);
+    this.timerLoadFailed.set(false);
     this.http.get<ActiveTimer | null>('/api/v1/time-tracking/timer/active').subscribe({
-      next: (timer) => this.activeTimer.set(timer ?? null),
-      error: () => this.activeTimer.set(null),
+      next: (timer) => {
+        this.activeTimer.set(timer ?? null);
+        this.timerKnown.set(true);
+      },
+      error: () => this.timerLoadFailed.set(true),
     });
+  }
+
+  protected retryTimer(): void {
+    this.loadTimer();
   }
 
   private loadJob(jobId: number): void {
@@ -109,7 +120,7 @@ export class MobileJobDetailComponent implements OnInit {
 
   protected stopTimer(): void {
     const timer = this.activeTimer();
-    if (!timer || this.submitting()) return;
+    if (!timer || this.submitting() || !this.timerKnown()) return;
 
     this.submitting.set(true);
     this.http.post('/api/v1/time-tracking/timer/stop', { timeEntryId: timer.timeEntryId }).subscribe({
@@ -128,7 +139,7 @@ export class MobileJobDetailComponent implements OnInit {
 
   protected startTimer(): void {
     const j = this.job();
-    if (!j || this.submitting() || this.timerOnThisJob()) return;
+    if (!j || this.submitting() || !this.timerKnown() || this.timerOnThisJob()) return;
 
     this.submitting.set(true);
     const previous = this.activeTimer();

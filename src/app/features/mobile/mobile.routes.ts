@@ -42,7 +42,35 @@ export const MOBILE_ROUTES: Routes = [
       },
       {
         path: 'account',
-        loadComponent: () => import('./pages/mobile-account.component').then(m => m.MobileAccountComponent),
+        children: [
+          {
+            path: '',
+            pathMatch: 'full',
+            loadComponent: () => import('./pages/mobile-account.component').then(m => m.MobileAccountComponent),
+          },
+          {
+            path: '',
+            loadComponent: () => import('./pages/mobile-account-section.component').then(m => m.MobileAccountSectionComponent),
+            children: [
+              {
+                path: 'profile',
+                loadComponent: () => import('../account/pages/profile/account-profile.component').then(m => m.AccountProfileComponent),
+              },
+              {
+                path: 'security',
+                loadComponent: () => import('../account/pages/security/account-security.component').then(m => m.AccountSecurityComponent),
+              },
+              {
+                path: 'customization',
+                loadComponent: () => import('../account/pages/customization/account-customization.component').then(m => m.AccountCustomizationComponent),
+              },
+              {
+                path: 'integrations',
+                loadComponent: () => import('../account/pages/integrations/account-integrations.component').then(m => m.AccountIntegrationsComponent),
+              },
+            ],
+          },
+        ],
       },
     ],
   },

@@ -48,9 +48,18 @@
     </div>
 
     <div class="timer-section">
+      @if (timerLoadFailed()) {
+        <div class="timer-unknown" role="alert" data-testid="mjob-timer-unknown">
+          <span class="timer-unknown__text">{{ 'mobileWeb.timer.stateUnknown' | translate }}</span>
+          <button class="action-btn" (click)="retryTimer()" [attr.aria-label]="'mobileWeb.timer.retryLabel' | translate" data-testid="mjob-timer-retry-btn">
+            <span class="material-icons-outlined">refresh</span>
+            {{ 'mobileWeb.timer.retry' | translate }}
+          </button>
+        </div>
+      }
       @if (timerOnThisJob()) {
         <button class="timer-btn timer-btn--active"
-                [disabled]="submitting()"
+                [disabled]="submitting() || !timerKnown()"
                 (click)="stopTimer()"
                 [attr.aria-label]="'mobileLegacy.jobDetail.stopTimer' | translate"
                 data-testid="mjob-timer-btn">
@@ -81,7 +90,7 @@
                 </span>
               </div>
               <button class="action-btn timer-elsewhere__stop"
-                      [disabled]="submitting()"
+                      [disabled]="submitting() || !timerKnown()"
                       (click)="stopTimer()"
                       [attr.aria-label]="'mobileWeb.timer.stopRunning' | translate"
                       data-testid="mjob-timer-elsewhere-stop-btn">
@@ -92,7 +101,7 @@
           }
         }
         <button class="timer-btn"
-                [disabled]="submitting()"
+                [disabled]="submitting() || !timerKnown()"
                 (click)="startTimer()"
                 [attr.aria-label]="(timerElsewhere() ? 'mobileWeb.timer.switchHere' : 'mobileLegacy.jobDetail.startTimer') | translate"
                 data-testid="mjob-timer-btn">

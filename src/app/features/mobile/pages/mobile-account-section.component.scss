@@ -1,0 +1,22 @@
+@use 'styles/variables' as *;
+
+.mobile-account-section {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  &__back {
+    display: inline-flex;
+    align-items: center;
+    gap: $sp-sm;
+    align-self: flex-start;
+    margin: $sp-lg $sp-lg 0;
+    font-size: $font-size-md;
+    color: var(--text);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--primary);
+    }
+  }
+}

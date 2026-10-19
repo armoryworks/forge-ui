@@ -128,6 +128,22 @@
   }
 }
 
+.timer-unknown {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  border: $border-width-thin solid var(--warning);
+  background: color-mix(in srgb, var(--warning) 8%, var(--surface));
+
+  &__text {
+    flex: 1;
+    min-width: 0;
+    font-size: $font-size-sm;
+    font-weight: 600;
+  }
+}
+
 .timer-btn {
   display: flex;
   align-items: center;

@@ -1,10 +1,12 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from '@angular/core';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { LanguageService } from '../../../shared/services/language.service';
+import { AppNotification } from '../../../shared/models/app-notification.model';
 import { NotificationService } from '../../../shared/services/notification.service';
+import { MobileEntityLinkService } from '../services/mobile-entity-link.service';
 
 @Component({
   selector: 'app-mobile-notifications',
@@ -18,16 +20,23 @@ export class MobileNotificationsComponent implements OnInit {
   private readonly notificationService = inject(NotificationService);
   private readonly translate = inject(TranslateService);
   private readonly languageService = inject(LanguageService);
+  private readonly entityLinks = inject(MobileEntityLinkService);
 
   protected readonly notifications = this.notificationService.filteredNotifications;
+  protected readonly rows = computed(() => this.notifications().map((notification) => ({
+    notification,
+    target: this.entityLinks.targetFor(notification.entityType, notification.entityId),
+  })));
   protected readonly unreadCount = this.notificationService.unreadCount;
 
   ngOnInit(): void {
     this.notificationService.load();
   }
 
-  protected markAsRead(id: number): void {
-    this.notificationService.markAsRead(id);
+  protected open(notification: AppNotification): void {
+    this.notificationService.markAsRead(notification.id);
+    const target = this.entityLinks.targetFor(notification.entityType, notification.entityId);
+    if (target) this.entityLinks.open(target);
   }
 
   protected markAllRead(): void {

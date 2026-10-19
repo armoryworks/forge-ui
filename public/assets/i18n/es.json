@@ -11738,7 +11738,12 @@
       "noMatch": "Ningún registro de Forge coincide con ese código. Revise la etiqueta o escríbalo.",
       "lookupFailed": "No se pudo buscar ese código. Revise la conexión e inténtelo de nuevo.",
       "disabled": "El escaneo está desactivado en este taller. Pida a un administrador que active la ejecución en planta.",
-      "scanAgain": "Escanear de nuevo"
+      "scanAgain": "Escanear de nuevo",
+      "noMatchTyped": "Ningún registro de Forge coincide con ese código. Revise lo que escribió e inténtelo de nuevo.",
+      "tooLong": "Ese código es demasiado largo. Los códigos de Forge tienen como máximo {{max}} caracteres.",
+      "open": "Abrir",
+      "openDesktop": "Abrir en el sitio de escritorio",
+      "openDesktopLabel": "Cambiar al sitio de escritorio para abrir este registro"
     },
     "timer": {
       "runningOn": "En curso en {{jobNumber}}",
@@ -11749,12 +11754,22 @@
       "stop": "Detener",
       "stopRunning": "Detener el temporizador en curso",
       "stoppedButNotStarted": "Se detuvo el temporizador de {{jobNumber}}, pero este no pudo iniciarse: {{reason}}",
-      "stoppedButNotStartedUnknown": "Se detuvo el temporizador en curso, pero este no pudo iniciarse: {{reason}}"
+      "stoppedButNotStartedUnknown": "Se detuvo el temporizador en curso, pero este no pudo iniciarse: {{reason}}",
+      "stateUnknown": "No se pudo comprobar si hay un temporizador en curso. Reintente antes de iniciar o detener uno.",
+      "retry": "Reintentar",
+      "retryLabel": "Volver a comprobar el temporizador en curso"
     },
     "desktopLink": {
       "message": "Esa página está en el sitio de escritorio.",
       "open": "Abrir el sitio de escritorio",
       "storageBlocked": "Este navegador bloquea el almacenamiento del sitio, así que no se puede recordar la vista de escritorio."
+    },
+    "notifications": {
+      "opensDesktop": "Se abre en el sitio de escritorio"
+    },
+    "account": {
+      "back": "Cuenta",
+      "setupWizardLabel": "Abrir el asistente de configuración en el sitio de escritorio"
     }
   },
   "jobOperations": {

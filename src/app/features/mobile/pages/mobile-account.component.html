@@ -22,31 +22,31 @@
   <div class="account-section">
     <span class="account-section__label">{{ 'mobileLegacyPages.account.account' | translate }}</span>
     <nav class="account-links" [attr.aria-label]="'mobileLegacyPages.account.accountSettingsLabel' | translate">
-      <a class="account-link" routerLink="/account/profile">
+      <a class="account-link" routerLink="/m/account/profile" data-testid="maccount-profile-link">
         <span class="material-icons-outlined">person</span>
         <span>{{ 'mobileLegacyPages.account.profile' | translate }}</span>
         <span class="material-icons-outlined account-link__chevron">chevron_right</span>
       </a>
-      <a class="account-link" routerLink="/account/integrations">
+      <a class="account-link" routerLink="/m/account/integrations" data-testid="maccount-integrations-link">
         <span class="material-icons-outlined">extension</span>
         <span>{{ 'mobileLegacyPages.account.integrations' | translate }}</span>
         <span class="material-icons-outlined account-link__chevron">chevron_right</span>
       </a>
-      <a class="account-link" routerLink="/account/security">
+      <a class="account-link" routerLink="/m/account/security" data-testid="maccount-security-link">
         <span class="material-icons-outlined">lock</span>
         <span>{{ 'mobileLegacyPages.account.security' | translate }}</span>
         <span class="material-icons-outlined account-link__chevron">chevron_right</span>
       </a>
-      <a class="account-link" routerLink="/account/customization">
+      <a class="account-link" routerLink="/m/account/customization" data-testid="maccount-customization-link">
         <span class="material-icons-outlined">palette</span>
         <span>{{ 'mobileLegacyPages.account.customization' | translate }}</span>
         <span class="material-icons-outlined account-link__chevron">chevron_right</span>
       </a>
-      <a class="account-link" routerLink="/onboarding">
+      <button class="account-link" (click)="openSetupWizard()" [attr.aria-label]="'mobileWeb.account.setupWizardLabel' | translate" data-testid="maccount-setup-wizard-btn">
         <span class="material-icons-outlined">school</span>
         <span>{{ 'mobileLegacyPages.account.setupWizard' | translate }}</span>
-        <span class="material-icons-outlined account-link__chevron">chevron_right</span>
-      </a>
+        <span class="material-icons-outlined account-link__chevron">desktop_windows</span>
+      </button>
     </nav>
   </div>
 
