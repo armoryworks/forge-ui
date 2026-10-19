@@ -35,3 +35,33 @@
     font-size: $font-size-title;
   }
 }
+
+.acct-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  padding: $sp-sm $sp-md;
+  border-left: $border-width-accent solid var(--border);
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    font-weight: 600;
+  }
+
+  &__items {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+  }
+}

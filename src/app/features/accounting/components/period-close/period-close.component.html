@@ -23,6 +23,33 @@
           }
         </header>
 
+        @if (year.status === 'Open' && checklists()[year.id]; as shown) {
+          <div class="acct-checklist" data-testid="period-close-checklist">
+            <span class="acct-checklist__title">
+              {{ 'accounting.periodClose.checklist.title' | translate }} — {{ shown.periodName }}
+              <span class="chip" [class.chip--success]="shown.result.allPassed" [class.chip--error]="!shown.result.allPassed">
+                {{ (shown.result.allPassed ? 'accounting.periodClose.checklist.ready' : 'accounting.periodClose.checklist.blocked') | translate }}
+              </span>
+            </span>
+            <ul class="acct-checklist__items">
+              @for (item of shown.result.items; track item.key) {
+                <li class="acct-checklist__item" [class.acct-checklist__item--failed]="!item.passed">
+                  <span class="chip chip--sm" [class.chip--success]="item.passed" [class.chip--error]="!item.passed">
+                    {{ (item.passed ? 'accounting.periodClose.checklist.passed' : 'accounting.periodClose.checklist.failed') | translate }}
+                  </span>
+                  <span>{{ checklistLabel(item) }}</span>
+                  @if (!item.passed) {
+                    <span class="acct-muted">{{ item.detail }}</span>
+                  }
+                </li>
+              }
+            </ul>
+            @if (!shown.result.allPassed) {
+              <p class="acct-muted">{{ 'accounting.periodClose.checklist.blockedHint' | translate }}</p>
+            }
+          </div>
+        }
+
         <div class="acct-table-block">
           <app-data-table
             [tableId]="'acct-periods-' + year.id"
@@ -44,11 +71,13 @@
             <ng-template appColumnCell="actions" let-row>
               @if (row.status === 'Open') {
                 <div class="acct-period-actions">
+                  <button type="button" class="action-btn action-btn--sm" (click)="showChecklist(year.id, row)">{{ 'accounting.periodClose.checklist.check' | translate }}</button>
                   <button type="button" class="action-btn action-btn--sm" (click)="setPeriod(row.id, 'SoftClosed')" [disabled]="busy()">{{ 'accounting.periodClose.softClose' | translate }}</button>
                   <button type="button" class="action-btn action-btn--sm" (click)="setPeriod(row.id, 'HardClosed')" [disabled]="busy()">{{ 'accounting.periodClose.hardClose' | translate }}</button>
                 </div>
               } @else if (row.status === 'SoftClosed') {
                 <div class="acct-period-actions">
+                  <button type="button" class="action-btn action-btn--sm" (click)="showChecklist(year.id, row)">{{ 'accounting.periodClose.checklist.check' | translate }}</button>
                   <button type="button" class="action-btn action-btn--sm" (click)="setPeriod(row.id, 'Open')" [disabled]="busy()">{{ 'accounting.periodClose.reopen' | translate }}</button>
                   <button type="button" class="action-btn action-btn--sm" (click)="setPeriod(row.id, 'HardClosed')" [disabled]="busy()">{{ 'accounting.periodClose.hardClose' | translate }}</button>
                 </div>

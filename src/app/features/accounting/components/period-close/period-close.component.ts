@@ -14,9 +14,27 @@ import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-
 import { CapDirective } from '../../../../shared/directives/cap.directive';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { JobCostCloseComponent } from '../job-cost-close/job-cost-close.component';
-import { FiscalPeriodStatus, FiscalYearModel } from '../../models/accounting.models';
+import {
+  CloseChecklistItem,
+  CloseChecklistResult,
+  FiscalPeriodModel,
+  FiscalPeriodStatus,
+  FiscalYearModel,
+} from '../../models/accounting.models';
 
 const DEFAULT_BOOK_ID = 1;
+
+const CHECKLIST_LABEL_KEYS: Readonly<Record<string, string>> = {
+  GRNI_RECONCILED: 'accounting.periodClose.checklist.grniReconciled',
+  AR_TIES: 'accounting.periodClose.checklist.arTies',
+  AP_TIES: 'accounting.periodClose.checklist.apTies',
+};
+
+interface ShownChecklist {
+  periodId: number;
+  periodName: string;
+  result: CloseChecklistResult;
+}
 
 @Component({
   selector: 'app-period-close',
@@ -36,13 +54,14 @@ export class PeriodCloseComponent implements OnInit {
   protected readonly busy = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly years = signal<FiscalYearModel[]>([]);
+  protected readonly checklists = signal<Record<number, ShownChecklist>>({});
 
   protected readonly periodColumns: ColumnDef[] = [
     { field: 'periodNumber', header: this.translate.instant('accounting.periodClose.number'), sortable: true, type: 'number', align: 'right', width: '60px' },
     { field: 'name', header: this.translate.instant('accounting.periodClose.period'), sortable: true },
     { field: 'dates', header: this.translate.instant('accounting.periodClose.dates'), width: '220px' },
     { field: 'status', header: this.translate.instant('accounting.common.status'), sortable: true, width: '130px' },
-    { field: 'actions', header: this.translate.instant('accounting.common.actions'), align: 'right', width: '240px' },
+    { field: 'actions', header: this.translate.instant('accounting.common.actions'), align: 'right', width: '340px' },
   ];
 
   constructor() {
@@ -63,12 +82,39 @@ export class PeriodCloseComponent implements OnInit {
         next: (y) => {
           this.years.set(y);
           this.loading.set(false);
+          for (const year of y) {
+            const final = this.finalPeriod(year);
+            if (year.status === 'Open' && final) this.showChecklist(year.id, final);
+          }
         },
         error: () => {
           this.error.set(this.translate.instant('accounting.errors.fiscalCalendarLoadFailed'));
           this.loading.set(false);
         },
       });
+  }
+
+  protected showChecklist(fiscalYearId: number, period: FiscalPeriodModel): void {
+    this.gl
+      .getCloseChecklist(period.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (result) =>
+          this.checklists.update((all) => ({
+            ...all,
+            [fiscalYearId]: { periodId: period.id, periodName: period.name, result },
+          })),
+        error: () => this.error.set(this.translate.instant('accounting.periodClose.checklist.loadFailed')),
+      });
+  }
+
+  protected checklistLabel(item: CloseChecklistItem): string {
+    const key = CHECKLIST_LABEL_KEYS[item.key];
+    return key ? this.translate.instant(key) : item.label;
+  }
+
+  private finalPeriod(year: FiscalYearModel): FiscalPeriodModel | undefined {
+    return [...year.periods].sort((a, b) => b.endDate.localeCompare(a.endDate))[0];
   }
 
   protected setPeriod(periodId: number, target: FiscalPeriodStatus): void {

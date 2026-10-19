@@ -10073,7 +10073,20 @@
       "locked": "Bloqueado",
       "confirmTitle": "¿Cerrar el año fiscal?",
       "confirmMessage": "Esto registra el traslado de utilidades retenidas y cierra definitivamente todos los períodos del año. No se puede deshacer.",
-      "confirmLabel": "Cerrar año"
+      "confirmLabel": "Cerrar año",
+      "checklist": {
+        "title": "Lista de verificación de cierre",
+        "check": "Verificación",
+        "ready": "Listo para el cierre definitivo",
+        "blocked": "Cierre definitivo bloqueado",
+        "passed": "Correcto",
+        "failed": "Con diferencias",
+        "grniReconciled": "GRNI cuadra (libro mayor vs. recibido no facturado)",
+        "arTies": "La antigüedad de cuentas por cobrar cuadra con la cuenta de control",
+        "apTies": "La antigüedad de cuentas por pagar cuadra con la cuenta de control",
+        "blockedHint": "El cierre definitivo de este período, o el cierre del año cuando es el último período, se rechaza hasta que todos los puntos estén correctos.",
+        "loadFailed": "No se pudo cargar la lista de verificación de cierre."
+      }
     },
     "bankRec": {
       "title": "Conciliación bancaria",
