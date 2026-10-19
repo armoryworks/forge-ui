@@ -146,7 +146,9 @@ export class AuditLogPanelComponent implements OnInit {
 
     this.adminService.getAuditLog(this.buildQuery()).subscribe({
       next: (result) => {
-        this.entries.set(result.data);
+        const systemActor = this.translate.instant('adminPanels.auditLog.systemActor');
+        this.entries.set(result.data.map(entry =>
+          entry.userId === 0 && !entry.userName ? { ...entry, userName: systemActor } : entry));
         this.totalCount.set(result.totalCount);
         this.isLoading.set(false);
       },

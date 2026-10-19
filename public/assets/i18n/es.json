@@ -8878,6 +8878,7 @@
       "action": "Acción",
       "actionPlaceholder": "ej. Creado, Actualizado",
       "systemEvent": "Evento del Sistema",
+      "systemActor": "Sistema",
       "fromDate": "Desde",
       "toDate": "Hasta",
       "noEntries": "No se encontraron entradas de auditoría",

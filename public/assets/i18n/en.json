@@ -8885,6 +8885,7 @@
       "action": "Action",
       "actionPlaceholder": "e.g. Created, Updated",
       "systemEvent": "System Event",
+      "systemActor": "System",
       "fromDate": "From Date",
       "toDate": "To Date",
       "noEntries": "No audit log entries found",
