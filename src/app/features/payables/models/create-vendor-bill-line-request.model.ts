@@ -8,4 +8,5 @@ export interface CreateVendorBillLineRequest {
   unitPrice: number;
   accountDeterminationKey?: string;
   purchaseOrderLineId?: number;
+  glAccountId?: number;
 }

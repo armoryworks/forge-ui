@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ExpenseItem } from '../models/expense-item.model';
 import { CreateExpenseRequest } from '../models/create-expense-request.model';
@@ -49,7 +49,9 @@ export class ExpensesService {
   uploadReceipt(file: File): Observable<{ id: string; fileName: string }> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<{ id: string; fileName: string }>(`${this.base}/receipts`, formData);
+    return this.http.post<{ id: number; fileName: string }>(`${this.base}/receipts`, formData).pipe(
+      map((attachment) => ({ id: String(attachment.id), fileName: attachment.fileName })),
+    );
   }
 
   getSettings(): Observable<ExpenseSettings> {

@@ -3341,6 +3341,7 @@
       "autoPo": "Auto-PO",
       "carriers": "Carriers",
       "expenses": "Expense Policy",
+      "banking": "Banking",
       "capabilities": "Capabilities",
       "discovery": "Discovery Wizard",
       "presets": "Presets",
@@ -10384,6 +10385,7 @@
     "transmission": {
       "column": "Transmission",
       "statusQueued": "Queued",
+      "statusAwaitingAttestation": "Awaiting attestation",
       "statusRetrying": "Retrying",
       "statusRetryingCount": "Retrying {{attempts}}/5",
       "statusSucceeded": "Succeeded",
@@ -10477,7 +10479,9 @@
       "attestTitle": "Attest wire entry?",
       "attestMessage": "Confirm wire {{number}} was entered at the bank portal. Attestation must be done by a different user than the payment creator, marks the wire transmitted, and clears cash-in-transit.",
       "attested": "Wire attested — marked transmitted"
-    }
+    },
+    "glAccount": "GL account",
+    "defaultExpenseAccount": "Default expense account"
   },
   "terms": {
     "scope": {
@@ -11764,5 +11768,67 @@
     "noCostData": "No cost data available for this job.",
     "summaryAria": "Job cost summary",
     "noMaterials": "No materials issued to this job."
+  },
+  "adminBanking": {
+    "title": "Banking",
+    "intro": "Bank file origination, the SFTP channel and wire attestation. Values come from your ACH origination agreement with the bank.",
+    "saved": "Banking settings saved",
+    "secretStored": "Stored — leave blank to keep",
+    "secretNotSet": "Not set",
+    "sections": {
+      "wires": "Wire payments",
+      "nacha": "NACHA file identity",
+      "controls": "Controls",
+      "balanced": "Balanced files",
+      "channel": "Submission channel"
+    },
+    "fields": {
+      "wireManualAttestation": "Wires — manual attestation",
+      "wireManualAttestationHint": "On: a wire payment waits until a second user attests that it was entered at the bank portal. Turn this on for production until a bank wire connection exists. Wires already waiting stay waiting if you turn it off.",
+      "immediateDestination": "Immediate destination (bank routing)",
+      "immediateDestinationHint": "The receiving bank's 9-digit routing number for the file header, from your ACH origination agreement.",
+      "immediateDestinationName": "Immediate destination name",
+      "immediateDestinationNameHint": "The receiving bank's name as it should appear in the file header (up to 23 characters).",
+      "immediateOrigin": "Immediate origin",
+      "immediateOriginHint": "Your origin identifier for the file header, usually 1 followed by your EIN, or the value your bank assigns (10 characters).",
+      "immediateOriginName": "Immediate origin name",
+      "immediateOriginNameHint": "Your company name as it should appear in the file header (up to 23 characters).",
+      "companyName": "Company name",
+      "companyNameHint": "The company name on each batch header, which the vendor sees on their bank statement (up to 16 characters).",
+      "companyId": "Company ID",
+      "companyIdHint": "The 10-character company identification on batch headers, usually 1 followed by your EIN.",
+      "originatingDfi": "Originating DFI",
+      "originatingDfiHint": "The first 8 digits of your bank's routing number. It prefixes every trace number.",
+      "entryClassCode": "Standard entry class",
+      "entryClassCodeHint": "CCD for corporate accounts (the default) or PPD for personal accounts such as sole proprietors.",
+      "requirePrenote": "Require prenote verification",
+      "requirePrenoteHint": "On (the default): a vendor bank account must pass a zero-dollar prenote before it can receive payments. Turn off only if your bank agreement waives prenotes.",
+      "exposureLimit": "ACH exposure limit",
+      "exposureLimitHint": "The largest total allowed in one payment batch. 0 means no limit.",
+      "matchWindowDays": "Statement auto-match window (days)",
+      "matchWindowDaysHint": "A statement line matches a cash entry automatically only when the amounts are equal and the dates are within this many days.",
+      "balancedFiles": "Balanced files",
+      "balancedFilesHint": "Off (the default): credits-only files; the bank creates the offset. On: each batch carries its own offsetting debit against the offset account below. Some banks require this.",
+      "offsetRouting": "Offset account routing",
+      "offsetRoutingHint": "Your funding account's routing number, used for the offset debit when balanced files are on.",
+      "offsetAccount": "Offset account number",
+      "offsetAccountHint": "Your funding account number for the offset debit. Stored encrypted; leave blank to keep the stored value.",
+      "channel": "Submission channel",
+      "channelHint": "manual (the default): generate the file, download it and upload it to the bank portal yourself. sftp: releasing a batch uploads the file over SFTP using the settings below. Release still needs a second user.",
+      "sftpHost": "SFTP host",
+      "sftpHostHint": "The bank's SFTP server name or address.",
+      "sftpPort": "SFTP port",
+      "sftpPortHint": "The SFTP port, usually 22.",
+      "sftpUsername": "SFTP username",
+      "sftpUsernameHint": "The username the bank issued for its SFTP drop.",
+      "sftpPassword": "SFTP password",
+      "sftpPasswordHint": "Stored encrypted; leave blank to keep the stored value.",
+      "sftpHostKeyFingerprint": "SFTP host key fingerprint",
+      "sftpHostKeyFingerprintHint": "Required for the sftp channel. The server's SHA256 fingerprint as ssh-keygen prints it (SHA256:…). Confirm it with the bank before pasting it here. A refused connection reports the fingerprint the server presented.",
+      "sftpUploadDir": "SFTP upload directory",
+      "sftpUploadDirHint": "Where payment files are uploaded on the bank's server.",
+      "sftpReturnsDir": "SFTP returns directory",
+      "sftpReturnsDirHint": "Where the bank leaves return files for Forge to read."
+    }
   }
 }

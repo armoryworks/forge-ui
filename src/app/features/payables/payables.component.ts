@@ -169,6 +169,7 @@ export class PayablesComponent {
     { field: 'referenceNumber', header: this.translate.instant('payables.referenceNumber'), sortable: true, width: '120px' },
     { field: 'transmissionStatus', header: this.translate.instant('payables.transmission.column'), sortable: true, filterable: true, type: 'enum', width: '130px', filterOptions: [
       { value: 'Queued', label: this.translate.instant('payables.transmission.statusQueued') },
+      { value: 'AwaitingAttestation', label: this.translate.instant('payables.transmission.statusAwaitingAttestation') },
       { value: 'Retrying', label: this.translate.instant('payables.transmission.statusRetrying') },
       { value: 'Succeeded', label: this.translate.instant('payables.transmission.statusSucceeded') },
       { value: 'Failed', label: this.translate.instant('payables.transmission.statusFailed') },
@@ -550,6 +551,7 @@ export class PayablesComponent {
   protected getTransmissionChipClass(status: string): string {
     const map: Record<string, string> = {
       Queued: 'chip--info',
+      AwaitingAttestation: 'chip--warning',
       Retrying: 'chip--warning',
       Succeeded: 'chip--success',
       Failed: 'chip--error',

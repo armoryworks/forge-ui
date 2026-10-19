@@ -104,6 +104,7 @@ export class VendorPaymentDetailPanelComponent {
   protected getTransmissionChipClass(status: string): string {
     const map: Record<string, string> = {
       Queued: 'chip--info',
+      AwaitingAttestation: 'chip--warning',
       Retrying: 'chip--warning',
       Succeeded: 'chip--success',
       Failed: 'chip--error',

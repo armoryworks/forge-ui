@@ -53,6 +53,19 @@ describe('ExpensesService', () => {
     });
   });
 
+  describe('uploadReceipt', () => {
+    it('should return the uploaded attachment id as the string the expense request carries', () => {
+      let result: { id: string; fileName: string } | undefined;
+      service.uploadReceipt(new File(['x'], 'receipt.pdf')).subscribe((attachment) => { result = attachment; });
+
+      const req = httpMock.expectOne(`${baseUrl}/receipts`);
+      expect(req.request.method).toBe('POST');
+      req.flush({ id: 42, fileName: 'receipt.pdf' });
+
+      expect(result).toEqual({ id: '42', fileName: 'receipt.pdf' });
+    });
+  });
+
   // ── createExpense ─────────────────────────────────────────────────────────
 
   describe('createExpense', () => {

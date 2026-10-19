@@ -1,0 +1,39 @@
+@use 'styles/variables' as *;
+
+.banking-settings {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: $sp-lg;
+  max-width: 640px;
+}
+
+.banking-settings__section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.banking-settings__title {
+  font-size: $font-size-md;
+  margin: 0;
+}
+
+.panel-intro {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.settings-row {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.field-hint {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}

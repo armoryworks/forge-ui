@@ -10,4 +10,6 @@ export interface VendorBillLine {
   unitPrice: number;
   lineTotal: number;
   accountDeterminationKey: string;
+  glAccountId: number | null;
+  glAccountName: string | null;
 }

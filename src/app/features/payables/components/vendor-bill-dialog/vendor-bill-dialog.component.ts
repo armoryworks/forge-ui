@@ -42,6 +42,7 @@ type StandaloneLineGroup = FormGroup<{
   description: FormControl<string>;
   quantity: FormControl<number>;
   unitPrice: FormControl<number>;
+  glAccountId: FormControl<number | null>;
 }>;
 
 type PoLineGroup = FormGroup<{
@@ -55,6 +56,7 @@ interface DraftStandaloneLine {
   description: string;
   quantity: number;
   unitPrice: number;
+  glAccountId?: number | null;
 }
 
 /** Draft shape of one PO-mode row — keyed by purchaseOrderLineId so a restore
@@ -108,6 +110,7 @@ export class VendorBillDialogComponent {
   protected readonly poLines = new FormArray<PoLineGroup>([]);
   protected readonly poLineMeta = signal<PoLineMeta[]>([]);
   protected readonly poOptions = signal<SelectOption[]>([]);
+  protected readonly accountOptions = signal<SelectOption[]>([]);
   protected readonly loadingPoLines = signal(false);
   /** True once a PO was loaded and none of its lines have unbilled receipts. */
   protected readonly poHasNoBillableLines = signal(false);
@@ -234,6 +237,13 @@ export class VendorBillDialogComponent {
   private pendingPoLineRestore: DraftPoLine[] | null = null;
 
   constructor() {
+    this.billService.getBillableAccounts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (accounts) => this.accountOptions.set(accounts.length === 0 ? [] : [
+        { value: null, label: this.translate.instant('payables.defaultExpenseAccount') },
+        ...accounts.map(account => ({ value: account.id, label: `${account.accountNumber} — ${account.name}` })),
+      ]),
+    });
+
     this.vendorService.getVendorDropdown().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.vendorOptions.set([
         { value: null, label: this.translate.instant('payables.selectVendor') },
@@ -310,6 +320,7 @@ export class VendorBillDialogComponent {
       description: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
       quantity: new FormControl(1, { nonNullable: true, validators: [Validators.required, Validators.min(0.0001)] }),
       unitPrice: new FormControl(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
+      glAccountId: new FormControl<number | null>(null),
     }));
   }
 
@@ -536,6 +547,7 @@ export class VendorBillDialogComponent {
           description: value.description,
           quantity: value.quantity,
           unitPrice: value.unitPrice,
+          glAccountId: value.glAccountId ?? undefined,
         };
       });
     }
