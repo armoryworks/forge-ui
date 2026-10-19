@@ -28,6 +28,10 @@ export class EcoService {
     return this.http.patch<Eco>(`${this.base}/${id}`, data);
   }
 
+  submitEco(id: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/submit`, {});
+  }
+
   approveEco(id: number): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/approve`, {});
   }

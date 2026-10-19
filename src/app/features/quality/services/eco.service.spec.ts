@@ -66,6 +66,13 @@ describe('EcoService', () => {
     req.flush({ id: 7, ...patch });
   });
 
+  it('submitEco(id) sends POST to base/{id}/submit', () => {
+    service.submitEco(2).subscribe();
+    const req = httpMock.expectOne(`${base}/2/submit`);
+    expect(req.request.method).toBe('POST');
+    req.flush(null);
+  });
+
   it('approveEco(id) sends POST to base/{id}/approve', () => {
     service.approveEco(3).subscribe();
     const req = httpMock.expectOne(`${base}/3/approve`);

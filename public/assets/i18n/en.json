@@ -6783,7 +6783,9 @@
     "inspector": "Inspector",
     "expires": "Expires",
     "traceQty": "Qty: {{qty}}",
-    "jobId": "Job ID"
+    "jobId": "Job ID",
+    "ecoSubmitForReview": "Submit for Review",
+    "ecoSubmitted": "ECO submitted for review"
   },
   "ncrDetail": {
     "createTitle": "Create Non-Conformance",
