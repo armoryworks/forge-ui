@@ -126,6 +126,7 @@
           <!-- Data table — uses filteredRows() for drill-down support -->
           <app-data-table
             tableId="report-builder-results"
+            [exportFileName]="exportFileName()"
             [columns]="resultColumns()"
             [data]="filteredRows()"
             emptyIcon="assessment"

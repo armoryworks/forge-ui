@@ -131,7 +131,7 @@ export class CustomersComponent {
 
   // Table
   protected readonly customerColumns: ColumnDef[] = [
-    { field: 'name', header: this.translate.instant('customers.colName'), sortable: true },
+    { field: 'name', header: this.translate.instant('customers.colName'), sortable: true, exportValue: row => (row as CustomerListItem).name },
     { field: 'companyName', header: this.translate.instant('customers.colCompany'), sortable: true },
     { field: 'email', header: this.translate.instant('customers.colEmail'), sortable: true },
     { field: 'phone', header: this.translate.instant('customers.colPhone'), sortable: true },
@@ -143,7 +143,7 @@ export class CustomersComponent {
     { field: 'createdAt', header: this.translate.instant('customers.colCreated'), sortable: true, type: 'date', width: '110px' },
     // Hidden by default — power users opt in via column-manager. Renders the
     // full completeness chip (click → popover with per-capability gaps).
-    { field: 'completeness', header: this.translate.instant('entityCompleteness.columnHeader'), width: '160px', align: 'center', visible: false },
+    { field: 'completeness', header: this.translate.instant('entityCompleteness.columnHeader'), width: '160px', align: 'center', visible: false, exportable: false },
   ];
 
   constructor() {

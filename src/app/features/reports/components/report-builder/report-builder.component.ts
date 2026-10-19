@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed, viewChild } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -17,6 +17,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
+import { toDateOnly } from '../../../../shared/utils/date.utils';
 import { ReportBuilderService } from '../../services/report-builder.service';
 import {
   ReportEntityDefinition,
@@ -95,6 +96,13 @@ export class ReportBuilderComponent {
 
   /** Currently active drill-down filter value (label clicked in chart). Null = no filter. */
   protected readonly drillFilter = signal<string | null>(null);
+  private readonly resultsTable = viewChild(DataTableComponent);
+
+  protected readonly exportFileName = computed(() => {
+    const name = this.editingReport()?.name ?? this.entitySource() ?? 'report';
+    const slug = String(name).trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'report';
+    return `${slug}-${toDateOnly(new Date())}`;
+  });
 
   // Derived from service
   protected readonly entities = this.builderService.entities;
@@ -455,27 +463,7 @@ export class ReportBuilderComponent {
   }
 
   protected exportCsv(): void {
-    const rows = this.filteredRows();
-    const results = this.reportResults();
-    if (!results || rows.length === 0) return;
-
-    const headers = results.columns.join(',');
-    const csvRows = rows.map(row =>
-      results.columns.map(col => {
-        const val = row[col];
-        const str = val == null ? '' : String(val);
-        return str.includes(',') || str.includes('"') ? `"${str.replace(/"/g, '""')}"` : str;
-      }).join(','),
-    );
-
-    const csv = [headers, ...csvRows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `report-${Date.now()}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    this.resultsTable()?.exportCsv();
   }
 
   private loadSavedReport(id: number): void {

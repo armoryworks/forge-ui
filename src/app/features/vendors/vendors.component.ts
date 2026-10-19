@@ -75,7 +75,7 @@ export class VendorsComponent implements OnInit {
   ];
 
   protected readonly vendorColumns: ColumnDef[] = [
-    { field: 'companyName', header: this.translate.instant('vendors.companyName'), sortable: true },
+    { field: 'companyName', header: this.translate.instant('vendors.companyName'), sortable: true, exportValue: row => (row as VendorListItem).companyName },
     { field: 'contactName', header: this.translate.instant('vendors.contact'), sortable: true },
     { field: 'email', header: this.translate.instant('common.email'), sortable: true },
     { field: 'phone', header: this.translate.instant('common.phone'), sortable: true },
@@ -86,7 +86,7 @@ export class VendorsComponent implements OnInit {
     { field: 'createdAt', header: this.translate.instant('common.createdAt'), sortable: true, type: 'date', width: '110px' },
     // Hidden by default — power users opt in via column-manager. Renders the
     // full completeness chip (click → popover with per-capability gaps).
-    { field: 'completeness', header: this.translate.instant('entityCompleteness.columnHeader'), width: '160px', align: 'center', visible: false },
+    { field: 'completeness', header: this.translate.instant('entityCompleteness.columnHeader'), width: '160px', align: 'center', visible: false, exportable: false },
   ];
 
   constructor() {

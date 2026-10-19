@@ -166,7 +166,7 @@ export class PartsComponent {
 
   protected readonly partColumns: ColumnDef[] = [
     { field: 'partNumber', header: this.translate.instant('parts.partNumber'), sortable: true, width: '120px' },
-    { field: 'name', header: this.translate.instant('common.name'), sortable: true },
+    { field: 'name', header: this.translate.instant('common.name'), sortable: true, exportValue: row => (row as { name?: string }).name },
     { field: 'revision', header: this.translate.instant('parts.rev'), width: '60px', align: 'center' },
     { field: 'procurementSource', header: 'Procurement', sortable: true, width: '110px' },
     { field: 'inventoryClass', header: 'Class', sortable: true, width: '110px' },
@@ -177,7 +177,7 @@ export class PartsComponent {
     { field: 'bomLineCount', header: this.translate.instant('parts.bom'), width: '60px', align: 'center' },
     // Hidden by default — power users opt in via column-manager. Renders the
     // full completeness chip (click → popover with per-capability gaps).
-    { field: 'completeness', header: this.translate.instant('entityCompleteness.columnHeader'), width: '160px', align: 'center', visible: false },
+    { field: 'completeness', header: this.translate.instant('entityCompleteness.columnHeader'), width: '160px', align: 'center', visible: false, exportable: false },
     { field: 'actions', header: this.translate.instant('common.actions'), width: '80px', align: 'center' },
   ];
 
