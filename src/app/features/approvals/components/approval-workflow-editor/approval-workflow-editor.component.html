@@ -62,7 +62,7 @@
                 <app-select [label]="'approvals.workflows.approverType' | translate" formControlName="approverType" [options]="approverTypeOptions" />
               </div>
               @if (step.value.approverType === 'Role') {
-                <app-select [label]="'approvals.workflows.role' | translate" formControlName="approverRole" [options]="roleOptions" />
+                <app-select [label]="'approvals.workflows.role' | translate" formControlName="approverRole" [options]="roleOptions()" />
               }
               <div class="dialog-row">
                 <app-input [label]="'approvals.workflows.autoApproveBelow' | translate" formControlName="autoApproveBelow" type="number" />

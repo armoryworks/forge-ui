@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
@@ -15,6 +15,7 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
+import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
@@ -34,6 +35,7 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
 })
 export class ApprovalWorkflowEditorComponent implements OnInit {
   private readonly approvalsService = inject(ApprovalsService);
+  private readonly referenceData = inject(ReferenceDataService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -58,12 +60,22 @@ export class ApprovalWorkflowEditorComponent implements OnInit {
     { value: 'Manager', label: this.translate.instant('approvals.approverTypes.manager') },
   ];
 
-  protected readonly roleOptions: SelectOption[] = [
-    { value: 'Admin', label: this.translate.instant('approvals.roles.admin') },
-    { value: 'Manager', label: this.translate.instant('approvals.roles.manager') },
-    { value: 'OfficeManager', label: this.translate.instant('approvals.roles.officeManager') },
-    { value: 'PM', label: this.translate.instant('approvals.roles.pm') },
-  ];
+  private readonly roleLabelKeys: Record<string, string> = {
+    Admin: 'approvals.roles.admin',
+    Manager: 'approvals.roles.manager',
+    OfficeManager: 'approvals.roles.officeManager',
+    PM: 'approvals.roles.pm',
+  };
+
+  private readonly roleNames = signal<string[]>([]);
+
+  protected readonly roleOptions = computed<SelectOption[]>(() => {
+    const names = [...this.roleNames()];
+    for (const step of this.editingWorkflow()?.steps ?? []) {
+      if (step.approverRole && !names.includes(step.approverRole)) names.push(step.approverRole);
+    }
+    return names.map(name => ({ value: name, label: this.roleLabel(name) }));
+  });
 
   protected readonly columns: ColumnDef[] = [
     { field: 'name', header: this.translate.instant('approvals.cols.name'), sortable: true },
@@ -93,6 +105,7 @@ export class ApprovalWorkflowEditorComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadWorkflows();
+    this.loadRoles();
   }
 
   protected openCreate(): void {
@@ -202,6 +215,17 @@ export class ApprovalWorkflowEditorComponent implements OnInit {
       requireComments: new FormControl(step['requireComments']),
       allowDelegation: new FormControl(step['allowDelegation']),
     });
+  }
+
+  private roleLabel(name: string): string {
+    const key = this.roleLabelKeys[name];
+    return key ? this.translate.instant(key) : name;
+  }
+
+  private loadRoles(): void {
+    this.referenceData.getRoles()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(roles => this.roleNames.set(roles.map(r => r.name)));
   }
 
   private loadWorkflows(): void {
