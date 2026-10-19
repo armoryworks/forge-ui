@@ -35,8 +35,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: $tap-target-min;
+    height: $tap-target-min;
     background: var(--surface);
     border: $border-width-thin solid var(--border);
     color: var(--text);
@@ -127,6 +127,7 @@
     align-items: center;
     gap: $sp-md;
     width: 100%;
+    min-height: $tap-target-min;
     padding: $sp-md $sp-lg;
     background: var(--surface);
     border: none;

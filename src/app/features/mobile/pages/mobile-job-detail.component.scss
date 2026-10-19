@@ -16,8 +16,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: $tap-target-min;
+    height: $tap-target-min;
     background: none;
     border: $border-width-thin solid var(--border);
     color: var(--text);
