@@ -1,0 +1,11 @@
+@use 'styles/variables' as *;
+
+.shift-assignments {
+  margin-top: $sp-lg;
+}
+
+.shift-assignments__title {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: 600;
+}

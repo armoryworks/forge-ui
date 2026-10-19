@@ -41,6 +41,7 @@
   padding: $sp-xxs $sp-sm; border-radius: $border-radius; border: $border-width-thin solid var(--border);
   &--manual { background: var(--bg); color: var(--text-muted); }
   &--timer { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+  &--non-billable { margin-left: $sp-xxs; background: var(--warning-light); border-color: var(--warning); color: var(--text); }
 }
 
 .lock-icon { font-size: $icon-size-xs; color: var(--text-muted); }

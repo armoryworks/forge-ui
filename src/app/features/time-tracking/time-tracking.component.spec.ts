@@ -9,6 +9,7 @@ import { TimeTrackingComponent } from './time-tracking.component';
 import { TimeEntry } from './models/time-entry.model';
 import { TimeTrackingService } from './services/time-tracking.service';
 import { AuthService } from '../../shared/services/auth.service';
+import { CapabilityService } from '../../shared/services/capability.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { RunningTimersService } from '../../shared/services/running-timers.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
@@ -26,6 +27,10 @@ interface PageInternals {
   openStopTimer(entry?: TimeEntry | null): void;
   openStopTimerById(id: number): void;
   stopTimer(): void;
+  entryForm: { patchValue(value: Record<string, unknown>): void };
+  dialogRef: { clearDraft(): void };
+  openManualEntry(): void;
+  saveEntry(): void;
 }
 
 function entry(overrides: Partial<TimeEntry> = {}): TimeEntry {
@@ -49,10 +54,11 @@ function entry(overrides: Partial<TimeEntry> = {}): TimeEntry {
   };
 }
 
-function setup(entries: TimeEntry[], mine: Observable<TimeEntry[]>) {
+function setup(entries: TimeEntry[], mine: Observable<TimeEntry[]>, billableEnabled = false) {
   const service = {
     getTimeEntries: vi.fn().mockReturnValue(of(entries)),
     stopTimer: vi.fn().mockReturnValue(of({})),
+    createTimeEntry: vi.fn().mockReturnValue(of({})),
   };
   const running = { getMine: vi.fn().mockReturnValue(mine) };
   TestBed.resetTestingModule();
@@ -66,6 +72,7 @@ function setup(entries: TimeEntry[], mine: Observable<TimeEntry[]>) {
       { provide: MatDialog, useValue: { open: vi.fn() } },
       { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
       { provide: DraftResumeService, useValue: { consume: vi.fn().mockReturnValue(false) } },
+      { provide: CapabilityService, useValue: { isEnabled: (code: string) => billableEnabled && code === 'CAP-PS-TIME-BILLABLE' } },
     ],
   });
   const component = TestBed.runInInjectionContext(() => new TimeTrackingComponent()) as unknown as PageInternals;
@@ -122,5 +129,27 @@ describe('TimeTrackingComponent', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it('sends the billable choice when billable time is turned on', () => {
+    const { component, service } = setup([], of([]), true);
+    component.dialogRef = { clearDraft: vi.fn() };
+
+    component.openManualEntry();
+    component.entryForm.patchValue({ hours: 0, minutes: 30, category: 'Meeting', isBillable: false });
+    component.saveEntry();
+
+    expect(service.createTimeEntry).toHaveBeenCalledWith(expect.objectContaining({ durationMinutes: 30, isBillable: false }));
+  });
+
+  it('leaves the billable flag to the server default when billable time is off', () => {
+    const { component, service } = setup([], of([]));
+    component.dialogRef = { clearDraft: vi.fn() };
+
+    component.openManualEntry();
+    component.entryForm.patchValue({ hours: 1, minutes: 0, isBillable: false });
+    component.saveEntry();
+
+    expect(service.createTimeEntry.mock.calls[0][0].isBillable).toBeUndefined();
   });
 });

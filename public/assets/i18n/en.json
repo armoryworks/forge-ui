@@ -3237,7 +3237,9 @@
     "runningStep": "Step {{step}}",
     "runningJustStarted": "just started",
     "runningStop": "Stop",
-    "runningStopAria": "Stop the timer on {{job}}"
+    "runningStopAria": "Stop the timer on {{job}}",
+    "billable": "Billable",
+    "nonBillable": "Non-billable"
   },
   "assets": {
     "title": "Assets",
@@ -8240,6 +8242,26 @@
       "chartLabel": "Timeline of scheduled operations by work center over time",
       "empty": "No scheduled operations to plot.",
       "noWorkCenter": "Unassigned"
+    },
+    "assignments": {
+      "title": "Who works each shift",
+      "assign": "Assign to shift",
+      "assignTitle": "Assign to a shift",
+      "person": "Person",
+      "shift": "Shift",
+      "from": "From",
+      "to": "To",
+      "openEnded": "Open-ended",
+      "differential": "Shift differential",
+      "differentialInput": "Shift differential ($/hour)",
+      "perHour": "${{amount}}/h",
+      "notes": "Notes",
+      "empty": "No one is assigned to a shift yet.",
+      "saved": "Shift assignment saved",
+      "remove": "Remove assignment",
+      "removeTitle": "Remove shift assignment",
+      "removeMessage": "Remove {{name}} from the {{shift}} shift?",
+      "removed": "Shift assignment removed"
     }
   },
   "routingTools": {

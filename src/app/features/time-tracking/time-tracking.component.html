@@ -76,6 +76,9 @@
           <span class="entry-type" [class]="entry.isManual ? 'entry-type--manual' : 'entry-type--timer'">
             {{ entry.isManual ? ('timeTracking.manual' | translate) : ('timeTracking.timer' | translate) }}
           </span>
+          @if (billableEnabled() && entry.isBillable === false) {
+            <span class="entry-type entry-type--non-billable">{{ 'timeTracking.nonBillable' | translate }}</span>
+          }
         </ng-template>
         <ng-template appColumnCell="actions" let-entry>
           @if (!isEditable(entry)) {
@@ -106,6 +109,10 @@
       </div>
 
       <app-textarea data-testid="time-entry-notes" [label]="'common.notes' | translate" formControlName="notes" [rows]="3" />
+
+      @if (billableEnabled()) {
+        <app-toggle data-testid="time-entry-billable" [label]="'timeTracking.billable' | translate" formControlName="isBillable" />
+      }
     </div>
 
     <div dialog-footer>

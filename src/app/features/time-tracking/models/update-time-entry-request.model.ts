@@ -4,4 +4,5 @@ export interface UpdateTimeEntryRequest {
   durationMinutes?: number;
   category?: string;
   notes?: string;
+  isBillable?: boolean;
 }
