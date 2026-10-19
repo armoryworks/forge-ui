@@ -28,9 +28,9 @@ import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { CapabilityService } from '../../../shared/services/capability.service';
 import { AuthService } from '../../../shared/services/auth.service';
 import { ColumnDef } from '../../../shared/models/column-def.model';
+import { InventoryHomeTab } from '../models/inventory-home-tab.model';
 
 type StockVerb = 'receive' | 'use' | 'count';
-type HomeTab = 'kiosk' | 'tasks' | 'dashboard';
 
 interface VerbDialogState {
   mode: StockVerb;
@@ -69,8 +69,8 @@ export class InventoryHomeComponent {
 
   // ── Tabs (URL is the source of truth) ──
   protected readonly activeTab = toSignal(
-    this.route.paramMap.pipe(map(p => (p.get('tab') as HomeTab) ?? 'kiosk')),
-    { initialValue: 'kiosk' as HomeTab },
+    this.route.paramMap.pipe(map(p => (p.get('tab') as InventoryHomeTab) ?? 'kiosk')),
+    { initialValue: 'kiosk' as InventoryHomeTab },
   );
 
   protected readonly locationsEnabled = computed(() => this.capabilities.isEnabled('CAP-INV-MULTILOC'));
@@ -159,7 +159,7 @@ export class InventoryHomeComponent {
     });
   }
 
-  protected switchTab(tab: HomeTab): void {
+  protected switchTab(tab: InventoryHomeTab): void {
     this.router.navigate(['..', tab], { relativeTo: this.route });
   }
 

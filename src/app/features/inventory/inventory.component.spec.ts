@@ -140,7 +140,7 @@ describe('InventoryComponent inspection tab', () => {
 describe('InventoryComponent replenishment', () => {
   beforeEach(() => vi.restoreAllMocks());
 
-  it('sends a role the replenishment API refuses back to stock without calling it', () => {
+  it('renders stock for a role the replenishment API refuses, leaving the refusal to the tab guard, without calling it', () => {
     const getBurnRates = vi.fn(() => of([]));
     const getSuggestions = vi.fn(() => of([]));
     const getSettings = vi.fn(() => of({ assigneeUserId: null }));
@@ -148,7 +148,7 @@ describe('InventoryComponent replenishment', () => {
       { replenishment: { getBurnRates, getSuggestions, getSettings } }, ['Engineer']);
 
     expect(internals.activeTab()).toBe('stock');
-    expect(redirectsToStock(router)).toBe(true);
+    expect(redirectsToStock(router)).toBe(false);
     expect(getBurnRates).not.toHaveBeenCalled();
     expect(getSuggestions).not.toHaveBeenCalled();
     expect(getSettings).not.toHaveBeenCalled();
@@ -328,5 +328,20 @@ describe('InventoryComponent stock dialogs', () => {
 
     expect(getPartBins).not.toHaveBeenCalled();
     expect(internals.showNoBinsHint(null, internals.adjustBinOptions())).toBe(false);
+  });
+});
+
+describe('inventory tab routes', () => {
+  it('shows the forbidden page for replenishment to a role that may not open it', async () => {
+    const { INVENTORY_ROUTES } = await import('./inventory.routes');
+    const { RedirectCommand, convertToParamMap, Router } = await import('@angular/router');
+    const { AuthService } = await import('../../shared/services/auth.service');
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: [{ provide: AuthService, useValue: { hasAnyRole: (r: string[]) => r.includes('OfficeManager') } }] });
+    const guard = INVENTORY_ROUTES.find(r => r.path === ':tab')!.canActivate![0] as (...a: unknown[]) => unknown;
+    const result = TestBed.runInInjectionContext(() =>
+      guard({ paramMap: convertToParamMap({ tab: 'replenishment' }) }, { url: '/inventory/replenishment' }));
+    expect(result).toBeInstanceOf(RedirectCommand);
+    expect(TestBed.inject(Router).serializeUrl((result as InstanceType<typeof RedirectCommand>).redirectTo)).toBe('/forbidden');
   });
 });

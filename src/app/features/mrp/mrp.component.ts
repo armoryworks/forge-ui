@@ -55,10 +55,7 @@ import {
   MpsVsActualDialogData,
 } from './components/mps-vs-actual-dialog.component';
 import { GenerateForecastRequest } from './models/mrp.model';
-
-type MrpTab = 'dashboard' | 'planned-orders' | 'exceptions' | 'runs' | 'master-schedule' | 'forecasts';
-
-const VALID_TABS = new Set<MrpTab>(['dashboard', 'planned-orders', 'exceptions', 'runs', 'master-schedule', 'forecasts']);
+import { MRP_TABS, MrpTab } from './models/mrp-tab.model';
 
 @Component({
   selector: 'app-mrp',
@@ -96,7 +93,7 @@ export class MrpComponent {
     this.route.paramMap.pipe(
       map(p => {
         const tab = p.get('tab') as MrpTab;
-        return VALID_TABS.has(tab) ? tab : 'dashboard';
+        return MRP_TABS.includes(tab) ? tab : 'dashboard';
       }),
     ),
     { initialValue: 'dashboard' as MrpTab },

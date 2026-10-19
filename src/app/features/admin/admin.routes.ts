@@ -1,7 +1,12 @@
+import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
 import { AdminComponent } from './admin.component';
 import { capabilityGuard } from '../../shared/guards/capability.guard';
 import { roleGuard } from '../../shared/guards/role.guard';
+import { tabGuard } from '../../shared/guards/tab.guard';
+import { AuthService } from '../../shared/services/auth.service';
+import { ADMIN_TAB_ROLES } from './models/admin-tab-roles.model';
+import { ADMIN_TABS } from './models/admin-tab.model';
 
 export const ADMIN_ROUTES: Routes = [
   // Admin Overview is the landing surface for /admin. Previously redirected
@@ -9,7 +14,7 @@ export const ADMIN_ROUTES: Routes = [
   // entry point and full-screen task page even when the admin was here to
   // do something else. Overview is a launchpad — people / capabilities /
   // integrations / recent audit — that deep-links into the relevant tab.
-  { path: '', redirectTo: 'overview', pathMatch: 'full' },
+  { path: '', redirectTo: () => adminDefaultTab(), pathMatch: 'full' },
   // Phase 4 Phase-A — diagnostic page that renders the loaded capability descriptor.
   // Listed before the catch-all `:tab` route so it wins. Phase C added the
   // working `/admin/capabilities` page below; the debug page stays as a
@@ -217,5 +222,9 @@ export const ADMIN_ROUTES: Routes = [
     path: 'configuration/:group',
     redirectTo: 'integrations',
   },
-  { path: ':tab', component: AdminComponent },
+  { path: ':tab', canActivate: [tabGuard(ADMIN_TABS, () => adminDefaultTab(), ADMIN_TAB_ROLES)], component: AdminComponent },
 ];
+
+function adminDefaultTab(): string {
+  return inject(AuthService).hasRole('Admin') ? 'overview' : 'compliance';
+}

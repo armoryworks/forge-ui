@@ -37,10 +37,7 @@ import {
   WorkCenterLoad,
   Shift,
 } from './models/scheduling.model';
-
-type SchedulingTab = 'gantt' | 'dispatch' | 'work-centers' | 'shifts' | 'runs';
-
-const VALID_TABS = new Set<SchedulingTab>(['gantt', 'dispatch', 'work-centers', 'shifts', 'runs']);
+import { SCHEDULING_TABS, SchedulingTab } from './models/scheduling-tab.model';
 
 @Component({
   selector: 'app-scheduling',
@@ -83,7 +80,7 @@ export class SchedulingComponent implements OnInit {
     this.route.paramMap.pipe(
       map(p => {
         const tab = p.get('tab') as SchedulingTab;
-        return VALID_TABS.has(tab) ? tab : 'gantt';
+        return SCHEDULING_TABS.includes(tab) ? tab : 'gantt';
       }),
     ),
     { initialValue: 'gantt' as SchedulingTab },

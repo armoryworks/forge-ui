@@ -49,8 +49,9 @@ import { AuthService } from '../../shared/services/auth.service';
 import { CapabilityService } from '../../shared/services/capability.service';
 import { EntityPickerComponent } from '../../shared/components/entity-picker/entity-picker.component';
 import { EntityLinkComponent, LinkableEntityType } from '../../shared/components/entity-link/entity-link.component';
+import { INVENTORY_TAB_ROLES } from './models/inventory-tab-roles.model';
+import { INVENTORY_TABS, InventoryTab } from './models/inventory-tab.model';
 
-type InventoryTab = 'stock' | 'locations' | 'movements' | 'receiving' | 'inspection' | 'stockOps' | 'cycleCounts' | 'reservations' | 'replenishment' | 'uom';
 
 @Component({
   selector: 'app-inventory',
@@ -72,31 +73,24 @@ export class InventoryComponent {
   private readonly capabilities = inject(CapabilityService);
   private readonly auth = inject(AuthService);
 
-  private static readonly VALID_TABS: InventoryTab[] = ['stock', 'locations', 'movements', 'receiving', 'inspection', 'stockOps', 'cycleCounts', 'reservations', 'replenishment', 'uom'];
-
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   private readonly routeTab = toSignal(
     this.route.paramMap.pipe(map(p => {
       const tab = p.get('tab') as InventoryTab;
-      return InventoryComponent.VALID_TABS.includes(tab) ? tab : 'stock';
+      return INVENTORY_TABS.includes(tab) ? tab : 'stock';
     })),
     { initialValue: 'stock' as InventoryTab },
   );
 
   protected readonly inspectionEnabled = computed(() => this.capabilities.isEnabled('CAP-QC-INSPECTION'));
 
-  protected readonly canReplenish = this.auth.hasAnyRole(['Admin', 'Manager']);
+  protected readonly canReplenish = this.auth.hasAnyRole([...INVENTORY_TAB_ROLES['replenishment']]);
 
   protected readonly activeTab = computed<InventoryTab>(() => {
     const tab = this.routeTab();
     if (tab === 'replenishment' && !this.canReplenish) return 'stock';
     return tab === 'inspection' && !this.inspectionEnabled() ? 'stock' : tab;
-  });
-
-  private readonly forbiddenReplenishmentRedirect = effect(() => {
-    if (this.routeTab() !== 'replenishment' || this.canReplenish) return;
-    untracked(() => this.router.navigate(['..', 'stock'], { relativeTo: this.route, replaceUrl: true }));
   });
 
   private readonly disabledInspectionRedirect = effect(() => {

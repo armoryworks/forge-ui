@@ -29,8 +29,8 @@ import { DetailDialogService } from '../../shared/services/detail-dialog.service
 import { AuthService } from '../../shared/services/auth.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
-
-type PoTab = 'orders' | 'suggestions' | 'settings';
+import { PURCHASE_ORDERS_TAB_ROLES } from './models/purchase-orders-tab-roles.model';
+import { PURCHASE_ORDERS_TABS, PurchaseOrdersTab } from './models/purchase-orders-tab.model';
 
 @Component({
   selector: 'app-purchase-orders',
@@ -56,15 +56,13 @@ export class PurchaseOrdersComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly draftResume = inject(DraftResumeService);
 
-  private static readonly VALID_TABS: PoTab[] = ['orders', 'suggestions', 'settings'];
-
-  protected readonly isAdmin = this.auth.hasRole('Admin');
+  protected readonly isAdmin = this.auth.hasAnyRole([...PURCHASE_ORDERS_TAB_ROLES['settings']]);
 
   protected readonly activeTab = toSignal(
     this.route.paramMap.pipe(map(p => {
-      const tab = p.get('tab') as PoTab;
+      const tab = p.get('tab') as PurchaseOrdersTab;
       if (tab === 'settings' && !this.isAdmin) return 'orders';
-      return PurchaseOrdersComponent.VALID_TABS.includes(tab) ? tab : 'orders';
+      return PURCHASE_ORDERS_TABS.includes(tab) ? tab : 'orders';
     })),
     { initialValue: 'orders' },
   );
@@ -182,7 +180,7 @@ export class PurchaseOrdersComponent implements OnInit {
     }
   }
 
-  protected switchTab(tab: PoTab): void {
+  protected switchTab(tab: PurchaseOrdersTab): void {
     this.router.navigate(['..', tab], { relativeTo: this.route });
   }
 

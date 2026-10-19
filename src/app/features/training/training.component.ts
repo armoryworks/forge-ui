@@ -16,8 +16,7 @@ import { TrainingModuleListItem } from './models/training-module.model';
 import { TrainingEnrollment } from './models/training-progress.model';
 import { TrainingPath } from './models/training-path.model';
 import { TrainingContentType } from './models/training-content-type.enum';
-
-type TrainingTab = 'my-learning' | 'paths' | 'all-modules';
+import { TrainingTab } from './models/training-tab.model';
 
 @Component({
   selector: 'app-training',
