@@ -2,8 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
-import { FONT_SCALE_PREF_KEY, THEME_PREF_KEY, ThemeService } from './theme.service';
-import { UserPreferencesService } from './user-preferences.service';
+import { ThemeService } from './theme.service';
 import { environment } from '../../../environments/environment';
 
 describe('ThemeService', () => {
@@ -139,31 +138,6 @@ describe('ThemeService', () => {
       });
 
       expect(service.appName()).toBe('Forge');
-    });
-  });
-
-  describe('account-synced appearance', () => {
-    it('saves theme and text size with the account', () => {
-      const prefs = TestBed.inject(UserPreferencesService);
-
-      service.toggle();
-      service.setFontScale('large');
-
-      expect(prefs.get(THEME_PREF_KEY)).toBe('light');
-      expect(prefs.get(FONT_SCALE_PREF_KEY)).toBe('large');
-    });
-
-    it('applies the appearance saved with the account when preferences arrive, keeping the local cache in step', () => {
-      const prefs = TestBed.inject(UserPreferencesService);
-
-      prefs.set(THEME_PREF_KEY, 'light');
-      prefs.set(FONT_SCALE_PREF_KEY, 'xl');
-      TestBed.tick();
-
-      expect(service.theme()).toBe('light');
-      expect(localStorage.getItem('forge-theme')).toBe('light');
-      expect(service.fontScale()).toBe('xl');
-      expect(document.documentElement.getAttribute('data-font-size')).toBe('xl');
     });
   });
 });

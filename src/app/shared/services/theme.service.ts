@@ -1,16 +1,9 @@
-import { Injectable, effect, inject, signal, untracked } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { UserPreferencesService } from './user-preferences.service';
 
 export type ThemeMode = 'light' | 'dark';
 export type FontScale = 'default' | 'comfortable' | 'large' | 'xl';
-
-/** Account preference keys that carry the appearance choice to the user's other browsers. */
-export const THEME_PREF_KEY = 'appearance:theme';
-export const FONT_SCALE_PREF_KEY = 'appearance:fontScale';
-
-const FONT_SCALES: readonly FontScale[] = ['default', 'comfortable', 'large', 'xl'];
 
 interface BrandSettings {
   primaryColor: string | null;
@@ -22,7 +15,6 @@ interface BrandSettings {
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   private readonly http = inject(HttpClient);
-  private readonly preferences = inject(UserPreferencesService);
   private readonly _theme = signal<ThemeMode>('dark');
   readonly theme = this._theme.asReadonly();
   private readonly _fontScale = signal<FontScale>('default');
@@ -51,28 +43,12 @@ export class ThemeService {
       this.brandColors = JSON.parse(cachedBrand);
       this.applyBrandColors();
     }
-
-    effect(() => {
-      const theme = this.preferences.get<ThemeMode>(THEME_PREF_KEY);
-      const scale = this.preferences.get<FontScale>(FONT_SCALE_PREF_KEY);
-      untracked(() => {
-        if ((theme === 'light' || theme === 'dark') && theme !== this._theme()) {
-          this.applyThemeFromBroadcast(theme);
-        }
-        if (scale && FONT_SCALES.includes(scale) && scale !== this._fontScale()) {
-          this._fontScale.set(scale);
-          localStorage.setItem('forge-font-scale', scale);
-          this.applyFontScale(scale);
-        }
-      });
-    });
   }
 
   toggle(): void {
     const next: ThemeMode = this._theme() === 'light' ? 'dark' : 'light';
     this._theme.set(next);
     localStorage.setItem('forge-theme', next);
-    this.preferences.set(THEME_PREF_KEY, next);
     this.applyTheme(next);
     this.applyBrandColors();
     this._broadcastThemeChange?.(next);
@@ -103,7 +79,6 @@ export class ThemeService {
   setFontScale(scale: FontScale): void {
     this._fontScale.set(scale);
     localStorage.setItem('forge-font-scale', scale);
-    this.preferences.set(FONT_SCALE_PREF_KEY, scale);
     this.applyFontScale(scale);
   }
 
