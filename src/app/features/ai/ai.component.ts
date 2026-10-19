@@ -47,8 +47,7 @@ export class AiComponent {
   protected readonly sending = signal(false);
   protected readonly messageInput = new FormControl('');
 
-  // Conversation history per assistant (keyed by ID)
-  private readonly conversations = new Map<number, ChatMessage[]>();
+  private readonly conversations = signal<ReadonlyMap<number, readonly ChatMessage[]>>(new Map());
 
   protected readonly assistantIdParam = toSignal(
     this.route.paramMap.pipe(map(p => p.get('assistantId') ?? 'general')),
@@ -68,7 +67,7 @@ export class AiComponent {
   protected readonly messages = computed(() => {
     const assistant = this.activeAssistant();
     if (!assistant) return [];
-    return this.conversations.get(assistant.id) ?? [];
+    return this.conversations().get(assistant.id) ?? [];
   });
 
   protected readonly hasMessages = computed(() => this.messages().length > 0);
@@ -106,14 +105,14 @@ export class AiComponent {
     const assistant = this.activeAssistant();
     if (!text || !assistant || this.sending()) return;
 
-    this.messageInput.reset();
-    this.addMessage(assistant.id, { role: 'user', content: text, timestamp: new Date() });
-    this.sending.set(true);
-
-    const history: AiHelpMessage[] = (this.conversations.get(assistant.id) ?? [])
+    const history: AiHelpMessage[] = (this.conversations().get(assistant.id) ?? [])
       .filter(m => m.role === 'user' || m.role === 'assistant')
       .slice(-10)
       .map(m => ({ role: m.role, content: m.content }));
+
+    this.messageInput.reset();
+    this.addMessage(assistant.id, { role: 'user', content: text, timestamp: new Date() });
+    this.sending.set(true);
 
     this.aiService.assistantChat(assistant.id, text, history).subscribe({
       next: (response) => {
@@ -135,9 +134,7 @@ export class AiComponent {
   protected clearChat(): void {
     const assistant = this.activeAssistant();
     if (!assistant) return;
-    this.conversations.set(assistant.id, []);
-    // Force reactivity by touching the signal
-    this.assistants.update(a => [...a]);
+    this.conversations.update(m => new Map(m).set(assistant.id, []));
   }
 
   protected onKeydown(event: KeyboardEvent): void {
@@ -148,11 +145,6 @@ export class AiComponent {
   }
 
   private addMessage(assistantId: number, message: ChatMessage): void {
-    if (!this.conversations.has(assistantId)) {
-      this.conversations.set(assistantId, []);
-    }
-    this.conversations.get(assistantId)!.push(message);
-    // Force reactivity
-    this.assistants.update(a => [...a]);
+    this.conversations.update(m => new Map(m).set(assistantId, [...(m.get(assistantId) ?? []), message]));
   }
 }
