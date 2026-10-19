@@ -8023,7 +8023,8 @@
       "scheduleUpdated": "Master schedule updated",
       "forecastGenerated": "Forecast generated",
       "scheduleCompleted": "Schedule completed",
-      "scheduleCancelled": "Schedule cancelled"
+      "scheduleCancelled": "Schedule cancelled",
+      "unplannedDemandParts": "Run finished, but {{count}} part(s) with demand are not flagged for MRP planning and were skipped. Turn on MRP planned on those parts."
     },
     "newMasterSchedule": "New Master Schedule",
     "newForecast": "Generate Forecast",
@@ -8076,7 +8077,7 @@
       "title": "MRP Run",
       "horizon": "Horizon",
       "partsTouched": "Parts Touched",
-      "noParts": "No parts in this run.",
+      "noParts": "No parts in this run. MRP only plans active parts flagged for MRP planning; turn it on in the part's planning settings.",
       "pickPart": "Select a part to view its time-bucket plan and demand pegging.",
       "orders": "orders",
       "timeBuckets": "Time-Bucket Plan",
@@ -8117,7 +8118,9 @@
     "completeScheduleMessage": "Mark \"{{name}}\" complete? MRP stops planning its lines.",
     "cancelSchedule": "Cancel schedule",
     "cancelScheduleTitle": "Cancel master schedule?",
-    "cancelScheduleMessage": "Cancel \"{{name}}\"? MRP stops planning its lines."
+    "cancelScheduleMessage": "Cancel \"{{name}}\"? MRP stops planning its lines.",
+    "approveForecastTitle": "Approve forecast?",
+    "approveForecastMessage": "Approve \"{{name}}\"? It leaves Draft and cannot be approved again."
   },
   "portal": {
     "title": "Customer Portal",

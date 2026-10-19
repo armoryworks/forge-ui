@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component, computed, inject, signal, viewChildren } from '@angular/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -97,6 +97,16 @@ export class MasterScheduleDialogComponent {
 
   protected readonly saving = signal(false);
 
+  private readonly partPickers = viewChildren(EntityPickerComponent);
+
+  constructor() {
+    afterNextRender(() => this.showPrefilledParts(this.partPickers()));
+  }
+
+  protected showPrefilledParts(pickers: readonly Pick<EntityPickerComponent, 'setSelected'>[]): void {
+    (this.data.schedule?.lines ?? []).forEach((line, i) => pickers[i]?.setSelected(line.partId, line.partNumber));
+  }
+
   protected addLine(): void {
     this.lines.push(this.buildLine());
     this.lines.markAsDirty();
@@ -111,7 +121,7 @@ export class MasterScheduleDialogComponent {
     return new FormGroup<LineFormGroup>({
       id: new FormControl<number | null>(values?.id ?? null),
       partId: new FormControl<number | null>(values?.partId ?? null, [Validators.required]),
-      quantity: new FormControl<number | null>(values?.quantity ?? null, [Validators.required, Validators.min(0.0001)]),
+      quantity: new FormControl<number | null>(values?.quantity ?? null, [Validators.required, Validators.min(0.0001), Validators.pattern(/^\d+(\.\d{1,4})?$/)]),
       dueDate: new FormControl<Date | null>(values?.dueDate ?? null, [Validators.required]),
       notes: new FormControl<string>(values?.notes ?? '', { nonNullable: true }),
     });

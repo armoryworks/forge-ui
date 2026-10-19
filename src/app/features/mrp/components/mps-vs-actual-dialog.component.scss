@@ -25,10 +25,11 @@
       white-space: nowrap;
     }
 
-    th:first-child,
-    th:nth-child(2),
-    td:first-child,
-    td:nth-child(2) {
+    thead th:first-child,
+    thead th:nth-child(2),
+    tbody td:first-child,
+    tbody td:nth-child(2),
+    tfoot td:first-child {
       text-align: left;
     }
 

@@ -8016,7 +8016,8 @@
       "scheduleUpdated": "Programación maestra actualizada",
       "forecastGenerated": "Pronóstico generado",
       "scheduleCompleted": "Programa completado",
-      "scheduleCancelled": "Programa cancelado"
+      "scheduleCancelled": "Programa cancelado",
+      "unplannedDemandParts": "La ejecución terminó, pero {{count}} parte(s) con demanda no están marcadas para planificación MRP y se omitieron. Active la planificación MRP en esas partes."
     },
     "newMasterSchedule": "Nueva Programación Maestra",
     "newForecast": "Generar Pronóstico",
@@ -8069,7 +8070,7 @@
       "title": "Ejecución MRP",
       "horizon": "Horizonte",
       "partsTouched": "Partes Tocadas",
-      "noParts": "Sin partes en esta ejecución.",
+      "noParts": "Sin partes en esta ejecución. MRP solo planifica partes activas marcadas para planificación MRP; actívela en la configuración de planificación de la parte.",
       "pickPart": "Selecciona una parte para ver su plan por período y trazabilidad de demanda.",
       "orders": "órdenes",
       "timeBuckets": "Plan por Período",
@@ -8110,7 +8111,9 @@
     "completeScheduleMessage": "¿Marcar \"{{name}}\" como completado? MRP deja de planificar sus líneas.",
     "cancelSchedule": "Cancelar programa",
     "cancelScheduleTitle": "¿Cancelar programa maestro?",
-    "cancelScheduleMessage": "¿Cancelar \"{{name}}\"? MRP deja de planificar sus líneas."
+    "cancelScheduleMessage": "¿Cancelar \"{{name}}\"? MRP deja de planificar sus líneas.",
+    "approveForecastTitle": "¿Aprobar pronóstico?",
+    "approveForecastMessage": "¿Aprobar \"{{name}}\"? Deja de ser borrador y no se puede volver a aprobar."
   },
   "portal": {
     "title": "Portal de Cliente",

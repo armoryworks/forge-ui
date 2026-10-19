@@ -22,7 +22,7 @@
     <div class="mrp__kpis">
       <app-kpi-chip [label]="'mrp.kpi.latestRun' | translate" [value]="latestRun()?.runNumber ?? ('mrp.kpi.none' | translate)" />
       <app-kpi-chip [label]="'mrp.kpi.plannedOrders' | translate" [value]="plannedOrderCount().toString()" valueColor="primary" />
-      <app-kpi-chip [label]="'mrp.kpi.firmedOrders' | translate" [value]="firmedOrderCount().toString()" valueColor="warn" />
+      <app-kpi-chip [label]="'mrp.kpi.firmedOrders' | translate" [value]="firmedOrderCount().toString()" valueColor="primary" />
       <app-kpi-chip [label]="'mrp.kpi.unresolvedExceptions' | translate" [value]="unresolvedExceptionCount().toString()"
         [valueColor]="unresolvedExceptionCount() > 0 ? 'warn' : 'success'" />
     </div>
