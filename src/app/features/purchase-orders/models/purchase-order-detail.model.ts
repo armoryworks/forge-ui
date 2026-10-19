@@ -56,4 +56,5 @@ export interface PurchaseOrderDetail {
   shipToLocationId?: number | null;
   shipToLocationName?: string | null;
   shipToAddressText?: string | null;
+  rowVersion?: number;
 }
