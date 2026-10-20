@@ -7,12 +7,12 @@
   </ng-container>
 
   <ng-container content>
-    <div class="tab-bar">
-      <button class="tab" [class.tab--active]="activeTab() === 'proposals'" (click)="switchTab('proposals')">
+    <div class="tab-bar" appTabList>
+      <button class="tab" [appTab]="activeTab() === 'proposals'" (click)="switchTab('proposals')">
         {{ 'watchtower.tabs.proposals' | translate }}
         @if (pendingCount() > 0) { <span class="chip chip--warning wt-tab-badge">{{ pendingCount() }}</span> }
       </button>
-      <button class="tab" [class.tab--active]="activeTab() === 'sources'" (click)="switchTab('sources')">
+      <button class="tab" [appTab]="activeTab() === 'sources'" (click)="switchTab('sources')">
         {{ 'watchtower.tabs.sources' | translate }}
       </button>
     </div>

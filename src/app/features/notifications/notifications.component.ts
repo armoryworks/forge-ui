@@ -14,11 +14,14 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { SelectOption } from '../../shared/components/select/select.component';
 import { NotificationService } from '../../shared/services/notification.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
+import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 
 @Component({
   selector: 'app-notifications',
   standalone: true,
   imports: [
+    TabListDirective,
+    TabDirective,
     ReactiveFormsModule,
     PageHeaderComponent,
     DataTableComponent,

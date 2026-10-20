@@ -22,6 +22,7 @@ import {
   ApplyProposalDialogData,
   ApplyProposalDialogResult,
 } from './components/apply-proposal-dialog/apply-proposal-dialog.component';
+import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 
 type WatchtowerTab = 'proposals' | 'sources';
 
@@ -33,7 +34,7 @@ type WatchtowerTab = 'proposals' | 'sources';
 @Component({
   selector: 'app-watchtower',
   standalone: true,
-  imports: [ReactiveFormsModule, DatePipe, TranslatePipe, PageLayoutComponent, SelectComponent, EmptyStateComponent],
+  imports: [TabListDirective, TabDirective, ReactiveFormsModule, DatePipe, TranslatePipe, PageLayoutComponent, SelectComponent, EmptyStateComponent],
   templateUrl: './watchtower.component.html',
   styleUrl: './watchtower.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -9,12 +9,12 @@
   </div>
 
   <!-- Tabs -->
-  <div class="tab-bar">
-    <button class="tab" [class.tab--active]="activeTab() === 'gantt'" (click)="switchTab('gantt')">{{ 'scheduling.tabs.schedule' | translate }}</button>
-    <button class="tab" [class.tab--active]="activeTab() === 'dispatch'" (click)="switchTab('dispatch')">{{ 'scheduling.tabs.dispatch' | translate }}</button>
-    <button class="tab" [class.tab--active]="activeTab() === 'work-centers'" (click)="switchTab('work-centers')">{{ 'scheduling.tabs.workCenters' | translate }}</button>
-    <button class="tab" [class.tab--active]="activeTab() === 'shifts'" (click)="switchTab('shifts')">{{ 'scheduling.tabs.shifts' | translate }}</button>
-    <button class="tab" [class.tab--active]="activeTab() === 'runs'" (click)="switchTab('runs')">{{ 'scheduling.tabs.runHistory' | translate }}</button>
+  <div class="tab-bar" appTabList>
+    <button class="tab" [appTab]="activeTab() === 'gantt'" (click)="switchTab('gantt')">{{ 'scheduling.tabs.schedule' | translate }}</button>
+    <button class="tab" [appTab]="activeTab() === 'dispatch'" (click)="switchTab('dispatch')">{{ 'scheduling.tabs.dispatch' | translate }}</button>
+    <button class="tab" [appTab]="activeTab() === 'work-centers'" (click)="switchTab('work-centers')">{{ 'scheduling.tabs.workCenters' | translate }}</button>
+    <button class="tab" [appTab]="activeTab() === 'shifts'" (click)="switchTab('shifts')">{{ 'scheduling.tabs.shifts' | translate }}</button>
+    <button class="tab" [appTab]="activeTab() === 'runs'" (click)="switchTab('runs')">{{ 'scheduling.tabs.runHistory' | translate }}</button>
   </div>
 
   <!-- Gantt / Schedule Tab -->

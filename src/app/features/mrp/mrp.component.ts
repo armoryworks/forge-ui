@@ -55,6 +55,7 @@ import {
   MpsVsActualDialogData,
 } from './components/mps-vs-actual-dialog.component';
 import { GenerateForecastRequest } from './models/mrp.model';
+import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 
 type MrpTab = 'dashboard' | 'planned-orders' | 'exceptions' | 'runs' | 'master-schedule' | 'forecasts';
 
@@ -64,6 +65,8 @@ const VALID_TABS = new Set<MrpTab>(['dashboard', 'planned-orders', 'exceptions',
   selector: 'app-mrp',
   standalone: true,
   imports: [
+    TabListDirective,
+    TabDirective,
     ReactiveFormsModule,
     TranslatePipe,
     PageHeaderComponent,

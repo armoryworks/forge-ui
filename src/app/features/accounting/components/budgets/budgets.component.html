@@ -18,11 +18,11 @@
       }
     </div>
 
-    <div class="tab-bar" role="tablist">
-      <button type="button" role="tab" class="tab" [class.tab--active]="mode() === 'entry'" [attr.aria-selected]="mode() === 'entry'" (click)="setMode('entry')">
+    <div class="tab-bar" appTabList>
+      <button class="tab" [appTab]="mode() === 'entry'" (click)="setMode('entry')">
         {{ 'accounting.budget.entryTab' | translate }}
       </button>
-      <button type="button" role="tab" class="tab" [class.tab--active]="mode() === 'vs-actual'" [attr.aria-selected]="mode() === 'vs-actual'" (click)="setMode('vs-actual')">
+      <button class="tab" [appTab]="mode() === 'vs-actual'" (click)="setMode('vs-actual')">
         {{ 'accounting.budget.vsActualTab' | translate }}
       </button>
     </div>

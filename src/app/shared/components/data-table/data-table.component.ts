@@ -5,12 +5,14 @@ import {
   contentChild,
   contentChildren,
   DestroyRef,
+  effect,
   inject,
   input,
   OnInit,
   output,
   signal,
   TemplateRef,
+  untracked,
   viewChild,
 ElementRef, } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
@@ -320,6 +322,17 @@ export class DataTableComponent implements OnInit {
     if (this.expandable()) count++;
     return count;
   });
+
+  constructor() {
+    effect(() => {
+      const clamped = this.effectivePageIndex();
+      if (untracked(this.pageIndex) !== clamped) this.pageIndex.set(clamped);
+    });
+    effect(() => {
+      this.data();
+      untracked(() => this.pruneSelectionToFiltered());
+    });
+  }
 
   ngOnInit(): void {
     this.loadPreferences();

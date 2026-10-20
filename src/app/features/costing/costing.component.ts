@@ -38,6 +38,7 @@ import {
   WorkCenterCostRate,
   CostingTemplate,
 } from './models/costing.model';
+import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 
 type CostingTab = 'periods' | 'cost-centers' | 'pools' | 'templates';
 
@@ -45,6 +46,8 @@ type CostingTab = 'periods' | 'cost-centers' | 'pools' | 'templates';
   selector: 'app-costing',
   standalone: true,
   imports: [
+    TabListDirective,
+    TabDirective,
     ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent, DatepickerComponent,
     ToggleComponent, PageLayoutComponent, DataTableComponent, ColumnCellDirective, DatePipe,
     ViewModeToggleComponent, CostingRatesVisualComponent, SpacerDirective,

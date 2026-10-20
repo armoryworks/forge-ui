@@ -51,23 +51,23 @@
     </div>
   }
 
-  <div class="tab-bar">
-    <button class="tab" [class.tab--active]="activeTab() === 'bills'" (click)="switchTab('bills')">
+  <div class="tab-bar" appTabList>
+    <button class="tab" [appTab]="activeTab() === 'bills'" (click)="switchTab('bills')">
       <span class="material-icons-outlined">receipt_long</span>
       {{ 'payables.tabBills' | translate }}
     </button>
     @if (canReadPayments) {
-      <button class="tab" [class.tab--active]="activeTab() === 'payments'" (click)="switchTab('payments')">
+      <button class="tab" [appTab]="activeTab() === 'payments'" (click)="switchTab('payments')">
         <span class="material-icons-outlined">payments</span>
         {{ 'payables.tabPayments' | translate }}
       </button>
     }
     @if (nachaEnabled()) {
-      <button class="tab" [class.tab--active]="activeTab() === 'batches'" (click)="switchTab('batches')">
+      <button class="tab" [appTab]="activeTab() === 'batches'" (click)="switchTab('batches')">
         <span class="material-icons-outlined">account_balance</span>
         {{ 'payables.tabBatches' | translate }}
       </button>
-      <button class="tab" [class.tab--active]="activeTab() === 'accounts'" (click)="switchTab('accounts')">
+      <button class="tab" [appTab]="activeTab() === 'accounts'" (click)="switchTab('accounts')">
         <span class="material-icons-outlined">credit_card</span>
         {{ 'payables.tabAccounts' | translate }}
       </button>

@@ -40,17 +40,13 @@
     </div>
 
     <!-- Tab Bar -->
-    <div class="tab-bar" role="tablist" aria-label="Sales order detail tabs">
-      <button class="tab" role="tab"
-        [class.tab--active]="activeTab() === 'overview'"
-        [attr.aria-selected]="activeTab() === 'overview'"
+    <div class="tab-bar" appTabList aria-label="Sales order detail tabs">
+      <button class="tab" [appTab]="activeTab() === 'overview'"
         (click)="switchTab('overview')"
         aria-label="Overview tab">
         {{ 'common.overview' | translate }}
       </button>
-      <button class="tab" role="tab"
-        [class.tab--active]="activeTab() === 'lines'"
-        [attr.aria-selected]="activeTab() === 'lines'"
+      <button class="tab" [appTab]="activeTab() === 'lines'"
         (click)="switchTab('lines')"
         aria-label="Line items tab">
         {{ 'salesOrders.lineItems' | translate }}
@@ -59,9 +55,7 @@
           <span class="material-icons-outlined tab__warning" [matTooltip]="'salesOrders.lineItemsNoJobWarning' | translate" matTooltipPosition="above" [attr.aria-label]="'salesOrders.lineItemsNoJobWarning' | translate">warning</span>
         }
       </button>
-      <button class="tab" role="tab"
-        [class.tab--active]="activeTab() === 'schedule'"
-        [attr.aria-selected]="activeTab() === 'schedule'"
+      <button class="tab" [appTab]="activeTab() === 'schedule'"
         (click)="switchTab('schedule')"
         aria-label="Schedule tab">
         {{ 'salesOrders.schedule.tab' | translate }}
@@ -70,17 +64,13 @@
         }
       </button>
       @if (canViewFulfilmentRecords()) {
-        <button class="tab" role="tab"
-          [class.tab--active]="activeTab() === 'stages'"
-          [attr.aria-selected]="activeTab() === 'stages'"
+        <button class="tab" [appTab]="activeTab() === 'stages'"
           (click)="switchTab('stages')"
           aria-label="Staged schedule tab">
           {{ 'salesOrders.stages.tab' | translate }}
         </button>
       }
-      <button class="tab" role="tab"
-        [class.tab--active]="activeTab() === 'shipments'"
-        [attr.aria-selected]="activeTab() === 'shipments'"
+      <button class="tab" [appTab]="activeTab() === 'shipments'"
         (click)="switchTab('shipments')"
         aria-label="Shipments tab">
         {{ 'salesOrders.shipments' | translate }}
@@ -91,9 +81,7 @@
           <span class="material-icons-outlined tab__warning" [matTooltip]="'salesOrders.tabWarning.partiallyShipped' | translate" matTooltipPosition="above" [attr.aria-label]="'salesOrders.tabWarning.partiallyShipped' | translate">warning</span>
         }
       </button>
-      <button class="tab" role="tab"
-        [class.tab--active]="activeTab() === 'returns'"
-        [attr.aria-selected]="activeTab() === 'returns'"
+      <button class="tab" [appTab]="activeTab() === 'returns'"
         (click)="switchTab('returns')"
         aria-label="Returns tab">
         {{ 'salesOrders.returns' | translate }}
@@ -101,9 +89,7 @@
           <span class="material-icons-outlined tab__warning" [matTooltip]="'salesOrders.tabWarning.openReturns' | translate" matTooltipPosition="above" [attr.aria-label]="'salesOrders.tabWarning.openReturns' | translate">warning</span>
         }
       </button>
-      <button class="tab" role="tab"
-        [class.tab--active]="activeTab() === 'documents'"
-        [attr.aria-selected]="activeTab() === 'documents'"
+      <button class="tab" [appTab]="activeTab() === 'documents'"
         (click)="switchTab('documents')"
         aria-label="Documents tab">
         {{ 'salesOrders.documents' | translate }}
@@ -111,9 +97,7 @@
           <span class="tab__count">{{ documentCount() }}</span>
         }
       </button>
-      <button class="tab" role="tab"
-        [class.tab--active]="activeTab() === 'invoices'"
-        [attr.aria-selected]="activeTab() === 'invoices'"
+      <button class="tab" [appTab]="activeTab() === 'invoices'"
         (click)="switchTab('invoices')"
         aria-label="Invoices tab">
         {{ 'salesOrders.invoices' | translate }}
@@ -125,17 +109,13 @@
         }
       </button>
       @if (canViewFulfilmentRecords()) {
-        <button class="tab" role="tab"
-          [class.tab--active]="activeTab() === 'customer-po'"
-          [attr.aria-selected]="activeTab() === 'customer-po'"
+        <button class="tab" [appTab]="activeTab() === 'customer-po'"
           (click)="switchTab('customer-po')"
           aria-label="Customer P.O. tab">
           {{ 'salesOrders.customerPoDoc.tab' | translate }}
         </button>
       }
-      <button *appCap="'CAP-O2C-SO-ACCEPTANCE'" class="tab" role="tab"
-        [class.tab--active]="activeTab() === 'acceptance'"
-        [attr.aria-selected]="activeTab() === 'acceptance'"
+      <button *appCap="'CAP-O2C-SO-ACCEPTANCE'" class="tab" [appTab]="activeTab() === 'acceptance'"
         (click)="switchTab('acceptance')"
         aria-label="Customer acceptance tab">
         {{ 'salesOrders.acceptance.tab' | translate }}
@@ -143,9 +123,7 @@
           <span class="material-icons-outlined tab__warning" [matTooltip]="'salesOrders.acceptance.noneBanner' | translate" matTooltipPosition="above" [attr.aria-label]="'salesOrders.acceptance.noneBanner' | translate">warning</span>
         }
       </button>
-      <button class="tab" role="tab"
-        [class.tab--active]="activeTab() === 'activity'"
-        [attr.aria-selected]="activeTab() === 'activity'"
+      <button class="tab" [appTab]="activeTab() === 'activity'"
         (click)="switchTab('activity')"
         aria-label="Activity tab">
         {{ 'common.activity' | translate }}

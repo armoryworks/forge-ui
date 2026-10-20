@@ -37,6 +37,7 @@ import {
   WorkCenterLoad,
   Shift,
 } from './models/scheduling.model';
+import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 
 type SchedulingTab = 'gantt' | 'dispatch' | 'work-centers' | 'shifts' | 'runs';
 
@@ -46,6 +47,8 @@ const VALID_TABS = new Set<SchedulingTab>(['gantt', 'dispatch', 'work-centers', 
   selector: 'app-scheduling',
   standalone: true,
   imports: [
+    TabListDirective,
+    TabDirective,
     ReactiveFormsModule,
     PageHeaderComponent,
     DataTableComponent,

@@ -1,27 +1,27 @@
 <app-dialog [title]="data.operation ? ('parts.editOperation' | translate) + ' — Op ' + data.operation.stepNumber : ('parts.addOperation' | translate)" width="800px" [draftConfig]="draftConfig" [draftFormGroup]="formGroup" (closed)="matDialogRef.close()">
 
   <!-- Tabs -->
-  <div class="tab-bar">
-    <button class="tab" [class.tab--active]="activeTab() === 'details'" (click)="activeTab.set('details')">
+  <div class="tab-bar" appTabList>
+    <button class="tab" [appTab]="activeTab() === 'details'" (click)="activeTab.set('details')">
       <span class="material-icons-outlined">settings</span>
       {{ 'parts.operationDetails' | translate }}
     </button>
     @if (isEditMode) {
-      <button class="tab" [class.tab--active]="activeTab() === 'materials'" (click)="activeTab.set('materials')">
+      <button class="tab" [appTab]="activeTab() === 'materials'" (click)="activeTab.set('materials')">
         <span class="material-icons-outlined">category</span>
         {{ 'parts.operationMaterials' | translate }}
         @if (materials().length > 0) {
           <span class="tab__badge">{{ materials().length }}</span>
         }
       </button>
-      <button class="tab" [class.tab--active]="activeTab() === 'files'" (click)="activeTab.set('files')">
+      <button class="tab" [appTab]="activeTab() === 'files'" (click)="activeTab.set('files')">
         <span class="material-icons-outlined">attach_file</span>
         {{ 'parts.operationFiles' | translate }}
         @if (files().length > 0) {
           <span class="tab__badge">{{ files().length }}</span>
         }
       </button>
-      <button class="tab" [class.tab--active]="activeTab() === 'activity'" (click)="activeTab.set('activity')">
+      <button class="tab" [appTab]="activeTab() === 'activity'" (click)="activeTab.set('activity')">
         <span class="material-icons-outlined">history</span>
         {{ 'parts.operationActivity' | translate }}
       </button>

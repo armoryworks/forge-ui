@@ -1,11 +1,11 @@
 <app-page-header [title]="'notifications.title' | translate" [subtitle]="'notifications.subtitle' | translate" />
 
 <div class="notifications-layout">
-  <div class="tab-bar">
-    <button class="tab" [class.tab--active]="activeTab() === 'all'" (click)="setTab('all')">
+  <div class="tab-bar" appTabList>
+    <button class="tab" [appTab]="activeTab() === 'all'" (click)="setTab('all')">
       {{ 'notifications.allNotifications' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'preferences'" (click)="setTab('preferences')">
+    <button class="tab" [appTab]="activeTab() === 'preferences'" (click)="setTab('preferences')">
       {{ 'notifications.preferences' | translate }}
     </button>
   </div>

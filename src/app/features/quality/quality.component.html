@@ -44,12 +44,12 @@
 </app-page-header>
 
 <div class="quality-content">
-  <div class="tab-bar">
-    <button class="tab" [class.tab--active]="activeTab() === 'inspections'" (click)="switchTab('inspections')">
+  <div class="tab-bar" appTabList>
+    <button class="tab" [appTab]="activeTab() === 'inspections'" (click)="switchTab('inspections')">
       <span class="material-icons-outlined">fact_check</span>
       {{ 'quality.qcInspections' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'templates'" data-testid="qc-templates-tab" (click)="switchTab('templates')">
+    <button class="tab" [appTab]="activeTab() === 'templates'" data-testid="qc-templates-tab" (click)="switchTab('templates')">
       <span class="material-icons-outlined">checklist</span>
       {{ 'qcInspections.tabTemplates' | translate }}
     </button>
@@ -57,31 +57,31 @@
       <span class="material-icons-outlined">qr_code_2</span>
       {{ 'quality.lotTracking' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'spc-charts'" (click)="switchTab('spc-charts')">
+    <button class="tab" [appTab]="activeTab() === 'spc-charts'" (click)="switchTab('spc-charts')">
       <span class="material-icons-outlined">show_chart</span>
       {{ 'qcInspections.tabSpcCharts' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'spc-data'" (click)="switchTab('spc-data')">
+    <button class="tab" [appTab]="activeTab() === 'spc-data'" (click)="switchTab('spc-data')">
       <span class="material-icons-outlined">edit_note</span>
       {{ 'qcInspections.tabSpcData' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'spc-ooc'" (click)="switchTab('spc-ooc')">
+    <button class="tab" [appTab]="activeTab() === 'spc-ooc'" (click)="switchTab('spc-ooc')">
       <span class="material-icons-outlined">warning</span>
       {{ 'qcInspections.tabOocEvents' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'ncrs'" (click)="switchTab('ncrs')">
+    <button class="tab" [appTab]="activeTab() === 'ncrs'" (click)="switchTab('ncrs')">
       <span class="material-icons-outlined">report_problem</span>
       {{ 'qcInspections.tabNcrs' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'capas'" (click)="switchTab('capas')">
+    <button class="tab" [appTab]="activeTab() === 'capas'" (click)="switchTab('capas')">
       <span class="material-icons-outlined">assignment_turned_in</span>
       {{ 'qcInspections.tabCapas' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'ecos'" (click)="switchTab('ecos')">
+    <button class="tab" [appTab]="activeTab() === 'ecos'" (click)="switchTab('ecos')">
       <span class="material-icons-outlined">engineering</span>
       {{ 'qcInspections.tabEcos' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'gages'" (click)="switchTab('gages')">
+    <button class="tab" [appTab]="activeTab() === 'gages'" (click)="switchTab('gages')">
       <span class="material-icons-outlined">straighten</span>
       {{ 'qcInspections.tabGages' | translate }}
     </button>

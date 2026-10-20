@@ -9,13 +9,14 @@ import { AuthService } from '../../shared/services/auth.service';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { ApprovalInboxComponent } from './components/approval-inbox/approval-inbox.component';
 import { ApprovalWorkflowEditorComponent } from './components/approval-workflow-editor/approval-workflow-editor.component';
+import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 
 type ApprovalsTab = 'inbox' | 'workflows';
 
 @Component({
   selector: 'app-approvals',
   standalone: true,
-  imports: [TranslatePipe, PageHeaderComponent, ApprovalInboxComponent, ApprovalWorkflowEditorComponent],
+  imports: [TabListDirective, TabDirective, TranslatePipe, PageHeaderComponent, ApprovalInboxComponent, ApprovalWorkflowEditorComponent],
   templateUrl: './approvals.component.html',
   styleUrl: './approvals.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

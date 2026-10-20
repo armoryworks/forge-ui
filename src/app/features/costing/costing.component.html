@@ -8,21 +8,17 @@
   </ng-container>
 
   <ng-container content>
-    <div class="tab-bar" role="tablist">
-      <button class="tab" role="tab" [attr.aria-selected]="activeTab() === 'periods'"
-        [class.tab--active]="activeTab() === 'periods'" (click)="switchTab('periods')" data-testid="costing-tab-periods">
+    <div class="tab-bar" appTabList>
+      <button class="tab" [appTab]="activeTab() === 'periods'" (click)="switchTab('periods')" data-testid="costing-tab-periods">
         {{ 'costing.tabs.periods' | translate }}
       </button>
-      <button class="tab" role="tab" [attr.aria-selected]="activeTab() === 'cost-centers'"
-        [class.tab--active]="activeTab() === 'cost-centers'" (click)="switchTab('cost-centers')" data-testid="costing-tab-cost-centers">
+      <button class="tab" [appTab]="activeTab() === 'cost-centers'" (click)="switchTab('cost-centers')" data-testid="costing-tab-cost-centers">
         {{ 'costing.tabs.costCenters' | translate }}
       </button>
-      <button class="tab" role="tab" [attr.aria-selected]="activeTab() === 'pools'"
-        [class.tab--active]="activeTab() === 'pools'" (click)="switchTab('pools')" data-testid="costing-tab-pools">
+      <button class="tab" [appTab]="activeTab() === 'pools'" (click)="switchTab('pools')" data-testid="costing-tab-pools">
         {{ 'costing.tabs.pools' | translate }}
       </button>
-      <button class="tab" role="tab" [attr.aria-selected]="activeTab() === 'templates'"
-        [class.tab--active]="activeTab() === 'templates'" (click)="switchTab('templates')" data-testid="costing-tab-templates">
+      <button class="tab" [appTab]="activeTab() === 'templates'" (click)="switchTab('templates')" data-testid="costing-tab-templates">
         {{ 'costing.tabs.templates' | translate }}
       </button>
     </div>

@@ -29,6 +29,7 @@ import { DetailDialogService } from '../../shared/services/detail-dialog.service
 import { AuthService } from '../../shared/services/auth.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
+import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 
 type PoTab = 'orders' | 'suggestions' | 'settings';
 
@@ -36,6 +37,8 @@ type PoTab = 'orders' | 'suggestions' | 'settings';
   selector: 'app-purchase-orders',
   standalone: true,
   imports: [
+    TabListDirective,
+    TabDirective,
     ReactiveFormsModule, DatePipe, DateOnlyPipe, TranslatePipe, MatTooltipModule,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective,

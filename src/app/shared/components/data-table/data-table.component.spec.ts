@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed, ComponentFixture, ComponentFixtureAutoDetect } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { DataTableComponent } from './data-table.component';
 import { ColumnDef } from '../../models/column-def.model';
@@ -84,6 +85,7 @@ describe('DataTableComponent · behaviour', () => {
     TestBed.configureTestingModule({
       providers: [
         provideNoopAnimations(),
+        provideTranslateService(),
         { provide: ComponentFixtureAutoDetect, useValue: false },
         { provide: UserPreferencesService, useValue: { get: () => null, set: () => undefined, reset: () => undefined } },
       ],
@@ -111,6 +113,19 @@ describe('DataTableComponent · behaviour', () => {
     fixture.componentRef.setInput('data', rows(59));
 
     expect(internals.effectivePageIndex()).toBe(1);
+  });
+
+  it('stays on the first page when the parent data shrinks and then grows back', () => {
+    setup([{ field: 'name', header: 'Name' }], rows(60));
+    internals.pageIndex.set(2);
+    TestBed.tick();
+
+    fixture.componentRef.setInput('data', rows(5));
+    TestBed.tick();
+    fixture.componentRef.setInput('data', rows(60));
+    TestBed.tick();
+
+    expect(internals.effectivePageIndex()).toBe(0);
   });
 
   it('sorts text with embedded numbers naturally', () => {
@@ -249,5 +264,19 @@ describe('DataTableComponent · behaviour', () => {
     table.onFilterApplied({ field: 'name', value: 'row 2' });
 
     expect(emitted.at(-1)).toEqual([{ id: 2, name: 'Row 2' }]);
+  });
+
+  it('drops rows the parent removes from the data from the selection handed to bulk actions', () => {
+    setup([{ field: 'name', header: 'Name' }], rows(3), { selectable: true });
+    TestBed.tick();
+    const emitted: unknown[][] = [];
+    table.selectionChange.subscribe(sel => emitted.push(sel));
+    table.toggleSelectAll();
+    expect(emitted.at(-1)!.length).toBe(3);
+
+    fixture.componentRef.setInput('data', rows(1));
+    TestBed.tick();
+
+    expect(emitted.at(-1)).toEqual([{ id: 1, name: 'Row 1' }]);
   });
 });
