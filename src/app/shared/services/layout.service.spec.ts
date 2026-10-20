@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 
 import { DesktopPreferenceService } from './desktop-preference.service';
 import { LayoutService } from './layout.service';
@@ -189,6 +190,33 @@ describe('LayoutService', () => {
       vi.spyOn(service, 'isMobileDevice').mockReturnValue(true);
       vi.spyOn(TestBed.inject(DesktopPreferenceService), 'isPreferred').mockReturnValue(true);
       expect(service.getDefaultRoute()).toBe('/dashboard');
+    });
+  });
+
+  describe('getMfaEnrollmentRoute', () => {
+    it('sends a desktop user to the account security page', () => {
+      expect(service.getMfaEnrollmentRoute()).toBe('/account/security');
+    });
+
+    it('sends a phone to the security page inside the mobile shell', () => {
+      vi.spyOn(service, 'isMobileDevice').mockReturnValue(true);
+      expect(service.getMfaEnrollmentRoute()).toBe('/m/account/security');
+    });
+
+    it('keeps a phone that chose the desktop site on the desktop security page', () => {
+      vi.spyOn(service, 'isMobileDevice').mockReturnValue(true);
+      vi.spyOn(TestBed.inject(DesktopPreferenceService), 'isPreferred').mockReturnValue(true);
+      expect(service.getMfaEnrollmentRoute()).toBe('/account/security');
+    });
+
+    it('keeps a user already in the mobile shell inside it', () => {
+      vi.spyOn(TestBed.inject(Router), 'url', 'get').mockReturnValue('/m/jobs/42?tab=ops');
+      expect(service.getMfaEnrollmentRoute()).toBe('/m/account/security');
+    });
+
+    it('does not mistake a desktop route that starts with m for the mobile shell', () => {
+      vi.spyOn(TestBed.inject(Router), 'url', 'get').mockReturnValue('/maintenance');
+      expect(service.getMfaEnrollmentRoute()).toBe('/account/security');
     });
   });
 

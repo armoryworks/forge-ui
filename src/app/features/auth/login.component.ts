@@ -173,7 +173,7 @@ export class LoginComponent implements OnInit {
 
   private navigatePostLogin(user: AuthUser | null | undefined, mfaEnrollmentRequired = false): void {
     if (mfaEnrollmentRequired) {
-      this.router.navigate(['/account/security']);
+      this.router.navigate([this.layout.getMfaEnrollmentRoute()]);
       return;
     }
     if (needsProfileCompletion(user, window.innerWidth)) {

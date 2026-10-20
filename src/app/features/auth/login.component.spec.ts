@@ -25,6 +25,7 @@ describe('LoginComponent', () => {
   let host: HTMLElement;
   let auth: { isAuthenticated: WritableSignal<boolean>; user: WritableSignal<AuthUser | null>; login: ReturnType<typeof vi.fn>; getSsoProviders: ReturnType<typeof vi.fn> };
   let router: { navigate: ReturnType<typeof vi.fn>; navigateByUrl: ReturnType<typeof vi.fn> };
+  let mfaRoute: string;
 
   beforeEach(() => {
     host = document.createElement('div');
@@ -38,6 +39,7 @@ describe('LoginComponent', () => {
       getSsoProviders: vi.fn(() => of([])),
     };
     router = { navigate: vi.fn(), navigateByUrl: vi.fn() };
+    mfaRoute = '/account/security';
 
     TestBed.configureTestingModule({
       providers: [
@@ -45,7 +47,7 @@ describe('LoginComponent', () => {
         { provide: AuthService, useValue: auth },
         { provide: Router, useValue: router },
         { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({}) } } },
-        { provide: LayoutService, useValue: { getDefaultRoute: () => '/dashboard' } },
+        { provide: LayoutService, useValue: { getDefaultRoute: () => '/dashboard', getMfaEnrollmentRoute: () => mfaRoute } },
         { provide: BrandingService, useValue: {} },
         { provide: SnackbarService, useValue: { error: vi.fn(), info: vi.fn() } },
         { provide: ToastService, useValue: { show: vi.fn() } },
@@ -114,5 +116,16 @@ describe('LoginComponent', () => {
     login.onSubmit();
 
     expect(router.navigate).toHaveBeenCalledWith(['/account/security']);
+  });
+
+  it('sends a phone user who must enrol in MFA to the security page inside the mobile shell', () => {
+    mfaRoute = '/m/account/security';
+    respond({ user: user(['Controller'], true), mfaEnrollmentRequired: true });
+    const login = create();
+    autofill('controller@forge.local', 'correct horse');
+
+    login.onSubmit();
+
+    expect(router.navigate).toHaveBeenCalledWith(['/m/account/security']);
   });
 });
