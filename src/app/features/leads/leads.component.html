@@ -285,7 +285,7 @@
 
 @if (showBulkAssignDialog()) {
   <app-dialog [title]="'leads.bulkAssignTitle' | translate" width="480px" (closed)="closeBulkAssignDialog()">
-    <p class="hint">{{ 'leads.bulkAssignHint' | translate:{ count: selectedLeads().length } }}</p>
+    <p class="hint">{{ (selectedLeads().length === 1 ? 'leads.bulkAssignHintOne' : 'leads.bulkAssignHintOther') | translate: { count: selectedLeads().length } }}</p>
     <div class="dialog-row">
       <app-select
         [label]="'leads.owner' | translate"

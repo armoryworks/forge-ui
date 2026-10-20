@@ -41,3 +41,10 @@
   font-family: $font-family-mono;
 }
 
+.price-tiers-dialog__open {
+  font-size: $font-size-xxs;
+  color: var(--success);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

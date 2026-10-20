@@ -21,6 +21,7 @@ interface CarriersInternals {
   openCreate(): void;
   saveCarrier(): void;
   showCarrierDialog(): boolean;
+  columns: { field: string; header: string }[];
 }
 
 function setup() {
@@ -67,5 +68,18 @@ describe('CarriersComponent edit', () => {
 
     expect(service.update).not.toHaveBeenCalled();
     expect(service.create).toHaveBeenCalledWith(expect.objectContaining({ name: 'House courier' }));
+  });
+
+  it('translates every column header', () => {
+    const { component } = setup();
+
+    expect(component.columns.filter(c => c.header).map(c => c.header)).toEqual([
+      'admin.carriers.cols.name',
+      'admin.carriers.cols.code',
+      'admin.carriers.cols.integration',
+      'admin.carriers.cols.scan',
+      'admin.carriers.cols.credentials',
+      'admin.carriers.cols.active',
+    ]);
   });
 });

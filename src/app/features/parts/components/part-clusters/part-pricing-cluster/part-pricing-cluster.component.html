@@ -60,7 +60,7 @@
           </span>
         </ng-template>
         <ng-template appColumnCell="notes" let-row>
-          <span [class.cluster__value--muted]="row.effectiveTo !== null">{{ row.notes || '---' }}</span>
+          <span [class.cluster__value--muted]="row.effectiveTo !== null">{{ row.notes || '—' }}</span>
         </ng-template>
         <ng-template appColumnCell="actions" let-row>
           @if (editing() && row.id === openRowId()) {

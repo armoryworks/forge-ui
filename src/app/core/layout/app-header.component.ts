@@ -65,16 +65,22 @@ export class AppHeaderComponent implements OnInit {
 
   private readonly crumbTrail = computed(() => collapseRepeatedCrumbs(this.navTree.breadcrumbTrail()));
 
+  protected readonly recordCrumb = this.navTree.recordCrumb;
+
+  private readonly visibleTrailCap = computed(() => this.recordCrumb() ? this.maxVisibleCrumbs - 1 : this.maxVisibleCrumbs);
+
   protected readonly visibleCrumbs = computed(() => {
     const trail = this.crumbTrail();
-    if (trail.length <= this.maxVisibleCrumbs) return trail;
-    return trail.slice(-this.maxVisibleCrumbs);
+    const cap = this.visibleTrailCap();
+    if (trail.length <= cap) return trail;
+    return trail.slice(-cap);
   });
 
   protected readonly hiddenCrumbs = computed(() => {
     const trail = this.crumbTrail();
-    if (trail.length <= this.maxVisibleCrumbs) return [];
-    return trail.slice(0, trail.length - this.maxVisibleCrumbs);
+    const cap = this.visibleTrailCap();
+    if (trail.length <= cap) return [];
+    return trail.slice(0, trail.length - cap);
   });
 
   /**

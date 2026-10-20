@@ -1191,7 +1191,7 @@
           </div>
         }
         <div dialog-footer>
-          <button class="action-btn" (click)="showSignatureDialog.set(false)">{{ 'common.close' | translate }}</button>
+          <button class="action-btn" data-testid="so-signature-dismiss" (click)="showSignatureDialog.set(false)">{{ (signatureSubmitUrl() ? 'common.close' : 'common.cancel') | translate }}</button>
           <button class="action-btn action-btn--primary" [disabled]="signatureForm.invalid || savingAcceptance()" (click)="sendSignature()">
             <span class="material-icons-outlined">send</span>
             {{ 'salesOrders.acceptance.send' | translate }}
@@ -1220,7 +1220,7 @@
           </div>
         }
         <div dialog-footer>
-          <button class="action-btn" (click)="showPortalDialog.set(false)">{{ 'common.close' | translate }}</button>
+          <button class="action-btn" data-testid="so-portal-dismiss" (click)="showPortalDialog.set(false)">{{ (portalLink() ? 'common.close' : 'common.cancel') | translate }}</button>
           <button class="action-btn action-btn--primary" [disabled]="portalForm.invalid || savingAcceptance()" (click)="requestPortal()">
             <span class="material-icons-outlined">link</span>
             {{ 'salesOrders.acceptance.generateLink' | translate }}

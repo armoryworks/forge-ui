@@ -6,6 +6,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { EmployeeService } from '../../services/employee.service';
+import { NavTreeService } from '../../../../shared/services/nav-tree.service';
 import { EmployeeDetail, EmployeeStats } from '../../models/employee.model';
 import { EmployeeKind } from '../../models/employee-kind.model';
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
@@ -47,6 +48,7 @@ export class EmployeeDetailComponent {
   private readonly router = inject(Router);
   private readonly employeeService = inject(EmployeeService);
   private readonly translate = inject(TranslateService);
+  private readonly navTree = inject(NavTreeService);
 
   protected readonly employeeId = toSignal(
     this.route.paramMap.pipe(map(p => parsePositiveId(p.get('id')))),
@@ -89,6 +91,11 @@ export class EmployeeDetailComponent {
         this.loadError.set(notFoundError());
         this.loading.set(false);
       }
+    });
+
+    effect(() => {
+      const e = this.employee();
+      if (e) this.navTree.setRecordCrumb(this.displayName(), `/employees/${e.id}`);
     });
   }
 

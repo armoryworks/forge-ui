@@ -19,6 +19,10 @@
         emptyIcon="local_shipping"
         [emptyMessage]="'admin.carriers.empty' | translate">
 
+        <ng-template appColumnCell="integrationKind" let-row>
+          {{ (row.integrationKind === 'Api' ? 'admin.carriers.kindApi' : 'admin.carriers.kindManual') | translate }}
+        </ng-template>
+
         <ng-template appColumnCell="requiresScanToShip" let-row>
           @if (row.requiresScanToShip) {
             <span class="material-icons-outlined scan-icon" [attr.aria-label]="'admin.carriers.scanRequired' | translate"

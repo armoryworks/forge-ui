@@ -162,23 +162,23 @@
       </ng-template>
 
       <ng-template appColumnCell="vendorPartNumber" let-row>
-        <span class="text-muted">{{ row.vendorPartNumber || '---' }}</span>
+        <span class="text-muted">{{ row.vendorPartNumber || '—' }}</span>
       </ng-template>
 
       <ng-template appColumnCell="vendorMpn" let-row>
-        <span class="text-muted">{{ row.vendorMpn || '---' }}</span>
+        <span class="text-muted">{{ row.vendorMpn || '—' }}</span>
       </ng-template>
 
       <ng-template appColumnCell="leadTimeDays" let-row>
-        <span class="text-muted">{{ row.leadTimeDays !== null ? row.leadTimeDays + 'd' : '---' }}</span>
+        <span class="text-muted">{{ row.leadTimeDays !== null ? row.leadTimeDays + 'd' : '—' }}</span>
       </ng-template>
 
       <ng-template appColumnCell="minOrderQty" let-row>
-        <span class="text-muted">{{ row.minOrderQty ?? '---' }}</span>
+        <span class="text-muted">{{ row.minOrderQty ?? '—' }}</span>
       </ng-template>
 
       <ng-template appColumnCell="packSize" let-row>
-        <span class="text-muted">{{ row.packSize ?? '---' }}</span>
+        <span class="text-muted">{{ row.packSize ?? '—' }}</span>
       </ng-template>
 
       <ng-template appColumnCell="lowestTierPrice" let-row>
@@ -197,7 +197,7 @@
             [matTooltip]="'vendorPart.priceTiersLabel' | translate"
             matTooltipPosition="above"
             [attr.aria-label]="'vendorPart.priceTiersLabel' | translate">
-            ---
+            —
           </button>
         }
       </ng-template>
@@ -213,7 +213,7 @@
       </ng-template>
 
       <ng-template appColumnCell="notes" let-row>
-        <span class="text-muted vendor-part-notes">{{ row.notes || '---' }}</span>
+        <span class="text-muted vendor-part-notes">{{ row.notes || '—' }}</span>
       </ng-template>
 
       <ng-template appColumnCell="actions" let-row>

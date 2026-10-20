@@ -316,7 +316,7 @@
                 }
               </ng-template>
               <ng-template appColumnCell="leadTimeDays" let-row>
-                <span class="text-muted">{{ $any(row).leadTimeDays !== null ? $any(row).leadTimeDays + 'd' : '---' }}</span>
+                <span class="text-muted">{{ $any(row).leadTimeDays !== null ? $any(row).leadTimeDays + 'd' : '—' }}</span>
               </ng-template>
               <ng-template appColumnCell="referenceDesignator" let-row>
                 @if (editingBomLineId() === $any(row).id) {
@@ -327,7 +327,7 @@
                     (keydown.escape)="cancelBomLineEdit()"
                     (focusout)="commitBomLineEdit(false)" />
                 } @else {
-                  <span class="text-muted">{{ $any(row).referenceDesignator || '---' }}</span>
+                  <span class="text-muted">{{ $any(row).referenceDesignator || '—' }}</span>
                 }
               </ng-template>
               <ng-template appColumnCell="actions" let-row>

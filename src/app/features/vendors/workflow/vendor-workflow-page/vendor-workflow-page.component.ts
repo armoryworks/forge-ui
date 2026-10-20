@@ -7,6 +7,7 @@ import { forkJoin, map } from 'rxjs';
 
 import { EntityValidator } from '../../../../shared/models/entity-validator.model';
 import { LoadingService } from '../../../../shared/services/loading.service';
+import { NavTreeService } from '../../../../shared/services/nav-tree.service';
 import { MissingValidator } from '../../../../shared/models/workflow-missing-validator.model';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowDefinition } from '../../../../shared/models/workflow-definition.model';
@@ -53,6 +54,7 @@ export class VendorWorkflowPageComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly loading = inject(LoadingService);
+  private readonly navTree = inject(NavTreeService);
 
   protected readonly vendor = signal<VendorDetail | null>(null);
   protected readonly run = signal<WorkflowRun | null>(null);
@@ -97,6 +99,11 @@ export class VendorWorkflowPageComponent {
   });
 
   constructor() {
+    effect(() => {
+      const v = this.vendor();
+      if (v) this.navTree.setRecordCrumb(v.companyName, `/vendors/${v.id}`);
+    });
+
     effect(() => {
       const vendorId = this.vendorIdFromUrl();
       const runId = this.runIdFromUrl();

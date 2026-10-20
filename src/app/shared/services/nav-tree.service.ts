@@ -1,5 +1,5 @@
-import { Injectable, Signal, computed, inject } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
+import { Injectable, Signal, computed, inject, signal } from '@angular/core';
+import { ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 
@@ -21,6 +21,16 @@ export class NavTreeService {
     ),
     { initialValue: this.router.url.split('?')[0] },
   );
+
+  private readonly routeBreadcrumbKey = toSignal(
+    this.router.events.pipe(
+      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+      map(() => this.deepestRouteBreadcrumb()),
+    ),
+    { initialValue: this.deepestRouteBreadcrumb() },
+  );
+
+  private readonly recordCrumbState = signal<{ label: string; urlPrefix: string } | null>(null);
 
   // Pinned-top items: always rendered at the top of the sidebar regardless of
   // which group the user has drilled into. Currently empty — see allMainTree
@@ -228,7 +238,7 @@ export class NavTreeService {
         { icon: 'badge', label: 'Employees', i18nKey: 'nav.employees', route: '/employees', capability: 'CAP-MD-EMPLOYEES', allowedRoles: ['Admin', 'Manager'] },
         { icon: 'schedule', label: 'Time', i18nKey: 'nav.timeTracking', route: '/time-tracking', shortcut: ['Q', 'T'], capability: 'CAP-HR-TIMETRACK' },
         { icon: 'request_quote', label: 'Piece Rates', i18nKey: 'nav.pieceRates', route: '/piece-rates', capability: 'CAP-HR-PIECE-RATES', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'school', label: 'Training', i18nKey: 'nav.training', route: '/training/library' },
+        { icon: 'school', label: 'Training', i18nKey: 'nav.training', route: '/training/library', routePrefix: '/training' },
       ],
     },
 
@@ -377,6 +387,10 @@ export class NavTreeService {
   readonly breadcrumbTrail: Signal<NavItem[]> = computed(() => {
     const url = this.currentUrl();
     const trail = this.findTrail([...this.mainTree(), ...this.bottomTree()], url, /*requirePrefix*/ false);
+    if (trail.length === 0) {
+      const key = this.routeBreadcrumbKey();
+      return key ? [{ icon: '', label: key, i18nKey: key }] : [];
+    }
     // Group crumbs (Operations, Sales, …) are organizational — they carry
     // `children` but no `route`, so the header renders them as dead <span>s and
     // clicking a mid-breadcrumb does nothing. Resolve each routeless group to
@@ -386,6 +400,22 @@ export class NavTreeService {
       item.route || !item.children ? item : { ...item, route: this.firstLeafRoute(item) },
     );
   });
+
+  /**
+   * Name of the record the current page shows (a customer, an employee, …),
+   * rendered by the header as the final breadcrumb. Only reported while the
+   * URL stays under the prefix it was set for, so it disappears as soon as
+   * the user navigates away from that record.
+   */
+  readonly recordCrumb: Signal<string | null> = computed(() => {
+    const state = this.recordCrumbState();
+    return state && this.urlMatchesPrefix(this.currentUrl(), state.urlPrefix) ? state.label : null;
+  });
+
+  /** Names the record shown under `urlPrefix` (e.g. `/customers/12`) for the header breadcrumb. */
+  setRecordCrumb(label: string, urlPrefix: string): void {
+    this.recordCrumbState.set(label ? { label, urlPrefix } : null);
+  }
 
   /**
    * Ancestor chain used by the sidebar to auto-drill into the current URL's
@@ -468,7 +498,8 @@ export class NavTreeService {
           }
           return [item, ...childTrail];
         }
-      } else if (item.route && (item.route === url || url.startsWith(item.route + '/'))) {
+      } else if (item.route && (item.route === url || url.startsWith(item.route + '/')
+        || (item.routePrefix && this.urlMatchesPrefix(url, item.routePrefix)))) {
         return [item];
       }
     }
@@ -477,6 +508,17 @@ export class NavTreeService {
 
   private urlMatchesPrefix(url: string, prefix: string): boolean {
     return url === prefix || url.startsWith(prefix + '/');
+  }
+
+  private deepestRouteBreadcrumb(): string | null {
+    let route: ActivatedRouteSnapshot | null = this.router.routerState.snapshot.root;
+    let key: string | null = null;
+    while (route) {
+      const crumb = route.data['titleKey'];
+      if (typeof crumb === 'string') key = crumb;
+      route = route.firstChild;
+    }
+    return key;
   }
 
   /** First navigable route within an item's subtree (its own, else first descendant leaf). */

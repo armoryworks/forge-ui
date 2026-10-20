@@ -143,6 +143,7 @@ export class SequenceInstancePanelComponent {
       title: this.translate.instant('sequences.cancel.title'),
       message: this.translate.instant('sequences.cancel.message'),
       confirmLabel: this.translate.instant('sequences.cancel.confirm'),
+      cancelLabel: this.translate.instant('sequences.cancel.keep'),
       severity: 'danger',
     });
     if (reason) this.apply(id => this.service.cancel(id, reason));

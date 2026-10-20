@@ -67,6 +67,13 @@
   opacity: 1;
 }
 
+.breadcrumb__record {
+  max-width: 24ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .breadcrumb__group {
   color: inherit;
   opacity: 0.7;

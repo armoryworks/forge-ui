@@ -75,6 +75,7 @@ import { CompanyLocationDialogComponent } from './components/company-location-di
 import { AuthService } from '../../shared/services/auth.service';
 import { ReferenceDataService } from '../../shared/services/reference-data.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
+import { NavTreeService } from '../../shared/services/nav-tree.service';
 import { CompanyLocation, CompanyProfile } from './models/company-location.model';
 import { ADMIN_TAB_ROLES } from './models/admin-tab-roles.model';
 import { ADMIN_TABS } from './models/admin-tab.model';
@@ -114,11 +115,24 @@ export class AdminComponent implements OnInit {
   private readonly adminSettings = inject(AdminSettingsService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
+  private readonly navTree = inject(NavTreeService);
 
   protected readonly isAdmin = computed(() => this.authService.hasRole('Admin'));
   protected readonly isManagerOrAdmin = computed(() => this.authService.hasRole('Admin') || this.authService.hasRole('Manager'));
-  protected readonly pageTitle = computed(() => this.isAdmin() ? this.translate.instant('admin.title') : this.translate.instant('admin.titleEmployee'));
-  protected readonly pageSubtitle = computed(() => this.isAdmin() ? this.translate.instant('admin.subtitle') : this.translate.instant('admin.subtitleEmployee'));
+  private readonly activeTabTitleKey = computed(() => {
+    const tab = this.activeTab();
+    if (tab === 'overview') return undefined;
+    return this.navTree.breadcrumbTrail().find(c => c.route === `/admin/${tab}` && !c.children)?.i18nKey;
+  });
+  protected readonly pageTitle = computed(() => {
+    const key = this.activeTabTitleKey();
+    if (key) return this.translate.instant(key);
+    return this.isAdmin() ? this.translate.instant('admin.title') : this.translate.instant('admin.titleEmployee');
+  });
+  protected readonly pageSubtitle = computed(() => {
+    if (this.activeTabTitleKey()) return '';
+    return this.isAdmin() ? this.translate.instant('admin.subtitle') : this.translate.instant('admin.subtitleEmployee');
+  });
 
   static resolveTab(requested: string | null, isAdmin: boolean, isManager: boolean): { tab: string; denied: boolean } {
     // Admins land on the new Overview dashboard (replaces the prior

@@ -859,7 +859,8 @@
       "action": "Cancelar ejecución",
       "title": "¿Cancelar esta secuencia?",
       "message": "Cancelar detiene la ejecución de forma permanente. Se requiere un motivo.",
-      "confirm": "Cancelar ejecución"
+      "confirm": "Cancelar ejecución",
+      "keep": "Seguir ejecutando"
     },
     "skip": {
       "title": "¿Omitir \"{{step}}\"?",
@@ -2945,12 +2946,14 @@
     "bulkSelected": "{{ count }} seleccionados",
     "bulkAssign": "Asignar…",
     "bulkAssignTitle": "Asignar leads",
-    "bulkAssignHint": "{{ count }} lead(s) seleccionados. Elige un responsable, una cuenta o ambos; \"Mantener actual\" deja ese campo como está. Elige \"— Ninguno —\" como cuenta para desafiliar.",
+    "bulkAssignHintOne": "1 lead seleccionado. Elige un responsable, una cuenta o ambos; \"Mantener actual\" deja ese campo como está. Elige \"— Ninguno —\" como cuenta para desafiliar.",
+    "bulkAssignHintOther": "{{count}} leads seleccionados. Elige un responsable, una cuenta o ambos; \"Mantener actual\" deja ese campo como está. Elige \"— Ninguno —\" como cuenta para desafiliar.",
     "bulkKeepCurrent": "Mantener actual",
     "owner": "Responsable",
     "ownerUnassigned": "— Sin asignar —",
     "bulkAssignConfirm": "Asignar",
-    "bulkAssignSuccess": "{{ count }} lead(s) asignados.",
+    "bulkAssignSuccessOne": "1 lead asignado.",
+    "bulkAssignSuccessOther": "{{count}} leads asignados.",
     "bulkAssignPartial": "Asignados {{ ok }} de {{ total }} — algunos fallaron. Revisa el registro de actividad.",
     "bulkAssignFailed": "Asignación masiva fallida.",
     "companyName": "Nombre de Empresa",
@@ -3701,6 +3704,14 @@
     },
     "carriers": {
       "title": "Transportistas",
+      "cols": {
+        "name": "Transportista",
+        "code": "Código",
+        "integration": "Integración",
+        "scan": "Escaneo",
+        "credentials": "Credenciales",
+        "active": "Activo"
+      },
       "hint": "Transportistas de envío para cotizaciones, etiquetas, seguimiento y recogidas. Agregue transportistas personalizados e ingrese las credenciales de API de cada transportista integrado.",
       "newCarrier": "Nuevo transportista",
       "empty": "No hay transportistas configurados.",
@@ -4759,7 +4770,8 @@
       "mockInProd": "MockIntegrations está ACTIVADO en Producción — todas las integraciones externas devuelven datos simulados. Establezca MockIntegrations=false y configure proveedores reales antes de atender a usuarios reales.",
       "gapSummary": "Estas capacidades están activadas pero su integración no está configurada. Configure cada una o desactive la capacidad.",
       "setupRequired": "Configuración requerida"
-    }
+    },
+    "lead": "Servicios <strong>a los que Forge se conecta</strong>: contabilidad, transportistas y otras API externas."
   },
   "complianceTemplates": {
     "templates": "plantillas de cumplimiento",
@@ -4823,11 +4835,13 @@
     "walkthroughHint": "Haga clic en \"{{label}}\" arriba para comenzar. Al completar el recorrido, este módulo se marca como terminado automáticamente."
   },
   "aiAssistants": {
-    "assistants": "asistentes",
+    "assistantCountOne": "{{count}} asistente",
+    "assistantCountOther": "{{count}} asistentes",
     "newAssistant": "Nuevo Asistente",
     "noAssistants": "Sin asistentes de IA configurados",
     "builtIn": "Integrado",
-    "types": "tipos",
+    "typeCountOne": "{{count}} tipo",
+    "typeCountOther": "{{count}} tipos",
     "colName": "Nombre",
     "colCategory": "Categoría",
     "colEntityFilters": "Filtros de Entidad",
@@ -5852,6 +5866,7 @@
     "cancelPoTitle": "¿Cancelar Orden de Compra?",
     "cancelPoMessage": "¿Cancelar \"{{number}}\"? Esta acción no se puede deshacer.",
     "cancelPo": "Cancelar OC",
+    "keepPo": "Mantener OC",
     "poCancelled": "Orden de compra cancelada.",
     "poClosed": "Orden de compra cerrada.",
     "deletePoTitle": "¿Eliminar Orden de Compra?",
@@ -6558,7 +6573,8 @@
     "editCycle": "Editar Ciclo",
     "newPlanningCycle": "Nuevo Ciclo de Planificación",
     "backlog": "Pendientes",
-    "jobs": "trabajos",
+    "jobCountOne": "{{count}} trabajo",
+    "jobCountOther": "{{count}} trabajos",
     "searchPlaceholder": "Buscar trabajos...",
     "commitToCycle": "Comprometer al ciclo",
     "noAvailableJobs": "No hay trabajos disponibles",
@@ -7180,6 +7196,7 @@
       "newGroup": "Nuevo Grupo",
       "searchConversations": "Buscar conversaciones",
       "noConversations": "Sin conversaciones aún",
+      "noConversationsHelp": "Haga clic en Nuevo Mensaje para iniciar una conversación.",
       "noResults": "No se encontraron resultados",
       "muteChannel": "Silenciar canal",
       "mute": "Silenciar",
@@ -7917,6 +7934,7 @@
     "inspectedAt": "Inspeccionado el",
     "inspectedBy": "Inspeccionado por",
     "inspectionNotes": "Notas de Inspección",
+    "inspectionNotesOptional": "Notas de inspección (opcional)",
     "newReturn": "Nueva Devolución",
     "noReturns": "No se encontraron devoluciones",
     "originalJob": "Trabajo Original",
@@ -8708,6 +8726,7 @@
     "searchPlaceholder": "Buscar solicitudes...",
     "status": "Estado",
     "noRfqs": "Sin solicitudes de cotización",
+    "noRfqsHelp": "Una solicitud de cotización pide a varios proveedores que coticen las mismas piezas. Haga clic en Nueva Solicitud para enviar una.",
     "part": "Pieza",
     "quantity": "Cantidad",
     "requiredDate": "Fecha Requerida",
@@ -9079,7 +9098,8 @@
   },
   "adminPanels": {
     "biApiKeys": {
-      "headerCount": "claves",
+      "headerCountOne": "{{count}} clave",
+      "headerCountOther": "{{count}} claves",
       "newKey": "Nueva Clave API",
       "noKeys": "Aún no se han emitido claves API de BI",
       "issueButton": "Emitir Clave",
@@ -9117,7 +9137,8 @@
       }
     },
     "connections": {
-      "headerCount": "conexiones",
+      "headerCountOne": "{{count}} conexión",
+      "headerCountOther": "{{count}} conexiones",
       "lede": "Vista federada de sólo lectura de cada credencial y conexión emitida o aceptada por esta instalación. Haga clic en Administrar en cualquier fila para ir a su superficie administrativa nativa.",
       "noRows": "No hay integraciones conectadas todavía",
       "capabilityDisabledTitle": "Capacidad desactivada",
@@ -9143,7 +9164,8 @@
       }
     },
     "systemApiKeys": {
-      "headerCount": "claves",
+      "headerCountOne": "{{count}} clave",
+      "headerCountOther": "{{count}} claves",
       "newKey": "Nueva Clave API del Sistema",
       "noKeys": "Aún no se han emitido claves API del sistema",
       "issueButton": "Emitir Clave",
@@ -9383,6 +9405,12 @@
       "calendarType": "Categoría del calendario",
       "markDone": "Marcar como hecho",
       "acknowledge": "Confirmar",
+      "cancelDialog": {
+        "title": "¿Cancelar evento?",
+        "message": "¿Cancelar \"{{title}}\"? Se notificará a los asistentes.",
+        "confirm": "Cancelar evento",
+        "keep": "Mantener evento"
+      },
       "noCalendarType": "— Ninguno —",
       "types": {
         "meeting": "Reunión",
@@ -10752,6 +10780,7 @@
     "balance": "Saldo",
     "balanceDue": "Saldo Pendiente",
     "noBillsFound": "No se encontraron facturas de proveedor",
+    "noBillsHelp": "Las facturas de sus proveedores se registran aquí hasta que se pagan. Haga clic en Nueva Factura para ingresar una.",
     "paymentNumber": "Pago #",
     "method": "Método",
     "methodCash": "Efectivo",
@@ -10869,6 +10898,7 @@
       "download": "Descargar archivo",
       "release": "Liberar",
       "cancel": "Cancelar lote",
+      "keep": "Mantener lote",
       "generated": "Archivo NACHA generado",
       "released": "Lote liberado — pagos marcados como transmitidos",
       "cancelled": "Lote cancelado — los pagos vuelven al grupo elegible",
@@ -11317,7 +11347,7 @@
     }
   },
   "costing": {
-    "title": "Costeo (Nivel 3)",
+    "title": "Costeo",
     "tabs": {
       "periods": "Periodos",
       "costCenters": "Centros de Costo",

@@ -33,6 +33,9 @@
         <ng-template appColumnCell="vendorName" let-row>
           {{ row.vendorName ?? '—' }}
         </ng-template>
+        <ng-template appColumnCell="transportMethod" let-row>
+          {{ ('adminPanels.edi.transports.' + row.transportMethod.toLowerCase()) | translate }}
+        </ng-template>
         <ng-template appColumnCell="isActive" let-row>
           <span class="material-icons-outlined" [style.color]="row.isActive ? 'var(--success)' : 'var(--text-muted)'">
             {{ row.isActive ? 'check_circle' : 'cancel' }}

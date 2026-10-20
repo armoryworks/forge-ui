@@ -440,6 +440,7 @@ export class PayablesComponent {
         title: this.translate.instant('payables.batches.cancelTitle'),
         message: this.translate.instant('payables.batches.cancelMessage', { number: batch.batchNumber }),
         confirmLabel: this.translate.instant('payables.batches.cancel'),
+        cancelLabel: this.translate.instant('payables.batches.keep'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {

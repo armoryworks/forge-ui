@@ -17,7 +17,7 @@
         <div class="vendor-part-form__locked-field">
           <span class="vendor-part-form__locked-label">{{ 'vendors.companyName' | translate }}</span>
           <span class="vendor-part-form__locked-value">
-            {{ data.vendorPart?.vendorCompanyName || data.parentLabel || '---' }}
+            {{ data.vendorPart?.vendorCompanyName || data.parentLabel || '—' }}
           </span>
         </div>
       }
@@ -40,7 +40,7 @@
             @if (data.vendorPart) {
               {{ data.vendorPart.partNumber }} — {{ data.vendorPart.partName }}
             } @else {
-              {{ data.parentLabel || '---' }}
+              {{ data.parentLabel || '—' }}
             }
           </span>
         </div>

@@ -1,5 +1,5 @@
 <div class="panel-header">
-  <span class="panel-header__count">{{ assistants().length }} {{ 'aiAssistants.assistants' | translate }}</span>
+  <span class="panel-header__count">{{ (assistants().length === 1 ? 'aiAssistants.assistantCountOne' : 'aiAssistants.assistantCountOther') | translate: { count: assistants().length } }}</span>
   <button class="action-btn action-btn--create" (click)="openCreate()">
     <span class="material-icons-outlined">add</span>
     {{ 'aiAssistants.newAssistant' | translate }}
@@ -37,7 +37,7 @@
 
     <ng-template appColumnCell="entityTypes" let-row>
       @if (row.allowedEntityTypes.length > 0) {
-        <span class="text-muted">{{ row.allowedEntityTypes.length }} {{ 'aiAssistants.types' | translate }}</span>
+        <span class="text-muted">{{ (row.allowedEntityTypes.length === 1 ? 'aiAssistants.typeCountOne' : 'aiAssistants.typeCountOther') | translate: { count: row.allowedEntityTypes.length } }}</span>
       } @else {
         <span class="text-muted">{{ 'common.all' | translate }}</span>
       }

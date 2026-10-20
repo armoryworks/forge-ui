@@ -189,7 +189,7 @@
     "src/app/features/admin/components/expense-settings-panel/expense-settings-panel.component.html": 1,
     "src/app/features/admin/components/integration-config-dialog/integration-config-dialog.component.html": 4,
     "src/app/features/admin/components/integration-outbox-panel/integration-outbox-panel.component.html": 13,
-    "src/app/features/admin/components/integrations-panel/integrations-panel.component.html": 6,
+    "src/app/features/admin/components/integrations-panel/integrations-panel.component.html": 3,
     "src/app/features/admin/components/mfa-policy-panel/mfa-policy-panel.component.html": 5,
     "src/app/features/admin/components/role-templates-panel/role-templates-panel.component.html": 11,
     "src/app/features/admin/components/sales-tax-dialog/sales-tax-dialog.component.html": 5,

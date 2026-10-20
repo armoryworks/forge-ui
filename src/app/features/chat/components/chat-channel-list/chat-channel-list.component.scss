@@ -38,6 +38,12 @@
   color: var(--text-muted);
 }
 
+.channel-list__empty-help {
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+  text-align: center;
+}
+
 // ── Section ──
 .channel-list__section {
   &-header {

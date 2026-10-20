@@ -71,18 +71,18 @@
         </ng-template>
 
         <ng-template appColumnCell="partNumber" let-row>
-          <span>{{ row.partNumber || '---' }}</span>
+          <span>{{ row.partNumber || '—' }}</span>
         </ng-template>
 
         <ng-template appColumnCell="partName" let-row>
-          <span class="text-muted">{{ row.partName || '---' }}</span>
+          <span class="text-muted">{{ row.partName || '—' }}</span>
         </ng-template>
 
         <ng-template appColumnCell="unitPrice" let-row>
           @if (row.unitPrice !== null) {
             <app-currency-display [value]="row.unitPrice" [currency]="row.currency" />
           } @else {
-            <span>---</span>
+            <span>—</span>
           }
         </ng-template>
 
@@ -98,7 +98,7 @@
           <span class="text-muted ple-import__notes"
             [matTooltip]="row.notes || ''"
             matTooltipPosition="above">
-            {{ row.notes || '---' }}
+            {{ row.notes || '—' }}
           </span>
         </ng-template>
 

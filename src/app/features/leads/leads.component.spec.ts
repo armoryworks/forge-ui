@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Observable, of, throwError } from 'rxjs';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader, TranslateService } from '@ngx-translate/core';
 
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -183,6 +183,26 @@ describe('LeadsComponent — inline account creation (forge#2/#3)', () => {
       expect(leadsService.bulkAssignOwner).not.toHaveBeenCalled();
       expect(leadsService.updateLead).toHaveBeenCalledWith(1, { accountId: 99 });
       expect(leadsService.updateLead).toHaveBeenCalledWith(2, { accountId: 99 });
+    });
+
+    it('words the success for one lead in the singular and for several in the plural', () => {
+      const internals = component as unknown as BulkInternals;
+      const snackbar = TestBed.inject(SnackbarService) as unknown as { success: ReturnType<typeof vi.fn> };
+      const translate = TestBed.inject(TranslateService);
+      const instant = vi.spyOn(translate, 'instant');
+
+      internals.selectedLeads.set([selected[0]]);
+      internals.openBulkAssignDialog();
+      internals.bulkOwnerControl.setValue(7);
+      internals.confirmBulkAssign();
+      expect(instant).toHaveBeenCalledWith('leads.bulkAssignSuccessOne', { count: 1 });
+
+      internals.selectedLeads.set(selected);
+      internals.openBulkAssignDialog();
+      internals.bulkOwnerControl.setValue(7);
+      internals.confirmBulkAssign();
+      expect(instant).toHaveBeenCalledWith('leads.bulkAssignSuccessOther', { count: 2 });
+      expect(snackbar.success).toHaveBeenCalledTimes(2);
     });
   });
 });

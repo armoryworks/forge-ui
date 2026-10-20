@@ -1,7 +1,7 @@
 <div class="system-api-keys-panel">
   <div class="panel-header">
     <span class="panel-header__count">
-      {{ keys().length }} {{ 'adminPanels.systemApiKeys.headerCount' | translate }}
+      {{ (keys().length === 1 ? 'adminPanels.systemApiKeys.headerCountOne' : 'adminPanels.systemApiKeys.headerCountOther') | translate: { count: keys().length } }}
     </span>
     <span class="system-api-keys-panel__spacer"></span>
     <button class="action-btn action-btn--create"

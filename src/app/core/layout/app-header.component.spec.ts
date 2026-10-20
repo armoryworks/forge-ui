@@ -16,6 +16,7 @@ import { SearchService } from '../../shared/services/search.service';
 import { ThemeService } from '../../shared/services/theme.service';
 import { VersionService } from '../../shared/services/version.service';
 import { AppHeaderComponent } from './app-header.component';
+import { NavItem } from '../../shared/models/nav-item.model';
 
 describe('AppHeaderComponent logout', () => {
   let logout: ReturnType<typeof vi.fn>;
@@ -32,7 +33,7 @@ describe('AppHeaderComponent logout', () => {
         { provide: TranslateService, useValue: { instant: (k: string) => k } },
         { provide: LanguageService, useValue: { currentLanguage: signal('en'), availableLanguages: [] } },
         { provide: NotificationService, useValue: { unreadCount: signal(0), panelOpen: signal(false) } },
-        { provide: NavTreeService, useValue: { breadcrumbTrail: signal([]), flatLeaves: signal([]) } },
+        { provide: NavTreeService, useValue: { breadcrumbTrail: signal([]), flatLeaves: signal([]), recordCrumb: signal(null) } },
         { provide: ThemeService, useValue: { theme: signal('light') } },
         { provide: CapabilityService, useValue: { isEnabled: () => false } },
         { provide: AiService, useValue: { available: signal(false) } },
@@ -65,5 +66,50 @@ describe('AppHeaderComponent logout', () => {
     await component.logout();
 
     expect(navigate).not.toHaveBeenCalled();
+  });
+});
+
+describe('AppHeaderComponent breadcrumb', () => {
+  const trail: NavItem[] = [
+    { icon: 'sell', label: 'Sales', i18nKey: 'navGroups.sales', route: '/customers' },
+    { icon: 'people', label: 'Customers', i18nKey: 'nav.customers', route: '/customers' },
+    { icon: 'list', label: 'All Customers', i18nKey: 'nav.customersAll', route: '/customers' },
+  ];
+  let recordCrumb: ReturnType<typeof signal<string | null>>;
+  let component: { visibleCrumbs(): NavItem[]; hiddenCrumbs(): NavItem[]; recordCrumb(): string | null };
+
+  beforeEach(() => {
+    recordCrumb = signal<string | null>(null);
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: AuthService, useValue: { user: signal(null), logout: vi.fn() } },
+        { provide: Router, useValue: { events: of(), url: '/customers/12/overview', navigate: vi.fn() } },
+        { provide: TranslateService, useValue: { instant: (k: string) => k } },
+        { provide: LanguageService, useValue: { currentLanguage: signal('en'), availableLanguages: [] } },
+        { provide: NotificationService, useValue: { unreadCount: signal(0), panelOpen: signal(false) } },
+        { provide: NavTreeService, useValue: { breadcrumbTrail: signal(trail), flatLeaves: signal([]), recordCrumb } },
+        { provide: ThemeService, useValue: { theme: signal('light') } },
+        { provide: CapabilityService, useValue: { isEnabled: () => false } },
+        { provide: AiService, useValue: { available: signal(false) } },
+        { provide: SearchService, useValue: {} },
+        { provide: VersionService, useValue: {} },
+        { provide: BrandingService, useValue: {} },
+        { provide: LayoutService, useValue: {} },
+      ],
+    });
+    component = TestBed.runInInjectionContext(() => new AppHeaderComponent()) as unknown as typeof component;
+  });
+
+  it('shows the last two navigation crumbs when the page names no record', () => {
+    expect(component.visibleCrumbs().map(c => c.i18nKey)).toEqual(['nav.customers', 'nav.customersAll']);
+    expect(component.recordCrumb()).toBeNull();
+  });
+
+  it('ends the trail with the record name and keeps the same number of visible crumbs', () => {
+    recordCrumb.set('Acme Tooling');
+
+    expect(component.recordCrumb()).toBe('Acme Tooling');
+    expect(component.visibleCrumbs().map(c => c.i18nKey)).toEqual(['nav.customersAll']);
+    expect(component.hiddenCrumbs().map(c => c.i18nKey)).toEqual(['navGroups.sales', 'nav.customers']);
   });
 });

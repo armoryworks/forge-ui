@@ -5,6 +5,10 @@
   flex-direction: column;
   gap: $sp-md;
 
+  .panel-header {
+    gap: $sp-md;
+  }
+
   &__lede {
     flex: 1;
     margin: 0;

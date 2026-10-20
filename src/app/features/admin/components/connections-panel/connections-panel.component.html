@@ -1,7 +1,7 @@
 <div class="connections-panel">
   <div class="panel-header">
     <span class="panel-header__count">
-      {{ count() }} {{ 'adminPanels.connections.headerCount' | translate }}
+      {{ (count() === 1 ? 'adminPanels.connections.headerCountOne' : 'adminPanels.connections.headerCountOther') | translate: { count: count() } }}
     </span>
     <p class="connections-panel__lede">
       {{ 'adminPanels.connections.lede' | translate }}
