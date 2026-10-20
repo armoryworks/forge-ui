@@ -569,30 +569,30 @@
 // ─── Snackbar ───
 .snackbar--success .mdc-snackbar__surface {
   background: var(--success) !important;
-  color: white !important;
+  color: var(--success-text) !important;
 
-  .mat-mdc-snack-bar-action { color: white !important; }
+  .mat-mdc-snack-bar-action { color: var(--success-text) !important; }
 }
 
 .snackbar--info .mdc-snackbar__surface {
   background: var(--info) !important;
-  color: white !important;
+  color: var(--info-text) !important;
 
-  .mat-mdc-snack-bar-action { color: white !important; }
+  .mat-mdc-snack-bar-action { color: var(--info-text) !important; }
 }
 
 .snackbar--warn .mdc-snackbar__surface {
   background: var(--warning) !important;
-  color: white !important;
+  color: var(--warning-text) !important;
 
-  .mat-mdc-snack-bar-action { color: white !important; }
+  .mat-mdc-snack-bar-action { color: var(--warning-text) !important; }
 }
 
 .snackbar--error .mdc-snackbar__surface {
   background: var(--error) !important;
-  color: white !important;
+  color: var(--error-text) !important;
 
-  .mat-mdc-snack-bar-action { color: white !important; }
+  .mat-mdc-snack-bar-action { color: var(--error-text) !important; }
 }
 
 // Shift snackbar above mobile bottom nav (56px + safe area)
