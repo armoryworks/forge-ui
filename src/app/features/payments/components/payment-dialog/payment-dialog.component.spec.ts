@@ -1,6 +1,7 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormGroup } from '@angular/forms';
-import { provideTranslateService } from '@ngx-translate/core';
+import { provideTranslateService, TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 
@@ -10,6 +11,7 @@ import { CustomerService } from '../../../customers/services/customer.service';
 import { InvoiceService } from '../../../invoices/services/invoice.service';
 import { InvoiceListItem } from '../../../invoices/models/invoice-list-item.model';
 import { ActiveCurrencyService } from '../../../../shared/services/active-currency.service';
+import { CurrencyService } from '../../../../shared/services/currency.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
@@ -41,8 +43,11 @@ describe('PaymentDialogComponent invoice picker', () => {
         { provide: ActiveCurrencyService, useValue: { listActiveCurrencies: () => of([]) } },
         { provide: ManualNumberSettingsService, useValue: { isEnabled: () => false } },
         { provide: SnackbarService, useValue: {} },
+        { provide: CurrencyService, useValue: { baseCurrency: signal('USD') } },
       ],
     });
+    TestBed.inject(TranslateService).setTranslation('en', { payments: { invoiceOptionLabel: '{{number}} — {{balance}} open' } });
+    TestBed.inject(TranslateService).use('en');
     dialog = TestBed.runInInjectionContext(() => new PaymentDialogComponent()) as unknown as DialogInternals;
   });
 
@@ -61,5 +66,28 @@ describe('PaymentDialogComponent invoice picker', () => {
     expect(dialog.appForm.controls['invoiceNumber'].value).toBe('INV-00005');
     expect(dialog.appForm.controls['amount'].value).toBe(1250);
     expect(dialog.appForm.valid).toBe(true);
+  });
+
+  it('labels each invoice with its open balance as money', () => {
+    dialog.paymentForm.controls['customerId'].setValue(3);
+
+    const expected = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(1250);
+    expect(dialog.invoiceOptions()[0]['label']).toBe(`INV-00005 — ${expected} open`);
+  });
+
+  it('refuses to apply more than the invoice still owes', () => {
+    dialog.paymentForm.controls['customerId'].setValue(3);
+    dialog.appForm.controls['invoiceId'].setValue(5);
+
+    dialog.appForm.controls['amount'].setValue(1300);
+
+    expect(dialog.appForm.controls['amount'].hasError('max')).toBe(true);
+    expect(dialog.appForm.valid).toBe(false);
+  });
+
+  it('starts the payment date at today', () => {
+    const date = dialog.paymentForm.controls['paymentDate'].value as Date;
+
+    expect(date.toDateString()).toBe(new Date().toDateString());
   });
 });

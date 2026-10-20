@@ -76,10 +76,16 @@
         }
         <app-select [label]="'invoices.customer' | translate" formControlName="customerId" [options]="customerOptions()" [required]="true" data-testid="invoice-customer" />
         <app-select [label]="'invoices.salesOrderId' | translate" formControlName="salesOrderId" [options]="salesOrderOptions()" data-testid="invoice-sales-order" />
-        <app-datepicker [label]="'invoices.invoiceDate' | translate" formControlName="invoiceDate" [max]="today" data-testid="invoice-date" />
-        <app-datepicker [label]="'invoices.dueDate' | translate" formControlName="dueDate" data-testid="invoice-due-date" />
+        <app-datepicker [label]="'invoices.invoiceDate' | translate" formControlName="invoiceDate" [max]="today" [required]="true" data-testid="invoice-date" />
         <app-select [label]="'invoices.creditTerms' | translate" formControlName="creditTerms" [options]="creditTermsOptions" data-testid="invoice-credit-terms" />
+        <app-datepicker [label]="'invoices.dueDate' | translate" formControlName="dueDate" [required]="true" data-testid="invoice-due-date" />
         <app-input [label]="'invoices.taxRate' | translate" type="number" formControlName="taxRate" suffix="%" data-testid="invoice-tax-rate" />
+        @if (customerTaxExempt()) {
+          <div class="tax-exempt-note" role="note" data-testid="invoice-tax-exempt-note">
+            <span class="material-icons-outlined" aria-hidden="true">info</span>
+            {{ 'invoices.taxExemptNote' | translate: { id: customerDetail()?.taxExemptionId ?? '' } }}
+          </div>
+        }
         @if (showCurrencySelector()) {
           <app-select [label]="'accounting.currency.currency' | translate" formControlName="currencyId" [options]="currencyOptions()" [required]="true" data-testid="invoice-currency" />
         }
@@ -101,7 +107,7 @@
           <app-currency-display [value]="lineTotal()" [currency]="null" />
         </div>
         <div class="dlg-total-row">
-          <span>{{ 'quotes.tax' | translate }} ({{ taxRateValue() | number:'1.0-4' }}%)</span>
+          <span>{{ 'quotes.tax' | translate }} ({{ effectiveTaxRate() | number:'1.0-4' }}%)</span>
           <app-currency-display [value]="taxAmount()" [currency]="null" />
         </div>
         <div class="dlg-total-row dlg-total-row--grand">

@@ -70,6 +70,11 @@ export class PaymentService {
     return this.http.post<PaymentListItem>(`${this.base}/${id}/applications`, request);
   }
 
+  /** Reverses a recorded payment: its applications are dropped so the invoices reopen, and the receipt is reversed. */
+  voidPayment(id: number, reason: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/void`, { reason });
+  }
+
   deletePayment(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
   }

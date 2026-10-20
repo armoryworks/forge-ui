@@ -117,6 +117,7 @@ describe('CustomerIdentityClusterComponent', () => {
     type Internals = {
       form: {
         patchValue(v: Record<string, unknown>): void;
+        getRawValue(): { defaultCreditTerms: string | null };
         invalid: boolean;
         controls: { taxExemptionId: { hasError(code: string): boolean } };
       };
@@ -176,6 +177,17 @@ describe('CustomerIdentityClusterComponent', () => {
       expect(patch).not.toHaveProperty('creditLimit');
       expect(patch).not.toHaveProperty('isTaxExempt');
       expect(patch).not.toHaveProperty('taxExemptionId');
+      expect(patch).not.toHaveProperty('defaultCreditTerms');
+    });
+
+    it('loads the customer\'s default credit terms and saves a new pick', () => {
+      const { c, cb } = build(true, true, { defaultCreditTerms: 'Net30' });
+      expect(c.form.getRawValue().defaultCreditTerms).toBe('Net30');
+      c.form.patchValue({ defaultCreditTerms: 'Net60' });
+
+      c.onSave();
+
+      expect(cb.mock.calls[0][0]).toEqual(expect.objectContaining({ defaultCreditTerms: 'Net60' }));
     });
   });
 });

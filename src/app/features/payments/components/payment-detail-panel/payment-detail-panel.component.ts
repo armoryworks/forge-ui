@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -16,6 +16,10 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
+import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
+import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
+import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { NumberLockInfoComponent } from '../../../../shared/components/number-lock-info/number-lock-info.component';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
@@ -29,7 +33,7 @@ import { ApplyCreditDialogComponent } from '../apply-credit-dialog/apply-credit-
     DateOnlyPipe, NumberLockInfoComponent, DatePipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent, InputComponent,
-    DetailLoadErrorComponent, ApplyCreditDialogComponent,
+    DetailLoadErrorComponent, ApplyCreditDialogComponent, DialogComponent, TextareaComponent, ValidationButtonComponent,
   ],
   templateUrl: './payment-detail-panel.component.html',
   styleUrl: './payment-detail-panel.component.scss',
@@ -65,6 +69,19 @@ export class PaymentDetailPanelComponent {
   protected readonly canEditNumber = computed(() => {
     const p = this.payment();
     return this.manualNumbers.isEnabled('payments') && !!p && p.applications.length === 0;
+  });
+
+  protected readonly canVoid = computed(() => this.payment()?.canVoid === true);
+  protected readonly showVoidDialog = signal(false);
+  protected readonly voidSaving = signal(false);
+  protected readonly voidForm = new FormGroup({
+    reason: new FormControl<string>('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(3), Validators.maxLength(2000)],
+    }),
+  });
+  protected readonly voidViolations = FormValidationService.getViolations(this.voidForm, {
+    reason: this.translate.instant('payments.voidReason'),
   });
 
   constructor() {
@@ -158,6 +175,28 @@ export class PaymentDetailPanelComponent {
           this.closed.emit();
         },
       });
+    });
+  }
+
+  protected openVoidDialog(): void {
+    this.voidForm.reset();
+    this.showVoidDialog.set(true);
+  }
+
+  protected confirmVoid(): void {
+    const payment = this.payment();
+    if (!payment || this.voidForm.invalid) return;
+    const reason = this.voidForm.getRawValue().reason.trim();
+    this.voidSaving.set(true);
+    this.paymentService.voidPayment(payment.id, reason).subscribe({
+      next: () => {
+        this.voidSaving.set(false);
+        this.showVoidDialog.set(false);
+        this.snackbar.success(this.translate.instant('payments.paymentVoided'));
+        this.paymentChanged.emit();
+        this.closed.emit();
+      },
+      error: () => this.voidSaving.set(false),
     });
   }
 

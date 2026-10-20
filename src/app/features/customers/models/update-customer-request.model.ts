@@ -19,4 +19,6 @@ export interface UpdateCustomerRequest {
   taxExemptionId?: string;
   creditLimit?: number;
   clearCreditLimit?: boolean;
+  defaultCreditTerms?: string;
+  clearDefaultCreditTerms?: boolean;
 }

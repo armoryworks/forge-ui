@@ -16,4 +16,5 @@ export interface PaymentDetail {
   createdAt: Date;
   updatedAt: Date;
   rowVersion?: number | string | null;
+  canVoid?: boolean;
 }

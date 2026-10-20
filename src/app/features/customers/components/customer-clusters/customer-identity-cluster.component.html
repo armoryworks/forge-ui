@@ -71,6 +71,9 @@
       }
       <app-toggle data-testid="customer-identity-tax-exempt" [label]="'customers.workflow.creditAndTax.isTaxExemptLabel' | translate" formControlName="isTaxExempt" [isReadonly]="!editing()" />
     </div>
+    <div class="cluster__form-row">
+      <app-select data-testid="customer-identity-credit-terms" [label]="'customers.workflow.creditAndTax.defaultCreditTermsLabel' | translate" formControlName="defaultCreditTerms" [options]="creditTermsOptions" [isReadonly]="!editing()" />
+    </div>
     @if (form.controls.isTaxExempt.value) {
       <div class="cluster__form-row">
         <app-input data-testid="customer-identity-tax-exemption-id" [label]="'customers.workflow.creditAndTax.taxExemptionIdLabel' | translate" formControlName="taxExemptionId" [required]="editing()" [maxlength]="50" [isReadonly]="!editing()" />

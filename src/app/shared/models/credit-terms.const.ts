@@ -10,6 +10,23 @@ export const CREDIT_TERMS_OPTIONS: SelectOption[] = [
   { value: 'Net90', label: 'Net 90' },
 ];
 
+export const CREDIT_TERMS_NET_DAYS: Readonly<Record<string, number>> = {
+  DueOnReceipt: 0,
+  Net15: 15,
+  Net30: 30,
+  Net45: 45,
+  Net60: 60,
+  Net90: 90,
+};
+
+export function dueDateForCreditTerms(documentDate: Date, creditTerms: string | null | undefined): Date | null {
+  const days = creditTerms ? CREDIT_TERMS_NET_DAYS[creditTerms] : undefined;
+  if (days === undefined) return null;
+  const due = new Date(documentDate.getFullYear(), documentDate.getMonth(), documentDate.getDate());
+  due.setDate(due.getDate() + days);
+  return due;
+}
+
 export const PAYMENT_TERMS_OPTIONS: SelectOption[] = [
   { value: '', label: '-- None --' },
   { value: 'Due on Receipt', label: 'Due on Receipt' },

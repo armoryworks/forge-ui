@@ -11,6 +11,7 @@ import { environment } from '../../../../../environments/environment';
 import { SelectOption } from '../../../../shared/components/select/select.component';
 import { InvoiceSources } from '../../models/invoice-sources.model';
 import { PartListItem } from '../../../parts/models/part-list-item.model';
+import { CustomerDetail } from '../../../customers/models/customer-detail.model';
 import { InvoiceDialogComponent } from './invoice-dialog.component';
 
 class FakeLoader implements TranslateLoader {
@@ -23,6 +24,9 @@ interface DialogInternals {
     customerId: FormControl<number | null>;
     salesOrderId: FormControl<number | null>;
     shipmentId: FormControl<number | null>;
+    invoiceDate: FormControl<Date | null>;
+    dueDate: FormControl<Date | null>;
+    creditTerms: FormControl<string | null>;
     taxRate: FormControl<number | null>;
   }>;
   lineForm: FormGroup<{
@@ -40,6 +44,8 @@ interface DialogInternals {
   lineAmounts(): number[];
   lineTotal(): number;
   grandTotal(): number;
+  customerTaxExempt(): boolean;
+  effectiveTaxRate(): number;
   toggleTaxable(index: number): void;
 }
 
@@ -47,7 +53,7 @@ const emptyPage = { items: [], totalCount: 0, page: 1, pageSize: 200 };
 
 const acmeSources: InvoiceSources = {
   salesOrders: [
-    { id: 42, orderNumber: 'SO-00042', customerName: 'Acme', taxRate: 0.0485 },
+    { id: 42, orderNumber: 'SO-00042', customerName: 'Acme', taxRate: 0.0485, creditTerms: 'Net45' },
     { id: 43, orderNumber: 'SO-00043', customerName: 'Acme', taxRate: 0.0725 },
   ],
   shipments: [
@@ -94,11 +100,14 @@ function setup() {
 
 function selectCustomer(
   internals: DialogInternals, httpMock: HttpTestingController, customerId: number, sources: InvoiceSources, customerRate: number | null = null,
+  customer: Partial<CustomerDetail> = {},
 ) {
   internals.invoiceForm.controls.customerId.setValue(customerId);
   const req = httpMock.expectOne(r => r.url === `${environment.apiUrl}/invoices/sources`);
   expect(req.request.params.get('customerId')).toBe(String(customerId));
   req.flush(sources);
+  httpMock.expectOne(`${environment.apiUrl}/customers/${customerId}`)
+    .flush({ id: customerId, name: 'Acme', isTaxExempt: false, ...customer });
   httpMock.expectOne(`${environment.apiUrl}/sales-tax-rates/for-customer/${customerId}`)
     .flush(customerRate === null ? null : { id: 53, code: 'UT-UTCO', rate: customerRate });
 }
@@ -332,5 +341,78 @@ describe('InvoiceDialogComponent — tax rate and taxable lines', () => {
     internals.invoiceForm.controls.shipmentId.setValue(8);
 
     expect(internals.lines()[0].taxable).toBe(false);
+  });
+});
+
+describe('InvoiceDialogComponent — dates and credit terms', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  it('starts the invoice date at today', () => {
+    const { internals } = setup();
+
+    expect(internals.invoiceForm.controls.invoiceDate.value?.toDateString()).toBe(new Date().toDateString());
+  });
+
+  it('takes the customer\'s default terms and dates the invoice from them', () => {
+    const { internals, httpMock } = setup();
+    internals.invoiceForm.controls.invoiceDate.setValue(new Date(2026, 9, 19));
+
+    selectCustomer(internals, httpMock, 5, acmeSources, null, { defaultCreditTerms: 'Net30' });
+
+    expect(internals.invoiceForm.controls.creditTerms.value).toBe('Net30');
+    expect(internals.invoiceForm.controls.dueDate.value?.toDateString()).toBe(new Date(2026, 10, 18).toDateString());
+  });
+
+  it('prefers the picked sales order\'s terms', () => {
+    const { internals, httpMock } = setup();
+    internals.invoiceForm.controls.invoiceDate.setValue(new Date(2026, 9, 19));
+    selectCustomer(internals, httpMock, 5, acmeSources, null, { defaultCreditTerms: 'Net30' });
+
+    internals.invoiceForm.controls.salesOrderId.setValue(42);
+
+    expect(internals.invoiceForm.controls.creditTerms.value).toBe('Net45');
+    expect(internals.invoiceForm.controls.dueDate.value?.toDateString()).toBe(new Date(2026, 11, 3).toDateString());
+  });
+
+  it('flags a hand-typed due date that contradicts the terms', () => {
+    const { internals } = setup();
+    const controls = internals.invoiceForm.controls;
+    controls.invoiceDate.setValue(new Date(2026, 9, 19));
+    controls.creditTerms.setValue('Net30');
+
+    controls.dueDate.setValue(new Date(2026, 10, 3));
+    expect(controls.dueDate.hasError('termsMismatch')).toBe(true);
+
+    controls.creditTerms.setValue(null);
+    expect(controls.dueDate.valid).toBe(true);
+  });
+});
+
+describe('InvoiceDialogComponent — tax-exempt customer', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  it('bills no tax and locks the rate for a customer with a current exemption', () => {
+    const { internals, httpMock } = setup();
+    internals.lines.set([{ partId: null, partNumber: '', description: 'Probe', quantity: 2, unitPrice: 10, taxable: true }]);
+
+    selectCustomer(internals, httpMock, 5, acmeSources, 0.0725, { isTaxExempt: true, taxExemptionId: 'RS-1' });
+    TestBed.tick();
+
+    expect(internals.customerTaxExempt()).toBe(true);
+    expect(internals.effectiveTaxRate()).toBe(0);
+    expect(internals.taxAmount()).toBe(0);
+    expect(internals.invoiceForm.controls.taxRate.disabled).toBe(true);
+  });
+
+  it('charges tax again once the exemption has lapsed by the invoice date', () => {
+    const { internals, httpMock } = setup();
+    internals.invoiceForm.controls.invoiceDate.setValue(new Date(2026, 9, 19));
+    internals.lines.set([{ partId: null, partNumber: '', description: 'Probe', quantity: 2, unitPrice: 10, taxable: true }]);
+
+    selectCustomer(internals, httpMock, 5, acmeSources, 0.0725,
+      { isTaxExempt: true, taxExemptionId: 'RS-1', exemptionExpiryDate: '2026-10-01' });
+
+    expect(internals.customerTaxExempt()).toBe(false);
+    expect(internals.taxAmount()).toBeCloseTo(1.45, 6);
   });
 });

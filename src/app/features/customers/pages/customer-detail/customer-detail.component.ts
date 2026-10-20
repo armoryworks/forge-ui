@@ -315,6 +315,14 @@ export class CustomerDetailComponent {
         changes.creditLimit = patch.creditLimit;
       }
     }
+    if (patch.defaultCreditTerms !== undefined) {
+      const current = this.customer()?.defaultCreditTerms ?? null;
+      if (patch.defaultCreditTerms === null) {
+        if (current != null) changes.clearDefaultCreditTerms = true;
+      } else if (patch.defaultCreditTerms !== current) {
+        changes.defaultCreditTerms = patch.defaultCreditTerms;
+      }
+    }
     return changes;
   }
 

@@ -30,4 +30,5 @@ export interface CustomerSummary {
   isTaxExempt?: boolean;
   taxExemptionId?: string | null;
   rowVersion?: number;
+  defaultCreditTerms?: string | null;
 }
