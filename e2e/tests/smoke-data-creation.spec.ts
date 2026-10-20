@@ -465,7 +465,7 @@ test.describe('Smoke Test — Data Creation & Report Verification', () => {
   // ─── Phase 3: Verify All Reports Load ──────────────────────────────────
 
   const ALL_REPORTS = [
-    'Jobs by Stage',
+    'Jobs by Status',
     'Overdue Jobs',
     'Time by User',
     'Expense Summary',
@@ -483,7 +483,7 @@ test.describe('Smoke Test — Data Creation & Report Verification', () => {
     'My Expenses',
     'Quote-to-Close',
     'Shipping Summary',
-    'Time in Stage',
+    'Time in Status',
     'Employee Productivity',
     'Inventory Levels',
     'Maintenance',

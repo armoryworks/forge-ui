@@ -1910,11 +1910,11 @@ or chart. Reports can be saved and accessed from a personal saved reports list.
 ## Detected Report Templates
 
 ${fmtList(reportNames.length > 0 ? reportNames : [
-  'Jobs by Stage', 'Overdue Jobs', 'Time by User', 'Expense Summary',
+  'Jobs by Status', 'Overdue Jobs', 'Time by User', 'Expense Summary',
   'Lead Pipeline', 'Completion Trend', 'On-Time Delivery', 'Avg Lead Time',
   'Team Workload', 'Customer Activity', 'My Work History', 'My Time Log',
   'AR Aging', 'Revenue', 'Profit & Loss', 'My Expenses',
-  'Quote-to-Close', 'Shipping Summary', 'Time in Stage', 'Employee Productivity',
+  'Quote-to-Close', 'Shipping Summary', 'Time in Status', 'Employee Productivity',
   'Inventory Levels', 'Maintenance', 'Quality / Scrap Rate', 'Cycle Review',
   'Job Margin', 'My Cycle Summary', 'Lead & Sales', 'R&D Report',
 ])}
