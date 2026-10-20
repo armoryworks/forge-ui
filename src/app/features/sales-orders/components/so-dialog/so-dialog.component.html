@@ -42,7 +42,9 @@
 
         <!-- Add Line Form -->
         <div class="add-line add-line--4col" [formGroup]="lineForm">
-          <app-autocomplete [label]="'common.part' | translate" [options]="partOptions()" displayField="label" valueField="value" formControlName="partId" [required]="true" data-testid="so-line-part" />
+          <app-entity-picker [label]="'common.part' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name"
+            [filters]="partFilters" formControlName="partId" [required]="true" [placeholder]="'parts.searchPlaceholder' | translate"
+            (selected)="onPartPicked($event)" data-testid="so-line-part" />
           <!-- Phase 3 / WU-10 / F8-partial — qty + price are decimal(18,4); UoM-aware shops
                need fractional quantities. -->
           <app-input [label]="'salesOrders.qty' | translate" type="number" formControlName="quantity" [required]="true" step="0.0001" min="0.0001" data-testid="so-line-qty" />
@@ -68,7 +70,7 @@
           <app-input [label]="'salesOrders.orderNumberLabel' | translate" formControlName="orderNumber"
             [maxlength]="20" [placeholder]="'salesOrders.orderNumberPlaceholder' | translate" data-testid="sales-order-number-create" />
         }
-        <app-entity-picker [label]="'salesOrders.customer' | translate" entityType="customers" displayField="name"
+        <app-entity-picker #customerPicker [label]="'salesOrders.customer' | translate" entityType="customers" displayField="name"
           formControlName="customerId" [required]="true" [placeholder]="'customers.searchPlaceholder' | translate"
           (selected)="onCustomerSelected($event)" data-testid="so-customer" />
         @if (creditHoldMessage(); as message) {

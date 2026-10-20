@@ -54,6 +54,7 @@ export interface InvoiceListItem {
   status: string;
   jobId: number | null;
   totalAmount: number;
+  customerName?: string;
 }
 
 export interface UserListItem {
@@ -161,6 +162,7 @@ export interface PartListItem {
   partNumber: string;
   description: string;
   status: string;
+  procurementSource?: string;
 }
 
 export interface VendorListItem {
@@ -190,8 +192,8 @@ export interface EventListItem {
 
 /** Get parts */
 export async function getParts(token: string): Promise<PartListItem[]> {
-  const result = await apiCall<{ data: PartListItem[] }>('GET', 'parts?pageSize=100', token);
-  return result?.data ?? [];
+  const result = await apiCall<{ items?: PartListItem[]; data?: PartListItem[] }>('GET', 'parts?pageSize=100', token);
+  return result?.items ?? result?.data ?? [];
 }
 
 /** Get vendors */
@@ -232,8 +234,8 @@ export async function getAllInvoices(token: string): Promise<InvoiceListItem[]> 
 
 /** Get sent invoices (ready for payment) */
 export async function getSentInvoices(token: string): Promise<InvoiceListItem[]> {
-  const result = await apiCall<{ data: InvoiceListItem[] }>('GET', 'invoices?pageSize=100', token);
-  return (result?.data ?? []).filter(i => i.status === 'Sent');
+  const result = await apiCall<{ items?: InvoiceListItem[]; data?: InvoiceListItem[] }>('GET', 'invoices?pageSize=100', token);
+  return (result?.items ?? result?.data ?? []).filter(i => i.status === 'Sent');
 }
 
 // ── Shipment queries ────────────────────────────────────────────────────────

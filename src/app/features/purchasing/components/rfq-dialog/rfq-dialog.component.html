@@ -1,6 +1,7 @@
 <app-dialog [title]="(isEdit ? 'purchasing.editRfq' : 'purchasing.dialog.createRfq') | translate" width="520px" (closed)="close()">
   <div [formGroup]="form">
-    <app-select data-testid="rfq-part" [label]="'purchasing.dialog.part' | translate" formControlName="partId" [options]="partOptions()" [required]="true" />
+    <app-entity-picker data-testid="rfq-part" [label]="'purchasing.dialog.part' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name"
+      [filters]="partFilters" formControlName="partId" [required]="true" [placeholder]="'parts.searchPlaceholder' | translate" />
     <div class="dialog-row">
       <app-input data-testid="rfq-quantity" [label]="'purchasing.dialog.quantity' | translate" type="number" formControlName="quantity" [required]="true" />
       <app-datepicker data-testid="rfq-required-date" [label]="'purchasing.dialog.requiredDate' | translate" formControlName="requiredDate" />

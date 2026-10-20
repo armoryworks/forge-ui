@@ -12,7 +12,6 @@ import { CustomerService } from '../../../customers/services/customer.service';
 import { CustomerAddressService } from '../../../customers/services/customer-address.service';
 import { CreditStatus } from '../../../customers/models/credit-status.model';
 import { CustomerAddress } from '../../../../shared/models/customer-address.model';
-import { PartsService } from '../../../parts/services/parts.service';
 import { CustomerTaxEditability } from '../../../customers/models/customer-tax-editability.model';
 import { AdminService } from '../../../admin/services/admin.service';
 import { PartListItem } from '../../../parts/models/part-list-item.model';
@@ -23,7 +22,6 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
-import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
@@ -50,7 +48,7 @@ interface LineEntry {
   imports: [
     ReactiveFormsModule, DecimalPipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
-    AutocompleteComponent, EntityPickerComponent, CurrencyDisplayComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
+    EntityPickerComponent, CurrencyDisplayComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './so-dialog.component.html',
   styleUrl: './so-dialog.component.scss',
@@ -58,13 +56,12 @@ interface LineEntry {
 })
 export class SoDialogComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
-  @ViewChild(EntityPickerComponent) private customerPicker?: EntityPickerComponent;
+  @ViewChild('customerPicker') private customerPicker?: EntityPickerComponent;
   private readonly soService = inject(SalesOrderService);
   private readonly customerService = inject(CustomerService);
   private readonly adminService = inject(AdminService);
   private readonly addressService = inject(CustomerAddressService);
   private readonly dialog = inject(MatDialog);
-  private readonly partsService = inject(PartsService);
   private readonly auth = inject(AuthService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -78,7 +75,7 @@ export class SoDialogComponent {
   readonly saved = output<void>();
 
   protected readonly saving = signal(false);
-  protected readonly parts = signal<PartListItem[]>([]);
+  protected readonly selectedPart = signal<PartListItem | null>(null);
   protected readonly lines = signal<LineEntry[]>([]);
   protected readonly addresses = signal<CustomerAddress[]>([]);
   protected readonly creditStatus = signal<CreditStatus | null>(null);
@@ -100,8 +97,7 @@ export class SoDialogComponent {
       : null;
   });
 
-  protected readonly partOptions = computed<AutocompleteOption[]>(() =>
-    this.parts().map(p => ({ value: p.id, label: `${p.partNumber} — ${p.name}` })));
+  protected readonly partFilters: Record<string, string> = { isActive: 'true' };
 
   protected readonly creditTermsOptions = CREDIT_TERMS_OPTIONS;
 
@@ -183,10 +179,6 @@ export class SoDialogComponent {
   };
 
   constructor() {
-    this.partsService.getTransactableParts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (list) => this.parts.set(list),
-    });
-
     const customerChanges = this.form.controls.customerId.valueChanges;
     customerChanges.pipe(
       switchMap(customerId => {
@@ -237,7 +229,9 @@ export class SoDialogComponent {
       }
     });
 
-    this.lineForm.controls.partId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+    this.lineForm.controls.partId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(partId => {
+      if (partId != null) return;
+      this.selectedPart.set(null);
       this.lineForm.controls.unitPrice.markAsPristine();
       this.priceLookups.next();
     });
@@ -291,7 +285,7 @@ export class SoDialogComponent {
   private lookupPendingPrice(): Observable<number | null> {
     const partId = this.lineForm.controls.partId.value;
     if (partId == null) return of(null);
-    const part = this.parts().find(p => p.id === partId);
+    const part = this.selectedPart()?.id === partId ? this.selectedPart() : null;
     const fallback = part && part.effectivePriceSource !== 'Default' && part.effectivePrice > 0
       ? part.effectivePrice
       : null;
@@ -301,6 +295,13 @@ export class SoDialogComponent {
       map(price => price ?? fallback),
       catchError(() => of(fallback)),
     );
+  }
+
+  protected onPartPicked(part: Record<string, unknown> | null): void {
+    this.selectedPart.set(part as PartListItem | null);
+    if (!part) return;
+    this.lineForm.controls.unitPrice.markAsPristine();
+    this.priceLookups.next();
   }
 
   protected onCustomerSelected(customer: Record<string, unknown> | null): void {
@@ -333,8 +334,8 @@ export class SoDialogComponent {
   private commitLine(): void {
     if (this.lineForm.invalid) return;
     const f = this.lineForm.getRawValue();
-    const part = this.parts().find(p => p.id === f.partId);
-    if (!part) return;
+    const part = this.selectedPart();
+    if (!part || part.id !== f.partId) return;
     this.lines.update(prev => [...prev, {
       partId: part.id,
       partNumber: part.partNumber,

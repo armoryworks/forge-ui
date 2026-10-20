@@ -37,16 +37,17 @@ export class CustomerService {
    * flat array continue to work; new callers should use {@link getCustomersPaged}
    * instead so they can read `totalCount` for proper server-side pagination.
    *
-   * Default page size is 200 (the server cap) to preserve the previous
-   * "everything in one round trip" UX while the data-table handles client-
-   * side filtering / sort / pagination. Lists larger than 200 will need a
-   * follow-up to switch the table to true server-side paging.
+   * Returns at most 200 customers (the server cap), sorted by name. Pickers
+   * that must reach every customer should search the server instead, e.g.
+   * through `app-entity-picker` with `entityType="customers"`.
    */
   getCustomers(search?: string, isActive?: boolean): Observable<CustomerListItem[]> {
     return this.getCustomersPaged({
       q: search,
       isActive,
       pageSize: 200,
+      sort: 'name',
+      order: 'asc',
     }).pipe(map(p => p.items));
   }
 

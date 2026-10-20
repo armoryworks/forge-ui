@@ -59,7 +59,7 @@ export class CustomerReturnDialogComponent {
   });
   protected readonly jobFilters = computed(() => {
     const customerId = this.selectedCustomerId();
-    const filters: Record<string, string> = {};
+    const filters: Record<string, string> = { includeArchived: 'true' };
     if (customerId != null) filters['customerId'] = String(customerId);
     return filters;
   });

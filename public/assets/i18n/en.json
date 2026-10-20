@@ -5128,7 +5128,8 @@
     }
   },
   "entityPicker": {
-    "createNew": "Create new {{label}} “{{term}}”"
+    "createNew": "Create new {{label}} “{{term}}”",
+    "minChars": "Type at least 2 characters to search"
   },
   "similarEntities": {
     "title": "Did you mean one of these?",
@@ -5273,7 +5274,9 @@
     "preview": {
       "open": "Open"
     },
-    "offlineNotSaved": "You're offline. Changes can't be saved until you reconnect."
+    "offlineNotSaved": "You're offline. Changes can't be saved until you reconnect.",
+    "exportCsvPage": "Export this page to CSV",
+    "exportExcelPage": "Export this page to Excel"
   },
   "address": {
     "street": "Street",

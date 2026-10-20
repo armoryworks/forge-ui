@@ -430,9 +430,11 @@ export function getOfficeWorkflow(): Workflow {
             await page.locator('[data-testid="quote-customer"]')
               .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
 
-            // Select customer via mat-select (app-select component)
             const customer = randomPick(CUSTOMERS);
-            await selectByTestId(page, 'quote-customer', customer);
+            if (!await fillEntityPickerByTestId(page, 'quote-customer', customer)) {
+              await safeCloseDialog(page);
+              return;
+            }
 
             await page.waitForTimeout(randomDelay(300, 600));
 
@@ -1015,8 +1017,10 @@ export function getOfficeWorkflow(): Workflow {
             await page.locator('[data-testid="invoice-customer"]')
               .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
 
-            // Select first available customer
-            await selectNthByTestId(page, 'invoice-customer', 0);
+            if (!await fillEntityPickerByTestId(page, 'invoice-customer', randomPick(CUSTOMERS))) {
+              await safeCloseDialog(page);
+              return;
+            }
             await page.waitForTimeout(randomDelay(300, 600));
 
             // Fill invoice date (today)
@@ -1116,8 +1120,10 @@ export function getOfficeWorkflow(): Workflow {
             await page.locator('[data-testid="payment-customer"]')
               .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
 
-            // Select first available customer
-            await selectNthByTestId(page, 'payment-customer', 0);
+            if (!await fillEntityPickerByTestId(page, 'payment-customer', randomPick(CUSTOMERS))) {
+              await safeCloseDialog(page);
+              return;
+            }
             await page.waitForTimeout(randomDelay(300, 600));
 
             // Select payment method
@@ -1235,9 +1241,11 @@ export function getOfficeWorkflow(): Workflow {
             await page.locator('[data-testid="rfq-part"]')
               .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
 
-            // Select part via mat-select — use part number prefix
             const partPrefixes = ['M-001', 'M-002', 'P-1001', 'P-1002', 'P-1003', 'P-1004', 'P-1005'];
-            await selectByTestId(page, 'rfq-part', randomPick(partPrefixes));
+            if (!await fillEntityPickerByTestId(page, 'rfq-part', randomPick(partPrefixes))) {
+              await safeCloseDialog(page);
+              return;
+            }
 
             await page.waitForTimeout(randomDelay(200, 400));
 

@@ -71,7 +71,9 @@
         @if (allowManualPaymentNumbers()) {
           <app-input [label]="'payments.paymentNumberLabel' | translate" formControlName="paymentNumber" [maxlength]="50" [placeholder]="'payments.optional' | translate" data-testid="payment-number-create" />
         }
-        <app-select [label]="'payments.customer' | translate" formControlName="customerId" [options]="customerOptions()" data-testid="payment-customer" />
+        <app-entity-picker #customerPicker data-testid="payment-customer" [label]="'payments.customer' | translate" entityType="customers" displayField="name"
+          [filters]="customerFilters" formControlName="customerId" [required]="true" [placeholder]="'customers.searchPlaceholder' | translate"
+          (selected)="onCustomerSelected($event)" />
         <app-select [label]="'payments.paymentMethod' | translate" formControlName="method" [options]="methodOptions" data-testid="payment-method" />
         <app-input [label]="'payments.amount' | translate" type="number" formControlName="amount" [placeholder]="'payments.amountPlaceholder' | translate" [required]="true" data-testid="payment-amount" />
         <app-datepicker [label]="'payments.paymentDate' | translate" formControlName="paymentDate" [max]="today" [required]="true" data-testid="payment-date" />

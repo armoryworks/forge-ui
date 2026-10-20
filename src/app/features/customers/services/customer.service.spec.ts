@@ -38,6 +38,8 @@ describe('CustomerService', () => {
       expect(req.request.method).toBe('GET');
       // Default page size of 200 is always sent
       expect(req.request.params.get('pageSize')).toBe('200');
+      expect(req.request.params.get('sort')).toBe('name');
+      expect(req.request.params.get('order')).toBe('asc');
       req.flush({ items: [{ id: 1, name: 'Acme Corp' }], totalCount: 1, page: 1, pageSize: 200 });
 
       expect(result.length).toBe(1);

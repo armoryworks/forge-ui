@@ -26,7 +26,7 @@ interface DialogInternals {
 describe('ApplyCreditDialogComponent', () => {
   let dialog: DialogInternals;
   let paymentService: { applyPayment: ReturnType<typeof vi.fn> };
-  let invoiceService: { getInvoices: ReturnType<typeof vi.fn> };
+  let invoiceService: { getOpenInvoices: ReturnType<typeof vi.fn> };
   let savedCount: number;
 
   const payment = {
@@ -42,7 +42,7 @@ describe('ApplyCreditDialogComponent', () => {
 
   beforeEach(() => {
     paymentService = { applyPayment: vi.fn(() => of({ id: 4 })) };
-    invoiceService = { getInvoices: vi.fn(() => of(invoices)) };
+    invoiceService = { getOpenInvoices: vi.fn(() => of(invoices)) };
     TestBed.configureTestingModule({
       providers: [
         provideTranslateService(),
@@ -61,7 +61,7 @@ describe('ApplyCreditDialogComponent', () => {
   });
 
   it('offers only the open invoices of the payment customer', () => {
-    expect(invoiceService.getInvoices).toHaveBeenCalledWith(3);
+    expect(invoiceService.getOpenInvoices).toHaveBeenCalledWith(3);
     expect(dialog.invoiceOptions().map(o => o['value'])).toEqual([5, 8]);
   });
 

@@ -7,7 +7,6 @@ import { vi } from 'vitest';
 
 import { PaymentDialogComponent } from './payment-dialog.component';
 import { PaymentService } from '../../services/payment.service';
-import { CustomerService } from '../../../customers/services/customer.service';
 import { InvoiceService } from '../../../invoices/services/invoice.service';
 import { InvoiceListItem } from '../../../invoices/models/invoice-list-item.model';
 import { ActiveCurrencyService } from '../../../../shared/services/active-currency.service';
@@ -20,11 +19,13 @@ interface DialogInternals {
   paymentForm: FormGroup;
   appForm: FormGroup;
   invoiceOptions(): AutocompleteOption[];
+  onCustomerSelected(customer: Record<string, unknown> | null): void;
+  draftConfig: { snapshotFn(): Record<string, unknown> };
 }
 
 describe('PaymentDialogComponent invoice picker', () => {
   let dialog: DialogInternals;
-  let invoiceService: { getInvoices: ReturnType<typeof vi.fn> };
+  let invoiceService: { getOpenInvoices: ReturnType<typeof vi.fn> };
 
   const invoices = [
     { id: 5, invoiceNumber: 'INV-00005', status: 'Sent', balanceDue: 1250 },
@@ -33,12 +34,11 @@ describe('PaymentDialogComponent invoice picker', () => {
   ] as InvoiceListItem[];
 
   beforeEach(() => {
-    invoiceService = { getInvoices: vi.fn(() => of(invoices)) };
+    invoiceService = { getOpenInvoices: vi.fn(() => of(invoices)) };
     TestBed.configureTestingModule({
       providers: [
         provideTranslateService(),
         { provide: PaymentService, useValue: {} },
-        { provide: CustomerService, useValue: { getCustomers: () => of([]) } },
         { provide: InvoiceService, useValue: invoiceService },
         { provide: ActiveCurrencyService, useValue: { listActiveCurrencies: () => of([]) } },
         { provide: ManualNumberSettingsService, useValue: { isEnabled: () => false } },
@@ -54,8 +54,15 @@ describe('PaymentDialogComponent invoice picker', () => {
   it('offers the open invoices of the picked customer', () => {
     dialog.paymentForm.controls['customerId'].setValue(3);
 
-    expect(invoiceService.getInvoices).toHaveBeenCalledWith(3);
+    expect(invoiceService.getOpenInvoices).toHaveBeenCalledWith(3);
     expect(dialog.invoiceOptions().map(o => o['value'])).toEqual([5]);
+  });
+
+  it('keeps the picked customer name in the draft snapshot', () => {
+    dialog.paymentForm.controls['customerId'].setValue(3);
+    dialog.onCustomerSelected({ id: 3, name: 'Acme Corp' });
+
+    expect(dialog.draftConfig.snapshotFn()['customerName']).toBe('Acme Corp');
   });
 
   it('fills the invoice number and the open balance when an invoice is picked', () => {

@@ -96,7 +96,9 @@
           @if (lineForm.controls.nonStock.value) {
             <app-input data-testid="po-line-description" [label]="'purchaseOrders.lineDescription' | translate" formControlName="description" [required]="true" [maxlength]="500" />
           } @else {
-            <app-autocomplete data-testid="po-line-part" [label]="'common.part' | translate" [options]="partOptions()" displayField="label" valueField="value" formControlName="partId" [required]="true" [minChars]="0" (input)="onPartSearch($event)" />
+            <app-entity-picker data-testid="po-line-part" [label]="'common.part' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name"
+              [filters]="partFilters()" [optionSuffix]="obsoletePartSuffix" formControlName="partId" [required]="true" [placeholder]="'parts.searchPlaceholder' | translate"
+              (selected)="onPartPicked($event)" (searchCompleted)="onPartSearchCompleted($event)" />
           }
           <!-- Phase 3 / WU-10 / F8-partial — qty + price are decimal(18,4); UoM-aware shops
                need fractional quantities (lb, kg, hr, gal). 4 decimals on price is industry-

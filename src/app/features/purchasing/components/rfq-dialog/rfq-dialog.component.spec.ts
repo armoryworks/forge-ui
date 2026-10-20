@@ -6,7 +6,6 @@ import { of } from 'rxjs';
 
 import { RfqDialogComponent } from './rfq-dialog.component';
 import { PurchasingService } from '../../services/purchasing.service';
-import { PartsService } from '../../../parts/services/parts.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { CreateRfqRequest, RfqListItem } from '../../models/rfq.model';
 
@@ -14,6 +13,8 @@ interface DialogApi {
   form: FormGroup;
   save(): void;
   ngOnInit(): void;
+  ngAfterViewInit(): void;
+  partPicker?: { setSelected(id: number, text: string): void };
 }
 
 const rfq: RfqListItem = {
@@ -47,7 +48,6 @@ describe('RfqDialogComponent date-only fields west of UTC', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: PurchasingService, useValue: { updateRfq, createRfq: vi.fn(() => of({})) } },
-        { provide: PartsService, useValue: { getParts: () => of([]) } },
         { provide: SnackbarService, useValue: { success: vi.fn() } },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
       ],
@@ -87,5 +87,26 @@ describe('RfqDialogComponent date-only fields west of UTC', () => {
     const request = updateRfq.mock.calls[0][1] as CreateRfqRequest;
     expect(request.requiredDate).toBe('2026-11-20T00:00:00Z');
     expect(request.responseDeadline).toBe('2026-11-13T00:00:00Z');
+  });
+
+  it('shows the stored part in the part search box when editing', () => {
+    const api = create(rfq);
+    const setSelected = vi.fn();
+    api.partPicker = { setSelected };
+
+    api.ngAfterViewInit();
+
+    expect(setSelected).toHaveBeenCalledWith(3, 'PRT-3');
+    expect(api.form.controls['partId'].value).toBe(3);
+  });
+
+  it('leaves the part search box empty for a new RFQ', () => {
+    const api = create(null);
+    const setSelected = vi.fn();
+    api.partPicker = { setSelected };
+
+    api.ngAfterViewInit();
+
+    expect(setSelected).not.toHaveBeenCalled();
   });
 });

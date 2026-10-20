@@ -18,6 +18,7 @@ type DialogInternals = {
   returnForm: FormGroup;
   dialogRef: { clearDraft(): void };
   save(): void;
+  jobFilters(): Record<string, string>;
 };
 
 describe('CustomerReturnDialogComponent quantity', () => {
@@ -40,6 +41,10 @@ describe('CustomerReturnDialogComponent quantity', () => {
     d.dialogRef = { clearDraft: () => undefined };
     return d;
   }
+
+  it('lets the original job picker reach archived jobs', () => {
+    expect(dialog().jobFilters()['includeArchived']).toBe('true');
+  });
 
   it('requires a positive quantity on a new return', () => {
     const d = dialog();

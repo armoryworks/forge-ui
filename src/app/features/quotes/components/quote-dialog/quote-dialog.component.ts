@@ -7,9 +7,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { QuoteService } from '../../services/quote.service';
 import { CustomerService } from '../../../customers/services/customer.service';
-import { PartsService } from '../../../parts/services/parts.service';
 import { AdminService } from '../../../admin/services/admin.service';
-import { CustomerListItem } from '../../../customers/models/customer-list-item.model';
 import { CustomerTaxEditability } from '../../../customers/models/customer-tax-editability.model';
 import { CreditStatus } from '../../../customers/models/credit-status.model';
 import { CUSTOMER_COMMERCIAL_TERMS_ROLES } from '../../../customers/customer-roles';
@@ -18,10 +16,9 @@ import { PartListItem } from '../../../parts/models/part-list-item.model';
 import { CreateQuoteLineRequest } from '../../models/create-quote-line-request.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
-import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
-import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
+import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
@@ -47,8 +44,8 @@ interface LineEntry {
   standalone: true,
   imports: [
     ReactiveFormsModule, DecimalPipe,
-    DialogComponent, InputComponent, SelectComponent, DatepickerComponent, TextareaComponent,
-    AutocompleteComponent, CurrencyDisplayComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
+    DialogComponent, InputComponent, DatepickerComponent, TextareaComponent,
+    EntityPickerComponent, CurrencyDisplayComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './quote-dialog.component.html',
   styleUrl: './quote-dialog.component.scss',
@@ -56,9 +53,9 @@ interface LineEntry {
 })
 export class QuoteDialogComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+  @ViewChild('customerPicker') private customerPicker?: EntityPickerComponent;
   private readonly quoteService = inject(QuoteService);
   private readonly customerService = inject(CustomerService);
-  private readonly partsService = inject(PartsService);
   private readonly adminService = inject(AdminService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -73,8 +70,8 @@ export class QuoteDialogComponent {
   readonly saved = output<void>();
 
   protected readonly saving = signal(false);
-  protected readonly customers = signal<CustomerListItem[]>([]);
-  protected readonly parts = signal<PartListItem[]>([]);
+  protected readonly selectedPart = signal<PartListItem | null>(null);
+  private readonly customerName = signal('');
   protected readonly lines = signal<LineEntry[]>([]);
   /** True while the unit price reflects the part's list price and hasn't been manually edited. */
   protected readonly priceIsDefault = signal(false);
@@ -101,13 +98,8 @@ export class QuoteDialogComponent {
   protected readonly taxCertBacked = computed(
     () => this.taxOverridden() && this.taxEditability()?.canEditTax === true);
 
-  protected readonly customerOptions = computed<SelectOption[]>(() => [
-    { value: null, label: this.translate.instant('quotes.selectCustomer') },
-    ...this.customers().map(c => ({ value: c.id, label: c.name })),
-  ]);
-
-  protected readonly partOptions = computed<AutocompleteOption[]>(() =>
-    this.parts().map(p => ({ value: p.id, label: `${p.partNumber} — ${p.name}` })));
+  protected readonly customerFilters: Record<string, string> = { isActive: 'true' };
+  protected readonly partFilters: Record<string, string> = { isActive: 'true' };
 
   readonly form = new FormGroup({
     customerId: new FormControl<number | null>(null, [Validators.required]),
@@ -152,8 +144,14 @@ export class QuoteDialogComponent {
     entityType: 'quote',
     entityId: 'new',
     route: '/quotes',
-    snapshotFn: () => ({ ...this.form.getRawValue(), lines: this.lines() }),
+    snapshotFn: () => ({ ...this.form.getRawValue(), customerName: this.customerName(), lines: this.lines() }),
     restoreFn: (data) => {
+      const customerId = typeof data['customerId'] === 'number' ? data['customerId'] : null;
+      const customerName = typeof data['customerName'] === 'string' ? data['customerName'] : '';
+      if (customerId != null && customerName) {
+        this.customerName.set(customerName);
+        this.customerPicker?.setSelected(customerId, customerName);
+      }
       this.form.patchValue(data);
       if (Array.isArray(data['lines'])) this.lines.set(data['lines'] as LineEntry[]);
       this.form.markAsDirty();
@@ -161,13 +159,6 @@ export class QuoteDialogComponent {
   };
 
   constructor() {
-    this.customerService.getCustomers(undefined, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (list) => this.customers.set(list),
-    });
-    this.partsService.getTransactableParts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (list) => this.parts.set(list),
-    });
-
     // Auto-fill tax rate from customer's state when customer is selected
     this.form.controls.customerId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((customerId) => {
       this.taxAutoFilled.set(false);
@@ -219,9 +210,8 @@ export class QuoteDialogComponent {
       this.taxOverridden.set(true);
     });
 
-    // Pre-fill unit price from part's list price when a part is selected
     this.lineForm.controls.partId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((partId) => {
-      this.onPartSelected(partId);
+      if (partId == null) this.onPartPicked(null);
     });
 
     // When price is manually changed, clear the "list price" indicator
@@ -234,12 +224,17 @@ export class QuoteDialogComponent {
     this.closed.emit();
   }
 
-  private onPartSelected(partId: number | null): void {
-    if (partId == null) {
+  protected onCustomerSelected(customer: Record<string, unknown> | null): void {
+    this.customerName.set(customer ? String(customer['name'] ?? '') : '');
+  }
+
+  protected onPartPicked(row: Record<string, unknown> | null): void {
+    const part = row as PartListItem | null;
+    this.selectedPart.set(part);
+    if (part == null) {
       this.priceIsDefault.set(false);
       return;
     }
-    const part = this.parts().find(p => p.id === partId);
     // Use the resolver-supplied effective price. When source is "Default" the
     // resolver returned 0 (no pricing configured) — don't pre-fill in that case.
     if (part && part.effectivePriceSource !== 'Default' && part.effectivePrice > 0) {
@@ -253,8 +248,8 @@ export class QuoteDialogComponent {
   protected addLine(): void {
     if (this.lineForm.invalid) return;
     const f = this.lineForm.getRawValue();
-    const part = this.parts().find(p => p.id === f.partId);
-    if (!part) return;
+    const part = this.selectedPart();
+    if (!part || part.id !== f.partId) return;
     this.lines.update(prev => [...prev, {
       partId: part.id,
       partNumber: part.partNumber,

@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { PagedResponse, PagedQuery } from '../../../shared/models/paged-response.model';
 import { PartListItem } from '../models/part-list-item.model';
@@ -38,6 +37,8 @@ export interface PartListPagedQuery extends PagedQuery {
   isActive?: boolean | null;
   /** Pillar 1 axis filter — Make / Buy / Subcontract / Phantom. */
   procurementSource?: ProcurementSource;
+  /** True keeps Buy and Subcontract parts; false keeps Make and Phantom parts. */
+  purchasable?: boolean;
   /** Pillar 1 axis filter — Raw / Component / Subassembly / FinishedGood / Consumable / Tool. */
   inventoryClass?: InventoryClass;
   defaultVendorId?: number;
@@ -47,32 +48,6 @@ export interface PartListPagedQuery extends PagedQuery {
 export class PartsService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiUrl}/parts`;
-
-  /**
-   * Phase 3 F7-partial / WU-17 — backward-compat shim. Calls the paged
-   * endpoint and unwraps the envelope so existing callers that just want
-   * the flat array keep working. New callers should use {@link getPartsPaged}
-   * to read `totalCount` for true server-side pagination.
-   *
-   * Default page size is 200 (the server cap); the data-table component
-   * handles client-side sort/filter/page within that slice. Lists exceeding
-   * 200 parts need a follow-up to switch to server-side pagination.
-   */
-  getParts(status?: PartStatus, search?: string): Observable<PartListItem[]> {
-    return this.getPartsPaged({
-      status,
-      q: search,
-      pageSize: 200,
-    }).pipe(map(p => p.items));
-  }
-
-  /**
-   * Parts a quote or sales-order line may reference: every status except
-   * Obsolete, matching the server's active check on line create.
-   */
-  getTransactableParts(): Observable<PartListItem[]> {
-    return this.getParts().pipe(map(parts => parts.filter(p => p.status !== 'Obsolete')));
-  }
 
   /**
    * Phase 3 F7-partial / WU-17 — paged part list. Returns the standard
@@ -89,6 +64,7 @@ export class PartsService {
     if (query.status) params = params.set('status', query.status);
     if (query.isActive !== undefined && query.isActive !== null) params = params.set('isActive', String(query.isActive));
     if (query.procurementSource) params = params.set('procurementSource', query.procurementSource);
+    if (query.purchasable != null) params = params.set('purchasable', String(query.purchasable));
     if (query.inventoryClass) params = params.set('inventoryClass', query.inventoryClass);
     if (query.defaultVendorId != null) params = params.set('defaultVendorId', String(query.defaultVendorId));
     if (query.dateFrom) params = params.set('dateFrom', query.dateFrom);

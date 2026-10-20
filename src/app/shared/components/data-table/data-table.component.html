@@ -85,7 +85,7 @@
                   every column where filterable is not explicitly false
                   (default behavior — text filter applies everywhere).
                 -->
-                @if (col.filterable !== false) {
+                @if (col.filterable !== false && !isServerPaged()) {
                   <ng-template
                     cdkConnectedOverlay
                     [cdkConnectedOverlayOrigin]="filterOrigin"
@@ -121,15 +121,15 @@
                 <ng-content select="[table-actions]" />
                 <button
                   class="data-table__gear-btn"
-                  [attr.aria-label]="'shared.exportCsv' | translate"
-                  [matTooltip]="'shared.exportCsv' | translate" matTooltipPosition="above"
+                  [attr.aria-label]="(isServerPaged() ? 'shared.exportCsvPage' : 'shared.exportCsv') | translate"
+                  [matTooltip]="(isServerPaged() ? 'shared.exportCsvPage' : 'shared.exportCsv') | translate" matTooltipPosition="above"
                   (click)="exportCsv()">
                   <span class="material-icons-outlined">download</span>
                 </button>
                 <button
                   class="data-table__gear-btn"
-                  [attr.aria-label]="'shared.exportExcel' | translate"
-                  [matTooltip]="'shared.exportExcel' | translate" matTooltipPosition="above"
+                  [attr.aria-label]="(isServerPaged() ? 'shared.exportExcelPage' : 'shared.exportExcel') | translate"
+                  [matTooltip]="(isServerPaged() ? 'shared.exportExcelPage' : 'shared.exportExcel') | translate" matTooltipPosition="above"
                   (click)="exportExcel()">
                   <span class="material-icons-outlined">grid_on</span>
                 </button>
@@ -205,11 +205,11 @@
         </tbody>
       </table>
     </div>
-    @if (sortedData().length > 25) {
+    @if (paginatorLength() > 25) {
       <mat-paginator
-        [length]="sortedData().length"
-        [pageSize]="pageSize()"
-        [pageIndex]="effectivePageIndex()"
+        [length]="paginatorLength()"
+        [pageSize]="paginatorPageSize()"
+        [pageIndex]="paginatorPageIndex()"
         [pageSizeOptions]="[25, 50, 100]"
         (page)="onPageChange($event)"
         showFirstLastButtons />
@@ -269,7 +269,7 @@
       of filtering is rare (action-only columns can set filterable: false to
       hide the row, but the default is filter-on).
     -->
-    @if (col.filterable !== false) {
+    @if (col.filterable !== false && !isServerPaged()) {
       <button mat-menu-item (click)="contextFilter()">
         <span class="material-icons-outlined">filter_list</span>
         <span>{{ 'shared.filterEllipsis' | translate }}</span>

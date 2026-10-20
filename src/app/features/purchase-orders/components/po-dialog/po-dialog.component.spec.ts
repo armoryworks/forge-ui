@@ -21,7 +21,6 @@ import { PoVendorRef } from '../../models/po-vendor-ref.model';
 import { CreatePurchaseOrderRequest } from '../../models/create-purchase-order-request.model';
 import { CheckTierVarianceResult } from '../../models/tier-variance-check.model';
 import { VendorPart } from '../../../parts/models/vendor-part.model';
-import { AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
 import { SelectOption } from '../../../../shared/components/select/select.component';
 import { OffTierPromptResult } from '../off-tier-prompt-dialog/off-tier-prompt-dialog.component';
 
@@ -32,8 +31,17 @@ class FakeLoader implements TranslateLoader {
 interface DialogInternals {
   form: FormGroup;
   dialogRef: { clearDraft: () => void };
-  lines: { set(lines: PoLineEntry[]): void };
-  partOptions(): AutocompleteOption[];
+  partFilters(): Record<string, string>;
+  showInactiveParts: { set(value: boolean): void };
+  obsoletePartSuffix(part: Record<string, unknown>): string;
+  lineForm: FormGroup;
+  lines: { set(lines: PoLineEntry[]): void; (): PoLineEntry[] };
+  inactiveLineWarning(): string | null;
+  partLookup(): Map<number, { partNumber: string; description: string }>;
+  priceIsDefault(): boolean;
+  addLine(): void;
+  onPartPicked(row: Record<string, unknown> | null): void;
+  onPartSearchCompleted(event: { term: string; count: number }): void;
   contactOptions(): SelectOption[];
   addressOptions(): SelectOption[];
   shipToOptions(): SelectOption[];
@@ -43,7 +51,6 @@ interface DialogInternals {
   showOffTierPrompt(): boolean;
   offTierLines(): CheckTierVarianceResult[];
   noTierLines(): CheckTierVarianceResult[];
-  onPartSearch(event: Event): void;
   save(): void;
   onOffTierConfirm(result: OffTierPromptResult): void;
 }
@@ -89,6 +96,13 @@ function setup(opts: SetupOptions = {}) {
   const createVendorPart = vi.fn(() => of({ id: 77 }));
   const addPriceTier = vi.fn(() => of({ id: 1 }));
   const snackbar = { success: vi.fn(), error: vi.fn(), info: vi.fn() };
+  const getPartsPaged = vi.fn((query: { procurementSource?: string; q?: string }) => {
+    const term = (query.q ?? '').toLowerCase();
+    const items = (opts.parts ?? []).filter(p =>
+      (!query.procurementSource || p.procurementSource === query.procurementSource)
+      && p.partNumber.toLowerCase().includes(term));
+    return of({ items, totalCount: items.length, page: 1, pageSize: 5 });
+  });
 
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
@@ -96,7 +110,7 @@ function setup(opts: SetupOptions = {}) {
       provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
       { provide: PurchaseOrderService, useValue: { createPurchaseOrder } },
       { provide: VendorService, useValue: { getVendorDropdown: () => of([]) } },
-      { provide: PartsService, useValue: { getParts: () => of(opts.parts ?? []) } },
+      { provide: PartsService, useValue: { getPartsPaged } },
       {
         provide: VendorPartsService,
         useValue: {
@@ -127,6 +141,7 @@ function setup(opts: SetupOptions = {}) {
 
   const translate = TestBed.inject(TranslateService);
   translate.setTranslation('en', {
+    common: { deactivatedSuffix: '(deactivated)' },
     poCreate: {
       makePartOnly: 'No buyable parts match. {{partNumber}} is made in-house.',
       noContact: 'No contact',
@@ -143,11 +158,12 @@ function setup(opts: SetupOptions = {}) {
   const component = TestBed.runInInjectionContext(() => new PoDialogComponent());
   const internals = component as unknown as DialogInternals;
   internals.dialogRef = { clearDraft: vi.fn() };
-  return { internals, createPurchaseOrder, checkTierVariance, createVendorPart, addPriceTier, snackbar };
+  return { internals, createPurchaseOrder, checkTierVariance, createVendorPart, addPriceTier, snackbar, getPartsPaged };
 }
 
-function searchFor(internals: DialogInternals, text: string): void {
-  internals.onPartSearch({ target: { value: text } } as unknown as Event);
+function pick(internals: DialogInternals, picked: PartListItem): void {
+  internals.lineForm.controls['partId'].setValue(picked.id);
+  internals.onPartPicked(picked as unknown as Record<string, unknown>);
 }
 
 describe('PoDialogComponent — vendor contact, order-from address and ship-to', () => {
@@ -273,52 +289,96 @@ describe('PoDialogComponent — blanket order', () => {
 describe('PoDialogComponent — part picker', () => {
   beforeEach(() => TestBed.resetTestingModule());
 
-  it('lists only buy and subcontract parts, sorted by part number', () => {
-    const { internals } = setup({
-      parts: [
-        part(1, 'P-10', 'Buy'),
-        part(2, 'M-1', 'Make'),
-        part(3, 'P-2', 'Subcontract'),
-        part(4, 'A-5', 'Buy'),
-        part(5, 'X-1', 'Phantom'),
-      ],
-    });
+  it('searches the server for active buy and subcontract parts by part number', () => {
+    const { internals } = setup();
 
-    expect(internals.partOptions().map(o => o['value'])).toEqual([4, 3, 1]);
+    expect(internals.partFilters()).toEqual({ purchasable: 'true', isActive: 'true' });
+  });
+
+  it('drops the active filter when deactivated parts are shown', () => {
+    const { internals } = setup();
+
+    internals.showInactiveParts.set(true);
+
+    expect(internals.partFilters()).toEqual({ purchasable: 'true' });
+  });
+
+  it('marks obsolete parts as deactivated in the picker results', () => {
+    const { internals } = setup();
+
+    expect(internals.obsoletePartSuffix({ ...part(1, 'P-10', 'Buy'), status: 'Obsolete' } as unknown as Record<string, unknown>)).toBe('(deactivated)');
+    expect(internals.obsoletePartSuffix(part(2, 'P-11', 'Buy') as unknown as Record<string, unknown>)).toBe('');
   });
 
   it('explains that a typed make part is made in-house when nothing buyable matches', () => {
-    const { internals } = setup({ parts: [part(1, 'P-10', 'Buy'), part(2, 'ASM-200', 'Make')] });
+    const { internals, getPartsPaged } = setup({ parts: [part(1, 'P-10', 'Buy'), part(2, 'ASM-200', 'Make')] });
 
-    searchFor(internals, 'asm-200');
+    internals.onPartSearchCompleted({ term: 'asm-200', count: 0 });
+
+    expect(getPartsPaged).toHaveBeenCalledWith(expect.objectContaining({ procurementSource: 'Make', q: 'asm-200' }));
+    expect(getPartsPaged.mock.calls.at(-1)?.[0]).not.toHaveProperty('sort');
+    expect(internals.makePartHint()).toBe('No buyable parts match. ASM-200 is made in-house.');
+  });
+
+  it('prefers the make part whose number matches the text exactly', () => {
+    const { internals } = setup({ parts: [part(2, 'ASM-200-B', 'Make'), part(3, 'ASM-200', 'Make')] });
+
+    internals.onPartSearchCompleted({ term: 'ASM-200', count: 0 });
 
     expect(internals.makePartHint()).toBe('No buyable parts match. ASM-200 is made in-house.');
   });
 
   it('shows no explanation while a buyable part still matches the text', () => {
-    const { internals } = setup({ parts: [part(1, 'ASM-200-B', 'Buy'), part(2, 'ASM-200', 'Make')] });
+    const { internals, getPartsPaged } = setup({ parts: [part(1, 'ASM-200-B', 'Buy'), part(2, 'ASM-200', 'Make')] });
 
-    searchFor(internals, 'ASM-200');
+    internals.onPartSearchCompleted({ term: 'ASM-200', count: 1 });
 
-    expect(internals.makePartHint()).toBeNull();
-  });
-
-  it('shows no explanation when the text matches a hidden obsolete buy part', () => {
-    const obsolete = { ...part(1, 'ASM-200-B', 'Buy'), status: 'Obsolete' } as PartListItem;
-    const { internals } = setup({ parts: [obsolete, part(2, 'ASM-200', 'Make')] });
-
-    searchFor(internals, 'ASM-200');
-
-    expect(internals.partOptions()).toEqual([]);
+    expect(getPartsPaged).not.toHaveBeenCalled();
     expect(internals.makePartHint()).toBeNull();
   });
 
   it('shows no explanation when the text matches no part at all', () => {
     const { internals } = setup({ parts: [part(2, 'ASM-200', 'Make')] });
 
-    searchFor(internals, 'ZZZ');
+    internals.onPartSearchCompleted({ term: 'ZZZ', count: 0 });
 
     expect(internals.makePartHint()).toBeNull();
+  });
+
+  it('clears the explanation once a part is picked', () => {
+    const { internals } = setup({ parts: [part(2, 'ASM-200', 'Make')] });
+    internals.onPartSearchCompleted({ term: 'ASM-200', count: 0 });
+
+    pick(internals, part(9, 'P-9', 'Buy'));
+
+    expect(internals.makePartHint()).toBeNull();
+  });
+
+  it('prefills the effective price of the picked part and adds the line from it', () => {
+    const { internals } = setup();
+    const picked = { ...part(9, 'P-9', 'Buy', 'Bearing'), effectivePrice: 3.25, effectivePriceSource: 'PartPrice' } as PartListItem;
+
+    pick(internals, picked);
+
+    expect(internals.lineForm.controls['unitPrice'].value).toBe(3.25);
+    expect(internals.priceIsDefault()).toBe(true);
+
+    internals.addLine();
+
+    expect(internals.lines()).toEqual([expect.objectContaining({
+      partId: 9, partNumber: 'P-9', description: 'Bearing', unitPrice: 3.25, partStatus: 'Active',
+    })]);
+    expect(internals.partLookup().get(9)).toEqual({ partNumber: 'P-9', description: 'Bearing' });
+  });
+
+  it('warns about a line added for an obsolete part', () => {
+    const { internals } = setup();
+    internals.showInactiveParts.set(true);
+
+    pick(internals, { ...part(9, 'P-9', 'Buy'), status: 'Obsolete' } as PartListItem);
+    internals.addLine();
+
+    expect(internals.inactiveLineWarning()).not.toBeNull();
   });
 });
 

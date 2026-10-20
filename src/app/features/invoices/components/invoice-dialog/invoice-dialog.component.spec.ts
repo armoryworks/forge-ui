@@ -48,9 +48,9 @@ interface DialogInternals {
   customerTaxExempt(): boolean;
   effectiveTaxRate(): number;
   toggleTaxable(index: number): void;
+  onCustomerSelected(customer: Record<string, unknown> | null): void;
+  draftConfig: { snapshotFn(): Record<string, unknown> };
 }
-
-const emptyPage = { items: [], totalCount: 0, page: 1, pageSize: 200 };
 
 const acmeSources: InvoiceSources = {
   salesOrders: [
@@ -93,7 +93,6 @@ function setup() {
   const component = TestBed.runInInjectionContext(() => new InvoiceDialogComponent());
   const httpMock = TestBed.inject(HttpTestingController);
 
-  httpMock.expectOne(r => r.url === `${environment.apiUrl}/customers`).flush(emptyPage);
   httpMock.match(r => r.url === `${environment.apiUrl}/system/currencies`).forEach(r => r.flush([]));
 
   return { internals: component as unknown as DialogInternals, httpMock };
@@ -355,6 +354,23 @@ describe('InvoiceDialogComponent — tax rate and taxable lines', () => {
     internals.invoiceForm.controls.shipmentId.setValue(8);
 
     expect(internals.lines()[0].taxable).toBe(false);
+  });
+
+  it('searches customers on the server instead of loading a capped list up front', () => {
+    const { httpMock } = setup();
+
+    expect(httpMock.match(r => r.url === `${environment.apiUrl}/customers`)).toHaveLength(0);
+  });
+
+  it('keeps the picked customer name in the draft snapshot', () => {
+    const { internals, httpMock } = setup();
+    selectCustomer(internals, httpMock, 5, acmeSources);
+    internals.onCustomerSelected({ id: 5, name: 'Acme' });
+
+    const snapshot = internals.draftConfig.snapshotFn();
+
+    expect(snapshot['customerId']).toBe(5);
+    expect(snapshot['customerName']).toBe('Acme');
   });
 });
 

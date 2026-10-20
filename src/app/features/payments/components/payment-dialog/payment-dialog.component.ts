@@ -4,11 +4,10 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { catchError, map, of, switchMap } from 'rxjs';
 
 import { PaymentService } from '../../services/payment.service';
-import { CustomerService } from '../../../customers/services/customer.service';
-import { CustomerListItem } from '../../../customers/models/customer-list-item.model';
 import { InvoiceService } from '../../../invoices/services/invoice.service';
 import { InvoiceListItem } from '../../../invoices/models/invoice-list-item.model';
 import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
+import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { CreatePaymentApplicationRequest } from '../../models/create-payment-application-request.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -41,7 +40,7 @@ interface ApplicationEntry {
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    DialogComponent, InputComponent, SelectComponent, TextareaComponent, DatepickerComponent, AutocompleteComponent,
+    DialogComponent, InputComponent, SelectComponent, TextareaComponent, DatepickerComponent, AutocompleteComponent, EntityPickerComponent,
     CurrencyDisplayComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './payment-dialog.component.html',
@@ -50,8 +49,8 @@ interface ApplicationEntry {
 })
 export class PaymentDialogComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+  @ViewChild('customerPicker') private customerPicker?: EntityPickerComponent;
   private readonly paymentService = inject(PaymentService);
-  private readonly customerService = inject(CustomerService);
   private readonly invoiceService = inject(InvoiceService);
   private readonly currencyService = inject(ActiveCurrencyService);
   private readonly snackbar = inject(SnackbarService);
@@ -66,7 +65,7 @@ export class PaymentDialogComponent {
   readonly saved = output<void>();
 
   protected readonly saving = signal(false);
-  protected readonly customers = signal<CustomerListItem[]>([]);
+  private readonly customerName = signal('');
   /** Phase 1l — payment dates record when payment was received; not future. */
   protected readonly today = todayEnd();
   protected readonly applications = signal<ApplicationEntry[]>([]);
@@ -93,10 +92,7 @@ export class PaymentDialogComponent {
 
   protected readonly applicationRemaining = signal<number | null>(null);
 
-  protected readonly customerOptions = computed<SelectOption[]>(() => [
-    { value: null, label: this.translate.instant('payments.selectCustomer') },
-    ...this.customers().map(c => ({ value: c.id, label: c.name })),
-  ]);
+  protected readonly customerFilters: Record<string, string> = { isActive: 'true' };
 
   protected readonly methodOptions: SelectOption[] = [
     { value: null, label: this.translate.instant('payments.selectMethod') },
@@ -143,8 +139,14 @@ export class PaymentDialogComponent {
     entityType: 'payment',
     entityId: 'new',
     route: '/payments',
-    snapshotFn: () => ({ ...this.paymentForm.getRawValue(), applications: this.applications() }),
+    snapshotFn: () => ({ ...this.paymentForm.getRawValue(), customerName: this.customerName(), applications: this.applications() }),
     restoreFn: (data) => {
+      const customerId = typeof data['customerId'] === 'number' ? data['customerId'] : null;
+      const customerName = typeof data['customerName'] === 'string' ? data['customerName'] : '';
+      if (customerId != null && customerName) {
+        this.customerName.set(customerName);
+        this.customerPicker?.setSelected(customerId, customerName);
+      }
       this.paymentForm.patchValue(data);
       if (Array.isArray(data['applications'])) {
         // Older drafts predate settlementFxRate — default it to 1 on restore.
@@ -162,17 +164,13 @@ export class PaymentDialogComponent {
   };
 
   constructor() {
-    this.customerService.getCustomers(undefined, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (list) => this.customers.set(list),
-    });
-
     this.paymentForm.controls.customerId.valueChanges.pipe(
       switchMap(customerId => {
         this.openInvoices.set([]);
         this.appForm.reset({ invoiceId: null, invoiceNumber: '', amount: null, settlementFxRate: 1 });
         return customerId == null
           ? of<InvoiceListItem[]>([])
-          : this.invoiceService.getInvoices(customerId).pipe(
+          : this.invoiceService.getOpenInvoices(customerId).pipe(
             map(list => list.filter(inv => inv.balanceDue > 0 && inv.status !== 'Draft' && inv.status !== 'Voided')),
             catchError(() => of<InvoiceListItem[]>([])),
           );
@@ -195,6 +193,10 @@ export class PaymentDialogComponent {
     this.currencyService.listActiveCurrencies().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.activeCurrencyCount.set(list.length),
     });
+  }
+
+  protected onCustomerSelected(customer: Record<string, unknown> | null): void {
+    this.customerName.set(customer ? String(customer['name'] ?? '') : '');
   }
 
   protected close(): void {

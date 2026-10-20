@@ -1,16 +1,13 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, input, OnInit, output, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AfterViewInit, ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { map } from 'rxjs';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PurchasingService } from '../../services/purchasing.service';
-import { PartsService } from '../../../parts/services/parts.service';
-import { PartListItem } from '../../../parts/models/part-list-item.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
-import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
@@ -24,28 +21,25 @@ import { CreateRfqRequest, RfqListItem } from '../../models/rfq.model';
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe,
-    DialogComponent, InputComponent, SelectComponent, TextareaComponent,
+    DialogComponent, InputComponent, EntityPickerComponent, TextareaComponent,
     DatepickerComponent, ValidationButtonComponent,
   ],
   templateUrl: './rfq-dialog.component.html',
   styleUrl: './rfq-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class RfqDialogComponent implements OnInit {
+export class RfqDialogComponent implements OnInit, AfterViewInit {
+  @ViewChild(EntityPickerComponent) private partPicker?: EntityPickerComponent;
   private readonly purchasingService = inject(PurchasingService);
-  private readonly partsService = inject(PartsService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
-  private readonly destroyRef = inject(DestroyRef);
 
   readonly rfq = input<RfqListItem | null>(null);
   readonly closed = output<void>();
   readonly saved = output<void>();
 
   protected readonly saving = signal(false);
-  protected readonly parts = signal<PartListItem[]>([]);
-
-  protected readonly partOptions = signal<SelectOption[]>([]);
+  protected readonly partFilters: Record<string, string> = {};
 
   readonly form = new FormGroup({
     partId: new FormControl<number | null>(null, [Validators.required]),
@@ -65,18 +59,6 @@ export class RfqDialogComponent implements OnInit {
     responseDeadline: this.translate.instant('purchasing.responseDeadline'),
   });
 
-  constructor() {
-    this.partsService.getParts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (list) => {
-        this.parts.set(list);
-        this.partOptions.set([
-          { value: null, label: this.translate.instant('purchasing.selectPart') },
-          ...list.map(p => ({ value: p.id, label: `${p.partNumber} — ${p.name}` })),
-        ]);
-      },
-    });
-  }
-
   ngOnInit(): void {
     const existing = this.rfq();
     if (existing) {
@@ -89,6 +71,11 @@ export class RfqDialogComponent implements OnInit {
         responseDeadline: fromIsoDate(existing.responseDeadline),
       });
     }
+  }
+
+  ngAfterViewInit(): void {
+    const existing = this.rfq();
+    if (existing) this.partPicker?.setSelected(existing.partId, existing.partNumber);
   }
 
   protected get isEdit(): boolean {
