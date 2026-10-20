@@ -78,8 +78,8 @@ export class WorkerComponent {
   }
 
   protected getProgressPercent(task: WorkerTask): number {
-    return task.subtaskCount > 0
-      ? Math.round((task.subtasksCompleted / task.subtaskCount) * 100)
+    return task.operationCount > 0
+      ? Math.round((task.operationsCompleted / task.operationCount) * 100)
       : 0;
   }
 }

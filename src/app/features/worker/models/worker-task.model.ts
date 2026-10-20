@@ -7,6 +7,6 @@ export interface WorkerTask {
   priority: string;
   customerName: string | null;
   dueDate: Date | null;
-  subtaskCount: number;
-  subtasksCompleted: number;
+  operationCount: number;
+  operationsCompleted: number;
 }

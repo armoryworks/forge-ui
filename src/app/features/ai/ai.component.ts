@@ -9,6 +9,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { AiService, AiHelpMessage } from '../../shared/services/ai.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { TermTextPipe } from '../../shared/pipes/term-text.pipe';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { parsePositiveId } from '../../shared/utils/parse-positive-id';
 
@@ -32,7 +33,7 @@ export interface ChatMessage {
 @Component({
   selector: 'app-ai',
   standalone: true,
-  imports: [ReactiveFormsModule, MatTooltipModule, LoadingBlockDirective, EmptyStateComponent, TranslatePipe],
+  imports: [ReactiveFormsModule, MatTooltipModule, LoadingBlockDirective, EmptyStateComponent, TranslatePipe, TermTextPipe],
   templateUrl: './ai.component.html',
   styleUrl: './ai.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

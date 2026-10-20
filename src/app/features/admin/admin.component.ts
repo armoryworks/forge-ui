@@ -79,6 +79,7 @@ import { CompanyLocation, CompanyProfile } from './models/company-location.model
 import { ADMIN_TAB_ROLES } from './models/admin-tab-roles.model';
 import { ADMIN_TABS } from './models/admin-tab.model';
 import { EnumLabelPipe } from '../../shared/pipes/enum-label.pipe';
+import { humanizeIdentifier } from '../../shared/utils/humanize-identifier';
 
 @Component({
   selector: 'app-admin',
@@ -838,7 +839,9 @@ export class AdminComponent implements OnInit {
   }
 
   protected formatGroupCode(code: string): string {
-    return code.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    const key = `adminPanels.referenceData.groups.${code.replace(/\./g, '_')}`;
+    const label = this.translate.instant(key);
+    return typeof label === 'string' && label !== key ? label : humanizeIdentifier(code);
   }
 
   // ── System Settings ──

@@ -27,6 +27,7 @@ export class TermSetStore {
   private engine: TermEngine | null = null;
   private enginePromise: Promise<TermEngine> | null = null;
   private readonly _entries = signal<ReadonlyMap<string, string>>(readCache());
+  private readonly engineReady = signal(false);
 
   readonly entries = this._entries.asReadonly();
 
@@ -56,12 +57,16 @@ export class TermSetStore {
   }
 
   loadEngine(): Promise<TermEngine> {
-    this.enginePromise ??= import('./term-substitution').then(engine => (this.engine = engine));
+    this.enginePromise ??= import('./term-substitution').then(engine => {
+      this.engine = engine;
+      this.engineReady.set(true);
+      return engine;
+    });
     return this.enginePromise;
   }
 
   substituter(lang: string): TermSubstituter | null {
-    if (!this.engine) return null;
+    if (!this.engineReady() || !this.engine) return null;
     let substituter = this.substituters.get(lang);
     if (!substituter) {
       substituter = this.engine.createSubstituter(this._entries(), lang);

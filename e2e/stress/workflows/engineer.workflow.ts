@@ -1064,7 +1064,7 @@ export function getEngineerWorkflow(): Workflow {
             await page.waitForTimeout(randomDelay(500, 1000));
 
             // Try clicking a report template (Jobs by Stage, Time in Stage, etc.)
-            const reportLinks = ['Jobs by Stage', 'Time in Stage', 'Jobs by Priority', 'Open Jobs'];
+            const reportLinks = ['Jobs by Status', 'Time in Status', 'Jobs by Priority', 'Open Jobs'];
             for (const label of reportLinks) {
               try {
                 const link = page.locator(`text=${label}`).first();

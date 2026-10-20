@@ -148,7 +148,7 @@ export class ReportsComponent {
       datasets: [{
         data: data.map(d => d.count),
         backgroundColor: data.map(d => d.stageColor),
-        label: 'Jobs',
+        label: this.translate.instant('reports.colJobs'),
       }],
     };
   });
@@ -160,7 +160,7 @@ export class ReportsComponent {
       datasets: [{
         data: data.map(d => d.totalHours),
         backgroundColor: 'rgba(59, 130, 246, 0.7)',
-        label: 'Hours',
+        label: this.translate.instant('reports.legend.hours'),
       }],
     };
   });
@@ -187,7 +187,7 @@ export class ReportsComponent {
       datasets: [{
         data: data.map(d => d.count),
         backgroundColor: data.map(d => statusColors[d.status] ?? '#94a3b8'),
-        label: 'Leads',
+        label: this.translate.instant('reports.legend.leads'),
       }],
     };
   });
@@ -197,8 +197,8 @@ export class ReportsComponent {
     return {
       labels: data.map(d => d.month),
       datasets: [
-        { data: data.map(d => d.created), label: 'Created', borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.3 },
-        { data: data.map(d => d.completed), label: 'Completed', borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.1)', fill: true, tension: 0.3 },
+        { data: data.map(d => d.created), label: this.translate.instant('reports.legend.created'), borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.3 },
+        { data: data.map(d => d.completed), label: this.translate.instant('reports.legend.completed'), borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.1)', fill: true, tension: 0.3 },
       ],
     };
   });
@@ -207,7 +207,7 @@ export class ReportsComponent {
     const data = this.onTimeDeliveryData();
     if (!data) return { labels: [], datasets: [{ data: [] }] };
     return {
-      labels: ['On Time', 'Late'],
+      labels: [this.translate.instant('reports.onTime'), this.translate.instant('reports.late')],
       datasets: [{
         data: [data.onTime, data.late],
         backgroundColor: ['#22c55e', '#ef4444'],
@@ -222,7 +222,7 @@ export class ReportsComponent {
       datasets: [{
         data: data.map(d => d.averageDays),
         backgroundColor: data.map(d => d.stageColor),
-        label: 'Avg Days',
+        label: this.translate.instant('reports.legend.avgDays'),
       }],
     };
   });
@@ -232,8 +232,8 @@ export class ReportsComponent {
     return {
       labels: data.map(d => d.userName),
       datasets: [
-        { data: data.map(d => d.activeJobs), label: 'Active', backgroundColor: 'rgba(59, 130, 246, 0.7)' },
-        { data: data.map(d => d.overdueJobs), label: 'Overdue', backgroundColor: 'rgba(239, 68, 68, 0.7)' },
+        { data: data.map(d => d.activeJobs), label: this.translate.instant('reports.legend.active'), backgroundColor: 'rgba(59, 130, 246, 0.7)' },
+        { data: data.map(d => d.overdueJobs), label: this.translate.instant('reports.legend.overdue'), backgroundColor: 'rgba(239, 68, 68, 0.7)' },
       ],
     };
   });
@@ -243,8 +243,8 @@ export class ReportsComponent {
     return {
       labels: data.map(d => d.customerName),
       datasets: [
-        { data: data.map(d => d.activeJobs), label: 'Active', backgroundColor: 'rgba(59, 130, 246, 0.7)' },
-        { data: data.map(d => d.completedJobs), label: 'Completed', backgroundColor: 'rgba(34, 197, 94, 0.7)' },
+        { data: data.map(d => d.activeJobs), label: this.translate.instant('reports.legend.active'), backgroundColor: 'rgba(59, 130, 246, 0.7)' },
+        { data: data.map(d => d.completedJobs), label: this.translate.instant('reports.legend.completed'), backgroundColor: 'rgba(34, 197, 94, 0.7)' },
       ],
     };
   });
@@ -259,7 +259,7 @@ export class ReportsComponent {
       datasets: [{
         data: data.map(d => d.count),
         backgroundColor: data.map(d => statusColors[d.status] ?? '#94a3b8'),
-        label: 'Quotes',
+        label: this.translate.instant('reports.legend.quotes'),
       }],
     };
   });
@@ -271,7 +271,7 @@ export class ReportsComponent {
       datasets: [{
         data: data.map(d => d.averageDays),
         backgroundColor: data.map(d => d.stageColor),
-        label: 'Avg Days',
+        label: this.translate.instant('reports.legend.avgDays'),
       }],
     };
   });
@@ -283,7 +283,7 @@ export class ReportsComponent {
       datasets: [{
         data: data.map(d => d.total),
         backgroundColor: 'rgba(34, 197, 94, 0.7)',
-        label: 'Revenue',
+        label: this.translate.instant('reports.legend.revenue'),
       }],
     };
   });
@@ -302,7 +302,7 @@ export class ReportsComponent {
       datasets: [{
         data: data.map(d => d.totalHours),
         backgroundColor: 'rgba(59, 130, 246, 0.7)',
-        label: 'Hours',
+        label: this.translate.instant('reports.legend.hours'),
       }],
     };
   });
@@ -314,7 +314,7 @@ export class ReportsComponent {
       datasets: [{
         data: data.map(d => d.currentStock),
         backgroundColor: data.map(d => d.isLowStock ? 'rgba(239, 68, 68, 0.7)' : 'rgba(34, 197, 94, 0.7)'),
-        label: 'Stock',
+        label: this.translate.instant('reports.legend.stock'),
       }],
     };
   });
@@ -326,7 +326,7 @@ export class ReportsComponent {
       datasets: [{
         data: data.map(d => d.completedCount),
         backgroundColor: 'rgba(59, 130, 246, 0.7)',
-        label: 'Completed',
+        label: this.translate.instant('reports.legend.completed'),
       }],
     };
   });
@@ -338,7 +338,7 @@ export class ReportsComponent {
       datasets: [{
         data: data.map(d => d.scrapRate),
         backgroundColor: data.map(d => d.scrapRate > 10 ? 'rgba(239, 68, 68, 0.7)' : 'rgba(59, 130, 246, 0.7)'),
-        label: 'Scrap Rate %',
+        label: this.translate.instant('reports.legend.scrapRate'),
       }],
     };
   });
@@ -350,7 +350,7 @@ export class ReportsComponent {
       datasets: [{
         data: data.map(d => d.completionRate),
         backgroundColor: data.map(d => d.completionRate >= 80 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(245, 158, 11, 0.7)'),
-        label: 'Completion %',
+        label: this.translate.instant('reports.legend.completionRate'),
       }],
     };
   });
@@ -362,7 +362,7 @@ export class ReportsComponent {
       datasets: [{
         data: data.map(d => d.margin),
         backgroundColor: data.map(d => d.margin >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
-        label: 'Margin',
+        label: this.translate.instant('reports.legend.margin'),
       }],
     };
   });

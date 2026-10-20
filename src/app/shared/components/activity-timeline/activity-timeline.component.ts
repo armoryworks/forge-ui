@@ -6,15 +6,16 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AvatarComponent } from '../avatar/avatar.component';
 import { RichTextPipe } from '../../pipes/rich-text.pipe';
+import { TermTextPipe } from '../../pipes/term-text.pipe';
 import { DATETIME_FORMAT, formatDate } from '../../utils/date.utils';
 import { ActivityItem } from '../../models/activity.model';
 import { DisplayActivity } from '../../models/display-activity.model';
-import { collapseFieldChanges } from '../../utils/activity-batching';
+import { collapseFieldChanges, isPersonAuthored } from '../../utils/activity-batching';
 
 @Component({
   selector: 'app-activity-timeline',
   standalone: true,
-  imports: [DatePipe, MatTooltipModule, TranslatePipe, AvatarComponent, RichTextPipe],
+  imports: [DatePipe, MatTooltipModule, TranslatePipe, AvatarComponent, RichTextPipe, TermTextPipe],
   templateUrl: './activity-timeline.component.html',
   styleUrl: './activity-timeline.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -64,6 +65,10 @@ export class ActivityTimelineComponent {
       this.filteredActivities(),
       count => this.translate.instant('activityHistory.updatedFields', { count }),
     ));
+
+  protected isPersonText(activity: ActivityItem): boolean {
+    return isPersonAuthored(activity.action);
+  }
 
   protected toggleBatch(id: number): void {
     this.expandedBatch.set(this.expandedBatch() === id ? null : id);

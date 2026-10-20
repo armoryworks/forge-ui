@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 import { RichTextPipe } from '../../../shared/pipes/rich-text.pipe';
+import { TermTextPipe } from '../../../shared/pipes/term-text.pipe';
 import { ActivityEntry } from '../models/activity-entry.model';
 
 const MAX_VISIBLE = 6;
@@ -8,7 +9,7 @@ const MAX_VISIBLE = 6;
 @Component({
   selector: 'app-activity-widget',
   standalone: true,
-  imports: [RichTextPipe],
+  imports: [RichTextPipe, TermTextPipe],
   templateUrl: './activity-widget.component.html',
   styleUrl: './activity-widget.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

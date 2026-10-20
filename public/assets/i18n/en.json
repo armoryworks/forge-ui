@@ -296,7 +296,37 @@
     "userMenu": "User menu",
     "closeUserMenu": "Close user menu",
     "closeNotifications": "Close notifications",
-    "pageResult": "Page"
+    "pageResult": "Page",
+    "entityTypes": {
+      "Job": "Job",
+      "Part": "Part",
+      "Customer": "Customer",
+      "Lead": "Lead",
+      "Asset": "Asset",
+      "Expense": "Expense",
+      "FileAttachment": "File",
+      "Documentation": "Documentation",
+      "Vendor": "Vendor",
+      "SalesOrder": "Sales Order",
+      "PurchaseOrder": "Purchase Order",
+      "Quote": "Quote",
+      "Shipment": "Shipment",
+      "Invoice": "Invoice",
+      "Payment": "Payment",
+      "Lot": "Lot"
+    },
+    "sourceFields": {
+      "Title": "Title",
+      "Description": "Description",
+      "IterationNotes": "Iteration notes",
+      "PartNumber": "Part number",
+      "Operations": "Operations",
+      "FileName": "File name",
+      "Content": "Content",
+      "Name": "Name",
+      "CompanyName": "Company name",
+      "Notes": "Notes"
+    }
   },
   "app": {
     "updateAvailable": "A new version is available.",
@@ -501,7 +531,24 @@
     "addWorkCenters": "Add your work centers",
     "addFirstPart": "Add a part with a routing",
     "sendFirstQuote": "Send your first quote",
-    "shipFirstOrder": "Ship your first order"
+    "shipFirstOrder": "Ship your first order",
+    "export": {
+      "section": "Section",
+      "field": "Field",
+      "value": "Value",
+      "kpis": "KPIs",
+      "activeJobs": "Active Jobs",
+      "overdueJobs": "Overdue Jobs",
+      "totalHours": "Total Hours",
+      "status": "Status",
+      "count": "Count",
+      "teamMember": "Team Member",
+      "taskCount": "Task Count",
+      "dueDate": "Due Date",
+      "jobNumber": "Job #",
+      "title": "Title",
+      "overdue": "Overdue"
+    }
   },
   "boardFilters": {
     "search": "Search",
@@ -6583,7 +6630,7 @@
     "noDeliveryData": "No delivery data available",
     "noLeadSalesData": "No lead & sales data available",
     "reportJobDelivery": "Job Delivery Performance",
-    "reportJobsByStage": "Jobs by Stage",
+    "reportJobsByStage": "Jobs by Status",
     "reportOverdueJobs": "Overdue Jobs",
     "reportJobCycleTime": "Job Cycle Time",
     "reportTimeByUser": "Time by User",
@@ -6669,7 +6716,7 @@
     "operatorBetween": "Between",
     "operatorIn": "In",
     "subtitleExplore": "Explore operational data with built-in report templates",
-    "navJobsByStage": "Jobs by Stage",
+    "navJobsByStage": "Jobs by Status",
     "navOverdueJobs": "Overdue Jobs",
     "navTimeByUser": "Time by User",
     "navExpenseSummary": "Expense Summary",
@@ -6687,7 +6734,7 @@
     "navMyExpenses": "My Expenses",
     "navQuoteToClose": "Quote-to-Close",
     "navShippingSummary": "Shipping Summary",
-    "navTimeInStage": "Time in Stage",
+    "navTimeInStage": "Time in Status",
     "navEmployeeProductivity": "Employee Productivity",
     "navInventoryLevels": "Inventory Levels",
     "navMaintenance": "Maintenance",
@@ -6697,7 +6744,7 @@
     "navMyCycleSummary": "My Cycle Summary",
     "navLeadSales": "Lead & Sales",
     "navRdReport": "R&D Report",
-    "colStage": "Stage",
+    "colStage": "Status",
     "colCount": "Count",
     "colJobNumber": "Job #",
     "colTitle": "Title",
@@ -6773,7 +6820,7 @@
     "colMargin": "Margin",
     "colMarginPercent": "Margin %",
     "colIterations": "Iterations",
-    "colStageName": "Stage",
+    "colStageName": "Status",
     "emptyNoJobsFound": "No jobs found",
     "emptyNoOverdueJobs": "No overdue jobs",
     "emptyNoTimeEntries": "No time entries found",
@@ -6789,7 +6836,7 @@
     "emptyNoFinancialData": "No financial data",
     "emptyNoQuoteData": "No quote data",
     "emptyNoShippingData": "No shipping data",
-    "emptyNoStageData": "No stage data",
+    "emptyNoStageData": "No status data",
     "emptyNoProductivityData": "No productivity data",
     "emptyNoInventoryData": "No inventory data",
     "emptyNoMaintenanceData": "No maintenance data",
@@ -6827,7 +6874,22 @@
     "colFailures": "Failures",
     "colDowntimeHours": "Downtime (h)",
     "colUnplannedDowntimeHours": "Unplanned downtime (h)",
-    "colMtbfHours": "MTBF (h)"
+    "colMtbfHours": "MTBF (h)",
+    "legend": {
+      "hours": "Hours",
+      "leads": "Leads",
+      "created": "Created",
+      "completed": "Completed",
+      "avgDays": "Avg days",
+      "active": "Active",
+      "overdue": "Overdue",
+      "quotes": "Quotes",
+      "revenue": "Revenue",
+      "stock": "Stock",
+      "scrapRate": "Scrap rate %",
+      "completionRate": "Completion %",
+      "margin": "Margin"
+    }
   },
   "qcInspections": {
     "tabTemplates": "Templates",
@@ -7191,8 +7253,8 @@
     "noTasksAssigned": "No tasks assigned to you",
     "overdue": "OVERDUE",
     "due": "Due",
-    "subtasks": "subtasks",
-    "openJobAria": "Open job {{jobNumber}}: {{title}}"
+    "openJobAria": "Open job {{jobNumber}}: {{title}}",
+    "operations": "operations"
   },
   "kioskFlows": {
     "common": {
@@ -8929,6 +8991,15 @@
         "activity": "Activity"
       },
       "noLoginHint": "This employee has no system login, so only the overview is shown. Grant system access to track time, jobs and training.",
+      "jobsTab": {
+        "empty": "No active jobs assigned",
+        "colJobNumber": "Job #",
+        "colTitle": "Title",
+        "colTrack": "Track",
+        "colStage": "Stage",
+        "colPriority": "Priority",
+        "colDue": "Due"
+      },
       "checklist": {
         "title": "Onboarding checklist",
         "w4": "Federal W-4",
@@ -9561,6 +9632,30 @@
       "machineNote": "Spanish was translated automatically from the English rename. Edit it to use your own wording.",
       "untranslatedNote": "Automatic Spanish translation isn't available right now, so Spanish users still see the standard term. Type the Spanish wording, or save the English rename again later.",
       "savedUntranslated": "Terminology saved, but Spanish couldn't be translated automatically for: {{terms}}"
+    },
+    "referenceData": {
+      "groups": {
+        "asset_hold_type": "Asset Hold Types",
+        "clock_event_type": "Clock Event Types",
+        "contact_role": "Contact Roles",
+        "currency": "Currencies",
+        "deliverable_type": "Deliverable Types",
+        "expense_category": "Expense Categories",
+        "job_hold_type": "Job Hold Types",
+        "job_priority": "Job Priorities",
+        "job_workflow_status": "Job Workflow Statuses",
+        "lead_source": "Lead Sources",
+        "mobile_note_presets": "Mobile Note Presets",
+        "operation_reason": "Operation Reasons",
+        "part_item_kind": "Part Item Kinds",
+        "part_material_spec": "Part Material Specs",
+        "part_valuation_class": "Part Valuation Classes",
+        "po_workflow_status": "Purchase Order Workflow Statuses",
+        "quote_workflow_status": "Quote Workflow Statuses",
+        "return_reason": "Return Reasons",
+        "so_workflow_status": "Sales Order Workflow Statuses",
+        "state_withholding": "State Withholding"
+      }
     }
   },
   "announcements": {

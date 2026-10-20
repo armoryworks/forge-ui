@@ -27,6 +27,7 @@ import { AiHelpPanelComponent } from '../../shared/components/ai-help-panel/ai-h
 import { TrainingContextPanelComponent } from '../../shared/components/training-context-panel/training-context-panel.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 import { collapseRepeatedCrumbs } from './breadcrumb.utils';
+import { humanizeIdentifier } from '../../shared/utils/humanize-identifier';
 
 @Component({
   selector: 'app-header',
@@ -361,6 +362,20 @@ export class AppHeaderComponent implements OnInit {
       lot: 'science',
     };
     return iconMap[entityType.toLowerCase()] ?? 'article';
+  }
+
+  protected entityTypeLabel(entityType: string): string {
+    return this.labelFor(`header.entityTypes.${entityType}`, entityType);
+  }
+
+  protected sourceFieldLabel(sourceField: string): string {
+    if (!/^[A-Za-z]+$/.test(sourceField)) return sourceField;
+    return this.labelFor(`header.sourceFields.${sourceField}`, sourceField);
+  }
+
+  private labelFor(key: string, identifier: string): string {
+    const label = this.translate.instant(key);
+    return typeof label === 'string' && label !== key ? label : humanizeIdentifier(identifier);
   }
 
   protected getScorePercent(score: number): number {

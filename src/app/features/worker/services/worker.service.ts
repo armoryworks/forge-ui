@@ -29,8 +29,8 @@ export class WorkerService {
       priority: item.priorityName,
       customerName: item.customerName,
       dueDate: item.dueDate ? new Date(item.dueDate) : null,
-      subtaskCount: item.operationsTotal ?? 0,
-      subtasksCompleted: item.operationsComplete ?? 0,
+      operationCount: item.operationsTotal ?? 0,
+      operationsCompleted: item.operationsComplete ?? 0,
     };
   }
 }

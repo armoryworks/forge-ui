@@ -5,4 +5,5 @@ export interface DashboardKPIs {
   overdueChange: number;
   totalHours: string;
   hoursStatus: string;
+  totalHoursValue?: number;
 }

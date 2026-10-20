@@ -3,4 +3,5 @@ export interface DeadlineEntry {
   jobNumber: string;
   description: string;
   isOverdue: boolean;
+  dueDate?: string | null;
 }

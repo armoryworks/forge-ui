@@ -42,7 +42,7 @@
       @for (entry of job.recentActivity; track entry.id) {
         <div class="job-status__entry">
           <span class="job-status__entry-when">{{ entry.createdAt | date: 'MM/dd hh:mm' }}</span>
-          <span class="job-status__entry-text">{{ entry.description }}</span>
+          <span class="job-status__entry-text">{{ isPersonText(entry.action) ? entry.description : (entry.description | termText) }}</span>
         </div>
       } @empty {
         <p class="job-status__hint">{{ 'mobileApp.jobs.noActivity' | translate }}</p>

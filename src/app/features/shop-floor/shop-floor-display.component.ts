@@ -455,9 +455,9 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
       {
         userId: -1, name: 'Alex Morgan', email: '', initials: 'AM', avatarColor: '#2563eb',
         isClockedIn: true, clockedInAt: null, status: 'In', currentTask: 'CNC Milling',
-        currentJobNumber: 'JOB-1042', timeOnTask: '1h 12m', statusSince: null, role: 'ProductionWorker',
+        currentJobNumber: 'J-1042', timeOnTask: '1h 12m', statusSince: null, role: 'ProductionWorker',
         assignments: [{
-          jobId: -1, jobNumber: 'JOB-1042', title: 'Precision Shaft Assembly', priorityName: 'High',
+          jobId: -1, jobNumber: 'J-1042', title: 'Precision Shaft Assembly', priorityName: 'High',
           stageName: 'In Production', stageColor: '#16a34a', isOverdue: false, hasActiveTimer: true,
         }],
       },

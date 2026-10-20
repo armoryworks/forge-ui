@@ -74,7 +74,7 @@
                   <span class="search-result__subtitle">{{ result.subtitle }}</span>
                 }
               </div>
-              <span class="search-result__type">{{ result.entityType }}</span>
+              <span class="search-result__type">{{ entityTypeLabel(result.entityType) }}</span>
             </button>
           }
           @if (searchResults().length === 0 && navMatches().length === 0) {
@@ -105,11 +105,11 @@
                 <div class="search-result__content">
                   <span class="search-result__title">{{ result.chunkText }}</span>
                   @if (result.sourceField) {
-                    <span class="search-result__subtitle">{{ result.sourceField }}</span>
+                    <span class="search-result__subtitle">{{ sourceFieldLabel(result.sourceField) }}</span>
                   }
                 </div>
                 <div class="search-result__meta">
-                  <span class="search-result__type">{{ result.entityType }}</span>
+                  <span class="search-result__type">{{ entityTypeLabel(result.entityType) }}</span>
                   <span class="search-result__score">{{ getScorePercent(result.score) }}%</span>
                 </div>
               </button>

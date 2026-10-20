@@ -43,13 +43,13 @@
             </div>
           }
 
-          @if (task.subtaskCount > 0) {
+          @if (task.operationCount > 0) {
             <div class="task-card__progress">
               <div class="task-card__progress-bar">
                 <div class="task-card__progress-fill" [style.width.%]="getProgressPercent(task)"></div>
               </div>
               <span class="task-card__progress-label">
-                {{ task.subtasksCompleted }}/{{ task.subtaskCount }} {{ 'worker.subtasks' | translate }}
+                {{ task.operationsCompleted }}/{{ task.operationCount }} {{ 'worker.operations' | translate }}
               </span>
             </div>
           }

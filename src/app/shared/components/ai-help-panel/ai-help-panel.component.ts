@@ -74,8 +74,8 @@ export class AiHelpPanelComponent implements OnInit, OnDestroy {
     localStorage.removeItem(this.storageKey);
   }
 
-  protected askStarter(question: string): void {
-    this.inputControl.setValue(question);
+  protected askStarterKey(key: string): void {
+    this.inputControl.setValue(this.translate.instant(key));
     this.send();
   }
 
