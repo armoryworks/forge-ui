@@ -100,8 +100,8 @@
             (start)="startOperation($event)"
             (startSetup)="startOperation($event, 'Setup')"
             (stop)="stopOperation($event)"
-            (done)="openQuantity($event, true)"
-            (addQuantity)="openQuantity($event, false)" />
+            (done)="openQuantity($event)"
+            (addQuantity)="openQuantity($event)" />
         }
       </div>
     }
@@ -213,18 +213,6 @@
         </button>
       </div>
     </div>
-  }
-
-  @if (step() === 'quantity') {
-    @if (quantityTarget(); as target) {
-      <app-kiosk-operation-quantity
-        [operation]="target.row"
-        [jobQuantity]="jobOperations()?.jobQuantity ?? 0"
-        [prefillAll]="target.prefillAll"
-        [busy]="operationBusy()"
-        (submitted)="submitQuantity($event)"
-        (cancelled)="cancelQuantity()" />
-    }
   }
 
   <!-- Step 3: Processing -->

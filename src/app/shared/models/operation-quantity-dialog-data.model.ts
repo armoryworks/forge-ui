@@ -6,4 +6,5 @@ export interface OperationQuantityDialogData {
   completedQuantity: number;
   scrapQuantity: number;
   reasons: OperationReason[];
+  touch?: boolean;
 }

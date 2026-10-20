@@ -1,20 +1,29 @@
-<app-dialog [title]="'jobOperations.dialog.title' | translate: { operation: data.title }" width="420px" (closed)="close()">
-  <p class="op-qty__summary" data-testid="operation-qty-summary">
+<app-dialog [title]="'jobOperations.dialog.title' | translate: { operation: data.title }" [width]="touch ? '560px' : '420px'" (closed)="close()">
+  <p class="op-qty__summary" [class.op-qty__summary--touch]="touch" data-testid="operation-qty-summary">
     {{ 'jobOperations.dialog.summary' | translate: {
       done: (data.completedQuantity | number:'1.0-4'),
       total: (data.jobQuantity | number:'1.0-4'),
       remaining: (remaining | number:'1.0-4') } }}
   </p>
   <div [formGroup]="form">
-    <app-input data-testid="operation-qty-quantity" type="number" min="0"
-               [label]="'jobOperations.dialog.quantity' | translate" formControlName="quantity" />
+    <div class="op-qty__field" [class.op-qty__field--active]="touch && activeField() === 'quantity'"
+         (focusin)="selectField('quantity')" (input)="onTyped()">
+      <app-input data-testid="operation-qty-quantity" type="number" min="0"
+                 [label]="'jobOperations.dialog.quantity' | translate" formControlName="quantity" />
+    </div>
     @if (showScrap() || data.scrapQuantity > 0) {
-      <app-input data-testid="operation-qty-scrap" type="number" min="0"
-                 [label]="'jobOperations.dialog.scrap' | translate" formControlName="scrap" />
+      <div class="op-qty__field" [class.op-qty__field--active]="touch && activeField() === 'scrap'"
+           (focusin)="selectField('scrap')" (input)="onTyped()">
+        <app-input data-testid="operation-qty-scrap" type="number" min="0"
+                   [label]="'jobOperations.dialog.scrap' | translate" formControlName="scrap" />
+      </div>
     }
     @if (showRework()) {
-      <app-input data-testid="operation-qty-rework" type="number" min="0"
-                 [label]="'jobOperations.dialog.rework' | translate" formControlName="rework" />
+      <div class="op-qty__field" [class.op-qty__field--active]="touch && activeField() === 'rework'"
+           (focusin)="selectField('rework')" (input)="onTyped()">
+        <app-input data-testid="operation-qty-rework" type="number" min="0"
+                   [label]="'jobOperations.dialog.rework' | translate" formControlName="rework" />
+      </div>
     }
     @if (askReason()) {
       <app-select data-testid="operation-qty-reason" [label]="'jobOperations.dialog.reason' | translate"
@@ -32,15 +41,18 @@
         </button>
       }
     </div>
+    @if (touch) {
+      <app-numeric-keypad (digit)="onDigit($event)" (backspace)="onBackspace()" (clear)="onClear()" />
+    }
   </div>
 
   <div dialog-footer>
-    <button type="button" class="action-btn" data-testid="operation-qty-record"
+    <button type="button" class="action-btn" [class.op-qty__btn--touch]="touch" data-testid="operation-qty-record"
             [disabled]="!canRecord()" (click)="record()">
       {{ 'jobOperations.dialog.record' | translate: { count: (added() | number:'1.0-4') } }}
     </button>
     <app-validation-button [violations]="violations">
-      <button type="button" class="action-btn action-btn--primary" data-testid="operation-qty-done"
+      <button type="button" class="action-btn action-btn--primary" [class.op-qty__btn--touch]="touch" data-testid="operation-qty-done"
               [disabled]="!canComplete()" (click)="complete()">
         @if (isAll()) {
           {{ 'jobOperations.dialog.doneAll' | translate: { count: (newCompleted() | number:'1.0-4') } }}

@@ -19,8 +19,13 @@ interface DialogInternals {
   violations: () => string[];
   canRecord: () => boolean;
   isAll: () => boolean;
+  touch: boolean;
   record(): void;
   complete(): void;
+  selectField(field: 'quantity' | 'scrap' | 'rework'): void;
+  onDigit(digit: string): void;
+  onBackspace(): void;
+  onClear(): void;
 }
 
 function setup(data: OperationQuantityDialogData, confirm = true) {
@@ -120,5 +125,28 @@ describe('OperationQuantityDialogComponent', () => {
     const { component, confirmDialog } = setup({ title: 'Mill', jobQuantity: 4, completedQuantity: 0, scrapQuantity: 0, reasons: [] });
     component.complete();
     expect(confirmDialog.open).not.toHaveBeenCalled();
+  });
+
+  it('the touch keypad types into the chosen field, replacing the prefill on the first digit', () => {
+    const { component, close } = setup({ title: 'Mill', jobQuantity: 40, completedQuantity: 12, scrapQuantity: 0, reasons: [], touch: true });
+
+    expect(component.touch).toBe(true);
+    component.onDigit('1');
+    component.onDigit('5');
+    component.selectField('scrap');
+    component.onDigit('2');
+    component.onBackspace();
+    component.onDigit('3');
+    component.record();
+
+    expect(close).toHaveBeenCalledWith({ completedQuantity: 27, scrapQuantity: 3, reworkQuantity: 0, reasonCode: null, complete: false });
+  });
+
+  it('clearing the pieces with the keypad leaves nothing to record', () => {
+    const { component } = setup({ title: 'Mill', jobQuantity: 40, completedQuantity: 0, scrapQuantity: 0, reasons: [], touch: true });
+
+    component.onClear();
+
+    expect(component.canRecord()).toBe(false);
   });
 });

@@ -255,7 +255,13 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
   const clockTypes = {
     load: vi.fn(), isWorking: () => false, isOnBreakOrLunch: () => false,
     isClockedOut: () => true, isActive: () => false,
-    definitions: () => [{ code: 'IN', statusMapping: 'In', category: 'work' }],
+    definitions: () => [
+      { code: 'IN', statusMapping: 'In', category: 'work' },
+      { code: 'BREAK_END', statusMapping: 'In', category: 'break' },
+      { code: 'BREAK_START', statusMapping: 'OnBreak', category: 'break' },
+      { code: 'LUNCH_START', statusMapping: 'OnLunch', category: 'break' },
+      { code: 'OUT', statusMapping: 'Out', category: 'work' },
+    ],
   };
   const dialogClose = vi.fn();
   const dialog = { open: vi.fn(() => ({ afterClosed: () => of(true), close: dialogClose })) };
@@ -367,6 +373,39 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     vi.advanceTimersByTime(800);
     expect(c.phase()).toBe('job-select');
     expect(shopFloor.getAvailableJobs).toHaveBeenCalledWith(undefined, '', 50);
+  });
+
+  it.each(['IN', 'BREAK_END'])('a worker with work who punches %s stays signed in on their jobs until the idle timeout', (code) => {
+    vi.useFakeTimers();
+    const c = create();
+    const worker = makeWorker('ProductionWorker', [assignment]);
+    c.selectedWorker.set(worker);
+    c.phase.set('actions');
+    c.clockAction(worker, code);
+    expect(c.actionFeedback()?.success).toBe(true);
+
+    vi.advanceTimersByTime(5_000);
+    expect(c.phase()).toBe('actions');
+    expect(c.selectedWorker()?.userId).toBe(5);
+    const signOutsBeforeIdle = auth.clearAuth.mock.calls.length;
+
+    vi.advanceTimersByTime(30_000);
+    expect(c.phase()).toBe('main');
+    expect(c.selectedWorker()).toBeNull();
+    expect(auth.clearAuth.mock.calls.length).toBeGreaterThan(signOutsBeforeIdle);
+  });
+
+  it.each(['BREAK_START', 'LUNCH_START', 'OUT'])('punching %s still signs the worker out straight after the confirmation', (code) => {
+    vi.useFakeTimers();
+    const c = create();
+    const worker = makeWorker('ProductionWorker', [assignment]);
+    c.selectedWorker.set(worker);
+    c.phase.set('actions');
+    c.clockAction(worker, code);
+
+    vi.advanceTimersByTime(1_500);
+    expect(c.phase()).toBe('main');
+    expect(c.selectedWorker()).toBeNull();
   });
 
   it('a worker finds J-2403 by typing in the picker and claims it', () => {

@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
+import { MatDialog } from '@angular/material/dialog';
 import { of, throwError } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -9,6 +10,7 @@ import { KanbanService } from '../../../kanban/services/kanban.service';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
 import { JobStatus } from '../../../../shared/models/mobile-api.model';
+import { OperationQuantityDialogResult } from '../../../../shared/models/operation-quantity-dialog-result.model';
 import { JobOperationRow } from '../../models/job-operation-row.model';
 import { JobOperations } from '../../models/job-operations.model';
 
@@ -140,8 +142,7 @@ interface TrackingInternals {
   startOperation(row: JobOperationRow, entryType?: 'Run' | 'Setup'): void;
   stopOperation(row: JobOperationRow): void;
   stopRunningTimer(timer: { id: number; jobNumber: string }): void;
-  openQuantity(row: JobOperationRow, prefillAll: boolean): void;
-  submitQuantity(request: Record<string, unknown>): void;
+  openQuantity(row: JobOperationRow): void;
 }
 
 function opRow(stepNumber: number, overrides: Partial<JobOperationRow> = {}): JobOperationRow {
@@ -180,6 +181,12 @@ describe('ScanJobFlowComponent — operation tracking', () => {
     stopOperationTimer: vi.fn(() => of({ stopped: true, entry: null })),
     updateOperationProgress: vi.fn(),
   };
+  let dialogResult: OperationQuantityDialogResult | undefined;
+  const dialog = { open: vi.fn(() => ({ afterClosed: () => of(dialogResult) })) };
+
+  function pieces(completedQuantity: number, complete = false, extra: Partial<OperationQuantityDialogResult> = {}): OperationQuantityDialogResult {
+    return { completedQuantity, scrapQuantity: 0, reworkQuantity: 0, reasonCode: null, complete, ...extra };
+  }
 
   function create(): TrackingInternals {
     const fixture = TestBed.createComponent(ScanJobFlowComponent);
@@ -198,6 +205,7 @@ describe('ScanJobFlowComponent — operation tracking', () => {
       imports: [ScanJobFlowComponent],
       providers: [
         { provide: ShopFloorService, useValue: shopFloor },
+        { provide: MatDialog, useValue: dialog },
         { provide: KanbanService, useValue: {} },
         { provide: AuthService, useValue: { user: () => ({ id: 3 }) } },
         { provide: CapabilityService, useValue: { isEnabled: () => false } },
@@ -324,9 +332,8 @@ describe('ScanJobFlowComponent — operation tracking', () => {
     }));
     const c = create();
 
-    c.openQuantity(opRow(2), true);
-    expect(c.step()).toBe('quantity');
-    c.submitQuantity({ completedQuantity: 40, scrapQuantity: 0, expectedVersion: null, status: 'Complete' });
+    dialogResult = pieces(40, true);
+    c.openQuantity(opRow(2));
 
     expect(shopFloor.updateOperationProgress).toHaveBeenCalledWith(5, 102,
       { completedQuantity: 40, scrapQuantity: 0, expectedVersion: null, status: 'Complete' });
@@ -343,10 +350,56 @@ describe('ScanJobFlowComponent — operation tracking', () => {
     }));
     const c = create();
 
-    c.openQuantity(opRow(2), false);
-    c.submitQuantity({ completedQuantity: 20, scrapQuantity: 0, expectedVersion: null });
+    dialogResult = pieces(20);
+    c.openQuantity(opRow(2));
+    expect(shopFloor.updateOperationProgress).toHaveBeenCalledWith(5, 102,
+      { completedQuantity: 20, scrapQuantity: 0, expectedVersion: null, status: null });
     expect(c.step()).toBe('actions');
     expect(c.operationNotice()).toBe('shopFloor.operations.recorded:{"step":2,"count":20,"total":40}');
+  });
+
+  it('Record pieces opens the shared progress dialog with the step\'s counts and the reasons', () => {
+    shopFloor.getConfig.mockReturnValueOnce(of({ operationTracking: true, reasons: [{ code: 'tooling', label: 'Tooling' }] }));
+    dialogResult = undefined;
+    const c = create();
+
+    c.openQuantity(opRow(2, { completedQuantity: 12, scrapQuantity: 1 }));
+
+    expect(dialog.open).toHaveBeenCalledTimes(1);
+    const config = (dialog.open.mock.calls[0] as unknown[])[1] as { data: Record<string, unknown> };
+    expect(config.data).toEqual({
+      title: 'shopFloor.operations.quantityTitle:{"step":2,"title":"Step 2"}',
+      jobQuantity: 40, completedQuantity: 12, scrapQuantity: 1,
+      reasons: [{ code: 'tooling', label: 'Tooling' }], touch: true,
+    });
+    expect(shopFloor.updateOperationProgress).not.toHaveBeenCalled();
+  });
+
+  it('scrap, rework and a reason travel with the recorded pieces', () => {
+    shopFloor.getConfig.mockReturnValueOnce(of({ operationTracking: true }));
+    shopFloor.updateOperationProgress.mockReturnValue(of({
+      operation: opRow(2, { status: 'InProgress', completedQuantity: 15, scrapQuantity: 2 }), allOperationsComplete: false, estimatedRemainingMinutes: 60,
+    }));
+    const c = create();
+
+    dialogResult = pieces(15, false, { scrapQuantity: 2, reworkQuantity: 1, reasonCode: 'tooling' });
+    c.openQuantity(opRow(2, { version: 4 }));
+
+    expect(shopFloor.updateOperationProgress).toHaveBeenCalledWith(5, 102, {
+      completedQuantity: 15, scrapQuantity: 2, status: null, expectedVersion: 4, reworkQuantity: 1, reasonCode: 'tooling',
+    });
+  });
+
+  it('Record pieces is refused when tracking is off or the row is not a routing step', () => {
+    const off = create();
+    off.openQuantity(opRow(2));
+    expect(dialog.open).not.toHaveBeenCalled();
+
+    shopFloor.getConfig.mockReturnValueOnce(of({ operationTracking: true }));
+    const on = create();
+    on.openQuantity(opRow(2, { isRoutingStep: false }));
+    on.openQuantity(opRow(2, { operationId: null }));
+    expect(dialog.open).not.toHaveBeenCalled();
   });
 
   it('a stale count shows the conflict and reloads', () => {
@@ -355,8 +408,8 @@ describe('ScanJobFlowComponent — operation tracking', () => {
       new HttpErrorResponse({ status: 409, error: { detail: 'This operation was changed by someone else — refresh and try again.' } })));
     const c = create();
 
-    c.openQuantity(opRow(2), false);
-    c.submitQuantity({ completedQuantity: 20, scrapQuantity: 0, expectedVersion: 1 });
+    dialogResult = pieces(20);
+    c.openQuantity(opRow(2, { version: 1 }));
     expect(c.step()).toBe('actions');
     expect(c.error()).toContain('changed by someone else');
     expect(shopFloor.getOperations).toHaveBeenCalledTimes(2);

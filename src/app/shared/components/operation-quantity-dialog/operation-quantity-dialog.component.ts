@@ -10,15 +10,18 @@ import { startWith } from 'rxjs';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../confirm-dialog/confirm-dialog.component';
 import { DialogComponent } from '../dialog/dialog.component';
 import { InputComponent } from '../input/input.component';
+import { NumericKeypadComponent } from '../numeric-keypad/numeric-keypad.component';
 import { SelectComponent, SelectOption } from '../select/select.component';
 import { ValidationButtonComponent } from '../validation-button/validation-button.component';
 import { OperationQuantityDialogData } from '../../models/operation-quantity-dialog-data.model';
 import { OperationQuantityDialogResult } from '../../models/operation-quantity-dialog-result.model';
 
+type QuantityField = 'quantity' | 'scrap' | 'rework';
+
 @Component({
   selector: 'app-operation-quantity-dialog',
   standalone: true,
-  imports: [DecimalPipe, ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, SelectComponent, ValidationButtonComponent],
+  imports: [DecimalPipe, ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, NumericKeypadComponent, SelectComponent, ValidationButtonComponent],
   templateUrl: './operation-quantity-dialog.component.html',
   styleUrl: './operation-quantity-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,6 +35,9 @@ export class OperationQuantityDialogComponent {
   protected readonly remaining = Math.max(this.data.jobQuantity - this.data.completedQuantity - this.data.scrapQuantity, 0);
   protected readonly showScrap = signal(false);
   protected readonly showRework = signal(false);
+  protected readonly touch = this.data.touch === true;
+  protected readonly activeField = signal<QuantityField>('quantity');
+  private replaceOnNextDigit = true;
   protected readonly reasonOptions: SelectOption[] = [
     { value: null, label: this.translate.instant('jobOperations.dialog.noReason') },
     ...(this.data.reasons ?? []).map(r => ({ value: r.code, label: r.label })),
@@ -79,6 +85,36 @@ export class OperationQuantityDialogComponent {
 
   protected toggleRework(): void {
     this.showRework.update(v => !v);
+  }
+
+  protected selectField(field: QuantityField): void {
+    if (this.activeField() === field) return;
+    this.activeField.set(field);
+    this.replaceOnNextDigit = true;
+  }
+
+  protected onTyped(): void {
+    this.replaceOnNextDigit = false;
+  }
+
+  protected onDigit(digit: string): void {
+    const control = this.form.controls[this.activeField()];
+    const current = this.replaceOnNextDigit ? '' : String(control.value ?? '').replace(/^0$/, '');
+    this.replaceOnNextDigit = false;
+    if (current.length >= 7) return;
+    control.setValue(Number(current + digit));
+  }
+
+  protected onBackspace(): void {
+    this.replaceOnNextDigit = false;
+    const control = this.form.controls[this.activeField()];
+    const text = String(control.value ?? '').slice(0, -1);
+    control.setValue(text ? Number(text) : null);
+  }
+
+  protected onClear(): void {
+    this.replaceOnNextDigit = false;
+    this.form.controls[this.activeField()].setValue(null);
   }
 
   protected close(): void {

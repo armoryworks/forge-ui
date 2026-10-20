@@ -47,7 +47,7 @@ import { ScanActionOverlayComponent } from './components/scan-action-overlay/sca
 import { ScanDailyLogComponent } from './components/scan-daily-log/scan-daily-log.component';
 import { ScanDevicesPanelComponent } from './components/scan-devices-panel/scan-devices-panel.component';
 import { ScanLocationViewComponent } from './components/scan-location-view/scan-location-view.component';
-import { NumericKeypadComponent } from './components/numeric-keypad/numeric-keypad.component';
+import { NumericKeypadComponent } from '../../shared/components/numeric-keypad/numeric-keypad.component';
 import { LanguageToggleComponent } from '../../shared/components/language-toggle/language-toggle.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EnumLabelPipe } from '../../shared/pipes/enum-label.pipe';
@@ -712,10 +712,14 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
         this.loadData();
 
         const eventDef = this.clockTypes.definitions().find(d => d.code === eventType);
-        const clockedInWithoutWork = eventDef?.statusMapping === 'In' && eventDef.category === 'work' && worker.assignments.length === 0;
+        const nowWorking = eventDef?.statusMapping === 'In';
+        const clockedInWithoutWork = nowWorking && eventDef.category === 'work' && worker.assignments.length === 0;
         if (clockedInWithoutWork) {
           this.showActionFeedback(worker.userId, true, this.translate.instant('shopFloor.actionDone'));
           this.scheduleTransition(() => this.openJobPicker(worker), 800);
+        } else if (nowWorking) {
+          this.showActionFeedback(worker.userId, true, this.translate.instant('shopFloor.actionDone'));
+          this.startAutoLogoutTimer();
         } else {
           this.showActionFeedback(worker.userId, true, this.translate.instant('shopFloor.actionDone'));
           this.scheduleTransition(() => this.ephemeralLogout(), 1500);

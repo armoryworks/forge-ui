@@ -11,3 +11,18 @@
   flex-wrap: wrap;
   gap: $sp-lg;
 }
+
+.op-qty__summary--touch {
+  font-size: $font-size-lg;
+  color: var(--text);
+}
+
+.op-qty__field--active {
+  outline: $border-width solid var(--primary);
+  outline-offset: $sp-xs;
+}
+
+.op-qty__btn--touch {
+  min-height: $tap-target-min;
+  font-size: $font-size-lg;
+}

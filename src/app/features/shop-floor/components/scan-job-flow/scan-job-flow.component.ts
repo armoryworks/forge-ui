@@ -4,9 +4,11 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { interval } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { OperationQuantityDialogComponent } from '../../../../shared/components/operation-quantity-dialog/operation-quantity-dialog.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
@@ -14,9 +16,11 @@ import { ShopFloorService } from '../../services/shop-floor.service';
 import { KanbanService } from '../../../kanban/services/kanban.service';
 import { BILLING_STAGE_ROLES } from '../../../../shared/models/billing-stage-roles.const';
 import { JobStatus } from '../../../../shared/models/mobile-api.model';
+import { OperationQuantityDialogData } from '../../../../shared/models/operation-quantity-dialog-data.model';
+import { OperationQuantityDialogResult } from '../../../../shared/models/operation-quantity-dialog-result.model';
+import { OperationReason } from '../../../../shared/models/operation-reason.model';
 import { KioskOperationTilesComponent } from '../kiosk-operation-tiles/kiosk-operation-tiles.component';
 import { KioskRunningTimersComponent } from '../kiosk-running-timers/kiosk-running-timers.component';
-import { KioskOperationQuantityComponent } from '../kiosk-operation-quantity/kiosk-operation-quantity.component';
 import { JobOperations } from '../../models/job-operations.model';
 import { JobOperationRow } from '../../models/job-operation-row.model';
 import { OperationTimerEntryType } from '../../models/operation-timer-entry-type.type';
@@ -24,7 +28,7 @@ import { RunningTimer } from '../../models/running-timer.model';
 import { UpdateJobOperationProgressRequest } from '../../models/update-job-operation-progress-request.model';
 import { KioskAndonType } from '../../models/kiosk-andon-type.type';
 
-type JobStep = 'actions' | 'confirm-advance' | 'log-note' | 'problem' | 'quantity' | 'processing' | 'done';
+type JobStep = 'actions' | 'confirm-advance' | 'log-note' | 'problem' | 'processing' | 'done';
 type CompletedAction = 'timer-started' | 'timer-stopped' | 'stage-advanced' | 'note-logged' | 'problem-raised';
 
 const PROBLEM_TYPES: readonly { type: KioskAndonType; icon: string; labelKey: string }[] = [
@@ -38,7 +42,7 @@ const PROBLEM_TYPES: readonly { type: KioskAndonType; icon: string; labelKey: st
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe, TextareaComponent,
-    KioskOperationTilesComponent, KioskRunningTimersComponent, KioskOperationQuantityComponent,
+    KioskOperationTilesComponent, KioskRunningTimersComponent,
   ],
   templateUrl: './scan-job-flow.component.html',
   styleUrl: './scan-job-flow.component.scss',
@@ -50,6 +54,7 @@ export class ScanJobFlowComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly auth = inject(AuthService);
   private readonly capabilities = inject(CapabilityService);
+  private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
 
   // Inputs
@@ -90,7 +95,7 @@ export class ScanJobFlowComponent implements OnInit {
   protected readonly runningTimers = signal<RunningTimer[]>([]);
   protected readonly operationBusy = signal(false);
   protected readonly operationNotice = signal<string | null>(null);
-  protected readonly quantityTarget = signal<{ row: JobOperationRow; prefillAll: boolean } | null>(null);
+  private readonly reasons = signal<OperationReason[]>([]);
   protected readonly now = signal(Date.now());
   protected readonly currentUserId = computed(() => this.auth.user()?.id ?? null);
   protected readonly jobTimerRunning = computed(() => this.tracking()
@@ -108,6 +113,7 @@ export class ScanJobFlowComponent implements OnInit {
     this.shopFloorService.getConfig().subscribe(config => {
       if (!config.operationTracking) return;
       this.tracking.set(true);
+      this.reasons.set(config.reasons ?? []);
       this.loadOperations();
       this.loadRunningTimers();
       this.startTicking();
@@ -210,43 +216,52 @@ export class ScanJobFlowComponent implements OnInit {
     });
   }
 
-  protected openQuantity(row: JobOperationRow, prefillAll: boolean): void {
+  protected openQuantity(row: JobOperationRow): void {
+    if (!this.tracking() || row.operationId == null || !row.isRoutingStep || this.operationBusy()) return;
     this.error.set(null);
     this.operationNotice.set(null);
-    this.quantityTarget.set({ row, prefillAll });
-    this.step.set('quantity');
+    this.dialog.open<OperationQuantityDialogComponent, OperationQuantityDialogData, OperationQuantityDialogResult | undefined>(
+      OperationQuantityDialogComponent, {
+        width: '560px',
+        maxWidth: '95vw',
+        data: {
+          title: this.translate.instant('shopFloor.operations.quantityTitle', { step: row.stepNumber, title: row.title }),
+          jobQuantity: this.jobOperations()?.jobQuantity ?? 0,
+          completedQuantity: row.completedQuantity,
+          scrapQuantity: row.scrapQuantity,
+          reasons: this.reasons(),
+          touch: true,
+        },
+      }).afterClosed().subscribe(result => {
+      if (result) this.submitQuantity(row, result);
+    });
   }
 
-  protected submitQuantity(request: UpdateJobOperationProgressRequest): void {
-    const target = this.quantityTarget();
-    if (!target || target.row.operationId == null || !this.beginOperationCall()) return;
-    const row = target.row;
-    this.shopFloorService.updateOperationProgress(this.jobId(), target.row.operationId, request).subscribe({
-      next: (result) => {
+  private submitQuantity(row: JobOperationRow, result: OperationQuantityDialogResult): void {
+    if (row.operationId == null || !this.beginOperationCall()) return;
+    const request: UpdateJobOperationProgressRequest = {
+      completedQuantity: result.completedQuantity,
+      scrapQuantity: result.scrapQuantity,
+      status: result.complete ? 'Complete' : null,
+      expectedVersion: row.version,
+      ...(result.reworkQuantity > 0 ? { reworkQuantity: result.reworkQuantity } : {}),
+      ...(result.reasonCode ? { reasonCode: result.reasonCode } : {}),
+    };
+    this.shopFloorService.updateOperationProgress(this.jobId(), row.operationId, request).subscribe({
+      next: (progress) => {
         this.operationBusy.set(false);
-        this.quantityTarget.set(null);
-        this.replaceOperation(result.operation, result.allOperationsComplete, result.estimatedRemainingMinutes);
+        this.replaceOperation(progress.operation, progress.allOperationsComplete, progress.estimatedRemainingMinutes);
         this.loadRunningTimers();
-        if (result.allOperationsComplete && this.canAdvance()) {
+        if (progress.allOperationsComplete && this.canAdvance()) {
           this.step.set('confirm-advance');
           return;
         }
         this.operationNotice.set(this.translate.instant('shopFloor.operations.recorded', {
-          step: row.stepNumber, count: result.operation.completedQuantity, total: this.jobOperations()?.jobQuantity ?? 0,
+          step: row.stepNumber, count: progress.operation.completedQuantity, total: this.jobOperations()?.jobQuantity ?? 0,
         }));
-        this.step.set('actions');
       },
-      error: (err: HttpErrorResponse) => {
-        this.quantityTarget.set(null);
-        this.step.set('actions');
-        this.operationFailed(err);
-      },
+      error: (err: HttpErrorResponse) => this.operationFailed(err),
     });
-  }
-
-  protected cancelQuantity(): void {
-    this.quantityTarget.set(null);
-    this.step.set('actions');
   }
 
   private loadStatus(): void {
