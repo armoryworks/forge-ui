@@ -12,7 +12,7 @@ export interface QuizQuestion {
 }
 
 export interface QuizContent {
-  passingScore: number;
+  passingScore?: number;
   shuffleQuestions: boolean;
   shuffleOptions: boolean;
   showExplanationsAfterSubmit: boolean;
@@ -30,12 +30,13 @@ export interface QuizAnswer {
 export interface QuizScoredQuestion {
   questionId: string;
   isCorrect: boolean;
-  correctOptionId: string;
-  explanation?: string;
+  correctOptionId?: string | null;
+  explanation?: string | null;
 }
 
 export interface QuizSubmissionResult {
   score: number;
   passed: boolean;
+  passingScore: number;
   questions: QuizScoredQuestion[];
 }

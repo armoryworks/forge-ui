@@ -11,12 +11,6 @@
           <span class="quiz__passing">· {{ content().passingScore }}% to pass</span>
         }
       </span>
-      @if (content().timeLimit) {
-        <span class="quiz__time-limit">
-          <span class="material-icons-outlined" aria-hidden="true">timer</span>
-          {{ content().timeLimit }} min limit
-        </span>
-      }
     </div>
 
     <!-- Progress header -->
@@ -96,7 +90,7 @@
         <p class="quiz__score-msg">{{ scoreLabel() }}</p>
         <p class="quiz__score-sub">
           {{ correctCount() }} of {{ content().questions.length }} correct
-          &nbsp;·&nbsp; {{ content().passingScore }}% required to pass
+          &nbsp;·&nbsp; {{ result()?.passingScore }}% required to pass
         </p>
         @if (!result()?.passed) {
           <button class="action-btn action-btn--primary quiz__retry-btn" (click)="retry()" aria-label="Retry quiz">

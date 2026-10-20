@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InputComponent } from '../../shared/components/input/input.component';
@@ -64,7 +64,7 @@ export class TrainingComponent implements OnInit {
     { value: 'Quiz', label: this.translate.instant('trainingPage.typeOptions.quiz') },
   ];
 
-  protected readonly learningStyleOptions: SelectOption[] = [
+  private readonly allLearningStyleOptions: SelectOption[] = [
     { value: '', label: this.translate.instant('trainingPage.styleOptions.all') },
     { value: 'visual', label: this.translate.instant('trainingPage.styleOptions.visual') },
     { value: 'reading', label: this.translate.instant('trainingPage.styleOptions.reading') },
@@ -77,10 +77,18 @@ export class TrainingComponent implements OnInit {
 
   private readonly styleTypeMap: Record<string, string[]> = {
     visual:       ['Walkthrough', 'QuickRef'],
-    auditory:     [],
-    reading:      ['Article', 'QuickRef'],
+    reading:      ['Article', 'QuickRef', 'Reference'],
     kinesthetic:  ['Walkthrough', 'Quiz'],
   };
+
+  protected readonly learningStyleOptions = computed<SelectOption[]>(() => {
+    const type = this.contentTypeValue() ?? '';
+    return this.allLearningStyleOptions.filter(o =>
+      !o.value || !type || (this.styleTypeMap[o.value as string] ?? []).includes(type));
+  });
+
+  protected readonly hasActiveFilters = computed(() =>
+    !!this.searchValue() || !!this.contentTypeValue() || !!this.learningStyleValue());
 
   protected readonly modules = computed(() => {
     const search = (this.searchValue() ?? '').toLowerCase();
@@ -95,10 +103,25 @@ export class TrainingComponent implements OnInit {
     });
   });
 
+  constructor() {
+    this.contentTypeControl.valueChanges.pipe(takeUntilDestroyed()).subscribe(type => {
+      const style = this.learningStyleControl.value;
+      if (type && style && !(this.styleTypeMap[style] ?? []).includes(type)) {
+        this.learningStyleControl.setValue('');
+      }
+    });
+  }
+
   ngOnInit(): void {
     this.loadModules();
     this.loadEnrollments();
     this.loadPaths();
+  }
+
+  protected clearFilters(): void {
+    this.searchControl.setValue('');
+    this.contentTypeControl.setValue('');
+    this.learningStyleControl.setValue('');
   }
 
   protected switchTab(tab: TrainingTab): void {
@@ -107,9 +130,9 @@ export class TrainingComponent implements OnInit {
 
   private loadModules(): void {
     this.isLoading.set(true);
-    this.trainingService.getModules({ pageSize: 200 }).subscribe({
-      next: result => {
-        this.allModules.set(result.data);
+    this.trainingService.getAllModules().subscribe({
+      next: modules => {
+        this.allModules.set(modules);
         this.isLoading.set(false);
       },
       error: () => this.isLoading.set(false),

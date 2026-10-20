@@ -165,7 +165,7 @@
                     Repeat Training
                   } @else {
                     <span class="material-icons-outlined" aria-hidden="true">play_circle</span>
-                    {{ walkthrough.startButtonLabel || 'Take the Tour' }}
+                    {{ walkthroughStartLabel() }}
                   }
                 </button>
 
@@ -206,7 +206,8 @@
               <app-training-module-quiz
                 [content]="quiz"
                 [moduleId]="mod.id"
-                (completed)="onQuizComplete($event)" />
+                (completed)="onQuizComplete($event)"
+                (retryRequested)="reloadModule()" />
             }
           }
 
@@ -242,7 +243,7 @@
               @if (mod.contentType === 'Walkthrough') {
                 <span class="module-viewer__walkthrough-hint">
                   <span class="material-icons-outlined" aria-hidden="true">info</span>
-                  Click "Tour the Board" above to begin — completing the tour marks this module done automatically.
+                  {{ 'training.walkthroughHint' | translate: { label: walkthroughStartLabel() } }}
                 </span>
               } @else {
                 <button class="action-btn action-btn--primary"

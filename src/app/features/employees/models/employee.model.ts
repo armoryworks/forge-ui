@@ -50,6 +50,12 @@ export interface EmployeeDetail {
   complianceCompletedItems: number;
   complianceTotalItems: number;
   hasLogin?: boolean;
+  complianceChecklist?: EmployeeComplianceCheck[];
+}
+
+export interface EmployeeComplianceCheck {
+  key: string;
+  completed: boolean;
 }
 
 export interface EmployeeStats {

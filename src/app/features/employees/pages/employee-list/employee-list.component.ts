@@ -23,6 +23,8 @@ import { AvatarComponent } from '../../../../shared/components/avatar/avatar.com
 import { EmployeeCreateDialogComponent } from '../../components/employee-create-dialog/employee-create-dialog.component';
 import { CreatedEmployee } from '../../models/created-employee.model';
 
+type EmployeeRow = EmployeeListItem & { name: string };
+
 @Component({
   selector: 'app-employee-list',
   standalone: true,
@@ -51,7 +53,7 @@ export class EmployeeListComponent {
     (this.auth.user()?.roles ?? []).some(r => r === 'Admin' || r === 'Manager'));
 
   protected readonly loading = signal(false);
-  protected readonly employees = signal<EmployeeListItem[]>([]);
+  protected readonly employees = signal<EmployeeRow[]>([]);
   // Phase 3 F7-broad / WU-22 — server-side total for the header counter.
   protected readonly totalCount = signal<number>(0);
 
@@ -123,7 +125,7 @@ export class EmployeeListComponent {
       order: 'asc',
     }).subscribe({
       next: paged => {
-        this.employees.set(paged.items);
+        this.employees.set(paged.items.map(item => ({ ...item, name: this.formatName(item) })));
         this.totalCount.set(paged.totalCount);
         this.loading.set(false);
       },

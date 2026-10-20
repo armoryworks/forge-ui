@@ -4687,7 +4687,9 @@
     "colUser": "User",
     "noUsers": "No users found",
     "trackingNote": "Tour completion is tracked per-device via browser storage.",
-    "users": "Users"
+    "users": "Users",
+    "completionQueued": "Completion saved. It will sync the next time you sign in.",
+    "walkthroughHint": "Click \"{{label}}\" above to begin. Completing the tour marks this module done automatically."
   },
   "aiAssistants": {
     "assistants": "assistants",
@@ -8762,7 +8764,20 @@
         "documents": "Documents",
         "activity": "Activity"
       },
-      "noLoginHint": "This employee has no system login, so only the overview is shown. Grant system access to track time, jobs and training."
+      "noLoginHint": "This employee has no system login, so only the overview is shown. Grant system access to track time, jobs and training.",
+      "checklist": {
+        "title": "Onboarding checklist",
+        "w4": "Federal W-4",
+        "i9": "I-9",
+        "stateWithholding": "State withholding",
+        "emergencyContact": "Emergency contact (name and phone)",
+        "address": "Home address",
+        "directDeposit": "Direct deposit",
+        "workersComp": "Workers' comp acknowledgment",
+        "handbook": "Handbook acknowledgment",
+        "done": "Complete",
+        "missing": "Missing"
+      }
     },
     "newEmployee": "New Employee",
     "noLogin": "No login",
@@ -8813,7 +8828,8 @@
       "visual": "Visual",
       "reading": "Reading / Writing",
       "handson": "Hands-on / Kinesthetic"
-    }
+    },
+    "clearFilters": "Clear filters"
   },
   "auditLogUi": {
     "loadFailed": "The audit log could not be loaded.",

@@ -4,6 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, interval } from 'rxjs';
 
 import { MarkdownComponent } from 'ngx-markdown';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { createTourSvg, clearTourConnector, updateTourConnector, attachScrollRefresh, setupPopoverDraggable } from '../../../shared/utils/tour-connector.utils';
@@ -22,7 +23,7 @@ import { attachAdvanceGate } from '../walkthrough-gate.util';
 @Component({
   selector: 'app-training-module',
   standalone: true,
-  imports: [LoadingBlockDirective, TrainingModuleQuizComponent, MarkdownComponent],
+  imports: [LoadingBlockDirective, TrainingModuleQuizComponent, MarkdownComponent, TranslatePipe],
   templateUrl: './training-module.component.html',
   styleUrl: './training-module.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,6 +36,7 @@ export class TrainingModuleComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly ngZone = inject(NgZone);
   private readonly terminology = inject(TerminologyService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly isLoading = signal(true);
   protected readonly module = signal<TrainingModuleDetail | null>(null);
@@ -105,6 +107,9 @@ export class TrainingModuleComponent implements OnInit {
     try { return JSON.parse(m.contentJson) as WalkthroughContent; } catch { return null; }
   });
 
+  protected readonly walkthroughStartLabel = computed((): string =>
+    this.walkthroughContent()?.startButtonLabel || this.translate.instant('training.walkthroughStart'));
+
   protected readonly quickRefContent = computed<QuickRefContent | null>(() => {
     const m = this.module();
     if (!m || m.contentType !== 'QuickRef') return null;
@@ -163,16 +168,12 @@ export class TrainingModuleComponent implements OnInit {
     const m = this.module();
     if (!m || !this.canComplete()) return;
     this.isCompleting.set(true);
-    this.trainingService.completeModule(m.id).subscribe({
-      next: () => {
-        this.completed.set(true);
+    this.trainingService.completeOrQueue(m.id).subscribe({
+      next: outcome => {
+        this.completed.set(outcome === 'completed');
         this.isCompleting.set(false);
       },
-      error: () => {
-        // Don't lose the completion — replayed on the next authenticated session.
-        this.trainingService.queueCompletion(m.id);
-        this.isCompleting.set(false);
-      },
+      error: () => this.isCompleting.set(false),
     });
   }
 
@@ -203,6 +204,7 @@ export class TrainingModuleComponent implements OnInit {
     const router = this.router;
     const trainingService = this.trainingService;
     const numericModuleId = this.module()?.id;
+    const earnedBy = this.authService.user()?.id;
     const ngZone = this.ngZone;
     const fromUrl = this.fromUrl();
 
@@ -246,9 +248,7 @@ export class TrainingModuleComponent implements OnInit {
             if (numericModuleId) {
               // Session is intact (the preview never cleared it), so this POST
               // succeeds; the queue fallback stays for the token-expired case.
-              trainingService.completeModule(numericModuleId).subscribe({
-                error: () => trainingService.queueCompletion(numericModuleId),
-              });
+              trainingService.completeOrQueue(numericModuleId, earnedBy).subscribe({ error: () => undefined });
               // Carry ?from= back to the splash so its Back button still
               // returns to wherever the user originally opened it.
               const back = fromUrl ? `?from=${encodeURIComponent(fromUrl)}` : '';
@@ -392,6 +392,14 @@ export class TrainingModuleComponent implements OnInit {
     const seg = path.split('/').filter(s => s && !/^\d+$/.test(s)).pop();
     if (!seg) return '';
     return seg.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  protected reloadModule(): void {
+    const id = this.module()?.id;
+    if (!id) return;
+    this.trainingService.getModule(id).subscribe({
+      next: module => this.module.set(module),
+    });
   }
 
   protected onQuizComplete(passed: boolean): void {

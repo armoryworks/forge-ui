@@ -58,7 +58,6 @@ $type-colors: (
   border: $border-width-thin solid var(--border);
   cursor: pointer;
   transition: box-shadow $transition-fast, border-color $transition-fast, transform $transition-fast;
-  outline: none;
   position: relative;
 
   &:hover,
@@ -212,11 +211,13 @@ $type-colors: (
 }
 
 .enrollment-card {
+  display: block;
+  color: inherit;
+  text-decoration: none;
   background: var(--surface);
   border: $border-width-thin solid var(--border);
   cursor: pointer;
   transition: border-color $transition-fast;
-  outline: none;
 
   &:hover,
   &:focus-visible {
@@ -316,6 +317,8 @@ $type-colors: (
 
 .path-card {
   display: flex;
+  color: inherit;
+  text-decoration: none;
   align-items: center;
   gap: $sp-lg;
   padding: $sp-lg;
@@ -324,7 +327,6 @@ $type-colors: (
   border-bottom: none;      // Progress bar provides the bottom border
   cursor: pointer;
   transition: border-color $transition-fast;
-  outline: none;
 
   &:hover,
   &:focus-visible {
