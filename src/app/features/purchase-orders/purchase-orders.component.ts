@@ -123,8 +123,7 @@ export class PurchaseOrdersComponent implements OnInit {
     { field: 'status', header: this.translate.instant('common.status'), sortable: true, filterable: true, type: 'enum', width: '140px', filterOptions: this.statusOptions.slice(1) },
     { field: 'originSource', header: this.translate.instant('purchaseOrders.origin'), sortable: true, filterable: true, type: 'enum', width: '130px', filterOptions: this.originFilterOptions },
     { field: 'lineCount', header: this.translate.instant('purchaseOrders.lines'), sortable: true, width: '70px', align: 'center' },
-    { field: 'totalOrdered', header: this.translate.instant('purchaseOrders.ordered'), sortable: true, width: '90px', align: 'center' },
-    { field: 'totalReceived', header: this.translate.instant('purchaseOrders.received'), sortable: true, width: '90px', align: 'center' },
+    { field: 'linesFullyReceived', header: this.translate.instant('purchaseOrders.linesReceived'), width: '110px', align: 'center' },
     { field: 'expectedDeliveryDate', header: this.translate.instant('purchaseOrders.expected'), sortable: true, type: 'date', width: '110px' },
     { field: 'createdAt', header: this.translate.instant('common.created'), sortable: true, type: 'date', width: '110px' },
   ];

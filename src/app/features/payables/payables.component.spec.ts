@@ -102,3 +102,59 @@ describe('PayablesComponent · role access', () => {
     expect(banking.getBatches).toHaveBeenCalled();
   });
 });
+
+describe('PayablesComponent · detail deep link', () => {
+  let detailFromUrl: { entityType: string; entityId: number } | null;
+  let detailDialog: { getDetailFromUrl: () => typeof detailFromUrl; open: ReturnType<typeof vi.fn> };
+  let glChanged: () => void;
+
+  function setup(): void {
+    detailDialog = {
+      getDetailFromUrl: () => detailFromUrl,
+      open: vi.fn(() => ({ afterClosed: () => of(false) })),
+    };
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ tab: 'payments' })) } },
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: VendorBillService, useValue: { getVendorBills: vi.fn(() => of([])) } },
+        { provide: VendorPaymentService, useValue: { getVendorPayments: vi.fn(() => of([])) } },
+        { provide: PaymentTransmissionService, useValue: { getPaymentTransmissions: vi.fn(() => of([])) } },
+        { provide: BankingService, useValue: { getBatches: vi.fn(() => of([])), getBankAccounts: vi.fn(() => of([])) } },
+        { provide: VendorService, useValue: { getVendorDropdown: () => of([]) } },
+        { provide: DetailDialogService, useValue: detailDialog },
+        { provide: CapabilityService, useValue: { isEnabled: () => true, capabilities: () => [] } },
+        { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
+        { provide: MatDialog, useValue: { open: vi.fn() } },
+        {
+          provide: AccountingHubService,
+          useValue: { subscribe: (reload: () => void) => { glChanged = reload; return () => undefined; } },
+        },
+        { provide: AuthService, useValue: { hasAnyRole: () => true } },
+      ],
+    });
+    TestBed.runInInjectionContext(() => new PayablesComponent());
+    TestBed.flushEffects();
+  }
+
+  it('opens the payment named in the URL once when the page loads', () => {
+    detailFromUrl = { entityType: 'vendor-payment', entityId: 7 };
+    setup();
+    glChanged();
+
+    expect(detailDialog.open).toHaveBeenCalledTimes(1);
+    expect(detailDialog.open.mock.calls[0][1]).toBe(7);
+  });
+
+  it('does not reopen a payment the user opened when a GL push reloads the lists', () => {
+    detailFromUrl = null;
+    setup();
+
+    detailFromUrl = { entityType: 'vendor-payment', entityId: 7 };
+    glChanged();
+
+    expect(detailDialog.open).not.toHaveBeenCalled();
+  });
+});

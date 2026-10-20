@@ -75,7 +75,7 @@ export class VendorPaymentDetailPanelComponent {
   protected readonly voidForm = new FormGroup({
     reason: new FormControl<string>('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.minLength(3), Validators.maxLength(2000)],
+      validators: [Validators.required, Validators.minLength(3), Validators.maxLength(500)],
     }),
   });
   protected readonly voidViolations = FormValidationService.getViolations(this.voidForm, {

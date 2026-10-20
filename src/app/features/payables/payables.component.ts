@@ -298,12 +298,11 @@ export class PayablesComponent {
 
   private autoOpenFromUrl(): void {
     if (this.autoOpenedFromUrl) return;
+    this.autoOpenedFromUrl = true;
     const detail = this.detailDialog.getDetailFromUrl();
     if (detail?.entityType === 'vendor-bill') {
-      this.autoOpenedFromUrl = true;
       this.openBillDetail({ id: detail.entityId } as VendorBillListItem);
     } else if (detail?.entityType === 'vendor-payment') {
-      this.autoOpenedFromUrl = true;
       this.openPaymentDetail({ id: detail.entityId } as VendorPaymentListItem);
     }
   }
@@ -324,7 +323,9 @@ export class PayablesComponent {
       { paymentId: item.id },
       { width: '800px' },
     ).afterClosed().subscribe(changed => {
-      if (changed) this.loadPayments();
+      if (!changed) return;
+      this.loadPayments();
+      this.loadBills();
     });
   }
 

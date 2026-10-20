@@ -341,7 +341,12 @@
                   <td>{{ line.description }}</td>
                   <!-- Phase 3 / WU-10 — fractional quantities; display up to 4 decimals,
                        trim trailing zeros for clarity (1.5, not 1.5000). -->
-                  <td class="lines-table__right">{{ line.orderedQuantity | number:'1.0-4' }}</td>
+                  <td class="lines-table__right">
+                    {{ line.orderedQuantity | number:'1.0-4' }}
+                    @if (line.purchaseUnitLabel) {
+                      <span class="text-muted" data-testid="po-line-purchase-unit">{{ line.purchaseUnitLabel }}</span>
+                    }
+                  </td>
                   <td class="lines-table__right">
                     <span [class.text-success]="line.receivedQuantity >= line.orderedQuantity"
                           [class.text-warning]="line.receivedQuantity > 0 && line.receivedQuantity < line.orderedQuantity">
@@ -637,7 +642,7 @@
       <app-select label="Line Item" formControlName="purchaseOrderLineId" [options]="lineOptions()" [required]="true" />
       <app-input label="Quantity" type="number" formControlName="quantity" [required]="true" />
       <app-datepicker label="Requested Delivery Date" formControlName="requestedDeliveryDate" [required]="true" />
-      <app-textarea label="Notes" formControlName="notes" />
+      <app-textarea [label]="'common.notes' | translate" formControlName="notes" />
     </div>
     <div dialog-footer>
       <button class="action-btn" (click)="showCreateReleaseDialog.set(false)">Cancel</button>

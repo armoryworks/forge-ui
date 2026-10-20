@@ -3212,7 +3212,8 @@
     "colNextDue": "Next Due",
     "colActive": "Active",
     "noVendor": "-- None (out of pocket / card) --",
-    "vendorHint": "On approval, this expense becomes a vendor bill in Payables and is paid from there."
+    "vendorHint": "On approval, this expense becomes a vendor bill in Payables and is paid from there.",
+    "totalExcludingRejectedLabel": "Total (excluding rejected):"
   },
   "timeTracking": {
     "title": "Time Tracking",
@@ -5833,6 +5834,10 @@
       "createAsBlanket": "Blanket order",
       "createHint": "The ordered quantities become the agreed total; the vendor ships against releases you create on the PO."
     },
+    "linesReceived": "Lines Received",
+    "linesReceivedOf": "{{received}} of {{total}}",
+    "receiveQtyFor": "Receive quantity for {{line}}",
+    "receiveTable": "Quantities to receive",
     "receiveLotAutoAssigned": "Lot-tracked part: leave the lot blank and a lot number is assigned."
   },
   "poManage": {
@@ -8613,7 +8618,7 @@
     },
     "allStatuses": "All Statuses",
     "award": "Award",
-    "awardRfqMessage": "Award this RFQ to the selected vendor?",
+    "awardRfqMessage": "Award {{rfq}} to {{vendor}}? A draft purchase order is created from their quote.",
     "awardRfqTitle": "Award RFQ",
     "awarded": "Awarded",
     "awardedAt": "Awarded At",
@@ -8646,8 +8651,9 @@
     "vendors": "Vendors",
     "rfq": {
       "confirmSendTitle": "Add vendors to RFQ?",
-      "confirmSendMessage": "Add {{count}} vendor(s) to this RFQ? You will send it to them yourself."
-    }
+      "confirmSendMessage": "Add the selected vendors ({{count}}) to this RFQ? This does not email them: download the RFQ PDF and send it to each vendor yourself."
+    },
+    "viewPo": "View PO"
   },
   "approvals": {
     "title": "Approvals",
@@ -8750,7 +8756,8 @@
       "noWorkflows": "No workflows defined",
       "role": "Role",
       "stepName": "Step Name",
-      "workflowName": "Workflow Name"
+      "workflowName": "Workflow Name",
+      "unsupportedConditions": "This workflow's saved activation conditions are not supported, so it currently applies only when no other workflow matches. Set an amount threshold (or leave it empty) and save to replace them."
     }
   },
   "employees": {
@@ -10637,7 +10644,7 @@
       "cancelTitle": "Cancel batch?",
       "cancelMessage": "Cancel {{number}}? Its payments return to the eligible pool.",
       "eligiblePayments": "Eligible ACH payments",
-      "noneEligible": "No eligible ACH payments — record BankTransfer payments first.",
+      "noneEligible": "No eligible ACH payments. Record a payment with the Bank Transfer method first.",
       "destination": "Destination",
       "needsAccount": "Needs verified bank account",
       "selectedTotal": "Selected total",
@@ -10646,7 +10653,8 @@
       "created": "Batch {{number}} assembled",
       "prenoteHint": "Every approved (not yet prenoted) vendor bank account will receive a zero-dollar verification entry. After the bank's return window passes with no return, mark the accounts verified.",
       "importReturns": "Import Returns File",
-      "returnsApplied": "Returns applied: {{returned}} payment(s) returned, {{prenotes}} prenote rejection(s), {{nocs}} correction notice(s)"
+      "returnsApplied": "Returns applied: {{returned}} payment(s) returned, {{prenotes}} prenote rejection(s), {{nocs}} correction notice(s)",
+      "effectiveDatePast": "Effective date cannot be in the past."
     },
     "bankAccounts": {
       "nickname": "Nickname",
@@ -10683,7 +10691,12 @@
       "attested": "Wire attested — marked transmitted"
     },
     "glAccount": "GL account",
-    "defaultExpenseAccount": "Default expense account"
+    "defaultExpenseAccount": "Default expense account",
+    "accountKeys": {
+      "OPERATING_EXPENSE": "Operating expense",
+      "GRNI": "Goods received not invoiced"
+    },
+    "taxNegative": "Tax cannot be negative."
   },
   "terms": {
     "scope": {

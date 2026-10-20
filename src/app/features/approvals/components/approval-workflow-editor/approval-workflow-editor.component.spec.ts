@@ -18,6 +18,8 @@ interface EditorInternals {
   ngOnInit(): void;
   roleOptions(): SelectOption[];
   openEdit(workflow: ApprovalWorkflow): void;
+  unsupportedConditions(): boolean;
+  workflowForm: { controls: { amountThreshold: { value: number | null } } };
 }
 
 function setup(roles: string[]): EditorInternals {
@@ -71,5 +73,43 @@ describe('ApprovalWorkflowEditorComponent role options', () => {
     });
 
     expect(editor.roleOptions().map(o => o.value)).toEqual(['Manager', 'RetiredRole']);
+  });
+});
+
+describe('ApprovalWorkflowEditorComponent activation conditions', () => {
+  function workflowWith(conditions: string | null): ApprovalWorkflow {
+    return {
+      id: 3, name: 'PO tier', entityType: 'PurchaseOrder', description: null, isActive: true,
+      activationConditionsJson: conditions, createdAt: '2026-10-01T00:00:00Z',
+      steps: [
+        { id: 1, stepNumber: 1, name: 'Plant manager', approverType: 'Role', approverUserId: null, approverUserName: null, approverRole: 'Manager',
+          useDirectManager: false, autoApproveBelow: null, escalationHours: null, requireComments: false, allowDelegation: true },
+      ],
+    };
+  }
+
+  it('loads a supported amount threshold without a warning', () => {
+    const editor = setup(['Manager']);
+
+    editor.openEdit(workflowWith('{"amountGreaterThan":5000}'));
+
+    expect(editor.workflowForm.controls.amountThreshold.value).toBe(5000);
+    expect(editor.unsupportedConditions()).toBe(false);
+  });
+
+  it('flags an unknown condition key instead of showing an empty threshold silently', () => {
+    const editor = setup(['Manager']);
+
+    editor.openEdit(workflowWith('{"minAmount":5000}'));
+
+    expect(editor.workflowForm.controls.amountThreshold.value).toBeNull();
+    expect(editor.unsupportedConditions()).toBe(true);
+  });
+
+  it('opens a workflow whose saved conditions are not valid JSON', () => {
+    const editor = setup(['Manager']);
+
+    expect(() => editor.openEdit(workflowWith('{not json'))).not.toThrow();
+    expect(editor.unsupportedConditions()).toBe(true);
   });
 });

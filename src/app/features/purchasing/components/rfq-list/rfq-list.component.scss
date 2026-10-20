@@ -4,3 +4,11 @@
   font-family: $font-family-mono;
   font-weight: 600;
 }
+
+.rfq-description {
+  display: block;
+  max-width: 24rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -12,6 +12,18 @@
   }
 }
 
+.conditions-warning {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  margin: 0;
+  font-size: $font-size-sm;
+
+  .material-icons-outlined {
+    color: var(--warning);
+  }
+}
+
 .steps-section {
   margin-top: $sp-md;
 

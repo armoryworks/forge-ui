@@ -43,6 +43,7 @@ const ERROR_MESSAGES: Record<string, (label: string, error: unknown) => string> 
     return `${label} must be at most ${e.max}`;
   },
   pattern: (label) => `${label} format is invalid`,
+  positive: (label) => `${label} must be greater than 0`,
 };
 
 export class FormValidationService {

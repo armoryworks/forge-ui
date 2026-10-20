@@ -70,6 +70,9 @@
                 {{ getOriginLabel(row) }}
               </span>
             </ng-template>
+            <ng-template appColumnCell="linesFullyReceived" let-row>
+              <span>{{ 'purchaseOrders.linesReceivedOf' | translate: { received: row.linesFullyReceived, total: row.lineCount } }}</span>
+            </ng-template>
             <ng-template appColumnCell="expectedDeliveryDate" let-row>
               <span class="text-muted">{{ row.expectedDeliveryDate ? (row.expectedDeliveryDate | dateOnly) : '—' }}</span>
             </ng-template>

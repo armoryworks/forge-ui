@@ -10,7 +10,7 @@
     <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'expenses.searchPlaceholder' | translate"
       (keyup.enter)="applyFilters()" />
     <app-select data-testid="status-filter" [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusOptions" />
-    <span class="total-amount">{{ 'expenses.totalLabel' | translate }} {{ getTotalAmount() | currency }}</span>
+    <span class="total-amount">{{ (totalExcludesRejected() ? 'expenses.totalExcludingRejectedLabel' : 'expenses.totalLabel') | translate }} {{ getTotalAmount() | currency }}</span>
   </div>
 
   <div [appLoadingBlock]="loading()">

@@ -31,6 +31,9 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 
+const MAX_AMOUNT = 99_999_999_999_999;
+const MIN_MOQ = 0.0001;
+
 export interface RfqDetailDialogData {
   rfqId: number;
 }
@@ -83,10 +86,10 @@ export class RfqDetailDialogComponent {
   // Record Response form
   protected readonly responseForm = new FormGroup({
     vendorId: new FormControl<number | null>(null, [Validators.required]),
-    unitPrice: new FormControl<number | null>(null),
-    leadTimeDays: new FormControl<number | null>(null),
-    minimumOrderQuantity: new FormControl<number | null>(null),
-    toolingCost: new FormControl<number | null>(null),
+    unitPrice: new FormControl<number | null>(null, [Validators.min(0), Validators.max(MAX_AMOUNT)]),
+    leadTimeDays: new FormControl<number | null>(null, [Validators.min(0), Validators.max(3650)]),
+    minimumOrderQuantity: new FormControl<number | null>(null, [Validators.min(MIN_MOQ), Validators.max(MAX_AMOUNT)]),
+    toolingCost: new FormControl<number | null>(null, [Validators.min(0), Validators.max(MAX_AMOUNT)]),
     quoteValidUntil: new FormControl<Date | null>(null),
     notes: new FormControl(''),
   });
@@ -209,7 +212,10 @@ export class RfqDetailDialogComponent {
       width: '400px',
       data: {
         title: this.translate.instant('purchasing.awardRfqTitle'),
-        message: this.translate.instant('purchasing.awardRfqMessage', { vendor: response.vendorName }),
+        message: this.translate.instant('purchasing.awardRfqMessage', {
+          rfq: this.rfq()?.rfqNumber ?? '',
+          vendor: response.vendorName,
+        }),
         confirmLabel: this.translate.instant('purchasing.award'),
         severity: 'info',
       } satisfies ConfirmDialogData,
@@ -218,8 +224,16 @@ export class RfqDetailDialogComponent {
 
       this.saving.set(true);
       this.purchasingService.awardRfq(this.data.rfqId, response.id).subscribe({
-        next: () => {
-          this.snackbar.successWithNav(this.translate.instant('purchasing.snackbar.rfqAwarded'), `/purchase-orders`, 'View PO');
+        next: ({ purchaseOrderId }) => {
+          this.snackbar.successWithNav(
+            this.translate.instant('purchasing.snackbar.rfqAwarded'),
+            '/purchase-orders/orders',
+            this.translate.instant('purchasing.viewPo'),
+            {
+              queryParams: { detail: `purchase-order:${purchaseOrderId}` },
+              beforeNavigate: () => this.dialogRef.close(true),
+            },
+          );
           this.saving.set(false);
           this.hasChanged = true;
           this.loadRfq();

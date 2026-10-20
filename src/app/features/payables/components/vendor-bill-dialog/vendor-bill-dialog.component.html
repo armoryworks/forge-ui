@@ -11,7 +11,12 @@
     </div>
 
     <div class="dialog-row">
-      <app-currency-input [label]="'payables.tax' | translate" formControlName="taxAmount" data-testid="bill-tax-amount" />
+      <div class="tax-amount-field">
+        <app-currency-input [label]="'payables.tax' | translate" formControlName="taxAmount" data-testid="bill-tax-amount" />
+        @if (billForm.controls.taxAmount.hasError('min')) {
+          <p class="field-error" role="alert" data-testid="bill-tax-error">{{ 'payables.taxNegative' | translate }}</p>
+        }
+      </div>
       @if (showCurrencySelector()) {
         <app-select [label]="'accounting.currency.currency' | translate" formControlName="currencyId" [options]="currencyOptions()" [required]="true" data-testid="bill-currency" />
       }

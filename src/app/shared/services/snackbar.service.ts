@@ -2,13 +2,18 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { DestroyRef, inject, Injectable } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { NavigationStart, Router } from '@angular/router';
+import { NavigationStart, Params, Router } from '@angular/router';
 
 import { TranslateService } from '@ngx-translate/core';
 import { Observable, filter } from 'rxjs';
 
 import { wasHttpErrorShown } from '../utils/shown-http-errors';
 import { ToastService } from './toast.service';
+
+export interface SnackbarNavOptions {
+  queryParams?: Params;
+  beforeNavigate?: () => void;
+}
 
 @Injectable({ providedIn: 'root' })
 export class SnackbarService {
@@ -68,7 +73,7 @@ export class SnackbarService {
     );
   }
 
-  successWithNav(message: string, route: string, actionLabel: string): void {
+  successWithNav(message: string, route: string, actionLabel: string, options?: SnackbarNavOptions): void {
     this.toasts.clearErrors();
     const ref = this.snackBar.open(message, actionLabel, {
       duration: 4000,
@@ -76,7 +81,12 @@ export class SnackbarService {
     });
 
     ref.onAction().subscribe(() => {
-      this.router.navigate([route]);
+      options?.beforeNavigate?.();
+      if (options?.queryParams) {
+        this.router.navigate([route], { queryParams: options.queryParams });
+      } else {
+        this.router.navigate([route]);
+      }
     });
   }
 
