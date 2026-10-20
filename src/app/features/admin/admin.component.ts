@@ -76,6 +76,8 @@ import { AuthService } from '../../shared/services/auth.service';
 import { ReferenceDataService } from '../../shared/services/reference-data.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { CompanyLocation, CompanyProfile } from './models/company-location.model';
+import { ADMIN_TAB_ROLES } from './models/admin-tab-roles.model';
+import { ADMIN_TABS } from './models/admin-tab.model';
 
 @Component({
   selector: 'app-admin',
@@ -110,10 +112,6 @@ export class AdminComponent implements OnInit {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
 
-  private static readonly VALID_TABS = new Set(['overview', 'users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'role-templates', 'compliance', 'sales-tax', 'audit-log', 'time-corrections', 'events', 'announcements', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'banking', 'bi-api-keys', 'system-api-keys', 'connections']);
-  private static readonly ADMIN_ONLY_TABS = new Set(['overview', 'users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'ai-assistants', 'teams', 'role-templates', 'sales-tax', 'audit-log', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'banking', 'bi-api-keys', 'system-api-keys', 'connections']);
-  private static readonly MANAGER_AND_ADMIN_TABS = new Set(['training', 'time-corrections', 'events', 'announcements']);
-
   protected readonly isAdmin = computed(() => this.authService.hasRole('Admin'));
   protected readonly isManagerOrAdmin = computed(() => this.authService.hasRole('Admin') || this.authService.hasRole('Manager'));
   protected readonly pageTitle = computed(() => this.isAdmin() ? this.translate.instant('admin.title') : this.translate.instant('admin.titleEmployee'));
@@ -127,9 +125,9 @@ export class AdminComponent implements OnInit {
     // of tabs available to them.
     const defaultTab = isAdmin ? 'overview' : 'compliance';
     const tab = requested ?? defaultTab;
-    if (!AdminComponent.VALID_TABS.has(tab)) return { tab: defaultTab, denied: false };
-    if (AdminComponent.ADMIN_ONLY_TABS.has(tab) && !isAdmin) return { tab: 'compliance', denied: true };
-    if (AdminComponent.MANAGER_AND_ADMIN_TABS.has(tab) && !isAdmin && !isManager) return { tab: 'compliance', denied: true };
+    if (!ADMIN_TABS.includes(tab)) return { tab: defaultTab, denied: false };
+    const roles = ADMIN_TAB_ROLES[tab];
+    if (roles && !((isAdmin && roles.includes('Admin')) || (isManager && roles.includes('Manager')))) return { tab: 'compliance', denied: true };
     return { tab, denied: false };
   }
 

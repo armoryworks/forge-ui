@@ -1,9 +1,9 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn, RedirectCommand, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 export function roleGuard(...allowedRoles: string[]): CanActivateFn {
-  return () => {
+  return (_route, state) => {
     const auth = inject(AuthService);
     const router = inject(Router);
 
@@ -11,6 +11,6 @@ export function roleGuard(...allowedRoles: string[]): CanActivateFn {
       return true;
     }
 
-    return router.createUrlTree(['/dashboard']);
+    return new RedirectCommand(router.parseUrl('/forbidden'), { browserUrl: state.url });
   };
 }

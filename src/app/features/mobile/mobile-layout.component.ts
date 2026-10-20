@@ -77,7 +77,7 @@ export class MobileLayoutComponent implements OnInit {
         const url = this.router.url;
         const gatedPaths = ['/m/jobs', '/m/scan'];
         if (gatedPaths.some(p => url.startsWith(p))) {
-          this.router.navigate(['/m/clock']);
+          this.router.navigate(['/m/clock'], { queryParams: { returnUrl: url } });
         }
       }
     });

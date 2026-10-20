@@ -15,6 +15,9 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { notFoundError } from '../../../../shared/utils/not-found-error';
+import { parsePositiveId } from '../../../../shared/utils/parse-positive-id';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { CustomerService } from '../../../customers/services/customer.service';
@@ -51,6 +54,7 @@ import { CommunicationDetail } from '../../models/communication-detail.model';
     CurrencyInputComponent,
     DatepickerComponent,
     ValidationButtonComponent,
+    DetailLoadErrorComponent,
   ],
   templateUrl: './communication-review.component.html',
   styleUrl: './communication-review.component.scss',
@@ -68,12 +72,13 @@ export class CommunicationReviewComponent {
 
   protected readonly detail = signal<CommunicationDetail | null>(null);
   protected readonly loading = signal(true);
+  protected readonly loadError = signal<unknown>(null);
   protected readonly saving = signal(false);
   protected readonly customerOptions = signal<SelectOption[]>([]);
 
   private readonly communicationId = toSignal(
-    this.route.paramMap.pipe(map((p) => Number(p.get('id')) || 0)),
-    { initialValue: 0 },
+    this.route.paramMap.pipe(map((p) => parsePositiveId(p.get('id')))),
+    { initialValue: null },
   );
 
   protected readonly form = this.fb.group({
@@ -151,19 +156,31 @@ export class CommunicationReviewComponent {
     this.load();
   }
 
-  private load(): void {
+  protected load(): void {
     const id = this.communicationId();
-    if (!id) return;
+    if (!id) {
+      this.loadError.set(notFoundError());
+      this.loading.set(false);
+      return;
+    }
 
     this.loading.set(true);
+    this.loadError.set(null);
     this.service.getDetail(id).subscribe({
       next: (detail) => {
         this.detail.set(detail);
         this.prefill(detail);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err: unknown) => {
+        this.loadError.set(err);
+        this.loading.set(false);
+      },
     });
+  }
+
+  protected leave(): void {
+    this.router.navigateByUrl('/');
   }
 
   /**
@@ -221,12 +238,13 @@ export class CommunicationReviewComponent {
   }
 
   protected approve(): void {
-    if (this.form.invalid || this.saving() || !this.canApprove()) return;
+    const id = this.communicationId();
+    if (!id || this.form.invalid || this.saving() || !this.canApprove()) return;
     this.saving.set(true);
 
     const raw = this.form.getRawValue();
 
-    this.service.approveDraft(this.communicationId(), {
+    this.service.approveDraft(id, {
       customerId: raw.customerId!,
       authorizingArtifactId: raw.authorizingArtifactId!,
       customerPo: raw.customerPo?.trim() || null,

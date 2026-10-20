@@ -45,6 +45,9 @@ import { CustomerTaxDocumentsClusterComponent } from '../../components/customer-
 import { TermsSectionComponent } from '../../../terms/components/terms-section/terms-section.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { EntityCompletenessChipComponent } from '../../../../shared/components/entity-completeness-chip/entity-completeness-chip.component';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { notFoundError } from '../../../../shared/utils/not-found-error';
+import { parsePositiveId } from '../../../../shared/utils/parse-positive-id';
 
 /**
  * Pillar 5 — Customer detail shell.
@@ -66,7 +69,7 @@ import { EntityCompletenessChipComponent } from '../../../../shared/components/e
   selector: 'app-customer-detail',
   standalone: true,
   imports: [
-    TranslatePipe, RouterLink, MatTooltipModule,
+    TranslatePipe, RouterLink, MatTooltipModule, DetailLoadErrorComponent,
     CustomerOverviewTabComponent,
     CustomerEstimatesTabComponent, CustomerQuotesTabComponent, CustomerOrdersTabComponent,
     CustomerJobsTabComponent, CustomerInvoicesTabComponent, CustomerActivityTabComponent,
@@ -124,8 +127,8 @@ export class CustomerDetailComponent {
     this.auth.hasAnyRole(CustomerDetailComponent.COMMERCIAL_RECORD_ROLES));
 
   protected readonly customerId = toSignal(
-    this.route.paramMap.pipe(map(p => +p.get('id')!)),
-    { initialValue: 0 },
+    this.route.paramMap.pipe(map(p => parsePositiveId(p.get('id')))),
+    { initialValue: null },
   );
 
   protected readonly activeTab = toSignal(
@@ -141,6 +144,7 @@ export class CustomerDetailComponent {
 
   protected readonly customer = signal<CustomerSummary | null>(null);
   protected readonly loading = signal(true);
+  protected readonly loadError = signal<unknown>(null);
   protected readonly editing = signal(false);
   protected readonly saving = signal(false);
 
@@ -187,7 +191,13 @@ export class CustomerDetailComponent {
   constructor() {
     effect(() => {
       const id = this.customerId();
-      if (id > 0) this.loadCustomer(id);
+      if (id) {
+        this.loadCustomer(id);
+      } else {
+        this.customer.set(null);
+        this.loadError.set(notFoundError());
+        this.loading.set(false);
+      }
     });
 
     // Diagnostics — whenever tabs are dropped by capability gating, say so
@@ -219,14 +229,16 @@ export class CustomerDetailComponent {
 
   private loadCustomer(id: number): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.customerService.getCustomerSummary(id).subscribe({
       next: c => {
         this.customer.set(c);
         this.loading.set(false);
       },
-      error: () => {
+      error: (err: unknown) => {
+        this.customer.set(null);
+        this.loadError.set(err);
         this.loading.set(false);
-        this.router.navigate(['/customers']);
       },
     });
   }
@@ -241,7 +253,11 @@ export class CustomerDetailComponent {
 
   protected reloadCustomer(): void {
     const id = this.customerId();
-    if (id > 0) this.loadCustomer(id);
+    if (id) this.loadCustomer(id);
+  }
+
+  protected backToList(): void {
+    this.router.navigate(['/customers']);
   }
 
   protected switchTab(tab: CustomerDetailTabId): void {

@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, effect, inject, OnInit, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AuthService } from '../../../shared/services/auth.service';
@@ -34,6 +35,8 @@ export class MobileClockComponent implements OnInit {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly clockState = inject(MobileClockStateService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   protected readonly clockTypes = inject(ClockEventTypeService);
   protected readonly runningTimers = inject(MobileRunningTimersService);
 
@@ -45,6 +48,8 @@ export class MobileClockComponent implements OnInit {
 
   protected readonly actions = signal<ClockAction[]>([]);
   protected readonly timers = this.runningTimers.timers;
+
+  private readonly returnUrl = mobileReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
 
   constructor() {
     // Recompute actions whenever clock type definitions load (resolves race condition)
@@ -62,7 +67,7 @@ export class MobileClockComponent implements OnInit {
     this.loadStatus();
   }
 
-  private loadStatus(): void {
+  private loadStatus(afterClockEvent = false): void {
     const userId = this.user()?.id;
     if (!userId) return;
 
@@ -73,6 +78,9 @@ export class MobileClockComponent implements OnInit {
         this.status.set(s);
         this.clockState.update(s.isClockedIn);
         this.loading.set(false);
+        if (afterClockEvent && s.isClockedIn && this.returnUrl) {
+          this.router.navigateByUrl(this.returnUrl);
+        }
       },
       error: () => this.loading.set(false),
     });
@@ -95,7 +103,7 @@ export class MobileClockComponent implements OnInit {
       next: () => {
         this.submitting.set(false);
         this.snackbar.success(this.recordedMessage(action, stopping));
-        this.loadStatus();
+        this.loadStatus(true);
       },
       error: (err: unknown) => {
         this.submitting.set(false);
@@ -117,4 +125,8 @@ export class MobileClockComponent implements OnInit {
   protected get statusLabel(): string {
     return this.clockTypes.getLabel(this.status()?.status);
   }
+}
+
+function mobileReturnUrl(returnUrl: string | null): string | null {
+  return returnUrl?.startsWith('/m/') ? returnUrl : null;
 }

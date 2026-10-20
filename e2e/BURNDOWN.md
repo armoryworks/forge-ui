@@ -16,6 +16,11 @@ Root cause was twofold and is now diagnosed:
   project (99 tests) is the green gate, sharded. The **docgen** project (86
   screenshot/doc-generation tests) is a separate `continue-on-error` job that
   produces artifacts but can't redden the nightly.
+- **Dev-build-only project** — `playwright.config.ts`. `/dev-tools/*` and
+  `/workflow-shell-demo` are not in production builds, and the nightly runs the
+  published production image, so `loading-overlay` and `workflow-shell-demo`
+  live in a separate **dev** project that the nightly does not run. Run it
+  against `ng serve` with `--project=dev`.
 
 ## Functional gate — fixed (merged)
 | Test(s) | Root cause | Fix |

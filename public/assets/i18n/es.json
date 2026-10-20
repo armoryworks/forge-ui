@@ -509,7 +509,9 @@
     "customer": "Cliente",
     "allCustomers": "Todos los clientes",
     "overdue": "Vencidas",
-    "onHold": "En espera"
+    "onHold": "En espera",
+    "unknownCustomer": "No se encontró el cliente n.º {{id}}, así que el tablero muestra todos los clientes.",
+    "unknownTeam": "No se encontró el equipo n.º {{id}}, así que el tablero muestra todos los equipos."
   },
   "kanban": {
     "title": "Tablero",
@@ -7124,7 +7126,10 @@
     "sendMessage": "Enviar mensaje",
     "askPlaceholder": "Pregunte a {{name}}...",
     "messagePlaceholder": "Mensaje para {{name}}",
-    "errorMessage": "Lo siento, encontré un error. Intente de nuevo."
+    "errorMessage": "Lo siento, encontré un error. Intente de nuevo.",
+    "assistantNotFound": "Asistente no encontrado",
+    "assistantNotFoundHelp": "Es posible que se haya eliminado o que el enlace apunte al asistente equivocado.",
+    "openGeneralAssistant": "Abrir el asistente general"
   },
   "kioskInspect": {
     "referencePrompt": "Escanee la orden de trabajo o el lote al que pertenece esta pieza para que la inspección quede registrada con ellos.",
@@ -12072,7 +12077,9 @@
     "forbidden": "No tiene acceso a este registro",
     "forbiddenHelp": "Pida a un administrador si necesita verlo.",
     "failed": "No se pudo cargar este registro",
-    "failedHelp": "Revise su conexión e inténtelo de nuevo."
+    "failedHelp": "Revise su conexión e inténtelo de nuevo.",
+    "retry": "Intentar de nuevo",
+    "backToList": "Volver a la lista"
   },
   "jobCostTab": {
     "noCostData": "No hay datos de costo para este trabajo.",
@@ -12252,6 +12259,16 @@
       "sftpReturnsDir": "Directorio de devoluciones SFTP",
       "sftpReturnsDirHint": "Dónde deja el banco los archivos de devoluciones para que Forge los lea."
     }
+  },
+  "routeStatus": {
+    "notFound": "Página no encontrada",
+    "notFoundHelp": "No hay nada en {{url}}. Revise el enlace o vuelva a empezar desde su pantalla de inicio.",
+    "forbidden": "No tiene acceso a esta página",
+    "forbiddenHelp": "Su rol no puede abrir {{url}}. Pida acceso a un administrador si lo necesita.",
+    "featureOff": "Esta función está desactivada",
+    "featureOffHelp": "{{url}} pertenece a una función que no está habilitada en esta instalación. Un administrador puede activarla en Administración > Capacidades.",
+    "goHome": "Ir a mi pantalla de inicio",
+    "unknownTab": "Aquí no hay una pestaña “{{tab}}”, así que se muestra la pestaña predeterminada."
   },
   "routeTitles": {
     "login": "Iniciar sesión",

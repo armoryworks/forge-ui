@@ -7,6 +7,9 @@ import { MarkdownComponent } from 'ngx-markdown';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
+import { DetailLoadErrorComponent } from '../../../shared/components/detail-load-error/detail-load-error.component';
+import { notFoundError } from '../../../shared/utils/not-found-error';
+import { parsePositiveId } from '../../../shared/utils/parse-positive-id';
 import { createTourSvg, clearTourConnector, updateTourConnector, attachScrollRefresh, setupPopoverDraggable } from '../../../shared/utils/tour-connector.utils';
 
 import { AuthService } from '../../../shared/services/auth.service';
@@ -23,7 +26,7 @@ import { attachAdvanceGate } from '../walkthrough-gate.util';
 @Component({
   selector: 'app-training-module',
   standalone: true,
-  imports: [LoadingBlockDirective, TrainingModuleQuizComponent, MarkdownComponent, TranslatePipe],
+  imports: [LoadingBlockDirective, TrainingModuleQuizComponent, MarkdownComponent, TranslatePipe, DetailLoadErrorComponent],
   templateUrl: './training-module.component.html',
   styleUrl: './training-module.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,6 +43,7 @@ export class TrainingModuleComponent implements OnInit {
 
   protected readonly isLoading = signal(true);
   protected readonly module = signal<TrainingModuleDetail | null>(null);
+  protected readonly loadError = signal<unknown>(null);
   protected readonly isCompleting = signal(false);
   protected readonly completed = signal(false);
 
@@ -133,17 +137,8 @@ export class TrainingModuleComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
     this.fromUrl.set(this.route.snapshot.queryParamMap.get('from'));
-    this.trainingService.getModule(id).subscribe({
-      next: module => {
-        this.module.set(module);
-        this.isLoading.set(false);
-        this.trainingService.recordStart(id).subscribe();
-        this.completed.set(module.myStatus === 'Completed');
-      },
-      error: () => this.isLoading.set(false),
-    });
+    this.load();
 
     // Reading timer: tick every second, pause when tab is hidden
     interval(1000)
@@ -158,10 +153,34 @@ export class TrainingModuleComponent implements OnInit {
     interval(30_000)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
-        if (this.module()) {
-          this.trainingService.recordHeartbeat(id, 30).subscribe();
+        const loaded = this.module();
+        if (loaded) {
+          this.trainingService.recordHeartbeat(loaded.id, 30).subscribe();
         }
       });
+  }
+
+  protected load(): void {
+    const id = parsePositiveId(this.route.snapshot.paramMap.get('id'));
+    this.loadError.set(null);
+    if (!id) {
+      this.loadError.set(notFoundError());
+      this.isLoading.set(false);
+      return;
+    }
+    this.isLoading.set(true);
+    this.trainingService.getModule(id).subscribe({
+      next: module => {
+        this.module.set(module);
+        this.isLoading.set(false);
+        this.trainingService.recordStart(id).subscribe();
+        this.completed.set(module.myStatus === 'Completed');
+      },
+      error: (err: unknown) => {
+        this.loadError.set(err);
+        this.isLoading.set(false);
+      },
+    });
   }
 
   protected markComplete(): void {

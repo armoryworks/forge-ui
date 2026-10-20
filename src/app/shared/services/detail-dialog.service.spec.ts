@@ -6,6 +6,7 @@ import { provideRouter } from '@angular/router';
 import { of, Subject } from 'rxjs';
 
 import { DetailDialogService } from './detail-dialog.service';
+import { DetailNotFoundDialogComponent } from '../components/detail-not-found-dialog/detail-not-found-dialog.component';
 
 @Component({ selector: 'app-test-dialog', standalone: true, template: '<p>Test</p>' })
 class TestDialogComponent {}
@@ -292,6 +293,7 @@ describe('DetailDialogService', () => {
 
   it('getDetailFromUrl should return null for invalid format', () => {
     vi.spyOn(router, 'url', 'get').mockReturnValue('/kanban?detail=invalid');
+    dialogOpenSpy.mockReturnValue({ afterClosed: () => new Subject<void>() });
 
     const detail = service.getDetailFromUrl();
 
@@ -300,9 +302,52 @@ describe('DetailDialogService', () => {
 
   it('getDetailFromUrl should return null for non-numeric id', () => {
     vi.spyOn(router, 'url', 'get').mockReturnValue('/kanban?detail=job:abc');
+    dialogOpenSpy.mockReturnValue({ afterClosed: () => new Subject<void>() });
 
     const detail = service.getDetailFromUrl();
 
     expect(detail).toBeNull();
+  });
+
+  describe('a malformed detail link', () => {
+    let closed$: Subject<void>;
+
+    beforeEach(() => {
+      closed$ = new Subject<void>();
+      dialogOpenSpy.mockReturnValue({ afterClosed: () => closed$ });
+    });
+
+    it.each(['part:abc', 'sales-order:new', 'part:12abc', 'part:0', 'invalid'])('shows the not-found dialog for %s', (detail) => {
+      vi.spyOn(router, 'url', 'get').mockReturnValue(`/parts?detail=${detail}`);
+
+      expect(service.getDetailFromUrl()).toBeNull();
+
+      expect(dialogOpenSpy).toHaveBeenCalledWith(DetailNotFoundDialogComponent, expect.any(Object));
+    });
+
+    it('shows it once however many callers ask', () => {
+      vi.spyOn(router, 'url', 'get').mockReturnValue('/quality/ncrs?detail=ncr:abc');
+
+      service.getDetailFromUrl();
+      service.getDetailFromUrl();
+
+      expect(dialogOpenSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('clears the param, keeping the page tab, when the dialog closes', () => {
+      vi.spyOn(router, 'url', 'get').mockReturnValue('/admin?tab=training&detail=part:abc');
+      const navigateSpy = vi.spyOn(router, 'navigateByUrl').mockImplementation(() => Promise.resolve(true));
+
+      service.getDetailFromUrl();
+      closed$.next();
+
+      expect(navigateSpy.mock.calls[0][0].toString()).toBe('/admin?tab=training');
+    });
+
+    it('does not open anything for a well-formed or absent param', () => {
+      vi.spyOn(router, 'url', 'get').mockReturnValue('/parts?detail=part:999999');
+      expect(service.getDetailFromUrl()).toEqual({ entityType: 'part', entityId: 999999 });
+      expect(dialogOpenSpy).not.toHaveBeenCalled();
+    });
   });
 });

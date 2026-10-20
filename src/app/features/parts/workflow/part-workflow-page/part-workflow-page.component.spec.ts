@@ -1,9 +1,9 @@
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter, Router } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
 import { WorkflowDefinition } from '../../../../shared/models/workflow-definition.model';
@@ -123,5 +123,66 @@ describe('PartWorkflowPageComponent on an existing part', () => {
       .loadWorkflowContext(1, 'part-make-finishedgood-v1');
 
     expect(start).toHaveBeenCalledWith(expect.objectContaining({ entityType: 'Part', entityId: 1 }));
+  });
+});
+
+describe('PartWorkflowPageComponent bad links', () => {
+  let navSpy: ReturnType<typeof vi.spyOn>;
+  let getById: ReturnType<typeof vi.spyOn>;
+
+  function open(params: Record<string, string>, query: Record<string, string> = {}): { loadError(): unknown } {
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        {
+          provide: ActivatedRoute,
+          useValue: { paramMap: of(convertToParamMap(params)), queryParamMap: of(convertToParamMap(query)) },
+        },
+      ],
+    });
+    navSpy = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    getById = vi.spyOn(TestBed.inject(PartsService), 'getPartById')
+      .mockReturnValue(throwError(() => new HttpErrorResponse({ status: 404 })));
+    const workflowService = TestBed.inject(WorkflowService);
+    vi.spyOn(workflowService, 'listActive').mockReturnValue(of([]));
+    vi.spyOn(workflowService, 'loadDefinitionsForEntity').mockReturnValue(of([]));
+    vi.spyOn(workflowService, 'loadValidatorsForEntity').mockReturnValue(of([]));
+    vi.spyOn(workflowService, 'startRun');
+    const component = TestBed.runInInjectionContext(() => new PartWorkflowPageComponent());
+    TestBed.tick();
+    return component as unknown as { loadError(): unknown };
+  }
+
+  it.each(['abc', '12abc', '0'])('shows not-found in place for the malformed id %s', (id) => {
+    const page = open({ id }, { workflow: 'part-make-component-v1' });
+
+    expect((page.loadError() as HttpErrorResponse).status).toBe(404);
+    expect(getById).not.toHaveBeenCalled();
+    expect(TestBed.inject(WorkflowService).startRun).not.toHaveBeenCalled();
+    expect(navSpy).not.toHaveBeenCalled();
+  });
+
+  it('shows not-found in place instead of bouncing to the list when no workflow is named', () => {
+    const page = open({ id: 'abc' });
+
+    expect((page.loadError() as HttpErrorResponse).status).toBe(404);
+    expect(navSpy).not.toHaveBeenCalled();
+  });
+
+  it('shows a missing record in place instead of bouncing to the list', () => {
+    const page = open({ id: '42' }, { workflow: 'part-make-component-v1' });
+
+    expect(getById).toHaveBeenCalledWith(42);
+    expect((page.loadError() as HttpErrorResponse).status).toBe(404);
+    expect(navSpy).not.toHaveBeenCalled();
+  });
+
+  it('still sends a valid id without a workflow to the list detail', () => {
+    const page = open({ id: '42' });
+
+    expect(page.loadError()).toBeNull();
+    expect(navSpy).toHaveBeenCalledWith(['/parts'], { queryParams: { detail: 'part:42' }, replaceUrl: true });
   });
 });

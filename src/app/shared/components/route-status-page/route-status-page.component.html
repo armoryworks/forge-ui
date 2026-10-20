@@ -1,0 +1,8 @@
+<div class="route-status-page" role="alert" data-testid="route-status-page" [attr.data-status]="kind">
+  <app-empty-state
+    [icon]="view.icon"
+    [message]="view.message | translate"
+    [helpText]="view.help | translate: { url: attemptedUrl }"
+    [actionLabel]="'routeStatus.goHome' | translate"
+    (action)="goHome()" />
+</div>

@@ -79,3 +79,46 @@ describe('AiComponent chat', () => {
     expect(el.querySelector('.ai-chat__welcome')).not.toBeNull();
   });
 });
+
+describe('AiComponent unknown assistant', () => {
+  function render(assistantId: string): { el: HTMLElement; navigate: ReturnType<typeof vi.fn>; fixture: ComponentFixture<AiComponent> } {
+    const navigate = vi.fn();
+    TestBed.configureTestingModule({
+      imports: [AiComponent],
+      providers: [
+        {
+          provide: AiService,
+          useValue: {
+            getAssistants: () => of([{
+              id: 7, name: 'General Assistant', description: 'Ask anything', icon: 'smart_toy',
+              color: '#0d9488', category: 'General', starterQuestions: [], isActive: true,
+            }]),
+            assistantChat: vi.fn(),
+          },
+        },
+        { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ assistantId })) } },
+        { provide: Router, useValue: { navigate } },
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+      ],
+    });
+    const fixture = TestBed.createComponent(AiComponent);
+    fixture.detectChanges();
+    return { el: fixture.nativeElement as HTMLElement, navigate, fixture };
+  }
+
+  it.each(['999', '7abc'])('says the assistant %s was not found', (id) => {
+    const { el } = render(id);
+    expect(el.querySelector('[data-testid="ai-assistant-not-found"]')).not.toBeNull();
+  });
+
+  it('offers the general assistant instead', () => {
+    const { el, navigate } = render('999');
+    (el.querySelector('[data-testid="ai-assistant-not-found"] button') as HTMLButtonElement).click();
+    expect(navigate).toHaveBeenCalledWith(['..', 'general'], expect.objectContaining({ replaceUrl: true }));
+  });
+
+  it('shows a known assistant without the not-found state', () => {
+    const { el } = render('7');
+    expect(el.querySelector('[data-testid="ai-assistant-not-found"]')).toBeNull();
+  });
+});

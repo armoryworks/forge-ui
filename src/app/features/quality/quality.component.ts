@@ -50,10 +50,7 @@ import {
   QcTemplateEditorDialogComponent,
   QcTemplateEditorDialogData,
 } from './components/qc-template-editor-dialog/qc-template-editor-dialog.component';
-
-type QualityTab = 'inspections' | 'templates' | 'spc-charts' | 'spc-data' | 'spc-ooc' | 'ncrs' | 'capas' | 'ecos' | 'gages';
-
-const VALID_TABS: QualityTab[] = ['inspections', 'templates', 'spc-charts', 'spc-data', 'spc-ooc', 'ncrs', 'capas', 'ecos', 'gages'];
+import { QUALITY_TABS, QualityTab } from './models/quality-tab.model';
 
 const NEW_TEMPLATE_OPTION = -1;
 
@@ -107,7 +104,7 @@ export class QualityComponent {
 
   protected readonly activeTab = computed<QualityTab>(() => {
     const tab = this.routeTab() as QualityTab;
-    return VALID_TABS.includes(tab) ? tab : 'inspections';
+    return QUALITY_TABS.includes(tab) ? tab : 'inspections';
   });
 
   protected readonly loading = signal(false);

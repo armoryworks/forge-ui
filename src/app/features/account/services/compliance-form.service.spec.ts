@@ -30,6 +30,14 @@ describe('ComplianceFormService', () => {
       req.flush(mockTemplates);
       expect(service.templates()).toEqual(mockTemplates as any);
     });
+
+    it('reports the templates as loaded only once they arrive', () => {
+      expect(service.templatesLoaded()).toBe(false);
+      service.loadTemplates();
+      expect(service.templatesLoaded()).toBe(false);
+      httpMock.expectOne(base).flush([]);
+      expect(service.templatesLoaded()).toBe(true);
+    });
   });
 
   describe('loadMySubmissions', () => {

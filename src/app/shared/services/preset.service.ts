@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 
-import { Observable, tap } from 'rxjs';
+import { Observable, finalize, tap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import {
@@ -57,10 +57,11 @@ export class PresetService {
     return this.http
       .get<PresetDetail>(`${environment.apiUrl}/presets/${encodeURIComponent(id)}`)
       .pipe(
-        tap((res) => {
-          this._selected.set(res);
-          this._detailLoading.set(false);
+        tap({
+          next: (res) => this._selected.set(res),
+          error: () => this._selected.set(null),
         }),
+        finalize(() => this._detailLoading.set(false)),
       );
   }
 

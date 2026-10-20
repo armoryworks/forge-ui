@@ -4,6 +4,13 @@
     <div class="ed-loading">
       <span class="material-icons-outlined">hourglass_empty</span>
     </div>
+  } @else if (loadError(); as err) {
+    <app-detail-load-error
+      [error]="err"
+      closeLabel="detailLoadError.backToList"
+      [retryable]="true"
+      (closed)="backToList()"
+      (retry)="reloadEmployee()" />
   } @else if (employee(); as e) {
 
     <!-- ── Header ── -->

@@ -7,13 +7,12 @@ export const LANDING_ROUTE_PREF_KEY = 'landing:route';
  * screen most relevant to that role instead of the generic dashboard. Broad roles
  * (Admin, Manager, IT Admin) are intentionally absent — they land on the dashboard.
  *
- * Targets are best-effort: if a mapped screen is gated off by capability for that
- * install, the route guard falls the user back to the dashboard.
+ * Every target must admit its role under `ROUTE_ACCESS`. If a mapped screen
+ * is gated off by capability for that install, the landing resolver falls the
+ * user back to the dashboard.
  */
 export const ROLE_LANDING: Readonly<Record<string, string>> = {
   ProductionWorker: '/kanban',
-  'Production Manager': '/kanban',
-  'Production Planner': '/planning',
   Engineer: '/parts',
   Procurement: '/purchasing',
   Controller: '/accounting',

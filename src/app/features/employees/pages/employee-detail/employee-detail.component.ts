@@ -9,6 +9,9 @@ import { EmployeeService } from '../../services/employee.service';
 import { EmployeeDetail, EmployeeStats } from '../../models/employee.model';
 import { EmployeeKind } from '../../models/employee-kind.model';
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { notFoundError } from '../../../../shared/utils/not-found-error';
+import { parsePositiveId } from '../../../../shared/utils/parse-positive-id';
 import { EmployeeOverviewTabComponent } from './tabs/employee-overview-tab.component';
 import { EmployeeTimeTabComponent } from './tabs/employee-time-tab.component';
 import { EmployeePayTabComponent } from './tabs/employee-pay-tab.component';
@@ -19,9 +22,7 @@ import { EmployeeExpensesTabComponent } from './tabs/employee-expenses-tab.compo
 import { EmployeeDocumentsTabComponent } from './tabs/employee-documents-tab.component';
 import { EmployeeActivityTabComponent } from './tabs/employee-activity-tab.component';
 import { EmployeeEventsTabComponent } from './tabs/employee-events-tab.component';
-
-const TABS = ['overview', 'time', 'pay', 'training', 'compliance', 'jobs', 'events', 'expenses', 'documents', 'activity'] as const;
-type EmployeeTab = typeof TABS[number];
+import { EMPLOYEE_TABS, EmployeeTab } from '../../models/employee-tab.model';
 
 function toKind(value: string | null): EmployeeKind | null {
   return value === 'user' || value === 'profile' ? value : null;
@@ -31,7 +32,7 @@ function toKind(value: string | null): EmployeeKind | null {
   selector: 'app-employee-detail',
   standalone: true,
   imports: [
-    RouterLink, TranslatePipe, AvatarComponent,
+    RouterLink, TranslatePipe, AvatarComponent, DetailLoadErrorComponent,
     EmployeeOverviewTabComponent, EmployeeTimeTabComponent, EmployeePayTabComponent,
     EmployeeTrainingTabComponent, EmployeeComplianceTabComponent, EmployeeJobsTabComponent,
     EmployeeExpensesTabComponent, EmployeeDocumentsTabComponent, EmployeeActivityTabComponent,
@@ -48,8 +49,8 @@ export class EmployeeDetailComponent {
   private readonly translate = inject(TranslateService);
 
   protected readonly employeeId = toSignal(
-    this.route.paramMap.pipe(map(p => +p.get('id')!)),
-    { initialValue: 0 },
+    this.route.paramMap.pipe(map(p => parsePositiveId(p.get('id')))),
+    { initialValue: null },
   );
 
   protected readonly employeeKind = toSignal(
@@ -65,6 +66,7 @@ export class EmployeeDetailComponent {
   protected readonly employee = signal<EmployeeDetail | null>(null);
   protected readonly stats = signal<EmployeeStats | null>(null);
   protected readonly loading = signal(true);
+  protected readonly loadError = signal<unknown>(null);
 
   protected readonly displayName = computed(() => {
     const e = this.employee();
@@ -74,20 +76,25 @@ export class EmployeeDetailComponent {
 
   protected readonly hasLogin = computed(() => this.employee()?.hasLogin !== false);
 
-  protected readonly tabs = computed<readonly EmployeeTab[]>(() => this.hasLogin() ? TABS : ['overview']);
+  protected readonly tabs = computed<readonly EmployeeTab[]>(() => this.hasLogin() ? EMPLOYEE_TABS : ['overview']);
 
   constructor() {
     effect(() => {
       const id = this.employeeId();
       const kind = this.employeeKind();
-      if (id > 0) {
+      if (id) {
         this.loadEmployee(id, kind);
+      } else {
+        this.employee.set(null);
+        this.loadError.set(notFoundError());
+        this.loading.set(false);
       }
     });
   }
 
   private loadEmployee(id: number, kind: EmployeeKind | null): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.stats.set(null);
     this.employeeService.getEmployee(id, kind).subscribe({
       next: e => {
@@ -99,11 +106,21 @@ export class EmployeeDetailComponent {
           this.switchTab('overview');
         }
       },
-      error: () => {
+      error: (err: unknown) => {
+        this.employee.set(null);
+        this.loadError.set(err);
         this.loading.set(false);
-        this.router.navigate(['/employees']);
       },
     });
+  }
+
+  protected reloadEmployee(): void {
+    const id = this.employeeId();
+    if (id) this.loadEmployee(id, this.employeeKind());
+  }
+
+  protected backToList(): void {
+    this.router.navigate(['/employees']);
   }
 
   private loadStats(id: number): void {

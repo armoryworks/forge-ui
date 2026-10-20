@@ -8,6 +8,9 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { notFoundError } from '../../../../shared/utils/not-found-error';
+import { parsePositiveId } from '../../../../shared/utils/parse-positive-id';
 import { SequencesService } from '../../services/sequences.service';
 import {
   SequenceDefinitionRequest, SequenceEdgeDefinition, SequenceExpiryAction,
@@ -18,7 +21,7 @@ import {
 @Component({
   selector: 'app-sequence-definition-editor',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, InputComponent, SelectComponent, TextareaComponent],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, InputComponent, SelectComponent, TextareaComponent, DetailLoadErrorComponent],
   templateUrl: './sequence-definition-editor.component.html',
   styleUrl: './sequence-definition-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,6 +35,8 @@ export class SequenceDefinitionEditorComponent {
 
   protected readonly editingId = signal<number | null>(null);
   protected readonly saving = signal(false);
+  protected readonly loading = signal(false);
+  protected readonly loadError = signal<unknown>(null);
 
   protected readonly joinPolicyOptions: SelectOption[] = [
     { value: 'All', label: 'All' }, { value: 'Any', label: 'Any' },
@@ -85,13 +90,38 @@ export class SequenceDefinitionEditorComponent {
   constructor() {
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
-      const id = Number(idParam);
-      this.editingId.set(id);
-      this.service.getDefinition(id).subscribe({ next: (def) => this.hydrate(def) });
+      const id = parsePositiveId(idParam);
+      if (id) {
+        this.editingId.set(id);
+        this.load();
+      } else {
+        this.loadError.set(notFoundError());
+      }
     } else {
       this.addStep();
     }
     this.steps.valueChanges.subscribe(() => this.refreshStepKeys());
+  }
+
+  protected load(): void {
+    const id = this.editingId();
+    if (!id) return;
+    this.loading.set(true);
+    this.loadError.set(null);
+    this.service.getDefinition(id).subscribe({
+      next: (def) => {
+        this.hydrate(def);
+        this.loading.set(false);
+      },
+      error: (err: unknown) => {
+        this.loadError.set(err);
+        this.loading.set(false);
+      },
+    });
+  }
+
+  protected backToList(): void {
+    this.router.navigate(['/sequences']);
   }
 
   private refreshStepKeys(): void {

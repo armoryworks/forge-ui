@@ -273,12 +273,13 @@
         </div>
       }
 
-    } @else if (!isLoading()) {
-      <div class="module-viewer__not-found">
-        <span class="material-icons-outlined" aria-hidden="true">school</span>
-        <p>Module not found.</p>
-        <button class="action-btn" (click)="goBack()">Back to Library</button>
-      </div>
+    } @else if (loadError(); as err) {
+      <app-detail-load-error
+        [error]="err"
+        closeLabel="detailLoadError.backToList"
+        [retryable]="true"
+        (closed)="goBack()"
+        (retry)="load()" />
     }
   </div>
 

@@ -8,7 +8,12 @@
 
   <ng-container content>
     <div class="preset-detail" [appLoadingBlock]="loading()">
-      @if (preset(); as p) {
+      @if (loadError(); as err) {
+        <app-detail-load-error
+          [error]="err"
+          closeLabel="detailLoadError.backToList"
+          (closed)="back()" />
+      } @else if (preset(); as p) {
         <header class="preset-detail__hero">
           <div class="preset-detail__hero-left">
             <div class="preset-detail__hero-name">

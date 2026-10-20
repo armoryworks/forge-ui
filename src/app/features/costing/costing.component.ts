@@ -38,8 +38,7 @@ import {
   WorkCenterCostRate,
   CostingTemplate,
 } from './models/costing.model';
-
-type CostingTab = 'periods' | 'cost-centers' | 'pools' | 'templates';
+import { CostingTab } from './models/costing-tab.model';
 
 @Component({
   selector: 'app-costing',

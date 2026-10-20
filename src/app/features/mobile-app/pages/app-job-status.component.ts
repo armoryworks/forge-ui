@@ -18,6 +18,7 @@ import { PlatformService } from '../../../shared/services/platform.service';
 import { SharedIdentityService } from '../../../shared/services/shared-identity.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { UndoService } from '../../../shared/services/undo.service';
+import { parsePositiveId } from '../../../shared/utils/parse-positive-id';
 import { IdentityPromptComponent } from '../identity/identity-prompt.component';
 import { JobOperationsComponent } from '../components/job-operations/job-operations.component';
 
@@ -58,7 +59,7 @@ export class AppJobStatusComponent {
   private readonly router = inject(Router);
 
   protected readonly jobId = toSignal(
-    this.route.paramMap.pipe(map((p) => Number(p.get('id')))), { initialValue: 0 });
+    this.route.paramMap.pipe(map((p) => parsePositiveId(p.get('id')))), { initialValue: null });
 
   protected readonly job = signal<JobStatus | null>(null);
   protected readonly loading = signal(true);
@@ -91,7 +92,11 @@ export class AppJobStatusComponent {
 
   protected load(): void {
     const id = this.jobId();
-    if (!id) return;
+    if (!id) {
+      this.failed.set(true);
+      this.loading.set(false);
+      return;
+    }
     this.loading.set(true);
     this.failed.set(false);
     this.api.jobStatus(id).subscribe({

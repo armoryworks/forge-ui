@@ -3,12 +3,12 @@ import { LoginComponent } from './features/auth/login.component';
 import { authGuard } from './shared/guards/auth.guard';
 import { instanceGuard } from './shared/guards/instance.guard';
 import { shellAuthGuard } from './shared/guards/shell-auth.guard';
-import { capabilityGuard } from './shared/guards/capability.guard';
 import { demoOnlyGuard } from './shared/guards/demo-only.guard';
 import { mobileRedirectGuard } from './shared/guards/mobile-redirect.guard';
-import { roleGuard } from './shared/guards/role.guard';
+import { routeAccessGuards } from './shared/guards/route-access.guard';
 import { rootRedirectGuard } from './shared/guards/root-redirect.guard';
 import { setupRequiredGuard, setupCompleteGuard } from './shared/guards/setup.guard';
+import { devOnlyRoutes } from './shared/utils/dev-only-routes';
 import { portalTerminologyGuard } from './features/portal/services/portal-terminology.guard';
 
 export const routes: Routes = [
@@ -102,6 +102,7 @@ export const routes: Routes = [
       {
         path: 'kanban',
         data: { titleKey: 'nav.kanban' },
+        canActivate: routeAccessGuards('kanban'),
         loadChildren: () =>
           import('./features/kanban/kanban.routes').then((m) => m.KANBAN_ROUTES),
       },
@@ -120,14 +121,14 @@ export const routes: Routes = [
       {
         path: 'parts',
         data: { titleKey: 'nav.parts' },
-        canActivate: [roleGuard('Admin', 'Manager', 'Engineer', 'PM')],
+        canActivate: routeAccessGuards('parts'),
         loadChildren: () =>
           import('./features/parts/parts.routes').then((m) => m.PARTS_ROUTES),
       },
       {
         path: 'costing',
         data: { titleKey: 'nav.costing' },
-        canActivate: [roleGuard('Admin', 'Manager')],
+        canActivate: routeAccessGuards('costing'),
         loadChildren: () =>
           import('./features/costing/costing.routes').then((m) => m.COSTING_ROUTES),
       },
@@ -136,42 +137,42 @@ export const routes: Routes = [
         // whole area is unreachable by URL until the capability is enabled.
         path: 'sequences',
         data: { titleKey: 'nav.sequences' },
-        canActivate: [roleGuard('Admin', 'Manager'), capabilityGuard('CAP-CROSS-SEQUENCES')],
+        canActivate: routeAccessGuards('sequences'),
         loadChildren: () =>
           import('./features/sequences/sequences.routes').then((m) => m.SEQUENCES_ROUTES),
       },
       {
         path: 'compliance',
         data: { titleKey: 'nav.compliance' },
-        canActivate: [roleGuard('Admin', 'Manager', 'ComplianceOfficer', 'OfficeManager'), capabilityGuard('CAP-EXT-WATCHTOWER')],
+        canActivate: routeAccessGuards('compliance'),
         loadChildren: () =>
           import('./features/compliance/compliance.routes').then((m) => m.COMPLIANCE_ROUTES),
       },
       {
         path: 'watchtower',
         data: { titleKey: 'nav.watchtower' },
-        canActivate: [roleGuard('Admin', 'Manager'), capabilityGuard('CAP-EXT-WATCHTOWER')],
+        canActivate: routeAccessGuards('watchtower'),
         loadChildren: () =>
           import('./features/watchtower/watchtower.routes').then((m) => m.WATCHTOWER_ROUTES),
       },
       {
         path: 'shipping',
         data: { titleKey: 'nav.shipping' },
-        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager'), capabilityGuard('CAP-O2C-SHIP')],
+        canActivate: routeAccessGuards('shipping'),
         loadChildren: () =>
           import('./features/shipping/shipping.routes').then((m) => m.SHIPPING_ROUTES),
       },
       {
         path: 'inventory',
         data: { titleKey: 'nav.inventory' },
-        canActivate: [roleGuard('Admin', 'Manager', 'Engineer', 'OfficeManager')],
+        canActivate: routeAccessGuards('inventory'),
         loadChildren: () =>
           import('./features/inventory/inventory.routes').then((m) => m.INVENTORY_ROUTES),
       },
       {
         path: 'customers',
         data: { titleKey: 'nav.customers' },
-        canActivate: [roleGuard('Admin', 'Manager', 'PM', 'OfficeManager')],
+        canActivate: routeAccessGuards('customers'),
         loadChildren: () =>
           import('./features/customers/customers.routes').then((m) => m.CUSTOMERS_ROUTES),
       },
@@ -180,7 +181,7 @@ export const routes: Routes = [
         // proposes. The only path from an email to an order runs through here.
         path: 'communications',
         data: { titleKey: 'review.title' },
-        canActivate: [roleGuard('Admin', 'Manager', 'PM', 'OfficeManager')],
+        canActivate: routeAccessGuards('communications'),
         loadChildren: () =>
           import('./features/communications/communications.routes').then(
             (m) => m.COMMUNICATIONS_ROUTES,
@@ -192,10 +193,7 @@ export const routes: Routes = [
         // its own; the retail-specific sub-routes carry their own guards.
         path: 'sales-channels',
         data: { titleKey: 'nav.salesChannels' },
-        canActivate: [
-          roleGuard('Admin', 'Manager', 'PM', 'OfficeManager'),
-          capabilityGuard('CAP-O2C-CHANNELS'),
-        ],
+        canActivate: routeAccessGuards('sales-channels'),
         loadChildren: () =>
           import('./features/sales-channels/sales-channels.routes').then(
             (m) => m.SALES_CHANNELS_ROUTES,
@@ -204,21 +202,21 @@ export const routes: Routes = [
       {
         path: 'leads',
         data: { titleKey: 'nav.leads' },
-        canActivate: [roleGuard('Admin', 'Manager', 'PM')],
+        canActivate: routeAccessGuards('leads'),
         loadChildren: () =>
           import('./features/leads/leads.routes').then((m) => m.LEADS_ROUTES),
       },
       {
         path: 'expenses',
         data: { titleKey: 'nav.expenses' },
-        canActivate: [roleGuard('Admin', 'Manager', 'Engineer', 'OfficeManager')],
+        canActivate: routeAccessGuards('expenses'),
         loadChildren: () =>
           import('./features/expenses/expenses.routes').then((m) => m.EXPENSES_ROUTES),
       },
       {
         path: 'accounting/opening-journal',
         data: { titleKey: 'nav.openingJournal' },
-        canActivate: [roleGuard('Controller'), capabilityGuard('CAP-ACCT-MIGRATION')],
+        canActivate: routeAccessGuards('accounting/opening-journal'),
         loadComponent: () =>
           import('./features/accounting/components/opening-journal/opening-journal.component').then((m) => m.OpeningJournalComponent),
       },
@@ -229,21 +227,21 @@ export const routes: Routes = [
         // until the capability is switched on (mirrors the server-side gate).
         path: 'accounting',
         data: { titleKey: 'navGroups.accounting' },
-        canActivate: [roleGuard('Controller'), capabilityGuard('CAP-ACCT-GL-VIEW')],
+        canActivate: routeAccessGuards('accounting'),
         loadChildren: () =>
           import('./features/accounting/accounting.routes').then((m) => m.ACCOUNTING_ROUTES),
       },
       {
         path: 'assets',
         data: { titleKey: 'nav.assets' },
-        canActivate: [roleGuard('Admin', 'Manager', 'Engineer')],
+        canActivate: routeAccessGuards('assets'),
         loadChildren: () =>
           import('./features/assets/assets.routes').then((m) => m.ASSETS_ROUTES),
       },
       {
         path: 'maintenance',
         data: { titleKey: 'nav.maintenance' },
-        canActivate: [roleGuard('Admin', 'Manager')],
+        canActivate: routeAccessGuards('maintenance'),
         loadChildren: () =>
           import('./features/maintenance/maintenance.routes').then((m) => m.MAINTENANCE_ROUTES),
       },
@@ -256,14 +254,14 @@ export const routes: Routes = [
       {
         path: 'piece-rates',
         data: { titleKey: 'nav.pieceRates' },
-        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager'), capabilityGuard('CAP-HR-PIECE-RATES')],
+        canActivate: routeAccessGuards('piece-rates'),
         loadComponent: () =>
           import('./features/piece-rates/piece-rates.component').then((m) => m.PieceRatesComponent),
       },
       {
         path: 'employees',
         data: { titleKey: 'nav.employees' },
-        canActivate: [roleGuard('Admin', 'Manager')],
+        canActivate: routeAccessGuards('employees'),
         loadChildren: () =>
           import('./features/employees/employees.routes').then((m) => m.EMPLOYEES_ROUTES),
       },
@@ -276,63 +274,63 @@ export const routes: Routes = [
       {
         path: 'planning',
         data: { titleKey: 'nav.planning' },
-        canActivate: [roleGuard('Admin', 'Manager', 'PM')],
+        canActivate: routeAccessGuards('planning'),
         loadChildren: () =>
           import('./features/planning/planning.routes').then((m) => m.PLANNING_ROUTES),
       },
       {
         path: 'vendors',
         data: { titleKey: 'nav.vendors' },
-        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager', 'Procurement')],
+        canActivate: routeAccessGuards('vendors'),
         loadChildren: () =>
           import('./features/vendors/vendors.routes').then((m) => m.VENDORS_ROUTES),
       },
       {
         path: 'purchasing',
         data: { titleKey: 'nav.purchasing' },
-        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager', 'Procurement')],
+        canActivate: routeAccessGuards('purchasing'),
         loadChildren: () =>
           import('./features/purchasing/purchasing.routes').then((m) => m.PURCHASING_ROUTES),
       },
       {
         path: 'purchase-orders',
         data: { titleKey: 'nav.purchaseOrders' },
-        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager', 'Procurement')],
+        canActivate: routeAccessGuards('purchase-orders'),
         loadChildren: () =>
           import('./features/purchase-orders/purchase-orders.routes').then((m) => m.PURCHASE_ORDERS_ROUTES),
       },
       {
         path: 'sales-orders',
         data: { titleKey: 'nav.salesOrders' },
-        canActivate: [roleGuard('Admin', 'Manager', 'PM', 'OfficeManager')],
+        canActivate: routeAccessGuards('sales-orders'),
         loadChildren: () =>
           import('./features/sales-orders/sales-orders.routes').then((m) => m.SALES_ORDERS_ROUTES),
       },
       {
         path: 'quotes',
         data: { titleKey: 'nav.quotes' },
-        canActivate: [roleGuard('Admin', 'Manager', 'PM', 'OfficeManager')],
+        canActivate: routeAccessGuards('quotes'),
         loadChildren: () =>
           import('./features/quotes/quotes.routes').then((m) => m.QUOTES_ROUTES),
       },
       {
         path: 'shipments',
         data: { titleKey: 'nav.shipments' },
-        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
+        canActivate: routeAccessGuards('shipments'),
         loadChildren: () =>
           import('./features/shipments/shipments.routes').then((m) => m.SHIPMENTS_ROUTES),
       },
       {
         path: 'invoices',
         data: { titleKey: 'nav.invoices' },
-        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
+        canActivate: routeAccessGuards('invoices'),
         loadChildren: () =>
           import('./features/invoices/invoices.routes').then((m) => m.INVOICES_ROUTES),
       },
       {
         path: 'payments',
         data: { titleKey: 'nav.payments' },
-        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
+        canActivate: routeAccessGuards('payments'),
         loadChildren: () =>
           import('./features/payments/payments.routes').then((m) => m.PAYMENTS_ROUTES),
       },
@@ -343,7 +341,7 @@ export const routes: Routes = [
         // depends on CAP-P2P-BILL).
         path: 'payables',
         data: { titleKey: 'nav.payables' },
-        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager', 'Procurement', 'Controller'), capabilityGuard('CAP-P2P-BILL')],
+        canActivate: routeAccessGuards('payables'),
         loadChildren: () =>
           import('./features/payables/payables.routes').then((m) => m.PAYABLES_ROUTES),
       },
@@ -362,28 +360,28 @@ export const routes: Routes = [
       {
         path: 'approvals',
         data: { titleKey: 'nav.approvals' },
-        canActivate: [roleGuard('Admin', 'Manager', 'PM', 'OfficeManager')],
+        canActivate: routeAccessGuards('approvals'),
         loadChildren: () =>
           import('./features/approvals/approvals.routes').then((m) => m.APPROVALS_ROUTES),
       },
       {
         path: 'quality',
         data: { titleKey: 'nav.quality' },
-        canActivate: [roleGuard('Admin', 'Manager', 'Engineer')],
+        canActivate: routeAccessGuards('quality'),
         loadChildren: () =>
           import('./features/quality/quality.routes').then((m) => m.QUALITY_ROUTES),
       },
       {
         path: 'customer-returns',
         data: { titleKey: 'nav.customerReturns' },
-        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
+        canActivate: routeAccessGuards('customer-returns'),
         loadChildren: () =>
           import('./features/customer-returns/customer-returns.routes').then((m) => m.CUSTOMER_RETURNS_ROUTES),
       },
       {
         path: 'lots',
         data: { titleKey: 'nav.lots' },
-        canActivate: [roleGuard('Admin', 'Manager', 'Engineer')],
+        canActivate: routeAccessGuards('lots'),
         loadChildren: () =>
           import('./features/lots/lots.routes').then((m) => m.LOTS_ROUTES),
       },
@@ -414,21 +412,21 @@ export const routes: Routes = [
       {
         path: 'mrp',
         data: { titleKey: 'nav.mrp' },
-        canActivate: [roleGuard('Admin', 'Manager')],
+        canActivate: routeAccessGuards('mrp'),
         loadChildren: () =>
           import('./features/mrp/mrp.routes').then((m) => m.MRP_ROUTES),
       },
       {
         path: 'oee',
         data: { titleKey: 'nav.oee' },
-        canActivate: [roleGuard('Admin', 'Manager')],
+        canActivate: routeAccessGuards('oee'),
         loadChildren: () =>
           import('./features/oee/oee.routes').then((m) => m.OEE_ROUTES),
       },
       {
         path: 'scheduling',
         data: { titleKey: 'nav.scheduling' },
-        canActivate: [roleGuard('Admin', 'Manager')],
+        canActivate: routeAccessGuards('scheduling'),
         loadChildren: () =>
           import('./features/scheduling/scheduling.routes').then((m) => m.SCHEDULING_ROUTES),
       },
@@ -441,20 +439,36 @@ export const routes: Routes = [
       {
         path: 'admin',
         data: { titleKey: 'nav.admin' },
-        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
+        canActivate: routeAccessGuards('admin'),
         loadChildren: () =>
           import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
       },
       {
-        // Workflow Pattern Phase 4 — demo route, no role gating (any
-        // authenticated user can poke at the shell). Phase 5+ wires
-        // per-entity workflow surfaces into their own routes.
-        path: 'workflow-shell-demo',
-        data: { titleKey: 'routeTitles.workflowDemo' },
+        path: 'forbidden',
+        data: { status: 'forbidden' },
         loadComponent: () =>
-          import('./features/workflow-demo/workflow-shell-demo.component')
-            .then(m => m.WorkflowShellDemoComponent),
+          import('./shared/components/route-status-page/route-status-page.component')
+            .then(m => m.RouteStatusPageComponent),
       },
+      {
+        path: 'feature-off',
+        data: { status: 'featureOff' },
+        loadComponent: () =>
+          import('./shared/components/route-status-page/route-status-page.component')
+            .then(m => m.RouteStatusPageComponent),
+      },
+      ...devOnlyRoutes([
+        {
+          // Workflow Pattern Phase 4 — demo route, no role gating (any
+          // authenticated user can poke at the shell). Phase 5+ wires
+          // per-entity workflow surfaces into their own routes.
+          path: 'workflow-shell-demo',
+          data: { titleKey: 'routeTitles.workflowDemo' },
+          loadComponent: () =>
+            import('./features/workflow-demo/workflow-shell-demo.component')
+              .then(m => m.WorkflowShellDemoComponent),
+        },
+      ]),
     ],
   },
   {
@@ -481,20 +495,26 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./features/shop-floor/shop-floor.routes').then((m) => m.SHOP_FLOOR_ROUTES),
   },
-  {
-    path: 'dev-tools',
-    data: { titleKey: 'routeTitles.devTools' },
-    loadChildren: () =>
-      import('./features/dev-tools/dev-tools.routes').then((m) => m.DEV_TOOLS_ROUTES),
-  },
+  ...devOnlyRoutes([
+    {
+      path: 'dev-tools',
+      data: { titleKey: 'routeTitles.devTools' },
+      loadChildren: () =>
+        import('./features/dev-tools/dev-tools.routes').then((m) => m.DEV_TOOLS_ROUTES),
+    },
+  ]),
   {
     path: '__render-form',
     data: { titleKey: 'routeTitles.renderForm' },
     loadChildren: () =>
       import('./features/render/render.routes').then((m) => m.RENDER_ROUTES),
   },
-  // Catch-all — an unknown URL previously rendered a blank shell (no route
-  // matched). Send it back through the role-aware root redirect instead of
-  // leaving the user staring at an empty page.
-  { path: '**', redirectTo: '' },
+  {
+    path: '**',
+    canActivate: [authGuard],
+    data: { status: 'notFound' },
+    loadComponent: () =>
+      import('./shared/components/route-status-page/route-status-page.component')
+        .then(m => m.RouteStatusPageComponent),
+  },
 ];

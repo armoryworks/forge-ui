@@ -8,6 +8,7 @@ import { LayoutService } from '../services/layout.service';
  * Branches the root path based on build target. Demo builds land on the
  * marketing/welcome page; production builds resolve the role-aware default route
  * (mobile → `/m`, explicit user preference, single-role landing, else dashboard).
+ * A preference or landing the user's route access would refuse resolves to the dashboard.
  */
 export const rootRedirectGuard: CanActivateFn = () => {
   const router = inject(Router);

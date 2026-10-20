@@ -509,7 +509,9 @@
     "customer": "Customer",
     "allCustomers": "All customers",
     "overdue": "Overdue",
-    "onHold": "On hold"
+    "onHold": "On hold",
+    "unknownCustomer": "Customer #{{id}} wasn't found, so the board shows every customer.",
+    "unknownTeam": "Team #{{id}} wasn't found, so the board shows every team."
   },
   "kanban": {
     "title": "Board",
@@ -7131,7 +7133,10 @@
     "sendMessage": "Send message",
     "askPlaceholder": "Ask {{name}} a question...",
     "messagePlaceholder": "Message {{name}}",
-    "errorMessage": "Sorry, I encountered an error. Please try again."
+    "errorMessage": "Sorry, I encountered an error. Please try again.",
+    "assistantNotFound": "Assistant not found",
+    "assistantNotFoundHelp": "It may have been removed, or the link points to the wrong assistant.",
+    "openGeneralAssistant": "Open the general assistant"
   },
   "kioskInspect": {
     "referencePrompt": "Scan the work order or lot this part belongs to, so the inspection is recorded against it.",
@@ -12072,7 +12077,9 @@
     "forbidden": "You don't have access to this record",
     "forbiddenHelp": "Ask an administrator if you need to see it.",
     "failed": "This record couldn't be loaded",
-    "failedHelp": "Check your connection and try again."
+    "failedHelp": "Check your connection and try again.",
+    "retry": "Try again",
+    "backToList": "Back to the list"
   },
   "jobCostTab": {
     "noCostData": "No cost data available for this job.",
@@ -12252,6 +12259,16 @@
       "sftpReturnsDir": "SFTP returns directory",
       "sftpReturnsDirHint": "Where the bank leaves return files for Forge to read."
     }
+  },
+  "routeStatus": {
+    "notFound": "Page not found",
+    "notFoundHelp": "Nothing lives at {{url}}. Check the link, or start again from your home screen.",
+    "forbidden": "You don't have access to this page",
+    "forbiddenHelp": "Your role can't open {{url}}. Ask an administrator if you need it.",
+    "featureOff": "This feature is turned off",
+    "featureOffHelp": "{{url}} belongs to a feature that is not enabled on this install. An administrator can turn it on under Admin > Capabilities.",
+    "goHome": "Go to my home screen",
+    "unknownTab": "There is no “{{tab}}” tab here, so the default tab is shown."
   },
   "routeTitles": {
     "login": "Sign in",

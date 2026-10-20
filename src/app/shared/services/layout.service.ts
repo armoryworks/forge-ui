@@ -5,10 +5,12 @@ import { filter } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
+import { CapabilityService } from './capability.service';
 import { DesktopPreferenceService } from './desktop-preference.service';
 import { NavTreeService } from './nav-tree.service';
 import { UserPreferencesService } from './user-preferences.service';
 import { LANDING_ROUTE_PREF_KEY, resolveRoleLanding } from '../models/role-landing.model';
+import { routeAccessFor } from '../models/route-access.model';
 
 const MOBILE_BREAKPOINT = 768;
 
@@ -23,6 +25,7 @@ export class LayoutService {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
+  private readonly capabilities = inject(CapabilityService);
   private readonly userPreferences = inject(UserPreferencesService);
   private readonly desktopPreference = inject(DesktopPreferenceService);
   private readonly injector = inject(Injector);
@@ -163,17 +166,30 @@ export class LayoutService {
   /**
    * The post-login / root landing route. Mobile devices go to `/m` unless the
    * user chose "View Desktop Site". Otherwise an explicit per-user preference
-   * wins when the user's roles can open it; failing that, a user with a single
-   * mapped role lands on that role's most relevant screen; everyone else lands
-   * on the dashboard. A mapped screen gated off by capability falls back via
-   * its guard.
+   * wins; failing that, a user with a single mapped role lands on that role's
+   * most relevant screen; everyone else lands on the dashboard. A preferred or
+   * mapped screen the user's roles or the install's capabilities would refuse
+   * falls back to the dashboard.
    */
   getDefaultRoute(): string {
     if (environment.mobileShell) return '/app';
     if (this.isMobileDevice() && !this.desktopPreference.isPreferred()) return '/m';
     const explicit = this.userPreferences.get<string>(LANDING_ROUTE_PREF_KEY);
-    if (explicit && (explicit === '/dashboard' || this.injector.get(NavTreeService).canReach(explicit, false))) return explicit;
-    return resolveRoleLanding(this.auth.user()?.roles ?? []) ?? '/dashboard';
+    if (explicit && (explicit === '/dashboard' || (this.injector.get(NavTreeService).canReach(explicit, false) && this.canOpen(explicit)))) return explicit;
+    const landing = resolveRoleLanding(this.auth.user()?.roles ?? []);
+    return landing && this.canOpen(landing) ? landing : '/dashboard';
+  }
+
+  /**
+   * Whether the signed-in user passes the role and capability gates of the route
+   * at `url`. A capability not known yet counts as on; the route's own guard
+   * still decides once the live descriptor has loaded.
+   */
+  canOpen(url: string): boolean {
+    const access = routeAccessFor(url);
+    if (!access) return true;
+    if (access.roles?.length && !this.auth.hasAnyRole([...access.roles])) return false;
+    return (access.capabilities ?? []).every((code) => this.capabilities.isEnabled(code, true));
   }
 
   private detectMobileDevice(): boolean {

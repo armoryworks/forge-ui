@@ -3,6 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, CanActivateFn, provideRouter, Route, Router, RouterStateSnapshot } from '@angular/router';
 
 import { routes } from './app.routes';
+import { RouteStatusPageComponent } from './shared/components/route-status-page/route-status-page.component';
+import { authGuard } from './shared/guards/auth.guard';
 import { AuthService } from './shared/services/auth.service';
 
 @Component({ selector: 'app-test-kanban', standalone: true, template: '' })
@@ -101,5 +103,37 @@ describe('purchasing and payables routes', () => {
   it('admits the roles that may run planning cycles to /planning', () => {
     expect(admits('planning', ['PM'])).toBe(true);
     expect(admits('planning', ['Engineer'])).toBe(false);
+  });
+});
+
+describe('route status pages', () => {
+  it('shows a not-found page for an unknown URL to a signed-in user', async () => {
+    const wildcard = routes[routes.length - 1];
+    expect(wildcard.path).toBe('**');
+    expect(wildcard.redirectTo).toBeUndefined();
+    expect(wildcard.canActivate).toEqual([authGuard]);
+    expect(wildcard.data).toEqual({ status: 'notFound' });
+    const component = await (wildcard.loadComponent as () => Promise<unknown>)();
+    expect(component).toBe(RouteStatusPageComponent);
+  });
+
+  it('registers the forbidden and feature-off pages inside the signed-in shell', () => {
+    const shell = routes.find(r => r.path === '' && r.children?.some(c => c.path === 'kanban'));
+    expect(shell?.children?.find(r => r.path === 'forbidden')?.data).toEqual({ status: 'forbidden' });
+    expect(shell?.children?.find(r => r.path === 'feature-off')?.data).toEqual({ status: 'featureOff' });
+  });
+
+  it('keeps the headless form renderer reachable without a session', () => {
+    const render = routes.find(r => r.path === '__render-form');
+    expect(render).toBeDefined();
+    expect(render?.canActivate).toBeUndefined();
+  });
+});
+
+describe('developer pages', () => {
+  it('are registered only through devOnlyRoutes, so a development build still has them', () => {
+    const paths = [...routes.map(r => r.path), ...routes.flatMap(r => r.children ?? []).map(r => r.path)];
+    expect(paths).toContain('dev-tools');
+    expect(paths).toContain('workflow-shell-demo');
   });
 });

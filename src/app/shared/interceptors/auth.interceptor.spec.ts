@@ -1,12 +1,10 @@
 import { HttpClient, HttpErrorResponse, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
 
 import { of } from 'rxjs';
 
 import { AuthService } from '../services/auth.service';
-import { LayoutService } from '../services/layout.service';
 import { MobileAuthService } from '../services/mobile-auth.service';
 import { authInterceptor } from './auth.interceptor';
 
@@ -15,23 +13,21 @@ describe('authInterceptor', () => {
   let httpMock: HttpTestingController;
   const clearAuth = vi.fn();
   const refreshAccessToken = vi.fn();
-  const navigate = vi.fn();
+  const redirectToLogin = vi.fn();
 
   beforeEach(() => {
     clearAuth.mockReset();
     refreshAccessToken.mockReset().mockReturnValue(of('fresh-token'));
-    navigate.mockReset();
+    redirectToLogin.mockReset();
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(withInterceptors([authInterceptor])),
         provideHttpClientTesting(),
         {
           provide: AuthService,
-          useValue: { token: () => 'session-token', isAuthenticated: () => true, clearAuth, refreshAccessToken },
+          useValue: { token: () => 'session-token', isAuthenticated: () => true, clearAuth, refreshAccessToken, redirectToLogin },
         },
         { provide: MobileAuthService, useValue: { refreshAccessToken } },
-        { provide: Router, useValue: { navigate, url: '/jobs' } },
-        { provide: LayoutService, useValue: { isAuthRoute: () => false } },
       ],
     });
     http = TestBed.inject(HttpClient);
@@ -64,7 +60,31 @@ describe('authInterceptor', () => {
     expect(failure!.status).toBe(401);
     expect(refreshAccessToken).not.toHaveBeenCalled();
     expect(clearAuth).not.toHaveBeenCalled();
-    expect(navigate).not.toHaveBeenCalled();
+    expect(redirectToLogin).not.toHaveBeenCalled();
+  });
+
+  it('signs out and hands the session-expired redirect to the auth service when refresh fails', () => {
+    refreshAccessToken.mockReturnValue(of(null));
+    let failure: HttpErrorResponse | null = null;
+    http.get('/api/v1/jobs').subscribe({ error: (err: HttpErrorResponse) => { failure = err; } });
+
+    httpMock.expectOne('/api/v1/jobs').flush(null, { status: 401, statusText: 'Unauthorized' });
+
+    expect(failure!.status).toBe(401);
+    expect(clearAuth).toHaveBeenCalledTimes(1);
+    expect(redirectToLogin).toHaveBeenCalledWith('session_expired');
+  });
+
+  it('keeps the session when the retried request fails for another reason', () => {
+    let failure: HttpErrorResponse | null = null;
+    http.get('/api/v1/jobs').subscribe({ error: (err: HttpErrorResponse) => { failure = err; } });
+
+    httpMock.expectOne('/api/v1/jobs').flush(null, { status: 401, statusText: 'Unauthorized' });
+    httpMock.expectOne('/api/v1/jobs').flush(null, { status: 500, statusText: 'Server Error' });
+
+    expect(failure!.status).toBe(500);
+    expect(clearAuth).not.toHaveBeenCalled();
+    expect(redirectToLogin).not.toHaveBeenCalled();
   });
 
   it('leaves the employee session alone when a portal call gets a 401', () => {

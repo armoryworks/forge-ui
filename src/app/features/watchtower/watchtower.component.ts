@@ -22,8 +22,7 @@ import {
   ApplyProposalDialogData,
   ApplyProposalDialogResult,
 } from './components/apply-proposal-dialog/apply-proposal-dialog.component';
-
-type WatchtowerTab = 'proposals' | 'sources';
+import { WatchtowerTab } from './models/watchtower-tab.model';
 
 /**
  * Regulatory Watchtower workspace — the review surface for the CAP-EXT-WATCHTOWER backend.

@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
+import { AuthService } from './auth.service';
+import { CapabilityService } from './capability.service';
 import { DesktopPreferenceService } from './desktop-preference.service';
 import { LayoutService } from './layout.service';
 import { NavTreeService } from './nav-tree.service';
@@ -208,6 +210,35 @@ describe('LayoutService', () => {
       vi.spyOn(service, 'isMobileDevice').mockReturnValue(true);
       vi.spyOn(TestBed.inject(DesktopPreferenceService), 'isPreferred').mockReturnValue(true);
       expect(service.getDefaultRoute()).toBe('/dashboard');
+    });
+
+    describe('checks the landing against route access', () => {
+      const signIn = (roles: string[]): void => {
+        TestBed.inject(AuthService).setSession('token', { id: 1, roles } as unknown as Parameters<AuthService['setSession']>[1]);
+      };
+
+      it('lands a single-role user on their mapped screen', () => {
+        signIn(['ProductionWorker']);
+        expect(service.getDefaultRoute()).toBe('/kanban');
+      });
+
+      it('falls back to the dashboard when the mapped screen is switched off', () => {
+        signIn(['Controller']);
+        vi.spyOn(TestBed.inject(CapabilityService), 'isEnabled').mockReturnValue(false);
+        expect(service.getDefaultRoute()).toBe('/dashboard');
+      });
+
+      it('falls back to the dashboard for a saved landing the role cannot open', () => {
+        signIn(['ProductionWorker']);
+        vi.spyOn(TestBed.inject(UserPreferencesService), 'get').mockReturnValue('/accounting');
+        expect(service.getDefaultRoute()).toBe('/dashboard');
+      });
+
+      it('keeps a saved landing the role can open', () => {
+        signIn(['OfficeManager']);
+        vi.spyOn(TestBed.inject(UserPreferencesService), 'get').mockReturnValue('/sales-orders');
+        expect(service.getDefaultRoute()).toBe('/sales-orders');
+      });
     });
   });
 

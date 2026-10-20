@@ -49,3 +49,43 @@ describe('DetailLoadErrorComponent', () => {
     expect(closed).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('DetailLoadErrorComponent actions', () => {
+  beforeEach(() => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ imports: [DetailLoadErrorComponent, TranslateModule.forRoot()] });
+  });
+
+  function render(error: unknown, inputs: Record<string, unknown> = {}) {
+    const fixture = TestBed.createComponent(DetailLoadErrorComponent);
+    fixture.componentRef.setInput('error', error);
+    for (const [name, value] of Object.entries(inputs)) fixture.componentRef.setInput(name, value);
+    fixture.detectChanges();
+    const closed = vi.fn();
+    const retry = vi.fn();
+    fixture.componentInstance.closed.subscribe(closed);
+    fixture.componentInstance.retry.subscribe(retry);
+    const button = (fixture.nativeElement as HTMLElement).querySelector('button') as HTMLButtonElement;
+    return { button, closed, retry };
+  }
+
+  it('uses the given close label', () => {
+    const { button } = render(new HttpErrorResponse({ status: 404 }), { closeLabel: 'detailLoadError.backToList' });
+    expect(button.textContent?.trim()).toBe('detailLoadError.backToList');
+  });
+
+  it('offers a retry instead of close for a failed load when retryable', () => {
+    const { button, closed, retry } = render(new HttpErrorResponse({ status: 500 }), { retryable: true });
+    expect(button.textContent?.trim()).toBe('detailLoadError.retry');
+    button.click();
+    expect(retry).toHaveBeenCalledTimes(1);
+    expect(closed).not.toHaveBeenCalled();
+  });
+
+  it('still closes on a 404 when retryable', () => {
+    const { button, closed, retry } = render(new HttpErrorResponse({ status: 404 }), { retryable: true });
+    button.click();
+    expect(closed).toHaveBeenCalledTimes(1);
+    expect(retry).not.toHaveBeenCalled();
+  });
+});

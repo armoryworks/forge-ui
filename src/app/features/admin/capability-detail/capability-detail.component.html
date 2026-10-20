@@ -22,7 +22,12 @@
 
   <ng-container content>
     <div class="cap-detail">
-      @if (!entry()) {
+      @if (notFound()) {
+        <app-detail-load-error
+          [error]="notFoundError"
+          closeLabel="detailLoadError.backToList"
+          (closed)="back()" />
+      } @else if (!entry()) {
         <div class="cap-detail__empty">
           <span class="material-icons-outlined">hourglass_empty</span>
           <span>Loading capability…</span>

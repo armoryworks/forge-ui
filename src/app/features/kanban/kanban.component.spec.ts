@@ -851,6 +851,43 @@ describe('KanbanComponent', () => {
 
       expect(getBoard).not.toHaveBeenCalled();
     });
+
+    it('drops a team id from the URL that names no team, so the board is not silently empty', () => {
+      getTeams.mockReturnValue(of(teams));
+      queryParams.next(convertToParamMap({ team: '999999' }));
+      createComponent();
+      (component as unknown as { ngOnInit(): void }).ngOnInit();
+
+      expect(queryParams.value.has('team')).toBe(false);
+      expect(navigate).toHaveBeenCalledWith([], expect.objectContaining({ queryParams: { team: null }, replaceUrl: true }));
+    });
+
+    it('keeps a team id that names a known team', () => {
+      getTeams.mockReturnValue(of(teams));
+      queryParams.next(convertToParamMap({ team: '5' }));
+      createComponent();
+      (component as unknown as { ngOnInit(): void }).ngOnInit();
+
+      expect(queryParams.value.get('team')).toBe('5');
+    });
+  });
+
+  describe('customer filter from the URL', () => {
+    it('drops a customer id that names no customer', () => {
+      queryParams.next(convertToParamMap({ customer: '999999' }));
+      createComponent();
+      (component as unknown as { ngOnInit(): void }).ngOnInit();
+
+      expect(queryParams.value.has('customer')).toBe(false);
+    });
+
+    it('keeps a known customer', () => {
+      queryParams.next(convertToParamMap({ customer: '42' }));
+      createComponent();
+      (component as unknown as { ngOnInit(): void }).ngOnInit();
+
+      expect(queryParams.value.get('customer')).toBe('42');
+    });
   });
 
   describe('supervisory bulk actions', () => {

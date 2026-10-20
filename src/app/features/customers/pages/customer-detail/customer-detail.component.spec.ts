@@ -1,10 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { provideTranslateService, TranslateLoader, TranslatePipe } from '@ngx-translate/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 
 import { AuthService } from '../../../../shared/services/auth.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
@@ -222,5 +223,53 @@ describe('CustomerDetailComponent · credit and tax terms', () => {
     expect(request).not.toHaveProperty('creditLimit');
     expect(request).not.toHaveProperty('isTaxExempt');
     expect(request).not.toHaveProperty('taxExemptionId');
+  });
+});
+
+describe('CustomerDetailComponent · bad links', () => {
+  function setup(id: string, getCustomerSummary: () => Observable<CustomerSummary>) {
+    const navigate = vi.fn();
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id, tab: 'overview' })) } },
+        { provide: Router, useValue: { navigate } },
+        { provide: CustomerService, useValue: { getCustomerSummary: vi.fn(getCustomerSummary) } },
+        { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
+        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: CustomerDetailLayoutResolverService, useValue: { deriveLifecycle: () => 'active', resolve: () => [] } },
+        { provide: CapabilityService, useValue: { isEnabled: () => true } },
+      ],
+    });
+    const component = TestBed.runInInjectionContext(() => new CustomerDetailComponent());
+    TestBed.flushEffects();
+    const view = component as unknown as { loading(): boolean; loadError(): unknown; reloadCustomer(): void };
+    return { view, navigate, service: TestBed.inject(CustomerService) };
+  }
+
+  beforeEach(() => TestBed.resetTestingModule());
+
+  it('shows not-found in place for a non-numeric id without calling the API', () => {
+    const { view, navigate, service } = setup('abc', () => of(CUSTOMER));
+    expect(view.loading()).toBe(false);
+    expect((view.loadError() as HttpErrorResponse).status).toBe(404);
+    expect(service.getCustomerSummary).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('keeps the page and shows the error when the customer does not exist', () => {
+    const missing = new HttpErrorResponse({ status: 404 });
+    const { view, navigate } = setup('999999', () => throwError(() => missing));
+    expect(view.loading()).toBe(false);
+    expect(view.loadError()).toBe(missing);
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('loads again on retry after a failed load', () => {
+    let calls = 0;
+    const { view } = setup('5', () => (++calls === 1 ? throwError(() => new HttpErrorResponse({ status: 500 })) : of(CUSTOMER)));
+    view.reloadCustomer();
+    expect(calls).toBe(2);
+    expect(view.loadError()).toBeNull();
   });
 });
