@@ -8228,8 +8228,8 @@
   "scheduling": {
     "title": "Scheduling",
     "kpi": {
-      "scheduledOps": "Scheduled Ops",
-      "inProgress": "In Progress",
+      "scheduledOps": "Scheduled Ops (30 days)",
+      "inProgress": "In Progress (30 days)",
       "workCenters": "Work Centers"
     },
     "tabs": {
@@ -8284,7 +8284,8 @@
       "priority": "Priority",
       "dueDate": "Due Date",
       "endTime": "End Time",
-      "startTime": "Start Time"
+      "startTime": "Start Time",
+      "mode": "Mode"
     },
     "statuses": {
       "scheduled": "Scheduled",
@@ -8352,6 +8353,10 @@
       "removeTitle": "Remove shift assignment",
       "removeMessage": "Remove {{name}} from the {{shift}} shift?",
       "removed": "Shift assignment removed"
+    },
+    "runModes": {
+      "simulation": "Simulation",
+      "live": "Live"
     }
   },
   "routingTools": {

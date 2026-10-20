@@ -184,6 +184,7 @@ export class SchedulingComponent implements OnInit {
   protected readonly runColumns: ColumnDef[] = [
     { field: 'runDate', header: this.translate.instant('scheduling.cols.runDate'), sortable: true, type: 'date', width: '140px' },
     { field: 'direction', header: this.translate.instant('scheduling.cols.direction'), sortable: true, width: '100px' },
+    { field: 'isSimulation', header: this.translate.instant('scheduling.cols.mode'), sortable: true, width: '110px' },
     { field: 'status', header: this.translate.instant('scheduling.cols.status'), sortable: true, filterable: true, type: 'enum', width: '100px',
       filterOptions: [
         { value: 'Completed', label: this.translate.instant('scheduling.statuses.completed') },

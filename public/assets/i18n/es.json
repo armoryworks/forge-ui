@@ -8221,8 +8221,8 @@
   "scheduling": {
     "title": "Programación",
     "kpi": {
-      "scheduledOps": "Ops Programadas",
-      "inProgress": "En Progreso",
+      "scheduledOps": "Ops Programadas (30 días)",
+      "inProgress": "En Progreso (30 días)",
       "workCenters": "Centros de Trabajo"
     },
     "tabs": {
@@ -8285,7 +8285,8 @@
       "priority": "Prioridad",
       "dueDate": "Fecha Venc.",
       "endTime": "End Time",
-      "startTime": "Start Time"
+      "startTime": "Start Time",
+      "mode": "Modo"
     },
     "statuses": {
       "scheduled": "Programado",
@@ -8345,6 +8346,10 @@
       "removeTitle": "Quitar asignación de turno",
       "removeMessage": "¿Quitar a {{name}} del turno {{shift}}?",
       "removed": "Asignación de turno quitada"
+    },
+    "runModes": {
+      "simulation": "Simulación",
+      "live": "Real"
     }
   },
   "routingTools": {
