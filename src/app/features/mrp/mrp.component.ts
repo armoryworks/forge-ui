@@ -17,6 +17,7 @@ import { SpacerDirective } from '../../shared/directives/spacer.directive';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { DisplayLabelService } from '../../shared/services/display-label.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { SelectOption } from '../../shared/components/select/select.component';
@@ -90,6 +91,7 @@ export class MrpComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly dialog = inject(MatDialog);
+  private readonly labels = inject(DisplayLabelService);
 
   // Tab state from URL
   protected readonly activeTab = toSignal(
@@ -453,6 +455,11 @@ export class MrpComponent {
         },
       });
     });
+  }
+
+  protected statusLabel(columns: ColumnDef[], status: string): string {
+    return columns.find(c => c.field === 'status')?.filterOptions?.find(o => o.value === status)?.label
+      ?? this.labels.enumLabel(status);
   }
 
   protected getRunStatusClass(status: string): string {
