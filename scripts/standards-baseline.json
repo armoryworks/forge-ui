@@ -343,7 +343,6 @@
     "src/app/shared/components/draft-recovery-prompt/draft-recovery-prompt.component.html": 7,
     "src/app/shared/components/drillable-chart/drillable-chart.component.html": 3,
     "src/app/shared/components/entity-activity-section/entity-activity-section.component.html": 19,
-    "src/app/shared/components/loading-overlay/loading-overlay.component.html": 1,
     "src/app/shared/components/logout-drafts-dialog/logout-drafts-dialog.component.html": 9,
     "src/app/shared/components/preset-apply-dialog/preset-apply-dialog.component.html": 13,
     "src/app/shared/components/production-label/production-label.component.html": 1,

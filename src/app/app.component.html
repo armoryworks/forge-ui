@@ -1,9 +1,9 @@
 <a class="skip-link" href="#main-content">{{ 'shared.skipToContent' | translate }}</a>
 @if (showShell()) {
-  <app-header />
-  <app-connection-banner />
-  <app-announcement-overlay />
-  <app-onboarding-banner />
+  <app-header [attr.inert]="isGlobalLoading() || null" />
+  <app-connection-banner [attr.inert]="isGlobalLoading() || null" />
+  <app-announcement-overlay [attr.inert]="isGlobalLoading() || null" />
+  <app-onboarding-banner [attr.inert]="isGlobalLoading() || null" />
   <div class="app-body" [attr.inert]="isGlobalLoading() || null">
     @if (layout.sidebarVisible()) {
       @if (layout.isMobile()) {
@@ -16,7 +16,7 @@
     </main>
   </div>
 } @else {
-  <main class="app-standalone" id="main-content">
+  <main class="app-standalone" id="main-content" [attr.inert]="isGlobalLoading() || null">
     <router-outlet />
   </main>
 }
