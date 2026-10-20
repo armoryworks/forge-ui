@@ -1,8 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
+import { debounceTime, distinctUntilChanged, forkJoin, map, Observable, of, Subscription, switchMap } from 'rxjs';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -17,6 +19,7 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { DetailDialogService } from '../../../../shared/services/detail-dialog.service';
 import { DraftResumeService } from '../../../../shared/services/draft-resume.service';
 import { TrainingService } from '../../../training/services/training.service';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 export interface TrainingModuleRow {
   id: number;
@@ -47,6 +50,23 @@ export interface UserProgressRow {
   lastActivityAt: string | null;
 }
 
+interface TrainingModulePage {
+  data: TrainingModuleRow[];
+  totalCount: number;
+  totalPages: number;
+}
+
+interface TrainingPathResponse {
+  id: number;
+  title: string;
+  icon: string;
+  isAutoAssigned: boolean;
+  isActive: boolean;
+  modules: unknown[];
+}
+
+const MODULE_PAGE_SIZE = 100;
+
 export type PanelSubTab = 'content' | 'paths' | 'progress';
 
 @Component({
@@ -73,6 +93,8 @@ export class TrainingPanelComponent implements OnInit {
   private readonly detailDialog = inject(DetailDialogService);
   private readonly draftResume = inject(DraftResumeService);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
+  private moduleLoad?: Subscription;
 
   private readonly base = `${environment.apiUrl}/training`;
   protected readonly activeSubTab = signal<PanelSubTab>('content');
@@ -80,6 +102,7 @@ export class TrainingPanelComponent implements OnInit {
   protected readonly generatingModuleId = signal<number | null>(null);
 
   protected readonly modules = signal<TrainingModuleRow[]>([]);
+  protected readonly moduleTotal = signal(0);
   protected readonly paths = signal<TrainingPathRow[]>([]);
   protected readonly userProgress = signal<UserProgressRow[]>([]);
 
@@ -116,6 +139,10 @@ export class TrainingPanelComponent implements OnInit {
     this.loadPaths();
     this.loadProgress();
 
+    this.moduleSearchControl.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.loadModules());
+
     if (this.draftResume.consume('training-path')) {
       this.openCreatePathDialog();
     } else if (this.draftResume.consume('training-module')) {
@@ -128,17 +155,39 @@ export class TrainingPanelComponent implements OnInit {
   }
 
   private loadModules(): void {
+    this.moduleLoad?.unsubscribe();
     this.isLoading.set(true);
-    this.http.get<{ data: TrainingModuleRow[] }>(`${this.base}/modules?pageSize=100&includeUnpublished=true`)
-      .subscribe({
-        next: r => { this.modules.set(r.data); this.isLoading.set(false); },
-        error: () => this.isLoading.set(false),
-      });
+    const search = (this.moduleSearchControl.value ?? '').trim();
+    this.moduleLoad = this.fetchModulePage(1, search).pipe(
+      switchMap(first => {
+        const rest = Array.from({ length: Math.max(first.totalPages - 1, 0) }, (_, i) => this.fetchModulePage(i + 2, search));
+        const all$: Observable<TrainingModulePage[]> = rest.length ? forkJoin(rest).pipe(map(pages => [first, ...pages])) : of([first]);
+        return all$.pipe(map(pages => ({ total: first.totalCount, rows: pages.flatMap(p => p.data) })));
+      }),
+    ).subscribe({
+      next: ({ total, rows }) => {
+        this.modules.set(rows);
+        this.moduleTotal.set(total);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false),
+    });
+  }
+
+  private fetchModulePage(page: number, search: string): Observable<TrainingModulePage> {
+    let params = new HttpParams()
+      .set('page', page)
+      .set('pageSize', MODULE_PAGE_SIZE)
+      .set('includeUnpublished', true);
+    if (search) params = params.set('search', search);
+    return this.http.get<TrainingModulePage>(`${this.base}/modules`, { params });
   }
 
   private loadPaths(): void {
-    this.http.get<TrainingPathRow[]>(`${this.base}/paths`)
-      .subscribe({ next: paths => this.paths.set(paths) });
+    this.http.get<TrainingPathResponse[]>(`${this.base}/paths`)
+      .subscribe({
+        next: paths => this.paths.set(paths.map(({ modules, ...path }) => ({ ...path, moduleCount: modules?.length ?? 0 }))),
+      });
   }
 
   private loadProgress(): void {
@@ -191,11 +240,36 @@ export class TrainingPanelComponent implements OnInit {
   }
 
   protected deleteModule(module: TrainingModuleRow): void {
-    this.http.delete(`${this.base}/modules/${module.id}`).subscribe({
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('adminPanels.training.deleteConfirm.title'),
+        message: this.translate.instant('adminPanels.training.deleteConfirm.message', { title: module.title }),
+        confirmLabel: this.translate.instant('common.delete'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.http.delete(`${this.base}/modules/${module.id}`).subscribe({
+        next: () => {
+          this.loadModules();
+          this.snackbar.successWithAction(
+            this.translate.instant('adminPanels.training.snackbar.moduleDeleted'),
+            this.translate.instant('adminPanels.training.undo'),
+          ).subscribe(() => this.restoreModule(module));
+        },
+        error: (err: unknown) => this.snackbar.errorFrom(err, 'adminPanels.training.snackbar.deleteFailed'),
+      });
+    });
+  }
+
+  private restoreModule(module: TrainingModuleRow): void {
+    this.http.post(`${this.base}/modules/${module.id}/restore`, {}).subscribe({
       next: () => {
         this.loadModules();
-        this.snackbar.success(this.translate.instant('adminPanels.training.snackbar.moduleDeleted'));
+        this.snackbar.success(this.translate.instant('adminPanels.training.snackbar.moduleRestored'));
       },
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'adminPanels.training.snackbar.restoreFailed'),
     });
   }
 

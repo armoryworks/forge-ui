@@ -1,30 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal, untracked } from '@angular/core';
 
-// Provider ID → Simple Icons CDN URL (open-source brand icon set, MIT licensed)
-// Format: https://cdn.simpleicons.org/{slug}/{hex-color}
-// Falls back to Material icon on load error.
-const LOGO_MAP: Record<string, string> = {
-  // Accounting
-  quickbooks: 'https://cdn.simpleicons.org/intuit/2CA01C',
-  xero:       'https://cdn.simpleicons.org/xero/13B5EA',
-  sage:       'https://cdn.simpleicons.org/sage/00D639',
-  netsuite:   'https://logos-world.net/wp-content/uploads/2021/09/NetSuite-Emblem.png',
-  zoho:       'https://cdn.simpleicons.org/zoho/E42527',
-  // Shipping
-  ups:        'https://cdn.simpleicons.org/ups/351C15',
-  fedex:      'https://cdn.simpleicons.org/fedex/4D148C',
-  dhl:        'https://cdn.simpleicons.org/dhl/D40511',
-  usps:       'https://cdn.simpleicons.org/usps/004B87',
-  // Services
-  minio:      'https://cdn.simpleicons.org/minio/C72E49',
-  ollama:     'https://cdn.simpleicons.org/ollama/000000',
-  docuseal:   'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/docuseal.svg',
-  // Direct brand assets (not in Simple Icons)
-  freshbooks: 'https://www.freshbooks.com/apple-icon1.png',
-  wave:       'https://cdn.prod.website-files.com/62446230dcb514b828a6e237/677ed61188695f2316217fc5_Wave-2_0-logo-fullcolour-rgb.svg',
-  stamps:     'https://www.stamps.com/wp-content/uploads/2025/01/Stamps-Primary-Lockup-Red-RGB.svg',
-};
-
 import { MatDialog } from '@angular/material/dialog';
 
 import { TranslatePipe } from '@ngx-translate/core';
@@ -39,6 +14,9 @@ import {
   IntegrationConfigDialogComponent,
   IntegrationConfigDialogData,
 } from '../integration-config-dialog/integration-config-dialog.component';
+
+const sameOriginLogo = (url: string | null | undefined): string | null =>
+  url && url.startsWith('/') && !url.startsWith('//') ? url : null;
 
 // Providers that use OAuth (redirect to external auth page)
 const OAUTH_PROVIDERS = new Set(['quickbooks', 'xero', 'freshbooks', 'sage', 'zoho']);
@@ -86,21 +64,21 @@ export class IntegrationsPanelComponent implements OnInit {
 
   readonly qbIntegration = computed(() => this.integrations().find(i => i.provider === 'quickbooks') ?? null);
 
-  /** Accounting providers enriched with logo URLs from the static map. */
+  /** Accounting providers; no brand logos ship with the app, so each card shows its Material icon. */
   readonly providersWithLogos = computed(() =>
-    this.providers().map(p => ({ ...p, logoUrl: LOGO_MAP[p.id] ?? null })),
+    this.providers().map(p => ({ ...p, logoUrl: null as string | null })),
   );
 
   readonly shippingIntegrations = computed(() =>
     this.integrations()
       .filter(i => i.category === 'shipping')
-      .map(i => ({ ...i, logoUrl: LOGO_MAP[i.provider] ?? i.logoUrl ?? null })),
+      .map(i => ({ ...i, logoUrl: sameOriginLogo(i.logoUrl) })),
   );
 
   readonly serviceIntegrations = computed(() =>
     this.integrations()
       .filter(i => i.category !== 'shipping' && i.category !== 'accounting')
-      .map(i => ({ ...i, logoUrl: LOGO_MAP[i.provider] ?? i.logoUrl ?? null })),
+      .map(i => ({ ...i, logoUrl: sameOriginLogo(i.logoUrl) })),
   );
 
   readonly isOAuthProvider = (id: string) => OAUTH_PROVIDERS.has(id);

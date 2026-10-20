@@ -39,15 +39,17 @@ interface CustomAreaGroup {
 /**
  * Phase 4 Phase-G — Custom preset builder.
  *
- * Catalog defaults shown as starting state. Each capability has a binary
- * toggle; user-toggled rows are tagged "Override" so it's clear what
- * differs from the default. Live constraint validation calls the
- * `previewCustom` endpoint after each toggle. "Apply Custom" opens the
- * preset-apply-dialog (preview → confirm → mutate).
+ * The installation's current capability state is the starting point: the
+ * overrides map (which the server reads relative to catalog defaults) is
+ * seeded with every capability the install has moved off its default, so
+ * an untouched builder proposes no changes. Each capability has a binary
+ * toggle; rows that differ from the current install are tagged "Changed".
+ * Live constraint validation calls the `previewCustom` endpoint after each
+ * toggle. "Apply Custom" opens the preset-apply-dialog (preview → confirm →
+ * mutate).
  *
- * 4G decision: binary toggle (with override marker), not 3-state. Keeps
- * the UI simple — "I want X on" / "I want X off". The "default" state is
- * a derived condition (no override), not a third state.
+ * 4G decision: binary toggle (with change marker), not 3-state. Keeps the
+ * UI simple — "I want X on" / "I want X off".
  */
 @Component({
   selector: 'app-preset-custom',
@@ -74,14 +76,17 @@ export class PresetCustomComponent implements OnInit {
   protected readonly capabilityCount = computed(() => this.preview()?.capabilityCount ?? 0);
   protected readonly deltaCount = computed(() => this.preview()?.deltaVsCurrentInstall.length ?? 0);
 
+  private readonly currentEnabled = computed(
+    () => new Map(this.capabilityService.capabilities().map((c) => [c.code, c.enabled] as const)),
+  );
+
   protected readonly groupedCapabilities = computed<CustomAreaGroup[]>(() => {
     const p = this.preview();
     if (!p) return [];
-    const overrideMap = this.overrides();
+    const current = this.currentEnabled();
     const map = new Map<string, CustomCapabilityRow[]>();
     for (const row of p.capabilities) {
-      const overridden =
-        overrideMap.has(row.code) && overrideMap.get(row.code) !== row.defaultOn;
+      const overridden = row.inPreset !== (current.get(row.code) ?? row.defaultOn);
       if (!map.has(row.area)) map.set(row.area, []);
       map.get(row.area)!.push({ ...row, overridden });
     }
@@ -91,8 +96,10 @@ export class PresetCustomComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    // Initial preview with no overrides → catalog defaults.
-    this.refreshPreview();
+    this.capabilityService.load().subscribe({
+      next: () => this.resetOverrides(),
+      error: () => this.resetOverrides(),
+    });
   }
 
   protected back(): void {
@@ -113,8 +120,17 @@ export class PresetCustomComponent implements OnInit {
   }
 
   protected resetOverrides(): void {
-    this.overrides.set(new Map());
+    this.overrides.set(this.installOverrides());
     this.refreshPreview();
+  }
+
+  private installOverrides(): Map<string, boolean> {
+    return new Map(
+      this.capabilityService
+        .capabilities()
+        .filter((c) => c.enabled !== c.isDefaultOn)
+        .map((c) => [c.code, c.enabled] as const),
+    );
   }
 
   protected applyCustom(): void {

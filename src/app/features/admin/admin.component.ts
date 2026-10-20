@@ -119,24 +119,26 @@ export class AdminComponent implements OnInit {
   protected readonly pageTitle = computed(() => this.isAdmin() ? this.translate.instant('admin.title') : this.translate.instant('admin.titleEmployee'));
   protected readonly pageSubtitle = computed(() => this.isAdmin() ? this.translate.instant('admin.subtitle') : this.translate.instant('admin.subtitleEmployee'));
 
+  static resolveTab(requested: string | null, isAdmin: boolean, isManager: boolean): { tab: string; denied: boolean } {
+    // Admins land on the new Overview dashboard (replaces the prior
+    // bare-`/admin` → `/admin/users` redirect). Non-admin managers /
+    // office managers continue to land on Compliance because Overview
+    // is admin-gated and the rest of the admin shell only has a couple
+    // of tabs available to them.
+    const defaultTab = isAdmin ? 'overview' : 'compliance';
+    const tab = requested ?? defaultTab;
+    if (!AdminComponent.VALID_TABS.has(tab)) return { tab: defaultTab, denied: false };
+    if (AdminComponent.ADMIN_ONLY_TABS.has(tab) && !isAdmin) return { tab: 'compliance', denied: true };
+    if (AdminComponent.MANAGER_AND_ADMIN_TABS.has(tab) && !isAdmin && !isManager) return { tab: 'compliance', denied: true };
+    return { tab, denied: false };
+  }
+
+  private readonly resolvedTab$ = this.route.paramMap.pipe(
+    map(params => AdminComponent.resolveTab(params.get('tab'), this.authService.hasRole('Admin'), this.authService.hasRole('Manager'))),
+  );
+
   protected readonly activeTab = toSignal(
-    this.route.paramMap.pipe(
-      map(params => {
-        const isAdmin = this.authService.hasRole('Admin');
-        const isManager = this.authService.hasRole('Manager');
-        // Admins land on the new Overview dashboard (replaces the prior
-        // bare-`/admin` → `/admin/users` redirect). Non-admin managers /
-        // office managers continue to land on Compliance because Overview
-        // is admin-gated and the rest of the admin shell only has a couple
-        // of tabs available to them.
-        const defaultTab = isAdmin ? 'overview' : 'compliance';
-        const tab = params.get('tab') ?? defaultTab;
-        if (!AdminComponent.VALID_TABS.has(tab)) return defaultTab;
-        if (AdminComponent.ADMIN_ONLY_TABS.has(tab) && !isAdmin) return 'compliance';
-        if (AdminComponent.MANAGER_AND_ADMIN_TABS.has(tab) && !isAdmin && !isManager) return 'compliance';
-        return tab;
-      }),
-    ),
+    this.resolvedTab$.pipe(map(r => r.tab)),
     { initialValue: this.authService.hasRole('Admin') ? 'overview' : 'compliance' },
   );
   protected readonly loading = signal(false);
@@ -155,7 +157,7 @@ export class AdminComponent implements OnInit {
     lastName: new FormControl('', [Validators.required, Validators.maxLength(100)]),
     email: new FormControl('', [Validators.required, Validators.email, Validators.maxLength(256)]),
     initials: new FormControl('', [Validators.maxLength(3)]),
-    roles: new FormControl<string[]>(['Engineer'], [Validators.required]),
+    roles: new FormControl<string[]>([], [Validators.required]),
     workLocationId: new FormControl<number | null>(null),
     isActive: new FormControl(true),
   });
@@ -387,6 +389,12 @@ export class AdminComponent implements OnInit {
   ];
 
   constructor() {
+    this.resolvedTab$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(({ tab, denied }) => {
+      if (!denied) return;
+      this.router.navigate(['..', tab], { relativeTo: this.route, replaceUrl: true });
+      this.snackbar.info(this.translate.instant('admin.tabNotPermitted'));
+    });
+
     // Load roles from API (used by user form select + column filter)
     if (this.isAdmin()) {
       this.refDataService.getRolesAsOptions().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(opts => this.roleOptions.set(opts));
@@ -486,7 +494,7 @@ export class AdminComponent implements OnInit {
     this.setupTokenExpiresAt.set(null);
     this.userForm.reset({
       firstName: '', lastName: '', email: '',
-      initials: '', roles: ['Engineer'], isActive: true,
+      initials: '', roles: [], isActive: true,
     });
     this.showRoleSuggestions.set(false);
     this.userForm.controls.email.enable();
@@ -503,7 +511,7 @@ export class AdminComponent implements OnInit {
       lastName: user.lastName,
       email: user.email,
       initials: user.initials ?? '',
-      roles: user.roles.length ? [...user.roles] : ['Engineer'],
+      roles: [...user.roles],
       workLocationId: user.workLocationId ?? null,
       isActive: user.isActive,
     });

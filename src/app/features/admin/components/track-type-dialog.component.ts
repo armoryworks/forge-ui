@@ -42,7 +42,7 @@ export class TrackTypeDialogComponent {
 
   readonly form = new FormGroup({
     name: new FormControl('', [Validators.required]),
-    code: new FormControl('', [Validators.required, Validators.pattern(/^[A-Z0-9_]+$/)]),
+    code: new FormControl('', [Validators.required, Validators.pattern(/^[A-Za-z0-9_]+$/)]),
     description: new FormControl(''),
   });
   protected readonly violations = FormValidationService.getViolations(this.form, {

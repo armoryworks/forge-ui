@@ -6,7 +6,7 @@
     </button>
     <button class="action-btn action-btn--sm" type="button"
       (click)="resetOverrides()" data-testid="preset-custom-reset-btn">
-      <span class="material-icons-outlined">restart_alt</span> Reset to defaults
+      <span class="material-icons-outlined">restart_alt</span> Reset to current settings
     </button>
   </ng-container>
 
@@ -16,7 +16,7 @@
         <div class="preset-custom__hero-left">
           <h2>Custom Configuration</h2>
           <p>
-            Start from the catalog defaults and toggle individual capabilities. Hand-pick the exact set you want for this installation.
+            Starts from this installation's current settings. Toggle individual capabilities to hand-pick the exact set you want.
           </p>
         </div>
         <button class="action-btn action-btn--primary"
@@ -89,7 +89,7 @@
                     <code class="preset-custom__capability-code">{{ row.code }}</code>
                     <span class="preset-custom__capability-name">{{ row.name }}</span>
                     @if (row.overridden) {
-                      <span class="chip chip--info preset-custom__override-tag">Override</span>
+                      <span class="chip chip--info preset-custom__override-tag">Changed</span>
                     } @else if (row.defaultOn) {
                       <span class="chip preset-custom__default-tag">Default on</span>
                     }

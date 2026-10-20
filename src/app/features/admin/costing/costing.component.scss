@@ -6,6 +6,7 @@
   flex-direction: column;
   gap: $sp-lg;
   max-width: 640px;
+  padding: $sp-md $sp-lg;
 
   &__intro {
     color: var(--text-secondary);

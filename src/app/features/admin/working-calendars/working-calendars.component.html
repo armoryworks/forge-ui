@@ -118,15 +118,15 @@
                 <tbody>
                   @for (h of sel.holidays; track h.id) {
                     <tr data-testid="holiday-row">
-                      <td>{{ h.date }}</td>
+                      <td>{{ h.date | dateOnly }}</td>
                       <td>{{ h.name }}</td>
-                      <td>{{ h.observedDate ?? '—' }}</td>
+                      <td>{{ h.observedDate ? (h.observedDate | dateOnly) : '—' }}</td>
                       <td>{{ (h.isRecurring ? 'common.yes' : 'common.no') | translate }}</td>
                       <td class="working-calendars__holidays-action">
                         <button type="button" class="icon-btn icon-btn--danger"
                           data-testid="holiday-delete-btn"
                           [matTooltip]="'common.remove' | translate"
-                          [attr.aria-label]="'common.remove' | translate"
+                          [attr.aria-label]="'workingCalendars.removeHolidayAria' | translate: { name: h.name }"
                           (click)="deleteHoliday(h)">
                           <span class="material-icons-outlined">delete</span>
                         </button>
@@ -196,14 +196,14 @@
                         <button type="button" class="icon-btn"
                           data-testid="shift-edit-btn"
                           [matTooltip]="'common.edit' | translate"
-                          [attr.aria-label]="'common.edit' | translate"
+                          [attr.aria-label]="'workingCalendars.editShiftAria' | translate: { name: s.name }"
                           (click)="editShift(s)">
                           <span class="material-icons-outlined">edit</span>
                         </button>
                         <button type="button" class="icon-btn icon-btn--danger"
                           data-testid="shift-delete-btn"
                           [matTooltip]="'common.remove' | translate"
-                          [attr.aria-label]="'common.remove' | translate"
+                          [attr.aria-label]="'workingCalendars.removeShiftAria' | translate: { name: s.name }"
                           (click)="deleteShift(s)">
                           <span class="material-icons-outlined">delete</span>
                         </button>

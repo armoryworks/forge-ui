@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader, TranslateService } from '@ngx-translate/core';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 
@@ -29,7 +29,8 @@ interface OverviewInternals {
   scheduledTasks: { (): ScheduledTask[] };
   storageUsage: { (): StorageUsage[] };
   activeUserCount: { (): number };
-  roleBreakdown: { (): { role: string; count: number }[] };
+  roleBreakdown: { (): { role: string; label: string; count: number }[] };
+  actionLabel(action: string): string;
   expiredKeyCount: { (): number };
   complianceOpenCount: { (): number };
   i9AttentionCount: { (): number };
@@ -245,5 +246,27 @@ describe('AdminOverviewComponent', () => {
     expect(component.totalStorageDisplay()).toContain('GB');
     expect(component.topStorageEntity()?.entityType).toBe('Part');
     httpMock.verify();
+  });
+
+  it('labels role chips in words rather than raw role codes', () => {
+    const { component, httpMock } = setup();
+    component.ngOnInit();
+    flushAll(httpMock, {
+      users: [makeUser({ id: 1, roles: ['OfficeManager'] }), makeUser({ id: 2, roles: ['IT Admin'] })],
+    });
+
+    expect(component.roleBreakdown().map(r => r.label).sort()).toEqual(['IT Admin', 'Office Manager']);
+    httpMock.verify();
+  });
+
+  it('shows audit actions in words: the preset label when one exists, else the split code', () => {
+    const { component } = setup();
+    TestBed.inject(TranslateService).setTranslation('en', {
+      adminPanels: { auditLog: { presets: { userLoggedIn: 'User signed in' } } },
+    });
+    TestBed.inject(TranslateService).use('en');
+
+    expect(component.actionLabel('UserLoggedIn')).toBe('User signed in');
+    expect(component.actionLabel('CapabilityConfigChanged')).toBe('Capability Config Changed');
   });
 });

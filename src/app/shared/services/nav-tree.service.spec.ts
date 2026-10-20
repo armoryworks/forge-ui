@@ -92,3 +92,16 @@ describe('NavTreeService · canReach', () => {
     expect(nav.canReach('/sales-orders', false)).toBe(true);
   });
 });
+
+describe('NavTreeService · admin pages', () => {
+  it('lists working calendars, tariff rates and database transfer for an admin', () => {
+    expect(routesFor(['Admin'])).toEqual(expect.arrayContaining(['/admin/working-calendars', '/admin/tariffs', '/admin/database']));
+  });
+
+  it('keeps those admin-only pages off a manager menu', () => {
+    const routes = routesFor(['Manager']);
+
+    expect(routes).not.toContain('/admin/working-calendars');
+    expect(routes).not.toContain('/admin/database');
+  });
+});

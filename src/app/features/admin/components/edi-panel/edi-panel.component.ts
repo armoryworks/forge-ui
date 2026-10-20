@@ -1,5 +1,6 @@
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog } from '@angular/material/dialog';
 import { EdiPartNumberMapDialogComponent } from '../edi-part-number-map-dialog/edi-part-number-map-dialog.component';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
@@ -26,6 +27,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-edi-panel',
@@ -46,6 +48,7 @@ export class EdiPanelComponent {
   private readonly ediService = inject(EdiService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(MatDialog);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -260,11 +263,23 @@ export class EdiPanelComponent {
   }
 
   protected deletePartner(partner: EdiTradingPartner): void {
-    this.ediService.deleteTradingPartner(partner.id).subscribe({
-      next: () => {
-        this.snackbar.success(this.translate.instant('adminPanels.edi.snackbar.partnerDeleted'));
-        this.loadPartners();
-      },
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('adminPanels.edi.deleteConfirm.title'),
+        message: this.translate.instant('adminPanels.edi.deleteConfirm.message', { name: partner.name }),
+        confirmLabel: this.translate.instant('common.delete'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.ediService.deleteTradingPartner(partner.id).subscribe({
+        next: () => {
+          this.snackbar.success(this.translate.instant('adminPanels.edi.snackbar.partnerDeleted'));
+          this.loadPartners();
+        },
+        error: (err: unknown) => this.snackbar.errorFrom(err, 'adminPanels.edi.snackbar.deleteFailed'),
+      });
     });
   }
 

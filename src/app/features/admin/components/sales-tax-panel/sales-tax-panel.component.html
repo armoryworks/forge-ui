@@ -14,6 +14,10 @@
     emptyIcon="percent"
     [emptyMessage]="'salesTax.noRates' | translate">
 
+    <ng-template appColumnCell="rate" let-row>
+      {{ row.rate | percent: '1.2-3' }}
+    </ng-template>
+
     <ng-template appColumnCell="isDefault" let-row>
       @if (row.isDefault) {
         <span class="chip chip--primary" [attr.aria-label]="'salesTax.default' | translate">

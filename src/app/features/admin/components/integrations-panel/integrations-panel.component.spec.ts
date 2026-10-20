@@ -12,10 +12,10 @@ import { AdminService } from '../../services/admin.service';
 import { IntegrationStatus } from '../../models/integration-status.model';
 import { IntegrationsPanelComponent } from './integrations-panel.component';
 
-function integration(provider: string, category: IntegrationStatus['category']): IntegrationStatus {
+function integration(provider: string, category: IntegrationStatus['category'], logoUrl: string | null = null): IntegrationStatus {
   return {
     provider, name: provider, description: '', icon: 'extension', isConfigured: false, fields: [],
-    category, sandboxSteps: null, sandboxUrl: null, logoUrl: null,
+    category, sandboxSteps: null, sandboxUrl: null, logoUrl,
   };
 }
 
@@ -43,10 +43,10 @@ describe('IntegrationsPanelComponent', () => {
               showSandboxGuides: false,
               integrations: [
                 integration('gmail-oauth', 'communications'),
-                integration('twilio', 'communications'),
-                integration('smtp', 'service'),
+                integration('twilio', 'communications', 'https://logo.clearbit.com/twilio.com'),
+                integration('smtp', 'service', '/assets/logos/smtp.svg'),
                 integration('quickbooks', 'accounting'),
-                integration('ups', 'shipping'),
+                integration('ups', 'shipping', '//cdn.example.test/ups.svg'),
               ],
             }),
           },
@@ -66,5 +66,13 @@ describe('IntegrationsPanelComponent', () => {
   it('keeps shipping and accounting out of the services list', () => {
     expect(component.shippingIntegrations().map(i => i.provider)).toEqual(['ups']);
     expect(component.serviceIntegrations().some(i => i.category === 'accounting')).toBe(false);
+  });
+
+  it('only keeps same-origin logos, since the CSP blocks every off-origin image', () => {
+    const logos = Object.fromEntries(
+      [...component.serviceIntegrations(), ...component.shippingIntegrations()].map(i => [i.provider, i.logoUrl]),
+    );
+
+    expect(logos).toEqual({ 'gmail-oauth': null, twilio: null, smtp: '/assets/logos/smtp.svg', ups: null });
   });
 });

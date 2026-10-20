@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PageLayoutComponent } from '../../../../shared/components/page-layout/page-layout.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
@@ -38,13 +39,14 @@ interface ComparisonAreaGroup {
  *
  * Layout: rows = capabilities (grouped by area), columns = selected presets.
  * Cells display ✓ when in preset, — when not. Disagreement rows are visually
- * highlighted. Each column has a "Pick this one" button that routes to the
- * apply flow for that preset.
+ * highlighted, and the matrix opens filtered to those rows; the toolbar
+ * button switches to the full list. Each column has a "Pick this one"
+ * button that routes to the apply flow for that preset.
  */
 @Component({
   selector: 'app-preset-compare',
   standalone: true,
-  imports: [CommonModule, RouterModule, PageLayoutComponent, LoadingBlockDirective],
+  imports: [CommonModule, RouterModule, PageLayoutComponent, LoadingBlockDirective, TranslatePipe],
   templateUrl: './preset-compare.component.html',
   styleUrl: './preset-compare.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -57,11 +59,12 @@ export class PresetCompareComponent implements OnInit {
   private readonly capabilityService = inject(CapabilityService);
   private readonly installState = inject(CapabilityInstallStateService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly response = signal<PresetCompareResponse | null>(null);
   protected readonly loading = this.presetService.comparing;
   protected readonly applying = signal<boolean>(false);
-  protected readonly disagreementOnly = signal<boolean>(false);
+  protected readonly disagreementOnly = signal<boolean>(true);
 
   protected readonly groupedRows = computed<ComparisonAreaGroup[]>(() => {
     const r = this.response();
@@ -87,7 +90,7 @@ export class PresetCompareComponent implements OnInit {
     const idsParam = this.route.snapshot.queryParamMap.get('ids') ?? '';
     const ids = idsParam.split(',').map((s) => s.trim()).filter(Boolean);
     if (ids.length < 2 || ids.length > 4) {
-      this.snackbar.error('Compare requires 2-4 preset IDs');
+      this.snackbar.error(this.translate.instant('admin.presetCompare.needIds'));
       this.router.navigate(['/admin/presets']);
       return;
     }
@@ -148,9 +151,9 @@ export class PresetCompareComponent implements OnInit {
       next: (result) => {
         this.applying.set(false);
         if (result.noOp) {
-          this.snackbar.info(`${presetName}: no changes — already matches.`);
+          this.snackbar.info(this.translate.instant('admin.presetCompare.noChanges', { name: presetName }));
         } else {
-          this.snackbar.success(`Applied ${presetName} (${result.deltaCount} capabilities changed).`);
+          this.snackbar.success(this.translate.instant('admin.presetCompare.applied', { name: presetName, count: result.deltaCount }));
         }
         this.capabilityService.load().subscribe();
         this.installState.dismiss();

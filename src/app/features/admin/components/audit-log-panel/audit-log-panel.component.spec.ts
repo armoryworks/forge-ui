@@ -24,6 +24,9 @@ interface PanelInternals {
   loadError: { (): string | null };
   entityTypeControl: FormControl<string>;
   entityTypeOptions: SelectOption[];
+  expandedDetailsId: { (): number | null };
+  toggleDetails(id: number): void;
+  formatDetails(details: string | null): string;
 }
 
 const url = `${environment.apiUrl}/admin/audit-log`;
@@ -125,5 +128,24 @@ describe('AuditLogPanelComponent', () => {
       'QcInspection', 'NonConformance', 'CorrectiveAction', 'Gage', 'EngineeringChangeOrder',
       'LotRecord', 'SerialNumber', 'StorageLocation', 'CycleCount',
     ]));
+  });
+
+  it('expands one row of details at a time and collapses it on a second click', () => {
+    const { component } = setup();
+
+    component.toggleDetails(1);
+    expect(component.expandedDetailsId()).toBe(1);
+    component.toggleDetails(2);
+    expect(component.expandedDetailsId()).toBe(2);
+    component.toggleDetails(2);
+    expect(component.expandedDetailsId()).toBeNull();
+  });
+
+  it('pretty-prints JSON details and shows any other text as it is', () => {
+    const { component } = setup();
+
+    expect(component.formatDetails('{"from":"Draft","to":"Posted"}')).toBe('{\n  "from": "Draft",\n  "to": "Posted"\n}');
+    expect(component.formatDetails('Status changed to Posted')).toBe('Status changed to Posted');
+    expect(component.formatDetails(null)).toBe('');
   });
 });

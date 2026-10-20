@@ -16,6 +16,7 @@ import { AuditLogEntry } from '../../models/audit-log-entry.model';
 import { IntegrationRecord } from '../../models/integration-record.model';
 import { ScheduledTask } from '../../models/scheduled-task.model';
 import { StorageUsage } from '../../models/storage-usage.model';
+import { humanizeCode } from '../../../../shared/utils/humanize-code';
 
 /**
  * Compliance statuses that warrant admin attention — Overdue items risk
@@ -91,8 +92,15 @@ export class AdminOverviewComponent implements OnInit {
     }
     return [...counts.entries()]
       .sort((a, b) => b[1] - a[1])
-      .map(([role, count]) => ({ role, count }));
+      .map(([role, count]) => ({ role, label: humanizeCode(role), count }));
   });
+
+  /** Audit action as words: the audit-log preset label when one exists, else the code split into words. */
+  protected actionLabel(action: string): string {
+    const key = `adminPanels.auditLog.presets.${action.charAt(0).toLowerCase()}${action.slice(1)}`;
+    const label = this.translate.instant(key);
+    return label === key ? humanizeCode(action) : label;
+  }
 
   protected readonly capabilityEnabled = computed(
     () => this.capabilityService.capabilities().filter(c => c.enabled).length,

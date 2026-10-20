@@ -1,10 +1,16 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed, ComponentFixtureAutoDetect } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { Observable, of } from 'rxjs';
 
 import { DataTableComponent } from './data-table.component';
 import { ColumnDef } from '../../models/column-def.model';
 import { UserPreferencesService } from '../../services/user-preferences.service';
+
+class EmptyLoader implements TranslateLoader {
+  getTranslation(): Observable<Record<string, string>> { return of({}); }
+}
 
 describe('DataTableComponent · formatCellValue', () => {
   const dateCol: ColumnDef = { field: 'date', header: 'Date', type: 'date' };
@@ -47,5 +53,33 @@ describe('DataTableComponent · formatCellValue', () => {
 
   it('leaves empty date cells empty', () => {
     expect(table.formatCellValue({ date: null }, dateCol)).toBeNull();
+  });
+});
+
+describe('DataTableComponent · column menu', () => {
+  beforeEach(() => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideNoopAnimations(),
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: EmptyLoader } }),
+        { provide: UserPreferencesService, useValue: { get: () => null, set: () => undefined } },
+      ],
+    });
+  });
+
+  it('labels a headerless column menu generically instead of announcing " options"', () => {
+    const fixture = TestBed.createComponent(DataTableComponent);
+    fixture.componentRef.setInput('tableId', 'spec-table');
+    fixture.componentRef.setInput('columns', [
+      { field: 'name', header: 'Name' },
+      { field: 'actions', header: '' },
+    ] satisfies ColumnDef[]);
+    fixture.componentRef.setInput('data', [{ id: 1, name: 'A' }]);
+    fixture.detectChanges();
+
+    const menus = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.data-table__col-menu-btn'));
+    expect(menus.length).toBe(2);
+    expect(menus.map(m => m.getAttribute('aria-label'))).toEqual(['shared.columnMenu', 'shared.columnMenuUnnamed']);
   });
 });

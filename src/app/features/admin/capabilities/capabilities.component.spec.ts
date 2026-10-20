@@ -13,7 +13,7 @@ import { ConsultantModeService } from '../../../shared/services/consultant-mode.
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
-import { CapabilityDescriptorEntry } from '../../../shared/models/capability-descriptor.model';
+import { CapabilityDescriptor, CapabilityDescriptorEntry } from '../../../shared/models/capability-descriptor.model';
 import { CapabilitiesComponent } from './capabilities.component';
 
 @Component({
@@ -41,6 +41,8 @@ function entry(code: string, area: string, name: string): CapabilityDescriptorEn
 describe('CapabilitiesComponent', () => {
   let fixture: ComponentFixture<CapabilitiesComponent>;
   let consultantMode: ReturnType<typeof signal<boolean>>;
+  let descriptor: ReturnType<typeof signal<CapabilityDescriptor | null>>;
+  let bannerDismissed: ReturnType<typeof signal<boolean>>;
 
   function render(): HTMLElement {
     fixture = TestBed.createComponent(CapabilitiesComponent);
@@ -56,6 +58,8 @@ describe('CapabilitiesComponent', () => {
 
   beforeEach(() => {
     consultantMode = signal(false);
+    descriptor = signal<CapabilityDescriptor | null>(null);
+    bannerDismissed = signal(true);
     TestBed.configureTestingModule({
       imports: [CapabilitiesComponent, TranslateModule.forRoot()],
       providers: [
@@ -64,6 +68,7 @@ describe('CapabilitiesComponent', () => {
           provide: CapabilityService,
           useValue: {
             loading: signal(false),
+            descriptor,
             capabilities: signal([
               entry('CAP-ACCT-FULLGL', 'ACCT', 'Built-in full general ledger'),
               entry('CAP-O2C-SO', 'O2C', 'Sales orders'),
@@ -73,7 +78,7 @@ describe('CapabilitiesComponent', () => {
           },
         },
         { provide: ConsultantModeService, useValue: { enabled: consultantMode, toggle: () => consultantMode.update((v) => !v) } },
-        { provide: CapabilityInstallStateService, useValue: { dismissed: signal(true), dismiss: () => undefined } },
+        { provide: CapabilityInstallStateService, useValue: { dismissed: bannerDismissed, dismiss: () => undefined } },
         { provide: SnackbarService, useValue: { success: () => undefined, error: () => undefined } },
       ],
     });
@@ -133,6 +138,39 @@ describe('CapabilitiesComponent', () => {
 
     expect(el.querySelector('[data-testid="capability-settings-results"]')).toBeNull();
   });
+
+  describe('onboarding banner', () => {
+    const descriptorWith = (onboardingComplete: boolean): CapabilityDescriptor =>
+      ({ generatedAt: '2026-10-19T00:00:00Z', totalCount: 3, enabledCount: 2, capabilities: [], onboardingComplete });
+    const banner = (el: HTMLElement) => el.querySelector('[data-testid="capability-onboarding-banner"]');
+
+    it('shows on an install the server reports as not yet onboarded', () => {
+      bannerDismissed.set(false);
+      descriptor.set(descriptorWith(false));
+
+      expect(banner(render())).not.toBeNull();
+    });
+
+    it('stays hidden once the server reports a preset applied or discovery run, even without a local dismissal', () => {
+      bannerDismissed.set(false);
+      descriptor.set(descriptorWith(true));
+
+      expect(banner(render())).toBeNull();
+    });
+
+    it('stays hidden after the user skips it on this browser', () => {
+      bannerDismissed.set(true);
+      descriptor.set(descriptorWith(false));
+
+      expect(banner(render())).toBeNull();
+    });
+
+    it('does not flash before the descriptor has loaded', () => {
+      bannerDismissed.set(false);
+
+      expect(banner(render())).toBeNull();
+    });
+  });
 });
 
 describe('CapabilitiesComponent toggles', () => {
@@ -151,7 +189,7 @@ describe('CapabilitiesComponent toggles', () => {
         provideRouter([]),
         {
           provide: CapabilityService,
-          useValue: { loading: signal(false), capabilities: signal([fullGl]), load, setEnabled, isEnabled: () => false },
+          useValue: { loading: signal(false), descriptor: signal(null), capabilities: signal([fullGl]), load, setEnabled, isEnabled: () => false },
         },
         { provide: ConsultantModeService, useValue: { enabled: signal(false), toggle: () => undefined } },
         { provide: CapabilityInstallStateService, useValue: { dismissed: signal(true), dismiss: () => undefined } },

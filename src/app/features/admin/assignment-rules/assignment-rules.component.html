@@ -70,9 +70,10 @@
         formControlName="priority" [required]="true"
         data-testid="assignment-rule-priority" />
       @if (showRoundRobinFields()) {
-        <app-input [label]="'admin.assignmentRules.specRepIds' | translate"
+        <app-select [label]="'admin.assignmentRules.specRepIds' | translate"
           formControlName="specRepIds"
-          [placeholder]="'admin.assignmentRules.specRepIdsPlaceholder' | translate"
+          [multiple]="true"
+          [options]="repOptions()"
           data-testid="assignment-rule-repids" />
         <p class="hint-text">{{ 'admin.assignmentRules.specRepIdsHint' | translate }}</p>
       }
