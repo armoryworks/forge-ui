@@ -391,3 +391,36 @@ describe('InputComponent · phone and postal code masks', () => {
     expect(field(1).getAttribute('maxlength')).toBe('20');
   });
 });
+
+@Component({
+  selector: 'app-input-counter-host',
+  standalone: true,
+  imports: [ReactiveFormsModule, InputComponent],
+  template: `<app-input label="Code" [maxlength]="10" [formControl]="code" />`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+class CounterHostComponent {
+  readonly code = new FormControl<string>('');
+}
+
+describe('InputComponent · character counter', () => {
+  it('appears only once the value nears the max length', async () => {
+    TestBed.configureTestingModule({ providers: [provideNoopAnimations()] });
+    const fixture = TestBed.createComponent(CounterHostComponent);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const el: HTMLElement = fixture.nativeElement;
+    const counter = () => el.querySelector('[data-testid="input-counter"]')?.textContent?.trim() ?? null;
+    const inputEl = el.querySelector('input') as HTMLInputElement;
+
+    inputEl.value = 'abcde';
+    inputEl.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(counter()).toBeNull();
+
+    inputEl.value = 'abcdefgh';
+    inputEl.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(counter()).toBe('8 / 10');
+  });
+});

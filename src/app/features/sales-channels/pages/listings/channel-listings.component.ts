@@ -21,6 +21,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ChannelListingService } from '../../services/channel-listing.service';
 import { SalesChannelService } from '../../services/sales-channel.service';
 import { ChannelListing } from '../../models/channel-listing.model';
+import { SalesChannel } from '../../models/sales-channel.model';
 import {
   MapListingDialogComponent,
   MapListingDialogData,
@@ -71,6 +72,7 @@ export class ChannelListingsPageComponent {
   protected readonly loading = signal(false);
   protected readonly syncing = signal(false);
   protected readonly channelOptions = signal<SelectOption[]>([]);
+  private readonly retailChannels = signal<SalesChannel[]>([]);
 
   // URL is the source of truth for the filters — a triage queue is exactly the
   // kind of view someone pastes into chat to say "look at these".
@@ -103,8 +105,15 @@ export class ChannelListingsPageComponent {
 
   protected readonly isEmpty = computed(() => !this.loading() && this.listings().length === 0);
 
+  private readonly listingsInScope = computed(() => {
+    const channelId = this.selectedChannelId();
+    return this.retailChannels()
+      .filter((c) => channelId == null || c.id === channelId)
+      .reduce((sum, c) => sum + c.listingCount, 0);
+  });
+
   protected readonly emptyMessageKey = computed(() =>
-    this.unmappedOnly() ? 'channelListings.emptyUnmapped' : 'channelListings.empty',
+    this.unmappedOnly() && this.listingsInScope() > 0 ? 'channelListings.emptyUnmapped' : 'channelListings.empty',
   );
 
   protected readonly columns: ColumnDef[] = [
@@ -119,6 +128,7 @@ export class ChannelListingsPageComponent {
   constructor() {
     this.channelService.getChannels().subscribe({
       next: (channels) => {
+        this.retailChannels.set(channels.filter((c) => c.isRetail));
         this.channelOptions.set([
           { value: null, label: this.translate.instant('channelListings.allChannels') },
           ...channels.filter((c) => c.isRetail).map((c) => ({ value: c.id, label: c.name })),

@@ -2155,7 +2155,8 @@
         "Invalid": "Invalid",
         "DuplicateWithinBatch": "Duplicate in file",
         "DuplicateExistingCustomer": "Already exists"
-      }
+      },
+      "missingName": "Row {{row}}: no customer name, so this row was skipped."
     },
     "fork": {
       "title": "How would you like to add this customer?",
@@ -2247,7 +2248,7 @@
     "customerActivated": "Customer activated.",
     "customerDeleted": "Customer deleted.",
     "deleteCustomerTitle": "Delete Customer?",
-    "deleteCustomerMessage": "This will remove \"{name}\" from the system. This action cannot be undone.",
+    "deleteCustomerMessage": "This will remove \"{{name}}\" from the system. This action cannot be undone.",
     "newContact": "New Contact",
     "editContact": "Edit Contact",
     "addContact": "Add Contact",
@@ -2258,7 +2259,7 @@
     "contactCreated": "Contact created.",
     "contactRemoved": "Contact removed.",
     "deleteContactTitle": "Delete Contact?",
-    "deleteContactMessage": "Remove \"{name}\" from this customer?",
+    "deleteContactMessage": "Remove \"{{name}}\" from this customer?",
     "noJobsLinked": "No jobs linked",
     "firstName": "First Name",
     "lastName": "Last Name",
@@ -2280,7 +2281,7 @@
       "billing": "Billing",
       "shipping": "Shipping"
     },
-    "archiveMessage": "This customer will be archived.",
+    "archiveMessage": "Archive \"{{name}}\"? This customer has {{orders}} open order(s) and {{invoices}} open invoice(s).",
     "archiveTitle": "Archive Customer?",
     "archived": "Customer archived",
     "saved": "Customer saved",
@@ -2336,7 +2337,7 @@
       "hidePaymentsPlural": "Hide {{count}} payments",
       "placeHold": "Place Hold",
       "placeHoldDialogTitle": "Place Credit Hold",
-      "placeHoldDialogHint": "Customer will be blocked from new orders while on hold.",
+      "placeHoldDialogHint": "While on hold, the customer's orders can still be saved as drafts, but they can't be confirmed or shipped.",
       "holdReason": "Hold Reason",
       "toggleCreditDetailsAriaLabel": "Toggle credit details",
       "placeHoldAriaLabel": "Place credit hold"
@@ -2586,6 +2587,7 @@
       "typeOther": "Other",
       "addTitle": "Add Tax Document",
       "stateField": "State",
+      "stateNone": "No specific state (multistate)",
       "typeField": "Certificate Type",
       "certificateNumberField": "Certificate Number",
       "expirationField": "Expiration Date",
@@ -2598,7 +2600,8 @@
       "deleteTitle": "Delete Tax Document?",
       "deleteMessage": "This will remove {{name}} from the customer's tax documents. The uploaded file remains in Documents.",
       "documentDeleted": "Tax document deleted"
-    }
+    },
+    "colNumber": "Number"
   },
   "priceListEntry": {
     "partLabel": "Part",
@@ -2927,7 +2930,8 @@
       "expectedTimelineHint": "Weeks to first piece, or however the customer phrased it.",
       "back": "Back",
       "next": "Next",
-      "create": "Create lead"
+      "create": "Create lead",
+      "detailsTitle": "New lead"
     },
     "subtitle": "Track and qualify potential sales opportunities",
     "searchPlaceholder": "Search leads...",
@@ -2964,23 +2968,26 @@
       "ndaUpdated": "NDA state set to {{ state }}.",
       "exportControlUpdated": "Export-control clearance set to {{ state }}.",
       "capFit": {
-        "NotAssessed": "Cap fit: not assessed",
-        "Fits": "Cap fit: fits",
-        "NeedsReview": "Cap fit: needs review",
-        "DoesntFit": "Cap fit: doesn't fit"
+        "NotAssessed": "Not assessed",
+        "Fits": "Fits",
+        "NeedsReview": "Needs review",
+        "DoesntFit": "Doesn't fit"
       },
       "nda": {
-        "None": "none",
-        "Requested": "requested",
-        "InForce": "in force",
-        "Expired": "expired"
+        "None": "None",
+        "Requested": "Requested",
+        "InForce": "In force",
+        "Expired": "Expired"
       },
       "export": {
-        "NotApplicable": "n/a",
-        "Pending": "pending",
-        "Cleared": "cleared",
-        "Denied": "denied"
-      }
+        "NotApplicable": "N/A",
+        "Pending": "Pending",
+        "Cleared": "Cleared",
+        "Denied": "Denied"
+      },
+      "capFitChip": "Cap fit: {{ value }}",
+      "ndaChip": "NDA: {{ value }}",
+      "exportChip": "ITAR: {{ value }}"
     },
     "lostReason": "Lost Reason",
     "markAsLost": "Mark as Lost",
@@ -3070,7 +3077,10 @@
       "cooldownNotes": "Notes",
       "queueSource": "Suppressed from the outreach queue",
       "saved": "Outreach preferences saved"
-    }
+    },
+    "convertAnyway": "Convert anyway",
+    "convertRedFlagsMessage": "This lead still has open concerns: {{flags}}. Convert it to a customer anyway?",
+    "convertRedFlagsTitle": "Convert this lead?"
   },
   "expenses": {
     "title": "Expenses",
@@ -3299,7 +3309,7 @@
     "assetCreated": "Asset created.",
     "assetDeleted": "Asset deleted.",
     "deleteAssetTitle": "Delete Asset?",
-    "deleteAssetMessage": "This will permanently delete \"{name}\".",
+    "deleteAssetMessage": "This will permanently delete \"{{name}}\".",
     "colName": "Name",
     "colType": "Type",
     "colLocation": "Location",
@@ -4639,7 +4649,7 @@
     "manual": "Manual",
     "never": "Never",
     "deleteTitle": "Delete Template?",
-    "deleteMessage": "This will deactivate \"{name}\". Existing submissions will be preserved.",
+    "deleteMessage": "This will deactivate \"{{name}}\". Existing submissions will be preserved.",
     "deleted": "Template deleted",
     "synced": "All auto-sync templates synced",
     "colName": "Name",
@@ -5092,7 +5102,7 @@
     "noBarcodeAssigned": "No barcode assigned",
     "generateBarcode": "Generate Barcode",
     "offlineWithPending": "You're offline. {{count}} pending change(s) will sync when reconnected.",
-    "offlineNoChanges": "You're offline. Changes will sync when reconnected.",
+    "offlineNoChanges": "You're offline. Changes made now won't be saved until you reconnect.",
     "syncing": "Syncing {{count}} change(s)...",
     "allChangesSynced": "All changes synced.",
     "skipToContent": "Skip to main content",
@@ -5120,7 +5130,9 @@
     },
     "preview": {
       "open": "Open"
-    }
+    },
+    "selectRow": "Select row",
+    "selectAllRows": "Select all rows"
   },
   "address": {
     "street": "Street",
@@ -5842,7 +5854,7 @@
     "orderNumberPlaceholder": "Auto-generated if blank",
     "recurring": {
       "title": "Recurring Order Templates",
-      "hint": "Templates the nightly Hangfire job spins into fresh sales orders. Each template carries a customer, an interval, and the lines to replicate.",
+      "hint": "Templates that a nightly background job turns into new sales orders. Each template carries a customer, an interval, and the lines to repeat.",
       "newRecurring": "New Recurring Template",
       "empty": "No recurring order templates yet. Create one to schedule auto-generated sales orders for a customer.",
       "neverRun": "Never run",
@@ -5989,7 +6001,8 @@
       "overdue": "Overdue",
       "upcoming": "Upcoming",
       "noSchedule": "No schedule milestones available",
-      "timelineLabel": "Schedule timeline"
+      "timelineLabel": "Schedule timeline",
+      "shipped": "Shipped"
     },
     "lineItemsNoJobWarning": "Some line items have no associated jobs",
     "invoicesUninvoicedEmpty": "No invoices yet — this order has shipped items that haven't been invoiced.",
@@ -6114,7 +6127,8 @@
     "shipTo": "Ship to",
     "billTo": "Bill to",
     "zeroPriceConfirm": "This line is priced at $0.00. Add it anyway?",
-    "listPrice": "List price"
+    "listPrice": "List price",
+    "shippingAddress": "Shipping Address"
   },
   "salesOrderList": {
     "cancelOrder": "Cancel order"
@@ -6283,7 +6297,12 @@
     "downloadPdf": "Download PDF",
     "acceptQuoteTitle": "Accept Quote?",
     "acceptQuoteMessage": "Mark \"{{number}}\" as accepted by the customer?",
-    "viewOrder": "View order"
+    "viewOrder": "View order",
+    "convertOnHoldMessage": "This customer is on credit hold ({{reason}}). The order will be created as a draft, but it can't be confirmed or shipped until the hold is released. Convert anyway?",
+    "convertOnHoldTitle": "Customer on credit hold",
+    "taxAutoFilledTooltip": "Auto-filled from the customer's state. Edit to override.",
+    "taxAutoDefault": "Default {{rate}}%",
+    "creditHoldWarning": "This customer is on credit hold ({{reason}}). You can still save and send this quote, but an order converted from it can't be confirmed or shipped until the hold is released."
   },
   "shipments": {
     "shipmentNumberLabel": "Shipment Number",
@@ -9600,10 +9619,10 @@
         "close": "Close"
       },
       "mode": {
-        "express": "Quick add",
-        "expressSublabel": "All at once",
+        "express": "One page",
+        "expressSublabel": "All fields at once",
         "guided": "Step by step",
-        "guidedSublabel": "Step by step",
+        "guidedSublabel": "One section at a time",
         "toggle": "Mode"
       },
       "modeSwitch": {

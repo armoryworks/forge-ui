@@ -10,4 +10,5 @@ export interface ScheduleMilestone {
   materialsNeededBy: string | null;
   poOrderBy: string | null;
   isAtRisk: boolean;
+  isShipped?: boolean;
 }

@@ -400,6 +400,38 @@ export class LeadDetailPanelComponent {
     const lead = this.lead();
     if (!lead) return;
 
+    const flags = this.conversionRedFlags(lead);
+    if (flags.length === 0) {
+      this.performConvert();
+      return;
+    }
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '440px',
+      data: {
+        title: this.translate.instant('leads.convertRedFlagsTitle'),
+        message: this.translate.instant('leads.convertRedFlagsMessage', { flags: flags.join(', ') }),
+        confirmLabel: this.translate.instant('leads.convertAnyway'),
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (confirmed) this.performConvert();
+    });
+  }
+
+  private conversionRedFlags(lead: { capabilityFit?: string | null; ndaState?: string | null; exportControl?: string | null }): string[] {
+    const flags: string[] = [];
+    const chip = (key: string, group: string, value: string) =>
+      this.translate.instant(`leads.classification.${key}`, { value: this.translate.instant(`leads.classification.${group}.${value}`) });
+    if (lead.exportControl === 'Denied' || lead.exportControl === 'Pending') flags.push(chip('exportChip', 'export', lead.exportControl));
+    if (lead.capabilityFit === 'DoesntFit' || lead.capabilityFit === 'NeedsReview') flags.push(chip('capFitChip', 'capFit', lead.capabilityFit));
+    if (lead.ndaState === 'Requested' || lead.ndaState === 'Expired') flags.push(chip('ndaChip', 'nda', lead.ndaState));
+    return flags;
+  }
+
+  private performConvert(): void {
+    const lead = this.lead();
+    if (!lead) return;
+
     // Optimistic flip (mirrors updateStatus): show the Converted state
     // immediately — the convert button gives way to the converted-info
     // banner and the status chip turns green — so the rep gets visible

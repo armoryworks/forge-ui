@@ -10,6 +10,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { US_STATES } from '../../../../shared/components/address-form/address-form.component';
 
 import { CustomerTaxDocumentService } from '../../services/customer-tax-document.service';
 
@@ -57,10 +58,15 @@ export class CustomerTaxDocumentDialogComponent {
     { value: 'Other', label: this.translate.instant('customers.taxDocuments.typeOther') },
   ];
 
+  protected readonly stateOptions: SelectOption[] = [
+    { value: '', label: this.translate.instant('customers.taxDocuments.stateNone') },
+    ...US_STATES.map(s => ({ value: String(s['value']), label: String(s['label']) })),
+  ];
+
   protected readonly form = new FormGroup({
     stateCode: new FormControl<string>('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.pattern(/^[A-Za-z]{2}$/)],
+      validators: [Validators.pattern(/^[A-Za-z]{2}$/)],
     }),
     certificateType: new FormControl<string>('Exemption', { nonNullable: true, validators: [Validators.required] }),
     certificateNumber: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(100)] }),
@@ -85,7 +91,7 @@ export class CustomerTaxDocumentDialogComponent {
     this.saving.set(true);
     this.taxDocumentService.createTaxDocument(this.customerId(), {
       fileAttachmentId: this.fileAttachmentId(),
-      stateCode: v.stateCode.toUpperCase(),
+      stateCode: v.stateCode ? v.stateCode.toUpperCase() : null,
       certificateType: v.certificateType,
       certificateNumber: v.certificateNumber || undefined,
       expirationDate: v.expirationDate ? toIsoDate(v.expirationDate)! : undefined,

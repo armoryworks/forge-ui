@@ -4,16 +4,6 @@
     <section class="overview-section">
       <h3 class="overview-section__title">{{ 'customers.overview.accountDetails' | translate }}</h3>
       <div class="detail-rows">
-        <div class="detail-row">
-          <span class="detail-row__label">{{ 'customers.overview.customerName' | translate }}</span>
-          <span class="detail-row__value">{{ customer().name }}</span>
-        </div>
-        @if (customer().companyName) {
-          <div class="detail-row">
-            <span class="detail-row__label">{{ 'customers.overview.company' | translate }}</span>
-            <span class="detail-row__value">{{ customer().companyName }}</span>
-          </div>
-        }
         @if (customer().email) {
           <div class="detail-row">
             <span class="detail-row__label">{{ 'customers.colEmail' | translate }}</span>
@@ -26,12 +16,6 @@
             <a class="detail-row__link" [href]="'tel:' + customer().phone">{{ customer().phone }}</a>
           </div>
         }
-        <div class="detail-row">
-          <span class="detail-row__label">{{ 'common.status' | translate }}</span>
-          <span class="chip" [class.chip--success]="customer().isActive" [class.chip--muted]="!customer().isActive">
-            {{ (customer().isActive ? 'customers.detail.active' : 'customers.detail.inactive') | translate }}
-          </span>
-        </div>
         <div class="detail-row">
           <span class="detail-row__label">{{ 'customers.overview.customerSince' | translate }}</span>
           <span class="detail-row__value">{{ customer().createdAt | date:'MM/dd/yyyy' }}</span>

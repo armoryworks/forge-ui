@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
@@ -26,7 +27,7 @@ import { CustomerSummary } from '../../models/customer-summary.model';
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe,
-    InputComponent, ToggleComponent, ValidationButtonComponent, CurrencyInputComponent,
+    InputComponent, ToggleComponent, ValidationButtonComponent, CurrencyInputComponent, CurrencyDisplayComponent,
   ],
   templateUrl: './customer-identity-cluster.component.html',
   styleUrl: './customer-clusters.shared.scss',

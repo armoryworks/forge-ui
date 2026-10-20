@@ -2155,7 +2155,8 @@
         "Invalid": "Inválido",
         "DuplicateWithinBatch": "Duplicado en el archivo",
         "DuplicateExistingCustomer": "Ya existe"
-      }
+      },
+      "missingName": "Fila {{row}}: sin nombre de cliente, por lo que se omitió esta fila."
     },
     "fork": {
       "title": "¿Cómo deseas agregar este cliente?",
@@ -2242,7 +2243,7 @@
     "customerActivated": "Cliente activado.",
     "customerDeleted": "Cliente eliminado.",
     "deleteCustomerTitle": "¿Eliminar Cliente?",
-    "deleteCustomerMessage": "Esto eliminará \"{name}\" del sistema. Esta acción no se puede deshacer.",
+    "deleteCustomerMessage": "Esto eliminará \"{{name}}\" del sistema. Esta acción no se puede deshacer.",
     "newContact": "Nuevo Contacto",
     "editContact": "Editar Contacto",
     "addContact": "Agregar Contacto",
@@ -2253,7 +2254,7 @@
     "contactCreated": "Contacto creado.",
     "contactRemoved": "Contacto eliminado.",
     "deleteContactTitle": "¿Eliminar Contacto?",
-    "deleteContactMessage": "¿Eliminar \"{name}\" de este cliente?",
+    "deleteContactMessage": "¿Eliminar \"{{name}}\" de este cliente?",
     "noJobsLinked": "Sin trabajos vinculados",
     "firstName": "Nombre",
     "lastName": "Apellido",
@@ -2275,7 +2276,7 @@
       "billing": "Facturación",
       "shipping": "Envíos"
     },
-    "archiveMessage": "Este cliente será archivado.",
+    "archiveMessage": "¿Archivar \"{{name}}\"? Este cliente tiene {{orders}} orden(es) abierta(s) y {{invoices}} factura(s) abierta(s).",
     "archiveTitle": "¿Archivar Cliente?",
     "archived": "Cliente archivado",
     "saved": "Cliente guardado",
@@ -2331,7 +2332,7 @@
       "hidePaymentsPlural": "Ocultar {{count}} pagos",
       "placeHold": "Aplicar retención",
       "placeHoldDialogTitle": "Aplicar retención de crédito",
-      "placeHoldDialogHint": "El cliente quedará bloqueado para nuevos pedidos mientras esté retenido.",
+      "placeHoldDialogHint": "Mientras esté bloqueado, las órdenes del cliente se pueden guardar como borradores, pero no se pueden confirmar ni enviar.",
       "holdReason": "Motivo de la retención",
       "toggleCreditDetailsAriaLabel": "Alternar detalles de crédito",
       "placeHoldAriaLabel": "Aplicar retención de crédito"
@@ -2586,6 +2587,7 @@
       "typeOther": "Otro",
       "addTitle": "Agregar documento fiscal",
       "stateField": "Estado",
+      "stateNone": "Sin estado específico (varios estados)",
       "typeField": "Tipo de certificado",
       "certificateNumberField": "Número de certificado",
       "expirationField": "Fecha de vencimiento",
@@ -2598,7 +2600,8 @@
       "deleteTitle": "¿Eliminar documento fiscal?",
       "deleteMessage": "Esto eliminará {{name}} de los documentos fiscales del cliente. El archivo cargado permanece en Documentos.",
       "documentDeleted": "Documento fiscal eliminado"
-    }
+    },
+    "colNumber": "Número"
   },
   "priceListEntry": {
     "partLabel": "Pieza",
@@ -2926,7 +2929,8 @@
       "expectedTimelineHint": "Semanas hasta la primera pieza, o como lo expresó el cliente.",
       "back": "Atrás",
       "next": "Siguiente",
-      "create": "Crear prospecto"
+      "create": "Crear prospecto",
+      "detailsTitle": "Nuevo prospecto"
     },
     "lost": "Perdido",
     "subtitle": "Rastree y califique oportunidades de venta potenciales",
@@ -2964,23 +2968,26 @@
       "ndaUpdated": "Estado de NDA definido como {{ state }}.",
       "exportControlUpdated": "Autorización de control de exportación definida como {{ state }}.",
       "capFit": {
-        "NotAssessed": "Capacidad: sin evaluar",
-        "Fits": "Capacidad: ajusta",
-        "NeedsReview": "Capacidad: requiere revisión",
-        "DoesntFit": "Capacidad: no ajusta"
+        "NotAssessed": "Sin evaluar",
+        "Fits": "Ajusta",
+        "NeedsReview": "Requiere revisión",
+        "DoesntFit": "No ajusta"
       },
       "nda": {
-        "None": "ninguno",
-        "Requested": "solicitado",
-        "InForce": "vigente",
-        "Expired": "expirado"
+        "None": "Ninguno",
+        "Requested": "Solicitado",
+        "InForce": "Vigente",
+        "Expired": "Expirado"
       },
       "export": {
-        "NotApplicable": "n/a",
-        "Pending": "pendiente",
-        "Cleared": "autorizado",
-        "Denied": "denegado"
-      }
+        "NotApplicable": "N/D",
+        "Pending": "Pendiente",
+        "Cleared": "Autorizado",
+        "Denied": "Denegado"
+      },
+      "capFitChip": "Capacidad: {{ value }}",
+      "ndaChip": "NDA: {{ value }}",
+      "exportChip": "ITAR: {{ value }}"
     },
     "lostReason": "Razón de Pérdida",
     "markAsLost": "Marcar como Perdido",
@@ -3070,7 +3077,10 @@
       "cooldownNotes": "Notas",
       "queueSource": "Suprimido desde la cola de contacto",
       "saved": "Preferencias de contacto guardadas"
-    }
+    },
+    "convertAnyway": "Convertir de todos modos",
+    "convertRedFlagsMessage": "Este prospecto todavía tiene asuntos pendientes: {{flags}}. ¿Convertirlo en cliente de todos modos?",
+    "convertRedFlagsTitle": "¿Convertir este prospecto?"
   },
   "expenses": {
     "title": "Gastos",
@@ -3293,7 +3303,7 @@
     "assetCreated": "Activo creado.",
     "assetDeleted": "Activo eliminado.",
     "deleteAssetTitle": "¿Eliminar Activo?",
-    "deleteAssetMessage": "Esto eliminará permanentemente \"{name}\".",
+    "deleteAssetMessage": "Esto eliminará permanentemente \"{{name}}\".",
     "colName": "Nombre",
     "colType": "Tipo",
     "colLocation": "Ubicación",
@@ -4639,7 +4649,7 @@
     "manual": "Manual",
     "never": "Nunca",
     "deleteTitle": "¿Eliminar Plantilla?",
-    "deleteMessage": "Esto desactivará \"{name}\". Las presentaciones existentes se conservarán.",
+    "deleteMessage": "Esto desactivará \"{{name}}\". Las presentaciones existentes se conservarán.",
     "deleted": "Plantilla eliminada",
     "synced": "Todas las plantillas auto-sync sincronizadas",
     "colName": "Nombre",
@@ -5094,7 +5104,7 @@
     "cancel": "Cancelar",
     "send": "Enviar",
     "offlineWithPending": "Estás sin conexión. {{count}} cambio(s) pendiente(s) se sincronizarán al reconectarse.",
-    "offlineNoChanges": "Estás sin conexión. Los cambios se sincronizarán al reconectarse.",
+    "offlineNoChanges": "Está sin conexión. Los cambios que haga ahora no se guardarán hasta que se reconecte.",
     "syncing": "Sincronizando {{count}} cambio(s)...",
     "allChangesSynced": "Todos los cambios sincronizados.",
     "skipToContent": "Saltar al contenido principal",
@@ -5120,7 +5130,9 @@
     },
     "preview": {
       "open": "Abrir"
-    }
+    },
+    "selectRow": "Seleccionar fila",
+    "selectAllRows": "Seleccionar todas las filas"
   },
   "addressForm": {
     "streetAddress": "Dirección",
@@ -5835,7 +5847,7 @@
     "orderNumberPlaceholder": "Se genera automáticamente si se deja en blanco",
     "recurring": {
       "title": "Plantillas de Órdenes Recurrentes",
-      "hint": "Plantillas que el job nocturno de Hangfire convierte en órdenes de venta nuevas. Cada plantilla lleva un cliente, un intervalo y las líneas a replicar.",
+      "hint": "Plantillas que un proceso nocturno en segundo plano convierte en órdenes de venta nuevas. Cada plantilla lleva un cliente, un intervalo y las líneas a repetir.",
       "newRecurring": "Nueva plantilla recurrente",
       "empty": "Aún no hay plantillas de órdenes recurrentes. Crea una para programar órdenes de venta auto-generadas para un cliente.",
       "neverRun": "Nunca ejecutado",
@@ -5997,7 +6009,8 @@
       "overdue": "Atrasado",
       "upcoming": "Próximo",
       "noSchedule": "Sin hitos de programación disponibles",
-      "timelineLabel": "Cronograma de programación"
+      "timelineLabel": "Cronograma de programación",
+      "shipped": "Enviado"
     },
     "addLine": "Agregar línea",
     "editLine": "Editar línea",
@@ -6107,7 +6120,8 @@
     "shipTo": "Enviar a",
     "billTo": "Facturar a",
     "zeroPriceConfirm": "Esta línea tiene precio de $0.00. ¿Agregarla de todos modos?",
-    "listPrice": "Precio de lista"
+    "listPrice": "Precio de lista",
+    "shippingAddress": "Dirección de envío"
   },
   "salesOrderList": {
     "cancelOrder": "Cancelar orden"
@@ -6276,7 +6290,12 @@
     "downloadPdf": "Descargar PDF",
     "acceptQuoteTitle": "¿Aceptar Cotización?",
     "acceptQuoteMessage": "¿Marcar \"{{number}}\" como aceptada por el cliente?",
-    "viewOrder": "Ver orden"
+    "viewOrder": "Ver orden",
+    "convertOnHoldMessage": "Este cliente tiene un bloqueo de crédito ({{reason}}). La orden se creará como borrador, pero no se podrá confirmar ni enviar hasta que se libere el bloqueo. ¿Convertir de todos modos?",
+    "convertOnHoldTitle": "Cliente con bloqueo de crédito",
+    "taxAutoFilledTooltip": "Completado según el estado del cliente. Edítelo para reemplazarlo.",
+    "taxAutoDefault": "Predeterminado {{rate}}%",
+    "creditHoldWarning": "Este cliente tiene un bloqueo de crédito ({{reason}}). Aún puede guardar y enviar esta cotización, pero una orden convertida desde ella no se podrá confirmar ni enviar hasta que se libere el bloqueo."
   },
   "shipments": {
     "shipmentNumberLabel": "Número de envío",
@@ -9593,10 +9612,10 @@
         "close": "Close"
       },
       "mode": {
-        "express": "Alta rápida",
-        "expressSublabel": "Todo a la vez",
+        "express": "Una página",
+        "expressSublabel": "Todos los campos a la vez",
         "guided": "Paso a paso",
-        "guidedSublabel": "Paso a paso",
+        "guidedSublabel": "Una sección a la vez",
         "toggle": "Modo"
       },
       "modeSwitch": {

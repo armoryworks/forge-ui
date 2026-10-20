@@ -12,7 +12,7 @@
       <app-datepicker data-testid="interaction-date" [label]="'customers.interactions.date' | translate"
                       formControlName="interactionDate" [required]="true" [max]="today" />
       <app-input data-testid="interaction-duration" [label]="'customers.interactions.durationMinutes' | translate"
-                 type="number" formControlName="durationMinutes" />
+                 type="number" formControlName="durationMinutes" [min]="0" [max]="1440" [step]="1" />
     </div>
     @if (!isEdit) {
       <app-datepicker data-testid="interaction-follow-up-date" [label]="'customers.interactions.followUpDate' | translate"

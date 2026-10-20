@@ -23,6 +23,7 @@
         displayField="jobNumber"
         secondaryDisplayField="title"
         formControlName="originalJobId"
+        [filters]="jobFilters()"
         [required]="true"
         data-testid="return-job"
         [attr.aria-label]="'customerReturns.fieldOriginalJob' | translate" />

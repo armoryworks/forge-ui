@@ -101,6 +101,13 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
     return null;
   });
 
+  protected readonly charCounter = computed(() => {
+    const max = this.maxlength();
+    if (!max || this.type() !== 'text' || this.mask()) return null;
+    const length = String(this.value() ?? '').length;
+    return length >= Math.floor(max * 0.8) ? `${length} / ${max}` : null;
+  });
+
   protected readonly errorStateMatcher: ErrorStateMatcher = {
     isErrorState: () => this.errorMessage() !== null,
   };

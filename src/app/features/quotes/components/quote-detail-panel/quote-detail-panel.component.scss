@@ -85,7 +85,9 @@
     color: var(--text-muted);
   }
 
-  &__right { text-align: right; }
+  &__right,
+  th.lines-table__right,
+  td.lines-table__right { text-align: right; }
   &__mono { font-family: $font-family-mono; font-size: $font-size-xs; }
   &__margin { color: var(--success, #15803d); font-weight: 600; }
   &__muted { color: var(--text-muted); }

@@ -17,7 +17,7 @@ import { SelectComponent, SelectOption } from '../select/select.component';
 import { AddressService } from '../../services/address.service';
 import { Address } from '../../models/address.model';
 
-const US_STATES: AutocompleteOption[] = ([
+export const US_STATES: AutocompleteOption[] = ([
   ['AL', 'Alabama'],
   ['AK', 'Alaska'],
   ['AZ', 'Arizona'],

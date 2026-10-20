@@ -14,6 +14,9 @@ import { PaymentMilestone } from '../../../../shared/models/payment-milestone.mo
 import { SendQuoteEmailDialogComponent } from '../send-quote-email-dialog/send-quote-email-dialog.component';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { AuthService } from '../../../../shared/services/auth.service';
+import { CustomerService } from '../../../customers/services/customer.service';
+import { CreditStatus } from '../../../customers/models/credit-status.model';
 
 interface PanelInternals {
   quote: { set(value: QuoteDetail | null): void; (): QuoteDetail | null };
@@ -207,6 +210,22 @@ describe('QuoteDetailPanelComponent', () => {
     expect(changed).toHaveBeenCalledTimes(1);
     expect(closed).toHaveBeenCalledTimes(1);
     expect(snackbar.successWithNav).toHaveBeenCalledWith(expect.any(String), '/sales-orders/55', expect.any(String));
+  });
+
+  it('asks before converting a quote for a customer on credit hold', () => {
+    vi.spyOn(TestBed.inject(AuthService), 'hasAnyRole').mockReturnValue(true);
+    vi.spyOn(TestBed.inject(CustomerService), 'getCreditStatus')
+      .mockReturnValue(of({ isOnHold: true, holdReason: 'Past due' } as CreditStatus));
+    dialogResult = false;
+
+    panel.convertToOrder();
+
+    expect(dialog.open).toHaveBeenCalledWith(ConfirmDialogComponent, expect.anything());
+    expect(quoteService.convertToOrder).not.toHaveBeenCalled();
+
+    dialogResult = true;
+    panel.convertToOrder();
+    expect(quoteService.convertToOrder).toHaveBeenCalledWith(12);
   });
 
   it('offers mark-paid only on milestones that have no invoice', () => {

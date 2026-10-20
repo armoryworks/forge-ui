@@ -1,5 +1,5 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, signal, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -60,6 +60,7 @@ export class CustomerEstimatesTabComponent implements OnInit {
   private readonly translate = inject(TranslateService);
 
   readonly customerId = input.required<number>();
+  readonly changed = output<void>();
 
   protected readonly estimates = signal<Estimate[]>([]);
   protected readonly loading = signal(false);
@@ -150,13 +151,17 @@ export class CustomerEstimatesTabComponent implements OnInit {
   protected readonly isEditing = computed(() => this.editingId() !== null);
 
   ngOnInit(): void {
-    this.loadEstimates();
+    this.loadEstimates(false);
   }
 
-  protected loadEstimates(): void {
+  protected loadEstimates(notifyChanged = true): void {
     this.loading.set(true);
     this.estimateService.getEstimates(this.customerId()).subscribe({
-      next: data => { this.estimates.set(data); this.loading.set(false); },
+      next: data => {
+        this.estimates.set(data);
+        this.loading.set(false);
+        if (notifyChanged) this.changed.emit();
+      },
       error: () => this.loading.set(false),
     });
   }

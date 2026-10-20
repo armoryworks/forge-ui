@@ -39,7 +39,7 @@
             [disabled]="isPending(row.accessId)"
             (change)="onToggleEnabled(row, $event.checked)"
             (click)="$event.stopPropagation()"
-            [attr.aria-label]="'customers.portalAccessPage.toggleAriaLabel' | translate:{ name: row.contactFullName }" />
+            [aria-label]="'customers.portalAccessPage.toggleAriaLabel' | translate:{ name: row.contactFullName }" />
         </ng-template>
       </app-data-table>
     </div>

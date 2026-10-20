@@ -10,6 +10,7 @@ import { DataTableComponent } from '../../../../../shared/components/data-table/
 import { ColumnCellDirective } from '../../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../../shared/models/column-def.model';
 import { DateOnlyPipe } from '../../../../../shared/pipes/date-only.pipe';
+import { PriorityIndicatorComponent } from '../../../../../shared/components/priority-indicator/priority-indicator.component';
 
 interface CustomerJob {
   id: number;
@@ -17,15 +18,15 @@ interface CustomerJob {
   title: string;
   stageName?: string;
   stageColor?: string;
-  priority?: string;
+  priorityName?: string;
   dueDate?: string;
-  createdAt: string;
+  createdAt?: string;
 }
 
 @Component({
   selector: 'app-customer-jobs-tab',
   standalone: true,
-  imports: [DatePipe, DateOnlyPipe, TranslatePipe, DataTableComponent, ColumnCellDirective],
+  imports: [DatePipe, DateOnlyPipe, TranslatePipe, DataTableComponent, ColumnCellDirective, PriorityIndicatorComponent],
   templateUrl: './customer-jobs-tab.component.html',
   styleUrl: '../customer-detail-tabs.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -44,7 +45,7 @@ export class CustomerJobsTabComponent implements OnInit {
     { field: 'jobNumber', header: this.translate.instant('customers.tabs.colJobNumber'), sortable: true, width: '90px' },
     { field: 'title', header: this.translate.instant('customers.tabs.colTitle'), sortable: true },
     { field: 'stageName', header: this.translate.instant('customers.tabs.colStage'), sortable: true, width: '140px' },
-    { field: 'priority', header: this.translate.instant('customers.tabs.colPriority'), sortable: true, width: '90px' },
+    { field: 'priorityName', header: this.translate.instant('customers.tabs.colPriority'), sortable: true, width: '90px' },
     { field: 'dueDate', header: this.translate.instant('customers.tabs.colDue'), sortable: true, type: 'date', width: '100px' },
     { field: 'createdAt', header: this.translate.instant('customers.colCreated'), sortable: true, type: 'date', width: '100px' },
   ];

@@ -15,6 +15,12 @@
       }
     </ng-template>
 
+    <ng-template appColumnCell="priorityName" let-row>
+      @if ($any(row).priorityName) {
+        <app-priority-indicator [priority]="$any(row).priorityName" [showLabel]="true" size="sm" />
+      }
+    </ng-template>
+
     <ng-template appColumnCell="dueDate" let-row>
       {{ $any(row).dueDate | dateOnly }}
     </ng-template>

@@ -157,6 +157,17 @@ describe('QuoteService', () => {
       expect(result).toBe('second@acme.test');
     });
 
+    it('should use the customer email before a non-primary contact', () => {
+      let result: string | undefined;
+      service.getRecipientEmail(9).subscribe(e => (result = e));
+      httpMock.expectOne(`${apiUrl}/customers/9`).flush({
+        id: 9,
+        email: 'ap@acme.test',
+        contacts: [contact(1, 'first@acme.test')],
+      });
+      expect(result).toBe('ap@acme.test');
+    });
+
     it('should resolve undefined when no contact has an email', () => {
       let result: string | undefined = 'unset';
       service.getRecipientEmail(9).subscribe(e => (result = e));

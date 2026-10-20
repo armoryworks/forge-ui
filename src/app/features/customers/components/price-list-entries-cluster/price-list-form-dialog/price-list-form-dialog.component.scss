@@ -11,6 +11,13 @@
     color: var(--text-muted);
   }
 
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    min-width: 0;
+  }
+
   &__toggle-row {
     display: flex;
     flex-direction: column;

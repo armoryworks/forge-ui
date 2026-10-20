@@ -550,7 +550,13 @@ export class LeadsComponent implements OnInit {
         this.lostReasonControl.setValue('');
         this.loadLeads();
       },
+      error: () => undefined,
     });
+  }
+
+  protected cancelLost(): void {
+    this.lostLeadId.set(null);
+    this.showLostDialog.set(false);
   }
 
   protected getStatusClass(status: string): string {
@@ -601,17 +607,17 @@ export class LeadsComponent implements OnInit {
     const lead: LeadItem = event.item.data;
     if (lead.status === targetStatus) return;
 
-    // Optimistically move the card in the local leads array
-    this.leads.update(all =>
-      all.map(l => l.id === lead.id ? { ...l, status: targetStatus } : l)
-    );
-
     // If dropping into Lost, show the lost reason dialog (same UX as button)
     if (targetStatus === 'Lost') {
       this.lostLeadId.set(lead.id);
       this.showLostDialog.set(true);
       return;
     }
+
+    // Optimistically move the card in the local leads array
+    this.leads.update(all =>
+      all.map(l => l.id === lead.id ? { ...l, status: targetStatus } : l)
+    );
 
     this.leadsService.updateLead(lead.id, { status: targetStatus }).subscribe({
       next: (updated) => {

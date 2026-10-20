@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, input, output, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal, ViewChild } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -53,6 +54,16 @@ export class CustomerReturnDialogComponent {
     createReworkJob: new FormControl<boolean>(false, { nonNullable: true }),
   });
 
+  private readonly selectedCustomerId = toSignal(this.returnForm.controls.customerId.valueChanges, {
+    initialValue: this.returnForm.controls.customerId.value,
+  });
+  protected readonly jobFilters = computed(() => {
+    const customerId = this.selectedCustomerId();
+    const filters: Record<string, string> = {};
+    if (customerId != null) filters['customerId'] = String(customerId);
+    return filters;
+  });
+
   protected readonly violations = FormValidationService.getViolations(this.returnForm, {
     customerId: 'Customer',
     originalJobId: 'Original Job',
@@ -70,6 +81,9 @@ export class CustomerReturnDialogComponent {
   }
 
   constructor() {
+    this.returnForm.controls.customerId.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+      this.returnForm.controls.originalJobId.setValue(null);
+    });
     const r = this.returnDetail();
     if (r) {
       this.returnForm.controls.quantity.disable();

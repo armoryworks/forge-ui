@@ -231,6 +231,14 @@ export class CustomerDetailComponent {
     });
   }
 
+  protected refreshSummary(): void {
+    const id = this.customerId();
+    if (id <= 0) return;
+    this.customerService.getCustomerSummary(id).subscribe({
+      next: c => this.customer.set(c),
+    });
+  }
+
   protected reloadCustomer(): void {
     const id = this.customerId();
     if (id > 0) this.loadCustomer(id);
@@ -301,7 +309,7 @@ export class CustomerDetailComponent {
       width: '400px',
       data: {
         title: this.translate.instant('customers.archiveTitle'),
-        message: this.translate.instant('customers.archiveMessage'),
+        message: this.translate.instant('customers.archiveMessage', { name: c.name, orders: c.orderCount, invoices: c.openInvoiceCount }),
         confirmLabel: this.translate.instant('common.archive'),
         severity: 'warn',
       } satisfies ConfirmDialogData,
