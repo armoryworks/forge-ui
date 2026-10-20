@@ -129,8 +129,6 @@ export class PoDialogComponent {
 
   protected readonly partFilters = computed<Record<string, string>>(() => ({
     purchasable: 'true',
-    sort: 'partNumber',
-    order: 'asc',
     ...(this.showInactiveParts() ? {} : { isActive: 'true' }),
   }));
 
@@ -289,7 +287,7 @@ export class PoDialogComponent {
       .pipe(
         switchMap(term => term == null
           ? of(null)
-          : this.partsService.getPartsPaged({ procurementSource: 'Make', q: term, pageSize: 5, sort: 'partNumber', order: 'asc' }).pipe(
+          : this.partsService.getPartsPaged({ procurementSource: 'Make', q: term, pageSize: 5 }).pipe(
             map(page => {
               const search = term.toLowerCase();
               return (page.items.find(p => p.partNumber.toLowerCase() === search) ?? page.items[0])?.partNumber ?? null;

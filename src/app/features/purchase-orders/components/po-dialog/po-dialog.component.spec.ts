@@ -292,7 +292,7 @@ describe('PoDialogComponent — part picker', () => {
   it('searches the server for active buy and subcontract parts by part number', () => {
     const { internals } = setup();
 
-    expect(internals.partFilters()).toEqual({ purchasable: 'true', sort: 'partNumber', order: 'asc', isActive: 'true' });
+    expect(internals.partFilters()).toEqual({ purchasable: 'true', isActive: 'true' });
   });
 
   it('drops the active filter when deactivated parts are shown', () => {
@@ -300,7 +300,7 @@ describe('PoDialogComponent — part picker', () => {
 
     internals.showInactiveParts.set(true);
 
-    expect(internals.partFilters()).toEqual({ purchasable: 'true', sort: 'partNumber', order: 'asc' });
+    expect(internals.partFilters()).toEqual({ purchasable: 'true' });
   });
 
   it('marks obsolete parts as deactivated in the picker results', () => {
@@ -316,6 +316,7 @@ describe('PoDialogComponent — part picker', () => {
     internals.onPartSearchCompleted({ term: 'asm-200', count: 0 });
 
     expect(getPartsPaged).toHaveBeenCalledWith(expect.objectContaining({ procurementSource: 'Make', q: 'asm-200' }));
+    expect(getPartsPaged.mock.calls.at(-1)?.[0]).not.toHaveProperty('sort');
     expect(internals.makePartHint()).toBe('No buyable parts match. ASM-200 is made in-house.');
   });
 

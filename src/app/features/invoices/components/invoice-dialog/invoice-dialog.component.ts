@@ -87,7 +87,7 @@ export class InvoiceDialogComponent {
   private prefilledLines: LineEntry[] | null = null;
   protected readonly sources = signal<InvoiceSources>({ salesOrders: [], shipments: [] });
 
-  protected readonly customerFilters: Record<string, string> = { isActive: 'true', sort: 'name', order: 'asc' };
+  protected readonly customerFilters: Record<string, string> = { isActive: 'true' };
 
   protected readonly salesOrderOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('common.none') },

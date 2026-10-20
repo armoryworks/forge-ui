@@ -85,8 +85,8 @@ export class QuoteDialogComponent {
   protected readonly taxCertBacked = computed(
     () => this.taxOverridden() && this.taxEditability()?.canEditTax === true);
 
-  protected readonly customerFilters: Record<string, string> = { isActive: 'true', sort: 'name', order: 'asc' };
-  protected readonly partFilters: Record<string, string> = { isActive: 'true', sort: 'partNumber', order: 'asc' };
+  protected readonly customerFilters: Record<string, string> = { isActive: 'true' };
+  protected readonly partFilters: Record<string, string> = { isActive: 'true' };
 
   readonly form = new FormGroup({
     customerId: new FormControl<number | null>(null, [Validators.required]),

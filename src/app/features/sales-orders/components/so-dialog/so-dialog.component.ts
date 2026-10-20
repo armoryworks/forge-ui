@@ -97,7 +97,7 @@ export class SoDialogComponent {
       : null;
   });
 
-  protected readonly partFilters: Record<string, string> = { isActive: 'true', sort: 'partNumber', order: 'asc' };
+  protected readonly partFilters: Record<string, string> = { isActive: 'true' };
 
   protected readonly creditTermsOptions = CREDIT_TERMS_OPTIONS;
 

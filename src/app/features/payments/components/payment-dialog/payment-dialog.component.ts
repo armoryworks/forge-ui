@@ -82,7 +82,7 @@ export class PaymentDialogComponent {
   protected readonly invoiceOptions = computed<AutocompleteOption[]>(() =>
     this.openInvoices().map(inv => ({ value: inv.id, label: `${inv.invoiceNumber} — ${inv.balanceDue.toFixed(2)}` })));
 
-  protected readonly customerFilters: Record<string, string> = { isActive: 'true', sort: 'name', order: 'asc' };
+  protected readonly customerFilters: Record<string, string> = { isActive: 'true' };
 
   protected readonly methodOptions: SelectOption[] = [
     { value: null, label: this.translate.instant('payments.selectMethod') },

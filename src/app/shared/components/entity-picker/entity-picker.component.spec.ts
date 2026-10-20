@@ -60,7 +60,7 @@ describe('EntityPickerComponent', () => {
     httpMock.expectNone(() => true);
   });
 
-  it('searches the server from two characters and reports the result count', () => {
+  it('searches the server from two characters, leaves the order to its match ranking and reports the result count', () => {
     const { fixture, picker, internals } = create();
     fixture.componentRef.setInput('filters', { isActive: 'true', sort: 'partNumber', order: 'asc' });
     const completed = vi.fn();
@@ -73,7 +73,8 @@ describe('EntityPickerComponent', () => {
     const req = httpMock.expectOne(r => r.url === '/api/v1/parts');
     expect(req.request.params.get('q')).toBe('SA');
     expect(req.request.params.get('isActive')).toBe('true');
-    expect(req.request.params.get('sort')).toBe('partNumber');
+    expect(req.request.params.has('sort')).toBe(false);
+    expect(req.request.params.has('order')).toBe(false);
     req.flush({ items: [{ id: 210, partNumber: 'SA-210' }], totalCount: 1 });
 
     expect(internals.results()).toEqual([{ id: 210, partNumber: 'SA-210' }]);

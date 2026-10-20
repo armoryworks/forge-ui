@@ -327,6 +327,7 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
       .set('pageSize', '10');
     const extraFilters = this.filters();
     for (const [key, val] of Object.entries(extraFilters)) {
+      if (key === 'sort' || key === 'order') continue;
       params = params.set(key, val);
     }
 

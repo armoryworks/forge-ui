@@ -39,7 +39,7 @@ export class RfqDialogComponent implements OnInit, AfterViewInit {
   readonly saved = output<void>();
 
   protected readonly saving = signal(false);
-  protected readonly partFilters: Record<string, string> = { sort: 'partNumber', order: 'asc' };
+  protected readonly partFilters: Record<string, string> = {};
 
   readonly form = new FormGroup({
     partId: new FormControl<number | null>(null, [Validators.required]),
