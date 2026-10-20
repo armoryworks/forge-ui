@@ -1,5 +1,7 @@
 import { ElementRef } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
+import { throwError } from 'rxjs';
 
 import { TrainingModuleQuizComponent } from './training-module-quiz.component';
 import { TrainingService } from '../services/training.service';
@@ -9,6 +11,7 @@ interface QuizInternals {
   result: { set(r: QuizSubmissionResult | null): void };
   scoreLabel(): string;
   retry(): void;
+  submit(): void;
 }
 
 describe('TrainingModuleQuizComponent', () => {
@@ -37,5 +40,22 @@ describe('TrainingModuleQuizComponent', () => {
     internals.retry();
 
     expect(requested).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([[409, 1], [500, 0]])('after a %i on submit, asks the parent for a fresh question set %i time(s)', (status, times) => {
+    const submitQuiz = vi.fn(() => throwError(() => new HttpErrorResponse({ status })));
+    TestBed.configureTestingModule({ providers: [{ provide: TrainingService, useValue: { submitQuiz } }] });
+    const fixture = TestBed.createComponent(TrainingModuleQuizComponent);
+    fixture.componentRef.setInput('content', {
+      shuffleQuestions: false, shuffleOptions: false, showExplanationsAfterSubmit: false, questions: [],
+    });
+    fixture.componentRef.setInput('moduleId', 9);
+    const requested = vi.fn();
+    fixture.componentInstance.retryRequested.subscribe(requested);
+
+    (fixture.componentInstance as unknown as QuizInternals).submit();
+
+    expect(submitQuiz).toHaveBeenCalledWith(9, []);
+    expect(requested).toHaveBeenCalledTimes(times);
   });
 });
