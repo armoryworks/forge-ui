@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -269,7 +270,14 @@ export class OperationTimeTabComponent {
           this.allOperationsComplete.emit();
         }
       },
-      error: () => this.afterWrite(),
+      error: (err: unknown) => {
+        this.afterWrite();
+        if (!isRetryable(err)) return;
+        this.snackbar.errorWithAction(
+          this.translate.instant('jobOperations.messages.saveFailed', { operation: row.operationName }),
+          this.translate.instant('jobOperations.actions.retry'),
+        ).subscribe(() => this.updateProgress(row, change, messageKey));
+      },
     });
   }
 
@@ -337,4 +345,8 @@ export class OperationTimeTabComponent {
     if (estimated <= 0) return actual > 0 ? 100 : 0;
     return Math.min((actual / estimated) * 100, 150);
   }
+}
+
+function isRetryable(err: unknown): boolean {
+  return err instanceof HttpErrorResponse && (err.status === 0 || err.status >= 500);
 }

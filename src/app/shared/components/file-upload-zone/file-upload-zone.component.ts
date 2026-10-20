@@ -123,6 +123,7 @@ export class FileUploadZoneComponent {
     const files = Array.from(fileList);
     const maxBytes = this.maxSizeMb() * 1024 * 1024;
     const chunkBytes = this.chunkSizeMb() * 1024 * 1024;
+    this.uploads.update(list => list.filter(u => !u.error));
 
     for (const file of files) {
       if (file.size > maxBytes) {

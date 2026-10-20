@@ -68,4 +68,24 @@ describe('FileUploadZoneComponent', () => {
       expect(s.acceptedTypes()).toBe('STEP, STL');
     });
   });
+
+  it('clears an earlier rejected-file error when another file is chosen', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const component = TestBed.runInInjectionContext(() => new FileUploadZoneComponent());
+    mockSignalInputs(component, { entityType: 'jobs', entityId: 21 as string | number, accept: 'image/*' });
+    const zone = component as unknown as {
+      uploads: () => { fileName: string; error?: string }[];
+      onFileSelected(event: Event): void;
+    };
+    const choose = (file: File) => zone.onFileSelected({ target: { files: [file] as unknown as FileList, value: '' } } as unknown as Event);
+
+    choose(new File(['x'], 'np.txt', { type: 'text/plain' }));
+    expect(zone.uploads().map(u => u.error)).toEqual(['File type not allowed']);
+
+    choose(new File(['png'], 'np-cover.png', { type: 'image/png' }));
+    expect(zone.uploads().some(u => u.error)).toBe(false);
+    expect(zone.uploads().map(u => u.fileName)).toEqual(['np-cover.png']);
+  });
 });

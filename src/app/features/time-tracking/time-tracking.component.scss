@@ -47,3 +47,9 @@
 .lock-icon { font-size: $icon-size-xs; color: var(--text-muted); }
 
 .timer-info { font-size: var(--font-size-sm); color: var(--text-secondary); margin: 0 0 $sp-md 0; }
+
+.time-entry-duration-error {
+  margin: 0 0 $sp-sm;
+  font-size: $font-size-sm;
+  color: var(--error);
+}

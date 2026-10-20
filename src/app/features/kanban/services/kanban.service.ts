@@ -162,8 +162,8 @@ export class KanbanService {
     return this.http.delete<void>(`${environment.apiUrl}/files/${fileId}`);
   }
 
-  downloadFileUrl(fileId: number): string {
-    return `${environment.apiUrl}/files/${fileId}`;
+  downloadJobFile(fileId: number): Observable<Blob> {
+    return this.http.get(`${environment.apiUrl}/files/${fileId}/download`, { responseType: 'blob' });
   }
 
   getJobTimeEntries(jobId: number): Observable<TimeEntry[]> {

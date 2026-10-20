@@ -39,4 +39,12 @@ describe('DurationMsPipe', () => {
     expect(pipe.transform(5_400_500)).toBe('1h 30m 0.5s');
     expect(pipe.transform(3_612_300)).toBe('1h 12.3s');
   });
+
+  it('approximates an estimate to the minute, or the hour from 100 hours up', () => {
+    expect(pipe.transform(5_400_500, 'approx')).toBe('1h 30m');
+    expect(pipe.transform(1_212_330_000, 'approx')).toBe('337h');
+    expect(pipe.transform(64_911_305_000, 'approx')).toBe('18031h');
+    expect(pipe.transform(29_000, 'approx')).toBe('<1m');
+    expect(pipe.transform(0, 'approx')).toBe('');
+  });
 });

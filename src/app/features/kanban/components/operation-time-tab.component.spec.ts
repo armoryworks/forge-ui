@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
@@ -99,7 +100,13 @@ function setup(response: Observable<unknown>) {
   };
   const cost = { getOperationTimeSummary: vi.fn().mockReturnValue(of([])) };
   const undo = new Subject<void>();
-  const snackbar = { successWithAction: vi.fn().mockReturnValue(undo), success: vi.fn(), error: vi.fn() };
+  const retry = new Subject<void>();
+  const snackbar = {
+    successWithAction: vi.fn().mockReturnValue(undo),
+    errorWithAction: vi.fn().mockReturnValue(retry),
+    success: vi.fn(),
+    error: vi.fn(),
+  };
   const afterClosed = new Subject<unknown>();
   const dialog = { open: vi.fn().mockReturnValue({ afterClosed: () => afterClosed }) };
   const jobUpdated = new Subject<unknown>();
@@ -119,7 +126,7 @@ function setup(response: Observable<unknown>) {
   const component = TestBed.runInInjectionContext(() => new OperationTimeTabComponent());
   Object.defineProperty(component, 'jobId', { value: () => JOB_ID });
   TestBed.tick();
-  return { component, operations, cost, snackbar, undo, dialog, afterClosed, jobUpdated };
+  return { component, operations, cost, snackbar, undo, retry, dialog, afterClosed, jobUpdated };
 }
 
 function firstRow(component: OperationTimeTabComponent): OperationTimeRow {
@@ -201,6 +208,32 @@ describe('OperationTimeTabComponent', () => {
       scrapQuantity: 0,
       expectedVersion: 6,
     });
+  });
+
+  it('says so and offers a retry when progress cannot reach the server', () => {
+    const { component, operations, snackbar, retry } = setup(of(payload(true)));
+    operations.updateProgress.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 0 })));
+
+    component.markDone(firstRow(component));
+
+    expect(snackbar.errorWithAction).toHaveBeenCalledWith('jobOperations.messages.saveFailed', 'jobOperations.actions.retry');
+    operations.updateProgress.mockReturnValueOnce(of({
+      operation: op({ status: 'Complete', completedQuantity: 40, version: 6 }),
+      allOperationsComplete: false,
+      estimatedRemainingMinutes: 0,
+    }));
+    retry.next();
+    expect(operations.updateProgress).toHaveBeenCalledTimes(2);
+    expect(operations.updateProgress).toHaveBeenLastCalledWith(JOB_ID, 7, { status: 'Complete', expectedVersion: 5 });
+  });
+
+  it('leaves a rejected change to the server message without a retry', () => {
+    const { component, operations, snackbar } = setup(of(payload(true)));
+    operations.updateProgress.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 409 })));
+
+    component.markDone(firstRow(component));
+
+    expect(snackbar.errorWithAction).not.toHaveBeenCalled();
   });
 
   it('records a partial quantity from the dialog without completing the step', () => {

@@ -4,7 +4,7 @@
      (keydown.enter)="cardClicked.emit({ job: job(), event: $event })">
   @if (job().coverPhotoUrl) {
     <div class="card__cover">
-      <img [src]="job().coverPhotoUrl!" alt="Job cover photo" />
+      <img [appAuthSrc]="job().coverPhotoUrl" alt="Job cover photo" />
     </div>
   }
   @if (selected()) {
@@ -51,7 +51,7 @@
       }
       @if (progress.remainingMs !== null) {
         <span class="card__ops-sep" aria-hidden="true">·</span>
-        <span>{{ 'kanban.card.operationsRemaining' | translate: { time: (progress.remainingMs | durationMs) } }}</span>
+        <span>{{ 'kanban.card.operationsRemaining' | translate: { time: (progress.remainingMs | durationMs: 'approx') } }}</span>
       }
     </div>
   }

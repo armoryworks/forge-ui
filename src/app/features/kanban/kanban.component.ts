@@ -227,7 +227,14 @@ export class KanbanComponent implements OnInit, OnDestroy {
   }
 
   // ── View Mode ──
-  protected readonly viewMode = signal<ViewMode>('board');
+  protected readonly viewMode = toSignal(
+    this.route.queryParamMap.pipe(map(p => KanbanComponent.parseViewMode(p.get('view')))),
+    { initialValue: KanbanComponent.parseViewMode(this.route.snapshot.queryParamMap.get('view')) },
+  );
+
+  private static parseViewMode(raw: string | null): ViewMode {
+    return raw === 'team' ? 'team' : 'board';
+  }
   protected readonly teamUserIds = new FormControl<number[]>([]);
   private readonly teamUserIdsSignal = toSignal(this.teamUserIds.valueChanges, { initialValue: [] as number[] });
 
@@ -395,7 +402,11 @@ export class KanbanComponent implements OnInit, OnDestroy {
   }
 
   protected setViewMode(mode: ViewMode): void {
-    this.viewMode.set(mode);
+    this.router.navigate([], {
+      queryParams: { view: mode === 'team' ? 'team' : null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   protected selectTrackType(trackTypeId: number): void {
@@ -518,8 +529,10 @@ export class KanbanComponent implements OnInit, OnDestroy {
    * least one selected job can legally move, the target stays enabled and
    * the server reports per-job failures (partial success).
    */
-  protected readonly disabledBulkStageIds = computed<Set<number>>(() => {
-    const disabled = new Set<number>();
+  protected readonly disabledBulkStageIds = computed<Set<number>>(() => new Set(this.bulkStageDisabledReasons().keys()));
+
+  protected readonly bulkStageDisabledReasons = computed<Map<number, string>>(() => {
+    const disabled = new Map<number, string>();
     const selected = this.selectedJobIds();
     if (selected.size === 0) return disabled;
 
@@ -530,7 +543,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
     for (const target of stages) {
       if (this.billingLocked(target)) {
-        disabled.add(target.id);
+        disabled.set(target.id, this.translate.instant('kanban.bulkMoveBillingReason'));
         continue;
       }
       const anyAllowed = selectedJobs.some(j => {
@@ -544,7 +557,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
         }
         return true;
       });
-      if (!anyAllowed) disabled.add(target.id);
+      if (!anyAllowed) disabled.set(target.id, this.translate.instant('kanban.bulkMoveBlockedReason'));
     }
     return disabled;
   });

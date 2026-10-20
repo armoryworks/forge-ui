@@ -19,4 +19,5 @@ export interface OeeCalculation {
   oee: number;
   oeePercent: number;
   isWorldClass: boolean;
+  hasProduction?: boolean;
 }

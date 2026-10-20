@@ -151,9 +151,9 @@
           @for (file of files(); track file.id) {
             <div class="file-card">
               @if (isImage(file)) {
-                <img [src]="getFileUrl(file.id)" [alt]="file.fileName" class="file-card__preview" loading="lazy" />
+                <img [appAuthSrc]="getFileUrl(file.id)" [alt]="file.fileName" class="file-card__preview" />
               } @else if (isVideo(file)) {
-                <video [src]="getFileUrl(file.id)" class="file-card__preview" controls preload="metadata"></video>
+                <video [appAuthSrc]="getFileUrl(file.id)" class="file-card__preview" controls preload="metadata"></video>
               } @else {
                 <div class="file-card__icon">
                   <span class="material-icons-outlined">description</span>

@@ -3,6 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { AuthSrcDirective } from '../../../shared/directives/auth-src.directive';
 import { FileAttachment } from '../../../shared/models/file.model';
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
 import { FileUploadZoneComponent, UploadedFile } from '../../../shared/components/file-upload-zone/file-upload-zone.component';
@@ -17,7 +18,7 @@ export interface CoverPhotoDialogData {
 @Component({
   selector: 'app-cover-photo-upload-dialog',
   standalone: true,
-  imports: [DialogComponent, FileUploadZoneComponent, MatTooltipModule, TranslatePipe],
+  imports: [AuthSrcDirective, DialogComponent, FileUploadZoneComponent, MatTooltipModule, TranslatePipe],
   templateUrl: './cover-photo-upload-dialog.component.html',
   styleUrl: './cover-photo-upload-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -44,7 +45,7 @@ export class CoverPhotoUploadDialogComponent implements OnInit {
     this.kanbanService.setCoverPhoto(this.data.jobId, file.id).subscribe({
       next: () => {
         this.snackbar.success(this.translate.instant('kanban.coverPhotoSet'));
-        this.dialogRef.close({ coverPhotoUrl: `/api/v1/files/${file.id}`, fileId: file.id });
+        this.dialogRef.close({ coverPhotoUrl: `/api/v1/files/${file.id}/download`, fileId: file.id });
         this.saving.set(false);
       },
       error: () => this.saving.set(false),

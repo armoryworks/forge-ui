@@ -3,10 +3,11 @@ import { DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { startWith } from 'rxjs';
 
+import { ConfirmDialogComponent, ConfirmDialogData } from '../confirm-dialog/confirm-dialog.component';
 import { DialogComponent } from '../dialog/dialog.component';
 import { InputComponent } from '../input/input.component';
 import { SelectComponent, SelectOption } from '../select/select.component';
@@ -25,6 +26,7 @@ import { OperationQuantityDialogResult } from '../../models/operation-quantity-d
 export class OperationQuantityDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<OperationQuantityDialogComponent, OperationQuantityDialogResult | undefined>);
   private readonly translate = inject(TranslateService);
+  private readonly matDialog = inject(MatDialog);
   protected readonly data = inject<OperationQuantityDialogData>(MAT_DIALOG_DATA);
 
   protected readonly remaining = Math.max(this.data.jobQuantity - this.data.completedQuantity - this.data.scrapQuantity, 0);
@@ -90,7 +92,26 @@ export class OperationQuantityDialogComponent {
 
   protected complete(): void {
     if (!this.canComplete()) return;
-    this.dialogRef.close(this.result(true));
+    if (this.isAll()) {
+      this.dialogRef.close(this.result(true));
+      return;
+    }
+    const result = this.result(true);
+    this.matDialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('jobOperations.dialog.shortCloseTitle'),
+        message: this.translate.instant('jobOperations.dialog.shortCloseMessage', {
+          done: result.completedQuantity,
+          scrap: result.scrapQuantity,
+          quantity: this.data.jobQuantity,
+        }),
+        confirmLabel: this.translate.instant('jobOperations.dialog.shortCloseConfirm'),
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (confirmed) this.dialogRef.close(result);
+    });
   }
 
   private result(complete: boolean): OperationQuantityDialogResult {

@@ -279,6 +279,10 @@
     }
   }
 
+  &__stage-item {
+    display: block;
+  }
+
   &__stage-dot {
     display: inline-block;
     width: $dot-size-sm;

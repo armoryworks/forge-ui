@@ -13,14 +13,16 @@
       <button class="icon-btn" [class.icon-btn--active]="viewMode() === 'table'"
         [matTooltip]="'backlog.tableView' | translate"
         matTooltipPosition="below"
-        aria-label="Table view"
+        [attr.aria-label]="'backlog.tableView' | translate"
+        [attr.aria-pressed]="viewMode() === 'table'"
         (click)="setViewMode('table')">
         <span class="material-icons-outlined">view_list</span>
       </button>
       <button class="icon-btn" [class.icon-btn--active]="viewMode() === 'card'"
         [matTooltip]="'backlog.cardView' | translate"
         matTooltipPosition="below"
-        aria-label="Card view"
+        [attr.aria-label]="'backlog.cardView' | translate"
+        [attr.aria-pressed]="viewMode() === 'card'"
         (click)="setViewMode('card')">
         <span class="material-icons-outlined">view_module</span>
       </button>

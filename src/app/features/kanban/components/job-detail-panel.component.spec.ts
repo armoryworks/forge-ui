@@ -16,6 +16,7 @@ import { Stage } from '../../../shared/models/stage.model';
 import { JobPart } from '../models/job-part.model';
 import { JobDetail } from '../models/job-detail.model';
 import { JobLink } from '../models/job-link.model';
+import { FileAttachment } from '../../../shared/models/file.model';
 
 class FakeLoader implements TranslateLoader {
   getTranslation(): Observable<Record<string, string>> { return of({}); }
@@ -37,6 +38,13 @@ interface PanelInternals {
   isAdmin: () => boolean;
   canExplodeBom: () => boolean;
   canArchive: () => boolean;
+  canEditJob: () => boolean;
+  canRemovePart(jp: JobPart): boolean;
+  removePart(jp: JobPart): void;
+  deleteLink(link: JobLink): void;
+  deleteFile(file: FileAttachment): void;
+  downloadFile(file: FileAttachment): void;
+  files: { (): FileAttachment[]; set(v: FileAttachment[]): void };
   toggleSubtaskAdd(): void;
   toggleLinkAdd(): void;
   togglePartAdd(): void;
@@ -102,6 +110,10 @@ function setup(options: { admin?: boolean; confirm?: boolean; roles?: string[] }
     unarchiveJob: vi.fn(),
     getJobTimeEntries: vi.fn().mockReturnValue(of([])),
     moveJobStage: vi.fn().mockReturnValue(of(undefined)),
+    removeJobPart: vi.fn().mockReturnValue(of(undefined)),
+    deleteJobLink: vi.fn().mockReturnValue(of(undefined)),
+    deleteJobFile: vi.fn().mockReturnValue(of(undefined)),
+    downloadJobFile: vi.fn(),
   };
   const snackbar = { success: vi.fn(), error: vi.fn(), errorFrom: vi.fn() };
   const timeTracking = { stopTimer: vi.fn().mockReturnValue(of({})), startTimer: vi.fn() };
@@ -133,6 +145,36 @@ function setup(options: { admin?: boolean; confirm?: boolean; roles?: string[] }
 
 describe('JobDetailPanelComponent', () => {
   beforeEach(() => TestBed.resetTestingModule());
+
+  it('offers edit only to the roles that can save a work order', () => {
+    expect(setup({ roles: ['Manager'] }).component.canEditJob()).toBe(true);
+    expect(setup({ roles: ['ProductionWorker'] }).component.canEditJob()).toBe(false);
+  });
+
+  it('lets any role remove a supporting part but only an editor remove the build part', () => {
+    const worker = setup({ roles: ['ProductionWorker'] }).component;
+    worker.job.set(jobDetail({ partId: 9 }));
+    expect(worker.canRemovePart(jobPart({ partId: 9 }))).toBe(false);
+    expect(worker.canRemovePart(jobPart({ id: 6, partId: 11 }))).toBe(true);
+
+    const manager = setup({ roles: ['Manager'] }).component;
+    manager.job.set(jobDetail({ partId: 9 }));
+    expect(manager.canRemovePart(jobPart({ partId: 9 }))).toBe(true);
+  });
+
+  it('removes a part only after the confirm', () => {
+    const declined = setup({ confirm: false });
+    declined.component.jobParts.set([jobPart({ id: 6, partId: 11 })]);
+    declined.component.removePart(jobPart({ id: 6, partId: 11 }));
+    expect(declined.dialog.open).toHaveBeenCalled();
+    expect(declined.kanban.removeJobPart).not.toHaveBeenCalled();
+
+    const confirmed = setup({ confirm: true });
+    confirmed.component.jobParts.set([jobPart({ id: 6, partId: 11 })]);
+    confirmed.component.removePart(jobPart({ id: 6, partId: 11 }));
+    expect(confirmed.kanban.removeJobPart).toHaveBeenCalledWith(JOB_ID, 6);
+    expect(confirmed.component.jobParts()).toEqual([]);
+  });
 
   it('offers Explode BOM only to the roles the explode endpoint admits', () => {
     expect(setup({ roles: ['Admin'] }).component.canExplodeBom()).toBe(true);
@@ -586,6 +628,47 @@ describe('JobDetailPanelComponent', () => {
 
     expect(dialog.open).not.toHaveBeenCalled();
     expect(kanban.unarchiveJob).not.toHaveBeenCalled();
+  });
+
+  describe('link and file deletes', () => {
+    it('removes a link only after the user confirms', () => {
+      const declined = setup({ confirm: false });
+      declined.component.links.set([jobLink()]);
+      declined.component.deleteLink(jobLink());
+      expect(declined.kanban.deleteJobLink).not.toHaveBeenCalled();
+
+      const confirmed = setup({ confirm: true });
+      confirmed.component.links.set([jobLink()]);
+      confirmed.component.deleteLink(jobLink());
+      expect(confirmed.kanban.deleteJobLink).toHaveBeenCalledWith(JOB_ID, 3);
+      expect(confirmed.component.links()).toEqual([]);
+    });
+
+    it('says so when a confirmed file delete fails', () => {
+      const { component, kanban, snackbar } = setup({ confirm: true });
+      const file = { id: 8, fileName: 'drawing.pdf' } as FileAttachment;
+      component.files.set([file]);
+      kanban.deleteJobFile.mockReturnValue(throwError(() => new Error('boom')));
+
+      component.deleteFile(file);
+
+      expect(snackbar.errorFrom).toHaveBeenCalledWith(expect.anything(), 'kanban.deleteFileFailed');
+      expect(component.files()).toEqual([file]);
+    });
+
+    it('downloads a file through the authenticated API instead of opening a bare URL', () => {
+      const { component, kanban } = setup();
+      const open = vi.spyOn(window, 'open').mockReturnValue(null);
+      vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:file');
+      vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+      kanban.downloadJobFile.mockReturnValue(of(new Blob(['x'])));
+
+      component.downloadFile({ id: 8, fileName: 'drawing.pdf' } as FileAttachment);
+
+      expect(kanban.downloadJobFile).toHaveBeenCalledWith(8);
+      expect(open).not.toHaveBeenCalled();
+      vi.restoreAllMocks();
+    });
   });
 });
 

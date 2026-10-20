@@ -27,6 +27,7 @@ export class BarcodeInfoComponent {
   readonly entityLabel = input<string>('');
   readonly naturalIdentifier = input<string>('');
   readonly compact = input(false);
+  readonly canRegenerate = input(true);
 
   protected readonly barcode = signal<BarcodeInfo | null>(null);
   protected readonly loading = signal(false);

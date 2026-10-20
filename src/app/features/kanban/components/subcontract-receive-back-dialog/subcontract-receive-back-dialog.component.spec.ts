@@ -71,4 +71,16 @@ describe('SubcontractReceiveBackDialogComponent', () => {
     component.formGroup.controls.scrapQuantity.setValue(3);
     expect(component.formGroup.valid).toBe(true);
   });
+
+  it('blocks good plus scrap above what was sent', () => {
+    const { component, receiveBack } = setup();
+    component.formGroup.controls.scrapQuantity.setValue(1);
+
+    expect(component.formGroup.controls.goodQuantity.hasError('overSent')).toBe(true);
+    component.save();
+    expect(receiveBack).not.toHaveBeenCalled();
+
+    component.formGroup.controls.goodQuantity.setValue(9);
+    expect(component.formGroup.valid).toBe(true);
+  });
 });

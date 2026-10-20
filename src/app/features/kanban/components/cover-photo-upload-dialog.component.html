@@ -35,7 +35,7 @@
                   [matTooltip]="f.fileName"
                   matTooltipPosition="above"
                   [attr.aria-label]="('kanban.selectImageAria' | translate) + ' ' + f.fileName">
-            <img [src]="f.url" [alt]="f.fileName" />
+            <img [appAuthSrc]="f.url" [alt]="f.fileName" />
           </button>
         }
       </div>

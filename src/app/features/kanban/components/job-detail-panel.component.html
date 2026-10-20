@@ -65,11 +65,13 @@
           <span class="material-icons-outlined">unarchive</span>
         </button>
       }
-      <button class="panel__edit" (click)="editRequested.emit(job()!)"
-              [matTooltip]="'kanban.editJob' | translate" matTooltipPosition="above"
-              [attr.aria-label]="'kanban.editJobAria' | translate">
-        <span class="material-icons-outlined">edit</span>
-      </button>
+      @if (canEditJob()) {
+        <button class="panel__edit" (click)="editRequested.emit(job()!)"
+                [matTooltip]="'kanban.editJob' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'kanban.editJobAria' | translate">
+          <span class="material-icons-outlined">edit</span>
+        </button>
+      }
       <button class="panel__close" (click)="close()"
               [matTooltip]="'common.close' | translate" matTooltipPosition="above"
               [attr.aria-label]="'kanban.closeDetailPanel' | translate">
@@ -330,11 +332,13 @@
                     (focusout)="savePartQty(jp)" (keydown.enter)="commitPartQtyOnEnter($event)"
                     data-testid="job-part-qty" />
                 </span>
-                <button class="part-item__delete" (click)="removePart(jp)"
-                  [matTooltip]="'kanban.removePart' | translate" matTooltipPosition="above"
-                  [attr.aria-label]="'kanban.removePart' | translate">
-                  <span class="material-icons-outlined">close</span>
-                </button>
+                @if (canRemovePart(jp)) {
+                  <button class="part-item__delete" (click)="removePart(jp)" data-testid="job-part-remove"
+                    [matTooltip]="'kanban.removePart' | translate" matTooltipPosition="above"
+                    [attr.aria-label]="'kanban.removePart' | translate">
+                    <span class="material-icons-outlined">close</span>
+                  </button>
+                }
               </div>
             }
           </div>
@@ -393,7 +397,7 @@
         <app-status-timeline entityType="Job" [entityId]="j.id" />
         <p class="jd-sidebar-hint">{{ 'kanban.workflowStatusHint' | translate }}</p>
         <div class="jd-sidebar-actions">
-          @if (canDispose(j.disposition)) {
+          @if (canEditJob() && canDispose(j.disposition)) {
             <button class="action-btn" (click)="openDispose()">
               <span class="material-icons-outlined">assignment_turned_in</span> {{ 'kanban.dispose' | translate }}
             </button>
@@ -408,6 +412,7 @@
           [entityId]="j.id"
           [entityLabel]="j.jobNumber"
           [naturalIdentifier]="j.jobNumber"
+          [canRegenerate]="canEditJob()"
           [compact]="true" />
       </div>
 
@@ -421,18 +426,30 @@
               <app-priority-indicator [priority]="j.priority" [showLabel]="true" />
             </span>
           </div>
-          <div class="jd-detail-row jd-detail-row--clickable" [matMenuTriggerFor]="assignMenu">
-            <span class="jd-detail-label">{{ 'kanban.assignee' | translate }}</span>
-            <span class="jd-detail-value">
-              @if (j.assigneeInitials) {
-                <app-avatar [initials]="j.assigneeInitials" [color]="j.assigneeColor ?? '#0d9488'" size="sm" />
-                {{ j.assigneeName ?? j.assigneeInitials }}
-              } @else {
-                <span class="meta-row__empty">{{ 'kanban.unassigned' | translate }}</span>
-              }
-              <span class="material-icons-outlined meta-row__edit-icon">expand_more</span>
-            </span>
-          </div>
+          <ng-template #assigneeValue>
+            @if (j.assigneeInitials) {
+              <app-avatar [initials]="j.assigneeInitials" [color]="j.assigneeColor ?? '#0d9488'" size="sm" />
+              {{ j.assigneeName ?? j.assigneeInitials }}
+            } @else {
+              <span class="meta-row__empty">{{ 'kanban.unassigned' | translate }}</span>
+            }
+          </ng-template>
+          @if (canEditJob()) {
+            <div class="jd-detail-row jd-detail-row--clickable" [matMenuTriggerFor]="assignMenu" data-testid="job-assignee-menu">
+              <span class="jd-detail-label">{{ 'kanban.assignee' | translate }}</span>
+              <span class="jd-detail-value">
+                <ng-container [ngTemplateOutlet]="assigneeValue" />
+                <span class="material-icons-outlined meta-row__edit-icon">expand_more</span>
+              </span>
+            </div>
+          } @else {
+            <div class="jd-detail-row" data-testid="job-assignee">
+              <span class="jd-detail-label">{{ 'kanban.assignee' | translate }}</span>
+              <span class="jd-detail-value">
+                <ng-container [ngTemplateOutlet]="assigneeValue" />
+              </span>
+            </div>
+          }
           <mat-menu #assignMenu="matMenu">
             <button mat-menu-item (click)="assignJob(null)">
               <span class="material-icons-outlined">person_off</span>

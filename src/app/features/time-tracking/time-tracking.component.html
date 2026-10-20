@@ -99,7 +99,7 @@
 
     <div [formGroup]="entryForm">
       <div class="dialog-row">
-        <app-datepicker data-testid="time-entry-date" [label]="'common.date' | translate" formControlName="date" />
+        <app-datepicker data-testid="time-entry-date" [label]="'common.date' | translate" formControlName="date" [max]="today" />
         <app-select data-testid="time-entry-category" [label]="'common.category' | translate" formControlName="category" [options]="categoryOptions" />
       </div>
 
@@ -107,6 +107,11 @@
         <app-input data-testid="time-entry-hours" [label]="'common.hours' | translate" type="number" formControlName="hours" />
         <app-input data-testid="time-entry-minutes" [label]="'common.minutes' | translate" type="number" formControlName="minutes" />
       </div>
+      @if (entryForm.hasError('durationRange') && (entryForm.controls.hours.dirty || entryForm.controls.minutes.dirty)) {
+        <p class="time-entry-duration-error" role="alert" data-testid="time-entry-duration-error">
+          {{ 'timeTracking.durationRange' | translate }}
+        </p>
+      }
 
       <app-textarea data-testid="time-entry-notes" [label]="'common.notes' | translate" formControlName="notes" [rows]="3" />
 

@@ -79,7 +79,7 @@ export class OeeComponent implements OnInit {
   });
 
   protected readonly averageOee = computed(() => {
-    const wcs = this.workCenters();
+    const wcs = this.workCenters().filter(wc => wc.hasProduction !== false);
     if (wcs.length === 0) return 0;
     return wcs.reduce((sum, wc) => sum + wc.oeePercent, 0) / wcs.length;
   });
@@ -116,8 +116,13 @@ export class OeeComponent implements OnInit {
         this.workCenters.set(data);
         this.loading.set(false);
         // Auto-select first if none selected
-        if (!this.selectedWorkCenterId() && data.length > 0) {
+        const selected = this.selectedWorkCenterId();
+        if (selected && data.some(wc => wc.workCenterId === selected)) {
+          this.loadDetail(selected);
+        } else if (data.length > 0) {
           this.selectWorkCenter(data[0].workCenterId);
+        } else {
+          this.selectedWorkCenterId.set(null);
         }
       },
       error: () => this.loading.set(false),

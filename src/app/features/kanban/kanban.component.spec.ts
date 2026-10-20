@@ -117,6 +117,9 @@ interface ComponentInternals {
   onCardDropped(event: CdkDragDrop<KanbanJob[]>): void;
   selectedJobIds: { set(ids: Set<number>): void };
   disabledBulkStageIds: () => Set<number>;
+  bulkStageDisabledReasons: () => Map<number, string>;
+  viewMode: () => 'board' | 'team';
+  setViewMode(mode: 'board' | 'team'): void;
   onJobNumberClicked(event: { job: KanbanJob; event: Event }): void;
   onAccountingRefClicked(event: { job: KanbanJob; event: Event }): void;
   bulkMoveToStage(stage: Stage): void;
@@ -313,6 +316,8 @@ describe('KanbanComponent', () => {
       component.selectedJobIds.set(new Set([100]));
 
       expect(component.disabledBulkStageIds().has(8)).toBe(true);
+      expect(component.bulkStageDisabledReasons().get(8)).toBe('kanban.bulkMoveBillingReason');
+      expect(component.bulkStageDisabledReasons().get(7)).toBe('kanban.bulkMoveBlockedReason');
     });
 
     it('keeps a billing column as a bulk target for the office', () => {
@@ -878,6 +883,22 @@ describe('KanbanComponent', () => {
       expect(component.canCreateJobs()).toBe(false);
       component.openCreateDialog();
       expect(component.showJobDialog()).toBe(false);
+    });
+  });
+
+  describe('view mode', () => {
+    it('keeps the team view in the URL so a reload restores it', () => {
+      component.setViewMode('team');
+
+      expect(navigate).toHaveBeenLastCalledWith([], { queryParams: { view: 'team' }, queryParamsHandling: 'merge', replaceUrl: true });
+      expect(component.viewMode()).toBe('team');
+
+      queryParams.next(convertToParamMap({ view: 'team' }));
+      createComponent();
+      expect(component.viewMode()).toBe('team');
+
+      component.setViewMode('board');
+      expect(component.viewMode()).toBe('board');
     });
   });
 });

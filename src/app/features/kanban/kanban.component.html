@@ -38,7 +38,7 @@
             (click)="toggleMyWork()"
             [matTooltip]="myWorkOnly() ? ('kanban.allJobs' | translate) : ('kanban.myWork' | translate)"
             matTooltipPosition="above"
-            aria-label="Show only my assigned jobs">
+            data-testid="my-work-btn">
       <span class="material-icons-outlined">person</span>
       {{ myWorkOnly() ? ('kanban.allJobs' | translate) : ('kanban.myWork' | translate) }}
     </button>
@@ -174,11 +174,15 @@
       </button>
       <mat-menu #moveMenu="matMenu">
         @for (stage of currentStages(); track stage.id) {
-          <button mat-menu-item (click)="bulkMoveToStage(stage)"
-                  [disabled]="disabledBulkStageIds().has(stage.id)">
-            <span class="bulk-bar__stage-dot" [style.background]="stage.color"></span>
-            {{ stage.name }}
-          </button>
+          <span class="bulk-bar__stage-item" [matTooltip]="bulkStageDisabledReasons().get(stage.id) ?? ''"
+                [matTooltipDisabled]="!bulkStageDisabledReasons().has(stage.id)" matTooltipPosition="right">
+            <button mat-menu-item (click)="bulkMoveToStage(stage)"
+                    [disabled]="disabledBulkStageIds().has(stage.id)"
+                    [attr.aria-description]="bulkStageDisabledReasons().get(stage.id) ?? null">
+              <span class="bulk-bar__stage-dot" [style.background]="stage.color"></span>
+              {{ stage.name }}
+            </button>
+          </span>
         }
       </mat-menu>
 
