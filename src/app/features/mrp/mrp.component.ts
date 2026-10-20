@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, u
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
+import { map, startWith } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -54,6 +54,11 @@ import {
   MpsVsActualDialogComponent,
   MpsVsActualDialogData,
 } from './components/mps-vs-actual-dialog.component';
+import {
+  ForecastDetailDialogComponent,
+  ForecastDetailDialogData,
+  ForecastDetailDialogResult,
+} from './components/forecast-detail-dialog.component';
 import { GenerateForecastRequest } from './models/mrp.model';
 import { MRP_TABS, MrpTab } from './models/mrp-tab.model';
 
@@ -130,13 +135,32 @@ export class MrpComponent {
 
   // Dashboard KPIs
   protected readonly latestRun = computed(() => this.runs()[0] ?? null);
-  protected readonly unresolvedExceptionCount = computed(() => this.exceptions().filter(e => !e.isResolved).length);
+  protected readonly unresolvedExceptions = computed(() => this.exceptions().filter(e => !e.isResolved));
+  protected readonly unresolvedExceptionCount = computed(() => this.unresolvedExceptions().length);
   protected readonly plannedOrderCount = computed(() => this.plannedOrders().filter(o => o.status === 'Planned').length);
   protected readonly firmedOrderCount = computed(() => this.plannedOrders().filter(o => o.status === 'Firmed').length);
 
   // Filters
   protected readonly orderStatusControl = new FormControl<string | null>(null);
   protected readonly exceptionFilterControl = new FormControl<string | null>('unresolved');
+
+  private readonly orderStatusFilter = toSignal(
+    this.orderStatusControl.valueChanges.pipe(startWith(this.orderStatusControl.value)),
+    { initialValue: null },
+  );
+  private readonly exceptionFilter = toSignal(
+    this.exceptionFilterControl.valueChanges.pipe(startWith(this.exceptionFilterControl.value)),
+    { initialValue: 'unresolved' },
+  );
+
+  protected readonly visiblePlannedOrders = computed(() => {
+    const status = this.orderStatusFilter();
+    const orders = this.plannedOrders();
+    return status ? orders.filter(o => o.status === status) : orders;
+  });
+
+  protected readonly visibleExceptions = computed(() =>
+    this.exceptionFilter() === 'unresolved' ? this.unresolvedExceptions() : this.exceptions());
 
   protected readonly orderStatusOptions: SelectOption[] = [
     { value: null, label: this.translate.instant('mrp.filters.all') },
@@ -287,11 +311,16 @@ export class MrpComponent {
         ? this.mrpService.simulateRun(result.request)
         : this.mrpService.executeRun(result.request);
       call.subscribe({
-        next: () => {
+        next: (run) => {
           this.executingRun.set(false);
-          this.snackbar.success(result.isSimulation
-            ? this.translate.instant('mrp.snackbar.simulationComplete')
-            : this.translate.instant('mrp.snackbar.runComplete'));
+          const unplanned = run?.unplannedDemandPartCount ?? 0;
+          if (unplanned > 0) {
+            this.snackbar.warn(this.translate.instant('mrp.snackbar.unplannedDemandParts', { count: unplanned }));
+          } else {
+            this.snackbar.success(result.isSimulation
+              ? this.translate.instant('mrp.snackbar.simulationComplete')
+              : this.translate.instant('mrp.snackbar.runComplete'));
+          }
           this.loadRuns();
           this.loadPlannedOrders();
           this.loadExceptions();
@@ -345,7 +374,7 @@ export class MrpComponent {
   }
 
   protected completeSchedule(schedule: MasterSchedule): void {
-    this.confirmThen('mrp.completeScheduleTitle', 'mrp.completeScheduleMessage', 'mrp.completeSchedule', schedule, 'warn', () =>
+    this.confirmThen('mrp.completeScheduleTitle', 'mrp.completeScheduleMessage', 'mrp.completeSchedule', schedule.name, 'warn', () =>
       this.mrpService.completeMasterSchedule(schedule.id).subscribe({
         next: () => {
           this.snackbar.success(this.translate.instant('mrp.snackbar.scheduleCompleted'));
@@ -355,7 +384,7 @@ export class MrpComponent {
   }
 
   protected cancelSchedule(schedule: MasterSchedule): void {
-    this.confirmThen('mrp.cancelScheduleTitle', 'mrp.cancelScheduleMessage', 'mrp.cancelSchedule', schedule, 'danger', () =>
+    this.confirmThen('mrp.cancelScheduleTitle', 'mrp.cancelScheduleMessage', 'mrp.cancelSchedule', schedule.name, 'danger', () =>
       this.mrpService.cancelMasterSchedule(schedule.id).subscribe({
         next: () => {
           this.snackbar.success(this.translate.instant('mrp.snackbar.scheduleCancelled'));
@@ -365,14 +394,14 @@ export class MrpComponent {
   }
 
   private confirmThen(
-    titleKey: string, messageKey: string, confirmKey: string, schedule: MasterSchedule,
+    titleKey: string, messageKey: string, confirmKey: string, name: string,
     severity: ConfirmDialogData['severity'], action: () => void,
   ): void {
     this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
         title: this.translate.instant(titleKey),
-        message: this.translate.instant(messageKey, { name: schedule.name }),
+        message: this.translate.instant(messageKey, { name }),
         confirmLabel: this.translate.instant(confirmKey),
         severity,
       } satisfies ConfirmDialogData,
@@ -382,11 +411,22 @@ export class MrpComponent {
   }
 
   protected approveForecast(forecast: DemandForecast): void {
-    this.mrpService.approveForecast(forecast.id).subscribe({
-      next: () => {
-        this.snackbar.success(this.translate.instant('mrp.snackbar.forecastApproved'));
-        this.loadForecasts();
-      },
+    this.confirmThen('mrp.approveForecastTitle', 'mrp.approveForecastMessage', 'mrp.approveForecast', forecast.name, 'warn', () =>
+      this.mrpService.approveForecast(forecast.id).subscribe({
+        next: () => {
+          this.snackbar.success(this.translate.instant('mrp.snackbar.forecastApproved'));
+          this.loadForecasts();
+        },
+      }));
+  }
+
+  protected openForecast(forecast: DemandForecast): void {
+    this.dialog.open<ForecastDetailDialogComponent, ForecastDetailDialogData, ForecastDetailDialogResult>(
+      ForecastDetailDialogComponent,
+      { width: '760px', data: { forecast } satisfies ForecastDetailDialogData },
+    ).afterClosed().subscribe(result => {
+      if (result === 'approve') this.approveForecast(forecast);
+      else if (result === 'changed') this.loadForecasts();
     });
   }
 
@@ -518,7 +558,7 @@ export class MrpComponent {
   private loadExceptions(): void {
     if (this.loadingExceptions()) return;
     this.loadingExceptions.set(true);
-    this.mrpService.getExceptions(undefined, true).subscribe({
+    this.mrpService.getExceptions().subscribe({
       next: (data) => { this.exceptions.set(data); this.loadingExceptions.set(false); },
       error: () => this.loadingExceptions.set(false),
     });

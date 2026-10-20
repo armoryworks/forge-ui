@@ -49,7 +49,7 @@ export class EventStatusDialogComponent {
   ];
 
   protected readonly form = new FormGroup({
-    status: new FormControl(this.data.currentStatus ?? 'Open', { nonNullable: true }),
+    status: new FormControl(this.data.currentStatus || 'Open', { nonNullable: true }),
     waivedReason: new FormControl('', { nonNullable: true }),
   });
 
@@ -59,7 +59,8 @@ export class EventStatusDialogComponent {
   private readonly waivedReason = toSignal(this.form.controls.waivedReason.valueChanges, { initialValue: '' });
 
   protected readonly isWaived = computed(() => this.status() === 'Waived');
-  protected readonly canSave = computed(() => !this.isWaived() || this.waivedReason().trim().length > 0);
+  protected readonly canSave = computed(() =>
+    this.status().length > 0 && (!this.isWaived() || this.waivedReason().trim().length > 0));
 
   protected save(): void {
     if (!this.canSave() || this.saving()) return;

@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { interval, map, startWith } from 'rxjs';
 
 import { CdkDropList, CdkDrag, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -9,6 +11,7 @@ import { PlanningCycleDetail } from '../../models/planning-cycle-detail.model';
 import { PlanningCycleEntry } from '../../models/planning-cycle-entry.model';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { PriorityIndicatorComponent } from '../../../../shared/components/priority-indicator/priority-indicator.component';
+import { daysUntil, parseDateOnly, toDateOnly } from '../../../../shared/utils/date.utils';
 
 @Component({
   selector: 'app-cycle-board',
@@ -39,11 +42,14 @@ export class CycleBoardComponent {
     [...this.cycle().entries].sort((a, b) => a.sortOrder - b.sortOrder),
   );
 
+  private readonly today = toSignal(
+    interval(60_000).pipe(startWith(0), map(() => toDateOnly(new Date()) ?? '')),
+    { initialValue: toDateOnly(new Date()) ?? '' },
+  );
+
   protected readonly daysRemaining = computed(() => {
-    const end = new Date(this.cycle().endDate);
-    const now = new Date();
-    const diff = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    return Math.max(0, diff);
+    const today = parseDateOnly(this.today()) ?? new Date();
+    return Math.max(0, daysUntil(this.cycle().endDate, today));
   });
 
   protected readonly isActive = computed(() => this.cycle().status === 'Active');

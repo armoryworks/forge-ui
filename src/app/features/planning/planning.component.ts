@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { forkJoin, startWith } from 'rxjs';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { catchError, EMPTY, forkJoin, startWith, Subject, switchMap } from 'rxjs';
 
 import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import { MatDialog } from '@angular/material/dialog';
@@ -53,6 +53,8 @@ export class PlanningComponent implements OnInit {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly draftResume = inject(DraftResumeService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly cycleRequests = new Subject<number>();
 
   // State
   protected readonly loading = signal(true);
@@ -122,10 +124,17 @@ export class PlanningComponent implements OnInit {
   protected readonly isActiveCycle = computed(() => this.selectedCycle()?.status === 'Active');
   protected readonly isPlanningCycle = computed(() => this.selectedCycle()?.status === 'Planning');
 
+  constructor() {
+    this.cycleRequests.pipe(
+      switchMap(id => this.planningService.getCycle(id).pipe(catchError(() => EMPTY))),
+      takeUntilDestroyed(),
+    ).subscribe(cycle => this.selectedCycle.set(cycle));
+  }
+
   ngOnInit(): void {
     this.loadData();
 
-    this.cycleControl.valueChanges.subscribe(cycleId => {
+    this.cycleControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(cycleId => {
       if (cycleId) {
         this.loadCycle(cycleId);
       }
@@ -171,9 +180,11 @@ export class PlanningComponent implements OnInit {
   }
 
   private loadCycle(id: number): void {
-    this.planningService.getCycle(id).subscribe({
-      next: (cycle) => this.selectedCycle.set(cycle),
-    });
+    this.cycleRequests.next(id);
+  }
+
+  private reloadBacklog(): void {
+    this.backlogService.getJobs().subscribe(jobs => this.backlogJobs.set(jobs));
   }
 
   private reloadCycle(): void {
@@ -186,6 +197,7 @@ export class PlanningComponent implements OnInit {
   private reloadAll(): void {
     this.planningService.getCycles().subscribe(cycles => this.cycles.set(cycles));
     this.reloadCycle();
+    this.reloadBacklog();
   }
 
   // --- Backlog Actions ---
@@ -201,6 +213,7 @@ export class PlanningComponent implements OnInit {
     this.planningService.commitJob(cycle.id, job.id).subscribe({
       next: () => {
         this.reloadCycle();
+        this.reloadBacklog();
         this.snackbar.success(this.translate.instant('planning.committedToCycle', { number: job.jobNumber }));
       },
     });
@@ -237,6 +250,7 @@ export class PlanningComponent implements OnInit {
       this.planningService.removeEntry(cycle.id, entry.jobId).subscribe({
         next: () => {
           this.reloadCycle();
+          this.reloadBacklog();
           this.snackbar.success(this.translate.instant('planning.removedFromCycle', { number: entry.jobNumber }));
         },
       });
@@ -289,8 +303,8 @@ export class PlanningComponent implements OnInit {
           this.showCycleDialog.set(false);
           this.planningService.getCycles().subscribe(cycles => {
             this.cycles.set(cycles);
-            this.selectedCycle.set(created);
             this.cycleControl.setValue(created.id, { emitEvent: false });
+            this.loadCycle(created.id);
           });
           this.snackbar.success(this.translate.instant('planning.cycleCreated'));
         },
@@ -307,11 +321,22 @@ export class PlanningComponent implements OnInit {
     const cycle = this.selectedCycle();
     if (!cycle) return;
 
-    this.planningService.activateCycle(cycle.id).subscribe({
-      next: () => {
-        this.reloadAll();
-        this.snackbar.success(this.translate.instant('planning.cycleActivated'));
-      },
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('planning.activateCycleTitle'),
+        message: this.translate.instant('planning.activateCycleMessage', { name: cycle.name }),
+        confirmLabel: this.translate.instant('planning.activateBtn'),
+        severity: 'info',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.planningService.activateCycle(cycle.id).subscribe({
+        next: () => {
+          this.reloadAll();
+          this.snackbar.success(this.translate.instant('planning.cycleActivated'));
+        },
+      });
     });
   }
 
@@ -328,15 +353,18 @@ export class PlanningComponent implements OnInit {
         severity: 'info',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
-      if (confirmed === undefined) return;
+      if (!confirmed) return;
 
       this.planningService.completeCycle(cycle.id, true).subscribe({
         next: (result) => {
           if (result.newCycleId) {
             this.loadCycle(result.newCycleId);
             this.cycleControl.setValue(result.newCycleId, { emitEvent: false });
+          } else {
+            this.reloadCycle();
           }
           this.planningService.getCycles().subscribe(cycles => this.cycles.set(cycles));
+          this.reloadBacklog();
           this.snackbar.success(this.translate.instant('planning.cycleCompletedRolled'));
         },
       });

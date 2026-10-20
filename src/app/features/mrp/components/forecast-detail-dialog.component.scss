@@ -1,0 +1,26 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.forecast-detail {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-lg;
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+  }
+
+  &__history {
+    color: var(--text-muted);
+  }
+}

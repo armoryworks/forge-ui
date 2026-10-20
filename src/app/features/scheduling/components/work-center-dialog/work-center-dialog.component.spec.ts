@@ -133,4 +133,15 @@ describe('WorkCenterDialogComponent', () => {
     expect(emitted[0].isActive).toBe(false);
     expect(emitted[0].teamId).toBeNull();
   });
+
+  it('refuses more than 24 hours a day per machine and negative rates', () => {
+    const { api } = create(null);
+    api.form.patchValue({ code: 'WC-MILL', name: 'Mill', dailyCapacityHours: 25 });
+    expect(api.form.controls['dailyCapacityHours'].invalid).toBe(true);
+
+    api.form.patchValue({ dailyCapacityHours: 24, laborCostPerHour: -1, burdenRatePerHour: -5 });
+    expect(api.form.controls['dailyCapacityHours'].valid).toBe(true);
+    expect(api.form.controls['laborCostPerHour'].invalid).toBe(true);
+    expect(api.form.controls['burdenRatePerHour'].invalid).toBe(true);
+  });
 });

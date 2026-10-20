@@ -59,7 +59,7 @@ export class ExecuteMrpRunDialogComponent {
     ),
     planningHorizonDays: new FormControl<number>(
       90,
-      { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(730)] },
+      { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(730), Validators.pattern(/^\d+$/)] },
     ),
   });
 

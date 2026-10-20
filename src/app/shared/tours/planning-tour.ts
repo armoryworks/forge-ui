@@ -28,7 +28,7 @@ export const PLANNING_TOUR: TourDefinition = {
     {
       element: '.cycle-panel__actions',
       title: 'Cycle Lifecycle',
-      description: 'Activate a draft cycle to begin work. Complete a cycle to roll over unfinished items or return them to the backlog.',
+      description: 'Activate a cycle that is still in Planning to begin work. Complete a cycle to roll over unfinished items or return them to the backlog.',
       side: 'bottom',
     },
   ],

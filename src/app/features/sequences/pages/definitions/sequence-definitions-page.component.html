@@ -1,13 +1,12 @@
 <div class="seq-page" data-testid="sequence-definitions">
-  <div class="seq-page__toolbar">
-    <h2 class="seq-page__title">{{ 'sequences.definitions.title' | translate }}</h2>
+  <app-page-header [title]="'sequences.definitions.title' | translate" [wrap]="true">
     <div class="seq-page__filter">
       <app-select [label]="'common.status' | translate" [formControl]="statusFilter" [options]="statusOptions" />
     </div>
     <a class="action-btn action-btn--primary" routerLink="/sequences/new" data-testid="sequence-new-definition">
       <span class="material-icons-outlined">add</span>{{ 'sequences.editor.newDefinition' | translate }}
     </a>
-  </div>
+  </app-page-header>
 
   <div class="seq-page__body">
     <ul class="seq-list" data-testid="sequence-definitions-list">

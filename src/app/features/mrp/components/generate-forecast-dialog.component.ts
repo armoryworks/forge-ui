@@ -43,8 +43,8 @@ export class GenerateForecastDialogComponent {
     name: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(200)] }),
     partId: new FormControl<number | null>(null, [Validators.required]),
     method: new FormControl<ForecastMethod>('MovingAverage', { nonNullable: true, validators: [Validators.required] }),
-    historicalPeriods: new FormControl<number>(12, { nonNullable: true, validators: [Validators.required, Validators.min(2), Validators.max(60)] }),
-    forecastPeriods: new FormControl<number>(6, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(36)] }),
+    historicalPeriods: new FormControl<number>(12, { nonNullable: true, validators: [Validators.required, Validators.min(2), Validators.max(60), Validators.pattern(/^\d+$/)] }),
+    forecastPeriods: new FormControl<number>(6, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(36), Validators.pattern(/^\d+$/)] }),
     smoothingFactor: new FormControl<number | null>(null),
   });
 

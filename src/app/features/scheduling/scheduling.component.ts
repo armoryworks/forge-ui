@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { DecimalPipe } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -43,6 +44,7 @@ import { SCHEDULING_TABS, SchedulingTab } from './models/scheduling-tab.model';
   selector: 'app-scheduling',
   standalone: true,
   imports: [
+    DecimalPipe,
     ReactiveFormsModule,
     PageHeaderComponent,
     DataTableComponent,
@@ -179,6 +181,7 @@ export class SchedulingComponent implements OnInit {
   protected readonly runColumns: ColumnDef[] = [
     { field: 'runDate', header: this.translate.instant('scheduling.cols.runDate'), sortable: true, type: 'date', width: '140px' },
     { field: 'direction', header: this.translate.instant('scheduling.cols.direction'), sortable: true, width: '100px' },
+    { field: 'isSimulation', header: this.translate.instant('scheduling.cols.mode'), sortable: true, width: '110px' },
     { field: 'status', header: this.translate.instant('scheduling.cols.status'), sortable: true, filterable: true, type: 'enum', width: '100px',
       filterOptions: [
         { value: 'Completed', label: this.translate.instant('scheduling.statuses.completed') },
@@ -204,6 +207,7 @@ export class SchedulingComponent implements OnInit {
   constructor() {
     // Load work centers on init (needed for dispatch selector)
     this.loadWorkCenters();
+    if (untracked(this.activeTab) !== 'gantt') this.loadGanttData();
 
     // Lazy load tab data
     effect(() => {

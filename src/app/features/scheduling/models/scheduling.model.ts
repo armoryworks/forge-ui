@@ -61,6 +61,7 @@ export interface ScheduleRun {
   completedAt: string | null;
   runByUserId: number;
   errorMessage: string | null;
+  isSimulation: boolean;
 }
 
 export interface WorkCenterLoad {

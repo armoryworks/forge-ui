@@ -9,7 +9,7 @@
     </button>
 
     @for (item of pinnedTopTree(); track item.label) {
-      <a class="nav-item" [routerLink]="item.route" routerLinkActive="nav-item--active"
+      <a class="nav-item" [routerLink]="item.route" [class.nav-item--active]="isActiveLeaf(item)"
          [matTooltip]="collapsed() ? (item.i18nKey! | translate) : ''" matTooltipPosition="right"
          [attr.aria-label]="item.i18nKey! | translate" (click)="onLeafClick()">
         <span class="material-icons-outlined">{{ item.icon }}</span>
@@ -31,7 +31,7 @@
           }
         </button>
       } @else {
-        <a class="nav-item" [routerLink]="item.route" routerLinkActive="nav-item--active"
+        <a class="nav-item" [routerLink]="item.route" [class.nav-item--active]="isActiveLeaf(item)"
            [matTooltip]="collapsed() ? (item.i18nKey! | translate) : ''" matTooltipPosition="right"
            [attr.aria-label]="item.i18nKey! | translate" (click)="onLeafClick()">
           <span class="material-icons-outlined">{{ item.icon }}</span>
@@ -75,7 +75,7 @@
                   <span class="material-icons-outlined nav-item__chevron">chevron_right</span>
                 </button>
               } @else {
-                <a class="nav-item" [routerLink]="item.route" routerLinkActive="nav-item--active"
+                <a class="nav-item" [routerLink]="item.route" [class.nav-item--active]="isActiveLeaf(item)"
                    [attr.aria-label]="item.i18nKey! | translate" (click)="onLeafClick()">
                   <span class="material-icons-outlined">{{ item.icon }}</span>
                   <span class="nav-item__label">{{ item.i18nKey! | translate }}</span>
@@ -106,8 +106,7 @@
         }
       </button>
     } @else {
-      <a class="nav-item" [routerLink]="item.route" routerLinkActive="nav-item--active"
-         [routerLinkActiveOptions]="{ exact: false }"
+      <a class="nav-item" [routerLink]="item.route" [class.nav-item--active]="isActiveLeaf(item)"
          [matTooltip]="(collapsed() && !railTop()) ? (item.i18nKey! | translate) : ''" matTooltipPosition="right"
          [attr.aria-label]="item.i18nKey! | translate" (click)="onLeafClick()">
         <span class="material-icons-outlined">{{ item.icon }}</span>

@@ -28,14 +28,14 @@
         type="number"
         formControlName="historicalPeriods"
         [required]="true"
-        min="2" max="60" suffix="periods" />
+        step="1" min="2" max="60" suffix="periods" />
 
       <app-input
         [label]="'mrp.forecastDialog.fieldForecast' | translate"
         type="number"
         formControlName="forecastPeriods"
         [required]="true"
-        min="1" max="36" suffix="periods" />
+        step="1" min="1" max="36" suffix="periods" />
     </div>
 
     @if (showSmoothing()) {

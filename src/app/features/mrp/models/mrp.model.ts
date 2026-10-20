@@ -13,6 +13,7 @@ export interface MrpRun {
   exceptionCount: number;
   errorMessage: string | null;
   initiatedByUserId: number | null;
+  unplannedDemandPartCount?: number | null;
 }
 
 export type MrpRunType = 'Full' | 'NetChange' | 'Simulation';

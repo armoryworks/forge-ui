@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 
 import { AuthService } from './auth.service';
 import { CapabilityService } from './capability.service';
@@ -103,5 +104,38 @@ describe('NavTreeService · admin pages', () => {
 
     expect(routes).not.toContain('/admin/working-calendars');
     expect(routes).not.toContain('/admin/database');
+  });
+});
+
+@Component({ template: '' })
+class BlankPage {}
+
+async function activeLeafAt(url: string): Promise<string | null> {
+  TestBed.resetTestingModule();
+  TestBed.configureTestingModule({
+    providers: [
+      provideRouter([{ path: '**', component: BlankPage }]),
+      { provide: CapabilityService, useValue: { isEnabled: () => true } },
+      { provide: AuthService, useValue: { hasAnyRole: () => true, user: () => null } },
+    ],
+  });
+  const nav = TestBed.inject(NavTreeService);
+  await TestBed.inject(Router).navigateByUrl(url);
+  return nav.activeLeafRoute();
+}
+
+describe('NavTreeService · active leaf', () => {
+  it('lights only the instances leaf on the instances page', async () => {
+    expect(await activeLeafAt('/sequences/instances')).toBe('/sequences/instances');
+  });
+
+  it('keeps a new or opened definition under the definitions leaf', async () => {
+    expect(await activeLeafAt('/sequences/new')).toBe('/sequences');
+    expect(await activeLeafAt('/sequences/12')).toBe('/sequences');
+  });
+
+  it('prefers the longer of two sibling routes', async () => {
+    expect(await activeLeafAt('/leads/intake')).toBe('/leads/intake');
+    expect(await activeLeafAt('/leads?status=New')).toBe('/leads');
   });
 });

@@ -14,7 +14,8 @@
     <app-textarea [label]="'workCenterDialog.description' | translate" formControlName="description" [rows]="2" />
 
     <div class="dialog-row">
-      <app-input [label]="'workCenterDialog.dailyCapacityHours' | translate" type="number" formControlName="dailyCapacityHours" [required]="true" />
+      <app-input [label]="'workCenterDialog.dailyCapacityHours' | translate" type="number" formControlName="dailyCapacityHours" [required]="true"
+        [info]="'workCenterDialog.dailyCapacityHint' | translate" />
       <app-input [label]="'workCenterDialog.efficiencyPercent' | translate" type="number" formControlName="efficiencyPercent" [required]="true" suffix="%" />
     </div>
 

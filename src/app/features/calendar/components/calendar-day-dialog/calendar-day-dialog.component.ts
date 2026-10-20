@@ -95,7 +95,7 @@ export class CalendarDayDialogComponent {
 
   /** Tracking-tier events carry a workflow status; reminder-tier events have none. */
   protected isTracking(evt: CalendarDayEvent): boolean {
-    return evt.status != null;
+    return !!evt.status;
   }
 
   protected openEventStatus(evt: CalendarDayEvent): void {

@@ -850,7 +850,8 @@
       "subjectId": "ID del sujeto",
       "confirm": "Iniciar",
       "started": "Secuencia iniciada.",
-      "failed": "No se pudo iniciar la secuencia."
+      "failed": "No se pudo iniciar la secuencia.",
+      "job": "Trabajo"
     },
     "instances": {
       "title": "Instancias de secuencia",
@@ -910,7 +911,8 @@
       "noGates": "Aún no hay compuertas: un paso sin compuerta inicia en cuanto terminan sus predecesores.",
       "saved": "Definición guardada.",
       "saveFailed": "No se pudo guardar la definición.",
-      "badConfig": "La compuerta \"{{gate}}\" tiene una configuración JSON inválida."
+      "badConfig": "La compuerta \"{{gate}}\" tiene una configuración JSON inválida.",
+      "noSubject": "Ninguno"
     }
   },
   "newPartFlow": {
@@ -6540,7 +6542,10 @@
     "rolledOver": "Transferido del ciclo anterior",
     "markComplete": "Marcar completo",
     "removeFromCycle": "Remover del ciclo",
-    "noJobsCommitted": "No hay trabajos comprometidos en este ciclo"
+    "noJobsCommitted": "No hay trabajos comprometidos en este ciclo",
+    "selectCycleHint": "Seleccione un ciclo de planificación para ver su tablero",
+    "activateCycleTitle": "¿Activar ciclo?",
+    "activateCycleMessage": "¿Activar \"{{name}}\"? Pasa de Planificación a Activo y comienza el trabajo en sus trabajos."
   },
   "reports": {
     "title": "Reportes",
@@ -8188,7 +8193,8 @@
       "scheduleUpdated": "Programación maestra actualizada",
       "forecastGenerated": "Pronóstico generado",
       "scheduleCompleted": "Programa completado",
-      "scheduleCancelled": "Programa cancelado"
+      "scheduleCancelled": "Programa cancelado",
+      "unplannedDemandParts": "La ejecución terminó, pero {{count}} parte(s) con demanda no están marcadas para planificación MRP y se omitieron. Active la planificación MRP en esas partes."
     },
     "newMasterSchedule": "Nueva Programación Maestra",
     "newForecast": "Generar Pronóstico",
@@ -8241,7 +8247,7 @@
       "title": "Ejecución MRP",
       "horizon": "Horizonte",
       "partsTouched": "Partes Tocadas",
-      "noParts": "Sin partes en esta ejecución.",
+      "noParts": "Sin partes en esta ejecución. MRP solo planifica partes activas marcadas para planificación MRP; actívela en la configuración de planificación de la parte.",
       "pickPart": "Selecciona una parte para ver su plan por período y trazabilidad de demanda.",
       "orders": "órdenes",
       "timeBuckets": "Plan por Período",
@@ -8282,7 +8288,23 @@
     "completeScheduleMessage": "¿Marcar \"{{name}}\" como completado? MRP deja de planificar sus líneas.",
     "cancelSchedule": "Cancelar programa",
     "cancelScheduleTitle": "¿Cancelar programa maestro?",
-    "cancelScheduleMessage": "¿Cancelar \"{{name}}\"? MRP deja de planificar sus líneas."
+    "cancelScheduleMessage": "¿Cancelar \"{{name}}\"? MRP deja de planificar sus líneas.",
+    "approveForecastTitle": "¿Aprobar pronóstico?",
+    "approveForecastMessage": "¿Aprobar \"{{name}}\"? Deja de ser borrador y no se puede volver a aprobar.",
+    "forecastDetail": {
+      "forecastStart": "Inicio del pronóstico",
+      "empty": "Este pronóstico no tiene períodos.",
+      "period": "Período",
+      "historical": "Demanda real",
+      "forecasted": "Pronóstico",
+      "override": "Ajuste",
+      "applyTo": "Plan maestro en borrador",
+      "noDraftSchedules": "No hay un plan maestro en borrador al que aplicar este pronóstico.",
+      "saveOverrides": "Guardar ajustes",
+      "apply": "Aplicar al plan",
+      "overridesSaved": "Ajustes guardados",
+      "applied": "Pronóstico aplicado al plan maestro"
+    }
   },
   "portal": {
     "title": "Portal de Cliente",
@@ -8395,8 +8417,8 @@
   "scheduling": {
     "title": "Programación",
     "kpi": {
-      "scheduledOps": "Ops Programadas",
-      "inProgress": "En Progreso",
+      "scheduledOps": "Ops Programadas (30 días)",
+      "inProgress": "En Progreso (30 días)",
       "workCenters": "Centros de Trabajo"
     },
     "tabs": {
@@ -8459,7 +8481,8 @@
       "priority": "Prioridad",
       "dueDate": "Fecha Venc.",
       "endTime": "End Time",
-      "startTime": "Start Time"
+      "startTime": "Start Time",
+      "mode": "Modo"
     },
     "statuses": {
       "scheduled": "Programado",
@@ -8519,6 +8542,10 @@
       "removeTitle": "Quitar asignación de turno",
       "removeMessage": "¿Quitar a {{name}} del turno {{shift}}?",
       "removed": "Asignación de turno quitada"
+    },
+    "runModes": {
+      "simulation": "Simulación",
+      "live": "Real"
     }
   },
   "routingTools": {
@@ -8550,7 +8577,8 @@
     "noTeam": "Sin equipo",
     "create": "Crear Centro de Trabajo",
     "idealCycleTimeSeconds": "Tiempo de ciclo ideal (segundos por unidad)",
-    "idealCycleTimeHint": "Tiempo más rápido para fabricar una unidad buena; el rendimiento OEE compara el tiempo real de producción con él."
+    "idealCycleTimeHint": "Tiempo más rápido para fabricar una unidad buena; el rendimiento OEE compara el tiempo real de producción con él.",
+    "dailyCapacityHint": "Horas disponibles de cada máquina por día laborable (hasta 24)."
   },
   "oee": {
     "title": "Panel OEE",

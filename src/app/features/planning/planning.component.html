@@ -89,8 +89,10 @@
           (entryRemoved)="onEntryRemoved($event)"
           (entryReordered)="onEntryReordered($event)" />
       } @else {
-        <app-empty-state icon="event_note" [message]="'planning.noCycleSelected' | translate"
-          [actionLabel]="'planning.createFirstCycle' | translate" (action)="openCreateCycleDialog()" />
+        <app-empty-state icon="event_note"
+          [message]="(cycles().length > 0 ? 'planning.selectCycleHint' : 'planning.noCycleSelected') | translate"
+          [actionLabel]="(cycles().length > 0 ? 'planning.newCycle' : 'planning.createFirstCycle') | translate"
+          (action)="openCreateCycleDialog()" />
       }
     </div>
   </div>

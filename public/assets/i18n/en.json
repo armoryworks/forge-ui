@@ -850,7 +850,8 @@
       "subjectId": "Subject ID",
       "confirm": "Start",
       "started": "Sequence started.",
-      "failed": "Could not start the sequence."
+      "failed": "Could not start the sequence.",
+      "job": "Job"
     },
     "instances": {
       "title": "Sequence Instances",
@@ -910,7 +911,8 @@
       "noGates": "No gates yet — a step with no gate starts as soon as its predecessors are done.",
       "saved": "Definition saved.",
       "saveFailed": "Could not save the definition.",
-      "badConfig": "Gate \"{{gate}}\" has invalid JSON config."
+      "badConfig": "Gate \"{{gate}}\" has invalid JSON config.",
+      "noSubject": "None"
     }
   },
   "newPartFlow": {
@@ -6547,7 +6549,10 @@
     "rolledOver": "Rolled over from previous cycle",
     "markComplete": "Mark complete",
     "removeFromCycle": "Remove from cycle",
-    "noJobsCommitted": "No jobs committed to this cycle"
+    "noJobsCommitted": "No jobs committed to this cycle",
+    "selectCycleHint": "Select a planning cycle to see its board",
+    "activateCycleTitle": "Activate cycle?",
+    "activateCycleMessage": "Activate \"{{name}}\"? It moves from Planning to Active and work on its jobs begins."
   },
   "reports": {
     "title": "Reports",
@@ -8195,7 +8200,8 @@
       "scheduleUpdated": "Master schedule updated",
       "forecastGenerated": "Forecast generated",
       "scheduleCompleted": "Schedule completed",
-      "scheduleCancelled": "Schedule cancelled"
+      "scheduleCancelled": "Schedule cancelled",
+      "unplannedDemandParts": "Run finished, but {{count}} part(s) with demand are not flagged for MRP planning and were skipped. Turn on MRP planned on those parts."
     },
     "newMasterSchedule": "New Master Schedule",
     "newForecast": "Generate Forecast",
@@ -8248,7 +8254,7 @@
       "title": "MRP Run",
       "horizon": "Horizon",
       "partsTouched": "Parts Touched",
-      "noParts": "No parts in this run.",
+      "noParts": "No parts in this run. MRP only plans active parts flagged for MRP planning; turn it on in the part's planning settings.",
       "pickPart": "Select a part to view its time-bucket plan and demand pegging.",
       "orders": "orders",
       "timeBuckets": "Time-Bucket Plan",
@@ -8289,7 +8295,23 @@
     "completeScheduleMessage": "Mark \"{{name}}\" complete? MRP stops planning its lines.",
     "cancelSchedule": "Cancel schedule",
     "cancelScheduleTitle": "Cancel master schedule?",
-    "cancelScheduleMessage": "Cancel \"{{name}}\"? MRP stops planning its lines."
+    "cancelScheduleMessage": "Cancel \"{{name}}\"? MRP stops planning its lines.",
+    "approveForecastTitle": "Approve forecast?",
+    "approveForecastMessage": "Approve \"{{name}}\"? It leaves Draft and cannot be approved again.",
+    "forecastDetail": {
+      "forecastStart": "Forecast starts",
+      "empty": "This forecast has no periods.",
+      "period": "Period",
+      "historical": "Actual demand",
+      "forecasted": "Forecast",
+      "override": "Override",
+      "applyTo": "Draft master schedule",
+      "noDraftSchedules": "There is no draft master schedule to apply this forecast to.",
+      "saveOverrides": "Save overrides",
+      "apply": "Apply to schedule",
+      "overridesSaved": "Overrides saved",
+      "applied": "Forecast applied to the master schedule"
+    }
   },
   "portal": {
     "title": "Customer Portal",
@@ -8402,8 +8424,8 @@
   "scheduling": {
     "title": "Scheduling",
     "kpi": {
-      "scheduledOps": "Scheduled Ops",
-      "inProgress": "In Progress",
+      "scheduledOps": "Scheduled Ops (30 days)",
+      "inProgress": "In Progress (30 days)",
       "workCenters": "Work Centers"
     },
     "tabs": {
@@ -8458,7 +8480,8 @@
       "priority": "Priority",
       "dueDate": "Due Date",
       "endTime": "End Time",
-      "startTime": "Start Time"
+      "startTime": "Start Time",
+      "mode": "Mode"
     },
     "statuses": {
       "scheduled": "Scheduled",
@@ -8526,6 +8549,10 @@
       "removeTitle": "Remove shift assignment",
       "removeMessage": "Remove {{name}} from the {{shift}} shift?",
       "removed": "Shift assignment removed"
+    },
+    "runModes": {
+      "simulation": "Simulation",
+      "live": "Live"
     }
   },
   "routingTools": {
@@ -8557,7 +8584,8 @@
     "noTeam": "No team",
     "create": "Create Work Center",
     "idealCycleTimeSeconds": "Ideal cycle time (seconds per unit)",
-    "idealCycleTimeHint": "Fastest time to make one good unit; OEE performance compares actual run time to it."
+    "idealCycleTimeHint": "Fastest time to make one good unit; OEE performance compares actual run time to it.",
+    "dailyCapacityHint": "Hours each machine is available per working day (up to 24)."
   },
   "oee": {
     "title": "OEE Dashboard",

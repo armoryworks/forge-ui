@@ -136,6 +136,10 @@ export class MrpService {
     return this.http.get<DemandForecast[]>(`${this.base}/forecasts`, { params });
   }
 
+  getForecast(id: number): Observable<DemandForecast> {
+    return this.http.get<DemandForecast>(`${this.base}/forecasts/${id}`);
+  }
+
   generateForecast(request: GenerateForecastRequest): Observable<DemandForecast> {
     return this.http.post<DemandForecast>(`${this.base}/forecasts`, request);
   }

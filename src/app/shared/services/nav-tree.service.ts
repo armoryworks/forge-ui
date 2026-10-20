@@ -354,6 +354,20 @@ export class NavTreeService {
   });
 
   /**
+   * Route of the nav leaf that owns the current URL: the longest leaf route
+   * equal to the URL or a path prefix of it. The sidebar highlights only this
+   * leaf, so `/sequences/instances` lights Instances but not Definitions
+   * (`/sequences`), while `/sequences/new` still lights Definitions.
+   */
+  readonly activeLeafRoute: Signal<string | null> = computed(() => {
+    const url = this.currentUrl().split('#')[0];
+    return this.flatLeaves()
+      .map(leaf => leaf.route)
+      .filter(route => url === route || url.startsWith(route + '/'))
+      .reduce<string | null>((best, route) => (best === null || route.length > best.length ? route : best), null);
+  });
+
+  /**
    * Full ancestor chain of the current URL, walking all groups (including
    * non-routePrefix groups). Used by the header breadcrumb so that e.g.
    * `/kanban` shows `Operations > Board` even though Operations doesn't
