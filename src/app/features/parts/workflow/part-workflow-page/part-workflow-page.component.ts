@@ -217,6 +217,10 @@ export class PartWorkflowPageComponent {
               this.validators.set(validators);
               this.workflowService.setContext({ run, definition, entity: part, validators });
             },
+            error: (err: unknown) => {
+              this.snackbar.errorFrom(err, 'parts.workflow.page.loadFailed');
+              this.router.navigate(['/parts']);
+            },
           });
           return;
         }

@@ -116,6 +116,22 @@ describe('VendorWorkflowPageComponent routing', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/vendors'], { queryParams: { detail: 'vendor:7' }, replaceUrl: true });
   });
 
+  it('returns to the list when the run\'s vendor cannot be loaded', () => {
+    setUp({}, { workflow: 'vendor-guided-v1', runId: '4' });
+    vi.spyOn(workflowService, 'getRun').mockReturnValue(of(buildRun({ entityId: 9 })));
+    vi.spyOn(workflowService, 'loadDefinitionsForEntity').mockReturnValue(of([
+      { definitionId: 'vendor-guided-v1', steps: [] } as unknown as WorkflowDefinition,
+    ]));
+    vi.spyOn(workflowService, 'loadValidatorsForEntity').mockReturnValue(of([]));
+    vi.spyOn(TestBed.inject(VendorService), 'getVendorById').mockReturnValue(throwError(() => new Error('404')));
+    const errorFrom = vi.spyOn(TestBed.inject(SnackbarService), 'errorFrom').mockImplementation(() => undefined);
+    TestBed.runInInjectionContext(() => new VendorWorkflowPageComponent());
+    TestBed.tick();
+
+    expect(errorFrom).toHaveBeenCalledWith(expect.any(Error), 'vendors.workflow.page.loadFailed');
+    expect(router.navigate).toHaveBeenCalledWith(['/vendors']);
+  });
+
   it('moves to the new vendor URL in the chosen mode when Quick add materializes the vendor', () => {
     setUp({}, { workflow: 'vendor-guided-v1', runId: '4', mode: 'guided' });
     vi.spyOn(workflowService, 'getRun').mockReturnValue(of(buildRun()));

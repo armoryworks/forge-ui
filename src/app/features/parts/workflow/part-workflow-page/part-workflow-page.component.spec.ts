@@ -286,3 +286,38 @@ describe('PartWorkflowPageComponent bad links', () => {
     expect(navSpy).toHaveBeenCalledWith(['/parts'], { queryParams: { detail: 'part:42' }, replaceUrl: true });
   });
 });
+
+describe('PartWorkflowPageComponent run whose part cannot be loaded', () => {
+  it('returns to the list instead of loading forever', async () => {
+    await TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            paramMap: of(convertToParamMap({})),
+            queryParamMap: of(convertToParamMap({ workflow: 'part-make-finishedgood-v1', runId: '9' })),
+          },
+        },
+      ],
+    }).compileComponents();
+    const router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    const workflowService = TestBed.inject(WorkflowService);
+    vi.spyOn(workflowService, 'getRun').mockReturnValue(of(buildRun({ id: 9, entityId: 1 })));
+    vi.spyOn(workflowService, 'loadDefinitionsForEntity').mockReturnValue(of([
+      { definitionId: 'part-make-finishedgood-v1', steps: [] } as unknown as WorkflowDefinition,
+    ]));
+    vi.spyOn(workflowService, 'loadValidatorsForEntity').mockReturnValue(of([]));
+    vi.spyOn(TestBed.inject(PartsService), 'getPartById').mockReturnValue(throwError(() => new Error('404')));
+    const errorFrom = vi.spyOn(TestBed.inject(SnackbarService), 'errorFrom').mockImplementation(() => undefined);
+
+    TestBed.runInInjectionContext(() => new PartWorkflowPageComponent());
+    TestBed.tick();
+
+    expect(errorFrom).toHaveBeenCalledWith(expect.any(Error), 'parts.workflow.page.loadFailed');
+    expect(router.navigate).toHaveBeenCalledWith(['/parts']);
+  });
+});

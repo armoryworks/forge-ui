@@ -3,7 +3,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 
 import { WorkflowDefinition } from '../../../../shared/models/workflow-definition.model';
@@ -115,6 +115,18 @@ describe('CustomerWorkflowPageComponent', () => {
     TestBed.tick();
 
     expect((component as unknown as { run(): WorkflowRun | null }).run()?.currentStepId).toBe('identity');
+  });
+
+  it('returns to the list when the run\'s customer cannot be loaded', () => {
+    setUp({ workflow: 'customer-guided-v1', runId: '4' });
+    vi.spyOn(TestBed.inject(CustomerService), 'getCustomerById').mockReturnValue(throwError(() => new Error('404')));
+    stubLoad(buildRun());
+    const errorFrom = vi.spyOn(TestBed.inject(SnackbarService), 'errorFrom').mockImplementation(() => undefined);
+    create();
+    TestBed.tick();
+
+    expect(errorFrom).toHaveBeenCalledWith(expect.any(Error), 'customers.workflow.page.loadFailed');
+    expect(router.navigate).toHaveBeenCalledWith(['/customers']);
   });
 
   it('abandons an unsaved run on close but keeps one bound to a customer', () => {

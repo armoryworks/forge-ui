@@ -257,6 +257,10 @@ export class VendorWorkflowPageComponent {
               this.validators.set(validators);
               this.workflowService.setContext({ run, definition, entity: vendor, validators });
             },
+            error: (err: unknown) => {
+              this.snackbar.errorFrom(err, 'vendors.workflow.page.loadFailed');
+              this.router.navigate(['/vendors']);
+            },
           });
           return;
         }

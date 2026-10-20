@@ -201,6 +201,10 @@ export class CustomerWorkflowPageComponent {
               this.validators.set(validators);
               this.workflowService.setContext({ run, definition, entity: customer, validators });
             },
+            error: (err: unknown) => {
+              this.snackbar.errorFrom(err, 'customers.workflow.page.loadFailed');
+              this.router.navigate(['/customers']);
+            },
           });
           return;
         }
