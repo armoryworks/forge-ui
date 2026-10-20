@@ -177,6 +177,36 @@ describe('OperationTimeTabComponent', () => {
     expect(component.trackingEnabled()).toBe(false);
   });
 
+  it('fills the progress bar by pieces finished on the step and full once the step is closed', () => {
+    const { component } = setup(of(payload(true, [
+      op({ completedQuantity: 10, scrapQuantity: 2 }),
+      op({ operationId: 8, jobOperationId: 4, stepNumber: 3, status: 'Complete', completedQuantity: 1, scrapQuantity: 0 }),
+    ])));
+
+    const [partial, done] = component.operations();
+    expect(component.completionPercent(partial)).toBe(30);
+    expect(component.completionPercent(done)).toBe(100);
+  });
+
+  it('rates overall efficiency on the time earned by finished work, not the whole job estimate', () => {
+    const { component } = setup(of(payload(true, [
+      op({ status: 'Complete', completedQuantity: 40, actualTotalMinutes: 70 }),
+      op({ operationId: 8, jobOperationId: 4, stepNumber: 3, status: 'NotStarted', completedQuantity: 0 }),
+    ])));
+
+    const [done] = component.operations();
+    const expected = ((done.estimatedSetupMinutes + done.estimatedRunMinutes) / 70) * 100;
+    expect(component.overallEfficiency()).toBeCloseTo(expected);
+  });
+
+  it('shows no overall efficiency until a minute of work is logged', () => {
+    const { component } = setup(of(payload(true, [
+      op({ status: 'Complete', completedQuantity: 40, actualTotalMinutes: 0.1 }),
+    ])));
+
+    expect(component.overallEfficiency()).toBeNull();
+  });
+
   it('starts and stops the timer of one step', () => {
     const { component, operations } = setup(of(payload(true)));
     component.startTimer(firstRow(component), 'Setup');

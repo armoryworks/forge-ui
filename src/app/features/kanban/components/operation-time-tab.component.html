@@ -127,13 +127,14 @@
             </span>
           </ng-template>
           <ng-template appColumnCell="progress" let-row>
-            <div class="op-time__bar-track">
+            <div class="op-time__bar-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                 [attr.aria-valuenow]="completionPercent(row)"
+                 [attr.data-testid]="'operation-progress-' + row.operationSequence">
               <div
                 class="op-time__bar-fill"
-                [class]="getEfficiencyBarClass(row.efficiencyPercent)"
-                [style.width.%]="getBarWidth(row.actualTotalMinutes, row.estimatedSetupMinutes + row.estimatedRunMinutes)">
+                [class.op-time__bar-fill--good]="row.closed"
+                [style.width.%]="completionPercent(row)">
               </div>
-              <div class="op-time__bar-target"></div>
             </div>
           </ng-template>
           <ng-template appColumnCell="perPiece" let-row>

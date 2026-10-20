@@ -134,7 +134,13 @@ export class OperationTimeTabComponent {
   readonly totalActual = computed(() =>
     this.operations().reduce((sum, op) => sum + op.actualTotalMinutes, 0));
 
-  readonly overallEfficiency = computed(() => efficiencyPercent(this.totalEstimated(), this.totalActual()));
+  readonly overallEfficiency = computed(() => {
+    if (!this.trackingEnabled()) return efficiencyPercent(this.totalEstimated(), this.totalActual());
+    const timed = this.operations().filter(op => op.actualTotalMinutes > 0);
+    const actual = timed.reduce((sum, op) => sum + op.actualTotalMinutes, 0);
+    if (actual < 1) return null;
+    return efficiencyPercent(timed.reduce((sum, op) => sum + this.earnedMinutes(op), 0), actual);
+  });
 
   constructor() {
     effect(() => {
@@ -334,16 +340,19 @@ export class OperationTimeTabComponent {
     return 'op-time__efficiency--poor';
   }
 
-  getEfficiencyBarClass(efficiency: number | null): string {
-    if (efficiency === null) return '';
-    if (efficiency >= 100) return 'op-time__bar-fill--good';
-    if (efficiency >= 80) return 'op-time__bar-fill--fair';
-    return 'op-time__bar-fill--poor';
+  private earnedMinutes(row: OperationTimeRow): number {
+    if (row.closed) return row.estimatedSetupMinutes + row.estimatedRunMinutes;
+    const quantity = this.jobQuantity();
+    const pieces = row.completedQuantity + row.scrapQuantity;
+    if (!quantity || quantity <= 0 || pieces <= 0) return 0;
+    return row.estimatedSetupMinutes + row.estimatedRunMinutes * Math.min(1, pieces / quantity);
   }
 
-  getBarWidth(actual: number, estimated: number): number {
-    if (estimated <= 0) return actual > 0 ? 100 : 0;
-    return Math.min((actual / estimated) * 100, 150);
+  completionPercent(row: OperationTimeRow): number {
+    if (row.closed) return 100;
+    const quantity = this.jobQuantity();
+    if (!quantity || quantity <= 0) return 0;
+    return Math.min(100, Math.round(((row.completedQuantity + row.scrapQuantity) / quantity) * 100));
   }
 }
 

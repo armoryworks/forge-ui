@@ -82,6 +82,12 @@
     flex-wrap: nowrap;
   }
 
+  &__timers .action-btn,
+  &__row-actions .action-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
   &__other {
     @include flex-center;
     width: $avatar-size-sm;
@@ -126,16 +132,8 @@
     top: 0;
     left: 0;
     height: 100%;
+    background-color: var(--primary);
     transition: width $transition-normal;
-  }
-
-  &__bar-target {
-    position: absolute;
-    top: -2px;
-    left: 100%;
-    width: 2px;
-    height: 10px;
-    background: var(--text-muted);
   }
 
   &__variance--over {
@@ -160,13 +158,5 @@
 
   &__bar-fill--good {
     background-color: var(--success);
-  }
-
-  &__bar-fill--fair {
-    background-color: var(--warning);
-  }
-
-  &__bar-fill--poor {
-    background-color: var(--error);
   }
 }
