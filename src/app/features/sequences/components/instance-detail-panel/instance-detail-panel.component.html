@@ -9,10 +9,10 @@
         <span class="chip"
           [class.chip--info]="inst.status === 'Running'"
           [class.chip--success]="inst.status === 'Completed'"
-          [class.chip--danger]="inst.status === 'Cancelled'">{{ inst.status }}</span>
+          [class.chip--danger]="inst.status === 'Cancelled'">{{ inst.status | enumLabel }}</span>
       </div>
       @if (inst.subjectEntityType) {
-        <span class="seq-panel__subject">{{ inst.subjectEntityType }} #{{ inst.subjectEntityId }}</span>
+        <span class="seq-panel__subject">{{ inst.subjectLabel ?? (inst.subjectEntityType | enumLabel) + ' #' + inst.subjectEntityId }}</span>
       }
       <span class="seq-panel__started">{{ 'sequences.startedAt' | translate }} {{ inst.startedAt | date:'short' }}</span>
     </header>
@@ -36,7 +36,7 @@
       @for (step of inst.steps; track step.stepKey) {
         <li class="seq-step" [class.seq-step--blocked]="step.isBlocked">
           <div class="seq-step__head">
-            <span class="chip" [class]="stepChipClass(step.status)">{{ step.status }}</span>
+            <span class="chip" [class]="stepChipClass(step.status)">{{ step.status | enumLabel }}</span>
             <span class="seq-step__name">{{ step.name }}</span>
             @if (step.isBlocked) {
               <span class="chip chip--danger" data-testid="sequence-step-blocked">{{ 'sequences.blocked' | translate }}</span>
@@ -77,9 +77,9 @@
 
           @for (gate of gatesFor(step.stepKey); track gate.gateKey) {
             <div class="seq-gate" data-testid="sequence-gate">
-              <span class="chip" [class]="verdictChipClass(gate.verdict)">{{ gate.verdict }}</span>
+              <span class="chip" [class]="verdictChipClass(gate.verdict)">{{ gate.verdict | enumLabel }}</span>
               <span class="seq-gate__name">{{ gate.name }}</span>
-              <span class="seq-gate__source">{{ gate.sourceType }}</span>
+              <span class="seq-gate__source">{{ gate.sourceType | enumLabel }}</span>
               @if (gate.reason) { <span class="seq-gate__reason">{{ gate.reason }}</span> }
               @if (gate.overrideReason) {
                 <span class="seq-gate__override">{{ 'sequences.gate.overridden' | translate }}: {{ gate.overrideReason }}</span>
@@ -110,7 +110,7 @@
           @for (ev of events(); track ev.id) {
             <li class="seq-event">
               <span class="seq-event__time">{{ ev.occurredAt | date:'short' }}</span>
-              <span class="seq-event__type">{{ ev.type }}</span>
+              <span class="seq-event__type">{{ ev.type | enumLabel }}</span>
               @if (ev.stepKey) { <span class="seq-event__ref">{{ ev.stepKey }}</span> }
               @if (ev.gateKey) { <span class="seq-event__ref">/ {{ ev.gateKey }}</span> }
             </li>

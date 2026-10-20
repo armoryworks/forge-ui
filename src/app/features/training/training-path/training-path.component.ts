@@ -8,11 +8,12 @@ import { TrainingService } from '../services/training.service';
 import { TrainingPath } from '../models/training-path.model';
 import { TrainingContentType } from '../models/training-content-type.enum';
 import { TrainingProgressStatus } from '../models/training-progress-status.enum';
+import { EnumLabelPipe } from '../../../shared/pipes/enum-label.pipe';
 
 @Component({
   selector: 'app-training-path',
   standalone: true,
-  imports: [LoadingBlockDirective, EmptyStateComponent, RouterLink],
+  imports: [EnumLabelPipe, LoadingBlockDirective, EmptyStateComponent, RouterLink],
   templateUrl: './training-path.component.html',
   styleUrl: './training-path.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

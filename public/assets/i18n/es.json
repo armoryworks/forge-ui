@@ -2309,7 +2309,8 @@
         "activeJobs": "Trabajos activos",
         "outstanding": "Saldo pendiente",
         "ytdRevenue": "Ingresos del año"
-      }
+      },
+      "creditHold": "Crédito retenido"
     },
     "creditStatus": {
       "title": "Estado de crédito",
@@ -6344,7 +6345,8 @@
     "scanLabelMessage": "Escanee el código QR de la etiqueta impresa para el envío {{number}} para confirmarlo antes de enviarlo.",
     "scanLabelField": "Código de la etiqueta",
     "scanLabelPlaceholder": "Escanee, o escriba el código y pulse Intro",
-    "shipFailed": "No se pudo marcar el envío como enviado."
+    "shipFailed": "No se pudo marcar el envío como enviado.",
+    "invoiceNumberFallback": "Factura #{{id}}"
   },
   "planning": {
     "title": "Planificación",
@@ -8048,7 +8050,7 @@
     },
     "forecastDialog": {
       "title": "Generar Pronóstico de Demanda",
-      "hint": "Elige una parte con historial de ventas y un método de pronóstico. El motor lee `períodos históricos` de demanda pasada y proyecta `períodos de pronóstico` al futuro.",
+      "hint": "Elige una parte con historial de ventas y un método de pronóstico. El motor lee períodos históricos de demanda pasada y proyecta períodos de pronóstico al futuro.",
       "fieldName": "Nombre del Pronóstico",
       "fieldPart": "Parte",
       "fieldMethod": "Método",
@@ -8539,7 +8541,8 @@
     "rfq": {
       "confirmSendTitle": "¿Agregar proveedores a la RFQ?",
       "confirmSendMessage": "¿Agregar {{count}} proveedor(es) a esta RFQ? Usted mismo se la enviará."
-    }
+    },
+    "poNumberFallback": "OC #{{id}}"
   },
   "approvals": {
     "title": "Aprobaciones",
@@ -8667,7 +8670,8 @@
     "filters": {
       "all": "-- Todos --",
       "active": "Activo",
-      "inactive": "Inactivo"
+      "inactive": "Inactivo",
+      "allRoles": "-- Todos los roles --"
     },
     "detail": {
       "backToEmployees": "Empleados",
@@ -10563,7 +10567,8 @@
       "attested": "Transferencia atestiguada — marcada como transmitida"
     },
     "glAccount": "Cuenta contable",
-    "defaultExpenseAccount": "Cuenta de gastos predeterminada"
+    "defaultExpenseAccount": "Cuenta de gastos predeterminada",
+    "poLineFallback": "Línea de OC #{{id}}"
   },
   "terms": {
     "scope": {
@@ -12021,6 +12026,35 @@
       "sftpUploadDirHint": "Dónde se suben los archivos de pago en el servidor del banco.",
       "sftpReturnsDir": "Directorio de devoluciones SFTP",
       "sftpReturnsDirHint": "Dónde deja el banco los archivos de devoluciones para que Forge los lea."
+    }
+  },
+  "roles": {
+    "admin": "Administrador",
+    "manager": "Gerente",
+    "officeManager": "Gerente de oficina",
+    "engineer": "Ingeniero",
+    "pm": "Gerente de proyecto",
+    "productionWorker": "Operario de producción",
+    "procurement": "Compras",
+    "controller": "Contralor",
+    "complianceOfficer": "Oficial de cumplimiento",
+    "biApiClient": "Cliente de API de BI",
+    "leadIntake": "Captación de prospectos"
+  },
+  "enums": {
+    "creditRisk": {
+      "low": "Riesgo bajo",
+      "medium": "Riesgo medio",
+      "high": "Riesgo alto",
+      "onHold": "Retenido"
+    },
+    "creditTerms": {
+      "dueOnReceipt": "Pago a la recepción",
+      "net15": "Neto 15",
+      "net30": "Neto 30",
+      "net45": "Neto 45",
+      "net60": "Neto 60",
+      "net90": "Neto 90"
     }
   }
 }

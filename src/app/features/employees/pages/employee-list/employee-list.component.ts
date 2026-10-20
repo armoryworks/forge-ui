@@ -22,6 +22,9 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
 import { EmployeeCreateDialogComponent } from '../../components/employee-create-dialog/employee-create-dialog.component';
 import { CreatedEmployee } from '../../models/created-employee.model';
+import { DisplayLabelService } from '../../../../shared/services/display-label.service';
+
+const SERVICE_ROLES: ReadonlySet<string> = new Set(['LeadIntake', 'BiApiClient']);
 
 @Component({
   selector: 'app-employee-list',
@@ -41,6 +44,7 @@ export class EmployeeListComponent {
   private readonly refDataService = inject(ReferenceDataService);
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
+  private readonly labels = inject(DisplayLabelService);
   private readonly auth = inject(AuthService);
   private readonly dialog = inject(MatDialog);
 
@@ -62,7 +66,7 @@ export class EmployeeListComponent {
   // EmployeeProfile.Department).
   protected readonly departmentControl = new FormControl<string | null>(null);
 
-  protected readonly roleOptions = signal<SelectOption[]>([{ value: null, label: '-- All Roles --' }]);
+  protected readonly roleOptions = signal<SelectOption[]>([{ value: null, label: this.translate.instant('employees.filters.allRoles') }]);
 
   protected readonly statusOptions: SelectOption[] = [
     { value: null, label: this.translate.instant('employees.filters.all') },
@@ -83,7 +87,10 @@ export class EmployeeListComponent {
   ]);
 
   constructor() {
-    this.refDataService.getRolesAsOptions('-- All Roles --').pipe(takeUntilDestroyed()).subscribe(opts => this.roleOptions.set(opts));
+    this.refDataService.getRolesAsOptions(this.translate.instant('employees.filters.allRoles')).pipe(takeUntilDestroyed()).subscribe(opts =>
+      this.roleOptions.set(opts
+        .filter(o => !SERVICE_ROLES.has(o.value as string))
+        .map(o => o.value === null ? o : { ...o, label: this.labels.roleLabel(o.value as string) })));
     this.loadEmployees();
 
     // Phase 3 F7-broad / WU-22 — debounced search + filter changes refire

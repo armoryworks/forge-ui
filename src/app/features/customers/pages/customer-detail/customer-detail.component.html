@@ -30,6 +30,12 @@
           <span class="chip" [class.chip--success]="c.isActive" [class.chip--muted]="!c.isActive">
             {{ (c.isActive ? 'customers.detail.active' : 'customers.detail.inactive') | translate }}
           </span>
+          @if (c.isOnCreditHold) {
+            <span class="chip chip--error" data-testid="customer-credit-hold-chip">
+              <span class="material-icons-outlined">block</span>
+              {{ 'customers.detail.creditHold' | translate }}
+            </span>
+          }
           @if (c.provider) {
             <span class="chip chip--info" [matTooltip]="'customers.detail.syncedWith' | translate: { provider: c.provider }">
               <span class="material-icons-outlined">sync</span>

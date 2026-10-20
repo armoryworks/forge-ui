@@ -35,6 +35,7 @@ import { EmptyStateComponent } from '../empty-state/empty-state.component';
 import { ColumnFilterPopoverComponent, ColumnFilterState } from './column-filter-popover/column-filter-popover.component';
 import { ColumnManagerPanelComponent, ColumnManagerState } from './column-manager-panel/column-manager-panel.component';
 import { UserPreferencesService } from '../../services/user-preferences.service';
+import { DisplayLabelService } from '../../services/display-label.service';
 import { formatDate, formatDateTime, parseDateOnly } from '../../utils/date.utils';
 
 
@@ -61,6 +62,7 @@ import { formatDate, formatDateTime, parseDateOnly } from '../../utils/date.util
 })
 export class DataTableComponent implements OnInit {
   private readonly prefs = inject(UserPreferencesService);
+  private readonly labels = inject(DisplayLabelService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly host = inject(ElementRef<HTMLElement>);
 
@@ -328,6 +330,12 @@ export class DataTableComponent implements OnInit {
         return formatDate(dateOnly);
       }
       return formatDateTime(val as string | Date);
+    }
+    if (typeof val === 'boolean') {
+      return this.labels.booleanLabel(val);
+    }
+    if (col.type === 'enum' && typeof val === 'string' && val !== '') {
+      return col.filterOptions?.find(o => o.value === val)?.label ?? this.labels.enumLabel(val);
     }
     return val;
   }

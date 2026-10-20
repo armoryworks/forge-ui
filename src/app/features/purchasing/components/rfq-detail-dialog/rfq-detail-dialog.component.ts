@@ -30,6 +30,7 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { EnumLabelPipe } from '../../../../shared/pipes/enum-label.pipe';
 
 export interface RfqDetailDialogData {
   rfqId: number;
@@ -39,6 +40,7 @@ export interface RfqDetailDialogData {
   selector: 'app-rfq-detail-dialog',
   standalone: true,
   imports: [
+    EnumLabelPipe,
     DatePipe, DateOnlyPipe, ReactiveFormsModule, TranslatePipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     DatepickerComponent, DataTableComponent, ColumnCellDirective,

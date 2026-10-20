@@ -29,4 +29,5 @@ export interface CustomerSummary {
   creditLimit?: number | null;
   isTaxExempt?: boolean;
   taxExemptionId?: string | null;
+  isOnCreditHold?: boolean;
 }

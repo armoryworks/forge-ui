@@ -6,6 +6,8 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { EntityPreview, PreviewLink } from '../../models/entity-preview.model';
 import { EntityPreviewService } from '../../services/entity-preview.service';
+import { EnumLabelPipe } from '../../pipes/enum-label.pipe';
+import { CurrencyDisplayComponent } from '../currency-display/currency-display.component';
 
 /**
  * Supported entity types for cross-object navigation.
@@ -59,7 +61,7 @@ const CLOSE_DEBOUNCE_MS = 150;
 @Component({
   selector: 'app-entity-link',
   standalone: true,
-  imports: [OverlayModule, TranslatePipe],
+  imports: [OverlayModule, TranslatePipe, EnumLabelPipe, CurrencyDisplayComponent],
   templateUrl: './entity-link.component.html',
   styleUrl: './entity-link.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

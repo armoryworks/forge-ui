@@ -19,6 +19,7 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { DisplayLabelService } from '../../../../shared/services/display-label.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { VendorScorecardTabComponent } from '../vendor-scorecard-tab/vendor-scorecard-tab.component';
@@ -60,6 +61,7 @@ export class VendorDetailPanelComponent {
   private readonly router = inject(Router);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly labels = inject(DisplayLabelService);
 
   readonly vendorId = input.required<number>();
   readonly closed = output<void>();
@@ -172,7 +174,7 @@ export class VendorDetailPanelComponent {
   }
 
   protected getPoStatusLabel(status: string): string {
-    return status === 'PartiallyReceived' ? this.translate.instant('vendors.poStatusPartial') : status;
+    return status === 'PartiallyReceived' ? this.translate.instant('vendors.poStatusPartial') : this.labels.enumLabel(status);
   }
 
   protected openPurchaseOrder(row: { id: number }): void {

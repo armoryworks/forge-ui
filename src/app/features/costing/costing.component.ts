@@ -38,6 +38,7 @@ import {
   WorkCenterCostRate,
   CostingTemplate,
 } from './models/costing.model';
+import { EnumLabelPipe } from '../../shared/pipes/enum-label.pipe';
 
 type CostingTab = 'periods' | 'cost-centers' | 'pools' | 'templates';
 
@@ -45,6 +46,7 @@ type CostingTab = 'periods' | 'cost-centers' | 'pools' | 'templates';
   selector: 'app-costing',
   standalone: true,
   imports: [
+    EnumLabelPipe,
     ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent, DatepickerComponent,
     ToggleComponent, PageLayoutComponent, DataTableComponent, ColumnCellDirective, DatePipe,
     ViewModeToggleComponent, CostingRatesVisualComponent, SpacerDirective,
@@ -133,18 +135,18 @@ export class CostingComponent {
     { field: 'machineOhFixedRate', header: 'Mch OH Fixed', type: 'number', align: 'right' },
   ];
   protected readonly costCenterColumns: ColumnDef[] = [
-    { field: 'code', header: 'Code', sortable: true },
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'type', header: 'Type', sortable: true, filterable: true, type: 'enum' },
-    { field: 'sqft', header: 'Sq Ft', type: 'number', align: 'right' },
-    { field: 'headcount', header: 'Headcount', type: 'number', align: 'right' },
-    { field: 'isInventoriable', header: 'Inventoriable', align: 'center' },
+    { field: 'code', header: this.translate.instant('costing.costCenters.code'), sortable: true },
+    { field: 'name', header: this.translate.instant('costing.costCenters.name'), sortable: true },
+    { field: 'type', header: this.translate.instant('costing.costCenters.type'), sortable: true, filterable: true, type: 'enum', filterOptions: this.typeOptions },
+    { field: 'sqft', header: this.translate.instant('costing.costCenters.sqft'), type: 'number', align: 'right' },
+    { field: 'headcount', header: this.translate.instant('costing.costCenters.headcount'), type: 'number', align: 'right' },
+    { field: 'isInventoriable', header: this.translate.instant('costing.costCenters.inventoriable'), align: 'center' },
   ];
   protected readonly poolColumns: ColumnDef[] = [
-    { field: 'code', header: 'Code', sortable: true },
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'behavior', header: 'Behavior', sortable: true, filterable: true, type: 'enum' },
-    { field: 'driver', header: 'Driver', sortable: true, filterable: true, type: 'enum' },
+    { field: 'code', header: this.translate.instant('costing.pools.code'), sortable: true },
+    { field: 'name', header: this.translate.instant('costing.pools.name'), sortable: true },
+    { field: 'behavior', header: this.translate.instant('costing.pools.behavior'), sortable: true, filterable: true, type: 'enum', filterOptions: this.behaviorOptions },
+    { field: 'driver', header: this.translate.instant('costing.pools.driver'), sortable: true, filterable: true, type: 'enum', filterOptions: this.driverOptions },
   ];
 
   protected readonly costCenterOptions = computed<SelectOption[]>(() =>

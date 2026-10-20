@@ -436,7 +436,7 @@ export class ReportsComponent {
   ];
 
   protected readonly leadColumns: ColumnDef[] = [
-    { field: 'status', header: this.translate.instant('reports.colStatus'), sortable: true },
+    { field: 'status', header: this.translate.instant('reports.colStatus'), sortable: true, type: 'enum' },
     { field: 'count', header: this.translate.instant('reports.colCount'), sortable: true, type: 'number', width: '100px', align: 'right' },
   ];
 
@@ -532,18 +532,18 @@ export class ReportsComponent {
     { field: 'category', header: this.translate.instant('reports.colCategory'), sortable: true, width: '140px' },
     { field: 'description', header: this.translate.instant('reports.colDescription'), sortable: true },
     { field: 'amount', header: this.translate.instant('reports.colAmount'), sortable: true, type: 'number', width: '110px', align: 'right' },
-    { field: 'status', header: this.translate.instant('reports.colStatus'), sortable: true, width: '100px' },
+    { field: 'status', header: this.translate.instant('reports.colStatus'), sortable: true, type: 'enum', width: '100px' },
     { field: 'vendor', header: this.translate.instant('reports.colVendor'), sortable: true, width: '140px' },
   ];
 
   protected readonly quoteToCloseColumns: ColumnDef[] = [
-    { field: 'status', header: this.translate.instant('reports.colStatus'), sortable: true },
+    { field: 'status', header: this.translate.instant('reports.colStatus'), sortable: true, type: 'enum' },
     { field: 'count', header: this.translate.instant('reports.colCount'), sortable: true, type: 'number', width: '100px', align: 'right' },
     { field: 'totalValue', header: this.translate.instant('reports.colTotalValue'), sortable: true, type: 'number', width: '130px', align: 'right' },
   ];
 
   protected readonly shippingSummaryColumns: ColumnDef[] = [
-    { field: 'status', header: this.translate.instant('reports.colStatus'), sortable: true },
+    { field: 'status', header: this.translate.instant('reports.colStatus'), sortable: true, type: 'enum' },
     { field: 'count', header: this.translate.instant('reports.colShipments'), sortable: true, type: 'number', width: '100px', align: 'right' },
     { field: 'totalItems', header: this.translate.instant('reports.colTotalItems'), sortable: true, type: 'number', width: '110px', align: 'right' },
     { field: 'onTimeCount', header: this.translate.instant('reports.colOnTime'), sortable: true, type: 'number', width: '100px', align: 'right' },

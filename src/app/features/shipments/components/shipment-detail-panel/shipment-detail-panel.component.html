@@ -84,7 +84,7 @@
           <div class="info-item">
             <span class="info-label">{{ 'shipments.linkedInvoice' | translate }}</span>
             <span class="info-value">
-              <app-entity-link type="invoice" [entityId]="shipment.invoiceId!">{{ '#' + shipment.invoiceId }}</app-entity-link>
+              <app-entity-link type="invoice" [entityId]="shipment.invoiceId!">{{ shipment.invoiceNumber ?? ('shipments.invoiceNumberFallback' | translate: { id: shipment.invoiceId }) }}</app-entity-link>
             </span>
           </div>
         }

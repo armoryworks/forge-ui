@@ -74,7 +74,7 @@
         @if (inv.creditTerms) {
           <div class="info-item">
             <span class="info-label">{{ 'invoices.creditTerms' | translate }}</span>
-            <span class="info-value">{{ inv.creditTerms }}</span>
+            <span class="info-value">{{ inv.creditTerms | enumLabel: 'creditTerms' }}</span>
           </div>
         }
       </div>

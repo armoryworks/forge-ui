@@ -22,6 +22,7 @@ export interface ShipmentDetail {
   height: number | null;
   notes: string | null;
   invoiceId: number | null;
+  invoiceNumber?: string | null;
   lines: ShipmentLine[];
   createdAt: Date;
   updatedAt: Date;

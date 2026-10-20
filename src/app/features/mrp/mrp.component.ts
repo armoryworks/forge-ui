@@ -217,7 +217,12 @@ export class MrpComponent {
   protected readonly forecastColumns: ColumnDef[] = [
     { field: 'name', header: this.translate.instant('mrp.cols.name'), sortable: true },
     { field: 'partNumber', header: this.translate.instant('mrp.cols.partNumber'), sortable: true, width: '120px' },
-    { field: 'method', header: this.translate.instant('mrp.cols.method'), sortable: true, width: '160px' },
+    { field: 'method', header: this.translate.instant('mrp.cols.method'), sortable: true, filterable: true, type: 'enum', width: '160px',
+      filterOptions: [
+        { value: 'MovingAverage', label: this.translate.instant('mrp.forecastMethods.movingAverage') },
+        { value: 'WeightedMovingAverage', label: this.translate.instant('mrp.forecastMethods.weightedMovingAverage') },
+        { value: 'ExponentialSmoothing', label: this.translate.instant('mrp.forecastMethods.exponentialSmoothing') },
+      ] },
     { field: 'status', header: this.translate.instant('mrp.cols.status'), sortable: true, filterable: true, type: 'enum', width: '100px',
       filterOptions: [
         { value: 'Draft', label: this.translate.instant('mrp.forecastStatuses.draft') }, { value: 'Approved', label: this.translate.instant('mrp.forecastStatuses.approved') },

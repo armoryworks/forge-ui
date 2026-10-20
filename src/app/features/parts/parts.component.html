@@ -115,13 +115,13 @@
             }
           </ng-template>
           <ng-template appColumnCell="procurementSource" let-part>
-            <span class="type-chip">{{ part.procurementSource }}</span>
+            <span class="type-chip">{{ ('parts.procurementSource.' + part.procurementSource) | translate }}</span>
           </ng-template>
           <ng-template appColumnCell="inventoryClass" let-part>
-            <span class="type-chip">{{ part.inventoryClass }}</span>
+            <span class="type-chip">{{ ('parts.inventoryClass.' + part.inventoryClass) | translate }}</span>
           </ng-template>
           <ng-template appColumnCell="status" let-part>
-            <span class="status-badge" [class]="getStatusClass(part.status)">{{ part.status }}</span>
+            <span class="status-badge" [class]="getStatusClass(part.status)">{{ part.status | enumLabel }}</span>
           </ng-template>
           <ng-template appColumnCell="effectivePrice" let-part>
             @if (part.effectivePriceSource !== 'Default') {

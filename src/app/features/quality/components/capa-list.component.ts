@@ -14,15 +14,18 @@ import { TextareaComponent } from '../../../shared/components/textarea/textarea.
 import { DatepickerComponent } from '../../../shared/components/datepicker/datepicker.component';
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { DisplayLabelService } from '../../../shared/services/display-label.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { FormValidationService } from '../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
 import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
+import { EnumLabelPipe } from '../../../shared/pipes/enum-label.pipe';
 
 @Component({
   selector: 'app-capa-list',
   standalone: true,
   imports: [
+    EnumLabelPipe,
     DateOnlyPipe, ReactiveFormsModule,
     DataTableComponent, ColumnCellDirective,
     SelectComponent, InputComponent, TextareaComponent, DatepickerComponent,
@@ -36,6 +39,7 @@ import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
 export class CapaListComponent implements OnInit {
   private readonly ncrCapaService = inject(NcrCapaService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly labels = inject(DisplayLabelService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -149,7 +153,7 @@ export class CapaListComponent implements OnInit {
   advancePhase(capa: CorrectiveAction): void {
     this.ncrCapaService.advanceCapaPhase(capa.id).subscribe({
       next: updated => {
-        this.snackbar.success(`CAPA advanced to ${updated.status}`);
+        this.snackbar.success(`CAPA advanced to ${this.labels.enumLabel(updated.status)}`);
         this.loadCapas();
       },
     });

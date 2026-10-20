@@ -35,6 +35,7 @@ const CUSTOMER: CustomerSummary = {
   openInvoiceCount: 0,
   openInvoiceTotal: 0,
   ytdRevenue: 0,
+  isOnCreditHold: false,
 };
 
 describe('CustomerDetailComponent · saveClusterPatch', () => {

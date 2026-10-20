@@ -12,7 +12,7 @@
         <div class="account-page__avatar-info">
           <span class="account-page__email">{{ user()?.email }}</span>
           @if (user()?.roles?.length) {
-            <span class="account-page__roles">{{ user()?.roles?.join(', ') }}</span>
+            <span class="account-page__roles">{{ user()?.roles | roleLabel }}</span>
           }
         </div>
       </div>

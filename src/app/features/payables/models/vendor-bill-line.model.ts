@@ -12,4 +12,5 @@ export interface VendorBillLine {
   accountDeterminationKey: string;
   glAccountId: number | null;
   glAccountName: string | null;
+  purchaseOrderLineLabel?: string | null;
 }

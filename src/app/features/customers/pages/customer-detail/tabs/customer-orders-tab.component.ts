@@ -10,6 +10,7 @@ import { ColumnCellDirective } from '../../../../../shared/directives/column-cel
 import { CurrencyDisplayComponent } from '../../../../../shared/components/currency-display/currency-display.component';
 import { ColumnDef } from '../../../../../shared/models/column-def.model';
 import { DateOnlyPipe } from '../../../../../shared/pipes/date-only.pipe';
+import { EnumLabelPipe } from '../../../../../shared/pipes/enum-label.pipe';
 
 interface SalesOrderListItem {
   id: number;
@@ -24,7 +25,7 @@ interface SalesOrderListItem {
 @Component({
   selector: 'app-customer-orders-tab',
   standalone: true,
-  imports: [DatePipe, DateOnlyPipe, TranslatePipe, DataTableComponent, ColumnCellDirective, CurrencyDisplayComponent],
+  imports: [EnumLabelPipe, DatePipe, DateOnlyPipe, TranslatePipe, DataTableComponent, ColumnCellDirective, CurrencyDisplayComponent],
   templateUrl: './customer-orders-tab.component.html',
   styleUrl: '../customer-detail-tabs.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

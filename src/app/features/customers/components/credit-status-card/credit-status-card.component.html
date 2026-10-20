@@ -2,7 +2,7 @@
   @if (credit(); as c) {
     <div class="credit-card__header">
       <h3 class="credit-card__title">{{ 'customers.creditStatus.title' | translate }}</h3>
-      <span class="chip" [class]="'chip--' + riskClass(c.riskLevel)">{{ c.riskLevel }}</span>
+      <span class="chip" [class]="'chip--' + riskClass(c.riskLevel)">{{ c.riskLevel | enumLabel: 'creditRisk' }}</span>
     </div>
 
     @if (c.isOnHold) {

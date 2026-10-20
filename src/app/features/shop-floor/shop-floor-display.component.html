@@ -850,7 +850,7 @@
                 </div>
                 <div class="sf-shipping-card__item-meta">
                   <span class="sf-shipping-card__item-so">{{ 'shopFloor.display.salesOrderNumber' | translate: { number: shipment.salesOrderNumber } }}</span>
-                  <span class="sf-shipping-card__item-status chip chip--info">{{ shipment.status }}</span>
+                  <span class="sf-shipping-card__item-status chip chip--info">{{ shipment.status | enumLabel }}</span>
                 </div>
               </button>
             } @empty {

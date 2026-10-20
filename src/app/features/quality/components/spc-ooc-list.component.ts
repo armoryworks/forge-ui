@@ -12,11 +12,13 @@ import { DialogComponent } from '../../../shared/components/dialog/dialog.compon
 import { TextareaComponent } from '../../../shared/components/textarea/textarea.component';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
+import { EnumLabelPipe } from '../../../shared/pipes/enum-label.pipe';
 
 @Component({
   selector: 'app-spc-ooc-list',
   standalone: true,
   imports: [
+    EnumLabelPipe,
     DatePipe, ReactiveFormsModule,
     DataTableComponent, ColumnCellDirective,
     SelectComponent, DialogComponent, TextareaComponent,

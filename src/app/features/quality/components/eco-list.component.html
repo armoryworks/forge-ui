@@ -128,6 +128,9 @@
             <ng-template appColumnCell="entityType" let-row>
               <span class="chip chip--muted">{{ row.entityType }}</span>
             </ng-template>
+            <ng-template appColumnCell="entityLabel" let-row>
+              {{ row.entityLabel ?? '#' + row.entityId }}
+            </ng-template>
             <ng-template appColumnCell="isImplemented" let-row>
               @if (row.isImplemented) {
                 <span class="material-icons-outlined eco-detail__check" aria-label="Implemented">check_circle</span>

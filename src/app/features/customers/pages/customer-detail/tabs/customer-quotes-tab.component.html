@@ -10,7 +10,7 @@
     (rowClick)="openQuote($any($event))">
 
     <ng-template appColumnCell="status" let-row>
-      <span class="chip" [class]="getStatusClass($any(row).status)">{{ $any(row).status }}</span>
+      <span class="chip" [class]="getStatusClass($any(row).status)">{{ $any(row).status | enumLabel }}</span>
     </ng-template>
 
     <ng-template appColumnCell="total" let-row>

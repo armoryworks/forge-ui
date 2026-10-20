@@ -59,7 +59,7 @@
                     ~{{ module.estimatedMinutes }} min
                   </span>
                   @if (module.myStatus) {
-                    <span [class]="moduleStatusClass(module.myStatus)">{{ module.myStatus }}</span>
+                    <span [class]="moduleStatusClass(module.myStatus)">{{ module.myStatus | enumLabel }}</span>
                   }
                 </div>
               </div>

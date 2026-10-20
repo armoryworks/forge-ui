@@ -76,11 +76,13 @@ import { AuthService } from '../../shared/services/auth.service';
 import { ReferenceDataService } from '../../shared/services/reference-data.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { CompanyLocation, CompanyProfile } from './models/company-location.model';
+import { EnumLabelPipe } from '../../shared/pipes/enum-label.pipe';
 
 @Component({
   selector: 'app-admin',
   standalone: true,
   imports: [
+    EnumLabelPipe,
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent, DatepickerComponent, DataTableComponent,
     ColumnCellDirective, ValidationButtonComponent, TrackTypeDialogComponent, TerminologyPanelComponent,

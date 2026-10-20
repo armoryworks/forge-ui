@@ -8,6 +8,7 @@ export interface VendorBillDetail {
   vendorName: string;
   vendorInvoiceNumber: string | null;
   purchaseOrderId: number | null;
+  purchaseOrderNumber?: string | null;
   status: string;
   billDate: string;
   dueDate: string;

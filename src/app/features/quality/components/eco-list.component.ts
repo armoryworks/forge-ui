@@ -99,7 +99,7 @@ export class EcoListComponent implements OnInit {
 
   protected readonly affectedItemColumns: ColumnDef[] = [
     { field: 'entityType', header: 'Type', sortable: true, width: '100px' },
-    { field: 'entityId', header: 'Entity ID', sortable: true, width: '80px', align: 'center' },
+    { field: 'entityLabel', header: 'Item', sortable: true, width: '160px', sortValue: row => (row as EcoAffectedItem).entityLabel ?? (row as EcoAffectedItem).entityId },
     { field: 'changeDescription', header: 'Change Description', sortable: true },
     { field: 'isImplemented', header: 'Implemented', width: '100px', align: 'center' },
     { field: 'actions', header: '', width: '50px' },

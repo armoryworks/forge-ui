@@ -23,7 +23,7 @@
             <div class="sh-order__head">
               <span class="sh-order__number">{{ order.orderNumber }}</span>
               <span class="sh-order__customer">{{ order.customerName }}</span>
-              <span class="chip chip--muted">{{ order.status }}</span>
+              <span class="chip chip--muted">{{ order.status | enumLabel }}</span>
               @if (order.requestedDeliveryDate) {
                 <span class="sh-order__due">
                   <span class="material-icons-outlined">event</span>{{ order.requestedDeliveryDate | dateOnly }}
