@@ -158,7 +158,7 @@ export class ComplianceTemplateDialogComponent {
       sourceUrl: value.sourceUrl || null,
       isAutoSync: value.isAutoSync!,
       isActive: value.isActive!,
-      sortOrder: value.sortOrder!,
+      sortOrder: value.sortOrder ?? 0,
       requiresIdentityDocs: value.requiresIdentityDocs!,
       blocksJobAssignment: value.blocksJobAssignment!,
       profileCompletionKey: value.profileCompletionKey!,

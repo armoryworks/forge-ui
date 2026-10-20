@@ -63,7 +63,7 @@
       <app-input [label]="'customers.companyName' | translate" formControlName="companyName" data-testid="customer-company" />
       <div class="dialog-row">
         <app-input [label]="'common.email' | translate" type="email" formControlName="email" data-testid="customer-email" />
-        <app-input [label]="'common.phone' | translate" formControlName="phone" data-testid="customer-phone" />
+        <app-input [label]="'common.phone' | translate" formControlName="phone" mask="phone" [maxlength]="50" data-testid="customer-phone" />
       </div>
 
       <!-- F17 — Quick add is intentionally just the essentials (name + a

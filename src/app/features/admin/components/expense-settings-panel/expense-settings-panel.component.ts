@@ -82,7 +82,7 @@ export class ExpenseSettingsPanelComponent {
       autoApproveThreshold: val.autoApproveThreshold,
       maxAmount: val.maxAmount,
       requireReceipt: val.requireReceipt,
-      minDescriptionLength: val.minDescriptionLength,
+      minDescriptionLength: val.minDescriptionLength ?? 0,
     }).subscribe({
       next: () => {
         this.saving.set(false);

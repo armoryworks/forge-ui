@@ -40,8 +40,10 @@
             <td class="receive-table__right">{{ line.receivedQuantity }}</td>
             <td class="receive-table__right">{{ line.remainingQuantity }}</td>
             <td class="receive-table__input">
-              <input type="number" [formControl]="lineControls()[i]"
-                [min]="0" [max]="line.remainingQuantity"
+              <input appDecimalInput [formControl]="lineControls()[i]"
+                [attr.aria-label]="'purchaseOrders.receiveQty' | translate"
+                [attr.data-testid]="'receive-qty-' + line.id"
+                [attr.aria-invalid]="lineControls()[i].hasError('numberFormat')"
                 class="receive-qty-input" />
             </td>
             @if (binsEnabled()) {

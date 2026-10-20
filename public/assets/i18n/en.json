@@ -5030,6 +5030,8 @@
     "clear": "Clear",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
+    "numberFormat": "{{label}} must be a number",
+    "numberDecimals": "{{label}} allows at most {{places}} decimal places",
     "apply": "Apply",
     "columnFilter": "Column filter",
     "columnManager": "Column manager",

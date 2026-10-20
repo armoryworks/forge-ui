@@ -3,8 +3,15 @@ import { TestBed } from '@angular/core/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { Component, ViewChild } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { Observable, of } from 'rxjs';
 
 import { CurrencyInputComponent } from './currency-input.component';
+import { LanguageService } from '../../services/language.service';
+
+class FakeLoader implements TranslateLoader {
+  getTranslation(): Observable<Record<string, string>> { return of({}); }
+}
 
 @Component({
   standalone: true,
@@ -97,5 +104,80 @@ describe('CurrencyInputComponent', () => {
     const { fixture } = setup();
     const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
     expect(input.getAttribute('inputmode')).toBe('decimal');
+  });
+
+  it('uses a text field so the browser cannot drop separators', () => {
+    const { fixture } = setup();
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
+    expect(input.type).toBe('text');
+  });
+
+  it('flags en "1,5" as invalid and emits null instead of 15', () => {
+    const { fixture, host } = setup();
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
+    input.value = '1,5';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(host.control.value).toBeNull();
+    expect(host.control.hasError('numberFormat')).toBe(true);
+    expect(input.value).toBe('1,5');
+  });
+
+  it('emits null for a partial entry and keeps the typed text', () => {
+    const { fixture, host } = setup();
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
+    input.value = '-';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(host.control.value).toBeNull();
+    expect(input.value).toBe('-');
+  });
+
+  it('does not rewrite the field text when it renders after several keystrokes', () => {
+    const { fixture, host } = setup();
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
+    for (const text of ['4', '41', '412000', '412000.', '412000.0']) {
+      input.value = text;
+      input.dispatchEvent(new Event('input'));
+    }
+    fixture.detectChanges();
+    expect(input.value).toBe('412000.0');
+    input.value = '412000.05';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(input.value).toBe('412000.05');
+    expect(host.control.value).toBe(412000.05);
+  });
+
+  it('tidies the text on blur without changing the value', () => {
+    const { fixture, host } = setup();
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
+    input.value = '1,250.50';
+    input.dispatchEvent(new Event('input'));
+    input.dispatchEvent(new Event('blur'));
+    fixture.detectChanges();
+    expect(host.control.value).toBe(1250.5);
+    expect(input.value).toBe('1250.5');
+  });
+
+  it('reads the comma as the decimal separator in Spanish', () => {
+    TestBed.configureTestingModule({
+      imports: [HostComponent],
+      providers: [
+        provideAnimations(),
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+      ],
+    });
+    TestBed.inject(LanguageService).currentLanguage.set('es');
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    const host = fixture.componentInstance;
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
+    input.value = '1,5';
+    input.dispatchEvent(new Event('input'));
+    expect(host.control.value).toBe(1.5);
+    host.control.setValue(42.25);
+    fixture.detectChanges();
+    expect(input.value).toBe('42,25');
   });
 });

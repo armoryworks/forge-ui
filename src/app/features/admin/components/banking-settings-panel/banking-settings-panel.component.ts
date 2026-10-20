@@ -62,7 +62,7 @@ export class BankingSettingsPanelComponent {
       .filter(row => this.control(row.key).dirty)
       .map(row => ({ row, value: this.control(row.key).value }))
       .filter(({ row, value }) => !(row.kind === 'secret' && value === ''))
-      .map(({ row, value }) => ({ key: row.key, value: typeof value === 'string' ? value.trim() : String(value) }));
+      .map(({ row, value }) => ({ key: row.key, value: typeof value === 'string' ? value.trim() : String(value ?? '') }));
 
     if (changes.length === 0) {
       this.form.markAsPristine();

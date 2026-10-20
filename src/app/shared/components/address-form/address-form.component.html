@@ -9,10 +9,10 @@
     <div class="address-form__row">
       <app-input [label]="'addressForm.city' | translate" formControlName="city" [maxlength]="100" [required]="requireCity()" />
 
-      @if (stateDropdown()) {
-        <app-autocomplete data-testid="address-form-state" [label]="'addressForm.state' | translate" formControlName="state" [options]="stateOptions" [minChars]="0" [autoSelectFields]="stateMatchFields" [required]="requireState()" />
+      @if (stateDropdown() && stateOptions(); as options) {
+        <app-autocomplete data-testid="address-form-state" [label]="(country() === 'US' ? 'addressForm.state' : 'addressForm.stateProvince') | translate" formControlName="state" [options]="options" [minChars]="0" [autoSelectFields]="stateMatchFields" [required]="requireState()" />
       } @else {
-        <app-input [label]="'addressForm.stateProvince' | translate" formControlName="state" [maxlength]="50" [required]="requireState()" />
+        <app-input data-testid="address-form-state-text" [label]="'addressForm.stateProvince' | translate" formControlName="state" [maxlength]="50" [required]="requireState()" />
       }
     </div>
 

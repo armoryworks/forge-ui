@@ -131,7 +131,7 @@ export class UomManagementComponent implements OnInit {
     if (this.uomForm.invalid) return;
     this.saving.set(true);
     const data = this.uomForm.getRawValue();
-    const payload = { ...data, symbol: data.symbol || null, category: data.category as UomCategory };
+    const payload = { ...data, symbol: data.symbol || null, category: data.category as UomCategory, sortOrder: data.sortOrder ?? 0 };
     const editing = this.editingUom();
 
     const obs = editing
