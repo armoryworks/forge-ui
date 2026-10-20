@@ -141,7 +141,7 @@ describe('FormValidationService', () => {
       });
     });
 
-    it('should use field key as fallback label when not in labels map', () => {
+    it('should derive a readable label from the field key when not in labels map', () => {
       const form = new FormGroup({
         unknownField: new FormControl('', Validators.required),
       });
@@ -149,7 +149,7 @@ describe('FormValidationService', () => {
       TestBed.runInInjectionContext(() => {
         const violations = FormValidationService.getViolations(form, {});
 
-        expect(violations()).toContain('unknownField is required');
+        expect(violations()).toContain('Unknown field is required');
       });
     });
 
@@ -225,6 +225,30 @@ describe('FormValidationService', () => {
       const form = new FormGroup({ a: new FormControl('') }, { validators: [() => ({ g: true })] });
 
       expect(FormValidationService.collectViolationItems(form, {})).toEqual([]);
+    });
+  });
+
+  describe('collectViolationItems with nested groups', () => {
+    it('reports errors inside nested groups under their path', () => {
+      const form = new FormGroup({
+        name: new FormControl('ok'),
+        address: new FormGroup({
+          postalCode: new FormControl('', Validators.required),
+          city: new FormControl('', Validators.required),
+        }),
+      });
+
+      expect(FormValidationService.collectViolationItems(form, { 'address.city': 'City' })).toEqual([
+        { controlName: 'address.postalCode', message: 'Postal code is required' },
+        { controlName: 'address.city', message: 'City is required' },
+      ]);
+    });
+  });
+
+  describe('labelFromControlName', () => {
+    it('splits camelCase and snake_case names into sentence case', () => {
+      expect(FormValidationService.labelFromControlName('unitPrice')).toBe('Unit price');
+      expect(FormValidationService.labelFromControlName('min_qty')).toBe('Min qty');
     });
   });
 

@@ -1,4 +1,4 @@
-import { FormGroup, AbstractControl } from '@angular/forms';
+import { FormGroup, ValidationErrors } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Signal, signal } from '@angular/core';
 import { startWith } from 'rxjs';
@@ -81,19 +81,7 @@ export class FormValidationService {
   static collectViolationItems(form: FormGroup, labels: Record<string, string>): ViolationItem[] {
     const items: ViolationItem[] = [];
 
-    for (const [key, control] of Object.entries(form.controls)) {
-      const errors = (control as AbstractControl).errors;
-      if (!errors) continue;
-
-      const label = labels[key] ?? key;
-
-      for (const [errorKey, errorValue] of Object.entries(errors)) {
-        const message = FormValidationService.messageFor(errorKey, errorValue, label);
-        if (message !== null) {
-          items.push({ controlName: key, message });
-        }
-      }
-    }
+    FormValidationService.collectGroup(items, form, '', labels);
 
     for (const errorValue of Object.values(form.errors ?? {})) {
       const { message, field } = (errorValue ?? {}) as { message?: unknown; field?: unknown };
@@ -102,6 +90,51 @@ export class FormValidationService {
     }
 
     return items;
+  }
+
+  /**
+   * Readable fallback label for a control with no entry in the labels map
+   * ("unitPrice" -> "Unit price").
+   */
+  static labelFromControlName(controlName: string): string {
+    const words = controlName
+      .replace(/[_-]+/g, ' ')
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .trim()
+      .toLowerCase();
+    return words ? words.charAt(0).toUpperCase() + words.slice(1) : controlName;
+  }
+
+  private static collectGroup(
+    items: ViolationItem[],
+    group: FormGroup,
+    prefix: string,
+    labels: Record<string, string>,
+  ): void {
+    for (const [key, control] of Object.entries(group.controls)) {
+      const path = prefix ? `${prefix}.${key}` : key;
+      const label = labels[path] ?? labels[key] ?? FormValidationService.labelFromControlName(key);
+      if (control.errors) {
+        FormValidationService.pushMessages(items, path, control.errors, label);
+      }
+      if (control instanceof FormGroup) {
+        FormValidationService.collectGroup(items, control, path, labels);
+      }
+    }
+  }
+
+  private static pushMessages(
+    items: ViolationItem[],
+    controlName: string,
+    errors: ValidationErrors,
+    label: string,
+  ): void {
+    for (const [errorKey, errorValue] of Object.entries(errors)) {
+      const message = FormValidationService.messageFor(errorKey, errorValue, label);
+      if (message !== null) {
+        items.push({ controlName, message });
+      }
+    }
   }
 
   /**
