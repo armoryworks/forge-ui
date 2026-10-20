@@ -323,7 +323,7 @@
     "src/app/features/shop-floor/scan/inventory-scan.component.html": 6,
     "src/app/features/shop-floor/shop-floor-display.component.html": 2,
     "src/app/features/training/training-module/training-module-quiz.component.html": 15,
-    "src/app/features/training/training-module/training-module.component.html": 29,
+    "src/app/features/training/training-module/training-module.component.html": 27,
     "src/app/features/training/training-path/training-path.component.html": 7,
     "src/app/features/training/training.component.html": 5,
     "src/app/features/vendors/components/vendor-scorecard-tab/vendor-scorecard-tab.component.html": 15,

@@ -293,6 +293,7 @@ describe('DetailDialogService', () => {
 
   it('getDetailFromUrl should return null for invalid format', () => {
     vi.spyOn(router, 'url', 'get').mockReturnValue('/kanban?detail=invalid');
+    dialogOpenSpy.mockReturnValue({ afterClosed: () => new Subject<void>() });
 
     const detail = service.getDetailFromUrl();
 
