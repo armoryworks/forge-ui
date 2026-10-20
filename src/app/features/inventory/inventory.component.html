@@ -40,42 +40,42 @@
 <div class="inventory-content">
   <!-- Tabs -->
   <div class="tab-bar" role="tablist" [attr.aria-label]="'inventory.tabs.label' | translate">
-    <button class="tab" role="tab" [class.tab--active]="activeTab() === 'stock'" [attr.aria-selected]="activeTab() === 'stock'" (click)="switchTab('stock')">
+    <button class="tab" role="tab" id="inventory-tab-stock" aria-controls="inventory-tabpanel" (keydown)="onTabKeydown($event)" [class.tab--active]="activeTab() === 'stock'" [attr.aria-selected]="activeTab() === 'stock'" [attr.tabindex]="activeTab() === 'stock' ? 0 : -1" (click)="switchTab('stock')">
       <span class="material-icons-outlined">inventory</span>
       {{ 'inventory.tabs.stockLevels' | translate }}
     </button>
-    <button class="tab" role="tab" [class.tab--active]="activeTab() === 'locations'" [attr.aria-selected]="activeTab() === 'locations'" (click)="switchTab('locations')">
+    <button class="tab" role="tab" id="inventory-tab-locations" aria-controls="inventory-tabpanel" (keydown)="onTabKeydown($event)" [class.tab--active]="activeTab() === 'locations'" [attr.aria-selected]="activeTab() === 'locations'" [attr.tabindex]="activeTab() === 'locations' ? 0 : -1" (click)="switchTab('locations')">
       <span class="material-icons-outlined">warehouse</span>
       {{ 'inventory.tabs.locations' | translate }}
     </button>
-    <button class="tab" role="tab" [class.tab--active]="activeTab() === 'movements'" [attr.aria-selected]="activeTab() === 'movements'" (click)="switchTab('movements')">
+    <button class="tab" role="tab" id="inventory-tab-movements" aria-controls="inventory-tabpanel" (keydown)="onTabKeydown($event)" [class.tab--active]="activeTab() === 'movements'" [attr.aria-selected]="activeTab() === 'movements'" [attr.tabindex]="activeTab() === 'movements' ? 0 : -1" (click)="switchTab('movements')">
       <span class="material-icons-outlined">swap_horiz</span>
       {{ 'inventory.tabs.movements' | translate }}
     </button>
-    <button class="tab" role="tab" [class.tab--active]="activeTab() === 'receiving'" [attr.aria-selected]="activeTab() === 'receiving'" (click)="switchTab('receiving')">
+    <button class="tab" role="tab" id="inventory-tab-receiving" aria-controls="inventory-tabpanel" (keydown)="onTabKeydown($event)" [class.tab--active]="activeTab() === 'receiving'" [attr.aria-selected]="activeTab() === 'receiving'" [attr.tabindex]="activeTab() === 'receiving' ? 0 : -1" (click)="switchTab('receiving')">
       <span class="material-icons-outlined">local_shipping</span>
       {{ 'inventory.tabs.receiving' | translate }}
     </button>
     @if (inspectionEnabled()) {
-      <button class="tab" data-testid="inventory-tab-inspection" role="tab" [class.tab--active]="activeTab() === 'inspection'" [attr.aria-selected]="activeTab() === 'inspection'" (click)="switchTab('inspection')">
+      <button class="tab" data-testid="inventory-tab-inspection" role="tab" id="inventory-tab-inspection" aria-controls="inventory-tabpanel" (keydown)="onTabKeydown($event)" [class.tab--active]="activeTab() === 'inspection'" [attr.aria-selected]="activeTab() === 'inspection'" [attr.tabindex]="activeTab() === 'inspection' ? 0 : -1" (click)="switchTab('inspection')">
         <span class="material-icons-outlined">verified</span>
         {{ 'inventory.tabs.inspection' | translate }}
       </button>
     }
-    <button class="tab" role="tab" [class.tab--active]="activeTab() === 'stockOps'" [attr.aria-selected]="activeTab() === 'stockOps'" (click)="switchTab('stockOps')">
+    <button class="tab" role="tab" id="inventory-tab-stockOps" aria-controls="inventory-tabpanel" (keydown)="onTabKeydown($event)" [class.tab--active]="activeTab() === 'stockOps'" [attr.aria-selected]="activeTab() === 'stockOps'" [attr.tabindex]="activeTab() === 'stockOps' ? 0 : -1" (click)="switchTab('stockOps')">
       <span class="material-icons-outlined">tune</span>
       {{ 'inventory.tabs.stockOps' | translate }}
     </button>
-    <button class="tab" role="tab" [class.tab--active]="activeTab() === 'cycleCounts'" [attr.aria-selected]="activeTab() === 'cycleCounts'" (click)="switchTab('cycleCounts')">
+    <button class="tab" role="tab" id="inventory-tab-cycleCounts" aria-controls="inventory-tabpanel" (keydown)="onTabKeydown($event)" [class.tab--active]="activeTab() === 'cycleCounts'" [attr.aria-selected]="activeTab() === 'cycleCounts'" [attr.tabindex]="activeTab() === 'cycleCounts' ? 0 : -1" (click)="switchTab('cycleCounts')">
       <span class="material-icons-outlined">fact_check</span>
       {{ 'inventory.tabs.cycleCounts' | translate }}
     </button>
-    <button class="tab" role="tab" [class.tab--active]="activeTab() === 'reservations'" [attr.aria-selected]="activeTab() === 'reservations'" (click)="switchTab('reservations')">
+    <button class="tab" role="tab" id="inventory-tab-reservations" aria-controls="inventory-tabpanel" (keydown)="onTabKeydown($event)" [class.tab--active]="activeTab() === 'reservations'" [attr.aria-selected]="activeTab() === 'reservations'" [attr.tabindex]="activeTab() === 'reservations' ? 0 : -1" (click)="switchTab('reservations')">
       <span class="material-icons-outlined">lock</span>
       {{ 'inventory.tabs.reservations' | translate }}
     </button>
     @if (canReplenish) {
-      <button class="tab" role="tab" [class.tab--active]="activeTab() === 'replenishment'" [attr.aria-selected]="activeTab() === 'replenishment'" (click)="switchTab('replenishment')">
+      <button class="tab" role="tab" id="inventory-tab-replenishment" aria-controls="inventory-tabpanel" (keydown)="onTabKeydown($event)" [class.tab--active]="activeTab() === 'replenishment'" [attr.aria-selected]="activeTab() === 'replenishment'" [attr.tabindex]="activeTab() === 'replenishment' ? 0 : -1" (click)="switchTab('replenishment')">
         <span class="material-icons-outlined">shopping_cart</span>
         {{ 'inventory.tabs.replenishment' | translate }}
         @if (pendingSuggestions().length > 0) {
@@ -83,13 +83,13 @@
         }
       </button>
     }
-    <button class="tab" role="tab" [class.tab--active]="activeTab() === 'uom'" [attr.aria-selected]="activeTab() === 'uom'" (click)="switchTab('uom')">
+    <button class="tab" role="tab" id="inventory-tab-uom" aria-controls="inventory-tabpanel" (keydown)="onTabKeydown($event)" [class.tab--active]="activeTab() === 'uom'" [attr.aria-selected]="activeTab() === 'uom'" [attr.tabindex]="activeTab() === 'uom' ? 0 : -1" (click)="switchTab('uom')">
       <span class="material-icons-outlined">straighten</span>
       {{ 'inventory.tabs.uom' | translate }}
     </button>
   </div>
 
-  <div class="inventory-content__body" [appLoadingBlock]="loading()">
+  <div class="inventory-content__body" id="inventory-tabpanel" role="tabpanel" [attr.aria-labelledby]="'inventory-tab-' + activeTab()" [appLoadingBlock]="loading()">
     <!-- Stock Levels Tab -->
     @if (activeTab() === 'stock') {
       <div class="tab-panel">

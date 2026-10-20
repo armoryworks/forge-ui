@@ -409,6 +409,21 @@ export class InventoryComponent {
     this.router.navigate(['..', tab], { relativeTo: this.route });
   }
 
+  protected onTabKeydown(event: KeyboardEvent): void {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    const tab = event.target as HTMLButtonElement;
+    const tabs = Array.from(tab.closest('[role="tablist"]')?.querySelectorAll<HTMLButtonElement>('[role="tab"]') ?? []);
+    const current = tabs.indexOf(tab);
+    if (current < 0) return;
+    event.preventDefault();
+    const step = event.key === 'ArrowRight' ? 1 : -1;
+    const next = event.key === 'Home' ? 0
+      : event.key === 'End' ? tabs.length - 1
+        : (current + step + tabs.length) % tabs.length;
+    tabs[next].focus();
+    tabs[next].click();
+  }
+
   private readonly tabEffect = effect(() => {
     const tab = this.activeTab();
     untracked(() => {

@@ -24,6 +24,7 @@ class FakeLoader implements TranslateLoader {
 interface InventoryInternals {
   inspectionEnabled(): boolean;
   activeTab(): string;
+  onTabKeydown(event: KeyboardEvent): void;
   approveLabelKey(s: ReorderSuggestion): string;
   approveSuggestion(s: ReorderSuggestion): void;
   approveBulk(): void;
@@ -457,5 +458,54 @@ describe('InventoryComponent cycle count lines', () => {
 
     expect(fix.suggestionBurnRate(suggestion({ burnRateDailyAvg: 0 }))).toBeNull();
     expect(fix.suggestionBurnRate(suggestion({ burnRateDailyAvg: 2.5 }))).toBe(2.5);
+  });
+});
+
+describe('InventoryComponent tab keyboard', () => {
+  beforeEach(() => vi.restoreAllMocks());
+
+  function tablist() {
+    const list = document.createElement('div');
+    list.setAttribute('role', 'tablist');
+    const tabs = ['stock', 'locations', 'movements'].map(name => {
+      const tab = document.createElement('button');
+      tab.setAttribute('role', 'tab');
+      tab.dataset['tab'] = name;
+      list.appendChild(tab);
+      return tab;
+    });
+    document.body.appendChild(list);
+    return { list, tabs };
+  }
+
+  function press(internals: InventoryInternals, target: HTMLElement, key: string): KeyboardEvent {
+    const event = new KeyboardEvent('keydown', { key, cancelable: true });
+    Object.defineProperty(event, 'target', { value: target });
+    internals.onTabKeydown(event);
+    return event;
+  }
+
+  it('moves focus and selection with the arrow, Home and End keys, wrapping at the ends', () => {
+    const { internals } = setup('stock', { loaded: true, enabled: false });
+    const { list, tabs } = tablist();
+    const clicked: string[] = [];
+    tabs.forEach(t => t.addEventListener('click', () => clicked.push(t.dataset['tab']!)));
+
+    expect(press(internals, tabs[0], 'ArrowRight').defaultPrevented).toBe(true);
+    press(internals, tabs[0], 'ArrowLeft');
+    press(internals, tabs[1], 'End');
+    press(internals, tabs[2], 'Home');
+
+    expect(clicked).toEqual(['locations', 'movements', 'movements', 'stock']);
+    expect(document.activeElement).toBe(tabs[0]);
+    list.remove();
+  });
+
+  it('leaves other keys alone', () => {
+    const { internals } = setup('stock', { loaded: true, enabled: false });
+    const { list, tabs } = tablist();
+
+    expect(press(internals, tabs[0], 'Enter').defaultPrevented).toBe(false);
+    list.remove();
   });
 });
