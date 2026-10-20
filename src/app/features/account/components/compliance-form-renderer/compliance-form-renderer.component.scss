@@ -880,7 +880,7 @@ $gov-step-label-pct: 14%;
     margin-top: 1px;
     position: relative;
     z-index: 2;
-    background: var(--surface, #fff);
+    background: #fff;
 
     // Remove borders on total field to avoid doubling with step border
     .gov-form__amount-field {

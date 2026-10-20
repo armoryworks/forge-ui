@@ -107,15 +107,15 @@
   border-right: $border-width-thin solid var(--border);
   border-bottom: $border-width-thin solid var(--border);
   min-height: 100px; min-width: 0; padding: $sp-xs; display: flex; flex-direction: column;
+  position: relative;
   cursor: pointer;
   transition: background $transition-fast;
 
   &:hover { background: color-mix(in srgb, var(--primary) 6%, var(--surface)); }
-  &:focus-visible { outline: $border-width solid var(--primary); outline-offset: -2px; }
 
   &--weekend { background: color-mix(in srgb, var(--text-muted) 5%, var(--surface)); }
   &--other { background: var(--bg); }
-  &--other .cell-date { color: var(--text-muted); opacity: 0.5; }
+  &--other .cell-date { color: var(--text-muted); }
   &--today { background: color-mix(in srgb, var(--primary) 6%, var(--surface)); }
   &--today .cell-date {
     background: var(--primary); color: var(--primary-btn-text);
@@ -127,9 +127,17 @@
 .cell-date {
   font-size: var(--font-size-sm); font-weight: 600; padding: $sp-xs $sp-xs;
   align-self: flex-end; margin-bottom: $sp-xs;
+  background: none; border: none; color: inherit; font-family: inherit; cursor: pointer;
+
+  &::after { content: ''; position: absolute; inset: 0; }
+
+  &:focus-visible { outline: none; }
+  &:focus-visible::after { outline: $border-width solid var(--primary); outline-offset: -2px; }
 }
 
-.cell-jobs { display: flex; flex-direction: column; gap: $sp-xs; overflow: hidden; }
+.cell-jobs { display: flex; flex-direction: column; gap: $sp-xs; overflow: hidden; position: relative; z-index: 1; pointer-events: none;
+  > * { pointer-events: auto; }
+}
 
 .job-chip {
   display: flex; align-items: center; gap: $sp-sm;
@@ -154,7 +162,7 @@
 }
 
 .job-chip__number { font-weight: 700; flex-shrink: 0; }
-.job-chip__title { overflow: hidden; text-overflow: ellipsis; color: var(--text-muted); }
+.job-chip__title { overflow: hidden; text-overflow: ellipsis; color: var(--text); }
 .job-chip__overdue { font-size: var(--font-size-base); color: var(--error); flex-shrink: 0; }
 
 .job-chip__priority {
@@ -216,7 +224,7 @@
   border-left: $border-width-accent solid var(--border);
   border-left-color: var(--job-tint, var(--border));
 }
-.job-chip__customer { font-size: var(--font-size-xs); color: var(--text-muted); }
+.job-chip__customer { font-size: var(--font-size-xs); color: var(--text); }
 
 // Day View
 .day-view {
@@ -289,7 +297,7 @@
   margin-top: $sp-xs;
   cursor: default;
 
-  [data-theme='dark'] & {
+  :host-context([data-theme='dark']) & {
     background: color-mix(in srgb, var(--warning) 15%, transparent);
   }
 
@@ -329,7 +337,7 @@
   padding: $sp-md $sp-lg;
   background: color-mix(in srgb, var(--warning) 10%, var(--surface));
 
-  [data-theme='dark'] & {
+  :host-context([data-theme='dark']) & {
     background: color-mix(in srgb, var(--warning) 15%, var(--surface));
   }
 

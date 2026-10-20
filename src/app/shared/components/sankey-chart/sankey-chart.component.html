@@ -1,5 +1,5 @@
 @if (data().length > 0) {
-  <div class="sankey-chart" [style.height.px]="height()">
+  <div class="sankey-chart" [style.height.px]="chartHeight()">
     <canvas baseChart
             type="sankey"
             [data]="chartData()"

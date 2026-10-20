@@ -5199,6 +5199,8 @@
     "clearAllFilters": "Limpiar todos los filtros",
     "hideColumn": "Ocultar columna",
     "resetWidth": "Restablecer ancho",
+    "selectAllRows": "Seleccionar todas las filas",
+    "selectRow": "Seleccionar fila",
     "columns": "Columnas",
     "resetColumns": "Restablecer",
     "contains": "Contiene",

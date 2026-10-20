@@ -10,7 +10,7 @@
       }
     </span>
   </div>
-  <div class="widget__body">
+  <div class="widget__body" role="region" tabindex="0" [attr.aria-label]="title()">
     <ng-content />
   </div>
   @if (viewAllLink()) {

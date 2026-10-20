@@ -23,7 +23,7 @@
 
 :root,
 [data-theme='light'] {
-  --primary: #0d9488;
+  --primary: #0f766e;
   --primary-light: #ccfbf1;
   --primary-dark: #115e59;
   --primary-btn-text: #ffffff;
@@ -39,9 +39,9 @@
   --info: #2563eb;
   --info-light: #dbeafe;
   --info-text: #ffffff;
-  --warning: #d97706;
+  --warning: #b45309;
   --warning-light: #fef3c7;
-  --warning-text: #1e293b;
+  --warning-text: #ffffff;
   --error: #dc2626;
   --error-light: #fee2e2;
   --error-text: #ffffff;
@@ -53,8 +53,8 @@
   --text-secondary: #64748b;
   --text-muted: #6b7280;
   // Action colors — high-contrast signals for primary page actions (WCAG AA verified)
-  --action-create: #16a34a;
-  --action-create-hover: #15803d;
+  --action-create: #15803d;
+  --action-create-hover: #166534;
   --action-destructive: #dc2626;
   --action-destructive-hover: #b91c1c;
   // Attention: the "beta bar" green used to spotlight the highest-value action /
@@ -97,13 +97,13 @@
   --text-muted: #94a3b8;
   // Action colors — lighter for contrast against dark backgrounds.
   // Create green is toned down to GitHub's dark-mode primary (Primer
-  // btn-primary): muted #238636 rest / #2ea043 hover, rather than the vivid
+  // btn-primary): muted #238636 rest / #1a7f37 hover, rather than the vivid
   // Tailwind green-500, which read as too saturated and also gave weak white-
   // text contrast.
   --action-create: #238636;
-  --action-create-hover: #2ea043;
-  --action-destructive: #ef4444;
-  --action-destructive-hover: #dc2626;
+  --action-create-hover: #1a7f37;
+  --action-destructive: #dc2626;
+  --action-destructive-hover: #b91c1c;
   --attention: #0f766e;
   --attention-text: #ffffff;
   --attention-hover: #38bdf8;

@@ -70,7 +70,7 @@
     margin: 0;
     padding: $sp-md $sp-lg;
     background: rgba(0, 0, 0, 0.55);
-    color: var(--text);
+    color: var(--header-text);
     font-size: $font-size-lg;
     text-align: center;
   }
@@ -85,7 +85,7 @@
     padding: 0 $sp-md;
     background: rgba(0, 0, 0, 0.45);
     border: none;
-    color: var(--text-muted);
+    color: color-mix(in srgb, var(--header-text) 85%, transparent);
     font-family: $font-family-primary;
     font-size: $font-size-sm;
     cursor: pointer;

@@ -847,7 +847,7 @@
     width: 8px;
     height: 8px;
     flex: none;
-    background: var(--text-dim);
+    background: var(--text-muted);
 
     &--on { background: var(--success); }
     &--pending { background: var(--warning); }

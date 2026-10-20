@@ -116,7 +116,7 @@
   min-height: 88px;
   background: var(--surface);
   border: $border-width solid var(--btn-color, var(--border));
-  color: var(--btn-color, var(--text));
+  color: var(--text);
   cursor: pointer;
   font: inherit;
   transition: all $transition-fast;
@@ -132,6 +132,7 @@
 
   &__icon {
     font-size: $icon-size-xxl;
+    color: var(--btn-color, var(--text));
   }
 
   &__label {

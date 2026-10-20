@@ -80,7 +80,6 @@ export class BalanceSheetVisualComponent {
           x: {
             stacked: true,
             ticks: { font: { size: 10 } },
-            grid: { color: 'rgba(0,0,0,0.05)' },
           },
           y: {
             stacked: true,

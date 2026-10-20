@@ -78,9 +78,9 @@
 .lifecycle-warning {
   margin: 0.25rem 0 0.25rem;
   padding: 0.5rem 0.75rem;
-  border-left: 3px solid #c62828;
-  background: #fdecea;
-  color: #b71c1c;
+  border-left: 3px solid var(--error);
+  background: var(--error-light);
+  color: var(--text);
   font-size: 0.875rem;
   border-radius: 2px;
 }

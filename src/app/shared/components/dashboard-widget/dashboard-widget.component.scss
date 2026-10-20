@@ -75,6 +75,8 @@
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+
+  &:focus-visible { outline: $border-width solid var(--primary); outline-offset: -2px; }
 }
 
 .widget__view-all {

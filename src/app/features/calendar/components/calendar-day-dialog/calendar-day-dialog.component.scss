@@ -150,7 +150,7 @@
   flex-direction: column;
   gap: $sp-xs;
 
-  [data-theme='dark'] & { background: color-mix(in srgb, var(--warning) 15%, var(--surface)); }
+  :host-context([data-theme='dark']) & { background: color-mix(in srgb, var(--warning) 15%, var(--surface)); }
 }
 
 .day-dialog__po-head {

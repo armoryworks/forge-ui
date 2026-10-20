@@ -5,6 +5,6 @@ export const SYSTEM_SETTING_DEFAULTS: Partial<Record<string, string>> = {
   'jobs.default_priority': 'Normal',
   'jobs.auto_archive_days': '0',
   'notifications.email_enabled': 'false',
-  'theme.primary_color': '#0d9488',
+  'theme.primary_color': '#0f766e',
   'theme.accent_color': '#f59e0b',
 };

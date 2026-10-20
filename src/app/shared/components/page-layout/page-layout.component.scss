@@ -26,7 +26,7 @@
   min-height: 48px;
   gap: $sp-md;
 
-  [data-theme='dark'] & {
+  :host-context([data-theme='dark']) & {
     border-bottom-color: var(--primary);
   }
 

@@ -91,11 +91,10 @@
           <div class="calendar-cell"
             [class.calendar-cell--other]="!day.isCurrentMonth"
             [class.calendar-cell--today]="day.isToday"
-            [class.calendar-cell--weekend]="day.isWeekend"
-            role="button" tabindex="0"
-            [attr.aria-label]="('calendar.selectDay' | translate) + ' ' + day.date.getDate()"
-            (click)="onDayClick(day)" (keydown.enter)="onDayClick(day)">
-            <div class="cell-date">{{ day.date.getDate() }}</div>
+            [class.calendar-cell--weekend]="day.isWeekend">
+            <button type="button" class="cell-date"
+              [attr.aria-label]="('calendar.selectDay' | translate) + ' ' + day.date.getDate()"
+              (click)="onDayClick(day)">{{ day.date.getDate() }}</button>
             <div class="cell-jobs">
               @for (job of visibleJobs(day); track job.id) {
                 <div class="job-chip"

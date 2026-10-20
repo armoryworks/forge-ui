@@ -49,11 +49,11 @@
     transition: background $transition-fast, color $transition-fast;
 
     &:last-child { border-right: none; }
-    &:hover { background: var(--surface-2, var(--bg)); }
+    &:hover { background: var(--bg); }
 
     &--active {
       background: var(--primary);
-      color: var(--header, #fff);
+      color: var(--primary-btn-text);
     }
   }
 }

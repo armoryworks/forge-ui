@@ -3,7 +3,7 @@ import { Component, TemplateRef, viewChild } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { TestBed, ComponentFixture, ComponentFixtureAutoDetect } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { provideTranslateService, TranslateLoader, TranslateService } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader, TranslateService, TranslationObject } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { BehaviorSubject } from 'rxjs';
@@ -14,6 +14,12 @@ import { UserPreferencesService } from '../../services/user-preferences.service'
 
 class EmptyLoader implements TranslateLoader {
   getTranslation(): Observable<Record<string, string>> { return of({}); }
+}
+
+class CatalogLoader implements TranslateLoader {
+  getTranslation(): Observable<TranslationObject> {
+    return of({ shared: { selectAllRows: 'Select all rows', selectRow: 'Select row' } });
+  }
 }
 
 describe('DataTableComponent · formatCellValue', () => {
@@ -542,5 +548,27 @@ describe('DataTableComponent · phone column priority', () => {
     phone.next({ matches: true, breakpoints: {} });
     saved = { columnVisibility: { email: true } };
     expect(create()).toEqual(['name', 'email']);
+  });
+});
+
+describe('DataTableComponent · selection checkboxes', () => {
+  it('gives the select-all and row checkboxes an accessible name', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideNoopAnimations(),
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: CatalogLoader } }),
+        { provide: UserPreferencesService, useValue: { get: () => null, set: () => undefined } },
+      ],
+    });
+    TestBed.inject(TranslateService).use('en');
+    const fixture = TestBed.createComponent(DataTableComponent);
+    fixture.componentRef.setInput('tableId', 'spec-table');
+    fixture.componentRef.setInput('columns', [{ field: 'name', header: 'Name' }]);
+    fixture.componentRef.setInput('data', [{ id: 1, name: 'A' }]);
+    fixture.componentRef.setInput('selectable', true);
+    fixture.detectChanges();
+
+    const inputs = Array.from(fixture.nativeElement.querySelectorAll('mat-checkbox input')) as HTMLInputElement[];
+    expect(inputs.map(i => i.getAttribute('aria-label'))).toEqual(['Select all rows', 'Select row']);
   });
 });
