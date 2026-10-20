@@ -119,12 +119,12 @@ export class PaymentDialogComponent {
   });
 
   protected readonly violations = FormValidationService.getViolations(this.paymentForm, {
-    customerId: 'Customer',
-    method: 'Payment Method',
-    amount: 'Amount',
-    paymentDate: 'Payment Date',
-    referenceNumber: 'Reference #',
-    notes: 'Notes',
+    customerId: this.translate.instant('payments.customer'),
+    method: this.translate.instant('payments.paymentMethod'),
+    amount: this.translate.instant('payments.amount'),
+    paymentDate: this.translate.instant('payments.paymentDate'),
+    referenceNumber: this.translate.instant('payments.referenceNumber'),
+    notes: this.translate.instant('common.notes'),
   });
 
   // Application form
