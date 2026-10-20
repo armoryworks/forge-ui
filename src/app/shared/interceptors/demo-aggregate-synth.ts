@@ -384,20 +384,26 @@ async function synthesizeInventoryParts(store: DemoDataStore, query: URLSearchPa
     });
 }
 
-/** /inventory/low-stock — parts whose on-hand fell below their min threshold. */
+/** /inventory/low-stock — parts whose on-hand fell below their min threshold or reached their reorder point. */
 async function synthesizeLowStock(store: DemoDataStore): Promise<unknown[]> {
   const { parts, byPart } = await loadPartStock(store);
+  const optionalNumber = (value: unknown): number | null => value == null ? null : Number(value);
   return parts
     .filter(p => p['deletedAt'] == null)
-    .map(p => ({ p, onHand: partOnHand(byPart.get(String(p['id'])) ?? []), min: Number(p['minStockThreshold'] ?? 0) }))
-    .filter(({ onHand, min }) => min > 0 && onHand < min)
-    .map(({ p, onHand }) => ({
+    .map(p => ({
+      p,
+      onHand: partOnHand(byPart.get(String(p['id'])) ?? []),
+      min: optionalNumber(p['minStockThreshold']),
+      reorderPoint: optionalNumber(p['reorderPoint']),
+    }))
+    .filter(({ onHand, min, reorderPoint }) => (min != null && onHand < min) || (reorderPoint != null && onHand <= reorderPoint))
+    .map(({ p, onHand, min, reorderPoint }) => ({
       partId: p['id'],
       partNumber: String(p['partNumber'] ?? ''),
       description: String(p['description'] ?? ''),
       currentStock: onHand,
-      minStockThreshold: Number(p['minStockThreshold'] ?? 0),
-      reorderPoint: p['reorderPoint'] ?? null,
+      minStockThreshold: min,
+      reorderPoint,
     }));
 }
 
