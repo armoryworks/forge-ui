@@ -54,15 +54,12 @@ export class OperationQuantitySheetComponent {
   protected readonly typing = signal(false);
   protected readonly typedGood = new FormControl<number | null>(null);
 
+  private readonly lastAction = viewChild<ElementRef<HTMLElement>>('lastAction');
+
   constructor() {
     this.typedGood.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
       if (value !== null && Number.isFinite(value)) this.goodCount.set(Math.max(0, Math.floor(value)));
     });
-  }
-
-  private readonly lastAction = viewChild<ElementRef<HTMLElement>>('lastAction');
-
-  constructor() {
     afterNextRender(() => this.lastAction()?.nativeElement.scrollIntoView?.({ block: 'nearest' }));
   }
 

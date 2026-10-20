@@ -594,6 +594,7 @@ describe('DataTableComponent · server paging', () => {
     TestBed.configureTestingModule({
       providers: [
         provideNoopAnimations(),
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: EmptyLoader } }),
         { provide: ComponentFixtureAutoDetect, useValue: false },
         { provide: UserPreferencesService, useValue: { get: () => null, set: () => undefined } },
       ],

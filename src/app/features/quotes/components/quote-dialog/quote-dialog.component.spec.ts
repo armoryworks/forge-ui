@@ -220,7 +220,6 @@ describe('QuoteDialogComponent — summary tax', () => {
   it('keeps the picked customer name in the draft and restores it into the picker', () => {
     const { component, internals, httpMock } = setup();
     component.form.controls.customerId.setValue(5);
-    httpMock.expectOne(`${environment.apiUrl}/customers/5/credit-status`).flush({ customerId: 5, isOnHold: false, holdReason: null });
     httpMock.expectOne(`${environment.apiUrl}/sales-tax-rates/for-customer/5`).flush(null);
     httpMock.expectOne(`${environment.apiUrl}/customers/5/tax-editability`).flush(makeEditability());
     internals.onCustomerSelected({ id: 5, name: 'Northwind Fabrication' });
@@ -232,7 +231,6 @@ describe('QuoteDialogComponent — summary tax', () => {
     const setSelected = vi.fn();
     restored.internals.customerPicker = { setSelected };
     restored.internals.draftConfig.restoreFn(snapshot);
-    restored.httpMock.expectOne(`${environment.apiUrl}/customers/5/credit-status`).flush({ customerId: 5, isOnHold: false, holdReason: null });
     restored.httpMock.expectOne(`${environment.apiUrl}/sales-tax-rates/for-customer/5`).flush(null);
     restored.httpMock.expectOne(`${environment.apiUrl}/customers/5/tax-editability`).flush(makeEditability());
 
