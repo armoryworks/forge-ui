@@ -90,7 +90,7 @@ export class QuoteDialogComponent {
   protected readonly creditHoldMessage = computed(() => {
     const status = this.creditStatus();
     return status?.isOnHold
-      ? this.translate.instant('salesOrders.creditHoldWarning', {
+      ? this.translate.instant('quotes.creditHoldWarning', {
         reason: status.holdReason?.trim() || this.translate.instant('onboarding.notSpecified'),
       })
       : null;

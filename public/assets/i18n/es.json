@@ -6253,7 +6253,8 @@
     "convertOnHoldMessage": "Este cliente tiene un bloqueo de crédito ({{reason}}). La orden se creará como borrador, pero no se podrá confirmar ni enviar hasta que se libere el bloqueo. ¿Convertir de todos modos?",
     "convertOnHoldTitle": "Cliente con bloqueo de crédito",
     "taxAutoFilledTooltip": "Completado según el estado del cliente. Edítelo para reemplazarlo.",
-    "taxAutoDefault": "Predeterminado {{rate}}%"
+    "taxAutoDefault": "Predeterminado {{rate}}%",
+    "creditHoldWarning": "Este cliente tiene un bloqueo de crédito ({{reason}}). Aún puede guardar y enviar esta cotización, pero una orden convertida desde ella no se podrá confirmar ni enviar hasta que se libere el bloqueo."
   },
   "shipments": {
     "shipmentNumberLabel": "Número de envío",

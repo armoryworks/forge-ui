@@ -6260,7 +6260,8 @@
     "convertOnHoldMessage": "This customer is on credit hold ({{reason}}). The order will be created as a draft, but it can't be confirmed or shipped until the hold is released. Convert anyway?",
     "convertOnHoldTitle": "Customer on credit hold",
     "taxAutoFilledTooltip": "Auto-filled from the customer's state. Edit to override.",
-    "taxAutoDefault": "Default {{rate}}%"
+    "taxAutoDefault": "Default {{rate}}%",
+    "creditHoldWarning": "This customer is on credit hold ({{reason}}). You can still save and send this quote, but an order converted from it can't be confirmed or shipped until the hold is released."
   },
   "shipments": {
     "shipmentNumberLabel": "Shipment Number",

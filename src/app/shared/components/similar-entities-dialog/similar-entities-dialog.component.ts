@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DialogComponent } from '../dialog/dialog.component';
 
@@ -56,8 +56,8 @@ export type SimilarEntitiesDialogResult =
       </ul>
       <div dialog-footer>
         <button type="button" class="action-btn" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
-        <button type="button" class="action-btn action-btn--create similar-entities__create" (click)="createNew()">
-          {{ 'similarEntities.createAnyway' | translate:{ term: data.typedTerm } }}
+        <button type="button" class="action-btn action-btn--create" (click)="createNew()">
+          {{ createAnyway.before }}<span class="similar-entities__term">{{ data.typedTerm }}</span>{{ createAnyway.after }}
         </button>
       </div>
     </app-dialog>
@@ -72,13 +72,21 @@ export type SimilarEntitiesDialogResult =
     .similar-entities__text { display: flex; flex-direction: column; min-width: 0; }
     .similar-entities__primary { font-weight: 600; }
     .similar-entities__secondary { font-size: var(--font-size-sm); color: var(--text-secondary); }
-    .similar-entities__create { text-transform: none; }
+    .similar-entities__term { text-transform: none; }
   `],
 })
 export class SimilarEntitiesDialogComponent {
   protected readonly data = inject<SimilarEntitiesDialogData>(MAT_DIALOG_DATA);
+  private readonly translate = inject(TranslateService);
+  protected readonly createAnyway = this.splitAroundTerm('similarEntities.createAnyway');
   private readonly dialogRef =
     inject<MatDialogRef<SimilarEntitiesDialogComponent, SimilarEntitiesDialogResult>>(MatDialogRef);
+
+  private splitAroundTerm(key: string): { before: string; after: string } {
+    const marker = '\u0000';
+    const [before, after = ''] = String(this.translate.instant(key, { term: marker })).split(marker);
+    return { before, after };
+  }
 
   protected primary(e: Record<string, unknown>): string {
     return String(e[this.data.displayField] ?? '');

@@ -8,6 +8,7 @@ import { Observable, of } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
 import { CustomerTaxEditability } from '../../../customers/models/customer-tax-editability.model';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { QuoteDialogComponent } from './quote-dialog.component';
 
 class FakeLoader implements TranslateLoader {
@@ -152,6 +153,35 @@ describe('QuoteDialogComponent — summary tax', () => {
 
     expect(internals.taxAmount()).toBeCloseTo(20, 3);
     expect(internals.grandTotal()).toBeCloseTo(220, 3);
+    httpMock.verify();
+  });
+});
+
+describe('QuoteDialogComponent — credit hold warning', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  it('warns with quote wording when the selected customer is on hold', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideAnimations(),
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        { provide: AuthService, useValue: { hasAnyRole: () => true, hasRole: () => true, user: () => null } },
+      ],
+    });
+    const component = TestBed.runInInjectionContext(() => new QuoteDialogComponent());
+    const internals = component as unknown as { creditHoldMessage(): string | null };
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.expectOne(r => r.url === `${environment.apiUrl}/customers`).flush(emptyPage);
+    httpMock.expectOne(r => r.url === `${environment.apiUrl}/parts`).flush(emptyPage);
+
+    component.form.controls.customerId.setValue(5);
+    httpMock.expectOne(`${environment.apiUrl}/customers/5/credit-status`).flush({ customerId: 5, isOnHold: true, holdReason: 'Past due' });
+    httpMock.expectOne(`${environment.apiUrl}/sales-tax-rates/for-customer/5`).flush(null);
+    httpMock.expectOne(`${environment.apiUrl}/customers/5/tax-editability`).flush(makeEditability());
+
+    expect(internals.creditHoldMessage()).toBe('quotes.creditHoldWarning');
     httpMock.verify();
   });
 });
