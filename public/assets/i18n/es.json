@@ -8365,6 +8365,7 @@
       "colCarrier": "Transportista",
       "colTracking": "Rastreo #"
     },
+    "companyPortal": "Portal de clientes de {{company}}",
     "list": {
       "loadError": "No pudimos cargar esta lista. Revisa tu conexión e inténtalo de nuevo.",
       "retry": "Reintentar",
@@ -12251,6 +12252,22 @@
       "sftpReturnsDir": "Directorio de devoluciones SFTP",
       "sftpReturnsDirHint": "Dónde deja el banco los archivos de devoluciones para que Forge los lea."
     }
+  },
+  "routeTitles": {
+    "login": "Iniciar sesión",
+    "ssoCallback": "Iniciando sesión",
+    "welcome": "Bienvenida",
+    "setup": "Configuración",
+    "tokenSetup": "Configuración de la cuenta",
+    "acceptOrder": "Revisar pedido",
+    "workflowDemo": "Demostración de flujo de trabajo",
+    "devTools": "Herramientas de desarrollo",
+    "renderForm": "Formulario",
+    "lockScreen": "Desbloquear",
+    "setupLock": "Configurar el bloqueo de la aplicación",
+    "enroll": "Conectar este dispositivo",
+    "timeClock": "Reloj checador",
+    "inventoryScan": "Escaneo de inventario"
   },
   "gages": {
     "updated": "Calibre actualizado",

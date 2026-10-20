@@ -12,6 +12,7 @@ export const MAINTENANCE_ROUTES: Routes = [
   },
   {
     path: 'predictions',
+    data: { titleKey: 'nav.maintenancePredictions' },
     canActivate: [capabilityGuard('CAP-MAINT-PREDICTIVE')],
     loadComponent: () =>
       import('./pages/predictions/predictions.component').then((m) => m.PredictionsComponent),

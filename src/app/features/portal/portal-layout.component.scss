@@ -41,6 +41,13 @@
     flex-shrink: 0;
   }
 
+  &__logo-img {
+    max-height: 32px;
+    max-width: 160px;
+    object-fit: contain;
+    align-self: center;
+  }
+
   &__title {
     font-size: $font-size-sm;
     text-transform: uppercase;

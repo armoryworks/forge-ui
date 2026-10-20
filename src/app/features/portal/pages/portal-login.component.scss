@@ -19,6 +19,15 @@
     gap: $sp-md;
   }
 
+  &__supplier {
+    margin: 0;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+  }
+
   &__title {
     margin: 0;
     font-size: $font-size-xl;

@@ -14,6 +14,7 @@ export const REPORTS_ROUTES: Routes = [
   },
   {
     path: 'sankey',
+    data: { titleKey: 'reports.sankey.title' },
     canActivate: [roleGuard('Admin', 'Manager', 'PM')],
     loadComponent: () =>
       import('./components/sankey-reports/sankey-reports.component').then(

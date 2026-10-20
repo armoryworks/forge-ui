@@ -1,7 +1,11 @@
 <div class="portal-shell">
   <header class="portal-shell__header">
     <div class="portal-shell__brand">
-      <img class="portal-shell__logo" [src]="branding.wordmarkUrl()" alt="" />
+      @if (theme.logoUrl(); as logo) {
+        <img class="portal-shell__logo-img" [src]="logo" [alt]="supplierName()" />
+      } @else {
+        <span class="portal-shell__logo">{{ supplierName() }}</span>
+      }
       <span class="portal-shell__title">{{ 'portal.title' | translate }}</span>
     </div>
 

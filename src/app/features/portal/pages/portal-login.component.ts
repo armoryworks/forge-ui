@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -6,6 +6,7 @@ import { Subscription, interval, take } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InputComponent } from '../../../shared/components/input/input.component';
+import { ThemeService } from '../../../shared/services/theme.service';
 import { PortalService } from '../services/portal.service';
 
 /**
@@ -31,6 +32,9 @@ export class PortalLoginComponent {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly translate = inject(TranslateService);
+  private readonly theme = inject(ThemeService);
+
+  protected readonly supplierName = computed(() => this.theme.companyName() || this.theme.appName());
 
   protected readonly emailControl = new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.email] });
   protected readonly submitting = signal(false);

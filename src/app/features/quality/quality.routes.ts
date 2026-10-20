@@ -8,6 +8,7 @@ export const QUALITY_ROUTES: Routes = [
   { path: '', redirectTo: 'inspections', pathMatch: 'full' },
   {
     path: 'recalls',
+    data: { titleKey: 'recalls.title' },
     canActivate: [capabilityGuard('CAP-QC-RECALL'), roleGuard('Admin', 'Manager', 'Engineer')],
     loadComponent: () =>
       import('./components/recall-list/recall-list.component').then((m) => m.RecallListComponent),

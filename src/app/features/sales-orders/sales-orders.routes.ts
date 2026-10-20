@@ -10,6 +10,7 @@ export const SALES_ORDERS_ROUTES: Routes = [
   // intrinsically tied to sales orders.
   {
     path: 'recurring',
+    data: { titleKey: 'nav.recurringOrders' },
     canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
     loadComponent: () => import('./pages/recurring/recurring-orders.component').then(m => m.RecurringOrdersComponent),
   },

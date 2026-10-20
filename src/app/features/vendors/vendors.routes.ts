@@ -30,6 +30,7 @@ export const VENDORS_ROUTES: Routes = [
   },
   {
     path: 'new',
+    data: { titleKey: 'vendors.fork.title' },
     providers: [provideVendorWorkflowSteps()],
     loadComponent: () =>
       import('./workflow/vendor-workflow-page/vendor-workflow-page.component')
