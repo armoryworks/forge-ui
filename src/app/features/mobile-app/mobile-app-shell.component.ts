@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal, untracked,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -21,6 +22,7 @@ import { UndoService } from '../../shared/services/undo.service';
 import { MOBILE_APP_SCREENS } from '../../shared/utils/mobile-app-screens';
 import { LanguageToggleComponent } from '../../shared/components/language-toggle/language-toggle.component';
 import { SyncIndicatorComponent } from './components/sync-indicator/sync-indicator.component';
+import { BottomChromeOffsetDirective } from './directives/bottom-chrome-offset.directive';
 
 /**
  * Native-shell chrome: top bar + five-tab bottom bar (Scan, Clock, Jobs,
@@ -28,14 +30,18 @@ import { SyncIndicatorComponent } from './components/sync-indicator/sync-indicat
  * this instance; with none on, the bar is not drawn. Account lives behind
  * the gear, never a tab. While a timer runs, a strip above the tab bar
  * shows it ticking with a Stop button, one row per running operation timer
- * when operation tracking is on. On a shared device, a Stop from the strip
+ * when operation tracking is on. With more than one timer running only the
+ * first row shows, with a +N chip that unfolds the rest. On a shared device, a Stop from the strip
  * ends the person's identity once its undo toast closes, and the undo runs
  * with the token captured beforehand.
  */
 @Component({
   selector: 'app-mobile-app-shell',
   standalone: true,
-  imports: [SyncIndicatorComponent, RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe, LanguageToggleComponent],
+  imports: [
+    SyncIndicatorComponent, RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe, LanguageToggleComponent,
+    NgTemplateOutlet, BottomChromeOffsetDirective,
+  ],
   templateUrl: './mobile-app-shell.component.html',
   styleUrl: './mobile-app-shell.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -63,6 +69,16 @@ export class MobileAppShellComponent {
   private readonly now = signal(Date.now());
   protected readonly stopping = signal(false);
   protected readonly stoppingOperation = signal<number | null>(null);
+  protected readonly timersExpanded = signal(false);
+
+  protected readonly timerCount = computed(() =>
+    (this.timer.active() ? 1 : 0) + this.timer.operationTimers().length);
+
+  protected readonly visibleOperationTimers = computed(() => {
+    const operations = this.timer.operationTimers();
+    if (this.timersExpanded()) return operations;
+    return this.timer.active() ? [] : operations.slice(0, 1);
+  });
 
   protected readonly runningLabel = computed(() => {
     const running = this.timer.active();
@@ -102,6 +118,10 @@ export class MobileAppShellComponent {
 
     this.refreshOnResume();
     this.destroyRef.onDestroy(() => this.timerHub.clearCallbacks());
+  }
+
+  protected toggleTimers(): void {
+    this.timersExpanded.update((open) => !open);
   }
 
   protected async stopTimer(): Promise<void> {

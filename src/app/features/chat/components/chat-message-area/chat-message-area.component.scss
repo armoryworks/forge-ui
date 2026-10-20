@@ -149,9 +149,10 @@
 }
 
 .message-area__reply-btn {
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   width: 20px;
   height: 20px;
   border: none;
@@ -159,6 +160,8 @@
   color: var(--text-muted);
   cursor: pointer;
   align-self: flex-end;
+  opacity: 0;
+  @include touch-target;
 
   .material-icons-outlined {
     font-size: $icon-size-xs;
@@ -167,10 +170,15 @@
   &:hover {
     color: var(--primary);
   }
+
+  @media (hover: none) {
+    opacity: 1;
+  }
 }
 
-.message-area__msg:hover .message-area__reply-btn {
-  display: flex;
+.message-area__msg:hover .message-area__reply-btn,
+.message-area__msg:focus-within .message-area__reply-btn {
+  opacity: 1;
 }
 
 // ── Input area ──

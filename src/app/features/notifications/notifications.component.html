@@ -1,7 +1,7 @@
 <app-page-header [title]="'notifications.title' | translate" [subtitle]="'notifications.subtitle' | translate" />
 
 <div class="notifications-layout">
-  <div class="tab-bar" appTabList>
+  <div class="tab-bar" appTabList appScrollCue>
     <button class="tab" [appTab]="activeTab() === 'all'" (click)="setTab('all')">
       {{ 'notifications.allNotifications' | translate }}
     </button>

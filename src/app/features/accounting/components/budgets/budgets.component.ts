@@ -15,6 +15,7 @@ import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { BudgetLine, BudgetVsActual, GlAccount } from '../../models/accounting.models';
 import { TabListDirective, TabDirective } from '../../../../shared/directives/tab-list.directive';
+import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
 
 const DEFAULT_BOOK_ID = 1;
 
@@ -37,6 +38,7 @@ interface BudgetRow {
   imports: [
     TabListDirective,
     TabDirective,
+    ScrollCueDirective,
     DecimalPipe,
     ReactiveFormsModule,
     TranslatePipe,

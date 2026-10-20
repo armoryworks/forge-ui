@@ -52,6 +52,7 @@ import {
 } from './components/qc-template-editor-dialog/qc-template-editor-dialog.component';
 import { QUALITY_TABS, QualityTab } from './models/quality-tab.model';
 import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
+import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
 
 const NEW_TEMPLATE_OPTION = -1;
 
@@ -64,6 +65,7 @@ const INSPECTION_DETAIL_TYPE = 'qc-inspection';
   imports: [
     TabListDirective,
     TabDirective,
+    ScrollCueDirective,
     ReactiveFormsModule, DatePipe,
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent, EntityPickerComponent,

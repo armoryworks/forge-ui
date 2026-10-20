@@ -24,6 +24,7 @@
 
 .row-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: $sp-sm;
   justify-content: flex-end;
 }

@@ -28,6 +28,7 @@ export interface ColumnManagerState {
 export class ColumnManagerPanelComponent implements OnInit {
   readonly columns = input.required<ColumnDef[]>();
   readonly visibility = input.required<Record<string, boolean>>();
+  readonly defaultVisibility = input<Record<string, boolean>>({});
   readonly order = input.required<string[]>();
 
   readonly stateChanged = output<ColumnManagerState>();
@@ -47,7 +48,7 @@ export class ColumnManagerPanelComponent implements OnInit {
   }
 
   isVisible(field: string): boolean {
-    return this.localVisibility()[field] !== false;
+    return this.localVisibility()[field] ?? this.defaultVisibility()[field] ?? true;
   }
 
   toggleVisibility(field: string): void {

@@ -72,8 +72,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: $tap-target-min;
+  height: $tap-target-min;
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.25);
   color: inherit;
@@ -926,6 +926,7 @@
 
 .sf-actions-card__cancel {
   color: var(--text-muted);
+  min-height: $tap-target-min;
 }
 
 // ─── Action Buttons ───

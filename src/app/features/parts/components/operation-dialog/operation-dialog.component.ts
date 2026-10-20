@@ -30,6 +30,7 @@ import { SchedulingService } from '../../../scheduling/services/scheduling.servi
 import { WorkCenter } from '../../../scheduling/models/scheduling.model';
 import { WorkCenterQuickCreateDialogComponent, WorkCenterQuickCreateDialogData } from '../../../scheduling/components/work-center-quick-create-dialog/work-center-quick-create-dialog.component';
 import { TabListDirective, TabDirective } from '../../../../shared/directives/tab-list.directive';
+import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
 
 export type OperationTab = 'details' | 'materials' | 'files' | 'activity';
 
@@ -48,6 +49,7 @@ export interface OperationDialogData {
     AuthSrcDirective,
     TabListDirective,
     TabDirective,
+    ScrollCueDirective,
     ReactiveFormsModule,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     ToggleComponent, EntityPickerComponent, FileUploadZoneComponent,

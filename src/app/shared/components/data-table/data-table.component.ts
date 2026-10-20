@@ -22,6 +22,9 @@ import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { OverlayModule } from '@angular/cdk/overlay';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 
 import writeXlsxFile, { type CellObject, type SheetData } from 'write-excel-file/browser';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -32,6 +35,7 @@ import { TablePreferences } from '../../models/table-preferences.model';
 import { ColumnCellDirective } from '../../directives/column-cell.directive';
 import { RowExpandDirective } from '../../directives/row-expand.directive';
 import { LoadingBlockDirective } from '../../directives/loading-block.directive';
+import { ScrollCueDirective } from '../../directives/scroll-cue.directive';
 import { EmptyStateComponent } from '../empty-state/empty-state.component';
 import { ColumnFilterPopoverComponent, ColumnFilterState } from './column-filter-popover/column-filter-popover.component';
 import { ColumnManagerPanelComponent, ColumnManagerState } from './column-manager-panel/column-manager-panel.component';
@@ -41,6 +45,7 @@ import { formatDate, formatDateTime, parseDateOnly } from '../../utils/date.util
 import { foldText } from '../../utils/text-fold';
 import { downloadCsv } from '../../utils/download-csv';
 
+const PHONE_QUERY = '(max-width: 767.98px)';
 
 @Component({
   selector: 'app-data-table',
@@ -54,6 +59,7 @@ import { downloadCsv } from '../../utils/download-csv';
     MatTooltipModule,
     OverlayModule,
     LoadingBlockDirective,
+    ScrollCueDirective,
     EmptyStateComponent,
     ColumnFilterPopoverComponent,
     ColumnManagerPanelComponent,
@@ -69,6 +75,10 @@ export class DataTableComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly translate = inject(TranslateService);
+  private readonly isPhone = toSignal(
+    inject(BreakpointObserver).observe(PHONE_QUERY).pipe(map(state => state.matches)),
+    { initialValue: false },
+  );
 
   readonly tableId = input.required<string>();
   readonly columns = input.required<ColumnDef[]>();
@@ -137,11 +147,21 @@ export class DataTableComponent implements OnInit {
     return ordered;
   });
 
+  protected readonly defaultVisibility = computed(() => {
+    const phone = this.isPhone();
+    const defaults: Record<string, boolean> = {};
+    for (const col of this.columns()) {
+      defaults[col.field] = col.visible !== false && !(phone && col.phoneHidden);
+    }
+    return defaults;
+  });
+
   protected readonly visibleColumns = computed(() => {
     const vis = this.columnVisibility();
+    const defaults = this.defaultVisibility();
     return this.orderedColumns().filter(col => {
       if (col.field in vis) return vis[col.field];
-      return col.visible !== false;
+      return defaults[col.field];
     });
   });
 

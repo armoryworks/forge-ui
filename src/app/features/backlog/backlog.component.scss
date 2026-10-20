@@ -12,6 +12,7 @@
 .new-job-btn {
   @include uppercase-label(var(--font-size-xs), 0.5px, 600);
   @include flex-center;
+  @include touch-target(height);
   gap: $sp-sm;
   height: 2rem;
   padding: 0 $sp-lg;

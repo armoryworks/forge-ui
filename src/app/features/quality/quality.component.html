@@ -44,7 +44,7 @@
 </app-page-header>
 
 <div class="quality-content">
-  <div class="tab-bar" appTabList [attr.aria-label]="'quality.title' | translate">
+  <div class="tab-bar" appTabList appScrollCue [attr.aria-label]="'quality.title' | translate">
     <button class="tab" [appTab]="activeTab() === 'inspections'" (click)="switchTab('inspections')">
       <span class="material-icons-outlined" aria-hidden="true">fact_check</span>
       {{ 'quality.qcInspections' | translate }}

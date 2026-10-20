@@ -200,7 +200,7 @@ export class LedgerViewComponent implements OnInit {
       { field: 'entryNumber', header: this.translate.instant('accounting.ledger.entryNumber'), sortable: true, width: '90px' },
       // NOT type:'date' — the shared date formatter is for timestamps (adds a time + TZ-shifts DateOnly).
       { field: 'entryDate', header: this.translate.instant('accounting.common.date'), sortable: true, width: '110px' },
-      { field: 'source', header: this.translate.instant('accounting.ledger.source'), sortable: true, filterable: true, type: 'enum', width: '120px' },
+      { field: 'source', phoneHidden: true, header: this.translate.instant('accounting.ledger.source'), sortable: true, filterable: true, type: 'enum', width: '120px' },
       { field: 'status', header: this.translate.instant('accounting.common.status'), sortable: true, filterable: true, type: 'enum', width: '140px' },
       { field: 'memo', header: this.translate.instant('accounting.ledger.memo'), sortable: true },
       { field: 'accounts', header: this.translate.instant('accounting.ledger.accounts'), sortable: true },

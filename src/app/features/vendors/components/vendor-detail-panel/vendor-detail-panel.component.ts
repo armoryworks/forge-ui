@@ -36,6 +36,7 @@ import { EntityCompletenessChipComponent } from '../../../../shared/components/e
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 import { TabListDirective, TabDirective } from '../../../../shared/directives/tab-list.directive';
+import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
 
 @Component({
   selector: 'app-vendor-detail-panel',
@@ -43,6 +44,7 @@ import { TabListDirective, TabDirective } from '../../../../shared/directives/ta
   imports: [
     TabListDirective,
     TabDirective,
+    ScrollCueDirective,
     DatePipe, DateOnlyPipe,
     MatTooltipModule,
     TranslatePipe,

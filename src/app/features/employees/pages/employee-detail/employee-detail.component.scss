@@ -95,6 +95,14 @@
   gap: 0;
   border-top: $border-width-thin solid var(--border);
   margin: 0 (-$sp-xl);
+
+  @include mobile {
+    flex-wrap: wrap;
+
+    .ed-stat {
+      flex: 1 1 30%;
+    }
+  }
 }
 
 .ed-stat {
@@ -142,6 +150,7 @@
 .ed-tab {
   flex: 0 0 auto;
   padding: $sp-sm $sp-lg;
+  @include touch-target(height);
   font-size: $font-size-sm;
   color: var(--text-secondary);
   background: none;

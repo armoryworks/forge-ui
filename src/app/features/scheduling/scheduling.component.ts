@@ -40,6 +40,7 @@ import {
 } from './models/scheduling.model';
 import { SCHEDULING_TABS, SchedulingTab } from './models/scheduling-tab.model';
 import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
+import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
 
 @Component({
   selector: 'app-scheduling',
@@ -48,6 +49,7 @@ import { TabListDirective, TabDirective } from '../../shared/directives/tab-list
     DecimalPipe,
     TabListDirective,
     TabDirective,
+    ScrollCueDirective,
     ReactiveFormsModule,
     PageHeaderComponent,
     DataTableComponent,

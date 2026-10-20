@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, input, linkedSignal, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy, Component, ElementRef, afterNextRender, computed, input, linkedSignal, output, signal, viewChild,
+} from '@angular/core';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -44,6 +46,12 @@ export class OperationQuantitySheetComponent {
   protected readonly over = computed(() => this.goodCount() + this.scrapCount() > this.jobQuantity());
   protected readonly askReason = computed(() =>
     this.reasons().length > 0 && (this.scrapCount() > this.scrap() || this.reworkCount() > 0));
+
+  private readonly lastAction = viewChild<ElementRef<HTMLElement>>('lastAction');
+
+  constructor() {
+    afterNextRender(() => this.lastAction()?.nativeElement.scrollIntoView?.({ block: 'nearest' }));
+  }
 
   protected bumpGood(delta: number): void {
     this.goodCount.update((n) => Math.max(0, n + delta));

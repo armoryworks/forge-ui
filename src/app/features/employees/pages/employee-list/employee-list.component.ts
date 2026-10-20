@@ -80,12 +80,12 @@ export class EmployeeListComponent {
     { field: 'name', header: this.translate.instant('employees.cols.name'), sortable: true },
     { field: 'role', header: this.translate.instant('employees.cols.role'), sortable: true, filterable: true, type: 'enum' as const,
       filterOptions: this.roleOptions().filter(o => o.value !== null), width: '130px' },
-    { field: 'teamName', header: this.translate.instant('employees.cols.team'), sortable: true, width: '120px' },
-    { field: 'jobTitle', header: this.translate.instant('employees.cols.title'), sortable: true, width: '140px' },
-    { field: 'email', header: this.translate.instant('employees.cols.email'), sortable: true },
-    { field: 'phone', header: this.translate.instant('employees.cols.phone'), sortable: true, width: '130px' },
+    { field: 'teamName', phoneHidden: true, header: this.translate.instant('employees.cols.team'), sortable: true, width: '120px' },
+    { field: 'jobTitle', phoneHidden: true, header: this.translate.instant('employees.cols.title'), sortable: true, width: '140px' },
+    { field: 'email', phoneHidden: true, header: this.translate.instant('employees.cols.email'), sortable: true },
+    { field: 'phone', phoneHidden: true, header: this.translate.instant('employees.cols.phone'), sortable: true, width: '130px' },
     { field: 'isActive', header: this.translate.instant('employees.cols.status'), sortable: true, width: '80px' },
-    { field: 'startDate', header: this.translate.instant('employees.cols.startDate'), sortable: true, type: 'date' as const, width: '100px' },
+    { field: 'startDate', phoneHidden: true, header: this.translate.instant('employees.cols.startDate'), sortable: true, type: 'date' as const, width: '100px' },
   ]);
 
   constructor() {

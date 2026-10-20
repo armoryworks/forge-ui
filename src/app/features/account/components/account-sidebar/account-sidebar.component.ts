@@ -8,6 +8,7 @@ import { completenessItemStatus, EmployeeProfileService, WIZARD_FORM_KEYS } from
 import { ComplianceFormService } from '../../services/compliance-form.service';
 import { OnboardingService } from '../../../onboarding/onboarding.service';
 import { LayoutService } from '../../../../shared/services/layout.service';
+import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
 
 interface AccountNavItem {
   path: string;
@@ -27,7 +28,7 @@ interface AccountNavChild {
 @Component({
   selector: 'app-account-sidebar',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, TranslatePipe],
+  imports: [ScrollCueDirective, RouterLink, RouterLinkActive, TranslatePipe],
   templateUrl: './account-sidebar.component.html',
   styleUrl: './account-sidebar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

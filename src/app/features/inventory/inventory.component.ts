@@ -52,12 +52,13 @@ import { EntityLinkComponent, LinkableEntityType } from '../../shared/components
 import { INVENTORY_TAB_ROLES } from './models/inventory-tab-roles.model';
 import { INVENTORY_TABS, InventoryTab } from './models/inventory-tab.model';
 import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
+import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
 
 
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [TabListDirective, TabDirective, ReactiveFormsModule, CurrencyPipe, DatePipe, DecimalPipe, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, DataTableComponent, ColumnCellDirective, RowExpandDirective, ValidationButtonComponent, EmptyStateComponent, LoadingBlockDirective, BarcodeInfoComponent, MatTooltipModule, UomManagementComponent, ViewModeToggleComponent, InventoryReorderVisualComponent, ReceivingInspectionQueueComponent, EntityPickerComponent, EntityLinkComponent],
+  imports: [TabListDirective, TabDirective, ScrollCueDirective, ReactiveFormsModule, CurrencyPipe, DatePipe, DecimalPipe, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, DataTableComponent, ColumnCellDirective, RowExpandDirective, ValidationButtonComponent, EmptyStateComponent, LoadingBlockDirective, BarcodeInfoComponent, MatTooltipModule, UomManagementComponent, ViewModeToggleComponent, InventoryReorderVisualComponent, ReceivingInspectionQueueComponent, EntityPickerComponent, EntityLinkComponent],
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -121,8 +122,8 @@ export class InventoryComponent {
 
   protected readonly stockColumns: ColumnDef[] = [
     { field: 'partNumber', header: this.translate.instant('inventory.columns.partNumber'), sortable: true, width: '120px' },
-    { field: 'description', header: this.translate.instant('common.description'), sortable: true },
-    { field: 'material', header: this.translate.instant('inventory.columns.material'), sortable: true, width: '140px' },
+    { field: 'description', phoneHidden: true, header: this.translate.instant('common.description'), sortable: true },
+    { field: 'material', phoneHidden: true, header: this.translate.instant('inventory.columns.material'), sortable: true, width: '140px' },
     { field: 'onHand', header: this.translate.instant('inventory.onHand'), sortable: true, align: 'right', width: '90px' },
     { field: 'reserved', header: this.translate.instant('inventory.columns.reserved'), sortable: true, align: 'right', width: '90px' },
     { field: 'available', header: this.translate.instant('inventory.available'), sortable: true, align: 'right', width: '90px' },

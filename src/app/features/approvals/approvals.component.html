@@ -1,6 +1,6 @@
 <app-page-header [title]="'approvals.title' | translate" icon="rule" />
 
-<div class="tab-bar" appTabList>
+<div class="tab-bar" appTabList appScrollCue>
   <button class="tab" [appTab]="activeTab() === 'inbox'" (click)="switchTab('inbox')">
     <span class="material-icons-outlined">inbox</span> {{ 'approvals.tabs.inbox' | translate }}
   </button>

@@ -1,6 +1,6 @@
 <div class="announcements-panel">
   <div class="panel-header">
-    <div class="tab-bar" appTabList>
+    <div class="tab-bar" appTabList appScrollCue>
       <button
         class="tab" [appTab]="activeView() === 'announcements'"
         (click)="switchView('announcements')"

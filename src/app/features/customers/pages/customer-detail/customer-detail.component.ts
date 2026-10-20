@@ -49,6 +49,7 @@ import { EntityCompletenessChipComponent } from '../../../../shared/components/e
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 import { notFoundError } from '../../../../shared/utils/not-found-error';
 import { parsePositiveId } from '../../../../shared/utils/parse-positive-id';
+import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
 
 /**
  * Pillar 5 — Customer detail shell.
@@ -70,6 +71,7 @@ import { parsePositiveId } from '../../../../shared/utils/parse-positive-id';
   selector: 'app-customer-detail',
   standalone: true,
   imports: [
+    ScrollCueDirective,
     TranslatePipe, RouterLink, MatTooltipModule, DetailLoadErrorComponent,
     CustomerOverviewTabComponent,
     CustomerEstimatesTabComponent, CustomerQuotesTabComponent, CustomerOrdersTabComponent,

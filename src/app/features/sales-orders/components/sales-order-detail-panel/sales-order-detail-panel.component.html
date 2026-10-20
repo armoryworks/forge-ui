@@ -40,7 +40,7 @@
     </div>
 
     <!-- Tab Bar -->
-    <div class="tab-bar" appTabList aria-label="Sales order detail tabs">
+    <div class="tab-bar" appTabList appScrollCue aria-label="Sales order detail tabs">
       <button class="tab" [appTab]="activeTab() === 'overview'"
         (click)="switchTab('overview')"
         aria-label="Overview tab">

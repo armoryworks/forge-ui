@@ -24,6 +24,7 @@ import { EmployeeDocumentsTabComponent } from './tabs/employee-documents-tab.com
 import { EmployeeActivityTabComponent } from './tabs/employee-activity-tab.component';
 import { EmployeeEventsTabComponent } from './tabs/employee-events-tab.component';
 import { EMPLOYEE_TABS, EmployeeTab } from '../../models/employee-tab.model';
+import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
 
 function toKind(value: string | null): EmployeeKind | null {
   return value === 'user' || value === 'profile' ? value : null;
@@ -33,6 +34,7 @@ function toKind(value: string | null): EmployeeKind | null {
   selector: 'app-employee-detail',
   standalone: true,
   imports: [
+    ScrollCueDirective,
     RouterLink, TranslatePipe, AvatarComponent, DetailLoadErrorComponent,
     EmployeeOverviewTabComponent, EmployeeTimeTabComponent, EmployeePayTabComponent,
     EmployeeTrainingTabComponent, EmployeeComplianceTabComponent, EmployeeJobsTabComponent,

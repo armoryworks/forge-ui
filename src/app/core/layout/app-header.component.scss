@@ -589,6 +589,48 @@
   .hide-mobile {
     display: none !important; // responsive layout override
   }
+
+  .app-header {
+    padding: 0 $sp-sm;
+    gap: $sp-xs;
+  }
+
+  .app-header__logo-link {
+    flex-shrink: 1;
+    min-width: 0;
+    min-height: $tap-target-min;
+  }
+
+  .app-header__lockup {
+    flex-shrink: 1;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .app-header__actions {
+    gap: 0;
+    flex-shrink: 0;
+  }
+
+  .app-header__user {
+    margin-left: 0;
+  }
+
+  .hamburger-btn {
+    margin-right: 0;
+  }
+
+  .user-trigger {
+    justify-content: center;
+    padding: 0;
+    border-color: transparent;
+    background: transparent;
+  }
+}
+
+.icon-btn,
+.user-trigger {
+  @include touch-target;
 }
 
 // ─── About Dialog ───

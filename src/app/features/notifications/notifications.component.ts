@@ -15,6 +15,7 @@ import { SelectOption } from '../../shared/components/select/select.component';
 import { NotificationService } from '../../shared/services/notification.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
+import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
 
 @Component({
   selector: 'app-notifications',
@@ -22,6 +23,7 @@ import { TabListDirective, TabDirective } from '../../shared/directives/tab-list
   imports: [
     TabListDirective,
     TabDirective,
+    ScrollCueDirective,
     ReactiveFormsModule,
     PageHeaderComponent,
     DataTableComponent,
@@ -75,13 +77,13 @@ export class NotificationsComponent {
   readonly notificationColumns: ColumnDef[] = [
     { field: 'title', header: this.translate.instant('common.title'), sortable: true },
     { field: 'message', header: this.translate.instant('notifications.message'), sortable: true },
-    { field: 'severity', header: this.translate.instant('notifications.severity'), sortable: true, filterable: true, type: 'enum',
+    { field: 'severity', phoneHidden: true, header: this.translate.instant('notifications.severity'), sortable: true, filterable: true, type: 'enum',
       filterOptions: [
         { value: 'info', label: this.translate.instant('notifications.severityInfo') },
         { value: 'warning', label: this.translate.instant('notifications.severityWarning') },
         { value: 'critical', label: this.translate.instant('notifications.severityCritical') },
       ] },
-    { field: 'source', header: this.translate.instant('notifications.source'), sortable: true, type: 'enum' },
+    { field: 'source', phoneHidden: true, header: this.translate.instant('notifications.source'), sortable: true, type: 'enum' },
     { field: 'createdAt', header: this.translate.instant('common.date'), sortable: true, type: 'date', width: '150px' },
   ];
 

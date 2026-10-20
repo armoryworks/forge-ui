@@ -32,6 +32,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
 import { toIsoDate } from '../../../shared/utils/date.utils';
 import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
 import { TabListDirective, TabDirective } from '../../../shared/directives/tab-list.directive';
+import { ScrollCueDirective } from '../../../shared/directives/scroll-cue.directive';
 
 type LedgerTab = 'upcoming' | 'recurring';
 
@@ -41,6 +42,7 @@ type LedgerTab = 'upcoming' | 'recurring';
   imports: [
     TabListDirective,
     TabDirective,
+    ScrollCueDirective,
     DateOnlyPipe, ReactiveFormsModule, CurrencyPipe, DatePipe, TranslatePipe,
     PageHeaderComponent, DialogComponent,
     InputComponent, CurrencyInputComponent, SelectComponent, DatepickerComponent, ToggleComponent,

@@ -41,6 +41,7 @@ import {
 import { CostingTab } from './models/costing-tab.model';
 import { EnumLabelPipe } from '../../shared/pipes/enum-label.pipe';
 import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
+import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
 
 @Component({
   selector: 'app-costing',
@@ -49,6 +50,7 @@ import { TabListDirective, TabDirective } from '../../shared/directives/tab-list
     EnumLabelPipe,
     TabListDirective,
     TabDirective,
+    ScrollCueDirective,
     ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent, DatepickerComponent,
     ToggleComponent, PageLayoutComponent, DataTableComponent, ColumnCellDirective, DatePipe,
     ViewModeToggleComponent, CostingRatesVisualComponent, SpacerDirective,
@@ -123,9 +125,9 @@ export class CostingComponent {
 
   protected readonly periodColumns: ColumnDef[] = [
     { field: 'startDate', header: 'Start', sortable: true, type: 'date', width: '120px' },
-    { field: 'endDate', header: 'End', sortable: true, type: 'date', width: '120px' },
+    { field: 'endDate', phoneHidden: true, header: 'End', sortable: true, type: 'date', width: '120px' },
     { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum' },
-    { field: 'frozenAt', header: 'Frozen', sortable: true, type: 'date', width: '120px' },
+    { field: 'frozenAt', phoneHidden: true, header: 'Frozen', sortable: true, type: 'date', width: '120px' },
     { field: 'actions', header: '', align: 'right' },
   ];
   protected readonly rateColumns: ColumnDef[] = [

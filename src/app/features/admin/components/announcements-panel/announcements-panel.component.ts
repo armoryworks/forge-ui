@@ -23,6 +23,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/co
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TabListDirective, TabDirective } from '../../../../shared/directives/tab-list.directive';
+import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
 
 @Component({
   selector: 'app-announcements-panel',
@@ -30,6 +31,7 @@ import { TabListDirective, TabDirective } from '../../../../shared/directives/ta
   imports: [
     TabListDirective,
     TabDirective,
+    ScrollCueDirective,
     DatePipe,
     ReactiveFormsModule,
     DataTableComponent,

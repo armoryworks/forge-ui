@@ -63,6 +63,7 @@ import {
 import { GenerateForecastRequest } from './models/mrp.model';
 import { MRP_TABS, MrpTab } from './models/mrp-tab.model';
 import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
+import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
 
 @Component({
   selector: 'app-mrp',
@@ -70,6 +71,7 @@ import { TabListDirective, TabDirective } from '../../shared/directives/tab-list
   imports: [
     TabListDirective,
     TabDirective,
+    ScrollCueDirective,
     ReactiveFormsModule,
     TranslatePipe,
     PageHeaderComponent,

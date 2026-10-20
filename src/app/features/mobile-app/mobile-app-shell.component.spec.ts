@@ -26,6 +26,9 @@ interface ShellInternals {
   stopTimer(): Promise<void>;
   operationElapsed(running: RunningTimer): string;
   stopOperation(running: RunningTimer): Promise<void>;
+  timerCount: Signal<number>;
+  visibleOperationTimers: Signal<RunningTimer[]>;
+  toggleTimers(): void;
 }
 
 const deburr: RunningTimer = {
@@ -282,5 +285,23 @@ describe('MobileAppShellComponent timer strip', () => {
 
     enabled = () => false;
     expect(create().tabs()).toEqual([]);
+  });
+
+  it('folds several running timers into one strip that unfolds on demand', () => {
+    const tapping = { ...deburr, id: 32, operationStepNumber: 30, operationTitle: 'Tap' };
+    active.set({ timeEntryId: 3, jobId: 42, jobNumber: 'JOB-42', operationId: null, timerStart: new Date() });
+    operationTimers.set([deburr, tapping]);
+    const shell = create();
+
+    expect(shell.timerCount()).toBe(3);
+    expect(shell.visibleOperationTimers()).toEqual([]);
+
+    shell.toggleTimers();
+    expect(shell.visibleOperationTimers()).toEqual([deburr, tapping]);
+
+    shell.toggleTimers();
+    active.set(null);
+    expect(shell.timerCount()).toBe(2);
+    expect(shell.visibleOperationTimers()).toEqual([deburr]);
   });
 });

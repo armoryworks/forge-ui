@@ -1,6 +1,6 @@
 <header class="app-header">
   @if (layout.isMobile()) {
-    <button class="icon-btn hamburger-btn" [matTooltip]="'header.menu' | translate" matTooltipPosition="above" [attr.aria-label]="'header.toggleNav' | translate" (click)="layout.toggleSidebar()">
+    <button class="icon-btn hamburger-btn" [attr.aria-label]="'header.toggleNav' | translate" (click)="layout.toggleSidebar()">
       <span class="material-icons-outlined">{{ layout.mobileMenuOpen() ? 'close' : 'menu' }}</span>
     </button>
   }
@@ -165,7 +165,7 @@
     <div class="app-header__user">
       <button class="user-trigger" (click)="toggleUserMenu()" [attr.aria-label]="'header.userMenu' | translate">
         <span class="user-trigger__name hide-tablet">{{ userFullName() }}</span>
-        <span class="material-icons-outlined user-trigger__icon">{{ userMenuOpen() ? 'close' : 'menu' }}</span>
+        <span class="material-icons-outlined user-trigger__icon">{{ userMenuOpen() ? 'close' : 'account_circle' }}</span>
       </button>
 
       @if (userMenuOpen()) {

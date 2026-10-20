@@ -37,7 +37,7 @@
 
 <div class="inventory-content">
   <!-- Tabs -->
-  <div class="tab-bar" appTabList>
+  <div class="tab-bar" appTabList appScrollCue>
     <button class="tab" [appTab]="activeTab() === 'stock'" (click)="switchTab('stock')">
       <span class="material-icons-outlined">inventory</span>
       {{ 'inventory.tabs.stockLevels' | translate }}

@@ -29,6 +29,7 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { TabListDirective, TabDirective } from '../../../../shared/directives/tab-list.directive';
+import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
 
 @Component({
   selector: 'app-edi-panel',
@@ -36,6 +37,7 @@ import { TabListDirective, TabDirective } from '../../../../shared/directives/ta
   imports: [
     TabListDirective,
     TabDirective,
+    ScrollCueDirective,
     EdiPartNumberMapDialogComponent,
     MatTooltipModule,
     DatePipe, ReactiveFormsModule, TranslatePipe,

@@ -32,6 +32,7 @@ import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
 import { PURCHASE_ORDERS_TAB_ROLES } from './models/purchase-orders-tab-roles.model';
 import { PURCHASE_ORDERS_TABS, PurchaseOrdersTab } from './models/purchase-orders-tab.model';
 import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
+import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
 
 @Component({
   selector: 'app-purchase-orders',
@@ -39,6 +40,7 @@ import { TabListDirective, TabDirective } from '../../shared/directives/tab-list
   imports: [
     TabListDirective,
     TabDirective,
+    ScrollCueDirective,
     ReactiveFormsModule, DatePipe, DateOnlyPipe, TranslatePipe, MatTooltipModule,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective,
@@ -120,13 +122,13 @@ export class PurchaseOrdersComponent implements OnInit {
   protected readonly poColumns: ColumnDef[] = [
     { field: 'poNumber', header: this.translate.instant('purchaseOrders.poNumber'), sortable: true, width: '120px' },
     { field: 'vendorName', header: this.translate.instant('purchaseOrders.vendor'), sortable: true },
-    { field: 'jobNumber', header: this.translate.instant('purchaseOrders.job'), sortable: true, width: '100px' },
+    { field: 'jobNumber', phoneHidden: true, header: this.translate.instant('purchaseOrders.job'), sortable: true, width: '100px' },
     { field: 'status', header: this.translate.instant('common.status'), sortable: true, filterable: true, type: 'enum', width: '140px', filterOptions: this.statusOptions.slice(1) },
-    { field: 'originSource', header: this.translate.instant('purchaseOrders.origin'), sortable: true, filterable: true, type: 'enum', width: '130px', filterOptions: this.originFilterOptions },
-    { field: 'lineCount', header: this.translate.instant('purchaseOrders.lines'), sortable: true, width: '70px', align: 'center' },
-    { field: 'linesFullyReceived', header: this.translate.instant('purchaseOrders.linesReceived'), width: '110px', align: 'center' },
-    { field: 'expectedDeliveryDate', header: this.translate.instant('purchaseOrders.expected'), sortable: true, type: 'date', width: '110px' },
-    { field: 'createdAt', header: this.translate.instant('common.created'), sortable: true, type: 'date', width: '110px' },
+    { field: 'originSource', phoneHidden: true, header: this.translate.instant('purchaseOrders.origin'), sortable: true, filterable: true, type: 'enum', width: '130px', filterOptions: this.originFilterOptions },
+    { field: 'lineCount', phoneHidden: true, header: this.translate.instant('purchaseOrders.lines'), sortable: true, width: '70px', align: 'center' },
+    { field: 'linesFullyReceived', phoneHidden: true, header: this.translate.instant('purchaseOrders.linesReceived'), width: '110px', align: 'center' },
+    { field: 'expectedDeliveryDate', phoneHidden: true, header: this.translate.instant('purchaseOrders.expected'), sortable: true, type: 'date', width: '110px' },
+    { field: 'createdAt', phoneHidden: true, header: this.translate.instant('common.created'), sortable: true, type: 'date', width: '110px' },
   ];
 
   constructor() {

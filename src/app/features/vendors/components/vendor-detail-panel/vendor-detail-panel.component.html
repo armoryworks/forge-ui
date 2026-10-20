@@ -25,7 +25,7 @@
     </div>
 
     <!-- Tabs -->
-    <div class="tab-bar" appTabList [attr.aria-label]="'vendors.detail.tabsLabel' | translate">
+    <div class="tab-bar" appTabList appScrollCue [attr.aria-label]="'vendors.detail.tabsLabel' | translate">
       <button class="tab" [appTab]="activeTab() === 'info'" id="vendor-tab-info" aria-controls="vendor-detail-tabpanel" (click)="activeTab.set('info')">{{ 'vendors.info' | translate }}</button>
       <button class="tab" [appTab]="activeTab() === 'contacts'" id="vendor-tab-contacts" aria-controls="vendor-detail-tabpanel" data-testid="vendor-tab-contacts" (click)="activeTab.set('contacts')">
         {{ 'vendorContacts.contactsTab' | translate }}

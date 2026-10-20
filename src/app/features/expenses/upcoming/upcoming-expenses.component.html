@@ -5,7 +5,7 @@
 </app-page-header>
 
 <!-- Tabs -->
-<div class="tab-bar" appTabList>
+<div class="tab-bar" appTabList appScrollCue>
   <button class="tab" [appTab]="activeTab() === 'upcoming'" (click)="switchTab('upcoming')">
     <span class="material-icons-outlined tab__icon">calendar_month</span>
     {{ 'expenses.upcomingTab' | translate }}

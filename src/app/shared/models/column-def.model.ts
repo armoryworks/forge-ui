@@ -31,4 +31,6 @@ export interface ColumnDef {
   exportValue?: (row: unknown) => unknown;
   /** Set to `false` to leave the column out of CSV/Excel exports. */
   exportable?: boolean;
+  /** Hide this column by default at phone width; a visibility the user saved in the column manager still wins. */
+  phoneHidden?: boolean;
 }
