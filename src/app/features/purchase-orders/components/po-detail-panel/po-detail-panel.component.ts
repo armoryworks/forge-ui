@@ -137,6 +137,8 @@ export class PoDetailPanelComponent implements OnInit {
     return INCOTERM_OPTIONS.find(o => o.value === incoterm)?.label ?? incoterm;
   });
 
+  protected readonly amountCurrency = computed(() => this.po()?.quoteCurrency ?? null);
+
   protected readonly showFxRate = computed(() => {
     const po = this.po();
     return !!po && po.fxRate !== null && po.quoteCurrency !== this.currencyService.baseCurrency();
