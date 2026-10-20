@@ -4204,6 +4204,10 @@
     "cancel": "Cancelar",
     "bypassFailed": "No se pudo omitir la documentación: {{reason}}"
   },
+  "mfaGraceBanner": {
+    "message": "Configure la autenticación de dos factores antes del {{date}}",
+    "setUp": "Configurar ahora"
+  },
   "account": {
     "title": "Cuenta",
     "myAccount": "Mi Cuenta",
@@ -9087,7 +9091,7 @@
     },
     "mfa": {
       "title": "Política MFA",
-      "description": "Requerir autenticación de dos factores para usuarios con roles específicos. Los usuarios obligados deben configurar MFA en su próximo inicio de sesión.",
+      "description": "Requerir autenticación de dos factores para usuarios con roles específicos. Los usuarios obligados pueden seguir trabajando durante el período de gracia y luego deben configurar MFA para continuar.",
       "requireMfa": "Requerir MFA para roles",
       "placeholder": "Seleccionar roles a aplicar...",
       "savePolicy": "Guardar Política",
@@ -9111,7 +9115,9 @@
       },
       "requiredForRoles": "Required for Roles",
       "save": "Save",
-      "selectRoles": "Select roles"
+      "selectRoles": "Select roles",
+      "graceDays": "Período de gracia (días)",
+      "graceDaysHint": "Días que un usuario con estos roles puede seguir trabajando tras su primer inicio de sesión antes de que Forge le exija configurar MFA. 0 lo exige de inmediato."
     },
     "timeCorrections": {
       "employee": "Empleado",

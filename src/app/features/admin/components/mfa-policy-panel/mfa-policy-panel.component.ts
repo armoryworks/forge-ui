@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
-import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { ReactiveFormsModule, FormControl, Validators } from '@angular/forms';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
@@ -13,10 +14,13 @@ import { ReferenceDataService } from '../../../../shared/services/reference-data
 import { MfaService } from '../../../account/services/mfa.service';
 import { MfaComplianceUser } from '../../../account/models/mfa.model';
 
+const DEFAULT_GRACE_DAYS = 7;
+const MAX_GRACE_DAYS = 90;
+
 @Component({
   selector: 'app-mfa-policy-panel',
   standalone: true,
-  imports: [ReactiveFormsModule, DataTableComponent, ColumnCellDirective, SelectComponent, LoadingBlockDirective, TranslatePipe],
+  imports: [ReactiveFormsModule, DataTableComponent, ColumnCellDirective, SelectComponent, InputComponent, LoadingBlockDirective, TranslatePipe],
   templateUrl: './mfa-policy-panel.component.html',
   styleUrl: './mfa-policy-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,7 +36,13 @@ export class MfaPolicyPanelComponent implements OnInit {
   protected readonly users = signal<MfaComplianceUser[]>([]);
   protected readonly roles = signal<SelectOption[]>([]);
 
+  protected readonly maxGraceDays = MAX_GRACE_DAYS;
+
   protected readonly enforcedRolesControl = new FormControl<string[]>([], { nonNullable: true });
+  protected readonly graceDaysControl = new FormControl<number>(DEFAULT_GRACE_DAYS, {
+    nonNullable: true,
+    validators: [Validators.required, Validators.min(0), Validators.max(MAX_GRACE_DAYS)],
+  });
 
   protected readonly columns: ColumnDef[] = [
     { field: 'fullName', header: 'Name', sortable: true },
@@ -55,7 +65,10 @@ export class MfaPolicyPanelComponent implements OnInit {
     });
 
     this.mfaService.getPolicy().subscribe({
-      next: (policy) => this.enforcedRolesControl.setValue([...policy.requiredRoles], { emitEvent: false }),
+      next: (policy) => {
+        this.enforcedRolesControl.setValue([...policy.requiredRoles], { emitEvent: false });
+        this.graceDaysControl.setValue(policy.enrollmentGraceDays, { emitEvent: false });
+      },
     });
 
     this.mfaService.getCompliance().subscribe({
@@ -70,9 +83,13 @@ export class MfaPolicyPanelComponent implements OnInit {
   }
 
   protected savePolicy(): void {
+    if (this.graceDaysControl.invalid) {
+      this.graceDaysControl.markAsTouched();
+      return;
+    }
     this.saving.set(true);
 
-    this.mfaService.setPolicy(this.enforcedRolesControl.value).subscribe({
+    this.mfaService.setPolicy(this.enforcedRolesControl.value, Number(this.graceDaysControl.value)).subscribe({
       next: () => {
         this.saving.set(false);
         this.snackbar.success(this.translate.instant('adminPanels.mfa.snackbar.policySaved'));

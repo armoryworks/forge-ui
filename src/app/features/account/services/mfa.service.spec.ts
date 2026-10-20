@@ -138,22 +138,22 @@ describe('MfaService', () => {
   });
 
   describe('getPolicy', () => {
-    it('should GET /admin/mfa/policy and return the stored roles', () => {
+    it('should GET /admin/mfa/policy and return the stored roles and grace days', () => {
       service.getPolicy().subscribe(res => {
-        expect(res).toEqual({ requiredRoles: ['Controller'] });
+        expect(res).toEqual({ requiredRoles: ['Controller'], enrollmentGraceDays: 7 });
       });
       const req = httpMock.expectOne(`${base}/admin/mfa/policy`);
       expect(req.request.method).toBe('GET');
-      req.flush({ requiredRoles: ['Controller'] });
+      req.flush({ requiredRoles: ['Controller'], enrollmentGraceDays: 7 });
     });
   });
 
   describe('setPolicy', () => {
-    it('should PUT /admin/mfa/policy with requiredRoles', () => {
-      service.setPolicy(['Admin', 'Manager']).subscribe();
+    it('should PUT /admin/mfa/policy with requiredRoles and the grace days', () => {
+      service.setPolicy(['Admin', 'Manager'], 14).subscribe();
       const req = httpMock.expectOne(`${base}/admin/mfa/policy`);
       expect(req.request.method).toBe('PUT');
-      expect(req.request.body).toEqual({ requiredRoles: ['Admin', 'Manager'] });
+      expect(req.request.body).toEqual({ requiredRoles: ['Admin', 'Manager'], enrollmentGraceDays: 14 });
       req.flush(null);
     });
   });

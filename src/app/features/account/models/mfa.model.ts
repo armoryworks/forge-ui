@@ -60,4 +60,5 @@ export interface MfaComplianceUser {
 
 export interface MfaPolicy {
   requiredRoles: string[];
+  enrollmentGraceDays: number;
 }

@@ -11,6 +11,7 @@ import { ToastContainerComponent } from './shared/components/toast/toast.compone
 import { ConnectionBannerComponent } from './shared/components/connection-banner/connection-banner.component';
 import { AnnouncementOverlayComponent } from './shared/components/announcement-overlay/announcement-overlay.component';
 import { OnboardingBannerComponent } from './shared/components/onboarding-banner/onboarding-banner.component';
+import { MfaGraceBannerComponent } from './shared/components/mfa-grace-banner/mfa-grace-banner.component';
 import { ChatPreviewPopupComponent } from './shared/components/chat-preview-popup/chat-preview-popup.component';
 import { OfflineBannerComponent } from './shared/components/offline-banner/offline-banner.component';
 import { LoadingOverlayComponent } from './shared/components/loading-overlay/loading-overlay.component';
@@ -68,7 +69,7 @@ import { PLANNING_TOUR } from './shared/tours/planning-tour';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, TranslatePipe, AppHeaderComponent, SidebarComponent, ToastContainerComponent, ConnectionBannerComponent, AnnouncementOverlayComponent, OnboardingBannerComponent, OfflineBannerComponent, LoadingOverlayComponent, KeyboardShortcutsHelpComponent, ChatPreviewPopupComponent, DemoMarkerComponent, DemoModuleSwitcherComponent, UpgradeLockComponent],
+  imports: [RouterOutlet, TranslatePipe, AppHeaderComponent, SidebarComponent, ToastContainerComponent, ConnectionBannerComponent, AnnouncementOverlayComponent, OnboardingBannerComponent, MfaGraceBannerComponent, OfflineBannerComponent, LoadingOverlayComponent, KeyboardShortcutsHelpComponent, ChatPreviewPopupComponent, DemoMarkerComponent, DemoModuleSwitcherComponent, UpgradeLockComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

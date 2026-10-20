@@ -1,0 +1,21 @@
+@if (visible()) {
+  <div class="mfa-grace-banner" role="status" aria-live="polite" data-testid="mfa-grace-banner">
+    <span class="material-icons-outlined mfa-grace-banner__icon">shield</span>
+    <span class="mfa-grace-banner__text">
+      {{ 'mfaGraceBanner.message' | translate: { date: deadlineLabel() } }}
+    </span>
+    <button class="action-btn action-btn--sm action-btn--primary"
+            data-testid="mfa-grace-setup-btn"
+            (click)="setUp()">
+      {{ 'mfaGraceBanner.setUp' | translate }}
+    </button>
+    <button class="icon-btn mfa-grace-banner__dismiss"
+            data-testid="mfa-grace-dismiss-btn"
+            (click)="dismiss()"
+            [attr.aria-label]="'common.close' | translate"
+            [matTooltip]="'common.close' | translate"
+            matTooltipPosition="above">
+      <span class="material-icons-outlined">close</span>
+    </button>
+  </div>
+}
