@@ -8134,7 +8134,8 @@
       "orders": "Orders",
       "quotes": "Quotes",
       "invoices": "Invoices",
-      "shipments": "Shipments"
+      "shipments": "Shipments",
+      "label": "Portal sections"
     },
     "login": {
       "title": "Sign in to your portal",
@@ -8145,7 +8146,11 @@
       "sentTitle": "Check your inbox",
       "sentBody": "If we have your email on file, a sign-in link is on its way. The link expires in 15 minutes — feel free to close this tab.",
       "devLink": "Dev mode — SMTP isn't configured. Use the link directly:",
-      "openLink": "Open sign-in link"
+      "openLink": "Open sign-in link",
+      "sessionExpired": "Your session has ended. Please sign in again.",
+      "sendAgain": "Send again",
+      "sendAgainIn": "Send again in {{seconds}}s",
+      "useDifferentEmail": "Use a different email"
     },
     "callback": {
       "signingIn": "Signing you in",
@@ -8186,19 +8191,30 @@
       "colExpires": "Expires",
       "colStatus": "Status",
       "colTotal": "Total",
-      "colActions": "Actions"
+      "colActions": "Actions",
+      "typeEstimate": "Estimate",
+      "typeQuote": "Quote",
+      "statusConvertedToQuote": "Converted to Quote",
+      "acceptTitle": "Accept this quote?",
+      "acceptMessage": "Accept quote {{number}}? Your supplier will be told you accepted it.",
+      "declineTitle": "Decline this quote?",
+      "declineMessage": "Decline quote {{number}}? You can't undo this from the portal.",
+      "respondFailed": "We couldn't record your response to quote {{number}}. Please try again.",
+      "acceptLabel": "Accept quote {{number}}",
+      "declineLabel": "Decline quote {{number}}"
     },
     "invoices": {
       "title": "Your Invoices",
       "subtitle": "Open and recent invoices. If your supplier uses an external accounting provider, see their portal for the most current data.",
-      "empty": "No invoices to show. Your supplier may handle billing through an external accounting provider.",
+      "empty": "No invoices to show.",
       "colNumber": "Invoice #",
       "colDate": "Invoice Date",
       "colDueDate": "Due Date",
       "colStatus": "Status",
       "colTotal": "Total",
       "colPaid": "Paid",
-      "colBalance": "Balance"
+      "colBalance": "Balance",
+      "externalAccounting": "Your supplier handles invoices through an external accounting provider. See their billing portal for your invoices and balances."
     },
     "shipments": {
       "title": "Your Shipments",
@@ -8210,6 +8226,11 @@
       "colDelivered": "Delivered",
       "colCarrier": "Carrier",
       "colTracking": "Tracking #"
+    },
+    "list": {
+      "loadError": "We couldn't load this list. Check your connection and try again.",
+      "retry": "Retry",
+      "truncated": "Showing the latest {{ shown }} of {{ total }}. Contact us for older records."
     }
   },
   "scheduling": {

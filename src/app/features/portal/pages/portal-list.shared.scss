@@ -60,8 +60,30 @@
     }
   }
 
-  &__num {
+  &__table &__num {
     text-align: right;
     font-variant-numeric: tabular-nums;
+  }
+
+  &__error {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $sp-sm $sp-md;
+    padding: $sp-md;
+    background: color-mix(in srgb, var(--error) 8%, transparent);
+    border-left: $border-width-accent solid var(--error);
+    color: var(--error);
+    font-size: $font-size-sm;
+  }
+
+  &__error-text {
+    flex: 1 1 auto;
+  }
+
+  &__notice {
+    margin: $sp-sm 0 0;
+    color: var(--text-muted);
+    font-size: $font-size-sm;
   }
 }

@@ -8,6 +8,9 @@ export const portalAuthGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   if (portal.isAuthenticated()) return true;
-  router.navigate(['/portal/login']);
-  return false;
+  if (portal.hasLapsedSession()) {
+    portal.logout();
+    return router.createUrlTree(['/portal/login'], { queryParams: { reason: 'session_expired' } });
+  }
+  return router.createUrlTree(['/portal/login']);
 };

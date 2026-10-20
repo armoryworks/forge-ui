@@ -3,6 +3,12 @@
     <h1 class="portal-login__title">{{ 'portal.login.title' | translate }}</h1>
     <p class="portal-login__hint">{{ 'portal.login.hint' | translate }}</p>
 
+    @if (sessionExpired() && !submitted()) {
+      <p class="portal-login__notice" role="status" data-testid="portal-login-session-expired">
+        {{ 'portal.login.sessionExpired' | translate }}
+      </p>
+    }
+
     @if (!submitted()) {
       <form (submit)="$event.preventDefault(); submit()">
         <app-input
@@ -14,7 +20,7 @@
           data-testid="portal-login-email" />
 
         @if (errorMessage(); as msg) {
-          <p class="portal-login__error">{{ msg }}</p>
+          <p class="portal-login__error" role="alert">{{ msg }}</p>
         }
 
         <button class="action-btn action-btn--primary portal-login__submit"
@@ -22,24 +28,49 @@
           type="submit"
           [disabled]="emailControl.invalid || submitting()">
           @if (submitting()) {
-            <span class="material-icons-outlined">sync</span>
+            <span class="material-icons-outlined spin" aria-hidden="true">sync</span>
           } @else {
-            <span class="material-icons-outlined">send</span>
+            <span class="material-icons-outlined" aria-hidden="true">send</span>
           }
           {{ 'portal.login.send' | translate }}
         </button>
       </form>
     } @else {
-      <div class="portal-login__success">
-        <span class="material-icons-outlined portal-login__success-icon">mark_email_read</span>
+      <div class="portal-login__success" role="status">
+        <span class="material-icons-outlined portal-login__success-icon" aria-hidden="true">mark_email_read</span>
         <h2>{{ 'portal.login.sentTitle' | translate }}</h2>
         <p>{{ 'portal.login.sentBody' | translate }}</p>
+
+        <div class="portal-login__again">
+          <button class="action-btn" type="button"
+            data-testid="portal-login-send-again"
+            [disabled]="resendIn() > 0 || submitting()"
+            (click)="submit()">
+            @if (submitting()) {
+              <span class="material-icons-outlined spin" aria-hidden="true">sync</span>
+            } @else {
+              <span class="material-icons-outlined" aria-hidden="true">refresh</span>
+            }
+            @if (resendIn() > 0) {
+              {{ 'portal.login.sendAgainIn' | translate: { seconds: resendIn() } }}
+            } @else {
+              {{ 'portal.login.sendAgain' | translate }}
+            }
+          </button>
+          <button class="action-btn" type="button"
+            data-testid="portal-login-different-email"
+            [disabled]="submitting()"
+            (click)="useDifferentEmail()">
+            <span class="material-icons-outlined" aria-hidden="true">alternate_email</span>
+            {{ 'portal.login.useDifferentEmail' | translate }}
+          </button>
+        </div>
 
         @if (devLink(); as link) {
           <div class="portal-login__dev">
             <p class="portal-login__dev-label">{{ 'portal.login.devLink' | translate }}</p>
             <button class="action-btn action-btn--primary" type="button" (click)="followDevLink()">
-              <span class="material-icons-outlined">vpn_key</span>
+              <span class="material-icons-outlined" aria-hidden="true">vpn_key</span>
               {{ 'portal.login.openLink' | translate }}
             </button>
             <code class="portal-login__dev-link">{{ link }}</code>

@@ -1,11 +1,14 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { HttpClient, HttpContext, HttpResponse } from '@angular/common/http';
+import { Injectable, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { Observable, map, tap } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
+import { SILENT_HTTP_ERRORS } from '../../../shared/interceptors/silent-http-errors.token';
 import {
   PortalIdentity,
   PortalInvoice,
+  PortalList,
   PortalQuote,
   PortalSalesOrder,
   PortalSession,
@@ -17,6 +20,8 @@ import {
 const TOKEN_KEY = 'portal-token';
 const EXPIRES_KEY = 'portal-token-expires';
 const IDENTITY_KEY = 'portal-identity';
+const TOTAL_COUNT_HEADER = 'X-Total-Count';
+const EXTERNAL_ACCOUNTING_HEADER = 'X-External-Accounting';
 
 /**
  * Portal-side auth + data service. Token storage is keyed off `portal-*`
@@ -27,25 +32,39 @@ const IDENTITY_KEY = 'portal-identity';
 @Injectable({ providedIn: 'root' })
 export class PortalService {
   private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
   private readonly base = `${environment.apiUrl}/portal`;
 
   private readonly _identity = signal<PortalIdentity | null>(this.loadStoredIdentity());
   readonly identity = this._identity.asReadonly();
-  readonly isAuthenticated = computed(() => this._identity() !== null && this.getToken() !== null);
+  isAuthenticated(): boolean {
+    return this._identity() !== null && this.getToken() !== null;
+  }
 
   getToken(): string | null {
     const token = localStorage.getItem(TOKEN_KEY);
     if (!token) return null;
     const expiresRaw = localStorage.getItem(EXPIRES_KEY);
     if (expiresRaw && new Date(expiresRaw).getTime() < Date.now()) {
-      this.clearSession();
       return null;
     }
     return token;
   }
 
+  hasLapsedSession(): boolean {
+    const stored = this._identity() !== null || localStorage.getItem(TOKEN_KEY) !== null;
+    return stored && this.getToken() === null;
+  }
+
+  endSession(): void {
+    this.clearSession();
+    this.router.navigate(['/portal/login'], { queryParams: { reason: 'session_expired' } });
+  }
+
   requestMagicLink(email: string): Observable<RequestMagicLinkResult> {
-    return this.http.post<RequestMagicLinkResult>(`${this.base}/auth/request-link`, { email });
+    return this.http.post<RequestMagicLinkResult>(`${this.base}/auth/request-link`, { email }, {
+      context: new HttpContext().set(SILENT_HTTP_ERRORS, true),
+    });
   }
 
   exchangeMagicLink(token: string): Observable<PortalSession> {
@@ -58,24 +77,38 @@ export class PortalService {
     return this.http.get<PortalSummary>(`${this.base}/me/dashboard`);
   }
 
-  getSalesOrders(): Observable<PortalSalesOrder[]> {
-    return this.http.get<PortalSalesOrder[]>(`${this.base}/me/sales-orders`);
+  getSalesOrders(): Observable<PortalList<PortalSalesOrder>> {
+    return this.getList<PortalSalesOrder>('sales-orders');
   }
 
-  getQuotes(): Observable<PortalQuote[]> {
-    return this.http.get<PortalQuote[]>(`${this.base}/me/quotes`);
+  getQuotes(): Observable<PortalList<PortalQuote>> {
+    return this.getList<PortalQuote>('quotes');
   }
 
-  getInvoices(): Observable<PortalInvoice[]> {
-    return this.http.get<PortalInvoice[]>(`${this.base}/me/invoices`);
+  getInvoices(): Observable<PortalList<PortalInvoice>> {
+    return this.getList<PortalInvoice>('invoices');
   }
 
-  getShipments(): Observable<PortalShipment[]> {
-    return this.http.get<PortalShipment[]>(`${this.base}/me/shipments`);
+  getShipments(): Observable<PortalList<PortalShipment>> {
+    return this.getList<PortalShipment>('shipments');
   }
 
   respondToQuote(quoteId: number, accepted: boolean): Observable<void> {
     return this.http.post<void>(`${this.base}/me/quotes/${quoteId}/respond`, { accepted });
+  }
+
+  private getList<T>(path: string): Observable<PortalList<T>> {
+    return this.http.get<T[]>(`${this.base}/me/${path}`, { observe: 'response' }).pipe(
+      map((response: HttpResponse<T[]>) => {
+        const items = response.body ?? [];
+        const total = Number(response.headers.get(TOTAL_COUNT_HEADER));
+        return {
+          items,
+          totalCount: Number.isFinite(total) && total > items.length ? total : items.length,
+          externalAccounting: response.headers.get(EXTERNAL_ACCOUNTING_HEADER) === 'true',
+        };
+      }),
+    );
   }
 
   logout(): void {

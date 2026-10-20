@@ -4,20 +4,31 @@
     <p class="portal-list__subtitle">{{ 'portal.invoices.subtitle' | translate }}</p>
   </header>
 
-  @if (!loading() && invoices().length === 0) {
+  @if (loadError()) {
+    <div class="portal-list__error" role="alert">
+      <span class="material-icons-outlined" aria-hidden="true">error_outline</span>
+      <span class="portal-list__error-text">{{ 'portal.list.loadError' | translate }}</span>
+      <button type="button" class="action-btn action-btn--sm" (click)="load()" data-testid="portal-invoices-retry">
+        <span class="material-icons-outlined" aria-hidden="true">refresh</span>
+        {{ 'portal.list.retry' | translate }}
+      </button>
+    </div>
+  } @else if (!loading() && externalAccounting()) {
+    <app-empty-state icon="account_balance" [message]="'portal.invoices.externalAccounting' | translate" data-testid="portal-invoices-external" />
+  } @else if (!loading() && invoices().length === 0) {
     <app-empty-state icon="payments" [message]="'portal.invoices.empty' | translate" />
   } @else {
     <div class="portal-list__table-wrap">
       <table class="portal-list__table" [attr.aria-label]="'portal.invoices.title' | translate">
         <thead>
           <tr>
-            <th>{{ 'portal.invoices.colNumber' | translate }}</th>
-            <th>{{ 'portal.invoices.colDate' | translate }}</th>
-            <th>{{ 'portal.invoices.colDueDate' | translate }}</th>
-            <th>{{ 'portal.invoices.colStatus' | translate }}</th>
-            <th class="portal-list__num">{{ 'portal.invoices.colTotal' | translate }}</th>
-            <th class="portal-list__num">{{ 'portal.invoices.colPaid' | translate }}</th>
-            <th class="portal-list__num">{{ 'portal.invoices.colBalance' | translate }}</th>
+            <th scope="col">{{ 'portal.invoices.colNumber' | translate }}</th>
+            <th scope="col">{{ 'portal.invoices.colDate' | translate }}</th>
+            <th scope="col">{{ 'portal.invoices.colDueDate' | translate }}</th>
+            <th scope="col">{{ 'portal.invoices.colStatus' | translate }}</th>
+            <th scope="col" class="portal-list__num">{{ 'portal.invoices.colTotal' | translate }}</th>
+            <th scope="col" class="portal-list__num">{{ 'portal.invoices.colPaid' | translate }}</th>
+            <th scope="col" class="portal-list__num">{{ 'portal.invoices.colBalance' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -26,14 +37,19 @@
               <td>{{ i.invoiceNumber }}</td>
               <td>{{ i.invoiceDate | dateOnly }}</td>
               <td>{{ i.dueDate ? (i.dueDate | dateOnly) : '—' }}</td>
-              <td><span [class]="statusClass(i.status)">{{ i.status }}</span></td>
-              <td class="portal-list__num">{{ i.total | number:'1.2-2' }}</td>
-              <td class="portal-list__num">{{ i.amountPaid | number:'1.2-2' }}</td>
-              <td class="portal-list__num">{{ i.balance | number:'1.2-2' }}</td>
+              <td><span [class]="statusChip(i.status)">{{ statusLabelKey(i.status) | translate }}</span></td>
+              <td class="portal-list__num"><app-currency-display [value]="i.total" [currency]="i.currencyCode" /></td>
+              <td class="portal-list__num"><app-currency-display [value]="i.amountPaid" [currency]="i.currencyCode" /></td>
+              <td class="portal-list__num"><app-currency-display [value]="i.balance" [currency]="i.currencyCode" /></td>
             </tr>
           }
         </tbody>
       </table>
     </div>
+    @if (totalCount() > invoices().length) {
+      <p class="portal-list__notice" data-testid="portal-invoices-truncated">
+        {{ 'portal.list.truncated' | translate: { shown: invoices().length, total: totalCount() } }}
+      </p>
+    }
   }
 </div>

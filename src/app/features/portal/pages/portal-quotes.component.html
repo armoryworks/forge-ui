@@ -4,45 +4,58 @@
     <p class="portal-list__subtitle">{{ 'portal.quotes.subtitle' | translate }}</p>
   </header>
 
-  @if (!loading() && quotes().length === 0) {
+  @if (loadError()) {
+    <div class="portal-list__error" role="alert">
+      <span class="material-icons-outlined" aria-hidden="true">error_outline</span>
+      <span class="portal-list__error-text">{{ 'portal.list.loadError' | translate }}</span>
+      <button type="button" class="action-btn action-btn--sm" (click)="load()" data-testid="portal-quotes-retry">
+        <span class="material-icons-outlined" aria-hidden="true">refresh</span>
+        {{ 'portal.list.retry' | translate }}
+      </button>
+    </div>
+  } @else if (!loading() && quotes().length === 0) {
     <app-empty-state icon="request_quote" [message]="'portal.quotes.empty' | translate" />
   } @else {
     <div class="portal-list__table-wrap">
       <table class="portal-list__table" [attr.aria-label]="'portal.quotes.title' | translate">
         <thead>
           <tr>
-            <th>{{ 'portal.quotes.colNumber' | translate }}</th>
-            <th>{{ 'portal.quotes.colType' | translate }}</th>
-            <th>{{ 'portal.quotes.colDate' | translate }}</th>
-            <th>{{ 'portal.quotes.colExpires' | translate }}</th>
-            <th>{{ 'portal.quotes.colStatus' | translate }}</th>
-            <th class="portal-list__num">{{ 'portal.quotes.colTotal' | translate }}</th>
-            <th>{{ 'portal.quotes.colActions' | translate }}</th>
+            <th scope="col">{{ 'portal.quotes.colNumber' | translate }}</th>
+            <th scope="col">{{ 'portal.quotes.colType' | translate }}</th>
+            <th scope="col">{{ 'portal.quotes.colDate' | translate }}</th>
+            <th scope="col">{{ 'portal.quotes.colExpires' | translate }}</th>
+            <th scope="col">{{ 'portal.quotes.colStatus' | translate }}</th>
+            <th scope="col" class="portal-list__num">{{ 'portal.quotes.colTotal' | translate }}</th>
+            <th scope="col">{{ 'portal.quotes.colActions' | translate }}</th>
           </tr>
         </thead>
         <tbody>
           @for (q of quotes(); track q.id) {
             <tr>
               <td>{{ q.quoteNumber }}</td>
-              <td>{{ q.quoteType }}</td>
+              <td>{{ quoteTypeLabelKey(q.quoteType) | translate }}</td>
               <td>{{ q.quoteDate | date:'MM/dd/yyyy' }}</td>
               <td>{{ q.expiresAt ? (q.expiresAt | date:'MM/dd/yyyy') : '—' }}</td>
-              <td><span [class]="statusClass(q.status)">{{ q.status }}</span></td>
-              <td class="portal-list__num">{{ q.total | number:'1.2-2' }}</td>
+              <td><span [class]="statusChip(q.status)">{{ statusLabelKey(q.status) | translate }}</span></td>
+              <td class="portal-list__num"><app-currency-display [value]="q.total" [currency]="q.currencyCode" /></td>
               <td>
-                @if (q.status === 'Sent') {
-                  <button type="button" class="action-btn action-btn--sm action-btn--primary"
-                    [disabled]="isResponding(q.id)"
-                    (click)="respond(q, true)"
-                    [attr.data-testid]="'portal-quote-accept-' + q.id">
-                    <span class="material-icons-outlined">check</span>
-                    {{ 'portal.quotes.accept' | translate }}
-                  </button>
+                @if (q.status === 'Sent' || q.status === 'Expired') {
+                  @if (q.status === 'Sent') {
+                    <button type="button" class="action-btn action-btn--sm action-btn--primary"
+                      [disabled]="isResponding(q.id)"
+                      (click)="respond(q, true)"
+                      [attr.aria-label]="'portal.quotes.acceptLabel' | translate: { number: q.quoteNumber }"
+                      [attr.data-testid]="'portal-quote-accept-' + q.id">
+                      <span class="material-icons-outlined" aria-hidden="true">check</span>
+                      {{ 'portal.quotes.accept' | translate }}
+                    </button>
+                  }
                   <button type="button" class="action-btn action-btn--sm action-btn--danger"
                     [disabled]="isResponding(q.id)"
                     (click)="respond(q, false)"
+                    [attr.aria-label]="'portal.quotes.declineLabel' | translate: { number: q.quoteNumber }"
                     [attr.data-testid]="'portal-quote-decline-' + q.id">
-                    <span class="material-icons-outlined">close</span>
+                    <span class="material-icons-outlined" aria-hidden="true">close</span>
                     {{ 'portal.quotes.decline' | translate }}
                   </button>
                 } @else {
@@ -54,5 +67,10 @@
         </tbody>
       </table>
     </div>
+    @if (totalCount() > quotes().length) {
+      <p class="portal-list__notice" data-testid="portal-quotes-truncated">
+        {{ 'portal.list.truncated' | translate: { shown: quotes().length, total: totalCount() } }}
+      </p>
+    }
   }
 </div>

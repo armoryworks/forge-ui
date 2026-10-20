@@ -4,26 +4,35 @@
     <p class="portal-list__subtitle">{{ 'portal.shipments.subtitle' | translate }}</p>
   </header>
 
-  @if (!loading() && shipments().length === 0) {
+  @if (loadError()) {
+    <div class="portal-list__error" role="alert">
+      <span class="material-icons-outlined" aria-hidden="true">error_outline</span>
+      <span class="portal-list__error-text">{{ 'portal.list.loadError' | translate }}</span>
+      <button type="button" class="action-btn action-btn--sm" (click)="load()" data-testid="portal-shipments-retry">
+        <span class="material-icons-outlined" aria-hidden="true">refresh</span>
+        {{ 'portal.list.retry' | translate }}
+      </button>
+    </div>
+  } @else if (!loading() && shipments().length === 0) {
     <app-empty-state icon="local_shipping" [message]="'portal.shipments.empty' | translate" />
   } @else {
     <div class="portal-list__table-wrap">
       <table class="portal-list__table" [attr.aria-label]="'portal.shipments.title' | translate">
         <thead>
           <tr>
-            <th>{{ 'portal.shipments.colNumber' | translate }}</th>
-            <th>{{ 'portal.shipments.colStatus' | translate }}</th>
-            <th>{{ 'portal.shipments.colShipped' | translate }}</th>
-            <th>{{ 'portal.shipments.colDelivered' | translate }}</th>
-            <th>{{ 'portal.shipments.colCarrier' | translate }}</th>
-            <th>{{ 'portal.shipments.colTracking' | translate }}</th>
+            <th scope="col">{{ 'portal.shipments.colNumber' | translate }}</th>
+            <th scope="col">{{ 'portal.shipments.colStatus' | translate }}</th>
+            <th scope="col">{{ 'portal.shipments.colShipped' | translate }}</th>
+            <th scope="col">{{ 'portal.shipments.colDelivered' | translate }}</th>
+            <th scope="col">{{ 'portal.shipments.colCarrier' | translate }}</th>
+            <th scope="col">{{ 'portal.shipments.colTracking' | translate }}</th>
           </tr>
         </thead>
         <tbody>
           @for (s of shipments(); track s.id) {
             <tr>
               <td>{{ s.shipmentNumber }}</td>
-              <td><span [class]="statusClass(s.status)">{{ s.status }}</span></td>
+              <td><span [class]="statusChip(s.status)">{{ statusLabelKey(s.status) | translate }}</span></td>
               <td>{{ s.shippedDate ? (s.shippedDate | date:'MM/dd/yyyy') : '—' }}</td>
               <td>{{ s.deliveredDate ? (s.deliveredDate | date:'MM/dd/yyyy') : '—' }}</td>
               <td>{{ s.carrier ?? '—' }}</td>
@@ -33,5 +42,10 @@
         </tbody>
       </table>
     </div>
+    @if (totalCount() > shipments().length) {
+      <p class="portal-list__notice" data-testid="portal-shipments-truncated">
+        {{ 'portal.list.truncated' | translate: { shown: shipments().length, total: totalCount() } }}
+      </p>
+    }
   }
 </div>

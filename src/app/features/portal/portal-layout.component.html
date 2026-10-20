@@ -1,12 +1,12 @@
 <div class="portal-shell">
   <header class="portal-shell__header">
     <div class="portal-shell__brand">
-      <span class="portal-shell__logo">QB·ENG</span>
+      <img class="portal-shell__logo" [src]="branding.wordmarkUrl()" alt="" />
       <span class="portal-shell__title">{{ 'portal.title' | translate }}</span>
     </div>
 
     @if (identity(); as me) {
-      <nav class="portal-shell__nav">
+      <nav class="portal-shell__nav" [attr.aria-label]="'portal.nav.label' | translate">
         <a routerLink="/portal/dashboard" routerLinkActive="portal-shell__tab--active" class="portal-shell__tab">
           {{ 'portal.nav.dashboard' | translate }}
         </a>
@@ -31,13 +31,13 @@
           <span class="portal-shell__user-customer">{{ me.customerName }}</span>
         </div>
         <button type="button" class="portal-shell__logout" (click)="logout()" [attr.aria-label]="'portal.logout' | translate">
-          <span class="material-icons-outlined">logout</span>
+          <span class="material-icons-outlined" aria-hidden="true">logout</span>
         </button>
       </div>
     }
   </header>
 
-  <main class="portal-shell__main">
+  <div class="portal-shell__main">
     <router-outlet />
-  </main>
+  </div>
 </div>

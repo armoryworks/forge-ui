@@ -69,7 +69,6 @@ export const appConfig: ApplicationConfig = {
       registrationStrategy: 'registerWhenStable:30000',
     }),
     provideTranslateService({
-      defaultLanguage: 'en',
       loader: provideTranslateLoader(TerminologyTranslateLoader),
     }),
     {

@@ -51,6 +51,22 @@
     width: 100%;
   }
 
+  &__notice {
+    margin: 0;
+    padding: $sp-sm $sp-md;
+    background: color-mix(in srgb, var(--info) 8%, transparent);
+    border-left: $border-width-accent solid var(--info);
+    font-size: $font-size-sm;
+  }
+
+  &__again {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: $sp-sm;
+    margin-top: $sp-sm;
+  }
+
   &__success {
     text-align: center;
     display: flex;
