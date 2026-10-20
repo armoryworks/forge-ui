@@ -19,7 +19,7 @@
     <button
       type="button"
       class="pin-pad__key pin-pad__key--action"
-      aria-label="Backspace"
+      [attr.aria-label]="'mobileApp.pinPad.backspace' | translate"
       data-testid="pin-key-backspace"
       (click)="backspace()"
     >

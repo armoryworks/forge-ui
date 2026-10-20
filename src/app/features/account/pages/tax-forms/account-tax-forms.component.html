@@ -10,11 +10,11 @@
 
   @if (!onboardingStatus()?.allComplete) {
     <a class="tax-forms__wizard-banner" routerLink="/onboarding"
-      aria-label="Start onboarding wizard">
+      [attr.aria-label]="'account.startOnboardingWizard' | translate">
       <span class="material-icons-outlined">assignment_ind</span>
       <div>
-        <strong>Complete your onboarding</strong>
-        <span>Click here to fill out your tax withholding, employment eligibility, direct deposit, and policy acknowledgments in one guided workflow.</span>
+        <strong>{{ 'account.completeYourOnboarding' | translate }}</strong>
+        <span>{{ 'account.clickHereToFillOutYour' | translate }}</span>
       </div>
       <span class="material-icons-outlined">arrow_forward</span>
     </a>
@@ -34,7 +34,7 @@
           <span class="tax-forms__item-label">{{ tmpl.name }}</span>
           <span class="tax-forms__item-description">{{ tmpl.description }}</span>
           @if (isWizardForm(tmpl.formType) && !isComplete(tmpl.profileCompletionKey)) {
-            <span class="tax-forms__item-badge">Completed in onboarding wizard</span>
+            <span class="tax-forms__item-badge">{{ 'account.completedInOnboardingWizard' | translate }}</span>
           }
         </div>
         @if (isComplete(tmpl.profileCompletionKey)) {

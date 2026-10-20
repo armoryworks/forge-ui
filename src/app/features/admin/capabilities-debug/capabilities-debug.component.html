@@ -1,36 +1,36 @@
 <div class="capabilities-debug">
   <header class="capabilities-debug__header">
-    <h2>Capabilities (Phase 4 Phase-A diagnostic)</h2>
+    <h2>{{ 'admin.capabilitiesDebug.capabilitiesPhase4PhaseADiagnostic' | translate }}</h2>
     <p class="capabilities-debug__hint">
-      Read-only descriptor view. Mutation lands in Phase C; the full admin UI lands in Phase E.
+      {{ 'admin.capabilitiesDebug.readOnlyDescriptorViewMutationLands' | translate }}
     </p>
     <div class="capabilities-debug__summary">
       @if (descriptor()) {
-        <span><strong>Total:</strong> {{ descriptor()!.totalCount }}</span>
-        <span><strong>Enabled:</strong> {{ enabledCount() }}</span>
-        <span><strong>Generated:</strong> {{ descriptor()!.generatedAt }}</span>
+        <span><strong>{{ 'admin.capabilitiesDebug.total' | translate }}</strong> {{ descriptor()!.totalCount }}</span>
+        <span><strong>{{ 'admin.capabilitiesDebug.enabled' | translate }}</strong> {{ enabledCount() }}</span>
+        <span><strong>{{ 'admin.capabilitiesDebug.generated' | translate }}</strong> {{ descriptor()!.generatedAt }}</span>
       } @else {
-        <span>Descriptor not loaded.</span>
+        <span>{{ 'admin.capabilitiesDebug.descriptorNotLoaded' | translate }}</span>
       }
-      <button class="action-btn" type="button" (click)="refresh()" [disabled]="loading()" aria-label="Refresh capability descriptor">
+      <button class="action-btn" type="button" (click)="refresh()" [disabled]="loading()" [attr.aria-label]="'admin.capabilitiesDebug.refreshCapabilityDescriptor' | translate">
         <span class="material-icons-outlined">refresh</span>
-        Refresh
+        {{ 'common.refresh' | translate }}
       </button>
     </div>
   </header>
 
   @if (capabilities().length === 0) {
-    <p>No capabilities loaded.</p>
+    <p>{{ 'admin.capabilitiesDebug.noCapabilitiesLoaded' | translate }}</p>
   } @else {
-    <table class="capabilities-debug__table" aria-label="Capabilities">
+    <table class="capabilities-debug__table" [attr.aria-label]="'admin.capabilitiesDebug.capabilities' | translate">
       <thead>
         <tr>
-          <th scope="col">Code</th>
-          <th scope="col">Area</th>
-          <th scope="col">Name</th>
-          <th scope="col">Default</th>
-          <th scope="col">State</th>
-          <th scope="col">Roles</th>
+          <th scope="col">{{ 'admin.capabilitiesDebug.code' | translate }}</th>
+          <th scope="col">{{ 'admin.capabilitiesDebug.area' | translate }}</th>
+          <th scope="col">{{ 'common.name' | translate }}</th>
+          <th scope="col">{{ 'common.default' | translate }}</th>
+          <th scope="col">{{ 'common.state' | translate }}</th>
+          <th scope="col">{{ 'admin.capabilitiesDebug.roles' | translate }}</th>
         </tr>
       </thead>
       <tbody>

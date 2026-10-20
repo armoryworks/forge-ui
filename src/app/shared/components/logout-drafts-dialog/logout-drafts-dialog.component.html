@@ -1,15 +1,15 @@
-<div class="dialog-backdrop" role="button" tabindex="0" aria-label="Cancel" (click)="cancel()" (keydown.enter)="cancel()">
-  <div class="dialog" role="dialog" aria-modal="true" aria-label="Unsaved work" style="width: 520px" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+<div class="dialog-backdrop" role="button" tabindex="0" [attr.aria-label]="'common.cancel' | translate" (click)="cancel()" (keydown.enter)="cancel()">
+  <div class="dialog" role="dialog" aria-modal="true" [attr.aria-label]="'shared.logoutDraftsDialog.unsavedWork' | translate" style="width: 520px" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
     <div class="dialog__header">
-      <span class="dialog__title">Unsaved Work</span>
-      <button class="icon-btn" aria-label="Cancel" (click)="cancel()">
+      <span class="dialog__title">{{ 'shared.logoutDraftsDialog.unsavedWork2' | translate }}</span>
+      <button class="icon-btn" [attr.aria-label]="'common.cancel' | translate" (click)="cancel()">
         <span class="material-icons-outlined">close</span>
       </button>
     </div>
 
     <div class="dialog__body">
       <p class="logout-drafts__description">
-        You have unsaved changes. They will be preserved for when you return.
+        {{ 'shared.logoutDraftsDialog.youHaveUnsavedChangesTheyWill' | translate }}
       </p>
 
       <div class="logout-drafts__list">
@@ -19,9 +19,9 @@
               <span class="logout-drafts__item-label">{{ draft.displayLabel }}</span>
               <span class="logout-drafts__item-time">{{ draft.lastModified | date:'MM/dd/yyyy hh:mm a' }}</span>
             </div>
-            <button class="action-btn action-btn--sm" aria-label="Go to {{ draft.displayLabel }}" (click)="navigateTo(draft)">
+            <button class="action-btn action-btn--sm" [attr.aria-label]="'shared.logoutDraftsDialog.goToDisplaylabel' | translate:{ displayLabel: draft.displayLabel }" (click)="navigateTo(draft)">
               <span class="material-icons-outlined">open_in_new</span>
-              Go to
+              {{ 'shared.logoutDraftsDialog.goTo' | translate }}
             </button>
           </div>
         }
@@ -29,8 +29,8 @@
     </div>
 
     <div class="dialog__footer">
-      <button class="action-btn" (click)="cancel()">Cancel</button>
-      <button class="action-btn action-btn--primary" (click)="logout()">Logout Anyway</button>
+      <button class="action-btn" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
+      <button class="action-btn action-btn--primary" (click)="logout()">{{ 'shared.logoutDraftsDialog.logoutAnyway' | translate }}</button>
     </div>
   </div>
 </div>

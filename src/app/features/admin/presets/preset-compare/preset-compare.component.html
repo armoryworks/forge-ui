@@ -2,7 +2,7 @@
   <ng-container toolbar>
     <button class="action-btn action-btn--sm" type="button"
       (click)="back()" data-testid="preset-compare-back-btn">
-      <span class="material-icons-outlined">chevron_left</span> Presets
+      <span class="material-icons-outlined">chevron_left</span> {{ 'admin.presetCompare.presets' | translate }}
     </button>
     <button class="action-btn action-btn--sm" type="button"
       [class.action-btn--primary]="disagreementOnly()"
@@ -25,7 +25,7 @@
           <table class="preset-compare__table" aria-label="Table table">
             <thead>
               <tr>
-                <th class="preset-compare__th preset-compare__th--row">Capability</th>
+                <th class="preset-compare__th preset-compare__th--row">{{ 'admin.presetCompare.capability' | translate }}</th>
                 @for (preset of r.presets; track preset.id) {
                   <th class="preset-compare__th preset-compare__th--col"
                     [attr.data-testid]="'preset-compare-col-' + preset.id">
@@ -40,7 +40,7 @@
                         (click)="pickPreset(preset.id)"
                         [disabled]="applying()"
                         [attr.data-testid]="'preset-compare-pick-' + preset.id">
-                        Pick this one
+                        {{ 'admin.presetCompare.pickThisOne' | translate }}
                       </button>
                     </div>
                   </th>
@@ -61,7 +61,7 @@
                       <code>{{ row.code }}</code>
                       <span>{{ row.name }}</span>
                       @if (row.defaultOn) {
-                        <span class="chip preset-compare__default-chip">Default</span>
+                        <span class="chip preset-compare__default-chip">{{ 'common.default' | translate }}</span>
                       }
                     </td>
                     @for (cell of row.cells; track cell.presetId) {

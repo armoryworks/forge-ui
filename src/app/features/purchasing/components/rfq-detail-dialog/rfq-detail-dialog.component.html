@@ -76,7 +76,7 @@
           </button>
         }
         @if (canRecordResponse()) {
-          <button class="action-btn action-btn--sm" (click)="toggleResponseForm()" aria-label="Record response">
+          <button class="action-btn action-btn--sm" (click)="toggleResponseForm()" [attr.aria-label]="'purchasing.recordResponse2' | translate">
             <span class="material-icons-outlined">edit_note</span> {{ 'purchasing.recordResponse' | translate }}
           </button>
         }
@@ -166,7 +166,7 @@
                 <span class="material-icons-outlined">picture_as_pdf</span>
               </button>
               @if (canAward() && isReceived(row)) {
-                <button class="action-btn action-btn--sm action-btn--primary" (click)="awardVendor(row)" aria-label="Award to vendor">
+                <button class="action-btn action-btn--sm action-btn--primary" (click)="awardVendor(row)" [attr.aria-label]="'purchasing.awardToVendor' | translate">
                   {{ 'purchasing.award' | translate }}
                 </button>
               }

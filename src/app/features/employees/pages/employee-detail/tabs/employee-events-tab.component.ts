@@ -6,11 +6,12 @@ import { AppEvent } from '../../../../events/models/event.model';
 import { DataTableComponent } from '../../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../../shared/models/column-def.model';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-employee-events-tab',
   standalone: true,
-  imports: [DatePipe, DataTableComponent, ColumnCellDirective],
+  imports: [DatePipe, DataTableComponent, ColumnCellDirective, TranslatePipe],
   templateUrl: './employee-events-tab.component.html',
   styleUrl: '../employee-detail-tabs.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

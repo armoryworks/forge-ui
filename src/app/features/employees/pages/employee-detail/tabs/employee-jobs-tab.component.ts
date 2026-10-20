@@ -7,11 +7,12 @@ import { DataTableComponent } from '../../../../../shared/components/data-table/
 import { ColumnCellDirective } from '../../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../../shared/models/column-def.model';
 import { DateOnlyPipe } from '../../../../../shared/pipes/date-only.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-employee-jobs-tab',
   standalone: true,
-  imports: [DateOnlyPipe, DataTableComponent, ColumnCellDirective],
+  imports: [DateOnlyPipe, DataTableComponent, ColumnCellDirective, TranslatePipe],
   templateUrl: './employee-jobs-tab.component.html',
   styleUrl: '../employee-detail-tabs.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

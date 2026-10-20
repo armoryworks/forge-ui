@@ -1,6 +1,6 @@
 <div class="integrations-tabs__body">
   <p class="integrations-tabs__lead">
-    Services <strong>forge connects to</strong> — accounting, shipping carriers, and other external APIs.
+    {{ 'integrations.services' | translate }} <strong>{{ 'integrations.forgeConnectsTo' | translate }}</strong> {{ 'integrations.accountingShippingCarriersAndOtherExternal' | translate }}
   </p>
 
   @if (showReadinessBanner()) {
@@ -60,8 +60,8 @@
             @if (provider.id === 'quickbooks' && showSandboxGuides() && qbIntegration()?.sandboxSteps?.length) {
               <p class="integration-card__sandbox-hint">
                 <span class="material-icons-outlined">science</span>
-                <button class="link-btn" (click)="configureIntegration(qbIntegration()!)" aria-label="QuickBooks sandbox setup guide">
-                  Sandbox setup guide
+                <button class="link-btn" (click)="configureIntegration(qbIntegration()!)" [attr.aria-label]="'integrations.quickbooksSandboxSetupGuide' | translate">
+                  {{ 'integrations.sandboxSetupGuide' | translate }}
                 </button>
               </p>
             }
@@ -104,7 +104,7 @@
                 <button class="action-btn action-btn--sm action-btn--primary"
                         (click)="connectProvider('local')"
                         [disabled]="loading()"
-                        aria-label="Use standalone mode">
+                        [attr.aria-label]="'integrations.useStandaloneMode' | translate">
                   {{ 'integrations.useStandalone' | translate }}
                 </button>
               } @else if (isOAuthProvider(provider.id)) {

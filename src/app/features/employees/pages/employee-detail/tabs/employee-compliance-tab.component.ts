@@ -6,11 +6,12 @@ import { EmployeeCompliance } from '../../../models/employee.model';
 import { DataTableComponent } from '../../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../../shared/models/column-def.model';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-employee-compliance-tab',
   standalone: true,
-  imports: [DatePipe, DataTableComponent, ColumnCellDirective],
+  imports: [DatePipe, DataTableComponent, ColumnCellDirective, TranslatePipe],
   templateUrl: './employee-compliance-tab.component.html',
   styleUrl: '../employee-detail-tabs.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

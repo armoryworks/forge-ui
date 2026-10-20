@@ -9,6 +9,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { UserIntegrationService } from '../../services/user-integration.service';
 import { IntegrationProviderInfo, UserIntegrationSummary } from '../../models/user-integration.model';
 import { ConnectIntegrationDialogComponent, ConnectIntegrationDialogData } from './connect-integration-dialog.component';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface CategoryGroup {
   category: string;
@@ -21,7 +22,7 @@ interface CategoryGroup {
 @Component({
   selector: 'app-account-integrations',
   standalone: true,
-  imports: [EmptyStateComponent, LoadingBlockDirective],
+  imports: [EmptyStateComponent, LoadingBlockDirective, TranslatePipe],
   templateUrl: './account-integrations.component.html',
   styleUrl: './account-integrations.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

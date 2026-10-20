@@ -12,7 +12,7 @@
           class="action-btn action-btn--sm"
           [class.action-btn--primary]="consultantModeEnabled()"
           (click)="toggleConsultantMode()"
-          aria-label="Toggle consultant mode"
+          [attr.aria-label]="'discoveryWizard.toggleConsultantMode' | translate"
           data-testid="discovery-consultant-toggle">
           <span class="material-icons-outlined">{{ consultantModeEnabled() ? 'engineering' : 'person' }}</span>
           {{ (consultantModeEnabled() ? 'discoveryWizard.consultantMode' : 'discoveryWizard.selfServe') | translate }}
@@ -21,9 +21,9 @@
           type="button"
           class="action-btn action-btn--sm action-btn--link"
           (click)="exitToCustom()"
-          aria-label="Skip discovery and configure manually"
+          [attr.aria-label]="'discoveryWizard.skipDiscoveryAndConfigureManually' | translate"
           data-testid="discovery-skip-btn">
-          Skip discovery
+          {{ 'discoveryWizard.skipDiscovery' | translate }}
         </button>
       </div>
 
@@ -34,19 +34,19 @@
             <!-- Recommendation review screen -->
             <article class="recommendation" data-testid="discovery-recommendation">
               <header class="recommendation__header">
-                <span class="recommendation__label">Recommended for you</span>
+                <span class="recommendation__label">{{ 'discoveryWizard.recommendedForYou' | translate }}</span>
                 <h2 class="recommendation__title">{{ rec.presetName }}</h2>
                 <p class="recommendation__description">{{ rec.presetDescription }}</p>
                 <div class="recommendation__confidence" [attr.data-confidence]="rec.confidenceLabel">
                   <span class="material-icons-outlined">
                     {{ rec.confidenceLabel === 'high' ? 'verified' : rec.confidenceLabel === 'medium' ? 'help_outline' : 'warning' }}
                   </span>
-                  <span>Confidence: {{ rec.confidenceLabel }}</span>
+                  <span>{{ 'discoveryWizard.confidenceConfidencelabel' | translate:{ confidenceLabel: rec.confidenceLabel } }}</span>
                 </div>
               </header>
 
               <div class="recommendation__rationale">
-                <h3>Why we recommend this</h3>
+                <h3>{{ 'discoveryWizard.whyWeRecommendThis' | translate }}</h3>
                 <p>{{ rec.rationale }}</p>
                 @if (rec.factors.length > 0) {
                   <details>
@@ -67,7 +67,7 @@
 
               @if (rec.alternatives.length > 0) {
                 <div class="recommendation__alternatives" data-testid="discovery-alternatives">
-                  <h3>Or pick an alternative</h3>
+                  <h3>{{ 'discoveryWizard.orPickAnAlternative' | translate }}</h3>
                   <ul>
                     @for (alt of rec.alternatives; track alt.presetId) {
                       <li>
@@ -89,7 +89,7 @@
                         [class.alt-card--chosen]="!chosenPreset() || chosenPreset()!.id === rec.presetId"
                         (click)="resetToRecommended()"
                         data-testid="discovery-reset-btn">
-                        <strong>Use the recommended preset</strong>
+                        <strong>{{ 'discoveryWizard.useTheRecommendedPreset' | translate }}</strong>
                         <span>{{ rec.presetName }}</span>
                       </button>
                     </li>
@@ -116,8 +116,8 @@
                 </div>
               } @else {
                 <div class="recommendation__deltas">
-                  <h3>No capability changes</h3>
-                  <p>Your installation already matches this preset.</p>
+                  <h3>{{ 'discoveryWizard.noCapabilityChanges' | translate }}</h3>
+                  <p>{{ 'discoveryWizard.yourInstallationAlreadyMatchesThisPreset' | translate }}</p>
                 </div>
               }
 
@@ -142,7 +142,7 @@
               }
 
               <footer class="recommendation__actions">
-                <button class="action-btn" type="button" (click)="prevStep()" data-testid="discovery-back-btn">Back</button>
+                <button class="action-btn" type="button" (click)="prevStep()" data-testid="discovery-back-btn">{{ 'common.back' | translate }}</button>
                 <button
                   class="action-btn action-btn--primary"
                   type="button"
@@ -220,7 +220,7 @@
                           [checked]="getAnswer(q.id) === 'yes'"
                           (change)="setAnswer(q.id, 'yes')"
                           data-testid="discovery-choice" />
-                        <span class="choice__label">Yes</span>
+                        <span class="choice__label">{{ 'common.yes' | translate }}</span>
                       </label>
                       <label class="choice"
                         [class.choice--selected]="getAnswer(q.id) === 'no'">
@@ -266,12 +266,12 @@
                   }
                   @case ('FreeText') {
                     <app-textarea
-                      label="Your answer"
+                      [label]="'discoveryWizard.yourAnswer' | translate"
                       [formControl]="textareaControl(q.id)"
                       [rows]="4"
                       (input)="onTextareaInput(q.id, $event)"
                       data-testid="discovery-freetext" />
-                    <p class="question-card__hint">Optional — but the more you say, the better the recommendation.</p>
+                    <p class="question-card__hint">{{ 'discoveryWizard.optionalButTheMoreYouSay' | translate }}</p>
                   }
                 }
               </div>
@@ -283,7 +283,7 @@
                   [disabled]="currentStep() === 0"
                   (click)="prevStep()"
                   data-testid="discovery-prev-btn">
-                  Back
+                  {{ 'common.back' | translate }}
                 </button>
                 <button
                   class="action-btn action-btn--primary"
@@ -291,7 +291,7 @@
                   [disabled]="!canAdvance()"
                   (click)="nextStep()"
                   data-testid="discovery-next-btn">
-                  Next
+                  {{ 'common.next' | translate }}
                   <span class="material-icons-outlined">arrow_forward</span>
                 </button>
                 @if (canPreview() && currentStep() >= 5) {
@@ -300,7 +300,7 @@
                     type="button"
                     (click)="jumpToRecommendation()"
                     data-testid="discovery-jump-btn">
-                    Jump to recommendation
+                    {{ 'discoveryWizard.jumpToRecommendation' | translate }}
                   </button>
                 }
               </footer>
@@ -312,36 +312,36 @@
         <aside class="discovery-page__sidebar" [appLoadingBlock]="previewing()">
           @if (recommendation(); as rec) {
             <div class="live-recommendation" data-testid="discovery-live-preview">
-              <span class="live-recommendation__label">Currently leaning toward</span>
+              <span class="live-recommendation__label">{{ 'discoveryWizard.currentlyLeaningToward' | translate }}</span>
               <h3 class="live-recommendation__name">{{ rec.presetName }}</h3>
               <p class="live-recommendation__desc">{{ rec.presetDescription }}</p>
               <div class="live-recommendation__confidence" [attr.data-confidence]="rec.confidenceLabel">
-                Confidence: {{ rec.confidenceLabel }}
+                {{ 'discoveryWizard.confidenceConfidencelabel' | translate:{ confidenceLabel: rec.confidenceLabel } }}
               </div>
               <button
                 type="button"
                 class="action-btn action-btn--sm action-btn--link"
                 (click)="jumpToRecommendation()">
-                See full recommendation
+                {{ 'discoveryWizard.seeFullRecommendation' | translate }}
               </button>
             </div>
           } @else {
             <div class="live-recommendation live-recommendation--empty">
               <span class="material-icons-outlined">auto_awesome</span>
-              <p>Answer the opening questions and we'll start surfacing a recommendation here.</p>
+              <p>{{ 'discoveryWizard.answerTheOpeningQuestionsAndWe' | translate }}</p>
             </div>
           }
 
           <div class="discovery-page__branch">
             @if (branch()) {
               @if (consultantModeEnabled()) {
-                <span class="discovery-page__branch-label">Branch {{ branch() }}</span>
+                <span class="discovery-page__branch-label">{{ 'discoveryWizard.branchBranch' | translate:{ branch: branch() } }}</span>
               }
               <span class="discovery-page__branch-detail">
                 @switch (branch()) {
-                  @case ('A') { Small (1–25) }
-                  @case ('B') { Mid (25–200) }
-                  @case ('C') { Large (200+) or multi-site }
+                  @case ('A') { {{ 'discoveryWizard.small125' | translate }} }
+                  @case ('B') { {{ 'discoveryWizard.mid25200' | translate }} }
+                  @case ('C') { {{ 'discoveryWizard.large200OrMultiSite' | translate }} }
                 }
               </span>
             }

@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-draft-recovery-banner',
   standalone: true,
-  imports: [DatePipe],
+  imports: [DatePipe, TranslatePipe],
   templateUrl: './draft-recovery-banner.component.html',
   styleUrl: './draft-recovery-banner.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

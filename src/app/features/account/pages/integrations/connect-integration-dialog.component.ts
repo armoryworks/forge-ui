@@ -11,6 +11,7 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { UserIntegrationService } from '../../services/user-integration.service';
 import { IntegrationProviderInfo } from '../../models/user-integration.model';
+import { TranslatePipe } from '@ngx-translate/core';
 
 export interface ConnectIntegrationDialogData {
   provider: IntegrationProviderInfo;
@@ -25,6 +26,7 @@ export interface ConnectIntegrationDialogData {
     InputComponent,
     TextareaComponent,
     ValidationButtonComponent,
+    TranslatePipe,
   ],
   templateUrl: './connect-integration-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

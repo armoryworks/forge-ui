@@ -144,7 +144,22 @@
       "planningTitle": "Planning cycle",
       "planningDesc": "default cycle length",
       "payPeriodTitle": "Pay period lock",
-      "payPeriodDesc": "stop changes to time entries up to a date"
+      "payPeriodDesc": "stop changes to time entries up to a date",
+      "area": "Area",
+      "browsePresets": "Browse Presets",
+      "consultantMode": "Consultant mode",
+      "countAfterFilter": "({{count}} after filter)",
+      "dismissOnboardingBanner": "Dismiss onboarding banner",
+      "enabled": "enabled",
+      "enabledOnly": "Enabled only",
+      "noCapabilitiesMatchTheCurrentFilter": "No capabilities match the current filter.",
+      "openDetailPage": "Open detail page",
+      "refreshCapabilities": "Refresh capabilities",
+      "runDiscovery": "Run Discovery",
+      "runDiscoveryToGetATailored": "Run discovery to get a tailored preset, browse curated presets, or skip and configure capabilities manually.",
+      "searchByNameCodeDescription": "Search by name, code, description",
+      "toggleConsultantMode": "Toggle consultant mode",
+      "welcomeLetSSetUpForge": "Welcome — let's set up forge for your business."
     },
     "systemSettings": {
       "defaultValue": "Default: {{value}}",
@@ -196,7 +211,8 @@
       "activeLabel": "integrations",
       "expiredAlert": "{{ count }} expired key — review before clients hit 401",
       "capabilityDisabled": "BI / integration API keys are disabled on this install.",
-      "cta": "View Connections"
+      "cta": "View Connections",
+      "roleBreakdown": "Role breakdown"
     },
     "compliance": {
       "title": "Compliance",
@@ -304,7 +320,8 @@
       "license": "License",
       "stack": "Stack",
       "description": "Open-source ERP and production management for small manufacturers. Integrates with QuickBooks Online for accounting sync."
-    }
+    },
+    "breadcrumb": "Breadcrumb"
   },
   "app": {
     "updateAvailable": "A new version is available.",
@@ -1900,7 +1917,8 @@
       },
       "defaultReason": {
         "count": "Physical count"
-      }
+      },
+      "inventoryViews": "Inventory views"
     },
     "title": "Inventory",
     "location": "Location",
@@ -4001,7 +4019,19 @@
     "noSettingsMatch": "No settings match.",
     "capability": {
       "relatedSettings": "Related settings",
-      "toggleAria": "Toggle {{name}}"
+      "toggleAria": "Toggle {{name}}",
+      "backToCapabilities": "Back to capabilities",
+      "dependsOnCount": "Depends on ({{count}})",
+      "lastCount": "last {{count}}",
+      "loadingCapability": "Loading capability…",
+      "mutuallyExclusiveWithCount": "Mutually exclusive with ({{count}})",
+      "noAuditEntriesYet": "No audit entries yet.",
+      "noDependencies": "No dependencies",
+      "noDependentsSafeToDisable": "No dependents — safe to disable",
+      "recentActivity": "Recent activity",
+      "relationships": "Relationships",
+      "requiredByCount": "Required by ({{count}})",
+      "requiresRolesRequiresroles": "Requires roles: {{requiresRoles}}"
     },
     "glOpening": {
       "title": "Full general ledger needs an opening journal first",
@@ -4012,6 +4042,139 @@
       "stepFullGl": "Turn on Built-in full general ledger again.",
       "migrationEnabled": "Accounting migration wizard turned on",
       "migrationFailed": "Could not turn on the accounting migration wizard"
+    },
+    "allRequiredItemsComplete": "All required items complete",
+    "announcementsPanel": {
+      "acknowledgmentRequired": "Acknowledgment required",
+      "announcements": "Announcements",
+      "content": "Content",
+      "createTemplate": "Create Template",
+      "defaultScope": "Default Scope",
+      "defaultSeverity": "Default Severity",
+      "deleteTemplate": "Delete template",
+      "newAnnouncement": "New Announcement",
+      "newTemplate": "New Template",
+      "noAcknowledgmentsYet": "No acknowledgments yet",
+      "noAnnouncementsSentYet": "No announcements sent yet",
+      "noTemplatesCreatedYet": "No templates created yet",
+      "requireAcknowledgmentByDefault": "Require Acknowledgment by Default",
+      "templates": "Templates",
+      "viewAcknowledgments": "View acknowledgments"
+    },
+    "capabilitiesDebug": {
+      "area": "Area",
+      "capabilities": "Capabilities",
+      "capabilitiesPhase4PhaseADiagnostic": "Capabilities (Phase 4 Phase-A diagnostic)",
+      "code": "Code",
+      "descriptorNotLoaded": "Descriptor not loaded.",
+      "enabled": "Enabled:",
+      "generated": "Generated:",
+      "noCapabilitiesLoaded": "No capabilities loaded.",
+      "readOnlyDescriptorViewMutationLands": "Read-only descriptor view. Mutation lands in Phase C; the full admin UI lands in Phase E.",
+      "refreshCapabilityDescriptor": "Refresh capability descriptor",
+      "roles": "Roles",
+      "total": "Total:"
+    },
+    "downloadRfidRelaySetupScript": "Download RFID relay setup script",
+    "integrationOutboxPanel": {
+      "attempts": "Attempts",
+      "discard": "Discard",
+      "discardDeadLetter": "Discard (dead-letter)",
+      "entity": "Entity",
+      "lastAttempt": "Last attempt",
+      "lastError": "Last error",
+      "noOutboxEntries": "No outbox entries",
+      "provider": "Provider",
+      "retry": "Retry",
+      "retryNow": "Retry now",
+      "sentAt": "Sent at"
+    },
+    "lockEntriesThrough": "Lock entries through",
+    "lockPayPeriodThroughSelectedDate": "Lock pay period through selected date",
+    "none": "None",
+    "presetBrowser": {
+      "capabilities": "Capabilities",
+      "capabilities2": "capabilities",
+      "compare": "Compare",
+      "curatedCapabilityBundlesForCommonBusiness": "Curated capability bundles for common business profiles. Pick a preset to view its capabilities and apply it to this installation. Or build a Custom configuration starting from catalog defaults."
+    },
+    "presetCompare": {
+      "capability": "Capability",
+      "pickThisOne": "Pick this one",
+      "presets": "Presets"
+    },
+    "presetCustom": {
+      "applyCustom": "Apply Custom",
+      "capabilities": "Capabilities",
+      "capabilitiesEnabled": "Capabilities enabled",
+      "constraintViolations": "Constraint violations",
+      "customConfiguration": "Custom Configuration",
+      "defaultOn": "Default on",
+      "override": "Override",
+      "presets": "Presets",
+      "resetToDefaults": "Reset to defaults",
+      "resolveEachViolationBeforeApplyingToggle": "Resolve each violation before applying. Toggle the capability listed back to fix the issue.",
+      "startFromTheCatalogDefaultsAnd": "Start from the catalog defaults and toggle individual capabilities. Hand-pick the exact set you want for this installation.",
+      "willChangeIfApplied": "Will change if applied"
+    },
+    "presetDetail": {
+      "allCapabilitiesEnabledinpresetInEnabledinpreset2Out": "All capabilities ({{enabledInPreset}} in / {{enabledInPreset2}} out)",
+      "capabilitiesEnabled": "Capabilities enabled",
+      "differFromCatalogDefaults": "Differ from catalog defaults",
+      "differencesVsCurrentInstall": "Differences vs current install",
+      "presets": "Presets",
+      "targetProfile": "Target profile:",
+      "theseCapabilitiesWillChangeIfYou": "These capabilities will change if you apply this preset right now.",
+      "willChangeIfApplied": "Will change if applied"
+    },
+    "roleTemplatesPanel": {
+      "createOneToBundleSeveralBase": "Create one to bundle several base roles into a single rollup.",
+      "custom": "Custom",
+      "deleteRoleTemplate": "Delete role template",
+      "editRoleTemplate": "Edit role template",
+      "includedRoles": "Included Roles",
+      "newTemplate": "New Template",
+      "noRoleTemplatesYet": "No role templates yet",
+      "pickAtLeastOneASystem": "Pick at least one. A System API key scoped to this bundle is granted every role listed above.",
+      "pickTheUnderlyingRolesThisTemplate": "Pick the underlying roles this template grants",
+      "roleBundlesRollupsGroupSeveralBase": "Role bundles (\"rollups\") group several base roles under one name — handy for scoping a System API key to a set of roles without listing each one. System defaults seed at install and are read-only; create your own to customize.",
+      "seededAtInstallReadOnlyDuplicate": "Seeded at install. Read-only — duplicate to customize.",
+      "system": "System",
+      "systemDefaultsAreReadOnly": "System defaults are read-only",
+      "templateName": "Template Name"
+    },
+    "trainingModuleDialog": {
+      "appRoutes": "App Routes",
+      "contentType": "Content Type",
+      "editTheContentJsonDirectlySee": "Edit the content JSON directly. See training docs for format by type.",
+      "estimatedMinutes": "Estimated Minutes",
+      "published": "Published",
+      "slug": "Slug",
+      "tags": "Tags"
+    },
+    "trainingPathDialog": {
+      "autoAssignToNewUsers": "Auto-assign to new users",
+      "icon": "Icon",
+      "slug": "Slug"
+    },
+    "walkthroughPreviewDialog": {
+      "addStep": "Add step",
+      "addStep2": "Add Step",
+      "align": "Align",
+      "cssSelector": "CSS Selector",
+      "deleteStep": "Delete step",
+      "eGAppPageHeaderAction": "e.g. app-page-header, .action-btn--primary",
+      "explainWhatThisStepCovers": "Explain what this step covers...",
+      "moveDown": "Move down",
+      "moveStepDown": "Move step down",
+      "moveStepUp": "Move step up",
+      "moveUp": "Move up",
+      "noStepsDefinedClickAddStep": "No steps defined. Click \"Add Step\" to create the first step.",
+      "nullCenterOverlay": "(null = center overlay)",
+      "saveSteps": "Save Steps",
+      "side": "Side",
+      "stepI": "Step {{i}}",
+      "stepTitle": "Step title"
     }
   },
   "teamsPanel": {
@@ -4608,8 +4771,60 @@
       "enabledTitle": "Two-Factor Authentication Enabled",
       "enabledText": "Your account is now protected with two-factor authentication. You'll need your authenticator app each time you sign in.",
       "verifying": "Verifying...",
-      "verifyAndEnable": "Verify & Enable"
-    }
+      "verifyAndEnable": "Verify & Enable",
+      "generateRecoveryCodesFromTheSecurity": "Generate recovery codes from the Security page in case you lose access to your authenticator."
+    },
+    "accountLast4": "Account (last 4)",
+    "accountType": "Account Type",
+    "acknowledgedOnCompleteddate": "Acknowledged on {{completedDate}}.",
+    "additionalWithholding": "Additional Withholding",
+    "allowances": "Allowances",
+    "bank": "Bank",
+    "citizenshipStatus": "Citizenship Status",
+    "clickHereToFillOutYour": "Click here to fill out your tax withholding, employment eligibility, direct deposit, and policy acknowledgments in one guided workflow.",
+    "completeYourOnboarding": "Complete your onboarding",
+    "completedInOnboardingWizard": "Completed in onboarding wizard",
+    "complianceFormRenderer": {
+      "backToFormsList": "Back to forms list",
+      "employers": "Employers",
+      "formFormnumberRevRevisionAgency": "Form {{formNumber}} (Rev. {{revision}}) — {{agency}}",
+      "formPages": "Form pages",
+      "nextPage": "Next page",
+      "only": "Only",
+      "prev": "Prev",
+      "previousPage": "Previous page",
+      "saveDraft": "Save Draft",
+      "socialSecurityNumber": "Social security number",
+      "submitForm": "Submit Form",
+      "typeYourFullLegalName": "Type your full legal name"
+    },
+    "connectIntegrationDialog": {
+      "displayNameOptional": "Display Name (optional)",
+      "eGWorkCalendar": "e.g., Work Calendar"
+    },
+    "contactPayrollIfYouNeedTo": "Contact payroll if you need to update your direct deposit information.",
+    "documentsVerified": "Documents Verified",
+    "eGDh": "e.g. DH",
+    "exempt": "Exempt",
+    "filingStatus": "Filing Status",
+    "i9FormsCannotBeChanged": "I-9 forms cannot be changed after submission. Contact HR for corrections.",
+    "listA": "List A",
+    "listB": "List B",
+    "listC": "List C",
+    "mfaRecoveryCodesDialog": {
+      "copyAll": "Copy All",
+      "generatingRecoveryCodes": "Generating recovery codes...",
+      "iVeSavedTheseCodes": "I've Saved These Codes"
+    },
+    "multipleJobs": "Multiple Jobs",
+    "routingLast4": "Routing (last 4)",
+    "startOnboardingWizard": "Start onboarding wizard",
+    "toggleChatNotificationSound": "Toggle chat notification sound",
+    "toggleChatVibration": "Toggle chat vibration",
+    "toggleDesktopPreviewPopups": "Toggle desktop preview popups",
+    "update": "Update",
+    "youMayUpdateYourStateWithholding": "You may update your state withholding if your tax situation changes.",
+    "youMayUpdateYourW4": "You may update your W-4 at any time if your tax situation changes."
   },
   "errorFallbacksA": {
     "chartOfAccountsLoadFailed": "Failed to load chart of accounts",
@@ -4736,7 +4951,19 @@
       "mockInProd": "MockIntegrations is ON in Production — every external integration is returning canned data. Set MockIntegrations=false and configure real providers before serving real users.",
       "gapSummary": "These capabilities are on but their integration is not configured. Configure each one, or turn the capability off.",
       "setupRequired": "Setup required"
-    }
+    },
+    "accountingShippingCarriersAndOtherExternal": "— accounting, shipping carriers, and other external APIs.",
+    "connectYourExternalAccountsForCalendar": "Connect your external accounts for calendar sync, notifications, and file storage.",
+    "disconnectIntegration": "Disconnect integration",
+    "forgeConnectsTo": "forge connects to",
+    "integrations": "Integrations",
+    "lastSyncLastsyncat": "Last sync: {{lastSyncAt}}",
+    "noProvidersAvailableForThisCategory": "No providers available for this category",
+    "quickbooksSandboxSetupGuide": "QuickBooks sandbox setup guide",
+    "sandboxSetupGuide": "Sandbox setup guide",
+    "services": "Services",
+    "testConnection": "Test connection",
+    "useStandaloneMode": "Use standalone mode"
   },
   "complianceTemplates": {
     "templates": "compliance templates",
@@ -4759,7 +4986,9 @@
     "extractDefinition": "Extract form definition",
     "extracting": "Extracting...",
     "extractionComplete": "Form definition extracted successfully",
-    "extractionFailed": "Form definition extraction failed"
+    "extractionFailed": "Form definition extraction failed",
+    "syncTemplate": "Sync template",
+    "viewStateWithholdingDetails": "View state withholding details"
   },
   "training": {
     "title": "Training Library",
@@ -4909,7 +5138,8 @@
     "acroFieldMapHint": "JSON object mapping dynamic form field IDs to PDF AcroForm field names. Example: {\"firstName\": \"topmostSubform[0].Page1[0].f1_01[0]\"}",
     "acroFieldMapPlaceholder": "{ \"fieldId\": \"AcroFormFieldName\", ... }",
     "saveAcroMap": "Save Map",
-    "acroMapSaved": "AcroField map saved"
+    "acroMapSaved": "AcroField map saved",
+    "acrofieldJsonMap": "AcroField JSON map"
   },
   "companyLocationDialog": {
     "editLocation": "Edit Location",
@@ -4925,7 +5155,10 @@
     "test": "Test",
     "settingsSaved": "settings saved",
     "connectionTestFailed": "Connection test failed",
-    "enterNewValue": "Enter new value to change"
+    "enterNewValue": "Enter new value to change",
+    "connect": "Connect",
+    "openNameDeveloperPortal": "Open {{name}} Developer Portal",
+    "sandboxTestEnvironmentSetup": "Sandbox / Test Environment Setup"
   },
   "stateWithholdingDialog": {
     "title": "State Tax Withholding Forms",
@@ -5224,6 +5457,84 @@
     },
     "preview": {
       "open": "Open"
+    },
+    "announcementOverlay": {
+      "allCount": "All ({{count}})"
+    },
+    "demoModuleSwitcher": {
+      "demoModuleSwitcher": "Demo module switcher",
+      "demoModules": "Demo modules",
+      "fullSuite": "Full suite",
+      "inventoryOnly": "Inventory only",
+      "modulesSummary": "Modules: {{summary}}",
+      "preview": "preview",
+      "switchWhatSTurnedOnTo": "Switch what's turned on to show the modular build live."
+    },
+    "dirtyFormIndicator": {
+      "formHasUnsavedChanges": "Form has unsaved changes",
+      "unsavedChanges": "Unsaved changes"
+    },
+    "draftRecoveryBanner": {
+      "discard": "Discard",
+      "discardRecoveredDraft": "Discard recovered draft",
+      "recoveredUnsavedChangesFromTimestamp": "Recovered unsaved changes from {{timestamp}}."
+    },
+    "draftRecoveryPrompt": {
+      "discardAll": "Discard All",
+      "goTo": "Go to",
+      "goToDisplaylabel": "Go to {{displayLabel}}",
+      "keepAll": "Keep All",
+      "reviewLater": "Review Later"
+    },
+    "drillableChart": {
+      "backToPreviousLevel": "Back to previous level",
+      "navigateToCrumb": "Navigate to {{crumb}}"
+    },
+    "loadingOverlay": {
+      "loading": "Loading"
+    },
+    "logoutDraftsDialog": {
+      "goTo": "Go to",
+      "goToDisplaylabel": "Go to {{displayLabel}}",
+      "logoutAnyway": "Logout Anyway",
+      "unsavedWork": "Unsaved work",
+      "unsavedWork2": "Unsaved Work",
+      "youHaveUnsavedChangesTheyWill": "You have unsaved changes. They will be preserved for when you return."
+    },
+    "presetApplyDialog": {
+      "alreadyAtThisPreset": "Already at this preset.",
+      "applyIsBlockedUntilTheseAre": "Apply is blocked until these are resolved.",
+      "applyPresetname": "Apply {{presetName}}",
+      "closeApplyDialog": "Close apply dialog",
+      "constraintViolationsCount": "Constraint violations ({{count}})",
+      "noCapabilityChangesDetected": "No capability changes detected.",
+      "noDataWillBeDeletedDisabled": "No data will be deleted. Disabled capabilities keep their data — re-enabling restores them.",
+      "reasonOptional": "Reason (optional)",
+      "theCurrentInstallStateMatchesPresetname": "The current install state matches {{presetName}} — no capabilities will change.",
+      "thisWillChange": "This will change",
+      "toDisableCount": "To disable ({{count}})",
+      "toEnableCount": "To enable ({{count}})",
+      "whyAreYouApplyingThisPreset": "Why are you applying this preset? Captured in audit log."
+    },
+    "productionLabel": {
+      "printLabel": "Print label"
+    },
+    "richTextEditor": {
+      "mentionAUser": "Mention a user",
+      "richTextEditorWithMentionSupport": "Rich text editor with mention support"
+    },
+    "stlViewer": {
+      "loading3dModel": "Loading 3D model..."
+    },
+    "toast": {
+      "copy": "Copy"
+    },
+    "trainingContextPanel": {
+      "closeTrainingHelpPanel": "Close training help panel",
+      "estimatedminutesMin": "~{{estimatedMinutes}} min",
+      "helpForThisPage": "Help for this page",
+      "noTrainingModulesForThisPage": "No training modules for this page yet",
+      "trainingHelpForThisPage": "Training help for this page"
     }
   },
   "address": {
@@ -5268,7 +5579,24 @@
     "system": "System",
     "updatedFields": "Updated {{count}} fields",
     "fieldChange": "1 field change",
-    "fieldChanges": "{{count}} field changes"
+    "fieldChanges": "{{count}} field changes",
+    "activityFilter": "Activity filter",
+    "addAComment": "Add a comment...",
+    "addANote": "Add a note...",
+    "allActions": "All Actions",
+    "allUsers": "All Users",
+    "conversation": "Conversation",
+    "deleteNote": "Delete note",
+    "history": "History",
+    "noActivityYet": "No activity yet",
+    "noActivityYet2": "No activity yet.",
+    "noCommentsYet": "No comments yet.",
+    "noHistoryYet": "No history yet.",
+    "noNotesYet": "No notes yet.",
+    "note": "Note",
+    "postComment": "Post comment",
+    "saveNote": "Save note",
+    "saveNote2": "Save Note"
   },
   "statusTimeline": {
     "currentStatus": "Current Status",
@@ -5934,7 +6262,14 @@
       "expires": "Expires",
       "createAsBlanket": "Blanket order",
       "createHint": "The ordered quantities become the agreed total; the vendor ships against releases you create on the PO."
-    }
+    },
+    "createRelease": "Create Release",
+    "lineItem": "Line Item",
+    "newRelease": "New Release",
+    "noReleasesYet": "No releases yet",
+    "purchaseOrderLineItems": "Purchase order line items",
+    "releasesCount": "Releases ({{count}})",
+    "requestedDeliveryDate": "Requested Delivery Date"
   },
   "poManage": {
     "packingSlipNumber": "Packing slip #",
@@ -6835,7 +7170,8 @@
       "inventoryLocation": "Inventory Location Flow",
       "customerRevenue": "Customer Revenue Breakdown",
       "trainingCompletion": "Training Completion",
-      "noFlowData": "No flow data available"
+      "noFlowData": "No flow data available",
+      "backToReports2": "Back to reports"
     },
     "colFailures": "Failures",
     "colDowntimeHours": "Downtime (h)",
@@ -7033,7 +7369,90 @@
     "traceQty": "Qty: {{qty}}",
     "jobId": "Job ID",
     "ecoSubmitForReview": "Submit for Review",
-    "ecoSubmitted": "ECO submitted for review"
+    "ecoSubmitted": "ECO submitted for review",
+    "addAffectedItem": "Add Affected Item",
+    "addItem": "Add Item",
+    "affectedItemsCount": "Affected Items ({{count}})",
+    "approve": "Approve",
+    "approvedBy": "Approved By",
+    "capaList": {
+      "advanceCapaPhase": "Advance CAPA phase",
+      "createCapa": "Create CAPA",
+      "impactDescription": "Impact Description",
+      "noCorrectiveActionsFound": "No corrective actions found",
+      "ownerId": "Owner ID",
+      "problemDescription": "Problem Description",
+      "source": "Source"
+    },
+    "changeDescription": "Change Description",
+    "changeType": "Change Type",
+    "createEngineeringChangeOrder": "Create Engineering Change Order",
+    "effectiveDate": "Effective Date",
+    "entityId": "Entity ID",
+    "entityType": "Entity Type",
+    "gageList": {
+      "accuracy": "Accuracy",
+      "accuracySpec": "Accuracy Spec",
+      "asFoundCondition": "As Found Condition",
+      "asLeftCondition": "As Left Condition",
+      "asset": "Asset",
+      "calInterval": "Cal Interval",
+      "calibratedDate": "Calibrated Date",
+      "calibrationHistory": "Calibration History",
+      "calibrationIntervalDays": "Calibration Interval (Days)",
+      "gageType": "Gage Type",
+      "labName": "Lab Name",
+      "lastCalibrated": "Last Calibrated",
+      "location": "Location",
+      "manufacturer": "Manufacturer",
+      "model": "Model",
+      "newGage": "New Gage",
+      "nextCalDue": "Next Cal Due",
+      "noCalibrationRecordsYet": "No calibration records yet",
+      "noGagesFound": "No gages found",
+      "range": "Range",
+      "rangeSpec": "Range Spec",
+      "recordCalibration": "Record Calibration",
+      "resolution": "Resolution",
+      "result": "Result",
+      "searchGages": "Search gages...",
+      "serialNumber": "Serial Number",
+      "standardsUsed": "Standards Used"
+    },
+    "impactAnalysis": "Impact Analysis",
+    "implement": "Implement",
+    "implemented": "Implemented",
+    "newValueJson": "New Value (JSON)",
+    "noAffectedItems": "No affected items",
+    "noAffectedItemsAddedYet": "No affected items added yet.",
+    "noEngineeringChangeOrdersFound": "No engineering change orders found",
+    "oldValueJson": "Old Value (JSON)",
+    "reasonForChange": "Reason for Change",
+    "removeAffectedItem": "Remove affected item",
+    "requestedBy": "Requested By",
+    "spcChart": {
+      "lslLsl": "LSL: {{lsl}}",
+      "noMeasurementDataYetRecordSubgroups": "No measurement data yet. Record subgroups to generate charts.",
+      "nominalNominal": "Nominal: {{nominal}}",
+      "points": "Points",
+      "rChart": "R Chart",
+      "recalculate": "Recalculate",
+      "selectACharacteristicToViewControl": "Select a characteristic to view control charts.",
+      "uslUsl": "USL: {{usl}}",
+      "xBarChart": "X-bar Chart"
+    },
+    "spcOocList": {
+      "acknowledge": "Acknowledge",
+      "acknowledgeEvent": "Acknowledge event",
+      "acknowledgeOocEvent": "Acknowledge OOC Event",
+      "acknowledgmentNotes": "Acknowledgment Notes",
+      "createCapa": "Create CAPA",
+      "noOutOfControlEvents": "No out-of-control events",
+      "rule": "Rule",
+      "severity": "Severity"
+    },
+    "viewDetails": "View details",
+    "viewEcoDetails": "View ECO details"
   },
   "ncrDetail": {
     "createTitle": "Create Non-Conformance",
@@ -7205,7 +7624,11 @@
     "ncrLotLine": "Lot: {{number}}",
     "ncrFailedItemsLine": "Checklist items that did not pass:",
     "ncrNotesLine": "Inspector notes: {{notes}}",
-    "templatePrompt": "This part has more than one inspection checklist. Pick the one to use."
+    "templatePrompt": "This part has more than one inspection checklist. Pick the one to use.",
+    "cancelInspection": "Cancel inspection",
+    "markInspectionAsFail": "Mark inspection as fail",
+    "markInspectionAsPass": "Mark inspection as pass",
+    "submitInspection": "Submit inspection"
   },
   "worker": {
     "title": "My Tasks",
@@ -8067,7 +8490,16 @@
     "fieldName": "Name",
     "fieldRate": "Rate (%)",
     "noRates": "No sales tax rates configured",
-    "rates": "Tax Rates"
+    "rates": "Tax Rates",
+    "descriptionOptional": "Description (optional)",
+    "eG2200SalesTax": "e.g. 2200-Sales-Tax",
+    "eGCaSales": "e.g. CA-SALES",
+    "effectiveFrom": "Effective From",
+    "effectiveFromDate": "Effective from date",
+    "exemptRate": "Exempt rate",
+    "glPostingAccountOptional": "GL Posting Account (optional)",
+    "setAsDefaultRate": "Set as default rate",
+    "stateCode": "State code"
   },
   "maintenance": {
     "title": "Predictive Maintenance",
@@ -8760,7 +9192,9 @@
     "rfq": {
       "confirmSendTitle": "Add vendors to RFQ?",
       "confirmSendMessage": "Add {{count}} vendor(s) to this RFQ? You will send it to them yourself."
-    }
+    },
+    "awardToVendor": "Award to vendor",
+    "recordResponse2": "Record response"
   },
   "approvals": {
     "title": "Approvals",
@@ -8929,6 +9363,50 @@
       "save": "Create Employee",
       "created": "Employee {{name}} created",
       "failed": "Could not create the employee"
+    },
+    "employeeActivityTab": {
+      "noActivityRecorded": "No activity recorded"
+    },
+    "employeeComplianceTab": {
+      "noComplianceFormsFound": "No compliance forms found"
+    },
+    "employeeEventsTab": {
+      "noUpcomingEvents": "No upcoming events"
+    },
+    "employeeExpensesTab": {
+      "noExpensesFound": "No expenses found"
+    },
+    "employeeJobsTab": {
+      "noActiveJobsAssigned": "No active jobs assigned"
+    },
+    "employeeOverviewTab": {
+      "barcode": "Barcode",
+      "cityStateZip": "City / State / ZIP",
+      "compliance": "Compliance",
+      "contactInformation": "Contact Information",
+      "department": "Department",
+      "emergencyContact": "Emergency Contact",
+      "employmentDetails": "Employment Details",
+      "jobTitle": "Job Title",
+      "personalEmail": "Personal Email",
+      "pinConfigured": "PIN Configured",
+      "relationship": "Relationship",
+      "rfidNfc": "RFID / NFC",
+      "role": "Role",
+      "systemAccess": "System Access",
+      "team": "Team",
+      "workEmail": "Work Email",
+      "workLocation": "Work Location"
+    },
+    "employeePayTab": {
+      "noPayStubsFound": "No pay stubs found"
+    },
+    "employeeTimeTab": {
+      "noTimeEntriesFound": "No time entries found",
+      "period": "Period"
+    },
+    "employeeTrainingTab": {
+      "noTrainingRecordsFound": "No training records found"
     }
   },
   "trainingPage": {
@@ -9143,7 +9621,8 @@
         "userDeactivated": "User Deactivated",
         "biApiKeyIssued": "BI API Key Issued",
         "biApiKeyRevoked": "BI API Key Revoked"
-      }
+      },
+      "auditLogPagination": "Audit log pagination"
     },
     "edi": {
       "tabs": {
@@ -9253,7 +9732,11 @@
         "unresolvedTooltip": "Our part number above matches no part in the catalog — the mapping saves, but an 850 line using it will still arrive unresolved until the part exists.",
         "saved": "Part-number map saved",
         "imported": "Imported {{imported}} new, updated {{updated}} ({{unresolved}} with no matching part)"
-      }
+      },
+      "deletePartner": "Delete partner",
+      "editPartner2": "Edit partner",
+      "retryTransaction": "Retry transaction",
+      "testConnection": "Test connection"
     },
     "events": {
       "events": "events",
@@ -9304,7 +9787,9 @@
         "eventCreated": "Event created",
         "eventCancelled": "Event cancelled",
         "eventDeleted": "Event deleted"
-      }
+      },
+      "cancelEvent": "Cancel event",
+      "editEvent2": "Edit event"
     },
     "mfa": {
       "title": "MFA Policy",
@@ -9332,7 +9817,8 @@
       },
       "requiredForRoles": "Required for Roles",
       "save": "Save",
-      "selectRoles": "Select roles"
+      "selectRoles": "Select roles",
+      "saving": "Saving..."
     },
     "domainEventFailures": {
       "failures": "failures",
@@ -9409,7 +9895,8 @@
         "corrected": "Time entry corrected",
         "correctionSaved": "Time correction saved"
       },
-      "allEmployees": "All Employees"
+      "allEmployees": "All Employees",
+      "correctTimeEntry": "Correct time entry"
     },
     "training": {
       "tabs": {
@@ -9471,7 +9958,8 @@
       "moduleBreakdown": "Module Breakdown",
       "completed": "Completed",
       "inProgress": "In Progress",
-      "notStarted": "Not Started"
+      "notStarted": "Not Started",
+      "closeDetailPanel": "Close detail panel"
     },
     "completeI9": {
       "title": "Complete I-9 Section 2",
@@ -9600,7 +10088,11 @@
     "tabSuggestions": "Suggestions",
     "vendor": "Vendor",
     "autoCustomerPo": "Auto-generate customer P.O. on order",
-    "autoCustomerPoHint": "When a quote is converted to a sales order, automatically generate the internal read-only customer purchase-order document."
+    "autoCustomerPoHint": "When a quote is converted to a sales order, automatically generate the internal read-only customer purchase-order document.",
+    "convertSelectedSuggestionsToPurchaseOrders": "Convert selected suggestions to purchase orders",
+    "dismissSelectedSuggestions": "Dismiss selected suggestions",
+    "runAutoPoAnalysisNow": "Run auto-PO analysis now",
+    "saveAutoPoSettings": "Save auto-PO settings"
   },
   "expenseSettings": {
     "title": "Expense Policy",
@@ -9618,7 +10110,8 @@
     "minDescriptionLength": "Minimum description length",
     "minDescriptionLengthHint": "Shortest acceptable expense description (in characters). Use 0 to allow blank descriptions.",
     "saved": "Expense policy saved",
-    "thresholdExceedsMax": "Auto-approve threshold cannot exceed the maximum expense amount."
+    "thresholdExceedsMax": "Auto-approve threshold cannot exceed the maximum expense amount.",
+    "saveExpensePolicySettings": "Save expense policy settings"
   },
   "welcomePage": {
     "brandName": "Armory Works Forge",
@@ -9670,7 +10163,27 @@
     "applyFailed": "Failed to apply discovery — check capability constraints.",
     "previewFailed": "Failed to preview discovery apply — check capability constraints.",
     "followUpFailed": "{{preset}} was applied, but some changes from your answers could not be saved. Review your capabilities and numbering settings.",
-    "adjustmentsTitle": "Also changed because of your answers"
+    "adjustmentsTitle": "Also changed because of your answers",
+    "answerTheOpeningQuestionsAndWe": "Answer the opening questions and we'll start surfacing a recommendation here.",
+    "branchBranch": "Branch {{branch}}",
+    "confidenceConfidencelabel": "Confidence: {{confidenceLabel}}",
+    "currentlyLeaningToward": "Currently leaning toward",
+    "jumpToRecommendation": "Jump to recommendation",
+    "large200OrMultiSite": "Large (200+) or multi-site",
+    "mid25200": "Mid (25–200)",
+    "noCapabilityChanges": "No capability changes",
+    "optionalButTheMoreYouSay": "Optional — but the more you say, the better the recommendation.",
+    "orPickAnAlternative": "Or pick an alternative",
+    "recommendedForYou": "Recommended for you",
+    "seeFullRecommendation": "See full recommendation",
+    "skipDiscovery": "Skip discovery",
+    "skipDiscoveryAndConfigureManually": "Skip discovery and configure manually",
+    "small125": "Small (1–25)",
+    "toggleConsultantMode": "Toggle consultant mode",
+    "useTheRecommendedPreset": "Use the recommended preset",
+    "whyWeRecommendThis": "Why we recommend this",
+    "yourAnswer": "Your answer",
+    "yourInstallationAlreadyMatchesThisPreset": "Your installation already matches this preset."
   },
   "workflow": {
     "parts": {
@@ -11520,7 +12033,8 @@
       "problemLabel": "What went wrong?",
       "send": "Send",
       "problemSent": "Sent. Your admins have it.",
-      "problemFailed": "Could not send. Try again when online."
+      "problemFailed": "Could not send. Try again when online.",
+      "forgeVersion": "Forge {{version}}"
     },
     "timer": {
       "running": "Running: {{jobNumber}} · {{elapsed}}",
@@ -11568,6 +12082,9 @@
       "rework": "Rework",
       "addRework": "Add rework",
       "reason": "Reason"
+    },
+    "pinPad": {
+      "backspace": "Backspace"
     }
   },
   "mobileAppWork": {

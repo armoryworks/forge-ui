@@ -5,6 +5,7 @@ import { environment } from '../../../../environments/environment';
 import { CapabilityService } from '../../services/capability.service';
 import { LayoutService } from '../../services/layout.service';
 import { DEMO_MODULES, DemoModuleStateService } from '../../services/demo-module-state.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 /**
  * Demo-only presenter control: a floating chip that switches which modules are
@@ -16,7 +17,7 @@ import { DEMO_MODULES, DemoModuleStateService } from '../../services/demo-module
 @Component({
   selector: 'app-demo-module-switcher',
   standalone: true,
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './demo-module-switcher.component.html',
   styleUrl: './demo-module-switcher.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

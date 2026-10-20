@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from '@angular/core';
 
 import { CapabilityService } from '../../../shared/services/capability.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 /**
  * Phase 4 Phase-A — admin-only diagnostic page that renders the loaded
@@ -15,7 +16,7 @@ import { CapabilityService } from '../../../shared/services/capability.service';
 @Component({
   selector: 'app-capabilities-debug',
   standalone: true,
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './capabilities-debug.component.html',
   styleUrl: './capabilities-debug.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

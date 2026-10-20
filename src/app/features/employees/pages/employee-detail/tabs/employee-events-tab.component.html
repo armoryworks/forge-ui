@@ -5,7 +5,7 @@
     [data]="events()"
     [loading]="loading()"
     emptyIcon="event"
-    emptyMessage="No upcoming events">
+    [emptyMessage]="'employees.employeeEventsTab.noUpcomingEvents' | translate">
 
     <ng-template appColumnCell="eventType" let-row>
       <span class="chip">
@@ -21,9 +21,9 @@
     </ng-template>
     <ng-template appColumnCell="isRequired" let-row>
       @if (row.isRequired) {
-        <span class="chip chip--warning">Required</span>
+        <span class="chip chip--warning">{{ 'common.required' | translate }}</span>
       } @else {
-        <span class="text-muted">Optional</span>
+        <span class="text-muted">{{ 'common.optional' | translate }}</span>
       }
     </ng-template>
     <ng-template appColumnCell="status" let-row>

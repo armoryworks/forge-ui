@@ -1,7 +1,7 @@
 <div class="integrations" [appLoadingBlock]="loading()">
   <div class="integrations__header">
-    <h2 class="integrations__title">Integrations</h2>
-    <p class="integrations__subtitle">Connect your external accounts for calendar sync, notifications, and file storage.</p>
+    <h2 class="integrations__title">{{ 'integrations.integrations' | translate }}</h2>
+    <p class="integrations__subtitle">{{ 'integrations.connectYourExternalAccountsForCalendar' | translate }}</p>
   </div>
 
   @for (group of categoryGroups(); track group.category) {
@@ -28,18 +28,18 @@
                 </div>
                 <div class="integration-card__meta">
                   @if (integration.isActive) {
-                    <span class="integration-card__status integration-card__status--active">Active</span>
+                    <span class="integration-card__status integration-card__status--active">{{ 'common.active' | translate }}</span>
                   } @else {
-                    <span class="integration-card__status integration-card__status--inactive">Inactive</span>
+                    <span class="integration-card__status integration-card__status--inactive">{{ 'common.inactive' | translate }}</span>
                   }
-                  <span class="integration-card__sync">Last sync: {{ formatDate(integration.lastSyncAt) }}</span>
+                  <span class="integration-card__sync">{{ 'integrations.lastSyncLastsyncat' | translate:{ lastSyncAt: formatDate(integration.lastSyncAt) } }}</span>
                 </div>
                 @if (integration.lastError) {
                   <div class="integration-card__error">{{ integration.lastError }}</div>
                 }
               </div>
               <div class="integration-card__actions">
-                <button class="icon-btn" aria-label="Test connection"
+                <button class="icon-btn" [attr.aria-label]="'integrations.testConnection' | translate"
                         [disabled]="testing() === integration.id"
                         (click)="testConnection(integration)">
                   <span class="material-icons-outlined"
@@ -47,7 +47,7 @@
                     {{ testing() === integration.id ? 'sync' : 'check_circle' }}
                   </span>
                 </button>
-                <button class="icon-btn icon-btn--danger" aria-label="Disconnect integration"
+                <button class="icon-btn icon-btn--danger" [attr.aria-label]="'integrations.disconnectIntegration' | translate"
                         (click)="disconnect(integration)">
                   <span class="material-icons-outlined">link_off</span>
                 </button>
@@ -73,7 +73,7 @@
               </div>
               <div class="integration-card__connect">
                 <span class="material-icons-outlined">add</span>
-                Connect
+                {{ 'integrations.connect' | translate }}
               </div>
             </button>
           }
@@ -81,7 +81,7 @@
       }
 
       @if (group.connected.length === 0 && group.available.length === 0) {
-        <app-empty-state icon="extension" message="No providers available for this category" />
+        <app-empty-state icon="extension" [message]="'integrations.noProvidersAvailableForThisCategory' | translate" />
       }
     </div>
   }

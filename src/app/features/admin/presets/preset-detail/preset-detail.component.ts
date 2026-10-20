@@ -24,6 +24,7 @@ import { CapabilityService } from '../../../../shared/services/capability.servic
 import { PresetService } from '../../../../shared/services/preset.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { PresetCapabilityRow } from '../../../../shared/models/preset.model';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface CapabilityAreaGroup {
   area: string;
@@ -42,7 +43,7 @@ interface CapabilityAreaGroup {
 @Component({
   selector: 'app-preset-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, PageLayoutComponent, LoadingBlockDirective],
+  imports: [CommonModule, RouterModule, PageLayoutComponent, LoadingBlockDirective, TranslatePipe],
   templateUrl: './preset-detail.component.html',
   styleUrl: './preset-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

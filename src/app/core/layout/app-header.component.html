@@ -8,7 +8,7 @@
     <img class="app-header__lockup" [src]="branding.wordmarkUrl()" alt="Forge" />
   </a>
   <div class="header-sep hide-tablet"></div>
-  <nav class="breadcrumb hide-tablet" aria-label="Breadcrumb">
+  <nav class="breadcrumb hide-tablet" [attr.aria-label]="'header.breadcrumb' | translate">
     <a routerLink="/dashboard" class="breadcrumb__link">{{ 'header.home' | translate }}</a>
     @if (hiddenCrumbs().length > 0) {
       <span class="material-icons-outlined breadcrumb__separator">chevron_right</span>
@@ -44,7 +44,7 @@
     <span class="material-icons-outlined search-icon">search</span>
     <input class="search-input" data-testid="header-search-input" type="text" [placeholder]="'header.searchPlaceholder' | translate"
            [formControl]="searchControl" (focus)="onSearchFocus()" (blur)="onSearchBlur()" (keydown.enter)="onSearchEnter()" />
-    <kbd>Ctrl+K</kbd>
+    <kbd>{{ 'header.ctrlK' | translate }}</kbd>
 
     @if (showResults()) {
       <div class="search-results" [class.search-results--two-col]="aiService.available()">

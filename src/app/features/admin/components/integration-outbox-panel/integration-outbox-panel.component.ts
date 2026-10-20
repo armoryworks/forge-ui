@@ -14,6 +14,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-integration-outbox-panel',
@@ -26,6 +27,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/co
     ColumnCellDirective,
     SelectComponent,
     LoadingBlockDirective,
+    TranslatePipe,
   ],
   templateUrl: './integration-outbox-panel.component.html',
   styleUrl: './integration-outbox-panel.component.scss',

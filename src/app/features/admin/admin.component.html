@@ -42,14 +42,14 @@
                 }
               </div>
             } @else {
-              <span class="chip">None</span>
+              <span class="chip">{{ 'admin.none' | translate }}</span>
             }
           </ng-template>
           <ng-template appColumnCell="compliance" let-user>
             @if (user.isServiceAccount) {
               <span class="text-muted">—</span>
             } @else if (user.canBeAssignedJobs) {
-              <span class="chip chip--success" title="All required items complete">
+              <span class="chip chip--success" [title]="'admin.allRequiredItemsComplete' | translate">
                 <span class="material-icons-outlined chip__icon">check_circle</span>
                 {{ user.complianceCompletedItems }}/{{ user.complianceTotalItems }}
               </span>
@@ -308,11 +308,11 @@
               </h3>
             </div>
             <div class="pay-period-lock-row">
-              <app-datepicker label="Lock entries through" [formControl]="lockThroughControl" />
+              <app-datepicker [label]="'admin.lockEntriesThrough' | translate" [formControl]="lockThroughControl" />
               <button class="action-btn action-btn--sm"
                 [disabled]="!lockThroughControl.value || lockingPeriod()"
                 (click)="confirmLockPayPeriod()"
-                aria-label="Lock pay period through selected date">
+                [attr.aria-label]="'admin.lockPayPeriodThroughSelectedDate' | translate">
                 <span class="material-icons-outlined">lock</span>
                 {{ 'admin.lockPeriod' | translate }}
               </button>
@@ -772,8 +772,8 @@
                         <th>{{ 'admin.order' | translate }}</th>
                         <th>{{ 'admin.code' | translate }}</th>
                         <th>{{ 'admin.label' | translate }}</th>
-                        <th>Effective From</th>
-                        <th>Effective To</th>
+                        <th>{{ 'admin.tariffs.effectiveFrom' | translate }}</th>
+                        <th>{{ 'admin.tariffs.effectiveTo' | translate }}</th>
                         <th>{{ 'common.status' | translate }}</th>
                       </tr>
                     </thead>
@@ -946,7 +946,7 @@
               <div class="rfid-reader__setup-actions">
                 <button class="action-btn action-btn--sm" type="button"
                   (click)="downloadSetupScript()"
-                  aria-label="Download RFID relay setup script">
+                  [attr.aria-label]="'admin.downloadRfidRelaySetupScript' | translate">
                   <span class="material-icons-outlined">download</span>
                   {{ 'rfid.downloadSetupScript' | translate }}
                 </button>
@@ -962,7 +962,7 @@
               [disabled]="!newScanValue.value?.trim()"
               (click)="addScanIdentifier()">
               <span class="material-icons-outlined">add</span>
-              Add
+              {{ 'common.add' | translate }}
             </button>
           </div>
         </div>

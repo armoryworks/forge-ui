@@ -53,11 +53,11 @@ describe('ClockEventTypeService', () => {
     },
     {
       id: 3,
-      code: 'StartBreak',
+      code: 'BreakStart',
       label: 'Start Break',
       metadata: JSON.stringify({
         statusMapping: 'OnBreak',
-        oppositeCode: 'EndBreak',
+        oppositeCode: 'BreakEnd',
         category: 'break',
         countsAsActive: false,
         isMismatchable: false,
@@ -67,11 +67,11 @@ describe('ClockEventTypeService', () => {
     },
     {
       id: 4,
-      code: 'EndBreak',
+      code: 'BreakEnd',
       label: 'End Break',
       metadata: JSON.stringify({
         statusMapping: 'In',
-        oppositeCode: 'StartBreak',
+        oppositeCode: 'BreakStart',
         category: 'break',
         countsAsActive: true,
         isMismatchable: false,
@@ -81,11 +81,11 @@ describe('ClockEventTypeService', () => {
     },
     {
       id: 5,
-      code: 'StartLunch',
+      code: 'LunchStart',
       label: 'Start Lunch',
       metadata: JSON.stringify({
         statusMapping: 'OnLunch',
-        oppositeCode: 'EndLunch',
+        oppositeCode: 'LunchEnd',
         category: 'lunch',
         countsAsActive: false,
         isMismatchable: false,
@@ -95,11 +95,11 @@ describe('ClockEventTypeService', () => {
     },
     {
       id: 6,
-      code: 'EndLunch',
+      code: 'LunchEnd',
       label: 'End Lunch',
       metadata: JSON.stringify({
         statusMapping: 'In',
-        oppositeCode: 'StartLunch',
+        oppositeCode: 'LunchStart',
         category: 'lunch',
         countsAsActive: true,
         isMismatchable: false,
@@ -285,18 +285,18 @@ describe('ClockEventTypeService', () => {
     expect(outCodes).toContain('ClockIn');
     expect(outCodes).not.toContain('ClockOut');
 
-    // When clocked in, ClockOut + StartBreak + StartLunch should be available
+    // When clocked in, ClockOut + BreakStart + LunchStart should be available
     const inActions = service.getAvailableActions('In');
     const inCodes = inActions.map((a) => a.code);
     expect(inCodes).toContain('ClockOut');
-    expect(inCodes).toContain('StartBreak');
-    expect(inCodes).toContain('StartLunch');
+    expect(inCodes).toContain('BreakStart');
+    expect(inCodes).toContain('LunchStart');
     expect(inCodes).not.toContain('ClockIn');
 
-    // When on break, EndBreak + ClockOut should be available
+    // When on break, BreakEnd + ClockOut should be available
     const breakActions = service.getAvailableActions('OnBreak');
     const breakCodes = breakActions.map((a) => a.code);
-    expect(breakCodes).toContain('EndBreak');
+    expect(breakCodes).toContain('BreakEnd');
     expect(breakCodes).toContain('ClockOut');
   });
 

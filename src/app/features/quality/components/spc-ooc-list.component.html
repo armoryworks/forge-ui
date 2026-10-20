@@ -1,14 +1,14 @@
 <div class="spc-ooc">
   <div class="filters-bar">
-    <app-select label="Status" [formControl]="statusFilter" [options]="statusOptions"
+    <app-select [label]="'common.status' | translate" [formControl]="statusFilter" [options]="statusOptions"
       (selectionChange)="applyFilters()" />
-    <app-select label="Severity" [formControl]="severityFilter" [options]="severityOptions"
+    <app-select [label]="'quality.spcOocList.severity' | translate" [formControl]="severityFilter" [options]="severityOptions"
       (selectionChange)="applyFilters()" />
   </div>
 
   <div [appLoadingBlock]="loading()">
     <app-data-table tableId="spc-ooc-events" [columns]="columns" [data]="events()"
-      emptyIcon="warning" emptyMessage="No out-of-control events">
+      emptyIcon="warning" [emptyMessage]="'quality.spcOocList.noOutOfControlEvents' | translate">
       <ng-template appColumnCell="detectedAt" let-row>
         <span class="text-muted">{{ row.detectedAt | date:'MM/dd/yyyy HH:mm' }}</span>
       </ng-template>
@@ -24,12 +24,12 @@
       <ng-template appColumnCell="actions" let-row>
         <div class="spc-ooc__actions">
           @if (row.status === 'Open') {
-            <button class="icon-btn" aria-label="Acknowledge event" (click)="openAcknowledge(row); $event.stopPropagation()">
+            <button class="icon-btn" [attr.aria-label]="'quality.spcOocList.acknowledgeEvent' | translate" (click)="openAcknowledge(row); $event.stopPropagation()">
               <span class="material-icons-outlined">done</span>
             </button>
           }
           @if (row.status === 'Open' || row.status === 'Acknowledged') {
-            <button class="icon-btn" aria-label="Create CAPA" (click)="createCapa(row); $event.stopPropagation()">
+            <button class="icon-btn" [attr.aria-label]="'quality.spcOocList.createCapa' | translate" (click)="createCapa(row); $event.stopPropagation()">
               <span class="material-icons-outlined">assignment</span>
             </button>
           }
@@ -40,23 +40,23 @@
 </div>
 
 @if (showAckDialog()) {
-  <app-dialog title="Acknowledge OOC Event" (closed)="closeAckDialog()">
+  <app-dialog [title]="'quality.spcOocList.acknowledgeOocEvent' | translate" (closed)="closeAckDialog()">
     <div class="spc-ooc__ack-info">
       <div class="spc-ooc__ack-field">
-        <span class="spc-ooc__ack-label">Rule</span>
+        <span class="spc-ooc__ack-label">{{ 'quality.spcOocList.rule' | translate }}</span>
         <span>{{ ackEvent()?.ruleName }}</span>
       </div>
       <div class="spc-ooc__ack-field">
-        <span class="spc-ooc__ack-label">Description</span>
+        <span class="spc-ooc__ack-label">{{ 'common.description' | translate }}</span>
         <span>{{ ackEvent()?.description }}</span>
       </div>
     </div>
-    <app-textarea label="Acknowledgment Notes" [formControl]="ackNotes" [rows]="3" />
+    <app-textarea [label]="'quality.spcOocList.acknowledgmentNotes' | translate" [formControl]="ackNotes" [rows]="3" />
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeAckDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeAckDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary" [disabled]="saving()" (click)="acknowledge()">
-        <span class="material-icons-outlined">done</span> Acknowledge
+        <span class="material-icons-outlined">done</span> {{ 'quality.spcOocList.acknowledge' | translate }}
       </button>
     </div>
   </app-dialog>

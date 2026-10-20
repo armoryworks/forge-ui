@@ -35,7 +35,7 @@
         @if (row.isRequired) {
           <span class="chip chip--warning">{{ 'adminPanels.events.required' | translate }}</span>
         } @else {
-          <span class="text-muted">Optional</span>
+          <span class="text-muted">{{ 'common.optional' | translate }}</span>
         }
       </ng-template>
       <ng-template appColumnCell="actions" let-row>
@@ -50,10 +50,10 @@
               <span class="material-icons-outlined">notifications_active</span>
             </button>
           }
-          <button class="icon-btn" aria-label="Edit event" (click)="openEdit(row); $event.stopPropagation()">
+          <button class="icon-btn" [attr.aria-label]="'adminPanels.events.editEvent2' | translate" (click)="openEdit(row); $event.stopPropagation()">
             <span class="material-icons-outlined">edit</span>
           </button>
-          <button class="icon-btn icon-btn--danger" aria-label="Cancel event" (click)="cancelEvent(row); $event.stopPropagation()">
+          <button class="icon-btn icon-btn--danger" [attr.aria-label]="'adminPanels.events.cancelEvent' | translate" (click)="cancelEvent(row); $event.stopPropagation()">
             <span class="material-icons-outlined">close</span>
           </button>
         </div>
@@ -79,12 +79,12 @@
 
       <div class="dialog-row">
         <app-datepicker [label]="'adminPanels.events.startDate' | translate" formControlName="startDate" [required]="true" data-testid="event-start-date" />
-        <app-input [label]="'adminPanels.events.startTime' | translate" formControlName="startTime" placeholder="HH:MM" [required]="true" data-testid="event-start-time" />
+        <app-input [label]="'adminPanels.events.startTime' | translate" formControlName="startTime" [placeholder]="'adminPanels.events.endTimePlaceholder' | translate" [required]="true" data-testid="event-start-time" />
       </div>
 
       <div class="dialog-row">
         <app-datepicker [label]="'adminPanels.events.endDate' | translate" formControlName="endDate" [required]="true" data-testid="event-end-date" />
-        <app-input [label]="'adminPanels.events.endTime' | translate" formControlName="endTime" placeholder="HH:MM" [required]="true" data-testid="event-end-time" />
+        <app-input [label]="'adminPanels.events.endTime' | translate" formControlName="endTime" [placeholder]="'adminPanels.events.endTimePlaceholder' | translate" [required]="true" data-testid="event-end-time" />
       </div>
 
       <app-textarea [label]="'adminPanels.events.description' | translate" formControlName="description" [rows]="3" data-testid="event-description" />

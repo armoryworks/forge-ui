@@ -6,11 +6,12 @@ import { EmployeeTimeEntry } from '../../../models/employee.model';
 import { DataTableComponent } from '../../../../../shared/components/data-table/data-table.component';
 import { ColumnDef } from '../../../../../shared/models/column-def.model';
 import { SelectComponent, SelectOption } from '../../../../../shared/components/select/select.component';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-employee-time-tab',
   standalone: true,
-  imports: [ReactiveFormsModule, DataTableComponent, SelectComponent],
+  imports: [ReactiveFormsModule, DataTableComponent, SelectComponent, TranslatePipe],
   templateUrl: './employee-time-tab.component.html',
   styleUrl: '../employee-detail-tabs.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

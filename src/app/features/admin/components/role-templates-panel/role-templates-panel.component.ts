@@ -19,6 +19,7 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
+import { TranslatePipe } from '@ngx-translate/core';
 
 /**
  * Phase 3 / WU-06 / C1 — Tenant-side CRUD over role templates (rollups).
@@ -41,6 +42,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
     SelectComponent,
     ValidationButtonComponent,
     MatTooltipModule,
+    TranslatePipe,
   ],
   templateUrl: './role-templates-panel.component.html',
   styleUrl: './role-templates-panel.component.scss',

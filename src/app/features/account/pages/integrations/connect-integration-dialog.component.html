@@ -1,7 +1,7 @@
 <app-dialog [title]="'Connect ' + data.provider.displayName" width="480px" (closed)="close()">
   <div [formGroup]="form">
-    <app-input label="Display Name (optional)"
-               placeholder="e.g., Work Calendar"
+    <app-input [label]="'account.connectIntegrationDialog.displayNameOptional' | translate"
+               [placeholder]="'account.connectIntegrationDialog.eGWorkCalendar' | translate"
                formControlName="displayName"
                data-testid="integration-display-name" />
 
@@ -30,7 +30,7 @@
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="close()">Cancel</button>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <app-validation-button [violations]="violations" [loading]="saving()">
     <button class="action-btn action-btn--primary"
             [disabled]="form.invalid || saving()"

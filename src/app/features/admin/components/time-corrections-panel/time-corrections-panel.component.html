@@ -13,7 +13,7 @@
   </div>
 
   <!-- Time Entries -->
-  <h3 class="time-corrections-panel__section-title">Time Entries</h3>
+  <h3 class="time-corrections-panel__section-title">{{ 'adminPanels.timeCorrections.timeEntries' | translate }}</h3>
   <div [appLoadingBlock]="isLoading()">
     <app-data-table
       tableId="admin-time-entries"
@@ -34,7 +34,7 @@
         {{ formatDuration(row.durationMinutes) }}
       </ng-template>
       <ng-template appColumnCell="actions" let-row>
-        <button class="icon-btn" aria-label="Correct time entry" (click)="openCorrection(row); $event.stopPropagation()">
+        <button class="icon-btn" [attr.aria-label]="'adminPanels.timeCorrections.correctTimeEntry' | translate" (click)="openCorrection(row); $event.stopPropagation()">
           <span class="material-icons-outlined">edit</span>
         </button>
       </ng-template>
@@ -42,7 +42,7 @@
   </div>
 
   <!-- Correction History -->
-  <h3 class="time-corrections-panel__section-title">Correction History</h3>
+  <h3 class="time-corrections-panel__section-title">{{ 'adminPanels.timeCorrections.correctionHistory' | translate }}</h3>
   <app-data-table
     tableId="admin-time-corrections"
     [columns]="correctionColumns"
@@ -69,46 +69,46 @@
 
 <!-- Correction Dialog -->
 @if (showDialog()) {
-  <app-dialog title="Correct Time Entry" width="520px" (closed)="closeDialog()">
+  <app-dialog [title]="'adminPanels.timeCorrections.correctTitle' | translate" width="520px" (closed)="closeDialog()">
     @if (editingEntry(); as entry) {
       <div class="correction-original">
-        <span class="correction-original__label">Employee:</span>
+        <span class="correction-original__label">{{ 'adminPanels.timeCorrections.employeeLabel' | translate }}</span>
         <span>{{ entry.userName }}</span>
-        <span class="correction-original__label">Original Date:</span>
+        <span class="correction-original__label">{{ 'adminPanels.timeCorrections.originalDate' | translate }}</span>
         <span>{{ entry.date | date:'MM/dd/yyyy' }}</span>
-        <span class="correction-original__label">Original Start:</span>
+        <span class="correction-original__label">{{ 'adminPanels.timeCorrections.originalStart' | translate }}</span>
         <span>{{ formatTime(entry.timerStart) }}</span>
-        <span class="correction-original__label">Original End:</span>
+        <span class="correction-original__label">{{ 'adminPanels.timeCorrections.originalEnd' | translate }}</span>
         <span>{{ formatTime(entry.timerStop) }}</span>
-        <span class="correction-original__label">Original Duration:</span>
+        <span class="correction-original__label">{{ 'adminPanels.timeCorrections.originalDuration' | translate }}</span>
         <span>{{ formatDuration(entry.durationMinutes) }}</span>
       </div>
     }
 
     <div [formGroup]="correctionForm">
-      <app-datepicker label="Date" formControlName="date" />
+      <app-datepicker [label]="'common.date' | translate" formControlName="date" />
       <div class="dialog-row">
-        <app-input label="Start Time" type="time" formControlName="startTime" />
-        <app-input label="End Time" type="time" formControlName="endTime" />
+        <app-input [label]="'adminPanels.timeCorrections.startTime' | translate" type="time" formControlName="startTime" />
+        <app-input [label]="'adminPanels.timeCorrections.endTime' | translate" type="time" formControlName="endTime" />
       </div>
       @if (calculatedDuration(); as dur) {
         <div class="correction-calculated-duration">
-          Calculated duration: <strong>{{ dur }}</strong>
+          {{ 'adminPanels.timeCorrections.calculatedDuration' | translate }} <strong>{{ dur }}</strong>
         </div>
       }
-      <app-input label="Category" formControlName="category" />
-      <app-textarea label="Notes" formControlName="notes" [rows]="2" />
-      <app-textarea label="Reason for Correction" formControlName="reason" [rows]="3" [required]="true" />
+      <app-input [label]="'common.category' | translate" formControlName="category" />
+      <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
+      <app-textarea [label]="'adminPanels.timeCorrections.reasonForCorrection' | translate" formControlName="reason" [rows]="3" [required]="true" />
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
       <app-validation-button [violations]="violations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
         [disabled]="correctionForm.invalid || saving()"
         (click)="saveCorrection()">
         <span class="material-icons-outlined">save</span>
-        Save Correction
+        {{ 'adminPanels.timeCorrections.saveCorrection' | translate }}
       </button>
       </app-validation-button>
     </div>

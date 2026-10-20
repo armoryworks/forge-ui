@@ -25,6 +25,7 @@ import {
   PresetCompareCapabilityRow,
   PresetCompareResponse,
 } from '../../../../shared/models/preset.model';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface ComparisonAreaGroup {
   area: string;
@@ -44,7 +45,7 @@ interface ComparisonAreaGroup {
 @Component({
   selector: 'app-preset-compare',
   standalone: true,
-  imports: [CommonModule, RouterModule, PageLayoutComponent, LoadingBlockDirective],
+  imports: [CommonModule, RouterModule, PageLayoutComponent, LoadingBlockDirective, TranslatePipe],
   templateUrl: './preset-compare.component.html',
   styleUrl: './preset-compare.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

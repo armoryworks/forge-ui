@@ -8,11 +8,12 @@ import { SpcChartData, SpcCharacteristic } from '../models/spc.model';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { KpiChipComponent } from '../../../shared/components/kpi-chip/kpi-chip.component';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-spc-chart',
   standalone: true,
-  imports: [DecimalPipe, BaseChartDirective, LoadingBlockDirective, KpiChipComponent],
+  imports: [DecimalPipe, BaseChartDirective, LoadingBlockDirective, KpiChipComponent, TranslatePipe],
   templateUrl: './spc-chart.component.html',
   styleUrl: './spc-chart.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

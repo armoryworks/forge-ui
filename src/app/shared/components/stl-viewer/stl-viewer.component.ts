@@ -8,11 +8,12 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-stl-viewer',
   standalone: true,
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './stl-viewer.component.html',
   styleUrl: './stl-viewer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -84,7 +84,7 @@
         [class.toggle-option--active]="chatSoundEnabled()"
         (click)="toggleChatSound()"
         [attr.aria-pressed]="chatSoundEnabled()"
-        aria-label="Toggle chat notification sound">
+        [attr.aria-label]="'account.toggleChatNotificationSound' | translate">
         <span class="material-icons-outlined toggle-option__icon">volume_up</span>
         <span class="toggle-option__label">{{ 'account.chatSound' | translate }}</span>
         <span class="toggle-option__status">{{ chatSoundEnabled() ? 'On' : 'Off' }}</span>
@@ -93,7 +93,7 @@
         [class.toggle-option--active]="chatVibrateEnabled()"
         (click)="toggleChatVibrate()"
         [attr.aria-pressed]="chatVibrateEnabled()"
-        aria-label="Toggle chat vibration">
+        [attr.aria-label]="'account.toggleChatVibration' | translate">
         <span class="material-icons-outlined toggle-option__icon">vibration</span>
         <span class="toggle-option__label">{{ 'account.chatVibrate' | translate }}</span>
         <span class="toggle-option__status">{{ chatVibrateEnabled() ? 'On' : 'Off' }}</span>
@@ -102,7 +102,7 @@
         [class.toggle-option--active]="chatPreviewPopupEnabled()"
         (click)="toggleChatPreviewPopup()"
         [attr.aria-pressed]="chatPreviewPopupEnabled()"
-        aria-label="Toggle desktop preview popups">
+        [attr.aria-label]="'account.toggleDesktopPreviewPopups' | translate">
         <span class="material-icons-outlined toggle-option__icon">picture_in_picture</span>
         <span class="toggle-option__label">{{ 'account.previewPopups' | translate }}</span>
         <span class="toggle-option__status">{{ chatPreviewPopupEnabled() ? 'On' : 'Off' }}</span>

@@ -47,7 +47,7 @@
         </ng-template>
         <ng-template appColumnCell="actions" let-row>
           <div class="edi-panel__actions">
-            <button class="icon-btn" aria-label="Test connection" (click)="testConnection(row); $event.stopPropagation()">
+            <button class="icon-btn" [attr.aria-label]="'adminPanels.edi.testConnection' | translate" (click)="testConnection(row); $event.stopPropagation()">
               <span class="material-icons-outlined">wifi_tethering</span>
             </button>
             <button class="icon-btn" [attr.aria-label]="'adminPanels.edi.partMap.title' | translate"
@@ -55,10 +55,10 @@
               (click)="openPartNumberMap(row); $event.stopPropagation()">
               <span class="material-icons-outlined">swap_horiz</span>
             </button>
-            <button class="icon-btn" aria-label="Edit partner" (click)="openEditPartner(row); $event.stopPropagation()">
+            <button class="icon-btn" [attr.aria-label]="'adminPanels.edi.editPartner2' | translate" (click)="openEditPartner(row); $event.stopPropagation()">
               <span class="material-icons-outlined">edit</span>
             </button>
-            <button class="icon-btn icon-btn--danger" aria-label="Delete partner" (click)="deletePartner(row); $event.stopPropagation()">
+            <button class="icon-btn icon-btn--danger" [attr.aria-label]="'adminPanels.edi.deletePartner' | translate" (click)="deletePartner(row); $event.stopPropagation()">
               <span class="material-icons-outlined">delete</span>
             </button>
           </div>
@@ -97,7 +97,7 @@
         </ng-template>
         <ng-template appColumnCell="actions" let-row>
           @if (row.status === 'Error') {
-            <button class="icon-btn" aria-label="Retry transaction" (click)="retryTransaction(row); $event.stopPropagation()">
+            <button class="icon-btn" [attr.aria-label]="'adminPanels.edi.retryTransaction' | translate" (click)="retryTransaction(row); $event.stopPropagation()">
               <span class="material-icons-outlined">refresh</span>
             </button>
           }
@@ -154,7 +154,7 @@
       <app-textarea [label]="'adminPanels.edi.notes' | translate" formControlName="notes" />
     </div>
     <div dialog-footer>
-      <button class="action-btn" (click)="showPartnerDialog.set(false)">Cancel</button>
+      <button class="action-btn" (click)="showPartnerDialog.set(false)">{{ 'common.cancel' | translate }}</button>
       <app-validation-button [violations]="partnerViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
         [disabled]="partnerForm.invalid || saving()"
@@ -207,7 +207,7 @@
       }
     </div>
     <div dialog-footer>
-      <button class="action-btn action-btn--primary" (click)="showTransactionDetail.set(false)">Close</button>
+      <button class="action-btn action-btn--primary" (click)="showTransactionDetail.set(false)">{{ 'common.close' | translate }}</button>
     </div>
   </app-dialog>
 }

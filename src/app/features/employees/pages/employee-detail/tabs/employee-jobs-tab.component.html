@@ -7,7 +7,7 @@
     [clickableRows]="true"
     (rowClick)="openJob($any($event))"
     emptyIcon="work"
-    emptyMessage="No active jobs assigned">
+    [emptyMessage]="'employees.employeeJobsTab.noActiveJobsAssigned' | translate">
 
     <ng-template appColumnCell="stageName" let-row>
       @if (row.stageName) {

@@ -110,6 +110,6 @@
   </section>
 
   <section class="account__section account__section--about">
-    <span class="account__sub">Forge {{ appInfo.version() }}@if (appInfo.build(); as build) { ({{ build }})} · {{ platform.name }}</span>
+    <span class="account__sub">{{ 'mobileApp.account.forgeVersion' | translate:{ version: appInfo.version() } }}@if (appInfo.build(); as build) { ({{ build }})} · {{ platform.name }}</span>
   </section>
 </div>

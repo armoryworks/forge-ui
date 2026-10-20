@@ -18,6 +18,7 @@ import { LoadingBlockDirective } from '../../../shared/directives/loading-block.
 import { FormValidationService } from '../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
 import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-capa-list',
@@ -28,6 +29,7 @@ import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
     SelectComponent, InputComponent, TextareaComponent, DatepickerComponent,
     DialogComponent, LoadingBlockDirective,
     ValidationButtonComponent,
+    TranslatePipe,
   ],
   templateUrl: './capa-list.component.html',
   styleUrl: './capa-list.component.scss',

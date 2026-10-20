@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { Draft } from '../../models/draft.model';
+import { TranslatePipe } from '@ngx-translate/core';
 
 export interface LogoutDraftsDialogData {
   drafts: Draft[];
@@ -16,7 +17,7 @@ export interface LogoutDraftsDialogResult {
 @Component({
   selector: 'app-logout-drafts-dialog',
   standalone: true,
-  imports: [DatePipe],
+  imports: [DatePipe, TranslatePipe],
   templateUrl: './logout-drafts-dialog.component.html',
   styleUrl: './logout-drafts-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

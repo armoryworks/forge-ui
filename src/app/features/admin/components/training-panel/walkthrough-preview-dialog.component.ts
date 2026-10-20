@@ -6,6 +6,7 @@ import { DialogComponent } from '../../../../shared/components/dialog/dialog.com
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { TrainingService } from '../../../training/services/training.service';
 import { WalkthroughStep, WalkthroughPopover } from '../../models/walkthrough-step.model';
+import { TranslatePipe } from '@ngx-translate/core';
 
 export interface WalkthroughPreviewDialogData {
   moduleId: number;
@@ -16,7 +17,7 @@ export interface WalkthroughPreviewDialogData {
 @Component({
   selector: 'app-walkthrough-preview-dialog',
   standalone: true,
-  imports: [FormsModule, DialogComponent],
+  imports: [FormsModule, DialogComponent, TranslatePipe],
   templateUrl: './walkthrough-preview-dialog.component.html',
   styleUrl: './walkthrough-preview-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

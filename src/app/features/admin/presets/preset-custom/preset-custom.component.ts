@@ -26,6 +26,7 @@ import {
   PresetCustomOverride,
   PresetCustomPreview,
 } from '../../../../shared/models/preset.model';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface CustomCapabilityRow extends PresetCapabilityRow {
   overridden: boolean;
@@ -52,7 +53,7 @@ interface CustomAreaGroup {
 @Component({
   selector: 'app-preset-custom',
   standalone: true,
-  imports: [CommonModule, RouterModule, PageLayoutComponent, LoadingBlockDirective],
+  imports: [CommonModule, RouterModule, PageLayoutComponent, LoadingBlockDirective, TranslatePipe],
   templateUrl: './preset-custom.component.html',
   styleUrl: './preset-custom.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -2,10 +2,10 @@
   <div class="draft-banner" role="status">
     <span class="material-icons-outlined draft-banner__icon">restore</span>
     <span class="draft-banner__text">
-      Recovered unsaved changes from {{ timestamp() | date:'MM/dd/yyyy hh:mm a' }}.
+      {{ 'shared.draftRecoveryBanner.recoveredUnsavedChangesFromTimestamp' | translate:{ timestamp: (timestamp() | date:'MM/dd/yyyy hh:mm a') } }}
     </span>
-    <button class="draft-banner__action" aria-label="Discard recovered draft" (click)="discarded.emit()">
-      Discard
+    <button class="draft-banner__action" [attr.aria-label]="'shared.draftRecoveryBanner.discardRecoveredDraft' | translate" (click)="discarded.emit()">
+      {{ 'shared.draftRecoveryBanner.discard' | translate }}
     </button>
   </div>
 }

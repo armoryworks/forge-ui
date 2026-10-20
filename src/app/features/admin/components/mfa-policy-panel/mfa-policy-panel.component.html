@@ -17,7 +17,7 @@
       data-testid="mfa-save-policy">
       @if (saving()) {
         <span class="material-icons-outlined mfa-policy__spinner">sync</span>
-        Saving...
+        {{ 'adminPanels.mfa.saving' | translate }}
       } @else {
         <span class="material-icons-outlined">save</span>
         {{ 'adminPanels.mfa.save' | translate }}
@@ -26,18 +26,18 @@
   </div>
 
   <div class="mfa-policy__compliance">
-    <h4>User Compliance</h4>
+    <h4>{{ 'adminPanels.mfa.userCompliance' | translate }}</h4>
     <app-data-table
       tableId="mfa-compliance"
       [columns]="columns"
       [data]="users()"
       emptyIcon="verified_user"
-      emptyMessage="No users found">
+      [emptyMessage]="'adminPanels.mfa.noUsers' | translate">
       <ng-template appColumnCell="mfaEnabled" let-row>
         @if ($any(row).mfaEnabled) {
-          <span class="chip chip--success">Enabled</span>
+          <span class="chip chip--success">{{ 'common.enabled' | translate }}</span>
         } @else {
-          <span class="chip chip--muted">Disabled</span>
+          <span class="chip chip--muted">{{ 'common.disabled' | translate }}</span>
         }
       </ng-template>
       <ng-template appColumnCell="mfaDeviceType" let-row>
@@ -49,7 +49,7 @@
       </ng-template>
       <ng-template appColumnCell="isEnforcedByPolicy" let-row>
         @if ($any(row).isEnforcedByPolicy) {
-          <span class="chip chip--warning">Enforced</span>
+          <span class="chip chip--warning">{{ 'adminPanels.mfa.cols.enforced' | translate }}</span>
         } @else {
           <span class="mfa-policy__none">—</span>
         }

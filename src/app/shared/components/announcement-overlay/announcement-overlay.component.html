@@ -17,7 +17,7 @@
             <span class="material-icons-outlined">check</span>
             {{ group.representative.requiresAcknowledgment ? 'I Understand' : 'Acknowledge' }}
             @if (group.count > 1) {
-              <span>All ({{ group.count }})</span>
+              <span>{{ 'shared.announcementOverlay.allCount' | translate:{ count: group.count } }}</span>
             }
           </button>
         </div>

@@ -145,7 +145,7 @@
                 [class.scan-inspect__result-btn--selected]="result() === 'Pass'"
                 [disabled]="!canPass()"
                 (click)="setResult('Pass')"
-                aria-label="Mark inspection as pass"
+                [attr.aria-label]="'kioskInspect.markInspectionAsPass' | translate"
                 data-testid="inspect-pass-btn">
           <span class="material-icons-outlined">check_circle</span>
           {{ 'shopFloor.inspectFlow.pass' | translate }}
@@ -153,7 +153,7 @@
         <button class="scan-inspect__result-btn scan-inspect__result-btn--fail"
                 [class.scan-inspect__result-btn--selected]="result() === 'Fail'"
                 (click)="setResult('Fail')"
-                aria-label="Mark inspection as fail"
+                [attr.aria-label]="'kioskInspect.markInspectionAsFail' | translate"
                 data-testid="inspect-fail-btn">
           <span class="material-icons-outlined">cancel</span>
           {{ 'shopFloor.inspectFlow.fail' | translate }}
@@ -168,14 +168,14 @@
       data-testid="inspect-notes" />
 
     <div class="scan-inspect__actions">
-      <button class="action-btn" (click)="cancel()" aria-label="Cancel inspection">
+      <button class="action-btn" (click)="cancel()" [attr.aria-label]="'kioskInspect.cancelInspection' | translate">
         <span class="material-icons-outlined">close</span>
         {{ 'common.cancel' | translate }}
       </button>
       <button class="action-btn action-btn--primary"
               [disabled]="!canSubmit()"
               (click)="submitInspection()"
-              aria-label="Submit inspection"
+              [attr.aria-label]="'kioskInspect.submitInspection' | translate"
               data-testid="inspect-submit-btn">
         <span class="material-icons-outlined">save</span>
         {{ 'shopFloor.inspectFlow.submitInspection' | translate }}

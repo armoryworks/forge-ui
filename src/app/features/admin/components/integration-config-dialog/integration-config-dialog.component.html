@@ -4,7 +4,7 @@
     <div class="sandbox-guide">
       <button class="sandbox-guide__toggle" (click)="toggleGuide()" [attr.aria-expanded]="guideExpanded()" aria-controls="sandbox-guide-steps">
         <span class="material-icons-outlined">science</span>
-        <span>Sandbox / Test Environment Setup</span>
+        <span>{{ 'integrationConfigDialog.sandboxTestEnvironmentSetup' | translate }}</span>
         <span class="material-icons-outlined sandbox-guide__chevron" [class.sandbox-guide__chevron--open]="guideExpanded()">expand_more</span>
       </button>
       @if (guideExpanded()) {
@@ -17,7 +17,7 @@
           @if (data.integration.sandboxUrl) {
             <a class="sandbox-guide__link" [href]="data.integration.sandboxUrl" target="_blank" rel="noopener noreferrer">
               <span class="material-icons-outlined">open_in_new</span>
-              Open {{ data.integration.name }} Developer Portal
+              {{ 'integrationConfigDialog.openNameDeveloperPortal' | translate:{ name: data.integration.name } }}
             </a>
           }
         </div>
@@ -76,7 +76,7 @@
           } @else {
             <span class="material-icons-outlined">link</span>
           }
-          Connect
+          {{ 'integrationConfigDialog.connect' | translate }}
         </button>
       }
       <span class="footer-spacer"></span>

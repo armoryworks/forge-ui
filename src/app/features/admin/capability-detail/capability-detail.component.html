@@ -5,18 +5,18 @@
       type="button"
       (click)="back()"
       data-testid="capability-detail-back-btn"
-      aria-label="Back to capabilities">
+      [attr.aria-label]="'admin.capability.backToCapabilities' | translate">
       <span class="material-icons-outlined">arrow_back</span>
-      Back
+      {{ 'common.back' | translate }}
     </button>
     <button
       class="action-btn"
       type="button"
       (click)="refreshAll()"
       data-testid="capability-detail-refresh-btn"
-      aria-label="Refresh">
+      [attr.aria-label]="'common.refresh' | translate">
       <span class="material-icons-outlined">refresh</span>
-      Refresh
+      {{ 'common.refresh' | translate }}
     </button>
   </ng-container>
 
@@ -25,7 +25,7 @@
       @if (!entry()) {
         <div class="cap-detail__empty">
           <span class="material-icons-outlined">hourglass_empty</span>
-          <span>Loading capability…</span>
+          <span>{{ 'admin.capability.loadingCapability' | translate }}</span>
         </div>
       } @else {
         @if (glOpeningReason() !== null) {
@@ -41,7 +41,7 @@
               <span>Default: {{ entry()!.isDefaultOn ? 'on' : 'off' }}</span>
               @if (entry()!.requiresRoles) {
                 <span class="cap-detail__divider">·</span>
-                <span>Requires roles: {{ entry()!.requiresRoles }}</span>
+                <span>{{ 'admin.capability.requiresRolesRequiresroles' | translate:{ requiresRoles: entry()!.requiresRoles } }}</span>
               }
             </div>
             @if (entry()!.description) {
@@ -68,7 +68,7 @@
 
         <section class="cap-detail__section" [appLoadingBlock]="relationsLoading()">
           <div class="cap-detail__section-header">
-            <span class="cap-detail__section-title">Relationships</span>
+            <span class="cap-detail__section-title">{{ 'admin.capability.relationships' | translate }}</span>
           </div>
 
           @if (relations(); as rel) {
@@ -76,10 +76,10 @@
               <div class="relation-group" data-testid="capability-detail-dependencies">
                 <div class="relation-group__heading">
                   <span class="material-icons-outlined">link</span>
-                  Depends on ({{ rel.dependencies.length }})
+                  {{ 'admin.capability.dependsOnCount' | translate:{ count: rel.dependencies.length } }}
                 </div>
                 @if (rel.dependencies.length === 0) {
-                  <div class="relation-group__empty">No dependencies</div>
+                  <div class="relation-group__empty">{{ 'admin.capability.noDependencies' | translate }}</div>
                 } @else {
                   <ul class="relation-list" role="list">
                     @for (dep of rel.dependencies; track dep.code) {
@@ -107,10 +107,10 @@
               <div class="relation-group" data-testid="capability-detail-dependents">
                 <div class="relation-group__heading">
                   <span class="material-icons-outlined">trending_flat</span>
-                  Required by ({{ rel.dependents.length }})
+                  {{ 'admin.capability.requiredByCount' | translate:{ count: rel.dependents.length } }}
                 </div>
                 @if (rel.dependents.length === 0) {
-                  <div class="relation-group__empty">No dependents — safe to disable</div>
+                  <div class="relation-group__empty">{{ 'admin.capability.noDependentsSafeToDisable' | translate }}</div>
                 } @else {
                   <ul class="relation-list" role="list">
                     @for (dep of rel.dependents; track dep.code) {
@@ -139,7 +139,7 @@
                 <div class="relation-group" data-testid="capability-detail-mutexes">
                   <div class="relation-group__heading relation-group__heading--warn">
                     <span class="material-icons-outlined">block</span>
-                    Mutually exclusive with ({{ rel.mutexes.length }})
+                    {{ 'admin.capability.mutuallyExclusiveWithCount' | translate:{ count: rel.mutexes.length } }}
                   </div>
                   <ul class="relation-list" role="list">
                     @for (peer of rel.mutexes; track peer.code) {
@@ -188,11 +188,11 @@
 
         <section class="cap-detail__section" [appLoadingBlock]="auditLoading()">
           <div class="cap-detail__section-header">
-            <span class="cap-detail__section-title">Recent activity</span>
-            <span class="cap-detail__section-meta">last {{ auditLog().length }}</span>
+            <span class="cap-detail__section-title">{{ 'admin.capability.recentActivity' | translate }}</span>
+            <span class="cap-detail__section-meta">{{ 'admin.capability.lastCount' | translate:{ count: auditLog().length } }}</span>
           </div>
           @if (auditLog().length === 0) {
-            <div class="cap-detail__audit-empty">No audit entries yet.</div>
+            <div class="cap-detail__audit-empty">{{ 'admin.capability.noAuditEntriesYet' | translate }}</div>
           } @else {
             <ul class="cap-detail__audit" role="list" data-testid="capability-detail-audit">
               @for (row of auditLog(); track row.id) {

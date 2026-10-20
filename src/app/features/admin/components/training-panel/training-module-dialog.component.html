@@ -1,37 +1,37 @@
 <app-dialog [title]="isEditing ? 'Edit Module' : 'New Training Module'" width="800px" [draftConfig]="draftConfig" [draftFormGroup]="form" (closed)="cancel()">
 
   <div [formGroup]="form">
-    <app-input data-testid="module-title" label="Title" formControlName="title" [required]="true" [maxlength]="200" />
+    <app-input data-testid="module-title" [label]="'common.title' | translate" formControlName="title" [required]="true" [maxlength]="200" />
 
-    <app-input data-testid="module-slug" label="Slug" formControlName="slug" [maxlength]="200"
+    <app-input data-testid="module-slug" [label]="'admin.trainingModuleDialog.slug' | translate" formControlName="slug" [maxlength]="200"
       placeholder="auto-generated-from-title" />
 
-    <app-textarea data-testid="module-summary" label="Summary" formControlName="summary" [rows]="2" [required]="true" [maxlength]="500" />
+    <app-textarea data-testid="module-summary" [label]="'common.summary' | translate" formControlName="summary" [rows]="2" [required]="true" [maxlength]="500" />
 
     <div class="dialog-row">
-      <app-select data-testid="module-content-type" label="Content Type" formControlName="contentType"
+      <app-select data-testid="module-content-type" [label]="'admin.trainingModuleDialog.contentType' | translate" formControlName="contentType"
         [options]="contentTypeOptions" [required]="true" />
-      <app-input data-testid="module-est-minutes" label="Estimated Minutes" formControlName="estimatedMinutes"
+      <app-input data-testid="module-est-minutes" [label]="'admin.trainingModuleDialog.estimatedMinutes' | translate" formControlName="estimatedMinutes"
         type="number" [required]="true" />
     </div>
 
-    <app-input data-testid="module-app-routes" label="App Routes" formControlName="appRoutes"
+    <app-input data-testid="module-app-routes" [label]="'admin.trainingModuleDialog.appRoutes' | translate" formControlName="appRoutes"
       placeholder="/kanban, /backlog" />
 
-    <app-input data-testid="module-tags" label="Tags" formControlName="tags"
+    <app-input data-testid="module-tags" [label]="'admin.trainingModuleDialog.tags' | translate" formControlName="tags"
       placeholder="onboarding, kanban" />
 
-    <app-toggle data-testid="module-published" label="Published" formControlName="isPublished" />
+    <app-toggle data-testid="module-published" [label]="'admin.trainingModuleDialog.published' | translate" formControlName="isPublished" />
 
     <app-textarea data-testid="module-content-json" [label]="contentJsonLabel()" formControlName="contentJson" [rows]="12" />
 
     <p class="training-module-dialog__json-hint">
-      Edit the content JSON directly. See training docs for format by type.
+      {{ 'admin.trainingModuleDialog.editTheContentJsonDirectlySee' | translate }}
     </p>
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="cancel()">Cancel</button>
+    <button class="action-btn" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
     <app-validation-button [violations]="violations" [loading]="saving()">
     <button class="action-btn action-btn--primary" data-testid="module-save-btn"
       [disabled]="form.invalid || saving()"

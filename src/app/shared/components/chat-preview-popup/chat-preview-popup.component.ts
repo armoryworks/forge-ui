@@ -4,6 +4,7 @@ import { ChatNotificationService } from '../../services/chat-notification.servic
 import { LayoutService } from '../../services/layout.service';
 import { AvatarComponent } from '../avatar/avatar.component';
 import { ChatMessageEvent } from '../../../features/chat/models/chat-message-event.model';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface PreviewItem {
   message: ChatMessageEvent;
@@ -16,7 +17,7 @@ const AUTO_DISMISS_MS = 5000;
 @Component({
   selector: 'app-chat-preview-popup',
   standalone: true,
-  imports: [AvatarComponent],
+  imports: [AvatarComponent, TranslatePipe],
   templateUrl: './chat-preview-popup.component.html',
   styleUrl: './chat-preview-popup.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

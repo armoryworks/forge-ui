@@ -23,7 +23,7 @@
           <app-input [label]="'account.lastName' | translate" formControlName="lastName" [maxlength]="100" [required]="true" />
         </div>
         <div class="account-page__row">
-          <app-input [label]="'account.initials' | translate" formControlName="initials" placeholder="e.g. DH" [maxlength]="3" />
+          <app-input [label]="'account.initials' | translate" formControlName="initials" [placeholder]="'account.eGDh' | translate" [maxlength]="3" />
           <app-datepicker [label]="'account.dateOfBirth' | translate" formControlName="dateOfBirth" [min]="dobMin" [max]="dobMax" />
         </div>
         <app-select [label]="'account.gender' | translate" formControlName="gender" [options]="genderOptions" />
@@ -58,10 +58,10 @@
       (click)="save()">
       @if (saving()) {
         <span class="material-icons-outlined account-page__spinner">sync</span>
-        Saving...
+        {{ 'account.saving' | translate }}
       } @else {
         <span class="material-icons-outlined">save</span>
-        Save
+        {{ 'common.save' | translate }}
       }
     </button>
     </app-validation-button>

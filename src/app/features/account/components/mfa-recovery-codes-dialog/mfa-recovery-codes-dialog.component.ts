@@ -5,11 +5,12 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { MfaService } from '../../services/mfa.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-mfa-recovery-codes-dialog',
   standalone: true,
-  imports: [DialogComponent],
+  imports: [DialogComponent, TranslatePipe],
   templateUrl: './mfa-recovery-codes-dialog.component.html',
   styleUrl: './mfa-recovery-codes-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

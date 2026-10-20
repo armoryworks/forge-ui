@@ -16,7 +16,7 @@
         <span class="admin-overview-card__label">{{ 'adminOverview.people.activeLabel' | translate }}</span>
       </div>
       @if (roleBreakdown().length > 0) {
-        <ul class="admin-overview-card__chips" aria-label="Role breakdown">
+        <ul class="admin-overview-card__chips" [attr.aria-label]="'adminOverview.connections.roleBreakdown' | translate">
           @for (entry of roleBreakdown(); track entry.role) {
             <li class="chip chip--muted">
               <span class="admin-overview-card__chip-count">{{ entry.count }}</span>

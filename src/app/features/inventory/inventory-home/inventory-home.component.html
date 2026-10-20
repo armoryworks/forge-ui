@@ -10,7 +10,7 @@
     </a>
   </header>
 
-  <nav class="tab-bar" role="tablist" aria-label="Inventory views">
+  <nav class="tab-bar" role="tablist" [attr.aria-label]="'inventory.home.inventoryViews' | translate">
     <button class="tab" role="tab" [class.tab--active]="activeTab() === 'kiosk'"
       [attr.aria-selected]="activeTab() === 'kiosk'" (click)="switchTab('kiosk')">
       <span class="material-icons-outlined">touch_app</span>{{ 'inventory.home.tabs.kiosk' | translate }}

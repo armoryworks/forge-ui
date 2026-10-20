@@ -19,6 +19,7 @@ import { ColumnCellDirective } from '../../../shared/directives/column-cell.dire
 import { FormValidationService } from '../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../shared/utils/date.utils';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-gage-list',
@@ -28,6 +29,7 @@ import { toIsoDate } from '../../../shared/utils/date.utils';
     DataTableComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     DatepickerComponent, EmptyStateComponent, LoadingBlockDirective, ValidationButtonComponent,
     ColumnCellDirective,
+    TranslatePipe,
   ],
   templateUrl: './gage-list.component.html',
   styleUrl: './gage-list.component.scss',

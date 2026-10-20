@@ -12,6 +12,7 @@ import { DialogComponent } from '../../../shared/components/dialog/dialog.compon
 import { TextareaComponent } from '../../../shared/components/textarea/textarea.component';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-spc-ooc-list',
@@ -21,6 +22,7 @@ import { LoadingBlockDirective } from '../../../shared/directives/loading-block.
     DataTableComponent, ColumnCellDirective,
     SelectComponent, DialogComponent, TextareaComponent,
     LoadingBlockDirective,
+    TranslatePipe,
   ],
   templateUrl: './spc-ooc-list.component.html',
   styleUrl: './spc-ooc-list.component.scss',

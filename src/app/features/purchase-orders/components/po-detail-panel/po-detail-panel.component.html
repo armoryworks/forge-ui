@@ -308,7 +308,7 @@
           }
         </div>
         @if (po.lines.length > 0) {
-          <table class="lines-table" aria-label="Purchase order line items">
+          <table class="lines-table" [attr.aria-label]="'purchaseOrders.purchaseOrderLineItems' | translate">
             <thead>
               <tr>
                 <th scope="col">{{ 'purchaseOrders.partNumber' | translate }}</th>
@@ -389,9 +389,9 @@
       @if (po.isBlanket) {
         <div class="lines-section">
           <div class="lines-section__header">
-            <span class="info-label">Releases ({{ releases().length }})</span>
+            <span class="info-label">{{ 'purchaseOrders.releasesCount' | translate:{ count: releases().length } }}</span>
             <button class="action-btn action-btn--sm" (click)="openCreateRelease()">
-              <span class="material-icons-outlined">add</span> New Release
+              <span class="material-icons-outlined">add</span> {{ 'purchaseOrders.newRelease' | translate }}
             </button>
           </div>
           <app-data-table
@@ -399,7 +399,7 @@
             [columns]="releaseColumns"
             [data]="releases()"
             emptyIcon="local_shipping"
-            emptyMessage="No releases yet">
+            [emptyMessage]="'purchaseOrders.noReleasesYet' | translate">
 
             <ng-template appColumnCell="partNumber" let-row>
               <span class="lines-table__mono">{{ $any(row).partNumber ?? '—' }}</span>
@@ -632,19 +632,19 @@
 
 <!-- Create Release Dialog -->
 @if (showCreateReleaseDialog()) {
-  <app-dialog title="Create Release" width="420px" (closed)="showCreateReleaseDialog.set(false)">
+  <app-dialog [title]="'purchaseOrders.createRelease' | translate" width="420px" (closed)="showCreateReleaseDialog.set(false)">
     <div [formGroup]="releaseForm">
-      <app-select label="Line Item" formControlName="purchaseOrderLineId" [options]="lineOptions()" [required]="true" />
-      <app-input label="Quantity" type="number" formControlName="quantity" [required]="true" />
-      <app-datepicker label="Requested Delivery Date" formControlName="requestedDeliveryDate" [required]="true" />
-      <app-textarea label="Notes" formControlName="notes" />
+      <app-select [label]="'purchaseOrders.lineItem' | translate" formControlName="purchaseOrderLineId" [options]="lineOptions()" [required]="true" />
+      <app-input [label]="'common.quantity' | translate" type="number" formControlName="quantity" [required]="true" />
+      <app-datepicker [label]="'purchaseOrders.requestedDeliveryDate' | translate" formControlName="requestedDeliveryDate" [required]="true" />
+      <app-textarea [label]="'common.notes' | translate" formControlName="notes" />
     </div>
     <div dialog-footer>
-      <button class="action-btn" (click)="showCreateReleaseDialog.set(false)">Cancel</button>
+      <button class="action-btn" (click)="showCreateReleaseDialog.set(false)">{{ 'common.cancel' | translate }}</button>
       <app-validation-button [violations]="releaseViolations" [loading]="releaseSaving()">
       <button class="action-btn action-btn--primary"
         [disabled]="releaseForm.invalid || releaseSaving()"
-        (click)="saveRelease()">Create</button>
+        (click)="saveRelease()">{{ 'common.create' | translate }}</button>
       </app-validation-button>
     </div>
   </app-dialog>

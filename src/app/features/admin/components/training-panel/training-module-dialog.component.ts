@@ -13,6 +13,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { TrainingModuleRow } from './training-panel.component';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface TrainingModuleDetail extends TrainingModuleRow {
   slug?: string;
@@ -31,6 +32,7 @@ interface TrainingModuleDetail extends TrainingModuleRow {
     TextareaComponent,
     ToggleComponent,
     ValidationButtonComponent,
+    TranslatePipe,
   ],
   templateUrl: './training-module-dialog.component.html',
   styleUrl: './training-module-dialog.component.scss',

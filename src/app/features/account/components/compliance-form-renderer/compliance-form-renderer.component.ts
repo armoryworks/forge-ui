@@ -23,6 +23,7 @@ import {
   FormSection,
   normalizeFormPages,
 } from '../../../../shared/models/compliance-form-definition.model';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-compliance-form-renderer',
@@ -32,6 +33,7 @@ import {
     ReactiveFormsModule,
     ValidationButtonComponent,
     DynamicQbFormControlComponent,
+    TranslatePipe,
   ],
   templateUrl: './compliance-form-renderer.component.html',
   styleUrl: './compliance-form-renderer.component.scss',

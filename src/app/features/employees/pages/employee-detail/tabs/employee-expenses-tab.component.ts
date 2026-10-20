@@ -6,11 +6,12 @@ import { EmployeeExpense } from '../../../models/employee.model';
 import { DataTableComponent } from '../../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../../shared/models/column-def.model';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-employee-expenses-tab',
   standalone: true,
-  imports: [CurrencyPipe, DatePipe, DataTableComponent, ColumnCellDirective],
+  imports: [CurrencyPipe, DatePipe, DataTableComponent, ColumnCellDirective, TranslatePipe],
   templateUrl: './employee-expenses-tab.component.html',
   styleUrl: '../employee-detail-tabs.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

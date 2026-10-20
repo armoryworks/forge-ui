@@ -2,7 +2,7 @@
   @if (loading()) {
     <div class="recovery__loading">
       <span class="material-icons-outlined recovery__spinner">sync</span>
-      <p>Generating recovery codes...</p>
+      <p>{{ 'account.mfaRecoveryCodesDialog.generatingRecoveryCodes' | translate }}</p>
     </div>
   } @else {
     <div class="recovery__content">
@@ -20,11 +20,11 @@
       <div class="recovery__actions">
         <button class="action-btn" (click)="copyAll()" type="button">
           <span class="material-icons-outlined">content_copy</span>
-          Copy All
+          {{ 'account.mfaRecoveryCodesDialog.copyAll' | translate }}
         </button>
         <button class="action-btn" (click)="download()" type="button">
           <span class="material-icons-outlined">download</span>
-          Download
+          {{ 'common.download' | translate }}
         </button>
       </div>
     </div>
@@ -33,7 +33,7 @@
   <div dialog-footer>
     <button class="action-btn action-btn--primary" (click)="close()" type="button">
       <span class="material-icons-outlined">check</span>
-      I've Saved These Codes
+      {{ 'account.mfaRecoveryCodesDialog.iVeSavedTheseCodes' | translate }}
     </button>
   </div>
 </app-dialog>

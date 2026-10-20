@@ -2,11 +2,11 @@
   <ng-container toolbar>
     <button class="action-btn action-btn--sm" type="button"
       (click)="back()" data-testid="preset-custom-back-btn">
-      <span class="material-icons-outlined">chevron_left</span> Presets
+      <span class="material-icons-outlined">chevron_left</span> {{ 'admin.presetCustom.presets' | translate }}
     </button>
     <button class="action-btn action-btn--sm" type="button"
       (click)="resetOverrides()" data-testid="preset-custom-reset-btn">
-      <span class="material-icons-outlined">restart_alt</span> Reset to defaults
+      <span class="material-icons-outlined">restart_alt</span> {{ 'admin.presetCustom.resetToDefaults' | translate }}
     </button>
   </ng-container>
 
@@ -14,9 +14,9 @@
     <div class="preset-custom" [appLoadingBlock]="loading()">
       <header class="preset-custom__hero">
         <div class="preset-custom__hero-left">
-          <h2>Custom Configuration</h2>
+          <h2>{{ 'admin.presetCustom.customConfiguration' | translate }}</h2>
           <p>
-            Start from the catalog defaults and toggle individual capabilities. Hand-pick the exact set you want for this installation.
+            {{ 'admin.presetCustom.startFromTheCatalogDefaultsAnd' | translate }}
           </p>
         </div>
         <button class="action-btn action-btn--primary"
@@ -25,23 +25,23 @@
           (click)="applyCustom()"
           data-testid="preset-custom-apply-btn">
           <span class="material-icons-outlined">check</span>
-          Apply Custom
+          {{ 'admin.presetCustom.applyCustom' | translate }}
         </button>
       </header>
 
       <section class="preset-custom__stats">
         <div class="preset-custom__stat">
           <span class="preset-custom__stat-value">{{ capabilityCount() }}</span>
-          <span class="preset-custom__stat-label">Capabilities enabled</span>
+          <span class="preset-custom__stat-label">{{ 'admin.presetCustom.capabilitiesEnabled' | translate }}</span>
         </div>
         <div class="preset-custom__stat">
           <span class="preset-custom__stat-value">{{ deltaCount() }}</span>
-          <span class="preset-custom__stat-label">Will change if applied</span>
+          <span class="preset-custom__stat-label">{{ 'admin.presetCustom.willChangeIfApplied' | translate }}</span>
         </div>
         <div class="preset-custom__stat" data-testid="preset-custom-violation-count"
           [class.preset-custom__stat--error]="violationCount() > 0">
           <span class="preset-custom__stat-value">{{ violationCount() }}</span>
-          <span class="preset-custom__stat-label">Constraint violations</span>
+          <span class="preset-custom__stat-label">{{ 'admin.presetCustom.constraintViolations' | translate }}</span>
         </div>
       </section>
 
@@ -50,10 +50,10 @@
           <section class="preset-custom__violations" data-testid="preset-custom-violations">
             <h3 class="preset-custom__section-title">
               <span class="material-icons-outlined">warning</span>
-              Constraint violations
+              {{ 'admin.presetCustom.constraintViolations' | translate }}
             </h3>
             <p class="preset-custom__violations-help">
-              Resolve each violation before applying. Toggle the capability listed back to fix the issue.
+              {{ 'admin.presetCustom.resolveEachViolationBeforeApplyingToggle' | translate }}
             </p>
             <ul class="preset-custom__violation-list">
               @for (v of p.violations; track v.code + v.capability) {
@@ -66,7 +66,7 @@
         <section class="preset-custom__capabilities" data-testid="preset-custom-capabilities">
           <h3 class="preset-custom__section-title">
             <span class="material-icons-outlined">view_list</span>
-            Capabilities
+            {{ 'admin.presetCustom.capabilities' | translate }}
           </h3>
           @for (group of groupedCapabilities(); track group.area) {
             <div class="preset-custom__area">
@@ -89,9 +89,9 @@
                     <code class="preset-custom__capability-code">{{ row.code }}</code>
                     <span class="preset-custom__capability-name">{{ row.name }}</span>
                     @if (row.overridden) {
-                      <span class="chip chip--info preset-custom__override-tag">Override</span>
+                      <span class="chip chip--info preset-custom__override-tag">{{ 'admin.presetCustom.override' | translate }}</span>
                     } @else if (row.defaultOn) {
-                      <span class="chip preset-custom__default-tag">Default on</span>
+                      <span class="chip preset-custom__default-tag">{{ 'admin.presetCustom.defaultOn' | translate }}</span>
                     }
                   </li>
                 }

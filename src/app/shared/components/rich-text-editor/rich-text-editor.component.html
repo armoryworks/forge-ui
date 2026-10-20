@@ -7,7 +7,7 @@
     [disabled]="disabled()"
     [value]="value()"
     role="combobox"
-    aria-label="Rich text editor with mention support"
+    [attr.aria-label]="'shared.richTextEditor.richTextEditorWithMentionSupport' | translate"
     [attr.aria-expanded]="showMentionPicker() && filteredUsers().length > 0"
     [attr.aria-controls]="showMentionPicker() && filteredUsers().length > 0 ? 'rte-mention-listbox' : null"
     aria-autocomplete="list"
@@ -21,7 +21,7 @@
     <div class="rte__mention-picker"
          role="listbox"
          id="rte-mention-listbox"
-         aria-label="Mention a user">
+         [attr.aria-label]="'shared.richTextEditor.mentionAUser' | translate">
       @for (user of filteredUsers(); track user.id; let i = $index) {
         <button
           #mentionOption

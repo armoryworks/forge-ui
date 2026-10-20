@@ -1,9 +1,9 @@
 @if (open()) {
-  <div class="side-panel-backdrop" role="button" tabindex="0" aria-label="Close" (click)="onBackdropClick()" (keydown.enter)="onBackdropClick()"></div>
+  <div class="side-panel-backdrop" role="button" tabindex="0" [attr.aria-label]="'common.close' | translate" (click)="onBackdropClick()" (keydown.enter)="onBackdropClick()"></div>
   <aside class="side-panel">
     <div class="side-panel__header">
       <span class="side-panel__title">{{ title() }}</span>
-      <button class="icon-btn" (click)="close()" aria-label="Close" matTooltip="Close" matTooltipPosition="above">
+      <button class="icon-btn" (click)="close()" [attr.aria-label]="'common.close' | translate" [matTooltip]="'common.close' | translate" matTooltipPosition="above">
         <span class="material-icons-outlined">close</span>
       </button>
     </div>
