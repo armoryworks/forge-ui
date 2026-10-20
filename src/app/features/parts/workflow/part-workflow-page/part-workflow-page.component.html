@@ -1,4 +1,11 @@
-@if (run() && definition()) {
+@if (loadError(); as err) {
+  <app-detail-load-error
+    [error]="err"
+    closeLabel="detailLoadError.backToList"
+    [retryable]="true"
+    (closed)="backToList()"
+    (retry)="retryLoad()" />
+} @else if (run() && definition()) {
   <!-- Card-on-scrim presentation: the workflow shell renders as a sized
        card centered on a backdrop, instead of taking the entire viewport.
        Continue/Back live inside the card — significantly closer to the

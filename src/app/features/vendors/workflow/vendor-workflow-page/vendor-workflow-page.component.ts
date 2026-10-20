@@ -11,6 +11,9 @@ import { MissingValidator } from '../../../../shared/models/workflow-missing-val
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowDefinition } from '../../../../shared/models/workflow-definition.model';
 import { WorkflowComponent } from '../../../../shared/components/workflow/workflow.component';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { notFoundError } from '../../../../shared/utils/not-found-error';
+import { parsePositiveId } from '../../../../shared/utils/parse-positive-id';
 import { WorkflowRun } from '../../../../shared/models/workflow-run.model';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 
@@ -37,7 +40,7 @@ import { VendorService } from '../../services/vendor.service';
 @Component({
   selector: 'app-vendor-workflow-page',
   standalone: true,
-  imports: [TranslatePipe, WorkflowComponent],
+  imports: [TranslatePipe, WorkflowComponent, DetailLoadErrorComponent],
   templateUrl: './vendor-workflow-page.component.html',
   styleUrl: './vendor-workflow-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,23 +59,18 @@ export class VendorWorkflowPageComponent {
   protected readonly definition = signal<WorkflowDefinition | null>(null);
   protected readonly validators = signal<EntityValidator[]>([]);
   protected readonly missingValidators = signal<MissingValidator[]>([]);
+  protected readonly loadError = signal<unknown>(null);
 
   // ── URL-bound state ──
-  private readonly vendorIdFromUrl = toSignal(
-    this.route.paramMap.pipe(map((p) => {
-      const raw = p.get('id');
-      const n = raw ? parseInt(raw, 10) : 0;
-      return Number.isFinite(n) && n > 0 ? n : 0;
-    })),
-    { initialValue: 0 },
+  private readonly vendorIdParam = toSignal(
+    this.route.paramMap.pipe(map((p) => p.get('id'))),
+    { initialValue: null },
   );
 
+  private readonly vendorIdFromUrl = computed(() => parsePositiveId(this.vendorIdParam()) ?? 0);
+
   private readonly runIdFromUrl = toSignal(
-    this.route.queryParamMap.pipe(map((p) => {
-      const raw = p.get('runId');
-      const n = raw ? parseInt(raw, 10) : 0;
-      return Number.isFinite(n) && n > 0 ? n : 0;
-    })),
+    this.route.queryParamMap.pipe(map((p) => parsePositiveId(p.get('runId')) ?? 0)),
     { initialValue: 0 },
   );
 
@@ -103,6 +101,10 @@ export class VendorWorkflowPageComponent {
       const vendorId = this.vendorIdFromUrl();
       const runId = this.runIdFromUrl();
       const definitionId = this.definitionIdFromUrl();
+      if (this.vendorIdParam() !== null && !vendorId) {
+        this.loadError.set(notFoundError());
+        return;
+      }
       if (!definitionId) {
         this.router.navigate(['/vendors'], {
           queryParams: vendorId ? { detail: `vendor:${vendorId}` } : {},
@@ -253,6 +255,7 @@ export class VendorWorkflowPageComponent {
   }
 
   private loadWorkflowContext(vendorId: number, definitionId: string): void {
+    this.loadError.set(null);
     this.loading.start('vendor-workflow', this.translate.instant('vendors.workflow.page.loading'));
     forkJoin({
       vendor: this.vendorService.getVendorById(vendorId),
@@ -310,10 +313,19 @@ export class VendorWorkflowPageComponent {
       },
       error: (err: unknown) => {
         this.loading.stop('vendor-workflow');
-        this.snackbar.errorFrom(err, 'vendors.workflow.page.loadFailed');
-        this.router.navigate(['/vendors']);
+        this.loadError.set(err);
       },
     });
+  }
+
+  protected retryLoad(): void {
+    const vendorId = this.vendorIdFromUrl();
+    const definitionId = this.definitionIdFromUrl();
+    if (vendorId && definitionId) this.loadWorkflowContext(vendorId, definitionId);
+  }
+
+  protected backToList(): void {
+    this.router.navigate(['/vendors']);
   }
 
   protected onModeChanged(mode: 'express' | 'guided'): void {

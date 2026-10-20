@@ -11,6 +11,9 @@ import { MissingValidator } from '../../../../shared/models/workflow-missing-val
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowDefinition } from '../../../../shared/models/workflow-definition.model';
 import { WorkflowComponent } from '../../../../shared/components/workflow/workflow.component';
+import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { notFoundError } from '../../../../shared/utils/not-found-error';
+import { parsePositiveId } from '../../../../shared/utils/parse-positive-id';
 import { WorkflowRun } from '../../../../shared/models/workflow-run.model';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { PartDetail } from '../../models/part-detail.model';
@@ -28,7 +31,7 @@ import { PartsService } from '../../services/parts.service';
 @Component({
   selector: 'app-part-workflow-page',
   standalone: true,
-  imports: [TranslatePipe, WorkflowComponent],
+  imports: [TranslatePipe, WorkflowComponent, DetailLoadErrorComponent],
   templateUrl: './part-workflow-page.component.html',
   styleUrl: './part-workflow-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,16 +50,15 @@ export class PartWorkflowPageComponent {
   protected readonly definition = signal<WorkflowDefinition | null>(null);
   protected readonly validators = signal<EntityValidator[]>([]);
   protected readonly missingValidators = signal<MissingValidator[]>([]);
+  protected readonly loadError = signal<unknown>(null);
 
   // ── URL-bound state ──
-  private readonly partIdFromUrl = toSignal(
-    this.route.paramMap.pipe(map((p) => {
-      const raw = p.get('id');
-      const n = raw ? parseInt(raw, 10) : 0;
-      return Number.isFinite(n) && n > 0 ? n : 0;
-    })),
-    { initialValue: 0 },
+  private readonly partIdParam = toSignal(
+    this.route.paramMap.pipe(map((p) => p.get('id'))),
+    { initialValue: null },
   );
+
+  private readonly partIdFromUrl = computed(() => parsePositiveId(this.partIdParam()) ?? 0);
 
   /**
    * Run id from query string. Used by the entity-less /parts/new path before
@@ -65,11 +67,7 @@ export class PartWorkflowPageComponent {
    * back-nav can resume the same in-flight run.
    */
   private readonly runIdFromUrl = toSignal(
-    this.route.queryParamMap.pipe(map((p) => {
-      const raw = p.get('runId');
-      const n = raw ? parseInt(raw, 10) : 0;
-      return Number.isFinite(n) && n > 0 ? n : 0;
-    })),
+    this.route.queryParamMap.pipe(map((p) => parsePositiveId(p.get('runId')) ?? 0)),
     { initialValue: 0 },
   );
 
@@ -106,6 +104,10 @@ export class PartWorkflowPageComponent {
       const partId = this.partIdFromUrl();
       const runId = this.runIdFromUrl();
       const definitionId = this.definitionIdFromUrl();
+      if (this.partIdParam() !== null && !partId) {
+        this.loadError.set(notFoundError());
+        return;
+      }
       if (!definitionId) {
         this.router.navigate(['/parts'], {
           queryParams: partId ? { detail: `part:${partId}` } : {},
@@ -228,6 +230,7 @@ export class PartWorkflowPageComponent {
   }
 
   private loadWorkflowContext(partId: number, definitionId: string): void {
+    this.loadError.set(null);
     this.loading.start('part-workflow', this.translate.instant('parts.workflow.page.loading'));
 
     forkJoin({
@@ -291,10 +294,19 @@ export class PartWorkflowPageComponent {
       },
       error: (err: unknown) => {
         this.loading.stop('part-workflow');
-        this.snackbar.errorFrom(err, 'parts.workflow.page.loadFailed');
-        this.router.navigate(['/parts']);
+        this.loadError.set(err);
       },
     });
+  }
+
+  protected retryLoad(): void {
+    const partId = this.partIdFromUrl();
+    const definitionId = this.definitionIdFromUrl();
+    if (partId && definitionId) this.loadWorkflowContext(partId, definitionId);
+  }
+
+  protected backToList(): void {
+    this.router.navigate(['/parts']);
   }
 
   protected onModeChanged(mode: 'express' | 'guided'): void {

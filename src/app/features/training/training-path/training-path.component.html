@@ -75,8 +75,13 @@
           }
         }
       </div>
-    } @else if (!isLoading()) {
-      <app-empty-state icon="route" message="Learning path not found" />
+    } @else if (loadError(); as err) {
+      <app-detail-load-error
+        [error]="err"
+        closeLabel="detailLoadError.backToList"
+        [retryable]="true"
+        (closed)="goBack()"
+        (retry)="load()" />
     }
   </div>
 </div>
