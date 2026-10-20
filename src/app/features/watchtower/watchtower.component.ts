@@ -51,6 +51,12 @@ const FEED_TYPE_LABEL_KEYS: Readonly<Record<string, string>> = {
   Scrape: 'watchtower.feedType.scrape',
 };
 
+const STATUS_LABEL_KEYS: Readonly<Record<string, string>> = {
+  Pending: 'watchtower.status.pending',
+  Applied: 'watchtower.status.applied',
+  Dismissed: 'watchtower.status.dismissed',
+};
+
 @Component({
   selector: 'app-watchtower',
   standalone: true,
@@ -122,6 +128,11 @@ export class WatchtowerComponent {
     return key ? this.translate.instant(key) : feedType;
   }
 
+  protected statusLabel(status: string): string {
+    const key = STATUS_LABEL_KEYS[status];
+    return key ? this.translate.instant(key) : status;
+  }
+
   protected switchTab(tab: WatchtowerTab): void {
     this.router.navigate(['..', tab], { relativeTo: this.route });
   }
@@ -148,6 +159,8 @@ export class WatchtowerComponent {
         this.polling.set(false);
         if (r.activeSources === 0) {
           this.snackbar.info(this.translate.instant('watchtower.noActiveSources'));
+        } else if (r.failedSources > 0) {
+          this.snackbar.warn(this.translate.instant('watchtower.polledWithFailures', { count: r.created, failed: r.failedSources }));
         } else {
           this.snackbar.success(this.translate.instant('watchtower.polled', { count: r.created }));
         }

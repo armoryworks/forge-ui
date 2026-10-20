@@ -11137,6 +11137,7 @@
       "eventType": "Tipo de evento del calendario"
     },
     "noActiveSources": "No hay fuentes activas, así que no se consultó nada.",
+    "polledWithFailures": "Fuentes consultadas — {{count}} propuesta(s) nueva(s). No se pudo acceder a {{failed}} fuente(s); inténtelo más tarde.",
     "domain": {
       "crossCutting": "General",
       "environmental": "Ambiental",

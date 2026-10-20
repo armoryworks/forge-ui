@@ -11137,6 +11137,7 @@
       "eventType": "Calendar event type"
     },
     "noActiveSources": "No sources are active, so nothing was polled.",
+    "polledWithFailures": "Polled sources — {{count}} new proposal(s). {{failed}} source(s) could not be reached; try again later.",
     "domain": {
       "crossCutting": "Cross-cutting",
       "environmental": "Environmental",

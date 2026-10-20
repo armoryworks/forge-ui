@@ -8,7 +8,7 @@ export const DASHBOARD_TOUR: TourDefinition = {
       description: 'This is your personalized overview. Widgets show key metrics and upcoming work.',
     },
     {
-      element: '.dashboard-grid',
+      element: '.grid-stack',
       title: 'Dashboard Widgets',
       description: 'Drag and resize widgets to customize your layout. Your preferences are saved automatically.',
       side: 'top',

@@ -15,11 +15,12 @@ interface WatchtowerInternals {
   applyProposal(p: { id: number; title: string }): void;
   domainLabel(domain: string): string;
   feedTypeLabel(feedType: string): string;
+  statusLabel(status: string): string;
 }
 
 describe('WatchtowerComponent', () => {
   let poll: ReturnType<typeof vi.fn>;
-  let snackbar: { success: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
+  let snackbar: { success: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn>; warn: ReturnType<typeof vi.fn> };
   let dialogOpen: ReturnType<typeof vi.fn>;
 
   function create(): WatchtowerInternals {
@@ -28,7 +29,7 @@ describe('WatchtowerComponent', () => {
 
   beforeEach(() => {
     poll = vi.fn();
-    snackbar = { success: vi.fn(), info: vi.fn() };
+    snackbar = { success: vi.fn(), info: vi.fn(), warn: vi.fn() };
     dialogOpen = vi.fn(() => ({ afterClosed: () => of(undefined) }));
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
@@ -45,7 +46,7 @@ describe('WatchtowerComponent', () => {
   });
 
   it('says nothing was polled when no source is active', () => {
-    poll.mockReturnValue(of({ created: 0, activeSources: 0 }));
+    poll.mockReturnValue(of({ created: 0, activeSources: 0, failedSources: 0 }));
 
     create().poll();
 
@@ -54,12 +55,21 @@ describe('WatchtowerComponent', () => {
   });
 
   it('reports new proposals when sources were polled', () => {
-    poll.mockReturnValue(of({ created: 2, activeSources: 3 }));
+    poll.mockReturnValue(of({ created: 2, activeSources: 3, failedSources: 0 }));
 
     create().poll();
 
     expect(snackbar.success).toHaveBeenCalledWith('watchtower.polled');
     expect(snackbar.info).not.toHaveBeenCalled();
+  });
+
+  it('warns when some sources could not be reached', () => {
+    poll.mockReturnValue(of({ created: 1, activeSources: 3, failedSources: 2 }));
+
+    create().poll();
+
+    expect(snackbar.warn).toHaveBeenCalledWith('watchtower.polledWithFailures');
+    expect(snackbar.success).not.toHaveBeenCalled();
   });
 
   it('opens the apply dialog with focus on its first field', () => {
@@ -74,5 +84,13 @@ describe('WatchtowerComponent', () => {
     expect(component.feedTypeLabel('Api')).toBe('watchtower.feedType.api');
     expect(component.domainLabel('cross-cutting')).toBe('watchtower.domain.crossCutting');
     expect(component.domainLabel('medical-devices')).toBe('Medical Devices');
+  });
+
+  it('labels proposal statuses through translation keys', () => {
+    const component = create();
+
+    expect(component.statusLabel('Pending')).toBe('watchtower.status.pending');
+    expect(component.statusLabel('Applied')).toBe('watchtower.status.applied');
+    expect(component.statusLabel('Dismissed')).toBe('watchtower.status.dismissed');
   });
 });
