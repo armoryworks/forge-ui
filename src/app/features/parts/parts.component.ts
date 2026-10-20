@@ -57,7 +57,7 @@ type ViewMode = 'table' | 'cards';
   standalone: true,
   imports: [
     EnumLabelPipe,
-    DatePipe, DateTimePipe, NgTemplateOutlet,
+    DateTimePipe, NgTemplateOutlet,
     ReactiveFormsModule, TranslatePipe,
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent,

@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -21,7 +20,7 @@ import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
   selector: 'app-sequence-instances-page',
   standalone: true,
   imports: [
-    EnumLabelPipe, DatePipe, DateTimePipe, ReactiveFormsModule, TranslatePipe, EntityPickerComponent, InputComponent, PageHeaderComponent, SelectComponent,
+    EnumLabelPipe, DateTimePipe, ReactiveFormsModule, TranslatePipe, EntityPickerComponent, InputComponent, PageHeaderComponent, SelectComponent,
     SequenceInstancePanelComponent,
   ],
   templateUrl: './sequence-instances-page.component.html',

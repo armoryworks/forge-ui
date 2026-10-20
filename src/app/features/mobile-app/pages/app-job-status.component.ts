@@ -41,7 +41,7 @@ type PendingAction = 'advance' | 'note' | 'photo' | 'timer';
 @Component({
   selector: 'app-app-job-status',
   standalone: true,
-  imports: [DateOnlyPipe, DatePipe, DateTimePipe, TranslatePipe, TermTextPipe, IdentityPromptComponent, JobOperationsComponent],
+  imports: [DateOnlyPipe, DateTimePipe, TranslatePipe, TermTextPipe, IdentityPromptComponent, JobOperationsComponent],
   templateUrl: './app-job-status.component.html',
   styleUrl: './app-job-status.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

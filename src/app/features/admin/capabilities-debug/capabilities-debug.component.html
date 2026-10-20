@@ -8,7 +8,7 @@
       @if (descriptor(); as d) {
         <span><strong>{{ 'admin.capabilitiesDebug.total' | translate }}</strong> {{ d.totalCount }}</span>
         <span><strong>{{ 'admin.capabilitiesDebug.enabled' | translate }}</strong> {{ enabledCount() }}</span>
-        <span><strong>{{ 'admin.capabilitiesDebug.generated' | translate }}</strong> {{ d.generatedAt | date: 'medium' }}</span>
+        <span><strong>{{ 'admin.capabilitiesDebug.generated' | translate }}</strong> {{ d.generatedAt | dateTime }}</span>
       } @else {
         <span>{{ 'admin.capabilitiesDebug.notLoaded' | translate }}</span>
       }

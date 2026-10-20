@@ -44,7 +44,7 @@ export interface RfqDetailDialogData {
   standalone: true,
   imports: [
     EnumLabelPipe,
-    DatePipe, DateTimePipe, DateOnlyPipe, ReactiveFormsModule, TranslatePipe,
+    DateTimePipe, DateOnlyPipe, ReactiveFormsModule, TranslatePipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     DatepickerComponent, DataTableComponent, ColumnCellDirective,
     LoadingBlockDirective, ValidationButtonComponent, EntityLinkComponent,

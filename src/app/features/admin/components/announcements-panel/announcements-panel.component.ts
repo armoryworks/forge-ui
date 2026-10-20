@@ -32,7 +32,7 @@ import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
     TabListDirective,
     TabDirective,
     ScrollCueDirective,
-    DatePipe, DateTimePipe,
+    DateTimePipe,
     ReactiveFormsModule,
     DataTableComponent,
     ColumnCellDirective,

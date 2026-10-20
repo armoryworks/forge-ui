@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../../shared/services/auth.service';
 import { QUALITY_MANAGER_ROLES } from '../quality-roles';
@@ -23,7 +22,7 @@ import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
   standalone: true,
   imports: [
     EnumLabelPipe,
-    DatePipe, DateTimePipe, ReactiveFormsModule, TranslatePipe,
+    DateTimePipe, ReactiveFormsModule, TranslatePipe,
     DataTableComponent, ColumnCellDirective,
     SelectComponent, DialogComponent, TextareaComponent,
     LoadingBlockDirective,

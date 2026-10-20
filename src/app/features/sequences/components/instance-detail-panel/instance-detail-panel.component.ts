@@ -21,7 +21,7 @@ import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 @Component({
   selector: 'app-sequence-instance-panel',
   standalone: true,
-  imports: [EnumLabelPipe, DatePipe, DateTimePipe, TranslatePipe],
+  imports: [EnumLabelPipe, DateTimePipe, TranslatePipe],
   templateUrl: './instance-detail-panel.component.html',
   styleUrl: './instance-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
