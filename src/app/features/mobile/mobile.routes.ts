@@ -51,7 +51,39 @@ export const MOBILE_ROUTES: Routes = [
       {
         path: 'account',
         data: { titleKey: 'mobileLegacyPages.account.account' },
-        loadComponent: () => import('./pages/mobile-account.component').then(m => m.MobileAccountComponent),
+        children: [
+          {
+            path: '',
+            pathMatch: 'full',
+            loadComponent: () => import('./pages/mobile-account.component').then(m => m.MobileAccountComponent),
+          },
+          {
+            path: '',
+            loadComponent: () => import('./pages/mobile-account-section.component').then(m => m.MobileAccountSectionComponent),
+            children: [
+              {
+                path: 'profile',
+                data: { titleKey: 'account.profile' },
+                loadComponent: () => import('../account/pages/profile/account-profile.component').then(m => m.AccountProfileComponent),
+              },
+              {
+                path: 'security',
+                data: { titleKey: 'account.security' },
+                loadComponent: () => import('../account/pages/security/account-security.component').then(m => m.AccountSecurityComponent),
+              },
+              {
+                path: 'customization',
+                data: { titleKey: 'account.customization' },
+                loadComponent: () => import('../account/pages/customization/account-customization.component').then(m => m.AccountCustomizationComponent),
+              },
+              {
+                path: 'integrations',
+                data: { titleKey: 'admin.tabs.integrations' },
+                loadComponent: () => import('../account/pages/integrations/account-integrations.component').then(m => m.AccountIntegrationsComponent),
+              },
+            ],
+          },
+        ],
       },
     ],
   },

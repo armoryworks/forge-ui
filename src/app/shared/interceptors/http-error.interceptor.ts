@@ -1,11 +1,12 @@
 import { HttpContext, HttpContextToken, HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { Injector, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, retry, throwError, timer } from 'rxjs';
 
 import { TranslateService } from '@ngx-translate/core';
 
 import { CapabilityDisabledError } from '../errors/capability-disabled.error';
+import { LayoutService } from '../services/layout.service';
 import { SnackbarService } from '../services/snackbar.service';
 import { ToastService } from '../services/toast.service';
 import { parseServerValidationEnvelope } from '../utils/server-validation.utils';
@@ -27,6 +28,7 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
   const toast = inject(ToastService);
   const translate = inject(TranslateService);
   const router = inject(Router);
+  const injector = inject(Injector);
 
   const isExternal = /^https?:\/\//i.test(req.url) && !req.url.startsWith(window.location.origin);
 
@@ -79,7 +81,7 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
           // the Observable simply errors with the tagged error, which the
           // toast/snackbar layers explicitly ignore.
           if (isMfaEnrollmentRequired(error)) {
-            void router.navigate(['/account/security']);
+            void router.navigate([injector.get(LayoutService).getMfaEnrollmentRoute()]);
             markHttpErrorShown(error);
             break;
           }

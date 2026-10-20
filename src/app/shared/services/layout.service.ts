@@ -192,6 +192,19 @@ export class LayoutService {
     return (access.capabilities ?? []).every((code) => this.capabilities.isEnabled(code, true));
   }
 
+  /**
+   * Where a user the server holds to MFA enrolment is sent: the security page
+   * inside the `/m` shell when that shell is in use or would be the landing
+   * route, otherwise the desktop account security page.
+   */
+  getMfaEnrollmentRoute(): string {
+    if (environment.mobileShell) return '/account/security';
+    const path = this.router.url.split(/[?#]/)[0];
+    const inMobileShell = path === '/m' || path.startsWith('/m/');
+    if (inMobileShell || (this.isMobileDevice() && !this.desktopPreference.isPreferred())) return '/m/account/security';
+    return '/account/security';
+  }
+
   private detectMobileDevice(): boolean {
     const hasTouch = navigator.maxTouchPoints > 0;
     // Check both dimensions — landscape phones have innerWidth > breakpoint

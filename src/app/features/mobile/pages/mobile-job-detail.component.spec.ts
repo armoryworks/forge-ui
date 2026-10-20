@@ -189,6 +189,48 @@ describe('MobileJobDetailComponent', () => {
     expect(snackbar.error).not.toHaveBeenCalled();
   });
 
+  it('keeps the running timer and blocks the buttons when the timer lookup fails', () => {
+    render(timerOn(5, 'J-1042'));
+
+    timerButton().click();
+    http.expectOne('/api/v1/time-tracking/timer/stop').flush({ title: 'Nope' }, { status: 500, statusText: 'Server Error' });
+    http.expectOne('/api/v1/time-tracking/timer/active').error(new ProgressEvent('offline'));
+    fixture.detectChanges();
+
+    expect(timerButton().textContent).toContain('Stop Timer');
+    expect(timerButton().disabled).toBe(true);
+    expect(el().querySelector('[data-testid="mjob-timer-unknown"]')).not.toBeNull();
+  });
+
+  it('never offers Start while the running timer is unknown', () => {
+    fixture = TestBed.createComponent(MobileJobDetailComponent);
+    fixture.detectChanges();
+    http.expectOne('/api/v1/jobs/5').flush(job);
+    http.expectOne('/api/v1/time-tracking/timer/active').error(new ProgressEvent('offline'));
+    fixture.detectChanges();
+
+    expect(timerButton().disabled).toBe(true);
+    timerButton().click();
+    http.expectNone('/api/v1/time-tracking/timer/start');
+    http.expectNone('/api/v1/time-tracking/timer/stop');
+  });
+
+  it('retries the timer lookup and unblocks once it answers', () => {
+    fixture = TestBed.createComponent(MobileJobDetailComponent);
+    fixture.detectChanges();
+    http.expectOne('/api/v1/jobs/5').flush(job);
+    http.expectOne('/api/v1/time-tracking/timer/active').error(new ProgressEvent('offline'));
+    fixture.detectChanges();
+
+    el().querySelector<HTMLButtonElement>('[data-testid="mjob-timer-retry-btn"]')!.click();
+    http.expectOne('/api/v1/time-tracking/timer/active').flush(timerOn(9, 'J-2001'));
+    fixture.detectChanges();
+
+    expect(el().querySelector('[data-testid="mjob-timer-unknown"]')).toBeNull();
+    expect(timerButton().disabled).toBe(false);
+    expect(timerButton().textContent).toContain('Switch Timer Here');
+  });
+
   it('shows the priority the job detail returns', () => {
     render(null);
 

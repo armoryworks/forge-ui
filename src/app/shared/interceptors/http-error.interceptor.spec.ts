@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 
 import { CapabilityDisabledError } from '../errors/capability-disabled.error';
+import { LayoutService } from '../services/layout.service';
 import { SnackbarService } from '../services/snackbar.service';
 import { ToastService } from '../services/toast.service';
 import { wasHttpErrorShown } from '../utils/shown-http-errors';
@@ -23,6 +24,7 @@ describe('httpErrorInterceptor', () => {
   let snackbar: { error: ReturnType<typeof vi.fn>; warn: ReturnType<typeof vi.fn>; success: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
   let toast: { show: ReturnType<typeof vi.fn> };
   let router: { navigate: ReturnType<typeof vi.fn> };
+  let mfaRoute: string;
 
   beforeEach(() => {
     snackbar = {
@@ -33,6 +35,7 @@ describe('httpErrorInterceptor', () => {
     };
     toast = { show: vi.fn() };
     router = { navigate: vi.fn().mockResolvedValue(true) };
+    mfaRoute = '/account/security';
 
     TestBed.configureTestingModule({
       providers: [
@@ -42,6 +45,7 @@ describe('httpErrorInterceptor', () => {
         { provide: ToastService, useValue: toast },
         { provide: TranslateService, useValue: { instant: (k: string) => k } },
         { provide: Router, useValue: router },
+        { provide: LayoutService, useValue: { getMfaEnrollmentRoute: () => mfaRoute } },
       ],
     });
 
@@ -109,6 +113,16 @@ describe('httpErrorInterceptor', () => {
     expect(snackbar.error).not.toHaveBeenCalled();
     expect(captured).toBeInstanceOf(HttpErrorResponse);
     expect(wasHttpErrorShown(captured)).toBe(true);
+  });
+
+  it('keeps a mobile-shell user who must enrol in MFA inside the mobile shell', () => {
+    mfaRoute = '/m/account/security';
+    http.get('/api/v1/jobs').subscribe({ next: () => {}, error: () => {} });
+
+    httpMock.expectOne('/api/v1/jobs').flush({ status: 403, code: MFA_ENROLLMENT_REQUIRED }, { status: 403, statusText: 'Forbidden' });
+
+    expect(router.navigate).toHaveBeenCalledWith(['/m/account/security']);
+    expect(snackbar.error).not.toHaveBeenCalled();
   });
 
   it('falls back to access-denied snackbar on plain 403 (no capability envelope, no header)', () => {

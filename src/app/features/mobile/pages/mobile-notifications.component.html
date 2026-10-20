@@ -13,8 +13,9 @@
     <app-empty-state icon="notifications_none" [message]="'mobileLegacyPages.notifications.empty' | translate" />
   } @else {
     <div class="mobile-notif__list">
-      @for (n of notifications(); track n.id) {
-        <div class="notif-item" role="button" tabindex="0" [class.notif-item--unread]="!n.isRead" (click)="markAsRead(n.id)" (keydown.enter)="markAsRead(n.id)" (keydown.space)="$event.preventDefault(); markAsRead(n.id)">
+      @for (row of rows(); track row.notification.id) {
+        @let n = row.notification;
+        <div class="notif-item" role="button" tabindex="0" [class.notif-item--unread]="!n.isRead" (click)="open(n)" (keydown.enter)="open(n)" (keydown.space)="$event.preventDefault(); open(n)" [attr.data-testid]="'mnotif-item-' + n.id">
           <div class="notif-item__icon-wrap" [class]="'notif-item__icon-wrap--' + n.severity">
             @if (n.senderInitials) {
               <app-avatar [initials]="n.senderInitials" [color]="n.senderColor ?? '#6366f1'" size="sm" />
@@ -28,6 +29,12 @@
               <span class="notif-item__time">{{ formatTime(n.createdAt) }}</span>
             </div>
             <span class="notif-item__message">{{ n.message }}</span>
+            @if (row.target?.desktop) {
+              <span class="notif-item__desktop" data-testid="mnotif-opens-desktop">
+                <span class="material-icons-outlined">desktop_windows</span>
+                {{ 'mobileWeb.notifications.opensDesktop' | translate }}
+              </span>
+            }
           </div>
           <button class="icon-btn" (click)="dismiss(n.id, $event)" [attr.aria-label]="'mobileLegacyPages.notifications.dismissLabel' | translate">
             <span class="material-icons-outlined">close</span>

@@ -81,7 +81,7 @@
         </span>
         <div class="scan-result__info">
           @if (result.kind === 'unknown') {
-            <span class="scan-result__label" data-testid="scan-no-match">{{ 'mobileWeb.scan.noMatch' | translate }}</span>
+            <span class="scan-result__label" data-testid="scan-no-match">{{ (lastSource() === 'manual' ? 'mobileWeb.scan.noMatchTyped' : 'mobileWeb.scan.noMatch') | translate }}</span>
           } @else {
             <span class="scan-result__label">{{ result.label }}</span>
             @if (result.subtitle) {
@@ -92,6 +92,12 @@
         </div>
       </div>
       <div class="scan-result__actions">
+        @if (resultTarget(); as target) {
+          <button class="action-btn action-btn--primary" (click)="openResult()" [attr.aria-label]="(target.desktop ? 'mobileWeb.scan.openDesktopLabel' : 'mobileWeb.scan.open') | translate" data-testid="scan-open-btn">
+            <span class="material-icons-outlined">{{ target.desktop ? 'desktop_windows' : 'open_in_new' }}</span>
+            {{ (target.desktop ? 'mobileWeb.scan.openDesktop' : 'mobileWeb.scan.open') | translate }}
+          </button>
+        }
         <button class="action-btn" (click)="resumeScanning()" [attr.aria-label]="'mobileWeb.scan.scanAgain' | translate" data-testid="scan-again-btn">
           <span class="material-icons-outlined">refresh</span>
           {{ 'mobileWeb.scan.scanAgain' | translate }}
@@ -100,11 +106,13 @@
     </div>
   }
 
-  @if (lookupError(); as message) {
-    <div class="scan-error" role="alert" data-testid="scan-lookup-error">
-      <span class="material-icons-outlined">warning</span>
-      {{ message }}
-    </div>
+  @if (lookupError() || lookupHandled()) {
+    @if (lookupError(); as message) {
+      <div class="scan-error" role="alert" data-testid="scan-lookup-error">
+        <span class="material-icons-outlined">warning</span>
+        {{ message }}
+      </div>
+    }
     <div class="scan-result__actions">
       <button class="action-btn" (click)="resumeScanning()" [attr.aria-label]="'mobileWeb.scan.scanAgain' | translate" data-testid="scan-error-again-btn">
         <span class="material-icons-outlined">refresh</span>
@@ -127,6 +135,7 @@
           class="manual-entry__input"
           [placeholder]="'mobileLegacyPages.scan.manualPlaceholder' | translate"
           [value]="manualValue()"
+          [attr.maxlength]="maxCodeLength"
           (input)="onManualInput($event)"
           (keydown)="onManualKeydown($event)"
           [attr.aria-label]="'mobileLegacyPages.scan.manualInputLabel' | translate"

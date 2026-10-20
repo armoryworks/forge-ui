@@ -103,3 +103,15 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+.notif-item__desktop {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-xs;
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+
+  .material-icons-outlined {
+    font-size: $font-size-md;
+  }
+}
