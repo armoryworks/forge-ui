@@ -1268,7 +1268,7 @@
         "tier2Tooltip": "Habilita CAP-COSTING-TIER2-DEPTRATES en admin para usar",
         "tier3Tooltip": "Habilita CAP-COSTING-TIER3-ABC en admin para usar",
         "tierNotImplemented": "Los periodos, centros de costos y grupos de gastos generales por actividad los configura un Administrador o Gerente, pero el cálculo de costo estándar de la pieza aún no usa sus tarifas. La elección de nivel se guarda en la pieza; la sustitución manual debajo sigue siendo el costo activo.",
-        "departmentalConfigured": "Las tarifas departamentales de gastos generales son una configuración de toda la planta — configure las tarifas por centro de trabajo en Administración → Costeo (Tarifas departamentales). El cálculo de costo estándar las aplica automáticamente a la ruta de cada pieza.",
+        "departmentalConfigured": "Las tarifas departamentales de gastos generales son una configuración de toda la planta que un Administrador o Gerente define por centro de trabajo. El cálculo de costo estándar las aplica automáticamente a la ruta de cada pieza.",
         "manualOverrideLabel": "Sustitución manual de costo",
         "manualOverridePlaceholder": "0.00",
         "currentLabel": "Costo mostrado actualmente",
