@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, effect, inject, input, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { forkJoin } from 'rxjs';
 
@@ -16,11 +15,12 @@ import { ReferenceDataItem, ReferenceDataService } from '../../services/referenc
 import { ConfirmDialogComponent, ConfirmDialogData } from '../confirm-dialog/confirm-dialog.component';
 import { SetStatusDialogComponent, SetStatusDialogData } from '../set-status-dialog/set-status-dialog.component';
 import { AddHoldDialogComponent, AddHoldDialogData } from '../add-hold-dialog/add-hold-dialog.component';
+import { DateTimePipe } from '../../pipes/date-time.pipe';
 
 @Component({
   selector: 'app-status-timeline',
   standalone: true,
-  imports: [DatePipe, MatTooltipModule, LoadingBlockDirective, TranslatePipe],
+  imports: [DateTimePipe, MatTooltipModule, LoadingBlockDirective, TranslatePipe],
   templateUrl: './status-timeline.component.html',
   styleUrl: './status-timeline.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

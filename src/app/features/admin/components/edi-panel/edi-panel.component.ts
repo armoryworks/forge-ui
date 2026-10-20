@@ -3,7 +3,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { EdiPartNumberMapDialogComponent } from '../edi-part-number-map-dialog/edi-part-number-map-dialog.component';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -30,6 +29,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { TabListDirective, TabDirective } from '../../../../shared/directives/tab-list.directive';
 import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-edi-panel',
@@ -40,7 +40,7 @@ import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.dir
     ScrollCueDirective,
     EdiPartNumberMapDialogComponent,
     MatTooltipModule,
-    DatePipe, ReactiveFormsModule, TranslatePipe,
+    DateTimePipe, ReactiveFormsModule, TranslatePipe,
     DataTableComponent, ColumnCellDirective,
     SelectComponent, InputComponent, TextareaComponent, ToggleComponent,
     DialogComponent, LoadingBlockDirective, ValidationButtonComponent,

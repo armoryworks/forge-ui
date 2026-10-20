@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
-import { DatePipe, NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ManualNumberSettingsService } from '../../shared/services/manual-number-settings.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -48,6 +48,7 @@ import { EntityCompletenessBadgeComponent } from '../../shared/components/entity
 import { EntityCompletenessService } from '../../shared/services/entity-completeness.service';
 import { ClonePartDialogComponent, ClonePartDialogData } from './components/clone-part-dialog/clone-part-dialog.component';
 import { EnumLabelPipe } from '../../shared/pipes/enum-label.pipe';
+import { DateTimePipe } from '../../shared/pipes/date-time.pipe';
 
 type ViewMode = 'table' | 'cards';
 
@@ -56,7 +57,7 @@ type ViewMode = 'table' | 'cards';
   standalone: true,
   imports: [
     EnumLabelPipe,
-    DatePipe, NgTemplateOutlet,
+    DatePipe, DateTimePipe, NgTemplateOutlet,
     ReactiveFormsModule, TranslatePipe,
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent,

@@ -33,6 +33,7 @@ import {
   CreateSystemApiKeyRequest,
   CreateSystemApiKeyResponse,
 } from '../../models/system-api-key.model';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 /**
  * User-bound system API keys admin panel. Companion to BiApiKeysPanel:
@@ -51,7 +52,7 @@ import {
   selector: 'app-system-api-keys-panel',
   standalone: true,
   imports: [
-    DatePipe,
+    DatePipe, DateTimePipe,
     ReactiveFormsModule,
     TranslatePipe,
     DataTableComponent,

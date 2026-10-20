@@ -1016,7 +1016,7 @@
                   <div class="acceptance-item__head">
                     <span class="chip chip--muted">{{ acceptanceMethodLabel(a.method) }}</span>
                     <span [class]="acceptanceStatusClass(a.status)">{{ acceptanceStatusLabel(a.status) }}</span>
-                    <span class="acceptance-item__when">{{ a.createdAt | date:'MM/dd/yyyy hh:mm' }}</span>
+                    <span class="acceptance-item__when">{{ a.createdAt | dateTime }}</span>
                   </div>
                   <div class="acceptance-item__meta">
                     @if (a.acceptedByName) {

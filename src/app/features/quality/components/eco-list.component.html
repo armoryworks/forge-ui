@@ -75,7 +75,7 @@
           @if (eco.effectiveDate) {
             <div class="eco-detail__field">
               <span class="eco-detail__label">Effective Date</span>
-              <span class="eco-detail__value">{{ eco.effectiveDate }}</span>
+              <span class="eco-detail__value">{{ eco.effectiveDate | dateOnly }}</span>
             </div>
           }
           @if (eco.approvedByName) {

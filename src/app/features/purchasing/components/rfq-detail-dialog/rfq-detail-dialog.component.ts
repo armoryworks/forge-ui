@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -31,6 +30,7 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 import { EnumLabelPipe } from '../../../../shared/pipes/enum-label.pipe';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 const MAX_AMOUNT = 99_999_999_999_999;
 const MIN_MOQ = 0.0001;
@@ -44,7 +44,7 @@ export interface RfqDetailDialogData {
   standalone: true,
   imports: [
     EnumLabelPipe,
-    DatePipe, DateOnlyPipe, ReactiveFormsModule, TranslatePipe,
+    DatePipe, DateTimePipe, DateOnlyPipe, ReactiveFormsModule, TranslatePipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     DatepickerComponent, DataTableComponent, ColumnCellDirective,
     LoadingBlockDirective, ValidationButtonComponent, EntityLinkComponent,

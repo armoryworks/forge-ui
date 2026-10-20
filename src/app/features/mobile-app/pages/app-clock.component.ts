@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 
-import { DatePipe } from '@angular/common';
 
 import { firstValueFrom } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -14,6 +13,7 @@ import { SharedIdentityService } from '../../../shared/services/shared-identity.
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { UndoService } from '../../../shared/services/undo.service';
 import { IdentityPromptComponent } from '../identity/identity-prompt.component';
+import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
 
 type Punch = 'ClockIn' | 'ClockOut' | 'BreakStart' | 'BreakEnd';
 
@@ -25,7 +25,7 @@ type Punch = 'ClockIn' | 'ClockOut' | 'BreakStart' | 'BreakEnd';
 @Component({
   selector: 'app-app-clock',
   standalone: true,
-  imports: [DatePipe, TranslatePipe, IdentityPromptComponent],
+  imports: [DateTimePipe, TranslatePipe, IdentityPromptComponent],
   templateUrl: './app-clock.component.html',
   styleUrl: './app-clock.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -21,6 +21,7 @@ import {
   FiscalPeriodStatus,
   FiscalYearModel,
 } from '../../models/accounting.models';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 
 const DEFAULT_BOOK_ID = 1;
 
@@ -39,7 +40,7 @@ interface ShownChecklist {
 @Component({
   selector: 'app-period-close',
   standalone: true,
-  imports: [TranslatePipe, PageHeaderComponent, DataTableComponent, ColumnCellDirective, CapDirective, JobCostCloseComponent],
+  imports: [TranslatePipe, DateOnlyPipe, PageHeaderComponent, DataTableComponent, ColumnCellDirective, CapDirective, JobCostCloseComponent],
   templateUrl: './period-close.component.html',
   styleUrl: './period-close.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

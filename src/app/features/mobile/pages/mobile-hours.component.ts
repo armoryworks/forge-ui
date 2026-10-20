@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -12,6 +11,7 @@ import { elapsedMs } from '../../../shared/utils/elapsed-ms';
 import { secondTicker } from '../../../shared/utils/second-ticker';
 import { HoursDay } from '../models/hours-day.model';
 import { HoursTimeEntry } from '../models/hours-time-entry.model';
+import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
 
 interface ClockStatus {
   isClockedIn: boolean;
@@ -23,7 +23,7 @@ const WEEKDAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 @Component({
   selector: 'app-mobile-hours',
   standalone: true,
-  imports: [DatePipe, TranslatePipe, EmptyStateComponent, LoadingBlockDirective],
+  imports: [DateTimePipe, TranslatePipe, EmptyStateComponent, LoadingBlockDirective],
   templateUrl: './mobile-hours.component.html',
   styleUrl: './mobile-hours.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

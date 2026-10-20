@@ -60,7 +60,7 @@
         </ng-template>
 
         <ng-template appColumnCell="predictedFailureDate" let-row>
-          {{ row.predictedFailureDate | date:'MM/dd/yyyy hh:mm' }}
+          {{ row.predictedFailureDate | dateTime }}
         </ng-template>
 
         <ng-template appColumnCell="status" let-row>

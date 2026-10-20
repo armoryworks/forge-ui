@@ -202,7 +202,7 @@
             <ul class="cap-detail__audit" role="list" data-testid="capability-detail-audit">
               @for (row of auditLog(); track row.id) {
                 <li class="audit-row" role="listitem">
-                  <div class="audit-row__date">{{ row.createdAt | date:'MM/dd/yyyy hh:mm' }}</div>
+                  <div class="audit-row__date">{{ row.createdAt | dateTime }}</div>
                   <div class="audit-row__action">{{ formatAuditAction(row.action) }}</div>
                   <div class="audit-row__user">{{ row.userName || '(system)' }}</div>
                   <div class="audit-row__details">{{ formatAuditDetails(row) }}</div>

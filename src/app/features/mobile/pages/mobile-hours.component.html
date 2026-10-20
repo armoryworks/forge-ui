@@ -22,7 +22,7 @@
       @if (clockedInAt(); as since) {
         <div class="today-card__row" data-testid="mhours-clocked-in-since">
           <span class="today-card__label">{{ 'mobileLegacy.hours.clockedInSince' | translate }}</span>
-          <span class="today-card__value">{{ since | date: 'shortTime' }}</span>
+          <span class="today-card__value">{{ since | dateTime:'time' }}</span>
         </div>
       }
       @if (inProgress !== null) {

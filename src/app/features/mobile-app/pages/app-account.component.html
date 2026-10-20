@@ -49,7 +49,7 @@
           <li class="account__row">
             <span class="account__row-main account__row-main--static">
               <span class="account__row-title">{{ device.name }}@if (isCurrentDevice(device)) { · {{ 'mobileApp.account.thisDevice' | translate }}}</span>
-              <span class="account__row-sub">{{ device.platform }} {{ device.appVersion ?? '' }} · {{ 'mobileApp.account.lastSeen' | translate }} {{ device.lastSeenAt ? (device.lastSeenAt | date: 'MM/dd/yyyy hh:mm') : '—' }}</span>
+              <span class="account__row-sub">{{ device.platform }} {{ device.appVersion ?? '' }} · {{ 'mobileApp.account.lastSeen' | translate }} {{ device.lastSeenAt ? (device.lastSeenAt | dateTime) : '—' }}</span>
             </span>
             @if (pendingRevoke() === device.id) {
               <button type="button" class="account__row-action account__row-action--danger" (click)="revoke(device)">{{ 'mobileApp.account.confirmSignOut' | translate }}</button>

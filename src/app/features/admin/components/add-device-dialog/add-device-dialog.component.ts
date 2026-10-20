@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -24,6 +23,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { AdminUser } from '../../models/admin-user.model';
 import { AdminDevice, EnrollmentToken } from '../../models/device.model';
 import { DeviceAdminService } from '../../services/device-admin.service';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 /**
  * Admin "Add a device": mints a single-use enrollment token for the user and
@@ -33,7 +33,7 @@ import { DeviceAdminService } from '../../services/device-admin.service';
 @Component({
   selector: 'app-admin-add-device-dialog',
   standalone: true,
-  imports: [DatePipe, TranslatePipe, DialogComponent, QrCodeComponent],
+  imports: [DateTimePipe, TranslatePipe, DialogComponent, QrCodeComponent],
   templateUrl: './add-device-dialog.component.html',
   styleUrl: './add-device-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

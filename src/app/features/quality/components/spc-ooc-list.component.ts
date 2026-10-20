@@ -16,13 +16,14 @@ import { TextareaComponent } from '../../../shared/components/textarea/textarea.
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { EnumLabelPipe } from '../../../shared/pipes/enum-label.pipe';
+import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-spc-ooc-list',
   standalone: true,
   imports: [
     EnumLabelPipe,
-    DatePipe, ReactiveFormsModule, TranslatePipe,
+    DatePipe, DateTimePipe, ReactiveFormsModule, TranslatePipe,
     DataTableComponent, ColumnCellDirective,
     SelectComponent, DialogComponent, TextareaComponent,
     LoadingBlockDirective,

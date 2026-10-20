@@ -15,6 +15,8 @@
  *         scripts/.lint-standards-allow with a reason (one per line:
  *         `<rule> <path> — <why>`), never by weakening the check.
  *    • console.log in non-spec .ts        (CLAUDE.md "What NOT to Do")
+ *    • a time-of-day format on the `date` (use the `dateTime` pipe: one
+ *      pipe in a template                   12-hour clock with AM/PM)
  *
  *  RATCHET — legacy debt too large to fix in one commit, tracked PER FILE in
  *         scripts/standards-baseline.json. A file not in the baseline must be
@@ -70,6 +72,23 @@ function consoleLogInProdTs() {
   for (const f of walk(SRC, ['.ts'])) {
     if (isSpec(f)) continue;
     const n = (read(f).match(/\bconsole\.log\(/g) ?? []).length;
+    if (n) out.set(rel(f), n);
+  }
+  return out;
+}
+
+const NAMED_DATE_ONLY_FORMATS = new Set(['shortDate', 'mediumDate', 'longDate', 'fullDate']);
+const NAMED_TIME_FORMATS = new Set(['short', 'medium', 'long', 'full', 'shortTime', 'mediumTime', 'longTime', 'fullTime']);
+
+function timeFormatsInDatePipe() {
+  const out = new Map();
+  for (const f of walk(SRC, ['.html'])) {
+    let n = 0;
+    for (const m of stripHtmlComments(read(f)).matchAll(/\|\s*date\s*:\s*(?:'([^']*)'|"([^"]*)")/g)) {
+      const fmt = m[1] ?? m[2];
+      if (NAMED_DATE_ONLY_FORMATS.has(fmt)) continue;
+      if (NAMED_TIME_FORMATS.has(fmt) || /[hHmsa]/.test(fmt.replace(/'[^']*'/g, ''))) n++;
+    }
     if (n) out.set(rel(f), n);
   }
   return out;
@@ -349,6 +368,7 @@ function dateOnlyFieldsInLocalTime() {
 
 const HARD = [
   ['console-log', 'console.log in non-spec .ts (CLAUDE.md: never in production code)', consoleLogInProdTs],
+  ['time-in-date-pipe', 'time of day shown with the `date` pipe (use `dateTime`, so every time reads as a 12-hour clock with AM/PM)', timeFormatsInDatePipe],
 ];
 
 const RATCHET = [

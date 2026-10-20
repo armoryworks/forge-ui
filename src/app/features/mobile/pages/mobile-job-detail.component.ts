@@ -12,6 +12,7 @@ import { DetailLoadErrorComponent } from '../../../shared/components/detail-load
 import { notFoundError } from '../../../shared/utils/not-found-error';
 import { parsePositiveId } from '../../../shared/utils/parse-positive-id';
 import { MobileClockStateService } from '../services/mobile-clock-state.service';
+import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
 
 interface JobDetail {
   id: number;
@@ -40,7 +41,7 @@ const PRIORITY_KEYS = new Set(['low', 'normal', 'high', 'urgent']);
 @Component({
   selector: 'app-mobile-job-detail',
   standalone: true,
-  imports: [DatePipe, TranslatePipe, LoadingBlockDirective, DetailLoadErrorComponent],
+  imports: [DatePipe, DateTimePipe, TranslatePipe, LoadingBlockDirective, DetailLoadErrorComponent],
   templateUrl: './mobile-job-detail.component.html',
   styleUrl: './mobile-job-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

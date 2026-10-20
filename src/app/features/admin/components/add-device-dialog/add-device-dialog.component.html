@@ -53,7 +53,7 @@
               </span>
               <span class="add-device__row-meta">
                 @if (device.lastSeenAt) {
-                  {{ 'admin.devices.lastSeen' | translate }} {{ device.lastSeenAt | date: 'MM/dd/yyyy HH:mm' }}
+                  {{ 'admin.devices.lastSeen' | translate }} {{ device.lastSeenAt | dateTime }}
                 } @else {
                   {{ 'admin.devices.neverSeen' | translate }}
                 }

@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { DatePipe } from '@angular/common';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -11,11 +10,12 @@ import { RichTextPipe } from '../../pipes/rich-text.pipe';
 import { AppNotification } from '../../models/app-notification.model';
 import { NotificationTab } from '../../models/notification-tab.type';
 import { resolveEntityRoute } from '../../utils/notification-route';
+import { DateTimePipe } from '../../pipes/date-time.pipe';
 
 @Component({
   selector: 'app-notification-panel',
   standalone: true,
-  imports: [DatePipe, MatTooltipModule, AvatarComponent, TranslatePipe, RichTextPipe],
+  imports: [DateTimePipe, MatTooltipModule, AvatarComponent, TranslatePipe, RichTextPipe],
   templateUrl: './notification-panel.component.html',
   styleUrl: './notification-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

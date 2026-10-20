@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
@@ -17,6 +16,7 @@ import { IntegrationRecord } from '../../models/integration-record.model';
 import { ScheduledTask } from '../../models/scheduled-task.model';
 import { StorageUsage } from '../../models/storage-usage.model';
 import { humanizeCode } from '../../../../shared/utils/humanize-code';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 /**
  * Compliance statuses that warrant admin attention — Overdue items risk
@@ -45,7 +45,7 @@ const I9_ATTENTION_STATUSES = new Set([
   selector: 'app-admin-overview',
   standalone: true,
   imports: [
-    DatePipe,
+    DateTimePipe,
     TranslatePipe,
     LoadingBlockDirective,
   ],

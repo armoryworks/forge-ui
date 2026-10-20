@@ -21,6 +21,7 @@ import {
   ProvisionPortalAccessDialogData,
   ProvisionPortalAccessResult,
 } from '../../components/provision-portal-access-dialog/provision-portal-access-dialog.component';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 interface PortalAccessDisplayRow extends PortalAccessRow {
   contactFullName: string;
@@ -30,7 +31,7 @@ interface PortalAccessDisplayRow extends PortalAccessRow {
   selector: 'app-customer-portal-access-page',
   standalone: true,
   imports: [
-    DatePipe,
+    DatePipe, DateTimePipe,
     TranslatePipe,
     MatSlideToggleModule,
     PageLayoutComponent, ToolbarComponent, SpacerDirective,

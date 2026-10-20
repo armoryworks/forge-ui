@@ -93,7 +93,7 @@
           <span [class]="getStatusClass(row.status)">{{ row.status }}</span>
         </ng-template>
         <ng-template appColumnCell="receivedAt" let-row>
-          {{ row.receivedAt | date:'MM/dd/yyyy HH:mm' }}
+          {{ row.receivedAt | dateTime }}
         </ng-template>
         <ng-template appColumnCell="relatedEntityType" let-row>
           {{ row.relatedEntityType ?? '—' }}

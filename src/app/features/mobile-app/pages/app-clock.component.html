@@ -15,7 +15,7 @@
       {{ ('mobileApp.clock.state.' + (state()?.state ?? 'unknown')) | translate }}
     </div>
     @if (state()?.lastEventAt; as since) {
-      <span class="clock__since">{{ 'mobileApp.clock.since' | translate }} {{ since | date: 'hh:mm a' }}</span>
+      <span class="clock__since">{{ 'mobileApp.clock.since' | translate }} {{ since | dateTime:'time' }}</span>
     }
 
     <div class="clock__actions">

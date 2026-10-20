@@ -81,6 +81,7 @@ import { ADMIN_TAB_ROLES } from './models/admin-tab-roles.model';
 import { ADMIN_TABS } from './models/admin-tab.model';
 import { EnumLabelPipe } from '../../shared/pipes/enum-label.pipe';
 import { humanizeIdentifier } from '../../shared/utils/humanize-identifier';
+import { DateTimePipe } from '../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-admin',
@@ -90,7 +91,7 @@ import { humanizeIdentifier } from '../../shared/utils/humanize-identifier';
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent, DatepickerComponent, DataTableComponent,
     ColumnCellDirective, ValidationButtonComponent, TrackTypeDialogComponent, TerminologyPanelComponent,
-    LoadingBlockDirective, AdminOverviewComponent, TrainingPanelComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, RoleTemplatesPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, AuditLogPanelComponent, TimeCorrectionsPanelComponent, EventsPanelComponent, AnnouncementsPanelComponent, EdiPanelComponent, MfaPolicyPanelComponent, DomainEventFailuresPanelComponent, IntegrationOutboxPanelComponent, AutoPoSettingsComponent, ExpenseSettingsPanelComponent, BankingSettingsPanelComponent, BiApiKeysPanelComponent, SystemApiKeysPanelComponent, ConnectionsPanelComponent, BarcodeInfoComponent, DatePipe, LowerCasePipe, TranslatePipe, MatTooltipModule, AddDeviceDialogComponent, CapDirective, TelemetryConsentDialogComponent,
+    LoadingBlockDirective, AdminOverviewComponent, TrainingPanelComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, RoleTemplatesPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, AuditLogPanelComponent, TimeCorrectionsPanelComponent, EventsPanelComponent, AnnouncementsPanelComponent, EdiPanelComponent, MfaPolicyPanelComponent, DomainEventFailuresPanelComponent, IntegrationOutboxPanelComponent, AutoPoSettingsComponent, ExpenseSettingsPanelComponent, BankingSettingsPanelComponent, BiApiKeysPanelComponent, SystemApiKeysPanelComponent, ConnectionsPanelComponent, BarcodeInfoComponent, DatePipe, DateTimePipe, LowerCasePipe, TranslatePipe, MatTooltipModule, AddDeviceDialogComponent, CapDirective, TelemetryConsentDialogComponent,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',

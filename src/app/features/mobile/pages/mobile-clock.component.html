@@ -7,7 +7,7 @@
     <h2 class="clock-status__label">{{ statusLabel }}</h2>
     @if (status()?.clockedInAt) {
       <p class="clock-status__since">
-        {{ 'mobileLegacy.clock.since' | translate: { time: (status()?.clockedInAt | date: 'shortTime') } }}
+        {{ 'mobileLegacy.clock.since' | translate: { time: (status()?.clockedInAt | dateTime:'time') } }}
       </p>
     }
   </div>

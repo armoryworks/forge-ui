@@ -35,7 +35,7 @@
             </div>
             <span class="workflow-active-list__row-step">{{ run.currentStepId || '—' }}</span>
             <span class="workflow-active-list__row-time">
-              {{ run.lastActivityAt | date:'MM/dd/yyyy hh:mm' }}
+              {{ run.lastActivityAt | dateTime }}
             </span>
           </button>
         </li>

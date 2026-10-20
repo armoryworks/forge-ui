@@ -23,7 +23,7 @@
 
         <ng-template appColumnCell="lastLoginAt" let-row>
           @if (row.lastLoginAt) {
-            {{ row.lastLoginAt | date:'MM/dd/yyyy hh:mm' }}
+            {{ row.lastLoginAt | dateTime }}
           } @else {
             <span class="text-muted">{{ 'customers.portalAccessPage.neverSignedIn' | translate }}</span>
           }

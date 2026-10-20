@@ -5,6 +5,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PartsService } from '../../services/parts.service';
 import { BomRevisionDetail, BomRevisionSummary } from '../../models/bom-revision.model';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { formatDateTime } from '../../../../shared/utils/date.utils';
 
 /**
  * Phase 3 H4 / WU-20 — Read-only revision history widget for a part's BOM.
@@ -101,6 +102,6 @@ export class BomRevisionHistoryComponent {
     if (!iso) return '';
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return iso;
-    return d.toLocaleString();
+    return formatDateTime(d);
   }
 }

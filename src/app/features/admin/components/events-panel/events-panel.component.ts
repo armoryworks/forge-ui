@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -23,12 +22,14 @@ import { DialogComponent } from '../../../../shared/components/dialog/dialog.com
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-events-panel',
   standalone: true,
   imports: [
-    DatePipe,
+    DateTimePipe, DateOnlyPipe,
     ReactiveFormsModule,
     DataTableComponent,
     ColumnCellDirective,

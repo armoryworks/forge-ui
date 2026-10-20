@@ -25,7 +25,7 @@
       @for (entry of recentEntries(); track entry.id) {
         <div class="undo-entry" [class.undo-entry--reversed]="entry.isReversed">
           <div class="undo-entry__main">
-            <span class="undo-entry__time">{{ entry.createdAt | date:'HH:mm' }}</span>
+            <span class="undo-entry__time">{{ entry.createdAt | dateTime:'time' }}</span>
             <span class="undo-entry__user">{{ entry.userName }}</span>
             <span class="undo-entry__action">{{ actionTypeLabel(entry.actionType) }}</span>
           </div>

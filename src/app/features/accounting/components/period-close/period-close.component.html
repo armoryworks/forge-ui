@@ -58,7 +58,7 @@
             emptyIcon="event_busy"
             [emptyMessage]="'accounting.periodClose.empty' | translate">
             <ng-template appColumnCell="dates" let-row>
-              {{ row.startDate }} – {{ row.endDate }}
+              {{ row.startDate | dateOnly }} – {{ row.endDate | dateOnly }}
             </ng-template>
             <ng-template appColumnCell="status" let-row>
               <span class="chip"

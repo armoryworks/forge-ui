@@ -8,7 +8,7 @@
         {{ confidenceKey() | translate }}
       </span>
       <span class="review__from">{{ d.fromAddress }}</span>
-      <span class="review__when">{{ d.occurredAt | date:'MM/dd/yyyy hh:mm a' }}</span>
+      <span class="review__when">{{ d.occurredAt | dateTime }}</span>
     }
     <span appSpacer></span>
   </ng-container>

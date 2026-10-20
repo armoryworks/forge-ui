@@ -13,4 +13,5 @@ export interface CalendarEvent {
   eventTypeId: number | null;
   superGroupId: number | null;
   isSystemGenerated?: boolean;
+  isAllDay: boolean;
 }

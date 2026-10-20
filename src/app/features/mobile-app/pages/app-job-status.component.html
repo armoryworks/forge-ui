@@ -41,7 +41,7 @@
     <section class="job-status__timeline" [attr.aria-label]="'mobileApp.jobs.recent' | translate">
       @for (entry of job.recentActivity; track entry.id) {
         <div class="job-status__entry">
-          <span class="job-status__entry-when">{{ entry.createdAt | date: 'MM/dd hh:mm' }}</span>
+          <span class="job-status__entry-when">{{ entry.createdAt | dateTime:'compact' }}</span>
           <span class="job-status__entry-text">{{ isPersonText(entry.action) ? entry.description : (entry.description | termText) }}</span>
         </div>
       } @empty {

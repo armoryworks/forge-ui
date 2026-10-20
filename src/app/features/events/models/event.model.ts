@@ -11,6 +11,7 @@ export interface AppEvent {
   superGroupId: number | null;
   isRequired: boolean;
   isCancelled: boolean;
+  isAllDay: boolean;
   createdByUserId: number;
   createdByName: string;
   attendees: EventAttendee[];

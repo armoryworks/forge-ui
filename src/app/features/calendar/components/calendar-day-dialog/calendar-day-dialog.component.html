@@ -26,7 +26,7 @@
             <div class="day-dialog__meta">
               <span class="day-dialog__meta-item">
                 <span class="material-icons-outlined">schedule</span>
-                @if (isAllDay(evt)) {
+                @if (evt.isAllDay) {
                   {{ 'calendar.dayDialog.allDay' | translate }}
                 } @else {
                   {{ eventTime(evt) }}

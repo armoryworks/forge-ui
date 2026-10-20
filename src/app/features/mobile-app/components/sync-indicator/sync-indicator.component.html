@@ -34,7 +34,7 @@
         @for (item of rejected(); track item.id) {
           <li class="sync-sheet__row sync-sheet__row--rejected" data-testid="sync-rejected-row">
             <span class="sync-sheet__desc">{{ item.label.key | translate: item.label.params }}</span>
-            <span class="sync-sheet__meta">{{ item.timestamp | date: 'MM/dd/yyyy hh:mm' }} · {{ item.reasonKey | translate }}</span>
+            <span class="sync-sheet__meta">{{ item.timestamp | dateTime }} · {{ item.reasonKey | translate }}</span>
             <button type="button" class="sync-sheet__action" (click)="dismiss(item.id)">{{ 'mobileApp.sync.dismiss' | translate }}</button>
           </li>
         }
@@ -48,7 +48,7 @@
           @let label = labelOf(item);
           <li class="sync-sheet__row" data-testid="sync-pending-row">
             <span class="sync-sheet__desc">{{ label.key | translate: label.params }}</span>
-            <span class="sync-sheet__meta">{{ item.timestamp | date: 'MM/dd/yyyy hh:mm' }}</span>
+            <span class="sync-sheet__meta">{{ item.timestamp | dateTime }}</span>
             <button type="button" class="sync-sheet__action" (click)="discard(item.id)">{{ 'mobileApp.sync.discard' | translate }}</button>
           </li>
         }

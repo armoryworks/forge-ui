@@ -73,7 +73,7 @@
 
           <ng-template appColumnCell="fetchedAt" let-row>
             @if (row.fetchedAt) {
-              {{ row.fetchedAt | date:'MM/dd/yyyy hh:mm' }}
+              {{ row.fetchedAt | dateTime }}
             }
           </ng-template>
         </app-data-table>

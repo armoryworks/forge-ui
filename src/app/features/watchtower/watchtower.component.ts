@@ -25,6 +25,7 @@ import {
 import { WatchtowerTab } from './models/watchtower-tab.model';
 import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
+import { DateTimePipe } from '../../shared/pipes/date-time.pipe';
 
 /**
  * Regulatory Watchtower workspace — the review surface for the CAP-EXT-WATCHTOWER backend.
@@ -34,7 +35,7 @@ import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive
 @Component({
   selector: 'app-watchtower',
   standalone: true,
-  imports: [TabListDirective, TabDirective, ScrollCueDirective, ReactiveFormsModule, DatePipe, TranslatePipe, PageLayoutComponent, SelectComponent, EmptyStateComponent],
+  imports: [TabListDirective, TabDirective, ScrollCueDirective, ReactiveFormsModule, DatePipe, DateTimePipe, TranslatePipe, PageLayoutComponent, SelectComponent, EmptyStateComponent],
   templateUrl: './watchtower.component.html',
   styleUrl: './watchtower.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

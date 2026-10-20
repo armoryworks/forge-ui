@@ -61,6 +61,7 @@ import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 import { TabListDirective, TabDirective } from '../../../../shared/directives/tab-list.directive';
 import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 /** Capability gating the whole customer-acceptance feature. */
 const CAP_SO_ACCEPTANCE = 'CAP-O2C-SO-ACCEPTANCE';
@@ -83,7 +84,7 @@ type TabId = 'overview' | 'lines' | 'schedule' | 'stages' | 'shipments' | 'retur
   selector: 'app-sales-order-detail-panel',
   standalone: true,
   imports: [TabListDirective, TabDirective, ScrollCueDirective, NumberLockInfoComponent, 
-    DatePipe, DateOnlyPipe, DecimalPipe, TranslatePipe, ReactiveFormsModule,
+    DatePipe, DateTimePipe, DateOnlyPipe, DecimalPipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
     BarcodeInfoComponent, EntityActivitySectionComponent,
     EntityLinkComponent, CurrencyDisplayComponent, FileUploadZoneComponent, EmptyStateComponent,

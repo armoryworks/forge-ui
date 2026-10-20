@@ -356,7 +356,7 @@
                           </span>
                         </td>
                         <td class="text-muted">{{ item.lotNumber ?? '—' }}</td>
-                        <td class="text-muted">{{ item.placedAt | date:'MM/dd/yyyy hh:mm a' }}</td>
+                        <td class="text-muted">{{ item.placedAt | dateTime }}</td>
                       </tr>
                     }
                   </tbody>
@@ -393,7 +393,7 @@
             <span class="chip">{{ getReasonLabel($any(row).reason) }}</span>
           </ng-template>
           <ng-template appColumnCell="movedAt" let-row>
-            <span class="text-muted">{{ $any(row).movedAt | date:'MM/dd/yyyy hh:mm a' }}</span>
+            <span class="text-muted">{{ $any(row).movedAt | dateTime }}</span>
           </ng-template>
         </app-data-table>
       </div>
@@ -421,7 +421,7 @@
             <span class="text-muted">{{ $any(row).lotNumber ?? '—' }}</span>
           </ng-template>
           <ng-template appColumnCell="createdAt" let-row>
-            <span class="text-muted">{{ $any(row).createdAt | date:'MM/dd/yyyy hh:mm a' }}</span>
+            <span class="text-muted">{{ $any(row).createdAt | dateTime }}</span>
           </ng-template>
         </app-data-table>
       </div>
@@ -466,7 +466,7 @@
             <span [class]="getCycleCountStatusClass($any(row).status)">{{ $any(row).status }}</span>
           </ng-template>
           <ng-template appColumnCell="countedAt" let-row>
-            <span class="text-muted">{{ $any(row).countedAt | date:'MM/dd/yyyy hh:mm a' }}</span>
+            <span class="text-muted">{{ $any(row).countedAt | dateTime }}</span>
           </ng-template>
           <ng-template appColumnCell="variance" let-row>
             @if ($any(row).variance > 0) {
@@ -510,7 +510,7 @@
           </ng-template>
 
           <ng-template appColumnCell="createdAt" let-row>
-            <span class="text-muted">{{ $any(row).createdAt | date:'MM/dd/yyyy hh:mm a' }}</span>
+            <span class="text-muted">{{ $any(row).createdAt | dateTime }}</span>
           </ng-template>
 
           <ng-template appColumnCell="actions" let-row>
@@ -681,7 +681,7 @@
       </div>
       <div class="meta-item">
         <span class="meta-label">{{ 'common.date' | translate }}</span>
-        <span class="meta-value">{{ cc.countedAt | date:'MM/dd/yyyy hh:mm a' }}</span>
+        <span class="meta-value">{{ cc.countedAt | dateTime }}</span>
       </div>
       <div class="meta-item">
         <span class="meta-label">{{ 'common.status' | translate }}</span>

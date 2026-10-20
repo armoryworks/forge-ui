@@ -58,9 +58,9 @@
                 }
               </div>
               <div class="timeline-entry__meta">
-                <span>{{ entry.startedAt | date:'MM/dd/yyyy hh:mm a' }}</span>
+                <span>{{ entry.startedAt | dateTime }}</span>
                 @if (entry.endedAt) {
-                  <span> &rarr; {{ entry.endedAt | date:'MM/dd/yyyy hh:mm a' }}</span>
+                  <span> &rarr; {{ entry.endedAt | dateTime }}</span>
                 }
                 <span> &middot; {{ entry.setByName || ('activityHistory.system' | translate) }}</span>
               </div>

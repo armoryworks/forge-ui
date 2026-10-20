@@ -20,12 +20,13 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { TranslatePipe } from '@ngx-translate/core';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-serial-numbers-tab',
   standalone: true,
   imports: [
-    DatePipe, DecimalPipe, NgTemplateOutlet, ReactiveFormsModule, TranslatePipe,
+    DatePipe, DateTimePipe, DecimalPipe, NgTemplateOutlet, ReactiveFormsModule, TranslatePipe,
     DataTableComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, EntityPickerComponent,
     EmptyStateComponent, LoadingBlockDirective, ValidationButtonComponent, ColumnCellDirective,
   ],

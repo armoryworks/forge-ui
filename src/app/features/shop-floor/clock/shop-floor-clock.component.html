@@ -398,7 +398,7 @@
             <span class="sf-action-btn__label">{{ action.label }}</span>
             <span class="sf-action-btn__name">{{ worker.name }}</span>
             @if (worker.openFromPriorShift && worker.openSince) {
-              <span class="sf-action-btn__warning">{{ 'shopFloor.stillClockedInSince' | translate: { date: (worker.openSince | date: 'short') } }}</span>
+              <span class="sf-action-btn__warning">{{ 'shopFloor.stillClockedInSince' | translate: { date: (worker.openSince | dateTime) } }}</span>
             }
           </button>
         }

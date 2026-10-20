@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy, Component, computed, effect, inject,
   input, OnInit, signal,
@@ -19,6 +18,7 @@ import { ActivityTimelineComponent } from '../activity-timeline/activity-timelin
 import { RichTextEditorComponent } from '../rich-text-editor/rich-text-editor.component';
 import { RichTextDisplayComponent } from '../rich-text-display/rich-text-display.component';
 import { TermTextPipe } from '../../pipes/term-text.pipe';
+import { DateTimePipe } from '../../pipes/date-time.pipe';
 
 export type ActivityFilterTab = 'all' | 'comments' | 'notes' | 'history';
 
@@ -26,7 +26,7 @@ export type ActivityFilterTab = 'all' | 'comments' | 'notes' | 'history';
   selector: 'app-entity-activity-section',
   standalone: true,
   imports: [
-    DatePipe,
+    DateTimePipe,
     ReactiveFormsModule,
     MatTooltipModule,
     TranslatePipe,

@@ -6,6 +6,7 @@ import { DialogComponent } from '../../../../shared/components/dialog/dialog.com
 import { PriorityIndicatorComponent } from '../../../../shared/components/priority-indicator/priority-indicator.component';
 import { CalendarJob } from '../../models/calendar-job.model';
 import { PoCalendarEvent } from '../../models/po-calendar-event.model';
+import { formatTime } from '../../../../shared/utils/date.utils';
 import {
   EventStatusDialogComponent,
   EventStatusDialogData,
@@ -22,6 +23,7 @@ export interface CalendarDayEvent {
   endTime: string;
   status: string | null;
   isRequired: boolean;
+  isAllDay: boolean;
   color: string;
 }
 
@@ -76,21 +78,11 @@ export class CalendarDayDialogComponent {
     return job.trackTypeColor ?? job.stageColor;
   }
 
-  /** True when the event carries no meaningful clock time (both ends at midnight) — an all-day item. */
-  protected isAllDay(evt: CalendarDayEvent): boolean {
-    const midnight = (iso: string) => {
-      const d = new Date(iso);
-      return d.getHours() === 0 && d.getMinutes() === 0;
-    };
-    return midnight(evt.startTime) && midnight(evt.endTime);
-  }
-
-  /** Human time range for a timed event (e.g. "9:00 AM – 10:30 AM"). */
+  /** Human time range for a timed event (e.g. "09:00 AM – 10:30 AM"). */
   protected eventTime(evt: CalendarDayEvent): string {
     const start = new Date(evt.startTime);
     const end = new Date(evt.endTime);
-    const fmt = (d: Date) => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    return end.getTime() > start.getTime() ? `${fmt(start)} – ${fmt(end)}` : fmt(start);
+    return end.getTime() > start.getTime() ? `${formatTime(start)} – ${formatTime(end)}` : formatTime(start);
   }
 
   /** Tracking-tier events carry a workflow status; reminder-tier events have none. */

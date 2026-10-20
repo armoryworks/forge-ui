@@ -75,7 +75,7 @@
           <span class="material-icons-outlined timer-btn__icon">stop</span>
           <span class="timer-btn__label">{{ 'mobileLegacy.jobDetail.stopTimer' | translate }}</span>
           @if (activeTimer(); as t) {
-            <span class="timer-btn__since">{{ 'mobileLegacy.jobDetail.since' | translate: { time: (t.timerStart | date:'shortTime') } }}</span>
+            <span class="timer-btn__since">{{ 'mobileLegacy.jobDetail.since' | translate: { time: (t.timerStart | dateTime:'time') } }}</span>
           }
         </button>
       } @else {

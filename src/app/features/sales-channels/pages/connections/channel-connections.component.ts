@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -16,6 +15,7 @@ import {
   ConnectionDialogData,
   ConnectionDialogResult,
 } from './connection-dialog/connection-dialog.component';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 /**
  * Storefront and marketplace credentials.
@@ -34,7 +34,7 @@ import {
   selector: 'app-channel-connections-page',
   standalone: true,
   imports: [
-    DatePipe,
+    DateTimePipe,
     MatTooltipModule,
     TranslatePipe,
     PageLayoutComponent,

@@ -51,7 +51,7 @@
           <span [class]="severityChipClass(row.severity)">{{ row.severity }}</span>
         </ng-template>
         <ng-template appColumnCell="createdAt" let-row>
-          {{ row.createdAt | date: 'MM/dd/yyyy hh:mm' }}
+          {{ row.createdAt | dateTime }}
         </ng-template>
         <ng-template appColumnCell="actions" let-row>
           <button
@@ -115,7 +115,7 @@
         @for (ack of acknowledgments(); track ack.userId) {
           <div class="ack-item">
             <span class="ack-item__name">{{ ack.userName }}</span>
-            <span class="ack-item__time">{{ ack.acknowledgedAt | date: 'MM/dd/yyyy hh:mm' }}</span>
+            <span class="ack-item__time">{{ ack.acknowledgedAt | dateTime }}</span>
           </div>
         }
       </div>

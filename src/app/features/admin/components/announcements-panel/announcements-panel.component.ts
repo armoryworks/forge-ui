@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { FormControl } from '@angular/forms';
 
@@ -24,6 +23,7 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TabListDirective, TabDirective } from '../../../../shared/directives/tab-list.directive';
 import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
+import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-announcements-panel',
@@ -32,7 +32,7 @@ import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.dir
     TabListDirective,
     TabDirective,
     ScrollCueDirective,
-    DatePipe,
+    DatePipe, DateTimePipe,
     ReactiveFormsModule,
     DataTableComponent,
     ColumnCellDirective,

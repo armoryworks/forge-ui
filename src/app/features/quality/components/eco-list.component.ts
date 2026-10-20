@@ -25,6 +25,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { EntityPickerComponent } from '../../../shared/components/entity-picker/entity-picker.component';
 import { AuthService } from '../../../shared/services/auth.service';
 import { ECO_AUTHOR_ROLES, QUALITY_MANAGER_ROLES } from '../quality-roles';
+import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
 
 const PART_ENTITY_TYPES = ['Part', 'BOM'];
 
@@ -43,7 +44,7 @@ const jsonText = (control: AbstractControl): ValidationErrors | null => {
   selector: 'app-eco-list',
   standalone: true,
   imports: [
-    DatePipe, ReactiveFormsModule,
+    DatePipe, DateOnlyPipe, ReactiveFormsModule,
     DataTableComponent, ColumnCellDirective,
     SelectComponent, InputComponent, TextareaComponent, DatepickerComponent,
     DialogComponent, LoadingBlockDirective,

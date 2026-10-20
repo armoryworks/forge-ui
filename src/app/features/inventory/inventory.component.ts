@@ -53,12 +53,13 @@ import { INVENTORY_TAB_ROLES } from './models/inventory-tab-roles.model';
 import { INVENTORY_TABS, InventoryTab } from './models/inventory-tab.model';
 import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
+import { DateTimePipe } from '../../shared/pipes/date-time.pipe';
 
 
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [TabListDirective, TabDirective, ScrollCueDirective, ReactiveFormsModule, CurrencyPipe, DatePipe, DecimalPipe, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, DataTableComponent, ColumnCellDirective, RowExpandDirective, ValidationButtonComponent, EmptyStateComponent, LoadingBlockDirective, BarcodeInfoComponent, MatTooltipModule, UomManagementComponent, ViewModeToggleComponent, InventoryReorderVisualComponent, ReceivingInspectionQueueComponent, EntityPickerComponent, EntityLinkComponent],
+  imports: [TabListDirective, TabDirective, ScrollCueDirective, ReactiveFormsModule, CurrencyPipe, DatePipe, DateTimePipe, DecimalPipe, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, DataTableComponent, ColumnCellDirective, RowExpandDirective, ValidationButtonComponent, EmptyStateComponent, LoadingBlockDirective, BarcodeInfoComponent, MatTooltipModule, UomManagementComponent, ViewModeToggleComponent, InventoryReorderVisualComponent, ReceivingInspectionQueueComponent, EntityPickerComponent, EntityLinkComponent],
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
