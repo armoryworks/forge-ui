@@ -39,12 +39,15 @@ import {
   Shift,
 } from './models/scheduling.model';
 import { SCHEDULING_TABS, SchedulingTab } from './models/scheduling-tab.model';
+import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 
 @Component({
   selector: 'app-scheduling',
   standalone: true,
   imports: [
     DecimalPipe,
+    TabListDirective,
+    TabDirective,
     ReactiveFormsModule,
     PageHeaderComponent,
     DataTableComponent,

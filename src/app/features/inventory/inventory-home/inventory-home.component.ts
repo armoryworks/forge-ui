@@ -29,6 +29,7 @@ import { CapabilityService } from '../../../shared/services/capability.service';
 import { AuthService } from '../../../shared/services/auth.service';
 import { ColumnDef } from '../../../shared/models/column-def.model';
 import { InventoryHomeTab } from '../models/inventory-home-tab.model';
+import { TabListDirective, TabDirective } from '../../../shared/directives/tab-list.directive';
 
 type StockVerb = 'receive' | 'use' | 'count';
 
@@ -48,6 +49,8 @@ interface VerbDialogState {
   selector: 'app-inventory-home',
   standalone: true,
   imports: [
+    TabListDirective,
+    TabDirective,
     ReactiveFormsModule, DecimalPipe, TranslatePipe, RouterLink,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     EntityPickerComponent, QuickActionPanelComponent, DataTableComponent,

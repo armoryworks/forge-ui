@@ -5,12 +5,12 @@
 </app-page-header>
 
 <!-- Tabs -->
-<div class="tab-bar">
-  <button class="tab" [class.tab--active]="activeTab() === 'upcoming'" (click)="switchTab('upcoming')">
+<div class="tab-bar" appTabList>
+  <button class="tab" [appTab]="activeTab() === 'upcoming'" (click)="switchTab('upcoming')">
     <span class="material-icons-outlined tab__icon">calendar_month</span>
     {{ 'expenses.upcomingTab' | translate }}
   </button>
-  <button class="tab" [class.tab--active]="activeTab() === 'recurring'" (click)="switchTab('recurring')">
+  <button class="tab" [appTab]="activeTab() === 'recurring'" (click)="switchTab('recurring')">
     <span class="material-icons-outlined tab__icon">repeat</span>
     {{ 'expenses.recurringTab' | translate }}
   </button>

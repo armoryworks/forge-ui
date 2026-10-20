@@ -22,6 +22,9 @@ interface ComponentInternals {
   canCreateJobs: () => boolean;
   showJobDialog: () => boolean;
   openCreateDialog(): void;
+  jobs: { set(value: unknown[]): void };
+  searchControl: { setValue(value: string): void };
+  filteredJobs: () => { jobNumber: string }[];
 }
 
 describe('BacklogComponent', () => {
@@ -66,5 +69,17 @@ describe('BacklogComponent', () => {
     expect(component.canCreateJobs()).toBe(false);
     component.openCreateDialog();
     expect(component.showJobDialog()).toBe(false);
+  });
+
+  it('matches the search without regard to accents or case', () => {
+    const component = create();
+    component.jobs.set([
+      { jobNumber: 'J-1', title: 'Soporte de García' },
+      { jobNumber: 'J-2', title: 'Bracket' },
+    ]);
+
+    component.searchControl.setValue('GARCIA');
+
+    expect(component.filteredJobs().map(j => j.jobNumber)).toEqual(['J-1']);
   });
 });

@@ -1,10 +1,10 @@
 <div class="edi-panel">
-  <div class="tab-bar">
-    <button class="tab" [class.tab--active]="subTab() === 'partners'" (click)="switchSubTab('partners')">
+  <div class="tab-bar" appTabList>
+    <button class="tab" [appTab]="subTab() === 'partners'" (click)="switchSubTab('partners')">
       <span class="material-icons-outlined">business</span>
       {{ 'adminPanels.edi.tabs.tradingPartners' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="subTab() === 'transactions'" (click)="switchSubTab('transactions')">
+    <button class="tab" [appTab]="subTab() === 'transactions'" (click)="switchSubTab('transactions')">
       <span class="material-icons-outlined">swap_horiz</span>
       {{ 'adminPanels.edi.tabs.transactions' | translate }}
     </button>

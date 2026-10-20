@@ -1,5 +1,20 @@
 <div class="data-table">
   @if (pagedData().length || sortedData().length) {
+    @if (showSelectAllMatching()) {
+      <div class="data-table__selection-banner" role="status" data-testid="data-table-selection-banner">
+        @if (allMatchingSelected()) {
+          <span>{{ 'shared.allMatchingSelected' | translate:{ count: sortedData().length } }}</span>
+          <button type="button" class="data-table__selection-link" (click)="clearSelection()">
+            {{ 'shared.clearSelection' | translate }}
+          </button>
+        } @else {
+          <span>{{ 'shared.pageRowsSelected' | translate:{ count: pagedData().length } }}</span>
+          <button type="button" class="data-table__selection-link" (click)="selectAllMatching()">
+            {{ 'shared.selectAllMatching' | translate:{ count: sortedData().length } }}
+          </button>
+        }
+      </div>
+    }
     <div class="data-table__scroll" [appLoadingBlock]="loading()">
       <table class="data-table__table">
         <thead>
@@ -26,13 +41,14 @@
                 [class.data-table__th--has-filter]="hasFilter(col.field)"
                 [style.width]="getColumnWidth(col)"
                 [style.left.px]="first && stickyFirstColumn() ? stickyLeftOffset() : null"
+                [attr.aria-sort]="getAriaSort(col)"
                 (click)="onHeaderClick(col, $event)"
                 (contextmenu)="onHeaderContextMenu(col, $event)">
                 <div class="data-table__th-inner">
                   <span class="data-table__th-content">
                     {{ col.header }}
                     @if (getSortState(col.field); as sort) {
-                      <span class="material-icons-outlined data-table__sort-icon">
+                      <span class="material-icons-outlined data-table__sort-icon" aria-hidden="true">
                         {{ sort.direction === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
                       </span>
                     }
@@ -139,7 +155,9 @@
               [class.data-table__row--clickable]="clickableRows()"
               [class.data-table__row--expanded]="expandable() && isRowExpanded(row)"
               [style]="getRowStyles(row)"
-              (click)="onRowClick(row)">
+              [attr.tabindex]="clickableRows() ? 0 : null"
+              (click)="onRowClick(row)"
+              (keydown)="onRowKeydown(row, $event)">
               @if (expandable()) {
                 <td class="data-table__td data-table__td--expand" (click)="toggleRowExpand(row, $event)">
                   <span class="material-icons-outlined data-table__expand-icon">
@@ -191,7 +209,7 @@
       <mat-paginator
         [length]="sortedData().length"
         [pageSize]="pageSize()"
-        [pageIndex]="pageIndex()"
+        [pageIndex]="effectivePageIndex()"
         [pageSizeOptions]="[25, 50, 100]"
         (page)="onPageChange($event)"
         showFirstLastButtons />

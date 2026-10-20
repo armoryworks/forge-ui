@@ -10,17 +10,14 @@
     </a>
   </header>
 
-  <nav class="tab-bar" role="tablist" aria-label="Inventory views">
-    <button class="tab" role="tab" [class.tab--active]="activeTab() === 'kiosk'"
-      [attr.aria-selected]="activeTab() === 'kiosk'" (click)="switchTab('kiosk')">
+  <nav class="tab-bar" appTabList aria-label="Inventory views">
+    <button class="tab" [appTab]="activeTab() === 'kiosk'" (click)="switchTab('kiosk')">
       <span class="material-icons-outlined">touch_app</span>{{ 'inventory.home.tabs.kiosk' | translate }}
     </button>
-    <button class="tab" role="tab" [class.tab--active]="activeTab() === 'tasks'"
-      [attr.aria-selected]="activeTab() === 'tasks'" (click)="switchTab('tasks')">
+    <button class="tab" [appTab]="activeTab() === 'tasks'" (click)="switchTab('tasks')">
       <span class="material-icons-outlined">checklist</span>{{ 'inventory.home.tabs.tasks' | translate }}
     </button>
-    <button class="tab" role="tab" [class.tab--active]="activeTab() === 'dashboard'"
-      [attr.aria-selected]="activeTab() === 'dashboard'" (click)="switchTab('dashboard')">
+    <button class="tab" [appTab]="activeTab() === 'dashboard'" (click)="switchTab('dashboard')">
       <span class="material-icons-outlined">insights</span>{{ 'inventory.home.tabs.dashboard' | translate }}
     </button>
   </nav>

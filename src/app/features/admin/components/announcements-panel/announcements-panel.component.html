@@ -1,16 +1,14 @@
 <div class="announcements-panel">
   <div class="panel-header">
-    <div class="tab-bar">
+    <div class="tab-bar" appTabList>
       <button
-        class="tab"
-        [class.tab--active]="activeView() === 'announcements'"
+        class="tab" [appTab]="activeView() === 'announcements'"
         (click)="switchView('announcements')"
       >
         Announcements
       </button>
       <button
-        class="tab"
-        [class.tab--active]="activeView() === 'templates'"
+        class="tab" [appTab]="activeView() === 'templates'"
         (click)="switchView('templates')"
       >
         Templates

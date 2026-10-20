@@ -9,12 +9,12 @@
 
 <div class="po-content">
   <!-- Tabs -->
-  <div class="tab-bar">
-    <button class="tab" [class.tab--active]="activeTab() === 'orders'" (click)="switchTab('orders')">
+  <div class="tab-bar" appTabList>
+    <button class="tab" [appTab]="activeTab() === 'orders'" (click)="switchTab('orders')">
       <span class="material-icons-outlined">description</span>
       {{ 'purchaseOrders.tabOrders' | translate }}
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'suggestions'" (click)="switchTab('suggestions')">
+    <button class="tab" [appTab]="activeTab() === 'suggestions'" (click)="switchTab('suggestions')">
       <span class="material-icons-outlined">auto_awesome</span>
       {{ 'autoPo.tabSuggestions' | translate }}
       @if (pendingSuggestionCount() > 0) {
@@ -22,7 +22,7 @@
       }
     </button>
     @if (isAdmin) {
-      <button class="tab" [class.tab--active]="activeTab() === 'settings'" (click)="switchTab('settings')">
+      <button class="tab" [appTab]="activeTab() === 'settings'" (click)="switchTab('settings')">
         <span class="material-icons-outlined">settings</span>
         {{ 'autoPo.tabSettings' | translate }}
       </button>

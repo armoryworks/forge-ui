@@ -29,6 +29,7 @@ import { VendorListItem } from '../../../vendors/models/vendor-list-item.model';
 import { SchedulingService } from '../../../scheduling/services/scheduling.service';
 import { WorkCenter } from '../../../scheduling/models/scheduling.model';
 import { WorkCenterQuickCreateDialogComponent, WorkCenterQuickCreateDialogData } from '../../../scheduling/components/work-center-quick-create-dialog/work-center-quick-create-dialog.component';
+import { TabListDirective, TabDirective } from '../../../../shared/directives/tab-list.directive';
 
 export type OperationTab = 'details' | 'materials' | 'files' | 'activity';
 
@@ -45,6 +46,8 @@ export interface OperationDialogData {
   standalone: true,
   imports: [
     AuthSrcDirective,
+    TabListDirective,
+    TabDirective,
     ReactiveFormsModule,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     ToggleComponent, EntityPickerComponent, FileUploadZoneComponent,

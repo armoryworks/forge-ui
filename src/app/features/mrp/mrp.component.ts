@@ -62,11 +62,14 @@ import {
 } from './components/forecast-detail-dialog.component';
 import { GenerateForecastRequest } from './models/mrp.model';
 import { MRP_TABS, MrpTab } from './models/mrp-tab.model';
+import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 
 @Component({
   selector: 'app-mrp',
   standalone: true,
   imports: [
+    TabListDirective,
+    TabDirective,
     ReactiveFormsModule,
     TranslatePipe,
     PageHeaderComponent,

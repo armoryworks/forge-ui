@@ -28,11 +28,14 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { TabListDirective, TabDirective } from '../../../../shared/directives/tab-list.directive';
 
 @Component({
   selector: 'app-edi-panel',
   standalone: true,
   imports: [
+    TabListDirective,
+    TabDirective,
     EdiPartNumberMapDialogComponent,
     MatTooltipModule,
     DatePipe, ReactiveFormsModule, TranslatePipe,

@@ -51,6 +51,7 @@ import {
   QcTemplateEditorDialogData,
 } from './components/qc-template-editor-dialog/qc-template-editor-dialog.component';
 import { QUALITY_TABS, QualityTab } from './models/quality-tab.model';
+import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 
 const NEW_TEMPLATE_OPTION = -1;
 
@@ -61,6 +62,8 @@ const INSPECTION_DETAIL_TYPE = 'qc-inspection';
   selector: 'app-quality',
   standalone: true,
   imports: [
+    TabListDirective,
+    TabDirective,
     ReactiveFormsModule, DatePipe,
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent, EntityPickerComponent,

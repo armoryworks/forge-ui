@@ -37,6 +37,7 @@ import { BacklogCardGridComponent } from './components/backlog-card-grid/backlog
 import { PriorityIndicatorComponent } from '../../shared/components/priority-indicator/priority-indicator.component';
 import { EntityLinkComponent } from '../../shared/components/entity-link/entity-link.component';
 import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
+import { foldText } from '../../shared/utils/text-fold';
 
 type ViewMode = 'table' | 'card';
 
@@ -168,11 +169,11 @@ export class BacklogComponent implements OnInit {
   protected readonly filteredJobs = computed(() => {
     let jobs = this.jobs();
 
-    const search = (this.searchTerm() ?? '').toLowerCase().trim();
+    const search = foldText(this.searchTerm()).trim();
     if (search) {
       jobs = jobs.filter(j =>
-        j.title.toLowerCase().includes(search) ||
-        j.jobNumber.toLowerCase().includes(search),
+        foldText(j.title).includes(search) ||
+        foldText(j.jobNumber).includes(search),
       );
     }
 

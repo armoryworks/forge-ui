@@ -40,12 +40,15 @@ import {
 } from './models/costing.model';
 import { CostingTab } from './models/costing-tab.model';
 import { EnumLabelPipe } from '../../shared/pipes/enum-label.pipe';
+import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 
 @Component({
   selector: 'app-costing',
   standalone: true,
   imports: [
     EnumLabelPipe,
+    TabListDirective,
+    TabDirective,
     ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent, DatepickerComponent,
     ToggleComponent, PageLayoutComponent, DataTableComponent, ColumnCellDirective, DatePipe,
     ViewModeToggleComponent, CostingRatesVisualComponent, SpacerDirective,

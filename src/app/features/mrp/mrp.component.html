@@ -1,12 +1,12 @@
 <app-page-header [title]="'mrp.title' | translate" />
 
-<div class="tab-bar">
-  <button class="tab" [class.tab--active]="activeTab() === 'dashboard'" (click)="switchTab('dashboard')">{{ 'mrp.tabs.dashboard' | translate }}</button>
-  <button class="tab" [class.tab--active]="activeTab() === 'planned-orders'" (click)="switchTab('planned-orders')">{{ 'mrp.tabs.plannedOrders' | translate }}</button>
-  <button class="tab" [class.tab--active]="activeTab() === 'exceptions'" (click)="switchTab('exceptions')">{{ 'mrp.tabs.exceptions' | translate }}</button>
-  <button class="tab" [class.tab--active]="activeTab() === 'runs'" (click)="switchTab('runs')">{{ 'mrp.tabs.runHistory' | translate }}</button>
-  <button class="tab" [class.tab--active]="activeTab() === 'master-schedule'" (click)="switchTab('master-schedule')">{{ 'mrp.tabs.masterSchedule' | translate }}</button>
-  <button class="tab" [class.tab--active]="activeTab() === 'forecasts'" (click)="switchTab('forecasts')">{{ 'mrp.tabs.forecasts' | translate }}</button>
+<div class="tab-bar" appTabList>
+  <button class="tab" [appTab]="activeTab() === 'dashboard'" (click)="switchTab('dashboard')">{{ 'mrp.tabs.dashboard' | translate }}</button>
+  <button class="tab" [appTab]="activeTab() === 'planned-orders'" (click)="switchTab('planned-orders')">{{ 'mrp.tabs.plannedOrders' | translate }}</button>
+  <button class="tab" [appTab]="activeTab() === 'exceptions'" (click)="switchTab('exceptions')">{{ 'mrp.tabs.exceptions' | translate }}</button>
+  <button class="tab" [appTab]="activeTab() === 'runs'" (click)="switchTab('runs')">{{ 'mrp.tabs.runHistory' | translate }}</button>
+  <button class="tab" [appTab]="activeTab() === 'master-schedule'" (click)="switchTab('master-schedule')">{{ 'mrp.tabs.masterSchedule' | translate }}</button>
+  <button class="tab" [appTab]="activeTab() === 'forecasts'" (click)="switchTab('forecasts')">{{ 'mrp.tabs.forecasts' | translate }}</button>
 </div>
 
 <!-- Dashboard Tab -->

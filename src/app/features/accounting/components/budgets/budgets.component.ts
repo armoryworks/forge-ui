@@ -14,6 +14,7 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-refresh.util';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { BudgetLine, BudgetVsActual, GlAccount } from '../../models/accounting.models';
+import { TabListDirective, TabDirective } from '../../../../shared/directives/tab-list.directive';
 
 const DEFAULT_BOOK_ID = 1;
 
@@ -34,6 +35,8 @@ interface BudgetRow {
   selector: 'app-budgets',
   standalone: true,
   imports: [
+    TabListDirective,
+    TabDirective,
     DecimalPipe,
     ReactiveFormsModule,
     TranslatePipe,

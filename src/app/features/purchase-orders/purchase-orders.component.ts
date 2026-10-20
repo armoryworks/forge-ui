@@ -31,11 +31,14 @@ import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
 import { PURCHASE_ORDERS_TAB_ROLES } from './models/purchase-orders-tab-roles.model';
 import { PURCHASE_ORDERS_TABS, PurchaseOrdersTab } from './models/purchase-orders-tab.model';
+import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 
 @Component({
   selector: 'app-purchase-orders',
   standalone: true,
   imports: [
+    TabListDirective,
+    TabDirective,
     ReactiveFormsModule, DatePipe, DateOnlyPipe, TranslatePipe, MatTooltipModule,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective,
