@@ -20,6 +20,11 @@ const DOCGEN_ARTIFACTS = [
   '**/admin-onboarding.spec.ts',
 ];
 
+const DEV_BUILD_ONLY = [
+  '**/loading-overlay.spec.ts',
+  '**/workflow-shell-demo.spec.ts',
+];
+
 // Shared Chromium launch settings for both projects.
 const chromiumUse = {
   browserName: 'chromium' as const,
@@ -65,8 +70,9 @@ export default defineConfig({
 
   projects: [
     // The green gate: behavior-asserting tests.
-    { name: 'functional', use: chromiumUse, testIgnore: DOCGEN_ARTIFACTS },
+    { name: 'functional', use: chromiumUse, testIgnore: [...DOCGEN_ARTIFACTS, ...DEV_BUILD_ONLY] },
     // Non-gating artifact generators (run on their own job in nightly.yml).
     { name: 'docgen', use: chromiumUse, testMatch: DOCGEN_ARTIFACTS },
+    { name: 'dev', use: chromiumUse, testMatch: DEV_BUILD_ONLY },
   ],
 });
