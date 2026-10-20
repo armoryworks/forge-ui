@@ -48,6 +48,8 @@ import { UserPreferencesService } from '../../shared/services/user-preferences.s
 import { CapabilityService } from '../../shared/services/capability.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { AMBIENT_IDLE_PREF_KEY, DEFAULT_AMBIENT_IDLE_MS } from '../../shared/models/ambient-idle.model';
+import { formatDate, toDateOnly } from '../../shared/utils/date.utils';
+import { downloadCsv } from '../../shared/utils/download-csv';
 
 import type { GridStack, GridStackNode } from 'gridstack';
 
@@ -359,34 +361,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const d = this.data();
     if (!d) return;
 
-    const lines: string[] = [];
-    lines.push('Section,Field,Value');
-    lines.push(`KPIs,Active Jobs,${d.kpis.activeCount}`);
-    lines.push(`KPIs,Overdue Jobs,${d.kpis.overdueCount}`);
-    lines.push(`KPIs,Total Hours,${d.kpis.totalHours}`);
-    lines.push('');
-    lines.push('Stage,Count');
-    for (const s of d.stages) {
-      lines.push(`${s.label},${s.count}`);
-    }
-    lines.push('');
-    lines.push('Team Member,Task Count');
-    for (const t of d.team) {
-      lines.push(`${t.name},${t.taskCount}`);
-    }
-    lines.push('');
-    lines.push('Deadline,Job #,Title,Overdue');
-    for (const dl of d.deadlines) {
-      lines.push(`${dl.date},${dl.jobNumber},"${dl.description}",${dl.isOverdue}`);
-    }
+    const rows: unknown[][] = [
+      [this.translate.instant('dashboard.csv.section'), this.translate.instant('dashboard.csv.field'), this.translate.instant('dashboard.csv.value')],
+      [this.translate.instant('dashboard.csv.kpis'), this.translate.instant('dashboard.activeJobs'), d.kpis.activeCount],
+      [this.translate.instant('dashboard.csv.kpis'), this.translate.instant('dashboard.overdueJobs'), d.kpis.overdueCount],
+      [this.translate.instant('dashboard.csv.kpis'), this.translate.instant('dashboard.csv.totalHours'), d.kpis.totalHours],
+      [],
+      [this.translate.instant('dashboard.csv.stage'), this.translate.instant('dashboard.csv.count')],
+      ...d.stages.map(s => [s.label, s.count]),
+      [],
+      [this.translate.instant('dashboard.csv.teamMember'), this.translate.instant('dashboard.csv.taskCount')],
+      ...d.team.map(m => [m.name, m.taskCount]),
+      [],
+      [this.translate.instant('dashboard.csv.deadline'), this.translate.instant('dashboard.csv.jobNumber'), this.translate.instant('dashboard.csv.title'), this.translate.instant('dashboard.csv.overdue')],
+      ...d.deadlines.map(dl => [
+        formatDate(dl.date),
+        dl.jobNumber,
+        dl.description,
+        dl.isOverdue ? this.translate.instant('common.yes') : this.translate.instant('common.no'),
+      ]),
+    ];
 
-    const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `dashboard-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadCsv(rows, `dashboard-${toDateOnly(new Date())}`);
   }
 
   private loadSavedLayout(): void {

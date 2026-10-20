@@ -178,6 +178,28 @@ describe('DataTableComponent · exports', () => {
     expect(lines[4]).toBe('"\'-cmd"');
   });
 
+  it('leaves negative currency text alone and prefixes =cmd', async () => {
+    useTable([{ note: '-$1,234.56' }, { note: '=cmd' }], [{ field: 'note', header: 'Note' }]);
+    const { lines } = await exportedCsv();
+    expect(lines[1]).toBe('"-$1,234.56"');
+    expect(lines[2]).toBe('"\'=cmd"');
+  });
+
+  it('exports a 1,000-row table with a templated column', async () => {
+    const rows = Array.from({ length: 1000 }, (_, i) => ({ name: `R${i}`, amount: i }));
+    useTable(rows, [{ field: 'name', header: 'Name' }, { field: 'amount', header: 'Amount', type: 'number' }]);
+    const { lines } = await exportedCsv();
+    expect(lines.filter(l => l !== '')).toHaveLength(1001);
+    expect(lines[1000]).toBe('R999,$999.00');
+  });
+
+  it('keeps a templated number column numeric in the Excel export', () => {
+    useTable([], [{ field: 'amount', header: 'Amount', type: 'number' }]);
+    const cell = (table as unknown as { toExcelCell(row: unknown, col: ColumnDef): unknown })
+      .toExcelCell({ amount: 12.5 }, { field: 'amount', header: 'Amount', type: 'number' });
+    expect(cell).toEqual({ type: Number, value: 12.5 });
+  });
+
   it('names the file from exportFileName when one is given', () => {
     Object.defineProperty(table, 'exportFileName', { value: () => 'ar-aging-2026-10-19' });
     useTable([{ name: 'A' }], [{ field: 'name', header: 'Name' }]);

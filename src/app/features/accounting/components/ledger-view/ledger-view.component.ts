@@ -29,6 +29,15 @@ const DEFAULT_BOOK_ID = 1;
  */
 const PAGE_SIZE = 100;
 
+type LedgerRow = LedgerRegisterEntry & {
+  entryDateDisplay: string;
+  total: number;
+  accounts: string;
+  lensDebit?: number;
+  lensCredit?: number;
+  balanceAfter?: number;
+};
+
 interface ExplainState {
   loading: boolean;
   result: JournalEntryExplanation | null;
@@ -69,7 +78,7 @@ export class LedgerViewComponent implements OnInit {
    * purely as a string (MM/dd/yyyy) because `new Date("YYYY-MM-DD")` parses as UTC midnight and
    * renders as the PREVIOUS day in any western timezone (caught by visual verification 2026-07-07).
    */
-  protected readonly entries = computed<(LedgerRegisterEntry & { entryDateDisplay: string; balanceAfter?: number })[]>(() => {
+  protected readonly entries = computed<LedgerRow[]>(() => {
     const lens = this.lensAccount();
     // Running balance (lens only), walked newest -> oldest in the SAME debit-positive (Dr - Cr)
     // convention the trial balance reports: the newest row carries the account's current
@@ -77,12 +86,17 @@ export class LedgerViewComponent implements OnInit {
     let balance = lens?.netBalance ?? 0;
     return (this.page()?.data ?? []).map((e, i, rows) => {
       const [y, m, d] = e.entryDate.split('-');
-      const row: LedgerRegisterEntry & { entryDateDisplay: string; balanceAfter?: number } = {
+      const row: LedgerRow = {
         ...e,
         entryDateDisplay: `${m}/${d}/${y}`,
+        total: e.lines.reduce((acc, l) => acc + l.debit, 0),
+        accounts: [...new Set(e.lines.map((l) => `${l.accountNumber} ${l.accountName}`))].join('; '),
       };
       if (lens) {
         if (i > 0) balance -= this.accountNet(rows[i - 1], lens.glAccountId);
+        const lensLines = e.lines.filter((l) => l.glAccountId === lens.glAccountId);
+        row.lensDebit = lensLines.reduce((acc, l) => acc + l.debit, 0);
+        row.lensCredit = lensLines.reduce((acc, l) => acc + l.credit, 0);
         row.balanceAfter = balance;
       }
       return row;
@@ -95,6 +109,11 @@ export class LedgerViewComponent implements OnInit {
       .filter((l) => l.glAccountId === glAccountId)
       .reduce((acc, l) => acc + l.debit - l.credit, 0);
   }
+  /** Entries the server holds beyond the loaded page; the table, find and exports cover the loaded page only. */
+  protected readonly unloadedCount = computed(() => {
+    const p = this.page();
+    return p ? Math.max(p.totalCount - p.data.length, 0) : 0;
+  });
   protected readonly explanations = signal<Record<number, ExplainState>>({});
   protected readonly scanning = signal(false);
   protected readonly anomalyFlags = signal<Record<number, string[]>>({});
@@ -125,7 +144,7 @@ export class LedgerViewComponent implements OnInit {
     };
   });
 
-  private entryMatches(entry: LedgerRegisterEntry & { entryDateDisplay: string }, term: string): boolean {
+  private entryMatches(entry: LedgerRow, term: string): boolean {
     if (
       String(entry.entryNumber).includes(term) ||
       entry.entryDateDisplay.includes(term) ||
@@ -184,9 +203,15 @@ export class LedgerViewComponent implements OnInit {
       { field: 'source', header: this.translate.instant('accounting.ledger.source'), sortable: true, filterable: true, type: 'enum', width: '120px' },
       { field: 'status', header: this.translate.instant('accounting.common.status'), sortable: true, filterable: true, type: 'enum', width: '140px' },
       { field: 'memo', header: this.translate.instant('accounting.ledger.memo'), sortable: true },
+      { field: 'accounts', header: this.translate.instant('accounting.ledger.accounts'), sortable: true },
+      { field: 'total', header: this.translate.instant('accounting.common.total'), sortable: true, type: 'number', align: 'right', width: '140px' },
     ];
     if (this.lensAccount()) {
-      cols.push({ field: 'balanceAfter', header: this.translate.instant('accounting.ledger.balance'), align: 'right', width: '150px' });
+      cols.push(
+        { field: 'lensDebit', header: this.translate.instant('accounting.common.debit'), sortable: true, type: 'number', align: 'right', width: '130px' },
+        { field: 'lensCredit', header: this.translate.instant('accounting.common.credit'), sortable: true, type: 'number', align: 'right', width: '130px' },
+        { field: 'balanceAfter', header: this.translate.instant('accounting.ledger.balance'), type: 'number', align: 'right', width: '150px' },
+      );
     }
     return cols;
   });

@@ -500,7 +500,22 @@
     "addWorkCenters": "Agregue sus centros de trabajo",
     "addFirstPart": "Agregue una pieza con enrutamiento",
     "sendFirstQuote": "Envíe su primera cotización",
-    "shipFirstOrder": "Envíe su primera orden"
+    "shipFirstOrder": "Envíe su primera orden",
+    "csv": {
+      "section": "Sección",
+      "field": "Campo",
+      "value": "Valor",
+      "kpis": "Indicadores",
+      "totalHours": "Horas totales",
+      "stage": "Etapa",
+      "count": "Cantidad",
+      "teamMember": "Miembro del equipo",
+      "taskCount": "Tareas",
+      "deadline": "Fecha límite",
+      "jobNumber": "N.º de trabajo",
+      "title": "Título",
+      "overdue": "Vencido"
+    }
   },
   "boardFilters": {
     "search": "Buscar",
@@ -9778,7 +9793,9 @@
       "previousMatch": "Coincidencia anterior",
       "nextMatch": "Siguiente coincidencia",
       "entryNotLoaded": "El asiento id {{number}} es anterior a la página cargada",
-      "empty": "Sin asientos contables"
+      "empty": "Sin asientos contables",
+      "accounts": "Cuentas",
+      "loadedOnly": "Se muestran los {{shown}} asientos más recientes de {{total}}. La búsqueda y la exportación CSV/Excel solo incluyen estos asientos."
     },
     "journalEditor": {
       "title": "Nuevo asiento contable",

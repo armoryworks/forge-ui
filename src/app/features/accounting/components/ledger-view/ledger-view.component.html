@@ -45,6 +45,11 @@
   @if (error()) {
     <p class="acct-error" role="alert">{{ error() }}</p>
   }
+  @if (unloadedCount() > 0) {
+    <p class="acct-caveat" data-testid="ledger-loaded-only">
+      {{ 'accounting.ledger.loadedOnly' | translate: { shown: entries().length, total: page()!.totalCount } }}
+    </p>
+  }
 
   <app-data-table
     data-tour="register"
@@ -57,6 +62,15 @@
     emptyIcon="receipt_long"
     [emptyMessage]="'accounting.ledger.empty' | translate">
     <ng-template appColumnCell="entryDate" let-row>{{ row.entryDateDisplay }}</ng-template>
+    <ng-template appColumnCell="total" let-row>
+      <app-currency-display [value]="row.total" />
+    </ng-template>
+    <ng-template appColumnCell="lensDebit" let-row>
+      @if (row.lensDebit) { <app-currency-display [value]="row.lensDebit" /> }
+    </ng-template>
+    <ng-template appColumnCell="lensCredit" let-row>
+      @if (row.lensCredit) { <app-currency-display [value]="row.lensCredit" /> }
+    </ng-template>
     <ng-template appColumnCell="balanceAfter" let-row>
       <app-currency-display [value]="row.balanceAfter" />
     </ng-template>

@@ -500,7 +500,22 @@
     "addWorkCenters": "Add your work centers",
     "addFirstPart": "Add a part with a routing",
     "sendFirstQuote": "Send your first quote",
-    "shipFirstOrder": "Ship your first order"
+    "shipFirstOrder": "Ship your first order",
+    "csv": {
+      "section": "Section",
+      "field": "Field",
+      "value": "Value",
+      "kpis": "KPIs",
+      "totalHours": "Total Hours",
+      "stage": "Stage",
+      "count": "Count",
+      "teamMember": "Team Member",
+      "taskCount": "Task Count",
+      "deadline": "Deadline",
+      "jobNumber": "Job #",
+      "title": "Title",
+      "overdue": "Overdue"
+    }
   },
   "boardFilters": {
     "search": "Search",
@@ -9778,7 +9793,9 @@
       "previousMatch": "Previous match",
       "nextMatch": "Next match",
       "entryNotLoaded": "Entry id {{number}} is older than the loaded page",
-      "empty": "No journal entries"
+      "empty": "No journal entries",
+      "accounts": "Accounts",
+      "loadedOnly": "Showing the newest {{shown}} of {{total}} entries. Find and the CSV/Excel export cover these entries only."
     },
     "journalEditor": {
       "title": "New Journal Entry",

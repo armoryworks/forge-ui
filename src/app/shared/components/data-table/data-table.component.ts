@@ -21,7 +21,6 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { OverlayModule } from '@angular/cdk/overlay';
 
-import { unparse } from 'papaparse';
 import writeXlsxFile, { type CellObject, type SheetData } from 'write-excel-file/browser';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -36,6 +35,7 @@ import { ColumnFilterPopoverComponent, ColumnFilterState } from './column-filter
 import { ColumnManagerPanelComponent, ColumnManagerState } from './column-manager-panel/column-manager-panel.component';
 import { UserPreferencesService } from '../../services/user-preferences.service';
 import { formatDate, formatDateTime, parseDateOnly } from '../../utils/date.utils';
+import { downloadCsv } from '../../utils/download-csv';
 
 
 @Component({
@@ -466,16 +466,9 @@ export class DataTableComponent implements OnInit {
   // ─── CSV Export ───
   exportCsv(): void {
     const cols = this.exportColumns();
-    const fields = cols.map(col => this.exportHeader(col));
+    const header = cols.map(col => this.exportHeader(col));
     const data = this.sortedData().map(row => cols.map(col => this.exportText(row, col)));
-    const csv = unparse({ fields, data }, { escapeFormulae: DataTableComponent.FORMULA_PATTERN });
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${this.exportBaseName()}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadCsv([header, ...data], this.exportBaseName());
   }
 
   // ─── Excel Export ───
@@ -487,7 +480,6 @@ export class DataTableComponent implements OnInit {
     void writeXlsxFile(data).toFile(`${this.exportBaseName()}.xlsx`);
   }
 
-  private static readonly FORMULA_PATTERN = /^(?:[=+@\t\r]|-(?![\d$€£¥.,\s%()]*$))/;
   private static readonly DECORATIVE_FIELDS = new Set(['actions', 'icon', 'avatar', 'color']);
   private static readonly EXPORT_STRIP_SELECTOR =
     'mat-icon, .material-icons, .material-icons-outlined, .material-icons-round, .material-icons-sharp, .material-symbols-outlined, '
@@ -548,8 +540,7 @@ export class DataTableComponent implements OnInit {
 
   private toExcelCell(row: unknown, col: ColumnDef): CellObject | null {
     const raw = (row as Record<string, unknown>)[col.field];
-    const typed = !col.exportValue && !this.getCellTemplate(col.field);
-    if (typed && raw !== null && raw !== undefined && raw !== '' && typeof raw !== 'boolean') {
+    if (!col.exportValue && raw !== null && raw !== undefined && raw !== '' && typeof raw !== 'boolean') {
       if (col.type === 'number') {
         const n = typeof raw === 'number' ? raw : Number(raw);
         if (!Number.isNaN(n)) return { type: Number, value: n };

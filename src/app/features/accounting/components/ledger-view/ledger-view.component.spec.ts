@@ -41,7 +41,11 @@ interface LedgerApi {
   ngOnInit(): void;
   loading(): boolean;
   error(): string | null;
-  entries(): (LedgerRegisterEntry & { entryDateDisplay: string; balanceAfter?: number })[];
+  entries(): (LedgerRegisterEntry & {
+    entryDateDisplay: string; total: number; accounts: string; lensDebit?: number; lensCredit?: number; balanceAfter?: number;
+  })[];
+  columns(): { field: string }[];
+  unloadedCount(): number;
   explanations(): Record<number, ExplainState>;
   explain(entry: LedgerRegisterEntry): void;
   scanAnomalies(): void;
@@ -152,6 +156,30 @@ describe('LedgerViewComponent', () => {
     expect(api.lensAccount()).toMatchObject({ glAccountId: 1, netBalance: 120 });
     // balance AFTER each entry, walking newest -> oldest: 120, 20, 50
     expect(api.entries().map((e) => e.balanceAfter)).toEqual([120, 20, 50]);
+    expect(api.entries().map((e) => [e.lensDebit, e.lensCredit])).toEqual([[100, 0], [0, 30], [50, 0]]);
+    expect(api.columns().map((c) => c.field)).toEqual(
+      ['entryNumber', 'entryDate', 'source', 'status', 'memo', 'accounts', 'total', 'lensDebit', 'lensCredit', 'balanceAfter']);
+  });
+
+  it('gives each entry an exportable total and account list', () => {
+    const line = (id: number, glAccountId: number, accountNumber: string, accountName: string, debit: number, credit: number) => ({
+      id, lineNumber: id, glAccountId, accountNumber, accountName, debit, credit, description: null, jobId: null, costCenterId: null,
+    });
+    gl.getLedgerRegister.mockReturnValue(of({
+      ...PAGE,
+      data: [{ ...ENTRY, lines: [line(1, 1, '1000', 'Cash', 60, 0), line(2, 1, '1000', 'Cash', 40, 0), line(3, 2, '4000', 'Revenue', 0, 100)] }],
+    }));
+    const api = create();
+    expect(api.entries()[0].total).toBe(100);
+    expect(api.entries()[0].accounts).toBe('1000 Cash; 4000 Revenue');
+    expect(api.columns().map((c) => c.field)).toEqual(['entryNumber', 'entryDate', 'source', 'status', 'memo', 'accounts', 'total']);
+  });
+
+  it('counts the entries the loaded page leaves out', () => {
+    gl.getLedgerRegister.mockReturnValue(of({ ...PAGE, totalCount: 250, totalPages: 3 }));
+    expect(create().unloadedCount()).toBe(249);
+    gl.getLedgerRegister.mockReturnValue(of(PAGE));
+    expect(create().unloadedCount()).toBe(0);
   });
 
   it('reverses an entry via the dialog result, then reloads', () => {
