@@ -1002,6 +1002,7 @@
       "procurement": "Aprovisionamiento",
       "externalId": "ID externo",
       "newPartNumber": "N.º de pieza nuevo",
+      "newPartNumberPreview": "N.º de pieza (se asignará)",
       "statusCol": "Estado",
       "viewParts": "Ver piezas",
       "noContent": "No hay contenido para analizar.",
@@ -1266,14 +1267,14 @@
         "modeAbcDesc": "Asignación por drivers (m², horas máquina, etc.).",
         "tier2Tooltip": "Habilita CAP-COSTING-TIER2-DEPTRATES en admin para usar",
         "tier3Tooltip": "Habilita CAP-COSTING-TIER3-ABC en admin para usar",
-        "tierNotImplemented": "Los periodos, centros de costos y grupos de gastos generales por actividad se configuran en Finanzas → Costeo, pero el cálculo de costo estándar de la pieza aún no usa sus tarifas. La elección de nivel se guarda en la pieza; la sustitución manual debajo sigue siendo el costo activo.",
+        "tierNotImplemented": "Los periodos, centros de costos y grupos de gastos generales por actividad los configura un Administrador o Gerente, pero el cálculo de costo estándar de la pieza aún no usa sus tarifas. La elección de nivel se guarda en la pieza; la sustitución manual debajo sigue siendo el costo activo.",
         "departmentalConfigured": "Las tarifas departamentales de gastos generales son una configuración de toda la planta — configure las tarifas por centro de trabajo en Administración → Costeo (Tarifas departamentales). El cálculo de costo estándar las aplica automáticamente a la ruta de cada pieza.",
         "manualOverrideLabel": "Sustitución manual de costo",
         "manualOverridePlaceholder": "0.00",
         "currentLabel": "Costo mostrado actualmente",
         "notSet": "No definido",
         "saveFailed": "No se pudo guardar.",
-        "rationale": "<strong>El costo determina cada dólar aguas abajo.</strong> El precio de cotización, los reportes de margen, la valuación de WIP y el análisis de variación estándar-vs-real leen de este número. <br><br>El Nivel 1 (override manual) es el camino más simple: ingresa un número en el que confíes. El Nivel 2 aplica las tarifas departamentales de gastos generales definidas en Administración. El Nivel 3 (grupos por actividad) se configura en Finanzas → Costeo pero aún no alimenta el cálculo de la pieza, así que para el Nivel 3 el override manual sigue siendo la respuesta operativa."
+        "rationale": "<strong>El costo determina cada dólar aguas abajo.</strong> El precio de cotización, los reportes de margen, la valuación de WIP y el análisis de variación estándar-vs-real leen de este número. <br><br>El Nivel 1 (override manual) es el camino más simple: ingresa un número en el que confíes. El Nivel 2 aplica las tarifas departamentales de gastos generales que define un Administrador o Gerente. El Nivel 3 (grupos por actividad) lo configura un Administrador o Gerente pero aún no alimenta el cálculo de la pieza, así que para el Nivel 3 el override manual sigue siendo la respuesta operativa."
       },
       "alternates": {
         "title": "Alternativos",

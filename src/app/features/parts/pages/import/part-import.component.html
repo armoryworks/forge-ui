@@ -50,7 +50,7 @@
                   <th scope="col">{{ 'parts.importPage.inventoryClass' | translate }}</th>
                   <th scope="col">{{ 'parts.importPage.procurement' | translate }}</th>
                   <th scope="col">{{ 'parts.importPage.externalId' | translate }}</th>
-                  <th scope="col">{{ 'parts.importPage.newPartNumber' | translate }}</th>
+                  <th scope="col" data-testid="import-new-part-number-header">{{ (committed() ? 'parts.importPage.newPartNumber' : 'parts.importPage.newPartNumberPreview') | translate }}</th>
                   <th scope="col">{{ 'parts.importPage.statusCol' | translate }}</th>
                 </tr>
               </thead>

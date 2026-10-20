@@ -1002,6 +1002,7 @@
       "procurement": "Procurement",
       "externalId": "External ID",
       "newPartNumber": "New Part #",
+      "newPartNumberPreview": "Part # (will be assigned)",
       "statusCol": "Status",
       "viewParts": "View parts",
       "noContent": "No content to parse.",
@@ -1283,14 +1284,14 @@
         "modeAbcDesc": "Cost pools allocated by drivers (square footage, machine hours, etc.).",
         "tier2Tooltip": "Enable CAP-COSTING-TIER2-DEPTRATES in admin to use",
         "tier3Tooltip": "Enable CAP-COSTING-TIER3-ABC in admin to use",
-        "tierNotImplemented": "Activity-based periods, cost centers and overhead pools are set up under Financials → Costing, but the part standard-cost rollup does not use their rates yet. The tier choice is saved on the part; the manual override below stays the active cost.",
+        "tierNotImplemented": "Activity-based periods, cost centers and overhead pools are configured by an Admin or Manager, but the part standard-cost rollup does not use their rates yet. The tier choice is saved on the part; the manual override below stays the active cost.",
         "departmentalConfigured": "Departmental overhead rates are a shop-wide setting — configure per-work-center rates in Admin → Costing (Departmental Rates). The standard-cost rollup applies them automatically to every part's routing.",
         "manualOverrideLabel": "Manual cost override",
         "manualOverridePlaceholder": "0.00",
         "currentLabel": "Currently displayed cost",
         "notSet": "Not set",
         "saveFailed": "Couldn't save costing.",
-        "rationale": "<strong>Cost drives every dollar downstream.</strong> Quote pricing, margin reporting, WIP valuation, and standard-vs-actual variance analysis all read from this number. <br><br>Tier 1 (manual override) is the simplest path: enter a number you trust. Tier 2 applies the departmental overhead rates set in Admin. Tier 3 (activity-based pools) is configured under Financials → Costing but does not feed the part rollup yet, so for Tier 3 the manual override is still the working answer."
+        "rationale": "<strong>Cost drives every dollar downstream.</strong> Quote pricing, margin reporting, WIP valuation, and standard-vs-actual variance analysis all read from this number. <br><br>Tier 1 (manual override) is the simplest path: enter a number you trust. Tier 2 applies the departmental overhead rates an Admin or Manager sets. Tier 3 (activity-based pools) is configured by an Admin or Manager but does not feed the part rollup yet, so for Tier 3 the manual override is still the working answer."
       },
       "alternates": {
         "title": "Alternates",
