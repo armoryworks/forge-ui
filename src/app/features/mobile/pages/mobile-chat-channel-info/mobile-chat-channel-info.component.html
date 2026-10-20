@@ -72,5 +72,10 @@
         <span class="channel-info__meta">{{ ch.createdAt | date:'MM/dd/yyyy' }}</span>
       </div>
     </div>
+  } @else {
+    <app-empty-state
+      icon="forum"
+      [message]="'mobileLegacyPages.channelInfo.notFound' | translate"
+      data-testid="channel-info-not-found" />
   }
 </div>

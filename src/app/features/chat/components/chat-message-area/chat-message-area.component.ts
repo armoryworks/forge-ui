@@ -2,13 +2,15 @@ import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, input
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
 import { AuthService } from '../../../../shared/services/auth.service';
+import { LanguageService } from '../../../../shared/services/language.service';
 import { ChatMessage } from '../../models/chat-message.model';
 import { MentionRenderPipe } from '../../pipes/mention-render.pipe';
 import { formatTime as formatClockTime } from '../../../../shared/utils/date.utils';
+import { chatDateSeparator } from '../../utils/chat-time';
 
 @Component({
   selector: 'app-chat-message-area',
@@ -20,6 +22,8 @@ import { formatTime as formatClockTime } from '../../../../shared/utils/date.uti
 })
 export class ChatMessageAreaComponent {
   private readonly authService = inject(AuthService);
+  private readonly language = inject(LanguageService);
+  private readonly translate = inject(TranslateService);
 
   private readonly messagesContainer = viewChild<ElementRef<HTMLElement>>('messagesContainer');
 
@@ -58,6 +62,9 @@ export class ChatMessageAreaComponent {
     const content = this.messageControl.value?.trim();
     if (!content && !this.pendingFileAttachmentId()) return;
     this.messageSent.emit(content ?? '');
+  }
+
+  clearComposer(): void {
     this.messageControl.setValue('');
   }
 
@@ -93,22 +100,7 @@ export class ChatMessageAreaComponent {
   }
 
   protected dateSeparator(index: number): string | null {
-    const msgs = this.topLevelMessages();
-    if (index >= msgs.length) return null;
-    const current = new Date(msgs[index].createdAt);
-    const currentDay = this.toDayKey(current);
-
-    if (index === 0) {
-      return this.isToday(current) ? null : this.formatDayLabel(current);
-    }
-
-    const prev = new Date(msgs[index - 1].createdAt);
-    const prevDay = this.toDayKey(prev);
-
-    if (currentDay !== prevDay) {
-      return this.isToday(current) ? 'Today' : this.formatDayLabel(current);
-    }
-    return null;
+    return chatDateSeparator(this.topLevelMessages(), index, this.language.currentLanguage(), key => this.translate.instant(key));
   }
 
   protected formatFileSize(bytes: number): string {
@@ -127,21 +119,5 @@ export class ChatMessageAreaComponent {
 
   protected openThread(msg: ChatMessage): void {
     this.threadOpened.emit(msg);
-  }
-
-  private toDayKey(d: Date): string {
-    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-  }
-
-  private isToday(d: Date): boolean {
-    const now = new Date();
-    return this.toDayKey(d) === this.toDayKey(now);
-  }
-
-  private formatDayLabel(d: Date): string {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    if (this.toDayKey(d) === this.toDayKey(yesterday)) return 'Yesterday';
-    return d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
   }
 }

@@ -98,3 +98,33 @@ describe('MobileNotificationsComponent', () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 });
+
+describe('MobileNotificationsComponent rendering', () => {
+  it('renders mentions and markdown like the desktop panel instead of raw markup', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [MobileNotificationsComponent],
+      providers: [
+        provideTranslateService(),
+        {
+          provide: NotificationService,
+          useValue: {
+            filteredNotifications: signal([{
+              id: 1, title: 'Mentioned', message: 'Hi @[Ana Ruiz](user:4), see **J-12**', severity: 'info',
+              isRead: false, createdAt: new Date(), senderInitials: null, senderColor: null,
+            }]),
+            unreadCount: signal(1),
+            load: vi.fn(),
+          },
+        },
+      ],
+    });
+    const fixture = TestBed.createComponent(MobileNotificationsComponent);
+    fixture.detectChanges();
+    const message = (fixture.nativeElement as HTMLElement).querySelector('.notif-item__message') as HTMLElement;
+
+    expect(message.querySelector('.mention')?.textContent).toBe('@Ana Ruiz');
+    expect(message.querySelector('strong')?.textContent).toBe('J-12');
+    expect(message.textContent).not.toContain('user:4');
+  });
+});

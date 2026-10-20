@@ -11,8 +11,11 @@
         [selectedChannelId]="selectedChannelId()"
         [selectedUserId]="selectedUserId()"
         [searchTerm]="searchTerm()"
+        [mutedChannelIds]="mutedChannelIds()"
+        [canStartDirectMessage]="canStartDirectMessage()"
         (searchChanged)="searchTerm.set($event)"
         (channelSelected)="onChannelSelected($event)"
+        (newMessageClicked)="openNewMessage()"
         (newGroup)="openCreateChannel()"
         (browseChannels)="openBrowseChannels()"
         (muteToggled)="onMuteToggled($event)" />
@@ -37,7 +40,7 @@
       [currentUserId]="currentUserId()"
       [isChannel]="isChannel()"
       [isReadOnly]="isReadOnly()"
-      [showFileAttach]="true"
+      [showFileAttach]="isChannel()"
       [pendingFile]="pendingFile()"
       [pendingFileAttachmentId]="pendingFileAttachmentId()"
       [isUploading]="isUploading()"
@@ -49,7 +52,15 @@
 
   <!-- Mobile Thread View (full-screen slide-over) -->
   @if (threadParentMessage(); as parent) {
-    <div class="mobile-thread-overlay" role="dialog" [attr.aria-label]="'mobileLegacyPages.chat.threadLabel' | translate">
+    <div
+      class="mobile-thread-overlay"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="'mobileLegacyPages.chat.threadLabel' | translate"
+      cdkTrapFocus
+      cdkTrapFocusAutoCapture
+      (keydown.escape)="closeThread()"
+      data-testid="mobile-thread-overlay">
       <div class="mobile-thread-overlay__content">
         <app-chat-thread-panel
           [parentMessage]="parent"

@@ -1,20 +1,20 @@
-<app-dialog title="Create Channel" width="520px" (closed)="close()">
+<app-dialog [title]="'chat.createChannel.title' | translate" width="520px" (closed)="close()">
   <div [formGroup]="form">
     <div class="dialog-row">
-      <app-input label="Channel Name" formControlName="name" [required]="true" data-testid="channel-name" />
-      <app-select label="Type" formControlName="channelType" [options]="channelTypeOptions" [required]="true" data-testid="channel-type" />
+      <app-input [label]="'chat.createChannel.name' | translate" formControlName="name" [required]="true" data-testid="channel-name" />
+      <app-select [label]="'chat.createChannel.type' | translate" formControlName="channelType" [options]="channelTypeOptions" [required]="true" data-testid="channel-type" />
     </div>
-    <app-textarea label="Description" formControlName="description" [rows]="2" data-testid="channel-description" />
+    <app-textarea [label]="'chat.createChannel.description' | translate" formControlName="description" [rows]="2" data-testid="channel-description" />
 
     <div class="member-section">
-      <span class="member-section__label">Members</span>
+      <span class="member-section__label">{{ 'chat.createChannel.members' | translate }}</span>
       @if (selectedMembers().length > 0) {
         <div class="member-chips">
           @for (member of selectedMembers(); track member.id) {
             <div class="member-chip">
               <app-avatar [initials]="member.initials" [color]="member.color" size="sm" />
               <span class="member-chip__name">{{ member.name }}</span>
-              <button class="member-chip__remove" (click)="removeMember(member.id)" aria-label="Remove member">
+              <button class="member-chip__remove" (click)="removeMember(member.id)" [attr.aria-label]="'chat.createChannel.removeMember' | translate">
                 <span class="material-icons-outlined">close</span>
               </button>
             </div>
@@ -25,7 +25,7 @@
         <input
           class="member-search__input"
           type="text"
-          placeholder="Search users..."
+          [placeholder]="'chat.createChannel.searchUsers' | translate"
           [formControl]="memberSearchControl"
           data-testid="channel-member-search" />
       </div>
@@ -38,7 +38,7 @@
             </button>
           }
           @if (filteredUsers().length === 0) {
-            <div class="member-results__empty">No users found</div>
+            <div class="member-results__empty">{{ 'chat.createChannel.noUsers' | translate }}</div>
           }
         </div>
       }
@@ -46,14 +46,14 @@
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="close()">Cancel</button>
+    <button class="action-btn" (click)="close()">{{ 'chat.createChannel.cancel' | translate }}</button>
     <app-validation-button [violations]="violations">
     <button
       class="action-btn action-btn--primary"
       [disabled]="form.invalid || saving() || selectedMembers().length === 0"
       (click)="save()"
       data-testid="channel-save-btn">
-      {{ saving() ? 'Creating...' : 'Create Channel' }}
+      {{ (saving() ? 'chat.createChannel.creating' : 'chat.createChannel.create') | translate }}
     </button>
     </app-validation-button>
   </div>

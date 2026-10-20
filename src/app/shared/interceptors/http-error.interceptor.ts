@@ -19,6 +19,8 @@ export const MFA_ENROLLMENT_REQUIRED = 'mfa-enrollment-required';
 
 const NETWORK_RETRY_DELAYS_MS = [500, 1500];
 
+const BARE_PROBLEM_KEYS = new Set(['type', 'title', 'status', 'detail', 'traceId', 'instance']);
+
 export function formValidationContext(): HttpContext {
   return new HttpContext().set(SUPPRESS_VALIDATION_SNACKBAR, true);
 }
@@ -178,17 +180,20 @@ function extractMessage(error: HttpErrorResponse): string | null {
 
 function extractDetails(error: HttpErrorResponse): string | undefined {
   const body = error.error;
-  if (!body) return undefined;
+  if (!body || typeof body !== 'object') return undefined;
 
-  // Problem Details detail field
-  if (typeof body === 'object' && body.detail) return body.detail;
-
-  // Stack trace or full error body for copy button
-  try {
-    return JSON.stringify(body, null, 2);
-  } catch {
-    return undefined;
+  if (Object.keys(body).some(key => !BARE_PROBLEM_KEYS.has(key))) {
+    try {
+      return JSON.stringify(body, null, 2);
+    } catch {
+      return undefined;
+    }
   }
+
+  const lines: string[] = [];
+  if (typeof body.detail === 'string' && body.detail) lines.push(body.detail);
+  if (typeof body.traceId === 'string' && body.traceId) lines.push(`traceId: ${body.traceId}`);
+  return lines.length > 0 ? lines.join('\n') : undefined;
 }
 
 /**

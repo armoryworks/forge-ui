@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { AuthService } from '../../../../shared/services/auth.service';
+import { CapabilityService } from '../../../../shared/services/capability.service';
 import { ChatBroadcastService } from '../../services/chat-broadcast.service';
 import { ChatHubService } from '../../../../shared/services/chat-hub.service';
 import { ChatService } from '../../services/chat.service';
@@ -18,6 +19,8 @@ import { ChatChannelListComponent, ChannelSelection } from '../chat-channel-list
 import { ChatMessageAreaComponent } from '../chat-message-area/chat-message-area.component';
 import { ChatChannelHeaderComponent } from '../chat-channel-header/chat-channel-header.component';
 import { ChatThreadPanelComponent } from '../chat-thread-panel/chat-thread-panel.component';
+import { NewMessageDialogComponent, NewMessageRecipient } from '../new-message-dialog/new-message-dialog.component';
+import { mutedChannelIds } from '../../utils/chat-rooms';
 
 @Component({
   selector: 'app-chat-popout',
@@ -33,8 +36,10 @@ export class ChatPopoutComponent implements OnInit, OnDestroy {
   private readonly chatHub = inject(ChatHubService);
   private readonly authService = inject(AuthService);
   private readonly dialog = inject(MatDialog);
+  private readonly capabilities = inject(CapabilityService);
 
   private readonly messageArea = viewChild<ChatMessageAreaComponent>('messageArea');
+  private readonly threadPanel = viewChild(ChatThreadPanelComponent);
 
   protected readonly conversations = signal<ChatConversation[]>([]);
   protected readonly channels = signal<ChatRoom[]>([]);
@@ -57,6 +62,8 @@ export class ChatPopoutComponent implements OnInit, OnDestroy {
   protected readonly hasSelection = computed(() => this.selectedConversation() !== null || this.selectedChannel() !== null);
   protected readonly isChannel = computed(() => this.selectedChannel() !== null);
   protected readonly isReadOnly = computed(() => this.selectedChannel()?.isReadOnly ?? false);
+  protected readonly mutedChannelIds = computed(() => mutedChannelIds(this.channels(), this.currentUserId()));
+  protected readonly canStartDirectMessage = computed(() => this.capabilities.isEnabled('CAP-IDEN-USERS', true));
 
   protected readonly headerTitle = computed(() => {
     const conv = this.selectedConversation();
@@ -106,6 +113,13 @@ export class ChatPopoutComponent implements OnInit, OnDestroy {
         this.selectChannel(channel);
       }
     }
+  }
+
+  protected openNewMessage(): void {
+    this.dialog.open<NewMessageDialogComponent, void, NewMessageRecipient>(NewMessageDialogComponent, { width: '420px' })
+      .afterClosed().subscribe(user => {
+        if (user) this.startDirectMessage(user);
+      });
   }
 
   protected onMuteToggled(event: { channel: ChatRoom; mute: boolean }): void {
@@ -166,6 +180,7 @@ export class ChatPopoutComponent implements OnInit, OnDestroy {
     const onSent = (msg: ChatMessage) => {
       this.messages.update((msgs) => [...msgs, msg]);
       this.clearPendingFile();
+      this.messageArea()?.clearComposer();
       this.messageArea()?.scrollToBottom();
     };
 
@@ -211,6 +226,7 @@ export class ChatPopoutComponent implements OnInit, OnDestroy {
     if (!parent) return;
 
     this.chatService.replyInThread(parent.id, content).subscribe(reply => {
+      this.threadPanel()?.clearComposer();
       this.threadReplies.update(r => [...r, reply]);
       this.messages.update(msgs => msgs.map(m =>
         m.id === parent.id ? { ...m, threadReplyCount: m.threadReplyCount + 1, threadLastReplyAt: new Date() } : m,
@@ -224,7 +240,21 @@ export class ChatPopoutComponent implements OnInit, OnDestroy {
     this.threadReplies.set([]);
   }
 
+  private startDirectMessage(user: NewMessageRecipient): void {
+    const existing = this.conversations().find(c => c.userId === user.id);
+    this.selectConversation(existing ?? {
+      userId: user.id,
+      userName: user.name,
+      userInitials: user.initials,
+      userColor: user.color,
+      lastMessage: null,
+      lastMessageAt: null,
+      unreadCount: 0,
+    });
+  }
+
   private selectConversation(conv: ChatConversation): void {
+    this.clearPendingFile();
     this.selectedConversation.set(conv);
     this.selectedChannel.set(null);
     this.threadParentMessage.set(null);
@@ -234,6 +264,7 @@ export class ChatPopoutComponent implements OnInit, OnDestroy {
   }
 
   private selectChannel(channel: ChatRoom): void {
+    if (this.selectedChannel()?.id !== channel.id) this.clearPendingFile();
     this.selectedChannel.set(channel);
     this.selectedConversation.set(null);
     this.threadParentMessage.set(null);

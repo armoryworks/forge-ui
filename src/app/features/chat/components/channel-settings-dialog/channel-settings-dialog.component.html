@@ -1,32 +1,33 @@
-<app-dialog [title]="channel().name" width="520px" (closed)="close()">
+<app-dialog [title]="'chat.settings.title' | translate" width="520px" (closed)="close()">
   <div class="settings">
+    <div class="settings__channel-name" data-testid="settings-channel-title">{{ channel().name }}</div>
     @if (canEdit()) {
       <div [formGroup]="form">
-        <app-input label="Channel Name" formControlName="name" [required]="true" data-testid="settings-channel-name" />
-        <app-textarea label="Description" formControlName="description" [rows]="2" data-testid="settings-channel-desc" />
-        <app-input label="Icon Name" formControlName="iconName" placeholder="e.g. forum, campaign, tag" data-testid="settings-channel-icon" />
+        <app-input [label]="'chat.settings.name' | translate" formControlName="name" [required]="true" data-testid="settings-channel-name" />
+        <app-textarea [label]="'chat.settings.description' | translate" formControlName="description" [rows]="2" data-testid="settings-channel-desc" />
+        <app-input [label]="'chat.settings.iconName' | translate" formControlName="iconName" [placeholder]="'chat.settings.iconPlaceholder' | translate" data-testid="settings-channel-icon" />
       </div>
     } @else {
       @if (channel().description) {
         <div class="settings__description">
-          <span class="settings__label">Description</span>
+          <span class="settings__label">{{ 'chat.settings.description' | translate }}</span>
           <span class="settings__value">{{ channel().description }}</span>
         </div>
       }
     }
 
     <div class="settings__members">
-      <span class="settings__label">Members ({{ channel().members.length }})</span>
+      <span class="settings__label">{{ 'chat.settings.members' | translate: { count: channel().members.length } }}</span>
       <div class="settings__member-list">
         @for (member of sortedMembers(); track member.userId) {
           <div class="settings__member">
             <app-avatar [initials]="member.initials" [color]="member.color" size="sm" />
             <span class="settings__member-name">{{ member.displayName }}</span>
-            @if (member.role !== 'Member') {
-              <span class="role-badge" [class]="getRoleBadgeClass(member.role)">{{ member.role }}</span>
+            @if (getRoleLabelKey(member.role); as roleKey) {
+              <span class="role-badge" [class]="getRoleBadgeClass(member.role)">{{ roleKey | translate }}</span>
             }
             @if (member.isMuted) {
-              <span class="material-icons-outlined settings__muted-icon" matTooltip="Muted" matTooltipPosition="above">notifications_off</span>
+              <span class="material-icons-outlined settings__muted-icon" [matTooltip]="'chat.muted' | translate" matTooltipPosition="above">notifications_off</span>
             }
           </div>
         }
@@ -40,18 +41,18 @@
         class="action-btn action-btn--danger"
         [disabled]="leaving()"
         (click)="leaveChannel()"
-        aria-label="Leave channel"
+        [attr.aria-label]="'chat.settings.leaveChannel' | translate"
         data-testid="settings-leave-btn">
         @if (leaving()) {
           <span class="material-icons-outlined spin">sync</span>
         } @else {
           <span class="material-icons-outlined">logout</span>
         }
-        Leave
+        {{ 'chat.settings.leave' | translate }}
       </button>
     }
     <span class="dialog-footer__spacer"></span>
-    <button class="action-btn" (click)="close()">Cancel</button>
+    <button class="action-btn" (click)="close()">{{ 'chat.settings.cancel' | translate }}</button>
     @if (canEdit()) {
       <app-validation-button [violations]="violations" [loading]="saving()">
       <button
@@ -59,7 +60,7 @@
         [disabled]="form.invalid || saving()"
         (click)="save()"
         data-testid="settings-save-btn">
-        {{ saving() ? 'Saving...' : 'Save' }}
+        {{ (saving() ? 'chat.settings.saving' : 'chat.settings.save') | translate }}
       </button>
       </app-validation-button>
     }

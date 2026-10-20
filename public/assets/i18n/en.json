@@ -7204,10 +7204,10 @@
     "entityShared": "Shared to chat",
     "channelList": {
       "directMessages": "Direct Messages",
-      "groupChats": "Group Chats",
+      "channels": "Channels",
       "teams": "Teams",
       "newMessage": "New Message",
-      "newGroup": "New Group",
+      "newChannel": "New Channel",
       "searchConversations": "Search conversations",
       "noConversations": "No conversations yet",
       "noConversationsHelp": "Click New Message to start a conversation.",
@@ -7216,7 +7216,8 @@
       "mute": "Mute",
       "unmute": "Unmute",
       "unmuteChannel": "Unmute channel",
-      "browseChannels": "Browse channels"
+      "browseChannels": "Browse Channels",
+      "noChannels": "No channels yet"
     },
     "thread": {
       "replies": "Thread",
@@ -7231,7 +7232,68 @@
     "replies": "Replies",
     "reply": "Reply",
     "replyInThread": "Reply in thread",
-    "searching": "Searching…"
+    "searching": "Searching…",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "readOnly": "This channel is read-only",
+    "attachFile": "Attach file",
+    "removeFile": "Remove file",
+    "muted": "Muted",
+    "channelSettings": "Channel settings",
+    "viewThreadReplies": "View thread replies",
+    "sendThreadReply": "Send thread reply",
+    "closeThread": "Close thread",
+    "threadRepliesLabel": "Thread replies",
+    "mentionSuggestions": "Mention suggestions",
+    "toggleSection": "Show or hide {{section}}",
+    "settings": {
+      "title": "Channel Settings",
+      "name": "Channel Name",
+      "description": "Description",
+      "iconName": "Icon Name",
+      "iconPlaceholder": "e.g. forum, campaign, tag",
+      "members": "Members ({{count}})",
+      "roleOwner": "Owner",
+      "roleAdmin": "Admin",
+      "leaveChannel": "Leave channel",
+      "leave": "Leave",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving..."
+    },
+    "browser": {
+      "title": "Browse Channels",
+      "search": "Search channels",
+      "loading": "Loading channels...",
+      "empty": "No channels found",
+      "memberCount_one": "{{count}} member",
+      "memberCount_other": "{{count}} members",
+      "join": "Join",
+      "joinLabel": "Join {{name}}",
+      "close": "Close"
+    },
+    "createChannel": {
+      "title": "Create Channel",
+      "name": "Channel Name",
+      "type": "Type",
+      "typePrivateGroup": "Private Group",
+      "typePublicChannel": "Public Channel",
+      "description": "Description",
+      "members": "Members",
+      "removeMember": "Remove member",
+      "searchUsers": "Search users...",
+      "noUsers": "No users found",
+      "cancel": "Cancel",
+      "create": "Create Channel",
+      "creating": "Creating..."
+    },
+    "newMessageDialog": {
+      "title": "New Message",
+      "search": "Search people",
+      "empty": "No people found",
+      "unavailable": "The people list is not available.",
+      "cancel": "Cancel"
+    }
   },
   "ai": {
     "title": "AI Assistants",
@@ -12014,7 +12076,8 @@
       "leaveTitle": "Leave Channel?",
       "leaveMessage": "Are you sure you want to leave #{{name}}? You can rejoin later.",
       "leaveConfirm": "Leave",
-      "left": "Left #{{name}}"
+      "left": "Left #{{name}}",
+      "notFound": "This channel isn't available. It may have been removed or you may no longer be a member."
     }
   },
   "adminUpdates": {

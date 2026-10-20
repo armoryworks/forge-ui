@@ -35,7 +35,7 @@ export const MOBILE_ROUTES: Routes = [
       },
       {
         path: 'chat',
-        data: { titleKey: 'chat.title' },
+        data: { titleKey: 'chat.title', fillContent: true },
         loadComponent: () => import('./pages/mobile-chat.component').then(m => m.MobileChatComponent),
       },
       {

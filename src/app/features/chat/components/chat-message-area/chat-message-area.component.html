@@ -30,12 +30,12 @@
         <span class="message-area__time">{{ formatTime(msg.createdAt) }}</span>
       </div>
       @if (msg.threadReplyCount > 0) {
-        <button class="message-area__thread-link" (click)="openThread(msg)" aria-label="View thread replies">
+        <button class="message-area__thread-link" (click)="openThread(msg)" [attr.aria-label]="'chat.viewThreadReplies' | translate">
           <span class="material-icons-outlined">forum</span>
-          {{ msg.threadReplyCount }} {{ msg.threadReplyCount === 1 ? 'reply' : 'replies' }}
+          {{ (msg.threadReplyCount === 1 ? 'chat.thread.replyCount_one' : 'chat.thread.replyCount_other') | translate: { count: msg.threadReplyCount } }}
         </button>
       }
-      <button class="message-area__reply-btn" (click)="openThread(msg)" aria-label="Reply in thread" matTooltip="Reply in thread" matTooltipPosition="above">
+      <button class="message-area__reply-btn" (click)="openThread(msg)" [attr.aria-label]="'chat.replyInThread' | translate" [matTooltip]="'chat.replyInThread' | translate" matTooltipPosition="above">
         <span class="material-icons-outlined">reply</span>
       </button>
     </div>
@@ -51,19 +51,19 @@
       @if (isUploading()) {
         <span class="material-icons-outlined spin">sync</span>
       }
-      <button class="icon-btn" (click)="clearPendingFile()" aria-label="Remove file">
+      <button class="icon-btn" (click)="clearPendingFile()" [attr.aria-label]="'chat.removeFile' | translate">
         <span class="material-icons-outlined">close</span>
       </button>
     </div>
   }
   <div class="message-area__input">
     @if (isReadOnly()) {
-      <span class="message-area__readonly">This channel is read-only</span>
+      <span class="message-area__readonly">{{ 'chat.readOnly' | translate }}</span>
     } @else {
       @if (showFileAttach()) {
         <input type="file" #fileInput class="message-area__file-input" (change)="onFileSelected($event)"
-          accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx,.xls,.xlsx,.csv,.txt,.step,.stl,.dxf" />
-        <button class="icon-btn" (click)="fileInput.click()" aria-label="Attach file" matTooltip="Attach file" matTooltipPosition="above">
+          accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx,.xls,.xlsx,.csv,.txt" />
+        <button class="icon-btn" (click)="fileInput.click()" [attr.aria-label]="'chat.attachFile' | translate" [matTooltip]="'chat.attachFile' | translate" matTooltipPosition="above">
           <span class="material-icons-outlined">attach_file</span>
         </button>
       }

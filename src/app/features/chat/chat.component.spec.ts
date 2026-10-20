@@ -35,13 +35,17 @@ const ROOM: ChatRoom = {
 describe('ChatComponent channel rows', () => {
   let fixture: ComponentFixture<ChatComponent>;
   let el: HTMLElement;
-  let chatService: { getConversations: ReturnType<typeof vi.fn>; getChannels: ReturnType<typeof vi.fn>; muteChannel: ReturnType<typeof vi.fn> };
+  let chatService: { getConversations: ReturnType<typeof vi.fn>; getChannels: ReturnType<typeof vi.fn>; muteChannel: ReturnType<typeof vi.fn> } & Record<string, ReturnType<typeof vi.fn>>;
 
   beforeEach(() => {
     chatService = {
       getConversations: vi.fn(() => of([])),
       getChannels: vi.fn(() => of([ROOM])),
       muteChannel: vi.fn(() => of(undefined)),
+      getMessages: vi.fn(() => of([])),
+      getChatRoomMessages: vi.fn(() => of([])),
+      markAsRead: vi.fn(() => of(undefined)),
+      markChannelRead: vi.fn(() => of(undefined)),
     };
     TestBed.configureTestingModule({
       imports: [ChatComponent, TranslateModule.forRoot()],
@@ -73,5 +77,51 @@ describe('ChatComponent channel rows', () => {
 
     expect(chatService.muteChannel).toHaveBeenCalledWith(7, true);
     expect(el.querySelector('.channel-item__mute-btn')).not.toBeNull();
+  });
+
+  it('offers the paperclip in a channel', () => {
+    (el.querySelector('.channel-item') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(el.querySelector('[data-testid="chat-attach-btn"]')).not.toBeNull();
+  });
+
+  it('hides the paperclip in a direct message, where uploads are not supported', () => {
+    fixture.componentInstance.selectConversation({
+      userId: 2, userName: 'Ana', userInitials: 'A', userColor: '#000', lastMessage: null, lastMessageAt: null, unreadCount: 0,
+    });
+    fixture.detectChanges();
+
+    expect(el.querySelector('[data-testid="chat-message-input"]')).not.toBeNull();
+    expect(el.querySelector('[data-testid="chat-attach-btn"]')).toBeNull();
+  });
+
+  it('drops a channel attachment when switching to a direct message', () => {
+    chatService['uploadChatFile'] = vi.fn(() => of({ id: 99 }));
+    chatService['sendMessage'] = vi.fn(() => of({
+      id: 1, senderId: 1, senderName: 'Me', senderInitials: 'M', senderColor: '#000', recipientId: 2, content: 'hi', isRead: false,
+      createdAt: new Date(), chatRoomId: null, fileAttachment: null, linkedEntityType: null, linkedEntityId: null,
+      parentMessageId: null, threadReplyCount: 0, threadLastReplyAt: null, mentions: [],
+    }));
+    (el.querySelector('.channel-item') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    const fileInput = el.querySelector('.chat-panel__file-input') as HTMLInputElement;
+    Object.defineProperty(fileInput, 'files', { value: [new File(['x'], 'plan.pdf')] });
+    fileInput.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(el.querySelector('.chat-panel__pending-file')).not.toBeNull();
+
+    fixture.componentInstance.selectConversation({
+      userId: 2, userName: 'Ana', userInitials: 'A', userColor: '#000', lastMessage: null, lastMessageAt: null, unreadCount: 0,
+    });
+    fixture.detectChanges();
+    const input = el.querySelector('[data-testid="chat-message-input"]') as HTMLInputElement;
+    input.value = 'hi';
+    input.dispatchEvent(new Event('input'));
+    fixture.componentInstance.sendMessage();
+    fixture.detectChanges();
+
+    expect(el.querySelector('.chat-panel__pending-file')).toBeNull();
+    expect(chatService['sendMessage']).toHaveBeenCalledWith(2, 'hi', undefined);
   });
 });

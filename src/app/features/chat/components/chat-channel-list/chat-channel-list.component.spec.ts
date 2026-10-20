@@ -109,17 +109,59 @@ describe('ChatChannelListComponent channel rows', () => {
   });
 });
 
-describe('ChatChannelListComponent empty state', () => {
-  it('tells a user with no conversations how to start one', () => {
+describe('ChatChannelListComponent actions and search', () => {
+  let fixture: ComponentFixture<ChatChannelListComponent>;
+  let el: HTMLElement;
+
+  beforeEach(() => {
+    TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       imports: [ChatChannelListComponent, TranslateModule.forRoot()],
       providers: [provideNoopAnimations()],
     });
-    const fixture = TestBed.createComponent(ChatChannelListComponent);
-    fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
+    fixture = TestBed.createComponent(ChatChannelListComponent);
+    el = fixture.nativeElement as HTMLElement;
+  });
 
-    expect(el.querySelector('.channel-list__empty-text')?.textContent).toContain('chat.channelList.noConversations');
-    expect(el.querySelector('[data-testid="chat-empty-help"]')?.textContent).toContain('chat.channelList.noConversationsHelp');
+  it('keeps New Message, New Channel and Browse when there are no conversations or channels', () => {
+    fixture.detectChanges();
+
+    expect(el.querySelector('[data-testid="chat-new-message-btn"]')).not.toBeNull();
+    expect(el.textContent).toContain('chat.channelList.newChannel');
+    expect(el.textContent).toContain('chat.channelList.browseChannels');
+  });
+
+  it('emits newMessageClicked from the New Message button', () => {
+    let clicks = 0;
+    fixture.componentInstance.newMessageClicked.subscribe(() => clicks++);
+    fixture.detectChanges();
+
+    (el.querySelector('[data-testid="chat-new-message-btn"]') as HTMLButtonElement).click();
+
+    expect(clicks).toBe(1);
+  });
+
+  it('hides New Message when direct messages cannot be started', () => {
+    fixture.componentRef.setInput('canStartDirectMessage', false);
+    fixture.detectChanges();
+
+    expect(el.querySelector('[data-testid="chat-new-message-btn"]')).toBeNull();
+  });
+
+  it('matches names regardless of accents', () => {
+    fixture.componentRef.setInput('channels', [{ ...ROOM, name: 'Producción' }]);
+    fixture.componentRef.setInput('searchTerm', 'produccion');
+    fixture.detectChanges();
+
+    expect(el.textContent).toContain('Producción');
+    expect(el.textContent).not.toContain('chat.channelList.noResults');
+  });
+
+  it('shows the muted marker with a translated tooltip key for muted channels', () => {
+    fixture.componentRef.setInput('channels', [ROOM]);
+    fixture.componentRef.setInput('mutedChannelIds', new Set([ROOM.id]));
+    fixture.detectChanges();
+
+    expect(el.querySelector('.channel-list__muted-icon')).not.toBeNull();
   });
 });

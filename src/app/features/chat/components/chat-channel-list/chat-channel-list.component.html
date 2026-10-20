@@ -14,13 +14,6 @@
       <span class="material-icons-outlined channel-list__empty-icon">search_off</span>
       <span class="channel-list__empty-text">{{ 'chat.channelList.noResults' | translate }}</span>
     </div>
-  } @else if (!hasResults()) {
-    <!-- No conversations at all -->
-    <div class="channel-list__empty">
-      <span class="material-icons-outlined channel-list__empty-icon">chat_bubble_outline</span>
-      <span class="channel-list__empty-text">{{ 'chat.channelList.noConversations' | translate }}</span>
-      <span class="channel-list__empty-help" data-testid="chat-empty-help">{{ 'chat.channelList.noConversationsHelp' | translate }}</span>
-    </div>
   } @else {
     <!-- Direct Messages section -->
     <div class="channel-list__section">
@@ -30,15 +23,18 @@
           <span class="channel-list__section-title">{{ 'chat.channelList.directMessages' | translate }}</span>
         </button>
         <span class="channel-list__spacer"></span>
-        <button
-          class="action-btn action-btn--create action-btn--sm"
-          (click)="newMessageClicked.emit()"
-          [attr.aria-label]="'chat.channelList.newMessage' | translate"
-          [matTooltip]="'chat.channelList.newMessage' | translate"
-          matTooltipPosition="above">
-          <span class="material-icons-outlined">add</span>
-          <span>{{ 'chat.channelList.newMessage' | translate }}</span>
-        </button>
+        @if (canStartDirectMessage()) {
+          <button
+            class="action-btn action-btn--create action-btn--sm"
+            (click)="newMessageClicked.emit()"
+            [attr.aria-label]="'chat.channelList.newMessage' | translate"
+            [matTooltip]="'chat.channelList.newMessage' | translate"
+            matTooltipPosition="above"
+            data-testid="chat-new-message-btn">
+            <span class="material-icons-outlined">add</span>
+            <span>{{ 'chat.channelList.newMessage' | translate }}</span>
+          </button>
+        }
       </div>
       @if (sectionsExpanded()['dms']) {
         <div class="channel-list__items" role="listbox" [attr.aria-label]="'chat.channelList.directMessages' | translate">
@@ -77,25 +73,25 @@
     <!-- Channels section -->
     <div class="channel-list__section">
       <div class="channel-list__section-header">
-        <button class="channel-list__section-toggle" (click)="toggleSection('channels')" [attr.aria-label]="'chat.channelList.groupChats' | translate">
+        <button class="channel-list__section-toggle" (click)="toggleSection('channels')" [attr.aria-label]="'chat.channelList.channels' | translate">
           <span class="material-icons-outlined channel-list__chevron" [class.channel-list__chevron--collapsed]="!sectionsExpanded()['channels']">expand_more</span>
-          <span class="channel-list__section-title">{{ 'chat.channelList.groupChats' | translate }}</span>
+          <span class="channel-list__section-title">{{ 'chat.channelList.channels' | translate }}</span>
         </button>
         <span class="channel-list__spacer"></span>
         <button
           class="action-btn action-btn--create action-btn--sm"
           (click)="newGroup.emit()"
-          [attr.aria-label]="'chat.channelList.newGroup' | translate"
-          [matTooltip]="'chat.channelList.newGroup' | translate"
+          [attr.aria-label]="'chat.channelList.newChannel' | translate"
+          [matTooltip]="'chat.channelList.newChannel' | translate"
           matTooltipPosition="above">
           <span class="material-icons-outlined">add</span>
-          <span>{{ 'chat.channelList.newGroup' | translate }}</span>
+          <span>{{ 'chat.channelList.newChannel' | translate }}</span>
         </button>
       </div>
       @if (sectionsExpanded()['channels']) {
-        <div class="channel-list__items" role="list" [attr.aria-label]="'chat.channelList.groupChats' | translate">
+        <div class="channel-list__items" role="list" [attr.aria-label]="'chat.channelList.channels' | translate">
           @if (filteredGroupChannels().length === 0) {
-            <div class="channel-list__section-empty">{{ 'chat.channelList.noConversations' | translate }}</div>
+            <div class="channel-list__section-empty">{{ 'chat.channelList.noChannels' | translate }}</div>
           }
           @for (channel of filteredGroupChannels(); track channel.id) {
             <div class="channel-list__row" role="listitem">
@@ -118,7 +114,7 @@
                   }
                 </div>
                 @if (isChannelMuted(channel)) {
-                  <span class="material-icons-outlined channel-list__muted-icon" [matTooltip]="'Muted'" matTooltipPosition="above">notifications_off</span>
+                  <span class="material-icons-outlined channel-list__muted-icon" [matTooltip]="'chat.muted' | translate" matTooltipPosition="above">notifications_off</span>
                 }
                 @if (channel.unreadCount > 0) {
                   <span class="channel-list__badge">{{ channel.unreadCount }}</span>
@@ -178,7 +174,7 @@
                     }
                   </div>
                   @if (isChannelMuted(channel)) {
-                    <span class="material-icons-outlined channel-list__muted-icon" [matTooltip]="'Muted'" matTooltipPosition="above">notifications_off</span>
+                    <span class="material-icons-outlined channel-list__muted-icon" [matTooltip]="'chat.muted' | translate" matTooltipPosition="above">notifications_off</span>
                   }
                   @if (channel.unreadCount > 0) {
                     <span class="channel-list__badge">{{ channel.unreadCount }}</span>

@@ -17,10 +17,10 @@
       <span class="channel-header__members">{{ memberCount }}</span>
     }
 
-    <button class="icon-btn" (click)="onMuteToggle()" [attr.aria-label]="isChannelMuted ? 'Unmute channel' : 'Mute channel'" [matTooltip]="isChannelMuted ? 'Unmute' : 'Mute'" matTooltipPosition="above">
+    <button class="icon-btn" (click)="onMuteToggle()" [attr.aria-label]="(isChannelMuted ? 'chat.channelList.unmuteChannel' : 'chat.channelList.muteChannel') | translate" [matTooltip]="(isChannelMuted ? 'chat.channelList.unmute' : 'chat.channelList.mute') | translate" matTooltipPosition="above">
       <span class="material-icons-outlined">{{ isChannelMuted ? 'notifications_off' : 'notifications_active' }}</span>
     </button>
-    <button class="icon-btn" (click)="onSettings()" aria-label="Channel settings" matTooltip="Channel settings" matTooltipPosition="above">
+    <button class="icon-btn" (click)="onSettings()" [attr.aria-label]="'chat.channelSettings' | translate" [matTooltip]="'chat.channelSettings' | translate" matTooltipPosition="above">
       <span class="material-icons-outlined">settings</span>
     </button>
   }
@@ -28,7 +28,7 @@
   <span class="channel-header__spacer"></span>
 
   @if (showPopout()) {
-    <button class="icon-btn" (click)="onPopout()" aria-label="Pop out chat" matTooltip="Pop out" matTooltipPosition="above">
+    <button class="icon-btn" (click)="onPopout()" [attr.aria-label]="'chat.popoutChat' | translate" [matTooltip]="'chat.openInWindow' | translate" matTooltipPosition="above">
       <span class="material-icons-outlined">open_in_new</span>
     </button>
   }

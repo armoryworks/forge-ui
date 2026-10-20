@@ -1,0 +1,32 @@
+<app-dialog [title]="'chat.newMessageDialog.title' | translate" width="420px" (closed)="close()">
+  <div class="new-message">
+    <app-input
+      [label]="'chat.newMessageDialog.search' | translate"
+      [formControl]="searchControl"
+      prefix="search"
+      data-testid="new-message-search" />
+
+    <div class="new-message__list" role="list">
+      @if (loading()) {
+        <div class="new-message__state">
+          <span class="material-icons-outlined spin">sync</span>
+        </div>
+      } @else if (unavailable()) {
+        <div class="new-message__state">{{ 'chat.newMessageDialog.unavailable' | translate }}</div>
+      } @else {
+        @for (user of filteredUsers(); track user.id) {
+          <button class="new-message__user" role="listitem" (click)="select(user)" data-testid="new-message-user">
+            <app-avatar [initials]="user.initials" [color]="user.color" size="sm" />
+            <span class="new-message__user-name">{{ user.name }}</span>
+          </button>
+        } @empty {
+          <div class="new-message__state">{{ 'chat.newMessageDialog.empty' | translate }}</div>
+        }
+      }
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'chat.newMessageDialog.cancel' | translate }}</button>
+  </div>
+</app-dialog>

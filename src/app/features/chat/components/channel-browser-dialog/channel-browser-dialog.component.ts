@@ -4,16 +4,18 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
+import { matchesSearch } from '../../../../shared/utils/fold-for-search';
 import { ChatService } from '../../services/chat.service';
 import { ChatRoom } from '../../models/chat-room.model';
 
 @Component({
   selector: 'app-channel-browser-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, MatTooltipModule, DialogComponent, InputComponent],
+  imports: [ReactiveFormsModule, MatTooltipModule, DialogComponent, InputComponent, TranslatePipe],
   templateUrl: './channel-browser-dialog.component.html',
   styleUrl: './channel-browser-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,12 +31,8 @@ export class ChannelBrowserDialogComponent {
   protected readonly joiningId = signal<number | null>(null);
 
   protected readonly filteredChannels = computed(() => {
-    const term = (this.searchControl.value ?? '').toLowerCase();
-    if (!term) return this.channels();
-    return this.channels().filter(c =>
-      c.name.toLowerCase().includes(term) ||
-      (c.description?.toLowerCase().includes(term) ?? false),
-    );
+    const term = this.searchControl.value ?? '';
+    return this.channels().filter(c => matchesSearch(c.name, term) || matchesSearch(c.description, term));
   });
 
   constructor() {

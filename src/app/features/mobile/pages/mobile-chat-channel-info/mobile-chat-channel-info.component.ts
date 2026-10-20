@@ -5,6 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
+import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ChatService } from '../../../chat/services/chat.service';
 import { ChatRoom, ChatRoomMember } from '../../../chat/models/chat-room.model';
@@ -15,7 +16,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/co
 @Component({
   selector: 'app-mobile-chat-channel-info',
   standalone: true,
-  imports: [DatePipe, AvatarComponent, TranslatePipe],
+  imports: [DatePipe, AvatarComponent, EmptyStateComponent, TranslatePipe],
   templateUrl: './mobile-chat-channel-info.component.html',
   styleUrl: './mobile-chat-channel-info.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,17 +36,24 @@ export class MobileChatChannelInfoComponent implements OnInit {
 
   protected readonly currentUserId = this.authService.user()?.id;
 
+  private channelId = 0;
+
   ngOnInit(): void {
     const channelId = Number(this.route.snapshot.paramMap.get('channelId'));
-    if (!channelId) {
-      this.goBack();
+    if (!Number.isInteger(channelId) || channelId <= 0) {
+      this.router.navigate(['/m/chat'], { replaceUrl: true });
       return;
     }
+    this.channelId = channelId;
     this.loadChannel(channelId);
   }
 
   protected goBack(): void {
-    this.router.navigate(['../../chat'], { relativeTo: this.route });
+    if (this.channel()) {
+      this.router.navigate(['/m/chat'], { queryParams: { channel: this.channelId } });
+    } else {
+      this.router.navigate(['/m/chat']);
+    }
   }
 
   protected getChannelIcon(channel: ChatRoom): string {
@@ -102,7 +110,7 @@ export class MobileChatChannelInfoComponent implements OnInit {
         this.chatService.leaveChannel(ch.id).subscribe({
           next: () => {
             this.snackbar.info(this.translate.instant('mobileLegacyPages.channelInfo.left', { name: ch.name }));
-            this.router.navigate(['../../chat'], { relativeTo: this.route });
+            this.router.navigate(['/m/chat'], { replaceUrl: true });
           },
         });
       }
@@ -141,7 +149,6 @@ export class MobileChatChannelInfoComponent implements OnInit {
         },
         error: () => {
           this.loading.set(false);
-          this.goBack();
         },
       });
     }

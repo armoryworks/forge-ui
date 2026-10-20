@@ -18,11 +18,14 @@ interface ChannelInfoInternals {
   getRoleBadgeKey(role: string): string;
   toggleMute(): void;
   leaveChannel(): void;
+  goBack(): void;
+  ngOnInit(): void;
 }
 
 describe('MobileChatChannelInfoComponent', () => {
   const open = vi.fn();
   const info = vi.fn();
+  const navigate = vi.fn();
   const chatService = {
     muteChannel: vi.fn(() => of(undefined)),
     leaveChannel: vi.fn(() => of(undefined)),
@@ -41,7 +44,7 @@ describe('MobileChatChannelInfoComponent', () => {
         { provide: AuthService, useValue: { user: () => ({ id: 1 }) } },
         { provide: SnackbarService, useValue: { info } },
         { provide: MatDialog, useValue: { open } },
-        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: Router, useValue: { navigate } },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: convertToParamMap({ channelId: '4' }) } } },
       ],
     });
@@ -78,5 +81,26 @@ describe('MobileChatChannelInfoComponent', () => {
     expect(data.message).toBe('mobileLegacyPages.channelInfo.leaveMessage');
     expect(data.confirmLabel).toBe('mobileLegacyPages.channelInfo.leaveConfirm');
     expect(info).toHaveBeenCalledWith('mobileLegacyPages.channelInfo.left');
+    expect(navigate).toHaveBeenCalledWith(['/m/chat'], { replaceUrl: true });
+  });
+
+  it('goes back to the open conversation inside /m, not the desktop chat', () => {
+    component.ngOnInit();
+    component.channel.set(room);
+    navigate.mockClear();
+
+    component.goBack();
+
+    expect(navigate).toHaveBeenCalledWith(['/m/chat'], { queryParams: { channel: 4 } });
+  });
+
+  it('goes back to the mobile chat list when the channel was not found', () => {
+    component.ngOnInit();
+    component.channel.set(null);
+    navigate.mockClear();
+
+    component.goBack();
+
+    expect(navigate).toHaveBeenCalledWith(['/m/chat']);
   });
 });

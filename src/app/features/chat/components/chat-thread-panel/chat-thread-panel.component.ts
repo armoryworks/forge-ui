@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
+import { TranslatePipe } from '@ngx-translate/core';
+
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { ChatMessage } from '../../models/chat-message.model';
@@ -10,7 +12,7 @@ import { formatTime as formatClockTime } from '../../../../shared/utils/date.uti
 @Component({
   selector: 'app-chat-thread-panel',
   standalone: true,
-  imports: [ReactiveFormsModule, AvatarComponent, MentionRenderPipe],
+  imports: [ReactiveFormsModule, AvatarComponent, MentionRenderPipe, TranslatePipe],
   templateUrl: './chat-thread-panel.component.html',
   styleUrl: './chat-thread-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,6 +32,9 @@ export class ChatThreadPanelComponent {
     const content = this.replyControl.value?.trim();
     if (!content) return;
     this.replySent.emit(content);
+  }
+
+  clearComposer(): void {
     this.replyControl.setValue('');
   }
 

@@ -3,6 +3,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -31,6 +32,7 @@ export type ChannelSettingsDialogResult = 'left' | 'updated' | undefined;
     TextareaComponent,
     ValidationButtonComponent,
     AvatarComponent,
+    TranslatePipe,
   ],
   templateUrl: './channel-settings-dialog.component.html',
   styleUrl: './channel-settings-dialog.component.scss',
@@ -41,6 +43,7 @@ export class ChannelSettingsDialogComponent {
   private readonly data = inject<ChannelSettingsDialogData>(MAT_DIALOG_DATA);
   private readonly chatService = inject(ChatService);
   private readonly authService = inject(AuthService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly channel = signal<ChatRoom>(this.data.channel);
   protected readonly saving = signal(false);
@@ -53,7 +56,7 @@ export class ChannelSettingsDialogComponent {
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
-    name: 'Channel Name',
+    name: this.translate.instant('chat.settings.name'),
   });
 
   protected readonly currentUserRole = computed(() => {
@@ -78,6 +81,14 @@ export class ChannelSettingsDialogComponent {
       (roleOrder[a.role] ?? 2) - (roleOrder[b.role] ?? 2),
     );
   });
+
+  protected getRoleLabelKey(role: string): string {
+    switch (role) {
+      case 'Owner': return 'chat.settings.roleOwner';
+      case 'Admin': return 'chat.settings.roleAdmin';
+      default: return '';
+    }
+  }
 
   protected getRoleBadgeClass(role: string): string {
     switch (role) {

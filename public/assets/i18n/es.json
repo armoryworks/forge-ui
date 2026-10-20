@@ -7197,10 +7197,10 @@
     "entityShared": "Compartido en chat",
     "channelList": {
       "directMessages": "Mensajes Directos",
-      "groupChats": "Chats de Grupo",
+      "channels": "Canales",
       "teams": "Equipos",
       "newMessage": "Nuevo Mensaje",
-      "newGroup": "Nuevo Grupo",
+      "newChannel": "Nuevo Canal",
       "searchConversations": "Buscar conversaciones",
       "noConversations": "Sin conversaciones aún",
       "noConversationsHelp": "Haga clic en Nuevo Mensaje para iniciar una conversación.",
@@ -7209,7 +7209,8 @@
       "mute": "Silenciar",
       "unmute": "Activar sonido",
       "unmuteChannel": "Activar sonido del canal",
-      "browseChannels": "Explorar canales"
+      "browseChannels": "Explorar Canales",
+      "noChannels": "Aún no hay canales"
     },
     "thread": {
       "replies": "Hilo",
@@ -7224,7 +7225,68 @@
     "replies": "Respuestas",
     "reply": "Respuesta",
     "replyInThread": "Responder en el hilo",
-    "searching": "Buscando…"
+    "searching": "Buscando…",
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "readOnly": "Este canal es de solo lectura",
+    "attachFile": "Adjuntar archivo",
+    "removeFile": "Quitar archivo",
+    "muted": "Silenciado",
+    "channelSettings": "Configuración del canal",
+    "viewThreadReplies": "Ver respuestas del hilo",
+    "sendThreadReply": "Enviar respuesta en el hilo",
+    "closeThread": "Cerrar hilo",
+    "threadRepliesLabel": "Respuestas del hilo",
+    "mentionSuggestions": "Sugerencias de mención",
+    "toggleSection": "Mostrar u ocultar {{section}}",
+    "settings": {
+      "title": "Configuración del Canal",
+      "name": "Nombre del Canal",
+      "description": "Descripción",
+      "iconName": "Nombre del Icono",
+      "iconPlaceholder": "p. ej. forum, campaign, tag",
+      "members": "Miembros ({{count}})",
+      "roleOwner": "Propietario",
+      "roleAdmin": "Administrador",
+      "leaveChannel": "Salir del canal",
+      "leave": "Salir",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "saving": "Guardando..."
+    },
+    "browser": {
+      "title": "Explorar Canales",
+      "search": "Buscar canales",
+      "loading": "Cargando canales...",
+      "empty": "No se encontraron canales",
+      "memberCount_one": "{{count}} miembro",
+      "memberCount_other": "{{count}} miembros",
+      "join": "Unirse",
+      "joinLabel": "Unirse a {{name}}",
+      "close": "Cerrar"
+    },
+    "createChannel": {
+      "title": "Crear Canal",
+      "name": "Nombre del Canal",
+      "type": "Tipo",
+      "typePrivateGroup": "Grupo Privado",
+      "typePublicChannel": "Canal Público",
+      "description": "Descripción",
+      "members": "Miembros",
+      "removeMember": "Quitar miembro",
+      "searchUsers": "Buscar usuarios...",
+      "noUsers": "No se encontraron usuarios",
+      "cancel": "Cancelar",
+      "create": "Crear Canal",
+      "creating": "Creando..."
+    },
+    "newMessageDialog": {
+      "title": "Nuevo Mensaje",
+      "search": "Buscar personas",
+      "empty": "No se encontraron personas",
+      "unavailable": "La lista de personas no está disponible.",
+      "cancel": "Cancelar"
+    }
   },
   "ai": {
     "title": "Asistentes IA",
@@ -12014,7 +12076,8 @@
       "leaveTitle": "¿Salir del canal?",
       "leaveMessage": "¿Seguro que desea salir de #{{name}}? Puede volver a unirse más tarde.",
       "leaveConfirm": "Salir",
-      "left": "Salió de #{{name}}"
+      "left": "Salió de #{{name}}",
+      "notFound": "Este canal no está disponible. Puede que se haya eliminado o que ya no sea miembro."
     }
   },
   "adminUpdates": {

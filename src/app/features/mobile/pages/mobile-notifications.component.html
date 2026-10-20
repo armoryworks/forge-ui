@@ -28,7 +28,7 @@
               <span class="notif-item__title">{{ n.title }}</span>
               <span class="notif-item__time">{{ formatTime(n.createdAt) }}</span>
             </div>
-            <span class="notif-item__message">{{ n.message }}</span>
+            <div class="notif-item__message" [innerHTML]="n.message | richText"></div>
             @if (row.target?.desktop) {
               <span class="notif-item__desktop" data-testid="mnotif-opens-desktop">
                 <span class="material-icons-outlined">desktop_windows</span>
