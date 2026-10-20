@@ -18,6 +18,7 @@ export interface AuthUser {
   avatarColor: string | null;
   roles: string[];
   profileComplete: boolean;
+  mfaEnrollmentDeadline?: string | null;
 }
 
 export interface LoginRequest {

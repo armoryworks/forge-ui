@@ -81,7 +81,7 @@ export class MfaService {
     return this.http.get<MfaPolicy>(`${environment.apiUrl}/admin/mfa/policy`);
   }
 
-  setPolicy(requiredRoles: string[]): Observable<void> {
-    return this.http.put<void>(`${environment.apiUrl}/admin/mfa/policy`, { requiredRoles });
+  setPolicy(requiredRoles: string[], enrollmentGraceDays: number): Observable<void> {
+    return this.http.put<void>(`${environment.apiUrl}/admin/mfa/policy`, { requiredRoles, enrollmentGraceDays });
   }
 }

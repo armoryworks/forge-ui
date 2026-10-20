@@ -1,0 +1,31 @@
+@use 'styles/variables' as *;
+
+.mfa-grace-banner {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-xl;
+  background: var(--warning-light);
+  border-bottom: $border-width-thin solid var(--warning);
+  min-height: 36px;
+}
+
+.mfa-grace-banner__icon {
+  font-size: $icon-size-md;
+  color: var(--warning);
+}
+
+.mfa-grace-banner__text {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.mfa-grace-banner__dismiss {
+  color: var(--text-secondary);
+
+  &:hover {
+    color: var(--text);
+  }
+}

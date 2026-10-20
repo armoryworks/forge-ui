@@ -11,6 +11,14 @@
 
   <div class="mfa-policy__controls">
     <app-select [label]="'adminPanels.mfa.requiredForRoles' | translate" [options]="roles()" [formControl]="enforcedRolesControl" [multiple]="true" [placeholder]="'adminPanels.mfa.selectRoles' | translate" />
+    <app-input class="mfa-policy__grace"
+      [label]="'adminPanels.mfa.graceDays' | translate"
+      [info]="'adminPanels.mfa.graceDaysHint' | translate"
+      type="number"
+      [min]="0"
+      [max]="maxGraceDays"
+      [formControl]="graceDaysControl"
+      data-testid="mfa-grace-days" />
     <button class="action-btn action-btn--primary"
       [disabled]="saving()"
       (click)="savePolicy()"
