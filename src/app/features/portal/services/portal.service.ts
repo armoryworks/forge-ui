@@ -21,6 +21,7 @@ const TOKEN_KEY = 'portal-token';
 const EXPIRES_KEY = 'portal-token-expires';
 const IDENTITY_KEY = 'portal-identity';
 const TOTAL_COUNT_HEADER = 'X-Total-Count';
+const EXTERNAL_ACCOUNTING_HEADER = 'X-External-Accounting';
 
 /**
  * Portal-side auth + data service. Token storage is keyed off `portal-*`
@@ -101,7 +102,11 @@ export class PortalService {
       map((response: HttpResponse<T[]>) => {
         const items = response.body ?? [];
         const total = Number(response.headers.get(TOTAL_COUNT_HEADER));
-        return { items, totalCount: Number.isFinite(total) && total > items.length ? total : items.length };
+        return {
+          items,
+          totalCount: Number.isFinite(total) && total > items.length ? total : items.length,
+          externalAccounting: response.headers.get(EXTERNAL_ACCOUNTING_HEADER) === 'true',
+        };
       }),
     );
   }

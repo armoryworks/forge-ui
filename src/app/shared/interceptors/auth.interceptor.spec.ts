@@ -66,4 +66,18 @@ describe('authInterceptor', () => {
     expect(clearAuth).not.toHaveBeenCalled();
     expect(navigate).not.toHaveBeenCalled();
   });
+
+  it('leaves the employee session alone when a portal call gets a 401', () => {
+    let failure: HttpErrorResponse | null = null;
+    http.get('/api/v1/portal/me/quotes').subscribe({ error: (err: HttpErrorResponse) => { failure = err; } });
+
+    const req = httpMock.expectOne('/api/v1/portal/me/quotes');
+    expect(req.request.headers.has('Authorization')).toBe(false);
+    req.flush(null, { status: 401, statusText: 'Unauthorized' });
+
+    expect(failure!.status).toBe(401);
+    expect(refreshAccessToken).not.toHaveBeenCalled();
+    expect(clearAuth).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
+  });
 });

@@ -55,7 +55,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 && isOwnApi && authService.isAuthenticated()) {
+      if (error.status === 401 && isOwnApi && !isPortalCall && authService.isAuthenticated()) {
         // Don't attempt refresh for auth endpoints themselves
         if (NO_REFRESH_URLS.some(url => req.url.includes(url))) {
           redirectToLogin();

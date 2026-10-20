@@ -72,4 +72,5 @@ export interface RequestMagicLinkResult {
 export interface PortalList<T> {
   items: T[];
   totalCount: number;
+  externalAccounting: boolean;
 }

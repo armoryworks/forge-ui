@@ -8122,7 +8122,8 @@
       "orders": "Pedidos",
       "quotes": "Cotizaciones",
       "invoices": "Facturas",
-      "shipments": "Envíos"
+      "shipments": "Envíos",
+      "label": "Secciones del portal"
     },
     "login": {
       "title": "Inicia sesión en tu portal",
@@ -8186,19 +8187,22 @@
       "acceptMessage": "¿Aceptar la cotización {{number}}? Se le avisará a tu proveedor que la aceptaste.",
       "declineTitle": "¿Rechazar esta cotización?",
       "declineMessage": "¿Rechazar la cotización {{number}}? No podrás deshacerlo desde el portal.",
-      "respondFailed": "No pudimos registrar tu respuesta a la cotización {{number}}. Inténtalo de nuevo."
+      "respondFailed": "No pudimos registrar tu respuesta a la cotización {{number}}. Inténtalo de nuevo.",
+      "acceptLabel": "Aceptar la cotización {{number}}",
+      "declineLabel": "Rechazar la cotización {{number}}"
     },
     "invoices": {
       "title": "Tus Facturas",
       "subtitle": "Facturas abiertas y recientes. Si tu proveedor usa un sistema contable externo, consulta su portal para los datos más actuales.",
-      "empty": "No hay facturas para mostrar. Tu proveedor podría gestionar la facturación a través de un sistema contable externo.",
+      "empty": "No hay facturas para mostrar.",
       "colNumber": "Factura #",
       "colDate": "Fecha de Factura",
       "colDueDate": "Fecha de Vencimiento",
       "colStatus": "Estado",
       "colTotal": "Total",
       "colPaid": "Pagado",
-      "colBalance": "Saldo"
+      "colBalance": "Saldo",
+      "externalAccounting": "Tu proveedor gestiona las facturas a través de un sistema contable externo. Consulta su portal de facturación para ver tus facturas y saldos."
     },
     "shipments": {
       "title": "Tus Envíos",

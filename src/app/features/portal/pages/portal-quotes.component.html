@@ -20,13 +20,13 @@
       <table class="portal-list__table" [attr.aria-label]="'portal.quotes.title' | translate">
         <thead>
           <tr>
-            <th>{{ 'portal.quotes.colNumber' | translate }}</th>
-            <th>{{ 'portal.quotes.colType' | translate }}</th>
-            <th>{{ 'portal.quotes.colDate' | translate }}</th>
-            <th>{{ 'portal.quotes.colExpires' | translate }}</th>
-            <th>{{ 'portal.quotes.colStatus' | translate }}</th>
-            <th class="portal-list__num">{{ 'portal.quotes.colTotal' | translate }}</th>
-            <th>{{ 'portal.quotes.colActions' | translate }}</th>
+            <th scope="col">{{ 'portal.quotes.colNumber' | translate }}</th>
+            <th scope="col">{{ 'portal.quotes.colType' | translate }}</th>
+            <th scope="col">{{ 'portal.quotes.colDate' | translate }}</th>
+            <th scope="col">{{ 'portal.quotes.colExpires' | translate }}</th>
+            <th scope="col">{{ 'portal.quotes.colStatus' | translate }}</th>
+            <th scope="col" class="portal-list__num">{{ 'portal.quotes.colTotal' | translate }}</th>
+            <th scope="col">{{ 'portal.quotes.colActions' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -39,17 +39,21 @@
               <td><span [class]="statusChip(q.status)">{{ statusLabelKey(q.status) | translate }}</span></td>
               <td class="portal-list__num"><app-currency-display [value]="q.total" [currency]="q.currencyCode" /></td>
               <td>
-                @if (q.status === 'Sent') {
-                  <button type="button" class="action-btn action-btn--sm action-btn--primary"
-                    [disabled]="isResponding(q.id)"
-                    (click)="respond(q, true)"
-                    [attr.data-testid]="'portal-quote-accept-' + q.id">
-                    <span class="material-icons-outlined" aria-hidden="true">check</span>
-                    {{ 'portal.quotes.accept' | translate }}
-                  </button>
+                @if (q.status === 'Sent' || q.status === 'Expired') {
+                  @if (q.status === 'Sent') {
+                    <button type="button" class="action-btn action-btn--sm action-btn--primary"
+                      [disabled]="isResponding(q.id)"
+                      (click)="respond(q, true)"
+                      [attr.aria-label]="'portal.quotes.acceptLabel' | translate: { number: q.quoteNumber }"
+                      [attr.data-testid]="'portal-quote-accept-' + q.id">
+                      <span class="material-icons-outlined" aria-hidden="true">check</span>
+                      {{ 'portal.quotes.accept' | translate }}
+                    </button>
+                  }
                   <button type="button" class="action-btn action-btn--sm action-btn--danger"
                     [disabled]="isResponding(q.id)"
                     (click)="respond(q, false)"
+                    [attr.aria-label]="'portal.quotes.declineLabel' | translate: { number: q.quoteNumber }"
                     [attr.data-testid]="'portal-quote-decline-' + q.id">
                     <span class="material-icons-outlined" aria-hidden="true">close</span>
                     {{ 'portal.quotes.decline' | translate }}

@@ -8129,7 +8129,8 @@
       "orders": "Orders",
       "quotes": "Quotes",
       "invoices": "Invoices",
-      "shipments": "Shipments"
+      "shipments": "Shipments",
+      "label": "Portal sections"
     },
     "login": {
       "title": "Sign in to your portal",
@@ -8193,19 +8194,22 @@
       "acceptMessage": "Accept quote {{number}}? Your supplier will be told you accepted it.",
       "declineTitle": "Decline this quote?",
       "declineMessage": "Decline quote {{number}}? You can't undo this from the portal.",
-      "respondFailed": "We couldn't record your response to quote {{number}}. Please try again."
+      "respondFailed": "We couldn't record your response to quote {{number}}. Please try again.",
+      "acceptLabel": "Accept quote {{number}}",
+      "declineLabel": "Decline quote {{number}}"
     },
     "invoices": {
       "title": "Your Invoices",
       "subtitle": "Open and recent invoices. If your supplier uses an external accounting provider, see their portal for the most current data.",
-      "empty": "No invoices to show. Your supplier may handle billing through an external accounting provider.",
+      "empty": "No invoices to show.",
       "colNumber": "Invoice #",
       "colDate": "Invoice Date",
       "colDueDate": "Due Date",
       "colStatus": "Status",
       "colTotal": "Total",
       "colPaid": "Paid",
-      "colBalance": "Balance"
+      "colBalance": "Balance",
+      "externalAccounting": "Your supplier handles invoices through an external accounting provider. See their billing portal for your invoices and balances."
     },
     "shipments": {
       "title": "Your Shipments",

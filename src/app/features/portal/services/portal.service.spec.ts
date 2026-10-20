@@ -95,4 +95,24 @@ describe('PortalService', () => {
 
     expect(result?.totalCount).toBe(1);
   });
+
+  it('flags an invoice list owned by an external accounting provider', () => {
+    let result: { items: unknown[]; externalAccounting: boolean } | undefined;
+    TestBed.inject(PortalService).getInvoices().subscribe(list => (result = list));
+
+    TestBed.inject(HttpTestingController).expectOne(r => r.url.endsWith('/portal/me/invoices'))
+      .flush([], { headers: { 'X-Total-Count': '0', 'X-External-Accounting': 'true' } });
+
+    expect(result?.items.length).toBe(0);
+    expect(result?.externalAccounting).toBe(true);
+  });
+
+  it('does not flag an ordinary list as externally owned', () => {
+    let result: { externalAccounting: boolean } | undefined;
+    TestBed.inject(PortalService).getInvoices().subscribe(list => (result = list));
+
+    TestBed.inject(HttpTestingController).expectOne(r => r.url.endsWith('/portal/me/invoices')).flush([]);
+
+    expect(result?.externalAccounting).toBe(false);
+  });
 });

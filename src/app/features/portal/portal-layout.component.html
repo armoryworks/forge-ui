@@ -6,7 +6,7 @@
     </div>
 
     @if (identity(); as me) {
-      <nav class="portal-shell__nav">
+      <nav class="portal-shell__nav" [attr.aria-label]="'portal.nav.label' | translate">
         <a routerLink="/portal/dashboard" routerLinkActive="portal-shell__tab--active" class="portal-shell__tab">
           {{ 'portal.nav.dashboard' | translate }}
         </a>

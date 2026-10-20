@@ -13,6 +13,8 @@
         {{ 'portal.list.retry' | translate }}
       </button>
     </div>
+  } @else if (!loading() && externalAccounting()) {
+    <app-empty-state icon="account_balance" [message]="'portal.invoices.externalAccounting' | translate" data-testid="portal-invoices-external" />
   } @else if (!loading() && invoices().length === 0) {
     <app-empty-state icon="payments" [message]="'portal.invoices.empty' | translate" />
   } @else {
@@ -20,13 +22,13 @@
       <table class="portal-list__table" [attr.aria-label]="'portal.invoices.title' | translate">
         <thead>
           <tr>
-            <th>{{ 'portal.invoices.colNumber' | translate }}</th>
-            <th>{{ 'portal.invoices.colDate' | translate }}</th>
-            <th>{{ 'portal.invoices.colDueDate' | translate }}</th>
-            <th>{{ 'portal.invoices.colStatus' | translate }}</th>
-            <th class="portal-list__num">{{ 'portal.invoices.colTotal' | translate }}</th>
-            <th class="portal-list__num">{{ 'portal.invoices.colPaid' | translate }}</th>
-            <th class="portal-list__num">{{ 'portal.invoices.colBalance' | translate }}</th>
+            <th scope="col">{{ 'portal.invoices.colNumber' | translate }}</th>
+            <th scope="col">{{ 'portal.invoices.colDate' | translate }}</th>
+            <th scope="col">{{ 'portal.invoices.colDueDate' | translate }}</th>
+            <th scope="col">{{ 'portal.invoices.colStatus' | translate }}</th>
+            <th scope="col" class="portal-list__num">{{ 'portal.invoices.colTotal' | translate }}</th>
+            <th scope="col" class="portal-list__num">{{ 'portal.invoices.colPaid' | translate }}</th>
+            <th scope="col" class="portal-list__num">{{ 'portal.invoices.colBalance' | translate }}</th>
           </tr>
         </thead>
         <tbody>
