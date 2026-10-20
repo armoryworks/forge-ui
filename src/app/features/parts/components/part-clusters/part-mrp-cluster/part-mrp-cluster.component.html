@@ -49,6 +49,18 @@
       [isReadonly]="!editing()" />
   </div>
 
+  <div class="cluster__form-row">
+    <app-input data-testid="part-mrp-expected-yield"
+      [label]="'parts.detail.mrp.expectedYield' | translate"
+      [info]="'parts.detail.mrp.expectedYieldInfo' | translate"
+      type="number"
+      [min]="0.01"
+      [max]="100"
+      step="any"
+      formControlName="expectedYieldPercent"
+      [isReadonly]="!editing()" />
+  </div>
+
   <p class="cluster__value cluster__value--muted">{{ 'parts.detail.mrp.leadTimeNote' | translate }}</p>
 
   @if (editing()) {

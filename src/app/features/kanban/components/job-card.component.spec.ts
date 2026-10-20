@@ -199,6 +199,21 @@ describe('JobCardComponent', () => {
     expect(cardClicked).not.toHaveBeenCalled();
   });
 
+  it('shows the target and start when the job starts extra pieces for planned scrap', () => {
+    TestBed.inject(TranslateService).setTranslation('en', { kanban: { targetStart: 'Target {{target}} · Start {{start}}' } });
+    TestBed.inject(TranslateService).use('en');
+    render(job({ partNumber: 'BRK-100', quantity: 316, targetQuantity: 300 }));
+
+    expect(el().querySelector('[data-testid="job-card-target-start"]')!.textContent!.trim()).toBe('Target 300 · Start 316');
+  });
+
+  it('shows no target line when the job starts exactly its target or has none', () => {
+    render(job({ partNumber: 'BRK-100', quantity: 300, targetQuantity: 300 }));
+    expect(el().querySelector('[data-testid="job-card-target-start"]')).toBeNull();
+    render(job({ partNumber: 'BRK-100', quantity: 300 }));
+    expect(el().querySelector('[data-testid="job-card-target-start"]')).toBeNull();
+  });
+
   it('renders the part number and quantity under the title', () => {
     render(job({ partNumber: 'BRK-100', quantity: 500 }));
 

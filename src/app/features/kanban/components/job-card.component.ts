@@ -37,6 +37,12 @@ export class JobCardComponent {
     return j.quantity ?? (j.partNumber ? 1 : null);
   });
 
+  protected readonly targetStart = computed(() => {
+    const target = this.job().targetQuantity;
+    const start = this.buildQuantity();
+    return target != null && start != null && target !== start ? { target, start } : null;
+  });
+
   protected readonly holdTooltip = computed(() => this.job().activeHolds.join('\n'));
 
   protected readonly operationProgress = computed(() => {

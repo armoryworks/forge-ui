@@ -12,6 +12,7 @@ export interface JobOperationRow {
   status: JobOperationStatus;
   completedQuantity: number;
   scrapQuantity: number;
+  plannedQuantity?: number | null;
   startedAt: string | null;
   completedAt: string | null;
   completedByName: string | null;

@@ -39,6 +39,11 @@
       }
     </div>
   }
+  @if (targetStart(); as plan) {
+    <div class="card__part" data-testid="job-card-target-start">
+      {{ 'kanban.targetStart' | translate: { target: (plan.target | number:'1.0-4'), start: (plan.start | number:'1.0-4') } }}
+    </div>
+  }
   @if (operationProgress(); as progress) {
     <div class="card__ops" data-testid="job-card-operations">
       @if (progress.running) {

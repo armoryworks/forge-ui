@@ -164,6 +164,22 @@ describe('OperationTimeTabComponent', () => {
     expect(component.remainingMs()).toBe(3600000);
   });
 
+  it('carries each step planned quantity and the job target beside the start', () => {
+    const { component } = setup(of({ ...payload(true, [op({ plannedQuantity: 322 })]), jobQuantity: 322, targetQuantity: 300 }));
+
+    expect(firstRow(component).plannedQuantity).toBe(322);
+    const view = component as unknown as { targetStart: () => { target: number; start: number } | null };
+    expect(view.targetStart()).toEqual({ target: 300, start: 322 });
+  });
+
+  it('shows no target beside the start for a job without one', () => {
+    const { component } = setup(of(payload(true)));
+
+    expect(firstRow(component).plannedQuantity).toBeNull();
+    const view = component as unknown as { targetStart: () => unknown };
+    expect(view.targetStart()).toBeNull();
+  });
+
   it('falls back to the legacy summary when the operations endpoint is unavailable', () => {
     const { component, cost } = setup(throwError(() => new Error('403')));
     expect(cost.getOperationTimeSummary).toHaveBeenCalledWith(JOB_ID);

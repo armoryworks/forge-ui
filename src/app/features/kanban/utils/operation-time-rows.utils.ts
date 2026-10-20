@@ -62,6 +62,7 @@ function toRow(
     statusChipClass: display.chipClass,
     completedQuantity: op.completedQuantity,
     scrapQuantity: op.scrapQuantity,
+    plannedQuantity: op.plannedQuantity ?? null,
     estimatedSetupMinutes: estimatedSetup,
     estimatedRunMinutes: estimatedRun,
     actualSetupMinutes: actualSetup,

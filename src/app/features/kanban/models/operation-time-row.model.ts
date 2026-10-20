@@ -11,6 +11,7 @@ export interface OperationTimeRow {
   statusChipClass: string;
   completedQuantity: number;
   scrapQuantity: number;
+  plannedQuantity?: number | null;
   estimatedSetupMinutes: number;
   estimatedRunMinutes: number;
   actualSetupMinutes: number;

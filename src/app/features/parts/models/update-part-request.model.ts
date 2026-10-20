@@ -54,6 +54,7 @@ export interface UpdatePartRequest {
   fixedOrderQuantity?: number;
   minimumOrderQuantity?: number;
   orderMultiple?: number;
+  expectedYieldPercent?: number;
   planningFenceDays?: number;
   demandFenceDays?: number;
   // Pillar 4 Phase 2 — Quality cluster (receiving inspection)

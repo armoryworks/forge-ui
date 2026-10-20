@@ -31,6 +31,7 @@ export interface JobDetail {
   partId: number | null;
   partNumber: string | null;
   quantity: number | null;
+  targetQuantity?: number | null;
   salesOrderId: number | null;
   salesOrderNumber: string | null;
   parentJobId: number | null;

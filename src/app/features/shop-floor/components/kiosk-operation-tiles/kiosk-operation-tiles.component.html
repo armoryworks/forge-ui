@@ -12,7 +12,11 @@
               [class.op-tile__status--complete]="tile.row.status === 'Complete'">{{ tile.statusKey | translate }}</span>
       </div>
       <div class="op-tile__meta">
-        <span class="op-tile__qty">{{ 'shopFloor.operations.quantityOf' | translate: { count: tile.row.completedQuantity, total: jobQuantity() } }}</span>
+        @if (tile.row.plannedQuantity; as planned) {
+          <span class="op-tile__qty" [attr.data-testid]="'kiosk-op-tile-planned-' + tile.row.stepNumber">{{ 'shopFloor.operations.quantityOfPlanned' | translate: { count: tile.row.completedQuantity, total: planned } }}</span>
+        } @else {
+          <span class="op-tile__qty">{{ 'shopFloor.operations.quantityOf' | translate: { count: tile.row.completedQuantity, total: jobQuantity() } }}</span>
+        }
         @if (tile.elapsedMs !== null) {
           <span class="op-tile__elapsed">
             <span class="material-icons-outlined">timer</span>

@@ -55,6 +55,7 @@ export class PartMrpClusterComponent {
     orderMultiple: new FormControl<number | null>(null, [Validators.min(0)]),
     planningFenceDays: new FormControl<number | null>(null, [Validators.min(0)]),
     demandFenceDays: new FormControl<number | null>(null, [Validators.min(0)]),
+    expectedYieldPercent: new FormControl<number | null>(null, [Validators.min(0.01), Validators.max(100)]),
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {});
@@ -81,6 +82,7 @@ export class PartMrpClusterComponent {
         orderMultiple: p.orderMultiple ?? null,
         planningFenceDays: p.planningFenceDays ?? null,
         demandFenceDays: p.demandFenceDays ?? null,
+        expectedYieldPercent: p.expectedYieldPercent ?? null,
       });
       this.lotRuleSignal.set(p.lotSizingRule ?? null);
       this.minQtySignal.set(p.minimumOrderQuantity ?? null);
@@ -103,6 +105,7 @@ export class PartMrpClusterComponent {
       orderMultiple: v.orderMultiple ?? null,
       planningFenceDays: v.planningFenceDays ?? null,
       demandFenceDays: v.demandFenceDays ?? null,
+      expectedYieldPercent: v.expectedYieldPercent ?? null,
     });
   }
 

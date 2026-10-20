@@ -706,6 +706,7 @@
     "bulkMoveBlockedTitle": "Some jobs were not moved",
     "bulkMoveBlockedMessage": "{{count}} job(s) could not be moved to {{stage}}",
     "partQty": "{{partNumber}} · Qty {{quantity}}",
+    "targetStart": "Target {{target}} · Start {{start}}",
     "boardTruncated": "Showing {{shown}} of {{total}} work orders. Archive shipped work to see the rest.",
     "activeOnly": "Active only",
     "quantityUpdated": "Quantity updated",
@@ -1596,6 +1597,8 @@
         "fixedOrderQty": "Fixed Order Qty",
         "minOrderQty": "Min Order Qty",
         "orderMultiple": "Order Multiple",
+        "expectedYield": "Expected Yield (%)",
+        "expectedYieldInfo": "Share of started pieces expected to come out good. Jobs made for an order start the order quantity divided by the yield, rounded up. Routing steps with a scrap factor plan backwards from the target: each step starts the next step's pieces × (1 + scrap factor), rounded up. When both are set the larger plan is used, never both. Blank means no overage.",
         "planningFence": "Planning Fence (days)",
         "demandFence": "Demand Fence (days)",
         "leadTimeNote": "Lead time resolves from preferred VendorPart when configured."
@@ -7852,6 +7855,7 @@
         "Skipped": "Skipped"
       },
       "quantityOf": "{{count}} / {{total}}",
+      "quantityOfPlanned": "{{count}} / {{total}} planned",
       "othersRunning": "Also running: {{names}}",
       "start": "Start",
       "startSetup": "Start setup",
@@ -12264,6 +12268,7 @@
     "empty": "No operation time data. This job may not have a part with operations defined.",
     "noneRemaining": "Nothing left",
     "qtyOf": "{{done}} / {{total}}",
+    "qtyOfPlanned": "{{done}} / {{total}} planned",
     "scrapCount": "{{count}} scrap",
     "otherRunning": "{{initials}} has a timer running on this step",
     "perPieceEst": "Est {{value}}",
@@ -12316,6 +12321,7 @@
       "actual": "Actual",
       "efficiency": "Efficiency",
       "remaining": "Remaining",
+      "target": "Target",
       "quantity": "Qty"
     },
     "dialog": {

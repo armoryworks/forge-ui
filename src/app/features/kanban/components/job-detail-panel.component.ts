@@ -115,6 +115,12 @@ export class JobDetailPanelComponent implements OnInit {
   private readonly operationTimeTab = viewChild(OperationTimeTabComponent);
 
   protected readonly quantityControl = new FormControl<number | null>(null);
+  protected readonly targetStart = computed(() => {
+    const j = this.job();
+    const target = j?.targetQuantity;
+    return j && target != null && j.quantity != null && target !== j.quantity ? { target, start: j.quantity } : null;
+  });
+
   protected readonly canEditQuantity = computed(() => {
     const j = this.job();
     return !!j && j.partId != null && !j.completedDate && !j.disposition && !j.isArchived

@@ -80,6 +80,7 @@ export interface PartDetail {
   fixedOrderQuantity: number | null;
   minimumOrderQuantity: number | null;
   orderMultiple: number | null;
+  expectedYieldPercent?: number | null;
   planningFenceDays: number | null;
   demandFenceDays: number | null;
   // Pillar 4 Phase 2 — Units of measure (FK to UnitOfMeasure + resolved code/label).

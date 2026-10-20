@@ -515,6 +515,11 @@
               <span class="jd-detail-value" data-testid="job-detail-quantity-value">{{ j.quantity | number:'1.0-4' }}</span>
             </div>
           }
+          @if (targetStart(); as plan) {
+            <div class="jd-detail-row">
+              <span class="jd-detail-value" data-testid="job-detail-target-start">{{ 'kanban.targetStart' | translate: { target: (plan.target | number:'1.0-4'), start: (plan.start | number:'1.0-4') } }}</span>
+            </div>
+          }
           @if (j.partId) {
             <!-- Phase 3 H4 / WU-20 — BOM revision pinned at release time. -->
             @if (bomAtRelease(); as snap) {

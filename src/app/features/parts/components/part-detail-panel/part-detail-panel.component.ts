@@ -464,6 +464,7 @@ export class PartDetailPanelComponent {
     if ('fixedOrderQuantity' in patch) request['fixedOrderQuantity'] = patch.fixedOrderQuantity;
     if ('minimumOrderQuantity' in patch) request['minimumOrderQuantity'] = patch.minimumOrderQuantity;
     if ('orderMultiple' in patch) request['orderMultiple'] = patch.orderMultiple;
+    if ('expectedYieldPercent' in patch) request['expectedYieldPercent'] = patch.expectedYieldPercent ?? -1;
     if ('planningFenceDays' in patch) request['planningFenceDays'] = patch.planningFenceDays;
     if ('demandFenceDays' in patch) request['demandFenceDays'] = patch.demandFenceDays;
     if ('requiresReceivingInspection' in patch) request['requiresReceivingInspection'] = patch.requiresReceivingInspection;

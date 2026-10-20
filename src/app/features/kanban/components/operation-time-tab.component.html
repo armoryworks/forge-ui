@@ -40,6 +40,12 @@
           <span class="op-time__summary-label">{{ 'jobOperations.summary.quantity' | translate }}</span>
           <span class="op-time__summary-value">{{ jobQuantity() | number:'1.0-4' }}</span>
         </div>
+        @if (targetStart(); as plan) {
+          <div class="op-time__summary-item" data-testid="operation-time-target-start">
+            <span class="op-time__summary-label">{{ 'jobOperations.summary.target' | translate }}</span>
+            <span class="op-time__summary-value">{{ 'kanban.targetStart' | translate: { target: (plan.target | number:'1.0-4'), start: (plan.start | number:'1.0-4') } }}</span>
+          </div>
+        }
       }
     </div>
 
@@ -62,10 +68,18 @@
                       [disabled]="busyRowId() === row.id"
                       [attr.aria-label]="'jobOperations.recordQuantityAria' | translate: { operation: row.operationName }"
                       (click)="openQuantity(row)">
-                {{ 'jobOperations.qtyOf' | translate: { done: (row.completedQuantity | number:'1.0-4'), total: (jobQuantity() | number:'1.0-4') } }}
+                @if (row.plannedQuantity; as planned) {
+                  {{ 'jobOperations.qtyOfPlanned' | translate: { done: (row.completedQuantity | number:'1.0-4'), total: (planned | number:'1.0-4') } }}
+                } @else {
+                  {{ 'jobOperations.qtyOf' | translate: { done: (row.completedQuantity | number:'1.0-4'), total: (jobQuantity() | number:'1.0-4') } }}
+                }
               </button>
             } @else {
-              <span class="op-time__num">{{ 'jobOperations.qtyOf' | translate: { done: (row.completedQuantity | number:'1.0-4'), total: (jobQuantity() | number:'1.0-4') } }}</span>
+              <span class="op-time__num">@if (row.plannedQuantity; as planned) {
+                  {{ 'jobOperations.qtyOfPlanned' | translate: { done: (row.completedQuantity | number:'1.0-4'), total: (planned | number:'1.0-4') } }}
+                } @else {
+                  {{ 'jobOperations.qtyOf' | translate: { done: (row.completedQuantity | number:'1.0-4'), total: (jobQuantity() | number:'1.0-4') } }}
+                }</span>
             }
             @if (row.scrapQuantity > 0) {
               <span class="op-time__scrap">{{ 'jobOperations.scrapCount' | translate: { count: (row.scrapQuantity | number:'1.0-4') } }}</span>

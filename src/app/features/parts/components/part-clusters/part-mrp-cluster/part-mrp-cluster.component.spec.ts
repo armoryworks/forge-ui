@@ -127,4 +127,30 @@ describe('PartMrpClusterComponent', () => {
     expect(cb.mock.calls[0][0].lotSizingRule).toBe('LotForLot');
     expect(cb.mock.calls[0][0].planningFenceDays).toBe(14);
   });
+
+  it('seeds, validates and emits the expected yield percent', () => {
+    const component = TestBed.runInInjectionContext(() => new PartMrpClusterComponent());
+    mockSignalInputs(component, {
+      part: makePart({ expectedYieldPercent: 95 }),
+      editing: true,
+      saving: false,
+    });
+    TestBed.flushEffects();
+    const c = component as unknown as {
+      form: { value: Record<string, unknown>; invalid: boolean; patchValue(v: Record<string, unknown>): void };
+      onSave(): void;
+    };
+    expect(c.form.value['expectedYieldPercent']).toBe(95);
+
+    c.form.patchValue({ expectedYieldPercent: 120 });
+    expect(c.form.invalid).toBe(true);
+    c.form.patchValue({ expectedYieldPercent: 0 });
+    expect(c.form.invalid).toBe(true);
+
+    c.form.patchValue({ expectedYieldPercent: 92.5 });
+    const cb = vi.fn();
+    component.save.subscribe(cb);
+    c.onSave();
+    expect(cb.mock.calls[0][0].expectedYieldPercent).toBe(92.5);
+  });
 });

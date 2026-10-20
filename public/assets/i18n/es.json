@@ -706,6 +706,7 @@
     "bulkMoveBlockedTitle": "Algunos trabajos no se movieron",
     "bulkMoveBlockedMessage": "{{count}} trabajo(s) no se pudieron mover a {{stage}}",
     "partQty": "{{partNumber}} · Cant. {{quantity}}",
+    "targetStart": "Objetivo {{target}} · Inicio {{start}}",
     "boardTruncated": "Mostrando {{shown}} de {{total}} órdenes de trabajo. Archive el trabajo enviado para ver el resto.",
     "activeOnly": "Solo activas",
     "quantityUpdated": "Cantidad actualizada",
@@ -1578,6 +1579,8 @@
         "fixedOrderQty": "Cantidad Fija de Orden",
         "minOrderQty": "Cantidad Mínima",
         "orderMultiple": "Múltiplo de Orden",
+        "expectedYield": "Rendimiento esperado (%)",
+        "expectedYieldInfo": "Parte de las piezas iniciadas que se espera salgan buenas. Las órdenes de trabajo para un pedido inician la cantidad del pedido dividida entre el rendimiento, redondeada hacia arriba. Los pasos de la ruta con factor de desperdicio planifican hacia atrás desde el objetivo: cada paso inicia las piezas del siguiente paso × (1 + factor de desperdicio), redondeado hacia arriba. Si ambos están definidos se usa el plan mayor, nunca ambos. En blanco significa sin excedente.",
         "planningFence": "Cerco de Planificación (días)",
         "demandFence": "Cerco de Demanda (días)",
         "leadTimeNote": "El plazo de entrega se obtiene de VendorPart preferido cuando está configurado."
@@ -7834,6 +7837,7 @@
         "Skipped": "Omitida"
       },
       "quantityOf": "{{count}} / {{total}}",
+      "quantityOfPlanned": "{{count}} / {{total}} planificadas",
       "othersRunning": "También en curso: {{names}}",
       "start": "Iniciar",
       "startSetup": "Iniciar preparación",
@@ -12264,6 +12268,7 @@
     "empty": "No hay datos de tiempo por operación. Puede que este trabajo no tenga una pieza con operaciones definidas.",
     "noneRemaining": "No queda nada",
     "qtyOf": "{{done}} / {{total}}",
+    "qtyOfPlanned": "{{done}} / {{total}} planificadas",
     "scrapCount": "{{count}} de desecho",
     "otherRunning": "{{initials}} tiene un temporizador en marcha en este paso",
     "perPieceEst": "Est. {{value}}",
@@ -12316,6 +12321,7 @@
       "actual": "Real",
       "efficiency": "Eficiencia",
       "remaining": "Restante",
+      "target": "Objetivo",
       "quantity": "Cant."
     },
     "dialog": {

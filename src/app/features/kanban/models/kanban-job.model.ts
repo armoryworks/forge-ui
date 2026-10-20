@@ -26,6 +26,7 @@ export interface KanbanJob {
   boardPosition: number;
   partNumber: string | null;
   quantity: number | null;
+  targetQuantity?: number | null;
   completedDate?: string | null;
   operationsTotal?: number | null;
   operationsComplete?: number | null;

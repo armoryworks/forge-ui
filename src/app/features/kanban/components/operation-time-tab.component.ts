@@ -81,6 +81,11 @@ export class OperationTimeTabComponent {
 
   readonly trackingEnabled = computed(() => this.data()?.trackingEnabled === true);
   readonly jobQuantity = computed(() => this.data()?.jobQuantity ?? 0);
+  protected readonly targetStart = computed(() => {
+    const target = this.data()?.targetQuantity;
+    const start = this.jobQuantity();
+    return target != null && target !== start ? { target, start } : null;
+  });
   readonly remainingMs = computed(() => {
     const minutes = this.data()?.estimatedRemainingMinutes;
     return minutes === null || minutes === undefined ? null : minutesToSecondsMs(minutes);
