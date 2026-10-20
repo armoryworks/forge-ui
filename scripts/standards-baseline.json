@@ -17,7 +17,6 @@
     "src/app/features/purchase-orders/components/po-dialog/po-dialog.component.scss": 1,
     "src/app/features/quotes/components/estimate-form-dialog/estimate-form-dialog.component.scss": 15,
     "src/app/features/quotes/components/quote-detail-panel/quote-detail-panel.component.scss": 2,
-    "src/app/features/shipments/components/shipment-dialog/shipment-dialog.component.scss": 1,
     "src/app/features/training/training-module/training-module.component.scss": 3,
     "src/app/shared/components/demo-marker/demo-marker.component.scss": 1,
     "src/app/shared/components/production-label/production-label.component.scss": 4,
