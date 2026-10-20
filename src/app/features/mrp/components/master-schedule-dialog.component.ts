@@ -76,7 +76,7 @@ export class MasterScheduleDialogComponent {
     lines: new FormArray<FormGroup<LineFormGroup>>(
       (this.data.schedule?.lines ?? []).map(l => this.buildLine({
         id: l.id, partId: l.partId, quantity: l.quantity,
-        dueDate: new Date(l.dueDate), notes: l.notes ?? '',
+        dueDate: fromIsoDate(l.dueDate) ?? undefined, notes: l.notes ?? '',
       })),
       [Validators.minLength(1)],
     ),

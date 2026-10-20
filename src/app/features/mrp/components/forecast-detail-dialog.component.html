@@ -1,0 +1,74 @@
+<app-dialog [title]="forecast().name + ' — ' + forecast().partNumber" width="760px" (closed)="close()">
+  <div class="forecast-detail" [appLoadingBlock]="loading() || saving()">
+    <div class="forecast-detail__meta">
+      <span>{{ 'mrp.cols.status' | translate }}: <strong>{{ forecast().status }}</strong></span>
+      <span>{{ 'mrp.cols.method' | translate }}: <strong>{{ forecast().method }}</strong></span>
+      <span>{{ 'mrp.forecastDetail.forecastStart' | translate }}: <strong>{{ forecast().forecastStartDate | date:dateFormat:'UTC' }}</strong></span>
+    </div>
+
+    <app-data-table
+      tableId="mrp-forecast-detail"
+      [columns]="columns"
+      [data]="rows()"
+      emptyIcon="trending_up"
+      [emptyMessage]="'mrp.forecastDetail.empty' | translate"
+      [clickableRows]="false">
+
+      <ng-template appColumnCell="period" let-row>
+        <span [class.forecast-detail__history]="!row.isForecast">{{ row.period | date:'MMM yyyy' }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="historical" let-row>
+        {{ row.bucket.historicalQuantity === null ? '—' : (row.bucket.historicalQuantity | number:'1.0-2') }}
+      </ng-template>
+
+      <ng-template appColumnCell="forecasted" let-row>
+        {{ row.isForecast ? (row.bucket.forecastedQuantity | number:'1.0-2') : '—' }}
+      </ng-template>
+
+      <ng-template appColumnCell="override" let-row>
+        @if (row.override) {
+          <app-input
+            [label]="'mrp.forecastDetail.override' | translate"
+            type="number"
+            [formControl]="row.override"
+            step="1" min="0" />
+        } @else {
+          {{ row.bucket.overrideQuantity === null ? '—' : (row.bucket.overrideQuantity | number:'1.0-2') }}
+        }
+      </ng-template>
+    </app-data-table>
+
+    @if (canApply()) {
+      <div class="forecast-detail__apply">
+        <app-select
+          [label]="'mrp.forecastDetail.applyTo' | translate"
+          [formControl]="scheduleControl"
+          [options]="scheduleOptions()" />
+        @if (scheduleOptions().length === 0) {
+          <p class="forecast-detail__hint">{{ 'mrp.forecastDetail.noDraftSchedules' | translate }}</p>
+        }
+      </div>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.close' | translate }}</button>
+    @if (canOverride()) {
+      <button class="action-btn" [disabled]="saving()" (click)="saveOverrides()" data-testid="mrp-forecast-save-overrides">
+        {{ 'mrp.forecastDetail.saveOverrides' | translate }}
+      </button>
+    }
+    @if (canApprove()) {
+      <button class="action-btn action-btn--primary" (click)="approve()" data-testid="mrp-forecast-detail-approve">
+        {{ 'mrp.approveForecast' | translate }}
+      </button>
+    }
+    @if (canApply()) {
+      <button class="action-btn action-btn--primary" [disabled]="saving() || scheduleControl.invalid"
+        (click)="applyToSchedule()" data-testid="mrp-forecast-detail-apply">
+        {{ 'mrp.forecastDetail.apply' | translate }}
+      </button>
+    }
+  </div>
+</app-dialog>

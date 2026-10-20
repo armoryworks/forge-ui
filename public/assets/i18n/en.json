@@ -8123,7 +8123,21 @@
     "cancelScheduleTitle": "Cancel master schedule?",
     "cancelScheduleMessage": "Cancel \"{{name}}\"? MRP stops planning its lines.",
     "approveForecastTitle": "Approve forecast?",
-    "approveForecastMessage": "Approve \"{{name}}\"? It leaves Draft and cannot be approved again."
+    "approveForecastMessage": "Approve \"{{name}}\"? It leaves Draft and cannot be approved again.",
+    "forecastDetail": {
+      "forecastStart": "Forecast starts",
+      "empty": "This forecast has no periods.",
+      "period": "Period",
+      "historical": "Actual demand",
+      "forecasted": "Forecast",
+      "override": "Override",
+      "applyTo": "Draft master schedule",
+      "noDraftSchedules": "There is no draft master schedule to apply this forecast to.",
+      "saveOverrides": "Save overrides",
+      "apply": "Apply to schedule",
+      "overridesSaved": "Overrides saved",
+      "applied": "Forecast applied to the master schedule"
+    }
   },
   "portal": {
     "title": "Customer Portal",

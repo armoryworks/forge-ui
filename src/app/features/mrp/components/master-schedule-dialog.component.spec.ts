@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { FormArray, FormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -51,5 +51,25 @@ describe('MasterScheduleDialogComponent', () => {
 
     quantity.setValue(12.3457);
     expect(quantity.valid).toBe(true);
+  });
+
+  describe('west of UTC', () => {
+    let originalTz: string | undefined;
+
+    beforeEach(() => {
+      originalTz = process.env['TZ'];
+      process.env['TZ'] = 'America/Denver';
+    });
+
+    afterEach(() => {
+      if (originalTz === undefined) delete process.env['TZ'];
+      else process.env['TZ'] = originalTz;
+    });
+
+    it('loads a UTC-midnight line due date on its own calendar day', () => {
+      const due = setup().lines.at(0).controls['dueDate'].value as Date;
+
+      expect([due.getFullYear(), due.getMonth(), due.getDate()]).toEqual([2026, 9, 12]);
+    });
   });
 });

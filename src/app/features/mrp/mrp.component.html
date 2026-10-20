@@ -68,13 +68,13 @@
       </div>
     }
 
-    @if (exceptions().length > 0) {
+    @if (unresolvedExceptions().length > 0) {
       <div class="mrp__recent-exceptions">
         <h3 class="mrp__section-title">{{ 'mrp.unresolvedExceptions' | translate }}</h3>
         <app-data-table
           tableId="mrp-dashboard-exceptions"
           [columns]="exceptionColumns"
-          [data]="exceptions()"
+          [data]="unresolvedExceptions()"
           [loading]="loadingExceptions()"
           emptyIcon="check_circle"
           [emptyMessage]="'mrp.noUnresolvedException' | translate"
@@ -115,7 +115,7 @@
     <app-data-table
       tableId="mrp-planned-orders"
       [columns]="orderColumns"
-      [data]="plannedOrders()"
+      [data]="visiblePlannedOrders()"
       emptyIcon="assignment"
       [emptyMessage]="'mrp.noPlannedOrders' | translate"
       [clickableRows]="false">
@@ -157,7 +157,7 @@
     <app-data-table
       tableId="mrp-exceptions"
       [columns]="exceptionColumns"
-      [data]="exceptions()"
+      [data]="visibleExceptions()"
       emptyIcon="check_circle"
       [emptyMessage]="'mrp.noExceptions' | translate"
       [clickableRows]="false">
@@ -289,7 +289,8 @@
       [data]="forecasts()"
       emptyIcon="trending_up"
       [emptyMessage]="'mrp.noForecasts' | translate"
-      [clickableRows]="false">
+      [clickableRows]="true"
+      (rowClick)="openForecast($any($event))">
 
       <ng-template appColumnCell="status" let-row>
         <span [class]="getForecastStatusClass(row.status)">{{ row.status }}</span>
@@ -299,7 +300,7 @@
         @if (row.status === 'Draft') {
           <button class="icon-btn"
             [attr.aria-label]="'mrp.approveForecast' | translate" [title]="'mrp.approveForecast' | translate"
-            (click)="approveForecast(row)">
+            (click)="$event.stopPropagation(); approveForecast(row)">
             <span class="material-icons-outlined">check</span>
           </button>
         }

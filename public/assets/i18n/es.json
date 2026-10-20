@@ -8116,7 +8116,21 @@
     "cancelScheduleTitle": "¿Cancelar programa maestro?",
     "cancelScheduleMessage": "¿Cancelar \"{{name}}\"? MRP deja de planificar sus líneas.",
     "approveForecastTitle": "¿Aprobar pronóstico?",
-    "approveForecastMessage": "¿Aprobar \"{{name}}\"? Deja de ser borrador y no se puede volver a aprobar."
+    "approveForecastMessage": "¿Aprobar \"{{name}}\"? Deja de ser borrador y no se puede volver a aprobar.",
+    "forecastDetail": {
+      "forecastStart": "Inicio del pronóstico",
+      "empty": "Este pronóstico no tiene períodos.",
+      "period": "Período",
+      "historical": "Demanda real",
+      "forecasted": "Pronóstico",
+      "override": "Ajuste",
+      "applyTo": "Plan maestro en borrador",
+      "noDraftSchedules": "No hay un plan maestro en borrador al que aplicar este pronóstico.",
+      "saveOverrides": "Guardar ajustes",
+      "apply": "Aplicar al plan",
+      "overridesSaved": "Ajustes guardados",
+      "applied": "Pronóstico aplicado al plan maestro"
+    }
   },
   "portal": {
     "title": "Portal de Cliente",
