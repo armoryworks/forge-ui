@@ -339,6 +339,23 @@ describe('NotificationService', () => {
       service.push(makeNotification({ id: 2 }));
       expect(playChime).toHaveBeenCalledTimes(1);
     });
+
+    it('reloads instead of adding a blank row when the push is only a nudge', () => {
+      service.push({ type: 'invoice_overdue', invoiceId: 7 } as unknown as AppNotification);
+
+      expect(service.activeNotifications().length).toBe(0);
+      const req = httpMock.expectOne(`${environment.apiUrl}/notifications`);
+      req.flush({ data: [makeNotification({ id: 9, title: 'Invoice overdue' })] });
+      expect(service.activeNotifications().map(n => n.id)).toEqual([9]);
+      expect(playChime).toHaveBeenCalledTimes(1);
+    });
+
+    it('replaces rather than duplicates a notification pushed twice', () => {
+      service.push(makeNotification({ id: 3, title: 'Old' }));
+      service.push(makeNotification({ id: 3, title: 'New' }));
+
+      expect(service.activeNotifications().map(n => n.title)).toEqual(['New']);
+    });
   });
 
   describe('failed writes', () => {

@@ -5370,7 +5370,7 @@
     "toggleSound": "Alternar sonido de notificación",
     "sourceUser": "Personas",
     "updateFailed": "No se pudo actualizar la notificación. Se deshizo el cambio.",
-    "dismissFailed": "No se pudo descartar. Las notificaciones volvieron a tu lista.",
+    "dismissFailed": "No se pudo descartar. Las notificaciones volvieron a su lista.",
     "dismissAllConfirmTitle": "¿Descartar todas las notificaciones?",
     "dismissAllConfirmMessage": "¿Descartar las {{count}} notificaciones? Las notificaciones descartadas no se pueden recuperar."
   },
@@ -5445,12 +5445,12 @@
     "bundleJobShop": "Taller por pedido: cotizar, fabricar, enviar, facturar",
     "passwordChangedSignIn": "Contraseña cambiada. Inicia sesión con tu nueva contraseña.",
     "mfa": {
-      "challengeExpired": "Esta verificación expiró. Inicia sesión de nuevo.",
-      "tooManyAttempts": "Demasiados códigos incorrectos. Espera unos minutos y vuelve a iniciar sesión.",
-      "verifyFailed": "No se pudo comprobar el código. Inténtalo de nuevo."
+      "challengeExpired": "Esta verificación expiró. Inicie sesión de nuevo.",
+      "tooManyAttempts": "Demasiados códigos incorrectos. Espere unos minutos y vuelva a iniciar sesión.",
+      "verifyFailed": "No se pudo comprobar el código. Inténtelo de nuevo."
     },
     "setupFailedTitle": "Error en la configuración",
-    "ssoNoResponse": "El inicio de sesión único no terminó. Intenta iniciar sesión de nuevo."
+    "ssoNoResponse": "El inicio de sesión único no terminó. Intente iniciar sesión de nuevo."
   },
   "validation": {
     "required": "{field} es requerido",

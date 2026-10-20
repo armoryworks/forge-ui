@@ -1094,13 +1094,6 @@ export class OnboardingWizardComponent {
 
   // ── Server-side draft sync ────────────────────────────────────────────────
 
-  /**
-   * Patches each form group with the non-sensitive values coming back from
-   * GET /onboarding/draft. Sensitive fields (SSN, bank routing/account,
-   * I-9 doc numbers) are intentionally left blank — the user re-enters
-   * them only if they want to overwrite. The Has* signals drive the
-   * "Securely stored" badge + validator relaxation.
-   */
   private clampStepToReachable(): void {
     const forms = [this.personalForm, this.addressForm, this.w4Form, this.stateForm, this.i9Form, this.depositForm, this.ackForm];
     const firstInvalid = forms.findIndex(f => f.invalid);
@@ -1116,6 +1109,13 @@ export class OnboardingWizardComponent {
     }
   }
 
+  /**
+   * Patches each form group with the non-sensitive values coming back from
+   * GET /onboarding/draft. Sensitive fields (SSN, bank routing/account,
+   * I-9 doc numbers) are intentionally left blank — the user re-enters
+   * them only if they want to overwrite. The Has* signals drive the
+   * "Securely stored" badge + validator relaxation.
+   */
   private applyDraftStatus(status: OnboardingDraftStatus): void {
     this.draftStatus.set(status);
 

@@ -78,13 +78,21 @@ export class NotificationService {
 
   /**
    * Add a notification from SignalR push. Hub payloads skip the HTTP date
-   * interceptor, so `createdAt` is normalised to a Date here.
+   * interceptor, so `createdAt` is normalised to a Date here. A payload that is
+   * only a nudge (no notification id) reloads the list from the API instead.
    */
   push(notification: AppNotification): void {
-    const createdAt = notification.createdAt instanceof Date
-      ? notification.createdAt
-      : new Date(notification.createdAt as unknown as string);
-    this._notifications.update(list => [{ ...notification, createdAt }, ...list]);
+    if (typeof notification?.id !== 'number') {
+      this.load();
+    } else {
+      const createdAt = notification.createdAt instanceof Date
+        ? notification.createdAt
+        : new Date(notification.createdAt as unknown as string);
+      this._notifications.update(list => [
+        { ...notification, createdAt },
+        ...list.filter(n => n.id !== notification.id),
+      ]);
+    }
     if (this.prefs.get<boolean>('notif:sound') ?? true) this.chime.playChime();
   }
 
