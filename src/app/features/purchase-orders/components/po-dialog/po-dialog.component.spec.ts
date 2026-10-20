@@ -33,6 +33,7 @@ interface DialogInternals {
   dialogRef: { clearDraft: () => void };
   partFilters(): Record<string, string>;
   showInactiveParts: { set(value: boolean): void };
+  obsoletePartSuffix(part: Record<string, unknown>): string;
   lineForm: FormGroup;
   lines: { set(lines: PoLineEntry[]): void; (): PoLineEntry[] };
   inactiveLineWarning(): string | null;
@@ -140,6 +141,7 @@ function setup(opts: SetupOptions = {}) {
 
   const translate = TestBed.inject(TranslateService);
   translate.setTranslation('en', {
+    common: { deactivatedSuffix: '(deactivated)' },
     poCreate: {
       makePartOnly: 'No buyable parts match. {{partNumber}} is made in-house.',
       noContact: 'No contact',
@@ -299,6 +301,13 @@ describe('PoDialogComponent — part picker', () => {
     internals.showInactiveParts.set(true);
 
     expect(internals.partFilters()).toEqual({ purchasable: 'true', sort: 'partNumber', order: 'asc' });
+  });
+
+  it('marks obsolete parts as deactivated in the picker results', () => {
+    const { internals } = setup();
+
+    expect(internals.obsoletePartSuffix({ ...part(1, 'P-10', 'Buy'), status: 'Obsolete' } as unknown as Record<string, unknown>)).toBe('(deactivated)');
+    expect(internals.obsoletePartSuffix(part(2, 'P-11', 'Buy') as unknown as Record<string, unknown>)).toBe('');
   });
 
   it('explains that a typed make part is made in-house when nothing buyable matches', () => {

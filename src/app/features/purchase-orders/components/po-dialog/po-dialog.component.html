@@ -97,7 +97,7 @@
             <app-input data-testid="po-line-description" [label]="'purchaseOrders.lineDescription' | translate" formControlName="description" [required]="true" [maxlength]="500" />
           } @else {
             <app-entity-picker data-testid="po-line-part" [label]="'common.part' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name"
-              [filters]="partFilters()" formControlName="partId" [required]="true" [placeholder]="'parts.searchPlaceholder' | translate"
+              [filters]="partFilters()" [optionSuffix]="obsoletePartSuffix" formControlName="partId" [required]="true" [placeholder]="'parts.searchPlaceholder' | translate"
               (selected)="onPartPicked($event)" (searchCompleted)="onPartSearchCompleted($event)" />
           }
           <!-- Phase 3 / WU-10 / F8-partial — qty + price are decimal(18,4); UoM-aware shops

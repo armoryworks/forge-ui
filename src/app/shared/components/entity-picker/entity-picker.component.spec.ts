@@ -16,6 +16,7 @@ interface PickerInternals {
   searchControl: { setValue(value: string): void };
   results(): Record<string, unknown>[];
   showMinCharsHint(): boolean;
+  getOptionText(entity: Record<string, unknown>): string;
 }
 
 describe('EntityPickerComponent', () => {
@@ -101,6 +102,15 @@ describe('EntityPickerComponent', () => {
     req.flush({ items: [{ id: 1 }], totalCount: 1 });
 
     expect(internals.results()).toEqual([]);
+  });
+
+  it('appends the option suffix to a result row\'s primary text', () => {
+    const { fixture, internals } = create();
+    fixture.componentRef.setInput('displayField', 'partNumber');
+    fixture.componentRef.setInput('optionSuffix', (e: Record<string, unknown>) => e['status'] === 'Obsolete' ? '(deactivated)' : '');
+
+    expect(internals.getOptionText({ id: 1, partNumber: 'P-1', status: 'Obsolete' })).toBe('P-1 (deactivated)');
+    expect(internals.getOptionText({ id: 2, partNumber: 'P-2', status: 'Active' })).toBe('P-2');
   });
 
   it('accepts a bare required attribute', () => {

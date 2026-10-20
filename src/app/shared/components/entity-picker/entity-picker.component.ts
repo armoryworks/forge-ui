@@ -59,6 +59,8 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
    * hidden silently. Omit to revert to single-line rows.
    */
   readonly secondaryDisplayField = input<string | null>(null);
+  /** Optional text appended to a result row's primary text, e.g. a "(deactivated)" marker. */
+  readonly optionSuffix = input<((entity: Record<string, unknown>) => string) | null>(null);
   readonly filters = input<Record<string, string>>({});
   readonly placeholder = input<string>('');
   readonly isReadonly = input<boolean>(false);
@@ -294,6 +296,12 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
 
   protected getDisplayText(entity: Record<string, unknown>): string {
     return String(entity[this.displayField()] ?? '');
+  }
+
+  /** Primary text for a result row: the display text plus any {@link optionSuffix}. */
+  protected getOptionText(entity: Record<string, unknown>): string {
+    const suffix = this.optionSuffix()?.(entity) ?? '';
+    return suffix ? `${this.getDisplayText(entity)} ${suffix}` : this.getDisplayText(entity);
   }
 
   /**

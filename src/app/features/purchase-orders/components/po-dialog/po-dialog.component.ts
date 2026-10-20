@@ -134,6 +134,9 @@ export class PoDialogComponent {
     ...(this.showInactiveParts() ? {} : { isActive: 'true' }),
   }));
 
+  protected readonly obsoletePartSuffix = (part: Record<string, unknown>): string =>
+    part['status'] === 'Obsolete' ? this.translate.instant('common.deactivatedSuffix') : '';
+
   protected readonly contactOptions = computed<SelectOption[]>(() =>
     this.refOptions(this.vendorContacts(), 'poCreate.noContact', 'poCreate.defaultContact'));
   protected readonly addressOptions = computed<SelectOption[]>(() =>
