@@ -63,7 +63,7 @@ describe('DatepickerComponent.writeValue west of UTC', () => {
 describe('DatepickerComponent as a validator', () => {
   interface ValidatingPicker extends PickerApi {
     validate(control: unknown): Record<string, { message: string }> | null;
-    registerOnValidatorChange(fn: () => void): void;
+    registerOnChange(fn: (value: Date | null) => void): void;
     errorMessage(): string | null;
     markTouched(): void;
   }
@@ -107,14 +107,22 @@ describe('DatepickerComponent as a validator', () => {
     expect(Object.keys(picker.validate(null)!)).toEqual(['matDatepickerMax']);
   });
 
-  it('asks the parent to re-validate whenever the inner status changes', () => {
+  it('re-validates the parent through the forwarded value, emitting once per user change', () => {
     const picker = create();
-    const revalidate = vi.fn();
-    picker.registerOnValidatorChange(revalidate);
+    const parent = new FormControl<Date | null>(null, (control) => picker.validate(control));
+    picker.registerOnChange((value) => parent.setValue(value));
+    const emitted = vi.fn();
+    parent.valueChanges.subscribe(emitted);
 
-    picker.internalControl.setErrors({ matDatepickerParse: { text: 'x' } });
+    picker.internalControl.markAsDirty();
+    picker.internalControl.setValue(new Date(2026, 9, 19));
+    expect(emitted).toHaveBeenCalledTimes(1);
+    expect(parent.valid).toBe(true);
 
-    expect(revalidate).toHaveBeenCalled();
+    picker.internalControl.addValidators(() => ({ matDatepickerParse: { text: '02/30/2026' } }));
+    picker.internalControl.setValue(null);
+    expect(emitted).toHaveBeenCalledTimes(2);
+    expect(parent.hasError('matDatepickerParse')).toBe(true);
   });
 
   it('shows the parse message under the field once touched, and clears it when the parent writes a value', () => {

@@ -84,7 +84,6 @@ export class DatepickerComponent implements ControlValueAccessor, Validator {
 
   private onChange: (value: Date | null) => void = () => {};
   private onTouched: () => void = () => {};
-  private onValidatorChange: () => void = () => {};
 
   constructor() {
     // Forward internal-control changes out to the parent CVA. Skipping
@@ -94,10 +93,7 @@ export class DatepickerComponent implements ControlValueAccessor, Validator {
       .subscribe((value) => this.onChange(value));
     this.internalControl.statusChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.refreshErrorMessage();
-        this.onValidatorChange();
-      });
+      .subscribe(() => this.refreshErrorMessage());
   }
 
   writeValue(value: Date | string | null): void {
@@ -128,10 +124,6 @@ export class DatepickerComponent implements ControlValueAccessor, Validator {
       return { matDatepickerMax: { message: this.t('validation.dateMax', { field: this.label(), max }) } };
     }
     return null;
-  }
-
-  registerOnValidatorChange(fn: () => void): void {
-    this.onValidatorChange = fn;
   }
 
   registerOnChange(fn: (value: Date | null) => void): void {
