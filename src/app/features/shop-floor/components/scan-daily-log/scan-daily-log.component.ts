@@ -14,7 +14,7 @@ import { DatepickerComponent } from '../../../../shared/components/datepicker/da
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { PageLayoutComponent } from '../../../../shared/components/page-layout/page-layout.component';
 import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
-import { toDateOnly } from '../../../../shared/utils/date.utils';
+import { toDateOnly, todayEnd } from '../../../../shared/utils/date.utils';
 import { SCAN_LOG_ACTION_LABEL_KEYS } from '../../models/scan-log-action-label-keys.const';
 
 const ACTION_TYPE_FILTER_VALUES = ['Move', 'CycleCount', 'Receive', 'Ship', 'Issue'];
@@ -46,6 +46,7 @@ export class ScanDailyLogComponent implements OnInit {
   readonly entries = signal<ScanLogEntry[]>([]);
   readonly loading = signal(false);
 
+  protected readonly today = todayEnd();
   readonly dateControl = new FormControl(new Date());
   readonly actionTypeControl = new FormControl<string | null>(null);
   readonly actionTypeOptions: SelectOption[] = [

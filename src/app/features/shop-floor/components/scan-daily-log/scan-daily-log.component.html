@@ -1,7 +1,7 @@
 <app-page-layout [pageTitle]="'kioskFlows.dailyLog.title' | translate">
   <ng-container toolbar>
     <app-toolbar>
-      <app-datepicker [label]="'kioskFlows.dailyLog.date' | translate" [formControl]="dateControl"
+      <app-datepicker [label]="'kioskFlows.dailyLog.date' | translate" [formControl]="dateControl" [max]="today"
                       data-testid="scan-log-date" />
       <app-select [label]="'kioskFlows.dailyLog.actionType' | translate" [formControl]="actionTypeControl"
                   [options]="actionTypeOptions"
