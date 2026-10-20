@@ -121,6 +121,20 @@ describe('TrainingService', () => {
       httpMock.expectOne(`${base}/progress/5/complete`).flush(null, { status: 0, statusText: 'Unknown Error' });
       expect(JSON.parse(localStorage.getItem(PENDING_KEY)!)).toEqual([{ userId: 8, moduleId: 5 }]);
     });
+
+    it('does not resend a queued completion that is still in flight when the user signal re-emits', () => {
+      localStorage.setItem(PENDING_KEY, JSON.stringify([{ userId: 8, moduleId: 4 }]));
+      user.set(asUser(8));
+      TestBed.tick();
+      const first = httpMock.expectOne(`${base}/progress/4/complete`);
+
+      user.set(asUser(8));
+      TestBed.tick();
+      httpMock.expectNone(`${base}/progress/4/complete`);
+
+      first.flush(null);
+      expect(localStorage.getItem(PENDING_KEY)).toBeNull();
+    });
   });
 
   describe('getAllModules', () => {

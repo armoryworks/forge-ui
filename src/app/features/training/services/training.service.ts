@@ -96,11 +96,20 @@ export class TrainingService {
     this.writePending(pending);
   }
 
+  private readonly flushing = new Set<string>();
+
   private flushPendingCompletions(userId: number): void {
     for (const { moduleId } of this.readPending().filter(p => p.userId === userId)) {
+      const key = `${userId}:${moduleId}`;
+      if (this.flushing.has(key)) continue;
+      this.flushing.add(key);
       this.completeModule(moduleId, new HttpContext().set(SILENT_HTTP_ERRORS, true)).subscribe({
-        next: () => this.removePending(userId, moduleId),
+        next: () => {
+          this.flushing.delete(key);
+          this.removePending(userId, moduleId);
+        },
         error: (error: unknown) => {
+          this.flushing.delete(key);
           if (!TrainingService.isRetryable(error)) this.removePending(userId, moduleId);
         },
       });
