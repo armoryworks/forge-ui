@@ -1207,7 +1207,7 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
       await navigateTo(officePage, '/invoices');
       await clickButton(officePage, 'new-invoice-btn');
       await waitForDialog(officePage);
-      await fillMatSelect(officePage, 'invoice-customer', customer.name);
+      await fillAutocomplete(officePage, 'invoice-customer', customer.name);
       await fillDatepicker(officePage, 'invoice-date', invDate);
       await fillDatepicker(officePage, 'invoice-due-date', dueDate);
       // Add line item
@@ -1244,7 +1244,7 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
         await navigateTo(officePage, '/payments');
         await clickButton(officePage, 'new-payment-btn');
         await waitForDialog(officePage);
-        await fillMatSelect(officePage, 'payment-customer', ''); // auto-select first
+        await fillAutocomplete(officePage, 'payment-customer', inv.customerName ?? '');
         await fillMatSelect(officePage, 'payment-method', payMethod);
         await fillInput(officePage, 'payment-amount', String(inv.totalAmount));
         await fillDatepicker(officePage, 'payment-date', weekDayDisplay(ctx, 4));

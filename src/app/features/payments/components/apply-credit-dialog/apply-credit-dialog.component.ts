@@ -73,7 +73,7 @@ export class ApplyCreditDialogComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.invoiceService.getInvoices(this.payment().customerId).pipe(
+    this.invoiceService.getOpenInvoices(this.payment().customerId).pipe(
       map(list => list.filter(inv => inv.balanceDue > 0 && inv.status !== 'Draft' && inv.status !== 'Voided')),
       catchError(() => of<InvoiceListItem[]>([])),
       takeUntilDestroyed(this.destroyRef),

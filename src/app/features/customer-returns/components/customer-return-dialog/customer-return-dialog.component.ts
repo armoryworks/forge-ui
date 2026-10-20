@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input, output, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -52,6 +52,8 @@ export class CustomerReturnDialogComponent {
     returnDate: new FormControl<Date | null>(new Date(), [Validators.required]),
     createReworkJob: new FormControl<boolean>(false, { nonNullable: true }),
   });
+
+  protected readonly jobFilters = computed<Record<string, string>>(() => ({ includeArchived: 'true' }));
 
   protected readonly violations = FormValidationService.getViolations(this.returnForm, {
     customerId: 'Customer',

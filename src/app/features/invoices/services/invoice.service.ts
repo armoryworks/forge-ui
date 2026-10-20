@@ -18,6 +18,7 @@ import { SendInvoiceEmailRequest } from '../models/send-invoice-email-request.mo
 export interface InvoiceListPagedQuery extends PagedQuery {
   customerId?: number | null;
   status?: string;
+  openOnly?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -27,10 +28,21 @@ export class InvoiceService {
 
   /**
    * Phase 3 F7-broad / WU-22 — backward-compat shim that calls the paged
-   * endpoint and unwraps the envelope.
+   * endpoint and unwraps the envelope. Returns at most 200 invoices (the
+   * server cap), newest first.
    */
   getInvoices(customerId?: number, status?: string): Observable<InvoiceListItem[]> {
     return this.getInvoicesPaged({ customerId, status, pageSize: 200 })
+      .pipe(map(p => p.items));
+  }
+
+  /**
+   * Open invoices for one customer — not Draft or Voided, with a balance due
+   * above zero — filtered on the server so older open invoices are not lost
+   * behind the 200-row page cap.
+   */
+  getOpenInvoices(customerId: number): Observable<InvoiceListItem[]> {
+    return this.getInvoicesPaged({ customerId, openOnly: true, pageSize: 200, sort: 'dueDate', order: 'asc' })
       .pipe(map(p => p.items));
   }
 
@@ -47,6 +59,7 @@ export class InvoiceService {
     if (query.q) params = params.set('q', query.q);
     if (query.customerId) params = params.set('customerId', String(query.customerId));
     if (query.status) params = params.set('status', query.status);
+    if (query.openOnly) params = params.set('openOnly', 'true');
     if (query.dateFrom) params = params.set('dateFrom', query.dateFrom);
     if (query.dateTo) params = params.set('dateTo', query.dateTo);
     return this.http.get<PagedResponse<InvoiceListItem>>(this.base, { params });

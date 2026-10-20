@@ -9,7 +9,6 @@ import { EMPTY, catchError, distinctUntilChanged, of, startWith, switchMap } fro
 import { InvoiceService } from '../../services/invoice.service';
 import { AdminService } from '../../../admin/services/admin.service';
 import { CustomerService } from '../../../customers/services/customer.service';
-import { CustomerListItem } from '../../../customers/models/customer-list-item.model';
 import { PartListItem } from '../../../parts/models/part-list-item.model';
 import { InvoiceSources } from '../../models/invoice-sources.model';
 import { InvoiceSourceShipment } from '../../models/invoice-source-shipment.model';
@@ -56,6 +55,7 @@ interface LineEntry {
 })
 export class InvoiceDialogComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+  @ViewChild('customerPicker') private customerPicker?: EntityPickerComponent;
   private readonly invoiceService = inject(InvoiceService);
   private readonly customerService = inject(CustomerService);
   private readonly adminService = inject(AdminService);
@@ -80,17 +80,14 @@ export class InvoiceDialogComponent {
   readonly initialSalesOrderId = input<number | null>(null);
 
   protected readonly saving = signal(false);
-  protected readonly customers = signal<CustomerListItem[]>([]);
+  private readonly customerName = signal('');
   /** Phase 1l — invoice issue date is when it was issued; not future. */
   protected readonly today = todayEnd();
   protected readonly lines = signal<LineEntry[]>([]);
   private prefilledLines: LineEntry[] | null = null;
   protected readonly sources = signal<InvoiceSources>({ salesOrders: [], shipments: [] });
 
-  protected readonly customerOptions = computed<SelectOption[]>(() => [
-    { value: null, label: this.translate.instant('invoices.selectCustomer') },
-    ...this.customers().map(c => ({ value: c.id, label: c.name })),
-  ]);
+  protected readonly customerFilters: Record<string, string> = { isActive: 'true', sort: 'name', order: 'asc' };
 
   protected readonly salesOrderOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('common.none') },
@@ -202,8 +199,14 @@ export class InvoiceDialogComponent {
     entityType: 'invoice',
     entityId: 'new',
     route: '/invoices',
-    snapshotFn: () => ({ ...this.invoiceForm.getRawValue(), lines: this.lines() }),
+    snapshotFn: () => ({ ...this.invoiceForm.getRawValue(), customerName: this.customerName(), lines: this.lines() }),
     restoreFn: (data) => {
+      const customerId = typeof data['customerId'] === 'number' ? data['customerId'] : null;
+      const customerName = typeof data['customerName'] === 'string' ? data['customerName'] : '';
+      if (customerId != null && customerName && !this.invoiceForm.controls.customerId.disabled) {
+        this.customerName.set(customerName);
+        this.customerPicker?.setSelected(customerId, customerName);
+      }
       this.invoiceForm.patchValue(data);
       if (Array.isArray(data['lines'])) {
         this.lines.set((data['lines'] as LineEntry[]).map(l => ({ ...l, taxable: l.taxable ?? true })));
@@ -214,10 +217,6 @@ export class InvoiceDialogComponent {
   };
 
   constructor() {
-    this.customerService.getCustomers(undefined, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (list) => this.customers.set(list),
-    });
-
     const controls = this.invoiceForm.controls;
     controls.customerId.valueChanges.pipe(
       startWith(controls.customerId.value),
@@ -275,6 +274,12 @@ export class InvoiceDialogComponent {
       if (customerId != null && this.invoiceForm.controls.customerId.value === null) {
         this.invoiceForm.controls.customerId.setValue(customerId);
         this.invoiceForm.controls.customerId.disable();
+        this.customerService.getCustomerById(customerId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+          next: (customer) => {
+            this.customerName.set(customer.name);
+            this.customerPicker?.setSelected(customer.id, customer.name);
+          },
+        });
       }
       if (salesOrderId != null && this.invoiceForm.controls.salesOrderId.value === null) {
         this.invoiceForm.controls.salesOrderId.setValue(salesOrderId);
@@ -302,6 +307,10 @@ export class InvoiceDialogComponent {
           this.invoiceForm.controls.fxRate.setValue(1);
         }
       });
+  }
+
+  protected onCustomerSelected(customer: Record<string, unknown> | null): void {
+    this.customerName.set(customer ? String(customer['name'] ?? '') : '');
   }
 
   protected close(): void {

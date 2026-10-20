@@ -1017,8 +1017,10 @@ export function getOfficeWorkflow(): Workflow {
             await page.locator('[data-testid="invoice-customer"]')
               .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
 
-            // Select first available customer
-            await selectNthByTestId(page, 'invoice-customer', 0);
+            if (!await fillEntityPickerByTestId(page, 'invoice-customer', randomPick(CUSTOMERS))) {
+              await safeCloseDialog(page);
+              return;
+            }
             await page.waitForTimeout(randomDelay(300, 600));
 
             // Fill invoice date (today)
@@ -1118,8 +1120,10 @@ export function getOfficeWorkflow(): Workflow {
             await page.locator('[data-testid="payment-customer"]')
               .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
 
-            // Select first available customer
-            await selectNthByTestId(page, 'payment-customer', 0);
+            if (!await fillEntityPickerByTestId(page, 'payment-customer', randomPick(CUSTOMERS))) {
+              await safeCloseDialog(page);
+              return;
+            }
             await page.waitForTimeout(randomDelay(300, 600));
 
             // Select payment method

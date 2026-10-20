@@ -22,8 +22,29 @@ describe('InvoiceService', () => {
 
   // Phase 3 F7-broad / WU-22 — getInvoices() now goes through the paged
   // endpoint and unwraps the envelope.
+  describe('getOpenInvoices', () => {
+    it('asks the server for the customer\'s open invoices, oldest due first', () => {
+      let result: unknown[] = [];
+      service.getOpenInvoices(5).subscribe(items => { result = items; });
+      const req = httpMock.expectOne(r => r.url === base);
+      expect(req.request.params.get('customerId')).toBe('5');
+      expect(req.request.params.get('openOnly')).toBe('true');
+      expect(req.request.params.get('sort')).toBe('dueDate');
+      expect(req.request.params.get('order')).toBe('asc');
+      req.flush({ items: [{ id: 1 }], totalCount: 1, page: 1, pageSize: 200 });
+      expect(result).toHaveLength(1);
+    });
+  });
+
   describe('getInvoices', () => {
     const empty = { items: [], totalCount: 0, page: 1, pageSize: 200 };
+
+    it('should not send openOnly', () => {
+      service.getInvoices(5).subscribe();
+      const req = httpMock.expectOne(r => r.url === base);
+      expect(req.request.params.has('openOnly')).toBe(false);
+      req.flush(empty);
+    });
 
     it('should GET invoices without filters', () => {
       service.getInvoices().subscribe();
