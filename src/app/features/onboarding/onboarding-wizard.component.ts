@@ -29,6 +29,7 @@ import { FormValidationService } from '../../shared/services/form-validation.ser
 import { LayoutService } from '../../shared/services/layout.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { dateOfBirthMax, dateOfBirthMin, fromIsoDate, toIsoDate } from '../../shared/utils/date.utils';
+import { wholeNumber } from '../../shared/validators/whole-number.validator';
 
 import { AuthService } from '../../shared/services/auth.service';
 
@@ -43,6 +44,9 @@ import {
 } from './onboarding.service';
 
 const REVIEW_STATE_KEY = 'forge-onboarding-review-state';
+const MAX_DEPENDENTS = 20;
+const MAX_STATE_ALLOWANCES = 99;
+const MAX_MONEY = 999_999.99;
 
 /**
  * Default OnboardingDraftStatus before the server response lands. All Has*
@@ -201,13 +205,18 @@ export class OnboardingWizardComponent {
   private readonly sanitizer = inject(DomSanitizer);
 
   // ── Step tracking — URL is source of truth (?step=0..6) ──────────────────
-  protected readonly currentStepIndex = toSignal(
+  private readonly requestedStepIndex = toSignal(
     this.route.queryParamMap.pipe(map(p => {
       const n = parseInt(p.get('step') ?? '0', 10);
       return isNaN(n) || n < 0 || n > 6 ? 0 : n;
     })),
     { initialValue: 0 },
   );
+
+  private readonly reachableStepIndex = signal(0);
+
+  protected readonly currentStepIndex = computed(() =>
+    Math.min(this.requestedStepIndex(), this.reachableStepIndex()));
 
   // Review-phase params live in the URL too (?review=preview|signing&formIdx=N)
   // so the address bar represents what the user is looking at and a shared
@@ -244,6 +253,7 @@ export class OnboardingWizardComponent {
     const current = this.currentStepIndex() ?? 0;
     this.saveStepToDraft(current);
     const next = Math.min(current + 1, 6);
+    this.reachableStepIndex.update(r => Math.max(r, next));
     this.router.navigate([], { relativeTo: this.route, queryParams: { step: next }, queryParamsHandling: 'merge' });
   }
 
@@ -265,6 +275,7 @@ export class OnboardingWizardComponent {
   protected onStepperSelectionChange(index: number): void {
     const current = this.currentStepIndex() ?? 0;
     if (index === current) return;
+    this.reachableStepIndex.update(r => Math.max(r, index));
     this.saveStepToDraft(current);
     this.router.navigate([], {
       relativeTo: this.route,
@@ -407,12 +418,12 @@ export class OnboardingWizardComponent {
     filingStatus: new FormControl<string | null>(null, [Validators.required]),
     multipleJobs: new FormControl(false),
     // Step 3: Claim Dependents — 3a (qualifying children) and 3b (other dependents)
-    qualifyingChildren: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
-    otherDependents: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
+    qualifyingChildren: new FormControl<number | null>(null, [Validators.required, Validators.min(0), Validators.max(MAX_DEPENDENTS), wholeNumber]),
+    otherDependents: new FormControl<number | null>(null, [Validators.required, Validators.min(0), Validators.max(MAX_DEPENDENTS), wholeNumber]),
     // Step 4: Other Adjustments (optional — leave blank if not applicable)
-    otherIncome: new FormControl<number | null>(null, [Validators.min(0)]),
-    deductions: new FormControl<number | null>(null, [Validators.min(0)]),
-    extraWithholding: new FormControl<number | null>(null, [Validators.min(0)]),
+    otherIncome: new FormControl<number | null>(null, [Validators.min(0), Validators.max(MAX_MONEY)]),
+    deductions: new FormControl<number | null>(null, [Validators.min(0), Validators.max(MAX_MONEY)]),
+    extraWithholding: new FormControl<number | null>(null, [Validators.min(0), Validators.max(MAX_MONEY)]),
     exemptFromWithholding: new FormControl(false),
   });
 
@@ -444,8 +455,8 @@ export class OnboardingWizardComponent {
   // ── Step 4: State Withholding ─────────────────────────────────────────────
   protected readonly stateForm = new FormGroup({
     stateFilingStatus: new FormControl('', [Validators.required]),
-    stateAllowances: new FormControl<number | null>(null),
-    stateAdditionalWithholding: new FormControl<number | null>(null),
+    stateAllowances: new FormControl<number | null>(null, [Validators.min(0), Validators.max(MAX_STATE_ALLOWANCES), wholeNumber]),
+    stateAdditionalWithholding: new FormControl<number | null>(null, [Validators.min(0), Validators.max(MAX_MONEY)]),
     stateExempt: new FormControl(false),
   });
 
@@ -456,6 +467,8 @@ export class OnboardingWizardComponent {
 
   protected readonly stateViolations = FormValidationService.getViolations(this.stateForm, {
     stateFilingStatus: 'State Filing Status',
+    stateAllowances: 'State Allowances',
+    stateAdditionalWithholding: 'Additional State Withholding',
   });
 
   // ── Step 5: I-9 Employment Eligibility ───────────────────────────────────
@@ -612,7 +625,7 @@ export class OnboardingWizardComponent {
     // so stateViolations picks up the relaxed validator immediately.
     effect(() => {
       const ctrl = this.stateForm.controls.stateFilingStatus;
-      if (this.stateExempt()) {
+      if (this.stateExempt() || this.hasNoIncomeTax()) {
         ctrl.removeValidators(Validators.required);
       } else {
         ctrl.addValidators(Validators.required);
@@ -658,8 +671,11 @@ export class OnboardingWizardComponent {
       });
     }
     this.service.getDraft().subscribe({
-      next: status => this.applyDraftStatus(status),
-      error: () => {}, // First-time user — empty draft is fine
+      next: status => {
+        this.applyDraftStatus(status);
+        setTimeout(() => this.clampStepToReachable());
+      },
+      error: () => this.clampStepToReachable(), // First-time user — empty draft is fine
     });
 
     // Relax Validators.required on sensitive fields when the server tells us
@@ -1085,6 +1101,21 @@ export class OnboardingWizardComponent {
    * them only if they want to overwrite. The Has* signals drive the
    * "Securely stored" badge + validator relaxation.
    */
+  private clampStepToReachable(): void {
+    const forms = [this.personalForm, this.addressForm, this.w4Form, this.stateForm, this.i9Form, this.depositForm, this.ackForm];
+    const firstInvalid = forms.findIndex(f => f.invalid);
+    this.reachableStepIndex.update(r => Math.max(r, firstInvalid === -1 ? 6 : firstInvalid));
+    const requested = this.requestedStepIndex();
+    if (requested > this.reachableStepIndex()) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { step: this.reachableStepIndex() },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    }
+  }
+
   private applyDraftStatus(status: OnboardingDraftStatus): void {
     this.draftStatus.set(status);
 

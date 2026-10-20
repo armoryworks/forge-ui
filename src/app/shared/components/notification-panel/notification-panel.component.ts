@@ -45,7 +45,7 @@ export class NotificationPanelComponent {
   }
 
   protected dismissAll(): void {
-    this.notificationService.dismissAll();
+    this.notificationService.confirmDismissAll();
   }
 
   protected onNotificationClick(notification: AppNotification): void {

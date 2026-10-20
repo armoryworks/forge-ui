@@ -326,6 +326,9 @@
       "Name": "Nombre",
       "CompanyName": "Nombre de la empresa",
       "Notes": "Notas"
+    },
+    "about": {
+      "server": "Servidor"
     }
   },
   "app": {
@@ -5361,22 +5364,15 @@
     "severityCritical": "Crítico",
     "allFilter": "-- Todos --",
     "sourceSystem": "Sistema",
-    "sourceBoard": "Tablero",
-    "sourceTimer": "Temporizador",
-    "emailNotifications": "Notificaciones por Email",
     "inAppNotifications": "Notificaciones en la Aplicación",
-    "criticalAlerts": "Alertas Críticas",
-    "criticalAlertsDesc": "Recibir email para alertas críticas del sistema",
-    "toggleCriticalAlerts": "Alternar alertas críticas por email",
-    "jobAssignments": "Asignaciones de Trabajo",
-    "jobAssignmentsDesc": "Recibir email al ser asignado a un trabajo",
-    "toggleJobAssignments": "Alternar asignaciones de trabajo por email",
-    "mentions": "Menciones",
-    "mentionsDesc": "Recibir email al ser mencionado en un comentario",
-    "toggleMentions": "Alternar menciones por email",
     "sound": "Sonido",
     "soundDesc": "Reproducir un sonido cuando llega una notificación",
-    "toggleSound": "Alternar sonido de notificación"
+    "toggleSound": "Alternar sonido de notificación",
+    "sourceUser": "Personas",
+    "updateFailed": "No se pudo actualizar la notificación. Se deshizo el cambio.",
+    "dismissFailed": "No se pudo descartar. Las notificaciones volvieron a tu lista.",
+    "dismissAllConfirmTitle": "¿Descartar todas las notificaciones?",
+    "dismissAllConfirmMessage": "¿Descartar las {{count}} notificaciones? Las notificaciones descartadas no se pueden recuperar."
   },
   "auth": {
     "appName": "Armory Works Forge",
@@ -5447,7 +5443,14 @@
     "invalidSetupLink": "Enlace de configuración inválido. Contacte a su administrador.",
     "expiredSetupCode": "Código de configuración inválido o expirado. Contacte a su administrador.",
     "bundleJobShop": "Taller por pedido: cotizar, fabricar, enviar, facturar",
-    "passwordChangedSignIn": "Contraseña cambiada. Inicia sesión con tu nueva contraseña."
+    "passwordChangedSignIn": "Contraseña cambiada. Inicia sesión con tu nueva contraseña.",
+    "mfa": {
+      "challengeExpired": "Esta verificación expiró. Inicia sesión de nuevo.",
+      "tooManyAttempts": "Demasiados códigos incorrectos. Espera unos minutos y vuelve a iniciar sesión.",
+      "verifyFailed": "No se pudo comprobar el código. Inténtalo de nuevo."
+    },
+    "setupFailedTitle": "Error en la configuración",
+    "ssoNoResponse": "El inicio de sesión único no terminó. Intenta iniciar sesión de nuevo."
   },
   "validation": {
     "required": "{field} es requerido",

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
+import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -16,6 +17,7 @@ import { NotificationService } from '../../shared/services/notification.service'
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
+import { humanizeNotificationSource } from '../../shared/utils/notification-origin';
 
 @Component({
   selector: 'app-notifications',
@@ -41,6 +43,7 @@ export class NotificationsComponent {
   private readonly notificationService = inject(NotificationService);
   private readonly prefs = inject(UserPreferencesService);
   private readonly translate = inject(TranslateService);
+  private readonly route = inject(ActivatedRoute);
 
   readonly searchControl = new FormControl('');
   readonly severityControl = new FormControl<string | null>(null);
@@ -50,9 +53,11 @@ export class NotificationsComponent {
   private readonly severityFilter = toSignal(this.severityControl.valueChanges, { initialValue: null });
   private readonly sourceFilter = toSignal(this.sourceControl.valueChanges, { initialValue: null });
 
-  readonly activeTab = signal<'all' | 'preferences'>('all');
+  readonly activeTab = signal<'all' | 'preferences'>(
+    this.route.snapshot.queryParamMap.get('tab') === 'preferences' ? 'preferences' : 'all');
 
-  readonly notifications = this.notificationService.filteredNotifications;
+  readonly notifications = computed(() =>
+    this.notificationService.activeNotifications().map(n => ({ ...n, sourceLabel: this.sourceLabel(n.source) })));
 
   readonly filteredNotifications = computed(() => {
     let items = this.notifications();
@@ -69,7 +74,7 @@ export class NotificationsComponent {
       items = items.filter(n => n.severity === severity);
     }
     if (source) {
-      items = items.filter(n => n.source === source);
+      items = items.filter(n => n.source?.toLowerCase() === source);
     }
     return items;
   });
@@ -83,7 +88,7 @@ export class NotificationsComponent {
         { value: 'warning', label: this.translate.instant('notifications.severityWarning') },
         { value: 'critical', label: this.translate.instant('notifications.severityCritical') },
       ] },
-    { field: 'source', phoneHidden: true, header: this.translate.instant('notifications.source'), sortable: true, type: 'enum' },
+    { field: 'sourceLabel', phoneHidden: true, header: this.translate.instant('notifications.source'), sortable: true },
     { field: 'createdAt', header: this.translate.instant('common.date'), sortable: true, type: 'date', width: '150px' },
   ];
 
@@ -94,17 +99,16 @@ export class NotificationsComponent {
     { value: 'critical', label: this.translate.instant('notifications.severityCritical') },
   ];
 
-  readonly sourceOptions: SelectOption[] = [
-    { value: null, label: this.translate.instant('notifications.allFilter') },
-    { value: 'system', label: this.translate.instant('notifications.sourceSystem') },
-    { value: 'board', label: this.translate.instant('notifications.sourceBoard') },
-    { value: 'timer', label: this.translate.instant('notifications.sourceTimer') },
-  ];
+  readonly sourceOptions = computed<SelectOption[]>(() => {
+    const sources = [...new Set(this.notificationService.activeNotifications().map(n => n.source?.toLowerCase()).filter((s): s is string => !!s))];
+    return [
+      { value: null, label: this.translate.instant('notifications.allFilter') },
+      ...sources
+        .map(source => ({ value: source, label: this.sourceLabel(source) }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    ];
+  });
 
-  // Notification preference toggles
-  readonly emailOnCritical = signal(this.prefs.get<boolean>('notif:email_critical') ?? true);
-  readonly emailOnAssignment = signal(this.prefs.get<boolean>('notif:email_assignment') ?? true);
-  readonly emailOnMention = signal(this.prefs.get<boolean>('notif:email_mention') ?? true);
   readonly soundEnabled = signal(this.prefs.get<boolean>('notif:sound') ?? true);
 
   setTab(tab: 'all' | 'preferences'): void {
@@ -116,18 +120,20 @@ export class NotificationsComponent {
   }
 
   dismissAll(): void {
-    this.notificationService.dismissAll();
+    this.notificationService.confirmDismissAll();
   }
 
   togglePref(key: string, current: boolean): void {
     const newVal = !current;
     this.prefs.set(`notif:${key}`, newVal);
 
-    switch (key) {
-      case 'email_critical': this.emailOnCritical.set(newVal); break;
-      case 'email_assignment': this.emailOnAssignment.set(newVal); break;
-      case 'email_mention': this.emailOnMention.set(newVal); break;
-      case 'sound': this.soundEnabled.set(newVal); break;
-    }
+    if (key === 'sound') this.soundEnabled.set(newVal);
+  }
+
+  private sourceLabel(source: string): string {
+    const key = source.toLowerCase();
+    if (key === 'system') return this.translate.instant('notifications.sourceSystem');
+    if (key === 'user') return this.translate.instant('notifications.sourceUser');
+    return humanizeNotificationSource(source);
   }
 }

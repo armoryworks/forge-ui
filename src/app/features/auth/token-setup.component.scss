@@ -35,3 +35,11 @@
     font-size: var(--font-size-sm);
   }
 }
+
+.setup-submit-error {
+  margin: 0;
+  padding: $sp-sm $sp-md;
+  background: var(--error-light);
+  color: var(--error);
+  font-size: var(--font-size-sm);
+}

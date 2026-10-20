@@ -167,9 +167,12 @@ export class AppHeaderComponent implements OnInit {
       debounceTime(300),
       distinctUntilChanged(),
       filter(v => (v?.length ?? 0) >= 2),
-      switchMap(term => this.searchService.search(term!)),
+      switchMap(term => this.searchService.search(term!).pipe(
+        catchError(() => of([] as SearchResult[])),
+      )),
       takeUntilDestroyed(this.destroyRef),
     ).subscribe(results => {
+      if ((this.searchControl.value?.length ?? 0) < 2) return;
       this.searchResults.set(results);
       this.showResults.set(results.length > 0 || this.navMatches().length > 0 || this.aiService.available() || this.aiSuggestions().length > 0);
     });
@@ -202,10 +205,12 @@ export class AppHeaderComponent implements OnInit {
       filter(v => !v || v.length < 2),
       takeUntilDestroyed(this.destroyRef),
     ).subscribe(() => {
+      this.searchResults.set([]);
       this.aiSuggestions.set([]);
       this.ragResults.set([]);
       this.ragAnswer.set(null);
       this.aiLoading.set(false);
+      this.showResults.set(this.navMatches().length > 0);
     });
   }
 
@@ -250,6 +255,19 @@ export class AppHeaderComponent implements OnInit {
         this.searchResults.set(res);
         this.showResults.set(true);
       });
+    }
+  }
+
+  /** Escape closes the results first; a second Escape clears the search term. */
+  protected onSearchEscape(event: Event): void {
+    if (this.showResults()) {
+      this.showResults.set(false);
+      event.preventDefault();
+      return;
+    }
+    if (this.searchControl.value) {
+      this.searchControl.setValue('');
+      event.preventDefault();
     }
   }
 
@@ -426,6 +444,7 @@ export class AppHeaderComponent implements OnInit {
 
   protected openAbout(): void {
     this.userMenuOpen.set(false);
+    this.versionService.loadServer();
     this.showAboutDialog.set(true);
   }
 

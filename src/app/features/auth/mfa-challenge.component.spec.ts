@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { FormGroup } from '@angular/forms';
-import { of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { MfaChallengeComponent } from './mfa-challenge.component';
 import { MfaService } from '../account/services/mfa.service';
@@ -9,13 +10,15 @@ import { SnackbarService } from '../../shared/services/snackbar.service';
 interface ChallengeInternals {
   codeForm: FormGroup;
   submitCode(): void;
+  error(): string | null;
 }
 
 describe('MfaChallengeComponent', () => {
   const mfa = {
     createChallenge: vi.fn(() => of({ challengeToken: 'challenge-1', maskedTarget: null })),
-    validateChallenge: vi.fn(() => of({ accessToken: 'a', refreshToken: 'r', expiresAt: '2026-10-19T00:00:00Z' })),
+    validateChallenge: vi.fn((): Observable<unknown> => of({ accessToken: 'a', refreshToken: 'r', expiresAt: '2026-10-19T00:00:00Z' })),
   };
+  const snackbar = { errorFrom: vi.fn(), error: vi.fn() };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -23,7 +26,7 @@ describe('MfaChallengeComponent', () => {
       imports: [MfaChallengeComponent],
       providers: [
         { provide: MfaService, useValue: mfa },
-        { provide: SnackbarService, useValue: { errorFrom: vi.fn() } },
+        { provide: SnackbarService, useValue: snackbar },
       ],
     });
   });
@@ -55,5 +58,53 @@ describe('MfaChallengeComponent', () => {
     expect((fixture.nativeElement as HTMLElement).querySelector('[data-testid="mfa-remember-device"]')).toBeNull();
     submitWithRemember(c);
     expect(mfa.validateChallenge).toHaveBeenCalledWith({ challengeToken: 'challenge-1', code: '123456', rememberDevice: false });
+  });
+
+  const failWith = (status: number) =>
+    mfa.validateChallenge.mockReturnValue(throwError(() => new HttpErrorResponse({ status })));
+
+  it('says the code is wrong and clears it on a rejected code', () => {
+    failWith(401);
+    const { c } = create();
+    submitWithRemember(c);
+    expect(c.error()).toBe('auth.mfa.invalidCode');
+    expect(c.codeForm.value.code).toBe('');
+  });
+
+  it('keeps the typed code and reports the failure when the server cannot be reached', () => {
+    failWith(0);
+    const { c } = create();
+    submitWithRemember(c);
+    expect(snackbar.errorFrom).toHaveBeenCalledWith(expect.anything(), 'auth.mfa.verifyFailed');
+    expect(c.error()).toBeNull();
+    expect(c.codeForm.value.code).toBe('123456');
+  });
+
+  it('reports too many attempts instead of a wrong code on a 429', () => {
+    failWith(429);
+    const { c } = create();
+    submitWithRemember(c);
+    expect(c.error()).toBe('auth.mfa.tooManyAttempts');
+    expect(c.codeForm.value.code).toBe('123456');
+  });
+
+  it('switches to the lockout message after repeated rejected codes', () => {
+    failWith(401);
+    const { c } = create();
+    for (let i = 0; i < 5; i++) submitWithRemember(c);
+    expect(c.error()).toBe('auth.mfa.tooManyAttempts');
+  });
+
+  it('sends the user back to sign in when the challenge has expired', () => {
+    failWith(401);
+    const { fixture, c } = create();
+    const cancelled = vi.fn();
+    fixture.componentInstance.cancelled.subscribe(cancelled);
+    const now = Date.now();
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(now + 6 * 60 * 1000);
+    submitWithRemember(c);
+    clock.mockRestore();
+    expect(snackbar.error).toHaveBeenCalledWith('auth.mfa.challengeExpired');
+    expect(cancelled).toHaveBeenCalled();
   });
 });

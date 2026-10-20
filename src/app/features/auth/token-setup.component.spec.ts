@@ -2,7 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { TokenSetupComponent } from './token-setup.component';
 import { AuthService, AuthUser } from '../../shared/services/auth.service';
@@ -69,5 +70,49 @@ describe('TokenSetupComponent', () => {
 
     expect(router.navigate).not.toHaveBeenCalledWith(['/account/profile']);
     expect(router.navigate).toHaveBeenCalledWith(['/accounting']);
+  });
+
+  function filledForm(): TokenSetupHarness {
+    const setup = TestBed.runInInjectionContext(() => new TokenSetupComponent()) as unknown as TokenSetupHarness;
+    setup.form.setValue({ password: 'Forge-Setup-2026!', confirmPassword: 'Forge-Setup-2026!' });
+    return setup;
+  }
+
+  it('flags mismatched passwords on the confirm field and blocks submit', () => {
+    const setup = TestBed.runInInjectionContext(() => new TokenSetupComponent()) as unknown as TokenSetupHarness;
+    setup.form.setValue({ password: 'Forge-Setup-2026!', confirmPassword: 'Forge-Setup-2027!' });
+
+    expect(setup.form.controls.confirmPassword.hasError('passwordsMismatch')).toBe(true);
+    setup.onSubmit();
+    expect(completeSetup).not.toHaveBeenCalled();
+
+    setup.form.controls.password.setValue('Forge-Setup-2027!');
+    expect(setup.form.controls.confirmPassword.hasError('passwordsMismatch')).toBe(false);
+    expect(setup.form.valid).toBe(true);
+  });
+
+  it('keeps the form and marks the password when the server rejects it', () => {
+    completeSetup.mockReturnValue(throwError(() => new HttpErrorResponse({
+      status: 400,
+      error: { status: 400, title: 'Validation failed', detail: 'Passwords must have at least one digit.', errors: [{ field: 'password', message: 'Passwords must have at least one digit.' }] },
+    })));
+    const setup = filledForm() as TokenSetupHarness & { error(): string | null };
+
+    setup.onSubmit();
+
+    expect(setup.error()).toBeNull();
+    expect(setup.form.controls.password.hasError('serverError')).toBe(true);
+  });
+
+  it('shows the error card when the setup link itself is no longer valid', () => {
+    completeSetup.mockReturnValue(throwError(() => new HttpErrorResponse({
+      status: 409,
+      error: { status: 409, title: 'Action not allowed', detail: 'Invalid or expired setup token' },
+    })));
+    const setup = filledForm() as TokenSetupHarness & { error(): string | null };
+
+    setup.onSubmit();
+
+    expect(setup.error()).toBe('Invalid or expired setup token');
   });
 });

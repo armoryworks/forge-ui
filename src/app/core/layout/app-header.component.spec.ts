@@ -2,7 +2,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 import { AiService } from '../../shared/services/ai.service';
 import { AuthService } from '../../shared/services/auth.service';
@@ -111,5 +111,79 @@ describe('AppHeaderComponent breadcrumb', () => {
     expect(component.recordCrumb()).toBe('Acme Tooling');
     expect(component.visibleCrumbs().map(c => c.i18nKey)).toEqual(['nav.customersAll']);
     expect(component.hiddenCrumbs().map(c => c.i18nKey)).toEqual(['navGroups.sales', 'nav.customers']);
+  });
+});
+
+describe('AppHeaderComponent search', () => {
+  type SearchHarness = {
+    searchControl: { setValue(v: string): void; value: string | null };
+    searchResults: () => unknown[];
+    showResults: { (): boolean; set(v: boolean): void };
+    onSearchEscape(e: Event): void;
+  };
+  let search: ReturnType<typeof vi.fn>;
+  let component: SearchHarness;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    search = vi.fn();
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: AuthService, useValue: { user: signal(null) } },
+        { provide: Router, useValue: { events: of(), url: '/dashboard', navigate: vi.fn() } },
+        { provide: TranslateService, useValue: { instant: (k: string) => k } },
+        { provide: LanguageService, useValue: { currentLanguage: signal('en'), availableLanguages: [] } },
+        { provide: NotificationService, useValue: { unreadCount: signal(0), panelOpen: signal(false) } },
+        { provide: NavTreeService, useValue: { breadcrumbTrail: signal([]), flatLeaves: signal([]), recordCrumb: signal(null) } },
+        { provide: ThemeService, useValue: { theme: signal('light') } },
+        { provide: CapabilityService, useValue: { isEnabled: () => false } },
+        { provide: AiService, useValue: { available: signal(false) } },
+        { provide: SearchService, useValue: { search } },
+        { provide: VersionService, useValue: {} },
+        { provide: BrandingService, useValue: {} },
+        { provide: LayoutService, useValue: {} },
+      ],
+    });
+    component = TestBed.runInInjectionContext(() => new AppHeaderComponent()) as unknown as SearchHarness;
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('drops the previous results when the term is cut back below two characters', () => {
+    search.mockReturnValue(of([{ entityType: 'job', entityId: 1, title: 'J-1' }]));
+    component.searchControl.setValue('J-1');
+    vi.advanceTimersByTime(300);
+    expect(component.searchResults().length).toBe(1);
+
+    component.searchControl.setValue('J');
+    expect(component.searchResults()).toEqual([]);
+    expect(component.showResults()).toBe(false);
+  });
+
+  it('keeps searching after one request fails', () => {
+    search.mockReturnValueOnce(throwError(() => new Error('500')));
+    component.searchControl.setValue('J-1');
+    vi.advanceTimersByTime(300);
+    expect(component.searchResults()).toEqual([]);
+
+    search.mockReturnValue(of([{ entityType: 'job', entityId: 15, title: 'J-15' }]));
+    component.searchControl.setValue('J-15');
+    vi.advanceTimersByTime(300);
+    expect(component.searchResults().length).toBe(1);
+  });
+
+  it('closes the results on Escape, then clears the term on a second Escape', () => {
+    component.searchControl.setValue('J-1');
+    component.showResults.set(true);
+    const first = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
+    component.onSearchEscape(first);
+    expect(component.showResults()).toBe(false);
+    expect(first.defaultPrevented).toBe(true);
+    expect(component.searchControl.value).toBe('J-1');
+
+    component.onSearchEscape(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true }));
+    expect(component.searchControl.value).toBe('');
   });
 });

@@ -2,7 +2,7 @@ export interface AppNotification {
   id: number;
   type: 'assignment' | 'overdue' | 'expense' | 'maintenance' | 'system' | 'message' | 'mention';
   severity: 'info' | 'warning' | 'critical';
-  source: 'user' | 'system';
+  source: string;
   title: string;
   message: string;
   isRead: boolean;

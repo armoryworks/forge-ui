@@ -326,6 +326,9 @@
       "Name": "Name",
       "CompanyName": "Company name",
       "Notes": "Notes"
+    },
+    "about": {
+      "server": "Server"
     }
   },
   "app": {
@@ -5368,22 +5371,15 @@
     "severityCritical": "Critical",
     "allFilter": "-- All --",
     "sourceSystem": "System",
-    "sourceBoard": "Board",
-    "sourceTimer": "Timer",
-    "emailNotifications": "Email Notifications",
     "inAppNotifications": "In-App Notifications",
-    "criticalAlerts": "Critical Alerts",
-    "criticalAlertsDesc": "Receive email for critical system alerts",
-    "toggleCriticalAlerts": "Toggle critical alerts email",
-    "jobAssignments": "Job Assignments",
-    "jobAssignmentsDesc": "Receive email when assigned to a job",
-    "toggleJobAssignments": "Toggle job assignments email",
-    "mentions": "Mentions",
-    "mentionsDesc": "Receive email when mentioned in a comment",
-    "toggleMentions": "Toggle mentions email",
     "sound": "Sound",
     "soundDesc": "Play a sound when a notification arrives",
-    "toggleSound": "Toggle notification sound"
+    "toggleSound": "Toggle notification sound",
+    "sourceUser": "People",
+    "updateFailed": "Could not update the notification. Your change was undone.",
+    "dismissFailed": "Could not dismiss. The notifications are back in your list.",
+    "dismissAllConfirmTitle": "Dismiss all notifications?",
+    "dismissAllConfirmMessage": "Dismiss all {{count}} notifications? Dismissed notifications cannot be brought back."
   },
   "auth": {
     "appName": "Armory Works Forge",
@@ -5454,7 +5450,14 @@
     "invalidSetupLink": "Invalid setup link. Please contact your administrator.",
     "expiredSetupCode": "Invalid or expired setup code. Please contact your administrator.",
     "bundleJobShop": "Job shop: quote, make, ship, invoice",
-    "passwordChangedSignIn": "Password changed. Sign in with your new password."
+    "passwordChangedSignIn": "Password changed. Sign in with your new password.",
+    "mfa": {
+      "challengeExpired": "This verification has expired. Please sign in again.",
+      "tooManyAttempts": "Too many incorrect codes. Wait a few minutes, then sign in again.",
+      "verifyFailed": "Could not check the code. Please try again."
+    },
+    "setupFailedTitle": "Setup failed",
+    "ssoNoResponse": "Single sign-on did not finish. Please try signing in again."
   },
   "validation": {
     "required": "{field} is required",

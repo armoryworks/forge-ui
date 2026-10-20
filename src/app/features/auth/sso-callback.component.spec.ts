@@ -43,4 +43,18 @@ describe('SsoCallbackComponent', () => {
 
     expect(snackbar.error).toHaveBeenCalledWith('auth.noAccountFound');
   });
+
+  it('explains an identity-provider error it has no specific message for', () => {
+    create({ error: 'access_denied' }).ngOnInit();
+
+    expect(snackbar.error).toHaveBeenCalledWith('auth.ssoFailed');
+    expect(router.navigate).toHaveBeenCalledWith(['/login'], { replaceUrl: true });
+  });
+
+  it('explains a callback that came back with neither a code nor an error', () => {
+    create({}).ngOnInit();
+
+    expect(snackbar.error).toHaveBeenCalledWith('auth.ssoNoResponse');
+    expect(router.navigate).toHaveBeenCalledWith(['/login'], { replaceUrl: true });
+  });
 });

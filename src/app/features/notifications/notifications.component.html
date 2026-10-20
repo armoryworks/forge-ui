@@ -14,7 +14,7 @@
     <app-toolbar>
       <app-input [label]="'common.search' | translate" [formControl]="searchControl" />
       <app-select [label]="'notifications.severity' | translate" [formControl]="severityControl" [options]="severityOptions" />
-      <app-select [label]="'notifications.source' | translate" [formControl]="sourceControl" [options]="sourceOptions" />
+      <app-select [label]="'notifications.source' | translate" [formControl]="sourceControl" [options]="sourceOptions()" />
       <span appSpacer></span>
       <button class="action-btn" (click)="markAllRead()">
         <span class="material-icons-outlined">done_all</span> {{ 'notifications.markAllRead' | translate }}
@@ -34,41 +34,6 @@
 
   @if (activeTab() === 'preferences') {
     <div class="pref-section">
-      <h3 class="pref-section__title">{{ 'notifications.emailNotifications' | translate }}</h3>
-
-      <div class="pref-row" role="button" tabindex="0" [attr.aria-label]="'notifications.toggleCriticalAlerts' | translate" (click)="togglePref('email_critical', emailOnCritical())" (keydown.enter)="togglePref('email_critical', emailOnCritical())">
-        <div class="pref-row__info">
-          <span class="pref-row__label">{{ 'notifications.criticalAlerts' | translate }}</span>
-          <span class="pref-row__desc">{{ 'notifications.criticalAlertsDesc' | translate }}</span>
-        </div>
-        <span class="material-icons-outlined pref-row__toggle"
-              [class.pref-row__toggle--on]="emailOnCritical()">
-          {{ emailOnCritical() ? 'toggle_on' : 'toggle_off' }}
-        </span>
-      </div>
-
-      <div class="pref-row" role="button" tabindex="0" [attr.aria-label]="'notifications.toggleJobAssignments' | translate" (click)="togglePref('email_assignment', emailOnAssignment())" (keydown.enter)="togglePref('email_assignment', emailOnAssignment())">
-        <div class="pref-row__info">
-          <span class="pref-row__label">{{ 'notifications.jobAssignments' | translate }}</span>
-          <span class="pref-row__desc">{{ 'notifications.jobAssignmentsDesc' | translate }}</span>
-        </div>
-        <span class="material-icons-outlined pref-row__toggle"
-              [class.pref-row__toggle--on]="emailOnAssignment()">
-          {{ emailOnAssignment() ? 'toggle_on' : 'toggle_off' }}
-        </span>
-      </div>
-
-      <div class="pref-row" role="button" tabindex="0" [attr.aria-label]="'notifications.toggleMentions' | translate" (click)="togglePref('email_mention', emailOnMention())" (keydown.enter)="togglePref('email_mention', emailOnMention())">
-        <div class="pref-row__info">
-          <span class="pref-row__label">{{ 'notifications.mentions' | translate }}</span>
-          <span class="pref-row__desc">{{ 'notifications.mentionsDesc' | translate }}</span>
-        </div>
-        <span class="material-icons-outlined pref-row__toggle"
-              [class.pref-row__toggle--on]="emailOnMention()">
-          {{ emailOnMention() ? 'toggle_on' : 'toggle_off' }}
-        </span>
-      </div>
-
       <h3 class="pref-section__title">{{ 'notifications.inAppNotifications' | translate }}</h3>
 
       <div class="pref-row" role="button" tabindex="0" [attr.aria-label]="'notifications.toggleSound' | translate" (click)="togglePref('sound', soundEnabled())" (keydown.enter)="togglePref('sound', soundEnabled())">

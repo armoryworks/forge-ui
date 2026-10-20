@@ -512,6 +512,7 @@
       <!-- Step 4: State Withholding                                           -->
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <mat-step
+        [stepControl]="stateForm"
         [label]="'onboarding.steps.stateTax' | translate"
         aria-label="State Tax Withholding"
       >

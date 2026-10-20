@@ -3,7 +3,7 @@ import { NotificationTab } from './notification-tab.type';
 
 export interface NotificationFilter {
   tab: NotificationTab;
-  source?: 'user' | 'system';
+  source?: string;
   severity?: AppNotification['severity'];
   type?: AppNotification['type'];
   unreadOnly: boolean;

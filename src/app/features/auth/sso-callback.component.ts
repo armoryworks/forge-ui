@@ -50,6 +50,7 @@ export class SsoCallbackComponent implements OnInit {
       this.snackbar.error(this.translate.instant('auth.noAccountFound'));
       this.router.navigate(['/login'], { replaceUrl: true });
     } else {
+      this.snackbar.error(this.translate.instant(error ? 'auth.ssoFailed' : 'auth.ssoNoResponse'));
       this.router.navigate(['/login'], { replaceUrl: true });
     }
   }
