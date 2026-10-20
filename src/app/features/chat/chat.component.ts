@@ -7,7 +7,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 
-import { formatDate } from '../../shared/utils/date.utils';
+import { formatDate, formatTime as formatClockTime } from '../../shared/utils/date.utils';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { AuthService } from '../../shared/services/auth.service';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
@@ -532,8 +532,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   protected formatTime(date: Date | string): string {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return formatClockTime(date);
   }
 
   protected dateSeparator(index: number): string | null {

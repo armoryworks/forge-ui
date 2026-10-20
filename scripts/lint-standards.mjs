@@ -87,7 +87,7 @@ function timeFormatsInDatePipe() {
     for (const m of stripHtmlComments(read(f)).matchAll(/\|\s*date\s*:\s*(?:'([^']*)'|"([^"]*)")/g)) {
       const fmt = m[1] ?? m[2];
       if (NAMED_DATE_ONLY_FORMATS.has(fmt)) continue;
-      if (NAMED_TIME_FORMATS.has(fmt) || /[hHmsa]/.test(fmt)) n++;
+      if (NAMED_TIME_FORMATS.has(fmt) || /[hHmsa]/.test(fmt.replace(/'[^']*'/g, ''))) n++;
     }
     if (n) out.set(rel(f), n);
   }

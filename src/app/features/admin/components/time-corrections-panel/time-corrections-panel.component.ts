@@ -22,7 +22,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
-import { fromIsoDate, toIsoDate } from '../../../../shared/utils/date.utils';
+import { fromIsoDate, toIsoDate, formatTime as formatClockTime } from '../../../../shared/utils/date.utils';
 import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 @Component({
@@ -235,8 +235,7 @@ export class TimeCorrectionsPanelComponent implements OnInit {
 
   protected formatTime(dateStr: Date | string | null): string {
     if (!dateStr) return '--';
-    const d = new Date(dateStr);
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return formatClockTime(dateStr);
   }
 
   private toTimeString(date: Date): string {

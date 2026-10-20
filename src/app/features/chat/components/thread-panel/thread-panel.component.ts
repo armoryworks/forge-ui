@@ -9,6 +9,7 @@ import { AuthService } from '../../../../shared/services/auth.service';
 import { ChatService } from '../../services/chat.service';
 import { ChatMessage } from '../../models/chat-message.model';
 import { MentionRenderPipe } from '../../pipes/mention-render.pipe';
+import { formatTime as formatClockTime } from '../../../../shared/utils/date.utils';
 
 @Component({
   selector: 'app-thread-panel',
@@ -51,8 +52,7 @@ export class ThreadPanelComponent {
   }
 
   protected formatTime(date: Date | string): string {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return formatClockTime(date);
   }
 
   protected sendReply(): void {
