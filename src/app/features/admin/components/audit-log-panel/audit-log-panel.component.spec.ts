@@ -74,6 +74,15 @@ describe('AuditLogPanelComponent', () => {
     expect(component.loadError()).toBeNull();
   });
 
+  it('labels rows written by background work as the system actor', () => {
+    const { component, httpMock } = setup();
+    component.ngOnInit();
+
+    expectAuditRequest(httpMock).flush(page([entry, { ...entry, id: 2, userId: 0, userName: '' }]));
+
+    expect(component.entries().map(e => e.userName)).toEqual(['Pat Admin', 'adminPanels.auditLog.systemActor']);
+  });
+
   it('adds the entity type once one is picked', () => {
     const { component, httpMock } = setup();
     component.ngOnInit();
