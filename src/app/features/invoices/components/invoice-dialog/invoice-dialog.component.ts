@@ -188,24 +188,20 @@ export class InvoiceDialogComponent {
     this.lines().map(l => roundMoney(l.quantity * l.unitPrice))
   );
 
-  private readonly rawLineTotal = computed(() =>
-    this.lines().reduce((sum, l) => sum + l.quantity * l.unitPrice, 0)
+  protected readonly lineTotal = computed(() =>
+    roundMoney(this.lineAmounts().reduce((sum, amount) => sum + amount, 0))
   );
 
-  protected readonly lineTotal = computed(() => roundMoney(this.rawLineTotal()));
-
   protected readonly taxableTotal = computed(() =>
-    this.lines().reduce((sum, l) => (l.taxable ? sum + l.quantity * l.unitPrice : sum), 0)
+    roundMoney(this.lineAmounts().reduce((sum, amount, i) => (this.lines()[i].taxable ? sum + amount : sum), 0))
   );
 
   protected readonly taxRateValue = toSignal(
     this.invoiceForm.controls.taxRate.valueChanges.pipe(startWith(this.invoiceForm.controls.taxRate.value ?? 0)),
     { initialValue: this.invoiceForm.controls.taxRate.value ?? 0 }
   );
-  protected readonly grandTotal = computed(() =>
-    roundMoney(this.rawLineTotal() + (this.taxRateValue() ?? 0) / 100 * this.taxableTotal())
-  );
-  protected readonly taxAmount = computed(() => roundMoney(this.grandTotal() - this.lineTotal()));
+  protected readonly taxAmount = computed(() => roundMoney((this.taxRateValue() ?? 0) / 100 * this.taxableTotal()));
+  protected readonly grandTotal = computed(() => roundMoney(this.lineTotal() + this.taxAmount()));
 
   protected readonly draftConfig: DraftConfig = {
     entityType: 'invoice',

@@ -298,7 +298,7 @@ describe('InvoiceDialogComponent — tax rate and taxable lines', () => {
     expect(internals.lines()[1].taxable).toBe(false);
   });
 
-  it('rounds the line, subtotal and total the way the server does and derives tax from them', () => {
+  it('rounds each line, the tax on the taxable lines and the total the way the server does', () => {
     const { internals, httpMock } = setup();
     selectCustomer(internals, httpMock, 5, acmeSources, 0.0725);
     internals.lines.set([
@@ -310,6 +310,19 @@ describe('InvoiceDialogComponent — tax rate and taxable lines', () => {
     expect(internals.lineTotal()).toBe(100.03);
     expect(internals.taxAmount()).toBe(7.25);
     expect(internals.grandTotal()).toBe(107.28);
+  });
+
+  it('sums the rounded lines into the subtotal, not the raw products', () => {
+    const { internals, httpMock } = setup();
+    selectCustomer(internals, httpMock, 5, acmeSources, 0.0725);
+    internals.lines.set([1, 2, 3].map(n => (
+      { partId: null, partNumber: '', description: `Line ${n}`, quantity: 1, unitPrice: 33.333, taxable: true }
+    )));
+
+    expect(internals.lineAmounts()).toEqual([33.33, 33.33, 33.33]);
+    expect(internals.lineTotal()).toBe(99.99);
+    expect(internals.taxAmount()).toBe(7.25);
+    expect(internals.grandTotal()).toBe(107.24);
   });
 
   it('carries a non-taxable order line onto the prefilled invoice line', () => {
