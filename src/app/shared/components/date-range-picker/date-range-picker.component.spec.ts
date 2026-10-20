@@ -67,6 +67,25 @@ describe('DateRangePickerComponent validation', () => {
     expect(picker.validate(null)).toBeNull();
   });
 
+  it('fails a typed date outside [min]/[max]', () => {
+    TestBed.overrideComponent(DateRangePickerComponent, { set: { template: '', imports: [] } });
+    const fixture = TestBed.createComponent(DateRangePickerComponent);
+    fixture.componentRef.setInput('min', new Date(2026, 0, 1));
+    fixture.componentRef.setInput('max', new Date(2026, 11, 31));
+    const picker = fixture.componentInstance as unknown as RangeApi;
+
+    picker.writeValue({ start: new Date(2026, 0, 1), end: new Date(2026, 11, 31, 23, 59) });
+    expect(picker.validate(null)).toBeNull();
+
+    picker.onStartChange(event(new Date(2025, 11, 31), '12/31/2025'));
+    expect(Object.keys(picker.validate(null)!)).toEqual(['dateRangeMin']);
+
+    picker.onStartChange(event(new Date(2026, 5, 1), '06/01/2026'));
+    picker.onEndChange(event(new Date(2027, 0, 1), '01/01/2027'));
+    expect(Object.keys(picker.validate(null)!)).toEqual(['dateRangeMax']);
+    expect(picker.errorMessage()).toBe('validation.dateMax');
+  });
+
   it('treats a cleared field as empty rather than invalid', () => {
     const picker = create();
     picker.writeValue({ start: new Date(2026, 9, 1), end: new Date(2026, 9, 19) });

@@ -48,8 +48,8 @@ import { provideStrictDateAdapter } from '../../utils/strict-date-adapter';
     // Standalone components don't inherit NgModule providers, so
     // MatNativeDateModule's DateAdapter binding never reached
     // matDatepicker — clicks threw NG0201 NullInjectorError. The
-    // `provideStrictDateAdapter()` helper is the standalone-friendly
-    // form and registers DateAdapter + MAT_DATE_FORMATS locally.
+    // `provideNativeDateAdapter()` helper is the standalone-friendly
+    // form and registers DateAdapter + MAT_DATE_LOCALE locally.
     provideStrictDateAdapter(),
   ],
 })

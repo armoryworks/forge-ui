@@ -20,6 +20,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerInputEvent, MatDatepickerModule } from '@angular/material/datepicker';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { formatDate, toDateOnly } from '../../utils/date.utils';
 import { provideStrictDateAdapter } from '../../utils/strict-date-adapter';
 
 export interface DateRange {
@@ -82,7 +83,7 @@ export class DateRangePickerComponent implements ControlValueAccessor, Validator
     this.endUnparsed.set(false);
   }
 
-  /** Fails while either typed date is not a real calendar day, or when From falls after To. */
+  /** Fails while either typed date is not a real calendar day, falls outside [min]/[max], or when From falls after To. */
   validate(_control: AbstractControl): ValidationErrors | null {
     return this.rangeErrors(this.startDate(), this.endDate(), this.startUnparsed(), this.endUnparsed());
   }
@@ -135,6 +136,17 @@ export class DateRangePickerComponent implements ControlValueAccessor, Validator
     if (startUnparsed || endUnparsed) {
       const field = this.t(startUnparsed ? 'common.from' : 'common.to');
       return { dateRangeParse: { message: this.t('validation.invalidDate', { field }) } };
+    }
+    const min = toDateOnly(this.min());
+    const max = toDateOnly(this.max());
+    for (const [date, key] of [[start, 'common.from'], [end, 'common.to']] as const) {
+      const day = toDateOnly(date);
+      if (day && min && day < min) {
+        return { dateRangeMin: { message: this.t('validation.dateMin', { field: this.t(key), min: formatDate(this.min()) }) } };
+      }
+      if (day && max && day > max) {
+        return { dateRangeMax: { message: this.t('validation.dateMax', { field: this.t(key), max: formatDate(this.max()) }) } };
+      }
     }
     if (start && end && start.getTime() > end.getTime()) {
       return {

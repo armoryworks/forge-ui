@@ -125,6 +125,20 @@ describe('DatepickerComponent as a validator', () => {
     expect(parent.hasError('matDatepickerParse')).toBe(true);
   });
 
+  it('re-validates the parent when a [min]/[max] change re-runs the inner validators', () => {
+    const picker = create();
+    const parent = new FormControl<Date | null>(null, (control) => picker.validate(control));
+    picker.registerOnChange((value) => parent.setValue(value));
+
+    picker.internalControl.markAsDirty();
+    picker.internalControl.setValue(new Date(2026, 0, 15));
+    expect(parent.valid).toBe(true);
+
+    picker.internalControl.addValidators(() => ({ matDatepickerMin: { min: new Date(2026, 5, 1), actual: new Date(2026, 0, 15) } }));
+    picker.internalControl.updateValueAndValidity();
+    expect(parent.hasError('matDatepickerMin')).toBe(true);
+  });
+
   it('shows the parse message under the field once touched, and clears it when the parent writes a value', () => {
     const picker = create();
     picker.internalControl.setErrors({ matDatepickerParse: { text: 'x' } });
