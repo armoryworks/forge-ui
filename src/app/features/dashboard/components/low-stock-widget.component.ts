@@ -11,8 +11,9 @@ interface LowStockRow {
   partNumber: string;
   description: string;
   currentStock: number;
-  minStockThreshold: number;
+  minStockThreshold: number | null;
   reorderPoint: number | null;
+  threshold?: number | null;
 }
 
 interface PartSummary {
@@ -47,7 +48,7 @@ export class LowStockWidgetComponent implements OnInit {
 
   ngOnInit(): void {
     this.http.get<LowStockRow[]>(`${environment.apiUrl}/inventory/low-stock`)
-      .subscribe(rows => this.lowStock.set(rows ?? []));
+      .subscribe(rows => this.lowStock.set((rows ?? []).map(r => ({ ...r, threshold: r.minStockThreshold ?? r.reorderPoint }))));
     this.http.get<PartSummary[]>(`${environment.apiUrl}/inventory/parts`, { params: { status: 'Active' } })
       .subscribe(parts => {
         this.partCount.set(parts?.length ?? 0);
