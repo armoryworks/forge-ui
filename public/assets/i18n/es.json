@@ -2586,6 +2586,7 @@
       "typeOther": "Otro",
       "addTitle": "Agregar documento fiscal",
       "stateField": "Estado",
+      "stateNone": "Sin estado específico (varios estados)",
       "typeField": "Tipo de certificado",
       "certificateNumberField": "Número de certificado",
       "expirationField": "Fecha de vencimiento",

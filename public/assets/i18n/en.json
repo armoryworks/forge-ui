@@ -2586,6 +2586,7 @@
       "typeOther": "Other",
       "addTitle": "Add Tax Document",
       "stateField": "State",
+      "stateNone": "No specific state (multistate)",
       "typeField": "Certificate Type",
       "certificateNumberField": "Certificate Number",
       "expirationField": "Expiration Date",

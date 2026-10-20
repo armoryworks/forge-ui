@@ -107,7 +107,7 @@ describe('LeadsComponent — inline account creation (forge#2/#3)', () => {
     expect(internals.filteredLeads().map(l => l.id)).toEqual([2]);
   });
 
-  it('puts a card back in its column when the drag-to-Lost dialog is cancelled', () => {
+  it('leaves a card in its column when the drag-to-Lost dialog is cancelled', () => {
     const internals = component as unknown as {
       leads: { set: (rows: unknown[]) => void; (): { id: number; status: string }[] };
       onCardDrop: (event: unknown, status: string) => void;
@@ -118,7 +118,7 @@ describe('LeadsComponent — inline account creation (forge#2/#3)', () => {
     internals.leads.set([lead]);
 
     internals.onCardDrop({ previousContainer: {}, container: {}, item: { data: lead } }, 'Lost');
-    expect(internals.leads()[0].status).toBe('Lost');
+    expect(internals.leads()[0].status).toBe('Quoting');
     expect(internals.showLostDialog()).toBe(true);
 
     internals.cancelLost();
@@ -128,7 +128,7 @@ describe('LeadsComponent — inline account creation (forge#2/#3)', () => {
     expect(leadsService.updateLead).not.toHaveBeenCalled();
   });
 
-  it('puts a card back when saving the drag-to-Lost reason fails', () => {
+  it('leaves a card in its column and the dialog open when saving the drag-to-Lost reason fails', () => {
     const internals = component as unknown as {
       leads: { set: (rows: unknown[]) => void; (): { id: number; status: string }[] };
       onCardDrop: (event: unknown, status: string) => void;
@@ -145,7 +145,7 @@ describe('LeadsComponent — inline account creation (forge#2/#3)', () => {
     internals.confirmLost();
 
     expect(internals.leads()[0].status).toBe('Contacted');
-    expect(internals.showLostDialog()).toBe(false);
+    expect(internals.showLostDialog()).toBe(true);
   });
 
   describe('bulk assign', () => {

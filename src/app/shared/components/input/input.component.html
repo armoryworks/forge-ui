@@ -36,6 +36,9 @@
     <span matSuffix class="material-icons-outlined info-icon"
       [matTooltip]="info()" matTooltipPosition="above">info</span>
   }
+  @if (charCounter(); as counter) {
+    <mat-hint align="end" class="input__counter" data-testid="input-counter">{{ counter }}</mat-hint>
+  }
 </mat-form-field>
 @if (errorMessage(); as message) {
   <span class="input__error" role="alert" data-testid="input-error">{{ message }}</span>
