@@ -108,3 +108,18 @@ describe('ChatChannelListComponent channel rows', () => {
     expect(opened).toEqual([]);
   });
 });
+
+describe('ChatChannelListComponent empty state', () => {
+  it('tells a user with no conversations how to start one', () => {
+    TestBed.configureTestingModule({
+      imports: [ChatChannelListComponent, TranslateModule.forRoot()],
+      providers: [provideNoopAnimations()],
+    });
+    const fixture = TestBed.createComponent(ChatChannelListComponent);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+
+    expect(el.querySelector('.channel-list__empty-text')?.textContent).toContain('chat.channelList.noConversations');
+    expect(el.querySelector('[data-testid="chat-empty-help"]')?.textContent).toContain('chat.channelList.noConversationsHelp');
+  });
+});

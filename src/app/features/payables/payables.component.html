@@ -82,7 +82,7 @@
 
     <div class="tab-content" [appLoadingBlock]="billsLoading()">
       <app-data-table tableId="payables-bills" [columns]="billColumns" [data]="bills()"
-        emptyIcon="receipt_long" [emptyMessage]="'payables.noBillsFound' | translate"
+        emptyIcon="receipt_long" [emptyMessage]="'payables.noBillsFound' | translate" [emptyHelpText]="'payables.noBillsHelp' | translate"
         [clickableRows]="true"
         (rowClick)="openBillDetail($any($event))">
         <ng-template appColumnCell="billNumber" let-row>
