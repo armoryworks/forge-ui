@@ -78,11 +78,13 @@ import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { CompanyLocation, CompanyProfile } from './models/company-location.model';
 import { ADMIN_TAB_ROLES } from './models/admin-tab-roles.model';
 import { ADMIN_TABS } from './models/admin-tab.model';
+import { EnumLabelPipe } from '../../shared/pipes/enum-label.pipe';
 
 @Component({
   selector: 'app-admin',
   standalone: true,
   imports: [
+    EnumLabelPipe,
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent, DatepickerComponent, DataTableComponent,
     ColumnCellDirective, ValidationButtonComponent, TrackTypeDialogComponent, TerminologyPanelComponent,

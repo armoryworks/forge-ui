@@ -36,11 +36,11 @@
         <li class="seq-list__item" [class.seq-list__item--active]="selectedId() === inst.id"
           data-testid="sequence-instance-row" tabindex="0" role="button"
           (click)="select(inst)" (keyup.enter)="select(inst)">
-          <span class="chip" [class]="statusChipClass(inst.status)">{{ inst.status }}</span>
+          <span class="chip" [class]="statusChipClass(inst.status)">{{ inst.status | enumLabel }}</span>
           <span class="seq-list__name">{{ inst.definitionName }}</span>
           <span class="chip chip--muted">v{{ inst.definitionVersion }}</span>
           @if (inst.subjectEntityType) {
-            <span class="seq-list__subject">{{ inst.subjectEntityType }} #{{ inst.subjectEntityId }}</span>
+            <span class="seq-list__subject">{{ inst.subjectLabel ?? (inst.subjectEntityType | enumLabel) + ' #' + inst.subjectEntityId }}</span>
           }
           <span class="seq-list__date">{{ inst.startedAt | date:'short' }}</span>
         </li>

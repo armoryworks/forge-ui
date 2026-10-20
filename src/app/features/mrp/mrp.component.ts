@@ -17,6 +17,7 @@ import { SpacerDirective } from '../../shared/directives/spacer.directive';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { DisplayLabelService } from '../../shared/services/display-label.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { SelectOption } from '../../shared/components/select/select.component';
@@ -92,6 +93,7 @@ export class MrpComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly dialog = inject(MatDialog);
+  private readonly labels = inject(DisplayLabelService);
 
   // Tab state from URL
   protected readonly activeTab = toSignal(
@@ -238,7 +240,12 @@ export class MrpComponent {
   protected readonly forecastColumns: ColumnDef[] = [
     { field: 'name', header: this.translate.instant('mrp.cols.name'), sortable: true },
     { field: 'partNumber', header: this.translate.instant('mrp.cols.partNumber'), sortable: true, width: '120px' },
-    { field: 'method', header: this.translate.instant('mrp.cols.method'), sortable: true, width: '160px' },
+    { field: 'method', header: this.translate.instant('mrp.cols.method'), sortable: true, filterable: true, type: 'enum', width: '160px',
+      filterOptions: [
+        { value: 'MovingAverage', label: this.translate.instant('mrp.forecastMethods.movingAverage') },
+        { value: 'WeightedMovingAverage', label: this.translate.instant('mrp.forecastMethods.weightedMovingAverage') },
+        { value: 'ExponentialSmoothing', label: this.translate.instant('mrp.forecastMethods.exponentialSmoothing') },
+      ] },
     { field: 'status', header: this.translate.instant('mrp.cols.status'), sortable: true, filterable: true, type: 'enum', width: '100px',
       filterOptions: [
         { value: 'Draft', label: this.translate.instant('mrp.forecastStatuses.draft') }, { value: 'Approved', label: this.translate.instant('mrp.forecastStatuses.approved') },
@@ -485,6 +492,11 @@ export class MrpComponent {
         },
       });
     });
+  }
+
+  protected statusLabel(columns: ColumnDef[], status: string): string {
+    return columns.find(c => c.field === 'status')?.filterOptions?.find(o => o.value === status)?.label
+      ?? this.labels.enumLabel(status);
   }
 
   protected getRunStatusClass(status: string): string {

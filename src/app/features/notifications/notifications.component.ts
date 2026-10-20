@@ -51,7 +51,7 @@ export class NotificationsComponent {
 
   readonly filteredNotifications = computed(() => {
     let items = this.notifications();
-    const search = this.searchTerm()?.toLowerCase() ?? '';
+    const search = this.searchTerm()?.trim().toLowerCase() ?? '';
     const severity = this.severityFilter();
     const source = this.sourceFilter();
 
@@ -78,7 +78,7 @@ export class NotificationsComponent {
         { value: 'warning', label: this.translate.instant('notifications.severityWarning') },
         { value: 'critical', label: this.translate.instant('notifications.severityCritical') },
       ] },
-    { field: 'source', header: this.translate.instant('notifications.source'), sortable: true },
+    { field: 'source', header: this.translate.instant('notifications.source'), sortable: true, type: 'enum' },
     { field: 'createdAt', header: this.translate.instant('common.date'), sortable: true, type: 'date', width: '150px' },
   ];
 

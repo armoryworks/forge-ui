@@ -10,6 +10,7 @@ import { ColumnCellDirective } from '../../../../../shared/directives/column-cel
 import { CurrencyDisplayComponent } from '../../../../../shared/components/currency-display/currency-display.component';
 import { ColumnDef } from '../../../../../shared/models/column-def.model';
 import { DateOnlyPipe } from '../../../../../shared/pipes/date-only.pipe';
+import { EnumLabelPipe } from '../../../../../shared/pipes/enum-label.pipe';
 
 interface QuoteListItem {
   id: number;
@@ -24,7 +25,7 @@ interface QuoteListItem {
 @Component({
   selector: 'app-customer-quotes-tab',
   standalone: true,
-  imports: [DateOnlyPipe, DatePipe, TranslatePipe, DataTableComponent, ColumnCellDirective, CurrencyDisplayComponent],
+  imports: [EnumLabelPipe, DateOnlyPipe, DatePipe, TranslatePipe, DataTableComponent, ColumnCellDirective, CurrencyDisplayComponent],
   templateUrl: './customer-quotes-tab.component.html',
   styleUrl: '../customer-detail-tabs.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

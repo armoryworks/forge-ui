@@ -121,7 +121,7 @@
       [clickableRows]="false">
 
       <ng-template appColumnCell="status" let-row>
-        <span [class]="getOrderStatusClass(row.status)">{{ row.status }}</span>
+        <span [class]="getOrderStatusClass(row.status)">{{ statusLabel(orderColumns, row.status) }}</span>
       </ng-template>
 
       <ng-template appColumnCell="isFirmed" let-row>
@@ -206,7 +206,7 @@
       (rowClick)="openRunDetail($any($event))">
 
       <ng-template appColumnCell="status" let-row>
-        <span [class]="getRunStatusClass(row.status)">{{ row.status }}</span>
+        <span [class]="getRunStatusClass(row.status)">{{ statusLabel(runColumns, row.status) }}</span>
       </ng-template>
     </app-data-table>
   </div>
@@ -231,7 +231,7 @@
       [clickableRows]="false">
 
       <ng-template appColumnCell="status" let-row>
-        <span [class]="getScheduleStatusClass(row.status)">{{ row.status }}</span>
+        <span [class]="getScheduleStatusClass(row.status)">{{ statusLabel(scheduleColumns, row.status) }}</span>
       </ng-template>
 
       <ng-template appColumnCell="actions" let-row>
@@ -293,7 +293,7 @@
       (rowClick)="openForecast($any($event))">
 
       <ng-template appColumnCell="status" let-row>
-        <span [class]="getForecastStatusClass(row.status)">{{ row.status }}</span>
+        <span [class]="getForecastStatusClass(row.status)">{{ statusLabel(forecastColumns, row.status) }}</span>
       </ng-template>
 
       <ng-template appColumnCell="actions" let-row>

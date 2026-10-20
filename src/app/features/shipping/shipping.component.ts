@@ -9,6 +9,7 @@ import { ShipmentDialogComponent } from '../shipments/components/shipment-dialog
 import { ShippingService } from './services/shipping.service';
 import { ReadyToShipOrder } from './models/ready-to-ship-order.model';
 import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
+import { EnumLabelPipe } from '../../shared/pipes/enum-label.pipe';
 
 /**
  * Shipping fulfillment workspace — the operational "what needs to ship" home. Shows the
@@ -19,7 +20,7 @@ import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
 @Component({
   selector: 'app-shipping',
   standalone: true,
-  imports: [DateOnlyPipe, DecimalPipe, RouterLink, TranslatePipe, PageLayoutComponent, EmptyStateComponent, ShipmentDialogComponent],
+  imports: [EnumLabelPipe, DateOnlyPipe, DecimalPipe, RouterLink, TranslatePipe, PageLayoutComponent, EmptyStateComponent, ShipmentDialogComponent],
   templateUrl: './shipping.component.html',
   styleUrl: './shipping.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

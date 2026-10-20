@@ -44,7 +44,7 @@
         @if (bill.purchaseOrderId) {
           <div class="info-item">
             <span class="info-label">{{ 'payables.purchaseOrder' | translate }}</span>
-            <span class="info-value"><app-entity-link type="purchase-order" [entityId]="bill.purchaseOrderId">PO #{{ bill.purchaseOrderId }}</app-entity-link></span>
+            <span class="info-value"><app-entity-link type="purchase-order" [entityId]="bill.purchaseOrderId">{{ bill.purchaseOrderNumber ?? ('purchasing.poNumberFallback' | translate: { id: bill.purchaseOrderId }) }}</app-entity-link></span>
           </div>
         }
         @if (bill.sourceExpenseId) {
@@ -82,7 +82,7 @@
                 <th scope="col">#</th>
                 <th scope="col">{{ 'common.description' | translate }}</th>
                 @if (bill.purchaseOrderId) {
-                  <th scope="col" class="lines-table__right">{{ 'payables.poLine' | translate }}</th>
+                  <th scope="col">{{ 'payables.poLine' | translate }}</th>
                 } @else {
                   <th scope="col">{{ 'payables.glAccount' | translate }}</th>
                 }
@@ -97,7 +97,7 @@
                   <td class="lines-table__mono">{{ line.lineNumber }}</td>
                   <td>{{ line.description }}</td>
                   @if (bill.purchaseOrderId) {
-                    <td class="lines-table__right lines-table__mono">{{ line.purchaseOrderLineId ?? '—' }}</td>
+                    <td class="lines-table__mono">{{ line.purchaseOrderLineLabel ?? (line.purchaseOrderLineId ? ('payables.poLineFallback' | translate: { id: line.purchaseOrderLineId }) : '—') }}</td>
                   } @else {
                     <td data-testid="bill-line-account">{{ line.glAccountName ?? getAccountKeyLabel(line.accountDeterminationKey) }}</td>
                   }

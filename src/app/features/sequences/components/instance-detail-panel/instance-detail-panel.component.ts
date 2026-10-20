@@ -10,6 +10,7 @@ import {
   SequenceEvent, SequenceGateInstance, SequenceInstance, SequenceStepInstance,
 } from '../../models/sequence.model';
 import { ReasonDialogComponent, ReasonDialogData } from '../reason-dialog/reason-dialog.component';
+import { EnumLabelPipe } from '../../../../shared/pipes/enum-label.pipe';
 
 /**
  * Operational view of one sequence instance: the steps with their live status
@@ -20,7 +21,7 @@ import { ReasonDialogComponent, ReasonDialogData } from '../reason-dialog/reason
 @Component({
   selector: 'app-sequence-instance-panel',
   standalone: true,
-  imports: [DatePipe, TranslatePipe],
+  imports: [EnumLabelPipe, DatePipe, TranslatePipe],
   templateUrl: './instance-detail-panel.component.html',
   styleUrl: './instance-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

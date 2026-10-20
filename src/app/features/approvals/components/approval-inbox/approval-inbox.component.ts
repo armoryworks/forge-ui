@@ -15,11 +15,13 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
+import { EnumLabelPipe } from '../../../../shared/pipes/enum-label.pipe';
 
 @Component({
   selector: 'app-approval-inbox',
   standalone: true,
   imports: [
+    EnumLabelPipe,
     ReactiveFormsModule, DatePipe, CurrencyPipe, TranslatePipe,
     DataTableComponent, ColumnCellDirective, DialogComponent,
     TextareaComponent, LoadingBlockDirective, EmptyStateComponent,
@@ -42,7 +44,14 @@ export class ApprovalInboxComponent implements OnInit {
   protected readonly rejectComments = new FormControl('', { nonNullable: true, validators: [Validators.required] });
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'entityType', header: this.translate.instant('approvals.cols.type'), sortable: true, width: '120px' },
+    { field: 'entityType', header: this.translate.instant('approvals.cols.type'), sortable: true, width: '120px', type: 'enum',
+      filterOptions: [
+        { value: 'PurchaseOrder', label: this.translate.instant('approvals.entityTypes.purchaseOrder') },
+        { value: 'Expense', label: this.translate.instant('approvals.entityTypes.expense') },
+        { value: 'Quote', label: this.translate.instant('approvals.entityTypes.quote') },
+        { value: 'TimeEntry', label: this.translate.instant('approvals.entityTypes.timeEntry') },
+        { value: 'SalesOrder', label: this.translate.instant('approvals.entityTypes.salesOrder') },
+      ] },
     { field: 'entitySummary', header: this.translate.instant('approvals.cols.summary'), sortable: true },
     { field: 'workflowName', header: this.translate.instant('approvals.cols.workflow'), sortable: true, width: '150px' },
     { field: 'currentStepName', header: this.translate.instant('approvals.cols.step'), sortable: true, width: '150px' },

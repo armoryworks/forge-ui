@@ -11,13 +11,13 @@
       <span class="capa-list__number">{{ row.capaNumber }}</span>
     </ng-template>
     <ng-template appColumnCell="type" let-row>
-      <span class="chip chip--muted">{{ row.type }}</span>
+      <span class="chip chip--muted">{{ row.type | enumLabel }}</span>
     </ng-template>
     <ng-template appColumnCell="priority" let-row>
-      <span [class]="getPriorityClass(row.priority)">{{ row.priority }}</span>
+      <span [class]="getPriorityClass(row.priority)">{{ row.priority | enumLabel }}</span>
     </ng-template>
     <ng-template appColumnCell="status" let-row>
-      <span [class]="getStatusClass(row.status)">{{ row.status }}</span>
+      <span [class]="getStatusClass(row.status)">{{ row.status | enumLabel }}</span>
     </ng-template>
     <ng-template appColumnCell="dueDate" let-row>
       {{ row.dueDate | dateOnly }}

@@ -2334,7 +2334,8 @@
         "activeJobs": "Active Jobs",
         "outstanding": "Outstanding",
         "ytdRevenue": "YTD Revenue"
-      }
+      },
+      "creditHold": "Credit hold"
     },
     "creditStatus": {
       "title": "Credit Status",
@@ -6506,7 +6507,8 @@
     "scanLabelMessage": "Scan the QR code on the label printed for shipment {{number}} to confirm it before it ships.",
     "scanLabelField": "Label code",
     "scanLabelPlaceholder": "Scan, or type the code and press Enter",
-    "shipFailed": "Could not mark the shipment as shipped."
+    "shipFailed": "Could not mark the shipment as shipped.",
+    "invoiceNumberFallback": "Invoice #{{id}}"
   },
   "planning": {
     "title": "Planning",
@@ -8235,7 +8237,7 @@
     },
     "forecastDialog": {
       "title": "Generate Demand Forecast",
-      "hint": "Pick a part with sales history and a forecast method. The engine reads `historical periods` of past demand and projects `forecast periods` into the future.",
+      "hint": "Pick a part with sales history and a forecast method. The engine reads historical periods of past demand and projects forecast periods into the future.",
       "fieldName": "Forecast Name",
       "fieldPart": "Part",
       "fieldMethod": "Method",
@@ -8772,6 +8774,7 @@
       "confirmSendTitle": "Add vendors to RFQ?",
       "confirmSendMessage": "Add the selected vendors ({{count}}) to this RFQ? This does not email them: download the RFQ PDF and send it to each vendor yourself."
     },
+    "poNumberFallback": "PO #{{id}}",
     "viewPo": "View PO"
   },
   "approvals": {
@@ -8901,7 +8904,8 @@
     "filters": {
       "all": "-- All --",
       "active": "Active",
-      "inactive": "Inactive"
+      "inactive": "Inactive",
+      "allRoles": "-- All Roles --"
     },
     "detail": {
       "backToEmployees": "Employees",
@@ -10826,6 +10830,7 @@
     },
     "glAccount": "GL account",
     "defaultExpenseAccount": "Default expense account",
+    "poLineFallback": "PO line #{{id}}",
     "accountKeys": {
       "OPERATING_EXPENSE": "Operating expense",
       "GRNI": "Goods received not invoiced"
@@ -12316,6 +12321,35 @@
       "sftpUploadDirHint": "Where payment files are uploaded on the bank's server.",
       "sftpReturnsDir": "SFTP returns directory",
       "sftpReturnsDirHint": "Where the bank leaves return files for Forge to read."
+    }
+  },
+  "roles": {
+    "admin": "Admin",
+    "manager": "Manager",
+    "officeManager": "Office manager",
+    "engineer": "Engineer",
+    "pm": "Project manager",
+    "productionWorker": "Production worker",
+    "procurement": "Procurement",
+    "controller": "Controller",
+    "complianceOfficer": "Compliance officer",
+    "biApiClient": "BI API client",
+    "leadIntake": "Lead intake"
+  },
+  "enums": {
+    "creditRisk": {
+      "low": "Low risk",
+      "medium": "Medium risk",
+      "high": "High risk",
+      "onHold": "On hold"
+    },
+    "creditTerms": {
+      "dueOnReceipt": "Due on receipt",
+      "net15": "Net 15",
+      "net30": "Net 30",
+      "net45": "Net 45",
+      "net60": "Net 60",
+      "net90": "Net 90"
     }
   },
   "routeStatus": {

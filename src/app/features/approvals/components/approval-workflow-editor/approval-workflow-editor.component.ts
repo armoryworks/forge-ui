@@ -80,7 +80,7 @@ export class ApprovalWorkflowEditorComponent implements OnInit {
 
   protected readonly columns: ColumnDef[] = [
     { field: 'name', header: this.translate.instant('approvals.cols.name'), sortable: true },
-    { field: 'entityType', header: this.translate.instant('approvals.cols.entityType'), sortable: true, width: '150px' },
+    { field: 'entityType', header: this.translate.instant('approvals.cols.entityType'), sortable: true, width: '150px', type: 'enum', filterOptions: this.entityTypeOptions },
     { field: 'isActive', header: this.translate.instant('approvals.cols.active'), sortable: true, align: 'center', width: '80px' },
     { field: 'stepsCount', header: this.translate.instant('approvals.cols.steps'), align: 'center', width: '80px' },
     { field: 'createdAt', header: this.translate.instant('approvals.cols.created'), sortable: true, type: 'date', width: '120px' },

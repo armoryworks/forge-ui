@@ -175,7 +175,7 @@
                             {{ stage.color }}
                           </td>
                           <td>{{ stage.wipLimit ?? '—' }}</td>
-                          <td>{{ stage.accountingDocumentType ?? '—' }}</td>
+                          <td>{{ stage.accountingDocumentType ? (stage.accountingDocumentType | enumLabel) : '—' }}</td>
                           <td>
                             @if (stage.isIrreversible) {
                               <span class="material-icons-outlined lock-icon">lock</span>

@@ -96,6 +96,7 @@ export interface SequenceInstance {
   definitionName: string;
   subjectEntityType?: string | null;
   subjectEntityId?: number | null;
+  subjectLabel?: string | null;
   status: SequenceInstanceStatus;
   startedAt: string;
   startedByUserId?: number | null;

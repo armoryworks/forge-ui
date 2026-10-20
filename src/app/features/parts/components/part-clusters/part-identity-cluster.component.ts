@@ -92,8 +92,10 @@ export class PartIdentityClusterComponent {
     label: this.translate.instant(`parts.inventoryClass.${v}`),
   }));
 
-  protected readonly procurementLabel = computed(() => this.part().procurementSource);
-  protected readonly inventoryClassLabel = computed(() => this.part().inventoryClass);
+  protected readonly procurementLabel = computed(() =>
+    this.procurementSourceOptions.find(o => o.value === this.part().procurementSource)?.label ?? this.part().procurementSource);
+  protected readonly inventoryClassLabel = computed(() =>
+    this.inventoryClassOptions.find(o => o.value === this.part().inventoryClass)?.label ?? this.part().inventoryClass);
 
   protected readonly dateFormat = DATE_FORMAT;
   protected readonly revisions = signal<PartRevision[]>([]);

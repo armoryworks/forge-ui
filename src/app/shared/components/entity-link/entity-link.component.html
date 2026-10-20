@@ -42,7 +42,15 @@
           @for (f of p.fields; track f.label) {
             <div class="entity-preview__field">
               <dt class="entity-preview__field-label">{{ f.label }}</dt>
-              <dd class="entity-preview__field-value">{{ f.value }}</dd>
+              <dd class="entity-preview__field-value">
+                @if (f.kind === 'enum' && f.rawValue) {
+                  {{ f.rawValue | enumLabel }}
+                } @else if (f.kind === 'money' && f.rawValue) {
+                  <app-currency-display [value]="+f.rawValue" [currency]="f.currency ?? null" />
+                } @else {
+                  {{ f.value }}
+                }
+              </dd>
             </div>
           }
         </dl>

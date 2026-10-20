@@ -14,6 +14,7 @@ export interface RfqListItem {
   awardedAt: string | null;
   awardedVendorResponseId: number | null;
   generatedPurchaseOrderId: number | null;
+  generatedPurchaseOrderNumber?: string | null;
   notes: string | null;
   vendorResponseCount: number;
   receivedResponseCount: number;

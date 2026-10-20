@@ -54,6 +54,27 @@ describe('DataTableComponent · formatCellValue', () => {
   it('leaves empty date cells empty', () => {
     expect(table.formatCellValue({ date: null }, dateCol)).toBeNull();
   });
+
+  it('shows an enum cell by its filter option label', () => {
+    const col: ColumnDef = { field: 'severity', header: 'Severity', type: 'enum', filterOptions: [{ value: 'critical', label: 'Critical' }] };
+    expect(table.formatCellValue({ severity: 'critical' }, col)).toBe('Critical');
+  });
+
+  it('humanizes an enum cell that has no matching option', () => {
+    const col: ColumnDef = { field: 'status', header: 'Status', type: 'enum' };
+    expect(table.formatCellValue({ status: 'PartiallyReceived' }, col)).toBe('Partially received');
+    expect(table.formatCellValue({ status: 'QcHold' }, col)).toBe('QC hold');
+  });
+
+  it('shows a boolean cell as yes or no instead of true or false', () => {
+    const col: ColumnDef = { field: 'isLowStock', header: 'Low stock' };
+    expect(table.formatCellValue({ isLowStock: false }, col)).toBe('No');
+    expect(table.formatCellValue({ isLowStock: true }, col)).toBe('Yes');
+  });
+
+  it('leaves plain text cells as sent', () => {
+    expect(table.formatCellValue({ name: 'InProgress' }, { field: 'name', header: 'Name' })).toBe('InProgress');
+  });
 });
 
 describe('DataTableComponent · column menu', () => {

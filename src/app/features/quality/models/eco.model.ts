@@ -27,6 +27,7 @@ export interface EcoAffectedItem {
   id: number;
   entityType: string;
   entityId: number;
+  entityLabel?: string | null;
   changeDescription: string;
   oldValue?: string;
   newValue?: string;

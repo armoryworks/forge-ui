@@ -39,7 +39,7 @@
 @if (showRejectDialog()) {
   <app-dialog [title]="'approvals.inbox.rejectTitle' | translate" width="440px" (closed)="showRejectDialog.set(false)">
     <p class="text-muted">
-      Rejecting: <strong>{{ rejectTarget()?.entitySummary ?? rejectTarget()?.entityType }}</strong>
+      Rejecting: <strong>{{ rejectTarget()?.entitySummary ?? (rejectTarget()?.entityType | enumLabel) }}</strong>
     </p>
     <app-textarea
       [label]="'approvals.inbox.reasonLabel' | translate"

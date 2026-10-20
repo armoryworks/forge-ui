@@ -11,11 +11,12 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { EnumLabelPipe } from '../../../../shared/pipes/enum-label.pipe';
 
 @Component({
   selector: 'app-credit-status-card',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, PercentPipe, ReactiveFormsModule, TranslatePipe, DialogComponent, TextareaComponent, CurrencyDisplayComponent, LoadingBlockDirective],
+  imports: [EnumLabelPipe, DatePipe, DecimalPipe, PercentPipe, ReactiveFormsModule, TranslatePipe, DialogComponent, TextareaComponent, CurrencyDisplayComponent, LoadingBlockDirective],
   templateUrl: './credit-status-card.component.html',
   styleUrl: './credit-status-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

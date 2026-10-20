@@ -83,18 +83,16 @@
             [value]="'' + d.kpis.activeCount"
             [label]="'dashboard.active' | translate"
             [change]="d.kpis.activeChange > 0 ? '+' + d.kpis.activeChange : '' + d.kpis.activeChange"
-            changeDirection="up" />
+            [changeDirection]="kpiDirection(d.kpis.activeChange, true)" />
           <app-kpi-chip
             [value]="'' + d.kpis.overdueCount"
             valueColor="warn"
             [label]="'dashboard.overdue' | translate"
             [change]="d.kpis.overdueChange > 0 ? '+' + d.kpis.overdueChange : '' + d.kpis.overdueChange"
-            changeDirection="down" />
+            [changeDirection]="kpiDirection(d.kpis.overdueChange, false)" />
           <app-kpi-chip
             [value]="d.kpis.totalHours"
-            [label]="'dashboard.hours' | translate"
-            [change]="d.kpis.hoursStatus"
-            changeDirection="up" />
+            [label]="'dashboard.hours' | translate" />
         </div>
       }
 

@@ -21,7 +21,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DashboardWidgetComponent } from '../../shared/components/dashboard-widget/dashboard-widget.component';
-import { KpiChipComponent } from '../../shared/components/kpi-chip/kpi-chip.component';
+import { KpiChipComponent, kpiChangeDirection } from '../../shared/components/kpi-chip/kpi-chip.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { ActivityWidgetComponent } from './components/activity-widget.component';
 import { DeadlinesWidgetComponent } from './components/deadlines-widget.component';
@@ -251,6 +251,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.grid = null;
     }
   }
+
+  protected readonly kpiDirection = kpiChangeDirection;
 
   protected exitAmbientMode(): void {
     this.ambientMode.set(false);

@@ -47,6 +47,7 @@ import { EntityCompletenessChipComponent } from '../../shared/components/entity-
 import { EntityCompletenessBadgeComponent } from '../../shared/components/entity-completeness-badge/entity-completeness-badge.component';
 import { EntityCompletenessService } from '../../shared/services/entity-completeness.service';
 import { ClonePartDialogComponent, ClonePartDialogData } from './components/clone-part-dialog/clone-part-dialog.component';
+import { EnumLabelPipe } from '../../shared/pipes/enum-label.pipe';
 
 type ViewMode = 'table' | 'cards';
 
@@ -54,6 +55,7 @@ type ViewMode = 'table' | 'cards';
   selector: 'app-parts',
   standalone: true,
   imports: [
+    EnumLabelPipe,
     DatePipe, NgTemplateOutlet,
     ReactiveFormsModule, TranslatePipe,
     PageHeaderComponent, DialogComponent,

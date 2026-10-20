@@ -41,7 +41,7 @@
           @if (rfq.generatedPurchaseOrderId) {
             <div class="info-item">
               <span class="info-label">{{ 'purchasing.generatedPo' | translate }}</span>
-              <span class="info-value"><app-entity-link type="purchase-order" [entityId]="rfq.generatedPurchaseOrderId">PO #{{ rfq.generatedPurchaseOrderId }}</app-entity-link></span>
+              <span class="info-value"><app-entity-link type="purchase-order" [entityId]="rfq.generatedPurchaseOrderId">{{ rfq.generatedPurchaseOrderNumber ?? ('purchasing.poNumberFallback' | translate: { id: rfq.generatedPurchaseOrderId }) }}</app-entity-link></span>
             </div>
           }
         </div>
@@ -132,7 +132,7 @@
         <app-data-table tableId="rfq-responses" [columns]="responseColumns" [data]="rfq.vendorResponses"
           emptyIcon="group" [emptyMessage]="'purchasing.noVendorResponses' | translate">
           <ng-template appColumnCell="responseStatus" let-row>
-            <span [class]="getResponseStatusClass(row.responseStatus)">{{ row.responseStatus }}</span>
+            <span [class]="getResponseStatusClass(row.responseStatus)">{{ row.responseStatus | enumLabel }}</span>
           </ng-template>
           <ng-template appColumnCell="unitPrice" let-row>
             @if (row.unitPrice !== null) {

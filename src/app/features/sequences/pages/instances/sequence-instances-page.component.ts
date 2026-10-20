@@ -13,13 +13,14 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { SequencesService } from '../../services/sequences.service';
 import { SequenceDefinition, SequenceInstance, SequenceInstanceStatus } from '../../models/sequence.model';
 import { SequenceInstancePanelComponent } from '../../components/instance-detail-panel/instance-detail-panel.component';
+import { EnumLabelPipe } from '../../../../shared/pipes/enum-label.pipe';
 
 /** Running/finished sequence instances: filter, start a new run, and operate the selected one. */
 @Component({
   selector: 'app-sequence-instances-page',
   standalone: true,
   imports: [
-    DatePipe, ReactiveFormsModule, TranslatePipe, EntityPickerComponent, InputComponent, PageHeaderComponent, SelectComponent,
+    EnumLabelPipe, DatePipe, ReactiveFormsModule, TranslatePipe, EntityPickerComponent, InputComponent, PageHeaderComponent, SelectComponent,
     SequenceInstancePanelComponent,
   ],
   templateUrl: './sequence-instances-page.component.html',

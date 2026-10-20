@@ -13,10 +13,10 @@
         <span class="text-muted">{{ row.detectedAt | date:'MM/dd/yyyy HH:mm' }}</span>
       </ng-template>
       <ng-template appColumnCell="severity" let-row>
-        <span [class]="getSeverityClass(row.severity)">{{ row.severity }}</span>
+        <span [class]="getSeverityClass(row.severity)">{{ row.severity | enumLabel }}</span>
       </ng-template>
       <ng-template appColumnCell="status" let-row>
-        <span [class]="getStatusClass(row.status)">{{ row.status }}</span>
+        <span [class]="getStatusClass(row.status)">{{ row.status | enumLabel }}</span>
       </ng-template>
       <ng-template appColumnCell="acknowledgedByName" let-row>
         <span class="text-muted">{{ row.acknowledgedByName ?? '—' }}</span>

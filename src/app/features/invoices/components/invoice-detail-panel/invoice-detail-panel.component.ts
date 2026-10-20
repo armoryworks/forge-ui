@@ -24,6 +24,7 @@ import { downloadBlob } from '../../../../shared/utils/download-blob';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { SendInvoiceEmailDialogComponent } from '../send-invoice-email-dialog/send-invoice-email-dialog.component';
 import { SendInvoiceEmailDialogData } from '../../models/send-invoice-email-dialog-data.model';
+import { EnumLabelPipe } from '../../../../shared/pipes/enum-label.pipe';
 
 const EMAILABLE_STATUSES = new Set(['Sent', 'PartiallyPaid', 'Overdue', 'Paid']);
 const VOIDABLE_STATUSES = new Set(['Sent', 'Overdue']);
@@ -32,6 +33,7 @@ const VOIDABLE_STATUSES = new Set(['Sent', 'Overdue']);
   selector: 'app-invoice-detail-panel',
   standalone: true,
   imports: [
+    EnumLabelPipe,
     DateOnlyPipe, NumberLockInfoComponent, DatePipe, DecimalPipe, TranslatePipe, RouterLink, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent, InputComponent,

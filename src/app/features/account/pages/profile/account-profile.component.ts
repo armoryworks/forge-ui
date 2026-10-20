@@ -15,6 +15,7 @@ import { AccountService } from '../../services/account.service';
 import { EmployeeProfileService } from '../../services/employee-profile.service';
 import { dateOfBirthMin, dateOfBirthMax } from '../../../../shared/utils/date.utils';
 import { patchPristineControls } from '../../shared/patch-pristine-controls';
+import { RoleLabelPipe } from '../../../../shared/pipes/enum-label.pipe';
 
 const AVATAR_COLORS = [
   '#6366f1', '#8b5cf6', '#ec4899', '#ef4444', '#f97316',
@@ -33,7 +34,7 @@ const GENDER_OPTIONS = [
 @Component({
   selector: 'app-account-profile',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent, DatepickerComponent, AvatarComponent, ValidationButtonComponent],
+  imports: [RoleLabelPipe, ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent, DatepickerComponent, AvatarComponent, ValidationButtonComponent],
   templateUrl: './account-profile.component.html',
   styleUrl: './account-profile.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
