@@ -169,7 +169,7 @@ export class AppComponent implements OnInit, OnDestroy {
         // this effect's setTimeout races with and clobbers the demo's root→/welcome
         // redirect.
         if (this.wasAuthenticated && !this.layout.isAuthRoute() && !this.layout.isDisplayRoute()) {
-          setTimeout(() => this.router.navigate(['/login']));
+          setTimeout(() => this.authService.redirectToLogin());
         }
         this.wasAuthenticated = false;
       }

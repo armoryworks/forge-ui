@@ -1,4 +1,7 @@
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { Router, provideRouter } from '@angular/router';
+import { ReplaySubject, take } from 'rxjs';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
@@ -234,5 +237,89 @@ describe('AuthService', () => {
       const req = httpMock.expectOne(`${environment.apiUrl}/auth/sso/providers`);
       req.error(new ProgressEvent('error'));
     });
+  });
+});
+
+describe('AuthService.redirectToLogin', () => {
+  let service: AuthService;
+  let router: Router;
+  let setupCheck: ReplaySubject<boolean>;
+
+  @Component({ template: '' })
+  class BlankComponent {}
+
+  beforeEach(() => {
+    localStorage.clear();
+    setupCheck = new ReplaySubject<boolean>(1);
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([
+          { path: 'login', component: BlankComponent, canActivate: [() => setupCheck.pipe(take(1))] },
+          { path: '**', component: BlankComponent },
+        ]),
+      ],
+    });
+    service = TestBed.inject(AuthService);
+    router = TestBed.inject(Router);
+  });
+
+  afterEach(() => localStorage.clear());
+
+  async function settle(): Promise<void> {
+    setupCheck.next(true);
+    await new Promise((resolve) => setTimeout(resolve));
+  }
+
+  it('keeps the reason and return route when a bare redirect follows while the first is still in flight', async () => {
+    await router.navigateByUrl('/jobs/42');
+
+    service.redirectToLogin('session_expired');
+    service.redirectToLogin();
+    await settle();
+
+    expect(router.url).toBe('/login?reason=session_expired&returnUrl=%2Fjobs%2F42');
+  });
+
+  it('does not strip the reason when a bare redirect arrives after the user reached login', async () => {
+    await router.navigateByUrl('/parts');
+    service.redirectToLogin('session_expired');
+    await settle();
+
+    service.redirectToLogin();
+    await settle();
+
+    expect(router.url).toBe('/login?reason=session_expired&returnUrl=%2Fparts');
+  });
+
+  it('goes to a bare login screen for an explicit sign-out', async () => {
+    await router.navigateByUrl('/parts');
+
+    service.redirectToLogin();
+    await settle();
+
+    expect(router.url).toBe('/login');
+  });
+
+  it('does not offer an auth screen as the return route', async () => {
+    await router.navigateByUrl('/welcome');
+
+    service.redirectToLogin('session_expired');
+    await settle();
+
+    expect(router.url).toBe('/login?reason=session_expired');
+  });
+
+  it('redirects again once the earlier redirect has finished', async () => {
+    await router.navigateByUrl('/parts');
+    service.redirectToLogin();
+    await settle();
+    await router.navigateByUrl('/jobs');
+
+    service.redirectToLogin('session_expired');
+    await settle();
+
+    expect(router.url).toBe('/login?reason=session_expired&returnUrl=%2Fjobs');
   });
 });

@@ -118,6 +118,7 @@ export class AuthService {
   // request-time path; this covers the "left the tab open" path.
   private expiryTimer: ReturnType<typeof setTimeout> | null = null;
   private expiring = false;
+  private loginRedirectPending = false;
 
   constructor() {
     effect(() => this.scheduleExpiryCheck(this._token()));
@@ -359,6 +360,7 @@ export class AuthService {
     }
     if (!token) return;
     this.expiring = false; // fresh/valid token — re-arm
+    this.loginRedirectPending = false;
 
     const expMs = this.getTokenExpiryMs(token);
     if (expMs === null) return;
@@ -394,14 +396,42 @@ export class AuthService {
   private expireSession(): void {
     if (this.expiring || !this._token()) return;
     this.expiring = true;
-    const currentUrl = this.router.url;
     this.clearAuth();
-    const queryParams: Record<string, string> = { reason: 'session_expired' };
-    if (currentUrl && currentUrl !== '/'
-      && !currentUrl.startsWith('/login') && !currentUrl.startsWith('/setup')) {
-      queryParams['returnUrl'] = currentUrl;
+    this.redirectToLogin('session_expired');
+  }
+
+  /**
+   * Send a signed-out user to the login screen, or to enrollment in the mobile
+   * shell. With a reason, the current route travels along as `returnUrl`.
+   * Does nothing while an earlier redirect is still in flight, or when a bare
+   * redirect finds the user already there, so a later call cannot drop the
+   * reason and `returnUrl` of an earlier one.
+   */
+  redirectToLogin(reason?: 'session_expired'): void {
+    const target = environment.mobileShell ? '/app/enroll' : '/login';
+    if (this.loginRedirectPending) return;
+    const inFlight = this.router.currentNavigation()?.extractedUrl;
+    if (inFlight && this.router.serializeUrl(inFlight).startsWith(target)) return;
+    const currentUrl = this.router.url;
+    if (!reason && currentUrl.startsWith(target)) return;
+
+    const queryParams: Record<string, string> = {};
+    if (reason) {
+      queryParams['reason'] = reason;
+      if (!environment.mobileShell && this.isReturnableUrl(currentUrl)) {
+        queryParams['returnUrl'] = currentUrl;
+      }
     }
-    this.router.navigate(['/login'], { queryParams });
+    this.loginRedirectPending = true;
+    void this.router.navigate([target], { queryParams })
+      .catch(() => false)
+      .finally(() => { this.loginRedirectPending = false; });
+  }
+
+  /** True for a route worth coming back to after signing in again. */
+  private isReturnableUrl(url: string): boolean {
+    return !!url && url !== '/'
+      && !['/login', '/setup', '/sso/callback', '/welcome', '/portal', '/app/enroll'].some((prefix) => url.startsWith(prefix));
   }
 
   /** Update local user state after self-service profile edit. */
