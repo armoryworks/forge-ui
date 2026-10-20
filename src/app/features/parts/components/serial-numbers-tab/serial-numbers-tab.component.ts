@@ -71,8 +71,8 @@ export class SerialNumbersTabComponent {
   });
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'serialValue', header: 'Serial #', sortable: true, width: '140px' },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', width: '110px',
+    { field: 'serialValue', header: 'columns.serialNumber', sortable: true, width: '140px' },
+    { field: 'status', header: 'common.status', sortable: true, filterable: true, type: 'enum', width: '110px',
       filterOptions: [
         { value: 'Available', label: 'Available' },
         { value: 'InUse', label: 'In Use' },
@@ -81,10 +81,10 @@ export class SerialNumbersTabComponent {
         { value: 'Scrapped', label: 'Scrapped' },
         { value: 'Quarantined', label: 'Quarantined' },
       ] },
-    { field: 'currentLocationName', header: 'Location', sortable: true },
-    { field: 'jobNumber', header: 'Job', sortable: true, width: '100px' },
-    { field: 'manufacturedAt', header: 'Manufactured', sortable: true, type: 'date', width: '110px' },
-    { field: 'childCount', header: 'Children', sortable: true, type: 'number', width: '80px' },
+    { field: 'currentLocationName', header: 'columns.location', sortable: true },
+    { field: 'jobNumber', header: 'columns.job', sortable: true, width: '100px' },
+    { field: 'manufacturedAt', header: 'columns.manufactured', sortable: true, type: 'date', width: '110px' },
+    { field: 'childCount', header: 'columns.children', sortable: true, type: 'number', width: '80px' },
   ];
 
   protected readonly statusOptions: SelectOption[] = [

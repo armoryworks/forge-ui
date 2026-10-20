@@ -23,7 +23,7 @@ import { OverlayModule } from '@angular/cdk/overlay';
 
 import { unparse } from 'papaparse';
 import writeXlsxFile, { type CellObject, type SheetData } from 'write-excel-file/browser';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ColumnDef } from '../../models/column-def.model';
 import { SortState } from '../../models/sort-state.model';
@@ -63,6 +63,7 @@ export class DataTableComponent implements OnInit {
   private readonly prefs = inject(UserPreferencesService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly translate = inject(TranslateService);
 
   readonly tableId = input.required<string>();
   readonly columns = input.required<ColumnDef[]>();
@@ -70,7 +71,7 @@ export class DataTableComponent implements OnInit {
   readonly selectable = input(false);
   readonly trackByField = input('id');
   readonly emptyIcon = input('search_off');
-  readonly emptyMessage = input('No data found');
+  readonly emptyMessage = input('common.noResults');
   readonly emptyHelpText = input<string>();
   readonly expandable = input(false);
   readonly loading = input(false);
@@ -464,6 +465,10 @@ export class DataTableComponent implements OnInit {
     return this.expandedRows().has(this.getTrackValue(row));
   }
 
+  private headerText(col: ColumnDef): string {
+    return col.header ? this.translate.instant(col.header) : col.header;
+  }
+
   // ─── CSV Export ───
   exportCsv(): void {
     const cols = this.visibleColumns();
@@ -471,7 +476,7 @@ export class DataTableComponent implements OnInit {
       const rec = row as Record<string, unknown>;
       const mapped: Record<string, unknown> = {};
       for (const col of cols) {
-        mapped[col.header] = rec[col.field] ?? '';
+        mapped[this.headerText(col)] = rec[col.field] ?? '';
       }
       return mapped;
     });
@@ -489,7 +494,7 @@ export class DataTableComponent implements OnInit {
   // ─── Excel Export ───
   exportExcel(): void {
     const cols = this.visibleColumns();
-    const header: CellObject[] = cols.map(col => ({ value: col.header, fontWeight: 'bold' }));
+    const header: CellObject[] = cols.map(col => ({ value: this.headerText(col), fontWeight: 'bold' }));
     const body = this.filteredData().map(row => {
       const rec = row as Record<string, unknown>;
       return cols.map(col => this.toExcelCell(rec[col.field], col));

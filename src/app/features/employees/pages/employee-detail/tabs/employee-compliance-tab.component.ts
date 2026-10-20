@@ -24,11 +24,11 @@ export class EmployeeComplianceTabComponent implements OnInit {
   protected readonly loading = signal(false);
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'formName', header: 'Form', sortable: true },
-    { field: 'formType', header: 'Type', sortable: true, width: '120px' },
-    { field: 'status', header: 'Status', sortable: true, width: '110px' },
-    { field: 'signedAt', header: 'Signed', sortable: true, type: 'date', width: '100px' },
-    { field: 'createdAt', header: 'Created', sortable: true, type: 'date', width: '100px' },
+    { field: 'formName', header: 'columns.form', sortable: true },
+    { field: 'formType', header: 'common.type', sortable: true, width: '120px' },
+    { field: 'status', header: 'common.status', sortable: true, width: '110px' },
+    { field: 'signedAt', header: 'columns.signed', sortable: true, type: 'date', width: '100px' },
+    { field: 'createdAt', header: 'common.created', sortable: true, type: 'date', width: '100px' },
   ];
 
   ngOnInit(): void {

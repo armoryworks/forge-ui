@@ -24,12 +24,12 @@ export class EmployeeTrainingTabComponent implements OnInit {
   protected readonly loading = signal(false);
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'moduleName', header: 'Module', sortable: true },
-    { field: 'moduleType', header: 'Type', sortable: true, width: '100px' },
-    { field: 'status', header: 'Status', sortable: true, width: '110px' },
-    { field: 'quizScore', header: 'Score', sortable: true, width: '70px', align: 'center' },
-    { field: 'startedAt', header: 'Started', sortable: true, type: 'date', width: '100px' },
-    { field: 'completedAt', header: 'Completed', sortable: true, type: 'date', width: '100px' },
+    { field: 'moduleName', header: 'columns.module', sortable: true },
+    { field: 'moduleType', header: 'common.type', sortable: true, width: '100px' },
+    { field: 'status', header: 'common.status', sortable: true, width: '110px' },
+    { field: 'quizScore', header: 'columns.score', sortable: true, width: '70px', align: 'center' },
+    { field: 'startedAt', header: 'columns.started', sortable: true, type: 'date', width: '100px' },
+    { field: 'completedAt', header: 'common.completed', sortable: true, type: 'date', width: '100px' },
   ];
 
   ngOnInit(): void {

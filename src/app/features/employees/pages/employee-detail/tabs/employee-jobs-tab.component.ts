@@ -26,12 +26,12 @@ export class EmployeeJobsTabComponent implements OnInit {
   protected readonly loading = signal(false);
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'jobNumber', header: 'Job #', sortable: true, width: '90px' },
-    { field: 'title', header: 'Title', sortable: true },
-    { field: 'trackTypeName', header: 'Track', sortable: true, width: '120px' },
-    { field: 'stageName', header: 'Stage', sortable: true, width: '140px' },
-    { field: 'priority', header: 'Priority', sortable: true, width: '90px' },
-    { field: 'dueDate', header: 'Due', sortable: true, type: 'date', width: '100px' },
+    { field: 'jobNumber', header: 'columns.jobNumber', sortable: true, width: '90px' },
+    { field: 'title', header: 'common.title', sortable: true },
+    { field: 'trackTypeName', header: 'columns.trackType', sortable: true, width: '120px' },
+    { field: 'stageName', header: 'columns.stage', sortable: true, width: '140px' },
+    { field: 'priority', header: 'common.priority', sortable: true, width: '90px' },
+    { field: 'dueDate', header: 'columns.due', sortable: true, type: 'date', width: '100px' },
   ];
 
   ngOnInit(): void {

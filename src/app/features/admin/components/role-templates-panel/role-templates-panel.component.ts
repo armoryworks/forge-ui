@@ -71,11 +71,11 @@ export class RoleTemplatesPanelComponent implements OnInit {
   });
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'description', header: 'Description', sortable: false },
-    { field: 'includedRoleNames', header: 'Included Roles', sortable: false },
-    { field: 'isSystemDefault', header: 'Source', sortable: true, width: '110px' },
-    { field: 'actions', header: 'Actions', width: '140px', align: 'right' },
+    { field: 'name', header: 'common.name', sortable: true },
+    { field: 'description', header: 'common.description', sortable: false },
+    { field: 'includedRoleNames', header: 'columns.includedRoles', sortable: false },
+    { field: 'isSystemDefault', header: 'columns.source', sortable: true, width: '110px' },
+    { field: 'actions', header: 'common.actions', width: '140px', align: 'right' },
   ];
 
   ngOnInit(): void {

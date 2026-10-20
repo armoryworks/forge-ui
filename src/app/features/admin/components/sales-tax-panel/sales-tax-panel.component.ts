@@ -41,11 +41,11 @@ export class SalesTaxPanelComponent implements OnInit {
   protected readonly editingRate = signal<SalesTaxRate | null>(null);
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'code', header: 'Code', sortable: true, width: '120px' },
-    { field: 'rateDisplay', header: 'Rate', sortable: true, width: '90px', align: 'right' },
-    { field: 'isDefault', header: 'Default', width: '80px', align: 'center' },
-    { field: 'isActive', header: 'Active', width: '80px', align: 'center' },
+    { field: 'name', header: 'common.name', sortable: true },
+    { field: 'code', header: 'salesTax.fieldCode', sortable: true, width: '120px' },
+    { field: 'rateDisplay', header: 'common.rate', sortable: true, width: '90px', align: 'right' },
+    { field: 'isDefault', header: 'common.default', width: '80px', align: 'center' },
+    { field: 'isActive', header: 'common.active', width: '80px', align: 'center' },
     { field: 'actions', header: '', width: '100px', align: 'right' },
   ];
 

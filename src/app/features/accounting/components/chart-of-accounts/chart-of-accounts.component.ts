@@ -65,13 +65,13 @@ export class ChartOfAccountsComponent implements OnInit {
   ]);
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'accountNumber', header: 'Number', sortable: true, width: '110px' },
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'accountType', header: 'Type', sortable: true, filterable: true, type: 'enum',
+    { field: 'accountNumber', header: 'columns.number', sortable: true, width: '110px' },
+    { field: 'name', header: 'common.name', sortable: true },
+    { field: 'accountType', header: 'common.type', sortable: true, filterable: true, type: 'enum',
       filterOptions: TYPES.map(t => ({ value: t, label: t })) },
-    { field: 'normalBalance', header: 'Normal', sortable: true, width: '90px' },
-    { field: 'isPostable', header: 'Postable', align: 'center', width: '90px' },
-    { field: 'isActive', header: 'Active', align: 'center', width: '80px' },
+    { field: 'normalBalance', header: 'columns.normalBalance', sortable: true, width: '90px' },
+    { field: 'isPostable', header: 'columns.postable', align: 'center', width: '90px' },
+    { field: 'isActive', header: 'common.active', align: 'center', width: '80px' },
     { field: 'actions', header: '', align: 'right', width: '90px' },
   ];
 

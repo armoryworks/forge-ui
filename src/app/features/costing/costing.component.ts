@@ -110,41 +110,41 @@ export class CostingComponent {
   ];
 
   protected readonly templateColumns: ColumnDef[] = [
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'description', header: 'Description' },
-    { field: 'lines', header: 'Lines', width: '70px', align: 'center' },
+    { field: 'name', header: 'common.name', sortable: true },
+    { field: 'description', header: 'common.description' },
+    { field: 'lines', header: 'costing.templates.lines', width: '70px', align: 'center' },
     { field: 'isSystem', header: '', width: '90px' },
     { field: 'actions', header: '', width: '160px' },
   ];
 
   protected readonly periodColumns: ColumnDef[] = [
-    { field: 'startDate', header: 'Start', sortable: true, type: 'date', width: '120px' },
-    { field: 'endDate', header: 'End', sortable: true, type: 'date', width: '120px' },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum' },
-    { field: 'frozenAt', header: 'Frozen', sortable: true, type: 'date', width: '120px' },
+    { field: 'startDate', header: 'costing.periods.start', sortable: true, type: 'date', width: '120px' },
+    { field: 'endDate', header: 'costing.periods.end', sortable: true, type: 'date', width: '120px' },
+    { field: 'status', header: 'common.status', sortable: true, filterable: true, type: 'enum' },
+    { field: 'frozenAt', header: 'costing.periods.frozen', sortable: true, type: 'date', width: '120px' },
     { field: 'actions', header: '', align: 'right' },
   ];
   protected readonly rateColumns: ColumnDef[] = [
-    { field: 'workCenterId', header: 'Work Center', sortable: true },
-    { field: 'laborRate', header: 'Labor', type: 'number', align: 'right' },
-    { field: 'laborOhRate', header: 'Labor OH', type: 'number', align: 'right' },
-    { field: 'machineRate', header: 'Machine', type: 'number', align: 'right' },
-    { field: 'machineOhVarRate', header: 'Mch OH Var', type: 'number', align: 'right' },
-    { field: 'machineOhFixedRate', header: 'Mch OH Fixed', type: 'number', align: 'right' },
+    { field: 'workCenterId', header: 'costing.rates.workCenter', sortable: true },
+    { field: 'laborRate', header: 'costing.rates.labor', type: 'number', align: 'right' },
+    { field: 'laborOhRate', header: 'costing.rates.laborOh', type: 'number', align: 'right' },
+    { field: 'machineRate', header: 'costing.rates.machine', type: 'number', align: 'right' },
+    { field: 'machineOhVarRate', header: 'costing.rates.mchVar', type: 'number', align: 'right' },
+    { field: 'machineOhFixedRate', header: 'costing.rates.mchFixed', type: 'number', align: 'right' },
   ];
   protected readonly costCenterColumns: ColumnDef[] = [
-    { field: 'code', header: 'Code', sortable: true },
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'type', header: 'Type', sortable: true, filterable: true, type: 'enum' },
-    { field: 'sqft', header: 'Sq Ft', type: 'number', align: 'right' },
-    { field: 'headcount', header: 'Headcount', type: 'number', align: 'right' },
-    { field: 'isInventoriable', header: 'Inventoriable', align: 'center' },
+    { field: 'code', header: 'costing.pools.code', sortable: true },
+    { field: 'name', header: 'common.name', sortable: true },
+    { field: 'type', header: 'common.type', sortable: true, filterable: true, type: 'enum' },
+    { field: 'sqft', header: 'costing.costCenters.sqft', type: 'number', align: 'right' },
+    { field: 'headcount', header: 'costing.costCenters.headcount', type: 'number', align: 'right' },
+    { field: 'isInventoriable', header: 'costing.costCenters.inventoriable', align: 'center' },
   ];
   protected readonly poolColumns: ColumnDef[] = [
-    { field: 'code', header: 'Code', sortable: true },
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'behavior', header: 'Behavior', sortable: true, filterable: true, type: 'enum' },
-    { field: 'driver', header: 'Driver', sortable: true, filterable: true, type: 'enum' },
+    { field: 'code', header: 'costing.pools.code', sortable: true },
+    { field: 'name', header: 'common.name', sortable: true },
+    { field: 'behavior', header: 'costing.pools.behavior', sortable: true, filterable: true, type: 'enum' },
+    { field: 'driver', header: 'costing.pools.driver', sortable: true, filterable: true, type: 'enum' },
   ];
 
   protected readonly costCenterOptions = computed<SelectOption[]>(() =>

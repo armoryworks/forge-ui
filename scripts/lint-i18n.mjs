@@ -213,6 +213,7 @@ const PATTERNS = [
   // These are config properties that flow into translate calls elsewhere.
   { name: 'config-single', re: /\b(?:i18nKey|labelKey|tooltipKey|placeholderKey|messageKey|titleKey|viewAllLabelKey|descKey|descriptionKey|contextKey|hintKey|emptyMessageKey|emptyHelpKey|addLabelKey|missingMessageKey|displayNameKey|sourceLabelKey)\s*:\s*'([a-zA-Z][\w]*(?:\.[\w]+)+)'/g },
   { name: 'config-double', re: /\b(?:i18nKey|labelKey|tooltipKey|placeholderKey|messageKey|titleKey|viewAllLabelKey|descKey|descriptionKey|contextKey|hintKey|emptyMessageKey|emptyHelpKey|addLabelKey|missingMessageKey|displayNameKey|sourceLabelKey)\s*:\s*"([a-zA-Z][\w]*(?:\.[\w]+)+)"/g },
+  { name: 'column-header', re: /\bheader\s*:\s*'([a-zA-Z][\w]*(?:\.[\w]+)+)'/g },
 ];
 
 const PAREN_PIPE = /\(((?:[^()]|\((?:[^()]|\([^()]*\))*\))*)\)\s*\|\s*translate(?!\w)/g;

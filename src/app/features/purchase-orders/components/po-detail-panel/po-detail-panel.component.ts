@@ -146,10 +146,10 @@ export class PoDetailPanelComponent implements OnInit {
 
   protected readonly releaseColumns: ColumnDef[] = [
     { field: 'releaseNumber', header: '#', sortable: true, width: '60px' },
-    { field: 'partNumber', header: 'Part', sortable: true, width: '120px' },
-    { field: 'quantity', header: 'Qty', sortable: true, type: 'number', width: '80px', align: 'right' },
-    { field: 'requestedDeliveryDate', header: 'Req. Delivery', sortable: true, type: 'date', width: '120px' },
-    { field: 'status', header: 'Status', sortable: true, width: '110px' },
+    { field: 'partNumber', header: 'common.part', sortable: true, width: '120px' },
+    { field: 'quantity', header: 'purchaseOrders.qty', sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'requestedDeliveryDate', header: 'columns.requestedDelivery', sortable: true, type: 'date', width: '120px' },
+    { field: 'status', header: 'common.status', sortable: true, width: '110px' },
   ];
 
   ngOnInit(): void {

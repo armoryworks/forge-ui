@@ -57,12 +57,12 @@ export class CarriersComponent {
   protected readonly testingId = signal<number | null>(null);
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'name', header: 'Carrier', sortable: true },
-    { field: 'code', header: 'Code', sortable: true, width: '110px' },
-    { field: 'integrationKind', header: 'Integration', sortable: true, width: '120px' },
-    { field: 'requiresScanToShip', header: 'Scan', width: '80px', align: 'center' },
-    { field: 'credentialsConfigured', header: 'Credentials', width: '130px', align: 'center' },
-    { field: 'isActive', header: 'Active', width: '80px', align: 'center' },
+    { field: 'name', header: 'columns.carrier', sortable: true },
+    { field: 'code', header: 'admin.carriers.fieldCode', sortable: true, width: '110px' },
+    { field: 'integrationKind', header: 'admin.carriers.fieldKind', sortable: true, width: '120px' },
+    { field: 'requiresScanToShip', header: 'columns.scan', width: '80px', align: 'center' },
+    { field: 'credentialsConfigured', header: 'columns.credentials', width: '130px', align: 'center' },
+    { field: 'isActive', header: 'common.active', width: '80px', align: 'center' },
     { field: 'actions', header: '', width: '160px', align: 'right' },
   ];
 

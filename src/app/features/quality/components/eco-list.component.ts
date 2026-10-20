@@ -86,22 +86,22 @@ export class EcoListComponent implements OnInit {
   ];
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'ecoNumber', header: 'ECO #', sortable: true, width: '160px' },
-    { field: 'title', header: 'Title', sortable: true },
-    { field: 'changeType', header: 'Type', sortable: true, filterable: true, type: 'enum', filterOptions: this.changeTypeOptions, width: '130px' },
-    { field: 'priority', header: 'Priority', sortable: true, filterable: true, type: 'enum', filterOptions: this.priorityOptions, width: '90px' },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', filterOptions: this.statusOptions.slice(1), width: '130px' },
-    { field: 'requestedByName', header: 'Requested By', sortable: true, width: '140px' },
-    { field: 'affectedItemCount', header: 'Items', sortable: true, type: 'number', width: '60px', align: 'center' },
-    { field: 'createdAt', header: 'Created', sortable: true, type: 'date', width: '100px' },
+    { field: 'ecoNumber', header: 'columns.ecoNumber', sortable: true, width: '160px' },
+    { field: 'title', header: 'common.title', sortable: true },
+    { field: 'changeType', header: 'common.type', sortable: true, filterable: true, type: 'enum', filterOptions: this.changeTypeOptions, width: '130px' },
+    { field: 'priority', header: 'common.priority', sortable: true, filterable: true, type: 'enum', filterOptions: this.priorityOptions, width: '90px' },
+    { field: 'status', header: 'common.status', sortable: true, filterable: true, type: 'enum', filterOptions: this.statusOptions.slice(1), width: '130px' },
+    { field: 'requestedByName', header: 'columns.requestedBy', sortable: true, width: '140px' },
+    { field: 'affectedItemCount', header: 'columns.items', sortable: true, type: 'number', width: '60px', align: 'center' },
+    { field: 'createdAt', header: 'common.created', sortable: true, type: 'date', width: '100px' },
     { field: 'actions', header: '', width: '50px' },
   ];
 
   protected readonly affectedItemColumns: ColumnDef[] = [
-    { field: 'entityType', header: 'Type', sortable: true, width: '100px' },
-    { field: 'entityId', header: 'Entity ID', sortable: true, width: '80px', align: 'center' },
-    { field: 'changeDescription', header: 'Change Description', sortable: true },
-    { field: 'isImplemented', header: 'Implemented', width: '100px', align: 'center' },
+    { field: 'entityType', header: 'common.type', sortable: true, width: '100px' },
+    { field: 'entityId', header: 'columns.entityId', sortable: true, width: '80px', align: 'center' },
+    { field: 'changeDescription', header: 'columns.changeDescription', sortable: true },
+    { field: 'isImplemented', header: 'columns.implemented', width: '100px', align: 'center' },
     { field: 'actions', header: '', width: '50px' },
   ];
 

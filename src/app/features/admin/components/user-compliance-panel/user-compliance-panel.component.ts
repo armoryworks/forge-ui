@@ -74,12 +74,12 @@ export class UserCompliancePanelComponent {
   ];
 
   protected readonly payStubColumns: ColumnDef[] = [
-    { field: 'payDate', header: 'Pay Date', sortable: true, type: 'date', width: '100px' },
-    { field: 'period', header: 'Period', sortable: false, width: '160px' },
-    { field: 'grossPay', header: 'Gross', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'netPay', header: 'Net', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'source', header: 'Source', sortable: true, width: '90px' },
-    { field: 'actions', header: 'Actions', sortable: false, width: '80px' },
+    { field: 'payDate', header: 'userCompliance.payDate', sortable: true, type: 'date', width: '100px' },
+    { field: 'period', header: 'userCompliance.period', sortable: false, width: '160px' },
+    { field: 'grossPay', header: 'userCompliance.gross', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'netPay', header: 'userCompliance.net', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'source', header: 'userCompliance.source', sortable: true, width: '90px' },
+    { field: 'actions', header: 'common.actions', sortable: false, width: '80px' },
   ];
 
   constructor() {

@@ -81,14 +81,14 @@ export class CapaListComponent implements OnInit {
   ];
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'capaNumber', header: 'CAPA #', sortable: true, width: '140px' },
-    { field: 'type', header: 'Type', sortable: true, width: '100px' },
-    { field: 'title', header: 'Title', sortable: true },
-    { field: 'ownerName', header: 'Owner', sortable: true, width: '150px' },
-    { field: 'priority', header: 'Priority', sortable: true, width: '80px', align: 'center' },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', filterOptions: this.statusOptions.slice(1), width: '150px' },
-    { field: 'dueDate', header: 'Due', sortable: true, type: 'date', width: '100px' },
-    { field: 'tasks', header: 'Tasks', width: '80px', align: 'center' },
+    { field: 'capaNumber', header: 'columns.capaNumber', sortable: true, width: '140px' },
+    { field: 'type', header: 'common.type', sortable: true, width: '100px' },
+    { field: 'title', header: 'common.title', sortable: true },
+    { field: 'ownerName', header: 'columns.owner', sortable: true, width: '150px' },
+    { field: 'priority', header: 'common.priority', sortable: true, width: '80px', align: 'center' },
+    { field: 'status', header: 'common.status', sortable: true, filterable: true, type: 'enum', filterOptions: this.statusOptions.slice(1), width: '150px' },
+    { field: 'dueDate', header: 'columns.due', sortable: true, type: 'date', width: '100px' },
+    { field: 'tasks', header: 'columns.tasks', width: '80px', align: 'center' },
     { field: 'actions', header: '', width: '60px' },
   ];
 

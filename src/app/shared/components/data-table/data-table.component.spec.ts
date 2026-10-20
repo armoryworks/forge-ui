@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { TestBed, ComponentFixtureAutoDetect } from '@angular/core/testing';
+import { ComponentFixture, TestBed, ComponentFixtureAutoDetect } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 
 import { DataTableComponent } from './data-table.component';
 import { ColumnDef } from '../../models/column-def.model';
@@ -14,6 +15,7 @@ describe('DataTableComponent · formatCellValue', () => {
     TestBed.configureTestingModule({
       providers: [
         provideNoopAnimations(),
+        provideTranslateService(),
         { provide: ComponentFixtureAutoDetect, useValue: false },
         { provide: UserPreferencesService, useValue: { get: () => null, set: () => undefined } },
       ],
@@ -56,5 +58,48 @@ describe('DataTableComponent · formatCellValue', () => {
 
   it('leaves empty date cells empty', () => {
     expect(table.formatCellValue({ date: null }, dateCol)).toBeNull();
+  });
+});
+
+describe('DataTableComponent · column headers', () => {
+  const columns: ColumnDef[] = [
+    { field: 'name', header: 'common.name' },
+    { field: 'code', header: 'Code' },
+  ];
+  let translate: TranslateService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideNoopAnimations(),
+        provideTranslateService(),
+        { provide: UserPreferencesService, useValue: { get: () => null, set: () => undefined } },
+      ],
+    });
+    translate = TestBed.inject(TranslateService);
+    translate.setTranslation('en', { common: { name: 'Name' } });
+    translate.setTranslation('es', { common: { name: 'Nombre' } });
+    translate.use('en');
+  });
+
+  function headerTexts(fixture: ComponentFixture<DataTableComponent>): string[] {
+    return Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('.data-table__th-content'),
+      el => el.textContent?.trim() ?? '',
+    );
+  }
+
+  it('shows a header key in the current language and follows a live language switch', () => {
+    const fixture = TestBed.createComponent(DataTableComponent);
+    fixture.componentRef.setInput('tableId', 'header-spec');
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', [{ id: 1, name: 'Bracket', code: 'BR-1' }]);
+    fixture.detectChanges();
+    expect(headerTexts(fixture)).toEqual(['Name', 'Code']);
+
+    translate.use('es');
+    fixture.detectChanges();
+
+    expect(headerTexts(fixture)).toEqual(['Nombre', 'Code']);
   });
 });

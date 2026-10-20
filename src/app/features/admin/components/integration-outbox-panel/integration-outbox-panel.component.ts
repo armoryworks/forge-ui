@@ -72,14 +72,14 @@ export class IntegrationOutboxPanelComponent {
   });
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'id', header: 'ID', sortable: true, width: '70px', align: 'right' },
-    { field: 'provider', header: 'Provider', sortable: true, width: '110px' },
-    { field: 'operationKey', header: 'Operation Key', sortable: true },
-    { field: 'status', header: 'Status', sortable: true, width: '110px' },
-    { field: 'attemptCount', header: 'Attempts', sortable: true, width: '90px', align: 'right' },
-    { field: 'nextAttemptAt', header: 'Next Attempt', sortable: true, type: 'date', width: '150px' },
-    { field: 'sentAt', header: 'Sent At', sortable: true, type: 'date', width: '150px' },
-    { field: 'lastError', header: 'Last Error', sortable: false },
+    { field: 'id', header: 'columns.id', sortable: true, width: '70px', align: 'right' },
+    { field: 'provider', header: 'columns.provider', sortable: true, width: '110px' },
+    { field: 'operationKey', header: 'columns.operationKey', sortable: true },
+    { field: 'status', header: 'common.status', sortable: true, width: '110px' },
+    { field: 'attemptCount', header: 'columns.attempts', sortable: true, width: '90px', align: 'right' },
+    { field: 'nextAttemptAt', header: 'columns.nextAttempt', sortable: true, type: 'date', width: '150px' },
+    { field: 'sentAt', header: 'columns.sentAt', sortable: true, type: 'date', width: '150px' },
+    { field: 'lastError', header: 'columns.lastError', sortable: false },
     { field: 'actions', header: '', width: '100px', sortable: false },
   ];
 

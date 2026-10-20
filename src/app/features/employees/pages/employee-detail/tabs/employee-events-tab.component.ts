@@ -24,13 +24,13 @@ export class EmployeeEventsTabComponent implements OnInit {
   protected readonly loading = signal(false);
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'title', header: 'Title', sortable: true },
-    { field: 'eventType', header: 'Type', sortable: true, width: '120px' },
-    { field: 'startTime', header: 'Start', sortable: true, type: 'date', width: '160px' },
-    { field: 'endTime', header: 'End', sortable: true, type: 'date', width: '160px' },
-    { field: 'location', header: 'Location', sortable: true, width: '140px' },
-    { field: 'isRequired', header: 'Required', sortable: true, width: '90px' },
-    { field: 'status', header: 'RSVP', sortable: true, width: '100px' },
+    { field: 'title', header: 'common.title', sortable: true },
+    { field: 'eventType', header: 'common.type', sortable: true, width: '120px' },
+    { field: 'startTime', header: 'columns.start', sortable: true, type: 'date', width: '160px' },
+    { field: 'endTime', header: 'columns.end', sortable: true, type: 'date', width: '160px' },
+    { field: 'location', header: 'columns.location', sortable: true, width: '140px' },
+    { field: 'isRequired', header: 'common.required', sortable: true, width: '90px' },
+    { field: 'status', header: 'columns.rsvp', sortable: true, width: '100px' },
   ];
 
   ngOnInit(): void {

@@ -119,14 +119,14 @@ export class UpcomingExpensesComponent {
   ];
 
   protected readonly upcomingColumns: ColumnDef[] = [
-    { field: 'dueDate', header: 'Due Date', sortable: true, type: 'date', width: '110px' },
-    { field: 'classification', header: 'Classification', sortable: true, filterable: true, type: 'enum', width: '140px',
+    { field: 'dueDate', header: 'common.dueDate', sortable: true, type: 'date', width: '110px' },
+    { field: 'classification', header: 'expenses.classification', sortable: true, filterable: true, type: 'enum', width: '140px',
       filterOptions: this.classificationOptions },
-    { field: 'category', header: 'Category', sortable: true, width: '120px' },
-    { field: 'description', header: 'Description', sortable: true },
-    { field: 'vendor', header: 'Vendor', sortable: true, width: '140px' },
-    { field: 'amount', header: 'Amount', sortable: true, align: 'right', width: '100px' },
-    { field: 'frequency', header: 'Frequency', sortable: true, width: '100px' },
+    { field: 'category', header: 'common.category', sortable: true, width: '120px' },
+    { field: 'description', header: 'common.description', sortable: true },
+    { field: 'vendor', header: 'expenses.vendor', sortable: true, width: '140px' },
+    { field: 'amount', header: 'common.amount', sortable: true, align: 'right', width: '100px' },
+    { field: 'frequency', header: 'expenses.frequency', sortable: true, width: '100px' },
   ];
 
   // Recurring tab
@@ -134,14 +134,14 @@ export class UpcomingExpensesComponent {
   protected readonly showDialog = signal(false);
 
   protected readonly recurringColumns: ColumnDef[] = [
-    { field: 'classification', header: 'Classification', sortable: true, width: '140px' },
-    { field: 'category', header: 'Category', sortable: true, width: '120px' },
-    { field: 'description', header: 'Description', sortable: true },
-    { field: 'vendor', header: 'Vendor', sortable: true, width: '140px' },
-    { field: 'amount', header: 'Amount', sortable: true, align: 'right', width: '100px' },
-    { field: 'frequency', header: 'Frequency', sortable: true, width: '100px' },
-    { field: 'nextOccurrenceDate', header: 'Next Due', sortable: true, type: 'date', width: '110px' },
-    { field: 'isActive', header: 'Active', sortable: true, width: '80px', align: 'center' },
+    { field: 'classification', header: 'expenses.classification', sortable: true, width: '140px' },
+    { field: 'category', header: 'common.category', sortable: true, width: '120px' },
+    { field: 'description', header: 'common.description', sortable: true },
+    { field: 'vendor', header: 'expenses.vendor', sortable: true, width: '140px' },
+    { field: 'amount', header: 'common.amount', sortable: true, align: 'right', width: '100px' },
+    { field: 'frequency', header: 'expenses.frequency', sortable: true, width: '100px' },
+    { field: 'nextOccurrenceDate', header: 'expenses.colNextDue', sortable: true, type: 'date', width: '110px' },
+    { field: 'isActive', header: 'common.active', sortable: true, width: '80px', align: 'center' },
     { field: 'actions', header: '', width: '60px', align: 'right' },
   ];
 

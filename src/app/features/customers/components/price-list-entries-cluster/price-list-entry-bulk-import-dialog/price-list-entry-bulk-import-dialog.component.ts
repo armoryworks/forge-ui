@@ -86,14 +86,14 @@ export class PriceListEntryBulkImportDialogComponent {
 
   protected readonly columns: ColumnDef[] = [
     { field: 'lineNumber', header: '#', width: '50px', align: 'right' },
-    { field: 'partNumber', header: 'Part #', width: '120px' },
-    { field: 'partName', header: 'Description' },
-    { field: 'unitPrice', header: 'Unit Price', width: '110px', align: 'right' },
-    { field: 'minQuantity', header: 'Min Qty', width: '80px', align: 'right' },
-    { field: 'currency', header: 'Currency', width: '80px' },
-    { field: 'notes', header: 'Notes' },
-    { field: 'action', header: 'Action', width: '100px' },
-    { field: 'errorMessage', header: 'Error' },
+    { field: 'partNumber', header: 'columns.partNumber', width: '120px' },
+    { field: 'partName', header: 'common.description' },
+    { field: 'unitPrice', header: 'columns.unitPrice', width: '110px', align: 'right' },
+    { field: 'minQuantity', header: 'columns.minQty', width: '80px', align: 'right' },
+    { field: 'currency', header: 'columns.currency', width: '80px' },
+    { field: 'notes', header: 'common.notes' },
+    { field: 'action', header: 'columns.action', width: '100px' },
+    { field: 'errorMessage', header: 'common.error' },
   ];
 
   protected readonly rows = computed<BulkImportRowPreview[]>(

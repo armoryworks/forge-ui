@@ -35,12 +35,12 @@ export class MfaPolicyPanelComponent implements OnInit {
   protected readonly enforcedRolesControl = new FormControl<string[]>([], { nonNullable: true });
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'fullName', header: 'Name', sortable: true },
-    { field: 'email', header: 'Email', sortable: true },
-    { field: 'role', header: 'Role', sortable: true, filterable: true, type: 'text' },
-    { field: 'mfaEnabled', header: 'MFA Enabled', sortable: true, width: '100px' },
-    { field: 'mfaDeviceType', header: 'Device Type', sortable: true, width: '120px' },
-    { field: 'isEnforcedByPolicy', header: 'Enforced', sortable: true, width: '100px' },
+    { field: 'fullName', header: 'common.name', sortable: true },
+    { field: 'email', header: 'common.email', sortable: true },
+    { field: 'role', header: 'columns.role', sortable: true, filterable: true, type: 'text' },
+    { field: 'mfaEnabled', header: 'columns.mfaEnabled', sortable: true, width: '100px' },
+    { field: 'mfaDeviceType', header: 'columns.deviceType', sortable: true, width: '120px' },
+    { field: 'isEnforcedByPolicy', header: 'adminPanels.mfa.enforced', sortable: true, width: '100px' },
   ];
 
   ngOnInit(): void {

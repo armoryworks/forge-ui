@@ -70,25 +70,25 @@ export class AnnouncementsPanelComponent implements OnInit {
   ];
 
   protected readonly announcementColumns: ColumnDef[] = [
-    { field: 'title', header: 'Title', sortable: true },
-    { field: 'severity', header: 'Severity', sortable: true, filterable: true, type: 'enum', width: '100px',
+    { field: 'title', header: 'common.title', sortable: true },
+    { field: 'severity', header: 'columns.severity', sortable: true, filterable: true, type: 'enum', width: '100px',
       filterOptions: [
         { value: 'Critical', label: 'Critical' },
         { value: 'Warning', label: 'Warning' },
         { value: 'Info', label: 'Info' },
       ] },
-    { field: 'scope', header: 'Scope', sortable: true, width: '140px' },
-    { field: 'createdByName', header: 'Sent By', sortable: true, width: '140px' },
-    { field: 'createdAt', header: 'Sent', sortable: true, type: 'date', width: '140px' },
-    { field: 'acknowledgmentCount', header: 'Acks', sortable: true, type: 'number', width: '80px' },
+    { field: 'scope', header: 'columns.scope', sortable: true, width: '140px' },
+    { field: 'createdByName', header: 'columns.sentBy', sortable: true, width: '140px' },
+    { field: 'createdAt', header: 'columns.sent', sortable: true, type: 'date', width: '140px' },
+    { field: 'acknowledgmentCount', header: 'columns.acknowledgements', sortable: true, type: 'number', width: '80px' },
     { field: 'actions', header: '', width: '60px' },
   ];
 
   protected readonly templateColumns: ColumnDef[] = [
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'defaultSeverity', header: 'Severity', sortable: true, width: '100px' },
-    { field: 'defaultScope', header: 'Scope', sortable: true, width: '140px' },
-    { field: 'defaultRequiresAcknowledgment', header: 'Ack Required', width: '110px' },
+    { field: 'name', header: 'common.name', sortable: true },
+    { field: 'defaultSeverity', header: 'columns.severity', sortable: true, width: '100px' },
+    { field: 'defaultScope', header: 'columns.scope', sortable: true, width: '140px' },
+    { field: 'defaultRequiresAcknowledgment', header: 'columns.acknowledgementRequired', width: '110px' },
     { field: 'actions', header: '', width: '60px' },
   ];
 

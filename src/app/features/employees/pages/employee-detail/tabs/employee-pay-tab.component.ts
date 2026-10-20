@@ -24,13 +24,13 @@ export class EmployeePayTabComponent implements OnInit {
   protected readonly loading = signal(false);
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'payDate', header: 'Pay Date', sortable: true, type: 'date', width: '100px' },
-    { field: 'payPeriodStart', header: 'Period Start', sortable: true, type: 'date', width: '100px' },
-    { field: 'payPeriodEnd', header: 'Period End', sortable: true, type: 'date', width: '100px' },
-    { field: 'grossPay', header: 'Gross', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'totalDeductions', header: 'Deductions', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'totalTaxes', header: 'Taxes', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'netPay', header: 'Net Pay', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'payDate', header: 'columns.payDate', sortable: true, type: 'date', width: '100px' },
+    { field: 'payPeriodStart', header: 'columns.periodStart', sortable: true, type: 'date', width: '100px' },
+    { field: 'payPeriodEnd', header: 'columns.periodEnd', sortable: true, type: 'date', width: '100px' },
+    { field: 'grossPay', header: 'columns.gross', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'totalDeductions', header: 'columns.deductions', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'totalTaxes', header: 'columns.taxes', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'netPay', header: 'columns.netPay', sortable: true, type: 'number', width: '100px', align: 'right' },
   ];
 
   ngOnInit(): void {

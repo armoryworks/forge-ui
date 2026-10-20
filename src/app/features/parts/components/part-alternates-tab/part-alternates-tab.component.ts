@@ -64,12 +64,12 @@ export class PartAlternatesTabComponent {
   ];
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'alternatePartNumber', header: 'Part #', sortable: true, width: '120px' },
-    { field: 'alternatePartName', header: 'Name', sortable: true },
-    { field: 'type', header: 'Type', sortable: true, width: '110px' },
-    { field: 'priority', header: 'Priority', sortable: true, width: '80px', align: 'center' },
-    { field: 'isApproved', header: 'Approved', sortable: true, width: '90px', align: 'center' },
-    { field: 'isBidirectional', header: 'Bi-Dir', sortable: true, width: '70px', align: 'center' },
+    { field: 'alternatePartNumber', header: 'parts.partNumber', sortable: true, width: '120px' },
+    { field: 'alternatePartName', header: 'common.name', sortable: true },
+    { field: 'type', header: 'common.type', sortable: true, width: '110px' },
+    { field: 'priority', header: 'common.priority', sortable: true, width: '80px', align: 'center' },
+    { field: 'isApproved', header: 'columns.approved', sortable: true, width: '90px', align: 'center' },
+    { field: 'isBidirectional', header: 'columns.bidirectional', sortable: true, width: '70px', align: 'center' },
     { field: 'actions', header: '', width: '80px' },
   ];
 

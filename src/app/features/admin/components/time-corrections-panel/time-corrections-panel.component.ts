@@ -86,24 +86,24 @@ export class TimeCorrectionsPanelComponent implements OnInit {
   protected readonly entryColumns: ColumnDef[] = [
     { field: 'userName', header: this.translate.instant('adminPanels.timeCorrections.cols.employee'), sortable: true },
     { field: 'date', header: this.translate.instant('adminPanels.timeCorrections.cols.date'), sortable: true, type: 'date', width: '110px' },
-    { field: 'jobNumber', header: 'Job #', sortable: true, width: '120px' },
-    { field: 'timerStart', header: 'Start', sortable: true, width: '100px' },
-    { field: 'timerStop', header: 'End', sortable: true, width: '100px' },
-    { field: 'durationMinutes', header: 'Duration', sortable: true, type: 'number', width: '100px' },
-    { field: 'category', header: 'Category', sortable: true, width: '120px' },
-    { field: 'notes', header: 'Notes', sortable: true },
+    { field: 'jobNumber', header: 'adminPanels.timeCorrections.cols.jobNumber', sortable: true, width: '120px' },
+    { field: 'timerStart', header: 'adminPanels.timeCorrections.cols.start', sortable: true, width: '100px' },
+    { field: 'timerStop', header: 'adminPanels.timeCorrections.cols.end', sortable: true, width: '100px' },
+    { field: 'durationMinutes', header: 'adminPanels.timeCorrections.cols.duration', sortable: true, type: 'number', width: '100px' },
+    { field: 'category', header: 'common.category', sortable: true, width: '120px' },
+    { field: 'notes', header: 'common.notes', sortable: true },
     { field: 'actions', header: '', width: '60px' },
   ];
 
   protected readonly correctionColumns: ColumnDef[] = [
     { field: 'correctedByName', header: this.translate.instant('adminPanels.timeCorrections.cols.correctedBy'), sortable: true },
     { field: 'createdAt', header: this.translate.instant('adminPanels.timeCorrections.cols.correctedAt'), sortable: true, type: 'date', width: '140px' },
-    { field: 'timeEntryId', header: 'Entry ID', sortable: true, width: '90px' },
-    { field: 'originalJobNumber', header: 'Orig. Job #', sortable: true, width: '110px' },
+    { field: 'timeEntryId', header: 'adminPanels.timeCorrections.cols.entryId', sortable: true, width: '90px' },
+    { field: 'originalJobNumber', header: 'adminPanels.timeCorrections.cols.origJob', sortable: true, width: '110px' },
     { field: 'originalDate', header: this.translate.instant('adminPanels.timeCorrections.cols.date'), sortable: true, type: 'date', width: '110px' },
     { field: 'originalStartTime', header: this.translate.instant('adminPanels.timeCorrections.cols.originalValue'), sortable: true, width: '100px' },
     { field: 'originalEndTime', header: this.translate.instant('adminPanels.timeCorrections.cols.newValue'), sortable: true, width: '100px' },
-    { field: 'originalDurationMinutes', header: 'Orig. Duration', sortable: true, type: 'number', width: '110px' },
+    { field: 'originalDurationMinutes', header: 'adminPanels.timeCorrections.cols.origDuration', sortable: true, type: 'number', width: '110px' },
     { field: 'reason', header: this.translate.instant('adminPanels.timeCorrections.cols.reason'), sortable: true },
   ];
 
