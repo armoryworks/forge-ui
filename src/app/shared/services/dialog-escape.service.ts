@@ -17,7 +17,8 @@ export interface DialogEscapeTarget {
 
 /**
  * Escape closes the topmost MatDialog, since the app-wide `disableClose` default
- * turns off the CDK's own Escape handling.
+ * turns off the CDK's own Escape handling. A dialog opened with `disableClose: false`
+ * keeps the CDK's handling and is left alone.
  *
  * The overlay keyboard dispatcher routes the key to the topmost overlay, so an
  * open select, datepicker or tooltip takes it first. When the dialog hosts
@@ -69,7 +70,7 @@ export class DialogEscapeService {
   private watch(ref: MatDialogRef<unknown, unknown>): void {
     ref.keydownEvents()
       .pipe(
-        filter(event => event.key === 'Escape' && !event.defaultPrevented && !hasModifierKey(event)),
+        filter(event => event.key === 'Escape' && ref.disableClose === true && !event.defaultPrevented && !hasModifierKey(event)),
         takeUntil(ref.afterClosed()),
       )
       .subscribe(() => this.onEscape(ref));

@@ -10,6 +10,7 @@ interface FakeRef {
   closed$: Subject<void>;
   close: ReturnType<typeof vi.fn>;
   componentInstance: unknown;
+  disableClose: boolean | undefined;
   keydownEvents(): Subject<KeyboardEvent>;
   afterClosed(): Subject<void>;
 }
@@ -19,6 +20,7 @@ function fakeRef(componentInstance: unknown = {}): FakeRef {
   const closed$ = new Subject<void>();
   return {
     keydown$, closed$, componentInstance,
+    disableClose: true,
     close: vi.fn(),
     keydownEvents: () => keydown$,
     afterClosed: () => closed$,
@@ -112,6 +114,20 @@ describe('DialogEscapeService', () => {
     ref.keydown$.next(escape());
 
     expect(ref.close).toHaveBeenCalledWith();
+  });
+
+  it('leaves a dialog opened with disableClose false to the CDK', () => {
+    const cancel = vi.fn();
+    const ref = opened(fakeRef({ cancel }));
+    ref.disableClose = false;
+    const tryClose = vi.fn();
+    service.register({ hostRef: asRef(ref), tryClose });
+
+    ref.keydown$.next(escape());
+
+    expect(cancel).not.toHaveBeenCalled();
+    expect(tryClose).not.toHaveBeenCalled();
+    expect(ref.close).not.toHaveBeenCalled();
   });
 
   it('leaves a detail dialog without an app-dialog to the detail dialog service', () => {

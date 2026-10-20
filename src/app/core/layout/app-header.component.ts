@@ -221,7 +221,7 @@ export class AppHeaderComponent implements OnInit {
       event.preventDefault();
       const input = document.querySelector<HTMLInputElement>('.search-input');
       input?.focus();
-    } else if (event.key === 'Escape' && !hasModifierKey(event)) {
+    } else if (event.key === 'Escape' && !event.defaultPrevented && !hasModifierKey(event)) {
       this.closeTopPanelOnEscape();
     }
   }

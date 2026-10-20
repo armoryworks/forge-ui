@@ -164,6 +164,16 @@ describe('AppHeaderComponent Escape', () => {
     expect(mobileMenuOpen()).toBe(false);
   });
 
+  it('leaves the menu open when another control already handled the Escape', () => {
+    header.userMenuOpen.set(true);
+    const event = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
+    event.preventDefault();
+
+    header.onKeydown(event);
+
+    expect(header.userMenuOpen()).toBe(true);
+  });
+
   it('leaves the menu open while a MatDialog owns Escape', () => {
     openDialogs.push({});
     header.userMenuOpen.set(true);
