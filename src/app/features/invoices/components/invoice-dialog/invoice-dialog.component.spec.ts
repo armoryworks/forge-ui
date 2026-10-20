@@ -28,8 +28,6 @@ interface DialogInternals {
     dueDate: FormControl<Date | null>;
     creditTerms: FormControl<string | null>;
     taxRate: FormControl<number | null>;
-    invoiceDate: FormControl<Date | null>;
-    dueDate: FormControl<Date | null>;
   }>;
   violations(): string[];
   lineForm: FormGroup<{

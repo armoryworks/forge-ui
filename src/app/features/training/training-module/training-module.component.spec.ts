@@ -2,6 +2,7 @@ import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
+import { provideTranslateService } from '@ngx-translate/core';
 import { Observable, throwError } from 'rxjs';
 
 import { TrainingService } from '../services/training.service';
@@ -13,6 +14,7 @@ describe('TrainingModuleComponent loading', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideTranslateService(),
         {
           provide: ActivatedRoute,
           useValue: { snapshot: { paramMap: convertToParamMap({ id }), queryParamMap: convertToParamMap({}) } },

@@ -254,7 +254,7 @@ export class CustomerDetailComponent {
 
   protected refreshSummary(): void {
     const id = this.customerId();
-    if (id <= 0) return;
+    if (!id) return;
     this.customerService.getCustomerSummary(id).subscribe({
       next: c => this.customer.set(c),
     });

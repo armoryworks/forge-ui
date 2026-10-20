@@ -521,6 +521,7 @@ describe('DataTableComponent · phone column priority', () => {
     TestBed.configureTestingModule({
       providers: [
         provideNoopAnimations(),
+        provideTranslateService(),
         { provide: ComponentFixtureAutoDetect, useValue: false },
         { provide: UserPreferencesService, useValue: { get: () => saved, set: () => undefined } },
         { provide: BreakpointObserver, useValue: { observe: () => phone.asObservable() } },

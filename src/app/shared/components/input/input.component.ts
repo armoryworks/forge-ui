@@ -104,7 +104,7 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
   protected readonly charCounter = computed(() => {
     const max = this.maxlength();
     if (!max || this.type() !== 'text' || this.mask()) return null;
-    const length = String(this.value() ?? '').length;
+    const length = this.textLength();
     return length >= Math.floor(max * 0.8) ? `${length} / ${max}` : null;
   });
 
@@ -116,6 +116,7 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
   private readonly field = viewChild<ElementRef<HTMLInputElement>>('field');
 
   private text = '';
+  private readonly textLength = signal(0);
   private edited = false;
   private invalidNumber = false;
 
@@ -239,6 +240,7 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
       this.text = typingMask(this.text);
       el.value = this.text;
     }
+    this.textLength.set(this.text.length);
     this.onChange(this.text);
   }
 
@@ -258,6 +260,7 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
 
   private setText(text: string): void {
     this.text = text;
+    this.textLength.set(text.length);
     const el = this.field()?.nativeElement;
     if (el && el.value !== text) el.value = text;
   }

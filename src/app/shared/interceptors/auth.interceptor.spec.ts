@@ -98,6 +98,6 @@ describe('authInterceptor', () => {
     expect(failure!.status).toBe(401);
     expect(refreshAccessToken).not.toHaveBeenCalled();
     expect(clearAuth).not.toHaveBeenCalled();
-    expect(navigate).not.toHaveBeenCalled();
+    expect(redirectToLogin).not.toHaveBeenCalled();
   });
 });

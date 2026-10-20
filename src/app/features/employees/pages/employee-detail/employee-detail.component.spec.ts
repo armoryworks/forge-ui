@@ -5,6 +5,7 @@ import { Observable, of, throwError } from 'rxjs';
 
 import { provideTranslateService, TranslateService } from '@ngx-translate/core';
 
+import { NavTreeService } from '../../../../shared/services/nav-tree.service';
 import { EmployeeService } from '../../services/employee.service';
 import { EmployeeDetail } from '../../models/employee.model';
 import { EmployeeDetailComponent } from './employee-detail.component';
@@ -16,6 +17,7 @@ describe('EmployeeDetailComponent', () => {
       providers: [
         provideTranslateService(),
         { provide: Router, useValue: {} },
+        { provide: NavTreeService, useValue: { setRecordCrumb: vi.fn() } },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -47,6 +49,7 @@ describe('EmployeeDetailComponent · bad links', () => {
       providers: [
         { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id, tab: 'overview' })), queryParamMap: of(convertToParamMap({})), snapshot: { queryParamMap: convertToParamMap({}) } } },
         { provide: Router, useValue: { navigate } },
+        { provide: NavTreeService, useValue: { setRecordCrumb: vi.fn() } },
         { provide: EmployeeService, useValue: { getEmployee: vi.fn(getEmployee), getEmployeeStats: vi.fn(() => of(null)) } },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
       ],

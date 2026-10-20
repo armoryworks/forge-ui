@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, NgZone, inject, DestroyRef, Injector } from '@angular/core';
+import { Injectable, signal, computed, NgZone, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
@@ -7,7 +7,6 @@ import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
 import { CapabilityService } from './capability.service';
 import { DesktopPreferenceService } from './desktop-preference.service';
-import { NavTreeService } from './nav-tree.service';
 import { UserPreferencesService } from './user-preferences.service';
 import { LANDING_ROUTE_PREF_KEY, resolveRoleLanding } from '../models/role-landing.model';
 import { routeAccessFor } from '../models/route-access.model';
@@ -28,7 +27,6 @@ export class LayoutService {
   private readonly capabilities = inject(CapabilityService);
   private readonly userPreferences = inject(UserPreferencesService);
   private readonly desktopPreference = inject(DesktopPreferenceService);
-  private readonly injector = inject(Injector);
 
   private readonly _sidebarCollapsed = signal(this.loadCollapsedState());
   private readonly _mobileMenuOpen = signal(false);
@@ -175,8 +173,7 @@ export class LayoutService {
     if (environment.mobileShell) return '/app';
     if (this.isMobileDevice() && !this.desktopPreference.isPreferred()) return '/m';
     const explicit = this.userPreferences.get<string>(LANDING_ROUTE_PREF_KEY);
-    if (explicit && (explicit === '/dashboard' || (this.injector.get(NavTreeService).canReach(explicit, false) && this.canOpen(explicit)))) return explicit;
-    const landing = resolveRoleLanding(this.auth.user()?.roles ?? []);
+    const landing = explicit || resolveRoleLanding(this.auth.user()?.roles ?? []);
     return landing && this.canOpen(landing) ? landing : '/dashboard';
   }
 

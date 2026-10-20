@@ -269,6 +269,7 @@ describe('CustomerDetailComponent · bad links', () => {
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
         { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id, tab: 'overview' })) } },
         { provide: Router, useValue: { navigate } },
+        { provide: NavTreeService, useValue: { setRecordCrumb: vi.fn() } },
         { provide: CustomerService, useValue: { getCustomerSummary: vi.fn(getCustomerSummary) } },
         { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
         { provide: MatDialog, useValue: { open: vi.fn() } },
