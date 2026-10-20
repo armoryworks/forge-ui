@@ -200,6 +200,9 @@ export class SignalrService {
           this.authService.clearAuth();
           return;
         }
+        if (this.isForbiddenError(err)) {
+          return;
+        }
         if (this.connections.get(hubPath) !== connection) return;
         await new Promise<void>(resolve => {
           this.retryTimers.set(hubPath, setTimeout(resolve, 5000));
@@ -209,14 +212,25 @@ export class SignalrService {
   }
 
   /**
-   * Detects 401/403 errors from SignalR negotiate failures.
+   * Detects 401 errors from SignalR negotiate failures.
    * SignalR wraps HTTP errors differently depending on transport.
    */
   private isAuthError(err: unknown): boolean {
     if (err instanceof Error) {
       const msg = err.message;
-      return msg.includes('401') || msg.includes('Unauthorized')
-        || msg.includes('403') || msg.includes('Forbidden');
+      return msg.includes('401') || msg.includes('Unauthorized');
+    }
+    return false;
+  }
+
+  /**
+   * Detects 403 errors from SignalR negotiate failures: the token is valid but the
+   * role may not use this hub, so stop retrying without signing the user out.
+   */
+  private isForbiddenError(err: unknown): boolean {
+    if (err instanceof Error) {
+      const msg = err.message;
+      return msg.includes('403') || msg.includes('Forbidden');
     }
     return false;
   }

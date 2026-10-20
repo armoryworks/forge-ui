@@ -138,6 +138,26 @@ describe('SignalrService', () => {
     });
   });
 
+  describe('negotiate refused', () => {
+    it('signs the user out when the token is rejected with 401', async () => {
+      mockConnection.start.mockRejectedValue(new Error('Failed to complete negotiation with the server: Error: Unauthorized: Status code \'401\''));
+
+      await service.startConnection('board');
+
+      expect(mockAuthService.clearAuth).toHaveBeenCalledTimes(1);
+    });
+
+    it('stops retrying without signing the user out when the role is refused with 403', async () => {
+      mockConnection.start.mockRejectedValue(new Error('Failed to complete negotiation with the server: Error: Forbidden: Status code \'403\''));
+
+      await service.startConnection('accounting');
+
+      expect(mockConnection.start).toHaveBeenCalledTimes(1);
+      expect(mockAuthService.clearAuth).not.toHaveBeenCalled();
+      expect((service as unknown as { retryTimers: Map<string, unknown> }).retryTimers.size).toBe(0);
+    });
+  });
+
   describe('stop during negotiation', () => {
     it('resolves without scheduling a retry when the hub was stopped mid-start', async () => {
       let rejectStart: (err: Error) => void = () => undefined;
