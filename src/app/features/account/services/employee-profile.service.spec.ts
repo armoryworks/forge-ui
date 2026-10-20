@@ -112,6 +112,34 @@ describe('EmployeeProfileService', () => {
 
       expect(service.profile()).toEqual(mockProfile);
     });
+
+    it('sends the loaded profile version as If-Match, since the PUT path has no id to key the ETag cache on', () => {
+      service.load();
+      httpMock.expectOne(r => r.method === 'GET' && r.url === base).flush({ ...mockProfile, rowVersion: 4 });
+      httpMock.expectOne(`${base}/completeness`).flush(mockCompleteness);
+
+      service.updateProfile({ ...mockProfile }).subscribe();
+
+      const req = httpMock.expectOne(r => r.method === 'PUT' && r.url === base);
+      expect(req.request.headers.get('If-Match')).toBe('"4"');
+      req.flush({ ...mockProfile, rowVersion: 5 });
+      httpMock.expectOne(`${base}/completeness`).flush(mockCompleteness);
+
+      service.updateProfile({ ...mockProfile }).subscribe();
+      const next = httpMock.expectOne(r => r.method === 'PUT' && r.url === base);
+      expect(next.request.headers.get('If-Match')).toBe('"5"');
+      next.flush(mockProfile);
+      httpMock.expectOne(`${base}/completeness`).flush(mockCompleteness);
+    });
+
+    it('sends no If-Match before the profile has loaded', () => {
+      service.updateProfile({ ...mockProfile }).subscribe();
+
+      const req = httpMock.expectOne(r => r.method === 'PUT' && r.url === base);
+      expect(req.request.headers.has('If-Match')).toBe(false);
+      req.flush(mockProfile);
+      httpMock.expectOne(`${base}/completeness`).flush(mockCompleteness);
+    });
   });
 
   describe('acknowledgeForm', () => {

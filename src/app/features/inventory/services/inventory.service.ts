@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { EMPTY, Observable, expand, map, reduce } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { AtpResult, AtpBucket } from '../models/atp.model';
@@ -196,12 +196,15 @@ export class InventoryService {
     return this.http.get<UnitOfMeasure[]>(`${this.base}/uom`, { params });
   }
 
-  createUnitOfMeasure(data: Omit<UnitOfMeasure, 'id' | 'isActive'>): Observable<UnitOfMeasure> {
+  createUnitOfMeasure(data: Omit<UnitOfMeasure, 'id' | 'isActive' | 'rowVersion'>): Observable<UnitOfMeasure> {
     return this.http.post<UnitOfMeasure>(`${this.base}/uom`, data);
   }
 
-  updateUnitOfMeasure(id: number, data: Omit<UnitOfMeasure, 'id' | 'isActive'>): Observable<UnitOfMeasure> {
-    return this.http.put<UnitOfMeasure>(`${this.base}/uom/${id}`, data);
+  updateUnitOfMeasure(
+    id: number, data: Omit<UnitOfMeasure, 'id' | 'isActive' | 'rowVersion'>, rowVersion?: number,
+  ): Observable<UnitOfMeasure> {
+    const headers = rowVersion === undefined ? undefined : new HttpHeaders({ 'If-Match': `"${rowVersion}"` });
+    return this.http.put<UnitOfMeasure>(`${this.base}/uom/${id}`, data, { headers });
   }
 
   getUomConversions(partId?: number): Observable<UomConversion[]> {

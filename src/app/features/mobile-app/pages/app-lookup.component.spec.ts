@@ -59,7 +59,7 @@ describe('AppLookupComponent moving a job', () => {
   }
 
   beforeEach(() => {
-    api.advanceJob.mockReset().mockReturnValue(of({ ...moved, status: { stageName: 'Machining' } }));
+    api.advanceJob.mockReset().mockReturnValue(of({ ...moved, status: { stageName: 'Machining', rowVersion: 8 } }));
     api.jobStatus.mockReset().mockReturnValue(of({ id: 42, nextStageId: 6, nextStageName: 'Invoiced' }));
     api.moveJobToStage.mockReset().mockReturnValue(of({}));
     api.stopTimer.mockReset().mockReturnValue(of({}));
@@ -105,6 +105,13 @@ describe('AppLookupComponent moving a job', () => {
     expect(api.advanceJob).toHaveBeenCalledWith(42, null, null, true);
     expect(confirmMove.ask).not.toHaveBeenCalled();
     expect(offer).toHaveBeenCalledOnce();
+  });
+
+  it('undoes the move with the job version the advance returned', async () => {
+    await create().onAction('move');
+
+    await offer.mock.calls[0][1]();
+    expect(api.moveJobToStage).toHaveBeenCalledWith(42, 5, undefined, 8);
   });
 
   it('asks when the server needs a move confirmed, resends it for that status only, and offers no Undo', async () => {

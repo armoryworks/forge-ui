@@ -208,7 +208,7 @@ export class AppLookupComponent {
       this.snackbar.success(message);
       return;
     }
-    this.undo.offer(message, () => firstValueFrom(this.api.moveJobToStage(jobId, outcome.previousStageId)));
+    this.undo.offer(message, () => firstValueFrom(this.api.moveJobToStage(jobId, outcome.previousStageId, undefined, outcome.status.rowVersion)));
   }
 
   private async stopForComplete(): Promise<void> {

@@ -70,7 +70,7 @@
          work — the *appCap directive prevents render. -->
     @if (canSeeCredit) {
       <ng-container *appCap="'CAP-O2C-CREDIT-LIMITS'">
-        <app-credit-status-card [customerId]="customer().id" />
+        <app-credit-status-card [customerId]="customer().id" (creditChanged)="customerUpdated.emit()" />
       </ng-container>
     }
 

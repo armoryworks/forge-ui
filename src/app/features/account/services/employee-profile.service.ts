@@ -1,5 +1,5 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
@@ -38,6 +38,7 @@ export interface EmployeeProfile {
   directDepositCompletedAt: string | null;
   workersCompAcknowledgedAt: string | null;
   handbookAcknowledgedAt: string | null;
+  rowVersion?: number;
 }
 
 export interface UpdateEmployeeProfileRequest {
@@ -134,8 +135,15 @@ export class EmployeeProfileService {
     this.http.get<ProfileCompleteness>(`${this.base}/completeness`).subscribe(c => this._completeness.set(c));
   }
 
+  /**
+   * Sends the loaded profile's version as If-Match. The ETag cache cannot
+   * supply it here: the profile body carries its own id, so its version is
+   * filed under /employee-profile/{id} while this PUT goes to /employee-profile.
+   */
   updateProfile(data: UpdateEmployeeProfileRequest): Observable<EmployeeProfile> {
-    return this.http.put<EmployeeProfile>(this.base, data).pipe(
+    const rowVersion = this._profile()?.rowVersion;
+    const headers = rowVersion === undefined ? undefined : new HttpHeaders({ 'If-Match': `"${rowVersion}"` });
+    return this.http.put<EmployeeProfile>(this.base, data, { headers }).pipe(
       tap(p => {
         this._profile.set(p);
         this.refreshCompleteness();

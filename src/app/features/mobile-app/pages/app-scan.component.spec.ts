@@ -102,7 +102,7 @@ describe('AppScanComponent', () => {
     timer.undoStart.mockReset().mockResolvedValue(undefined);
     timer.undoStop.mockReset().mockResolvedValue(undefined);
     api.advanceJob.mockReset().mockReturnValue(of({
-      status: { stageName: 'Machining' }, previousStageId: 3, previousStageName: 'Queued', collapsed: false,
+      status: { stageName: 'Machining', rowVersion: 9 }, previousStageId: 3, previousStageName: 'Queued', collapsed: false,
     }));
     api.moveJobToStage.mockReset().mockReturnValue(of({}));
     api.stopTimer.mockReset().mockReturnValue(of({}));
@@ -196,7 +196,7 @@ describe('AppScanComponent', () => {
 
     const [, compensate, closed] = offer.mock.calls[0];
     await compensate();
-    expect(api.moveJobToStage).toHaveBeenCalledWith(42, 3, 'person-token');
+    expect(api.moveJobToStage).toHaveBeenCalledWith(42, 3, 'person-token', 9);
     expect(closed).toBeTypeOf('function');
   });
 

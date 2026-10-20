@@ -67,6 +67,37 @@ describe('MobileApiService', () => {
     http.expectNone('/api/v1/mobile/clock/punch');
   });
 
+  it('sends a move back with the given job version as If-Match', () => {
+    service.moveJobToStage(42, 3, undefined, 7).subscribe();
+    const req = http.expectOne('/api/v1/jobs/42/stage');
+
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.headers.get('If-Match')).toBe('"7"');
+    expect(req.request.headers.get('Idempotency-Key')).toMatch(/^[0-9a-f-]{36}$/);
+    expect(req.request.body).toEqual({ stageId: 3 });
+    req.flush({});
+  });
+
+  it('leaves If-Match out of a move back with no job version', () => {
+    service.moveJobToStage(42, 3).subscribe();
+    const req = http.expectOne('/api/v1/jobs/42/stage');
+
+    expect(req.request.headers.has('If-Match')).toBe(false);
+    req.flush({});
+  });
+
+  it('queues a move back without the job version, so a later replay cannot send a stale one', async () => {
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+
+    const result = await firstValueFrom(service.moveJobToStage(42, 3, undefined, 7));
+
+    expect(isQueued(result)).toBe(true);
+    const options = enqueue.mock.calls[0][4] as { headers: Record<string, string> };
+    expect(options.headers['If-Match']).toBeUndefined();
+    expect(options.headers['Idempotency-Key']).toEqual(expect.any(String));
+    http.expectNone('/api/v1/jobs/42/stage');
+  });
+
   it('reads the running timer and treats 204 as none running', async () => {
     const running = firstValueFrom(service.activeTimer());
     const req = http.expectOne('/api/v1/time-tracking/timer/active');

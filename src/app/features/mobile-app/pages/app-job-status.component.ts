@@ -213,7 +213,7 @@ export class AppJobStatusComponent {
     this.undo.offer(
       this.translate.instant('mobileApp.jobs.movedTo', { column: outcome.status.stageName }),
       async () => {
-        await firstValueFrom(this.api.moveJobToStage(job.id, outcome.previousStageId));
+        await firstValueFrom(this.api.moveJobToStage(job.id, outcome.previousStageId, undefined, outcome.status.rowVersion));
         this.load();
       },
     );

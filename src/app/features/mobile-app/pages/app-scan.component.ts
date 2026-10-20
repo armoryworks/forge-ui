@@ -239,7 +239,7 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
     }
     this.undo.offer(
       this.translate.instant('mobileApp.jobs.movedTo', { column: outcome.status.stageName }),
-      () => firstValueFrom(this.api.moveJobToStage(jobId, outcome.previousStageId, token)),
+      () => firstValueFrom(this.api.moveJobToStage(jobId, outcome.previousStageId, token, outcome.status.rowVersion)),
       this.endIdentity(token),
     );
     this.result.set(null);

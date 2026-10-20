@@ -135,7 +135,7 @@ export class UomManagementComponent implements OnInit {
     const editing = this.editingUom();
 
     const obs = editing
-      ? this.inventoryService.updateUnitOfMeasure(editing.id, payload)
+      ? this.inventoryService.updateUnitOfMeasure(editing.id, payload, editing.rowVersion)
       : this.inventoryService.createUnitOfMeasure(payload);
 
     obs.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({

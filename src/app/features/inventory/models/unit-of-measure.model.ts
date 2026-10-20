@@ -8,6 +8,7 @@ export interface UnitOfMeasure {
   isBaseUnit: boolean;
   isActive: boolean;
   sortOrder: number;
+  rowVersion?: number;
 }
 
 export type UomCategory = 'Count' | 'Length' | 'Weight' | 'Volume' | 'Area' | 'Time';
