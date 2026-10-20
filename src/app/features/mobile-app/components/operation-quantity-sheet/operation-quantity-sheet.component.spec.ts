@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormControl } from '@angular/forms';
 
 import { Observable, of } from 'rxjs';
 import { TranslateLoader, provideTranslateService } from '@ngx-translate/core';
@@ -135,5 +136,34 @@ describe('OperationQuantitySheetComponent', () => {
     } finally {
       HTMLElement.prototype.scrollIntoView = original;
     }
+  });
+
+  it('takes a typed count when it is too far to step to, and keeps the stepper', () => {
+    const el = render(12, 0, false);
+    const recorded: unknown[] = [];
+    fixture.componentInstance.recorded.subscribe((e) => recorded.push(e));
+
+    click(el, 'operation-qty-type');
+    expect(el.querySelector('[data-testid="operation-qty-typed"]')).not.toBeNull();
+    (fixture.componentInstance as unknown as { typedGood: FormControl<number | null> }).typedGood.setValue(30.7);
+    fixture.detectChanges();
+    expect(text(el, 'operation-qty-good')).toBe('30');
+    click(el, 'operation-qty-plus');
+    expect(text(el, 'operation-qty-good')).toBe('31');
+    click(el, 'operation-qty-record');
+
+    expect(recorded).toEqual([{ completed: 31, scrap: 0, rework: 0, reason: null, complete: false }]);
+  });
+
+  it('is a modal dialog that Escape cancels', () => {
+    const el = render(12, 0, false);
+    let cancelled = 0;
+    fixture.componentInstance.cancelled.subscribe(() => cancelled++);
+    const sheet = el.querySelector<HTMLElement>('[data-testid="operation-quantity-sheet"]')!;
+
+    expect(sheet.getAttribute('aria-modal')).toBe('true');
+    sheet.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+
+    expect(cancelled).toBe(1);
   });
 });

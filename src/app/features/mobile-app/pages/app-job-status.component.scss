@@ -56,7 +56,7 @@
 
   &__facts {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 96px), 1fr));
     gap: $sp-md;
     margin: 0;
   }
@@ -64,6 +64,7 @@
   &__fact {
     display: flex;
     flex-direction: column;
+    min-width: 0;
     gap: $sp-xs;
     padding: $sp-md;
     border: $border-width-thin solid var(--border);
@@ -78,6 +79,7 @@
 
     dd {
       margin: 0;
+      overflow-wrap: anywhere;
       font-size: $font-size-md;
       font-weight: 600;
       color: var(--text);
@@ -91,7 +93,7 @@
     background: var(--surface);
   }
 
-  &__overdue { color: var(--error); }
+  &__fact &__overdue { color: var(--error); }
 
   &__timeline {
     display: flex;

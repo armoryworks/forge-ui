@@ -18,4 +18,16 @@ describe('MobileAuthService.normalizeOrigin', () => {
   it('refuses plain http', () => {
     expect(() => MobileAuthService.normalizeOrigin('http://shop.example.com')).toThrow();
   });
+
+  it('refuses any other scheme instead of trying it as a host name', () => {
+    expect(() => MobileAuthService.normalizeOrigin('ftp://x')).toThrow();
+  });
+
+  it('refuses an address of only spaces', () => {
+    expect(() => MobileAuthService.normalizeOrigin('   ')).toThrow();
+  });
+
+  it('treats a host with a port as an address, not a scheme', () => {
+    expect(MobileAuthService.normalizeOrigin('localhost:4590')).toBe('https://localhost:4590');
+  });
 });

@@ -1,14 +1,19 @@
 import {
   ChangeDetectionStrategy, Component, ElementRef, afterNextRender, computed, input, linkedSignal, output, signal, viewChild,
 } from '@angular/core';
+import { A11yModule } from '@angular/cdk/a11y';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { InputComponent } from '../../../../shared/components/input/input.component';
 import { OperationReason } from '../../../../shared/models/operation-reason.model';
 import { OperationQuantityEntry } from '../../models/operation-quantity-entry.model';
 
 /**
- * Quantities for one operation on a stepper, never a keyboard. Good pieces
+ * Quantities for one operation on a stepper; the good count can also be
+ * typed when it is too far to step to. Good pieces
  * start at everything not yet scrapped when the sheet opens from Done, and at
  * the recorded count otherwise; scrap and rework stay folded away until asked
  * for, and a reason is offered as chips once either is non-zero. Counts are
@@ -18,7 +23,7 @@ import { OperationQuantityEntry } from '../../models/operation-quantity-entry.mo
 @Component({
   selector: 'app-operation-quantity-sheet',
   standalone: true,
-  imports: [TranslatePipe],
+  imports: [A11yModule, ReactiveFormsModule, TranslatePipe, InputComponent],
   templateUrl: './operation-quantity-sheet.component.html',
   styleUrl: './operation-quantity-sheet.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,6 +51,14 @@ export class OperationQuantitySheetComponent {
   protected readonly over = computed(() => this.goodCount() + this.scrapCount() > this.jobQuantity());
   protected readonly askReason = computed(() =>
     this.reasons().length > 0 && (this.scrapCount() > this.scrap() || this.reworkCount() > 0));
+  protected readonly typing = signal(false);
+  protected readonly typedGood = new FormControl<number | null>(null);
+
+  constructor() {
+    this.typedGood.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
+      if (value !== null && Number.isFinite(value)) this.goodCount.set(Math.max(0, Math.floor(value)));
+    });
+  }
 
   private readonly lastAction = viewChild<ElementRef<HTMLElement>>('lastAction');
 
@@ -55,6 +68,12 @@ export class OperationQuantitySheetComponent {
 
   protected bumpGood(delta: number): void {
     this.goodCount.update((n) => Math.max(0, n + delta));
+    if (this.typing()) this.typedGood.setValue(this.goodCount(), { emitEvent: false });
+  }
+
+  protected typeGood(): void {
+    this.typedGood.setValue(this.goodCount(), { emitEvent: false });
+    this.typing.set(true);
   }
 
   protected bumpScrap(delta: number): void {

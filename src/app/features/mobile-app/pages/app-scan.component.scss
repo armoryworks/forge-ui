@@ -4,6 +4,8 @@
 $frame-size: 240px;
 $corner-size: 32px;
 $torch-size: 72px;
+$scrim: rgba(0, 0, 0, 0.55);
+$on-scrim: rgba(255, 255, 255, 0.95);
 
 :host {
   flex: 1;
@@ -53,8 +55,8 @@ $torch-size: 72px;
     position: relative;
     margin: 0;
     padding: $sp-md $sp-lg;
-    background: rgba(0, 0, 0, 0.55);
-    color: var(--header-text);
+    background: $scrim;
+    color: $on-scrim;
     font-size: $font-size-md;
     text-align: center;
   }
@@ -66,9 +68,9 @@ $torch-size: 72px;
     bottom: calc(#{$sp-lg} + env(safe-area-inset-bottom));
     width: $torch-size;
     height: $torch-size;
-    background: rgba(0, 0, 0, 0.55);
+    background: $scrim;
     border: $border-width-thin solid var(--border);
-    color: var(--header-text);
+    color: $on-scrim;
     cursor: pointer;
 
     .material-icons-outlined { font-size: $icon-size-xxl; }

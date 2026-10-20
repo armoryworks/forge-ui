@@ -9,6 +9,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { A11yModule } from '@angular/cdk/a11y';
 
 import { Html5Qrcode, Html5QrcodeScannerState } from 'html5-qrcode';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -20,12 +21,13 @@ type IdentityStage = 'badge' | 'pin';
 
 /**
  * Shared-device identity: scan the badge, enter the PIN, and the person is
- * attributed to the next transaction. Emits `identified` on success.
+ * attributed to the next transaction. Emits `identified` on success. A
+ * modal dialog: it takes focus when it opens and Escape cancels.
  */
 @Component({
   selector: 'app-identity-prompt',
   standalone: true,
-  imports: [TranslatePipe, PinPadComponent],
+  imports: [A11yModule, TranslatePipe, PinPadComponent],
   templateUrl: './identity-prompt.component.html',
   styleUrl: './identity-prompt.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

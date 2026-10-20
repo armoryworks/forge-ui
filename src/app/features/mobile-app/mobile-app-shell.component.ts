@@ -1,5 +1,5 @@
 import {
-  ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal, untracked,
+  ChangeDetectionStrategy, Component, DestroyRef, ElementRef, computed, effect, inject, signal, untracked, viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
@@ -33,7 +33,8 @@ import { BottomChromeOffsetDirective } from './directives/bottom-chrome-offset.d
  * when operation tracking is on. With more than one timer running only the
  * first row shows, with a +N chip that unfolds the rest. On a shared device, a Stop from the strip
  * ends the person's identity once its undo toast closes, and the undo runs
- * with the token captured beforehand.
+ * with the token captured beforehand. Toasts sit above the strip, the tab
+ * bar and the controls at the foot of each screen.
  */
 @Component({
   selector: 'app-mobile-app-shell',
@@ -66,6 +67,7 @@ export class MobileAppShellComponent {
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
 
+  private readonly content = viewChild<ElementRef<HTMLElement>>('content');
   private readonly now = signal(Date.now());
   protected readonly stopping = signal(false);
   protected readonly stoppingOperation = signal<number | null>(null);
@@ -117,6 +119,7 @@ export class MobileAppShellComponent {
     });
 
     this.refreshOnResume();
+    this.liftToastsAboveChrome();
     this.destroyRef.onDestroy(() => this.timerHub.clearCallbacks());
   }
 
@@ -189,6 +192,27 @@ export class MobileAppShellComponent {
     if (!this.hubStarted) return;
     this.hubStarted = false;
     void this.timerHub.disconnect().catch(() => undefined);
+  }
+
+  private liftToastsAboveChrome(): void {
+    const body = document.body;
+    body.classList.add('app-mobile-shell');
+    let observer: ResizeObserver | null = null;
+    effect(() => {
+      const content = this.content()?.nativeElement;
+      observer?.disconnect();
+      if (!content || typeof ResizeObserver === 'undefined') return;
+      const measure = (): void => body.style.setProperty(
+        '--app-mobile-shell-chrome', `${Math.max(0, window.innerHeight - content.getBoundingClientRect().bottom)}px`);
+      observer = new ResizeObserver(measure);
+      observer.observe(content);
+      measure();
+    });
+    this.destroyRef.onDestroy(() => {
+      observer?.disconnect();
+      body.classList.remove('app-mobile-shell');
+      body.style.removeProperty('--app-mobile-shell-chrome');
+    });
   }
 
   private refreshOnResume(): void {

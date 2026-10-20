@@ -238,6 +238,22 @@ describe('JobOperationsComponent', () => {
     expect(api.updateOperationProgress).toHaveBeenLastCalledWith(42, 20, { completedQuantity: 12, scrapQuantity: 0, expectedVersion: 4 }, undefined);
   });
 
+  it('names the scrap in the toast when scrap is recorded', async () => {
+    const before = row(20, { status: 'InProgress', completedQuantity: 12, version: 3 });
+    render(operations([before]));
+    api.updateOperationProgress.mockReturnValue(of({
+      operation: { ...before, completedQuantity: 12, scrapQuantity: 1, version: 4 }, allOperationsComplete: false, estimatedRemainingMinutes: 27,
+    }));
+
+    click('job-operation-qty-20');
+    click('operation-scrap-open');
+    click('operation-scrap-plus');
+    click('operation-qty-record');
+    await settle();
+
+    expect(offer.mock.calls[0][0]).toBe('mobileApp.operations.recordedWithScrap');
+  });
+
   it('offers the gated move once the last step is done, and hands it to the page', async () => {
     render(operations([row(20, { status: 'InProgress' })]));
     api.updateOperationProgress.mockReturnValue(of({

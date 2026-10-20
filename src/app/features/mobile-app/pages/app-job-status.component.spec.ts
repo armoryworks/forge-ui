@@ -1,6 +1,7 @@
 import { WritableSignal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Location } from '@angular/common';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 
 import { of, throwError } from 'rxjs';
@@ -22,6 +23,7 @@ interface JobStatusInternals {
   job: WritableSignal<JobStatus | null>;
   busy: WritableSignal<boolean>;
   advance(): void;
+  back(): void;
 }
 
 const status: JobStatus = {
@@ -44,6 +46,8 @@ describe('AppJobStatusComponent advancing', () => {
   };
   const offer = vi.fn();
   const snackbar = { success: vi.fn(), error: vi.fn(), info: vi.fn() };
+  const location = { getState: vi.fn(), back: vi.fn() };
+  const router = { navigate: vi.fn() };
 
   function create(): JobStatusInternals {
     const component = TestBed.runInInjectionContext(() => new AppJobStatusComponent());
@@ -68,6 +72,9 @@ describe('AppJobStatusComponent advancing', () => {
     snackbar.success.mockReset();
     snackbar.error.mockReset();
     snackbar.info.mockReset();
+    location.getState.mockReset().mockReturnValue({ navigationId: 3 });
+    location.back.mockReset();
+    router.navigate.mockReset();
     TestBed.configureTestingModule({
       providers: [
         { provide: MobileApiService, useValue: api },
@@ -81,7 +88,8 @@ describe('AppJobStatusComponent advancing', () => {
         { provide: SharedIdentityService, useValue: { identified: signal(false), touch: vi.fn() } },
         { provide: InstanceService, useValue: { instance: () => ({ id: 'shop', shared: false }) } },
         { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: '42' })) } },
-        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: Router, useValue: router },
+        { provide: Location, useValue: location },
       ],
     });
   });
@@ -92,6 +100,22 @@ describe('AppJobStatusComponent advancing', () => {
     expect(component.loading()).toBe(false);
     expect(component.failed()).toBe(true);
     expect(api.jobStatus).not.toHaveBeenCalled();
+  });
+
+  it('goes back to the list or search it was opened from', () => {
+    create().back();
+
+    expect(location.back).toHaveBeenCalledOnce();
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('goes to Scan when the page was opened directly', () => {
+    location.getState.mockReturnValue({ navigationId: 1 });
+
+    create().back();
+
+    expect(location.back).not.toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenCalledWith(['/app/scan']);
   });
 
   it('asks before moving into Invoiced, confirms that status only, and offers no Undo', async () => {

@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { A11yModule } from '@angular/cdk/a11y';
+import { Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { firstValueFrom, map } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-
 
 import { JobStatus, isQueued } from '../../../shared/models/mobile-api.model';
 import { InstanceService } from '../../../shared/services/instance.service';
@@ -27,7 +28,8 @@ import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
 type PendingAction = 'advance' | 'note' | 'photo' | 'timer';
 
 /**
- * Job Status: reached from Scan, Lookup or My work orders. Job number,
+ * Job Status: reached from Scan, Lookup or My work orders; Back returns
+ * there, or to Scan when the page was opened directly. Job number,
  * customer, current column, due date, next step, last three timeline
  * entries. Advancing asks nothing and shows an undo toast, except into a
  * column that can't be undone or that creates an accounting document: that
@@ -41,7 +43,7 @@ type PendingAction = 'advance' | 'note' | 'photo' | 'timer';
 @Component({
   selector: 'app-app-job-status',
   standalone: true,
-  imports: [DateOnlyPipe, DateTimePipe, TranslatePipe, TermTextPipe, IdentityPromptComponent, JobOperationsComponent],
+  imports: [A11yModule, DateOnlyPipe, DateTimePipe, TranslatePipe, TermTextPipe, IdentityPromptComponent, JobOperationsComponent],
   templateUrl: './app-job-status.component.html',
   styleUrl: './app-job-status.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -59,6 +61,7 @@ export class AppJobStatusComponent {
   private readonly instances = inject(InstanceService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly location = inject(Location);
 
   protected readonly jobId = toSignal(
     this.route.paramMap.pipe(map((p) => parsePositiveId(p.get('id')))), { initialValue: null });
@@ -110,7 +113,9 @@ export class AppJobStatusComponent {
   }
 
   protected back(): void {
-    void this.router.navigate(['/app/scan']);
+    const state = this.location.getState() as { navigationId?: number } | null;
+    if ((state?.navigationId ?? 1) > 1) this.location.back();
+    else void this.router.navigate(['/app/scan']);
   }
 
   protected advance(): void {

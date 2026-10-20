@@ -22,4 +22,6 @@ export interface PurchaseOrderLine {
   partDefaultBinPath: string | null;
   /** Lot-tracked part with lots on: a receipt that names no lot gets a lot number assigned. */
   lotTracked?: boolean;
+  unitSymbol?: string | null;
+  quantityDecimalPlaces?: number | null;
 }

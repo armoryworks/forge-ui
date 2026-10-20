@@ -5273,8 +5273,7 @@
     "preview": {
       "open": "Open"
     },
-    "selectRow": "Select row",
-    "selectAllRows": "Select all rows"
+    "offlineNotSaved": "You're offline. Changes can't be saved until you reconnect."
   },
   "address": {
     "street": "Street",
@@ -11595,7 +11594,7 @@
       },
       "manual": {
         "open": "Type it in",
-        "label": "Code on the label (e.g. JOB-01042)",
+        "label": "Code on the label (e.g. J-1042)",
         "go": "Look up"
       },
       "actingAs": "Acting as {{name}}",
@@ -11640,7 +11639,9 @@
       "biometricTitle": "Unlock with your fingerprint or face?",
       "biometricHint": "Faster than the PIN. The PIN stays as the fallback.",
       "enableBiometric": "Enable",
-      "notNow": "Not now"
+      "notNow": "Not now",
+      "backspace": "Delete last digit",
+      "digitsEntered": "{{count}} of {{total}} digits entered"
     },
     "identity": {
       "scanBadge": "Scan your badge",
@@ -11669,7 +11670,8 @@
       "noteFromList": "Note from list",
       "noPresets": "No preset notes configured.",
       "attachPhoto": "Attach photo",
-      "homeHint": "Scan a job traveler or look one up to see its status."
+      "homeHint": "Scan a job traveler or look one up to see its status.",
+      "timerStoppedMovedTo": "Timer stopped · moved to {{column}}"
     },
     "undo": {
       "action": "Undo",
@@ -11721,13 +11723,21 @@
       "expect": {
         "part": "That is not a part label.",
         "bin": "That is not a bin label."
-      }
+      },
+      "stepsLabel": "Move stock steps",
+      "notInBin": "{{part}} is not in {{bin}}. Scan the bin it is in.",
+      "noLotChoice": "No lot",
+      "typeQuantity": "Type a number",
+      "typedQuantity": "Quantity to move",
+      "wholeOnly": "Enter a whole number.",
+      "fractionLeft": "Only whole units move here; {{qty}} stays in the bin."
     },
     "lookup": {
       "placeholder": "Job, part, customer, or bin",
       "voice": "Search by voice",
       "hint": "Type or say a job number, part, customer, or bin.",
-      "none": "Nothing matched."
+      "none": "Nothing matched.",
+      "needsConnection": "Lookup needs a connection. Scanning still works offline."
     },
     "offline": {
       "queued": "Saved on this phone. It will sync when you are back online."
@@ -11773,7 +11783,10 @@
       "problemLabel": "What went wrong?",
       "send": "Send",
       "problemSent": "Sent. Your admins have it.",
-      "problemFailed": "Could not send. Try again when online."
+      "problemFailed": "Could not send. Try again when online.",
+      "signOut": "Sign out",
+      "confirmSignOutHere": "Tap again to sign out",
+      "problemCount": "{{count}} / {{max}}"
     },
     "timer": {
       "running": "Running: {{jobNumber}} · {{elapsed}}",
@@ -11799,7 +11812,7 @@
       "start": "Start",
       "startSetup": "Setup",
       "stop": "Stop",
-      "addQuantity": "+Qty",
+      "addQuantity": "Count",
       "done": "Done",
       "othersRunning": "Also running: {{names}}",
       "status": {
@@ -11822,7 +11835,11 @@
       "recordCount": "Record {{count}}, keep going",
       "rework": "Rework",
       "addRework": "Add rework",
-      "reason": "Reason"
+      "reason": "Reason",
+      "typeCount": "Type a number",
+      "typedCount": "Good pieces",
+      "recordedWithScrap": "Recorded {{count}} good and {{scrap}} scrap on {{name}}",
+      "completedWithScrap": "{{name}} done · {{scrap}} scrap"
     }
   },
   "mobileAppWork": {
@@ -11958,7 +11975,10 @@
     "receive": "Receive",
     "receiving": "Receiving…",
     "received": "Receipt recorded on {{number}}.",
-    "failed": "The receipt did not go through. Try again."
+    "failed": "The receipt did not go through. Try again.",
+    "wholeUnitsOnly": "Enter a whole number of {{unit}}.",
+    "tooManyDecimals": "Use at most {{places}} decimal places for {{unit}}.",
+    "binCreatedHint": "Left empty, the stock goes to a new Receiving bin."
   },
   "upgradeLock": {
     "title": "Forge is being updated",

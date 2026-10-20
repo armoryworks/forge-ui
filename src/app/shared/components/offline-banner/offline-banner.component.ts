@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy
 import { TranslateService } from '@ngx-translate/core';
 
 import { OfflineQueueService } from '../../services/offline-queue.service';
+import { PlatformService } from '../../services/platform.service';
 
 type BannerState = 'hidden' | 'offline' | 'syncing' | 'synced';
 
@@ -16,6 +17,7 @@ type BannerState = 'hidden' | 'offline' | 'syncing' | 'synced';
 export class OfflineBannerComponent implements OnDestroy {
   private readonly offlineQueue = inject(OfflineQueueService);
   private readonly translate = inject(TranslateService);
+  private readonly platform = inject(PlatformService);
   private autoDismissTimer: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly isOffline = signal(!navigator.onLine);
@@ -46,7 +48,7 @@ export class OfflineBannerComponent implements OnDestroy {
         if (count > 0) {
           return this.translate.instant('shared.offlineWithPending', { count });
         }
-        return this.translate.instant('shared.offlineNoChanges');
+        return this.translate.instant(this.platform.mobileShell ? 'shared.offlineNoChanges' : 'shared.offlineNotSaved');
       }
       case 'syncing': {
         const count = this.pendingCount();

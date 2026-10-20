@@ -115,6 +115,14 @@ describe('MobileAppShellComponent timer strip', () => {
 
   afterEach(() => vi.useRealTimers());
 
+  it('marks the page so toasts sit above the shell chrome, only while the shell is open', () => {
+    create();
+    expect(document.body.classList.contains('app-mobile-shell')).toBe(true);
+
+    TestBed.resetTestingModule();
+    expect(document.body.classList.contains('app-mobile-shell')).toBe(false);
+  });
+
   it('loads the running timer and listens for timer events', () => {
     create();
 

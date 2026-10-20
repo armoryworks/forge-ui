@@ -12,7 +12,8 @@ type NativeScanner = typeof import('@capacitor-mlkit/barcode-scanning');
  * WebView (the page must be transparent while scanning — the shell adds the
  * `mlkit-scanning` class to <body>). Web/PWA: html5-qrcode into the given
  * element. Decodes are de-duplicated per value for 1.5 s so a held code
- * doesn't fire repeatedly.
+ * doesn't fire repeatedly. A torch is offered only where the running
+ * camera has one.
  */
 @Injectable({ providedIn: 'root' })
 export class CameraScannerService {
@@ -69,6 +70,15 @@ export class CameraScannerService {
       await this.web.stop().catch(() => undefined);
     }
     this.web = null;
+  }
+
+  async torchAvailable(): Promise<boolean> {
+    try {
+      if (this.native) return (await this.native.BarcodeScanner.isTorchAvailable()).available;
+      return this.web?.getRunningTrackCameraCapabilities().torchFeature().isSupported() ?? false;
+    } catch {
+      return false;
+    }
   }
 
   async toggleTorch(): Promise<boolean> {

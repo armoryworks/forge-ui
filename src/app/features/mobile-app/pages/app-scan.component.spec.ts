@@ -28,6 +28,9 @@ interface ScanInternals {
   actingAs: Signal<string | null>;
   identifying: Signal<boolean>;
   notice: Signal<string | null>;
+  torchSupported: Signal<boolean>;
+  cameraError: Signal<boolean>;
+  ngAfterViewInit(): Promise<void>;
   onAction(action: ScanAction): Promise<void>;
   onIdentified(): void;
   notYou(): void;
@@ -117,7 +120,7 @@ describe('AppScanComponent', () => {
     router.navigate.mockReset().mockResolvedValue(true);
     TestBed.configureTestingModule({
       providers: [
-        { provide: CameraScannerService, useValue: { start: vi.fn().mockResolvedValue(undefined), stop: vi.fn() } },
+        { provide: CameraScannerService, useValue: { start: vi.fn().mockResolvedValue(undefined), stop: vi.fn(), torchAvailable: vi.fn().mockResolvedValue(false) } },
         { provide: MobileApiService, useValue: api },
         { provide: ScanFeedbackService, useValue: { tick: vi.fn(), doubleBuzz: vi.fn() } },
         { provide: UndoService, useValue: { offer } },
@@ -234,10 +237,10 @@ describe('AppScanComponent', () => {
     expect(identity.clear).toHaveBeenCalledOnce();
   });
 
-  it('completes by stopping the newest timer, as before, while operation tracking is off', async () => {
+  it('completes by stopping only the person\'s timer on that job while operation tracking is off', async () => {
     await create().onAction('complete');
 
-    expect(api.stopTimer).toHaveBeenCalledWith();
+    expect(api.stopTimer).toHaveBeenCalledWith(undefined, { jobId: 42 }, true);
     expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', null, true);
     expect(api.advanceJob.mock.invocationCallOrder[0]).toBeLessThan(api.stopTimer.mock.invocationCallOrder[0]);
   });
@@ -247,8 +250,49 @@ describe('AppScanComponent', () => {
 
     await create().onAction('complete');
 
-    expect(api.stopTimer).toHaveBeenCalledWith(undefined, { jobId: 42 });
+    expect(api.stopTimer).toHaveBeenCalledWith(undefined, { jobId: 42 }, true);
     expect(api.advanceJob).toHaveBeenCalledWith(42, 'JOB-42', null, true);
+  });
+
+  it('says in one toast that the timer stopped and the job moved on', async () => {
+    await create().onAction('complete');
+
+    expect(offer).toHaveBeenCalledOnce();
+    expect(offer.mock.calls[0][0]).toBe('mobileApp.jobs.timerStoppedMovedTo');
+  });
+
+  it('says only that the job moved on when the person had no timer on it', async () => {
+    api.stopTimer.mockReturnValue(throwError(() => new Error('No active timer found.')));
+
+    await create().onAction('complete');
+
+    expect(offer).toHaveBeenCalledOnce();
+    expect(offer.mock.calls[0][0]).toBe('mobileApp.jobs.movedTo');
+  });
+
+  it('offers the torch only when the running camera has one', async () => {
+    const scanner = TestBed.inject(CameraScannerService) as unknown as { torchAvailable: ReturnType<typeof vi.fn> };
+    const scan = create();
+    await scan.ngAfterViewInit();
+    expect(scan.torchSupported()).toBe(false);
+
+    scanner.torchAvailable.mockResolvedValue(true);
+    await scan.ngAfterViewInit();
+    expect(scan.torchSupported()).toBe(true);
+  });
+
+  it('keeps a notice when the camera cannot start', async () => {
+    const scanner = TestBed.inject(CameraScannerService) as unknown as { start: ReturnType<typeof vi.fn> };
+    scanner.start.mockRejectedValue(new Error('denied'));
+    const scan = create();
+    await scan.ngAfterViewInit();
+    scan.result.set({ kind: 'part', id: 7, code: 'PRT-SA-210', label: 'SA-210', subtitle: null });
+
+    await scan.onAction('details');
+
+    expect(scan.cameraError()).toBe(true);
+    expect(scan.torchSupported()).toBe(false);
+    expect(scan.notice()).toBe('mobileApp.scan.openOnDesktopHint');
   });
 
   it('names the identified person and clears them on Not you', () => {
@@ -430,7 +474,7 @@ describe('AppScanComponent requests', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: CameraScannerService, useValue: { start: vi.fn().mockResolvedValue(undefined), stop: vi.fn() } },
+        { provide: CameraScannerService, useValue: { start: vi.fn().mockResolvedValue(undefined), stop: vi.fn(), torchAvailable: vi.fn().mockResolvedValue(false) } },
         { provide: ScanFeedbackService, useValue: { tick: vi.fn(), doubleBuzz: vi.fn() } },
         { provide: UndoService, useValue: { offer } },
         { provide: OfflineQueueService, useValue: { remove: vi.fn(), enqueue: vi.fn() } },
@@ -449,7 +493,7 @@ describe('AppScanComponent requests', () => {
 
   afterEach(() => http.verify());
 
-  it('with operation tracking off, start, complete and stop send exactly the requests they always sent', async () => {
+  it('with operation tracking off, start and stop send the requests they always sent and complete names its job', async () => {
     await signIn(false);
     const scan = create();
 
@@ -474,7 +518,7 @@ describe('AppScanComponent requests', () => {
     expect(advance.request.body).toEqual({ scanCode: 'JOB-42' });
     advance.flush({ status: { stageName: 'Machining' }, previousStageId: 3, previousStageName: 'Queued', collapsed: false });
     const completeStop = await next('POST', '/api/v1/time-tracking/timer/stop');
-    expect(completeStop.request.body).toEqual({});
+    expect(completeStop.request.body).toEqual({ jobId: 42 });
     completeStop.flush({});
     (await next('GET', '/api/v1/time-tracking/timer/active')).flush(null, { status: 204, statusText: 'No Content' });
     await completed;

@@ -26,12 +26,14 @@ import { ScanAction, ScanActionSheetComponent } from '../components/scan-action-
 /**
  * Scan is home: the viewfinder opens immediately. A decode ticks, resolves
  * on the server, and offers one contextual action sheet — never a detail
- * page by itself. Unknown codes double-buzz. Torch bottom-left. On a shared
+ * page by itself. Unknown codes double-buzz. Torch bottom-left, shown only
+ * when the camera has one. On a shared
  * device a start, stop, move or complete ends the person's identity once its
  * undo toast closes; the undo itself runs with the token captured beforehand.
- * With operation tracking on, a job's open operations sit under the sheet,
- * and Complete stops the person's timer on that job rather than whichever
- * one is newest. A move or complete is sent as it always was; when the
+ * With operation tracking on, a job's open operations sit under the sheet.
+ * Complete moves the job on one step and stops the person's timer on that
+ * job only, never one running on another job, and says both in one toast.
+ * A notice stays readable when the camera is unavailable. A move or complete is sent as it always was; when the
  * server answers that the column can't be undone or creates an accounting
  * document, the person is asked, the move is resent confirmed, offers no
  * undo, even when it was saved offline, and ends the identity at once. Any
@@ -65,6 +67,7 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
   protected readonly busy = signal(false);
   protected readonly notice = signal<string | null>(null);
   protected readonly torchOn = signal(false);
+  protected readonly torchSupported = signal(false);
   protected readonly cameraError = signal(false);
   protected readonly identifying = signal(false);
   protected readonly typing = signal(false);
@@ -214,7 +217,9 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private async afterAdvance(jobId: number, sent: { outcome: JobAdvanceResult | QueuedOffline; confirmed: boolean }, token: string | undefined): Promise<boolean> {
+  private async afterAdvance(
+    jobId: number, sent: { outcome: JobAdvanceResult | QueuedOffline; confirmed: boolean }, token: string | undefined, timerStopped = false,
+  ): Promise<boolean> {
     const { outcome, confirmed } = sent;
     if (isQueued(outcome)) {
       if (!confirmed) this.offerQueuedUndo([outcome.entryId], token);
@@ -233,12 +238,12 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
     if (confirmed) {
       this.result.set(null);
       await this.startScanner();
-      this.notice.set(this.translate.instant('mobileApp.jobs.movedTo', { column: outcome.status.stageName }));
+      this.notice.set(this.movedMessage(outcome.status.stageName, timerStopped));
       if (token) this.identity.clear();
       return !!token;
     }
     this.undo.offer(
-      this.translate.instant('mobileApp.jobs.movedTo', { column: outcome.status.stageName }),
+      this.movedMessage(outcome.status.stageName, timerStopped),
       () => firstValueFrom(this.api.moveJobToStage(jobId, outcome.previousStageId, token, outcome.status.rowVersion)),
       this.endIdentity(token),
     );
@@ -292,14 +297,18 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
       throw err;
     }
     if (!sent) return false;
-    await this.stopForComplete(jobId);
-    return this.afterAdvance(jobId, sent, token);
+    const stopped = await this.stopForComplete(jobId);
+    return this.afterAdvance(jobId, sent, token, stopped);
   }
 
-  private async stopForComplete(jobId: number): Promise<void> {
-    const stop = this.timer.operationTracking() ? this.api.stopTimer(undefined, { jobId }) : this.api.stopTimer();
-    await firstValueFrom(stop).catch(() => undefined);
+  private async stopForComplete(jobId: number): Promise<boolean> {
+    const stopped = await firstValueFrom(this.api.stopTimer(undefined, { jobId }, true)).then(() => true, () => false);
     void this.timer.refresh();
+    return stopped;
+  }
+
+  private movedMessage(column: string, timerStopped: boolean): string {
+    return this.translate.instant(timerStopped ? 'mobileApp.jobs.timerStoppedMovedTo' : 'mobileApp.jobs.movedTo', { column });
   }
 
   private offerQueuedUndo(entryIds: string[], token?: string): void {
@@ -315,7 +324,9 @@ export class AppScanComponent implements AfterViewInit, OnDestroy {
     this.cameraError.set(false);
     try {
       await this.scanner.start('app-scan-viewfinder', (value) => void this.onDecode(value));
+      this.torchSupported.set(await this.scanner.torchAvailable());
     } catch {
+      this.torchSupported.set(false);
       this.cameraError.set(true);
     }
   }
