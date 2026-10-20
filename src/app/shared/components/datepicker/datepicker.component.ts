@@ -79,7 +79,7 @@ export class DatepickerComponent implements ControlValueAccessor, Validator {
   protected readonly errorMessage = signal<string | null>(null);
 
   protected readonly errorStateMatcher: ErrorStateMatcher = {
-    isErrorState: () => this.errorMessage() !== null,
+    isErrorState: (control) => this.errorMessage() !== null || !!(control?.hasError('required') && control.touched),
   };
 
   private onChange: (value: Date | null) => void = () => {};

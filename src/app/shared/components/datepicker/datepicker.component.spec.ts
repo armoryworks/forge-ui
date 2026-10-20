@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { FormControl } from '@angular/forms';
+import { FormControl, Validators } from '@angular/forms';
 
 import { DatepickerComponent } from './datepicker.component';
 
@@ -66,6 +66,7 @@ describe('DatepickerComponent as a validator', () => {
     registerOnChange(fn: (value: Date | null) => void): void;
     errorMessage(): string | null;
     markTouched(): void;
+    errorStateMatcher: { isErrorState(control: FormControl | null, form: null): boolean };
   }
 
   function create(): ValidatingPicker {
@@ -149,5 +150,18 @@ describe('DatepickerComponent as a validator', () => {
 
     picker.writeValue(new Date(2026, 9, 19));
     expect(picker.errorMessage()).toBeNull();
+  });
+
+  it('keeps the error outline on an empty required field once touched, as the default matcher did', () => {
+    const picker = create();
+    const inner = new FormControl<Date | null>(null, Validators.required);
+
+    expect(picker.errorStateMatcher.isErrorState(inner, null)).toBe(false);
+
+    inner.markAsTouched();
+    expect(picker.errorStateMatcher.isErrorState(inner, null)).toBe(true);
+
+    inner.setValue(new Date(2026, 9, 19));
+    expect(picker.errorStateMatcher.isErrorState(inner, null)).toBe(false);
   });
 });
