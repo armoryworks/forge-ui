@@ -27,4 +27,8 @@ export interface ColumnDef {
   sortField?: string;
   /** Value resolver for sort when the sort key isn't a direct property (multi-field compositions, derived status, etc.). Takes precedence over `sortField`. */
   sortValue?: (row: unknown) => unknown;
+  /** Value resolver for CSV/Excel export, used instead of rendering the cell template (templates that load data per row, composed cells, etc.). */
+  exportValue?: (row: unknown) => unknown;
+  /** Set to `false` to leave the column out of CSV/Excel exports. */
+  exportable?: boolean;
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildDashboardCsv } from './dashboard-export';
+import { dashboardCsvRows } from './dashboard-export';
 import { DashboardData } from './models/dashboard-data.model';
 
 const labels: Record<string, string> = {
@@ -37,20 +37,20 @@ const data = {
   },
 } as unknown as DashboardData;
 
-describe('buildDashboardCsv', () => {
-  const csv = buildDashboardCsv(data, key => labels[key] ?? key).split('\n');
+describe('dashboardCsvRows', () => {
+  const rows = dashboardCsvRows(data, key => labels[key] ?? key);
 
   it('writes translated headers that follow the install terms', () => {
-    expect(csv[1]).toBe('KPIs,Active Work Orders,5');
-    expect(csv).toContain('Due Date,Work Order #,Title,Overdue');
+    expect(rows[1]).toEqual(['KPIs', 'Active Work Orders', 5]);
+    expect(rows).toContainEqual(['Due Date', 'Work Order #', 'Title', 'Overdue']);
   });
 
   it('writes numeric hours and ISO due dates instead of display strings', () => {
-    expect(csv[3]).toBe('KPIs,Total Hours,0.1');
-    expect(csv[csv.length - 1]).toBe('2026-11-03,J-4,"Bracket ""A"" run",No');
+    expect(rows[3]).toEqual(['KPIs', 'Total Hours', 0.1]);
+    expect(rows[rows.length - 1]).toEqual(['2026-11-03', 'J-4', 'Bracket "A" run', 'No']);
   });
 
-  it('quotes cells that contain commas', () => {
-    expect(csv).toContain('"Sam, Lee",2');
+  it('keeps a team member name with a comma as one cell', () => {
+    expect(rows).toContainEqual(['Sam, Lee', 2]);
   });
 });

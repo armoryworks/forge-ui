@@ -23,9 +23,8 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { OverlayModule } from '@angular/cdk/overlay';
 
-import { unparse } from 'papaparse';
 import writeXlsxFile, { type CellObject, type SheetData } from 'write-excel-file/browser';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ColumnDef } from '../../models/column-def.model';
 import { SortState } from '../../models/sort-state.model';
@@ -40,6 +39,7 @@ import { UserPreferencesService } from '../../services/user-preferences.service'
 import { DisplayLabelService } from '../../services/display-label.service';
 import { formatDate, formatDateTime, parseDateOnly } from '../../utils/date.utils';
 import { foldText } from '../../utils/text-fold';
+import { downloadCsv } from '../../utils/download-csv';
 
 
 @Component({
@@ -68,6 +68,7 @@ export class DataTableComponent implements OnInit {
   private readonly labels = inject(DisplayLabelService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly translate = inject(TranslateService);
 
   readonly tableId = input.required<string>();
   readonly columns = input.required<ColumnDef[]>();
@@ -90,6 +91,8 @@ export class DataTableComponent implements OnInit {
    * regardless of the active sort column. Returns true → row pins to top.
    */
   readonly pinPredicate = input<((row: unknown) => boolean) | null>(null);
+  /** Base file name, without extension, for the CSV and Excel exports. Defaults to `<tableId>-export`. */
+  readonly exportFileName = input<string | null>(null);
 
   readonly rowClick = output<unknown>();
   readonly selectionChange = output<unknown[]>();
@@ -530,56 +533,93 @@ export class DataTableComponent implements OnInit {
 
   // ─── CSV Export ───
   exportCsv(): void {
-    const cols = this.visibleColumns();
-    const rows = this.filteredData().map(row => {
-      const rec = row as Record<string, unknown>;
-      const mapped: Record<string, unknown> = {};
-      for (const col of cols) {
-        mapped[col.header] = rec[col.field] ?? '';
-      }
-      return mapped;
-    });
-
-    const csv = unparse(rows);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${this.tableId()}-export.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+    const cols = this.exportColumns();
+    const header = cols.map(col => this.exportHeader(col));
+    const data = this.sortedData().map(row => cols.map(col => this.exportText(row, col)));
+    downloadCsv([header, ...data], this.exportBaseName());
   }
 
   // ─── Excel Export ───
   exportExcel(): void {
-    const cols = this.visibleColumns();
-    const header: CellObject[] = cols.map(col => ({ value: col.header, fontWeight: 'bold' }));
-    const body = this.filteredData().map(row => {
-      const rec = row as Record<string, unknown>;
-      return cols.map(col => this.toExcelCell(rec[col.field], col));
-    });
+    const cols = this.exportColumns();
+    const header: CellObject[] = cols.map(col => ({ value: this.exportHeader(col), fontWeight: 'bold' }));
+    const body = this.sortedData().map(row => cols.map(col => this.toExcelCell(row, col)));
     const data: SheetData = [header, ...body];
-    void writeXlsxFile(data).toFile(`${this.tableId()}-export.xlsx`);
+    void writeXlsxFile(data).toFile(`${this.exportBaseName()}.xlsx`);
   }
 
-  private toExcelCell(raw: unknown, col: ColumnDef): CellObject | null {
-    if (raw === null || raw === undefined || raw === '') {
-      return null;
+  private static readonly DECORATIVE_FIELDS = new Set(['actions', 'icon', 'avatar', 'color']);
+  private static readonly EXPORT_STRIP_SELECTOR =
+    'mat-icon, .material-icons, .material-icons-outlined, .material-icons-round, .material-icons-sharp, .material-symbols-outlined, '
+    + '[aria-hidden="true"], button, .sr-only, .cdk-visually-hidden';
+
+  private exportBaseName(): string {
+    return this.exportFileName() || `${this.tableId()}-export`;
+  }
+
+  private exportColumns(): ColumnDef[] {
+    return this.visibleColumns().filter(col =>
+      col.exportable !== false && !DataTableComponent.DECORATIVE_FIELDS.has(col.field));
+  }
+
+  private exportHeader(col: ColumnDef): string {
+    return col.header?.trim() ? col.header : col.field;
+  }
+
+  private exportText(row: unknown, col: ColumnDef): string {
+    if (col.exportValue) {
+      return this.plainText(col.exportValue(row), col);
     }
+    const tmpl = this.getCellTemplate(col.field);
+    if (tmpl) {
+      const rendered = this.renderTemplateText(tmpl, row);
+      if (rendered) return rendered;
+    }
+    return this.plainText((row as Record<string, unknown>)[col.field], col);
+  }
+
+  private plainText(raw: unknown, col: ColumnDef): string {
+    if (raw === null || raw === undefined) return '';
     if (typeof raw === 'boolean') {
-      return { type: Boolean, value: raw };
+      return this.translate.instant(raw ? 'common.yes' : 'common.no');
     }
-    if (col.type === 'number') {
-      const n = typeof raw === 'number' ? raw : Number(raw);
-      return Number.isNaN(n) ? { type: String, value: String(raw) } : { type: Number, value: n };
+    if (col.type === 'enum' && col.filterOptions?.length) {
+      const option = col.filterOptions.find(o => o.value === raw);
+      if (option) return option.label;
     }
-    if (col.type === 'date') {
-      const d = raw instanceof Date ? raw : parseDateOnly(String(raw)) ?? new Date(raw as string);
-      return Number.isNaN(d.getTime())
-        ? { type: String, value: String(raw) }
-        : { type: Date, value: d, format: 'mm/dd/yyyy' };
+    const formatted = this.formatCellValue({ [col.field]: raw }, col);
+    return formatted === null || formatted === undefined ? '' : String(formatted);
+  }
+
+  private renderTemplateText(tmpl: TemplateRef<unknown>, row: unknown): string {
+    const view = tmpl.createEmbeddedView({ $implicit: row });
+    try {
+      view.detectChanges();
+      const holder = document.createElement('div');
+      for (const node of view.rootNodes as Node[]) {
+        holder.appendChild(node.cloneNode(true));
+      }
+      holder.querySelectorAll(DataTableComponent.EXPORT_STRIP_SELECTOR).forEach(el => el.remove());
+      return (holder.textContent ?? '').replace(/\s+/g, ' ').trim();
+    } finally {
+      view.destroy();
     }
-    return { type: String, value: String(raw) };
+  }
+
+  private toExcelCell(row: unknown, col: ColumnDef): CellObject | null {
+    const raw = (row as Record<string, unknown>)[col.field];
+    if (!col.exportValue && raw !== null && raw !== undefined && raw !== '' && typeof raw !== 'boolean') {
+      if (col.type === 'number') {
+        const n = typeof raw === 'number' ? raw : Number(raw);
+        if (!Number.isNaN(n)) return { type: Number, value: n };
+      }
+      if (col.type === 'date') {
+        const d = raw instanceof Date ? raw : parseDateOnly(String(raw)) ?? new Date(raw as string);
+        if (!Number.isNaN(d.getTime())) return { type: Date, value: d, format: 'mm/dd/yyyy' };
+      }
+    }
+    const text = this.exportText(row, col);
+    return text === '' ? null : { type: String, value: text };
   }
 
   // ─── Filter ───

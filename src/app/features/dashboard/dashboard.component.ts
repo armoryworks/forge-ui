@@ -41,16 +41,16 @@ import { DashboardData } from './models/dashboard-data.model';
 import { DashboardWidgetConfig } from './models/dashboard-widget-config.model';
 import { DashboardSavedLayout, DashboardWidgetLayout } from './models/dashboard-widget-layout.model';
 import { WIDGET_REGISTRY } from './widget-registry';
-import { buildDashboardCsv } from './dashboard-export';
+import { dashboardCsvRows } from './dashboard-export';
 import { DashboardService } from './services/dashboard.service';
 import { IdleService } from '../../shared/services/idle.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 import { CapabilityService } from '../../shared/services/capability.service';
 import { AuthService } from '../../shared/services/auth.service';
-import { downloadBlob } from '../../shared/utils/download-blob';
-import { toDateOnly } from '../../shared/utils/date.utils';
 import { AMBIENT_IDLE_PREF_KEY, DEFAULT_AMBIENT_IDLE_MS } from '../../shared/models/ambient-idle.model';
+import { toDateOnly } from '../../shared/utils/date.utils';
+import { downloadCsv } from '../../shared/utils/download-csv';
 
 import type { GridStack, GridStackNode } from 'gridstack';
 
@@ -363,8 +363,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   protected exportDashboard(): void {
     const d = this.data();
     if (!d) return;
-    const csv = buildDashboardCsv(d, key => this.translate.instant(key));
-    downloadBlob(new Blob([csv], { type: 'text/csv' }), `dashboard-${toDateOnly(new Date())}.csv`);
+    downloadCsv(dashboardCsvRows(d, key => this.translate.instant(key)), `dashboard-${toDateOnly(new Date())}`);
   }
 
   private loadSavedLayout(): void {

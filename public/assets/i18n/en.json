@@ -10169,7 +10169,9 @@
       "previousMatch": "Previous match",
       "nextMatch": "Next match",
       "entryNotLoaded": "Entry id {{number}} is older than the loaded page",
-      "empty": "No journal entries"
+      "empty": "No journal entries",
+      "accounts": "Accounts",
+      "loadedOnly": "Showing the newest {{shown}} of {{total}} entries. Find and the CSV/Excel export cover these entries only."
     },
     "journalEditor": {
       "title": "New Journal Entry",
