@@ -23,7 +23,12 @@
           <app-select [label]="'watchtower.statusFilter' | translate" [formControl]="statusControl" [options]="statusOptions" />
         </div>
 
-        @if (filteredProposals().length === 0) {
+        @if (proposalsLoadError()) {
+          <app-empty-state data-testid="watchtower-proposals-error" icon="error_outline"
+                           [message]="'watchtower.proposalsLoadFailed' | translate"
+                           [actionLabel]="'watchtower.retry' | translate"
+                           (action)="loadProposals()" />
+        } @else if (filteredProposals().length === 0) {
           <app-empty-state icon="verified" [message]="'watchtower.noProposals' | translate" />
         } @else {
           <div class="wt-list">
@@ -61,7 +66,12 @@
 
     @if (activeTab() === 'sources') {
       <div class="tab-panel">
-        @if (sources().length === 0) {
+        @if (sourcesLoadError()) {
+          <app-empty-state data-testid="watchtower-sources-error" icon="error_outline"
+                           [message]="'watchtower.sourcesLoadFailed' | translate"
+                           [actionLabel]="'watchtower.retry' | translate"
+                           (action)="loadSources()" />
+        } @else if (sources().length === 0) {
           <app-empty-state icon="rss_feed" [message]="'watchtower.noSources' | translate" />
         } @else {
           <div class="wt-list">

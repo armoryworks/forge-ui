@@ -455,7 +455,9 @@
     "margin": {
       "costNotRecorded": "Costo no registrado",
       "jobsWithoutCost": "Trabajos sin costo registrado",
-      "coverage": "de {{costed}} de {{total}} con costo"
+      "coverage": "de {{costed}} de {{total}} con costo",
+      "loadFailed": "No se pudo cargar el margen.",
+      "retry": "Reintentar"
     },
     "lowStock": {
       "noMinimumsSet": "No hay niveles mínimos de existencias definidos"
@@ -6923,7 +6925,8 @@
     "deleteReportTitle": "¿Eliminar el informe guardado?",
     "deleteReportConfirm": "¿Eliminar el informe guardado \"{{name}}\"? Esta acción no se puede deshacer.",
     "chooseDataSourceFirst": "Elija una fuente de datos",
-    "pickColumnFirst": "Elija al menos una columna"
+    "pickColumnFirst": "Elija al menos una columna",
+    "runFailed": "No se pudo ejecutar este informe."
   },
   "qcInspections": {
     "tabTemplates": "Plantillas",
@@ -11154,7 +11157,10 @@
       "email": "Correo",
       "bulk": "Descarga masiva",
       "scrape": "Página web"
-    }
+    },
+    "proposalsLoadFailed": "No se pudieron cargar las propuestas.",
+    "sourcesLoadFailed": "No se pudieron cargar las fuentes supervisadas.",
+    "retry": "Reintentar"
   },
   "shipping": {
     "title": "Envío",

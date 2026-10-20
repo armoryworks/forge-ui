@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { provideTranslateService } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 import { WatchtowerComponent } from './watchtower.component';
 import { WatchtowerService } from './services/watchtower.service';
@@ -16,10 +16,16 @@ interface WatchtowerInternals {
   domainLabel(domain: string): string;
   feedTypeLabel(feedType: string): string;
   statusLabel(status: string): string;
+  loadProposals(): void;
+  loadSources(): void;
+  proposalsLoadError(): boolean;
+  sourcesLoadError(): boolean;
 }
 
 describe('WatchtowerComponent', () => {
   let poll: ReturnType<typeof vi.fn>;
+  let getProposals: ReturnType<typeof vi.fn>;
+  let getSources: ReturnType<typeof vi.fn>;
   let snackbar: { success: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn>; warn: ReturnType<typeof vi.fn> };
   let dialogOpen: ReturnType<typeof vi.fn>;
 
@@ -29,13 +35,15 @@ describe('WatchtowerComponent', () => {
 
   beforeEach(() => {
     poll = vi.fn();
+    getProposals = vi.fn(() => of([]));
+    getSources = vi.fn(() => of([]));
     snackbar = { success: vi.fn(), info: vi.fn(), warn: vi.fn() };
     dialogOpen = vi.fn(() => ({ afterClosed: () => of(undefined) }));
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
         provideTranslateService(),
-        { provide: WatchtowerService, useValue: { getProposals: () => of([]), getSources: () => of([]), poll } },
+        { provide: WatchtowerService, useValue: { getProposals, getSources, poll } },
         { provide: CalendarService, useValue: { getSuperGroups: () => of([]) } },
         { provide: SnackbarService, useValue: snackbar },
         { provide: MatDialog, useValue: { open: dialogOpen } },
@@ -92,5 +100,21 @@ describe('WatchtowerComponent', () => {
     expect(component.statusLabel('Pending')).toBe('watchtower.status.pending');
     expect(component.statusLabel('Applied')).toBe('watchtower.status.applied');
     expect(component.statusLabel('Dismissed')).toBe('watchtower.status.dismissed');
+  });
+
+  it('shows a load error, not an empty inbox, when proposals or sources fail to load', () => {
+    getProposals.mockReturnValueOnce(throwError(() => new Error('500')));
+    getSources.mockReturnValueOnce(throwError(() => new Error('500')));
+
+    const component = create();
+
+    expect(component.proposalsLoadError()).toBe(true);
+    expect(component.sourcesLoadError()).toBe(true);
+
+    component.loadProposals();
+    component.loadSources();
+
+    expect(component.proposalsLoadError()).toBe(false);
+    expect(component.sourcesLoadError()).toBe(false);
   });
 });

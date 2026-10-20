@@ -9,7 +9,8 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
 
 export interface SaveReportDialogData {
@@ -47,6 +48,8 @@ const DESCRIPTION_MAX_LENGTH = 500;
 export class SaveReportDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<SaveReportDialogComponent>);
   private readonly data = inject<SaveReportDialogData>(MAT_DIALOG_DATA);
+  private readonly translate = inject(TranslateService);
+  private readonly snackbar = inject(SnackbarService);
 
   protected readonly form = new FormGroup({
     name: new FormControl(this.data.name, [requiredTrimmed, Validators.maxLength(NAME_MAX_LENGTH)]),
@@ -55,9 +58,9 @@ export class SaveReportDialogComponent {
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
-    name: 'Report Name',
-    description: 'Description',
-    isShared: 'Shared',
+    name: this.translate.instant('reports.reportName'),
+    description: this.translate.instant('common.description'),
+    isShared: this.translate.instant('reports.shareWithTeam'),
   });
 
   protected readonly nameMaxLength = NAME_MAX_LENGTH;
@@ -79,7 +82,11 @@ export class SaveReportDialogComponent {
     this.saving.set(true);
     this.data.submit(result).subscribe({
       next: () => this.dialogRef.close(result),
-      error: () => this.saving.set(false),
+      error: (err: unknown) => {
+        this.saving.set(false);
+        const applied = FormValidationService.applyServerError(this.form, err);
+        if (applied?.unmatched.length) this.snackbar.error(applied.unmatched[0].message);
+      },
     });
   }
 }

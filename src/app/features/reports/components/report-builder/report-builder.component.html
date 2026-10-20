@@ -143,6 +143,11 @@
             }
             {{ 'reports.recordsFound' | translate }}
           </div>
+        } @else if (runError()) {
+          <app-empty-state data-testid="report-run-error" icon="error_outline"
+                           [message]="'reports.runFailed' | translate"
+                           [actionLabel]="'reports.retry' | translate"
+                           (action)="runReport()" />
         } @else {
           <app-empty-state icon="analytics" [message]="'reports.configureReport' | translate" />
         }

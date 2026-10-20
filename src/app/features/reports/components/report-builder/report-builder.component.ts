@@ -17,6 +17,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { SpacerDirective } from '../../../../shared/directives/spacer.directive';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { formValidationContext } from '../../../../shared/interceptors/http-error.interceptor';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { toDateOnly } from '../../../../shared/utils/date.utils';
@@ -96,6 +97,7 @@ export class ReportBuilderComponent {
   protected readonly filters = signal<FilterRow[]>([]);
   protected readonly reportResults = signal<RunReportResponse | null>(null);
   protected readonly isRunning = signal(false);
+  protected readonly runError = signal(false);
   protected readonly editingReport = signal<SavedReport | null>(null);
 
   /** Currently active drill-down filter value (label clicked in chart). Null = no filter. */
@@ -378,6 +380,7 @@ export class ReportBuilderComponent {
   protected runReport(): void {
     if (!this.canRun()) return;
     this.isRunning.set(true);
+    this.runError.set(false);
     this.drillFilter.set(null);
 
     const filterValues: ReportFilter[] = this.filters().map(f => ({
@@ -398,7 +401,11 @@ export class ReportBuilderComponent {
         this.reportResults.set(results);
         this.isRunning.set(false);
       },
-      error: () => this.isRunning.set(false),
+      error: () => {
+        this.reportResults.set(null);
+        this.runError.set(true);
+        this.isRunning.set(false);
+      },
     });
   }
 
@@ -537,11 +544,11 @@ export class ReportBuilderComponent {
 
     const existing = this.editingReport();
     if (existing) {
-      return this.builderService.updateReport(existing.id, request).pipe(
+      return this.builderService.updateReport(existing.id, request, formValidationContext()).pipe(
         tap(() => this.snackbar.success(this.translate.instant('reports.reportUpdated'))),
       );
     }
-    return this.builderService.createReport(request).pipe(
+    return this.builderService.createReport(request, formValidationContext()).pipe(
       tap(saved => {
         this.editingReport.set(saved);
         this.snackbar.success(this.translate.instant('reports.reportSaved'));

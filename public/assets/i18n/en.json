@@ -455,7 +455,9 @@
     "margin": {
       "costNotRecorded": "Cost not recorded",
       "jobsWithoutCost": "Jobs without recorded cost",
-      "coverage": "from {{costed}} of {{total}} costed"
+      "coverage": "from {{costed}} of {{total}} costed",
+      "loadFailed": "Margin could not be loaded.",
+      "retry": "Retry"
     },
     "lowStock": {
       "noMinimumsSet": "No minimum stock levels set"
@@ -6930,7 +6932,8 @@
     "deleteReportTitle": "Delete saved report?",
     "deleteReportConfirm": "Delete the saved report \"{{name}}\"? This cannot be undone.",
     "chooseDataSourceFirst": "Choose a data source",
-    "pickColumnFirst": "Pick at least one column"
+    "pickColumnFirst": "Pick at least one column",
+    "runFailed": "This report could not be run."
   },
   "qcInspections": {
     "tabTemplates": "Templates",
@@ -11154,7 +11157,10 @@
       "email": "Email",
       "bulk": "Bulk download",
       "scrape": "Web page"
-    }
+    },
+    "proposalsLoadFailed": "The proposals could not be loaded.",
+    "sourcesLoadFailed": "The monitored sources could not be loaded.",
+    "retry": "Retry"
   },
   "shipping": {
     "title": "Shipping",

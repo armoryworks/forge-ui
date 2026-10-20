@@ -27,11 +27,6 @@ import { TabListDirective, TabDirective } from '../../shared/directives/tab-list
 import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
 import { DateTimePipe } from '../../shared/pipes/date-time.pipe';
 
-/**
- * Regulatory Watchtower workspace — the review surface for the CAP-EXT-WATCHTOWER backend.
- * Proposals inbox (apply → optional compliance-calendar deadline / dismiss), monitored-sources
- * view, and a manual poll trigger. Tabs are URL-driven (`/watchtower/:tab`).
- */
 const DOMAIN_LABEL_KEYS: Readonly<Record<string, string>> = {
   'cross-cutting': 'watchtower.domain.crossCutting',
   environmental: 'watchtower.domain.environmental',
@@ -57,6 +52,11 @@ const STATUS_LABEL_KEYS: Readonly<Record<string, string>> = {
   Dismissed: 'watchtower.status.dismissed',
 };
 
+/**
+ * Regulatory Watchtower workspace — the review surface for the CAP-EXT-WATCHTOWER backend.
+ * Proposals inbox (apply → optional compliance-calendar deadline / dismiss), monitored-sources
+ * view, and a manual poll trigger. Tabs are URL-driven (`/watchtower/:tab`).
+ */
 @Component({
   selector: 'app-watchtower',
   standalone: true,
@@ -83,6 +83,8 @@ export class WatchtowerComponent {
   protected readonly proposals = signal<RegulatoryProposal[]>([]);
   protected readonly sources = signal<RegulatorySource[]>([]);
   protected readonly loading = signal(false);
+  protected readonly proposalsLoadError = signal(false);
+  protected readonly sourcesLoadError = signal(false);
   protected readonly polling = signal(false);
   private readonly eventTypeOptions = signal<SelectOption[]>([]);
 
@@ -137,18 +139,27 @@ export class WatchtowerComponent {
     this.router.navigate(['..', tab], { relativeTo: this.route });
   }
 
-  private loadProposals(): void {
+  protected loadProposals(): void {
     this.loading.set(true);
+    this.proposalsLoadError.set(false);
     this.service.getProposals().subscribe({
       next: (p) => { this.proposals.set(p); this.loading.set(false); },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.proposals.set([]);
+        this.proposalsLoadError.set(true);
+        this.loading.set(false);
+      },
     });
   }
 
-  private loadSources(): void {
+  protected loadSources(): void {
+    this.sourcesLoadError.set(false);
     this.service.getSources().subscribe({
       next: (s) => this.sources.set(s),
-      error: () => this.sources.set([]),
+      error: () => {
+        this.sources.set([]);
+        this.sourcesLoadError.set(true);
+      },
     });
   }
 
