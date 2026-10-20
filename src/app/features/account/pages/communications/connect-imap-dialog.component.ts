@@ -73,12 +73,14 @@ export class ConnectImapDialogComponent {
   });
 
   protected pickPreset(preset: ImapPreset): void {
+    if (this.preset()?.id !== preset.id) {
+      this.form.patchValue({
+        host: preset.host,
+        port: preset.port,
+        useSsl: preset.useSsl,
+      });
+    }
     this.preset.set(preset);
-    this.form.patchValue({
-      host: preset.host,
-      port: preset.port,
-      useSsl: preset.useSsl,
-    });
     this.currentStep.set(1);
   }
 

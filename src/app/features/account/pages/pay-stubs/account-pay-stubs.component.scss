@@ -1,14 +1,15 @@
 @use 'styles/variables' as *;
 
-.pay-stubs {
-  padding: $sp-xl;
-}
+@use '../../shared/account-page';
 
-.pay-stubs__title {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  color: var(--text);
-  margin: 0 0 $sp-sm;
+.pay-stubs {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: $sp-xl;
+
+  .account-page__title {
+    margin-bottom: $sp-sm;
+  }
 }
 
 .pay-stubs__subtitle {

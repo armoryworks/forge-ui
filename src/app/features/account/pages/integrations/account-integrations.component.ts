@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 
 import { MatDialog } from '@angular/material/dialog';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
@@ -21,7 +22,7 @@ interface CategoryGroup {
 @Component({
   selector: 'app-account-integrations',
   standalone: true,
-  imports: [EmptyStateComponent, LoadingBlockDirective],
+  imports: [TranslatePipe, EmptyStateComponent, LoadingBlockDirective],
   templateUrl: './account-integrations.component.html',
   styleUrl: './account-integrations.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

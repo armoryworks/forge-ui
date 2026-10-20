@@ -28,12 +28,12 @@ export class PayrollService {
     );
   }
 
-  downloadPayStubPdf(id: number): void {
-    window.open(`${this.base}/pay-stubs/${id}/pdf`, '_blank');
+  downloadPayStubPdf(id: number): Observable<Blob> {
+    return this.http.get(`${this.base}/pay-stubs/${id}/pdf`, { responseType: 'blob' });
   }
 
-  downloadTaxDocumentPdf(id: number): void {
-    window.open(`${this.base}/tax-documents/${id}/pdf`, '_blank');
+  downloadTaxDocumentPdf(id: number): Observable<Blob> {
+    return this.http.get(`${this.base}/tax-documents/${id}/pdf`, { responseType: 'blob' });
   }
 
   // Admin/OM methods

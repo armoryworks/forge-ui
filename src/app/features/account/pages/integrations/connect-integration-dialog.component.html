@@ -1,23 +1,47 @@
-<app-dialog [title]="'Connect ' + data.provider.displayName" width="480px" (closed)="close()">
+<app-dialog [title]="'account.integrationConnectTitle' | translate: { name: data.provider.displayName }" width="480px" (closed)="close()">
   <div [formGroup]="form">
-    <app-input label="Display Name (optional)"
-               placeholder="e.g., Work Calendar"
+    <app-input [label]="'account.integrationDisplayName' | translate"
+               [placeholder]="'account.integrationDisplayNamePlaceholder' | translate"
                formControlName="displayName"
+               (keydown.enter)="save()"
                data-testid="integration-display-name" />
 
     @if (!isNoAuth) {
-      @if (data.provider.authType === 'webhook' || data.provider.authType === 'oauth2' || data.provider.authType === 'app_password') {
+      @if (isSingleSecret) {
         <app-input [label]="credentialLabel"
+                   type="password"
                    [placeholder]="credentialPlaceholder"
                    formControlName="credentials"
                    [required]="true"
+                   (keydown.enter)="save()"
                    data-testid="integration-credentials" />
+      } @else if (isBasic) {
+        <app-input [label]="'account.integrationUsername' | translate"
+                   formControlName="username"
+                   [required]="true"
+                   autocomplete="username"
+                   data-testid="integration-username" />
+        <app-input [label]="'account.integrationPassword' | translate"
+                   type="password"
+                   formControlName="password"
+                   [required]="true"
+                   (keydown.enter)="save()"
+                   data-testid="integration-password" />
       } @else {
-        <app-textarea [label]="credentialLabel"
-                      [placeholder]="credentialPlaceholder"
-                      formControlName="credentials"
-                      [rows]="4"
-                      data-testid="integration-credentials" />
+        <app-input [label]="'account.integrationAccessKey' | translate"
+                   formControlName="accessKey"
+                   [required]="true"
+                   data-testid="integration-access-key" />
+        <app-input [label]="'account.integrationSecretKey' | translate"
+                   type="password"
+                   formControlName="secretKey"
+                   [required]="true"
+                   data-testid="integration-secret-key" />
+        <app-input [label]="'account.integrationEndpoint' | translate"
+                   [placeholder]="'account.integrationEndpointPlaceholder' | translate"
+                   formControlName="endpoint"
+                   (keydown.enter)="save()"
+                   data-testid="integration-endpoint" />
       }
     }
 
@@ -30,14 +54,14 @@
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="close()">Cancel</button>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <app-validation-button [violations]="violations" [loading]="saving()">
     <button class="action-btn action-btn--primary"
             [disabled]="form.invalid || saving()"
             (click)="save()"
             data-testid="integration-save-btn">
       <span class="material-icons-outlined">{{ saving() ? 'sync' : 'link' }}</span>
-      {{ saving() ? 'Connecting...' : 'Connect' }}
+      {{ (saving() ? 'account.integrationConnecting' : 'account.integrationConnect') | translate }}
     </button>
     </app-validation-button>
   </div>

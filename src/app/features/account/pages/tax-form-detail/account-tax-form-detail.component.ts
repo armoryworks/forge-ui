@@ -7,14 +7,14 @@ import { map } from 'rxjs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { environment } from '../../../../../environments/environment';
 import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { ComplianceFormDefinition } from '../../../../shared/models/compliance-form-definition.model';
 import { ComplianceFormRendererComponent } from '../../components/compliance-form-renderer/compliance-form-renderer.component';
-import { EmployeeProfileService } from '../../services/employee-profile.service';
+import { completenessItemStatus, EmployeeProfileService, WIZARD_FORM_KEYS } from '../../services/employee-profile.service';
+import { downloadBlob } from '../../../../shared/utils/download-blob';
 import { ComplianceFormService } from '../../services/compliance-form.service';
 import { IdentityDocument, IdentityDocumentType, IDENTITY_DOC_LIST_A, IDENTITY_DOC_LIST_B, IDENTITY_DOC_LIST_C } from '../../models/compliance-form.model';
 
@@ -73,10 +73,8 @@ export class AccountTaxFormDetailComponent {
 
   protected readonly isComplete = computed(() => {
     const ft = this.formType();
-    const c = this.profileService.completeness();
-    if (!ft || !c) return false;
-    const item = c.items.find(i => i.key === ft);
-    return item?.isComplete ?? false;
+    if (!ft) return false;
+    return completenessItemStatus(this.profileService.completeness(), ft) ?? false;
   });
 
   /** Sensitive forms contain PII (SSN, etc.) — don't show data back after submission */
@@ -171,33 +169,32 @@ export class AccountTaxFormDetailComponent {
   });
 
   // Embedded PDF — only for admin-uploaded files (external URLs like IRS block iframes)
+  private readonly overridePdfObjectUrl = signal<string | null>(null);
   protected readonly pdfUrl = computed(() => {
-    const tmpl = this.template();
-    if (!tmpl?.manualOverrideFileId) return null;
-    const url = `${environment.apiUrl}/files/${tmpl.manualOverrideFileId}`;
-    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    const url = this.overridePdfObjectUrl();
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
   });
 
-  // Download link — admin upload or external source URL
+  // Download link — external source URL only; admin uploads download through downloadFile()
   protected readonly pdfDownloadUrl = computed(() => {
     const tmpl = this.template();
-    if (!tmpl) return null;
-    if (tmpl.manualOverrideFileId) return `${environment.apiUrl}/files/${tmpl.manualOverrideFileId}`;
+    if (!tmpl || tmpl.manualOverrideFileId) return null;
     return tmpl.sourceUrl;
   });
 
-
-  private static readonly WIZARD_PROFILE_KEYS = new Set([
-    'w4', 'i9', 'state_withholding', 'direct_deposit', 'workers_comp', 'handbook',
-  ]);
+  /** Acknowledgement-only forms the employee may mark complete themselves; the rest need a submission. */
+  protected readonly isSelfAcknowledgeable = computed(() => ['handbook', 'workersComp'].includes(this.formType()));
 
   protected readonly isWizardManaged = computed(() => {
     const ft = this.formType();
-    return !!ft && AccountTaxFormDetailComponent.WIZARD_PROFILE_KEYS.has(ft);
+    return !!ft && WIZARD_FORM_KEYS.includes(ft);
   });
 
-  /** I-9 must not be changed after completion per legal/regulatory requirements */
-  protected readonly canResubmit = computed(() => this.formType() !== 'i9');
+  /**
+   * I-9 must not be changed after completion per legal/regulatory requirements; other forms
+   * can be resubmitted only when there is an electronic form to fill in again.
+   */
+  protected readonly canResubmit = computed(() => this.formType() !== 'i9' && !!this.formDefinition());
 
   /** Non-sensitive summary fields to display for completed wizard forms */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -216,13 +213,13 @@ export class AccountTaxFormDetailComponent {
         case 'i9': return {
           citizenshipStatus: this.getCitizenshipLabel(String(d['i9CitizenshipStatus'] ?? '')),
         };
-        case 'state_withholding': return {
+        case 'stateWithholding': return {
           filingStatus: String(d['stateFilingStatus'] ?? '—'),
           allowances: String(d['stateAllowances'] ?? '0'),
           additionalWithholding: String(d['stateAdditionalWithholding'] ?? '0'),
           exempt: d['stateExempt'] ? 'Yes' : 'No',
         };
-        case 'direct_deposit': return {
+        case 'directDeposit': return {
           bankName: String(d['bankName'] ?? ''),
           accountType: String(d['accountType'] ?? ''),
           routingLast4: String(d['routingNumber'] ?? '').slice(-4).padStart(4, '•'),
@@ -249,11 +246,25 @@ export class AccountTaxFormDetailComponent {
     effect(() => {
       const ft = this.formType();
       const completeness = this.profileService.completeness();
-      if (!ft || !completeness || !AccountTaxFormDetailComponent.WIZARD_PROFILE_KEYS.has(ft)) return;
-      const item = completeness.items.find(i => i.key === ft);
-      if (!item?.isComplete) {
+      if (!ft || !completeness || !WIZARD_FORM_KEYS.includes(ft)) return;
+      if (completenessItemStatus(completeness, ft) !== true) {
         this.router.navigate(['/onboarding']);
       }
+    });
+
+    effect((onCleanup) => {
+      const fileId = this.template()?.manualOverrideFileId;
+      if (!fileId) return;
+      let objectUrl: string | null = null;
+      const sub = this.complianceService.downloadFile(fileId).subscribe(blob => {
+        objectUrl = URL.createObjectURL(blob);
+        this.overridePdfObjectUrl.set(objectUrl);
+      });
+      onCleanup(() => {
+        sub.unsubscribe();
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        this.overridePdfObjectUrl.set(null);
+      });
     });
 
     // Load templates, submissions, and profile completeness when form type changes
@@ -364,15 +375,16 @@ export class AccountTaxFormDetailComponent {
     this.complianceService.downloadSubmissionPdf(sub.id).subscribe({
       next: (blob) => {
         this.downloadingPdf.set(false);
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${this.template()?.name ?? 'form'}.pdf`;
-        a.click();
-        URL.revokeObjectURL(url);
+        downloadBlob(blob, `${this.template()?.name ?? 'form'}.pdf`);
       },
       error: () => this.downloadingPdf.set(false),
     });
+  }
+
+  protected downloadFile(fileId: number): void {
+    this.complianceService.downloadFile(fileId).subscribe(
+      blob => downloadBlob(blob, `${this.template()?.name ?? 'form'}.pdf`),
+    );
   }
 
   protected startResubmit(): void {
@@ -385,7 +397,7 @@ export class AccountTaxFormDetailComponent {
 
   protected acknowledge(): void {
     const ft = this.formType();
-    if (!ft) return;
+    if (!ft || this.acknowledging()) return;
     this.acknowledging.set(true);
     this.profileService.acknowledgeForm(ft).subscribe({
       next: () => {

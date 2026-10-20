@@ -1,24 +1,21 @@
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
 
+@use '../../shared/account-page';
+
 .comms {
   padding: $sp-xl;
-  max-width: 800px;
+  max-width: 960px;
+  margin: 0 auto;
 
   &__header {
     margin-bottom: $sp-lg;
   }
 
-  &__title {
-    font-size: $font-size-lg;
-    font-weight: 600;
-    margin: 0 0 $sp-sm;
-  }
-
   &__subtitle {
     font-size: $font-size-sm;
     color: var(--text-muted);
-    margin: 0;
+    margin: $sp-sm 0 0;
   }
 
   // Phase 1k.1 — connection health summary banner

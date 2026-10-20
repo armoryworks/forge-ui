@@ -13,11 +13,11 @@
 // Two-column card grid — side-by-side cards at desktop
 .account-page__card-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: $sp-xl;
 
   @include mobile {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

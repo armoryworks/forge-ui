@@ -2,6 +2,8 @@ import { TestBed } from '@angular/core/testing';
 
 import { DesktopPreferenceService } from './desktop-preference.service';
 import { LayoutService } from './layout.service';
+import { NavTreeService } from './nav-tree.service';
+import { UserPreferencesService } from './user-preferences.service';
 
 describe('LayoutService', () => {
   let service: LayoutService;
@@ -183,6 +185,23 @@ describe('LayoutService', () => {
     it('sends a phone to /m', () => {
       vi.spyOn(service, 'isMobileDevice').mockReturnValue(true);
       expect(service.getDefaultRoute()).toBe('/m');
+    });
+
+    function withStoredLanding(route: string, reachable: (r: string) => boolean): LayoutService {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [LayoutService, { provide: NavTreeService, useValue: { canReach: reachable } }],
+      });
+      vi.spyOn(TestBed.inject(UserPreferencesService), 'get').mockReturnValue(route);
+      return TestBed.inject(LayoutService);
+    }
+
+    it('honours a stored landing screen the user can open', () => {
+      expect(withStoredLanding('/kanban', r => r === '/kanban').getDefaultRoute()).toBe('/kanban');
+    });
+
+    it('ignores a stored landing screen the user cannot open', () => {
+      expect(withStoredLanding('/accounting', () => false).getDefaultRoute()).toBe('/dashboard');
     });
 
     it('keeps a phone on the desktop site once the user chose it', () => {

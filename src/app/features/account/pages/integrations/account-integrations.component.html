@@ -1,7 +1,10 @@
 <div class="integrations" [appLoadingBlock]="loading()">
   <div class="integrations__header">
-    <h2 class="integrations__title">Integrations</h2>
-    <p class="integrations__subtitle">Connect your external accounts for calendar sync, notifications, and file storage.</p>
+    <h1 class="account-page__title">
+      <span class="material-icons-outlined">extension</span>
+      {{ 'account.integrations' | translate }}
+    </h1>
+    <p class="integrations__subtitle">{{ 'account.integrationsSubtitle' | translate }}</p>
   </div>
 
   @for (group of categoryGroups(); track group.category) {

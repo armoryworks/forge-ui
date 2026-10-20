@@ -9,34 +9,28 @@
     <div class="account-page__card">
       <span class="account-page__section-label">{{ 'account.changePassword' | translate }}</span>
 
-      <div [formGroup]="passwordForm" class="account-page__form">
-        <app-input [label]="'account.currentPassword' | translate" type="password" formControlName="currentPassword" [required]="true" />
-        <app-input [label]="'account.newPassword' | translate" type="password" formControlName="newPassword" [placeholder]="'account.minPasswordHint' | translate" [required]="true" />
-        <app-input [label]="'account.confirmNewPassword' | translate" type="password" formControlName="confirmPassword" [required]="true" />
-        @if (passwordMismatch()) {
-          <div class="security__error">
-            <span class="material-icons-outlined">warning</span>
-            {{ 'account.passwordsDoNotMatch' | translate }}
-          </div>
-        }
-      </div>
+      <form [formGroup]="passwordForm" class="account-page__form" (ngSubmit)="changePassword()">
+        <app-input [label]="'account.currentPassword' | translate" type="password" formControlName="currentPassword" autocomplete="current-password" [required]="true" />
+        <app-input [label]="'account.newPassword' | translate" type="password" formControlName="newPassword" autocomplete="new-password" [required]="true" />
+        <p class="security__hint">{{ 'account.passwordPolicyHint' | translate }}</p>
+        <app-input [label]="'account.confirmNewPassword' | translate" type="password" formControlName="confirmPassword" autocomplete="new-password" [required]="true" />
 
-      <div class="account-page__actions">
-        <app-validation-button [violations]="passwordViolations" [loading]="passwordMismatch()">
-        <button class="action-btn action-btn--primary"
-          data-testid="change-password-btn"
-          [disabled]="passwordForm.invalid || savingPassword() || passwordMismatch()"
-          (click)="changePassword()">
-          @if (savingPassword()) {
-            <span class="material-icons-outlined account-page__spinner">sync</span>
-            {{ 'account.changing' | translate }}
-          } @else {
-            <span class="material-icons-outlined">lock_reset</span>
-            {{ 'account.changePassword' | translate }}
-          }
-        </button>
-        </app-validation-button>
-      </div>
+        <div class="account-page__actions">
+          <app-validation-button [violations]="passwordViolations" [loading]="passwordForm.pristine">
+          <button type="submit" class="action-btn action-btn--primary"
+            data-testid="change-password-btn"
+            [disabled]="passwordForm.invalid || savingPassword()">
+            @if (savingPassword()) {
+              <span class="material-icons-outlined account-page__spinner">sync</span>
+              {{ 'account.changing' | translate }}
+            } @else {
+              <span class="material-icons-outlined">lock_reset</span>
+              {{ 'account.changePassword' | translate }}
+            }
+          </button>
+          </app-validation-button>
+        </div>
+      </form>
     </div>
 
     <!-- Set PIN -->
@@ -44,31 +38,26 @@
       <span class="account-page__section-label">{{ 'account.kioskPin' | translate }}</span>
       <p class="security__hint">{{ 'account.kioskPinHint' | translate }}</p>
 
-      <div [formGroup]="pinForm" class="account-page__form">
+      <form [formGroup]="pinForm" class="account-page__form" (ngSubmit)="setPin()">
         <app-input [label]="'account.pin' | translate" type="password" formControlName="pin" [placeholder]="'account.pinPlaceholder' | translate" [maxlength]="8" [required]="true" />
         <app-input [label]="'account.confirmPin' | translate" type="password" formControlName="confirmPin" [maxlength]="8" [required]="true" />
-        @if (pinMismatch()) {
-          <div class="security__error">
-            <span class="material-icons-outlined">warning</span>
-            {{ 'account.pinsDoNotMatch' | translate }}
-          </div>
-        }
-      </div>
 
-      <div class="account-page__actions">
-        <button class="action-btn action-btn--primary"
-          data-testid="set-pin-btn"
-          [disabled]="pinForm.invalid || savingPin() || pinMismatch()"
-          (click)="setPin()">
-          @if (savingPin()) {
-            <span class="material-icons-outlined account-page__spinner">sync</span>
-            {{ 'account.saving' | translate }}
-          } @else {
-            <span class="material-icons-outlined">pin</span>
-            {{ 'account.setPin' | translate }}
-          }
-        </button>
-      </div>
+        <div class="account-page__actions">
+          <app-validation-button [violations]="pinViolations" [loading]="pinForm.pristine">
+          <button type="submit" class="action-btn action-btn--primary"
+            data-testid="set-pin-btn"
+            [disabled]="pinForm.invalid || savingPin()">
+            @if (savingPin()) {
+              <span class="material-icons-outlined account-page__spinner">sync</span>
+              {{ 'account.saving' | translate }}
+            } @else {
+              <span class="material-icons-outlined">pin</span>
+              {{ 'account.setPin' | translate }}
+            }
+          </button>
+          </app-validation-button>
+        </div>
+      </form>
     </div>
 
     <!-- Two-Factor Authentication -->

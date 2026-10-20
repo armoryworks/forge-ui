@@ -30,6 +30,7 @@
       <a class="account-sidebar__link"
         routerLink="/onboarding"
         routerLinkActive="account-sidebar__link--active"
+        [class.account-sidebar__link--active]="onTaxFormsPage() && !onboardingComplete()"
         [attr.aria-label]="'account.employeeOnboarding' | translate">
         <span class="material-icons-outlined account-sidebar__icon">assignment_ind</span>
         <span class="account-sidebar__label">{{ 'account.employeeOnboarding' | translate }}</span>

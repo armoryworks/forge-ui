@@ -84,6 +84,19 @@ describe('UserPreferencesService', () => {
       expect(service.get('sidebar:collapsed')).toBe(true);
     });
 
+    it('keeps a value set while the load was in flight', () => {
+      service.load();
+      service.set('appearance:theme', 'light');
+
+      httpMock.expectOne(baseUrl).flush([
+        { key: 'appearance:theme', valueJson: '"dark"' },
+        { key: 'sidebar:collapsed', valueJson: 'true' },
+      ]);
+
+      expect(service.get('appearance:theme')).toBe('light');
+      expect(service.get('sidebar:collapsed')).toBe(true);
+    });
+
     it('should handle API errors gracefully', () => {
       service.load();
 

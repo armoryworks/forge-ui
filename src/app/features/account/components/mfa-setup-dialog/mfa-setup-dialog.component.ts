@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -12,7 +13,7 @@ import { MfaSetupResponse } from '../../models/mfa.model';
 @Component({
   selector: 'app-mfa-setup-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, DialogComponent, InputComponent, QrCodeComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, QrCodeComponent],
   templateUrl: './mfa-setup-dialog.component.html',
   styleUrl: './mfa-setup-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

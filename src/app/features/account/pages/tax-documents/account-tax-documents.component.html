@@ -1,5 +1,8 @@
 <div class="tax-documents">
-  <h2 class="tax-documents__title">{{ 'account.taxDocuments' | translate }}</h2>
+  <h1 class="account-page__title">
+    <span class="material-icons-outlined">receipt_long</span>
+    {{ 'account.taxDocuments' | translate }}
+  </h1>
   <p class="tax-documents__subtitle">{{ 'account.taxDocumentsSubtitle' | translate }}</p>
 
   <app-data-table
@@ -27,7 +30,7 @@
 
     <ng-template appColumnCell="actions" let-row>
       @if (row.fileAttachmentId) {
-        <button class="icon-btn" (click)="downloadPdf(row.id); $event.stopPropagation()" [attr.aria-label]="'account.downloadTaxDocPdf' | translate" [matTooltip]="'account.downloadTaxDocPdf' | translate" matTooltipPosition="above">
+        <button class="icon-btn" (click)="downloadPdf(row); $event.stopPropagation()" [attr.aria-label]="'account.downloadTaxDocPdf' | translate" [matTooltip]="'account.downloadTaxDocPdf' | translate" matTooltipPosition="above">
           <span class="material-icons-outlined">download</span>
         </button>
       }
