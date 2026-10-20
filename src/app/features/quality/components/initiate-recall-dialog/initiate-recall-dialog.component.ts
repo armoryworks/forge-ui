@@ -7,14 +7,15 @@ import { RecallService } from '../../services/recall.service';
 import { RecallDetail } from '../../models/recall-detail.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 
 export interface InitiateRecallDialogData {
-  lotId: number;
-  lotNumber: string;
+  lotId: number | null;
+  lotNumber: string | null;
 }
 
 @Component({
@@ -22,7 +23,7 @@ export interface InitiateRecallDialogData {
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe,
-    DialogComponent, TextareaComponent, ValidationButtonComponent,
+    DialogComponent, TextareaComponent, ValidationButtonComponent, EntityPickerComponent,
   ],
   templateUrl: './initiate-recall-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,7 +37,10 @@ export class InitiateRecallDialogComponent {
 
   protected readonly saving = signal(false);
 
+  protected readonly pickLot = this.data.lotId == null;
+
   protected readonly form = new FormGroup({
+    lotId: new FormControl<number | null>(this.data.lotId, [Validators.required]),
     reason: new FormControl<string>('', {
       nonNullable: true,
       validators: [Validators.required, Validators.maxLength(2000), Validators.pattern(/\S/)],
@@ -45,6 +49,7 @@ export class InitiateRecallDialogComponent {
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
     reason: this.translate.instant('recalls.reason'),
+    lotId: this.translate.instant('recalls.pickLot'),
   });
 
   protected close(): void { this.dialogRef.close(); }
@@ -53,7 +58,7 @@ export class InitiateRecallDialogComponent {
     if (this.form.invalid || this.saving()) return;
     this.saving.set(true);
     this.recallService.initiateRecall({
-      recalledLotId: this.data.lotId,
+      recalledLotId: this.form.controls.lotId.value!,
       reason: this.form.controls.reason.value.trim(),
       recallDate: toIsoDate(new Date())!,
     }).subscribe({

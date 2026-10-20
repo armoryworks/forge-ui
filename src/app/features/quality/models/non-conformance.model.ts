@@ -45,4 +45,5 @@ export interface NonConformance {
   vendorId: number | null;
   vendorName: string | null;
   createdAt: string;
+  rowVersion?: number;
 }

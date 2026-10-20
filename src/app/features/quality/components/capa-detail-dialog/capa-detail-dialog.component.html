@@ -1,0 +1,97 @@
+<app-dialog [title]="capa()?.capaNumber ?? ('capas.detailTitle' | translate)" width="760px" [dirty]="form.dirty" (closed)="close()">
+  <div class="capa-detail" [appLoadingBlock]="loading()">
+    @if (capa(); as c) {
+      <div class="capa-detail__summary">
+        <h3 class="capa-detail__title" data-testid="capa-detail-title">{{ c.title }}</h3>
+        <div class="capa-detail__meta">
+          <span class="chip chip--info">{{ c.status }}</span>
+          <span class="text-muted">{{ 'capas.owner' | translate }}: {{ c.ownerName }}</span>
+          <span class="text-muted">{{ 'common.dueDate' | translate }}: {{ c.dueDate | dateOnly }}</span>
+        </div>
+        <p class="capa-detail__problem">{{ c.problemDescription }}</p>
+      </div>
+
+      @if (c.status !== 'Closed' && (c.advanceBlockers?.length ?? 0) > 0) {
+        <div class="capa-detail__blockers" role="status" data-testid="capa-advance-blockers">
+          <span class="material-icons-outlined" aria-hidden="true">info</span>
+          <span>{{ 'capas.blockers' | translate: { fields: c.advanceBlockers!.join(', ') } }}</span>
+        </div>
+      }
+
+      <div [formGroup]="form" class="capa-detail__form">
+        <app-select [label]="'capas.owner' | translate" formControlName="ownerId" [options]="userOptions()" />
+        <div class="dialog-row">
+          <app-select [label]="'capas.rootCauseMethod' | translate" formControlName="rootCauseMethod"
+            [options]="rootCauseMethodOptions" data-testid="capa-root-cause-method" />
+        </div>
+        <app-textarea [label]="'capas.rootCauseAnalysis' | translate" formControlName="rootCauseAnalysis"
+          data-testid="capa-root-cause-analysis" />
+        <app-textarea [label]="'capas.containmentAction' | translate" formControlName="containmentAction" />
+        <app-textarea [label]="'capas.correctiveAction' | translate" formControlName="correctiveActionDescription"
+          data-testid="capa-corrective-action" />
+        <app-textarea [label]="'capas.preventiveAction' | translate" formControlName="preventiveAction" />
+        <div class="dialog-row">
+          <app-input [label]="'capas.verificationMethod' | translate" formControlName="verificationMethod" />
+          <app-input [label]="'capas.verificationResult' | translate" formControlName="verificationResult"
+            data-testid="capa-verification-result" />
+        </div>
+        <div class="dialog-row">
+          <app-input [label]="'capas.effectivenessResult' | translate" formControlName="effectivenessResult" />
+          <app-select [label]="'capas.isEffective' | translate" formControlName="isEffective" [options]="effectiveOptions"
+            data-testid="capa-is-effective" />
+        </div>
+      </div>
+
+      <div class="capa-detail__section">
+        <div class="capa-detail__section-header">
+          <h4 class="capa-detail__section-title">{{ 'capas.tasks' | translate }}</h4>
+          @if (canManage() && c.status !== 'Closed') {
+            <button class="action-btn action-btn--sm" (click)="openTaskForm()" data-testid="capa-add-task-btn">
+              <span class="material-icons-outlined" aria-hidden="true">add</span> {{ 'capas.addTask' | translate }}
+            </button>
+          }
+        </div>
+        @if (showTaskForm()) {
+          <div [formGroup]="taskForm" class="capa-detail__task-form">
+            <app-input [label]="'common.title' | translate" formControlName="title" [required]="true" data-testid="capa-task-title" />
+            <div class="dialog-row">
+              <app-select [label]="'common.assignee' | translate" formControlName="assigneeId" [options]="userOptions()"
+                [required]="true" data-testid="capa-task-assignee" />
+              <app-datepicker [label]="'common.dueDate' | translate" formControlName="dueDate" [required]="true" />
+            </div>
+            <div class="capa-detail__task-actions">
+              <button class="action-btn action-btn--sm" (click)="showTaskForm.set(false)">{{ 'common.cancel' | translate }}</button>
+              <button class="action-btn action-btn--sm action-btn--primary" [disabled]="taskForm.invalid || saving()"
+                (click)="addTask()" data-testid="capa-task-save">{{ 'common.add' | translate }}</button>
+            </div>
+          </div>
+        }
+        @for (task of tasks(); track task.id) {
+          <div class="capa-detail__task" [attr.data-testid]="'capa-task-' + task.id">
+            <div class="capa-detail__task-text">
+              <span class="capa-detail__task-title">{{ task.title }}</span>
+              <span class="text-muted">{{ task.assigneeName }} · {{ task.dueDate | dateOnly }}</span>
+            </div>
+            <app-select [label]="'common.status' | translate" [options]="taskStatusOptions"
+              [formControl]="taskStatusControl(task)" (selectionChange)="setTaskStatus(task, $event)"
+              [isReadonly]="c.status === 'Closed'" />
+          </div>
+        } @empty {
+          <p class="text-muted">{{ 'capas.noTasks' | translate }}</p>
+        }
+      </div>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.close' | translate }}</button>
+    @if (canManage() && capa()?.status !== 'Closed') {
+      <button class="action-btn" [disabled]="!form.dirty || saving()" (click)="save()" data-testid="capa-save-btn">
+        {{ 'common.save' | translate }}
+      </button>
+      <button class="action-btn action-btn--primary" [disabled]="saving()" (click)="advance()" data-testid="capa-advance-btn">
+        <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span> {{ 'capas.advance' | translate }}
+      </button>
+    }
+  </div>
+</app-dialog>

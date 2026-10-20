@@ -92,7 +92,7 @@
 .calendar-grid { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: auto; scrollbar-gutter: stable; }
 
 .calendar-header {
-  display: grid; grid-template-columns: repeat(7, 1fr);
+  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));
   border-bottom: $border-width-thin solid var(--border); flex-shrink: 0;
 }
 .weekday-label {
@@ -101,7 +101,7 @@
   background: var(--surface);
 }
 
-.calendar-body { display: grid; grid-template-columns: repeat(7, 1fr); flex: 1; }
+.calendar-body { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); flex: 1; }
 
 .calendar-cell {
   border-right: $border-width-thin solid var(--border);
@@ -177,7 +177,7 @@
 .week-grid { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: auto; scrollbar-gutter: stable; }
 
 .week-header {
-  display: grid; grid-template-columns: repeat(7, 1fr); flex-shrink: 0;
+  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); flex-shrink: 0;
   border-bottom: $border-width solid var(--border);
 
   &__cell {
@@ -199,7 +199,7 @@
 }
 
 .week-body {
-  display: grid; grid-template-columns: repeat(7, 1fr); flex: 1;
+  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); flex: 1;
 }
 
 .week-column {

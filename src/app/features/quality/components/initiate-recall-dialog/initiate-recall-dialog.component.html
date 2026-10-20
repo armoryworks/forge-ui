@@ -1,10 +1,14 @@
 <app-dialog
-  [title]="'recalls.initiateTitle' | translate: { lotNumber: data.lotNumber }"
+  [title]="pickLot ? ('recalls.initiateTitleNoLot' | translate) : ('recalls.initiateTitle' | translate: { lotNumber: data.lotNumber })"
   width="480px"
   [dirty]="form.dirty"
   (closed)="close()">
   <div [formGroup]="form">
     <p class="text-muted">{{ 'recalls.initiateHint' | translate }}</p>
+    @if (pickLot) {
+      <app-entity-picker [label]="'recalls.pickLot' | translate" entityType="lots" displayField="lotNumber"
+        secondaryDisplayField="partNumber" formControlName="lotId" data-testid="recall-lot-picker" />
+    }
     <app-textarea [label]="'recalls.reason' | translate"
       formControlName="reason" [rows]="4" [maxlength]="2000"
       data-testid="recall-reason" />

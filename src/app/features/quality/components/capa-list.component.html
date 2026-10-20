@@ -5,7 +5,11 @@
 
 <div [appLoadingBlock]="loading()">
   <app-data-table tableId="capa-list" [columns]="columns" [data]="capas()"
+    [clickableRows]="true" (rowClick)="openDetail($event)"
     emptyIcon="assignment_turned_in" emptyMessage="No corrective actions found">
+    <ng-template appColumnCell="capaNumber" let-row>
+      <span class="capa-list__number">{{ row.capaNumber }}</span>
+    </ng-template>
     <ng-template appColumnCell="type" let-row>
       <span class="chip chip--muted">{{ row.type }}</span>
     </ng-template>
@@ -22,9 +26,11 @@
       {{ row.completedTaskCount }}/{{ row.taskCount }}
     </ng-template>
     <ng-template appColumnCell="actions" let-row>
-      @if (row.status !== 'Closed') {
-        <button class="icon-btn" aria-label="Advance CAPA phase" (click)="advancePhase(row); $event.stopPropagation()">
-          <span class="material-icons-outlined">arrow_forward</span>
+      @if (canManage && row.status !== 'Closed') {
+        <button class="icon-btn" [attr.aria-label]="'capas.advance' | translate"
+          [matTooltip]="'capas.advance' | translate" matTooltipPosition="above"
+          (click)="advancePhase(row); $event.stopPropagation()">
+          <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
         </button>
       }
     </ng-template>
@@ -42,7 +48,8 @@
       <app-textarea label="Problem Description" formControlName="problemDescription" [required]="true" />
       <app-textarea label="Impact Description" formControlName="impactDescription" />
       <div class="dialog-row">
-        <app-input label="Owner ID" type="number" formControlName="ownerId" [required]="true" />
+        <app-select [label]="'capas.owner' | translate" formControlName="ownerId" [options]="userOptions()" [required]="true"
+          data-testid="capa-create-owner" />
         <app-select label="Priority" formControlName="priority" [options]="priorityOptions" />
       </div>
       <app-datepicker label="Due Date" formControlName="dueDate" />
@@ -56,4 +63,9 @@
       </app-validation-button>
     </div>
   </app-dialog>
+}
+
+@if (openCapaId(); as capaId) {
+  <app-capa-detail-dialog [capaId]="capaId" [userOptions]="userOptions()"
+    (closed)="openCapaId.set(null)" (changed)="loadCapas()" />
 }

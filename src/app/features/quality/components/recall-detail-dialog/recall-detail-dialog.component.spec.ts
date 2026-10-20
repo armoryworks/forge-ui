@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormControl, FormGroup } from '@angular/forms';
@@ -49,7 +49,9 @@ interface DialogApi {
 }
 
 describe('RecallDetailDialogComponent', () => {
-  const dialogRef = { close: vi.fn() };
+  const dialogRef = { close: vi.fn(), removePanelClass: vi.fn(), updateSize: vi.fn() };
+  let confirmAnswer = true;
+  const confirmDialog = { open: vi.fn(() => ({ afterClosed: () => of(confirmAnswer) })) };
   let getRecall: ReturnType<typeof vi.fn>;
   let resolveRecall: ReturnType<typeof vi.fn>;
   let roles: string[];
@@ -62,6 +64,7 @@ describe('RecallDetailDialogComponent', () => {
       providers: [
         { provide: MAT_DIALOG_DATA, useValue: { recallId: detail.id } },
         { provide: MatDialogRef, useValue: dialogRef },
+        { provide: MatDialog, useValue: confirmDialog },
         { provide: RecallService, useValue: { getRecall, resolveRecall } },
         { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
         { provide: SnackbarService, useValue: { success: vi.fn(), errorFrom: vi.fn() } },
@@ -77,6 +80,7 @@ describe('RecallDetailDialogComponent', () => {
     TestBed.resetTestingModule();
     vi.clearAllMocks();
     roles = ['Manager'];
+    confirmAnswer = true;
   });
 
   it('loads the recall by id and rolls up its customers', () => {
@@ -109,8 +113,10 @@ describe('RecallDetailDialogComponent', () => {
     const { api } = create();
 
     expect(api.canResolve()).toBe(true);
+    api.resolveForm.controls.resolutionNotes.setValue('  Supplier lot cleared  ');
     api.resolve();
-    expect(resolveRecall).toHaveBeenCalledWith(4, null, false);
+    expect(confirmDialog.open).toHaveBeenCalledTimes(1);
+    expect(resolveRecall).toHaveBeenCalledWith(4, 'Supplier lot cleared', false);
     expect(api.canResolve()).toBe(false);
 
     api.close();
@@ -120,10 +126,32 @@ describe('RecallDetailDialogComponent', () => {
   it('releases held stock on resolve only when the user turns it on', () => {
     const { api } = create();
 
+    api.resolveForm.controls.resolutionNotes.setValue('Scrapped');
     api.resolveForm.controls.releaseHeldStock.setValue(true);
     api.resolve();
 
-    expect(resolveRecall).toHaveBeenCalledWith(4, null, true);
+    expect(resolveRecall).toHaveBeenCalledWith(4, 'Scrapped', true);
+  });
+
+  it('needs resolution notes and a confirmation before resolving', () => {
+    const { api } = create();
+
+    api.resolveForm.controls.resolutionNotes.setValue('   ');
+    api.resolve();
+    expect(confirmDialog.open).not.toHaveBeenCalled();
+
+    api.resolveForm.controls.resolutionNotes.setValue('Contained');
+    confirmAnswer = false;
+    api.resolve();
+    expect(confirmDialog.open).toHaveBeenCalledTimes(1);
+    expect(resolveRecall).not.toHaveBeenCalled();
+  });
+
+  it('names the recalled lot in the title once it loads', () => {
+    const { fixture } = create();
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('[data-testid="recall-detail-title"]')?.textContent)
+      .toContain('recalls.detailTitleWithLot');
   });
 
   it('does not offer Resolve to an Engineer', () => {
@@ -140,6 +168,8 @@ describe('RecallDetailDialogComponent', () => {
 
     expect(el.querySelector('[data-testid="detail-load-error"]')).not.toBeNull();
     expect(el.querySelector('[data-testid="recall-status"]')).toBeNull();
+    expect(el.querySelector('[data-testid="recall-detail-close-btn"]')).toBeNull();
+    expect(dialogRef.removePanelClass).toHaveBeenCalledWith('detail-dialog-panel');
 
     (el.querySelector('[data-testid="detail-load-error"] button') as HTMLButtonElement).click();
     expect(dialogRef.close).toHaveBeenCalled();

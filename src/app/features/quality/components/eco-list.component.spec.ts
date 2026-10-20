@@ -8,6 +8,7 @@ import { of } from 'rxjs';
 import { EcoListComponent } from './eco-list.component';
 import { EcoService } from '../services/eco.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { AuthService } from '../../../shared/services/auth.service';
 import { Eco } from '../models/eco.model';
 
 interface EcoView {
@@ -41,6 +42,7 @@ describe('EcoListComponent submit for review', () => {
         },
         { provide: SnackbarService, useValue: { success: vi.fn() } },
         { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: AuthService, useValue: { hasAnyRole: () => true } },
       ],
     });
     view = TestBed.runInInjectionContext(() => new EcoListComponent()) as unknown as EcoView;

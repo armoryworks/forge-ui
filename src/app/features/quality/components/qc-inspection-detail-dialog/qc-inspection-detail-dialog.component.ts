@@ -4,10 +4,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { map, startWith } from 'rxjs';
 
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -55,7 +55,7 @@ const DETECTION_STAGES: NcrDetectionStage[] = ['Receiving', 'InProcess', 'FinalI
   standalone: true,
   imports: [
     DatePipe, ReactiveFormsModule, TranslatePipe,
-    DialogComponent, EntityActivitySectionComponent, EntityPickerComponent,
+    EntityActivitySectionComponent, EntityPickerComponent,
     InputComponent, SelectComponent, TextareaComponent, ValidationButtonComponent, LoadingBlockDirective,
     DetailLoadErrorComponent,
   ],
@@ -71,6 +71,7 @@ export class QcInspectionDetailDialogComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly capabilities = inject(CapabilityService);
+  private readonly dialog = inject(MatDialog);
 
   protected readonly inspection = signal<QcInspectionDetail | null>(null);
   protected readonly loading = signal(true);
@@ -142,6 +143,9 @@ export class QcInspectionDetailDialogComponent {
       .map(r => this.translate.instant('qcInspections.requiredNotChecked', { item: r.description })));
 
   protected readonly passViolations = computed<string[]>(() => [
+    ...(this.completeViolations().length === 0 && !this.formValue().results.some(r => r.passed !== null)
+      ? [this.translate.instant('qcInspections.noCheckRecorded')]
+      : []),
     ...this.completeViolations(),
     ...this.formValue().results
       .filter(r => r.isRequired && r.passed === false)
@@ -175,12 +179,27 @@ export class QcInspectionDetailDialogComponent {
 
   protected markPassed(): void {
     if (this.passViolations().length > 0) return;
-    this.submit('Passed', 'qcInspections.passedMessage');
+    this.confirmComplete('Passed', 'qcInspections.passedMessage');
   }
 
   protected markFailed(): void {
     if (this.completeViolations().length > 0) return;
-    this.submit('Failed', 'qcInspections.failedMessage');
+    this.confirmComplete('Failed', 'qcInspections.failedMessage');
+  }
+
+  private confirmComplete(status: 'Passed' | 'Failed', messageKey: string): void {
+    const passed = status === 'Passed';
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: this.translate.instant(passed ? 'qcInspections.confirmPassTitle' : 'qcInspections.confirmFailTitle'),
+        message: this.translate.instant('qcInspections.confirmCompleteMessage'),
+        confirmLabel: this.translate.instant(passed ? 'qcInspections.markPassed' : 'qcInspections.markFailed'),
+        severity: passed ? 'info' : 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (confirmed) this.submit(status, messageKey);
+    });
   }
 
   protected openNcrForm(): void {

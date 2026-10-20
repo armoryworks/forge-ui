@@ -47,7 +47,7 @@
         [columns]="columns"
         [data]="filteredPredictions()"
         emptyIcon="precision_manufacturing"
-        [emptyMessage]="'maintenance.empty' | translate">
+        [emptyMessage]="emptyMessageKey() | translate">
 
         <ng-template appColumnCell="severity" let-row>
           <span [class]="getSeverityClass(row.severity)">

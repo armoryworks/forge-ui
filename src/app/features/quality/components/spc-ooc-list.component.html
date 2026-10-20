@@ -21,6 +21,9 @@
       <ng-template appColumnCell="acknowledgedByName" let-row>
         <span class="text-muted">{{ row.acknowledgedByName ?? '—' }}</span>
       </ng-template>
+      <ng-template appColumnCell="capaNumber" let-row>
+        <span class="spc-ooc__capa">{{ row.capaNumber ?? '—' }}</span>
+      </ng-template>
       <ng-template appColumnCell="actions" let-row>
         <div class="spc-ooc__actions">
           @if (row.status === 'Open') {
@@ -28,7 +31,7 @@
               <span class="material-icons-outlined">done</span>
             </button>
           }
-          @if (row.status === 'Open' || row.status === 'Acknowledged') {
+          @if (canCreateCapa && (row.status === 'Open' || row.status === 'Acknowledged')) {
             <button class="icon-btn" aria-label="Create CAPA" (click)="createCapa(row); $event.stopPropagation()">
               <span class="material-icons-outlined">assignment</span>
             </button>

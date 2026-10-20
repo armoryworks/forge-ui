@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 import { EcoService } from '../services/eco.service';
 import { Eco, EcoAffectedItem, EcoStatus, EcoChangeType, EcoPriority, CreateEcoAffectedItemRequest } from '../models/eco.model';
@@ -21,6 +22,22 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
 import { MatDialog } from '@angular/material/dialog';
 import { toDateOnly } from '../../../shared/utils/date.utils';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { EntityPickerComponent } from '../../../shared/components/entity-picker/entity-picker.component';
+import { AuthService } from '../../../shared/services/auth.service';
+import { ECO_AUTHOR_ROLES, QUALITY_MANAGER_ROLES } from '../quality-roles';
+
+const PART_ENTITY_TYPES = ['Part', 'BOM'];
+
+const jsonText = (control: AbstractControl): ValidationErrors | null => {
+  const value = control.value as string | null;
+  if (!value || !value.trim()) return null;
+  try {
+    JSON.parse(value);
+    return null;
+  } catch {
+    return { pattern: { requiredPattern: 'JSON' } };
+  }
+};
 
 @Component({
   selector: 'app-eco-list',
@@ -30,7 +47,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
     DataTableComponent, ColumnCellDirective,
     SelectComponent, InputComponent, TextareaComponent, DatepickerComponent,
     DialogComponent, LoadingBlockDirective,
-    ValidationButtonComponent, MatTooltipModule, TranslatePipe,
+    ValidationButtonComponent, MatTooltipModule, TranslatePipe, EntityPickerComponent,
   ],
   templateUrl: './eco-list.component.html',
   styleUrl: './eco-list.component.scss',
@@ -41,7 +58,10 @@ export class EcoListComponent implements OnInit {
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
+  private readonly auth = inject(AuthService);
 
+  protected readonly canAuthor = this.auth.hasAnyRole(ECO_AUTHOR_ROLES);
+  protected readonly canApproveRole = this.auth.hasAnyRole(QUALITY_MANAGER_ROLES);
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   protected readonly ecos = signal<Eco[]>([]);
@@ -119,9 +139,14 @@ export class EcoListComponent implements OnInit {
     entityType: new FormControl('Part', { nonNullable: true }),
     entityId: new FormControl<number | null>(null, [Validators.required, Validators.min(1)]),
     changeDescription: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(500)] }),
-    oldValue: new FormControl(''),
-    newValue: new FormControl(''),
+    oldValue: new FormControl('', [jsonText]),
+    newValue: new FormControl('', [jsonText]),
   });
+
+  protected readonly addItemEntityType = toSignal(this.addItemForm.controls.entityType.valueChanges, {
+    initialValue: this.addItemForm.controls.entityType.value,
+  });
+  protected readonly pickPart = () => PART_ENTITY_TYPES.includes(this.addItemEntityType());
 
   protected readonly createViolations = FormValidationService.getViolations(this.createForm, {
     title: 'Title',
@@ -131,7 +156,15 @@ export class EcoListComponent implements OnInit {
   protected readonly addItemViolations = FormValidationService.getViolations(this.addItemForm, {
     entityId: 'Entity ID',
     changeDescription: 'Change Description',
+    oldValue: this.translate.instant('ecos.oldValue'),
+    newValue: this.translate.instant('ecos.newValue'),
   });
+
+  constructor() {
+    this.addItemForm.controls.entityType.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.addItemForm.controls.entityId.setValue(null));
+  }
 
   ngOnInit(): void {
     this.loadEcos();

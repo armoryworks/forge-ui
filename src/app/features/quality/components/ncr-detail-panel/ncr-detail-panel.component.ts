@@ -51,6 +51,7 @@ export class NcrDetailPanelComponent {
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   protected readonly statusAction = signal<StatusAction | null>(null);
+  protected readonly activityRefresh = signal(0);
 
   protected readonly canCloseOrReopen = this.auth.hasAnyRole(['Admin', 'Manager']);
 
@@ -96,6 +97,7 @@ export class NcrDetailPanelComponent {
 
   private load(id: number): void {
     this.loading.set(true);
+    this.activityRefresh.update(n => n + 1);
     this.ncrCapaService.getNcr(id).subscribe({
       next: ncr => {
         this.applyNcr(ncr);

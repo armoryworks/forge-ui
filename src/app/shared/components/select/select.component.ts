@@ -3,6 +3,7 @@ import {
   Component,
   forwardRef,
   input,
+  output,
   signal,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -40,6 +41,7 @@ export class SelectComponent implements ControlValueAccessor {
    *  internally; the global readonly rule strips the disabled tint
    *  and arrow so it visually reads as data, not a disabled control. */
   readonly isReadonly = input<boolean>(false);
+  readonly selectionChange = output<unknown>();
 
   protected readonly value = signal<unknown>(null);
   protected readonly disabled = signal(false);
@@ -66,6 +68,7 @@ export class SelectComponent implements ControlValueAccessor {
   protected onSelectionChange(value: unknown): void {
     this.value.set(value);
     this.onChange(value);
+    this.selectionChange.emit(value);
   }
 
   protected markTouched(): void {

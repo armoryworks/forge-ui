@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { BehaviorSubject, of } from 'rxjs';
 
@@ -9,6 +10,7 @@ import { RecallService } from '../../services/recall.service';
 import { Recall } from '../../models/recall.model';
 import { DetailDialogService } from '../../../../shared/services/detail-dialog.service';
 import { UserPreferencesService } from '../../../../shared/services/user-preferences.service';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 
 const RECALLS: Recall[] = [
@@ -35,11 +37,14 @@ describe('RecallListComponent', () => {
   let open: ReturnType<typeof vi.fn>;
   let detailFromUrl: { entityType: string; entityId: number } | null;
   let queryParams: BehaviorSubject<ReturnType<typeof convertToParamMap>>;
+  let roles: string[];
+  let dialogOpen: ReturnType<typeof vi.fn>;
 
   function create() {
     getRecalls = vi.fn(() => of(RECALLS));
     open = vi.fn(() => ({ afterClosed: () => of(false) }));
     queryParams = new BehaviorSubject(convertToParamMap({}));
+    dialogOpen = vi.fn(() => ({ afterClosed: () => of({ id: 9 }) }));
     TestBed.configureTestingModule({
       imports: [RecallListComponent, TranslateModule.forRoot()],
       providers: [
@@ -47,6 +52,8 @@ describe('RecallListComponent', () => {
         { provide: DetailDialogService, useValue: { open, getDetailFromUrl: () => detailFromUrl } },
         { provide: ActivatedRoute, useValue: { queryParamMap: queryParams.asObservable() } },
         { provide: UserPreferencesService, useValue: { get: () => null, set: vi.fn(), reset: vi.fn() } },
+        { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
+        { provide: MatDialog, useValue: { open: dialogOpen } },
       ],
     });
     const fixture = TestBed.createComponent(RecallListComponent);
@@ -57,6 +64,7 @@ describe('RecallListComponent', () => {
   beforeEach(() => {
     TestBed.resetTestingModule();
     detailFromUrl = null;
+    roles = ['Manager'];
   });
 
   it('renders a row per recall with its lot, number and status', () => {
@@ -95,5 +103,22 @@ describe('RecallListComponent', () => {
     create();
 
     expect(open).toHaveBeenCalledWith('recall', 2, expect.anything(), { recallId: 2 });
+  });
+
+  it('lets a manager start a recall by picking a lot, then opens it', () => {
+    const { fixture } = create();
+    const button = (fixture.nativeElement as HTMLElement).querySelector('[data-testid="recall-start-btn"]') as HTMLButtonElement;
+
+    button.click();
+
+    expect(dialogOpen).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ data: { lotId: null, lotNumber: null } }));
+    expect(open).toHaveBeenCalledWith('recall', 9, expect.anything(), { recallId: 9 });
+  });
+
+  it('does not offer Start Recall to an Engineer', () => {
+    roles = ['Engineer'];
+    const { fixture } = create();
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('[data-testid="recall-start-btn"]')).toBeNull();
   });
 });

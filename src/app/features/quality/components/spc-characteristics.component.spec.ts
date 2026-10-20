@@ -11,6 +11,7 @@ import { SpcCharacteristic } from '../models/spc.model';
 import { PartsService } from '../../parts/services/parts.service';
 import { Operation } from '../../parts/models/operation.model';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { AuthService } from '../../../shared/services/auth.service';
 import { SelectOption } from '../../../shared/components/select/select.component';
 
 interface CharacteristicsView {
@@ -36,6 +37,7 @@ describe('SpcCharacteristicsComponent part and operation pickers', () => {
         { provide: SpcService, useValue: { getCharacteristics: vi.fn(() => of([])) } },
         { provide: PartsService, useValue: { getOperations } },
         { provide: SnackbarService, useValue: { success: vi.fn() } },
+        { provide: AuthService, useValue: { hasAnyRole: () => true } },
       ],
     });
     view = TestBed.runInInjectionContext(() => new SpcCharacteristicsComponent()) as unknown as CharacteristicsView;

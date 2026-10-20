@@ -124,6 +124,7 @@ export interface SpcOocEvent {
   acknowledgedAt: string | null;
   acknowledgmentNotes: string | null;
   capaId: number | null;
+  capaNumber?: string | null;
 }
 
 export interface RecordMeasurementRequest {

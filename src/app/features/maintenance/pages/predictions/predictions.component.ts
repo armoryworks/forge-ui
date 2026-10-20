@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -96,10 +96,20 @@ export class PredictionsComponent {
     { field: 'actions', header: '', width: '180px', align: 'right' },
   ];
 
+  private readonly severity = toSignal(this.severityControl.valueChanges, { initialValue: this.severityControl.value });
+  private readonly status = toSignal(this.statusControl.valueChanges, { initialValue: this.statusControl.value });
+
+  protected readonly emptyMessageKey = computed(() => {
+    if (this.predictions().length === 0) return 'maintenance.empty';
+    return this.status() === 'all' && this.severity() === 'all'
+      ? 'maintenance.empty'
+      : 'maintenance.emptyFiltered';
+  });
+
   protected readonly filteredPredictions = computed(() => {
     const all = this.predictions();
-    const sev = this.severityControl.value;
-    const status = this.statusControl.value;
+    const sev = this.severity();
+    const status = this.status();
     return all.filter(p => {
       if (sev !== 'all' && p.severity !== sev) return false;
       if (status === 'open') {
@@ -112,8 +122,6 @@ export class PredictionsComponent {
 
   constructor() {
     this.load();
-    this.severityControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
-    this.statusControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 
   protected load(): void {

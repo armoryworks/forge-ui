@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -17,6 +17,7 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 export interface RecallDetailDialogData {
   recallId: number;
@@ -40,6 +41,7 @@ export class RecallDetailDialogComponent {
   private readonly auth = inject(AuthService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(MatDialog);
   protected readonly data = inject<RecallDetailDialogData>(MAT_DIALOG_DATA);
 
   protected readonly recall = signal<RecallDetail | null>(null);
@@ -47,6 +49,13 @@ export class RecallDetailDialogComponent {
   protected readonly loadError = signal<unknown>(null);
   protected readonly resolving = signal(false);
   private changed = false;
+
+  protected readonly title = computed(() => {
+    const r = this.recall();
+    return r
+      ? this.translate.instant('recalls.detailTitleWithLot', { id: this.data.recallId, lotNumber: r.initiatedLotNumber })
+      : this.translate.instant('recalls.detailTitle', { id: this.data.recallId });
+  });
 
   protected readonly affectedCustomerCount = computed(() =>
     new Set((this.recall()?.affectedShipments ?? []).map(s => s.customerId)).size);
@@ -56,7 +65,10 @@ export class RecallDetailDialogComponent {
     this.recall()?.status === 'Active' && this.auth.hasAnyRole(['Admin', 'Manager']));
 
   protected readonly resolveForm = new FormGroup({
-    resolutionNotes: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(2000)] }),
+    resolutionNotes: new FormControl<string>('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.pattern(/\S/), Validators.maxLength(2000)],
+    }),
     releaseHeldStock: new FormControl<boolean>(false, { nonNullable: true }),
   });
 
@@ -78,7 +90,12 @@ export class RecallDetailDialogComponent {
   constructor() {
     this.recallService.getRecall(this.data.recallId).subscribe({
       next: (recall) => { this.recall.set(recall); this.loading.set(false); },
-      error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); },
+      error: (err: unknown) => {
+        this.loading.set(false);
+        this.loadError.set(err);
+        this.dialogRef.removePanelClass('detail-dialog-panel');
+        this.dialogRef.updateSize('480px', 'auto');
+      },
     });
   }
 
@@ -93,10 +110,24 @@ export class RecallDetailDialogComponent {
   protected resolve(): void {
     const recall = this.recall();
     if (!recall || !this.canResolve() || this.resolveForm.invalid || this.resolving()) return;
-    this.resolving.set(true);
     const notes = this.resolveForm.controls.resolutionNotes.value.trim();
     const releaseHeldStock = this.resolveForm.controls.releaseHeldStock.value;
-    this.recallService.resolveRecall(recall.id, notes || null, releaseHeldStock).subscribe({
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: this.translate.instant('recalls.confirmResolveTitle'),
+        message: this.translate.instant(releaseHeldStock ? 'recalls.confirmResolveRelease' : 'recalls.confirmResolveMessage'),
+        confirmLabel: this.translate.instant('recalls.resolve'),
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (confirmed) this.submitResolve(recall.id, notes, releaseHeldStock);
+    });
+  }
+
+  private submitResolve(recallId: number, notes: string, releaseHeldStock: boolean): void {
+    this.resolving.set(true);
+    this.recallService.resolveRecall(recallId, notes, releaseHeldStock).subscribe({
       next: (updated) => {
         this.resolving.set(false);
         this.recall.set(updated);

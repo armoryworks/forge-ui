@@ -1,6 +1,6 @@
 <div class="detail-panel">
   <div class="detail-panel__header">
-    <h2 class="detail-panel__title">{{ 'recalls.detailTitle' | translate: { id: data.recallId } }}</h2>
+    <h2 class="detail-panel__title" data-testid="recall-detail-title">{{ title() }}</h2>
     <button class="icon-btn" [attr.aria-label]="'common.close' | translate" (click)="close()" data-testid="recall-detail-x-btn">
       <span class="material-icons-outlined">close</span>
     </button>
@@ -127,7 +127,9 @@
   </div>
 
   <div class="detail-panel__footer">
-    <button class="action-btn" (click)="close()" data-testid="recall-detail-close-btn">{{ 'common.close' | translate }}</button>
+    @if (!loadError()) {
+      <button class="action-btn" (click)="close()" data-testid="recall-detail-close-btn">{{ 'common.close' | translate }}</button>
+    }
     @if (canResolve()) {
       <button class="action-btn action-btn--primary"
         [disabled]="resolveForm.invalid || resolving()"

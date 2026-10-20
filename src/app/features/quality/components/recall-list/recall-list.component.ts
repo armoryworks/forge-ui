@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -14,6 +15,10 @@ import { ColumnCellDirective } from '../../../../shared/directives/column-cell.d
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { DetailDialogService } from '../../../../shared/services/detail-dialog.service';
+import { AuthService } from '../../../../shared/services/auth.service';
+import { RecallDetail } from '../../models/recall-detail.model';
+import { QUALITY_MANAGER_ROLES } from '../../quality-roles';
+import { InitiateRecallDialogComponent, InitiateRecallDialogData } from '../initiate-recall-dialog/initiate-recall-dialog.component';
 
 const RECALL_ENTITY_TYPE = 'recall';
 
@@ -33,6 +38,10 @@ export class RecallListComponent {
   private readonly detailDialog = inject(DetailDialogService);
   private readonly route = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(MatDialog);
+  private readonly auth = inject(AuthService);
+
+  protected readonly canStartRecall = this.auth.hasAnyRole(QUALITY_MANAGER_ROLES);
 
   protected readonly loading = signal(false);
   protected readonly recalls = signal<Recall[]>([]);
@@ -70,6 +79,17 @@ export class RecallListComponent {
     this.recallService.getRecalls().subscribe({
       next: (recalls) => { this.recalls.set(recalls); this.loading.set(false); },
       error: () => this.loading.set(false),
+    });
+  }
+
+  protected startRecall(): void {
+    this.dialog.open<InitiateRecallDialogComponent, InitiateRecallDialogData, RecallDetail | undefined>(
+      InitiateRecallDialogComponent,
+      { width: '480px', data: { lotId: null, lotNumber: null } },
+    ).afterClosed().subscribe(recall => {
+      if (!recall) return;
+      this.load();
+      this.openRecall(recall.id);
     });
   }
 

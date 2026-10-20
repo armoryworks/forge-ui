@@ -1,7 +1,6 @@
 <!-- Filter Bar -->
 <div class="filters-bar">
-  <app-input label="Search" [formControl]="searchControl" placeholder="Search gages..."
-    (keyup.enter)="applyFilters()" />
+  <app-input label="Search" [formControl]="searchControl" placeholder="Search gages..." />
   <app-select label="Status" [formControl]="statusFilter" [options]="statusOptions"
     (selectionChange)="applyFilters()" />
 </div>
@@ -25,7 +24,7 @@
 
 <!-- Create Gage Dialog -->
 @if (showCreateDialog()) {
-  <app-dialog title="New Gage" width="520px" (closed)="closeCreate()">
+  <app-dialog [title]="(editingGageId() === null ? 'qcInspections.newGage' : 'gages.editTitle') | translate" width="520px" (closed)="closeCreate()">
     <div [formGroup]="createForm">
       <app-input label="Description" formControlName="description" [required]="true" />
 
@@ -39,7 +38,20 @@
         <app-input label="Serial Number" formControlName="serialNumber" />
       </div>
 
-      <app-input label="Calibration Interval (Days)" type="number" formControlName="calibrationIntervalDays" [required]="true" />
+      <div class="dialog-row">
+        <app-input label="Calibration Interval (Days)" type="number" formControlName="calibrationIntervalDays" [required]="true"
+          [min]="1" [max]="maxIntervalDays" />
+        @if (editingGageId() === null) {
+          <app-datepicker [label]="'gages.lastCalibratedAt' | translate" formControlName="lastCalibratedAt" [max]="today"
+            data-testid="gage-last-calibrated" />
+        } @else {
+          <app-select [label]="'common.status' | translate" formControlName="status" [options]="statusOptions.slice(1)"
+            data-testid="gage-status" />
+        }
+      </div>
+      @if (editingGageId() === null) {
+        <p class="text-muted">{{ 'gages.lastCalibratedHint' | translate }}</p>
+      }
 
       <div class="dialog-row">
         <app-input label="Accuracy Spec" formControlName="accuracySpec" />
@@ -56,7 +68,7 @@
       <button class="action-btn action-btn--primary"
         [disabled]="createForm.invalid || saving()"
         (click)="saveGage()">
-        <span class="material-icons-outlined">save</span> Create
+        <span class="material-icons-outlined">save</span> {{ (editingGageId() === null ? 'common.create' : 'common.save') | translate }}
       </button>
       </app-validation-button>
     </div>
@@ -156,9 +168,11 @@
       <div class="gage-detail__section">
         <div class="gage-detail__section-header">
           <h4 class="gage-detail__section-title">Calibration History</h4>
-          <button class="action-btn action-btn--sm action-btn--primary" (click)="openCalDialog()">
-            <span class="material-icons-outlined">add</span> Record Calibration
-          </button>
+          @if (canManage()) {
+            <button class="action-btn action-btn--sm action-btn--primary" (click)="openCalDialog()">
+              <span class="material-icons-outlined">add</span> Record Calibration
+            </button>
+          }
         </div>
 
         <div [appLoadingBlock]="calibrationLoading()">
@@ -177,6 +191,11 @@
     </div>
 
     <div dialog-footer>
+      @if (canManage()) {
+        <button class="action-btn" (click)="openEdit(gage)" data-testid="gage-edit-btn">
+          <span class="material-icons-outlined">edit</span> {{ 'common.edit' | translate }}
+        </button>
+      }
       <button class="action-btn action-btn--primary" (click)="closeDetail()">Close</button>
     </div>
   </app-dialog>
@@ -187,7 +206,7 @@
   <app-dialog title="Record Calibration" width="520px" (closed)="closeCalDialog()">
     <div [formGroup]="calForm">
       <div class="dialog-row">
-        <app-datepicker label="Calibrated Date" formControlName="calibratedAt" [required]="true" />
+        <app-datepicker label="Calibrated Date" formControlName="calibratedAt" [required]="true" [max]="today" />
         <app-select label="Result" formControlName="result" [options]="calResultOptions" [required]="true" />
       </div>
 

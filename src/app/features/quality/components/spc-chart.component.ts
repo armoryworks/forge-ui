@@ -8,6 +8,8 @@ import { SpcChartData, SpcCharacteristic } from '../models/spc.model';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { KpiChipComponent } from '../../../shared/components/kpi-chip/kpi-chip.component';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { AuthService } from '../../../shared/services/auth.service';
+import { QUALITY_MANAGER_ROLES } from '../quality-roles';
 
 @Component({
   selector: 'app-spc-chart',
@@ -20,6 +22,9 @@ import { SnackbarService } from '../../../shared/services/snackbar.service';
 export class SpcChartComponent {
   private readonly spcService = inject(SpcService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly auth = inject(AuthService);
+
+  protected readonly canRecalculate = this.auth.hasAnyRole(QUALITY_MANAGER_ROLES);
 
   readonly characteristic = input.required<SpcCharacteristic>();
 
