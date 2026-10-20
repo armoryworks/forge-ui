@@ -62,7 +62,7 @@ export class JobCostCloseComponent implements OnInit {
   }
 
   protected close(row: JobCostCloseCandidate): void {
-    if (this.closingId() !== null) return;
+    if (this.closingId() !== null || !row.isComplete) return;
     this.closingId.set(row.jobId);
     this.gl.closeJobProductionCost(row.jobId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (result) => {

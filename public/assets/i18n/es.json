@@ -1970,7 +1970,8 @@
       "countedBy": "Contado Por",
       "reject": "Rechazar",
       "approveAndAdjust": "Aprobar y Ajustar Stock",
-      "noItemsAtLocation": "Sin artículos en esta ubicación"
+      "noItemsAtLocation": "Sin artículos en esta ubicación",
+      "lotAutoAssigned": "Pieza controlada por lote: deje el lote en blanco y se asignará un número de lote."
     },
     "columns": {
       "partNumber": "Pieza #",
@@ -5759,7 +5760,8 @@
       "expires": "Vence",
       "createAsBlanket": "Orden abierta",
       "createHint": "Las cantidades pedidas pasan a ser el total acordado; el proveedor envía contra las liberaciones que cree en la orden."
-    }
+    },
+    "receiveLotAutoAssigned": "Pieza controlada por lote: deje el lote en blanco y se asignará un número de lote."
   },
   "poManage": {
     "packingSlipNumber": "N.º de lista de empaque",
@@ -7160,7 +7162,8 @@
       "submitting": "Recibiendo...",
       "confirm": "Confirmar recepción",
       "success": "Se recibieron {{quantity}} x {{part}} de {{po}}",
-      "failed": "La recepción falló. Inténtelo de nuevo."
+      "failed": "La recepción falló. Inténtelo de nuevo.",
+      "lot": "Lote / n.º de colada"
     },
     "return": {
       "decreaseQtyAria": "Disminuir cantidad",
@@ -10336,7 +10339,8 @@
       "close": "Cerrar costo",
       "closed": "{{job}} cerrada; variación de producción {{variance}}",
       "empty": "Ninguna orden tiene saldo de WIP abierto",
-      "loadFailed": "No se pudieron cargar las órdenes con WIP abierto"
+      "loadFailed": "No se pudieron cargar las órdenes con WIP abierto",
+      "notComplete": "Complete el trabajo antes de cerrar su costo"
     }
   },
   "subcontractUi": {

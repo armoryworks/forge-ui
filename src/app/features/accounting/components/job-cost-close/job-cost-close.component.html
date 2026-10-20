@@ -19,7 +19,8 @@
       </ng-template>
       <ng-template appColumnCell="actions" let-row>
         <button type="button" class="action-btn action-btn--sm"
-          [disabled]="closingId() !== null"
+          [disabled]="closingId() !== null || !row.isComplete"
+          [attr.title]="row.isComplete ? null : ('accounting.jobCostClose.notComplete' | translate)"
           (click)="close(row)"
           data-testid="job-cost-close-btn">
           <span class="material-icons-outlined" aria-hidden="true">lock_clock</span>

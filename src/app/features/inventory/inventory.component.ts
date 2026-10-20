@@ -214,6 +214,8 @@ export class InventoryComponent {
   // Receive dialog
   protected readonly showReceiveDialog = signal(false);
   protected readonly poLineOptions = signal<SelectOption[]>([]);
+  private readonly lotTrackedLineIds = new Set<number>();
+  protected readonly receiveLotTracked = signal(false);
   protected readonly receiveForm = new FormGroup({
     purchaseOrderLineId: new FormControl<number | null>(null, [Validators.required]),
     quantityReceived: new FormControl<number | null>(null, [Validators.required, Validators.min(1)]),
@@ -341,6 +343,9 @@ export class InventoryComponent {
     this.watchPartBins(this.adjustForm.controls.partId, this.adjustForm.controls.binContentId);
 
     this.assigneeControl.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.saveAssignee());
+
+    this.receiveForm.controls.purchaseOrderLineId.valueChanges.pipe(takeUntilDestroyed())
+      .subscribe(lineId => this.receiveLotTracked.set(lineId != null && this.lotTrackedLineIds.has(lineId)));
   }
 
   private watchPartBins(partControl: FormControl<number | null>, binControl: FormControl<number | null>): void {
@@ -558,6 +563,7 @@ export class InventoryComponent {
 
   protected openReceiveDialog(): void {
     this.receiveForm.reset();
+    this.lotTrackedLineIds.clear();
     this.loadPoLineOptions();
     this.showReceiveDialog.set(true);
   }
@@ -572,6 +578,7 @@ export class InventoryComponent {
           detail.lines
             .filter(line => line.remainingQuantity > 0)
             .forEach(line => {
+              if (line.lotTracked) this.lotTrackedLineIds.add(line.id);
               options.push({
                 value: line.id,
                 label: `${detail.poNumber} — ${line.partNumber} (${line.remainingQuantity} remaining)`,

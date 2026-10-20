@@ -30,8 +30,25 @@ interface ReceiveInternals {
   step: () => string;
   selectAll: () => void;
   toLocationId: { setValue: (value: number) => void };
+  lotNumber: { setValue: (value: string) => void };
   confirmDestination: () => void;
   submit: () => void;
+}
+
+function createFlow(context: ScanContext, receive: ReturnType<typeof vi.fn>): ReceiveInternals {
+  TestBed.configureTestingModule({
+    providers: [
+      { provide: ScanActionService, useValue: { receive } },
+      { provide: SnackbarService, useValue: { success: vi.fn(), errorFrom: vi.fn() } },
+      { provide: InventoryService, useValue: { getBinLocations: () => of([{ id: 9, name: 'B1', locationPath: 'Main / B1' }]) } },
+      { provide: TranslateService, useValue: { instant: (key: string) => key } },
+    ],
+  });
+  const component = TestBed.runInInjectionContext(() => new ScanReceiveFlowComponent());
+  mockSignalInputs(component, { context });
+  const flow = component as unknown as ReceiveInternals;
+  flow.ngOnInit();
+  return flow;
 }
 
 describe('ScanReceiveFlowComponent', () => {
@@ -60,5 +77,25 @@ describe('ScanReceiveFlowComponent', () => {
     flow.submit();
 
     expect(receive).toHaveBeenCalledWith({ partId: 5, purchaseOrderLineId: 31, quantity: 6, toLocationId: 9 });
+  });
+
+  it('lets a lot-tracked line go through without a lot, and sends the trimmed lot when one is entered', () => {
+    const receive = vi.fn(() => of(1));
+    const lotLine: ScanReceiveContextLine = { ...LINE, lotTracked: true };
+    const flow = createFlow(
+      { ...CONTEXT, availableActions: [{ action: 'Receive', enabled: true, disabledReason: null, context: { poLines: [lotLine] } }] },
+      receive);
+
+    flow.selectAll();
+    flow.toLocationId.setValue(9);
+    flow.confirmDestination();
+    expect(flow.step()).toBe('confirm');
+
+    flow.lotNumber.setValue(' HT-77 ');
+    flow.confirmDestination();
+    expect(flow.step()).toBe('confirm');
+    flow.submit();
+
+    expect(receive).toHaveBeenCalledWith({ partId: 5, purchaseOrderLineId: 31, quantity: 6, toLocationId: 9, lotNumber: 'HT-77' });
   });
 });

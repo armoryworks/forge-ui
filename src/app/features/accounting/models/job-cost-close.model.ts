@@ -5,6 +5,7 @@ export interface JobCostCloseCandidate {
   title: string;
   completedDate: string | null;
   wipBalance: number;
+  isComplete: boolean;
 }
 
 /** Outcome of `POST accounting/jobs/{jobId}/close-production-cost`. */
