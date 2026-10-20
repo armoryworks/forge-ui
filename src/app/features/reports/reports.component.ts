@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BaseChartDirective } from '../../shared/charts/base-chart.directive';
 import { ChartData, ChartOptions } from 'chart.js';
@@ -8,6 +8,7 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { DatepickerComponent } from '../../shared/components/datepicker/datepicker.component';
 import { toIsoDate } from '../../shared/utils/date.utils';
+import { dateOrderValidator } from '../../shared/validators/date-order.validator';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { AuthService } from '../../shared/services/auth.service';
 import { ReportService } from './services/report.service';
@@ -102,6 +103,12 @@ export class ReportsComponent {
   // Date range controls (DatepickerComponent works with Date objects)
   protected readonly startControl = new FormControl<Date | null>(this.defaultStart());
   protected readonly endControl = new FormControl<Date | null>(this.defaultEnd());
+  protected readonly dateRange = new FormGroup({ start: this.startControl, end: this.endControl }, {
+    validators: [dateOrderValidator('start', 'end', () => this.translate.instant('validation.dateRangeOrder', {
+      start: this.translate.instant('reports.from'),
+      end: this.translate.instant('reports.to'),
+    }))],
+  });
 
   // Report data
   protected readonly jobsByStageData = signal<JobsByStageItem[]>([]);
@@ -649,6 +656,7 @@ export class ReportsComponent {
 
   protected loadReport(reportId?: ReportType): void {
     const id = reportId ?? this.activeReport();
+    if (this.dateRange.invalid && this.reports.find(r => r.id === id)?.needsDateRange) return;
     this.loading.set(true);
     const done = () => this.loading.set(false);
 

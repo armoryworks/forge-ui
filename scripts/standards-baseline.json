@@ -327,7 +327,6 @@
     "src/app/shared/components/chat-preview-popup/chat-preview-popup.component.html": 1,
     "src/app/shared/components/concurrency-conflict-dialog/concurrency-conflict-dialog.component.html": 1,
     "src/app/shared/components/connection-banner/connection-banner.component.html": 1,
-    "src/app/shared/components/date-range-picker/date-range-picker.component.html": 2,
     "src/app/shared/components/demo-module-switcher/demo-module-switcher.component.html": 8,
     "src/app/shared/components/detail-side-panel/detail-side-panel.component.html": 2,
     "src/app/shared/components/dirty-form-indicator/dirty-form-indicator.component.html": 2,

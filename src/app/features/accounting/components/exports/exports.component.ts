@@ -86,6 +86,7 @@ export class ExportsComponent implements OnInit {
   }
 
   protected download(kind: CsvExportKind): void {
+    if (this.rangeControl.invalid) return;
     this.downloading.set(kind);
     this.error.set(null);
     this.exportService
@@ -137,6 +138,7 @@ export class ExportsComponent implements OnInit {
   }
 
   protected confirmPush(): void {
+    if (this.rangeControl.invalid) return;
     this.dialog
       .open(ConfirmDialogComponent, {
         width: '420px',

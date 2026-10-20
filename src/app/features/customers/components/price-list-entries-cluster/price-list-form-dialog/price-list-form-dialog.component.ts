@@ -76,6 +76,18 @@ export class PriceListFormDialogComponent {
       : this.translate.instant('priceList.create'),
   );
 
+  /** Cross-field validator: EffectiveTo must be > EffectiveFrom when both set. */
+  private readonly dateRangeValidator = (control: AbstractControl): ValidationErrors | null => {
+    const fromCtrl = control.get('effectiveFrom');
+    const toCtrl = control.get('effectiveTo');
+    const from = fromCtrl?.value ? new Date(fromCtrl.value) : null;
+    const to = toCtrl?.value ? new Date(toCtrl.value) : null;
+    if (from && to && to <= from) {
+      return { effectiveRange: { message: this.translate.instant('priceList.effectiveRangeInvalid'), field: 'effectiveTo' } };
+    }
+    return null;
+  };
+
   protected readonly form = new FormGroup({
     name: new FormControl<string>(
       this.data.priceList?.name ?? '',
@@ -99,7 +111,7 @@ export class PriceListFormDialogComponent {
       this.data.priceList?.isActive ?? true,
       { nonNullable: true },
     ),
-  }, { validators: [PriceListFormDialogComponent.dateRangeValidator] });
+  }, { validators: [this.dateRangeValidator] });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
     name: this.translate.instant('priceList.nameLabel'),
@@ -109,18 +121,6 @@ export class PriceListFormDialogComponent {
     isDefault: this.translate.instant('priceList.isDefaultLabel'),
     isActive: this.translate.instant('priceList.isActiveLabel'),
   });
-
-  /** Cross-field validator: EffectiveTo must be > EffectiveFrom when both set. */
-  static dateRangeValidator(control: AbstractControl): ValidationErrors | null {
-    const fromCtrl = control.get('effectiveFrom');
-    const toCtrl = control.get('effectiveTo');
-    const from = fromCtrl?.value ? new Date(fromCtrl.value) : null;
-    const to = toCtrl?.value ? new Date(toCtrl.value) : null;
-    if (from && to && to <= from) {
-      return { effectiveRange: true };
-    }
-    return null;
-  }
 
   close(): void {
     this.dialogRef.close(null);

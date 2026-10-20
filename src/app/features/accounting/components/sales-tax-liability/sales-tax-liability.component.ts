@@ -112,6 +112,7 @@ export class SalesTaxLiabilityComponent {
 
     // Picker → URL.
     this.rangeControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((range) => {
+      if (this.rangeControl.invalid) return;
       this.router.navigate([], {
         relativeTo: this.route,
         queryParams: { from: this.iso(range.start), to: this.iso(range.end) },

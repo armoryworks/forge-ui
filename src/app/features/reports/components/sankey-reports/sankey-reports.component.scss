@@ -50,3 +50,8 @@
   &__title { font-size: var(--font-size-title); font-weight: 700; }
   &__filters { display: flex; align-items: flex-end; gap: $sp-md; }
 }
+
+.report-header__error {
+  color: var(--error);
+  font-size: var(--font-size-xs);
+}

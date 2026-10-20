@@ -1,15 +1,27 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   forwardRef,
+  inject,
   input,
   signal,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import {
+  AbstractControl,
+  ControlValueAccessor,
+  NG_VALIDATORS,
+  NG_VALUE_ACCESSOR,
+  ValidationErrors,
+  Validator,
+} from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerInputEvent, MatDatepickerModule } from '@angular/material/datepicker';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
+import { formatDate, toDateOnly } from '../../utils/date.utils';
+import { provideStrictDateAdapter } from '../../utils/strict-date-adapter';
 
 export interface DateRange {
   start: Date | null;
@@ -24,7 +36,7 @@ export interface DateRangePreset {
 @Component({
   selector: 'app-date-range-picker',
   standalone: true,
-  imports: [MatFormFieldModule, MatInputModule, MatDatepickerModule, MatNativeDateModule],
+  imports: [MatFormFieldModule, MatInputModule, MatDatepickerModule, TranslatePipe],
   templateUrl: './date-range-picker.component.html',
   styleUrl: './date-range-picker.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,9 +46,17 @@ export interface DateRangePreset {
       useExisting: forwardRef(() => DateRangePickerComponent),
       multi: true,
     },
+    {
+      provide: NG_VALIDATORS,
+      useExisting: forwardRef(() => DateRangePickerComponent),
+      multi: true,
+    },
+    provideStrictDateAdapter(),
   ],
 })
-export class DateRangePickerComponent implements ControlValueAccessor {
+export class DateRangePickerComponent implements ControlValueAccessor, Validator {
+  private readonly translate = inject(TranslateService, { optional: true });
+
   readonly label = input<string>('Date Range');
   readonly presets = input<string[]>([]);
   readonly min = input<Date | null>(null);
@@ -45,6 +65,13 @@ export class DateRangePickerComponent implements ControlValueAccessor {
   protected readonly startDate = signal<Date | null>(null);
   protected readonly endDate = signal<Date | null>(null);
   protected readonly disabled = signal(false);
+  protected readonly startUnparsed = signal(false);
+  protected readonly endUnparsed = signal(false);
+
+  protected readonly errorMessage = computed(() => {
+    const errors = this.rangeErrors(this.startDate(), this.endDate(), this.startUnparsed(), this.endUnparsed());
+    return errors ? (Object.values(errors)[0] as { message: string }).message : null;
+  });
 
   private onChange: (value: DateRange) => void = () => {};
   private onTouched: () => void = () => {};
@@ -52,6 +79,13 @@ export class DateRangePickerComponent implements ControlValueAccessor {
   writeValue(value: DateRange | null): void {
     this.startDate.set(value?.start ?? null);
     this.endDate.set(value?.end ?? null);
+    this.startUnparsed.set(false);
+    this.endUnparsed.set(false);
+  }
+
+  /** Fails while either typed date is not a real calendar day, falls outside [min]/[max], or when From falls after To. */
+  validate(_control: AbstractControl): ValidationErrors | null {
+    return this.rangeErrors(this.startDate(), this.endDate(), this.startUnparsed(), this.endUnparsed());
   }
 
   registerOnChange(fn: (value: DateRange) => void): void {
@@ -66,13 +100,17 @@ export class DateRangePickerComponent implements ControlValueAccessor {
     this.disabled.set(disabled);
   }
 
-  protected onStartChange(date: Date | null): void {
-    this.startDate.set(date);
+  protected onStartChange(event: MatDatepickerInputEvent<Date>): void {
+    const unparsed = this.isUnparsed(event);
+    this.startUnparsed.set(unparsed);
+    if (!unparsed) this.startDate.set(event.value);
     this.emitChange();
   }
 
-  protected onEndChange(date: Date | null): void {
-    this.endDate.set(date);
+  protected onEndChange(event: MatDatepickerInputEvent<Date>): void {
+    const unparsed = this.isUnparsed(event);
+    this.endUnparsed.set(unparsed);
+    if (!unparsed) this.endDate.set(event.value);
     this.emitChange();
   }
 
@@ -84,7 +122,44 @@ export class DateRangePickerComponent implements ControlValueAccessor {
     const range = this.resolvePreset(presetLabel);
     this.startDate.set(range.start);
     this.endDate.set(range.end);
+    this.startUnparsed.set(false);
+    this.endUnparsed.set(false);
     this.emitChange();
+  }
+
+  private isUnparsed(event: MatDatepickerInputEvent<Date>): boolean {
+    const text = (event.targetElement as HTMLInputElement | undefined)?.value ?? '';
+    return event.value === null && text.trim() !== '';
+  }
+
+  private rangeErrors(start: Date | null, end: Date | null, startUnparsed: boolean, endUnparsed: boolean): ValidationErrors | null {
+    if (startUnparsed || endUnparsed) {
+      const field = this.t(startUnparsed ? 'common.from' : 'common.to');
+      return { dateRangeParse: { message: this.t('validation.invalidDate', { field }) } };
+    }
+    const min = toDateOnly(this.min());
+    const max = toDateOnly(this.max());
+    for (const [date, key] of [[start, 'common.from'], [end, 'common.to']] as const) {
+      const day = toDateOnly(date);
+      if (day && min && day < min) {
+        return { dateRangeMin: { message: this.t('validation.dateMin', { field: this.t(key), min: formatDate(this.min()) }) } };
+      }
+      if (day && max && day > max) {
+        return { dateRangeMax: { message: this.t('validation.dateMax', { field: this.t(key), max: formatDate(this.max()) }) } };
+      }
+    }
+    if (start && end && start.getTime() > end.getTime()) {
+      return {
+        dateRangeOrder: {
+          message: this.t('validation.dateRangeOrder', { start: this.t('common.from'), end: this.t('common.to') }),
+        },
+      };
+    }
+    return null;
+  }
+
+  private t(key: string, params?: Record<string, string>): string {
+    return this.translate?.instant(key, params) ?? key;
   }
 
   private emitChange(): void {

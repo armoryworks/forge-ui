@@ -28,6 +28,7 @@ interface FormDialogInternals {
   };
   save(): void;
   isEdit: boolean;
+  violations(): string[];
 }
 
 function setup(data?: Partial<PriceListFormDialogData>) {
@@ -97,6 +98,7 @@ describe('PriceListFormDialogComponent', () => {
       effectiveTo: to,
     });
     expect(component.form.invalid).toBe(true);
+    expect(component.violations()).toEqual(['priceList.effectiveRangeInvalid']);
 
     // Fix it — flip the dates.
     component.form.patchValue({

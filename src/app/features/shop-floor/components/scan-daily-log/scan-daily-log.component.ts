@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { startWith } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { merge } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ScanActionService } from '../../../../shared/services/scan-action.service';
@@ -14,7 +14,7 @@ import { DatepickerComponent } from '../../../../shared/components/datepicker/da
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { PageLayoutComponent } from '../../../../shared/components/page-layout/page-layout.component';
 import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
-import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { toDateOnly, todayEnd } from '../../../../shared/utils/date.utils';
 import { SCAN_LOG_ACTION_LABEL_KEYS } from '../../models/scan-log-action-label-keys.const';
 
 const ACTION_TYPE_FILTER_VALUES = ['Move', 'CycleCount', 'Receive', 'Ship', 'Issue'];
@@ -46,22 +46,13 @@ export class ScanDailyLogComponent implements OnInit {
   readonly entries = signal<ScanLogEntry[]>([]);
   readonly loading = signal(false);
 
+  protected readonly today = todayEnd();
   readonly dateControl = new FormControl(new Date());
   readonly actionTypeControl = new FormControl<string | null>(null);
   readonly actionTypeOptions: SelectOption[] = [
     { value: null, label: this.translate.instant('kioskFlows.dailyLog.all') },
     ...ACTION_TYPE_FILTER_VALUES.map(value => ({ value, label: this.actionTypeLabel(value) })),
   ];
-
-  private readonly dateValue = toSignal(
-    this.dateControl.valueChanges.pipe(startWith(this.dateControl.value)),
-    { initialValue: this.dateControl.value },
-  );
-
-  private readonly actionTypeValue = toSignal(
-    this.actionTypeControl.valueChanges.pipe(startWith(this.actionTypeControl.value)),
-    { initialValue: this.actionTypeControl.value },
-  );
 
   readonly columns: ColumnDef[] = [
     { field: 'createdAt', header: this.translate.instant('kioskFlows.dailyLog.columns.time'), sortable: true, type: 'date', width: '100px' },
@@ -92,15 +83,24 @@ export class ScanDailyLogComponent implements OnInit {
     return parts.join(', ');
   });
 
+  constructor() {
+    merge(this.dateControl.valueChanges, this.actionTypeControl.valueChanges)
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        if (this.dateControl.invalid) return;
+        this.loadData();
+      });
+  }
+
   ngOnInit(): void {
     this.loadData();
   }
 
   loadData(): void {
     this.loading.set(true);
-    const date = this.dateValue();
-    const dateStr = date ? toIsoDate(date)!.slice(0, 10) : new Date().toISOString().slice(0, 10);
-    const actionType = this.actionTypeValue() || undefined;
+    const date = this.dateControl.value;
+    const dateStr = (date ? toDateOnly(date) : null) ?? toDateOnly(new Date())!;
+    const actionType = this.actionTypeControl.value || undefined;
 
     this.scanActionService.getScanLog(undefined, dateStr, actionType).subscribe({
       next: (entries) => {
@@ -111,14 +111,6 @@ export class ScanDailyLogComponent implements OnInit {
         this.loading.set(false);
       },
     });
-  }
-
-  onDateChange(): void {
-    this.loadData();
-  }
-
-  onActionTypeChange(): void {
-    this.loadData();
   }
 
   actionTypeLabel(actionType: string): string {

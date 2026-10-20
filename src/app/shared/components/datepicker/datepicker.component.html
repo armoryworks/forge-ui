@@ -7,7 +7,11 @@
     [max]="max()"
     [required]="required()"
     [readonly]="isReadonly()"
+    [errorStateMatcher]="errorStateMatcher"
     (blur)="markTouched()" />
   <mat-datepicker-toggle matSuffix [for]="picker" [disabled]="isReadonly() || internalControl.disabled" />
   <mat-datepicker #picker />
 </mat-form-field>
+@if (errorMessage(); as message) {
+  <span class="datepicker__error" role="alert" data-testid="datepicker-error">{{ message }}</span>
+}

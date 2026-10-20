@@ -28,7 +28,7 @@ import { ValidationButtonComponent } from '../../shared/components/validation-bu
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { LayoutService } from '../../shared/services/layout.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
-import { fromIsoDate, toIsoDate } from '../../shared/utils/date.utils';
+import { dateOfBirthMax, dateOfBirthMin, fromIsoDate, toIsoDate } from '../../shared/utils/date.utils';
 
 import { AuthService } from '../../shared/services/auth.service';
 
@@ -346,6 +346,8 @@ export class OnboardingWizardComponent {
   protected readonly listATypeOptions = LIST_A_TYPE_OPTIONS;
   protected readonly listBTypeOptions = LIST_B_TYPE_OPTIONS;
   protected readonly listCTypeOptions = LIST_C_TYPE_OPTIONS;
+  protected readonly dobMin = dateOfBirthMin();
+  protected readonly dobMax = dateOfBirthMax();
 
   // ── Step 1: Personal Information ─────────────────────────────────────────
   protected readonly personalForm = new FormGroup({
