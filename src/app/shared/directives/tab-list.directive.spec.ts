@@ -12,12 +12,15 @@ import { TabListDirective, TabDirective } from './tab-list.directive';
       <button class="tab" [appTab]="active() === 'a'" (click)="active.set('a')">A</button>
       <button class="tab" [appTab]="active() === 'b'" (click)="active.set('b')">B</button>
       <button class="tab" data-testid="action">Action</button>
-      <button class="tab" [appTab]="active() === 'c'" (click)="active.set('c')">C</button>
+      @if (showC()) {
+        <button class="tab" [appTab]="active() === 'c'" (click)="active.set('c')">C</button>
+      }
     </div>
   `,
 })
 class HostComponent {
   readonly active = signal('a');
+  readonly showC = signal(true);
 }
 
 describe('TabListDirective', () => {
@@ -54,6 +57,19 @@ describe('TabListDirective', () => {
     expect(tabs.map(t => t.getAttribute('aria-selected'))).toEqual(['false', 'true', 'false']);
     expect(tabs.map(t => t.getAttribute('tabindex'))).toEqual(['-1', '0', '-1']);
     expect(tabs[1].classList.contains('tab--active')).toBe(true);
+  });
+
+  it('keeps the first tab in the Tab order when the active tab is not shown', () => {
+    fixture.componentInstance.active.set('c');
+    fixture.detectChanges();
+    expect(tabs.map(t => t.getAttribute('tabindex'))).toEqual(['-1', '-1', '0']);
+
+    fixture.componentInstance.showC.set(false);
+    fixture.detectChanges();
+    const shown = Array.from(list.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+
+    expect(shown.map(t => t.getAttribute('aria-selected'))).toEqual(['false', 'false']);
+    expect(shown.map(t => t.getAttribute('tabindex'))).toEqual(['0', '-1']);
   });
 
   it('moves focus between tabs with the arrow, Home and End keys, skipping non-tab buttons', () => {

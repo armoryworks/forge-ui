@@ -1,4 +1,4 @@
-import { Directive, ElementRef, inject, input } from '@angular/core';
+import { computed, contentChildren, Directive, ElementRef, forwardRef, inject, input } from '@angular/core';
 
 @Directive({
   selector: '[appTabList]',
@@ -10,6 +10,12 @@ import { Directive, ElementRef, inject, input } from '@angular/core';
 })
 export class TabListDirective {
   private readonly el = inject(ElementRef<HTMLElement>);
+  private readonly tabs = contentChildren(forwardRef(() => TabDirective), { descendants: true });
+
+  readonly focusableTab = computed(() => {
+    const tabs = this.tabs();
+    return tabs.find(tab => tab.appTab()) ?? tabs[0] ?? null;
+  });
 
   onKeydown(event: KeyboardEvent): void {
     const tabs = Array.from(
@@ -39,9 +45,16 @@ export class TabListDirective {
     type: 'button',
     '[class.tab--active]': 'appTab()',
     '[attr.aria-selected]': 'appTab()',
-    '[attr.tabindex]': 'appTab() ? 0 : -1',
+    '[attr.tabindex]': 'tabIndex()',
   },
 })
 export class TabDirective {
+  private readonly list = inject(TabListDirective, { optional: true });
+
   readonly appTab = input.required<boolean>();
+
+  protected readonly tabIndex = computed(() => {
+    if (this.appTab()) return 0;
+    return this.list?.focusableTab() === this ? 0 : -1;
+  });
 }
