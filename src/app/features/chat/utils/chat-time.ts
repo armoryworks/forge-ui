@@ -1,14 +1,8 @@
-/** Message time in the active language's short form, e.g. "3:05 PM" (en) or "15:05" (es). */
 export function formatChatTime(date: Date | string, lang: string): string {
   const d = typeof date === 'string' ? new Date(date) : date;
   return d.toLocaleTimeString(lang, { hour: 'numeric', minute: '2-digit' });
 }
 
-/**
- * Day-separator label to show above `messages[index]`, or null when it continues the previous
- * message's day (or is the first message and from today). Today and yesterday use the
- * translated `chat.today` / `chat.yesterday` labels; older days use a localised date.
- */
 export function chatDateSeparator(
   messages: readonly { createdAt: Date | string }[],
   index: number,
