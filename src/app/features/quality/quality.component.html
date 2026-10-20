@@ -228,7 +228,7 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeInspectionDialog()">{{ 'common.cancel' | translate }}</button>
-      <app-validation-button [violations]="inspectionViolations" [loading]="saving()">
+      <app-validation-button [violations]="createInspectionViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
         data-testid="inspection-save-btn"
         [disabled]="saving()"

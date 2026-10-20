@@ -25,6 +25,7 @@ import { AuthService } from '../../shared/services/auth.service';
 
 const CALENDAR_JOB_ROLES = ['Admin', 'Manager', 'PM', 'Engineer', 'ProductionWorker', 'OfficeManager'];
 const PO_READ_ROLES = ['Admin', 'Manager', 'OfficeManager', 'Procurement'];
+const OPERATIONAL_GROUP_KEYS = ['purchasing', 'sales', 'production'];
 
 export type CalendarView = 'month' | 'week' | 'day';
 
@@ -192,7 +193,7 @@ export class CalendarComponent implements OnInit {
         if (this.userPreferences.get<number[]>('calendar:layers') == null) {
           const defaults = this.scope() === 'master'
             ? groups.filter(g => g.defaultVisible)
-            : groups;
+            : groups.filter(g => this.showOperationalLayers() || !OPERATIONAL_GROUP_KEYS.includes(g.key));
           this.selectedLayerIds.set(defaults.map(g => g.id));
         }
       },

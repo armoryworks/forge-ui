@@ -35,6 +35,7 @@ interface QualityView {
   onWorkOrderSelected(job: Record<string, unknown> | null): void;
   saveInspection(): void;
   openInspection(row: unknown): void;
+  createInspectionViolations: Signal<string[]>;
 }
 
 interface SetupOptions {
@@ -110,6 +111,19 @@ describe('QualityComponent', () => {
 
     view.inspectionForm.controls.lotNumber.setValue('b2');
     expect(view.lotSuggestions()).toEqual(['LOT-B2']);
+  });
+
+  it('will not create an inspection until a work order, part or lot is picked', () => {
+    const { view, createInspection } = setup('inspections');
+    view.inspectionForm.patchValue({ templateId: 3, lotNumber: '  ' });
+
+    view.saveInspection();
+
+    expect(view.createInspectionViolations()).toEqual(['qcInspections.subjectRequired']);
+    expect(createInspection).not.toHaveBeenCalled();
+
+    view.inspectionForm.controls.lotNumber.setValue('LOT-1');
+    expect(view.createInspectionViolations()).toEqual([]);
   });
 
   it('sends no work order when none was picked', () => {

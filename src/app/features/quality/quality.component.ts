@@ -173,6 +173,19 @@ export class QualityComponent {
     notes: this.translate.instant('common.notes'),
   });
 
+  private readonly inspectionValue = toSignal(this.inspectionForm.valueChanges, {
+    initialValue: this.inspectionForm.getRawValue(),
+  });
+
+  protected readonly createInspectionViolations = computed<string[]>(() => {
+    const v = this.inspectionValue();
+    const noSubject = !v.jobId && !v.partId && !(v.lotNumber ?? '').trim();
+    return [
+      ...(noSubject ? [this.translate.instant('qcInspections.subjectRequired')] : []),
+      ...this.inspectionViolations(),
+    ];
+  });
+
   private readonly partLots = toSignal(
     this.inspectionForm.controls.partId.valueChanges.pipe(
       distinctUntilChanged(),
@@ -321,7 +334,7 @@ export class QualityComponent {
   }
 
   protected saveInspection(): void {
-    if (this.saving()) return;
+    if (this.saving() || this.createInspectionViolations().length > 0) return;
     this.saving.set(true);
     const form = this.inspectionForm.getRawValue();
     const templateId = form.templateId && form.templateId !== NEW_TEMPLATE_OPTION ? form.templateId : undefined;

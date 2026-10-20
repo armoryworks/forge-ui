@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 
 import { AuthService } from '../../shared/services/auth.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
@@ -19,6 +19,7 @@ class FakeLoader implements TranslateLoader {
 interface CalendarInternals {
   canReadPoDeliveries: boolean;
   showPoDeliveries(): boolean;
+  selectedLayerIds(): number[];
 }
 
 describe('CalendarComponent · role access', () => {
@@ -88,5 +89,21 @@ describe('CalendarComponent · role access', () => {
     expect(calendar['getPoEvents']).not.toHaveBeenCalled();
     expect(view.showPoDeliveries()).toBe(false);
     expect(calendar['getEvents']).toHaveBeenCalled();
+  });
+
+  it('leaves the purchasing, sales and production layers off by default in the compliance calendar', () => {
+    const groups$ = new Subject<{ id: number; key: string; defaultVisible: boolean }[]>();
+    calendar['getSuperGroups'] = vi.fn(() => groups$);
+    const view = setup(['Admin'], 'module:compliance');
+
+    groups$.next([
+      { id: 1, key: 'general', defaultVisible: true },
+      { id: 2, key: 'regulatory', defaultVisible: false },
+      { id: 3, key: 'purchasing', defaultVisible: false },
+      { id: 4, key: 'sales', defaultVisible: false },
+      { id: 5, key: 'production', defaultVisible: false },
+    ]);
+
+    expect(view.selectedLayerIds()).toEqual([1, 2]);
   });
 });

@@ -6744,6 +6744,7 @@
     "ncrCreated": "{{number}} levantada.",
     "linkedNcr": "No conformidad levantada:",
     "activity": "Actividad",
+    "subjectRequired": "Elige qué se inspecciona: una orden de trabajo, una pieza o un lote.",
     "noCheckRecorded": "Registra al menos un resultado de verificación antes de aprobar",
     "confirmPassTitle": "¿Aprobar esta inspección?",
     "confirmFailTitle": "¿Rechazar esta inspección?",

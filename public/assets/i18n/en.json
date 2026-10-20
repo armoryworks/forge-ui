@@ -6751,6 +6751,7 @@
     "ncrCreated": "{{number}} raised.",
     "linkedNcr": "Non-conformance raised:",
     "activity": "Activity",
+    "subjectRequired": "Pick what is being inspected: a work order, part or lot.",
     "noCheckRecorded": "Record at least one check result before passing",
     "confirmPassTitle": "Pass this inspection?",
     "confirmFailTitle": "Fail this inspection?",
