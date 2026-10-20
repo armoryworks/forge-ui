@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, it, expect } from 'vitest';
 
-import { formatDate, fromIsoDate, parseDateOnly, toCalendarDate, toDateOnly, toIsoDate } from './date.utils';
+import { daysUntil, formatDate, fromIsoDate, parseDateOnly, toCalendarDate, toDateOnly, toIsoDate } from './date.utils';
 
 describe('fromIsoDate', () => {
   it('keeps the calendar day of a UTC-midnight value', () => {
@@ -123,5 +123,29 @@ describe.each([
     const picked = new Date(2026, 10, 20);
 
     expect(toCalendarDate(picked).getTime()).toBe(picked.getTime());
+  });
+});
+
+describe('daysUntil', () => {
+  let originalTz: string | undefined;
+
+  beforeEach(() => {
+    originalTz = process.env['TZ'];
+    process.env['TZ'] = 'America/Denver';
+  });
+
+  afterEach(() => {
+    if (originalTz === undefined) delete process.env['TZ'];
+    else process.env['TZ'] = originalTz;
+  });
+
+  it('counts a UTC-midnight end date as its own calendar day west of UTC', () => {
+    expect(daysUntil('2026-10-26T00:00:00Z', new Date(2026, 9, 19, 23, 30))).toBe(7);
+    expect(daysUntil('2026-10-19T00:00:00Z', new Date(2026, 9, 19, 23, 30))).toBe(0);
+  });
+
+  it('goes negative once the day has passed and holds across a DST change', () => {
+    expect(daysUntil('2026-10-18', new Date(2026, 9, 19, 8))).toBe(-1);
+    expect(daysUntil('2026-11-09', new Date(2026, 10, 1, 12))).toBe(8);
   });
 });

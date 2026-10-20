@@ -144,3 +144,14 @@ export function dateOfBirthMax(): Date {
   d.setFullYear(d.getFullYear() - 13);
   return d;
 }
+
+/**
+ * Whole calendar days from the local day of `from` to the calendar day `value` stands for;
+ * negative once that day has passed. A date-only API value counts as its own calendar day.
+ */
+export function daysUntil(value: Date | string, from: Date = new Date()): number {
+  const target = toCalendarDate(value);
+  const start = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+  const end = new Date(target.getFullYear(), target.getMonth(), target.getDate());
+  return Math.round((end.getTime() - start.getTime()) / 86_400_000);
+}
