@@ -60,7 +60,8 @@ export function pluralize(singular: string, lang: string): string {
 export function createSubstituter(overrides: TermOverrideMap, lang: string): TermSubstituter {
   const resolved = resolveTerms(overrides, lang);
   const termIds = new Set(resolved.keys());
-  const pattern = compilePattern(lang, termIds);
+  const renamed = [...resolved.values()].flatMap(term => [term.one, term.other]).filter((label): label is string => !!label);
+  const pattern = compilePattern(lang, termIds, renamed);
 
   const substitute = (text: string, allowed?: ReadonlySet<string>): string => {
     if (!pattern || !text) return text;
@@ -123,9 +124,9 @@ export function transformCatalog(
 
 const patternCache = new Map<string, CompiledPattern | null>();
 
-function compilePattern(lang: string, termIds: ReadonlySet<string>): CompiledPattern | null {
+function compilePattern(lang: string, termIds: ReadonlySet<string>, renamed: readonly string[] = []): CompiledPattern | null {
   if (termIds.size === 0) return null;
-  const cacheKey = `${lang}|${[...termIds].sort().join(',')}`;
+  const cacheKey = `${lang}|${[...termIds].sort().join(',')}|${[...renamed].map(r => normalize(r, lang)).sort().join('\u0000')}`;
   const cached = patternCache.get(cacheKey);
   if (cached !== undefined) return cached;
 
@@ -140,7 +141,7 @@ function compilePattern(lang: string, termIds: ReadonlySet<string>): CompiledPat
     }
     protectedForms.push(...(locale.protect ?? []));
   }
-  for (const phrase of protectedForms) {
+  for (const phrase of [...protectedForms, ...renamed]) {
     const key = normalize(phrase, lang);
     if (!lookup.has(key)) lookup.set(key, { termId: null, plural: false });
   }
