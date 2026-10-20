@@ -9987,7 +9987,8 @@
         "heading": "Este paso necesita datos para completar el flujo"
       },
       "steps": {
-        "heading": "Steps"
+        "heading": "Steps",
+        "incomplete": "Sin completar"
       },
       "resume": {
         "heading": "Configuraciones en curso",

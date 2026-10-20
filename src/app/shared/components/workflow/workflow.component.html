@@ -132,6 +132,7 @@
           <li class="workflow-step workflow-step--carousel"
               [class.workflow-step--current]="isCurrent(step)"
               [class.workflow-step--complete]="isComplete(step)"
+              [class.workflow-step--incomplete]="isIncomplete(step)"
               [class.workflow-step--locked]="isFutureStep(step)"
               [class.workflow-step--has-error]="hasError(step)">
             <button
@@ -151,11 +152,16 @@
                   <span class="material-icons-outlined">check</span>
                 } @else if (isFutureStep(step)) {
                   <span class="material-icons-outlined">lock</span>
+                } @else if (isIncomplete(step)) {
+                  <span class="workflow-step__dot"></span>
                 } @else {
                   <span class="workflow-step__index">{{ i + 1 }}</span>
                 }
               </span>
               <span class="workflow-step__label">{{ step.labelKey | translate }}</span>
+              @if (isIncomplete(step)) {
+                <span class="workflow-step__status">{{ 'workflow.shell.steps.incomplete' | translate }}</span>
+              }
               @if (!step.required) {
                 <span class="workflow-step__optional">{{ 'workflow.shell.optional' | translate }}</span>
               }

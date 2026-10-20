@@ -474,6 +474,22 @@
     animation: workflow-step-complete-pop $transition-normal ease-out;
   }
 
+  &__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-muted);
+  }
+
+  &__status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
   &--locked &__btn {
     cursor: not-allowed;
   }

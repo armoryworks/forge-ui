@@ -9994,7 +9994,8 @@
         "heading": "This step is missing data needed to complete the workflow"
       },
       "steps": {
-        "heading": "Steps"
+        "heading": "Steps",
+        "incomplete": "Not completed"
       },
       "resume": {
         "heading": "Workflow drafts in progress",
