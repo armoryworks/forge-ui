@@ -729,7 +729,7 @@ export class InventoryComponent {
       ...cc,
       lines: cc.lines.map(l =>
         l.id === lineId
-          ? { ...l, actualQuantity, variance: actualQuantity - l.expectedQuantity }
+          ? { ...l, actualQuantity, variance: Math.round((actualQuantity - l.expectedQuantity) * 10000) / 10000 }
           : l
       ),
     };

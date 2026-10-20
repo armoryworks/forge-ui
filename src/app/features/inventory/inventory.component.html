@@ -703,19 +703,19 @@
         @for (line of cc.lines; track line.id) {
           <tr>
             <td>{{ line.entityName }}</td>
-            <td>{{ line.expectedQuantity }}</td>
+            <td>{{ line.expectedQuantity | number:'1.0-4' }}</td>
             <td>
               @if (cc.status === 'Pending') {
-                <input type="number" class="inline-input"
+                <input type="number" class="inline-input" min="0" step="any"
                   [value]="line.actualQuantity"
                   (change)="updateCycleCountLine(line.id, +$any($event.target).value)" />
               } @else {
-                {{ line.actualQuantity }}
+                {{ line.actualQuantity | number:'1.0-4' }}
               }
             </td>
             <td>
               <span [class]="getVarianceClass(line.variance)">
-                {{ line.variance > 0 ? '+' : '' }}{{ line.variance }}
+                {{ line.variance > 0 ? '+' : '' }}{{ line.variance | number:'1.0-4' }}
               </span>
             </td>
             <td class="text-muted">{{ line.notes ?? '—' }}</td>
