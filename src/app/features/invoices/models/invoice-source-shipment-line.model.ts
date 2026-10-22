@@ -5,4 +5,5 @@ export interface InvoiceSourceShipmentLine {
   quantity: number;
   unitPrice: number;
   taxable: boolean;
+  salesOrderLineId?: number | null;
 }

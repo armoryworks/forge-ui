@@ -2,12 +2,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DEFAULT_CURRENCY_CODE,
   contentChild,
   contentChildren,
   DestroyRef,
   effect,
   inject,
   input,
+  LOCALE_ID,
   OnInit,
   output,
   signal,
@@ -15,7 +17,7 @@ import {
   untracked,
   viewChild,
 ElementRef, } from '@angular/core';
-import { NgTemplateOutlet } from '@angular/common';
+import { CurrencyPipe, NgTemplateOutlet } from '@angular/common';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
@@ -76,6 +78,7 @@ export class DataTableComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly translate = inject(TranslateService);
+  private readonly money = new CurrencyPipe(inject(LOCALE_ID), inject(DEFAULT_CURRENCY_CODE));
   private readonly isPhone = toSignal(
     inject(BreakpointObserver).observe(PHONE_QUERY).pipe(map(state => state.matches)),
     { initialValue: false },
@@ -234,7 +237,8 @@ export class DataTableComponent implements OnInit {
               default: return cell.includes(needle);
             }
           }
-          case 'number': {
+          case 'number':
+          case 'currency': {
             const range = filterVal as { min?: number; max?: number };
             const num = Number(cellVal);
             if (range.min != null && num < range.min) return false;
@@ -416,6 +420,9 @@ export class DataTableComponent implements OnInit {
     }
     if (typeof val === 'boolean') {
       return this.labels.booleanLabel(val);
+    }
+    if (col.type === 'currency' && val !== null && val !== undefined && val !== '' && !Number.isNaN(Number(val))) {
+      return this.money.transform(Number(val));
     }
     if (col.type === 'enum' && typeof val === 'string' && val !== '') {
       return col.filterOptions?.find(o => o.value === val)?.label ?? this.labels.enumLabel(val);
@@ -681,9 +688,9 @@ export class DataTableComponent implements OnInit {
   private toExcelCell(row: unknown, col: ColumnDef): CellObject | null {
     const raw = (row as Record<string, unknown>)[col.field];
     if (!col.exportValue && raw !== null && raw !== undefined && raw !== '' && typeof raw !== 'boolean') {
-      if (col.type === 'number') {
+      if (col.type === 'number' || col.type === 'currency') {
         const n = typeof raw === 'number' ? raw : Number(raw);
-        if (!Number.isNaN(n)) return { type: Number, value: n };
+        if (!Number.isNaN(n)) return col.type === 'currency' ? { type: Number, value: n, format: '#,##0.00' } : { type: Number, value: n };
       }
       if (col.type === 'date') {
         const d = raw instanceof Date ? raw : parseDateOnly(String(raw)) ?? new Date(raw as string);
@@ -939,7 +946,7 @@ function isBlankSortValue(value: unknown): boolean {
 }
 
 function compareSortValues(a: unknown, b: unknown, type: ColumnDef['type']): number {
-  if (type === 'number') {
+  if (type === 'number' || type === 'currency') {
     const na = Number(a);
     const nb = Number(b);
     if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;

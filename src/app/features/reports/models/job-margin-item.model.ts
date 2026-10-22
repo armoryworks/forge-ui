@@ -7,6 +7,7 @@ export interface JobMarginItem {
   materialCost: number;
   expenseCost: number;
   totalCost: number;
-  margin: number;
-  marginPercentage: number;
+  margin: number | null;
+  marginPercentage: number | null;
+  costRecorded: boolean;
 }

@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
@@ -43,14 +43,14 @@ export class ReportBuilderService {
     return this.http.get<SavedReport>(`${this.API}/saved/${id}`);
   }
 
-  createReport(request: CreateSavedReportRequest): Observable<SavedReport> {
-    return this.http.post<SavedReport>(`${this.API}/saved`, request).pipe(
+  createReport(request: CreateSavedReportRequest, context?: HttpContext): Observable<SavedReport> {
+    return this.http.post<SavedReport>(`${this.API}/saved`, request, { context }).pipe(
       tap(() => this.loadSavedReports()),
     );
   }
 
-  updateReport(id: number, request: CreateSavedReportRequest): Observable<void> {
-    return this.http.put<void>(`${this.API}/saved/${id}`, request).pipe(
+  updateReport(id: number, request: CreateSavedReportRequest, context?: HttpContext): Observable<void> {
+    return this.http.put<void>(`${this.API}/saved/${id}`, request, { context }).pipe(
       tap(() => this.loadSavedReports()),
     );
   }

@@ -4,7 +4,7 @@
   </div>
 
   <div class="filter-popover__body">
-    @switch (column().type ?? 'text') {
+    @switch (filterType()) {
       @case ('text') {
         <div class="filter-popover__text-stack">
           <app-select

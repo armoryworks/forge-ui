@@ -4,4 +4,6 @@ export interface ShippingSummaryItem {
   totalItems: number;
   onTimeCount: number;
   lateCount: number;
+  noDueDateCount: number;
+  notShippedCount: number;
 }

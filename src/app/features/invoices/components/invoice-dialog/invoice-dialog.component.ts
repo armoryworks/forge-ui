@@ -40,6 +40,7 @@ interface LineEntry {
   quantity: number;
   unitPrice: number;
   taxable: boolean;
+  salesOrderLineId?: number | null;
 }
 
 // ---- ACCOUNTING BOUNDARY ----
@@ -427,6 +428,7 @@ export class InvoiceDialogComponent {
       quantity: l.quantity,
       unitPrice: l.unitPrice,
       taxable: l.taxable ?? true,
+      salesOrderLineId: l.salesOrderLineId ?? null,
     }));
     this.prefilledLines = entries;
     this.lines.set(entries);
@@ -474,6 +476,7 @@ export class InvoiceDialogComponent {
       quantity: l.quantity,
       unitPrice: l.unitPrice,
       taxable: l.taxable,
+      salesOrderLineId: l.salesOrderLineId ?? undefined,
     }));
 
     // Only attach currency when the install is multi-currency; otherwise let

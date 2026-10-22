@@ -10,6 +10,9 @@ interface WidgetInternals {
   ngOnInit(): void;
   costMissing: { (): boolean };
   uncostedJobCount: { (): number };
+  partialCoverage: { (): boolean };
+  loadError: { (): boolean };
+  load(): void;
 }
 
 const url = `${environment.apiUrl}/dashboard/margin-summary`;
@@ -48,6 +51,17 @@ describe('MarginSummaryWidgetComponent', () => {
 
     expect(component.costMissing()).toBe(false);
     expect(component.uncostedJobCount()).toBe(1);
+    expect(component.partialCoverage()).toBe(true);
+  });
+
+  it('does not add a coverage note when every job has a cost', () => {
+    const { component, httpMock } = setup();
+
+    httpMock.expectOne(url).flush({
+      totalRevenue: 1500, totalCost: 750, totalMargin: 750, averageMarginPercentage: 50, jobCount: 2, costedJobCount: 2,
+    });
+
+    expect(component.partialCoverage()).toBe(false);
   });
 
   it('does not flag missing cost when there are no jobs at all', () => {
@@ -59,5 +73,19 @@ describe('MarginSummaryWidgetComponent', () => {
 
     expect(component.costMissing()).toBe(false);
     expect(component.uncostedJobCount()).toBe(0);
+  });
+
+  it('shows a load error instead of zero margin when the request fails, and retries', () => {
+    const { component, httpMock } = setup();
+
+    httpMock.expectOne(url).flush('boom', { status: 500, statusText: 'Server Error' });
+    expect(component.loadError()).toBe(true);
+
+    component.load();
+    expect(component.loadError()).toBe(false);
+    httpMock.expectOne(url).flush({
+      totalRevenue: 100, totalCost: 50, totalMargin: 50, averageMarginPercentage: 50, jobCount: 1, costedJobCount: 1,
+    });
+    expect(component.loadError()).toBe(false);
   });
 });

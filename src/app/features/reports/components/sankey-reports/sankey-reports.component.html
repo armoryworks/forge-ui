@@ -19,6 +19,9 @@
   </aside>
 
   <main class="reports-main">
+    <app-select class="reports-picker" data-testid="sankey-select-mobile"
+                [label]="'reports.chooseReport' | translate" [options]="reportPickerOptions" [formControl]="reportPicker" />
+
     <div class="report-header">
       <h2 class="report-header__title">{{ activeReportDef().label }}</h2>
 
@@ -39,6 +42,11 @@
         <span class="material-icons-outlined spin">sync</span>
         {{ 'reports.loadingReport' | translate }}
       </div>
+    } @else if (loadError()) {
+      <app-empty-state data-testid="sankey-load-error" icon="error_outline"
+                       [message]="'reports.loadFailed' | translate"
+                       [actionLabel]="'reports.retry' | translate"
+                       (action)="loadReport()" />
     } @else {
       <app-sankey-chart [data]="flowData()" [height]="500" />
     }

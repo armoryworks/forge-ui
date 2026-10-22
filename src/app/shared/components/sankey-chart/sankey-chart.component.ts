@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DEFAULT_CURRENCY_CODE, inject, input, LOCALE_ID } from '@angular/core';
 
 import { BaseChartDirective } from '../../charts/base-chart.directive';
 import { cssVar } from '../../charts/chart-theme';
@@ -7,11 +7,13 @@ import { ChartData, ChartOptions } from 'chart.js';
 
 import { SankeyFlowItem } from '../../../features/reports/models/sankey-flow-item.model';
 import { TranslatePipe } from '@ngx-translate/core';
+import { formatSankeyFlow } from './sankey-flow-format';
 
 interface SankeyDataPoint {
   from: string;
   to: string;
   flow: number;
+  unit?: string | null;
 }
 
 interface SankeyScriptableContext {
@@ -28,7 +30,6 @@ const NODE_COLORS: string[] = [
 
 const NODE_ROW_HEIGHT = 32;
 const MIN_LABEL_SHARE = 0.02;
-const FLOW_FORMAT = new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 });
 
 @Component({
   selector: 'app-sankey-chart',
@@ -43,6 +44,8 @@ export class SankeyChartComponent {
   readonly height = input<number>(400);
 
   private readonly themeService = inject(ThemeService);
+  private readonly currencyCode = inject(DEFAULT_CURRENCY_CODE);
+  private readonly locale = inject(LOCALE_ID);
 
   protected readonly chartHeight = computed(() => {
     const items = this.data();
@@ -59,6 +62,7 @@ export class SankeyChartComponent {
       from: i.from,
       to: i.to,
       flow: i.flow,
+      unit: i.unit,
     }));
 
     const nodes = new Set<string>();
@@ -113,7 +117,7 @@ export class SankeyChartComponent {
         callbacks: {
           label: (ctx: SankeyScriptableContext) => {
             const dp = ctx.dataset.data[ctx.dataIndex];
-            return `${dp.from} → ${dp.to}: ${FLOW_FORMAT.format(dp.flow)}`;
+            return `${dp.from} → ${dp.to}: ${formatSankeyFlow(dp.flow, dp.unit, this.currencyCode, this.locale)}`;
           },
         },
       },

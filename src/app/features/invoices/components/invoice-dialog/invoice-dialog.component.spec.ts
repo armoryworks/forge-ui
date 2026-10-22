@@ -60,7 +60,7 @@ const acmeSources: InvoiceSources = {
   shipments: [
     {
       id: 7, shipmentNumber: 'SHP-00007', salesOrderId: 42, salesOrderNumber: 'SO-00042', shippedDate: '2026-10-01T12:00:00Z',
-      lines: [{ partId: 4711, partNumber: 'PN-1001', description: 'Bracket', quantity: 4, unitPrice: 12.5, taxable: true }],
+      lines: [{ partId: 4711, partNumber: 'PN-1001', description: 'Bracket', quantity: 4, unitPrice: 12.5, taxable: true, salesOrderLineId: 901 }],
     },
     {
       id: 8, shipmentNumber: 'SHP-00008', salesOrderId: 43, salesOrderNumber: 'SO-00043', shippedDate: null,
@@ -240,7 +240,7 @@ describe('InvoiceDialogComponent — order, shipment and part pickers', () => {
     internals.invoiceForm.controls.shipmentId.setValue(7);
 
     expect(internals.lines()).toEqual([
-      { partId: 4711, partNumber: 'PN-1001', description: 'Bracket', quantity: 4, unitPrice: 12.5, taxable: true },
+      { partId: 4711, partNumber: 'PN-1001', description: 'Bracket', quantity: 4, unitPrice: 12.5, taxable: true, salesOrderLineId: 901 },
     ]);
   });
 

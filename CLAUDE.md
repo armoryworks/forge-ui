@@ -892,7 +892,7 @@ protected readonly partRowStyle = (row: unknown): Record<string, string> => {
 };
 ```
 
-**ColumnDef interface:** `field`, `header`, `sortable?`, `filterable?`, `type?` ('text'|'number'|'date'|'enum'), `filterOptions?` (SelectOption[]), `width?`, `visible?`, `align?` ('left'|'center'|'right'), `phoneHidden?` (hidden by default under 768px; a saved column-manager choice wins)
+**ColumnDef interface:** `field`, `header`, `sortable?`, `filterable?`, `type?` ('text'|'number'|'currency'|'date'|'enum'; `currency` formats as money and sorts, filters and exports like `number`), `filterOptions?` (SelectOption[]), `width?`, `visible?`, `align?` ('left'|'center'|'right'), `phoneHidden?` (hidden by default under 768px; a saved column-manager choice wins)
 
 **Additional inputs:** `loading` (boolean, shows `LoadingBlockDirective` overlay on scroll area), `stickyFirstColumn` (boolean, keeps first data column visible during horizontal scroll), `expandable` (boolean, adds expand/collapse chevron column), `clickableRows` (boolean, adds pointer cursor + hover highlight on rows that have a `(rowClick)` handler)
 

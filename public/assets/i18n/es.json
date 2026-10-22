@@ -489,7 +489,10 @@
   "dashboardWidgets": {
     "margin": {
       "costNotRecorded": "Costo no registrado",
-      "jobsWithoutCost": "Trabajos sin costo registrado"
+      "jobsWithoutCost": "Trabajos sin costo registrado",
+      "coverage": "de {{costed}} de {{total}} con costo",
+      "loadFailed": "No se pudo cargar el margen.",
+      "retry": "Reintentar"
     },
     "lowStock": {
       "noMinimumsSet": "No hay niveles mínimos de existencias definidos"
@@ -7569,7 +7572,20 @@
       "late": "Con retraso",
       "allStages": "Todas las etapas",
       "allCategories": "Todas las categorías"
-    }
+    },
+    "loadFailed": "No se pudo cargar este informe.",
+    "retry": "Reintentar",
+    "chooseReport": "Informe",
+    "marginCoverage": "de {{measured}} de {{total}} con costo e ingresos",
+    "costNotRecorded": "Sin costo registrado",
+    "notInvoiced": "Aún no facturado",
+    "colNoDueDate": "Sin fecha de entrega",
+    "colNotShipped": "No enviado",
+    "deleteReportTitle": "¿Eliminar el informe guardado?",
+    "deleteReportConfirm": "¿Eliminar el informe guardado \"{{name}}\"? Esta acción no se puede deshacer.",
+    "chooseDataSourceFirst": "Elija una fuente de datos",
+    "pickColumnFirst": "Elija al menos una columna",
+    "runFailed": "No se pudo ejecutar este informe."
   },
   "qcInspections": {
     "tabTemplates": "Plantillas",
@@ -8066,7 +8082,8 @@
     "errorMessage": "Lo siento, encontré un error. Intente de nuevo.",
     "assistantNotFound": "Asistente no encontrado",
     "assistantNotFoundHelp": "Es posible que se haya eliminado o que el enlace apunte al asistente equivocado.",
-    "openGeneralAssistant": "Abrir el asistente general"
+    "openGeneralAssistant": "Abrir el asistente general",
+    "unavailableMessage": "El servicio de IA no está disponible en este momento. Inténtelo de nuevo en unos minutos."
   },
   "kioskInspect": {
     "referencePrompt": "Escanee la orden de trabajo o el lote al que pertenece esta pieza para que la inspección quede registrada con ellos.",
@@ -12068,7 +12085,29 @@
       "hint": "Opcionalmente, establezca una fecha límite y un tipo de evento para agregar esto al calendario de cumplimiento como fecha límite.",
       "dueDate": "Fecha límite",
       "eventType": "Tipo de evento del calendario"
-    }
+    },
+    "noActiveSources": "No hay fuentes activas, así que no se consultó nada.",
+    "polledWithFailures": "Fuentes consultadas — {{count}} propuesta(s) nueva(s). No se pudo acceder a {{failed}} fuente(s); inténtelo más tarde.",
+    "domain": {
+      "crossCutting": "General",
+      "environmental": "Ambiental",
+      "firearms": "Armas de fuego",
+      "food": "Alimentos",
+      "labor": "Laboral",
+      "productSafety": "Seguridad de productos",
+      "safety": "Seguridad",
+      "tax": "Impuestos"
+    },
+    "feedType": {
+      "api": "API",
+      "rss": "RSS",
+      "email": "Correo",
+      "bulk": "Descarga masiva",
+      "scrape": "Página web"
+    },
+    "proposalsLoadFailed": "No se pudieron cargar las propuestas.",
+    "sourcesLoadFailed": "No se pudieron cargar las fuentes supervisadas.",
+    "retry": "Reintentar"
   },
   "shipping": {
     "title": "Envío",
