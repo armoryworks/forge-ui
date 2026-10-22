@@ -83,7 +83,7 @@
         <ng-template appColumnCell="actions" let-entry>
           @if (!isEditable(entry)) {
             <span class="material-icons-outlined lock-icon" [title]="'timeTracking.lockedTitle' | translate">lock</span>
-          } @else {
+          } @else if (canChange(entry)) {
             <button class="icon-btn icon-btn--danger" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" (click)="deleteTimeEntry(entry); $event.stopPropagation()">
               <span class="material-icons-outlined">delete</span>
             </button>

@@ -174,6 +174,10 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
     return new Date(entry.date).getTime() >= today.getTime();
   }
 
+  protected canChange(entry: TimeEntry): boolean {
+    return entry.userId === this.auth.user()?.id || this.auth.hasAnyRole(['Admin', 'Manager']);
+  }
+
   constructor() {
     this.loadEntries();
     this.initTimerHub();
