@@ -48,7 +48,6 @@
 
   &__canvas {
     position: relative;
-    touch-action: none;
   }
 
   &__edges {
@@ -105,6 +104,7 @@
     font-family: inherit;
     text-align: left;
     cursor: grab;
+    touch-action: none;
 
     &--selected {
       border-color: var(--primary);
@@ -145,6 +145,7 @@
     background: var(--surface);
     color: var(--primary);
     cursor: crosshair;
+    touch-action: none;
 
     .material-icons-outlined {
       font-size: $icon-size-sm;
