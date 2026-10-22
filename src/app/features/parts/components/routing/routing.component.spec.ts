@@ -185,3 +185,44 @@ describe('RoutingComponent — step links and gating', () => {
     expect(component.gatingControl.disabled).toBe(true);
   });
 });
+
+describe('RoutingComponent — flow editor', () => {
+  interface FlowInternals {
+    canEditFlow: boolean;
+    flowDirty: { (): boolean; set(value: boolean): void };
+    routingViewMode(): string;
+    showView(mode: 'list' | 'flow'): void;
+    onFlowSaved(operations: Operation[]): void;
+    operations(): Operation[];
+  }
+
+  it('lets engineers, managers and admins edit the flow, and not other roles', () => {
+    expect((setup(vi.fn(), {}, ['Engineer']) as unknown as FlowInternals).canEditFlow).toBe(true);
+    expect((setup(vi.fn(), {}, ['ProductionWorker']) as unknown as FlowInternals).canEditFlow).toBe(false);
+  });
+
+  it('asks before leaving the flow with unsaved changes and stays when the user declines', () => {
+    const open = vi.fn(() => ({ afterClosed: () => of(false) }));
+    const component = setup(open) as unknown as FlowInternals;
+    component.showView('flow');
+    component.flowDirty.set(true);
+
+    component.showView('list');
+
+    expect(open).toHaveBeenCalledTimes(1);
+    expect(component.routingViewMode()).toBe('flow');
+  });
+
+  it('switches without asking when nothing is unsaved, and takes the saved order from the editor', () => {
+    const open = vi.fn();
+    const component = setup(open) as unknown as FlowInternals;
+    component.showView('flow');
+
+    component.onFlowSaved([operation(2, 20, null, 0, 0), operation(1, 10, null, 0, 0)]);
+    component.showView('list');
+
+    expect(open).not.toHaveBeenCalled();
+    expect(component.routingViewMode()).toBe('list');
+    expect(component.operations().map(op => op.id)).toEqual([1, 2]);
+  });
+});

@@ -1,0 +1,198 @@
+<div class="graph-editor" [appLoadingBlock]="loading()" data-testid="routing-graph-editor">
+  @if (ordered().length === 0) {
+    <app-empty-state icon="route" [message]="'parts.noOperations' | translate" />
+  } @else {
+    <p class="graph-editor__hint" id="routing-graph-hint">{{ 'routingGraph.hint' | translate }}</p>
+
+    @if (connectFrom(); as from) {
+      <div class="graph-editor__mode" role="status" data-testid="routing-graph-connect-mode">
+        <span class="material-icons-outlined" aria-hidden="true">link</span>
+        {{ 'routingGraph.connectMode' | translate: { step: from.stepNumber } }}
+        <button class="action-btn action-btn--sm" data-testid="routing-graph-connect-cancel" (click)="cancelConnect()">
+          {{ 'common.cancel' | translate }}
+        </button>
+      </div>
+    }
+
+    <div class="graph-editor__body">
+      <div class="graph-editor__scroller">
+        <div #canvas class="graph-editor__canvas" data-testid="routing-graph-canvas"
+             [style.width.px]="layout().width" [style.height.px]="layout().height"
+             (pointermove)="onPointerMove($event)" (pointerup)="onPointerUp($event)" (pointercancel)="drag.set(null)" (pointerleave)="drag.set(null)">
+          <svg class="graph-editor__edges" [attr.width]="layout().width" [attr.height]="layout().height" aria-hidden="true">
+            @for (edge of layout().edges; track edge.key) {
+              <path class="graph-editor__edge"
+                    [class.graph-editor__edge--implicit]="edge.implicit"
+                    [class.graph-editor__edge--done]="edge.gate === 'Complete'"
+                    [class.graph-editor__edge--conflict]="edge.conflict"
+                    [attr.d]="edge.path" [attr.data-testid]="'routing-graph-edge-' + edge.fromStep + '-' + edge.toStep" />
+            }
+            @if (dragPath(); as path) {
+              <path class="graph-editor__edge graph-editor__edge--drag" [attr.d]="path" />
+            }
+          </svg>
+
+          <ul class="graph-editor__nodes" role="list" [attr.aria-label]="'routingGraph.stepsLabel' | translate">
+            @for (node of layout().nodes; track node.step.id) {
+              <li class="graph-editor__node-slot" [style.left.px]="node.x" [style.top.px]="node.y"
+                  [style.width.px]="nodeWidth" [style.height.px]="nodeHeight">
+                <button class="graph-editor__node"
+                        [class.graph-editor__node--selected]="selectedId() === node.step.id"
+                        [class.graph-editor__node--source]="connectFromId() === node.step.id"
+                        [attr.aria-pressed]="selectedId() === node.step.id"
+                        aria-describedby="routing-graph-hint"
+                        [attr.data-testid]="'routing-graph-node-' + node.step.stepNumber"
+                        (pointerdown)="onPointerDown($event, node.step.id, 'lane')"
+                        (click)="selectNode(node.step.id)">
+                  <span class="graph-editor__node-number">{{ 'parts.operation' | translate }} {{ node.step.stepNumber }}</span>
+                  <span class="graph-editor__node-title" [title]="node.step.title">{{ node.step.title }}</span>
+                  @if (node.step.workCenterName) {
+                    <span class="graph-editor__node-meta">{{ node.step.workCenterName }}</span>
+                  }
+                </button>
+                <button class="graph-editor__handle" tabindex="-1"
+                        [attr.aria-label]="'routingGraph.dragToConnect' | translate: { step: node.step.stepNumber }"
+                        [matTooltip]="'routingGraph.dragToConnectTooltip' | translate"
+                        [attr.data-testid]="'routing-graph-handle-' + node.step.stepNumber"
+                        (pointerdown)="onPointerDown($event, node.step.id, 'connect')">
+                  <span class="material-icons-outlined" aria-hidden="true">arrow_right_alt</span>
+                </button>
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+
+      <aside class="graph-editor__panel" [attr.aria-label]="'routingGraph.panelLabel' | translate">
+        @if (selected(); as step) {
+          <section class="graph-editor__section" data-testid="routing-graph-step-actions">
+            <h5 class="graph-editor__section-title">{{ 'routingGraph.stepActions' | translate: { step: step.stepNumber, title: step.title } }}</h5>
+            <div class="graph-editor__actions">
+              <button class="action-btn action-btn--sm" data-testid="routing-graph-connect-from" (click)="startConnect(step.id)">
+                <span class="material-icons-outlined" aria-hidden="true">link</span> {{ 'routingGraph.connectTo' | translate }}
+              </button>
+              <button class="action-btn action-btn--sm" data-testid="routing-graph-parallel" [disabled]="selectedIndex() <= 0" (click)="runParallel(step.id)">
+                <span class="material-icons-outlined" aria-hidden="true">call_split</span> {{ 'routingGraph.runParallel' | translate }}
+              </button>
+              <button class="action-btn action-btn--sm" data-testid="routing-graph-sequential" (click)="runSequential(step.id)">
+                <span class="material-icons-outlined" aria-hidden="true">trending_flat</span> {{ 'routingGraph.runSequential' | translate }}
+              </button>
+              <button class="action-btn action-btn--sm" data-testid="routing-graph-move-earlier" [disabled]="selectedIndex() <= 0" (click)="move(step.id, -1)">
+                <span class="material-icons-outlined" aria-hidden="true">arrow_upward</span> {{ 'routingGraph.moveEarlier' | translate }}
+              </button>
+              <button class="action-btn action-btn--sm" data-testid="routing-graph-move-later" [disabled]="selectedIndex() >= ordered().length - 1" (click)="move(step.id, 1)">
+                <span class="material-icons-outlined" aria-hidden="true">arrow_downward</span> {{ 'routingGraph.moveLater' | translate }}
+              </button>
+            </div>
+          </section>
+        }
+
+        @if (conflictRows().length > 0) {
+          <section class="graph-editor__section graph-editor__section--conflicts" role="alert" data-testid="routing-graph-conflicts">
+            <h5 class="graph-editor__section-title">{{ 'routingGraph.conflictsTitle' | translate }}</h5>
+            <p class="graph-editor__note">{{ 'routingGraph.conflictsHelp' | translate }}</p>
+            <ul class="graph-editor__list">
+              @for (row of conflictRows(); track row.conflict.operationId + '-' + row.conflict.predecessorId) {
+                <li class="graph-editor__row">
+                  <span class="material-icons-outlined graph-editor__row-icon--error" aria-hidden="true">error_outline</span>
+                  <span class="graph-editor__row-label">{{ row.label }}</span>
+                  <button class="icon-btn icon-btn--danger" [attr.aria-label]="'routingGraph.removeLinkAria' | translate: { link: row.label }"
+                          [attr.data-testid]="'routing-graph-conflict-remove-' + row.conflict.stepNumber + '-' + row.conflict.predecessorStepNumber"
+                          (click)="removeConflict(row.conflict)">
+                    <span class="material-icons-outlined" aria-hidden="true">link_off</span>
+                  </button>
+                </li>
+              }
+            </ul>
+            <button class="action-btn action-btn--danger action-btn--sm" data-testid="routing-graph-conflicts-remove-all" (click)="removeAllConflicts()">
+              <span class="material-icons-outlined" aria-hidden="true">link_off</span> {{ 'routingGraph.removeAllConflicts' | translate }}
+            </button>
+          </section>
+        }
+
+        @if (issueMessages().length > 0) {
+          <section class="graph-editor__section graph-editor__section--conflicts" role="alert" data-testid="routing-graph-server-issues">
+            <h5 class="graph-editor__section-title">{{ 'routingGraph.serverIssuesTitle' | translate }}</h5>
+            <ul class="graph-editor__list">
+              @for (message of issueMessages(); track $index) {
+                <li class="graph-editor__row"><span class="graph-editor__row-label">{{ message }}</span></li>
+              }
+            </ul>
+          </section>
+        }
+
+        <section class="graph-editor__section">
+          <h5 class="graph-editor__section-title">{{ 'routingGraph.orderTitle' | translate }}</h5>
+          <ol class="graph-editor__list" cdkDropList (cdkDropListDropped)="onReorder($event)" data-testid="routing-graph-order">
+            @for (step of ordered(); track step.id; let first = $first; let last = $last) {
+              <li class="graph-editor__row" cdkDrag [attr.data-testid]="'routing-graph-order-' + step.id">
+                <span class="material-icons-outlined graph-editor__drag" cdkDragHandle aria-hidden="true">drag_indicator</span>
+                <span class="graph-editor__row-label">{{ 'routingGraph.stepOption' | translate: { step: step.stepNumber, title: step.title } }}</span>
+                <button class="icon-btn" [disabled]="first" [attr.aria-label]="'routingGraph.moveEarlierAria' | translate: { step: step.stepNumber }"
+                        [attr.data-testid]="'routing-graph-order-up-' + step.id" (click)="move(step.id, -1)">
+                  <span class="material-icons-outlined" aria-hidden="true">arrow_upward</span>
+                </button>
+                <button class="icon-btn" [disabled]="last" [attr.aria-label]="'routingGraph.moveLaterAria' | translate: { step: step.stepNumber }"
+                        [attr.data-testid]="'routing-graph-order-down-' + step.id" (click)="move(step.id, 1)">
+                  <span class="material-icons-outlined" aria-hidden="true">arrow_downward</span>
+                </button>
+              </li>
+            }
+          </ol>
+        </section>
+
+        <section class="graph-editor__section">
+          <h5 class="graph-editor__section-title">{{ 'routingGraph.linksTitle' | translate }}</h5>
+          <ul class="graph-editor__list" data-testid="routing-graph-links">
+            @for (row of linkRows(); track row.key) {
+              <li class="graph-editor__row" [attr.data-testid]="'routing-graph-link-' + row.key">
+                <span class="graph-editor__row-label">
+                  {{ row.label }}
+                  @if (row.implicit) {
+                    <span class="graph-editor__tag">{{ 'routingGraph.byDefault' | translate }}</span>
+                  }
+                </span>
+                <button class="icon-btn" [class.icon-btn--active]="row.waitsForDone" [attr.aria-pressed]="row.waitsForDone"
+                        [attr.aria-label]="'routingGraph.waitForDoneAria' | translate: { link: row.label }"
+                        [matTooltip]="'routingGraph.waitForDoneTooltip' | translate"
+                        [attr.data-testid]="'routing-graph-link-gate-' + row.key" (click)="toggleGate(row)">
+                  <span class="material-icons-outlined" aria-hidden="true">lock_clock</span>
+                </button>
+                <button class="icon-btn icon-btn--danger" [attr.aria-label]="'routingGraph.removeLinkAria' | translate: { link: row.label }"
+                        [attr.data-testid]="'routing-graph-link-remove-' + row.key" (click)="disconnect(row.toId, row.fromId)">
+                  <span class="material-icons-outlined" aria-hidden="true">link_off</span>
+                </button>
+              </li>
+            }
+          </ul>
+          <div class="graph-editor__add" [formGroup]="addLinkForm">
+            <app-select data-testid="routing-graph-add-step" [label]="'routingGraph.addStep' | translate"
+                        formControlName="stepId" [options]="stepOptions()" />
+            <app-select data-testid="routing-graph-add-predecessor" [label]="'routingGraph.addPredecessor' | translate"
+                        formControlName="predecessorId" [options]="predecessorOptions()" />
+            <button class="action-btn action-btn--sm" data-testid="routing-graph-add-link" [disabled]="addLinkForm.invalid" (click)="addLink()">
+              <span class="material-icons-outlined" aria-hidden="true">add_link</span> {{ 'routingGraph.addLink' | translate }}
+            </button>
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    <div class="graph-editor__live" aria-live="polite" data-testid="routing-graph-announcement">{{ announcement() }}</div>
+
+    <div class="graph-editor__footer">
+      @if (dirty()) {
+        <span class="graph-editor__dirty" data-testid="routing-graph-dirty">{{ 'routingGraph.unsaved' | translate }}</span>
+      }
+      <button class="action-btn" data-testid="routing-graph-discard" [disabled]="!dirty() || saving()" (click)="discard()">
+        {{ 'routingGraph.discard' | translate }}
+      </button>
+      <app-validation-button class="validation-button--inline" [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" data-testid="routing-graph-save"
+                [disabled]="!dirty() || conflicts().length > 0 || saving()" (click)="save()">
+          <span class="material-icons-outlined" aria-hidden="true">save</span> {{ 'routingGraph.save' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  }
+</div>

@@ -13,6 +13,7 @@ import { Operation } from '../../models/operation.model';
 import { BOMLine } from '../../models/bom-line.model';
 import { OperationDialogComponent, OperationDialogData } from '../operation-dialog/operation-dialog.component';
 import { RoutingFlowViewComponent } from '../routing-flow-view/routing-flow-view.component';
+import { RoutingGraphEditorComponent } from '../routing-graph-editor/routing-graph-editor.component';
 import { RoutingCopyDialogComponent, RoutingCopyDialogData } from '../routing-copy-dialog/routing-copy-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -31,7 +32,7 @@ type RoutingViewMode = 'list' | 'flow';
 @Component({
   selector: 'app-routing',
   standalone: true,
-  imports: [EmptyStateComponent, LoadingBlockDirective, TranslatePipe, MatTooltipModule, RoutingFlowViewComponent, DragDropModule, DurationMsPipe, PercentPipe, ReactiveFormsModule, SelectComponent],
+  imports: [EmptyStateComponent, LoadingBlockDirective, TranslatePipe, MatTooltipModule, RoutingFlowViewComponent, RoutingGraphEditorComponent, DragDropModule, DurationMsPipe, PercentPipe, ReactiveFormsModule, SelectComponent],
   templateUrl: './routing.component.html',
   styleUrl: './routing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -70,6 +71,8 @@ export class RoutingComponent implements OnInit {
   });
 
   protected readonly canEditGating = this.auth.hasAnyRole(['Admin', 'Manager', 'Engineer']);
+  protected readonly canEditFlow = this.canEditGating;
+  protected readonly flowDirty = signal(false);
   protected readonly gatingControl = new FormControl<StepGatingMode | null>({ value: null, disabled: !this.canEditGating });
   protected readonly gatingOptions: SelectOption[] = [
     { value: null, label: this.translate.instant('parts.stepGatingDefault') },
@@ -127,6 +130,31 @@ export class RoutingComponent implements OnInit {
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  protected showView(mode: RoutingViewMode): void {
+    if (mode === this.routingViewMode()) return;
+    if (!this.flowDirty()) {
+      this.routingViewMode.set(mode);
+      return;
+    }
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: this.translate.instant('routingGraph.leaveTitle'),
+        message: this.translate.instant('routingGraph.leaveMessage'),
+        confirmLabel: this.translate.instant('routingGraph.leaveConfirm'),
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.flowDirty.set(false);
+      this.routingViewMode.set(mode);
+    });
+  }
+
+  protected onFlowSaved(operations: Operation[]): void {
+    this.operations.set([...operations].sort((a, b) => a.stepNumber - b.stepNumber));
   }
 
   protected toggleInstructions(operationId: number): void {

@@ -1,14 +1,16 @@
 import { Operation } from '../models/operation.model';
 import { RoutingLink } from '../models/routing-link.model';
 
-export function defaultPredecessorIds(operations: Operation[], stepNumber: number, excludeId?: number | null): number[] {
+export type RoutingNode = Pick<Operation, 'id' | 'stepNumber' | 'predecessors'>;
+
+export function defaultPredecessorIds(operations: readonly RoutingNode[], stepNumber: number, excludeId?: number | null): number[] {
   const lower = operations.filter(op => op.id !== excludeId && op.stepNumber < stepNumber);
   if (lower.length === 0) return [];
   const previous = Math.max(...lower.map(op => op.stepNumber));
   return lower.filter(op => op.stepNumber === previous).map(op => op.id);
 }
 
-export function effectivePredecessors(operations: Operation[]): Map<number, RoutingLink[]> {
+export function effectivePredecessors(operations: readonly RoutingNode[]): Map<number, RoutingLink[]> {
   const byId = new Map(operations.map(op => [op.id, op]));
   const result = new Map<number, RoutingLink[]>();
   for (const op of operations) {
@@ -27,7 +29,7 @@ export function effectivePredecessors(operations: Operation[]): Map<number, Rout
   return result;
 }
 
-export function routingDepths(operations: Operation[]): Map<number, number> {
+export function routingDepths(operations: readonly RoutingNode[]): Map<number, number> {
   const links = effectivePredecessors(operations);
   const depths = new Map<number, number>();
   const ordered = [...operations].sort((a, b) => a.stepNumber - b.stepNumber || a.id - b.id);

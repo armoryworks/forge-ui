@@ -29,6 +29,8 @@ import { Operation, OperationMaterial } from '../models/operation.model';
 import { CreateOperationRequest } from '../models/create-operation-request.model';
 import { UpdateOperationRequest } from '../models/update-operation-request.model';
 import { ReorderOperationsRequest } from '../models/reorder-operations-request.model';
+import { RoutingGraph } from '../models/routing-graph.model';
+import { UpdateRoutingGraphRequest } from '../models/update-routing-graph-request.model';
 import { CreateOperationMaterialRequest } from '../models/create-operation-material-request.model';
 import { AddPartPriceRequest, PartPrice } from '../models/part-price.model';
 import { PartAlternate, CreatePartAlternateRequest, UpdatePartAlternateRequest } from '../models/part-alternate.model';
@@ -182,6 +184,15 @@ export class PartsService {
 
   reorderOperations(partId: number, request: ReorderOperationsRequest): Observable<Operation[]> {
     return this.http.put<Operation[]>(`${this.base}/${partId}/operations/order`, request,
+      { context: new HttpContext().set(SILENT_HTTP_ERRORS, true) });
+  }
+
+  getRoutingGraph(partId: number): Observable<RoutingGraph> {
+    return this.http.get<RoutingGraph>(`${this.base}/${partId}/routing/graph`);
+  }
+
+  updateRoutingGraph(partId: number, request: UpdateRoutingGraphRequest): Observable<RoutingGraph> {
+    return this.http.put<RoutingGraph>(`${this.base}/${partId}/routing/graph`, request,
       { context: new HttpContext().set(SILENT_HTTP_ERRORS, true) });
   }
 
