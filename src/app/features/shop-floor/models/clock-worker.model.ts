@@ -1,3 +1,6 @@
+import { KioskNextOperation } from './kiosk-available-job.model';
+import { KioskRunningTimer } from './kiosk-running-timer.model';
+
 export interface WorkerAssignment {
   jobId: number;
   jobNumber: string;
@@ -8,6 +11,11 @@ export interface WorkerAssignment {
   isOverdue: boolean;
   hasActiveTimer: boolean;
   timerStartedAt?: string | null;
+  partNumber?: string | null;
+  nextOperation?: KioskNextOperation | null;
+  dueDate?: string | null;
+  isAssigned?: boolean;
+  isRecent?: boolean;
 }
 
 export interface ClockWorker {
@@ -27,4 +35,5 @@ export interface ClockWorker {
   role: string;
   openFromPriorShift?: boolean;
   openSince?: string | null;
+  runningTimers?: KioskRunningTimer[];
 }

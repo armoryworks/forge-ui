@@ -68,6 +68,8 @@ function toRow(
     actualSetupMinutes: actualSetup,
     actualRunMinutes: actualRun,
     actualTotalMinutes: actualTotal,
+    laborMinutes: op.laborMinutes ?? null,
+    operationId: op.operationId,
     setupVarianceMinutes: actualSetup - estimatedSetup,
     runVarianceMinutes: actualRun - estimatedRun,
     efficiencyPercent: efficiencyPercent(estimatedSetup + estimatedRun, actualTotal),

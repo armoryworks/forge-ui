@@ -46,7 +46,8 @@ const STOCKED: ScanContext = {
 interface OverlayInternals {
   triggerScan: (value: string) => void;
   phase: () => string;
-  jobContext: () => { jobId: number; jobNumber: string; currentStage: string } | null;
+  jobContext: () => { jobId: number; jobNumber: string; currentStage: string; focusOperationId: number | null } | null;
+  openJobById: (jobId: number, job: { jobNumber: string; title: string; stageName: string }, focusOperationId?: number | null) => void;
   openShipmentLines: () => { shipmentId: number }[];
   qcTemplateId: () => number | null;
   contextLoaded: { subscribe: (fn: (ctx: ScanContext) => void) => unknown };
@@ -155,6 +156,31 @@ describe('ScanActionOverlayComponent', () => {
     expect(overlay.phase()).toBe('job');
     expect(overlay.jobContext()).toMatchObject({ jobId: 21, jobNumber: 'J-21', currentStage: 'In Production' });
     expect(overlay.error()).toBeNull();
+  });
+
+  it('opens a job\'s steps straight from the worker card without a scan lookup', () => {
+    const identify = vi.fn(() => of<ScanIdentification>({ scanType: 'unknown' }));
+    const getContext = vi.fn(() => of(CONTEXT));
+    const { overlay } = setup(getContext, identify);
+
+    overlay.openJobById(42, { jobNumber: 'J-42', title: 'Shaft', stageName: 'Machining' });
+
+    expect(overlay.phase()).toBe('job');
+    expect(overlay.jobContext()).toMatchObject({ jobId: 42, jobNumber: 'J-42', currentStage: 'Machining', focusOperationId: null });
+    expect(identify).not.toHaveBeenCalled();
+    expect(getContext).not.toHaveBeenCalled();
+  });
+
+  it('a step barcode opens the job with that step focused', () => {
+    const identify = vi.fn(() => of<ScanIdentification>({
+      scanType: 'job-operation', entityId: 21, entityNumber: 'J-21', stageName: 'In Production', operationId: 77, stepNumber: 20,
+    }));
+    const { overlay } = setup(vi.fn(() => throwError(() => new Error('404'))), identify);
+
+    overlay.triggerScan('FJO:21.77');
+
+    expect(overlay.phase()).toBe('job');
+    expect(overlay.jobContext()).toMatchObject({ jobId: 21, focusOperationId: 77 });
   });
 
   it('opens a work order without asking for a part context first', () => {

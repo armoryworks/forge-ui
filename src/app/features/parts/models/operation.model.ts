@@ -10,6 +10,8 @@ export interface Operation {
   setupMinutes: number;
   runMinutesLot: number;
   scrapFactor: number;
+  runMinutesEach?: number;
+  laborAttendancePercent?: number;
   isQcCheckpoint: boolean;
   qcCriteria: string | null;
   referencedOperationId: number | null;

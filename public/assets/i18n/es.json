@@ -1773,7 +1773,10 @@
     },
     "noPartsMatch": "Ninguna pieza coincide con estos filtros",
     "noPartsMatchHelp": "Borre la búsqueda o cambie los filtros para ver más piezas.",
-    "clearFilters": "Borrar filtros"
+    "clearFilters": "Borrar filtros",
+    "laborAttendance": "Asistencia del operador",
+    "laborAttendanceHint": "Cuánto del paso necesita al operador: 100 = operador ocupado todo el tiempo; 20 = solo cargar, descargar y medir. Reparte el tiempo fichado de una persona cuando lleva varios temporizadores a la vez.",
+    "laborAttendanceMachineHint": "Una máquina hace parte de este paso. Ponga la base de carga de su centro de trabajo en Máquina para que la máquina siga cargando su ciclo completo."
   },
   "partsCatalog": {
     "duplicateRow": "Duplicar {{partNumber}}"
@@ -3514,7 +3517,9 @@
     "runningStopAria": "Detener el temporizador de {{job}}",
     "billable": "Facturable",
     "nonBillable": "No facturable",
-    "durationRange": "Ingrese una duración entre 1 minuto y 24 horas."
+    "durationRange": "Ingrese una duración entre 1 minuto y 24 horas.",
+    "colLabor": "Mano de obra",
+    "splitWith": "Repartido con {{count}} temporizador(es) simultáneo(s)"
   },
   "assets": {
     "title": "Activos",
@@ -8561,7 +8566,8 @@
       "assetScannedUnnamed": "Etiqueta de activo escaneada",
       "locationScanned": "Ubicación {{name}}",
       "receivingLoadFailed": "No se pudieron cargar las órdenes de compra por recibir. Vuelva e inténtelo de nuevo.",
-      "shippingLoadFailed": "No se pudieron cargar los envíos. Vuelva e inténtelo de nuevo."
+      "shippingLoadFailed": "No se pudieron cargar los envíos. Vuelva e inténtelo de nuevo.",
+      "piecesRecorded": "Piezas registradas en {{jobNumber}}"
     },
     "trainingModeActive": "MODO DE ENTRENAMIENTO — Las acciones no se guardarán",
     "trainingModeEnabled": "Modo de entrenamiento activado",
@@ -8658,7 +8664,23 @@
       "alreadyRunning": "Su temporizador en el paso {{step}} · {{title}} ya está en curso",
       "stopped": "Paso {{step}} · {{title}} detenido",
       "timerStopped": "Se detuvo su temporizador en {{jobNumber}}",
-      "recorded": "Paso {{step}}: {{count}} de {{total}} registradas"
+      "recorded": "Paso {{step}}: {{count}} de {{total}} registradas",
+      "chipAria": "{{jobNumber}} {{step}}: mostrar acciones",
+      "indirect": "Indirecto",
+      "entryType": {
+        "Setup": "Preparación",
+        "Run": "Producción",
+        "Teardown": "Desmontaje",
+        "Inspection": "Inspección",
+        "Rework": "Retrabajo",
+        "Wait": "Espera",
+        "Other": "Otro"
+      },
+      "staleTimer": "Lleva 10 horas o más en marcha. Compruebe que deba seguir en marcha.",
+      "stopAndDone": "Detener + Terminado",
+      "suggested": "Sugerido",
+      "doneCount": "Terminados ({{count}})",
+      "attendance": "Operador {{percent}} %"
     },
     "returnFlow": {
       "title": "Devolver Artículos",
@@ -8766,7 +8788,14 @@
     "closedJobScanned": "La orden de trabajo {{number}} está cerrada y no admite tiempo.",
     "scanNotForClock": "{{label}} no sirve para fichar. Escanee su credencial o una orden de trabajo.",
     "kioskMfaUseBadge": "Esta cuenta requiere un segundo paso de inicio de sesión. Use su credencial y PIN en este quiosco.",
-    "terminalCheckFailed": "No se puede contactar con el servidor para comprobar esta terminal."
+    "terminalCheckFailed": "No se puede contactar con el servidor para comprobar esta terminal.",
+    "clockOutSheet": {
+      "title": "Registrar salida de {{name}}",
+      "hint": "Estos temporizadores siguen en marcha y se detendrán al registrar la salida. Indique las piezas buenas y de desecho que hizo, o déjelas en blanco.",
+      "good": "Buenas",
+      "scrap": "Desecho",
+      "confirm": "Registrar salida"
+    }
   },
   "kioskDisplay": {
     "entryTitle": "¿Usar este navegador como terminal de planta?",
@@ -8800,7 +8829,13 @@
     "claiming": "Tomando el trabajo...",
     "claimed": "{{jobNumber}} ahora es suya",
     "claimFailed": "No se pudo tomar {{jobNumber}}",
-    "boardShowing": "Mostrando {{shown}} de {{total}}"
+    "boardShowing": "Mostrando {{shown}} de {{total}}",
+    "myJobs": "Mis trabajos",
+    "openStepsAria": "Abrir los pasos de {{jobNumber}}",
+    "nextStep": "Siguiente: Op {{step}}",
+    "myJobRunning": "En marcha",
+    "myJobRecent": "Reciente",
+    "myJobAssigned": "Asignado"
   },
   "customerReturns": {
     "allStatuses": "Todos los estados",
@@ -9558,7 +9593,12 @@
     "create": "Crear Centro de Trabajo",
     "idealCycleTimeSeconds": "Tiempo de ciclo ideal (segundos por unidad)",
     "idealCycleTimeHint": "Tiempo más rápido para fabricar una unidad buena; el rendimiento OEE compara el tiempo real de producción con él.",
-    "dailyCapacityHint": "Horas disponibles de cada máquina por día laborable (hasta 24)."
+    "dailyCapacityHint": "Horas disponibles de cada máquina por día laborable (hasta 24).",
+    "burdenBasis": "Base de carga",
+    "burdenBasisAuto": "Automática (Máquina si está vinculado a un activo de máquina)",
+    "burdenBasisLabor": "Mano de obra — la carga sigue el tiempo de mano de obra del operador",
+    "burdenBasisMachine": "Máquina — la carga sigue el tiempo completo de la máquina",
+    "burdenBasisHint": "Cuando un operador lleva varios temporizadores a la vez, la mano de obra se reparte entre ellos. Máquina carga la carga indirecta de este centro sobre el tiempo transcurrido completo de cada temporizador; Mano de obra la carga sobre la parte del operador."
   },
   "oee": {
     "title": "Panel OEE",
@@ -13336,7 +13376,8 @@
       "efficiency": "Efic.",
       "progress": "Avance",
       "perPiece": "Por pieza",
-      "remaining": "Restante"
+      "remaining": "Restante",
+      "laborHours": "Mano de obra h"
     },
     "summary": {
       "estimated": "Estimado",
@@ -13365,7 +13406,12 @@
       "shortCloseMessage": "Solo se cuentan {{done}} buenas y {{scrap}} desechadas de {{quantity}}. ¿Marcar este paso como terminado de todos modos?",
       "shortCloseConfirm": "Marcar terminada",
       "wholeNumbers": "Ingrese solo piezas enteras (0 o más).",
-      "decimals": "Introduzca 0 o más, con un máximo de {{places}} decimales."
+      "decimals": "Introduzca 0 o más, con un máximo de {{places}} decimales.",
+      "skip": "Omitir",
+      "stop": "Detener",
+      "stopAndRecord": "Detener y registrar {{count}}",
+      "stopAndDone": "Detener y marcar terminado ({{count}})",
+      "overPlanned": "{{total}} es más que las {{planned}} planificadas para este paso. Revise el conteo antes de continuar."
     },
     "messages": {
       "completed": "{{operation}} marcada como terminada",
@@ -13374,7 +13420,9 @@
       "reset": "{{operation}} restablecida",
       "recorded": "Avance registrado en {{operation}}",
       "saveFailed": "El avance de {{operation}} no se guardó. Revise la conexión e inténtelo de nuevo."
-    }
+    },
+    "printStepLabels": "Imprimir códigos de pasos",
+    "stepLabel": "Op {{step}} · {{title}}"
   },
   "detailLoadError": {
     "notFound": "Registro no encontrado",
@@ -13934,6 +13982,44 @@
       "format": "{{field}} no tiene el formato esperado.",
       "invalidOption": "{{field}} no es uno de los valores permitidos.",
       "precision": "{{field}} tiene demasiados dígitos."
+    }
+  },
+  "laborReconciliation": {
+    "title": "Conciliación de mano de obra",
+    "subtitle": "Tiempo pagado frente a la mano de obra cargada a trabajos, por persona y día",
+    "back": "Control de tiempo",
+    "load": "Mostrar",
+    "hint": "Horas. Pagado es el tiempo fichado menos las pausas no pagadas. Sin asignar es el tiempo pagado no cargado a ningún trabajo ni temporizador indirecto; un número negativo significa que se cargó más de lo pagado (entradas manuales o temporizadores detenidos antes del reparto de mano de obra).",
+    "empty": "No hay tiempo en este rango.",
+    "noClock": "Sin fichaje",
+    "timers": "{{long}} largos / {{running}} en marcha",
+    "columns": {
+      "date": "Fecha",
+      "person": "Persona",
+      "paid": "Pagado h",
+      "jobLabor": "Mano de obra en trabajos h",
+      "indirect": "Indirecto h",
+      "unallocated": "Sin asignar h",
+      "manual": "Manual h",
+      "overlap": "Solapado h",
+      "longTimers": "Temporizadores 10 h+"
+    },
+    "recompute": {
+      "title": "Recalcular mano de obra",
+      "hint": "Vuelve a repartir la mano de obra de los temporizadores no bloqueados de este rango y les vuelve a poner precio. Previsualice primero; los periodos de pago bloqueados nunca cambian.",
+      "preview": "Previsualizar",
+      "apply": "Aplicar",
+      "summary": "Cambiarían {{count}} entradas de tiempo ({{locked}} bloqueadas, omitidas). Costo de trabajos {{before}} → {{after}}.",
+      "noChanges": "No cambiaría nada.",
+      "job": "Trabajo",
+      "entries": "Entradas",
+      "laborBefore": "Mano de obra h antes",
+      "laborAfter": "Mano de obra h después",
+      "costBefore": "Costo antes",
+      "costAfter": "Costo después",
+      "confirmTitle": "¿Aplicar el recálculo?",
+      "confirmMessage": "Se volverán a valorar {{count}} entradas de tiempo en {{jobs}} trabajo(s). Los costos ya absorbidos en producto terminado no se revierten; cualquier disminución aparece como variación al cierre.",
+      "applied": "Se volvieron a valorar {{count}} entradas de tiempo."
     }
   }
 }

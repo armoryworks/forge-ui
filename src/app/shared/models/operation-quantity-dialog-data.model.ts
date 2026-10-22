@@ -8,4 +8,6 @@ export interface OperationQuantityDialogData {
   reasons: OperationReason[];
   touch?: boolean;
   decimalPlaces?: number | null;
+  mode?: 'record' | 'stop';
+  plannedQuantity?: number | null;
 }

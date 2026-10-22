@@ -14,6 +14,12 @@
     <span class="material-icons-outlined">edit_note</span>
     {{ 'timeTracking.manualEntry' | translate }}
   </button>
+  @if (canSeeLaborReconciliation()) {
+    <a data-testid="labor-reconciliation-link" class="action-btn" routerLink="labor-reconciliation">
+      <span class="material-icons-outlined">balance</span>
+      {{ 'laborReconciliation.title' | translate }}
+    </a>
+  }
 </app-page-header>
 
 <div class="time-tracking-layout">
@@ -61,6 +67,16 @@
         </ng-template>
         <ng-template appColumnCell="category" let-entry>
           <span class="text-muted">{{ entry.category ?? '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="laborMinutes" let-entry>
+          @if (entry.timerStart && !entry.timerStop) {
+            &mdash;
+          } @else {
+            <span [attr.data-testid]="'time-entry-labor-' + entry.id">{{ formatDuration(entry.laborMinutes ?? entry.durationMinutes) }}</span>
+            @if (concurrentTimers().get(entry.id); as others) {
+              <span class="time-entry__split" [attr.data-testid]="'time-entry-split-' + entry.id">{{ 'timeTracking.splitWith' | translate: { count: others } }}</span>
+            }
+          }
         </ng-template>
         <ng-template appColumnCell="durationMinutes" let-entry>
           @if (entry.timerStart && !entry.timerStop) {

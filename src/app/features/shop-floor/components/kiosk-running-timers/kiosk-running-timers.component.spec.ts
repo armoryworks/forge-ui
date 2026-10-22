@@ -43,4 +43,47 @@ describe('KioskRunningTimersComponent', () => {
     const lines = (fixture.componentInstance as unknown as { lines: () => { elapsedMs: number }[] }).lines();
     expect(lines[0].elapsedMs).toBe(0);
   });
+
+  it('turns a chip amber once it has been open ten hours', () => {
+    const fixture = TestBed.createComponent(KioskRunningTimersComponent);
+    fixture.componentRef.setInput('timers', [
+      timer({ id: 1, timerStart: '2026-10-08T02:00:00Z' }),
+      timer({ id: 2, timerStart: '2026-10-08T02:00:01Z' }),
+    ]);
+    fixture.componentRef.setInput('now', Date.parse('2026-10-08T12:00:00Z'));
+    const lines = (fixture.componentInstance as unknown as { lines: () => { stale: boolean }[] }).lines();
+    expect(lines.map(l => l.stale)).toEqual([true, false]);
+  });
+
+  it('offers Stop, Record pieces and Stop + Done for a step timer and stops a whole-job timer straight away', () => {
+    const fixture = TestBed.createComponent(KioskRunningTimersComponent);
+    const step = timer({ id: 4, operationId: 70, operationStepNumber: 2 });
+    const whole = timer({ id: 5 });
+    fixture.componentRef.setInput('timers', [step, whole]);
+    fixture.componentRef.setInput('now', Date.parse('2026-10-08T12:00:00Z'));
+    const stops: RunningTimer[] = [];
+    const records: RunningTimer[] = [];
+    const dones: RunningTimer[] = [];
+    fixture.componentInstance.stop.subscribe(t => stops.push(t));
+    fixture.componentInstance.recordPieces.subscribe(t => records.push(t));
+    fixture.componentInstance.stopDone.subscribe(t => dones.push(t));
+    const component = fixture.componentInstance as unknown as {
+      lines: () => { timer: RunningTimer; isStep: boolean }[];
+      toggle: (line: unknown) => void;
+      act: (kind: 'stop' | 'record' | 'done', timer: RunningTimer) => void;
+      expandedId: () => number | null;
+    };
+
+    component.toggle(component.lines()[0]);
+    expect(component.expandedId()).toBe(4);
+    component.act('record', step);
+    component.act('done', step);
+    component.act('stop', step);
+    component.toggle(component.lines()[1]);
+
+    expect(records).toEqual([step]);
+    expect(dones).toEqual([step]);
+    expect(stops).toEqual([step, whole]);
+    expect(component.expandedId()).toBeNull();
+  });
 });

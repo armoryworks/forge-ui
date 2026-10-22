@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { startWith } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PartsService } from '../../services/parts.service';
@@ -137,6 +139,10 @@ export class OperationDialogComponent implements OnInit {
     scrapFactorPercent: new FormControl<number | null>(
       this.data.operation?.scrapFactor ? Math.round(this.data.operation.scrapFactor * 1_000_000) / 10_000 : null,
       [this.scrapFactorRange]),
+    laborAttendancePercent: new FormControl<number | null>(this.data.operation?.laborAttendancePercent ?? 100, [
+      Validators.required, Validators.min(0), Validators.max(100),
+      maxDecimalsValidator(2, this.translate.instant('parts.laborAttendance'), this.translate),
+    ]),
     isQcCheckpoint: new FormControl(this.data.operation?.isQcCheckpoint ?? false),
     qcCriteria: new FormControl(this.data.operation?.qcCriteria ?? ''),
     referencedOperationId: new FormControl<number | null>(this.data.operation?.referencedOperationId ?? null),
@@ -151,6 +157,14 @@ export class OperationDialogComponent implements OnInit {
     ]),
   });
 
+  private readonly attendance = toSignal(
+    this.formGroup.controls.laborAttendancePercent.valueChanges.pipe(startWith(this.formGroup.controls.laborAttendancePercent.value)),
+    { initialValue: this.formGroup.controls.laborAttendancePercent.value });
+  protected readonly attendanceBelowFull = computed(() => {
+    const value = this.attendance();
+    return value !== null && value !== undefined && Number(value) < 100;
+  });
+
   protected readonly violations = FormValidationService.getViolations(this.formGroup, {
     stepNumber: this.translate.instant('parts.stepNumber'),
     title: this.translate.instant('common.title'),
@@ -160,6 +174,7 @@ export class OperationDialogComponent implements OnInit {
     setupMinutes: this.translate.instant('parts.setupTime'),
     runMinutesLot: this.translate.instant('parts.lotTime'),
     scrapFactorPercent: this.translate.instant('parts.scrapFactor'),
+    laborAttendancePercent: this.translate.instant('parts.laborAttendance'),
     subcontractVendorId: this.translate.instant('parts.subcontractVendor'),
     subcontractTurnTimeDays: this.translate.instant('parts.subcontractTurnTimeDays'),
   });
@@ -272,6 +287,7 @@ export class OperationDialogComponent implements OnInit {
         setupMinutes: raw.setupMinutes ?? 0,
         runMinutesLot: raw.runMinutesLot ?? 0,
         scrapFactor,
+        laborAttendancePercent: raw.laborAttendancePercent ?? 100,
         isQcCheckpoint: raw.isQcCheckpoint ?? undefined,
         qcCriteria: raw.qcCriteria || undefined,
         referencedOperationId: raw.referencedOperationId ?? 0,
@@ -296,6 +312,7 @@ export class OperationDialogComponent implements OnInit {
         setupMinutes: raw.setupMinutes ?? undefined,
         runMinutesLot: raw.runMinutesLot ?? undefined,
         scrapFactor,
+        laborAttendancePercent: raw.laborAttendancePercent ?? 100,
         isQcCheckpoint: raw.isQcCheckpoint ?? false,
         qcCriteria: raw.qcCriteria || undefined,
         referencedOperationId: raw.referencedOperationId ?? undefined,

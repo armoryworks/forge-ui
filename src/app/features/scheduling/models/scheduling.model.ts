@@ -1,3 +1,5 @@
+import { BurdenBasis } from './burden-basis.type';
+
 export interface WorkCenter {
   id: number;
   name: string;
@@ -17,6 +19,7 @@ export interface WorkCenter {
   teamId: number | null;
   teamName: string | null;
   idealCycleTimeSeconds?: number | null;
+  burdenBasis?: BurdenBasis | null;
 }
 
 export interface Shift {
@@ -113,6 +116,7 @@ export interface CreateWorkCenterRequest {
   sortOrder: number;
   teamId?: number | null;
   idealCycleTimeSeconds?: number | null;
+  burdenBasis?: BurdenBasis | null;
 }
 
 export interface CreateShiftRequest {

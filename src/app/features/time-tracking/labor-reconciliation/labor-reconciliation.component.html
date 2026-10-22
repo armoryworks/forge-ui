@@ -1,0 +1,102 @@
+<app-page-header [title]="'laborReconciliation.title' | translate" [subtitle]="'laborReconciliation.subtitle' | translate">
+  <a class="action-btn" routerLink="/time-tracking" data-testid="labor-recon-back">
+    <span class="material-icons-outlined">arrow_back</span>
+    {{ 'laborReconciliation.back' | translate }}
+  </a>
+</app-page-header>
+
+<div class="labor-recon">
+  <div class="labor-recon__filters">
+    <app-datepicker [label]="'common.from' | translate" [formControl]="fromControl" data-testid="labor-recon-from" />
+    <app-datepicker [label]="'common.to' | translate" [formControl]="toControl" data-testid="labor-recon-to" />
+    <button type="button" class="action-btn action-btn--primary" [disabled]="loading()" (click)="load()" data-testid="labor-recon-load">
+      <span class="material-icons-outlined">refresh</span>
+      {{ 'laborReconciliation.load' | translate }}
+    </button>
+  </div>
+
+  <p class="labor-recon__hint">{{ 'laborReconciliation.hint' | translate }}</p>
+
+  @if (error()) {
+    <p class="labor-recon__error" role="alert" data-testid="labor-recon-error">{{ error() }}</p>
+  }
+
+  <app-data-table
+    tableId="labor-reconciliation"
+    [columns]="columns"
+    [data]="rows()"
+    [loading]="loading()"
+    emptyIcon="schedule"
+    [emptyMessage]="'laborReconciliation.empty' | translate">
+    <ng-template appColumnCell="date" let-row>{{ row.date | dateOnly }}</ng-template>
+    <ng-template appColumnCell="paidMinutes" let-row>
+      @if (hours(row.paidMinutes); as paid) {
+        {{ paid | number:'1.2-2' }}
+      } @else if (row.paidMinutes === 0) {
+        0.00
+      } @else {
+        <span class="labor-recon__muted">{{ 'laborReconciliation.noClock' | translate }}</span>
+      }
+    </ng-template>
+    <ng-template appColumnCell="jobLaborMinutes" let-row>{{ hours(row.jobLaborMinutes) | number:'1.2-2' }}</ng-template>
+    <ng-template appColumnCell="indirectMinutes" let-row>{{ hours(row.indirectMinutes) | number:'1.2-2' }}</ng-template>
+    <ng-template appColumnCell="unallocatedMinutes" let-row>
+      @if (row.unallocatedMinutes !== null) {
+        <span [class.labor-recon__over]="row.unallocatedMinutes < 0">{{ hours(row.unallocatedMinutes) | number:'1.2-2' }}</span>
+      } @else {
+        &mdash;
+      }
+    </ng-template>
+    <ng-template appColumnCell="manualMinutes" let-row>{{ hours(row.manualMinutes) | number:'1.2-2' }}</ng-template>
+    <ng-template appColumnCell="overlappingTimerMinutes" let-row>{{ hours(row.overlappingTimerMinutes) | number:'1.2-2' }}</ng-template>
+    <ng-template appColumnCell="longTimers" let-row>
+      @if (row.longTimers > 0 || row.runningTimers > 0) {
+        <span class="labor-recon__over" [attr.data-testid]="'labor-recon-long-' + row.id">
+          {{ 'laborReconciliation.timers' | translate: { long: row.longTimers, running: row.runningTimers } }}
+        </span>
+      } @else {
+        0
+      }
+    </ng-template>
+  </app-data-table>
+
+  @if (canRecompute()) {
+    <section class="labor-recon__recompute" data-testid="labor-recon-recompute">
+      <h2 class="labor-recon__section-title">{{ 'laborReconciliation.recompute.title' | translate }}</h2>
+      <p class="labor-recon__hint">{{ 'laborReconciliation.recompute.hint' | translate }}</p>
+      <div class="labor-recon__actions">
+        <button type="button" class="action-btn" [disabled]="recomputing()" (click)="runPreview()" data-testid="labor-recon-preview">
+          <span class="material-icons-outlined">preview</span>
+          {{ 'laborReconciliation.recompute.preview' | translate }}
+        </button>
+        @if (preview(); as result) {
+          <button type="button" class="action-btn action-btn--primary" [disabled]="recomputing() || result.entriesChanged === 0"
+                  (click)="apply()" data-testid="labor-recon-apply">
+            <span class="material-icons-outlined">published_with_changes</span>
+            {{ 'laborReconciliation.recompute.apply' | translate }}
+          </button>
+        }
+      </div>
+      @if (preview(); as result) {
+        <p class="labor-recon__summary" data-testid="labor-recon-preview-summary">
+          {{ 'laborReconciliation.recompute.summary' | translate: {
+            count: result.entriesChanged,
+            locked: result.lockedSkipped,
+            before: (result.costBefore | number:'1.2-2'),
+            after: (result.costAfter | number:'1.2-2') } }}
+        </p>
+        <app-data-table
+          tableId="labor-recompute-preview"
+          [columns]="jobColumns"
+          [data]="previewJobs()"
+          emptyIcon="check_circle"
+          [emptyMessage]="'laborReconciliation.recompute.noChanges' | translate">
+          <ng-template appColumnCell="laborMinutesBefore" let-row>{{ hours(row.laborMinutesBefore) | number:'1.2-2' }}</ng-template>
+          <ng-template appColumnCell="laborMinutesAfter" let-row>{{ hours(row.laborMinutesAfter) | number:'1.2-2' }}</ng-template>
+          <ng-template appColumnCell="costBefore" let-row>{{ row.costBefore | number:'1.2-2' }}</ng-template>
+          <ng-template appColumnCell="costAfter" let-row>{{ row.costAfter | number:'1.2-2' }}</ng-template>
+        </app-data-table>
+      }
+    </section>
+  }
+</div>

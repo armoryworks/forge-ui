@@ -33,7 +33,9 @@ export class OperationQuantityDialogComponent {
   protected readonly data = inject<OperationQuantityDialogData>(MAT_DIALOG_DATA);
 
   protected readonly remaining = Math.max(this.data.jobQuantity - this.data.completedQuantity - this.data.scrapQuantity, 0);
-  protected readonly showScrap = signal(false);
+  protected readonly stopMode = this.data.mode === 'stop';
+  protected readonly steps = [1, 5, 10];
+  protected readonly showScrap = signal(this.stopMode);
   protected readonly showRework = signal(false);
   protected readonly touch = this.data.touch === true;
   protected readonly activeField = signal<QuantityField>('quantity');
@@ -44,8 +46,8 @@ export class OperationQuantityDialogComponent {
   ];
 
   protected readonly form = new FormGroup({
-    quantity: new FormControl<number | null>(this.remaining),
-    scrap: new FormControl<number | null>(0),
+    quantity: new FormControl<number | null>(this.stopMode ? null : this.remaining),
+    scrap: new FormControl<number | null>(this.stopMode ? null : 0),
     rework: new FormControl<number | null>(0),
     reason: new FormControl<string | null>(null),
   });
@@ -82,8 +84,14 @@ export class OperationQuantityDialogComponent {
     return issues;
   });
 
+  protected readonly overPlanned = computed(() => {
+    const planned = this.data.plannedQuantity;
+    return planned != null && planned > 0 && this.newCompleted() + this.newScrap() > planned;
+  });
+
   protected readonly canRecord = computed(() =>
-    this.violations().length === 0 && (this.added() > 0 || this.addedScrap() > 0 || this.addedRework() > 0));
+    this.violations().length === 0
+    && (this.stopMode || this.added() > 0 || this.addedScrap() > 0 || this.addedRework() > 0));
   protected readonly canComplete = computed(() => this.violations().length === 0);
 
   protected toggleScrap(): void {
@@ -110,6 +118,16 @@ export class OperationQuantityDialogComponent {
     this.replaceOnNextDigit = false;
     if (current.length >= 7) return;
     control.setValue(Number(current + digit));
+  }
+
+  protected step(amount: number): void {
+    this.replaceOnNextDigit = false;
+    const control = this.form.controls[this.activeField()];
+    control.setValue(toCount(control.value) + amount);
+  }
+
+  protected skip(): void {
+    this.dialogRef.close({ ...this.result(false), skipped: true, addedQuantity: 0, addedScrap: 0, reworkQuantity: 0 });
   }
 
   protected onBackspace(): void {
@@ -164,6 +182,8 @@ export class OperationQuantityDialogComponent {
       reworkQuantity: this.addedRework(),
       reasonCode: this.askReason() ? (this.value().reason ?? null) : null,
       complete,
+      addedQuantity: this.added(),
+      addedScrap: this.addedScrap(),
     };
   }
 }

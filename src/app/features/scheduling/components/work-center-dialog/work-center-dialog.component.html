@@ -33,6 +33,10 @@
       <app-currency-input [label]="'workCenterDialog.burdenRatePerHour' | translate" formControlName="burdenRatePerHour" />
     </div>
 
+    <app-select data-testid="wc-burden-basis" [label]="'workCenterDialog.burdenBasis' | translate"
+                formControlName="burdenBasis" [options]="burdenBasisOptions()" />
+    <p class="wc-burden-basis-hint">{{ 'workCenterDialog.burdenBasisHint' | translate }}</p>
+
     <app-autocomplete [label]="'workCenterDialog.asset' | translate" [options]="assetOptions()"
       displayField="label" valueField="value" formControlName="assetId"
       [placeholder]="'workCenterDialog.assetPlaceholder' | translate" />

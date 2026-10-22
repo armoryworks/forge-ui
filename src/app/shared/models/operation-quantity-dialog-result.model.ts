@@ -4,4 +4,7 @@ export interface OperationQuantityDialogResult {
   reworkQuantity: number;
   reasonCode: string | null;
   complete: boolean;
+  addedQuantity: number;
+  addedScrap: number;
+  skipped?: boolean;
 }

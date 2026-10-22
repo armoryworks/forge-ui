@@ -408,7 +408,7 @@
   }
 
   <!-- ─── Actions Overlay ─── -->
-  @if (phase() === 'actions') {
+  @if (phase() === 'actions' && !stepsOpen()) {
     <div class="sf-overlay">
       <div class="sf-actions-card" role="dialog" aria-modal="true" aria-labelledby="sf-actions-title" tabindex="-1"
            cdkTrapFocus cdkTrapFocusAutoCapture (keydown.escape)="cancelActions()">
@@ -450,70 +450,121 @@
             </div>
           }
 
-          <!-- Assigned Jobs -->
-          @if (worker.assignments.length > 0) {
-            <div class="sf-actions-card__jobs">
-              <h3 class="sf-actions-card__section-title">{{ 'shopFloor.yourWorkOrders' | translate }}</h3>
+          @if (operationTracking()) {
+            <app-kiosk-running-timers
+              [timers]="selectedWorkerTimers()"
+              [now]="nowMs()"
+              [busy]="processing() !== null"
+              (stop)="chipStop($event)"
+              (recordPieces)="chipRecord($event)"
+              (stopDone)="chipDone($event)" />
+          }
+
+          @if (operationTracking() && worker.assignments.length > 0) {
+            <div class="sf-actions-card__jobs" data-testid="sf-my-jobs">
+              <h3 class="sf-actions-card__section-title">{{ 'kioskDisplay.myJobs' | translate }}</h3>
               @for (assignment of worker.assignments; track assignment.jobId) {
-                <div class="sf-actions-card__job"
-                     [class.sf-actions-card__job--active]="assignment.hasActiveTimer">
+                <button type="button" class="sf-actions-card__job sf-actions-card__job--open"
+                        [class.sf-actions-card__job--active]="assignment.hasActiveTimer"
+                        [class.sf-actions-card__job--overdue]="assignment.isOverdue"
+                        [disabled]="processing() !== null"
+                        (click)="openJobSteps(assignment)"
+                        [attr.aria-label]="'kioskDisplay.openStepsAria' | translate: { jobNumber: assignment.jobNumber }"
+                        [attr.data-testid]="'sf-my-job-' + assignment.jobId">
                   <div class="sf-actions-card__job-dot" [style.background]="assignment.stageColor"></div>
                   <div class="sf-actions-card__job-info">
                     <span class="sf-actions-card__job-number">{{ assignment.jobNumber }}</span>
                     <span class="sf-actions-card__job-title">{{ assignment.title }}</span>
-                    <span class="sf-actions-card__job-stage">{{ assignment.stageName }}</span>
-                    @if (assignment.hasActiveTimer && timerElapsed()[jobKey(worker.userId, assignment.jobId)]; as elapsed) {
-                      <span class="sf-actions-card__job-elapsed" [attr.data-testid]="'sf-actions-elapsed-' + assignment.jobId">
-                        {{ 'kioskDisplay.onJob' | translate: { time: elapsed } }}
-                      </span>
+                    <span class="sf-actions-card__job-stage">
+                      @if (assignment.partNumber) {
+                        {{ 'kioskDisplay.partNumber' | translate: { partNumber: assignment.partNumber } }}
+                      }
+                      @if (assignment.dueDate) {
+                        · {{ 'kioskDisplay.due' | translate: { date: (assignment.dueDate | date: 'MMM d' : 'UTC') } }}
+                      }
+                    </span>
+                    @if (assignment.nextOperation; as op) {
+                      <span class="sf-actions-card__job-next">{{ 'kioskDisplay.nextStep' | translate: { step: op.stepNumber } }}</span>
                     }
                   </div>
-                  <div class="sf-actions-card__job-actions">
+                  <span class="sf-actions-card__job-tag">
                     @if (assignment.hasActiveTimer) {
-                      <button class="sf-action-btn sf-action-btn--stop-timer"
-                              [disabled]="processing() !== null"
-                              (click)="stopJobTimer(assignment)"
-                              [attr.aria-label]="'shopFloor.display.stopTimerOn' | translate: { jobNumber: assignment.jobNumber }"
-                              data-testid="sf-stop-timer">
-                        @if (processing() === 'timer-stop') {
-                          <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
-                        } @else {
-                          <span class="material-icons-outlined">stop_circle</span>
-                        }
-                        <span class="sf-action-btn__label">{{ 'shopFloor.jobFlow.stopTimer' | translate }}</span>
-                      </button>
+                      {{ 'kioskDisplay.myJobRunning' | translate }}
+                    } @else if (assignment.isRecent) {
+                      {{ 'kioskDisplay.myJobRecent' | translate }}
                     } @else {
-                      <button class="sf-action-btn sf-action-btn--start-timer"
-                              [disabled]="processing() !== null"
-                              (click)="startJobTimer(assignment)"
-                              [attr.aria-label]="'shopFloor.display.startTimerOn' | translate: { jobNumber: assignment.jobNumber }"
-                              data-testid="sf-start-timer">
-                        @if (processing() === 'timer-start-' + assignment.jobId) {
-                          <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
-                        } @else {
-                          <span class="material-icons-outlined">play_circle</span>
-                        }
-                        <span class="sf-action-btn__label">{{ 'shopFloor.jobFlow.startTimer' | translate }}</span>
-                      </button>
+                      {{ 'kioskDisplay.myJobAssigned' | translate }}
                     }
-                    @if (canSupervise()) {
-                      <button class="sf-action-btn sf-action-btn--complete"
-                              [disabled]="processing() !== null"
-                              (click)="confirmNextStatus(assignment)"
-                              [attr.aria-label]="'shopFloor.confirmNextStatus' | translate: { jobNumber: assignment.jobNumber }"
-                              data-testid="sf-complete-job">
-                        @if (processing() === 'complete-' + assignment.jobId) {
-                          <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
-                        } @else {
-                          <span class="material-icons-outlined">skip_next</span>
-                        }
-                        <span class="sf-action-btn__label">{{ 'shopFloor.nextStatus' | translate }}</span>
-                      </button>
-                    }
-                  </div>
-                </div>
+                  </span>
+                  <span class="material-icons-outlined">chevron_right</span>
+                </button>
               }
             </div>
+          } @else {
+            @if (worker.assignments.length > 0) {
+              <div class="sf-actions-card__jobs">
+                <h3 class="sf-actions-card__section-title">{{ 'shopFloor.yourWorkOrders' | translate }}</h3>
+                @for (assignment of worker.assignments; track assignment.jobId) {
+                  <div class="sf-actions-card__job"
+                       [class.sf-actions-card__job--active]="assignment.hasActiveTimer">
+                    <div class="sf-actions-card__job-dot" [style.background]="assignment.stageColor"></div>
+                    <div class="sf-actions-card__job-info">
+                      <span class="sf-actions-card__job-number">{{ assignment.jobNumber }}</span>
+                      <span class="sf-actions-card__job-title">{{ assignment.title }}</span>
+                      <span class="sf-actions-card__job-stage">{{ assignment.stageName }}</span>
+                      @if (assignment.hasActiveTimer && timerElapsed()[jobKey(worker.userId, assignment.jobId)]; as elapsed) {
+                        <span class="sf-actions-card__job-elapsed" [attr.data-testid]="'sf-actions-elapsed-' + assignment.jobId">
+                          {{ 'kioskDisplay.onJob' | translate: { time: elapsed } }}
+                        </span>
+                      }
+                    </div>
+                    <div class="sf-actions-card__job-actions">
+                      @if (assignment.hasActiveTimer) {
+                        <button class="sf-action-btn sf-action-btn--stop-timer"
+                                [disabled]="processing() !== null"
+                                (click)="stopJobTimer(assignment)"
+                                [attr.aria-label]="'shopFloor.display.stopTimerOn' | translate: { jobNumber: assignment.jobNumber }"
+                                data-testid="sf-stop-timer">
+                          @if (processing() === 'timer-stop') {
+                            <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
+                          } @else {
+                            <span class="material-icons-outlined">stop_circle</span>
+                          }
+                          <span class="sf-action-btn__label">{{ 'shopFloor.jobFlow.stopTimer' | translate }}</span>
+                        </button>
+                      } @else {
+                        <button class="sf-action-btn sf-action-btn--start-timer"
+                                [disabled]="processing() !== null"
+                                (click)="startJobTimer(assignment)"
+                                [attr.aria-label]="'shopFloor.display.startTimerOn' | translate: { jobNumber: assignment.jobNumber }"
+                                data-testid="sf-start-timer">
+                          @if (processing() === 'timer-start-' + assignment.jobId) {
+                            <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
+                          } @else {
+                            <span class="material-icons-outlined">play_circle</span>
+                          }
+                          <span class="sf-action-btn__label">{{ 'shopFloor.jobFlow.startTimer' | translate }}</span>
+                        </button>
+                      }
+                      @if (canSupervise()) {
+                        <button class="sf-action-btn sf-action-btn--complete"
+                                [disabled]="processing() !== null"
+                                (click)="confirmNextStatus(assignment)"
+                                [attr.aria-label]="'shopFloor.confirmNextStatus' | translate: { jobNumber: assignment.jobNumber }"
+                                data-testid="sf-complete-job">
+                          @if (processing() === 'complete-' + assignment.jobId) {
+                            <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
+                          } @else {
+                            <span class="material-icons-outlined">skip_next</span>
+                          }
+                          <span class="sf-action-btn__label">{{ 'shopFloor.nextStatus' | translate }}</span>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
           }
 
           <!-- Clock Actions (dynamic from reference data) -->
@@ -598,7 +649,7 @@
   }
 
   <!-- ─── Job Selection Overlay ─── -->
-  @if (phase() === 'job-select') {
+  @if (phase() === 'job-select' && !stepsOpen()) {
     <div class="sf-overlay">
       <div class="sf-job-select-card" role="dialog" aria-modal="true" aria-labelledby="sf-job-select-title" tabindex="-1"
            cdkTrapFocus cdkTrapFocusAutoCapture (keydown.escape)="skipJobSelect()">
@@ -803,7 +854,7 @@
   }
 
   <!-- ─── Scan Action Overlay ─── -->
-  <app-scan-action-overlay />
+  <app-scan-action-overlay (dismissed)="onOverlayDismissed()" />
 
   <!-- ─── Location View (triggered by scanning a storage location) ─── -->
   @if (scannedLocationId(); as locId) {

@@ -27,9 +27,50 @@
 
 .running-timers__item {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: $sp-sm;
   font-size: $font-size-sm;
+}
+
+.running-timers__chip {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: $sp-sm;
+  min-width: 0;
+  min-height: $tap-target-min;
+  padding: $sp-xs $sp-sm;
+  border: $border-width-thin solid var(--success);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.running-timers__chip--stale {
+  border-color: var(--warning);
+  background: var(--warning-light);
+}
+
+.running-timers__type {
+  color: var(--text-muted);
+}
+
+.running-timers__stale-icon {
+  color: var(--warning);
+}
+
+.running-timers__actions {
+  display: flex;
+  flex-basis: 100%;
+  gap: $sp-sm;
+}
+
+.running-timers__action {
+  flex: 1;
+  min-height: $tap-target-min + $sp-lg + $sp-sm;
 }
 
 .running-timers__job {

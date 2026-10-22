@@ -1773,7 +1773,10 @@
       "removed": "Alternate removed",
       "removeTitle": "Remove Alternate",
       "removeMessage": "Remove {{part}} as alternate?"
-    }
+    },
+    "laborAttendance": "Operator attendance",
+    "laborAttendanceHint": "How much of the step needs the operator: 100 = operator busy the whole time; 20 = load, unload and gauge only. Shares a person's clocked time when they run several timers at once.",
+    "laborAttendanceMachineHint": "A machine runs part of this step. Set its work center's burden basis to Machine so the machine is still charged its full cycle time."
   },
   "partsCatalog": {
     "duplicateRow": "Duplicate {{partNumber}}"
@@ -3514,7 +3517,9 @@
     "runningStopAria": "Stop the timer on {{job}}",
     "billable": "Billable",
     "nonBillable": "Non-billable",
-    "durationRange": "Enter a duration between 1 minute and 24 hours."
+    "durationRange": "Enter a duration between 1 minute and 24 hours.",
+    "colLabor": "Labor",
+    "splitWith": "Split with {{count}} concurrent timer(s)"
   },
   "assets": {
     "title": "Assets",
@@ -8568,7 +8573,8 @@
       "assetScannedUnnamed": "Asset label scanned",
       "locationScanned": "Location {{name}}",
       "receivingLoadFailed": "Couldn't load the purchase orders to receive. Go back and try again.",
-      "shippingLoadFailed": "Couldn't load the shipments. Go back and try again."
+      "shippingLoadFailed": "Couldn't load the shipments. Go back and try again.",
+      "piecesRecorded": "Pieces recorded on {{jobNumber}}"
     },
     "trainingModeActive": "TRAINING MODE — Actions will not be saved",
     "trainingModeEnabled": "Training mode enabled",
@@ -8676,7 +8682,23 @@
       "alreadyRunning": "Your timer on step {{step}} · {{title}} is already running",
       "stopped": "Stopped step {{step}} · {{title}}",
       "timerStopped": "Stopped your timer on {{jobNumber}}",
-      "recorded": "Step {{step}}: {{count}} of {{total}} recorded"
+      "recorded": "Step {{step}}: {{count}} of {{total}} recorded",
+      "chipAria": "{{jobNumber}} {{step}}: show actions",
+      "indirect": "Indirect",
+      "entryType": {
+        "Setup": "Setup",
+        "Run": "Run",
+        "Teardown": "Teardown",
+        "Inspection": "Inspection",
+        "Rework": "Rework",
+        "Wait": "Wait",
+        "Other": "Other"
+      },
+      "staleTimer": "Running 10 hours or more. Check that it should still be running.",
+      "stopAndDone": "Stop + Done",
+      "suggested": "Suggested",
+      "doneCount": "Done ({{count}})",
+      "attendance": "Operator {{percent}}%"
     },
     "returnFlow": {
       "title": "Return Items",
@@ -8773,7 +8795,14 @@
     "closedJobScanned": "Work order {{number}} is closed and can't take time.",
     "scanNotForClock": "{{label}} isn't used for clocking. Scan your badge or a work order.",
     "kioskMfaUseBadge": "This account needs a second sign-in step. Use your badge and PIN on this kiosk.",
-    "terminalCheckFailed": "Can't reach the server to check this terminal."
+    "terminalCheckFailed": "Can't reach the server to check this terminal.",
+    "clockOutSheet": {
+      "title": "Clock out {{name}}",
+      "hint": "These timers are still running and will stop when you clock out. Enter the good and scrap pieces you made, or leave them blank.",
+      "good": "Good",
+      "scrap": "Scrap",
+      "confirm": "Clock out"
+    }
   },
   "kioskDisplay": {
     "entryTitle": "Use this browser as a shop-floor terminal?",
@@ -8807,7 +8836,13 @@
     "claiming": "Taking the job...",
     "claimed": "{{jobNumber}} is yours",
     "claimFailed": "Could not take {{jobNumber}}",
-    "boardShowing": "Showing {{shown}} of {{total}}"
+    "boardShowing": "Showing {{shown}} of {{total}}",
+    "myJobs": "My jobs",
+    "openStepsAria": "Open the steps of {{jobNumber}}",
+    "nextStep": "Next: Op {{step}}",
+    "myJobRunning": "Running",
+    "myJobRecent": "Recent",
+    "myJobAssigned": "Assigned"
   },
   "customerReturns": {
     "allStatuses": "All Statuses",
@@ -9565,7 +9600,12 @@
     "create": "Create Work Center",
     "idealCycleTimeSeconds": "Ideal cycle time (seconds per unit)",
     "idealCycleTimeHint": "Fastest time to make one good unit; OEE performance compares actual run time to it.",
-    "dailyCapacityHint": "Hours each machine is available per working day (up to 24)."
+    "dailyCapacityHint": "Hours each machine is available per working day (up to 24).",
+    "burdenBasis": "Burden basis",
+    "burdenBasisAuto": "Automatic (Machine when linked to a machine asset)",
+    "burdenBasisLabor": "Labor — burden follows the operator's labor time",
+    "burdenBasisMachine": "Machine — burden follows the full machine time",
+    "burdenBasisHint": "When an operator runs several timers at once, labor is shared between them. Machine charges this center's burden on the full elapsed time of each timer; Labor charges it on the operator's share."
   },
   "oee": {
     "title": "OEE Dashboard",
@@ -13336,7 +13376,8 @@
       "efficiency": "Eff.",
       "progress": "Progress",
       "perPiece": "Per piece",
-      "remaining": "Remaining"
+      "remaining": "Remaining",
+      "laborHours": "Labor h"
     },
     "summary": {
       "estimated": "Estimated",
@@ -13365,7 +13406,12 @@
       "shortCloseMessage": "Only {{done}} good and {{scrap}} scrapped of {{quantity}} are counted. Mark this step done anyway?",
       "shortCloseConfirm": "Mark done",
       "wholeNumbers": "Enter whole pieces only (0 or more).",
-      "decimals": "Enter 0 or more, with at most {{places}} decimal places."
+      "decimals": "Enter 0 or more, with at most {{places}} decimal places.",
+      "skip": "Skip",
+      "stop": "Stop",
+      "stopAndRecord": "Stop and record {{count}}",
+      "stopAndDone": "Stop and mark done ({{count}})",
+      "overPlanned": "{{total}} is more than the {{planned}} planned for this step. Check the count before you continue."
     },
     "messages": {
       "completed": "{{operation}} marked done",
@@ -13374,7 +13420,9 @@
       "reset": "{{operation}} reset",
       "recorded": "Progress recorded on {{operation}}",
       "saveFailed": "Progress on {{operation}} was not saved. Check the connection and try again."
-    }
+    },
+    "printStepLabels": "Print step barcodes",
+    "stepLabel": "Op {{step}} · {{title}}"
   },
   "detailLoadError": {
     "notFound": "Record not found",
@@ -13934,6 +13982,44 @@
       "format": "{{field}} is not in the expected format.",
       "invalidOption": "{{field}} is not one of the allowed values.",
       "precision": "{{field}} has too many digits."
+    }
+  },
+  "laborReconciliation": {
+    "title": "Labor reconciliation",
+    "subtitle": "Paid time against the labor charged to jobs, per person and day",
+    "back": "Time tracking",
+    "load": "Show",
+    "hint": "Hours. Paid is clocked time less unpaid breaks. Unallocated is paid time not charged to any job or indirect timer; a negative number means more was charged than paid (manual entries, or timers stopped before the labor split).",
+    "empty": "No time in this range.",
+    "noClock": "Not clocked",
+    "timers": "{{long}} long / {{running}} running",
+    "columns": {
+      "date": "Date",
+      "person": "Person",
+      "paid": "Paid h",
+      "jobLabor": "Job labor h",
+      "indirect": "Indirect h",
+      "unallocated": "Unallocated h",
+      "manual": "Manual h",
+      "overlap": "Overlap h",
+      "longTimers": "Timers 10 h+"
+    },
+    "recompute": {
+      "title": "Recompute labor",
+      "hint": "Re-runs the labor split for unlocked timers in this range and re-prices them. Preview first; locked pay periods are never changed.",
+      "preview": "Preview",
+      "apply": "Apply",
+      "summary": "{{count}} time entries would change ({{locked}} locked, skipped). Job cost {{before}} → {{after}}.",
+      "noChanges": "Nothing would change.",
+      "job": "Job",
+      "entries": "Entries",
+      "laborBefore": "Labor h before",
+      "laborAfter": "Labor h after",
+      "costBefore": "Cost before",
+      "costAfter": "Cost after",
+      "confirmTitle": "Apply the recompute?",
+      "confirmMessage": "{{count}} time entries on {{jobs}} job(s) will be re-priced. Costs already absorbed into finished goods are not reversed; any decrease shows up as variance at close.",
+      "applied": "Re-priced {{count}} time entries."
     }
   }
 }

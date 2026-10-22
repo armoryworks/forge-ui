@@ -40,6 +40,13 @@
           <span class="op-time__summary-label">{{ 'jobOperations.summary.quantity' | translate }}</span>
           <span class="op-time__summary-value">{{ jobQuantity() | number:'1.0-4' }}</span>
         </div>
+        <div class="op-time__summary-item">
+          <button type="button" class="action-btn action-btn--sm" data-testid="operation-print-step-labels"
+                  (click)="printStepLabels()">
+            <span class="material-icons-outlined">qr_code_2</span>
+            {{ 'jobOperations.printStepLabels' | translate }}
+          </button>
+        </div>
         @if (targetStart(); as plan) {
           <div class="op-time__summary-item" data-testid="operation-time-target-start">
             <span class="op-time__summary-label">{{ 'jobOperations.summary.target' | translate }}</span>
@@ -126,6 +133,15 @@
           <ng-template appColumnCell="actualRunMinutes" let-row>
             <span class="op-time__num" [class]="getVarianceClass(row.runVarianceMinutes)">
               {{ formatMinutes(row.actualRunMinutes) }}
+            </span>
+          </ng-template>
+          <ng-template appColumnCell="laborMinutes" let-row>
+            <span class="op-time__num" [attr.data-testid]="'operation-labor-' + row.operationSequence">
+              @if (row.laborMinutes !== null && row.laborMinutes !== undefined) {
+                {{ (row.laborMinutes / 60) | number:'1.2-2' }}
+              } @else {
+                &mdash;
+              }
             </span>
           </ng-template>
           <ng-template appColumnCell="actualTotalMinutes" let-row>

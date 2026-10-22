@@ -1,9 +1,37 @@
 <ul class="op-tiles" [attr.aria-label]="'shopFloor.operations.title' | translate">
-  @for (tile of tiles(); track tile.row.operationId) {
+  @for (tile of openTiles(); track tile.row.operationId) {
+    <ng-container *ngTemplateOutlet="tileTemplate; context: { $implicit: tile }" />
+  } @empty {
+    @if (doneTiles().length === 0) {
+      <li class="op-tiles__empty">{{ 'shopFloor.operations.noRouting' | translate }}</li>
+    }
+  }
+  @if (doneTiles().length > 0) {
+    <li class="op-tiles__done">
+      <button type="button" class="action-btn op-tiles__done-toggle" (click)="toggleDone()"
+              [attr.aria-expanded]="showDone()" data-testid="kiosk-op-done-toggle">
+        <span class="material-icons-outlined">{{ showDone() ? 'expand_less' : 'expand_more' }}</span>
+        {{ 'shopFloor.operations.doneCount' | translate: { count: doneTiles().length } }}
+      </button>
+    </li>
+    @if (showDone()) {
+      @for (tile of doneTiles(); track tile.row.operationId) {
+        <ng-container *ngTemplateOutlet="tileTemplate; context: { $implicit: tile }" />
+      }
+    }
+  }
+</ul>
+
+<ng-template #tileTemplate let-tile>
     <li class="op-tile"
         [class.op-tile--running]="tile.row.openTimers.length > 0"
         [class.op-tile--closed]="tile.closed"
+        [class.op-tile--suggested]="tile.suggested && !tile.closed"
+        [class.op-tile--focused]="tile.focused"
         [attr.data-testid]="'kiosk-op-tile-' + tile.row.stepNumber">
+      @if (tile.suggested && !tile.closed) {
+        <span class="op-tile__suggested" [attr.data-testid]="'kiosk-op-suggested-' + tile.row.stepNumber">{{ 'shopFloor.operations.suggested' | translate }}</span>
+      }
       <div class="op-tile__head">
         <span class="op-tile__step">{{ tile.row.stepNumber }}</span>
         <span class="op-tile__title">{{ tile.row.title }}</span>
@@ -22,6 +50,9 @@
             <span class="material-icons-outlined">timer</span>
             {{ tile.elapsedMs | durationMs }}
           </span>
+        }
+        @if ((tile.row.laborAttendancePercent ?? 100) < 100) {
+          <span class="op-tile__attendance">{{ 'shopFloor.operations.attendance' | translate: { percent: tile.row.laborAttendancePercent } }}</span>
         }
         @if (tile.othersInitials) {
           <span class="op-tile__others">{{ 'shopFloor.operations.othersRunning' | translate: { names: tile.othersInitials } }}</span>
@@ -70,7 +101,4 @@
         </div>
       }
     </li>
-  } @empty {
-    <li class="op-tiles__empty">{{ 'shopFloor.operations.noRouting' | translate }}</li>
-  }
-</ul>
+</ng-template>

@@ -253,6 +253,7 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     completeJob: vi.fn(() => of(undefined)),
     identifyScan: vi.fn(() => of({})),
     getConfig: vi.fn(() => of({ operationTracking: false })),
+    stopOperationTimer: vi.fn((_jobId: number, _operationId: number, _request?: unknown) => of({ stopped: true, entry: null })),
   };
   const events = { getUpcomingEvents: vi.fn(() => of([])) };
   const clockTypes = {
@@ -1139,6 +1140,114 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'part', entityId: 5, entityNumber: 'BR-100' }));
     c.handleScanValue('BR');
     expect(c.scanFeedback()).toBe('shopFloor.display.partScanned {"number":"BR-100"}');
+  });
+  describe('with operation tracking on', () => {
+    interface StepInternals {
+      operationTracking: { set: (v: boolean) => void };
+      stepsOpen: () => boolean;
+      openJobSteps: (job: unknown, focus?: number | null) => void;
+      onOverlayDismissed: () => void;
+      selectedWorkerTimers: () => { id: number; operationStepNumber: number | null; entryType: string | null }[];
+      scanOverlay: () => unknown;
+    }
+    const running = (id: number, jobId: number | null, operationId: number | null, stepNumber: number | null) => ({
+      timeEntryId: id, jobId, jobNumber: jobId ? `J-${jobId}` : null, jobOperationId: operationId ? id * 10 : null,
+      operationId, stepNumber, operationTitle: stepNumber ? `Step ${stepNumber}` : null, entryType: 'Run',
+      timerStart: '2026-10-22T13:00:00Z', attendancePercent: 100,
+    });
+
+    function tracked(): { c: Internals & StepInternals; overlay: { openJobById: ReturnType<typeof vi.fn> } } {
+      const c = create() as Internals & StepInternals;
+      const overlay = { openJobById: vi.fn() };
+      (c as unknown as { scanOverlay: () => unknown }).scanOverlay = () => overlay;
+      c.operationTracking.set(true);
+      return { c, overlay };
+    }
+
+    it('a My jobs row opens the job\'s steps — never a job-level start', () => {
+      const { c, overlay } = tracked();
+      c.selectedWorker.set(makeWorker('ProductionWorker', [assignment]));
+      c.phase.set('actions');
+
+      c.openJobSteps(assignment);
+
+      expect(overlay.openJobById).toHaveBeenCalledWith(41, { jobNumber: 'JOB-0041', title: 'Bracket', stageName: 'In Production' }, null);
+      expect(c.stepsOpen()).toBe(true);
+      expect(shopFloor.startTimer).not.toHaveBeenCalled();
+    });
+
+    it('picking a job opens its steps instead of claiming it at its next step', () => {
+      const { c, overlay } = tracked();
+      const worker = makeWorker('ProductionWorker');
+      c.selectedWorker.set(worker);
+      c.jobSelectWorker.set(worker);
+      c.phase.set('job-select');
+
+      c.claimJob(availableJob);
+
+      expect(shopFloor.claimJob).not.toHaveBeenCalled();
+      expect(overlay.openJobById).toHaveBeenCalledWith(2403, expect.objectContaining({ jobNumber: 'J-2403' }), null);
+
+      c.onOverlayDismissed();
+      expect(c.stepsOpen()).toBe(false);
+      expect(c.phase()).toBe('actions');
+      expect(shopFloor.getClockStatus).toHaveBeenCalled();
+    });
+
+    it('the running strip shows every timer the worker has open', () => {
+      const { c } = tracked();
+      c.selectedWorker.set({ ...makeWorker('ProductionWorker'), runningTimers: [
+        running(1, 41, 401, 2), running(2, 42, 408, 8), running(3, null, null, null),
+      ] });
+
+      const timers = c.selectedWorkerTimers();
+
+      expect(timers.map(t => t.id)).toEqual([1, 2, 3]);
+      expect(timers.map(t => t.operationStepNumber)).toEqual([2, 8, null]);
+    });
+
+    it('clocking out with timers running shows the sheet and records its pieces before the punch', () => {
+      const { c } = tracked();
+      const worker = { ...makeWorker('ProductionWorker'), runningTimers: [running(1, 41, 401, 2), running(2, 42, 408, 8)] };
+      c.selectedWorker.set(worker);
+      const lines = [
+        { timer: worker.runningTimers[0], goodQuantity: 6, scrapQuantity: 1 },
+        { timer: worker.runningTimers[1], goodQuantity: null, scrapQuantity: null },
+      ];
+      dialog.open.mockReturnValueOnce({ afterClosed: () => of(lines), close: dialogClose } as never);
+
+      c.clockAction(worker, 'OUT');
+
+      expect(dialog.open).toHaveBeenCalledTimes(1);
+      expect(shopFloor.stopOperationTimer).toHaveBeenCalledTimes(1);
+      expect(shopFloor.stopOperationTimer).toHaveBeenCalledWith(41, 401, { goodQuantity: 6, scrapQuantity: 1 });
+      expect(shopFloor.clockInOut).toHaveBeenCalledWith(5, 'OUT');
+      expect(shopFloor.stopOperationTimer.mock.invocationCallOrder[0])
+        .toBeLessThan(shopFloor.clockInOut.mock.invocationCallOrder[0]);
+    });
+
+    it('closing the clock-out sheet does not clock out', () => {
+      const { c } = tracked();
+      const worker = { ...makeWorker('ProductionWorker'), runningTimers: [running(1, 41, 401, 2)] };
+      c.selectedWorker.set(worker);
+      dialog.open.mockReturnValueOnce({ afterClosed: () => of(undefined), close: dialogClose } as never);
+
+      c.clockAction(worker, 'OUT');
+
+      expect(shopFloor.clockInOut).not.toHaveBeenCalled();
+      expect(shopFloor.stopOperationTimer).not.toHaveBeenCalled();
+    });
+
+    it('clocking out with nothing running goes straight to the punch', () => {
+      const { c } = tracked();
+      const worker = makeWorker('ProductionWorker');
+      c.selectedWorker.set(worker);
+
+      c.clockAction(worker, 'OUT');
+
+      expect(dialog.open).not.toHaveBeenCalled();
+      expect(shopFloor.clockInOut).toHaveBeenCalledWith(5, 'OUT');
+    });
   });
 });
 

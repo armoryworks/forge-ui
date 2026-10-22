@@ -7,6 +7,7 @@ export interface UpdateOperationRequest {
   setupMinutes?: number;
   runMinutesLot?: number;
   scrapFactor?: number;
+  laborAttendancePercent?: number;
   isQcCheckpoint?: boolean;
   qcCriteria?: string;
   referencedOperationId?: number;

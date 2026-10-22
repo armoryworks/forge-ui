@@ -31,6 +31,7 @@ interface JobActionContext {
   currentStage: string;
   assigneeName: string | null;
   hasActiveTimer: boolean;
+  focusOperationId: number | null;
 }
 
 const ACTION_ICONS: Record<string, string> = {
@@ -169,6 +170,22 @@ export class ScanActionOverlayComponent {
     this.lookupPart(value);
   }
 
+  /** Open a job's step view directly, as a job scan would (e.g., from the worker card's My jobs). */
+  openJobById(jobId: number, job: { jobNumber: string; title: string; stageName: string }, focusOperationId: number | null = null): void {
+    this.error.set(null);
+    this.context.set(null);
+    this.jobContext.set({
+      jobId,
+      jobNumber: job.jobNumber,
+      jobTitle: job.title,
+      currentStage: job.stageName,
+      assigneeName: null,
+      hasActiveTimer: false,
+      focusOperationId,
+    });
+    this.phase.set('job');
+  }
+
   private lookupPart(identifier: string): void {
     this.phase.set('loading');
     this.error.set(null);
@@ -178,7 +195,7 @@ export class ScanActionOverlayComponent {
       next: (result) => {
         if (result.scanType === 'job' && result.isClosed) {
           this.showMessage(this.translate.instant('shopFloor.closedJobScanned', { number: result.entityNumber ?? '' }));
-        } else if (result.scanType === 'job' && result.entityId != null) {
+        } else if ((result.scanType === 'job' || result.scanType === 'job-operation') && result.entityId != null) {
           this.openJob(result);
         } else {
           this.loadPartContext(identifier);
@@ -216,6 +233,7 @@ export class ScanActionOverlayComponent {
       currentStage: result.stageName ?? '',
       assigneeName: null,
       hasActiveTimer: false,
+      focusOperationId: result.scanType === 'job-operation' ? result.operationId ?? null : null,
     });
     this.phase.set('job');
   }

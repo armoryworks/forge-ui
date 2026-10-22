@@ -136,6 +136,7 @@
           [currentStage]="jobContext()!.currentStage"
           [assigneeName]="jobContext()!.assigneeName"
           [hasActiveTimer]="jobContext()!.hasActiveTimer"
+          [focusOperationId]="jobContext()!.focusOperationId"
           (completed)="onFlowCompleted()"
           (cancelled)="onFlowCancelled()" />
       }

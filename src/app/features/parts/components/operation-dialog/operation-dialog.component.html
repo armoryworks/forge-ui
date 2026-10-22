@@ -49,6 +49,11 @@
 
       <app-input data-testid="op-scrap-factor" [label]="'parts.scrapFactor' | translate" [info]="'parts.scrapFactorHint' | translate" type="number" [min]="0" step="any" suffix="%" formControlName="scrapFactorPercent" />
 
+      <app-input data-testid="op-labor-attendance" [label]="'parts.laborAttendance' | translate" [info]="'parts.laborAttendanceHint' | translate" type="number" [min]="0" [max]="100" step="any" suffix="%" formControlName="laborAttendancePercent" />
+      @if (attendanceBelowFull()) {
+        <p class="op-attendance-hint" data-testid="op-labor-attendance-machine-hint">{{ 'parts.laborAttendanceMachineHint' | translate }}</p>
+      }
+
       <app-input data-testid="op-title" [label]="'common.title' | translate" formControlName="title" [maxlength]="200" [required]="true" />
       <app-textarea data-testid="op-instructions" [label]="'parts.instructions' | translate" formControlName="instructions" [rows]="5" [maxlength]="4000" />
 

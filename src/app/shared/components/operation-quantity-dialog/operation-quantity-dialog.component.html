@@ -35,26 +35,53 @@
           {{ 'jobOperations.dialog.addScrap' | translate }}
         </button>
       }
-      @if (!showRework()) {
+      @if (!showRework() && !stopMode) {
         <button type="button" class="action-btn action-btn--link" data-testid="operation-qty-show-rework" (click)="toggleRework()">
           {{ 'jobOperations.dialog.addRework' | translate }}
         </button>
       }
     </div>
+    @if (overPlanned()) {
+      <p class="op-qty__warning" role="status" data-testid="operation-qty-over-planned">
+        {{ 'jobOperations.dialog.overPlanned' | translate: {
+          total: ((newCompleted() + newScrap()) | number:'1.0-4'),
+          planned: (data.plannedQuantity | number:'1.0-4') } }}
+      </p>
+    }
     @if (touch) {
+      <div class="op-qty__steps">
+        @for (amount of steps; track amount) {
+          <button type="button" class="action-btn op-qty__step" (click)="step(amount)"
+                  [attr.data-testid]="'operation-qty-step-' + amount">+{{ amount }}</button>
+        }
+      </div>
       <app-numeric-keypad (digit)="onDigit($event)" (backspace)="onBackspace()" (clear)="onClear()" />
     }
   </div>
 
   <div dialog-footer>
+    @if (stopMode) {
+      <button type="button" class="action-btn action-btn--link" [class.op-qty__btn--touch]="touch" data-testid="operation-qty-skip"
+              (click)="skip()">
+        {{ 'jobOperations.dialog.skip' | translate }}
+      </button>
+    }
     <button type="button" class="action-btn" [class.op-qty__btn--touch]="touch" data-testid="operation-qty-record"
             [disabled]="!canRecord()" (click)="record()">
-      {{ 'jobOperations.dialog.record' | translate: { count: (added() | number:'1.0-4') } }}
+      @if (!stopMode) {
+        {{ 'jobOperations.dialog.record' | translate: { count: (added() | number:'1.0-4') } }}
+      } @else if (added() > 0 || addedScrap() > 0) {
+        {{ 'jobOperations.dialog.stopAndRecord' | translate: { count: (added() | number:'1.0-4') } }}
+      } @else {
+        {{ 'jobOperations.dialog.stop' | translate }}
+      }
     </button>
     <app-validation-button [violations]="violations">
       <button type="button" class="action-btn action-btn--primary" [class.op-qty__btn--touch]="touch" data-testid="operation-qty-done"
               [disabled]="!canComplete()" (click)="complete()">
-        @if (isAll()) {
+        @if (stopMode) {
+          {{ 'jobOperations.dialog.stopAndDone' | translate: { count: (newCompleted() | number:'1.0-4') } }}
+        } @else if (isAll()) {
           {{ 'jobOperations.dialog.doneAll' | translate: { count: (newCompleted() | number:'1.0-4') } }}
         } @else {
           {{ 'jobOperations.dialog.done' | translate: { count: (newCompleted() | number:'1.0-4') } }}

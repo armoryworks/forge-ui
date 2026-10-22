@@ -5,13 +5,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { interval } from 'rxjs';
+import { interval, Observable } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { OperationQuantityDialogComponent } from '../../../../shared/components/operation-quantity-dialog/operation-quantity-dialog.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
+import { KioskStepActionsService } from '../../services/kiosk-step-actions.service';
 import { ShopFloorService } from '../../services/shop-floor.service';
 import { KanbanService } from '../../../kanban/services/kanban.service';
 import { BILLING_STAGE_ROLES } from '../../../../shared/models/billing-stage-roles.const';
@@ -23,6 +24,7 @@ import { KioskOperationTilesComponent } from '../kiosk-operation-tiles/kiosk-ope
 import { KioskRunningTimersComponent } from '../kiosk-running-timers/kiosk-running-timers.component';
 import { JobOperations } from '../../models/job-operations.model';
 import { JobOperationRow } from '../../models/job-operation-row.model';
+import { KioskStepContext } from '../../models/kiosk-step-context.model';
 import { OperationTimerEntryType } from '../../models/operation-timer-entry-type.type';
 import { RunningTimer } from '../../models/running-timer.model';
 import { UpdateJobOperationProgressRequest } from '../../models/update-job-operation-progress-request.model';
@@ -50,6 +52,7 @@ const PROBLEM_TYPES: readonly { type: KioskAndonType; icon: string; labelKey: st
 })
 export class ScanJobFlowComponent implements OnInit {
   private readonly shopFloorService = inject(ShopFloorService);
+  private readonly stepActions = inject(KioskStepActionsService);
   private readonly kanbanService = inject(KanbanService);
   private readonly translate = inject(TranslateService);
   private readonly auth = inject(AuthService);
@@ -64,6 +67,7 @@ export class ScanJobFlowComponent implements OnInit {
   readonly currentStage = input.required<string>();
   readonly assigneeName = input<string | null>(null);
   readonly hasActiveTimer = input<boolean>(false);
+  readonly focusOperationId = input<number | null>(null);
 
   // Outputs
   readonly completed = output<void>();
@@ -101,6 +105,15 @@ export class ScanJobFlowComponent implements OnInit {
   protected readonly jobTimerRunning = computed(() => this.tracking()
     ? this.runningTimers().some(timer => timer.jobId === this.jobId())
     : this.hasActiveTimer());
+  protected readonly suggestedOperationId = computed(() => {
+    const me = this.currentUserId();
+    const open = (this.jobOperations()?.operations ?? [])
+      .filter(op => op.isRoutingStep && op.operationId != null && op.status !== 'Complete' && op.status !== 'Skipped');
+    const rank = (op: JobOperationRow) => op.openTimers.some(t => t.userId === me) ? 0
+      : op.status === 'InProgress' || op.openTimers.length > 0 ? 1 : 2;
+    const best = [...open].sort((a, b) => rank(a) - rank(b) || a.stepNumber - b.stepNumber)[0];
+    return best?.operationId ?? null;
+  });
   private serverOffsetMs = 0;
   private ticking = false;
 
@@ -190,11 +203,20 @@ export class ScanJobFlowComponent implements OnInit {
     });
   }
 
-  protected stopOperation(row: JobOperationRow): void {
+  private stepContext(): KioskStepContext {
+    const ops = this.jobOperations();
+    return { jobQuantity: ops?.jobQuantity ?? 0, decimalPlaces: ops?.quantityDecimalPlaces ?? null, reasons: this.reasons() };
+  }
+
+  protected stopOperation(row: JobOperationRow, askAlways = false): void {
     if (row.operationId == null || !this.beginOperationCall()) return;
-    this.shopFloorService.stopOperationTimer(this.jobId(), row.operationId).subscribe({
-      next: () => {
+    const mine = row.openTimers.find(t => t.userId === this.currentUserId());
+    const entryType = askAlways ? 'Run' : mine?.entryType ?? null;
+    this.stepActions.stop(this.jobId(), row, this.stepContext(), entryType).subscribe({
+      next: (result) => {
         this.operationBusy.set(false);
+        if (!result) return;
+        if (result.operation) this.replaceOperation(result.operation);
         this.operationNotice.set(this.translate.instant('shopFloor.operations.stopped', { step: row.stepNumber, title: row.title }));
         this.loadOperations();
         this.loadRunningTimers();
@@ -203,7 +225,62 @@ export class ScanJobFlowComponent implements OnInit {
     });
   }
 
+  protected chipRecordPieces(timer: RunningTimer): void {
+    const row = this.rowForTimer(timer);
+    if (row) {
+      this.openQuantity(row);
+      return;
+    }
+    this.withOtherJobStep(timer, (step) => this.stepActions.recordPieces(timer.jobId!, step.row, step.context));
+  }
+
+  protected chipStopDone(timer: RunningTimer): void {
+    const row = this.rowForTimer(timer);
+    if (row) {
+      this.stopOperation(row, true);
+      return;
+    }
+    this.withOtherJobStep(timer, (step) => this.stepActions.stop(timer.jobId!, step.row, step.context, 'Run'));
+  }
+
+  private rowForTimer(timer: RunningTimer): JobOperationRow | null {
+    if (timer.jobId !== this.jobId() || timer.operationId == null) return null;
+    return this.jobOperations()?.operations.find(op => op.operationId === timer.operationId) ?? null;
+  }
+
+  private withOtherJobStep(
+    timer: RunningTimer,
+    act: (step: { row: JobOperationRow; context: KioskStepContext }) => Observable<unknown>,
+  ): void {
+    if (timer.jobId == null || timer.operationId == null || !this.beginOperationCall()) return;
+    this.stepActions.loadStep(timer.jobId, timer.operationId).subscribe({
+      next: (step) => {
+        if (!step) {
+          this.operationBusy.set(false);
+          return;
+        }
+        act(step).subscribe({
+          next: () => {
+            this.operationBusy.set(false);
+            this.loadRunningTimers();
+          },
+          error: (err: HttpErrorResponse) => this.operationFailed(err),
+        });
+      },
+      error: (err: HttpErrorResponse) => this.operationFailed(err),
+    });
+  }
+
   protected stopRunningTimer(timer: RunningTimer): void {
+    if (timer.jobId != null && timer.operationId != null) {
+      const row = this.rowForTimer(timer);
+      if (row) {
+        this.stopOperation(row);
+        return;
+      }
+      this.withOtherJobStep(timer, (step) => this.stepActions.stop(timer.jobId!, step.row, step.context, timer.entryType));
+      return;
+    }
     if (!this.beginOperationCall()) return;
     this.shopFloorService.stopTimer({ timeEntryId: timer.id }).subscribe({
       next: () => {

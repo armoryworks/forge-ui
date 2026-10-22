@@ -89,7 +89,9 @@
           [timers]="runningTimers()"
           [now]="now()"
           [busy]="operationBusy()"
-          (stop)="stopRunningTimer($event)" />
+          (stop)="stopRunningTimer($event)"
+          (recordPieces)="chipRecordPieces($event)"
+          (stopDone)="chipStopDone($event)" />
         @if (jobOperations(); as ops) {
           <app-kiosk-operation-tiles
             [operations]="ops.operations"
@@ -97,6 +99,8 @@
             [currentUserId]="currentUserId()"
             [now]="now()"
             [busy]="operationBusy()"
+            [suggestedOperationId]="suggestedOperationId()"
+            [focusOperationId]="focusOperationId()"
             (start)="startOperation($event)"
             (startSetup)="startOperation($event, 'Setup')"
             (stop)="stopOperation($event)"

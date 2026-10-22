@@ -4,17 +4,55 @@
     <ul class="running-timers__list">
       @for (line of lines(); track line.timer.id) {
         <li class="running-timers__item" [attr.data-testid]="'kiosk-running-timer-' + line.timer.id">
-          <span class="running-timers__job">{{ line.timer.jobNumber }}</span>
-          <span class="running-timers__step">{{ line.stepLabel ?? ('shopFloor.operations.wholeJob' | translate) }}</span>
-          <span class="running-timers__elapsed">{{ line.elapsedMs | durationMs }}</span>
-          <button type="button" class="action-btn action-btn--danger running-timers__stop"
+          <button type="button" class="running-timers__chip"
+                  [class.running-timers__chip--stale]="line.stale"
                   [disabled]="busy()"
-                  (click)="stop.emit(line.timer)"
-                  [attr.aria-label]="'shopFloor.operations.stopTimerAria' | translate: { jobNumber: line.timer.jobNumber }"
-                  [attr.data-testid]="'kiosk-running-timer-stop-' + line.timer.id">
-            <span class="material-icons-outlined">stop_circle</span>
-            {{ 'shopFloor.operations.stop' | translate }}
+                  [attr.aria-expanded]="line.isStep ? expandedId() === line.timer.id : null"
+                  [attr.aria-label]="'shopFloor.operations.chipAria' | translate: { jobNumber: line.timer.jobNumber ?? '', step: line.stepLabel ?? '' }"
+                  (click)="toggle(line)"
+                  [attr.data-testid]="'kiosk-running-chip-' + line.timer.id">
+            <span class="running-timers__job">{{ line.timer.jobNumber ?? ('shopFloor.operations.indirect' | translate) }}</span>
+            <span class="running-timers__step">{{ line.stepLabel ?? ('shopFloor.operations.wholeJob' | translate) }}</span>
+            @if (line.timer.entryType) {
+              <span class="running-timers__type">{{ ('shopFloor.operations.entryType.' + line.timer.entryType) | translate }}</span>
+            }
+            <span class="running-timers__elapsed">{{ line.elapsedMs | durationMs }}</span>
+            @if (line.stale) {
+              <span class="material-icons-outlined running-timers__stale-icon" [attr.title]="'shopFloor.operations.staleTimer' | translate">schedule</span>
+            }
           </button>
+          @if (!line.isStep) {
+            <button type="button" class="action-btn action-btn--danger running-timers__stop"
+                    [disabled]="busy()"
+                    (click)="act('stop', line.timer)"
+                    [attr.aria-label]="'shopFloor.operations.stopTimerAria' | translate: { jobNumber: line.timer.jobNumber }"
+                    [attr.data-testid]="'kiosk-running-timer-stop-' + line.timer.id">
+              <span class="material-icons-outlined">stop_circle</span>
+              {{ 'shopFloor.operations.stop' | translate }}
+            </button>
+          }
+          @if (expandedId() === line.timer.id) {
+            <div class="running-timers__actions">
+              <button type="button" class="action-btn action-btn--danger running-timers__action"
+                      [disabled]="busy()" (click)="act('stop', line.timer)"
+                      [attr.data-testid]="'kiosk-running-timer-stop-' + line.timer.id">
+                <span class="material-icons-outlined">stop_circle</span>
+                {{ 'shopFloor.operations.stop' | translate }}
+              </button>
+              <button type="button" class="action-btn running-timers__action"
+                      [disabled]="busy()" (click)="act('record', line.timer)"
+                      [attr.data-testid]="'kiosk-running-timer-record-' + line.timer.id">
+                <span class="material-icons-outlined">exposure_plus_1</span>
+                {{ 'shopFloor.operations.addQuantity' | translate }}
+              </button>
+              <button type="button" class="action-btn action-btn--primary running-timers__action"
+                      [disabled]="busy()" (click)="act('done', line.timer)"
+                      [attr.data-testid]="'kiosk-running-timer-done-' + line.timer.id">
+                <span class="material-icons-outlined">task_alt</span>
+                {{ 'shopFloor.operations.stopAndDone' | translate }}
+              </button>
+            </div>
+          }
         </li>
       }
     </ul>

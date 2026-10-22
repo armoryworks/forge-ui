@@ -15,6 +15,7 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { AssetsService } from '../../../assets/services/assets.service';
 import { WorkCenter } from '../../models/scheduling.model';
+import { BurdenBasis } from '../../models/burden-basis.type';
 import { SchedulingService } from '../../services/scheduling.service';
 import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
 import { wholeNumber } from '../../../../shared/validators/whole-number.validator';
@@ -65,6 +66,7 @@ export class WorkCenterDialogComponent implements OnInit {
     assetId: new FormControl<number | null>(null),
     teamId: new FormControl<number | null>(null),
     idealCycleTimeSeconds: new FormControl<number | null>(null, [Validators.min(0.001)]),
+    burdenBasis: new FormControl<BurdenBasis | null>(null),
     isActive: new FormControl(true),
   });
 
@@ -80,6 +82,11 @@ export class WorkCenterDialogComponent implements OnInit {
   });
 
   protected readonly isEdit = signal(false);
+  protected readonly burdenBasisOptions = signal<SelectOption[]>([
+    { value: null, label: this.translate.instant('workCenterDialog.burdenBasisAuto') },
+    { value: 'Labor', label: this.translate.instant('workCenterDialog.burdenBasisLabor') },
+    { value: 'Machine', label: this.translate.instant('workCenterDialog.burdenBasisMachine') },
+  ]);
 
   ngOnInit(): void {
     this.assetsService.getAssets().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
@@ -111,8 +118,10 @@ export class WorkCenterDialogComponent implements OnInit {
         assetId: wc.assetId ?? null,
         teamId: wc.teamId ?? null,
         idealCycleTimeSeconds: wc.idealCycleTimeSeconds ?? null,
+        burdenBasis: wc.burdenBasis ?? 'Labor',
         isActive: wc.isActive,
       });
+      this.burdenBasisOptions.update(options => options.filter(o => o.value !== null));
     }
   }
 
@@ -138,6 +147,7 @@ export class WorkCenterDialogComponent implements OnInit {
       assetId: v.assetId ?? null,
       teamId: v.teamId ?? null,
       idealCycleTimeSeconds: v.idealCycleTimeSeconds || null,
+      burdenBasis: v.burdenBasis ?? null,
       isActive: v.isActive ?? true,
       companyLocationId: existing?.companyLocationId ?? null,
     });

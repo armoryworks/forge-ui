@@ -24,6 +24,7 @@ export interface JobOperationRow {
   actualRunMinutes: number;
   actualOtherMinutes: number;
   actualTotalMinutes: number;
+  laborMinutes?: number;
   actualRunMinutesEach: number | null;
   remainingMinutes: number;
   historyRunMinutesEach: number | null;

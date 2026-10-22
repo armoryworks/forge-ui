@@ -26,3 +26,22 @@
   min-height: $tap-target-min;
   font-size: $font-size-lg;
 }
+
+.op-qty__warning {
+  margin: $sp-sm 0 0;
+  color: var(--warning);
+  font-size: $font-size-md;
+}
+
+.op-qty__steps {
+  display: flex;
+  gap: $sp-sm;
+  margin: $sp-sm 0;
+}
+
+.op-qty__step {
+  flex: 1;
+  min-height: $tap-target-min + $sp-lg + $sp-sm;
+  font-size: $font-size-kpi;
+  font-weight: 600;
+}

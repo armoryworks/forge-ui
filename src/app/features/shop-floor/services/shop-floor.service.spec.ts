@@ -115,6 +115,7 @@ describe('ShopFloorService', () => {
       const req = httpMock.expectOne(`${apiUrl}/time-tracking/timer/start`);
       expect(req.request.method).toBe('POST');
       expect(req.request.body.jobId).toBe(5);
+      expect(req.request.body.switchFromActive).toBe(true);
       req.flush(null);
     });
   });
@@ -184,6 +185,12 @@ describe('ShopFloorService', () => {
       const req = httpMock.expectOne(`${apiUrl}/jobs/41/operations/7/timer/stop`);
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual({ notes: null });
+    });
+
+    it('sends the good and scrap pieces with the stop', () => {
+      service.stopOperationTimer(41, 7, { goodQuantity: 4, scrapQuantity: 1, markComplete: true, reasonCode: 'chatter' }).subscribe();
+      const req = httpMock.expectOne(`${apiUrl}/jobs/41/operations/7/timer/stop`);
+      expect(req.request.body).toEqual({ notes: null, goodQuantity: 4, scrapQuantity: 1, markComplete: true, reasonCode: 'chatter' });
     });
 
     it('leaves operation failures to the terminal instead of the global error toast', () => {

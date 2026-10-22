@@ -30,6 +30,36 @@
   &--closed {
     opacity: 0.6;
   }
+
+  &--suggested {
+    border-color: var(--accent);
+    border-width: $border-width-accent;
+  }
+
+  &--focused {
+    outline: $border-width solid var(--primary);
+    outline-offset: $sp-xs;
+  }
+}
+
+.op-tile__suggested {
+  align-self: flex-start;
+  padding: $chip-padding-sm;
+  background: var(--accent);
+  color: var(--surface);
+  font-size: $font-size-sm;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.op-tile__attendance {
+  color: var(--text-muted);
+}
+
+.op-tiles__done-toggle {
+  width: 100%;
+  min-height: $tap-target-min;
+  justify-content: flex-start;
 }
 
 .op-tile__head {

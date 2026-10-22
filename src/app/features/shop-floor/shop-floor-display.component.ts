@@ -1,6 +1,6 @@
 import {
   afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, HostBinding, inject, Injector, OnDestroy, OnInit,
-  Renderer2, signal,
+  Renderer2, signal, viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -9,7 +9,7 @@ import { A11yModule } from '@angular/cdk/a11y';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { catchError, debounceTime, forkJoin, interval, of, Subject, switchMap } from 'rxjs';
+import { catchError, concatMap, debounceTime, forkJoin, from, interval, last, Observable, of, Subject, switchMap } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { environment } from '../../../environments/environment';
@@ -46,6 +46,13 @@ import { describeNonClockScan } from './utils/describe-scan';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { ScanUndoListComponent } from './components/scan-undo-list/scan-undo-list.component';
 import { ScanActionOverlayComponent } from './components/scan-action-overlay/scan-action-overlay.component';
+import { KioskRunningTimersComponent } from './components/kiosk-running-timers/kiosk-running-timers.component';
+import { ClockOutSheetDialogComponent } from './components/clock-out-sheet/clock-out-sheet-dialog.component';
+import { KioskStepActionsService } from './services/kiosk-step-actions.service';
+import { RunningTimer } from './models/running-timer.model';
+import { KioskRunningTimer } from './models/kiosk-running-timer.model';
+import { ClockOutSheetData } from './models/clock-out-sheet-data.model';
+import { ClockOutSheetLine } from './models/clock-out-sheet-line.model';
 import { ScanDailyLogComponent } from './components/scan-daily-log/scan-daily-log.component';
 import { ScanDevicesPanelComponent } from './components/scan-devices-panel/scan-devices-panel.component';
 import { ScanLocationViewComponent } from './components/scan-location-view/scan-location-view.component';
@@ -79,7 +86,7 @@ const SIGNED_IN_PHASES: ReadonlySet<DisplayPhase> = new Set<DisplayPhase>(['acti
 @Component({
   selector: 'app-shop-floor-display',
   standalone: true,
-  imports: [EnumLabelPipe, DatePipe, DateOnlyPipe, DateTimePipe, NgTemplateOutlet, A11yModule, TranslatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, KioskSessionBarComponent, KioskSetupComponent, TrainingModeBannerComponent, ScanUndoListComponent, ScanActionOverlayComponent, ScanDailyLogComponent, ScanDevicesPanelComponent, ScanLocationViewComponent, NumericKeypadComponent, LanguageToggleComponent],
+  imports: [EnumLabelPipe, DatePipe, DateOnlyPipe, DateTimePipe, NgTemplateOutlet, A11yModule, TranslatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, KioskSessionBarComponent, KioskSetupComponent, TrainingModeBannerComponent, ScanUndoListComponent, ScanActionOverlayComponent, KioskRunningTimersComponent, ScanDailyLogComponent, ScanDevicesPanelComponent, ScanLocationViewComponent, NumericKeypadComponent, LanguageToggleComponent],
   templateUrl: './shop-floor-display.component.html',
   styleUrl: './shop-floor-display.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -256,7 +263,14 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   // Action state
   protected readonly processing = signal<string | null>(null);
-  private readonly operationTracking = signal(false);
+  protected readonly operationTracking = signal(false);
+  protected readonly stepsOpen = signal(false);
+  private readonly scanOverlay = viewChild(ScanActionOverlayComponent);
+  private readonly stepActions = inject(KioskStepActionsService);
+  protected readonly nowMs = computed(() => {
+    this.tick();
+    return Date.now();
+  });
   protected readonly actionFeedback = signal<{ workerId: number; success: boolean; message: string; detail: string | null } | null>(null);
 
   // Job selection state
@@ -715,12 +729,46 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   }
 
   protected clockAction(worker: ClockWorker, eventType: string): void {
+    if (this.processing()) return;
+    const clockingOut = this.clockTypes.definitions().find(d => d.code === eventType)?.statusMapping === 'Out';
+    const timers = worker.runningTimers ?? [];
+    if (clockingOut && this.operationTracking() && timers.length > 0) {
+      this.clearAutoLogoutTimer();
+      this.dialog.open<ClockOutSheetDialogComponent, ClockOutSheetData, ClockOutSheetLine[] | undefined>(ClockOutSheetDialogComponent, {
+        width: '560px',
+        maxWidth: '95vw',
+        data: { workerName: worker.name, timers },
+      }).afterClosed().subscribe(lines => {
+        if (!lines) {
+          this.startAutoLogoutTimer();
+          return;
+        }
+        this.punch(worker, eventType, lines);
+      });
+      return;
+    }
+    this.punch(worker, eventType, []);
+  }
+
+  private punch(worker: ClockWorker, eventType: string, sheet: ClockOutSheetLine[]): void {
     const key = `${worker.userId}-${eventType}`;
     if (this.processing()) return;
     this.processing.set(key);
     this.resetAutoLogoutTimer();
 
-    this.loading.track(this.translate.instant('shopFloor.display.processing'), this.shopFloorService.clockInOut(worker.userId, eventType)).subscribe({
+    const counted = sheet.filter(line => (line.goodQuantity || line.scrapQuantity)
+      && line.timer.jobId != null && line.timer.operationId != null);
+    const recordPieces$: Observable<unknown> = counted.length === 0
+      ? of(null)
+      : from(counted).pipe(
+        concatMap(line => this.shopFloorService.stopOperationTimer(line.timer.jobId!, line.timer.operationId!, {
+          goodQuantity: line.goodQuantity,
+          scrapQuantity: line.scrapQuantity,
+        })),
+        last());
+    const punch$ = recordPieces$.pipe(switchMap(() => this.shopFloorService.clockInOut(worker.userId, eventType)));
+
+    this.loading.track(this.translate.instant('shopFloor.display.processing'), punch$).subscribe({
       next: () => {
         this.processing.set(null);
         this.loadData();
@@ -801,6 +849,10 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   protected claimJob(job: KioskAvailableJob): void {
     const worker = this.jobSelectWorker();
     if (!worker || this.processing()) return;
+    if (this.operationTracking()) {
+      this.openJobSteps(job);
+      return;
+    }
     this.processing.set(`claim-${job.jobId}`);
     this.clearPhaseTimeout();
 
@@ -976,6 +1028,83 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   protected cancelActions(): void {
     this.ephemeralLogout();
     this.focusSearchArea();
+  }
+
+  protected readonly selectedWorkerTimers = computed<RunningTimer[]>(() => {
+    const worker = this.selectedWorker();
+    return worker ? (worker.runningTimers ?? []).map(timer => toRunningTimer(timer, worker.userId)) : [];
+  });
+
+  protected openJobSteps(
+    job: { jobId: number; jobNumber: string; title: string; stageName: string },
+    focusOperationId: number | null = null,
+  ): void {
+    const overlay = this.scanOverlay();
+    if (!overlay || this.processing()) return;
+    this.clearAutoLogoutTimer();
+    this.clearPhaseTimeout();
+    this.actionFeedback.set(null);
+    this.stepsOpen.set(true);
+    overlay.openJobById(job.jobId, { jobNumber: job.jobNumber, title: job.title, stageName: job.stageName }, focusOperationId);
+  }
+
+  protected onOverlayDismissed(): void {
+    if (!this.stepsOpen()) return;
+    this.stepsOpen.set(false);
+    if (this.phase() === 'job-select') {
+      this.jobSelectWorker.set(null);
+      this.phase.set('actions');
+    }
+    this.loadData();
+    if (SIGNED_IN_PHASES.has(this.phase())) this.startAutoLogoutTimer();
+  }
+
+  protected chipStop(timer: RunningTimer): void {
+    this.runChip(timer, 'stop');
+  }
+
+  protected chipRecord(timer: RunningTimer): void {
+    this.runChip(timer, 'record');
+  }
+
+  protected chipDone(timer: RunningTimer): void {
+    this.runChip(timer, 'done');
+  }
+
+  private runChip(timer: RunningTimer, kind: 'stop' | 'record' | 'done'): void {
+    const worker = this.selectedWorker();
+    if (!worker || this.processing()) return;
+    this.clearAutoLogoutTimer();
+    this.processing.set(`chip-${timer.id}`);
+    const jobId = timer.jobId;
+    const operationId = timer.operationId;
+    const action$: Observable<unknown> = jobId == null || operationId == null
+      ? this.shopFloorService.stopTimer({ timeEntryId: timer.id })
+      : this.stepActions.loadStep(jobId, operationId).pipe(
+        switchMap(step => {
+          if (!step) return of(null);
+          if (kind === 'record') return this.stepActions.recordPieces(jobId, step.row, step.context);
+          return this.stepActions.stop(jobId, step.row, step.context, kind === 'done' ? 'Run' : timer.entryType);
+        }));
+
+    action$.subscribe({
+      next: (result) => {
+        this.processing.set(null);
+        this.startAutoLogoutTimer();
+        if (result === null) return;
+        this.loadData();
+        this.showActionFeedback(worker.userId, true, this.translate.instant(
+          kind === 'record' ? 'shopFloor.display.piecesRecorded' : 'shopFloor.timerStoppedOn',
+          { jobNumber: timer.jobNumber ?? '' }));
+      },
+      error: (err: HttpErrorResponse) => {
+        this.processing.set(null);
+        this.startAutoLogoutTimer();
+        this.showActionFeedback(worker.userId, false,
+          this.translate.instant('shopFloor.timerStopFailed', { reason: this.serverReason(err) }));
+        this.loadData();
+      },
+    });
   }
 
   // ─── Receiving ───
@@ -1603,4 +1732,19 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     if (minutes >= 1) return `${minutes}m ${String(seconds).padStart(2, '0')}s`;
     return `${seconds}s`;
   }
+}
+
+function toRunningTimer(timer: KioskRunningTimer, userId: number): RunningTimer {
+  return {
+    id: timer.timeEntryId,
+    jobId: timer.jobId,
+    jobNumber: timer.jobNumber,
+    userId,
+    timerStart: timer.timerStart,
+    operationId: timer.operationId,
+    jobOperationId: timer.jobOperationId,
+    operationStepNumber: timer.stepNumber,
+    operationTitle: timer.operationTitle,
+    entryType: timer.entryType,
+  };
 }
