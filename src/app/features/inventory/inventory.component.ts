@@ -252,7 +252,7 @@ export class InventoryComponent {
     partId: new FormControl<number | null>(null),
     sourceBinContentId: new FormControl<number | null>(null, [Validators.required]),
     destinationLocationId: new FormControl<number | null>(null, [Validators.required]),
-    quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(1)]),
+    quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0.0001)]),
     notes: new FormControl(''),
   });
 
@@ -359,8 +359,8 @@ export class InventoryComponent {
       const bin = this.transferSourceBin();
       const quantity = this.transferForm.controls.quantity;
       quantity.setValidators(bin
-        ? [Validators.required, Validators.min(1), Validators.max(bin.availableQuantity)]
-        : [Validators.required, Validators.min(1)]);
+        ? [Validators.required, Validators.min(0.0001), Validators.max(bin.availableQuantity)]
+        : [Validators.required, Validators.min(0.0001)]);
       untracked(() => quantity.updateValueAndValidity());
     });
 

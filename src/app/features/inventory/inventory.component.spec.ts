@@ -421,6 +421,22 @@ describe('InventoryComponent stock search, counts and permissions', () => {
     form.controls.quantity.setValue(6);
     expect(form.controls.quantity.valid).toBe(true);
   });
+
+  it('accepts a fractional transfer quantity but not zero', () => {
+    const bins: PartBinLocation[] = [
+      { binContentId: 31, locationPath: 'Main / A1', quantity: 2.5, reservedQuantity: 0, availableQuantity: 2.5, lotNumber: null, status: 'Stored' },
+    ];
+    const { internals } = setup('stockOps', { loaded: true, enabled: false }, { inventory: { getPartBins: () => of(bins) } });
+    const form = (internals as unknown as InventoryFixInternals).transferForm;
+
+    form.controls.partId.setValue(10);
+    form.controls.sourceBinContentId.setValue(31);
+    TestBed.flushEffects();
+    form.controls.quantity.setValue(0.5);
+    expect(form.controls.quantity.valid).toBe(true);
+    form.controls.quantity.setValue(0);
+    expect(form.controls.quantity.hasError('min')).toBe(true);
+  });
 });
 
 describe('InventoryComponent cycle count lines', () => {

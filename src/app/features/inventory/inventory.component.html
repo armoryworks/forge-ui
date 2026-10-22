@@ -833,7 +833,7 @@
         <p class="dialog-hint" data-testid="transfer-no-bins">{{ 'replenishmentUi.noBins' | translate }}</p>
       }
       <app-select [label]="'inventory.dialogs.destinationLocation' | translate" formControlName="destinationLocationId" [options]="binLocationOptions()" />
-      <app-input data-testid="transfer-quantity" [label]="'common.quantity' | translate" formControlName="quantity" type="number" [min]="1" [max]="transferSourceBin()?.availableQuantity ?? null" />
+      <app-input data-testid="transfer-quantity" [label]="'common.quantity' | translate" formControlName="quantity" type="number" [min]="0.0001" step="any" [max]="transferSourceBin()?.availableQuantity ?? null" />
       <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
     </div>
 
