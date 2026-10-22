@@ -263,6 +263,15 @@ export class SetupComponent {
     }
   }
 
+  protected ignoreRepeatClick(event: MouseEvent): void {
+    if (event.detail > 1) event.preventDefault();
+  }
+
+  protected completeFromModules(event: MouseEvent): void {
+    if (event.detail > 1) return;
+    this.onSubmit();
+  }
+
   protected onSubmit(): void {
     if (this.submitting() || this.accountForm.invalid || this.companyForm.invalid) return;
 
