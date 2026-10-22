@@ -85,7 +85,8 @@
     "pieceRates": "Tarifas por pieza",
     "openingJournal": "Asiento de apertura",
     "journalApprovals": "Aprobación de asientos",
-    "maintenancePredictions": "Predicciones"
+    "maintenancePredictions": "Predicciones",
+    "accountingTraining": "Capacitación contable"
   },
   "navGroups": {
     "operations": "Operaciones",
@@ -449,7 +450,13 @@
     "continue": "Continuar",
     "dismiss": "Descartar",
     "fax": "Fax",
-    "deactivatedSuffix": "(desactivado)"
+    "deactivatedSuffix": "(desactivado)",
+    "unsavedChanges": {
+      "title": "Cambios sin guardar",
+      "message": "Tiene cambios sin guardar que se perderán. ¿Seguro que desea salir?",
+      "leave": "Salir",
+      "stay": "Quedarse"
+    }
   },
   "dashboardWidgets": {
     "margin": {
@@ -10231,7 +10238,12 @@
       "entryNotLoaded": "El asiento id {{number}} es anterior a la página cargada",
       "empty": "Sin asientos contables",
       "accounts": "Cuentas",
-      "loadedOnly": "Se muestran los {{shown}} asientos más recientes de {{total}}. La búsqueda y la exportación CSV/Excel solo incluyen estos asientos."
+      "loadedOnly": "Se muestran los {{shown}} asientos más recientes de {{total}}. La búsqueda y la exportación CSV/Excel solo incluyen estos asientos.",
+      "rejectedDrafts": "Borradores rechazados",
+      "draftsNote": "Los asientos rechazados vuelven aquí como borradores. Reenvíe uno suyo para corregirlo en el editor y enviarlo de nuevo a aprobación; conserva su número de asiento.",
+      "accountNotFound": "No se encontró esa cuenta. Abra el libro mayor desde el catálogo de cuentas o el balance de comprobación.",
+      "flaggedOffPage": "{{count}} asientos marcados son anteriores a los asientos cargados aquí.",
+      "resubmit": "Reenviar"
     },
     "journalEditor": {
       "title": "Nuevo asiento contable",
@@ -10246,7 +10258,8 @@
       "posted": "Asiento n.º {{number}} registrado",
       "correctionMemo": "Corrección del asiento n.º {{number}}: ",
       "correcting": "Corrigiendo el asiento n.º {{number}}",
-      "pendingApproval": "El asiento {{number}} espera un segundo aprobador"
+      "pendingApproval": "El asiento {{number}} espera un segundo aprobador",
+      "resubmitting": "Reenviando el asiento rechazado #{{number}}"
     },
     "training": {
       "title": "Formación del libro mayor",
@@ -10468,7 +10481,9 @@
       "account": "Cuenta",
       "net": "Neto",
       "balanced": "Cuadrado",
-      "empty": "Sin actividad en el libro mayor"
+      "empty": "Sin actividad en el libro mayor",
+      "debitTurnover": "Movimiento débito",
+      "creditTurnover": "Movimiento crédito"
     },
     "profitLoss": {
       "title": "Estado de resultados",
@@ -10488,7 +10503,7 @@
       "roa": "Rendimiento sobre activos",
       "debtToEquity": "Deuda sobre capital",
       "expenseRatio": "Índice de gastos",
-      "currentPeriodNote": "Estado de resultados del período actual y balance general a la fecha de hoy."
+      "currentPeriodNote": "Estado de resultados del ejercicio fiscal hasta la fecha y balance general a la fecha de hoy."
     },
     "comparison": {
       "compareToPrior": "Comparar con el período anterior",
@@ -10498,14 +10513,15 @@
       "current": "Actual",
       "prior": "Anterior",
       "variance": "Variación",
-      "variancePercent": "Variación %"
+      "variancePercent": "Variación %",
+      "currentPeriod": "Período"
     },
     "budget": {
       "title": "Presupuestos",
       "subtitle": "Defina presupuestos por cuenta y compare presupuesto contra real",
-      "entryTab": "Entrada de Presupuesto",
-      "vsActualTab": "Presupuesto vs Real",
-      "amount": "Monto Presupuestado",
+      "entryTab": "Entrada de presupuesto",
+      "vsActualTab": "Presupuesto vs real",
+      "amount": "Monto presupuestado",
       "budget": "Presupuesto",
       "actual": "Real",
       "total": "Total",
@@ -10532,7 +10548,11 @@
         "10": "Octubre",
         "11": "Noviembre",
         "12": "Diciembre"
-      }
+      },
+      "window": "Período",
+      "totalIncome": "Total de ingresos",
+      "totalExpense": "Total de gastos",
+      "netIncome": "Utilidad neta"
     },
     "balanceSheet": {
       "title": "Balance general",
@@ -10565,7 +10585,9 @@
       "netChangeInCash": "Variación neta de efectivo",
       "actualCashMovement": "Movimiento real de efectivo",
       "operatingAdjustments": "Ajustes de operación",
-      "chartLabel": "Gráfico de cascada de flujo de efectivo"
+      "chartLabel": "Gráfico de cascada de flujo de efectivo",
+      "beginningCash": "Efectivo al inicio del periodo",
+      "endingCash": "Efectivo al final del periodo"
     },
     "arAging": {
       "title": "Antigüedad de cuentas por cobrar",
@@ -10622,12 +10644,15 @@
       "totalPayments": "Pagos totales",
       "status": "Estado",
       "reportable": "Declarable",
-      "underThreshold": "Menos de $600",
+      "underThreshold": "Bajo el umbral",
       "reportableVendors": "Proveedores declarables",
       "empty": "No hay proveedores 1099 marcados",
       "vendorToggle": "Proveedor 1099",
       "taxIdLabel": "Id. fiscal (TIN/EIN)",
-      "taxIdPlaceholder": "p. ej. 12-3456789"
+      "taxIdPlaceholder": "p. ej. 12-3456789",
+      "includeZero": "Mostrar proveedores sin pagos",
+      "zeroHidden": "Se ocultan {{count}} proveedores 1099 sin pagos este año.",
+      "threshold": "Umbral de declaración"
     },
     "periodClose": {
       "title": "Cierre de período",
@@ -10637,13 +10662,13 @@
       "dates": "Fechas",
       "empty": "Sin períodos",
       "noFiscalYears": "No hay años fiscales configurados.",
-      "closeYear": "Cerrar año (traslado de UR)",
+      "closeYear": "Cerrar año fiscal",
       "softClose": "Cierre parcial",
       "hardClose": "Cierre definitivo",
       "reopen": "Reabrir",
       "locked": "Bloqueado",
       "confirmTitle": "¿Cerrar el año fiscal?",
-      "confirmMessage": "Esto registra el traslado de utilidades retenidas y cierra definitivamente todos los períodos del año. No se puede deshacer.",
+      "confirmMessage": "Esto traslada la utilidad neta del año a utilidades retenidas y cierra definitivamente todos los períodos del año. No se puede deshacer.",
       "confirmLabel": "Cerrar año",
       "checklist": {
         "title": "Lista de verificación de cierre",
@@ -10656,7 +10681,14 @@
         "arTies": "La antigüedad de cuentas por cobrar cuadra con la cuenta de control",
         "apTies": "La antigüedad de cuentas por pagar cuadra con la cuenta de control",
         "blockedHint": "El cierre definitivo de este período, o el cierre del año cuando es el último período, se rechaza hasta que todos los puntos estén correctos.",
-        "loadFailed": "No se pudo cargar la lista de verificación de cierre."
+        "loadFailed": "No se pudo cargar la lista de verificación de cierre.",
+        "noPendingEntries": "Ningún asiento contable pendiente de aprobación"
+      },
+      "statuses": {
+        "Open": "Abierto",
+        "SoftClosed": "Cierre provisional",
+        "HardClosed": "Cierre definitivo",
+        "Closed": "Cerrado"
       }
     },
     "bankRec": {
@@ -10730,7 +10762,8 @@
       "requiresCostCenter": "Requiere Centro de Costo",
       "active": "Activa",
       "description": "Descripción",
-      "lockedNote": "Esta cuenta tiene asientos — su número, tipo y saldo normal están bloqueados. Cree una cuenta nueva para cambios estructurales."
+      "lockedNote": "Esta cuenta tiene asientos — su número, tipo y saldo normal están bloqueados. Cree una cuenta nueva para cambios estructurales.",
+      "contraNote": "Este saldo normal es el lado opuesto al habitual para el tipo de cuenta, como en una cuenta de contrapartida."
     },
     "openingJournal": {
       "title": "Asiento de apertura",
@@ -10770,7 +10803,8 @@
       "rejectTitle": "Rechazar asiento {{number}}",
       "rejectNote": "El asiento vuelve a borrador; nada llega al libro mayor. El motivo se agrega a su nota.",
       "rejectReason": "Motivo (opcional)",
-      "noLines": "Este asiento no tiene líneas"
+      "noLines": "Este asiento no tiene líneas",
+      "ownEntry": "Usted envió este asiento, así que otro aprobador debe aprobarlo."
     },
     "jobCostClose": {
       "title": "Costo de producción por orden",
@@ -10784,6 +10818,29 @@
       "empty": "Ninguna orden tiene saldo de WIP abierto",
       "loadFailed": "No se pudieron cargar las órdenes con WIP abierto",
       "notComplete": "Complete el trabajo antes de cerrar su costo"
+    },
+    "period": {
+      "period": "Período",
+      "from": "Desde",
+      "to": "Hasta",
+      "asOf": "Al",
+      "inception": "Inicio",
+      "presets": {
+        "thisMonth": "Este mes",
+        "lastMonth": "Mes pasado",
+        "thisQuarter": "Este trimestre",
+        "lastQuarter": "Trimestre pasado",
+        "yearToDate": "Año fiscal hasta la fecha",
+        "lastYear": "Año calendario pasado",
+        "custom": "Personalizado",
+        "today": "Hoy",
+        "endOfLastMonth": "Fin del mes pasado",
+        "endOfLastQuarter": "Fin del trimestre pasado",
+        "endOfLastYear": "Fin del año pasado"
+      }
+    },
+    "aging": {
+      "current": "Al corriente"
     }
   },
   "subcontractUi": {

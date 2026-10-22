@@ -1,0 +1,13 @@
+<div class="statement-period">
+  <app-select class="statement-period__preset" [label]="'accounting.period.period' | translate" [options]="presetOptions()"
+    [formControl]="presetControl" data-testid="statement-period-preset" />
+  @if (mode() === 'range') {
+    <app-datepicker class="statement-period__date" [label]="'accounting.period.from' | translate" [formControl]="fromControl"
+      data-testid="statement-period-from" />
+    <app-datepicker class="statement-period__date" [label]="'accounting.period.to' | translate" [formControl]="toControl"
+      data-testid="statement-period-to" />
+  } @else {
+    <app-datepicker class="statement-period__date" [label]="'accounting.period.asOf' | translate" [formControl]="toControl"
+      data-testid="statement-period-as-of" />
+  }
+</div>

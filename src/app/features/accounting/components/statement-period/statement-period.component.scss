@@ -1,0 +1,16 @@
+@use 'styles/variables' as *;
+
+.statement-period {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: $sp-sm;
+}
+
+.statement-period__preset {
+  min-width: 180px;
+}
+
+.statement-period__date {
+  width: 170px;
+}

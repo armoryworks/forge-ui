@@ -48,7 +48,7 @@
             <tr>
               <td>{{ row.account.accountNumber }} · {{ row.account.name }}</td>
               <td class="num budget-amount-cell">
-                <app-currency-input [label]="'accounting.budget.amount' | translate" [formControlName]="row.controlName" />
+                <app-currency-input [label]="row.account.accountNumber" [formControlName]="row.controlName" />
               </td>
             </tr>
           } @empty {
@@ -67,7 +67,7 @@
     </form>
   } @else if (comparison(); as c) {
     <p class="acct-muted stmt-compare-note">
-      {{ 'accounting.comparison.priorPeriod' | translate }}: {{ c.fromDate }} – {{ c.toDate }}
+      {{ 'accounting.budget.window' | translate }}: {{ c.fromDate | dateOnly }} – {{ c.toDate | dateOnly }}
     </p>
 
     <table class="statement" [attr.aria-label]="'accounting.budget.vsActualTab' | translate">
@@ -86,10 +86,10 @@
             <td>{{ line.accountNumber }} · {{ line.accountName }}</td>
             <td class="num"><app-currency-display [value]="line.budgetAmount" /></td>
             <td class="num"><app-currency-display [value]="line.actualAmount" /></td>
-            <td class="num" [class.stmt-variance--pos]="(line.variance ?? 0) >= 0" [class.stmt-variance--neg]="(line.variance ?? 0) < 0">
+            <td class="num" [class.stmt-variance--pos]="line.isFavorable" [class.stmt-variance--neg]="!line.isFavorable">
               <app-currency-display [value]="line.variance ?? 0" />
             </td>
-            <td class="num" [class.stmt-variance--pos]="(line.variance ?? 0) >= 0" [class.stmt-variance--neg]="(line.variance ?? 0) < 0">
+            <td class="num" [class.stmt-variance--pos]="line.isFavorable" [class.stmt-variance--neg]="!line.isFavorable">
               @if (line.variancePercent !== null && line.variancePercent !== undefined) { {{ line.variancePercent | number: '1.0-1' }}% } @else { <span class="acct-muted">—</span> }
             </td>
           </tr>
@@ -98,17 +98,19 @@
         }
       </tbody>
       <tfoot>
-        <tr>
-          <td>{{ 'accounting.budget.total' | translate }}</td>
-          <td class="num"><app-currency-display [value]="c.totalBudget" /></td>
-          <td class="num"><app-currency-display [value]="c.totalActual" /></td>
-          <td class="num" [class.stmt-variance--pos]="(c.totalVariance ?? 0) >= 0" [class.stmt-variance--neg]="(c.totalVariance ?? 0) < 0">
-            <app-currency-display [value]="c.totalVariance ?? 0" />
-          </td>
-          <td class="num" [class.stmt-variance--pos]="(c.totalVariance ?? 0) >= 0" [class.stmt-variance--neg]="(c.totalVariance ?? 0) < 0">
-            @if (c.totalVariancePercent !== null && c.totalVariancePercent !== undefined) { {{ c.totalVariancePercent | number: '1.0-1' }}% } @else { <span class="acct-muted">—</span> }
-          </td>
-        </tr>
+        @for (total of totals(); track total.key) {
+          <tr [class.statement__subtotal]="total.key !== 'net'">
+            <td>{{ total.labelKey | translate }}</td>
+            <td class="num"><app-currency-display [value]="total.budget" /></td>
+            <td class="num"><app-currency-display [value]="total.actual" /></td>
+            <td class="num" [class.stmt-variance--pos]="total.favorable" [class.stmt-variance--neg]="!total.favorable">
+              <app-currency-display [value]="total.variance" />
+            </td>
+            <td class="num" [class.stmt-variance--pos]="total.favorable" [class.stmt-variance--neg]="!total.favorable">
+              @if (total.variancePercent !== null) { {{ total.variancePercent | number: '1.0-1' }}% } @else { <span class="acct-muted">—</span> }
+            </td>
+          </tr>
+        }
       </tfoot>
     </table>
   }

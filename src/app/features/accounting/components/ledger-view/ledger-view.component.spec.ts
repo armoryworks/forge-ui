@@ -8,6 +8,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { LedgerViewComponent } from './ledger-view.component';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { AuthService } from '../../../../shared/services/auth.service';
 import {
   JournalEntryExplanation,
   LedgerRegisterEntry,
@@ -54,6 +55,10 @@ interface LedgerApi {
   anomalyCount(): number;
   reverseEntry(entry: LedgerRegisterEntry): void;
   lensAccount(): unknown;
+  accountNotFound(): boolean;
+  toggleDrafts(): void;
+  toggleFlaggedOnly(): void;
+  canResubmit(entry: LedgerRegisterEntry): boolean;
 }
 
 describe('LedgerViewComponent', () => {
@@ -76,6 +81,7 @@ describe('LedgerViewComponent', () => {
         { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap(routeParams)), snapshot: { queryParamMap: convertToParamMap({}) } } },
         { provide: SnackbarService, useValue: snackbar },
         { provide: MatDialog, useValue: dialog },
+        { provide: AuthService, useValue: { user: () => ({ id: 5 }) } },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
       ],
     });
@@ -104,10 +110,39 @@ describe('LedgerViewComponent', () => {
 
   it('loads the register for the default book on init', () => {
     const api = create();
-    expect(gl.getLedgerRegister).toHaveBeenCalledWith(1, { pageSize: 100, glAccountId: null });
+    expect(gl.getLedgerRegister).toHaveBeenCalledWith(1, { pageSize: 100, glAccountId: null, status: null });
     expect(api.entries()).toHaveLength(1);
     expect(api.loading()).toBe(false);
     expect(api.error()).toBeNull();
+  });
+
+  it('shows a not-found state for an invalid account id instead of the whole register', () => {
+    routeParams = { accountId: 'abc' };
+    const api = create();
+    expect(api.accountNotFound()).toBe(true);
+    expect(gl.getLedgerRegister).not.toHaveBeenCalled();
+    expect(api.entries()).toHaveLength(0);
+  });
+
+  it('lists rejected drafts on request and offers resubmit only on the signed-in user\'s own', () => {
+    const api = create();
+    api.toggleDrafts();
+    expect(gl.getLedgerRegister).toHaveBeenLastCalledWith(1, { pageSize: 100, glAccountId: null, status: 'Draft' });
+
+    expect(api.canResubmit({ ...ENTRY, status: 'Draft', postedBy: 5 })).toBe(true);
+    expect(api.canResubmit({ ...ENTRY, status: 'Draft', postedBy: 6 })).toBe(false);
+    expect(api.canResubmit({ ...ENTRY, status: 'Posted', postedBy: 5 })).toBe(false);
+  });
+
+  it('narrows the register to flagged entries', () => {
+    gl.getLedgerRegister.mockReturnValue(of({ ...PAGE, data: [ENTRY, { ...ENTRY, id: 2, entryNumber: 2 }], totalCount: 2 }));
+    gl.getGlAnomalies.mockReturnValue(
+      of([{ entryId: 2, entryNumber: 2, entryDate: '2026-01-10', source: 'Manual', totalDebit: 100, flags: ['big'] }]),
+    );
+    const api = create();
+    api.scanAnomalies();
+    api.toggleFlaggedOnly();
+    expect(api.entries().map((e) => e.id)).toEqual([2]);
   });
 
   it('formats the DateOnly entry date as a plain string (no timezone shift)', () => {
@@ -152,7 +187,7 @@ describe('LedgerViewComponent', () => {
     }));
 
     const api = create();
-    expect(gl.getLedgerRegister).toHaveBeenCalledWith(1, { pageSize: 100, glAccountId: 1 });
+    expect(gl.getLedgerRegister).toHaveBeenCalledWith(1, { pageSize: 100, glAccountId: 1, status: null });
     expect(api.lensAccount()).toMatchObject({ glAccountId: 1, netBalance: 120 });
     // balance AFTER each entry, walking newest -> oldest: 120, 20, 50
     expect(api.entries().map((e) => e.balanceAfter)).toEqual([120, 20, 50]);

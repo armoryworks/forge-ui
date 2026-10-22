@@ -53,6 +53,12 @@
   &__actions {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
     gap: $sp-sm;
+  }
+
+  &__own-note {
+    font-size: $font-size-sm;
+    color: var(--text-muted);
   }
 }

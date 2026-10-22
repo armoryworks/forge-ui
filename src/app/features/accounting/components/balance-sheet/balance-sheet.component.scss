@@ -12,14 +12,14 @@
 
 .acct-view-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-end;
+  gap: $sp-md;
   margin-bottom: $sp-md;
-}
 
-// Pushed to the left so the view-mode toggle stays right-aligned.
-.acct-compare-toggle {
-  margin-right: auto;
+  app-view-mode-toggle {
+    margin-left: auto;
+  }
 }
 
 .stmt-compare-note {

@@ -1,6 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal, OnInit } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { filter } from 'rxjs';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -21,9 +23,15 @@ import { GlAccountAdmin } from '../../models/accounting.models';
 const DEFAULT_BOOK_ID = 1;
 const TYPES = ['Asset', 'Liability', 'Equity', 'Income', 'Expense'];
 const CASH_FLOW = ['Operating', 'Investing', 'Financing'];
+const NOT_BLANK = /\S/;
+const ACCOUNT_NUMBER = /^\s*[A-Za-z0-9][A-Za-z0-9.-]*\s*$/;
+
+const conventionalBalance = (type: string | null): 'Debit' | 'Credit' =>
+  type === 'Asset' || type === 'Expense' ? 'Debit' : 'Credit';
 
 /** Chart-of-accounts management: create postable accounts + edit safe fields. Structural fields
- * (number/type/normal-balance) lock once an account has postings — the editor disables them. */
+ * (number/type/normal-balance) lock once an account has postings — the editor disables them. The
+ * normal balance defaults to the type's convention; the opposite side marks a contra account. */
 @Component({
   selector: 'app-chart-of-accounts',
   standalone: true,
@@ -40,6 +48,7 @@ export class ChartOfAccountsComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly gl = inject(GeneralLedgerService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly destroyRef = inject(DestroyRef);
 
   private bookId = DEFAULT_BOOK_ID;
 
@@ -76,8 +85,8 @@ export class ChartOfAccountsComponent implements OnInit {
   ];
 
   protected readonly form = this.fb.group({
-    accountNumber: ['', [Validators.required, Validators.maxLength(20)]],
-    name: ['', [Validators.required, Validators.maxLength(200)]],
+    accountNumber: ['', [Validators.required, Validators.maxLength(20), Validators.pattern(ACCOUNT_NUMBER)]],
+    name: ['', [Validators.required, Validators.maxLength(200), Validators.pattern(NOT_BLANK)]],
     accountType: ['Expense', Validators.required],
     normalBalance: ['Debit', Validators.required],
     parentAccountId: this.fb.control<number | null>(null),
@@ -87,6 +96,24 @@ export class ChartOfAccountsComponent implements OnInit {
     isActive: [true],
     description: this.fb.control<string | null>(null),
   });
+
+  private readonly typeValue = toSignal(this.form.controls.accountType.valueChanges, { initialValue: this.form.controls.accountType.value });
+  private readonly balanceValue = toSignal(this.form.controls.normalBalance.valueChanges, { initialValue: this.form.controls.normalBalance.value });
+  /** The chosen normal balance is opposite the type's convention (a contra account). */
+  protected readonly contraBalance = computed(() => {
+    const type = this.typeValue();
+    const balance = this.balanceValue();
+    return !!type && !!balance && conventionalBalance(type) !== balance;
+  });
+
+  constructor() {
+    this.form.controls.accountType.valueChanges
+      .pipe(
+        filter(() => this.form.controls.accountType.dirty),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => this.onTypeChange());
+  }
 
   ngOnInit(): void {
     const b = Number(this.route.snapshot.queryParamMap.get('bookId'));
@@ -102,16 +129,14 @@ export class ChartOfAccountsComponent implements OnInit {
     });
   }
 
-  /** Keep normal balance aligned with the type convention as the user picks a type. */
+  /** Default the normal balance to the type convention when the user picks a type; it can still be flipped for a contra account. */
   protected onTypeChange(): void {
-    const t = this.form.controls.accountType.value;
-    const nb = t === 'Asset' || t === 'Expense' ? 'Debit' : 'Credit';
-    this.form.controls.normalBalance.setValue(nb);
+    this.form.controls.normalBalance.setValue(conventionalBalance(this.form.controls.accountType.value));
   }
 
   protected openCreate(): void {
     this.editing.set(null);
-    this.form.reset({ accountType: 'Expense', normalBalance: 'Debit', isActive: true, requiresJob: false, requiresCostCenter: false, parentAccountId: null, cashFlowCategory: null, description: null });
+    this.form.reset({ accountNumber: '', name: '', accountType: 'Expense', normalBalance: 'Debit', isActive: true, requiresJob: false, requiresCostCenter: false, parentAccountId: null, cashFlowCategory: null, description: null });
     this.dialogOpen.set(true);
   }
 
@@ -140,14 +165,14 @@ export class ChartOfAccountsComponent implements OnInit {
     if (current) {
       const locked = current.hasPostings;
       this.gl.updateGlAccount({
-        id: current.id, name: v.name!, parentAccountId: v.parentAccountId, requiresJob: v.requiresJob!,
+        id: current.id, name: v.name!.trim(), parentAccountId: v.parentAccountId, requiresJob: v.requiresJob!,
         requiresCostCenter: v.requiresCostCenter!, cashFlowCategory: v.cashFlowCategory, description: v.description,
         isActive: v.isActive!,
-        accountNumber: locked ? null : v.accountNumber!, accountType: locked ? null : v.accountType!, normalBalance: locked ? null : v.normalBalance!,
+        accountNumber: locked ? null : v.accountNumber!.trim(), accountType: locked ? null : v.accountType!, normalBalance: locked ? null : v.normalBalance!,
       }).subscribe(done);
     } else {
       this.gl.createGlAccount({
-        bookId: this.bookId, accountNumber: v.accountNumber!, name: v.name!, accountType: v.accountType!,
+        bookId: this.bookId, accountNumber: v.accountNumber!.trim(), name: v.name!.trim(), accountType: v.accountType!,
         normalBalance: v.normalBalance!, parentAccountId: v.parentAccountId, requiresJob: v.requiresJob!,
         requiresCostCenter: v.requiresCostCenter!, cashFlowCategory: v.cashFlowCategory, description: v.description,
       }).subscribe(done);

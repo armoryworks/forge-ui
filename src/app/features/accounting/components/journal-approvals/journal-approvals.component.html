@@ -34,13 +34,17 @@
               <span class="material-icons-outlined" aria-hidden="true">undo</span>
               {{ 'accounting.approvals.reject' | translate }}
             </button>
-            <button type="button" class="action-btn action-btn--sm action-btn--primary"
-              [disabled]="busyId() !== null"
-              (click)="approve(item.entry)"
-              data-testid="je-approve">
-              <span class="material-icons-outlined" aria-hidden="true">check</span>
-              {{ 'accounting.approvals.approve' | translate }}
-            </button>
+            @if (item.ownEntry) {
+              <span class="jea__own-note" data-testid="je-own-entry">{{ 'accounting.approvals.ownEntry' | translate }}</span>
+            } @else {
+              <button type="button" class="action-btn action-btn--sm action-btn--primary"
+                [disabled]="busyId() !== null"
+                (click)="approve(item.entry)"
+                data-testid="je-approve">
+                <span class="material-icons-outlined" aria-hidden="true">check</span>
+                {{ 'accounting.approvals.approve' | translate }}
+              </button>
+            }
           </div>
         </section>
       } @empty {

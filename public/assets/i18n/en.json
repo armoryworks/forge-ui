@@ -85,7 +85,8 @@
     "pieceRates": "Piece Rates",
     "openingJournal": "Opening Journal",
     "journalApprovals": "Journal Approvals",
-    "maintenancePredictions": "Predictions"
+    "maintenancePredictions": "Predictions",
+    "accountingTraining": "Accounting Training"
   },
   "navGroups": {
     "operations": "Operations",
@@ -449,7 +450,13 @@
     "continue": "Continue",
     "dismiss": "Dismiss",
     "fax": "Fax",
-    "deactivatedSuffix": "(deactivated)"
+    "deactivatedSuffix": "(deactivated)",
+    "unsavedChanges": {
+      "title": "Unsaved changes",
+      "message": "You have unsaved changes that will be lost. Are you sure you want to leave?",
+      "leave": "Leave",
+      "stay": "Stay"
+    }
   },
   "dashboardWidgets": {
     "margin": {
@@ -10231,7 +10238,12 @@
       "entryNotLoaded": "Entry id {{number}} is older than the loaded page",
       "empty": "No journal entries",
       "accounts": "Accounts",
-      "loadedOnly": "Showing the newest {{shown}} of {{total}} entries. Find and the CSV/Excel export cover these entries only."
+      "loadedOnly": "Showing the newest {{shown}} of {{total}} entries. Find and the CSV/Excel export cover these entries only.",
+      "rejectedDrafts": "Rejected drafts",
+      "draftsNote": "Rejected entries return here as drafts. Resubmit one of yours to correct it in the editor and send it back for approval; it keeps its entry number.",
+      "accountNotFound": "That account could not be found. Open the ledger from the chart of accounts or the trial balance.",
+      "flaggedOffPage": "{{count}} flagged entries are older than the entries loaded here.",
+      "resubmit": "Resubmit"
     },
     "journalEditor": {
       "title": "New Journal Entry",
@@ -10246,7 +10258,8 @@
       "posted": "Entry #{{number}} posted",
       "correctionMemo": "Correction of entry #{{number}}: ",
       "correcting": "Correcting entry #{{number}}",
-      "pendingApproval": "Entry {{number}} is waiting for a second approver"
+      "pendingApproval": "Entry {{number}} is waiting for a second approver",
+      "resubmitting": "Resubmitting rejected entry #{{number}}"
     },
     "training": {
       "title": "GL Training",
@@ -10468,7 +10481,9 @@
       "account": "Account",
       "net": "Net",
       "balanced": "Balanced",
-      "empty": "No ledger activity"
+      "empty": "No ledger activity",
+      "debitTurnover": "Debit activity",
+      "creditTurnover": "Credit activity"
     },
     "profitLoss": {
       "title": "Profit & Loss",
@@ -10488,7 +10503,7 @@
       "roa": "Return on assets",
       "debtToEquity": "Debt-to-equity",
       "expenseRatio": "Expense ratio",
-      "currentPeriodNote": "Current period P&L and balance sheet as of today."
+      "currentPeriodNote": "Fiscal year-to-date P&L and balance sheet as of today."
     },
     "comparison": {
       "compareToPrior": "Compare to prior period",
@@ -10498,14 +10513,15 @@
       "current": "Current",
       "prior": "Prior",
       "variance": "Variance",
-      "variancePercent": "Variance %"
+      "variancePercent": "Variance %",
+      "currentPeriod": "Period"
     },
     "budget": {
       "title": "Budgets",
       "subtitle": "Set budgets per account and compare budget vs actual",
-      "entryTab": "Budget Entry",
-      "vsActualTab": "Budget vs Actual",
-      "amount": "Budget Amount",
+      "entryTab": "Budget entry",
+      "vsActualTab": "Budget vs actual",
+      "amount": "Budget amount",
       "budget": "Budget",
       "actual": "Actual",
       "total": "Total",
@@ -10532,7 +10548,11 @@
         "10": "October",
         "11": "November",
         "12": "December"
-      }
+      },
+      "window": "Period",
+      "totalIncome": "Total income",
+      "totalExpense": "Total expense",
+      "netIncome": "Net income"
     },
     "balanceSheet": {
       "title": "Balance Sheet",
@@ -10565,7 +10585,9 @@
       "netChangeInCash": "Net change in cash",
       "actualCashMovement": "Actual cash movement",
       "operatingAdjustments": "Operating adjustments",
-      "chartLabel": "Cash flow waterfall chart"
+      "chartLabel": "Cash flow waterfall chart",
+      "beginningCash": "Cash at beginning of period",
+      "endingCash": "Cash at end of period"
     },
     "arAging": {
       "title": "AR Aging",
@@ -10622,12 +10644,15 @@
       "totalPayments": "Total payments",
       "status": "Status",
       "reportable": "Reportable",
-      "underThreshold": "Under $600",
+      "underThreshold": "Under threshold",
       "reportableVendors": "Reportable vendors",
       "empty": "No 1099 vendors flagged",
       "vendorToggle": "1099 vendor",
       "taxIdLabel": "Tax ID (TIN/EIN)",
-      "taxIdPlaceholder": "e.g. 12-3456789"
+      "taxIdPlaceholder": "e.g. 12-3456789",
+      "includeZero": "Show vendors with no payments",
+      "zeroHidden": "{{count}} 1099 vendors with no payments this year are hidden.",
+      "threshold": "Reporting threshold"
     },
     "periodClose": {
       "title": "Period Close",
@@ -10637,13 +10662,13 @@
       "dates": "Dates",
       "empty": "No periods",
       "noFiscalYears": "No fiscal years configured.",
-      "closeYear": "Close year (RE roll)",
+      "closeYear": "Close fiscal year",
       "softClose": "Soft-close",
       "hardClose": "Hard-close",
       "reopen": "Reopen",
       "locked": "Locked",
       "confirmTitle": "Close fiscal year?",
-      "confirmMessage": "This posts the retained-earnings roll and hard-closes every period in the year. It cannot be undone.",
+      "confirmMessage": "This moves the year's net income into retained earnings and hard-closes every period in the year. It cannot be undone.",
       "confirmLabel": "Close year",
       "checklist": {
         "title": "Close checklist",
@@ -10656,7 +10681,14 @@
         "arTies": "AR aging ties to control",
         "apTies": "AP aging ties to control",
         "blockedHint": "Hard-closing this period, or closing the year when it is the final period, is refused until every item passes.",
-        "loadFailed": "Could not load the close checklist."
+        "loadFailed": "Could not load the close checklist.",
+        "noPendingEntries": "No journal entries awaiting approval"
+      },
+      "statuses": {
+        "Open": "Open",
+        "SoftClosed": "Soft-closed",
+        "HardClosed": "Hard-closed",
+        "Closed": "Closed"
       }
     },
     "bankRec": {
@@ -10730,7 +10762,8 @@
       "requiresCostCenter": "Requires Cost Center",
       "active": "Active",
       "description": "Description",
-      "lockedNote": "This account has postings — its number, type, and normal balance are locked. Create a new account for structural changes."
+      "lockedNote": "This account has postings — its number, type, and normal balance are locked. Create a new account for structural changes.",
+      "contraNote": "This normal balance is opposite the usual side for the account type, as for a contra account."
     },
     "openingJournal": {
       "title": "Opening journal",
@@ -10770,7 +10803,8 @@
       "rejectTitle": "Reject entry {{number}}",
       "rejectNote": "The entry goes back to draft; nothing reaches the ledger. The reason is added to its memo.",
       "rejectReason": "Reason (optional)",
-      "noLines": "This entry has no lines"
+      "noLines": "This entry has no lines",
+      "ownEntry": "You submitted this entry, so another approver must approve it."
     },
     "jobCostClose": {
       "title": "Job production cost",
@@ -10784,6 +10818,29 @@
       "empty": "No job has an open WIP balance",
       "loadFailed": "Could not load the jobs with open WIP",
       "notComplete": "Complete the job before closing its cost"
+    },
+    "period": {
+      "period": "Period",
+      "from": "From",
+      "to": "To",
+      "asOf": "As of",
+      "inception": "Inception",
+      "presets": {
+        "thisMonth": "This month",
+        "lastMonth": "Last month",
+        "thisQuarter": "This quarter",
+        "lastQuarter": "Last quarter",
+        "yearToDate": "Fiscal year to date",
+        "lastYear": "Last calendar year",
+        "custom": "Custom",
+        "today": "Today",
+        "endOfLastMonth": "End of last month",
+        "endOfLastQuarter": "End of last quarter",
+        "endOfLastYear": "End of last year"
+      }
+    },
+    "aging": {
+      "current": "Current"
     }
   },
   "subcontractUi": {

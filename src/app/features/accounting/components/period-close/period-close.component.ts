@@ -12,6 +12,7 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-refresh.util';
 import { CapDirective } from '../../../../shared/directives/cap.directive';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { JobCostCloseComponent } from '../job-cost-close/job-cost-close.component';
 import {
@@ -29,6 +30,7 @@ const CHECKLIST_LABEL_KEYS: Readonly<Record<string, string>> = {
   GRNI_RECONCILED: 'accounting.periodClose.checklist.grniReconciled',
   AR_TIES: 'accounting.periodClose.checklist.arTies',
   AP_TIES: 'accounting.periodClose.checklist.apTies',
+  PENDING_JE: 'accounting.periodClose.checklist.noPendingEntries',
 };
 
 interface ShownChecklist {
