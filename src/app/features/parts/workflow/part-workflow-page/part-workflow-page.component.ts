@@ -88,7 +88,10 @@ export class PartWorkflowPageComponent {
 
   protected readonly entityTitle = computed(() => {
     const p = this.part();
-    if (p) return `${p.partNumber} — ${p.description ?? ''}`.trim().replace(/—\s*$/, '').trim();
+    if (p) {
+      const label = p.name?.trim() || p.description?.trim();
+      return label ? `${p.partNumber} — ${label}` : p.partNumber;
+    }
     // Entity-less workflow path (/parts/new before first patch materializes
     // the row). The shell still mounts and the user is filling the basics
     // step — calling that "Loading…" is wrong because nothing is loading,

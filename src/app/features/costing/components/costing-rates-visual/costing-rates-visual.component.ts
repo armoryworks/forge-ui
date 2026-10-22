@@ -3,7 +3,7 @@ import { BaseChartDirective } from '../../../../shared/charts/base-chart.directi
 import { ChartConfiguration } from 'chart.js';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { WorkCenterCostRate } from '../../models/costing.model';
+import { WorkCenterCostRate, workCenterRateLabel } from '../../models/costing.model';
 
 // One hue per rate component: labour blues, machine teal, overhead ambers — so a
 // bar reads as its labour-vs-machine-vs-overhead composition at a glance.
@@ -37,7 +37,7 @@ export class CostingRatesVisualComponent {
 
   protected readonly chartConfig = computed<ChartConfiguration<'bar'>>(() => {
     const rates = this.rates();
-    const labels = rates.map((r) => `#${r.workCenterId}`);
+    const labels = rates.map(workCenterRateLabel);
 
     return {
       type: 'bar',
@@ -105,7 +105,7 @@ export class CostingRatesVisualComponent {
           },
           y: {
             stacked: true,
-            ticks: { callback: (v) => `${v}`, font: { size: 10 } },
+            ticks: { callback: (v) => Number(v).toLocaleString(undefined, { style: 'currency', currency: 'USD' }), font: { size: 10 } },
           },
         },
       },

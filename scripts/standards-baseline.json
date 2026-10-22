@@ -326,6 +326,6 @@
     "src/app/shared/components/stl-viewer/stl-viewer.component.html": 1,
     "src/app/shared/components/toast/toast.component.html": 3,
     "src/app/shared/components/training-context-panel/training-context-panel.component.html": 5,
-    "src/app/shared/components/validation-button/validation-button.component.html": 3
+    "src/app/shared/components/validation-button/validation-button.component.html": 2
   }
 }

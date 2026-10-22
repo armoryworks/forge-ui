@@ -186,3 +186,34 @@ describe('PartWorkflowPageComponent bad links', () => {
     expect(navSpy).toHaveBeenCalledWith(['/parts'], { queryParams: { detail: 'part:42' }, replaceUrl: true });
   });
 });
+
+describe('PartWorkflowPageComponent title', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+      ],
+    }).compileComponents();
+  });
+
+  function titleFor(part: Partial<PartDetail>): string {
+    const component = TestBed.runInInjectionContext(() => new PartWorkflowPageComponent()) as unknown as {
+      part: { set(p: PartDetail): void };
+      entityTitle: () => string;
+    };
+    component.part.set(part as PartDetail);
+    return component.entityTitle();
+  }
+
+  it('shows the part number and name, not the description', () => {
+    expect(titleFor({ partNumber: 'NP-1', name: 'Widget', description: 'long text' })).toBe('NP-1 — Widget');
+  });
+
+  it('falls back to the description when the name is blank, then to the number alone', () => {
+    expect(titleFor({ partNumber: 'NP-1', name: ' ', description: 'Bracket' })).toBe('NP-1 — Bracket');
+    expect(titleFor({ partNumber: 'NP-1', name: '', description: null })).toBe('NP-1');
+  });
+});

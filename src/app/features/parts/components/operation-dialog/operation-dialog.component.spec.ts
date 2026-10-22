@@ -159,4 +159,22 @@ describe('OperationDialogComponent — estimated time, setup and per-lot fields'
     expect(internals.formGroup.controls.setupMinutes.hasError('min')).toBe(true);
     expect(internals.formGroup.controls.runMinutesLot.hasError('min')).toBe(true);
   });
+
+  it('rejects minutes the server column cannot hold and a third decimal place', () => {
+    const { internals } = setup({ partId: 3, nextStepNumber: 1 });
+    const { setupMinutes, runMinutesLot, subcontractTurnTimeDays } = internals.formGroup.controls;
+
+    setupMinutes.setValue(1e12);
+    runMinutesLot.setValue(12.345);
+    subcontractTurnTimeDays.setValue(2.25);
+
+    expect(setupMinutes.hasError('max')).toBe(true);
+    expect(runMinutesLot.hasError('maxDecimals')).toBe(true);
+    expect(subcontractTurnTimeDays.hasError('maxDecimals')).toBe(true);
+
+    setupMinutes.setValue(99_999_999.99);
+    runMinutesLot.setValue(12.5);
+    expect(setupMinutes.valid).toBe(true);
+    expect(runMinutesLot.valid).toBe(true);
+  });
 });

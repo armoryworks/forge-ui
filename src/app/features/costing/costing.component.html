@@ -91,7 +91,12 @@
         } @else {
           <app-data-table tableId="costing-rates" [columns]="rateColumns" [data]="rates()"
             emptyIcon="table_chart" [emptyMessage]="'costing.rates.noneYet' | translate">
-            <ng-template appColumnCell="workCenterId" let-row>#{{ row.workCenterId }}</ng-template>
+            <ng-template appColumnCell="workCenterId" let-row>{{ workCenterRateLabel(row) }}</ng-template>
+            <ng-template appColumnCell="laborRate" let-row>{{ row.laborRate | currency:'USD':'symbol':'1.2-4' }}</ng-template>
+            <ng-template appColumnCell="laborOhRate" let-row>{{ row.laborOhRate | currency:'USD':'symbol':'1.2-4' }}</ng-template>
+            <ng-template appColumnCell="machineRate" let-row>{{ row.machineRate | currency:'USD':'symbol':'1.2-4' }}</ng-template>
+            <ng-template appColumnCell="machineOhVarRate" let-row>{{ row.machineOhVarRate | currency:'USD':'symbol':'1.2-4' }}</ng-template>
+            <ng-template appColumnCell="machineOhFixedRate" let-row>{{ row.machineOhFixedRate | currency:'USD':'symbol':'1.2-4' }}</ng-template>
           </app-data-table>
         }
       }
@@ -102,8 +107,8 @@
         <app-input [label]="'costing.costCenters.code' | translate" formControlName="code" [required]="true" data-testid="costing-cc-code" />
         <app-input [label]="'costing.costCenters.name' | translate" formControlName="name" [required]="true" data-testid="costing-cc-name" />
         <app-select [label]="'costing.costCenters.type' | translate" formControlName="type" [options]="typeOptions" data-testid="costing-cc-type" />
-        <app-input [label]="'costing.costCenters.sqft' | translate" type="number" formControlName="sqft" data-testid="costing-cc-sqft" />
-        <app-input [label]="'costing.costCenters.headcount' | translate" type="number" formControlName="headcount" data-testid="costing-cc-headcount" />
+        <app-input [label]="'costing.costCenters.sqft' | translate" type="number" [min]="0" formControlName="sqft" data-testid="costing-cc-sqft" />
+        <app-input [label]="'costing.costCenters.headcount' | translate" type="number" [min]="0" formControlName="headcount" data-testid="costing-cc-headcount" />
         <app-toggle [label]="'costing.costCenters.inventoriable' | translate" formControlName="isInventoriable" data-testid="costing-cc-inventoriable" />
         <button class="action-btn action-btn--create" [disabled]="costCenterForm.invalid" (click)="createCostCenter()" data-testid="costing-cc-create">
           {{ 'costing.costCenters.create' | translate }}
@@ -122,7 +127,10 @@
         <app-input [label]="'costing.pools.code' | translate" formControlName="code" [required]="true" data-testid="costing-pool-code" />
         <app-input [label]="'costing.pools.name' | translate" formControlName="name" [required]="true" data-testid="costing-pool-name" />
         <app-select [label]="'costing.pools.behavior' | translate" formControlName="behavior" [options]="behaviorOptions" data-testid="costing-pool-behavior" />
-        <app-input [label]="'costing.pools.fixedPortion' | translate" type="number" formControlName="fixedPortion" data-testid="costing-pool-fixedportion" />
+        <app-input [label]="'costing.pools.fixedPortion' | translate" type="number" [min]="0" [max]="1" step="0.01"
+          [info]="'costing.pools.fixedPortionHint' | translate"
+          [required]="poolForm.controls.behavior.value === 'Semi'"
+          formControlName="fixedPortion" data-testid="costing-pool-fixedportion" />
         <app-select [label]="'costing.pools.driver' | translate" formControlName="driver" [options]="driverOptions" data-testid="costing-pool-driver" />
         <button class="action-btn action-btn--create" [disabled]="poolForm.invalid" (click)="createPool()" data-testid="costing-pool-create">
           {{ 'costing.pools.create' | translate }}

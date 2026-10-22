@@ -334,6 +334,8 @@
   },
   "common": {
     "save": "Guardar",
+    "showValidationErrors": "Mostrar errores de validación",
+    "validationIssues": "{{count}} problema(s) de validación. Haga clic para verlos.",
     "viewMode": "Modo de vista",
     "viewClassic": "Clásico",
     "viewVisual": "Visual",
@@ -1020,6 +1022,7 @@
     "drafts": {
       "rowLabel": "Borrador",
       "unnamed": "(Borrador sin nombre)",
+      "inProgress": "{{count}} borrador(es) en curso",
       "lastEdited": "Última edición {{when}}",
       "stepLabel": "Paso: {{step}}",
       "abandonAction": "Abandonar",
@@ -1049,10 +1052,10 @@
     "importParts": "Importar",
     "importPage": {
       "title": "Importación masiva",
-      "subtitle": "Suba un CSV de piezas, deduplique contra las existentes y luego confirme. Los números de pieza se asignan automáticamente.",
+      "subtitle": "Suba un CSV de piezas, deduplique contra las existentes y luego confirme. Forge asigna a cada pieza nueva su propio número de pieza; una columna de número de pieza del archivo se guarda como ID externo de la pieza.",
       "step1": "1. Origen",
       "step2": "2. Vista previa y confirmación",
-      "columnsHint": "Columnas: nombre (obligatorio), descripción, clase de inventario (materia prima/componente/subconjunto/producto terminado/consumible/herramienta), aprovisionamiento (fabricar/comprar/subcontratar/fantasma), número de pieza. Se requiere una fila de encabezado; se detectan alias comunes. Clase/aprovisionamiento no reconocidos usan Componente / Comprar.",
+      "columnsHint": "Columnas: nombre (obligatorio), descripción, clase de inventario (materia prima/componente/subconjunto/producto terminado/consumible/herramienta), aprovisionamiento (fabricar/comprar/subcontratar/fantasma), número de pieza (se guarda como ID externo). Se requiere una fila de encabezado; se detectan alias comunes. Clase/aprovisionamiento no reconocidos usan Componente / Comprar.",
       "uploadCsv": "Subir CSV",
       "or": "o",
       "pasteLabel": "Pegar filas (CSV o separadas por tabulaciones)",
@@ -1064,8 +1067,15 @@
       "name": "Nombre",
       "inventoryClass": "Clase de inventario",
       "procurement": "Aprovisionamiento",
-      "externalId": "N.º de pieza",
+      "externalId": "ID externo",
+      "newPartNumber": "N.º de pieza nuevo",
+      "newPartNumberPreview": "N.º de pieza (se asignará)",
       "statusCol": "Estado",
+      "viewParts": "Ver piezas",
+      "noContent": "No hay contenido para analizar.",
+      "readFailed": "No se pudo leer el archivo.",
+      "noDataRows": "No se encontraron filas de datos debajo del encabezado.",
+      "importedStatus": "Creada",
       "preview": "Vista previa",
       "commit": "Confirmar",
       "committed": "Importadas {{created}} de {{total}} piezas.",
@@ -1100,6 +1110,9 @@
     "allStatuses": "Todos los Estados",
     "allTypes": "Todos los Tipos",
     "noPartsFound": "No se encontraron piezas",
+    "noPartsMatch": "Ninguna pieza coincide con estos filtros",
+    "noPartsMatchHelp": "Borre la búsqueda o cambie los filtros para ver más piezas.",
+    "clearFilters": "Borrar filtros",
     "noPartsHelp": "Cree su primera pieza para comenzar a construir su catálogo. Las piezas pueden incluir listas de materiales, operaciones y archivos adjuntos.",
     "externalPartNumber": "Pieza Externa #",
     "externalPartNumberPlaceholder": "Número de pieza del proveedor",
@@ -1321,14 +1334,14 @@
         "modeAbcDesc": "Asignación por drivers (m², horas máquina, etc.).",
         "tier2Tooltip": "Habilita CAP-COSTING-TIER2-DEPTRATES en admin para usar",
         "tier3Tooltip": "Habilita CAP-COSTING-TIER3-ABC en admin para usar",
-        "tierNotImplemented": "La capacidad está habilitada pero el motor de cálculo y pantallas de configuración aún están pendientes. La elección de nivel se guarda en la pieza para uso futuro; la sustitución manual debajo sigue siendo el valor activo.",
-        "departmentalConfigured": "Las tarifas departamentales de gastos generales son una configuración de toda la planta — configure las tarifas por centro de trabajo en Administración → Costeo. El cálculo de costo estándar las aplica automáticamente a la ruta de cada pieza.",
+        "tierNotImplemented": "Los periodos, centros de costos y grupos de gastos generales por actividad los configura un Administrador o Gerente, pero el cálculo de costo estándar de la pieza aún no usa sus tarifas. La elección de nivel se guarda en la pieza; la sustitución manual debajo sigue siendo el costo activo.",
+        "departmentalConfigured": "Las tarifas departamentales de gastos generales son una configuración de toda la planta que un Administrador o Gerente define por centro de trabajo. El cálculo de costo estándar las aplica automáticamente a la ruta de cada pieza.",
         "manualOverrideLabel": "Sustitución manual de costo",
         "manualOverridePlaceholder": "0.00",
         "currentLabel": "Costo mostrado actualmente",
         "notSet": "No definido",
         "saveFailed": "No se pudo guardar.",
-        "rationale": "<strong>El costo determina cada dólar aguas abajo.</strong> El precio de cotización, los reportes de margen, la valuación de WIP y el análisis de variación estándar-vs-real leen de este número. <br><br>El Nivel 1 (override manual) es el camino más simple: ingresa un número en el que confíes. El Nivel 2 / Nivel 3 agregan tarifas por centro de costo y bolsas basadas en actividad — están bloqueados por capacidad y aún no implementados, por lo que hoy el override manual es la respuesta operativa."
+        "rationale": "<strong>El costo determina cada dólar aguas abajo.</strong> El precio de cotización, los reportes de margen, la valuación de WIP y el análisis de variación estándar-vs-real leen de este número. <br><br>El Nivel 1 (override manual) es el camino más simple: ingresa un número en el que confíes. El Nivel 2 aplica las tarifas departamentales de gastos generales que define un Administrador o Gerente. El Nivel 3 (grupos por actividad) lo configura un Administrador o Gerente pero aún no alimenta el cálculo de la pieza, así que para el Nivel 3 el override manual sigue siendo la respuesta operativa."
       },
       "alternates": {
         "title": "Alternativos",
@@ -1526,7 +1539,14 @@
         },
         "cost": {
           "manualCostOverride": "Costo manual (sobrescribir)",
-          "costCalculationId": "Id de cálculo de costo",
+          "standardCost": "Costo estándar",
+          "sourceCalculation": "Calculado el {{date}}",
+          "sourceOverride": "Sustitución manual",
+          "sourceOverrideWithCalc": "Sustitución manual (último cálculo {{amount}} el {{date}})",
+          "notCalculated": "Aún no calculado",
+          "material": "Material",
+          "labor": "Mano de obra",
+          "overhead": "Gastos generales",
           "valuationClass": "Clase de valoración"
         }
       },
@@ -1583,7 +1603,7 @@
         "expectedYieldInfo": "Parte de las piezas iniciadas que se espera salgan buenas. Las órdenes de trabajo para un pedido inician la cantidad del pedido dividida entre el rendimiento, redondeada hacia arriba. Los pasos de la ruta con factor de desperdicio planifican hacia atrás desde el objetivo: cada paso inicia las piezas del siguiente paso × (1 + factor de desperdicio), redondeado hacia arriba. Si ambos están definidos se usa el plan mayor, nunca ambos. En blanco significa sin excedente.",
         "planningFence": "Cerco de Planificación (días)",
         "demandFence": "Cerco de Demanda (días)",
-        "leadTimeNote": "El plazo de entrega se obtiene de VendorPart preferido cuando está configurado."
+        "leadTimeNote": "El plazo de entrega se toma del registro de pieza del proveedor preferido cuando existe."
       },
       "quality": {
         "title": "Calidad y Cumplimiento",
@@ -3394,6 +3414,13 @@
     "workCenterId": "ID de centro de trabajo",
     "workCenter": "Centro de trabajo",
     "glAccount": "Cuenta contable (opcional)",
+    "glAccountLabel": "Cuenta contable",
+    "glAccountSyncHint": "La asigna la sincronización contable; no se puede editar aquí.",
+    "depreciation": {
+      "StraightLine": "Línea recta",
+      "DecliningBalance": "Saldo decreciente",
+      "UnitsOfProduction": "Unidades de producción"
+    },
     "currentShotCount": "Conteo actual de disparos"
   },
   "admin": {
@@ -11458,7 +11485,8 @@
       "code": "Código",
       "name": "Nombre",
       "behavior": "Comportamiento",
-      "fixedPortion": "Porción Fija",
+      "fixedPortion": "Porción fija (0–1)",
+      "fixedPortionHint": "Parte del grupo que es fija, como fracción: 0.4 significa 40 %. Obligatoria para un grupo semivariable.",
       "driver": "Generador",
       "create": "Agregar Fondo",
       "noneYet": "Aún no hay fondos"

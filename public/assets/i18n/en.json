@@ -334,6 +334,8 @@
   },
   "common": {
     "save": "Save",
+    "showValidationErrors": "Show validation errors",
+    "validationIssues": "{{count}} validation issue(s). Click to view.",
     "viewMode": "View mode",
     "viewClassic": "Classic",
     "viewVisual": "Visual",
@@ -1020,6 +1022,7 @@
     "drafts": {
       "rowLabel": "Draft",
       "unnamed": "(Unnamed draft)",
+      "inProgress": "{{count}} draft(s) in progress",
       "lastEdited": "Last edited {{when}}",
       "stepLabel": "Step: {{step}}",
       "abandonAction": "Abandon",
@@ -1049,10 +1052,10 @@
     "importParts": "Import",
     "importPage": {
       "title": "Bulk Import",
-      "subtitle": "Upload a CSV of parts, dedupe against existing rows, then commit. Part numbers are assigned automatically.",
+      "subtitle": "Upload a CSV of parts, dedupe against existing rows, then commit. Forge assigns each new part its own part number; a part number column in the file is saved as the part's external ID.",
       "step1": "1. Source",
       "step2": "2. Preview & commit",
-      "columnsHint": "Columns: name (required), description, inventory class (raw/component/subassembly/finished good/consumable/tool), procurement (make/buy/subcontract/phantom), part number. A header row is required; common aliases are auto-detected. Unrecognized class/procurement default to Component / Buy.",
+      "columnsHint": "Columns: name (required), description, inventory class (raw/component/subassembly/finished good/consumable/tool), procurement (make/buy/subcontract/phantom), part number (saved as the external ID). A header row is required; common aliases are auto-detected. Unrecognized class/procurement default to Component / Buy.",
       "uploadCsv": "Upload CSV",
       "or": "or",
       "pasteLabel": "Paste rows (CSV or tab-separated)",
@@ -1064,8 +1067,15 @@
       "name": "Name",
       "inventoryClass": "Inventory Class",
       "procurement": "Procurement",
-      "externalId": "Part #",
+      "externalId": "External ID",
+      "newPartNumber": "New Part #",
+      "newPartNumberPreview": "Part # (will be assigned)",
       "statusCol": "Status",
+      "viewParts": "View parts",
+      "noContent": "No content to parse.",
+      "readFailed": "Failed to read file.",
+      "noDataRows": "No data rows found below the header row.",
+      "importedStatus": "Created",
       "preview": "Preview",
       "commit": "Commit",
       "committed": "Imported {{created}} of {{total}} parts.",
@@ -1100,6 +1110,9 @@
     "allStatuses": "All Statuses",
     "allTypes": "All Types",
     "noPartsFound": "No parts found",
+    "noPartsMatch": "No parts match these filters",
+    "noPartsMatchHelp": "Clear the search or change the filters to see more parts.",
+    "clearFilters": "Clear filters",
     "noPartsHelp": "Create your first part to start building your catalog. Parts can include BOMs, operations, and file attachments.",
     "externalPartNumber": "External Part #",
     "externalPartNumberPlaceholder": "Vendor/supplier part number",
@@ -1338,14 +1351,14 @@
         "modeAbcDesc": "Cost pools allocated by drivers (square footage, machine hours, etc.).",
         "tier2Tooltip": "Enable CAP-COSTING-TIER2-DEPTRATES in admin to use",
         "tier3Tooltip": "Enable CAP-COSTING-TIER3-ABC in admin to use",
-        "tierNotImplemented": "Capability is enabled but the calculation engine + configuration screens are still pending. Tier choice is stored on the part for future use; the manual override below remains the active value.",
-        "departmentalConfigured": "Departmental overhead rates are a shop-wide setting — configure per-work-center rates in Admin → Costing. The standard-cost rollup applies them automatically to every part's routing.",
+        "tierNotImplemented": "Activity-based periods, cost centers and overhead pools are configured by an Admin or Manager, but the part standard-cost rollup does not use their rates yet. The tier choice is saved on the part; the manual override below stays the active cost.",
+        "departmentalConfigured": "Departmental overhead rates are a shop-wide setting that an Admin or Manager configures per work center. The standard-cost rollup applies them automatically to every part's routing.",
         "manualOverrideLabel": "Manual cost override",
         "manualOverridePlaceholder": "0.00",
         "currentLabel": "Currently displayed cost",
         "notSet": "Not set",
         "saveFailed": "Couldn't save costing.",
-        "rationale": "<strong>Cost drives every dollar downstream.</strong> Quote pricing, margin reporting, WIP valuation, and standard-vs-actual variance analysis all read from this number. <br><br>Tier 1 (manual override) is the simplest path: enter a number you trust. Tier 2 / Tier 3 add per-cost-center rates and activity-based pools — capability-gated and not implemented yet, so today the manual override is the working answer."
+        "rationale": "<strong>Cost drives every dollar downstream.</strong> Quote pricing, margin reporting, WIP valuation, and standard-vs-actual variance analysis all read from this number. <br><br>Tier 1 (manual override) is the simplest path: enter a number you trust. Tier 2 applies the departmental overhead rates an Admin or Manager sets. Tier 3 (activity-based pools) is configured by an Admin or Manager but does not feed the part rollup yet, so for Tier 3 the manual override is still the working answer."
       },
       "alternates": {
         "title": "Alternates",
@@ -1544,7 +1557,14 @@
         },
         "cost": {
           "manualCostOverride": "Manual Cost Override",
-          "costCalculationId": "Cost Calculation Id",
+          "standardCost": "Standard Cost",
+          "sourceCalculation": "Calculated {{date}}",
+          "sourceOverride": "Manual override",
+          "sourceOverrideWithCalc": "Manual override (last calculation {{amount}} on {{date}})",
+          "notCalculated": "Not calculated yet",
+          "material": "Material",
+          "labor": "Labor",
+          "overhead": "Overhead",
           "valuationClass": "Valuation Class"
         }
       },
@@ -1601,7 +1621,7 @@
         "expectedYieldInfo": "Share of started pieces expected to come out good. Jobs made for an order start the order quantity divided by the yield, rounded up. Routing steps with a scrap factor plan backwards from the target: each step starts the next step's pieces × (1 + scrap factor), rounded up. When both are set the larger plan is used, never both. Blank means no overage.",
         "planningFence": "Planning Fence (days)",
         "demandFence": "Demand Fence (days)",
-        "leadTimeNote": "Lead time resolves from preferred VendorPart when configured."
+        "leadTimeNote": "Lead time comes from the preferred vendor's part record when one is set."
       },
       "quality": {
         "title": "Quality & Compliance",
@@ -3367,6 +3387,13 @@
     "workCenterId": "Work Center ID",
     "workCenter": "Work Center",
     "glAccount": "GL Account (optional)",
+    "glAccountLabel": "GL Account",
+    "glAccountSyncHint": "Set by the accounting sync; it can't be edited here.",
+    "depreciation": {
+      "StraightLine": "Straight Line",
+      "DecliningBalance": "Declining Balance",
+      "UnitsOfProduction": "Units of Production"
+    },
     "sourceJob": "Source Job",
     "sourcePart": "Source Part",
     "setStatus": "Set Status",
@@ -11458,7 +11485,8 @@
       "code": "Code",
       "name": "Name",
       "behavior": "Behavior",
-      "fixedPortion": "Fixed Portion",
+      "fixedPortion": "Fixed portion (0–1)",
+      "fixedPortionHint": "Share of the pool that is fixed, as a fraction: 0.4 means 40%. Required for a semi-variable pool.",
       "driver": "Driver",
       "create": "Add Pool",
       "noneYet": "No pools yet"
@@ -11474,7 +11502,7 @@
     "quickStart": {
       "button": "Quick start",
       "title": "Costing quick start",
-      "lead": "Answer a few questions and NOM-style setup populates the plant cost center, this year’s costing period, the standard overhead pools with budgets, and (with full GL on) matching expense accounts + GL budget lines.",
+      "lead": "Answer a few questions and Forge sets up the plant cost center, this year’s costing period, the standard overhead pools with budgets, and (with full GL on) matching expense accounts + GL budget lines.",
       "fiscalYear": "Fiscal year",
       "headcount": "Direct headcount",
       "wage": "Average hourly wage",

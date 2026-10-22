@@ -23,6 +23,7 @@ import { PartInventorySummary } from '../../models/part-inventory-summary.model'
 import { PartPurchaseHistoryItem } from '../../models/part-purchase-history-item.model';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
+import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 import { FileAttachment } from '../../../../shared/models/file.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -210,7 +211,7 @@ export class PartDetailPanelComponent {
 
   protected readonly bomForm = new FormGroup({
     childPartId: new FormControl<number | null>(null, [Validators.required]),
-    quantity: new FormControl(1, [Validators.required, Validators.min(0.01)]),
+    quantity: new FormControl(1, [Validators.required, Validators.min(0.0001), maxDecimalsValidator(4, this.translate.instant('parts.bomQty'))]),
     uomId: new FormControl<number | null>(null),
     sourceType: new FormControl('Buy'),
     referenceDesignator: new FormControl(''),
@@ -229,7 +230,7 @@ export class PartDetailPanelComponent {
   private bomLineCommitQueued: { close: boolean } | null = null;
 
   protected readonly bomLineEditForm = new FormGroup({
-    quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
+    quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0.0001), maxDecimalsValidator(4, this.translate.instant('parts.bomQty'))]),
     sourceType: new FormControl<BOMSourceType>('Buy', { nonNullable: true }),
     referenceDesignator: new FormControl<string>('', { nonNullable: true }),
   });
@@ -244,8 +245,8 @@ export class PartDetailPanelComponent {
   protected readonly bomColumns: ColumnDef[] = [
     { field: 'sortOrder', header: '#', width: '40px', align: 'center' },
     { field: 'childPartNumber', header: this.translate.instant('parts.bomPart'), sortable: true },
-    { field: 'quantity', header: this.translate.instant('parts.bomQty'), width: '90px', align: 'center', sortable: true },
-    { field: 'sourceType', header: this.translate.instant('parts.bomSource'), width: '120px', sortable: true, filterable: true, type: 'enum',
+    { field: 'quantity', header: this.translate.instant('parts.bomQty'), width: '140px', align: 'center', sortable: true },
+    { field: 'sourceType', header: this.translate.instant('parts.bomSource'), width: '150px', sortable: true, filterable: true, type: 'enum',
       filterOptions: this.sourceTypeOptions },
     { field: 'leadTimeDays', header: this.translate.instant('parts.bomLeadTime'), width: '90px' },
     { field: 'referenceDesignator', header: this.translate.instant('parts.bomRefDes') },

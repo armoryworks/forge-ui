@@ -172,9 +172,11 @@
                 [formControl]="purchaseHistorySearch"
                 [placeholder]="'parts.detail.purchaseHistory.searchPlaceholder' | translate"
                 data-testid="purchase-history-search" />
-              <span class="purchase-history__cap">
-                {{ 'parts.detail.purchaseHistory.cap' | translate: { count: purchaseHistory().length } }}
-              </span>
+              @if (purchaseHistory().length > 0) {
+                <span class="purchase-history__cap" data-testid="purchase-history-cap">
+                  {{ 'parts.detail.purchaseHistory.cap' | translate: { count: purchaseHistory().length } }}
+                </span>
+              }
             </header>
             <app-data-table
               tableId="part-purchase-history"
