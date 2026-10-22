@@ -12,6 +12,7 @@ import { OperationQuantityDialogComponent } from '../../../../shared/components/
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
+import { StepGateService } from '../../../../shared/services/step-gate.service';
 import { KioskStepActionsService } from '../../services/kiosk-step-actions.service';
 import { ShopFloorService } from '../../services/shop-floor.service';
 import { KanbanService } from '../../../kanban/services/kanban.service';
@@ -57,6 +58,7 @@ export class ScanJobFlowComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly auth = inject(AuthService);
   private readonly capabilities = inject(CapabilityService);
+  private readonly stepGate = inject(StepGateService);
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -205,7 +207,12 @@ export class ScanJobFlowComponent implements OnInit {
 
   private stepContext(): KioskStepContext {
     const ops = this.jobOperations();
-    return { jobQuantity: ops?.jobQuantity ?? 0, decimalPlaces: ops?.quantityDecimalPlaces ?? null, reasons: this.reasons() };
+    return {
+      jobQuantity: ops?.jobQuantity ?? 0,
+      decimalPlaces: ops?.quantityDecimalPlaces ?? null,
+      reasons: this.reasons(),
+      gating: ops?.stepGating ?? null,
+    };
   }
 
   protected stopOperation(row: JobOperationRow, askAlways = false): void {
@@ -309,6 +316,8 @@ export class ScanJobFlowComponent implements OnInit {
           reasons: this.reasons(),
           touch: true,
           decimalPlaces: this.jobOperations()?.quantityDecimalPlaces ?? null,
+          plannedQuantity: row.plannedQuantity ?? null,
+          gate: this.stepGate.gateFor(row, this.jobOperations()?.stepGating),
         },
       }).afterClosed().subscribe(result => {
       if (result) this.submitQuantity(row, result);
@@ -324,6 +333,7 @@ export class ScanJobFlowComponent implements OnInit {
       expectedVersion: row.version,
       ...(result.reworkQuantity > 0 ? { reworkQuantity: result.reworkQuantity } : {}),
       ...(result.reasonCode ? { reasonCode: result.reasonCode } : {}),
+      ...(result.acknowledgeGate ? { acknowledgeGate: true, overrideReason: result.overrideReason ?? null } : {}),
     };
     this.shopFloorService.updateOperationProgress(this.jobId(), row.operationId, request).subscribe({
       next: (progress) => {

@@ -1,3 +1,5 @@
+import { OperationPredecessor } from './operation-predecessor.model';
+
 export interface Operation {
   id: number;
   partId: number;
@@ -12,6 +14,8 @@ export interface Operation {
   scrapFactor: number;
   runMinutesEach?: number;
   laborAttendancePercent?: number;
+  cycleCountdown?: boolean;
+  predecessors?: OperationPredecessor[];
   isQcCheckpoint: boolean;
   qcCriteria: string | null;
   referencedOperationId: number | null;

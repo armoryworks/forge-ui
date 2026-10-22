@@ -310,7 +310,7 @@ describe('OperationTimeTabComponent', () => {
     component.openQuantity(firstRow(component));
     expect(dialog.open.mock.calls[0][1].data).toEqual({
       title: 'Mill', jobQuantity: 40, completedQuantity: 20, scrapQuantity: 0,
-      reasons: [{ code: 'tooling', label: 'Tool wear' }], decimalPlaces: null,
+      reasons: [{ code: 'tooling', label: 'Tool wear' }], decimalPlaces: null, plannedQuantity: null, gate: null,
     });
     afterClosed.next({ completedQuantity: 30, scrapQuantity: 1, reworkQuantity: 0, reasonCode: null, complete: false });
 
@@ -321,6 +321,26 @@ describe('OperationTimeTabComponent', () => {
       expectedVersion: 5,
     });
     expect(finished).not.toHaveBeenCalled();
+  });
+
+  it('shows the step gate in the dialog and sends the acknowledgement it returns', () => {
+    const gated = { ...payload(true, [op({ available: 22, availableFromStep: 1 })]), stepGating: 'Warn' as const };
+    const { component, operations, dialog, afterClosed } = setup(of(gated));
+    operations.updateProgress.mockReturnValue(of({ operation: op({ completedQuantity: 25, version: 6 }), allOperationsComplete: false }));
+
+    component.openQuantity(firstRow(component));
+    expect(dialog.open.mock.calls[0][1].data.gate).toEqual({
+      mode: 'Warn', available: 22, availableFromStep: 1, waitingOnSteps: [], canOverride: true,
+    });
+    afterClosed.next({
+      completedQuantity: 25, scrapQuantity: 0, reworkQuantity: 0, reasonCode: null, complete: false,
+      acknowledgeGate: true, overrideReason: 'counted twice at the saw',
+    });
+
+    expect(operations.updateProgress).toHaveBeenCalledWith(JOB_ID, 7, {
+      completedQuantity: 25, scrapQuantity: 0, status: null, expectedVersion: 5,
+      acknowledgeGate: true, overrideReason: 'counted twice at the saw',
+    });
   });
 
   it('sends rework and the reason only when the dialog recorded them', () => {

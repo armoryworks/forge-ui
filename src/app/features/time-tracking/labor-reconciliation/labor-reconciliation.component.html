@@ -58,6 +58,13 @@
         0
       }
     </ng-template>
+    <ng-template appColumnCell="staleTimers" let-row>
+      @if ((row.staleTimers ?? 0) > 0) {
+        <span class="labor-recon__over" [attr.data-testid]="'labor-recon-stale-' + row.id">{{ row.staleTimers }}</span>
+      } @else {
+        0
+      }
+    </ng-template>
   </app-data-table>
 
   @if (canRecompute()) {

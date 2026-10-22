@@ -70,6 +70,22 @@
         <app-select data-testid="op-referenced-op" [label]="'parts.referencedOperation' | translate" formControlName="referencedOperationId" [options]="otherOperationOptions()" />
       </div>
 
+      <div class="dialog-row">
+        <app-select data-testid="op-predecessors" [label]="'parts.mustFollow' | translate" [multiple]="true"
+                    [placeholder]="'parts.mustFollowDefault' | translate"
+                    formControlName="predecessorIds" [options]="predecessorOptions()" />
+        @if (completeGateOptions().length > 0) {
+          <app-select data-testid="op-complete-gates" [label]="'parts.waitUntilDone' | translate" [multiple]="true"
+                      formControlName="completeGateIds" [options]="completeGateOptions()" />
+        }
+      </div>
+      <p class="op-attendance-hint">{{ 'parts.mustFollowHint' | translate }}</p>
+
+      <app-toggle data-testid="op-cycle-countdown" [label]="'parts.cycleCountdown' | translate" formControlName="cycleCountdown" />
+      @if (formGroup.controls.cycleCountdown.value) {
+        <p class="op-attendance-hint" data-testid="op-cycle-countdown-hint">{{ 'parts.cycleCountdownHint' | translate }}</p>
+      }
+
       <app-toggle data-testid="op-qc-checkpoint" [label]="'parts.qcCheckpoint' | translate" formControlName="isQcCheckpoint" />
       @if (formGroup.get('isQcCheckpoint')?.value) {
         <app-textarea data-testid="op-qc-criteria" [label]="'parts.qcCriteria' | translate" formControlName="qcCriteria" [rows]="2" [maxlength]="1000" />

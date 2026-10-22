@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { SILENT_HTTP_ERRORS } from '../../../shared/interceptors/silent-http-errors.token';
 import { PagedResponse, PagedQuery } from '../../../shared/models/paged-response.model';
 import { PartListItem } from '../models/part-list-item.model';
 import { PartDetail } from '../models/part-detail.model';
@@ -23,9 +24,11 @@ import { PartLandedCost } from '../models/part-landed-cost.model';
 import { RecalculatedStandardCost } from '../models/recalculated-standard-cost.model';
 import { FileAttachment } from '../../../shared/models/file.model';
 import { ActivityItem } from '../../../shared/models/activity.model';
+import { StepGatingMode } from '../../../shared/models/step-gating-mode.type';
 import { Operation, OperationMaterial } from '../models/operation.model';
 import { CreateOperationRequest } from '../models/create-operation-request.model';
 import { UpdateOperationRequest } from '../models/update-operation-request.model';
+import { ReorderOperationsRequest } from '../models/reorder-operations-request.model';
 import { CreateOperationMaterialRequest } from '../models/create-operation-material-request.model';
 import { AddPartPriceRequest, PartPrice } from '../models/part-price.model';
 import { PartAlternate, CreatePartAlternateRequest, UpdatePartAlternateRequest } from '../models/part-alternate.model';
@@ -172,8 +175,18 @@ export class PartsService {
     return this.http.post<Operation>(`${this.base}/${partId}/operations`, request);
   }
 
-  updateOperation(partId: number, operationId: number, request: UpdateOperationRequest): Observable<Operation> {
-    return this.http.patch<Operation>(`${this.base}/${partId}/operations/${operationId}`, request);
+  updateOperation(partId: number, operationId: number, request: UpdateOperationRequest, silent = false): Observable<Operation> {
+    return this.http.patch<Operation>(`${this.base}/${partId}/operations/${operationId}`, request,
+      silent ? { context: new HttpContext().set(SILENT_HTTP_ERRORS, true) } : {});
+  }
+
+  reorderOperations(partId: number, request: ReorderOperationsRequest): Observable<Operation[]> {
+    return this.http.put<Operation[]>(`${this.base}/${partId}/operations/order`, request,
+      { context: new HttpContext().set(SILENT_HTTP_ERRORS, true) });
+  }
+
+  updateStepGating(partId: number, stepGating: StepGatingMode | null): Observable<void> {
+    return this.http.put<void>(`${this.base}/${partId}/step-gating`, { stepGating });
   }
 
   deleteOperation(partId: number, operationId: number): Observable<void> {

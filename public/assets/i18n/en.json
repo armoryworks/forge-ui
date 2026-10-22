@@ -1776,7 +1776,29 @@
     },
     "laborAttendance": "Operator attendance",
     "laborAttendanceHint": "How much of the step needs the operator: 100 = operator busy the whole time; 20 = load, unload and gauge only. Shares a person's clocked time when they run several timers at once.",
-    "laborAttendanceMachineHint": "A machine runs part of this step. Set its work center's burden basis to Machine so the machine is still charged its full cycle time."
+    "laborAttendanceMachineHint": "A machine runs part of this step. Set its work center's burden basis to Machine so the machine is still charged its full cycle time.",
+    "mustFollow": "Must follow",
+    "mustFollowDefault": "Previous step",
+    "mustFollowHint": "Leave it empty to follow the previous step. Steps that must follow the same step run in parallel.",
+    "waitUntilDone": "Wait until done",
+    "cycleCountdown": "Cycle countdown",
+    "cycleCountdownHint": "On the kiosk, a running Run timer on this step counts down each cycle (the cycle time per piece) and offers to record the pieces when a cycle ends.",
+    "operationSaveFailed": "Couldn't save the operation.",
+    "predecessorConflictTitle": "Remove step links?",
+    "predecessorConflictMessage": "This step order breaks these links: {{links}}. Remove them and save?",
+    "predecessorConflictConfirm": "Remove links",
+    "followsDone": "Op {{step}} (done)",
+    "followsTag": "After Op {{steps}}",
+    "waitsForTag": "Waits for Op {{steps}} to be done",
+    "stepGating": "Step gating",
+    "stepGatingDefault": "Shop setting",
+    "stepGatingModes": {
+      "Off": "Off",
+      "Warn": "Warn",
+      "Block": "Block"
+    },
+    "stepGatingSaved": "Step gating saved",
+    "stepGatingSaveFailed": "Couldn't save step gating."
   },
   "partsCatalog": {
     "duplicateRow": "Duplicate {{partNumber}}"
@@ -8698,7 +8720,13 @@
       "stopAndDone": "Stop + Done",
       "suggested": "Suggested",
       "doneCount": "Done ({{count}})",
-      "attendance": "Operator {{percent}}%"
+      "attendance": "Operator {{percent}}%",
+      "available": "Available: {{available}} from Op {{step}}",
+      "waitingOn": "Waits for Op {{steps}}",
+      "gateBlocked": "Blocked by step gating",
+      "cycleCountdown": "Time left in this cycle",
+      "recordCycles": "+{{count}}",
+      "recordCyclesAria": "Record {{count}} pieces from finished cycles on {{jobNumber}}"
     },
     "returnFlow": {
       "title": "Return Items",
@@ -13422,7 +13450,18 @@
       "saveFailed": "Progress on {{operation}} was not saved. Check the connection and try again."
     },
     "printStepLabels": "Print step barcodes",
-    "stepLabel": "Op {{step}} · {{title}}"
+    "stepLabel": "Op {{step}} · {{title}}",
+    "gate": {
+      "available": "Only {{available}} available from Op {{step}}.",
+      "availableHint": "Available: {{available}} from Op {{step}}",
+      "waitingOn": "Op {{steps}} must be done first.",
+      "acknowledge": "Record anyway",
+      "override": "Override the step gate",
+      "reasonRequired": "Reason (required)",
+      "reasonOptional": "Reason (optional)",
+      "askSupervisor": "A manager or production manager can override this.",
+      "confirmFirst": "Confirm the step gate first."
+    }
   },
   "detailLoadError": {
     "notFound": "Record not found",
@@ -14002,7 +14041,8 @@
       "unallocated": "Unallocated h",
       "manual": "Manual h",
       "overlap": "Overlap h",
-      "longTimers": "Timers 10 h+"
+      "longTimers": "Timers 10 h+",
+      "staleTimers": "Stale"
     },
     "recompute": {
       "title": "Recompute labor",

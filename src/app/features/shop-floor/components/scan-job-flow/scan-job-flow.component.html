@@ -101,6 +101,7 @@
             [busy]="operationBusy()"
             [suggestedOperationId]="suggestedOperationId()"
             [focusOperationId]="focusOperationId()"
+            [gating]="ops.stepGating ?? 'Off'"
             (start)="startOperation($event)"
             (startSetup)="startOperation($event, 'Setup')"
             (stop)="stopOperation($event)"

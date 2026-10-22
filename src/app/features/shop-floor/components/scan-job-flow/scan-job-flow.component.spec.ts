@@ -421,7 +421,7 @@ describe('ScanJobFlowComponent — operation tracking', () => {
     expect(config.data).toEqual({
       title: 'shopFloor.operations.quantityTitle:{"step":2,"title":"Step 2"}',
       jobQuantity: 40, completedQuantity: 12, scrapQuantity: 1,
-      reasons: [{ code: 'tooling', label: 'Tooling' }], touch: true, decimalPlaces: null,
+      reasons: [{ code: 'tooling', label: 'Tooling' }], touch: true, decimalPlaces: null, plannedQuantity: null, gate: null,
     });
     expect(shopFloor.updateOperationProgress).not.toHaveBeenCalled();
   });

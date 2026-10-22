@@ -31,4 +31,8 @@ export interface JobOperationRow {
   historyRunMinutesEach: number | null;
   historyJobCount: number;
   openTimers: JobOperationOpenTimer[];
+  available?: number | null;
+  availableFromStep?: number | null;
+  waitingOnSteps?: number[];
+  cycleCountdown?: boolean;
 }

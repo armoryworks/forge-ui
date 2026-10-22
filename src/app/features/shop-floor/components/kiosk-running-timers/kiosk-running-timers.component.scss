@@ -54,6 +54,28 @@
   background: var(--warning-light);
 }
 
+.running-timers__chip--cycle-due {
+  border-color: var(--warning);
+  background: var(--warning-light);
+}
+
+.running-timers__cycle {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-xs;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.running-timers__cycle--due {
+  color: var(--warning-text);
+  font-weight: 600;
+}
+
+.running-timers__cycle-record {
+  min-height: $tap-target-min;
+}
+
 .running-timers__type {
   color: var(--text-muted);
 }

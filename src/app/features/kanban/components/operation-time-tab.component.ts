@@ -24,6 +24,7 @@ import { OperationQuantityDialogResult } from '../../../shared/models/operation-
 import { UpdateJobOperationProgressRequest } from '../../../shared/models/update-job-operation-progress-request.model';
 import { DurationMsPipe } from '../../../shared/pipes/duration-ms.pipe';
 import { AuthService } from '../../../shared/services/auth.service';
+import { StepGateService } from '../../../shared/services/step-gate.service';
 import { BoardHubService } from '../../../shared/services/board-hub.service';
 import { JobOperationsService } from '../../../shared/services/job-operations.service';
 import { LabelPrintService } from '../../../shared/services/label-print.service';
@@ -67,6 +68,7 @@ export class OperationTimeTabComponent {
   private readonly operationsService = inject(JobOperationsService);
   private readonly costService = inject(JobCostService);
   private readonly auth = inject(AuthService);
+  private readonly stepGate = inject(StepGateService);
   private readonly boardHub = inject(BoardHubService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
@@ -83,6 +85,8 @@ export class OperationTimeTabComponent {
 
   readonly trackingEnabled = computed(() => this.data()?.trackingEnabled === true);
   readonly jobQuantity = computed(() => this.data()?.jobQuantity ?? 0);
+  protected readonly gating = computed(() => this.data()?.stepGating ?? 'Off');
+  protected readonly gated = computed(() => this.gating() !== 'Off');
   protected readonly targetStart = computed(() => {
     const target = this.data()?.targetQuantity;
     const start = this.jobQuantity();
@@ -253,6 +257,8 @@ export class OperationTimeTabComponent {
           scrapQuantity: row.scrapQuantity,
           reasons: this.operationsService.reasons(),
           decimalPlaces: this.data()?.quantityDecimalPlaces ?? null,
+          plannedQuantity: row.plannedQuantity ?? null,
+          gate: row.source ? this.stepGate.gateFor(row.source, this.data()?.stepGating) : null,
         },
       }).afterClosed().subscribe(result => {
       if (!result) return;
@@ -262,6 +268,7 @@ export class OperationTimeTabComponent {
         status: result.complete ? 'Complete' : null,
         ...(result.reworkQuantity > 0 ? { reworkQuantity: result.reworkQuantity } : {}),
         ...(result.reasonCode ? { reasonCode: result.reasonCode } : {}),
+        ...(result.acknowledgeGate ? { acknowledgeGate: true, overrideReason: result.overrideReason ?? null } : {}),
       }, result.complete ? 'jobOperations.messages.completed' : 'jobOperations.messages.recorded');
     });
   }

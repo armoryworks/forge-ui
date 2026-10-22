@@ -1,3 +1,4 @@
+import { OperationGate } from './operation-gate.model';
 import { OperationReason } from './operation-reason.model';
 
 export interface OperationQuantityDialogData {
@@ -10,4 +11,5 @@ export interface OperationQuantityDialogData {
   decimalPlaces?: number | null;
   mode?: 'record' | 'stop';
   plannedQuantity?: number | null;
+  gate?: OperationGate | null;
 }

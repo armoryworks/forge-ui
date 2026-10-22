@@ -4,4 +4,6 @@ export interface StopOperationTimerRequest {
   scrapQuantity?: number | null;
   markComplete?: boolean;
   reasonCode?: string | null;
+  acknowledgeGate?: boolean;
+  overrideReason?: string | null;
 }

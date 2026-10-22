@@ -6,6 +6,7 @@
         <li class="running-timers__item" [attr.data-testid]="'kiosk-running-timer-' + line.timer.id">
           <button type="button" class="running-timers__chip"
                   [class.running-timers__chip--stale]="line.stale"
+                  [class.running-timers__chip--cycle-due]="(line.cycle?.pending ?? 0) > 0"
                   [disabled]="busy()"
                   [attr.aria-expanded]="line.isStep ? expandedId() === line.timer.id : null"
                   [attr.aria-label]="'shopFloor.operations.chipAria' | translate: { jobNumber: line.timer.jobNumber ?? '', step: line.stepLabel ?? '' }"
@@ -17,10 +18,28 @@
               <span class="running-timers__type">{{ ('shopFloor.operations.entryType.' + line.timer.entryType) | translate }}</span>
             }
             <span class="running-timers__elapsed">{{ line.elapsedMs | durationMs }}</span>
+            @if (line.cycle; as cycle) {
+              <span class="running-timers__cycle" [class.running-timers__cycle--due]="cycle.pending > 0"
+                    [attr.data-testid]="'kiosk-running-cycle-' + line.timer.id"
+                    [attr.title]="'shopFloor.operations.cycleCountdown' | translate">
+                <span class="material-icons-outlined" aria-hidden="true">autorenew</span>
+                {{ cycle.remainingMs | durationMs }}
+              </span>
+            }
             @if (line.stale) {
               <span class="material-icons-outlined running-timers__stale-icon" [attr.title]="'shopFloor.operations.staleTimer' | translate">schedule</span>
             }
           </button>
+          @if (line.isStep && (line.cycle?.pending ?? 0) > 0) {
+            <button type="button" class="action-btn action-btn--primary running-timers__cycle-record"
+                    [disabled]="busy()"
+                    (click)="recordCycle(line)"
+                    [attr.aria-label]="'shopFloor.operations.recordCyclesAria' | translate: { count: line.cycle?.pending, jobNumber: line.timer.jobNumber ?? '' }"
+                    [attr.data-testid]="'kiosk-running-cycle-record-' + line.timer.id">
+              <span class="material-icons-outlined">exposure_plus_1</span>
+              {{ 'shopFloor.operations.recordCycles' | translate: { count: line.cycle?.pending } }}
+            </button>
+          }
           @if (!line.isStep) {
             <button type="button" class="action-btn action-btn--danger running-timers__stop"
                     [disabled]="busy()"

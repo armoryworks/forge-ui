@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal, untracked } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { DurationMsPipe } from '../../../../shared/pipes/duration-ms.pipe';
 import { RunningTimer } from '../../models/running-timer.model';
+import { RunningTimerCycles } from '../../models/running-timer-cycles.model';
 
 export const STALE_TIMER_MS = 10 * 60 * 60 * 1000;
 
@@ -12,6 +13,7 @@ interface RunningTimerLine {
   elapsedMs: number;
   stale: boolean;
   isStep: boolean;
+  cycle: { remainingMs: number; pending: number } | null;
 }
 
 @Component({
@@ -30,11 +32,25 @@ export class KioskRunningTimersComponent {
   readonly stop = output<RunningTimer>();
   readonly recordPieces = output<RunningTimer>();
   readonly stopDone = output<RunningTimer>();
+  readonly recordCycles = output<RunningTimerCycles>();
 
   protected readonly expandedId = signal<number | null>(null);
+  private readonly cycleBaselines = signal<ReadonlyMap<number, number>>(new Map());
+
+  private readonly baselineEffect = effect(() => {
+    const timers = this.timers();
+    const now = untracked(this.now);
+    const known = untracked(this.cycleBaselines);
+    const fresh = timers.filter(t => cycleMs(t) !== null && !known.has(t.id));
+    if (fresh.length === 0) return;
+    const next = new Map(known);
+    for (const timer of fresh) next.set(timer.id, cycleIndex(timer, now));
+    this.cycleBaselines.set(next);
+  });
 
   protected readonly lines = computed<RunningTimerLine[]>(() => {
     const now = this.now();
+    const baselines = this.cycleBaselines();
     return this.timers()
       .filter(timer => timer.timerStart != null)
       .map(timer => {
@@ -47,6 +63,7 @@ export class KioskRunningTimersComponent {
           elapsedMs,
           stale: elapsedMs >= STALE_TIMER_MS,
           isStep: timer.operationId != null && timer.jobId != null,
+          cycle: cycleOf(timer, now, baselines.get(timer.id)),
         };
       });
   });
@@ -56,10 +73,39 @@ export class KioskRunningTimersComponent {
     this.expandedId.update(id => id === line.timer.id ? null : line.timer.id);
   }
 
+  protected recordCycle(line: RunningTimerLine): void {
+    const pending = line.cycle?.pending ?? 0;
+    if (pending <= 0) return;
+    this.cycleBaselines.update(map => new Map(map).set(line.timer.id, (map.get(line.timer.id) ?? 0) + pending));
+    this.recordCycles.emit({ timer: line.timer, cycles: pending });
+  }
+
   protected act(kind: 'stop' | 'record' | 'done', timer: RunningTimer): void {
     this.expandedId.set(null);
     if (kind === 'stop') this.stop.emit(timer);
     else if (kind === 'record') this.recordPieces.emit(timer);
     else this.stopDone.emit(timer);
   }
+}
+
+function cycleMs(timer: RunningTimer): number | null {
+  const minutes = timer.cycleMinutes;
+  return timer.entryType === 'Run' && minutes != null && minutes > 0 ? minutes * 60_000 : null;
+}
+
+function cycleIndex(timer: RunningTimer, now: number): number {
+  const length = cycleMs(timer);
+  if (length === null || timer.timerStart == null) return 0;
+  return Math.floor(Math.max(0, now - Date.parse(timer.timerStart)) / length);
+}
+
+function cycleOf(timer: RunningTimer, now: number, baseline: number | undefined): { remainingMs: number; pending: number } | null {
+  const length = cycleMs(timer);
+  if (length === null || timer.timerStart == null) return null;
+  const elapsed = Math.max(0, now - Date.parse(timer.timerStart));
+  const index = Math.floor(elapsed / length);
+  return {
+    remainingMs: Math.ceil((length - (elapsed % length)) / 1000) * 1000,
+    pending: baseline === undefined ? 0 : Math.max(0, index - baseline),
+  };
 }

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -8,6 +8,11 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PartsService } from '../../services/parts.service';
 import { Operation, OperationMaterial } from '../../models/operation.model';
+import { OperationPredecessorRequest } from '../../models/operation-predecessor-request.model';
+import { UpdateOperationRequest } from '../../models/update-operation-request.model';
+import { defaultPredecessorIds } from '../../utils/routing-predecessors.utils';
+import { describeConflicts, predecessorConflictsOf } from '../../utils/predecessor-conflicts.utils';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { BOMLine } from '../../models/bom-line.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -155,7 +160,40 @@ export class OperationDialogComponent implements OnInit {
       Validators.min(0.1), Validators.max(OperationDialogComponent.MAX_TURN_TIME_DAYS),
       maxDecimalsValidator(1, this.translate.instant('parts.subcontractTurnTimeDays'), this.translate),
     ]),
+    predecessorIds: new FormControl<number[]>(this.initialPredecessorIds(), { nonNullable: true }),
+    completeGateIds: new FormControl<number[]>(
+      (this.data.operation?.predecessors ?? []).filter(p => p.gate === 'Complete').map(p => p.operationId), { nonNullable: true }),
+    cycleCountdown: new FormControl(this.data.operation?.cycleCountdown ?? false, { nonNullable: true }),
   });
+
+  private readonly hadExplicitPredecessors = (this.data.operation?.predecessors ?? []).length > 0;
+  private readonly stepNumberValue = toSignal(
+    this.formGroup.controls.stepNumber.valueChanges.pipe(startWith(this.formGroup.controls.stepNumber.value)),
+    { initialValue: this.formGroup.controls.stepNumber.value });
+  private readonly predecessorValue = toSignal(
+    this.formGroup.controls.predecessorIds.valueChanges.pipe(startWith(this.formGroup.controls.predecessorIds.value)),
+    { initialValue: this.formGroup.controls.predecessorIds.value });
+
+  protected readonly predecessorOptions = computed<SelectOption[]>(() => {
+    const step = Number(this.stepNumberValue() ?? 0);
+    const currentId = this.data.operation?.id;
+    return (this.data.operations ?? [])
+      .filter(o => o.id !== currentId && o.stepNumber < step)
+      .sort((a, b) => a.stepNumber - b.stepNumber)
+      .map(o => ({ value: o.id, label: `Op ${o.stepNumber}: ${o.title}` }));
+  });
+  protected readonly completeGateOptions = computed<SelectOption[]>(() => {
+    const selected = new Set(this.predecessorValue());
+    return this.predecessorOptions().filter(o => selected.has(o.value as number));
+  });
+
+  private readonly keepDefaultPredecessors = this.formGroup.controls.stepNumber.valueChanges
+    .pipe(takeUntilDestroyed())
+    .subscribe(step => {
+      const control = this.formGroup.controls.predecessorIds;
+      if (control.dirty) return;
+      control.setValue(defaultPredecessorIds(this.data.operations ?? [], Number(step ?? 0), this.data.operation?.id));
+    });
 
   private readonly attendance = toSignal(
     this.formGroup.controls.laborAttendancePercent.valueChanges.pipe(startWith(this.formGroup.controls.laborAttendancePercent.value)),
@@ -258,6 +296,57 @@ export class OperationDialogComponent implements OnInit {
     });
   }
 
+  private initialPredecessorIds(): number[] {
+    const explicit = (this.data.operation?.predecessors ?? []).map(p => p.operationId);
+    if (explicit.length > 0) return explicit;
+    const step = this.data.operation?.stepNumber ?? this.data.nextStepNumber ?? 1;
+    return defaultPredecessorIds(this.data.operations ?? [], step, this.data.operation?.id);
+  }
+
+  private predecessorPayload(stepNumber: number): OperationPredecessorRequest[] | undefined {
+    const allowed = new Set(this.predecessorOptions().map(o => o.value as number));
+    const selected = this.formGroup.controls.predecessorIds.value.filter(id => allowed.has(id));
+    const complete = new Set(this.formGroup.controls.completeGateIds.value);
+    const defaults = defaultPredecessorIds(this.data.operations ?? [], stepNumber, this.data.operation?.id);
+    const isDefault = selected.length === 0 || (selected.every(id => !complete.has(id))
+      && selected.length === defaults.length && defaults.every(id => selected.includes(id)));
+    if (isDefault) return this.hadExplicitPredecessors ? [] : undefined;
+    return selected.map((id): OperationPredecessorRequest => ({ operationId: id, gate: complete.has(id) ? 'Complete' : 'Quantity' }));
+  }
+
+  private submitUpdate(request: UpdateOperationRequest): void {
+    this.partsService.updateOperation(this.data.partId, this.data.operation!.id, request, true).subscribe({
+      next: (result) => {
+        this.saving.set(false);
+        this.dialogRef.clearDraft();
+        this.matDialogRef.close(result);
+      },
+      error: (err: unknown) => {
+        const conflicts = predecessorConflictsOf(err);
+        if (!conflicts) {
+          this.saving.set(false);
+          this.snackbar.errorFrom(err, 'parts.operationSaveFailed');
+          return;
+        }
+        this.matDialog.open(ConfirmDialogComponent, {
+          width: '440px',
+          data: {
+            title: this.translate.instant('parts.predecessorConflictTitle'),
+            message: this.translate.instant('parts.predecessorConflictMessage', { links: describeConflicts(conflicts) }),
+            confirmLabel: this.translate.instant('parts.predecessorConflictConfirm'),
+            severity: 'warn',
+          } satisfies ConfirmDialogData,
+        }).afterClosed().subscribe(confirmed => {
+          if (confirmed) {
+            this.submitUpdate({ ...request, removeConflictingPredecessors: true });
+            return;
+          }
+          this.saving.set(false);
+        });
+      },
+    });
+  }
+
   protected save(): void {
     if (this.formGroup.invalid) return;
     this.saving.set(true);
@@ -277,8 +366,9 @@ export class OperationDialogComponent implements OnInit {
     const subVendorId = isSubcontract ? (raw.subcontractVendorId ?? undefined) : null;
     const subTurnTime = isSubcontract ? (raw.subcontractTurnTimeDays ?? undefined) : null;
 
+    const predecessors = this.predecessorPayload(raw.stepNumber ?? 1);
     if (this.data.operation) {
-      this.partsService.updateOperation(this.data.partId, this.data.operation.id, {
+      this.submitUpdate({
         stepNumber: raw.stepNumber ?? undefined,
         title: raw.title ?? undefined,
         instructions: raw.instructions || undefined,
@@ -294,13 +384,8 @@ export class OperationDialogComponent implements OnInit {
         isSubcontract,
         subcontractVendorId: subVendorId as number | null | undefined,
         subcontractTurnTimeDays: subTurnTime as number | null | undefined,
-      }).subscribe({
-        next: (result) => {
-          this.saving.set(false);
-          this.dialogRef.clearDraft();
-          this.matDialogRef.close(result);
-        },
-        error: () => this.saving.set(false),
+        cycleCountdown: raw.cycleCountdown,
+        ...(predecessors !== undefined ? { predecessors } : {}),
       });
     } else {
       this.partsService.createOperation(this.data.partId, {
@@ -319,6 +404,8 @@ export class OperationDialogComponent implements OnInit {
         isSubcontract,
         subcontractVendorId: isSubcontract ? (raw.subcontractVendorId ?? undefined) : undefined,
         subcontractTurnTimeDays: isSubcontract ? (raw.subcontractTurnTimeDays ?? undefined) : undefined,
+        cycleCountdown: raw.cycleCountdown,
+        ...(predecessors !== undefined ? { predecessors } : {}),
       }).subscribe({
         next: (result) => {
           this.saving.set(false);

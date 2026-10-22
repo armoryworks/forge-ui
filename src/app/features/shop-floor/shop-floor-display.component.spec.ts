@@ -254,6 +254,10 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     identifyScan: vi.fn(() => of({})),
     getConfig: vi.fn(() => of({ operationTracking: false })),
     stopOperationTimer: vi.fn((_jobId: number, _operationId: number, _request?: unknown) => of({ stopped: true, entry: null })),
+    getOperations: vi.fn(() => of({
+      jobId: 41, jobQuantity: 40, operations: [{ operationId: 401, completedQuantity: 10, scrapQuantity: 1, version: 3 }],
+    })),
+    updateOperationProgress: vi.fn((_jobId: number, _operationId: number, _request: unknown) => of({ operation: {}, allOperationsComplete: false })),
   };
   const events = { getUpcomingEvents: vi.fn(() => of([])) };
   const clockTypes = {
@@ -1257,6 +1261,17 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
 
       expect(shopFloor.clockInOut).not.toHaveBeenCalled();
       expect(shopFloor.stopOperationTimer).not.toHaveBeenCalled();
+    });
+
+    it('a finished cycle on the running strip records its pieces on that step', () => {
+      const { c } = tracked();
+      const worker = { ...makeWorker('ProductionWorker'), runningTimers: [{ ...running(1, 41, 401, 2), cycleMinutes: 2 }] };
+      c.selectedWorker.set(worker);
+
+      (c as unknown as { chipCycles: (e: unknown) => void }).chipCycles({ timer: c.selectedWorkerTimers()[0], cycles: 3 });
+
+      expect(shopFloor.updateOperationProgress).toHaveBeenCalledWith(41, 401,
+        { completedQuantity: 13, scrapQuantity: 1, expectedVersion: 3 });
     });
 
     it('clocking out with nothing running goes straight to the punch', () => {

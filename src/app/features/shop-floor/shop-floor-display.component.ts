@@ -50,6 +50,7 @@ import { KioskRunningTimersComponent } from './components/kiosk-running-timers/k
 import { ClockOutSheetDialogComponent } from './components/clock-out-sheet/clock-out-sheet-dialog.component';
 import { KioskStepActionsService } from './services/kiosk-step-actions.service';
 import { RunningTimer } from './models/running-timer.model';
+import { RunningTimerCycles } from './models/running-timer-cycles.model';
 import { KioskRunningTimer } from './models/kiosk-running-timer.model';
 import { ClockOutSheetData } from './models/clock-out-sheet-data.model';
 import { ClockOutSheetLine } from './models/clock-out-sheet-line.model';
@@ -1078,7 +1079,11 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     this.runChip(timer, 'done');
   }
 
-  private runChip(timer: RunningTimer, kind: 'stop' | 'record' | 'done'): void {
+  protected chipCycles(event: RunningTimerCycles): void {
+    this.runChip(event.timer, 'cycles', event.cycles);
+  }
+
+  private runChip(timer: RunningTimer, kind: 'stop' | 'record' | 'done' | 'cycles', cycles = 0): void {
     const worker = this.selectedWorker();
     if (!worker || this.processing()) return;
     this.resetAutoLogoutTimer();
@@ -1090,6 +1095,13 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
       : this.stepActions.loadStep(jobId, operationId).pipe(
         switchMap(step => {
           if (!step) return of(null);
+          if (kind === 'cycles') {
+            return this.shopFloorService.updateOperationProgress(jobId, operationId, {
+              completedQuantity: step.row.completedQuantity + cycles,
+              scrapQuantity: step.row.scrapQuantity,
+              expectedVersion: step.row.version,
+            });
+          }
           if (kind === 'record') return this.stepActions.recordPieces(jobId, step.row, step.context);
           return this.stepActions.stop(jobId, step.row, step.context, kind === 'done' ? 'Run' : timer.entryType);
         }));
@@ -1102,7 +1114,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
         if (result === null) return;
         this.loadData();
         this.showActionFeedback(worker.userId, true, this.translate.instant(
-          kind === 'record' ? 'shopFloor.display.piecesRecorded' : 'shopFloor.timerStoppedOn',
+          kind === 'record' || kind === 'cycles' ? 'shopFloor.display.piecesRecorded' : 'shopFloor.timerStoppedOn',
           { jobNumber: timer.jobNumber ?? '' }));
       },
       error: (err: HttpErrorResponse) => {
@@ -1760,5 +1772,6 @@ function toRunningTimer(timer: KioskRunningTimer, userId: number): RunningTimer 
     operationStepNumber: timer.stepNumber,
     operationTitle: timer.operationTitle,
     entryType: timer.entryType,
+    cycleMinutes: timer.cycleMinutes ?? null,
   };
 }

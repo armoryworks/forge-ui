@@ -20,6 +20,10 @@
       }
     </div>
     <div class="routing__header-actions">
+      <div class="routing__gating">
+        <app-select data-testid="routing-step-gating" [label]="'parts.stepGating' | translate"
+                    [formControl]="gatingControl" [options]="gatingOptions" />
+      </div>
       <div class="view-toggle" role="group" [attr.aria-label]="'parts.viewModeLabel' | translate">
         <button class="icon-btn" [class.icon-btn--active]="routingViewMode() === 'list'"
                 (click)="routingViewMode.set('list')"
@@ -81,6 +85,18 @@
                   <span class="operation-card__tag">
                     <span class="material-icons-outlined">schedule</span>
                     {{ operation.estimatedMs | durationMs }}
+                  </span>
+                }
+                @if (followsByOperation().get(operation.id); as follows) {
+                  <span class="operation-card__tag" data-testid="op-follows-meta">
+                    <span class="material-icons-outlined">call_merge</span>
+                    {{ 'parts.followsTag' | translate: { steps: follows } }}
+                  </span>
+                }
+                @if (operation.cycleCountdown) {
+                  <span class="operation-card__tag" data-testid="op-cycle-countdown-meta">
+                    <span class="material-icons-outlined">autorenew</span>
+                    {{ 'parts.cycleCountdown' | translate }}
                   </span>
                 }
                 @if (operation.scrapFactor > 0) {

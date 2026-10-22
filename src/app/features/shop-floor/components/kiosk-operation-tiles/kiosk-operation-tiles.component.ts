@@ -4,6 +4,7 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { StepGatingMode } from '../../../../shared/models/step-gating-mode.type';
 import { DurationMsPipe } from '../../../../shared/pipes/duration-ms.pipe';
 import { JobOperationRow } from '../../models/job-operation-row.model';
 
@@ -17,6 +18,8 @@ interface OperationTile {
   suggested: boolean;
   focused: boolean;
   mineEntryType: string | null;
+  available: number | null;
+  waitingOn: string | null;
 }
 
 @Component({
@@ -39,6 +42,7 @@ export class KioskOperationTilesComponent {
   readonly busy = input(false);
   readonly suggestedOperationId = input<number | null>(null);
   readonly focusOperationId = input<number | null>(null);
+  readonly gating = input<StepGatingMode>('Off');
 
   readonly start = output<JobOperationRow>();
   readonly startSetup = output<JobOperationRow>();
@@ -47,12 +51,14 @@ export class KioskOperationTilesComponent {
   readonly addQuantity = output<JobOperationRow>();
 
   protected readonly showDone = signal(false);
+  protected readonly blocking = computed(() => this.gating() === 'Block');
 
   protected readonly tiles = computed<OperationTile[]>(() => {
     const me = this.currentUserId();
     const now = this.now();
     const suggested = this.suggestedOperationId();
     const focused = this.focusOperationId();
+    const gated = this.gating() !== 'Off';
     return this.operations()
       .filter(row => row.isRoutingStep && row.operationId != null)
       .map(row => {
@@ -69,6 +75,8 @@ export class KioskOperationTilesComponent {
           suggested: row.operationId === suggested,
           focused: row.operationId === focused,
           mineEntryType: mine?.entryType ?? null,
+          available: gated ? row.available ?? null : null,
+          waitingOn: gated && (row.waitingOnSteps?.length ?? 0) > 0 ? row.waitingOnSteps!.join(', ') : null,
         };
       });
   });

@@ -61,6 +61,7 @@ export class LaborReconciliationComponent implements OnInit {
     { field: 'manualMinutes', header: this.translate.instant('laborReconciliation.columns.manual'), sortable: true, align: 'right' },
     { field: 'overlappingTimerMinutes', header: this.translate.instant('laborReconciliation.columns.overlap'), sortable: true, align: 'right' },
     { field: 'longTimers', header: this.translate.instant('laborReconciliation.columns.longTimers'), sortable: true, align: 'right' },
+    { field: 'staleTimers', header: this.translate.instant('laborReconciliation.columns.staleTimers'), sortable: true, align: 'right' },
   ];
 
   protected readonly jobColumns: ColumnDef[] = [

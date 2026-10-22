@@ -9,4 +9,5 @@ export interface KioskRunningTimer {
   entryType: string;
   timerStart: string;
   attendancePercent: number;
+  cycleMinutes?: number | null;
 }

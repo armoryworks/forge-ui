@@ -7,4 +7,6 @@ export interface OperationQuantityDialogResult {
   addedQuantity: number;
   addedScrap: number;
   skipped?: boolean;
+  acknowledgeGate?: boolean;
+  overrideReason?: string | null;
 }

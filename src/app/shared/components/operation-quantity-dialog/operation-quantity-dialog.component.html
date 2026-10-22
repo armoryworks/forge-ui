@@ -48,6 +48,32 @@
           planned: (data.plannedQuantity | number:'1.0-4') } }}
       </p>
     }
+    @if (gate && gateShown()) {
+      <div class="op-qty__gate" [class.op-qty__gate--block]="gate.mode === 'Block'" role="alert" data-testid="operation-qty-gate">
+        <span class="material-icons-outlined op-qty__gate-icon" aria-hidden="true">{{ gate.mode === 'Block' ? 'lock' : 'warning' }}</span>
+        <div class="op-qty__gate-body">
+          @if (gateQuantityShown()) {
+            <p class="op-qty__gate-line" data-testid="operation-qty-gate-available">
+              {{ 'jobOperations.gate.available' | translate: { available: (gate.available | number:'1.0-4'), step: gate.availableFromStep } }}
+            </p>
+          }
+          @if (gateWaitingOn) {
+            <p class="op-qty__gate-line" data-testid="operation-qty-gate-waiting">{{ 'jobOperations.gate.waitingOn' | translate: { steps: gateWaitingOn } }}</p>
+          }
+          @if (gate.canOverride) {
+            <app-toggle data-testid="operation-qty-gate-ack" formControlName="gateAck"
+                        [label]="(gate.mode === 'Block' ? 'jobOperations.gate.override' : 'jobOperations.gate.acknowledge') | translate" />
+            @if (gateAckOn()) {
+              <app-input data-testid="operation-qty-gate-reason" formControlName="gateReason" [maxlength]="200"
+                         [required]="gate.mode === 'Block'"
+                         [label]="(gate.mode === 'Block' ? 'jobOperations.gate.reasonRequired' : 'jobOperations.gate.reasonOptional') | translate" />
+            }
+          } @else {
+            <p class="op-qty__gate-line" data-testid="operation-qty-gate-supervisor">{{ 'jobOperations.gate.askSupervisor' | translate }}</p>
+          }
+        </div>
+      </div>
+    }
     @if (touch) {
       <div class="op-qty__steps">
         @for (amount of steps; track amount) {
@@ -76,7 +102,7 @@
         {{ 'jobOperations.dialog.stop' | translate }}
       }
     </button>
-    <app-validation-button [violations]="violations">
+    <app-validation-button [violations]="doneViolations">
       <button type="button" class="action-btn action-btn--primary" [class.op-qty__btn--touch]="touch" data-testid="operation-qty-done"
               [disabled]="!canComplete()" (click)="complete()">
         @if (stopMode) {

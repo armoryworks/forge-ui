@@ -457,7 +457,8 @@
               [busy]="processing() !== null"
               (stop)="chipStop($event)"
               (recordPieces)="chipRecord($event)"
-              (stopDone)="chipDone($event)" />
+              (stopDone)="chipDone($event)"
+              (recordCycles)="chipCycles($event)" />
           }
 
           @if (operationTracking() && worker.assignments.length > 0) {

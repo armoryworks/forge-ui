@@ -9,4 +9,5 @@ export interface RunningTimer {
   operationStepNumber: number | null;
   operationTitle: string | null;
   entryType: string | null;
+  cycleMinutes?: number | null;
 }

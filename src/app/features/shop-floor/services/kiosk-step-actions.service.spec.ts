@@ -8,6 +8,7 @@ import { KioskStepActionsService } from './kiosk-step-actions.service';
 import { ShopFloorService } from './shop-floor.service';
 import { JobOperationRow } from '../models/job-operation-row.model';
 import { OperationQuantityDialogResult } from '../../../shared/models/operation-quantity-dialog-result.model';
+import { StepGateService } from '../../../shared/services/step-gate.service';
 
 function row(overrides: Partial<JobOperationRow> = {}): JobOperationRow {
   return {
@@ -31,6 +32,8 @@ describe('KioskStepActionsService', () => {
   const dialog = { open: vi.fn(() => ({ afterClosed: () => of(result) })) };
   let service: KioskStepActionsService;
   const context = { jobQuantity: 40, decimalPlaces: 0, reasons: [] };
+  const gate = { mode: 'Warn' as const, available: 8, availableFromStep: 1, waitingOnSteps: [], canOverride: true };
+  const stepGate = { gateFor: vi.fn((_row: unknown, mode: string | null | undefined) => mode === 'Warn' ? gate : null) };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -40,6 +43,7 @@ describe('KioskStepActionsService', () => {
         { provide: ShopFloorService, useValue: shopFloor },
         { provide: MatDialog, useValue: dialog },
         { provide: TranslateService, useValue: { instant: (k: string) => k } },
+        { provide: StepGateService, useValue: stepGate },
       ],
     });
     service = TestBed.inject(KioskStepActionsService);
@@ -48,7 +52,7 @@ describe('KioskStepActionsService', () => {
   it('loads one step with its job quantity, decimals and reasons', () => {
     let loaded: unknown;
     service.loadStep(41, 401).subscribe(step => loaded = step);
-    expect(loaded).toEqual({ row: row(), context: { jobQuantity: 40, decimalPlaces: 0, reasons: [{ code: 'chatter', label: 'Chatter' }] } });
+    expect(loaded).toEqual({ row: row(), context: { jobQuantity: 40, decimalPlaces: 0, reasons: [{ code: 'chatter', label: 'Chatter' }], gating: null } });
   });
 
   it('stopping a run timer sends only the pieces entered and a Done', () => {
@@ -71,5 +75,29 @@ describe('KioskStepActionsService', () => {
     service.recordPieces(41, row(), context).subscribe();
     expect(shopFloor.updateOperationProgress).toHaveBeenCalledWith(41, 401,
       { completedQuantity: 14, scrapQuantity: 1, status: null, expectedVersion: 3 });
+  });
+
+  it('shows the step gate in the dialog and passes an acknowledgement through on stop', () => {
+    result = {
+      completedQuantity: 19, scrapQuantity: 1, reworkQuantity: 0, reasonCode: null, complete: false, addedQuantity: 9, addedScrap: 0,
+      acknowledgeGate: true, overrideReason: 'saw count pending',
+    };
+    service.stop(41, row(), { ...context, gating: 'Warn' }, 'Run').subscribe();
+
+    const data = (dialog.open.mock.calls[0] as unknown[])[1] as { data: { gate: unknown } };
+    expect(data.data.gate).toEqual(gate);
+    expect(shopFloor.stopOperationTimer).toHaveBeenCalledWith(41, 401,
+      { goodQuantity: 9, acknowledgeGate: true, overrideReason: 'saw count pending' });
+  });
+
+  it('passes the acknowledgement on recorded pieces too', () => {
+    result = {
+      completedQuantity: 19, scrapQuantity: 1, reworkQuantity: 0, reasonCode: null, complete: false, addedQuantity: 9, addedScrap: 0,
+      acknowledgeGate: true, overrideReason: null,
+    };
+    service.recordPieces(41, row(), { ...context, gating: 'Warn' }).subscribe();
+
+    expect(shopFloor.updateOperationProgress).toHaveBeenCalledWith(41, 401,
+      { completedQuantity: 19, scrapQuantity: 1, status: null, expectedVersion: 3, acknowledgeGate: true, overrideReason: null });
   });
 });

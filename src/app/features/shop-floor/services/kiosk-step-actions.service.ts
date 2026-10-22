@@ -6,6 +6,7 @@ import { forkJoin, map, Observable, of, switchMap } from 'rxjs';
 import { OperationQuantityDialogComponent } from '../../../shared/components/operation-quantity-dialog/operation-quantity-dialog.component';
 import { OperationQuantityDialogData } from '../../../shared/models/operation-quantity-dialog-data.model';
 import { OperationQuantityDialogResult } from '../../../shared/models/operation-quantity-dialog-result.model';
+import { StepGateService } from '../../../shared/services/step-gate.service';
 import { ShopFloorService } from './shop-floor.service';
 import { JobOperationRow } from '../models/job-operation-row.model';
 import { JobOperationProgressResult } from '../models/job-operation-progress-result.model';
@@ -18,6 +19,7 @@ export class KioskStepActionsService {
   private readonly shopFloor = inject(ShopFloorService);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
+  private readonly stepGate = inject(StepGateService);
 
   loadStep(jobId: number, operationId: number): Observable<{ row: JobOperationRow; context: KioskStepContext } | null> {
     return forkJoin([this.shopFloor.getOperations(jobId), this.shopFloor.getConfig()]).pipe(
@@ -29,6 +31,7 @@ export class KioskStepActionsService {
             jobQuantity: ops.jobQuantity,
             decimalPlaces: ops.quantityDecimalPlaces ?? null,
             reasons: config.reasons ?? [],
+            gating: ops.stepGating ?? null,
           },
         } : null;
       }),
@@ -57,6 +60,7 @@ export class KioskStepActionsService {
           expectedVersion: row.version,
           ...(result.reworkQuantity > 0 ? { reworkQuantity: result.reworkQuantity } : {}),
           ...(result.reasonCode ? { reasonCode: result.reasonCode } : {}),
+          ...gateAcknowledgement(result),
         })
         : of(null)),
     );
@@ -77,6 +81,7 @@ export class KioskStepActionsService {
           decimalPlaces: context.decimalPlaces,
           mode,
           plannedQuantity: row.plannedQuantity ?? null,
+          gate: this.stepGate.gateFor(row, context.gating),
         },
       }).afterClosed();
   }
@@ -89,5 +94,10 @@ function toStopRequest(result: OperationQuantityDialogResult): StopOperationTime
     ...(result.addedScrap > 0 ? { scrapQuantity: result.addedScrap } : {}),
     ...(result.complete ? { markComplete: true } : {}),
     ...(result.reasonCode ? { reasonCode: result.reasonCode } : {}),
+    ...gateAcknowledgement(result),
   };
+}
+
+function gateAcknowledgement(result: OperationQuantityDialogResult): { acknowledgeGate?: boolean; overrideReason?: string | null } {
+  return result.acknowledgeGate ? { acknowledgeGate: true, overrideReason: result.overrideReason ?? null } : {};
 }

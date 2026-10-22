@@ -58,6 +58,19 @@
           <span class="op-tile__others">{{ 'shopFloor.operations.othersRunning' | translate: { names: tile.othersInitials } }}</span>
         }
       </div>
+      @if (!tile.closed && (tile.available !== null || tile.waitingOn)) {
+        <div class="op-tile__gate" [class.op-tile__gate--block]="blocking()" [attr.data-testid]="'kiosk-op-gate-' + tile.row.stepNumber">
+          @if (blocking()) {
+            <span class="material-icons-outlined op-tile__gate-icon" [attr.aria-label]="'shopFloor.operations.gateBlocked' | translate">lock</span>
+          }
+          @if (tile.available !== null) {
+            <span>{{ 'shopFloor.operations.available' | translate: { available: tile.available, step: tile.row.availableFromStep } }}</span>
+          }
+          @if (tile.waitingOn) {
+            <span>{{ 'shopFloor.operations.waitingOn' | translate: { steps: tile.waitingOn } }}</span>
+          }
+        </div>
+      }
       @if (!tile.closed) {
         <div class="op-tile__actions">
           @if (tile.mineRunning) {

@@ -1776,7 +1776,29 @@
     "clearFilters": "Borrar filtros",
     "laborAttendance": "Asistencia del operador",
     "laborAttendanceHint": "Cuánto del paso necesita al operador: 100 = operador ocupado todo el tiempo; 20 = solo cargar, descargar y medir. Reparte el tiempo fichado de una persona cuando lleva varios temporizadores a la vez.",
-    "laborAttendanceMachineHint": "Una máquina hace parte de este paso. Ponga la base de carga de su centro de trabajo en Máquina para que la máquina siga cargando su ciclo completo."
+    "laborAttendanceMachineHint": "Una máquina hace parte de este paso. Ponga la base de carga de su centro de trabajo en Máquina para que la máquina siga cargando su ciclo completo.",
+    "mustFollow": "Debe seguir a",
+    "mustFollowDefault": "Paso anterior",
+    "mustFollowHint": "Déjelo vacío para seguir al paso anterior. Los pasos que siguen al mismo paso se hacen en paralelo.",
+    "waitUntilDone": "Esperar a que termine",
+    "cycleCountdown": "Cuenta regresiva del ciclo",
+    "cycleCountdownHint": "En el quiosco, un temporizador de producción en este paso cuenta cada ciclo (el tiempo por pieza) y ofrece registrar las piezas al terminar cada ciclo.",
+    "operationSaveFailed": "No se pudo guardar la operación.",
+    "predecessorConflictTitle": "¿Quitar vínculos entre pasos?",
+    "predecessorConflictMessage": "Este orden de pasos rompe estos vínculos: {{links}}. ¿Quitarlos y guardar?",
+    "predecessorConflictConfirm": "Quitar vínculos",
+    "followsDone": "Op {{step}} (terminada)",
+    "followsTag": "Después de la Op {{steps}}",
+    "waitsForTag": "Espera a que termine la Op {{steps}}",
+    "stepGating": "Control de pasos",
+    "stepGatingDefault": "Configuración del taller",
+    "stepGatingModes": {
+      "Off": "Desactivado",
+      "Warn": "Advertir",
+      "Block": "Bloquear"
+    },
+    "stepGatingSaved": "Control de pasos guardado",
+    "stepGatingSaveFailed": "No se pudo guardar el control de pasos."
   },
   "partsCatalog": {
     "duplicateRow": "Duplicar {{partNumber}}"
@@ -8680,7 +8702,13 @@
       "stopAndDone": "Detener + Terminado",
       "suggested": "Sugerido",
       "doneCount": "Terminados ({{count}})",
-      "attendance": "Operador {{percent}} %"
+      "attendance": "Operador {{percent}} %",
+      "available": "Disponibles: {{available}} de la Op {{step}}",
+      "waitingOn": "Espera a la Op {{steps}}",
+      "gateBlocked": "Bloqueado por el control de pasos",
+      "cycleCountdown": "Tiempo restante del ciclo",
+      "recordCycles": "+{{count}}",
+      "recordCyclesAria": "Registrar {{count}} piezas de los ciclos terminados en {{jobNumber}}"
     },
     "returnFlow": {
       "title": "Devolver Artículos",
@@ -13422,7 +13450,18 @@
       "saveFailed": "El avance de {{operation}} no se guardó. Revise la conexión e inténtelo de nuevo."
     },
     "printStepLabels": "Imprimir códigos de pasos",
-    "stepLabel": "Op {{step}} · {{title}}"
+    "stepLabel": "Op {{step}} · {{title}}",
+    "gate": {
+      "available": "Solo hay {{available}} disponibles de la Op {{step}}.",
+      "availableHint": "Disponibles: {{available}} de la Op {{step}}",
+      "waitingOn": "Primero hay que terminar la Op {{steps}}.",
+      "acknowledge": "Registrar de todos modos",
+      "override": "Anular el control de pasos",
+      "reasonRequired": "Motivo (obligatorio)",
+      "reasonOptional": "Motivo (opcional)",
+      "askSupervisor": "Un gerente o gerente de producción puede anular esto.",
+      "confirmFirst": "Primero confirme el control de pasos."
+    }
   },
   "detailLoadError": {
     "notFound": "Registro no encontrado",
@@ -14002,7 +14041,8 @@
       "unallocated": "Sin asignar h",
       "manual": "Manual h",
       "overlap": "Solapado h",
-      "longTimers": "Temporizadores 10 h+"
+      "longTimers": "Temporizadores 10 h+",
+      "staleTimers": "Olvidados"
     },
     "recompute": {
       "title": "Recalcular mano de obra",

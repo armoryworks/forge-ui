@@ -8,6 +8,7 @@ import { ReceivingInspectionFrequency } from './receiving-inspection-frequency.t
 import { TraceabilityType } from './traceability-type.type';
 import { BOMLine } from './bom-line.model';
 import { BOMUsage } from './bom-usage.model';
+import { StepGatingMode } from '../../../shared/models/step-gating-mode.type';
 
 export interface PartDetail {
   id: number;
@@ -70,6 +71,7 @@ export interface PartDetail {
   hazmatClass: string | null;
   shelfLifeDays: number | null;
   backflushPolicy: BackflushPolicy | null;
+  stepGating?: StepGatingMode | null;
   isKit: boolean;
   isConfigurable: boolean;
   defaultBinId: number | null;

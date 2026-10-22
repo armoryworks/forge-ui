@@ -1,3 +1,5 @@
+import { OperationPredecessorRequest } from './operation-predecessor-request.model';
+
 export interface CreateOperationRequest {
   stepNumber: number;
   title: string;
@@ -8,6 +10,8 @@ export interface CreateOperationRequest {
   runMinutesLot?: number;
   scrapFactor?: number;
   laborAttendancePercent?: number;
+  cycleCountdown?: boolean;
+  predecessors?: OperationPredecessorRequest[];
   isQcCheckpoint: boolean;
   qcCriteria?: string;
   referencedOperationId?: number;

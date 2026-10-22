@@ -10,4 +10,5 @@ export interface LaborReconciliationRow {
   overlappingTimerMinutes: number;
   longTimers: number;
   runningTimers: number;
+  staleTimers?: number;
 }

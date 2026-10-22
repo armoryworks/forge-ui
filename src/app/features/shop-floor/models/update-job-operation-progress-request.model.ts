@@ -7,4 +7,6 @@ export interface UpdateJobOperationProgressRequest {
   status?: JobOperationStatus | null;
   expectedVersion?: number | null;
   reasonCode?: string | null;
+  acknowledgeGate?: boolean;
+  overrideReason?: string | null;
 }

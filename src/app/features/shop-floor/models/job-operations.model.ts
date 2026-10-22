@@ -1,3 +1,4 @@
+import { StepGatingMode } from '../../../shared/models/step-gating-mode.type';
 import { JobOperationRow } from './job-operation-row.model';
 
 export interface JobOperations {
@@ -10,4 +11,5 @@ export interface JobOperations {
   serverNow: string;
   operations: JobOperationRow[];
   quantityDecimalPlaces?: number | null;
+  stepGating?: StepGatingMode;
 }

@@ -128,6 +128,23 @@
   color: var(--text-muted);
 }
 
+.op-tile__gate {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $sp-sm;
+  color: var(--warning-text);
+  font-size: $font-size-md;
+}
+
+.op-tile__gate--block {
+  color: var(--error-text);
+}
+
+.op-tile__gate-icon {
+  font-size: $icon-size-sm;
+}
+
 .op-tile__actions {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
