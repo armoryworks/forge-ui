@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, LOCALE_ID, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DatePipe } from '@angular/common';
+import { DatePipe, formatNumber } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -42,6 +42,7 @@ export class SchedulesComponent {
   private readonly assetsService = inject(AssetsService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly locale = inject(LOCALE_ID);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -175,7 +176,7 @@ export class SchedulesComponent {
   protected intervalParts(schedule: MaintenanceSchedule): string[] {
     const parts = [this.translate.instant('maintenanceSchedules.everyDays', { count: schedule.intervalDays })];
     if (schedule.intervalHours) parts.push(this.translate.instant('maintenanceSchedules.everyHours', { count: schedule.intervalHours }));
-    if (schedule.intervalShots) parts.push(this.translate.instant('maintenanceSchedules.everyShots', { count: schedule.intervalShots.toLocaleString() }));
+    if (schedule.intervalShots) parts.push(this.translate.instant('maintenanceSchedules.everyShots', { count: formatNumber(schedule.intervalShots, this.locale) }));
     return parts;
   }
 }

@@ -53,6 +53,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/componen
 import { EnumLabelPipe } from '../../shared/pipes/enum-label.pipe';
 import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
 import { DateTimePipe } from '../../shared/pipes/date-time.pipe';
+import { LanguageService } from '../../shared/services/language.service';
 
 const FONT_SIZES = [12, 14, 16, 18, 20, 24, 28] as const;
 
@@ -112,6 +113,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private readonly eventsService = inject(EventsService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
+  private readonly language = inject(LanguageService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
@@ -1270,6 +1272,13 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     localStorage.setItem('sf-font-index', String(this.fontSizeIndex()));
   }
 
+  protected priorityLabel(priority: string | null | undefined): string {
+    if (!priority) return '';
+    const key = `priority.${priority.toLowerCase()}`;
+    const text = this.translate.instant(key);
+    return text === key ? priority : text;
+  }
+
   protected priorityClass(priority: string): string {
     switch (priority) {
       case 'Urgent': return 'priority--urgent';
@@ -1514,7 +1523,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   private updateClock(): void {
     this.clockDisplay.set(
-      new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      new Date().toLocaleTimeString(this.language.intlLocale(), { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
     );
     this.tick.update(t => t + 1);
   }

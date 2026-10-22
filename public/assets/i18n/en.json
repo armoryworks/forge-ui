@@ -144,7 +144,22 @@
       "planningTitle": "Planning cycle",
       "planningDesc": "default cycle length",
       "payPeriodTitle": "Pay period lock",
-      "payPeriodDesc": "stop changes to time entries up to a date"
+      "payPeriodDesc": "stop changes to time entries up to a date",
+      "area": "Area",
+      "browsePresets": "Browse Presets",
+      "consultantMode": "Consultant mode",
+      "countAfterFilter": "({{count}} after filter)",
+      "dismissOnboardingBanner": "Dismiss onboarding banner",
+      "enabled": "enabled",
+      "enabledOnly": "Enabled only",
+      "noCapabilitiesMatchTheCurrentFilter": "No capabilities match the current filter.",
+      "openDetailPage": "Open detail page",
+      "refreshCapabilities": "Refresh capabilities",
+      "runDiscovery": "Run Discovery",
+      "runDiscoveryToGetATailored": "Run discovery to get a tailored preset, browse curated presets, or skip and configure capabilities manually.",
+      "searchByNameCodeDescription": "Search by name, code, description",
+      "toggleConsultantMode": "Toggle consultant mode",
+      "welcomeLetSSetUpForge": "Welcome — let's set up forge for your business."
     },
     "systemSettings": {
       "defaultValue": "Default: {{value}}",
@@ -197,7 +212,8 @@
       "activeLabel": "integrations",
       "expiredAlert": "{{ count }} expired key — review before clients hit 401",
       "capabilityDisabled": "BI / integration API keys are disabled on this install.",
-      "cta": "View Connections"
+      "cta": "View Connections",
+      "roleBreakdown": "Role breakdown"
     },
     "compliance": {
       "title": "Compliance",
@@ -326,7 +342,17 @@
       "Name": "Name",
       "CompanyName": "Company name",
       "Notes": "Notes"
-    }
+    },
+    "about": {
+      "menu": "About",
+      "title": "About Armory Works Forge",
+      "logoAlt": "Forge — Manufacturing Operations Platform",
+      "build": "Your build",
+      "license": "License",
+      "stack": "Stack",
+      "description": "Open-source ERP and production management for small manufacturers. Integrates with QuickBooks Online for accounting sync."
+    },
+    "breadcrumb": "Breadcrumb"
   },
   "app": {
     "updateAvailable": "A new version is available.",
@@ -548,6 +574,25 @@
       "jobNumber": "Job #",
       "title": "Title",
       "overdue": "Overdue"
+    },
+    "widgets": {
+      "todaysTasks": "Today's Tasks",
+      "teamLoad": "Team Load",
+      "deadlines": "Deadlines",
+      "activity": "Activity",
+      "marginSummary": "Margin Summary",
+      "cycleProgress": "Cycle Progress",
+      "openOrders": "Open Orders",
+      "endOfDay": "End of Day",
+      "actionItems": "Action Items",
+      "inventorySnapshot": "Inventory Snapshot",
+      "viewBoard": "View board",
+      "timeTracking": "Time tracking",
+      "viewCalendar": "View calendar",
+      "planningCycles": "Planning cycles",
+      "allOrders": "All orders",
+      "viewInventory": "View inventory",
+      "viewAll": "View all"
     }
   },
   "boardFilters": {
@@ -1683,6 +1728,16 @@
       "total": "Standard cost",
       "rolled": "Standard cost recalculated",
       "rollFailed": "Could not recalculate the standard cost"
+    },
+    "messages": {
+      "updated": "Part updated"
+    },
+    "alternatesMessages": {
+      "added": "Alternate part added",
+      "approved": "Alternate approved",
+      "removed": "Alternate removed",
+      "removeTitle": "Remove Alternate",
+      "removeMessage": "Remove {{part}} as alternate?"
     }
   },
   "partsCatalog": {
@@ -1851,7 +1906,9 @@
       "empty": "No price tiers — add one to enable per-quantity pricing.",
       "option": "Purchase Unit",
       "perBase": "Per Base Unit",
-      "perBaseUnit": "Per base unit"
+      "perBaseUnit": "Per base unit",
+      "removed": "Price tier removed",
+      "removeConfirm": "Remove this price tier?"
     },
     "priceTierHistory": "Price tier history",
     "priceTierHistoryEmpty": "No tier history yet."
@@ -1941,7 +1998,8 @@
       },
       "defaultReason": {
         "count": "Physical count"
-      }
+      },
+      "inventoryViews": "Inventory views"
     },
     "title": "Inventory",
     "location": "Location",
@@ -1962,7 +2020,9 @@
       "stockOps": "Stock Ops",
       "cycleCounts": "Cycle Counts",
       "reservations": "Reservations",
-      "inspection": "Inspection"
+      "inspection": "Inspection",
+      "replenishment": "Replenishment",
+      "uom": "Units of Measure"
     },
     "subtitle": "Track stock levels, locations, and movements",
     "addLocation": "Add Location",
@@ -2134,6 +2194,77 @@
       "recordResult": "Record result",
       "recorded": "Inspection recorded",
       "waived": "Inspection waived"
+    },
+    "clearSearch": "Clear search",
+    "replenishment": {
+      "pendingTitle": "Pending Reorder Suggestions",
+      "noPending": "No pending reorder suggestions",
+      "allGood": "No pending reorder suggestions — inventory levels look good.",
+      "dismissFor": "Dismiss suggestion for {{part}}",
+      "dismissTitle": "Dismiss Reorder Suggestion",
+      "dismissingFor": "Dismissing the suggestion for",
+      "dismissReasonHint": "Please provide a reason so it can be reviewed later."
+    },
+    "burnRates": {
+      "title": "Burn Rate Analysis",
+      "searchParts": "Search parts",
+      "needsReorder": "Needs Reorder",
+      "needsReorderTooltip": "Show only parts that need reordering",
+      "refresh": "Refresh burn rates",
+      "empty": "No burn rate data — start receiving and picking parts to build history",
+      "daysShort": "{{count}}d",
+      "ok": "OK",
+      "per30": "30d / day",
+      "per60": "60d / day",
+      "per90": "90d / day",
+      "daysLeft": "Days Left",
+      "stockout": "Stockout",
+      "reorder": "Reorder",
+      "burnPerDay": "Burn/Day",
+      "suggestQty": "Suggest Qty"
+    },
+    "uom": {
+      "conversions": "Conversions",
+      "newUom": "New UOM",
+      "emptyUoms": "No units of measure configured",
+      "baseUnit": "Base unit",
+      "editUom": "Edit UOM",
+      "newConversion": "New Conversion",
+      "emptyConversions": "No conversions configured",
+      "reversible": "Reversible",
+      "editTitle": "Edit Unit of Measure",
+      "newTitle": "New Unit of Measure",
+      "code": "Code",
+      "codePlaceholder": "e.g. EA, FT, LB",
+      "namePlaceholder": "e.g. Each, Foot, Pound",
+      "symbol": "Symbol",
+      "symbolPlaceholder": "e.g. ft, lb, kg",
+      "decimalPlaces": "Decimal Places",
+      "decimals": "Decimals",
+      "sortOrder": "Sort Order",
+      "base": "Base",
+      "baseForCategory": "Base Unit for Category",
+      "update": "Update",
+      "fromUom": "From UOM",
+      "toUom": "To UOM",
+      "conversionFactor": "Conversion Factor",
+      "factor": "Factor",
+      "factorPlaceholder": "e.g. 12 (1 ft = 12 in)",
+      "reversibleToggle": "Reversible (auto-creates inverse)",
+      "updated": "UOM updated",
+      "created": "UOM created",
+      "conversionCreated": "Conversion created",
+      "categories": {
+        "count": "Count",
+        "length": "Length",
+        "weight": "Weight",
+        "volume": "Volume",
+        "area": "Area",
+        "time": "Time"
+      }
+    },
+    "messages": {
+      "suggestionDismissed": "Suggestion dismissed"
     }
   },
   "contactFields": {
@@ -2672,7 +2803,11 @@
       "deleteMessage": "This will remove {{name}} from the customer's tax documents. The uploaded file remains in Documents.",
       "documentDeleted": "Tax document deleted"
     },
-    "colNumber": "Number"
+    "colNumber": "Number",
+    "creditMessages": {
+      "holdPlaced": "Credit hold placed",
+      "holdReleased": "Credit hold released"
+    }
   },
   "priceListEntry": {
     "partLabel": "Part",
@@ -2710,6 +2845,11 @@
       "fileTooLarge": "File exceeds 5MB limit.",
       "fileTypeNotAllowed": "Only .csv files are allowed.",
       "previewFailed": "Failed to read the CSV file."
+    },
+    "messages": {
+      "removed": "Price entry removed",
+      "updated": "Price entry updated",
+      "added": "Price entry added"
     }
   },
   "priceList": {
@@ -3274,7 +3414,11 @@
     "colActive": "Active",
     "noVendor": "-- None (out of pocket / card) --",
     "vendorHint": "On approval, this expense becomes a vendor bill in Payables and is paid from there.",
-    "totalExcludingRejectedLabel": "Total (excluding rejected):"
+    "totalExcludingRejectedLabel": "Total (excluding rejected):",
+    "recurringMessages": {
+      "deleteTitle": "Delete Recurring Expense?",
+      "deleteMessage": "This will remove \"{{description}}\" from recurring expenses."
+    }
   },
   "timeTracking": {
     "title": "Time Tracking",
@@ -4009,7 +4153,19 @@
         "runDiscovery": "Run Discovery",
         "browsePresets": "Browse Presets",
         "dismiss": "Skip onboarding for now"
-      }
+      },
+      "backToCapabilities": "Back to capabilities",
+      "dependsOnCount": "Depends on ({{count}})",
+      "lastCount": "last {{count}}",
+      "loadingCapability": "Loading capability…",
+      "mutuallyExclusiveWithCount": "Mutually exclusive with ({{count}})",
+      "noAuditEntriesYet": "No audit entries yet.",
+      "noDependencies": "No dependencies",
+      "noDependentsSafeToDisable": "No dependents — safe to disable",
+      "recentActivity": "Recent activity",
+      "relationships": "Relationships",
+      "requiredByCount": "Required by ({{count}})",
+      "requiresRolesRequiresroles": "Requires roles: {{requiresRoles}}"
     },
     "glOpening": {
       "title": "Full general ledger needs an opening journal first",
@@ -4044,7 +4200,16 @@
       "on": "On",
       "off": "Off",
       "stateEnabled": "Enabled",
-      "stateDisabled": "Disabled"
+      "stateDisabled": "Disabled",
+      "area": "Area",
+      "capabilities": "Capabilities",
+      "capabilitiesPhase4PhaseADiagnostic": "Capabilities (Phase 4 Phase-A diagnostic)",
+      "code": "Code",
+      "descriptorNotLoaded": "Descriptor not loaded.",
+      "noCapabilitiesLoaded": "No capabilities loaded.",
+      "readOnlyDescriptorViewMutationLands": "Read-only descriptor view. Mutation lands in Phase C; the full admin UI lands in Phase E.",
+      "refreshCapabilityDescriptor": "Refresh capability descriptor",
+      "roles": "Roles"
     },
     "presetCompare": {
       "title": "Compare Presets",
@@ -4059,7 +4224,162 @@
       "default": "Default",
       "needIds": "Compare needs 2 to 4 presets",
       "noChanges": "{{name}}: no changes — already matches.",
+      "applied": "Applied {{name}} ({{count}} capabilities changed).",
+      "pickThisOne": "Pick this one",
+      "presets": "Presets"
+    },
+    "allRequiredItemsComplete": "All required items complete",
+    "announcementsPanel": {
+      "acknowledgmentRequired": "Acknowledgment required",
+      "announcements": "Announcements",
+      "content": "Content",
+      "createTemplate": "Create Template",
+      "defaultScope": "Default Scope",
+      "defaultSeverity": "Default Severity",
+      "deleteTemplate": "Delete template",
+      "newAnnouncement": "New Announcement",
+      "newTemplate": "New Template",
+      "noAcknowledgmentsYet": "No acknowledgments yet",
+      "noAnnouncementsSentYet": "No announcements sent yet",
+      "noTemplatesCreatedYet": "No templates created yet",
+      "requireAcknowledgmentByDefault": "Require Acknowledgment by Default",
+      "templates": "Templates",
+      "viewAcknowledgments": "View acknowledgments"
+    },
+    "downloadRfidRelaySetupScript": "Download RFID relay setup script",
+    "integrationOutboxPanel": {
+      "attempts": "Attempts",
+      "discard": "Discard",
+      "discardDeadLetter": "Discard (dead-letter)",
+      "entity": "Entity",
+      "lastAttempt": "Last attempt",
+      "lastError": "Last error",
+      "noOutboxEntries": "No outbox entries",
+      "provider": "Provider",
+      "retry": "Retry",
+      "retryNow": "Retry now",
+      "sentAt": "Sent at",
+      "messages": {
+        "queued": "Queued for retry",
+        "discarded": "Entry discarded",
+        "retryTitle": "Retry outbox entry?",
+        "retryMessage": "Re-queue {{provider}} entry \"{{key}}\" for immediate dispatch?",
+        "discardTitle": "Discard outbox entry?",
+        "discardMessage": "Mark {{provider}} entry \"{{key}}\" as dead-lettered. It will not be retried automatically."
+      }
+    },
+    "lockEntriesThrough": "Lock entries through",
+    "lockPayPeriodThroughSelectedDate": "Lock pay period through selected date",
+    "none": "None",
+    "presetBrowser": {
+      "capabilities": "Capabilities",
+      "capabilities2": "capabilities",
+      "compare": "Compare",
+      "curatedCapabilityBundlesForCommonBusiness": "Curated capability bundles for common business profiles. Pick a preset to view its capabilities and apply it to this installation. Or build a Custom configuration starting from catalog defaults."
+    },
+    "presetCustom": {
+      "applyCustom": "Apply Custom",
+      "capabilities": "Capabilities",
+      "capabilitiesEnabled": "Capabilities enabled",
+      "constraintViolations": "Constraint violations",
+      "customConfiguration": "Custom Configuration",
+      "defaultOn": "Default on",
+      "presets": "Presets",
+      "resolveEachViolationBeforeApplyingToggle": "Resolve each violation before applying. Toggle the capability listed back to fix the issue.",
+      "willChangeIfApplied": "Will change if applied",
+      "resetToCurrent": "Reset to current settings",
+      "startFromCurrentSettings": "Starts from this installation's current settings. Toggle individual capabilities to hand-pick the exact set you want.",
+      "changed": "Changed"
+    },
+    "presetDetail": {
+      "allCapabilitiesEnabledinpresetInEnabledinpreset2Out": "All capabilities ({{enabledInPreset}} in / {{enabledInPreset2}} out)",
+      "capabilitiesEnabled": "Capabilities enabled",
+      "differFromCatalogDefaults": "Differ from catalog defaults",
+      "differencesVsCurrentInstall": "Differences vs current install",
+      "presets": "Presets",
+      "targetProfile": "Target profile:",
+      "theseCapabilitiesWillChangeIfYou": "These capabilities will change if you apply this preset right now.",
+      "willChangeIfApplied": "Will change if applied"
+    },
+    "roleTemplatesPanel": {
+      "createOneToBundleSeveralBase": "Create one to bundle several base roles into a single rollup.",
+      "custom": "Custom",
+      "deleteRoleTemplate": "Delete role template",
+      "editRoleTemplate": "Edit role template",
+      "includedRoles": "Included Roles",
+      "newTemplate": "New Template",
+      "noRoleTemplatesYet": "No role templates yet",
+      "pickAtLeastOneASystem": "Pick at least one. A System API key scoped to this bundle is granted every role listed above.",
+      "pickTheUnderlyingRolesThisTemplate": "Pick the underlying roles this template grants",
+      "roleBundlesRollupsGroupSeveralBase": "Role bundles (\"rollups\") group several base roles under one name — handy for scoping a System API key to a set of roles without listing each one. System defaults seed at install and are read-only; create your own to customize.",
+      "seededAtInstallReadOnlyDuplicate": "Seeded at install. Read-only — duplicate to customize.",
+      "system": "System",
+      "systemDefaultsAreReadOnly": "System defaults are read-only",
+      "templateName": "Template Name",
+      "messages": {
+        "systemNoEdit": "System-default templates cannot be edited. Create a new template to customize.",
+        "systemNoDelete": "System-default templates cannot be deleted.",
+        "deleted": "Template deleted.",
+        "created": "Template created.",
+        "updated": "Template updated.",
+        "deleteTitle": "Delete Role Bundle?",
+        "deleteMessage": "This will deactivate \"{{name}}\". Any System API keys scoped to this bundle will need to be re-scoped. The underlying roles are unaffected."
+      }
+    },
+    "trainingModuleDialog": {
+      "appRoutes": "App Routes",
+      "contentType": "Content Type",
+      "editTheContentJsonDirectlySee": "Edit the content JSON directly. See training docs for format by type.",
+      "estimatedMinutes": "Estimated Minutes",
+      "published": "Published",
+      "slug": "Slug",
+      "tags": "Tags"
+    },
+    "trainingPathDialog": {
+      "autoAssignToNewUsers": "Auto-assign to new users",
+      "icon": "Icon",
+      "slug": "Slug"
+    },
+    "walkthroughPreviewDialog": {
+      "addStep": "Add step",
+      "addStep2": "Add Step",
+      "align": "Align",
+      "cssSelector": "CSS Selector",
+      "deleteStep": "Delete step",
+      "eGAppPageHeaderAction": "e.g. app-page-header, .action-btn--primary",
+      "explainWhatThisStepCovers": "Explain what this step covers...",
+      "moveDown": "Move down",
+      "moveStepDown": "Move step down",
+      "moveStepUp": "Move step up",
+      "moveUp": "Move up",
+      "noStepsDefinedClickAddStep": "No steps defined. Click \"Add Step\" to create the first step.",
+      "nullCenterOverlay": "(null = center overlay)",
+      "saveSteps": "Save Steps",
+      "side": "Side",
+      "stepI": "Step {{i}}",
+      "stepTitle": "Step title"
+    },
+    "payPeriodLock": {
+      "lockedOne": "1 time entry locked.",
+      "lockedOther": "{{count}} time entries locked.",
+      "title": "Lock Pay Period?",
+      "message": "This will lock all unlocked time entries through {{date}}. Locked entries cannot be edited or deleted. This action cannot be undone.",
+      "confirm": "Lock Period"
+    },
+    "presetMessages": {
+      "customNoChanges": "Custom configuration: no changes — already matches.",
+      "customApplied": "Applied Custom configuration ({{count}} capabilities changed).",
+      "noChanges": "{{name}}: no changes — already matches.",
       "applied": "Applied {{name}} ({{count}} capabilities changed)."
+    },
+    "capabilityMessages": {
+      "enabled": "Capability enabled: {{name}}",
+      "disabled": "Capability disabled: {{name}}",
+      "updateFailed": "Failed to update {{name}}.",
+      "dependents": "Cannot disable {{name}} — disable these dependents first: {{list}}.",
+      "missing": "Cannot enable {{name}} — enable these dependencies first: {{list}}.",
+      "conflicts": "{{name}} conflicts with: {{list}}. Disable the peer first.",
+      "concurrency": "{{name}} was modified by another admin. The page has been refreshed; try again."
     }
   },
   "teamsPanel": {
@@ -4100,7 +4420,11 @@
     "removeTerminalTitle": "Remove Terminal?",
     "removeTerminalConfirm": "Remove terminal \"{{name}}\"? Any kiosk connected on this terminal will lose its session immediately.",
     "terminalRemoved": "Terminal removed",
-    "terminalRemoveFailed": "Failed to remove terminal"
+    "terminalRemoveFailed": "Failed to remove terminal",
+    "messages": {
+      "deleteTitle": "Delete Team?",
+      "deleteMessage": "This will delete \"{{name}}\" and unassign all its members. Active kiosk terminals must be removed first."
+    }
   },
   "onboarding": {
     "completeProfile": "Complete your employee profile",
@@ -4646,7 +4970,109 @@
     "formCompletedNoteFinal": "This form was completed successfully.",
     "formCompletedTitle": "{{name}} — Completed",
     "uploadedDocuments": "Uploaded Documents",
-    "noUploadedDocuments": "You have not uploaded any documents yet."
+    "noUploadedDocuments": "You have not uploaded any documents yet.",
+    "selectNotificationSound": "Select notification sound: {{name}}",
+    "draftRetention": {
+      "title": "Keep unsaved work for",
+      "hint": "When a form has unsaved changes, they are saved automatically. Choose how long to keep them before they expire.",
+      "oneDay": "1 day",
+      "threeDays": "3 days",
+      "oneWeek": "1 week",
+      "twoWeeks": "2 weeks"
+    },
+    "mfa": {
+      "title": "Two-Factor Authentication",
+      "statusPrefix": "Two-factor authentication is",
+      "statusEnabled": "enabled",
+      "statusNotEnabled": "not enabled",
+      "requiredByPolicy": "Required by organization policy",
+      "requiredMustEnable": "Required by organization policy — you must enable MFA",
+      "registeredDevices": "Registered Devices",
+      "lastUsed": "Last used: {{date}}",
+      "removeDeviceAria": "Remove {{name}}",
+      "recoveryCodesRemaining": "{{count}} recovery codes remaining",
+      "addDevice": "Add Device",
+      "addPasskey": "Add Passkey",
+      "newRecoveryCodes": "New Recovery Codes",
+      "disable": "Disable MFA",
+      "disableTitle": "Disable MFA?",
+      "disableMessage": "This will remove all MFA devices and recovery codes. Your account will be less secure.",
+      "disabled": "Two-factor authentication disabled",
+      "deviceRemoved": "Device removed",
+      "passkeyUnsupported": "This browser does not support passkeys.",
+      "passkeyAdded": "Passkey \"{{name}}\" added.",
+      "passkeyIncomplete": "Passkey registration was not completed.",
+      "hint": "Add an extra layer of security by requiring a verification code from an authenticator app when signing in.",
+      "enable": "Enable Two-Factor Authentication",
+      "loadFailed": "Unable to load MFA status.",
+      "setupTitle": "Set Up Two-Factor Authentication",
+      "preparing": "Preparing authenticator setup...",
+      "scanInstructions": "Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)",
+      "manualKeyToggle": "Can't scan? Enter key manually",
+      "copyKey": "Copy key",
+      "keyCopied": "Key copied to clipboard",
+      "enterCode": "Enter the 6-digit code from your app:",
+      "verificationCode": "Verification Code",
+      "invalidCode": "Invalid code. Please try again.",
+      "enabledTitle": "Two-Factor Authentication Enabled",
+      "enabledText": "Your account is now protected with two-factor authentication. You'll need your authenticator app each time you sign in.",
+      "verifying": "Verifying...",
+      "verifyAndEnable": "Verify & Enable",
+      "generateRecoveryCodesFromTheSecurity": "Generate recovery codes from the Security page in case you lose access to your authenticator.",
+      "recoveryCodesCopied": "Recovery codes copied to clipboard"
+    },
+    "accountLast4": "Account (last 4)",
+    "accountType": "Account Type",
+    "acknowledgedOnCompleteddate": "Acknowledged on {{completedDate}}.",
+    "additionalWithholding": "Additional Withholding",
+    "allowances": "Allowances",
+    "bank": "Bank",
+    "citizenshipStatus": "Citizenship Status",
+    "clickHereToFillOutYour": "Click here to fill out your tax withholding, employment eligibility, direct deposit, and policy acknowledgments in one guided workflow.",
+    "completeYourOnboarding": "Complete your onboarding",
+    "completedInOnboardingWizard": "Completed in onboarding wizard",
+    "complianceFormRenderer": {
+      "backToFormsList": "Back to forms list",
+      "employers": "Employers",
+      "formFormnumberRevRevisionAgency": "Form {{formNumber}} (Rev. {{revision}}) — {{agency}}",
+      "formPages": "Form pages",
+      "nextPage": "Next page",
+      "only": "Only",
+      "prev": "Prev",
+      "previousPage": "Previous page",
+      "saveDraft": "Save Draft",
+      "socialSecurityNumber": "Social security number",
+      "submitForm": "Submit Form",
+      "typeYourFullLegalName": "Type your full legal name"
+    },
+    "connectIntegrationDialog": {
+      "displayNameOptional": "Display Name (optional)",
+      "eGWorkCalendar": "e.g., Work Calendar"
+    },
+    "contactPayrollIfYouNeedTo": "Contact payroll if you need to update your direct deposit information.",
+    "documentsVerified": "Documents Verified",
+    "eGDh": "e.g. DH",
+    "exempt": "Exempt",
+    "filingStatus": "Filing Status",
+    "i9FormsCannotBeChanged": "I-9 forms cannot be changed after submission. Contact HR for corrections.",
+    "listA": "List A",
+    "listB": "List B",
+    "listC": "List C",
+    "mfaRecoveryCodesDialog": {
+      "copyAll": "Copy All",
+      "generatingRecoveryCodes": "Generating recovery codes...",
+      "iVeSavedTheseCodes": "I've Saved These Codes"
+    },
+    "multipleJobs": "Multiple Jobs",
+    "routingLast4": "Routing (last 4)",
+    "startOnboardingWizard": "Start onboarding wizard",
+    "toggleChatNotificationSound": "Toggle chat notification sound",
+    "toggleChatVibration": "Toggle chat vibration",
+    "toggleDesktopPreviewPopups": "Toggle desktop preview popups",
+    "update": "Update",
+    "youMayUpdateYourStateWithholding": "You may update your state withholding if your tax situation changes.",
+    "youMayUpdateYourW4": "You may update your W-4 at any time if your tax situation changes.",
+    "mfaRemoveDeviceTitle": "Remove Device?"
   },
   "errorFallbacksA": {
     "chartOfAccountsLoadFailed": "Failed to load chart of accounts",
@@ -4774,7 +5200,27 @@
       "gapSummary": "These capabilities are on but their integration is not configured. Configure each one, or turn the capability off.",
       "setupRequired": "Setup required"
     },
-    "lead": "Services <strong>Forge connects to</strong> — accounting, shipping carriers, and other external APIs."
+    "lead": "Services <strong>Forge connects to</strong> — accounting, shipping carriers, and other external APIs.",
+    "accountingShippingCarriersAndOtherExternal": "— accounting, shipping carriers, and other external APIs.",
+    "connectYourExternalAccountsForCalendar": "Connect your external accounts for calendar sync, notifications, and file storage.",
+    "disconnectIntegration": "Disconnect integration",
+    "forgeConnectsTo": "forge connects to",
+    "integrations": "Integrations",
+    "lastSyncLastsyncat": "Last sync: {{lastSyncAt}}",
+    "noProvidersAvailableForThisCategory": "No providers available for this category",
+    "quickbooksSandboxSetupGuide": "QuickBooks sandbox setup guide",
+    "sandboxSetupGuide": "Sandbox setup guide",
+    "services": "Services",
+    "testConnection": "Test connection",
+    "useStandaloneMode": "Use standalone mode",
+    "messages": {
+      "savedUnverified": "Credentials saved, but Forge cannot contact this provider to check them yet",
+      "testPassed": "Connection test passed",
+      "disconnected": "{{provider}} disconnected",
+      "disconnectTitle": "Disconnect Integration?",
+      "disconnectMessage": "This will disconnect {{provider}}. You can reconnect later."
+    },
+    "never": "Never"
   },
   "complianceTemplates": {
     "templates": "compliance templates",
@@ -4797,7 +5243,9 @@
     "extractDefinition": "Extract form definition",
     "extracting": "Extracting...",
     "extractionComplete": "Form definition extracted successfully",
-    "extractionFailed": "Form definition extraction failed"
+    "extractionFailed": "Form definition extraction failed",
+    "syncTemplate": "Sync template",
+    "viewStateWithholdingDetails": "View state withholding details"
   },
   "training": {
     "title": "Training Library",
@@ -4951,7 +5399,8 @@
     "acroFieldMapHint": "JSON object mapping dynamic form field IDs to PDF AcroForm field names. Example: {\"firstName\": \"topmostSubform[0].Page1[0].f1_01[0]\"}",
     "acroFieldMapPlaceholder": "{ \"fieldId\": \"AcroFormFieldName\", ... }",
     "saveAcroMap": "Save Map",
-    "acroMapSaved": "AcroField map saved"
+    "acroMapSaved": "AcroField map saved",
+    "acrofieldJsonMap": "AcroField JSON map"
   },
   "companyLocationDialog": {
     "editLocation": "Edit Location",
@@ -4967,7 +5416,11 @@
     "test": "Test",
     "settingsSaved": "settings saved",
     "connectionTestFailed": "Connection test failed",
-    "enterNewValue": "Enter new value to change"
+    "enterNewValue": "Enter new value to change",
+    "connect": "Connect",
+    "openNameDeveloperPortal": "Open {{name}} Developer Portal",
+    "sandboxTestEnvironmentSetup": "Sandbox / Test Environment Setup",
+    "restartRequired": "{{name}} mode change requires an API restart to take effect. Run: docker compose restart forge-api"
   },
   "stateWithholdingDialog": {
     "title": "State Tax Withholding Forms",
@@ -5063,7 +5516,13 @@
     "documentType": "Document Type",
     "taxYear": "Tax Year",
     "saveTaxDocument": "Save Tax Document",
-    "selectUserHint": "Select a user to view compliance details"
+    "selectUserHint": "Select a user to view compliance details",
+    "messages": {
+      "deletePayStubTitle": "Delete Pay Stub?",
+      "deletePayStubMessage": "This will remove the manually uploaded pay stub for {{date}}.",
+      "deleteTaxDocTitle": "Delete Tax Document?",
+      "deleteTaxDocMessage": "This will remove the manually uploaded {{type}} for {{year}}."
+    }
   },
   "compliance": {
     "title": "Compliance",
@@ -5279,7 +5738,85 @@
     },
     "offlineNotSaved": "You're offline. Changes can't be saved until you reconnect.",
     "exportCsvPage": "Export this page to CSV",
-    "exportExcelPage": "Export this page to Excel"
+    "exportExcelPage": "Export this page to Excel",
+    "announcementOverlay": {
+      "allCount": "All ({{count}})"
+    },
+    "demoModuleSwitcher": {
+      "demoModuleSwitcher": "Demo module switcher",
+      "demoModules": "Demo modules",
+      "fullSuite": "Full suite",
+      "inventoryOnly": "Inventory only",
+      "modulesSummary": "Modules: {{summary}}",
+      "preview": "preview",
+      "switchWhatSTurnedOnTo": "Switch what's turned on to show the modular build live."
+    },
+    "dirtyFormIndicator": {
+      "formHasUnsavedChanges": "Form has unsaved changes",
+      "unsavedChanges": "Unsaved changes"
+    },
+    "draftRecoveryBanner": {
+      "discard": "Discard",
+      "discardRecoveredDraft": "Discard recovered draft",
+      "recoveredUnsavedChangesFromTimestamp": "Recovered unsaved changes from {{timestamp}}."
+    },
+    "draftRecoveryPrompt": {
+      "discardAll": "Discard All",
+      "goTo": "Go to",
+      "goToDisplaylabel": "Go to {{displayLabel}}",
+      "keepAll": "Keep All",
+      "reviewLater": "Review Later"
+    },
+    "drillableChart": {
+      "backToPreviousLevel": "Back to previous level",
+      "navigateToCrumb": "Navigate to {{crumb}}"
+    },
+    "loadingOverlay": {
+      "loading": "Loading"
+    },
+    "logoutDraftsDialog": {
+      "goTo": "Go to",
+      "goToDisplaylabel": "Go to {{displayLabel}}",
+      "logoutAnyway": "Logout Anyway",
+      "unsavedWork": "Unsaved work",
+      "unsavedWork2": "Unsaved Work",
+      "youHaveUnsavedChangesTheyWill": "You have unsaved changes. They will be preserved for when you return."
+    },
+    "presetApplyDialog": {
+      "alreadyAtThisPreset": "Already at this preset.",
+      "applyIsBlockedUntilTheseAre": "Apply is blocked until these are resolved.",
+      "applyPresetname": "Apply {{presetName}}",
+      "closeApplyDialog": "Close apply dialog",
+      "constraintViolationsCount": "Constraint violations ({{count}})",
+      "noCapabilityChangesDetected": "No capability changes detected.",
+      "noDataWillBeDeletedDisabled": "No data will be deleted. Disabled capabilities keep their data — re-enabling restores them.",
+      "reasonOptional": "Reason (optional)",
+      "theCurrentInstallStateMatchesPresetname": "The current install state matches {{presetName}} — no capabilities will change.",
+      "thisWillChange": "This will change",
+      "toDisableCount": "To disable ({{count}})",
+      "toEnableCount": "To enable ({{count}})",
+      "whyAreYouApplyingThisPreset": "Why are you applying this preset? Captured in audit log."
+    },
+    "productionLabel": {
+      "printLabel": "Print label"
+    },
+    "richTextEditor": {
+      "mentionAUser": "Mention a user",
+      "richTextEditorWithMentionSupport": "Rich text editor with mention support"
+    },
+    "stlViewer": {
+      "loading3dModel": "Loading 3D model..."
+    },
+    "toast": {
+      "copy": "Copy"
+    },
+    "trainingContextPanel": {
+      "closeTrainingHelpPanel": "Close training help panel",
+      "estimatedminutesMin": "~{{estimatedMinutes}} min",
+      "helpForThisPage": "Help for this page",
+      "noTrainingModulesForThisPage": "No training modules for this page yet",
+      "trainingHelpForThisPage": "Training help for this page"
+    }
   },
   "address": {
     "street": "Street",
@@ -5323,7 +5860,24 @@
     "system": "System",
     "updatedFields": "Updated {{count}} fields",
     "fieldChange": "1 field change",
-    "fieldChanges": "{{count}} field changes"
+    "fieldChanges": "{{count}} field changes",
+    "activityFilter": "Activity filter",
+    "addAComment": "Add a comment...",
+    "addANote": "Add a note...",
+    "allActions": "All Actions",
+    "allUsers": "All Users",
+    "conversation": "Conversation",
+    "deleteNote": "Delete note",
+    "history": "History",
+    "noActivityYet": "No activity yet",
+    "noActivityYet2": "No activity yet.",
+    "noCommentsYet": "No comments yet.",
+    "noHistoryYet": "No history yet.",
+    "noNotesYet": "No notes yet.",
+    "note": "Note",
+    "postComment": "Post comment",
+    "saveNote": "Save note",
+    "saveNote2": "Save Note"
   },
   "statusTimeline": {
     "currentStatus": "Current Status",
@@ -5454,7 +6008,21 @@
     "invalidSetupLink": "Invalid setup link. Please contact your administrator.",
     "expiredSetupCode": "Invalid or expired setup code. Please contact your administrator.",
     "bundleJobShop": "Job shop: quote, make, ship, invoice",
-    "passwordChangedSignIn": "Password changed. Sign in with your new password."
+    "passwordChangedSignIn": "Password changed. Sign in with your new password.",
+    "mfa": {
+      "preparing": "Preparing verification...",
+      "codeSentTo": "Code sent to {{target}}",
+      "sixDigitCode": "6-digit code",
+      "rememberDevice": "Remember this device for 30 days",
+      "verify": "Verify",
+      "useRecoveryCode": "Use a recovery code instead",
+      "recoveryCode": "Recovery Code",
+      "verifyRecoveryCode": "Verify Recovery Code",
+      "useAuthenticator": "Use authenticator code instead",
+      "backToLogin": "Back to login",
+      "invalidCode": "Invalid verification code",
+      "invalidRecoveryCode": "Invalid recovery code"
+    }
   },
   "validation": {
     "required": "{field} is required",
@@ -5466,7 +6034,18 @@
     "invalidDate": "{{field}} must be a real date (MM/DD/YYYY)",
     "dateMin": "{{field}} must be on or after {{min}}",
     "dateMax": "{{field}} must be on or before {{max}}",
-    "dateRangeOrder": "{{start}} must be on or before {{end}}"
+    "dateRangeOrder": "{{start}} must be on or before {{end}}",
+    "messages": {
+      "required": "{{label}} is required",
+      "email": "{{label}} must be a valid email",
+      "minLength": "{{label}} must be at least {{count}} characters",
+      "maxLength": "{{label}} must be at most {{count}} characters",
+      "min": "{{label}} must be at least {{min}}",
+      "max": "{{label}} must be at most {{max}}",
+      "pattern": "{{label}} format is invalid",
+      "wholeNumber": "{{label}} must be a whole number",
+      "invalid": "{{label}} is invalid"
+    }
   },
   "invoices": {
     "invoiceNumberLabel": "Invoice Number",
@@ -5821,6 +6400,9 @@
         "hint": "Capture the essentials in one form. You can fill in address, terms, and supply items later from the vendor detail page.",
         "saveFailed": "Could not save the vendor."
       }
+    },
+    "messages": {
+      "removedFromCatalog": "Removed from catalog"
     }
   },
   "poCreate": {
@@ -5929,7 +6511,7 @@
     "editShippingTitle": "Edit Shipping & Currency",
     "shippingUpdated": "Shipping & currency updated.",
     "belowVendorMinimumLabel": "Below vendor minimum",
-    "belowVendorMinimumMessage": "PO total is below the vendor minimum order amount of ${{amount}}. The vendor may reject or surcharge this order.",
+    "belowVendorMinimumMessage": "PO total is below the vendor minimum order amount of {{amount}}. The vendor may reject or surcharge this order.",
     "actualFreight": "Actual Freight",
     "freightAllocationMethod": "Allocation",
     "variance": "Variance",
@@ -5979,13 +6561,21 @@
       "agreedPrice": "Agreed Price",
       "expires": "Expires",
       "createAsBlanket": "Blanket order",
-      "createHint": "The ordered quantities become the agreed total; the vendor ships against releases you create on the PO."
+      "createHint": "The ordered quantities become the agreed total; the vendor ships against releases you create on the PO.",
+      "releaseCreated": "Release created"
     },
     "linesReceived": "Lines Received",
     "linesReceivedOf": "{{received}} of {{total}}",
     "receiveQtyFor": "Receive quantity for {{line}}",
     "receiveTable": "Quantities to receive",
-    "receiveLotAutoAssigned": "Lot-tracked part: leave the lot blank and a lot number is assigned."
+    "receiveLotAutoAssigned": "Lot-tracked part: leave the lot blank and a lot number is assigned.",
+    "createRelease": "Create Release",
+    "lineItem": "Line Item",
+    "newRelease": "New Release",
+    "noReleasesYet": "No releases yet",
+    "purchaseOrderLineItems": "Purchase order line items",
+    "releasesCount": "Releases ({{count}})",
+    "requestedDeliveryDate": "Requested Delivery Date"
   },
   "poManage": {
     "packingSlipNumber": "Packing slip #",
@@ -6897,7 +7487,9 @@
       "qualityRejection": "Quality / Rejection Flow",
       "inventoryLocation": "Inventory Location Flow",
       "customerRevenue": "Customer Revenue Breakdown",
-      "trainingCompletion": "Training Completion"
+      "trainingCompletion": "Training Completion",
+      "noFlowData": "No flow data available",
+      "backToReports2": "Back to reports"
     },
     "colFailures": "Failures",
     "colDowntimeHours": "Downtime (h)",
@@ -6917,6 +7509,26 @@
       "scrapRate": "Scrap rate %",
       "completionRate": "Completion %",
       "margin": "Margin"
+    },
+    "chart": {
+      "jobs": "Jobs",
+      "hours": "Hours",
+      "leads": "Leads",
+      "created": "Created",
+      "completed": "Completed",
+      "avgDays": "Avg Days",
+      "active": "Active",
+      "overdue": "Overdue",
+      "quotes": "Quotes",
+      "revenue": "Revenue",
+      "stock": "Stock",
+      "scrapRatePct": "Scrap Rate %",
+      "completionPct": "Completion %",
+      "margin": "Margin",
+      "onTime": "On Time",
+      "late": "Late",
+      "allStages": "All Stages",
+      "allCategories": "All Categories"
     }
   },
   "qcInspections": {
@@ -7056,7 +7668,8 @@
       "recordedOoc": "Subgroup #{{number}} recorded. Out of control: {{rule}}"
     },
     "ooc": {
-      "capaCreatedNumber": "Created {{number}} from the out-of-control event"
+      "capaCreatedNumber": "Created {{number}} from the out-of-control event",
+      "capaCreated": "CAPA created from the out-of-control event"
     }
   },
   "quality": {
@@ -7098,7 +7711,109 @@
     "traceQty": "Qty: {{qty}}",
     "jobId": "Job ID",
     "ecoSubmitForReview": "Submit for Review",
-    "ecoSubmitted": "ECO submitted for review"
+    "ecoSubmitted": "ECO submitted for review",
+    "addAffectedItem": "Add Affected Item",
+    "addItem": "Add Item",
+    "affectedItemsCount": "Affected Items ({{count}})",
+    "approve": "Approve",
+    "approvedBy": "Approved By",
+    "capaList": {
+      "advanceCapaPhase": "Advance CAPA phase",
+      "createCapa": "Create CAPA",
+      "impactDescription": "Impact Description",
+      "noCorrectiveActionsFound": "No corrective actions found",
+      "ownerId": "Owner ID",
+      "problemDescription": "Problem Description",
+      "source": "Source"
+    },
+    "changeDescription": "Change Description",
+    "changeType": "Change Type",
+    "createEngineeringChangeOrder": "Create Engineering Change Order",
+    "effectiveDate": "Effective Date",
+    "entityId": "Entity ID",
+    "entityType": "Entity Type",
+    "gageList": {
+      "accuracy": "Accuracy",
+      "accuracySpec": "Accuracy Spec",
+      "asFoundCondition": "As Found Condition",
+      "asLeftCondition": "As Left Condition",
+      "asset": "Asset",
+      "calInterval": "Cal Interval",
+      "calibratedDate": "Calibrated Date",
+      "calibrationHistory": "Calibration History",
+      "calibrationIntervalDays": "Calibration Interval (Days)",
+      "gageType": "Gage Type",
+      "labName": "Lab Name",
+      "lastCalibrated": "Last Calibrated",
+      "location": "Location",
+      "manufacturer": "Manufacturer",
+      "model": "Model",
+      "newGage": "New Gage",
+      "nextCalDue": "Next Cal Due",
+      "noCalibrationRecordsYet": "No calibration records yet",
+      "noGagesFound": "No gages found",
+      "range": "Range",
+      "rangeSpec": "Range Spec",
+      "recordCalibration": "Record Calibration",
+      "resolution": "Resolution",
+      "result": "Result",
+      "searchGages": "Search gages...",
+      "serialNumber": "Serial Number",
+      "standardsUsed": "Standards Used"
+    },
+    "impactAnalysis": "Impact Analysis",
+    "implement": "Implement",
+    "implemented": "Implemented",
+    "newValueJson": "New Value (JSON)",
+    "noAffectedItems": "No affected items",
+    "noAffectedItemsAddedYet": "No affected items added yet.",
+    "noEngineeringChangeOrdersFound": "No engineering change orders found",
+    "oldValueJson": "Old Value (JSON)",
+    "reasonForChange": "Reason for Change",
+    "removeAffectedItem": "Remove affected item",
+    "requestedBy": "Requested By",
+    "spcChart": {
+      "lslLsl": "LSL: {{lsl}}",
+      "noMeasurementDataYetRecordSubgroups": "No measurement data yet. Record subgroups to generate charts.",
+      "nominalNominal": "Nominal: {{nominal}}",
+      "points": "Points",
+      "rChart": "R Chart",
+      "recalculate": "Recalculate",
+      "selectACharacteristicToViewControl": "Select a characteristic to view control charts.",
+      "uslUsl": "USL: {{usl}}",
+      "xBarChart": "X-bar Chart"
+    },
+    "spcOocList": {
+      "acknowledge": "Acknowledge",
+      "acknowledgeEvent": "Acknowledge event",
+      "acknowledgeOocEvent": "Acknowledge OOC Event",
+      "acknowledgmentNotes": "Acknowledgment Notes",
+      "createCapa": "Create CAPA",
+      "noOutOfControlEvents": "No out-of-control events",
+      "rule": "Rule",
+      "severity": "Severity"
+    },
+    "viewDetails": "View details",
+    "viewEcoDetails": "View ECO details",
+    "messages": {
+      "oocAcknowledged": "OOC event acknowledged",
+      "limitsRecalculated": "Control limits recalculated",
+      "capaCreated": "CAPA created",
+      "capaAdvanced": "CAPA advanced to {{status}}",
+      "gageCreated": "Gage created",
+      "calibrationRecorded": "Calibration recorded",
+      "ecoCreated": "ECO created",
+      "ecoApproved": "ECO approved",
+      "ecoImplemented": "ECO implemented",
+      "affectedItemAdded": "Affected item added",
+      "affectedItemRemoved": "Affected item removed",
+      "approveEcoTitle": "Approve ECO?",
+      "approveEcoMessage": "Approve {{number}}? This will allow implementation to begin.",
+      "implementEcoTitle": "Implement ECO?",
+      "implementEcoMessage": "Mark {{number}} as implemented? All affected items will be marked as implemented.",
+      "removeAffectedItemTitle": "Remove Affected Item?",
+      "removeAffectedItemMessage": "Remove this affected item from the ECO?"
+    }
   },
   "ncrDetail": {
     "createTitle": "Create Non-Conformance",
@@ -7336,7 +8051,11 @@
     "ncrLotLine": "Lot: {{number}}",
     "ncrFailedItemsLine": "Checklist items that did not pass:",
     "ncrNotesLine": "Inspector notes: {{notes}}",
-    "templatePrompt": "This part has more than one inspection checklist. Pick the one to use."
+    "templatePrompt": "This part has more than one inspection checklist. Pick the one to use.",
+    "cancelInspection": "Cancel inspection",
+    "markInspectionAsFail": "Mark inspection as fail",
+    "markInspectionAsPass": "Mark inspection as pass",
+    "submitInspection": "Submit inspection"
   },
   "worker": {
     "title": "My Tasks",
@@ -7644,7 +8363,8 @@
     "starterInventory": "How do I track inventory?",
     "starterShortcuts": "Keyboard shortcuts",
     "askPlaceholder": "Ask a question...",
-    "errorMessage": "Sorry, I was unable to process your question. Please try again."
+    "errorMessage": "Sorry, I was unable to process your question. Please try again.",
+    "relatedTraining": "Related training:"
   },
   "kioskSetup": {
     "noTeamsYet": "There are no teams yet. Name one here and it is created when you activate this terminal.",
@@ -7844,7 +8564,11 @@
         "submit": "Raise alert",
         "raised": "Alert raised at {{workCenter}}",
         "failed": "Could not raise the alert: {{reason}}"
-      }
+      },
+      "cancelActions": "Cancel job actions",
+      "cancelAdvance": "Cancel advance",
+      "confirmAdvance": "Confirm advance stage",
+      "cancelNote": "Cancel note"
     },
     "operations": {
       "title": "Operations",
@@ -7953,7 +8677,18 @@
     "assignFailed": "You can't take this work order. Ask a supervisor.",
     "fullscreen": "Full screen",
     "setupFullscreenHint": "Tap Full screen on the display after setup so the board fills the screen.",
-    "terminalNotForWorker": "This terminal is not set up for your team. Use your team's terminal or ask your supervisor."
+    "terminalNotForWorker": "This terminal is not set up for your team. Use your team's terminal or ask your supervisor.",
+    "teamOptionOne": "{{name}} ({{count}} member)",
+    "teamOptionOther": "{{name}} ({{count}} members)",
+    "invScan": {
+      "title": "Inventory Scan Mode",
+      "scanned": "Scanned",
+      "prompt": "Scan a part barcode to begin",
+      "inputLabel": "Scan Part Barcode",
+      "inputPlaceholder": "Scan or type part number...",
+      "recent": "Recent Scans",
+      "inStock": "{{count}} in stock"
+    }
   },
   "kioskDisplay": {
     "entryTitle": "Use this browser as a shop-floor terminal?",
@@ -8126,7 +8861,11 @@
     "deleteFileTitle": "Delete File?",
     "deleteFileMessage": "This will permanently delete \"{{name}}\".",
     "fileDeleted": "File deleted",
-    "fileUploaded": "File uploaded"
+    "fileUploaded": "File uploaded",
+    "fieldLinkedJobOptional": "Linked Job (optional)",
+    "fieldExpirationOptional": "Expiration Date (optional)",
+    "fieldNotesOptional": "Notes (optional)",
+    "searchLabel": "Search lot number or part"
   },
   "partQuality": {
     "recentInspections": "Recent Inspections",
@@ -8179,7 +8918,16 @@
     "fieldRate": "Rate (%)",
     "noRates": "No sales tax rates configured",
     "rates": "Tax Rates",
-    "colRate": "Rate"
+    "colRate": "Rate",
+    "descriptionOptional": "Description (optional)",
+    "eG2200SalesTax": "e.g. 2200-Sales-Tax",
+    "eGCaSales": "e.g. CA-SALES",
+    "effectiveFrom": "Effective From",
+    "effectiveFromDate": "Effective from date",
+    "exemptRate": "Exempt rate",
+    "glPostingAccountOptional": "GL Posting Account (optional)",
+    "setAsDefaultRate": "Set as default rate",
+    "stateCode": "State code"
   },
   "maintenance": {
     "title": "Predictive Maintenance",
@@ -8688,7 +9436,7 @@
       "openEnded": "Open-ended",
       "differential": "Shift differential",
       "differentialInput": "Shift differential ($/hour)",
-      "perHour": "${{amount}}/h",
+      "perHour": "{{amount}}/h",
       "notes": "Notes",
       "empty": "No one is assigned to a shift yet.",
       "saved": "Shift assignment saved",
@@ -8784,7 +9532,8 @@
     "noWorkCenters": "No work centers",
     "trendChartLabel": "OEE Trend",
     "worldClassBadge": "World-Class",
-    "noRunsInPeriod": "No runs in period"
+    "noRunsInPeriod": "No runs in period",
+    "gridLabel": "Work center OEE overview"
   },
   "rfqPdf": {
     "download": "Download PDF",
@@ -8921,7 +9670,9 @@
       "confirmSendMessage": "Add the selected vendors ({{count}}) to this RFQ? This does not email them: download the RFQ PDF and send it to each vendor yourself."
     },
     "poNumberFallback": "PO #{{id}}",
-    "viewPo": "View PO"
+    "viewPo": "View PO",
+    "awardToVendor": "Award to vendor",
+    "recordResponse2": "Record response"
   },
   "approvals": {
     "title": "Approvals",
@@ -9114,6 +9865,50 @@
       "save": "Create Employee",
       "created": "Employee {{name}} created",
       "failed": "Could not create the employee"
+    },
+    "employeeActivityTab": {
+      "noActivityRecorded": "No activity recorded"
+    },
+    "employeeComplianceTab": {
+      "noComplianceFormsFound": "No compliance forms found"
+    },
+    "employeeEventsTab": {
+      "noUpcomingEvents": "No upcoming events"
+    },
+    "employeeExpensesTab": {
+      "noExpensesFound": "No expenses found"
+    },
+    "employeeJobsTab": {
+      "noActiveJobsAssigned": "No active jobs assigned"
+    },
+    "employeeOverviewTab": {
+      "barcode": "Barcode",
+      "cityStateZip": "City / State / ZIP",
+      "compliance": "Compliance",
+      "contactInformation": "Contact Information",
+      "department": "Department",
+      "emergencyContact": "Emergency Contact",
+      "employmentDetails": "Employment Details",
+      "jobTitle": "Job Title",
+      "personalEmail": "Personal Email",
+      "pinConfigured": "PIN Configured",
+      "relationship": "Relationship",
+      "rfidNfc": "RFID / NFC",
+      "role": "Role",
+      "systemAccess": "System Access",
+      "team": "Team",
+      "workEmail": "Work Email",
+      "workLocation": "Work Location"
+    },
+    "employeePayTab": {
+      "noPayStubsFound": "No pay stubs found"
+    },
+    "employeeTimeTab": {
+      "noTimeEntriesFound": "No time entries found",
+      "period": "Period"
+    },
+    "employeeTrainingTab": {
+      "noTrainingRecordsFound": "No training records found"
     }
   },
   "trainingPage": {
@@ -9335,7 +10130,8 @@
         "biApiKeyRevoked": "BI API Key Revoked"
       },
       "expandDetails": "Show full details",
-      "collapseDetails": "Hide full details"
+      "collapseDetails": "Hide full details",
+      "auditLogPagination": "Audit log pagination"
     },
     "edi": {
       "tabs": {
@@ -9450,7 +10246,11 @@
       "deleteConfirm": {
         "title": "Delete trading partner?",
         "message": "Delete \"{{name}}\"? Inbound documents from this partner will no longer be matched to it."
-      }
+      },
+      "deletePartner": "Delete partner",
+      "editPartner2": "Edit partner",
+      "retryTransaction": "Retry transaction",
+      "testConnection": "Test connection"
     },
     "events": {
       "events": "events",
@@ -9507,7 +10307,9 @@
         "eventCreated": "Event created",
         "eventCancelled": "Event cancelled",
         "eventDeleted": "Event deleted"
-      }
+      },
+      "cancelEvent": "Cancel event",
+      "editEvent2": "Edit event"
     },
     "mfa": {
       "title": "MFA Policy",
@@ -9537,7 +10339,8 @@
       "save": "Save",
       "selectRoles": "Select roles",
       "graceDays": "Grace period (days)",
-      "graceDaysHint": "Days a user in these roles can keep working after their first sign-in before Forge holds them to MFA setup. 0 holds them at once."
+      "graceDaysHint": "Days a user in these roles can keep working after their first sign-in before Forge holds them to MFA setup. 0 holds them at once.",
+      "saving": "Saving..."
     },
     "domainEventFailures": {
       "failures": "failures",
@@ -9614,7 +10417,8 @@
         "corrected": "Time entry corrected",
         "correctionSaved": "Time correction saved"
       },
-      "allEmployees": "All Employees"
+      "allEmployees": "All Employees",
+      "correctTimeEntry": "Correct time entry"
     },
     "training": {
       "tabs": {
@@ -9684,7 +10488,8 @@
       "moduleBreakdown": "Module Breakdown",
       "completed": "Completed",
       "inProgress": "In Progress",
-      "notStarted": "Not Started"
+      "notStarted": "Not Started",
+      "closeDetailPanel": "Close detail panel"
     },
     "completeI9": {
       "title": "Complete I-9 Section 2",
@@ -9792,7 +10597,14 @@
       "announcementSent": "Announcement sent",
       "templateCreated": "Template created",
       "templateDeleted": "Template deleted"
-    }
+    },
+    "templateMessages": {
+      "created": "Template created",
+      "deleted": "Template deleted",
+      "deleteTitle": "Delete Template?",
+      "deleteMessage": "Delete template \"{{name}}\"? This cannot be undone."
+    },
+    "sentToast": "Announcement sent"
   },
   "autoPo": {
     "autoPoSuggestions": "Auto-PO Suggestions",
@@ -9837,7 +10649,11 @@
     "tabSuggestions": "Suggestions",
     "vendor": "Vendor",
     "autoCustomerPo": "Auto-generate customer P.O. on order",
-    "autoCustomerPoHint": "When a quote is converted to a sales order, automatically generate the internal read-only customer purchase-order document."
+    "autoCustomerPoHint": "When a quote is converted to a sales order, automatically generate the internal read-only customer purchase-order document.",
+    "convertSelectedSuggestionsToPurchaseOrders": "Convert selected suggestions to purchase orders",
+    "dismissSelectedSuggestions": "Dismiss selected suggestions",
+    "runAutoPoAnalysisNow": "Run auto-PO analysis now",
+    "saveAutoPoSettings": "Save auto-PO settings"
   },
   "expenseSettings": {
     "title": "Expense Policy",
@@ -9855,7 +10671,8 @@
     "minDescriptionLength": "Minimum description length",
     "minDescriptionLengthHint": "Shortest acceptable expense description (in characters). Use 0 to allow blank descriptions.",
     "saved": "Expense policy saved",
-    "thresholdExceedsMax": "Auto-approve threshold cannot exceed the maximum expense amount."
+    "thresholdExceedsMax": "Auto-approve threshold cannot exceed the maximum expense amount.",
+    "saveExpensePolicySettings": "Save expense policy settings"
   },
   "welcomePage": {
     "brandName": "Armory Works Forge",
@@ -9907,7 +10724,27 @@
     "applyFailed": "Failed to apply discovery — check capability constraints.",
     "previewFailed": "Failed to preview discovery apply — check capability constraints.",
     "followUpFailed": "{{preset}} was applied, but some changes from your answers could not be saved. Review your capabilities and numbering settings.",
-    "adjustmentsTitle": "Also changed because of your answers"
+    "adjustmentsTitle": "Also changed because of your answers",
+    "answerTheOpeningQuestionsAndWe": "Answer the opening questions and we'll start surfacing a recommendation here.",
+    "branchBranch": "Branch {{branch}}",
+    "confidenceConfidencelabel": "Confidence: {{confidenceLabel}}",
+    "currentlyLeaningToward": "Currently leaning toward",
+    "jumpToRecommendation": "Jump to recommendation",
+    "large200OrMultiSite": "Large (200+) or multi-site",
+    "mid25200": "Mid (25–200)",
+    "noCapabilityChanges": "No capability changes",
+    "optionalButTheMoreYouSay": "Optional — but the more you say, the better the recommendation.",
+    "orPickAnAlternative": "Or pick an alternative",
+    "recommendedForYou": "Recommended for you",
+    "seeFullRecommendation": "See full recommendation",
+    "skipDiscovery": "Skip discovery",
+    "skipDiscoveryAndConfigureManually": "Skip discovery and configure manually",
+    "small125": "Small (1–25)",
+    "toggleConsultantMode": "Toggle consultant mode",
+    "useTheRecommendedPreset": "Use the recommended preset",
+    "whyWeRecommendThis": "Why we recommend this",
+    "yourAnswer": "Your answer",
+    "yourInstallationAlreadyMatchesThisPreset": "Your installation already matches this preset."
   },
   "workflow": {
     "parts": {
@@ -10730,7 +11567,9 @@
       "requiresCostCenter": "Requires Cost Center",
       "active": "Active",
       "description": "Description",
-      "lockedNote": "This account has postings — its number, type, and normal balance are locked. Create a new account for structural changes."
+      "lockedNote": "This account has postings — its number, type, and normal balance are locked. Create a new account for structural changes.",
+      "controlSystemManaged": "Control accounts are system-managed",
+      "saved": "Account saved"
     },
     "openingJournal": {
       "title": "Opening journal",
@@ -11545,6 +12384,13 @@
         "MonthlyPerEmployee": "Per employee / month",
         "PercentOfWages": "Percent of wages"
       }
+    },
+    "messages": {
+      "periodCreated": "Period created",
+      "frozen": "Frozen: {{budgets}} budget(s), {{rates}} rate(s)",
+      "costCenterCreated": "Cost center created",
+      "poolCreated": "Pool created",
+      "budgetSet": "Budget set — rate {{rate}}"
     }
   },
   "mobileApp": {
@@ -11783,7 +12629,8 @@
       "problemFailed": "Could not send. Try again when online.",
       "signOut": "Sign out",
       "confirmSignOutHere": "Tap again to sign out",
-      "problemCount": "{{count}} / {{max}}"
+      "problemCount": "{{count}} / {{max}}",
+      "forgeVersion": "Forge {{version}}"
     },
     "timer": {
       "running": "Running: {{jobNumber}} · {{elapsed}}",
@@ -11837,6 +12684,9 @@
       "typedCount": "Good pieces",
       "recordedWithScrap": "Recorded {{count}} good and {{scrap}} scrap on {{name}}",
       "completedWithScrap": "{{name}} done · {{scrap}} scrap"
+    },
+    "pinPad": {
+      "backspace": "Backspace"
     }
   },
   "mobileAppWork": {
@@ -12378,7 +13228,31 @@
     "binOption": "{{location}} - lot {{lot}} - {{available}} available",
     "binOptionNoLot": "{{location}} - {{available}} available",
     "noIssuableMaterials": "This job's part has no BOM components or approved alternates to issue.",
-    "noIssuableStock": "No stock of this part can be issued: it is out of stock or on quality hold."
+    "noIssuableStock": "No stock of this part can be issued: it is out of stock or on quality hold.",
+    "category": "Category",
+    "estimated": "Estimated",
+    "actual": "Actual",
+    "variance": "Variance",
+    "material": "Material",
+    "labor": "Labor",
+    "burden": "Burden",
+    "subcontract": "Subcontract",
+    "quotedPrice": "Quoted Price",
+    "actualMargin": "Actual Margin",
+    "materialIssues": "MATERIAL ISSUES",
+    "recalculate": "Recalculate",
+    "recalculateAria": "Recalculate costs",
+    "returnMaterial": "Return material",
+    "returned": "Material returned to stock",
+    "recalculated": "Costs recalculated",
+    "colPartNumber": "Part #",
+    "colQty": "Qty",
+    "colUnitCost": "Unit Cost",
+    "issueTypes": {
+      "issue": "Issue",
+      "return": "Return",
+      "scrap": "Scrap"
+    }
   },
   "maintenanceSchedules": {
     "pageTitle": "Preventive Maintenance",
@@ -12640,6 +13514,252 @@
       "InProgress": "In Progress",
       "Completed": "Completed",
       "Cancelled": "Cancelled"
+    }
+  },
+  "shortcuts": {
+    "goToDashboard": "Go to Dashboard",
+    "goToBoard": "Go to Board",
+    "goToBacklog": "Go to Backlog",
+    "goToParts": "Go to Parts",
+    "goToInventory": "Go to Inventory",
+    "goToReports": "Go to Reports",
+    "goToTimeTracking": "Go to Time Tracking",
+    "showShortcuts": "Show keyboard shortcuts",
+    "closePanel": "Close panel/dialog",
+    "then": "then",
+    "groups": {
+      "navigation": "Navigation",
+      "general": "General",
+      "other": "Other"
+    }
+  },
+  "dialog": {
+    "unsaved": {
+      "title": "Unsaved Changes",
+      "message": "You have unsaved changes that will be lost. Are you sure you want to close?",
+      "stay": "Stay",
+      "leaveMessage": "You have unsaved changes that will be lost. Are you sure you want to leave?",
+      "leave": "Leave"
+    }
+  },
+  "paginator": {
+    "itemsPerPage": "Items per page:",
+    "nextPage": "Next page",
+    "previousPage": "Previous page",
+    "firstPage": "First page",
+    "lastPage": "Last page",
+    "range": "{{start}} – {{end}} of {{length}}",
+    "rangeEmpty": "0 of {{length}}"
+  },
+  "validationButton": {
+    "triggerAriaOne": "{{count}} validation issue. Click to view.",
+    "triggerAriaOther": "{{count}} validation issues. Click to view.",
+    "show": "Show validation errors",
+    "popoverLabel": "Validation errors",
+    "allResolved": "All issues resolved"
+  },
+  "clockStatus": {
+    "in": "Currently Working",
+    "inShort": "IN",
+    "out": "Clocked Out",
+    "outShort": "OUT",
+    "onBreak": "On Break",
+    "onBreakShort": "BREAK",
+    "onLunch": "On Lunch",
+    "onLunchShort": "LUNCH",
+    "unknown": "Unknown"
+  },
+  "clockActions": {
+    "ClockIn": "Clock In",
+    "ClockOut": "Clock Out",
+    "BreakStart": "Start Break",
+    "BreakEnd": "End Break",
+    "LunchStart": "Start Lunch",
+    "LunchEnd": "End Lunch"
+  },
+  "dateRange": {
+    "presets": {
+      "today": "Today",
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
+      "last30Days": "Last 30 Days"
+    }
+  },
+  "columns": {
+    "acknowledgedBy": "Acknowledged By",
+    "acknowledgementRequired": "Ack Required",
+    "acknowledgements": "Acks",
+    "action": "Action",
+    "approved": "Approved",
+    "asFound": "As Found",
+    "asLeft": "As Left",
+    "attempts": "Attempts",
+    "baseValue": "Base Value",
+    "bidirectional": "Bi-Dir",
+    "calibrationRecords": "Cal Records",
+    "capaNumber": "CAPA #",
+    "carrier": "Carrier",
+    "changeDescription": "Change Description",
+    "characteristic": "Characteristic",
+    "children": "Children",
+    "class": "Class",
+    "credentials": "Credentials",
+    "currency": "Currency",
+    "currentRate": "Current rate",
+    "deductions": "Deductions",
+    "detected": "Detected",
+    "deviceToken": "Device Token",
+    "deviceType": "Device Type",
+    "due": "Due",
+    "duration": "Duration",
+    "earned": "Earned",
+    "ecoNumber": "ECO #",
+    "effectiveFrom": "Effective From",
+    "effectivePerHour": "Effective /hr",
+    "effectiveTo": "Effective To",
+    "end": "End",
+    "entityId": "Entity ID",
+    "floor": "Floor",
+    "form": "Form",
+    "gageNumber": "Gage #",
+    "gross": "Gross",
+    "id": "ID",
+    "implemented": "Implemented",
+    "includedRoles": "Included Roles",
+    "items": "Items",
+    "job": "Job",
+    "jobNumber": "Job #",
+    "jobTitle": "Job Title",
+    "lab": "Lab",
+    "lastError": "Last Error",
+    "leadTime": "Lead",
+    "leads": "Leads",
+    "location": "Location",
+    "manufactured": "Manufactured",
+    "mfaEnabled": "MFA Enabled",
+    "minQty": "Min Qty",
+    "minimumWage": "Min wage",
+    "module": "Module",
+    "moq": "MOQ",
+    "netPay": "Net Pay",
+    "nextAttempt": "Next Attempt",
+    "nextCalibrationDue": "Next Cal Due",
+    "nextDue": "Next Due",
+    "normalBalance": "Normal",
+    "number": "Number",
+    "onHand": "On hand",
+    "operationKey": "Operation Key",
+    "origin": "Origin",
+    "override": "Override",
+    "owner": "Owner",
+    "partNumber": "Part #",
+    "payDate": "Pay Date",
+    "periodEnd": "Period End",
+    "periodStart": "Period Start",
+    "piecePay": "Piece pay",
+    "postable": "Postable",
+    "procurement": "Procurement",
+    "provider": "Provider",
+    "qty": "Qty",
+    "quality": "Quality",
+    "requestedBy": "Requested By",
+    "requestedDelivery": "Req. Delivery",
+    "result": "Result",
+    "role": "Role",
+    "rsvp": "RSVP",
+    "rule": "Rule",
+    "scan": "Scan",
+    "scope": "Scope",
+    "score": "Score",
+    "sent": "Sent",
+    "sentAt": "Sent At",
+    "sentBy": "Sent By",
+    "serialNumber": "Serial #",
+    "severity": "Severity",
+    "signed": "Signed",
+    "since": "Since",
+    "source": "Source",
+    "stage": "Stage",
+    "standards": "Standards",
+    "start": "Start",
+    "started": "Started",
+    "tasks": "Tasks",
+    "taxes": "Taxes",
+    "team": "Team",
+    "terminalName": "Terminal Name",
+    "trackType": "Track",
+    "unitPrice": "Unit Price",
+    "vendor": "Vendor",
+    "vendorPartNumber": "Vendor PN",
+    "capa": "CAPA",
+    "item": "Item"
+  },
+  "serialNumbers": {
+    "messages": {
+      "created": "Serial number created"
+    }
+  },
+  "trainingAdmin": {
+    "messages": {
+      "walkthroughSaved": "Walkthrough steps saved",
+      "invalidJson": "Content JSON is not valid JSON"
+    }
+  },
+  "drafts": {
+    "updatedInOtherTab": "Updated from another tab",
+    "discardedInOtherTab": "Draft discarded in another tab",
+    "savedInOtherTab": "This record was saved in another tab"
+  },
+  "workflowResume": {
+    "draftsOne": "You have 1 workflow draft in progress. Tap to resume.",
+    "draftsOther": "You have {{count}} workflow drafts in progress. Tap to resume."
+  },
+  "apiErrors": {
+    "codes": {
+      "effectiveRangeOrder": "Effective To must be after Effective From.",
+      "lotNumberTooLong": "Lot / heat number must be 100 characters or fewer.",
+      "roleTemplateEmpty": "Template must include at least one role.",
+      "roleTemplateTooMany": "Template may include at most 25 roles.",
+      "nameNotVisible": "Name must contain visible characters.",
+      "leadNameRequired": "Provide a company name or a contact name.",
+      "packingSlipTooLong": "Packing slip number must be 100 characters or fewer.",
+      "wholeQuantityRequired": "Good quantity must be a whole number.",
+      "fileTooLarge": "File size must not exceed 10MB.",
+      "emailInvalidCharacter": "Email contains an invalid character.",
+      "autoApproveOverMax": "Auto-approve threshold cannot exceed the max expense amount.",
+      "tooManyLeads": "Assign at most 500 leads at a time.",
+      "tooManyMilestones": "A payment schedule may have at most 20 milestones.",
+      "journalNeedsTwoLines": "A journal requires at least two lines.",
+      "journalLineOneSide": "Exactly one of debit or credit must be non-zero on each line.",
+      "andonTypeRequired": "Choose stoppage, quality or material.",
+      "materialCategoryConflict": "Choose an existing category or name a new one, not both.",
+      "operationProgressEmpty": "Send a completed quantity, a scrap quantity, a rework quantity or a status.",
+      "activationCodeInvalid": "That activation code isn't right. Check it with your contact at Forge.",
+      "presetCompareCount": "Compare between 2 and 4 presets.",
+      "cronInvalid": "Cron expression is not valid.",
+      "invalidDate": "{{field}} is not a valid date.",
+      "invalidNumber": "{{field}} is not a valid number.",
+      "wholeNumberRequired": "{{field}} must be a whole number.",
+      "invalidBoolean": "{{field}} must be true or false.",
+      "invalidIdentifier": "{{field}} is not a valid identifier.",
+      "invalidOption": "{{field}} is not one of the allowed values.",
+      "bodyRequired": "The request is empty.",
+      "invalidValue": "{{field}} has an invalid value."
+    },
+    "validators": {
+      "required": "{{field}} is required.",
+      "maxLength": "{{field}} must be {{maxLength}} characters or fewer.",
+      "minLength": "{{field}} must be at least {{minLength}} characters.",
+      "length": "{{field}} must be between {{minLength}} and {{maxLength}} characters.",
+      "greaterThan": "{{field}} must be greater than {{comparisonValue}}.",
+      "atLeast": "{{field}} must be {{comparisonValue}} or more.",
+      "lessThan": "{{field}} must be less than {{comparisonValue}}.",
+      "atMost": "{{field}} must be {{comparisonValue}} or less.",
+      "between": "{{field}} must be between {{from}} and {{to}}.",
+      "email": "{{field}} must be a valid email address.",
+      "format": "{{field}} is not in the expected format.",
+      "invalidOption": "{{field}} is not one of the allowed values.",
+      "precision": "{{field}} has too many digits."
     }
   }
 }

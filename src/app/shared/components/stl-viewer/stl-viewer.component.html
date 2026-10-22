@@ -2,7 +2,7 @@
   @if (loading()) {
     <div class="stl-viewer__loading">
       <span class="material-icons-outlined spin">progress_activity</span>
-      <span>Loading 3D model...</span>
+      <span>{{ 'shared.stlViewer.loading3dModel' | translate }}</span>
     </div>
   }
   @if (error()) {

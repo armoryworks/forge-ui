@@ -15,6 +15,7 @@ import {
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { ViolationItem } from '../../services/form-validation.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 const OUTSIDE_CLICK_DEBOUNCE_MS = 150;
 const AUTO_CLOSE_AFTER_CLEAR_MS = 1200;
@@ -22,7 +23,7 @@ const AUTO_CLOSE_AFTER_CLEAR_MS = 1200;
 @Component({
   selector: 'app-validation-button',
   standalone: true,
-  imports: [OverlayModule, MatTooltipModule],
+  imports: [OverlayModule, MatTooltipModule, TranslatePipe],
   templateUrl: './validation-button.component.html',
   styleUrl: './validation-button.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

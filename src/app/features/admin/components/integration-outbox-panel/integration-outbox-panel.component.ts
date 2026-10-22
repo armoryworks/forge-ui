@@ -14,6 +14,7 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-integration-outbox-panel',
@@ -26,6 +27,7 @@ import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
     ColumnCellDirective,
     SelectComponent,
     LoadingBlockDirective,
+    TranslatePipe,
   ],
   templateUrl: './integration-outbox-panel.component.html',
   styleUrl: './integration-outbox-panel.component.scss',
@@ -33,6 +35,7 @@ import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 })
 export class IntegrationOutboxPanelComponent {
   private readonly adminService = inject(AdminService);
+  private readonly translate = inject(TranslateService);
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
 
@@ -72,14 +75,14 @@ export class IntegrationOutboxPanelComponent {
   });
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'id', header: 'ID', sortable: true, width: '70px', align: 'right' },
-    { field: 'provider', header: 'Provider', sortable: true, width: '110px' },
-    { field: 'operationKey', header: 'Operation Key', sortable: true },
-    { field: 'status', header: 'Status', sortable: true, width: '110px' },
-    { field: 'attemptCount', header: 'Attempts', sortable: true, width: '90px', align: 'right' },
-    { field: 'nextAttemptAt', header: 'Next Attempt', sortable: true, type: 'date', width: '150px' },
-    { field: 'sentAt', header: 'Sent At', sortable: true, type: 'date', width: '150px' },
-    { field: 'lastError', header: 'Last Error', sortable: false },
+    { field: 'id', header: 'columns.id', sortable: true, width: '70px', align: 'right' },
+    { field: 'provider', header: 'columns.provider', sortable: true, width: '110px' },
+    { field: 'operationKey', header: 'columns.operationKey', sortable: true },
+    { field: 'status', header: 'common.status', sortable: true, width: '110px' },
+    { field: 'attemptCount', header: 'columns.attempts', sortable: true, width: '90px', align: 'right' },
+    { field: 'nextAttemptAt', header: 'columns.nextAttempt', sortable: true, type: 'date', width: '150px' },
+    { field: 'sentAt', header: 'columns.sentAt', sortable: true, type: 'date', width: '150px' },
+    { field: 'lastError', header: 'columns.lastError', sortable: false },
     { field: 'actions', header: '', width: '100px', sortable: false },
   ];
 
@@ -107,16 +110,16 @@ export class IntegrationOutboxPanelComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Retry outbox entry?',
-        message: `Re-queue ${row.provider} entry "${row.operationKey}" for immediate dispatch?`,
-        confirmLabel: 'Retry',
+        title: this.translate.instant('admin.integrationOutboxPanel.messages.retryTitle'),
+        message: this.translate.instant('admin.integrationOutboxPanel.messages.retryMessage', { provider: row.provider, key: row.operationKey }),
+        confirmLabel: this.translate.instant('admin.integrationOutboxPanel.retry'),
         severity: 'warn',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
       this.adminService.retryOutboxEntry(row.id).subscribe({
         next: () => {
-          this.snackbar.success('Queued for retry');
+          this.snackbar.success(this.translate.instant('admin.integrationOutboxPanel.messages.queued'));
           this.load();
         },
       });
@@ -128,16 +131,16 @@ export class IntegrationOutboxPanelComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Discard outbox entry?',
-        message: `Mark ${row.provider} entry "${row.operationKey}" as dead-lettered. It will not be retried automatically.`,
-        confirmLabel: 'Discard',
+        title: this.translate.instant('admin.integrationOutboxPanel.messages.discardTitle'),
+        message: this.translate.instant('admin.integrationOutboxPanel.messages.discardMessage', { provider: row.provider, key: row.operationKey }),
+        confirmLabel: this.translate.instant('admin.integrationOutboxPanel.discard'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
       this.adminService.discardOutboxEntry(row.id).subscribe({
         next: () => {
-          this.snackbar.success('Entry discarded');
+          this.snackbar.success(this.translate.instant('admin.integrationOutboxPanel.messages.discarded'));
           this.load();
         },
       });

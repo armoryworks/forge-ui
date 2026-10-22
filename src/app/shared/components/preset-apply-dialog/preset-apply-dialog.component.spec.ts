@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import {
@@ -18,6 +18,19 @@ function setupDialog(data: PresetApplyDialogData) {
       { provide: MatDialogRef, useValue: dialogRef },
     ],
   });
+  const translate = TestBed.inject(TranslateService);
+  translate.setTranslation('en', {
+    shared: {
+      presetApplyDialog: {
+        applyPresetname: 'Apply {{presetName}}',
+        alreadyAtThisPreset: 'Already at this preset.',
+        toEnableCount: 'To enable ({{count}})',
+        toDisableCount: 'To disable ({{count}})',
+        constraintViolationsCount: 'Constraint violations ({{count}})',
+      },
+    },
+  });
+  translate.use('en');
   const fixture = TestBed.createComponent(PresetApplyDialogComponent);
   fixture.detectChanges();
   return { fixture, dialogRef };

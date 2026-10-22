@@ -485,7 +485,7 @@ export class PartDetailPanelComponent {
         // Plain "Save" keeps the panel in edit mode (preferred when editing
         // across multiple tabs); only "Save & Close" exits edit mode.
         if (closeAfterSave) this.editing.set(false);
-        this.snackbar.success('Part updated');
+        this.snackbar.success(this.translate.instant('parts.messages.updated'));
       },
       error: () => this.saving.set(false),
     });

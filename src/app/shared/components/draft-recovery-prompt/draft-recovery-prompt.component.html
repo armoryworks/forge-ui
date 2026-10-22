@@ -1,8 +1,8 @@
-<div class="dialog-backdrop" role="button" tabindex="0" aria-label="Dismiss" (click)="dismiss()" (keydown.enter)="dismiss()">
+<div class="dialog-backdrop" role="button" tabindex="0" [attr.aria-label]="'common.dismiss' | translate" (click)="dismiss()" (keydown.enter)="dismiss()">
   <div class="dialog" role="dialog" aria-modal="true" [attr.aria-label]="title" style="width: 520px" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
     <div class="dialog__header">
       <span class="dialog__title">{{ title }}</span>
-      <button class="icon-btn" aria-label="Close" (click)="dismiss()">
+      <button class="icon-btn" [attr.aria-label]="'common.close' | translate" (click)="dismiss()">
         <span class="material-icons-outlined">close</span>
       </button>
     </div>
@@ -17,9 +17,9 @@
               <span class="draft-prompt__item-label">{{ draft.displayLabel }}</span>
               <span class="draft-prompt__item-time">{{ draft.lastModified | dateTime }}</span>
             </div>
-            <button class="action-btn action-btn--sm" aria-label="Go to {{ draft.displayLabel }}" (click)="navigateTo(draft)">
+            <button class="action-btn action-btn--sm" [attr.aria-label]="'shared.draftRecoveryPrompt.goToDisplaylabel' | translate:{ displayLabel: draft.displayLabel }" (click)="navigateTo(draft)">
               <span class="material-icons-outlined">open_in_new</span>
-              Go to
+              {{ 'shared.draftRecoveryPrompt.goTo' | translate }}
             </button>
           </div>
         }
@@ -28,10 +28,10 @@
 
     <div class="dialog__footer">
       @if (data.mode === 'expiry') {
-        <button class="action-btn" (click)="keepAll()">Keep All</button>
+        <button class="action-btn" (click)="keepAll()">{{ 'shared.draftRecoveryPrompt.keepAll' | translate }}</button>
       }
-      <button class="action-btn" (click)="discardAll()">Discard All</button>
-      <button class="action-btn action-btn--primary" (click)="dismiss()">Review Later</button>
+      <button class="action-btn" (click)="discardAll()">{{ 'shared.draftRecoveryPrompt.discardAll' | translate }}</button>
+      <button class="action-btn action-btn--primary" (click)="dismiss()">{{ 'shared.draftRecoveryPrompt.reviewLater' | translate }}</button>
     </div>
   </div>
 </div>

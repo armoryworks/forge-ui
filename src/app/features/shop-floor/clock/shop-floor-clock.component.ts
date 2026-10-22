@@ -27,6 +27,7 @@ import { KioskTerminal } from '../models/kiosk-terminal.model';
 import { ScanIdentification } from '../models/scan-identification.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
+import { LanguageService } from '../../../shared/services/language.service';
 
 const REFRESH_INTERVAL_MS = 15_000;
 const AUTO_LOGOUT_MS = 30_000;
@@ -53,6 +54,7 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
   private readonly rfid = inject(WebHidRfidService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
+  private readonly language = inject(LanguageService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly mobileApi = inject(MobileApiService);
@@ -496,7 +498,7 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
   // ─── Display Helpers ───
   protected formatTime(isoDate: string | null): string {
     if (!isoDate) return '';
-    return new Date(isoDate).toLocaleTimeString('en-US', {
+    return new Date(isoDate).toLocaleTimeString(this.language.intlLocale(), {
       hour: '2-digit', minute: '2-digit',
     });
   }
@@ -526,10 +528,10 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
   private updateClock(): void {
     const now = new Date();
     this.clockDisplay.set(
-      now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      now.toLocaleTimeString(this.language.intlLocale(), { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
     );
     this.dateDisplay.set(
-      now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }),
+      now.toLocaleDateString(this.language.intlLocale(), { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }),
     );
   }
 }

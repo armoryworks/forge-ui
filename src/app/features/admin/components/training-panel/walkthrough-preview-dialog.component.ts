@@ -6,6 +6,7 @@ import { DialogComponent } from '../../../../shared/components/dialog/dialog.com
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { TrainingService } from '../../../training/services/training.service';
 import { WalkthroughStep, WalkthroughPopover } from '../../models/walkthrough-step.model';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 export interface WalkthroughPreviewDialogData {
   moduleId: number;
@@ -16,13 +17,14 @@ export interface WalkthroughPreviewDialogData {
 @Component({
   selector: 'app-walkthrough-preview-dialog',
   standalone: true,
-  imports: [FormsModule, DialogComponent],
+  imports: [FormsModule, DialogComponent, TranslatePipe],
   templateUrl: './walkthrough-preview-dialog.component.html',
   styleUrl: './walkthrough-preview-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WalkthroughPreviewDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<WalkthroughPreviewDialogComponent>);
+  private readonly translate = inject(TranslateService);
   private readonly data = inject<WalkthroughPreviewDialogData>(MAT_DIALOG_DATA);
   private readonly trainingService = inject(TrainingService);
   private readonly snackbar = inject(SnackbarService);
@@ -81,7 +83,7 @@ export class WalkthroughPreviewDialogComponent {
     } as never).subscribe({
       next: () => {
         this.saving.set(false);
-        this.snackbar.success('Walkthrough steps saved');
+        this.snackbar.success(this.translate.instant('trainingAdmin.messages.walkthroughSaved'));
         this.dialogRef.close(true);
       },
       error: (err: unknown) => {

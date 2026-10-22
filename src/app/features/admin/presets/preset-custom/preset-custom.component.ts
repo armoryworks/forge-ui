@@ -26,6 +26,7 @@ import {
   PresetCustomOverride,
   PresetCustomPreview,
 } from '../../../../shared/models/preset.model';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 interface CustomCapabilityRow extends PresetCapabilityRow {
   overridden: boolean;
@@ -54,13 +55,14 @@ interface CustomAreaGroup {
 @Component({
   selector: 'app-preset-custom',
   standalone: true,
-  imports: [CommonModule, RouterModule, PageLayoutComponent, LoadingBlockDirective],
+  imports: [CommonModule, RouterModule, PageLayoutComponent, LoadingBlockDirective, TranslatePipe],
   templateUrl: './preset-custom.component.html',
   styleUrl: './preset-custom.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PresetCustomComponent implements OnInit {
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
   private readonly dialog = inject(MatDialog);
   private readonly presetService = inject(PresetService);
   private readonly capabilityService = inject(CapabilityService);
@@ -164,9 +166,9 @@ export class PresetCustomComponent implements OnInit {
       next: (result) => {
         this.applying.set(false);
         if (result.noOp) {
-          this.snackbar.info('Custom configuration: no changes — already matches.');
+          this.snackbar.info(this.translate.instant('admin.presetMessages.customNoChanges'));
         } else {
-          this.snackbar.success(`Applied Custom configuration (${result.deltaCount} capabilities changed).`);
+          this.snackbar.success(this.translate.instant('admin.presetMessages.customApplied', { count: result.deltaCount }));
         }
         this.capabilityService.load().subscribe();
         this.installState.dismiss();

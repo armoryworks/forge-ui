@@ -1,20 +1,20 @@
 <div class="ea-section">
   @if (showFilterBar()) {
     <div class="ea-header">
-      <h3 class="ea-title">Activity</h3>
-      <div class="ea-filter" role="group" aria-label="Activity filter">
+      <h3 class="ea-title">{{ 'common.activity' | translate }}</h3>
+      <div class="ea-filter" role="group" [attr.aria-label]="'activityHistory.activityFilter' | translate">
         @for (tab of tabs(); track tab) {
           <button class="ea-filter-btn" [class.ea-filter-btn--active]="activeFilter() === tab"
             [attr.data-testid]="'activity-filter-' + tab"
             (click)="setFilter(tab)" [attr.aria-label]="'Filter by ' + tab">
             @switch (tab) {
-              @case ('all') { All }
-              @case ('comments') { Conversation }
+              @case ('all') { {{ 'common.all' | translate }} }
+              @case ('comments') { {{ 'activityHistory.conversation' | translate }} }
               @case ('notes') {
-                Notes
+                {{ 'common.notes' | translate }}
                 @if (notes().length) { <span class="ea-filter-btn__count">{{ notes().length }}</span> }
               }
-              @case ('history') { History }
+              @case ('history') { {{ 'activityHistory.history' | translate }} }
             }
           </button>
         }
@@ -22,7 +22,7 @@
     </div>
   } @else {
     <div class="ea-header">
-      <h3 class="ea-title">History</h3>
+      <h3 class="ea-title">{{ 'activityHistory.history' | translate }}</h3>
     </div>
   }
 
@@ -30,13 +30,13 @@
     <!-- Notes tab -->
     <div class="ea-note-add">
       <app-rich-text-editor data-testid="activity-note-input"
-        placeholder="Add a note..."
+        [placeholder]="'activityHistory.addANote' | translate"
         [users]="mentionUsers()"
         [formControl]="noteControl" />
       <button class="action-btn action-btn--primary" data-testid="activity-note-save-btn"
         [disabled]="!noteControl.value?.trim() || isSavingNote()"
-        (click)="saveNote()" aria-label="Save note">
-        <span class="material-icons-outlined">save</span> Save Note
+        (click)="saveNote()" [attr.aria-label]="'activityHistory.saveNote' | translate">
+        <span class="material-icons-outlined">save</span> {{ 'activityHistory.saveNote2' | translate }}
       </button>
     </div>
     @if (notes().length) {
@@ -48,8 +48,8 @@
               <span class="ea-note-item__author">{{ note.authorName }}</span>
               <span class="ea-note-item__date">{{ note.createdAt | dateTime }}</span>
               <button class="ea-note-item__delete icon-btn icon-btn--danger"
-                (click)="deleteNote(note)" aria-label="Delete note"
-                matTooltip="Delete note" matTooltipPosition="above">
+                (click)="deleteNote(note)" [attr.aria-label]="'activityHistory.deleteNote' | translate"
+                [matTooltip]="'activityHistory.deleteNote' | translate" matTooltipPosition="above">
                 <span class="material-icons-outlined">delete</span>
               </button>
             </div>
@@ -58,24 +58,24 @@
         }
       </div>
     } @else {
-      <p class="ea-empty">No notes yet.</p>
+      <p class="ea-empty">{{ 'activityHistory.noNotesYet' | translate }}</p>
     }
   } @else if (activeFilter() === 'history') {
     @if (historyItems().length) {
       <app-activity-timeline [activities]="historyItems()" [compact]="true" />
     } @else {
-      <p class="ea-empty">No history yet.</p>
+      <p class="ea-empty">{{ 'activityHistory.noHistoryYet' | translate }}</p>
     }
   } @else if (activeFilter() === 'comments') {
     <div class="ea-comment-add">
       <app-rich-text-editor data-testid="activity-comment-input"
-        placeholder="Add a comment..."
+        [placeholder]="'activityHistory.addAComment' | translate"
         [users]="mentionUsers()"
         [formControl]="commentControl" />
       <button class="ea-comment-send" data-testid="activity-comment-send-btn" (click)="postComment()"
         [disabled]="!commentControl.value?.trim()"
-        aria-label="Post comment"
-        matTooltip="Post comment" matTooltipPosition="above">
+        [attr.aria-label]="'activityHistory.postComment' | translate"
+        [matTooltip]="'activityHistory.postComment' | translate" matTooltipPosition="above">
         <span class="material-icons-outlined">send</span>
       </button>
     </div>
@@ -96,7 +96,7 @@
         }
       </div>
     } @else {
-      <p class="ea-empty">No comments yet.</p>
+      <p class="ea-empty">{{ 'activityHistory.noCommentsYet' | translate }}</p>
     }
   } @else {
     @if (allActivityItems().length) {
@@ -110,7 +110,7 @@
                 <span class="material-icons-outlined ea-comment-item__system-icon">history</span>
               }
               @if (item.action === 'note') {
-                <span class="chip chip--muted ea-comment-item__tag">Note</span>
+                <span class="chip chip--muted ea-comment-item__tag">{{ 'activityHistory.note' | translate }}</span>
               }
               <span class="ea-comment-item__time">{{ item.createdAt | dateTime }}</span>
             </div>
@@ -135,7 +135,7 @@
         }
       </div>
     } @else {
-      <p class="ea-empty">No activity yet.</p>
+      <p class="ea-empty">{{ 'activityHistory.noActivityYet2' | translate }}</p>
     }
   }
 </div>

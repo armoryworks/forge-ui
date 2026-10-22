@@ -1,9 +1,9 @@
 <div class="preset-apply-dialog">
   <header class="preset-apply-dialog__header">
     <h3 class="preset-apply-dialog__title" data-testid="preset-apply-dialog-title">
-      Apply {{ data.presetName }}
+      {{ 'shared.presetApplyDialog.applyPresetname' | translate:{ presetName: data.presetName } }}
     </h3>
-    <button class="icon-btn" type="button" (click)="cancel()" aria-label="Close apply dialog"
+    <button class="icon-btn" type="button" (click)="cancel()" [attr.aria-label]="'shared.presetApplyDialog.closeApplyDialog' | translate"
       data-testid="preset-apply-dialog-close">
       <span class="material-icons-outlined">close</span>
     </button>
@@ -14,24 +14,24 @@
       <div class="preset-apply-dialog__noop" data-testid="preset-apply-dialog-noop">
         <span class="material-icons-outlined">check_circle</span>
         <div>
-          <strong>Already at this preset.</strong>
-          <span>The current install state matches {{ data.presetName }} — no capabilities will change.</span>
+          <strong>{{ 'shared.presetApplyDialog.alreadyAtThisPreset' | translate }}</strong>
+          <span>{{ 'shared.presetApplyDialog.theCurrentInstallStateMatchesPresetname' | translate:{ presetName: data.presetName } }}</span>
         </div>
       </div>
     } @else if (data.deltas.length === 0) {
       <div class="preset-apply-dialog__noop" data-testid="preset-apply-dialog-no-deltas">
         <span class="material-icons-outlined">info</span>
-        <span>No capability changes detected.</span>
+        <span>{{ 'shared.presetApplyDialog.noCapabilityChangesDetected' | translate }}</span>
       </div>
     } @else {
       <p class="preset-apply-dialog__intro">
-        This will change <strong>{{ data.deltas.length }}</strong> {{ data.deltas.length === 1 ? 'capability' : 'capabilities' }}:
+        {{ 'shared.presetApplyDialog.thisWillChange' | translate }} <strong>{{ data.deltas.length }}</strong> {{ data.deltas.length === 1 ? 'capability' : 'capabilities' }}:
       </p>
 
       @if (enableDeltas().length > 0) {
         <section class="preset-apply-dialog__section preset-apply-dialog__section--enable" data-testid="preset-apply-dialog-enable-section">
           <h4 class="preset-apply-dialog__section-title">
-            To enable ({{ enableDeltas().length }})
+            {{ 'shared.presetApplyDialog.toEnableCount' | translate:{ count: enableDeltas().length } }}
           </h4>
           <ul class="preset-apply-dialog__list">
             @for (delta of enableDeltas(); track delta.code) {
@@ -50,7 +50,7 @@
       @if (disableDeltas().length > 0) {
         <section class="preset-apply-dialog__section preset-apply-dialog__section--disable" data-testid="preset-apply-dialog-disable-section">
           <h4 class="preset-apply-dialog__section-title">
-            To disable ({{ disableDeltas().length }})
+            {{ 'shared.presetApplyDialog.toDisableCount' | translate:{ count: disableDeltas().length } }}
           </h4>
           <ul class="preset-apply-dialog__list">
             @for (delta of disableDeltas(); track delta.code) {
@@ -71,10 +71,10 @@
       <section class="preset-apply-dialog__violations" data-testid="preset-apply-dialog-violations">
         <h4 class="preset-apply-dialog__section-title">
           <span class="material-icons-outlined">warning</span>
-          Constraint violations ({{ data.violations.length }})
+          {{ 'shared.presetApplyDialog.constraintViolationsCount' | translate:{ count: data.violations.length } }}
         </h4>
         <p class="preset-apply-dialog__violations-help">
-          Apply is blocked until these are resolved.
+          {{ 'shared.presetApplyDialog.applyIsBlockedUntilTheseAre' | translate }}
         </p>
         <ul class="preset-apply-dialog__list">
           @for (v of data.violations; track v.code + v.capability) {
@@ -86,13 +86,13 @@
 
     @if (canConfirm() && !data.noOp) {
       <p class="preset-apply-dialog__note">
-        No data will be deleted. Disabled capabilities keep their data — re-enabling restores them.
+        {{ 'shared.presetApplyDialog.noDataWillBeDeletedDisabled' | translate }}
       </p>
 
       <app-textarea
-        label="Reason (optional)"
+        [label]="'shared.presetApplyDialog.reasonOptional' | translate"
         [formControl]="reasonControl"
-        placeholder="Why are you applying this preset? Captured in audit log."
+        [placeholder]="'shared.presetApplyDialog.whyAreYouApplyingThisPreset' | translate"
         [rows]="2"
         data-testid="preset-apply-dialog-reason" />
     }
@@ -100,7 +100,7 @@
 
   <footer class="preset-apply-dialog__footer">
     <button class="action-btn" type="button" (click)="cancel()" data-testid="preset-apply-dialog-cancel">
-      Cancel
+      {{ 'common.cancel' | translate }}
     </button>
     <button class="action-btn action-btn--primary" type="button"
       (click)="confirm()"

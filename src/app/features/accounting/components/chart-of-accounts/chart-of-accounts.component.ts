@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } 
 import { ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PageLayoutComponent } from '../../../../shared/components/page-layout/page-layout.component';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
@@ -37,6 +37,7 @@ const CASH_FLOW = ['Operating', 'Investing', 'Financing'];
 })
 export class ChartOfAccountsComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly translate = inject(TranslateService);
   private readonly fb = inject(FormBuilder);
   private readonly gl = inject(GeneralLedgerService);
   private readonly snackbar = inject(SnackbarService);
@@ -65,13 +66,13 @@ export class ChartOfAccountsComponent implements OnInit {
   ]);
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'accountNumber', header: 'Number', sortable: true, width: '110px' },
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'accountType', header: 'Type', sortable: true, filterable: true, type: 'enum',
+    { field: 'accountNumber', header: 'columns.number', sortable: true, width: '110px' },
+    { field: 'name', header: 'common.name', sortable: true },
+    { field: 'accountType', header: 'common.type', sortable: true, filterable: true, type: 'enum',
       filterOptions: TYPES.map(t => ({ value: t, label: t })) },
-    { field: 'normalBalance', header: 'Normal', sortable: true, width: '90px' },
-    { field: 'isPostable', header: 'Postable', align: 'center', width: '90px' },
-    { field: 'isActive', header: 'Active', align: 'center', width: '80px' },
+    { field: 'normalBalance', header: 'columns.normalBalance', sortable: true, width: '90px' },
+    { field: 'isPostable', header: 'columns.postable', align: 'center', width: '90px' },
+    { field: 'isActive', header: 'common.active', align: 'center', width: '80px' },
     { field: 'actions', header: '', align: 'right', width: '90px' },
   ];
 
@@ -116,7 +117,7 @@ export class ChartOfAccountsComponent implements OnInit {
   }
 
   protected openEdit(a: GlAccountAdmin): void {
-    if (a.isControlAccount) { this.snackbar.error('Control accounts are system-managed'); return; }
+    if (a.isControlAccount) { this.snackbar.error(this.translate.instant('accounting.coa.controlSystemManaged')); return; }
     this.editing.set(a);
     this.form.reset({
       accountNumber: a.accountNumber, name: a.name, accountType: a.accountType, normalBalance: a.normalBalance,
@@ -133,7 +134,7 @@ export class ChartOfAccountsComponent implements OnInit {
     const v = this.form.getRawValue();
     this.saving.set(true);
     const done = {
-      next: () => { this.snackbar.success('Account saved'); this.saving.set(false); this.dialogOpen.set(false); this.load(); },
+      next: () => { this.snackbar.success(this.translate.instant('accounting.coa.saved')); this.saving.set(false); this.dialogOpen.set(false); this.load(); },
       error: (e: unknown) => { this.snackbar.errorFrom(e, 'errorFallbacksA.glAccountSaveFailed'); this.saving.set(false); },
     };
     const current = this.editing();

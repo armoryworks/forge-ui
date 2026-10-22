@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CurrencyPipe } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -31,7 +32,7 @@ import { SchedulingService } from '../../services/scheduling.service';
   selector: 'app-shift-assignments-panel',
   standalone: true,
   imports: [
-    ReactiveFormsModule, TranslatePipe, DataTableComponent, ColumnCellDirective, DatepickerComponent, DialogComponent,
+    ReactiveFormsModule, CurrencyPipe, TranslatePipe, DataTableComponent, ColumnCellDirective, DatepickerComponent, DialogComponent,
     EmptyStateComponent, InputComponent, SelectComponent, TextareaComponent, ToolbarComponent, SpacerDirective,
     LoadingBlockDirective, ValidationButtonComponent,
   ],

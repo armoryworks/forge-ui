@@ -4,6 +4,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DetailDialogService } from '../../services/detail-dialog.service';
 import { DraftService } from '../../services/draft.service';
 import { DialogComponent } from './dialog.component';
+import { provideTranslateService } from '@ngx-translate/core';
 
 describe('DialogComponent Escape handling', () => {
   let component: DialogComponent;
@@ -14,6 +15,7 @@ describe('DialogComponent Escape handling', () => {
     openPanels = [];
     TestBed.configureTestingModule({
       providers: [
+        provideTranslateService(),
         { provide: MatDialog, useValue: { openDialogs: [], open: vi.fn() } },
         { provide: DraftService, useValue: { register: vi.fn(), unregister: vi.fn(), loadDraft: vi.fn() } },
         { provide: DetailDialogService, useValue: { isCurrent: () => false } },
@@ -88,6 +90,7 @@ describe('DialogComponent Escape handling inside a MatDialog', () => {
   function create(openDialogs: MatDialogRef<unknown>[], currentDetail: MatDialogRef<unknown> | null): { closedCount: () => number; escape: () => void } {
     TestBed.configureTestingModule({
       providers: [
+        provideTranslateService(),
         { provide: MatDialog, useValue: { openDialogs, open: vi.fn() } },
         { provide: MatDialogRef, useValue: hostRef },
         { provide: DraftService, useValue: { register: vi.fn(), unregister: vi.fn(), loadDraft: vi.fn() } },

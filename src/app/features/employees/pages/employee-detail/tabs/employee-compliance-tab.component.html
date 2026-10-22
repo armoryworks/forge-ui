@@ -20,7 +20,7 @@
     [data]="items()"
     [loading]="loading()"
     emptyIcon="fact_check"
-    emptyMessage="No compliance forms found">
+    [emptyMessage]="'employees.employeeComplianceTab.noComplianceFormsFound' | translate">
 
     <ng-template appColumnCell="status" let-row>
       <span class="chip" [class]="getStatusClass(row.status)">{{ row.status }}</span>

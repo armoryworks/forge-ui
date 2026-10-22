@@ -5,7 +5,7 @@
     [data]="stubs()"
     [loading]="loading()"
     emptyIcon="payments"
-    emptyMessage="No pay stubs found">
+    [emptyMessage]="'employees.employeePayTab.noPayStubsFound' | translate">
 
     <ng-template appColumnCell="grossPay" let-row>
       {{ row.grossPay | currency }}

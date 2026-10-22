@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ConfirmDialogComponent, ConfirmDialogData } from '../confirm-dialog/confirm-dialog.component';
 import { DirtyFormIndicatorComponent } from '../dirty-form-indicator/dirty-form-indicator.component';
@@ -31,6 +31,7 @@ export class DialogComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly document = inject(DOCUMENT);
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
   private readonly detailDialog = inject(DetailDialogService);
   // Non-null only when this <app-dialog> is itself rendered inside a MatDialog
   // overlay — in that case the CDK already handles Escape, so we must not
@@ -152,10 +153,10 @@ export class DialogComponent implements OnInit {
       .open(ConfirmDialogComponent, {
         width: '400px',
         data: {
-          title: 'Unsaved Changes',
-          message: 'You have unsaved changes that will be lost. Are you sure you want to close?',
-          confirmLabel: 'Close',
-          cancelLabel: 'Stay',
+          title: this.translate.instant('dialog.unsaved.title'),
+          message: this.translate.instant('dialog.unsaved.message'),
+          confirmLabel: this.translate.instant('common.close'),
+          cancelLabel: this.translate.instant('dialog.unsaved.stay'),
           severity: 'warn',
         } satisfies ConfirmDialogData,
       })

@@ -22,7 +22,7 @@
              (click)="openJob(task)" (keydown.enter)="openJob(task)">
           <div class="task-card__header">
             <span class="task-card__number">{{ task.jobNumber }}</span>
-            <span [class]="getPriorityClass(task.priority)">{{ task.priority }}</span>
+            <span [class]="getPriorityClass(task.priority)">{{ priorityLabel(task.priority) }}</span>
           </div>
 
           <h3 class="task-card__title">{{ task.title }}</h3>

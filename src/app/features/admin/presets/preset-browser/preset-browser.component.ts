@@ -13,6 +13,7 @@ import { PageLayoutComponent } from '../../../../shared/components/page-layout/p
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { PresetService } from '../../../../shared/services/preset.service';
 import { PresetSummary } from '../../../../shared/models/preset.model';
+import { TranslatePipe } from '@ngx-translate/core';
 
 /**
  * Phase 4 Phase-G — Preset browser landing page.
@@ -26,7 +27,7 @@ import { PresetSummary } from '../../../../shared/models/preset.model';
 @Component({
   selector: 'app-preset-browser',
   standalone: true,
-  imports: [CommonModule, RouterModule, PageLayoutComponent, LoadingBlockDirective],
+  imports: [CommonModule, RouterModule, PageLayoutComponent, LoadingBlockDirective, TranslatePipe],
   templateUrl: './preset-browser.component.html',
   styleUrl: './preset-browser.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

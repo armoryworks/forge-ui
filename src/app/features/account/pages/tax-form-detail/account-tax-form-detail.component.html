@@ -38,61 +38,61 @@
                 <!-- W-4 summary -->
                 @if (formType() === 'w4') {
                   <dl class="form-detail__summary-grid">
-                    <dt>Filing Status</dt><dd>{{ summary['filingStatus'] }}</dd>
-                    <dt>Multiple Jobs</dt><dd>{{ summary['multipleJobs'] }}</dd>
-                    <dt>Exempt</dt><dd>{{ summary['exempt'] }}</dd>
+                    <dt>{{ 'account.filingStatus' | translate }}</dt><dd>{{ summary['filingStatus'] }}</dd>
+                    <dt>{{ 'account.multipleJobs' | translate }}</dt><dd>{{ summary['multipleJobs'] }}</dd>
+                    <dt>{{ 'account.exempt' | translate }}</dt><dd>{{ summary['exempt'] }}</dd>
                   </dl>
                   <p class="form-detail__summary-note">
                     <span class="material-icons-outlined">info</span>
-                    You may update your W-4 at any time if your tax situation changes.
+                    {{ 'account.youMayUpdateYourW4' | translate }}
                   </p>
                 }
 
                 <!-- I-9 summary -->
                 @if (formType() === 'i9') {
                   <dl class="form-detail__summary-grid">
-                    <dt>Citizenship Status</dt><dd>{{ summary['citizenshipStatus'] }}</dd>
-                    <dt>Documents Verified</dt>
+                    <dt>{{ 'account.citizenshipStatus' | translate }}</dt><dd>{{ summary['citizenshipStatus'] }}</dd>
+                    <dt>{{ 'account.documentsVerified' | translate }}</dt>
                     <dd>{{ identityDocuments().length > 0 ? identityDocuments().length + ' document(s) on file' : 'Verified on file' }}</dd>
                   </dl>
                   <p class="form-detail__summary-note form-detail__summary-note--warn">
                     <span class="material-icons-outlined">lock</span>
-                    I-9 forms cannot be changed after submission. Contact HR for corrections.
+                    {{ 'account.i9FormsCannotBeChanged' | translate }}
                   </p>
                 }
 
                 <!-- State withholding summary -->
                 @if (formType() === 'stateWithholding') {
                   <dl class="form-detail__summary-grid">
-                    <dt>Filing Status</dt><dd>{{ summary['filingStatus'] }}</dd>
-                    <dt>Allowances</dt><dd>{{ summary['allowances'] }}</dd>
-                    <dt>Additional Withholding</dt><dd>${{ summary['additionalWithholding'] }}</dd>
-                    <dt>Exempt</dt><dd>{{ summary['exempt'] }}</dd>
+                    <dt>{{ 'account.filingStatus' | translate }}</dt><dd>{{ summary['filingStatus'] }}</dd>
+                    <dt>{{ 'account.allowances' | translate }}</dt><dd>{{ summary['allowances'] }}</dd>
+                    <dt>{{ 'account.additionalWithholding' | translate }}</dt><dd>${{ summary['additionalWithholding'] }}</dd>
+                    <dt>{{ 'account.exempt' | translate }}</dt><dd>{{ summary['exempt'] }}</dd>
                   </dl>
                   <p class="form-detail__summary-note">
                     <span class="material-icons-outlined">info</span>
-                    You may update your state withholding if your tax situation changes.
+                    {{ 'account.youMayUpdateYourStateWithholding' | translate }}
                   </p>
                 }
 
                 <!-- Direct deposit summary -->
                 @if (formType() === 'directDeposit') {
                   <dl class="form-detail__summary-grid">
-                    <dt>Bank</dt><dd>{{ summary['bankName'] }}</dd>
-                    <dt>Account Type</dt><dd>{{ summary['accountType'] }}</dd>
-                    <dt>Routing (last 4)</dt><dd class="form-detail__summary-mono">••••{{ summary['routingLast4'] }}</dd>
-                    <dt>Account (last 4)</dt><dd class="form-detail__summary-mono">••••{{ summary['accountLast4'] }}</dd>
+                    <dt>{{ 'account.bank' | translate }}</dt><dd>{{ summary['bankName'] }}</dd>
+                    <dt>{{ 'account.accountType' | translate }}</dt><dd>{{ summary['accountType'] }}</dd>
+                    <dt>{{ 'account.routingLast4' | translate }}</dt><dd class="form-detail__summary-mono">••••{{ summary['routingLast4'] }}</dd>
+                    <dt>{{ 'account.accountLast4' | translate }}</dt><dd class="form-detail__summary-mono">••••{{ summary['accountLast4'] }}</dd>
                   </dl>
                   <p class="form-detail__summary-note">
                     <span class="material-icons-outlined">info</span>
-                    Contact payroll if you need to update your direct deposit information.
+                    {{ 'account.contactPayrollIfYouNeedTo' | translate }}
                   </p>
                 }
 
                 <!-- Workers' comp / handbook summary -->
                 @if (formType() === 'workersComp' || formType() === 'handbook') {
                   <p class="form-detail__card-text">
-                    Acknowledged on {{ completedDate() | date:'MM/dd/yyyy' }}.
+                    {{ 'account.acknowledgedOnCompleteddate' | translate:{ completedDate: (completedDate() | date:'MM/dd/yyyy') } }}
                   </p>
                 }
               } @else {
@@ -374,7 +374,7 @@
           <!-- List A -->
           <div class="form-detail__doc-list-section">
             <div class="form-detail__doc-list-header">
-              <span class="form-detail__doc-list-badge form-detail__doc-list-badge--a">List A</span>
+              <span class="form-detail__doc-list-badge form-detail__doc-list-badge--a">{{ 'account.listA' | translate }}</span>
               <span class="form-detail__doc-list-title">{{ 'account.docListATitle' | translate }}</span>
             </div>
             <p class="form-detail__doc-list-desc">{{ 'account.docListADesc' | translate }}</p>
@@ -388,7 +388,7 @@
           <!-- List B + C -->
           <div class="form-detail__doc-list-section">
             <div class="form-detail__doc-list-header">
-              <span class="form-detail__doc-list-badge form-detail__doc-list-badge--b">List B</span>
+              <span class="form-detail__doc-list-badge form-detail__doc-list-badge--b">{{ 'account.listB' | translate }}</span>
               <span class="form-detail__doc-list-title">{{ 'account.docListBTitle' | translate }}</span>
             </div>
             <p class="form-detail__doc-list-desc">{{ 'account.docListBDesc' | translate }}</p>
@@ -401,7 +401,7 @@
 
           <div class="form-detail__doc-list-section">
             <div class="form-detail__doc-list-header">
-              <span class="form-detail__doc-list-badge form-detail__doc-list-badge--c">List C</span>
+              <span class="form-detail__doc-list-badge form-detail__doc-list-badge--c">{{ 'account.listC' | translate }}</span>
               <span class="form-detail__doc-list-title">{{ 'account.docListCTitle' | translate }}</span>
             </div>
             <p class="form-detail__doc-list-desc">{{ 'account.docListCDesc' | translate }}</p>
@@ -413,7 +413,7 @@
           <div dialog-footer>
             <button class="action-btn action-btn--primary" (click)="showDocsDialog.set(false)">
               <span class="material-icons-outlined">close</span>
-              Done
+              {{ 'common.done' | translate }}
             </button>
           </div>
         </app-dialog>

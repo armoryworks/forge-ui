@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, OnInit, signal,
 } from '@angular/core';
 
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 
 import { SignalrService } from '../../services/signalr.service';
 
@@ -14,6 +14,7 @@ const DEBOUNCE_MS = 15_000;
 
 @Component({
   selector: 'app-connection-banner',
+  imports: [TranslatePipe],
   standalone: true,
   templateUrl: './connection-banner.component.html',
   styleUrl: './connection-banner.component.scss',

@@ -32,6 +32,9 @@
  *    • inline `template:` in components   (templateUrl only)
  *    • raw <input>/<select>/<textarea> in (use the shared wrappers — see
  *      feature templates                    "Form Controls" in CLAUDE.md)
+ *    • English string literal passed to   (pass translate.instant('key') so
+ *      a snackbar call or a confirm         Spanish users see Spanish)
+ *      dialog title/message/label in .ts
  *
  * Exit code: 0 on pass, 1 on any failure.
  */
@@ -364,6 +367,54 @@ function dateOnlyFieldsInLocalTime() {
   return out;
 }
 
+const I18N_KEY = /^[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)+$/;
+const isEnglishLiteral = (quote, body) => {
+  const text = quote === '`' ? body.replace(/\$\{[^}]*\}/g, ' ') : body;
+  return /\p{L}/u.test(text) && !(quote !== '`' && I18N_KEY.test(body));
+};
+
+const isEnglishSentence = (quote, body) => {
+  const text = (quote === '`' ? body.replace(/\$\{[^}]*\}/g, '') : body).trim();
+  return /\p{L}{2,}/u.test(text) && /\s/.test(text) && !I18N_KEY.test(body);
+};
+
+function englishLiteralsInSnackbarAndDialogs() {
+  const out = new Map();
+  const snackbarCall = /\b\w*[sS]nack[bB]ar\w*\.(?!errorFrom\b)\w+\(/g;
+  const firstLiteral = /^\s*(['"`])((?:\\.|(?!\1)[^\\])*)\1/;
+  const anyLiteral = /(['"`])((?:\\.|(?!\1)[^\\])*)\1/g;
+  const translateKeyArg = /\b(?:instant|get|stream)\(\s*(['"`])[^'"`]*\1/g;
+  const dialogText = /\b(?:title|message|confirmLabel|cancelLabel)\s*:\s*(['"`])((?:\\.|(?!\1)[^\\])*)\1/g;
+  for (const f of walk(SRC, ['.ts'])) {
+    if (isSpec(f)) continue;
+    const src = stripTsComments(read(f));
+    let n = 0;
+    for (const m of src.matchAll(snackbarCall)) {
+      const open = m.index + m[0].length - 1;
+      const args = src.slice(open + 1, skipBalanced(src, open, '(', ')') - 1);
+      const first = firstLiteral.exec(args);
+      if (first && isEnglishLiteral(first[1], first[2])) {
+        n++;
+        continue;
+      }
+      for (const l of args.replace(translateKeyArg, '').matchAll(anyLiteral)) {
+        if (isEnglishSentence(l[1], l[2])) n++;
+      }
+    }
+    if (/ConfirmDialogData\b/.test(src)) {
+      for (const d of src.matchAll(/\bdata\s*:\s*\{/g)) {
+        const start = d.index + d[0].length - 1;
+        const block = src.slice(start, skipBalanced(src, start, '{', '}'));
+        for (const m of block.matchAll(dialogText)) {
+          if (isEnglishLiteral(m[1], m[2])) n++;
+        }
+      }
+    }
+    if (n) out.set(rel(f), n);
+  }
+  return out;
+}
+
 // ── evaluation ───────────────────────────────────────────────────────────────
 
 const HARD = [
@@ -381,6 +432,7 @@ const RATCHET = [
   ['raw-table-in-features', 'raw <table> in a feature (prefer <app-data-table> for entity lists)', rawTablesInFeatures],
   ['date-only-in-local-time', 'due / delivery / document / expiry date rendered with the `date` pipe in local time (use `dateOnly`, or pass \'UTC\')', dateOnlyFieldsInLocalTime],
   ['hardcoded-text-in-templates', 'hardcoded user-facing text in a template (text node or title/placeholder/aria-label without the translate pipe)', hardcodedTextInTemplates],
+  ['english-literal-in-snackbar-or-dialog', 'English string literal passed to a snackbar call or a confirm dialog title/message/label in .ts (use translate.instant with a catalog key)', englishLiteralsInSnackbarAndDialogs],
 ];
 
 function loadAllow() {

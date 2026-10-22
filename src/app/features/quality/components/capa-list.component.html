@@ -1,12 +1,12 @@
 <div class="filters-bar">
-  <app-select label="Type" [formControl]="typeFilter" [options]="typeOptions" (selectionChange)="loadCapas()" />
-  <app-select label="Status" [formControl]="statusFilter" [options]="statusOptions" (selectionChange)="loadCapas()" />
+  <app-select [label]="'common.type' | translate" [formControl]="typeFilter" [options]="typeOptions" (selectionChange)="loadCapas()" />
+  <app-select [label]="'common.status' | translate" [formControl]="statusFilter" [options]="statusOptions" (selectionChange)="loadCapas()" />
 </div>
 
 <div [appLoadingBlock]="loading()">
   <app-data-table tableId="capa-list" [columns]="columns" [data]="capas()"
     [clickableRows]="true" (rowClick)="openDetail($event)"
-    emptyIcon="assignment_turned_in" emptyMessage="No corrective actions found">
+    emptyIcon="assignment_turned_in" [emptyMessage]="'quality.capaList.noCorrectiveActionsFound' | translate">
     <ng-template appColumnCell="capaNumber" let-row>
       <span class="capa-list__number">{{ row.capaNumber }}</span>
     </ng-template>
@@ -38,28 +38,28 @@
 </div>
 
 @if (showCreateDialog()) {
-  <app-dialog title="Create CAPA" width="520px" (closed)="showCreateDialog.set(false)">
+  <app-dialog [title]="'quality.capaList.createCapa' | translate" width="520px" (closed)="showCreateDialog.set(false)">
     <div [formGroup]="createForm">
       <div class="dialog-row">
-        <app-select label="Type" formControlName="type" [options]="typeOptions.slice(1)" [required]="true" />
-        <app-select label="Source" formControlName="sourceType" [options]="sourceTypeOptions" [required]="true" />
+        <app-select [label]="'common.type' | translate" formControlName="type" [options]="typeOptions.slice(1)" [required]="true" />
+        <app-select [label]="'quality.capaList.source' | translate" formControlName="sourceType" [options]="sourceTypeOptions" [required]="true" />
       </div>
-      <app-input label="Title" formControlName="title" [required]="true" />
-      <app-textarea label="Problem Description" formControlName="problemDescription" [required]="true" />
-      <app-textarea label="Impact Description" formControlName="impactDescription" />
+      <app-input [label]="'common.title' | translate" formControlName="title" [required]="true" />
+      <app-textarea [label]="'quality.capaList.problemDescription' | translate" formControlName="problemDescription" [required]="true" />
+      <app-textarea [label]="'quality.capaList.impactDescription' | translate" formControlName="impactDescription" />
       <div class="dialog-row">
         <app-select [label]="'capas.owner' | translate" formControlName="ownerId" [options]="userOptions()" [required]="true"
           data-testid="capa-create-owner" />
-        <app-select label="Priority" formControlName="priority" [options]="priorityOptions" />
+        <app-select [label]="'common.priority' | translate" formControlName="priority" [options]="priorityOptions" />
       </div>
-      <app-datepicker label="Due Date" formControlName="dueDate" />
+      <app-datepicker [label]="'common.dueDate' | translate" formControlName="dueDate" />
     </div>
     <div dialog-footer>
-      <button class="action-btn" (click)="showCreateDialog.set(false)">Cancel</button>
+      <button class="action-btn" (click)="showCreateDialog.set(false)">{{ 'common.cancel' | translate }}</button>
       <app-validation-button [violations]="createViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
         [disabled]="createForm.invalid || saving()"
-        (click)="saveCapa()">Create</button>
+        (click)="saveCapa()">{{ 'common.create' | translate }}</button>
       </app-validation-button>
     </div>
   </app-dialog>

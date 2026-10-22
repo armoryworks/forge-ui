@@ -7,7 +7,7 @@ import { WorkerTask } from './models/worker-task.model';
 import { AuthService } from '../../shared/services/auth.service';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
 
 @Component({
@@ -22,6 +22,7 @@ export class WorkerComponent {
   private readonly workerService = inject(WorkerService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(true);
   protected readonly tasks = signal<WorkerTask[]>([]);
@@ -60,6 +61,13 @@ export class WorkerComponent {
 
   protected openJob(task: WorkerTask): void {
     this.router.navigate(['/kanban'], { queryParams: { detail: `job:${task.id}` } });
+  }
+
+  protected priorityLabel(priority: string | null | undefined): string {
+    if (!priority) return '';
+    const key = `priority.${priority.toLowerCase()}`;
+    const text = this.translate.instant(key);
+    return text === key ? priority : text;
   }
 
   protected getPriorityClass(priority: string): string {

@@ -25,7 +25,7 @@
     </div>
   }
 
-  <button class="label__print-btn" (click)="print()" title="Print label">
+  <button class="label__print-btn" (click)="print()" [title]="'shared.productionLabel.printLabel' | translate">
     <span class="material-icons-outlined">print</span>
   </button>
 </div>

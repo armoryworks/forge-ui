@@ -6,6 +6,7 @@ import { ThemeService } from '../../services/theme.service';
 import { ChartData, ChartOptions } from 'chart.js';
 
 import { SankeyFlowItem } from '../../../features/reports/models/sankey-flow-item.model';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface SankeyDataPoint {
   from: string;
@@ -32,7 +33,7 @@ const FLOW_FORMAT = new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 
 @Component({
   selector: 'app-sankey-chart',
   standalone: true,
-  imports: [BaseChartDirective],
+  imports: [BaseChartDirective, TranslatePipe],
   templateUrl: './sankey-chart.component.html',
   styleUrl: './sankey-chart.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

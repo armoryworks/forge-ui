@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 import { MfaChallengeComponent } from './mfa-challenge.component';
 import { MfaService } from '../account/services/mfa.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { provideTranslateService } from '@ngx-translate/core';
 
 interface ChallengeInternals {
   codeForm: FormGroup;
@@ -22,6 +23,7 @@ describe('MfaChallengeComponent', () => {
     TestBed.configureTestingModule({
       imports: [MfaChallengeComponent],
       providers: [
+        provideTranslateService(),
         { provide: MfaService, useValue: mfa },
         { provide: SnackbarService, useValue: { errorFrom: vi.fn() } },
       ],

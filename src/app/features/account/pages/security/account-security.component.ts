@@ -176,15 +176,15 @@ export class AccountSecurityComponent implements OnInit {
 
   protected async addPasskey(): Promise<void> {
     if (!this.passkeyService.supported()) {
-      this.snackbar.error('This browser does not support passkeys.');
+      this.snackbar.error(this.translate.instant('account.mfa.passkeyUnsupported'));
       return;
     }
     try {
       const name = await this.passkeyService.register();
-      this.snackbar.success(`Passkey "${name}" added.`);
+      this.snackbar.success(this.translate.instant('account.mfa.passkeyAdded', { name }));
       this.loadMfaStatus();
     } catch {
-      this.snackbar.error('Passkey registration was not completed.');
+      this.snackbar.error(this.translate.instant('account.mfa.passkeyIncomplete'));
     }
   }
 
@@ -224,16 +224,16 @@ export class AccountSecurityComponent implements OnInit {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Remove Device?',
+        title: this.translate.instant('account.mfaRemoveDeviceTitle'),
         message: this.translate.instant(isLastDevice ? 'account.mfaRemoveLastDevice' : 'account.mfaRemoveDevice', { name }),
-        confirmLabel: 'Remove',
+        confirmLabel: this.translate.instant('common.remove'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
       if (confirmed) {
         this.mfaService.removeDevice(device.id).subscribe({
           next: () => {
-            this.snackbar.success('Device removed');
+            this.snackbar.success(this.translate.instant('account.mfa.deviceRemoved'));
             this.loadMfaStatus();
           },
           error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.removeDeviceFailed'),
@@ -246,16 +246,16 @@ export class AccountSecurityComponent implements OnInit {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Disable MFA?',
-        message: 'This will remove all MFA devices and recovery codes. Your account will be less secure.',
-        confirmLabel: 'Disable MFA',
+        title: this.translate.instant('account.mfa.disableTitle'),
+        message: this.translate.instant('account.mfa.disableMessage'),
+        confirmLabel: this.translate.instant('account.mfa.disable'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
       if (confirmed) {
         this.mfaService.disable().subscribe({
           next: () => {
-            this.snackbar.success('Two-factor authentication disabled');
+            this.snackbar.success(this.translate.instant('account.mfa.disabled'));
             this.loadMfaStatus();
           },
           error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.disableMfaFailed'),

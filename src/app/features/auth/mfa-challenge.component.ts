@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, input, output, signal, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InputComponent } from '../../shared/components/input/input.component';
 import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
@@ -11,7 +12,7 @@ import { MfaChallengeResponse, MfaValidateResponse } from '../account/models/mfa
 @Component({
   selector: 'app-mfa-challenge',
   standalone: true,
-  imports: [ReactiveFormsModule, InputComponent, ValidationButtonComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, ValidationButtonComponent],
   templateUrl: './mfa-challenge.component.html',
   styleUrl: './mfa-challenge.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -19,6 +20,7 @@ import { MfaChallengeResponse, MfaValidateResponse } from '../account/models/mfa
 export class MfaChallengeComponent implements OnInit {
   private readonly mfaService = inject(MfaService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   readonly pendingToken = input.required<string>();
   readonly allowRememberDevice = input(true);
@@ -41,7 +43,7 @@ export class MfaChallengeComponent implements OnInit {
   });
 
   protected readonly codeViolations = FormValidationService.getViolations(this.codeForm, {
-    code: 'Verification Code',
+    code: this.translate.instant('account.mfa.verificationCode'),
   });
 
   ngOnInit(): void {
@@ -76,7 +78,7 @@ export class MfaChallengeComponent implements OnInit {
       },
       error: () => {
         this.verifying.set(false);
-        this.error.set('Invalid verification code');
+        this.error.set(this.translate.instant('auth.mfa.invalidCode'));
         this.codeForm.controls.code.reset();
       },
     });
@@ -100,7 +102,7 @@ export class MfaChallengeComponent implements OnInit {
       },
       error: () => {
         this.verifying.set(false);
-        this.error.set('Invalid recovery code');
+        this.error.set(this.translate.instant('auth.mfa.invalidRecoveryCode'));
         this.recoveryForm.controls.recoveryCode.reset();
       },
     });

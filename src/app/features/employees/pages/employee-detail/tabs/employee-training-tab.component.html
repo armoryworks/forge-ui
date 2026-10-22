@@ -5,7 +5,7 @@
     [data]="items()"
     [loading]="loading()"
     emptyIcon="school"
-    emptyMessage="No training records found">
+    [emptyMessage]="'employees.employeeTrainingTab.noTrainingRecordsFound' | translate">
 
     <ng-template appColumnCell="status" let-row>
       <span class="chip" [class]="getStatusClass(row.status)">{{ row.status }}</span>

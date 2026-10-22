@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { FormGroup, FormControl } from '@angular/forms';
 import { signal } from '@angular/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { DraftService } from './draft.service';
 import { DraftStorageService } from './draft-storage.service';
@@ -62,6 +63,7 @@ describe('DraftService', () => {
 
     TestBed.configureTestingModule({
       providers: [
+        provideTranslateService(),
         DraftService,
         { provide: DraftStorageService, useValue: mockStorage },
         { provide: DraftBroadcastService, useValue: mockBroadcast },

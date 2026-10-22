@@ -3,6 +3,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { DashboardService } from '../services/dashboard.service';
 import { DashboardData } from '../models/dashboard-data.model';
+import { LanguageService } from '../../../shared/services/language.service';
 
 @Component({
   selector: 'app-ambient-mode',
@@ -14,6 +15,7 @@ import { DashboardData } from '../models/dashboard-data.model';
 })
 export class AmbientModeComponent implements OnInit, OnDestroy {
   private readonly dashboardService = inject(DashboardService);
+  private readonly language = inject(LanguageService);
 
   readonly exit = output<void>();
 
@@ -54,7 +56,7 @@ export class AmbientModeComponent implements OnInit, OnDestroy {
   };
 
   protected formatTime(d: Date): string {
-    return d.toLocaleTimeString('en-US', {
+    return d.toLocaleTimeString(this.language.intlLocale(), {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
@@ -63,6 +65,6 @@ export class AmbientModeComponent implements OnInit, OnDestroy {
   }
 
   protected formatDate(d: Date): string {
-    return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    return d.toLocaleDateString(this.language.intlLocale(), { weekday: 'long', month: 'long', day: 'numeric' });
   }
 }
