@@ -109,6 +109,7 @@ export class NotificationsComponent {
     ];
   });
 
+  readonly emailDigestEnabled = signal(this.prefs.get<boolean>('notif:email_digest') ?? true);
   readonly soundEnabled = signal(this.prefs.get<boolean>('notif:sound') ?? true);
 
   setTab(tab: 'all' | 'preferences'): void {
@@ -128,6 +129,7 @@ export class NotificationsComponent {
     this.prefs.set(`notif:${key}`, newVal);
 
     if (key === 'sound') this.soundEnabled.set(newVal);
+    if (key === 'email_digest') this.emailDigestEnabled.set(newVal);
   }
 
   private sourceLabel(source: string): string {

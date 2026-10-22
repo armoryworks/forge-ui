@@ -118,6 +118,7 @@ describe('AppHeaderComponent search', () => {
   type SearchHarness = {
     searchControl: { setValue(v: string): void; value: string | null };
     searchResults: () => unknown[];
+    searchFailed: () => boolean;
     showResults: { (): boolean; set(v: boolean): void };
     onSearchEscape(e: Event): void;
   };
@@ -162,16 +163,19 @@ describe('AppHeaderComponent search', () => {
     expect(component.showResults()).toBe(false);
   });
 
-  it('keeps searching after one request fails', () => {
+  it('shows an error, not an empty result, when a search fails, and keeps searching', () => {
     search.mockReturnValueOnce(throwError(() => new Error('500')));
     component.searchControl.setValue('J-1');
     vi.advanceTimersByTime(300);
     expect(component.searchResults()).toEqual([]);
+    expect(component.searchFailed()).toBe(true);
+    expect(component.showResults()).toBe(true);
 
     search.mockReturnValue(of([{ entityType: 'job', entityId: 15, title: 'J-15' }]));
     component.searchControl.setValue('J-15');
     vi.advanceTimersByTime(300);
     expect(component.searchResults().length).toBe(1);
+    expect(component.searchFailed()).toBe(false);
   });
 
   it('closes the results on Escape, then clears the term on a second Escape', () => {

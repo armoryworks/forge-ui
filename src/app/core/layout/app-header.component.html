@@ -81,7 +81,9 @@
               <span class="search-result__type">{{ entityTypeLabel(result.entityType) }}</span>
             </button>
           }
-          @if (searchResults().length === 0 && navMatches().length === 0) {
+          @if (searchFailed()) {
+            <div class="search-results__empty search-results__empty--error" role="alert" data-testid="search-error">{{ 'header.searchFailed' | translate }}</div>
+          } @else if (searchResults().length === 0 && navMatches().length === 0) {
             <div class="search-results__empty">{{ 'header.noMatches' | translate }}</div>
           }
         </div>

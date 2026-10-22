@@ -15,9 +15,11 @@ describe('NotificationsComponent', () => {
   });
 
   let confirmDismissAll: ReturnType<typeof vi.fn>;
+  let setPref: ReturnType<typeof vi.fn>;
 
-  function create(query: Record<string, string> = {}) {
+  function create(query: Record<string, string> = {}, prefs: Record<string, unknown> = {}) {
     confirmDismissAll = vi.fn();
+    setPref = vi.fn();
     TestBed.configureTestingModule({
       providers: [
         {
@@ -29,7 +31,7 @@ describe('NotificationsComponent', () => {
             markAllRead: vi.fn(),
           },
         },
-        { provide: UserPreferencesService, useValue: { get: () => null, set: vi.fn() } },
+        { provide: UserPreferencesService, useValue: { get: (k: string) => prefs[k] ?? null, set: setPref } },
         { provide: TranslateService, useValue: { instant: (k: string) => k } },
         { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap(query) } } },
       ],
@@ -62,5 +64,19 @@ describe('NotificationsComponent', () => {
 
   it('opens on the preferences tab when linked there', () => {
     expect(create({ tab: 'preferences' }).activeTab()).toBe('preferences');
+  });
+
+  it('sends the daily digest by default and lets the user turn it off', () => {
+    const page = create();
+    expect(page.emailDigestEnabled()).toBe(true);
+
+    page.togglePref('email_digest', page.emailDigestEnabled());
+
+    expect(setPref).toHaveBeenCalledWith('notif:email_digest', false);
+    expect(page.emailDigestEnabled()).toBe(false);
+  });
+
+  it('shows a saved digest opt-out', () => {
+    expect(create({}, { 'notif:email_digest': false }).emailDigestEnabled()).toBe(false);
   });
 });

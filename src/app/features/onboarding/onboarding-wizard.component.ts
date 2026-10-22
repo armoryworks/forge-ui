@@ -47,6 +47,8 @@ const REVIEW_STATE_KEY = 'forge-onboarding-review-state';
 const MAX_DEPENDENTS = 20;
 const MAX_STATE_ALLOWANCES = 99;
 const MAX_MONEY = 999_999.99;
+const CHILD_TAX_CREDIT = 2200;
+const OTHER_DEPENDENT_CREDIT = 500;
 
 /**
  * Default OnboardingDraftStatus before the server response lands. All Has*
@@ -434,10 +436,10 @@ export class OnboardingWizardComponent {
   );
 
   protected readonly w4Step3a = computed(() =>
-    (this.w4FormValue().qualifyingChildren ?? 0) * 2000
+    (this.w4FormValue().qualifyingChildren ?? 0) * CHILD_TAX_CREDIT
   );
   protected readonly w4Step3b = computed(() =>
-    (this.w4FormValue().otherDependents ?? 0) * 500
+    (this.w4FormValue().otherDependents ?? 0) * OTHER_DEPENDENT_CREDIT
   );
   protected readonly w4Step3Total = computed(() =>
     this.w4Step3a() + this.w4Step3b()

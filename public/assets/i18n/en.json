@@ -329,7 +329,8 @@
     },
     "about": {
       "server": "Server"
-    }
+    },
+    "searchFailed": "Search is unavailable right now. Try again in a moment."
   },
   "app": {
     "updateAvailable": "A new version is available.",
@@ -4207,7 +4208,7 @@
       "multipleJobsInstructions": "Multiple Jobs (Step 2):",
       "multipleJobsDesc": "Check this if you (or your spouse) hold more than one job simultaneously. This prevents under-withholding.",
       "dependentsInstructions": "Dependents (Step 3):",
-      "dependentsDesc": "Enter the number of qualifying children under 17 (line 3a, worth $2,000 each) and other dependents (line 3b, worth $500 each). Most employees leave both at 0.",
+      "dependentsDesc": "Enter the number of qualifying children under 17 (line 3a, worth $2,200 each) and other dependents (line 3b, worth $500 each). Most employees leave both at 0.",
       "otherAdjustmentsInstructions": "Other Adjustments (Step 4 — Optional):",
       "otherAdjustmentsDesc": "Use these fields to fine-tune withholding for investment income, itemized deductions, or extra withholding per paycheck.",
       "exemptInstructions": "Exempt:",
@@ -5379,7 +5380,11 @@
     "updateFailed": "Could not update the notification. Your change was undone.",
     "dismissFailed": "Could not dismiss. The notifications are back in your list.",
     "dismissAllConfirmTitle": "Dismiss all notifications?",
-    "dismissAllConfirmMessage": "Dismiss all {{count}} notifications? Dismissed notifications cannot be brought back."
+    "dismissAllConfirmMessage": "Dismiss all {{count}} notifications? Dismissed notifications cannot be brought back.",
+    "emailNotifications": "Email Notifications",
+    "dailyDigest": "Daily digest",
+    "dailyDigestDesc": "A morning email with your overdue jobs, jobs due in the next three days and yesterday's completions",
+    "toggleDailyDigest": "Toggle the daily digest email"
   },
   "auth": {
     "appName": "Armory Works Forge",
@@ -5452,6 +5457,8 @@
     "bundleJobShop": "Job shop: quote, make, ship, invoice",
     "passwordChangedSignIn": "Password changed. Sign in with your new password.",
     "mfa": {
+      "invalidCode": "Invalid verification code",
+      "invalidRecoveryCode": "Invalid recovery code",
       "challengeExpired": "This verification has expired. Please sign in again.",
       "tooManyAttempts": "Too many incorrect codes. Wait a few minutes, then sign in again.",
       "verifyFailed": "Could not check the code. Please try again."

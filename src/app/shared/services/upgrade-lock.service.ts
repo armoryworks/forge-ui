@@ -90,7 +90,7 @@ export class UpgradeLockService {
   private async readMarker(): Promise<void> {
     try {
       const response = await fetch(MARKER_URL, { cache: 'no-store' });
-      // 204 (or 404 from older proxies) is the resting state: no marker means no upgrade in flight.
+      // 404 is the resting state: no marker means no upgrade in flight.
       const hasMarker = response.ok && response.status !== 204;
       this.apply(hasMarker ? ((await response.json()) as UpgradeStatus) : null);
     } catch {

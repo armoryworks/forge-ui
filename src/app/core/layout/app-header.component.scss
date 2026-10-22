@@ -253,6 +253,10 @@
   color: var(--text-muted);
 }
 
+.search-results__empty--error {
+  color: var(--error);
+}
+
 .search-results__thinking {
   display: flex; align-items: center; gap: $sp-sm;
   padding: $sp-md $sp-lg;

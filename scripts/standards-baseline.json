@@ -153,7 +153,7 @@
   },
   "date-only-in-local-time": {},
   "hardcoded-text-in-templates": {
-    "src/app/core/layout/app-header.component.html": 13,
+    "src/app/core/layout/app-header.component.html": 11,
     "src/app/features/account/account.component.html": 2,
     "src/app/features/account/components/compliance-form-renderer/compliance-form-renderer.component.html": 21,
     "src/app/features/account/components/mfa-recovery-codes-dialog/mfa-recovery-codes-dialog.component.html": 4,

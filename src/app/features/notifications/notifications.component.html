@@ -34,6 +34,21 @@
 
   @if (activeTab() === 'preferences') {
     <div class="pref-section">
+      <h3 class="pref-section__title">{{ 'notifications.emailNotifications' | translate }}</h3>
+
+      <div class="pref-row" role="button" tabindex="0" data-testid="pref-email-digest" [attr.aria-label]="'notifications.toggleDailyDigest' | translate" (click)="togglePref('email_digest', emailDigestEnabled())" (keydown.enter)="togglePref('email_digest', emailDigestEnabled())">
+        <div class="pref-row__info">
+          <span class="pref-row__label">{{ 'notifications.dailyDigest' | translate }}</span>
+          <span class="pref-row__desc">{{ 'notifications.dailyDigestDesc' | translate }}</span>
+        </div>
+        <span class="material-icons-outlined pref-row__toggle"
+              [class.pref-row__toggle--on]="emailDigestEnabled()">
+          {{ emailDigestEnabled() ? 'toggle_on' : 'toggle_off' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="pref-section">
       <h3 class="pref-section__title">{{ 'notifications.inAppNotifications' | translate }}</h3>
 
       <div class="pref-row" role="button" tabindex="0" [attr.aria-label]="'notifications.toggleSound' | translate" (click)="togglePref('sound', soundEnabled())" (keydown.enter)="togglePref('sound', soundEnabled())">

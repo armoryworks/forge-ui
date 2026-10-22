@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { FormGroup } from '@angular/forms';
 import { Observable, of, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { MfaChallengeComponent } from './mfa-challenge.component';
 import { MfaService } from '../account/services/mfa.service';
@@ -27,6 +28,7 @@ describe('MfaChallengeComponent', () => {
       providers: [
         { provide: MfaService, useValue: mfa },
         { provide: SnackbarService, useValue: snackbar },
+        provideTranslateService(),
       ],
     });
   });

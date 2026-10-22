@@ -97,6 +97,8 @@ describe('OnboardingWizardComponent step gating', () => {
     w4Form: FormGroup;
     stateForm: FormGroup;
     addressForm: FormGroup;
+    w4Step3a(): number;
+    w4Step3Total(): number;
   }
 
   function create(step: string, draft: Partial<OnboardingDraftStatus> = {}) {
@@ -150,6 +152,16 @@ describe('OnboardingWizardComponent step gating', () => {
     expect(state['stateAllowances'].hasError('min')).toBe(true);
     state['stateAdditionalWithholding'].setValue(-10);
     expect(state['stateAdditionalWithholding'].hasError('min')).toBe(true);
+  });
+
+  it('values W-4 step 3 at the current-year credits: $2,200 per child, $500 per other dependent', () => {
+    const { api } = create('0');
+    api.w4Form.controls['qualifyingChildren'].setValue(2);
+    api.w4Form.controls['otherDependents'].setValue(1);
+    TestBed.tick();
+
+    expect(api.w4Step3a()).toBe(4400);
+    expect(api.w4Step3Total()).toBe(4900);
   });
 
   it('does not require a state filing status where the state has no income tax', () => {
