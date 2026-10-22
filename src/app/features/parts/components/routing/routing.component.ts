@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, input, signal } from '@angular/core';
+import { PercentPipe } from '@angular/common';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 
 import { forkJoin } from 'rxjs';
@@ -25,7 +26,7 @@ type RoutingViewMode = 'list' | 'flow';
 @Component({
   selector: 'app-routing',
   standalone: true,
-  imports: [EmptyStateComponent, LoadingBlockDirective, TranslatePipe, MatTooltipModule, RoutingFlowViewComponent, DragDropModule, DurationMsPipe],
+  imports: [EmptyStateComponent, LoadingBlockDirective, TranslatePipe, MatTooltipModule, RoutingFlowViewComponent, DragDropModule, DurationMsPipe, PercentPipe],
   templateUrl: './routing.component.html',
   styleUrl: './routing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

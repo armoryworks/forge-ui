@@ -44,6 +44,7 @@ function makeOperation(overrides: Partial<Operation> = {}): Operation {
     subcontractVendorId: null,
     subcontractVendorName: null,
     subcontractTurnTimeDays: null,
+    scrapFactor: 0,
     ...overrides,
   };
 }
@@ -158,5 +159,50 @@ describe('OperationDialogComponent — estimated time, setup and per-lot fields'
 
     expect(internals.formGroup.controls.setupMinutes.hasError('min')).toBe(true);
     expect(internals.formGroup.controls.runMinutesLot.hasError('min')).toBe(true);
+  });
+});
+
+describe('OperationDialogComponent — scrap factor', () => {
+  it('sends the scrap factor percent as a 0 to 1 fraction on create', () => {
+    const { internals, partsService } = setup({ partId: 3, nextStepNumber: 1 });
+    internals.formGroup.patchValue({ title: 'Mold', scrapFactorPercent: 2.5 });
+
+    internals.save();
+
+    expect(partsService.createOperation.mock.calls[0][1].scrapFactor).toBe(0.025);
+  });
+
+  it('seeds the stored fraction as a percent in edit mode and sends a cleared value as zero', () => {
+    const { internals, partsService } = setup({ partId: 3, operation: makeOperation({ scrapFactor: 0.05 }) });
+    expect(internals.formGroup.controls.scrapFactorPercent.value).toBe(5);
+
+    internals.formGroup.patchValue({ scrapFactorPercent: null });
+    internals.save();
+
+    expect(partsService.updateOperation.mock.calls[0][2].scrapFactor).toBe(0);
+  });
+
+  it('leaves the field blank for an operation with no scrap factor', () => {
+    const { internals } = setup({ partId: 3, operation: makeOperation() });
+
+    expect(internals.formGroup.controls.scrapFactorPercent.value).toBeNull();
+  });
+
+  it('accepts 0 up to just below 100 percent and rejects negatives and 100 or more', () => {
+    const { internals, partsService } = setup({ partId: 3, nextStepNumber: 1 });
+    const scrap = internals.formGroup.controls.scrapFactorPercent;
+
+    for (const ok of [0, 12.5, 99.99]) {
+      scrap.setValue(ok);
+      expect(scrap.valid).toBe(true);
+    }
+    for (const bad of [-1, 100, 150]) {
+      scrap.setValue(bad);
+      expect(scrap.hasError('scrapFactorRange')).toBe(true);
+    }
+
+    internals.formGroup.patchValue({ title: 'Mold' });
+    internals.save();
+    expect(partsService.createOperation).not.toHaveBeenCalled();
   });
 });

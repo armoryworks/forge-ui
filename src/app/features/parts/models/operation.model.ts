@@ -9,6 +9,7 @@ export interface Operation {
   estimatedMs: number | null;
   setupMinutes: number;
   runMinutesLot: number;
+  scrapFactor: number;
   isQcCheckpoint: boolean;
   qcCriteria: string | null;
   referencedOperationId: number | null;

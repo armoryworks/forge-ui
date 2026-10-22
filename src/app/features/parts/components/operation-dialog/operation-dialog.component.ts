@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -100,6 +100,15 @@ export class OperationDialogComponent implements OnInit {
    *  `estimatedMs` for edit mode. Sub-minute remainder (0–59.999) lands in `seconds`. */
   private readonly estParts = OperationDialogComponent.decomposeMs(this.data.operation?.estimatedMs ?? null);
 
+  private readonly scrapFactorRange = (control: AbstractControl): ValidationErrors | null => {
+    const value = control.value;
+    if (value === null || value === undefined || value === '') return null;
+    const percent = Number(value);
+    return percent >= 0 && percent < 100
+      ? null
+      : { scrapFactorRange: { message: this.translate.instant('parts.scrapFactorError') } };
+  };
+
   protected readonly formGroup = new FormGroup({
     stepNumber: new FormControl<number>(this.data.operation?.stepNumber ?? this.data.nextStepNumber ?? 1, [Validators.required, Validators.min(1)]),
     title: new FormControl(this.data.operation?.title ?? '', [Validators.required, Validators.maxLength(200)]),
@@ -112,6 +121,9 @@ export class OperationDialogComponent implements OnInit {
     estSeconds: new FormControl<number | null>(this.estParts.seconds, [Validators.min(0), Validators.max(59.999)]),
     setupMinutes: new FormControl<number | null>(this.data.operation?.setupMinutes ?? null, [Validators.min(0)]),
     runMinutesLot: new FormControl<number | null>(this.data.operation?.runMinutesLot ?? null, [Validators.min(0)]),
+    scrapFactorPercent: new FormControl<number | null>(
+      this.data.operation?.scrapFactor ? Math.round(this.data.operation.scrapFactor * 1_000_000) / 10_000 : null,
+      [this.scrapFactorRange]),
     isQcCheckpoint: new FormControl(this.data.operation?.isQcCheckpoint ?? false),
     qcCriteria: new FormControl(this.data.operation?.qcCriteria ?? ''),
     referencedOperationId: new FormControl<number | null>(this.data.operation?.referencedOperationId ?? null),
@@ -131,6 +143,7 @@ export class OperationDialogComponent implements OnInit {
     estSeconds: this.translate.instant('parts.estSeconds'),
     setupMinutes: this.translate.instant('parts.setupTime'),
     runMinutesLot: this.translate.instant('parts.lotTime'),
+    scrapFactorPercent: this.translate.instant('parts.scrapFactor'),
     subcontractVendorId: this.translate.instant('parts.subcontractVendor'),
     subcontractTurnTimeDays: this.translate.instant('parts.subcontractTurnTimeDays'),
   });
@@ -224,6 +237,7 @@ export class OperationDialogComponent implements OnInit {
     // all-blank composition sends no estimate.
     const composedMs = ((raw.estHours ?? 0) * 3_600_000) + ((raw.estMinutes ?? 0) * 60_000) + Math.round((raw.estSeconds ?? 0) * 1000);
     const estimatedMs = composedMs > 0 ? composedMs : undefined;
+    const scrapFactor = (raw.scrapFactorPercent ?? 0) / 100;
 
     // Phase 3 H5 / WU-13 — only send subcontract metadata when the toggle is
     // on; when off, send the flag as false + clear vendor/turn-time so the
@@ -241,6 +255,7 @@ export class OperationDialogComponent implements OnInit {
         estimatedMs,
         setupMinutes: raw.setupMinutes ?? 0,
         runMinutesLot: raw.runMinutesLot ?? 0,
+        scrapFactor,
         isQcCheckpoint: raw.isQcCheckpoint ?? undefined,
         qcCriteria: raw.qcCriteria || undefined,
         referencedOperationId: raw.referencedOperationId ?? 0,
@@ -264,6 +279,7 @@ export class OperationDialogComponent implements OnInit {
         estimatedMs,
         setupMinutes: raw.setupMinutes ?? undefined,
         runMinutesLot: raw.runMinutesLot ?? undefined,
+        scrapFactor,
         isQcCheckpoint: raw.isQcCheckpoint ?? false,
         qcCriteria: raw.qcCriteria || undefined,
         referencedOperationId: raw.referencedOperationId ?? undefined,
