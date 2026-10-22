@@ -43,6 +43,7 @@ import { LanguageService } from './shared/services/language.service';
 import { ScannerService } from './shared/services/scanner.service';
 import { OfflineQueueService } from './shared/services/offline-queue.service';
 import { DraftRecoveryService } from './shared/services/draft-recovery.service';
+import { WorkflowResumeService } from './shared/services/workflow-resume.service';
 import { DraftBroadcastService } from './shared/services/draft-broadcast.service';
 import { AnnouncementService } from './shared/services/announcement.service';
 import { CapabilityService } from './shared/services/capability.service';
@@ -96,6 +97,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly scanner = inject(ScannerService);
   private readonly offlineQueue = inject(OfflineQueueService);
   private readonly draftRecovery = inject(DraftRecoveryService);
+  private readonly workflowResume = inject(WorkflowResumeService);
   private readonly draftBroadcast = inject(DraftBroadcastService);
   private readonly announcementService = inject(AnnouncementService);
   private readonly capabilityService = inject(CapabilityService);
@@ -145,6 +147,7 @@ export class AppComponent implements OnInit, OnDestroy {
           this.manualNumberSettings.load();
           this.scanner.start();
           this.draftRecovery.onLogin();
+          void this.workflowResume.checkAfterLogin();
         }
         this.userPreferences.load();
         this.terminology.load();
@@ -173,6 +176,7 @@ export class AppComponent implements OnInit, OnDestroy {
           setTimeout(() => this.authService.redirectToLogin());
         }
         this.wasAuthenticated = false;
+        this.workflowResume.reset();
       }
     });
 

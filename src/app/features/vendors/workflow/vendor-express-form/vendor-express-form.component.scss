@@ -12,4 +12,5 @@
   &__title  { margin: 0; font-size: $font-size-lg; color: var(--text); }
   &__hint   { margin: 0; font-size: $font-size-sm; color: var(--text-secondary); }
   &__form   { display: flex; flex-direction: column; gap: $sp-md; width: 100%; max-width: 720px; }
+  &__actions { display: flex; justify-content: flex-end; gap: $sp-md; width: 100%; max-width: 720px; }
 }

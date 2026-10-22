@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, of, switchMap, tap } from 'rxjs';
+import { Observable, map, of, switchMap, tap } from 'rxjs';
 
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -9,7 +10,9 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { AuthService } from '../../../../shared/services/auth.service';
+import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { phoneValidator } from '../../../../shared/validators/phone.validator';
@@ -30,7 +33,7 @@ import { CUSTOMER_COMMERCIAL_TERMS_ROLES } from '../../customer-roles';
   imports: [
     ReactiveFormsModule, TranslatePipe,
     InputComponent, SelectComponent, ToggleComponent, CurrencyInputComponent,
-    LoadingBlockDirective,
+    LoadingBlockDirective, ValidationButtonComponent,
   ],
   templateUrl: './customer-express-form.component.html',
   styleUrl: './customer-express-form.component.scss',
@@ -44,6 +47,7 @@ export class CustomerExpressFormComponent {
   private readonly manualNumberSettings = inject(ManualNumberSettingsService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
 
   readonly stepId = input<string>('express');
   readonly componentName = input<string>('CustomerExpressFormComponent');
@@ -78,6 +82,19 @@ export class CustomerExpressFormComponent {
     taxExemptionId: new FormControl<string>('', { nonNullable: true }),
   });
 
+  private readonly violationLabels: Record<string, string> = {
+    name: this.translate.instant('guidedSetup.customerIdentity.nameLabel'),
+    customerNumber: this.translate.instant('customers.customerNumberLabel'),
+    companyName: this.translate.instant('guidedSetup.customerIdentity.displayNameLabel'),
+    email: this.translate.instant('customers.workflow.identity.emailLabel'),
+    phone: this.translate.instant('customers.workflow.identity.phoneLabel'),
+    creditLimit: this.translate.instant('customers.workflow.creditAndTax.creditLimitLabel'),
+    defaultCurrency: this.translate.instant('customers.workflow.creditAndTax.defaultCurrencyLabel'),
+    isTaxExempt: this.translate.instant('customers.workflow.creditAndTax.isTaxExemptLabel'),
+    taxExemptionId: this.translate.instant('customers.workflow.creditAndTax.taxExemptionIdLabel'),
+  };
+  protected readonly violations = FormValidationService.getViolations(this.form, this.violationLabels);
+
   constructor() {
     effect(() => {
       const customer = this.entity() as CustomerDetail | null;
@@ -104,39 +121,56 @@ export class CustomerExpressFormComponent {
 
     this.workflowService.registerStepForm(
       this.form,
-      {
-        name: this.translate.instant('guidedSetup.customerIdentity.nameLabel'),
-        customerNumber: this.translate.instant('customers.customerNumberLabel'),
-        companyName: this.translate.instant('guidedSetup.customerIdentity.displayNameLabel'),
-        email: this.translate.instant('customers.workflow.identity.emailLabel'),
-        phone: this.translate.instant('customers.workflow.identity.phoneLabel'),
-        creditLimit: this.translate.instant('customers.workflow.creditAndTax.creditLimitLabel'),
-        defaultCurrency: this.translate.instant('customers.workflow.creditAndTax.defaultCurrencyLabel'),
-        isTaxExempt: this.translate.instant('customers.workflow.creditAndTax.isTaxExemptLabel'),
-        taxExemptionId: this.translate.instant('customers.workflow.creditAndTax.taxExemptionIdLabel'),
-      },
-      () => this.save(),
+      this.violationLabels,
+      () => this.persistOnly(),
     );
     this.destroyRef.onDestroy(() => this.workflowService.unregisterStepForm());
   }
 
-  private save(): Observable<unknown> {
+  protected save(): void {
+    if (this.form.invalid || this.saving()) return;
+    const runId = this.runId();
+    if (runId == null) return;
+    const knownEntityId = this.entityId();
+    const needsPatch = this.form.dirty || knownEntityId == null;
+    this.saving.set(true);
+    const persisted$: Observable<number | null> = needsPatch
+      ? this.workflowService.patchStep(runId, 'identity', this.fieldsFromForm()).pipe(
+        tap(() => this.form.markAsPristine()),
+        map((run) => run.entityId),
+      )
+      : of(knownEntityId);
+    persisted$.pipe(
+      switchMap((entityId) => this.workflowService.completeRun(runId).pipe(
+        map((result) => ({ entityId: result.success ? (result.run.entityId ?? entityId) : entityId, result })),
+      )),
+    ).subscribe({
+      next: ({ entityId, result }) => {
+        this.saving.set(false);
+        if (!result.success) {
+          const missing = result.missing
+            .map((m) => this.translate.instant(m.missingMessageKey ?? m.displayNameKey))
+            .join('; ');
+          this.snackbar.error(this.translate.instant('customers.workflow.page.missingValidators', { missing }));
+          return;
+        }
+        const target = entityId != null ? ['/customers', entityId, 'overview'] : ['/customers'];
+        this.router.navigate(target).then(() =>
+          this.snackbar.success(this.translate.instant('customers.workflow.page.completeSuccess')));
+      },
+      error: (err: unknown) => {
+        this.saving.set(false);
+        this.snackbar.errorFrom(err, 'customers.workflow.express.saveFailed');
+      },
+    });
+  }
+
+  private persistOnly(): Observable<unknown> {
     const runId = this.runId();
     if (runId == null) return of(null);
     if (this.form.pristine) return of(null);
-    const value = this.form.getRawValue();
     this.saving.set(true);
-    return this.workflowService.patchStep(runId, 'identity', {
-      name: value.name.trim(),
-      customerNumber: this.allowManualCustomerNumbers() ? (value.customerNumber.trim() || null) : null,
-      companyName: value.companyName.trim() || null,
-      email: value.email.trim() || null,
-      phone: value.phone.trim() || null,
-      creditLimit: value.creditLimit,
-      defaultCurrency: value.defaultCurrency || null,
-      isTaxExempt: value.isTaxExempt,
-      taxExemptionId: value.isTaxExempt ? (value.taxExemptionId.trim() || null) : null,
-    }).pipe(
+    return this.workflowService.patchStep(runId, 'identity', this.fieldsFromForm()).pipe(
       switchMap((run) => {
         if (run.entityId == null) return of(null);
         return this.customerService.getCustomerById(run.entityId).pipe(
@@ -151,5 +185,20 @@ export class CustomerExpressFormComponent {
         },
       }),
     );
+  }
+
+  private fieldsFromForm(): Record<string, unknown> {
+    const value = this.form.getRawValue();
+    return {
+      name: value.name.trim(),
+      customerNumber: this.allowManualCustomerNumbers() ? (value.customerNumber.trim() || null) : null,
+      companyName: value.companyName.trim() || null,
+      email: value.email.trim() || null,
+      phone: value.phone.trim() || null,
+      creditLimit: value.creditLimit,
+      defaultCurrency: value.defaultCurrency || null,
+      isTaxExempt: value.isTaxExempt,
+      taxExemptionId: value.isTaxExempt ? (value.taxExemptionId.trim() || null) : null,
+    };
   }
 }

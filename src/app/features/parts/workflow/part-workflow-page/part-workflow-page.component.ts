@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { forkJoin, map } from 'rxjs';
+import { Observable, forkJoin, map } from 'rxjs';
 
 import { EntityValidator } from '../../../../shared/models/entity-validator.model';
 import { LoadingService } from '../../../../shared/services/loading.service';
@@ -122,12 +122,15 @@ export class PartWorkflowPageComponent {
       //  • /parts/{id}?workflow=...      → load by partId (existing entity)
       //  • /parts/new?runId=N&workflow=… → load by runId (entity not yet materialized)
       if (partId) {
-        this.loadWorkflowContext(partId, definitionId);
+        this.loadWorkflowContext(partId, runId, definitionId);
         return;
       }
       if (runId) {
         this.loadEntitylessWorkflow(runId, definitionId);
+        return;
       }
+      this.router.navigate(['/parts'], { replaceUrl: true })
+        .then(() => this.snackbar.error(this.translate.instant('parts.workflow.page.noRun')));
     });
 
     // Deferred-materialization URL upgrade — when the workflow service emits
@@ -137,7 +140,7 @@ export class PartWorkflowPageComponent {
     // on the right page. Only runs when we're on /parts/new (partId === 0).
     effect(() => {
       const run = this.workflowService.currentRun();
-      if (!run || run.entityId == null) return;
+      if (!run || run.entityId == null || run.mode === 'express') return;
       if (this.partIdFromUrl() !== 0) return; // already on /parts/{id}
       this.router.navigate(['/parts', run.entityId], {
         queryParams: { runId: run.id, mode: run.mode },
@@ -152,6 +155,7 @@ export class PartWorkflowPageComponent {
       const run = this.run();
       if (!target || !run) return;
       if (run.currentStepId === target) return;
+      if (!this.definition()?.steps.some((s) => s.id === target)) return;
       this.run.set({ ...run, currentStepId: target });
     });
 
@@ -202,6 +206,7 @@ export class PartWorkflowPageComponent {
           this.router.navigate(['/parts']);
           return;
         }
+        if (this.leaveClosedRun(run)) return;
         // If the run was already materialized (e.g. user navigated back to
         // /parts/new after the URL upgrade fired), the URL-upgrade effect
         // will swing us to /parts/{id} on the next tick. Until then, render
@@ -214,6 +219,10 @@ export class PartWorkflowPageComponent {
               this.definition.set(definition);
               this.validators.set(validators);
               this.workflowService.setContext({ run, definition, entity: part, validators });
+            },
+            error: (err: unknown) => {
+              this.snackbar.errorFrom(err, 'parts.workflow.page.loadFailed');
+              this.router.navigate(['/parts']);
             },
           });
           return;
@@ -232,17 +241,29 @@ export class PartWorkflowPageComponent {
     });
   }
 
-  private loadWorkflowContext(partId: number, definitionId: string): void {
+  /**
+   * Bound variant: the route is /parts/{id}. A `runId=` in the query string
+   * names the run to mount, whoever started it; without one the page looks
+   * for the current user's open run on this part. A fresh run starts only
+   * for a part still being defined (Draft or Prototype), because the server
+   * reopens a finished part's closed run at step 1 — an Active or Obsolete
+   * part without an open run opens its detail.
+   */
+  private loadWorkflowContext(partId: number, runId: number, definitionId: string): void {
     this.loadError.set(null);
     this.loading.start('part-workflow', this.translate.instant('parts.workflow.page.loading'));
 
+    const candidates$: Observable<WorkflowRun[]> = runId
+      ? this.workflowService.getRun(runId).pipe(map((r) => [r]))
+      : this.workflowService.listActive().pipe(map((runs) => runs.filter((r) => r.completedAt == null && r.abandonedAt == null)));
+
     forkJoin({
       part: this.partsService.getPartById(partId),
-      activeRuns: this.workflowService.listActive(),
+      candidates: candidates$,
       definitions: this.workflowService.loadDefinitionsForEntity('Part'),
       validators: this.workflowService.loadValidatorsForEntity('Part'),
     }).subscribe({
-      next: ({ part, activeRuns, definitions, validators }) => {
+      next: ({ part, candidates, definitions, validators }) => {
         this.loading.stop('part-workflow');
         const definition = definitions.find((d) => d.definitionId === definitionId) ?? null;
         if (!definition) {
@@ -251,12 +272,14 @@ export class PartWorkflowPageComponent {
           return;
         }
 
-        const run = activeRuns.find((r) => r.entityType === 'Part' && r.entityId === partId
-          && r.completedAt == null && r.abandonedAt == null
+        const run = candidates.find((r) => r.entityType === 'Part' && r.entityId === partId
           && r.definitionId === definitionId) ?? null;
 
-        // No active run for this part + definition? Start one.
         if (!run) {
+          if (part.status === 'Active' || part.status === 'Obsolete') {
+            this.router.navigate(['/parts'], { queryParams: { detail: `part:${partId}` }, replaceUrl: true });
+            return;
+          }
           this.workflowService.startRun({
             entityType: 'Part',
             definitionId,
@@ -275,24 +298,26 @@ export class PartWorkflowPageComponent {
               this.router.navigate(['/parts']);
             },
           });
-        } else {
-          this.part.set(part);
-          this.run.set(run);
-          this.definition.set(definition);
-          this.validators.set(validators);
-          this.workflowService.setContext({ run, definition, entity: part, validators });
+          return;
+        }
+        if (this.leaveClosedRun(run)) return;
 
-          // Sync URL ?step= to the run's pointer if missing. Only meaningful
-          // in guided mode — express mode has no step rail so the ?step=
-          // param would be cosmetic noise.
-          if (run.mode === 'guided' && !this.stepFromUrl() && run.currentStepId) {
-            this.router.navigate([], {
-              relativeTo: this.route,
-              queryParams: { step: run.currentStepId, mode: run.mode },
-              queryParamsHandling: 'merge',
-              replaceUrl: true,
-            });
-          }
+        this.part.set(part);
+        this.run.set(run);
+        this.definition.set(definition);
+        this.validators.set(validators);
+        this.workflowService.setContext({ run, definition, entity: part, validators });
+
+        // Sync URL ?step= to the run's pointer if missing. Only meaningful
+        // in guided mode — express mode has no step rail so the ?step=
+        // param would be cosmetic noise.
+        if (run.mode === 'guided' && !this.stepFromUrl() && run.currentStepId) {
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { step: run.currentStepId, mode: run.mode },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+          });
         }
       },
       error: (err: unknown) => {
@@ -305,11 +330,25 @@ export class PartWorkflowPageComponent {
   protected retryLoad(): void {
     const partId = this.partIdFromUrl();
     const definitionId = this.definitionIdFromUrl();
-    if (partId && definitionId) this.loadWorkflowContext(partId, definitionId);
+    if (partId && definitionId) this.loadWorkflowContext(partId, this.runIdFromUrl(), definitionId);
   }
 
   protected backToList(): void {
     this.router.navigate(['/parts']);
+  }
+
+  /**
+   * A finished or abandoned run cannot take edits. Sends the user to the
+   * part (finished) or the list (abandoned) and reports whether it did.
+   */
+  private leaveClosedRun(run: WorkflowRun): boolean {
+    if (run.abandonedAt == null && run.completedAt == null) return false;
+    const completed = run.completedAt != null;
+    const queryParams = completed && run.entityId != null ? { detail: `part:${run.entityId}` } : {};
+    this.workflowService.clearContext();
+    this.router.navigate(['/parts'], { queryParams, replaceUrl: true }).then(() => this.snackbar.info(
+      this.translate.instant(completed ? 'workflow.shell.closedRun.completed' : 'workflow.shell.closedRun.abandoned')));
+    return true;
   }
 
   protected onModeChanged(mode: 'express' | 'guided'): void {
@@ -439,6 +478,12 @@ export class PartWorkflowPageComponent {
     const next = def.steps[idx + 1]?.id;
     if (!next) return;
     this.navigateToStep(next);
+  }
+
+  protected onSkippedStepsChanged(stepIds: string[]): void {
+    const run = this.run();
+    if (!run) return;
+    this.workflowService.saveSkippedSteps(run.id, stepIds).subscribe();
   }
 
   protected onCompleteRequested(): void {

@@ -8,6 +8,7 @@ import { Observable, of, throwError } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { WorkflowDefinition } from '../../../../shared/models/workflow-definition.model';
 import { WorkflowRun } from '../../../../shared/models/workflow-run.model';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { PartDetail } from '../../models/part-detail.model';
 import { PartsService } from '../../services/parts.service';
@@ -110,19 +111,152 @@ describe('PartWorkflowPageComponent on an existing part', () => {
     }).compileComponents();
   });
 
-  it('binds the new run to the part instead of starting an entity-less run', () => {
+  function stub(status: string): { workflowService: WorkflowService; router: Router } {
     const workflowService = TestBed.inject(WorkflowService);
-    vi.spyOn(TestBed.inject(PartsService), 'getPartById').mockReturnValue(of({ id: 1 } as unknown as PartDetail));
-    vi.spyOn(workflowService, 'listActive').mockReturnValue(of([]));
+    const router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    vi.spyOn(TestBed.inject(PartsService), 'getPartById').mockReturnValue(of({ id: 1, status } as unknown as PartDetail));
     vi.spyOn(workflowService, 'loadDefinitionsForEntity').mockReturnValue(of([definition]));
     vi.spyOn(workflowService, 'loadValidatorsForEntity').mockReturnValue(of([]));
-    const start = vi.spyOn(workflowService, 'startRun').mockReturnValue(of(buildRun({ entityId: 1 })));
-    const component = TestBed.runInInjectionContext(() => new PartWorkflowPageComponent());
+    return { workflowService, router };
+  }
 
-    (component as unknown as { loadWorkflowContext(id: number, def: string): void })
-      .loadWorkflowContext(1, 'part-make-finishedgood-v1');
+  function load(partId: number, runId: number): PartWorkflowPageComponent {
+    const component = TestBed.runInInjectionContext(() => new PartWorkflowPageComponent());
+    (component as unknown as { loadWorkflowContext(id: number, runId: number, def: string): void })
+      .loadWorkflowContext(partId, runId, 'part-make-finishedgood-v1');
+    return component;
+  }
+
+  it('binds the new run to a draft part instead of starting an entity-less run', () => {
+    const { workflowService } = stub('Draft');
+    vi.spyOn(workflowService, 'listActive').mockReturnValue(of([]));
+    const start = vi.spyOn(workflowService, 'startRun').mockReturnValue(of(buildRun({ entityId: 1 })));
+
+    load(1, 0);
 
     expect(start).toHaveBeenCalledWith(expect.objectContaining({ entityType: 'Part', entityId: 1 }));
+  });
+
+  it.each(['Active', 'Obsolete'])('opens a %s part instead of reopening its finished workflow', (status) => {
+    const { workflowService, router } = stub(status);
+    vi.spyOn(workflowService, 'listActive').mockReturnValue(of([]));
+    const start = vi.spyOn(workflowService, 'startRun');
+
+    load(1, 0);
+
+    expect(start).not.toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenCalledWith(['/parts'], { queryParams: { detail: 'part:1' }, replaceUrl: true });
+  });
+
+  it('starts a guided run on a prototype part, which is still being defined', () => {
+    const { workflowService, router } = stub('Prototype');
+    vi.spyOn(workflowService, 'listActive').mockReturnValue(of([]));
+    const start = vi.spyOn(workflowService, 'startRun').mockReturnValue(of(buildRun({ entityId: 1 })));
+
+    load(1, 0);
+
+    expect(start).toHaveBeenCalledWith(expect.objectContaining({ entityType: 'Part', entityId: 1 }));
+    expect(router.navigate).not.toHaveBeenCalledWith(['/parts'], expect.anything());
+  });
+
+  it('continues the open run on a prototype part', () => {
+    const { workflowService } = stub('Prototype');
+    const open = buildRun({ id: 5, entityId: 1, definitionId: 'part-make-finishedgood-v1' });
+    vi.spyOn(workflowService, 'listActive').mockReturnValue(of([open]));
+    const start = vi.spyOn(workflowService, 'startRun');
+
+    const page = load(1, 0);
+
+    expect(start).not.toHaveBeenCalled();
+    expect((page as unknown as { run(): WorkflowRun | null }).run()?.id).toBe(5);
+  });
+
+  it('saves the steps the shell reports as skipped on the mounted run', () => {
+    const { workflowService } = stub('Draft');
+    vi.spyOn(workflowService, 'listActive').mockReturnValue(of([buildRun({ id: 5, entityId: 1, definitionId: 'part-make-finishedgood-v1' })]));
+    const save = vi.spyOn(workflowService, 'saveSkippedSteps').mockReturnValue(of(undefined));
+
+    const page = load(1, 0);
+    (page as unknown as { onSkippedStepsChanged(ids: string[]): void }).onSkippedStepsChanged(['quality']);
+
+    expect(save).toHaveBeenCalledWith(5, ['quality']);
+  });
+
+  it('mounts the run named by ?runId even when someone else started it', () => {
+    const { workflowService } = stub('Draft');
+    const listActive = vi.spyOn(workflowService, 'listActive');
+    const getRun = vi.spyOn(workflowService, 'getRun').mockReturnValue(of(buildRun({
+      id: 9, entityId: 1, definitionId: 'part-make-finishedgood-v1', startedByUserId: 2, mode: 'guided',
+    })));
+    const start = vi.spyOn(workflowService, 'startRun');
+
+    const component = load(1, 9);
+
+    expect(getRun).toHaveBeenCalledWith(9);
+    expect(listActive).not.toHaveBeenCalled();
+    expect(start).not.toHaveBeenCalled();
+    expect((component as unknown as { run(): WorkflowRun | null }).run()?.id).toBe(9);
+  });
+
+  it('opens the part instead of editing a finished run', async () => {
+    const { workflowService, router } = stub('Active');
+    vi.spyOn(workflowService, 'getRun').mockReturnValue(of(buildRun({
+      id: 9, entityId: 1, definitionId: 'part-make-finishedgood-v1', completedAt: '2026-10-02T00:00:00Z',
+    })));
+    const info = vi.spyOn(TestBed.inject(SnackbarService), 'info').mockImplementation(() => undefined);
+
+    const component = load(1, 9);
+    await Promise.resolve();
+
+    expect(router.navigate).toHaveBeenCalledWith(['/parts'], { queryParams: { detail: 'part:1' }, replaceUrl: true });
+    expect(info).toHaveBeenCalledWith('workflow.shell.closedRun.completed');
+    expect((component as unknown as { run(): WorkflowRun | null }).run()).toBeNull();
+  });
+
+  it('returns to the list instead of editing an abandoned draft run', async () => {
+    const { workflowService, router } = stub('Draft');
+    vi.spyOn(workflowService, 'getRun').mockReturnValue(of(buildRun({
+      id: 9, definitionId: 'part-make-finishedgood-v1', abandonedAt: '2026-10-02T00:00:00Z',
+    })));
+    vi.spyOn(TestBed.inject(SnackbarService), 'info').mockImplementation(() => undefined);
+    const component = TestBed.runInInjectionContext(() => new PartWorkflowPageComponent());
+
+    (component as unknown as { loadEntitylessWorkflow(runId: number, def: string): void })
+      .loadEntitylessWorkflow(9, 'part-make-finishedgood-v1');
+    await Promise.resolve();
+
+    expect(router.navigate).toHaveBeenCalledWith(['/parts'], { queryParams: {}, replaceUrl: true });
+    expect(workflowService.currentRun()).toBeNull();
+  });
+});
+
+describe('PartWorkflowPageComponent link without a part or run', () => {
+  it('returns to the list with an error instead of loading forever', async () => {
+    await TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            paramMap: of(convertToParamMap({})),
+            queryParamMap: of(convertToParamMap({ workflow: 'part-make-finishedgood-v1' })),
+          },
+        },
+      ],
+    }).compileComponents();
+    const router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    const error = vi.spyOn(TestBed.inject(SnackbarService), 'error').mockImplementation(() => undefined);
+
+    TestBed.runInInjectionContext(() => new PartWorkflowPageComponent());
+    TestBed.tick();
+    await Promise.resolve();
+
+    expect(router.navigate).toHaveBeenCalledWith(['/parts'], { replaceUrl: true });
+    expect(error).toHaveBeenCalledWith('parts.workflow.page.noRun');
   });
 });
 
@@ -184,6 +318,41 @@ describe('PartWorkflowPageComponent bad links', () => {
 
     expect(page.loadError()).toBeNull();
     expect(navSpy).toHaveBeenCalledWith(['/parts'], { queryParams: { detail: 'part:42' }, replaceUrl: true });
+  });
+});
+
+describe('PartWorkflowPageComponent run whose part cannot be loaded', () => {
+  it('returns to the list instead of loading forever', async () => {
+    await TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            paramMap: of(convertToParamMap({})),
+            queryParamMap: of(convertToParamMap({ workflow: 'part-make-finishedgood-v1', runId: '9' })),
+          },
+        },
+      ],
+    }).compileComponents();
+    const router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    const workflowService = TestBed.inject(WorkflowService);
+    vi.spyOn(workflowService, 'getRun').mockReturnValue(of(buildRun({ id: 9, entityId: 1 })));
+    vi.spyOn(workflowService, 'loadDefinitionsForEntity').mockReturnValue(of([
+      { definitionId: 'part-make-finishedgood-v1', steps: [] } as unknown as WorkflowDefinition,
+    ]));
+    vi.spyOn(workflowService, 'loadValidatorsForEntity').mockReturnValue(of([]));
+    vi.spyOn(TestBed.inject(PartsService), 'getPartById').mockReturnValue(throwError(() => new Error('404')));
+    const errorFrom = vi.spyOn(TestBed.inject(SnackbarService), 'errorFrom').mockImplementation(() => undefined);
+
+    TestBed.runInInjectionContext(() => new PartWorkflowPageComponent());
+    TestBed.tick();
+
+    expect(errorFrom).toHaveBeenCalledWith(expect.any(Error), 'parts.workflow.page.loadFailed');
+    expect(router.navigate).toHaveBeenCalledWith(['/parts']);
   });
 });
 

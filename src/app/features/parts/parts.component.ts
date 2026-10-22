@@ -410,7 +410,7 @@ export class PartsComponent {
     // Phase 5: if this is a Draft part, see if a workflow run exists and offer
     // to resume; otherwise fall back to the regular detail dialog.
     const part = this.parts().find(p => p.id === partId);
-    if (part?.status === 'Draft') {
+    if (part?.status === 'Draft' || part?.status === 'Prototype') {
       this.tryResumeOrOpenDetail(partId);
       return;
     }

@@ -29,9 +29,9 @@ import { WorkflowActiveListDialogComponent } from '../components/workflow-active
 @Injectable({ providedIn: 'root' })
 export class WorkflowResumeService {
   private readonly workflowService = inject(WorkflowService);
-  private readonly translate = inject(TranslateService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   /**
    * Per-decision: 24-hour window. Phase 5 may make this user-tunable
@@ -63,13 +63,13 @@ export class WorkflowResumeService {
     const recent = runs.filter(r => Date.parse(r.lastActivityAt) >= cutoff);
     if (recent.length === 0) return;
 
-    this.snackbar.info(
-      this.translate.instant(recent.length === 1 ? 'workflowResume.draftsOne' : 'workflowResume.draftsOther', { count: recent.length }),
+    const message = this.translate.instant(
+      recent.length === 1 ? 'workflow.shell.resume.promptOne' : 'workflow.shell.resume.promptOther',
+      { count: recent.length },
     );
-    // The snackbar is informational — open the active list immediately
-    // (one click cost) so the user can resume without hunting for a
-    // dashboard widget.
-    this.openActiveList();
+    this.snackbar
+      .infoWithAction(message, this.translate.instant('workflow.shell.resume.resumeButton'))
+      .subscribe(() => this.openActiveList());
   }
 
   /** Open the active runs list dialog programmatically. */

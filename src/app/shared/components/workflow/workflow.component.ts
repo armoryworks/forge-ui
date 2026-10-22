@@ -10,6 +10,7 @@ import {
   Output,
   signal,
   Type,
+  untracked,
 } from '@angular/core';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -25,6 +26,8 @@ import { WorkflowStepRegistryService } from '../../services/workflow-step-regist
 import { SlideoutComponent } from '../slideout/slideout.component';
 import { ValidationButtonComponent } from '../validation-button/validation-button.component';
 import { WorkflowStepStubComponent } from './workflow-step-stub.component';
+
+const SKIPPED_STEPS_KEY = 'skippedStepIds';
 
 /**
  * Workflow Pattern Phase 4 — Generic shell that hosts a workflow run
@@ -98,6 +101,7 @@ export class WorkflowComponent {
   @Output() readonly stepAdvanced = new EventEmitter<string>();
   @Output() readonly stepBacked = new EventEmitter<string>();
   @Output() readonly stepSkipped = new EventEmitter<string>();
+  @Output() readonly skippedStepsChanged = new EventEmitter<string[]>();
   @Output() readonly completeRequested = new EventEmitter<void>();
 
   // ─── Derived state ──────────────────────────────────────────────────
@@ -143,12 +147,34 @@ export class WorkflowComponent {
    */
   private readonly reachedIndex = computed(() => Math.max(this.maxReachedIndex(), this.currentStepIndex()));
 
+  /**
+   * Gate-less steps the user left with Continue in this session. Not
+   * persisted, so after a reload or resume such a step shows as visited
+   * rather than complete.
+   */
+  private readonly continuedStepIds = signal<ReadonlySet<string>>(new Set());
+
+  /**
+   * Steps the user left with Skip and has not continued from since. Seeded
+   * from the run's saved `skippedStepIds` whenever a different run mounts;
+   * every change is emitted through `skippedStepsChanged` for the parent to
+   * save, so a reload or resume still flags them.
+   */
+  private readonly skippedStepIds = signal<ReadonlySet<string>>(new Set());
+
+  private readonly runId = computed(() => this.run()?.id ?? null);
+
   constructor() {
     effect(() => {
       const current = this.currentStepIndex();
       if (current > this.maxReachedIndex()) {
         this.maxReachedIndex.set(current);
       }
+    });
+    effect(() => {
+      this.runId();
+      const saved = untracked(() => this.run()?.draftPayload?.[SKIPPED_STEPS_KEY]);
+      this.skippedStepIds.set(new Set(Array.isArray(saved) ? saved.filter((id): id is string => typeof id === 'string') : []));
     });
   }
 
@@ -180,10 +206,11 @@ export class WorkflowComponent {
   });
 
   /**
-   * Per-step completion shown on the rail. A step the user has moved past
-   * is complete. A step whose gates pass is complete once the user has
-   * visited it, so a trailing step that re-asserts an earlier gate (Review)
-   * is not ticked before the user gets there.
+   * Per-step completion shown on the rail. A step with gates is complete
+   * once the user has visited it and its gates pass, so a trailing step that
+   * re-asserts an earlier gate (Review) is not ticked before the user gets
+   * there. A step without gates is complete only when the user left it with
+   * Continue in this session; skipping or merely passing it never ticks it.
    *
    * Evaluated inline (no service writes from a computed — that's NG0600).
    */
@@ -191,8 +218,13 @@ export class WorkflowComponent {
     const out = new Map<string, boolean>();
     const passed = this.gatesPassedMap();
     const reached = this.reachedIndex();
+    const continued = this.continuedStepIds();
+    const skipped = this.skippedStepIds();
     this.steps().forEach((step, idx) => {
-      out.set(step.id, idx < reached || (idx <= reached && passed.get(step.id) === true));
+      const gated = passed.get(step.id);
+      out.set(step.id, gated === undefined
+        ? idx < reached && continued.has(step.id) && !skipped.has(step.id)
+        : idx <= reached && gated);
     });
     return out;
   });
@@ -369,6 +401,13 @@ export class WorkflowComponent {
     return this.completionMap().get(step.id) === true;
   }
 
+  protected isIncomplete(step: WorkflowStepDefinition): boolean {
+    if (this.isCurrent(step)) return false;
+    if (this.skippedStepIds().has(step.id)) return true;
+    const idx = this.steps().findIndex(s => s.id === step.id);
+    return idx < this.reachedIndex() && this.gatesPassedMap().get(step.id) === false;
+  }
+
   protected isCurrent(step: WorkflowStepDefinition): boolean {
     return this.currentStepId() === step.id;
   }
@@ -397,12 +436,25 @@ export class WorkflowComponent {
       return;
     }
     const current = this.currentStep();
-    if (current) this.stepAdvanced.emit(current.id);
+    if (!current) return;
+    this.continuedStepIds.update(ids => new Set(ids).add(current.id));
+    if (this.skippedStepIds().has(current.id)) {
+      const remaining = new Set(this.skippedStepIds());
+      remaining.delete(current.id);
+      this.skippedStepIds.set(remaining);
+      this.skippedStepsChanged.emit([...remaining]);
+    }
+    this.stepAdvanced.emit(current.id);
   }
 
   protected skip(): void {
     const current = this.currentStep();
     if (!current || current.required) return;
+    if (!this.skippedStepIds().has(current.id)) {
+      const skipped = new Set(this.skippedStepIds()).add(current.id);
+      this.skippedStepIds.set(skipped);
+      this.skippedStepsChanged.emit([...skipped]);
+    }
     this.stepSkipped.emit(current.id);
   }
 

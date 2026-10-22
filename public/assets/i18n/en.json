@@ -1433,7 +1433,8 @@
         "startFailed": "Couldn't start the workflow.",
         "completeSuccess": "Part promoted to Active.",
         "missingValidators": "Cannot complete: missing {{missing}}",
-        "blockedByStep": "Finish '{{step}}' before moving on — needs {{missing}}"
+        "blockedByStep": "Finish '{{step}}' before moving on — needs {{missing}}",
+        "noRun": "That link doesn't name a part or a draft. Start a new part from the parts list."
       },
       "promote": {
         "cta": "Promote to Active",
@@ -2794,13 +2795,14 @@
       },
       "review": {
         "title": "Review",
-        "hint": "Confirm the details below, then Mark Complete to save.",
+        "hint": "The customer is already saved. Confirm the details below, then Mark Complete to finish setup.",
         "loading": "Loading customer…"
       },
       "express": {
         "title": "New Customer",
         "hint": "Capture the essentials in one form. Addresses can be added later from the customer detail page.",
-        "saveFailed": "Could not save the customer."
+        "saveFailed": "Could not save the customer.",
+        "save": "Save customer"
       }
     },
     "taxDocuments": {
@@ -6436,13 +6438,14 @@
       },
       "review": {
         "title": "Review",
-        "hint": "Confirm the details below, then Mark Complete to save.",
+        "hint": "The vendor is already saved. Confirm the details below, then Mark Complete to finish setup.",
         "loading": "Loading vendor…"
       },
       "express": {
         "title": "New Vendor",
         "hint": "Capture the essentials in one form. You can fill in address, terms, and supply items later from the vendor detail page.",
-        "saveFailed": "Could not save the vendor."
+        "saveFailed": "Could not save the vendor.",
+        "save": "Save vendor"
       }
     },
     "messages": {
@@ -10872,7 +10875,8 @@
         "heading": "This step is missing data needed to complete the workflow"
       },
       "steps": {
-        "heading": "Steps"
+        "heading": "Steps",
+        "incomplete": "Not completed"
       },
       "resume": {
         "heading": "Workflow drafts in progress",
@@ -10880,7 +10884,13 @@
         "resumeButton": "Resume",
         "dismissButton": "Dismiss",
         "empty": "No drafts in progress.",
-        "loadFailed": "Couldn't load active drafts."
+        "loadFailed": "Couldn't load active drafts.",
+        "promptOne": "You have 1 setup in progress.",
+        "promptOther": "You have {{count}} setups in progress."
+      },
+      "closedRun": {
+        "completed": "This setup is already finished.",
+        "abandoned": "This setup was discarded."
       }
     },
     "demo": {

@@ -56,16 +56,11 @@ export class WorkflowActiveListDialogComponent implements OnInit {
     // its first step yet, so there's no detail route to land on. Route to
     // the entity-less workflow path with `runId=` and let the workflow page
     // pick up where the user left off.
-    if (run.entityId == null) {
-      const segment = this.entityTypeSegment(run.entityType);
-      this.router.navigate([`/${segment}/new`], {
-        queryParams: { runId: run.id, workflow: run.definitionId, mode: run.mode },
-      });
+    const queryParams = { runId: run.id, workflow: run.definitionId, mode: run.mode };
+    if (run.entityId == null || run.entityType === 'Customer') {
+      this.router.navigate([`/${this.entityTypeSegment(run.entityType)}/new`], { queryParams });
     } else {
-      const route = this.entityRoute(run.entityType, run.entityId);
-      this.router.navigate([route], {
-        queryParams: { workflow: run.definitionId, mode: run.mode },
-      });
+      this.router.navigate([this.entityRoute(run.entityType, run.entityId)], { queryParams });
     }
     this.dialogRef.close({ resumed: run.id });
   }
