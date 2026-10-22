@@ -5470,7 +5470,19 @@
     "dateMax": "{{field}} must be on or before {{max}}",
     "dateRangeOrder": "{{start}} must be on or before {{end}}",
     "endOnOrAfterStartDate": "End date must be on or after the start date",
-    "dueOnOrAfterBillDate": "Due date must be on or after the bill date"
+    "dueOnOrAfterBillDate": "Due date must be on or after the bill date",
+    "messages": {
+      "required": "{{label}} is required",
+      "email": "{{label}} must be a valid email",
+      "minLength": "{{label}} must be at least {{count}} characters",
+      "maxLength": "{{label}} must be at most {{count}} characters",
+      "min": "{{label}} must be at least {{min}}",
+      "max": "{{label}} must be at most {{max}}",
+      "pattern": "{{label}} format is invalid",
+      "wholeNumber": "{{label}} must be a whole number",
+      "invalid": "{{label}} is invalid",
+      "positive": "{{label}} must be greater than 0"
+    }
   },
   "invoices": {
     "invoiceNumberLabel": "Invoice Number",

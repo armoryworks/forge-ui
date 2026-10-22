@@ -32,13 +32,13 @@ describe('wholeNumber', () => {
 describe('onOrAfter', () => {
   const build = (start: unknown, end: unknown) => new FormGroup({
     start: new FormControl(start),
-    end: new FormControl(end, onOrAfter('start', 'End must be on or after start')),
+    end: new FormControl(end, onOrAfter('start', 'validation.endOnOrAfterStartDate')),
   });
 
   it('fails when the end is before the start', () => {
     const form = build(new Date(2026, 9, 10), new Date(2026, 9, 9));
     form.controls.end.updateValueAndValidity();
-    expect(form.controls.end.errors).toEqual({ onOrAfter: { message: 'End must be on or after start' } });
+    expect(form.controls.end.errors).toEqual({ onOrAfter: { messageKey: 'validation.endOnOrAfterStartDate' } });
   });
 
   it('passes for the same day, a later day, or a missing value', () => {

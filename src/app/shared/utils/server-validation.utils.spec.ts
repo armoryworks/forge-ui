@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormArray, FormControl, FormGroup } from '@angular/forms';
 
 import { hasServerValidationDetail, resolveFormControl } from './server-validation.utils';
 
@@ -34,5 +34,43 @@ describe('resolveFormControl', () => {
   it('returns null when no segment matches', () => {
     expect(resolveFormControl(form, 'data.unknown')).toBeNull();
     expect(resolveFormControl(form, 'lines[0]')).toBeNull();
+  });
+
+  it('does not move an indexed line error onto a top-level control with the same name', () => {
+    const order = new FormGroup({
+      quantity: new FormControl(1),
+      lines: new FormArray([new FormGroup({ partId: new FormControl(1) })]),
+    });
+
+    expect(resolveFormControl(order, 'lines[0].quantity')).toBeNull();
+    expect(resolveFormControl(order, 'lines.0.quantity')).toBeNull();
+  });
+
+  it('still resolves an indexed path that exists', () => {
+    const order = new FormGroup({
+      quantity: new FormControl(1),
+      lines: new FormArray([new FormGroup({ quantity: new FormControl(2) })]),
+    });
+
+    expect(resolveFormControl(order, 'lines[0].quantity')).toBe(order.controls.lines.at(0).controls.quantity);
+  });
+
+  it('leaves the error unmatched when more than one control has the last segment name', () => {
+    const customer = new FormGroup({
+      name: new FormControl(''),
+      contact: new FormGroup({ name: new FormControl('') }),
+    });
+
+    expect(resolveFormControl(customer, 'data.name')).toBeNull();
+  });
+
+  it('does not guess a nested or line control from an unindexed wrapped name', () => {
+    const order = new FormGroup({
+      customerId: new FormControl(1),
+      lines: new FormArray([new FormGroup({ quantity: new FormControl(2) })]),
+    });
+
+    expect(resolveFormControl(order, 'data.quantity')).toBeNull();
+    expect(resolveFormControl(order, 'data.customerId')).toBe(order.controls.customerId);
   });
 });

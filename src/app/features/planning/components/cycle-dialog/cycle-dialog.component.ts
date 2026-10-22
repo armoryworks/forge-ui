@@ -56,7 +56,7 @@ export class CycleDialogComponent implements OnInit {
     startDate: new FormControl<Date | null>(null, [Validators.required]),
     endDate: new FormControl<Date | null>(null, [
       Validators.required,
-      onOrAfter('startDate', this.translate.instant('validation.endOnOrAfterStartDate')),
+      onOrAfter('startDate', 'validation.endOnOrAfterStartDate'),
     ]),
     goals: new FormControl(''),
   });

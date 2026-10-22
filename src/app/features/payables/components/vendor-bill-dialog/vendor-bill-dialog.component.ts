@@ -133,7 +133,7 @@ export class VendorBillDialogComponent {
     billDate: new FormControl<Date | null>(null, [Validators.required]),
     dueDate: new FormControl<Date | null>(null, [
       Validators.required,
-      onOrAfter('billDate', this.translate.instant('validation.dueOnOrAfterBillDate')),
+      onOrAfter('billDate', 'validation.dueOnOrAfterBillDate'),
     ]),
     taxAmount: new FormControl<number | null>(0, [Validators.min(0)]),
     currencyId: new FormControl<number | null>(null),

@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { AbstractControl, FormGroup } from '@angular/forms';
+import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
 
 /**
  * Shape of a single validation error returned by the server's
@@ -76,7 +76,10 @@ export function hasServerValidationDetail(error: HttpErrorResponse | unknown): b
  * matching control exists. Falls back to a case-insensitive lookup on the
  * top-level form so that `Field` from PascalCase server output hits the
  * camelCase reactive control, then to the last path segment so a wrapped
- * `data.title` still reaches a flat `title` control.
+ * `data.title` still reaches a flat `title` control. That fallback applies only
+ * to a path with no index, and only when the one control anywhere in the form
+ * with that name is a top-level control, so `lines[0].quantity` never lands on
+ * a top-level `quantity`.
  */
 export function resolveFormControl(
   form: FormGroup,
@@ -102,12 +105,22 @@ export function resolveFormControl(
     if (key.toLowerCase() === lower) return control;
   }
 
-  const lastSegment = normalized.split('.').pop();
-  if (lastSegment && lastSegment !== normalized && !/^\d+$/.test(lastSegment)) {
-    return resolveFormControl(form, lastSegment);
-  }
+  const segments = normalized.split('.');
+  if (segments.length < 2 || segments.some(segment => /^\d+$/.test(segment))) return null;
+  const matches = controlsNamed(form, segments[segments.length - 1].toLowerCase());
+  return matches.length === 1 && matches[0].parent === form ? matches[0] : null;
+}
 
-  return null;
+function controlsNamed(parent: AbstractControl, lowerName: string): AbstractControl[] {
+  const children: [string, AbstractControl][] = parent instanceof FormGroup
+    ? Object.entries(parent.controls)
+    : parent instanceof FormArray
+      ? parent.controls.map((control, index): [string, AbstractControl] => [String(index), control])
+      : [];
+  return children.flatMap(([key, control]) => [
+    ...(key.toLowerCase() === lowerName ? [control] : []),
+    ...controlsNamed(control, lowerName),
+  ]);
 }
 
 /**

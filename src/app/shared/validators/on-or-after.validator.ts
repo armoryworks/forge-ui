@@ -3,14 +3,15 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 /**
  * Fails when this date control is earlier than the sibling control named
  * `otherControlName`. Either value missing passes. The caller re-runs this
- * control's validation when the sibling changes.
+ * control's validation when the sibling changes. `messageKey` is a
+ * translation key, resolved when the message is shown.
  */
-export function onOrAfter(otherControlName: string, message: string): ValidatorFn {
+export function onOrAfter(otherControlName: string, messageKey: string): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const start = toTime(control.parent?.get(otherControlName)?.value);
     const end = toTime(control.value);
     if (start === null || end === null) return null;
-    return end < start ? { onOrAfter: { message } } : null;
+    return end < start ? { onOrAfter: { messageKey } } : null;
   };
 }
 

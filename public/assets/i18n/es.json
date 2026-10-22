@@ -5463,7 +5463,19 @@
     "dateMax": "{{field}} debe ser igual o anterior a {{max}}",
     "dateRangeOrder": "{{start}} debe ser igual o anterior a {{end}}",
     "endOnOrAfterStartDate": "La fecha de fin debe ser igual o posterior a la fecha de inicio",
-    "dueOnOrAfterBillDate": "La fecha de vencimiento debe ser igual o posterior a la fecha de la factura"
+    "dueOnOrAfterBillDate": "La fecha de vencimiento debe ser igual o posterior a la fecha de la factura",
+    "messages": {
+      "required": "{{label}} es obligatorio",
+      "email": "{{label}} debe ser un correo electrónico válido",
+      "minLength": "{{label}} debe tener al menos {{count}} caracteres",
+      "maxLength": "{{label}} debe tener como máximo {{count}} caracteres",
+      "min": "{{label}} debe ser al menos {{min}}",
+      "max": "{{label}} debe ser como máximo {{max}}",
+      "pattern": "El formato de {{label}} no es válido",
+      "wholeNumber": "{{label}} debe ser un número entero",
+      "invalid": "{{label}} no es válido",
+      "positive": "{{label}} debe ser mayor que 0"
+    }
   },
   "invoices": {
     "invoiceNumberLabel": "Número de factura",

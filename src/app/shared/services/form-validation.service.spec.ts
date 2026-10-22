@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
+import { onOrAfter } from '../validators/on-or-after.validator';
 import { FormValidationService } from './form-validation.service';
 
 describe('FormValidationService', () => {
@@ -265,5 +266,55 @@ describe('FormValidationService', () => {
     it('describes a whole-number failure', () => {
       expect(FormValidationService.messageFor('wholeNumber', true, 'Machines')).toBe('Machines must be a whole number');
     });
+  });
+
+  describe('messageFor with a translator', () => {
+    const catalogs: Record<string, Record<string, string>> = {
+      en: {
+        'validation.messages.wholeNumber': '{{label}} must be a whole number',
+        'validation.messages.positive': '{{label}} must be greater than 0',
+        'validation.endOnOrAfterStartDate': 'End date must be on or after the start date',
+      },
+      es: {
+        'validation.messages.wholeNumber': '{{label}} debe ser un número entero',
+        'validation.messages.positive': '{{label}} debe ser mayor que 0',
+        'validation.endOnOrAfterStartDate': 'La fecha de fin debe ser igual o posterior a la fecha de inicio',
+      },
+    };
+    let lang = 'en';
+
+    beforeEach(() => {
+      lang = 'en';
+      FormValidationService.setTranslator((key, params) =>
+        (catalogs[lang][key] ?? key).replace('{{label}}', String(params['label'])));
+    });
+
+    afterEach(() => FormValidationService.setTranslator(null));
+
+    it('reads the whole-number and greater-than-zero messages in the current language', () => {
+      expect(FormValidationService.messageFor('wholeNumber', true, 'Máquinas')).toBe('Máquinas must be a whole number');
+      lang = 'es';
+      expect(FormValidationService.messageFor('wholeNumber', true, 'Máquinas')).toBe('Máquinas debe ser un número entero');
+      expect(FormValidationService.messageFor('positive', true, 'Cantidad')).toBe('Cantidad debe ser mayor que 0');
+    });
+
+    it('translates a date-order error each time it is shown, so a language switch applies', () => {
+      const form = new FormGroup({
+        startDate: new FormControl<Date | null>(new Date(2026, 9, 10)),
+        endDate: new FormControl<Date | null>(new Date(2026, 9, 9), onOrAfter('startDate', 'validation.endOnOrAfterStartDate')),
+      });
+      form.controls.endDate.updateValueAndValidity();
+
+      expect(FormValidationService.collectViolations(form, { endDate: 'End date' }))
+        .toEqual(['End date must be on or after the start date']);
+      lang = 'es';
+      expect(FormValidationService.collectViolations(form, { endDate: 'End date' }))
+        .toEqual(['La fecha de fin debe ser igual o posterior a la fecha de inicio']);
+    });
+  });
+
+  it('shows the key of a translated error when no translator is set', () => {
+    expect(FormValidationService.messageFor('onOrAfter', { messageKey: 'validation.dueOnOrAfterBillDate' }, 'Due date'))
+      .toBe('validation.dueOnOrAfterBillDate');
   });
 });

@@ -47,7 +47,31 @@ const ERROR_MESSAGES: Record<string, (label: string, error: unknown) => string> 
   wholeNumber: (label) => `${label} must be a whole number`,
 };
 
+type MessageTranslator = (key: string, params: Record<string, unknown>) => string;
+
+const ERROR_MESSAGE_KEYS: Record<string, (label: string, error: unknown) => [string, Record<string, unknown>]> = {
+  required: (label) => ['validation.messages.required', { label }],
+  email: (label) => ['validation.messages.email', { label }],
+  minlength: (label, err) => ['validation.messages.minLength', { label, count: (err as { requiredLength: number }).requiredLength }],
+  maxlength: (label, err) => ['validation.messages.maxLength', { label, count: (err as { requiredLength: number }).requiredLength }],
+  min: (label, err) => ['validation.messages.min', { label, min: (err as { min: number }).min }],
+  max: (label, err) => ['validation.messages.max', { label, max: (err as { max: number }).max }],
+  pattern: (label) => ['validation.messages.pattern', { label }],
+  positive: (label) => ['validation.messages.positive', { label }],
+  wholeNumber: (label) => ['validation.messages.wholeNumber', { label }],
+};
+
+let translator: MessageTranslator | null = null;
+
 export class FormValidationService {
+  /**
+   * Routes the built-in validation messages through the UI translations.
+   * Set once at startup; until then (and in unit tests) messages are English.
+   */
+  static setTranslator(fn: MessageTranslator | null): void {
+    translator = fn;
+  }
+
   /**
    * Returns a signal of violation messages for the given form.
    * Safe to call from any context (constructor, effect, computed, etc.)
@@ -141,14 +165,25 @@ export class FormValidationService {
    * Message text for a single validation error on a field labelled `label`.
    * Shared by the violation summary and the per-field error lines on
    * app-input and app-autocomplete so all read the same. Returns null for an
-   * error object whose `message` is not a string.
+   * error object whose `message` is not a string. An error carrying a
+   * `messageKey` is translated here, each time it is shown, so the current
+   * language applies.
    */
   static messageFor(errorKey: string, errorValue: unknown, label: string): string | null {
+    if (errorValue && typeof errorValue === 'object' && 'messageKey' in errorValue) {
+      const messageKey = (errorValue as { messageKey: unknown }).messageKey;
+      if (typeof messageKey !== 'string') return null;
+      return translator ? translator(messageKey, { label }) : messageKey;
+    }
     if (errorValue && typeof errorValue === 'object' && 'message' in errorValue) {
       const message = (errorValue as { message: unknown }).message;
       if (typeof message !== 'string') return null;
       if (errorKey !== 'serverError' || message.toLowerCase().startsWith(label.toLowerCase())) return message;
       return `${label}: ${message}`;
+    }
+    if (translator) {
+      const [key, params] = ERROR_MESSAGE_KEYS[errorKey]?.(label, errorValue) ?? ['validation.messages.invalid', { label }];
+      return translator(key, params);
     }
     if (ERROR_MESSAGES[errorKey]) {
       return ERROR_MESSAGES[errorKey](label, errorValue);
