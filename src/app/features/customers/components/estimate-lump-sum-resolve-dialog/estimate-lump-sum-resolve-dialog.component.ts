@@ -84,7 +84,7 @@ export class EstimateLumpSumResolveDialogComponent {
         partId: new FormControl<number | null>(null),
         unitPrice: new FormControl<number | null>(line.unitPrice, [
           Validators.min(0),
-          maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('customers.estimates.resolveLumpSum.unitPriceLabel')),
+          maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('customers.estimates.resolveLumpSum.unitPriceLabel'), this.translate),
         ]),
       },
       { validators: [EstimateLumpSumResolveDialogComponent.replaceRequiresPart] },

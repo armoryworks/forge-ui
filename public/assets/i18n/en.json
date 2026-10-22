@@ -5466,7 +5466,8 @@
     "invalidDate": "{{field}} must be a real date (MM/DD/YYYY)",
     "dateMin": "{{field}} must be on or after {{min}}",
     "dateMax": "{{field}} must be on or before {{max}}",
-    "dateRangeOrder": "{{start}} must be on or before {{end}}"
+    "dateRangeOrder": "{{start}} must be on or before {{end}}",
+    "maxDecimals": "{{field}} can have at most {{max}} decimal places"
   },
   "invoices": {
     "invoiceNumberLabel": "Invoice Number",

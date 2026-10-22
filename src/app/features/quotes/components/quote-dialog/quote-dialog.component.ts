@@ -131,24 +131,20 @@ export class QuoteDialogComponent {
     // Phase 3 / WU-23 (F8-broad): fractional UoM-aware quantities accepted.
     quantity: new FormControl<number>(1, [
       Validators.required, Validators.min(0.0001),
-      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('quotes.qty')),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('quotes.qty'), this.translate),
     ]),
     unitPrice: new FormControl<number>(0, [
       Validators.required, Validators.min(0),
-      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('common.price')),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('common.price'), this.translate),
     ]),
   });
 
-  private readonly rawSubtotal = computed(() =>
-    this.lines().reduce((sum, l) => sum + l.quantity * l.unitPrice, 0)
-  );
-
   protected readonly taxRateValue = signal<number>(this.form.controls.taxRate.value ?? 0);
 
-  protected readonly lineTotal = computed(() => roundMoney(this.rawSubtotal()));
-  protected readonly grandTotal = computed(() =>
-    roundMoney(this.rawSubtotal() + this.rawSubtotal() * (this.taxRateValue() ?? 0) / 100));
-  protected readonly taxAmount = computed(() => roundMoney(this.grandTotal() - this.lineTotal()));
+  protected readonly lineTotal = computed(() =>
+    roundMoney(this.lines().reduce((sum, l) => sum + this.lineAmount(l), 0)));
+  protected readonly taxAmount = computed(() => roundMoney(this.lineTotal() * (this.taxRateValue() ?? 0) / 100));
+  protected readonly grandTotal = computed(() => roundMoney(this.lineTotal() + this.taxAmount()));
 
   protected lineAmount(line: LineEntry): number {
     return roundMoney(line.quantity * line.unitPrice);

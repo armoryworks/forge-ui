@@ -92,7 +92,7 @@ export class PartExpressFormComponent {
     // blocking the form on a field the user may not be ready to fill.
     manualCostOverride: new FormControl<number | null>(null, [
       Validators.min(0),
-      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('parts.workflow.costing.manualOverrideLabel')),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('parts.workflow.costing.manualOverrideLabel'), this.translate),
     ]),
   });
 

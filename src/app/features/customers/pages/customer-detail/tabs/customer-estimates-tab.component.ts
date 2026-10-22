@@ -90,7 +90,7 @@ export class CustomerEstimatesTabComponent implements OnInit {
     description: new FormControl(''),
     estimatedAmount: new FormControl<number>(0, [
       Validators.required, Validators.min(0),
-      maxDecimalsValidator(MONEY_DECIMALS, this.translate.instant('customers.estimates.estimatedAmount')),
+      maxDecimalsValidator(MONEY_DECIMALS, this.translate.instant('customers.estimates.estimatedAmount'), this.translate),
     ]),
     validUntil: new FormControl<Date | null>(null),
     notes: new FormControl(''),
@@ -110,11 +110,11 @@ export class CustomerEstimatesTabComponent implements OnInit {
     description: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     quantity: new FormControl<number>(1, { nonNullable: true, validators: [
       Validators.required, Validators.min(0.0001),
-      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('customers.estimates.qty')),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('customers.estimates.qty'), this.translate),
     ] }),
     unitPrice: new FormControl<number>(0, { nonNullable: true, validators: [
       Validators.required, Validators.min(0),
-      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('customers.estimates.amount')),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('customers.estimates.amount'), this.translate),
     ] }),
   });
 

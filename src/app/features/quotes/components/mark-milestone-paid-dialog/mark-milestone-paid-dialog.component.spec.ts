@@ -53,4 +53,13 @@ describe('MarkMilestonePaidDialogComponent', () => {
 
     expect(amount.errors?.['maxDecimals'].message).toBe('Paid amount can have at most 2 decimal places');
   });
+
+  it('accepts a 200-character payment reference, as the server does, and rejects 201', () => {
+    const reference = dialog.form.controls['paidReference'];
+    reference.setValue('R'.repeat(200));
+    expect(reference.errors).toBeNull();
+
+    reference.setValue('R'.repeat(201));
+    expect(reference.errors?.['maxlength']).toEqual({ requiredLength: 200, actualLength: 201 });
+  });
 });

@@ -119,11 +119,11 @@ export class QuoteDetailPanelComponent {
     description: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     quantity: new FormControl<number>(1, { nonNullable: true, validators: [
       Validators.required, Validators.min(0.0001),
-      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('quotes.qty')),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('quotes.qty'), this.translate),
     ] }),
     unitPrice: new FormControl<number>(0, { nonNullable: true, validators: [
       Validators.required, Validators.min(0),
-      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('quotes.unitPrice')),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('quotes.unitPrice'), this.translate),
     ] }),
   });
 

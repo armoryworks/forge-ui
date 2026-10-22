@@ -83,7 +83,7 @@ export class PartCostingStepComponent {
   protected readonly form = new FormGroup({
     manualCostOverride: new FormControl<number | null>(null, [
       Validators.min(0),
-      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('parts.workflow.costing.manualOverrideLabel')),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('parts.workflow.costing.manualOverrideLabel'), this.translate),
     ]),
   });
 

@@ -99,7 +99,7 @@ export class VendorPaymentDialogComponent {
     method: new FormControl<string | null>(null, [Validators.required]),
     amount: new FormControl<number | null>(null, [
       Validators.required, Validators.min(0.01),
-      maxDecimalsValidator(MONEY_DECIMALS, this.translate.instant('payables.amount')),
+      maxDecimalsValidator(MONEY_DECIMALS, this.translate.instant('payables.amount'), this.translate),
     ]),
     paymentDate: new FormControl<Date | null>(null, [Validators.required]),
     referenceNumber: new FormControl(''),
@@ -209,7 +209,7 @@ export class VendorPaymentDialogComponent {
               nonNullable: true,
               validators: [
                 Validators.required, Validators.min(0), Validators.max(bill.balanceDue),
-                maxDecimalsValidator(MONEY_DECIMALS, this.translate.instant('payables.amount')),
+                maxDecimalsValidator(MONEY_DECIMALS, this.translate.instant('payables.amount'), this.translate),
               ],
             }),
             settlementFxRate: new FormControl(1, {

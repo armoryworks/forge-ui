@@ -45,7 +45,7 @@ export class PartCostClusterComponent {
 
   protected readonly form = new FormGroup({
     manualCostOverride: new FormControl<number | null>(null, [
-      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('parts.detail.clusters.cost.manualCostOverride')),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('parts.detail.clusters.cost.manualCostOverride'), this.translate),
     ]),
   });
 

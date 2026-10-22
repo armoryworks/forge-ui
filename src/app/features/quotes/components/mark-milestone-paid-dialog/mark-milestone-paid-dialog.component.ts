@@ -55,9 +55,9 @@ export class MarkMilestonePaidDialogComponent {
   protected readonly form = new FormGroup({
     paidAmount: new FormControl<number | null>(this.remaining > 0 ? this.remaining : null, [
       Validators.required, Validators.min(0.01), Validators.max(this.remaining),
-      maxDecimalsValidator(MONEY_DECIMALS, this.translate.instant('quotes.paymentSchedule.paidAmount')),
+      maxDecimalsValidator(MONEY_DECIMALS, this.translate.instant('quotes.paymentSchedule.paidAmount'), this.translate),
     ]),
-    paidReference: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(100)] }),
+    paidReference: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(200)] }),
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {

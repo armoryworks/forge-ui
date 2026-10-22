@@ -127,8 +127,8 @@ export class VendorBillDialogComponent {
     this.currencies().map(c => ({ value: c.id, label: `${c.code} — ${c.name}` })),
   );
 
-  private readonly quantityDecimals = maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('payables.qty'));
-  private readonly unitPriceDecimals = maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('payables.unitPrice'));
+  private readonly quantityDecimals = maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('payables.qty'), this.translate);
+  private readonly unitPriceDecimals = maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('payables.unitPrice'), this.translate);
 
   protected readonly billForm = new FormGroup({
     vendorId: new FormControl<number | null>(null, [Validators.required]),
@@ -138,7 +138,7 @@ export class VendorBillDialogComponent {
     dueDate: new FormControl<Date | null>(null, [Validators.required]),
     taxAmount: new FormControl<number | null>(0, [
       Validators.min(0),
-      maxDecimalsValidator(MONEY_DECIMALS, this.translate.instant('payables.tax')),
+      maxDecimalsValidator(MONEY_DECIMALS, this.translate.instant('payables.tax'), this.translate),
     ]),
     currencyId: new FormControl<number | null>(null),
     fxRate: new FormControl<number>(1, [Validators.required, Validators.min(0.0000001)]),

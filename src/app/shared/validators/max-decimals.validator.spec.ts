@@ -1,4 +1,5 @@
 import { FormControl } from '@angular/forms';
+import { TranslateService } from '@ngx-translate/core';
 import { describe, expect, it } from 'vitest';
 
 import { maxDecimalsValidator } from './max-decimals.validator';
@@ -24,5 +25,24 @@ describe('maxDecimalsValidator', () => {
   it('allows four places for unit values', () => {
     expect(validate(0.3334, 4)).toBeNull();
     expect(validate(0.33335, 4)?.['maxDecimals'].message).toBe('Amount can have at most 4 decimal places');
+  });
+
+  it('uses the validation.maxDecimals translation when a translate service is given', () => {
+    const translate = {
+      instant: (key: string, params: { field: string; max: number }) =>
+        key === 'validation.maxDecimals' ? `${params.field} puede tener como máximo ${params.max} decimales` : key,
+    } as unknown as TranslateService;
+
+    const errors = maxDecimalsValidator(2, 'Importe', translate)(new FormControl(1.005));
+
+    expect(errors?.['maxDecimals'].message).toBe('Importe puede tener como máximo 2 decimales');
+  });
+
+  it('falls back to English when the key is missing from the catalog', () => {
+    const translate = { instant: (key: string) => key } as unknown as TranslateService;
+
+    const errors = maxDecimalsValidator(4, 'Unit price', translate)(new FormControl(0.12345));
+
+    expect(errors?.['maxDecimals'].message).toBe('Unit price can have at most 4 decimal places');
   });
 });

@@ -188,7 +188,7 @@ describe('QuoteDialogComponent — summary tax', () => {
     httpMock.verify();
   });
 
-  it('rounds the subtotal and total to the cent and takes tax as the difference', () => {
+  it('rounds each line to the cent, sums the rounded lines and taxes them like an invoice', () => {
     const { component, internals, httpMock } = setup();
     internals.lines.set([
       { partId: 1, partNumber: 'P-1', description: 'Eighths', quantity: 3, unitPrice: 0.125 },
@@ -200,9 +200,9 @@ describe('QuoteDialogComponent — summary tax', () => {
 
     expect(internals.lineAmount({ quantity: 3, unitPrice: 0.125 })).toBe(0.38);
     expect(internals.lineAmount({ quantity: 0.5, unitPrice: 19.999 })).toBe(10);
-    expect(internals.lineTotal()).toBe(20.37);
-    expect(internals.grandTotal()).toBe(21.85);
+    expect(internals.lineTotal()).toBe(20.38);
     expect(internals.taxAmount()).toBe(1.48);
+    expect(internals.grandTotal()).toBe(21.86);
     httpMock.verify();
   });
 });

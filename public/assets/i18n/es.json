@@ -5459,7 +5459,8 @@
     "invalidDate": "{{field}} debe ser una fecha válida (MM/DD/AAAA)",
     "dateMin": "{{field}} debe ser igual o posterior a {{min}}",
     "dateMax": "{{field}} debe ser igual o anterior a {{max}}",
-    "dateRangeOrder": "{{start}} debe ser igual o anterior a {{end}}"
+    "dateRangeOrder": "{{start}} debe ser igual o anterior a {{end}}",
+    "maxDecimals": "{{field}} puede tener como máximo {{max}} decimales"
   },
   "invoices": {
     "invoiceNumberLabel": "Número de factura",

@@ -241,11 +241,11 @@ export class PoDialogComponent {
     // common whole-unit case (caller can override).
     orderedQuantity: new FormControl<number>(1, [
       Validators.required, Validators.min(0.0001),
-      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('purchaseOrders.qty')),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('purchaseOrders.qty'), this.translate),
     ]),
     unitPrice: new FormControl<number>(0, [
       Validators.required, Validators.min(0),
-      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('common.price')),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('common.price'), this.translate),
     ]),
   });
 

@@ -602,11 +602,11 @@ export class PoDetailPanelComponent implements OnInit {
     description: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
     quantity: new FormControl<number | null>(null, [
       Validators.required, Validators.min(0.0001),
-      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('common.quantity')),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('common.quantity'), this.translate),
     ]),
     unitPrice: new FormControl<number | null>(null, [
       Validators.required, Validators.min(0),
-      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('purchaseOrders.unitPrice')),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('purchaseOrders.unitPrice'), this.translate),
     ]),
   });
 
