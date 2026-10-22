@@ -8589,7 +8589,8 @@
       "locationScanned": "Ubicación {{name}}",
       "receivingLoadFailed": "No se pudieron cargar las órdenes de compra por recibir. Vuelva e inténtelo de nuevo.",
       "shippingLoadFailed": "No se pudieron cargar los envíos. Vuelva e inténtelo de nuevo.",
-      "piecesRecorded": "Piezas registradas en {{jobNumber}}"
+      "piecesRecorded": "Piezas registradas en {{jobNumber}}",
+      "piecesRecordFailed": "No se pudieron registrar las piezas: {{reason}}"
     },
     "trainingModeActive": "MODO DE ENTRENAMIENTO — Las acciones no se guardarán",
     "trainingModeEnabled": "Modo de entrenamiento activado",
@@ -8822,7 +8823,12 @@
       "hint": "Estos temporizadores siguen en marcha y se detendrán al registrar la salida. Indique las piezas buenas y de desecho que hizo, o déjelas en blanco.",
       "good": "Buenas",
       "scrap": "Desecho",
-      "confirm": "Registrar salida"
+      "confirm": "Registrar salida",
+      "gateTitle": "{{jobNumber}} Op {{step}}: piezas aún sin registrar",
+      "gateWarnHint": "Regístrelas de todos modos, o vuelva y cambie la cantidad.",
+      "gateBlockHint": "Un gerente o gerente de producción tiene que registrarlas. Registre la salida sin estas piezas, o vuelva y cambie la cantidad.",
+      "gateRecordAnyway": "Registrar de todos modos",
+      "gateSkipPieces": "Registrar salida sin ellas"
     }
   },
   "kioskDisplay": {

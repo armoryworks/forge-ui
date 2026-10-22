@@ -12,6 +12,7 @@ import { provideTranslateService, TranslatePipe, TranslateService } from '@ngx-t
 import { ShopFloorDisplayComponent } from './shop-floor-display.component';
 import { KioskSessionService } from '../../shared/services/kiosk-session.service';
 import { ShopFloorService } from './services/shop-floor.service';
+import { KioskCycleTrackerService } from './services/kiosk-cycle-tracker.service';
 import { ClockEventTypeService } from '../../shared/services/clock-event-type.service';
 import { EventsService } from '../events/services/events.service';
 import { AuthService } from '../../shared/services/auth.service';
@@ -229,6 +230,13 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     statusSince: null, role, assignments,
   });
   const problem = (detail: string) => throwError(() => new HttpErrorResponse({ status: 400, error: { detail } }));
+  const gateConflict = (mode: 'Warn' | 'Block') => new HttpErrorResponse({
+    status: 409,
+    error: {
+      code: 'step-gate', detail: 'Op 2 would report 16 pieces.',
+      gate: { mode, gate: 'Quantity', predecessorStep: 1, available: 12, requested: 16, waitingOnSteps: [], canOverride: mode === 'Warn' },
+    },
+  });
 
   const auth = { clearAuth: vi.fn(), isAuthenticated: vi.fn(() => false), scanLogin: vi.fn(), login: vi.fn() };
   const scanner = {
@@ -293,6 +301,7 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     localStorage.removeItem('forge-kiosk-device-token');
     localStorage.removeItem('forge-kiosk-terminal');
     localStorage.removeItem('sf-font-index');
+    localStorage.removeItem('forge-kiosk-cycle-baselines');
 
     TestBed.configureTestingModule({
       imports: [ShopFloorDisplayComponent],
@@ -1272,6 +1281,89 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
 
       expect(shopFloor.updateOperationProgress).toHaveBeenCalledWith(41, 401,
         { completedQuantity: 13, scrapQuantity: 1, expectedVersion: 3 });
+    });
+
+    it('cycles over what the step gate allows open the pieces dialog with the cycle count instead of saving straight away', () => {
+      const { c } = tracked();
+      const worker = { ...makeWorker('ProductionWorker'), runningTimers: [{ ...running(1, 41, 401, 2), cycleMinutes: 2 }] };
+      c.selectedWorker.set(worker);
+      shopFloor.getOperations.mockReturnValueOnce(of({
+        jobId: 41, jobQuantity: 40, stepGating: 'Warn',
+        operations: [{ operationId: 401, stepNumber: 2, title: 'Press', completedQuantity: 10, scrapQuantity: 1, version: 3, available: 12, availableFromStep: 1 }],
+      }) as never);
+      dialog.open.mockReturnValueOnce({
+        afterClosed: () => of({
+          completedQuantity: 13, scrapQuantity: 1, reworkQuantity: 0, reasonCode: null, complete: false,
+          addedQuantity: 3, addedScrap: 0, acknowledgeGate: true, overrideReason: null,
+        }),
+        close: dialogClose,
+      } as never);
+
+      (c as unknown as { chipCycles: (e: unknown) => void }).chipCycles({ timer: c.selectedWorkerTimers()[0], cycles: 3 });
+
+      expect(dialog.open).toHaveBeenCalledTimes(1);
+      expect((dialog.open.mock.calls[0] as unknown[])[1]).toEqual(expect.objectContaining({
+        data: expect.objectContaining({ initialQuantity: 3, gate: expect.objectContaining({ mode: 'Warn', available: 12 }) }),
+      }));
+      expect(shopFloor.updateOperationProgress).toHaveBeenCalledWith(41, 401, expect.objectContaining({
+        completedQuantity: 13, acknowledgeGate: true,
+      }));
+    });
+
+    it('recorded cycles move the countdown on only once the pieces are saved', () => {
+      const { c } = tracked();
+      const tracker = TestBed.inject(KioskCycleTrackerService);
+      const worker = { ...makeWorker('ProductionWorker'), runningTimers: [{ ...running(1, 41, 401, 2), cycleMinutes: 2 }] };
+      c.selectedWorker.set(worker);
+      tracker.seed([{ timerId: 1, cycle: 0 }], Date.now());
+      const chipCycles = (c as unknown as { chipCycles: (e: unknown) => void }).chipCycles.bind(c);
+
+      shopFloor.updateOperationProgress.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 409, error: { detail: 'Stale' } })) as never);
+      chipCycles({ timer: c.selectedWorkerTimers()[0], cycles: 3 });
+      expect(tracker.baselines().get(1)).toBe(0);
+
+      chipCycles({ timer: c.selectedWorkerTimers()[0], cycles: 3 });
+      expect(tracker.baselines().get(1)).toBe(3);
+    });
+
+    it('a Warn gate on a clock-out count asks, then records the pieces with the acknowledgement and clocks out', () => {
+      const { c } = tracked();
+      const worker = { ...makeWorker('ProductionWorker'), runningTimers: [running(1, 41, 401, 2)] };
+      c.selectedWorker.set(worker);
+      const lines = [{ timer: worker.runningTimers[0], goodQuantity: 6, scrapQuantity: null }];
+      dialog.open
+        .mockReturnValueOnce({ afterClosed: () => of(lines), close: dialogClose } as never)
+        .mockReturnValueOnce({ afterClosed: () => of(true), close: dialogClose } as never);
+      shopFloor.stopOperationTimer.mockReturnValueOnce(throwError(() => gateConflict('Warn')) as never);
+
+      c.clockAction(worker, 'OUT');
+
+      expect(dialog.open).toHaveBeenCalledTimes(2);
+      expect(shopFloor.stopOperationTimer).toHaveBeenLastCalledWith(41, 401, { goodQuantity: 6, scrapQuantity: null, acknowledgeGate: true });
+      expect(shopFloor.clockInOut).toHaveBeenCalledWith(5, 'OUT');
+    });
+
+    it('a Block gate on a clock-out count can clock out without those pieces, and backing out keeps the worker clocked in', () => {
+      const { c } = tracked();
+      const worker = { ...makeWorker('ProductionWorker'), runningTimers: [running(1, 41, 401, 2)] };
+      c.selectedWorker.set(worker);
+      const lines = [{ timer: worker.runningTimers[0], goodQuantity: 6, scrapQuantity: null }];
+
+      dialog.open
+        .mockReturnValueOnce({ afterClosed: () => of(lines), close: dialogClose } as never)
+        .mockReturnValueOnce({ afterClosed: () => of(false), close: dialogClose } as never);
+      shopFloor.stopOperationTimer.mockReturnValueOnce(throwError(() => gateConflict('Block')) as never);
+      c.clockAction(worker, 'OUT');
+      expect(shopFloor.clockInOut).not.toHaveBeenCalled();
+      expect(shopFloor.stopOperationTimer).toHaveBeenCalledTimes(1);
+
+      dialog.open
+        .mockReturnValueOnce({ afterClosed: () => of(lines), close: dialogClose } as never)
+        .mockReturnValueOnce({ afterClosed: () => of(true), close: dialogClose } as never);
+      shopFloor.stopOperationTimer.mockReturnValueOnce(throwError(() => gateConflict('Block')) as never);
+      c.clockAction(worker, 'OUT');
+      expect(shopFloor.stopOperationTimer).toHaveBeenCalledTimes(2);
+      expect(shopFloor.clockInOut).toHaveBeenCalledWith(5, 'OUT');
     });
 
     it('clocking out with nothing running goes straight to the punch', () => {

@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { DurationMsPipe } from '../../../../shared/pipes/duration-ms.pipe';
 import { RunningTimer } from '../../models/running-timer.model';
 import { RunningTimerCycles } from '../../models/running-timer-cycles.model';
+import { KioskCycleTrackerService } from '../../services/kiosk-cycle-tracker.service';
 
 export const STALE_TIMER_MS = 10 * 60 * 60 * 1000;
 
@@ -35,22 +36,18 @@ export class KioskRunningTimersComponent {
   readonly recordCycles = output<RunningTimerCycles>();
 
   protected readonly expandedId = signal<number | null>(null);
-  private readonly cycleBaselines = signal<ReadonlyMap<number, number>>(new Map());
+  private readonly cycleTracker = inject(KioskCycleTrackerService);
 
   private readonly baselineEffect = effect(() => {
     const timers = this.timers();
     const now = untracked(this.now);
-    const known = untracked(this.cycleBaselines);
-    const fresh = timers.filter(t => cycleMs(t) !== null && !known.has(t.id));
-    if (fresh.length === 0) return;
-    const next = new Map(known);
-    for (const timer of fresh) next.set(timer.id, cycleIndex(timer, now));
-    this.cycleBaselines.set(next);
+    untracked(() => this.cycleTracker.seed(
+      timers.filter(t => cycleMs(t) !== null).map(t => ({ timerId: t.id, cycle: cycleIndex(t, now) })), now));
   });
 
   protected readonly lines = computed<RunningTimerLine[]>(() => {
     const now = this.now();
-    const baselines = this.cycleBaselines();
+    const baselines = this.cycleTracker.baselines();
     return this.timers()
       .filter(timer => timer.timerStart != null)
       .map(timer => {
@@ -76,7 +73,6 @@ export class KioskRunningTimersComponent {
   protected recordCycle(line: RunningTimerLine): void {
     const pending = line.cycle?.pending ?? 0;
     if (pending <= 0) return;
-    this.cycleBaselines.update(map => new Map(map).set(line.timer.id, (map.get(line.timer.id) ?? 0) + pending));
     this.recordCycles.emit({ timer: line.timer, cycles: pending });
   }
 

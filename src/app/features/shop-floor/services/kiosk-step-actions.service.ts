@@ -48,10 +48,12 @@ export class KioskStepActionsService {
     );
   }
 
-  recordPieces(jobId: number, row: JobOperationRow, context: KioskStepContext): Observable<JobOperationProgressResult | null> {
+  recordPieces(
+    jobId: number, row: JobOperationRow, context: KioskStepContext, initialQuantity: number | null = null,
+  ): Observable<JobOperationProgressResult | null> {
     if (row.operationId == null) return of(null);
     const operationId = row.operationId;
-    return this.openDialog(row, context, 'record').pipe(
+    return this.openDialog(row, context, 'record', initialQuantity).pipe(
       switchMap(result => result
         ? this.shopFloor.updateOperationProgress(jobId, operationId, {
           completedQuantity: result.completedQuantity,
@@ -66,7 +68,9 @@ export class KioskStepActionsService {
     );
   }
 
-  private openDialog(row: JobOperationRow, context: KioskStepContext, mode: 'stop' | 'record'): Observable<OperationQuantityDialogResult | undefined> {
+  private openDialog(
+    row: JobOperationRow, context: KioskStepContext, mode: 'stop' | 'record', initialQuantity: number | null = null,
+  ): Observable<OperationQuantityDialogResult | undefined> {
     return this.dialog.open<OperationQuantityDialogComponent, OperationQuantityDialogData, OperationQuantityDialogResult | undefined>(
       OperationQuantityDialogComponent, {
         width: '560px',
@@ -82,6 +86,7 @@ export class KioskStepActionsService {
           mode,
           plannedQuantity: row.plannedQuantity ?? null,
           gate: this.stepGate.gateFor(row, context.gating),
+          initialQuantity,
         },
       }).afterClosed();
   }

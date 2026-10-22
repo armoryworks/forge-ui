@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { KioskRunningTimersComponent } from './kiosk-running-timers.component';
 import { RunningTimer } from '../../models/running-timer.model';
 import { RunningTimerCycles } from '../../models/running-timer-cycles.model';
+import { KioskCycleTrackerService } from '../../services/kiosk-cycle-tracker.service';
 
 interface CycleLine { timer: RunningTimer; cycle: { remainingMs: number; pending: number } | null }
 interface CycleInternals { lines: () => CycleLine[]; recordCycle(line: CycleLine): void }
@@ -19,6 +20,7 @@ function timer(overrides: Partial<RunningTimer>): RunningTimer {
 
 describe('KioskRunningTimersComponent cycle countdown', () => {
   beforeEach(() => {
+    localStorage.removeItem('forge-kiosk-cycle-baselines');
     TestBed.configureTestingModule({ imports: [KioskRunningTimersComponent] });
     TestBed.overrideComponent(KioskRunningTimersComponent, { set: { template: '', imports: [] } });
   });
@@ -44,7 +46,24 @@ describe('KioskRunningTimersComponent cycle countdown', () => {
 
     component.recordCycle(lines[0]);
     expect(emitted).toEqual([{ timer: lines[0].timer, cycles: 2 }]);
+
+    TestBed.inject(KioskCycleTrackerService).advance(1, 2);
     expect(component.lines()[0].cycle?.pending).toBe(0);
+  });
+
+  it('keeps counting cycles across a sign-out, so the worker can come back and record them in one tap', () => {
+    const first = TestBed.createComponent(KioskRunningTimersComponent);
+    first.componentRef.setInput('timers', [timer({})]);
+    first.componentRef.setInput('now', START + 5_000);
+    first.detectChanges();
+    first.destroy();
+
+    const later = TestBed.createComponent(KioskRunningTimersComponent);
+    later.componentRef.setInput('timers', [timer({})]);
+    later.componentRef.setInput('now', START + 7 * 60_000);
+    later.detectChanges();
+
+    expect((later.componentInstance as unknown as CycleInternals).lines()[0].cycle).toEqual({ remainingMs: 60_000, pending: 3 });
   });
 
   it('does not offer cycles that finished before the chip was shown', () => {

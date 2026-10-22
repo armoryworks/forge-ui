@@ -14,7 +14,7 @@ class FakeLoader implements TranslateLoader {
 }
 
 interface GateInternals {
-  form: { patchValue(value: { quantity?: number | null; scrap?: number | null; gateAck?: boolean; gateReason?: string | null }): void };
+  form: { value: { quantity?: number | null } } & { patchValue(value: { quantity?: number | null; scrap?: number | null; gateAck?: boolean; gateReason?: string | null }): void };
   gateShown: () => boolean;
   recordGated: () => boolean;
   doneGated: () => boolean;
@@ -119,5 +119,19 @@ describe('OperationQuantityDialogComponent step gate', () => {
 
     expect(component.recordGated()).toBe(false);
     expect(component.doneGated()).toBe(true);
+  });
+
+  it('starts a record at what the gate leaves room for, not the whole remaining quantity', () => {
+    const { component } = setup(warn, { mode: 'record' });
+
+    expect(component.form.value.quantity).toBe(3);
+    expect(component.gateShown()).toBe(false);
+  });
+
+  it('starts a record at the count it was given', () => {
+    const { component } = setup(warn, { mode: 'record', initialQuantity: 4 });
+
+    expect(component.form.value.quantity).toBe(4);
+    expect(component.recordGated()).toBe(true);
   });
 });

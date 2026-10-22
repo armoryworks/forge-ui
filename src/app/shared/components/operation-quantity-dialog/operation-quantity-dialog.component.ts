@@ -47,7 +47,7 @@ export class OperationQuantityDialogComponent {
   ];
 
   protected readonly form = new FormGroup({
-    quantity: new FormControl<number | null>(this.stopMode ? null : this.remaining),
+    quantity: new FormControl<number | null>(this.data.initialQuantity ?? (this.stopMode ? null : this.defaultRecordQuantity())),
     scrap: new FormControl<number | null>(this.stopMode ? null : 0),
     rework: new FormControl<number | null>(0),
     reason: new FormControl<string | null>(null),
@@ -200,6 +200,12 @@ export class OperationQuantityDialogComponent {
     }).afterClosed().subscribe(confirmed => {
       if (confirmed) this.dialogRef.close(result);
     });
+  }
+
+  private defaultRecordQuantity(): number {
+    const available = this.data.gate?.available;
+    if (available === null || available === undefined) return this.remaining;
+    return Math.min(this.remaining, Math.max(available - this.data.completedQuantity - this.data.scrapQuantity, 0));
   }
 
   private exceedsGate(total: number): boolean {

@@ -9,7 +9,7 @@ import { A11yModule } from '@angular/cdk/a11y';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { catchError, concatMap, debounceTime, forkJoin, from, interval, last, Observable, of, Subject, switchMap } from 'rxjs';
+import { catchError, concatMap, debounceTime, forkJoin, from, interval, last, Observable, of, Subject, switchMap, tap, throwError } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { environment } from '../../../environments/environment';
@@ -41,6 +41,7 @@ import { ShipmentDetail } from '../shipments/models/shipment-detail.model';
 import { ScanLabelDialogComponent } from '../shipments/components/scan-label-dialog/scan-label-dialog.component';
 import { ScanLabelDialogData } from '../shipments/models/scan-label-dialog-data.model';
 import { httpProblemDetail } from '../../shared/utils/http-problem-detail';
+import { describeStepGate, stepGateViolationOf } from '../../shared/utils/step-gate-error';
 import { focusCancelOnOpen } from '../../shared/utils/focus-dialog-cancel';
 import { describeNonClockScan } from './utils/describe-scan';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
@@ -49,6 +50,7 @@ import { ScanActionOverlayComponent } from './components/scan-action-overlay/sca
 import { KioskRunningTimersComponent } from './components/kiosk-running-timers/kiosk-running-timers.component';
 import { ClockOutSheetDialogComponent } from './components/clock-out-sheet/clock-out-sheet-dialog.component';
 import { KioskStepActionsService } from './services/kiosk-step-actions.service';
+import { KioskCycleTrackerService } from './services/kiosk-cycle-tracker.service';
 import { RunningTimer } from './models/running-timer.model';
 import { RunningTimerCycles } from './models/running-timer-cycles.model';
 import { KioskRunningTimer } from './models/kiosk-running-timer.model';
@@ -268,6 +270,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   protected readonly stepsOpen = signal(false);
   private readonly scanOverlay = viewChild(ScanActionOverlayComponent);
   private readonly stepActions = inject(KioskStepActionsService);
+  private readonly cycleTracker = inject(KioskCycleTrackerService);
   protected readonly nowMs = computed(() => {
     this.tick();
     return Date.now();
@@ -763,10 +766,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     const recordPieces$: Observable<unknown> = counted.length === 0
       ? of(null)
       : from(counted).pipe(
-        concatMap(line => this.shopFloorService.stopOperationTimer(line.timer.jobId!, line.timer.operationId!, {
-          goodQuantity: line.goodQuantity,
-          scrapQuantity: line.scrapQuantity,
-        })),
+        concatMap(line => this.recordSheetLine(line)),
         last());
     const punch$ = recordPieces$.pipe(switchMap(() => this.shopFloorService.clockInOut(worker.userId, eventType)));
 
@@ -797,6 +797,40 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
         if (err?.status === 409) this.loadData();
       },
     });
+  }
+
+  private recordSheetLine(line: ClockOutSheetLine): Observable<unknown> {
+    const jobId = line.timer.jobId!;
+    const operationId = line.timer.operationId!;
+    const request = { goodQuantity: line.goodQuantity, scrapQuantity: line.scrapQuantity };
+    return this.shopFloorService.stopOperationTimer(jobId, operationId, request).pipe(
+      catchError((err: unknown) => {
+        const gate = stepGateViolationOf(err);
+        if (!gate) return throwError(() => err);
+        const warn = gate.mode === 'Warn';
+        this.resetAutoLogoutTimer();
+        return this.dialog.open(ConfirmDialogComponent, {
+          width: '440px',
+          data: {
+            title: this.translate.instant('shopFloor.clockOutSheet.gateTitle', {
+              jobNumber: line.timer.jobNumber ?? '', step: line.timer.stepNumber ?? '',
+            }),
+            message: `${describeStepGate(gate, this.translate)} ${this.translate.instant(
+              warn ? 'shopFloor.clockOutSheet.gateWarnHint' : 'shopFloor.clockOutSheet.gateBlockHint')}`,
+            confirmLabel: this.translate.instant(
+              warn ? 'shopFloor.clockOutSheet.gateRecordAnyway' : 'shopFloor.clockOutSheet.gateSkipPieces'),
+            severity: 'warn',
+          } satisfies ConfirmDialogData,
+        }).afterClosed().pipe(
+          switchMap(confirmed => {
+            if (!confirmed) return throwError(() => err);
+            return warn
+              ? this.shopFloorService.stopOperationTimer(jobId, operationId, { ...request, acknowledgeGate: true })
+              : of(null);
+          }),
+        );
+      }),
+    );
   }
 
   // ─── Job Selection ───
@@ -1096,11 +1130,18 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
         switchMap(step => {
           if (!step) return of(null);
           if (kind === 'cycles') {
-            return this.shopFloorService.updateOperationProgress(jobId, operationId, {
-              completedQuantity: step.row.completedQuantity + cycles,
-              scrapQuantity: step.row.scrapQuantity,
-              expectedVersion: step.row.version,
-            });
+            const reported = step.row.completedQuantity + step.row.scrapQuantity + cycles;
+            const gated = (step.context.gating ?? 'Off') !== 'Off' && step.row.available != null && reported > step.row.available;
+            const record$: Observable<unknown> = gated
+              ? this.stepActions.recordPieces(jobId, step.row, step.context, cycles)
+              : this.shopFloorService.updateOperationProgress(jobId, operationId, {
+                completedQuantity: step.row.completedQuantity + cycles,
+                scrapQuantity: step.row.scrapQuantity,
+                expectedVersion: step.row.version,
+              });
+            return record$.pipe(tap(result => {
+              if (result !== null) this.cycleTracker.advance(timer.id, cycles);
+            }));
           }
           if (kind === 'record') return this.stepActions.recordPieces(jobId, step.row, step.context);
           return this.stepActions.stop(jobId, step.row, step.context, kind === 'done' ? 'Run' : timer.entryType);
@@ -1121,8 +1162,9 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
         if (this.selectedWorker()?.userId !== worker.userId) return;
         this.processing.set(null);
         this.startAutoLogoutTimer();
-        this.showActionFeedback(worker.userId, false,
-          this.translate.instant('shopFloor.timerStopFailed', { reason: this.serverReason(err) }));
+        this.showActionFeedback(worker.userId, false, this.translate.instant(
+          kind === 'record' || kind === 'cycles' ? 'shopFloor.display.piecesRecordFailed' : 'shopFloor.timerStopFailed',
+          { reason: this.serverReason(err) }));
         this.loadData();
       },
     });
@@ -1615,6 +1657,8 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   }
 
   private serverReason(err: HttpErrorResponse): string {
+    const gate = stepGateViolationOf(err);
+    if (gate) return describeStepGate(gate, this.translate);
     const body = err?.error as { detail?: unknown; title?: unknown } | string | null | undefined;
     const candidates = typeof body === 'string' ? [body] : body && typeof body === 'object' ? [body.detail, body.title] : [];
     const reason = candidates.map(c => typeof c === 'string' ? c.trim() : '').find(c => this.isPresentableReason(c));

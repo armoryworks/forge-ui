@@ -12,4 +12,5 @@ export interface OperationQuantityDialogData {
   mode?: 'record' | 'stop';
   plannedQuantity?: number | null;
   gate?: OperationGate | null;
+  initialQuantity?: number | null;
 }

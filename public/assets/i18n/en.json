@@ -8596,7 +8596,8 @@
       "locationScanned": "Location {{name}}",
       "receivingLoadFailed": "Couldn't load the purchase orders to receive. Go back and try again.",
       "shippingLoadFailed": "Couldn't load the shipments. Go back and try again.",
-      "piecesRecorded": "Pieces recorded on {{jobNumber}}"
+      "piecesRecorded": "Pieces recorded on {{jobNumber}}",
+      "piecesRecordFailed": "Could not record the pieces: {{reason}}"
     },
     "trainingModeActive": "TRAINING MODE — Actions will not be saved",
     "trainingModeEnabled": "Training mode enabled",
@@ -8829,7 +8830,12 @@
       "hint": "These timers are still running and will stop when you clock out. Enter the good and scrap pieces you made, or leave them blank.",
       "good": "Good",
       "scrap": "Scrap",
-      "confirm": "Clock out"
+      "confirm": "Clock out",
+      "gateTitle": "{{jobNumber}} Op {{step}}: pieces not recorded yet",
+      "gateWarnHint": "Record them anyway, or go back and change the count.",
+      "gateBlockHint": "A manager or production manager has to record them. Clock out without these pieces, or go back and change the count.",
+      "gateRecordAnyway": "Record anyway",
+      "gateSkipPieces": "Clock out without them"
     }
   },
   "kioskDisplay": {
