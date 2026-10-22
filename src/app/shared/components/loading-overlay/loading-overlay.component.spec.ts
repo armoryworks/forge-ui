@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideTranslateService, TranslateService } from '@ngx-translate/core';
 
 import { LoadingService } from '../../services/loading.service';
 import { LoadingOverlayComponent } from './loading-overlay.component';
@@ -52,5 +53,18 @@ describe('LoadingOverlayComponent', () => {
     fixture.detectChanges();
 
     expect(overlay(fixture.nativeElement as HTMLElement)).toBeNull();
+  });
+
+  it('announces politely as a status with a translated label', () => {
+    const translate = TestBed.inject(TranslateService);
+    translate.setTranslation('es', { common: { loading: 'Cargando...' } });
+    translate.use('es');
+    loading.start('route-navigation', 'Loading...', { blocking: true });
+
+    const el = overlay(render());
+
+    expect(el?.getAttribute('role')).toBe('status');
+    expect(el?.getAttribute('aria-live')).toBe('polite');
+    expect(el?.getAttribute('aria-label')).toBe('Cargando...');
   });
 });

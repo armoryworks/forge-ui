@@ -1,6 +1,7 @@
 <app-dialog
   [title]="'accounting.approvals.rejectTitle' | translate: { number: data.entryNumber }"
   width="480px"
+  [dirty]="reason.dirty"
   (closed)="close()">
   <div>
     <p>{{ 'accounting.approvals.rejectNote' | translate }}</p>

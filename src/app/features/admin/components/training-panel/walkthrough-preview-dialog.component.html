@@ -1,4 +1,4 @@
-<app-dialog [title]="'Walkthrough Steps — ' + moduleTitle" width="720px" (closed)="close()">
+<app-dialog [title]="'Walkthrough Steps — ' + moduleTitle" width="720px" [dirty]="edited()" (closed)="close()">
   <div class="walkthrough-preview">
     <div class="walkthrough-preview__toolbar">
       <span class="walkthrough-preview__count">{{ steps().length }} step{{ steps().length === 1 ? '' : 's' }}</span>

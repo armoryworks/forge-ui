@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, effect, inject, signal, untracked } from '@angular/core';
 
+import { TranslatePipe } from '@ngx-translate/core';
+
 import { LoadingService, LoadingCause } from '../../services/loading.service';
 import { TranslatePipe } from '@ngx-translate/core';
 

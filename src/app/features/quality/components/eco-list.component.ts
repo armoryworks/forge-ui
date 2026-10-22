@@ -332,6 +332,7 @@ export class EcoListComponent implements OnInit {
       data: {
         title: this.translate.instant('quality.messages.removeAffectedItemTitle'),
         message: this.translate.instant('quality.messages.removeAffectedItemMessage'),
+        details: [`${item.entityType} ${item.entityId}: ${item.changeDescription}`],
         confirmLabel: this.translate.instant('common.remove'),
         severity: 'danger',
       } satisfies ConfirmDialogData,

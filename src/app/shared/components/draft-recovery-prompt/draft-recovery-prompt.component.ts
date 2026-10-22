@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Draft } from '../../models/draft.model';
 import { DateTimePipe } from '../../pipes/date-time.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
+import { DialogEscapeHandler } from '../../models/dialog-escape.model';
 
 export interface DraftRecoveryPromptData {
   drafts: Draft[];
@@ -23,7 +24,7 @@ export interface DraftRecoveryPromptResult {
   styleUrl: './draft-recovery-prompt.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DraftRecoveryPromptComponent {
+export class DraftRecoveryPromptComponent implements DialogEscapeHandler {
   readonly dialogRef = inject(MatDialogRef<DraftRecoveryPromptComponent>);
   readonly data: DraftRecoveryPromptData = inject(MAT_DIALOG_DATA);
 
@@ -49,6 +50,10 @@ export class DraftRecoveryPromptComponent {
 
   discardAll(): void {
     this.dialogRef.close({ action: 'discard' } satisfies DraftRecoveryPromptResult);
+  }
+
+  onDialogEscape(): void {
+    this.dismiss();
   }
 
   dismiss(): void {

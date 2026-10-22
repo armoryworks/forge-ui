@@ -1,23 +1,25 @@
 <a class="skip-link" href="#main-content">{{ 'shared.skipToContent' | translate }}</a>
 @if (showShell()) {
-  <app-header />
-  <app-connection-banner />
-  <app-announcement-overlay />
-  <app-mfa-grace-banner />
-  <app-onboarding-banner />
-  <div class="app-body" [attr.inert]="isGlobalLoading() || null">
-    @if (layout.sidebarVisible()) {
-      @if (layout.isMobile()) {
-        <div class="mobile-sidebar-backdrop" aria-hidden="true"></div>
+  <div class="app-shell" [attr.inert]="isGlobalLoading() || null">
+    <app-header />
+    <app-connection-banner />
+    <app-announcement-overlay />
+    <app-mfa-grace-banner />
+    <app-onboarding-banner />
+    <div class="app-body">
+      @if (layout.sidebarVisible()) {
+        @if (layout.isMobile()) {
+          <div class="mobile-sidebar-backdrop" aria-hidden="true"></div>
+        }
+        <app-sidebar />
       }
-      <app-sidebar />
-    }
-    <main class="app-main" id="main-content">
-      <router-outlet />
-    </main>
+      <main class="app-main" id="main-content">
+        <router-outlet />
+      </main>
+    </div>
   </div>
 } @else {
-  <main class="app-standalone" id="main-content">
+  <main class="app-standalone" id="main-content" [attr.inert]="isGlobalLoading() || null">
     <router-outlet />
   </main>
 }
@@ -26,7 +28,7 @@
 <app-loading-overlay />
 <app-toast-container />
 <app-keyboard-shortcuts-help />
-<app-chat-preview-popup />
+<app-chat-preview-popup [attr.inert]="isGlobalLoading() || null" />
 <app-demo-marker />
-<app-demo-module-switcher />
+<app-demo-module-switcher [attr.inert]="isGlobalLoading() || null" />
 <app-upgrade-lock />

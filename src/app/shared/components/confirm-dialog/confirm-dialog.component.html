@@ -18,7 +18,7 @@
   </div>
 
   <div class="confirm-dialog__footer">
-    <button class="action-btn" (click)="cancel()" data-testid="confirm-dialog-cancel">{{ cancelLabel }}</button>
+    <button class="action-btn" cdkFocusInitial (click)="cancel()" data-testid="confirm-dialog-cancel">{{ cancelLabel }}</button>
     <button
       class="action-btn"
       [class.action-btn--primary]="severity === 'info'"

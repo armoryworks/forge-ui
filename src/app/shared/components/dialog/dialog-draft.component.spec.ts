@@ -1,4 +1,4 @@
-import { signal } from '@angular/core';
+import { ElementRef, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -26,6 +26,7 @@ describe('DialogComponent draft lifecycle', () => {
         { provide: MatDialog, useValue: { openDialogs: [], open: vi.fn() } },
         { provide: DraftService, useValue: draftService },
         { provide: Router, useValue: { currentNavigation } },
+        { provide: ElementRef, useValue: new ElementRef(document.createElement('app-dialog')) },
       ],
     });
   });

@@ -163,14 +163,14 @@
       <span class="material-icons-outlined">{{ themeIcon() }}</span>
     </button>
     <div class="app-header__user">
-      <button class="user-trigger" (click)="toggleUserMenu()" [attr.aria-label]="'header.userMenu' | translate">
+      <button #userTrigger class="user-trigger" (click)="toggleUserMenu()" [attr.aria-label]="'header.userMenu' | translate">
         <span class="user-trigger__name hide-tablet">{{ userFullName() }}</span>
         <span class="material-icons-outlined user-trigger__icon">{{ userMenuOpen() ? 'close' : 'account_circle' }}</span>
       </button>
 
       @if (userMenuOpen()) {
         <div class="user-menu-backdrop" role="button" tabindex="0" [attr.aria-label]="'header.closeUserMenu' | translate" (click)="closeUserMenu()" (keydown.enter)="closeUserMenu()"></div>
-        <div class="user-menu">
+        <div #userMenu class="user-menu">
           <div class="user-menu__header">
             <div class="user-menu__avatar" [style.background]="userAvatarColor()">
               {{ userInitials() }}

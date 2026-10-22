@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Draft } from '../../models/draft.model';
 import { DateTimePipe } from '../../pipes/date-time.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
+import { DialogEscapeHandler } from '../../models/dialog-escape.model';
 
 export interface LogoutDraftsDialogData {
   drafts: Draft[];
@@ -22,7 +23,7 @@ export interface LogoutDraftsDialogResult {
   styleUrl: './logout-drafts-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LogoutDraftsDialogComponent {
+export class LogoutDraftsDialogComponent implements DialogEscapeHandler {
   readonly dialogRef = inject(MatDialogRef<LogoutDraftsDialogComponent>);
   readonly data: LogoutDraftsDialogData = inject(MAT_DIALOG_DATA);
 
@@ -32,6 +33,10 @@ export class LogoutDraftsDialogComponent {
 
   logout(): void {
     this.dialogRef.close({ action: 'logout' } satisfies LogoutDraftsDialogResult);
+  }
+
+  onDialogEscape(): void {
+    this.cancel();
   }
 
   cancel(): void {

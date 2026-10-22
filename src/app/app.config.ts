@@ -5,6 +5,7 @@ import {
   inject,
   LOCALE_ID,
   provideBrowserGlobalErrorListeners,
+  provideEnvironmentInitializer,
   ErrorHandler,
 } from '@angular/core';
 import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
@@ -39,6 +40,7 @@ import { ForgeTitleStrategy } from './shared/services/forge-title-strategy';
 import { TranslatedPaginatorIntl } from './shared/services/translated-paginator-intl';
 import { FormValidationService } from './shared/services/form-validation.service';
 import { localeIdForStoredLanguage } from './shared/services/language.service';
+import { DialogEscapeService } from './shared/services/dialog-escape.service';
 
 function initTranslations(): () => Promise<void> {
   const translate = inject(TranslateService);
@@ -110,7 +112,8 @@ export const appConfig: ApplicationConfig = {
       // want backdrop-close (image lightbox, transient hint, etc.) opt
       // out by passing `disableClose: false` to MatDialog.open().
       provide: MAT_DIALOG_DEFAULT_OPTIONS,
-      useValue: { disableClose: true } satisfies MatDialogConfig,
+      useValue: { ...new MatDialogConfig(), disableClose: true } satisfies MatDialogConfig,
     },
+    provideEnvironmentInitializer(() => inject(DialogEscapeService).start()),
   ],
 };

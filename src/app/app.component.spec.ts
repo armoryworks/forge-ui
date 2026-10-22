@@ -10,6 +10,7 @@ import { EMPTY } from 'rxjs';
 import { AppComponent } from './app.component';
 import { AccountingService } from './shared/services/accounting.service';
 import { CapabilityService } from './shared/services/capability.service';
+import { LoadingService } from './shared/services/loading.service';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
@@ -49,6 +50,55 @@ describe('AppComponent', () => {
 
     it('loads the accounting mode when external accounting is on', () => {
       expect(loadGatedState(true)).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('blocking load', () => {
+    function standalone(): HTMLElement {
+      const fixture = TestBed.createComponent(AppComponent);
+      fixture.detectChanges();
+      return (fixture.nativeElement as HTMLElement).querySelector('main.app-standalone') as HTMLElement;
+    }
+
+    it('makes the page behind the scrim inert', () => {
+      TestBed.inject(LoadingService).start('route-navigation', 'Loading...', { blocking: true });
+
+      expect(standalone().hasAttribute('inert')).toBe(true);
+    });
+
+    it('leaves the page interactive for a non-blocking load', () => {
+      TestBed.inject(LoadingService).start('board', 'Loading board...');
+
+      expect(standalone().hasAttribute('inert')).toBe(false);
+    });
+
+    function shell(): HTMLElement {
+      const fixture = TestBed.createComponent(AppComponent);
+      Object.defineProperty(fixture.componentInstance, 'showShell', { value: () => true });
+      fixture.detectChanges();
+      return fixture.nativeElement as HTMLElement;
+    }
+
+    const shellParts = ['app-header', 'app-connection-banner', 'app-announcement-overlay', 'app-mfa-grace-banner', 'app-onboarding-banner', '.app-body'];
+    const floatingParts = ['app-chat-preview-popup', 'app-demo-module-switcher'];
+
+    it('makes the header, every shell banner and the floating widgets inert behind the scrim', () => {
+      TestBed.inject(LoadingService).start('route-navigation', 'Loading...', { blocking: true });
+      const root = shell();
+
+      for (const selector of [...shellParts, ...floatingParts]) {
+        expect(root.querySelector(selector)?.closest('[inert]'), selector).not.toBeNull();
+      }
+    });
+
+    it('leaves the shell interactive for a non-blocking load', () => {
+      TestBed.inject(LoadingService).start('board', 'Loading board...');
+      const root = shell();
+
+      for (const selector of [...shellParts, ...floatingParts]) {
+        expect(root.querySelector(selector), selector).not.toBeNull();
+        expect(root.querySelector(selector)?.closest('[inert]'), selector).toBeNull();
+      }
     });
   });
 });
