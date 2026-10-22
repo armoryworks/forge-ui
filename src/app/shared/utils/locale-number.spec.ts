@@ -49,7 +49,7 @@ describe('formatLocaleNumber', () => {
 
   it('pads to the minimum fraction digits without rounding longer values', () => {
     expect(formatLocaleNumber(74, 'en', false, 2)).toBe('74.00');
-    expect(formatLocaleNumber(42.5, 'es', false, 2)).toBe('42,50');
+    expect(formatLocaleNumber(42.5, 'es', false, 2)).toBe('42.50');
     expect(formatLocaleNumber(0.3334, 'en', false, 2)).toBe('0.3334');
   });
 

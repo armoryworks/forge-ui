@@ -28,7 +28,7 @@ describe('MarkMilestonePaidDialogComponent', () => {
         { provide: MatDialogRef, useValue: { close: vi.fn() } },
         { provide: MAT_DIALOG_DATA, useValue: { milestone } },
         { provide: PaymentScheduleService, useValue: { markPaid: vi.fn() } },
-        { provide: TranslateService, useValue: { instant: (key: string) => key === 'quotes.paymentSchedule.paidAmount' ? 'Paid amount' : key } },
+        { provide: TranslateService, useValue: { instant: (key: string, params?: { label?: string; places?: number }) => key === 'quotes.paymentSchedule.paidAmount' ? 'Paid amount' : key === 'shared.numberDecimals' ? `${params?.label} allows at most ${params?.places} decimal places` : key } },
       ],
     });
     dialog = TestBed.runInInjectionContext(() => new MarkMilestonePaidDialogComponent()) as unknown as DialogInternals;
@@ -51,7 +51,7 @@ describe('MarkMilestonePaidDialogComponent', () => {
     const amount = dialog.form.controls['paidAmount'];
     amount.setValue(99.999);
 
-    expect(amount.errors?.['maxDecimals'].message).toBe('Paid amount can have at most 2 decimal places');
+    expect(amount.errors?.['maxDecimals'].message).toBe('Paid amount allows at most 2 decimal places');
   });
 
   it('accepts a 200-character payment reference, as the server does, and rejects 201', () => {

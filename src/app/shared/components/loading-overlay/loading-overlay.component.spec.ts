@@ -3,7 +3,6 @@ import { provideTranslateService, TranslateService } from '@ngx-translate/core';
 
 import { LoadingService } from '../../services/loading.service';
 import { LoadingOverlayComponent } from './loading-overlay.component';
-import { provideTranslateService } from '@ngx-translate/core';
 
 describe('LoadingOverlayComponent', () => {
   let loading: LoadingService;
@@ -57,7 +56,7 @@ describe('LoadingOverlayComponent', () => {
 
   it('announces politely as a status with a translated label', () => {
     const translate = TestBed.inject(TranslateService);
-    translate.setTranslation('es', { common: { loading: 'Cargando...' } });
+    translate.setTranslation('es', { shared: { loadingOverlay: { loading: 'Cargando...' } } });
     translate.use('es');
     loading.start('route-navigation', 'Loading...', { blocking: true });
 

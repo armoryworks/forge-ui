@@ -3,7 +3,6 @@ import { ChangeDetectionStrategy, Component, effect, inject, signal, untracked }
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { LoadingService, LoadingCause } from '../../services/loading.service';
-import { TranslatePipe } from '@ngx-translate/core';
 
 interface DisplayCause extends LoadingCause {
   state: 'entering' | 'visible' | 'exiting';

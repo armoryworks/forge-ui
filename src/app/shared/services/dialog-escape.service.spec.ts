@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { provideTranslateService } from '@ngx-translate/core';
 import { Subject, of } from 'rxjs';
 
 import { DetailDialogService } from './detail-dialog.service';
@@ -49,6 +50,7 @@ describe('DialogEscapeService', () => {
     panels = [];
     TestBed.configureTestingModule({
       providers: [
+        provideTranslateService(),
         { provide: MatDialog, useValue: { afterOpened, open } },
         { provide: DetailDialogService, useValue: { isCurrent: (ref: unknown) => ref === currentDetail } },
       ],
