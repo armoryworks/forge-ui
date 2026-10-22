@@ -68,6 +68,7 @@ describe('LedgerViewComponent', () => {
     getGlAnomalies: vi.fn(),
     reverseJournalEntry: vi.fn(),
     getTrialBalance: vi.fn(),
+    getChartOfAccounts: vi.fn(),
   };
   const snackbar = { error: vi.fn(), errorFrom: vi.fn(), success: vi.fn() };
   const dialog = { open: vi.fn() };
@@ -98,6 +99,7 @@ describe('LedgerViewComponent', () => {
     routeParams = {};
     gl.getLedgerRegister.mockReturnValue(of(PAGE));
     gl.getTrialBalance.mockReturnValue(of({ bookId: 1, rows: [], totalDebit: 0, totalCredit: 0, isBalanced: true }));
+    gl.getChartOfAccounts.mockReturnValue(of([]));
     gl.explainJournalEntry.mockReturnValue(
       of<JournalEntryExplanation>({ entryId: 1, explanation: 'A $100 cash sale.', aiAvailable: true, deterministicSummary: 'd' }),
     );
@@ -122,6 +124,28 @@ describe('LedgerViewComponent', () => {
     expect(api.accountNotFound()).toBe(true);
     expect(gl.getLedgerRegister).not.toHaveBeenCalled();
     expect(api.entries()).toHaveLength(0);
+  });
+
+  it('shows the not-found state for a well-formed account id the book does not have', () => {
+    routeParams = { accountId: '999' };
+    const api = create();
+    expect(gl.getChartOfAccounts).toHaveBeenCalledWith(1);
+    expect(api.accountNotFound()).toBe(true);
+    expect(api.lensAccount()).toBeNull();
+    expect(api.entries()).toHaveLength(0);
+    expect(api.loading()).toBe(false);
+  });
+
+  it('lenses an account with no postings at a zero balance rather than not-found', () => {
+    routeParams = { accountId: '7' };
+    gl.getLedgerRegister.mockReturnValue(of({ data: [], page: 1, pageSize: 100, totalCount: 0, totalPages: 0 }));
+    gl.getChartOfAccounts.mockReturnValue(of([{
+      id: 7, accountNumber: '60100', name: 'Supplies', accountType: 'Expense', normalBalance: 'Debit',
+      isPostable: true, isControlAccount: false, requiresJob: false, requiresCostCenter: false,
+    }]));
+    const api = create();
+    expect(api.accountNotFound()).toBe(false);
+    expect(api.lensAccount()).toMatchObject({ glAccountId: 7, accountNumber: '60100', accountName: 'Supplies', netBalance: 0 });
   });
 
   it('lists rejected drafts on request and offers resubmit only on the signed-in user\'s own', () => {

@@ -4,7 +4,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 
-import { filter, forkJoin, switchMap } from 'rxjs';
+import { filter, forkJoin, map, of, switchMap } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
@@ -18,7 +18,7 @@ import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
-import { JournalEntryExplanation, LedgerRegisterEntry, LedgerRegisterPage, ReverseJournalEntryInput, TrialBalanceRow } from '../../models/accounting.models';
+import { GlAccount, JournalEntryExplanation, LedgerRegisterEntry, LedgerRegisterPage, ReverseJournalEntryInput, TrialBalanceRow } from '../../models/accounting.models';
 import { ReverseEntryDialogComponent, ReverseEntryDialogData } from '../reverse-entry-dialog/reverse-entry-dialog.component';
 
 /** Default book; overridable via ?bookId= (the training sandbox is its own book — §5A.4). */
@@ -73,7 +73,7 @@ export class LedgerViewComponent implements OnInit {
   protected readonly page = signal<LedgerRegisterPage | null>(null);
   /** Account lens (§5A.1 `:accountId`): when set, the register is scoped to one account. */
   private readonly accountId = signal<number | null>(null);
-  /** The `:accountId` in the URL is not a valid account id; nothing is loaded. */
+  /** The `:accountId` in the URL is malformed or names no account in the book; nothing is shown. */
   protected readonly accountNotFound = signal(false);
   /** Shows the never-posted Draft entries (where rejected entries land) instead of the journal. */
   protected readonly showDrafts = signal(false);
@@ -315,10 +315,29 @@ export class LedgerViewComponent implements OnInit {
     // Lens: the trial balance supplies the account's label + current net balance, which seeds the
     // running-balance walk. Loaded together so the balance column never renders from stale data.
     forkJoin([register$, this.gl.getTrialBalance(this.bookId())])
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        switchMap(([p, tb]) => {
+          const row = tb.rows.find((r) => r.glAccountId === accountId);
+          if (row) return of({ p, lens: row });
+          return this.gl.getChartOfAccounts(this.bookId()).pipe(
+            map((accounts) => {
+              const account = accounts.find((a) => a.id === accountId);
+              return { p, lens: account ? this.zeroBalanceRow(account) : null };
+            }),
+          );
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe({
-        next: ([p, tb]) => {
-          this.lensAccount.set(tb.rows.find((r) => r.glAccountId === accountId) ?? null);
+        next: ({ p, lens }) => {
+          if (!lens) {
+            this.accountNotFound.set(true);
+            this.lensAccount.set(null);
+            this.page.set(null);
+            this.loading.set(false);
+            return;
+          }
+          this.lensAccount.set(lens);
           this.page.set(p);
           this.explanations.set({});
           this.loading.set(false);
@@ -328,6 +347,14 @@ export class LedgerViewComponent implements OnInit {
           this.loading.set(false);
         },
       });
+  }
+
+  /** Lens row for an account with no postings, which the trial balance leaves out. */
+  private zeroBalanceRow(account: GlAccount): TrialBalanceRow {
+    return {
+      glAccountId: account.id, accountNumber: account.accountNumber, accountName: account.name,
+      debitTotal: 0, creditTotal: 0, netBalance: 0, debitBalance: 0, creditBalance: 0,
+    };
   }
 
   protected explain(entry: LedgerRegisterEntry): void {
