@@ -12,6 +12,7 @@ import { TrainingPath } from '../models/training-path.model';
 import { TrainingContentType } from '../models/training-content-type.enum';
 import { TrainingProgressStatus } from '../models/training-progress-status.enum';
 import { EnumLabelPipe } from '../../../shared/pipes/enum-label.pipe';
+import { trainingContentIcon } from '../../../shared/utils/training-content-icon';
 
 @Component({
   selector: 'app-training-path',
@@ -63,14 +64,7 @@ export class TrainingPathComponent implements OnInit {
   }
 
   protected contentTypeIcon(type: TrainingContentType): string {
-    const icons: Record<TrainingContentType, string> = {
-      Article: 'article',
-      Walkthrough: 'route',
-      QuickRef: 'quick_reference_all',
-      Quiz: 'quiz',
-      Reference: 'menu_book',
-    };
-    return icons[type] ?? 'school';
+    return trainingContentIcon(type);
   }
 
   protected moduleActionLabel(status: TrainingProgressStatus | null): string {

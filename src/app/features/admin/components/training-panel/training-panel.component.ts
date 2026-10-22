@@ -20,6 +20,7 @@ import { DetailDialogService } from '../../../../shared/services/detail-dialog.s
 import { DraftResumeService } from '../../../../shared/services/draft-resume.service';
 import { TrainingService } from '../../../training/services/training.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { trainingContentIcon } from '../../../../shared/utils/training-content-icon';
 
 export interface TrainingModuleRow {
   id: number;
@@ -322,14 +323,7 @@ export class TrainingPanelComponent implements OnInit {
   }
 
   protected contentTypeIcon(type: string): string {
-    const icons: Record<string, string> = {
-      Article: 'article',
-      Walkthrough: 'route',
-      QuickRef: 'quick_reference_all',
-      Quiz: 'quiz',
-      Reference: 'menu_book',
-    };
-    return icons[type] ?? 'school';
+    return trainingContentIcon(type);
   }
 
   protected contentTypeClass(type: string): string {

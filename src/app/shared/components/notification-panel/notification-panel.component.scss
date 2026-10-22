@@ -167,6 +167,10 @@
   }
 }
 
+.notification-item__pin--active {
+  color: var(--primary);
+}
+
 .notification-panel__footer {
   padding: $sp-sm $sp-md;
   border-top: $border-width-thin solid var(--border);

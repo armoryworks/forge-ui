@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
 import { environment } from '../../../../environments/environment';
+import { trainingContentIcon } from '../../utils/training-content-icon';
 
 export interface TrainingContextCard {
   id: number;
@@ -56,14 +57,6 @@ export class TrainingContextPanelComponent {
   }
 
   protected contentTypeIcon(type: string): string {
-    const icons: Record<string, string> = {
-      Article: 'article',
-      Video: 'play_circle',
-      Walkthrough: 'route',
-      QuickRef: 'quick_reference_all',
-      Quiz: 'quiz',
-      Reference: 'menu_book',
-    };
-    return icons[type] ?? 'school';
+    return trainingContentIcon(type);
   }
 }
