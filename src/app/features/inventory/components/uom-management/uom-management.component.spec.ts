@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { InventoryService } from '../../services/inventory.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -20,6 +21,7 @@ function setup(roles: string[]) {
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     providers: [
+      provideTranslateService(),
       { provide: InventoryService, useValue: new Proxy({}, { get: () => () => of([]) }) },
       { provide: SnackbarService, useValue: { success: () => undefined } },
       { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
