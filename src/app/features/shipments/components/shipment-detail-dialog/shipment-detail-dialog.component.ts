@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { ShipmentDetailPanelComponent } from '../shipment-detail-panel/shipment-detail-panel.component';
 import { ShipmentDetail } from '../../models/shipment-detail.model';
+import { DialogEscapeHandler } from '../../../../shared/models/dialog-escape.model';
 
 export interface ShipmentDetailDialogData {
   shipmentId: number;
@@ -27,10 +28,14 @@ export interface ShipmentDetailDialogResult {
   styles: [`:host { display: block; width: 100%; height: 100%; } app-shipment-detail-panel { height: 100%; }`],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ShipmentDetailDialogComponent {
+export class ShipmentDetailDialogComponent implements DialogEscapeHandler {
   private readonly dialogRef = inject(MatDialogRef<ShipmentDetailDialogComponent, ShipmentDetailDialogResult | undefined>);
 
   protected readonly data = inject<ShipmentDetailDialogData>(MAT_DIALOG_DATA);
+
+  onDialogEscape(): void {
+    this.close();
+  }
 
   protected close(): void {
     this.dialogRef.close();

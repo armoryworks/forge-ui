@@ -7,6 +7,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { WorkflowRun } from '../../models/workflow-run.model';
 import { WorkflowService } from '../../services/workflow.service';
 import { DateTimePipe } from '../../pipes/date-time.pipe';
+import { DialogEscapeHandler } from '../../models/dialog-escape.model';
 
 /**
  * Workflow Pattern Phase 4 — Active workflow runs list dialog.
@@ -28,7 +29,7 @@ import { DateTimePipe } from '../../pipes/date-time.pipe';
   styleUrl: './workflow-active-list-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WorkflowActiveListDialogComponent implements OnInit {
+export class WorkflowActiveListDialogComponent implements OnInit, DialogEscapeHandler {
   private readonly dialogRef = inject(MatDialogRef<WorkflowActiveListDialogComponent>);
   private readonly workflowService = inject(WorkflowService);
   private readonly router = inject(Router);
@@ -68,6 +69,10 @@ export class WorkflowActiveListDialogComponent implements OnInit {
       });
     }
     this.dialogRef.close({ resumed: run.id });
+  }
+
+  onDialogEscape(): void {
+    this.close();
   }
 
   protected close(): void {

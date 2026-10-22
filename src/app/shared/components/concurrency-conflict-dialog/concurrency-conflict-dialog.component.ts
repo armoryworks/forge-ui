@@ -3,6 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { TranslatePipe } from '@ngx-translate/core';
+import { DialogEscapeHandler } from '../../models/dialog-escape.model';
 
 export interface ConcurrencyConflictDialogData {
   resource: string | null;
@@ -26,12 +27,16 @@ export type ConcurrencyConflictResolution = 'reload' | 'cancel';
   styleUrl: './concurrency-conflict-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ConcurrencyConflictDialogComponent {
+export class ConcurrencyConflictDialogComponent implements DialogEscapeHandler {
   readonly dialogRef = inject(MatDialogRef<ConcurrencyConflictDialogComponent, ConcurrencyConflictResolution>);
   readonly data: ConcurrencyConflictDialogData = inject(MAT_DIALOG_DATA);
 
   reload(): void {
     this.dialogRef.close('reload');
+  }
+
+  onDialogEscape(): void {
+    this.cancel();
   }
 
   cancel(): void {

@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { PinPromptDialogComponent, PinPromptDialogData } from './pin-prompt-dialog.component';
+import { DialogEscapeService } from '../../../../shared/services/dialog-escape.service';
 
 const ES = {
   common: { cancel: 'Cancelar', confirm: 'Confirmar' },
@@ -19,13 +20,22 @@ const ES = {
   },
 };
 
-function setup(data: PinPromptDialogData | null) {
+function escapeStub(confirmed: boolean) {
+  return {
+    closeUnlessDirty: vi.fn((dirty: boolean, close: () => void) => {
+      if (!dirty || confirmed) close();
+    }),
+  };
+}
+
+function setup(data: PinPromptDialogData | null, escape = escapeStub(false)) {
   const dialogRef = { close: vi.fn() };
   TestBed.configureTestingModule({
     imports: [PinPromptDialogComponent, TranslateModule.forRoot()],
     providers: [
       { provide: MAT_DIALOG_DATA, useValue: data },
       { provide: MatDialogRef, useValue: dialogRef },
+      { provide: DialogEscapeService, useValue: escape },
     ],
   });
   const translate = TestBed.inject(TranslateService);
@@ -33,7 +43,7 @@ function setup(data: PinPromptDialogData | null) {
   translate.use('es');
   const fixture = TestBed.createComponent(PinPromptDialogComponent);
   fixture.detectChanges();
-  return { fixture, dialogRef };
+  return { fixture, dialogRef, escape };
 }
 
 describe('PinPromptDialogComponent', () => {
@@ -69,5 +79,35 @@ describe('PinPromptDialogComponent', () => {
     dialog.confirm();
     expect(dialog.error()).toBe('El PIN solo puede contener números');
     expect(dialogRef.close).not.toHaveBeenCalled();
+  });
+
+  describe('Escape', () => {
+    it('cancels straight away while no PIN is typed', () => {
+      const { fixture, dialogRef, escape } = setup(null);
+
+      fixture.componentInstance.onDialogEscape();
+
+      expect(escape.closeUnlessDirty).toHaveBeenCalledWith(false, expect.any(Function));
+      expect(dialogRef.close).toHaveBeenCalledWith(null);
+    });
+
+    it('keeps a typed PIN when the discard prompt is declined', () => {
+      const { fixture, dialogRef, escape } = setup(null);
+      fixture.componentInstance.pinControl.setValue('12');
+
+      fixture.componentInstance.onDialogEscape();
+
+      expect(escape.closeUnlessDirty).toHaveBeenCalledWith(true, expect.any(Function));
+      expect(dialogRef.close).not.toHaveBeenCalled();
+    });
+
+    it('cancels with a typed PIN once the discard is confirmed', () => {
+      const { fixture, dialogRef } = setup(null, escapeStub(true));
+      fixture.componentInstance.pinControl.setValue('12');
+
+      fixture.componentInstance.onDialogEscape();
+
+      expect(dialogRef.close).toHaveBeenCalledWith(null);
+    });
   });
 });

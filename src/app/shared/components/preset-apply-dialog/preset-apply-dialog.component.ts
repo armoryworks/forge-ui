@@ -4,6 +4,8 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { TextareaComponent } from '../textarea/textarea.component';
+import { DialogEscapeHandler } from '../../models/dialog-escape.model';
+import { DialogEscapeService } from '../../services/dialog-escape.service';
 import {
   PresetApplyViolation,
   PresetCapabilityDelta,
@@ -43,9 +45,10 @@ export interface PresetApplyDialogResult {
   styleUrl: './preset-apply-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PresetApplyDialogComponent {
+export class PresetApplyDialogComponent implements DialogEscapeHandler {
   readonly data: PresetApplyDialogData = inject(MAT_DIALOG_DATA);
   private readonly dialogRef = inject(MatDialogRef<PresetApplyDialogComponent, PresetApplyDialogResult>);
+  private readonly dialogEscape = inject(DialogEscapeService);
 
   protected readonly reasonControl = new FormControl<string>('');
 
@@ -72,6 +75,10 @@ export class PresetApplyDialogComponent {
       confirmed: true,
       reason: this.reasonControl.value?.trim() || undefined,
     });
+  }
+
+  onDialogEscape(): void {
+    this.dialogEscape.closeUnlessDirty(!!this.reasonControl.value?.trim(), () => this.cancel());
   }
 
   protected cancel(): void {
