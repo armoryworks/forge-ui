@@ -373,16 +373,33 @@ const isEnglishLiteral = (quote, body) => {
   return /\p{L}/u.test(text) && !(quote !== '`' && I18N_KEY.test(body));
 };
 
+const isEnglishSentence = (quote, body) => {
+  const text = (quote === '`' ? body.replace(/\$\{[^}]*\}/g, '') : body).trim();
+  return /\p{L}{2,}/u.test(text) && /\s/.test(text) && !I18N_KEY.test(body);
+};
+
 function englishLiteralsInSnackbarAndDialogs() {
   const out = new Map();
-  const snackbarCall = /\b\w*[sS]nack[bB]ar\w*\.(?!errorFrom\b)(\w+)\(\s*(['"`])((?:\\.|(?!\2)[^\\])*)\2/g;
+  const snackbarCall = /\b\w*[sS]nack[bB]ar\w*\.(?!errorFrom\b)\w+\(/g;
+  const firstLiteral = /^\s*(['"`])((?:\\.|(?!\1)[^\\])*)\1/;
+  const anyLiteral = /(['"`])((?:\\.|(?!\1)[^\\])*)\1/g;
+  const translateKeyArg = /\b(?:instant|get|stream)\(\s*(['"`])[^'"`]*\1/g;
   const dialogText = /\b(?:title|message|confirmLabel|cancelLabel)\s*:\s*(['"`])((?:\\.|(?!\1)[^\\])*)\1/g;
   for (const f of walk(SRC, ['.ts'])) {
     if (isSpec(f)) continue;
     const src = stripTsComments(read(f));
     let n = 0;
     for (const m of src.matchAll(snackbarCall)) {
-      if (isEnglishLiteral(m[2], m[3])) n++;
+      const open = m.index + m[0].length - 1;
+      const args = src.slice(open + 1, skipBalanced(src, open, '(', ')') - 1);
+      const first = firstLiteral.exec(args);
+      if (first && isEnglishLiteral(first[1], first[2])) {
+        n++;
+        continue;
+      }
+      for (const l of args.replace(translateKeyArg, '').matchAll(anyLiteral)) {
+        if (isEnglishSentence(l[1], l[2])) n++;
+      }
     }
     if (/ConfirmDialogData\b/.test(src)) {
       for (const d of src.matchAll(/\bdata\s*:\s*\{/g)) {

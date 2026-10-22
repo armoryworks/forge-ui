@@ -2897,7 +2897,7 @@
       "placeholderHelp": "Suba un CSV o pegue filas abajo. El asistente de deduplicación previsualiza coincidencias contra prospectos existentes, contactos suprimidos y enfriamientos activos antes de confirmar.",
       "step1Title": "Elija la estrategia",
       "step2Title": "Proporcione los datos",
-      "step3Title": "Previsualiza y confirma",
+      "step3Title": "Previsualice y confirme",
       "fieldStrategy": "Estrategia",
       "fieldCampaignTag": "Etiqueta de campaña (opcional)",
       "campaignTagPlaceholder": "ej. IMTS-2026",
@@ -3800,7 +3800,7 @@
       "updated": "Fuente de leads actualizada.",
       "deleted": "Fuente de leads eliminada.",
       "deleteTitle": "¿Eliminar fuente de leads?",
-      "deleteMessage": "¿Eliminar suavemente \"{{name}}\"? Si algún lead está atribuido a esta fuente, el servidor se negará — desactiva en su lugar."
+      "deleteMessage": "¿Eliminar suavemente \"{{name}}\"? Si algún lead está atribuido a esta fuente, el servidor se negará — desactívela en su lugar."
     },
     "i18nLabels": {
       "title": "Etiquetas de UI",
@@ -3923,7 +3923,7 @@
       "updated": "Rúbrica ICP actualizada.",
       "deleted": "Rúbrica ICP eliminada.",
       "deleteTitle": "¿Eliminar rúbrica ICP?",
-      "deleteMessage": "¿Eliminar suavemente \"{{name}}\"? No se puede eliminar la rúbrica por defecto — marca otra como por defecto primero."
+      "deleteMessage": "¿Eliminar suavemente \"{{name}}\"? No se puede eliminar la rúbrica por defecto — primero marque otra como por defecto."
     },
     "assignmentRules": {
       "title": "Reglas de Asignación de Leads",
@@ -4320,6 +4320,8 @@
         "systemNoEdit": "Las plantillas predeterminadas del sistema no se pueden editar. Cree una plantilla nueva para personalizarla.",
         "systemNoDelete": "Las plantillas predeterminadas del sistema no se pueden eliminar.",
         "deleted": "Plantilla eliminada.",
+        "created": "Plantilla creada.",
+        "updated": "Plantilla actualizada.",
         "deleteTitle": "¿Eliminar la agrupación de roles?",
         "deleteMessage": "Esto desactivará \"{{name}}\". Las claves API del sistema limitadas a esta agrupación deberán volver a limitarse. Los roles base no se ven afectados."
       }
@@ -7659,7 +7661,8 @@
       "recordedOoc": "Subgrupo n.º {{number}} registrado. Fuera de control: {{rule}}"
     },
     "ooc": {
-      "capaCreatedNumber": "Se creó {{number}} a partir del evento fuera de control"
+      "capaCreatedNumber": "Se creó {{number}} a partir del evento fuera de control",
+      "capaCreated": "Se creó la CAPA a partir del evento fuera de control"
     }
   },
   "quality": {
@@ -10853,7 +10856,7 @@
     "customerIdentity": {
       "nameLabel": "Nombre del cliente (empresa)",
       "displayNameLabel": "Nombre para mostrar",
-      "displayNameHelp": "Opcional. Si se completa, este nombre se imprime en lugar del nombre del cliente en los albaranes, los conocimientos de embarque y otros documentos del cliente, y se envía a contabilidad como nombre de la empresa. Use el nombre completo de la empresa, no un apodo."
+      "displayNameHelp": "Opcional. Si se completa, este nombre se imprime en lugar del nombre del cliente en las listas de empaque, los conocimientos de embarque y otros documentos del cliente, y se envía a contabilidad como nombre de la empresa. Use el nombre completo de la empresa, no un apodo."
     },
     "customerAddresses": {
       "saveIdentityFirst": "Guarde primero la identidad del cliente y luego agregue las direcciones aquí.",
@@ -13481,7 +13484,7 @@
   "capas": {
     "detailTitle": "CAPA",
     "owner": "Responsable",
-    "blockers": "Para avanzar a la siguiente fase, completa: {{fields}}.",
+    "blockers": "Para avanzar a la siguiente fase, complete: {{fields}}.",
     "rootCauseMethod": "Método de causa raíz",
     "rootCauseAnalysis": "Análisis de causa raíz",
     "containmentAction": "Acción de contención",
@@ -13719,7 +13722,7 @@
       "roleTemplateTooMany": "La plantilla puede incluir como máximo 25 roles.",
       "nameNotVisible": "El nombre debe contener caracteres visibles.",
       "leadNameRequired": "Indique un nombre de empresa o un nombre de contacto.",
-      "packingSlipTooLong": "El número de albarán debe tener 100 caracteres o menos.",
+      "packingSlipTooLong": "El número de la lista de empaque debe tener 100 caracteres o menos.",
       "wholeQuantityRequired": "La cantidad buena debe ser un número entero.",
       "fileTooLarge": "El tamaño del archivo no debe superar los 10 MB.",
       "emailInvalidCharacter": "El correo electrónico contiene un carácter no válido.",

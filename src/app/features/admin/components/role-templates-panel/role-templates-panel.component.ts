@@ -142,7 +142,7 @@ export class RoleTemplatesPanelComponent implements OnInit {
         this.saving.set(false);
         this.closeDialog();
         this.load();
-        this.snackbar.success(editing ? 'Template updated.' : 'Template created.');
+        this.snackbar.success(this.translate.instant(editing ? 'admin.roleTemplatesPanel.messages.updated' : 'admin.roleTemplatesPanel.messages.created'));
       },
       error: (err) => {
         this.saving.set(false);

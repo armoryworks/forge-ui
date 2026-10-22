@@ -257,7 +257,7 @@ export class CapabilityDetailComponent implements OnInit {
         this.glOpeningReason.set(violation.message ?? '');
         break;
       default:
-        this.snackbar.error(violation.message ?? `Failed to update ${entry.name}.`);
+        this.snackbar.error(violation.message ?? this.translate.instant('admin.capabilityMessages.updateFailed', { name: entry.name }));
         break;
     }
   }

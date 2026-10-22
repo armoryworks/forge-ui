@@ -50,4 +50,13 @@ describe('localizeServerError', () => {
     expect(localizeServerError({ field: 'x', message: 'Server text', code: 'PredicateValidator' }, translate)).toBe('Server text');
     expect(localizeServerError({ field: 'x', message: 'Server text', code: 'EmailValidator' }, translate)).toBe('Server text');
   });
+
+  it('keeps the server message when the server sent no limit the wording needs', () => {
+    const keepsMissing = (key: string, params?: Record<string, unknown>): string =>
+      (catalog[key] ?? key).replace(/\{\{(\w+)\}\}/g, (whole, name: string) => (params?.[name] === undefined ? whole : String(params?.[name])));
+    expect(localizeServerError(
+      { field: 'endDate', message: 'End date must be on or after Start date.', code: 'InclusiveBetweenValidator', params: null },
+      keepsMissing,
+    )).toBe('End date must be on or after Start date.');
+  });
 });

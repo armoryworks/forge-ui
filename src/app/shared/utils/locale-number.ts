@@ -26,8 +26,8 @@ function separatorsFor(lang: string): Separators {
  * Parse number text typed in the given app language (`en`, `es`). Accepts an optional sign, the
  * language's decimal separator and correctly placed group separators (`1,500.25` in en and in
  * es, which keeps US conventions as es-US). Returns null for blank text and NaN for anything else that is not a whole
- * number in that form (`1,5` in en, `1.5` in es, `-`, `1e3`), so a separator typed in the wrong
- * place is reported instead of being dropped.
+ * number in that form (`1,5`, `-`, `1e3`), so a separator typed in the wrong place is reported
+ * instead of being dropped.
  */
 export function parseLocaleNumber(text: string | null | undefined, lang: string): number | null {
   const trimmed = (text ?? '').trim();

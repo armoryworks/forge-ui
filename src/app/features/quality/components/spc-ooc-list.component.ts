@@ -137,7 +137,7 @@ export class SpcOocListComponent {
         this.loadEvents();
         this.snackbar.success(updated.capaNumber
           ? this.translate.instant('spc.ooc.capaCreatedNumber', { number: updated.capaNumber })
-          : 'CAPA created from OOC event');
+          : this.translate.instant('spc.ooc.capaCreated'));
       },
     });
   }

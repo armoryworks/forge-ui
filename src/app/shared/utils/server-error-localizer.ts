@@ -84,11 +84,12 @@ export function serverFieldLabel(field: string, translate: ServerErrorTranslator
 /**
  * The error in the UI language when the server sent a code the catalog words,
  * with the rule's limits (`maxLength`, `from`, ...) and the field label filled in.
- * Falls back to the server's own message for uncoded errors or unknown codes.
+ * Falls back to the server's own message for uncoded errors, unknown codes, or when the server
+ * did not send a limit the wording needs (a comparison against another field, for example).
  */
 export function localizeServerError(error: ServerValidationError, translate: ServerErrorTranslator): string {
   const key = serverErrorKey(error.code);
   if (!key) return error.message;
   const text = translate(key, { ...(error.params ?? {}), field: serverFieldLabel(error.field, translate) });
-  return text && text !== key ? text : error.message;
+  return text && text !== key && !text.includes('{{') ? text : error.message;
 }

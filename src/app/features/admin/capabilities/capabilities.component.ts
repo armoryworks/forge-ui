@@ -301,7 +301,7 @@ export class CapabilitiesComponent implements OnInit {
         this.snackbar.error(this.translate.instant('admin.capabilityMessages.concurrency', { name: entry.name }));
         break;
       default:
-        this.snackbar.error(violation.message ?? `Failed to update ${entry.name}.`);
+        this.snackbar.error(violation.message ?? this.translate.instant('admin.capabilityMessages.updateFailed', { name: entry.name }));
         break;
     }
   }
