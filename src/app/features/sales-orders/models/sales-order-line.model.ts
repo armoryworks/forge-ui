@@ -15,4 +15,5 @@ export interface SalesOrderLine {
   notes: string | null;
   jobs: SalesOrderLineJob[];
   needsJob: boolean;
+  shipsGoods?: boolean;
 }

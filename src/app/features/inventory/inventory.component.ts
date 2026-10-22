@@ -3,7 +3,7 @@ import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { catchError, map, of, startWith, switchMap, tap } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, map, of, startWith, switchMap, tap } from 'rxjs';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -90,6 +90,7 @@ export class InventoryComponent {
   protected readonly inspectionEnabled = computed(() => this.capabilities.isEnabled('CAP-QC-INSPECTION'));
 
   protected readonly canReplenish = this.auth.hasAnyRole([...INVENTORY_TAB_ROLES['replenishment']]);
+  protected readonly canAdjustStock = this.auth.hasAnyRole(['Admin', 'Manager']);
 
   protected readonly activeTab = computed<InventoryTab>(() => {
     const tab = this.routeTab();
@@ -121,9 +122,10 @@ export class InventoryComponent {
   protected readonly lowStockAlerts = signal<LowStockAlert[]>([]);
   protected readonly searchControl = new FormControl('');
   private readonly searchTerm = toSignal(this.searchControl.valueChanges.pipe(startWith('')), { initialValue: '' });
+  protected readonly inStockCount = computed(() => this.partSummaries().filter(p => p.onHand > 0).length);
 
   protected readonly stockColumns: ColumnDef[] = [
-    { field: 'partNumber', header: this.translate.instant('inventory.columns.partNumber'), sortable: true, width: '120px' },
+    { field: 'partNumber', header: this.translate.instant('inventory.columns.partNumber'), sortable: true, width: '150px' },
     { field: 'description', phoneHidden: true, header: this.translate.instant('common.description'), sortable: true },
     { field: 'material', phoneHidden: true, header: this.translate.instant('inventory.columns.material'), sortable: true, width: '140px' },
     { field: 'onHand', header: this.translate.instant('inventory.onHand'), sortable: true, align: 'right', width: '90px' },
@@ -149,7 +151,8 @@ export class InventoryComponent {
 
   protected readonly movementColumns: ColumnDef[] = [
     { field: 'entityName', header: this.translate.instant('inventory.columns.item'), sortable: true },
-    { field: 'quantity', header: this.translate.instant('inventory.columns.qty'), sortable: true, width: '70px', align: 'right' },
+    { field: 'quantity', header: this.translate.instant('inventory.columns.qty'), sortable: true, type: 'number', width: '90px', align: 'right' },
+    { field: 'uomCode', header: this.translate.instant('inventory.columns.uom'), sortable: true, width: '70px' },
     { field: 'fromLocationName', header: this.translate.instant('inventory.columns.from'), sortable: true },
     { field: 'toLocationName', header: this.translate.instant('inventory.columns.to'), sortable: true },
     { field: 'reason', header: this.translate.instant('inventory.columns.reason'), sortable: true, width: '120px' },
@@ -162,8 +165,8 @@ export class InventoryComponent {
 
   protected readonly receivingColumns: ColumnDef[] = [
     { field: 'purchaseOrderNumber', header: this.translate.instant('inventory.columns.poNumber'), sortable: true, width: '110px' },
-    { field: 'partNumber', header: this.translate.instant('inventory.columns.partNumber'), sortable: true, width: '120px' },
-    { field: 'quantityReceived', header: this.translate.instant('inventory.columns.qty'), sortable: true, width: '70px', align: 'right' },
+    { field: 'partNumber', header: this.translate.instant('inventory.columns.partNumber'), sortable: true, width: '150px' },
+    { field: 'quantityReceived', header: this.translate.instant('inventory.columns.qty'), sortable: true, type: 'number', width: '90px', align: 'right' },
     { field: 'receivedBy', header: this.translate.instant('inventory.columns.receivedBy'), sortable: true },
     { field: 'storageLocationName', header: this.translate.instant('inventory.location'), sortable: true },
     { field: 'lotNumber', header: this.translate.instant('inventory.columns.lotNumber'), sortable: true, width: '100px' },
@@ -194,16 +197,18 @@ export class InventoryComponent {
   // Location dialog
   protected readonly showLocationDialog = signal(false);
   protected readonly locationForm = new FormGroup({
-    name: new FormControl('', [requiredTrimmed]),
+    name: new FormControl('', [requiredTrimmed, Validators.maxLength(200)]),
     locationType: new FormControl<LocationType>('Area', [Validators.required]),
     parentId: new FormControl<number | null>(null),
-    barcode: new FormControl(''),
-    description: new FormControl(''),
+    barcode: new FormControl('', [Validators.maxLength(100)]),
+    description: new FormControl('', [Validators.maxLength(500)]),
   });
 
   protected readonly locationViolations = FormValidationService.getViolations(this.locationForm, {
     name: 'Name',
     locationType: 'Type',
+    barcode: 'Barcode',
+    description: 'Description',
   });
 
   protected readonly locationTypes: LocationType[] = ['Area', 'Rack', 'Shelf', 'Bin'];
@@ -223,7 +228,7 @@ export class InventoryComponent {
   });
 
   protected readonly receiveViolations = FormValidationService.getViolations(this.receiveForm, {
-    purchaseOrderLineId: 'PO Line ID',
+    purchaseOrderLineId: this.translate.instant('inventory.dialogs.poLineId'),
     quantityReceived: 'Quantity',
   });
 
@@ -243,12 +248,18 @@ export class InventoryComponent {
 
   // Transfer dialog
   protected readonly showTransferDialog = signal(false);
+  private readonly transferSourceBinId = signal<number | null>(null);
   protected readonly transferForm = new FormGroup({
     partId: new FormControl<number | null>(null),
     sourceBinContentId: new FormControl<number | null>(null, [Validators.required]),
     destinationLocationId: new FormControl<number | null>(null, [Validators.required]),
-    quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(1)]),
+    quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0.0001)]),
     notes: new FormControl(''),
+  });
+
+  protected readonly transferSourceBin = computed(() => {
+    const binContentId = this.transferSourceBinId();
+    return this.partBins().find(b => b.binContentId === binContentId) ?? null;
   });
 
   protected readonly transferViolations = FormValidationService.getViolations(this.transferForm, {
@@ -309,6 +320,7 @@ export class InventoryComponent {
   // Cycle count detail dialog
   protected readonly showCycleCountDialog = signal(false);
   protected readonly selectedCycleCount = signal<CycleCount | null>(null);
+  protected readonly invalidCycleCountLineIds = signal<ReadonlySet<number>>(new Set());
 
   // Create cycle count dialog
   protected readonly showCreateCycleCountDialog = signal(false);
@@ -333,7 +345,24 @@ export class InventoryComponent {
       this.scanner.clearLastScan();
       this.searchControl.setValue(scan.value);
       this.router.navigate(['..', 'stock'], { relativeTo: this.route });
-      this.loadStock();
+    });
+
+    this.searchControl.valueChanges.pipe(
+      debounceTime(300),
+      map(term => (term ?? '').trim()),
+      distinctUntilChanged(),
+      takeUntilDestroyed(),
+    ).subscribe(() => this.loadStock());
+
+    this.transferForm.controls.sourceBinContentId.valueChanges.pipe(takeUntilDestroyed())
+      .subscribe(id => this.transferSourceBinId.set(id));
+    effect(() => {
+      const bin = this.transferSourceBin();
+      const quantity = this.transferForm.controls.quantity;
+      quantity.setValidators(bin
+        ? [Validators.required, Validators.min(0.0001), Validators.max(bin.availableQuantity)]
+        : [Validators.required, Validators.min(0.0001)]);
+      untracked(() => quantity.updateValueAndValidity());
     });
 
     this.watchPartBins(this.reservationForm.controls.partId, this.reservationForm.controls.binContentId);
@@ -430,13 +459,8 @@ export class InventoryComponent {
     this.router.navigate(['/purchase-orders']);
   }
 
-  protected applySearch(): void {
-    this.loadStock();
-  }
-
   protected clearSearch(): void {
     this.searchControl.setValue('');
-    this.loadStock();
   }
 
 
@@ -718,6 +742,7 @@ export class InventoryComponent {
   }
 
   protected openCycleCountDetail(cycleCount: CycleCount): void {
+    this.invalidCycleCountLineIds.set(new Set());
     this.selectedCycleCount.set(cycleCount);
     this.showCycleCountDialog.set(true);
   }
@@ -727,9 +752,17 @@ export class InventoryComponent {
     this.selectedCycleCount.set(null);
   }
 
-  protected updateCycleCountLine(lineId: number, actualQuantity: number): void {
+  protected updateCycleCountLine(lineId: number, rawValue: string): void {
     const cc = this.selectedCycleCount();
     if (!cc) return;
+    const actualQuantity = rawValue.trim() === '' ? Number.NaN : Number(rawValue);
+    const valid = Number.isFinite(actualQuantity) && actualQuantity >= 0;
+    this.invalidCycleCountLineIds.update(ids => {
+      const next = new Set(ids);
+      if (valid) next.delete(lineId); else next.add(lineId);
+      return next;
+    });
+    if (!valid) return;
     const updated = {
       ...cc,
       lines: cc.lines.map(l =>
@@ -743,7 +776,7 @@ export class InventoryComponent {
 
   protected approveCycleCount(): void {
     const cc = this.selectedCycleCount();
-    if (!cc) return;
+    if (!cc || this.invalidCycleCountLineIds().size > 0) return;
     this.saving.set(true);
     this.inventoryService.updateCycleCount(cc.id, {
       status: 'Approved',
@@ -881,10 +914,10 @@ export class InventoryComponent {
   );
 
   protected readonly burnRateColumns: ColumnDef[] = [
-    { field: 'partNumber', header: this.translate.instant('inventory.columns.partNumber'), sortable: true, width: '120px' },
-    { field: 'partDescription', header: this.translate.instant('common.description'), sortable: true },
+    { field: 'partNumber', header: this.translate.instant('inventory.columns.partNumber'), sortable: true, width: '150px' },
+    { field: 'description', header: this.translate.instant('common.description'), sortable: true },
     { field: 'preferredVendorName', header: this.translate.instant('inventory.receivingInspection.columns.vendor'), sortable: true, width: '140px' },
-    { field: 'availableStock', header: this.translate.instant('inventory.available'), sortable: true, align: 'right', width: '90px' },
+    { field: 'available', header: this.translate.instant('inventory.available'), sortable: true, type: 'number', align: 'right', width: '90px' },
     { field: 'incomingPoQuantity', header: this.translate.instant('replenishmentUi.incoming'), sortable: true, align: 'right', width: '130px' },
     { field: 'burnRate30Day', header: this.translate.instant('inventory.burnRates.per30'), sortable: true, align: 'right', width: '80px' },
     { field: 'burnRate60Day', header: this.translate.instant('inventory.burnRates.per60'), sortable: true, align: 'right', width: '80px' },
@@ -895,8 +928,9 @@ export class InventoryComponent {
   ];
 
   protected readonly suggestionColumns: ColumnDef[] = [
-    { field: 'partNumber', header: this.translate.instant('inventory.columns.partNumber'), sortable: true, width: '120px' },
+    { field: 'partNumber', header: this.translate.instant('inventory.columns.partNumber'), sortable: true, width: '150px' },
     { field: 'partDescription', header: this.translate.instant('common.description'), sortable: true },
+    { field: 'reorderPoint', header: this.translate.instant('replenishmentUi.why'), sortable: true, width: '170px' },
     { field: 'supplyType', header: this.translate.instant('replenishmentUi.supply'), sortable: true, width: '90px' },
     { field: 'vendorName', header: this.translate.instant('inventory.receivingInspection.columns.vendor'), sortable: true, width: '140px' },
     { field: 'leadTimeDays', header: this.translate.instant('replenishmentUi.leadTime'), sortable: true, align: 'right', width: '90px' },
@@ -1077,5 +1111,13 @@ export class InventoryComponent {
   protected formatBurnRate(rate: number | null): string {
     if (rate === null) return '—';
     return rate.toFixed(2);
+  }
+
+  protected suggestionBurnRate(suggestion: ReorderSuggestion): number | null {
+    return suggestion.burnRateDailyAvg > 0 ? suggestion.burnRateDailyAvg : null;
+  }
+
+  protected suggestionQcHold(suggestion: ReorderSuggestion): number | null {
+    return (suggestion.qcHoldQuantity ?? 0) > 0 ? suggestion.qcHoldQuantity! : null;
   }
 }

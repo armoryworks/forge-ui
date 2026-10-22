@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { FormControl, FormGroup } from '@angular/forms';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 
 import { AuthService } from '../../../shared/services/auth.service';
@@ -20,6 +21,9 @@ interface HomeInternals {
   kioskActions(): QuickAction[];
   verbDialog(): { mode: string } | null;
   openVerb(mode: string): void;
+  verbForm: FormGroup<{ quantity: FormControl<number | null> }>;
+  parts: { set(rows: { onHand: number | null }[]): void };
+  partsInStock(): number;
 }
 
 function setup(roles: string[], enabledCapabilities: string[]) {
@@ -72,5 +76,41 @@ describe('InventoryHomeComponent count verb', () => {
     internals.openVerb('count');
 
     expect(internals.verbDialog()).toBeNull();
+  });
+});
+
+describe('InventoryHomeComponent verb quantity and stats', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  it('requires more than zero to receive or use stock', () => {
+    for (const mode of ['receive', 'use']) {
+      const internals = setup(['Manager'], ['CAP-INV-ADJUST']);
+      internals.openVerb(mode);
+      const quantity = internals.verbForm.controls.quantity;
+
+      quantity.setValue(0);
+      expect(quantity.valid).toBe(false);
+      quantity.setValue(0.5);
+      expect(quantity.valid).toBe(true);
+    }
+  });
+
+  it('lets a count set a bin to zero', () => {
+    const internals = setup(['Manager'], ['CAP-INV-ADJUST']);
+    internals.openVerb('count');
+    const quantity = internals.verbForm.controls.quantity;
+
+    quantity.setValue(0);
+    expect(quantity.valid).toBe(true);
+    quantity.setValue(-1);
+    expect(quantity.valid).toBe(false);
+  });
+
+  it('counts parts in stock instead of adding quantities across units', () => {
+    const internals = setup(['Manager'], []);
+
+    internals.parts.set([{ onHand: 3000 }, { onHand: 0 }, { onHand: 2.5 }, { onHand: null }]);
+
+    expect(internals.partsInStock()).toBe(2);
   });
 });

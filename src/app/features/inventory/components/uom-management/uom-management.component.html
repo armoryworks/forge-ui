@@ -9,18 +9,20 @@
   </div>
 
   @if (activeSection() === 'uoms') {
-    <div class="uom-management__header">
-      <button class="action-btn action-btn--create action-btn--sm" (click)="openCreateUom()">
-        <span class="material-icons-outlined">add</span> {{ 'inventory.uom.newUom' | translate }}
-      </button>
-    </div>
+    @if (canManage) {
+      <div class="uom-management__header">
+        <button class="action-btn action-btn--create action-btn--sm" data-testid="uom-new-btn" (click)="openCreateUom()">
+          <span class="material-icons-outlined">add</span> {{ 'inventory.uom.newUom' | translate }}
+        </button>
+      </div>
+    }
 
     <div [appLoadingBlock]="loading()">
       <app-data-table
         tableId="uom-list"
         [columns]="uomColumns"
         [data]="uoms()"
-        [clickableRows]="true"
+        [clickableRows]="canManage"
         emptyIcon="straighten"
         [emptyMessage]="'inventory.uom.emptyUoms' | translate"
         (rowClick)="openEditUom($any($event))">
@@ -39,11 +41,13 @@
   }
 
   @if (activeSection() === 'conversions') {
-    <div class="uom-management__header">
-      <button class="action-btn action-btn--create action-btn--sm" (click)="openCreateConversion()">
-        <span class="material-icons-outlined">add</span> {{ 'inventory.uom.newConversion' | translate }}
-      </button>
-    </div>
+    @if (canManage) {
+      <div class="uom-management__header">
+        <button class="action-btn action-btn--create action-btn--sm" data-testid="uom-new-conversion-btn" (click)="openCreateConversion()">
+          <span class="material-icons-outlined">add</span> {{ 'inventory.uom.newConversion' | translate }}
+        </button>
+      </div>
+    }
 
     <div [appLoadingBlock]="loading()">
       <app-data-table

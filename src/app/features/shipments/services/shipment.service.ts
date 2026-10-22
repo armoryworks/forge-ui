@@ -65,6 +65,10 @@ export class ShipmentService {
     return this.http.post<void>(`${this.base}/${id}/ship`, scanCode ? { scanCode } : {});
   }
 
+  cancelShipment(id: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/cancel`, {});
+  }
+
   deliverShipment(id: number): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/deliver`, {});
   }

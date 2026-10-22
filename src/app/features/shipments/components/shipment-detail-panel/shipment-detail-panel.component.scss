@@ -92,6 +92,8 @@
   }
 
   &__right { text-align: right; }
+  th.lines-table__right, td.lines-table__right { text-align: right; font-variant-numeric: tabular-nums; }
+  &__mono { font-family: $font-family-mono; font-size: $font-size-xs; white-space: nowrap; }
 }
 
 // --- Tracking Section ---

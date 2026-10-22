@@ -14,4 +14,5 @@ export interface BinMovementItem {
   movedByName: string;
   movedAt: Date;
   reason: BinMovementReason | null;
+  uomCode?: string | null;
 }

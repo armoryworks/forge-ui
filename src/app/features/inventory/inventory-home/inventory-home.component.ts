@@ -100,7 +100,7 @@ export class InventoryHomeComponent {
   });
 
   protected readonly totalParts = computed(() => this.parts().length);
-  protected readonly totalOnHand = computed(() => this.parts().reduce((sum, p) => sum + (p.onHand ?? 0), 0));
+  protected readonly partsInStock = computed(() => this.parts().filter(p => (p.onHand ?? 0) > 0).length);
   protected readonly lowStockCount = computed(() => this.lowStock().length);
 
   protected readonly stockColumns: ColumnDef[] = [
@@ -178,6 +178,8 @@ export class InventoryHomeComponent {
 
   protected openVerb(mode: StockVerb, part?: InventoryPartSummary): void {
     if (mode === 'count' && !this.canCount()) return;
+    this.verbForm.controls.quantity.setValidators(
+      [Validators.required, mode === 'count' ? Validators.min(0) : Validators.min(0.0001)]);
     this.verbForm.reset({ partId: part?.partId ?? null, quantity: null, locationId: null, reason: '', notes: '', lotNumber: '' });
     this.verbDialog.set({ mode, partLabel: part?.partNumber });
     if (this.locationsEnabled() && this.locationOptions().length === 0) {

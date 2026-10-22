@@ -2010,7 +2010,10 @@
     "clearCreated": "Clear this list",
     "review": "Review",
     "taskCompleted": "Task completed",
-    "taskDismissed": "Task dismissed"
+    "taskDismissed": "Task dismissed",
+    "why": "Why",
+    "belowReorderPoint": "Below reorder point {{point}}",
+    "qcHold": "{{quantity}} on QC hold, not counted as available"
   },
   "inventory": {
     "home": {
@@ -2037,7 +2040,8 @@
       "stat": {
         "parts": "Parts tracked",
         "onHand": "Units on hand",
-        "lowStock": "Low on stock"
+        "lowStock": "Low on stock",
+        "partsInStock": "Parts in stock"
       },
       "dialog": {
         "part": "Part",
@@ -2082,6 +2086,7 @@
       "cycleCounts": "Cycle Counts",
       "reservations": "Reservations",
       "inspection": "Inspection",
+      "label": "Inventory sections",
       "replenishment": "Replenishment",
       "uom": "Units of Measure"
     },
@@ -2144,7 +2149,7 @@
       "barcode": "Barcode",
       "createLocation": "Create Location",
       "receiveGoodsTitle": "Receive Goods",
-      "poLineId": "PO Line ID",
+      "poLineId": "PO line",
       "quantityReceived": "Quantity Received",
       "binLocation": "Bin Location",
       "lotNumber": "Lot Number",
@@ -2161,7 +2166,9 @@
       "reject": "Reject",
       "approveAndAdjust": "Approve & Adjust Stock",
       "noItemsAtLocation": "No items at this location",
-      "lotAutoAssigned": "Lot-tracked part: leave the lot blank and a lot number is assigned."
+      "lotAutoAssigned": "Lot-tracked part: leave the lot blank and a lot number is assigned.",
+      "countMustBeZeroOrMore": "Each actual count must be a number, 0 or more.",
+      "managerApprovesCount": "An Admin or Manager enters the actual quantities and approves this count."
     },
     "columns": {
       "partNumber": "Part #",
@@ -2185,7 +2192,9 @@
       "job": "Job",
       "reservedDate": "Reserved",
       "expected": "Expected",
-      "actual": "Actual"
+      "actual": "Actual",
+      "uom": "UoM",
+      "actualFor": "Actual count for {{item}}"
     },
     "statuses": {
       "stored": "Stored",
@@ -2256,6 +2265,9 @@
       "recorded": "Inspection recorded",
       "waived": "Inspection waived"
     },
+    "partsCount": "{{total}} parts · {{inStock}} in stock",
+    "collapseLocation": "Collapse {{name}}",
+    "expandLocation": "Expand {{name}}",
     "clearSearch": "Clear search",
     "replenishment": {
       "pendingTitle": "Pending Reorder Suggestions",
@@ -7249,7 +7261,13 @@
     "scanLabelField": "Label code",
     "scanLabelPlaceholder": "Scan, or type the code and press Enter",
     "shipFailed": "Could not mark the shipment as shipped.",
-    "invoiceNumberFallback": "Invoice #{{id}}"
+    "invoiceNumberFallback": "Invoice #{{id}}",
+    "otherCarrier": "Other carrier (not in list)",
+    "cancelShipment": "Cancel shipment",
+    "cancelShipmentTitle": "Cancel shipment?",
+    "cancelShipmentMessage": "Cancel shipment {{number}}? Its quantities go back to the sales order so they can be shipped again.",
+    "shipmentCancelled": "Shipment cancelled",
+    "cancelFailed": "Could not cancel the shipment"
   },
   "planning": {
     "title": "Planning",
@@ -9016,6 +9034,7 @@
     "deleteFileMessage": "This will permanently delete \"{{name}}\".",
     "fileDeleted": "File deleted",
     "fileUploaded": "File uploaded",
+    "expired": "Expired",
     "fieldLinkedJobOptional": "Linked Job (optional)",
     "fieldExpirationOptional": "Expiration Date (optional)",
     "fieldNotesOptional": "Notes (optional)",

@@ -10,3 +10,10 @@
 .text-muted {
   color: var(--text-muted);
 }
+
+.lot-expiry {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-xs;
+  white-space: nowrap;
+}
