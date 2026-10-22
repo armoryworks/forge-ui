@@ -55,7 +55,7 @@ describe('KioskRunningTimersComponent', () => {
     expect(lines.map(l => l.stale)).toEqual([true, false]);
   });
 
-  it('offers Stop, Record pieces and Stop + Done for a step timer and stops a whole-job timer straight away', () => {
+  it('offers Stop, Record pieces and Stop + Done for a step timer, and a tap on a whole-job chip never stops it by itself', () => {
     const fixture = TestBed.createComponent(KioskRunningTimersComponent);
     const step = timer({ id: 4, operationId: 70, operationStepNumber: 2 });
     const whole = timer({ id: 5 });
@@ -80,6 +80,8 @@ describe('KioskRunningTimersComponent', () => {
     component.act('done', step);
     component.act('stop', step);
     component.toggle(component.lines()[1]);
+    expect(stops).toEqual([step]);
+    component.act('stop', whole);
 
     expect(records).toEqual([step]);
     expect(dones).toEqual([step]);

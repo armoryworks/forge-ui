@@ -80,7 +80,7 @@
       <button type="button" class="action-btn action-btn--primary" [class.op-qty__btn--touch]="touch" data-testid="operation-qty-done"
               [disabled]="!canComplete()" (click)="complete()">
         @if (stopMode) {
-          {{ 'jobOperations.dialog.stopAndDone' | translate: { count: (newCompleted() | number:'1.0-4') } }}
+          {{ 'jobOperations.dialog.stopAndDone' | translate: { count: (doneCompleted() | number:'1.0-4') } }}
         } @else if (isAll()) {
           {{ 'jobOperations.dialog.doneAll' | translate: { count: (newCompleted() | number:'1.0-4') } }}
         } @else {

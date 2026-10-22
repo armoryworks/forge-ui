@@ -52,10 +52,7 @@ export class KioskRunningTimersComponent {
   });
 
   protected toggle(line: RunningTimerLine): void {
-    if (!line.isStep) {
-      this.stop.emit(line.timer);
-      return;
-    }
+    if (!line.isStep) return;
     this.expandedId.update(id => id === line.timer.id ? null : line.timer.id);
   }
 

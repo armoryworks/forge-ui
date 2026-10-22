@@ -335,6 +335,11 @@ export class ScanActionOverlayComponent {
     this.multiScanMode.update(v => !v);
   }
 
+  /** Close the overlay from outside (e.g., when the kiosk signs the worker out). */
+  dismiss(): void {
+    if (this.phase() !== 'idle') this.close();
+  }
+
   protected close(): void {
     this.phase.set('idle');
     this.context.set(null);

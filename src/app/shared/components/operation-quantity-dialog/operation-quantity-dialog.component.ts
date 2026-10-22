@@ -60,6 +60,9 @@ export class OperationQuantityDialogComponent {
   protected readonly newCompleted = computed(() => this.data.completedQuantity + this.added());
   protected readonly newScrap = computed(() => this.data.scrapQuantity + this.addedScrap());
   protected readonly isAll = computed(() => this.newCompleted() + this.newScrap() >= this.data.jobQuantity);
+  protected readonly doneCompleted = computed(() => this.stopMode && this.value().quantity == null
+    ? Math.max(this.data.completedQuantity, this.data.jobQuantity - this.newScrap())
+    : this.newCompleted());
   protected readonly askReason = computed(() => this.reasonOptions.length > 1 && (this.addedScrap() > 0 || this.addedRework() > 0));
 
   protected readonly violations = computed(() => {
@@ -153,7 +156,7 @@ export class OperationQuantityDialogComponent {
 
   protected complete(): void {
     if (!this.canComplete()) return;
-    if (this.isAll()) {
+    if (this.doneCompleted() + this.newScrap() >= this.data.jobQuantity) {
       this.dialogRef.close(this.result(true));
       return;
     }
@@ -177,7 +180,7 @@ export class OperationQuantityDialogComponent {
 
   private result(complete: boolean): OperationQuantityDialogResult {
     return {
-      completedQuantity: this.newCompleted(),
+      completedQuantity: complete ? this.doneCompleted() : this.newCompleted(),
       scrapQuantity: this.newScrap(),
       reworkQuantity: this.addedRework(),
       reasonCode: this.askReason() ? (this.value().reason ?? null) : null,

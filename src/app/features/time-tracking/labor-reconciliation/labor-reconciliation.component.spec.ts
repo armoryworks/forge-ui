@@ -95,6 +95,7 @@ describe('LaborReconciliationComponent', () => {
     expect(service.recomputeLabor).toHaveBeenCalledTimes(1);
 
     confirm = true;
+    c.fromControl.setValue(new Date(2026, 8, 1));
     c.apply();
     expect(service.recomputeLabor).toHaveBeenLastCalledWith({ from: '2026-10-15', to: '2026-10-21', preview: false });
     expect(snackbar.success).toHaveBeenCalled();

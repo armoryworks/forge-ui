@@ -48,6 +48,7 @@ export class LaborReconciliationComponent implements OnInit {
   protected readonly error = signal<string | null>(null);
   protected readonly preview = signal<LaborRecomputeResult | null>(null);
   protected readonly recomputing = signal(false);
+  private previewRange: { from: string; to: string } | null = null;
   protected readonly canRecompute = computed(() => this.auth.hasAnyRole(RECOMPUTE_ROLES));
 
   protected readonly columns: ColumnDef[] = [
@@ -108,6 +109,7 @@ export class LaborReconciliationComponent implements OnInit {
     this.service.recomputeLabor({ ...range, preview: true }).subscribe({
       next: (result) => {
         this.recomputing.set(false);
+        this.previewRange = range;
         this.preview.set(result);
       },
       error: (err: HttpErrorResponse) => {
@@ -118,7 +120,7 @@ export class LaborReconciliationComponent implements OnInit {
   }
 
   protected apply(): void {
-    const range = this.range();
+    const range = this.previewRange;
     const preview = this.preview();
     if (!range || !preview || !this.canRecompute() || this.recomputing()) return;
     this.dialog.open<ConfirmDialogComponent, ConfirmDialogData, boolean>(ConfirmDialogComponent, {

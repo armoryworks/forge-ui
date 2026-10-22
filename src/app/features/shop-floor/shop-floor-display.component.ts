@@ -1,5 +1,5 @@
 import {
-  afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, HostBinding, inject, Injector, OnDestroy, OnInit,
+  afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, HostBinding, HostListener, inject, Injector, OnDestroy, OnInit,
   Renderer2, signal, viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -733,12 +733,13 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     const clockingOut = this.clockTypes.definitions().find(d => d.code === eventType)?.statusMapping === 'Out';
     const timers = worker.runningTimers ?? [];
     if (clockingOut && this.operationTracking() && timers.length > 0) {
-      this.clearAutoLogoutTimer();
+      this.resetAutoLogoutTimer();
       this.dialog.open<ClockOutSheetDialogComponent, ClockOutSheetData, ClockOutSheetLine[] | undefined>(ClockOutSheetDialogComponent, {
         width: '560px',
         maxWidth: '95vw',
         data: { workerName: worker.name, timers },
       }).afterClosed().subscribe(lines => {
+        if (this.selectedWorker()?.userId !== worker.userId) return;
         if (!lines) {
           this.startAutoLogoutTimer();
           return;
@@ -1041,11 +1042,17 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   ): void {
     const overlay = this.scanOverlay();
     if (!overlay || this.processing()) return;
-    this.clearAutoLogoutTimer();
     this.clearPhaseTimeout();
     this.actionFeedback.set(null);
     this.stepsOpen.set(true);
+    this.startAutoLogoutTimer();
     overlay.openJobById(job.jobId, { jobNumber: job.jobNumber, title: job.title, stageName: job.stageName }, focusOperationId);
+  }
+
+  @HostListener('document:pointerdown')
+  @HostListener('document:keydown')
+  protected onKioskActivity(): void {
+    this.keepSignedInSessionAlive();
   }
 
   protected onOverlayDismissed(): void {
@@ -1074,7 +1081,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private runChip(timer: RunningTimer, kind: 'stop' | 'record' | 'done'): void {
     const worker = this.selectedWorker();
     if (!worker || this.processing()) return;
-    this.clearAutoLogoutTimer();
+    this.resetAutoLogoutTimer();
     this.processing.set(`chip-${timer.id}`);
     const jobId = timer.jobId;
     const operationId = timer.operationId;
@@ -1089,6 +1096,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
     action$.subscribe({
       next: (result) => {
+        if (this.selectedWorker()?.userId !== worker.userId) return;
         this.processing.set(null);
         this.startAutoLogoutTimer();
         if (result === null) return;
@@ -1098,6 +1106,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
           { jobNumber: timer.jobNumber ?? '' }));
       },
       error: (err: HttpErrorResponse) => {
+        if (this.selectedWorker()?.userId !== worker.userId) return;
         this.processing.set(null);
         this.startAutoLogoutTimer();
         this.showActionFeedback(worker.userId, false,
@@ -1486,6 +1495,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   private ephemeralLogout(): void {
     this.clearAutoLogoutTimer();
+    this.dialog.closeAll();
     // Defence-in-depth: the preview never establishes a worker session (no
     // sign-in) and doesn't reach here, but must never clear the trainee's own
     // session if it somehow does — only reset the display.
@@ -1495,6 +1505,10 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   }
 
   private resetToMain(): void {
+    if (this.stepsOpen()) {
+      this.stepsOpen.set(false);
+      this.scanOverlay()?.dismiss();
+    }
     this.clearAutoLogoutTimer();
     this.clearPhaseTimeout();
     this.clearTransitionTimer();

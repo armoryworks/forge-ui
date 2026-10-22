@@ -89,7 +89,7 @@ describe('ShopFloorDisplayComponent — kiosk vs inert training preview', () => 
         { provide: InventoryService, useValue: noop },
         { provide: ShipmentService, useValue: noop },
         { provide: Router, useValue: router },
-        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: MatDialog, useValue: { open: vi.fn(), closeAll: vi.fn() } },
         { provide: TranslateService, useValue: { instant: (k: string) => k } },
       ],
     });
@@ -268,7 +268,7 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     ],
   };
   const dialogClose = vi.fn();
-  const dialog = { open: vi.fn(() => ({ afterClosed: () => of(true), close: dialogClose })) };
+  const dialog = { open: vi.fn(() => ({ afterClosed: () => of(true), close: dialogClose })), closeAll: vi.fn() };
   const loading = { track: (_label: string, obs: unknown) => obs };
   const translate = {
     instant: (k: string, p?: Record<string, unknown>) => (p ? `${k} ${JSON.stringify(p)}` : k),
@@ -1156,9 +1156,9 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
       timerStart: '2026-10-22T13:00:00Z', attendancePercent: 100,
     });
 
-    function tracked(): { c: Internals & StepInternals; overlay: { openJobById: ReturnType<typeof vi.fn> } } {
+    function tracked(): { c: Internals & StepInternals; overlay: { openJobById: ReturnType<typeof vi.fn>; dismiss: ReturnType<typeof vi.fn> } } {
       const c = create() as Internals & StepInternals;
-      const overlay = { openJobById: vi.fn() };
+      const overlay = { openJobById: vi.fn(), dismiss: vi.fn() };
       (c as unknown as { scanOverlay: () => unknown }).scanOverlay = () => overlay;
       c.operationTracking.set(true);
       return { c, overlay };
@@ -1174,6 +1174,27 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
       expect(overlay.openJobById).toHaveBeenCalledWith(41, { jobNumber: 'JOB-0041', title: 'Bracket', stageName: 'In Production' }, null);
       expect(c.stepsOpen()).toBe(true);
       expect(shopFloor.startTimer).not.toHaveBeenCalled();
+    });
+
+    it('the step view still signs the worker out when the kiosk sits idle, and any tap keeps it signed in', () => {
+      vi.useFakeTimers();
+      const { c, overlay } = tracked();
+      c.selectedWorker.set(makeWorker('ProductionWorker', [assignment]));
+      c.phase.set('actions');
+      c.openJobSteps(assignment);
+
+      vi.advanceTimersByTime(25_000);
+      (c as unknown as { onKioskActivity: () => void }).onKioskActivity();
+      vi.advanceTimersByTime(25_000);
+      expect(c.selectedWorker()?.userId).toBe(5);
+      expect(overlay.dismiss).not.toHaveBeenCalled();
+
+      vi.advanceTimersByTime(10_000);
+      expect(c.selectedWorker()).toBeNull();
+      expect(c.phase()).toBe('main');
+      expect(c.stepsOpen()).toBe(false);
+      expect(overlay.dismiss).toHaveBeenCalled();
+      expect(dialog.closeAll).toHaveBeenCalled();
     });
 
     it('picking a job opens its steps instead of claiming it at its next step', () => {
@@ -1284,7 +1305,7 @@ describe('ShopFloorDisplayComponent — header', () => {
         { provide: InventoryService, useValue: {} },
         { provide: ShipmentService, useValue: {} },
         { provide: Router, useValue: { navigate: vi.fn() } },
-        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: MatDialog, useValue: { open: vi.fn(), closeAll: vi.fn() } },
       ],
     });
     TestBed.overrideComponent(ShopFloorDisplayComponent, {

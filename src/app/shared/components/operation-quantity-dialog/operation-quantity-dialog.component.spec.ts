@@ -30,6 +30,7 @@ interface DialogInternals {
   skip(): void;
   overPlanned: () => boolean;
   stopMode: boolean;
+  doneCompleted: () => number;
 }
 
 function setup(data: OperationQuantityDialogData, confirm = true) {
@@ -200,6 +201,17 @@ describe('OperationQuantityDialogComponent', () => {
     skipped.component.form.patchValue({ quantity: 5 });
     skipped.component.skip();
     expect(skipped.close).toHaveBeenCalledWith(expect.objectContaining({ skipped: true, addedQuantity: 0, addedScrap: 0 }));
+  });
+
+  it('Stop + Done with the count left blank shows and closes with what the server records, without a short-close prompt', () => {
+    const { component, close, confirmDialog } = setup({ title: 'Mill', jobQuantity: 40, completedQuantity: 12, scrapQuantity: 0, reasons: [], mode: 'stop' });
+
+    component.form.patchValue({ scrap: 2 });
+    expect(component.doneCompleted()).toBe(38);
+    component.complete();
+
+    expect(confirmDialog.open).not.toHaveBeenCalled();
+    expect(close).toHaveBeenCalledWith(expect.objectContaining({ complete: true, completedQuantity: 38, scrapQuantity: 2, addedQuantity: 0, addedScrap: 2 }));
   });
 
   it('the +1 / +5 / +10 steppers add to the chosen field', () => {
