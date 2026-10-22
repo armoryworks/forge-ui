@@ -1,4 +1,4 @@
-<app-dialog [title]="title" width="820px" (closed)="close()">
+<app-dialog [title]="title" width="820px" [dirty]="notesControl.dirty" (closed)="close()">
   <div class="settlement-detail" [appLoadingBlock]="loading()">
     @if (settlement(); as s) {
       <header class="settlement-detail__head">

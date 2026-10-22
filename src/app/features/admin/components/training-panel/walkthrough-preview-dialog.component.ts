@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
@@ -29,6 +29,8 @@ export class WalkthroughPreviewDialogComponent {
 
   protected readonly saving = signal(false);
   protected readonly steps = signal<WalkthroughStep[]>(structuredClone(this.data.steps));
+  private readonly savedSteps = JSON.stringify(this.data.steps);
+  protected readonly edited = computed(() => JSON.stringify(this.steps()) !== this.savedSteps);
   protected readonly moduleTitle = this.data.moduleTitle;
 
   protected readonly sideOptions = ['top', 'bottom', 'left', 'right'] as const;
