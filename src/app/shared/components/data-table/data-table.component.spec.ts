@@ -220,6 +220,16 @@ describe('DataTableComponent · behaviour', () => {
     expect(sortBy('qty', 'asc')).toEqual(['c', 'b', 'a']);
   });
 
+  it('filters a currency column by a min/max range like a number column', () => {
+    setup([{ field: 'amount', header: 'Amount', type: 'currency' }], [
+      { id: 1, amount: 50 }, { id: 2, amount: 150 }, { id: 3, amount: 1200.5 },
+    ]);
+
+    internals.filters.set({ amount: { min: 100, max: 1000 } });
+
+    expect(internals.sortedData().map(r => (r as { id: number }).id)).toEqual([2]);
+  });
+
   it('matches text filters without regard to accents in either the data or the filter', () => {
     setup([{ field: 'name', header: 'Name' }], [
       { id: 1, name: 'García' }, { id: 2, name: 'Garden' }, { id: 3, name: 'Peña' },

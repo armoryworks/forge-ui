@@ -237,7 +237,8 @@ export class DataTableComponent implements OnInit {
               default: return cell.includes(needle);
             }
           }
-          case 'number': {
+          case 'number':
+          case 'currency': {
             const range = filterVal as { min?: number; max?: number };
             const num = Number(cellVal);
             if (range.min != null && num < range.min) return false;

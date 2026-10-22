@@ -36,6 +36,11 @@ export class ColumnFilterPopoverComponent implements OnInit {
   readonly column = input.required<ColumnDef>();
   readonly currentValue = input<unknown>(null);
 
+  protected readonly filterType = computed(() => {
+    const type = this.column().type ?? 'text';
+    return type === 'currency' ? 'number' : type;
+  });
+
   readonly filterApplied = output<ColumnFilterState>();
   readonly filterCleared = output<string>();
   readonly closed = output<void>();
@@ -77,7 +82,7 @@ export class ColumnFilterPopoverComponent implements OnInit {
     const col = this.column();
     let value: unknown;
 
-    switch (col.type ?? 'text') {
+    switch (this.filterType()) {
       case 'text': {
         const txt = this.textValue();
         value = txt ? { mode: this.textMode(), value: txt } satisfies TextFilterValue : null;
@@ -131,7 +136,7 @@ export class ColumnFilterPopoverComponent implements OnInit {
     const val = this.currentValue();
     if (val == null) return;
 
-    switch (this.column().type ?? 'text') {
+    switch (this.filterType()) {
       case 'text': {
         // Back-compat: legacy filters were stored as a plain string (treated
         // as "contains"). New shape is { mode, value }.

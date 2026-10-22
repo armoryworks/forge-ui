@@ -12,6 +12,7 @@ import {
   AiHelpResponse,
 } from './ai.service';
 import { CapabilityService } from './capability.service';
+import { SILENT_HTTP_ERRORS } from '../interceptors/silent-http-errors.token';
 import { RagSearchResponse } from '../models/rag-search-response.model';
 import { environment } from '../../../environments/environment';
 
@@ -171,6 +172,16 @@ describe('AiService', () => {
 
       expect(result).not.toBeNull();
       expect(result!.text).toBe('This job involves...');
+    });
+  });
+
+  describe('assistantChat', () => {
+    it('leaves a failed reply to the chat screen instead of the global error toast', () => {
+      service.assistantChat(7, 'Hello?', []).subscribe({ error: () => undefined });
+
+      const req = httpMock.expectOne(`${baseUrl}/assistants/7/chat`);
+      expect(req.request.context.get(SILENT_HTTP_ERRORS)).toBe(true);
+      req.flush({ title: 'Service unavailable' }, { status: 503, statusText: 'Service Unavailable' });
     });
   });
 
