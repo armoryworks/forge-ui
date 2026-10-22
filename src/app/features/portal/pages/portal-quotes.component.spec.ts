@@ -19,7 +19,7 @@ describe('PortalQuotesComponent · respond', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: PortalService, useValue: { respondToQuote, getQuotes: vi.fn(() => new Subject()) } },
-        { provide: SnackbarService, useValue: { success: vi.fn() } },
+        { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
         { provide: MatDialog, useValue: { open: vi.fn(() => ({ afterClosed: () => of(true) })) } },
       ],

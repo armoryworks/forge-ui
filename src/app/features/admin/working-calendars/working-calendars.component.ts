@@ -58,6 +58,8 @@ export class WorkingCalendarsComponent {
   protected readonly calendars = signal<WorkingCalendar[]>([]);
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
+  protected readonly savingHoliday = signal(false);
+  protected readonly savingShift = signal(false);
   protected readonly selectedId = signal<number | null>(null);
 
   protected readonly selected = computed(() =>
@@ -261,10 +263,11 @@ export class WorkingCalendarsComponent {
 
   protected addHoliday(): void {
     const sel = this.selected();
-    if (!sel || this.holidayForm.invalid) return;
+    if (!sel || this.holidayForm.invalid || this.savingHoliday()) return;
     const v = this.holidayForm.getRawValue();
     const dateStr = toDateOnly(v.date);
     if (!dateStr) return;
+    this.savingHoliday.set(true);
     this.service.addHoliday(sel.id, {
       date: dateStr,
       name: v.name,
@@ -272,10 +275,12 @@ export class WorkingCalendarsComponent {
       isRecurring: v.isRecurring,
     }).subscribe({
       next: () => {
+        this.savingHoliday.set(false);
         this.snackbar.success(this.translate.instant('workingCalendars.holidayAdded'));
         this.holidayForm.reset({ date: null, name: '', observedDate: null, isRecurring: false });
         this.load();
       },
+      error: () => this.savingHoliday.set(false),
     });
   }
 
@@ -337,7 +342,7 @@ export class WorkingCalendarsComponent {
 
   protected saveShift(): void {
     const sel = this.selected();
-    if (!sel || this.shiftForm.invalid) return;
+    if (!sel || this.shiftForm.invalid || this.savingShift()) return;
     const v = this.shiftForm.getRawValue();
     let mask = 0;
     this.shiftDayBits().forEach((on, i) => { if (on) mask |= (1 << i); });
@@ -356,15 +361,18 @@ export class WorkingCalendarsComponent {
       isActive: v.isActive,
     };
     const id = this.editingShiftId();
+    this.savingShift.set(true);
     const op = id == null
       ? this.service.addShift(sel.id, body)
       : this.service.updateShift(sel.id, id, body);
     op.subscribe({
       next: () => {
+        this.savingShift.set(false);
         this.snackbar.success(this.translate.instant(id == null ? 'workingCalendars.shiftAdded' : 'workingCalendars.shiftUpdated'));
         this.resetShiftForm();
         this.select(sel.id);
       },
+      error: () => this.savingShift.set(false),
     });
   }
 

@@ -92,6 +92,7 @@ export class PartsComponent {
   protected readonly loading = signal(false);
   protected readonly parts = signal<PartListItem[]>([]);
   protected readonly duplicating = signal(false);
+  protected readonly savingPart = signal(false);
   /**
    * Entity-less workflow drafts the user has started but hasn't materialized
    * a Part row for yet. Surfaced as color-coded ghost rows at the top of the
@@ -674,7 +675,7 @@ export class PartsComponent {
   }
 
   protected savePart(): void {
-    if (this.partForm.invalid) return;
+    if (this.savingPart() || this.partForm.invalid) return;
 
     // Drop any prior server messages so a re-submit doesn't accumulate.
     // (Phase 3 / WU-02 envelope pattern, mirroring customer-create.)
@@ -682,6 +683,7 @@ export class PartsComponent {
 
     const form = this.partForm.getRawValue();
     const editing = this.editingPart();
+    this.savingPart.set(true);
 
     if (editing) {
       this.partsService.updatePart(editing.id, {
@@ -700,11 +702,13 @@ export class PartsComponent {
         abcClass: (form.abcClass as AbcClass | null) ?? null,
       }, formValidationContext()).subscribe({
         next: () => {
+          this.savingPart.set(false);
           this.closePartDialog();
           this.loadParts();
           this.snackbar.success(this.translate.instant('parts.partUpdated'));
         },
         error: (err: HttpErrorResponse) => {
+          this.savingPart.set(false);
           // Phase 3 / WU-02 / F6: surface per-field server errors against the
           // form so the validation popover lights up on the offending field
           // (e.g. partType). Legacy non-envelope errors fall through to the
@@ -725,6 +729,7 @@ export class PartsComponent {
         inventoryClass: (form.inventoryClass as InventoryClass) ?? 'Component',
       }, formValidationContext()).subscribe({
         next: (detail) => {
+          this.savingPart.set(false);
           this.closePartDialog();
           this.loadParts();
           this.snackbar.success(this.translate.instant('parts.partCreated'));
@@ -732,6 +737,7 @@ export class PartsComponent {
           this.openPartDetail(detail.id);
         },
         error: (err: HttpErrorResponse) => {
+          this.savingPart.set(false);
           // Phase 3 / WU-02 / F6: see updatePart error handler for details.
           const applied = FormValidationService.applyServerError(this.partForm, err);
           if (applied?.unmatched.length) {

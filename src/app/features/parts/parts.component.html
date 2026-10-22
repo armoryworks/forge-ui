@@ -243,10 +243,10 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closePartDialog()">{{ 'common.cancel' | translate }}</button>
-      <app-validation-button [violations]="partViolations">
+      <app-validation-button [violations]="partViolations" [loading]="savingPart()">
       <button class="action-btn action-btn--primary"
         data-testid="part-save-btn"
-        [disabled]="partForm.invalid"
+        [disabled]="partForm.invalid || savingPart()"
         (click)="savePart()">
         <span class="material-icons-outlined">save</span>
         {{ editingPart() ? ('parts.saveChanges' | translate) : ('parts.createPart' | translate) }}

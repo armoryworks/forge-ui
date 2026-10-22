@@ -684,6 +684,7 @@ describe('DataTableComponent · row click', () => {
     TestBed.configureTestingModule({
       providers: [
         provideNoopAnimations(),
+        provideTranslateService(),
         { provide: ComponentFixtureAutoDetect, useValue: false },
         { provide: UserPreferencesService, useValue: { get: () => null, set: () => undefined } },
       ],

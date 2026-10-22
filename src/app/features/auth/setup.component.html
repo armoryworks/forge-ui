@@ -77,9 +77,9 @@
 
           <div class="auth-card__buttons">
             <button mat-stroked-button type="button" (click)="back()">{{ 'common.back' | translate }}</button>
-            <app-validation-button [violations]="accountViolations">
+            <app-validation-button [violations]="accountViolations" [loading]="submitting()">
             <button mat-flat-button color="primary" type="submit"
-              [disabled]="accountForm.invalid">
+              [disabled]="accountForm.invalid || submitting()">
               {{ 'common.next' | translate }}
             </button>
             </app-validation-button>
@@ -114,9 +114,9 @@
 
           <div class="auth-card__buttons">
             <button mat-stroked-button type="button" (click)="back()">{{ 'common.back' | translate }}</button>
-            <app-validation-button [violations]="companyViolations" [loading]="loading()">
+            <app-validation-button [violations]="companyViolations" [loading]="loading() || submitting()">
             <button mat-flat-button color="primary" type="submit"
-              [disabled]="companyForm.invalid || loading()">
+              [disabled]="companyForm.invalid || loading() || submitting()">
               @if (loading()) {
                 {{ 'auth.settingUp' | translate }}
               } @else if (path() === 'quick') {
@@ -167,7 +167,7 @@
           <div class="auth-card__buttons">
             <button mat-stroked-button type="button" (click)="back()">{{ 'common.back' | translate }}</button>
             <button mat-flat-button color="primary" type="button"
-              [disabled]="loading()" (click)="onSubmit()">
+              [disabled]="loading() || submitting()" (click)="onSubmit()">
               @if (loading()) {
                 {{ 'auth.settingUp' | translate }}
               } @else {

@@ -189,6 +189,7 @@ export class BudgetsComponent {
   }
 
   protected save(): void {
+    if (this.saving()) return;
     const form = this.form();
     const year = this.fiscalYear();
 

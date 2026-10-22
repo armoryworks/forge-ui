@@ -79,6 +79,7 @@ interface SetupInternals {
   unlock(): void;
   choosePath(path: 'quick' | 'full'): void;
   onSubmit(): void;
+  toCompany(): void;
   accountForm: FormGroup;
   companyForm: FormGroup;
 }
@@ -379,5 +380,45 @@ describe('SetupComponent — module bundles', () => {
     await Promise.resolve();
 
     expect(navigate).toHaveBeenCalledWith(['/dashboard']);
+  });
+});
+
+describe('SetupComponent — one setup per press', () => {
+  it('posts setup once when Complete is pressed twice before the server answers', () => {
+    const { component, httpMock } = setup();
+    flushStatus(httpMock, { setupRequired: true, activationRequired: false });
+    component.choosePath('full');
+    fillWizard(component);
+
+    component.onSubmit();
+    component.onSubmit();
+
+    expect(httpMock.match(SETUP_URL).length).toBe(1);
+  });
+
+  it('lets Complete be pressed again after the server rejects the first setup', () => {
+    const { component, httpMock } = setup();
+    flushStatus(httpMock, { setupRequired: true, activationRequired: false });
+    component.choosePath('full');
+    fillWizard(component);
+
+    component.onSubmit();
+    httpMock.expectOne(SETUP_URL).flush({ detail: 'nope' }, { status: 500, statusText: 'Server Error' });
+    component.onSubmit();
+
+    expect(httpMock.match(SETUP_URL).length).toBe(1);
+  });
+
+  it('advances the account step only once when Next is pressed twice', () => {
+    const { component, httpMock } = setup();
+    flushStatus(httpMock, { setupRequired: true, activationRequired: false });
+    component.choosePath('full');
+    fillWizard(component);
+
+    component.toCompany();
+    component.step.set(3);
+    component.toCompany();
+
+    expect(component.step()).toBe(3);
   });
 });

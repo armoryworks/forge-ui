@@ -76,6 +76,7 @@ export class NewLeadForkDialogComponent {
   protected readonly allowManualLeadNumbers = computed(() => this.manualNumberSettings.isEnabled('leads'));
 
   protected readonly currentStep = signal(0);
+  protected readonly submitted = signal(false);
   protected readonly shape = signal<LeadEngagementShape>('Unknown');
   // Hook into the shared DraftService via app-dialog's [draftConfig].
   // entityId is 'fork-new' so it doesn't collide with the edit-lead
@@ -219,7 +220,7 @@ export class NewLeadForkDialogComponent {
   }
 
   protected create(): void {
-    if (this.form.invalid) return;
+    if (this.submitted() || this.form.invalid) return;
     const v = this.form.getRawValue();
     const e = v.extras;
 
@@ -263,6 +264,7 @@ export class NewLeadForkDialogComponent {
       accountId: v.accountId,
     };
 
+    this.submitted.set(true);
     this.dialogRef.close(request);
   }
 }
