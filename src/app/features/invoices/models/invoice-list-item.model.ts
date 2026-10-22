@@ -10,4 +10,5 @@ export interface InvoiceListItem {
   amountPaid: number;
   balanceDue: number;
   createdAt: Date;
+  currencyCode?: string | null;
 }

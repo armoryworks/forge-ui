@@ -16,6 +16,7 @@ class FakeLoader implements TranslateLoader {
 
 type PanelInternals = {
   invoice: { set(v: InvoiceDetail): void };
+  currencyCode: () => string | null;
   downloadingPdf: () => boolean;
   downloadPdf(): void;
 };
@@ -51,5 +52,19 @@ describe('InvoiceDetailPanelComponent PDF', () => {
     expect(getPdf).toHaveBeenCalledWith(12);
     expect(names).toEqual(['INV-00012.pdf']);
     expect(panel.downloadingPdf()).toBe(false);
+  });
+
+  it('shows amounts in the invoice currency', () => {
+    const panel = TestBed.runInInjectionContext(() => new InvoiceDetailPanelComponent()) as unknown as PanelInternals;
+    panel.invoice.set({ id: 12, invoiceNumber: 'INV-00012', currencyCode: 'CAD' } as InvoiceDetail);
+
+    expect(panel.currencyCode()).toBe('CAD');
+  });
+
+  it('falls back to the base currency when the invoice has no currency code', () => {
+    const panel = TestBed.runInInjectionContext(() => new InvoiceDetailPanelComponent()) as unknown as PanelInternals;
+    panel.invoice.set({ id: 12, invoiceNumber: 'INV-00012' } as InvoiceDetail);
+
+    expect(panel.currencyCode()).toBeNull();
   });
 });

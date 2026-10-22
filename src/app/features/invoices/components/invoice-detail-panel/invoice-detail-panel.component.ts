@@ -60,6 +60,7 @@ export class InvoiceDetailPanelComponent {
   protected readonly invoice = signal<InvoiceDetail | null>(null);
 
   protected readonly invoiceIdValue = computed(() => this.invoice()?.id ?? 0);
+  protected readonly currencyCode = computed(() => this.invoice()?.currencyCode ?? null);
   protected readonly downloadingPdf = signal(false);
 
   // Inline rename of the invoice number — only offered while Draft and when the

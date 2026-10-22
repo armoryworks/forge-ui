@@ -73,6 +73,15 @@ describe('CurrencyDisplayComponent', () => {
     expect(text().endsWith('EUR')).toBe(true);
   });
 
+  it('marks a CAD record with its code under a USD base', () => {
+    const { inputs, text } = setup('USD');
+    inputs.value.set(10200);
+    inputs.currency.set('CAD');
+
+    expect(text()).toContain('10,200.00');
+    expect(text().endsWith(' CAD')).toBe(true);
+  });
+
   it('uses base when record currency is null, no suffix', () => {
     const { inputs, text } = setup('USD');
     inputs.value.set(9);
