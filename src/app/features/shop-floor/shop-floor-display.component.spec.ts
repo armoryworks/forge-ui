@@ -807,13 +807,13 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     expect(fb?.message).toBe('shopFloor.timerStartFailed {"jobNumber":"JOB-0041","reason":"Clock in first."}');
   });
 
-  it('a worker who is not clocked in cannot start a timer from the kiosk', () => {
+  it('leaves the clocked-in check to the server, so a worker on break or who never clocks can still start a timer', () => {
     const c = create();
-    c.selectedWorker.set(makeWorker('ProductionWorker', [assignment]));
+    c.selectedWorker.set({ ...makeWorker('ProductionWorker', [assignment]), status: 'Out' });
 
     c.startJobTimer(assignment);
 
-    expect(shopFloor.startTimer).not.toHaveBeenCalled();
+    expect(shopFloor.startTimer).toHaveBeenCalledWith(41);
   });
 
   it('a recorded punch names the event and the time', () => {

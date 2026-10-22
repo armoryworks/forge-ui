@@ -887,7 +887,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   protected startJobTimer(assignment: WorkerAssignment): void {
     const worker = this.selectedWorker();
-    if (!worker || this.processing() || !this.clockTypes.isWorking(worker.status)) return;
+    if (!worker || this.processing()) return;
     this.processing.set(`timer-start-${assignment.jobId}`);
     this.resetAutoLogoutTimer();
 

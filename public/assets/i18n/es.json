@@ -7775,7 +7775,6 @@
       "lotScanned": "Lote {{number}}",
       "assetScanned": "Activo: {{name}}",
       "assetScannedUnnamed": "Etiqueta de activo escaneada",
-      "clockInToStartTimer": "Registre su entrada para iniciar un temporizador",
       "locationScanned": "Ubicación {{name}}",
       "receivingLoadFailed": "No se pudieron cargar las órdenes de compra por recibir. Vuelva e inténtelo de nuevo.",
       "shippingLoadFailed": "No se pudieron cargar los envíos. Vuelva e inténtelo de nuevo."
@@ -11926,7 +11925,8 @@
           "ClockIn": "Marcar entrada",
           "ClockOut": "Marcar salida",
           "BreakStart": "Iniciar un descanso",
-          "BreakEnd": "Terminar el descanso"
+          "BreakEnd": "Terminar el descanso",
+          "LunchEnd": "Terminar el almuerzo"
         },
         "undoClockPunch": "Deshacer una marcación",
         "moveStock": "Mover {{quantity}} de {{part}}",

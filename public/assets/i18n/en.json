@@ -7782,7 +7782,6 @@
       "lotScanned": "Lot {{number}}",
       "assetScanned": "Asset: {{name}}",
       "assetScannedUnnamed": "Asset label scanned",
-      "clockInToStartTimer": "Clock in to start a timer",
       "locationScanned": "Location {{name}}",
       "receivingLoadFailed": "Couldn't load the purchase orders to receive. Go back and try again.",
       "shippingLoadFailed": "Couldn't load the shipments. Go back and try again."
@@ -11926,7 +11925,8 @@
           "ClockIn": "Clock in",
           "ClockOut": "Clock out",
           "BreakStart": "Start a break",
-          "BreakEnd": "End the break"
+          "BreakEnd": "End the break",
+          "LunchEnd": "End lunch"
         },
         "undoClockPunch": "Undo a clock punch",
         "moveStock": "Move {{quantity}} of {{part}}",

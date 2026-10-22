@@ -484,8 +484,7 @@
                       </button>
                     } @else {
                       <button class="sf-action-btn sf-action-btn--start-timer"
-                              [disabled]="processing() !== null || !clockTypes.isWorking(worker.status)"
-                              [attr.title]="clockTypes.isWorking(worker.status) ? null : ('shopFloor.display.clockInToStartTimer' | translate)"
+                              [disabled]="processing() !== null"
                               (click)="startJobTimer(assignment)"
                               [attr.aria-label]="'shopFloor.display.startTimerOn' | translate: { jobNumber: assignment.jobNumber }"
                               data-testid="sf-start-timer">
