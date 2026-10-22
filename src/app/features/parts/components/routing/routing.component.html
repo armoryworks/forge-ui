@@ -83,6 +83,12 @@
                     {{ operation.estimatedMs | durationMs }}
                   </span>
                 }
+                @if (operation.scrapFactor > 0) {
+                  <span class="operation-card__tag" data-testid="op-scrap-factor-meta">
+                    <span class="material-icons-outlined">delete_sweep</span>
+                    {{ 'parts.scrapFactorTag' | translate: { percent: (operation.scrapFactor | percent: '1.0-2') } }}
+                  </span>
+                }
                 <!-- Phase 3 H5 / WU-13 — surface subcontract metadata. -->
                 @if (operation.isSubcontract) {
                   <span class="operation-card__tag operation-card__tag--subcontract" data-testid="op-subcontract-meta">

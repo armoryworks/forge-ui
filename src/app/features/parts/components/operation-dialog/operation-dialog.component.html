@@ -47,6 +47,8 @@
         <app-input data-testid="op-run-minutes-lot" [label]="'parts.lotTime' | translate" type="number" [min]="0" step="any" formControlName="runMinutesLot" />
       </div>
 
+      <app-input data-testid="op-scrap-factor" [label]="'parts.scrapFactor' | translate" [info]="'parts.scrapFactorHint' | translate" type="number" [min]="0" step="any" suffix="%" formControlName="scrapFactorPercent" />
+
       <app-input data-testid="op-title" [label]="'common.title' | translate" formControlName="title" [maxlength]="200" [required]="true" />
       <app-textarea data-testid="op-instructions" [label]="'parts.instructions' | translate" formControlName="instructions" [rows]="5" [maxlength]="4000" />
 

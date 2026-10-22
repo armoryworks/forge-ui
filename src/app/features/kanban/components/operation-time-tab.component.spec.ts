@@ -172,6 +172,21 @@ describe('OperationTimeTabComponent', () => {
     expect(view.targetStart()).toEqual({ target: 300, start: 322 });
   });
 
+  it('plans the first step at the whole start when yield sets the start above the routing plan', () => {
+    const { component } = setup(of({
+      ...payload(true, [
+        op({ operationId: 7, stepNumber: 10, plannedQuantity: 112 }),
+        op({ operationId: 8, jobOperationId: null, stepNumber: 20, plannedQuantity: 105 }),
+      ]),
+      jobQuantity: 112,
+      targetQuantity: 100,
+    }));
+
+    expect(component.operations().map(r => r.plannedQuantity)).toEqual([112, 105]);
+    const view = component as unknown as { targetStart: () => { target: number; start: number } | null };
+    expect(view.targetStart()).toEqual({ target: 100, start: 112 });
+  });
+
   it('shows no target beside the start for a job without one', () => {
     const { component } = setup(of(payload(true)));
 

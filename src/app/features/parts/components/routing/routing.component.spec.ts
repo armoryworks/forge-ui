@@ -30,6 +30,7 @@ function operation(id: number, stepNumber: number, estimatedMs: number | null, s
     isQcCheckpoint: false, qcCriteria: null, referencedOperationId: null, referencedOperationTitle: null,
     materials: [], createdAt: new Date(), updatedAt: new Date(),
     isSubcontract: false, subcontractVendorId: null, subcontractVendorName: null, subcontractTurnTimeDays: null,
+    scrapFactor: 0,
   };
 }
 
